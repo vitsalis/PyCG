@@ -4,7 +4,7 @@ import ast
 
 from pycg.representations import Node, Scope, CallGraph
 
-from pycg.utils import analyze_scopes, discover_locals, to_mod_name, parent_ns, log, transitive_closure
+from pycg.utils import analyze_scopes, discover_locals, to_mod_name, parent_ns, log, transitive_closure, correct_tracking
 
 class Visitor(ast.NodeVisitor):
     def __init__(self, modulename, filename, modules_analyzed=[]):
@@ -38,6 +38,13 @@ class Visitor(ast.NodeVisitor):
         else:
             if target not in self.tracking[name]:
                 self.tracking[name].append(target)
+
+    def add_tracking_arg(self, ns, cnt, target, follow=False):
+        if ns in self.tracking:
+            for name in self.tracking[ns]:
+                self.add_tracking("%s.%s" % (name, "<arg" + str(cnt) + ">"), target, follow)
+        else:
+            self.add_tracking("%s.%s" % (ns, "<arg" + str(cnt) + ">"), target, follow)
 
     def get_current_namespace(self):
         # The name stack contains each name contained in the path
@@ -256,7 +263,7 @@ class Visitor(ast.NodeVisitor):
                     target_ns = self.find_ns(a.id)
                     follow = True
                 if ns:
-                    self.add_tracking("%s.%s" % (ns, "<arg" + str(cnt) + ">"), target_ns, follow)
+                    self.add_tracking_arg(ns, cnt, target_ns, follow)
 
         ns = self.find_ns(node.func.id)
         if ns:
@@ -295,6 +302,13 @@ class Visitor(ast.NodeVisitor):
                 known = True
             else:
                 known = False
+            # this is wrong since dir(__builtins__) inside
+            # a class, lists only the builtins of classes
+            # we need to know the context to resolve the
+            # correct builtins
+            if not ns and getattr(__builtins__, node.id, None):
+                ns = "<built-in>." + node.id
+
             self.cg.add_edge(current_namespace, ns, known)
 
     def visit_Assign(self, node):
@@ -332,6 +346,7 @@ class Visitor(ast.NodeVisitor):
         self.visit(ast.parse(self.contents, self.filename))
         self.analyze_submodules()
         self.visit(ast.parse(self.contents, self.filename))
+        self.tracking = correct_tracking(self.tracking)
         transitive = transitive_closure(self.tracking)
         for t in transitive:
             new_ls = []

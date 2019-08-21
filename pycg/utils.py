@@ -56,6 +56,24 @@ def discover_locals(dirname):
 def parent_ns(ns):
     return ".".join(ns.split(".")[:-1])
 
+def correct_tracking(track):
+    # resolve backwards tracking information
+    tracking = {}
+    for t in track:
+        tracking[t] = track[t]
+        prefix = t.split(".")
+        suffix = []
+        while len(prefix) != 1:
+            suffix = [prefix[-1]] + suffix
+            prefix = prefix[:-1]
+            prefixstr = ".".join(prefix)
+            suffixstr = ".".join(suffix)
+            if prefixstr in track:
+                for name in track[prefixstr]:
+                    tracking[name + "." + suffixstr] = track[t]
+
+    return tracking
+
 def transitive_closure(track):
     for t1 in track:
         for t2 in track:
