@@ -11,7 +11,7 @@ class ImportsTest(TestBase):
         Expected: The call graphs for the `main` module and `to_import`
         should be merged.
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet1", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "simple_import", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main.func": [], "to_import.func": []}
@@ -24,7 +24,7 @@ class ImportsTest(TestBase):
         `to_import` defines a function.
         Expected: The call graphs for `main` and `to_import` should be merged
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet2", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "import_as", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main.func": [], "to_import.func": []}
@@ -39,7 +39,7 @@ class ImportsTest(TestBase):
         Expected: The call graphs for `main`, `to_import.__init__` and `to_import.to_import`
         should be merged.
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet3", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "submodule_import", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main.func": [], "to_import.__init__.func": [], "to_import.to_import.func": []}
@@ -50,7 +50,7 @@ class ImportsTest(TestBase):
         """
         Same concept as with `test_import_as` but with a submodule
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet4", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "submodule_import_as", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main.func": [], "to_import.__init__.func": [], "to_import.to_import.func": []}
@@ -63,7 +63,7 @@ class ImportsTest(TestBase):
         which defines a function. This function is then called by `main`
         Expected: An edge from `main` to `from_module.func`
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet5", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "import_from", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main": ["from_module.func"], "from_module.func": []}
@@ -77,7 +77,7 @@ class ImportsTest(TestBase):
         These functions are called by `main`.
         Expected: Edges from `main` to those functions
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet6", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "import_all", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main": ["from_module.func1", "from_module.func2"], "from_module.func1": [], "from_module.func2": []}
@@ -88,7 +88,7 @@ class ImportsTest(TestBase):
         """
         Same concept as `test_import_from` but with a submodule.
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet7", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "submodule_import_from", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {
@@ -103,7 +103,7 @@ class ImportsTest(TestBase):
         """
         Same concept as `test_import_all` but with a submodule
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet8", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "submodule_import_all", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {
@@ -122,7 +122,7 @@ class ImportsTest(TestBase):
         then `main` calls `func2`.
         Expected: An edge from `main` to `func2` and from `func2` to `func1`.
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet9", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "chained_import", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {
@@ -140,7 +140,7 @@ class ImportsTest(TestBase):
         We define functions accordingly with `test_chained_import`.
         The import is of the form `from . import to_import`.
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet10", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "relative_import", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {"main.func": [], "to_import.func": []}
@@ -152,7 +152,7 @@ class ImportsTest(TestBase):
         Same as before but the import is of the form
         `from .to_import2 import func2`
         """
-        snippet_path = os.path.join(self.snippets_path, "snippet11", "main.py")
+        snippet_path = os.path.join(self.snippets_path, "relative_import_with_name", "main.py")
 
         output = self.get_snippet_output_cg(snippet_path)
         expected = {
@@ -163,7 +163,6 @@ class ImportsTest(TestBase):
 
         self.assertEqual(output, expected)
 
-    # TODO
     def test_parent_import(self):
         """
         Structure: The `main` module imports `nested.to_import` module
@@ -172,7 +171,7 @@ class ImportsTest(TestBase):
         Expected: An edge from nested.nested2.to_import to the function
         defined in nested.to_import2.
         """
-        #snippet_path = os.path.join(self.snippets_path, "snippet12", "main.py")
+        #snippet_path = os.path.join(self.snippets_path, "parent_import", "main.py")
 
         #output = self.get_snippet_output_cg(snippet_path)
         #expected = {
