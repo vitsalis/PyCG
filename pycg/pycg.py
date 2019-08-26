@@ -4,7 +4,7 @@ import ast
 
 from pycg.representations import Node, Scope, CallGraph
 
-from pycg.utils import analyze_scopes, discover_locals, to_mod_name, parent_ns, log, transitive_closure, correct_tracking
+from pycg.utils import analyze_scopes, discover_locals, to_mod_name, parent_ns, log, transitive_closure, backwards_tracking
 
 class Visitor(ast.NodeVisitor):
     def __init__(self, modulename, filename, modules_analyzed=[]):
@@ -429,7 +429,7 @@ class Visitor(ast.NodeVisitor):
         self.analyze_submodules()
         self.visit(ast.parse(self.contents, self.filename))
 
-        self.name_tracking = correct_tracking(self.name_tracking)
+        self.name_tracking = backwards_tracking(self.name_tracking)
         transitive = transitive_closure(self.name_tracking)
         for t in transitive:
             new_ls = []

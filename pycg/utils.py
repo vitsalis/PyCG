@@ -8,10 +8,15 @@ def log(msg):
     print (msg)
 
 def analyze_scopes(modulename, contents, filename):
+    """
+    Analyze the scopes of the given module.
+    Gets the symbol table of the module and
+    recursivelly iterates all functions defined
+    in the module to find the names they define.
+    Fills a dictionary in the form
+    "<scope_namespace>" -> <Scope object>
+    """
     scopes = {}
-    # Analyze scopes of the current module
-    # Fills up self.scopes recursivelly in the format
-    # "<scope_namespace>" -> <Scope object>
     def process(parent_ns, table, parent_defs):
         sc = Scope(table, parent_ns, parent_defs)
         scopes[sc.ns] = sc
@@ -33,12 +38,17 @@ def analyze_scopes(modulename, contents, filename):
     return scopes
 
 def to_mod_name(name):
+    """
+    Gets a file path and converts it to a module name
+    """
     name = name.replace("/", ".")
     name = name[:-3]
     return name
 
 def discover_locals(dirname):
-    # Recursivelly determine all modules accessible from filename
+    """
+    Recursivelly determine all modules accessible from filename
+    """
     local_modules = {}
 
     def process(dirname, modname):
@@ -47,6 +57,7 @@ def discover_locals(dirname):
             mod = os.path.join(modname, name)
             if os.path.isfile(fullname) and name.endswith(".py"):
                 local_modules[to_mod_name(mod)] = fullname
+            # if it has an init file then it is a submodule
             if os.path.isdir(fullname) and os.path.exists(os.path.join(fullname, "__init__.py")):
                 process(fullname, mod)
     process(dirname, "")
@@ -56,8 +67,10 @@ def discover_locals(dirname):
 def parent_ns(ns):
     return ".".join(ns.split(".")[:-1])
 
-def correct_tracking(track):
-    # resolve backwards tracking information
+def backwards_tracking(track):
+    """
+    Resolve backwards tracking information
+    """
     tracking = {}
     for t in track:
         tracking[t] = track[t]
@@ -75,6 +88,9 @@ def correct_tracking(track):
     return tracking
 
 def transitive_closure(track):
+    """
+    Perform a transitive closure on the given dictionary
+    """
     for t1 in track:
         for t2 in track:
             for t3 in track:

@@ -4,7 +4,7 @@ class Scope(object):
     IMPORT_DEF      = "IMPORT_DEF"
     VAR_DEF         = "VAR_DEF"
     FUNCTION_DEF    = "FUNCTION_DEF"
-    ARGUEMENT        = "ARGUEMENT"
+    ARGUEMENT       = "ARGUEMENT"
     UNKNOWN         = "UNKNOWN"
 
     def __init__(self, table, parent_ns, parent_defs):
