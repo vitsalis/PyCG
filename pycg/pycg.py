@@ -106,6 +106,15 @@ class Visitor(ast.NodeVisitor):
 
         return Scope.UNKNOWN
 
+    def set_scope_type(self, name, scope_type):
+        """
+        Iterate the scope stack and set the type for a given name.
+        """
+        for ns, scope in reversed(self.scope_stack):
+            if name in scope.defs:
+                scope.defs[name]["type"] = scope_type
+                break
+
     def find_ns(self, name):
         """
         Iterates the name stack in order to find the namespace a name
@@ -380,9 +389,8 @@ class Visitor(ast.NodeVisitor):
         if it is a function name or a call, add the proper
         name tracking information.
         """
-        stack_head = self.scope_stack[-1][1]
         for target in node.targets:
-            stack_head.defs[target.id]["type"] = Scope.VAR_DEF
+            self.set_scope_type(target.id, Scope.VAR_DEF)
         ns = None
         if isinstance(node.value, ast.Call):
             self.visit(node.value)
