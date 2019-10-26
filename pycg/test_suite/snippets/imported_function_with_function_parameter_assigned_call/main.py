@@ -4,4 +4,4 @@ def param_func():
     pass
 
 a = param_func
-a = func(a)
+func(a)

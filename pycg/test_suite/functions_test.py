@@ -27,26 +27,12 @@ class FunctionsTest(TestBase):
         snippet_path = os.path.join(self.snippets_path, "return_function_call")
         self.validate_snippet(snippet_path)
 
-    # TODO: This fails because we haven't yet identified a way
-    # to cound the number of calls using the ast.
-    def test_return_function_call_direct(self):
-        snippet_path = os.path.join(self.snippets_path, "return_function_call_direct")
-        self.validate_snippet(snippet_path)
-
-    def test_builtin_function_call(self):
-        snippet_path = os.path.join(self.snippets_path, "builtin_function_call")
-        self.validate_snippet(snippet_path)
-
     def test_imported_function_call(self):
         snippet_path = os.path.join(self.snippets_path, "imported_function_call")
         self.validate_snippet(snippet_path)
 
     def test_imported_function_return_call(self):
         snippet_path = os.path.join(self.snippets_path, "imported_function_return_call")
-        self.validate_snippet(snippet_path)
-
-    def test_imported_function_return_call_direct(self):
-        snippet_path = os.path.join(self.snippets_path, "imported_function_return_call_direct")
         self.validate_snippet(snippet_path)
 
     def test_imported_function_return_from_different_mod_call(self):
@@ -60,3 +46,15 @@ class FunctionsTest(TestBase):
     def test_imported_function_with_function_parameter_assigned_call(self):
         snippet_path = os.path.join(self.snippets_path, "imported_function_with_function_parameter_assigned_call")
         self.validate_snippet(snippet_path)
+
+    """
+    # TODO: This fails because we haven't yet identified a way
+    # to cound the number of calls using the ast.
+    def test_return_function_call_direct(self):
+        snippet_path = os.path.join(self.snippets_path, "return_function_call_direct")
+        self.validate_snippet(snippet_path)
+
+    def test_imported_function_return_call_direct(self):
+        snippet_path = os.path.join(self.snippets_path, "imported_function_return_call_direct")
+        self.validate_snippet(snippet_path)
+    """

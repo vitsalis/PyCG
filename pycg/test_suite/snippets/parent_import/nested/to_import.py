@@ -1,4 +1,4 @@
-from .. import to_import2
+import to_import2
 
 def func():
     pass

@@ -34,9 +34,8 @@ class TestBase(TestCase):
 
     def get_snippet_output_cg(self, snippet_path):
         main_path = os.path.join(snippet_path, "main.py")
-        cg = self.cg_class("main", main_path)
-        cg.analyze()
-        return cg.output_call_graph()
+        cg = self.cg_class(main_path)
+        return cg.output()
 
     def get_snippet_expected_cg(self, snippet_path):
         cg_path = os.path.join(snippet_path, "callgraph.json")
