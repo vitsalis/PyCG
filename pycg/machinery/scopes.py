@@ -54,6 +54,12 @@ class ScopeManager(object):
 
 class ScopeItem(object):
     def __init__(self, fullns, parent):
+        if parent and not isinstance(parent, ScopeItem):
+            raise ScopeError("Parent must be a ScopeItem instance")
+
+        if not isinstance(fullns, str):
+            raise ScopeError("Namespace should be a string")
+
         self.parent = parent
         self.defs = {}
         self.fullns = fullns
@@ -75,5 +81,9 @@ class ScopeItem(object):
     def merge_def(self, name, to_merge):
         if not name in self.defs:
             self.defs[name] = to_merge
+            return
 
         self.defs[name].merge_points_to(to_merge.get_points_to())
+
+class ScopeError(Exception):
+    pass
