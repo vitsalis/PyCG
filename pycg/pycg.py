@@ -93,45 +93,32 @@ class ModuleVisitor(ast.NodeVisitor):
         self.analyze_submodules()
 
 class CallGraphGenerator(object):
+    def setUp(self):
+        self.import_manager = ImportManager(self.input_file)
+        self.scope_manager = ScopeManager()
+        self.def_manager = DefinitionManager()
+        self.call_graph = CallGraph()
+
+        self.import_manager.install_hooks()
+
+    def tearDown(self):
+        self.import_manager.remove_hooks()
+
     def __init__(self, input_file):
         input_mod = pycg.utils.to_mod_name(input_file.split("/")[-1])
         self.input_file = os.path.abspath(input_file)
 
-        scope_manager = ScopeManager()
-        def_manager = DefinitionManager()
-        import_manager = ImportManager(self.input_file)
-
-        import_manager.install_hooks()
-
-        self.call_graph = CallGraph()
+        self.setUp()
 
         # preprocessing
-        self.preprocessor = Preprocessor(input_file, import_manager, scope_manager, def_manager)
+        self.preprocessor = Preprocessor(input_file, self.import_manager, self.scope_manager, self.def_manager)
         self.preprocessor.analyze()
 
-        import_manager.remove_hooks()
+        self.import_manager.remove_hooks()
 
-        """
-        for ns, d in def_manager.defs.items():
-            print ("Def {} has:".format(ns))
-            print ("Module defs {}".format(d.get_mod_pointer().get()))
-            print ("Literal defs {}".format(d.get_lit_pointer().get()))
-            print ("Name defs {} with args {}".format(d.get_name_pointer().get(), d.get_name_pointer().get_args()))
-            print ("\n\n")
+        self.def_manager.complete_definitions()
 
-        print ("NEXT\n\n")
-        """
-        def_manager.complete_definitions()
-        """
-        for ns, d in def_manager.defs.items():
-            print ("Def {} has:".format(ns))
-            print ("Module defs {}".format(d.get_mod_pointer().get()))
-            print ("Literal defs {}".format(d.get_lit_pointer().get()))
-            print ("Name defs {} with args {}".format(d.get_name_pointer().get(), d.get_name_pointer().get_args()))
-            print ("\n\n")
-        """
-
-        self.visitor = ModuleVisitor(input_mod, input_file, import_manager, scope_manager, def_manager, self.call_graph)
+        self.visitor = ModuleVisitor(input_mod, input_file, self.import_manager, self.scope_manager, self.def_manager, self.call_graph)
         self.visitor.analyze()
 
     def output(self):

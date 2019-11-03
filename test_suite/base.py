@@ -34,8 +34,12 @@ class TestBase(TestCase):
 
     def get_snippet_output_cg(self, snippet_path):
         main_path = os.path.join(snippet_path, "main.py")
-        cg = self.cg_class(main_path)
-        return cg.output()
+        try:
+            cg = self.cg_class(main_path)
+            return cg.output()
+        except Exception as e:
+            cg.tearDown()
+            raise e
 
     def get_snippet_expected_cg(self, snippet_path):
         cg_path = os.path.join(snippet_path, "callgraph.json")
