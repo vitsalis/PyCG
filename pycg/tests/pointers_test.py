@@ -71,3 +71,20 @@ class PointerTest(TestBase):
 
         with self.assertRaises(PointerError):
             pointer.add_lit_arg("NaN", "fail")
+
+    def test_name_pointer_merge(self):
+        pointer1 = NamePointer()
+        pointer1.add("smth1")
+        pointer1.add_arg(0, set(["smth2", "smth3"]))
+        pointer1.add_arg(1, set(["smth4"]))
+
+        pointer2 = NamePointer()
+        pointer2.add("smth6")
+        pointer2.add_arg(0, set(["smth7", "smth8"]))
+        pointer2.add_arg(1, set(["smth9"]))
+
+        pointer1.merge(pointer2)
+
+        self.assertEqual(pointer1.get(), set(["smth1", "smth6"]))
+        self.assertEqual(pointer1.get_arg(0), set(["smth2", "smth3", "smth7", "smth8"]))
+        self.assertEqual(pointer1.get_arg(1), set(["smth4", "smth9"]))

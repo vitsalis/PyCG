@@ -68,6 +68,12 @@ class NamePointer(Pointer):
         if self.args.get(pos, None):
             return self.args[pos]
 
+    def merge(self, pointer):
+        super().merge(pointer)
+        if hasattr(pointer, "get_args"):
+            for pos, arg in pointer.get_args().items():
+                self.add_arg(pos, arg)
+
     def get_args(self):
         return self.args
 
