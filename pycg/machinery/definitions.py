@@ -1,3 +1,5 @@
+from pycg.machinery.pointers import ModulePointer, NamePointer, LiteralPointer
+
 class DefinitionManager(object):
     LIT_TYPE        = "LITERAL"
     FUN_TYPE        = "FUNCTION"
@@ -210,71 +212,3 @@ class Definition(object):
     def merge(self, to_merge):
         for name, pointer in to_merge.points_to.items():
             self.points_to[name].merge(pointer)
-
-class Pointer(object):
-    def __init__(self):
-        self.values = set()
-
-    def add(self, item):
-        self.values.add(item)
-
-    def add_set(self, s):
-        self.values = self.values.union(s)
-
-    def get(self):
-        return self.values
-
-    def merge(self, pointer):
-        self.values = self.values.union(pointer.values)
-
-class ModulePointer(Pointer):
-    pass
-
-class LiteralPointer(Pointer):
-    STR_LIT = "STRING"
-    INT_LIT = "INTEGER"
-    UNK_LIT = "UNKNOWN"
-
-    # no need to add the actual item
-    def add(self, item):
-        if isinstance(item, str):
-            self.values.add(self.STR_LIT)
-        elif isinstance(item, int):
-            self.values.add(self.INT_LIT)
-        else:
-            self.values.add(self.UNK_LIT)
-
-class NamePointer(Pointer):
-    def __init__(self):
-        super().__init__()
-        self.args = {}
-
-    def get_or_create(self, pos):
-        if not pos in self.args:
-            self.args[pos] = set()
-        return self.args[pos]
-
-    def add_arg(self, pos, name):
-        self.get_or_create(pos)
-        if isinstance(name, str):
-            self.args[pos].add(name)
-        elif isinstance(name, set):
-            self.args[pos]= self.args[pos].union(name)
-        else:
-            raise Exception()
-
-    def add_lit_arg(self, pos, item):
-        arg = self.get_or_create(pos)
-        if isinstance(item, str):
-            self.args[pos].add(self.STR_LIT)
-        elif isinstance(item, int):
-            self.args[pos].add(self.INT_LIT)
-        else:
-            self.args[pos].add(self.UNK_LIT)
-
-    def get_arg(self, pos):
-        if self.args.get(pos, None):
-            return self.args[pos]
-
-    def get_args(self):
-        return self.args
