@@ -240,7 +240,8 @@ class Preprocessor(object):
 
     def analyze(self):
         # add root node
-        self.import_manager.add_node(self.mod, self.input_file)
+        self.import_manager.create_node(self.mod)
+        self.import_manager.set_filepath(self.mod, self.input_file)
         self.import_manager.set_current_mod(self.mod)
 
         visitor = PreprocessorVisitor(self.input_file, self.mod, self.mod_dir,

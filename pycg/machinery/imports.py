@@ -24,8 +24,10 @@ def get_custom_loader(ig_obj):
         def __init__(self, fullname, path):
             self.fullname = fullname
             self.path = path
-            ig_obj.add_edge(self.fullname)
-            ig_obj.add_node(self.fullname, self.path)
+            ig_obj.create_edge(self.fullname)
+            if not ig_obj.get_node(self.fullname):
+                ig_obj.create_node(self.fullname)
+                ig_obj.set_filepath(self.fullname, self.path)
 
         def get_filename(self, fullname):
             return self.path
@@ -40,24 +42,34 @@ class ImportManager(object):
         self.import_graph = dict()
         self.current_module = ""
         self.input_file = os.path.abspath(input_file)
-        self.mod_dir = os.path.dirname(input_file)
+        self.mod_dir = os.path.dirname(self.input_file)
         self.old_path_hooks = None
         self.old_path = None
 
-    def _get_node(self, name):
-        if not name in self.import_graph:
-            return None
+    def get_node(self, name):
+        if name in self.import_graph:
+            return self.import_graph[name]
+
+    def create_node(self, name):
+        if not name or not isinstance(name, str):
+            raise ImportManagerError("Invalid node name")
+
+        if self.get_node(name):
+            raise ImportManagerError("Can't create a node a second time")
+
+        self.import_graph[name] = {"filename": "", "imports": set()}
         return self.import_graph[name]
 
-    def _create_node(self, name):
-        self.import_graph[name] = {"filename": "", "imports": []}
-        return self.import_graph[name]
+    def create_edge(self, dest):
+        if not dest or not isinstance(dest, str):
+            raise ImportManagerError("Invalid node name")
 
-    def _get_or_create(self, name):
-        node = self._get_node(name)
+        node = self.get_node(self._get_module_path())
         if not node:
-            return self._create_node(name)
-        return node
+            raise ImportManagerError("Can't add edge to a non existing node")
+
+        node["imports"].add(dest)
+
 
     def _clear_caches(self):
         importlib.invalidate_caches()
@@ -76,29 +88,41 @@ class ImportManager(object):
     def get_filepath(self, modname):
         return self.import_graph[modname]["filename"]
 
+    def set_filepath(self, node_name, filename):
+        if not filename or not isinstance(filename, str):
+            raise ImportManagerError("Invalid node name")
+
+        node = self.get_node(node_name)
+        if not node:
+            raise ImportManagerError("Node does not exist")
+
+        node["filename"] = filename
+
     def get_imports(self, modname):
         return self.import_graph[modname]["imports"]
 
-    def add_node(self, node_name, filename):
-        node = self._get_or_create(node_name)
-        node["filename"] = filename
-
-    def add_edge(self, dest):
-        node = self._get_or_create(self._get_module_path())
-        if not dest in node["imports"]:
-            node["imports"].append(dest)
-
-    def _handle_level(self, name, level):
+    def _handle_import_level(self, name, level):
         # add a dot for each level
-        mod_name = ("." * level) + name
         package = self._get_module_path().split(".")
         if level > len(package):
-            raise Exception("attempting import beyond top level package")
+            raise ImportError("Attempting import beyond top level package")
+
+        mod_name = ("." * level) + name
         package = ".".join(package[:-level])
         return mod_name, package
 
-    def do_import(self, mod_name, level):
-        mod_name, package = self._handle_level(mod_name, level)
+    def handle_import(self, name, level):
+
+        # We currently don't support builtin modules because they're frozen.
+        # Add an edge and continue.
+        # TODO: identify a way to include frozen modules
+        root = name.split(".")[0]
+        if root in sys.builtin_module_names:
+            self.create_edge(root)
+            return
+
+        # Import the module
+        mod_name, package = self._handle_import_level(name, level)
         try:
             mod = importlib.import_module(mod_name, package=package)
         except ImportError as e:
@@ -106,21 +130,8 @@ class ImportManager(object):
             mod_name = ".".join(mod_name.split(".")[:-1])
             mod = importlib.import_module(mod_name, package=package)
 
-        filepath = os.path.relpath(mod.__file__, self.mod_dir)
-        return utils.to_mod_name(filepath)
-
-    def handle_import(self, name, level):
-        # We currently don't support builtin modules because they're frozen.
-        # Add an edge and continue.
-        # TODO: identify a way to include frozen modules
-        root = name.split(".")[0]
-        if root in sys.builtin_module_names:
-            self.add_edge(root)
-            return
-
-        # Import the module
-        modname = self.do_import(name, level)
-        return modname
+        return utils.to_mod_name(
+            os.path.relpath(mod.__file__, self.mod_dir))
 
     def get_import_graph(self):
         return self.import_graph
@@ -141,3 +152,6 @@ class ImportManager(object):
         sys.path = self.old_path
 
         self._clear_caches()
+
+class ImportManagerError(Exception):
+    pass
