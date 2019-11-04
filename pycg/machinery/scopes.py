@@ -15,16 +15,14 @@ class ScopeManager(object):
             else:
                 fullns = namespace
 
+            if table.get_type() == "function":
+                functions.append(fullns)
+
             sc = ScopeItem(fullns, parent)
-            self.scopes[namespace] = sc
+            self.scopes[fullns] = sc
 
             for t in table.get_children():
-                childns = "{}.{}".format(namespace, t.get_name())
-
-                if t.get_type() == "function":
-                    functions.append(childns)
-
-                process(childns, sc, t)
+                process(fullns, sc, t)
 
         process(modulename, None, symtable.symtable(contents, filename, compile_type="exec"))
         return functions
@@ -47,7 +45,8 @@ class ScopeManager(object):
             current_scope = current_scope.parent
 
     def get_scope(self, namespace):
-        return self.get_scopes()[namespace]
+        if namespace in self.get_scopes():
+            return self.get_scopes()[namespace]
 
     def get_scopes(self):
         return self.scopes

@@ -1,10 +1,130 @@
 from base import TestBase
 from mock import patch
+import symtable
 
 from pycg.machinery.scopes import ScopeManager, ScopeItem, ScopeError
 
 class ScopeManagerTest(TestBase):
-    pass
+    def test_handle_module(self):
+        class MockTable(object):
+            def __init__(self, name, t, children=[]):
+                self.name = name
+                self.type = t
+                self.children = children
+
+            def get_type(self):
+                return self.type
+
+            def get_name(self):
+                return self.name
+
+            def get_children(self):
+                return self.children
+
+        grndchld1 = MockTable("grndchld1", "variable", [])
+        grndchld2 = MockTable("grndchld2", "function", [])
+        chld1 = MockTable("chld1", "function", [grndchld1, grndchld2])
+        grndchld3 = MockTable("grndchld3", "variable", [])
+        chld2 = MockTable("chld2", "function", [grndchld3])
+        root = MockTable("top", "module", [chld1, chld2])
+
+        sm = ScopeManager()
+        with patch.object(symtable, "symtable", return_value=root):
+            functions = sm.handle_module("root", "", "")
+
+        self.assertEqual(sorted(functions), sorted(["root.chld1", "root.chld1.grndchld2", "root.chld2"]))
+
+        self.assertEqual(sm.get_scope("root").get_ns(), "root")
+        self.assertEqual(sm.get_scope("root").parent, None)
+
+        self.assertEqual(sm.get_scope("root.chld1").get_ns(), "root.chld1")
+        self.assertEqual(sm.get_scope("root.chld1").parent, sm.get_scope("root"))
+
+        self.assertEqual(sm.get_scope("root.chld2").get_ns(), "root.chld2")
+        self.assertEqual(sm.get_scope("root.chld2").parent, sm.get_scope("root"))
+
+        self.assertEqual(sm.get_scope("root.chld1.grndchld1").get_ns(), "root.chld1.grndchld1")
+        self.assertEqual(sm.get_scope("root.chld1.grndchld1").parent, sm.get_scope("root.chld1"))
+
+        self.assertEqual(sm.get_scope("root.chld1.grndchld2").get_ns(), "root.chld1.grndchld2")
+        self.assertEqual(sm.get_scope("root.chld1.grndchld2").parent, sm.get_scope("root.chld1"))
+
+        self.assertEqual(sm.get_scope("root.chld2.grndchld3").get_ns(), "root.chld2.grndchld3")
+        self.assertEqual(sm.get_scope("root.chld2.grndchld3").parent, sm.get_scope("root.chld2"))
+
+    def test_handle_assign(self):
+        sm = ScopeManager()
+
+        sm.scopes["root"] = ScopeItem("root", None)
+        sm.handle_assign("root", "name", "value")
+        self.assertEqual(sm.get_def("root", "name"), "value")
+
+    def test_add_scope_defs(self):
+        class MockDef(object):
+            def __init__(self, name):
+                self.name = name
+
+            def get_name(self):
+                return self.name
+
+        sm = ScopeManager()
+        sm.scopes["root"] = ScopeItem("root", None)
+
+        defs = [MockDef(str(x)) for x in range(10)]
+
+        # all defs should be added to the scope
+        sm.add_scope_defs("root", defs)
+        for defi in defs:
+            self.assertEqual(sm.get_def("root", defi.get_name()), defi)
+
+
+    def test_get_def(self):
+        sm = ScopeManager()
+        root = "ns"
+        chld1 = "ns.chld1"
+        chld2 = "ns.chld2"
+        grndchld = "ns.chld1.chld1"
+        sm.scopes[root] = ScopeItem(root, None) # root scope
+        sm.scopes[chld1] = ScopeItem(chld1, sm.scopes[root]) # 1st child scope
+        sm.scopes[chld2] = ScopeItem(chld2, sm.scopes[root]) # 2nd child scope
+        sm.scopes[grndchld] = ScopeItem(grndchld, sm.scopes[chld1]) # grandchild
+
+        grndchld_def = ("var", "grndchild_def") # name, value
+        chld1_def1 = ("var", "chld1_def")
+        chld1_def2 = ("other_var", "chld1_other_def")
+        chld2_def = ("some_var", "chld2_some_var")
+        root_def = ("var", "root_var")
+
+        sm.scopes[root].add_def(root_def[0], root_def[1])
+        sm.scopes[chld2].add_def(chld2_def[0], chld2_def[1])
+        sm.scopes[chld1].add_def(chld1_def1[0], chld1_def1[1])
+        sm.scopes[chld1].add_def(chld1_def2[0], chld1_def2[1])
+        sm.scopes[grndchld].add_def(grndchld_def[0], grndchld_def[1])
+
+        # should be able to find a variable defined in its scope
+        # also it should get the value of the nearest scope, meaning it's own
+        self.assertEqual(sm.get_def("ns.chld1.chld1", grndchld_def[0]), grndchld_def[1])
+        # if it doesn't exist get the parent's
+        self.assertEqual(sm.get_def("ns.chld1.chld1", chld1_def2[0]), chld1_def2[1])
+        # it shouldn't be able to reach a def defined in chld2
+        self.assertEqual(sm.get_def("ns.chld1.chld1", chld2_def[0]), None)
+        # root doesn't have access to variables defined in lower scopes
+        self.assertEqual(sm.get_def("ns", chld1_def2[0]), None)
+        # but childs have access to root
+        self.assertEqual(sm.get_def("ns.chld2", root_def[0]), root_def[1])
+
+    def test_get_scope(self):
+        sm = ScopeManager()
+        st = ScopeItem("ns", None)
+        st2 = ScopeItem("ns.ns2", st)
+
+        sm.scopes["ns"] = st
+        # if it exists it should be returned
+        self.assertEqual(sm.get_scope("ns"), st)
+        sm.scopes["ns.ns2"] = st2
+        self.assertEqual(sm.get_scope("ns.ns2"), st2)
+        # otherwise None should be returned
+        self.assertEqual(sm.get_scope("notexist"), None)
 
 class ScopeItemTest(TestBase):
     def test_setup(self):
