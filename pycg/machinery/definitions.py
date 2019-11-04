@@ -16,20 +16,27 @@ class DefinitionManager(object):
         if info["type"] == DefinitionManager.LIT_TYPE:
             defi.get_lit_pointer().add(info["value"])
         elif info["type"] == DefinitionManager.NAME_TYPE:
-            defi.merge(info["value"])
+            if info["value"].is_function_def():
+                defi.get_name_pointer().add(info["value"].get_ns())
+            else:
+                defi.merge(info["value"])
         else:
             raise Exception("Unknown type")
 
     def create(self, ns, def_type):
+        if not ns or not isinstance(ns, str):
+            raise DefinitionError("Invalid namespace argument")
+        if not def_type in Definition.types:
+            raise DefinitionError("Invalid def type argument")
+        if self.get(ns):
+            raise DefinitionError("Definition already exists")
+
         self.defs[ns] = Definition(ns, def_type)
         return self.defs[ns]
 
     def assign(self, ns, defi):
-        # maybe deep copy
         self.defs[ns] = Definition(ns, defi.get_type())
-        self.defs[ns].get_name_pointer().add(defi.get_ns())
-        for cnt, arg in defi.get_name_pointer().get_args().items():
-            self.defs[ns].get_name_pointer().add_arg(cnt, arg)
+        self.defs[ns].merge(defi)
 
         # if it is a function def, we need to create a return pointer
         if defi.is_function_def():
@@ -77,8 +84,6 @@ class DefinitionManager(object):
                 # if arguments for this position exist update their namespace
                 for name in pos_arg_names:
                     arg_def = self.get(name)
-                    if not arg_def:
-                        arg_def = self.create(name)
                     if arg["type"] == DefinitionManager.LIT_TYPE:
                         arg_def.get_lit_pointer().add(arg["value"])
                     elif arg["type"] == DefinitionManager.NAME_TYPE:
@@ -104,7 +109,7 @@ class DefinitionManager(object):
         if value["type"] == DefinitionManager.LIT_TYPE:
             defi.get_lit_pointer().add(value["value"])
         elif value["type"] == DefinitionManager.NAME_TYPE:
-            defi.merge(value["value"])
+            # defi.merge(value["value"])
             defi.get_name_pointer().add(value["value"].get_ns())
         else:
             raise Exception("Unknown type")
@@ -178,6 +183,7 @@ class Definition(object):
     FUN_DEF     = "FUNCTIONDEF"
     NAME_DEF    = "NAMEDEF"
     MOD_DEF     = "MODULEDEF"
+    types       = [FUN_DEF, MOD_DEF, NAME_DEF]
 
     def __init__(self, fullns, def_type):
         self.fullns = fullns
@@ -208,3 +214,6 @@ class Definition(object):
     def merge(self, to_merge):
         for name, pointer in to_merge.points_to.items():
             self.points_to[name].merge(pointer)
+
+class DefinitionError(Exception):
+    pass
