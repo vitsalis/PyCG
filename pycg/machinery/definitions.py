@@ -1,4 +1,4 @@
-from pycg.machinery.pointers import ModulePointer, NamePointer, LiteralPointer
+from pycg.machinery.pointers import NamePointer, LiteralPointer
 
 class DefinitionManager(object):
     LIT_TYPE        = "LITERAL"
@@ -182,7 +182,6 @@ class Definition(object):
     def __init__(self, fullns, def_type):
         self.fullns = fullns
         self.points_to = {
-            "mod": ModulePointer(),
             "lit": LiteralPointer(),
             "name": NamePointer()
         }
@@ -193,9 +192,6 @@ class Definition(object):
 
     def is_function_def(self):
         return self.def_type == self.FUN_DEF
-
-    def get_mod_pointer(self):
-        return self.points_to["mod"]
 
     def get_lit_pointer(self):
         return self.points_to["lit"]

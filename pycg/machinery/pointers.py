@@ -14,9 +14,6 @@ class Pointer(object):
     def merge(self, pointer):
         self.values = self.values.union(pointer.values)
 
-class ModulePointer(Pointer):
-    pass
-
 class LiteralPointer(Pointer):
     STR_LIT = "STRING"
     INT_LIT = "INTEGER"

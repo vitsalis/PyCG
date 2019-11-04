@@ -92,9 +92,6 @@ class PreprocessorVisitor(ast.NodeVisitor):
         if not defi:
             defi = self.def_manager.create(self.modname, Definition.MOD_DEF)
 
-        mod_pointer = defi.get_mod_pointer()
-        mod_pointer.add(self.modname)
-
         self.name_stack.append(self.modname)
 
         self.generic_visit(node)
