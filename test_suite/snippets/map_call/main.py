@@ -13,7 +13,7 @@ def func3(x):
         return x
     return func
 
-res = map([1, 2, 3],, func3)
+res = map([1, 2, 3], func3)
 
 for r in res:
     r()

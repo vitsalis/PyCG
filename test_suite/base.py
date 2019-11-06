@@ -36,6 +36,7 @@ class TestBase(TestCase):
         main_path = os.path.join(snippet_path, "main.py")
         try:
             cg = self.cg_class(main_path)
+            cg.analyze()
             return cg.output()
         except Exception as e:
             cg.tearDown()

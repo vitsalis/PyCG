@@ -105,20 +105,21 @@ class CallGraphGenerator(object):
         self.import_manager.remove_hooks()
 
     def __init__(self, input_file):
-        input_mod = pycg.utils.to_mod_name(input_file.split("/")[-1])
+        self.input_mod = pycg.utils.to_mod_name(input_file.split("/")[-1])
         self.input_file = os.path.abspath(input_file)
 
         self.setUp()
 
+    def analyze(self):
         # preprocessing
-        self.preprocessor = Preprocessor(input_file, self.import_manager, self.scope_manager, self.def_manager)
+        self.preprocessor = Preprocessor(self.input_file, self.import_manager, self.scope_manager, self.def_manager)
         self.preprocessor.analyze()
 
         self.import_manager.remove_hooks()
 
         self.def_manager.complete_definitions()
 
-        self.visitor = ModuleVisitor(input_mod, input_file, self.import_manager, self.scope_manager, self.def_manager, self.call_graph)
+        self.visitor = ModuleVisitor(self.input_mod, self.input_file, self.import_manager, self.scope_manager, self.def_manager, self.call_graph)
         self.visitor.analyze()
 
     def output(self):
