@@ -18,8 +18,7 @@ class ScopeManager(object):
             if table.get_type() == "function":
                 functions.append(fullns)
 
-            sc = ScopeItem(fullns, parent)
-            self.scopes[fullns] = sc
+            sc = self.create_scope(fullns, parent)
 
             for t in table.get_children():
                 process(fullns, sc, t)
@@ -48,6 +47,11 @@ class ScopeManager(object):
         if namespace in self.get_scopes():
             return self.get_scopes()[namespace]
 
+    def create_scope(self, namespace, parent):
+        sc = ScopeItem(namespace, parent)
+        self.scopes[namespace] = sc
+        return sc
+
     def get_scopes(self):
         return self.scopes
 
@@ -61,6 +65,7 @@ class ScopeItem(object):
 
         self.parent = parent
         self.defs = {}
+        self.lambda_counter = 0
         self.fullns = fullns
 
     def get_ns(self):
@@ -73,6 +78,16 @@ class ScopeItem(object):
         defs = self.get_defs()
         if name in defs:
             return defs[name]
+
+    def get_lambda_counter(self):
+        return self.lambda_counter
+
+    def inc_lambda_counter(self, val=1):
+        self.lambda_counter += val
+        return self.lambda_counter
+
+    def reset_counters(self):
+        self.lambda_counter = 0
 
     def add_def(self, name, defi):
         self.defs[name] = defi

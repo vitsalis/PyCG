@@ -48,14 +48,29 @@ class ModuleVisitor(ast.NodeVisitor):
 
     def visit_Module(self, node):
         self.name_stack.append(self.modulename)
+        self.scope_manager.get_scope(self.modulename).reset_counters()
         self.generic_visit(node)
         self.name_stack.pop()
 
     def visit_FunctionDef(self, node):
         self.name_stack.append(node.name)
-        self.call_graph.add_node(self.get_current_namespace())
+        current_ns = self.get_current_namespace()
+        self.scope_manager.get_scope(current_ns).reset_counters()
+        self.call_graph.add_node(current_ns)
         for stmt in node.body:
             self.visit(stmt)
+        self.name_stack.pop()
+
+    def visit_Lambda(self, node):
+        current_ns = self.get_current_namespace()
+        counter = self.scope_manager.get_scope(current_ns).inc_lambda_counter()
+        lambda_name = "<lambda{}>".format(counter)
+        lambda_fullns = "{}.{}".format(current_ns, lambda_name)
+
+        self.call_graph.add_node(lambda_fullns)
+
+        self.name_stack.append(lambda_name)
+        self.visit(node.body)
         self.name_stack.pop()
 
     def visit_Call(self, node):

@@ -174,7 +174,14 @@ class DefinitionManager(object):
                             for item in arg:
                                 if not item in pointsto_arg_def.get():
                                     changed_something = True
-                            pointsto_arg_def.add_set(arg)
+                                # HACK: this check shouldn't be needed
+                                # if we remove this the following breaks:
+                                # x = lambda x: x + 1
+                                # x(1)
+                                # since on line 184 we don't discriminate between literal values and name values
+                                if not self.defs.get(item, None):
+                                    continue
+                                pointsto_arg_def.add(item)
             if not changed_something:
                 break
 

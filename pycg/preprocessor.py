@@ -29,6 +29,15 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def _get_current_namespace(self):
         return ".".join(self.name_stack)
 
+    def _get_fun_defaults(self, node):
+        defaults = {}
+        start = len(node.args.args) - len(node.args.defaults)
+        for cnt, d in enumerate(node.args.defaults, start=start):
+            self.visit(d)
+            defaults[cnt] = self._get_value_from_node(d)
+
+        return defaults
+
     def _analyze_submodule(self, fname, modname):
         self.import_manager.set_current_mod(modname)
 
@@ -39,6 +48,9 @@ class PreprocessorVisitor(ast.NodeVisitor):
         self.merge_modules_analyzed(visitor.get_modules_analyzed())
 
         self.import_manager.set_current_mod(self.modname)
+
+    def _get_lambda_name(self, cnt):
+        return "<lambda{}>".format(cnt)
 
     def _get_value_from_node(self, node):
         # TODO add more types
@@ -54,6 +66,11 @@ class PreprocessorVisitor(ast.NodeVisitor):
             return_ns = "{}.{}".format(defi.get_ns(), DefinitionManager.RETURN_NAME)
             return_def = self.def_manager.get(return_ns)
             return {"value": return_def, "type": DefinitionManager.NAME_TYPE}
+        elif isinstance(node, ast.Lambda):
+            lambda_name = self._get_lambda_name(self.scope_manager.get_scope(current_ns).get_lambda_counter())
+            defi = self.scope_manager.get_def(current_ns, lambda_name)
+            return {"value": defi,
+                    "type": DefinitionManager.NAME_TYPE}
         elif isinstance(node, ast.Num):
             return {"value": node.n, "type": DefinitionManager.LIT_TYPE}
         elif isinstance(node, ast.Str):
@@ -157,12 +174,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node):
         # only last n arguements have defaults
-        defaults = {}
-        start = len(node.args.args) - len(node.args.defaults)
-        for cnt, d in enumerate(node.args.defaults, start=start):
-            self.visit(d)
-            defaults[cnt] = self._get_value_from_node(d)
-
+        defaults = self._get_fun_defaults(node)
 
         self.def_manager.handle_function_def(self._get_current_namespace(),
             node.name, [arg.arg for arg in node.args.args], defaults)
@@ -189,6 +201,8 @@ class PreprocessorVisitor(ast.NodeVisitor):
         self.name_stack.pop()
 
     def visit_Assign(self, node):
+        self.visit(node.value)
+
         value = self._get_value_from_node(node.value)
         fullns = self._get_current_namespace()
         for target in node.targets:
@@ -219,6 +233,40 @@ class PreprocessorVisitor(ast.NodeVisitor):
         self.def_manager.update_def_args(defi, args)
 
         self.visit(node.func)
+
+    def visit_Lambda(self, node):
+        # The name of a lambda is defined by the counter of the current scope
+        current_scope = self.scope_manager.get_scope(self._get_current_namespace())
+        # TODO: create the method on the Scope object and test
+        lambda_counter = current_scope.inc_lambda_counter()
+        # add <> to the name so we don't override actual names
+        lambda_name = self._get_lambda_name(lambda_counter)
+        lambda_full_ns = "{}.{}".format(self._get_current_namespace(), lambda_name)
+
+
+        # create a scope for the lambda
+        self.scope_manager.create_scope(lambda_full_ns, current_scope)
+
+        defaults = self._get_fun_defaults(node)
+        lambda_def = self.def_manager.handle_function_def(self._get_current_namespace(), lambda_name, [arg.arg for arg in node.args.args], defaults)
+
+        # add it to the current scope
+        current_scope.add_def(lambda_name, lambda_def)
+
+        defs = self.def_manager.get_arg_defs(lambda_full_ns)
+
+        self.scope_manager.add_scope_defs(lambda_full_ns, defs)
+
+        self.name_stack.append(lambda_name)
+        # TODO: Add for kwargs
+        #for a in node.args.kwonlyargs:
+        #    pass
+
+        # TODO
+        #for d in node.args.kw_defaults:
+        #    self.visit(d)
+        self.visit(node.body)
+        self.name_stack.pop()
 
     def do_visit(self):
         self.visit(ast.parse(self.contents, self.filename))
