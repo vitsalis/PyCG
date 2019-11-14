@@ -217,6 +217,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
         fullns = self._get_current_namespace()
         return_ns = "{}.{}".format(fullns, DefinitionManager.RETURN_NAME)
 
+        self.visit(node.value)
         value = self._get_value_from_node(node.value)
         defi = self.def_manager.handle_assign(return_ns, value)
 
