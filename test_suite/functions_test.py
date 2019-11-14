@@ -51,7 +51,6 @@ class FunctionsTest(TestBase):
         snippet_path = os.path.join(self.snippets_path, "map_call")
         self.validate_snippet(snippet_path)
 
-    """
     # TODO: This fails because we haven't yet identified a way
     # to cound the number of calls using the ast.
     def test_return_function_call_direct(self):
@@ -61,4 +60,7 @@ class FunctionsTest(TestBase):
     def test_imported_function_return_call_direct(self):
         snippet_path = os.path.join(self.snippets_path, "imported_function_return_call_direct")
         self.validate_snippet(snippet_path)
-    """
+
+    def test_assigned_function_call_with_lit_param(self):
+        snippet_path = os.path.join(self.snippets_path, "assigned_function_call_with_lit_param")
+        self.validate_snippet(snippet_path)
