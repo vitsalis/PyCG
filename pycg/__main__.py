@@ -8,6 +8,7 @@ def main():
         sys.exit(1)
 
     cg = CallGraphGenerator(sys.argv[1])
+    cg.analyze()
     print (cg.output())
 
 if __name__ == "__main__":
