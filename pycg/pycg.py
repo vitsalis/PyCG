@@ -37,7 +37,8 @@ class ModuleVisitor(ast.NodeVisitor):
         # Stack for names of functions
         self.name_stack = []
 
-    def get_current_namespace(self):
+    @property
+    def current_ns(self):
         return ".".join(self.name_stack)
 
     def get_modules_analyzed(self):
@@ -54,18 +55,16 @@ class ModuleVisitor(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node):
         self.name_stack.append(node.name)
-        current_ns = self.get_current_namespace()
-        self.scope_manager.get_scope(current_ns).reset_counters()
-        self.call_graph.add_node(current_ns)
+        self.scope_manager.get_scope(self.current_ns).reset_counters()
+        self.call_graph.add_node(self.current_ns)
         for stmt in node.body:
             self.visit(stmt)
         self.name_stack.pop()
 
     def visit_Lambda(self, node):
-        current_ns = self.get_current_namespace()
-        counter = self.scope_manager.get_scope(current_ns).inc_lambda_counter()
+        counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
         lambda_name = "<lambda{}>".format(counter)
-        lambda_fullns = "{}.{}".format(current_ns, lambda_name)
+        lambda_fullns = "{}.{}".format(self.current_ns, lambda_name)
 
         self.call_graph.add_node(lambda_fullns)
 
@@ -75,14 +74,11 @@ class ModuleVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node):
         self.visit(node.func)
-        current_namespace = self.get_current_namespace()
-        defi = self.scope_manager.get_def(current_namespace, node.func.id)
+        defi = self.scope_manager.get_def(self.current_ns, node.func.id)
 
         if self.closured.get(defi.get_ns(), None):
             for pointer in self.closured[defi.get_ns()]:
-                self.call_graph.add_edge(current_namespace, pointer)
-
-
+                self.call_graph.add_edge(self.current_ns, pointer)
 
     def analyze_submodules(self):
         """

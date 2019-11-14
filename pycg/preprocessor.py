@@ -25,8 +25,8 @@ class PreprocessorVisitor(ast.NodeVisitor):
         with open(self.filename, "rt") as f:
             self.contents = f.read()
 
-
-    def _get_current_namespace(self):
+    @property
+    def current_ns(self):
         return ".".join(self.name_stack)
 
     def _get_fun_defaults(self, node):
@@ -54,21 +54,20 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
     def _get_value_from_node(self, node):
         # TODO add more types
-        current_ns = self._get_current_namespace()
         if isinstance(node, ast.Name):
-            defi = self.scope_manager.get_def(current_ns, node.id)
+            defi = self.scope_manager.get_def(self.current_ns, node.id)
             return {"value": defi,
                     "type": DefinitionManager.NAME_TYPE}
 
         elif isinstance(node, ast.Call):
             self.visit(node)
-            defi = self.scope_manager.get_def(current_ns, node.func.id)
+            defi = self.scope_manager.get_def(self.current_ns, node.func.id)
             return_ns = "{}.{}".format(defi.get_ns(), DefinitionManager.RETURN_NAME)
             return_def = self.def_manager.get(return_ns)
             return {"value": return_def, "type": DefinitionManager.NAME_TYPE}
         elif isinstance(node, ast.Lambda):
-            lambda_name = self._get_lambda_name(self.scope_manager.get_scope(current_ns).get_lambda_counter())
-            defi = self.scope_manager.get_def(current_ns, lambda_name)
+            lambda_name = self._get_lambda_name(self.scope_manager.get_scope(self.current_ns).get_lambda_counter())
+            defi = self.scope_manager.get_def(self.current_ns, lambda_name)
             return {"value": defi,
                     "type": DefinitionManager.NAME_TYPE}
         elif isinstance(node, ast.Num):
@@ -141,7 +140,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
                         defi = self.def_manager.assign(def_ns, imported_def)
                     current_scope.add_def(name, defi)
 
-            current_scope = self.scope_manager.get_scope(self._get_current_namespace())
+            current_scope = self.scope_manager.get_scope(self.current_ns)
             imported_scope = self.scope_manager.get_scope(modname)
             if tgt_name == "*":
                 for name, defi in imported_scope.get_defs().items():
@@ -176,10 +175,10 @@ class PreprocessorVisitor(ast.NodeVisitor):
         # only last n arguements have defaults
         defaults = self._get_fun_defaults(node)
 
-        self.def_manager.handle_function_def(self._get_current_namespace(),
+        self.def_manager.handle_function_def(self.current_ns,
             node.name, [arg.arg for arg in node.args.args], defaults)
 
-        fn_ns = "{}.{}".format(self._get_current_namespace(), node.name)
+        fn_ns = "{}.{}".format(self.current_ns, node.name)
 
         defs = self.def_manager.get_arg_defs(fn_ns)
 
@@ -204,18 +203,16 @@ class PreprocessorVisitor(ast.NodeVisitor):
         self.visit(node.value)
 
         value = self._get_value_from_node(node.value)
-        fullns = self._get_current_namespace()
         for target in node.targets:
-            targetns = "{}.{}".format(fullns, target.id)
+            targetns = "{}.{}".format(self.current_ns, target.id)
             defi = self.def_manager.handle_assign(targetns, value)
-            self.scope_manager.handle_assign(fullns, target.id, defi)
+            self.scope_manager.handle_assign(self.current_ns, target.id, defi)
 
     def visit_Name(self, node):
         pass
 
     def visit_Return(self, node):
-        fullns = self._get_current_namespace()
-        return_ns = "{}.{}".format(fullns, DefinitionManager.RETURN_NAME)
+        return_ns = "{}.{}".format(self.current_ns, DefinitionManager.RETURN_NAME)
 
         self.visit(node.value)
         value = self._get_value_from_node(node.value)
@@ -226,10 +223,9 @@ class PreprocessorVisitor(ast.NodeVisitor):
         for cnt, arg in enumerate(node.args):
             args[cnt] = self._get_value_from_node(arg)
 
-        current_ns = self._get_current_namespace()
-        defi = self.scope_manager.get_def(current_ns, node.func.id)
+        defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:
-            fullns = "{}.{}".format(current_ns, node.func.id)
+            fullns = "{}.{}".format(self.current_ns, node.func.id)
             defi = self.def_manager.create(fullns, Definition.FUN_DEF)
         self.def_manager.update_def_args(defi, args)
 
@@ -237,19 +233,20 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
     def visit_Lambda(self, node):
         # The name of a lambda is defined by the counter of the current scope
-        current_scope = self.scope_manager.get_scope(self._get_current_namespace())
+        current_scope = self.scope_manager.get_scope(self.current_ns)
         # TODO: create the method on the Scope object and test
         lambda_counter = current_scope.inc_lambda_counter()
         # add <> to the name so we don't override actual names
         lambda_name = self._get_lambda_name(lambda_counter)
-        lambda_full_ns = "{}.{}".format(self._get_current_namespace(), lambda_name)
+        lambda_full_ns = "{}.{}".format(self.current_ns, lambda_name)
 
 
         # create a scope for the lambda
         self.scope_manager.create_scope(lambda_full_ns, current_scope)
 
         defaults = self._get_fun_defaults(node)
-        lambda_def = self.def_manager.handle_function_def(self._get_current_namespace(), lambda_name, [arg.arg for arg in node.args.args], defaults)
+        lambda_def = self.def_manager.handle_function_def(self.current_ns,
+                lambda_name, [arg.arg for arg in node.args.args], defaults)
 
         # add it to the current scope
         current_scope.add_def(lambda_name, lambda_def)
