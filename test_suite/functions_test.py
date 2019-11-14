@@ -64,3 +64,7 @@ class FunctionsTest(TestBase):
     def test_assigned_function_call_with_lit_param(self):
         snippet_path = os.path.join(self.snippets_path, "assigned_function_call_with_lit_param")
         self.validate_snippet(snippet_path)
+
+    def test_function_return_complex(self):
+        snippet_path = os.path.join(self.snippets_path, "assigned_function_return_complex")
+        self.validate_snippet(snippet_path)
