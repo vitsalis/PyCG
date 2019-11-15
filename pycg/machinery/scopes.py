@@ -30,11 +30,6 @@ class ScopeManager(object):
         scope = self.get_scope(ns)
         scope.add_def(target, defi)
 
-    def add_scope_defs(self, ns, defs):
-        scope = self.get_scope(ns)
-        for defi in defs:
-            scope.add_def(defi.get_name(), defi)
-
     def get_def(self, current_ns, var_name):
         current_scope = self.get_scope(current_ns)
         while current_scope:

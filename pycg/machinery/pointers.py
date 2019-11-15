@@ -31,51 +31,84 @@ class LiteralPointer(Pointer):
 class NamePointer(Pointer):
     def __init__(self):
         super().__init__()
+        self.pos_to_name = {}
         self.args = {}
 
-    def _raise_on_invalid_arg(self, pos):
+    def _sanitize_pos(self, pos):
         try:
             int(pos)
         except ValueError:
             raise PointerError("Invalid position for argument")
 
-    def get_or_create(self, pos):
-        if not pos in self.args:
-            self.args[pos] = set()
-        return self.args[pos]
+        return str(pos)
 
-    def add_arg(self, pos, name):
-        self._raise_on_invalid_arg(pos)
-        self.get_or_create(pos)
-        if isinstance(name, str):
-            self.args[pos].add(name)
-        elif isinstance(name, set):
-            self.args[pos]= self.args[pos].union(name)
+    def get_or_create(self, name):
+        if not name in self.args:
+            self.args[name] = set()
+        return self.args[name]
+
+    def add_arg(self, name, item):
+        arg = self.get_or_create(name)
+        if isinstance(item, str):
+            self.args[name].add(item)
+        elif isinstance(item, set):
+            self.args[name] = self.args[name].union(item)
         else:
             raise Exception()
 
-    def add_lit_arg(self, pos, item):
-        self._raise_on_invalid_arg(pos)
-        arg = self.get_or_create(pos)
+    def add_lit_arg(self, name, item):
+        arg = self.get_or_create(name)
         if isinstance(item, str):
-            self.args[pos].add(LiteralPointer.STR_LIT)
+            arg.add(LiteralPointer.STR_LIT)
         elif isinstance(item, int):
-            self.args[pos].add(LiteralPointer.INT_LIT)
+            arg.add(LiteralPointer.INT_LIT)
         else:
-            self.args[pos].add(LiteralPointer.UNK_LIT)
+            arg.add(LiteralPointer.UNK_LIT)
 
-    def get_arg(self, pos):
-        if self.args.get(pos, None):
-            return self.args[pos]
+    def add_pos_arg(self, pos, name, item):
+        pos = self._sanitize_pos(pos)
+        if not name:
+            if self.pos_to_name.get(pos, None):
+                name = self.pos_to_name[pos]
+            else:
+                name = str(pos)
+        self.pos_to_name[pos] = name
+        self.add_arg(name, item)
 
-    def merge(self, pointer):
-        super().merge(pointer)
-        if hasattr(pointer, "get_args"):
-            for pos, arg in pointer.get_args().items():
-                self.add_arg(pos, arg)
+    def add_pos_lit_arg(self, pos, name, item):
+        pos = self._sanitize_pos(pos)
+        if not name:
+            name = str(pos)
+        self.pos_to_name[pos] = name
+        self.add_lit_arg(name, item)
+
+    def get_pos_arg(self, pos):
+        pos = self._sanitize_pos(pos)
+        name = self.pos_to_name.get(pos, None)
+        return self.get_arg(name)
+
+    def get_arg(self, name):
+        if self.args.get(name, None):
+            return self.args[name]
 
     def get_args(self):
         return self.args
+
+    def get_pos_args(self):
+        args = {}
+        for pos, name in self.pos_to_name.items():
+            args[pos] = self.args[name]
+        return args
+
+    def get_pos_names(self):
+        return self.pos_to_name
+
+    def merge(self, pointer):
+        super().merge(pointer)
+        if hasattr(pointer, "get_pos_names"):
+            for pos, name in pointer.get_pos_names().items():
+                self.pos_to_name[pos] = name
+                self.add_arg(name, pointer.get_arg(name))
 
 class PointerError(Exception):
     pass

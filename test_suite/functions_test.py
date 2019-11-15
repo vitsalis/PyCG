@@ -76,3 +76,7 @@ class FunctionsTest(TestBase):
     def test_function_call_with_kwargs_chained(self):
         snippet_path = os.path.join(self.snippets_path, "function_call_with_kwargs_chained")
         self.validate_snippet(snippet_path)
+
+    def test_function_call_with_assigned_kwarg(self):
+        snippet_path = os.path.join(self.snippets_path, "function_call_with_assigned_kwarg")
+        self.validate_snippet(snippet_path)

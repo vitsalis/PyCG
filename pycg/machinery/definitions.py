@@ -10,19 +10,6 @@ class DefinitionManager(object):
     def __init__(self):
         self.defs = {}
 
-    def _update_defi(self, defi, info):
-        if not info["value"]:
-            print ("empty value found")
-        if info["type"] == DefinitionManager.LIT_TYPE:
-            defi.get_lit_pointer().add(info["value"])
-        elif info["type"] == DefinitionManager.NAME_TYPE:
-            if info["value"].is_function_def():
-                defi.get_name_pointer().add(info["value"].get_ns())
-            else:
-                defi.merge(info["value"])
-        else:
-            raise Exception("Unknown type")
-
     def create(self, ns, def_type):
         if not ns or not isinstance(ns, str):
             raise DefinitionError("Invalid namespace argument")
@@ -50,54 +37,16 @@ class DefinitionManager(object):
         if ns in self.defs:
             return self.defs[ns]
 
-    def handle_function_def(self, parent_ns, fn_name, args, defaults):
+    def handle_function_def(self, parent_ns, fn_name):
         full_ns = "{}.{}".format(parent_ns, fn_name)
         defi = self.get(full_ns)
         if not defi:
             defi = self.create(full_ns, Definition.FUN_DEF)
-        name_pointer = defi.get_name_pointer()
-
-        for pos, arg in enumerate(args):
-            arg_ns = "{}.{}".format(full_ns, arg)
-            name_pointer.add_arg(pos, arg_ns)
-
-            arg_def = self.get(arg_ns)
-            if not arg_def:
-                arg_def = self.create(arg_ns, Definition.NAME_DEF)
-            # no default
-            if not defaults.get(pos, None):
-                continue
-
-            self._update_defi(arg_def, defaults[pos])
 
         return_ns = "{}.{}".format(full_ns, self.RETURN_NAME)
         self.create(return_ns, Definition.NAME_DEF)
 
         return defi
-
-    def update_def_args(self, defi, args):
-        for pos, arg in args.items():
-            if not arg["value"]:
-                print ("empty value found")
-            if defi.is_function_def():
-                pos_arg_names = defi.get_name_pointer().get_arg(pos)
-                # if arguments for this position exist update their namespace
-                for name in pos_arg_names:
-                    arg_def = self.get(name)
-                    if arg["type"] == DefinitionManager.LIT_TYPE:
-                        arg_def.get_lit_pointer().add(arg["value"])
-                    elif arg["type"] == DefinitionManager.NAME_TYPE:
-                        arg_def.get_name_pointer().add(arg["value"].get_ns())
-                    else:
-                        raise Exception("unkown type")
-            else:
-                # otherwise, add an argument to this definition
-                if arg["type"] == DefinitionManager.LIT_TYPE:
-                    defi.get_name_pointer().add_lit_arg(pos, arg["value"])
-                elif arg["type"] == DefinitionManager.NAME_TYPE:
-                    defi.get_name_pointer().add_arg(pos, arg["value"].get_ns())
-                else:
-                    raise Exception("unkown type")
 
     def handle_assign(self, targetns, value):
         defi = self.get(targetns)
@@ -115,10 +64,6 @@ class DefinitionManager(object):
             raise Exception("Unknown type")
 
         return defi
-
-    def get_arg_defs(self, ns):
-        # expects a function ns
-        return [self.defs[list(x)[0]] for x in self.get(ns).get_name_pointer().get_args().values()]
 
     def transitive_closure(self):
         closured = {}
@@ -143,6 +88,29 @@ class DefinitionManager(object):
     def complete_definitions(self):
         # THE MOST expensive part of this tool's process
         # TODO: IMPROVE COMPLEXITY
+        def update_pointsto_args(pointsto_args, arg):
+            changed_something = False
+            for pointsto_arg in pointsto_args:
+                if not self.defs.get(pointsto_arg, None):
+                    continue
+                pointsto_arg_def = self.defs[pointsto_arg].get_name_pointer()
+                # sometimes we may end up with a cycle
+                if pointsto_arg in arg:
+                    arg.remove(pointsto_arg)
+
+                for item in arg:
+                    if not item in pointsto_arg_def.get():
+                        changed_something = True
+                    # HACK: this check shouldn't be needed
+                    # if we remove this the following breaks:
+                    # x = lambda x: x + 1
+                    # x(1)
+                    # since on line 184 we don't discriminate between literal values and name values
+                    if not self.defs.get(item, None):
+                        continue
+                    pointsto_arg_def.add(item)
+            return changed_something
+
         for i in range(len(self.defs)):
             changed_something = False
             for ns, current_def in self.defs.items():
@@ -153,35 +121,21 @@ class DefinitionManager(object):
                     # get the name pointer of the points to name
                     pointsto_name_pointer = self.defs[name].get_name_pointer()
                     # iterate the arguments of the definition we're currently iterating
-                    for pos, arg in current_name_pointer.get_args().items():
-                        pointsto_args = pointsto_name_pointer.get_arg(pos)
+                    for pos, arg in current_name_pointer.get_pos_args().items():
+                        pointsto_args = pointsto_name_pointer.get_pos_arg(pos)
                         if not pointsto_args:
-                            # Check existence
-                            for item in arg:
-                                if not item in pointsto_name_pointer.get():
-                                    changed_something = True
-
-                            pointsto_name_pointer.add_arg(pos, arg)
+                            pointsto_name_pointer.add_pos_arg(pos, None, arg)
                             continue
-                        for pointsto_arg in pointsto_args:
-                            if not self.defs.get(pointsto_arg, None):
-                                continue
-                            pointsto_arg_def = self.defs[pointsto_arg].get_name_pointer()
-                            # sometimes we may end up with a cycle
-                            if pointsto_arg in arg:
-                                arg.remove(pointsto_arg)
+                        changed_something = update_pointsto_args(pointsto_args, arg)
 
-                            for item in arg:
-                                if not item in pointsto_arg_def.get():
-                                    changed_something = True
-                                # HACK: this check shouldn't be needed
-                                # if we remove this the following breaks:
-                                # x = lambda x: x + 1
-                                # x(1)
-                                # since on line 184 we don't discriminate between literal values and name values
-                                if not self.defs.get(item, None):
-                                    continue
-                                pointsto_arg_def.add(item)
+                    # do the same for kwargs
+                    for arg_name, arg in current_name_pointer.get_args().items():
+                        pointsto_args = pointsto_name_pointer.get_arg(arg_name)
+                        if not pointsto_args:
+                            pointsto_name_pointer.add_arg(arg_name, arg)
+                            continue
+                        changed_something = update_pointsto_args(pointsto_args, arg)
+
             if not changed_something:
                 break
 

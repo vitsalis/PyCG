@@ -16,12 +16,14 @@ class PreprocessorVisitor(ast.NodeVisitor):
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
+
         self.name_stack = []
-        if not modules_analyzed:
-            self.modules_analyzed = set()
-        else:
+
+        self.modules_analyzed = set()
+        if modules_analyzed:
             self.modules_analyzed = modules_analyzed
         self.modules_analyzed.add(self.modname)
+
         with open(self.filename, "rt") as f:
             self.contents = f.read()
 
@@ -29,12 +31,38 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def current_ns(self):
         return ".".join(self.name_stack)
 
+    def _decode_node(self, node):
+        if isinstance(node, ast.Name):
+            return self.scope_manager.get_def(self.current_ns, node.id)
+        elif isinstance(node, ast.Call):
+            # TODO: this function shouldn't visit anything
+            self.visit(node)
+            called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
+            # TODO: why is RETURN_NAME on definition manager??
+            return_ns = "{}.{}".format(called_def.get_ns(), DefinitionManager.RETURN_NAME)
+            return self.def_manager.get(return_ns)
+        elif isinstance(node, ast.Lambda):
+            lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
+            lambda_name = self._get_lambda_name(lambda_counter)
+            return self.scope_manager.get_def(self.current_ns, lambda_name)
+        elif isinstance(node, ast.Num):
+            return node.n
+        elif isinstance(node, ast.Str):
+            return node.s
+        else:
+            raise Exception("{}: This type is not supported".format(node))
+
     def _get_fun_defaults(self, node):
         defaults = {}
         start = len(node.args.args) - len(node.args.defaults)
         for cnt, d in enumerate(node.args.defaults, start=start):
             self.visit(d)
-            defaults[cnt] = self._get_value_from_node(d)
+            defaults[node.args.args[cnt].arg] = self._decode_node(d)
+
+        start = len(node.args.kwonlyargs) - len(node.args.kw_defaults)
+        for cnt, d in enumerate(node.args.kw_defaults, start=start):
+            self.visit(d)
+            defaults[node.args.kwonlyargs[cnt].arg] = self._decode_node(d)
 
         return defaults
 
@@ -82,7 +110,6 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
     def merge_modules_analyzed(self, analyzed):
         self.modules_analyzed = self.modules_analyzed.union(analyzed)
-
 
     def visit_Module(self, node):
         self.import_manager.set_current_mod(self.modname)
@@ -171,32 +198,55 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def visit_ImportFrom(self, node):
         self.visit_Import(node, prefix=node.module, level=node.level)
 
-    def visit_FunctionDef(self, node):
-        # only last n arguements have defaults
+    def _handle_function_def(self, node, fn_name):
         defaults = self._get_fun_defaults(node)
 
-        self.def_manager.handle_function_def(self.current_ns,
-            node.name, [arg.arg for arg in node.args.args], defaults)
+        fn_def = self.def_manager.handle_function_def(self.current_ns, fn_name)
 
-        fn_ns = "{}.{}".format(self.current_ns, node.name)
+        defs_to_create = []
+        name_pointer = fn_def.get_name_pointer()
+        for pos, arg in enumerate(node.args.args):
+            arg_ns = "{}.{}".format(fn_def.get_ns(), arg.arg)
+            name_pointer.add_pos_arg(pos, arg.arg, arg_ns)
+            defs_to_create.append(arg_ns)
 
-        defs = self.def_manager.get_arg_defs(fn_ns)
+        for arg in node.args.kwonlyargs:
+            arg_ns = "{}.{}".format(fn_def.get_ns(), arg.arg)
+            # TODO: add_name_arg function
+            name_pointer.add_name_arg(arg.arg, arg_ns)
+            defs_to_create.append(arg_ns)
 
-        self.scope_manager.add_scope_defs(fn_ns, defs)
-
-        self.name_stack.append(node.name)
-
-        # TODO: Add for kwargs
-        #for a in node.args.kwonlyargs:
+        # TODO: Add support for kwargs and varargs
+        #if node.args.kwarg:
+        #    pass
+        #if node.args.vararg:
         #    pass
 
-        # TODO
-        #for d in node.args.kw_defaults:
-        #    self.visit(d)
+        for arg_ns in defs_to_create:
+            arg_def = self.def_manager.get(arg_ns)
+            if not arg_def:
+                arg_def = self.def_manager.create(arg_ns, Definition.NAME_DEF)
 
+            self.scope_manager.handle_assign(fn_def.get_ns(), arg_def.get_name(), arg_def)
+
+            # has a default
+            arg_name = arg_ns.split(".")[-1]
+            if defaults.get(arg_name, None):
+                if isinstance(defaults[arg_name], Definition):
+                    if defaults[arg_name].is_function_def():
+                        arg_def.get_name_pointer().add(defaults[arg_name].get_ns())
+                    else:
+                        arg_def.merge(defaults[arg_name])
+                else:
+                    arg_def.get_lit_pointer().add(defaults[arg_name])
+        return fn_def
+
+    def visit_FunctionDef(self, node):
+        fn_def = self._handle_function_def(node, node.name)
+
+        self.name_stack.append(node.name)
         for stmt in node.body:
             self.visit(stmt)
-
         self.name_stack.pop()
 
     def visit_Assign(self, node):
@@ -219,50 +269,60 @@ class PreprocessorVisitor(ast.NodeVisitor):
         defi = self.def_manager.handle_assign(return_ns, value)
 
     def visit_Call(self, node):
-        args = {}
-        for cnt, arg in enumerate(node.args):
-            args[cnt] = self._get_value_from_node(arg)
-
+        fullns = "{}.{}".format(self.current_ns, node.func.id)
         defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:
-            fullns = "{}.{}".format(self.current_ns, node.func.id)
             defi = self.def_manager.create(fullns, Definition.FUN_DEF)
-        self.def_manager.update_def_args(defi, args)
+
+        for pos, arg in enumerate(node.args):
+            decoded = self._decode_node(arg)
+            if defi.is_function_def():
+                pos_arg_names = defi.get_name_pointer().get_pos_arg(pos)
+                # if arguments for this position exist update their namespace
+                for name in pos_arg_names:
+                    arg_def = self.def_manager.get(name)
+                    if isinstance(decoded, Definition):
+                        arg_def.get_name_pointer().add(decoded.get_ns())
+                    else:
+                        arg_def.get_lit_pointer().add(decoded)
+            else:
+                if isinstance(decoded, Definition):
+                    defi.get_name_pointer().add_pos_arg(pos, None, decoded.get_ns())
+                else:
+                    defi.get_name_pointer().add_pos_lit_arg(pos, None, decoded)
+
+        for keyword in node.keywords:
+            decoded = self._decode_node(keyword.value)
+            if defi.is_function_def():
+                arg_names = defi.get_name_pointer().get_arg(keyword.arg)
+                for name in arg_names:
+                    arg_def = self.def_manager.get(name)
+                    if isinstance(decoded, Definition):
+                        arg_def.get_name_pointer().add(decoded.get_ns())
+                    else:
+                        arg_def.get_lit_pointer().add(decoded)
+            else:
+                if isinstance(decoded, Definition):
+                    defi.get_name_pointer().add_arg(keyword.arg, decoded.get_ns())
+                else:
+                    defi.get_name_pointer().add_lit_arg(keyword.arg, decoded)
 
         self.visit(node.func)
 
     def visit_Lambda(self, node):
         # The name of a lambda is defined by the counter of the current scope
         current_scope = self.scope_manager.get_scope(self.current_ns)
-        # TODO: create the method on the Scope object and test
         lambda_counter = current_scope.inc_lambda_counter()
-        # add <> to the name so we don't override actual names
         lambda_name = self._get_lambda_name(lambda_counter)
         lambda_full_ns = "{}.{}".format(self.current_ns, lambda_name)
 
-
         # create a scope for the lambda
         self.scope_manager.create_scope(lambda_full_ns, current_scope)
-
-        defaults = self._get_fun_defaults(node)
-        lambda_def = self.def_manager.handle_function_def(self.current_ns,
-                lambda_name, [arg.arg for arg in node.args.args], defaults)
-
+        lambda_def = self._handle_function_def(node, lambda_name)
         # add it to the current scope
         current_scope.add_def(lambda_name, lambda_def)
 
-        defs = self.def_manager.get_arg_defs(lambda_full_ns)
-
-        self.scope_manager.add_scope_defs(lambda_full_ns, defs)
-
         self.name_stack.append(lambda_name)
-        # TODO: Add for kwargs
-        #for a in node.args.kwonlyargs:
-        #    pass
-
-        # TODO
-        #for d in node.args.kw_defaults:
-        #    self.visit(d)
         self.visit(node.body)
         self.name_stack.pop()
 
