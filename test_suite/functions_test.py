@@ -68,3 +68,11 @@ class FunctionsTest(TestBase):
     def test_function_return_complex(self):
         snippet_path = os.path.join(self.snippets_path, "assigned_function_return_complex")
         self.validate_snippet(snippet_path)
+
+    def test_function_call_with_kwargs(self):
+        snippet_path = os.path.join(self.snippets_path, "function_call_with_kwargs")
+        self.validate_snippet(snippet_path)
+
+    def test_function_call_with_kwargs_chained(self):
+        snippet_path = os.path.join(self.snippets_path, "function_call_with_kwargs_chained")
+        self.validate_snippet(snippet_path)
