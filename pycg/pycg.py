@@ -78,7 +78,9 @@ class ModuleVisitor(ast.NodeVisitor):
 
         if self.closured.get(defi.get_ns(), None):
             for pointer in self.closured[defi.get_ns()]:
-                self.call_graph.add_edge(self.current_ns, pointer)
+                pointer_def = self.def_manager.get(pointer)
+                if pointer_def.is_function_def():
+                    self.call_graph.add_edge(self.current_ns, pointer)
 
     def analyze_submodules(self):
         """
