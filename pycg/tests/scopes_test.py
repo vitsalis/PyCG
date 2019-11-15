@@ -59,24 +59,6 @@ class ScopeManagerTest(TestBase):
         sm.handle_assign("root", "name", "value")
         self.assertEqual(sm.get_def("root", "name"), "value")
 
-    def test_add_scope_defs(self):
-        class MockDef(object):
-            def __init__(self, name):
-                self.name = name
-
-            def get_name(self):
-                return self.name
-
-        sm = ScopeManager()
-        sm.scopes["root"] = ScopeItem("root", None)
-
-        defs = [MockDef(str(x)) for x in range(10)]
-
-        # all defs should be added to the scope
-        sm.add_scope_defs("root", defs)
-        for defi in defs:
-            self.assertEqual(sm.get_def("root", defi.get_name()), defi)
-
 
     def test_get_def(self):
         sm = ScopeManager()

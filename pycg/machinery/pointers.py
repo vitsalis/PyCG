@@ -40,7 +40,7 @@ class NamePointer(Pointer):
         except ValueError:
             raise PointerError("Invalid position for argument")
 
-        return str(pos)
+        return pos
 
     def get_or_create(self, name):
         if not name in self.args:
@@ -108,7 +108,8 @@ class NamePointer(Pointer):
         if hasattr(pointer, "get_pos_names"):
             for pos, name in pointer.get_pos_names().items():
                 self.pos_to_name[pos] = name
-                self.add_arg(name, pointer.get_arg(name))
+            for name, arg in pointer.get_args().items():
+                self.add_arg(name, arg)
 
 class PointerError(Exception):
     pass

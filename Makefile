@@ -1,5 +1,4 @@
-test: functional_test
-#test: unit_test functional_test
+test: unit_test functional_test
 
 unit_test:
 	python3 -m unittest discover -s pycg/tests -p "*_test.py"
