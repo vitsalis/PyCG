@@ -32,6 +32,7 @@ class NamePointer(Pointer):
     def __init__(self):
         super().__init__()
         self.pos_to_name = {}
+        self.name_to_pos = {}
         self.args = {}
 
     def _sanitize_pos(self, pos):
@@ -73,6 +74,8 @@ class NamePointer(Pointer):
             else:
                 name = str(pos)
         self.pos_to_name[pos] = name
+        self.name_to_pos[name] = pos
+
         self.add_arg(name, item)
 
     def add_pos_lit_arg(self, pos, name, item):
@@ -80,6 +83,7 @@ class NamePointer(Pointer):
         if not name:
             name = str(pos)
         self.pos_to_name[pos] = name
+        self.name_to_pos[name] = pos
         self.add_lit_arg(name, item)
 
     def get_pos_arg(self, pos):
@@ -99,6 +103,10 @@ class NamePointer(Pointer):
         for pos, name in self.pos_to_name.items():
             args[pos] = self.args[name]
         return args
+
+    def get_pos_of_name(self, name):
+        if name in self.name_to_pos:
+            return self.name_to_pos[name]
 
     def get_pos_names(self):
         return self.pos_to_name

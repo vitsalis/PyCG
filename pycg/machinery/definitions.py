@@ -121,20 +121,19 @@ class DefinitionManager(object):
                     # get the name pointer of the points to name
                     pointsto_name_pointer = self.defs[name].get_name_pointer()
                     # iterate the arguments of the definition we're currently iterating
-                    for pos, arg in current_name_pointer.get_pos_args().items():
-                        pointsto_args = pointsto_name_pointer.get_pos_arg(pos)
-                        if not pointsto_args:
-                            pointsto_name_pointer.add_pos_arg(pos, None, arg)
-                            continue
-                        changed_something = update_pointsto_args(pointsto_args, arg)
-
-                    # do the same for kwargs
                     for arg_name, arg in current_name_pointer.get_args().items():
-                        pointsto_args = pointsto_name_pointer.get_arg(arg_name)
-                        if not pointsto_args:
-                            pointsto_name_pointer.add_arg(arg_name, arg)
-                            continue
-                        changed_something = update_pointsto_args(pointsto_args, arg)
+                        pos = current_name_pointer.get_pos_of_name(arg_name)
+                        if not pos is None:
+                            pointsto_args = pointsto_name_pointer.get_pos_arg(pos)
+                            if not pointsto_args:
+                                pointsto_name_pointer.add_pos_arg(pos, None, arg)
+                                continue
+                        else:
+                            pointsto_args = pointsto_name_pointer.get_arg(arg_name)
+                            if not pointsto_args:
+                                pointsto_name_pointer.add_arg(arg_name, arg)
+                                continue
+                        changed_something = changed_something or update_pointsto_args(pointsto_args, arg)
 
             if not changed_something:
                 break
