@@ -80,31 +80,6 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def _get_lambda_name(self, cnt):
         return "<lambda{}>".format(cnt)
 
-    def _get_value_from_node(self, node):
-        # TODO add more types
-        if isinstance(node, ast.Name):
-            defi = self.scope_manager.get_def(self.current_ns, node.id)
-            return {"value": defi,
-                    "type": DefinitionManager.NAME_TYPE}
-
-        elif isinstance(node, ast.Call):
-            self.visit(node)
-            defi = self.scope_manager.get_def(self.current_ns, node.func.id)
-            return_ns = "{}.{}".format(defi.get_ns(), DefinitionManager.RETURN_NAME)
-            return_def = self.def_manager.get(return_ns)
-            return {"value": return_def, "type": DefinitionManager.NAME_TYPE}
-        elif isinstance(node, ast.Lambda):
-            lambda_name = self._get_lambda_name(self.scope_manager.get_scope(self.current_ns).get_lambda_counter())
-            defi = self.scope_manager.get_def(self.current_ns, lambda_name)
-            return {"value": defi,
-                    "type": DefinitionManager.NAME_TYPE}
-        elif isinstance(node, ast.Num):
-            return {"value": node.n, "type": DefinitionManager.LIT_TYPE}
-        elif isinstance(node, ast.Str):
-            return {"value": node.s, "type": DefinitionManager.LIT_TYPE}
-        else:
-            raise Exception("{} not supported".format(node))
-
     def get_modules_analyzed(self):
         return self.modules_analyzed
 
@@ -249,24 +224,31 @@ class PreprocessorVisitor(ast.NodeVisitor):
             self.visit(stmt)
         self.name_stack.pop()
 
+    def _handle_assign(self, targetns, decoded):
+        defi = self.def_manager.get(targetns)
+        if not defi:
+            defi = self.def_manager.create(targetns, Definition.NAME_DEF)
+
+        if isinstance(decoded, Definition):
+            defi.get_name_pointer().add(decoded.get_ns())
+        else:
+            defi.get_lit_pointer().add(decoded)
+        return defi
+
     def visit_Assign(self, node):
         self.visit(node.value)
 
-        value = self._get_value_from_node(node.value)
+        decoded = self._decode_node(node.value)
         for target in node.targets:
             targetns = "{}.{}".format(self.current_ns, target.id)
-            defi = self.def_manager.handle_assign(targetns, value)
+            defi = self._handle_assign(targetns, decoded)
             self.scope_manager.handle_assign(self.current_ns, target.id, defi)
 
-    def visit_Name(self, node):
-        pass
-
     def visit_Return(self, node):
-        return_ns = "{}.{}".format(self.current_ns, DefinitionManager.RETURN_NAME)
-
         self.visit(node.value)
-        value = self._get_value_from_node(node.value)
-        defi = self.def_manager.handle_assign(return_ns, value)
+
+        return_ns = "{}.{}".format(self.current_ns, DefinitionManager.RETURN_NAME)
+        self._handle_assign(return_ns, self._decode_node(node.value))
 
     def visit_Call(self, node):
         fullns = "{}.{}".format(self.current_ns, node.func.id)

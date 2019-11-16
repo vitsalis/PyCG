@@ -1,10 +1,6 @@
 from pycg.machinery.pointers import NamePointer, LiteralPointer
 
 class DefinitionManager(object):
-    LIT_TYPE        = "LITERAL"
-    FUN_TYPE        = "FUNCTION"
-    NAME_TYPE       = "NAME"
-
     RETURN_NAME     = "<**RETURN**>"
 
     def __init__(self):
@@ -45,23 +41,6 @@ class DefinitionManager(object):
 
         return_ns = "{}.{}".format(full_ns, self.RETURN_NAME)
         self.create(return_ns, Definition.NAME_DEF)
-
-        return defi
-
-    def handle_assign(self, targetns, value):
-        defi = self.get(targetns)
-        if not defi:
-            defi = self.create(targetns, Definition.NAME_DEF)
-
-        if not value["value"]:
-            print ("empty value found")
-        if value["type"] == DefinitionManager.LIT_TYPE:
-            defi.get_lit_pointer().add(value["value"])
-        elif value["type"] == DefinitionManager.NAME_TYPE:
-            # defi.merge(value["value"])
-            defi.get_name_pointer().add(value["value"].get_ns())
-        else:
-            raise Exception("Unknown type")
 
         return defi
 

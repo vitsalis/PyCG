@@ -64,23 +64,3 @@ class DefinitionManagerTest(TestBase):
         # a definition for the function should be created
         fn_def = dm.get(fn_ns)
         self.assertIsNotNone(fn_def)
-
-
-    def test_handle_assign(self):
-        dm = DefinitionManager()
-        to_assign = dm.create("to_assign", Definition.NAME_DEF)
-
-        name_info = {"type": DefinitionManager.NAME_TYPE, "value": to_assign}
-        lit_info = {"type": DefinitionManager.LIT_TYPE, "value": "10"}
-
-        dm.handle_assign("var1", name_info)
-        dm.handle_assign("var2", lit_info)
-
-        var1_def = dm.get("var1")
-        var2_def = dm.get("var2")
-
-        self.assertEqual(var1_def.get_name_pointer().get(), set([to_assign.get_ns()]))
-        self.assertEqual(var1_def.get_lit_pointer().get(), set())
-
-        self.assertEqual(var2_def.get_lit_pointer().get(), set([LiteralPointer.STR_LIT]))
-        self.assertEqual(var2_def.get_name_pointer().get(), set())
