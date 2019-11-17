@@ -44,6 +44,11 @@ class PreprocessorVisitor(ast.NodeVisitor):
             lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
             lambda_name = utils.get_lambda_name(lambda_counter)
             return self.scope_manager.get_def(self.current_ns, lambda_name)
+        elif isinstance(node, ast.Tuple):
+            decoded = []
+            for elt in node.elts:
+                decoded.append(self._decode_node(elt))
+            return decoded
         elif isinstance(node, ast.Num):
             return node.n
         elif isinstance(node, ast.Str):
@@ -231,14 +236,30 @@ class PreprocessorVisitor(ast.NodeVisitor):
             defi.get_lit_pointer().add(decoded)
         return defi
 
+    def visit_Tuple(self, node):
+        # node.ctx == ast.Load means get
+        # node.ctx == ast.Store means set
+        for elt in node.elts:
+            self.visit(elt)
+
     def visit_Assign(self, node):
         self.visit(node.value)
 
         decoded = self._decode_node(node.value)
+
+        def do_assign(decoded, target):
+            self.visit(target)
+            if isinstance(target, ast.Tuple):
+                for pos, elt in enumerate(target.elts):
+                    do_assign(decoded[pos], elt)
+            else:
+                targetns = utils.join_ns(self.current_ns, target.id)
+                defi = self._handle_assign(targetns, decoded)
+                self.scope_manager.handle_assign(self.current_ns, target.id, defi)
+
         for target in node.targets:
-            targetns = utils.join_ns(self.current_ns, target.id)
-            defi = self._handle_assign(targetns, decoded)
-            self.scope_manager.handle_assign(self.current_ns, target.id, defi)
+            do_assign(decoded, target)
+
 
     def visit_Return(self, node):
         self.visit(node.value)
