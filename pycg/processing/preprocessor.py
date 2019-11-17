@@ -9,73 +9,31 @@ from pycg.processing.base import ProcessingBase
 class PreProcessorVisitor(ProcessingBase):
     def __init__(self, input_file, modname, mod_dir,
             import_manager, scope_manager, def_manager, modules_analyzed=None):
-        super().__init__(modname, modules_analyzed)
+        super().__init__(input_file, modname, modules_analyzed)
 
-        self.filename = os.path.abspath(input_file)
         self.modname = modname
         self.mod_dir = mod_dir
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
 
-        self.name_stack = []
-
-        with open(self.filename, "rt") as f:
-            self.contents = f.read()
-
-    @property
-    def current_ns(self):
-        return ".".join(self.name_stack)
-
-    def _decode_node(self, node):
-        if isinstance(node, ast.Name):
-            return self.scope_manager.get_def(self.current_ns, node.id)
-        elif isinstance(node, ast.Call):
-            # TODO: this function shouldn't visit anything
-            self.visit(node)
-            called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
-            return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
-            return self.def_manager.get(return_ns)
-        elif isinstance(node, ast.Lambda):
-            lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
-            lambda_name = utils.get_lambda_name(lambda_counter)
-            return self.scope_manager.get_def(self.current_ns, lambda_name)
-        elif isinstance(node, ast.Tuple):
-            decoded = []
-            for elt in node.elts:
-                decoded.append(self._decode_node(elt))
-            return decoded
-        elif isinstance(node, ast.Num):
-            return node.n
-        elif isinstance(node, ast.Str):
-            return node.s
-        else:
-            raise Exception("{}: This type is not supported".format(node))
-
     def _get_fun_defaults(self, node):
         defaults = {}
         start = len(node.args.args) - len(node.args.defaults)
         for cnt, d in enumerate(node.args.defaults, start=start):
             self.visit(d)
-            defaults[node.args.args[cnt].arg] = self._decode_node(d)
+            defaults[node.args.args[cnt].arg] = self.decode_node(d)
 
         start = len(node.args.kwonlyargs) - len(node.args.kw_defaults)
         for cnt, d in enumerate(node.args.kw_defaults, start=start):
             self.visit(d)
-            defaults[node.args.kwonlyargs[cnt].arg] = self._decode_node(d)
+            defaults[node.args.kwonlyargs[cnt].arg] = self.decode_node(d)
 
         return defaults
 
-    def _analyze_submodule(self, fname, modname):
-        self.import_manager.set_current_mod(modname)
-
-        visitor = PreProcessorVisitor(fname, modname, self.mod_dir,
+    def analyze_submodule(self, modname):
+        super().analyze_submodule(PreProcessorVisitor, modname, self.mod_dir,
             self.import_manager, self.scope_manager, self.def_manager)
-        visitor.do_visit()
-
-        self.merge_modules_analyzed(visitor.get_modules_analyzed())
-
-        self.import_manager.set_current_mod(self.modname)
 
     def visit_Module(self, node):
         self.import_manager.set_current_mod(self.modname)
@@ -101,11 +59,7 @@ class PreProcessorVisitor(ProcessingBase):
         if not defi:
             defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
 
-        self.name_stack.append(self.modname)
-
-        self.generic_visit(node)
-
-        self.name_stack.pop()
+        super().visit_Module(node)
 
     def visit_Import(self, node, prefix='', level=0):
         """
@@ -156,8 +110,7 @@ class PreProcessorVisitor(ProcessingBase):
                 fname = self.import_manager.get_filepath(modname)
                 # only analyze modules under the current directory
                 if self.mod_dir in fname:
-                    if not modname in self.get_modules_analyzed():
-                        self._analyze_submodule(fname, modname)
+                    self.analyze_submodule(modname)
                     handle_scopes(tgt_name, modname)
 
 
@@ -210,10 +163,7 @@ class PreProcessorVisitor(ProcessingBase):
     def visit_FunctionDef(self, node):
         fn_def = self._handle_function_def(node, node.name)
 
-        self.name_stack.append(node.name)
-        for stmt in node.body:
-            self.visit(stmt)
-        self.name_stack.pop()
+        super().visit_FunctionDef(node)
 
     def _handle_assign(self, targetns, decoded):
         defi = self.def_manager.get(targetns)
@@ -235,7 +185,7 @@ class PreProcessorVisitor(ProcessingBase):
     def visit_Assign(self, node):
         self.visit(node.value)
 
-        decoded = self._decode_node(node.value)
+        decoded = self.decode_node(node.value)
 
         def do_assign(decoded, target):
             self.visit(target)
@@ -255,7 +205,7 @@ class PreProcessorVisitor(ProcessingBase):
         self.visit(node.value)
 
         return_ns = utils.join_ns(self.current_ns, utils.constants.RETURN_NAME)
-        self._handle_assign(return_ns, self._decode_node(node.value))
+        self._handle_assign(return_ns, self.decode_node(node.value))
 
     def visit_Call(self, node):
         self.visit(node.func)
@@ -271,38 +221,7 @@ class PreProcessorVisitor(ProcessingBase):
         if not defi:
             defi = self.def_manager.create(fullns, utils.constants.FUN_DEF)
 
-        for pos, arg in enumerate(node.args):
-            decoded = self._decode_node(arg)
-            if defi.is_function_def():
-                pos_arg_names = defi.get_name_pointer().get_pos_arg(pos)
-                # if arguments for this position exist update their namespace
-                for name in pos_arg_names:
-                    arg_def = self.def_manager.get(name)
-                    if isinstance(decoded, Definition):
-                        arg_def.get_name_pointer().add(decoded.get_ns())
-                    else:
-                        arg_def.get_lit_pointer().add(decoded)
-            else:
-                if isinstance(decoded, Definition):
-                    defi.get_name_pointer().add_pos_arg(pos, None, decoded.get_ns())
-                else:
-                    defi.get_name_pointer().add_pos_lit_arg(pos, None, decoded)
-
-        for keyword in node.keywords:
-            decoded = self._decode_node(keyword.value)
-            if defi.is_function_def():
-                arg_names = defi.get_name_pointer().get_arg(keyword.arg)
-                for name in arg_names:
-                    arg_def = self.def_manager.get(name)
-                    if isinstance(decoded, Definition):
-                        arg_def.get_name_pointer().add(decoded.get_ns())
-                    else:
-                        arg_def.get_lit_pointer().add(decoded)
-            else:
-                if isinstance(decoded, Definition):
-                    defi.get_name_pointer().add_arg(keyword.arg, decoded.get_ns())
-                else:
-                    defi.get_name_pointer().add_lit_arg(keyword.arg, decoded)
+        self.iterate_call_args(defi, node)
 
     def visit_Lambda(self, node):
         # The name of a lambda is defined by the counter of the current scope
@@ -317,11 +236,9 @@ class PreProcessorVisitor(ProcessingBase):
         # add it to the current scope
         current_scope.add_def(lambda_name, lambda_def)
 
-        self.name_stack.append(lambda_name)
-        self.visit(node.body)
-        self.name_stack.pop()
+        super().visit_Lambda(node, lambda_name)
 
-    def do_visit(self):
+    def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
 
 class PreProcessor(object):
@@ -344,7 +261,7 @@ class PreProcessor(object):
 
         visitor = PreProcessorVisitor(self.input_file, self.mod, self.mod_dir,
             self.import_manager, self.scope_manager, self.def_manager)
-        visitor.do_visit()
+        visitor.analyze()
 
     def cleanup(self):
         self.import_manager.remove_hooks()
