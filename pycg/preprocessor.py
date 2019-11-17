@@ -268,7 +268,15 @@ class PreprocessorVisitor(ast.NodeVisitor):
         self._handle_assign(return_ns, self._decode_node(node.value))
 
     def visit_Call(self, node):
+        self.visit(node.func)
+        # if it is not a name there's nothing we can do here
+        # ModuleVisitor will be able to resolve those calls
+        # since it'll have the name tracking information
+        if not isinstance(node.func, ast.Name):
+            return
+
         fullns = utils.join_ns(self.current_ns, node.func.id)
+
         defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:
             defi = self.def_manager.create(fullns, utils.constants.FUN_DEF)
@@ -305,8 +313,6 @@ class PreprocessorVisitor(ast.NodeVisitor):
                     defi.get_name_pointer().add_arg(keyword.arg, decoded.get_ns())
                 else:
                     defi.get_name_pointer().add_lit_arg(keyword.arg, decoded)
-
-        self.visit(node.func)
 
     def visit_Lambda(self, node):
         # The name of a lambda is defined by the counter of the current scope

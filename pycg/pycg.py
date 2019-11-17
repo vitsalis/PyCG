@@ -7,7 +7,7 @@ from pycg.machinery.scopes import ScopeManager
 from pycg.machinery.definitions import DefinitionManager
 from pycg.machinery.imports import ImportManager
 from pycg.machinery.callgraph import CallGraph
-from pycg.utils import common as utils
+from pycg import utils
 
 
 class ModuleVisitor(ast.NodeVisitor):
@@ -36,10 +36,17 @@ class ModuleVisitor(ast.NodeVisitor):
         self.modules_analyzed.add(modulename)
         # Stack for names of functions
         self.name_stack = []
+        self.last_called_names = None
 
     @property
     def current_ns(self):
         return ".".join(self.name_stack)
+
+    def get_last_called_names(self):
+        return self.last_called_names
+
+    def set_last_called_names(self, names):
+        self.last_called_names = names
 
     def get_modules_analyzed(self):
         return self.modules_analyzed
@@ -73,11 +80,27 @@ class ModuleVisitor(ast.NodeVisitor):
         self.name_stack.pop()
 
     def visit_Call(self, node):
+        # First visit the child function so that on the case of
+        #       func()()()
+        # we first visit the call to func and then the other calls
         self.visit(node.func)
-        defi = self.scope_manager.get_def(self.current_ns, node.func.id)
 
-        if self.closured.get(defi.get_ns(), None):
-            for pointer in self.closured[defi.get_ns()]:
+        names = set()
+        if isinstance(node.func, ast.Name):
+            defi = self.scope_manager.get_def(self.current_ns, node.func.id)
+            names = self.closured.get(defi.get_ns(), None)
+        else:
+            last_called_names = self.get_last_called_names()
+            for name in last_called_names:
+                return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)
+                returns = self.closured.get(return_ns)
+                for ret in returns:
+                    defi = self.def_manager.get(ret)
+                    names.add(defi.get_ns())
+
+        if names:
+            self.set_last_called_names(names)
+            for pointer in names:
                 pointer_def = self.def_manager.get(pointer)
                 if pointer_def.is_function_def():
                     self.call_graph.add_edge(self.current_ns, pointer)
