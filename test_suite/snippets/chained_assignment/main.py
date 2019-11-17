@@ -4,7 +4,7 @@ def func1():
 def func2():
     pass
 
-a = b = func
+a = b = func1
 
 b()
 
