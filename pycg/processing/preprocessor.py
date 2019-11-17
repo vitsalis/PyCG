@@ -4,11 +4,13 @@ import importlib
 
 from pycg.machinery.definitions import DefinitionManager, Definition
 from pycg import utils
+from pycg.processing.base import ProcessingBase
 
-class PreProcessorVisitor(ast.NodeVisitor):
-
+class PreProcessorVisitor(ProcessingBase):
     def __init__(self, input_file, modname, mod_dir,
             import_manager, scope_manager, def_manager, modules_analyzed=None):
+        super().__init__(modname, modules_analyzed)
+
         self.filename = os.path.abspath(input_file)
         self.modname = modname
         self.mod_dir = mod_dir
@@ -17,11 +19,6 @@ class PreProcessorVisitor(ast.NodeVisitor):
         self.def_manager = def_manager
 
         self.name_stack = []
-
-        self.modules_analyzed = set()
-        if modules_analyzed:
-            self.modules_analyzed = modules_analyzed
-        self.modules_analyzed.add(self.modname)
 
         with open(self.filename, "rt") as f:
             self.contents = f.read()
@@ -79,12 +76,6 @@ class PreProcessorVisitor(ast.NodeVisitor):
         self.merge_modules_analyzed(visitor.get_modules_analyzed())
 
         self.import_manager.set_current_mod(self.modname)
-
-    def get_modules_analyzed(self):
-        return self.modules_analyzed
-
-    def merge_modules_analyzed(self, analyzed):
-        self.modules_analyzed = self.modules_analyzed.union(analyzed)
 
     def visit_Module(self, node):
         self.import_manager.set_current_mod(self.modname)
@@ -165,7 +156,7 @@ class PreProcessorVisitor(ast.NodeVisitor):
                 fname = self.import_manager.get_filepath(modname)
                 # only analyze modules under the current directory
                 if self.mod_dir in fname:
-                    if not modname in self.modules_analyzed:
+                    if not modname in self.get_modules_analyzed():
                         self._analyze_submodule(fname, modname)
                     handle_scopes(tgt_name, modname)
 

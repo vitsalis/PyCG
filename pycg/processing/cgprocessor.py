@@ -2,9 +2,12 @@ import os
 import ast
 
 from pycg import utils
+from pycg.processing.base import ProcessingBase
 
-class CallGraphProcessor(ast.NodeVisitor):
-    def __init__(self, modulename, filename, import_manager, scope_manager, def_manager, call_graph, modules_analyzed=None):
+class CallGraphProcessor(ProcessingBase):
+    def __init__(self, modulename, filename, import_manager,
+            scope_manager, def_manager, call_graph, modules_analyzed=None):
+        super().__init__(modulename, modules_analyzed)
         # name of file being analyzed
         self.filename = filename
         # parent directory of file
@@ -21,12 +24,6 @@ class CallGraphProcessor(ast.NodeVisitor):
 
         self.closured = self.def_manager.transitive_closure()
 
-        # Add the current module to the already analyzed list
-        if not modules_analyzed:
-            self.modules_analyzed = set()
-        else:
-            self.modules_analyzed = modules_analyzed
-        self.modules_analyzed.add(modulename)
         # Stack for names of functions
         self.name_stack = []
         self.last_called_names = None
@@ -40,12 +37,6 @@ class CallGraphProcessor(ast.NodeVisitor):
 
     def set_last_called_names(self, names):
         self.last_called_names = names
-
-    def get_modules_analyzed(self):
-        return self.modules_analyzed
-
-    def merge_modules_analyzed(self, analyzed):
-        self.modules_analyzed = self.modules_analyzed.union(analyzed)
 
     def visit_Module(self, node):
         self.name_stack.append(self.modulename)
@@ -106,18 +97,17 @@ class CallGraphProcessor(ast.NodeVisitor):
         imports = self.import_manager.get_imports(self.modulename)
 
         for imp in imports:
-            if imp in self.modules_analyzed:
+            if imp in self.get_modules_analyzed():
                 continue
 
             fname = self.import_manager.get_filepath(imp)
 
             visitor = CallGraphProcessor(imp, fname, self.import_manager,
                 self.scope_manager, self.def_manager, self.call_graph,
-                modules_analyzed=self.modules_analyzed)
+                modules_analyzed=self.get_modules_analyzed())
             visitor.analyze()
             self.merge_modules_analyzed(visitor.get_modules_analyzed())
 
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
         self.analyze_submodules()
-
