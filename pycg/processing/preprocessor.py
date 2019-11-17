@@ -1,12 +1,11 @@
 import ast
 import os
-import sys
 import importlib
 
 from pycg.machinery.definitions import DefinitionManager, Definition
 from pycg import utils
 
-class PreprocessorVisitor(ast.NodeVisitor):
+class PreProcessorVisitor(ast.NodeVisitor):
 
     def __init__(self, input_file, modname, mod_dir,
             import_manager, scope_manager, def_manager, modules_analyzed=None):
@@ -73,7 +72,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def _analyze_submodule(self, fname, modname):
         self.import_manager.set_current_mod(modname)
 
-        visitor = PreprocessorVisitor(fname, modname, self.mod_dir,
+        visitor = PreProcessorVisitor(fname, modname, self.mod_dir,
             self.import_manager, self.scope_manager, self.def_manager)
         visitor.do_visit()
 
@@ -334,7 +333,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def do_visit(self):
         self.visit(ast.parse(self.contents, self.filename))
 
-class Preprocessor(object):
+class PreProcessor(object):
     def __init__(self, input_file, import_manager, scope_manager, def_manager):
         self.input_file = os.path.abspath(input_file)
 
@@ -352,7 +351,7 @@ class Preprocessor(object):
         self.import_manager.set_filepath(self.mod, self.input_file)
         self.import_manager.set_current_mod(self.mod)
 
-        visitor = PreprocessorVisitor(self.input_file, self.mod, self.mod_dir,
+        visitor = PreProcessorVisitor(self.input_file, self.mod, self.mod_dir,
             self.import_manager, self.scope_manager, self.def_manager)
         visitor.do_visit()
 
