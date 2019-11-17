@@ -78,3 +78,11 @@ class FunctionsTest(TestBase):
     def test_function_call_with_assigned_kwarg(self):
         snippet_path = os.path.join(self.snippets_path, "function_call_with_assigned_kwarg")
         self.validate_snippet(snippet_path)
+
+    def test_assigned_function_direct_call(self):
+        snippet_path = os.path.join(self.snippets_path, "assigned_function_direct_call")
+        self.validate_snippet(snippet_path)
+
+    def test_direct_call_with_parameters(self):
+        snippet_path = os.path.join(self.snippets_path, "direct_call_with_parameters")
+        self.validate_snippet(snippet_path)
