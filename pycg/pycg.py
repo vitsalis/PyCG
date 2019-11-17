@@ -7,8 +7,8 @@ from pycg.machinery.scopes import ScopeManager
 from pycg.machinery.definitions import DefinitionManager
 from pycg.machinery.imports import ImportManager
 from pycg.machinery.callgraph import CallGraph
+from pycg.utils import common as utils
 
-import pycg.utils
 
 class ModuleVisitor(ast.NodeVisitor):
     def __init__(self, modulename, filename, import_manager, scope_manager, def_manager, call_graph, modules_analyzed=None):
@@ -63,8 +63,8 @@ class ModuleVisitor(ast.NodeVisitor):
 
     def visit_Lambda(self, node):
         counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
-        lambda_name = "<lambda{}>".format(counter)
-        lambda_fullns = "{}.{}".format(self.current_ns, lambda_name)
+        lambda_name = utils.get_lambda_name(counter)
+        lambda_fullns = utils.join_ns(self.current_ns, lambda_name)
 
         self.call_graph.add_node(lambda_fullns)
 
@@ -118,7 +118,7 @@ class CallGraphGenerator(object):
         self.import_manager.remove_hooks()
 
     def __init__(self, input_file):
-        self.input_mod = pycg.utils.to_mod_name(input_file.split("/")[-1])
+        self.input_mod = utils.to_mod_name(input_file.split("/")[-1])
         self.input_file = os.path.abspath(input_file)
 
         self.setUp()

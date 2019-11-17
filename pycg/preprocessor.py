@@ -38,12 +38,11 @@ class PreprocessorVisitor(ast.NodeVisitor):
             # TODO: this function shouldn't visit anything
             self.visit(node)
             called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
-            # TODO: why is RETURN_NAME on definition manager??
-            return_ns = "{}.{}".format(called_def.get_ns(), DefinitionManager.RETURN_NAME)
+            return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
             return self.def_manager.get(return_ns)
         elif isinstance(node, ast.Lambda):
             lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
-            lambda_name = self._get_lambda_name(lambda_counter)
+            lambda_name = utils.get_lambda_name(lambda_counter)
             return self.scope_manager.get_def(self.current_ns, lambda_name)
         elif isinstance(node, ast.Num):
             return node.n
@@ -77,9 +76,6 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
         self.import_manager.set_current_mod(self.modname)
 
-    def _get_lambda_name(self, cnt):
-        return "<lambda{}>".format(cnt)
-
     def get_modules_analyzed(self):
         return self.modules_analyzed
 
@@ -99,7 +95,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
         for f in functions:
             defi = self.def_manager.get(f)
             if not defi:
-                defi = self.def_manager.create(f, Definition.FUN_DEF)
+                defi = self.def_manager.create(f, utils.constants.FUN_DEF)
 
             splitted = f.split(".")
             name = splitted[-1]
@@ -108,7 +104,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
         defi = self.def_manager.get(self.modname)
         if not defi:
-            defi = self.def_manager.create(self.modname, Definition.MOD_DEF)
+            defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
 
         self.name_stack.append(self.modname)
 
@@ -136,7 +132,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
         def handle_scopes(tgt_name, modname):
             def create_def(scope, name, imported_def):
                 if not name in scope.get_defs():
-                    def_ns = "{}.{}".format(scope.get_ns(), name)
+                    def_ns = utils.join_ns(scope.get_ns(), name)
                     defi = self.def_manager.get(def_ns)
                     if not defi:
                         defi = self.def_manager.assign(def_ns, imported_def)
@@ -181,12 +177,12 @@ class PreprocessorVisitor(ast.NodeVisitor):
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
         for pos, arg in enumerate(node.args.args):
-            arg_ns = "{}.{}".format(fn_def.get_ns(), arg.arg)
+            arg_ns = utils.join_ns(fn_def.get_ns(), arg.arg)
             name_pointer.add_pos_arg(pos, arg.arg, arg_ns)
             defs_to_create.append(arg_ns)
 
         for arg in node.args.kwonlyargs:
-            arg_ns = "{}.{}".format(fn_def.get_ns(), arg.arg)
+            arg_ns = utils.join_ns(fn_def.get_ns(), arg.arg)
             # TODO: add_name_arg function
             name_pointer.add_name_arg(arg.arg, arg_ns)
             defs_to_create.append(arg_ns)
@@ -200,7 +196,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
         for arg_ns in defs_to_create:
             arg_def = self.def_manager.get(arg_ns)
             if not arg_def:
-                arg_def = self.def_manager.create(arg_ns, Definition.NAME_DEF)
+                arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
 
             self.scope_manager.handle_assign(fn_def.get_ns(), arg_def.get_name(), arg_def)
 
@@ -227,7 +223,7 @@ class PreprocessorVisitor(ast.NodeVisitor):
     def _handle_assign(self, targetns, decoded):
         defi = self.def_manager.get(targetns)
         if not defi:
-            defi = self.def_manager.create(targetns, Definition.NAME_DEF)
+            defi = self.def_manager.create(targetns, utils.constants.NAME_DEF)
 
         if isinstance(decoded, Definition):
             defi.get_name_pointer().add(decoded.get_ns())
@@ -240,21 +236,21 @@ class PreprocessorVisitor(ast.NodeVisitor):
 
         decoded = self._decode_node(node.value)
         for target in node.targets:
-            targetns = "{}.{}".format(self.current_ns, target.id)
+            targetns = utils.join_ns(self.current_ns, target.id)
             defi = self._handle_assign(targetns, decoded)
             self.scope_manager.handle_assign(self.current_ns, target.id, defi)
 
     def visit_Return(self, node):
         self.visit(node.value)
 
-        return_ns = "{}.{}".format(self.current_ns, DefinitionManager.RETURN_NAME)
+        return_ns = utils.join_ns(self.current_ns, utils.constants.RETURN_NAME)
         self._handle_assign(return_ns, self._decode_node(node.value))
 
     def visit_Call(self, node):
-        fullns = "{}.{}".format(self.current_ns, node.func.id)
+        fullns = utils.join_ns(self.current_ns, node.func.id)
         defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:
-            defi = self.def_manager.create(fullns, Definition.FUN_DEF)
+            defi = self.def_manager.create(fullns, utils.constants.FUN_DEF)
 
         for pos, arg in enumerate(node.args):
             decoded = self._decode_node(arg)
@@ -295,8 +291,8 @@ class PreprocessorVisitor(ast.NodeVisitor):
         # The name of a lambda is defined by the counter of the current scope
         current_scope = self.scope_manager.get_scope(self.current_ns)
         lambda_counter = current_scope.inc_lambda_counter()
-        lambda_name = self._get_lambda_name(lambda_counter)
-        lambda_full_ns = "{}.{}".format(self.current_ns, lambda_name)
+        lambda_name = utils.get_lambda_name(lambda_counter)
+        lambda_full_ns = utils.join_ns(self.current_ns, lambda_name)
 
         # create a scope for the lambda
         self.scope_manager.create_scope(lambda_full_ns, current_scope)

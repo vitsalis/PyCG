@@ -1,8 +1,7 @@
 from pycg.machinery.pointers import NamePointer, LiteralPointer
+from pycg import utils
 
 class DefinitionManager(object):
-    RETURN_NAME     = "<**RETURN**>"
-
     def __init__(self):
         self.defs = {}
 
@@ -23,9 +22,10 @@ class DefinitionManager(object):
 
         # if it is a function def, we need to create a return pointer
         if defi.is_function_def():
-            return_ns = "{}.{}".format(ns, self.RETURN_NAME)
-            self.defs[return_ns] = Definition(return_ns, Definition.NAME_DEF)
-            self.defs[return_ns].get_name_pointer().add("{}.{}".format(defi.get_ns(), self.RETURN_NAME))
+            return_ns = utils.join_ns(ns, utils.constants.RETURN_NAME)
+            self.defs[return_ns] = Definition(return_ns, utils.constants.NAME_DEF)
+            self.defs[return_ns].get_name_pointer().add(
+                utils.join_ns(defi.get_ns(), utils.constants.RETURN_NAME))
 
         return self.defs[ns]
 
@@ -34,13 +34,13 @@ class DefinitionManager(object):
             return self.defs[ns]
 
     def handle_function_def(self, parent_ns, fn_name):
-        full_ns = "{}.{}".format(parent_ns, fn_name)
+        full_ns = utils.join_ns(parent_ns, fn_name)
         defi = self.get(full_ns)
         if not defi:
-            defi = self.create(full_ns, Definition.FUN_DEF)
+            defi = self.create(full_ns, utils.constants.FUN_DEF)
 
-        return_ns = "{}.{}".format(full_ns, self.RETURN_NAME)
-        self.create(return_ns, Definition.NAME_DEF)
+        return_ns = utils.join_ns(full_ns, utils.constants.RETURN_NAME)
+        self.create(return_ns, utils.constants.NAME_DEF)
 
         return defi
 
@@ -119,10 +119,11 @@ class DefinitionManager(object):
 
 
 class Definition(object):
-    FUN_DEF     = "FUNCTIONDEF"
-    NAME_DEF    = "NAMEDEF"
-    MOD_DEF     = "MODULEDEF"
-    types       = [FUN_DEF, MOD_DEF, NAME_DEF]
+    types = [
+        utils.constants.FUN_DEF,
+        utils.constants.MOD_DEF,
+        utils.constants.NAME_DEF
+    ]
 
     def __init__(self, fullns, def_type):
         self.fullns = fullns
@@ -136,7 +137,7 @@ class Definition(object):
         return self.def_type
 
     def is_function_def(self):
-        return self.def_type == self.FUN_DEF
+        return self.def_type == utils.constants.FUN_DEF
 
     def get_lit_pointer(self):
         return self.points_to["lit"]

@@ -1,4 +1,5 @@
 import symtable
+from pycg import utils
 
 class ScopeManager(object):
     """Manages the scope entries"""
@@ -11,7 +12,7 @@ class ScopeManager(object):
         def process(namespace, parent, table):
             name = table.get_name() if table.get_name() != 'top' else ''
             if name:
-                fullns = "{}.{}".format(namespace, name)
+                fullns = utils.join_ns(namespace, name)
             else:
                 fullns = namespace
 
