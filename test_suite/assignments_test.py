@@ -3,22 +3,19 @@ import os
 from base import TestBase
 
 class AssignmentsTest(TestBase):
-    def test_chained_assignment(self):
-        snippet_path = os.path.join(self.snippets_path, "chained_assignment")
-        self.validate_snippet(snippet_path)
+    snippet_dir = "assignments"
 
-    def test_starred_assignment(self):
-        snippet_path = os.path.join(self.snippets_path, "starred_assignment")
-        self.validate_snippet(snippet_path)
+    def test_chained(self):
+        self.validate_snippet(self.get_snippet_path("chained"))
 
-    def test_tuple_assignment(self):
-        snippet_path = os.path.join(self.snippets_path, "tuple_assignment")
-        self.validate_snippet(snippet_path)
+    def test_starred(self):
+        self.validate_snippet(self.get_snippet_path("starred"))
 
-    def test_recursive_tuple_assignment(self):
-        snippet_path = os.path.join(self.snippets_path, "recursive_tuple_assignment")
-        self.validate_snippet(snippet_path)
+    def test_tuple(self):
+        self.validate_snippet(self.get_snippet_path("tuple"))
 
-    def test_list_assignment_call(self):
-        snippet_path = os.path.join(self.snippets_path, "list_assignment_call")
-        self.validate_snippet(snippet_path)
+    def test_recursive_tuple(self):
+        self.validate_snippet(self.get_snippet_path("recursive_tuple"))
+
+    def test_list(self):
+        self.validate_snippet(self.get_snippet_path("list"))

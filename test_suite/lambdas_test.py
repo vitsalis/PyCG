@@ -3,18 +3,19 @@ import os
 from base import TestBase
 
 class LambdasTest(TestBase):
+    snippet_dir = "lambdas"
+
     def test_lambda_call(self):
-        snippet_path = os.path.join(self.snippets_path, "lambda_call")
-        self.validate_snippet(snippet_path)
+        self.validate_snippet(self.get_snippet_path("call"))
 
     def test_lambda_calls_parameter(self):
-        snippet_path = os.path.join(self.snippets_path, "lambda_calls_parameter")
-        self.validate_snippet(snippet_path)
+        self.validate_snippet(self.get_snippet_path("calls_parameter"))
 
     def test_lambda_parameter_call(self):
-        snippet_path = os.path.join(self.snippets_path, "lambda_parameter_call")
-        self.validate_snippet(snippet_path)
+        self.validate_snippet(self.get_snippet_path("parameter_call"))
 
     def test_lambda_return_call(self):
-        snippet_path = os.path.join(self.snippets_path, "lambda_return_call")
-        self.validate_snippet(snippet_path)
+        self.validate_snippet(self.get_snippet_path("return_call"))
+
+    def test_chained_calls(self):
+        self.validate_snippet(self.get_snippet_path("chained_calls"))

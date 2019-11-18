@@ -6,6 +6,8 @@ import json
 from unittest import TestCase, main
 
 class TestBase(TestCase):
+    snippet_dir = ""
+
     def setUp(self):
         def error():
             print ("Invalid module %s.%s" % (cg_mod, cg_class))
@@ -31,6 +33,9 @@ class TestBase(TestCase):
         expected = self.get_snippet_expected_cg(snippet_path)
 
         self.assertEqual(output, expected)
+
+    def get_snippet_path(self, name):
+        return os.path.join(self.snippets_path, self.snippet_dir, name)
 
     def get_snippet_output_cg(self, snippet_path):
         main_path = os.path.join(snippet_path, "main.py")
