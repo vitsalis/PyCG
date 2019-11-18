@@ -44,17 +44,19 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(stmt)
         self.name_stack.pop()
 
-    def visit_Lambda(self, node, lambda_name):
+    def visit_Lambda(self, node, lambda_name=None):
         self.name_stack.append(lambda_name)
         self.visit(node.body)
         self.name_stack.pop()
+
+    def visit_BinOp(self, node):
+        self.visit(node.left)
+        self.visit(node.right)
 
     def decode_node(self, node):
         if isinstance(node, ast.Name):
             return self.scope_manager.get_def(self.current_ns, node.id)
         elif isinstance(node, ast.Call):
-            # TODO: this function shouldn't visit anything
-            self.visit(node)
             called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
             return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
             return self.def_manager.get(return_ns)
@@ -67,6 +69,15 @@ class ProcessingBase(ast.NodeVisitor):
             for elt in node.elts:
                 decoded.append(self.decode_node(elt))
             return decoded
+        elif isinstance(node, ast.BinOp):
+            decoded_left = self.decode_node(node.left)
+            decoded_right = self.decode_node(node.right)
+            # return the non definition types if we're talking about a binop
+            # since we only care about the type of the return (num, str, etc)
+            if not isinstance(decoded_left, Definition):
+                return decoded_left
+            if not isinstance(decoded_right, Definition):
+                return decoded_right
         elif isinstance(node, ast.Num):
             return node.n
         elif isinstance(node, ast.Str):
