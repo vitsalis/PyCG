@@ -76,6 +76,7 @@ class ProcessingBase(ast.NodeVisitor):
 
     def iterate_call_args(self, defi, node):
         for pos, arg in enumerate(node.args):
+            self.visit(arg)
             decoded = self.decode_node(arg)
             if defi.is_function_def():
                 pos_arg_names = defi.get_name_pointer().get_pos_arg(pos)
@@ -93,6 +94,7 @@ class ProcessingBase(ast.NodeVisitor):
                     defi.get_name_pointer().add_pos_lit_arg(pos, None, decoded)
 
         for keyword in node.keywords:
+            self.visit(keyword.value)
             decoded = self.decode_node(keyword.value)
             if defi.is_function_def():
                 arg_names = defi.get_name_pointer().get_arg(keyword.arg)

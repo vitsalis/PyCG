@@ -7,6 +7,6 @@ def func2(a, b):
 
 def func1(a, b, c):
     a()
-    func2(a, b)
+    func2(b, c)
 
 func1(lambda x: x + 1, lambda x: x + 2, lambda x: x + 3)
