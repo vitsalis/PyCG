@@ -7,7 +7,8 @@ from pycg.machinery.callgraph import CallGraph
 
 class CallGraphProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
-            scope_manager, def_manager, call_graph=None, modules_analyzed=None):
+            scope_manager, def_manager, class_manager,
+            call_graph=None, modules_analyzed=None):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
@@ -15,6 +16,7 @@ class CallGraphProcessor(ProcessingBase):
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
+        self.class_manager = class_manager
 
         self.call_graph = call_graph
         if not self.call_graph:
@@ -61,8 +63,8 @@ class CallGraphProcessor(ProcessingBase):
 
     def analyze_submodules(self):
         super().analyze_submodules(CallGraphProcessor, self.import_manager,
-                self.scope_manager, self.def_manager, call_graph=self.call_graph,
-                modules_analyzed=self.get_modules_analyzed())
+                self.scope_manager, self.def_manager, self.class_manager,
+                call_graph=self.call_graph, modules_analyzed=self.get_modules_analyzed())
 
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))

@@ -44,6 +44,14 @@ class DefinitionManager(object):
 
         return defi
 
+    def handle_class_def(self, parent_ns, cls_name):
+        full_ns = utils.join_ns(parent_ns, cls_name)
+        defi = self.get(full_ns)
+        if not defi:
+            defi = self.create(full_ns, utils.constants.CLS_DEF)
+
+        return defi
+
     def transitive_closure(self):
         closured = {}
         def dfs(defi):
@@ -122,7 +130,8 @@ class Definition(object):
     types = [
         utils.constants.FUN_DEF,
         utils.constants.MOD_DEF,
-        utils.constants.NAME_DEF
+        utils.constants.NAME_DEF,
+        utils.constants.CLS_DEF
     ]
 
     def __init__(self, fullns, def_type):

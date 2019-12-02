@@ -53,6 +53,13 @@ class ProcessingBase(ast.NodeVisitor):
         self.visit(node.left)
         self.visit(node.right)
 
+    def visit_ClassDef(self, node):
+        self.name_stack.append(node.name)
+        self.scope_manager.get_scope(self.current_ns).reset_counters()
+        for stmt in node.body:
+            self.visit(stmt)
+        self.name_stack.pop()
+
     def decode_node(self, node):
         if isinstance(node, ast.Name):
             return self.scope_manager.get_def(self.current_ns, node.id)

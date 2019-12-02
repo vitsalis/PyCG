@@ -8,6 +8,7 @@ from pycg.processing.cgprocessor import CallGraphProcessor
 from pycg.machinery.scopes import ScopeManager
 from pycg.machinery.definitions import DefinitionManager
 from pycg.machinery.imports import ImportManager
+from pycg.machinery.classes import ClassManager
 from pycg import utils
 
 class CallGraphGenerator(object):
@@ -15,6 +16,7 @@ class CallGraphGenerator(object):
         self.import_manager = ImportManager(self.input_file)
         self.scope_manager = ScopeManager()
         self.def_manager = DefinitionManager()
+        self.class_manager = ClassManager()
 
         self.import_manager.install_hooks()
 
@@ -33,7 +35,8 @@ class CallGraphGenerator(object):
     def analyze(self):
         # preprocessing
         self.preprocessor = PreProcessor(self.input_file,
-                self.import_manager, self.scope_manager, self.def_manager)
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager)
         self.preprocessor.analyze()
 
         self.remove_import_hooks()
@@ -41,14 +44,15 @@ class CallGraphGenerator(object):
         self.def_manager.complete_definitions()
 
         self.postprocessor = PostProcessor(self.input_file, self.input_mod,
-                self.import_manager, self.scope_manager, self.def_manager)
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager)
         self.postprocessor.analyze()
 
         self.def_manager.complete_definitions()
 
-        self.visitor = CallGraphProcessor(self.input_file,
-                self.input_mod, self.import_manager,
-                self.scope_manager, self.def_manager)
+        self.visitor = CallGraphProcessor(self.input_file, self.input_mod,
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager)
         self.visitor.analyze()
 
     def output(self):

@@ -8,7 +8,8 @@ from pycg.processing.base import ProcessingBase
 
 class PreProcessorVisitor(ProcessingBase):
     def __init__(self, input_file, modname, mod_dir,
-            import_manager, scope_manager, def_manager, modules_analyzed=None):
+            import_manager, scope_manager, def_manager, class_manager,
+            modules_analyzed=None):
         super().__init__(input_file, modname, modules_analyzed)
 
         self.modname = modname
@@ -16,6 +17,7 @@ class PreProcessorVisitor(ProcessingBase):
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
+        self.class_manager = class_manager
 
     def _get_fun_defaults(self, node):
         defaults = {}
@@ -33,7 +35,7 @@ class PreProcessorVisitor(ProcessingBase):
 
     def analyze_submodule(self, modname):
         super().analyze_submodule(PreProcessorVisitor, modname, self.mod_dir,
-            self.import_manager, self.scope_manager, self.def_manager)
+            self.import_manager, self.scope_manager, self.def_manager, self.class_manager)
 
     def visit_Module(self, node):
         def iterate_mod_items(items, const):
@@ -223,7 +225,7 @@ class PreProcessorVisitor(ProcessingBase):
 
         defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:
-            defi = self.def_manager.create(fullns, utils.constants.FUN_DEF)
+            return
 
         self.iterate_call_args(defi, node)
 
@@ -242,16 +244,44 @@ class PreProcessorVisitor(ProcessingBase):
 
         super().visit_Lambda(node, lambda_name)
 
+    def visit_ClassDef(self, node):
+        # create a definition for the class (node.name)
+        cls_def = self.def_manager.handle_class_def(self.current_ns, node.name)
+
+        # iterate bases to compute MRO for the class
+        cls = self.class_manager.get(cls_def.get_ns())
+        if not cls:
+            cls = self.class_manager.create(cls_def.get_ns())
+        for base in node.bases:
+            # all bases are of the type ast.Name
+            if base.id == utils.constants.OBJECT_BASE:
+                continue
+            self.visit(base)
+            base_def = self.scope_manager.get_def(self.current_ns, base.id)
+            if not base_def:
+                continue
+            # add the base as a parent
+            cls.add_parent(base_def.get_ns())
+
+            # add the base's parents
+            parent_cls = self.class_manager.get(base_def.get_ns())
+            cls.add_parent(parent_cls.get_mro())
+
+        cls.compute_mro()
+
+        super().visit_ClassDef(node)
+
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
 
 class PreProcessor(object):
-    def __init__(self, input_file, import_manager, scope_manager, def_manager):
+    def __init__(self, input_file, import_manager, scope_manager, def_manager, class_manager):
         self.input_file = os.path.abspath(input_file)
 
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
+        self.class_manager = class_manager
 
         splitted = self.input_file.split("/")
         self.mod = utils.to_mod_name(splitted[-1])
@@ -264,7 +294,7 @@ class PreProcessor(object):
         self.import_manager.set_current_mod(self.mod)
 
         visitor = PreProcessorVisitor(self.input_file, self.mod, self.mod_dir,
-            self.import_manager, self.scope_manager, self.def_manager)
+            self.import_manager, self.scope_manager, self.def_manager, self.class_manager)
         visitor.analyze()
 
     def cleanup(self):
