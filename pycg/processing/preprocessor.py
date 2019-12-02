@@ -124,12 +124,24 @@ class PreProcessorVisitor(ProcessingBase):
         self.visit_Import(node, prefix=node.module, level=node.level)
 
     def _handle_function_def(self, node, fn_name):
+        current_def = self.def_manager.get(self.current_ns)
+
         defaults = self._get_fun_defaults(node)
 
         fn_def = self.def_manager.handle_function_def(self.current_ns, fn_name)
 
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
+
+        # TODO: take care for static methods
+        if current_def.get_type() == utils.constants.CLS_DEF:
+            arg_ns = utils.join_ns(fn_def.get_ns(), node.args.args[0].arg)
+            arg_def = self.def_manager.get(arg_ns)
+            if not arg_def:
+                arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
+            arg_def.get_name_pointer().add(current_def.get_ns())
+            node.args.args = node.args.args[1:]
+
         for pos, arg in enumerate(node.args.args):
             arg_ns = utils.join_ns(fn_def.get_ns(), arg.arg)
             name_pointer.add_pos_arg(pos, arg.arg, arg_ns)
