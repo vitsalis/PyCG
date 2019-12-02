@@ -150,7 +150,13 @@ class ProcessingBase(ast.NodeVisitor):
             parent = self.decode_node(node.func.value)
             closured = self.closured.get(parent.get_ns())
             for name in closured:
-                names.add(utils.join_ns(name, node.func.attr))
+                defi = self.def_manager.get(name)
+                if not defi:
+                    continue
+                if defi.get_type() == utils.constants.CLS_DEF:
+                    names.add(self.find_cls_fun_ns(defi.get_ns(), node.func.attr))
+                if defi.get_type() == utils.constants.FUN_DEF:
+                    names.add(utils.join_ns(name, node.func.attr))
 
         return names
 
