@@ -9,6 +9,7 @@ class ScopeManager(object):
 
     def handle_module(self, modulename, filename, contents):
         functions = []
+        classes = []
         def process(namespace, parent, table):
             name = table.get_name() if table.get_name() != 'top' else ''
             if name:
@@ -19,13 +20,16 @@ class ScopeManager(object):
             if table.get_type() == "function":
                 functions.append(fullns)
 
+            if table.get_type() == "class":
+                classes.append(fullns)
+
             sc = self.create_scope(fullns, parent)
 
             for t in table.get_children():
                 process(fullns, sc, t)
 
         process(modulename, None, symtable.symtable(contents, filename, compile_type="exec"))
-        return functions
+        return {"functions": functions, "classes": classes}
 
     def handle_assign(self, ns, target, defi):
         scope = self.get_scope(ns)

@@ -26,13 +26,16 @@ class ScopeManagerTest(TestBase):
         chld1 = MockTable("chld1", "function", [grndchld1, grndchld2])
         grndchld3 = MockTable("grndchld3", "variable", [])
         chld2 = MockTable("chld2", "function", [grndchld3])
-        root = MockTable("top", "module", [chld1, chld2])
+        grndchld4 = MockTable("grndchld4", "function", [])
+        chld3 = MockTable("chld3", "class", [grndchld4])
+        root = MockTable("top", "module", [chld1, chld2, chld3])
 
         sm = ScopeManager()
         with patch.object(symtable, "symtable", return_value=root):
-            functions = sm.handle_module("root", "", "")
+            items = sm.handle_module("root", "", "")
 
-        self.assertEqual(sorted(functions), sorted(["root.chld1", "root.chld1.grndchld2", "root.chld2"]))
+        self.assertEqual(sorted(items["functions"]), sorted(["root.chld1", "root.chld1.grndchld2", "root.chld2", "root.chld3.grndchld4"]))
+        self.assertEqual(sorted(items["classes"]), sorted(["root.chld3"]))
 
         self.assertEqual(sm.get_scope("root").get_ns(), "root")
         self.assertEqual(sm.get_scope("root").parent, None)
@@ -42,6 +45,9 @@ class ScopeManagerTest(TestBase):
 
         self.assertEqual(sm.get_scope("root.chld2").get_ns(), "root.chld2")
         self.assertEqual(sm.get_scope("root.chld2").parent, sm.get_scope("root"))
+
+        self.assertEqual(sm.get_scope("root.chld3").get_ns(), "root.chld3")
+        self.assertEqual(sm.get_scope("root.chld3").parent, sm.get_scope("root"))
 
         self.assertEqual(sm.get_scope("root.chld1.grndchld1").get_ns(), "root.chld1.grndchld1")
         self.assertEqual(sm.get_scope("root.chld1.grndchld1").parent, sm.get_scope("root.chld1"))

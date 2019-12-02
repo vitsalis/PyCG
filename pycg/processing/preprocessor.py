@@ -38,14 +38,16 @@ class PreProcessorVisitor(ProcessingBase):
     def visit_Module(self, node):
         self.import_manager.set_current_mod(self.modname)
         # initialize module scopes
-        functions = self.scope_manager.handle_module(self.modname,
+        items = self.scope_manager.handle_module(self.modname,
             self.filename, self.contents)
+
+        # TODO: add for classes too
 
         # create function defs and add them to their scope
         # we do this here, because scope_manager doesn't have an
         # interface with def_manager, and we want function definitions
         # to have the correct points_to set
-        for f in functions:
+        for f in items["functions"]:
             defi = self.def_manager.get(f)
             if not defi:
                 defi = self.def_manager.create(f, utils.constants.FUN_DEF)
