@@ -36,26 +36,28 @@ class PreProcessorVisitor(ProcessingBase):
             self.import_manager, self.scope_manager, self.def_manager)
 
     def visit_Module(self, node):
+        def iterate_mod_items(items, const):
+            for item in items:
+                defi = self.def_manager.get(item)
+                if not defi:
+                    defi = self.def_manager.create(item, const)
+
+                splitted = item.split(".")
+                name = splitted[-1]
+                parentns = ".".join(splitted[:-1])
+                self.scope_manager.get_scope(parentns).add_def(name, defi)
+
         self.import_manager.set_current_mod(self.modname)
         # initialize module scopes
         items = self.scope_manager.handle_module(self.modname,
             self.filename, self.contents)
 
-        # TODO: add for classes too
-
-        # create function defs and add them to their scope
+        # create function and class defs and add them to their scope
         # we do this here, because scope_manager doesn't have an
         # interface with def_manager, and we want function definitions
         # to have the correct points_to set
-        for f in items["functions"]:
-            defi = self.def_manager.get(f)
-            if not defi:
-                defi = self.def_manager.create(f, utils.constants.FUN_DEF)
-
-            splitted = f.split(".")
-            name = splitted[-1]
-            parentns = ".".join(splitted[:-1])
-            self.scope_manager.get_scope(parentns).add_def(name, defi)
+        iterate_mod_items(items["functions"], utils.constants.FUN_DEF)
+        iterate_mod_items(items["classes"], utils.constants.CLS_DEF)
 
         defi = self.def_manager.get(self.modname)
         if not defi:
