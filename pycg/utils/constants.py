@@ -7,3 +7,5 @@ MOD_DEF         = "MODULEDEF"
 CLS_DEF         = "CLASSDEF"
 
 OBJECT_BASE     = "object"
+
+CLS_INIT        = "__init__"

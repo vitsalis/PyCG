@@ -162,3 +162,13 @@ class ProcessingBase(ast.NodeVisitor):
         self.merge_modules_analyzed(visitor.get_modules_analyzed())
 
         self.import_manager.set_current_mod(self.modname)
+
+    def find_cls_fun_ns(self, cls_name, fn):
+        cls = self.class_manager.get(cls_name)
+        if not cls:
+            return
+
+        for item in cls.get_mro():
+            ns = utils.join_ns(item, fn)
+            if self.def_manager.get(ns):
+                return ns

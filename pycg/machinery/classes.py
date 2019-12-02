@@ -14,23 +14,23 @@ class ClassManager:
 class ClassNode:
     def __init__(self, ns):
         self.ns = ns
-        self.parents = []
+        self.mro = [ns]
 
     def add_parent(self, parent):
         if isinstance(parent, str):
-            self.parents.append(parent)
+            self.mro.append(parent)
         elif isinstance(parent, list):
-            self.parents += parent
+            self.mro += parent
 
     def get_mro(self):
-        return self.parents
+        return self.mro
 
     def compute_mro(self):
         res = []
-        self.parents.reverse()
-        for parent in self.parents:
+        self.mro.reverse()
+        for parent in self.mro:
             if not parent in res:
                 res.append(parent)
 
         res.reverse()
-        self.parents = res
+        self.mro = res

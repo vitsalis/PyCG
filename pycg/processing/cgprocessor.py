@@ -58,8 +58,13 @@ class CallGraphProcessor(ProcessingBase):
         self.last_called_names = names
         for pointer in names:
             pointer_def = self.def_manager.get(pointer)
-            if pointer_def.is_function_def():
+            if pointer_def.get_type() == utils.constants.FUN_DEF:
                 self.call_graph.add_edge(self.current_ns, pointer)
+
+            if pointer_def.get_type() == utils.constants.CLS_DEF:
+                init_ns = self.find_cls_fun_ns(pointer, utils.constants.CLS_INIT)
+                if init_ns:
+                    self.call_graph.add_edge(self.current_ns, init_ns)
 
     def analyze_submodules(self):
         super().analyze_submodules(CallGraphProcessor, self.import_manager,
