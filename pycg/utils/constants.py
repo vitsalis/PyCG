@@ -9,3 +9,5 @@ CLS_DEF         = "CLASSDEF"
 OBJECT_BASE     = "object"
 
 CLS_INIT        = "__init__"
+
+INVALID_NAME    = "<**INVALID**>"

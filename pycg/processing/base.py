@@ -65,7 +65,11 @@ class ProcessingBase(ast.NodeVisitor):
             return self.scope_manager.get_def(self.current_ns, node.id)
         elif isinstance(node, ast.Call):
             called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
-            return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
+            return_ns = utils.constants.INVALID_NAME
+            if called_def.get_type() == utils.constants.FUN_DEF:
+                return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
+            elif called_def.get_type() == utils.constants.CLS_DEF:
+                return_ns = called_def.get_ns()
             return self.def_manager.get(return_ns)
         elif isinstance(node, ast.Lambda):
             lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
@@ -133,13 +137,20 @@ class ProcessingBase(ast.NodeVisitor):
         if isinstance(node.func, ast.Name):
             defi = self.scope_manager.get_def(self.current_ns, node.func.id)
             names = self.closured.get(defi.get_ns(), None)
-        else:
+        elif isinstance(node.func, ast.Call):
             for name in self.last_called_names:
                 return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)
                 returns = self.closured.get(return_ns)
+                if not returns:
+                    continue
                 for ret in returns:
                     defi = self.def_manager.get(ret)
                     names.add(defi.get_ns())
+        elif isinstance(node.func, ast.Attribute):
+            parent = self.decode_node(node.func.value)
+            closured = self.closured.get(parent.get_ns())
+            for name in closured:
+                names.add(utils.join_ns(name, node.func.attr))
 
         return names
 
