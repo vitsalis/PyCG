@@ -2,7 +2,8 @@
 
 import os
 
-SNIPPETS_DIR = "./snippets"
+FILE_DIR = os.path.dirname(os.path.relpath(__file__))
+SNIPPETS_DIR = "snippets"
 
 base_template = """
 import os
@@ -26,15 +27,15 @@ def create_test_case(name):
         cls=capitalized,
         dir=name
     )
-    for name in os.listdir(os.path.join(SNIPPETS_DIR, name)):
+    for name in os.listdir(os.path.join(FILE_DIR, SNIPPETS_DIR, name)):
         if name == "." or name == "..":
             continue
         template += test_template.format(name=name)
 
-    with open(test_name, "w+") as f:
+    with open(os.path.join(FILE_DIR, test_name), "w+") as f:
         f.write(template)
 
-for name in os.listdir(SNIPPETS_DIR):
+for name in os.listdir(os.path.join(FILE_DIR, SNIPPETS_DIR)):
     if name == "." or name == "..":
         continue
 
