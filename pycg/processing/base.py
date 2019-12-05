@@ -60,6 +60,39 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(stmt)
         self.name_stack.pop()
 
+    def _handle_assign(self, targetns, decoded):
+        defi = self.def_manager.get(targetns)
+        if not defi:
+            defi = self.def_manager.create(targetns, utils.constants.NAME_DEF)
+
+        if isinstance(decoded, Definition):
+            defi.get_name_pointer().add(decoded.get_ns())
+        else:
+            defi.get_lit_pointer().add(decoded)
+        return defi
+
+    def _assign(self, node):
+        self.visit(node.value)
+
+        decoded = self.decode_node(node.value)
+
+        def do_assign(decoded, target):
+            self.visit(target)
+            if isinstance(target, ast.Tuple):
+                for pos, elt in enumerate(target.elts):
+                    do_assign(decoded[pos], elt)
+            else:
+                targetns = utils.join_ns(self.current_ns, target.id)
+                if not isinstance(decoded, list):
+                    decoded = [decoded]
+
+                for d in decoded:
+                    defi = self._handle_assign(targetns, d)
+                    self.scope_manager.handle_assign(self.current_ns, target.id, defi)
+
+        for target in node.targets:
+            do_assign(decoded, target)
+
     def decode_node(self, node):
         if isinstance(node, ast.Name):
             return self.scope_manager.get_def(self.current_ns, node.id)
@@ -89,12 +122,44 @@ class ProcessingBase(ast.NodeVisitor):
                 return decoded_left
             if not isinstance(decoded_right, Definition):
                 return decoded_right
+        elif isinstance(node, ast.Attribute):
+            names = self._retrieve_attribute_names(node)
+            defis = []
+            for name in names:
+                defi = self.def_manager.get(name)
+                if defi:
+                    defis.append(defi)
+            return defis
         elif isinstance(node, ast.Num):
             return node.n
         elif isinstance(node, ast.Str):
             return node.s
         else:
-            raise Exception("{}: This type is not supported".format(node))
+            return None
+
+    def _retrieve_attribute_names(self, node):
+        if not isinstance(node, ast.Attribute):
+            raise Exception("The node is not an attribute")
+
+        if not self.closured:
+            raise Exception("Can only decode attributes " + \
+                "after the transitive closure is completed")
+
+        parent = self.decode_node(node.value)
+        if not parent:
+            return None
+
+        names = set()
+        closured = self.closured.get(parent.get_ns())
+        for name in closured:
+            defi = self.def_manager.get(name)
+            if not defi:
+                continue
+            if defi.get_type() == utils.constants.CLS_DEF:
+                names.add(self.find_cls_fun_ns(defi.get_ns(), node.attr))
+            if defi.get_type() == utils.constants.FUN_DEF:
+                names.add(utils.join_ns(name, node.attr))
+        return names
 
     def iterate_call_args(self, defi, node):
         for pos, arg in enumerate(node.args):
@@ -147,16 +212,7 @@ class ProcessingBase(ast.NodeVisitor):
                     defi = self.def_manager.get(ret)
                     names.add(defi.get_ns())
         elif isinstance(node.func, ast.Attribute):
-            parent = self.decode_node(node.func.value)
-            closured = self.closured.get(parent.get_ns())
-            for name in closured:
-                defi = self.def_manager.get(name)
-                if not defi:
-                    continue
-                if defi.get_type() == utils.constants.CLS_DEF:
-                    names.add(self.find_cls_fun_ns(defi.get_ns(), node.func.attr))
-                if defi.get_type() == utils.constants.FUN_DEF:
-                    names.add(utils.join_ns(name, node.func.attr))
+            names = self._retrieve_attribute_names(node.func)
 
         return names
 

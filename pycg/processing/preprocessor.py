@@ -140,6 +140,8 @@ class PreProcessorVisitor(ProcessingBase):
             if not arg_def:
                 arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
             arg_def.get_name_pointer().add(current_def.get_ns())
+
+            self.scope_manager.handle_assign(fn_def.get_ns(), arg_def.get_name(), arg_def)
             node.args.args = node.args.args[1:]
 
         for pos, arg in enumerate(node.args.args):
@@ -183,17 +185,6 @@ class PreProcessorVisitor(ProcessingBase):
 
         super().visit_FunctionDef(node)
 
-    def _handle_assign(self, targetns, decoded):
-        defi = self.def_manager.get(targetns)
-        if not defi:
-            defi = self.def_manager.create(targetns, utils.constants.NAME_DEF)
-
-        if isinstance(decoded, Definition):
-            defi.get_name_pointer().add(decoded.get_ns())
-        else:
-            defi.get_lit_pointer().add(decoded)
-        return defi
-
     def visit_Tuple(self, node):
         # node.ctx == ast.Load means get
         # node.ctx == ast.Store means set
@@ -201,22 +192,11 @@ class PreProcessorVisitor(ProcessingBase):
             self.visit(elt)
 
     def visit_Assign(self, node):
-        self.visit(node.value)
+        # we don't handle attributes on the preprocessor
+        if isinstance(node.value, ast.Attribute):
+            return
 
-        decoded = self.decode_node(node.value)
-
-        def do_assign(decoded, target):
-            self.visit(target)
-            if isinstance(target, ast.Tuple):
-                for pos, elt in enumerate(target.elts):
-                    do_assign(decoded[pos], elt)
-            else:
-                targetns = utils.join_ns(self.current_ns, target.id)
-                defi = self._handle_assign(targetns, decoded)
-                self.scope_manager.handle_assign(self.current_ns, target.id, defi)
-
-        for target in node.targets:
-            do_assign(decoded, target)
+        self._assign(node)
 
 
     def visit_Return(self, node):
