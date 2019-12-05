@@ -39,6 +39,8 @@ class DefinitionManager(object):
         if not defi:
             defi = self.create(full_ns, utils.constants.FUN_DEF)
 
+        defi.decorator_names = set()
+
         return_ns = utils.join_ns(full_ns, utils.constants.RETURN_NAME)
         self.create(return_ns, utils.constants.NAME_DEF)
 

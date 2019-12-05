@@ -1,6 +1,7 @@
 import ast
 
 from pycg.processing.base import ProcessingBase
+from pycg.machinery.definitions import Definition
 from pycg import utils
 
 class PostProcessor(ProcessingBase):
@@ -31,6 +32,52 @@ class PostProcessor(ProcessingBase):
             defi = self.def_manager.get(name)
             self.iterate_call_args(defi, node)
 
+    def visit_Assign(self, node):
+        self._visit_assign(node)
+
+    def visit_Return(self, node):
+        self._visit_return(node)
+
+    def visit_FunctionDef(self, node):
+        # here we iterate decorators
+        if not node.decorator_list:
+            return
+
+        fn_def = self.def_manager.get(utils.join_ns(self.current_ns, node.name))
+        reversed_decorators = list(reversed(node.decorator_list))
+
+        # add to the name pointer of the function definition
+        # the return value of the first decorator
+        # since, now the function is a namespace to that point
+        if hasattr(fn_def, "decorator_names") and reversed_decorators:
+            last_decoded = self.decode_node(reversed_decorators[-1])
+            for d in last_decoded:
+                if not isinstance(d, Definition):
+                    continue
+                fn_def.decorator_names.add(utils.join_ns(d.get_ns(), utils.constants.RETURN_NAME))
+
+        previous_names = self.closured.get(fn_def.get_ns(), set())
+        for decorator in reversed_decorators:
+            # assign the previous_def as the first parameter of the decorator
+            decoded = self.decode_node(decorator)
+            new_previous_names = set()
+            for d in decoded:
+                if not isinstance(d, Definition):
+                    continue
+                for name in self.closured.get(d.get_ns(), []):
+                    return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)
+
+                    new_previous_names = new_previous_names.union(self.closured.get(return_ns))
+
+                    for prev_name in previous_names:
+                        pos_arg_names = d.get_name_pointer().get_pos_arg(0)
+                        if not pos_arg_names:
+                            continue
+                        for name in pos_arg_names:
+                            arg_def = self.def_manager.get(name)
+                            arg_def.get_name_pointer().add(prev_name)
+            previous_names = new_previous_names
+
     def analyze_submodules(self):
         super().analyze_submodules(PostProcessor, self.import_manager,
                 self.scope_manager, self.def_manager, self.class_manager,
@@ -39,9 +86,3 @@ class PostProcessor(ProcessingBase):
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
         self.analyze_submodules()
-
-    def visit_Assign(self, node):
-        self._visit_assign(node)
-
-    def visit_Return(self, node):
-        self._visit_return(node)

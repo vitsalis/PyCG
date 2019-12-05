@@ -217,7 +217,8 @@ class ProcessingBase(ast.NodeVisitor):
         names = set()
         if isinstance(node.func, ast.Name):
             defi = self.scope_manager.get_def(self.current_ns, node.func.id)
-            names = self.closured.get(defi.get_ns(), None)
+            if defi:
+                names = self.closured.get(defi.get_ns(), None)
         elif isinstance(node.func, ast.Call):
             for name in self.last_called_names:
                 return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)

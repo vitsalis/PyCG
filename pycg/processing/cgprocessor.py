@@ -4,6 +4,7 @@ import ast
 from pycg import utils
 from pycg.processing.base import ProcessingBase
 from pycg.machinery.callgraph import CallGraph
+from pycg.machinery.definitions import Definition
 
 class CallGraphProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
@@ -45,6 +46,19 @@ class CallGraphProcessor(ProcessingBase):
 
         super().visit_Lambda(node, lambda_name)
 
+    def visit_FunctionDef(self, node):
+        for decorator in node.decorator_list:
+            self.visit(decorator)
+            decoded = self.decode_node(decorator)
+            for d in decoded:
+                if not isinstance(d, Definition):
+                    continue
+                names = self.closured.get(d.get_ns(), [])
+                for name in names:
+                    self.call_graph.add_edge(self.current_ns, name)
+        self.call_graph.add_node(utils.join_ns(self.current_ns, node.name))
+        super().visit_FunctionDef(node)
+
     def visit_Call(self, node):
         # First visit the child function so that on the case of
         #       func()()()
@@ -60,6 +74,14 @@ class CallGraphProcessor(ProcessingBase):
             pointer_def = self.def_manager.get(pointer)
             if pointer_def.get_type() == utils.constants.FUN_DEF:
                 self.call_graph.add_edge(self.current_ns, pointer)
+
+                # TODO: This doesn't work and leads to calls from the decorators
+                #    themselves to the function, creating edges to the first decorator
+                #for decorator in pointer_def.decorator_names:
+                #    dec_names = self.closured.get(decorator, [])
+                #    for dec_name in dec_names:
+                #        if self.def_manager.get(dec_name).get_type() == utils.constants.FUN_DEF:
+                #            self.call_graph.add_edge(self.current_ns, dec_name)
 
             if pointer_def.get_type() == utils.constants.CLS_DEF:
                 init_ns = self.find_cls_fun_ns(pointer, utils.constants.CLS_INIT)
