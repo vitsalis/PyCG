@@ -65,10 +65,11 @@ class ProcessingBase(ast.NodeVisitor):
         if not defi:
             defi = self.def_manager.create(targetns, utils.constants.NAME_DEF)
 
-        if isinstance(decoded, Definition):
-            defi.get_name_pointer().add(decoded.get_ns())
-        else:
-            defi.get_lit_pointer().add(decoded)
+        for d in decoded:
+            if isinstance(d, Definition):
+                defi.get_name_pointer().add(d.get_ns())
+            else:
+                defi.get_lit_pointer().add(d)
         return defi
 
     def _assign(self, node):
@@ -83,19 +84,15 @@ class ProcessingBase(ast.NodeVisitor):
                     do_assign(decoded[pos], elt)
             else:
                 targetns = utils.join_ns(self.current_ns, target.id)
-                if not isinstance(decoded, list):
-                    decoded = [decoded]
-
-                for d in decoded:
-                    defi = self._handle_assign(targetns, d)
-                    self.scope_manager.handle_assign(self.current_ns, target.id, defi)
+                defi = self._handle_assign(targetns, decoded)
+                self.scope_manager.handle_assign(self.current_ns, target.id, defi)
 
         for target in node.targets:
             do_assign(decoded, target)
 
     def decode_node(self, node):
         if isinstance(node, ast.Name):
-            return self.scope_manager.get_def(self.current_ns, node.id)
+            return [self.scope_manager.get_def(self.current_ns, node.id)]
         elif isinstance(node, ast.Call):
             called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
             return_ns = utils.constants.INVALID_NAME
@@ -103,11 +100,11 @@ class ProcessingBase(ast.NodeVisitor):
                 return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
             elif called_def.get_type() == utils.constants.CLS_DEF:
                 return_ns = called_def.get_ns()
-            return self.def_manager.get(return_ns)
+            return [self.def_manager.get(return_ns)]
         elif isinstance(node, ast.Lambda):
             lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
             lambda_name = utils.get_lambda_name(lambda_counter)
-            return self.scope_manager.get_def(self.current_ns, lambda_name)
+            return [self.scope_manager.get_def(self.current_ns, lambda_name)]
         elif isinstance(node, ast.Tuple):
             decoded = []
             for elt in node.elts:
@@ -131,11 +128,11 @@ class ProcessingBase(ast.NodeVisitor):
                     defis.append(defi)
             return defis
         elif isinstance(node, ast.Num):
-            return node.n
+            return [node.n]
         elif isinstance(node, ast.Str):
-            return node.s
+            return [node.s]
         else:
-            return None
+            return []
 
     def _retrieve_attribute_names(self, node):
         if not isinstance(node, ast.Attribute):
@@ -145,20 +142,21 @@ class ProcessingBase(ast.NodeVisitor):
             raise Exception("Can only decode attributes " + \
                 "after the transitive closure is completed")
 
-        parent = self.decode_node(node.value)
-        if not parent:
+        decoded = self.decode_node(node.value)
+        if not decoded:
             return None
 
         names = set()
-        closured = self.closured.get(parent.get_ns())
-        for name in closured:
-            defi = self.def_manager.get(name)
-            if not defi:
-                continue
-            if defi.get_type() == utils.constants.CLS_DEF:
-                names.add(self.find_cls_fun_ns(defi.get_ns(), node.attr))
-            if defi.get_type() == utils.constants.FUN_DEF:
-                names.add(utils.join_ns(name, node.attr))
+        for parent in decoded:
+            closured = self.closured.get(parent.get_ns())
+            for name in closured:
+                defi = self.def_manager.get(name)
+                if not defi:
+                    continue
+                if defi.get_type() == utils.constants.CLS_DEF:
+                    names.add(self.find_cls_fun_ns(defi.get_ns(), node.attr))
+                if defi.get_type() == utils.constants.FUN_DEF:
+                    names.add(utils.join_ns(name, node.attr))
         return names
 
     def iterate_call_args(self, defi, node):
@@ -170,15 +168,17 @@ class ProcessingBase(ast.NodeVisitor):
                 # if arguments for this position exist update their namespace
                 for name in pos_arg_names:
                     arg_def = self.def_manager.get(name)
-                    if isinstance(decoded, Definition):
-                        arg_def.get_name_pointer().add(decoded.get_ns())
-                    else:
-                        arg_def.get_lit_pointer().add(decoded)
+                    for d in decoded:
+                        if isinstance(d, Definition):
+                            arg_def.get_name_pointer().add(d.get_ns())
+                        else:
+                            arg_def.get_lit_pointer().add(d)
             else:
-                if isinstance(decoded, Definition):
-                    defi.get_name_pointer().add_pos_arg(pos, None, decoded.get_ns())
-                else:
-                    defi.get_name_pointer().add_pos_lit_arg(pos, None, decoded)
+                for d in decoded:
+                    if isinstance(d, Definition):
+                        defi.get_name_pointer().add_pos_arg(pos, None, d.get_ns())
+                    else:
+                        defi.get_name_pointer().add_pos_lit_arg(pos, None, d)
 
         for keyword in node.keywords:
             self.visit(keyword.value)
@@ -187,15 +187,17 @@ class ProcessingBase(ast.NodeVisitor):
                 arg_names = defi.get_name_pointer().get_arg(keyword.arg)
                 for name in arg_names:
                     arg_def = self.def_manager.get(name)
-                    if isinstance(decoded, Definition):
-                        arg_def.get_name_pointer().add(decoded.get_ns())
-                    else:
-                        arg_def.get_lit_pointer().add(decoded)
+                    for d in decoded:
+                        if isinstance(d, Definition):
+                            arg_def.get_name_pointer().add(d.get_ns())
+                        else:
+                            arg_def.get_lit_pointer().add(d)
             else:
-                if isinstance(decoded, Definition):
-                    defi.get_name_pointer().add_arg(keyword.arg, decoded.get_ns())
-                else:
-                    defi.get_name_pointer().add_lit_arg(keyword.arg, decoded)
+                for d in decoded:
+                    if isinstance(d, Definition):
+                        defi.get_name_pointer().add_arg(keyword.arg, d.get_ns())
+                    else:
+                        defi.get_name_pointer().add_lit_arg(keyword.arg, d)
 
     def retrieve_call_names(self, node):
         names = set()

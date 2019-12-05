@@ -171,13 +171,14 @@ class PreProcessorVisitor(ProcessingBase):
             # has a default
             arg_name = arg_ns.split(".")[-1]
             if defaults.get(arg_name, None):
-                if isinstance(defaults[arg_name], Definition):
-                    if defaults[arg_name].is_function_def():
-                        arg_def.get_name_pointer().add(defaults[arg_name].get_ns())
+                for default in defaults[arg_name]:
+                    if isinstance(default, Definition):
+                        if default.is_function_def():
+                            arg_def.get_name_pointer().add(default.get_ns())
+                        else:
+                            arg_def.merge(default)
                     else:
-                        arg_def.merge(defaults[arg_name])
-                else:
-                    arg_def.get_lit_pointer().add(defaults[arg_name])
+                        arg_def.get_lit_pointer().add(default)
         return fn_def
 
     def visit_FunctionDef(self, node):
