@@ -18,12 +18,6 @@ class PostProcessor(ProcessingBase):
         lambda_name = utils.get_lambda_name(counter)
         super().visit_Lambda(node, lambda_name)
 
-    def visit_Assign(self, node):
-        # only handle ast.Attribute instances
-        if not isinstance(node.value, ast.Attribute):
-            return
-        self._assign(node)
-
     def visit_Call(self, node):
         self.visit(node.func)
 

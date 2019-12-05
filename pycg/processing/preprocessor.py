@@ -192,14 +192,6 @@ class PreProcessorVisitor(ProcessingBase):
         for elt in node.elts:
             self.visit(elt)
 
-    def visit_Assign(self, node):
-        # we don't handle attributes on the preprocessor
-        if isinstance(node.value, ast.Attribute):
-            return
-
-        self._assign(node)
-
-
     def visit_Return(self, node):
         self.visit(node.value)
 

@@ -72,7 +72,7 @@ class ProcessingBase(ast.NodeVisitor):
                 defi.get_lit_pointer().add(d)
         return defi
 
-    def _assign(self, node):
+    def visit_Assign(self, node):
         self.visit(node.value)
 
         decoded = self.decode_node(node.value)
@@ -138,13 +138,12 @@ class ProcessingBase(ast.NodeVisitor):
         if not isinstance(node, ast.Attribute):
             raise Exception("The node is not an attribute")
 
-        if not self.closured:
-            raise Exception("Can only decode attributes " + \
-                "after the transitive closure is completed")
+        if not getattr(self, "closured", None):
+            return []
 
         decoded = self.decode_node(node.value)
         if not decoded:
-            return None
+            return []
 
         names = set()
         for parent in decoded:
