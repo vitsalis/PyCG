@@ -192,11 +192,11 @@ class PreProcessorVisitor(ProcessingBase):
         for elt in node.elts:
             self.visit(elt)
 
-    def visit_Return(self, node):
-        self.visit(node.value)
+    def visit_Assign(self, node):
+        self._visit_assign(node)
 
-        return_ns = utils.join_ns(self.current_ns, utils.constants.RETURN_NAME)
-        self._handle_assign(return_ns, self.decode_node(node.value))
+    def visit_Return(self, node):
+        self._visit_return(node)
 
     def visit_Call(self, node):
         self.visit(node.func)

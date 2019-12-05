@@ -72,7 +72,13 @@ class ProcessingBase(ast.NodeVisitor):
                 defi.get_lit_pointer().add(d)
         return defi
 
-    def visit_Assign(self, node):
+    def _visit_return(self, node):
+        self.visit(node.value)
+
+        return_ns = utils.join_ns(self.current_ns, utils.constants.RETURN_NAME)
+        self._handle_assign(return_ns, self.decode_node(node.value))
+
+    def _visit_assign(self, node):
         self.visit(node.value)
 
         decoded = self.decode_node(node.value)
@@ -94,13 +100,22 @@ class ProcessingBase(ast.NodeVisitor):
         if isinstance(node, ast.Name):
             return [self.scope_manager.get_def(self.current_ns, node.id)]
         elif isinstance(node, ast.Call):
-            called_def = self.scope_manager.get_def(self.current_ns, node.func.id)
-            return_ns = utils.constants.INVALID_NAME
-            if called_def.get_type() == utils.constants.FUN_DEF:
-                return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
-            elif called_def.get_type() == utils.constants.CLS_DEF:
-                return_ns = called_def.get_ns()
-            return [self.def_manager.get(return_ns)]
+            decoded = self.decode_node(node.func)
+            return_defs = []
+            for called_def in decoded:
+                if not isinstance(called_def, Definition):
+                    continue
+
+                return_ns = utils.constants.INVALID_NAME
+                if called_def.get_type() == utils.constants.FUN_DEF:
+                    return_ns = utils.join_ns(called_def.get_ns(), utils.constants.RETURN_NAME)
+                elif called_def.get_type() == utils.constants.CLS_DEF:
+                    return_ns = called_def.get_ns()
+                defi = self.def_manager.get(return_ns)
+                if defi:
+                    return_defs.append(defi)
+
+            return return_defs
         elif isinstance(node, ast.Lambda):
             lambda_counter = self.scope_manager.get_scope(self.current_ns).get_lambda_counter()
             lambda_name = utils.get_lambda_name(lambda_counter)

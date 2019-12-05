@@ -39,3 +39,9 @@ class PostProcessor(ProcessingBase):
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
         self.analyze_submodules()
+
+    def visit_Assign(self, node):
+        self._visit_assign(node)
+
+    def visit_Return(self, node):
+        self._visit_return(node)
