@@ -135,9 +135,10 @@ class PreProcessorVisitor(ProcessingBase):
 
         # TODO: static methods can be created using the staticmethod() function too
         is_static_method = False
-        for decorator in node.decorator_list:
-            if decorator.id == utils.constants.STATIC_METHOD:
-                is_static_method = True
+        if hasattr(node, "decorator_list"):
+            for decorator in node.decorator_list:
+                if decorator.id == utils.constants.STATIC_METHOD:
+                    is_static_method = True
 
         if current_def.get_type() == utils.constants.CLS_DEF and not is_static_method:
             arg_ns = utils.join_ns(fn_def.get_ns(), node.args.args[0].arg)
