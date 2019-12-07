@@ -133,8 +133,13 @@ class PreProcessorVisitor(ProcessingBase):
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
 
-        # TODO: take care for static methods
-        if current_def.get_type() == utils.constants.CLS_DEF:
+        # TODO: static methods can be created using the staticmethod() function too
+        is_static_method = False
+        for decorator in node.decorator_list:
+            if decorator.id == utils.constants.STATIC_METHOD:
+                is_static_method = True
+
+        if current_def.get_type() == utils.constants.CLS_DEF and not is_static_method:
             arg_ns = utils.join_ns(fn_def.get_ns(), node.args.args[0].arg)
             arg_def = self.def_manager.get(arg_ns)
             if not arg_def:

@@ -9,5 +9,6 @@ CLS_DEF         = "CLASSDEF"
 OBJECT_BASE     = "object"
 
 CLS_INIT        = "__init__"
+STATIC_METHOD   = "staticmethod"
 
 INVALID_NAME    = "<**INVALID**>"
