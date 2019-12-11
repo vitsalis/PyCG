@@ -72,6 +72,8 @@ class CallGraphProcessor(ProcessingBase):
         self.last_called_names = names
         for pointer in names:
             pointer_def = self.def_manager.get(pointer)
+            if not pointer_def or not isinstance(pointer_def, Definition):
+                continue
             if pointer_def.get_type() == utils.constants.FUN_DEF:
                 self.call_graph.add_edge(self.current_ns, pointer)
 

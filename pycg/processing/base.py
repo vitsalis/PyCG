@@ -78,6 +78,13 @@ class ProcessingBase(ast.NodeVisitor):
         return_ns = utils.join_ns(self.current_ns, utils.constants.RETURN_NAME)
         self._handle_assign(return_ns, self.decode_node(node.value))
 
+    def _get_target_ns(self, target):
+        if isinstance(target, ast.Name):
+            return [utils.join_ns(self.current_ns, target.id)]
+        if isinstance(target, ast.Attribute):
+            return self._retrieve_attribute_names(target)
+        return []
+
     def _visit_assign(self, node):
         self.visit(node.value)
 
@@ -87,11 +94,16 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(target)
             if isinstance(target, ast.Tuple):
                 for pos, elt in enumerate(target.elts):
-                    do_assign(decoded[pos], elt)
+                    if pos < len(decoded):
+                        do_assign(decoded[pos], elt)
             else:
-                targetns = utils.join_ns(self.current_ns, target.id)
-                defi = self._handle_assign(targetns, decoded)
-                self.scope_manager.handle_assign(self.current_ns, target.id, defi)
+                targetns = self._get_target_ns(target)
+                for tns in targetns:
+                    if not tns:
+                        continue
+                    defi = self._handle_assign(tns, decoded)
+                    splitted = tns.split(".")
+                    self.scope_manager.handle_assign(".".join(splitted[:-1]), splitted[-1], defi)
 
         for target in node.targets:
             do_assign(decoded, target)
@@ -162,6 +174,8 @@ class ProcessingBase(ast.NodeVisitor):
 
         names = set()
         for parent in decoded:
+            if not parent or not isinstance(parent, Definition):
+                continue
             closured = self.closured.get(parent.get_ns())
             for name in closured:
                 defi = self.def_manager.get(name)
@@ -244,6 +258,9 @@ class ProcessingBase(ast.NodeVisitor):
             return
 
         fname = self.import_manager.get_filepath(imp)
+
+        if not fname or not self.import_manager.get_mod_dir() in fname:
+            return
 
         self.import_manager.set_current_mod(imp)
 

@@ -46,6 +46,9 @@ class ImportManager(object):
         self.old_path_hooks = None
         self.old_path = None
 
+    def get_mod_dir(self):
+        return self.mod_dir
+
     def get_node(self, name):
         if name in self.import_graph:
             return self.import_graph[name]
@@ -86,7 +89,8 @@ class ImportManager(object):
         self.current_module = name
 
     def get_filepath(self, modname):
-        return self.import_graph[modname]["filename"]
+        if modname in self.import_graph:
+            return self.import_graph[modname]["filename"]
 
     def set_filepath(self, node_name, filename):
         if not filename or not isinstance(filename, str):
@@ -99,7 +103,10 @@ class ImportManager(object):
         node["filename"] = filename
 
     def get_imports(self, modname):
+        if not modname in self.import_graph:
+            return []
         return self.import_graph[modname]["imports"]
+
 
     def _handle_import_level(self, name, level):
         # add a dot for each level
@@ -128,8 +135,15 @@ class ImportManager(object):
         except ImportError as e:
             # try the parent
             mod_name = ".".join(mod_name.split(".")[:-1])
-            mod = importlib.import_module(mod_name, package=package)
+            if not mod_name:
+                return
+            try:
+                mod = importlib.import_module(mod_name, package=package)
+            except ImportError as e:
+                return
 
+        if self.mod_dir not in mod.__file__:
+            return
         return utils.to_mod_name(
             os.path.relpath(mod.__file__, self.mod_dir))
 

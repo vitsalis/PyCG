@@ -7,6 +7,7 @@ class DefinitionManager(object):
 
     def create(self, ns, def_type):
         if not ns or not isinstance(ns, str):
+            print (ns)
             raise DefinitionError("Invalid namespace argument")
         if not def_type in Definition.types:
             raise DefinitionError("Invalid def type argument")

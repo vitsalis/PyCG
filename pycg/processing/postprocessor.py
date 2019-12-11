@@ -30,7 +30,8 @@ class PostProcessor(ProcessingBase):
 
         for name in names:
             defi = self.def_manager.get(name)
-            self.iterate_call_args(defi, node)
+            if defi:
+                self.iterate_call_args(defi, node)
 
     def visit_Assign(self, node):
         self._visit_assign(node)

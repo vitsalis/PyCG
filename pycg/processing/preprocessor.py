@@ -111,9 +111,10 @@ class PreProcessorVisitor(ProcessingBase):
             tgt_name = import_item.asname if import_item.asname else import_item.name
             self.import_manager.handle_import(src_name, level)
             for modname in self.import_manager.get_imports(self.modname):
-
                 # Work on scopes
                 fname = self.import_manager.get_filepath(modname)
+                if not fname:
+                    continue
                 # only analyze modules under the current directory
                 if self.mod_dir in fname:
                     self.analyze_submodule(modname)
