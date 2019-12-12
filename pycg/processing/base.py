@@ -82,7 +82,11 @@ class ProcessingBase(ast.NodeVisitor):
         if isinstance(target, ast.Name):
             return [utils.join_ns(self.current_ns, target.id)]
         if isinstance(target, ast.Attribute):
-            return self._retrieve_attribute_names(target)
+            parents = self._retrieve_parent_names(target)
+            res = []
+            for parent in parents:
+                res.append(utils.join_ns(parent, target.attr))
+            return res
         return []
 
     def _visit_assign(self, node):
@@ -161,7 +165,7 @@ class ProcessingBase(ast.NodeVisitor):
         else:
             return []
 
-    def _retrieve_attribute_names(self, node):
+    def _retrieve_parent_names(self, node):
         if not isinstance(node, ast.Attribute):
             raise Exception("The node is not an attribute")
 
@@ -176,15 +180,22 @@ class ProcessingBase(ast.NodeVisitor):
         for parent in decoded:
             if not parent or not isinstance(parent, Definition):
                 continue
-            closured = self.closured.get(parent.get_ns())
-            for name in closured:
-                defi = self.def_manager.get(name)
-                if not defi:
-                    continue
-                if defi.get_type() == utils.constants.CLS_DEF:
-                    names.add(self.find_cls_fun_ns(defi.get_ns(), node.attr))
-                if defi.get_type() == utils.constants.FUN_DEF:
-                    names.add(utils.join_ns(name, node.attr))
+            names = names.union(self.closured.get(parent.get_ns()))
+        return names
+
+    def _retrieve_attribute_names(self, node):
+        parent_names = self._retrieve_parent_names(node)
+        names = set()
+        for name in parent_names:
+            defi = self.def_manager.get(name)
+            if not defi:
+                continue
+            if defi.get_type() == utils.constants.CLS_DEF:
+                cls_names = self.find_cls_fun_ns(defi.get_ns(), node.attr)
+                if cls_names:
+                    names = names.union(cls_names)
+            if defi.get_type() == utils.constants.FUN_DEF:
+                names.add(utils.join_ns(name, node.attr))
         return names
 
     def iterate_call_args(self, defi, node):
@@ -271,11 +282,16 @@ class ProcessingBase(ast.NodeVisitor):
         self.import_manager.set_current_mod(self.modname)
 
     def find_cls_fun_ns(self, cls_name, fn):
+        if not getattr(self, "closured", None):
+            return set()
+
         cls = self.class_manager.get(cls_name)
         if not cls:
-            return
+            return set()
 
         for item in cls.get_mro():
             ns = utils.join_ns(item, fn)
+            names = self.closured.get(ns, None)
             if self.def_manager.get(ns):
-                return ns
+                return names
+        return set()
