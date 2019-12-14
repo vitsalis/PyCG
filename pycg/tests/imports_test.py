@@ -8,7 +8,8 @@ from pycg.machinery.imports import ImportManager, ImportManagerError, get_custom
 
 class ImportsTest(TestBase):
     def test_create_node(self):
-        im = ImportManager("input_file.py")
+        fpath = "input_file.py"
+        im = ImportManager(fpath, fpath)
 
         name = "node1"
         im.create_node(name)
@@ -27,18 +28,19 @@ class ImportsTest(TestBase):
             im.create_node(1)
 
     def test_set_filepath(self):
-        im = ImportManager("input_file.py")
+        fpath = "input_file.py"
+        im = ImportManager(fpath, fpath)
 
         name = "node1"
         im.create_node(name)
 
         filepath1 = "filepath1"
         im.set_filepath(name, filepath1)
-        self.assertEqual(im.get_filepath(name), filepath1)
+        self.assertEqual(im.get_filepath(name), os.path.abspath(filepath1))
 
         filepath2 = "filepath2"
         im.set_filepath(name, filepath2)
-        self.assertEqual(im.get_filepath(name), filepath2)
+        self.assertEqual(im.get_filepath(name), os.path.abspath(filepath2))
 
         # only non empty strings allowed
         with self.assertRaises(ImportManagerError):
@@ -48,7 +50,8 @@ class ImportsTest(TestBase):
             im.set_filepath(name, 1)
 
     def test_create_edge(self):
-        im = ImportManager("input_file.py")
+        fpath = "input_file.py"
+        im = ImportManager(fpath, fpath)
         node1 = "node1"
         node2 = "node2"
 
@@ -74,7 +77,7 @@ class ImportsTest(TestBase):
 
     def test_hooks(self):
         input_file = "somedir/somedir/input_file.py"
-        im = ImportManager(input_file)
+        im = ImportManager(input_file, input_file)
         old_sys_path = copy.deepcopy(sys.path)
         old_path_hooks = copy.deepcopy(sys.path_hooks)
         custom_loader = "custom_loader"
@@ -90,7 +93,8 @@ class ImportsTest(TestBase):
         self.assertEqual(old_path_hooks, sys.path_hooks)
 
     def test_custom_loader(self):
-        im = ImportManager("input_file.py")
+        fpath = "input_file.py"
+        im = ImportManager(fpath, fpath)
         im.set_current_mod("node1")
         im.create_node("node1")
 
@@ -99,17 +103,18 @@ class ImportsTest(TestBase):
 
         # verify that edges and nodes have been added
         self.assertEqual(im.get_imports("node1"), set(["node2"]))
-        self.assertEqual(im.get_filepath("node2"), "filepath")
+        self.assertEqual(im.get_filepath("node2"), os.path.abspath("filepath"))
 
         loader = get_custom_loader(im)("node2", "filepath")
         self.assertEqual(im.get_imports("node1"), set(["node2"]))
-        self.assertEqual(im.get_filepath("node2"), "filepath")
+        self.assertEqual(im.get_filepath("node2"), os.path.abspath("filepath"))
 
         self.assertEqual(loader.get_filename("filepath"), "filepath")
         self.assertEqual(loader.get_data("filepath"), "")
 
     def test_handle_import_level(self):
-        im = ImportManager("input_file.py")
+        fpath = "input_file.py"
+        im = ImportManager(fpath, fpath)
         im.set_current_mod("mod1.mod2.mod3")
 
         # gets outside of package scope
@@ -122,7 +127,8 @@ class ImportsTest(TestBase):
 
     def test_handle_import(self):
         # test builtin modules
-        im = ImportManager("input_file.py")
+        fpath = "input_file.py"
+        im = ImportManager(fpath, fpath)
         im.create_node("mod1")
         im.set_current_mod("mod1")
 

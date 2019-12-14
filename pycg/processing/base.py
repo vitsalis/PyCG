@@ -285,9 +285,13 @@ class ProcessingBase(ast.NodeVisitor):
         if not getattr(self, "closured", None):
             return set()
 
+
         cls = self.class_manager.get(cls_name)
         if not cls:
             return set()
+
+        if cls_name == "repofs.handlers.root.RootHandler" and fn == "__init__":
+            pass
 
         for item in cls.get_mro():
             ns = utils.join_ns(item, fn)

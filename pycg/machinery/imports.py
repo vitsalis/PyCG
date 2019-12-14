@@ -38,11 +38,11 @@ def get_custom_loader(ig_obj):
     return CustomLoader
 
 class ImportManager(object):
-    def __init__(self, input_file):
+    def __init__(self, input_file, input_pkg):
         self.import_graph = dict()
         self.current_module = ""
         self.input_file = os.path.abspath(input_file)
-        self.mod_dir = os.path.dirname(self.input_file)
+        self.mod_dir = os.path.dirname(input_pkg)
         self.old_path_hooks = None
         self.old_path = None
 
@@ -100,7 +100,7 @@ class ImportManager(object):
         if not node:
             raise ImportManagerError("Node does not exist")
 
-        node["filename"] = filename
+        node["filename"] = os.path.abspath(filename)
 
     def get_imports(self, modname):
         if not modname in self.import_graph:
@@ -118,8 +118,14 @@ class ImportManager(object):
         package = ".".join(package[:-level])
         return mod_name, package
 
-    def handle_import(self, name, level):
+    def _do_import(self, mod_name, package):
+        if mod_name in sys.modules:
+            self.create_edge(mod_name)
+            return sys.modules[mod_name]
 
+        return importlib.import_module(mod_name, package=package)
+
+    def handle_import(self, name, level):
         # We currently don't support builtin modules because they're frozen.
         # Add an edge and continue.
         # TODO: identify a way to include frozen modules
@@ -131,14 +137,14 @@ class ImportManager(object):
         # Import the module
         mod_name, package = self._handle_import_level(name, level)
         try:
-            mod = importlib.import_module(mod_name, package=package)
+            mod = self._do_import(mod_name, package)
         except ImportError as e:
             # try the parent
             mod_name = ".".join(mod_name.split(".")[:-1])
             if not mod_name:
                 return
             try:
-                mod = importlib.import_module(mod_name, package=package)
+                mod = self._do_import(mod_name, package)
             except ImportError as e:
                 return
 
@@ -157,7 +163,7 @@ class ImportManager(object):
 
         loader_details = loader, importlib.machinery.all_suffixes()
         sys.path_hooks.insert(0, importlib.machinery.FileFinder.path_hook(loader_details))
-        sys.path.insert(0, self.mod_dir)
+        sys.path.insert(0, os.path.abspath(self.mod_dir))
 
         self._clear_caches()
 

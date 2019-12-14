@@ -7,7 +7,6 @@ class DefinitionManager(object):
 
     def create(self, ns, def_type):
         if not ns or not isinstance(ns, str):
-            print (ns)
             raise DefinitionError("Invalid namespace argument")
         if not def_type in Definition.types:
             raise DefinitionError("Invalid def type argument")
@@ -39,11 +38,11 @@ class DefinitionManager(object):
         defi = self.get(full_ns)
         if not defi:
             defi = self.create(full_ns, utils.constants.FUN_DEF)
-
-        defi.decorator_names = set()
+            defi.decorator_names = set()
 
         return_ns = utils.join_ns(full_ns, utils.constants.RETURN_NAME)
-        self.create(return_ns, utils.constants.NAME_DEF)
+        if not self.get(return_ns):
+            self.create(return_ns, utils.constants.NAME_DEF)
 
         return defi
 

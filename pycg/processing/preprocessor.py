@@ -91,6 +91,7 @@ class PreProcessorVisitor(ProcessingBase):
                     defi = self.def_manager.get(def_ns)
                     if not defi:
                         defi = self.def_manager.assign(def_ns, imported_def)
+                    defi.get_name_pointer().add(imported_def.get_ns())
                     current_scope.add_def(name, defi)
 
             current_scope = self.scope_manager.get_scope(self.current_ns)
@@ -110,6 +111,7 @@ class PreProcessorVisitor(ProcessingBase):
             src_name = handle_src_name(import_item.name)
             tgt_name = import_item.asname if import_item.asname else import_item.name
             self.import_manager.handle_import(src_name, level)
+
             for modname in self.import_manager.get_imports(self.modname):
                 # Work on scopes
                 fname = self.import_manager.get_filepath(modname)
@@ -117,7 +119,8 @@ class PreProcessorVisitor(ProcessingBase):
                     continue
                 # only analyze modules under the current directory
                 if self.mod_dir in fname:
-                    self.analyze_submodule(modname)
+                    if not modname in self.modules_analyzed:
+                        self.analyze_submodule(modname)
                     handle_scopes(tgt_name, modname)
 
 
@@ -138,7 +141,7 @@ class PreProcessorVisitor(ProcessingBase):
         is_static_method = False
         if hasattr(node, "decorator_list"):
             for decorator in node.decorator_list:
-                if decorator.id == utils.constants.STATIC_METHOD:
+                if isinstance(decorator, ast.Name) and decorator.id == utils.constants.STATIC_METHOD:
                     is_static_method = True
 
         if current_def.get_type() == utils.constants.CLS_DEF and not is_static_method:
@@ -252,12 +255,19 @@ class PreProcessorVisitor(ProcessingBase):
             base_def = self.scope_manager.get_def(self.current_ns, base.id)
             if not base_def:
                 continue
-            # add the base as a parent
-            cls.add_parent(base_def.get_ns())
+            names = set()
+            if base_def.get_name_pointer().get():
+                names = base_def.get_name_pointer().get()
+            else:
+                names.add(base_def.get_ns())
+            for name in names:
+                # add the base as a parent
+                cls.add_parent(name)
 
-            # add the base's parents
-            parent_cls = self.class_manager.get(base_def.get_ns())
-            cls.add_parent(parent_cls.get_mro())
+                # add the base's parents
+                parent_cls = self.class_manager.get(name)
+                if parent_cls:
+                    cls.add_parent(parent_cls.get_mro())
 
         cls.compute_mro()
 

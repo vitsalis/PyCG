@@ -13,7 +13,7 @@ from pycg import utils
 
 class CallGraphGenerator(object):
     def setUp(self):
-        self.import_manager = ImportManager(self.input_file)
+        self.import_manager = ImportManager(self.input_file, self.input_pkg)
         self.scope_manager = ScopeManager()
         self.def_manager = DefinitionManager()
         self.class_manager = ClassManager()
@@ -26,9 +26,10 @@ class CallGraphGenerator(object):
     def tearDown(self):
         self.remove_import_hooks()
 
-    def __init__(self, input_file):
+    def __init__(self, input_file, input_pkg):
         self.input_mod = utils.to_mod_name(input_file.split("/")[-1])
         self.input_file = os.path.abspath(input_file)
+        self.input_pkg = input_pkg
 
         self.setUp()
 
