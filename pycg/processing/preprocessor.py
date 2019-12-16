@@ -54,6 +54,12 @@ class PreProcessorVisitor(ProcessingBase):
         items = self.scope_manager.handle_module(self.modname,
             self.filename, self.contents)
 
+        root_sc = self.scope_manager.get_scope(self.modname)
+        root_defi = self.def_manager.get(self.modname)
+        if not root_defi:
+            root_defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
+        root_sc.add_def(self.modname.split(".")[-1], root_defi)
+
         # create function and class defs and add them to their scope
         # we do this here, because scope_manager doesn't have an
         # interface with def_manager, and we want function definitions

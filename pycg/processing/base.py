@@ -170,11 +170,11 @@ class ProcessingBase(ast.NodeVisitor):
             raise Exception("The node is not an attribute")
 
         if not getattr(self, "closured", None):
-            return []
+            return set()
 
         decoded = self.decode_node(node.value)
         if not decoded:
-            return []
+            return set()
 
         names = set()
         for parent in decoded:
@@ -194,7 +194,7 @@ class ProcessingBase(ast.NodeVisitor):
                 cls_names = self.find_cls_fun_ns(defi.get_ns(), node.attr)
                 if cls_names:
                     names = names.union(cls_names)
-            if defi.get_type() == utils.constants.FUN_DEF:
+            if defi.get_type() in [utils.constants.FUN_DEF, utils.constants.MOD_DEF]:
                 names.add(utils.join_ns(name, node.attr))
         return names
 
