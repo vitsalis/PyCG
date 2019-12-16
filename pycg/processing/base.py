@@ -82,10 +82,10 @@ class ProcessingBase(ast.NodeVisitor):
         if isinstance(target, ast.Name):
             return [utils.join_ns(self.current_ns, target.id)]
         if isinstance(target, ast.Attribute):
-            parents = self._retrieve_parent_names(target)
+            bases = self._retrieve_base_names(target)
             res = []
-            for parent in parents:
-                res.append(utils.join_ns(parent, target.attr))
+            for base in bases:
+                res.append(utils.join_ns(base, target.attr))
             return res
         return []
 
@@ -164,6 +164,32 @@ class ProcessingBase(ast.NodeVisitor):
             return [node.s]
         else:
             return []
+
+    def _retrieve_base_names(self, node):
+        if not isinstance(node, ast.Attribute):
+            raise Exception("The node is not an attribute")
+
+        if not getattr(self, "closured", None):
+            return set()
+
+        decoded = self.decode_node(node.value)
+        if not decoded:
+            return set()
+
+        names = set()
+        for name in decoded:
+            if not name or not isinstance(name, Definition):
+                continue
+
+            for base in self.closured.get(name.get_ns(), []):
+                cls = self.class_manager.get(base)
+                if not cls:
+                    continue
+
+                for item in cls.get_mro():
+                    names.add(item)
+        return names
+
 
     def _retrieve_parent_names(self, node):
         if not isinstance(node, ast.Attribute):
