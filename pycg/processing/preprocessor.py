@@ -266,26 +266,25 @@ class PreProcessorVisitor(ProcessingBase):
             cls = self.class_manager.create(cls_def.get_ns())
         for base in node.bases:
             # all bases are of the type ast.Name
-            if not hasattr(base, "id") or base.id == utils.constants.OBJECT_BASE:
-                continue
-
             self.visit(base)
-            base_def = self.scope_manager.get_def(self.current_ns, base.id)
-            if not base_def:
-                continue
-            names = set()
-            if base_def.get_name_pointer().get():
-                names = base_def.get_name_pointer().get()
-            else:
-                names.add(base_def.get_ns())
-            for name in names:
-                # add the base as a parent
-                cls.add_parent(name)
 
-                # add the base's parents
-                parent_cls = self.class_manager.get(name)
-                if parent_cls:
-                    cls.add_parent(parent_cls.get_mro())
+            bases = self.decode_node(base)
+            for base_def in bases:
+                if not isinstance(base_def, Definition):
+                    continue
+                names = set()
+                if base_def.get_name_pointer().get():
+                    names = base_def.get_name_pointer().get()
+                else:
+                    names.add(base_def.get_ns())
+                for name in names:
+                    # add the base as a parent
+                    cls.add_parent(name)
+
+                    # add the base's parents
+                    parent_cls = self.class_manager.get(name)
+                    if parent_cls:
+                        cls.add_parent(parent_cls.get_mro())
 
         cls.compute_mro()
 

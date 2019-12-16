@@ -202,9 +202,6 @@ class ProcessingBase(ast.NodeVisitor):
         if not isinstance(node, ast.Attribute):
             raise Exception("The node is not an attribute")
 
-        if not getattr(self, "closured", None):
-            return set()
-
         decoded = self.decode_node(node.value)
         if not decoded:
             return set()
@@ -213,8 +210,10 @@ class ProcessingBase(ast.NodeVisitor):
         for parent in decoded:
             if not parent or not isinstance(parent, Definition):
                 continue
-            if self.closured.get(parent.get_ns(), None):
+            if getattr(self, "closured", None) and self.closured.get(parent.get_ns(), None):
                 names = names.union(self.closured.get(parent.get_ns()))
+            else:
+                names.add(parent.get_ns())
         return names
 
     def _retrieve_attribute_names(self, node):
@@ -320,18 +319,16 @@ class ProcessingBase(ast.NodeVisitor):
         self.import_manager.set_current_mod(self.modname)
 
     def find_cls_fun_ns(self, cls_name, fn):
-        if not getattr(self, "closured", None):
-            return set()
-
         cls = self.class_manager.get(cls_name)
         if not cls:
             return set()
 
         for item in cls.get_mro():
             ns = utils.join_ns(item, fn)
-            names = self.closured.get(ns, None)
-            if not names:
-                names = set()
+            names = set()
+            if getattr(self, "closured", None) and self.closured.get(ns, None):
+                names = self.closured[ns]
+            else:
                 names.add(ns)
 
             if self.def_manager.get(ns):
