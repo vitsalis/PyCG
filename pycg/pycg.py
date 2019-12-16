@@ -46,14 +46,14 @@ class CallGraphGenerator(object):
 
         self.postprocessor = PostProcessor(self.input_file, self.input_mod,
                 self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager)
+                self.class_manager, modules_analyzed=set())
         self.postprocessor.analyze()
 
         self.def_manager.complete_definitions()
 
         self.visitor = CallGraphProcessor(self.input_file, self.input_mod,
                 self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager)
+                self.class_manager, modules_analyzed=set())
         self.visitor.analyze()
 
     def output(self):

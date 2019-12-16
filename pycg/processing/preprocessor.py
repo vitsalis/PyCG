@@ -23,11 +23,16 @@ class PreProcessorVisitor(ProcessingBase):
         defaults = {}
         start = len(node.args.args) - len(node.args.defaults)
         for cnt, d in enumerate(node.args.defaults, start=start):
+            if not d:
+                continue
+
             self.visit(d)
             defaults[node.args.args[cnt].arg] = self.decode_node(d)
 
         start = len(node.args.kwonlyargs) - len(node.args.kw_defaults)
         for cnt, d in enumerate(node.args.kw_defaults, start=start):
+            if not d:
+                continue
             self.visit(d)
             defaults[node.args.kwonlyargs[cnt].arg] = self.decode_node(d)
 
@@ -35,7 +40,8 @@ class PreProcessorVisitor(ProcessingBase):
 
     def analyze_submodule(self, modname):
         super().analyze_submodule(PreProcessorVisitor, modname, self.mod_dir,
-            self.import_manager, self.scope_manager, self.def_manager, self.class_manager)
+            self.import_manager, self.scope_manager, self.def_manager, self.class_manager,
+            modules_analyzed=self.get_modules_analyzed())
 
     def visit_Module(self, node):
         def iterate_mod_items(items, const):
@@ -260,8 +266,9 @@ class PreProcessorVisitor(ProcessingBase):
             cls = self.class_manager.create(cls_def.get_ns())
         for base in node.bases:
             # all bases are of the type ast.Name
-            if base.id == utils.constants.OBJECT_BASE:
+            if not hasattr(base, "id") or base.id == utils.constants.OBJECT_BASE:
                 continue
+
             self.visit(base)
             base_def = self.scope_manager.get_def(self.current_ns, base.id)
             if not base_def:
@@ -307,7 +314,7 @@ class PreProcessor(object):
         self.import_manager.set_current_mod(self.mod)
 
         visitor = PreProcessorVisitor(self.input_file, self.mod, self.mod_dir,
-            self.import_manager, self.scope_manager, self.def_manager, self.class_manager)
+            self.import_manager, self.scope_manager, self.def_manager, self.class_manager, modules_analyzed=set())
         visitor.analyze()
 
     def cleanup(self):

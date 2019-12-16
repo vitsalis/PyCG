@@ -78,6 +78,9 @@ class NamePointer(Pointer):
 
         self.add_arg(name, item)
 
+    def add_name_arg(self, name, item):
+        self.add_arg(name, item)
+
     def add_pos_lit_arg(self, pos, name, item):
         pos = self._sanitize_pos(pos)
         if not name:

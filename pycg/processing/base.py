@@ -5,12 +5,10 @@ from pycg import utils
 from pycg.machinery.definitions import Definition
 
 class ProcessingBase(ast.NodeVisitor):
-    def __init__(self, filename, modname, modules_analyzed=None):
+    def __init__(self, filename, modname, modules_analyzed):
         self.modname = modname
 
-        self.modules_analyzed = set()
-        if modules_analyzed:
-            self.modules_analyzed = modules_analyzed
+        self.modules_analyzed = modules_analyzed
         self.modules_analyzed.add(self.modname)
 
         self.filename = os.path.abspath(filename)
@@ -65,6 +63,12 @@ class ProcessingBase(ast.NodeVisitor):
         if not defi:
             defi = self.def_manager.create(targetns, utils.constants.NAME_DEF)
 
+        # check if decoded is iterable
+        try:
+            iter(decoded)
+        except TypeError:
+            return defi
+
         for d in decoded:
             if isinstance(d, Definition):
                 defi.get_name_pointer().add(d.get_ns())
@@ -73,6 +77,9 @@ class ProcessingBase(ast.NodeVisitor):
         return defi
 
     def _visit_return(self, node):
+        if not node or not node.value:
+            return
+
         self.visit(node.value)
 
         return_ns = utils.join_ns(self.current_ns, utils.constants.RETURN_NAME)
@@ -232,6 +239,8 @@ class ProcessingBase(ast.NodeVisitor):
             if defi.is_function_def():
                 pos_arg_names = defi.get_name_pointer().get_pos_arg(pos)
                 # if arguments for this position exist update their namespace
+                if not pos_arg_names:
+                    continue
                 for name in pos_arg_names:
                     arg_def = self.def_manager.get(name)
                     for d in decoded:
@@ -251,6 +260,8 @@ class ProcessingBase(ast.NodeVisitor):
             decoded = self.decode_node(keyword.value)
             if defi.is_function_def():
                 arg_names = defi.get_name_pointer().get_arg(keyword.arg)
+                if not arg_names:
+                    continue
                 for name in arg_names:
                     arg_def = self.def_manager.get(name)
                     for d in decoded:
