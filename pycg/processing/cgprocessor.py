@@ -63,6 +63,12 @@ class CallGraphProcessor(ProcessingBase):
         # First visit the child function so that on the case of
         #       func()()()
         # we first visit the call to func and then the other calls
+        for arg in node.args:
+            self.visit(arg)
+
+        for keyword in node.keywords:
+            self.visit(keyword.value)
+
         self.visit(node.func)
 
         names = self.retrieve_call_names(node)
