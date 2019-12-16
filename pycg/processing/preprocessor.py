@@ -228,6 +228,11 @@ class PreProcessorVisitor(ProcessingBase):
         if not defi:
             return
 
+        if defi.get_type() == utils.constants.CLS_DEF:
+            defi = self.def_manager.get(utils.join_ns(defi.get_ns(), utils.constants.CLS_INIT))
+            if not defi:
+                return
+
         self.iterate_call_args(defi, node)
 
     def visit_Lambda(self, node):

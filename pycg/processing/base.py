@@ -180,7 +180,8 @@ class ProcessingBase(ast.NodeVisitor):
         for parent in decoded:
             if not parent or not isinstance(parent, Definition):
                 continue
-            names = names.union(self.closured.get(parent.get_ns()))
+            if self.closured.get(parent.get_ns(), None):
+                names = names.union(self.closured.get(parent.get_ns()))
         return names
 
     def _retrieve_attribute_names(self, node):
@@ -285,17 +286,17 @@ class ProcessingBase(ast.NodeVisitor):
         if not getattr(self, "closured", None):
             return set()
 
-
         cls = self.class_manager.get(cls_name)
         if not cls:
             return set()
 
-        if cls_name == "repofs.handlers.root.RootHandler" and fn == "__init__":
-            pass
-
         for item in cls.get_mro():
             ns = utils.join_ns(item, fn)
             names = self.closured.get(ns, None)
+            if not names:
+                names = set()
+                names.add(ns)
+
             if self.def_manager.get(ns):
                 return names
         return set()

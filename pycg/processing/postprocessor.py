@@ -30,8 +30,13 @@ class PostProcessor(ProcessingBase):
 
         for name in names:
             defi = self.def_manager.get(name)
-            if defi:
-                self.iterate_call_args(defi, node)
+            if not defi:
+                continue
+            if defi.get_type() == utils.constants.CLS_DEF:
+                defi = self.def_manager.get(utils.join_ns(defi.get_ns(), utils.constants.CLS_INIT))
+                if not defi:
+                    continue
+            self.iterate_call_args(defi, node)
 
     def visit_Assign(self, node):
         self._visit_assign(node)
