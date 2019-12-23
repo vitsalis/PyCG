@@ -13,7 +13,7 @@ from pycg import utils
 
 class CallGraphGenerator(object):
     def setUp(self):
-        self.import_manager = ImportManager(self.input_file, self.input_pkg)
+        self.import_manager = ImportManager(self.input_pkg)
         self.scope_manager = ScopeManager()
         self.def_manager = DefinitionManager()
         self.class_manager = ClassManager()

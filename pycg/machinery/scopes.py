@@ -33,7 +33,8 @@ class ScopeManager(object):
 
     def handle_assign(self, ns, target, defi):
         scope = self.get_scope(ns)
-        scope.add_def(target, defi)
+        if scope:
+            scope.add_def(target, defi)
 
     def get_def(self, current_ns, var_name):
         current_scope = self.get_scope(current_ns)

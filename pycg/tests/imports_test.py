@@ -9,7 +9,7 @@ from pycg.machinery.imports import ImportManager, ImportManagerError, get_custom
 class ImportsTest(TestBase):
     def test_create_node(self):
         fpath = "input_file.py"
-        im = ImportManager(fpath, fpath)
+        im = ImportManager(fpath)
 
         name = "node1"
         im.create_node(name)
@@ -29,7 +29,7 @@ class ImportsTest(TestBase):
 
     def test_set_filepath(self):
         fpath = "input_file.py"
-        im = ImportManager(fpath, fpath)
+        im = ImportManager(fpath)
 
         name = "node1"
         im.create_node(name)
@@ -51,7 +51,7 @@ class ImportsTest(TestBase):
 
     def test_create_edge(self):
         fpath = "input_file.py"
-        im = ImportManager(fpath, fpath)
+        im = ImportManager(fpath)
         node1 = "node1"
         node2 = "node2"
 
@@ -62,7 +62,7 @@ class ImportsTest(TestBase):
         with self.assertRaises(ImportManagerError):
             im.create_edge(node2)
 
-        im.set_current_mod(node1)
+        im.set_current_mod(node1, fpath)
         im.create_edge(node2)
 
         self.assertEqual(im.get_imports(node1), set([node2]))
@@ -77,7 +77,7 @@ class ImportsTest(TestBase):
 
     def test_hooks(self):
         input_file = "somedir/somedir/input_file.py"
-        im = ImportManager(input_file, input_file)
+        im = ImportManager(input_file)
         old_sys_path = copy.deepcopy(sys.path)
         old_path_hooks = copy.deepcopy(sys.path_hooks)
         custom_loader = "custom_loader"
@@ -94,8 +94,8 @@ class ImportsTest(TestBase):
 
     def test_custom_loader(self):
         fpath = "input_file.py"
-        im = ImportManager(fpath, fpath)
-        im.set_current_mod("node1")
+        im = ImportManager(fpath)
+        im.set_current_mod("node1", fpath)
         im.create_node("node1")
 
         # an import happens and the loader is called
@@ -114,8 +114,8 @@ class ImportsTest(TestBase):
 
     def test_handle_import_level(self):
         fpath = "input_file.py"
-        im = ImportManager(fpath, fpath)
-        im.set_current_mod("mod1.mod2.mod3")
+        im = ImportManager(fpath)
+        im.set_current_mod("mod1.mod2.mod3", fpath)
 
         # gets outside of package scope
         with self.assertRaises(ImportError):
@@ -128,9 +128,9 @@ class ImportsTest(TestBase):
     def test_handle_import(self):
         # test builtin modules
         fpath = "input_file.py"
-        im = ImportManager(fpath, fpath)
+        im = ImportManager(fpath)
         im.create_node("mod1")
-        im.set_current_mod("mod1")
+        im.set_current_mod("mod1", fpath)
 
         self.assertEqual(im.handle_import("sys", 0), None)
         self.assertEqual(im.handle_import("sys", 10), None)
@@ -148,7 +148,7 @@ class ImportsTest(TestBase):
             mock_import.assert_called_with("mod2", package="")
 
         with mock.patch("importlib.import_module", return_value=MockImport(os.path.abspath("mod2.py"))) as mock_import:
-            im.set_current_mod("mod1.mod3")
+            im.set_current_mod("mod1.mod3", fpath)
             modname = im.handle_import("mod2", 1)
             self.assertEqual(modname, "mod2")
             mock_import.assert_called_once_with(".mod2", package="mod1")

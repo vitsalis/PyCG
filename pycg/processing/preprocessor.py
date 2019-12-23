@@ -55,7 +55,7 @@ class PreProcessorVisitor(ProcessingBase):
                 parentns = ".".join(splitted[:-1])
                 self.scope_manager.get_scope(parentns).add_def(name, defi)
 
-        self.import_manager.set_current_mod(self.modname)
+        self.import_manager.set_current_mod(self.modname, self.filename)
         # initialize module scopes
         items = self.scope_manager.handle_module(self.modname,
             self.filename, self.contents)
@@ -310,7 +310,7 @@ class PreProcessor(object):
         # add root node
         self.import_manager.create_node(self.mod)
         self.import_manager.set_filepath(self.mod, self.input_file)
-        self.import_manager.set_current_mod(self.mod)
+        self.import_manager.set_current_mod(self.mod, self.input_file)
 
         visitor = PreProcessorVisitor(self.input_file, self.mod, self.mod_dir,
             self.import_manager, self.scope_manager, self.def_manager, self.class_manager, modules_analyzed=set())

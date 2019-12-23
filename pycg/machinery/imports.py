@@ -38,10 +38,10 @@ def get_custom_loader(ig_obj):
     return CustomLoader
 
 class ImportManager(object):
-    def __init__(self, input_file, input_pkg):
+    def __init__(self, input_pkg):
         self.import_graph = dict()
         self.current_module = ""
-        self.input_file = os.path.abspath(input_file)
+        self.input_file = ""
         self.mod_dir = os.path.dirname(input_pkg)
         self.old_path_hooks = None
         self.old_path = None
@@ -85,8 +85,9 @@ class ImportManager(object):
     def _get_module_path(self):
         return self.current_module
 
-    def set_current_mod(self, name):
+    def set_current_mod(self, name, fname):
         self.current_module = name
+        self.input_file = os.path.abspath(fname)
 
     def get_filepath(self, modname):
         if modname in self.import_graph:
@@ -108,6 +109,9 @@ class ImportManager(object):
         return self.import_graph[modname]["imports"]
 
 
+    def _is_init_file(self):
+        return self.input_file.endswith("__init__.py")
+
     def _handle_import_level(self, name, level):
         # add a dot for each level
         package = self._get_module_path().split(".")
@@ -115,8 +119,16 @@ class ImportManager(object):
             raise ImportError("Attempting import beyond top level package")
 
         mod_name = ("." * level) + name
-        package = ".".join(package[:-level])
-        return mod_name, package
+        # When an __init__ file is analyzed, then the module name doesn't contain
+        # the __init__ part in it, so special care must be taken for levels.
+        if self._is_init_file() and level >= 1:
+            if level != 1:
+                level -= 1
+                package = package[:-level]
+        else:
+            package = package[:-level]
+
+        return mod_name, ".".join(package)
 
     def _do_import(self, mod_name, package):
         if mod_name in sys.modules:

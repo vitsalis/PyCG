@@ -314,13 +314,13 @@ class ProcessingBase(ast.NodeVisitor):
         if not fname or not self.import_manager.get_mod_dir() in fname:
             return
 
-        self.import_manager.set_current_mod(imp)
+        self.import_manager.set_current_mod(imp, fname)
 
         visitor = cls(fname, imp, *args, **kwargs)
         visitor.analyze()
         self.merge_modules_analyzed(visitor.get_modules_analyzed())
 
-        self.import_manager.set_current_mod(self.modname)
+        self.import_manager.set_current_mod(self.modname, self.filename)
 
     def find_cls_fun_ns(self, cls_name, fn):
         cls = self.class_manager.get(cls_name)
