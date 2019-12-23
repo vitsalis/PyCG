@@ -60,8 +60,13 @@ class DefinitionManager(object):
             name_pointer = defi.get_name_pointer()
             new_set = set()
             # bottom
+            if not closured.get(defi.get_ns(), None) == None:
+                return closured[defi.get_ns()]
+
             if not name_pointer.get():
                 new_set.add(defi.get_ns())
+
+            closured[defi.get_ns()] = new_set
 
             for name in name_pointer.get():
                 new_set = new_set.union(dfs(self.defs[name]))
@@ -70,7 +75,8 @@ class DefinitionManager(object):
             return closured[defi.get_ns()]
 
         for ns, current_def in self.defs.items():
-            dfs(current_def)
+            if closured.get(current_def, None) == None:
+                dfs(current_def)
 
         return closured
 
@@ -89,7 +95,8 @@ class DefinitionManager(object):
 
                 for item in arg:
                     if not item in pointsto_arg_def.get():
-                        changed_something = True
+                        if self.defs.get(item, None) != None:
+                            changed_something = True
                     # HACK: this check shouldn't be needed
                     # if we remove this the following breaks:
                     # x = lambda x: x + 1

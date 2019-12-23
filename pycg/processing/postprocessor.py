@@ -71,6 +71,9 @@ class PostProcessor(ProcessingBase):
                     for name in self.closured.get(d.get_ns(), []):
                         return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)
 
+                        if self.closured.get(return_ns, None) == None:
+                            continue
+
                         new_previous_names = new_previous_names.union(self.closured.get(return_ns))
 
                         for prev_name in previous_names:

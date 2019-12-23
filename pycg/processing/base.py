@@ -242,6 +242,8 @@ class ProcessingBase(ast.NodeVisitor):
                     continue
                 for name in pos_arg_names:
                     arg_def = self.def_manager.get(name)
+                    if not arg_def:
+                        continue
                     for d in decoded:
                         if isinstance(d, Definition):
                             arg_def.get_name_pointer().add(d.get_ns())
@@ -263,6 +265,8 @@ class ProcessingBase(ast.NodeVisitor):
                     continue
                 for name in arg_names:
                     arg_def = self.def_manager.get(name)
+                    if not arg_def:
+                        continue
                     for d in decoded:
                         if isinstance(d, Definition):
                             arg_def.get_name_pointer().add(d.get_ns())
