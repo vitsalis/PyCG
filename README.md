@@ -26,10 +26,10 @@ are implemented.
 Installation
 ============
 
-pycg only uses stdlib modules.
+pycg is implemented in Python 3 and has only stdlib dependencies.
 
 ```
-python{,3} setup.py install
+python3 setup.py install
 ```
 
 Usage
