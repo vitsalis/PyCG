@@ -6,14 +6,15 @@ from pycg.machinery.definitions import DefinitionManager, Definition
 from pycg import utils
 from pycg.processing.base import ProcessingBase
 
-class PreProcessorVisitor(ProcessingBase):
-    def __init__(self, input_file, modname, mod_dir,
+class PreProcessor(ProcessingBase):
+    def __init__(self, filename, modname,
             import_manager, scope_manager, def_manager, class_manager,
             modules_analyzed=None):
-        super().__init__(input_file, modname, modules_analyzed)
+        super().__init__(filename, modname, modules_analyzed)
 
         self.modname = modname
-        self.mod_dir = mod_dir
+        self.mod_dir = "/".join(self.filename.split("/")[:-1])
+
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
@@ -39,7 +40,7 @@ class PreProcessorVisitor(ProcessingBase):
         return defaults
 
     def analyze_submodule(self, modname):
-        super().analyze_submodule(PreProcessorVisitor, modname, self.mod_dir,
+        super().analyze_submodule(PreProcessor, modname,
             self.import_manager, self.scope_manager, self.def_manager, self.class_manager,
             modules_analyzed=self.get_modules_analyzed())
 
@@ -130,7 +131,7 @@ class PreProcessorVisitor(ProcessingBase):
                 if not fname:
                     continue
                 # only analyze modules under the current directory
-                if self.mod_dir in fname:
+                if self.import_manager.get_mod_dir() in fname:
                     if not modname in self.modules_analyzed:
                         self.analyze_submodule(modname)
                     handle_scopes(tgt_name, modname)
@@ -291,30 +292,8 @@ class PreProcessorVisitor(ProcessingBase):
         super().visit_ClassDef(node)
 
     def analyze(self):
+        if not self.import_manager.get_node(self.modname):
+            self.import_manager.create_node(self.modname)
+            self.import_manager.set_filepath(self.modname, self.filename)
+
         self.visit(ast.parse(self.contents, self.filename))
-
-class PreProcessor(object):
-    def __init__(self, input_file, import_manager, scope_manager, def_manager, class_manager):
-        self.input_file = os.path.abspath(input_file)
-
-        self.import_manager = import_manager
-        self.scope_manager = scope_manager
-        self.def_manager = def_manager
-        self.class_manager = class_manager
-
-        splitted = self.input_file.split("/")
-        self.mod = utils.to_mod_name(splitted[-1])
-        self.mod_dir = "/".join(splitted[:-1])
-
-    def analyze(self):
-        # add root node
-        self.import_manager.create_node(self.mod)
-        self.import_manager.set_filepath(self.mod, self.input_file)
-        self.import_manager.set_current_mod(self.mod, self.input_file)
-
-        visitor = PreProcessorVisitor(self.input_file, self.mod, self.mod_dir,
-            self.import_manager, self.scope_manager, self.def_manager, self.class_manager, modules_analyzed=set())
-        visitor.analyze()
-
-    def cleanup(self):
-        self.import_manager.remove_hooks()

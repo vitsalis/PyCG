@@ -35,19 +35,17 @@ class CallGraphGenerator(object):
 
     def analyze(self):
         # preprocessing
-        self.preprocessor = PreProcessor(self.input_file,
+        PreProcessor(self.input_file, self.input_mod,
                 self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager)
-        self.preprocessor.analyze()
+                self.class_manager, modules_analyzed=set()).analyze()
 
         self.remove_import_hooks()
 
         self.def_manager.complete_definitions()
 
-        self.postprocessor = PostProcessor(self.input_file, self.input_mod,
+        PostProcessor(self.input_file, self.input_mod,
                 self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager, modules_analyzed=set())
-        self.postprocessor.analyze()
+                self.class_manager, modules_analyzed=set()).analyze()
 
         self.def_manager.complete_definitions()
 
