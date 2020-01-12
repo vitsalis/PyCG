@@ -38,13 +38,16 @@ def get_custom_loader(ig_obj):
     return CustomLoader
 
 class ImportManager(object):
-    def __init__(self, input_pkg):
+    def __init__(self):
         self.import_graph = dict()
         self.current_module = ""
         self.input_file = ""
-        self.mod_dir = os.path.dirname(input_pkg)
+        self.mod_dir = None
         self.old_path_hooks = None
         self.old_path = None
+
+    def set_pkg(self, input_pkg):
+        self.mod_dir = os.path.dirname(input_pkg)
 
     def get_mod_dir(self):
         return self.mod_dir

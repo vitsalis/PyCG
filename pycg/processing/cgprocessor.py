@@ -20,16 +20,11 @@ class CallGraphProcessor(ProcessingBase):
         self.class_manager = class_manager
 
         self.call_graph = call_graph
-        if not self.call_graph:
-            self.call_graph = CallGraph()
 
         self.closured = self.def_manager.transitive_closure()
 
         # Stack for names of functions
         self.name_stack = []
-
-    def get_call_graph(self):
-        return self.call_graph.get()
 
     def visit_FunctionDef(self, node):
         current_ns = utils.join_ns(self.current_ns, node.name)
