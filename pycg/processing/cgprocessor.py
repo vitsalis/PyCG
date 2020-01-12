@@ -9,10 +9,12 @@ from pycg.machinery.definitions import Definition
 class CallGraphProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
             scope_manager, def_manager, class_manager,
-            call_graph=None, modules_analyzed=None):
+            call_graph=None, modules_analyzed=None, try_complete=False):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
+
+        self.try_complete = try_complete
 
         self.import_manager = import_manager
         self.scope_manager = scope_manager
@@ -68,6 +70,9 @@ class CallGraphProcessor(ProcessingBase):
 
         names = self.retrieve_call_names(node)
         if not names:
+            if self.try_complete:
+                for name in self.get_all_reachable_functions():
+                    self.call_graph.add_edge(self.current_ns, name)
             return
 
         self.last_called_names = names
@@ -100,3 +105,18 @@ class CallGraphProcessor(ProcessingBase):
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
         self.analyze_submodules()
+
+    def get_all_reachable_functions(self):
+        reachable = set()
+        names = set()
+        current_scope = self.scope_manager.get_scope(self.current_ns)
+        while current_scope:
+            for name, defi in current_scope.get_defs().items():
+                if defi.is_function_def() and not name in names:
+                    closured = self.closured.get(defi.get_ns())
+                    for item in closured:
+                        reachable.add(item)
+                    names.add(name)
+            current_scope = current_scope.parent
+
+        return reachable
