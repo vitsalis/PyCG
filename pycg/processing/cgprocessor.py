@@ -70,7 +70,12 @@ class CallGraphProcessor(ProcessingBase):
 
         names = self.retrieve_call_names(node)
         if not names:
-            if self.try_complete:
+            if isinstance(node.func, ast.Attribute) and self.has_ext_parent(node.func):
+                # TODO: This doesn't work for cases where there is an assignment of an attribute
+                # i.e. import os; lala = os.path; lala.dirname()
+                for name in self.get_full_attr_names(node.func):
+                    self.call_graph.add_edge(self.current_ns, name)
+            elif self.try_complete:
                 for name in self.get_all_reachable_functions():
                     self.call_graph.add_edge(self.current_ns, name)
             return
@@ -80,7 +85,7 @@ class CallGraphProcessor(ProcessingBase):
             pointer_def = self.def_manager.get(pointer)
             if not pointer_def or not isinstance(pointer_def, Definition):
                 continue
-            if pointer_def.get_type() == utils.constants.FUN_DEF:
+            if pointer_def.is_callable():
                 self.call_graph.add_edge(self.current_ns, pointer)
 
                 # TODO: This doesn't work and leads to calls from the decorators
@@ -120,3 +125,32 @@ class CallGraphProcessor(ProcessingBase):
             current_scope = current_scope.parent
 
         return reachable
+
+    def has_ext_parent(self, node):
+        if not isinstance(node, ast.Attribute):
+            return False
+
+        while isinstance(node, ast.Attribute):
+            parents = self._retrieve_parent_names(node)
+            for parent in parents:
+                defi = self.def_manager.get(parent)
+                if defi and defi.is_ext_def():
+                    return True
+            node = node.value
+        return False
+
+    def get_full_attr_names(self, node):
+        name = ""
+        while isinstance(node, ast.Attribute):
+            if not name:
+                name = node.attr
+            else:
+                name = node.attr + "." + name
+            node = node.value
+
+        names = []
+        if self.closured.get(node.id):
+            for id in self.closured.get(node.id):
+                names.append(id + "." + name)
+
+        return names

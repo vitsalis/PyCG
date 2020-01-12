@@ -120,6 +120,18 @@ class PreProcessor(ProcessingBase):
                     create_def(current_scope, tgt_name, defi)
                     current_scope.get_def(tgt_name).get_name_pointer().add(imported_scope.get_def(tgt_name).get_ns())
 
+        def add_external_def(name, target):
+            # add an external def for the name
+            defi = self.def_manager.create(name, utils.constants.EXT_DEF)
+            scope = self.scope_manager.get_scope(self.current_ns)
+            if target != "*":
+                # add a def for the target that points to the name
+                tgt_defi = self.def_manager.create(
+                    utils.join_ns(scope.get_ns(), target),
+                    utils.constants.EXT_DEF)
+                tgt_defi.get_name_pointer().add(defi.get_ns())
+                scope.add_def(target, tgt_defi)
+
         for import_item in node.names:
             src_name = handle_src_name(import_item.name)
             tgt_name = import_item.asname if import_item.asname else import_item.name
@@ -129,12 +141,15 @@ class PreProcessor(ProcessingBase):
                 # Work on scopes
                 fname = self.import_manager.get_filepath(modname)
                 if not fname:
+                    add_external_def(src_name, tgt_name)
                     continue
                 # only analyze modules under the current directory
                 if self.import_manager.get_mod_dir() in fname:
                     if not modname in self.modules_analyzed:
                         self.analyze_submodule(modname)
                     handle_scopes(tgt_name, modname)
+                else:
+                    add_external_def(src_name, tgt_name)
 
 
     def visit_ImportFrom(self, node):

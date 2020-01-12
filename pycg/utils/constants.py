@@ -5,6 +5,7 @@ FUN_DEF         = "FUNCTIONDEF"
 NAME_DEF        = "NAMEDEF"
 MOD_DEF         = "MODULEDEF"
 CLS_DEF         = "CLASSDEF"
+EXT_DEF         = "EXTERNALDEF"
 
 OBJECT_BASE     = "object"
 

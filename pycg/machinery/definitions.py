@@ -140,7 +140,8 @@ class Definition(object):
         utils.constants.FUN_DEF,
         utils.constants.MOD_DEF,
         utils.constants.NAME_DEF,
-        utils.constants.CLS_DEF
+        utils.constants.CLS_DEF,
+        utils.constants.EXT_DEF
     ]
 
     def __init__(self, fullns, def_type):
@@ -156,6 +157,12 @@ class Definition(object):
 
     def is_function_def(self):
         return self.def_type == utils.constants.FUN_DEF
+
+    def is_ext_def(self):
+        return self.def_type == utils.constants.EXT_DEF
+
+    def is_callable(self):
+        return (self.is_function_def() or self.is_ext_def())
 
     def get_lit_pointer(self):
         return self.points_to["lit"]
