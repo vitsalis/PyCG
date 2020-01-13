@@ -47,7 +47,7 @@ class ImportManager(object):
         self.old_path = None
 
     def set_pkg(self, input_pkg):
-        self.mod_dir = os.path.dirname(input_pkg)
+        self.mod_dir = input_pkg
 
     def get_mod_dir(self):
         return self.mod_dir
@@ -150,7 +150,10 @@ class ImportManager(object):
             return
 
         # Import the module
-        mod_name, package = self._handle_import_level(name, level)
+        try:
+            mod_name, package = self._handle_import_level(name, level)
+        except ImportError:
+            return
         try:
             mod = self._do_import(mod_name, package)
         except ImportError as e:
@@ -160,9 +163,13 @@ class ImportManager(object):
                 return
             try:
                 mod = self._do_import(mod_name, package)
-            except ImportError as e:
+            except (ImportError,TypeError) as e:
                 return
+        except TypeError as e:
+            return
 
+        if not mod.__file__:
+            return
         if self.mod_dir not in mod.__file__:
             return
         return utils.to_mod_name(

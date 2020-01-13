@@ -13,8 +13,9 @@ from pycg.machinery.callgraph import CallGraph
 from pycg import utils
 
 class CallGraphGenerator(object):
-    def __init__(self, entry_points, try_complete):
+    def __init__(self, entry_points, package, try_complete):
         self.entry_points = entry_points
+        self.package = package
         self.try_complete = try_complete
         self.setUp()
 
@@ -35,12 +36,15 @@ class CallGraphGenerator(object):
         # preprocessing
         modules_analyzed = set()
         for entry_point in self.entry_points:
-            input_mod = utils.to_mod_name(entry_point.split("/")[-1])
+            input_pkg = self.package
+            input_mod = utils.to_mod_name(
+                os.path.relpath(entry_point, input_pkg))
             input_file = os.path.abspath(entry_point)
-            input_pkg = entry_point
+            if not input_pkg:
+                input_pkg = os.path.dirname(input_file)
 
             if not input_mod in modules_analyzed:
-                self.import_manager.set_pkg(input_file)
+                self.import_manager.set_pkg(input_pkg)
                 self.import_manager.install_hooks()
 
                 processor = PreProcessor(input_file, input_mod,
@@ -55,7 +59,8 @@ class CallGraphGenerator(object):
 
         modules_analyzed = set()
         for entry_point in self.entry_points:
-            input_mod = utils.to_mod_name(entry_point.split("/")[-1])
+            input_mod = utils.to_mod_name(
+                os.path.relpath(entry_point, input_pkg))
             input_file = os.path.abspath(entry_point)
 
             if not input_mod in modules_analyzed:
@@ -69,7 +74,8 @@ class CallGraphGenerator(object):
 
         modules_analyzed = set()
         for entry_point in self.entry_points:
-            input_mod = utils.to_mod_name(entry_point.split("/")[-1])
+            input_mod = utils.to_mod_name(
+                os.path.relpath(entry_point, input_pkg))
             input_file = os.path.abspath(entry_point)
 
             if not input_mod in modules_analyzed:

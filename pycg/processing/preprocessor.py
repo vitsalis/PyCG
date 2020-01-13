@@ -122,13 +122,16 @@ class PreProcessor(ProcessingBase):
 
         def add_external_def(name, target):
             # add an external def for the name
-            defi = self.def_manager.create(name, utils.constants.EXT_DEF)
+            defi = self.def_manager.get(name)
+            if not defi:
+                defi = self.def_manager.create(name, utils.constants.EXT_DEF)
             scope = self.scope_manager.get_scope(self.current_ns)
             if target != "*":
                 # add a def for the target that points to the name
-                tgt_defi = self.def_manager.create(
-                    utils.join_ns(scope.get_ns(), target),
-                    utils.constants.EXT_DEF)
+                tgt_ns = utils.join_ns(scope.get_ns(), target)
+                tgt_defi = self.def_manager.get(tgt_ns)
+                if not tgt_defi:
+                    tgt_defi = self.def_manager.create(tgt_ns, utils.constants.EXT_DEF)
                 tgt_defi.get_name_pointer().add(defi.get_ns())
                 scope.add_def(target, tgt_defi)
 
@@ -172,7 +175,7 @@ class PreProcessor(ProcessingBase):
                 if isinstance(decorator, ast.Name) and decorator.id == utils.constants.STATIC_METHOD:
                     is_static_method = True
 
-        if current_def.get_type() == utils.constants.CLS_DEF and not is_static_method:
+        if current_def.get_type() == utils.constants.CLS_DEF and not is_static_method and node.args.args:
             arg_ns = utils.join_ns(fn_def.get_ns(), node.args.args[0].arg)
             arg_def = self.def_manager.get(arg_ns)
             if not arg_def:

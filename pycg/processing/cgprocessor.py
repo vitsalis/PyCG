@@ -149,7 +149,7 @@ class CallGraphProcessor(ProcessingBase):
             node = node.value
 
         names = []
-        if self.closured.get(node.id):
+        if getattr(node, "id", None) and self.closured.get(node.id):
             for id in self.closured.get(node.id):
                 names.append(id + "." + name)
 

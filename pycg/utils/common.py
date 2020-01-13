@@ -6,5 +6,5 @@ def get_lambda_name(counter):
 def join_ns(*args):
     return ".".join([arg for arg in args])
 
-def to_mod_name(name):
+def to_mod_name(name, package=None):
     return os.path.splitext(name)[0].replace("/", ".")
