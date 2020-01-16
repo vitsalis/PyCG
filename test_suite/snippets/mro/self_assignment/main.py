@@ -14,6 +14,7 @@ class A(B):
 
 a = A()
 a.funcb()
-a.funca()
+a.smth()
 
+a.funca()
 a.smth()

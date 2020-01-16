@@ -8,7 +8,7 @@ a = dec1
 a = dec2
 
 @a
-def func2():
+def func():
     pass
 
-func2()
+func()

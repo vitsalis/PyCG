@@ -1,1 +1,1 @@
-A nested decorator is called.
+A function defined inside another function's context serves as a decorator.
