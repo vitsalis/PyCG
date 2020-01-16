@@ -90,7 +90,7 @@ class DefinitionManager(object):
                     continue
                 pointsto_arg_def = self.defs[pointsto_arg].get_name_pointer()
                 # sometimes we may end up with a cycle
-                if pointsto_arg in arg and arg != pointsto_args:
+                if pointsto_arg in arg:
                     arg.remove(pointsto_arg)
 
                 for item in arg:
@@ -104,8 +104,7 @@ class DefinitionManager(object):
                     # since on line 184 we don't discriminate between literal values and name values
                     if not self.defs.get(item, None):
                         continue
-                    if pointsto_arg_def != pointsto_args:
-                        pointsto_arg_def.add(item)
+                    pointsto_arg_def.add(item)
             return changed_something
 
         for i in range(len(self.defs)):
