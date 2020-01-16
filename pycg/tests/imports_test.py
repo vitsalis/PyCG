@@ -10,7 +10,7 @@ class ImportsTest(TestBase):
     def test_create_node(self):
         fpath = "input_file.py"
         im = ImportManager()
-        im.set_pkg(fpath)
+        im.set_pkg("")
 
         name = "node1"
         im.create_node(name)
@@ -31,7 +31,7 @@ class ImportsTest(TestBase):
     def test_set_filepath(self):
         fpath = "input_file.py"
         im = ImportManager()
-        im.set_pkg(fpath)
+        im.set_pkg("")
 
         name = "node1"
         im.create_node(name)
@@ -54,7 +54,7 @@ class ImportsTest(TestBase):
     def test_create_edge(self):
         fpath = "input_file.py"
         im = ImportManager()
-        im.set_pkg(fpath)
+        im.set_pkg("")
         node1 = "node1"
         node2 = "node2"
 
@@ -81,7 +81,7 @@ class ImportsTest(TestBase):
     def test_hooks(self):
         input_file = "somedir/somedir/input_file.py"
         im = ImportManager()
-        im.set_pkg(input_file)
+        im.set_pkg("somedir/somedir")
         old_sys_path = copy.deepcopy(sys.path)
         old_path_hooks = copy.deepcopy(sys.path_hooks)
         custom_loader = "custom_loader"
@@ -99,7 +99,7 @@ class ImportsTest(TestBase):
     def test_custom_loader(self):
         fpath = "input_file.py"
         im = ImportManager()
-        im.set_pkg(fpath)
+        im.set_pkg("")
         old_sys_path = copy.deepcopy(sys.path)
         im.set_current_mod("node1", fpath)
         im.create_node("node1")
@@ -121,7 +121,7 @@ class ImportsTest(TestBase):
     def test_handle_import_level(self):
         fpath = "input_file.py"
         im = ImportManager()
-        im.set_pkg(fpath)
+        im.set_pkg("")
         im.set_current_mod("mod1.mod2.mod3", fpath)
 
         # gets outside of package scope
@@ -136,7 +136,7 @@ class ImportsTest(TestBase):
         # test builtin modules
         fpath = "input_file.py"
         im = ImportManager()
-        im.set_pkg(fpath)
+        im.set_pkg("")
         im.create_node("mod1")
         im.set_current_mod("mod1", fpath)
 
