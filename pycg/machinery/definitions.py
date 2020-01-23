@@ -69,6 +69,8 @@ class DefinitionManager(object):
             closured[defi.get_ns()] = new_set
 
             for name in name_pointer.get():
+                if not self.defs.get(name, None):
+                    continue
                 new_set = new_set.union(dfs(self.defs[name]))
 
             closured[defi.get_ns()] = new_set
@@ -85,10 +87,15 @@ class DefinitionManager(object):
         # TODO: IMPROVE COMPLEXITY
         def update_pointsto_args(pointsto_args, arg):
             changed_something = False
+            if arg == pointsto_args:
+                return False
             for pointsto_arg in pointsto_args:
                 if not self.defs.get(pointsto_arg, None):
                     continue
                 pointsto_arg_def = self.defs[pointsto_arg].get_name_pointer()
+                if pointsto_arg_def == pointsto_args:
+                    continue
+
                 # sometimes we may end up with a cycle
                 if pointsto_arg in arg:
                     arg.remove(pointsto_arg)
@@ -115,6 +122,8 @@ class DefinitionManager(object):
                 # iterate the names the current definition points to items
                 for name in current_name_pointer.get():
                     # get the name pointer of the points to name
+                    if not self.defs.get(name, None):
+                        continue
                     pointsto_name_pointer = self.defs[name].get_name_pointer()
                     # iterate the arguments of the definition we're currently iterating
                     for arg_name, arg in current_name_pointer.get_args().items():

@@ -165,7 +165,7 @@ class ImportManager(object):
                 mod = self._do_import(mod_name, package)
             except (ImportError,TypeError) as e:
                 return
-        except TypeError as e:
+        except Exception as e:
             return
 
         if not mod.__file__:
