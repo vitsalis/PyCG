@@ -1,5 +1,6 @@
 RETURN_NAME     = "<**RETURN**>"
 LAMBDA_NAME     = "<**LAMBDA_{}**>" # needs to be formatted
+BUILTIN_NAME    = "<**builtin**>"
 
 FUN_DEF         = "FUNCTIONDEF"
 NAME_DEF        = "NAMEDEF"

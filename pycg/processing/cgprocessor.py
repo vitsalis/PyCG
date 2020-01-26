@@ -75,6 +75,8 @@ class CallGraphProcessor(ProcessingBase):
                 # i.e. import os; lala = os.path; lala.dirname()
                 for name in self.get_full_attr_names(node.func):
                     self.call_graph.add_edge(self.current_ns, name)
+            elif getattr(node.func, "id", None) and self.is_builtin(node.func.id):
+                self.call_graph.add_edge(self.current_ns, utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id))
             elif self.try_complete:
                 for name in self.get_all_reachable_functions():
                     self.call_graph.add_edge(self.current_ns, name)
@@ -154,3 +156,6 @@ class CallGraphProcessor(ProcessingBase):
                 names.append(id + "." + name)
 
         return names
+
+    def is_builtin(self, name):
+        return name in __builtins__
