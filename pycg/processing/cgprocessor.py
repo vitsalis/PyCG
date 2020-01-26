@@ -151,8 +151,12 @@ class CallGraphProcessor(ProcessingBase):
             node = node.value
 
         names = []
-        if getattr(node, "id", None) and self.closured.get(node.id):
-            for id in self.closured.get(node.id):
+        if getattr(node, "id", None) == None:
+            return names
+
+        defi = self.scope_manager.get_def(self.current_ns, node.id)
+        if defi and self.closured.get(defi.get_ns()):
+            for id in self.closured.get(defi.get_ns()):
                 names.append(id + "." + name)
 
         return names
