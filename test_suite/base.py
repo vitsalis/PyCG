@@ -40,7 +40,7 @@ class TestBase(TestCase):
     def get_snippet_output_cg(self, snippet_path):
         main_path = os.path.join(snippet_path, "main.py")
         try:
-            cg = self.cg_class([main_path], snippet_path, False)
+            cg = self.cg_class([main_path], snippet_path)
             cg.analyze()
             return cg.output()
         except Exception as e:

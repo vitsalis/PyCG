@@ -13,10 +13,9 @@ from pycg.machinery.callgraph import CallGraph
 from pycg import utils
 
 class CallGraphGenerator(object):
-    def __init__(self, entry_points, package, try_complete):
+    def __init__(self, entry_points, package):
         self.entry_points = entry_points
         self.package = package
-        self.try_complete = try_complete
         self.setUp()
 
     def setUp(self):
@@ -82,7 +81,7 @@ class CallGraphGenerator(object):
                 self.visitor = CallGraphProcessor(input_file, input_mod,
                         self.import_manager, self.scope_manager, self.def_manager,
                         self.class_manager, modules_analyzed=modules_analyzed,
-                        call_graph=self.cg, try_complete=self.try_complete)
+                        call_graph=self.cg)
                 self.visitor.analyze()
                 modules_analyzed = modules_analyzed.union(self.visitor.get_modules_analyzed())
 

@@ -9,12 +9,10 @@ from pycg.machinery.definitions import Definition
 class CallGraphProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
             scope_manager, def_manager, class_manager,
-            call_graph=None, modules_analyzed=None, try_complete=False):
+            call_graph=None, modules_analyzed=None):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
-
-        self.try_complete = try_complete
 
         self.import_manager = import_manager
         self.scope_manager = scope_manager
@@ -77,9 +75,6 @@ class CallGraphProcessor(ProcessingBase):
                     self.call_graph.add_edge(self.current_ns, name)
             elif getattr(node.func, "id", None) and self.is_builtin(node.func.id):
                 self.call_graph.add_edge(self.current_ns, utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id))
-            elif self.try_complete:
-                for name in self.get_all_reachable_functions():
-                    self.call_graph.add_edge(self.current_ns, name)
             return
 
         self.last_called_names = names

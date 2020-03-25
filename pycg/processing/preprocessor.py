@@ -214,6 +214,7 @@ class PreProcessor(ProcessingBase):
             if defaults.get(arg_name, None):
                 for default in defaults[arg_name]:
                     if isinstance(default, Definition):
+                        arg_def.get_name_pointer().add(default.get_ns())
                         if default.is_function_def():
                             arg_def.get_name_pointer().add(default.get_ns())
                         else:

@@ -26,7 +26,7 @@ def main():
 
     args = parser.parse_args()
 
-    cg = CallGraphGenerator(args.entry_point, args.package, args.try_complete)
+    cg = CallGraphGenerator(args.entry_point, args.package)
     cg.analyze()
     output_cg = {}
     output = cg.output()
