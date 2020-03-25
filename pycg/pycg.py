@@ -87,3 +87,6 @@ class CallGraphGenerator(object):
 
     def output(self):
         return self.cg.get()
+
+    def output_edges(self):
+        return self.cg.get_edges()

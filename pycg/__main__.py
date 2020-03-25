@@ -24,14 +24,33 @@ def main():
         default=False
     )
 
+    parser.add_argument(
+        "--fasten",
+        help="Produce call graph using the FASTEN format",
+        action="store_true",
+        default=False
+    )
+
     args = parser.parse_args()
 
     cg = CallGraphGenerator(args.entry_point, args.package)
     cg.analyze()
+
     output_cg = {}
-    output = cg.output()
-    for node in output:
-        output_cg[node] = list(output[node])
+
+    if args.fasten:
+        output_cg["product"] = ""
+        output_cg["forge"] = ""
+        output_cg["depset"] = []
+        output_cg["version"] = ""
+        output_cg["timestamp"] = 0
+        output_cg["cha"] = {}
+        output_cg["graph"] = cg.output_edges()
+    else:
+        output = cg.output()
+        for node in output:
+            output_cg[node] = list(output[node])
+
     print (json.dumps(output_cg))
 
 if __name__ == "__main__":
