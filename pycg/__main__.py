@@ -60,8 +60,13 @@ def find_dependencies(package_path):
         end = None
         for key, val in sorted(specs, key=lambda x: x[1]):
             # if begin, then it is already in a range
-            if key == "==" and not begin:
-                constraints.append(f"[{val}]")
+            if key == "==":
+                if begin and end:
+                    add_range(begin, end)
+                    begin = None
+                    end = None
+                if not begin:
+                    constraints.append(f"[{val}]")
 
             if key == ">":
                 if end:
