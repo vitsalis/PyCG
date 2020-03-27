@@ -24,6 +24,7 @@ def get_custom_loader(ig_obj):
         def __init__(self, fullname, path):
             self.fullname = fullname
             self.path = path
+
             ig_obj.create_edge(self.fullname)
             if not ig_obj.get_node(self.fullname):
                 ig_obj.create_node(self.fullname)
@@ -172,8 +173,12 @@ class ImportManager(object):
             return
         if self.mod_dir not in mod.__file__:
             return
+        fname = mod.__file__
+        if fname.endswith("__init__.py"):
+            fname = os.path.split(fname)[0]
+
         return utils.to_mod_name(
-            os.path.relpath(mod.__file__, self.mod_dir))
+            os.path.relpath(fname, self.mod_dir))
 
     def get_import_graph(self):
         return self.import_graph
