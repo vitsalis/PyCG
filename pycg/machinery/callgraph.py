@@ -12,6 +12,7 @@ class CallGraph(object):
         if not name in self.cg:
             self.cg[name] = set()
             self.modnames[name] = modname
+
         if name in self.cg and not self.modnames[name]:
             self.modnames[name] = modname
 

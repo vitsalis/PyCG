@@ -31,13 +31,27 @@ class CallGraphGenerator(object):
     def tearDown(self):
         self.remove_import_hooks()
 
+    def _get_mod_name(self, entry, pkg):
+        # We do this because we want __init__ modules to
+        # only contain the parent module
+        # since pycg can't differentiate between functions
+        # coming from __init__ files.
+
+        input_mod = utils.to_mod_name(
+            os.path.relpath(entry, pkg))
+        if input_mod.endswith("__init__"):
+            input_mod = ".".join(input_mod.split(".")[:-1])
+
+        return input_mod
+
     def analyze(self):
         # preprocessing
         modules_analyzed = set()
         for entry_point in self.entry_points:
             input_pkg = self.package
-            input_mod = utils.to_mod_name(
-                os.path.relpath(entry_point, input_pkg))
+
+            input_mod = self._get_mod_name(entry_point, input_pkg)
+
             input_file = os.path.abspath(entry_point)
             if not input_pkg:
                 input_pkg = os.path.dirname(input_file)
@@ -58,8 +72,7 @@ class CallGraphGenerator(object):
 
         modules_analyzed = set()
         for entry_point in self.entry_points:
-            input_mod = utils.to_mod_name(
-                os.path.relpath(entry_point, input_pkg))
+            input_mod = self._get_mod_name(entry_point, input_pkg)
             input_file = os.path.abspath(entry_point)
 
             if not input_mod in modules_analyzed:
@@ -73,8 +86,7 @@ class CallGraphGenerator(object):
 
         modules_analyzed = set()
         for entry_point in self.entry_points:
-            input_mod = utils.to_mod_name(
-                os.path.relpath(entry_point, input_pkg))
+            input_mod = self._get_mod_name(entry_point, input_pkg)
             input_file = os.path.abspath(entry_point)
 
             if not input_mod in modules_analyzed:

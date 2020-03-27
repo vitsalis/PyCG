@@ -49,6 +49,7 @@ class CallGraphProcessor(ProcessingBase):
                 names = self.closured.get(d.get_ns(), [])
                 for name in names:
                     self.call_graph.add_edge(self.current_ns, name)
+
         self.call_graph.add_node(utils.join_ns(self.current_ns, node.name), self.modname)
         super().visit_FunctionDef(node)
 
