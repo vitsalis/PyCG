@@ -5,6 +5,16 @@ import argparse
 
 from pycg.pycg import CallGraphGenerator
 
+def to_uri(product, modname, name):
+    if not name.startswith(modname):
+        raise Exception("name should start with modname")
+
+    cleared = name[len(modname):]
+    if cleared.startswith("."):
+        cleared = cleared[1:]
+
+    return f"//{product}/{modname}/{cleared}"
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("entry_point",
@@ -58,11 +68,20 @@ def main():
     if args.fasten:
         output_cg["product"] = args.product
         output_cg["forge"] = args.forge
-        output_cg["depset"] = []
+        output_cg["depset"] = find_dependencies(args.package)
         output_cg["version"] = args.version
         output_cg["timestamp"] = args.timestamp
         output_cg["cha"] = {}
-        output_cg["graph"] = cg.output_edges()
+        output_cg["graph"] = []
+
+        edges, modules = cg.output_edges()
+        for src, dst in edges:
+            src_mod = modules.get(src, "")
+            dst_mod = modules.get(dst, "")
+            output_cg["graph"].append([
+                to_uri(args.product, src_mod, src),
+                to_uri(args.product, dst_mod, dst)
+            ])
     else:
         output = cg.output()
         for node in output:

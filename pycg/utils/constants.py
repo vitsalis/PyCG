@@ -1,6 +1,7 @@
-RETURN_NAME     = "<**RETURN**>"
-LAMBDA_NAME     = "<**LAMBDA_{}**>" # needs to be formatted
-BUILTIN_NAME    = "<**builtin**>"
+RETURN_NAME     = "<RETURN>"
+LAMBDA_NAME     = "<LAMBDA_{}>" # needs to be formatted
+BUILTIN_NAME    = "<builtin>"
+EXT_NAME        = "<external>"
 
 FUN_DEF         = "FUNCTIONDEF"
 NAME_DEF        = "NAMEDEF"

@@ -26,18 +26,16 @@ class CallGraphProcessor(ProcessingBase):
         # Stack for names of functions
         self.name_stack = []
 
-    def visit_FunctionDef(self, node):
-        current_ns = utils.join_ns(self.current_ns, node.name)
-        self.call_graph.add_node(current_ns)
-
-        super().visit_FunctionDef(node)
+    def visit_Module(self, node):
+        self.call_graph.add_node(self.modname, self.modname)
+        super().visit_Module(node)
 
     def visit_Lambda(self, node):
         counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
         lambda_name = utils.get_lambda_name(counter)
         lambda_fullns = utils.join_ns(self.current_ns, lambda_name)
 
-        self.call_graph.add_node(lambda_fullns)
+        self.call_graph.add_node(lambda_fullns, self.modname)
 
         super().visit_Lambda(node, lambda_name)
 
@@ -51,7 +49,7 @@ class CallGraphProcessor(ProcessingBase):
                 names = self.closured.get(d.get_ns(), [])
                 for name in names:
                     self.call_graph.add_edge(self.current_ns, name)
-        self.call_graph.add_node(utils.join_ns(self.current_ns, node.name))
+        self.call_graph.add_node(utils.join_ns(self.current_ns, node.name), self.modname)
         super().visit_FunctionDef(node)
 
     def visit_Call(self, node):
@@ -72,9 +70,19 @@ class CallGraphProcessor(ProcessingBase):
                 # TODO: This doesn't work for cases where there is an assignment of an attribute
                 # i.e. import os; lala = os.path; lala.dirname()
                 for name in self.get_full_attr_names(node.func):
-                    self.call_graph.add_edge(self.current_ns, name)
+                    self.call_graph.add_node(
+                        utils.join_ns(utils.constants.EXT_NAME, name),
+                        utils.constants.EXT_NAME)
+                    self.call_graph.add_edge(
+                        self.current_ns,
+                        utils.join_ns(utils.constants.EXT_NAME, name))
             elif getattr(node.func, "id", None) and self.is_builtin(node.func.id):
-                self.call_graph.add_edge(self.current_ns, utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id))
+                self.call_graph.add_node(
+                    utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id),
+                    utils.constants.BUILTIN_NAME)
+                self.call_graph.add_edge(
+                    self.current_ns,
+                    utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id))
             return
 
         self.last_called_names = names
@@ -83,7 +91,12 @@ class CallGraphProcessor(ProcessingBase):
             if not pointer_def or not isinstance(pointer_def, Definition):
                 continue
             if pointer_def.is_callable():
-                self.call_graph.add_edge(self.current_ns, pointer)
+                name = pointer
+                if pointer_def.get_type() == utils.constants.EXT_DEF:
+                    name = utils.join_ns(utils.constants.EXT_NAME, pointer)
+                    self.call_graph.add_node(name, utils.constants.EXT_NAME)
+
+                self.call_graph.add_edge(self.current_ns, name)
 
                 # TODO: This doesn't work and leads to calls from the decorators
                 #    themselves to the function, creating edges to the first decorator
