@@ -6,14 +6,18 @@ class ClassManager:
         if name in self.names:
             return self.names[name]
 
-    def create(self, name):
-        cls = ClassNode(name)
+    def create(self, name, module):
+        cls = ClassNode(name, module)
         self.names[name] = cls
         return cls
 
+    def get_classes(self):
+        return self.names
+
 class ClassNode:
-    def __init__(self, ns):
+    def __init__(self, ns, module):
         self.ns = ns
+        self.module = module
         self.mro = [ns]
 
     def add_parent(self, parent):
@@ -24,6 +28,9 @@ class ClassNode:
 
     def get_mro(self):
         return self.mro
+
+    def get_module(self):
+        return self.module
 
     def compute_mro(self):
         res = []

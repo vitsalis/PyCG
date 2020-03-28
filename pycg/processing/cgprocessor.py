@@ -9,7 +9,7 @@ from pycg.machinery.definitions import Definition
 class CallGraphProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
             scope_manager, def_manager, class_manager,
-            call_graph=None, modules_analyzed=None):
+            module_manager, call_graph=None, modules_analyzed=None):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
@@ -18,6 +18,7 @@ class CallGraphProcessor(ProcessingBase):
         self.scope_manager = scope_manager
         self.def_manager = def_manager
         self.class_manager = class_manager
+        self.module_manager = module_manager
 
         self.call_graph = call_graph
 
@@ -71,19 +72,26 @@ class CallGraphProcessor(ProcessingBase):
                 # TODO: This doesn't work for cases where there is an assignment of an attribute
                 # i.e. import os; lala = os.path; lala.dirname()
                 for name in self.get_full_attr_names(node.func):
-                    self.call_graph.add_node(
-                        utils.join_ns(utils.constants.EXT_NAME, name),
-                        utils.constants.EXT_NAME)
-                    self.call_graph.add_edge(
-                        self.current_ns,
-                        utils.join_ns(utils.constants.EXT_NAME, name))
+                    method = utils.join_ns(utils.constants.EXT_NAME, name)
+
+                    mod = self.module_manager.get(utils.constants.EXT_NAME)
+                    if not mod:
+                        mod = self.module_manager.create(utils.constants.EXT_NAME, None, external=True)
+                    mod.add_method(method)
+
+                    self.call_graph.add_node(method, utils.constants.EXT_NAME)
+                    self.call_graph.add_edge(self.current_ns, method)
             elif getattr(node.func, "id", None) and self.is_builtin(node.func.id):
-                self.call_graph.add_node(
-                    utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id),
-                    utils.constants.BUILTIN_NAME)
-                self.call_graph.add_edge(
-                    self.current_ns,
-                    utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id))
+                method = utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id)
+
+                mod = self.module_manager.get(utils.constants.BUILTIN_NAME)
+                if not mod:
+                    mod = self.module_manager.create(utils.constants.BUILTIN_NAME, None, external=True)
+                mod.add_method(method)
+
+                self.call_graph.add_node(method, utils.constants.BUILTIN_NAME)
+                self.call_graph.add_edge(self.current_ns, method)
+
             return
 
         self.last_called_names = names
@@ -95,6 +103,11 @@ class CallGraphProcessor(ProcessingBase):
                 name = pointer
                 if pointer_def.get_type() == utils.constants.EXT_DEF:
                     name = utils.join_ns(utils.constants.EXT_NAME, pointer)
+                    mod = self.module_manager.get(utils.constants.EXT_NAME)
+                    if not mod:
+                        mod = self.module_manager.create(utils.constants.EXT_NAME, None, external=True)
+                    mod.add_method(name)
+
                     self.call_graph.add_node(name, utils.constants.EXT_NAME)
 
                 self.call_graph.add_edge(self.current_ns, name)
@@ -115,7 +128,7 @@ class CallGraphProcessor(ProcessingBase):
 
     def analyze_submodules(self):
         super().analyze_submodules(CallGraphProcessor, self.import_manager,
-                self.scope_manager, self.def_manager, self.class_manager,
+                self.scope_manager, self.def_manager, self.class_manager, self.module_manager,
                 call_graph=self.call_graph, modules_analyzed=self.get_modules_analyzed())
 
     def analyze(self):

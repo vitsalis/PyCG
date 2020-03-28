@@ -9,7 +9,7 @@ from pycg.processing.base import ProcessingBase
 class PreProcessor(ProcessingBase):
     def __init__(self, filename, modname,
             import_manager, scope_manager, def_manager, class_manager,
-            modules_analyzed=None):
+            module_manager, modules_analyzed=None):
         super().__init__(filename, modname, modules_analyzed)
 
         self.modname = modname
@@ -19,6 +19,7 @@ class PreProcessor(ProcessingBase):
         self.scope_manager = scope_manager
         self.def_manager = def_manager
         self.class_manager = class_manager
+        self.module_manager = module_manager
 
     def _get_fun_defaults(self, node):
         defaults = {}
@@ -42,7 +43,7 @@ class PreProcessor(ProcessingBase):
     def analyze_submodule(self, modname):
         super().analyze_submodule(PreProcessor, modname,
             self.import_manager, self.scope_manager, self.def_manager, self.class_manager,
-            modules_analyzed=self.get_modules_analyzed())
+            self.module_manager, modules_analyzed=self.get_modules_analyzed())
 
     def visit_Module(self, node):
         def iterate_mod_items(items, const):
@@ -57,6 +58,8 @@ class PreProcessor(ProcessingBase):
                 self.scope_manager.get_scope(parentns).add_def(name, defi)
 
         self.import_manager.set_current_mod(self.modname, self.filename)
+
+        self.module_manager.create(self.modname, self.filename)
 
         # initialize module scopes
         items = self.scope_manager.handle_module(self.modname,
@@ -179,6 +182,11 @@ class PreProcessor(ProcessingBase):
 
         fn_def = self.def_manager.handle_function_def(self.current_ns, fn_name)
 
+        mod = self.module_manager.get(self.modname)
+        if not mod:
+            mod = self.module_manager.create(self.modname, self.filename)
+        mod.add_method(fn_def.get_ns())
+
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
 
@@ -294,10 +302,15 @@ class PreProcessor(ProcessingBase):
         # create a definition for the class (node.name)
         cls_def = self.def_manager.handle_class_def(self.current_ns, node.name)
 
+        mod = self.module_manager.get(self.modname)
+        if not mod:
+            mod = self.module_manager.create(self.modname, self.filename)
+        mod.add_method(cls_def.get_ns())
+
         # iterate bases to compute MRO for the class
         cls = self.class_manager.get(cls_def.get_ns())
         if not cls:
-            cls = self.class_manager.create(cls_def.get_ns())
+            cls = self.class_manager.create(cls_def.get_ns(), self.modname)
         for base in node.bases:
             # all bases are of the type ast.Name
             self.visit(base)

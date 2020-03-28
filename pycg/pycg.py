@@ -10,6 +10,7 @@ from pycg.machinery.definitions import DefinitionManager
 from pycg.machinery.imports import ImportManager
 from pycg.machinery.classes import ClassManager
 from pycg.machinery.callgraph import CallGraph
+from pycg.machinery.modules import ModuleManager
 from pycg import utils
 
 class CallGraphGenerator(object):
@@ -23,6 +24,7 @@ class CallGraphGenerator(object):
         self.scope_manager = ScopeManager()
         self.def_manager = DefinitionManager()
         self.class_manager = ClassManager()
+        self.module_manager = ModuleManager()
         self.cg = CallGraph()
 
     def remove_import_hooks(self):
@@ -62,7 +64,7 @@ class CallGraphGenerator(object):
 
                 processor = PreProcessor(input_file, input_mod,
                         self.import_manager, self.scope_manager, self.def_manager,
-                        self.class_manager, modules_analyzed=modules_analyzed)
+                        self.class_manager, self.module_manager, modules_analyzed=modules_analyzed)
                 processor.analyze()
                 modules_analyzed = modules_analyzed.union(processor.get_modules_analyzed())
 
@@ -92,7 +94,7 @@ class CallGraphGenerator(object):
             if not input_mod in modules_analyzed:
                 self.visitor = CallGraphProcessor(input_file, input_mod,
                         self.import_manager, self.scope_manager, self.def_manager,
-                        self.class_manager, modules_analyzed=modules_analyzed,
+                        self.class_manager, self.module_manager, modules_analyzed=modules_analyzed,
                         call_graph=self.cg)
                 self.visitor.analyze()
                 modules_analyzed = modules_analyzed.union(self.visitor.get_modules_analyzed())
@@ -103,8 +105,26 @@ class CallGraphGenerator(object):
     def output_edges(self):
         return self.cg.get_edges()
 
-    def output_modules(self):
-        return self.cg.get_modules()
+    def _generate_mods(self, mods):
+        res = {}
+        for mod, node in mods.items():
+            res[mod] = {
+                "filename": node.get_filename(),
+                "methods": node.get_methods()
+            }
+        return res
+
+    def output_internal_mods(self):
+        return self._generate_mods(self.module_manager.get_internal_modules())
+
+    def output_external_mods(self):
+        return self._generate_mods(self.module_manager.get_external_modules())
 
     def output_classes(self):
-        return {}
+        classes = {}
+        for cls, node in self.class_manager.get_classes().items():
+            classes[cls] = {
+                "mro": node.get_mro(),
+                "module": node.get_module()
+            }
+        return classes

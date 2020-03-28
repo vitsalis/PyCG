@@ -4,7 +4,7 @@ import json
 import argparse
 
 from pycg.pycg import CallGraphGenerator
-from pycg.formats import fasten
+from pycg import formats
 
 def main():
     parser = argparse.ArgumentParser()
@@ -54,28 +54,13 @@ def main():
     cg = CallGraphGenerator(args.entry_point, args.package)
     cg.analyze()
 
-    output_cg = {}
-
     if args.fasten:
-        output_cg["product"] = args.product
-        output_cg["forge"] = args.forge
-        output_cg["depset"] = fasten.find_dependencies(args.package)
-        output_cg["version"] = args.version
-        output_cg["timestamp"] = args.timestamp
-        output_cg["cha"] = {}
-        output_cg["graph"] = []
-
-        graph, modules = fasten.generate_graph(args.product, cg.output_edges(), cg.output_modules(), cg.output_classes())
-
-        output_cg["graph"] = graph
-        output_cg["modules"] = modules
-
+        formatter = formats.Fasten(cg, args.package, \
+            args.product, args.forge, args.version, args.timestamp)
     else:
-        output = cg.output()
-        for node in output:
-            output_cg[node] = list(output[node])
+        formatter = formats.Simple(cg)
 
-    print (json.dumps(output_cg))
+    print (json.dumps(formatter.generate()))
 
 if __name__ == "__main__":
     main()
