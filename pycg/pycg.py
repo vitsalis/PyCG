@@ -101,4 +101,10 @@ class CallGraphGenerator(object):
         return self.cg.get()
 
     def output_edges(self):
-        return self.cg.get_edges(), self.cg.get_modules()
+        return self.cg.get_edges()
+
+    def output_modules(self):
+        return self.cg.get_modules()
+
+    def output_classes(self):
+        return {}

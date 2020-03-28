@@ -65,14 +65,11 @@ def main():
         output_cg["cha"] = {}
         output_cg["graph"] = []
 
-        edges, modules = cg.output_edges()
-        for src, dst in edges:
-            src_mod = modules.get(src, "")
-            dst_mod = modules.get(dst, "")
-            output_cg["graph"].append([
-                fasten.to_uri(args.product, src_mod, src),
-                fasten.to_uri(args.product, dst_mod, dst)
-            ])
+        graph, modules = fasten.generate_graph(args.product, cg.output_edges(), cg.output_modules(), cg.output_classes())
+
+        output_cg["graph"] = graph
+        output_cg["modules"] = modules
+
     else:
         output = cg.output()
         for node in output:

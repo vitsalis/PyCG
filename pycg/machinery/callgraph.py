@@ -34,5 +34,6 @@ class CallGraph(object):
     def get_modules(self):
         return self.modnames
 
+
 class CallGraphError(Exception):
     pass

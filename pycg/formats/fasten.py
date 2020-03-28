@@ -88,3 +88,17 @@ def find_dependencies(package_path):
         res.append({"forge": "PyPI", "product": req.name, "constraints": constraints})
 
     return res
+
+def generate_graph(product, edges, modules, classes):
+    graph = []
+    mods = {}
+
+    for src, dst in edges:
+        src_mod = modules.get(src, "")
+        dst_mod = modules.get(dst, "")
+        graph.append([
+            to_uri(product, src_mod, src),
+            to_uri(product, dst_mod, dst)
+        ])
+
+    return graph, mods
