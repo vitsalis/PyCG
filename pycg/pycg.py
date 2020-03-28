@@ -109,7 +109,8 @@ class CallGraphGenerator(object):
         res = {}
         for mod, node in mods.items():
             res[mod] = {
-                "filename": node.get_filename(),
+                "filename": os.path.relpath(node.get_filename(), self.package)\
+                    if node.get_filename() else None,
                 "methods": node.get_methods()
             }
         return res
