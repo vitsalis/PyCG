@@ -49,6 +49,13 @@ def main():
         default=0
     )
 
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Output path",
+        default=None
+    )
+
     args = parser.parse_args()
 
     cg = CallGraphGenerator(args.entry_point, args.package)
@@ -60,7 +67,11 @@ def main():
     else:
         formatter = formats.Simple(cg)
 
-    print (json.dumps(formatter.generate()))
+    if args.output:
+        with open(args.output, "w+") as f:
+            f.write(json.dumps(formatter.generate()))
+    else:
+        print (json.dumps(formatter.generate()))
 
 if __name__ == "__main__":
     main()
