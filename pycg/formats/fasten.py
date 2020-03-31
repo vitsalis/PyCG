@@ -168,7 +168,10 @@ class Fasten(BaseFormatter):
         return namespaces_maps
 
     def get_graph(self):
-        graph = []
+        graph = {
+            "internalCalls": [],
+            "externalCalls": []
+        }
 
         internal, external = self.create_namespaces_map()
 
@@ -184,10 +187,17 @@ class Fasten(BaseFormatter):
                     uris.append(self.to_uri(mod, node, external=True))
 
             if len(uris) == 2:
-                graph.append([
-                    uris[0],
-                    uris[1]
-                ])
+                # internal uris have been converted to ints
+                if type(uris[1]) == str:
+                    graph["externalCalls"].append([
+                        uris[0],
+                        uris[1]
+                    ])
+                else:
+                    graph["internalCalls"].append([
+                        uris[0],
+                        uris[1]
+                    ])
         return graph
 
     def generate(self):
