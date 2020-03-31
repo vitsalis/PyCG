@@ -14,7 +14,7 @@ class Fasten(BaseFormatter):
         self.classes = self.cg_generator.output_classes() or {}
         self.edges = self.cg_generator.output_edges() or []
         self.unique = 0
-        self.method_map = {}
+        self.namespace_map = {}
         self.package = package
         self.product = product
         self.forge = forge
@@ -125,20 +125,20 @@ class Fasten(BaseFormatter):
         for modname, module in self.internal_mods.items():
             name = self.to_uri(modname, external=False)
             filename = module["filename"]
-            methods = module["methods"]
+            namespaces = module["methods"]
 
             mods[name] = {
                 "SourceFileName": filename,
-                "methods": [],
+                "namespaces": [],
                 "superClasses": {}
             }
 
-            for method in methods:
-                method_uri = self.to_uri(modname, method, external=False)
+            for namespace in namespaces:
+                namespace_uri = self.to_uri(modname, namespace, external=False)
 
                 unique = self.get_unique_and_increment()
-                mods[name]["methods"].append([method_uri, unique])
-                self.method_map[method_uri] = unique
+                mods[name]["namespaces"].append([namespace_uri, unique])
+                self.namespace_map[namespace_uri] = unique
 
             for cls_name, cls in self.classes.items():
                 if not cls["module"] == modname:
@@ -158,19 +158,19 @@ class Fasten(BaseFormatter):
                         mods[name]["superClasses"][cls_uri].append(parent_uri)
         return mods
 
-    def create_methods_map(self):
-        methods_maps = [{}, {}]
-        for res, hmap in zip(methods_maps, [self.internal_mods, self.external_mods]):
+    def create_namespaces_map(self):
+        namespaces_maps = [{}, {}]
+        for res, hmap in zip(namespaces_maps, [self.internal_mods, self.external_mods]):
             for mod in hmap:
-                for method in hmap[mod]["methods"]:
-                    res[method] = mod
+                for namespace in hmap[mod]["methods"]:
+                    res[namespace] = mod
 
-        return methods_maps
+        return namespaces_maps
 
     def get_graph(self):
         graph = []
 
-        internal, external = self.create_methods_map()
+        internal, external = self.create_namespaces_map()
 
         for src, dst in self.edges:
             uris = []
@@ -178,7 +178,7 @@ class Fasten(BaseFormatter):
                 if node in internal:
                     mod = internal[node]
                     uri = self.to_uri(mod, node, external=False)
-                    uris.append(self.method_map.get(uri, uri))
+                    uris.append(self.namespace_map.get(uri, uri))
                 elif node in external:
                     mod = external[node]
                     uris.append(self.to_uri(mod, node, external=True))
