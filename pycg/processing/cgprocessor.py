@@ -96,17 +96,11 @@ class CallGraphProcessor(ProcessingBase):
             if not pointer_def or not isinstance(pointer_def, Definition):
                 continue
             if pointer_def.is_callable():
-                name = pointer
                 if pointer_def.get_type() == utils.constants.EXT_DEF:
-                    name = utils.join_ns(utils.constants.EXT_NAME, pointer)
-                    mod = self.module_manager.get(utils.constants.EXT_NAME)
-                    if not mod:
-                        mod = self.module_manager.create(utils.constants.EXT_NAME, None, external=True)
-                    mod.add_method(name)
-
-                    self.call_graph.add_node(name, utils.constants.EXT_NAME)
-
-                self.call_graph.add_edge(self.current_ns, name)
+                    ext_modname = pointer.split(".")[0]
+                    create_ext_edge(pointer, ext_modname)
+                    continue
+                self.call_graph.add_edge(self.current_ns, pointer)
 
                 # TODO: This doesn't work and leads to calls from the decorators
                 #    themselves to the function, creating edges to the first decorator
