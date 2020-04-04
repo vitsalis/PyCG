@@ -30,12 +30,13 @@ class Fasten(BaseFormatter):
     def to_uri(self, modname, name=""):
         cleared = name
         if name:
-            if not name.startswith(modname):
-                raise Exception("name should start with modname", name, modname)
+            if name == modname:
+                cleared = ""
+            else:
+                if not name.startswith(modname + "."):
+                    raise Exception("name should start with modname", name, modname)
 
-            cleared = name[len(modname):]
-            if cleared.startswith("."):
-                cleared = cleared[1:]
+                cleared = name[len(modname)+1:]
 
         suffix = ""
         if name in self.functions:
@@ -159,7 +160,6 @@ class Fasten(BaseFormatter):
                         parent_uri = self.to_uri(self.classes[parent]["module"],
                             parent)
                     else:
-                        # TODO-HACK: this instance should not know anything about utils.constants
                         parent_mod = parent.split(".")[0]
                         parent_uri = self.to_external_uri(parent_mod, parent)
                     if not parent_uri == cls_uri:
