@@ -55,6 +55,16 @@ class CallGraphProcessor(ProcessingBase):
         super().visit_FunctionDef(node)
 
     def visit_Call(self, node):
+        def create_ext_edge(name, ext_modname):
+            ext_mod = self.module_manager.get(ext_modname)
+            if not ext_mod:
+                ext_mod = self.module_manager.create(ext_modname, None, external=True)
+
+            ext_mod.add_method(name)
+
+            self.call_graph.add_node(name, ext_modname)
+            self.call_graph.add_edge(self.current_ns, name)
+
         # First visit the child function so that on the case of
         #       func()()()
         # we first visit the call to func and then the other calls
@@ -66,32 +76,18 @@ class CallGraphProcessor(ProcessingBase):
 
         self.visit(node.func)
 
+
         names = self.retrieve_call_names(node)
         if not names:
             if isinstance(node.func, ast.Attribute) and self.has_ext_parent(node.func):
                 # TODO: This doesn't work for cases where there is an assignment of an attribute
                 # i.e. import os; lala = os.path; lala.dirname()
                 for name in self.get_full_attr_names(node.func):
-                    method = utils.join_ns(utils.constants.EXT_NAME, name)
-
-                    mod = self.module_manager.get(utils.constants.EXT_NAME)
-                    if not mod:
-                        mod = self.module_manager.create(utils.constants.EXT_NAME, None, external=True)
-                    mod.add_method(method)
-
-                    self.call_graph.add_node(method, utils.constants.EXT_NAME)
-                    self.call_graph.add_edge(self.current_ns, method)
+                    ext_modname = name.split(".")[0]
+                    create_ext_edge(name, ext_modname)
             elif getattr(node.func, "id", None) and self.is_builtin(node.func.id):
-                method = utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id)
-
-                mod = self.module_manager.get(utils.constants.BUILTIN_NAME)
-                if not mod:
-                    mod = self.module_manager.create(utils.constants.BUILTIN_NAME, None, external=True)
-                mod.add_method(method)
-
-                self.call_graph.add_node(method, utils.constants.BUILTIN_NAME)
-                self.call_graph.add_edge(self.current_ns, method)
-
+                name = utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id)
+                create_ext_edge(name, utils.constants.BUILTIN_NAME)
             return
 
         self.last_called_names = names
