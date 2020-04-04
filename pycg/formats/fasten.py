@@ -26,11 +26,7 @@ class Fasten(BaseFormatter):
         self.unique += 1
         return unique
 
-    def to_uri(self, modname, name="", external=False):
-        prefix = ""
-        if external:
-            prefix = "/"
-
+    def to_uri(self, modname, name=""):
         cleared = name
         if name:
             if not name.startswith(modname):
@@ -40,7 +36,14 @@ class Fasten(BaseFormatter):
             if cleared.startswith("."):
                 cleared = cleared[1:]
 
-        return f"{prefix}/{modname}/{cleared}"
+        return f"/{modname}/{cleared}"
+
+    def to_external_uri(self, modname, name=""):
+        if modname == utils.constants.BUILTIN_NAME:
+            name = name[len(modname)+1:]
+            modname = ".builtin"
+
+        return f"//{modname}//{name}"
 
     def find_dependencies(self, package_path):
         res = []
@@ -123,7 +126,7 @@ class Fasten(BaseFormatter):
         mods = {}
 
         for modname, module in self.internal_mods.items():
-            name = self.to_uri(modname, external=False)
+            name = self.to_uri(modname)
             filename = module["filename"]
             namespaces = module["methods"]
 
@@ -134,7 +137,7 @@ class Fasten(BaseFormatter):
             }
 
             for namespace in namespaces:
-                namespace_uri = self.to_uri(modname, namespace, external=False)
+                namespace_uri = self.to_uri(modname, namespace)
 
                 unique = self.get_unique_and_increment()
                 mods[name]["namespaces"].append([namespace_uri, unique])
@@ -144,16 +147,16 @@ class Fasten(BaseFormatter):
                 if not cls["module"] == modname:
                     continue
 
-                cls_uri = self.to_uri(modname, cls_name, external=False)
+                cls_uri = self.to_uri(modname, cls_name)
                 mods[name]["superClasses"][cls_uri] = []
                 for parent in cls["mro"]:
                     if self.classes.get(parent):
                         parent_uri = self.to_uri(self.classes[parent]["module"],
-                            parent, external=False)
+                            parent)
                     else:
                         # TODO-HACK: this instance should not know anything about utils.constants
-                        parent_name = utils.join_ns(utils.constants.EXT_NAME, parent)
-                        parent_uri = self.to_uri(utils.constants.EXT_NAME, parent_name, external=True)
+                        parent_mod = parent.split(".")[0]
+                        parent_uri = self.to_external_uri(parent_mod, parent)
                     if not parent_uri == cls_uri:
                         mods[name]["superClasses"][cls_uri].append(parent_uri)
         return mods
@@ -180,15 +183,15 @@ class Fasten(BaseFormatter):
             for node in [src, dst]:
                 if node in internal:
                     mod = internal[node]
-                    uri = self.to_uri(mod, node, external=False)
+                    uri = self.to_uri(mod, node)
                     uris.append(self.namespace_map.get(uri, uri))
                 elif node in external:
                     mod = external[node]
-                    uris.append(self.to_uri(mod, node, external=True))
+                    uris.append(self.to_external_uri(mod, node))
 
             if len(uris) == 2:
                 # internal uris have been converted to ints
-                if type(uris[1]) == str:
+                if type(uris[1]) == str and uris[1].startswith("//"):
                     graph["externalCalls"].append([
                         uris[0],
                         uris[1]
