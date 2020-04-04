@@ -121,6 +121,13 @@ class CallGraphGenerator(object):
     def output_external_mods(self):
         return self._generate_mods(self.module_manager.get_external_modules())
 
+    def output_functions(self):
+        functions = []
+        for ns, defi in self.def_manager.get_defs().items():
+            if defi.is_function_def():
+                functions.append(ns)
+        return functions
+
     def output_classes(self):
         classes = {}
         for cls, node in self.class_manager.get_classes().items():

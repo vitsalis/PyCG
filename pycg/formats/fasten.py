@@ -13,6 +13,7 @@ class Fasten(BaseFormatter):
         self.external_mods = self.cg_generator.output_external_mods() or {}
         self.classes = self.cg_generator.output_classes() or {}
         self.edges = self.cg_generator.output_edges() or []
+        self.functions = self.cg_generator.output_functions() or []
         self.unique = 0
         self.namespace_map = {}
         self.package = package
@@ -36,7 +37,11 @@ class Fasten(BaseFormatter):
             if cleared.startswith("."):
                 cleared = cleared[1:]
 
-        return f"/{modname}/{cleared}"
+        suffix = ""
+        if name in self.functions:
+            suffix = "()"
+
+        return f"/{modname}/{cleared}{suffix}"
 
     def to_external_uri(self, modname, name=""):
         if modname == utils.constants.BUILTIN_NAME:

@@ -33,6 +33,9 @@ class DefinitionManager(object):
         if ns in self.defs:
             return self.defs[ns]
 
+    def get_defs(self):
+        return self.defs
+
     def handle_function_def(self, parent_ns, fn_name):
         full_ns = utils.join_ns(parent_ns, fn_name)
         defi = self.get(full_ns)
