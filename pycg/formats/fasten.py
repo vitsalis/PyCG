@@ -138,33 +138,34 @@ class Fasten(BaseFormatter):
 
             mods[name] = {
                 "sourceFile": filename,
-                "namespaces": {},
-                "superClasses": {}
+                "namespaces": {}
             }
 
             for namespace in namespaces:
                 namespace_uri = self.to_uri(modname, namespace)
 
                 unique = self.get_unique_and_increment()
-                mods[name]["namespaces"][str(unique)] = namespace_uri
+                mods[name]["namespaces"][unique] = namespace_uri
                 self.namespace_map[namespace_uri] = unique
 
-            for cls_name, cls in self.classes.items():
-                if not cls["module"] == modname:
-                    continue
-
-                cls_uri = self.to_uri(modname, cls_name)
-                mods[name]["superClasses"][cls_uri] = []
-                for parent in cls["mro"]:
-                    if self.classes.get(parent):
-                        parent_uri = self.to_uri(self.classes[parent]["module"],
-                            parent)
-                    else:
-                        parent_mod = parent.split(".")[0]
-                        parent_uri = self.to_external_uri(parent_mod, parent)
-                    if not parent_uri == cls_uri:
-                        mods[name]["superClasses"][cls_uri].append(parent_uri)
         return mods
+
+    def class_hiearchy(self):
+        hierarchy = {}
+        for cls_name, cls in self.classes.items():
+            cls_uri = self.to_uri(cls["module"], cls_name)
+            hierarchy[cls_uri] = []
+            for parent in cls["mro"]:
+                if self.classes.get(parent):
+                    parent_uri = self.to_uri(self.classes[parent]["module"],
+                        parent)
+                else:
+                    parent_mod = parent.split(".")[0]
+                    parent_uri = self.to_external_uri(parent_mod, parent)
+                if not parent_uri == cls_uri:
+                    hierarchy[cls_uri].append(parent_uri)
+
+        return hierarchy
 
     def create_namespaces_map(self):
         namespaces_maps = [{}, {}]
@@ -217,5 +218,6 @@ class Fasten(BaseFormatter):
             "version": self.version,
             "timestamp": self.timestamp,
             "modules": self.get_modules(),
+            "classHierarchy": self.class_hiearchy(),
             "graph": self.get_graph()
         }

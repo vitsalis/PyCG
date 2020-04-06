@@ -123,9 +123,7 @@ class FastenFormatTest(TestBase):
 
     def test_modules(self):
         internal_mods = self._get_internal_mods()
-        classes = self._get_classes()
         self.cg_generator.internal_mods = internal_mods
-        self.cg_generator.classes = classes
 
         formatter = self.get_formatter()
         modules = formatter.generate()["modules"]
@@ -139,7 +137,7 @@ class FastenFormatTest(TestBase):
         for name, mod in internal_mods.items():
             self.assertEqual(
                 mod["filename"],
-                modules[formatter.to_uri(name)]["SourceFileName"]
+                modules[formatter.to_uri(name)]["sourceFile"]
             )
 
         # test that namespaces contains all methods
@@ -149,38 +147,37 @@ class FastenFormatTest(TestBase):
             # collect expected namespaces for module
             expected_namespaces = [formatter.to_uri(name, method)\
                                     for method in mod["methods"]]
-            expected_classes = []
-            expected_superClasses = {}
-            for cls_name, cls in classes.items():
-                if cls["module"] == name:
-                    cls_uri = formatter.to_uri(name, cls_name)
-                    expected_classes.append(formatter.to_uri(name, cls_name))
-                    expected_superClasses[cls_uri] = []
-                    for m in cls["mro"]:
-                        if m == cls_name:
-                            continue
-                        if classes.get(m, None):
-                            expected_superClasses[cls_uri].append(
-                                formatter.to_uri(classes[m]["module"], m))
-                        else:
-                            expected_superClasses[cls_uri].append(
-                                formatter.to_external_uri(m.split(".")[0], m))
 
             # namespaces defined for module
-            result_namespaces = [ns for ns, _ in modules[name_uri]["namespaces"]]
+            result_namespaces = modules[name_uri]["namespaces"].values()
             # unique identifiers defined for module
-            result_ids = [i for _, i in modules[name_uri]["namespaces"]]
-            # get classes for od
-            result_classes = modules[name_uri]["superClasses"].keys()
+            result_ids = modules[name_uri]["namespaces"].keys()
 
             # no duplicate ids and same namespaces
             self.assertEqual(sorted(expected_namespaces), sorted(result_namespaces))
             self.assertEqual(len(result_ids), len(set(result_ids)))
 
-            # test that superClasses contains only classes defined in the module
-            self.assertEqual(sorted(expected_classes), sorted(result_classes))
 
-            # test that the superClasses class name is not appended to mro
-            # test that superClasses external parents have external uri
-            for cls_name, mro in modules[name_uri]["superClasses"].items():
-                self.assertEqual(expected_superClasses[cls_name], mro)
+    def test_hiearchy(self):
+        classes = self._get_classes()
+        self.cg_generator.classes = classes
+        formatter = self.get_formatter()
+        cls_hier = formatter.generate()["classHierarchy"]
+
+        self.assertEqual(len(cls_hier.keys()), len(classes.keys()))
+
+        for cls_name, cls in classes.items():
+            cls_name_uri = formatter.to_uri(cls["module"], cls_name)
+            cls_mro = []
+            for item in cls["mro"]:
+                # result mro should not contain the class name
+                if item == cls_name:
+                    continue
+
+                if classes.get(item, None): # it is an internal module
+                    cls_mro.append(formatter.to_uri(classes[item]["module"], item))
+                else:
+                    cls_mro.append(formatter.to_external_uri(item.split(".")[0], item))
+
+            self.assertTrue(cls_name_uri in cls_hier)
+            self.assertEqual(sorted(cls_mro), sorted(cls_hier[cls_name_uri]))
