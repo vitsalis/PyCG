@@ -137,7 +137,7 @@ class Fasten(BaseFormatter):
             namespaces = module["methods"]
 
             mods[name] = {
-                "SourceFileName": filename,
+                "sourceFile": filename,
                 "namespaces": {},
                 "superClasses": {}
             }
@@ -212,6 +212,7 @@ class Fasten(BaseFormatter):
         return {
             "product": self.product,
             "forge": self.forge,
+            "generator": "PyCG",
             "depset": self.find_dependencies(self.package),
             "version": self.version,
             "timestamp": self.timestamp,
