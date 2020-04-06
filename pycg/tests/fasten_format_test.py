@@ -166,7 +166,7 @@ class FastenFormatTest(TestBase):
 
         formatter = self.get_formatter()
         fasten_format = formatter.generate()
-        cls_hier = fasten_format["classHierarchy"]
+        cls_hier = fasten_format["cha"]
         modules = fasten_format["modules"]
 
         id_mapping = {}

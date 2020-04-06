@@ -221,6 +221,6 @@ class Fasten(BaseFormatter):
             "version": self.version,
             "timestamp": self.timestamp,
             "modules": self.get_modules(),
-            "classHierarchy": self.class_hiearchy(),
+            "cha": self.class_hiearchy(),
             "graph": self.get_graph()
         }
