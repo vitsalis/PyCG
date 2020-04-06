@@ -153,17 +153,20 @@ class Fasten(BaseFormatter):
     def class_hiearchy(self):
         hierarchy = {}
         for cls_name, cls in self.classes.items():
-            cls_uri = self.to_uri(cls["module"], cls_name)
+            cls_uri = self.namespace_map.get(self.to_uri(cls["module"], cls_name))
             hierarchy[cls_uri] = []
             for parent in cls["mro"]:
+                if parent == cls_name:
+                    continue
+
                 if self.classes.get(parent):
-                    parent_uri = self.to_uri(self.classes[parent]["module"],
-                        parent)
+                    parent_uri = self.to_uri(self.classes[parent]["module"], parent)
+                    parent_uri = self.namespace_map.get(parent_uri, parent_uri)
                 else:
                     parent_mod = parent.split(".")[0]
                     parent_uri = self.to_external_uri(parent_mod, parent)
-                if not parent_uri == cls_uri:
-                    hierarchy[cls_uri].append(parent_uri)
+
+                hierarchy[cls_uri].append(parent_uri)
 
         return hierarchy
 

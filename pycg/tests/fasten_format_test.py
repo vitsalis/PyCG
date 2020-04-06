@@ -160,14 +160,23 @@ class FastenFormatTest(TestBase):
 
     def test_hiearchy(self):
         classes = self._get_classes()
+        internal_mods = self._get_internal_mods()
+        self.cg_generator.internal_mods = internal_mods
         self.cg_generator.classes = classes
+
         formatter = self.get_formatter()
-        cls_hier = formatter.generate()["classHierarchy"]
+        fasten_format = formatter.generate()
+        cls_hier = fasten_format["classHierarchy"]
+        modules = fasten_format["modules"]
+
+        id_mapping = {}
+        for _, mod in modules.items():
+            for unique, ns in mod["namespaces"].items():
+                id_mapping[ns] = unique
 
         self.assertEqual(len(cls_hier.keys()), len(classes.keys()))
-
         for cls_name, cls in classes.items():
-            cls_name_uri = formatter.to_uri(cls["module"], cls_name)
+            cls_name_uri = id_mapping[formatter.to_uri(cls["module"], cls_name)]
             cls_mro = []
             for item in cls["mro"]:
                 # result mro should not contain the class name
@@ -175,7 +184,7 @@ class FastenFormatTest(TestBase):
                     continue
 
                 if classes.get(item, None): # it is an internal module
-                    cls_mro.append(formatter.to_uri(classes[item]["module"], item))
+                    cls_mro.append(id_mapping[formatter.to_uri(classes[item]["module"], item)])
                 else:
                     cls_mro.append(formatter.to_external_uri(item.split(".")[0], item))
 
