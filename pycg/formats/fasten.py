@@ -138,7 +138,7 @@ class Fasten(BaseFormatter):
 
             mods[name] = {
                 "SourceFileName": filename,
-                "namespaces": [],
+                "namespaces": {},
                 "superClasses": {}
             }
 
@@ -146,7 +146,7 @@ class Fasten(BaseFormatter):
                 namespace_uri = self.to_uri(modname, namespace)
 
                 unique = self.get_unique_and_increment()
-                mods[name]["namespaces"].append([namespace_uri, unique])
+                mods[name]["namespaces"][str(unique)] = namespace_uri
                 self.namespace_map[namespace_uri] = unique
 
             for cls_name, cls in self.classes.items():
