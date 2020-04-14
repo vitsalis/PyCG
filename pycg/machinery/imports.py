@@ -169,7 +169,7 @@ class ImportManager(object):
         except Exception as e:
             return
 
-        if not mod.__file__:
+        if not hasattr(mod, "__file__") or not mod.__file__:
             return
         if self.mod_dir not in mod.__file__:
             return
