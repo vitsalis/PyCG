@@ -42,14 +42,14 @@ class Fasten(BaseFormatter):
         if name in self.functions:
             suffix = "()"
 
-        return f"/{modname}/{cleared}{suffix}"
+        return "/{}/{}{}".format(modname, cleared, suffix)
 
     def to_external_uri(self, modname, name=""):
         if modname == utils.constants.BUILTIN_NAME:
             name = name[len(modname)+1:]
             modname = ".builtin"
 
-        return f"//{modname}//{name}"
+        return "//{}//{}".format(modname, name)
 
     def find_dependencies(self, package_path):
         res = []
@@ -73,23 +73,23 @@ class Fasten(BaseFormatter):
             def add_range(begin, end):
                 if begin and end:
                     if begin[1] and end[1]:
-                        constraints.append(f"[{begin[0]}..{end[0]}]")
+                        constraints.append("[{}..{}]".format(begin[0], end[0]))
                     elif begin[1]:
-                        constraints.append(f"[{begin[0]}..{end[0]})")
+                        constraints.append("[{}..{})".format(begin[0], end[0]))
                     elif end[1]:
-                        constraints.append(f"({begin[0]}..{end[0]}]")
+                        constraints.append("({}..{}]".format(begin[0], end[0]))
                     else:
-                        constraints.append(f"({begin[0]}..{end[0]})")
+                        constraints.append("({}..{})".format(begin[0], end[0]))
                 elif begin:
                     if begin[1]:
-                        constraints.append(f"[{begin[0]}..]")
+                        constraints.append("[{}..]".format(begin[0]))
                     else:
-                        constraints.append(f"({begin[0]}..]")
+                        constraints.append("({}..]".format(begin[0]))
                 elif end:
                     if end[1]:
-                        constraints.append(f"[..{end[0]}]")
+                        constraints.append("[..{}]".format(end[0]))
                     else:
-                        constraints.append(f"[..{end[0]})")
+                        constraints.append("[..{})".format(end[0]))
 
             begin = None
             end = None
@@ -101,7 +101,7 @@ class Fasten(BaseFormatter):
                         begin = None
                         end = None
                     if not begin:
-                        constraints.append(f"[{val}]")
+                        constraints.append("[{}]".format(val))
 
                 if key == ">":
                     if end:
