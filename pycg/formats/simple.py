@@ -6,6 +6,7 @@ class Simple(BaseFormatter):
 
     def generate(self):
         output = self.cg_generator.output()
+        output_cg = {}
         for node in output:
             output_cg[node] = list(output[node])
         return output_cg
