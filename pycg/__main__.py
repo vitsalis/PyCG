@@ -17,12 +17,6 @@ def main():
         default=None
     )
     parser.add_argument(
-        "--try-complete",
-        help="Try to produce a complete call graph",
-        action="store_true",
-        default=False
-    )
-    parser.add_argument(
         "--fasten",
         help="Produce call graph using the FASTEN format",
         action="store_true",
