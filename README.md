@@ -2,9 +2,9 @@ PyCG - Python Call Graphs
 =================================
 
 PyCG generates call graphs for Python code using static analysis.
-Given Python files as input it:
+Given a list of Python files as input it:
 - Traverses the AST of the Python module
-- Discovers the local modulses it imports and further analyzes them
+- Discovers the local modules it imports and further analyzes them
 - Tracks namespaces and scopes of modules, classes and functions
 - Builds the MRO of each class
 - Constructs an assignment graph allowing it to parse higher-order functions
