@@ -1,5 +1,4 @@
-PyCG - Python Call Graphs
-=================================
+# PyCG - Python Call Graphs
 
 PyCG generates call graphs for Python code using static analysis.
 Given a list of Python files as input it:
@@ -9,8 +8,7 @@ Given a list of Python files as input it:
 - Builds the MRO of each class
 - Constructs an assignment graph allowing it to parse higher-order functions
 
-Installation
-============
+# Installation
 
 PyCG is implemented in Python3 and has no dependencies.
 From the root directory:
@@ -18,8 +16,7 @@ From the root directory:
 python3 setup.py install
 ```
 
-Usage
-=====
+# Usage
 
 ```
 ~ >>> pycg -h
@@ -64,8 +61,29 @@ provied:
 - `--version`: The version of the package.
 - `--timestamp` : The timestamp of the package's version.
 
-Examples
-========
+# Output
+
+## Simple JSON format
+
+The call edges are in the form of an adjacency list where an edge `(src, dst)`
+is represented as an entry of `dst` in the list assigned to key `src`:
+
+```
+{
+    "node1": ["node2", "node3"],
+    "node2": ["node3"],
+    "node3": []
+}
+```
+
+## FASTEN Format
+
+For an up-to-date description of the FASTEN format refer to the
+[FASTEN
+wiki](https://github.com/fasten-project/fasten/wiki/Extended-Revision-Call-Graph-format#python).
+
+
+# Examples
 
 All the entry points are known and we want the simple JSON format
 ```
@@ -84,8 +102,7 @@ We want the FASTEN format:
         pypi_pkg/module1.py pkg_root/subpackage/module2.py -o cg.json
 ```
 
-Benchmark
-==========
+# Benchmark
 
 We provide an benchmark of minimal snippets of Python code
 testing a wide variety of the features that Python provides.
@@ -116,8 +133,7 @@ This benchmark is not dependent on PyCG and can be used to test
 other Python call graph generation tools.
 
 
-Running Tests & Benchmarks
-==========================
+# Running Tests & Benchmarks
 
 From the root directory:
 ```
