@@ -40,6 +40,22 @@ class CallGraphProcessor(ProcessingBase):
 
         super().visit_Lambda(node, lambda_name)
 
+    def visit_Raise(self, node):
+        # import IPython; IPython.embed(); exit(1)
+        decoded = self.decode_node(node.exc)
+        for d in decoded:
+            if not isinstance(d, Definition):
+                continue
+            names = self.closured.get(d.get_ns(), [])
+            for name in names:
+                pointer_def = self.def_manager.get(name)
+                if pointer_def.get_type() == utils.constants.CLS_DEF:
+                    init_ns = self.find_cls_fun_ns(name, utils.constants.CLS_INIT)
+                    for ns in init_ns:
+                        self.call_graph.add_edge(self.current_ns, ns)
+                if pointer_def.get_type() == utils.constants.EXT_DEF:
+                    self.call_graph.add_edge(self.current_ns, name)
+
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             self.visit(decorator)
