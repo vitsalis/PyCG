@@ -46,58 +46,46 @@ class CallGraphGenerator(object):
 
         return input_mod
 
-    def analyze(self):
-        # preprocessing
+    def do_pass(self, cls, install_hooks=False, *args, **kwargs):
         modules_analyzed = set()
         for entry_point in self.entry_points:
             input_pkg = self.package
-
             input_mod = self._get_mod_name(entry_point, input_pkg)
-
             input_file = os.path.abspath(entry_point)
+
             if not input_pkg:
                 input_pkg = os.path.dirname(input_file)
 
             if not input_mod in modules_analyzed:
-                self.import_manager.set_pkg(input_pkg)
-                self.import_manager.install_hooks()
+                if install_hooks:
+                    self.import_manager.set_pkg(input_pkg)
+                    self.import_manager.install_hooks()
 
-                processor = PreProcessor(input_file, input_mod,
-                        self.import_manager, self.scope_manager, self.def_manager,
-                        self.class_manager, self.module_manager, modules_analyzed=modules_analyzed)
+                processor = cls(input_file, input_mod,
+                                modules_analyzed=modules_analyzed, *args, **kwargs)
                 processor.analyze()
                 modules_analyzed = modules_analyzed.union(processor.get_modules_analyzed())
 
-                self.remove_import_hooks()
+                if install_hooks:
+                    self.remove_import_hooks()
+
+    def analyze(self):
+        # preprocessing
+        self.do_pass(PreProcessor, True,
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager, self.module_manager)
 
         self.def_manager.complete_definitions()
 
-        modules_analyzed = set()
-        for entry_point in self.entry_points:
-            input_mod = self._get_mod_name(entry_point, input_pkg)
-            input_file = os.path.abspath(entry_point)
-
-            if not input_mod in modules_analyzed:
-                processor = PostProcessor(input_file, input_mod,
-                        self.import_manager, self.scope_manager, self.def_manager,
-                        self.class_manager, modules_analyzed=modules_analyzed)
-                processor.analyze()
-                modules_analyzed = modules_analyzed.union(processor.get_modules_analyzed())
+        self.do_pass(PostProcessor, False,
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager)
 
         self.def_manager.complete_definitions()
 
-        modules_analyzed = set()
-        for entry_point in self.entry_points:
-            input_mod = self._get_mod_name(entry_point, input_pkg)
-            input_file = os.path.abspath(entry_point)
-
-            if not input_mod in modules_analyzed:
-                self.visitor = CallGraphProcessor(input_file, input_mod,
-                        self.import_manager, self.scope_manager, self.def_manager,
-                        self.class_manager, self.module_manager, modules_analyzed=modules_analyzed,
-                        call_graph=self.cg)
-                self.visitor.analyze()
-                modules_analyzed = modules_analyzed.union(self.visitor.get_modules_analyzed())
+        self.do_pass(CallGraphProcessor, False,
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager, self.module_manager, call_graph=self.cg)
 
     def output(self):
         return self.cg.get()
