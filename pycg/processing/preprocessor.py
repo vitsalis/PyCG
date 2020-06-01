@@ -298,6 +298,39 @@ class PreProcessor(ProcessingBase):
 
         super().visit_Lambda(node, lambda_name)
 
+    def visit_List(self, node):
+        # Works similarly with dicts
+        current_scope = self.scope_manager.get_scope(self.current_ns)
+        list_counter = current_scope.inc_list_counter()
+        list_name = utils.get_list_name(list_counter)
+        list_full_ns = utils.join_ns(self.current_ns, list_name)
+
+        # create a scope for the list
+        list_scope = self.scope_manager.create_scope(list_full_ns, current_scope)
+
+        # create a list definition
+        list_def = self.def_manager.get(list_full_ns)
+        if not list_def:
+            list_def = self.def_manager.create(list_full_ns, utils.constants.NAME_DEF)
+        current_scope.add_def(list_name, list_def)
+
+        self.name_stack.append(list_name)
+        for idx, elt in enumerate(node.elts):
+            self.visit(elt)
+            key_full_ns = utils.join_ns(list_def.get_ns(), str(idx))
+            key_def = self.def_manager.get(key_full_ns)
+            if not key_def:
+                key_def = self.def_manager.create(key_full_ns, utils.constants.NAME_DEF)
+
+            decoded_elt = self.decode_node(elt)
+            for v in decoded_elt:
+                if isinstance(v, Definition):
+                    key_def.get_name_pointer().add(v.get_ns())
+                else:
+                    key_def.get_lit_pointer().add(v)
+
+        self.name_stack.pop()
+
     def visit_Dict(self, node):
         # 1. create a scope using a counter
         # 2. Iterate keys and add them as children of the scope
@@ -307,7 +340,7 @@ class PreProcessor(ProcessingBase):
         dict_name = utils.get_dict_name(dict_counter)
         dict_full_ns = utils.join_ns(self.current_ns, dict_name)
 
-        # create a scope for the lambda
+        # create a scope for the dict
         dict_scope = self.scope_manager.create_scope(dict_full_ns, current_scope)
 
         # Create a dict definition

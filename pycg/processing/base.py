@@ -65,6 +65,19 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(val)
         self.name_stack.pop()
 
+    def visit_List(self, node):
+        counter = self.scope_manager.get_scope(self.current_ns).inc_list_counter()
+        list_name = utils.get_list_name(counter)
+
+        sc = self.scope_manager.get_scope(utils.join_ns(self.current_ns, list_name))
+        if not sc:
+            return
+        self.name_stack.append(list_name)
+        sc.reset_counters()
+        for elt in node.elts:
+            self.visit(elt)
+        self.name_stack.pop()
+
     def visit_BinOp(self, node):
         self.visit(node.left)
         self.visit(node.right)
@@ -194,6 +207,11 @@ class ProcessingBase(ast.NodeVisitor):
             dict_name = utils.get_dict_name(dict_counter)
             scope_def = self.scope_manager.get_def(self.current_ns, dict_name)
             return [self.scope_manager.get_def(self.current_ns, dict_name)]
+        elif isinstance(node, ast.List):
+            list_counter = self.scope_manager.get_scope(self.current_ns).get_list_counter()
+            list_name = utils.get_list_name(list_counter)
+            scope_def = self.scope_manager.get_def(self.current_ns, list_name)
+            return [self.scope_manager.get_def(self.current_ns, list_name)]
         elif isinstance(node, ast.Subscript):
             names = self.retrieve_subscript_names(node)
             defis = []
