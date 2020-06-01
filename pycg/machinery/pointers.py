@@ -22,9 +22,9 @@ class LiteralPointer(Pointer):
     # no need to add the actual item
     def add(self, item):
         if isinstance(item, str):
-            self.values.add(self.STR_LIT)
+            self.values.add(item)
         elif isinstance(item, int):
-            self.values.add(self.INT_LIT)
+            self.values.add(item)
         else:
             self.values.add(self.UNK_LIT)
 

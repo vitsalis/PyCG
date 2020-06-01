@@ -51,6 +51,20 @@ class ProcessingBase(ast.NodeVisitor):
         self.visit(node.body)
         self.name_stack.pop()
 
+    def visit_Dict(self, node):
+        counter = self.scope_manager.get_scope(self.current_ns).inc_dict_counter()
+        dict_name = utils.get_dict_name(counter)
+
+        sc = self.scope_manager.get_scope(utils.join_ns(self.current_ns, dict_name))
+        if not sc:
+            return
+        self.name_stack.append(dict_name)
+        sc.reset_counters()
+        for key, val in zip(node.keys, node.values):
+            self.visit(key)
+            self.visit(val)
+        self.name_stack.pop()
+
     def visit_BinOp(self, node):
         self.visit(node.left)
         self.visit(node.right)
@@ -98,6 +112,8 @@ class ProcessingBase(ast.NodeVisitor):
             for base in bases:
                 res.append(utils.join_ns(base, target.attr))
             return res
+        if isinstance(target, ast.Subscript):
+            return self.retrieve_subscript_names(target)
         return []
 
     def _visit_assign(self, node):
@@ -173,8 +189,21 @@ class ProcessingBase(ast.NodeVisitor):
             return [node.n]
         elif isinstance(node, ast.Str):
             return [node.s]
-        else:
-            return []
+        elif isinstance(node, ast.Dict):
+            dict_counter = self.scope_manager.get_scope(self.current_ns).get_dict_counter()
+            dict_name = utils.get_dict_name(dict_counter)
+            scope_def = self.scope_manager.get_def(self.current_ns, dict_name)
+            return [self.scope_manager.get_def(self.current_ns, dict_name)]
+        elif isinstance(node, ast.Subscript):
+            names = self.retrieve_subscript_names(node)
+            defis = []
+            for name in names:
+                defi = self.def_manager.get(name)
+                if defi:
+                    defis.append(defi)
+            return defis
+
+        return []
 
     def _retrieve_base_names(self, node):
         if not isinstance(node, ast.Attribute):
@@ -283,6 +312,45 @@ class ProcessingBase(ast.NodeVisitor):
                     else:
                         defi.get_name_pointer().add_lit_arg(keyword.arg, d)
 
+    def retrieve_subscript_names(self, node):
+        if not isinstance(node, ast.Subscript):
+            raise Exception("The node is not an subcript")
+
+        if not getattr(self, "closured", None):
+            return set()
+
+        # TODO: We don't currently support slices
+        if not getattr(node.slice, "value", None):
+            return set()
+
+        val_names = self.decode_node(node.value)
+        sl_names = self.decode_node(node.slice.value)
+        decoded_vals = set()
+        keys = set()
+        full_names = set()
+        # get all names associated with this variable name
+        for n in val_names:
+            decoded_vals |= self.closured.get(n.get_ns(), None)
+        for s in sl_names:
+            if isinstance(s, Definition) and self.closured.get(s.get_ns(), None):
+                # we care about the literals pointed by the name
+                # not the namespaces, so retrieve the literals pointed
+                for name in self.closured.get(s.get_ns()):
+                    defi = self.def_manager.get(name)
+                    if not defi:
+                        continue
+                    keys |= defi.get_lit_pointer().get()
+            else:
+                keys.add(s)
+
+        for d in decoded_vals:
+            for key in keys:
+                # check for existence of var name and key combination
+                full_ns = utils.join_ns(d, str(key))
+                full_names.add(full_ns)
+
+        return full_names
+
     def retrieve_call_names(self, node):
         names = set()
         if isinstance(node.func, ast.Name):
@@ -300,6 +368,12 @@ class ProcessingBase(ast.NodeVisitor):
                     names.add(defi.get_ns())
         elif isinstance(node.func, ast.Attribute):
             names = self._retrieve_attribute_names(node.func)
+        elif isinstance(node.func, ast.Subscript):
+            # Calls can be performed only on single indices, not ranges
+            full_names = self.retrieve_subscript_names(node.func)
+            for n in full_names:
+                if self.closured.get(n, None):
+                    names |= self.closured.get(n)
 
         return names
 

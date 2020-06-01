@@ -26,16 +26,12 @@ class PointerTest(TestBase):
         pointer = LiteralPointer()
         # assert that for string values, we just include
         # that the literal points to a str or int
-        clone = set([LiteralPointer.STR_LIT])
+        clone = set(["something"])
         pointer.add("something")
         self.assertEqual(pointer.get(), clone)
-        pointer.add("else")
-        self.assertEqual(pointer.get(), clone)
 
-        clone.add(LiteralPointer.INT_LIT)
+        clone.add(1)
         pointer.add(1)
-        self.assertEqual(pointer.get(), clone)
-        pointer.add(100)
         self.assertEqual(pointer.get(), clone)
 
         clone.add(LiteralPointer.UNK_LIT)

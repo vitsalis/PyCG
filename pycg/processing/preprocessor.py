@@ -298,6 +298,57 @@ class PreProcessor(ProcessingBase):
 
         super().visit_Lambda(node, lambda_name)
 
+    def visit_Dict(self, node):
+        # 1. create a scope using a counter
+        # 2. Iterate keys and add them as children of the scope
+        # 3. Iterate values and makes a points to connection with the keys
+        current_scope = self.scope_manager.get_scope(self.current_ns)
+        dict_counter = current_scope.inc_dict_counter()
+        dict_name = utils.get_dict_name(dict_counter)
+        dict_full_ns = utils.join_ns(self.current_ns, dict_name)
+
+        # create a scope for the lambda
+        dict_scope = self.scope_manager.create_scope(dict_full_ns, current_scope)
+
+        # Create a dict definition
+        dict_def = self.def_manager.get(dict_full_ns)
+        if not dict_def:
+            dict_def = self.def_manager.create(dict_full_ns, utils.constants.NAME_DEF)
+        # add it to the current scope
+        current_scope.add_def(dict_name, dict_def)
+
+        self.name_stack.append(dict_name)
+        for key, value in zip(node.keys, node.values):
+            self.visit(key)
+            self.visit(value)
+            decoded_key = self.decode_node(key)
+            decoded_value = self.decode_node(value)
+
+            # iterate decoded keys and values
+            # to do the assignment operation
+            for k in decoded_key:
+                if isinstance(k, Definition):
+                    # get literal pointer
+                    names = k.get_lit_pointer().get()
+                else:
+                    names = set()
+                    names.add(k)
+                for name in names:
+                    # create a definition for the key
+                    # TODO: convertion of int to str will result in false positives
+                    key_full_ns = utils.join_ns(dict_def.get_ns(), str(name))
+                    key_def = self.def_manager.get(key_full_ns)
+                    if not key_def:
+                        key_def = self.def_manager.create(key_full_ns, utils.constants.NAME_DEF)
+                    dict_scope.add_def(str(name), key_def)
+                    for v in decoded_value:
+                        if isinstance(v, Definition):
+                            key_def.get_name_pointer().add(v.get_ns())
+                        else:
+                            key_def.get_lit_pointer().add(v)
+        self.name_stack.pop()
+
+
     def visit_ClassDef(self, node):
         # create a definition for the class (node.name)
         cls_def = self.def_manager.handle_class_def(self.current_ns, node.name)

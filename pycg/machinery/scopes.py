@@ -67,6 +67,7 @@ class ScopeItem(object):
         self.parent = parent
         self.defs = {}
         self.lambda_counter = 0
+        self.dict_counter = 0
         self.fullns = fullns
 
     def get_ns(self):
@@ -83,12 +84,20 @@ class ScopeItem(object):
     def get_lambda_counter(self):
         return self.lambda_counter
 
+    def get_dict_counter(self):
+        return self.dict_counter
+
     def inc_lambda_counter(self, val=1):
         self.lambda_counter += val
         return self.lambda_counter
 
+    def inc_dict_counter(self, val=1):
+        self.dict_counter += val
+        return self.dict_counter
+
     def reset_counters(self):
         self.lambda_counter = 0
+        self.dict_counter = 0
 
     def add_def(self, name, defi):
         self.defs[name] = defi
