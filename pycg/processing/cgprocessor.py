@@ -28,6 +28,26 @@ class CallGraphProcessor(ProcessingBase):
         self.call_graph.add_node(self.modname, self.modname)
         super().visit_Module(node)
 
+    def visit_For(self, node):
+        self.visit(node.iter)
+        self.visit(node.target)
+        # assign target.id to the return value of __next__ of node.iter.it
+        # we need to have a visit for on the postprocessor also
+        iter_decoded = self.decode_node(node.iter)
+        for item in iter_decoded:
+            if not isinstance(item, Definition):
+                continue
+            names = self.closured.get(item.get_ns(), [])
+            for name in names:
+                iter_ns = utils.join_ns(name, utils.constants.ITER_METHOD)
+                next_ns = utils.join_ns(name, utils.constants.NEXT_METHOD)
+                if self.def_manager.get(iter_ns):
+                    self.call_graph.add_edge(self.current_method, iter_ns)
+                if self.def_manager.get(next_ns):
+                    self.call_graph.add_edge(self.current_method, next_ns)
+
+        super().visit_For(node)
+
     def visit_Lambda(self, node):
         counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
         lambda_name = utils.get_lambda_name(counter)

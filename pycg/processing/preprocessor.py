@@ -251,15 +251,25 @@ class PreProcessor(ProcessingBase):
         super().visit_FunctionDef(node)
 
     def visit_Tuple(self, node):
-        # node.ctx == ast.Load means get
-        # node.ctx == ast.Store means set
         for elt in node.elts:
             self.visit(elt)
 
+    def visit_For(self, node):
+        # just create the definition for target
+        if isinstance(node.target, ast.Name):
+            target_ns = utils.join_ns(self.current_ns, node.target.id)
+            if not self.def_manager.get(target_ns):
+                defi = self.def_manager.create(target_ns, utils.constants.NAME_DEF)
+                self.scope_manager.get_scope(self.current_ns).add_def(node.target.id, defi)
+        super().visit_For(node)
+
     def visit_Assign(self, node):
-        self._visit_assign(node)
+        self._visit_assign(node.value, node.targets)
 
     def visit_Return(self, node):
+        self._visit_return(node)
+
+    def visit_Yield(self, node):
         self._visit_return(node)
 
     def visit_Call(self, node):

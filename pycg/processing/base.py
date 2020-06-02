@@ -62,6 +62,10 @@ class ProcessingBase(ast.NodeVisitor):
         self.method_stack.pop()
         self.name_stack.pop()
 
+    def visit_For(self, node):
+        for item in node.body:
+            self.visit(item)
+
     def visit_Dict(self, node):
         counter = self.scope_manager.get_scope(self.current_ns).inc_dict_counter()
         dict_name = utils.get_dict_name(counter)
@@ -142,10 +146,10 @@ class ProcessingBase(ast.NodeVisitor):
             return self.retrieve_subscript_names(target)
         return []
 
-    def _visit_assign(self, node):
-        self.visit(node.value)
+    def _visit_assign(self, value, targets):
+        self.visit(value)
 
-        decoded = self.decode_node(node.value)
+        decoded = self.decode_node(value)
 
         def do_assign(decoded, target):
             self.visit(target)
@@ -162,7 +166,7 @@ class ProcessingBase(ast.NodeVisitor):
                     splitted = tns.split(".")
                     self.scope_manager.handle_assign(".".join(splitted[:-1]), splitted[-1], defi)
 
-        for target in node.targets:
+        for target in targets:
             do_assign(decoded, target)
 
     def decode_node(self, node):

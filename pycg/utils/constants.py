@@ -12,6 +12,8 @@ EXT_DEF         = "EXTERNALDEF"
 OBJECT_BASE     = "object"
 
 CLS_INIT        = "__init__"
+ITER_METHOD     = "__iter__"
+NEXT_METHOD     = "__next__"
 STATIC_METHOD   = "staticmethod"
 
 INVALID_NAME    = "<**INVALID**>"

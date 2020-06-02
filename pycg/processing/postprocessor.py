@@ -39,9 +39,38 @@ class PostProcessor(ProcessingBase):
             self.iterate_call_args(defi, node)
 
     def visit_Assign(self, node):
-        self._visit_assign(node)
+        self._visit_assign(node.value, node.targets)
+
+    def visit_For(self, node):
+        # only handle name targets
+        if isinstance(node.target, ast.Name):
+            target_def = self.def_manager.get(utils.join_ns(self.current_ns, node.target.id))
+            # if the target definition exists
+            if target_def:
+                iter_decoded = self.decode_node(node.iter)
+                # assign the target to the return value
+                # of the next function
+                for item in iter_decoded:
+                    if not isinstance(item, Definition):
+                        continue
+                    # return value for generators
+                    for name in self.closured.get(item.get_ns(), []):
+                        # If there exists a next method on the iterable
+                        # and if yes, add a pointer to it
+                        next_defi = self.def_manager.get(utils.join_ns(name,
+                            utils.constants.NEXT_METHOD, utils.constants.RETURN_NAME))
+                        if next_defi:
+                            for name in self.closured.get(next_defi.get_ns(), []):
+                                target_def.get_name_pointer().add(name)
+                        else: # otherwise, add a pointer to the name (e.g. a yield)
+                            target_def.get_name_pointer().add(name)
+
+        super().visit_For(node)
 
     def visit_Return(self, node):
+        self._visit_return(node)
+
+    def visit_Yield(self, node):
         self._visit_return(node)
 
     def visit_FunctionDef(self, node):
