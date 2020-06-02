@@ -1,12 +1,3 @@
-# TODO
-# 1) stdlib
-# 2) Modifications to to sys.path inside the analyzed module
-# 3) Handle PYTHONPATH env variable
-# 4) Usage of the `site` module
-# 5) `from smth import *` uses the `__all__.py` module of the file
-# 6) importlib dynamic imports
-# 7) `*.pth` files
-
 import sys
 import ast
 import os

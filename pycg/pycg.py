@@ -53,6 +53,9 @@ class CallGraphGenerator(object):
             input_mod = self._get_mod_name(entry_point, input_pkg)
             input_file = os.path.abspath(entry_point)
 
+            if not input_mod:
+                continue
+
             if not input_pkg:
                 input_pkg = os.path.dirname(input_file)
 

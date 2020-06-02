@@ -376,7 +376,7 @@ class ProcessingBase(ast.NodeVisitor):
                     if not defi:
                         continue
                     keys |= defi.get_lit_pointer().get()
-            else:
+            elif isinstance(s, str) or isinstance(s, int):
                 keys.add(s)
 
         for d in decoded_vals:
