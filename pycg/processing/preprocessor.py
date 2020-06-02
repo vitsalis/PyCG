@@ -101,7 +101,7 @@ class PreProcessor(ProcessingBase):
                 src_name = prefix + "." + src_name
             return src_name
 
-        def handle_scopes(tgt_name, modname):
+        def handle_scopes(imp_name, tgt_name, modname):
             def create_def(scope, name, imported_def):
                 if not name in scope.get_defs():
                     def_ns = utils.join_ns(scope.get_ns(), name)
@@ -119,10 +119,14 @@ class PreProcessor(ProcessingBase):
                     current_scope.get_def(name).get_name_pointer().add(defi.get_ns())
             else:
                 # if it exists in the imported scope then copy it
-                defi = imported_scope.get_def(tgt_name)
+                defi = imported_scope.get_def(imp_name)
+                if not defi:
+                    # maybe its a full namespace
+                    defi = self.def_manager.get(imp_name)
+
                 if defi:
                     create_def(current_scope, tgt_name, defi)
-                    current_scope.get_def(tgt_name).get_name_pointer().add(imported_scope.get_def(tgt_name).get_ns())
+                    current_scope.get_def(tgt_name).get_name_pointer().add(defi.get_ns())
 
         def add_external_def(name, target):
             # add an external def for the name
@@ -156,7 +160,7 @@ class PreProcessor(ProcessingBase):
             if self.import_manager.get_mod_dir() in fname:
                 if not imported_name in self.modules_analyzed:
                     self.analyze_submodule(imported_name)
-                handle_scopes(tgt_name, imported_name)
+                handle_scopes(import_item.name, tgt_name, imported_name)
             else:
                 add_external_def(src_name, tgt_name)
 

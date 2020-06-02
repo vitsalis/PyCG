@@ -111,7 +111,6 @@ class CallGraphProcessor(ProcessingBase):
 
         self.visit(node.func)
 
-
         names = self.retrieve_call_names(node)
         if not names:
             if isinstance(node.func, ast.Attribute) and self.has_ext_parent(node.func):
