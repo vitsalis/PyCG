@@ -348,7 +348,8 @@ class ProcessingBase(ast.NodeVisitor):
         full_names = set()
         # get all names associated with this variable name
         for n in val_names:
-            decoded_vals |= self.closured.get(n.get_ns(), None)
+            if n and self.closured.get(n.get_ns(), None):
+                decoded_vals |= self.closured.get(n.get_ns())
         for s in sl_names:
             if isinstance(s, Definition) and self.closured.get(s.get_ns(), None):
                 # we care about the literals pointed by the name
