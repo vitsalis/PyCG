@@ -1,1 +1,1 @@
-A generator is created using yield.
+Call of a function which was yielded.
