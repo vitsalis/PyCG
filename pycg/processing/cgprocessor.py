@@ -38,6 +38,9 @@ class CallGraphProcessor(ProcessingBase):
         super().visit_Lambda(node, lambda_name)
 
     def visit_Raise(self, node):
+        if not node.exc:
+            return
+        self.visit(node.exc)
         decoded = self.decode_node(node.exc)
         for d in decoded:
             if not isinstance(d, Definition):
