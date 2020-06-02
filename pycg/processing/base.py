@@ -17,6 +17,7 @@ class ProcessingBase(ast.NodeVisitor):
             self.contents = f.read()
 
         self.name_stack = []
+        self.method_stack = []
         self.last_called_names = None
 
     def get_modules_analyzed(self):
@@ -29,17 +30,25 @@ class ProcessingBase(ast.NodeVisitor):
     def current_ns(self):
         return ".".join(self.name_stack)
 
+    @property
+    def current_method(self):
+        return ".".join(self.method_stack)
+
     def visit_Module(self, node):
         self.name_stack.append(self.modname)
+        self.method_stack.append(self.modname)
         self.scope_manager.get_scope(self.modname).reset_counters()
         self.generic_visit(node)
+        self.method_stack.pop()
         self.name_stack.pop()
 
     def visit_FunctionDef(self, node):
         self.name_stack.append(node.name)
+        self.method_stack.append(node.name)
         self.scope_manager.get_scope(self.current_ns).reset_counters()
         for stmt in node.body:
             self.visit(stmt)
+        self.method_stack.pop()
         self.name_stack.pop()
 
     def visit_Lambda(self, node, lambda_name=None):
@@ -48,7 +57,9 @@ class ProcessingBase(ast.NodeVisitor):
             self.scope_manager.create_scope(lambda_ns,
                     self.scope_manager.get_scope(self.current_ns))
         self.name_stack.append(lambda_name)
+        self.method_stack.append(lambda_name)
         self.visit(node.body)
+        self.method_stack.pop()
         self.name_stack.pop()
 
     def visit_Dict(self, node):
@@ -84,9 +95,11 @@ class ProcessingBase(ast.NodeVisitor):
 
     def visit_ClassDef(self, node):
         self.name_stack.append(node.name)
+        self.method_stack.append(node.name)
         self.scope_manager.get_scope(self.current_ns).reset_counters()
         for stmt in node.body:
             self.visit(stmt)
+        self.method_stack.pop()
         self.name_stack.pop()
 
     def _handle_assign(self, targetns, decoded):
