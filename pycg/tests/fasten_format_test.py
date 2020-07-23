@@ -86,22 +86,49 @@ class FastenFormatTest(TestBase):
         return {
             "mod1": {
                 "filename": "mod1.py",
-                "methods": [
-                    "mod1.method",
-                    "mod1.Cls.method",
-                    "mod1",
-                    "mod1.Cls"
-                ]
+                "methods": {
+                    "mod1.method": {
+                        "name": "mod1.method",
+                        "lineno": 2
+                    },
+                    "mod1.Cls.method": {
+                        "name": "mod1.Cls.method",
+                        "lineno": 6
+                    },
+                    "mod1": {
+                        "name": "mod1",
+                        "lineno": 1
+                    },
+                    "mod1.Cls": {
+                        "name": "mod1.Cls",
+                        "lineno": 5
+                    }
+                }
             },
             "mod.mod2": {
                 "filename": "mod/mod2.py",
-                "methods": [
-                    "mod.mod2.method",
-                    "mod.mod2",
-                    "mod.mod2.Cls.Nested.method",
-                    "mod.mod2.Cls",
-                    "mod.mod2.Cls.Nested"
-                ]
+                "methods": {
+                    "mod.mod2.method": {
+                        "name": "mod.mod2.method",
+                        "lineno": 1
+                    },
+                    "mod.mod2": {
+                        "name": "mod.mod2",
+                        "lineno": 1
+                    },
+                    "mod.mod2.Cls.Nested.method": {
+                        "name": "mod.mod2.Cls.Nested.method",
+                        "lineno": 6
+                    },
+                    "mod.mod2.Cls": {
+                        "name": "mod.mod2.Cls",
+                        "lineno": 4
+                    },
+                    "mod.mod2.Cls.Nested": {
+                        "name": "mod.mod2.Cls.Nested",
+                        "lineno": 5
+                    }
+                }
             }
         }
 
@@ -145,8 +172,13 @@ class FastenFormatTest(TestBase):
             name_uri = formatter.to_uri(name)
 
             # collect expected namespaces for module
-            expected_namespaces = [formatter.to_uri(name, method)\
-                                    for method in mod["methods"]]
+            expected_namespaces = []
+            for method, info in mod["methods"].items():
+                method_uri = formatter.to_uri(name, method)
+                lineno = info['lineno']
+                expected_namespaces.append(dict(
+                    namespace=method_uri,
+                    metadata=dict(start=lineno)))
 
             # namespaces defined for module
             result_namespaces = modules[name_uri]["namespaces"].values()
@@ -154,7 +186,9 @@ class FastenFormatTest(TestBase):
             result_ids = modules[name_uri]["namespaces"].keys()
 
             # no duplicate ids and same namespaces
-            self.assertEqual(sorted(expected_namespaces), sorted(result_namespaces))
+            self.assertEqual(
+                sorted(expected_namespaces, key=lambda x: x["namespace"]),
+                sorted(result_namespaces, key=lambda x: x["namespace"]))
             self.assertEqual(len(result_ids), len(set(result_ids)))
 
 
@@ -172,7 +206,7 @@ class FastenFormatTest(TestBase):
         id_mapping = {}
         for _, mod in modules.items():
             for unique, ns in mod["namespaces"].items():
-                id_mapping[ns] = unique
+                id_mapping[ns["namespace"]] = unique
 
         self.assertEqual(len(cls_hier.keys()), len(classes.keys()))
         for cls_name, cls in classes.items():

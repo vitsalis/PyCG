@@ -189,7 +189,7 @@ class PreProcessor(ProcessingBase):
         mod = self.module_manager.get(self.modname)
         if not mod:
             mod = self.module_manager.create(self.modname, self.filename)
-        mod.add_method(fn_def.get_ns())
+        mod.add_method(fn_def.get_ns(), node.lineno)
 
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
@@ -403,7 +403,7 @@ class PreProcessor(ProcessingBase):
         mod = self.module_manager.get(self.modname)
         if not mod:
             mod = self.module_manager.create(self.modname, self.filename)
-        mod.add_method(cls_def.get_ns())
+        mod.add_method(cls_def.get_ns(), node.lineno)
 
         # iterate bases to compute MRO for the class
         cls = self.class_manager.get(cls_def.get_ns())

@@ -53,6 +53,8 @@ class Fasten(BaseFormatter):
 
     def find_dependencies(self, package_path):
         res = []
+        if not package_path:
+            return res
         requirements_path = os.path.join(package_path, "requirements.txt")
 
         if not os.path.exists(requirements_path):
@@ -141,11 +143,13 @@ class Fasten(BaseFormatter):
                 "namespaces": {}
             }
 
-            for namespace in namespaces:
-                namespace_uri = self.to_uri(modname, namespace)
+            for namespace, info in namespaces.items():
+                namespace_uri = self.to_uri(modname, info['name'])
 
                 unique = self.get_unique_and_increment()
-                mods[name]["namespaces"][unique] = namespace_uri
+                mods[name]["namespaces"][unique] = dict(
+                        namespace=namespace_uri,
+                        metadata=dict(start=info['lineno']))
                 self.namespace_map[namespace_uri] = unique
 
         return mods

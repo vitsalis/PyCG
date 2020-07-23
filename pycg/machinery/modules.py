@@ -27,8 +27,8 @@ class Module:
     def __init__(self, name, filename):
         self.name = name
         self.filename = filename
-        self.methods = set()
-        self.methods.add(name)
+        self.methods = dict()
+        self.add_method(name, 1)
 
     def get_name(self):
         return self.name
@@ -37,7 +37,10 @@ class Module:
         return self.filename
 
     def get_methods(self):
-        return list(self.methods)
+        return self.methods
 
-    def add_method(self, method):
-        self.methods.add(method)
+    def add_method(self, method, lineno=None):
+        if not self.methods.get(method, None):
+            self.methods[method] = dict(
+                    name=method,
+                    lineno=lineno)
