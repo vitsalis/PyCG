@@ -65,6 +65,9 @@ class Fasten(BaseFormatter):
             lines = [l.strip() for l in f.readlines()]
 
         for line in lines:
+            if not line:
+                continue
+
             req = Requirement.parse(line)
 
             product = req.unsafe_name
