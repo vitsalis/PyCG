@@ -59,7 +59,13 @@ class PreProcessor(ProcessingBase):
 
         self.import_manager.set_current_mod(self.modname, self.filename)
 
-        self.module_manager.create(self.modname, self.filename)
+        mod = self.module_manager.create(self.modname, self.filename)
+
+        first = 1
+        last = len(self.contents.splitlines())
+        if last == 0:
+            first = 0
+        mod.add_method(self.modname, first, last)
 
         # initialize module scopes
         items = self.scope_manager.handle_module(self.modname,
@@ -179,6 +185,17 @@ class PreProcessor(ProcessingBase):
     def visit_ImportFrom(self, node):
         self.visit_Import(node, prefix=node.module, level=node.level)
 
+    def _get_last_line(self, node):
+        lines = sorted(list(ast.walk(node)), key=lambda x: x.lineno if hasattr(x, "lineno") else 0, reverse=True)
+        if not lines:
+            return node.lineno
+
+        last = getattr(lines[0], "lineno", node.lineno)
+        if last < node.lineno:
+            return node.lineno
+
+        return last
+
     def _handle_function_def(self, node, fn_name):
         current_def = self.def_manager.get(self.current_ns)
 
@@ -189,7 +206,7 @@ class PreProcessor(ProcessingBase):
         mod = self.module_manager.get(self.modname)
         if not mod:
             mod = self.module_manager.create(self.modname, self.filename)
-        mod.add_method(fn_def.get_ns(), node.lineno)
+        mod.add_method(fn_def.get_ns(), node.lineno, self._get_last_line(node))
 
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
@@ -403,7 +420,7 @@ class PreProcessor(ProcessingBase):
         mod = self.module_manager.get(self.modname)
         if not mod:
             mod = self.module_manager.create(self.modname, self.filename)
-        mod.add_method(cls_def.get_ns(), node.lineno)
+        mod.add_method(cls_def.get_ns(), node.lineno, self._get_last_line(node))
 
         # iterate bases to compute MRO for the class
         cls = self.class_manager.get(cls_def.get_ns())

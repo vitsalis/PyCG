@@ -152,7 +152,7 @@ class Fasten(BaseFormatter):
                 unique = self.get_unique_and_increment()
                 mods[name]["namespaces"][unique] = dict(
                         namespace=namespace_uri,
-                        metadata=dict(start=info['lineno']))
+                        metadata=dict(first=info['first'], last=info['last']))
                 self.namespace_map[namespace_uri] = unique
 
         return mods

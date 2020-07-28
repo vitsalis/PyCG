@@ -94,6 +94,7 @@ class CallGraphProcessor(ProcessingBase):
             ext_mod = self.module_manager.get(ext_modname)
             if not ext_mod:
                 ext_mod = self.module_manager.create(ext_modname, None, external=True)
+                ext_mod.add_method(ext_modname)
 
             ext_mod.add_method(name)
 

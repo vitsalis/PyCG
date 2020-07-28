@@ -89,19 +89,23 @@ class FastenFormatTest(TestBase):
                 "methods": {
                     "mod1.method": {
                         "name": "mod1.method",
-                        "lineno": 2
+                        "first": 2,
+                        "last": 5
                     },
                     "mod1.Cls.method": {
                         "name": "mod1.Cls.method",
-                        "lineno": 6
+                        "first": 6,
+                        "last": 9
                     },
                     "mod1": {
                         "name": "mod1",
-                        "lineno": 1
+                        "first": 1,
+                        "last": 9
                     },
                     "mod1.Cls": {
                         "name": "mod1.Cls",
-                        "lineno": 5
+                        "first": 5,
+                        "last": 9
                     }
                 }
             },
@@ -110,23 +114,28 @@ class FastenFormatTest(TestBase):
                 "methods": {
                     "mod.mod2.method": {
                         "name": "mod.mod2.method",
-                        "lineno": 1
+                        "first": 1,
+                        "last": 3
                     },
                     "mod.mod2": {
                         "name": "mod.mod2",
-                        "lineno": 1
+                        "first": 1,
+                        "last": 9
                     },
                     "mod.mod2.Cls.Nested.method": {
                         "name": "mod.mod2.Cls.Nested.method",
-                        "lineno": 6
+                        "first": 6,
+                        "last": 9
                     },
                     "mod.mod2.Cls": {
                         "name": "mod.mod2.Cls",
-                        "lineno": 4
+                        "first": 4,
+                        "last": 9
                     },
                     "mod.mod2.Cls.Nested": {
                         "name": "mod.mod2.Cls.Nested",
-                        "lineno": 5
+                        "first": 5,
+                        "last": 9
                     }
                 }
             }
@@ -175,10 +184,11 @@ class FastenFormatTest(TestBase):
             expected_namespaces = []
             for method, info in mod["methods"].items():
                 method_uri = formatter.to_uri(name, method)
-                lineno = info['lineno']
+                first = info['first']
+                last = info['last']
                 expected_namespaces.append(dict(
                     namespace=method_uri,
-                    metadata=dict(start=lineno)))
+                    metadata=dict(first=first, last=last)))
 
             # namespaces defined for module
             result_namespaces = modules[name_uri]["namespaces"].values()

@@ -28,7 +28,6 @@ class Module:
         self.name = name
         self.filename = filename
         self.methods = dict()
-        self.add_method(name, 1)
 
     def get_name(self):
         return self.name
@@ -39,8 +38,9 @@ class Module:
     def get_methods(self):
         return self.methods
 
-    def add_method(self, method, lineno=None):
+    def add_method(self, method, first=None, last=None):
         if not self.methods.get(method, None):
             self.methods[method] = dict(
                     name=method,
-                    lineno=lineno)
+                    first=first,
+                    last=last)
