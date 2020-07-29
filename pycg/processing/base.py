@@ -76,8 +76,10 @@ class ProcessingBase(ast.NodeVisitor):
         self.name_stack.append(dict_name)
         sc.reset_counters()
         for key, val in zip(node.keys, node.values):
-            self.visit(key)
-            self.visit(val)
+            if key:
+                self.visit(key)
+            if val:
+                self.visit(val)
         self.name_stack.pop()
 
     def visit_List(self, node):

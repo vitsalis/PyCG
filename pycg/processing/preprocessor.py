@@ -383,8 +383,10 @@ class PreProcessor(ProcessingBase):
 
         self.name_stack.append(dict_name)
         for key, value in zip(node.keys, node.values):
-            self.visit(key)
-            self.visit(value)
+            if key:
+                self.visit(key)
+            if value:
+                self.visit(value)
             decoded_key = self.decode_node(key)
             decoded_value = self.decode_node(value)
 
