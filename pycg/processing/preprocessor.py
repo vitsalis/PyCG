@@ -398,6 +398,8 @@ class PreProcessor(ProcessingBase):
                     names = k.get_lit_pointer().get()
                 else:
                     names = set()
+                    if isinstance(k, list):
+                        continue
                     names.add(k)
                 for name in names:
                     # create a definition for the key
