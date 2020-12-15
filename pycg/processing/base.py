@@ -1,3 +1,23 @@
+#
+# Copyright (c) 2020 Vitalis Salis.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
 import ast
 import os
 
@@ -221,6 +241,10 @@ class ProcessingBase(ast.NodeVisitor):
             return [node.n]
         elif isinstance(node, ast.Str):
             return [node.s]
+        elif isinstance(node, int) or isinstance(node, str):
+            return [node]
+        elif isinstance(node, str) or isinstance(node, int):
+            return [node]
         elif isinstance(node, ast.Dict):
             dict_counter = self.scope_manager.get_scope(self.current_ns).get_dict_counter()
             dict_name = utils.get_dict_name(dict_counter)
@@ -367,7 +391,7 @@ class ProcessingBase(ast.NodeVisitor):
         full_names = set()
         # get all names associated with this variable name
         for n in val_names:
-            if n and self.closured.get(n.get_ns(), None):
+            if n and isinstance(n, Definition) and self.closured.get(n.get_ns(), None):
                 decoded_vals |= self.closured.get(n.get_ns())
         for s in sl_names:
             if isinstance(s, Definition) and self.closured.get(s.get_ns(), None):
@@ -384,7 +408,10 @@ class ProcessingBase(ast.NodeVisitor):
         for d in decoded_vals:
             for key in keys:
                 # check for existence of var name and key combination
-                full_ns = utils.join_ns(d, str(key))
+                str_key = str(key)
+                if isinstance(key, int):
+                    str_key = utils.get_int_name(key)
+                full_ns = utils.join_ns(d, str_key)
                 full_names.add(full_ns)
 
         return full_names

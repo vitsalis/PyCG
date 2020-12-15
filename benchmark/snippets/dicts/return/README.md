@@ -1,1 +1,0 @@
-A dictionary is returned.

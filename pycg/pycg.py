@@ -1,3 +1,23 @@
+#
+# Copyright (c) 2020 Vitalis Salis.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
 import os
 import ast
 
@@ -17,6 +37,7 @@ class CallGraphGenerator(object):
     def __init__(self, entry_points, package):
         self.entry_points = entry_points
         self.package = package
+        self.state = None
         self.setUp()
 
     def setUp(self):
@@ -26,6 +47,59 @@ class CallGraphGenerator(object):
         self.class_manager = ClassManager()
         self.module_manager = ModuleManager()
         self.cg = CallGraph()
+
+    def extract_state(self):
+        state = {}
+        state["defs"] = {}
+        for key, defi in self.def_manager.get_defs().items():
+            state["defs"][key] = {
+                "names": defi.get_name_pointer().get().copy(),
+                "lit": defi.get_lit_pointer().get().copy()
+            }
+
+        state["scopes"] = {}
+        for key, scope in self.scope_manager.get_scopes().items():
+            state["scopes"][key] = set([x.get_ns() for (_, x) in scope.get_defs().items()])
+
+        state["classes"] = {}
+        for key, ch in self.class_manager.get_classes().items():
+            state["classes"][key] = ch.get_mro().copy()
+        return state
+
+    def reset_counters(self):
+        for key, scope in self.scope_manager.get_scopes().items():
+            scope.reset_counters()
+
+    def has_converged(self):
+        if not self.state:
+            return False
+
+        curr_state = self.extract_state()
+
+        # check defs
+        for key, defi in curr_state["defs"].items():
+            if not key in self.state["defs"]:
+                return False
+            if defi["names"] != self.state["defs"][key]["names"]:
+                return False
+            if defi["lit"] != self.state["defs"][key]["lit"]:
+                return False
+
+        # check scopes
+        for key, scope in curr_state["scopes"].items():
+            if not key in self.state["scopes"]:
+                return False
+            if scope != self.state["scopes"][key]:
+                return False
+
+        # check classes
+        for key, ch in curr_state["classes"].items():
+            if not key in self.state["classes"]:
+                return False
+            if ch != self.state["classes"][key]:
+                return False
+
+        return True
 
     def remove_import_hooks(self):
         self.import_manager.remove_hooks()
@@ -73,22 +147,27 @@ class CallGraphGenerator(object):
                     self.remove_import_hooks()
 
     def analyze(self):
-        # preprocessing
-        self.do_pass(PreProcessor, True,
-                self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager, self.module_manager)
+        while not self.has_converged():
+            self.state = self.extract_state()
+            # preprocessing
+            self.reset_counters()
+            self.do_pass(PreProcessor, True,
+                    self.import_manager, self.scope_manager, self.def_manager,
+                    self.class_manager, self.module_manager)
 
-        self.def_manager.complete_definitions()
+            self.def_manager.complete_definitions()
 
-        self.do_pass(PostProcessor, False,
-                self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager)
+            self.reset_counters()
+            self.do_pass(PostProcessor, False,
+                    self.import_manager, self.scope_manager, self.def_manager,
+                    self.class_manager)
 
-        self.def_manager.complete_definitions()
+            self.def_manager.complete_definitions()
 
-        self.do_pass(CallGraphProcessor, False,
-                self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager, self.module_manager, call_graph=self.cg)
+            self.reset_counters()
+            self.do_pass(CallGraphProcessor, False,
+                    self.import_manager, self.scope_manager, self.def_manager,
+                    self.class_manager, self.module_manager, call_graph=self.cg)
 
     def output(self):
         return self.cg.get()

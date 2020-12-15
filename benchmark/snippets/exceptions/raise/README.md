@@ -1,1 +1,0 @@
-An exception is raised.

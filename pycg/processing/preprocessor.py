@@ -1,3 +1,23 @@
+#
+# Copyright (c) 2020 Vitalis Salis.
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
 import ast
 import os
 import importlib
@@ -67,22 +87,24 @@ class PreProcessor(ProcessingBase):
             first = 0
         mod.add_method(self.modname, first, last)
 
-        # initialize module scopes
-        items = self.scope_manager.handle_module(self.modname,
-            self.filename, self.contents)
-
         root_sc = self.scope_manager.get_scope(self.modname)
-        root_defi = self.def_manager.get(self.modname)
-        if not root_defi:
-            root_defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
-        root_sc.add_def(self.modname.split(".")[-1], root_defi)
+        if not root_sc:
+            # initialize module scopes
+            items = self.scope_manager.handle_module(self.modname,
+                self.filename, self.contents)
 
-        # create function and class defs and add them to their scope
-        # we do this here, because scope_manager doesn't have an
-        # interface with def_manager, and we want function definitions
-        # to have the correct points_to set
-        iterate_mod_items(items["functions"], utils.constants.FUN_DEF)
-        iterate_mod_items(items["classes"], utils.constants.CLS_DEF)
+            root_sc = self.scope_manager.get_scope(self.modname)
+            root_defi = self.def_manager.get(self.modname)
+            if not root_defi:
+                root_defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
+            root_sc.add_def(self.modname.split(".")[-1], root_defi)
+
+            # create function and class defs and add them to their scope
+            # we do this here, because scope_manager doesn't have an
+            # interface with def_manager, and we want function definitions
+            # to have the correct points_to set
+            iterate_mod_items(items["functions"], utils.constants.FUN_DEF)
+            iterate_mod_items(items["classes"], utils.constants.CLS_DEF)
 
         defi = self.def_manager.get(self.modname)
         if not defi:
@@ -348,7 +370,7 @@ class PreProcessor(ProcessingBase):
         self.name_stack.append(list_name)
         for idx, elt in enumerate(node.elts):
             self.visit(elt)
-            key_full_ns = utils.join_ns(list_def.get_ns(), str(idx))
+            key_full_ns = utils.join_ns(list_def.get_ns(), utils.get_int_name(idx))
             key_def = self.def_manager.get(key_full_ns)
             if not key_def:
                 key_def = self.def_manager.create(key_full_ns, utils.constants.NAME_DEF)
@@ -403,7 +425,8 @@ class PreProcessor(ProcessingBase):
                     names.add(k)
                 for name in names:
                     # create a definition for the key
-                    # TODO: convertion of int to str will result in false positives
+                    if isinstance(name, int):
+                        name = utils.get_int_name(name)
                     key_full_ns = utils.join_ns(dict_def.get_ns(), str(name))
                     key_def = self.def_manager.get(key_full_ns)
                     if not key_def:

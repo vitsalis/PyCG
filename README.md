@@ -1,19 +1,23 @@
-# PyCG - Python Call Graphs
+# PyCG - Practical Python Call Graphs
 
 PyCG generates call graphs for Python code using static analysis.
-Given a list of Python files as input it:
-- Traverses the AST of the Python module
-- Discovers the local modules it imports and further analyzes them
-- Tracks namespaces and scopes of modules, classes and functions
-- Builds the MRO of each class
-- Constructs an assignment graph allowing it to parse higher-order functions
+It efficiently supports
+* Higher order functions
+* Twisted class inherritance schemes
+* Automatic discovery of imported modules for further analysis
+* Nested definitions
+
+You can read the full methodology as well as a complete evaluation on the
+[ICSE 2021 paper](https://vitsalis.com/papers/pycg.pdf).
+
+Abstract:
+> Call graphs play an important role in different contexts, such as profiling and vulnerability propagation analysis. Generating call graphs in an efficient manner can be a challenging task when it comes to high-level languages that are modular and incorporate dynamic features and higher-order functions. Despite the language's popularity, there have been very few tools aiming to generate call graphs for Python programs. Worse, these tools suffer from several effectiveness issues that limit their practicality in realistic programs. We propose a pragmatic, static approach for call graph generation in Python. We compute all assignment relations between program identifiers of functions, variables, classes, and modules through an inter-procedural analysis. Based on these assignment relations, we produce the resulting call graph by resolving all calls to potentially invoked functions. Notably, the underlying analysis is designed to be efficient and scalable, handling several Python features, such as modules, generators, function closures, and multiple inheritance. We have evaluated our prototype implementation, which we call PyCG, using two benchmarks: a micro-benchmark suite containing small Python programs and a set of macro-benchmarks with several popular real-world Python packages. Our results indicate that PyCG can efficiently handle thousands of lines of code in less than a second (0.34 seconds for 1k LoC on average). Further, it outperforms the state-of-the-art for Python in both precision and recall: PyCG achieves high rates of precision ~99, and adequate recall ~69.3. Finally, we demonstrate how PyCG can aid dependency impact analysis by showcasing a potential enhancement to GitHub's security advisory notification service using a real-world example.
 
 # Installation
 
-PyCG is implemented in Python3 and has no dependencies.
-From the root directory:
+PyCG is implemented in Python3 and has no dependencies. Simply:
 ```
-python3 setup.py install
+pip install pycg
 ```
 
 # Usage
@@ -102,38 +106,7 @@ We want the FASTEN format:
         pypi_pkg/module1.py pkg_root/subpackage/module2.py -o cg.json
 ```
 
-# Benchmark
-
-We provide an benchmark of minimal snippets of Python code
-testing a wide variety of the features that Python provides.
-
-We organize this benchmark into the following categories:
-
-| Category       | No. Tests | Description                                   |
-|----------------|-----------|-----------------------------------------------|
-| parameters     | 6         | Positional arguments that are functions       |
-| assignments    | 5         | Assignment of functions to variables          |
-| built-ins      | 3         | Calls to built in functions and data types    |
-| classes        | 22        | Class construction, attributes, methods       |
-| comprehensions | 1         | Comprehensions                                |
-| decorators     | 7         | Function decorators                           |
-| dicts          | 5         | Hashmap with values that are functions        |
-| direct calls   | 4         | Direct call of a returned function (func()()) |
-| exceptions     | 3         | Exceptions                                    |
-| eval           | 1         | Usage of eval                                 |
-| functions      | 4         | Vanilla function calls                        |
-| generators     | 2         | Generators                                    |
-| imports        | 13        | Imported modules, functions classes           |
-| kwargs         | 3         | Keyword arguments that are functions          |
-| lambdas        | 5         | Lambdas                                       |
-| mro            | 7         | Method Resolution Order (mro)                 |
-| returns        | 4         | Returns that are functions                    |
-
-This benchmark is not dependent on PyCG and can be used to test
-other Python call graph generation tools.
-
-
-# Running Tests & Benchmarks
+# Running Tests
 
 From the root directory:
 ```
