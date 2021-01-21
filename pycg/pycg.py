@@ -136,7 +136,6 @@ class CallGraphGenerator(object):
             if not input_mod in modules_analyzed:
                 if install_hooks:
                     self.import_manager.set_pkg(input_pkg)
-                    self.import_manager.install_hooks()
 
                 processor = cls(input_file, input_mod,
                                 modules_analyzed=modules_analyzed, *args, **kwargs)

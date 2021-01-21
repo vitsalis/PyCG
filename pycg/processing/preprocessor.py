@@ -41,6 +41,8 @@ class PreProcessor(ProcessingBase):
         self.class_manager = class_manager
         self.module_manager = module_manager
 
+        self.import_manager.install_hooks()
+
     def _get_fun_defaults(self, node):
         defaults = {}
         start = len(node.args.args) - len(node.args.defaults)
