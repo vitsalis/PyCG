@@ -128,6 +128,10 @@ class ProcessingBase(ast.NodeVisitor):
         self.method_stack.pop()
         self.name_stack.pop()
 
+    def visit_Tuple(self, node):
+        for elt in node.elts:
+            self.visit(elt)
+
     def _handle_assign(self, targetns, decoded):
         defi = self.def_manager.get(targetns)
         if not defi:

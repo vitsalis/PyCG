@@ -72,3 +72,6 @@ class ClassNode:
 
         res.reverse()
         self.mro = res
+
+    def clear_mro(self):
+        self.mro = [self.ns]

@@ -41,7 +41,6 @@ class PreProcessor(ProcessingBase):
         self.class_manager = class_manager
         self.module_manager = module_manager
 
-        self.import_manager.install_hooks()
 
     def _get_fun_defaults(self, node):
         defaults = {}
@@ -295,10 +294,6 @@ class PreProcessor(ProcessingBase):
 
         super().visit_FunctionDef(node)
 
-    def visit_Tuple(self, node):
-        for elt in node.elts:
-            self.visit(elt)
-
     def visit_For(self, node):
         # just create the definition for target
         if isinstance(node.target, ast.Name):
@@ -353,95 +348,6 @@ class PreProcessor(ProcessingBase):
 
         super().visit_Lambda(node, lambda_name)
 
-    def visit_List(self, node):
-        # Works similarly with dicts
-        current_scope = self.scope_manager.get_scope(self.current_ns)
-        list_counter = current_scope.inc_list_counter()
-        list_name = utils.get_list_name(list_counter)
-        list_full_ns = utils.join_ns(self.current_ns, list_name)
-
-        # create a scope for the list
-        list_scope = self.scope_manager.create_scope(list_full_ns, current_scope)
-
-        # create a list definition
-        list_def = self.def_manager.get(list_full_ns)
-        if not list_def:
-            list_def = self.def_manager.create(list_full_ns, utils.constants.NAME_DEF)
-        current_scope.add_def(list_name, list_def)
-
-        self.name_stack.append(list_name)
-        for idx, elt in enumerate(node.elts):
-            self.visit(elt)
-            key_full_ns = utils.join_ns(list_def.get_ns(), utils.get_int_name(idx))
-            key_def = self.def_manager.get(key_full_ns)
-            if not key_def:
-                key_def = self.def_manager.create(key_full_ns, utils.constants.NAME_DEF)
-
-            decoded_elt = self.decode_node(elt)
-            for v in decoded_elt:
-                if isinstance(v, Definition):
-                    key_def.get_name_pointer().add(v.get_ns())
-                else:
-                    key_def.get_lit_pointer().add(v)
-
-        self.name_stack.pop()
-
-    def visit_Dict(self, node):
-        # 1. create a scope using a counter
-        # 2. Iterate keys and add them as children of the scope
-        # 3. Iterate values and makes a points to connection with the keys
-        current_scope = self.scope_manager.get_scope(self.current_ns)
-        dict_counter = current_scope.inc_dict_counter()
-        dict_name = utils.get_dict_name(dict_counter)
-        dict_full_ns = utils.join_ns(self.current_ns, dict_name)
-
-        # create a scope for the dict
-        dict_scope = self.scope_manager.create_scope(dict_full_ns, current_scope)
-
-        # Create a dict definition
-        dict_def = self.def_manager.get(dict_full_ns)
-        if not dict_def:
-            dict_def = self.def_manager.create(dict_full_ns, utils.constants.NAME_DEF)
-        # add it to the current scope
-        current_scope.add_def(dict_name, dict_def)
-
-        self.name_stack.append(dict_name)
-        for key, value in zip(node.keys, node.values):
-            if key:
-                self.visit(key)
-            if value:
-                self.visit(value)
-            decoded_key = self.decode_node(key)
-            decoded_value = self.decode_node(value)
-
-            # iterate decoded keys and values
-            # to do the assignment operation
-            for k in decoded_key:
-                if isinstance(k, Definition):
-                    # get literal pointer
-                    names = k.get_lit_pointer().get()
-                else:
-                    names = set()
-                    if isinstance(k, list):
-                        continue
-                    names.add(k)
-                for name in names:
-                    # create a definition for the key
-                    if isinstance(name, int):
-                        name = utils.get_int_name(name)
-                    key_full_ns = utils.join_ns(dict_def.get_ns(), str(name))
-                    key_def = self.def_manager.get(key_full_ns)
-                    if not key_def:
-                        key_def = self.def_manager.create(key_full_ns, utils.constants.NAME_DEF)
-                    dict_scope.add_def(str(name), key_def)
-                    for v in decoded_value:
-                        if isinstance(v, Definition):
-                            key_def.get_name_pointer().add(v.get_ns())
-                        else:
-                            key_def.get_lit_pointer().add(v)
-        self.name_stack.pop()
-
-
     def visit_ClassDef(self, node):
         # create a definition for the class (node.name)
         cls_def = self.def_manager.handle_class_def(self.current_ns, node.name)
@@ -455,29 +361,6 @@ class PreProcessor(ProcessingBase):
         cls = self.class_manager.get(cls_def.get_ns())
         if not cls:
             cls = self.class_manager.create(cls_def.get_ns(), self.modname)
-        for base in node.bases:
-            # all bases are of the type ast.Name
-            self.visit(base)
-
-            bases = self.decode_node(base)
-            for base_def in bases:
-                if not isinstance(base_def, Definition):
-                    continue
-                names = set()
-                if base_def.get_name_pointer().get():
-                    names = base_def.get_name_pointer().get()
-                else:
-                    names.add(base_def.get_ns())
-                for name in names:
-                    # add the base as a parent
-                    cls.add_parent(name)
-
-                    # add the base's parents
-                    parent_cls = self.class_manager.get(name)
-                    if parent_cls:
-                        cls.add_parent(parent_cls.get_mro())
-
-        cls.compute_mro()
 
         super().visit_ClassDef(node)
 

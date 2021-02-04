@@ -136,6 +136,7 @@ class CallGraphGenerator(object):
             if not input_mod in modules_analyzed:
                 if install_hooks:
                     self.import_manager.set_pkg(input_pkg)
+                    self.import_manager.install_hooks()
 
                 processor = cls(input_file, input_mod,
                                 modules_analyzed=modules_analyzed, *args, **kwargs)
@@ -146,16 +147,13 @@ class CallGraphGenerator(object):
                     self.remove_import_hooks()
 
     def analyze(self):
+        self.do_pass(PreProcessor, True,
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager, self.module_manager)
+        self.def_manager.complete_definitions()
+
         while not self.has_converged():
             self.state = self.extract_state()
-            # preprocessing
-            self.reset_counters()
-            self.do_pass(PreProcessor, True,
-                    self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager, self.module_manager)
-
-            self.def_manager.complete_definitions()
-
             self.reset_counters()
             self.do_pass(PostProcessor, False,
                     self.import_manager, self.scope_manager, self.def_manager,
@@ -163,10 +161,11 @@ class CallGraphGenerator(object):
 
             self.def_manager.complete_definitions()
 
-            self.reset_counters()
-            self.do_pass(CallGraphProcessor, False,
-                    self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager, self.module_manager, call_graph=self.cg)
+        self.reset_counters()
+        self.do_pass(CallGraphProcessor, False,
+                self.import_manager, self.scope_manager, self.def_manager,
+                self.class_manager, self.module_manager, call_graph=self.cg)
+
 
     def output(self):
         return self.cg.get()
