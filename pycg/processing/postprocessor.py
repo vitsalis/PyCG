@@ -53,6 +53,7 @@ class PostProcessor(ProcessingBase):
             if not defi:
                 continue
             if defi.get_type() == utils.constants.CLS_DEF:
+                self.update_parent_classes(defi)
                 defi = self.def_manager.get(utils.join_ns(defi.get_ns(), utils.constants.CLS_INIT))
                 if not defi:
                     continue
@@ -265,6 +266,33 @@ class PostProcessor(ProcessingBase):
                         else:
                             key_def.get_lit_pointer().add(v)
         self.name_stack.pop()
+
+    def update_parent_classes(self, defi):
+        cls = self.class_manager.get(defi.get_ns())
+        if not cls:
+            return
+        current_scope = self.scope_manager.get_scope(defi.get_ns())
+        for parent in cls.get_mro():
+            parent_def = self.def_manager.get(parent)
+            if not parent_def:
+                continue
+            parent_scope = self.scope_manager.get_scope(parent)
+            if not parent_scope:
+                continue
+            parent_items = list(parent_scope.get_defs().keys())
+            for key, child_def in current_scope.get_defs().items():
+                if key == "__init__":
+                    continue
+                # resolve name from the parent_def
+                names = self.find_cls_fun_ns(parent_def.get_ns(), key)
+
+                new_ns = utils.join_ns(parent_def.get_ns(), key)
+                new_def = self.def_manager.get(new_ns)
+                if not new_def:
+                    new_def = self.def_manager.create(new_ns, utils.constants.NAME_DEF)
+
+                new_def.get_name_pointer().add_set(names)
+                new_def.get_name_pointer().add(child_def.get_ns())
 
     def analyze_submodules(self):
         super().analyze_submodules(PostProcessor, self.import_manager,

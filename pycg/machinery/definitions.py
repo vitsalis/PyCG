@@ -94,7 +94,10 @@ class DefinitionManager(object):
             for name in name_pointer.get():
                 if not self.defs.get(name, None):
                     continue
-                new_set = new_set.union(dfs(self.defs[name]))
+                items = dfs(self.defs[name])
+                if not items:
+                    items = set([name])
+                new_set = new_set.union(items)
 
             closured[defi.get_ns()] = new_set
             return closured[defi.get_ns()]
