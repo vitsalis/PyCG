@@ -10,8 +10,11 @@ It efficiently supports
 You can read the full methodology as well as a complete evaluation on the
 [ICSE 2021 paper](https://vitsalis.com/papers/pycg.pdf).
 
-Abstract:
-> Call graphs play an important role in different contexts, such as profiling and vulnerability propagation analysis. Generating call graphs in an efficient manner can be a challenging task when it comes to high-level languages that are modular and incorporate dynamic features and higher-order functions. Despite the language's popularity, there have been very few tools aiming to generate call graphs for Python programs. Worse, these tools suffer from several effectiveness issues that limit their practicality in realistic programs. We propose a pragmatic, static approach for call graph generation in Python. We compute all assignment relations between program identifiers of functions, variables, classes, and modules through an inter-procedural analysis. Based on these assignment relations, we produce the resulting call graph by resolving all calls to potentially invoked functions. Notably, the underlying analysis is designed to be efficient and scalable, handling several Python features, such as modules, generators, function closures, and multiple inheritance. We have evaluated our prototype implementation, which we call PyCG, using two benchmarks: a micro-benchmark suite containing small Python programs and a set of macro-benchmarks with several popular real-world Python packages. Our results indicate that PyCG can efficiently handle thousands of lines of code in less than a second (0.34 seconds for 1k LoC on average). Further, it outperforms the state-of-the-art for Python in both precision and recall: PyCG achieves high rates of precision ~99, and adequate recall ~69.3. Finally, we demonstrate how PyCG can aid dependency impact analysis by showcasing a potential enhancement to GitHub's security advisory notification service using a real-world example.
+You can cite PyCG as follows.
+Vitalis Salis, Thodoris Sotiropoulos, Panos Louridas, Diomidis Spinellis and Dimitris Mitropoulos.
+PyCG: Practical Call Graph Generation in Python.
+In _43rd International Conference on Software Engineering, ICSE '21_,
+25–28 May 2021.
 
 # Installation
 
