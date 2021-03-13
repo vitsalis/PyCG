@@ -95,6 +95,9 @@ class CallGraphProcessor(ProcessingBase):
                 if pointer_def.get_type() == utils.constants.EXT_DEF:
                     self.call_graph.add_edge(self.current_method, name)
 
+    def visit_AsyncFunctionDef(self, node):
+        self.visit_FunctionDef(node)
+
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             self.visit(decorator)

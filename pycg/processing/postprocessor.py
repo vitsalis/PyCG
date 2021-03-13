@@ -100,6 +100,9 @@ class PostProcessor(ProcessingBase):
     def visit_Yield(self, node):
         self._visit_return(node)
 
+    def visit_AsyncFunctionDef(self, node):
+        self.visit_FunctionDef(node)
+
     def visit_FunctionDef(self, node):
         # here we iterate decorators
         if node.decorator_list:

@@ -289,6 +289,9 @@ class PreProcessor(ProcessingBase):
                         arg_def.get_lit_pointer().add(default)
         return fn_def
 
+    def visit_AsyncFunctionDef(self, node):
+        self.visit_FunctionDef(node)
+
     def visit_FunctionDef(self, node):
         fn_def = self._handle_function_def(node, node.name)
 
