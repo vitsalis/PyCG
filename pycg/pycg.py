@@ -34,10 +34,11 @@ from pycg.machinery.modules import ModuleManager
 from pycg import utils
 
 class CallGraphGenerator(object):
-    def __init__(self, entry_points, package):
+    def __init__(self, entry_points, package, max_iter):
         self.entry_points = entry_points
         self.package = package
         self.state = None
+        self.max_iter = max_iter
         self.setUp()
 
     def setUp(self):
@@ -152,7 +153,8 @@ class CallGraphGenerator(object):
                 self.class_manager, self.module_manager)
         self.def_manager.complete_definitions()
 
-        while not self.has_converged():
+        iter_cnt = 0
+        while (self.max_iter < 0 or iter_cnt < self.max_iter) and (not self.has_converged()):
             self.state = self.extract_state()
             self.reset_counters()
             self.do_pass(PostProcessor, False,
@@ -160,6 +162,7 @@ class CallGraphGenerator(object):
                     self.class_manager)
 
             self.def_manager.complete_definitions()
+            iter_cnt += 1
 
         self.reset_counters()
         self.do_pass(CallGraphProcessor, False,

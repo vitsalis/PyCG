@@ -29,8 +29,7 @@ pip install pycg
 ~ >>> pycg -h
 usage: pycg [-h] [--package PACKAGE] [--fasten] [--product PRODUCT]
             [--forge FORGE] [--version VERSION] [--timestamp TIMESTAMP]
-            [-o OUTPUT]
-            [entry_point [entry_point ...]]
+            [--max-iter MAX_ITER] [-o OUTPUT] [entry_point ...]
 
 positional arguments:
   entry_point           Entry points to be processed
@@ -44,6 +43,7 @@ optional arguments:
   --version VERSION     Version of the product
   --timestamp TIMESTAMP
                         Timestamp of the package's version
+  --max-iter MAX_ITER   Maximum number of iterations through source code. If not specified a fix-point iteration will be performed.
   -o OUTPUT, --output OUTPUT
                         Output path
 ```
@@ -57,7 +57,7 @@ where the command line arguments are:
   which the module would be executed). This parameter is really important for
   the correct resolving of imports.
 - `--fasten`: Output the callgraph in FASTEN format.
-- `-output`: The unix path where the output call graph will be stored in JSON
+- `--output`: The unix path where the output call graph will be stored in JSON
   format.
 
 The following command line arguments should used only when `--fasten` is

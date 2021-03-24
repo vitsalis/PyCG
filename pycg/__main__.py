@@ -42,6 +42,13 @@ def main():
         help="Timestamp of the package's version",
         default=0
     )
+    parser.add_argument(
+        "--max-iter",
+        type=int,
+        help=("Maximum number of iterations through source code. " +
+            "If not specified a fix-point iteration will be performed."),
+        default=-1
+    )
 
     parser.add_argument(
         "-o",
@@ -52,11 +59,11 @@ def main():
 
     args = parser.parse_args()
 
-    cg = CallGraphGenerator(args.entry_point, args.package)
+    cg = CallGraphGenerator(args.entry_point, args.package, args.max_iter)
     cg.analyze()
 
     if args.fasten:
-        formatter = formats.Fasten(cg, args.package, \
+        formatter = formats.Fasten(cg, args.package,
             args.product, args.forge, args.version, args.timestamp)
     else:
         formatter = formats.Simple(cg)
