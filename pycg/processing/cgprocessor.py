@@ -205,9 +205,10 @@ class CallGraphProcessor(ProcessingBase):
         while isinstance(node, ast.Attribute):
             parents = self._retrieve_parent_names(node)
             for parent in parents:
-                defi = self.def_manager.get(parent)
-                if defi and defi.is_ext_def():
-                    return True
+                for name in self.closured.get(parent, []):
+                    defi = self.def_manager.get(name)
+                    if defi and defi.is_ext_def():
+                        return True
             node = node.value
         return False
 

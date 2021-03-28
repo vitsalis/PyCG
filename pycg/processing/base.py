@@ -315,18 +315,31 @@ class ProcessingBase(ast.NodeVisitor):
         return names
 
     def _retrieve_attribute_names(self, node):
+        if not getattr(self, "closured", None):
+            return set()
+
         parent_names = self._retrieve_parent_names(node)
         names = set()
-        for name in parent_names:
-            defi = self.def_manager.get(name)
-            if not defi:
-                continue
-            if defi.get_type() == utils.constants.CLS_DEF:
-                cls_names = self.find_cls_fun_ns(defi.get_ns(), node.attr)
-                if cls_names:
-                    names = names.union(cls_names)
-            if defi.get_type() in [utils.constants.FUN_DEF, utils.constants.MOD_DEF]:
-                names.add(utils.join_ns(name, node.attr))
+        for parent_name in parent_names:
+            for name in self.closured.get(parent_name, []):
+                defi = self.def_manager.get(name)
+                if not defi:
+                    continue
+                if defi.get_type() == utils.constants.CLS_DEF:
+                    cls_names = self.find_cls_fun_ns(defi.get_ns(), node.attr)
+                    if cls_names:
+                        names = names.union(cls_names)
+                if defi.get_type() in [utils.constants.FUN_DEF, utils.constants.MOD_DEF]:
+                    names.add(utils.join_ns(name, node.attr))
+                if defi.get_type() == utils.constants.EXT_DEF:
+                    # HACK: extenral attributes can lead to infinite loops
+                    # Identify them here
+                    if node.attr in name:
+                        continue
+                    ext_name = utils.join_ns(name, node.attr)
+                    if not self.def_manager.get(ext_name):
+                        self.def_manager.create(ext_name, utils.constants.EXT_DEF)
+                    names.add(ext_name)
         return names
 
     def iterate_call_args(self, defi, node):
@@ -474,6 +487,7 @@ class ProcessingBase(ast.NodeVisitor):
         if not cls:
             return set()
 
+        ext_names = set()
         for item in cls.get_mro():
             ns = utils.join_ns(item, fn)
             names = set()
@@ -484,4 +498,11 @@ class ProcessingBase(ast.NodeVisitor):
 
             if self.def_manager.get(ns):
                 return names
-        return set()
+
+            parent = self.def_manager.get(item)
+            if parent and parent.get_type() == utils.constants.EXT_DEF:
+                ext_names.add(ns)
+
+        for name in ext_names:
+            self.def_manager.create(name, utils.constants.EXT_DEF)
+        return ext_names
