@@ -403,6 +403,7 @@ class ProcessingBase(ast.NodeVisitor):
 
         val_names = self.decode_node(node.value)
         sl_names = self.decode_node(node.slice.value)
+
         decoded_vals = set()
         keys = set()
         full_names = set()
@@ -419,8 +420,10 @@ class ProcessingBase(ast.NodeVisitor):
                     if not defi:
                         continue
                     keys |= defi.get_lit_pointer().get()
-            elif isinstance(s, str) or isinstance(s, int):
+            elif isinstance(s, str):
                 keys.add(s)
+            elif isinstance(s, int):
+                keys.add(utils.get_int_name(s))
 
         for d in decoded_vals:
             for key in keys:

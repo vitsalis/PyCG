@@ -168,6 +168,13 @@ class CallGraphProcessor(ProcessingBase):
                 for ns in init_ns:
                     self.call_graph.add_edge(self.current_method, ns)
 
+    def visit_Subscript(self, node):
+        names = self.retrieve_subscript_names(node)
+        for name in names:
+            defi = self.def_manager.get(name)
+            if not defi:
+                print ("Invalid access", name)
+
     def analyze_submodules(self):
         super().analyze_submodules(CallGraphProcessor, self.import_manager,
                 self.scope_manager, self.def_manager, self.class_manager, self.module_manager,

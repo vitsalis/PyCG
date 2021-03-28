@@ -24,6 +24,7 @@ import ast
 from pycg.processing.preprocessor import PreProcessor
 from pycg.processing.postprocessor import PostProcessor
 from pycg.processing.cgprocessor import CallGraphProcessor
+from pycg.processing.keyerrprocessor import KeyErrProcessor
 
 from pycg.machinery.scopes import ScopeManager
 from pycg.machinery.definitions import DefinitionManager
@@ -34,11 +35,12 @@ from pycg.machinery.modules import ModuleManager
 from pycg import utils
 
 class CallGraphGenerator(object):
-    def __init__(self, entry_points, package, max_iter):
+    def __init__(self, entry_points, package, max_iter, operation):
         self.entry_points = entry_points
         self.package = package
         self.state = None
         self.max_iter = max_iter
+        self.operation = operation
         self.setUp()
 
     def setUp(self):
@@ -165,9 +167,16 @@ class CallGraphGenerator(object):
             iter_cnt += 1
 
         self.reset_counters()
-        self.do_pass(CallGraphProcessor, False,
-                self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager, self.module_manager, call_graph=self.cg)
+        if self.operation == utils.constants.CALL_GRAPH_OP:
+            self.do_pass(CallGraphProcessor, False,
+                    self.import_manager, self.scope_manager, self.def_manager,
+                    self.class_manager, self.module_manager, call_graph=self.cg)
+        elif self.operation == utils.constants.KEY_ERR_OP:
+            self.do_pass(KeyErrProcessor, False,
+                    self.import_manager, self.scope_manager, self.def_manager,
+                    self.class_manager)
+        else:
+            raise Exception("Invalid operation: " + self.operation)
 
 
     def output(self):

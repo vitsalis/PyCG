@@ -5,6 +5,7 @@ import argparse
 
 from pycg.pycg import CallGraphGenerator
 from pycg import formats
+from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP
 
 def main():
     parser = argparse.ArgumentParser()
@@ -49,6 +50,15 @@ def main():
             "If not specified a fix-point iteration will be performed."),
         default=-1
     )
+    parser.add_argument(
+        '--operation',
+        type=str,
+        choices=[CALL_GRAPH_OP, KEY_ERR_OP],
+        help=("Operation to perform. " +
+             "Choose " + CALL_GRAPH_OP + " for call graph generation (default)" +
+             " or " + KEY_ERR_OP + " for key error detection on dictionaries."),
+        default=CALL_GRAPH_OP
+    )
 
     parser.add_argument(
         "--as-graph-output",
@@ -64,7 +74,8 @@ def main():
 
     args = parser.parse_args()
 
-    cg = CallGraphGenerator(args.entry_point, args.package, args.max_iter)
+    cg = CallGraphGenerator(args.entry_point, args.package,
+                        args.max_iter, args.operation)
     cg.analyze()
 
     if args.fasten:
