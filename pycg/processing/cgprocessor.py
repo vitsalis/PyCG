@@ -114,13 +114,7 @@ class CallGraphProcessor(ProcessingBase):
 
     def visit_Call(self, node):
         def create_ext_edge(name, ext_modname):
-            ext_mod = self.module_manager.get(ext_modname)
-            if not ext_mod:
-                ext_mod = self.module_manager.create(ext_modname, None, external=True)
-                ext_mod.add_method(ext_modname)
-
-            ext_mod.add_method(name)
-
+            self.add_ext_mod_node(name)
             self.call_graph.add_node(name, ext_modname)
             self.call_graph.add_edge(self.current_method, name)
 

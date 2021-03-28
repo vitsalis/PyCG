@@ -159,7 +159,7 @@ class CallGraphGenerator(object):
             self.reset_counters()
             self.do_pass(PostProcessor, False,
                     self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager)
+                    self.class_manager, self.module_manager)
 
             self.def_manager.complete_definitions()
             iter_cnt += 1

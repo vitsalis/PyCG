@@ -505,4 +505,14 @@ class ProcessingBase(ast.NodeVisitor):
 
         for name in ext_names:
             self.def_manager.create(name, utils.constants.EXT_DEF)
+            self.add_ext_mod_node(name)
         return ext_names
+
+    def add_ext_mod_node(self, name):
+        ext_modname = name.split(".")[0]
+        ext_mod = self.module_manager.get(ext_modname)
+        if not ext_mod:
+            ext_mod = self.module_manager.create(ext_modname, None, external=True)
+            ext_mod.add_method(ext_modname)
+
+        ext_mod.add_method(name)

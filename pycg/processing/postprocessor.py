@@ -25,13 +25,14 @@ from pycg.machinery.definitions import Definition
 from pycg import utils
 
 class PostProcessor(ProcessingBase):
-    def __init__(self, input_file, modname,
-            import_manager, scope_manager, def_manager, class_manager, modules_analyzed=None):
+    def __init__(self, input_file, modname, import_manager,
+            scope_manager, def_manager, class_manager, module_manager, modules_analyzed=None):
         super().__init__(input_file, modname, modules_analyzed)
         self.import_manager = import_manager
         self.scope_manager = scope_manager
         self.def_manager = def_manager
         self.class_manager = class_manager
+        self.module_manager = module_manager
         self.closured = self.def_manager.transitive_closure()
 
     def visit_Lambda(self, node):
@@ -300,7 +301,7 @@ class PostProcessor(ProcessingBase):
     def analyze_submodules(self):
         super().analyze_submodules(PostProcessor, self.import_manager,
                 self.scope_manager, self.def_manager, self.class_manager,
-                modules_analyzed=self.get_modules_analyzed())
+                self.module_manager, modules_analyzed=self.get_modules_analyzed())
 
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
