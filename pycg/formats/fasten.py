@@ -62,14 +62,14 @@ class Fasten(BaseFormatter):
         if name in self.functions:
             suffix = "()"
 
-        return "/{}/{}{}".format(modname, cleared, suffix)
+        return "/{}/{}{}".format(modname.replace("-", "_"), cleared, suffix)
 
     def to_external_uri(self, modname, name=""):
         if modname == utils.constants.BUILTIN_NAME:
             name = name[len(modname)+1:]
             modname = ".builtin"
 
-        return "//{}//{}".format(modname, name)
+        return "//{}//{}".format(modname.replace("-", "_"), name)
 
     def find_dependencies(self, package_path):
         res = []
