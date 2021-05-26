@@ -207,3 +207,6 @@ class CallGraphGenerator(object):
                 "module": node.get_module()
             }
         return classes
+
+    def get_as_graph(self):
+        return self.def_manager.get_defs().items()

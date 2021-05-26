@@ -51,6 +51,11 @@ def main():
     )
 
     parser.add_argument(
+        "--as-graph-output",
+        help="Output for the assignment graph",
+        default=None
+    )
+    parser.add_argument(
         "-o",
         "--output",
         help="Output path",
@@ -68,11 +73,17 @@ def main():
     else:
         formatter = formats.Simple(cg)
 
+    as_formatter = formats.AsGraph(cg)
+
     if args.output:
         with open(args.output, "w+") as f:
             f.write(json.dumps(formatter.generate()))
     else:
         print (json.dumps(formatter.generate()))
+
+    if args.as_graph_output:
+        with open(args.as_graph_output, "w+") as f:
+            f.write(json.dumps(as_formatter.generate()))
 
 if __name__ == "__main__":
     main()
