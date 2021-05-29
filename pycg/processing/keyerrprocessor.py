@@ -42,6 +42,8 @@ class KeyErrProcessor(ProcessingBase):
         self.state = "keyerr"
 
     def visit_Subscript(self, node):
+        self.visit(node.value)
+        self.visit(node.slice)
         names = self.retrieve_subscript_names(node)
         for name in names:
             if not self.is_subscriptable(name):
