@@ -27,7 +27,7 @@ from pycg.processing.base import ProcessingBase
 
 class KeyErrProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
-            scope_manager, def_manager, class_manager, modules_analyzed=None):
+            scope_manager, def_manager, class_manager, key_errs, modules_analyzed=None):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
@@ -36,6 +36,7 @@ class KeyErrProcessor(ProcessingBase):
         self.scope_manager = scope_manager
         self.def_manager = def_manager
         self.class_manager = class_manager
+        self.key_errs = key_errs
 
         self.closured = self.def_manager.transitive_closure()
         self.state = "keyerr"
@@ -48,13 +49,14 @@ class KeyErrProcessor(ProcessingBase):
 
             defi = self.def_manager.get(name)
             if not defi:
-                print ("Invalid access", self.current_ns, name, node.slice.value, node.value.id)
+                self.key_errs.add(
+                    filename=self.filename,
+                    lineno=node.lineno,
+                    namespace=".".join(name.split(".")[:-1]),
+                    key=node.slice.value)
 
     def is_subscriptable(self, name):
         if re.match(r".*<dict[0-9]+>.*", name):
-            return True
-
-        if re.match(r".*<list[0-9]+>.*", name):
             return True
 
         return False
@@ -62,7 +64,7 @@ class KeyErrProcessor(ProcessingBase):
     def analyze_submodules(self):
         super().analyze_submodules(KeyErrProcessor, self.import_manager,
                 self.scope_manager, self.def_manager, self.class_manager,
-                modules_analyzed=self.get_modules_analyzed())
+                self.key_errs, modules_analyzed=self.get_modules_analyzed())
 
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))

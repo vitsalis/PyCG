@@ -31,6 +31,7 @@ from pycg.machinery.definitions import DefinitionManager
 from pycg.machinery.imports import ImportManager
 from pycg.machinery.classes import ClassManager
 from pycg.machinery.callgraph import CallGraph
+from pycg.machinery.key_err import KeyErrors
 from pycg.machinery.modules import ModuleManager
 from pycg import utils
 
@@ -50,6 +51,7 @@ class CallGraphGenerator(object):
         self.class_manager = ClassManager()
         self.module_manager = ModuleManager()
         self.cg = CallGraph()
+        self.key_errs = KeyErrors()
 
     def extract_state(self):
         state = {}
@@ -174,13 +176,19 @@ class CallGraphGenerator(object):
         elif self.operation == utils.constants.KEY_ERR_OP:
             self.do_pass(KeyErrProcessor, False,
                     self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager)
+                    self.class_manager, self.key_errs)
         else:
             raise Exception("Invalid operation: " + self.operation)
 
 
     def output(self):
         return self.cg.get()
+
+    def output_key_errs(self):
+        return self.key_errs.get()
+
+    def output_edges(self):
+        return self.key_errors
 
     def output_edges(self):
         return self.cg.get_edges()

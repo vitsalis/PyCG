@@ -78,19 +78,23 @@ def main():
                         args.max_iter, args.operation)
     cg.analyze()
 
-    if args.fasten:
-        formatter = formats.Fasten(cg, args.package,
-            args.product, args.forge, args.version, args.timestamp)
+    if args.operation == CALL_GRAPH_OP:
+        if args.fasten:
+            formatter = formats.Fasten(cg, args.package,
+                args.product, args.forge, args.version, args.timestamp)
+        else:
+            formatter = formats.Simple(cg)
+        output = formatter.generate()
     else:
-        formatter = formats.Simple(cg)
+        output = cg.output_key_errs()
 
     as_formatter = formats.AsGraph(cg)
 
     if args.output:
         with open(args.output, "w+") as f:
-            f.write(json.dumps(formatter.generate()))
+            f.write(json.dumps(output))
     else:
-        print (json.dumps(formatter.generate()))
+        print (json.dumps(output))
 
     if args.as_graph_output:
         with open(args.as_graph_output, "w+") as f:
