@@ -397,12 +397,12 @@ class ProcessingBase(ast.NodeVisitor):
         if not getattr(self, "closured", None):
             return set()
 
-        # TODO: We don't currently support slices
         if not getattr(node.slice, "value", None):
-            return set()
+            sl_names = self.decode_node(node.slice)
+        else:
+            sl_names = self.decode_node(node.slice.value)
 
         val_names = self.decode_node(node.value)
-        sl_names = self.decode_node(node.slice.value)
 
         decoded_vals = set()
         keys = set()

@@ -49,11 +49,13 @@ class KeyErrProcessor(ProcessingBase):
 
             defi = self.def_manager.get(name)
             if not defi:
+                splitted = name.split(".")
+
                 self.key_errs.add(
                     filename=self.filename,
                     lineno=node.lineno,
-                    namespace=".".join(name.split(".")[:-1]),
-                    key=node.slice.value)
+                    namespace=".".join(splitted[:-1]),
+                    key=splitted[-1])
 
     def is_subscriptable(self, name):
         if re.match(r".*<dict[0-9]+>.*", name):
