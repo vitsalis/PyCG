@@ -52,7 +52,7 @@ class KeyErrProcessor(ProcessingBase):
                 splitted = name.split(".")
 
                 self.key_errs.add(
-                    filename=self.filename,
+                    filename=os.path.relpath(self.filename, self.import_manager.get_mod_dir()),
                     lineno=node.lineno,
                     namespace=".".join(splitted[:-1]),
                     key=splitted[-1])
