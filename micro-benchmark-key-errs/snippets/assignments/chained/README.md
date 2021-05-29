@@ -1,0 +1,1 @@
+A chained assignment.

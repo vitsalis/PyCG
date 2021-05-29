@@ -1,0 +1,1 @@
+Dictionary access inside comprehension.
