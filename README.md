@@ -3,7 +3,7 @@
 PyCG generates call graphs for Python code using static analysis.
 It efficiently supports
 * Higher order functions
-* Twisted class inherritance schemes
+* Twisted class inheritance schemes
 * Automatic discovery of imported modules for further analysis
 * Nested definitions
 
