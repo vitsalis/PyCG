@@ -32,9 +32,10 @@ def get_long_desc():
 def setup_package():
     setup(
         name='pycg',
-        version='0.0.2',
+        version='0.0.4',
         description='Practical Python Call Graphs',
         long_description=get_long_desc(),
+        long_description_content_type="text/markdown",
         url='https://github.com/vitsalis/pycg',
         license='Apache Software License',
         packages=find_packages(),
