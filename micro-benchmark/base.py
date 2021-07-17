@@ -24,6 +24,7 @@ import importlib
 import json
 
 from unittest import TestCase, main
+from pycg import utils
 
 class TestBase(TestCase):
     snippet_dir = ""
@@ -60,7 +61,7 @@ class TestBase(TestCase):
     def get_snippet_output_cg(self, snippet_path):
         main_path = os.path.join(snippet_path, "main.py")
         try:
-            cg = self.cg_class([main_path], snippet_path, -1)
+            cg = self.cg_class([main_path], snippet_path, -1, utils.constants.CALL_GRAPH_OP)
             cg.analyze()
             return cg.output()
         except Exception as e:

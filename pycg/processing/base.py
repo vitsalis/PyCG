@@ -244,9 +244,7 @@ class ProcessingBase(ast.NodeVisitor):
             return [node.n]
         elif isinstance(node, ast.Str):
             return [node.s]
-        elif isinstance(node, int) or isinstance(node, str):
-            return [node]
-        elif isinstance(node, str) or isinstance(node, int):
+        elif self._is_literal(node):
             return [node]
         elif isinstance(node, ast.Dict):
             dict_counter = self.scope_manager.get_scope(self.current_ns).get_dict_counter()
@@ -268,6 +266,9 @@ class ProcessingBase(ast.NodeVisitor):
             return defis
 
         return []
+
+    def _is_literal(self, item):
+        return isinstance(item, int) or isinstance(item, str) or isinstance(item, float)
 
     def _retrieve_base_names(self, node):
         if not isinstance(node, ast.Attribute):
@@ -396,12 +397,13 @@ class ProcessingBase(ast.NodeVisitor):
         if not getattr(self, "closured", None):
             return set()
 
-        # TODO: We don't currently support slices
-        if not getattr(node.slice, "value", None):
-            return set()
+        if getattr(node.slice, "value", None) and self._is_literal(node.slice.value):
+            sl_names = [node.slice.value]
+        else:
+            sl_names = self.decode_node(node.slice)
 
         val_names = self.decode_node(node.value)
-        sl_names = self.decode_node(node.slice.value)
+
         decoded_vals = set()
         keys = set()
         full_names = set()
@@ -418,8 +420,10 @@ class ProcessingBase(ast.NodeVisitor):
                     if not defi:
                         continue
                     keys |= defi.get_lit_pointer().get()
-            elif isinstance(s, str) or isinstance(s, int):
+            elif isinstance(s, str):
                 keys.add(s)
+            elif isinstance(s, int):
+                keys.add(utils.get_int_name(s))
 
         for d in decoded_vals:
             for key in keys:

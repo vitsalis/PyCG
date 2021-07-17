@@ -37,3 +37,6 @@ NEXT_METHOD     = "__next__"
 STATIC_METHOD   = "staticmethod"
 
 INVALID_NAME    = "<**INVALID**>"
+
+CALL_GRAPH_OP   = "call-graph"
+KEY_ERR_OP      = "key-error"

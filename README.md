@@ -27,9 +27,11 @@ pip install pycg
 
 ```
 ~ >>> pycg -h
-usage: pycg [-h] [--package PACKAGE] [--fasten] [--product PRODUCT]
-            [--forge FORGE] [--version VERSION] [--timestamp TIMESTAMP]
-            [--max-iter MAX_ITER] [-o OUTPUT] [entry_point ...]
+usage: __main__.py [-h] [--package PACKAGE] [--fasten] [--product PRODUCT]
+                        [--forge FORGE] [--version VERSION] [--timestamp TIMESTAMP]
+                        [--max-iter MAX_ITER] [--operation {call-graph,key-error}]
+                        [--as-graph-output AS_GRAPH_OUTPUT] [-o OUTPUT]
+                        [entry_point ...]
 
 positional arguments:
   entry_point           Entry points to be processed
@@ -44,21 +46,13 @@ optional arguments:
   --timestamp TIMESTAMP
                         Timestamp of the package's version
   --max-iter MAX_ITER   Maximum number of iterations through source code. If not specified a fix-point iteration will be performed.
+  --operation {call-graph,key-error}
+                        Operation to perform. Choose call-graph for call graph generation (default) or key-error for key error detection on dictionaries.
+  --as-graph-output AS_GRAPH_OUTPUT
+                        Output for the assignment graph
   -o OUTPUT, --output OUTPUT
                         Output path
 ```
-
-where the command line arguments are:
-
-- `entry_point`: A list of paths to Python modules that PyCG will analyze.
-  It is suggested that this list of paths contains only entry points
-  since PyCG automatically discovers all other (local) imported modules.
-- `--package`: The unix path to the module's namespace (i.e. the path from
-  which the module would be executed). This parameter is really important for
-  the correct resolving of imports.
-- `--fasten`: Output the callgraph in FASTEN format.
-- `--output`: The unix path where the output call graph will be stored in JSON
-  format.
 
 The following command line arguments should used only when `--fasten` is
 provied:
@@ -68,7 +62,7 @@ provied:
 - `--version`: The version of the package.
 - `--timestamp` : The timestamp of the package's version.
 
-# Output
+# Call Graph Output
 
 ## Simple JSON format
 
@@ -89,6 +83,30 @@ For an up-to-date description of the FASTEN format refer to the
 [FASTEN
 wiki](https://github.com/fasten-project/fasten/wiki/Extended-Revision-Call-Graph-format#python).
 
+# Key Errors Output
+
+We are currently experimenting on identifying potential invalid dictionary
+accesses on Python dictionaries (key errors).
+The output format for key errors is a list of dictionaries containing:
+- The file name in which the key error was identified
+- The line number inside the file
+- The namespace of the accessed dictionary
+- The key used to access the dictionary
+
+```
+[{
+    "filename": "mod.py",
+    "lineno": 2,
+    "namespace": "mod.<dict1>",
+    "key": "key2"
+},
+{
+    "filename": "mod.py",
+    "lineno": 8,
+    "namespace": "mod.<dict1>",
+    "key": "nokey"
+}]
+```
 
 # Examples
 
