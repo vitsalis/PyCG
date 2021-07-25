@@ -111,12 +111,14 @@ class DefinitionManager(object):
     def complete_definitions(self):
         # THE MOST expensive part of this tool's process
         # TODO: IMPROVE COMPLEXITY
-        def update_pointsto_args(pointsto_args, arg):
+        def update_pointsto_args(pointsto_args, arg, name):
             changed_something = False
             if arg == pointsto_args:
                 return False
             for pointsto_arg in pointsto_args:
                 if not self.defs.get(pointsto_arg, None):
+                    continue
+                if pointsto_arg == name:
                     continue
                 pointsto_arg_def = self.defs[pointsto_arg].get_name_pointer()
                 if pointsto_arg_def == pointsto_args:
@@ -150,6 +152,9 @@ class DefinitionManager(object):
                     # get the name pointer of the points to name
                     if not self.defs.get(name, None):
                         continue
+                    if name == ns:
+                        continue
+
                     pointsto_name_pointer = self.defs[name].get_name_pointer()
                     # iterate the arguments of the definition we're currently iterating
                     for arg_name, arg in current_name_pointer.get_args().items():
@@ -164,7 +169,7 @@ class DefinitionManager(object):
                             if not pointsto_args:
                                 pointsto_name_pointer.add_arg(arg_name, arg)
                                 continue
-                        changed_something = changed_something or update_pointsto_args(pointsto_args, arg)
+                        changed_something = changed_something or update_pointsto_args(pointsto_args, arg, current_def.get_ns())
 
             if not changed_something:
                 break

@@ -65,9 +65,10 @@ class ProcessingBase(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         self.name_stack.append(node.name)
         self.method_stack.append(node.name)
-        self.scope_manager.get_scope(self.current_ns).reset_counters()
-        for stmt in node.body:
-            self.visit(stmt)
+        if self.scope_manager.get_scope(self.current_ns):
+            self.scope_manager.get_scope(self.current_ns).reset_counters()
+            for stmt in node.body:
+                self.visit(stmt)
         self.method_stack.pop()
         self.name_stack.pop()
 
@@ -181,7 +182,7 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(target)
             if isinstance(target, ast.Tuple):
                 for pos, elt in enumerate(target.elts):
-                    if pos < len(decoded):
+                    if not isinstance(decoded, Definition) and pos < len(decoded):
                         do_assign(decoded[pos], elt)
             else:
                 targetns = self._get_target_ns(target)
