@@ -45,9 +45,9 @@ def read_input_file(filename):
     file_content = ""
     with open(filename, "rt") as f:
         for line in f:
-            if re.search(r'\s%|%', line): # searches line with the % symbol
+            if re.search(r'(^\s+\%)|(^\%)', line): # searches line with the % symbol
                 line = "#" + line
-            if re.search(r'\s!|!', line): # searches line with the ! symbol
+            if re.search(r'(^\s+\!)|(^\!)', line): # searches line with the ! symbol
                 line = "#" + line
             file_content = file_content + line
     return file_content
