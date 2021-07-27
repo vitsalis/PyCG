@@ -45,7 +45,9 @@ class CallGraphProcessor(ProcessingBase):
         self.closured = self.def_manager.transitive_closure()
 
     def visit_Module(self, node):
-        self.call_graph.add_node(self.modname, self.modname)
+        # Temporary adding linenumber of the 0th element of node.body array
+        lineno = node.body[0].lineno
+        self.call_graph.add_node(self.modname, self.modname, lineno)
         super().visit_Module(node)
 
     def visit_For(self, node):
@@ -73,7 +75,8 @@ class CallGraphProcessor(ProcessingBase):
         lambda_name = utils.get_lambda_name(counter)
         lambda_fullns = utils.join_ns(self.current_ns, lambda_name)
 
-        self.call_graph.add_node(lambda_fullns, self.modname)
+        lineno = node.lineno
+        self.call_graph.add_node(lambda_fullns, self.modname, lineno)
 
         super().visit_Lambda(node, lambda_name)
 
@@ -109,13 +112,15 @@ class CallGraphProcessor(ProcessingBase):
                 for name in names:
                     self.call_graph.add_edge(self.current_method, name)
 
-        self.call_graph.add_node(utils.join_ns(self.current_ns, node.name), self.modname)
+        lineno = node.lineno
+        self.call_graph.add_node(utils.join_ns(self.current_ns, node.name), self.modname, lineno)
         super().visit_FunctionDef(node)
 
     def visit_Call(self, node):
+        lineno = node.lineno
         def create_ext_edge(name, ext_modname):
             self.add_ext_mod_node(name)
-            self.call_graph.add_node(name, ext_modname)
+            self.call_graph.add_node(name, ext_modname, lineno)
             self.call_graph.add_edge(self.current_method, name)
 
         # First visit the child function so that on the case of

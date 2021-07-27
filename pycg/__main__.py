@@ -66,6 +66,12 @@ def main():
         default=None
     )
     parser.add_argument(
+        "--lineno",
+        help="Produce line numbers graph of the code",
+        action="store_true",
+        default=False
+    )
+    parser.add_argument(
         "-o",
         "--output",
         help="Output path",
@@ -87,6 +93,11 @@ def main():
         output = formatter.generate()
     else:
         output = cg.output_key_errs()
+
+    if args.lineno:
+        formatter_lineno = formats.LineNumber(cg)
+        output_line_graph = formatter_lineno.generate()
+        print ("Line numbers graph is:\n", json.dumps(output_line_graph), "\n")
 
     as_formatter = formats.AsGraph(cg)
 

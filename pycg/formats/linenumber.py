@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 Vitalis Salis.
+# Copyright (c) 2021 Ani Hovhannisyan.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -18,7 +18,27 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from .fasten import Fasten
-from .simple import Simple
-from .as_graph import AsGraph
-from .linenumber import LineNumber
+
+# Line Number class formats the JSON output.
+# By passing --lineno argument only node and its line number is outputed.
+
+import re
+
+from .base import BaseFormatter
+
+from pycg import utils
+
+class LineNumber(BaseFormatter):
+    def __init__(self, cg_generator):
+        self.lines_graph = cg_generator.output_lg()
+
+    def generate(self):
+        output_lg = {}
+        for node in self.lines_graph:
+            linenums = self.lines_graph[node]
+            for i in range(len(linenums)):
+                if linenums[i] in output_lg:
+                    output_lg[linenums[i]].append(node)
+                else:
+                    output_lg[linenums[i]] = [node]
+        return output_lg
