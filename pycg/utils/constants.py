@@ -40,4 +40,4 @@ INVALID_NAME    = "<**INVALID**>"
 
 CALL_GRAPH_OP   = "call-graph"
 KEY_ERR_OP      = "key-error"
-LINENO_JSON     = "_lineno.json"
+JSON_EXT     = "_lineno.json"

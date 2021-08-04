@@ -5,7 +5,7 @@ import argparse
 
 from pycg.pycg import CallGraphGenerator
 from pycg import formats
-from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP, LINENO_JSON
+from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP, JSON_EXT
 from multiprocessing import Process
 
 def parse_cmd_args():
@@ -87,6 +87,22 @@ def parse_cmd_args():
     args = parser.parse_args()
     return args
 
+def prepare_lineno_output(args, cg):
+    formatter = formats.LineNumber(cg)
+    output_lg = formatter.generate()
+    filename = os.path.splitext(os.path.basename(args.entry_point[0]))[0]
+    if args.output:
+        #TODO: Is there any better ways to generate multiple outputs
+        output_dir = args.output + "_pycg"
+        output_json = os.sep.join([output_dir, filename + JSON_EXT])
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+        print("Output path is:", output_dir)
+        with open(output_json, "w+") as f:
+            f.write(json.dumps(output_lg))
+    else:
+        print (json.dumps(output_lg))
+
 def prepare_output(args, cg):
     if args.operation == CALL_GRAPH_OP:
         if args.fasten:
@@ -99,11 +115,7 @@ def prepare_output(args, cg):
         output = cg.output_key_errs()
 
     if args.lineno:
-        formatter_lineno = formats.LineNumber(cg)
-        output_line_graph = formatter_lineno.generate()
-        output_filename = args.entry_point[0] + LINENO_JSON
-        with open(output_filename, "w+") as f:
-            f.write(json.dumps(output_line_graph))
+        prepare_lineno_output(args, cg)
 
     as_formatter = formats.AsGraph(cg)
 
@@ -124,10 +136,10 @@ def run_analysing(args, filename = None):
             cg = CallGraphGenerator(args.entry_point, args.package,
                                 args.max_iter, args.operation)
             cg.analyze()
+            prepare_output(args, cg)
         except Exception as e:
             print("Something went wrong while analysing",
                    args.entry_point, "file.\nError is:", e)
-    prepare_output(args, cg)
 
 # This function walks through directory and parallelly runs
 # separated threads for each independent file.
