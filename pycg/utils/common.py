@@ -45,9 +45,14 @@ def read_input_file(filename):
     file_content = ""
     with open(filename, "rt") as f:
         for line in f:
-            if re.search(r'(^\s+\%)|(^\%)', line): # searches line with the % symbol
+            if re.search(r'(^\s+\%)|(^\%)', line):
                 line = "#" + line
-            if re.search(r'(^\s+\!)|(^\!)', line): # searches line with the ! symbol
+            if re.search(r'(^\s+\!)|(^\!)', line):
                 line = "#" + line
             file_content = file_content + line
     return file_content
+
+def check_file_content(filename):
+    if 0 == os.stat(filename).st_size:
+        msg = " The " + filename + " is an empty file."
+        return msg

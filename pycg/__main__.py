@@ -7,6 +7,7 @@ from pycg.pycg import CallGraphGenerator
 from pycg import formats
 from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP, JSON_EXT
 from multiprocessing import Process
+from pycg import utils
 
 def parse_cmd_args():
     parser = argparse.ArgumentParser()
@@ -129,17 +130,25 @@ def prepare_output(args, cg):
         with open(args.as_graph_output, "w+") as f:
             f.write(json.dumps(as_formatter.generate()))
 
-def run_analysing(args, filename = None):
-    if filename:
+def run_analysing(args, filename):
+    msg = utils.check_file_content(filename[0])
+    if msg:
+        print ("Error occured:", msg)
+        return
+    else:
         args.entry_point = filename
         try:
+            #TODO: make CG argument passing vector understandable
             cg = CallGraphGenerator(args.entry_point, args.package,
                                 args.max_iter, args.operation)
             cg.analyze()
-            prepare_output(args, cg)
         except Exception as e:
-            print("Something went wrong while analysing",
-                   args.entry_point, "file.\nError is:", e)
+            msg = "\nSomething went wrong while analysing" + filename[0]
+            + "Error is:" + str(e)
+            print("Error occured:", msg)
+            return
+        #TODO: Handle the return/raise part properly
+        prepare_output(args, cg)
 
 # This function walks through directory and parallelly runs
 # separated threads for each independent file.
