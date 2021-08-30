@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 Vitalis Salis.
+# Copyright (c) 2021 Vitalis Salis.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -182,8 +182,11 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(target)
             if isinstance(target, ast.Tuple):
                 for pos, elt in enumerate(target.elts):
-                    if not isinstance(decoded, Definition) and pos < len(decoded):
-                        do_assign(decoded[pos], elt)
+                    try:
+                        if pos < len(decoded):
+                            do_assign(decoded[pos], elt)
+                    except TypeError: # hack: for some reason `decoded` is not a list
+                        return
             else:
                 targetns = self._get_target_ns(target)
                 for tns in targetns:
