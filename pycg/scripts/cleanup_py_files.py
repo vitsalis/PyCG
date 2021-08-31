@@ -26,6 +26,7 @@ import argparse
 import os
 import re
 import ast
+import shutil
 
 def parse_cmd_args():
     parser = argparse.ArgumentParser()
@@ -60,6 +61,7 @@ def has_syntax_error(filename):
         ast_parse = ast.parse(file_content)
         return False
     except Exception as e:
+        print("Error occured in:", filename, e)
         return True
 
 def is_empty_files(filepath):
@@ -75,8 +77,7 @@ def move_broken_files_to_dest(broken_files_list, dest):
 
     for f in broken_files_list:
         new_path = os.sep.join([dest, os.path.basename(f)])
-        print("Broken file:", f, "moved to", new_path, "path.")
-        os.rename(f, new_path)
+        shutil.move(f, new_path)
 
 def analyse_directory_content(path, dest):
     fileslist = []
