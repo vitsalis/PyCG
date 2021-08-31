@@ -46,7 +46,9 @@ class CallGraphProcessor(ProcessingBase):
 
     def visit_Module(self, node):
         # Temporary adding linenumber of the 0th element of node.body array
-        lineno = node.body[0].lineno
+        if node.body[0].lineno:
+            lineno = node.body[0].lineno
+        else: lineno = -1
         self.call_graph.add_node(self.modname, self.modname, lineno)
         super().visit_Module(node)
 

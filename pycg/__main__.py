@@ -6,7 +6,6 @@ import argparse
 from pycg.pycg import CallGraphGenerator
 from pycg import formats
 from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP, JSON_EXT
-from multiprocessing import Process
 from pycg import utils
 
 def parse_cmd_args():
@@ -98,12 +97,13 @@ def prepare_lineno_output(args, cg):
         output_json = os.sep.join([output_dir, filename + JSON_EXT])
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
-        print("Output path is:", output_dir)
         with open(output_json, "w+") as f:
+            print("Generated data is in JSON file:", output_lg)
             f.write(json.dumps(output_lg))
     else:
-        print (json.dumps(output_lg))
+        print("Analysing result is:\n", json.dumps(output_lg))
 
+#TODO: Add properly passed args and relatively the output results
 def prepare_output(args, cg):
     if args.operation == CALL_GRAPH_OP:
         if args.fasten:
@@ -115,16 +115,16 @@ def prepare_output(args, cg):
     else:
         output = cg.output_key_errs()
 
-    if args.lineno:
-        prepare_lineno_output(args, cg)
-
     as_formatter = formats.AsGraph(cg)
 
     if args.output:
-        with open(args.output, "w+") as f:
-            f.write(json.dumps(output))
+        if args.lineno:
+            prepare_lineno_output(args, cg)
+        else:
+            with open(args.output, "w+") as f:
+                f.write(json.dumps(output))
     else:
-        print (json.dumps(output))
+        print("Analysing result is:\n", json.dumps(output))
 
     if args.as_graph_output:
         with open(args.as_graph_output, "w+") as f:
@@ -133,7 +133,7 @@ def prepare_output(args, cg):
 def run_analysing(args, filename):
     msg = utils.check_file_content(filename[0])
     if msg:
-        print ("Error occured:", msg)
+        print("Found broken content in file:", filename, msg)
         return
     else:
         args.entry_point = filename
@@ -143,9 +143,8 @@ def run_analysing(args, filename):
                                 args.max_iter, args.operation)
             cg.analyze()
         except Exception as e:
-            msg = "\nSomething went wrong while analysing" + filename[0]
-            + "Error is:" + str(e)
-            print("Error occured:", msg)
+            msg = "\nSomething went wrong while analysing " + filename[0]
+            print(msg, str(e))
             return
         #TODO: Handle the return/raise part properly
         prepare_output(args, cg)
@@ -157,12 +156,9 @@ def analyze_multiple_files(args):
     for (dirpath, dirnames, filenames) in os.walk(args.dir):
         for filename in filenames:
             fileslist.append(os.sep.join([dirpath, filename]))
-    # Following is the multiprocessing part to get call graph of each file
-    process = [None] * len(fileslist)
     for i in range(len(fileslist)):
-        process[i] = Process(target=run_analysing, args=(args, [fileslist[i]]))
-        process[i].start()
-        process[i].join()
+        print("Running analysing for file:", i)
+        run_analysing(args, [fileslist[i]])
 
 def initiate_analyzing(args):
     call_graphs = []
