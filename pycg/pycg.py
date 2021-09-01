@@ -193,6 +193,9 @@ class CallGraphGenerator(object):
     def output_edges(self):
         return self.cg.get_edges()
 
+    def output_lg(self):
+        return self.cg.get_lines_graph()
+
     def _generate_mods(self, mods):
         res = {}
         for mod, node in mods.items():

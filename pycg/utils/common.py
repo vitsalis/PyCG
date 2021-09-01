@@ -19,6 +19,7 @@
 # under the License.
 #
 import os
+import re
 
 def get_lambda_name(counter):
     return "<lambda{}>".format(counter)
@@ -37,3 +38,21 @@ def join_ns(*args):
 
 def to_mod_name(name, package=None):
     return os.path.splitext(name)[0].replace("/", ".")
+
+# This function quotes ipynb (notebook) specific symbols, such as "%" or "!"
+# TODO: Improve regexp for all possible crashing symbols
+def read_input_file(filename):
+    file_content = ""
+    with open(filename, "rt") as f:
+        for line in f:
+            if re.search(r'(^\s+\%)|(^\%)', line):
+                line = "#" + line
+            if re.search(r'(^\s+\!)|(^\!)', line):
+                line = "#" + line
+            file_content = file_content + line
+    return file_content
+
+def check_file_content(filename):
+    if 0 == os.stat(filename).st_size:
+        msg = " The " + filename + " is an empty file."
+        return msg

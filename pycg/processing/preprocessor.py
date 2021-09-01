@@ -371,5 +371,5 @@ class PreProcessor(ProcessingBase):
         if not self.import_manager.get_node(self.modname):
             self.import_manager.create_node(self.modname)
             self.import_manager.set_filepath(self.modname, self.filename)
-
-        self.visit(ast.parse(self.contents, self.filename))
+        ast_tree = ast.parse(self.contents, self.filename)
+        self.visit(ast_tree)
