@@ -98,7 +98,7 @@ def prepare_lineno_output(args, cg):
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
         with open(output_json, "w+") as f:
-            print("Generated data is in JSON file:", output_lg)
+            print("Generated data is in JSON file:", output_json)
             f.write(json.dumps(output_lg))
     else:
         print("Analysing result is:\n", json.dumps(output_lg))
@@ -157,7 +157,7 @@ def analyze_multiple_files(args):
         for filename in filenames:
             fileslist.append(os.sep.join([dirpath, filename]))
     for i in range(len(fileslist)):
-        print("Running analysing for file:", i)
+        print("Running analysing for file:", i, fileslist[i])
         run_analysing(args, [fileslist[i]])
 
 def initiate_analyzing(args):
