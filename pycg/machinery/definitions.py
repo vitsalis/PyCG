@@ -148,7 +148,9 @@ class DefinitionManager(object):
                 # the name pointer of the definition we're currently iterating
                 current_name_pointer = current_def.get_name_pointer()
                 # iterate the names the current definition points to items
-                for name in current_name_pointer.get():
+                # for name in current_name_pointer.get():
+                for name in current_name_pointer.get().copy():
+
                     # get the name pointer of the points to name
                     if not self.defs.get(name, None):
                         continue
