@@ -30,6 +30,14 @@ class CallGraphProcessor(ProcessingBase):
     def __init__(self, filename, modname, import_manager,
             scope_manager, def_manager, class_manager,
             module_manager, call_graph=None, modules_analyzed=None):
+        
+        if filename.endswith('.so'):
+            # print('init encouter so file')
+            self.import_manager = None
+            self.modules_analyzed = set()
+            self.filename = None
+            return
+        
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
@@ -174,8 +182,16 @@ class CallGraphProcessor(ProcessingBase):
                 call_graph=self.call_graph, modules_analyzed=self.get_modules_analyzed())
 
     def analyze(self):
-        self.visit(ast.parse(self.contents, self.filename))
-        self.analyze_submodules()
+        if not self.filename:
+            # print('cgprossor analyze encouter so file')
+            return
+        else:
+            # print('into cgprocessing analyze')
+
+            self.visit(ast.parse(self.contents, self.filename))
+            self.analyze_submodules()
+        # self.visit(ast.parse(self.contents, self.filename))
+        # self.analyze_submodules()
 
     def get_all_reachable_functions(self):
         reachable = set()

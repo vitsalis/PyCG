@@ -30,6 +30,14 @@ class PreProcessor(ProcessingBase):
     def __init__(self, filename, modname,
             import_manager, scope_manager, def_manager, class_manager,
             module_manager, modules_analyzed=None):
+        
+        # print('preprocessor init----{}'.format(filename))
+        if filename.endswith('.so'):
+            # print('init encouter so file')
+            self.import_manager = None
+            self.modules_analyzed = set()
+            return
+
         super().__init__(filename, modname, modules_analyzed)
 
         self.modname = modname
@@ -143,19 +151,32 @@ class PreProcessor(ProcessingBase):
             current_scope = self.scope_manager.get_scope(self.current_ns)
             imported_scope = self.scope_manager.get_scope(modname)
             if tgt_name == "*":
-                for name, defi in imported_scope.get_defs().items():
-                    create_def(current_scope, name, defi)
-                    current_scope.get_def(name).get_name_pointer().add(defi.get_ns())
+                if imported_scope:
+                    for name, defi in imported_scope.get_defs().items():
+                        create_def(current_scope, name, defi)
+                        current_scope.get_def(name).get_name_pointer().add(defi.get_ns())
+                # for name, defi in imported_scope.get_defs().items():
+                #     create_def(current_scope, name, defi)
+                #     current_scope.get_def(name).get_name_pointer().add(defi.get_ns())
             else:
                 # if it exists in the imported scope then copy it
-                defi = imported_scope.get_def(imp_name)
-                if not defi:
-                    # maybe its a full namespace
-                    defi = self.def_manager.get(imp_name)
+                if imported_scope:
+                    defi = imported_scope.get_def(imp_name)
+                    if not defi:
+                        # maybe its a full namespace
+                        defi = self.def_manager.get(imp_name)
 
-                if defi:
-                    create_def(current_scope, tgt_name, defi)
-                    current_scope.get_def(tgt_name).get_name_pointer().add(defi.get_ns())
+                    if defi:
+                        create_def(current_scope, tgt_name, defi)
+                        current_scope.get_def(tgt_name).get_name_pointer().add(defi.get_ns())
+                # defi = imported_scope.get_def(imp_name)
+                # if not defi:
+                #     # maybe its a full namespace
+                #     defi = self.def_manager.get(imp_name)
+
+                # if defi:
+                #     create_def(current_scope, tgt_name, defi)
+                #     current_scope.get_def(tgt_name).get_name_pointer().add(defi.get_ns())
 
         def add_external_def(name, target):
             # add an external def for the name
@@ -368,6 +389,9 @@ class PreProcessor(ProcessingBase):
         super().visit_ClassDef(node)
 
     def analyze(self):
+        if not self.import_manager:
+            # print('analyze not handle')
+            return
         if not self.import_manager.get_node(self.modname):
             self.import_manager.create_node(self.modname)
             self.import_manager.set_filepath(self.modname, self.filename)

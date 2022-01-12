@@ -27,6 +27,15 @@ from pycg import utils
 class PostProcessor(ProcessingBase):
     def __init__(self, input_file, modname, import_manager,
             scope_manager, def_manager, class_manager, module_manager, modules_analyzed=None):
+        
+        # print('postprocessor init----{}'.format(input_file))
+        if input_file.endswith('.so'):
+            # print('init encouter so file')
+            self.import_manager = None
+            self.modules_analyzed = set()
+            self.filename = None
+            return
+
         super().__init__(input_file, modname, modules_analyzed)
         self.import_manager = import_manager
         self.scope_manager = scope_manager
@@ -304,5 +313,12 @@ class PostProcessor(ProcessingBase):
                 self.module_manager, modules_analyzed=self.get_modules_analyzed())
 
     def analyze(self):
-        self.visit(ast.parse(self.contents, self.filename))
-        self.analyze_submodules()
+        if not self.filename:
+            # print('post analyze encouter so file')
+            return
+        else:
+            # print('into postprocessing analyze')
+            self.visit(ast.parse(self.contents, self.filename))
+            self.analyze_submodules()
+        # self.visit(ast.parse(self.contents, self.filename))
+        # self.analyze_submodules()

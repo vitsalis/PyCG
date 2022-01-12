@@ -44,7 +44,14 @@ class ProcessingBase(ast.NodeVisitor):
         return self.modules_analyzed
 
     def merge_modules_analyzed(self, analyzed):
-        self.modules_analyzed = self.modules_analyzed.union(analyzed)
+        # add
+        if not self.modules_analyzed:
+            # print('modules_analyzed not handler')
+            return
+        else:
+            self.modules_analyzed = self.modules_analyzed.union(analyzed)
+
+        # self.modules_analyzed = self.modules_analyzed.union(analyzed)
 
     @property
     def current_ns(self):
