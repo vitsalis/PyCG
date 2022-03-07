@@ -31,7 +31,7 @@ class ScopeManager(object):
         functions = []
         classes = []
         def process(namespace, parent, table):
-            name = table.get_name() if table.get_name() != 'top' else ''
+            name = '' if table.get_name() == 'top' and table.get_lineno() == 0 else 'top'
             if name:
                 fullns = utils.join_ns(namespace, name)
             else:
