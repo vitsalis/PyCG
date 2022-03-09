@@ -234,8 +234,9 @@ class Fasten(BaseFormatter):
                     ])
                 else:
                     graph["internalCalls"].append([
-                        uris[0],
-                        uris[1]
+                        str(uris[0]),
+                        str(uris[1]),
+                        {}
                     ])
         return graph
 
