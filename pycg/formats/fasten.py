@@ -241,9 +241,10 @@ class Fasten(BaseFormatter):
         return graph
 
     def generate(self):
-        return {
+        cg= {
             "product": self.product,
             "forge": self.forge,
+            "nodes": None,
             "generator": "PyCG",
             "depset": self.find_dependencies(self.package),
             "version": self.version,
@@ -252,3 +253,5 @@ class Fasten(BaseFormatter):
             "cha": self.class_hiearchy(),
             "graph": self.get_graph()
         }
+        cg["nodes"] = self.get_unique_and_increment()
+        return cg
