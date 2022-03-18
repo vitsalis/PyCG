@@ -209,7 +209,8 @@ class Fasten(BaseFormatter):
     def get_graph(self):
         graph = {
             "internalCalls": [],
-            "externalCalls": []
+            "externalCalls": [],
+            "resolvedCalls": []
         }
 
         internal, external = self.create_namespaces_map()
@@ -241,17 +242,15 @@ class Fasten(BaseFormatter):
         return graph
 
     def generate(self):
-        cg= {
+        return {
             "product": self.product,
             "forge": self.forge,
-            "nodes": None,
             "generator": "PyCG",
             "depset": self.find_dependencies(self.package),
             "version": self.version,
             "timestamp": self.timestamp,
             "modules": self.get_modules(),
             "cha": self.class_hiearchy(),
-            "graph": self.get_graph()
+            "graph": self.get_graph(),
+            "nodes": self.get_unique_and_increment()
         }
-        cg["nodes"] = self.get_unique_and_increment()
-        return cg
