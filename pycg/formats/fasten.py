@@ -174,28 +174,26 @@ class Fasten(BaseFormatter):
                         namespace=namespace_uri,
                         metadata=dict(first=info['first'], last=info['last']))
                 self.namespace_map[namespace_uri] = unique
-
+        mods = self.add_superclasses(mods)
         return mods
 
-    def class_hiearchy(self):
-        hierarchy = {}
+    def add_superclasses(self, mods):
         for cls_name, cls in self.classes.items():
             cls_uri = self.namespace_map.get(self.to_uri(cls["module"], cls_name))
-            hierarchy[cls_uri] = []
+            mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"]["superClasses"] = []
             for parent in cls["mro"]:
                 if parent == cls_name:
                     continue
 
                 if self.classes.get(parent):
                     parent_uri = self.to_uri(self.classes[parent]["module"], parent)
-                    parent_uri = self.namespace_map.get(parent_uri, parent_uri)
                 else:
                     parent_mod = parent.split(".")[0]
                     parent_uri = self.to_external_uri(parent_mod, parent)
 
-                hierarchy[cls_uri].append(parent_uri)
+                mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"]["superClasses"].append(parent_uri)
 
-        return hierarchy
+        return mods
 
     def create_namespaces_map(self):
         namespaces_maps = [{}, {}]
@@ -249,8 +247,9 @@ class Fasten(BaseFormatter):
             "depset": self.find_dependencies(self.package),
             "version": self.version,
             "timestamp": self.timestamp,
-            "modules": self.get_modules(),
-            "cha": self.class_hiearchy(),
+            "modules": {
+                "internal": self.get_modules()
+            },
             "graph": self.get_graph(),
             "nodes": self.get_unique_and_increment()
         }
