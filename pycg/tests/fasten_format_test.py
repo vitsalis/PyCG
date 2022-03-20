@@ -73,8 +73,8 @@ class FastenFormatTest(TestBase):
         self.assertEqual(output["depset"], [])
         self.assertEqual(output["version"], self.version)
         self.assertEqual(output["timestamp"], self.timestamp)
-        self.assertEqual(output["modules"], {})
-        self.assertEqual(output["graph"], {"internalCalls": [], "externalCalls": []})
+        self.assertEqual(output["modules"], {"internal": {}, "external": {} })
+        self.assertEqual(output["graph"], {"internalCalls": [], "externalCalls": [], "resolvedCalls": []})
 
     def test_uri(self):
         self.cg_generator.functions = ['mod1.mod2.myfunc']
@@ -177,12 +177,12 @@ class FastenFormatTest(TestBase):
             }
         }
 
-    def test_modules(self):
+    def test_internal_modules(self):
         internal_mods = self._get_internal_mods()
         self.cg_generator.internal_mods = internal_mods
 
         formatter = self.get_formatter()
-        modules = formatter.generate()["modules"]
+        modules = formatter.generate()["modules"]["internal"]
 
         # test that keys are URI formatted names
         key_uris = [formatter.to_uri(key) for key in internal_mods]
