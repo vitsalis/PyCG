@@ -41,7 +41,6 @@ class Fasten(BaseFormatter):
         self.forge = forge
         self.version = version
         self.timestamp = timestamp
-        self.external_modules = {}
 
 
     def get_unique_and_increment(self):
@@ -206,30 +205,27 @@ class Fasten(BaseFormatter):
 
         return namespaces_maps
 
-    def add_external_module(self, item):
-        modname = item.split("/")[2]
-        if not modname in self.external_modules:
-            self.external_modules[modname] = {
+    def get_external_modules(self):
+        mods = {}
+        for modname, module in self.external_mods.items():
+            name = self.to_uri(modname)
+            namespaces = module["methods"]
+
+            mods[name] = {
                 "sourceFile": "",
                 "namespaces": {}
             }
 
-        # find out if the uri already exists
-        found = False
-        for k, v in self.external_modules[modname]["namespaces"].items():
-            if v["namespace"] == item:
-                cnt = int(k)
-                found = True
-                break
+            for namespace, info in namespaces.items():
+                if info['name'] != modname:
+                    namespace_uri = self.to_external_uri(modname, info['name'])
 
-        if not found:
-            cnt = self.get_unique_and_increment()
-            self.external_modules[modname]["namespaces"][str(cnt)] = {
-                "namespace": item,
-                "metadata": {}
-            }
-
-        return cnt
+                    unique = self.get_unique_and_increment()
+                    mods[name]["namespaces"][str(unique)] = dict(
+                            namespace=namespace_uri,
+                            metadata={})
+                    self.namespace_map[namespace_uri] = unique
+        return mods
 
     def get_graph(self):
         graph = {
@@ -239,7 +235,6 @@ class Fasten(BaseFormatter):
         }
 
         internal, external = self.create_namespaces_map()
-
         for src, dst in self.edges:
             uris = []
             for node in [src, dst]:
@@ -249,27 +244,23 @@ class Fasten(BaseFormatter):
                     uris.append(self.namespace_map.get(uri, uri))
                 elif node in external:
                     mod = external[node]
-                    uris.append(self.to_external_uri(mod, node))
-
-            if len(uris) == 2:
-                # internal uris have been converted to ints
-                if type(uris[1]) == str and uris[1].startswith("//"):
-                    dst = self.add_external_module(uris[1])
-                    graph["externalCalls"].append([
-                        str(uris[0]),
-                        str(dst),
-                        {}
-                    ])
-                else:
-                    graph["internalCalls"].append([
-                        str(uris[0]),
-                        str(uris[1]),
-                        {}
-                    ])
+                    uris.append(self.namespace_map.get(self.to_external_uri(mod, node)))
+            if dst in external:
+                graph["externalCalls"].append([
+                    str(uris[0]),
+                    str(uris[1]),
+                    {}
+                ])
+            else:
+                graph["internalCalls"].append([
+                    str(uris[0]),
+                    str(uris[1]),
+                    {}
+                ])
         return graph
 
     def generate(self):
-        rcg=  {
+        return  {
             "product": self.product,
             "forge": self.forge,
             "generator": "PyCG",
@@ -278,10 +269,9 @@ class Fasten(BaseFormatter):
             "timestamp": self.timestamp,
             "modules": {
                 "internal": self.get_internal_modules(),
-                "external": None
+                "external": self.get_external_modules()
             },
             "graph": self.get_graph(),
             "nodes": self.get_unique_and_increment()
         }
-        rcg["modules"]["external"] = self.external_modules
-        return rcg
+
