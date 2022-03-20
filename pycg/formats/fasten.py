@@ -217,6 +217,7 @@ class Fasten(BaseFormatter):
             }
 
             for namespace, info in namespaces.items():
+                # We avoid saving the external module as external method
                 if info['name'] != modname:
                     namespace_uri = self.to_external_uri(modname, info['name'])
 
