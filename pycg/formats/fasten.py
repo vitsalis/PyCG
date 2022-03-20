@@ -41,6 +41,8 @@ class Fasten(BaseFormatter):
         self.forge = forge
         self.version = version
         self.timestamp = timestamp
+        self.external_modules = {}
+
 
     def get_unique_and_increment(self):
         unique = self.unique
@@ -153,7 +155,7 @@ class Fasten(BaseFormatter):
 
         return res
 
-    def get_modules(self):
+    def get_internal_modules(self):
         mods = {}
 
         for modname, module in self.internal_mods.items():
@@ -204,6 +206,31 @@ class Fasten(BaseFormatter):
 
         return namespaces_maps
 
+    def add_external_module(self, item):
+        modname = item.split("/")[2]
+        if not modname in self.external_modules:
+            self.external_modules[modname] = {
+                "sourceFile": "",
+                "namespaces": {}
+            }
+
+        # find out if the uri already exists
+        found = False
+        for k, v in self.external_modules[modname]["namespaces"].items():
+            if v["namespace"] == item:
+                cnt = int(k)
+                found = True
+                break
+
+        if not found:
+            cnt = self.get_unique_and_increment()
+            self.external_modules[modname]["namespaces"][str(cnt)] = {
+                "namespace": item,
+                "metadata": {}
+            }
+
+        return cnt
+
     def get_graph(self):
         graph = {
             "internalCalls": [],
@@ -227,9 +254,11 @@ class Fasten(BaseFormatter):
             if len(uris) == 2:
                 # internal uris have been converted to ints
                 if type(uris[1]) == str and uris[1].startswith("//"):
+                    dst = self.add_external_module(uris[1])
                     graph["externalCalls"].append([
-                        uris[0],
-                        uris[1]
+                        str(uris[0]),
+                        str(dst),
+                        {}
                     ])
                 else:
                     graph["internalCalls"].append([
@@ -240,7 +269,7 @@ class Fasten(BaseFormatter):
         return graph
 
     def generate(self):
-        return {
+        rcg=  {
             "product": self.product,
             "forge": self.forge,
             "generator": "PyCG",
@@ -248,8 +277,11 @@ class Fasten(BaseFormatter):
             "version": self.version,
             "timestamp": self.timestamp,
             "modules": {
-                "internal": self.get_modules()
+                "internal": self.get_internal_modules(),
+                "external": None
             },
             "graph": self.get_graph(),
             "nodes": self.get_unique_and_increment()
         }
+        rcg["modules"]["external"] = self.external_modules
+        return rcg
