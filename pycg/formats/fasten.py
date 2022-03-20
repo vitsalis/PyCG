@@ -208,7 +208,7 @@ class Fasten(BaseFormatter):
     def get_external_modules(self):
         mods = {}
         for modname, module in self.external_mods.items():
-            name = self.to_uri(modname)
+            name = self.to_external_uri(modname).split("/")[2]
             namespaces = module["methods"]
 
             mods[name] = {
