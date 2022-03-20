@@ -42,7 +42,6 @@ class Fasten(BaseFormatter):
         self.version = version
         self.timestamp = timestamp
 
-
     def get_unique_and_increment(self):
         unique = self.unique
         self.unique += 1
@@ -176,6 +175,7 @@ class Fasten(BaseFormatter):
                         metadata=dict(first=info['first'], last=info['last']))
                 self.namespace_map[namespace_uri] = unique
         mods = self.add_superclasses(mods)
+
         return mods
 
     def add_superclasses(self, mods):
@@ -235,6 +235,7 @@ class Fasten(BaseFormatter):
         }
 
         internal, external = self.create_namespaces_map()
+
         for src, dst in self.edges:
             uris = []
             for node in [src, dst]:
@@ -260,7 +261,7 @@ class Fasten(BaseFormatter):
         return graph
 
     def generate(self):
-        return  {
+        return {
             "product": self.product,
             "forge": self.forge,
             "generator": "PyCG",
@@ -274,4 +275,3 @@ class Fasten(BaseFormatter):
             "graph": self.get_graph(),
             "nodes": self.get_unique_and_increment()
         }
-
