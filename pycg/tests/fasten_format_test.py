@@ -19,7 +19,7 @@
 # under the License.
 #
 from base import TestBase
-
+from pprint import pprint
 from pycg import utils
 from pycg.formats.fasten import Fasten
 
@@ -230,15 +230,15 @@ class FastenFormatTest(TestBase):
 
         formatter = self.get_formatter()
         fasten_format = formatter.generate()
-        cls_hier = fasten_format["cha"]
-        modules = fasten_format["modules"]
-
+        modules = fasten_format["modules"]["internal"]
         id_mapping = {}
+        total_classes = 0
         for _, mod in modules.items():
             for unique, ns in mod["namespaces"].items():
                 id_mapping[ns["namespace"]] = unique
-
-        self.assertEqual(len(cls_hier.keys()), len(classes.keys()))
+                if "superClasses" in ns["metadata"]:
+                    total_classes += 1
+        self.assertEqual(total_classes, len(classes.keys()))
         for cls_name, cls in classes.items():
             cls_name_uri = id_mapping[formatter.to_uri(cls["module"], cls_name)]
             cls_mro = []
@@ -248,9 +248,9 @@ class FastenFormatTest(TestBase):
                     continue
 
                 if classes.get(item, None): # it is an internal module
-                    cls_mro.append(id_mapping[formatter.to_uri(classes[item]["module"], item)])
+                    cls_mro.append(formatter.to_uri(classes[item]["module"], item))
                 else:
                     cls_mro.append(formatter.to_external_uri(item.split(".")[0], item))
+            
+            self.assertEqual(cls_mro,  modules[formatter.to_uri(cls["module"])]["namespaces"][cls_name_uri]["metadata"]["superClasses"])
 
-            self.assertTrue(cls_name_uri in cls_hier)
-            self.assertEqual(sorted(cls_mro), sorted(cls_hier[cls_name_uri]))
