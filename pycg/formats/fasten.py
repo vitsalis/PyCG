@@ -247,18 +247,20 @@ class Fasten(BaseFormatter):
                 elif node in external:
                     mod = external[node]
                     uris.append(self.namespace_map.get(self.to_external_uri(mod, node)))
-            if dst in external:
-                graph["externalCalls"].append([
-                    str(uris[0]),
-                    str(uris[1]),
-                    {}
-                ])
-            else:
-                graph["internalCalls"].append([
-                    str(uris[0]),
-                    str(uris[1]),
-                    {}
-                ])
+
+            if len(uris) == 2:
+                if dst in external:
+                    graph["externalCalls"].append([
+                        str(uris[0]),
+                        str(uris[1]),
+                        {}
+                    ])
+                else:
+                    graph["internalCalls"].append([
+                        str(uris[0]),
+                        str(uris[1]),
+                        {}
+                    ])
         return graph
 
     def generate(self):
