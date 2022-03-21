@@ -19,7 +19,7 @@
 # under the License.
 #
 from base import TestBase
-from pprint import pprint
+
 from pycg import utils
 from pycg.formats.fasten import Fasten
 
