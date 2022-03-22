@@ -73,8 +73,8 @@ class FastenFormatTest(TestBase):
         self.assertEqual(output["depset"], [])
         self.assertEqual(output["version"], self.version)
         self.assertEqual(output["timestamp"], self.timestamp)
-        self.assertEqual(output["modules"], {})
-        self.assertEqual(output["graph"], {"internalCalls": [], "externalCalls": []})
+        self.assertEqual(output["modules"], {"internal": {}, "external": {} })
+        self.assertEqual(output["graph"], {"internalCalls": [], "externalCalls": [], "resolvedCalls": []})
 
     def test_uri(self):
         self.cg_generator.functions = ['mod1.mod2.myfunc']
@@ -161,6 +161,45 @@ class FastenFormatTest(TestBase):
             }
         }
 
+    def _get_external_mods(self):
+        return {
+            "external": {
+                "filename": None,
+                "methods": {
+                    "external": {
+                        "name": "external",
+                        "first": None,
+                        "last": None
+                    },
+                    "external.Cls": {
+                        "name": "external.Cls",
+                        "first": None,
+                        "last": None
+                    },
+                    "external.method": {
+                        "name": "external.method",
+                        "first": None,
+                        "last": None
+                    },
+                }
+            },
+            "external2": {
+                "filename": None,
+                "methods": {
+                    "external2": {
+                        "name": "external2",
+                        "first": None,
+                        "last": None
+                    },
+                    "external2.method": {
+                        "name": "external2.method",
+                        "first": None,
+                        "last": None
+                    }
+                }
+            }
+        }
+
     def _get_classes(self):
         return {
             "mod1.Cls": {
@@ -177,23 +216,23 @@ class FastenFormatTest(TestBase):
             }
         }
 
-    def test_modules(self):
+    def test_internal_modules(self):
         internal_mods = self._get_internal_mods()
         self.cg_generator.internal_mods = internal_mods
 
         formatter = self.get_formatter()
-        modules = formatter.generate()["modules"]
+        internal_modules = formatter.generate()["modules"]["internal"]
 
         # test that keys are URI formatted names
         key_uris = [formatter.to_uri(key) for key in internal_mods]
-        self.assertEqual(set(key_uris), set(modules.keys()))
-        self.assertEqual(len(key_uris), len(modules.keys()))
+        self.assertEqual(set(key_uris), set(internal_modules.keys()))
+        self.assertEqual(len(key_uris), len(internal_modules.keys()))
 
         # test that SourceFileName are correct
         for name, mod in internal_mods.items():
             self.assertEqual(
                 mod["filename"],
-                modules[formatter.to_uri(name)]["sourceFile"]
+                internal_modules[formatter.to_uri(name)]["sourceFile"]
             )
 
         # test that namespaces contains all methods
@@ -211,9 +250,9 @@ class FastenFormatTest(TestBase):
                     metadata=dict(first=first, last=last)))
 
             # namespaces defined for module
-            result_namespaces = modules[name_uri]["namespaces"].values()
+            result_namespaces = internal_modules[name_uri]["namespaces"].values()
             # unique identifiers defined for module
-            result_ids = modules[name_uri]["namespaces"].keys()
+            result_ids = internal_modules[name_uri]["namespaces"].keys()
 
             # no duplicate ids and same namespaces
             self.assertEqual(
@@ -221,6 +260,40 @@ class FastenFormatTest(TestBase):
                 sorted(result_namespaces, key=lambda x: x["namespace"]))
             self.assertEqual(len(result_ids), len(set(result_ids)))
 
+    def test_external_modules(self):
+        external_mods = self._get_external_mods()
+        self.cg_generator.external_mods = external_mods
+
+        formatter = self.get_formatter()
+        external_modules = formatter.generate()["modules"]["external"]
+
+        # test that external modules keys are identical with the ones generated
+        self.assertEqual(set(external_mods.keys()), set(external_modules.keys()))
+        self.assertEqual(len(external_mods.keys()), len(external_modules.keys()))
+
+        # test that namespaces contains all the expected methods
+        for name, mod in external_mods.items():
+
+            # collect expected namespaces for module
+            expected_namespaces = []
+            for method, info in mod["methods"].items():
+                if method != name:
+                    method_uri = formatter.to_external_uri(name, method)
+                    expected_namespaces.append(dict(
+                        namespace=method_uri,
+                        metadata={}))
+
+            # namespaces defined for external modules
+            result_namespaces = external_modules[name]["namespaces"].values()
+
+            # unique identifiers defined for external modules
+            result_ids = external_modules[name]["namespaces"].keys()
+ 
+            # no duplicate ids and same namespaces
+            self.assertEqual(
+                sorted(expected_namespaces, key=lambda x: x["namespace"]),
+                sorted(result_namespaces, key=lambda x: x["namespace"]))
+            self.assertEqual(len(result_ids), len(set(result_ids)))
 
     def test_hiearchy(self):
         classes = self._get_classes()
@@ -230,15 +303,15 @@ class FastenFormatTest(TestBase):
 
         formatter = self.get_formatter()
         fasten_format = formatter.generate()
-        cls_hier = fasten_format["cha"]
-        modules = fasten_format["modules"]
-
+        modules = fasten_format["modules"]["internal"]
         id_mapping = {}
+        total_classes = 0
         for _, mod in modules.items():
             for unique, ns in mod["namespaces"].items():
                 id_mapping[ns["namespace"]] = unique
-
-        self.assertEqual(len(cls_hier.keys()), len(classes.keys()))
+                if "superClasses" in ns["metadata"]:
+                    total_classes += 1
+        self.assertEqual(total_classes, len(classes.keys()))
         for cls_name, cls in classes.items():
             cls_name_uri = id_mapping[formatter.to_uri(cls["module"], cls_name)]
             cls_mro = []
@@ -248,9 +321,9 @@ class FastenFormatTest(TestBase):
                     continue
 
                 if classes.get(item, None): # it is an internal module
-                    cls_mro.append(id_mapping[formatter.to_uri(classes[item]["module"], item)])
+                    cls_mro.append(formatter.to_uri(classes[item]["module"], item))
                 else:
                     cls_mro.append(formatter.to_external_uri(item.split(".")[0], item))
+            
+            self.assertEqual(cls_mro,  modules[formatter.to_uri(cls["module"])]["namespaces"][cls_name_uri]["metadata"]["superClasses"])
 
-            self.assertTrue(cls_name_uri in cls_hier)
-            self.assertEqual(sorted(cls_mro), sorted(cls_hier[cls_name_uri]))

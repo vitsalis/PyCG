@@ -153,7 +153,7 @@ class Fasten(BaseFormatter):
 
         return res
 
-    def get_modules(self):
+    def get_internal_modules(self):
         mods = {}
 
         for modname, module in self.internal_mods.items():
@@ -174,28 +174,27 @@ class Fasten(BaseFormatter):
                         namespace=namespace_uri,
                         metadata=dict(first=info['first'], last=info['last']))
                 self.namespace_map[namespace_uri] = unique
+        mods = self.add_superclasses(mods)
 
         return mods
 
-    def class_hiearchy(self):
-        hierarchy = {}
+    def add_superclasses(self, mods):
         for cls_name, cls in self.classes.items():
             cls_uri = self.namespace_map.get(self.to_uri(cls["module"], cls_name))
-            hierarchy[cls_uri] = []
+            mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"]["superClasses"] = []
             for parent in cls["mro"]:
                 if parent == cls_name:
                     continue
 
                 if self.classes.get(parent):
                     parent_uri = self.to_uri(self.classes[parent]["module"], parent)
-                    parent_uri = self.namespace_map.get(parent_uri, parent_uri)
                 else:
                     parent_mod = parent.split(".")[0]
                     parent_uri = self.to_external_uri(parent_mod, parent)
 
-                hierarchy[cls_uri].append(parent_uri)
+                mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"]["superClasses"].append(parent_uri)
 
-        return hierarchy
+        return mods
 
     def create_namespaces_map(self):
         namespaces_maps = [{}, {}]
@@ -206,10 +205,34 @@ class Fasten(BaseFormatter):
 
         return namespaces_maps
 
+    def get_external_modules(self):
+        mods = {}
+        for modname, module in self.external_mods.items():
+            name = self.to_external_uri(modname).split("/")[2]
+            namespaces = module["methods"]
+
+            mods[name] = {
+                "sourceFile": "",
+                "namespaces": {}
+            }
+
+            for namespace, info in namespaces.items():
+                # We avoid saving the external module as external method
+                if info['name'] != modname:
+                    namespace_uri = self.to_external_uri(modname, info['name'])
+
+                    unique = self.get_unique_and_increment()
+                    mods[name]["namespaces"][str(unique)] = dict(
+                            namespace=namespace_uri,
+                            metadata={})
+                    self.namespace_map[namespace_uri] = unique
+        return mods
+
     def get_graph(self):
         graph = {
             "internalCalls": [],
-            "externalCalls": []
+            "externalCalls": [],
+            "resolvedCalls": []
         }
 
         internal, external = self.create_namespaces_map()
@@ -223,19 +246,20 @@ class Fasten(BaseFormatter):
                     uris.append(self.namespace_map.get(uri, uri))
                 elif node in external:
                     mod = external[node]
-                    uris.append(self.to_external_uri(mod, node))
+                    uris.append(self.namespace_map.get(self.to_external_uri(mod, node)))
 
             if len(uris) == 2:
-                # internal uris have been converted to ints
-                if type(uris[1]) == str and uris[1].startswith("//"):
+                if dst in external:
                     graph["externalCalls"].append([
-                        uris[0],
-                        uris[1]
+                        str(uris[0]),
+                        str(uris[1]),
+                        {}
                     ])
                 else:
                     graph["internalCalls"].append([
-                        uris[0],
-                        uris[1]
+                        str(uris[0]),
+                        str(uris[1]),
+                        {}
                     ])
         return graph
 
@@ -247,7 +271,10 @@ class Fasten(BaseFormatter):
             "depset": self.find_dependencies(self.package),
             "version": self.version,
             "timestamp": self.timestamp,
-            "modules": self.get_modules(),
-            "cha": self.class_hiearchy(),
-            "graph": self.get_graph()
+            "modules": {
+                "internal": self.get_internal_modules(),
+                "external": self.get_external_modules()
+            },
+            "graph": self.get_graph(),
+            "nodes": self.get_unique_and_increment()
         }
