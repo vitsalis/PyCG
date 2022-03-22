@@ -161,6 +161,45 @@ class FastenFormatTest(TestBase):
             }
         }
 
+    def _get_external_mods(self):
+        return {
+            "external": {
+                "filename": None,
+                "methods": {
+                    "external": {
+                        "name": "external",
+                        "first": None,
+                        "last": None
+                    },
+                    "external.Cls": {
+                        "name": "external.Cls",
+                        "first": None,
+                        "last": None
+                    },
+                    "external.method": {
+                        "name": "external.method",
+                        "first": None,
+                        "last": None
+                    },
+                }
+            },
+            "external2": {
+                "filename": None,
+                "methods": {
+                    "external2": {
+                        "name": "external2",
+                        "first": None,
+                        "last": None
+                    },
+                    "external2.method": {
+                        "name": "external2.method",
+                        "first": None,
+                        "last": None
+                    }
+                }
+            }
+        }
+
     def _get_classes(self):
         return {
             "mod1.Cls": {
@@ -182,18 +221,18 @@ class FastenFormatTest(TestBase):
         self.cg_generator.internal_mods = internal_mods
 
         formatter = self.get_formatter()
-        modules = formatter.generate()["modules"]["internal"]
+        internal_modules = formatter.generate()["modules"]["internal"]
 
         # test that keys are URI formatted names
         key_uris = [formatter.to_uri(key) for key in internal_mods]
-        self.assertEqual(set(key_uris), set(modules.keys()))
-        self.assertEqual(len(key_uris), len(modules.keys()))
+        self.assertEqual(set(key_uris), set(internal_modules.keys()))
+        self.assertEqual(len(key_uris), len(internal_modules.keys()))
 
         # test that SourceFileName are correct
         for name, mod in internal_mods.items():
             self.assertEqual(
                 mod["filename"],
-                modules[formatter.to_uri(name)]["sourceFile"]
+                internal_modules[formatter.to_uri(name)]["sourceFile"]
             )
 
         # test that namespaces contains all methods
@@ -211,9 +250,9 @@ class FastenFormatTest(TestBase):
                     metadata=dict(first=first, last=last)))
 
             # namespaces defined for module
-            result_namespaces = modules[name_uri]["namespaces"].values()
+            result_namespaces = internal_modules[name_uri]["namespaces"].values()
             # unique identifiers defined for module
-            result_ids = modules[name_uri]["namespaces"].keys()
+            result_ids = internal_modules[name_uri]["namespaces"].keys()
 
             # no duplicate ids and same namespaces
             self.assertEqual(
@@ -221,6 +260,40 @@ class FastenFormatTest(TestBase):
                 sorted(result_namespaces, key=lambda x: x["namespace"]))
             self.assertEqual(len(result_ids), len(set(result_ids)))
 
+    def test_external_modules(self):
+        external_mods = self._get_external_mods()
+        self.cg_generator.external_mods = external_mods
+
+        formatter = self.get_formatter()
+        external_modules = formatter.generate()["modules"]["external"]
+
+        # test that external modules keys are identical with the ones generated
+        self.assertEqual(set(external_mods.keys()), set(external_modules.keys()))
+        self.assertEqual(len(external_mods.keys()), len(external_modules.keys()))
+
+        # test that namespaces contains all the expected methods
+        for name, mod in external_mods.items():
+
+            # collect expected namespaces for module
+            expected_namespaces = []
+            for method, info in mod["methods"].items():
+                if method != name:
+                    method_uri = formatter.to_external_uri(name, method)
+                    expected_namespaces.append(dict(
+                        namespace=method_uri,
+                        metadata={}))
+
+            # namespaces defined for external modules
+            result_namespaces = external_modules[name]["namespaces"].values()
+
+            # unique identifiers defined for external modules
+            result_ids = external_modules[name]["namespaces"].keys()
+ 
+            # no duplicate ids and same namespaces
+            self.assertEqual(
+                sorted(expected_namespaces, key=lambda x: x["namespace"]),
+                sorted(result_namespaces, key=lambda x: x["namespace"]))
+            self.assertEqual(len(result_ids), len(set(result_ids)))
 
     def test_hiearchy(self):
         classes = self._get_classes()
