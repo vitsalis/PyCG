@@ -476,7 +476,7 @@ class ProcessingBase(ast.NodeVisitor):
 
         fname = self.import_manager.get_filepath(imp)
 
-        if not fname or not self.import_manager.get_mod_dir() in fname:
+        if not fname or not fname.endswith(".py") or not self.import_manager.get_mod_dir() in fname:
             return
 
         self.import_manager.set_current_mod(imp, fname)
