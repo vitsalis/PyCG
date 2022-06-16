@@ -154,7 +154,7 @@ class ImportManager(object):
         if module_spec is None:
             return importlib.import_module(mod_name, package=package)
 
-         return importlib.util.module_from_spec(module_spec)
+        return importlib.util.module_from_spec(module_spec)
 
     def handle_import(self, name, level):
         # We currently don't support builtin modules because they're frozen.
