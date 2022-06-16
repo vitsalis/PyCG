@@ -150,7 +150,11 @@ class ImportManager(object):
             self.create_edge(mod_name)
             return sys.modules[mod_name]
 
-        return importlib.import_module(mod_name, package=package)
+        module_spec = importlib.util.find_spec(mod_name, package=package)
+        if module_spec is None:
+            return importlib.import_module(mod_name, package=package)
+
+         return importlib.util.module_from_spec(module_spec)
 
     def handle_import(self, name, level):
         # We currently don't support builtin modules because they're frozen.
