@@ -40,6 +40,7 @@ def setup_package():
         license='Apache Software License',
         packages=find_packages(),
         install_requires=[],
+        python_requires='>=3.4',
         entry_points = {
             'console_scripts': [
                 'pycg=pycg.__main__:main',
