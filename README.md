@@ -8,7 +8,7 @@ It efficiently supports
 * Nested definitions
 
 You can read the full methodology as well as a complete evaluation on the
-[ICSE 2021 paper](https://vitsalis.com/papers/pycg.pdf).
+[ICSE 2021 paper](https://arxiv.org/pdf/2103.00587.pdf).
 
 You can cite PyCG as follows.
 Vitalis Salis, Thodoris Sotiropoulos, Panos Louridas, Diomidis Spinellis and Dimitris Mitropoulos.
