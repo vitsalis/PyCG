@@ -87,8 +87,12 @@ class Fasten(BaseFormatter):
         for line in lines:
             if not line:
                 continue
-
-            req = Requirement.parse(line)
+            
+            try:
+                req = Requirement.parse(line)
+            except ValueError as e:
+                # The specific line in the requirements.txt does not follow the Requirements File Format
+                continue
 
             product = req.unsafe_name
             specs = req.specs
