@@ -123,7 +123,8 @@ class ProcessingBase(ast.NodeVisitor):
     def visit_ClassDef(self, node):
         self.name_stack.append(node.name)
         self.method_stack.append(node.name)
-        self.scope_manager.get_scope(self.current_ns).reset_counters()
+        if self.scope_manager.get_scope(self.current_ns):
+            self.scope_manager.get_scope(self.current_ns).reset_counters()
         for stmt in node.body:
             self.visit(stmt)
         self.method_stack.pop()
