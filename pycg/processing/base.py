@@ -33,7 +33,7 @@ class ProcessingBase(ast.NodeVisitor):
 
         self.filename = os.path.abspath(filename)
 
-        with open(filename, "rt") as f:
+        with open(filename, "rt", errors='replace') as f:
             self.contents = f.read()
 
         self.name_stack = []
