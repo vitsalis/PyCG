@@ -25,6 +25,8 @@ import importlib
 import copy
 
 from pycg import utils
+# Explicit import of abc is required in Python 3.10 https://github.com/grpc/grpc/issues/26062
+from importlib import abc
 
 def get_custom_loader(ig_obj):
     """
