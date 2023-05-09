@@ -27,10 +27,11 @@ from pycg.machinery.scopes import ScopeManager, ScopeItem, ScopeError
 class ScopeManagerTest(TestBase):
     def test_handle_module(self):
         class MockTable(object):
-            def __init__(self, name, t, children=[]):
+            def __init__(self, name, t, children=[], lineno=0):
                 self.name = name
                 self.type = t
                 self.children = children
+                self.lineno = lineno
 
             def get_type(self):
                 return self.type
@@ -40,6 +41,9 @@ class ScopeManagerTest(TestBase):
 
             def get_children(self):
                 return self.children
+
+            def get_lineno(self):
+                return self.lineno
 
         grndchld1 = MockTable("grndchld1", "variable", [])
         grndchld2 = MockTable("grndchld2", "function", [])
