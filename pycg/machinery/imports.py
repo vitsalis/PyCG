@@ -21,19 +21,19 @@
 import sys
 import ast
 import os
-import importlib
 import copy
 
-from pycg import utils
-# Explicit import of abc is required in Python 3.10 https://github.com/grpc/grpc/issues/26062
+import importlib
 from importlib import abc
+
+from pycg import utils
 
 def get_custom_loader(ig_obj):
     """
     Closure which returns a custom loader
     that modifies an ImportManager object
     """
-    class CustomLoader(importlib.abc.SourceLoader):
+    class CustomLoader(abc.SourceLoader):
         def __init__(self, fullname, path):
             self.fullname = fullname
             self.path = path
