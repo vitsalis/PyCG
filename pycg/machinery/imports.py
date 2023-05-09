@@ -150,7 +150,11 @@ class ImportManager(object):
             self.create_edge(mod_name)
             return sys.modules[mod_name]
 
-        module_spec = importlib.util.find_spec(mod_name, package=package)
+        try:
+            module_spec = importlib.util.find_spec(mod_name, package=package)
+        except ModuleNotFoundError as a:
+            module_spec = None
+        
         if module_spec is None:
             return importlib.import_module(mod_name, package=package)
 
