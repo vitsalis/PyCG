@@ -20,6 +20,7 @@
 #
 from .base import BaseFormatter
 
+
 class AsGraph(BaseFormatter):
     def __init__(self, cg_generator):
         self.cg_generator = cg_generator

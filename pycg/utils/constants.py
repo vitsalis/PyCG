@@ -18,25 +18,25 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-RETURN_NAME     = "<RETURN>"
-LAMBDA_NAME     = "<LAMBDA_{}>" # needs to be formatted
-BUILTIN_NAME    = "<builtin>"
-EXT_NAME        = "<external>"
+RETURN_NAME = "<RETURN>"
+LAMBDA_NAME = "<LAMBDA_{}>"  # needs to be formatted
+BUILTIN_NAME = "<builtin>"
+EXT_NAME = "<external>"
 
-FUN_DEF         = "FUNCTIONDEF"
-NAME_DEF        = "NAMEDEF"
-MOD_DEF         = "MODULEDEF"
-CLS_DEF         = "CLASSDEF"
-EXT_DEF         = "EXTERNALDEF"
+FUN_DEF = "FUNCTIONDEF"
+NAME_DEF = "NAMEDEF"
+MOD_DEF = "MODULEDEF"
+CLS_DEF = "CLASSDEF"
+EXT_DEF = "EXTERNALDEF"
 
-OBJECT_BASE     = "object"
+OBJECT_BASE = "object"
 
-CLS_INIT        = "__init__"
-ITER_METHOD     = "__iter__"
-NEXT_METHOD     = "__next__"
-STATIC_METHOD   = "staticmethod"
+CLS_INIT = "__init__"
+ITER_METHOD = "__iter__"
+NEXT_METHOD = "__next__"
+STATIC_METHOD = "staticmethod"
 
-INVALID_NAME    = "<**INVALID**>"
+INVALID_NAME = "<**INVALID**>"
 
-CALL_GRAPH_OP   = "call-graph"
-KEY_ERR_OP      = "key-error"
+CALL_GRAPH_OP = "call-graph"
+KEY_ERR_OP = "key-error"

@@ -19,7 +19,9 @@
 # under the License.
 #
 import symtable
+
 from pycg import utils
+
 
 class ScopeManager(object):
     """Manages the scope entries"""
@@ -30,9 +32,10 @@ class ScopeManager(object):
     def handle_module(self, modulename, filename, contents):
         functions = []
         classes = []
+
         def process(namespace, parent, table):
-            if table.get_name() == 'top' and table.get_lineno() == 0:
-                name = ''
+            if table.get_name() == "top" and table.get_lineno() == 0:
+                name = ""
             else:
                 name = table.get_name()
 
@@ -52,7 +55,9 @@ class ScopeManager(object):
             for t in table.get_children():
                 process(fullns, sc, t)
 
-        process(modulename, None, symtable.symtable(contents, filename, compile_type="exec"))
+        process(
+            modulename, None, symtable.symtable(contents, filename, compile_type="exec")
+        )
         return {"functions": functions, "classes": classes}
 
     def handle_assign(self, ns, target, defi):
@@ -80,6 +85,7 @@ class ScopeManager(object):
 
     def get_scopes(self):
         return self.scopes
+
 
 class ScopeItem(object):
     def __init__(self, fullns, parent):
@@ -142,6 +148,7 @@ class ScopeItem(object):
             return
 
         self.defs[name].merge_points_to(to_merge.get_points_to())
+
 
 class ScopeError(Exception):
     pass

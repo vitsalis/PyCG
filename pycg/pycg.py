@@ -18,22 +18,22 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import ast
+import os
 
-from pycg.processing.preprocessor import PreProcessor
-from pycg.processing.postprocessor import PostProcessor
-from pycg.processing.cgprocessor import CallGraphProcessor
-from pycg.processing.keyerrprocessor import KeyErrProcessor
-
-from pycg.machinery.scopes import ScopeManager
+from pycg import utils
+from pycg.machinery.callgraph import CallGraph
+from pycg.machinery.classes import ClassManager
 from pycg.machinery.definitions import DefinitionManager
 from pycg.machinery.imports import ImportManager
-from pycg.machinery.classes import ClassManager
-from pycg.machinery.callgraph import CallGraph
 from pycg.machinery.key_err import KeyErrors
 from pycg.machinery.modules import ModuleManager
-from pycg import utils
+from pycg.machinery.scopes import ScopeManager
+from pycg.processing.cgprocessor import CallGraphProcessor
+from pycg.processing.keyerrprocessor import KeyErrProcessor
+from pycg.processing.postprocessor import PostProcessor
+from pycg.processing.preprocessor import PreProcessor
+
 
 class CallGraphGenerator(object):
     def __init__(self, entry_points, package, max_iter, operation):
@@ -59,12 +59,14 @@ class CallGraphGenerator(object):
         for key, defi in self.def_manager.get_defs().items():
             state["defs"][key] = {
                 "names": defi.get_name_pointer().get().copy(),
-                "lit": defi.get_lit_pointer().get().copy()
+                "lit": defi.get_lit_pointer().get().copy(),
             }
 
         state["scopes"] = {}
         for key, scope in self.scope_manager.get_scopes().items():
-            state["scopes"][key] = set([x.get_ns() for (_, x) in scope.get_defs().items()])
+            state["scopes"][key] = set(
+                [x.get_ns() for (_, x) in scope.get_defs().items()]
+            )
 
         state["classes"] = {}
         for key, ch in self.class_manager.get_classes().items():
@@ -118,8 +120,7 @@ class CallGraphGenerator(object):
         # since pycg can't differentiate between functions
         # coming from __init__ files.
 
-        input_mod = utils.to_mod_name(
-            os.path.relpath(entry, pkg))
+        input_mod = utils.to_mod_name(os.path.relpath(entry, pkg))
         if input_mod.endswith("__init__"):
             input_mod = ".".join(input_mod.split(".")[:-1])
 
@@ -143,43 +144,76 @@ class CallGraphGenerator(object):
                     self.import_manager.set_pkg(input_pkg)
                     self.import_manager.install_hooks()
 
-                processor = cls(input_file, input_mod,
-                                modules_analyzed=modules_analyzed, *args, **kwargs)
+                processor = cls(
+                    input_file,
+                    input_mod,
+                    modules_analyzed=modules_analyzed,
+                    *args,
+                    **kwargs,
+                )
                 processor.analyze()
-                modules_analyzed = modules_analyzed.union(processor.get_modules_analyzed())
+                modules_analyzed = modules_analyzed.union(
+                    processor.get_modules_analyzed()
+                )
 
                 if install_hooks:
                     self.remove_import_hooks()
 
     def analyze(self):
-        self.do_pass(PreProcessor, True,
-                self.import_manager, self.scope_manager, self.def_manager,
-                self.class_manager, self.module_manager)
+        self.do_pass(
+            PreProcessor,
+            True,
+            self.import_manager,
+            self.scope_manager,
+            self.def_manager,
+            self.class_manager,
+            self.module_manager,
+        )
         self.def_manager.complete_definitions()
 
         iter_cnt = 0
-        while (self.max_iter < 0 or iter_cnt < self.max_iter) and (not self.has_converged()):
+        while (self.max_iter < 0 or iter_cnt < self.max_iter) and (
+            not self.has_converged()
+        ):
             self.state = self.extract_state()
             self.reset_counters()
-            self.do_pass(PostProcessor, False,
-                    self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager, self.module_manager)
+            self.do_pass(
+                PostProcessor,
+                False,
+                self.import_manager,
+                self.scope_manager,
+                self.def_manager,
+                self.class_manager,
+                self.module_manager,
+            )
 
             self.def_manager.complete_definitions()
             iter_cnt += 1
 
         self.reset_counters()
         if self.operation == utils.constants.CALL_GRAPH_OP:
-            self.do_pass(CallGraphProcessor, False,
-                    self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager, self.module_manager, call_graph=self.cg)
+            self.do_pass(
+                CallGraphProcessor,
+                False,
+                self.import_manager,
+                self.scope_manager,
+                self.def_manager,
+                self.class_manager,
+                self.module_manager,
+                call_graph=self.cg,
+            )
         elif self.operation == utils.constants.KEY_ERR_OP:
-            self.do_pass(KeyErrProcessor, False,
-                    self.import_manager, self.scope_manager, self.def_manager,
-                    self.class_manager, self.key_errs)
+            self.do_pass(
+                KeyErrProcessor,
+                False,
+                self.import_manager,
+                self.scope_manager,
+                self.def_manager,
+                self.class_manager,
+                self.key_errs,
+            )
         else:
             raise Exception("Invalid operation: " + self.operation)
-
 
     def output(self):
         return self.cg.get()
@@ -197,9 +231,12 @@ class CallGraphGenerator(object):
         res = {}
         for mod, node in mods.items():
             res[mod] = {
-                "filename": os.path.relpath(node.get_filename(), self.package)\
-                    if node.get_filename() else None,
-                "methods": node.get_methods()
+                "filename": (
+                    os.path.relpath(node.get_filename(), self.package)
+                    if node.get_filename()
+                    else None
+                ),
+                "methods": node.get_methods(),
             }
         return res
 
@@ -219,10 +256,7 @@ class CallGraphGenerator(object):
     def output_classes(self):
         classes = {}
         for cls, node in self.class_manager.get_classes().items():
-            classes[cls] = {
-                "mro": node.get_mro(),
-                "module": node.get_module()
-            }
+            classes[cls] = {"mro": node.get_mro(), "module": node.get_module()}
         return classes
 
     def get_as_graph(self):

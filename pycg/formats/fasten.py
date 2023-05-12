@@ -22,9 +22,10 @@ import os
 
 from pkg_resources import Requirement
 
+from pycg import utils
+
 from .base import BaseFormatter
 
-from pycg import utils
 
 class Fasten(BaseFormatter):
     def __init__(self, cg_generator, package, product, forge, version, timestamp):
@@ -56,7 +57,7 @@ class Fasten(BaseFormatter):
                 if not name.startswith(modname + "."):
                     raise Exception("name should start with modname", name, modname)
 
-                cleared = name[len(modname)+1:]
+                cleared = name[len(modname) + 1 :]
 
         suffix = ""
         if name in self.functions:
@@ -66,7 +67,7 @@ class Fasten(BaseFormatter):
 
     def to_external_uri(self, modname, name=""):
         if modname == utils.constants.BUILTIN_NAME:
-            name = name[len(modname)+1:]
+            name = name[len(modname) + 1 :]
             modname = ".builtin"
 
         return "//{}//{}".format(modname.replace("-", "_"), name)
@@ -87,7 +88,7 @@ class Fasten(BaseFormatter):
         for line in lines:
             if not line:
                 continue
-            
+
             try:
                 req = Requirement.parse(line)
             except ValueError as e:
@@ -153,7 +154,9 @@ class Fasten(BaseFormatter):
                     end = (val, True)
             add_range(begin, end)
 
-            res.append({"forge": "PyPI", "product": req.name, "constraints": constraints})
+            res.append(
+                {"forge": "PyPI", "product": req.name, "constraints": constraints}
+            )
 
         return res
 
@@ -165,18 +168,16 @@ class Fasten(BaseFormatter):
             filename = module["filename"]
             namespaces = module["methods"]
 
-            mods[name] = {
-                "sourceFile": filename,
-                "namespaces": {}
-            }
+            mods[name] = {"sourceFile": filename, "namespaces": {}}
 
             for namespace, info in namespaces.items():
-                namespace_uri = self.to_uri(modname, info['name'])
+                namespace_uri = self.to_uri(modname, info["name"])
 
                 unique = self.get_unique_and_increment()
                 mods[name]["namespaces"][unique] = dict(
-                        namespace=namespace_uri,
-                        metadata=dict(first=info['first'], last=info['last']))
+                    namespace=namespace_uri,
+                    metadata=dict(first=info["first"], last=info["last"]),
+                )
                 self.namespace_map[namespace_uri] = unique
         mods = self.add_superclasses(mods)
 
@@ -185,7 +186,9 @@ class Fasten(BaseFormatter):
     def add_superclasses(self, mods):
         for cls_name, cls in self.classes.items():
             cls_uri = self.namespace_map.get(self.to_uri(cls["module"], cls_name))
-            mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"]["superClasses"] = []
+            mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"][
+                "superClasses"
+            ] = []
             for parent in cls["mro"]:
                 if parent == cls_name:
                     continue
@@ -196,7 +199,9 @@ class Fasten(BaseFormatter):
                     parent_mod = parent.split(".")[0]
                     parent_uri = self.to_external_uri(parent_mod, parent)
 
-                mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"]["superClasses"].append(parent_uri)
+                mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"][
+                    "superClasses"
+                ].append(parent_uri)
 
         return mods
 
@@ -215,29 +220,22 @@ class Fasten(BaseFormatter):
             name = self.to_external_uri(modname).split("/")[2]
             namespaces = module["methods"]
 
-            mods[name] = {
-                "sourceFile": "",
-                "namespaces": {}
-            }
+            mods[name] = {"sourceFile": "", "namespaces": {}}
 
             for namespace, info in namespaces.items():
                 # We avoid saving the external module as external method
-                if info['name'] != modname:
-                    namespace_uri = self.to_external_uri(modname, info['name'])
+                if info["name"] != modname:
+                    namespace_uri = self.to_external_uri(modname, info["name"])
 
                     unique = self.get_unique_and_increment()
                     mods[name]["namespaces"][str(unique)] = dict(
-                            namespace=namespace_uri,
-                            metadata={})
+                        namespace=namespace_uri, metadata={}
+                    )
                     self.namespace_map[namespace_uri] = unique
         return mods
 
     def get_graph(self):
-        graph = {
-            "internalCalls": [],
-            "externalCalls": [],
-            "resolvedCalls": []
-        }
+        graph = {"internalCalls": [], "externalCalls": [], "resolvedCalls": []}
 
         internal, external = self.create_namespaces_map()
 
@@ -254,17 +252,9 @@ class Fasten(BaseFormatter):
 
             if len(uris) == 2:
                 if dst in external:
-                    graph["externalCalls"].append([
-                        str(uris[0]),
-                        str(uris[1]),
-                        {}
-                    ])
+                    graph["externalCalls"].append([str(uris[0]), str(uris[1]), {}])
                 else:
-                    graph["internalCalls"].append([
-                        str(uris[0]),
-                        str(uris[1]),
-                        {}
-                    ])
+                    graph["internalCalls"].append([str(uris[0]), str(uris[1]), {}])
         return graph
 
     def generate(self):
@@ -277,8 +267,8 @@ class Fasten(BaseFormatter):
             "timestamp": self.timestamp,
             "modules": {
                 "internal": self.get_internal_modules(),
-                "external": self.get_external_modules()
+                "external": self.get_external_modules(),
             },
             "graph": self.get_graph(),
-            "nodes": self.get_unique_and_increment()
+            "nodes": self.get_unique_and_increment(),
         }

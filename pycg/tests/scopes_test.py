@@ -18,11 +18,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from base import TestBase
-from mock import patch
 import symtable
 
-from pycg.machinery.scopes import ScopeManager, ScopeItem, ScopeError
+from base import TestBase
+from mock import patch
+
+from pycg.machinery.scopes import ScopeError, ScopeItem, ScopeManager
+
 
 class ScopeManagerTest(TestBase):
     def test_handle_module(self):
@@ -58,7 +60,17 @@ class ScopeManagerTest(TestBase):
         with patch.object(symtable, "symtable", return_value=root):
             items = sm.handle_module("root", "", "")
 
-        self.assertEqual(sorted(items["functions"]), sorted(["root.chld1", "root.chld1.grndchld2", "root.chld2", "root.chld3.grndchld4"]))
+        self.assertEqual(
+            sorted(items["functions"]),
+            sorted(
+                [
+                    "root.chld1",
+                    "root.chld1.grndchld2",
+                    "root.chld2",
+                    "root.chld3.grndchld4",
+                ]
+            ),
+        )
         self.assertEqual(sorted(items["classes"]), sorted(["root.chld3"]))
 
         self.assertEqual(sm.get_scope("root").get_ns(), "root")
@@ -73,14 +85,26 @@ class ScopeManagerTest(TestBase):
         self.assertEqual(sm.get_scope("root.chld3").get_ns(), "root.chld3")
         self.assertEqual(sm.get_scope("root.chld3").parent, sm.get_scope("root"))
 
-        self.assertEqual(sm.get_scope("root.chld1.grndchld1").get_ns(), "root.chld1.grndchld1")
-        self.assertEqual(sm.get_scope("root.chld1.grndchld1").parent, sm.get_scope("root.chld1"))
+        self.assertEqual(
+            sm.get_scope("root.chld1.grndchld1").get_ns(), "root.chld1.grndchld1"
+        )
+        self.assertEqual(
+            sm.get_scope("root.chld1.grndchld1").parent, sm.get_scope("root.chld1")
+        )
 
-        self.assertEqual(sm.get_scope("root.chld1.grndchld2").get_ns(), "root.chld1.grndchld2")
-        self.assertEqual(sm.get_scope("root.chld1.grndchld2").parent, sm.get_scope("root.chld1"))
+        self.assertEqual(
+            sm.get_scope("root.chld1.grndchld2").get_ns(), "root.chld1.grndchld2"
+        )
+        self.assertEqual(
+            sm.get_scope("root.chld1.grndchld2").parent, sm.get_scope("root.chld1")
+        )
 
-        self.assertEqual(sm.get_scope("root.chld2.grndchld3").get_ns(), "root.chld2.grndchld3")
-        self.assertEqual(sm.get_scope("root.chld2.grndchld3").parent, sm.get_scope("root.chld2"))
+        self.assertEqual(
+            sm.get_scope("root.chld2.grndchld3").get_ns(), "root.chld2.grndchld3"
+        )
+        self.assertEqual(
+            sm.get_scope("root.chld2.grndchld3").parent, sm.get_scope("root.chld2")
+        )
 
     def test_handle_assign(self):
         sm = ScopeManager()
@@ -89,19 +113,18 @@ class ScopeManagerTest(TestBase):
         sm.handle_assign("root", "name", "value")
         self.assertEqual(sm.get_def("root", "name"), "value")
 
-
     def test_get_def(self):
         sm = ScopeManager()
         root = "ns"
         chld1 = "ns.chld1"
         chld2 = "ns.chld2"
         grndchld = "ns.chld1.chld1"
-        sm.scopes[root] = ScopeItem(root, None) # root scope
-        sm.scopes[chld1] = ScopeItem(chld1, sm.scopes[root]) # 1st child scope
-        sm.scopes[chld2] = ScopeItem(chld2, sm.scopes[root]) # 2nd child scope
-        sm.scopes[grndchld] = ScopeItem(grndchld, sm.scopes[chld1]) # grandchild
+        sm.scopes[root] = ScopeItem(root, None)  # root scope
+        sm.scopes[chld1] = ScopeItem(chld1, sm.scopes[root])  # 1st child scope
+        sm.scopes[chld2] = ScopeItem(chld2, sm.scopes[root])  # 2nd child scope
+        sm.scopes[grndchld] = ScopeItem(grndchld, sm.scopes[chld1])  # grandchild
 
-        grndchld_def = ("var", "grndchild_def") # name, value
+        grndchld_def = ("var", "grndchild_def")  # name, value
         chld1_def1 = ("var", "chld1_def")
         chld1_def2 = ("other_var", "chld1_other_def")
         chld2_def = ("some_var", "chld2_some_var")
@@ -137,6 +160,7 @@ class ScopeManagerTest(TestBase):
         self.assertEqual(sm.get_scope("ns.ns2"), st2)
         # otherwise None should be returned
         self.assertEqual(sm.get_scope("notexist"), None)
+
 
 class ScopeItemTest(TestBase):
     def test_setup(self):

@@ -18,8 +18,9 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from pycg.machinery.pointers import NamePointer, LiteralPointer
 from pycg import utils
+from pycg.machinery.pointers import LiteralPointer, NamePointer
+
 
 class DefinitionManager(object):
     def __init__(self):
@@ -45,7 +46,8 @@ class DefinitionManager(object):
             return_ns = utils.join_ns(ns, utils.constants.RETURN_NAME)
             self.defs[return_ns] = Definition(return_ns, utils.constants.NAME_DEF)
             self.defs[return_ns].get_name_pointer().add(
-                utils.join_ns(defi.get_ns(), utils.constants.RETURN_NAME))
+                utils.join_ns(defi.get_ns(), utils.constants.RETURN_NAME)
+            )
 
         return self.defs[ns]
 
@@ -79,6 +81,7 @@ class DefinitionManager(object):
 
     def transitive_closure(self):
         closured = {}
+
         def dfs(defi):
             name_pointer = defi.get_name_pointer()
             new_set = set()
@@ -150,7 +153,6 @@ class DefinitionManager(object):
                 # iterate the names the current definition points to items
                 # for name in current_name_pointer.get():
                 for name in current_name_pointer.get().copy():
-
                     # get the name pointer of the points to name
                     if not self.defs.get(name, None):
                         continue
@@ -171,7 +173,9 @@ class DefinitionManager(object):
                             if not pointsto_args:
                                 pointsto_name_pointer.add_arg(arg_name, arg)
                                 continue
-                        changed_something = changed_something or update_pointsto_args(pointsto_args, arg, current_def.get_ns())
+                        changed_something = changed_something or update_pointsto_args(
+                            pointsto_args, arg, current_def.get_ns()
+                        )
 
             if not changed_something:
                 break
@@ -183,15 +187,12 @@ class Definition(object):
         utils.constants.MOD_DEF,
         utils.constants.NAME_DEF,
         utils.constants.CLS_DEF,
-        utils.constants.EXT_DEF
+        utils.constants.EXT_DEF,
     ]
 
     def __init__(self, fullns, def_type):
         self.fullns = fullns
-        self.points_to = {
-            "lit": LiteralPointer(),
-            "name": NamePointer()
-        }
+        self.points_to = {"lit": LiteralPointer(), "name": NamePointer()}
         self.def_type = def_type
 
     def get_type(self):
@@ -204,7 +205,7 @@ class Definition(object):
         return self.def_type == utils.constants.EXT_DEF
 
     def is_callable(self):
-        return (self.is_function_def() or self.is_ext_def())
+        return self.is_function_def() or self.is_ext_def()
 
     def get_lit_pointer(self):
         return self.points_to["lit"]
@@ -221,6 +222,7 @@ class Definition(object):
     def merge(self, to_merge):
         for name, pointer in to_merge.points_to.items():
             self.points_to[name].merge(pointer)
+
 
 class DefinitionError(Exception):
     pass

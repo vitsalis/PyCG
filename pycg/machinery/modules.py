@@ -43,6 +43,7 @@ class ModuleManager:
     def get_external_modules(self):
         return self.external
 
+
 class Module:
     def __init__(self, name, filename):
         self.name = name
@@ -60,7 +61,4 @@ class Module:
 
     def add_method(self, method, first=None, last=None):
         if not self.methods.get(method, None):
-            self.methods[method] = dict(
-                    name=method,
-                    first=first,
-                    last=last)
+            self.methods[method] = dict(name=method, first=first, last=last)

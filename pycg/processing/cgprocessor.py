@@ -18,18 +18,28 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import ast
+import os
 
 from pycg import utils
-from pycg.processing.base import ProcessingBase
 from pycg.machinery.callgraph import CallGraph
 from pycg.machinery.definitions import Definition
+from pycg.processing.base import ProcessingBase
+
 
 class CallGraphProcessor(ProcessingBase):
-    def __init__(self, filename, modname, import_manager,
-            scope_manager, def_manager, class_manager,
-            module_manager, call_graph=None, modules_analyzed=None):
+    def __init__(
+        self,
+        filename,
+        modname,
+        import_manager,
+        scope_manager,
+        def_manager,
+        class_manager,
+        module_manager,
+        call_graph=None,
+        modules_analyzed=None,
+    ):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
@@ -109,7 +119,9 @@ class CallGraphProcessor(ProcessingBase):
                 for name in names:
                     self.call_graph.add_edge(self.current_method, name)
 
-        self.call_graph.add_node(utils.join_ns(self.current_ns, node.name), self.modname)
+        self.call_graph.add_node(
+            utils.join_ns(self.current_ns, node.name), self.modname
+        )
         super().visit_FunctionDef(node)
 
     def visit_Call(self, node):
@@ -156,7 +168,7 @@ class CallGraphProcessor(ProcessingBase):
 
                 # TODO: This doesn't work and leads to calls from the decorators
                 #    themselves to the function, creating edges to the first decorator
-                #for decorator in pointer_def.decorator_names:
+                # for decorator in pointer_def.decorator_names:
                 #    dec_names = self.closured.get(decorator, [])
                 #    for dec_name in dec_names:
                 #        if self.def_manager.get(dec_name).get_type() == utils.constants.FUN_DEF:
@@ -169,9 +181,16 @@ class CallGraphProcessor(ProcessingBase):
                     self.call_graph.add_edge(self.current_method, ns)
 
     def analyze_submodules(self):
-        super().analyze_submodules(CallGraphProcessor, self.import_manager,
-                self.scope_manager, self.def_manager, self.class_manager, self.module_manager,
-                call_graph=self.call_graph, modules_analyzed=self.get_modules_analyzed())
+        super().analyze_submodules(
+            CallGraphProcessor,
+            self.import_manager,
+            self.scope_manager,
+            self.def_manager,
+            self.class_manager,
+            self.module_manager,
+            call_graph=self.call_graph,
+            modules_analyzed=self.get_modules_analyzed(),
+        )
 
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
