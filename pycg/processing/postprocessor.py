@@ -75,11 +75,12 @@ class PostProcessor(ProcessingBase):
     def visit_Assign(self, node):
         self._visit_assign(node.value, node.targets)
 
-    def visit_Return(self, node):
-        self._visit_return(node)
+    # Redefined in line 118, 121
+    # def visit_Return(self, node):
+    #     self._visit_return(node)
 
-    def visit_Yield(self, node):
-        self._visit_return(node)
+    # def visit_Yield(self, node):
+    #     self._visit_return(node)
 
     def visit_For(self, node):
         # only handle name targets
@@ -152,7 +153,7 @@ class PostProcessor(ProcessingBase):
                     for name in self.closured.get(d.get_ns(), []):
                         return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)
 
-                        if self.closured.get(return_ns, None) == None:
+                        if self.closured.get(return_ns, None) is None:
                             continue
 
                         new_previous_names = new_previous_names.union(
@@ -214,7 +215,7 @@ class PostProcessor(ProcessingBase):
         list_full_ns = utils.join_ns(self.current_ns, list_name)
 
         # create a scope for the list
-        list_scope = self.scope_manager.create_scope(list_full_ns, current_scope)
+        self.scope_manager.create_scope(list_full_ns, current_scope)
 
         # create a list definition
         list_def = self.def_manager.get(list_full_ns)
@@ -308,7 +309,7 @@ class PostProcessor(ProcessingBase):
             parent_scope = self.scope_manager.get_scope(parent)
             if not parent_scope:
                 continue
-            parent_items = list(parent_scope.get_defs().keys())
+            list(parent_scope.get_defs().keys())
             for key, child_def in current_scope.get_defs().items():
                 if key == "__init__":
                     continue

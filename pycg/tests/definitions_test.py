@@ -21,8 +21,7 @@
 from base import TestBase
 
 from pycg import utils
-from pycg.machinery.definitions import Definition, DefinitionError, DefinitionManager
-from pycg.machinery.pointers import LiteralPointer
+from pycg.machinery.definitions import DefinitionError, DefinitionManager
 
 
 class DefinitionManagerTest(TestBase):
@@ -67,7 +66,7 @@ class DefinitionManagerTest(TestBase):
 
         # for function defs a return def should be created too
         fndefi = dm.create("fndefi", utils.constants.FUN_DEF)
-        fndefi2 = dm.assign("fndefi2", fndefi)
+        dm.assign("fndefi2", fndefi)
         return_def = dm.get("{}.{}".format("fndefi2", utils.constants.RETURN_NAME))
         self.assertIsNotNone(return_def)
         self.assertEqual(

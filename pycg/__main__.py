@@ -1,7 +1,5 @@
 import argparse
 import json
-import os
-import sys
 
 from pycg import formats
 from pycg.pycg import CallGraphGenerator

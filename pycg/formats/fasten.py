@@ -81,9 +81,8 @@ class Fasten(BaseFormatter):
         if not os.path.exists(requirements_path):
             return res
 
-        reqs = []
         with open(requirements_path, "r") as f:
-            lines = [l.strip() for l in f.readlines()]
+            lines = [_l.strip() for _l in f.readlines()]
 
         for line in lines:
             if not line:
@@ -91,11 +90,10 @@ class Fasten(BaseFormatter):
 
             try:
                 req = Requirement.parse(line)
-            except ValueError as e:
+            except ValueError:
                 # The specific line in the requirements.txt does not follow the Requirements File Format
                 continue
 
-            product = req.unsafe_name
             specs = req.specs
 
             constraints = []

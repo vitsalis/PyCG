@@ -22,7 +22,6 @@ import ast
 import os
 
 from pycg import utils
-from pycg.machinery.callgraph import CallGraph
 from pycg.machinery.definitions import Definition
 from pycg.processing.base import ProcessingBase
 
@@ -202,7 +201,7 @@ class CallGraphProcessor(ProcessingBase):
         current_scope = self.scope_manager.get_scope(self.current_ns)
         while current_scope:
             for name, defi in current_scope.get_defs().items():
-                if defi.is_function_def() and not name in names:
+                if defi.is_function_def() and name not in names:
                     closured = self.closured.get(defi.get_ns())
                     for item in closured:
                         reachable.add(item)
@@ -235,7 +234,7 @@ class CallGraphProcessor(ProcessingBase):
             node = node.value
 
         names = []
-        if getattr(node, "id", None) == None:
+        if getattr(node, "id", None) is None:
             return names
 
         defi = self.scope_manager.get_def(self.current_ns, node.id)

@@ -18,7 +18,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import ast
 import os
 
 from pycg import utils
@@ -85,7 +84,7 @@ class CallGraphGenerator(object):
 
         # check defs
         for key, defi in curr_state["defs"].items():
-            if not key in self.state["defs"]:
+            if key not in self.state["defs"]:
                 return False
             if defi["names"] != self.state["defs"][key]["names"]:
                 return False
@@ -94,14 +93,14 @@ class CallGraphGenerator(object):
 
         # check scopes
         for key, scope in curr_state["scopes"].items():
-            if not key in self.state["scopes"]:
+            if key not in self.state["scopes"]:
                 return False
             if scope != self.state["scopes"][key]:
                 return False
 
         # check classes
         for key, ch in curr_state["classes"].items():
-            if not key in self.state["classes"]:
+            if key not in self.state["classes"]:
                 return False
             if ch != self.state["classes"][key]:
                 return False
@@ -139,7 +138,7 @@ class CallGraphGenerator(object):
             if not input_pkg:
                 input_pkg = os.path.dirname(input_file)
 
-            if not input_mod in modules_analyzed:
+            if input_mod not in modules_analyzed:
                 if install_hooks:
                     self.import_manager.set_pkg(input_pkg)
                     self.import_manager.install_hooks()
@@ -221,8 +220,9 @@ class CallGraphGenerator(object):
     def output_key_errs(self):
         return self.key_errs.get()
 
-    def output_edges(self):
-        return self.key_errors
+    # Redefined in line 227
+    # def output_edges(self):
+    #     return self.key_errors
 
     def output_edges(self):
         return self.cg.get_edges()

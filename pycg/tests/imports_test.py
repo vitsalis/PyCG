@@ -30,7 +30,6 @@ from pycg.machinery.imports import ImportManager, ImportManagerError, get_custom
 
 class ImportsTest(TestBase):
     def test_create_node(self):
-        fpath = "input_file.py"
         im = ImportManager()
         im.set_pkg("")
 
@@ -51,7 +50,6 @@ class ImportsTest(TestBase):
             im.create_node(1)
 
     def test_set_filepath(self):
-        fpath = "input_file.py"
         im = ImportManager()
         im.set_pkg("")
 
@@ -123,7 +121,7 @@ class ImportsTest(TestBase):
         fpath = "input_file.py"
         im = ImportManager()
         im.set_pkg("")
-        old_sys_path = copy.deepcopy(sys.path)
+        copy.deepcopy(sys.path)
         im.set_current_mod("node1", fpath)
         im.create_node("node1")
 

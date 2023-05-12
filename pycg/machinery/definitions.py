@@ -29,7 +29,7 @@ class DefinitionManager(object):
     def create(self, ns, def_type):
         if not ns or not isinstance(ns, str):
             raise DefinitionError("Invalid namespace argument")
-        if not def_type in Definition.types:
+        if def_type not in Definition.types:
             raise DefinitionError("Invalid def type argument")
         if self.get(ns):
             raise DefinitionError("Definition already exists")
@@ -86,7 +86,7 @@ class DefinitionManager(object):
             name_pointer = defi.get_name_pointer()
             new_set = set()
             # bottom
-            if not closured.get(defi.get_ns(), None) == None:
+            if closured.get(defi.get_ns(), None) is not None:
                 return closured[defi.get_ns()]
 
             if not name_pointer.get():
@@ -106,7 +106,7 @@ class DefinitionManager(object):
             return closured[defi.get_ns()]
 
         for ns, current_def in self.defs.items():
-            if closured.get(current_def, None) == None:
+            if closured.get(current_def, None) is None:
                 dfs(current_def)
 
         return closured
@@ -132,8 +132,8 @@ class DefinitionManager(object):
                     arg.remove(pointsto_arg)
 
                 for item in arg:
-                    if not item in pointsto_arg_def.get():
-                        if self.defs.get(item, None) != None:
+                    if item not in pointsto_arg_def.get():
+                        if self.defs.get(item, None) is not None:
                             changed_something = True
                     # HACK: this check shouldn't be needed
                     # if we remove this the following breaks:
@@ -163,7 +163,7 @@ class DefinitionManager(object):
                     # iterate the arguments of the definition we're currently iterating
                     for arg_name, arg in current_name_pointer.get_args().items():
                         pos = current_name_pointer.get_pos_of_name(arg_name)
-                        if not pos is None:
+                        if pos is not None:
                             pointsto_args = pointsto_name_pointer.get_pos_arg(pos)
                             if not pointsto_args:
                                 pointsto_name_pointer.add_pos_arg(pos, None, arg)

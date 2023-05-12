@@ -27,7 +27,7 @@ class ClassManager:
             return self.names[name]
 
     def create(self, name, module):
-        if not name in self.names:
+        if name not in self.names:
             cls = ClassNode(name, module)
             self.names[name] = cls
         return self.names[name]
@@ -68,7 +68,7 @@ class ClassNode:
         res = []
         self.mro.reverse()
         for parent in self.mro:
-            if not parent in res:
+            if parent not in res:
                 res.append(parent)
 
         res.reverse()

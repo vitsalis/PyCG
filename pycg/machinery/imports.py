@@ -18,7 +18,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import ast
 import copy
 import importlib
 import os
@@ -122,7 +121,7 @@ class ImportManager(object):
         node["filename"] = os.path.abspath(filename)
 
     def get_imports(self, modname):
-        if not modname in self.import_graph:
+        if modname not in self.import_graph:
             return []
         return self.import_graph[modname]["imports"]
 
@@ -154,7 +153,7 @@ class ImportManager(object):
 
         try:
             module_spec = importlib.util.find_spec(mod_name, package=package)
-        except ModuleNotFoundError as a:
+        except ModuleNotFoundError:
             module_spec = None
 
         if module_spec is None:
@@ -191,7 +190,7 @@ class ImportManager(object):
             try:
                 mod = self._do_import(mn, pkg)
                 break
-            except:
+            except Exception:
                 continue
 
         if not mod:

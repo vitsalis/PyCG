@@ -19,11 +19,9 @@
 # under the License.
 #
 import ast
-import importlib
-import os
 
 from pycg import utils
-from pycg.machinery.definitions import Definition, DefinitionManager
+from pycg.machinery.definitions import Definition
 from pycg.processing.base import ProcessingBase
 
 
@@ -151,7 +149,7 @@ class PreProcessor(ProcessingBase):
 
         def handle_scopes(imp_name, tgt_name, modname):
             def create_def(scope, name, imported_def):
-                if not name in scope.get_defs():
+                if name not in scope.get_defs():
                     def_ns = utils.join_ns(scope.get_ns(), name)
                     defi = self.def_manager.get(def_ns)
                     if not defi:
@@ -208,7 +206,7 @@ class PreProcessor(ProcessingBase):
                 continue
             # only analyze modules under the current directory
             if self.import_manager.get_mod_dir() in fname:
-                if not imported_name in self.modules_analyzed:
+                if imported_name not in self.modules_analyzed:
                     self.analyze_submodule(imported_name)
                 handle_scopes(import_item.name, tgt_name, imported_name)
             else:
@@ -223,7 +221,7 @@ class PreProcessor(ProcessingBase):
             # only analyze modules under the current directory
             if (
                 self.import_manager.get_mod_dir() in fname
-                and not modname in self.modules_analyzed
+                and modname not in self.modules_analyzed
             ):
                 self.analyze_submodule(modname)
 
@@ -330,7 +328,7 @@ class PreProcessor(ProcessingBase):
         self.visit_FunctionDef(node)
 
     def visit_FunctionDef(self, node):
-        fn_def = self._handle_function_def(node, node.name)
+        self._handle_function_def(node, node.name)
 
         super().visit_FunctionDef(node)
 
@@ -362,7 +360,7 @@ class PreProcessor(ProcessingBase):
         if not isinstance(node.func, ast.Name):
             return
 
-        fullns = utils.join_ns(self.current_ns, node.func.id)
+        utils.join_ns(self.current_ns, node.func.id)
 
         defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:

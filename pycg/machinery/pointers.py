@@ -66,12 +66,12 @@ class NamePointer(Pointer):
         return pos
 
     def get_or_create(self, name):
-        if not name in self.args:
+        if name not in self.args:
             self.args[name] = set()
         return self.args[name]
 
     def add_arg(self, name, item):
-        arg = self.get_or_create(name)
+        self.get_or_create(name)
         if isinstance(item, str):
             self.args[name].add(item)
         elif isinstance(item, set):

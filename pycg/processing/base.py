@@ -263,14 +263,14 @@ class ProcessingBase(ast.NodeVisitor):
             ).get_dict_counter()
             dict_name = utils.get_dict_name(dict_counter)
             scope_def = self.scope_manager.get_def(self.current_ns, dict_name)
-            return [self.scope_manager.get_def(self.current_ns, dict_name)]
+            return [scope_def]
         elif isinstance(node, ast.List):
             list_counter = self.scope_manager.get_scope(
                 self.current_ns
             ).get_list_counter()
             list_name = utils.get_list_name(list_counter)
             scope_def = self.scope_manager.get_def(self.current_ns, list_name)
-            return [self.scope_manager.get_def(self.current_ns, list_name)]
+            return [scope_def]
         elif isinstance(node, ast.Subscript):
             names = self.retrieve_subscript_names(node)
             defis = []
@@ -496,7 +496,7 @@ class ProcessingBase(ast.NodeVisitor):
         if (
             not fname
             or not fname.endswith(".py")
-            or not self.import_manager.get_mod_dir() in fname
+            or self.import_manager.get_mod_dir() not in fname
         ):
             return
 

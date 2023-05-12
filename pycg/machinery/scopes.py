@@ -78,7 +78,7 @@ class ScopeManager(object):
             return self.get_scopes()[namespace]
 
     def create_scope(self, namespace, parent):
-        if not namespace in self.scopes:
+        if namespace not in self.scopes:
             sc = ScopeItem(namespace, parent)
             self.scopes[namespace] = sc
         return self.scopes[namespace]
@@ -143,7 +143,7 @@ class ScopeItem(object):
         self.defs[name] = defi
 
     def merge_def(self, name, to_merge):
-        if not name in self.defs:
+        if name not in self.defs:
             self.defs[name] = to_merge
             return
 
