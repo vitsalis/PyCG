@@ -18,26 +18,35 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
-import sys
 import importlib
 import json
-
+import os
+import sys
+from os.path import abspath, dirname
 from unittest import TestCase, main
+
 from pycg import utils
+
+SCRIPT_DIR = dirname(abspath(__file__))
+
 
 class TestBase(TestCase):
     snippet_dir = ""
 
     def setUp(self):
         def error():
-            print ("Invalid module %s.%s" % (cg_mod, cg_class))
-            print ("Set environment variables `CALL_GRAPH_CLASS` and `CALL_GRAPH_MODULE` properly")
+            print("Invalid module %s.%s" % (cg_mod, cg_class))
+            print(
+                "Set environment variables `CALL_GRAPH_CLASS` and `CALL_GRAPH_MODULE`"
+                " properly"
+            )
             sys.exit(1)
 
-        self.snippets_path = os.environ.get("SNIPPETS_PATH")
-        cg_class = os.environ.get('CALL_GRAPH_CLASS', None)
-        cg_mod = os.environ.get('CALL_GRAPH_MODULE', None)
+        self.snippets_path = os.environ.get(
+            "SNIPPETS_PATH", os.path.join(SCRIPT_DIR, "snippets")
+        )
+        cg_class = os.environ.get("CALL_GRAPH_CLASS", "CallGraphGenerator")
+        cg_mod = os.environ.get("CALL_GRAPH_MODULE", "pycg.pycg")
         if not cg_class or not cg_mod:
             error()
         try:
@@ -61,7 +70,9 @@ class TestBase(TestCase):
     def get_snippet_output_cg(self, snippet_path):
         main_path = os.path.join(snippet_path, "main.py")
         try:
-            cg = self.cg_class([main_path], snippet_path, -1, utils.constants.CALL_GRAPH_OP)
+            cg = self.cg_class(
+                [main_path], snippet_path, -1, utils.constants.CALL_GRAPH_OP
+            )
             cg.analyze()
             return cg.output()
         except Exception as e:
