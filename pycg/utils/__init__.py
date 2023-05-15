@@ -18,5 +18,5 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from .common import *
 from . import constants
+from .common import *  # noqa

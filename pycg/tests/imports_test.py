@@ -18,17 +18,18 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import sys
 import copy
-import mock
 import os
+import sys
 
+import mock
 from base import TestBase
+
 from pycg.machinery.imports import ImportManager, ImportManagerError, get_custom_loader
+
 
 class ImportsTest(TestBase):
     def test_create_node(self):
-        fpath = "input_file.py"
         im = ImportManager()
         im.set_pkg("")
 
@@ -49,7 +50,6 @@ class ImportsTest(TestBase):
             im.create_node(1)
 
     def test_set_filepath(self):
-        fpath = "input_file.py"
         im = ImportManager()
         im.set_pkg("")
 
@@ -97,7 +97,6 @@ class ImportsTest(TestBase):
         with self.assertRaises(ImportManagerError):
             im.create_edge(1)
 
-
     def test_hooks(self):
         input_file = "somedir/somedir/input_file.py"
         im = ImportManager()
@@ -106,7 +105,9 @@ class ImportsTest(TestBase):
         old_path_hooks = copy.deepcopy(sys.path_hooks)
         custom_loader = "custom_loader"
 
-        with mock.patch("importlib.machinery.FileFinder.path_hook", return_value=custom_loader):
+        with mock.patch(
+            "importlib.machinery.FileFinder.path_hook", return_value=custom_loader
+        ):
             im.install_hooks()
 
         self.assertEqual(sys.path_hooks[0], custom_loader)
@@ -120,7 +121,7 @@ class ImportsTest(TestBase):
         fpath = "input_file.py"
         im = ImportManager()
         im.set_pkg("")
-        old_sys_path = copy.deepcopy(sys.path)
+        copy.deepcopy(sys.path)
         im.set_current_mod("node1", fpath)
         im.create_node("node1")
 
@@ -170,12 +171,18 @@ class ImportsTest(TestBase):
             def __init__(self, name):
                 self.__file__ = name
 
-        with mock.patch("importlib.import_module", return_value=MockImport(os.path.abspath("mod2.py"))) as mock_import:
+        with mock.patch(
+            "importlib.import_module",
+            return_value=MockImport(os.path.abspath("mod2.py")),
+        ) as mock_import:
             modname = im.handle_import("mod2", 0)
             self.assertEqual(modname, "mod2")
             mock_import.assert_called_with("mod2", package="")
 
-        with mock.patch("importlib.import_module", return_value=MockImport(os.path.abspath("mod2.py"))) as mock_import:
+        with mock.patch(
+            "importlib.import_module",
+            return_value=MockImport(os.path.abspath("mod2.py")),
+        ) as mock_import:
             im.set_current_mod("mod1.mod3", fpath)
             modname = im.handle_import("mod2", 1)
             self.assertEqual(modname, "mod2")

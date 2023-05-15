@@ -19,7 +19,9 @@
 # under the License.
 #
 import symtable
+
 from pycg import utils
+
 
 class ScopeManager(object):
     """Manages the scope entries"""
@@ -30,9 +32,10 @@ class ScopeManager(object):
     def handle_module(self, modulename, filename, contents):
         functions = []
         classes = []
+
         def process(namespace, parent, table):
-            if table.get_name() == 'top' and table.get_lineno() == 0:
-                name = ''
+            if table.get_name() == "top" and table.get_lineno() == 0:
+                name = ""
             else:
                 name = table.get_name()
 
@@ -52,7 +55,9 @@ class ScopeManager(object):
             for t in table.get_children():
                 process(fullns, sc, t)
 
-        process(modulename, None, symtable.symtable(contents, filename, compile_type="exec"))
+        process(
+            modulename, None, symtable.symtable(contents, filename, compile_type="exec")
+        )
         return {"functions": functions, "classes": classes}
 
     def handle_assign(self, ns, target, defi):
@@ -73,13 +78,14 @@ class ScopeManager(object):
             return self.get_scopes()[namespace]
 
     def create_scope(self, namespace, parent):
-        if not namespace in self.scopes:
+        if namespace not in self.scopes:
             sc = ScopeItem(namespace, parent)
             self.scopes[namespace] = sc
         return self.scopes[namespace]
 
     def get_scopes(self):
         return self.scopes
+
 
 class ScopeItem(object):
     def __init__(self, fullns, parent):
@@ -137,11 +143,12 @@ class ScopeItem(object):
         self.defs[name] = defi
 
     def merge_def(self, name, to_merge):
-        if not name in self.defs:
+        if name not in self.defs:
             self.defs[name] = to_merge
             return
 
         self.defs[name].merge_points_to(to_merge.get_points_to())
+
 
 class ScopeError(Exception):
     pass

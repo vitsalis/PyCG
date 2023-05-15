@@ -20,8 +20,8 @@
 #
 from base import TestBase
 
-from pycg.machinery.pointers import Pointer, NamePointer,\
-    LiteralPointer, PointerError
+from pycg.machinery.pointers import LiteralPointer, NamePointer, Pointer, PointerError
+
 
 class PointerTest(TestBase):
     def test_merge(self):

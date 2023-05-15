@@ -19,17 +19,24 @@
 # under the License.
 #
 import ast
-import os
-import importlib
 
-from pycg.machinery.definitions import DefinitionManager, Definition
 from pycg import utils
+from pycg.machinery.definitions import Definition
 from pycg.processing.base import ProcessingBase
 
+
 class PreProcessor(ProcessingBase):
-    def __init__(self, filename, modname,
-            import_manager, scope_manager, def_manager, class_manager,
-            module_manager, modules_analyzed=None):
+    def __init__(
+        self,
+        filename,
+        modname,
+        import_manager,
+        scope_manager,
+        def_manager,
+        class_manager,
+        module_manager,
+        modules_analyzed=None,
+    ):
         super().__init__(filename, modname, modules_analyzed)
 
         self.modname = modname
@@ -40,7 +47,6 @@ class PreProcessor(ProcessingBase):
         self.def_manager = def_manager
         self.class_manager = class_manager
         self.module_manager = module_manager
-
 
     def _get_fun_defaults(self, node):
         defaults = {}
@@ -62,9 +68,16 @@ class PreProcessor(ProcessingBase):
         return defaults
 
     def analyze_submodule(self, modname):
-        super().analyze_submodule(PreProcessor, modname,
-            self.import_manager, self.scope_manager, self.def_manager, self.class_manager,
-            self.module_manager, modules_analyzed=self.get_modules_analyzed())
+        super().analyze_submodule(
+            PreProcessor,
+            modname,
+            self.import_manager,
+            self.scope_manager,
+            self.def_manager,
+            self.class_manager,
+            self.module_manager,
+            modules_analyzed=self.get_modules_analyzed(),
+        )
 
     def visit_Module(self, node):
         def iterate_mod_items(items, const):
@@ -91,13 +104,16 @@ class PreProcessor(ProcessingBase):
         root_sc = self.scope_manager.get_scope(self.modname)
         if not root_sc:
             # initialize module scopes
-            items = self.scope_manager.handle_module(self.modname,
-                self.filename, self.contents)
+            items = self.scope_manager.handle_module(
+                self.modname, self.filename, self.contents
+            )
 
             root_sc = self.scope_manager.get_scope(self.modname)
             root_defi = self.def_manager.get(self.modname)
             if not root_defi:
-                root_defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
+                root_defi = self.def_manager.create(
+                    self.modname, utils.constants.MOD_DEF
+                )
             root_sc.add_def(self.modname.split(".")[-1], root_defi)
 
             # create function and class defs and add them to their scope
@@ -113,7 +129,7 @@ class PreProcessor(ProcessingBase):
 
         super().visit_Module(node)
 
-    def visit_Import(self, node, prefix='', level=0):
+    def visit_Import(self, node, prefix="", level=0):
         """
         For imports of the form
             `from something import anything`
@@ -123,6 +139,7 @@ class PreProcessor(ProcessingBase):
         level is set to a number indicating the number
         of parent directories (e.g. in this case level=1)
         """
+
         def handle_src_name(name):
             # Get the module name and prepend prefix if necessary
             src_name = name
@@ -132,7 +149,7 @@ class PreProcessor(ProcessingBase):
 
         def handle_scopes(imp_name, tgt_name, modname):
             def create_def(scope, name, imported_def):
-                if not name in scope.get_defs():
+                if name not in scope.get_defs():
                     def_ns = utils.join_ns(scope.get_ns(), name)
                     defi = self.def_manager.get(def_ns)
                     if not defi:
@@ -155,7 +172,9 @@ class PreProcessor(ProcessingBase):
 
                 if defi:
                     create_def(current_scope, tgt_name, defi)
-                    current_scope.get_def(tgt_name).get_name_pointer().add(defi.get_ns())
+                    current_scope.get_def(tgt_name).get_name_pointer().add(
+                        defi.get_ns()
+                    )
 
         def add_external_def(name, target):
             # add an external def for the name
@@ -187,7 +206,7 @@ class PreProcessor(ProcessingBase):
                 continue
             # only analyze modules under the current directory
             if self.import_manager.get_mod_dir() in fname:
-                if not imported_name in self.modules_analyzed:
+                if imported_name not in self.modules_analyzed:
                     self.analyze_submodule(imported_name)
                 handle_scopes(import_item.name, tgt_name, imported_name)
             else:
@@ -200,16 +219,21 @@ class PreProcessor(ProcessingBase):
             if not fname:
                 continue
             # only analyze modules under the current directory
-            if self.import_manager.get_mod_dir() in fname and \
-                not modname in self.modules_analyzed:
-                    self.analyze_submodule(modname)
-
+            if (
+                self.import_manager.get_mod_dir() in fname
+                and modname not in self.modules_analyzed
+            ):
+                self.analyze_submodule(modname)
 
     def visit_ImportFrom(self, node):
         self.visit_Import(node, prefix=node.module, level=node.level)
 
     def _get_last_line(self, node):
-        lines = sorted(list(ast.walk(node)), key=lambda x: x.lineno if hasattr(x, "lineno") else 0, reverse=True)
+        lines = sorted(
+            list(ast.walk(node)),
+            key=lambda x: x.lineno if hasattr(x, "lineno") else 0,
+            reverse=True,
+        )
         if not lines:
             return node.lineno
 
@@ -238,17 +262,26 @@ class PreProcessor(ProcessingBase):
         is_static_method = False
         if hasattr(node, "decorator_list"):
             for decorator in node.decorator_list:
-                if isinstance(decorator, ast.Name) and decorator.id == utils.constants.STATIC_METHOD:
+                if (
+                    isinstance(decorator, ast.Name)
+                    and decorator.id == utils.constants.STATIC_METHOD
+                ):
                     is_static_method = True
 
-        if current_def.get_type() == utils.constants.CLS_DEF and not is_static_method and node.args.args:
+        if (
+            current_def.get_type() == utils.constants.CLS_DEF
+            and not is_static_method
+            and node.args.args
+        ):
             arg_ns = utils.join_ns(fn_def.get_ns(), node.args.args[0].arg)
             arg_def = self.def_manager.get(arg_ns)
             if not arg_def:
                 arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
             arg_def.get_name_pointer().add(current_def.get_ns())
 
-            self.scope_manager.handle_assign(fn_def.get_ns(), arg_def.get_name(), arg_def)
+            self.scope_manager.handle_assign(
+                fn_def.get_ns(), arg_def.get_name(), arg_def
+            )
             node.args.args = node.args.args[1:]
 
         for pos, arg in enumerate(node.args.args):
@@ -263,9 +296,9 @@ class PreProcessor(ProcessingBase):
             defs_to_create.append(arg_ns)
 
         # TODO: Add support for kwargs and varargs
-        #if node.args.kwarg:
+        # if node.args.kwarg:
         #    pass
-        #if node.args.vararg:
+        # if node.args.vararg:
         #    pass
 
         for arg_ns in defs_to_create:
@@ -273,7 +306,9 @@ class PreProcessor(ProcessingBase):
             if not arg_def:
                 arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
 
-            self.scope_manager.handle_assign(fn_def.get_ns(), arg_def.get_name(), arg_def)
+            self.scope_manager.handle_assign(
+                fn_def.get_ns(), arg_def.get_name(), arg_def
+            )
 
             # has a default
             arg_name = arg_ns.split(".")[-1]
@@ -293,7 +328,7 @@ class PreProcessor(ProcessingBase):
         self.visit_FunctionDef(node)
 
     def visit_FunctionDef(self, node):
-        fn_def = self._handle_function_def(node, node.name)
+        self._handle_function_def(node, node.name)
 
         super().visit_FunctionDef(node)
 
@@ -303,7 +338,9 @@ class PreProcessor(ProcessingBase):
             target_ns = utils.join_ns(self.current_ns, node.target.id)
             if not self.def_manager.get(target_ns):
                 defi = self.def_manager.create(target_ns, utils.constants.NAME_DEF)
-                self.scope_manager.get_scope(self.current_ns).add_def(node.target.id, defi)
+                self.scope_manager.get_scope(self.current_ns).add_def(
+                    node.target.id, defi
+                )
         super().visit_For(node)
 
     def visit_Assign(self, node):
@@ -323,14 +360,16 @@ class PreProcessor(ProcessingBase):
         if not isinstance(node.func, ast.Name):
             return
 
-        fullns = utils.join_ns(self.current_ns, node.func.id)
+        utils.join_ns(self.current_ns, node.func.id)
 
         defi = self.scope_manager.get_def(self.current_ns, node.func.id)
         if not defi:
             return
 
         if defi.get_type() == utils.constants.CLS_DEF:
-            defi = self.def_manager.get(utils.join_ns(defi.get_ns(), utils.constants.CLS_INIT))
+            defi = self.def_manager.get(
+                utils.join_ns(defi.get_ns(), utils.constants.CLS_INIT)
+            )
             if not defi:
                 return
 

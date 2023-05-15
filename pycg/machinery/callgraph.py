@@ -29,7 +29,7 @@ class CallGraph(object):
         if not name:
             raise CallGraphError("Empty node name")
 
-        if not name in self.cg:
+        if name not in self.cg:
             self.cg[name] = set()
             self.modnames[name] = modname
 

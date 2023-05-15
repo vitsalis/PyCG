@@ -18,16 +18,26 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import os
 import ast
+import os
 import re
 
 from pycg import utils
 from pycg.processing.base import ProcessingBase
 
+
 class KeyErrProcessor(ProcessingBase):
-    def __init__(self, filename, modname, import_manager,
-            scope_manager, def_manager, class_manager, key_errs, modules_analyzed=None):
+    def __init__(
+        self,
+        filename,
+        modname,
+        import_manager,
+        scope_manager,
+        def_manager,
+        class_manager,
+        key_errs,
+        modules_analyzed=None,
+    ):
         super().__init__(filename, modname, modules_analyzed)
         # parent directory of file
         self.parent_dir = os.path.dirname(filename)
@@ -54,10 +64,13 @@ class KeyErrProcessor(ProcessingBase):
                 splitted = name.split(".")
 
                 self.key_errs.add(
-                    filename=os.path.relpath(self.filename, self.import_manager.get_mod_dir()),
+                    filename=os.path.relpath(
+                        self.filename, self.import_manager.get_mod_dir()
+                    ),
                     lineno=node.lineno,
                     namespace=".".join(splitted[:-1]),
-                    key=splitted[-1])
+                    key=splitted[-1],
+                )
 
     def is_subscriptable(self, name):
         if re.match(r".*<dict[0-9]+>.*", name):
@@ -66,9 +79,15 @@ class KeyErrProcessor(ProcessingBase):
         return False
 
     def analyze_submodules(self):
-        super().analyze_submodules(KeyErrProcessor, self.import_manager,
-                self.scope_manager, self.def_manager, self.class_manager,
-                self.key_errs, modules_analyzed=self.get_modules_analyzed())
+        super().analyze_submodules(
+            KeyErrProcessor,
+            self.import_manager,
+            self.scope_manager,
+            self.def_manager,
+            self.class_manager,
+            self.key_errs,
+            modules_analyzed=self.get_modules_analyzed(),
+        )
 
     def analyze(self):
         self.visit(ast.parse(self.contents, self.filename))
@@ -77,6 +96,6 @@ class KeyErrProcessor(ProcessingBase):
     def visit_Lambda(self, node):
         counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
         lambda_name = utils.get_lambda_name(counter)
-        lambda_fullns = utils.join_ns(self.current_ns, lambda_name)
+        utils.join_ns(self.current_ns, lambda_name)
 
         super().visit_Lambda(node, lambda_name)

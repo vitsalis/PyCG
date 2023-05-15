@@ -34,6 +34,7 @@ class Pointer(object):
     def merge(self, pointer):
         self.values = self.values.union(pointer.values)
 
+
 class LiteralPointer(Pointer):
     STR_LIT = "STRING"
     INT_LIT = "INTEGER"
@@ -47,6 +48,7 @@ class LiteralPointer(Pointer):
             self.values.add(item)
         else:
             self.values.add(self.UNK_LIT)
+
 
 class NamePointer(Pointer):
     def __init__(self):
@@ -64,12 +66,12 @@ class NamePointer(Pointer):
         return pos
 
     def get_or_create(self, name):
-        if not name in self.args:
+        if name not in self.args:
             self.args[name] = set()
         return self.args[name]
 
     def add_arg(self, name, item):
-        arg = self.get_or_create(name)
+        self.get_or_create(name)
         if isinstance(item, str):
             self.args[name].add(item)
         elif isinstance(item, set):
@@ -141,6 +143,7 @@ class NamePointer(Pointer):
                 self.pos_to_name[pos] = name
             for name, arg in pointer.get_args().items():
                 self.add_arg(name, arg)
+
 
 class PointerError(Exception):
     pass

@@ -23,12 +23,13 @@ from base import TestBase
 from pycg import utils
 from pycg.formats.fasten import Fasten
 
+
 class FastenFormatTest(TestBase):
-    FORGE       = "pypi"
-    PRODUCT     = "myproduct"
-    PACKAGE     = "mock_pkg"
-    VERSION     = "0.2.1"
-    TIMESTAMP   = 128
+    FORGE = "pypi"
+    PRODUCT = "myproduct"
+    PACKAGE = "mock_pkg"
+    VERSION = "0.2.1"
+    TIMESTAMP = 128
 
     def setUp(self):
         class CGGenerator:
@@ -61,8 +62,14 @@ class FastenFormatTest(TestBase):
         self.timestamp = self.TIMESTAMP
 
     def get_formatter(self):
-        return Fasten(self.cg_generator, self.package, self.product,\
-            self.forge, self.version, self.timestamp)
+        return Fasten(
+            self.cg_generator,
+            self.package,
+            self.product,
+            self.forge,
+            self.version,
+            self.timestamp,
+        )
 
     def test_cli_args(self):
         formatter = self.get_formatter()
@@ -73,61 +80,64 @@ class FastenFormatTest(TestBase):
         self.assertEqual(output["depset"], [])
         self.assertEqual(output["version"], self.version)
         self.assertEqual(output["timestamp"], self.timestamp)
-        self.assertEqual(output["modules"], {"internal": {}, "external": {} })
-        self.assertEqual(output["graph"], {"internalCalls": [], "externalCalls": [], "resolvedCalls": []})
+        self.assertEqual(output["modules"], {"internal": {}, "external": {}})
+        self.assertEqual(
+            output["graph"],
+            {"internalCalls": [], "externalCalls": [], "resolvedCalls": []},
+        )
 
     def test_uri(self):
-        self.cg_generator.functions = ['mod1.mod2.myfunc']
+        self.cg_generator.functions = ["mod1.mod2.myfunc"]
         formatter = self.get_formatter()
 
         ### Internal uri check
         # test modname without method
-        self.assertEqual(formatter.to_uri('mymod'), '/mymod/')
-        self.assertEqual(formatter.to_uri('mymod.mod1'), '/mymod.mod1/')
+        self.assertEqual(formatter.to_uri("mymod"), "/mymod/")
+        self.assertEqual(formatter.to_uri("mymod.mod1"), "/mymod.mod1/")
         # test method starting with modname
-        self.assertEqual(formatter.to_uri('mymod.mod1', 'mymod.mod1.fn'), '/mymod.mod1/fn')
-        self.assertEqual(formatter.to_uri('mymod.mod1', 'mymod.mod1.cls.fn'), '/mymod.mod1/cls.fn')
+        self.assertEqual(
+            formatter.to_uri("mymod.mod1", "mymod.mod1.fn"), "/mymod.mod1/fn"
+        )
+        self.assertEqual(
+            formatter.to_uri("mymod.mod1", "mymod.mod1.cls.fn"), "/mymod.mod1/cls.fn"
+        )
         # test method starting with modname but without . inbetween
         with self.assertRaises(Exception):
-            formatter.to_uri('mymod.mod1', 'mymod.mod1cls.fn')
+            formatter.to_uri("mymod.mod1", "mymod.mod1cls.fn")
         # test method being in functions
-        self.assertEqual(formatter.to_uri('mod1.mod2', 'mod1.mod2.myfunc'), '/mod1.mod2/myfunc()')
+        self.assertEqual(
+            formatter.to_uri("mod1.mod2", "mod1.mod2.myfunc"), "/mod1.mod2/myfunc()"
+        )
 
         ### External uri check
         # test modname builtin
         self.assertEqual(
-            formatter.to_external_uri(utils.constants.BUILTIN_NAME, utils.join_ns(utils.constants.BUILTIN_NAME, 'cls1.fn1')),
-            '//.builtin//cls1.fn1'
+            formatter.to_external_uri(
+                utils.constants.BUILTIN_NAME,
+                utils.join_ns(utils.constants.BUILTIN_NAME, "cls1.fn1"),
+            ),
+            "//.builtin//cls1.fn1",
         )
         # test modname not builtin
-        self.assertEqual(formatter.to_external_uri('requests', 'requests.Request.get'), '//requests//requests.Request.get')
+        self.assertEqual(
+            formatter.to_external_uri("requests", "requests.Request.get"),
+            "//requests//requests.Request.get",
+        )
 
     def _get_internal_mods(self):
         return {
             "mod1": {
                 "filename": "mod1.py",
                 "methods": {
-                    "mod1.method": {
-                        "name": "mod1.method",
-                        "first": 2,
-                        "last": 5
-                    },
+                    "mod1.method": {"name": "mod1.method", "first": 2, "last": 5},
                     "mod1.Cls.method": {
                         "name": "mod1.Cls.method",
                         "first": 6,
-                        "last": 9
+                        "last": 9,
                     },
-                    "mod1": {
-                        "name": "mod1",
-                        "first": 1,
-                        "last": 9
-                    },
-                    "mod1.Cls": {
-                        "name": "mod1.Cls",
-                        "first": 5,
-                        "last": 9
-                    }
-                }
+                    "mod1": {"name": "mod1", "first": 1, "last": 9},
+                    "mod1.Cls": {"name": "mod1.Cls", "first": 5, "last": 9},
+                },
             },
             "mod.mod2": {
                 "filename": "mod/mod2.py",
@@ -135,30 +145,22 @@ class FastenFormatTest(TestBase):
                     "mod.mod2.method": {
                         "name": "mod.mod2.method",
                         "first": 1,
-                        "last": 3
+                        "last": 3,
                     },
-                    "mod.mod2": {
-                        "name": "mod.mod2",
-                        "first": 1,
-                        "last": 9
-                    },
+                    "mod.mod2": {"name": "mod.mod2", "first": 1, "last": 9},
                     "mod.mod2.Cls.Nested.method": {
                         "name": "mod.mod2.Cls.Nested.method",
                         "first": 6,
-                        "last": 9
+                        "last": 9,
                     },
-                    "mod.mod2.Cls": {
-                        "name": "mod.mod2.Cls",
-                        "first": 4,
-                        "last": 9
-                    },
+                    "mod.mod2.Cls": {"name": "mod.mod2.Cls", "first": 4, "last": 9},
                     "mod.mod2.Cls.Nested": {
                         "name": "mod.mod2.Cls.Nested",
                         "first": 5,
-                        "last": 9
-                    }
-                }
-            }
+                        "last": 9,
+                    },
+                },
+            },
         }
 
     def _get_external_mods(self):
@@ -166,54 +168,40 @@ class FastenFormatTest(TestBase):
             "external": {
                 "filename": None,
                 "methods": {
-                    "external": {
-                        "name": "external",
-                        "first": None,
-                        "last": None
-                    },
+                    "external": {"name": "external", "first": None, "last": None},
                     "external.Cls": {
                         "name": "external.Cls",
                         "first": None,
-                        "last": None
+                        "last": None,
                     },
                     "external.method": {
                         "name": "external.method",
                         "first": None,
-                        "last": None
+                        "last": None,
                     },
-                }
+                },
             },
             "external2": {
                 "filename": None,
                 "methods": {
-                    "external2": {
-                        "name": "external2",
-                        "first": None,
-                        "last": None
-                    },
+                    "external2": {"name": "external2", "first": None, "last": None},
                     "external2.method": {
                         "name": "external2.method",
                         "first": None,
-                        "last": None
-                    }
-                }
-            }
+                        "last": None,
+                    },
+                },
+            },
         }
 
     def _get_classes(self):
         return {
-            "mod1.Cls": {
-                "module": "mod1",
-                "mro": ["mod1.Cls"]
-            },
-            "mod.mod2.Cls": {
-                "module": "mod.mod2",
-                "mro": ["mod.mod2.Cls", "mod1.Cls"]
-            },
+            "mod1.Cls": {"module": "mod1", "mro": ["mod1.Cls"]},
+            "mod.mod2.Cls": {"module": "mod.mod2", "mro": ["mod.mod2.Cls", "mod1.Cls"]},
             "mod.mod2.Cls.Nested": {
                 "module": "mod.mod2",
-                "mro": ["mod.mod2.Cls.Nested", "external.Cls"]
-            }
+                "mro": ["mod.mod2.Cls.Nested", "external.Cls"],
+            },
         }
 
     def test_internal_modules(self):
@@ -231,8 +219,7 @@ class FastenFormatTest(TestBase):
         # test that SourceFileName are correct
         for name, mod in internal_mods.items():
             self.assertEqual(
-                mod["filename"],
-                internal_modules[formatter.to_uri(name)]["sourceFile"]
+                mod["filename"], internal_modules[formatter.to_uri(name)]["sourceFile"]
             )
 
         # test that namespaces contains all methods
@@ -243,11 +230,11 @@ class FastenFormatTest(TestBase):
             expected_namespaces = []
             for method, info in mod["methods"].items():
                 method_uri = formatter.to_uri(name, method)
-                first = info['first']
-                last = info['last']
-                expected_namespaces.append(dict(
-                    namespace=method_uri,
-                    metadata=dict(first=first, last=last)))
+                first = info["first"]
+                last = info["last"]
+                expected_namespaces.append(
+                    dict(namespace=method_uri, metadata=dict(first=first, last=last))
+                )
 
             # namespaces defined for module
             result_namespaces = internal_modules[name_uri]["namespaces"].values()
@@ -257,7 +244,8 @@ class FastenFormatTest(TestBase):
             # no duplicate ids and same namespaces
             self.assertEqual(
                 sorted(expected_namespaces, key=lambda x: x["namespace"]),
-                sorted(result_namespaces, key=lambda x: x["namespace"]))
+                sorted(result_namespaces, key=lambda x: x["namespace"]),
+            )
             self.assertEqual(len(result_ids), len(set(result_ids)))
 
     def test_external_modules(self):
@@ -273,26 +261,24 @@ class FastenFormatTest(TestBase):
 
         # test that namespaces contains all the expected methods
         for name, mod in external_mods.items():
-
             # collect expected namespaces for module
             expected_namespaces = []
             for method, info in mod["methods"].items():
                 if method != name:
                     method_uri = formatter.to_external_uri(name, method)
-                    expected_namespaces.append(dict(
-                        namespace=method_uri,
-                        metadata={}))
+                    expected_namespaces.append(dict(namespace=method_uri, metadata={}))
 
             # namespaces defined for external modules
             result_namespaces = external_modules[name]["namespaces"].values()
 
             # unique identifiers defined for external modules
             result_ids = external_modules[name]["namespaces"].keys()
- 
+
             # no duplicate ids and same namespaces
             self.assertEqual(
                 sorted(expected_namespaces, key=lambda x: x["namespace"]),
-                sorted(result_namespaces, key=lambda x: x["namespace"]))
+                sorted(result_namespaces, key=lambda x: x["namespace"]),
+            )
             self.assertEqual(len(result_ids), len(set(result_ids)))
 
     def test_hiearchy(self):
@@ -320,10 +306,14 @@ class FastenFormatTest(TestBase):
                 if item == cls_name:
                     continue
 
-                if classes.get(item, None): # it is an internal module
+                if classes.get(item, None):  # it is an internal module
                     cls_mro.append(formatter.to_uri(classes[item]["module"], item))
                 else:
                     cls_mro.append(formatter.to_external_uri(item.split(".")[0], item))
-            
-            self.assertEqual(cls_mro,  modules[formatter.to_uri(cls["module"])]["namespaces"][cls_name_uri]["metadata"]["superClasses"])
 
+            self.assertEqual(
+                cls_mro,
+                modules[formatter.to_uri(cls["module"])]["namespaces"][cls_name_uri][
+                    "metadata"
+                ]["superClasses"],
+            )
