@@ -113,7 +113,6 @@ function reset() {
 }
 
 function install() {
-
     echo_block "Installing mandatory dependencies"
 
     if [ -x "$(command -v apt-get)" ]; then
@@ -121,7 +120,7 @@ function install() {
         install_debian
     else
         echo "This script does not support your OS."
-        echo "If you have Python version 3.8 - 3.10, pip, virtualenv you can continue."
+        echo "If you have Python version 3.10, pip, virtualenv you can continue."
         echo "Wait 10 seconds to continue the next install steps or use ctrl+c to interrupt this shell."
         sleep 10
     fi
