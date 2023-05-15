@@ -50,7 +50,7 @@ function updateenv() {
     SYS_ARCH=$(uname -m)
     echo "pip install in-progress. Please wait..."
     ${PYTHON} -m pip install --upgrade pip wheel setuptools
-    REQUIREMENTS=requirements.txt
+    REQUIREMENTS=requirements-dev.txt
 
     ${PYTHON} -m pip install --upgrade -r ${REQUIREMENTS}
     if [ $? -ne 0 ]; then
@@ -60,13 +60,6 @@ function updateenv() {
     ${PYTHON} -m pip install -e .
     if [ $? -ne 0 ]; then
         echo "Failed installing PyCG"
-        exit 1
-    fi
-
-    echo_block "Updating pre_commit scripts"
-    ${PYTHON} -m pre_commit install
-    if [ $? -ne 0 ]; then
-        echo "Failed installing pre-commit"
         exit 1
     fi
 
