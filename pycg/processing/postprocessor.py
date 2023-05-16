@@ -110,7 +110,8 @@ class PostProcessor(ProcessingBase):
                         if next_defi:
                             for name in self.closured.get(next_defi.get_ns(), []):
                                 target_def.get_name_pointer().add(name)
-                        else:  # otherwise, add a pointer to the name (e.g. a yield)
+                        else:  # otherwise, add a pointer to the name
+                            # (e.g. a yield)
                             target_def.get_name_pointer().add(name)
 
         super().visit_For(node)
@@ -144,7 +145,8 @@ class PostProcessor(ProcessingBase):
 
             previous_names = self.closured.get(fn_def.get_ns(), set())
             for decorator in reversed_decorators:
-                # assign the previous_def as the first parameter of the decorator
+                # assign the previous_def
+                # as the first parameter of the decorator
                 decoded = self.decode_node(decorator)
                 new_previous_names = set()
                 for d in decoded:

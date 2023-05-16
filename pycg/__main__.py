@@ -31,7 +31,7 @@ def main():
         type=int,
         help=(
             "Maximum number of iterations through source code. "
-            + "If not specified a fix-point iteration will be performed."
+            "If not specified a fix-point iteration will be performed."
         ),
         default=-1,
     )
@@ -40,11 +40,9 @@ def main():
         type=str,
         choices=[CALL_GRAPH_OP, KEY_ERR_OP],
         help=(
-            "Operation to perform. "
-            + "Choose "
+            "Operation to perform. Choose "
             + CALL_GRAPH_OP
-            + " for call graph generation (default)"
-            + " or "
+            + " for call graph generation (default) or "
             + KEY_ERR_OP
             + " for key error detection on dictionaries."
         ),

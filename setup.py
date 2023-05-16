@@ -23,36 +23,39 @@ import os
 from setuptools import setup, find_packages
 from subprocess import call
 
+
 def get_long_desc():
     with open("README.md", "r") as readme:
         desc = readme.read()
 
     return desc
 
+
 def setup_package():
     setup(
-        name='pycg',
-        version='0.0.6',
-        description='Practical Python Call Graphs',
+        name="pycg",
+        version="0.0.6",
+        description="Practical Python Call Graphs",
         long_description=get_long_desc(),
         long_description_content_type="text/markdown",
-        url='https://github.com/vitsalis/pycg',
-        license='Apache Software License',
+        url="https://github.com/vitsalis/pycg",
+        license="Apache Software License",
         packages=find_packages(),
         install_requires=[],
-        python_requires='>=3.4',
-        entry_points = {
-            'console_scripts': [
-                'pycg=pycg.__main__:main',
+        python_requires=">=3.4",
+        entry_points={
+            "console_scripts": [
+                "pycg=pycg.__main__:main",
             ],
         },
         classifiers=[
-            'License :: OSI Approved :: Apache Software License',
-            'Programming Language :: Python :: 3'
+            "License :: OSI Approved :: Apache Software License",
+            "Programming Language :: Python :: 3",
         ],
-        author = 'Vitalis Salis',
-        author_email = 'vitsalis@gmail.com'
+        author="Vitalis Salis",
+        author_email="vitsalis@gmail.com",
     )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     setup_package()

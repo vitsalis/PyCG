@@ -90,7 +90,7 @@ class FastenFormatTest(TestBase):
         self.cg_generator.functions = ["mod1.mod2.myfunc"]
         formatter = self.get_formatter()
 
-        ### Internal uri check
+        # Internal uri check
         # test modname without method
         self.assertEqual(formatter.to_uri("mymod"), "/mymod/")
         self.assertEqual(formatter.to_uri("mymod.mod1"), "/mymod.mod1/")
@@ -109,7 +109,7 @@ class FastenFormatTest(TestBase):
             formatter.to_uri("mod1.mod2", "mod1.mod2.myfunc"), "/mod1.mod2/myfunc()"
         )
 
-        ### External uri check
+        # External uri check
         # test modname builtin
         self.assertEqual(
             formatter.to_external_uri(

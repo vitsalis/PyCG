@@ -139,7 +139,8 @@ class DefinitionManager(object):
                     # if we remove this the following breaks:
                     # x = lambda x: x + 1
                     # x(1)
-                    # since on line 184 we don't discriminate between literal values and name values
+                    # since on line 184 we don't discriminate between
+                    # literal values and name values
                     if not self.defs.get(item, None):
                         continue
                     pointsto_arg_def.add(item)
@@ -160,7 +161,8 @@ class DefinitionManager(object):
                         continue
 
                     pointsto_name_pointer = self.defs[name].get_name_pointer()
-                    # iterate the arguments of the definition we're currently iterating
+                    # iterate the arguments of the definition
+                    # we're currently iterating
                     for arg_name, arg in current_name_pointer.get_args().items():
                         pos = current_name_pointer.get_pos_of_name(arg_name)
                         if pos is not None:

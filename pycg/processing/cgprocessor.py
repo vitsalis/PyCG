@@ -143,7 +143,8 @@ class CallGraphProcessor(ProcessingBase):
         names = self.retrieve_call_names(node)
         if not names:
             if isinstance(node.func, ast.Attribute) and self.has_ext_parent(node.func):
-                # TODO: This doesn't work for cases where there is an assignment of an attribute
+                # TODO: This doesn't work for cases
+                # where there is an assignment of an attribute
                 # i.e. import os; lala = os.path; lala.dirname()
                 for name in self.get_full_attr_names(node.func):
                     ext_modname = name.split(".")[0]
@@ -165,13 +166,16 @@ class CallGraphProcessor(ProcessingBase):
                     continue
                 self.call_graph.add_edge(self.current_method, pointer)
 
-                # TODO: This doesn't work and leads to calls from the decorators
-                #    themselves to the function, creating edges to the first decorator
-                # for decorator in pointer_def.decorator_names:
-                #    dec_names = self.closured.get(decorator, [])
-                #    for dec_name in dec_names:
-                #        if self.def_manager.get(dec_name).get_type() == utils.constants.FUN_DEF:
-                #            self.call_graph.add_edge(self.current_ns, dec_name)
+            # TODO: This doesn't work
+            # and leads to calls from the decorators
+            # themselves to the function,
+            # creating edges to the first decorator
+            # for decorator in pointer_def.decorator_names:
+            #   dec_names = self.closured.get(decorator, [])
+            #   for dec_name in dec_names:
+            #       if self.def_manager.get(dec_name).
+            #               get_type() == utils.constants.FUN_DEF:
+            #           self.call_graph.add_edge(self.current_ns, dec_name)
 
             if pointer_def.get_type() == utils.constants.CLS_DEF:
                 init_ns = self.find_cls_fun_ns(pointer, utils.constants.CLS_INIT)

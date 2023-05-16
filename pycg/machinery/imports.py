@@ -135,8 +135,10 @@ class ImportManager(object):
             raise ImportError("Attempting import beyond top level package")
 
         mod_name = ("." * level) + name
-        # When an __init__ file is analyzed, then the module name doesn't contain
-        # the __init__ part in it, so special care must be taken for levels.
+        # When an __init__ file is analyzed,
+        # then the module name doesn't contain
+        # the __init__ part in it,
+        # so special care must be taken for levels.
         if self._is_init_file() and level >= 1:
             if level != 1:
                 level -= 1

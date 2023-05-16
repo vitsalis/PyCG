@@ -258,7 +258,8 @@ class PreProcessor(ProcessingBase):
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
 
-        # TODO: static methods can be created using the staticmethod() function too
+        # TODO: static methods can be created using
+        # the staticmethod() function too
         is_static_method = False
         if hasattr(node, "decorator_list"):
             for decorator in node.decorator_list:

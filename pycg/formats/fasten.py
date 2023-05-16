@@ -57,7 +57,7 @@ class Fasten(BaseFormatter):
                 if not name.startswith(modname + "."):
                     raise Exception("name should start with modname", name, modname)
 
-                cleared = name[len(modname) + 1 :]
+                cleared = name[(len(modname) + 1) :]
 
         suffix = ""
         if name in self.functions:
@@ -91,7 +91,8 @@ class Fasten(BaseFormatter):
             try:
                 req = Requirement.parse(line)
             except ValueError:
-                # The specific line in the requirements.txt does not follow the Requirements File Format
+                # The specific line in the requirements.txt
+                # does not follow the Requirements File Format
                 continue
 
             specs = req.specs
