@@ -77,33 +77,42 @@ class ScopeManagerTest(TestBase):
         self.assertEqual(sm.get_scope("root").parent, None)
 
         self.assertEqual(sm.get_scope("root.chld1").get_ns(), "root.chld1")
-        self.assertEqual(sm.get_scope("root.chld1").parent, sm.get_scope("root"))
+        self.assertEqual(sm.get_scope("root.chld1").parent,
+                         sm.get_scope("root"))
 
         self.assertEqual(sm.get_scope("root.chld2").get_ns(), "root.chld2")
-        self.assertEqual(sm.get_scope("root.chld2").parent, sm.get_scope("root"))
+        self.assertEqual(sm.get_scope("root.chld2").parent,
+                         sm.get_scope("root"))
 
         self.assertEqual(sm.get_scope("root.chld3").get_ns(), "root.chld3")
-        self.assertEqual(sm.get_scope("root.chld3").parent, sm.get_scope("root"))
+        self.assertEqual(sm.get_scope("root.chld3").parent,
+                         sm.get_scope("root"))
 
         self.assertEqual(
-            sm.get_scope("root.chld1.grndchld1").get_ns(), "root.chld1.grndchld1"
+            sm.get_scope("root.chld1.grndchld1").get_ns(),
+            "root.chld1.grndchld1"
         )
         self.assertEqual(
-            sm.get_scope("root.chld1.grndchld1").parent, sm.get_scope("root.chld1")
-        )
-
-        self.assertEqual(
-            sm.get_scope("root.chld1.grndchld2").get_ns(), "root.chld1.grndchld2"
-        )
-        self.assertEqual(
-            sm.get_scope("root.chld1.grndchld2").parent, sm.get_scope("root.chld1")
+            sm.get_scope("root.chld1.grndchld1").parent,
+            sm.get_scope("root.chld1")
         )
 
         self.assertEqual(
-            sm.get_scope("root.chld2.grndchld3").get_ns(), "root.chld2.grndchld3"
+            sm.get_scope("root.chld1.grndchld2").get_ns(),
+            "root.chld1.grndchld2"
         )
         self.assertEqual(
-            sm.get_scope("root.chld2.grndchld3").parent, sm.get_scope("root.chld2")
+            sm.get_scope("root.chld1.grndchld2").parent,
+            sm.get_scope("root.chld1")
+        )
+
+        self.assertEqual(
+            sm.get_scope("root.chld2.grndchld3").get_ns(),
+            "root.chld2.grndchld3"
+        )
+        self.assertEqual(
+            sm.get_scope("root.chld2.grndchld3").parent,
+            sm.get_scope("root.chld2")
         )
 
     def test_handle_assign(self):
@@ -122,7 +131,8 @@ class ScopeManagerTest(TestBase):
         sm.scopes[root] = ScopeItem(root, None)  # root scope
         sm.scopes[chld1] = ScopeItem(chld1, sm.scopes[root])  # 1st child scope
         sm.scopes[chld2] = ScopeItem(chld2, sm.scopes[root])  # 2nd child scope
-        sm.scopes[grndchld] = ScopeItem(grndchld, sm.scopes[chld1])  # grandchild
+        sm.scopes[grndchld] = ScopeItem(grndchld,
+                                        sm.scopes[chld1])  # grandchild
 
         grndchld_def = ("var", "grndchild_def")  # name, value
         chld1_def1 = ("var", "chld1_def")
@@ -138,15 +148,20 @@ class ScopeManagerTest(TestBase):
 
         # should be able to find a variable defined in its scope
         # also it should get the value of the nearest scope, meaning it's own
-        self.assertEqual(sm.get_def("ns.chld1.chld1", grndchld_def[0]), grndchld_def[1])
+        self.assertEqual(sm.get_def("ns.chld1.chld1",
+                                    grndchld_def[0]), grndchld_def[1])
         # if it doesn't exist get the parent's
-        self.assertEqual(sm.get_def("ns.chld1.chld1", chld1_def2[0]), chld1_def2[1])
+        self.assertEqual(sm.get_def("ns.chld1.chld1",
+                                    chld1_def2[0]), chld1_def2[1])
         # it shouldn't be able to reach a def defined in chld2
-        self.assertEqual(sm.get_def("ns.chld1.chld1", chld2_def[0]), None)
+        self.assertEqual(sm.get_def("ns.chld1.chld1",
+                                    chld2_def[0]), None)
         # root doesn't have access to variables defined in lower scopes
-        self.assertEqual(sm.get_def("ns", chld1_def2[0]), None)
+        self.assertEqual(sm.get_def("ns",
+                                    chld1_def2[0]), None)
         # but childs have access to root
-        self.assertEqual(sm.get_def("ns.chld2", root_def[0]), root_def[1])
+        self.assertEqual(sm.get_def("ns.chld2",
+                                    root_def[0]), root_def[1])
 
     def test_get_scope(self):
         sm = ScopeManager()

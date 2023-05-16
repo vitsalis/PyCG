@@ -24,7 +24,8 @@ class KeyErrors(object):
 
     def add(self, filename, lineno, namespace, key):
         self.key_errs.append(
-            {"filename": filename, "lineno": lineno, "namespace": namespace, "key": key}
+            {"filename": filename, "lineno": lineno, "namespace": namespace,
+             "key": key}
         )
 
     def get(self):

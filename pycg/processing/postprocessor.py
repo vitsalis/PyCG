@@ -46,7 +46,9 @@ class PostProcessor(ProcessingBase):
         self.closured = self.def_manager.transitive_closure()
 
     def visit_Lambda(self, node):
-        counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
+        counter = self.scope_manager.\
+            get_scope(self.current_ns).\
+            inc_lambda_counter()
         lambda_name = utils.get_lambda_name(counter)
         super().visit_Lambda(node, lambda_name)
 
@@ -108,9 +110,11 @@ class PostProcessor(ProcessingBase):
                             )
                         )
                         if next_defi:
-                            for name in self.closured.get(next_defi.get_ns(), []):
+                            for name in self.closured.get(next_defi.get_ns(),
+                                                          []):
                                 target_def.get_name_pointer().add(name)
-                        else:  # otherwise, add a pointer to the name (e.g. a yield)
+                        else:  # otherwise, add a pointer to the name
+                            # (e.g. a yield)
                             target_def.get_name_pointer().add(name)
 
         super().visit_For(node)
@@ -127,7 +131,8 @@ class PostProcessor(ProcessingBase):
     def visit_FunctionDef(self, node):
         # here we iterate decorators
         if node.decorator_list:
-            fn_def = self.def_manager.get(utils.join_ns(self.current_ns, node.name))
+            fn_def = self.def_manager.get(utils.join_ns(self.current_ns,
+                                                        node.name))
             reversed_decorators = list(reversed(node.decorator_list))
 
             # add to the name pointer of the function definition
@@ -144,14 +149,16 @@ class PostProcessor(ProcessingBase):
 
             previous_names = self.closured.get(fn_def.get_ns(), set())
             for decorator in reversed_decorators:
-                # assign the previous_def as the first parameter of the decorator
+                # assign the previous_def
+                # as the first parameter of the decorator
                 decoded = self.decode_node(decorator)
                 new_previous_names = set()
                 for d in decoded:
                     if not isinstance(d, Definition):
                         continue
                     for name in self.closured.get(d.get_ns(), []):
-                        return_ns = utils.join_ns(name, utils.constants.RETURN_NAME)
+                        return_ns = utils.join_ns(name,
+                                                  utils.constants.RETURN_NAME)
 
                         if self.closured.get(return_ns, None) is None:
                             continue
@@ -220,16 +227,19 @@ class PostProcessor(ProcessingBase):
         # create a list definition
         list_def = self.def_manager.get(list_full_ns)
         if not list_def:
-            list_def = self.def_manager.create(list_full_ns, utils.constants.NAME_DEF)
+            list_def = self.def_manager.create(list_full_ns,
+                                               utils.constants.NAME_DEF)
         current_scope.add_def(list_name, list_def)
 
         self.name_stack.append(list_name)
         for idx, elt in enumerate(node.elts):
             self.visit(elt)
-            key_full_ns = utils.join_ns(list_def.get_ns(), utils.get_int_name(idx))
+            key_full_ns = utils.join_ns(list_def.get_ns(),
+                                        utils.get_int_name(idx))
             key_def = self.def_manager.get(key_full_ns)
             if not key_def:
-                key_def = self.def_manager.create(key_full_ns, utils.constants.NAME_DEF)
+                key_def = self.def_manager.create(key_full_ns,
+                                                  utils.constants.NAME_DEF)
 
             decoded_elt = self.decode_node(elt)
             for v in decoded_elt:
@@ -250,12 +260,14 @@ class PostProcessor(ProcessingBase):
         dict_full_ns = utils.join_ns(self.current_ns, dict_name)
 
         # create a scope for the dict
-        dict_scope = self.scope_manager.create_scope(dict_full_ns, current_scope)
+        dict_scope = self.scope_manager.create_scope(dict_full_ns,
+                                                     current_scope)
 
         # Create a dict definition
         dict_def = self.def_manager.get(dict_full_ns)
         if not dict_def:
-            dict_def = self.def_manager.create(dict_full_ns, utils.constants.NAME_DEF)
+            dict_def = self.def_manager.create(dict_full_ns,
+                                               utils.constants.NAME_DEF)
         # add it to the current scope
         current_scope.add_def(dict_name, dict_def)
 
@@ -319,7 +331,8 @@ class PostProcessor(ProcessingBase):
                 new_ns = utils.join_ns(parent_def.get_ns(), key)
                 new_def = self.def_manager.get(new_ns)
                 if not new_def:
-                    new_def = self.def_manager.create(new_ns, utils.constants.NAME_DEF)
+                    new_def = self.def_manager.create(new_ns,
+                                                      utils.constants.NAME_DEF)
 
                 new_def.get_name_pointer().add_set(names)
                 new_def.get_name_pointer().add(child_def.get_ns())

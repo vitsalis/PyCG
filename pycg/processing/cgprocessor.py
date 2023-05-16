@@ -78,7 +78,8 @@ class CallGraphProcessor(ProcessingBase):
         super().visit_For(node)
 
     def visit_Lambda(self, node):
-        counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
+        counter = self.scope_manager.get_scope(self.current_ns).\
+            inc_lambda_counter()
         lambda_name = utils.get_lambda_name(counter)
         lambda_fullns = utils.join_ns(self.current_ns, lambda_name)
 
@@ -98,7 +99,8 @@ class CallGraphProcessor(ProcessingBase):
             for name in names:
                 pointer_def = self.def_manager.get(name)
                 if pointer_def.get_type() == utils.constants.CLS_DEF:
-                    init_ns = self.find_cls_fun_ns(name, utils.constants.CLS_INIT)
+                    init_ns = self.find_cls_fun_ns(name,
+                                                   utils.constants.CLS_INIT)
                     for ns in init_ns:
                         self.call_graph.add_edge(self.current_method, ns)
                 if pointer_def.get_type() == utils.constants.EXT_DEF:
@@ -142,14 +144,18 @@ class CallGraphProcessor(ProcessingBase):
 
         names = self.retrieve_call_names(node)
         if not names:
-            if isinstance(node.func, ast.Attribute) and self.has_ext_parent(node.func):
-                # TODO: This doesn't work for cases where there is an assignment of an attribute
+            if isinstance(node.func, ast.Attribute) and \
+                          self.has_ext_parent(node.func):
+                # TODO: This doesn't work for cases
+                # where there is an assignment of an attribute
                 # i.e. import os; lala = os.path; lala.dirname()
                 for name in self.get_full_attr_names(node.func):
                     ext_modname = name.split(".")[0]
                     create_ext_edge(name, ext_modname)
-            elif getattr(node.func, "id", None) and self.is_builtin(node.func.id):
-                name = utils.join_ns(utils.constants.BUILTIN_NAME, node.func.id)
+            elif getattr(node.func, "id", None) and \
+                    self.is_builtin(node.func.id):
+                name = utils.join_ns(utils.constants.BUILTIN_NAME,
+                                     node.func.id)
                 create_ext_edge(name, utils.constants.BUILTIN_NAME)
             return
 
@@ -165,16 +171,20 @@ class CallGraphProcessor(ProcessingBase):
                     continue
                 self.call_graph.add_edge(self.current_method, pointer)
 
-                # TODO: This doesn't work and leads to calls from the decorators
-                #    themselves to the function, creating edges to the first decorator
-                # for decorator in pointer_def.decorator_names:
-                #    dec_names = self.closured.get(decorator, [])
-                #    for dec_name in dec_names:
-                #        if self.def_manager.get(dec_name).get_type() == utils.constants.FUN_DEF:
-                #            self.call_graph.add_edge(self.current_ns, dec_name)
+    # TODO: This doesn't work
+    # and leads to calls from the decorators
+    # themselves to the function,
+    # creating edges to the first decorator
+    # for decorator in pointer_def.decorator_names:
+    #   dec_names = self.closured.get(decorator, [])
+    #   for dec_name in dec_names:
+    #       if self.def_manager.get(dec_name).
+    #               get_type() == utils.constants.FUN_DEF:
+    #           self.call_graph.add_edge(self.current_ns, dec_name)
 
             if pointer_def.get_type() == utils.constants.CLS_DEF:
-                init_ns = self.find_cls_fun_ns(pointer, utils.constants.CLS_INIT)
+                init_ns = self.find_cls_fun_ns(pointer,
+                                               utils.constants.CLS_INIT)
 
                 for ns in init_ns:
                     self.call_graph.add_edge(self.current_method, ns)

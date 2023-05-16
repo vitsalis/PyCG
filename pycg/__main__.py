@@ -8,9 +8,12 @@ from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("entry_point", nargs="*", help="Entry points to be processed")
+    parser.add_argument("entry_point",
+                        nargs="*",
+                        help="Entry points to be processed")
     parser.add_argument(
-        "--package", help="Package containing the code to be analyzed", default=None
+        "--package",
+        help="Package containing the code to be analyzed", default=None
     )
     parser.add_argument(
         "--fasten",
@@ -18,13 +21,17 @@ def main():
         action="store_true",
         default=False,
     )
-    parser.add_argument("--product", help="Package name", default="")
+    parser.add_argument("--product",
+                        help="Package name", default="")
     parser.add_argument(
-        "--forge", help="Source the product was downloaded from", default=""
+        "--forge",
+        help="Source the product was downloaded from", default=""
     )
-    parser.add_argument("--version", help="Version of the product", default="")
+    parser.add_argument("--version",
+                        help="Version of the product", default="")
     parser.add_argument(
-        "--timestamp", help="Timestamp of the package's version", default=0
+        "--timestamp",
+        help="Timestamp of the package's version", default=0
     )
     parser.add_argument(
         "--max-iter",
@@ -52,9 +59,11 @@ def main():
     )
 
     parser.add_argument(
-        "--as-graph-output", help="Output for the assignment graph", default=None
+        "--as-graph-output",
+        help="Output for the assignment graph", default=None
     )
-    parser.add_argument("-o", "--output", help="Output path", default=None)
+    parser.add_argument("-o", "--output",
+                        help="Output path", default=None)
 
     args = parser.parse_args()
 
@@ -66,7 +75,8 @@ def main():
     if args.operation == CALL_GRAPH_OP:
         if args.fasten:
             formatter = formats.Fasten(
-                cg, args.package, args.product, args.forge, args.version, args.timestamp
+                cg, args.package, args.product,
+                args.forge, args.version, args.timestamp
             )
         else:
             formatter = formats.Simple(cg)

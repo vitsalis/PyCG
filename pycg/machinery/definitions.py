@@ -44,7 +44,8 @@ class DefinitionManager(object):
         # if it is a function def, we need to create a return pointer
         if defi.is_function_def():
             return_ns = utils.join_ns(ns, utils.constants.RETURN_NAME)
-            self.defs[return_ns] = Definition(return_ns, utils.constants.NAME_DEF)
+            self.defs[return_ns] = Definition(return_ns,
+                                              utils.constants.NAME_DEF)
             self.defs[return_ns].get_name_pointer().add(
                 utils.join_ns(defi.get_ns(), utils.constants.RETURN_NAME)
             )
@@ -139,7 +140,8 @@ class DefinitionManager(object):
                     # if we remove this the following breaks:
                     # x = lambda x: x + 1
                     # x(1)
-                    # since on line 184 we don't discriminate between literal values and name values
+                    # since on line 184 we don't discriminate between
+                    # literal values and name values
                     if not self.defs.get(item, None):
                         continue
                     pointsto_arg_def.add(item)
@@ -160,22 +162,31 @@ class DefinitionManager(object):
                         continue
 
                     pointsto_name_pointer = self.defs[name].get_name_pointer()
-                    # iterate the arguments of the definition we're currently iterating
-                    for arg_name, arg in current_name_pointer.get_args().items():
+                    # iterate the arguments of the definition
+                    # we're currently iterating
+                    for arg_name, arg in (
+                        current_name_pointer.get_args().items()
+                    ):
                         pos = current_name_pointer.get_pos_of_name(arg_name)
                         if pos is not None:
-                            pointsto_args = pointsto_name_pointer.get_pos_arg(pos)
+                            pointsto_args = (
+                                pointsto_name_pointer.get_pos_arg(pos)
+                            )
                             if not pointsto_args:
-                                pointsto_name_pointer.add_pos_arg(pos, None, arg)
+                                pointsto_name_pointer.add_pos_arg(pos, None,
+                                                                  arg)
                                 continue
                         else:
-                            pointsto_args = pointsto_name_pointer.get_arg(arg_name)
+                            pointsto_args = (
+                                pointsto_name_pointer.get_arg(arg_name)
+                            )
                             if not pointsto_args:
                                 pointsto_name_pointer.add_arg(arg_name, arg)
                                 continue
-                        changed_something = changed_something or update_pointsto_args(
-                            pointsto_args, arg, current_def.get_ns()
-                        )
+                        changed_something = changed_something or \
+                            update_pointsto_args(
+                                pointsto_args, arg, current_def.get_ns()
+                            )
 
             if not changed_something:
                 break

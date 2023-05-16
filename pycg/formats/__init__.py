@@ -18,6 +18,6 @@
 # specific language governing permissions and limitations
 # under the License.
 #
+from .as_graph import AsGraph
 from .fasten import Fasten
 from .simple import Simple
-from .as_graph import AsGraph

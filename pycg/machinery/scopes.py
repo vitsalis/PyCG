@@ -56,7 +56,8 @@ class ScopeManager(object):
                 process(fullns, sc, t)
 
         process(
-            modulename, None, symtable.symtable(contents, filename, compile_type="exec")
+            modulename, None, symtable.symtable(contents, filename,
+                                                compile_type="exec")
         )
         return {"functions": functions, "classes": classes}
 

@@ -25,7 +25,9 @@ import sys
 import mock
 from base import TestBase
 
-from pycg.machinery.imports import ImportManager, ImportManagerError, get_custom_loader
+from pycg.machinery.imports import (
+    ImportManager, ImportManagerError, get_custom_loader
+)
 
 
 class ImportsTest(TestBase):
@@ -106,12 +108,14 @@ class ImportsTest(TestBase):
         custom_loader = "custom_loader"
 
         with mock.patch(
-            "importlib.machinery.FileFinder.path_hook", return_value=custom_loader
+            "importlib.machinery.FileFinder.path_hook",
+            return_value=custom_loader
         ):
             im.install_hooks()
 
         self.assertEqual(sys.path_hooks[0], custom_loader)
-        self.assertEqual(sys.path[0], os.path.abspath(os.path.dirname(input_file)))
+        self.assertEqual(sys.path[0],
+                         os.path.abspath(os.path.dirname(input_file)))
 
         im.remove_hooks()
         self.assertEqual(old_sys_path, sys.path)
@@ -149,9 +153,12 @@ class ImportsTest(TestBase):
         with self.assertRaises(ImportError):
             im._handle_import_level("something", 4)
 
-        self.assertEqual(im._handle_import_level("smth", 2), ("..smth", "mod1"))
-        self.assertEqual(im._handle_import_level("smth", 1), (".smth", "mod1.mod2"))
-        self.assertEqual(im._handle_import_level("smth", 0), ("smth", ""))
+        self.assertEqual(im._handle_import_level("smth", 2),
+                         ("..smth", "mod1"))
+        self.assertEqual(im._handle_import_level("smth", 1),
+                         (".smth", "mod1.mod2"))
+        self.assertEqual(im._handle_import_level("smth", 0),
+                         ("smth", ""))
 
     def test_handle_import(self):
         # test builtin modules

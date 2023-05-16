@@ -125,7 +125,8 @@ class PreProcessor(ProcessingBase):
 
         defi = self.def_manager.get(self.modname)
         if not defi:
-            defi = self.def_manager.create(self.modname, utils.constants.MOD_DEF)
+            defi = self.def_manager.create(self.modname,
+                                           utils.constants.MOD_DEF)
 
         super().visit_Module(node)
 
@@ -162,7 +163,9 @@ class PreProcessor(ProcessingBase):
             if tgt_name == "*":
                 for name, defi in imported_scope.get_defs().items():
                     create_def(current_scope, name, defi)
-                    current_scope.get_def(name).get_name_pointer().add(defi.get_ns())
+                    current_scope.get_def(name).get_name_pointer().add(
+                        defi.get_ns()
+                        )
             else:
                 # if it exists in the imported scope then copy it
                 defi = imported_scope.get_def(imp_name)
@@ -187,13 +190,17 @@ class PreProcessor(ProcessingBase):
                 tgt_ns = utils.join_ns(scope.get_ns(), target)
                 tgt_defi = self.def_manager.get(tgt_ns)
                 if not tgt_defi:
-                    tgt_defi = self.def_manager.create(tgt_ns, utils.constants.EXT_DEF)
+                    tgt_defi = self.def_manager.create(
+                        tgt_ns, utils.constants.EXT_DEF
+                    )
                 tgt_defi.get_name_pointer().add(defi.get_ns())
                 scope.add_def(target, tgt_defi)
 
         for import_item in node.names:
             src_name = handle_src_name(import_item.name)
-            tgt_name = import_item.asname if import_item.asname else import_item.name
+            tgt_name = (
+                import_item.asname if import_item.asname else import_item.name
+            )
             imported_name = self.import_manager.handle_import(src_name, level)
 
             if not imported_name:
@@ -258,7 +265,8 @@ class PreProcessor(ProcessingBase):
         defs_to_create = []
         name_pointer = fn_def.get_name_pointer()
 
-        # TODO: static methods can be created using the staticmethod() function too
+        # TODO: static methods can be created using
+        # the staticmethod() function too
         is_static_method = False
         if hasattr(node, "decorator_list"):
             for decorator in node.decorator_list:
@@ -276,7 +284,8 @@ class PreProcessor(ProcessingBase):
             arg_ns = utils.join_ns(fn_def.get_ns(), node.args.args[0].arg)
             arg_def = self.def_manager.get(arg_ns)
             if not arg_def:
-                arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
+                arg_def = self.def_manager.create(arg_ns,
+                                                  utils.constants.NAME_DEF)
             arg_def.get_name_pointer().add(current_def.get_ns())
 
             self.scope_manager.handle_assign(
@@ -304,7 +313,8 @@ class PreProcessor(ProcessingBase):
         for arg_ns in defs_to_create:
             arg_def = self.def_manager.get(arg_ns)
             if not arg_def:
-                arg_def = self.def_manager.create(arg_ns, utils.constants.NAME_DEF)
+                arg_def = self.def_manager.create(arg_ns,
+                                                  utils.constants.NAME_DEF)
 
             self.scope_manager.handle_assign(
                 fn_def.get_ns(), arg_def.get_name(), arg_def
@@ -337,7 +347,8 @@ class PreProcessor(ProcessingBase):
         if isinstance(node.target, ast.Name):
             target_ns = utils.join_ns(self.current_ns, node.target.id)
             if not self.def_manager.get(target_ns):
-                defi = self.def_manager.create(target_ns, utils.constants.NAME_DEF)
+                defi = self.def_manager.create(target_ns,
+                                               utils.constants.NAME_DEF)
                 self.scope_manager.get_scope(self.current_ns).add_def(
                     node.target.id, defi
                 )
@@ -397,7 +408,8 @@ class PreProcessor(ProcessingBase):
         mod = self.module_manager.get(self.modname)
         if not mod:
             mod = self.module_manager.create(self.modname, self.filename)
-        mod.add_method(cls_def.get_ns(), node.lineno, self._get_last_line(node))
+        mod.add_method(cls_def.get_ns(), node.lineno,
+                       self._get_last_line(node))
 
         # iterate bases to compute MRO for the class
         cls = self.class_manager.get(cls_def.get_ns())
