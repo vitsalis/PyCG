@@ -31,7 +31,7 @@ jobs:
         uses: liskin/gh-problem-matcher-wrap@d8afa2cfb66dd3f982b1950429e652bc14d0d7d2
         with:
           linters: flake8
-          run: flake8
+          run: flake8 pycg
 
   isort:
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
         uses: liskin/gh-problem-matcher-wrap@d8afa2cfb66dd3f982b1950429e652bc14d0d7d2
         with:
           linters: isort
-          run: isort --check --diff pycg micro-benchmark-key-errs micro-benchmark
+          run: isort --check --diff pycg
 
   black:
     runs-on: ubuntu-latest
