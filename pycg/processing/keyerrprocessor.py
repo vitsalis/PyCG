@@ -94,8 +94,7 @@ class KeyErrProcessor(ProcessingBase):
         self.analyze_submodules()
 
     def visit_Lambda(self, node):
-        counter = self.scope_manager.get_scope(self.current_ns).\
-            inc_lambda_counter()
+        counter = self.scope_manager.get_scope(self.current_ns).inc_lambda_counter()
         lambda_name = utils.get_lambda_name(counter)
         utils.join_ns(self.current_ns, lambda_name)
 

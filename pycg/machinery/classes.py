@@ -53,7 +53,7 @@ class ClassNode:
     def fix_mro(self):
         new_mro = []
         for idx, item in enumerate(self.mro):
-            if self.mro[idx + 1:].count(item) > 0:
+            if self.mro[idx + 1 :].count(item) > 0:
                 continue
             new_mro.append(item)
         self.mro = new_mro

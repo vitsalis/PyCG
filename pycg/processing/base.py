@@ -90,12 +90,10 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(item)
 
     def visit_Dict(self, node):
-        counter = self.scope_manager.get_scope(self.current_ns). \
-            inc_dict_counter()
+        counter = self.scope_manager.get_scope(self.current_ns).inc_dict_counter()
         dict_name = utils.get_dict_name(counter)
 
-        sc = self.scope_manager.get_scope(utils.join_ns(self.current_ns,
-                                                        dict_name))
+        sc = self.scope_manager.get_scope(utils.join_ns(self.current_ns, dict_name))
         if not sc:
             return
         self.name_stack.append(dict_name)
@@ -108,12 +106,10 @@ class ProcessingBase(ast.NodeVisitor):
         self.name_stack.pop()
 
     def visit_List(self, node):
-        counter = self.scope_manager.get_scope(self.current_ns). \
-            inc_list_counter()
+        counter = self.scope_manager.get_scope(self.current_ns).inc_list_counter()
         list_name = utils.get_list_name(counter)
 
-        sc = self.scope_manager.get_scope(utils.join_ns(self.current_ns,
-                                                        list_name))
+        sc = self.scope_manager.get_scope(utils.join_ns(self.current_ns, list_name))
         if not sc:
             return
         self.name_stack.append(list_name)
@@ -189,8 +185,7 @@ class ProcessingBase(ast.NodeVisitor):
             self.visit(target)
             if isinstance(target, ast.Tuple):
                 for pos, elt in enumerate(target.elts):
-                    if not isinstance(decoded,
-                                      Definition) and pos < len(decoded):
+                    if not isinstance(decoded, Definition) and pos < len(decoded):
                         do_assign(decoded[pos], elt)
             else:
                 targetns = self._get_target_ns(target)
@@ -288,11 +283,7 @@ class ProcessingBase(ast.NodeVisitor):
         return []
 
     def _is_literal(self, item):
-        return (
-            isinstance(item, int)
-            or isinstance(item, str)
-            or isinstance(item, float)
-        )
+        return isinstance(item, int) or isinstance(item, str) or isinstance(item, float)
 
     def _retrieve_base_names(self, node):
         if not isinstance(node, ast.Attribute):
@@ -366,8 +357,7 @@ class ProcessingBase(ast.NodeVisitor):
                         continue
                     ext_name = utils.join_ns(name, node.attr)
                     if not self.def_manager.get(ext_name):
-                        self.def_manager.create(ext_name,
-                                                utils.constants.EXT_DEF)
+                        self.def_manager.create(ext_name, utils.constants.EXT_DEF)
                     names.add(ext_name)
         return names
 
@@ -392,8 +382,7 @@ class ProcessingBase(ast.NodeVisitor):
             else:
                 for d in decoded:
                     if isinstance(d, Definition):
-                        defi.get_name_pointer().add_pos_arg(pos, None,
-                                                            d.get_ns())
+                        defi.get_name_pointer().add_pos_arg(pos, None, d.get_ns())
                     else:
                         defi.get_name_pointer().add_pos_lit_arg(pos, None, d)
 
@@ -416,8 +405,7 @@ class ProcessingBase(ast.NodeVisitor):
             else:
                 for d in decoded:
                     if isinstance(d, Definition):
-                        defi.get_name_pointer().add_arg(keyword.arg,
-                                                        d.get_ns())
+                        defi.get_name_pointer().add_arg(keyword.arg, d.get_ns())
                     else:
                         defi.get_name_pointer().add_lit_arg(keyword.arg, d)
 
@@ -428,8 +416,7 @@ class ProcessingBase(ast.NodeVisitor):
         if not getattr(self, "closured", None):
             return set()
 
-        if getattr(node.slice, "value", None) and \
-                self._is_literal(node.slice.value):
+        if getattr(node.slice, "value", None) and self._is_literal(node.slice.value):
             sl_names = [node.slice.value]
         else:
             sl_names = self.decode_node(node.slice)
@@ -441,12 +428,10 @@ class ProcessingBase(ast.NodeVisitor):
         full_names = set()
         # get all names associated with this variable name
         for n in val_names:
-            if n and isinstance(n, Definition) and \
-                    self.closured.get(n.get_ns(), None):
+            if n and isinstance(n, Definition) and self.closured.get(n.get_ns(), None):
                 decoded_vals |= self.closured.get(n.get_ns())
         for s in sl_names:
-            if isinstance(s, Definition) and \
-                    self.closured.get(s.get_ns(), None):
+            if isinstance(s, Definition) and self.closured.get(s.get_ns(), None):
                 # we care about the literals pointed by the name
                 # not the namespaces, so retrieve the literals pointed
                 for name in self.closured.get(s.get_ns()):
@@ -553,8 +538,7 @@ class ProcessingBase(ast.NodeVisitor):
         ext_modname = name.split(".")[0]
         ext_mod = self.module_manager.get(ext_modname)
         if not ext_mod:
-            ext_mod = self.module_manager.create(ext_modname, None,
-                                                 external=True)
+            ext_mod = self.module_manager.create(ext_modname, None, external=True)
             ext_mod.add_method(ext_modname)
 
         ext_mod.add_method(name)

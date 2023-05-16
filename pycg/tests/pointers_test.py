@@ -108,6 +108,5 @@ class PointerTest(TestBase):
         pointer1.merge(pointer2)
 
         self.assertEqual(pointer1.get(), set(["smth1", "smth6"]))
-        self.assertEqual(pointer1.get_arg(0),
-                         set(["smth2", "smth3", "smth7", "smth8"]))
+        self.assertEqual(pointer1.get_arg(0), set(["smth2", "smth3", "smth7", "smth8"]))
         self.assertEqual(pointer1.get_arg(1), set(["smth4", "smth9"]))

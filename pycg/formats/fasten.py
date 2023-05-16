@@ -28,8 +28,7 @@ from .base import BaseFormatter
 
 
 class Fasten(BaseFormatter):
-    def __init__(self, cg_generator, package, product, forge, version,
-                 timestamp):
+    def __init__(self, cg_generator, package, product, forge, version, timestamp):
         self.cg_generator = cg_generator
         self.internal_mods = self.cg_generator.output_internal_mods() or {}
         self.external_mods = self.cg_generator.output_external_mods() or {}
@@ -56,10 +55,9 @@ class Fasten(BaseFormatter):
                 cleared = ""
             else:
                 if not name.startswith(modname + "."):
-                    raise Exception("name should start with modname", name,
-                                    modname)
+                    raise Exception("name should start with modname", name, modname)
 
-                cleared = name[len(modname) + 1:]
+                cleared = name[len(modname) + 1 :]
 
         suffix = ""
         if name in self.functions:
@@ -69,7 +67,7 @@ class Fasten(BaseFormatter):
 
     def to_external_uri(self, modname, name=""):
         if modname == utils.constants.BUILTIN_NAME:
-            name = name[len(modname) + 1:]
+            name = name[len(modname) + 1 :]
             modname = ".builtin"
 
         return "//{}//{}".format(modname.replace("-", "_"), name)
@@ -156,8 +154,7 @@ class Fasten(BaseFormatter):
             add_range(begin, end)
 
             res.append(
-                {"forge": "PyPI", "product": req.name,
-                 "constraints": constraints}
+                {"forge": "PyPI", "product": req.name, "constraints": constraints}
             )
 
         return res
@@ -187,10 +184,8 @@ class Fasten(BaseFormatter):
 
     def add_superclasses(self, mods):
         for cls_name, cls in self.classes.items():
-            cls_uri = self.namespace_map.get(self.to_uri(cls["module"],
-                                                         cls_name))
-            mods[self.to_uri(cls["module"])][
-                "namespaces"][cls_uri]["metadata"][
+            cls_uri = self.namespace_map.get(self.to_uri(cls["module"], cls_name))
+            mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"][
                 "superClasses"
             ] = []
             for parent in cls["mro"]:
@@ -198,14 +193,12 @@ class Fasten(BaseFormatter):
                     continue
 
                 if self.classes.get(parent):
-                    parent_uri = self.to_uri(self.classes[parent]["module"],
-                                             parent)
+                    parent_uri = self.to_uri(self.classes[parent]["module"], parent)
                 else:
                     parent_mod = parent.split(".")[0]
                     parent_uri = self.to_external_uri(parent_mod, parent)
 
-                mods[self.to_uri(cls["module"])]["namespaces"][
-                    cls_uri]["metadata"][
+                mods[self.to_uri(cls["module"])]["namespaces"][cls_uri]["metadata"][
                     "superClasses"
                 ].append(parent_uri)
 
@@ -213,8 +206,7 @@ class Fasten(BaseFormatter):
 
     def create_namespaces_map(self):
         namespaces_maps = [{}, {}]
-        for res, hmap in zip(namespaces_maps, [self.internal_mods,
-                                               self.external_mods]):
+        for res, hmap in zip(namespaces_maps, [self.internal_mods, self.external_mods]):
             for mod in hmap:
                 for namespace in hmap[mod]["methods"]:
                     res[namespace] = mod
@@ -255,17 +247,13 @@ class Fasten(BaseFormatter):
                     uris.append(self.namespace_map.get(uri, uri))
                 elif node in external:
                     mod = external[node]
-                    uris.append(
-                        self.namespace_map.get(self.to_external_uri(mod, node))
-                    )
+                    uris.append(self.namespace_map.get(self.to_external_uri(mod, node)))
 
             if len(uris) == 2:
                 if dst in external:
-                    graph["externalCalls"].append([str(uris[0]),
-                                                   str(uris[1]), {}])
+                    graph["externalCalls"].append([str(uris[0]), str(uris[1]), {}])
                 else:
-                    graph["internalCalls"].append([str(uris[0]),
-                                                   str(uris[1]), {}])
+                    graph["internalCalls"].append([str(uris[0]), str(uris[1]), {}])
         return graph
 
     def generate(self):

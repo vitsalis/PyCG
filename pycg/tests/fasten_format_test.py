@@ -99,16 +99,14 @@ class FastenFormatTest(TestBase):
             formatter.to_uri("mymod.mod1", "mymod.mod1.fn"), "/mymod.mod1/fn"
         )
         self.assertEqual(
-            formatter.to_uri("mymod.mod1", "mymod.mod1.cls.fn"),
-            "/mymod.mod1/cls.fn"
+            formatter.to_uri("mymod.mod1", "mymod.mod1.cls.fn"), "/mymod.mod1/cls.fn"
         )
         # test method starting with modname but without . inbetween
         with self.assertRaises(Exception):
             formatter.to_uri("mymod.mod1", "mymod.mod1cls.fn")
         # test method being in functions
         self.assertEqual(
-            formatter.to_uri("mod1.mod2", "mod1.mod2.myfunc"),
-            "/mod1.mod2/myfunc()"
+            formatter.to_uri("mod1.mod2", "mod1.mod2.myfunc"), "/mod1.mod2/myfunc()"
         )
 
         # External uri check
@@ -131,8 +129,7 @@ class FastenFormatTest(TestBase):
             "mod1": {
                 "filename": "mod1.py",
                 "methods": {
-                    "mod1.method": {"name": "mod1.method", "first": 2,
-                                    "last": 5},
+                    "mod1.method": {"name": "mod1.method", "first": 2, "last": 5},
                     "mod1.Cls.method": {
                         "name": "mod1.Cls.method",
                         "first": 6,
@@ -156,8 +153,7 @@ class FastenFormatTest(TestBase):
                         "first": 6,
                         "last": 9,
                     },
-                    "mod.mod2.Cls": {"name": "mod.mod2.Cls", "first": 4,
-                                     "last": 9},
+                    "mod.mod2.Cls": {"name": "mod.mod2.Cls", "first": 4, "last": 9},
                     "mod.mod2.Cls.Nested": {
                         "name": "mod.mod2.Cls.Nested",
                         "first": 5,
@@ -172,8 +168,7 @@ class FastenFormatTest(TestBase):
             "external": {
                 "filename": None,
                 "methods": {
-                    "external": {"name": "external", "first": None,
-                                 "last": None},
+                    "external": {"name": "external", "first": None, "last": None},
                     "external.Cls": {
                         "name": "external.Cls",
                         "first": None,
@@ -189,8 +184,7 @@ class FastenFormatTest(TestBase):
             "external2": {
                 "filename": None,
                 "methods": {
-                    "external2": {"name": "external2", "first": None,
-                                  "last": None},
+                    "external2": {"name": "external2", "first": None, "last": None},
                     "external2.method": {
                         "name": "external2.method",
                         "first": None,
@@ -203,8 +197,7 @@ class FastenFormatTest(TestBase):
     def _get_classes(self):
         return {
             "mod1.Cls": {"module": "mod1", "mro": ["mod1.Cls"]},
-            "mod.mod2.Cls": {"module": "mod.mod2", "mro": ["mod.mod2.Cls",
-                                                           "mod1.Cls"]},
+            "mod.mod2.Cls": {"module": "mod.mod2", "mro": ["mod.mod2.Cls", "mod1.Cls"]},
             "mod.mod2.Cls.Nested": {
                 "module": "mod.mod2",
                 "mro": ["mod.mod2.Cls.Nested", "external.Cls"],
@@ -226,8 +219,7 @@ class FastenFormatTest(TestBase):
         # test that SourceFileName are correct
         for name, mod in internal_mods.items():
             self.assertEqual(
-                mod["filename"],
-                internal_modules[formatter.to_uri(name)]["sourceFile"]
+                mod["filename"], internal_modules[formatter.to_uri(name)]["sourceFile"]
             )
 
         # test that namespaces contains all methods
@@ -241,15 +233,11 @@ class FastenFormatTest(TestBase):
                 first = info["first"]
                 last = info["last"]
                 expected_namespaces.append(
-                    dict(namespace=method_uri, metadata=dict(first=first,
-                                                             last=last))
+                    dict(namespace=method_uri, metadata=dict(first=first, last=last))
                 )
 
             # namespaces defined for module
-            result_namespaces = (
-                internal_modules[name_uri]["namespaces"].
-                values()
-            )
+            result_namespaces = internal_modules[name_uri]["namespaces"].values()
             # unique identifiers defined for module
             result_ids = internal_modules[name_uri]["namespaces"].keys()
 
@@ -268,10 +256,8 @@ class FastenFormatTest(TestBase):
         external_modules = formatter.generate()["modules"]["external"]
 
         # test that external modules keys are identical with the ones generated
-        self.assertEqual(set(external_mods.keys()),
-                         set(external_modules.keys()))
-        self.assertEqual(len(external_mods.keys()),
-                         len(external_modules.keys()))
+        self.assertEqual(set(external_mods.keys()), set(external_modules.keys()))
+        self.assertEqual(len(external_mods.keys()), len(external_modules.keys()))
 
         # test that namespaces contains all the expected methods
         for name, mod in external_mods.items():
@@ -280,8 +266,7 @@ class FastenFormatTest(TestBase):
             for method, info in mod["methods"].items():
                 if method != name:
                     method_uri = formatter.to_external_uri(name, method)
-                    expected_namespaces.append(dict(namespace=method_uri,
-                                                    metadata={}))
+                    expected_namespaces.append(dict(namespace=method_uri, metadata={}))
 
             # namespaces defined for external modules
             result_namespaces = external_modules[name]["namespaces"].values()
@@ -314,8 +299,7 @@ class FastenFormatTest(TestBase):
                     total_classes += 1
         self.assertEqual(total_classes, len(classes.keys()))
         for cls_name, cls in classes.items():
-            cls_name_uri = id_mapping[formatter.to_uri(cls["module"],
-                                                       cls_name)]
+            cls_name_uri = id_mapping[formatter.to_uri(cls["module"], cls_name)]
             cls_mro = []
             for item in cls["mro"]:
                 # result mro should not contain the class name
@@ -323,17 +307,13 @@ class FastenFormatTest(TestBase):
                     continue
 
                 if classes.get(item, None):  # it is an internal module
-                    cls_mro.append(formatter.to_uri(classes[item]["module"],
-                                                    item))
+                    cls_mro.append(formatter.to_uri(classes[item]["module"], item))
                 else:
-                    cls_mro.append(
-                        formatter.to_external_uri(item.split(".")[0],
-                                                  item))
+                    cls_mro.append(formatter.to_external_uri(item.split(".")[0], item))
 
             self.assertEqual(
                 cls_mro,
-                modules[formatter.to_uri(cls["module"])]["namespaces"]
-                [cls_name_uri][
+                modules[formatter.to_uri(cls["module"])]["namespaces"][cls_name_uri][
                     "metadata"
                 ]["superClasses"],
             )
