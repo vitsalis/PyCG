@@ -130,8 +130,11 @@ We want the FASTEN format:
 
 # Running Tests
 
-From the root directory:
+From the root directory, first install the [mock](https://pypi.org/project/mock/) package:
 ```
 pip3 install mock
+```
+Τhen, simply run the tests by executing:
+```
 make test
 ```
