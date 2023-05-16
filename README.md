@@ -132,5 +132,6 @@ We want the FASTEN format:
 
 From the root directory:
 ```
+pip3 install mock
 make test
 ```
