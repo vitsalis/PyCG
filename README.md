@@ -1,5 +1,8 @@
 # PyCG - Practical Python Call Graphs
 
+[![Linters](https://github.com/vitsalis/PyCG/actions/workflows/linters.yml/badge.svg)](https://github.com/vitsalis/PyCG/actions/workflows/linters.yml)
+[![Tests](https://github.com/vitsalis/PyCG/actions/workflows/test.yaml/badge.svg)](https://github.com/vitsalis/PyCG/actions/workflows/test.yaml)
+
 PyCG generates call graphs for Python code using static analysis.
 It efficiently supports
 * Higher order functions
