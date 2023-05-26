@@ -177,6 +177,15 @@ class PreProcessor(ProcessingBase):
                     )
 
         def add_external_def(name, target):
+            # In case we encounter an external import in the form of:
+            #  "import package.module.module...
+            # we want to treat it as: "import package" 
+            # and save it as such in the definition manager,
+            # so that we will be able to later map it
+            #  with its corresponding calls 
+            if (name == target) & (len(name.split(".")) > 1):
+                name = name.split(".")[0]
+                target = target.split(".")[0]
             # add an external def for the name
             defi = self.def_manager.get(name)
             if not defi:
