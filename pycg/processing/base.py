@@ -216,7 +216,10 @@ class ProcessingBase(ast.NodeVisitor):
                     return_ns = utils.join_ns(
                         called_def.get_ns(), utils.constants.RETURN_NAME
                     )
-                elif called_def.get_type() == utils.constants.CLS_DEF or called_def.get_type() == utils.constants.EXT_DEF :
+                elif (
+                    called_def.get_type() == utils.constants.CLS_DEF
+                    or called_def.get_type() == utils.constants.EXT_DEF
+                ):
                     return_ns = called_def.get_ns()
                 defi = self.def_manager.get(return_ns)
                 if defi:
