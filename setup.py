@@ -34,7 +34,7 @@ def get_long_desc():
 def setup_package():
     setup(
         name="pycg",
-        version="0.0.6",
+        version="0.0.7",
         description="Practical Python Call Graphs",
         long_description=get_long_desc(),
         long_description_content_type="text/markdown",
