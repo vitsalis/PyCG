@@ -50,8 +50,9 @@ class PreProcessor(ProcessingBase):
 
     def _get_fun_defaults(self, node):
         defaults = {}
-        start = len(node.args.posonlyargs) + len(node.args.args) - len(node.args.defaults)
-        defaults_sep = len(node.args.posonlyargs) - start
+        posonlyargs = getattr(node.args, 'posonlyargs', [])  # for python version less than 3.8
+        start = len(posonlyargs) + len(node.args.args) - len(node.args.defaults)
+        defaults_sep = len(posonlyargs) - start
         for cnt, d in enumerate(node.args.defaults[:defaults_sep], start=start):
             if not d:
                 continue
