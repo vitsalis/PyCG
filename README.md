@@ -19,6 +19,10 @@ PyCG: Practical Call Graph Generation in Python.
 In _43rd International Conference on Software Engineering, ICSE '21_,
 25–28 May 2021.
 
+> **PyCG** is archived. Due to limited availability, no further development
+> improvements are planned. Happy to help anyone that wants to create a fork to
+> continue development.
+
 # Installation
 
 PyCG is implemented in Python3 and requires Python version 3.4 or higher.
