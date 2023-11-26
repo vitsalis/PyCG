@@ -1,14 +1,30 @@
 [project]
 name = "PyCG"
-version = "0.0.7"
+version = "0.0.8"
 
 description = "PyCG - Practical Python Call Graphs"
 readme = "README.md"
 requires-python = ">=3.4"
 
+licence = {file = "LICENCE"}
+authors = [{name = "Vitalis Salis", email = "vitsalis@gmail.com"}]
+
+
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+]
+
+[project.optional-dependencies]
+dev = ["flake8>=6.0.0", "isort>=5.12.0", "black>=22.12.0", "mock"]
+
 [project.urls]
 "Homepage" = "https://github.com/vitsalis/PyCG"
 "Bug Tracker" = "https://github.com/vitsalis/PyCG/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 88
