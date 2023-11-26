@@ -63,9 +63,9 @@ class CallGraphGenerator(object):
 
         state["scopes"] = {}
         for key, scope in self.scope_manager.get_scopes().items():
-            state["scopes"][key] = set(
-                [x.get_ns() for (_, x) in scope.get_defs().items()]
-            )
+            state["scopes"][key] = set([
+                x.get_ns() for (_, x) in scope.get_defs().items()
+            ])
 
         state["classes"] = {}
         for key, ch in self.class_manager.get_classes().items():
