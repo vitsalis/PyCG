@@ -153,9 +153,9 @@ class Fasten(BaseFormatter):
                     end = (val, True)
             add_range(begin, end)
 
-            res.append(
-                {"forge": "PyPI", "product": req.name, "constraints": constraints}
-            )
+            res.append({
+                "forge": "PyPI", "product": req.name, "constraints": constraints
+            })
 
         return res
 

@@ -62,14 +62,12 @@ class ScopeManagerTest(TestBase):
 
         self.assertEqual(
             sorted(items["functions"]),
-            sorted(
-                [
-                    "root.chld1",
-                    "root.chld1.grndchld2",
-                    "root.chld2",
-                    "root.chld3.grndchld4",
-                ]
-            ),
+            sorted([
+                "root.chld1",
+                "root.chld1.grndchld2",
+                "root.chld2",
+                "root.chld3.grndchld4",
+            ]),
         )
         self.assertEqual(sorted(items["classes"]), sorted(["root.chld3"]))
 
