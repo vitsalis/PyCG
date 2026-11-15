@@ -1,1 +1,1 @@
-Same as `relative_import` but the import is of the form `from .to_import2 import func2`
+The `main` module imports `func1` from the `nested.to_import` module and calls it. `nested.to_import` imports `func2` from its sibling module with a relative import of the form `from .relative import func2`, and `func1` calls `func2`.

@@ -1,10 +1,14 @@
+PYTHON ?= python3
+
+.PHONY: test lint format
+
 test:
-	python3 -m unittest discover -s pycg/tests -p "*_test.py"
+	$(PYTHON) -m pytest
 
-functional_test:
-	./micro-benchmark/create_pytests.py
-	SNIPPETS_PATH="micro-benchmark/snippets" CALL_GRAPH_MODULE="pycg.pycg" CALL_GRAPH_CLASS="CallGraphGenerator" python3 -m unittest discover -s micro-benchmark -p "*_test.py"
+lint:
+	$(PYTHON) -m ruff check pycg tests micro-benchmark/validate.py
+	$(PYTHON) -m ruff format --check pycg tests micro-benchmark/validate.py
 
-key_err_test:
-	./micro-benchmark-key-errs/create_pytests.py
-	SNIPPETS_PATH="micro-benchmark-key-errs/snippets" CALL_GRAPH_MODULE="pycg.pycg" CALL_GRAPH_CLASS="CallGraphGenerator" python3 -m unittest discover -s micro-benchmark-key-errs -p "*_test.py"
+format:
+	$(PYTHON) -m ruff check --select I --fix pycg tests micro-benchmark/validate.py
+	$(PYTHON) -m ruff format pycg tests micro-benchmark/validate.py

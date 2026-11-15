@@ -1,61 +1,40 @@
 [project]
-name = "PyCG"
-version = "0.0.8"
-
-description = "PyCG - Practical Python Call Graphs"
+name = "pycg"
+version = "0.1.0.dev0"
+description = "Practical Python Call Graphs"
 readme = "README.md"
-requires-python = ">=3.4"
-
-licence = {file = "LICENCE"}
-authors = [{name = "Vitalis Salis", email = "vitsalis@gmail.com"}]
-
-
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENCE"]
+authors = [{ name = "Vitalis Salis", email = "vitsalis@gmail.com" }]
 classifiers = [
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
 ]
+dependencies = []
 
-[project.optional-dependencies]
-dev = ["flake8>=6.0.0", "isort>=5.12.0", "black>=22.12.0", "mock"]
+[project.scripts]
+pycg = "pycg.__main__:main"
 
 [project.urls]
-"Homepage" = "https://github.com/vitsalis/PyCG"
+Homepage = "https://github.com/vitsalis/PyCG"
 "Bug Tracker" = "https://github.com/vitsalis/PyCG/issues"
 
+[dependency-groups]
+dev = ["pytest>=9.2", "ruff==0.17.4"]
+
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
-[tool.black]
-line-length = 88
-target_version = ['py38', 'py39', 'py310']
-preview = true
-exclude = '''
-/(
-    \.eggs         # exclude a few common directories in the
-  | \.git          # root of the project
-  | \.mypy_cache
-  | \.vscode
-  | build
-  | dist
-  | micro-benchmark
-  | micro-benchmark-key-errs
-)/
-'''
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+empty_parameter_set_mark = "fail_at_collect"
 
 [tool.ruff]
-# Do not enforce `E501` (line length violations) for now.
-ignore = ["E501"]
+line-length = 88
+extend-exclude = ["micro-benchmark/snippets", "micro-benchmark-key-errs"]
 
-exclude = [
-    "micro-benchmark",
-    "micro-benchmark-key-errs"
-]
-
-# Ignore `E402` (import violations) in all `__init__.py` files
-[tool.ruff.per-file-ignores]
-"__init__.py" = ["E402", "F401"]
-
-
-[tool.isort]
-profile = "black"
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]

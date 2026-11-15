@@ -18,13 +18,13 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from base import TestBase
+from unittest import TestCase
 
 from pycg import utils
 from pycg.machinery.definitions import DefinitionError, DefinitionManager
 
 
-class DefinitionManagerTest(TestBase):
+class DefinitionManagerTest(TestCase):
     def test_create(self):
         dm = DefinitionManager()
 

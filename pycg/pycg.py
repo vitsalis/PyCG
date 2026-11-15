@@ -63,9 +63,9 @@ class CallGraphGenerator(object):
 
         state["scopes"] = {}
         for key, scope in self.scope_manager.get_scopes().items():
-            state["scopes"][key] = set([
-                x.get_ns() for (_, x) in scope.get_defs().items()
-            ])
+            state["scopes"][key] = set(
+                [x.get_ns() for (_, x) in scope.get_defs().items()]
+            )
 
         state["classes"] = {}
         for key, ch in self.class_manager.get_classes().items():
@@ -107,12 +107,6 @@ class CallGraphGenerator(object):
 
         return True
 
-    def remove_import_hooks(self):
-        self.import_manager.remove_hooks()
-
-    def tearDown(self):
-        self.remove_import_hooks()
-
     def _get_mod_name(self, entry, pkg):
         # We do this because we want __init__ modules to
         # only contain the parent module
@@ -125,7 +119,7 @@ class CallGraphGenerator(object):
 
         return input_mod
 
-    def do_pass(self, cls, install_hooks=False, *args, **kwargs):
+    def do_pass(self, cls, *args, **kwargs):
         modules_analyzed = set()
         for entry_point in self.entry_points:
             input_pkg = self.package
@@ -139,10 +133,7 @@ class CallGraphGenerator(object):
                 input_pkg = os.path.dirname(input_file)
 
             if input_mod not in modules_analyzed:
-                if install_hooks:
-                    self.import_manager.set_pkg(input_pkg)
-                    self.import_manager.install_hooks()
-
+                self.import_manager.set_pkg(input_pkg)
                 processor = cls(
                     input_file,
                     input_mod,
@@ -155,13 +146,9 @@ class CallGraphGenerator(object):
                     processor.get_modules_analyzed()
                 )
 
-                if install_hooks:
-                    self.remove_import_hooks()
-
     def analyze(self):
         self.do_pass(
             PreProcessor,
-            True,
             self.import_manager,
             self.scope_manager,
             self.def_manager,
@@ -178,7 +165,6 @@ class CallGraphGenerator(object):
             self.reset_counters()
             self.do_pass(
                 PostProcessor,
-                False,
                 self.import_manager,
                 self.scope_manager,
                 self.def_manager,
@@ -193,7 +179,6 @@ class CallGraphGenerator(object):
         if self.operation == utils.constants.CALL_GRAPH_OP:
             self.do_pass(
                 CallGraphProcessor,
-                False,
                 self.import_manager,
                 self.scope_manager,
                 self.def_manager,
@@ -204,7 +189,6 @@ class CallGraphGenerator(object):
         elif self.operation == utils.constants.KEY_ERR_OP:
             self.do_pass(
                 KeyErrProcessor,
-                False,
                 self.import_manager,
                 self.scope_manager,
                 self.def_manager,

@@ -1,7 +1,6 @@
 # PyCG - Practical Python Call Graphs
 
-[![Linters](https://github.com/vitsalis/PyCG/actions/workflows/linters.yml/badge.svg)](https://github.com/vitsalis/PyCG/actions/workflows/linters.yml)
-[![Tests](https://github.com/vitsalis/PyCG/actions/workflows/test.yaml/badge.svg)](https://github.com/vitsalis/PyCG/actions/workflows/test.yaml)
+[![CI](https://github.com/vitsalis/PyCG/actions/workflows/ci.yml/badge.svg)](https://github.com/vitsalis/PyCG/actions/workflows/ci.yml)
 
 PyCG generates call graphs for Python code using static analysis.
 It efficiently supports
@@ -19,16 +18,12 @@ PyCG: Practical Call Graph Generation in Python.
 In _43rd International Conference on Software Engineering, ICSE '21_,
 25–28 May 2021.
 
-> **PyCG** is archived. Due to limited availability, no further development
-> improvements are planned. Happy to help anyone that wants to create a fork to
-> continue development.
-
 # Installation
 
-PyCG is implemented in Python3 and requires Python version 3.4 or higher.
-It also has no dependencies. Simply:
+PyCG requires Python 3.12 or later and has no runtime dependencies.
+Install it from the root of a checkout of this repository:
 ```
-pip install pycg
+pip install .
 ```
 
 # Usage
@@ -135,13 +130,20 @@ We want the FASTEN format:
         pypi_pkg/module1.py pkg_root/subpackage/module2.py -o cg.json
 ```
 
-# Running Tests
+# Development
 
-From the root directory, first install the [mock](https://pypi.org/project/mock/) package:
+Install [uv](https://docs.astral.sh/uv/). Then, from the root directory:
 ```
-pip3 install mock
+uv run make test    # unit tests and both micro-benchmarks
+uv run make lint    # ruff check and ruff format --check
+uv run make format  # sort imports and format the code
 ```
-Τhen, simply run the tests by executing:
+
+Each micro-benchmark case is a directory
+`micro-benchmark/snippets/<category>/<name>/` that contains a `main.py` and the
+expected `callgraph.json`. The key error cases in `micro-benchmark-key-errs`
+have a `key_errs.json` instead. The tests find new case directories
+automatically. To run one case:
 ```
-make test
+uv run pytest "tests/test_micro_benchmark.py::test_call_graph[classes/call]"
 ```

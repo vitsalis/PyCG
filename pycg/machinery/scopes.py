@@ -22,6 +22,10 @@ import symtable
 
 from pycg import utils
 
+# Python 3.12 names this symbol table type "type parameter", 3.13 and later
+# "type parameters".
+_TYPE_PARAMETERS_TABLES = ("type parameter", "type parameters")
+
 
 class ScopeManager(object):
     """Manages the scope entries"""
@@ -34,6 +38,14 @@ class ScopeManager(object):
         classes = []
 
         def process(namespace, parent, table):
+            # A generic class or function (PEP 695) is a child of a table for
+            # its type parameters, which has the same name. That table adds no
+            # level to the namespace.
+            if table.get_type() in _TYPE_PARAMETERS_TABLES:
+                for t in table.get_children():
+                    process(namespace, parent, t)
+                return
+
             if table.get_name() == "top" and table.get_lineno() == 0:
                 name = ""
             else:

@@ -19,12 +19,50 @@
 # under the License.
 #
 import os
-
-from pkg_resources import Requirement
+import re
 
 from pycg import utils
 
 from .base import BaseFormatter
+
+# A PEP 508 requirement: a name, optional extras, version specifiers or a
+# direct reference ("name @ url"), and an optional environment marker.
+_REQUIREMENT = re.compile(
+    r"""
+    (?P<name>[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)
+    \s*(?:\[[^\]]*\])?
+    \s*(?:@\s*\S+|\(?(?P<specs>[^;()]*)\)?)
+    \s*(?:;.*)?
+    """,
+    re.VERBOSE,
+)
+_SPECIFIER = re.compile(r"\s*(===|==|!=|~=|<=|>=|<|>)\s*([A-Za-z0-9][^\s,;()]*)\s*")
+
+
+def _parse_requirement(line):
+    """Parse a requirements.txt line into (name, [(operator, version), ...]).
+
+    Return None if the line is not a requirement, for example an option
+    such as "-e .", a comment or a URL.
+    """
+    line = line.partition(" #")[0].strip()
+    match = _REQUIREMENT.fullmatch(line)
+    if not match:
+        return None
+
+    specs = []
+    if match["specs"] and match["specs"].strip():
+        spec_texts = match["specs"].split(",")
+        # One trailing comma is allowed.
+        if not spec_texts[-1].strip():
+            spec_texts.pop()
+        for spec in spec_texts:
+            spec_match = _SPECIFIER.fullmatch(spec)
+            if not spec_match:
+                return None
+            specs.append(spec_match.groups())
+
+    return match["name"], specs
 
 
 class Fasten(BaseFormatter):
@@ -88,14 +126,13 @@ class Fasten(BaseFormatter):
             if not line:
                 continue
 
-            try:
-                req = Requirement.parse(line)
-            except ValueError:
+            requirement = _parse_requirement(line)
+            if requirement is None:
                 # The specific line in the requirements.txt
                 # does not follow the Requirements File Format
                 continue
 
-            specs = req.specs
+            name, specs = requirement
 
             constraints = []
 
@@ -153,9 +190,7 @@ class Fasten(BaseFormatter):
                     end = (val, True)
             add_range(begin, end)
 
-            res.append({
-                "forge": "PyPI", "product": req.name, "constraints": constraints
-            })
+            res.append({"forge": "PyPI", "product": name, "constraints": constraints})
 
         return res
 

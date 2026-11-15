@@ -1,5 +1,5 @@
 def func(a):
-    a()
+    a(1)
 
 y = lambda x: x + 1
 

@@ -1,1 +1,1 @@
-The `main` module imports `to_import` as `as_import_name`. `to_import` defines a function.
+The `main` module imports `to_import` as `as_to_import` and defines a function. `to_import` defines a function. No function is called.

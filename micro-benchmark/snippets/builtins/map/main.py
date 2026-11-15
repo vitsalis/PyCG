@@ -1,19 +1,19 @@
 def func(x):
     pass
 
-map([1, 2, 3], func)
+list(map(func, [1, 2, 3]))
 
 def func2(x):
     return func(x)
 
-map([1, 2, 3], func2)
+list(map(func2, [1, 2, 3]))
 
 def func3(x):
     def func():
         return x
     return func
 
-res = map([1, 2, 3], func3)
+res = map(func3, [1, 2, 3])
 
 for r in res:
     r()

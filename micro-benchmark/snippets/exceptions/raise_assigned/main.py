@@ -3,4 +3,7 @@ class A(Exception):
         pass
 
 a = A
-raise a
+try:
+    raise a
+except A:
+    pass
