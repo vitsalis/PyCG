@@ -1,0 +1,1 @@
+An asynchronous generator has the methods of `types.AsyncGeneratorType`: `__aiter__` returns the generator itself, `__anext__` advances it, and `aclose()` runs its `finally` block, which calls a function.

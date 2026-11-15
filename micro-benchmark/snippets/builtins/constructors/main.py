@@ -1,0 +1,7 @@
+str(1)
+int("2")
+list((1, 2))
+dict(a=1)
+set([1])
+tuple([1])
+bytes(2)

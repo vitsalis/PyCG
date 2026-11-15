@@ -1,1 +1,0 @@
-A recursive tuple assignment.

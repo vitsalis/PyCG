@@ -1,0 +1,3 @@
+import api
+
+api.fetch()

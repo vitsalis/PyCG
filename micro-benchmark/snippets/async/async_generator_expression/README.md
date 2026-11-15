@@ -1,0 +1,1 @@
+A generator expression that contains `await` is an asynchronous generator: it has the methods of `types.AsyncGeneratorType`, and an `async for` loop calls each function that it gives. The call of the coroutine function in the expression belongs to the function that contains the expression.
