@@ -1,6 +1,6 @@
 [project]
 name = "pycg"
-version = "0.1.0.dev0"
+dynamic = ["version"]
 description = "Practical Python Call Graphs"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -15,17 +15,22 @@ dependencies = []
 
 [project.scripts]
 pycg = "pycg.__main__:main"
+pycg-view = "pycg.view:main"
 
 [project.urls]
 Homepage = "https://github.com/vitsalis/PyCG"
 "Bug Tracker" = "https://github.com/vitsalis/PyCG/issues"
 
 [dependency-groups]
-dev = ["pytest>=9.2", "ruff==0.17.4"]
+dev = ["hypothesis==6.170.12", "pytest>=9.2", "ruff==0.17.4"]
 
 [build-system]
 requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
+
+# The version is `__version__` in pycg/__init__.py, its one source.
+[tool.hatch.version]
+path = "pycg/__init__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -34,7 +39,7 @@ empty_parameter_set_mark = "fail_at_collect"
 
 [tool.ruff]
 line-length = 88
-extend-exclude = ["micro-benchmark/snippets", "micro-benchmark-key-errs"]
+extend-exclude = ["micro-benchmark/snippets", "tests/fixtures"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
