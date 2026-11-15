@@ -1,0 +1,240 @@
+"""*args and **kwargs parameters, and unpacked arguments at call sites."""
+
+from programs import callees, main_graph
+
+FUNCTIONS = "def f(): pass\ndef g(): pass\ndef h(): pass\n"
+
+
+def graph_of(tmp_path, source):
+    return main_graph(tmp_path, FUNCTIONS + source)
+
+
+def test_extra_positional_arguments_go_to_args(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def first(a, *args):
+    args[0]()
+def every(*args):
+    for arg in args:
+        arg()
+first(f, g, h)
+every(f, g)
+""",
+    )
+
+    assert callees(graph, "main.first") == ["main.g"]
+    assert callees(graph, "main.every") == ["main.f", "main.g"]
+
+
+def test_extra_keyword_arguments_go_to_kwargs(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def run(name, **options):
+    options["callback"]()
+    for key in options:
+        pass
+run("x", callback=f, other=g)
+""",
+    )
+
+    assert callees(graph, "main.run") == ["main.f"]
+
+
+def test_unpacked_positional_arguments_keep_their_positions(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def pair(a, b, c=None):
+    b()
+def rest(a, *more):
+    more[0]()
+pair(*[f, g])
+pair(f, *(g,))
+rest(*(f, g, h))
+""",
+    )
+
+    assert callees(graph, "main.pair") == ["main.g"]
+    assert callees(graph, "main.rest") == ["main.g"]
+
+
+def test_unpacked_argument_of_unknown_length(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def pair(a, b):
+    a()
+    b()
+def spread(values):
+    pair(f, *values)
+spread([g])
+""",
+    )
+
+    # values[0] may be at any position from b on.
+    assert callees(graph, "main.pair") == ["main.f", "main.g"]
+
+
+def test_unpacked_keyword_arguments(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def named(a=None, b=None, **rest):
+    b()
+    rest["c"]()
+named(**{"b": f, "c": g})
+""",
+    )
+
+    assert callees(graph, "main.named") == ["main.f", "main.g"]
+
+
+def test_forwarding_wrapper_keeps_arguments_apart(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def target(first, second, *, key=None):
+    second()
+    key()
+def forward(*args, **kwargs):
+    return target(*args, **kwargs)
+forward(f, g, key=h)
+""",
+    )
+
+    assert callees(graph, "main.target") == ["main.g", "main.h"]
+
+
+def test_functions_unpacked_into_a_builtin_that_applies_them_are_called(tmp_path):
+    # map(f, xs) and sorted(xs, key=g) unpacked; outside code without stubs
+    # calls nothing.
+    graph = graph_of(
+        tmp_path,
+        """
+import ext
+map(*[f], [1])
+sorted([1], **{"key": g})
+ext.run(*[h], **{"done": h})
+""",
+    )
+
+    assert callees(graph, "main") == [
+        "<builtin>.map",
+        "<builtin>.sorted",
+        "ext.run",
+        "main.f",
+        "main.g",
+    ]
+
+
+def test_args_unpacked_into_shifted_positions_terminate(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def shift(*args):
+    args[0]()
+    shift(g, *args)
+def back(a, b, *args):
+    back(*args)
+shift(f)
+back(f, g, h)
+""",
+    )
+
+    assert callees(graph, "main.shift") == ["main.f", "main.g", "main.shift"]
+
+
+def test_a_method_with_only_args_gets_its_receiver_first(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def target(): pass
+        class Base:
+            def run(*args):
+                args[0].step()
+                args[1]()
+            def step(self): pass
+        class Child(Base):
+            def step(self): pass
+        Base().run(target)
+        Child()
+        """,
+    )
+
+    # The receiver, a Base, is args[0]; the argument is args[1]. A Child
+    # exists, but no analysed code calls run on it.
+    assert callees(graph, "main.Base.run") == ["main.Base.step", "main.target"]
+
+
+def test_a_forwarding_wrapper_used_as_a_method_passes_the_receiver(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def forward(f):
+            def wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+            return wrapper
+        class Base:
+            @forward
+            def run(self):
+                self.step()
+            def step(self): pass
+        class Child(Base):
+            def step(self): pass
+        Base().run()
+        Child()
+        """,
+    )
+
+    # The wrapper passes its receiver, a Base, on to run.
+    assert callees(graph, "main.Base.run") == ["main.Base.step"]
+
+
+def test_a_method_with_only_args_gets_an_outside_receiver(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class C:
+            def run(*args):
+                args[0].helper()
+            def helper(self): pass
+        """,
+    )
+
+    # No analysed code calls run: as an entry point, its receiver is any
+    # instance of C.
+    assert callees(graph, "main.C.run") == ["main.C.helper"]
+
+
+def test_an_unpacked_argument_is_iterated_once_per_call_site(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+class Item:
+    action = staticmethod(g)
+    def __iter__(self):
+        return self
+    def __next__(self):
+        return self
+class Source:
+    __iter__ = Item
+def set_action(x):
+    x.action = f
+def invoke(x):
+    x.action()
+def dispatch(fn, src):
+    fn(*src)
+dispatch(set_action, Source())
+dispatch(invoke, Source())
+""",
+    )
+
+    # Python unpacks `*src` once, before the call, so the analysis iterates
+    # it once per call site whatever function the site calls: the `Item`
+    # that the iteration creates is one object for `set_action` and
+    # `invoke`, as two objects from one allocation site are. A run calls
+    # only `g` here; the edge to `f` is the price of that abstraction (an
+    # iteration per call and callee kept the two apart).
+    assert callees(graph, "main.invoke") == ["main.f", "main.g"]

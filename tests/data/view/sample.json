@@ -1,0 +1,1085 @@
+{
+ "calls": {
+  "shop.base.Base.describe": [
+   {
+    "callees": [
+     "shop.util.fmt"
+    ],
+    "col": 15,
+    "end": [
+     8,
+     29
+    ],
+    "line": 8
+   },
+   {
+    "callees": [
+     "shop.util.fmt"
+    ],
+    "col": 32,
+    "end": [
+     8,
+     51
+    ],
+    "line": 8
+   },
+   {
+    "callees": [
+     "<builtin>.len"
+    ],
+    "col": 36,
+    "end": [
+     8,
+     50
+    ],
+    "line": 8
+   }
+  ],
+  "shop.cart.Cart.__init__": [
+   {
+    "callees": [
+     "shop.base.Base.__init__"
+    ],
+    "col": 8,
+    "end": [
+     6,
+     35
+    ],
+    "line": 6
+   }
+  ],
+  "shop.cart.Cart.__iter__": [
+   {
+    "callees": [
+     "<builtin>.iter"
+    ],
+    "col": 15,
+    "end": [
+     19,
+     31
+    ],
+    "line": 19
+   }
+  ],
+  "shop.cart.Cart.__str__": [
+   {
+    "callees": [
+     "shop.util.fmt"
+    ],
+    "col": 15,
+    "end": [
+     28,
+     32
+    ],
+    "line": 28
+   },
+   {
+    "callees": [
+     "shop.cart.Cart.total"
+    ],
+    "col": 19,
+    "end": [
+     28,
+     31
+    ],
+    "line": 28
+   }
+  ],
+  "shop.cart.Cart._check": [
+   {
+    "callees": [
+     "<builtin>.ValueError"
+    ],
+    "col": 18,
+    "end": [
+     15,
+     34
+    ],
+    "line": 15
+   }
+  ],
+  "shop.cart.Cart.add": [
+   {
+    "callees": [
+     "shop.cart.Cart._check"
+    ],
+    "col": 8,
+    "end": [
+     10,
+     25
+    ],
+    "line": 10
+   },
+   {
+    "callees": [
+     "<builtin>.list.append"
+    ],
+    "col": 8,
+    "end": [
+     11,
+     31
+    ],
+    "line": 11
+   }
+  ],
+  "shop.cart.Cart.total": [
+   {
+    "callees": [
+     "shop.cart.Cart.__iter__"
+    ],
+    "col": 20,
+    "end": [
+     23,
+     24
+    ],
+    "implicit": "iteration",
+    "line": 23
+   }
+  ],
+  "shop.cart.Cart.tree": [
+   {
+    "callees": [
+     "shop.util.walk"
+    ],
+    "col": 15,
+    "end": [
+     31,
+     31
+    ],
+    "line": 31
+   }
+  ],
+  "shop.check": [
+   {
+    "callees": [
+     "shop.check.report"
+    ],
+    "col": 0,
+    "end": [
+     10,
+     33
+    ],
+    "line": 10
+   },
+   {
+    "callees": [
+     "shop.cli.main"
+    ],
+    "col": 11,
+    "end": [
+     7,
+     28
+    ],
+    "line": 7,
+    "module": "shop"
+   },
+   {
+    "callees": [
+     "<builtin>.str.__new__",
+     "shop.cart.Cart.__str__"
+    ],
+    "col": 17,
+    "end": [
+     7,
+     26
+    ],
+    "line": 7,
+    "module": "shop"
+   }
+  ],
+  "shop.check.Level.__lt__": [
+   {
+    "callees": [
+     "shop.util.fmt"
+    ],
+    "col": 15,
+    "end": [
+     5,
+     24
+    ],
+    "line": 5
+   },
+   {
+    "callees": [
+     "shop.util.fmt"
+    ],
+    "col": 27,
+    "end": [
+     5,
+     37
+    ],
+    "line": 5
+   }
+  ],
+  "shop.check.report": [
+   {
+    "callees": [
+     "shop.check.Level.__lt__"
+    ],
+    "col": 11,
+    "end": [
+     8,
+     20
+    ],
+    "implicit": "operator",
+    "line": 8
+   },
+   {
+    "callees": [
+     "shop.check.Level.__lt__"
+    ],
+    "col": 17,
+    "end": [
+     8,
+     27
+    ],
+    "implicit": "operator",
+    "line": 8
+   }
+  ],
+  "shop.cli": [
+   {
+    "callees": [
+     "shop.cli.main"
+    ],
+    "col": 4,
+    "end": [
+     23,
+     10
+    ],
+    "line": 23
+   }
+  ],
+  "shop.cli.main": [
+   {
+    "callees": [
+     "shop.cart.Cart.__init__"
+    ],
+    "col": 11,
+    "end": [
+     15,
+     17
+    ],
+    "line": 15
+   },
+   {
+    "callees": [
+     "shop.cli.Session.__enter__",
+     "shop.cli.Session.__exit__"
+    ],
+    "col": 9,
+    "end": [
+     16,
+     18
+    ],
+    "implicit": "with",
+    "line": 16
+   },
+   {
+    "callees": [
+     "shop.cart.Cart.add"
+    ],
+    "col": 8,
+    "end": [
+     17,
+     37
+    ],
+    "line": 17
+   },
+   {
+    "callees": [
+     "json.loads"
+    ],
+    "col": 17,
+    "end": [
+     17,
+     36
+    ],
+    "line": 17
+   },
+   {
+    "callees": [
+     "requests.get"
+    ],
+    "col": 11,
+    "end": [
+     18,
+     32
+    ],
+    "line": 18
+   },
+   {
+    "callees": [
+     "requests.Response.json"
+    ],
+    "col": 11,
+    "end": [
+     18,
+     39
+    ],
+    "line": 18
+   },
+   {
+    "callees": [
+     "<builtin>.print"
+    ],
+    "col": 4,
+    "end": [
+     19,
+     28
+    ],
+    "line": 19
+   },
+   {
+    "callees": [
+     "shop._speedups.escape"
+    ],
+    "col": 10,
+    "end": [
+     19,
+     27
+    ],
+    "line": 19
+   },
+   {
+    "callees": [
+     "<builtin>.str.__new__",
+     "shop.cart.Cart.__str__"
+    ],
+    "col": 17,
+    "end": [
+     19,
+     26
+    ],
+    "line": 19
+   },
+   {
+    "callees": [
+     "shop.util.load"
+    ],
+    "col": 11,
+    "end": [
+     20,
+     21
+    ],
+    "line": 20
+   }
+  ],
+  "shop.deep.build": [
+   {
+    "callees": [
+     "shop.util.fmt"
+    ],
+    "col": 11,
+    "end": [
+     4,
+     20
+    ],
+    "line": 4
+   }
+  ],
+  "shop.util": [
+   {
+    "callees": [
+     "shop.util.register"
+    ],
+    "col": 1,
+    "end": [
+     9,
+     9
+    ],
+    "implicit": "decorator",
+    "line": 9
+   },
+   {
+    "callees": [
+     "shop.util.apply"
+    ],
+    "col": 10,
+    "end": [
+     42,
+     40
+    ],
+    "line": 42
+   }
+  ],
+  "shop.util.apply": [
+   {
+    "callees": [
+     "<builtin>.list.__init__"
+    ],
+    "col": 11,
+    "end": [
+     24,
+     34
+    ],
+    "line": 24
+   },
+   {
+    "callees": [
+     "<builtin>.map.__init__",
+     "shop.util.<lambda1>",
+     "shop.util.fmt"
+    ],
+    "col": 16,
+    "end": [
+     24,
+     33
+    ],
+    "line": 24
+   }
+  ],
+  "shop.util.call_by_name": [
+   {
+    "callees": [
+     "<builtin>.getattr"
+    ],
+    "col": 13,
+    "end": [
+     30,
+     31
+    ],
+    "line": 30
+   },
+   {
+    "callees": [],
+    "col": 11,
+    "end": [
+     31,
+     19
+    ],
+    "line": 31,
+    "unresolved": "computed name"
+   }
+  ],
+  "shop.util.fmt": [
+   {
+    "callees": [
+     "<builtin>.str.format"
+    ],
+    "col": 11,
+    "end": [
+     11,
+     29
+    ],
+    "line": 11
+   }
+  ],
+  "shop.util.is_even": [
+   {
+    "callees": [
+     "shop.util.is_odd"
+    ],
+    "col": 21,
+    "end": [
+     18,
+     34
+    ],
+    "line": 18
+   }
+  ],
+  "shop.util.is_odd": [
+   {
+    "callees": [
+     "shop.util.is_even"
+    ],
+    "col": 22,
+    "end": [
+     21,
+     36
+    ],
+    "line": 21
+   }
+  ],
+  "shop.util.load": [
+   {
+    "callees": [
+     "yaml.safe_load"
+    ],
+    "col": 11,
+    "end": [
+     27,
+     31
+    ],
+    "line": 27
+   }
+  ],
+  "shop.util.outer": [
+   {
+    "callees": [
+     "shop.util.outer.inner"
+    ],
+    "col": 11,
+    "end": [
+     36,
+     18
+    ],
+    "line": 36
+   }
+  ],
+  "shop.util.outer.inner": [
+   {
+    "callees": [
+     "shop.util.apply"
+    ],
+    "col": 15,
+    "end": [
+     35,
+     30
+    ],
+    "line": 35
+   }
+  ],
+  "shop.util.run_hook": [
+   {
+    "callees": [],
+    "col": 11,
+    "end": [
+     39,
+     29
+    ],
+    "line": 39,
+    "unresolved": "no value"
+   },
+   {
+    "callees": [
+     "yaml.composer.Composer"
+    ],
+    "col": 11,
+    "end": [
+     40,
+     35
+    ],
+    "line": 40
+   },
+   {
+    "callees": [],
+    "col": 11,
+    "end": [
+     40,
+     54
+    ],
+    "line": 40,
+    "unresolved": "outside value"
+   }
+  ],
+  "shop.util.walk": [
+   {
+    "callees": [
+     "shop.util.walk"
+    ],
+    "col": 8,
+    "end": [
+     15,
+     19
+    ],
+    "line": 15
+   }
+  ]
+ },
+ "definitions": {
+  "shop": {
+   "kind": "module",
+   "lines": [
+    1,
+    7
+   ],
+   "module": "shop"
+  },
+  "shop.base": {
+   "kind": "module",
+   "lines": [
+    1,
+    8
+   ],
+   "module": "shop.base"
+  },
+  "shop.base.Base": {
+   "kind": "class",
+   "lines": [
+    3,
+    8
+   ],
+   "module": "shop.base",
+   "mro": [
+    "shop.base.Base",
+    "<builtin>.object"
+   ]
+  },
+  "shop.base.Base.__init__": {
+   "kind": "function",
+   "lines": [
+    4,
+    5
+   ],
+   "module": "shop.base"
+  },
+  "shop.base.Base.describe": {
+   "kind": "function",
+   "lines": [
+    7,
+    8
+   ],
+   "module": "shop.base"
+  },
+  "shop.broken": {
+   "kind": "module",
+   "lines": [
+    0,
+    0
+   ],
+   "module": "shop.broken"
+  },
+  "shop.cart": {
+   "kind": "module",
+   "lines": [
+    1,
+    34
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart": {
+   "kind": "class",
+   "lines": [
+    4,
+    31
+   ],
+   "module": "shop.cart",
+   "mro": [
+    "shop.cart.Cart",
+    "shop.base.Base",
+    "<builtin>.object"
+   ]
+  },
+  "shop.cart.Cart.__init__": {
+   "kind": "function",
+   "lines": [
+    5,
+    7
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart.__iter__": {
+   "kind": "function",
+   "lines": [
+    18,
+    19
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart.__str__": {
+   "kind": "function",
+   "lines": [
+    27,
+    28
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart._check": {
+   "kind": "function",
+   "lines": [
+    13,
+    16
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart.add": {
+   "kind": "function",
+   "lines": [
+    9,
+    11
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart.total": {
+   "kind": "function",
+   "lines": [
+    21,
+    25
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.Cart.tree": {
+   "kind": "function",
+   "lines": [
+    30,
+    31
+   ],
+   "module": "shop.cart"
+  },
+  "shop.cart.CartError": {
+   "kind": "class",
+   "lines": [
+    33,
+    34
+   ],
+   "module": "shop.cart",
+   "mro": [
+    "shop.cart.CartError",
+    "<builtin>.ValueError"
+   ]
+  },
+  "shop.check": {
+   "kind": "module",
+   "lines": [
+    1,
+    10
+   ],
+   "module": "shop.check"
+  },
+  "shop.check.Level": {
+   "kind": "class",
+   "lines": [
+    3,
+    5
+   ],
+   "module": "shop.check",
+   "mro": [
+    "shop.check.Level",
+    "<builtin>.object"
+   ]
+  },
+  "shop.check.Level.__lt__": {
+   "kind": "function",
+   "lines": [
+    4,
+    5
+   ],
+   "module": "shop.check"
+  },
+  "shop.check.report": {
+   "kind": "function",
+   "lines": [
+    7,
+    8
+   ],
+   "module": "shop.check"
+  },
+  "shop.cli": {
+   "kind": "module",
+   "lines": [
+    1,
+    23
+   ],
+   "module": "shop.cli"
+  },
+  "shop.cli.Session": {
+   "kind": "class",
+   "lines": [
+    7,
+    12
+   ],
+   "module": "shop.cli",
+   "mro": [
+    "shop.cli.Session",
+    "<builtin>.object"
+   ]
+  },
+  "shop.cli.Session.__enter__": {
+   "kind": "function",
+   "lines": [
+    8,
+    9
+   ],
+   "module": "shop.cli"
+  },
+  "shop.cli.Session.__exit__": {
+   "kind": "function",
+   "lines": [
+    11,
+    12
+   ],
+   "module": "shop.cli"
+  },
+  "shop.cli.main": {
+   "kind": "function",
+   "lines": [
+    14,
+    20
+   ],
+   "module": "shop.cli"
+  },
+  "shop.deep": {
+   "kind": "module",
+   "lines": [
+    1,
+    6
+   ],
+   "module": "shop.deep"
+  },
+  "shop.deep.build": {
+   "kind": "function",
+   "lines": [
+    3,
+    4
+   ],
+   "module": "shop.deep"
+  },
+  "shop.util": {
+   "kind": "module",
+   "lines": [
+    1,
+    42
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.<lambda1>": {
+   "kind": "function",
+   "lines": [
+    42,
+    42
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.apply": {
+   "kind": "function",
+   "lines": [
+    23,
+    24
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.call_by_name": {
+   "kind": "function",
+   "lines": [
+    29,
+    31
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.fmt": {
+   "kind": "function",
+   "lines": [
+    10,
+    11
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.is_even": {
+   "kind": "function",
+   "lines": [
+    17,
+    18
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.is_odd": {
+   "kind": "function",
+   "lines": [
+    20,
+    21
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.load": {
+   "kind": "function",
+   "lines": [
+    26,
+    27
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.outer": {
+   "kind": "function",
+   "lines": [
+    33,
+    36
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.outer.inner": {
+   "kind": "function",
+   "lines": [
+    34,
+    35
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.register": {
+   "kind": "function",
+   "lines": [
+    5,
+    7
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.run_hook": {
+   "kind": "function",
+   "lines": [
+    38,
+    40
+   ],
+   "module": "shop.util"
+  },
+  "shop.util.walk": {
+   "kind": "function",
+   "lines": [
+    13,
+    15
+   ],
+   "module": "shop.util"
+  }
+ },
+ "exports": {
+  "shop.Cart": [
+   "shop.cart.Cart"
+  ],
+  "shop.base.fmt": [
+   "shop.util.fmt"
+  ],
+  "shop.cart.Base": [
+   "shop.base.Base"
+  ],
+  "shop.cart.fmt": [
+   "shop.util.fmt"
+  ],
+  "shop.cart.walk": [
+   "shop.util.walk"
+  ],
+  "shop.check.fmt": [
+   "shop.util.fmt"
+  ],
+  "shop.cli.Cart": [
+   "shop.cart.Cart"
+  ],
+  "shop.cli.escape": [
+   "shop._speedups.escape"
+  ],
+  "shop.cli.json": [
+   "json"
+  ],
+  "shop.cli.load": [
+   "shop.util.load"
+  ],
+  "shop.cli.requests": [
+   "requests"
+  ],
+  "shop.deep.fmt": [
+   "shop.util.fmt"
+  ],
+  "shop.escape": [
+   "shop._speedups.escape"
+  ],
+  "shop.main": [
+   "shop.cli.main"
+  ],
+  "shop.util.yaml": [
+   "yaml"
+  ]
+ },
+ "format": "pycg/1",
+ "modules": {
+  "shop": {
+   "file": "shop/__init__.py",
+   "kind": "source",
+   "shadows": [
+    "shop.py"
+   ],
+   "status": "analysed"
+  },
+  "shop._speedups": {
+   "file": "shop/_speedups.cpython-312-darwin.so",
+   "kind": "extension"
+  },
+  "shop.base": {
+   "file": "shop/base.py",
+   "kind": "source",
+   "status": "analysed"
+  },
+  "shop.broken": {
+   "cause": "SyntaxError (line 3)",
+   "file": "shop/broken.py",
+   "kind": "source",
+   "status": "failed"
+  },
+  "shop.cart": {
+   "file": "shop/cart.py",
+   "kind": "source",
+   "status": "analysed"
+  },
+  "shop.check": {
+   "file": "shop/check.py",
+   "kind": "source",
+   "status": "analysed"
+  },
+  "shop.cli": {
+   "file": "shop/cli.py",
+   "kind": "source",
+   "status": "analysed"
+  },
+  "shop.deep": {
+   "cause": "RecursionError",
+   "file": "shop/deep.py",
+   "kind": "source",
+   "status": "partial"
+  },
+  "shop.util": {
+   "file": "shop/util.py",
+   "kind": "source",
+   "shadows": [
+    "shop/util.abi3.so",
+    "shop/util.cpython-312-darwin.so"
+   ],
+   "status": "analysed"
+  }
+ },
+ "outside": {
+  "<builtin>.ValueError": {
+   "known": "stub"
+  },
+  "<builtin>.getattr": {
+   "known": "stub"
+  },
+  "<builtin>.iter": {
+   "known": "stub"
+  },
+  "<builtin>.len": {
+   "known": "stub"
+  },
+  "<builtin>.list.__init__": {
+   "known": "stub"
+  },
+  "<builtin>.list.append": {
+   "known": "stub"
+  },
+  "<builtin>.map.__init__": {
+   "known": "stub"
+  },
+  "<builtin>.print": {
+   "known": "stub"
+  },
+  "<builtin>.str.__new__": {
+   "known": "stub"
+  },
+  "<builtin>.str.format": {
+   "known": "stub"
+  },
+  "json.loads": {
+   "known": "stub"
+  },
+  "requests.Response.json": {
+   "known": "stub"
+  },
+  "requests.get": {
+   "known": "stub"
+  },
+  "shop._speedups.escape": {
+   "known": "extension"
+  },
+  "yaml.composer.Composer": {
+   "known": "name"
+  },
+  "yaml.safe_load": {
+   "known": "name"
+  }
+ },
+ "package": {
+  "name": "shop",
+  "version": "2.1.0"
+ },
+ "tool": {
+  "name": "pycg",
+  "typeshed": "0123456789abcdef0123456789abcdef01234567",
+  "version": "0.1.0.dev0"
+ }
+}

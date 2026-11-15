@@ -1,236 +1,510 @@
-#
-# Copyright (c) 2020 Vitalis Salis.
-#
-# Licensed to the Apache Software Foundation (ASF) under one
-# or more contributor license agreements.  See the NOTICE file
-# distributed with this work for additional information
-# regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
-# "License"); you may not use this file except in compliance
-# with the License.  You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied.  See the License for the
-# specific language governing permissions and limitations
-# under the License.
-#
-import symtable
-from unittest import TestCase
-from unittest.mock import patch
+"""Name resolution and scope naming, computed from the AST."""
 
-from pycg.machinery.scopes import ScopeError, ScopeItem, ScopeManager
+import ast
+import textwrap
+
+import pytest
+
+from pycg.analysis.scopes import analyse_scopes
 
 
-class ScopeManagerTest(TestCase):
-    def test_handle_module_with_type_parameters(self):
-        source = "\n".join(
-            [
-                "class C[T]:",
-                "    def m[U](self, u: U) -> T: pass",
-                "def g[V](v: V): pass",
-            ]
-        )
-
-        sm = ScopeManager()
-        items = sm.handle_module("mod", "mod.py", source)
-
-        self.assertEqual(sorted(items["functions"]), ["mod.C.m", "mod.g"])
-        self.assertEqual(items["classes"], ["mod.C"])
-        self.assertEqual(sm.get_scope("mod.C").parent, sm.get_scope("mod"))
-        self.assertEqual(sm.get_scope("mod.C.m").parent, sm.get_scope("mod.C"))
-        self.assertEqual(sm.get_scope("mod.g").parent, sm.get_scope("mod"))
-
-    def test_handle_module(self):
-        class MockTable(object):
-            def __init__(self, name, t, children=[], lineno=0):
-                self.name = name
-                self.type = t
-                self.children = children
-                self.lineno = lineno
-
-            def get_type(self):
-                return self.type
-
-            def get_name(self):
-                return self.name
-
-            def get_children(self):
-                return self.children
-
-            def get_lineno(self):
-                return self.lineno
-
-        grndchld1 = MockTable("grndchld1", "variable", [])
-        grndchld2 = MockTable("grndchld2", "function", [])
-        chld1 = MockTable("chld1", "function", [grndchld1, grndchld2])
-        grndchld3 = MockTable("grndchld3", "variable", [])
-        chld2 = MockTable("chld2", "function", [grndchld3])
-        grndchld4 = MockTable("grndchld4", "function", [])
-        chld3 = MockTable("chld3", "class", [grndchld4])
-        root = MockTable("top", "module", [chld1, chld2, chld3])
-
-        sm = ScopeManager()
-        with patch.object(symtable, "symtable", return_value=root):
-            items = sm.handle_module("root", "", "")
-
-        self.assertEqual(
-            sorted(items["functions"]),
-            sorted(
-                [
-                    "root.chld1",
-                    "root.chld1.grndchld2",
-                    "root.chld2",
-                    "root.chld3.grndchld4",
-                ]
-            ),
-        )
-        self.assertEqual(sorted(items["classes"]), sorted(["root.chld3"]))
-
-        self.assertEqual(sm.get_scope("root").get_ns(), "root")
-        self.assertEqual(sm.get_scope("root").parent, None)
-
-        self.assertEqual(sm.get_scope("root.chld1").get_ns(), "root.chld1")
-        self.assertEqual(sm.get_scope("root.chld1").parent, sm.get_scope("root"))
-
-        self.assertEqual(sm.get_scope("root.chld2").get_ns(), "root.chld2")
-        self.assertEqual(sm.get_scope("root.chld2").parent, sm.get_scope("root"))
-
-        self.assertEqual(sm.get_scope("root.chld3").get_ns(), "root.chld3")
-        self.assertEqual(sm.get_scope("root.chld3").parent, sm.get_scope("root"))
-
-        self.assertEqual(
-            sm.get_scope("root.chld1.grndchld1").get_ns(), "root.chld1.grndchld1"
-        )
-        self.assertEqual(
-            sm.get_scope("root.chld1.grndchld1").parent, sm.get_scope("root.chld1")
-        )
-
-        self.assertEqual(
-            sm.get_scope("root.chld1.grndchld2").get_ns(), "root.chld1.grndchld2"
-        )
-        self.assertEqual(
-            sm.get_scope("root.chld1.grndchld2").parent, sm.get_scope("root.chld1")
-        )
-
-        self.assertEqual(
-            sm.get_scope("root.chld2.grndchld3").get_ns(), "root.chld2.grndchld3"
-        )
-        self.assertEqual(
-            sm.get_scope("root.chld2.grndchld3").parent, sm.get_scope("root.chld2")
-        )
-
-    def test_handle_assign(self):
-        sm = ScopeManager()
-
-        sm.scopes["root"] = ScopeItem("root", None)
-        sm.handle_assign("root", "name", "value")
-        self.assertEqual(sm.get_def("root", "name"), "value")
-
-    def test_get_def(self):
-        sm = ScopeManager()
-        root = "ns"
-        chld1 = "ns.chld1"
-        chld2 = "ns.chld2"
-        grndchld = "ns.chld1.chld1"
-        sm.scopes[root] = ScopeItem(root, None)  # root scope
-        sm.scopes[chld1] = ScopeItem(chld1, sm.scopes[root])  # 1st child scope
-        sm.scopes[chld2] = ScopeItem(chld2, sm.scopes[root])  # 2nd child scope
-        sm.scopes[grndchld] = ScopeItem(grndchld, sm.scopes[chld1])  # grandchild
-
-        grndchld_def = ("var", "grndchild_def")  # name, value
-        chld1_def1 = ("var", "chld1_def")
-        chld1_def2 = ("other_var", "chld1_other_def")
-        chld2_def = ("some_var", "chld2_some_var")
-        root_def = ("var", "root_var")
-
-        sm.scopes[root].add_def(root_def[0], root_def[1])
-        sm.scopes[chld2].add_def(chld2_def[0], chld2_def[1])
-        sm.scopes[chld1].add_def(chld1_def1[0], chld1_def1[1])
-        sm.scopes[chld1].add_def(chld1_def2[0], chld1_def2[1])
-        sm.scopes[grndchld].add_def(grndchld_def[0], grndchld_def[1])
-
-        # should be able to find a variable defined in its scope
-        # also it should get the value of the nearest scope, meaning it's own
-        self.assertEqual(sm.get_def("ns.chld1.chld1", grndchld_def[0]), grndchld_def[1])
-        # if it doesn't exist get the parent's
-        self.assertEqual(sm.get_def("ns.chld1.chld1", chld1_def2[0]), chld1_def2[1])
-        # it shouldn't be able to reach a def defined in chld2
-        self.assertEqual(sm.get_def("ns.chld1.chld1", chld2_def[0]), None)
-        # root doesn't have access to variables defined in lower scopes
-        self.assertEqual(sm.get_def("ns", chld1_def2[0]), None)
-        # but childs have access to root
-        self.assertEqual(sm.get_def("ns.chld2", root_def[0]), root_def[1])
-
-    def test_get_scope(self):
-        sm = ScopeManager()
-        st = ScopeItem("ns", None)
-        st2 = ScopeItem("ns.ns2", st)
-
-        sm.scopes["ns"] = st
-        # if it exists it should be returned
-        self.assertEqual(sm.get_scope("ns"), st)
-        sm.scopes["ns.ns2"] = st2
-        self.assertEqual(sm.get_scope("ns.ns2"), st2)
-        # otherwise None should be returned
-        self.assertEqual(sm.get_scope("notexist"), None)
+def scopes_of(source, module="mod"):
+    return analyse_scopes(ast.parse(textwrap.dedent(source)), module)
 
 
-class ScopeItemTest(TestCase):
-    def test_setup(self):
-        # no issues
-        scope = ScopeItem("smth", None)
-        scope = ScopeItem("smth", scope)
-        # starts of with empty defs
-        self.assertEqual(scope.get_defs(), {})
+def scope_named(scopes, name):
+    matches = [scope for scope in scopes.scopes if scope.name == name]
+    assert len(matches) == 1, f"{name}: {[scope.name for scope in scopes.scopes]}"
+    return matches[0]
 
-        # only strs allowed
-        with self.assertRaises(ScopeError):
-            scope = ScopeItem(1, None)
 
-        # parent needs to be a ScopeItem instance
-        with self.assertRaises(ScopeError):
-            scope = ScopeItem("smth", "parent")
+def binder(scopes, scope_name, name):
+    """Return the name of the scope that binds `name` as seen from a scope."""
+    return scopes.resolve(scope_named(scopes, scope_name), name).name
 
-    def test_get_ns(self):
-        # test that namespace is set properly
-        root_scope = ScopeItem("root", None)
-        self.assertEqual(root_scope.get_ns(), "root")
-        child_scope = ScopeItem("root.child", root_scope)
-        self.assertEqual(child_scope.get_ns(), "root.child")
 
-    def test_defs(self):
-        class MockDef(object):
-            def __init__(self):
-                self.get_points_to_called = False
-                self.merge_points_to_called = False
+def test_local_and_global_names():
+    scopes = scopes_of(
+        """
+        x = 1
+        def f():
+            x = 2
+            return x
+        def g():
+            return x
+        """
+    )
 
-            def get_points_to(self, *args, **kwargs):
-                self.get_points_to_called = True
+    assert binder(scopes, "mod.f", "x") == "mod.f"
+    assert binder(scopes, "mod.g", "x") == "mod"
 
-            def merge_points_to(self, *args, **kwargs):
-                self.merge_points_to_called = True
 
-        scope = ScopeItem("smth", None)
+def test_unknown_name_falls_back_to_the_module():
+    scopes = scopes_of("def f():\n    print(undefined)\n")
 
-        clone = {"adef": "definition"}
+    assert binder(scopes, "mod.f", "print") == "mod"
+    assert binder(scopes, "mod.f", "undefined") == "mod"
+    assert "print" not in scopes.module.bound
 
-        scope.add_def("adef", "definition")
-        self.assertEqual(scope.get_defs().items(), clone.items())
-        self.assertEqual(scope.get_def("adef"), "definition")
 
-        defi1 = MockDef()
-        defi2 = MockDef()
-        scope.add_def("defi1", defi1)
+def test_global_declaration_binds_in_the_module():
+    scopes = scopes_of(
+        """
+        def f():
+            global x
+            x = 1
+        def g():
+            return x
+        """
+    )
 
-        # appropriate functions were called
-        scope.merge_def("defi1", defi2)
-        self.assertTrue(defi1.merge_points_to_called)
-        self.assertTrue(defi2.get_points_to_called)
+    assert binder(scopes, "mod.f", "x") == "mod"
+    assert binder(scopes, "mod.g", "x") == "mod"
+    assert "x" in scopes.module.bound
+    assert "x" not in scope_named(scopes, "mod.f").bound
 
-        # If the def doesn't exist just assign to it
-        scope.merge_def("defi100", "defi1001")
-        self.assertEqual(scope.get_def("defi100"), "defi1001")
+
+def test_global_declaration_in_an_enclosing_function_reaches_nested_scopes():
+    scopes = scopes_of(
+        """
+        def outer():
+            global x
+            x = 1
+            def inner():
+                return x
+        """
+    )
+
+    assert binder(scopes, "mod.outer.inner", "x") == "mod"
+
+
+def test_nonlocal_declaration_binds_in_the_enclosing_function():
+    scopes = scopes_of(
+        """
+        def outer():
+            x = 1
+            def middle():
+                def inner():
+                    nonlocal x
+                    x = 2
+                return inner
+        """
+    )
+
+    assert binder(scopes, "mod.outer.middle.inner", "x") == "mod.outer"
+    assert "x" not in scope_named(scopes, "mod.outer.middle.inner").bound
+
+
+def test_class_body_names_are_invisible_to_nested_functions():
+    scopes = scopes_of(
+        """
+        x = 0
+        def outer():
+            y = 0
+            class C:
+                x = 1
+                y = 1
+                z = x
+                def m(self):
+                    return x, y
+        """
+    )
+
+    assert binder(scopes, "mod.outer.C", "x") == "mod.outer.C"
+    assert binder(scopes, "mod.outer.C.m", "x") == "mod"
+    assert binder(scopes, "mod.outer.C.m", "y") == "mod.outer"
+
+
+def test_comprehension_variables_are_local_to_the_comprehension():
+    scopes = scopes_of(
+        """
+        def f():
+            x = 1
+            return [x for x in range(3)]
+        """
+    )
+
+    assert binder(scopes, "mod.f.<listcomp>", "x") == "mod.f.<listcomp>"
+    assert binder(scopes, "mod.f", "x") == "mod.f"
+
+
+def test_comprehension_in_a_class_body_cannot_see_class_names():
+    scopes = scopes_of(
+        """
+        class C:
+            items = []
+            names = {item: items for item in items}
+        """
+    )
+
+    assert binder(scopes, "mod.C.<dictcomp>", "items") == "mod"
+    assert binder(scopes, "mod.C.<dictcomp>", "item") == "mod.C.<dictcomp>"
+    assert binder(scopes, "mod.C", "items") == "mod.C"
+
+
+def test_walrus_in_a_comprehension_binds_in_the_enclosing_function():
+    scopes = scopes_of(
+        """
+        def f(data):
+            if any((hit := d) for d in data):
+                return hit
+        """
+    )
+
+    assert binder(scopes, "mod.f", "hit") == "mod.f"
+    assert binder(scopes, "mod.f.<genexpr>", "hit") == "mod.f"
+    assert "hit" not in scope_named(scopes, "mod.f.<genexpr>").bound
+
+
+def test_walrus_in_a_module_level_comprehension_binds_a_global():
+    scopes = scopes_of("values = [(last := v) for v in range(3)]\n")
+
+    assert binder(scopes, "mod.<listcomp>", "last") == "mod"
+    assert "last" in scopes.module.bound
+
+
+def test_all_binding_forms_bind_locally():
+    scopes = scopes_of(
+        """
+        def f(a, /, b, *args, c, **kwargs):
+            import os.path
+            import json as js
+            from x import y as z, w
+            for i in a: pass
+            with b as fh: pass
+            try:
+                pass
+            except E as err:
+                pass
+            match c:
+                case [first, *rest]: pass
+                case {"k": val, **others}: pass
+                case P(x=px) as p: pass
+            n: int
+            def inner(): pass
+            class K: pass
+            type Alias = int
+        """
+    )
+
+    f = scope_named(scopes, "mod.f")
+    assert set(f.bound) == {
+        "a",
+        "b",
+        "args",
+        "c",
+        "kwargs",
+        "os",
+        "js",
+        "z",
+        "w",
+        "i",
+        "fh",
+        "err",
+        "first",
+        "rest",
+        "val",
+        "others",
+        "px",
+        "p",
+        "n",
+        "inner",
+        "K",
+        "Alias",
+    }
+
+
+def test_star_import_binds_nothing():
+    scopes = scopes_of("from m import *\n")
+
+    assert dict(scopes.module.bound) == {}
+
+
+def test_lambdas_are_numbered_per_enclosing_scope_in_source_order():
+    scopes = scopes_of(
+        """
+        a = lambda: 1
+        def f():
+            b = lambda: 2
+            c = (lambda: 3)(lambda: 4)
+        d = [lambda: 5 for _ in range(2)]
+        e = lambda: lambda: 6
+        """
+    )
+
+    lambdas = [
+        (node.lineno, node.col_offset, scopes.scope_of(node).name)
+        for node in ast.walk(scopes.tree)
+        if isinstance(node, ast.Lambda)
+    ]
+    assert sorted(lambdas) == [
+        (2, 4, "mod.<lambda1>"),
+        (4, 8, "mod.f.<lambda1>"),
+        (5, 9, "mod.f.<lambda2>"),
+        (5, 20, "mod.f.<lambda3>"),
+        (6, 5, "mod.<lambda2>"),
+        (7, 4, "mod.<lambda3>"),
+        (7, 12, "mod.<lambda3>.<lambda1>"),
+    ]
+
+
+def test_defaults_and_decorators_belong_to_the_enclosing_scope():
+    scopes = scopes_of(
+        """
+        @(lambda f: f)
+        def f(cb=lambda: 1):
+            return lambda: 2
+        """
+    )
+
+    names = sorted(
+        scopes.scope_of(node).name
+        for node in ast.walk(scopes.tree)
+        if isinstance(node, ast.Lambda)
+    )
+    assert names == ["mod.<lambda1>", "mod.<lambda2>", "mod.f.<lambda1>"]
+
+
+def test_qualified_names_of_nested_definitions():
+    scopes = scopes_of(
+        """
+        class A:
+            class B:
+                def m(self):
+                    def inner(): pass
+        def g[T](x: T) -> T:
+            pass
+        class C[T]:
+            def m(self): pass
+        """
+    )
+
+    assert [scope.name for scope in scopes.scopes] == [
+        "mod",
+        "mod.A",
+        "mod.A.B",
+        "mod.A.B.m",
+        "mod.A.B.m.inner",
+        "mod.g",
+        "mod.C",
+        "mod.C.m",
+    ]
+
+
+@pytest.mark.parametrize(
+    ("scope_name", "owner"),
+    [
+        ("mod", "mod"),
+        ("mod.f", "mod.f"),
+        ("mod.f.<listcomp>", "mod.f"),
+        ("mod.f.<listcomp>.<genexpr>", "mod.f"),
+        ("mod.C", "mod.C"),
+    ],
+)
+def test_owner_is_the_nearest_scope_that_is_not_a_comprehension(scope_name, owner):
+    scopes = scopes_of(
+        """
+        def f(rows):
+            return [list(x for x in row) for row in rows]
+        class C:
+            pass
+        """
+    )
+
+    assert scope_named(scopes, scope_name).owner.name == owner
+
+
+def test_private_names_are_mangled_inside_classes():
+    scopes = scopes_of(
+        """
+        class _Outer:
+            __a = 1
+            __dunder__ = 2
+            def method(self, __p):
+                __local = 3
+                global __g
+                __g = 4
+            class __Inner:
+                __b = 5
+        class ___:
+            __c = 6
+        __module_level = 7
+        """
+    )
+
+    assert set(scope_named(scopes, "mod._Outer").bound) == {
+        "_Outer__a",
+        "__dunder__",
+        "method",
+        "_Outer__Inner",
+    }
+    assert set(scope_named(scopes, "mod._Outer.method").bound) == {
+        "self",
+        "_Outer__p",
+        "_Outer__local",
+    }
+    # A nested class mangles with its own name.
+    assert set(scope_named(scopes, "mod._Outer.__Inner").bound) == {"_Inner__b"}
+    # A class name made only of underscores mangles nothing.
+    assert set(scope_named(scopes, "mod.___").bound) == {"__c"}
+    assert set(scopes.module.bound) == {"_Outer", "___", "__module_level", "_Outer__g"}
+
+
+# What the builder follows by definition (see `ModuleScopes.tracked`)
+
+
+def test_names_that_another_scope_rebinds_are_not_tracked():
+    scopes = scopes_of(
+        """
+        rebound = read = 1
+        def install():
+            global rebound
+            rebound = 2
+        def reader():
+            global read
+            return read
+        def outer():
+            mine = cell = 1
+            def inner():
+                nonlocal cell
+                cell = 2
+            [last := x for x in ()]
+        """
+    )
+    outer = scope_named(scopes, "mod.outer")
+
+    assert not scopes.tracked(scopes.module, "rebound")
+    # Reading a global does not rebind it.
+    assert scopes.tracked(scopes.module, "read")
+    assert scopes.tracked(outer, "mine")
+    assert not scopes.tracked(outer, "cell")
+    # A comprehension binds `last` on each of its iterations.
+    assert not scopes.tracked(outer, "last")
+    assert not scopes.tracked(scope_named(scopes, "mod.outer.<listcomp>"), "x")
+
+
+def test_a_module_with_a_star_import_tracks_no_name():
+    scopes = scopes_of("from os import *\nx = 1\n")
+
+    assert not scopes.tracked(scopes.module, "x")
+
+
+def test_class_bodies_and_comprehensions_run_inline_and_functions_do_not():
+    scopes = scopes_of(
+        """
+        def f():
+            class C:
+                [y for y in ()]
+                (z for z in ())
+                def method(self): pass
+            lambda: 0
+        """
+    )
+    function = scope_named(scopes, "mod.f")
+    body = scope_named(scopes, "mod.f.C")
+
+    assert scopes.inline(function, function)
+    assert scopes.inline(body, function)
+    assert scopes.inline(scope_named(scopes, "mod.f.C.<listcomp>"), function)
+    assert not scopes.inline(scope_named(scopes, "mod.f.C.<genexpr>"), function)
+    assert not scopes.inline(scope_named(scopes, "mod.f.C.method"), function)
+    assert not scopes.inline(scope_named(scopes, "mod.f.<lambda1>"), function)
+    assert not scopes.inline(function, scopes.module)
+
+
+def test_loops_record_the_names_their_iterations_bind():
+    scopes = scopes_of(
+        """
+        for target in items:
+            body = 1
+            while (tested := 2):
+                inner = 3
+                del body
+            else:
+                after_inner = 4
+            try:
+                pass
+            except E as error:
+                pass
+            def function():
+                local = 5
+        else:
+            after = 6
+        """
+    )
+    outer, inner = [
+        node for node in ast.walk(scopes.tree) if isinstance(node, (ast.For, ast.While))
+    ]
+
+    assert scopes.loop_bindings(outer) == {
+        "target": False,
+        "body": True,
+        "tested": False,
+        "inner": False,
+        "after_inner": False,
+        "error": True,
+        "function": False,
+    }
+    assert scopes.loop_bindings(inner) == {
+        "tested": False,
+        "inner": False,
+        "body": True,
+    }
+
+
+def test_names_that_only_one_import_binds():
+    scopes = scopes_of(
+        """
+        import typing as t
+        import os.path
+        from typing import TYPE_CHECKING
+        from . import sibling
+        from typing import cast
+        cast = None
+        import json
+        def f():
+            global json
+            json = 1
+        """
+    )
+    module = scopes.module
+
+    assert scopes.imported(module, "t") == "typing"
+    assert scopes.imported(module, "os") == "os"
+    assert scopes.imported(module, "TYPE_CHECKING") == "typing.TYPE_CHECKING"
+    # A relative import, a name bound another way, a name another scope binds.
+    assert scopes.imported(module, "sibling") is None
+    assert scopes.imported(module, "cast") is None
+    assert scopes.imported(module, "json") is None
+
+
+def test_scopes_that_use_their_namespace_track_no_name():
+    scopes = scopes_of(
+        """
+        import sys
+        def reads():
+            x = 1
+            return locals()
+        def described(obj):
+            x = 1
+            return vars(obj)
+        def shadowed():
+            locals = dict
+            x = 1
+            return locals()
+        def runs():
+            x = 1
+            exec("y = 2")
+        """
+    )
+
+    assert not scopes.tracked(scope_named(scopes, "mod.reads"), "x")
+    assert scopes.tracked(scope_named(scopes, "mod.described"), "x")
+    assert scopes.tracked(scope_named(scopes, "mod.shadowed"), "x")
+    # exec also reaches the module's names.
+    assert not scopes.tracked(scope_named(scopes, "mod.runs"), "x")
+    assert not scopes.tracked(scopes.module, "sys")
+    plain = scopes_of("import sys\nx = 1\nsys.modules['other']\n")
+    assert plain.tracked(plain.module, "x")
+    patched = scopes_of("import sys\nx = 1\nsys.modules[__name__].x = 2\n")
+    assert not patched.tracked(patched.module, "x")

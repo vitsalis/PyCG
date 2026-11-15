@@ -5,33 +5,42 @@ PyCG analyses its ``main.py`` and the result must equal ``callgraph.json``.
 """
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
-from pycg import utils
 from pycg.pycg import CallGraphGenerator
 
 SNIPPETS = Path(__file__).resolve().parent.parent / "micro-benchmark" / "snippets"
 
+KNOWN_FAILURES_FILE = Path(__file__).resolve().parent / "known_failures.txt"
+
+
+def read_known_failures(path):
+    """Read `<case id>: <reason>` lines; blank lines and `#` comments are skipped."""
+    failures = {}
+    for line in path.read_text().splitlines():
+        if line.strip() and not line.startswith("#"):
+            case_id, reason = line.split(": ", 1)
+            failures[case_id] = reason
+    return failures
+
+
 # Cases that fail because of known limitations of the analysis. The marks are
-# strict: when a case starts to pass, the suite fails until its entry is removed.
-KNOWN_FAILURES = {
-    "assignments/starred": "starred unpacking not modelled",
-    "builtins/map": "calls through map() not modelled",
-    "classes/static_method_call": "decorator call to builtin staticmethod missed",
-    "builtins/types": "methods of builtin types not modelled",
-    "decorators/assigned": "flow-insensitive: keeps both decorators bound to the name",
-    "decorators/nested_decorators": "stacked decorators: misses the outer wrapper",
-    "decorators/return_different_func": "decorated call goes to function, not wrapper",
-    "dicts/assign": "flow-insensitive: keeps the overwritten dict value",
-    "dicts/nested": "flow-insensitive: keeps the overwritten nested dict value",
-    "dicts/update": "dict.update() not modelled",
-    "dynamic/eval": "eval() of a string not analysed",
-    "kwargs/chained_call": "spurious func2 -> func2 through shared parameters",
-    "lists/slice": "list slices not modelled",
-    "mro/super_call": "super() not modelled",
-}
+# strict: when a case starts to pass, the suite fails until its line is removed.
+KNOWN_FAILURES = read_known_failures(KNOWN_FAILURES_FILE)
+
+
+def version_skip_reason(case):
+    """Why the interpreter cannot run the case (its `requires-python`), or None."""
+    path = case / "requires-python"
+    if not path.is_file():
+        return None
+    version = path.read_text().strip()
+    if sys.version_info >= tuple(int(part) for part in version.split(".")):
+        return None
+    return f"needs Python {version}"
 
 
 def snippet_cases():
@@ -44,6 +53,8 @@ def snippet_cases():
             marks.append(
                 pytest.mark.xfail(raises=AssertionError, strict=True, reason=reason)
             )
+        if skip_reason := version_skip_reason(path):
+            marks.append(pytest.mark.skip(reason=skip_reason))
         cases.append(pytest.param(path, id=case_id, marks=marks))
     return cases
 
@@ -57,9 +68,7 @@ def sorted_edges(call_graph):
 
 @pytest.mark.parametrize("snippet", CASES)
 def test_call_graph(snippet):
-    generator = CallGraphGenerator(
-        [str(snippet / "main.py")], str(snippet), -1, utils.constants.CALL_GRAPH_OP
-    )
+    generator = CallGraphGenerator([str(snippet / "main.py")], str(snippet))
     generator.analyze()
 
     expected = json.loads((snippet / "callgraph.json").read_text())
@@ -68,3 +77,11 @@ def test_call_graph(snippet):
 
 def test_known_failures_are_existing_cases():
     assert set(KNOWN_FAILURES) <= {case.id for case in CASES}
+
+
+def test_case_that_needs_a_newer_python_is_skipped(tmp_path):
+    assert version_skip_reason(tmp_path) is None
+    (tmp_path / "requires-python").write_text("3.12\n")
+    assert version_skip_reason(tmp_path) is None
+    (tmp_path / "requires-python").write_text("99.1\n")
+    assert version_skip_reason(tmp_path) == "needs Python 99.1"
