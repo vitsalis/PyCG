@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>PyCG call graph</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #59636e;
+  --line: #d1d9e0;
+  --panel: #f6f8fa;
+  --accent: #0a5cc2;
+  --accent-bg: #ddeaff;
+  --implicit: #7a3fbf;
+  --outside: #8a5a00;
+  --bad: #b42318;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1318;
+    --fg: #e3e8ee;
+    --muted: #97a1ad;
+    --line: #353d47;
+    --panel: #171d24;
+    --accent: #6cb0ff;
+    --accent-bg: #1d3657;
+    --implicit: #c09cff;
+    --outside: #e0b45a;
+    --bad: #ff8a80;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+#app { display: flex; flex-direction: column; height: 100%; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+[hidden] { display: none !important; }
+.error { margin: 2rem; color: var(--bad); }
+
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.5rem;
+  padding: .6rem 1rem; border-bottom: 1px solid var(--line); background: var(--panel);
+}
+.top h1 { font-size: 1.15rem; margin: 0; }
+.top .version { color: var(--muted); font-weight: normal; }
+.meta { color: var(--muted); font-size: .85rem; }
+.counts { display: flex; flex-wrap: wrap; gap: .2rem .9rem; margin: 0; padding: 0; list-style: none; font-size: .85rem; }
+.counts b { font-variant-numeric: tabular-nums; }
+.tabs { display: flex; gap: .25rem; }
+.tabs button {
+  border: 1px solid var(--line); background: var(--bg); padding: .2rem .7rem; border-radius: 6px;
+}
+.tabs button[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent); }
+.filters { display: flex; flex-wrap: wrap; gap: .2rem .9rem; font-size: .85rem; }
+.filters .legend { color: var(--muted); }
+.filters label { white-space: nowrap; }
+
+.view { flex: 1; min-height: 0; }
+#hierarchy { display: grid; grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.sidebar {
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  border-right: 1px solid var(--line); background: var(--panel);
+}
+.sidebar input {
+  margin: .6rem; padding: .35rem .5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+}
+.sidebar .scroll { overflow: auto; flex: 1; min-height: 0; padding: 0 .4rem .6rem; }
+.hint { color: var(--muted); font-size: .85rem; margin: .3rem .4rem; }
+.results { list-style: none; margin: 0; padding: 0; }
+.result { padding: .2rem .4rem; border-radius: 4px; cursor: pointer; overflow-wrap: anywhere; }
+.result[aria-selected="true"] { background: var(--accent-bg); }
+.result .target { display: block; color: var(--muted); font-size: .8rem; font-family: var(--mono); }
+
+.main { overflow: auto; min-height: 0; padding: .8rem 1rem; }
+.panes {
+  display: grid; gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 24rem) minmax(0, 1fr);
+  grid-template-areas: "callers card callees";
+}
+.pane-callers { grid-area: callers; }
+.pane-callees { grid-area: callees; }
+.card { grid-area: card; align-self: start; border: 1px solid var(--line); border-radius: 8px; padding: .7rem .9rem; background: var(--panel); }
+.card h2 { font-size: 1rem; margin: 0 0 .3rem; font-family: var(--mono); overflow-wrap: anywhere; }
+.card dl { margin: .4rem 0 0; display: grid; grid-template-columns: auto 1fr; gap: .15rem .7rem; font-size: .85rem; }
+.card dt { color: var(--muted); }
+.card dd { margin: 0; overflow-wrap: anywhere; }
+.card h3 { font-size: .85rem; margin: .8rem 0 .2rem; }
+.card ul { margin: 0; padding-left: 1rem; font-size: .85rem; }
+.pane h3 { font-size: .9rem; margin: 0 0 .4rem; }
+.pane .note { color: var(--muted); font-weight: normal; font-size: .8rem; }
+
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree ul { margin-left: .6rem; padding-left: .5rem; border-left: 1px solid var(--line); }
+.row { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .4rem; padding: .1rem 0; }
+.toggle {
+  flex: none; width: 1.2rem; text-align: center; border: 0; background: none; padding: 0; color: var(--muted);
+}
+.toggle.recursive { color: var(--implicit); }
+.label {
+  border: 0; background: none; padding: 0; text-align: left; color: var(--accent);
+  font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; min-width: 0;
+}
+.label:hover { text-decoration: underline; }
+.prefix { opacity: .7; }
+.mono { font-family: var(--mono); font-size: .85rem; overflow-wrap: anywhere; }
+.badge {
+  font-size: .72rem; border: 1px solid var(--line); border-radius: 4px; padding: 0 .3rem; color: var(--muted); white-space: nowrap;
+}
+.badge.outside { color: var(--outside); border-color: currentColor; }
+.badge.implicit, .site.implicit { color: var(--implicit); }
+.badge.recursive { color: var(--implicit); border-color: currentColor; }
+.badge.failed, .failed-text { color: var(--bad); }
+.badge.failed { border-color: currentColor; }
+.badge.partial, .partial-text { color: var(--outside); }
+.badge.partial { border-color: currentColor; border-style: dashed; }
+.badge.shadows { border-style: dotted; }
+.badge.extension { color: var(--outside); border-color: currentColor; }
+.sites { font-family: var(--mono); font-size: .75rem; color: var(--muted); }
+.site + .site::before { content: ", "; color: var(--muted); }
+.more { border: 1px dashed var(--line); background: none; border-radius: 4px; padding: .05rem .5rem; margin: .2rem 0; font-size: .8rem; color: var(--muted); }
+.empty { color: var(--muted); font-size: .85rem; }
+
+#modules { overflow: auto; padding: .8rem 1rem; }
+.toolbar { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; margin-bottom: .6rem; }
+.toolbar input { padding: .3rem .5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); min-width: 0; }
+table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+th, td { border-bottom: 1px solid var(--line); padding: .25rem .5rem; text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--panel); white-space: nowrap; }
+th button { border: 0; background: none; padding: 0; font-weight: bold; }
+td.number, th.number { text-align: right; font-variant-numeric: tabular-nums; }
+.module-name { border: 0; background: none; padding: 0; color: var(--accent); font-family: var(--mono); text-align: left; overflow-wrap: anywhere; }
+.module-detail > td { background: var(--panel); }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .5rem 1.5rem; }
+.detail-grid h4 { margin: .2rem 0; font-size: .85rem; }
+.detail-grid ul { list-style: none; margin: 0; padding: 0; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; margin-left: .4rem; }
+
+@media (max-width: 1250px) {
+  .panes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "card card" "callers callees"; }
+}
+@media (max-width: 760px) {
+  #app { height: auto; }
+  #hierarchy { display: block; }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--line); max-height: 45vh; }
+  .panes { grid-template-columns: minmax(0, 1fr); grid-template-areas: "card" "callers" "callees"; }
+}
+</style>
+</head>
+<body>
+<div id="app"><noscript><p class="error">This page needs JavaScript to show the call graph.</p></noscript></div>
+<script type="application/json" id="pycg-document">@@PYCG_DOCUMENT@@</script>
+<script id="pycg-logic">
+"use strict";
+/*
+ * The logic of the page, without the DOM: indexes, callers and callees
+ * under the filters, search, the tree and the module map. Every function
+ * works on the index that buildIndex makes once.
+ */
+const PyCG = (() => {
+  const FORMAT = "pycg/1";
+  /* The implicit constructs and the unresolved causes of docs/format.md, in one line each. */
+  const IMPLICIT = new Map([
+    ["attribute", "a load or store of an attribute: a property, __get__, __set__, __getattr__, __setattr__"],
+    ["await", "await, async with or async for: __await__"],
+    ["class", "a class statement: the metaclass, __init_subclass__, __set_name__"],
+    ["decorator", "a decorator, called with the function or class"],
+    ["delete", "del x.a or del x[k]: a deleter, __delete__, __delattr__, __delitem__"],
+    ["dict", "a dict display or lookup: __hash__ and __eq__ of the keys"],
+    ["format", "an f-string field, % or str.format: __format__, __str__, __repr__"],
+    ["iteration", "for, a comprehension, unpacking, yield from or *: __iter__, __next__"],
+    ["match", "a sequence pattern of match: __len__"],
+    ["operator", "an operator, a comparison or in: the operator's special method"],
+    ["raise", "raise C: __new__ and __init__ of the instance it creates"],
+    ["subscript", "a subscript or a pattern item: __getitem__, __setitem__, __missing__"],
+    ["truth", "a condition, not, and or or: __bool__, __len__"],
+    ["with", "with or async with: __enter__, __exit__, __aenter__, __aexit__"],
+  ]);
+  const UNRESOLVED = new Map([
+    ["no value", "the called expression holds no value that the analysis knows"],
+    ["computed name", "an attribute looked up with a name that is not a constant"],
+    ["outside value", "a value of outside code that has no name, or whose type is not known"],
+    ["saturated", "a value that may be more objects than the analysis keeps for one node"],
+  ]);
+  const KINDS = new Map([["function", 0], ["class", 1], ["module", 2], ["export", 3], ["outside", 4]]);
+
+  function compare(a, b) {
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+
+  function parentName(name) {
+    const at = name.lastIndexOf(".");
+    return at < 0 ? null : name.slice(0, at);
+  }
+
+  function lastName(name) {
+    return name.slice(name.lastIndexOf(".") + 1);
+  }
+
+  function entries(object) {
+    return object !== null && typeof object === "object" ? Object.entries(object) : [];
+  }
+
+  function endOf(site) {
+    return Array.isArray(site.end) ? site.end : [site.line, site.col];
+  }
+
+  /*
+   * Sites in the order of the document: those in the module of the listed
+   * definition, then those of another definition of the name, by module;
+   * then by start, end and implicit construct.
+   */
+  function bySite(a, b) {
+    const x = endOf(a);
+    const y = endOf(b);
+    return (
+      (a.module ? 1 : 0) - (b.module ? 1 : 0) ||
+      compare(a.module || "", b.module || "") ||
+      a.line - b.line ||
+      a.col - b.col ||
+      x[0] - y[0] ||
+      x[1] - y[1] ||
+      compare(a.implicit || "", b.implicit || "")
+    );
+  }
+
+  function push(map, key, value) {
+    const list = map.get(key);
+    if (list) list.push(value);
+    else map.set(key, [value]);
+  }
+
+  function firstLine(index, name) {
+    const definition = index.definitions.get(name);
+    return definition && Array.isArray(definition.lines) ? definition.lines[0] : 0;
+  }
+
+  /*
+   * Two sites of a caller can start at the same place of one module
+   * (`a.get().strip()`). Their labels then show their ends, which tell
+   * them apart.
+   */
+  function markSameStarts(index, list) {
+    if (list.length < 2) return;
+    const starts = new Map();
+    for (const site of list) push(starts, (site.module || "") + "\u0000" + site.line + ":" + site.col, site);
+    for (const group of starts.values()) {
+      if (group.length < 2) continue;
+      const ends = new Set(group.map((site) => endOf(site).join(":")));
+      if (ends.size > 1) for (const site of group) index.showEnd.add(site);
+    }
+  }
+
+  /*
+   * `line:col`, with the end when the caller has another site with the same
+   * start, and after the file of the site's module when it is not the
+   * module of the listed definition.
+   */
+  function siteLabel(index, site) {
+    let label = site.line + ":" + site.col;
+    if (index.showEnd.has(site)) {
+      const [line, col] = endOf(site);
+      label += "–" + (line === site.line ? col : line + ":" + col);
+    }
+    if (!site.module) return label;
+    const module = index.modules.get(site.module);
+    return (module && module.file ? module.file : site.module) + " " + label;
+  }
+
+  function buildIndex(doc) {
+    const index = {
+      modules: new Map(entries(doc.modules)),
+      definitions: new Map(entries(doc.definitions)),
+      outside: new Map(entries(doc.outside)),
+      calls: new Map(entries(doc.calls)),
+      callers: new Map(),
+      extensionModule: new Map(),
+      showEnd: new Set(),
+      exportedAs: new Map(),
+      children: new Map(),
+      members: new Map(),
+      moduleNames: [],
+      searchEntries: [],
+      counts: null,
+    };
+
+    let sites = 0;
+    let unresolved = 0;
+    let edges = 0;
+    for (const [caller, list] of index.calls) {
+      markSameStarts(index, list);
+      const seen = new Set();
+      for (const site of list) {
+        sites += 1;
+        if (site.unresolved) unresolved += 1;
+        for (const callee of site.callees) {
+          push(index.callers, callee, {caller, site});
+          if (!seen.has(callee)) {
+            seen.add(callee);
+            edges += 1;
+          }
+        }
+      }
+    }
+    index.counts = {
+      modules: index.modules.size,
+      definitions: index.definitions.size,
+      sites,
+      edges,
+      outside: index.outside.size,
+      unresolved,
+    };
+
+    const moduleNames = new Set(index.modules.keys());
+    for (const [name, definition] of index.definitions) {
+      if (definition.kind === "module") moduleNames.add(name);
+    }
+    index.moduleNames = [...moduleNames].sort(compare);
+
+    for (const [name, info] of index.outside) {
+      if (info.known !== "extension") continue;
+      for (let prefix = parentName(name); prefix !== null; prefix = parentName(prefix)) {
+        if (index.modules.has(prefix)) {
+          index.extensionModule.set(name, prefix);
+          break;
+        }
+      }
+    }
+
+    for (const [path, targets] of entries(doc.exports)) {
+      for (const target of targets) push(index.exportedAs, target, path);
+    }
+    for (const paths of index.exportedAs.values()) paths.sort(compare);
+
+    const roots = [];
+    for (const name of index.moduleNames) {
+      let parent = parentName(name);
+      while (parent !== null && !moduleNames.has(parent)) parent = parentName(parent);
+      if (parent === null) roots.push(name);
+      else push(index.children, parent, name);
+    }
+    index.children.set(null, roots);
+    for (const [name, definition] of index.definitions) {
+      if (definition.kind === "module") continue;
+      let parent = parentName(name);
+      while (parent !== null) {
+        const above = index.definitions.get(parent);
+        if (above && above.module === definition.module) break;
+        parent = parentName(parent);
+      }
+      push(index.children, parent === null ? definition.module : parent, name);
+      push(index.members, definition.module, name);
+    }
+    for (const [name, module] of index.extensionModule) {
+      push(index.children, module, name);
+      push(index.members, module, name);
+    }
+    const rank = (name) => (moduleNames.has(name) ? 0 : index.definitions.has(name) ? 1 : 2);
+    const treeOrder = (a, b) =>
+      rank(a) - rank(b) ||
+      (rank(a) === 1 ? firstLine(index, a) - firstLine(index, b) : 0) ||
+      compare(a, b);
+    for (const list of index.children.values()) list.sort(treeOrder);
+    for (const list of index.members.values()) list.sort(treeOrder);
+
+    const add = (name, target, kind) =>
+      index.searchEntries.push({
+        name,
+        target,
+        kind: KINDS.has(kind) ? kind : "function",
+        lower: name.toLowerCase(),
+        last: lastName(name).toLowerCase(),
+      });
+    for (const [name, definition] of index.definitions) add(name, name, definition.kind);
+    for (const name of moduleNames) if (!index.definitions.has(name)) add(name, name, "module");
+    for (const name of index.outside.keys()) add(name, name, "outside");
+    for (const [path, targets] of entries(doc.exports)) {
+      for (const target of targets) add(path, target, "export");
+    }
+    return index;
+  }
+
+  function moduleOf(index, name) {
+    const definition = index.definitions.get(name);
+    if (definition) return definition.module;
+    return index.extensionModule.get(name) || null;
+  }
+
+  function describe(index, name) {
+    const info = {
+      name,
+      kind: null,
+      known: null,
+      module: null,
+      file: null,
+      lines: null,
+      mro: null,
+      moduleKind: null,
+      status: null,
+      cause: null,
+      shadows: [],
+      exportedAs: index.exportedAs.get(name) || [],
+      otherModules: [],
+    };
+    const definition = index.definitions.get(name);
+    if (definition) {
+      info.kind = definition.kind;
+      info.module = definition.module;
+      info.lines = definition.lines || null;
+      info.mro = definition.mro || null;
+    } else if (index.modules.has(name)) {
+      info.kind = "module";
+      info.module = name;
+    } else if (index.outside.has(name)) {
+      info.kind = "outside";
+      info.known = index.outside.get(name).known;
+      info.module = index.extensionModule.get(name) || null;
+    } else if (index.exportedAs.has(name)) {
+      info.kind = "outside";
+    } else {
+      return null;
+    }
+    const others = new Set();
+    for (const site of index.calls.get(name) || []) if (site.module) others.add(site.module);
+    info.otherModules = [...others].sort(compare);
+    const module = info.module === null ? undefined : index.modules.get(info.module);
+    if (module) {
+      info.file = module.file ?? null;
+      info.moduleKind = module.kind ?? null;
+      if (info.kind === "module") {
+        info.status = module.status ?? null;
+        info.cause = module.cause ?? null;
+        info.shadows = module.shadows || [];
+      }
+    }
+    return info;
+  }
+
+  function siteShown(site, filters) {
+    return filters.implicit || !site.implicit;
+  }
+
+  function calleeShown(index, name, filters) {
+    return filters.outside || index.definitions.has(name);
+  }
+
+  function grouped(rows) {
+    const list = [...rows.values()];
+    for (const row of list) row.sites.sort(bySite);
+    return list;
+  }
+
+  /* The callees of `name`, one row per callee with its sites in `name`. */
+  function callees(index, name, filters) {
+    const rows = new Map();
+    for (const site of index.calls.get(name) || []) {
+      if (!siteShown(site, filters)) continue;
+      for (const callee of site.callees) {
+        if (!calleeShown(index, callee, filters)) continue;
+        if (!rows.has(callee)) rows.set(callee, {name: callee, sites: []});
+        rows.get(callee).sites.push(site);
+      }
+    }
+    return grouped(rows).sort((a, b) => bySite(a.sites[0], b.sites[0]) || compare(a.name, b.name));
+  }
+
+  /* The callers of `name`, one row per caller with its sites that call `name`. */
+  function callers(index, name, filters) {
+    if (!calleeShown(index, name, filters)) return [];
+    const rows = new Map();
+    for (const {caller, site} of index.callers.get(name) || []) {
+      if (!siteShown(site, filters)) continue;
+      if (!rows.has(caller)) rows.set(caller, {name: caller, sites: []});
+      rows.get(caller).sites.push(site);
+    }
+    return grouped(rows).sort((a, b) => compare(a.name, b.name));
+  }
+
+  function hasCallees(index, name, filters) {
+    for (const site of index.calls.get(name) || []) {
+      if (!siteShown(site, filters)) continue;
+      for (const callee of site.callees) if (calleeShown(index, callee, filters)) return true;
+    }
+    return false;
+  }
+
+  function hasCallers(index, name, filters) {
+    if (!calleeShown(index, name, filters)) return false;
+    for (const {site} of index.callers.get(name) || []) if (siteShown(site, filters)) return true;
+    return false;
+  }
+
+  function unresolved(index, name, filters) {
+    if (!filters.unresolved) return [];
+    return (index.calls.get(name) || []).filter((site) => site.unresolved);
+  }
+
+  /*
+   * The rows under `name` in a callers or callees tree. `path` holds the
+   * names from the selected node down to `name`: a row on it is marked
+   * recursive and is not expanded again.
+   */
+  function expand(index, name, direction, filters, path) {
+    const rows = direction === "callers" ? callers(index, name, filters) : callees(index, name, filters);
+    const more = direction === "callers" ? hasCallers : hasCallees;
+    const onPath = new Set(path);
+    for (const row of rows) {
+      row.recursive = onPath.has(row.name);
+      row.expandable = !row.recursive && more(index, row.name, filters);
+    }
+    return rows;
+  }
+
+  function searchOrder(a, b) {
+    return (
+      KINDS.get(a.kind) - KINDS.get(b.kind) ||
+      a.name.length - b.name.length ||
+      compare(a.name, b.name) ||
+      compare(a.target, b.target)
+    );
+  }
+
+  /*
+   * Names that match `query`, best first: the whole name, a dotted tail
+   * (the last part, or `Class.method`), the start of the last part, the
+   * start of any part, then any substring. Case is ignored.
+   */
+  function search(index, query, limit) {
+    const text = query.trim().toLowerCase();
+    if (text === "") return {total: 0, entries: []};
+    const dotted = "." + text;
+    const tiers = [[], [], [], [], []];
+    for (const entry of index.searchEntries) {
+      const name = entry.lower;
+      let tier;
+      if (name === text) tier = 0;
+      else if (name.endsWith(dotted)) tier = 1;
+      else if (entry.last.startsWith(text)) tier = 2;
+      else if (name.startsWith(text) || name.includes(dotted)) tier = 3;
+      else if (name.includes(text)) tier = 4;
+      else continue;
+      tiers[tier].push(entry);
+    }
+    let total = 0;
+    for (const tier of tiers) total += tier.length;
+    const found = [];
+    for (const tier of tiers) {
+      if (found.length >= limit) break;
+      tier.sort(searchOrder);
+      for (const entry of tier.slice(0, limit - found.length)) found.push(entry);
+    }
+    return {total, entries: found};
+  }
+
+  function children(index, name) {
+    return index.children.get(name) || [];
+  }
+
+  function members(index, module) {
+    return index.members.get(module) || [];
+  }
+
+  function byCount(map) {
+    return [...map].sort((a, b) => b[1] - a[1] || compare(a[0], b[0]));
+  }
+
+  /*
+   * One row per module: the call edges from it to each other module, to
+   * itself, and to outside names; and the edges into it. An edge is a
+   * distinct caller and callee with at least one site, in the module's
+   * code, that the filters show.
+   */
+  function moduleMap(index, filters) {
+    const rows = new Map();
+    for (const name of index.moduleNames) {
+      const module = index.modules.get(name) || {};
+      rows.set(name, {
+        name,
+        file: module.file ?? null,
+        kind: module.kind ?? "source",
+        status: module.status ?? null,
+        cause: module.cause ?? null,
+        shadows: module.shadows || [],
+        definitions: members(index, name).length,
+        out: new Map(),
+        in: new Map(),
+        within: 0,
+        outside: 0,
+        callsOut: 0,
+        callsIn: 0,
+      });
+    }
+    for (const [caller, list] of index.calls) {
+      const home = moduleOf(index, caller);
+      const seen = new Set();
+      for (const site of list) {
+        if (!siteShown(site, filters)) continue;
+        const from = rows.get(site.module || home);
+        if (!from) continue;
+        for (const callee of site.callees) {
+          const edge = from.name + "\u0000" + callee;
+          if (seen.has(edge) || !calleeShown(index, callee, filters)) continue;
+          seen.add(edge);
+          const to = rows.get(moduleOf(index, callee));
+          if (!to) from.outside += 1;
+          else if (to === from) from.within += 1;
+          else {
+            from.out.set(to.name, (from.out.get(to.name) || 0) + 1);
+            to.in.set(from.name, (to.in.get(from.name) || 0) + 1);
+            from.callsOut += 1;
+            to.callsIn += 1;
+          }
+        }
+      }
+    }
+    const list = [...rows.values()];
+    for (const row of list) {
+      row.out = byCount(row.out);
+      row.in = byCount(row.in);
+    }
+    return list;
+  }
+
+  function sortModules(rows, key) {
+    const order =
+      key === "name"
+        ? (a, b) => compare(a.name, b.name)
+        : (a, b) => b[key] - a[key] || compare(a.name, b.name);
+    return [...rows].sort(order);
+  }
+
+  return {
+    FORMAT,
+    IMPLICIT,
+    UNRESOLVED,
+    buildIndex,
+    describe,
+    callees,
+    callers,
+    unresolved,
+    expand,
+    search,
+    siteLabel,
+    children,
+    members,
+    moduleMap,
+    sortModules,
+  };
+})();
+</script>
+<script id="pycg-ui">
+"use strict";
+/*
+ * The page: header, call hierarchy and module map. Every name comes from
+ * the analysed code, so text goes into the page as text nodes only.
+ */
+(() => {
+  const CHUNK = 200;
+  const MODULE_CHUNK = 500;
+  const RESULTS = 50;
+  const SITES_SHOWN = 12;
+  const app = document.getElementById("app");
+
+  function h(tag, props, ...children) {
+    const node = document.createElement(tag);
+    for (const [key, value] of Object.entries(props || {})) {
+      if (value === null || value === undefined || value === false) continue;
+      if (key === "class") node.className = value;
+      else if (key === "on") {
+        for (const [type, listener] of Object.entries(value)) node.addEventListener(type, listener);
+      } else node.setAttribute(key, value === true ? "" : String(value));
+    }
+    for (const child of children.flat(Infinity)) {
+      if (child === null || child === undefined || child === false) continue;
+      node.appendChild(typeof child === "object" ? child : document.createTextNode(String(child)));
+    }
+    return node;
+  }
+
+  function clear(node) {
+    while (node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function fail(message) {
+    clear(app);
+    app.appendChild(h("p", {class: "error"}, message));
+  }
+
+  function number(value) {
+    return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function plural(count, one, many) {
+    return number(count) + " " + (count === 1 ? one : many);
+  }
+
+  let doc;
+  try {
+    doc = JSON.parse(document.getElementById("pycg-document").textContent);
+  } catch (error) {
+    fail("The call graph in this page is not valid JSON: " + error.message);
+    return;
+  }
+  if (doc === null || typeof doc !== "object" || doc.format !== PyCG.FORMAT) {
+    const format = doc !== null && typeof doc === "object" ? String(doc.format) : "none";
+    fail("This page holds a call graph of format " + format + "; it reads " + PyCG.FORMAT + ".");
+    return;
+  }
+  let index;
+  try {
+    index = PyCG.buildIndex(doc);
+  } catch (error) {
+    fail("The call graph in this page cannot be read: " + error.message);
+    return;
+  }
+  const tool = doc.tool || {};
+  const pkg = doc.package || {};
+
+  const state = {
+    view: "hierarchy",
+    selected: null,
+    filters: {outside: true, implicit: true, unresolved: true},
+    results: [],
+    active: -1,
+    expanded: new Set(),
+    moduleSort: "name",
+    moduleQuery: "",
+    openModules: new Set(),
+    moduleRows: null,
+  };
+
+  /* Names */
+
+  function nameParts(name, shown) {
+    const text = shown === undefined ? name : shown;
+    const at = text.lastIndexOf(".");
+    if (at < 0) return [h("span", {class: "last"}, text)];
+    return [h("span", {class: "prefix"}, text.slice(0, at + 1)), h("span", {class: "last"}, text.slice(at + 1))];
+  }
+
+  function nameButton(name, shown) {
+    return h(
+      "button",
+      {type: "button", class: "label", title: name, on: {click: () => select(name)}},
+      nameParts(name, shown)
+    );
+  }
+
+  function kindBadges(info) {
+    if (info === null) return [h("span", {class: "badge"}, "unknown")];
+    const badges = [];
+    if (info.kind === "outside") {
+      badges.push(info.known
+        ? h("span", {class: "badge outside", title: "Outside the package; known by " + info.known}, "outside: " + info.known)
+        : h("span", {class: "badge outside", title: "Outside the package"}, "outside"));
+    } else if (info.kind === "class" || info.kind === "module") {
+      badges.push(h("span", {class: "badge"}, info.kind));
+    }
+    if (info.kind === "module" && info.moduleKind === "extension") {
+      badges.push(h("span", {class: "badge extension"}, "extension"));
+    }
+    if (info.kind === "module" && (info.status === "failed" || info.status === "partial")) {
+      badges.push(h("span", {class: "badge " + info.status, title: info.cause || ""}, info.status));
+    }
+    if (info.shadows.length) {
+      badges.push(h("span", {class: "badge shadows", title: "Not analysed: " + info.shadows.join(", ")}, "shadows"));
+    }
+    return badges;
+  }
+
+  /* The other files of a module's name, which the analysis does not read. */
+  function shadowMark(files) {
+    return [
+      h("span", {class: "badge shadows", title: "Other files of this module's name; PyCG does not analyse them"}, "shadows"),
+      " " + files.join(", ") + ": not analysed",
+    ];
+  }
+
+  function siteText(site) {
+    return PyCG.siteLabel(index, site) + (site.implicit ? " " + site.implicit : "");
+  }
+
+  function described(table, word) {
+    return table.has(word) ? word + ": " + table.get(word) : word;
+  }
+
+  function sitesLabel(sites, title) {
+    const shown = sites.slice(0, SITES_SHOWN).map((site) =>
+      h("span", {class: site.implicit ? "site implicit" : "site", title: site.implicit ? described(PyCG.IMPLICIT, site.implicit) : null}, siteText(site))
+    );
+    if (sites.length > SITES_SHOWN) shown.push(h("span", {class: "site"}, "+" + number(sites.length - SITES_SHOWN)));
+    return h("span", {class: "sites", title}, shown);
+  }
+
+  /* Lists that grow by CHUNK items on demand */
+
+  function chunked(list, items, render) {
+    let shown = 0;
+    function step() {
+      const end = Math.min(items.length, shown + CHUNK);
+      for (; shown < end; shown += 1) list.appendChild(render(items[shown]));
+      if (shown < items.length) {
+        const rest = items.length - shown;
+        const item = h("li", null, h("button", {
+          type: "button",
+          class: "more",
+          on: {click: () => { item.remove(); step(); }},
+        }, "Show " + number(Math.min(rest, CHUNK)) + " more of " + number(rest)));
+        list.appendChild(item);
+      }
+    }
+    step();
+    return list;
+  }
+
+  /* Header */
+
+  function filterBox(key, label) {
+    const input = h("input", {type: "checkbox", id: "filter-" + key, checked: true});
+    input.checked = true;
+    input.addEventListener("change", () => {
+      state.filters = {...state.filters, [key]: input.checked};
+      refresh();
+    });
+    return h("label", null, input, " " + label);
+  }
+
+  const tabs = {
+    hierarchy: h("button", {type: "button", id: "tab-hierarchy", "aria-pressed": "true", on: {click: () => show("hierarchy")}}, "Call hierarchy"),
+    modules: h("button", {type: "button", id: "tab-modules", "aria-pressed": "false", on: {click: () => show("modules")}}, "Module map"),
+  };
+
+  const counts = index.counts;
+  const packageName = pkg.name === null || pkg.name === undefined ? "Unnamed package" : String(pkg.name);
+  const packageVersion = pkg.version === null || pkg.version === undefined ? "" : String(pkg.version);
+  document.title = (packageVersion ? packageName + " " + packageVersion : packageName) + " call graph";
+  const header = h(
+    "header",
+    {class: "top"},
+    h("div", null,
+      h("h1", null, packageName, packageVersion ? h("span", {class: "version"}, " " + packageVersion) : null),
+      h("div", {class: "meta"},
+        "Call graph by " + (tool.name || "pycg") + " " + (tool.version || "") + (tool.typeshed ? " · typeshed " + String(tool.typeshed).slice(0, 12) : "") + (tool.cap !== undefined ? " · cap " + (tool.cap === null ? "none" : tool.cap) : ""))),
+    h("ul", {class: "counts", "aria-label": "Counts"},
+      [
+        [counts.modules, "module", "modules"],
+        [counts.definitions, "definition", "definitions"],
+        [counts.sites, "call site", "call sites"],
+        [counts.edges, "edge", "edges"],
+        [counts.outside, "outside callee", "outside callees"],
+        [counts.unresolved, "unresolved site", "unresolved sites"],
+      ].map(([count, one, many]) => h("li", null, h("b", null, number(count)), " " + (count === 1 ? one : many)))),
+    h("nav", {class: "tabs", "aria-label": "Views"}, tabs.hierarchy, tabs.modules),
+    h("div", {class: "filters", role: "group", "aria-label": "Filters"},
+      h("span", {class: "legend"}, "Show:"),
+      filterBox("outside", "outside callees"),
+      filterBox("implicit", "implicit calls"),
+      filterBox("unresolved", "unresolved sites"))
+  );
+
+  /* Sidebar: search and tree */
+
+  const searchInput = h("input", {
+    type: "search",
+    id: "search",
+    placeholder: "Search names (press /)",
+    "aria-label": "Search names",
+    autocomplete: "off",
+    spellcheck: "false",
+    role: "combobox",
+    "aria-controls": "results",
+    "aria-expanded": "false",
+  });
+  const resultInfo = h("p", {class: "hint", "aria-live": "polite"});
+  const resultList = h("ul", {class: "results", id: "results", role: "listbox", "aria-label": "Matches"});
+  const treeList = h("ul", {class: "tree", id: "tree", "aria-label": "Modules"});
+  const searchPane = h("div", {hidden: true}, resultInfo, resultList);
+  const sidebar = h("nav", {class: "sidebar", "aria-label": "Find a function"},
+    searchInput,
+    h("div", {class: "scroll"}, searchPane, treeList));
+
+  function runSearch() {
+    const query = searchInput.value;
+    clear(resultList);
+    const searching = query.trim() !== "";
+    searchPane.hidden = !searching;
+    treeList.hidden = searching;
+    searchInput.setAttribute("aria-expanded", String(searching));
+    if (!searching) {
+      state.results = [];
+      state.active = -1;
+      searchInput.removeAttribute("aria-activedescendant");
+      return;
+    }
+    const found = PyCG.search(index, query, RESULTS);
+    state.results = found.entries;
+    state.active = found.entries.length ? 0 : -1;
+    resultInfo.textContent = found.total === 0
+      ? "No name matches."
+      : found.total > found.entries.length
+        ? "First " + number(found.entries.length) + " of " + plural(found.total, "match", "matches") + "."
+        : plural(found.total, "match", "matches") + ".";
+    found.entries.forEach((entry, at) => {
+      resultList.appendChild(h(
+        "li",
+        {class: "result", id: "result-" + at, role: "option", "aria-selected": "false", title: entry.name,
+          on: {click: () => open(at)}},
+        h("span", {class: "label"}, nameParts(entry.name)),
+        " ",
+        h("span", {class: entry.kind === "outside" ? "badge outside" : "badge"}, entry.kind),
+        entry.kind === "export" ? h("span", {class: "target"}, "→ " + entry.target) : null
+      ));
+    });
+    markActive();
+  }
+
+  function markActive() {
+    Array.from(resultList.children).forEach((item, at) =>
+      item.setAttribute("aria-selected", String(at === state.active)));
+    if (state.active >= 0) {
+      searchInput.setAttribute("aria-activedescendant", "result-" + state.active);
+      const item = resultList.children[state.active];
+      if (item && item.scrollIntoView) item.scrollIntoView({block: "nearest"});
+    } else {
+      searchInput.removeAttribute("aria-activedescendant");
+    }
+  }
+
+  function open(at) {
+    const entry = state.results[at];
+    if (!entry) return;
+    state.active = at;
+    markActive();
+    select(entry.target);
+  }
+
+  searchInput.addEventListener("input", runSearch);
+  searchInput.addEventListener("keydown", (event) => {
+    const count = state.results.length;
+    if (event.key === "ArrowDown" && count) {
+      state.active = Math.min(count - 1, state.active + 1);
+      markActive();
+      event.preventDefault();
+    } else if (event.key === "ArrowUp" && count) {
+      state.active = Math.max(0, state.active - 1);
+      markActive();
+      event.preventDefault();
+    } else if (event.key === "Enter") {
+      open(Math.max(0, state.active));
+      event.preventDefault();
+    } else if (event.key === "Escape") {
+      searchInput.value = "";
+      runSearch();
+    }
+  });
+
+  function treeItem(name, parent) {
+    const info = PyCG.describe(index, name);
+    const shown = parent !== null && name.startsWith(parent + ".") ? name.slice(parent.length + 1) : name;
+    const kids = PyCG.children(index, name);
+    const item = h("li", {class: "tree-item"});
+    const row = h("div", {class: "row"});
+    let list = null;
+    if (kids.length) {
+      const toggle = h("button", {type: "button", class: "toggle", "aria-expanded": "false", "aria-label": "Open " + name}, "▸");
+      toggle.addEventListener("click", () => {
+        if (list) {
+          list.remove();
+          list = null;
+        } else {
+          list = chunked(h("ul"), kids, (kid) => treeItem(kid, name));
+          item.appendChild(list);
+        }
+        toggle.textContent = list ? "▾" : "▸";
+        toggle.setAttribute("aria-expanded", String(list !== null));
+      });
+      row.appendChild(toggle);
+    } else {
+      row.appendChild(h("span", {class: "toggle"}));
+    }
+    row.appendChild(nameButton(name, shown));
+    if (info) {
+      for (const badge of kindBadges(info)) row.appendChild(badge);
+    }
+    item.appendChild(row);
+    return item;
+  }
+
+  chunked(treeList, PyCG.children(index, null), (name) => treeItem(name, null));
+
+  /* Call hierarchy */
+
+  const card = h("section", {class: "card", "aria-label": "Selected node"});
+  const callersPane = h("section", {class: "pane pane-callers", id: "callers", "aria-label": "Callers"});
+  const calleesPane = h("section", {class: "pane pane-callees", id: "callees", "aria-label": "Callees"});
+  const main = h("main", {class: "main"}, h("div", {class: "panes"}, callersPane, card, calleesPane));
+  const hierarchy = h("div", {class: "view", id: "hierarchy"}, sidebar, main);
+
+  function hierarchyRow(row, direction, path, parent) {
+    const here = path.concat(row.name);
+    const key = direction + "\u0000" + here.join("\u0000");
+    const item = h("li");
+    const line = h("div", {class: "row"});
+    const info = PyCG.describe(index, row.name);
+    let toggle;
+    if (row.recursive) {
+      toggle = h("span", {class: "toggle recursive", title: "Already on this path: recursion"}, "↻");
+    } else if (row.expandable) {
+      toggle = h("button", {type: "button", class: "toggle", "aria-expanded": "false", "aria-label": "Expand " + row.name}, "▸");
+    } else {
+      toggle = h("span", {class: "toggle"});
+    }
+    line.appendChild(toggle);
+    line.appendChild(nameButton(row.name));
+    for (const badge of kindBadges(info)) line.appendChild(badge);
+    if (row.recursive) line.appendChild(h("span", {class: "badge recursive"}, "recursion"));
+    const where = direction === "callees" ? "call sites in " + parent : "call sites in " + row.name;
+    line.appendChild(sitesLabel(row.sites, where));
+    item.appendChild(line);
+
+    if (toggle.tagName === "BUTTON") {
+      let list = null;
+      const expand = () => {
+        const rows = PyCG.expand(index, row.name, direction, state.filters, here);
+        list = chunked(h("ul"), rows, (child) => hierarchyRow(child, direction, here, row.name));
+        item.appendChild(list);
+        state.expanded.add(key);
+      };
+      const collapse = () => {
+        list.remove();
+        list = null;
+        state.expanded.delete(key);
+      };
+      const mark = () => {
+        toggle.textContent = list ? "▾" : "▸";
+        toggle.setAttribute("aria-expanded", String(list !== null));
+      };
+      toggle.addEventListener("click", () => {
+        if (list) collapse();
+        else expand();
+        mark();
+      });
+      if (state.expanded.has(key)) {
+        expand();
+        mark();
+      }
+    }
+    return item;
+  }
+
+  function pane(section, title, direction, name) {
+    clear(section);
+    const rows = PyCG.expand(index, name, direction, state.filters, [name]);
+    const all = direction === "callers"
+      ? PyCG.callers(index, name, {outside: true, implicit: true, unresolved: true})
+      : PyCG.callees(index, name, {outside: true, implicit: true, unresolved: true});
+    const hidden = all.length - rows.length;
+    section.appendChild(h("h3", null, title + " (" + number(rows.length) + ")",
+      hidden ? h("span", {class: "note"}, " · " + number(hidden) + " hidden by the filters") : null));
+    if (!rows.length) {
+      section.appendChild(h("p", {class: "empty"}, direction === "callers" ? "No caller." : "No callee."));
+      return;
+    }
+    section.appendChild(chunked(h("ul", {class: "tree"}), rows, (row) => hierarchyRow(row, direction, [name], name)));
+  }
+
+  function nameList(names) {
+    return h("ul", null, names.map((name) => h("li", null, PyCG.describe(index, name) ? nameButton(name) : h("span", {class: "mono"}, name))));
+  }
+
+  function renderCard(name, info) {
+    clear(card);
+    card.appendChild(h("h2", {class: "node-name"}, name));
+    if (info === null) {
+      card.appendChild(h("p", {class: "empty"}, "No module, definition or outside callee has this name."));
+      return;
+    }
+    const facts = [];
+    const fact = (term, ...value) => facts.push(h("dt", null, term), h("dd", null, value));
+    if (info.kind === "outside" && info.known === null) {
+      fact("Kind", "outside name that the package exports, and does not call");
+    } else if (info.kind === "outside") {
+      fact("Kind", "outside callee");
+      fact("Known by", info.known === "stub" ? "stub: the stub data declares it"
+        : info.known === "name" ? "name: an access path of a value without a type"
+        : info.known === "extension" ? "extension: a name in an extension module of the package"
+        : String(info.known));
+    } else {
+      fact("Kind", info.kind);
+    }
+    if (info.module !== null && info.module !== name) fact("Module", nameButton(info.module));
+    if (info.file !== null) {
+      const lines = info.lines && info.lines[0] > 0 ? ", lines " + info.lines[0] + "–" + info.lines[1] : "";
+      fact("File", info.file + lines);
+    }
+    if (info.shadows.length) fact("Other files", shadowMark(info.shadows));
+    if (info.otherModules.length) {
+      fact("Also in", ...info.otherModules.map((module) => {
+        const file = index.modules.has(module) ? index.modules.get(module).file : module;
+        return h("div", null, file + " (another definition of this name)");
+      }));
+    }
+    if (info.kind === "module" && info.moduleKind === "extension") fact("Module kind", "extension (binary; not analysed)");
+    if (info.status === "failed") {
+      fact("Status", h("span", {class: "failed-text"}, "failed: " + (info.cause || "no cause given")),
+        " (the file cannot be read or parsed: no definition and no call)");
+    } else if (info.status === "partial") {
+      fact("Status", h("span", {class: "partial-text"}, "partial: " + (info.cause || "no cause given")),
+        " (the analysis stopped before the end of the module, so it may call less than its code does)");
+    }
+    card.appendChild(h("dl", null, facts));
+    if (info.mro && info.mro.length) {
+      card.appendChild(h("h3", null, "Method resolution order"));
+      card.appendChild(nameList(info.mro));
+    }
+    if (info.exportedAs.length) {
+      card.appendChild(h("h3", null, "Exported as"));
+      card.appendChild(h("ul", null, info.exportedAs.map((path) => h("li", {class: "mono"}, path))));
+    }
+    if (info.kind === "module" && info.moduleKind === "extension") {
+      const names = PyCG.members(index, name);
+      card.appendChild(h("h3", null, "Names called in it (" + number(names.length) + ")"));
+      card.appendChild(chunked(h("ul"), names, (member) => h("li", null, nameButton(member))));
+    }
+    const sites = PyCG.unresolved(index, name, state.filters);
+    const unresolvedBox = h("div", {id: "unresolved", hidden: sites.length === 0},
+      h("h3", null, "Unresolved call sites (" + number(sites.length) + ")"),
+      chunked(h("ul"), sites, (site) => h("li", {title: described(PyCG.UNRESOLVED, site.unresolved)},
+        h("span", {class: "sites"}, PyCG.siteLabel(index, site)), " " + site.unresolved)));
+    card.appendChild(unresolvedBox);
+  }
+
+  function renderHierarchy() {
+    const name = state.selected;
+    if (name === null) {
+      clear(card);
+      card.appendChild(h("h2", {class: "node-name"}, "No function selected"));
+      card.appendChild(h("p", {class: "empty"}, "Type a name in the search box (press /) or open the tree, then pick a function."));
+      clear(callersPane);
+      clear(calleesPane);
+      return;
+    }
+    const info = PyCG.describe(index, name);
+    renderCard(name, info);
+    pane(callersPane, "Callers", "callers", name);
+    pane(calleesPane, "Callees", "callees", name);
+  }
+
+  /* Module map */
+
+  const moduleFilter = h("input", {type: "search", placeholder: "Filter modules", "aria-label": "Filter modules"});
+  const moduleInfo = h("span", {class: "hint"});
+  const tableBody = h("tbody");
+  const sortButtons = {};
+  const columns = [
+    ["name", "Module", false],
+    [null, "Status", false],
+    ["definitions", "Definitions", true],
+    ["callsOut", "Calls out", true],
+    ["callsIn", "Calls in", true],
+    ["within", "Within", true],
+    ["outside", "Outside", true],
+  ];
+  const titles = {
+    definitions: "Definitions in the module (for an extension module: its names that are called)",
+    callsOut: "Call edges to other modules of the package",
+    callsIn: "Call edges from other modules of the package",
+    within: "Call edges inside the module",
+    outside: "Call edges to outside callees",
+  };
+  const headRow = h("tr", null, columns.map(([key, label, numeric]) => {
+    if (key === null) return h("th", {scope: "col"}, label);
+    const button = h("button", {type: "button", title: titles[key] || null, on: {click: () => {
+      state.moduleSort = key;
+      renderModules();
+    }}}, label);
+    sortButtons[key] = button;
+    return h("th", {scope: "col", class: numeric ? "number" : null}, button);
+  }));
+  const table = h("table", {id: "module-table"}, h("thead", null, headRow), tableBody);
+  const modules = h("div", {class: "view", id: "modules", hidden: true},
+    h("div", {class: "toolbar"}, moduleFilter, moduleInfo),
+    table);
+  moduleFilter.addEventListener("input", () => {
+    state.moduleQuery = moduleFilter.value;
+    renderModules();
+  });
+
+  function pairList(title, pairs) {
+    return h("div", null,
+      h("h4", null, title + " (" + number(pairs.length) + ")"),
+      pairs.length
+        ? chunked(h("ul"), pairs, ([module, count]) => h("li", null,
+            h("button", {type: "button", class: "module-name", on: {click: () => openModule(module)}}, module),
+            h("span", {class: "count"}, plural(count, "edge", "edges"))))
+        : h("p", {class: "empty"}, "None."));
+  }
+
+  function moduleDetail(row) {
+    const names = PyCG.members(index, row.name);
+    return h("tr", {class: "module-detail"}, h("td", {colspan: columns.length},
+      h("div", {class: "detail-grid"},
+        pairList("Calls into", row.out),
+        pairList("Called from", row.in),
+        h("div", null,
+          h("h4", null, "Definitions (" + number(names.length) + ")"),
+          names.length
+            ? chunked(h("ul"), names, (name) => {
+                const info = PyCG.describe(index, name);
+                return h("li", null, nameButton(name), " ", kindBadges(info),
+                  info && info.lines ? h("span", {class: "count"}, "line " + info.lines[0]) : null);
+              })
+            : h("p", {class: "empty"}, "None.")))));
+  }
+
+  function statusCell(row) {
+    const shadows = row.shadows.length ? [h("br"), shadowMark(row.shadows)] : [];
+    if (row.kind === "extension") {
+      return h("td", null, h("span", {class: "badge extension"}, "extension"), " binary module, not analysed", shadows);
+    }
+    if (row.status === "failed" || row.status === "partial") {
+      const note = row.status === "failed" ? "" : " (incomplete)";
+      return h("td", null, h("span", {class: "badge " + row.status}, row.status), " ",
+        h("span", {class: row.status + "-text"}, (row.cause || "no cause given") + note), shadows);
+    }
+    return h("td", null, row.status || "", shadows);
+  }
+
+  function moduleRow(row) {
+    const open = state.openModules.has(row.name);
+    const button = h("button", {type: "button", class: "module-name", "aria-expanded": String(open), title: row.file || "", on: {click: () => {
+      if (state.openModules.has(row.name)) state.openModules.delete(row.name);
+      else state.openModules.add(row.name);
+      renderModules();
+    }}}, row.name);
+    const cells = [
+      h("td", null, button),
+      statusCell(row),
+      h("td", {class: "number"}, number(row.definitions)),
+      h("td", {class: "number"}, number(row.callsOut)),
+      h("td", {class: "number"}, number(row.callsIn)),
+      h("td", {class: "number"}, number(row.within)),
+      h("td", {class: "number"}, state.filters.outside ? number(row.outside) : "–"),
+    ];
+    const tr = h("tr", {class: "module-row", id: "module-" + row.name}, cells);
+    return open ? [tr, moduleDetail(row)] : [tr];
+  }
+
+  function renderModules() {
+    if (state.moduleRows === null) state.moduleRows = PyCG.moduleMap(index, state.filters);
+    const query = state.moduleQuery.trim().toLowerCase();
+    const rows = PyCG.sortModules(
+      query ? state.moduleRows.filter((row) => row.name.toLowerCase().includes(query)) : state.moduleRows,
+      state.moduleSort
+    );
+    for (const [key, button] of Object.entries(sortButtons)) {
+      button.parentNode.setAttribute("aria-sort", key === state.moduleSort ? (key === "name" ? "ascending" : "descending") : "none");
+    }
+    moduleInfo.textContent = query
+      ? number(rows.length) + " of " + plural(state.moduleRows.length, "module", "modules")
+      : plural(rows.length, "module", "modules") + ". Pick a module to see its edges and definitions.";
+    clear(tableBody);
+    let shown = 0;
+    const step = () => {
+      const end = Math.min(rows.length, shown + MODULE_CHUNK);
+      for (; shown < end; shown += 1) for (const tr of moduleRow(rows[shown])) tableBody.appendChild(tr);
+      if (shown < rows.length) {
+        const more = h("tr", null, h("td", {colspan: columns.length}, h("button", {type: "button", class: "more", on: {click: () => {
+          more.remove();
+          step();
+        }}}, "Show " + number(Math.min(MODULE_CHUNK, rows.length - shown)) + " more of " + number(rows.length - shown))));
+        tableBody.appendChild(more);
+      }
+    };
+    step();
+  }
+
+  function openModule(name) {
+    state.openModules.add(name);
+    state.moduleQuery = "";
+    moduleFilter.value = "";
+    renderModules();
+    const row = document.getElementById("module-" + name);
+    if (row && row.scrollIntoView) row.scrollIntoView({block: "nearest"});
+  }
+
+  /* Views, selection and the address */
+
+  function show(view) {
+    state.view = view;
+    hierarchy.hidden = view !== "hierarchy";
+    modules.hidden = view !== "modules";
+    tabs.hierarchy.setAttribute("aria-pressed", String(view === "hierarchy"));
+    tabs.modules.setAttribute("aria-pressed", String(view === "modules"));
+    if (view === "modules") renderModules();
+  }
+
+  function refresh() {
+    state.moduleRows = null;
+    renderHierarchy();
+    if (state.view === "modules") renderModules();
+  }
+
+  function nameInAddress() {
+    const hash = location.hash.slice(1);
+    if (hash === "") return null;
+    try {
+      return decodeURIComponent(hash);
+    } catch (error) {
+      return hash;
+    }
+  }
+
+  /* Show `name`, and put it in the address so that Back returns to the last one. */
+  function select(name) {
+    show("hierarchy");
+    showNode(name);
+    const hash = "#" + encodeURIComponent(name);
+    if (location.hash !== hash) location.hash = hash;
+  }
+
+  function showNode(name) {
+    if (name !== state.selected) state.expanded = new Set();
+    state.selected = name;
+    renderHierarchy();
+  }
+
+  window.addEventListener("hashchange", () => {
+    const name = nameInAddress();
+    show("hierarchy");
+    if (name !== state.selected) showNode(name);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
+    const target = event.target;
+    const tag = target && target.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (target && target.isContentEditable)) return;
+    event.preventDefault();
+    show("hierarchy");
+    searchInput.focus();
+    searchInput.select();
+  });
+
+  clear(app);
+  app.appendChild(header);
+  app.appendChild(hierarchy);
+  app.appendChild(modules);
+  state.selected = nameInAddress();
+  renderHierarchy();
+})();
+</script>
+</body>
+</html>

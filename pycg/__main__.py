@@ -1,88 +1,68 @@
+"""The command line: analyse a package and write its document
+(docs/format.md)."""
+
 import argparse
-import json
 
 from pycg import formats
+from pycg.analysis.solver import DEFAULT_CAP
 from pycg.pycg import CallGraphGenerator
-from pycg.utils.constants import CALL_GRAPH_OP, KEY_ERR_OP
+
+
+def cap(text):
+    """The value of `--cap`: a positive integer, or `none`."""
+    if text == "none":
+        return None
+    if text.isdecimal() and int(text) > 0:
+        return int(text)
+    raise argparse.ArgumentTypeError(f"{text!r} is not a positive integer or none")
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="Write the call graph of a Python package as one JSON document."
+    )
     parser.add_argument("entry_point", nargs="*", help="Entry points to be processed")
     parser.add_argument(
-        "--package", help="Package containing the code to be analyzed", default=None
-    )
-    parser.add_argument(
-        "--fasten",
-        help="Produce call graph using the FASTEN format",
-        action="store_true",
-        default=False,
-    )
-    parser.add_argument("--product", help="Package name", default="")
-    parser.add_argument(
-        "--forge", help="Source the product was downloaded from", default=""
-    )
-    parser.add_argument("--version", help="Version of the product", default="")
-    parser.add_argument(
-        "--timestamp", help="Timestamp of the package's version", default=0
-    )
-    parser.add_argument(
-        "--max-iter",
-        type=int,
+        "--package",
         help=(
-            "Maximum number of iterations through source code. "
-            "If not specified a fix-point iteration will be performed."
+            "Package root: module names are relative to it and only modules "
+            "under it are analysed. Default: the deepest directory that "
+            "contains every entry point"
         ),
-        default=-1,
+        default=None,
     )
     parser.add_argument(
-        "--operation",
-        type=str,
-        choices=[CALL_GRAPH_OP, KEY_ERR_OP],
-        help=(
-            "Operation to perform. Choose "
-            + CALL_GRAPH_OP
-            + " for call graph generation (default) or "
-            + KEY_ERR_OP
-            + " for key error detection on dictionaries."
-        ),
-        default=CALL_GRAPH_OP,
+        "--package-name", help="Name of the analysed package", default=None
     )
-
     parser.add_argument(
-        "--as-graph-output", help="Output for the assignment graph", default=None
+        "--package-version", help="Version of the analysed package", default=None
     )
     parser.add_argument("-o", "--output", help="Output path", default=None)
+    parser.add_argument(
+        "--cap",
+        type=cap,
+        metavar="N",
+        default=DEFAULT_CAP,
+        help=(
+            "The most objects that the analysis keeps for one variable or "
+            "expression: past it the value is treated as unknown, and calls "
+            "through it are reported as unresolved (saturated). 'none' "
+            "removes the cap: the analysis may then not finish, or run out "
+            f"of memory, on large inputs. Default: {DEFAULT_CAP}"
+        ),
+    )
 
     args = parser.parse_args()
 
-    cg = CallGraphGenerator(
-        args.entry_point, args.package, args.max_iter, args.operation
-    )
+    cg = CallGraphGenerator(args.entry_point, args.package, args.cap)
     cg.analyze()
-
-    if args.operation == CALL_GRAPH_OP:
-        if args.fasten:
-            formatter = formats.Fasten(
-                cg, args.package, args.product, args.forge, args.version, args.timestamp
-            )
-        else:
-            formatter = formats.Simple(cg)
-        output = formatter.generate()
-    else:
-        output = cg.output_key_errs()
-
-    as_formatter = formats.AsGraph(cg)
+    text = formats.dumps(cg.document(args.package_name, args.package_version))
 
     if args.output:
-        with open(args.output, "w+") as f:
-            f.write(json.dumps(output))
+        with open(args.output, "w", encoding="utf-8") as f:
+            f.write(text + "\n")
     else:
-        print(json.dumps(output))
-
-    if args.as_graph_output:
-        with open(args.as_graph_output, "w+") as f:
-            f.write(json.dumps(as_formatter.generate()))
+        print(text)
 
 
 if __name__ == "__main__":
