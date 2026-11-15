@@ -19,6 +19,7 @@
 # under the License.
 #
 import ast
+import builtins
 import os
 
 from pycg import utils
@@ -249,4 +250,4 @@ class CallGraphProcessor(ProcessingBase):
         return names
 
     def is_builtin(self, name):
-        return name in __builtins__
+        return name in vars(builtins)

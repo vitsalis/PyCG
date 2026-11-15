@@ -214,7 +214,7 @@ class PreProcessor(ProcessingBase):
                 add_external_def(src_name, tgt_name)
                 continue
             # only analyze modules under the current directory
-            if self.import_manager.get_mod_dir() in fname:
+            if self.import_manager.is_internal(fname):
                 if imported_name not in self.modules_analyzed:
                     self.analyze_submodule(imported_name)
                 handle_scopes(import_item.name, tgt_name, imported_name)
@@ -229,7 +229,7 @@ class PreProcessor(ProcessingBase):
                 continue
             # only analyze modules under the current directory
             if (
-                self.import_manager.get_mod_dir() in fname
+                self.import_manager.is_internal(fname)
                 and modname not in self.modules_analyzed
             ):
                 self.analyze_submodule(modname)

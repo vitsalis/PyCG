@@ -13,7 +13,7 @@ def func3():
 def func4(a):
     return func3()
 
-func4()()
+func4(1)()
 
 def func5():
     return func2() + 1

@@ -19,14 +19,31 @@
 # under the License.
 #
 import symtable
-
-from base import TestBase
-from mock import patch
+from unittest import TestCase
+from unittest.mock import patch
 
 from pycg.machinery.scopes import ScopeError, ScopeItem, ScopeManager
 
 
-class ScopeManagerTest(TestBase):
+class ScopeManagerTest(TestCase):
+    def test_handle_module_with_type_parameters(self):
+        source = "\n".join(
+            [
+                "class C[T]:",
+                "    def m[U](self, u: U) -> T: pass",
+                "def g[V](v: V): pass",
+            ]
+        )
+
+        sm = ScopeManager()
+        items = sm.handle_module("mod", "mod.py", source)
+
+        self.assertEqual(sorted(items["functions"]), ["mod.C.m", "mod.g"])
+        self.assertEqual(items["classes"], ["mod.C"])
+        self.assertEqual(sm.get_scope("mod.C").parent, sm.get_scope("mod"))
+        self.assertEqual(sm.get_scope("mod.C.m").parent, sm.get_scope("mod.C"))
+        self.assertEqual(sm.get_scope("mod.g").parent, sm.get_scope("mod"))
+
     def test_handle_module(self):
         class MockTable(object):
             def __init__(self, name, t, children=[], lineno=0):
@@ -62,12 +79,14 @@ class ScopeManagerTest(TestBase):
 
         self.assertEqual(
             sorted(items["functions"]),
-            sorted([
-                "root.chld1",
-                "root.chld1.grndchld2",
-                "root.chld2",
-                "root.chld3.grndchld4",
-            ]),
+            sorted(
+                [
+                    "root.chld1",
+                    "root.chld1.grndchld2",
+                    "root.chld2",
+                    "root.chld3.grndchld4",
+                ]
+            ),
         )
         self.assertEqual(sorted(items["classes"]), sorted(["root.chld3"]))
 
@@ -160,7 +179,7 @@ class ScopeManagerTest(TestBase):
         self.assertEqual(sm.get_scope("notexist"), None)
 
 
-class ScopeItemTest(TestBase):
+class ScopeItemTest(TestCase):
     def test_setup(self):
         # no issues
         scope = ScopeItem("smth", None)

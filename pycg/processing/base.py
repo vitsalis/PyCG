@@ -25,6 +25,14 @@ from pycg import utils
 from pycg.machinery.definitions import Definition
 
 
+def _is_number_or_str(value):
+    # The literals that the removed ast.Num and ast.Str nodes covered.
+    # bool is a subclass of int, but True and False were never numbers there.
+    if isinstance(value, bool):
+        return False
+    return isinstance(value, (int, float, complex, str))
+
+
 class ProcessingBase(ast.NodeVisitor):
     def __init__(self, filename, modname, modules_analyzed):
         self.modname = modname
@@ -254,12 +262,8 @@ class ProcessingBase(ast.NodeVisitor):
                 if defi:
                     defis.append(defi)
             return defis
-        elif isinstance(node, ast.Num):
-            return [node.n]
-        elif isinstance(node, ast.Str):
-            return [node.s]
-        elif self._is_literal(node):
-            return [node]
+        elif isinstance(node, ast.Constant) and _is_number_or_str(node.value):
+            return [node.value]
         elif isinstance(node, ast.Dict):
             dict_counter = self.scope_manager.get_scope(
                 self.current_ns
@@ -284,9 +288,6 @@ class ProcessingBase(ast.NodeVisitor):
             return defis
 
         return []
-
-    def _is_literal(self, item):
-        return isinstance(item, int) or isinstance(item, str) or isinstance(item, float)
 
     def _retrieve_base_names(self, node):
         if not isinstance(node, ast.Attribute):
@@ -419,11 +420,7 @@ class ProcessingBase(ast.NodeVisitor):
         if not getattr(self, "closured", None):
             return set()
 
-        if getattr(node.slice, "value", None) and self._is_literal(node.slice.value):
-            sl_names = [node.slice.value]
-        else:
-            sl_names = self.decode_node(node.slice)
-
+        sl_names = self.decode_node(node.slice)
         val_names = self.decode_node(node.value)
 
         decoded_vals = set()
@@ -499,7 +496,7 @@ class ProcessingBase(ast.NodeVisitor):
         if (
             not fname
             or not fname.endswith(".py")
-            or self.import_manager.get_mod_dir() not in fname
+            or not self.import_manager.is_internal(fname)
         ):
             return
 

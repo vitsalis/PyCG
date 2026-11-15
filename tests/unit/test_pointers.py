@@ -18,12 +18,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from base import TestBase
+from unittest import TestCase
 
 from pycg.machinery.pointers import LiteralPointer, NamePointer, Pointer, PointerError
 
 
-class PointerTest(TestBase):
+class PointerTest(TestCase):
     def test_merge(self):
         pointer = Pointer()
         pointer2 = Pointer()

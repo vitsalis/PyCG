@@ -18,54 +18,38 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-import copy
-import importlib
 import os
 import sys
-from importlib import abc
-
-from pycg import utils
-
-
-def get_custom_loader(ig_obj):
-    """
-    Closure which returns a custom loader
-    that modifies an ImportManager object
-    """
-
-    class CustomLoader(abc.SourceLoader):
-        def __init__(self, fullname, path):
-            self.fullname = fullname
-            self.path = path
-
-            ig_obj.create_edge(self.fullname)
-            if not ig_obj.get_node(self.fullname):
-                ig_obj.create_node(self.fullname)
-                ig_obj.set_filepath(self.fullname, self.path)
-
-        def get_filename(self, fullname):
-            return self.path
-
-        def get_data(self, filename):
-            return ""
-
-    return CustomLoader
+from importlib.machinery import FrozenImporter
 
 
 class ImportManager(object):
+    """Resolves imports to modules under the package root.
+
+    Module names are dotted paths relative to the package root (`mod_dir`).
+    Resolution reads only the filesystem: it never imports or executes code
+    and never reads or changes `sys.path` or `sys.modules`.
+
+    The import graph maps each module under the root to its file and to the
+    modules under the root that it imports.
+    """
+
     def __init__(self):
         self.import_graph = dict()
         self.current_module = ""
         self.input_file = ""
         self.mod_dir = None
-        self.old_path_hooks = None
-        self.old_path = None
 
     def set_pkg(self, input_pkg):
-        self.mod_dir = input_pkg
+        self.mod_dir = os.path.abspath(input_pkg)
 
     def get_mod_dir(self):
         return self.mod_dir
+
+    def is_internal(self, filename):
+        """Return True if `filename` is inside the package root."""
+        path = os.path.abspath(filename)
+        return os.path.commonpath([self.mod_dir, path]) == self.mod_dir
 
     def get_node(self, name):
         if name in self.import_graph:
@@ -85,22 +69,11 @@ class ImportManager(object):
         if not dest or not isinstance(dest, str):
             raise ImportManagerError("Invalid node name")
 
-        node = self.get_node(self._get_module_path())
+        node = self.get_node(self.current_module)
         if not node:
             raise ImportManagerError("Can't add edge to a non existing node")
 
         node["imports"].add(dest)
-
-    def _clear_caches(self):
-        importlib.invalidate_caches()
-        sys.path_importer_cache.clear()
-        # TODO: maybe not do that since it empties the whole cache
-        for name in self.import_graph:
-            if name in sys.modules:
-                del sys.modules[name]
-
-    def _get_module_path(self):
-        return self.current_module
 
     def set_current_mod(self, name, fname):
         self.current_module = name
@@ -125,110 +98,124 @@ class ImportManager(object):
             return []
         return self.import_graph[modname]["imports"]
 
-    def _is_init_file(self):
-        return self.input_file.endswith("__init__.py")
-
-    def _handle_import_level(self, name, level):
-        # add a dot for each level
-        package = self._get_module_path().split(".")
-        if level > len(package):
-            raise ImportError("Attempting import beyond top level package")
-
-        mod_name = ("." * level) + name
-        # When an __init__ file is analyzed,
-        # then the module name doesn't contain
-        # the __init__ part in it,
-        # so special care must be taken for levels.
-        if self._is_init_file() and level >= 1:
-            if level != 1:
-                level -= 1
-                package = package[:-level]
-        else:
-            package = package[:-level]
-
-        return mod_name, ".".join(package)
-
-    def _do_import(self, mod_name, package):
-        if mod_name in sys.modules:
-            self.create_edge(mod_name)
-            return sys.modules[mod_name]
-
-        try:
-            module_spec = importlib.util.find_spec(mod_name, package=package)
-        except ModuleNotFoundError:
-            module_spec = None
-
-        if module_spec is None:
-            return importlib.import_module(mod_name, package=package)
-
-        return importlib.util.module_from_spec(module_spec)
-
-    def handle_import(self, name, level):
-        # We currently don't support builtin modules because they're frozen.
-        # Add an edge and continue.
-        # TODO: identify a way to include frozen modules
-        root = name.split(".")[0]
-        if root in sys.builtin_module_names:
-            self.create_edge(root)
-            return
-
-        # Import the module
-        try:
-            mod_name, package = self._handle_import_level(name, level)
-        except ImportError:
-            return
-
-        parent = ".".join(mod_name.split(".")[:-1])
-        parent_name = ".".join(name.split(".")[:-1])
-        combos = [
-            (mod_name, package),
-            (parent, package),
-            (utils.join_ns(package, name), ""),
-            (utils.join_ns(package, parent_name), ""),
-        ]
-
-        mod = None
-        for mn, pkg in combos:
-            try:
-                mod = self._do_import(mn, pkg)
-                break
-            except Exception:
-                continue
-
-        if not mod:
-            return
-
-        if not hasattr(mod, "__file__") or not mod.__file__:
-            return
-        if self.mod_dir not in mod.__file__:
-            return
-        fname = mod.__file__
-        if fname.endswith("__init__.py"):
-            fname = os.path.split(fname)[0]
-
-        return utils.to_mod_name(os.path.relpath(fname, self.mod_dir))
-
     def get_import_graph(self):
         return self.import_graph
 
-    def install_hooks(self):
-        loader = get_custom_loader(self)
-        self.old_path_hooks = copy.deepcopy(sys.path_hooks)
-        self.old_path = copy.deepcopy(sys.path)
+    def handle_import(self, name, level):
+        """Resolve the import of `name` with relative `level` from the current
+        module.
 
-        loader_details = loader, importlib.machinery.all_suffixes()
-        sys.path_hooks.insert(
-            0, importlib.machinery.FileFinder.path_hook(loader_details)
-        )
-        sys.path.insert(0, os.path.abspath(self.mod_dir))
+        `name` is the imported module for `import a.b` and the module joined
+        with the imported name for `from a import b` ("a.b"). If no module
+        "a.b" exists, "b" is taken to be an attribute of module "a".
 
-        self._clear_caches()
+        Return the name of the imported module if it is under the package
+        root, else None. Add the module and every package on its path to the
+        import graph, with edges from the current module. The packages are
+        added even if the module is missing, because Python runs them before
+        the import fails.
+        """
+        # Built-in and frozen modules take precedence over any file, as in
+        # Python.
+        if level == 0 and _is_builtin_or_frozen(name.split(".")[0]):
+            return None
 
-    def remove_hooks(self):
-        sys.path_hooks = self.old_path_hooks
-        sys.path = self.old_path
+        base = self._get_base_package(level)
+        if base is None:
+            return None
 
-        self._clear_caches()
+        parts = base + name.split(".")
+        modules = self._find_modules(parts)
+        for modname, filename in modules:
+            if not self.get_node(modname):
+                self.create_node(modname)
+                if filename:
+                    self.set_filepath(modname, filename)
+            if modname != self.current_module:
+                self.create_edge(modname)
+
+        # Either the whole name is a module, or all but its last part is
+        # and the last part is an attribute of that module.
+        if modules and len(modules) >= len(parts) - 1:
+            return modules[-1][0]
+        return None
+
+    def _get_base_package(self, level):
+        """Return the package that a relative import of `level` starts from,
+        as a list of name parts.
+
+        Return [] for an absolute import and None if the import goes beyond
+        the top-level package. The package root itself is not a package.
+        """
+        if level == 0:
+            return []
+
+        package = self.current_module.split(".")
+        # The module name of an __init__.py file is the name of its package.
+        if os.path.basename(self.input_file) != "__init__.py":
+            package = package[:-1]
+
+        if level > len(package):
+            return None
+
+        return package[: len(package) - level + 1]
+
+    def _find_modules(self, parts):
+        """Find the modules on the path `parts` (a list of name parts).
+
+        Return a (name, filename) pair for each module of the longest prefix
+        of `parts` that exists under the root: the first element is the
+        top-level package, the last is the deepest module found. The filename
+        is None for a namespace package. Within a directory a package with
+        __init__.py comes first, then a module file, then a namespace
+        package, as in Python.
+        """
+        found = []
+        directory = self.mod_dir
+        for index, part in enumerate(parts):
+            # `*` from `from a import *` is never a module.
+            if not part.isidentifier():
+                break
+
+            name = ".".join(parts[: index + 1])
+            path = os.path.join(directory, part)
+            init_file = os.path.join(path, "__init__.py")
+            # Compare against directory listings so that the match is case
+            # sensitive also on case-insensitive filesystems. A directory
+            # named like a source file is not a source file.
+            entries = _list_dir(directory)
+            if (
+                part in entries
+                and "__init__.py" in _list_dir(path)
+                and os.path.isfile(init_file)
+            ):
+                found.append((name, init_file))
+            elif part + ".py" in entries and os.path.isfile(path + ".py"):
+                found.append((name, path + ".py"))
+                # A plain module has no submodules.
+                break
+            elif part in entries and os.path.isdir(path):
+                found.append((name, None))
+            else:
+                break
+            directory = path
+
+        return found
+
+
+def _is_builtin_or_frozen(name):
+    # FrozenImporter.find_spec only looks the name up in the interpreter's
+    # table of frozen modules (io, os, ...). It imports nothing.
+    return (
+        name in sys.builtin_module_names or FrozenImporter.find_spec(name) is not None
+    )
+
+
+def _list_dir(path):
+    try:
+        return set(os.listdir(path))
+    except OSError:
+        return set()
 
 
 class ImportManagerError(Exception):

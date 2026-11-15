@@ -18,13 +18,15 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from base import TestBase
+import os
+import tempfile
+from unittest import TestCase
 
 from pycg import utils
 from pycg.formats.fasten import Fasten
 
 
-class FastenFormatTest(TestBase):
+class FastenFormatTest(TestCase):
     FORGE = "pypi"
     PRODUCT = "myproduct"
     PACKAGE = "mock_pkg"
@@ -84,6 +86,70 @@ class FastenFormatTest(TestBase):
         self.assertEqual(
             output["graph"],
             {"internalCalls": [], "externalCalls": [], "resolvedCalls": []},
+        )
+
+    def test_dependencies(self):
+        requirements = "\n".join(
+            [
+                "requests",
+                "numpy>=1.20",
+                "pandas>=1.0,<2.0",
+                "flask==2.0.1",
+                "django>1.0,<=3.2",
+                "six (>=1.10)",
+                'click[extra]>=7.0 ; python_version >= "3.6"',
+                "  spaced >= 1.0 , < 2.0  ",
+                "foo==1.0  # inline comment",
+                "pkg @ https://example.com/pkg.tar.gz",
+                "attrs!=19.1.0",
+                "two==1.0,==2.0",
+                "range>=1.0,<2.0,>=3.0,<4.0",
+                "Name_With.Dots-1==0.1",
+                # PEP 508 allows one trailing comma after the specifiers.
+                "trailing>=2.0,",
+                "paren (>=2.0,)",
+                # Lines that are not requirements are skipped.
+                "",
+                "# comment",
+                "-e .",
+                "-r other.txt",
+                "git+https://github.com/x/y.git",
+                "bad>=",
+                "six (>=1.10) trailing",
+                "lonely ,",
+                "double>=2.0,,",
+            ]
+        )
+        with tempfile.TemporaryDirectory() as package:
+            with open(os.path.join(package, "requirements.txt"), "w") as f:
+                f.write(requirements)
+            self.package = package
+            depset = self.get_formatter().generate()["depset"]
+
+        expected = [
+            ("requests", []),
+            ("numpy", ["[1.20..]"]),
+            ("pandas", ["[1.0..2.0)"]),
+            ("flask", ["[2.0.1]"]),
+            ("django", ["(1.0..3.2]"]),
+            ("six", ["[1.10..]"]),
+            ("click", ["[7.0..]"]),
+            ("spaced", ["[1.0..2.0)"]),
+            ("foo", ["[1.0]"]),
+            ("pkg", []),
+            ("attrs", []),
+            ("two", ["[1.0]", "[2.0]"]),
+            ("range", ["[1.0..2.0)", "[3.0..4.0)"]),
+            ("Name_With.Dots-1", ["[0.1]"]),
+            ("trailing", ["[2.0..]"]),
+            ("paren", ["[2.0..]"]),
+        ]
+        self.assertEqual(
+            depset,
+            [
+                {"forge": "PyPI", "product": name, "constraints": constraints}
+                for name, constraints in expected
+            ],
         )
 
     def test_uri(self):

@@ -3,4 +3,7 @@ class A:
         def __init__(self):
             pass
 
-raise A.B
+try:
+    raise A.B
+except A.B:
+    pass

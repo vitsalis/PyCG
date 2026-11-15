@@ -18,12 +18,12 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-from base import TestBase
+from unittest import TestCase
 
 from pycg.machinery.callgraph import CallGraph, CallGraphError
 
 
-class CallGraphTest(TestBase):
+class CallGraphTest(TestCase):
     def setUp(self):
         self.cg = CallGraph()
 
