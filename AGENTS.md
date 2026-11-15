@@ -7,11 +7,12 @@ It never imports or executes the code it analyses. Keep it that way.
 
 | Path | Content |
 |---|---|
-| `pycg/` | The tool. `__main__.py` is the CLI, `pycg.py` the `CallGraphGenerator` entry point, `formats/` the output formats |
+| `pycg/` | The tool. `__main__.py` is the CLI, `pycg.py` the `CallGraphGenerator` entry point, `formats/` the output format (docs/format.md) |
+| `pycg/analysis/` | The analysis: the builder that turns the AST into constraints, the rules, and the solver |
 | `tests/unit/` | Unit tests |
 | `tests/test_micro_benchmark.py` | Runs every micro-benchmark case against its expected call graph |
 | `micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json` |
-| `docs/paper-notes.md` | Measurements and decisions for the follow-up paper |
+| `docs/design.md` | The design of the analysis: what it models, its rules, termination, open problems |
 
 ## Commands
 
@@ -31,17 +32,18 @@ not add one without discussion.
 - **Ground truth is independent of the tool.** A `callgraph.json` states what
   Python does when the snippet runs. Never edit one to match PyCG's output,
   and never special-case the analysis for a snippet.
-- **Known failures are explicit.** `KNOWN_FAILURES` in the benchmark test
-  lists the cases the analysis does not handle, as strict expected failures.
-  When a change fixes a case, remove its entry. When a new case fails, add it
-  with a one-line reason.
+- **Known failures are explicit.** `tests/known_failures.txt` lists the
+  cases the analysis does not handle, each with its cause, as strict expected
+  failures. `tests/triage.py` holds the causes and regenerates the file: run
+  it after a change, and give a new failing case its cause there.
 - **Tests first.** Write the failing test, then the code. Test behaviour
   through public entry points; cover edge cases and error paths.
 - **Results are deterministic.** The same input gives the same output on every
   run and every supported Python version.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
 - Record every measurable result (benchmark numbers, bugs found in ground
-  truth, design decisions and their reasons) in `docs/paper-notes.md`.
+  truth, design decisions and their reasons) in the commit message of the
+  change.
 
 ## Workflow
 
