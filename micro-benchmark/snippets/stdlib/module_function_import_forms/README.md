@@ -1,0 +1,1 @@
+One standard library function is reached through `import os`, `from os import path`, `import os.path as osp`, and a variable. Each form is used in its own function. The callee is named by the path that the snippet imports, `os.path.join`.

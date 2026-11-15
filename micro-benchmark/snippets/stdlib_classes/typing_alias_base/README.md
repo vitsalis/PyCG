@@ -1,0 +1,1 @@
+`typing.Iterator` and `typing.AbstractSet` are aliases of `collections.abc.Iterator` and `collections.abc.Set`: a class statement puts the `collections.abc` class in the bases, so the inherited methods are those of `collections.abc`.

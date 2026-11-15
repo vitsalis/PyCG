@@ -1,0 +1,5 @@
+def hit():
+    pass
+
+
+hit()

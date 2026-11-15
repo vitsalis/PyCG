@@ -1,0 +1,1 @@
+A string run by `exec` defines the function `generated`, which `main` then calls. A function defined in a string is not a node, so the call of `helper` in its body belongs to the scope that calls it, `main`.

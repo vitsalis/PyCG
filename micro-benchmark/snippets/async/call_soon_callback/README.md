@@ -1,0 +1,1 @@
+`loop.call_soon` schedules a function, and the event loop calls it. By the callback convention the call belongs to the scope that runs the event loop, `main`, which calls `asyncio.run`, not to `main.start`, which schedules the function.

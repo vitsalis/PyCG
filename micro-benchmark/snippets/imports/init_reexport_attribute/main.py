@@ -1,0 +1,3 @@
+import geometry
+
+geometry.area()

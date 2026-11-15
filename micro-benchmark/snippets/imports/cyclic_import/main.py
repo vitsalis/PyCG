@@ -1,0 +1,3 @@
+import ping
+
+ping.start()

@@ -1,0 +1,4 @@
+def record():
+    pass
+
+record()

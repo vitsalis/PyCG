@@ -1,0 +1,1 @@
+A class that derives from `collections.abc.AsyncIterator` inherits `__aiter__`, which returns the instance itself, so an `async for` loop calls the class's `__anext__` and the function that it returns.
