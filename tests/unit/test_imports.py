@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 Vitalis Salis.
+# Copyright (c) 2026 Vitalis Salis.
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
@@ -24,8 +24,7 @@ from importlib.machinery import FrozenImporter
 
 import pytest
 
-from pycg import utils
-from pycg.machinery.imports import ImportManager, ImportManagerError
+from pycg.analysis.imports import ImportManager, ImportManagerError
 from pycg.pycg import CallGraphGenerator
 
 
@@ -298,6 +297,38 @@ def test_frozen_module_wins_over_local_file(tmp_path):
     assert im.get_imports("main") == set()
 
 
+def skip_unless_importlib_util_is_frozen():
+    if FrozenImporter.find_spec("importlib.util") is None:
+        pytest.skip("this interpreter does not freeze importlib.util")
+    assert FrozenImporter.find_spec("importlib") is None
+
+
+def test_frozen_submodule_wins_over_local_file(tmp_path):
+    # importlib is not frozen, but importlib.util is: Python runs a local
+    # importlib/__init__.py and then imports the frozen importlib.util.
+    skip_unless_importlib_util_is_frozen()
+    make_files(
+        tmp_path, "importlib/__init__.py", "importlib/util.py", "importlib/other.py"
+    )
+    im = manager_in(tmp_path, "main", "main.py")
+
+    # from importlib.util import find_spec
+    assert im.handle_import("importlib.util.find_spec", 0) is None
+    # import importlib.util, from importlib import util
+    assert im.handle_import("importlib.util", 0) is None
+    assert im.get_imports("main") == {"importlib"}
+    # Submodules that are not frozen stay local.
+    assert im.handle_import("importlib.other", 0) == "importlib.other"
+
+
+def test_relative_import_of_a_frozen_submodule_name_is_local(tmp_path):
+    make_files(tmp_path, "importlib/__init__.py", "importlib/util.py")
+    im = manager_in(tmp_path, "importlib", "importlib/__init__.py")
+
+    # from . import util
+    assert im.handle_import("util", 1) == "importlib.util"
+
+
 def test_local_file_shadows_stdlib_module_that_is_not_frozen(tmp_path):
     make_files(tmp_path, "json.py")
     im = manager_in(tmp_path, "main", "main.py")
@@ -324,6 +355,38 @@ def test_module_name_is_case_sensitive(tmp_path):
 
     assert im.handle_import("Lower", 0) is None
     assert im.handle_import("PKG", 0) is None
+
+
+@pytest.mark.parametrize(
+    ("files", "name", "packages"),
+    [
+        (("pkg/__init__.py", "pkg/sub/__init__.py"), "pkg.sub.mod", ["pkg", "pkg.sub"]),
+        (("ns/sub/mod.py",), "ns.sub.mod", ["ns", "ns.sub"]),
+        (("ns.py", "ns/sub/mod.py"), "ns.sub.mod", []),
+        (("ns/sub.py", "ns/sub/mod.py"), "ns.sub.mod", ["ns"]),
+        (("os/sub/mod.py",), "os.sub.mod", []),
+        (("mod.py",), "mod", []),
+        # An extension module wins over a namespace directory of its name.
+        (("ns.cpython-312-darwin.so", "ns/sub/mod.py"), "ns.sub.mod", []),
+        # `pkg.__init__` is the module pkg/__init__.py, no package.
+        (("pkg/__init__.py", "pkg/__init__/b.py"), "pkg.__init__.b", ["pkg"]),
+        (
+            ("pkg/__init__.py", "pkg/__init__/__init__.py", "pkg/__init__/b.py"),
+            "pkg.__init__.b",
+            ["pkg", "pkg.__init__"],
+        ),
+    ],
+)
+def test_packages_are_the_prefixes_that_an_import_resolves_as_packages(
+    tmp_path, files, name, packages
+):
+    # A module file wins over a namespace directory of its name, and a
+    # built-in or frozen module over any file.
+    make_files(tmp_path, *files)
+    im = manager_in(tmp_path, "main", "main.py")
+
+    assert im.packages(name) == packages
+    assert im.extension_modules == {}
 
 
 def test_resolution_does_not_import_or_touch_sys(tmp_path):
@@ -418,21 +481,131 @@ def test_failed_import_still_runs_package_init(tmp_path):
     main = "try:\n    from pkg.missing import thing\nexcept ImportError:\n    pass\n"
     make_files(tmp_path, "pkg/__init__.py", content=package_init)
     make_files(tmp_path, "main.py", content=main)
-    generator = CallGraphGenerator(
-        [str(tmp_path / "main.py")], str(tmp_path), -1, utils.constants.CALL_GRAPH_OP
-    )
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
     generator.analyze()
 
-    assert "pkg.setup" in generator.output().get("pkg", set())
+    assert "pkg.setup" in generator.output()["pkg"]
+
+
+def test_call_to_a_frozen_submodule_is_external(tmp_path):
+    skip_unless_importlib_util_is_frozen()
+    make_files(tmp_path, "importlib/__init__.py")
+    make_files(tmp_path, "importlib/util.py", content="def find_spec(): pass\n")
+    make_files(
+        tmp_path,
+        "main.py",
+        content="from importlib.util import find_spec\nfind_spec('x')\n",
+    )
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+
+    assert generator.output() == {
+        "main": ["importlib.util.find_spec"],
+        "importlib": [],
+        "importlib.util.find_spec": [],
+    }
+    assert "importlib.util.find_spec" in generator.document()["outside"]
 
 
 def test_directory_named_like_a_source_file_does_not_crash_analysis(tmp_path):
     (tmp_path / "mod.py").mkdir()
     (tmp_path / "pkg" / "__init__.py").mkdir(parents=True)
     make_files(tmp_path, "main.py", content="import mod\nimport pkg\n")
-    generator = CallGraphGenerator(
-        [str(tmp_path / "main.py")], str(tmp_path), -1, utils.constants.CALL_GRAPH_OP
-    )
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
     generator.analyze()
 
-    assert generator.output() == {"main": set()}
+    assert generator.output() == {"main": []}
+
+
+def test_limit_import_as_binds_the_submodule_not_the_package_attribute(tmp_path):
+    # Python's `import a.b as c` reads the attribute `b` of `a` after the
+    # import (IMPORT_FROM; a longer name reads each part). The package
+    # rebinds `b` after it imported the submodule, so Python calls
+    # `a.Replacement.hit`. The analysis binds the submodule (a limit).
+    package_init = (
+        "from . import b\n"
+        "class Replacement:\n"
+        "    @staticmethod\n"
+        "    def hit(): pass\n"
+        "b = Replacement\n"
+    )
+    make_files(tmp_path, "a/__init__.py", content=package_init)
+    make_files(tmp_path, "a/b.py", content="def hit(): pass\n")
+    make_files(tmp_path, "main.py", content="import a.b as c\nc.hit()\n")
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+
+    assert generator.output()["main"] == ["a.b.hit"]
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 15), reason="`lazy import` is Python 3.15 syntax"
+)
+def test_an_unread_lazy_import_as_reads_no_attribute(tmp_path):
+    # `target` is never read, so Python never reifies the import and runs
+    # no getter on the package's `b`.
+    package_init = (
+        "from . import b\n"
+        "class Replacement:\n"
+        "    @property\n"
+        "    def c(self):\n"
+        "        return 1\n"
+        "b = Replacement()\n"
+    )
+    make_files(tmp_path, "a/__init__.py", content=package_init)
+    make_files(tmp_path, "a/b/__init__.py", content="from . import c\n")
+    make_files(tmp_path, "a/b/c.py")
+    main = "import a\nlazy import a.b.c as target\n"
+    make_files(tmp_path, "main.py", content=main)
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+
+    assert generator.output()["main"] == []
+
+
+def test_a_literal_import_module_gives_the_module(tmp_path):
+    # `importlib.import_module("a.b")` returns sys.modules["a.b"], the
+    # module, whatever the package binds to `b`.
+    make_files(tmp_path, "a/__init__.py", content="from . import b\nb = None\n")
+    make_files(tmp_path, "a/b.py", content="def hit(): pass\n")
+    main = "import importlib\nimportlib.import_module('a.b').hit()\n"
+    make_files(tmp_path, "main.py", content=main)
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+
+    assert "a.b.hit" in generator.output()["main"]
+
+
+@pytest.mark.parametrize(
+    ("statement", "binding"),
+    [
+        ("from pkg import x", "x = hit\n"),
+        ("from pkg import __x", "__x = _C__x = hit\n"),
+    ],
+)
+def test_limit_a_submodule_that_a_package_attribute_shadows_is_analysed(
+    tmp_path, statement, binding
+):
+    # Python's `from pkg import x` reads the attribute `x` that
+    # pkg/__init__.py binds, and imports pkg/x.py only where the package
+    # has no such attribute when the import runs. That depends on what ran
+    # before: an import that runs while pkg/__init__.py runs (also through a
+    # call back) finds no attribute yet, and a deletion removes it. So
+    # discovery follows the submodule: the program has `pkg.x` and its call,
+    # which Python does not run here. In a class body, the from-list keeps
+    # `__x`, which decides the submodule, and the name read is `_C__x`.
+    name = statement.rpartition(" ")[2]
+    make_files(tmp_path, "pkg/__init__.py", content="def hit(): pass\n" + binding)
+    make_files(tmp_path, f"pkg/{name}.py", content="def hit(): pass\nhit()\n")
+    main = f"class C:\n    {statement}\n    {name}()\n"
+    make_files(tmp_path, "main.py", content=main)
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+
+    assert generator.output() == {
+        "main": ["pkg.hit"],
+        "pkg": [],
+        "pkg.hit": [],
+        f"pkg.{name}": [f"pkg.{name}.hit"],
+        f"pkg.{name}.hit": [],
+    }
