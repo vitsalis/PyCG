@@ -47,6 +47,5 @@ not add one without discussion.
 
 ## Workflow
 
-`dev` is the integration branch. Do each feature on its own branch in a
-worktree under `.worktrees/`, and merge it into `dev` with a descriptive
-merge commit when tests and lint pass.
+Do each feature on its own branch from `main`, in a worktree under
+`.worktrees/`, and open a pull request when tests and lint pass.
