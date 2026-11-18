@@ -1144,6 +1144,14 @@ contains itself, or tuples that share their elements, end
   resolve and give more edges: on hypothesis, 24,737 more, nearly all of
   them outside names built past a function of an extension module, at 13
   sites that call a drawn value.
+- Limit: an assert narrows as if it always runs. The analysis follows the
+  default interpreter, where asserts run. Under `python -O` an assert does
+  not run, so the statements after `assert isinstance(x, C)` also run with
+  values of `x` that are not instances of `C`, and the analysis misses the
+  calls on them (`test_limit_an_assert_narrows_as_if_it_always_runs`). On
+  the 30 benchmark packages this misses 4 edges, all in h11, whose ground
+  truth also counts runs under `-O`: `normalize_and_validate` and
+  `get_comma_header` call `str.lower` and `str.split`.
 
 ### Code that cannot run
 
@@ -2121,6 +2129,17 @@ obj.attr  =  Field(obj, attr)                the instance's own field
   analysis gives those unbound.
 - Limit: a `__getattr__` stored on a class after its body (`C.__getattr__
   = fetch`, or through `setattr`) is not called, as it would be in Python.
+- Limit: where a property's getter or a descriptor's `__get__` raises
+  `AttributeError`, Python then calls the class's `__getattr__` with the
+  name. The analysis calls `__getattr__` only where no class of the MRO
+  defines the name, so that call, and what it calls, are missing
+  (`test_limit_a_getter_that_raises_attribute_error_does_not_call_getattr`).
+  On the 30 benchmark packages, 32 missed edges have this cause (bottle
+  19, structlog 8, anytree 4, asyncstdlib 1). A rule that makes each load
+  of a name bound to a property or a descriptor also call the class's
+  `__getattr__` was measured: it adds 31 of them and 21 wrong edges
+  (anytree 19, bottle 2). That is more than one wrong edge for every ten
+  true ones, the bound for admitting a rule, so the rule is not built.
 
 **Records on demand.** Whether a class has a name depends on the class
 only; only what the class gives is bound to the instance. So a rule that

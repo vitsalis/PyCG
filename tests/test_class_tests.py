@@ -193,6 +193,33 @@ def test_after_a_guard_the_rest_of_the_block_is_the_branch(tmp_path):
     assert methods(graph, "main.block", "after") == []
 
 
+def test_limit_an_assert_narrows_as_if_it_always_runs(tmp_path):
+    """Python: `use` calls `str.strip`, and the assert then fails. Under
+    `python -O` the assert does not run, so `use` also calls `str.lower`
+    and `str.split` on the str. The analysis follows the default
+    interpreter: after the assert, `name` holds only bytes (see *Class
+    tests*, limits)."""
+    graph = graph_of(
+        tmp_path,
+        """
+        def use(name):
+            name.strip()
+            assert isinstance(name, bytes)
+            name.lower()
+            name.split()
+        def caller():
+            use("Content-Length")
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "<builtin>.bytes.lower",
+        "<builtin>.bytes.split",
+        "<builtin>.isinstance",
+        "<builtin>.str.strip",
+    ]
+
+
 def test_nested_functions_read_the_variable_and_comprehensions_the_branch(tmp_path):
     graph = graph_of(
         tmp_path,
