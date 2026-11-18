@@ -1366,6 +1366,36 @@ def test_getattr_of_a_base_runs_for_a_subclass_that_defines_none(tmp_path):
     assert callees(graph, "main") == ["main.Base.__getattr__", "main.target"]
 
 
+def test_limit_a_getter_that_raises_attribute_error_does_not_call_getattr(tmp_path):
+    """Python: a property's getter or a descriptor's `__get__` that raises
+    AttributeError makes the load call the class's `__getattr__` with the
+    name, so `use` also calls `Node.__getattr__` and, through its result,
+    `fetch`. The analysis calls `__getattr__` only where no class of the
+    MRO defines the name (see *Lookup through an instance*, limits)."""
+    graph = main_graph(
+        tmp_path,
+        """
+        def fetch(): pass
+        class Lazy:
+            def __get__(self, obj, owner=None):
+                raise AttributeError("value")
+        class Node:
+            value = Lazy()
+            @property
+            def parent(self):
+                raise AttributeError("parent")
+            def __getattr__(self, name):
+                return fetch
+        def use():
+            node = Node()
+            node.parent()
+            node.value()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["main.Lazy.__get__", "main.Node.parent"]
+
+
 @pytest.mark.parametrize("name", sorted(ASSIGNED_HOOKS))
 def test_a_hook_named_late_still_runs_for_earlier_accesses(tmp_path, name):
     # The name is a constant f-string in a variable, so setattr stores the

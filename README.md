@@ -4,7 +4,7 @@
 
 > **PyCG is maintained again.** The repository was archived in November
 > 2023. Development restarted in 2026 with a new analysis for Python 3.12
-> and later. Issues and pull requests are welcome.
+> and later.
 
 PyCG generates call graphs for Python code with a fully static analysis:
 it never imports or runs the code that it analyses. The analysis follows
