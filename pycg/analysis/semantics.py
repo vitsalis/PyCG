@@ -184,6 +184,9 @@ class Analysis(
         # The module that each call site imports by a str literal, if its
         # callee is an importer (see `IMPORTERS`).
         self.literal_imports = {}
+        # The positions at which each call expression, by scope and site,
+        # passes the literal None (see `literal_none`).
+        self.none_arguments = {}
         # The sites of `super()` without arguments, whose arguments the
         # builder supplies (see `BuiltinRules._rule_super`); the calls and
         # classes of `super(C, x)` with arguments that are paired; and the
@@ -838,6 +841,19 @@ class Analysis(
             self._receiver_calls[key] = call
             self._prefixes[call] = (base, receivers)
         return self._receiver_calls[key]
+
+    def literal_none(self, call, index):
+        """Whether `call` passes the literal `None` at the position `index`:
+        a fact of the source, which a call expression records (see
+        `none_arguments`) and the calls that copy it keep, with their
+        receivers before it. An argument without a value is not None
+        (`False`, `1.5` and `...` have none either)."""
+        base, receivers = self._prefixes.get(call, (call, ()))
+        root = self._roots.get(base, base)
+        if root.origin is not root:
+            return False
+        nones = self.none_arguments.get((root.caller, root.site), ())
+        return index - len(receivers) in nones
 
     def _callee(self, call):
         """A node whose objects `call` calls, through the worklist."""

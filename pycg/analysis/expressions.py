@@ -251,6 +251,13 @@ class Expressions:
     def _expr_Call(self, node):
         callee = self.expression(node.func)
         args, star = self._implicit_super_arguments(node), []
+        nones = frozenset(
+            index
+            for index, arg in enumerate(node.args)
+            if isinstance(arg, ast.Constant)
+            and arg.value is None
+            and not any(isinstance(a, ast.Starred) for a in node.args[:index])
+        )
         for arg in node.args:
             if isinstance(arg, ast.Starred):
                 value = self.expression(arg.value)
@@ -285,6 +292,8 @@ class Expressions:
         module = self.literal_import(node)
         if module is not None:
             self.analysis.literal_imports[self._site(node)] = module
+        if nones:
+            self.analysis.none_arguments[self._caller, self._site(node)] = nones
         result = self.analysis.node()
         self.analysis.add_call(
             callee,

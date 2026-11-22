@@ -2127,9 +2127,10 @@ C.attr
 - Through the class, the metaclass of a stubbed base gives its members too
   (`API.register` for `class API(abc.ABC)`), unless a class of the MRO,
   `object` included, defines the name.
-- An instance found there whose class defines `__get__` calls it with None
-  and the class, from the scope of the load, and the load gets the result;
-  a property loaded through its class is itself.
+- An instance found there whose class resolves `__get__` to an analysed
+  method calls it with no value for the instance and the class, from the
+  scope of the load, and the load gets the result; a property loaded
+  through its class is itself (see *Descriptors*).
 - The lookup is remembered and redone when the MROs change.
 - Limit: the stub hierarchy of an outside base is searched where the base
   stands in the analysed MRO, so a later analysed base that shares an
@@ -2351,19 +2352,92 @@ hook, see *Attribute hooks*), and the access gets the result:
 
 - a property calls its getter with the instance on a load, its setter on
   a store and its deleter on a `del`;
-- an instance whose class defines `__get__`, `__set__` or `__delete__`
-  calls it, with the instance and its class for `__get__`.
+- an instance whose class resolves `__get__`, `__set__` or `__delete__`
+  to an analysed method calls it, with the instance and its class for
+  `__get__`.
 
-An instance whose class does not define `__get__` (or where only an
-outside base does, whose `__get__` is not called) is itself the value.
-`prop.setter(f)` and its siblings add `f` to `prop` itself and give
-`prop`.
+A *property* is the engine's own (`property(...)`, `@property`) or an
+instance of an analysed class that may derive from the builtin `property`
+(`Hierarchy.relation`, so a base that comes late counts; an analysed class
+that is itself named `property` and derives from nothing is an ordinary
+class). Such an instance keeps the accessors that a valid call of the
+resolved builtin `property.__init__` passes: the inherited `__init__` of
+`Sub(f)` and `@Sub`, `super().__init__(f)` in an `__init__` of its own, or
+`property.__init__(self, f)`. The call is valid if it may bind `(self, /,
+fget=None, fset=None, fdel=None, doc=None)`: no other keyword, `self` by
+position, at most five positional arguments. `property.__init__` calls none
+of its arguments. In each MRO of the instance's class, the first class that
+resolves the descriptor method decides (an outside base by its stubs): an
+analysed class's method runs; the builtin `property`'s runs as the engine's
+own property does; any other outside class's method that the stubs describe
+is called by its stub, with a typed result, and the descriptor is also the
+value of the load; an outside base without stubs gives an external that is
+not called, and the descriptor is the value. Where no class resolves
+`__get__` (`object` has none), the instance is itself the value (decided
+like a lookup: `Hierarchy.descriptor_itself`).
 
-- Limit: Python's `prop.setter(f)` gives a copy, so the original property
-  keeps its accessors apart from the copy's; the analysis merges them.
+A load through the class runs `__get__` with no value for the instance and
+the class: a property is then itself (property's own `__get__` is not
+run), and a subclass's own `__get__` runs.
+
+The methods of `property` are also called explicitly, on the engine's
+property or on a property instance, through the instance, through
+`super()` or unbound: `p.__get__(obj, owner)` calls the getter with `obj`
+and gives its result, or gives `p` where `obj` is the literal `None` and an
+owner other than the literal `None` may be passed; `p.__set__(obj, v)` and
+`p.__delete__(obj)` call the setter and the deleter and give None, whatever
+the accessor returns. `prop.setter(f)` and its siblings add `f` to `prop`
+itself and give `prop`, for a subclass too. An explicit `__get__` of the
+engine's `staticmethod` gives the function it wraps; of a `classmethod`,
+its function bound to each class that the owner may hold (analysed or
+outside), and, where the owner may be absent (an unpacking may omit it) or
+is the literal `None`, to the class of the instance, or to the metaclasses
+of a class (see `Hierarchy.bind`). A call of these methods is valid if it
+passes no keyword and a number of positional arguments in the range of the
+signature (`(instance, owner=None, /)`), or an unpacking that may fill it;
+`x.__get__(None)` and `x.__get__(None, None)` give nothing, as Python
+raises. "The literal `None`" is what the source writes: the builder
+records the positions at which a call expression passes `None` (before any
+unpacking), and the calls that copy it keep them, with bound receivers
+before them (`Analysis.literal_none`). An argument without a value is not
+`None` (`False` and `1.5` have none either), and a node that holds nothing
+decides nothing.
+
+- Limit: Python's `prop.setter(f)` calls the class of `prop` to make a
+  copy, so the original property keeps its accessors apart from the
+  copy's, and a subclass's own `__init__` may run for the copy; the
+  analysis merges them and calls nothing (the micro-benchmark cases
+  `descriptors/property_subclass_copy` and `property_subclass_copy_init`).
 - Limit: which of a data descriptor and the instance's `__dict__` wins is
   not decided: both count.
-- Limit: the descriptor methods of outside bases are not called.
+- Limit: a known `None` flows only as a literal argument: a subclass
+  `__get__(self, obj, owner=None)` that forwards to `super().__get__(obj,
+  owner)` calls the getter on a load through the class
+  (`descriptors/property_get_forwards_none`).
+- Limit: an explicit `__get__` with `**` gives nothing, even with an empty
+  mapping (`descriptors/wrapper_get_double_star`).
+- Limit: a second `property.__init__` adds accessors; Python replaces them.
+  The reads and writes of `__doc__` that construction makes, and the name
+  that a property keeps, are not modelled.
+- Limit: a class that derives from `property` only through an outside
+  class (`abc.abstractproperty`) is not a property: that class resolves the
+  descriptor methods by its stubs. The descriptor methods of other outside
+  bases (`functools.cached_property`) run only by their stubs
+  (`descriptors/outside_descriptor_subclass`).
+- Limit: in Python 3.12, `classmethod.__get__` calls `__get__` of a
+  wrapped descriptor with the owner twice; the analysis binds as 3.13 to
+  3.15 do, and gives a wrapped callable other than a function unbound. An
+  explicit `__get__` of a function is not modelled.
+- Limit: a descriptor method has one set of parameter and return nodes for
+  all the descriptor objects that it serves (no calling context), so the
+  accessors of all the instances of one property subclass, and the owners
+  of all its accesses, mix in its body. Measured on the one development
+  package where the rule fires (path, whose `ClassProperty.__get__` serves
+  four instances): of the 41 false edges that the rule adds, 40 come from
+  this mixing (36 to `functools.partial.__call__`, 4 from `Multi.__iter__`),
+  and 74 of its 168 true edges (`TempDir.__new__` and `__init__`) are
+  reached only through it, while Python makes those calls through a class
+  that `type()` makes.
 
 ### Attribute hooks
 
@@ -3426,9 +3500,11 @@ reads only constant nodes. Class lookups wait for complete hierarchies
 not fixpoint steps: whether Python's own special method may run
 (`__contains__`, an attribute hook, `__new__`, `__get__`, `__await__`,
 `__class_getitem__`, a metaclass's `__getitem__`) is decided like a lookup
-(`Hierarchy.python_method`), when the class is ready and again when its
-MROs grow, and so is whether a class may derive from another, or may not,
-for a class test (`Hierarchy.relation`).
+(`Hierarchy.python_method`, and `Hierarchy.descriptor_itself` for whether a
+descriptor is itself the value of a load), when the class is ready and
+again when its MROs grow, and so is whether a class may derive from
+another, or may not, for a class test and for a property
+(`Hierarchy.relation`).
 
 ### Saturation and the rounds
 

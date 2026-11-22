@@ -17,6 +17,18 @@ FUNCTIONS = {
     "staticmethod": ("(function, /)", "wrap", "staticmethod"),
     "classmethod": ("(function, /)", "wrap", "classmethod"),
     "property": ("(fget=None, fset=None, fdel=None, doc=None)", "property"),
+    # The methods of `property`, whose receiver is the engine's own property
+    # or an instance of an analysed subclass of `property`.
+    "property.__init__": (
+        "(self, /, fget=None, fset=None, fdel=None, doc=None)",
+        "property_init",
+    ),
+    "property.getter": ("(self, function, /)", "property_with", "fget"),
+    "property.setter": ("(self, function, /)", "property_with", "fset"),
+    "property.deleter": ("(self, function, /)", "property_with", "fdel"),
+    "property.__get__": ("(self, instance, owner=None, /)", "property_run", "fget"),
+    "property.__set__": ("(self, instance, value, /)", "property_run", "fset"),
+    "property.__delete__": ("(self, instance, /)", "property_run", "fdel"),
     "list": ("(iterable=(), /)", "collection", "list"),
     "tuple": ("(iterable=(), /)", "collection", "tuple"),
     "set": ("(iterable=(), /)", "collection", "set"),
@@ -55,9 +67,8 @@ MAX_DYNAMIC_NAMES = 4
 
 # Methods of builtin types, by type name and method name.
 METHODS = {
-    ("property", "getter"): ("(function, /)", "property_with", "fget"),
-    ("property", "setter"): ("(function, /)", "property_with", "fset"),
-    ("property", "deleter"): ("(function, /)", "property_with", "fdel"),
+    ("classmethod", "__get__"): ("(instance, owner=None, /)", "bind"),
+    ("staticmethod", "__get__"): ("(instance, owner=None, /)", "bind"),
     ("list", "append"): ("(object, /)", "add", "object"),
     ("list", "insert"): ("(index, object, /)", "add", "object"),
     ("list", "extend"): ("(iterable, /)", "extend"),
@@ -260,6 +271,9 @@ def opened_class(mode, unbuffered):
         return "_io.BufferedRandom"
     return "_io.BufferedReader" if "r" in letters else "_io.BufferedWriter"
 
+
+# The accessor of a property for each descriptor method.
+PROPERTY_ACCESSORS = {"__get__": "fget", "__set__": "fset", "__delete__": "fdel"}
 
 # The attributes of a builtin object that hold what it wraps, by type name.
 WRAPPED = {

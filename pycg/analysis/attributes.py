@@ -4,6 +4,7 @@
 and constraints it uses.
 """
 
+from .builtin_models import PROPERTY_ACCESSORS
 from .hierarchy import EXPLICIT
 from .model import (
     BUILTIN_MODULE,
@@ -34,11 +35,12 @@ from .solver import Constraint, Each
 # (`base_member_external`).
 MAX_EXTERNAL_STEPS = 2
 
-# The accessor of a property for each descriptor method.
-PROPERTY_ACCESSORS = {"__get__": "fget", "__set__": "fset", "__delete__": "fdel"}
-
-# The descriptor methods that an analysed class defines: those of an outside
-# base are not called (the instance is then the value of a load).
+# The descriptor methods that an access calls: an analysed class's, and the
+# bound method of an outside base that the stubs describe, which runs by its
+# stub (the builtin `property`'s by its rule); a plain external, an outside
+# base without stubs, is not called. Where an outside base resolves `__get__`
+# (`property` aside), the instance is also the value of a load (see
+# `Hierarchy.descriptor_itself`).
 ANALYSED_METHODS = (Function, BoundMethod, Instance, Wrapper, Class)
 
 
@@ -48,10 +50,12 @@ class Attributes:
         `receiver`, for `access`, which calls its `method` (`__get__`,
         `__set__` or `__delete__`); return whether `obj` is one. A property
         is: it calls its accessor (`fget`...) with the instance. So is an
-        instance: it calls the method of its class with the instance (and
-        the class, for `__get__`), if an analysed class defines it; a load
-        gets the instance itself where none does (see `python_method`). The
-        accessor runs from `hook` (see `_call_accessor`)."""
+        instance: it calls the method that its class resolves with the
+        instance (and the class, for `__get__`; see `ANALYSED_METHODS`); a
+        load also gets the instance itself where no class resolves
+        `__get__` or an outside one other than `property` does (see
+        `descriptor_itself`). The accessor runs from `hook` (see
+        `_call_accessor`)."""
         if isinstance(obj, Wrapper) and obj.kind == "property":
             accessor = self.field(obj, PROPERTY_ACCESSORS[method])
             self._call_accessor(accessor, receiver, (receiver,), hook, access)
@@ -60,7 +64,7 @@ class Attributes:
             return False
         if isinstance(access, Load):
             itself = Each(self._itself, obj, access.dst, results=(access.dst,))
-            self.solver.attach(self.python_method(obj.cls, method), itself)
+            self.solver.attach(self.descriptor_itself(obj.cls), itself)
         prefix = (receiver, receiver.cls) if method == "__get__" else (receiver,)
         found = self.lookup(obj.cls, method, obj)
         self._call_accessor(found, receiver, prefix, hook, access, ANALYSED_METHODS)
@@ -88,8 +92,15 @@ class Attributes:
         args = [None, self.constant(cls)]
         call = self.site_call(load.caller, load.site, role, args, dst=load.dst)
         found = self.lookup(obj.cls, "__get__", obj)
-        each = Each(self.call, call, kinds=ANALYSED_METHODS, results=(call.dst,))
+        each = Each(self._class_get, call, kinds=ANALYSED_METHODS, results=(call.dst,))
         self.solver.attach(found, each)
+
+    def _class_get(self, method, call):
+        """Call the `__get__` method `method` with `call`, but property's
+        own: with None for the instance, it gives the property, as
+        `_itself` does."""
+        if not (isinstance(method, BoundMethod) and _is_property_method(method)):
+            self.call(method, call)
 
     def _call_accessor(self, accessor, receiver, prefix, hook, access, kinds=None):
         """Call the accessors in the node `accessor` (of the `kinds`, if
@@ -332,6 +343,14 @@ class Attributes:
         if name in self._external_modules or external.name == BUILTIN_MODULE:
             steps = 0
         self.add_object(dst, self.external(name, steps))
+
+
+def _is_property_method(method):
+    """Whether the bound method `method` is a method of `property`."""
+    function = method.function
+    return isinstance(function, External) and function.name.startswith(
+        f"{BUILTIN_MODULE}.property."
+    )
 
 
 class _Access(Constraint):

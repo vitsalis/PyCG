@@ -22,11 +22,13 @@ from .builtin_models import (
     method_model,
 )
 from .containers import SEQUENCES, hashes_keys, is_dict, keeps_mapping_hashes
+from .hierarchy import MAY_DERIVE
 from .model import (
     BUILTIN_MODULE,
     Class,
     Const,
     Container,
+    External,
     Function,
     Generator,
     Instance,
@@ -211,16 +213,159 @@ class BuiltinRules:
     def _rule_property(self, call, receiver, args):
         """property(fget, fset, fdel, doc)"""
         prop = self.wrapper("property", call)
-        for name in WRAPPED["property"]:
-            self.add_edge(args[name], self.field(prop, name))
+        self._store_accessors(prop, args)
         self._result(call, prop)
+
+    def _store_accessors(self, prop, args):
+        for name in WRAPPED["property"]:
+            if args.given(name):
+                self.add_edge(args[name], self.field(prop, name))
+
+    def _properties(self, call, args, rule, *parameters):
+        """Apply `rule(prop, *parameters)` to each property that `self`
+        holds: the engine's own, or an instance whose class may derive from
+        the builtin `property` (once it may: its bases may come late). The
+        rule may give the result of `call`."""
+        each = Each(
+            self._property_receiver,
+            rule,
+            parameters,
+            call.dst,
+            kinds=(Wrapper, Instance),
+            results=(call.dst,),
+        )
+        self.solver.attach(args["self"], each)
+
+    def _property_receiver(self, prop, rule, parameters, dst):
+        if isinstance(prop, Wrapper):
+            if prop.kind == "property":
+                rule(prop, *parameters)
+            return
+        builtin = self.external(f"{BUILTIN_MODULE}.property")
+        derives = self.relation(prop.cls, builtin, MAY_DERIVE)
+        each = Each(self._derived_property, rule, prop, parameters, results=(dst,))
+        self.solver.attach(derives, each)
+
+    def _derived_property(self, derives, rule, prop, parameters):
+        rule(prop, *parameters)
+
+    def _rule_property_init(self, call, receiver, args):
+        """property.__init__(self, /, fget, fset, fdel, doc), resolved for
+        an instance of a subclass of `property` (or called with one), in a
+        call that may be valid: `self` keeps the accessors. It calls none of
+        them."""
+        if _may_init_property(call):
+            self._properties(call, args, self._store_accessors, args)
 
     def _rule_property_with(self, call, receiver, args, accessor):
         """prop.getter(f), prop.setter(f), prop.deleter(f): `prop` itself,
-        with `f` as that accessor too. Python returns a copy; flow-
-        insensitively, the copy and `prop` hold the same accessors."""
-        self.add_edge(args["function"], self.field(receiver, accessor))
-        self._result(call, receiver)
+        with `f` as that accessor too. Python returns a copy (for a
+        subclass, a call of its class); flow-insensitively, the copy and
+        `prop` hold the same accessors."""
+        self._properties(call, args, self._property_with, args, accessor, call)
+
+    def _property_with(self, prop, args, accessor, call):
+        self.add_edge(args["function"], self.field(prop, accessor))
+        self._result(call, prop)
+
+    def _rule_property_run(self, call, receiver, args, accessor):
+        """prop.__get__(instance, owner), prop.__set__(instance, value),
+        prop.__delete__(instance), for a valid call: call the accessor that
+        `prop` holds with the instance (and the value). `__get__` gives
+        what the getter returns, or `prop` itself for the literal None as
+        the instance with an owner that is not; `__set__` and `__delete__`
+        give None."""
+        arity = {"fget": (2, 3), "fset": (3, 3), "fdel": (2, 2)}[accessor]
+        if not self._positional_call(call, *arity):
+            return
+        if accessor == "fget" and self.literal_none(call, 1):
+            if self.literal_none(call, 2) or not self._supplies(call, 2):
+                return
+            self._properties(call, args, self._give, call)
+            return
+        values = [args["instance"]]
+        if accessor == "fset":
+            values.append(args["value"])
+        kind = _ACCESS_KINDS[accessor]
+        dst = call.dst if accessor == "fget" else None
+        run = self.site_call(
+            call.caller, call.site, ("property", kind, accessor), values, dst=dst
+        )
+        self._properties(call, args, self._run_property, accessor, run)
+
+    def _give(self, prop, call):
+        self._result(call, prop)
+
+    def _run_property(self, prop, accessor, run):
+        each = Each(self.call, run, results=(run.dst,))
+        self.solver.attach(self.field(prop, accessor), each)
+
+    def _rule_bind(self, call, receiver, args):
+        """sm.__get__(instance, owner) and cm.__get__(instance, owner) of a
+        static method and a class method, for a valid call (the literal None
+        for both, or for the instance without an owner, raises): the
+        function that a static method wraps; a class method's function
+        bound to each owner that the call may pass, and, where it may pass
+        none or the literal None, to the type of the instance (see
+        `Hierarchy.bind`)."""
+        if call.dst is None or not self._positional_call(call, 1, 2):
+            return
+        no_instance = self.literal_none(call, 0)
+        owner_none = self.literal_none(call, 1)
+        may_have_owner = self._supplies(call, 1) and not owner_none
+        may_lack_owner = len(call.args) < 2 or owner_none
+        if no_instance and not may_have_owner:
+            return
+        if receiver.kind == "staticmethod":
+            self.add_edge(self.field(receiver, "__func__"), call.dst)
+            return
+        if may_have_owner:
+            each = Each(
+                self._bind_class,
+                receiver,
+                call.dst,
+                kinds=(Class, External),
+                results=(call.dst,),
+            )
+            self.solver.attach(args["owner"], each)
+        if may_lack_owner and not no_instance:
+            each = Each(
+                self._bind_type,
+                receiver,
+                call.dst,
+                kinds=(Instance, Class),
+                results=(call.dst,),
+            )
+            self.solver.attach(args["instance"], each)
+
+    def _bind_class(self, owner, method, dst):
+        self.bind(method, owner, dst)
+
+    def _bind_type(self, instance, method, dst):
+        """Bind the class method `method` to the type of `instance`: its
+        class, or the metaclasses of a class."""
+        if isinstance(instance, Instance):
+            self.bind(method, instance, dst)
+            return
+        each = Each(
+            self._bind_class, method, dst, kinds=(Class, External), results=(dst,)
+        )
+        self.solver.attach(instance.metaclass, each)
+
+    def _positional_call(self, call, least, most):
+        """Whether `call` may pass between `least` and `most` arguments by
+        position and none by keyword, as a method whose parameters are
+        positional-only takes them. A call with `**` is not, even `**{}`: a
+        restriction of the analysis."""
+        if call.keywords or call.double_star:
+            return False
+        if call.star:
+            return len(call.args) <= most
+        return least <= len(call.args) <= most
+
+    def _supplies(self, call, index):
+        """Whether `call` may pass an argument at the position `index`."""
+        return index < len(call.args) or bool(call.star)
 
     # Containers
 
@@ -847,6 +992,27 @@ class BuiltinRules:
             self._result_node(call), call.caller, call.site, role="advance"
         )
         self.next_element(receiver, iteration)
+
+
+def _may_init_property(call):
+    """Whether `call` may be a valid call of `property.__init__(self, /,
+    fget=None, fset=None, fdel=None, doc=None)`: `self` by position, at most
+    five positional arguments, and no other keyword nor one given twice
+    (`**` may pass any)."""
+    names = WRAPPED["property"] + ("doc",)
+    given = len(call.args)
+    if given > len(names) + 1 or (given == 0 and not call.star):
+        return False
+    taken = set(names[: max(given - 1, 0)])
+    for name, _ in call.keywords:
+        if name not in names or name in taken:
+            return False
+        taken.add(name)
+    return True
+
+
+# The kind of access that runs each accessor of a property.
+_ACCESS_KINDS = {"fget": "Load", "fset": "Store", "fdel": "Delete"}
 
 
 def _builtin_name(external):

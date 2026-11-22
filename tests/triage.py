@@ -136,6 +136,11 @@ GROUPS = {
         "unpacked arguments may or may not supply a parameter, so its default "
         "always counts",
     ),
+    "language/descriptors": (
+        "what the builtin descriptors do that the analysis approximates: the copy "
+        "that a property's getter, setter or deleter makes, a None instance "
+        "forwarded through a parameter, an explicit `__get__` with `**`",
+    ),
 }
 
 CASES = {
@@ -388,6 +393,41 @@ CASES = {
         "outside/library-calls-back",
         "a function passed to library code is not a call: functools.cached_property "
         "calls the function it wraps",
+    ),
+    "descriptors/outside_descriptor_subclass": (
+        "outside/library-calls-back",
+        "the inherited functools.cached_property.__get__ runs by its stub, not "
+        "its code, so the wrapped method is not called",
+    ),
+    "descriptors/property_earlier_outside_base": (
+        "outside/library-calls-back",
+        "functools.cached_property comes before property in the MRO: its "
+        "__init__ and __get__ run by their stubs, so the wrapped method is not "
+        "called",
+    ),
+    "descriptors/property_get_forwards_none": (
+        "language/descriptors",
+        "a load through the class passes None to the subclass's __get__, which "
+        "forwards it to property.__get__: None is known only as a literal, so "
+        "the getter is called",
+    ),
+    "descriptors/property_on_metaclass": (
+        "language/metaclasses",
+        "a property on the metaclass is not run for a load through the class",
+    ),
+    "descriptors/property_subclass_copy": (
+        "language/descriptors",
+        "prop.getter(f) merges f into prop instead of making a copy, so the "
+        "original also calls the new getter",
+    ),
+    "descriptors/property_subclass_copy_init": (
+        "language/descriptors",
+        "prop.setter(f) merges f into prop instead of calling the subclass, so "
+        "its __init__ does not run for the copy",
+    ),
+    "descriptors/wrapper_get_double_star": (
+        "language/descriptors",
+        "an explicit __get__ with ** gives no result, even with an empty mapping",
     ),
     "descriptors/non_data_descriptor_shadowed": (
         "dynamic/dynamic",

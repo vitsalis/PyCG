@@ -54,6 +54,10 @@ MAX_HIERARCHIES = 8
 # may run (see `python_method`).
 _PYTHONS_OWN = ("<python's own>",)
 
+# The `unless` of the lookup that tells whether a load through an instance
+# may give a descriptor itself (see `descriptor_itself`).
+_ITSELF = ("<the descriptor itself>",)
+
 # The `unless` of the lookup that tells whether the attribute that Python
 # finds may be the default one, that of `object` or `type` (see
 # `default_member`).
@@ -240,6 +244,37 @@ class Hierarchy:
         answer from no to yes."""
         return self.lookup(cls, name, None, None, _PYTHONS_OWN)
 
+    def descriptor_itself(self, cls):
+        """A node that gets an object once a load through an instance of
+        `cls` (`obj.attr` for an instance found on a class) may give that
+        instance itself: no class resolves `__get__` (`object` has none), or
+        an outside class does whose `__get__` the analysis does not run. The
+        builtin `property`'s runs (it calls the getter, see
+        `BuiltinRules._rule_property_run`). Like a lookup, it waits until
+        `cls` is ready and is redone when its MROs grow, which can only turn
+        the answer from no to yes."""
+        return self.lookup(cls, "__get__", None, None, _ITSELF)
+
+    def _may_give_itself(self, cls, name):
+        """See `descriptor_itself`: in some MRO, the first class that
+        resolves `name` is an outside class other than `property` (by its
+        stubs; one without stubs may define any name), or none is. In an
+        exhaustive order, unless `cls` itself defines it."""
+        if cls.exhaustive:
+            return name not in cls.defines
+        for mro in cls.mros:
+            for base in mro:
+                if isinstance(base, Class):
+                    if name in base.defines:
+                        break
+                elif is_property(base):
+                    break
+                elif self.outside_member(base, name) != _INHERITED:
+                    return True
+            else:
+                return True
+        return False
+
     def default_member(self, cls, name):
         """A node that gets an object once the attribute `name` (`__dir__`
         or `__dict__`) that Python finds for an instance of `cls` may be the
@@ -382,6 +417,11 @@ class Hierarchy:
         explicit = unless == EXPLICIT
         if explicit:
             unless = ()
+        if unless == _ITSELF:
+            if self._may_give_itself(cls, attr):
+                name = f"{BUILTIN_OBJECT}.{attr}"
+                self.add_object(dst, self.external(name, 1))
+            return
         if unless == _PYTHONS_OWN:
             if _python_may_define(cls, attr):
                 name = f"{BUILTIN_OBJECT}.{attr}"
@@ -1031,6 +1071,11 @@ def _python_may_define(cls, name):
         if not isinstance(definer, Class):
             return True
     return False
+
+
+def is_property(obj):
+    """Whether `obj` is the builtin class `property`."""
+    return isinstance(obj, External) and obj.name == f"{BUILTIN_MODULE}.property"
 
 
 def _defines(classes, names):
