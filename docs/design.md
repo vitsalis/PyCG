@@ -1323,7 +1323,9 @@ Per module the data keeps:
 
 Every Python version and platform counts: all branches of
 `sys.version_info` and `sys.platform` tests are read, and a name that they
-bind differently keeps every definition (the data records no versions). A
+bind differently keeps every definition (the data records no versions).
+The implicit calls that the hand rules model take the union of the
+supported CPython versions in the same way (see *Length hints*). A
 class has a public name, its shortest path through public modules and names
 (`asyncio.AbstractEventLoop` for `asyncio.events.AbstractEventLoop`,
 `io.TextIOWrapper` for `_io.TextIOWrapper`). A type keeps classes, unions,
@@ -2919,9 +2921,63 @@ holds every instance of `E` and of its subclasses that the analysis
 creates, and an outside instance for an outside class. A bare `raise`
 raises nothing that the analysis tracks.
 
-**Builtins with hand rules.** `len()` calls `__len__`. `list(x)` and
-`list.extend(x)` ask the length of `x` before they iterate it: `__len__`,
-else `__length_hint__` (`LENGTH_HINT`). `enumerate`, `zip`,
+**Builtins with hand rules.** `len()` calls `__len__`.
+
+**Length hints.** Some builtins ask the length of what they iterate before
+they iterate it (CPython's `PyObject_LengthHint`): `__len__`, else
+`__length_hint__` (`LENGTH_HINT`, which selects by definition; the fallback
+to `__length_hint__` after a `__len__` that raises `TypeError` is not
+modelled). They are, by probes of CPython 3.12.12, 3.13.12, 3.14.9 and
+3.15.2:
+
+| Asks the length of `x` | 3.12, 3.13 | 3.14, 3.15 |
+|---|---|---|
+| `list(x)`, `l.extend(x)`, `l += x` on a list, `sorted(x)`, `[*x]`, `(*x,)`, `f(a, *x)` and a call with more than one argument besides `*x`, `bytes(x)` (after `__bytes__`, `__index__` and a buffer), `bytearray.extend(x)` (after a buffer) | yes | yes |
+| `tuple(x)`, a call `f(*x)` whose only argument is `*x` | yes | no |
+| `str.join(x)`, `bytes.join(x)`, `bytearray.join(x)`, an assignment to a starred target (`a, *b = x`): the iterator that `iter(x)` gives, so `x` where `x.__iter__` returns `x` | yes | yes |
+| `set`, `frozenset`, `{*x}`, `bytearray(x)`, `collections.deque`, `dict.fromkeys`, `min`, `max`, `sum`, `zip`, `enumerate`, `map`, an assignment without a starred target (`a, b = x`), `for` | no | no |
+
+Implicit calls that a hand rule models take the union of the supported
+CPython versions, as the stub data does (see *Stub data*): `tuple(x)` and
+`f(*x)` ask on every version. The unpacking of an argument is the
+interpreter's work, so `f(*x)` asks whatever `f` is, also an outside name
+without stubs or a name that has no value. The builtins of the stubs that
+ask are `LENGTH_HINTS`.
+
+The length is asked of an argument, or of the iterators that `iter()` of
+it gives: `join` takes, for an instance or a class, what the `__iter__`
+that its protocol calls returns (a class's metaclass's), or the sequence
+protocol's iterator where the type has `__getitem__` only; an engine
+container goes on as it is, so an iterator that the program already made
+(`"".join(iter(x))`) is its own. A starred target takes the iterators of
+its unpacking. What that node may hold, and what Python asks of it (the
+table of `BuiltinRules.add_length_hint`):
+
+- an instance of an analysed class: `__len__`, else `__length_hint__`, by
+  its class;
+- an analysed class: the same, by its metaclass;
+- the sequence protocol's iterator: the `__len__` of each sequence that it
+  iterates, instance or class, and nothing else; a class whose outside
+  base defines `__iter__` (a subclass of `Sequence`, iterated by its
+  mixin's generator) is asked nothing there;
+- a `reversed` object: the `__len__` of its sequence again, instance or
+  class, unless a class of its MRO defines `__reversed__` (also the mixin
+  of `Sequence`, a generator);
+- any other engine container (lists, tuples, sets, dicts, views, their
+  iterators, `enumerate`, `zip`, `map`, `filter`, `callable_iterator`), a
+  generator, a coroutine, a constant, an outside value, a function, the
+  saturated value: nothing that the program defines.
+
+A buffer is a class that defines `__buffer__` or derives from an outside
+class whose stubs define it (`bytes`, `bytearray`, `memoryview`,
+`array.array`): `bytes()` and `bytearray.extend` read it without asking
+its length. Only the length hints test the outside classes for a method,
+for `__buffer__`, `__iter__` and `__reversed__` (`DEFINES_MARKERS`); the
+conversions of `int()` and `float()`, whose overloads list `Buffer` first,
+still call `__int__` and `__float__` of a subclass of `bytearray`, as
+CPython does.
+
+`enumerate`, `zip`,
 `reversed`, `map` and `filter` are hand rules over the engine's
 containers: iterators whose elements are pairs of an index and an element,
 tuples of the elements of each argument, the elements (or what
@@ -2944,9 +3000,11 @@ Limits:
 - `__instancecheck__` and `__subclasscheck__` are not called: without
   CPython's exact-type shortcut, `isinstance(Duck(), Duck)` would call
   them.
-- `tuple(x)` asks the length of `x` on Python 3.12 and 3.13, and not from
-  3.14 on; the analysis does not, on every version. `sorted(x)`, `[*x]`,
-  `(*x,)` and `bytes(x)` ask it too; the analysis does not.
+- `join` asks the length of the iterator of `x`, but the analysis does not
+  iterate that iterator further (`__iter__` on it again, `__next__`): its
+  protocol gives `x.__iter__` only.
+- `xs += ys` asks the length of `ys` only where `xs` is a list of the
+  engine, not an instance of an analysed subclass of `list`.
 
 ### Containers and iteration
 

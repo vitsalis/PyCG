@@ -722,6 +722,9 @@ class Containers:
         if operation.inplace and concatenation and operation.right is not None:
             elements = self.iterated(operation.right, operation, operation.caller, site)
             self.add_edge(elements, self.unknown(result))
+            if obj.kind == "list":
+                # `xs += ys` is `xs.extend(ys)`: it asks the length of ys.
+                self.add_length_hint(operation.right, operation.caller, site)
         if operation.dst is not None:
             self.add_object(operation.dst, result)
 
@@ -796,7 +799,8 @@ class Containers:
     def iterator_source(self, iterator):
         """The node of what an iterator that `iter()` makes iterates over:
         the sequences of an `iterator`, the callables of a
-        `callable_iterator`. It is the node that holds the keys of a dict."""
+        `callable_iterator`, the sequences of a `reversed` object. It is the
+        node that holds the keys of a dict."""
         return self.keys(iterator)
 
     def next_element(self, obj, iteration):
@@ -970,6 +974,11 @@ class _Unpack(_Site):
             self._iteration = _Iterate(
                 analysis, elements, self.caller, self.site, role="unpack"
             )
+            if self.starred is not None:
+                # The starred target makes a list of the rest of the
+                # iterator, which asks the iterator's length.
+                iterators = self._iteration.iterators()
+                analysis.add_length_hint(iterators, self.caller, self.site)
         return self._iteration
 
     def apply(self, obj):

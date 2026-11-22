@@ -29,6 +29,8 @@ from .builtin_models import (
     CLOSURES,
     CONTAINER_CLASSES,
     HASHED_ARGUMENTS,
+    ITERATOR,
+    LENGTH_HINTS,
     OPENERS,
     REFLECTION_CALLS,
     VARIABLE_TYPES,
@@ -459,7 +461,7 @@ class Outside:
                         overloads += self._constructor_signatures(definition, call)
                 self.call_protocols(base, overloads, plain=True)
             return
-        overloads, builtins, calling = [], [], []
+        overloads, builtins, calling, hinting = [], [], [], []
         for definition in definitions:
             if definition.kind == "function":
                 found = self._call_signatures(definition, call, receivers, external)
@@ -473,6 +475,8 @@ class Outside:
             overloads += found
             if definition.path.startswith(f"{STUB_BUILTINS}."):
                 builtins += found
+            if definition.path in LENGTH_HINTS:
+                hinting += [(LENGTH_HINTS[definition.path], each) for each in found]
             if definition.path in CALLS_BACK:
                 calling += [(CALLS_BACK[definition.path], each) for each in found]
         if call.dst is not None and call.decorator and call.args[-1] is not None:
@@ -498,6 +502,8 @@ class Outside:
                 self.call_protocols(base, builtins)
             if calling:
                 self.call_back_library(call, calling)
+            if hinting:
+                self.length_hints(call, hinting)
             # A namespace read by reflection (see reflection.py).
             for definition in definitions:
                 entry = REFLECTION_CALLS.get(definition.path)
@@ -519,6 +525,21 @@ class Outside:
                 node = self._parameter_node(bound, parameter)
                 if parameter[0] == name and node is not None:
                     self.add_edge(node, self._callee(back))
+
+    def length_hints(self, call, hinting):
+        """A builtin of `LENGTH_HINTS` asks the length of the argument that
+        each fitting overload binds to its parameter, or of the iterator of
+        that argument (`ITERATOR`); `hinting` holds the entry and the
+        overload (parameters, result, bound arguments)."""
+        for (name, plan, how), (parameters, _, bound) in hinting:
+            for parameter in parameters:
+                node = self._parameter_node(bound, parameter)
+                if parameter[0] != name or node is None:
+                    continue
+                if how == ITERATOR:
+                    self.add_iterator_length_hint(node, call.caller, call.site)
+                else:
+                    self.add_length_hint(node, call.caller, call.site, plan)
 
     def compare_items(self, method, call, overloads):
         """`sorted`, `min`, `max` and `list.sort` compare their items with

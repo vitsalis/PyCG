@@ -9,12 +9,15 @@ of the rule, and it decides the result of the call.
 
 import ast
 from functools import cache
+from typing import NamedTuple
 
 from .builtin_models import (
     FUNCTIONS,
     LENGTH_HINT,
     MAX_DYNAMIC_NAMES,
     RETURNS_ARGUMENT,
+    REVERSED_LENGTH,
+    SEQUENCE_LENGTH,
     WRAPPED,
     method_model,
 )
@@ -243,18 +246,89 @@ class BuiltinRules:
                 self.add_keys(new, iterable, args, call.caller, call.site)
             else:
                 self.add_elements(new, iterable, call.caller, call.site)
-            if kind == "list":
-                self._length_hint(iterable, call)
+            if kind in ("list", "tuple"):
+                self.add_length_hint(iterable, call.caller, call.site)
         self._result(call, new)
 
-    def _length_hint(self, iterable, call):
-        """list(x) and list.extend(x) ask the length of x before they
-        iterate it: `__len__`, else `__length_hint__` (`LENGTH_HINT`)."""
-        key = ("length hint", call)
+    def add_length_hint(self, iterable, caller, site, plan=LENGTH_HINT):
+        """The construct at `site`, in the scope `caller`, asks the length
+        of what the node `iterable` holds before it iterates it: `__len__`,
+        else `__length_hint__` (`LENGTH_HINT`), implicit calls from that
+        scope. Once per construct, node and plan.
+
+        The node is an argument (`list(x)`, `sorted`, `f(*x)`, a display,
+        `bytes`, `extend`, `+=`; see `LENGTH_HINTS`) or the iterators that
+        `iter()` of one gives (`add_iterator_length_hint`, a starred
+        target). What it may hold, and what Python asks:
+
+        - an instance of an analysed class: `plan`, by its class;
+        - an analysed class: `plan`, by its metaclass;
+        - the sequence protocol's iterator (`Container` "iterator"): the
+          `__len__` of each sequence it iterates, instance or class
+          (`SEQUENCE_LENGTH`);
+        - a `reversed` object (`Container` "reversed"): the `__len__` of
+          its sequence, instance or class (`REVERSED_LENGTH`);
+        - any other engine container (lists, tuples, sets, dicts, views,
+          their iterators, `enumerate`, `zip`, `map`, `filter`,
+          `callable_iterator`), a generator, a coroutine, a constant, an
+          outside value, a function, the saturated value: nothing that the
+          program defines (a builtin length, or none)."""
+        key = ("length hint", caller, site, iterable, plan)
         if key not in self._subscriptions:
             self._subscriptions.add(key)
-            hint = Each(self._call_protocol, LENGTH_HINT, call, kinds=(Instance, Class))
+            at = _At(caller, site)
+            hint = Each(self._call_protocol, plan, at, kinds=(Instance, Class))
             self.solver.attach(iterable, hint)
+            # The iterators of the sequence protocol and `reversed` objects
+            # ask their sequences.
+            sequences = Each(self._sequence_length, at, kinds=(Container,))
+            self.solver.attach(iterable, sequences)
+
+    def _sequence_length(self, iterator, at):
+        plan = {"iterator": SEQUENCE_LENGTH, "reversed": REVERSED_LENGTH}.get(
+            iterator.kind
+        )
+        if plan is not None:
+            hint = Each(self._call_protocol, plan, at, kinds=(Instance, Class))
+            self.solver.attach(self.iterator_source(iterator), hint)
+
+    def add_iterator_length_hint(self, iterable, caller, site):
+        """The construct at `site` asks the length of the iterator that
+        `iter()` gives for what `iterable` holds (`str.join`): the result of
+        the `__iter__` that its protocol calls there, which is the object
+        itself where `__iter__` returns it."""
+        key = ("iterator length hint", caller, site, iterable)
+        if key not in self._subscriptions:
+            self._subscriptions.add(key)
+            iterators = self.node()
+            call = self.site_call(caller, site, ("protocol", "__iter__"))
+            # For the sequence protocol's iterator (see `_sequence_type`).
+            iteration = self.iteration(self.node(), caller, site, role="length")
+            each = Each(
+                self._iterator_of,
+                call,
+                iteration,
+                iterators,
+                kinds=(Instance, Class, Container),
+                results=(iterators,),
+            )
+            self.solver.attach(iterable, each)
+            self.add_length_hint(iterators, caller, site)
+
+    def _iterator_of(self, obj, call, iteration, iterators):
+        """`iter(obj)` for the length hint of `str.join`: what the
+        `__iter__` that its protocol calls returns (a class's metaclass's),
+        or the sequence protocol's iterator where its type has `__getitem__`
+        only. An engine container goes on as it is: an iterator is its own,
+        and the others have no analysed length (see `add_length_hint`)."""
+        if isinstance(obj, Container):
+            self.add_object(iterators, obj)
+            return
+        self.call_dunder(obj, "__iter__", call, iterators)
+        sequence = Each(
+            self._sequence_type, obj, iteration, iterators, results=(iterators,)
+        )
+        self.solver.attach(self._types(obj), sequence)
 
     def _rule_dict(self, call, receiver, args, kind="dict"):
         """dict(mapping_or_pairs, **keywords), and the dict of `collections`
@@ -322,7 +396,7 @@ class BuiltinRules:
         elements = self.iterated(iterables, args, call.caller, call.site)
         self.add_edge(elements, self.unknown(receiver))
         if receiver.kind == "list":
-            self._length_hint(iterables, call)
+            self.add_length_hint(iterables, call.caller, call.site)
 
     def _rule_any_element(self, call, receiver, args):
         """list.pop(i), set.pop()"""
@@ -687,6 +761,8 @@ class BuiltinRules:
             self.call_dunder(obj, "__len__", length, None, unless)
             index = self.site_call(call.caller, call.site, ("reversed", "item"), [None])
             self.call_dunder(obj, "__getitem__", index, self.unknown(result), unless)
+            # Its length hint asks the sequence again (`REVERSED_LENGTH`).
+            self.add_object(self.iterator_source(result), obj)
         else:
             iteration.apply(obj)
         self.add_object(dst, result)
@@ -780,6 +856,13 @@ def _builtin_name(external):
     if module == BUILTIN_MODULE and external.steps <= 1:
         return name
     return None
+
+
+class _At(NamedTuple):
+    """A construct that makes implicit calls: its scope and its site."""
+
+    caller: str
+    site: str
 
 
 class _DynamicAccess:

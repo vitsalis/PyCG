@@ -91,10 +91,66 @@ METHODS = {
     ("callable_iterator", "__next__"): ("()", "advance"),
 }
 
-# What list(x) and list.extend(x) call on x before they iterate it: its
-# `__len__`, else its `__length_hint__` (an entry of a protocol plan: the
-# method and the methods whose definition makes Python skip it).
+# What a builtin that asks the length of what it iterates calls on it
+# before it iterates it (CPython's `PyObject_LengthHint`): its `__len__`,
+# else its `__length_hint__`. An entry of a protocol plan: the method and
+# the methods whose definition makes Python skip it. The fallback to
+# `__length_hint__` after a `__len__` that raises `TypeError` is not
+# modelled. Every supported version counts: `tuple(x)` and a call that
+# unpacks one argument alone, `f(*x)`, ask on 3.12 and 3.13 only; `list(x)`,
+# `list.extend`, `+=` on a list, `sorted`, the unpacking in a list or tuple
+# display and in any other call ask on every version.
 LENGTH_HINT = (("__len__", ()), ("__length_hint__", ("__len__",)))
+# Markers in the `unless` of a length hint: a class of the MRO defines the
+# method, an analysed class or an outside class whose stubs define it (see
+# `hierarchy._defines`). A buffer exporter defines `__buffer__` (`bytes`,
+# `bytearray`, `memoryview`, `array.array`); an iterable, `__iter__`
+# (`collections.abc.Sequence`). Only these plans test the outside classes:
+# another plan that lists `__buffer__` (the overloads of `int` and `float`
+# put `Buffer` first, where CPython calls `__int__` and `__float__` first)
+# sees analysed definitions only.
+BUFFER_EXPORTER = "<defines __buffer__>"
+ITERABLE = "<defines __iter__>"
+REVERSIBLE = "<defines __reversed__>"
+DEFINES_MARKERS = {
+    BUFFER_EXPORTER: "__buffer__",
+    ITERABLE: "__iter__",
+    REVERSIBLE: "__reversed__",
+}
+# `bytes(x)` takes `__bytes__`, then `__index__`, then a buffer, before it
+# iterates x; `bytearray.extend(x)` takes a buffer first.
+BYTES_LENGTH_HINT = (
+    ("__len__", ("__bytes__", "__index__", BUFFER_EXPORTER)),
+    ("__length_hint__", ("__len__", "__bytes__", "__index__", BUFFER_EXPORTER)),
+)
+BUFFER_LENGTH_HINT = (
+    ("__len__", (BUFFER_EXPORTER,)),
+    ("__length_hint__", ("__len__", BUFFER_EXPORTER)),
+)
+# What the iterator that the sequence protocol makes asks of its sequence
+# when its length is asked (CPython's `iter_len`): `__len__` only. Where an
+# outside base defines `__iter__` (the mixin of `Sequence`, a generator),
+# Python iterates through it, not through the sequence protocol.
+SEQUENCE_LENGTH = (("__len__", (ITERABLE,)),)
+# What a `reversed` object asks of its sequence when its length is asked
+# (`reversed_len`): `__len__` again, where `reversed()` made one; where a
+# class of the MRO defines `__reversed__` (also the mixin of `Sequence`),
+# `reversed()` returns what that returns.
+REVERSED_LENGTH = (("__len__", (REVERSIBLE,)),)
+# The builtins of the stubs that ask the length of an argument, by
+# definition path: the parameter and the plan. With `ITERATOR`, they ask the
+# iterator that `iter()` of the argument gives: `str.join` makes a list of
+# `iter(x)` (CPython's `PySequence_Fast`), so it asks x itself only where
+# `x.__iter__` returns x.
+ARGUMENT, ITERATOR = "argument", "iterator"
+LENGTH_HINTS = {
+    "builtins.sorted": ("iterable", LENGTH_HINT, ARGUMENT),
+    "builtins.bytes": ("o", BYTES_LENGTH_HINT, ARGUMENT),
+    "builtins.bytearray.extend": ("iterable_of_ints", BUFFER_LENGTH_HINT, ARGUMENT),
+    "builtins.str.join": ("iterable", LENGTH_HINT, ITERATOR),
+    "builtins.bytes.join": ("iterable_of_bytes", LENGTH_HINT, ITERATOR),
+    "builtins.bytearray.join": ("iterable_of_bytes", LENGTH_HINT, ITERATOR),
+}
 
 # The methods of the builtin sets, and `dict.fromkeys`, that the stubs
 # describe and that hash what they get (see `Containers.add_hash`), by stub

@@ -17,6 +17,7 @@ give. Classes on a cycle of candidate bases get the exhaustive order.
 from collections import deque
 from functools import cache
 
+from .builtin_models import DEFINES_MARKERS
 from .model import (
     BUILTIN_MODULE,
     Class,
@@ -1034,17 +1035,38 @@ def _python_may_define(cls, name):
 
 def _defines(classes, names):
     """Whether a class among `classes` defines one of `names`: an analysed
-    class, or a builtin class that defines one of `FINAL_BUILTIN_METHODS`
-    among them."""
+    class, a builtin class that defines one of `FINAL_BUILTIN_METHODS`
+    among them; for a marker of `DEFINES_MARKERS`, a class that defines its
+    method, analysed or outside (as the stubs say)."""
+    marked = [DEFINES_MARKERS[name] for name in names if name in DEFINES_MARKERS]
     for base in classes:
         if isinstance(base, Class):
-            if any(name in base.defines for name in names):
+            if any(name in base.defines for name in (*names, *marked)):
                 return True
         elif isinstance(base, External):
             final = FINAL_BUILTIN_METHODS.intersection(names)
             if any(_builtin_defines(base.name, name) for name in final):
                 return True
+            if any(_outside_defines(base.name, name) for name in marked):
+                return True
     return False
+
+
+@cache
+def _outside_defines(name, attr):
+    """Whether the outside class named `name` (`array.array`,
+    `<builtin>.bytearray`) or one of its bases other than `object` defines
+    `attr`, as the stubs say (in some version)."""
+    prefix = f"{BUILTIN_MODULE}."
+    if name.startswith(prefix):
+        name = f"builtins.{name[len(prefix) :]}"
+    return any(
+        definition.kind == "class"
+        and any(
+            m.owner != "builtins.object" for m in _STUBS.member(definition.path, attr)
+        )
+        for definition in _STUBS.find(name)
+    )
 
 
 @cache

@@ -253,7 +253,14 @@ class Expressions:
         args, star = self._implicit_super_arguments(node), []
         for arg in node.args:
             if isinstance(arg, ast.Starred):
-                star.append((self.expression(arg.value), True))
+                value = self.expression(arg.value)
+                star.append((value, True))
+                if value is not None:
+                    # The interpreter builds a tuple or a list of the
+                    # unpacked argument, whatever the callee: it asks its
+                    # length (see `LENGTH_HINT`).
+                    site = self._site(node)
+                    self.analysis.add_length_hint(value, self._caller, site)
             elif star:
                 star.append((self.expression(arg), False))
             else:
@@ -696,7 +703,9 @@ class Expressions:
                 continue
             if isinstance(elt, ast.Starred):
                 positional = False
-                elements = self._elements_of(elt.value)
+                # A list or tuple display extends a list with the
+                # unpacked iterable, which asks its length.
+                elements = self._elements_of(elt.value, length_hint=True)
                 if elements is not None:
                     unordered.append(elements)
                 continue
@@ -823,14 +832,17 @@ class Expressions:
     _expr_DictComp = _comprehension
     _expr_GeneratorExp = _comprehension
 
-    def _elements_of(self, iterable, is_async=False):
+    def _elements_of(self, iterable, is_async=False, length_hint=False):
         """Evaluate the expression `iterable` and return a node with what
-        iterating over it (with `async for` if `is_async`) gives, or None."""
+        iterating over it (with `async for` if `is_async`) gives, or None;
+        with `length_hint`, the iteration first asks its length."""
         value = self.expression(iterable)
         if value is None:
             return None
         elements = self.analysis.node()
         site = self._site(iterable)
+        if length_hint:
+            self.analysis.add_length_hint(value, self._caller, site)
         self.analysis.add_iteration(value, elements, self._caller, site, is_async)
         self.analysis.iterated_expressions.add((self._caller, site))
         return elements

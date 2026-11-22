@@ -979,6 +979,7 @@ WITHOUT_RESULTS = {
     "_percent_format",
     "_percent",
     "_call_protocol",
+    "_sequence_length",
     "_raise",
     "_set_name",
     "_call_back_object",
