@@ -666,6 +666,32 @@ def use(
 BASE = typing.AsyncIterator
 """
 
+# The protocols of the builtin types: the analysed classes below them arrive
+# through a base that a call gives, a subclass, and the bases that a
+# module's own stub declares.
+PROTOCOL_BASES = {
+    "main.py": """
+import collections.abc
+import typing
+import mod
+def base():
+    return BASE
+class Late(base()):
+    def __next__(self): pass
+    def ping(self): pass
+class Later(Late):
+    def ping(self): pass
+def use(items: typing.Iterable[str], sized: typing.Sized):
+    items.ping()
+    sized.ping()
+BASE = collections.abc.Iterator
+""",
+    "mod.py": "class Peek:\n    def ping(self): pass\n"
+    "class Measured:\n    def ping(self): pass\n",
+    "mod.pyi": "from typing import Iterator, Sized\n"
+    "class Peek(Iterator[int]): ...\nclass Measured(Sized): ...\n",
+}
+
 # Annotated assignments: an alias and a class defined after the use, a base
 # that a call gives, and a container of the annotation.
 ANNOTATED_ASSIGNMENTS = """
@@ -1180,6 +1206,7 @@ LATE = argparse.ArgumentParser()
 """,
     "annotations": ANNOTATIONS,
     "outside classes in annotations": OUTSIDE_CLASSES_IN_ANNOTATIONS,
+    "builtin protocols through late and stub bases": PROTOCOL_BASES,
     "annotated assignments": ANNOTATED_ASSIGNMENTS,
     "patterns": PATTERNS,
     "dict reads by pattern keys": PATTERN_KEYS,
@@ -2151,6 +2178,11 @@ def test_programs_give_the_same_results_under_every_order(
 # that they test is off: the caller and its callees whose name starts with
 # the prefix.
 EXPECTED_CALLEES = {
+    "builtin protocols through late and stub bases": (
+        "main.use",
+        "",
+        ["main.Late.ping", "main.Later.ping", "mod.Measured.ping", "mod.Peek.ping"],
+    ),
     "library closures that arrive late": (
         "main.use",
         "",
@@ -2205,7 +2237,10 @@ EXPECTED_CALLEES = {
 @pytest.mark.parametrize("program", EXPECTED_CALLEES)
 def test_programs_call_what_their_rule_gives(tmp_path, program):
     caller, prefix, expected = EXPECTED_CALLEES[program]
-    graph = call_graph(tmp_path, {"main.py": PROGRAMS[program]})
+    files = PROGRAMS[program]
+    if isinstance(files, str):
+        files = {"main.py": files}
+    graph = call_graph(tmp_path, files)
 
     found = [c for c in callees(graph, caller) if c.startswith(prefix)]
     assert found == expected
@@ -2227,6 +2262,7 @@ def test_benchmark_cases_give_the_same_results_under_every_order(monkeypatch, sn
 # results do not depend on it either.
 
 ENTRY_ORDERS = {
+    "builtin protocols through late and stub bases": PROTOCOL_BASES,
     # A base expression that holds a class of each of two modules (final
     # review of the engine, finding 4).
     "bases from two modules": {
@@ -2769,6 +2805,18 @@ def test_exhaustive_lookup_after_a_class_ignores_what_that_class_defines():
 # entry modules.
 
 SATURATING = {
+    # The node of the bases that a stub declares saturates (four bases, a cap
+    # of 3), beside a late base and a hub that saturates.
+    "stub bases past the cap": {
+        "main.py": PROTOCOL_BASES["main.py"]
+        + "".join(f"def h{i}(): pass\n" for i in range(5))
+        + "def run(handler):\n    handler()\n"
+        + "for handler in [h0, h1, h2, h3, h4]:\n    run(handler)\n",
+        "mod.py": PROTOCOL_BASES["mod.py"] + "class Wide:\n    def ping(self): pass\n",
+        "mod.pyi": PROTOCOL_BASES["mod.pyi"]
+        + "from typing import Container, Hashable\n"
+        "class Wide(Iterator[int], Sized, Hashable, Container[int]): ...\n",
+    },
     "a registry through one parameter": {
         "main.py": "".join(f"def h{i}(): pass\n" for i in range(5))
         + "HANDLERS = [h0, h1, h2, h3, h4]\n"
@@ -2823,3 +2871,18 @@ def test_programs_that_saturate_give_the_same_results_in_every_order(
     calls = json.loads(expected["document"])["calls"]
     causes = {site.get("unresolved") for sites in calls.values() for site in sites}
     assert "saturated" in causes
+
+
+@pytest.mark.parametrize("cap", [1, 3, None])
+def test_stub_bases_give_the_same_results_under_every_order_and_cap(
+    tmp_path, monkeypatch, cap
+):
+    write(tmp_path, SATURATING["stub bases past the cap"])
+    expected = None
+    for name, order in orders().items():
+        monkeypatch.setattr(solver.Solver, "order", order)
+        for entries in itertools.permutations(["main.py", "mod.py"]):
+            found = whole_output(tmp_path, entries, cap=cap)
+            if expected is None:
+                expected = found
+            assert found == expected, (name, entries)

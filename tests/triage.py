@@ -132,11 +132,6 @@ GROUPS = {
         "the analysis takes an annotation as a declaration of what the parameter "
         "may hold",
     ),
-    "types/builtin-protocols": (
-        "an annotation of a protocol that the builtin types implement (Iterable, "
-        "Iterator, Collection, Container, Sized, Hashable, Reversible) names no "
-        "analysed class below it: a client most likely passes a builtin",
-    ),
     "flow/unpacked-arguments": (
         "unpacked arguments may or may not supply a parameter, so its default "
         "always counts",
@@ -774,11 +769,6 @@ CASES = {
     "type_hints/generic_alias_instantiation": (
         "outside/library-callables",
         "calling Box[int] goes through typing._GenericAlias.__call__",
-    ),
-    "type_hints/outside_class_annotation": (
-        "types/builtin-protocols",
-        "the parameter annotated collections.abc.Iterator does not hold the "
-        "snippet's Iterator subclass that a pickle round trip passes",
     ),
     "type_hints/string_annotation_evaluated": (
         "dynamic/dynamic",

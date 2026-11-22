@@ -9,10 +9,11 @@ themselves; one level of a standard container or iterable (`list[C]`,
 `Sequence[C]`, `tuple[C, ...]`, `dict[K, C]`) is a container that holds
 them; `Optional`, unions and `Annotated` name what their arguments name. A
 class of the stubs gives a typed outside value of it (macro scope rule B4,
-see outside.py), or the class for `type[C]`; an abstract one that is not a
-protocol of the builtin types also gives the instances (for `type[C]`, the
-classes) of every analysed class whose MRO reaches it through the stub MROs
-(`below_outside`; not structural fit). An annotation that names
+see outside.py), or the class for `type[C]`; an abstract one also gives the
+instances (for `type[C]`, the classes) of every analysed class whose MRO
+reaches it through the stub MROs, through abstract classes only for a
+protocol of the builtin types (`below_outside`; not structural fit). An
+annotation that names
 nothing else (`object`, `Any`, a bare `Callable`, a type variable, outside
 code without stubs) gives nothing.
 
@@ -47,13 +48,22 @@ name in the stub counts (the overloads of a function, the branches of an
 stub (class body, module, builtins), and each of its bindings there
 contributes: an import, what a type-only import of it binds, without loads;
 a class statement, the source's class definitions of the same qualified
-name; any other binding, nothing. Nothing else of the stub is used.
+name; any other binding, nothing. The outside classes among the bases that
+the stub declares for a class put the source's class of the same path below
+them, for what annotations name only. Nothing else of the stub is used.
 """
 
 import ast
 
 from .builtin_models import RETURNS_ARGUMENT, builtin_kind
-from .model import Class, External, ReturnsArgument, TypeForm
+from .model import (
+    BUILTIN_MODULE,
+    Class,
+    External,
+    ReturnsArgument,
+    TypeForm,
+    UnknownExternal,
+)
 from .scopes import CLASS as CLASS_SCOPE
 from .scopes import FUNCTION, MODULE, mangle
 from .solver import Each
@@ -107,8 +117,10 @@ _ELEMENTS = {"list": slice(0, 1), "set": slice(0, 1), "tuple": slice(0, None)}
 
 # The protocols that the builtin types implement (`list`, `str`, `dict`,
 # `tuple`, ...), by stub definition path; the names of `collections.abc` are
-# the same definitions. A client most likely passes a builtin value where
-# one is annotated, so they name no analysed class below them.
+# the same definitions. An annotation of one names the analysed classes that
+# reach it through abstract classes only: one that reaches it only through
+# a concrete class (a subclass of `list`) is as unlikely as any other
+# builtin value, which a client most likely passes.
 BUILTIN_PROTOCOLS = frozenset(
     f"typing.{name}"
     for name in (
@@ -121,6 +133,8 @@ BUILTIN_PROTOCOLS = frozenset(
         "Reversible",
     )
 )
+
+BUILTIN_OBJECT = f"{BUILTIN_MODULE}.object"
 
 DATACLASS = "dataclasses.dataclass"
 # `dataclass` itself, and the decorator that `dataclass(frozen=True)`
@@ -161,6 +175,7 @@ class OwnStub:
         self.parameters = {}
         self.variables = {}
         self.names = {}
+        self.bases = {}
         self._absolute = absolute
         pending = [(tree.body, ())]
         while pending:
@@ -188,6 +203,12 @@ class OwnStub:
             case ast.ClassDef():
                 cls = (*path, statement.name)
                 self._bind(path, statement.name, STUB_CLASS, cls)
+                bases = self.bases.setdefault(cls, [])
+                for base in statement.bases:
+                    while isinstance(base, ast.Subscript):
+                        base = base.value
+                    if isinstance(base, (ast.Name, ast.Attribute)):
+                        bases.append(base)
                 pending.append((statement.body, cls))
             case ast.AnnAssign(target=ast.Name() as target):
                 self._bind(path, target.id, STUB_OTHER)
@@ -559,6 +580,13 @@ class AnnotationBuilder:
             path = _stub_path(scope)
             if path is not None:
                 self.analysis.add_object(self.source_classes(path), cls)
+                # The outside classes among the stub's bases of the class
+                # put it below them (`Annotations.add_stub_bases`); its names
+                # resolve in the scope that encloses the class in the stub.
+                bases = self.own_stub.bases.get(path)
+                node = self._stub_annotation(bases, path[:-1])
+                if node is not None:
+                    self.analysis.add_stub_bases(cls, node)
 
 
 class Annotations:
@@ -696,10 +724,11 @@ class Annotations:
     def names_classes_below(self, path):
         """Whether an annotation that names the stub class `path` names the
         analysed classes below it: only if the class is abstract (it cannot
-        be instantiated as it is), and not one of the protocols that the
-        builtin types implement. A concrete class already names a value of
-        its own, an instance of it; `object` and `type` are concrete."""
-        return self.stubs.abstract(path) and path not in BUILTIN_PROTOCOLS
+        be instantiated as it is). A concrete class already names a value of
+        its own, an instance of it; `object` and `type` are concrete. Which
+        classes are below a protocol of the builtin types is narrower (see
+        `add_outside_base`)."""
+        return self.stubs.abstract(path)
 
     def _below_node(self, path, as_class):
         key = (path, as_class)
@@ -716,13 +745,19 @@ class Annotations:
         """`cls` has the outside candidate base `base`: it is below every
         class of the stub MRO of `base`, whose nodes get its instances and
         its family (with its subclasses), as an analysed base's do (see
-        `Hierarchy.add_base`). Classes are keyed by their stub definition,
-        so a name of `typing` and its `collections.abc` class are one."""
+        `Hierarchy.add_base`); below a protocol of the builtin types only if
+        `base` reaches it through abstract classes (`Stubs.abstract_reach`).
+        The decision reads the stub data only. Classes are keyed by their
+        stub definition, so a name of `typing` and its `collections.abc`
+        class are one."""
         for definition in self.stub_definitions(base) or ():
             if definition.kind != "class":
                 continue
+            through = self.stubs.abstract_reach(definition.path)
             for path in self.stubs.mro(definition.path):
                 if not self.names_classes_below(path):
+                    continue
+                if path in BUILTIN_PROTOCOLS and path not in through:
                     continue
                 below = self._classes_below.setdefault(path, {})
                 if cls in below:
@@ -732,6 +767,22 @@ class Annotations:
                     node = self._below_nodes.get((path, as_class))
                     if node is not None:
                         self.add_edge(self._below_source(cls, as_class), node)
+
+    def add_stub_bases(self, cls, node):
+        """The module's own stub declares the bases in `node` for the class
+        `cls`: `cls` is below each outside class among them, as if the
+        source declared it, for what annotations name only. Lookup, the
+        MROs, `super()` and whether the class has instances stay the
+        source's, and a base that is an analysed class adds nothing. A
+        saturated `node` admits nothing more: what it already admitted
+        stays, as any rule's effects do, and the bases that it would have
+        given later are lost."""
+        self.solver.attach(node, Each(self._stub_base, cls, kinds=(External,)))
+
+    def _stub_base(self, base, cls):
+        if isinstance(base, UnknownExternal) or base.name == BUILTIN_OBJECT:
+            return
+        self.add_outside_base(cls, self.mro_entry(self.same_class(base)))
 
     def gate_type_form(self, form, gate):
         """Add `form` to `gate` once one of its operands may be a type (see

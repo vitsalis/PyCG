@@ -110,10 +110,13 @@ the instances of the class it names and of its subclasses. For an
 abstract class of outside code, which no value of its own can be, the
 subclasses are the analysed classes that derive from it
 (`it: AsyncIterator[T]` holds the instances of the analysed async
-iterators), except for the protocols that the builtin types implement
-(`Iterable`, `Sized`, ...), for which a client most likely passes a
+iterators). For the protocols that the builtin types implement
+(`Iterable`, `Sized`, ...), only those that derive from them through
+abstract classes count: for a class that reaches one only through a
+concrete class (a subclass of `list`), a client most likely passes a
 builtin. A stub `x.pyi` that the package ships beside `x.py` gives the
-annotations that the source leaves out.
+annotations that the source leaves out, and the bases of its classes for
+what an annotation names.
 
 ```python
 class Shape:
@@ -189,8 +192,8 @@ test.
    (`imports._candidates`), then the files that only entry points name
    (`a.pyw`, a script without a suffix), by path; the output lists the
    others as shadowed. The stub `x.pyi` beside a module file `x.py` is
-   read for annotations only (see *A module's own stub*); a stub is never a
-   module. The
+   read for annotations and for the bases of its classes only (see *A
+   module's own stub*); a stub is never a module. The
    other rules of imports are under *Imports*.
 2. **Scopes** (`scopes.py`). A light pass over each AST decides which scope
    binds each name, by Python's rules computed from the AST (not from
@@ -1731,9 +1734,9 @@ The annotation of a parameter names (`annotations.py`):
 - a class of the stubs: a typed value of it, as a call result of that type
   is, and for `type[C]` the class (a concrete outside type gives the edges
   of its methods; an abstract one gives none, see *What is reported as an
-  edge*); and, for an abstract class that is not a protocol of the builtin
-  types, also every instance of each analysed class below it, and for
-  `type[C]` those classes (see *Analysed classes below an outside class*);
+  edge*); and, for an abstract class, also every instance of each analysed
+  class below it, and for `type[C]` those classes (see *Analysed classes
+  below an outside class*);
 - `Optional[...]`, `Union[...]`, `A | B`: what each arm names;
   `Annotated`, `Required`, `NotRequired`, `ReadOnly`, `Final`, `ClassVar`:
   what the first argument names;
@@ -1827,20 +1830,28 @@ annotation into a store, that of its generated `__init__`.
 
 **Analysed classes below an outside class.** An annotation that names an
 outside class names the analysed classes below it only when that class is
-abstract and is not one of the protocols that the builtin types implement.
-Abstract means that the class cannot be instantiated as it is: a protocol,
-a class that exists only in the stubs, or a class whose MRO has an
-abstract method that no class before it implements (`Stubs.abstract`).
-The protocols of the builtin types are `Iterable`, `Iterator`,
-`Collection`, `Container`, `Sized`, `Hashable` and `Reversible` (of
-`typing` and `collections.abc`). The reasons: for a concrete outside class
-(`list`, `dict`, `BaseException`, `Enum`, `object`, `type`, `Any`) the
-annotation already names a value, an instance of that class, so its
-analysed subclasses are as unlikely as any other value; for a protocol
-that the builtin types implement, a client most likely passes a builtin.
-On hypothesis, the analysed classes below concrete classes and below these
-protocols gave about 19,000 edges, no traced one, and most of the cost of
-the rule.
+abstract. Abstract means that the class cannot be instantiated as it is: a
+protocol, a class that exists only in the stubs, or a class whose MRO has
+an abstract method that no class before it implements (`Stubs.abstract`).
+For a concrete outside class (`list`, `dict`, `BaseException`, `Enum`,
+`object`, `type`, `Any`) the annotation already names a value, an instance
+of that class, so its analysed subclasses are as unlikely as any other
+value. The protocols that the builtin types implement, `Iterable`,
+`Iterator`, `Collection`, `Container`, `Sized`, `Hashable` and
+`Reversible` (of `typing` and `collections.abc`), name a class below them
+only through abstract classes: some outside base of the class reaches the
+protocol by stub bases that are all abstract (`Stubs.abstract_reach`;
+`class Line(Sequence)` and `class Countdown(Iterator)` count, a subclass of
+`list`, `str`, `tuple`, `dict` or `NamedTuple` does not, nor does a class
+of the stub-only base `tokenize._TokenInfo`, abstract itself but a
+`NamedTuple`). A class that reaches one only through a concrete class is a
+builtin value, and a client most likely passes a builtin one. This is a
+policy for what an annotation supplies, not Python's subclass relation: a
+subclass of `list` is an `Iterable`, and a value of it that the program
+passes is called as any value is. On hypothesis (6.170.12, the package
+alone) the rule adds 308 edges to 20,200 and removes none, with no
+saturated site; admitting the protocols through concrete classes as well
+gives the same graph there.
 
 An analysed class is below an outside class `B` when one of its MROs
 reaches `B` through the stub MROs: a candidate base of it, or of one of
@@ -1891,7 +1902,27 @@ scope that binds it contributes (a binding under an `if` or a `try` of
 that scope counts): an import, what a type-only import of it binds,
 without loads (so no hook runs) and without registering a module; a class
 statement, the source's class definitions of the same qualified name; any
-other binding (an alias, a variable, a function), nothing. Nothing else of the stub is used: it defines no function, class or
+other binding (an alias, a variable, a function), nothing.
+
+The bases that the stub declares for a class count for what an annotation
+names, and for nothing else: the source's class definitions of the same
+path are below each outside class that a base names (subscripts dropped:
+`class Peek(Iterator[_T])` for `class Peek:` puts `Peek` below `Iterator`
+and `Iterable`), as if the source declared that base, under the rule
+above. The source's own bases count too, so a stub that contradicts them
+adds its classes (`class C(list)` with the stub `class C(Iterator[int])`
+is below `Iterable` through `Iterator`). The stub's bases never give an
+inherited method, never change whether the class has instances, its MROs
+or `super()`: lookup is the source's. A base that names an analysed class
+adds nothing, a limit of scope: the declared relation could follow it
+without changing the source's hierarchy, but no case asks for it. The
+bases are one node per class statement. When it saturates, as any node
+past the cap does, it admits nothing more: the classes that it already put
+the class below stay (rules only add), those that would arrive later are
+lost, and the source's hierarchy is untouched
+(`test_a_stub_base_node_that_saturates_late_keeps_what_it_admitted`).
+
+Nothing else of the stub is used: it defines no function, class or
 variable, a name that only it defines is ignored, its calls and return
 types give nothing, and its imports bring in no module. A stub without its
 `.py`, a stub that cannot be read or parsed, a stub with a `global` or
@@ -1919,12 +1950,24 @@ Limits:
   below it, also where the package does not play that role (a set-like
   class for a parameter annotated `AbstractSet[str]` that is only ever
   given sets).
-- An annotation of a concrete outside class or of a protocol of the
-  builtin types names no analysed class below it, also where the package
-  passes one: an analysed exception for `BaseException`, an analysed
-  iterator for `Iterator`
-  (`test_the_protocols_of_the_builtin_types_name_no_class_below_them`,
-  micro case `type_hints/outside_class_annotation`).
+- An annotation of a concrete outside class names no analysed class below
+  it, and one of a protocol of the builtin types none that reaches it only
+  through a concrete class, also where the package passes one: an analysed
+  exception for `BaseException`, a subclass of `list` for `Iterable`
+  (`test_limit_a_builtin_protocol_names_no_class_below_it_through_a_concrete_class`).
+- The admission through abstract classes, with the stubs' bases, has a
+  measured cost. On the 40 development packages, the 30 older ones get 40
+  false edges inside the package and no true one (cachetools 20,
+  marshmallow 19, h11 1); more-itertools gets 2,142 true and 334 false
+  edges, 182 of the false ones at parameters whose annotation is wider than
+  the documented contract (numbers, mappings, matrices and the helpers
+  they reach). Batch 6's recall inside the packages rises from 0.383 to
+  0.788, and its precision falls from 0.975 to 0.915.
+- The stubs' `Collection` does not derive from `Sized`, where Python's
+  does, and classes are compared by their stub definitions: a subclass of
+  `Sequence` is not below `Sized`.
+- A stub base that names an analysed class adds nothing
+  (`test_limit_a_stub_base_that_names_an_analysed_class_adds_nothing`).
 - A stub annotation's attribute chain must start at a name that the stub
   imports: `Outer.Inner` for a class nested in the module's class names
   nothing

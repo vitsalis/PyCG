@@ -1005,6 +1005,10 @@ WITHOUT_RESULTS = {
     "_keyword_candidate",
     "_dataclass_decorator",
     "_dataclass_base",
+    # The bases that a module's own stub declares: a class below an outside
+    # class joins its nodes by edges. Past the cap the node admits nothing
+    # more; what it admitted stays (design.md, "A module's own stub").
+    "_stub_base",
     # What they find goes to the accesses that reach the object, which
     # name their results; a name that is not a str constant makes the
     # access a computed name (`MAX_DYNAMIC_NAMES`). `_pattern_class_instance`

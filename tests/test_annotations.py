@@ -1186,7 +1186,9 @@ def synchronous(m: typing.ContextManager[int]):
     assert inside(graph, "main.synchronous") == ["main.Plain.tick"]
 
 
-def test_the_protocols_of_the_builtin_types_name_no_class_below_them(tmp_path):
+def test_builtin_protocols_name_the_classes_below_them_through_abstract_classes(
+    tmp_path,
+):
     graph = main_graph(
         tmp_path,
         """
@@ -1214,26 +1216,147 @@ class Line(collections.abc.Sequence):
     def __getitem__(self, i): pass
     def __len__(self): return 0
     def tick(self): pass
-def protocols(
-    a: typing.Iterable[int],
-    b: collections.abc.Iterator,
-    c: typing.Collection[int],
-    d: collections.abc.Container,
-    e: typing.Sized,
-    f: collections.abc.Hashable,
-    g: typing.Reversible[int],
-):
-    for each in (a, b, c, d, e, f, g):
-        each.tick()
-def sequence(s: collections.abc.Sequence):
-    s.tick()
+def iterable(a: typing.Iterable[int]):
+    a.tick()
+def iterator(b: collections.abc.Iterator):
+    b.tick()
+def collection(c: typing.Collection[int]):
+    c.tick()
+def container(d: collections.abc.Container):
+    d.tick()
+def sized(e: typing.Sized):
+    e.tick()
+def hashable(f: collections.abc.Hashable):
+    f.tick()
+def reversible(g: typing.Reversible[int]):
+    g.tick()
 """,
     )
 
-    # A client most likely passes a builtin value for these protocols.
+    assert inside(graph, "main.iterable") == [
+        "main.Backwards.tick",
+        "main.Box.tick",
+        "main.Countdown.tick",
+        "main.Line.tick",
+    ]
+    assert inside(graph, "main.iterator") == ["main.Countdown.tick"]
+    assert inside(graph, "main.collection") == ["main.Box.tick", "main.Line.tick"]
+    assert inside(graph, "main.container") == ["main.Box.tick", "main.Line.tick"]
+    # The stubs' Collection does not derive from Sized (Python's does), and
+    # classes are compared by their stub definitions.
+    assert inside(graph, "main.sized") == ["main.Sized.tick"]
+    assert inside(graph, "main.hashable") == ["main.Key.tick"]
+    assert inside(graph, "main.reversible") == ["main.Backwards.tick", "main.Line.tick"]
+
+
+BUILTIN_PROTOCOL_PARAMETERS = """
+def protocols(
+    a: typing.Iterable[int],
+    b: typing.Iterator[int],
+    c: typing.Collection[int],
+    d: typing.Container[int],
+    e: typing.Sized,
+    f: typing.Hashable,
+    g: typing.Reversible[int],
+):
+    for each in (a, b, c, d, e, f, g):
+        each.ping()
+"""
+
+
+def test_limit_a_builtin_protocol_names_no_class_below_it_through_a_concrete_class(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        CONCRETE_SUBCLASSES
+        + """
+class Text(str):
+    def ping(self): pass
+class Row(typing.NamedTuple):
+    x: int
+    def ping(self): pass
+"""
+        + BUILTIN_PROTOCOL_PARAMETERS
+        + """
+def sequence(s: typing.Sequence[int]):
+    s.ping()
+""",
+    )
+
+    # A client most likely passes a builtin value: the classes reach these
+    # protocols only through `list`, `str`, `tuple`, `dict`, ...
     assert inside(graph, "main.protocols") == []
-    # Control: a Sequence is abstract and not one of them.
-    assert inside(graph, "main.sequence") == ["main.Line.tick"]
+    # Control: the same classes are below the protocols in the stub MROs;
+    # the abstract Sequence, no protocol of the builtin types, names those
+    # that are sequences.
+    assert inside(graph, "main.sequence") == [
+        "main.Names.ping",
+        "main.Pair.ping",
+        "main.Queue.ping",
+        "main.Row.ping",
+        "main.Text.ping",
+    ]
+
+
+def test_an_abstract_base_reaches_a_protocol_only_through_abstract_classes(tmp_path):
+    # `tokenize._TokenInfo` exists only in the stubs, so it is abstract, but
+    # it reaches Iterable through `tuple`: it is no abstract path.
+    graph = main_graph(
+        tmp_path,
+        """
+import tokenize
+import typing
+class Token(tokenize._TokenInfo):
+    def ping(self): pass
+"""
+        + BUILTIN_PROTOCOL_PARAMETERS
+        + """
+def sequence(s: typing.Sequence[int]):
+    s.ping()
+""",
+    )
+
+    assert inside(graph, "main.protocols") == []
+    assert inside(graph, "main.sequence") == ["main.Token.ping"]
+
+
+def test_one_abstract_path_admits_beside_a_concrete_one(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import collections.abc
+import typing
+class Names(list):
+    def ping(self): pass
+class Stream(Names, collections.abc.Iterator):
+    def __next__(self): pass
+    def ping(self): pass
+def use(xs: typing.Iterable[str]):
+    xs.ping()
+""",
+    )
+
+    assert inside(graph, "main.use") == ["main.Stream.ping"]
+
+
+def test_value_flow_still_reaches_a_subclass_of_a_concrete_builtin(tmp_path):
+    # The restriction is about what an annotation names; a value that the
+    # program passes is called as always.
+    graph = main_graph(
+        tmp_path,
+        """
+import typing
+class Names(list):
+    def __iter__(self): return iter([])
+def drain(xs: typing.Iterable[str]):
+    for x in xs:
+        pass
+drain(Names())
+""",
+    )
+
+    assert inside(graph, "main.drain") == ["main.Names.__iter__"]
 
 
 # One analysed subclass of each concrete class that an annotation, a
