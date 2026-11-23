@@ -294,6 +294,15 @@ class Expressions:
             self.analysis.literal_imports[self._site(node)] = module
         if nones:
             self.analysis.none_arguments[self._caller, self._site(node)] = nones
+        none_keywords = frozenset(
+            keyword.arg
+            for keyword in node.keywords
+            if keyword.arg is not None
+            and isinstance(keyword.value, ast.Constant)
+            and keyword.value.value is None
+        )
+        if none_keywords:
+            self.analysis.none_keywords[self._caller, self._site(node)] = none_keywords
         result = self.analysis.node()
         self.analysis.add_call(
             callee,

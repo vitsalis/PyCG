@@ -12,11 +12,18 @@ is itself advanced): from that scope and site, it advances its sources. A
 lazy object that no analysed code advances advances nothing: its client
 does. Construction, storing, returning and `iter()` of it advance nothing.
 
-Each advancing of a lazy object from a scope and a site is one activation
-with one result node, made before its subscriptions, which every later
-request of the same key joins (`advance_library`). Lazy objects, scopes
-and sites are finite, so the activations are; a lazy object that is its
-own source (`x = chain(x, y)`) reaches its own activation, which exists.
+One state per call origin and operation: every call of that origin (the
+implicit calls that copy a call expression, each with its receivers)
+merges its arguments into the state's nodes and gets the state's result.
+A position, a fill value or an initial value that a later call brings is
+wired into every activation made before. Each advancing of a lazy object
+from a scope and a site is one activation with one result node, made
+before its subscriptions, which every later request of the same key
+joins (`advance_library`). Lazy objects, scopes, sites and positions are
+finite, so the activations are; a lazy object that is its own source
+(`x = chain(x, y)`) reaches its own activation, which exists. Facts that
+only grow (the positions are not known, the key of `groupby` is the item)
+rewire what came before.
 """
 
 from .builtin_models import (
@@ -29,12 +36,18 @@ from .builtin_models import (
     LAZY,
     LAZY_ALL,
     LAZY_OUTER,
+    LENGTH_HINT,
     LIBRARY_ITERATION,
+    LIBRARY_VALUES,
     MATERIALIZE,
+    MERGE,
     NOT_CONSUMING,
     POSITIONS,
+    READS_TUPLES,
+    REPEATS,
     STARMAP,
     TEE,
+    TUPLE_STORAGE,
     TUPLES,
 )
 from .model import Container
@@ -42,20 +55,68 @@ from .solver import Each
 
 # What `len()` of an argument calls: `__len__` (heapq.nlargest).
 LENGTH = (("__len__", ()),)
+# The key of a position that is not known (an unpacked argument).
+ANY = "*"
 
 
 class _Lazy:
-    """The state of a lazy object of the table: how it advances, what it
-    gives, and a node of sources per position."""
+    """The state of one call origin of an operation of the table: how it
+    advances (`mode`), what it gives (`values`), the scope and site of the
+    call, a node per position of its arguments (`arguments`, `ANY` for one
+    that is not known) and of its sources (`sources`: the iterators, or the
+    iterables for `chain` and `merge`), the items made at the call for a
+    materializer, the values that the result gets as they are (`given`),
+    whether the positions are not known (`scattered`), whether the key of
+    `groupby` is the item (`identity`), and the activations made."""
 
-    __slots__ = ("mode", "values", "sources", "group", "keyed")
+    __slots__ = (
+        "path",
+        "mode",
+        "values",
+        "caller",
+        "site",
+        "unless",
+        "arguments",
+        "sources",
+        "items",
+        "made",
+        "given",
+        "scattered",
+        "identity",
+        "group",
+        "activations",
+    )
 
-    def __init__(self, mode, values, sources):
+    def __init__(self, path, mode, values, caller, site):
+        self.path = path
         self.mode = mode
         self.values = values
-        self.sources = sources
+        self.caller = caller
+        self.site = site
+        self.unless = (TUPLE_STORAGE,) if path in READS_TUPLES else ()
+        self.arguments = {}
+        self.sources = {}
+        self.items = {}
+        self.made = None
+        self.given = None
+        self.scattered = False
+        self.identity = False
         self.group = None
-        self.keyed = False
+        self.activations = []
+
+
+class _Activation:
+    """An advancing of a lazy object from a scope and a site: its result
+    node, the items of each position, and the tuple or pair it makes."""
+
+    __slots__ = ("caller", "site", "found", "items", "made")
+
+    def __init__(self, caller, site, found):
+        self.caller = caller
+        self.site = site
+        self.found = found
+        self.items = {}
+        self.made = None
 
 
 class LibraryIteration:
@@ -64,108 +125,183 @@ class LibraryIteration:
     def library_operation(self, call, path, overloads):
         """The call `call` binds the operation `path` of the table with
         `overloads` (parameters, result, bound arguments)."""
-        key = ("library", call.origin, path)
-        if key in self._library_calls:
-            return
-        self._library_calls.add(key)
         mode, roles, values, kind = LIBRARY_ITERATION[path]
-        positions = self._operation_arguments(roles, overloads)
-        caller, site = call.caller, call.site
-        if mode == EAGER:
-            for index, node in enumerate(positions):
-                construct = ("library", call, path, index)
-                self.iterated(node, construct, caller, site)
-            return
-        if mode == MATERIALIZE:
-            self._materialize(call, path, positions, values, kind)
-            return
-        if mode == LARGEST:
-            for index, node in enumerate(positions):
-                self.add_length_hint(node, caller, site, LENGTH)
-                iterators = self._obtain(node, call, (path, index))
-                again = self._obtain(iterators, call, (path, index, "again"))
-                advance = self.iteration(
-                    self.node(), caller, site, role=("library", path, index)
-                )
-                self.solver.attach(
-                    again, Each(self.next_element, advance, results=(advance.dst,))
-                )
-            return
-        lazy = self.container_at(kind, call.origin, site, ("library", path))
-        if mode == LAZY_ALL:
-            sources = positions
-        else:
-            sources = [
-                self._obtain(node, call, (path, index))
-                for index, node in enumerate(positions)
-            ]
-            if mode == TEE:
-                sources = [
-                    self._obtain(node, call, (path, index, "again"))
-                    for index, node in enumerate(sources)
-                ]
-        state = _Lazy(mode, values, sources)
-        self._library[lazy] = state
-        result = lazy
-        if mode == TEE:
-            result = self.container_at("tuple", call.origin, site, "tee", exact=True)
-            self.add_object(self.unknown(result), lazy)
-        elif mode == GROUPBY:
-            state.keyed = any(bound.given("key") for _, _, bound in overloads)
-            group = self.container_at(GROUPER, call.origin, site, "group")
-            self._library[group] = _Lazy(LAZY, ITEMS, sources)
-            state.group = group
-        if call.dst is not None:
-            self.add_object(call.dst, result)
+        key = (call.origin, path)
+        state = self._library_calls.get(key)
+        if state is None:
+            state = self._new_operation(call, path, mode, values, kind)
+            self._library_calls[key] = state
+        for position, node in self._operation_arguments(roles, overloads, call):
+            self.add_edge(node, self._argument(state, position))
+        for parameters, _, bound in overloads:
+            name = LIBRARY_VALUES.get(path)
+            if name is not None and bound.given(name) and bound[name] is not None:
+                self.add_edge(bound[name], self._given(state))
+            repeat = REPEATS.get(path)
+            if repeat is not None and bound.given(repeat):
+                self._scatter(state)
+            if mode == GROUPBY and _identity_key(self, call, parameters, bound):
+                self._identity(state)
+        if mode == MATERIALIZE and state.made is not None and None not in state.items:
+            # The tuples of the items: of a known length where the first
+            # call's positions are all known.
+            rule = ("library items", path)
+            items = self.container_at(
+                "tuple", call.origin, call.site, rule, _length(state), exact=True
+            )
+            self.add_object(self.unknown(state.made), items)
+            for position, node in list(state.items.items()):
+                self.add_edge(node, self._items_position(items, position, state))
+            state.items[None] = items
+        if call.dst is not None and state.made is not None:
+            self.add_object(call.dst, state.made)
 
-    def _operation_arguments(self, roles, overloads):
-        """A node per position of the iterated arguments that the
-        overloads bind: by name, or for "*" every parameter typed as an
-        abstract iterable, in order (`*iterables` is one position)."""
-        positions = []
+    def _new_operation(self, call, path, mode, values, kind):
+        state = _Lazy(path, mode, values, call.caller, call.site)
+        origin, site = call.origin, call.site
+        if mode == MATERIALIZE:
+            if kind is not None:
+                state.made = self.container_at(kind, origin, site, ("library", path))
+        elif mode not in (EAGER, LARGEST):
+            lazy = self.container_at(kind, origin, site, ("library", path))
+            self._library[lazy] = state
+            state.made = lazy
+            if mode == TEE:
+                state.made = self.container_at("tuple", origin, site, "tee", exact=True)
+                self.add_object(self.unknown(state.made), lazy)
+            elif mode == GROUPBY:
+                group = self.container_at(GROUPER, origin, site, "group")
+                grouper = _Lazy(path, LAZY, ITEMS, call.caller, site)
+                grouper.sources = state.sources
+                self._library[group] = grouper
+                state.group = group
+        return state
+
+    def _operation_arguments(self, roles, overloads, call):
+        """The (position, node) of each iterated argument that the overloads
+        bind: by name, or for "*" every parameter typed as an abstract
+        iterable, in order. The arguments that `*iterables` takes keep their
+        positions where the call unpacks nothing (`product(a, b)`); an
+        unpacked argument is at a position that is not known (`ANY`)."""
+        found = []
         for parameters, _, bound in overloads:
             if roles == ("*",):
                 chosen = [p for p in parameters if _iterable_type(p[3])]
             else:
                 chosen = [p for name in roles for p in parameters if p[0] == name]
             for index, parameter in enumerate(chosen):
-                node = self._parameter_node(bound, parameter)
-                if node is None:
+                if parameter[1] == "*" and bound.varargs is not None:
+                    if call.star:
+                        found.append((ANY, self.every(bound.varargs)))
+                        continue
+                    for offset in range(len(call.args) - index):
+                        element = self.element(bound.varargs, offset)
+                        found.append((index + offset, element))
                     continue
-                while len(positions) <= index:
-                    positions.append(self.node())
-                self.add_edge(node, positions[index])
-        return positions
+                node = self._parameter_node(bound, parameter)
+                if node is not None:
+                    found.append((ANY if call.star else index, node))
+        return found
 
-    def _obtain(self, node, call, tag):
+    def _argument(self, state, position):
+        """The node of the arguments at `position`, made with what the mode
+        does with them at the call (once per position)."""
+        node = state.arguments.get(position)
+        if node is not None:
+            return node
+        node = state.arguments[position] = self.node()
+        caller, site, mode, path = state.caller, state.site, state.mode, state.path
+        tag = (path, position)
+        if mode == EAGER:
+            self._iterate(node, self.node(), caller, site, ("library", tag))
+        elif mode == MATERIALIZE:
+            items = self.node()
+            self._iterate(node, items, caller, site, ("library", tag), state.unless)
+            self.add_length_hint(node, caller, site, _hint(state.unless))
+            if None in state.items:
+                made = state.items[None]
+                self.add_edge(items, self._items_position(made, position, state))
+            state.items[position] = items
+            if position == ANY:
+                self._scatter(state)
+        elif mode == LARGEST:
+            self.add_length_hint(node, caller, site, LENGTH)
+            iterators = self._obtain(node, caller, site, tag)
+            again = self._obtain(iterators, caller, site, (*tag, "again"))
+            self._advance(again, self.node(), caller, site, ("library", tag))
+        else:
+            if mode in (LAZY_ALL, MERGE):
+                source = node
+            else:
+                source = self._obtain(node, caller, site, tag)
+                if mode == TEE:
+                    source = self._obtain(source, caller, site, (*tag, "again"))
+            state.sources[position] = source
+            if position == ANY:
+                self._scatter(state)
+            for activation in state.activations:
+                self._wire(state, activation, position)
+        return node
+
+    def _given(self, state):
+        """The node of the values that the result gets as they are."""
+        if state.given is None:
+            state.given = self.node()
+            for activation in state.activations:
+                self._wire_given(state, activation)
+        return state.given
+
+    def _scatter(self, state):
+        """The positions of the items are not known (an unpacked argument,
+        `repeat`): every item goes to every position."""
+        if state.scattered:
+            return
+        state.scattered = True
+        made = state.items.get(None)
+        if state.mode == MATERIALIZE and made is not None:
+            for position, items in list(state.items.items()):
+                if position is not None:
+                    self.add_edge(items, self.unknown(made))
+        for activation in state.activations:
+            if activation.made is not None and state.values == POSITIONS:
+                for items in activation.items.values():
+                    self.add_edge(items, self.unknown(activation.made))
+
+    def _identity(self, state):
+        """The key of `groupby` is the item."""
+        if state.identity:
+            return
+        state.identity = True
+        for activation in state.activations:
+            for items in activation.items.values():
+                self.add_edge(items, self.element(activation.made, 0))
+
+    def _items_position(self, made, position, state):
+        """The node of the tuple `made` that the items of `position` go to;
+        a position past its length makes the positions unknown."""
+        if made.length is not None and position != ANY and position >= made.length:
+            self._scatter(state)
+        if state.scattered or position == ANY or state.values != POSITIONS:
+            return self.unknown(made)
+        return self.element(made, position)
+
+    def _iterate(self, node, dst, caller, site, role, unless=()):
+        iteration = self.iteration(dst, caller, site, unless=unless, role=role)
+        self.solver.attach(node, iteration)
+
+    def _advance(self, node, dst, caller, site, role):
+        """dst ⊇ what advancing the iterators of `node` gives, from there."""
+        advance = self.iteration(dst, caller, site, role=role)
+        self.solver.attach(node, Each(self.next_element, advance, results=(dst,)))
+
+    def _obtain(self, node, caller, site, tag):
         """A node with what `iter()` of each object of `node` gives, called
-        from the scope and site of `call`."""
+        from `caller` at `site`."""
         iterators = self.node()
-        iteration = self.iteration(
-            self.node(), call.caller, call.site, role=("library", tag)
-        )
+        iteration = self.iteration(self.node(), caller, site, role=("library", tag))
         each = Each(self.iterator, iteration, iterators, results=(iterators,))
         self.solver.attach(node, each)
         return iterators
-
-    def _materialize(self, call, path, positions, values, kind):
-        caller, site = call.caller, call.site
-        items = []
-        for index, node in enumerate(positions):
-            construct = ("library", call, path, index)
-            items.append(self.iterated(node, construct, caller, site))
-            self.add_length_hint(node, caller, site)
-        if kind is None or call.dst is None:
-            return
-        result = self.container_at(kind, call.origin, site, ("library", path))
-        rule = ("library items", path)
-        length = len(items) if values == POSITIONS else None
-        made = self.container_at("tuple", call.origin, site, rule, length, exact=True)
-        for index, node in enumerate(items):
-            target = self.element(made, index) if length else self.unknown(made)
-            self.add_edge(node, target)
-        self.add_object(self.unknown(result), made)
-        self.add_object(call.dst, result)
 
     def advance_library(self, obj, iteration):
         """Advance the lazy object `obj` from the scope and site of
@@ -175,59 +311,70 @@ class LibraryIteration:
         found = self._library_advances.get(key)
         if found is None:
             found = self._library_advances[key] = self.node()
-            self._activate(obj, self._library[obj], iteration, found)
+            state = self._library[obj]
+            activation = _Activation(iteration.caller, iteration.site, found)
+            if state.values in (TUPLES, POSITIONS):
+                rule = ("library items", iteration.caller)
+                length = _length(state) if state.values == POSITIONS else None
+                activation.made = self.container_at(
+                    "tuple", obj, iteration.site, rule, length, exact=True
+                )
+                self.add_object(found, activation.made)
+            elif state.mode == GROUPBY:
+                rule = ("group pair", iteration.caller)
+                activation.made = self.container_at(
+                    "tuple", obj, iteration.site, rule, 2, exact=True
+                )
+                self.add_object(self.element(activation.made, 1), state.group)
+                self.add_object(found, activation.made)
+            state.activations.append(activation)
+            for position in list(state.sources):
+                self._wire(state, activation, position)
+            if state.given is not None:
+                self._wire_given(state, activation)
         self.add_edge(found, iteration.dst)
 
-    def _activate(self, obj, state, iteration, found):
-        caller, site = iteration.caller, iteration.site
+    def _wire(self, state, activation, position):
+        """Advance the sources of `position` for `activation`."""
+        caller, site = activation.caller, activation.site
+        source, found = state.sources[position], activation.found
+        role = ("library", position)
         if state.mode == LAZY_ALL:
-            for index, node in enumerate(state.sources):
-                target = found if state.values == ITEMS else self.node()
-                each = self.iteration(target, caller, site, role=("library", index))
-                self.solver.attach(node, each)
+            self._iterate(source, found, caller, site, role)
             return
-        items = []
-        for index, node in enumerate(state.sources):
-            items.append(self.node())
-            advance = self.iteration(
-                items[index], caller, site, role=("library", index)
+        if state.mode == MERGE:
+            # iter() of each iterable, advanced; the last one is delegated
+            # to with `yield from`, which takes iter() of its iterator again.
+            iterators = self._obtain(source, caller, site, (state.path, position))
+            again = self._obtain(
+                iterators, caller, site, (state.path, position, "again")
             )
-            self.solver.attach(
-                node, Each(self.next_element, advance, results=(items[index],))
-            )
+            self._advance(iterators, found, caller, site, role)
+            self._advance(again, found, caller, site, (*role, "again"))
+            return
+        items = activation.items[position] = self.node()
+        self._advance(source, items, caller, site, role)
         if state.mode == LAZY_OUTER:
             # Each item is an inner iterable, iterated here.
-            inner = self.iteration(found, caller, site, role=("library", "inner"))
-            for node in items:
-                self.solver.attach(node, inner)
-            return
-        if state.mode == STARMAP:
+            self._iterate(items, found, caller, site, ("library", "inner"))
+        elif state.mode == STARMAP:
             # Each argument bundle is made a tuple: iterated, its length asked.
-            for node in items:
-                bundle = self.iteration(
-                    self.node(), caller, site, role=("library", "bundle")
-                )
-                self.solver.attach(node, bundle)
-                self.add_length_hint(node, caller, site)
-            return
-        if state.mode == GROUPBY:
-            pair = self.container_at("tuple", obj, site, "group pair", 2, exact=True)
-            if not state.keyed:
-                for node in items:
-                    self.add_edge(node, self.element(pair, 0))
-            self.add_object(self.element(pair, 1), state.group)
-            self.add_object(found, pair)
-            return
-        if state.values in (ITEMS, FIRST):
-            for node in items[:1] if state.values == FIRST else items:
-                self.add_edge(node, found)
+            self._iterate(items, self.node(), caller, site, ("library", "bundle"))
+            self.add_length_hint(items, caller, site)
+        elif state.mode == GROUPBY:
+            if state.identity:
+                self.add_edge(items, self.element(activation.made, 0))
+        elif state.values == ITEMS or (state.values == FIRST and position == 0):
+            self.add_edge(items, found)
         elif state.values in (TUPLES, POSITIONS):
-            length = len(items) if state.values == POSITIONS else None
-            made = self.container_at("tuple", obj, site, "items", length, exact=True)
-            for index, node in enumerate(items):
-                target = self.element(made, index) if length else self.unknown(made)
-                self.add_edge(node, target)
-            self.add_object(found, made)
+            self.add_edge(items, self._items_position(activation.made, position, state))
+
+    def _wire_given(self, state, activation):
+        if state.values == POSITIONS:
+            # A fill value can be at any position.
+            self.add_edge(state.given, self.unknown(activation.made))
+        else:
+            self.add_edge(state.given, activation.found)
 
     def consume_library(self, call, overloads):
         """A builtin of the stubs that takes an iterable (`str.join`, `sum`,
@@ -250,6 +397,38 @@ class LibraryIteration:
                 self.node(), call.caller, call.site, role="consume"
             )
             self.advance_library(obj, consuming)
+
+
+def _length(state):
+    """The length of the tuples of a state whose positions are all known
+    (`POSITIONS`), else None."""
+    if state.values != POSITIONS or state.scattered:
+        return None
+    positions = state.sources or state.items
+    known = [p for p in positions if p is not None]
+    if not known or ANY in known:
+        return None
+    return max(known) + 1
+
+
+def _identity_key(analysis, call, parameters, bound):
+    """Whether the key of a call of `groupby` may be the item: no key, a key
+    that `**kwargs` may omit, or the literal `None` (by keyword or at its
+    position)."""
+    if not bound.surely("key") or bound["key"] is None:
+        return True
+    if analysis.literal_none_keyword(call, "key"):
+        return True
+    names = [parameter[0] for parameter in parameters]
+    return "key" in names and analysis.literal_none(call, names.index("key"))
+
+
+def _hint(unless):
+    """The length hint of a materializer: `LENGTH_HINT`, skipped as a whole
+    where the class derives from `tuple` for `math.dist`."""
+    if not unless:
+        return LENGTH_HINT
+    return tuple((name, (*skips, *unless)) for name, skips in LENGTH_HINT)
 
 
 # The abstract iterables of the stubs that a parameter of an operation is

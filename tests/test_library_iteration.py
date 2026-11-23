@@ -198,18 +198,27 @@ use(Able(), OtherAble())
     ]
 
 
-def test_materializers_iterate_at_the_call_and_ask_the_length(tmp_path):
-    # product, combinations and permutations make a tuple of each input at
-    # once (with its length hint on Python 3.12 and 3.13); advancing their
-    # result iterates nothing of the program.
+@pytest.mark.parametrize(
+    "operation",
+    [
+        "itertools.product(x)",
+        "itertools.combinations(x, 1)",
+        "itertools.combinations_with_replacement(x, 1)",
+        "itertools.permutations(x)",
+        "math.dist(x, x)",
+    ],
+)
+def test_materializers_iterate_at_the_call_and_ask_the_length(tmp_path, operation):
+    # Each makes a tuple of each input at once (with its length hint on
+    # Python 3.12 and 3.13); advancing its result iterates nothing of the
+    # program.
     graph = graph_of(
         tmp_path,
-        """
+        f"""
 def make(x):
-    return itertools.product(x, x), itertools.combinations(x, 1), math.dist(x, x)
-def use(pair):
-    for each in pair:
-        list(each)
+    return {operation}
+def use(made):
+    list(made)
 use(make(Able()))
 """,
     )
@@ -241,13 +250,25 @@ def test_eager_operations_iterate_at_the_call(tmp_path, call):
 
 @pytest.mark.parametrize("name", ["nlargest", "nsmallest"])
 def test_nlargest_asks_the_length_and_iterates_its_iterator_again(tmp_path, name):
-    graph = graph_of(tmp_path, f"def use(x):\n    heapq.{name}(2, x)\nuse(Able())\n")
+    # Longer than n: no sorted shortcut; zip(range(n), it) takes iter() of
+    # the iterator again.
+    graph = graph_of(
+        tmp_path,
+        f"""
+class Long:
+    def __iter__(self): return Iter()
+    def __len__(self): return 5
+def use(x):
+    heapq.{name}(2, x)
+use(Long())
+""",
+    )
 
     assert inside(graph, "main.use") == [
-        "main.Able.__iter__",
-        "main.Able.__len__",
         "main.Iter.__iter__",
         "main.Iter.__next__",
+        "main.Long.__iter__",
+        "main.Long.__len__",
     ]
 
 
@@ -350,10 +371,14 @@ use(merged(Able(), OtherAble()))
     )
 
     assert inside(graph, "main.merged") == []
+    # merge delegates to the last source with `yield from`, which takes
+    # iter() of its iterator again; either source may be the last.
     assert inside(graph, "main.use") == [
         "main.Able.__iter__",
+        "main.Iter.__iter__",
         "main.Iter.__next__",
         "main.OtherAble.__iter__",
+        "main.OtherIter.__iter__",
         "main.OtherIter.__next__",
     ]
 
@@ -615,3 +640,143 @@ def test_cycles_of_lazy_objects_give_one_result_in_every_order(
             if expected is None:
                 expected = found
             assert found == expected, (name, entries)
+
+
+@pytest.mark.parametrize(
+    ("make", "first", "second"),
+    [
+        ("itertools.product(x, y)", ["main.Item.ping"], ["main.Other.ping"]),
+        (
+            "itertools.zip_longest(x, y, x, y, x, y)",
+            ["main.Item.ping"],
+            ["main.Other.ping"],
+        ),
+        # Repetition or unpacking leaves the positions unknown.
+        (
+            "itertools.product(x, y, repeat=2)",
+            ["main.Item.ping", "main.Other.ping"],
+            ["main.Item.ping", "main.Other.ping"],
+        ),
+        (
+            "itertools.product(*[x, y])",
+            ["main.Item.ping", "main.Other.ping"],
+            ["main.Item.ping", "main.Other.ping"],
+        ),
+    ],
+)
+def test_the_tuples_of_product_and_zip_longest_keep_their_positions(
+    tmp_path, make, first, second
+):
+    graph = graph_of(
+        tmp_path,
+        f"""
+def use(x, y):
+    for a, b, *rest in {make}:
+        a.ping()
+def other(x, y):
+    for a, b, *rest in {make}:
+        b.ping()
+use(Able(), OtherAble())
+other(Able(), OtherAble())
+""",
+    )
+
+    assert [c for c in inside(graph, "main.use") if c.endswith("ping")] == first
+    assert [c for c in inside(graph, "main.other") if c.endswith("ping")] == second
+
+
+def test_dist_reads_a_tuple_subclass_without_iterating_it(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+class Point(tuple):
+    def __iter__(self): return Iter()
+    def __len__(self): return 2
+def use(p, q):
+    math.dist(p, p)
+    math.dist(q, q)
+use(Point(), Able())
+""",
+    )
+
+    # Control: a plain iterable is iterated; a tuple subclass is read.
+    assert inside(graph, "main.use") == [
+        "main.Able.__iter__",
+        "main.Able.__len__",
+        "main.Iter.__next__",
+    ]
+
+
+def test_merge_takes_the_iterator_again_for_the_last_source(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def use(x):
+    list(heapq.merge(x))
+use(Able())
+""",
+    )
+
+    assert inside(graph, "main.use") == [
+        "main.Able.__iter__",
+        "main.Iter.__iter__",
+        "main.Iter.__next__",
+    ]
+
+
+def test_fillvalue_and_initial_are_values_of_the_result(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def filled():
+    next(itertools.zip_longest([], [0], fillvalue=Item()))[0].ping()
+def started():
+    next(itertools.accumulate([], initial=Other())).ping()
+filled()
+started()
+""",
+    )
+
+    assert inside(graph, "main.filled") == ["main.Item.ping"]
+    assert inside(graph, "main.started") == ["main.Other.ping"]
+
+
+@pytest.mark.parametrize(
+    ("make", "keyed"),
+    [
+        ("itertools.groupby(x)", False),
+        ("itertools.groupby(x, key=None)", False),
+        ("itertools.groupby(x, None)", False),
+        ("itertools.groupby(x, **options)", False),
+        ("itertools.groupby(x, key=len)", True),
+    ],
+)
+def test_groupby_without_a_key_function_gives_the_items_as_keys(tmp_path, make, keyed):
+    graph = graph_of(
+        tmp_path,
+        f"""
+def use(x, options):
+    for key, group in {make}:
+        key.ping()
+use(Able(), {{}})
+""",
+    )
+
+    pinged = "main.Item.ping" in callees(graph, "main.use")
+    assert pinged is not keyed
+
+
+def test_zip_longest_of_many_arguments_keeps_a_trailing_position(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def use(x, y):
+    for a, b, c, d, e, f, g in itertools.zip_longest(x, x, x, x, x, y, x):
+        f.ping()
+use(Able(), OtherAble())
+""",
+    )
+
+    assert [c for c in inside(graph, "main.use") if c.endswith("ping")] == [
+        "main.Other.ping"
+    ]

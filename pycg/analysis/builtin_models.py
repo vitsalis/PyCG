@@ -119,13 +119,15 @@ METHODS = {
 # - STARMAP: as LAZY; each argument bundle is made a tuple when advanced;
 # - GROUPBY: as LAZY; a group advances the same source;
 # - LAZY_ALL: `iter()` and the advancing where the object is advanced
-#   (`chain`, `heapq.merge`);
+#   (`chain`);
+# - MERGE: as LAZY_ALL, and `iter()` of an iterator again (`heapq.merge`
+#   delegates to its last source with `yield from`);
 # - LAZY_OUTER: `iter()` of the outer iterable at the call; each inner
 #   iterable is taken and iterated where the object is advanced.
 EAGER, MATERIALIZE, LARGEST = "eager", "materialize", "largest"
 LAZY, TEE, STARMAP, GROUPBY = "lazy", "tee", "starmap", "groupby"
-LAZY_ALL, LAZY_OUTER = "lazy all", "lazy outer"
-LAZY_MODES = frozenset({LAZY, TEE, STARMAP, GROUPBY, LAZY_ALL, LAZY_OUTER})
+LAZY_ALL, LAZY_OUTER, MERGE = "lazy all", "lazy outer", "merge"
+LAZY_MODES = frozenset({LAZY, TEE, STARMAP, GROUPBY, LAZY_ALL, LAZY_OUTER, MERGE})
 # What advancing a lazy object gives: the items (of every argument, or of
 # the first only), tuples of items, a tuple per position, or nothing.
 ITEMS, FIRST, TUPLES, POSITIONS, NOTHING = (
@@ -178,7 +180,7 @@ LIBRARY_ITERATION = {
     "itertools.groupby": (GROUPBY, ("iterable",), NOTHING, "itertools.groupby"),
     "itertools.tee": (TEE, ("iterable",), ITEMS, "itertools._tee"),
     "itertools.chain": (LAZY_ALL, ("iterables",), ITEMS, "itertools.chain"),
-    "heapq.merge": (LAZY_ALL, ("iterables",), ITEMS, "generator"),
+    "heapq.merge": (MERGE, ("iterables",), ITEMS, "generator"),
     "itertools.chain.from_iterable": (
         LAZY_OUTER,
         ("iterable",),
@@ -186,6 +188,18 @@ LIBRARY_ITERATION = {
         "itertools.chain",
     ),
 }
+# The operations whose result gets an argument as a value, without
+# iterating it: `zip_longest`'s fill value, `accumulate`'s first value.
+LIBRARY_VALUES = {
+    "itertools.zip_longest": "fillvalue",
+    "itertools.accumulate": "initial",
+}
+# The operations that read a tuple, also of a subclass, without iterating
+# it (`PyTuple_Check`): `math.dist`.
+READS_TUPLES = frozenset({"math.dist"})
+# A parameter of an operation that repeats its iterables (`product`): the
+# positions of the items are not known where it is given.
+REPEATS = {"itertools.product": "repeat"}
 # The class of the groups of `groupby`.
 GROUPER = "itertools._grouper"
 # The builtins of the stubs that take an iterable and do not consume it.
@@ -214,6 +228,9 @@ LENGTH_HINT = (("__len__", ()), ("__length_hint__", ("__len__",)))
 # put `Buffer` first, where CPython calls `__int__` and `__float__` first)
 # sees analysed definitions only.
 BUFFER_EXPORTER = "<defines __buffer__>"
+# In the `unless` of an iteration: a class that derives from `tuple`, whose
+# storage `math.dist` reads (see `hierarchy._defines`).
+TUPLE_STORAGE = "<derives from tuple>"
 ITERABLE = "<defines __iter__>"
 REVERSIBLE = "<defines __reversed__>"
 DEFINES_MARKERS = {

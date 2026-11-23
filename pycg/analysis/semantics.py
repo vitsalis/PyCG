@@ -171,7 +171,7 @@ class Analysis(
         # (see library.py).
         self._library = {}
         self._library_advances = {}
-        self._library_calls = set()
+        self._library_calls = {}
         self._consts = {}
         self._containers = {}
         self._constants = {}
@@ -196,6 +196,9 @@ class Analysis(
         # The positions at which each call expression, by scope and site,
         # passes the literal None (see `literal_none`).
         self.none_arguments = {}
+        # The keywords that a call expression passes the literal `None`, by
+        # (caller, site) (see `literal_none_keyword`).
+        self.none_keywords = {}
         # The sites of `super()` without arguments, whose arguments the
         # builder supplies (see `BuiltinRules._rule_super`); the calls and
         # classes of `super(C, x)` with arguments that are paired; and the
@@ -865,6 +868,15 @@ class Analysis(
             return False
         nones = self.none_arguments.get((root.caller, root.site), ())
         return index - len(receivers) in nones
+
+    def literal_none_keyword(self, call, name):
+        """Whether `call`, or the call expression that it copies, passes the
+        literal `None` to the keyword `name`."""
+        base, _ = self._prefixes.get(call, (call, ()))
+        root = self._roots.get(base, base)
+        if root.origin is not root:
+            return False
+        return name in self.none_keywords.get((root.caller, root.site), ())
 
     def _callee(self, call):
         """A node whose objects `call` calls, through the worklist."""

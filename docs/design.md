@@ -1675,13 +1675,14 @@ alias is.
 | Operation | At the call | Where the object is advanced |
 |---|---|---|
 | `functools.reduce`, `math.sumprod`, `math.fsum`, `math.prod`, `operator.countOf`, `operator.indexOf` | iterate | (no object) |
-| `math.dist`, `itertools.product`, `combinations`, `combinations_with_replacement`, `permutations` | make a tuple: iterate, ask the length (`LENGTH_HINT`, 3.12 and 3.13; every version counts) | nothing of the program; the items come in tuples |
+| `math.dist`, `itertools.product`, `combinations`, `combinations_with_replacement`, `permutations` | make a tuple: iterate, ask the length (`LENGTH_HINT`, 3.12 and 3.13; every version counts); `math.dist` reads a tuple, also of a subclass of `tuple`, without either | nothing of the program; the items come in tuples |
 | `heapq.nlargest`, `nsmallest` | `__len__`, `iter()`, `iter()` of that iterator again, advance it | (no object) |
 | `itertools.islice`, `dropwhile`, `takewhile`, `filterfalse`, `compress`, `cycle`, `accumulate`, `pairwise`, `batched`, `zip_longest` | `iter()` | advance the iterators |
 | `itertools.tee` | `iter()`, and `iter()` of that iterator again | each copy advances the iterator |
 | `itertools.starmap` | `iter()` | advance; make a tuple of each argument bundle (iterate it, ask its length) |
 | `itertools.groupby` | `iter()` | advance; a group, also one that another scope advances, advances the same iterator |
-| `itertools.chain`, `heapq.merge` | nothing | `iter()` of each argument and advance it |
+| `itertools.chain` | nothing | `iter()` of each argument and advance it |
+| `heapq.merge` | nothing | `iter()` of each argument, advance it, and `iter()` of that iterator again (it delegates to the last one with `yield from`) |
 | `itertools.chain.from_iterable` | `iter()` of the outer iterable | advance it; iterate each inner iterable |
 
 A lazy object is an engine container of the operation's class (methods
@@ -1703,8 +1704,19 @@ keeps its own). Items pass through the objects that keep them (`islice`,
 `dropwhile`, `takewhile`, `filterfalse`, the data of `compress`, `cycle`,
 `accumulate`, `chain`, `chain.from_iterable`, `tee`, `merge`), as tuples
 (`pairwise`, `batched`, the combinatorial ones), per position
-(`zip_longest`, `product`), and as (item, group) pairs for `groupby`
-without a key; `starmap` gives nothing.
+(`zip_longest`, `product`: the arguments that `*iterables` takes keep
+their positions; an unpacked argument or `repeat` leaves them unknown),
+and as (item, group) pairs for `groupby` whose key is the item (no key,
+`key=None` by keyword or position, or a key that `**kwargs` may omit);
+`starmap` gives nothing. `zip_longest`'s `fillvalue` and `accumulate`'s
+`initial` are values of the result, at any position.
+
+One state stands for every call of one origin of an operation (the
+implicit calls that copy a call expression, each with its receivers): each
+merges its arguments into the state's nodes and gets its result, and what
+a later one brings (a position, a fill value) is wired into every
+activation made before; facts that only grow (the positions are not
+known, the key is the item) rewire what came before.
 
 Each advancing of a lazy object from a scope and a site is one
 activation: a result node made before its subscriptions, which every
@@ -1730,6 +1742,8 @@ Limits, each pinned by a test:
 - `heapq.merge` reads `__next__` by an ordinary attribute lookup, so an
   instance attribute wins in Python; the analysis calls the class's method
   (`test_limit_merge_advances_by_the_special_method`).
+- A `groupby` key that a variable gives is taken as a key function, also
+  where the variable may hold `None`.
 - `Counter(mapping)` counts the keys of a mapping, and a deque that
   extends itself copies itself first: the existing rules of `Counter` and
   `deque` model neither.

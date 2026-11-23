@@ -839,6 +839,7 @@ NOT_COUNTED = {
     "_called",
     "literal_imports",
     "none_arguments",
+    "none_keywords",
     "_type_forms",
     "_annotated",
     "_tested_classes",

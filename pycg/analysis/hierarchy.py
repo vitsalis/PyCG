@@ -17,7 +17,7 @@ give. Classes on a cycle of candidate bases get the exhaustive order.
 from collections import deque
 from functools import cache
 
-from .builtin_models import DEFINES_MARKERS
+from .builtin_models import DEFINES_MARKERS, TUPLE_STORAGE
 from .model import (
     BUILTIN_MODULE,
     Class,
@@ -1094,7 +1094,22 @@ def _defines(classes, names):
                 return True
             if any(_outside_defines(base.name, name) for name in marked):
                 return True
+            if TUPLE_STORAGE in names and _derives_from_tuple(base.name):
+                return True
     return False
+
+
+@cache
+def _derives_from_tuple(name):
+    """Whether the outside class named `name` is `tuple` or derives from it,
+    as the stubs say."""
+    prefix = f"{BUILTIN_MODULE}."
+    if name.startswith(prefix):
+        name = f"builtins.{name[len(prefix) :]}"
+    return any(
+        definition.kind == "class" and "builtins.tuple" in _STUBS.mro(definition.path)
+        for definition in _STUBS.find(name)
+    )
 
 
 @cache

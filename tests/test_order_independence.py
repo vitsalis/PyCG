@@ -1207,6 +1207,14 @@ LATE = argparse.ArgumentParser()
     "annotations": ANNOTATIONS,
     "outside classes in annotations": OUTSIDE_CLASSES_IN_ANNOTATIONS,
     "builtin protocols through late and stub bases": PROTOCOL_BASES,
+    # Calls of a standard-library operation that share an origin, each with
+    # its receivers (code review of R3, finding 1).
+    "library operations sharing an origin": "import itertools\n"
+    "class MetaA(type):\n    def __iter__(cls): return iter(())\n"
+    "class MetaB(type):\n    def __iter__(cls): return iter(())\n"
+    "class One(metaclass=MetaA):\n    __new__ = staticmethod(itertools.chain)\n"
+    "class Two(metaclass=MetaB):\n    __new__ = staticmethod(itertools.chain)\n"
+    "def use(factory):\n    return list(factory(()))\nuse(One)\nuse(Two)\n",
     "annotated assignments": ANNOTATED_ASSIGNMENTS,
     "patterns": PATTERNS,
     "dict reads by pattern keys": PATTERN_KEYS,
