@@ -17,6 +17,7 @@ from .builtin_models import DECORATOR, method_model
 from .builtin_rules import BuiltinRules
 from .containers import Containers
 from .hierarchy import Hierarchy, opaque
+from .library import LibraryIteration
 from .model import (
     BUILTIN_MODULE,
     BoundMethod,
@@ -71,6 +72,7 @@ class Analysis(
     Patterns,
     Reflection,
     Outside,
+    LibraryIteration,
 ):
     def __init__(self, cap=None):
         # What a node holds once it would hold more objects than `cap`, if
@@ -163,6 +165,13 @@ class Analysis(
         # Construct -> what iterating over its iterable gives (see
         # Containers.iterated).
         self._iterated = {}
+        # The lazy objects of the selected standard-library operations, with
+        # their state; the activations of their advancing, by (object,
+        # scope, site), with their result nodes; the calls that made one
+        # (see library.py).
+        self._library = {}
+        self._library_advances = {}
+        self._library_calls = set()
         self._consts = {}
         self._containers = {}
         self._constants = {}
@@ -415,6 +424,8 @@ class Analysis(
             self.named_nodes,
             self._open_arguments,
             self._open_modes,
+            self._library,
+            self._library_advances,
         )
         return sum(map(len, made))
 

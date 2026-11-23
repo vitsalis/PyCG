@@ -102,6 +102,99 @@ METHODS = {
     ("callable_iterator", "__next__"): ("()", "advance"),
 }
 
+# Selected operations of the standard library that iterate what they get
+# (design.md, "Selected standard-library operations"), by the canonical
+# stub definition path: how (below), the parameters whose arguments they
+# iterate ("*": every parameter that the overload types as an abstract
+# iterable, by position), what the lazy objects give, and the class of the
+# lazy object (its methods' names). By probes of CPython 3.12.12, 3.13.12,
+# 3.14.9 and 3.15.2 with an iterable apart from its iterator:
+# - EAGER: iterate at the call (`functools.reduce`, `math.sumprod`, ...);
+# - MATERIALIZE: make a tuple of each at the call, which asks its length
+#   (on 3.12 and 3.13; every version counts), and give tuples of items;
+# - LARGEST: `heapq.nlargest`/`nsmallest`: `len()`, `iter()`, `iter()` of
+#   that iterator again, and advance it, at the call;
+# - LAZY: `iter()` at the call, the advancing where the object is advanced;
+# - TEE: as LAZY, with `iter()` of the iterator again at the call;
+# - STARMAP: as LAZY; each argument bundle is made a tuple when advanced;
+# - GROUPBY: as LAZY; a group advances the same source;
+# - LAZY_ALL: `iter()` and the advancing where the object is advanced
+#   (`chain`, `heapq.merge`);
+# - LAZY_OUTER: `iter()` of the outer iterable at the call; each inner
+#   iterable is taken and iterated where the object is advanced.
+EAGER, MATERIALIZE, LARGEST = "eager", "materialize", "largest"
+LAZY, TEE, STARMAP, GROUPBY = "lazy", "tee", "starmap", "groupby"
+LAZY_ALL, LAZY_OUTER = "lazy all", "lazy outer"
+LAZY_MODES = frozenset({LAZY, TEE, STARMAP, GROUPBY, LAZY_ALL, LAZY_OUTER})
+# What advancing a lazy object gives: the items (of every argument, or of
+# the first only), tuples of items, a tuple per position, or nothing.
+ITEMS, FIRST, TUPLES, POSITIONS, NOTHING = (
+    "items",
+    "first",
+    "tuples",
+    "positions",
+    "nothing",
+)
+LIBRARY_ITERATION = {
+    "functools.reduce": (EAGER, ("iterable",), NOTHING, None),
+    "math.sumprod": (EAGER, ("p", "q"), NOTHING, None),
+    "math.fsum": (EAGER, ("seq",), NOTHING, None),
+    "math.prod": (EAGER, ("iterable",), NOTHING, None),
+    "_operator.countOf": (EAGER, ("a",), NOTHING, None),
+    "_operator.indexOf": (EAGER, ("a",), NOTHING, None),
+    "math.dist": (MATERIALIZE, ("p", "q"), NOTHING, None),
+    "itertools.product": (MATERIALIZE, ("*",), POSITIONS, "itertools.product"),
+    "itertools.combinations": (
+        MATERIALIZE,
+        ("iterable",),
+        TUPLES,
+        "itertools.combinations",
+    ),
+    "itertools.combinations_with_replacement": (
+        MATERIALIZE,
+        ("iterable",),
+        TUPLES,
+        "itertools.combinations_with_replacement",
+    ),
+    "itertools.permutations": (
+        MATERIALIZE,
+        ("iterable",),
+        TUPLES,
+        "itertools.permutations",
+    ),
+    "heapq.nlargest": (LARGEST, ("iterable",), NOTHING, None),
+    "heapq.nsmallest": (LARGEST, ("iterable",), NOTHING, None),
+    "itertools.islice": (LAZY, ("iterable",), ITEMS, "itertools.islice"),
+    "itertools.dropwhile": (LAZY, ("iterable",), ITEMS, "itertools.dropwhile"),
+    "itertools.takewhile": (LAZY, ("iterable",), ITEMS, "itertools.takewhile"),
+    "itertools.filterfalse": (LAZY, ("iterable",), ITEMS, "itertools.filterfalse"),
+    "itertools.compress": (LAZY, ("data", "selectors"), FIRST, "itertools.compress"),
+    "itertools.cycle": (LAZY, ("iterable",), ITEMS, "itertools.cycle"),
+    "itertools.accumulate": (LAZY, ("iterable",), ITEMS, "itertools.accumulate"),
+    "itertools.pairwise": (LAZY, ("iterable",), TUPLES, "itertools.pairwise"),
+    "itertools.batched": (LAZY, ("iterable",), TUPLES, "itertools.batched"),
+    "itertools.zip_longest": (LAZY, ("*",), POSITIONS, "itertools.zip_longest"),
+    "itertools.starmap": (STARMAP, ("iterable",), NOTHING, "itertools.starmap"),
+    "itertools.groupby": (GROUPBY, ("iterable",), NOTHING, "itertools.groupby"),
+    "itertools.tee": (TEE, ("iterable",), ITEMS, "itertools._tee"),
+    "itertools.chain": (LAZY_ALL, ("iterables",), ITEMS, "itertools.chain"),
+    "heapq.merge": (LAZY_ALL, ("iterables",), ITEMS, "generator"),
+    "itertools.chain.from_iterable": (
+        LAZY_OUTER,
+        ("iterable",),
+        ITEMS,
+        "itertools.chain",
+    ),
+}
+# The class of the groups of `groupby`.
+GROUPER = "itertools._grouper"
+# The builtins of the stubs that take an iterable and do not consume it.
+NOT_CONSUMING = frozenset({"builtins.iter"})
+# `next()` on a lazy object of the table advances it, as `next(x)` does.
+for _kind in {entry[3] for entry in LIBRARY_ITERATION.values()} | {GROUPER}:
+    if _kind is not None and (_kind, "__next__") not in METHODS:
+        METHODS[(_kind, "__next__")] = ("()", "advance")
+
 # What a builtin that asks the length of what it iterates calls on it
 # before it iterates it (CPython's `PyObject_LengthHint`): its `__len__`,
 # else its `__length_hint__`. An entry of a protocol plan: the method and

@@ -979,6 +979,9 @@ WITHOUT_RESULTS = {
     "_percent_format",
     "_percent",
     "_call_protocol",
+    # A builtin that consumes a lazy object of the standard library: the
+    # activation joins its result node to the consuming iteration's.
+    "_consume_library",
     "_sequence_length",
     "_raise",
     "_set_name",

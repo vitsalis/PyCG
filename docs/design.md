@@ -87,8 +87,11 @@ value is named by the public name of its class. No name is invented for a
 value whose type the stubs give. Outside code is not assumed to call what
 the analysed code gives it. Only the builtins of Python apply their
 arguments: `map`, `sorted(key=...)`, and the special methods of their
-protocol parameters (`len(x)` calls `x.__len__`). The one other exception
-is `re.sub` and `re.subn`, which call a callable replacement.
+protocol parameters (`len(x)` calls `x.__len__`). The other exceptions are
+`re.sub` and `re.subn`, which call a callable replacement, and a table of
+selected standard-library operations (`itertools`, `functools.reduce`,
+`math.sumprod`, `heapq.nlargest`, ...), which iterate what they get: at
+the call, or, for a lazy object, where analysed code advances it.
 
 ```python
 m = re.match("a+", text)  # a re.Match
@@ -1641,9 +1644,10 @@ elements (see *Comparisons of containers*). Like a builtin with a hand
 rule, these call through their protocols only the methods that are not
 special.
 
-Outside code other than `builtins` calls no method of the analysed objects
-it gets (`Thread.start` and `run`, `Logger.warning` and a handler's
-`emit`, `ExitStack.enter_context` and `__enter__`).
+Outside code other than `builtins` and the operations below calls no
+method of the analysed objects it gets (`Thread.start` and `run`,
+`Logger.warning` and a handler's `emit`, `ExitStack.enter_context` and
+`__enter__`).
 
 - Limit: the stubs list the buffer protocol before `SupportsInt` and
   `SupportsFloat` for `int` and `float`, and `Iterable` and
@@ -1655,6 +1659,82 @@ it gets (`Thread.start` and `run`, `Logger.warning` and a handler's
   compared too.
 - Limit: with an unpacked argument every overload fits, so `min(*[a, b])`
   also iterates `a`.
+
+### Selected standard-library operations
+
+A table of operations of the standard library (`LIBRARY_ITERATION`, keyed
+by the canonical stub definition and the exact parameters whose arguments
+they iterate) calls the iteration methods of what they get, as CPython
+3.12 to 3.15 does (probed with an iterable apart from its iterator). The
+stubs cannot state it: `islice`, `chain`, `groupby` and `product` have one
+shape there (no bases, `__iter__` and `__next__`), but `product` makes a
+tuple of its argument at once and the others do not. A name that only
+looks like an operation (a package function `islice`) is not one; an
+alias is.
+
+| Operation | At the call | Where the object is advanced |
+|---|---|---|
+| `functools.reduce`, `math.sumprod`, `math.fsum`, `math.prod`, `operator.countOf`, `operator.indexOf` | iterate | (no object) |
+| `math.dist`, `itertools.product`, `combinations`, `combinations_with_replacement`, `permutations` | make a tuple: iterate, ask the length (`LENGTH_HINT`, 3.12 and 3.13; every version counts) | nothing of the program; the items come in tuples |
+| `heapq.nlargest`, `nsmallest` | `__len__`, `iter()`, `iter()` of that iterator again, advance it | (no object) |
+| `itertools.islice`, `dropwhile`, `takewhile`, `filterfalse`, `compress`, `cycle`, `accumulate`, `pairwise`, `batched`, `zip_longest` | `iter()` | advance the iterators |
+| `itertools.tee` | `iter()`, and `iter()` of that iterator again | each copy advances the iterator |
+| `itertools.starmap` | `iter()` | advance; make a tuple of each argument bundle (iterate it, ask its length) |
+| `itertools.groupby` | `iter()` | advance; a group, also one that another scope advances, advances the same iterator |
+| `itertools.chain`, `heapq.merge` | nothing | `iter()` of each argument and advance it |
+| `itertools.chain.from_iterable` | `iter()` of the outer iterable | advance it; iterate each inner iterable |
+
+A lazy object is an engine container of the operation's class (methods
+named by it, `itertools._tee` for a copy of `tee`, `itertools._grouper`
+for a group) whose state holds the iterators (the iterables for `chain`
+and `merge`). It is advanced by what advances an iterator: `next()`, its
+`__next__` called explicitly or through a stored bound method, a loop,
+unpacking, a builtin or an operation that consumes it (`list`, `sorted`,
+`deque`, `"".join`, `sum`, `reduce`), and another lazy object when that
+one is advanced. Making, storing, returning it and `iter()` of it advance
+nothing. Advancing it from a scope and a site advances its sources from
+there: library frames are transparent, so the calls belong to the scope
+that advances the object, and a lazy object that only a client advances
+gives no `__next__` edge, neither at the call that made it nor in the
+function that returns it. A lazy operation's result type does not bind
+its type variables by iterating the argument at the call (the deferred
+binding of that definition's signature; another callable at the same call
+keeps its own). Items pass through the objects that keep them (`islice`,
+`dropwhile`, `takewhile`, `filterfalse`, the data of `compress`, `cycle`,
+`accumulate`, `chain`, `chain.from_iterable`, `tee`, `merge`), as tuples
+(`pairwise`, `batched`, the combinatorial ones), per position
+(`zip_longest`, `product`), and as (item, group) pairs for `groupby`
+without a key; `starmap` gives nothing.
+
+Each advancing of a lazy object from a scope and a site is one
+activation: a result node made before its subscriptions, which every
+request of that key joins, also a later one. The lazy objects are keyed by
+their call origin, so activations are finite; a lazy object that is its
+own source (`acc = chain(acc, x)` in a loop) reaches its own activation.
+A saturated source passes the saturated value to the result node.
+
+The builtin `map`, `zip`, `enumerate` and `filter` stay eager: they
+iterate their arguments, and `map` and `filter` call their function, where
+they are made (an approximation, C26), so a lazy object that one of them
+gets is advanced there.
+
+Limits, each pinned by a test:
+
+- The callbacks of these operations (`starmap`'s function, the predicates
+  of `takewhile`, `dropwhile`, `filterfalse`, `groupby`'s key,
+  `accumulate`'s function and its `__add__`) are not called.
+- Counts are not read: `tee(x, 0)` and `product(x, repeat=0)` iterate and
+  `islice(x, 0)` advances, where Python does not
+  (`test_limit_a_count_of_zero_still_iterates`); `nlargest(1, x)` asks the
+  length, which its shortcut does not (`test_limit_nlargest_of_one_asks_the_length`).
+- `heapq.merge` reads `__next__` by an ordinary attribute lookup, so an
+  instance attribute wins in Python; the analysis calls the class's method
+  (`test_limit_merge_advances_by_the_special_method`).
+- `Counter(mapping)` counts the keys of a mapping, and a deque that
+  extends itself copies itself first: the existing rules of `Counter` and
+  `deque` model neither.
+- `math.dist` is in the table; `statistics` and the other Python modules
+  of the standard library are not.
 
 ## Declared types (idea 4)
 
@@ -3656,6 +3736,7 @@ another origin without a bound.
 | Call back from outside code | the origin of the outside calls; every call with that origin passes its arguments to it once |
 | `Instance` | class and origin; one more per class, the abstract instance |
 | `Container` | kind, origin and the rule that makes it: a display or comprehension; a call origin and the model (`tuple(x)` and the pair of `d.items()` at one call are two containers), and for the tuples of `zip` their length (a call that adds receivers keeps the origin and passes more iterables); a slice, operator or unpacking of the source; `(scope, site, role)` for an iterator that `iter()` makes; the container, for the iterator of an exact collection and for its inexact alias; the function and parameter (or class and field) whose annotation names it; the class, for its namespace; for the result of a stubbed call, the call origin (or the stub attribute, never the receiver that it is loaded through, which may itself be such a container: `x = x.__dict__` in a loop), the position in the type and the type, which the stub data bounds; an instance of a generic stub class likewise |
+| Lazy object of a standard-library operation | its container (as above); an activation of its advancing: the object, the scope and the site |
 | `Wrapper` | kind and origin |
 | `BoundMethod` | function (or outside method) and receiver |
 | `Generator` | function, and whether it is the inexact alias |

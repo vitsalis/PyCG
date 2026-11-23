@@ -2805,6 +2805,19 @@ def test_exhaustive_lookup_after_a_class_ignores_what_that_class_defines():
 # entry modules.
 
 SATURATING = {
+    # The sources of a lazy object of the standard library saturate after it
+    # was advanced (a source that only a late call gives), beside a hub.
+    "lazy library objects past the cap": {
+        "main.py": "import itertools\n"
+        + "".join(
+            f"class S{i}:\n    def __iter__(self): return self\n"
+            f"    def __next__(self): return self\n"
+            for i in range(5)
+        )
+        + "def late():\n    return [S0(), S1(), S2(), S3(), S4()]\n"
+        "def use(xs):\n    it = itertools.chain(*xs)\n    for x in it:\n        x()\n"
+        "use([S0()])\nuse(late())\n",
+    },
     # The node of the bases that a stub declares saturates (four bases, a cap
     # of 3), beside a late base and a hub that saturates.
     "stub bases past the cap": {

@@ -813,6 +813,8 @@ COUNTED = {
     "_open_arguments",
     "_open_modes",
     "_closures",
+    "_library",
+    "_library_advances",
 }
 
 # The other tables: what the builder makes, one per definition or name in
@@ -821,6 +823,7 @@ COUNTED = {
 # the completion.
 NOT_COUNTED = {
     "_stub_definitions",
+    "_library_calls",
     "_typed_callbacks",
     "_unknown_modes",
     "modules",
@@ -870,6 +873,7 @@ NOT_COUNTED = {
 # A program that puts something in every counted table.
 EVERY_TABLE = """\
 import functools
+import itertools
 import typing
 import lib
 async def coroutine(): pass
@@ -923,6 +927,7 @@ class E:
     def idle(self): pass
 E()
 vars(C)
+list(itertools.islice(c, 1))
 """
 
 

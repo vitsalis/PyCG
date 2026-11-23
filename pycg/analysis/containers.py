@@ -813,6 +813,10 @@ class Containers:
                 self.call_dunder(obj, "__anext__", iteration.call(), iteration.anext())
             case Instance() | Class():
                 self.call_dunder(obj, "__next__", iteration.call(), iteration.dst)
+            case Container() if obj in self._library and not iteration.is_async:
+                # A lazy object of a standard-library operation: it advances
+                # its sources from here (see library.py).
+                self.advance_library(obj, iteration)
             case Container(kind="iterator"):
                 # The sequence protocol: __getitem__ with an unknown index.
                 next_item = Each(self._next_item, iteration, results=(iteration.dst,))
