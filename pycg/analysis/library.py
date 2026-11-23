@@ -21,9 +21,11 @@ from a scope and a site is one activation with one result node, made
 before its subscriptions, which every later request of the same key
 joins (`advance_library`). Lazy objects, scopes, sites and positions are
 finite, so the activations are; a lazy object that is its own source
-(`x = chain(x, y)`) reaches its own activation, which exists. Facts that
-only grow (the positions are not known, the key of `groupby` is the item)
-rewire what came before.
+(`x = chain(x, y)`) reaches its own activation, which exists. The tuples
+of `product` and `zip_longest` have one shape per arity of the calls of
+the origin (None where an unpacked argument or a repetition hides the
+positions), so a later call of another arity adds a shape and changes
+none; the key of `groupby` becoming the item rewires what came before.
 """
 
 from .builtin_models import (
@@ -66,7 +68,9 @@ class _Lazy:
     that is not known) and of its sources (`sources`: the iterators, or the
     iterables for `chain` and `merge`), the items made at the call for a
     materializer, the values that the result gets as they are (`given`),
-    whether the positions are not known (`scattered`), whether the key of
+    the arities of the calls (`arities`: the number of positions, None
+    where an unpacked argument or a repetition hides them), the tuples of
+    a materializer's items, one per arity (`shapes`), whether the key of
     `groupby` is the item (`identity`), and the activations made."""
 
     __slots__ = (
@@ -81,7 +85,8 @@ class _Lazy:
         "items",
         "made",
         "given",
-        "scattered",
+        "arities",
+        "shapes",
         "identity",
         "group",
         "activations",
@@ -99,7 +104,8 @@ class _Lazy:
         self.items = {}
         self.made = None
         self.given = None
-        self.scattered = False
+        self.arities = {}
+        self.shapes = {}
         self.identity = False
         self.group = None
         self.activations = []
@@ -109,14 +115,16 @@ class _Activation:
     """An advancing of a lazy object from a scope and a site: its result
     node, the items of each position, and the tuple or pair it makes."""
 
-    __slots__ = ("caller", "site", "found", "items", "made")
+    __slots__ = ("lazy", "caller", "site", "found", "items", "made", "shapes")
 
-    def __init__(self, caller, site, found):
+    def __init__(self, lazy, caller, site, found):
+        self.lazy = lazy
         self.caller = caller
         self.site = site
         self.found = found
         self.items = {}
         self.made = None
+        self.shapes = {}
 
 
 class LibraryIteration:
@@ -131,28 +139,23 @@ class LibraryIteration:
         if state is None:
             state = self._new_operation(call, path, mode, values, kind)
             self._library_calls[key] = state
-        for position, node in self._operation_arguments(roles, overloads, call):
+        arguments = self._operation_arguments(roles, overloads, call)
+        for position, node in arguments:
             self.add_edge(node, self._argument(state, position))
+        arity = None
+        if not call.star:
+            arity = 1 + max((p for p, _ in arguments if p != ANY), default=-1)
         for parameters, _, bound in overloads:
             name = LIBRARY_VALUES.get(path)
             if name is not None and bound.given(name) and bound[name] is not None:
                 self.add_edge(bound[name], self._given(state))
             repeat = REPEATS.get(path)
             if repeat is not None and bound.given(repeat):
-                self._scatter(state)
+                arity = None
             if mode == GROUPBY and _identity_key(self, call, parameters, bound):
                 self._identity(state)
-        if mode == MATERIALIZE and state.made is not None and None not in state.items:
-            # The tuples of the items: of a known length where the first
-            # call's positions are all known.
-            rule = ("library items", path)
-            items = self.container_at(
-                "tuple", call.origin, call.site, rule, _length(state), exact=True
-            )
-            self.add_object(self.unknown(state.made), items)
-            for position, node in list(state.items.items()):
-                self.add_edge(node, self._items_position(items, position, state))
-            state.items[None] = items
+        if values in (TUPLES, POSITIONS):
+            self._arity(state, arity if values == POSITIONS else None)
         if call.dst is not None and state.made is not None:
             self.add_object(call.dst, state.made)
 
@@ -200,7 +203,9 @@ class LibraryIteration:
                     continue
                 node = self._parameter_node(bound, parameter)
                 if node is not None:
-                    found.append((ANY if call.star else index, node))
+                    # A named parameter keeps its role (compress's data),
+                    # also where the call unpacks its arguments.
+                    found.append((index, node))
         return found
 
     def _argument(self, state, position):
@@ -218,12 +223,9 @@ class LibraryIteration:
             items = self.node()
             self._iterate(node, items, caller, site, ("library", tag), state.unless)
             self.add_length_hint(node, caller, site, _hint(state.unless))
-            if None in state.items:
-                made = state.items[None]
-                self.add_edge(items, self._items_position(made, position, state))
             state.items[position] = items
-            if position == ANY:
-                self._scatter(state)
+            for arity, shape in state.shapes.items():
+                self._into_shape(items, shape, arity, position)
         elif mode == LARGEST:
             self.add_length_hint(node, caller, site, LENGTH)
             iterators = self._obtain(node, caller, site, tag)
@@ -237,8 +239,6 @@ class LibraryIteration:
                 if mode == TEE:
                     source = self._obtain(source, caller, site, (*tag, "again"))
             state.sources[position] = source
-            if position == ANY:
-                self._scatter(state)
             for activation in state.activations:
                 self._wire(state, activation, position)
         return node
@@ -248,24 +248,54 @@ class LibraryIteration:
         if state.given is None:
             state.given = self.node()
             for activation in state.activations:
-                self._wire_given(state, activation)
+                if state.values == POSITIONS:
+                    # A fill value can be at any position.
+                    for shape in activation.shapes.values():
+                        self.add_edge(state.given, self.unknown(shape))
+                else:
+                    self.add_edge(state.given, activation.found)
         return state.given
 
-    def _scatter(self, state):
-        """The positions of the items are not known (an unpacked argument,
-        `repeat`): every item goes to every position."""
-        if state.scattered:
+    def _arity(self, state, arity):
+        """A call of `state` makes tuples of `arity` positions (None: not
+        known): a tuple shape of that length for the materializer and for
+        every activation, made once per arity, with the items of every
+        position wired into it."""
+        if arity in state.arities:
             return
-        state.scattered = True
-        made = state.items.get(None)
-        if state.mode == MATERIALIZE and made is not None:
+        state.arities[arity] = None
+        if state.mode == MATERIALIZE and state.made is not None:
+            rule = ("library items", state.path, arity)
+            shape = self.container_at(
+                "tuple", state.made, state.site, rule, arity, exact=True
+            )
+            state.shapes[arity] = shape
+            self.add_object(self.unknown(state.made), shape)
             for position, items in list(state.items.items()):
-                if position is not None:
-                    self.add_edge(items, self.unknown(made))
+                self._into_shape(items, shape, arity, position)
         for activation in state.activations:
-            if activation.made is not None and state.values == POSITIONS:
-                for items in activation.items.values():
-                    self.add_edge(items, self.unknown(activation.made))
+            self._activation_shape(state, activation, arity)
+
+    def _activation_shape(self, state, activation, arity):
+        rule = ("library items", activation.caller, arity)
+        shape = self.container_at(
+            "tuple", activation.lazy, activation.site, rule, arity, exact=True
+        )
+        activation.shapes[arity] = shape
+        self.add_object(activation.found, shape)
+        for position, items in list(activation.items.items()):
+            self._into_shape(items, shape, arity, position)
+        if state.given is not None:
+            self.add_edge(state.given, self.unknown(shape))
+
+    def _into_shape(self, items, shape, arity, position):
+        """The items of `position` in the tuple `shape` of `arity`: at that
+        position, at any position where the arity is not known, nowhere for
+        a position that the shape does not have."""
+        if arity is None:
+            self.add_edge(items, self.unknown(shape))
+        elif position != ANY and position < arity:
+            self.add_edge(items, self.element(shape, position))
 
     def _identity(self, state):
         """The key of `groupby` is the item."""
@@ -275,15 +305,6 @@ class LibraryIteration:
         for activation in state.activations:
             for items in activation.items.values():
                 self.add_edge(items, self.element(activation.made, 0))
-
-    def _items_position(self, made, position, state):
-        """The node of the tuple `made` that the items of `position` go to;
-        a position past its length makes the positions unknown."""
-        if made.length is not None and position != ANY and position >= made.length:
-            self._scatter(state)
-        if state.scattered or position == ANY or state.values != POSITIONS:
-            return self.unknown(made)
-        return self.element(made, position)
 
     def _iterate(self, node, dst, caller, site, role, unless=()):
         iteration = self.iteration(dst, caller, site, unless=unless, role=role)
@@ -312,15 +333,8 @@ class LibraryIteration:
         if found is None:
             found = self._library_advances[key] = self.node()
             state = self._library[obj]
-            activation = _Activation(iteration.caller, iteration.site, found)
-            if state.values in (TUPLES, POSITIONS):
-                rule = ("library items", iteration.caller)
-                length = _length(state) if state.values == POSITIONS else None
-                activation.made = self.container_at(
-                    "tuple", obj, iteration.site, rule, length, exact=True
-                )
-                self.add_object(found, activation.made)
-            elif state.mode == GROUPBY:
+            activation = _Activation(obj, iteration.caller, iteration.site, found)
+            if state.mode == GROUPBY:
                 rule = ("group pair", iteration.caller)
                 activation.made = self.container_at(
                     "tuple", obj, iteration.site, rule, 2, exact=True
@@ -328,10 +342,12 @@ class LibraryIteration:
                 self.add_object(self.element(activation.made, 1), state.group)
                 self.add_object(found, activation.made)
             state.activations.append(activation)
+            for arity in list(state.arities):
+                self._activation_shape(state, activation, arity)
             for position in list(state.sources):
                 self._wire(state, activation, position)
-            if state.given is not None:
-                self._wire_given(state, activation)
+            if state.given is not None and state.values != POSITIONS:
+                self.add_edge(state.given, found)
         self.add_edge(found, iteration.dst)
 
     def _wire(self, state, activation, position):
@@ -367,14 +383,8 @@ class LibraryIteration:
         elif state.values == ITEMS or (state.values == FIRST and position == 0):
             self.add_edge(items, found)
         elif state.values in (TUPLES, POSITIONS):
-            self.add_edge(items, self._items_position(activation.made, position, state))
-
-    def _wire_given(self, state, activation):
-        if state.values == POSITIONS:
-            # A fill value can be at any position.
-            self.add_edge(state.given, self.unknown(activation.made))
-        else:
-            self.add_edge(state.given, activation.found)
+            for arity, shape in activation.shapes.items():
+                self._into_shape(items, shape, arity, position)
 
     def consume_library(self, call, overloads):
         """A builtin of the stubs that takes an iterable (`str.join`, `sum`,
@@ -397,18 +407,6 @@ class LibraryIteration:
                 self.node(), call.caller, call.site, role="consume"
             )
             self.advance_library(obj, consuming)
-
-
-def _length(state):
-    """The length of the tuples of a state whose positions are all known
-    (`POSITIONS`), else None."""
-    if state.values != POSITIONS or state.scattered:
-        return None
-    positions = state.sources or state.items
-    known = [p for p in positions if p is not None]
-    if not known or ANY in known:
-        return None
-    return max(known) + 1
 
 
 def _identity_key(analysis, call, parameters, bound):

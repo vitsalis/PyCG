@@ -1705,7 +1705,10 @@ keeps its own). Items pass through the objects that keep them (`islice`,
 `accumulate`, `chain`, `chain.from_iterable`, `tee`, `merge`), as tuples
 (`pairwise`, `batched`, the combinatorial ones), per position
 (`zip_longest`, `product`: the arguments that `*iterables` takes keep
-their positions; an unpacked argument or `repeat` leaves them unknown),
+their positions, and the tuples have one shape per arity of the calls,
+of unknown length where an unpacked argument or `repeat` hides the
+positions; `compress` keeps its data apart from its selectors, also in a
+call that unpacks them),
 and as (item, group) pairs for `groupby` whose key is the item (no key,
 `key=None` by keyword or position, or a key that `**kwargs` may omit);
 `starmap` gives nothing. `zip_longest`'s `fillvalue` and `accumulate`'s
@@ -1715,8 +1718,8 @@ One state stands for every call of one origin of an operation (the
 implicit calls that copy a call expression, each with its receivers): each
 merges its arguments into the state's nodes and gets its result, and what
 a later one brings (a position, a fill value) is wired into every
-activation made before; facts that only grow (the positions are not
-known, the key is the item) rewire what came before.
+activation made before; a call of another arity adds a tuple shape and
+changes none, and the key becoming the item rewires what came before.
 
 Each advancing of a lazy object from a scope and a site is one
 activation: a result node made before its subscriptions, which every

@@ -1212,8 +1212,9 @@ LATE = argparse.ArgumentParser()
     "library operations sharing an origin": "import itertools\n"
     "class MetaA(type):\n    def __iter__(cls): return iter(())\n"
     "class MetaB(type):\n    def __iter__(cls): return iter(())\n"
-    "class One(metaclass=MetaA):\n    __new__ = staticmethod(itertools.chain)\n"
-    "class Two(metaclass=MetaB):\n    __new__ = staticmethod(itertools.chain)\n"
+    "class Factory:\n    __call__ = staticmethod(itertools.chain)\n"
+    "class One(metaclass=MetaA):\n    __new__ = Factory()\n"
+    "class Two(metaclass=MetaB):\n    __new__ = Factory()\n"
     "def use(factory):\n    return list(factory(()))\nuse(One)\nuse(Two)\n",
     "annotated assignments": ANNOTATED_ASSIGNMENTS,
     "patterns": PATTERNS,
@@ -2186,6 +2187,11 @@ def test_programs_give_the_same_results_under_every_order(
 # that they test is off: the caller and its callees whose name starts with
 # the prefix.
 EXPECTED_CALLEES = {
+    "library operations sharing an origin": (
+        "main.use",
+        "main.",
+        ["main.MetaA.__iter__", "main.MetaB.__iter__"],
+    ),
     "builtin protocols through late and stub bases": (
         "main.use",
         "",

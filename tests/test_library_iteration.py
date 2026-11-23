@@ -780,3 +780,94 @@ use(Able(), OtherAble())
     assert [c for c in inside(graph, "main.use") if c.endswith("ping")] == [
         "main.Other.ping"
     ]
+
+
+# One call expression that is a call of zip_longest with one argument and,
+# through a metaclass's __new__, with two (the class first); its result is
+# advanced at two sites (code review 2 of R3, finding 1).
+GROWING = """
+def b(): pass
+class M(type):
+    def __iter__(cls): return iter([b, b])
+class Factory:
+    __call__ = staticmethod(itertools.zip_longest)
+class C(metaclass=M):
+    __new__ = Factory()
+class Delay:
+    def __call__(self, x): return x
+def use(factory):
+    it = factory([b, b])
+    first, *more = next(it)
+    first()
+    for pair in Delay()(it):
+        pair[1]()
+use(itertools.zip_longest)
+use(C)
+"""
+
+
+def test_tuples_of_calls_of_two_arities_at_two_sites(tmp_path):
+    graph = graph_of(tmp_path, GROWING)
+
+    assert inside(graph, "main.use") == [
+        "main.Delay.__call__",
+        "main.M.__iter__",
+        "main.b",
+    ]
+
+
+@pytest.mark.parametrize("cap", [3, None])
+def test_tuples_of_calls_of_two_arities_in_every_order(tmp_path, monkeypatch, cap):
+    from programs import write
+    from test_order_independence import orders, whole_output
+
+    from pycg.analysis import solver
+
+    write(tmp_path, {"main.py": CLASSES + GROWING})
+    expected = None
+    for name, order in orders().items():
+        monkeypatch.setattr(solver.Solver, "order", order)
+        found = whole_output(tmp_path, ["main.py"], cap=cap)
+        if expected is None:
+            expected = found
+        assert found == expected, name
+
+
+def test_unpacked_compress_keeps_its_data_and_not_its_selectors(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def use():
+    for item in itertools.compress(*([Item()], [Other()])):
+        item.ping()
+use()
+""",
+    )
+
+    assert "main.Item.ping" in callees(graph, "main.use")
+
+
+SHARED_ORIGIN = """
+class MetaA(type):
+    def __iter__(cls): return iter(())
+class MetaB(type):
+    def __iter__(cls): return iter(())
+class Factory:
+    __call__ = staticmethod(itertools.chain)
+class One(metaclass=MetaA):
+    __new__ = Factory()
+class Two(metaclass=MetaB):
+    __new__ = Factory()
+def use(factory):
+    return list(factory(()))
+use(One)
+use(Two)
+"""
+
+
+def test_calls_that_share_an_origin_give_every_argument(tmp_path):
+    # One call expression is a call of chain with either class first,
+    # through the `__new__` of each: both are iterated by their metaclass.
+    graph = graph_of(tmp_path, SHARED_ORIGIN)
+
+    assert inside(graph, "main.use") == ["main.MetaA.__iter__", "main.MetaB.__iter__"]
