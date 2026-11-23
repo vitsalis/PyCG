@@ -277,7 +277,8 @@ class LibraryIteration:
             self._activation_shape(state, activation, arity)
 
     def _activation_shape(self, state, activation, arity):
-        rule = ("library items", activation.caller, arity)
+        # The site is part of the key: each advancing makes its own tuples.
+        rule = ("library items", activation.caller, activation.site, arity)
         shape = self.container_at(
             "tuple", activation.lazy, activation.site, rule, arity, exact=True
         )
@@ -335,7 +336,7 @@ class LibraryIteration:
             state = self._library[obj]
             activation = _Activation(obj, iteration.caller, iteration.site, found)
             if state.mode == GROUPBY:
-                rule = ("group pair", iteration.caller)
+                rule = ("group pair", iteration.caller, iteration.site)
                 activation.made = self.container_at(
                     "tuple", obj, iteration.site, rule, 2, exact=True
                 )

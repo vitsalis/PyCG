@@ -845,6 +845,42 @@ use()
     )
 
     assert "main.Item.ping" in callees(graph, "main.use")
+    assert "main.Other.ping" not in callees(graph, "main.use")
+
+
+@pytest.mark.parametrize(
+    "make", ["itertools.zip_longest([1, 2])", "itertools.groupby([1, 2])"]
+)
+def test_two_advances_of_one_object_give_the_same_results_in_every_order(
+    tmp_path, monkeypatch, make
+):
+    # The tuples that each advancing makes are those of its own site.
+    from programs import write
+    from test_order_independence import orders, whole_output
+
+    from pycg.analysis import solver
+
+    write(
+        tmp_path,
+        {
+            "main.py": f"""
+import itertools
+def use(it):
+    first = next(it)
+    second = next(it)
+    return first, second
+use({make})
+"""
+        },
+    )
+    for cap in (3, None):
+        expected = None
+        for name, order in orders().items():
+            monkeypatch.setattr(solver.Solver, "order", order)
+            found = whole_output(tmp_path, ["main.py"], cap=cap)
+            if expected is None:
+                expected = found
+            assert found == expected, (cap, name)
 
 
 SHARED_ORIGIN = """
