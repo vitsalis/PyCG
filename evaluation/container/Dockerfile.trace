@@ -15,7 +15,7 @@ ARG NAME
 RUN test -n "${NAME}"
 
 # The requirements file in the context: requirements.txt as trace.sh lays
-# it out; <name>.txt of macro-benchmark/requirements/ for the `trace`
+# it out; <name>.txt of macro-benchmark/test-environments/ for the `trace`
 # service of compose.yaml.
 ARG REQUIREMENTS=requirements.txt
 COPY ${REQUIREMENTS} /opt/pycg-trace/requirements.txt
