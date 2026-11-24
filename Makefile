@@ -2,10 +2,64 @@ RUN := uv run --locked
 LINTED := pycg tests tools micro-benchmark/validate.py evaluation
 INPUTS := evaluation/container/Dockerfile.inputs
 PROJECTS := evaluation/macro-benchmark/projects
+METRICS := evaluation/metrics.json
 EVAL_OUT ?= $(or $(TMPDIR),/tmp)/pycg-evaluation
+EVAL_JOBS ?= $(shell nproc)
+BASE ?=
+SUMMARY ?= /dev/stdout
+LABELS ?= /dev/stdout
 GIT_COMMON = $(abspath $(shell git rev-parse --git-common-dir))
+COMMIT = $(shell git rev-parse --short=10 HEAD)
+RESULT = $(EVAL_OUT)/pycg-$(COMMIT)
+BASE_COMMIT = $(shell git rev-parse --short=10 $(BASE))
+BASE_RESULT = $(EVAL_OUT)/base-$(BASE_COMMIT)-for-$(COMMIT)
+BASE_TREE = $(EVAL_OUT)/tree-$(BASE_COMMIT)
+BASE_METRICS = $(EVAL_OUT)/metrics-$(BASE_COMMIT).json
+SANDBOX = docker run --rm --network none --read-only --tmpfs /tmp \
+	--memory 6g --memory-swap 6g --cap-drop ALL \
+	--security-opt no-new-privileges --user $$(id -u):$$(id -g) \
+	-e HOME=/tmp -e PYTHONHASHSEED=0 \
+	-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
+	-v $(EVAL_OUT):$(EVAL_OUT) pycg-eval-runner python3 -I
+LOOP = $(SANDBOX) $(CURDIR)/evaluation/common/loop.py
+GATE = $(SANDBOX) $(CURDIR)/evaluation/common/gate.py
+LABELER = $(SANDBOX) $(CURDIR)/evaluation/common/labels.py
+measure = $(LOOP) run --flavour new --checkout $(1) --name $(2) --hash-seed $(3) \
+	--micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT)
+measured = test -f $(RESULT)/result.json || $(call measure,$(CURDIR),$(notdir $(RESULT)),0)
+base_metrics = $(if $(BASE),git rev-parse --verify --quiet $(BASE)^{commit} > /dev/null \
+	&& (git show $(BASE):$(METRICS) > $(BASE_METRICS) 2> /dev/null \
+	|| : > $(BASE_METRICS)))
+base_flag = $(if $(BASE),--base $(BASE_METRICS))
+need_base = $(if $(BASE),,$(error $@ needs BASE=<git ref of the base commit>))
 
-.PHONY: setup test lint format eval
+define gate
+$(base_metrics)
+$(GATE) check $(RESULT)/result.json $(CURDIR)/$(METRICS) $(base_flag)
+endef
+
+define measure_base
+git worktree add --detach $(BASE_TREE) $(BASE)
+$(call measure,$(BASE_TREE),$(notdir $(BASE_RESULT)),0) \
+	|| (git worktree remove --force $(BASE_TREE) && false)
+git worktree remove --force $(BASE_TREE)
+endef
+
+define compare
+$(LOOP) compare $(BASE_RESULT) $(RESULT) > $(RESULT)-changes.txt
+$(GATE) summary $(RESULT)/result.json $(CURDIR)/$(METRICS) \
+	--base-result $(BASE_RESULT)/result.json \
+	--changes $(RESULT)-changes.txt >> $(SUMMARY)
+endef
+
+define same_graphs
+diff -rq -x runs.json -x result.json $(RESULT) $(RESULT)-seed1
+@echo "the graphs of hash seeds 0 and 1 are byte-identical"
+endef
+
+.PHONY: setup test lint format eval-inputs eval eval-record eval-diff eval-determinism \
+	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-compare \
+	eval-same-graphs eval-labels
 
 setup:
 	uv sync --locked
@@ -21,7 +75,7 @@ format:
 	$(RUN) ruff check --select I --fix $(LINTED)
 	$(RUN) ruff format $(LINTED)
 
-eval:
+eval-inputs:
 	docker build --target macro -t pycg-eval-macro -f $(INPUTS) .
 	docker build --target network -t pycg-eval-runner -f $(INPUTS) .
 	rm -rf $(PROJECTS)
@@ -30,12 +84,52 @@ eval:
 	docker run --rm --network none --user $$(id -u):$$(id -g) \
 		-v $(CURDIR)/$(PROJECTS):/out pycg-eval-macro \
 		cp -RP /inputs/macro-benchmark/projects/. /out/
-	docker run --rm --network none --read-only --tmpfs /tmp \
-		--memory 6g --memory-swap 6g --cap-drop ALL \
-		--security-opt no-new-privileges --user $$(id -u):$$(id -g) \
-		-e HOME=/tmp -e PYTHONHASHSEED=0 \
-		-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
-		-v $(EVAL_OUT):/out pycg-eval-runner \
-		sh -c "git config --global --add safe.directory '*' \
-		&& python3 -I $(CURDIR)/evaluation/common/loop.py run --flavour new \
-		--checkout $(CURDIR) --name pycg-$$(git rev-parse --short=10 HEAD) --out /out"
+
+eval: eval-inputs
+	$(call measure,$(CURDIR),$(notdir $(RESULT)),0)
+	$(gate)
+
+eval-record: eval-inputs
+	$(measured)
+	$(base_metrics)
+	$(GATE) record $(RESULT)/result.json $(CURDIR)/$(METRICS) $(base_flag) \
+		> $(EVAL_OUT)/metrics-$(COMMIT).json
+	cp $(EVAL_OUT)/metrics-$(COMMIT).json $(METRICS)
+
+eval-diff: eval-inputs
+	$(need_base)
+	$(measured)
+	$(measure_base)
+	$(compare)
+
+eval-determinism: eval-inputs
+	$(measured)
+	$(call measure,$(CURDIR),$(notdir $(RESULT))-seed1,1)
+	$(same_graphs)
+
+eval-measure-pr: eval-inputs
+	$(call measure,$(CURDIR),$(notdir $(RESULT)),0)
+
+eval-measure-seed1: eval-inputs
+	$(call measure,$(CURDIR),$(notdir $(RESULT))-seed1,1)
+
+eval-measure-base: eval-inputs
+	$(need_base)
+	$(measure_base)
+
+eval-gate: eval-inputs
+	$(gate)
+
+eval-compare: eval-inputs
+	$(need_base)
+	$(compare)
+
+eval-same-graphs:
+	$(same_graphs)
+
+eval-labels: eval-inputs
+	$(need_base)
+	git diff --no-renames --name-only $(BASE) HEAD > $(EVAL_OUT)/changed-$(COMMIT).txt
+	$(LABELER) $(RESULT)/result.json $(BASE_RESULT)/result.json \
+		$(EVAL_OUT)/changed-$(COMMIT).txt $(EVAL_OUT)/labels-$(COMMIT).txt >> $(SUMMARY)
+	cat $(EVAL_OUT)/labels-$(COMMIT).txt >> $(LABELS)

@@ -11,7 +11,8 @@ as paths, and nothing imports or runs them.
 The call graph is `{caller: [callees]}`, sorted. The result is `{"status":
 "ok"}` or `{"status": "crash", "error": ..., "where": ...}`, with `seconds`
 (construction, analysis and output) and `peak_rss_mib` (peak resident set
-size of this process).
+size of this process: on Linux VmHWM, which starts again at exec, not
+ru_maxrss, which keeps the parent's).
 """
 
 import json
@@ -44,6 +45,13 @@ FLAVOURS = {"original": _original, "new": _new}
 
 
 def _peak_rss_mib():
+    if sys.platform.startswith("linux"):
+        status = Path("/proc/self/status").read_text(encoding="utf-8")
+        peaks = [
+            line.split() for line in status.splitlines() if line.startswith("VmHWM:")
+        ]
+        assert len(peaks) == 1 and peaks[0][2] == "kB", peaks
+        return round(int(peaks[0][1]) / (1 << 10), 1)
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     # macOS reports bytes, Linux kibibytes.
     return round(peak / (1 << 20 if sys.platform == "darwin" else 1 << 10), 1)

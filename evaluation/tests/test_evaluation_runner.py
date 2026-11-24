@@ -7,6 +7,7 @@ supported Python version.
 
 import importlib.util
 import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -62,6 +63,17 @@ def test_an_analysis_runs_isolated_and_never_runs_the_analysed_source(
     assert json.loads(again.read_text())["hash"] == graph["hash"]
 
 
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="VmHWM is Linux")
+def test_a_child_of_a_large_parent_reports_its_own_peak_memory(tmp_path):
+    ballast = b"x" * (400 << 20)
+    record = run.run_job(
+        tool(tmp_path), project(tmp_path, "ok"), tmp_path / "g.json", timeout=60
+    )
+    assert len(ballast) == 400 << 20
+    assert record["status"] == "ok"
+    assert 0 < record["peak_rss_mib"] < 200
+
+
 def test_a_run_past_its_time_limit_is_killed(tmp_path):
     job = project(tmp_path, "hang")
     record = run.run_job(tool(tmp_path), job, tmp_path / "graph.json", timeout=1)
@@ -86,6 +98,40 @@ def test_a_child_that_dies_without_a_result_is_a_crash(tmp_path):
     record = run.run_job(tool(tmp_path), job, tmp_path / "graph.json", timeout=60)
     assert record["status"] == "crash"
     assert record["error"].startswith("exit status 3")
+
+
+def test_the_jobs_of_a_benchmark_run_k_at_a_time_each_with_its_limits(tmp_path):
+    behaviours = ("hang", "ok", "die", "crash")
+    jobs = [project(tmp_path, behaviour) for behaviour in behaviours]
+    data = run.run(
+        tool(tmp_path),
+        "micro",
+        jobs,
+        tmp_path / "out",
+        2,
+        progress=None,
+        allow_dirty=True,
+        workers=4,
+    )
+    statuses = {key: record["status"] for key, record in data["runs"].items()}
+    assert statuses == {
+        "micro/demo/crash": "crash",
+        "micro/demo/die": "crash",
+        "micro/demo/hang": "timeout",
+        "micro/demo/ok": "ok",
+    }
+    assert data["workers"] == 4
+
+
+def test_the_first_error_of_a_task_stops_the_tasks():
+    def task(number):
+        if number == 1:
+            raise ValueError("task 1")
+        return number
+
+    with pytest.raises(ValueError, match="task 1"):
+        run.run_tasks([0, 1, 2], task, 2)
+    assert run.run_tasks([0, 2, 3], task, 2) == [0, 2, 3]
 
 
 def test_micro_cases_that_need_a_newer_python_are_skipped(tmp_path):

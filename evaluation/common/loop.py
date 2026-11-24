@@ -59,12 +59,25 @@ def measure(
     allow_dirty=False,
     snippets=score.SNIPPETS,
     progress=None,
+    micro_workers=1,
 ):
-    """Run both benchmarks, score them; write and return OUT/NAME/result.json."""
+    """Run both benchmarks, score them; write and return OUT/NAME/result.json.
+    The micro-benchmark runs `micro_workers` cases at a time, the
+    macro-benchmark one project at a time: its times and memory are reported."""
     config = Path(benchmark_dir) / "projects.toml"
     macro, macro_skipped = run.macro_jobs(config)  # the pins first, before any run
     micro, skipped = run.micro_jobs(snippets, run.python_version(tool.python))
-    run.run(tool, "micro", micro, out, timeout, skipped, progress, allow_dirty)
+    run.run(
+        tool,
+        "micro",
+        micro,
+        out,
+        timeout,
+        skipped,
+        progress,
+        allow_dirty,
+        workers=micro_workers,
+    )
     run.run(tool, "macro", macro, out, timeout, macro_skipped, progress, allow_dirty)
     tool_dir = Path(out) / tool.name
     data = score.tool_results(tool_dir, config, snippets)
@@ -215,6 +228,9 @@ def main(argv=None):
     measure_parser.add_argument("--python", default=sys.executable)
     measure_parser.add_argument("--hash-seed", type=int, default=0)
     measure_parser.add_argument("--allow-dirty", action="store_true")
+    measure_parser.add_argument(
+        "--micro-jobs", type=int, default=1, help="micro-benchmark cases at a time"
+    )
     compare_parser = commands.add_parser("compare", help="compare two results")
     compare_parser.add_argument("old_dir", type=Path)
     compare_parser.add_argument("new_dir", type=Path)
@@ -230,7 +246,11 @@ def main(argv=None):
         )
         try:
             data = measure(
-                tool, args.out, timeout=args.timeout, allow_dirty=args.allow_dirty
+                tool,
+                args.out,
+                timeout=args.timeout,
+                allow_dirty=args.allow_dirty,
+                micro_workers=args.micro_jobs,
             )
         except run.DirtyCheckout as error:
             parser.error(f"{error}; commit it, or pass --allow-dirty")
