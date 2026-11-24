@@ -1022,7 +1022,7 @@ WITHOUT_RESULTS = {
     "_stub_base",
     # What they find goes to the accesses that reach the object, which
     # name their results; a name that is not a str constant makes the
-    # access a computed name (`MAX_DYNAMIC_NAMES`). `_pattern_class_instance`
+    # access a computed name (`DYNAMIC_NAMES_MAX`). `_pattern_class_instance`
     # watches the instances of a class for the accesses by pattern on them:
     # when that node saturates, the candidates of those accesses are lost
     # and their calls keep the cause `computed name` (final review, round

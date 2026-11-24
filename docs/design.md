@@ -830,20 +830,28 @@ without bound; past 50 nested attachments (see *Bounds*), the application
 waits for the solve. The rules that walk a class hierarchy (the MROs of a
 class and its subclasses, the classes below a class for `type[C]`) take
 the classes from a work list, so a long hierarchy does not nest calls
-either.
+either. A field that a container gains notifies its observers through a
+queue: a notification that adds a field to another container queues more
+instead of nesting calls, so a long chain of copied containers (`a + b +
+c + ...`) does not exhaust the stack in any order. Copying the fields of
+one container to another is done once per pair: many sites copy the same
+container to the same place (pydantic: half of 191,000 copies), and each
+copy would add the same edges again for every field.
 
-A node that no rule can read yet need not exist. A call of a modelled
-builtin or of a stubbed function binds its arguments to the parameters of
-each signature that it fits, and no rule reads most of those parameters
-(on sphinx, 12 % of them). For a plain call to a plain signature (no `*`
-or `**` in either, no argument passed twice), where a parameter has one
-source, the node of a parameter is made when a rule first reads it, in the
-state that it would have had (`Solver.follower`). The rules run only
-between propagations, and a propagation ends at its fixpoint: a node
-bound in an earlier phase holds what its source holds (the same set, or
-the saturated value with it), and a node bound in the same phase still
-waits for what its source held. So the result is the same, also with the
-cap, and the unread parameters cost no node, no edge and no propagation.
+A node that no rule can read yet need not exist. A call of a modelled builtin
+or of a stubbed function binds its arguments to the parameters of each
+signature that it fits, and no rule reads most of those parameters (on sphinx,
+1.2 million bindings, of whose parameters the rules read 12 %). For a plain
+call to a plain signature (no `*` or `**` in either, no argument passed twice),
+where a parameter has one source, the node of a parameter is made when a rule
+first reads it, in the state that it would have had (`Solver.follower`). The
+rules run only between propagations, and a propagation ends at its fixpoint: a
+node bound in an earlier phase holds what its source holds (the same set, or
+the saturated value with it), and a node bound in the same phase still waits
+for what its source held. So the result is the same, also with the cap, and the
+unread parameters cost no node, no edge and no propagation. The constant
+defaults of such a signature are made at the binding in both cases, since the
+solver numbers objects in the order in which their nodes are made.
 
 ### Limits of idea 1
 
@@ -1535,8 +1543,10 @@ or a list:
   text mode, or none, gives `io.TextIOWrapper`; a binary mode gives
   `io.FileIO` with `buffering=0`, else `io.BufferedRandom` with `+`,
   `io.BufferedReader` for `r`, `io.BufferedWriter` for `w`, `a` and `x`.
-  What Python rejects with `ValueError` gives nothing: a mode such as
-  `"rw"`, and a text mode with `buffering=0`. Each str constant
+  What Python rejects with `ValueError` gives nothing: a mode with a
+  letter other than `rwaxbt+`, with a repeated letter, without exactly one
+  of `rwax` (`"rw"`), or with both `b` and `t`, and a text mode with
+  `buffering=0`. Each str constant
   that reaches the mode adds its class, and each value of the buffering
   its own (an int constant is 0 or not; any other value is both). The
   alias of a constant (a class attribute, see *Where a class stops being
@@ -1608,7 +1618,9 @@ or a list:
   (`subparsers.add_parser("x")`, without `parents:
   Iterable[_ArgumentParserT]`, gives an `ArgumentParser`). An argument
   whose type has the variable where it is not read (`PathLike[AnyStr]`,
-  `**kwargs: T`) binds nothing known. A constrained
+  `**kwargs: T`) binds nothing known: the engine's mappings keep their
+  keys, which a type argument would not (`frozendict(a=f, b=g).get("x",
+  f)` would give `g`). A constrained
   type variable (`AnyStr`, marked in the data) bound to a value is the
   constraint that the value is (`bytes` for `b"x"`; every constraint for a
   value of neither: no `bytearray` passes through). A callable result is
@@ -2481,7 +2493,10 @@ As `type.__call__` does, the call calls `__new__` with
 the class and the arguments, gives what it returns, and calls `__init__`
 with the arguments, bound, on what it returns that is an instance of the
 class or of a subclass (the instances of the class, joined with what
-`__new__` returns: either may arrive first).
+`__new__` returns: either may arrive first). A class has thousands of
+calls and of instances, so the calls of a class share one set of its
+instances; each call sees every instance, in the same rounds, unless it
+comes after the instances of the class saturated: it then sees none.
 
 - Where no analysed class of an MRO defines `__new__` before an outside
   base or the end, Python's own (or the base's) runs: it returns
@@ -2646,7 +2661,8 @@ outside), and, where the owner may be absent (an unpacking may omit it) or
 is the literal `None`, to the class of the instance, or to the metaclasses
 of a class (see `Hierarchy.bind`). A call of these methods is valid if it
 passes no keyword and a number of positional arguments in the range of the
-signature (`(instance, owner=None, /)`), or an unpacking that may fill it;
+signature (`(instance, owner=None, /)`), or an unpacking that may fill it
+(a call with `**` is not valid, even `**{}`: a restriction of the analysis);
 `x.__get__(None)` and `x.__get__(None, None)` give nothing, as Python
 raises. "The literal `None`" is what the source writes: the builder
 records the positions at which a call expression passes `None` (before any
@@ -2995,7 +3011,10 @@ is redone when its MROs or its bases' metaclasses grow
   class of the statement; an explicit `type.__new__(mcs, ...)`
   (`super().__new__` in a metaclass's `__new__`) gives every class whose
   metaclass `mcs` is, since the analysis does not tell the statements apart
-  there. A class whose metaclass is `type` makes no such call.
+  there. Each class that such a `__new__` may return gets `__init__` with
+  the arguments of its own statement, and `__init__` is the same method
+  for each, so the work grows with the number of classes, not with its
+  square. A class whose metaclass is `type` makes no such call.
 
 Limits:
 
@@ -4081,10 +4100,10 @@ closure of the standard library. The document records it (`tool.cap`).
 
 | Bound | Value | Why | Past it |
 |---|---|---|---|
-| Names that a computed attribute name may hold (`getattr`, `hasattr`, `setattr`, `delattr`; `MAX_DYNAMIC_NAMES`) | 4 str constants | Precision and cost: a name that may be any of many strings would load every name in the program | The access is dynamic and gets no more names (see *Computed attribute names*) |
+| Names that a computed attribute name may hold (`getattr`, `hasattr`, `setattr`, `delattr`; `DYNAMIC_NAMES_MAX`) | 4 str constants | Precision and cost: a name that may be any of many strings would load every name in the program | The access is dynamic and gets no more names (see *Computed attribute names*) |
 | Alternative MROs of a class (`HIERARCHIES_PER_CLASS_MAX`) | 8 | Cost: the hierarchies are the product of the candidates of each base expression | One exhaustive order stands for all of them and finds every definition (see *Alternative hierarchies*) |
 | Steps of an outside name past its root (`EXTERNAL_STEPS_PAST_ROOT_MAX`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
-| Receivers that a call passes before its arguments (`MAX_RECEIVERS`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |
+| Receivers that a call passes before its arguments (`RECEIVERS_PER_CALL_MAX`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |
 | Layers of generic arguments in the stub data (`GENERIC_ARGUMENT_DEPTH_MAX` of `tools/generate_stubs.py`) | 2 | Termination and size: the types of recursive aliases nest without end, and the containers of stubbed results are keyed by the position in the type | A deeper argument keeps its class without its type arguments (see *Stub data*) |
 | Nested attachments of constraints in the solver (`_ATTACH_NESTING_MAX`) | 50 | The Python stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
 | Objects that a node holds (the cap, a parameter; `DEFAULT_CAP`) | 5,000 by default; any positive integer, or none | Cost and precision: a hub of generic code (a parameter that every strategy of a library reaches) costs its size times its constraints, and its calls are noise; real registries (the lexers of pygments) stay under it | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, stores into it are dropped. What it stood for is lost: code reached only through it is code that no analysed code calls, and a set it would have filled holds less, so a rule that depends on how much a set holds (nothing, or at most four computed names) may apply where it would not without the cap and add edges (`leaf -> fallback`, `main -> C.a` in *The solver*). The bound of hierarchies counts candidates too, but fewer candidates give a part of the hierarchies, which the exhaustive order over-approximates: it adds none; the bound of receivers counts the receivers that a call passes, not the objects of a set. A rule that widens a value adds one object (the pattern rule for a class member, see *Computed attribute names*), so a node saturates one object sooner: at a cap of 1 such a widening may lose a call that the analysis without it keeps |

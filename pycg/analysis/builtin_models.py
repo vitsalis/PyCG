@@ -1,24 +1,7 @@
-"""The rules of builtin functions and methods of builtin types that track
-more than their stubs say: elements of containers, what a descriptor
-wraps, the special methods a builtin calls, attributes by name.
-
-Every other builtin is described by the stubs (see outside.py). A modelled
-builtin gives the edge, and its rule (in `builtin_rules.py`) decides the
-result; it never calls its arguments. An entry is a tuple: the signature of
-the builtin in Python syntax, the rule name, then the parameters of the
-rule. A call binds its arguments to the signature like a call of a
-function, so unpacked and keyword arguments reach the rule, and so do
-defaults that are str or int constants (`format_spec=''`).
-"""
-
-# Builtin functions and classes, by their name in `builtins`, and methods of
-# builtin classes, by the class's name and theirs.
 FUNCTIONS = {
     "staticmethod": ("(function, /)", "wrap", "staticmethod"),
     "classmethod": ("(function, /)", "wrap", "classmethod"),
     "property": ("(fget=None, fset=None, fdel=None, doc=None)", "property"),
-    # The methods of `property`, whose receiver is the engine's own property
-    # or an instance of an analysed subclass of `property`.
     "property.__init__": (
         "(self, /, fget=None, fset=None, fdel=None, doc=None)",
         "property_init",
@@ -59,13 +42,8 @@ FUNCTIONS = {
     "delattr": ("(obj, name, /)", "delattr"),
 }
 
-# getattr, hasattr, setattr and delattr whose name is a str literal are a
-# load, a store or a deletion. With any other name, they are one of each str
-# constant it holds at each fixpoint, whatever else it holds, while it holds
-# at most this many; beyond that, the access is dynamic and gets no more names.
-MAX_DYNAMIC_NAMES = 4
+DYNAMIC_NAMES_MAX = 4
 
-# Methods of builtin types, by type name and method name.
 METHODS = {
     ("classmethod", "__get__"): ("(instance, owner=None, /)", "bind"),
     ("staticmethod", "__get__"): ("(instance, owner=None, /)", "bind"),
@@ -102,34 +80,10 @@ METHODS = {
     ("callable_iterator", "__next__"): ("()", "advance"),
 }
 
-# Selected operations of the standard library that iterate what they get
-# (design.md, "Selected standard-library operations"), by the canonical
-# stub definition path: how (below), the parameters whose arguments they
-# iterate ("*": every parameter that the overload types as an abstract
-# iterable, by position), what the lazy objects give, and the class of the
-# lazy object (its methods' names). By probes of CPython 3.12.12, 3.13.12,
-# 3.14.9 and 3.15.2 with an iterable apart from its iterator:
-# - EAGER: iterate at the call (`functools.reduce`, `math.sumprod`, ...);
-# - MATERIALIZE: make a tuple of each at the call, which asks its length
-#   (on 3.12 and 3.13; every version counts), and give tuples of items;
-# - LARGEST: `heapq.nlargest`/`nsmallest`: `len()`, `iter()`, `iter()` of
-#   that iterator again, and advance it, at the call;
-# - LAZY: `iter()` at the call, the advancing where the object is advanced;
-# - TEE: as LAZY, with `iter()` of the iterator again at the call;
-# - STARMAP: as LAZY; each argument bundle is made a tuple when advanced;
-# - GROUPBY: as LAZY; a group advances the same source;
-# - LAZY_ALL: `iter()` and the advancing where the object is advanced
-#   (`chain`);
-# - MERGE: as LAZY_ALL, and `iter()` of an iterator again (`heapq.merge`
-#   delegates to its last source with `yield from`);
-# - LAZY_OUTER: `iter()` of the outer iterable at the call; each inner
-#   iterable is taken and iterated where the object is advanced.
 EAGER, MATERIALIZE, LARGEST = "eager", "materialize", "largest"
 LAZY, TEE, STARMAP, GROUPBY = "lazy", "tee", "starmap", "groupby"
 LAZY_ALL, LAZY_OUTER, MERGE = "lazy all", "lazy outer", "merge"
 LAZY_MODES = frozenset({LAZY, TEE, STARMAP, GROUPBY, LAZY_ALL, LAZY_OUTER, MERGE})
-# What advancing a lazy object gives: the items (of every argument, or of
-# the first only), tuples of items, a tuple per position, or nothing.
 ITEMS, FIRST, TUPLES, POSITIONS, NOTHING = (
     "items",
     "first",
@@ -188,48 +142,20 @@ LIBRARY_ITERATION = {
         "itertools.chain",
     ),
 }
-# The operations whose result gets an argument as a value, without
-# iterating it: `zip_longest`'s fill value, `accumulate`'s first value.
 LIBRARY_VALUES = {
     "itertools.zip_longest": "fillvalue",
     "itertools.accumulate": "initial",
 }
-# The operations that read a tuple, also of a subclass, without iterating
-# it (`PyTuple_Check`): `math.dist`.
 READS_TUPLES = frozenset({"math.dist"})
-# A parameter of an operation that repeats its iterables (`product`): the
-# positions of the items are not known where it is given.
 REPEATS = {"itertools.product": "repeat"}
-# The class of the groups of `groupby`.
 GROUPER = "itertools._grouper"
-# The builtins of the stubs that take an iterable and do not consume it.
 NOT_CONSUMING = frozenset({"builtins.iter"})
-# `next()` on a lazy object of the table advances it, as `next(x)` does.
 for _kind in {entry[3] for entry in LIBRARY_ITERATION.values()} | {GROUPER}:
     if _kind is not None and (_kind, "__next__") not in METHODS:
         METHODS[(_kind, "__next__")] = ("()", "advance")
 
-# What a builtin that asks the length of what it iterates calls on it
-# before it iterates it (CPython's `PyObject_LengthHint`): its `__len__`,
-# else its `__length_hint__`. An entry of a protocol plan: the method and
-# the methods whose definition makes Python skip it. The fallback to
-# `__length_hint__` after a `__len__` that raises `TypeError` is not
-# modelled. Every supported version counts: `tuple(x)` and a call that
-# unpacks one argument alone, `f(*x)`, ask on 3.12 and 3.13 only; `list(x)`,
-# `list.extend`, `+=` on a list, `sorted`, the unpacking in a list or tuple
-# display and in any other call ask on every version.
 LENGTH_HINT = (("__len__", ()), ("__length_hint__", ("__len__",)))
-# Markers in the `unless` of a length hint: a class of the MRO defines the
-# method, an analysed class or an outside class whose stubs define it (see
-# `hierarchy._defines`). A buffer exporter defines `__buffer__` (`bytes`,
-# `bytearray`, `memoryview`, `array.array`); an iterable, `__iter__`
-# (`collections.abc.Sequence`). Only these plans test the outside classes:
-# another plan that lists `__buffer__` (the overloads of `int` and `float`
-# put `Buffer` first, where CPython calls `__int__` and `__float__` first)
-# sees analysed definitions only.
 BUFFER_EXPORTER = "<defines __buffer__>"
-# In the `unless` of an iteration: a class that derives from `tuple`, whose
-# storage `math.dist` reads (see `hierarchy._defines`).
 TUPLE_STORAGE = "<derives from tuple>"
 ITERABLE = "<defines __iter__>"
 REVERSIBLE = "<defines __reversed__>"
@@ -238,8 +164,6 @@ DEFINES_MARKERS = {
     ITERABLE: "__iter__",
     REVERSIBLE: "__reversed__",
 }
-# `bytes(x)` takes `__bytes__`, then `__index__`, then a buffer, before it
-# iterates x; `bytearray.extend(x)` takes a buffer first.
 BYTES_LENGTH_HINT = (
     ("__len__", ("__bytes__", "__index__", BUFFER_EXPORTER)),
     ("__length_hint__", ("__len__", "__bytes__", "__index__", BUFFER_EXPORTER)),
@@ -248,21 +172,8 @@ BUFFER_LENGTH_HINT = (
     ("__len__", (BUFFER_EXPORTER,)),
     ("__length_hint__", ("__len__", BUFFER_EXPORTER)),
 )
-# What the iterator that the sequence protocol makes asks of its sequence
-# when its length is asked (CPython's `iter_len`): `__len__` only. Where an
-# outside base defines `__iter__` (the mixin of `Sequence`, a generator),
-# Python iterates through it, not through the sequence protocol.
 SEQUENCE_LENGTH = (("__len__", (ITERABLE,)),)
-# What a `reversed` object asks of its sequence when its length is asked
-# (`reversed_len`): `__len__` again, where `reversed()` made one; where a
-# class of the MRO defines `__reversed__` (also the mixin of `Sequence`),
-# `reversed()` returns what that returns.
 REVERSED_LENGTH = (("__len__", (REVERSIBLE,)),)
-# The builtins of the stubs that ask the length of an argument, by
-# definition path: the parameter and the plan. With `ITERATOR`, they ask the
-# iterator that `iter()` of the argument gives: `str.join` makes a list of
-# `iter(x)` (CPython's `PySequence_Fast`), so it asks x itself only where
-# `x.__iter__` returns x.
 ARGUMENT, ITERATOR = "argument", "iterator"
 LENGTH_HINTS = {
     "builtins.sorted": ("iterable", LENGTH_HINT, ARGUMENT),
@@ -273,11 +184,7 @@ LENGTH_HINTS = {
     "builtins.bytearray.join": ("iterable_of_bytes", LENGTH_HINT, ITERATOR),
 }
 
-# The methods of the builtin sets, and `dict.fromkeys`, that the stubs
-# describe and that hash what they get (see `Containers.add_hash`), by stub
-# path: the parameter, and whether its argument is an iterable of keys
-# (else one key).
-_SET_OPERATIONS = (
+_HASHING_SET_OPERATIONS = (
     "union",
     "intersection",
     "difference",
@@ -292,7 +199,7 @@ HASHED_ARGUMENTS = {
     **{
         f"builtins.{kind}.{name}": ("s", True)
         for kind in ("set", "frozenset")
-        for name in _SET_OPERATIONS
+        for name in _HASHING_SET_OPERATIONS
     },
     **{
         f"builtins.set.{name}_update": ("s", True)
@@ -301,10 +208,6 @@ HASHED_ARGUMENTS = {
     "builtins.dict.fromkeys": ("iterable", True),
 }
 
-# The classes of `collections` whose instances are containers, by stub
-# class: the builtin container whose elements they keep in the same way, and
-# whose modelled methods (`METHODS`) they share where the table lists none
-# of their own; then their constructor, as an entry of `FUNCTIONS`.
 CONTAINER_CLASSES = {
     "collections.OrderedDict": (
         "dict",
@@ -323,22 +226,14 @@ CONTAINER_CLASSES = {
 
 
 def builtin_kind(kind):
-    """The builtin container whose elements a container of `kind` keeps:
-    `dict` for `collections.OrderedDict`, the kind itself for the others."""
     entry = CONTAINER_CLASSES.get(kind)
     return kind if entry is None else entry[0]
 
 
 def method_model(kind, method):
-    """The entry of the modelled method `method` of an object of `kind`: its
-    own, else that of its builtin container; None if it has none."""
     return METHODS.get((kind, method)) or METHODS.get((builtin_kind(kind), method))
 
 
-# The library functions other than the builtins that call what they are
-# given, by stub path: the parameter whose callable they call, with one
-# argument. They are C code with a documented call: `re.sub` and `re.subn`
-# call a callable replacement with each match.
 CALLS_BACK = {
     "re.sub": "repl",
     "re.subn": "repl",
@@ -346,28 +241,16 @@ CALLS_BACK = {
     "re.Pattern.subn": "repl",
 }
 
-# Variables of the standard library whose values have a concrete class that
-# the stubs do not give, by stub path: the class. The interpreter makes the
-# standard streams `io.TextIOWrapper` objects; the stubs type them as the
-# abstract `TextIO`.
 VARIABLE_TYPES = {
     "sys.stdin": "_io.TextIOWrapper",
     "sys.stdout": "_io.TextIOWrapper",
     "sys.stderr": "_io.TextIOWrapper",
 }
 
-# The functions that open a file as `io.open` does, by stub path (`io.open`
-# is `builtins.open`). Their stubs give an overload per kind of mode, whose
-# `Literal` modes the stub data reduces to `str`; `opened_class` decides.
 OPENERS = frozenset({"builtins.open", "os.fdopen", "pathlib.Path.open"})
 
 
 def opened_class(mode, unbuffered):
-    """The stub class of the file object that `io.open` makes for the str
-    `mode`, with `buffering=0` if `unbuffered`; None where it raises
-    `ValueError`: a mode of other letters than `rwaxbt+`, with a repeated
-    one, without exactly one of `rwax`, or with both `b` and `t`, and
-    unbuffered text."""
     letters = set(mode)
     if len(letters) < len(mode) or not letters <= set("rwaxbt+"):
         return None
@@ -382,28 +265,14 @@ def opened_class(mode, unbuffered):
     return "_io.BufferedReader" if "r" in letters else "_io.BufferedWriter"
 
 
-# The accessor of a property for each descriptor method.
 PROPERTY_ACCESSORS = {"__get__": "fget", "__set__": "fset", "__delete__": "fdel"}
 
-# The attributes of a builtin object that hold what it wraps, by type name.
-WRAPPED = {
+WRAPPED_ATTRIBUTES_BY_TYPE = {
     "staticmethod": ("__func__",),
     "classmethod": ("__func__",),
     "property": ("fget", "fset", "fdel"),
 }
 
-# Library callables that return one of their arguments where their stubs do
-# not say so (`dataclass(frozen=True)` returns a callable; `update_wrapper`
-# a stub-only type; `typing.cast` the declared type), by qualified name,
-# whether the analysis analyses them or not: their signature, the parameter
-# that the call returns, and the name of the decorator it returns
-# otherwise. Stubs of the form `(x: T) -> T` (`typing.final`,
-# `abc.abstractmethod`) say it for the others.
-# If the call may omit that parameter, or there is none, the call returns a
-# decorator: a callable that returns its argument, named as it runs
-# (`@dataclass(frozen=True)` applies the closure `dataclasses.dataclass.wrap`,
-# `functools.wraps(f)` a `functools.partial` of `update_wrapper`), or after
-# the callable if the entry names none.
 RETURNS_ARGUMENT = {
     "dataclasses.dataclass": (
         "(cls=None, /, **options)",
@@ -422,29 +291,14 @@ RETURNS_ARGUMENT = {
     "typing.cast": ("(typ, val)", "val"),
 }
 
-# The signature of the decorator that such a callable returns.
-DECORATOR = ("(argument, /)", "argument")
+RETURNED_DECORATOR_SIGNATURE = ("(argument, /)", "argument")
 
-# Library decorators whose stubs return a callable type where CPython returns
-# a closure that it defines inside the decorator, by stub path: the closure's
-# name (micro-benchmark README, "Functions without an attribute path"). A call
-# of the decorated function calls that closure first (Lib/contextlib.py and
-# Lib/functools.py of CPython 3.12 to 3.15):
-# - `contextmanager` and `asynccontextmanager` return `helper`
-#   (`@wraps(func) def helper(*args, **kwds)`), which makes the
-#   `_GeneratorContextManager` or `_AsyncGeneratorContextManager`;
-# - `lru_cache` given an int or None returns `decorating_function`, which
-#   makes the `_lru_cache_wrapper` (given a function, it makes the wrapper at
-#   once, as the stub's other overload says; so does `cache`).
 CLOSURES = {
     "contextlib.contextmanager": "contextlib.contextmanager.helper",
     "contextlib.asynccontextmanager": "contextlib.asynccontextmanager.helper",
     "functools.lru_cache": "functools.lru_cache.decorating_function",
 }
 
-# Outside callables that read a namespace by reflection, by stub path: the
-# signature that binds their arguments and the rule, which adds to what the
-# stubs give (see reflection.py).
 REFLECTION_CALLS = {
     "builtins.vars": ("(object=None, /)", "namespace"),
     "inspect.getmembers": ("(object, predicate=None)", "members"),
