@@ -1,0 +1,2850 @@
+# Call-site ledger of sqlparse 0.6.1 (sqlparse/, commit 09dbe1eec31ed1b3cd05366748865f11ba427d32).
+# Hand-written from the source and Python semantics; judgements and statistics in sqlparse.md.
+#
+# Value sets used below (sqlparse.md, "Value dispatch"):
+#   preprocess filters: KeywordCaseFilter (_CaseFilter.process), IdentifierCaseFilter, TruncateStringFilter.
+#   stmtprocess filters: StripTrailingSemicolonFilter, SpacesAroundOperatorsFilter, StripCommentsFilter,
+#     StripWhitespaceFilter, ReindentFilter, AlignedIndentFilter, RightMarginFilter.
+#   postprocess filters: SerializerUnicode, OutputPythonFilter and OutputPHPFilter (OutputFilter.process).
+#   _group callbacks: the local match, valid(_prev/_next/_final) and post functions of the group_* functions.
+#   Token types: _TokenType.__getattr__ runs on the first load of a child type only (sqlparse.md, token types).
+default reject sqlparse.tokens._TokenType.__getattr__: Python calls __getattr__ only when the normal lookup fails on a _TokenType instance. At this site the receiver is not a token type (a module, a class, a token or token list, a filter, a Lexer, a StatementSplitter, a FilterStack, a DelimitedSpans, a super() object, a file or sys stream, a str, bytes, a list, a dict, a re.Match, an argparse object, or another object that is not a token type), or it is a token type whose attribute already exists: the first load of a child type stores it in the parent's instance dict (setattr, tokens.py:26), and the module code that `import sqlparse` runs (tokens.py, sql.py, engine/grouping.py, keywords.py) creates every token type that the package names, except Comment.Multiline and Comment.Multiline.Hint. The sites that create a token type accept the candidate explicitly
+default reject sqlparse.sql.TokenList.__getitem__: no TokenList is subscripted, iterated, unpacked, searched with `in` or converted here; the operand is a list (self.tokens, a slice of it, the filter lists, the lists of grouping and filters), a tuple, a str, a dict, a re.Match, a generator or other iterator, an argparse value, a typing construct in an annotation, or a client object; the sites that subscript or iterate a TokenList accept it explicitly
+default reject sqlparse.sql.TokenList.__iter__: no TokenList is iterated, unpacked, searched with `in` or converted here; the operand is a list (self.tokens, a slice of it, the filter lists, the lists of grouping and filters), a tuple, a str, a dict, a generator or other iterator, an argparse value, or a client object; the sites that iterate a TokenList accept it explicitly
+default reject sqlparse.engine.grouping.group_typecasts.match, sqlparse.engine.grouping.group_tzcasts.match, sqlparse.engine.grouping.group_typed_literal.match, sqlparse.engine.grouping.group_period.match, sqlparse.engine.grouping.group_as.match, sqlparse.engine.grouping.group_assignment.match, sqlparse.engine.grouping.group_comparison.match, sqlparse.engine.grouping.group_arrays.match, sqlparse.engine.grouping.group_operator.match, sqlparse.engine.grouping.group_identifier_list.match: a local function of its group_* function, which passes it to _group; only _group calls it, through its parameter `match` (grouping.py:532). A call `x.match(...)` is the method Token.match of a token
+
+== sqlparse
+
+[sqlparse.parse]
+29:17 call  tuple(parsestream(sql, encoding))
+    -> <builtin>.tuple
+    note: the argument is the generator that FilterStack.run returns; tuple() resumes it, which is not a new call
+29:29 call  parsestream(sql, encoding)
+    -> sqlparse.parsestream
+
+[sqlparse.parsestream]
+41:31 call  engine.FilterStack()
+    -> sqlparse.engine.filter_stack.FilterStack.__init__
+42:26 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+43:21 call  stack.run(stream, encoding)
+    -> sqlparse.engine.filter_stack.FilterStack.run
+
+[sqlparse.format]
+56:31 call  engine.FilterStack()
+    -> sqlparse.engine.filter_stack.FilterStack.__init__
+57:41 call  formatter.validate_options(options)
+    -> sqlparse.formatter.validate_options
+58:41 call  formatter.build_filter_stack(stack, options)
+    -> sqlparse.formatter.build_filter_stack
+59:29 call  stack.postprocess.append(filters.SerializerUnicode())
+    -> <builtin>.list.append
+59:55 call  filters.SerializerUnicode()
+    note: SerializerUnicode defines no __init__ and has no base but object: object.__init__, no edge
+60:19 call  "".join(stack.run(sql, encoding))
+    -> <builtin>.str.join
+    note: join resumes the generator of FilterStack.run, whose items are the str that SerializerUnicode.process returns
+60:29 call  stack.run(sql, encoding)
+    -> sqlparse.engine.filter_stack.FilterStack.run
+
+[sqlparse.split]
+74:31 call  engine.FilterStack(strip_semicolon=strip_semicolon)
+    -> sqlparse.engine.filter_stack.FilterStack.__init__
+75:16 call  str(stmt)
+    -> <builtin>.str
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__str__, sqlparse.sql.Token.__repr__: stmt is a Statement that StatementSplitter.process yields (the stack has no postprocess filter); Statement inherits TokenList.__str__
+    reject sqlparse.tokens._TokenType.__repr__: stmt is a Statement, not a token type
+75:28 call  str(stmt).strip()
+    -> <builtin>.str.strip
+75:52 call  stack.run(sql, encoding)
+    -> sqlparse.engine.filter_stack.FilterStack.run
+
+== sqlparse.__main__
+
+[sqlparse.__main__]
+22:13 call  sys.exit(main())
+    -> sys.exit
+    note: the module body runs only for `python -m sqlparse` (__name__ == '__main__'); rule A keeps its edges
+22:18 call  main()
+    -> sqlparse.cli.main
+
+== sqlparse.cli
+
+[sqlparse.cli.create_parser]
+33:37 call  argparse.ArgumentParser( prog='sqlformat', description='F...
+    -> argparse.ArgumentParser
+40:24 call  parser.add_argument( 'filename', nargs='+', help='file(s)...
+    -> argparse.ArgumentParser.add_argument
+45:24 call  parser.add_argument( '-o', '--outfile', dest='outfile', m...
+    -> argparse.ArgumentParser.add_argument
+51:24 call  parser.add_argument( '--in-place', dest='inplace', action...
+    -> argparse.ArgumentParser.add_argument
+58:24 call  parser.add_argument( '--version', action='version', versi...
+    -> argparse.ArgumentParser.add_argument
+63:38 call  parser.add_argument_group('Formatting Options')
+    -> argparse.ArgumentParser.add_argument_group
+65:23 call  group.add_argument( '-k', '--keywords', metavar='CHOICE',...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+70:67 call  'change case of keywords, CHOICE is one of {}'.format( ',...
+    -> <builtin>.str.format
+    reject sqlparse.format: the receiver is a str literal, so this is str.format, not the package function sqlparse.format
+    reject sqlparse.sql.Token.__repr__, sqlparse.sql.Token.__str__, sqlparse.sql.TokenList.__str__, sqlparse.tokens._TokenType.__repr__: the only field is the str that ', '.join returns
+71:22 call  ', '.join(f'"{x}"' for x in _CASE_CHOICES)
+    -> <builtin>.str.join
+71:26 format  {x}
+    reject *: x is a str of the list _CASE_CHOICES
+73:23 call  group.add_argument( '-i', '--identifiers', metavar='CHOIC...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+78:70 call  'change case of identifiers, CHOICE is one of {}'.format(...
+    -> <builtin>.str.format
+    reject sqlparse.format: the receiver is a str literal, so this is str.format, not the package function sqlparse.format
+    reject sqlparse.sql.Token.__repr__, sqlparse.sql.Token.__str__, sqlparse.sql.TokenList.__str__, sqlparse.tokens._TokenType.__repr__: the only field is the str that ', '.join returns
+79:22 call  ', '.join(f'"{x}"' for x in _CASE_CHOICES)
+    -> <builtin>.str.join
+79:26 format  {x}
+    reject *: x is a str of the list _CASE_CHOICES
+81:23 call  group.add_argument( '-l', '--language', metavar='LANG', d...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+89:23 call  group.add_argument( '--strip-comments', dest='strip_comme...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+96:23 call  group.add_argument( '-r', '--reindent', dest='reindent', ...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+103:23 call  group.add_argument( '--indent_width', dest='indent_width'...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+110:23 call  group.add_argument( '--indent_after_first', dest='indent_...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+117:23 call  group.add_argument( '--indent_columns', dest='indent_colu...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+124:23 call  group.add_argument( '-a', '--reindent_aligned', action='s...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+130:23 call  group.add_argument( '-s', '--use_space_around_operators',...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+136:23 call  group.add_argument( '--wrap_after', dest='wrap_after', de...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+143:23 call  group.add_argument( '--comma_first', dest='comma_first', ...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+150:23 call  group.add_argument( '--compact', dest='compact', default=...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+157:23 call  group.add_argument( '--encoding', dest='encoding', defaul...
+    -> argparse._ArgumentGroup.add_argument
+    note: group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor.
+
+[sqlparse.cli._error]
+168:21 call  sys.stderr.write(f'[ERROR] {msg}\n')
+    -> io.TextIOWrapper.write
+    note: sys.stderr is the interpreter's text stream, an io.TextIOWrapper (sqlparse.md, naming)
+168:32 format  {msg}
+    reject *: _error is private; every package call passes a str (a literal or an f-string)
+
+[sqlparse.cli._process_file]
+179:22 call  _error('Cannot use --in-place with stdin')
+    -> sqlparse.cli._error
+183:32 call  TextIOWrapper(sys.stdin.buffer, encoding=args.encoding)
+    -> io.TextIOWrapper
+185:32 call  wrapper.read()
+    -> io.TextIOWrapper.read
+187:27 call  wrapper.detach()
+    -> io.TextIOWrapper.detach
+190:22 call  open(filename, encoding=args.encoding)
+    -> <builtin>.open
+191:31 call  ''.join(f.readlines())
+    -> <builtin>.str.join
+191:43 call  f.readlines()
+    -> io.TextIOWrapper.readlines
+    note: f is the text file that open() returns in mode 'r'
+193:26 call  _error(f'Failed to read {filename}: {e}')
+    -> sqlparse.cli._error
+193:44 format  {filename}
+    reject *: filename is a str of args.filename (argparse, nargs='+')
+193:56 format  {e}
+    reject *: e is an OSError; formatting it runs OSError.__str__, no package code
+197:26 call  vars(args)
+    -> <builtin>.vars
+199:61 call  sqlparse.formatter.validate_options(formatter_opts)
+    -> sqlparse.formatter.validate_options
+201:22 call  _error(f'Invalid options: {e}')
+    -> sqlparse.cli._error
+201:42 format  {e}
+    reject *: e is a SQLParseError, which defines no __str__ (BaseException.__str__)
+204:28 call  sqlparse.format(data, **formatter_opts)
+    -> sqlparse.format
+    reject sqlparse.sql.Token.__repr__, sqlparse.sql.Token.__str__, sqlparse.sql.TokenList.__str__, sqlparse.tokens._TokenType.__repr__: sqlparse.format is the package function of sqlparse/__init__.py, not str.format; it formats no template
+206:22 call  _error(f'Failed to format {filename}: {e}')
+    -> sqlparse.cli._error
+206:42 format  {filename}
+    reject *: filename is a str of args.filename (argparse, nargs='+')
+206:54 format  {e}
+    reject *: e is a SQLParseError, which defines no __str__ (BaseException.__str__)
+214:25 call  sys.stdout.write(s)
+    -> io.TextIOWrapper.write
+    note: sys.stdout is the interpreter's text stream, an io.TextIOWrapper (sqlparse.md, naming)
+215:25 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+219:18 call  open(outfile, 'w', encoding=args.encoding)
+    -> <builtin>.open
+220:25 call  stream.write(s)
+    -> io.TextIOWrapper.write
+222:22 call  _error(f'Failed to open {outfile}: {e}')
+    -> sqlparse.cli._error
+222:40 format  {outfile}
+    reject *: outfile is filename (a str of args.filename) or args.outfile (a str from argparse)
+222:51 format  {e}
+    reject *: e is an OSError; formatting it runs OSError.__str__, no package code
+
+[sqlparse.cli.main]
+227:27 call  create_parser()
+    -> sqlparse.cli.create_parser
+228:29 call  parser.parse_args(args)
+    -> argparse.ArgumentParser.parse_args
+231:11 call  len(args.filename)
+    -> <builtin>.len
+233:26 call  _error('Cannot use -o/--outfile with multiple files')
+    -> sqlparse.cli._error
+235:26 call  _error('Multiple files require --in-place flag')
+    -> sqlparse.cli._error
+240:31 call  _process_file(filename, args)
+    -> sqlparse.cli._process_file
+
+== sqlparse.engine.filter_stack
+
+[sqlparse.engine.filter_stack.FilterStack.__init__]
+24:36 call  self.stmtprocess.append(StripTrailingSemicolonFilter())
+    -> <builtin>.list.append
+24:65 call  StripTrailingSemicolonFilter()
+    note: StripTrailingSemicolonFilter defines no __init__ and has no base but object: object.__init__, no edge
+
+[sqlparse.engine.filter_stack.FilterStack.run]
+31:36 call  lexer.tokenize(sql, encoding)
+    -> sqlparse.lexer.tokenize
+34:41 call  filter_.process(stream)
+    -> sqlparse.filters.tokens._CaseFilter.process
+    -> sqlparse.filters.tokens.IdentifierCaseFilter.process
+    -> sqlparse.filters.tokens.TruncateStringFilter.process
+    reject *: the preprocess filters that the package makes are KeywordCaseFilter (inherits _CaseFilter.process), IdentifierCaseFilter and TruncateStringFilter (formatter.py:146-155); the other filters go to stmtprocess or postprocess, and StatementSplitter is never in a list
+    note: self.preprocess is a public list; the package fills it only in formatter.build_filter_stack (sqlparse.md, filter stack); filters of the client are client objects. The three process methods are generator functions, called here
+36:39 call  StatementSplitter()
+    -> sqlparse.engine.statement_splitter.StatementSplitter.__init__
+36:49 call  StatementSplitter().process(stream)
+    -> sqlparse.engine.statement_splitter.StatementSplitter.process
+    reject *: the receiver is the StatementSplitter made at 36:39
+41:42 call  grouping.group(stmt)
+    -> sqlparse.engine.grouping.group
+44:36 call  filter_.process(stmt)
+    -> sqlparse.filters.others.StripTrailingSemicolonFilter.process
+    -> sqlparse.filters.others.SpacesAroundOperatorsFilter.process
+    -> sqlparse.filters.others.StripCommentsFilter.process
+    -> sqlparse.filters.others.StripWhitespaceFilter.process
+    -> sqlparse.filters.reindent.ReindentFilter.process
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.process
+    -> sqlparse.filters.right_margin.RightMarginFilter.process
+    reject *: the stmtprocess filters that the package makes are StripTrailingSemicolonFilter (FilterStack.__init__) and the six filters of formatter.py:159-190; the token filters go to preprocess, the serializers to postprocess, and StatementSplitter is never in a list
+    note: self.stmtprocess is a public list; the package fills it in FilterStack.__init__ and formatter.build_filter_stack (sqlparse.md, filter stack). RightMarginFilter.process raises NotImplementedError
+47:43 call  filter_.process(stmt)
+    -> sqlparse.filters.others.SerializerUnicode.process
+    -> sqlparse.filters.output.OutputFilter.process
+    reject *: the postprocess filters that the package makes are SerializerUnicode (sqlparse/__init__.py:59) and OutputPHPFilter or OutputPythonFilter (formatter.py:196-202), which inherit OutputFilter.process
+    note: self.postprocess is a public list; the package fills it in sqlparse.format and formatter.build_filter_stack (sqlparse.md, filter stack)
+51:32 call  SQLParseError('Maximum recursion depth exceeded')
+    -> <builtin>.Exception.__init__
+    note: SQLParseError defines no __init__; Exception.__init__ runs
+
+== sqlparse.engine.grouping
+
+[sqlparse.engine.grouping]
+22:35 getattr  T.Number.Integer
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Number.Integer when `import sqlparse` runs (sqlparse.md, token types): __getattr__ creates it
+22:53 getattr  T.Number.Float
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Number.Float when `import sqlparse` runs (sqlparse.md, token types)
+23:49 getattr  T.String.Symbol
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of String.Symbol when `import sqlparse` runs (sqlparse.md, token types)
+24:26 getattr  T.Name.Placeholder
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Name.Placeholder when `import sqlparse` runs (sqlparse.md, token types)
+251:2 decorator  @recurse(sql.Identifier)
+    -> sqlparse.utils.recurse.wrap
+    note: the decorator is the closure wrap that recurse(...) returns (251:9)
+251:9 call  recurse(sql.Identifier)
+    -> sqlparse.utils.recurse
+261:2 decorator  @recurse(sql.Over)
+    -> sqlparse.utils.recurse.wrap
+261:9 call  recurse(sql.Over)
+    -> sqlparse.utils.recurse
+335:2 decorator  @recurse(sql.Comment)
+    -> sqlparse.utils.recurse.wrap
+335:9 call  recurse(sql.Comment)
+    -> sqlparse.utils.recurse
+353:2 decorator  @recurse(sql.Where)
+    -> sqlparse.utils.recurse.wrap
+353:9 call  recurse(sql.Where)
+    -> sqlparse.utils.recurse
+370:2 decorator  @recurse()
+    -> sqlparse.utils.recurse.wrap
+370:9 call  recurse()
+    -> sqlparse.utils.recurse
+383:2 decorator  @recurse(sql.Function)
+    -> sqlparse.utils.recurse.wrap
+383:9 call  recurse(sql.Function)
+    -> sqlparse.utils.recurse
+411:2 decorator  @recurse(sql.Identifier)
+    -> sqlparse.utils.recurse.wrap
+411:9 call  recurse(sql.Identifier)
+    -> sqlparse.utils.recurse
+423:2 decorator  @recurse()
+    -> sqlparse.utils.recurse.wrap
+423:9 call  recurse()
+    -> sqlparse.utils.recurse
+
+[sqlparse.engine.grouping._group_matching]
+34:28 call  SQLParseError( f"Maximum grouping depth exceeded ({MAX_GR...
+    -> <builtin>.Exception.__init__
+    note: SQLParseError defines no __init__; Exception.__init__ runs
+35:48 format  {MAX_GROUPING_DEPTH}
+    reject *: MAX_GROUPING_DEPTH is an int (the module constant, or the int or None that a client sets; the message is built only when it is not None)
+40:15 call  len(tlist.tokens)
+    -> <builtin>.len
+41:28 call  SQLParseError( f"Maximum number of tokens exceeded ({MAX_...
+    -> <builtin>.Exception.__init__
+42:50 format  {MAX_GROUPING_TOKENS}
+    reject *: MAX_GROUPING_TOKENS is an int (the module constant, or the int that a client sets; the message is built only when it is not None)
+47:22 call  list(tlist)
+    -> <builtin>.list
+    -> sqlparse.sql.TokenList.__iter__
+    reject sqlparse.sql.TokenList.__getitem__: tlist is a TokenList (the Statement of group(), or a group token); it defines __iter__, so list() does not fall back to __getitem__
+49:32 call  enumerate(token_list)
+    -> <builtin>.enumerate
+58:45 call  isinstance(token, cls)
+    -> <builtin>.isinstance
+62:28 call  _group_matching(token, cls, depth + 1)
+    -> sqlparse.engine.grouping._group_matching
+65:23 call  token.match(*cls.M_OPEN)
+    -> sqlparse.sql.Token.match
+66:25 call  opens.append(tidx)
+    -> <builtin>.list.append
+68:25 call  token.match(*cls.M_CLOSE)
+    -> sqlparse.sql.Token.match
+70:37 call  opens.pop()
+    -> <builtin>.list.pop
+76:31 call  tlist.group_tokens(cls, open_idx, close_idx)
+    -> sqlparse.sql.TokenList.group_tokens
+
+[sqlparse.engine.grouping.group_brackets]
+81:20 call  _group_matching(tlist, sql.SquareBrackets)
+    -> sqlparse.engine.grouping._group_matching
+
+[sqlparse.engine.grouping.group_parenthesis]
+85:20 call  _group_matching(tlist, sql.Parenthesis)
+    -> sqlparse.engine.grouping._group_matching
+
+[sqlparse.engine.grouping.group_case]
+89:20 call  _group_matching(tlist, sql.Case)
+    -> sqlparse.engine.grouping._group_matching
+
+[sqlparse.engine.grouping.group_if]
+93:20 call  _group_matching(tlist, sql.If)
+    -> sqlparse.engine.grouping._group_matching
+
+[sqlparse.engine.grouping.group_for]
+97:20 call  _group_matching(tlist, sql.For)
+    -> sqlparse.engine.grouping._group_matching
+
+[sqlparse.engine.grouping.group_begin]
+101:20 call  _group_matching(tlist, sql.Begin)
+    -> sqlparse.engine.grouping._group_matching
+
+[sqlparse.engine.grouping.group_typecasts]
+115:11 call  _group(tlist, sql.Identifier, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_typecasts.match]
+106:27 call  token.match(T.Punctuation, '::')
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_tzcasts]
+135:11 call  _group(tlist, sql.Identifier, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_tzcasts.valid_next]
+128:27 call  token.match(T.Keyword, 'AS')
+    -> sqlparse.sql.Token.match
+129:27 call  token.match(*sql.TypedLiteral.M_CLOSE)
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_typed_literal]
+162:11 call  _group(tlist, sql.TypedLiteral, match, valid_prev, valid_...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+164:11 call  _group(tlist, sql.TypedLiteral, match_to_extend, valid_pr...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_typed_literal.match]
+145:19 call  imt(token, m=sql.TypedLiteral.M_OPEN)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_typed_literal.match_to_extend]
+148:26 call  isinstance(token, sql.TypedLiteral)
+    -> <builtin>.isinstance
+
+[sqlparse.engine.grouping.group_typed_literal.valid_next]
+154:49 call  token.match(*sql.TypedLiteral.M_CLOSE)
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_typed_literal.valid_final]
+157:49 call  token.match(*sql.TypedLiteral.M_EXTEND)
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_period]
+195:11 call  _group(tlist, sql.Identifier, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_period.match]
+173:27 call  token.match(ttype, value)
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_period.valid_prev]
+180:19 call  imt(token, i=sqlcls, t=ttypes)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_period.post]
+190:22 getitem  tlist[nidx]
+    -> sqlparse.sql.TokenList.__getitem__
+    note: tlist is the TokenList that _group passes to post (the Statement or a group)
+191:25 call  imt(next_, i=sqlcls, t=ttypes)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_as]
+212:11 call  _group(tlist, sql.Identifier, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_as.valid_next]
+207:23 call  imt(token, t=ttypes)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_assignment]
+229:11 call  _group(tlist, sql.Assignment, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_assignment.match]
+217:27 call  token.match(T.Assignment, ':=')
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_assignment.valid]
+220:50 op  token.ttype not in (T.Keyword,)
+    reject *: the right operand is a tuple display; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+
+[sqlparse.engine.grouping.group_assignment.post]
+224:39 call  tlist.token_next_by(m=m_semicolon, idx=nidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_comparison]
+247:11 call  _group(tlist, sql.Comparison, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_comparison.valid]
+241:20 call  bool(imt(token, t=ttypes, i=sqlcls) or (token and token.i...
+    -> <builtin>.bool
+    note: the argument is the bool of imt, None, or the bool of the comparison; no package __bool__ runs
+241:24 call  imt(token, t=ttypes, i=sqlcls)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_identifier]
+255:38 call  tlist.token_next_by(t=ttypes)
+    -> sqlparse.sql.TokenList.token_next_by
+257:27 call  tlist.group_tokens(sql.Identifier, tidx, tidx)
+    -> sqlparse.sql.TokenList.group_tokens
+258:42 call  tlist.token_next_by(t=ttypes, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_over]
+263:38 call  tlist.token_next_by(m=sql.Over.M_OPEN)
+    -> sqlparse.sql.TokenList.token_next_by
+265:39 call  tlist.token_next(tidx)
+    -> sqlparse.sql.TokenList.token_next
+266:15 call  imt(next_, i=sql.Parenthesis, t=T.Name)
+    -> sqlparse.utils.imt
+267:31 call  tlist.group_tokens(sql.Over, tidx, nidx)
+    -> sqlparse.sql.TokenList.group_tokens
+268:42 call  tlist.token_next_by(m=sql.Over.M_OPEN, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_arrays]
+287:11 call  _group(tlist, sql.Identifier, match, valid_prev, valid_ne...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_arrays.match]
+276:26 call  isinstance(token, sql.SquareBrackets)
+    -> <builtin>.isinstance
+
+[sqlparse.engine.grouping.group_arrays.valid_prev]
+279:19 call  imt(token, i=sqlcls, t=ttypes)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_operator]
+310:11 call  _group(tlist, sql.Operation, match, valid_prev, valid_nex...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_operator.match]
+297:19 call  imt(token, t=(T.Operator, T.Wildcard))
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_operator.valid]
+300:19 call  imt(token, i=sqlcls, t=ttypes)
+    -> sqlparse.utils.imt
+301:38 call  token.match( T.Keyword, ('CURRENT_DATE', 'CURRENT_TIME', ...
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_operator.post]
+306:14 getitem  tlist[tidx]
+    -> sqlparse.sql.TokenList.__getitem__
+    note: tlist is the TokenList that _group passes to post (the Statement or a group)
+
+[sqlparse.engine.grouping.group_identifier_list]
+331:11 call  _group(tlist, sql.IdentifierList, match, valid_prev, vali...
+    -> sqlparse.engine.grouping._group
+    reject *: the local functions passed here are called by _group itself (grouping.py:532-537), not by this call
+
+[sqlparse.engine.grouping.group_identifier_list.match]
+322:27 call  token.match(T.Punctuation, ',')
+    -> sqlparse.sql.Token.match
+
+[sqlparse.engine.grouping.group_identifier_list.valid]
+325:19 call  imt(token, i=sqlcls, m=m_role, t=ttypes)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_comments]
+337:38 call  tlist.token_next_by(t=T.Comment)
+    -> sqlparse.sql.TokenList.token_next_by
+339:45 call  tlist.token_not_matching( lambda tk: imt(tk, t=T.Comment)...
+    -> sqlparse.sql.TokenList.token_not_matching
+    reject sqlparse.engine.grouping.group_comments.<lambda1>: token_not_matching wraps it in its own lambda (sql.py:278), which _token_matching calls; this call does not call it
+347:37 call  tlist.token_prev(eidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_prev
+348:27 call  tlist.group_tokens(sql.Comment, tidx, eidx)
+    -> sqlparse.sql.TokenList.group_tokens
+350:42 call  tlist.token_next_by(t=T.Comment, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_comments.<lambda1>]
+340:27 call  imt(tk, t=T.Comment)
+    -> sqlparse.utils.imt
+
+[sqlparse.engine.grouping.group_where]
+355:38 call  tlist.token_next_by(m=sql.Where.M_OPEN)
+    -> sqlparse.sql.TokenList.token_next_by
+357:40 call  tlist.token_next_by(m=sql.Where.M_CLOSE, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+360:25 getattr  tlist._groupable_tokens
+    -> sqlparse.sql.TokenList._groupable_tokens
+    -> sqlparse.sql.Parenthesis._groupable_tokens
+    -> sqlparse.sql.SquareBrackets._groupable_tokens
+    note: tlist is the Statement or any group below it except a Where (recurse(sql.Where) does not enter Where groups); group_brackets and group_parenthesis have made SquareBrackets and Parenthesis groups by then
+365:33 call  tlist.token_index(end)
+    -> sqlparse.sql.TokenList.token_index
+366:27 call  tlist.group_tokens(sql.Where, tidx, eidx)
+    -> sqlparse.sql.TokenList.group_tokens
+367:42 call  tlist.token_next_by(m=sql.Where.M_OPEN, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_aliased]
+375:38 call  tlist.token_next_by(i=I_ALIAS, t=T.Number)
+    -> sqlparse.sql.TokenList.token_next_by
+377:39 call  tlist.token_next(tidx)
+    -> sqlparse.sql.TokenList.token_next
+378:22 call  isinstance(next_, sql.Identifier)
+    -> <builtin>.isinstance
+379:31 call  tlist.group_tokens(sql.Identifier, tidx, nidx, extend=True)
+    -> sqlparse.sql.TokenList.group_tokens
+380:42 call  tlist.token_next_by(i=I_ALIAS, t=T.Number, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_functions]
+389:33 call  tmp_token.value.upper()
+    -> <builtin>.str.upper
+391:33 call  tmp_token.value.upper()
+    -> <builtin>.str.upper
+393:33 call  tmp_token.value.upper()
+    -> <builtin>.str.upper
+398:38 call  tlist.token_next_by(t=T.Name)
+    -> sqlparse.sql.TokenList.token_next_by
+400:39 call  tlist.token_next(tidx)
+    -> sqlparse.sql.TokenList.token_next
+401:22 call  isinstance(next_, sql.Parenthesis)
+    -> <builtin>.isinstance
+402:46 call  tlist.token_next(nidx)
+    -> sqlparse.sql.TokenList.token_next
+403:35 call  isinstance(over, sql.Over)
+    -> <builtin>.isinstance
+407:31 call  tlist.group_tokens(sql.Function, tidx, eidx)
+    -> sqlparse.sql.TokenList.group_tokens
+408:42 call  tlist.token_next_by(t=T.Name, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_order]
+414:38 call  tlist.token_next_by(t=T.Keyword.Order)
+    -> sqlparse.sql.TokenList.token_next_by
+416:39 call  tlist.token_prev(tidx)
+    -> sqlparse.sql.TokenList.token_prev
+417:15 call  imt(prev_, i=sql.Identifier, t=T.Number)
+    -> sqlparse.utils.imt
+418:31 call  tlist.group_tokens(sql.Identifier, pidx, tidx)
+    -> sqlparse.sql.TokenList.group_tokens
+420:42 call  tlist.token_next_by(t=T.Keyword.Order, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.align_comments]
+425:38 call  tlist.token_next_by(i=sql.Comment)
+    -> sqlparse.sql.TokenList.token_next_by
+427:39 call  tlist.token_prev(tidx)
+    -> sqlparse.sql.TokenList.token_prev
+428:22 call  isinstance(prev_, sql.TokenList)
+    -> <builtin>.isinstance
+429:31 call  tlist.group_tokens(sql.TokenList, pidx, tidx, extend=True)
+    -> sqlparse.sql.TokenList.group_tokens
+431:42 call  tlist.token_next_by(i=sql.Comment, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.engine.grouping.group_values]
+435:38 call  tlist.token_next_by(m=(T.Keyword, 'VALUES'))
+    -> sqlparse.sql.TokenList.token_next_by
+439:22 call  isinstance(token, sql.Parenthesis)
+    -> <builtin>.isinstance
+441:39 call  tlist.token_next(tidx)
+    -> sqlparse.sql.TokenList.token_next
+443:27 call  tlist.group_tokens(sql.Values, start_idx, end_idx, extend...
+    -> sqlparse.sql.TokenList.group_tokens
+
+[sqlparse.engine.grouping.group]
+478:13 call  func(stmt)
+    -> sqlparse.utils.recurse.wrap.wrapped_f
+    -> sqlparse.engine.grouping.group_brackets
+    -> sqlparse.engine.grouping.group_parenthesis
+    -> sqlparse.engine.grouping.group_case
+    -> sqlparse.engine.grouping.group_if
+    -> sqlparse.engine.grouping.group_for
+    -> sqlparse.engine.grouping.group_begin
+    -> sqlparse.engine.grouping.group_period
+    -> sqlparse.engine.grouping.group_arrays
+    -> sqlparse.engine.grouping.group_typecasts
+    -> sqlparse.engine.grouping.group_tzcasts
+    -> sqlparse.engine.grouping.group_typed_literal
+    -> sqlparse.engine.grouping.group_operator
+    -> sqlparse.engine.grouping.group_comparison
+    -> sqlparse.engine.grouping.group_as
+    -> sqlparse.engine.grouping.group_assignment
+    -> sqlparse.engine.grouping.group_identifier_list
+    -> sqlparse.engine.grouping.group_values
+    exclude sqlparse.engine.grouping.group_comments, sqlparse.engine.grouping.group_over, sqlparse.engine.grouping.group_functions, sqlparse.engine.grouping.group_where, sqlparse.engine.grouping.group_identifier, sqlparse.engine.grouping.group_order, sqlparse.engine.grouping.group_aliased, sqlparse.engine.grouping.align_comments: decorated with @recurse(...), so the module name is bound to the closure wrapped_f that recurse(...)(f) returns; wrapped_f calls the function (utils.py:78)
+    note: func is an item of the list display at grouping.py:447-477: the 25 module names. Eight of them are decorated with @recurse and name a wrapped_f closure; the other 17 name the functions themselves
+
+[sqlparse.engine.grouping._is_delimiter]
+491:27 call  isinstance(tlist, _DELIMITED_GROUPS)
+    -> <builtin>.isinstance
+
+[sqlparse.engine.grouping._group]
+505:28 call  SQLParseError( f"Maximum grouping depth exceeded ({MAX_GR...
+    -> <builtin>.Exception.__init__
+    note: SQLParseError defines no __init__; Exception.__init__ runs
+506:48 format  {MAX_GROUPING_DEPTH}
+    reject *: MAX_GROUPING_DEPTH is an int (the module constant, or the int or None that a client sets; the message is built only when it is not None)
+511:15 call  len(tlist.tokens)
+    -> <builtin>.len
+512:28 call  SQLParseError( f"Maximum number of tokens exceeded ({MAX_...
+    -> <builtin>.Exception.__init__
+513:50 format  {MAX_GROUPING_TOKENS}
+    reject *: MAX_GROUPING_TOKENS is an int (the module constant, or the int that a client sets; the message is built only when it is not None)
+518:22 call  list(tlist)
+    -> <builtin>.list
+    -> sqlparse.sql.TokenList.__iter__
+    reject sqlparse.sql.TokenList.__getitem__: tlist is a TokenList (the Statement of group(), or a group token); it defines __iter__, so list() does not fall back to __getitem__
+520:32 call  enumerate(token_list)
+    -> <builtin>.enumerate
+528:57 call  isinstance(token, cls)
+    -> <builtin>.isinstance
+529:19 call  _group(token, cls, match, valid_prev, valid_next, post, e...
+    -> sqlparse.engine.grouping._group
+532:17 call  match(token)
+    -> sqlparse.engine.grouping.group_typecasts.match
+    -> sqlparse.engine.grouping.group_tzcasts.match
+    -> sqlparse.engine.grouping.group_typed_literal.match
+    -> sqlparse.engine.grouping.group_typed_literal.match_to_extend
+    -> sqlparse.engine.grouping.group_period.match
+    -> sqlparse.engine.grouping.group_as.match
+    -> sqlparse.engine.grouping.group_assignment.match
+    -> sqlparse.engine.grouping.group_comparison.match
+    -> sqlparse.engine.grouping.group_arrays.match
+    -> sqlparse.engine.grouping.group_operator.match
+    -> sqlparse.engine.grouping.group_identifier_list.match
+    reject sqlparse.sql.Token.match: match is the parameter, a local function of a group_* function, not the method of a token
+    note: _group is private; its eleven package calls (grouping.py:115, 135, 162, 164, 195, 212, 229, 247, 287, 310, 331, and the recursion at 529 that passes its own parameter) pass the local function match of their group_* function, or match_to_extend (164)
+533:43 call  tlist.token_next(tidx)
+    -> sqlparse.sql.TokenList.token_next
+534:37 call  valid_prev(prev_)
+    -> sqlparse.engine.grouping.group_typecasts.valid
+    -> sqlparse.engine.grouping.group_tzcasts.valid_prev
+    -> sqlparse.engine.grouping.group_typed_literal.valid_prev
+    -> sqlparse.engine.grouping.group_period.valid_prev
+    -> sqlparse.engine.grouping.group_as.valid_prev
+    -> sqlparse.engine.grouping.group_assignment.valid
+    -> sqlparse.engine.grouping.group_comparison.valid
+    -> sqlparse.engine.grouping.group_arrays.valid_prev
+    -> sqlparse.engine.grouping.group_operator.valid
+    -> sqlparse.engine.grouping.group_identifier_list.valid
+    exclude sqlparse.engine.grouping.<lambda1>: the default value of valid_prev; every package call of the private _group passes valid_prev, so the default is never used
+    note: valid_prev is the fourth argument of the package calls of _group (see 532:17): valid_prev or the shared valid of each group_* function
+534:59 call  valid_next(next_)
+    -> sqlparse.engine.grouping.group_typecasts.valid
+    -> sqlparse.engine.grouping.group_tzcasts.valid_next
+    -> sqlparse.engine.grouping.group_typed_literal.valid_next
+    -> sqlparse.engine.grouping.group_typed_literal.valid_final
+    -> sqlparse.engine.grouping.group_period.valid_next
+    -> sqlparse.engine.grouping.group_as.valid_next
+    -> sqlparse.engine.grouping.group_assignment.valid
+    -> sqlparse.engine.grouping.group_comparison.valid
+    -> sqlparse.engine.grouping.group_arrays.valid_next
+    -> sqlparse.engine.grouping.group_operator.valid
+    -> sqlparse.engine.grouping.group_identifier_list.valid
+    exclude sqlparse.engine.grouping.<lambda2>: the default value of valid_next; every package call of the private _group passes valid_next, so the default is never used
+    note: valid_next is the fifth argument of the package calls of _group (see 532:17): valid_next, the shared valid, or valid_final (164)
+535:42 call  _is_delimiter(tlist, prev_)
+    -> sqlparse.engine.grouping._is_delimiter
+536:42 call  _is_delimiter(tlist, next_)
+    -> sqlparse.engine.grouping._is_delimiter
+537:40 call  post(tlist, pidx, tidx, nidx)
+    -> sqlparse.engine.grouping.group_typecasts.post
+    -> sqlparse.engine.grouping.group_tzcasts.post
+    -> sqlparse.engine.grouping.group_typed_literal.post
+    -> sqlparse.engine.grouping.group_period.post
+    -> sqlparse.engine.grouping.group_as.post
+    -> sqlparse.engine.grouping.group_assignment.post
+    -> sqlparse.engine.grouping.group_comparison.post
+    -> sqlparse.engine.grouping.group_arrays.post
+    -> sqlparse.engine.grouping.group_operator.post
+    -> sqlparse.engine.grouping.group_identifier_list.post
+    note: post is the sixth argument of the package calls of _group (see 532:17), the local function post of each group_* function; its default None is never used
+538:41 call  tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
+    -> sqlparse.sql.TokenList.group_tokens
+
+== sqlparse.engine.statement_splitter
+
+[sqlparse.engine.statement_splitter.StatementSplitter.__init__]
+16:20 call  self._reset()
+    -> sqlparse.engine.statement_splitter.StatementSplitter._reset
+
+[sqlparse.engine.statement_splitter.StatementSplitter._handle_nested_block]
+38:20 op  unified in ('LOOP', 'DO')
+    reject *: a str searched in a tuple display of str
+39:40 op  self._unconfirmed_start in ('FOR', 'WHILE')
+    reject *: a str or None searched in a tuple display of str
+40:41 call  self._block_stack.append(self._unconfirmed_start)
+    -> <builtin>.list.append
+44:41 call  self._block_stack.append('LOOP')
+    -> <builtin>.list.append
+46:20 op  unified in ('IF', 'CASE')
+    reject *: a str searched in a tuple display of str
+47:37 call  self._block_stack.append(unified)
+    -> <builtin>.list.append
+
+[sqlparse.engine.statement_splitter.StatementSplitter._handle_closing_keyword]
+55:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+59:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+63:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+67:43 op  self._block_stack[-1] in ('LOOP', 'FOR', 'WHILE')
+    reject *: a str of the block stack searched in a tuple display of str
+68:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+72:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+76:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+
+[sqlparse.engine.statement_splitter.StatementSplitter._change_splitlevel]
+90:42 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+99:42 call  max(0, self._parenthesis_level - 1)
+    -> <builtin>.max
+101:20 op  ttype not in T.Keyword
+    -> sqlparse.tokens._TokenType.__contains__
+105:30 call  value.upper()
+    -> <builtin>.str.upper
+108:57 call  unified.startswith('CREATE')
+    -> <builtin>.str.startswith
+114:37 call  self._block_stack.append('DECLARE')
+    -> <builtin>.list.append
+122:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+123:41 call  self._block_stack.append('BEGIN')
+    -> <builtin>.list.append
+126:41 call  self._block_stack.append('BEGIN')
+    -> <builtin>.list.append
+133:25 op  unified in ('TRANSACTION', 'WORK', 'TRAN', 'DISTRIBUTED',...
+    reject *: a str searched in a tuple display of str
+138:38 call  self._block_stack.pop()
+    -> <builtin>.list.pop
+143:20 op  'BEGIN' in self._block_stack
+    reject *: the block stack is a list of str
+144:44 call  self._handle_nested_block(unified)
+    -> sqlparse.engine.statement_splitter.StatementSplitter._handle_nested_block
+149:44 call  self._handle_closing_keyword(unified)
+    -> sqlparse.engine.statement_splitter.StatementSplitter._handle_closing_keyword
+
+[sqlparse.engine.statement_splitter.StatementSplitter.process]
+161:42 op  ttype not in EOS_TTYPE
+    reject *: EOS_TTYPE is a tuple of two token types; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+162:36 call  sql.Statement(self.tokens)
+    -> sqlparse.sql.TokenList.__init__
+    reject sqlparse.sql.Token.__init__: Statement inherits TokenList.__init__, which calls Token.__init__ itself (super(), sql.py:170)
+165:28 call  self._reset()
+    -> sqlparse.engine.statement_splitter.StatementSplitter._reset
+168:50 call  self._change_splitlevel(ttype, value)
+    -> sqlparse.engine.statement_splitter.StatementSplitter._change_splitlevel
+171:31 call  self.tokens.append(sql.Token(ttype, value))
+    -> <builtin>.list.append
+171:41 call  sql.Token(ttype, value)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+183:48 op  'BEGIN' not in self._block_stack
+    reject *: the block stack is a list of str
+185:52 call  value.split()
+    -> <builtin>.str.split
+    reject sqlparse.split: value is the str of a lexer token, so this is str.split
+187:25 op  ttype not in (T.Whitespace, T.Newline, T.Comment.Single, ...
+    reject *: the right operand is a tuple display of token types; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+188:43 getattr  T.Comment.Multiline
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline; the first load in a run, here or at keywords.py:108, 111, others.py:35 or sql.py:554, calls __getattr__ (sqlparse.md, token types)
+189:62 call  value.upper()
+    -> <builtin>.str.upper
+195:35 call  all(t.is_whitespace for t in self.tokens)
+    -> <builtin>.all
+196:32 call  sql.Statement(self.tokens)
+    -> sqlparse.sql.TokenList.__init__
+    reject sqlparse.sql.Token.__init__: Statement inherits TokenList.__init__, which calls Token.__init__ itself (super(), sql.py:170)
+
+== sqlparse.filters.aligned_indent
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter.__init__]
+30:32 call  len('select')
+    -> <builtin>.len
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter.nl]
+34:22 call  len(offset)
+    -> <builtin>.len
+    note: offset is a str here (the callers pass 'SELECT' or the str token_indent; ints skip this branch)
+34:48 call  isinstance(offset, int)
+    -> <builtin>.isinstance
+38:25 call  sql.Token(T.Whitespace, self.n + self.char * ( self._max_...
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._process_statement]
+42:15 call  len(tlist.tokens)
+    -> <builtin>.len
+44:29 call  tlist.tokens.pop(0)
+    -> <builtin>.list.pop
+47:22 call  self._process(sql.TokenList(tlist.tokens))
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process
+    reject *: self is an AlignedIndentFilter (the package defines no subclass)
+47:36 call  sql.TokenList(tlist.tokens)
+    -> sqlparse.sql.TokenList.__init__
+    reject sqlparse.sql.Token.__init__: TokenList.__init__ calls Token.__init__ itself (super(), sql.py:170)
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._process_parenthesis]
+51:39 call  tlist.token_next_by(m=(T.DML, 'SELECT'))
+    -> sqlparse.sql.TokenList.token_next_by
+53:24 call  indent(self)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.indent
+    note: indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back
+54:35 call  tlist.insert_after(tlist[0], self.nl('SELECT'))
+    -> sqlparse.sql.TokenList.insert_after
+54:41 getitem  tlist[0]
+    -> sqlparse.sql.TokenList.__getitem__
+    note: tlist is a Parenthesis (_process dispatches on the class name)
+54:53 call  self.nl('SELECT')
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.nl
+    reject sqlparse.filters.reindent.ReindentFilter.nl: self is an AlignedIndentFilter
+56:38 call  self._process_default(tlist)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default
+    reject sqlparse.filters.reindent.ReindentFilter._process_default: self is an AlignedIndentFilter
+59:32 call  tlist.insert_before(tlist[-1], self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+59:38 getitem  tlist[-1]
+    -> sqlparse.sql.TokenList.__getitem__
+    note: tlist is a Parenthesis (_process dispatches on the class name)
+59:51 call  self.nl()
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.nl
+    reject sqlparse.filters.reindent.ReindentFilter.nl: self is an AlignedIndentFilter
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._process_identifierlist]
+63:27 call  list(tlist.get_identifiers())
+    -> <builtin>.list
+63:49 call  tlist.get_identifiers()
+    -> sqlparse.sql.IdentifierList.get_identifiers
+64:24 call  identifiers.pop(0)
+    -> <builtin>.list.pop
+65:29 call  tlist.insert_before(token, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+65:44 call  self.nl()
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.nl
+    reject sqlparse.filters.reindent.ReindentFilter.nl: self is an AlignedIndentFilter
+66:30 call  self._process_default(tlist)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default
+    reject sqlparse.filters.reindent.ReindentFilter._process_default: self is an AlignedIndentFilter
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._process_case]
+69:22 call  len('case ')
+    -> <builtin>.len
+69:37 call  len('when ')
+    -> <builtin>.len
+70:32 call  tlist.get_cases(skip_ws=True)
+    -> sqlparse.sql.Case.get_cases
+72:40 call  tlist.token_next_by(m=(T.Keyword, 'END'))
+    -> sqlparse.sql.TokenList.token_next_by
+76:25 call  cases.append((None, [end_token]))
+    -> <builtin>.list.append
+78:31 call  len(' '.join(map(str, cond)))
+    -> <builtin>.len
+78:40 call  ' '.join(map(str, cond))
+    -> <builtin>.str.join
+    -> sqlparse.sql.Token.__str__
+    -> sqlparse.sql.TokenList.__str__
+    note: join consumes the lazy map and calls str on each token of cond, a list of Case-group tokens. This ledger chooses join78:40 as an allowed normalization; README ruling 12 also permits map78:44 in this same function. Both previous callback placements were valid
+78:44 call  map(str, cond)
+    -> <builtin>.map
+80:29 call  max(condition_width, default=0)
+    -> <builtin>.max
+82:42 call  enumerate(cases)
+    -> <builtin>.enumerate
+87:36 call  tlist.insert_before(stmt, self.nl(offset_ - len(str(stmt))))
+    -> sqlparse.sql.TokenList.insert_before
+87:50 call  self.nl(offset_ - len(str(stmt)))
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.nl
+    reject sqlparse.filters.reindent.ReindentFilter.nl: self is an AlignedIndentFilter
+87:64 call  len(str(stmt))
+    -> <builtin>.len
+87:68 call  str(stmt)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    reject sqlparse.sql.TokenList.__str__, sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: i > 0 excludes the initial condition; each later record starts with a leaf WHEN or ELSE token, or the appended END leaf. TokenList groups have ttype None and cannot match these keyword delimiters.
+89:31 call  sql.Token(T.Whitespace, self.char * ( max_cond_width - co...
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+91:35 call  tlist.insert_after(cond[-1], ws)
+    -> sqlparse.sql.TokenList.insert_after
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token]
+95:42 call  tlist.token_next_by(m=split_words, idx=idx)
+    -> sqlparse.sql.TokenList.token_next_by
+98:43 call  self._next_token(tlist, tidx)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token
+    reject sqlparse.filters.reindent.ReindentFilter._next_token: self is an AlignedIndentFilter
+100:47 call  self._next_token(tlist, tidx)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token
+    reject sqlparse.filters.reindent.ReindentFilter._next_token: self is an AlignedIndentFilter
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._split_kwds]
+104:39 call  self._next_token(tlist)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token
+    reject sqlparse.filters.reindent.ReindentFilter._next_token: self is an AlignedIndentFilter
+109:28 call  token.match(T.Keyword, self.join_words, regex=True)
+    -> sqlparse.sql.Token.match
+110:31 call  token.match(T.Keyword, self.by_words, regex=True)
+    -> sqlparse.sql.Token.match
+112:49 call  token.value.split()
+    -> <builtin>.str.split
+    reject sqlparse.split: token.value is a str, so this is str.split
+114:35 call  str(token)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    reject sqlparse.sql.TokenList.__str__: _next_token matches ttype Keyword (Token.match tests `self.ttype is ttype`), and a group has ttype None, so token is a plain Token
+    reject sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: token is a Token, which defines __str__
+115:32 call  tlist.insert_before(token, self.nl(token_indent))
+    -> sqlparse.sql.TokenList.insert_before
+115:47 call  self.nl(token_indent)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.nl
+    reject sqlparse.filters.reindent.ReindentFilter.nl: self is an AlignedIndentFilter
+117:43 call  self._next_token(tlist, tidx)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token
+    reject sqlparse.filters.reindent.ReindentFilter._next_token: self is an AlignedIndentFilter
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default]
+120:25 call  self._split_kwds(tlist)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._split_kwds
+    reject sqlparse.filters.reindent.ReindentFilter._split_kwds: self is an AlignedIndentFilter
+122:41 call  tlist.get_sublists()
+    -> sqlparse.sql.TokenList.get_sublists
+123:36 call  tlist.token_index(sgroup)
+    -> sqlparse.sql.TokenList.token_index
+124:43 call  tlist.token_prev(idx)
+    -> sqlparse.sql.TokenList.token_prev
+127:38 call  prev_.match(T.Keyword, self.by_words, regex=True)
+    -> sqlparse.sql.Token.match
+129:24 call  offset(self, offset_)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+    note: offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back
+130:30 call  self._process(sgroup)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process
+    reject *: self is an AlignedIndentFilter (the package defines no subclass)
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter._process]
+133:32 format  {type(tlist).__name__}
+    reject *: the class name is a str
+133:37 call  type(tlist)
+    -> <builtin>.type
+134:23 call  getattr(self, func_name.lower(), self._process_default)
+    -> <builtin>.getattr
+    reject *: getattr returns the bound method or the default; it calls neither (func is called at 135:13)
+134:45 call  func_name.lower()
+    -> <builtin>.str.lower
+135:13 call  func(tlist)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_statement
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_parenthesis
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_identifierlist
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_case
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default
+    note: func is the method of self named '_process_' + the lower-cased class name of tlist, else _process_default (134:23). tlist is the Statement or a group: the classes Statement, Parenthesis, IdentifierList and Case have such a method; every other class (and the TokenList of 47:36) gets _process_default
+
+[sqlparse.filters.aligned_indent.AlignedIndentFilter.process]
+138:22 call  self._process(stmt)
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter._process
+    reject *: self is an AlignedIndentFilter (the package defines no subclass)
+
+== sqlparse.filters.others
+
+[sqlparse.filters.others]
+17:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+90:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+140:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+177:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[sqlparse.filters.others.StripCommentsFilter._process]
+35:32 getattr  T.Comment.Multiline
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline; the first load in a run, here or at keywords.py:108, 111, statement_splitter.py:188 or sql.py:554, calls __getattr__ (sqlparse.md, token types)
+35:42 getattr  T.Comment.Multiline.Hint
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline.Hint; the first load in a run, here or at keywords.py:108, calls __getattr__ (sqlparse.md, token types)
+36:39 call  get_next_comment()
+    -> sqlparse.filters.others.StripCommentsFilter._process.get_next_comment
+40:28 op  token.ttype in sql_hints
+    reject *: sql_hints is a tuple of two token types; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+42:28 call  isinstance(token, sql.Comment)
+    -> <builtin>.isinstance
+44:23 call  len(comment_tokens)
+    -> <builtin>.len
+45:48 op  comment_tokens[0].ttype in sql_hints
+    reject *: sql_hints is a tuple of two token types; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+52:47 call  get_next_comment(idx=tidx)
+    -> sqlparse.filters.others.StripCommentsFilter._process.get_next_comment
+55:43 call  tlist.token_prev(tidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_prev
+56:43 call  tlist.token_next(tidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_next
+61:54 call  prev_.match(T.Punctuation, '(')
+    -> sqlparse.sql.Token.match
+62:54 call  next_.match(T.Punctuation, ')')
+    -> sqlparse.sql.Token.match
+66:57 call  prev_.match(T.Punctuation, '(')
+    -> sqlparse.sql.Token.match
+67:40 call  tlist.tokens.insert(tidx, _get_insert_token(token))
+    -> <builtin>.list.insert
+67:64 call  _get_insert_token(token)
+    -> sqlparse.filters.others.StripCommentsFilter._process._get_insert_token
+68:36 call  tlist.tokens.remove(token)
+    -> <builtin>.list.remove
+    note: list.remove compares with ==; Token defines no __eq__ (identity)
+71:55 call  _get_insert_token(token)
+    -> sqlparse.filters.others.StripCommentsFilter._process._get_insert_token
+76:43 call  get_next_comment(idx=tidx)
+    -> sqlparse.filters.others.StripCommentsFilter._process.get_next_comment
+
+[sqlparse.filters.others.StripCommentsFilter._process.get_next_comment]
+21:39 call  tlist.token_next_by(i=sql.Comment, t=T.Comment, idx=idx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.filters.others.StripCommentsFilter._process._get_insert_token]
+29:26 call  re.search(r'([\r\n]+) *$', token.value)
+    -> re.search
+31:33 call  sql.Token(T.Whitespace.Newline, m.groups()[0])
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+31:64 call  m.groups()
+    -> re.Match.groups
+33:33 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+
+[sqlparse.filters.others.StripCommentsFilter.process]
+79:22 call  self.process(sgroup)
+    -> sqlparse.filters.others.StripCommentsFilter.process
+    reject *: self is a StripCommentsFilter (the package defines no subclass)
+79:62 call  stmt.get_sublists()
+    -> sqlparse.sql.TokenList.get_sublists
+80:37 call  StripCommentsFilter._process(stmt)
+    -> sqlparse.filters.others.StripCommentsFilter._process
+    reject *: the static method is named through its class StripCommentsFilter
+
+[sqlparse.filters.others.StripWhitespaceFilter._stripws]
+86:32 format  {type(tlist).__name__}
+    reject *: the class name is a str
+86:37 call  type(tlist)
+    -> <builtin>.type
+87:23 call  getattr(self, func_name.lower(), self._stripws_default)
+    -> <builtin>.getattr
+    reject *: getattr returns the method or the default; it calls neither (func is called at 88:13)
+87:45 call  func_name.lower()
+    -> <builtin>.str.lower
+88:13 call  func(tlist)
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws_identifierlist
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws_parenthesis
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws_default
+    note: func is the method of self named '_stripws_' + the lower-cased class name of tlist, else _stripws_default (87:23). tlist is the Statement or a group: IdentifierList and Parenthesis have such a method; every other class gets _stripws_default
+
+[sqlparse.filters.others.StripWhitespaceFilter._stripws_identifierlist]
+103:26 call  list(tlist.tokens)
+    -> <builtin>.list
+105:36 call  tlist.tokens.remove(last_nl)
+    -> <builtin>.list.remove
+    note: list.remove compares with ==; Token defines no __eq__ (identity)
+112:37 call  self._stripws_default(tlist)
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws_default
+
+[sqlparse.filters.others.StripWhitespaceFilter._stripws_parenthesis]
+117:20 call  len(tlist.tokens)
+    -> <builtin>.len
+118:42 call  tlist.tokens[0].match(T.Punctuation, '(')
+    -> sqlparse.sql.Token.match
+119:43 call  tlist.tokens[-1].match(T.Punctuation, ')')
+    -> sqlparse.sql.Token.match
+120:41 call  self._stripws_default(tlist)
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws_default
+122:29 call  tlist.tokens.pop(1)
+    -> <builtin>.list.pop
+124:29 call  tlist.tokens.pop(-2)
+    -> <builtin>.list.pop
+128:44 call  tlist.tokens[-2].tokens.pop(-1)
+    -> <builtin>.list.pop
+129:30 call  self._stripws_default(tlist)
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws_default
+
+[sqlparse.filters.others.StripWhitespaceFilter.process]
+132:22 call  self.process(sgroup, depth + 1)
+    -> sqlparse.filters.others.StripWhitespaceFilter.process
+    reject *: self is a StripWhitespaceFilter (the package defines no subclass)
+132:73 call  stmt.get_sublists()
+    -> sqlparse.sql.TokenList.get_sublists
+133:22 call  self._stripws(stmt)
+    -> sqlparse.filters.others.StripWhitespaceFilter._stripws
+135:28 call  stmt.tokens.pop(-1)
+    -> <builtin>.list.pop
+
+[sqlparse.filters.others.SpacesAroundOperatorsFilter._process]
+144:42 call  tlist.token_next_by(t=ttypes)
+    -> sqlparse.sql.TokenList.token_next_by
+146:43 call  tlist.token_next(tidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_next
+148:35 call  tlist.insert_after(tidx, sql.Token(T.Whitespace, ' '))
+    -> sqlparse.sql.TokenList.insert_after
+148:51 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+150:43 call  tlist.token_prev(tidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_prev
+152:36 call  tlist.insert_before(tidx, sql.Token(T.Whitespace, ' '))
+    -> sqlparse.sql.TokenList.insert_before
+152:52 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+156:46 call  tlist.token_next_by(t=ttypes, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.filters.others.SpacesAroundOperatorsFilter.process]
+159:22 call  self.process(sgroup)
+    -> sqlparse.filters.others.SpacesAroundOperatorsFilter.process
+    reject *: self is a SpacesAroundOperatorsFilter (the package defines no subclass)
+159:62 call  stmt.get_sublists()
+    -> sqlparse.sql.TokenList.get_sublists
+160:45 call  SpacesAroundOperatorsFilter._process(stmt)
+    -> sqlparse.filters.others.SpacesAroundOperatorsFilter._process
+    reject *: the static method is named through its class SpacesAroundOperatorsFilter
+
+[sqlparse.filters.others.StripTrailingSemicolonFilter.process]
+169:28 call  stmt.tokens.pop()
+    -> <builtin>.list.pop
+
+[sqlparse.filters.others.SerializerUnicode.process]
+179:40 call  split_unquoted_newlines(stmt)
+    -> sqlparse.utils.split_unquoted_newlines
+180:25 call  '\n'.join(line.rstrip() for line in lines)
+    -> <builtin>.str.join
+180:37 call  line.rstrip()
+    -> <builtin>.str.rstrip
+
+== sqlparse.filters.output
+
+[sqlparse.filters.output.OutputFilter.process]
+25:25 format  {self.varname}
+    reject *: self.varname is a str (varname_prefix + the str varname)
+25:39 format  {self.count}
+    reject *: self.count is an int
+29:21 call  len(str(stmt).strip().splitlines())
+    -> <builtin>.len
+29:25 call  str(stmt)
+    -> <builtin>.str
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__str__, sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: stmt is the Statement that the stmtprocess filters return (the package puts the output filter before SerializerUnicode, formatter.py:202 and sqlparse/__init__.py:59); Statement inherits TokenList.__str__
+29:37 call  str(stmt).strip()
+    -> <builtin>.str.strip
+29:50 call  str(stmt).strip().splitlines()
+    -> <builtin>.str.splitlines
+30:36 call  self._process(stmt.tokens, varname, has_nl)
+    -> sqlparse.filters.output.OutputPythonFilter._process
+    -> sqlparse.filters.output.OutputPHPFilter._process
+    -> sqlparse.filters.output.OutputFilter._process
+    reject *: self is an OutputFilter, OutputPythonFilter or OutputPHPFilter
+    note: OutputFilter is public (sqlparse.filters.output.OutputFilter) and not abstract by abc, so a client can make one; its _process raises NotImplementedError (sqlparse.md, judgement on OutputFilter). The two subclass methods are generator functions, called here
+
+[sqlparse.filters.output.OutputPythonFilter._process]
+38:28 call  sql.Token(T.Whitespace, '\n')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+39:24 call  sql.Token(T.Name, varname)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+40:24 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+41:24 call  sql.Token(T.Operator, '=')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+42:24 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+44:28 call  sql.Token(T.Operator, '(')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+45:24 call  sql.Token(T.Text, "'")
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+50:45 op  '\n' in token.value
+    reject *: token.value is a str
+52:32 call  sql.Token(T.Text, " '")
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+53:32 call  sql.Token(T.Whitespace, '\n')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+56:32 call  sql.Token(T.Whitespace, ' ' * (len(varname) + 4))
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+56:57 call  len(varname)
+    -> <builtin>.len
+57:32 call  sql.Token(T.Text, "'")
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+60:45 call  token.value.split('\n', 1)
+    -> <builtin>.str.split
+    reject sqlparse.split: token.value is a str, so this is str.split
+62:36 call  sql.Token(T.Whitespace, after_lb)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+69:50 call  token.value.replace('\\', '\\\\')
+    -> <builtin>.str.replace
+69:72 call  token.value.replace('\\', '\\\\').replace("'", "\\'")
+    -> <builtin>.str.replace
+72:28 call  sql.Token(T.Text, token.value)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+75:24 call  sql.Token(T.Text, "'")
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+77:28 call  sql.Token(T.Operator, ')')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+
+[sqlparse.filters.output.OutputPHPFilter._process]
+86:28 call  sql.Token(T.Whitespace, '\n')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+87:24 call  sql.Token(T.Name, varname)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+88:24 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+90:28 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+91:24 call  sql.Token(T.Operator, '=')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+92:24 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+93:24 call  sql.Token(T.Text, '"')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+98:45 op  '\n' in token.value
+    reject *: token.value is a str
+100:32 call  sql.Token(T.Text, ' ";')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+101:32 call  sql.Token(T.Whitespace, '\n')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+104:32 call  sql.Token(T.Name, varname)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+105:32 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+106:32 call  sql.Token(T.Operator, '.=')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+107:32 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+108:32 call  sql.Token(T.Text, '"')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+111:45 call  token.value.split('\n', 1)
+    -> <builtin>.str.split
+    reject sqlparse.split: token.value is a str, so this is str.split
+113:36 call  sql.Token(T.Whitespace, after_lb)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+122:51 call  token.value.replace('\\', '\\\\')
+    -> <builtin>.str.replace
+123:40 call  token.value.replace('\\', '\\\\') .replace('"', '\\"')
+    -> <builtin>.str.replace
+124:40 call  token.value.replace('\\', '\\\\') .replace('"', '\\"') .r...
+    -> <builtin>.str.replace
+127:28 call  sql.Token(T.Text, token.value)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+130:24 call  sql.Token(T.Text, '"')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+131:24 call  sql.Token(T.Punctuation, ';')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+
+
+
+== sqlparse.filters.reindent
+
+[sqlparse.filters.reindent]
+30:6 decorator  @property
+    -> <builtin>.property
+
+[sqlparse.filters.reindent.ReindentFilter._current_line_len]
+52:55 call  parent.tokens.index(node)
+    -> <builtin>.list.index
+    note: list.index compares with ==; Token defines no __eq__ (identity)
+54:34 call  stack.pop()
+    -> <builtin>.list.pop
+56:33 call  stack.extend(prev_.tokens)
+    -> <builtin>.list.extend
+60:27 call  len(value)
+    -> <builtin>.len
+63:41 call  value.splitlines()
+    -> <builtin>.str.splitlines
+64:23 call  len(lines)
+    -> <builtin>.len
+64:43 call  len(lines[0])
+    -> <builtin>.len
+74:49 call  (value + '.').splitlines()
+    -> <builtin>.str.splitlines
+75:27 call  len(lines[-1])
+    -> <builtin>.len
+80:23 call  len(lines)
+    -> <builtin>.len
+81:31 call  len(lines[-2])
+    -> <builtin>.len
+82:29 call  len(lines[0])
+    -> <builtin>.len
+
+[sqlparse.filters.reindent.ReindentFilter._get_offset]
+88:38 call  self._current_line_len(token)
+    -> sqlparse.filters.reindent.ReindentFilter._current_line_len
+88:51 call  len(self.char * self.leading_ws)
+    -> <builtin>.len
+88:69 getattr  self.leading_ws
+    -> sqlparse.filters.reindent.ReindentFilter.leading_ws
+
+[sqlparse.filters.reindent.ReindentFilter.nl]
+91:25 call  sql.Token( T.Whitespace, self.n + self.char * max(0, self...
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+93:37 call  max(0, self.leading_ws + offset)
+    -> <builtin>.max
+93:46 getattr  self.leading_ws
+    -> sqlparse.filters.reindent.ReindentFilter.leading_ws
+
+[sqlparse.filters.reindent.ReindentFilter._next_token]
+100:42 call  tlist.token_next_by(m=m_split, idx=idx)
+    -> sqlparse.sql.TokenList.token_next_by
+103:43 call  self._next_token(tlist, tidx)
+    -> sqlparse.filters.reindent.ReindentFilter._next_token
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token: self is a ReindentFilter
+106:47 call  self._next_token(tlist, tidx)
+    -> sqlparse.filters.reindent.ReindentFilter._next_token
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._split_kwds]
+111:39 call  self._next_token(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._next_token
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token: self is a ReindentFilter
+113:43 call  tlist.token_prev(tidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_prev
+114:24 call  str(prev_)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: prev_ is the token before a split keyword (a plain token or a group), or None; both token classes define __str__
+120:35 call  uprev.endswith('\n')
+    -> <builtin>.str.endswith
+120:59 call  uprev.endswith('\r')
+    -> <builtin>.str.endswith
+121:36 call  tlist.insert_before(tidx, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+121:50 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+124:43 call  self._next_token(tlist, tidx)
+    -> sqlparse.filters.reindent.ReindentFilter._next_token
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._next_token: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._split_statements]
+128:42 call  tlist.token_next_by(t=ttypes)
+    -> sqlparse.sql.TokenList.token_next_by
+130:43 call  tlist.token_prev(tidx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_prev
+136:36 call  tlist.insert_before(tidx, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+136:50 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+138:46 call  tlist.token_next_by(t=ttypes, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.filters.reindent.ReindentFilter._process]
+141:32 format  {type(tlist).__name__}
+    reject *: the class name is a str
+141:37 call  type(tlist)
+    -> <builtin>.type
+142:23 call  getattr(self, func_name.lower(), self._process_default)
+    -> <builtin>.getattr
+    reject *: getattr returns the bound method or the default; it calls neither (func is called at 143:13)
+142:45 call  func_name.lower()
+    -> <builtin>.str.lower
+143:13 call  func(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._process_where
+    -> sqlparse.filters.reindent.ReindentFilter._process_parenthesis
+    -> sqlparse.filters.reindent.ReindentFilter._process_function
+    -> sqlparse.filters.reindent.ReindentFilter._process_identifierlist
+    -> sqlparse.filters.reindent.ReindentFilter._process_case
+    -> sqlparse.filters.reindent.ReindentFilter._process_values
+    -> sqlparse.filters.reindent.ReindentFilter._process_default
+    note: func is the method of self named '_process_' + the lower-cased class name of tlist, else _process_default (142:23). tlist is the Statement or a group: Where, Parenthesis, Function, IdentifierList, Case and Values have such a method; every other class gets _process_default
+
+[sqlparse.filters.reindent.ReindentFilter._process_where]
+146:42 call  tlist.token_next_by(m=(T.Keyword, 'WHERE'))
+    -> sqlparse.sql.TokenList.token_next_by
+150:28 call  tlist.insert_before(tidx, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+150:42 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+151:20 call  indent(self)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.indent
+    note: indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back
+152:34 call  self._process_default(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._process_default
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._process_parenthesis]
+156:44 call  tlist.token_next_by(t=ttypes)
+    -> sqlparse.sql.TokenList.token_next_by
+157:42 call  tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
+    -> sqlparse.sql.TokenList.token_next_by
+161:20 call  indent(self, 1 if is_dml_dll else 0)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.indent
+    note: indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back
+162:32 call  tlist.tokens.insert(0, self.nl())
+    -> <builtin>.list.insert
+162:43 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+163:24 call  offset(self, self._get_offset(first) + 1)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+    note: offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back
+163:47 call  self._get_offset(first)
+    -> sqlparse.filters.reindent.ReindentFilter._get_offset
+164:38 call  self._process_default(tlist, not is_dml_dll)
+    -> sqlparse.filters.reindent.ReindentFilter._process_default
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._process_function]
+167:32 getitem  tlist[0]
+    -> sqlparse.sql.TokenList.__getitem__
+    note: tlist is a Function (_process dispatches on the class name)
+168:30 call  self._process_default(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._process_default
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._process_identifierlist]
+171:27 call  list(tlist.get_identifiers())
+    -> <builtin>.list
+171:49 call  tlist.get_identifiers()
+    -> sqlparse.sql.IdentifierList.get_identifiers
+173:25 call  next(identifiers[0].flatten())
+    -> <builtin>.next
+173:48 call  identifiers[0].flatten()
+    -> sqlparse.sql.Token.flatten
+    -> sqlparse.sql.TokenList.flatten
+    note: identifiers[0] is the first item of an IdentifierList that is not whitespace or a comma: a plain token (a name, number or keyword) or a group; both flatten methods are generator functions
+176:25 call  next(identifiers.pop(0).flatten())
+    -> <builtin>.next
+176:41 call  identifiers.pop(0)
+    -> <builtin>.list.pop
+176:52 call  identifiers.pop(0).flatten()
+    -> sqlparse.sql.Token.flatten
+    -> sqlparse.sql.TokenList.flatten
+    note: the first item of an IdentifierList that is not whitespace or a comma: a plain token or a group
+177:70 call  self._get_offset(first)
+    -> sqlparse.filters.reindent.ReindentFilter._get_offset
+179:28 call  tlist.within(sql.Function)
+    -> sqlparse.sql.Token.within
+179:63 call  tlist.within(sql.Values)
+    -> sqlparse.sql.Token.within
+180:24 call  offset(self, num_offset)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+    note: offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back
+184:36 call  len(token.value)
+    -> <builtin>.len
+189:56 call  tlist.token_prev( tlist.token_index(token))
+    -> sqlparse.sql.TokenList.token_prev
+190:50 call  tlist.token_index(token)
+    -> sqlparse.sql.TokenList.token_index
+194:44 call  tlist.insert_before(token, self.nl(offset=adjust))
+    -> sqlparse.sql.TokenList.insert_before
+194:59 call  self.nl(offset=adjust)
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+196:53 call  tlist.token_next( tlist.token_index(token), skip_ws=False)
+    -> sqlparse.sql.TokenList.token_next
+197:50 call  tlist.token_index(token)
+    -> sqlparse.sql.TokenList.token_index
+200:51 call  tlist.insert_after( token, sql.Token(T.Whitespace, ' '))
+    -> sqlparse.sql.TokenList.insert_after
+201:53 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+205:26 iter  tlist
+    -> sqlparse.sql.TokenList.__iter__
+    reject sqlparse.sql.TokenList.__getitem__: tlist is an IdentifierList; it defines __iter__, so the loop does not fall back to __getitem__
+206:46 call  tlist.token_next( tlist.token_index(token), skip_ws=False)
+    -> sqlparse.sql.TokenList.token_next
+207:38 call  tlist.token_index(token)
+    -> sqlparse.sql.TokenList.token_index
+209:39 call  tlist.insert_after( token, sql.Token(T.Whitespace, ' '))
+    -> sqlparse.sql.TokenList.insert_after
+210:41 call  sql.Token(T.Whitespace, ' ')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+212:39 call  sum(len(i.value) + 1 for i in identifiers)
+    -> <builtin>.sum
+212:43 call  len(i.value)
+    -> <builtin>.len
+217:39 call  len(self._last_func.value)
+    -> <builtin>.len
+219:24 call  offset(self, adjusted_offset)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+    note: offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back
+219:55 call  indent(self)
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.indent
+    note: indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back
+221:40 call  tlist.insert_before(identifiers[0], self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+221:64 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+225:36 call  len(token.value)
+    -> <builtin>.len
+229:44 call  tlist.insert_before(token, self.nl(offset=adjust))
+    -> sqlparse.sql.TokenList.insert_before
+229:59 call  self.nl(offset=adjust)
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+231:30 call  self._process_default(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._process_default
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._process_case]
+234:24 call  iter(tlist.get_cases())
+    -> <builtin>.iter
+234:40 call  tlist.get_cases()
+    -> sqlparse.sql.Case.get_cases
+235:23 call  next(iterable)
+    -> <builtin>.next
+236:21 call  next(cond[0].flatten())
+    -> <builtin>.next
+236:37 call  cond[0].flatten()
+    -> sqlparse.sql.Token.flatten
+    -> sqlparse.sql.TokenList.flatten
+    note: cond[0] is the first token of the first condition of the Case: a plain token or a group
+238:20 call  offset(self, self._get_offset(tlist[0]))
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+    note: offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back
+238:43 call  self._get_offset(tlist[0])
+    -> sqlparse.filters.reindent.ReindentFilter._get_offset
+238:49 getitem  tlist[0]
+    -> sqlparse.sql.TokenList.__getitem__
+    note: tlist is a Case (_process dispatches on the class name)
+239:24 call  offset(self, self._get_offset(first))
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+239:47 call  self._get_offset(first)
+    -> sqlparse.filters.reindent.ReindentFilter._get_offset
+241:39 call  ''.join(str(x) for x in cond or [])
+    -> <builtin>.str.join
+241:43 call  str(x)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: x is a token of a condition of the Case (a plain token or a group); both classes define __str__
+242:40 call  ''.join(str(x) for x in value)
+    -> <builtin>.str.join
+242:44 call  str(x)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: x is a token of a value of the Case (a plain token or a group); both classes define __str__
+243:52 call  len(str_cond)
+    -> <builtin>.len
+243:68 call  len(str_value)
+    -> <builtin>.len
+246:44 call  tlist.insert_before(token, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+246:59 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+250:28 call  offset(self, len("WHEN "))
+    -> contextlib.contextmanager.helper
+    -> sqlparse.utils.offset
+250:38 call  len("WHEN ")
+    -> <builtin>.len
+251:42 call  self._process_default(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._process_default
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default: self is a ReindentFilter
+252:47 call  tlist.token_next_by(m=sql.Case.M_CLOSE)
+    -> sqlparse.sql.TokenList.token_next_by
+254:36 call  tlist.insert_before(end_idx, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+254:53 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+
+[sqlparse.filters.reindent.ReindentFilter._process_values]
+257:28 call  tlist.insert_before(0, self.nl())
+    -> sqlparse.sql.TokenList.insert_before
+257:39 call  self.nl()
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+258:42 call  tlist.token_next_by(i=sql.Parenthesis)
+    -> sqlparse.sql.TokenList.token_next_by
+261:48 call  tlist.token_next_by(m=(T.Punctuation, ','), idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+266:46 call  self._get_offset(first_token)
+    -> sqlparse.filters.reindent.ReindentFilter._get_offset
+267:40 call  tlist.insert_before(ptoken, self.nl(offset))
+    -> sqlparse.sql.TokenList.insert_before
+267:56 call  self.nl(offset)
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+269:39 call  tlist.insert_after(ptoken, self.nl(self._get_offset(token)))
+    -> sqlparse.sql.TokenList.insert_after
+270:47 call  self.nl(self._get_offset(token))
+    -> sqlparse.filters.reindent.ReindentFilter.nl
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter.nl: self is a ReindentFilter
+270:64 call  self._get_offset(token)
+    -> sqlparse.filters.reindent.ReindentFilter._get_offset
+271:46 call  tlist.token_next_by(i=sql.Parenthesis, idx=tidx)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.filters.reindent.ReindentFilter._process_default]
+274:31 call  self._split_statements(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._split_statements
+275:25 call  self._split_kwds(tlist)
+    -> sqlparse.filters.reindent.ReindentFilter._split_kwds
+    reject sqlparse.filters.aligned_indent.AlignedIndentFilter._split_kwds: self is a ReindentFilter
+276:41 call  tlist.get_sublists()
+    -> sqlparse.sql.TokenList.get_sublists
+277:26 call  self._process(sgroup)
+    -> sqlparse.filters.reindent.ReindentFilter._process
+    reject *: self is a ReindentFilter (the package defines no subclass)
+
+[sqlparse.filters.reindent.ReindentFilter.process]
+281:22 call  self._process(stmt)
+    -> sqlparse.filters.reindent.ReindentFilter._process
+    reject *: self is a ReindentFilter (the package defines no subclass)
+284:29 call  str(self._last_stmt)
+    -> <builtin>.str
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__str__, sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: self._last_stmt is the Statement of the previous call (process sets it at 287); Statement inherits TokenList.__str__
+284:55 call  str(self._last_stmt).endswith('\n')
+    -> <builtin>.str.endswith
+285:31 call  stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
+    -> <builtin>.list.insert
+285:44 call  sql.Token(T.Whitespace, nl)
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+
+
+
+== sqlparse.filters.right_margin
+
+[sqlparse.filters.right_margin.RightMarginFilter._process]
+26:45 op  '\n' in token.value
+    reject *: token.value is a str
+27:40 call  token.value.endswith('\n')
+    -> <builtin>.str.endswith
+30:55 call  token.value.splitlines()
+    -> <builtin>.str.splitlines
+31:41 call  type(token)
+    -> <builtin>.type
+31:49 op  type(token) not in self.keep_together
+    reject *: self.keep_together is the empty tuple of the class body (line 16); tuple.__contains__ runs no package code
+32:45 call  self._process(token, token.tokens)
+    -> sqlparse.filters.right_margin.RightMarginFilter._process
+    reject *: self is a RightMarginFilter (the package defines no subclass)
+    note: _process is a generator function; the call makes the generator that replaces token.tokens
+34:26 call  str(token)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    reject sqlparse.sql.TokenList.__str__: a group takes the branch at line 31 (keep_together is empty), so token is a plain Token here
+    reject sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: token is a Token, which defines __str__
+35:23 call  len(self.line)
+    -> <builtin>.len
+35:40 call  len(val)
+    -> <builtin>.len
+36:38 call  re.search(r'^ +', self.line)
+    -> re.search
+38:45 call  match.group()
+    -> re.Match.group
+    reject sqlparse.engine.grouping.group: match is the re.Match that re.search returns
+41:36 call  sql.Token(T.Whitespace, f'\n{indent}')
+    -> sqlparse.sql.Token.__init__
+    note: sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)
+41:55 format  {indent}
+    reject *: indent is a str (a re.Match group or '')
+
+== sqlparse.filters.tokens
+
+[sqlparse.filters.tokens._CaseFilter.__init__]
+16:31 call  getattr(str, case)
+    -> <builtin>.getattr
+    note: getattr(str, case) returns the method; it is called at 21:37 and 35:37
+
+[sqlparse.filters.tokens._CaseFilter.process]
+20:22 op  ttype in self.ttype
+    -> sqlparse.tokens._TokenType.__contains__
+    note: _CaseFilter is private and never instantiated, and IdentifierCaseFilter overrides process, so self is a KeywordCaseFilter, whose ttype is T.Keyword
+21:37 call  self.convert(value)
+    -> <builtin>.str.upper
+    -> <builtin>.str.lower
+    -> <builtin>.str.capitalize
+    note: self.convert is getattr(str, case) (16:31): case is the documented 'upper', 'lower' or 'capitalize' (docs/source/api.rst:27-33, checked by validate_options for formatter.build_filter_stack), or the default 'upper'
+
+[sqlparse.filters.tokens.IdentifierCaseFilter.process]
+34:22 op  ttype in self.ttype
+    reject *: self.ttype is the tuple (T.Name, T.String.Symbol) of IdentifierCaseFilter; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+34:51 call  value.strip()
+    -> <builtin>.str.strip
+35:37 call  self.convert(value)
+    -> <builtin>.str.upper
+    -> <builtin>.str.lower
+    -> <builtin>.str.capitalize
+    note: self.convert is getattr(str, case) (16:31): case is the documented 'upper', 'lower' or 'capitalize' (docs/source/api.rst:27-33, checked by validate_options for formatter.build_filter_stack), or the default 'upper'
+
+[sqlparse.filters.tokens.TruncateStringFilter.process]
+57:19 call  len(inner)
+    -> <builtin>.len
+58:32 call  ''.join((quote, inner[:self.width], self.char, quote))
+    -> <builtin>.str.join
+
+
+
+== sqlparse.formatter
+
+[sqlparse.formatter.validate_options]
+16:25 call  options.get('keyword_case')
+    -> <builtin>.dict.get
+17:15 op  kwcase not in [None, 'upper', 'lower', 'capitalize']
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+18:28 call  SQLParseError('Invalid value for keyword_case: ' f'{kwcas...
+    -> <builtin>.Exception.__init__
+19:31 format  {kwcase!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+21:25 call  options.get('identifier_case')
+    -> <builtin>.dict.get
+22:15 op  idcase not in [None, 'upper', 'lower', 'capitalize']
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+23:28 call  SQLParseError('Invalid value for identifier_case: ' f'{id...
+    -> <builtin>.Exception.__init__
+24:31 format  {idcase!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+26:24 call  options.get('output_format')
+    -> <builtin>.dict.get
+27:14 op  ofrmt not in [None, 'sql', 'python', 'php']
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+28:28 call  SQLParseError('Unknown output format: ' f'{ofrmt!r}')
+    -> <builtin>.Exception.__init__
+29:31 format  {ofrmt!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+31:33 call  options.get('strip_comments', False)
+    -> <builtin>.dict.get
+32:23 op  strip_comments not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+33:28 call  SQLParseError('Invalid value for strip_comments: ' f'{str...
+    -> <builtin>.Exception.__init__
+34:31 format  {strip_comments!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+36:41 call  options.get('use_space_around_operators', False)
+    -> <builtin>.dict.get
+37:31 op  space_around_operators not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+38:28 call  SQLParseError('Invalid value for use_space_around_operato...
+    -> <builtin>.Exception.__init__
+39:31 format  {space_around_operators!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+41:27 call  options.get('strip_whitespace', False)
+    -> <builtin>.dict.get
+42:17 op  strip_ws not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+43:28 call  SQLParseError('Invalid value for strip_whitespace: ' f'{s...
+    -> <builtin>.Exception.__init__
+44:31 format  {strip_ws!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+46:35 call  options.get('truncate_strings')
+    -> <builtin>.dict.get
+49:35 call  int(truncate_strings)
+    -> <builtin>.int
+51:32 call  SQLParseError('Invalid value for truncate_strings: ' f'{t...
+    -> <builtin>.Exception.__init__
+52:35 format  {truncate_strings!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+54:32 call  SQLParseError('Invalid value for truncate_strings: ' f'{t...
+    -> <builtin>.Exception.__init__
+55:35 format  {truncate_strings!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+57:47 call  options.get('truncate_char', '[...]')
+    -> <builtin>.dict.get
+59:33 call  options.get('indent_columns', False)
+    -> <builtin>.dict.get
+60:23 op  indent_columns not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+61:28 call  SQLParseError('Invalid value for indent_columns: ' f'{ind...
+    -> <builtin>.Exception.__init__
+62:31 format  {indent_columns!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+67:27 call  options.get('reindent', False)
+    -> <builtin>.dict.get
+68:17 op  reindent not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+69:28 call  SQLParseError('Invalid value for reindent: ' f'{reindent!...
+    -> <builtin>.Exception.__init__
+70:31 format  {reindent!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+74:35 call  options.get('reindent_aligned', False)
+    -> <builtin>.dict.get
+75:25 op  reindent_aligned not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+76:28 call  SQLParseError('Invalid value for reindent_aligned: ' f'{r...
+    -> <builtin>.Exception.__init__
+77:31 format  {reindent!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+81:37 call  options.get('indent_after_first', False)
+    -> <builtin>.dict.get
+82:27 op  indent_after_first not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+83:28 call  SQLParseError('Invalid value for indent_after_first: ' f'...
+    -> <builtin>.Exception.__init__
+84:31 format  {indent_after_first!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+87:30 call  options.get('indent_tabs', False)
+    -> <builtin>.dict.get
+88:20 op  indent_tabs not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+89:28 call  SQLParseError('Invalid value for indent_tabs: ' f'{indent...
+    -> <builtin>.Exception.__init__
+90:31 format  {indent_tabs!r}
+    reject *: the option value is a client value of the documented option types (str, bool, int or None); formatting it runs no package code
+96:31 call  options.get('indent_width', 2)
+    -> <builtin>.dict.get
+98:27 call  int(indent_width)
+    -> <builtin>.int
+100:28 call  SQLParseError('indent_width requires an integer')
+    -> <builtin>.Exception.__init__
+102:28 call  SQLParseError('indent_width requires a positive integer')
+    -> <builtin>.Exception.__init__
+105:29 call  options.get('wrap_after', 0)
+    -> <builtin>.dict.get
+107:25 call  int(wrap_after)
+    -> <builtin>.int
+109:28 call  SQLParseError('wrap_after requires an integer')
+    -> <builtin>.Exception.__init__
+111:28 call  SQLParseError('wrap_after requires a positive integer')
+    -> <builtin>.Exception.__init__
+114:30 call  options.get('comma_first', False)
+    -> <builtin>.dict.get
+115:20 op  comma_first not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+116:28 call  SQLParseError('comma_first requires a boolean value')
+    -> <builtin>.Exception.__init__
+119:26 call  options.get('compact', False)
+    -> <builtin>.dict.get
+120:16 op  compact not in [True, False]
+    reject *: an option value searched in a list display of None, str or bool; list.__contains__ compares with ==, and the values are client str, bool or int options
+121:28 call  SQLParseError('compact requires a boolean value')
+    -> <builtin>.Exception.__init__
+124:31 call  options.get('right_margin')
+    -> <builtin>.dict.get
+127:31 call  int(right_margin)
+    -> <builtin>.int
+129:32 call  SQLParseError('right_margin requires an integer')
+    -> <builtin>.Exception.__init__
+131:32 call  SQLParseError('right_margin requires an integer > 10')
+    -> <builtin>.Exception.__init__
+
+[sqlparse.formatter.build_filter_stack]
+145:19 call  options.get('keyword_case')
+    -> <builtin>.dict.get
+146:32 call  stack.preprocess.append( filters.KeywordCaseFilter(option...
+    -> <builtin>.list.append
+147:38 call  filters.KeywordCaseFilter(options['keyword_case'])
+    -> sqlparse.filters.tokens._CaseFilter.__init__
+149:19 call  options.get('identifier_case')
+    -> <builtin>.dict.get
+150:32 call  stack.preprocess.append( filters.IdentifierCaseFilter(opt...
+    -> <builtin>.list.append
+151:41 call  filters.IdentifierCaseFilter(options['identifier_case'])
+    -> sqlparse.filters.tokens._CaseFilter.__init__
+153:19 call  options.get('truncate_strings')
+    -> <builtin>.dict.get
+154:32 call  stack.preprocess.append(filters.TruncateStringFilter( wid...
+    -> <builtin>.list.append
+154:61 call  filters.TruncateStringFilter( width=options['truncate_str...
+    -> sqlparse.filters.tokens.TruncateStringFilter.__init__
+157:19 call  options.get('use_space_around_operators', False)
+    -> <builtin>.dict.get
+158:30 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+159:33 call  stack.stmtprocess.append(filters.SpacesAroundOperatorsFil...
+    -> <builtin>.list.append
+159:69 call  filters.SpacesAroundOperatorsFilter()
+    note: SpacesAroundOperatorsFilter defines no __init__ and has no base but object: object.__init__, no edge
+162:19 call  options.get('strip_comments')
+    -> <builtin>.dict.get
+163:30 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+164:33 call  stack.stmtprocess.append(filters.StripCommentsFilter())
+    -> <builtin>.list.append
+164:61 call  filters.StripCommentsFilter()
+    note: StripCommentsFilter defines no __init__ and has no base but object: object.__init__, no edge
+166:19 call  options.get('strip_whitespace')
+    -> <builtin>.dict.get
+166:54 call  options.get('reindent')
+    -> <builtin>.dict.get
+167:30 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+168:33 call  stack.stmtprocess.append(filters.StripWhitespaceFilter())
+    -> <builtin>.list.append
+168:63 call  filters.StripWhitespaceFilter()
+    note: StripWhitespaceFilter defines no __init__ and has no base but object: object.__init__, no edge
+170:19 call  options.get('reindent')
+    -> <builtin>.dict.get
+171:30 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+172:33 call  stack.stmtprocess.append( filters.ReindentFilter( char=op...
+    -> <builtin>.list.append
+173:35 call  filters.ReindentFilter( char=options['indent_char'], widt...
+    -> sqlparse.filters.reindent.ReindentFilter.__init__
+182:19 call  options.get('reindent_aligned', False)
+    -> <builtin>.dict.get
+183:30 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+184:33 call  stack.stmtprocess.append( filters.AlignedIndentFilter(cha...
+    -> <builtin>.list.append
+185:40 call  filters.AlignedIndentFilter(char=options['indent_char'])
+    -> sqlparse.filters.aligned_indent.AlignedIndentFilter.__init__
+187:19 call  options.get('right_margin')
+    -> <builtin>.dict.get
+188:30 call  stack.enable_grouping()
+    -> sqlparse.engine.filter_stack.FilterStack.enable_grouping
+189:33 call  stack.stmtprocess.append( filters.RightMarginFilter(width...
+    -> <builtin>.list.append
+190:38 call  filters.RightMarginFilter(width=options['right_margin'])
+    -> sqlparse.filters.right_margin.RightMarginFilter.__init__
+193:19 call  options.get('output_format')
+    -> <builtin>.dict.get
+195:22 call  frmt.lower()
+    -> <builtin>.str.lower
+196:43 call  filters.OutputPHPFilter()
+    -> sqlparse.filters.output.OutputFilter.__init__
+197:24 call  frmt.lower()
+    -> <builtin>.str.lower
+198:46 call  filters.OutputPythonFilter()
+    -> sqlparse.filters.output.OutputFilter.__init__
+202:37 call  stack.postprocess.append(fltr)
+    -> <builtin>.list.append
+
+
+== sqlparse.keywords
+
+[sqlparse.keywords]
+17:28 call  object()
+    -> <builtin>.object
+33:33 call  re.compile( r'(?=(\$(?:[_A-ZÀ-Ü]\w*)?\$))', re.IGNORECASE...
+    -> re.compile
+35:37 call  re.compile(r'(?<![\w"$])', re.UNICODE)
+    -> re.compile
+36:32 call  re.compile(r'/\*\+')
+    -> re.compile
+37:27 call  re.compile(r'/\*(?!\+)')
+    -> re.compile
+38:28 call  re.compile(r'\*/')
+    -> re.compile
+76:27 call  DelimitedSpans({}, {})
+    -> sqlparse.keywords.DelimitedSpans.__init__
+120:52 getattr  tokens.Comment.Single
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Comment.Single when `import sqlparse` runs (sqlparse.md, token types)
+120:59 getattr  tokens.Comment.Single.Hint
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Comment.Single.Hint when `import sqlparse` runs (sqlparse.md, token types)
+161:37 getattr  tokens.Number.Hexadecimal
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Number.Hexadecimal when `import sqlparse` runs (sqlparse.md, token types)
+179:64 getattr  tokens.Keyword.Order
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Keyword.Order when `import sqlparse` runs (sqlparse.md, token types)
+193:60 getattr  tokens.Keyword.TZCast
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Keyword.TZCast when `import sqlparse` runs (sqlparse.md, token types)
+793:29 getattr  tokens.Keyword.DCL
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Keyword.DCL when `import sqlparse` runs (sqlparse.md, token types)
+
+[sqlparse.keywords.DelimitedSpans.resolve]
+70:26 call  bisect_left(starts, opener_end)
+    -> bisect.bisect_left
+71:22 call  len(starts)
+    -> <builtin>.len
+
+[sqlparse.keywords.find_delimited_spans]
+83:22 op  '$' in text
+    reject *: text is the str that Lexer.get_tokens decoded (the function is documented for SQL text)
+87:29 op  '/*' in text
+    reject *: text is the str that Lexer.get_tokens decoded (the function is documented for SQL text)
+92:26 call  defaultdict(lambda: ([], []))
+    -> collections.defaultdict
+    reject sqlparse.keywords.find_delimited_spans.<lambda1>: stored as the default_factory; defaultdict calls it later, on a missing key (100:35, 112:31)
+94:46 call  _DOLLAR_QUOTE_DELIM.finditer(text)
+    -> re.Pattern.finditer
+95:28 call  m.start()
+    -> re.Match.start
+96:26 call  m.group(1)
+    -> re.Match.group
+    reject sqlparse.engine.grouping.group: m is a re.Match of finditer
+97:30 call  len(tag)
+    -> <builtin>.len
+100:35 getitem  closers[tag]
+    -> sqlparse.keywords.find_delimited_spans.<lambda1>
+    note: closers is the defaultdict of 92:26; on the first occurrence of a tag, defaultdict.__missing__ calls the default_factory lambda back
+101:26 call  starts.append(start)
+    -> <builtin>.list.append
+102:24 call  ends.append(end)
+    -> <builtin>.list.append
+103:45 call  _DOLLAR_QUOTE_OPENER_OK.match(text, start)
+    -> re.Pattern.match
+    reject sqlparse.sql.Token.match: the receiver is a compiled re.Pattern (line 35)
+106:45 call  _COMMENT_HINT_OPEN.finditer(text)
+    -> re.Pattern.finditer
+107:28 call  m.start()
+    -> re.Match.start
+108:22 call  m.end()
+    -> re.Match.end
+108:55 getattr  tokens.Comment.Multiline
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline; the first load in a run, here or at 111:55, statement_splitter.py:188, others.py:35 or sql.py:554, calls __getattr__ (sqlparse.md, token types)
+108:65 getattr  tokens.Comment.Multiline.Hint
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline.Hint; the first load in a run, here or at others.py:35, calls __getattr__ (sqlparse.md, token types)
+109:40 call  _COMMENT_OPEN.finditer(text)
+    -> re.Pattern.finditer
+110:28 call  m.start()
+    -> re.Match.start
+111:22 call  m.end()
+    -> re.Match.end
+111:55 getattr  tokens.Comment.Multiline
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline; the first load in a run, here or at 108:55, statement_splitter.py:188, others.py:35 or sql.py:554, calls __getattr__ (sqlparse.md, token types)
+112:31 getitem  closers[_COMMENT_TAG]
+    -> sqlparse.keywords.find_delimited_spans.<lambda1>
+    note: closers is the defaultdict of 92:26; the comment tag is never a key before this line, so defaultdict.__missing__ calls the default_factory lambda back
+113:41 call  _COMMENT_CLOSE.finditer(text)
+    -> re.Pattern.finditer
+114:26 call  starts.append(m.start())
+    -> <builtin>.list.append
+114:34 call  m.start()
+    -> re.Match.start
+115:24 call  ends.append(m.end())
+    -> <builtin>.list.append
+115:30 call  m.end()
+    -> re.Match.end
+116:26 call  DelimitedSpans(openers, closers)
+    -> sqlparse.keywords.DelimitedSpans.__init__
+
+== sqlparse.lexer
+
+[sqlparse.lexer]
+27:17 call  Lock()
+    -> threading.Lock
+47:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[sqlparse.lexer.Lexer.get_default_instance]
+53:44 call  cls()
+    note: cls is Lexer (or a client subclass, client code); Lexer defines no __init__ and has no base but object: object.__init__, no edge
+54:61 call  cls._default_instance.default_initialization()
+    -> sqlparse.lexer.Lexer.default_initialization
+
+[sqlparse.lexer.Lexer.default_initialization]
+60:19 call  self.clear()
+    -> sqlparse.lexer.Lexer.clear
+61:27 call  self.set_SQL_REGEX(keywords.SQL_REGEX)
+    -> sqlparse.lexer.Lexer.set_SQL_REGEX
+62:26 call  self.add_keywords(keywords.KEYWORDS_COMMON)
+    -> sqlparse.lexer.Lexer.add_keywords
+63:26 call  self.add_keywords(keywords.KEYWORDS_ORACLE)
+    -> sqlparse.lexer.Lexer.add_keywords
+64:26 call  self.add_keywords(keywords.KEYWORDS_MYSQL)
+    -> sqlparse.lexer.Lexer.add_keywords
+65:26 call  self.add_keywords(keywords.KEYWORDS_PLPGSQL)
+    -> sqlparse.lexer.Lexer.add_keywords
+66:26 call  self.add_keywords(keywords.KEYWORDS_HQL)
+    -> sqlparse.lexer.Lexer.add_keywords
+67:26 call  self.add_keywords(keywords.KEYWORDS_MSACCESS)
+    -> sqlparse.lexer.Lexer.add_keywords
+68:26 call  self.add_keywords(keywords.KEYWORDS_SNOWFLAKE)
+    -> sqlparse.lexer.Lexer.add_keywords
+69:26 call  self.add_keywords(keywords.KEYWORDS_BIGQUERY)
+    -> sqlparse.lexer.Lexer.add_keywords
+70:26 call  self.add_keywords(keywords.KEYWORDS)
+    -> sqlparse.lexer.Lexer.add_keywords
+
+[sqlparse.lexer.Lexer.set_SQL_REGEX]
+84:24 call  re.compile(rx, FLAGS)
+    -> re.compile
+
+[sqlparse.lexer.Lexer.add_keywords]
+91:30 call  self._keywords.append(keywords)
+    -> <builtin>.list.append
+
+[sqlparse.lexer.Lexer.is_keyword]
+99:26 call  value.upper()
+    -> <builtin>.str.upper
+101:20 op  val in kwdict
+    reject *: kwdict is a keyword dict (the KEYWORDS_* dicts of keywords.py, or a dict that the client adds, docs/source/extending.rst:83); dict.__contains__ hashes the str val
+
+[sqlparse.lexer.Lexer.get_tokens]
+119:22 call  isinstance(text, TextIOBase)
+    -> <builtin>.isinstance
+120:29 call  text.read()
+    note: text is a client stream; the isinstance test names io.TextIOBase, an abstract io base class, which does not fix the class (rule B4), so its read is client behaviour (B5)
+122:22 call  isinstance(text, str)
+    -> <builtin>.isinstance
+124:24 call  isinstance(text, bytes)
+    -> <builtin>.isinstance
+126:35 call  text.decode(encoding)
+    -> <builtin>.bytes.decode
+129:39 call  text.decode('utf-8')
+    -> <builtin>.bytes.decode
+131:39 call  text.decode('unicode-escape')
+    -> <builtin>.bytes.decode
+133:28 call  TypeError(f"Expected text or file-like object, got {type(...
+    -> <builtin>.TypeError
+133:70 format  {type(text)!r}
+    reject *: type(text) is a class; repr() of a class runs type.__repr__ (the package defines no metaclass)
+133:75 call  type(text)
+    -> <builtin>.type
+135:56 call  keywords.find_delimited_spans(text)
+    -> sqlparse.keywords.find_delimited_spans
+138:29 call  enumerate(text)
+    -> <builtin>.enumerate
+144:20 op  pos in span_openers
+    reject *: span_openers is the dict openers of a DelimitedSpans; dict.__contains__ hashes the int pos
+145:51 call  delimited_spans.resolve(pos)
+    -> sqlparse.keywords.DelimitedSpans.resolve
+149:28 call  consume(iterable, end - pos - 1)
+    -> sqlparse.utils.consume
+153:29 call  rexmatch(text, pos)
+    -> re.Pattern.match
+    note: rexmatch is the first item of a pair of self._SQL_REGEX, which only set_SQL_REGEX fills (clear() empties it): re.compile(rx, FLAGS).match, a bound re.Pattern.match
+157:32 call  isinstance(action, tokens._TokenType)
+    -> <builtin>.isinstance
+158:42 call  m.group()
+    -> re.Match.group
+    reject sqlparse.engine.grouping.group: m is the re.Match that rexmatch returns
+160:42 call  self.is_keyword(m.group())
+    -> sqlparse.lexer.Lexer.is_keyword
+    note: self is a Lexer (Lexer.get_default_instance; client subclasses are client code); the site finder sees the Token slot is_keyword, which Token.__init__ assigns, but the receiver is not a token
+160:50 call  m.group()
+    -> re.Match.group
+    reject sqlparse.engine.grouping.group: m is the re.Match that rexmatch returns
+162:24 call  consume(iterable, m.end() - pos - 1)
+    -> sqlparse.utils.consume
+162:40 call  m.end()
+    -> re.Match.end
+
+[sqlparse.lexer.tokenize]
+174:38 call  Lexer.get_default_instance()
+    -> sqlparse.lexer.Lexer.get_default_instance
+174:51 call  Lexer.get_default_instance().get_tokens(sql, encoding)
+    -> sqlparse.lexer.Lexer.get_tokens
+
+
+== sqlparse.sql
+
+[sqlparse.sql]
+231:6 decorator  @property
+    -> <builtin>.property
+497:23 getattr  T.Name.Builtin
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of Name.Builtin when `import sqlparse` runs (sqlparse.md, token types)
+498:24 getattr  T.String.Single
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: first load of String.Single when `import sqlparse` runs (sqlparse.md, token types)
+507:6 decorator  @property
+    -> <builtin>.property
+517:6 decorator  @property
+    -> <builtin>.property
+541:6 decorator  @property
+    -> <builtin>.property
+545:6 decorator  @property
+    -> <builtin>.property
+
+[sqlparse.sql.NameAliasMixin.get_real_name]
+23:34 call  enumerate(self.tokens)
+    -> <builtin>.enumerate
+24:25 call  tok.match(T.Punctuation, '.')
+    -> sqlparse.sql.Token.match
+26:36 call  self._get_first_name(dot_idx, real_name=True)
+    -> sqlparse.sql.TokenList._get_first_name
+
+[sqlparse.sql.NameAliasMixin.get_alias]
+32:40 call  self.token_next_by(m=(T.Keyword, 'AS'))
+    -> sqlparse.sql.TokenList.token_next_by
+34:40 call  self._get_first_name(kw_idx + 1, keywords=True)
+    -> sqlparse.sql.TokenList._get_first_name
+37:35 call  self.token_next_by(t=T.Whitespace)
+    -> sqlparse.sql.TokenList.token_next_by
+38:15 call  len(self.tokens)
+    -> <builtin>.len
+39:40 call  self._get_first_name(reverse=True)
+    -> sqlparse.sql.TokenList._get_first_name
+
+[sqlparse.sql.Token.__init__]
+62:20 call  str(value)
+    -> <builtin>.str
+    reject *: value is a str at every package call (lexer text, the joined values of TokenList.__init__, the text of the filters); a value of the client is opaque, and an arbitrary package object as the value is not considered (rule B3)
+67:33 op  ttype in T.Keyword
+    -> sqlparse.tokens._TokenType.__contains__
+68:41 op  self.ttype in T.Whitespace
+    -> sqlparse.tokens._TokenType.__contains__
+69:38 op  self.ttype in T.Newline
+    -> sqlparse.tokens._TokenType.__contains__
+70:38 call  value.upper()
+    -> <builtin>.str.upper
+
+[sqlparse.sql.Token.__repr__]
+80:34 call  self._get_repr_name()
+    -> sqlparse.sql.Token._get_repr_name
+    -> sqlparse.sql.TokenList._get_repr_name
+    note: self is a plain Token or any group (TokenList and its subclasses inherit __repr__)
+81:37 call  self._get_repr_value()
+    -> sqlparse.sql.Token._get_repr_value
+83:36 call  value.startswith("'")
+    -> <builtin>.str.startswith
+83:60 call  value.endswith("'")
+    -> <builtin>.str.endswith
+84:59 call  "<{cls} {q}{value}{q} at 0x{id:2X}>".format( id=id(self),...
+    -> <builtin>.str.format
+    reject sqlparse.format: the receiver is a str literal, so this is str.format
+    reject sqlparse.sql.Token.__repr__, sqlparse.sql.Token.__str__, sqlparse.sql.TokenList.__str__, sqlparse.tokens._TokenType.__repr__: the fields cls, q and value are str (from _get_repr_name, _get_repr_value) and id an int; self is in locals() but no field names it
+85:18 call  id(self)
+    -> <builtin>.id
+85:34 call  locals()
+    -> <builtin>.locals
+
+[sqlparse.sql.Token._get_repr_name]
+88:19 call  str(self.ttype)
+    -> <builtin>.str
+    -> sqlparse.tokens._TokenType.__repr__
+    reject sqlparse.sql.Token.__repr__, sqlparse.sql.Token.__str__, sqlparse.sql.TokenList.__str__: self.ttype is a token type (TokenList overrides _get_repr_name, so self is a plain Token); _TokenType defines no __str__, so str() falls back to its __repr__
+88:37 call  str(self.ttype).split('.')
+    -> <builtin>.str.split
+    reject sqlparse.split: the receiver is the str of 88:19, so this is str.split
+
+[sqlparse.sql.Token._get_repr_value]
+91:18 call  str(self)
+    -> <builtin>.str
+    -> sqlparse.sql.Token.__str__
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: self is a plain Token or a group; both classes define __str__
+92:15 call  len(raw)
+    -> <builtin>.len
+94:22 call  re.sub(r'\s+', ' ', raw)
+    -> re.sub
+
+[sqlparse.sql.Token.match]
+116:22 call  isinstance(values, str)
+    -> <builtin>.isinstance
+122:33 call  re.compile(v, flag)
+    -> re.compile
+124:23 call  any(pattern.search(self.normalized) for pattern in values)
+    -> <builtin>.any
+124:38 call  pattern.search(self.normalized)
+    -> re.Pattern.search
+127:30 call  v.upper()
+    -> <builtin>.str.upper
+129:32 op  self.normalized in values
+    reject *: values is a tuple or list of str, or a generator over one (lines 117, 127); its __contains__ compares with ==
+
+[sqlparse.sql.Token.within]
+139:26 call  isinstance(parent, group_cls)
+    -> <builtin>.isinstance
+
+[sqlparse.sql.TokenList.__init__]
+169:17 call  setattr(token, 'parent', self)
+    -> <builtin>.setattr
+170:14 call  super()
+    -> <builtin>.super
+170:25 call  super().__init__(None, ''.join(token.value for token in s...
+    -> sqlparse.sql.Token.__init__
+    reject *: super() after TokenList in the MRO of every TokenList subclass (also through NameAliasMixin) is Token
+170:39 call  ''.join(token.value for token in self.tokens)
+    -> <builtin>.str.join
+
+[sqlparse.sql.TokenList.__str__]
+174:23 call  ''.join(token.value for token in self.flatten())
+    -> <builtin>.str.join
+174:61 call  self.flatten()
+    -> sqlparse.sql.TokenList.flatten
+    reject sqlparse.sql.Token.flatten: self is a TokenList, which overrides flatten
+
+[sqlparse.sql.TokenList.__iter__]
+181:20 call  iter(self.tokens)
+    -> <builtin>.iter
+
+[sqlparse.sql.TokenList._get_repr_name]
+187:20 call  type(self)
+    -> <builtin>.type
+
+[sqlparse.sql.TokenList._pprint_tree]
+191:26 call  len(self.tokens)
+    -> <builtin>.len
+192:36 call  enumerate(self.tokens)
+    -> <builtin>.enumerate
+193:39 call  token._get_repr_name()
+    -> sqlparse.sql.Token._get_repr_name
+    -> sqlparse.sql.TokenList._get_repr_name
+    note: token is a child of the group: a plain token or a group
+194:42 call  token._get_repr_value()
+    -> sqlparse.sql.Token._get_repr_value
+199:40 call  value.startswith("'")
+    -> <builtin>.str.startswith
+199:64 call  value.endswith("'")
+    -> <builtin>.str.endswith
+200:18 call  print(f"{_pre}{pre}{idx} {cls} {q}{value}{q}", file=f)
+    -> <builtin>.print
+    reject *: the argument is an f-string, a str; print writes it to f or sys.stdout (no package code)
+200:21 format  {_pre}
+    reject *: _pre is a str
+200:27 format  {pre}
+    reject *: pre is a str
+200:32 format  {idx}
+    reject *: idx is an int of enumerate
+200:38 format  {cls}
+    reject *: cls is the str of _get_repr_name
+200:44 format  {q}
+    reject *: q is a str
+200:47 format  {value}
+    reject *: value is the str of _get_repr_value
+200:54 format  {q}
+    reject *: q is a str
+204:35 call  token._pprint_tree(max_depth, depth + 1, f, _pre + parent...
+    -> sqlparse.sql.TokenList._pprint_tree
+
+[sqlparse.sql.TokenList.get_token_at_offset]
+209:34 call  self.flatten()
+    -> sqlparse.sql.TokenList.flatten
+    reject sqlparse.sql.Token.flatten: self is a TokenList, which overrides flatten
+210:28 call  len(token.value)
+    -> <builtin>.len
+
+[sqlparse.sql.TokenList.flatten]
+222:41 call  token.flatten()
+    -> sqlparse.sql.TokenList.flatten
+    reject sqlparse.sql.Token.flatten: token.is_group is True only for a TokenList (Token.__init__ sets False, TokenList.__init__ sets True)
+
+[sqlparse.sql.TokenList._token_matching]
+240:26 call  isinstance(funcs, (list, tuple))
+    -> <builtin>.isinstance
+245:28 call  range(start - 2, -1, -1)
+    -> <builtin>.range
+248:26 call  len(self.tokens)
+    -> <builtin>.len
+249:28 call  range(start, end)
+    -> <builtin>.range
+253:24 call  func(token)
+    -> sqlparse.sql.TokenList.token_first.matcher
+    -> sqlparse.sql.TokenList.token_next.matcher
+    -> sqlparse.sql.TokenList.token_next_by.<lambda1>
+    -> sqlparse.sql.TokenList.token_not_matching.<lambda1>
+    note: _token_matching is private; the package passes the local matcher of token_first (270) and token_next (308), the lambda of token_next_by (274), and the list of lambdas of token_not_matching (278-279). token_matching (282) passes the funcs of its caller, which no package code calls: client callbacks
+
+[sqlparse.sql.TokenList.token_first]
+270:36 call  self._token_matching(matcher)
+    -> sqlparse.sql.TokenList._token_matching
+    reject sqlparse.sql.TokenList.token_first.matcher, sqlparse.sql.TokenList.token_next.matcher: passed to _token_matching, which calls it (253:24)
+
+[sqlparse.sql.TokenList.token_first.matcher]
+269:44 call  imt(tk, t=T.Comment, i=Comment)
+    -> sqlparse.utils.imt
+
+[sqlparse.sql.TokenList.token_next_by]
+274:36 call  self._token_matching(lambda tk: imt(tk, i, m, t), idx, end)
+    -> sqlparse.sql.TokenList._token_matching
+    reject sqlparse.sql.TokenList.token_next_by.<lambda1>: passed to _token_matching, which calls it (253:24)
+
+[sqlparse.sql.TokenList.token_next_by.<lambda1>]
+274:51 call  imt(tk, i, m, t)
+    -> sqlparse.utils.imt
+
+[sqlparse.sql.TokenList.token_not_matching]
+277:43 call  isinstance(funcs, (list, tuple))
+    -> <builtin>.isinstance
+279:36 call  self._token_matching(funcs, idx)
+    -> sqlparse.sql.TokenList._token_matching
+
+[sqlparse.sql.TokenList.token_not_matching.<lambda1>]
+278:48 call  func(tk)
+    -> sqlparse.engine.grouping.group_comments.<lambda1>
+    note: func is an item of the funcs of token_not_matching; its only package caller, group_comments (grouping.py:339), passes its lambda. Functions of the client are client callbacks
+
+[sqlparse.sql.TokenList.token_matching]
+282:36 call  self._token_matching(funcs, idx)
+    -> sqlparse.sql.TokenList._token_matching
+
+[sqlparse.sql.TokenList.token_prev]
+291:31 call  self.token_next(idx, skip_ws, skip_cm, _reverse=True)
+    -> sqlparse.sql.TokenList.token_next
+
+[sqlparse.sql.TokenList.token_next]
+308:36 call  self._token_matching(matcher, idx, reverse=_reverse)
+    -> sqlparse.sql.TokenList._token_matching
+    reject sqlparse.sql.TokenList.token_first.matcher, sqlparse.sql.TokenList.token_next.matcher: passed to _token_matching, which calls it (253:24)
+
+[sqlparse.sql.TokenList.token_next.matcher]
+307:44 call  imt(tk, t=T.Comment, i=Comment)
+    -> sqlparse.utils.imt
+
+[sqlparse.sql.TokenList.token_index]
+312:36 call  isinstance(start, int)
+    -> <builtin>.isinstance
+312:70 call  self.token_index(start)
+    -> sqlparse.sql.TokenList.token_index
+313:49 call  self.tokens[start:].index(token)
+    -> <builtin>.list.index
+    note: list.index compares with ==; Token defines no __eq__ (identity)
+
+[sqlparse.sql.TokenList.group_tokens]
+327:33 call  isinstance(start, grp_cls)
+    -> <builtin>.isinstance
+331:30 call  grp.tokens.extend(subtokens)
+    -> <builtin>.list.extend
+333:33 call  ''.join(token.value for token in subtokens)
+    -> <builtin>.str.join
+336:26 call  grp_cls(subtokens)
+    -> sqlparse.sql.TokenList.__init__
+    note: grp_cls is the group class of the caller: grouping passes Parenthesis, SquareBrackets, Case, If, For, Begin, Identifier, TypedLiteral, Assignment, Comparison, Operation, IdentifierList, Over, Comment, Where, Function, Values and TokenList; none defines __init__, so each runs TokenList.__init__. A class of the client is client code
+
+[sqlparse.sql.TokenList.insert_before]
+347:26 call  isinstance(where, int)
+    -> <builtin>.isinstance
+348:37 call  self.token_index(where)
+    -> sqlparse.sql.TokenList.token_index
+350:27 call  self.tokens.insert(where, token)
+    -> <builtin>.list.insert
+
+[sqlparse.sql.TokenList.insert_after]
+354:26 call  isinstance(where, int)
+    -> <builtin>.isinstance
+355:37 call  self.token_index(where)
+    -> sqlparse.sql.TokenList.token_index
+356:38 call  self.token_next(where, skip_ws=skip_ws)
+    -> sqlparse.sql.TokenList.token_next
+359:31 call  self.tokens.append(token)
+    -> <builtin>.list.append
+361:31 call  self.tokens.insert(nidx, token)
+    -> <builtin>.list.insert
+
+[sqlparse.sql.TokenList.has_alias]
+365:30 call  self.get_alias()
+    -> sqlparse.sql.NameAliasMixin.get_alias
+    -> sqlparse.sql.TokenList.get_alias
+    note: has_alias is public on every group: Identifier and Function take get_alias from NameAliasMixin, the other classes from TokenList
+
+[sqlparse.sql.TokenList.get_name]
+378:30 call  self.get_alias()
+    -> sqlparse.sql.NameAliasMixin.get_alias
+    -> sqlparse.sql.TokenList.get_alias
+    note: self is any group: Identifier and Function take get_alias from NameAliasMixin, the other classes from TokenList (get_name is also reached from _get_first_name for an Identifier or Function)
+378:54 call  self.get_real_name()
+    -> sqlparse.sql.NameAliasMixin.get_real_name
+    -> sqlparse.sql.TokenList.get_real_name
+    note: self is any group: Identifier and Function take get_real_name from NameAliasMixin, the other classes from TokenList
+
+[sqlparse.sql.TokenList.get_parent_name]
+389:40 call  self.token_next_by(m=(T.Punctuation, '.'))
+    -> sqlparse.sql.TokenList.token_next_by
+390:35 call  self.token_prev(dot_idx)
+    -> sqlparse.sql.TokenList.token_prev
+391:29 call  remove_quotes(prev_.value)
+    -> sqlparse.utils.remove_quotes
+
+[sqlparse.sql.TokenList._get_first_name]
+398:26 call  reversed(tokens)
+    -> <builtin>.reversed
+402:25 call  types.append(T.Keyword)
+    -> <builtin>.list.append
+405:28 op  token.ttype in types
+    reject *: types is a list of token types; list.__contains__ compares with ==, which _TokenType inherits from tuple
+406:37 call  remove_quotes(token.value)
+    -> sqlparse.utils.remove_quotes
+407:28 call  isinstance(token, (Identifier, Function))
+    -> <builtin>.isinstance
+408:43 call  token.get_real_name()
+    -> sqlparse.sql.NameAliasMixin.get_real_name
+    reject sqlparse.sql.TokenList.get_real_name: token is an Identifier or a Function (407:28); NameAliasMixin precedes TokenList in their MRO
+408:78 call  token.get_name()
+    -> sqlparse.sql.TokenList.get_name
+
+[sqlparse.sql.Statement.get_type]
+424:33 call  self.token_first(skip_cm=True)
+    -> sqlparse.sql.TokenList.token_first
+430:26 op  token.ttype in (T.Keyword.DML, T.Keyword.DDL)
+    reject *: the right operand is a tuple display of token types; tuple.__contains__ compares with ==, which _TokenType inherits from tuple
+437:36 call  self.token_index(token)
+    -> sqlparse.sql.TokenList.token_index
+439:46 call  self.token_next(tidx, skip_ws=True)
+    -> sqlparse.sql.TokenList.token_next
+440:30 call  isinstance(token, (Identifier, IdentifierList))
+    -> <builtin>.isinstance
+441:50 call  self.token_next(tidx, skip_ws=True)
+    -> sqlparse.sql.TokenList.token_next
+
+[sqlparse.sql.Identifier.is_wildcard]
+459:38 call  self.token_next_by(t=T.Wildcard)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.sql.Identifier.get_typecast]
+464:42 call  self.token_next_by(m=(T.Punctuation, '::'))
+    -> sqlparse.sql.TokenList.token_next_by
+465:38 call  self.token_next(midx, skip_ws=False)
+    -> sqlparse.sql.TokenList.token_next
+
+[sqlparse.sql.Identifier.get_ordering]
+470:41 call  self.token_next_by(t=T.Keyword.Order)
+    -> sqlparse.sql.TokenList.token_next_by
+
+[sqlparse.sql.Identifier.get_array_indices]
+477:26 call  isinstance(token, SquareBrackets)
+    -> <builtin>.isinstance
+
+[sqlparse.sql.IdentifierList.get_identifiers]
+491:55 call  token.match(T.Punctuation, ',')
+    -> sqlparse.sql.Token.match
+
+[sqlparse.sql.Comment.is_multiline]
+554:66 getattr  T.Comment.Multiline
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: no module code creates Comment.Multiline; the first load in a run, here or at keywords.py:108, 111, statement_splitter.py:188 or others.py:35, calls __getattr__ (sqlparse.md, token types)
+
+[sqlparse.sql.Case.get_cases]
+594:27 call  token.match(T.Keyword, 'CASE')
+    -> sqlparse.sql.Token.match
+594:75 op  token.ttype in T.Whitespace
+    -> sqlparse.tokens._TokenType.__contains__
+597:29 call  token.match(T.Keyword, 'WHEN')
+    -> sqlparse.sql.Token.match
+598:27 call  ret.append(([], []))
+    -> <builtin>.list.append
+601:29 call  token.match(T.Keyword, 'THEN')
+    -> sqlparse.sql.Token.match
+604:29 call  token.match(T.Keyword, 'ELSE')
+    -> sqlparse.sql.Token.match
+605:27 call  ret.append((None, []))
+    -> <builtin>.list.append
+608:29 call  token.match(T.Keyword, 'END')
+    -> sqlparse.sql.Token.match
+613:27 call  ret.append(([], []))
+    -> <builtin>.list.append
+617:34 call  ret[-1][0].append(token)
+    -> <builtin>.list.append
+620:34 call  ret[-1][1].append(token)
+    -> <builtin>.list.append
+
+[sqlparse.sql.Function.get_parameters]
+631:41 call  self.token_next_by(i=Parenthesis)
+    -> sqlparse.sql.TokenList.token_next_by
+634:26 call  isinstance(token, IdentifierList)
+    -> <builtin>.isinstance
+635:45 call  token.get_identifiers()
+    -> sqlparse.sql.IdentifierList.get_identifiers
+636:21 call  imt(token, i=(Function, Identifier, TypedLiteral), t=T.Li...
+    -> sqlparse.utils.imt
+638:30 call  result.append(token)
+    -> <builtin>.list.append
+
+[sqlparse.sql.Function.get_window]
+643:41 call  self.token_next_by(i=Over)
+    -> sqlparse.sql.TokenList.token_next_by
+
+
+
+== sqlparse.tokens
+
+[sqlparse.tokens]
+35:19 call  _TokenType()
+    note: _TokenType subclasses tuple and defines neither __new__ nor __init__; tuple.__new__ makes the value and the first __init__ in its MRO is object.__init__: no edge
+38:14 getattr  Token.Text
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Text here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+39:19 getattr  Text.Whitespace
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Text.Whitespace here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+40:22 getattr  Whitespace.Newline
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Whitespace.Newline here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+41:15 getattr  Token.Error
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Error here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+43:15 getattr  Token.Other
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Other here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+46:17 getattr  Token.Keyword
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Keyword here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+47:14 getattr  Token.Name
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Name here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+48:17 getattr  Token.Literal
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Literal here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+49:18 getattr  Literal.String
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Literal.String here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+50:18 getattr  Literal.Number
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Literal.Number here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+51:21 getattr  Token.Punctuation
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Punctuation here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+52:18 getattr  Token.Operator
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Operator here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+53:23 getattr  Operator.Comparison
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Operator.Comparison here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+54:18 getattr  Token.Wildcard
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Wildcard here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+55:17 getattr  Token.Comment
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Comment here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+56:20 getattr  Token.Assignment
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Assignment here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+59:17 getattr  Token.Generic
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Token.Generic here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+60:19 getattr  Generic.Command
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Generic.Command here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+69:15 getattr  Keyword.DML
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Keyword.DML here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+70:15 getattr  Keyword.DDL
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Keyword.DDL here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+71:15 getattr  Keyword.CTE
+    -> sqlparse.tokens._TokenType.__getattr__
+    note: the module creates Keyword.CTE here: the attribute is not yet in the instance dict, so __getattr__ runs and stores it (tokens.py:26)
+
+[sqlparse.tokens._TokenType.__contains__]
+19:63 call  len(self)
+    -> <builtin>.len
+
+[sqlparse.tokens._TokenType.__getattr__]
+23:27 call  name.startswith('__')
+    -> <builtin>.str.startswith
+24:25 call  super()
+    -> <builtin>.super
+24:39 call  super().__getattr__(self, name)
+    reject sqlparse.tokens._TokenType.__getattr__: super() skips _TokenType, and neither tuple nor object defines __getattr__, so the attribute load raises AttributeError and nothing is called
+    note: the public bound method sqlparse.tokens.Token.__getattr__("__absent__") reaches super() at 24:25 under rule C, but the lookup of super().__getattr__ fails before this call; no target is entered
+25:25 call  _TokenType(self + (name,))
+    note: _TokenType subclasses tuple and defines neither __new__ nor __init__; tuple.__new__ makes the value and the first __init__ in its MRO is object.__init__: no edge
+26:16 call  setattr(self, name, new)
+    -> <builtin>.setattr
+
+[sqlparse.tokens._TokenType.__repr__]
+32:58 call  '.'.join(self)
+    -> <builtin>.str.join
+
+== sqlparse.utils
+
+[sqlparse.utils]
+13:28 call  re.compile(r'[^\r\n\'"]+')
+    -> re.compile
+17:20 call  re.compile(r'(?:[^"\\]|\\.)*')
+    -> re.compile
+18:20 call  re.compile(r"(?:[^'\\]|\\.)*")
+    -> re.compile
+117:2 decorator  @contextmanager
+    -> contextlib.contextmanager
+124:2 decorator  @contextmanager
+    -> contextlib.contextmanager
+
+[sqlparse.utils.split_unquoted_newlines]
+28:15 call  str(stmt)
+    -> <builtin>.str
+    -> sqlparse.sql.TokenList.__str__
+    reject sqlparse.sql.Token.__str__, sqlparse.sql.Token.__repr__, sqlparse.tokens._TokenType.__repr__: the package passes the Statement that reaches SerializerUnicode.process (others.py:179), which inherits TokenList.__str__; clients pass str (the docstring: "Split a string")
+29:17 call  len(text)
+    -> <builtin>.len
+40:17 op  char in '\r\n'
+    reject *: char is a str searched in a str
+41:25 call  lines.append(text[line_start:pos])
+    -> <builtin>.list.append
+42:40 call  text.startswith('\r\n', pos)
+    -> <builtin>.str.startswith
+44:19 op  char in unclosed_before
+    reject *: unclosed_before is a dict of str keys
+46:50 call  _STRING_CONTENT[char].match(text, pos + 1)
+    -> re.Pattern.match
+    reject sqlparse.sql.Token.match: the receiver is a compiled re.Pattern of _STRING_CONTENT
+46:69 call  _STRING_CONTENT[char].match(text, pos + 1).end()
+    -> re.Match.end
+53:39 call  _UNQUOTED_TEXT.match(text, pos)
+    -> re.Pattern.match
+    reject sqlparse.sql.Token.match: the receiver is the compiled re.Pattern _UNQUOTED_TEXT
+53:54 call  _UNQUOTED_TEXT.match(text, pos).end()
+    -> re.Match.end
+54:17 call  lines.append(text[line_start:])
+    -> <builtin>.list.append
+
+[sqlparse.utils.remove_quotes]
+62:15 op  val[0] in ('"', "'", '`')
+    reject *: a str searched in a tuple display of str
+
+[sqlparse.utils.recurse.wrap.wrapped_f]
+75:45 call  tlist.get_sublists()
+    -> sqlparse.sql.TokenList.get_sublists
+76:34 call  isinstance(sgroup, cls)
+    -> <builtin>.isinstance
+77:30 call  wrapped_f(sgroup)
+    -> sqlparse.utils.recurse.wrap.wrapped_f
+78:14 call  f(tlist)
+    -> sqlparse.engine.grouping.group_identifier
+    -> sqlparse.engine.grouping.group_over
+    -> sqlparse.engine.grouping.group_comments
+    -> sqlparse.engine.grouping.group_where
+    -> sqlparse.engine.grouping.group_aliased
+    -> sqlparse.engine.grouping.group_functions
+    -> sqlparse.engine.grouping.group_order
+    -> sqlparse.engine.grouping.align_comments
+    note: f is the function that the decorator wrap received: the package decorates the eight functions of grouping.py:251-423 with @recurse(...); recurse is public, and a function of the client is client code
+
+[sqlparse.utils.imt]
+95:24 call  isinstance(token, i)
+    -> <builtin>.isinstance
+98:22 call  isinstance(m, list)
+    -> <builtin>.isinstance
+99:19 call  any(token.match(*pattern) for pattern in m)
+    -> <builtin>.any
+99:31 call  token.match(*pattern)
+    -> sqlparse.sql.Token.match
+101:25 call  token.match(*m)
+    -> sqlparse.sql.Token.match
+104:22 call  isinstance(t, list)
+    -> <builtin>.isinstance
+105:19 call  any(token.ttype in ttype for ttype in t)
+    -> <builtin>.any
+105:32 op  token.ttype in ttype
+    -> sqlparse.tokens._TokenType.__contains__
+    note: t is a list of token types (the docstring: "TokenType or Tuple/List of TokenTypes")
+107:26 op  token.ttype in t
+    -> sqlparse.tokens._TokenType.__contains__
+    note: t is a token type (T.Comment, T.Name, ...) or a tuple of token types; for a tuple, tuple.__contains__ compares with == (no package code)
+
+[sqlparse.utils.consume]
+114:10 call  deque(itertools.islice(iterator, n), maxlen=0)
+    -> collections.deque
+114:27 call  itertools.islice(iterator, n)
+    -> itertools.islice
+

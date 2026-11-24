@@ -1,0 +1,1535 @@
+{
+  "aliases": {
+    "<builtin>.RuntimeError": [
+      "threading.ThreadError"
+    ],
+    "<builtin>.TimeoutError": [
+      "asyncio.TimeoutError",
+      "asyncio.exceptions.TimeoutError",
+      "concurrent.futures.TimeoutError",
+      "socket.timeout"
+    ],
+    "<builtin>.dict.clear": [
+      "collections.defaultdict.clear"
+    ],
+    "<builtin>.dict.items": [
+      "collections.defaultdict.items"
+    ],
+    "<builtin>.dict.pop": [
+      "collections.defaultdict.pop"
+    ],
+    "<builtin>.dict.update": [
+      "collections.defaultdict.update"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.object.__init__": [
+      "<builtin>.str.__init__",
+      "abc.ABC.__init__",
+      "contextlib.AbstractAsyncContextManager.__init__",
+      "contextlib.AbstractContextManager.__init__",
+      "contextlib.ContextDecorator.__init__",
+      "enum.Enum.__init__",
+      "types.CoroutineType.__init__",
+      "typing.Generic.__init__",
+      "typing.Protocol.__init__",
+      "typing.Text.__init__",
+      "uuid.Enum.__init__"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "_asyncio.Task.cancel": [
+      "asyncio.Task.cancel",
+      "asyncio.tasks.Task.cancel"
+    ],
+    "_asyncio.Task.done": [
+      "asyncio.Task.done",
+      "asyncio.tasks.Task.done"
+    ],
+    "_asyncio.get_running_loop": [
+      "asyncio.events.get_running_loop",
+      "asyncio.get_running_loop"
+    ],
+    "_bisect.bisect_left": [
+      "bisect.bisect_left"
+    ],
+    "_sqlite3.connect": [
+      "sqlite3.connect",
+      "sqlite3.dbapi2.connect"
+    ],
+    "_thread._local": [
+      "threading.local"
+    ],
+    "abc.abstractmethod": [
+      "selectors.abstractmethod"
+    ],
+    "asyncio.base_futures.isfuture": [
+      "asyncio.futures.isfuture",
+      "asyncio.isfuture"
+    ],
+    "asyncio.locks.Lock": [
+      "asyncio.Lock"
+    ],
+    "asyncio.runners.run": [
+      "asyncio.run"
+    ],
+    "asyncio.tasks.create_task": [
+      "asyncio.create_task"
+    ],
+    "asyncio.tasks.sleep": [
+      "asyncio.sleep"
+    ],
+    "asyncio.tasks.wait_for": [
+      "asyncio.wait_for"
+    ],
+    "builtins.coroutine.close": [
+      "types.CoroutineType.close"
+    ],
+    "filelock._api.BaseFileLock.acquire": [
+      "filelock.BaseFileLock.acquire",
+      "filelock.FileLock.acquire",
+      "filelock.UnixFileLock.acquire"
+    ],
+    "filelock._api.BaseFileLock.release": [
+      "filelock.BaseFileLock.release",
+      "filelock.FileLock.release",
+      "filelock.UnixFileLock.release"
+    ],
+    "filelock._unix.UnixFileLock": [
+      "filelock.FileLock",
+      "filelock.UnixFileLock"
+    ],
+    "functools.wraps": [
+      "unittest.result.wraps",
+      "unittest.signals.wraps"
+    ],
+    "multiprocessing.context.BaseContext.Manager": [
+      "multiprocessing.Manager"
+    ],
+    "multiprocessing.context.BaseContext.RLock": [
+      "multiprocessing.RLock"
+    ],
+    "multiprocessing.managers.BaseManager.register.temp": [
+      "multiprocessing.managers.SyncManager.list"
+    ],
+    "sqlite3.Connection.close": [
+      "sqlite3.dbapi2.Connection.close"
+    ],
+    "sqlite3.Connection.commit": [
+      "sqlite3.dbapi2.Connection.commit"
+    ],
+    "sqlite3.Connection.cursor": [
+      "sqlite3.dbapi2.Connection.cursor"
+    ],
+    "sqlite3.Connection.execute": [
+      "sqlite3.dbapi2.Connection.execute"
+    ],
+    "sqlite3.Connection.executemany": [
+      "sqlite3.dbapi2.Connection.executemany"
+    ],
+    "sqlite3.Cursor.close": [
+      "sqlite3.dbapi2.Cursor.close"
+    ],
+    "sqlite3.Cursor.execute": [
+      "sqlite3.dbapi2.Cursor.execute"
+    ],
+    "sqlite3.Cursor.fetchall": [
+      "sqlite3.dbapi2.Cursor.fetchall"
+    ],
+    "sqlite3.Cursor.fetchone": [
+      "sqlite3.dbapi2.Cursor.fetchone"
+    ]
+  },
+  "commit": "968301de411f722235c6db152a55fa4ea77fd3c7",
+  "deselect": [
+    {
+      "reason": "runs `sys.executable -c` twice in a subprocess: the tracer does not record a child process, and the child writes bytecode into the checkout copy (its environment has no PYTHONDONTWRITEBYTECODE)",
+      "test": "tests/test_postgres_concurrent.py::test_advisory_lock_id_is_the_same_in_every_process"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "filelock": "4.2.4",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0",
+    "pytest-asyncio": "1.4.0"
+  },
+  "dropped": {
+    "client_callbacks": 74,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "pyrate_limiter._version": [
+      "importlib.metadata.version"
+    ],
+    "pyrate_limiter.abstracts.algorithm": [
+      "<builtin>.property",
+      "<builtin>.staticmethod",
+      "abc.abstractmethod",
+      "dataclasses.dataclass",
+      "dataclasses.dataclass.wrap"
+    ],
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.admit": [
+      "<builtin>.int",
+      "<builtin>.zip"
+    ],
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after": [
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start"
+    ],
+    "pyrate_limiter.abstracts.algorithm.GCRA._emission_us": [
+      "<builtin>.max",
+      "math.ceil"
+    ],
+    "pyrate_limiter.abstracts.algorithm.GCRA.consumed": [
+      "<builtin>.int",
+      "<builtin>.max",
+      "<builtin>.zip",
+      "math.ceil",
+      "pyrate_limiter.abstracts.algorithm.GCRA._emission_us"
+    ],
+    "pyrate_limiter.abstracts.algorithm.GCRA.initial": [
+      "<builtin>.tuple"
+    ],
+    "pyrate_limiter.abstracts.algorithm.GCRA.redis_args": [
+      "pyrate_limiter.abstracts.algorithm.GCRA._emission_us"
+    ],
+    "pyrate_limiter.abstracts.algorithm.GCRA.step": [
+      "<builtin>.int",
+      "<builtin>.list.append",
+      "<builtin>.max",
+      "<builtin>.tuple",
+      "<builtin>.zip",
+      "math.ceil",
+      "pyrate_limiter.abstracts.algorithm.GCRA._emission_us"
+    ],
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.decide": [
+      "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+      "pyrate_limiter.abstracts.algorithm.Decision.allowed",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.admit",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after",
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.blocking_offset",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.admit",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.blocking_offset",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._peek_timestamp"
+    ],
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound": [
+      "<builtin>.min",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start"
+    ],
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.admit": [
+      "<builtin>.int",
+      "<builtin>.zip"
+    ],
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.decode": [
+      "<builtin>.float",
+      "<builtin>.tuple"
+    ],
+    "pyrate_limiter.abstracts.bucket": [
+      "<builtin>.property",
+      "<builtin>.property.setter",
+      "abc.abstractmethod",
+      "logging.getLogger"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.__exit__": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.close",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.close"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._decision": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._recorded_wait",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.failing_rate"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._record": [
+      "pyrate_limiter.abstracts.algorithm.Decision.allowed"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._recorded_wait": [
+      "<builtin>.max",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._last_wait"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.now": [
+      "pyrate_limiter.clocks.MonotonicClock.now"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision": [
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._decision",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision._await_decision",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision._await_decision": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._decision"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.rates": [
+      "<builtin>.sorted",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates.<lambda1>",
+      "pyrate_limiter.utils.enforce_rate_list"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after",
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.blocking_offset",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.blocking_offset",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._recorded_wait",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting_async",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.peek"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting": [
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after"
+    ],
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting_async": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__del__": [
+      "pyrate_limiter.abstracts.bucket.BucketFactory.dispose",
+      "pyrate_limiter.abstracts.bucket.BucketFactory.get_buckets"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__getstate__": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.pop"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__setstate__": [
+      "<builtin>.dict.update"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.close": [
+      "logging.Logger.debug",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.close",
+      "pyrate_limiter.abstracts.bucket.Leaker.close",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.close",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.close",
+      "pyrate_limiter.limiter.SingleBucketFactory.owned_buckets"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.create": [
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__init__"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.dispose": [
+      "<builtin>.id",
+      "<builtin>.isinstance",
+      "pyrate_limiter.abstracts.bucket.Leaker.deregister"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.get_buckets": [
+      "<builtin>.dict.items",
+      "<builtin>.list.append"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.owned_buckets": [
+      "pyrate_limiter.abstracts.bucket.BucketFactory.get_buckets"
+    ],
+    "pyrate_limiter.abstracts.bucket.BucketFactory.schedule_leak": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.abstracts.bucket.BucketFactory.leak_interval",
+      "pyrate_limiter.abstracts.bucket.Leaker.__init__",
+      "pyrate_limiter.abstracts.bucket.Leaker.leak_async",
+      "pyrate_limiter.abstracts.bucket.Leaker.register",
+      "pyrate_limiter.abstracts.bucket.Leaker.start",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.rates"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.__init__": [
+      "collections.defaultdict",
+      "threading.Event"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker._leak": [
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.tuple",
+      "asyncio.tasks.sleep",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.now",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.leak",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.leak",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.leak",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.leak",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.now",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.leak",
+      "threading.Event.is_set"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker._run": [
+      "asyncio.runners.run",
+      "pyrate_limiter.abstracts.bucket.Leaker._leak"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.close": [
+      "<builtin>.dict.clear",
+      "threading.Event.set"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.deregister": [
+      "_asyncio.Task.cancel"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.is_alive": [
+      "threading.Thread.is_alive"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.leak_async": [
+      "asyncio.tasks.create_task",
+      "pyrate_limiter.abstracts.bucket.Leaker._leak"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.register": [
+      "<builtin>.id",
+      "builtins.coroutine.close",
+      "inspect.iscoroutine"
+    ],
+    "pyrate_limiter.abstracts.bucket.Leaker.start": [
+      "pyrate_limiter.abstracts.bucket.Leaker._run",
+      "pyrate_limiter.abstracts.bucket.Leaker.is_alive",
+      "threading.Event.clear",
+      "threading.Thread",
+      "threading.Thread.start"
+    ],
+    "pyrate_limiter.abstracts.rate": [
+      "<builtin>.staticmethod"
+    ],
+    "pyrate_limiter.abstracts.rate.Duration.__add__": [
+      "<builtin>.int",
+      "pyrate_limiter.abstracts.rate.Duration.__int__"
+    ],
+    "pyrate_limiter.abstracts.rate.Duration.__eq__": [
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "pyrate_limiter.abstracts.rate.Duration.__int__"
+    ],
+    "pyrate_limiter.abstracts.rate.Duration.__mul__": [
+      "<builtin>.int"
+    ],
+    "pyrate_limiter.abstracts.rate.Duration.__radd__": [
+      "pyrate_limiter.abstracts.rate.Duration.__add__"
+    ],
+    "pyrate_limiter.abstracts.rate.Duration.__rmul__": [
+      "pyrate_limiter.abstracts.rate.Duration.__mul__"
+    ],
+    "pyrate_limiter.abstracts.rate.Rate.__init__": [
+      "<builtin>.int",
+      "pyrate_limiter.abstracts.rate.Duration.__int__"
+    ],
+    "pyrate_limiter.abstracts.rate.Rate.__str__": [
+      "pyrate_limiter.abstracts.rate.Duration.readable"
+    ],
+    "pyrate_limiter.abstracts.store": [
+      "abc.abstractmethod"
+    ],
+    "pyrate_limiter.abstracts.wrappers": [
+      "<builtin>.property",
+      "<builtin>.property.setter"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.__init__": [
+      "<builtin>.isinstance"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.count": [
+      "inspect.isawaitable",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.count",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.count",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.count"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.flush": [
+      "inspect.isawaitable",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.flush",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.flush"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.leak": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.leak",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.leak",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.leak",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.leak"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.now",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.now"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.peek": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.peek",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.peek"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put": [
+      "inspect.isawaitable",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.rates": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.waiting"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket": [
+      "operator.attrgetter"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__getstate__": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.pop"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__init__": [
+      "<builtin>.object.__init__",
+      "<builtin>.super",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "threading.RLock"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__setstate__": [
+      "<builtin>.dict.update",
+      "threading.RLock"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket._deny": [
+      "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after",
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.blocking_offset",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.blocking_offset",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.count": [
+      "<builtin>.len"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.leak": [
+      "<builtin>.len",
+      "_bisect.bisect_left",
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.peek": [
+      "<builtin>.abs",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.count"
+    ],
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.range",
+      "_bisect.bisect_left",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket._deny"
+    ],
+    "pyrate_limiter.buckets.mp_bucket": [
+      "<builtin>.classmethod"
+    ],
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__init__": [
+      "<builtin>.isinstance",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.init": [
+      "multiprocessing.context.BaseContext.Manager",
+      "multiprocessing.context.BaseContext.RLock",
+      "multiprocessing.managers.BaseManager.register.temp",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__init__"
+    ],
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.leak": [
+      "<builtin>.super",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.leak"
+    ],
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put": [
+      "<builtin>.super",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put"
+    ],
+    "pyrate_limiter.buckets.postgres": [
+      "contextlib.contextmanager",
+      "logging.getLogger"
+    ],
+    "pyrate_limiter.buckets.redis_bucket": [
+      "<builtin>.classmethod"
+    ],
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.__init__": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert": [
+      "<builtin>.len",
+      "<builtin>.list.extend",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.blocking_offset",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_sync",
+      "pyrate_limiter.utils.id_generator"
+    ],
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_sync": [
+      "<builtin>.int",
+      "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record",
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert"
+    ],
+    "pyrate_limiter.buckets.redis_state": [
+      "<builtin>.staticmethod"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket": [
+      "<builtin>.classmethod",
+      "<builtin>.str.strip",
+      "logging.getLogger"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.__init__": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "threading.RLock"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._build_full_count_query": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start",
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._peek_timestamp": [
+      "<builtin>.int",
+      "<builtin>.str.format",
+      "sqlite3.Connection.execute",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.fetchone"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.close": [
+      "sqlite3.Connection.close"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.count": [
+      "<builtin>.str.format",
+      "sqlite3.Connection.execute",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.fetchone"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.flush": [
+      "<builtin>.str.format",
+      "sqlite3.Connection.commit",
+      "sqlite3.Connection.execute",
+      "sqlite3.Cursor.close"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.init_from_file": [
+      "<builtin>.str",
+      "<builtin>.str.format",
+      "_sqlite3.connect",
+      "contextlib.nullcontext",
+      "filelock._unix.UnixFileLock",
+      "pathlib.Path",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.__init__",
+      "sqlite3.Connection.commit",
+      "sqlite3.Connection.cursor",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.execute",
+      "tempfile.gettempdir",
+      "time.time"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.leak": [
+      "<builtin>.str.format",
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "sqlite3.Connection.commit",
+      "sqlite3.Connection.execute",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.execute",
+      "sqlite3.Cursor.fetchone"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.now": [
+      "time.time_ns"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.peek": [
+      "<builtin>.str.format",
+      "pyrate_limiter.abstracts.rate.RateItem.__init__",
+      "sqlite3.Connection.execute",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.fetchone"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put": [
+      "<builtin>.list.append",
+      "<builtin>.str.format",
+      "<builtin>.zip",
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.decide",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._build_full_count_query",
+      "sqlite3.Connection.commit",
+      "sqlite3.Connection.execute",
+      "sqlite3.Connection.executemany",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.fetchall"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.__init__": [
+      "<builtin>.isinstance"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.default": [
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.__init__",
+      "pyrate_limiter.utils.dedicated_sqlite_clock_connection"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.now": [
+      "<builtin>.int",
+      "contextlib.nullcontext",
+      "sqlite3.Connection.execute",
+      "sqlite3.Cursor.close",
+      "sqlite3.Cursor.fetchone"
+    ],
+    "pyrate_limiter.buckets.state_bucket": [
+      "<builtin>.classmethod"
+    ],
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__getstate__": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.pop"
+    ],
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__init__": [
+      "threading.RLock"
+    ],
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__setstate__": [
+      "<builtin>.dict.update",
+      "threading.RLock"
+    ],
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.check": [
+      "pyrate_limiter.abstracts.algorithm.GCRA.initial",
+      "pyrate_limiter.abstracts.algorithm.GCRA.step"
+    ],
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.read": [
+      "pyrate_limiter.abstracts.algorithm.GCRA.initial"
+    ],
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore._load": [
+      "<builtin>.len",
+      "<builtin>.tuple",
+      "pyrate_limiter.abstracts.algorithm.GCRA.initial"
+    ],
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.check": [
+      "<builtin>.list",
+      "pyrate_limiter.abstracts.algorithm.Decision.allowed",
+      "pyrate_limiter.abstracts.algorithm.GCRA.step",
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore._load"
+    ],
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.init": [
+      "multiprocessing.context.BaseContext.Manager",
+      "multiprocessing.context.BaseContext.RLock",
+      "multiprocessing.managers.BaseManager.register.temp",
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.__init__"
+    ],
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.read": [
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore._load"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket.__init__": [
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__init__"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket._replay": [
+      "pyrate_limiter.abstracts.algorithm.Decision.allowed",
+      "pyrate_limiter.abstracts.algorithm.GCRA.step",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket.close": [
+      "pyrate_limiter.abstracts.store.StateStore.close"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count": [
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.algorithm.GCRA.consumed",
+      "pyrate_limiter.abstracts.algorithm.StateAlgorithm.consumed",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.now",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.read",
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.read"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket.flush": [
+      "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.reset",
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.reset"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket.put": [
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.check",
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.check"
+    ],
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting": [
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+      "pyrate_limiter.abstracts.algorithm.GCRA.max_weight",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._recorded_wait",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+      "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.read",
+      "pyrate_limiter.buckets.state_bucket.StateBucket._replay"
+    ],
+    "pyrate_limiter.clocks": [
+      "<builtin>.staticmethod",
+      "abc.abstractmethod",
+      "logging.getLogger"
+    ],
+    "pyrate_limiter.clocks.AbstractClock._get_monotonic_ms": [
+      "time.monotonic_ns"
+    ],
+    "pyrate_limiter.clocks.AbstractClock._get_wall_ms": [
+      "time.time_ns"
+    ],
+    "pyrate_limiter.clocks.MonotonicAsyncClock.now": [
+      "pyrate_limiter.clocks.AbstractClock._get_monotonic_ms"
+    ],
+    "pyrate_limiter.clocks.MonotonicClock.now": [
+      "pyrate_limiter.clocks.AbstractClock._get_monotonic_ms"
+    ],
+    "pyrate_limiter.clocks.PostgresClock.now": [
+      "<builtin>.RuntimeError",
+      "logging.Logger.exception"
+    ],
+    "pyrate_limiter.clocks.WallClock.now": [
+      "pyrate_limiter.clocks.AbstractClock._get_wall_ms"
+    ],
+    "pyrate_limiter.limiter": [
+      "<builtin>.object",
+      "contextlib.contextmanager",
+      "logging.getLogger"
+    ],
+    "pyrate_limiter.limiter.Limiter.__exit__": [
+      "pyrate_limiter.limiter.Limiter.close"
+    ],
+    "pyrate_limiter.limiter.Limiter.__getstate__": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.pop"
+    ],
+    "pyrate_limiter.limiter.Limiter.__init__": [
+      "<builtin>.isinstance",
+      "_thread._local",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.limiter_lock",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.limiter_lock",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.limiter_lock",
+      "pyrate_limiter.limiter.Limiter._init_bucket_factory",
+      "threading.RLock"
+    ],
+    "pyrate_limiter.limiter.Limiter.__setstate__": [
+      "<builtin>.dict.update",
+      "_thread._local",
+      "threading.RLock"
+    ],
+    "pyrate_limiter.limiter.Limiter._acquire_async": [
+      "pyrate_limiter.limiter.Limiter._handle_async_result",
+      "pyrate_limiter.limiter.Limiter._try_acquire"
+    ],
+    "pyrate_limiter.limiter.Limiter._acquire_co": [
+      "<builtin>.isinstance",
+      "pyrate_limiter.limiter.Limiter._handle_async_result",
+      "pyrate_limiter.limiter.Limiter.handle_bucket_put",
+      "pyrate_limiter.limiter.SingleBucketFactory.get"
+    ],
+    "pyrate_limiter.limiter.Limiter._blocking_retry_sync": [
+      "<builtin>.TimeoutError",
+      "<builtin>.isinstance",
+      "<builtin>.max",
+      "contextlib.contextmanager.helper",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put",
+      "pyrate_limiter.limiter.Limiter._delay_to_sleep_ms",
+      "pyrate_limiter.limiter._plan_delay_step",
+      "time.monotonic",
+      "time.sleep"
+    ],
+    "pyrate_limiter.limiter.Limiter._delay_waiter": [
+      "<builtin>.isinstance",
+      "inspect.isawaitable",
+      "logging.Logger.debug",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.failing_rate",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.waiting",
+      "pyrate_limiter.limiter.Limiter._delay_to_sleep_ms",
+      "pyrate_limiter.limiter.Limiter._delay_waiter._resume_async",
+      "pyrate_limiter.limiter.Limiter._delay_waiter._run_async_with_deadline",
+      "pyrate_limiter.limiter._plan_delay_step",
+      "time.sleep"
+    ],
+    "pyrate_limiter.limiter.Limiter._delay_waiter._resume_async": [
+      "pyrate_limiter.limiter.Limiter._handle_async_result"
+    ],
+    "pyrate_limiter.limiter.Limiter._delay_waiter._retry_async": [
+      "<builtin>.isinstance",
+      "asyncio.tasks.sleep",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put",
+      "pyrate_limiter.limiter.Limiter._delay_to_sleep_ms",
+      "pyrate_limiter.limiter.SingleBucketFactory.wrap_item",
+      "pyrate_limiter.limiter._plan_delay_step",
+      "time.monotonic"
+    ],
+    "pyrate_limiter.limiter.Limiter._delay_waiter._run_async_with_deadline": [
+      "pyrate_limiter.limiter.Limiter._delay_waiter._retry_async",
+      "pyrate_limiter.limiter.Limiter._handle_async_result"
+    ],
+    "pyrate_limiter.limiter.Limiter._get_async_lock": [
+      "_asyncio.get_running_loop",
+      "asyncio.locks.Lock"
+    ],
+    "pyrate_limiter.limiter.Limiter._handle_async_result": [
+      "<builtin>.TimeoutError",
+      "asyncio.tasks.wait_for",
+      "builtins.coroutine.close",
+      "inspect.isawaitable",
+      "inspect.iscoroutine",
+      "pyrate_limiter.limiter.Limiter._handle_async_result._cancel_if_pending",
+      "time.monotonic"
+    ],
+    "pyrate_limiter.limiter.Limiter._handle_async_result._cancel_if_pending": [
+      "_asyncio.Task.cancel",
+      "_asyncio.Task.done",
+      "asyncio.base_futures.isfuture"
+    ],
+    "pyrate_limiter.limiter.Limiter._init_bucket_factory": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "logging.Logger.info",
+      "pyrate_limiter.abstracts.rate.Rate.__repr__",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__init__",
+      "pyrate_limiter.limiter.SingleBucketFactory.__init__"
+    ],
+    "pyrate_limiter.limiter.Limiter._try_acquire": [
+      "<builtin>.id",
+      "<builtin>.isinstance",
+      "contextlib.contextmanager.helper",
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.waiting",
+      "pyrate_limiter.limiter.Limiter._acquire_co",
+      "pyrate_limiter.limiter.Limiter._blocking_retry_sync",
+      "pyrate_limiter.limiter.Limiter._delay_waiter",
+      "pyrate_limiter.limiter.Limiter._handle_async_result",
+      "pyrate_limiter.limiter.Limiter._wait_after_async_put",
+      "pyrate_limiter.limiter.SingleBucketFactory.get",
+      "pyrate_limiter.limiter.SingleBucketFactory.wrap_item",
+      "time.monotonic"
+    ],
+    "pyrate_limiter.limiter.Limiter._wait_after_async_put": [
+      "pyrate_limiter.limiter.Limiter._delay_waiter",
+      "pyrate_limiter.limiter.Limiter._handle_async_result"
+    ],
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco": [
+      "functools.partial.__call__",
+      "functools.wraps",
+      "inspect.iscoroutinefunction"
+    ],
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco.wrapper": [
+      "<builtin>.RuntimeError",
+      "inspect.isawaitable",
+      "pyrate_limiter.limiter.Limiter._try_acquire",
+      "pyrate_limiter.limiter.Limiter.try_acquire_async"
+    ],
+    "pyrate_limiter.limiter.Limiter.buckets": [
+      "pyrate_limiter.abstracts.bucket.BucketFactory.get_buckets"
+    ],
+    "pyrate_limiter.limiter.Limiter.close": [
+      "pyrate_limiter.abstracts.bucket.BucketFactory.close"
+    ],
+    "pyrate_limiter.limiter.Limiter.dispose": [
+      "pyrate_limiter.abstracts.bucket.BucketFactory.dispose"
+    ],
+    "pyrate_limiter.limiter.Limiter.handle_bucket_put": [
+      "inspect.isawaitable",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+      "pyrate_limiter.limiter.Limiter._delay_waiter"
+    ],
+    "pyrate_limiter.limiter.Limiter.try_acquire": [
+      "<builtin>.RuntimeError",
+      "<builtin>.ValueError",
+      "inspect.isawaitable",
+      "logging.Logger.debug",
+      "pyrate_limiter.limiter.Limiter._try_acquire",
+      "pyrate_limiter.limiter.Limiter.try_acquire._resolve_result"
+    ],
+    "pyrate_limiter.limiter.Limiter.try_acquire._resolve_result": [
+      "logging.Logger.debug",
+      "pyrate_limiter.limiter.Limiter._handle_async_result"
+    ],
+    "pyrate_limiter.limiter.Limiter.try_acquire_async": [
+      "<builtin>.RuntimeError",
+      "<builtin>.ValueError",
+      "asyncio.tasks.wait_for",
+      "pyrate_limiter.limiter.Limiter.try_acquire_async.run"
+    ],
+    "pyrate_limiter.limiter.Limiter.try_acquire_async.run": [
+      "pyrate_limiter.limiter.Limiter._acquire_async",
+      "pyrate_limiter.limiter.Limiter._get_async_lock"
+    ],
+    "pyrate_limiter.limiter.SingleBucketFactory.__init__": [
+      "pyrate_limiter.abstracts.bucket.BucketFactory.schedule_leak"
+    ],
+    "pyrate_limiter.limiter.SingleBucketFactory.owned_buckets": [
+      "<builtin>.all",
+      "<builtin>.list.append",
+      "<builtin>.super",
+      "pyrate_limiter.abstracts.bucket.BucketFactory.owned_buckets"
+    ],
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item": [
+      "inspect.isawaitable",
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.now",
+      "pyrate_limiter.abstracts.rate.RateItem.__init__",
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.now",
+      "pyrate_limiter.limiter.SingleBucketFactory.wrap_item.wrap_async"
+    ],
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item.wrap_async": [
+      "pyrate_limiter.abstracts.rate.RateItem.__init__"
+    ],
+    "pyrate_limiter.limiter._plan_delay_step": [
+      "<builtin>.TimeoutError",
+      "time.monotonic"
+    ],
+    "pyrate_limiter.limiter.combined_lock": [
+      "<builtin>.TimeoutError",
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.max",
+      "<builtin>.reversed",
+      "_multiprocessing.SemLock.acquire",
+      "_multiprocessing.SemLock.release",
+      "_thread.RLock.acquire",
+      "_thread.RLock.release",
+      "filelock._api.BaseFileLock.acquire",
+      "filelock._api.BaseFileLock.release",
+      "time.monotonic"
+    ],
+    "pyrate_limiter.limiter_factory": [
+      "logging.getLogger"
+    ],
+    "pyrate_limiter.limiter_factory.create_inmemory_limiter": [
+      "pyrate_limiter.abstracts.rate.Rate.__init__",
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__init__",
+      "pyrate_limiter.limiter.Limiter.__init__"
+    ],
+    "pyrate_limiter.limiter_factory.create_sqlite_bucket": [
+      "logging.Logger.info",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.init_from_file"
+    ],
+    "pyrate_limiter.limiter_factory.create_sqlite_limiter": [
+      "pyrate_limiter.abstracts.rate.Rate.__init__",
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.init_from_file",
+      "pyrate_limiter.limiter.Limiter.__init__"
+    ],
+    "pyrate_limiter.limiter_factory.create_token_bucket_limiter": [
+      "pyrate_limiter.abstracts.rate.Rate.__init__",
+      "pyrate_limiter.buckets.state_bucket.StateBucket.__init__",
+      "pyrate_limiter.limiter.Limiter.__init__"
+    ],
+    "pyrate_limiter.limiter_factory.init_global_limiter": [
+      "pyrate_limiter.limiter.Limiter.__init__"
+    ],
+    "pyrate_limiter.utils.dedicated_sqlite_clock_connection": [
+      "_sqlite3.connect",
+      "pathlib.Path",
+      "tempfile.gettempdir"
+    ],
+    "pyrate_limiter.utils.enforce_rate_list": [
+      "<builtin>.ValueError",
+      "pyrate_limiter.abstracts.rate.Rate.__repr__",
+      "pyrate_limiter.utils.validate_rate_list"
+    ],
+    "pyrate_limiter.utils.id_generator": [
+      "uuid.uuid4"
+    ],
+    "pyrate_limiter.utils.validate_rate_list": [
+      "<builtin>.enumerate"
+    ]
+  },
+  "executed": [
+    "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+    "pyrate_limiter.abstracts.algorithm.Decision.allowed",
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.admit",
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after",
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start",
+    "pyrate_limiter.abstracts.algorithm.GCRA._emission_us",
+    "pyrate_limiter.abstracts.algorithm.GCRA.consumed",
+    "pyrate_limiter.abstracts.algorithm.GCRA.initial",
+    "pyrate_limiter.abstracts.algorithm.GCRA.max_weight",
+    "pyrate_limiter.abstracts.algorithm.GCRA.redis_args",
+    "pyrate_limiter.abstracts.algorithm.GCRA.step",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.blocking_offset",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.decide",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.admit",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.blocking_offset",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.consumed",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.decode",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.redis_args",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.redis_script",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.__enter__",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.__exit__",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._decision",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._record",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._recorded_wait",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.close",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.limiter_lock",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.now",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision._await_decision",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.rates.<lambda1>",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting_async",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__del__",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__getstate__",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__setstate__",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.close",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.create",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.dispose",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.get_buckets",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.leak_interval",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.owned_buckets",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.schedule_leak",
+    "pyrate_limiter.abstracts.bucket.Leaker.__init__",
+    "pyrate_limiter.abstracts.bucket.Leaker._leak",
+    "pyrate_limiter.abstracts.bucket.Leaker._run",
+    "pyrate_limiter.abstracts.bucket.Leaker.close",
+    "pyrate_limiter.abstracts.bucket.Leaker.deregister",
+    "pyrate_limiter.abstracts.bucket.Leaker.is_alive",
+    "pyrate_limiter.abstracts.bucket.Leaker.leak_async",
+    "pyrate_limiter.abstracts.bucket.Leaker.register",
+    "pyrate_limiter.abstracts.bucket.Leaker.start",
+    "pyrate_limiter.abstracts.rate.Duration.__add__",
+    "pyrate_limiter.abstracts.rate.Duration.__eq__",
+    "pyrate_limiter.abstracts.rate.Duration.__int__",
+    "pyrate_limiter.abstracts.rate.Duration.__mul__",
+    "pyrate_limiter.abstracts.rate.Duration.__radd__",
+    "pyrate_limiter.abstracts.rate.Duration.__rmul__",
+    "pyrate_limiter.abstracts.rate.Duration.readable",
+    "pyrate_limiter.abstracts.rate.Rate.__init__",
+    "pyrate_limiter.abstracts.rate.Rate.__repr__",
+    "pyrate_limiter.abstracts.rate.Rate.__str__",
+    "pyrate_limiter.abstracts.rate.RateItem.__init__",
+    "pyrate_limiter.abstracts.rate.RateItem.__str__",
+    "pyrate_limiter.abstracts.store.StateStore.close",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.__init__",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._algorithm",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._last_wait",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.count",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.failing_rate",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.flush",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.leak",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.peek",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.rates",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__getstate__",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__init__",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__setstate__",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket._deny",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.count",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.flush",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.leak",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.peek",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__init__",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.init",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.leak",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.limiter_lock",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.__init__",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_sync",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.put",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.__init__",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._build_full_count_query",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._peek_timestamp",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.close",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.count",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.flush",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.init_from_file",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.leak",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.limiter_lock",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.now",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.peek",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.__init__",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.default",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.now",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__getstate__",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__init__",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__setstate__",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.check",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.read",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.reset",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.__init__",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore._load",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.check",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.init",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.read",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.reset",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.__init__",
+    "pyrate_limiter.buckets.state_bucket.StateBucket._replay",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.close",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.flush",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.leak",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.peek",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.put",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting",
+    "pyrate_limiter.clocks.AbstractClock._get_monotonic_ms",
+    "pyrate_limiter.clocks.AbstractClock._get_wall_ms",
+    "pyrate_limiter.clocks.MonotonicAsyncClock.now",
+    "pyrate_limiter.clocks.MonotonicClock.now",
+    "pyrate_limiter.clocks.PostgresClock.__init__",
+    "pyrate_limiter.clocks.PostgresClock.now",
+    "pyrate_limiter.clocks.WallClock.now",
+    "pyrate_limiter.limiter.Limiter.__enter__",
+    "pyrate_limiter.limiter.Limiter.__exit__",
+    "pyrate_limiter.limiter.Limiter.__getstate__",
+    "pyrate_limiter.limiter.Limiter.__init__",
+    "pyrate_limiter.limiter.Limiter.__setstate__",
+    "pyrate_limiter.limiter.Limiter._acquire_async",
+    "pyrate_limiter.limiter.Limiter._acquire_co",
+    "pyrate_limiter.limiter.Limiter._blocking_retry_sync",
+    "pyrate_limiter.limiter.Limiter._delay_to_sleep_ms",
+    "pyrate_limiter.limiter.Limiter._delay_waiter",
+    "pyrate_limiter.limiter.Limiter._delay_waiter._resume_async",
+    "pyrate_limiter.limiter.Limiter._delay_waiter._retry_async",
+    "pyrate_limiter.limiter.Limiter._delay_waiter._run_async_with_deadline",
+    "pyrate_limiter.limiter.Limiter._get_async_lock",
+    "pyrate_limiter.limiter.Limiter._handle_async_result",
+    "pyrate_limiter.limiter.Limiter._handle_async_result._cancel_if_pending",
+    "pyrate_limiter.limiter.Limiter._init_bucket_factory",
+    "pyrate_limiter.limiter.Limiter._try_acquire",
+    "pyrate_limiter.limiter.Limiter._wait_after_async_put",
+    "pyrate_limiter.limiter.Limiter.as_decorator",
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco",
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco.wrapper",
+    "pyrate_limiter.limiter.Limiter.buckets",
+    "pyrate_limiter.limiter.Limiter.close",
+    "pyrate_limiter.limiter.Limiter.dispose",
+    "pyrate_limiter.limiter.Limiter.handle_bucket_put",
+    "pyrate_limiter.limiter.Limiter.try_acquire",
+    "pyrate_limiter.limiter.Limiter.try_acquire._resolve_result",
+    "pyrate_limiter.limiter.Limiter.try_acquire_async",
+    "pyrate_limiter.limiter.Limiter.try_acquire_async.run",
+    "pyrate_limiter.limiter.SingleBucketFactory.__init__",
+    "pyrate_limiter.limiter.SingleBucketFactory.get",
+    "pyrate_limiter.limiter.SingleBucketFactory.owned_buckets",
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item",
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item.wrap_async",
+    "pyrate_limiter.limiter._plan_delay_step",
+    "pyrate_limiter.limiter.combined_lock",
+    "pyrate_limiter.limiter_factory.create_inmemory_limiter",
+    "pyrate_limiter.limiter_factory.create_sqlite_bucket",
+    "pyrate_limiter.limiter_factory.create_sqlite_limiter",
+    "pyrate_limiter.limiter_factory.create_token_bucket_limiter",
+    "pyrate_limiter.limiter_factory.init_global_limiter",
+    "pyrate_limiter.utils.dedicated_sqlite_clock_connection",
+    "pyrate_limiter.utils.enforce_rate_list",
+    "pyrate_limiter.utils.id_generator",
+    "pyrate_limiter.utils.validate_rate_list"
+  ],
+  "functions": [
+    "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight",
+    "pyrate_limiter.abstracts.algorithm.Decision.allowed",
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.admit",
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after",
+    "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start",
+    "pyrate_limiter.abstracts.algorithm.GCRA._emission_us",
+    "pyrate_limiter.abstracts.algorithm.GCRA.consumed",
+    "pyrate_limiter.abstracts.algorithm.GCRA.decode",
+    "pyrate_limiter.abstracts.algorithm.GCRA.initial",
+    "pyrate_limiter.abstracts.algorithm.GCRA.max_weight",
+    "pyrate_limiter.abstracts.algorithm.GCRA.redis_args",
+    "pyrate_limiter.abstracts.algorithm.GCRA.redis_script",
+    "pyrate_limiter.abstracts.algorithm.GCRA.step",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.admit",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.blocking_offset",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.decide",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.retry_after",
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.window_start",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.admit",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.blocking_offset",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after",
+    "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.consumed",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.decode",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.initial",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.redis_args",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.redis_script",
+    "pyrate_limiter.abstracts.algorithm.StateAlgorithm.step",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.__enter__",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.__exit__",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._decision",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._record",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket._recorded_wait",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.close",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.count",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.flush",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.leak",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.limiter_lock",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.now",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.peek",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision._await_decision",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.rates",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.rates.<lambda1>",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting",
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting._calc_waiting_async",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__del__",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__getstate__",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__setstate__",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.close",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.create",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.dispose",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.get",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.get_buckets",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.leak_interval",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.owned_buckets",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.schedule_leak",
+    "pyrate_limiter.abstracts.bucket.BucketFactory.wrap_item",
+    "pyrate_limiter.abstracts.bucket.Leaker.__init__",
+    "pyrate_limiter.abstracts.bucket.Leaker._leak",
+    "pyrate_limiter.abstracts.bucket.Leaker._run",
+    "pyrate_limiter.abstracts.bucket.Leaker.close",
+    "pyrate_limiter.abstracts.bucket.Leaker.deregister",
+    "pyrate_limiter.abstracts.bucket.Leaker.is_alive",
+    "pyrate_limiter.abstracts.bucket.Leaker.leak_async",
+    "pyrate_limiter.abstracts.bucket.Leaker.register",
+    "pyrate_limiter.abstracts.bucket.Leaker.start",
+    "pyrate_limiter.abstracts.rate.Duration.__add__",
+    "pyrate_limiter.abstracts.rate.Duration.__eq__",
+    "pyrate_limiter.abstracts.rate.Duration.__int__",
+    "pyrate_limiter.abstracts.rate.Duration.__mul__",
+    "pyrate_limiter.abstracts.rate.Duration.__radd__",
+    "pyrate_limiter.abstracts.rate.Duration.__rmul__",
+    "pyrate_limiter.abstracts.rate.Duration.readable",
+    "pyrate_limiter.abstracts.rate.Rate.__init__",
+    "pyrate_limiter.abstracts.rate.Rate.__repr__",
+    "pyrate_limiter.abstracts.rate.Rate.__str__",
+    "pyrate_limiter.abstracts.rate.RateItem.__init__",
+    "pyrate_limiter.abstracts.rate.RateItem.__str__",
+    "pyrate_limiter.abstracts.store.StateStore.check",
+    "pyrate_limiter.abstracts.store.StateStore.close",
+    "pyrate_limiter.abstracts.store.StateStore.read",
+    "pyrate_limiter.abstracts.store.StateStore.reset",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.__init__",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._algorithm",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._last_wait",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.count",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.failing_rate",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.flush",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.leak",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.peek",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.rates",
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__getstate__",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__init__",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.__setstate__",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket._deny",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.count",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.flush",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.leak",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.peek",
+    "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__init__",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__setstate__",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.init",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.leak",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.limiter_lock",
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.__init__",
+    "pyrate_limiter.buckets.postgres.PostgresBucket._create_table",
+    "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.close",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.count",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.flush",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.leak",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.peek",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.put",
+    "pyrate_limiter.buckets.postgres.PostgresBucket.put.peek_timestamp",
+    "pyrate_limiter.buckets.postgres.advisory_lock_id",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.__init__",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_async",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_sync",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.count",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.flush",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.init",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.init._async_init",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.leak",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.now",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._awaiting",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._handle_items",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.put",
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.put._handle_async",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.__init__",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._decision",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._parse",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._script",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._ttl_for",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.check",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.check._await_decision",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.read",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.read._await_state",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.reset",
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.reset._await_reset",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.__init__",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._build_full_count_query",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket._peek_timestamp",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.close",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.count",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.flush",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.init_from_file",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.leak",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.limiter_lock",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.now",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.peek",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.__init__",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.default",
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.now",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__getstate__",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__init__",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.__setstate__",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.check",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.read",
+    "pyrate_limiter.buckets.state_bucket.InMemoryStateStore.reset",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.__init__",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore._load",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.check",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.init",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.read",
+    "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.reset",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.__init__",
+    "pyrate_limiter.buckets.state_bucket.StateBucket._replay",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.close",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count._await_count",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.flush",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.leak",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.peek",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.put",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.put._await_decision",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting",
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting._await_wait",
+    "pyrate_limiter.clocks.AbstractClock._get_monotonic_ms",
+    "pyrate_limiter.clocks.AbstractClock._get_wall_ms",
+    "pyrate_limiter.clocks.AbstractClock.now",
+    "pyrate_limiter.clocks.MonotonicAsyncClock.now",
+    "pyrate_limiter.clocks.MonotonicClock.now",
+    "pyrate_limiter.clocks.PostgresClock.__init__",
+    "pyrate_limiter.clocks.PostgresClock.now",
+    "pyrate_limiter.clocks.WallClock.now",
+    "pyrate_limiter.limiter.Limiter.__enter__",
+    "pyrate_limiter.limiter.Limiter.__exit__",
+    "pyrate_limiter.limiter.Limiter.__getstate__",
+    "pyrate_limiter.limiter.Limiter.__init__",
+    "pyrate_limiter.limiter.Limiter.__setstate__",
+    "pyrate_limiter.limiter.Limiter._acquire_async",
+    "pyrate_limiter.limiter.Limiter._acquire_co",
+    "pyrate_limiter.limiter.Limiter._blocking_retry_sync",
+    "pyrate_limiter.limiter.Limiter._cleanup_awaitable",
+    "pyrate_limiter.limiter.Limiter._delay_to_sleep_ms",
+    "pyrate_limiter.limiter.Limiter._delay_waiter",
+    "pyrate_limiter.limiter.Limiter._delay_waiter._resume_async",
+    "pyrate_limiter.limiter.Limiter._delay_waiter._retry_async",
+    "pyrate_limiter.limiter.Limiter._delay_waiter._run_async_with_deadline",
+    "pyrate_limiter.limiter.Limiter._get_async_lock",
+    "pyrate_limiter.limiter.Limiter._handle_async_result",
+    "pyrate_limiter.limiter.Limiter._handle_async_result._cancel_if_pending",
+    "pyrate_limiter.limiter.Limiter._init_bucket_factory",
+    "pyrate_limiter.limiter.Limiter._try_acquire",
+    "pyrate_limiter.limiter.Limiter._wait_after_async_put",
+    "pyrate_limiter.limiter.Limiter.as_decorator",
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco",
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco.wrapper",
+    "pyrate_limiter.limiter.Limiter.buckets",
+    "pyrate_limiter.limiter.Limiter.close",
+    "pyrate_limiter.limiter.Limiter.dispose",
+    "pyrate_limiter.limiter.Limiter.handle_bucket_put",
+    "pyrate_limiter.limiter.Limiter.try_acquire",
+    "pyrate_limiter.limiter.Limiter.try_acquire._resolve_result",
+    "pyrate_limiter.limiter.Limiter.try_acquire_async",
+    "pyrate_limiter.limiter.Limiter.try_acquire_async.run",
+    "pyrate_limiter.limiter.LockLike.acquire",
+    "pyrate_limiter.limiter.LockLike.release",
+    "pyrate_limiter.limiter.SingleBucketFactory.__init__",
+    "pyrate_limiter.limiter.SingleBucketFactory.get",
+    "pyrate_limiter.limiter.SingleBucketFactory.owned_buckets",
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item",
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item.wrap_async",
+    "pyrate_limiter.limiter._plan_delay_step",
+    "pyrate_limiter.limiter.combined_lock",
+    "pyrate_limiter.limiter_factory.create_inmemory_limiter",
+    "pyrate_limiter.limiter_factory.create_sqlite_bucket",
+    "pyrate_limiter.limiter_factory.create_sqlite_limiter",
+    "pyrate_limiter.limiter_factory.create_token_bucket_limiter",
+    "pyrate_limiter.limiter_factory.init_global_limiter",
+    "pyrate_limiter.utils.dedicated_sqlite_clock_connection",
+    "pyrate_limiter.utils.enforce_rate_list",
+    "pyrate_limiter.utils.id_generator",
+    "pyrate_limiter.utils.validate_rate_list"
+  ],
+  "modules": [
+    "pyrate_limiter",
+    "pyrate_limiter._version",
+    "pyrate_limiter.abstracts",
+    "pyrate_limiter.abstracts.algorithm",
+    "pyrate_limiter.abstracts.bucket",
+    "pyrate_limiter.abstracts.rate",
+    "pyrate_limiter.abstracts.store",
+    "pyrate_limiter.abstracts.wrappers",
+    "pyrate_limiter.buckets",
+    "pyrate_limiter.buckets.in_memory_bucket",
+    "pyrate_limiter.buckets.mp_bucket",
+    "pyrate_limiter.buckets.postgres",
+    "pyrate_limiter.buckets.redis_bucket",
+    "pyrate_limiter.buckets.redis_state",
+    "pyrate_limiter.buckets.sqlite_bucket",
+    "pyrate_limiter.buckets.state_bucket",
+    "pyrate_limiter.clocks",
+    "pyrate_limiter.limiter",
+    "pyrate_limiter.limiter_factory",
+    "pyrate_limiter.utils"
+  ],
+  "project": "pyrate-limiter",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 1,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 322,
+    "skipped": 22,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

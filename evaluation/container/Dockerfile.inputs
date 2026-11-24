@@ -1,0 +1,54 @@
+# The inputs image (the service `inputs` of evaluation/compose.yaml): the
+# sources of the macro-benchmark, fetched by their pins when the image is
+# built. The trace image takes what it needs from it at its own build (the
+# additional context `inputs: service:inputs`); nothing is fetched when a
+# service runs.
+#
+#   /inputs/macro-benchmark/projects/<name>   the 30 projects (fetch.py macro)
+#
+# A step fails, and so the build, if a source is not its pin: git checks the
+# commit, fetch.py the SHA-256 of an sdist. git and the downloads run only
+# here, as a user without rights, with git's hooks, submodules and
+# configuration off (fetch.py); nothing fetched is installed, imported or
+# run.
+#
+# The context is the repository; Dockerfile.inputs.dockerignore lets in only
+# the files that the steps read. PYTHON_IMAGE is the Python image by digest:
+# its default is x-python-image of compose.yaml (tests/test_compose.py
+# checks that they are equal), so every target builds without arguments.
+ARG PYTHON_IMAGE=python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+
+# The base of every fetch: the Python image, git and the CA certificates.
+# It is also the image in which `make eval` runs evaluation/common/loop.py
+# without network.
+FROM ${PYTHON_IMAGE} AS network
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 10001 fetcher \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /tmp \
+        --shell /usr/sbin/nologin fetcher \
+    && mkdir /inputs && chown 10001:10001 /inputs
+ENV HOME=/tmp PYTHONDONTWRITEBYTECODE=1
+WORKDIR /repo
+
+# Not part of the inputs: the image of the maintenance commands that need
+# the network (macro-benchmark/draw.py), with uv for the Python 3.15 that
+# draw.py frame needs. evaluation/macro-benchmark/README.md, "Choosing a
+# new batch", says how to run it.
+FROM network AS maintain
+RUN pip install --no-cache-dir uv
+
+FROM network AS macro
+USER 10001:10001
+COPY evaluation/macro-benchmark/projects.py evaluation/macro-benchmark/projects.toml \
+    evaluation/macro-benchmark/
+COPY evaluation/container/fetch.py evaluation/container/
+RUN python3 -I -B evaluation/container/fetch.py macro /inputs/macro-benchmark/projects
+
+# The image: the plain Python image and the inputs, without git. Its shell
+# and Python serve the commands of the README that read the sources (a
+# copy of the sources for reading, check.py).
+FROM ${PYTHON_IMAGE}
+COPY --from=macro /inputs/macro-benchmark /inputs/macro-benchmark
+WORKDIR /repo

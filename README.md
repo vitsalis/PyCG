@@ -30,9 +30,9 @@ analysis.
 The first version of PyCG is described in the
 [ICSE 2021 paper](https://arxiv.org/pdf/2103.00587.pdf). The analysis in
 this repository is a redesign of it; that version is the tag
-`baseline-original-engine`. The benchmarks with real packages and the
-evaluation are in
-[vitsalis/pycg-evaluation](https://github.com/vitsalis/pycg-evaluation).
+`baseline-original-engine`. [evaluation/](evaluation/README.md) measures
+PyCG on the micro-benchmark and on a benchmark of real packages:
+`make eval`.
 
 You can cite PyCG as follows.
 Vitalis Salis, Thodoris Sotiropoulos, Panos Louridas, Diomidis Spinellis and Dimitris Mitropoulos.

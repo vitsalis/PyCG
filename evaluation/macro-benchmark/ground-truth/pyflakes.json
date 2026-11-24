@@ -1,0 +1,1020 @@
+{
+  "pyflakes": [],
+  "pyflakes.__main__": [
+    "pyflakes.api.main"
+  ],
+  "pyflakes.api": [
+    "re.compile"
+  ],
+  "pyflakes.api._exitOnSignal": [
+    "<builtin>.getattr",
+    "signal.signal"
+  ],
+  "pyflakes.api._exitOnSignal.handler": [
+    "sys.exit"
+  ],
+  "pyflakes.api._get_version": [
+    "platform.python_version",
+    "platform.system"
+  ],
+  "pyflakes.api.check": [
+    "<builtin>.len",
+    "<builtin>.list.sort",
+    "ast.parse",
+    "pyflakes.api.check.<lambda1>",
+    "pyflakes.checker.Checker.__init__",
+    "pyflakes.reporter.Reporter.flake",
+    "pyflakes.reporter.Reporter.syntaxError",
+    "pyflakes.reporter.Reporter.unexpectedError",
+    "pyflakes.reporter._makeDefaultReporter"
+  ],
+  "pyflakes.api.check.<lambda1>": [],
+  "pyflakes.api.checkPath": [
+    "<builtin>.open",
+    "io.BufferedReader.read",
+    "pyflakes.api.check",
+    "pyflakes.reporter.Reporter.unexpectedError",
+    "pyflakes.reporter._makeDefaultReporter"
+  ],
+  "pyflakes.api.checkRecursive": [
+    "pyflakes.api.checkPath",
+    "pyflakes.api.iterSourceCode"
+  ],
+  "pyflakes.api.isPythonFile": [
+    "<builtin>.bytes.endswith",
+    "<builtin>.open",
+    "<builtin>.str.endswith",
+    "io.BufferedReader.read",
+    "re.Pattern.match"
+  ],
+  "pyflakes.api.iterSourceCode": [
+    "os.path.isdir",
+    "os.path.join",
+    "os.walk",
+    "pyflakes.api.isPythonFile"
+  ],
+  "pyflakes.api.main": [
+    "<builtin>.SystemExit",
+    "argparse.ArgumentParser",
+    "argparse.ArgumentParser.add_argument",
+    "argparse.ArgumentParser.parse_args",
+    "io.TextIOWrapper.read",
+    "pyflakes.api._exitOnSignal",
+    "pyflakes.api._get_version",
+    "pyflakes.api.check",
+    "pyflakes.api.checkRecursive",
+    "pyflakes.reporter._makeDefaultReporter"
+  ],
+  "pyflakes.checker": [
+    "<builtin>.dir",
+    "<builtin>.frozenset",
+    "<builtin>.hasattr",
+    "<builtin>.property",
+    "<builtin>.property.setter",
+    "contextlib.contextmanager",
+    "functools.cache",
+    "pyflakes.checker.in_annotation",
+    "pyflakes.checker.in_string_annotation",
+    "re.compile",
+    "string.Formatter"
+  ],
+  "pyflakes.checker.Annotation.redefines": [],
+  "pyflakes.checker.Binding.__init__": [],
+  "pyflakes.checker.Binding.__repr__": [
+    "<builtin>.id",
+    "<builtin>.str.format"
+  ],
+  "pyflakes.checker.Binding.redefines": [
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.Builtin.__init__": [
+    "<builtin>.super",
+    "pyflakes.checker.Binding.__init__"
+  ],
+  "pyflakes.checker.Builtin.__repr__": [
+    "<builtin>.id",
+    "<builtin>.str.format"
+  ],
+  "pyflakes.checker.Checker.ANNASSIGN": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._enter_annotation",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker._is_typing",
+    "pyflakes.checker.in_annotation.in_annotation_func"
+  ],
+  "pyflakes.checker.Checker.ARG": [
+    "pyflakes.checker.Binding.__init__",
+    "pyflakes.checker.Checker.addBinding"
+  ],
+  "pyflakes.checker.Checker.ARGUMENTS": [
+    "pyflakes.checker.Checker.handleChildren"
+  ],
+  "pyflakes.checker.Checker.ASSERT": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.ASSIGN": [
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNode"
+  ],
+  "pyflakes.checker.Checker.AUGASSIGN": [
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.handleNodeLoad"
+  ],
+  "pyflakes.checker.Checker.BINOP": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker._handle_percent_format",
+    "pyflakes.checker.Checker.handleChildren"
+  ],
+  "pyflakes.checker.Checker.CALL": [
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "pyflakes.checker.Checker.CALL._annotation",
+    "pyflakes.checker.Checker.CALL._annotations",
+    "pyflakes.checker.Checker.CALL._non_annotation",
+    "pyflakes.checker.Checker.CALL._non_annotations",
+    "pyflakes.checker.Checker._handle_string_dot_format",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker._is_typing",
+    "pyflakes.checker.iter_dict_children"
+  ],
+  "pyflakes.checker.Checker.CALL._annotation": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._enter_annotation",
+    "pyflakes.checker.Checker.handleNode"
+  ],
+  "pyflakes.checker.Checker.CALL._annotations": [
+    "pyflakes.checker.Checker.CALL._annotation"
+  ],
+  "pyflakes.checker.Checker.CALL._non_annotation": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._enter_annotation",
+    "pyflakes.checker.Checker.handleNode"
+  ],
+  "pyflakes.checker.Checker.CALL._non_annotations": [
+    "pyflakes.checker.Checker.CALL._non_annotation"
+  ],
+  "pyflakes.checker.Checker.CLASSDEF": [
+    "<builtin>.isinstance",
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Binding.__init__",
+    "pyflakes.checker.Checker._in_doctest",
+    "pyflakes.checker.Checker._type_param_scope",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.deferFunction",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.in_scope",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.CLASSDEF.<lambda1>": [
+    "pyflakes.checker.Checker.handleDoctests"
+  ],
+  "pyflakes.checker.Checker.COMPARE": [
+    "<builtin>.isinstance",
+    "<builtin>.zip",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker._is_const_non_singleton"
+  ],
+  "pyflakes.checker.Checker.CONSTANT": [
+    "<builtin>.isinstance",
+    "functools.partial",
+    "pyflakes.checker.Checker.deferFunction"
+  ],
+  "pyflakes.checker.Checker.CONTINUE": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.DICT": [
+    "<builtin>.any",
+    "<builtin>.enumerate",
+    "<builtin>.isinstance",
+    "collections.Counter",
+    "collections.Counter.items",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.VariableKey.__eq__",
+    "pyflakes.checker.VariableKey.__hash__",
+    "pyflakes.checker.convert_to_value",
+    "pyflakes.checker.iter_dict_children"
+  ],
+  "pyflakes.checker.Checker.EXCEPTHANDLER": [
+    "<builtin>.dict.pop",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNodeStore",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.FOR": [
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNode"
+  ],
+  "pyflakes.checker.Checker.FUNCTIONDEF": [
+    "<builtin>.isinstance",
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Binding.__init__",
+    "pyflakes.checker.Checker.LAMBDA",
+    "pyflakes.checker.Checker._in_doctest",
+    "pyflakes.checker.Checker._type_param_scope",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.deferFunction",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.FUNCTIONDEF.<lambda1>": [
+    "pyflakes.checker.Checker.handleDoctests"
+  ],
+  "pyflakes.checker.Checker.GENERATOREXP": [
+    "<builtin>.isinstance",
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.in_scope"
+  ],
+  "pyflakes.checker.Checker.GLOBAL": [
+    "<builtin>.dict.setdefault",
+    "<builtin>.isinstance",
+    "pyflakes.checker.Binding.__init__",
+    "pyflakes.checker.Checker._in_doctest",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.IF": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.IMPORT": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker._in_try",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope",
+    "pyflakes.checker.Importation.__init__",
+    "pyflakes.checker.SubmoduleImportation.__init__"
+  ],
+  "pyflakes.checker.Checker.IMPORTFROM": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker._in_try",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.annotationsFutureEnabled",
+    "pyflakes.checker.Checker.futuresAllowed",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope",
+    "pyflakes.checker.FutureImportation.__init__",
+    "pyflakes.checker.ImportationFrom.__init__",
+    "pyflakes.checker.StarImportation.__init__"
+  ],
+  "pyflakes.checker.Checker.JOINEDSTR": [
+    "<builtin>.any",
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.LAMBDA": [
+    "<builtin>.enumerate",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.set",
+    "pyflakes.checker.Checker.deferFunction",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.in_annotation.in_annotation_func"
+  ],
+  "pyflakes.checker.Checker.LAMBDA.runFunction": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.in_scope"
+  ],
+  "pyflakes.checker.Checker.NAME": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.getParent",
+    "pyflakes.checker.Checker.handleNodeDelete",
+    "pyflakes.checker.Checker.handleNodeLoad",
+    "pyflakes.checker.Checker.handleNodeStore",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.RAISE": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.is_notimplemented_name_node"
+  ],
+  "pyflakes.checker.Checker.RETURN": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.SUBSCRIPT": [
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._enter_annotation",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker._is_any_typing_member",
+    "pyflakes.checker._is_name_or_attr"
+  ],
+  "pyflakes.checker.Checker.TEMPLATESTR": [
+    "<builtin>.any",
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.TRY": [
+    "<builtin>.enumerate",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.list.pop",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.getNodeName"
+  ],
+  "pyflakes.checker.Checker.TUPLE": [
+    "<builtin>.enumerate",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.TYPEALIAS": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._type_param_scope",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.handle_annotation_always_deferred"
+  ],
+  "pyflakes.checker.Checker.TYPEVAR": [
+    "pyflakes.checker.Checker.handleNodeStore",
+    "pyflakes.checker.Checker.handle_annotation_always_deferred"
+  ],
+  "pyflakes.checker.Checker.YIELD": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.__init__": [
+    "<builtin>.frozenset.union",
+    "<builtin>.type",
+    "collections.deque",
+    "contextlib.contextmanager.helper",
+    "functools._lru_cache_wrapper.__call__",
+    "functools._lru_cache_wrapper.wrapper",
+    "pyflakes.checker.Builtin.__init__",
+    "pyflakes.checker.Checker._run_deferred",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.checkDeadScopes",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.in_scope",
+    "pyflakes.checker._custom_builtins"
+  ],
+  "pyflakes.checker.Checker._enter_annotation": [],
+  "pyflakes.checker.Checker._handle_percent_format": [
+    "<builtin>.all",
+    "<builtin>.any",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.set",
+    "<builtin>.set.add",
+    "<builtin>.sorted",
+    "<builtin>.str.join",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.parse_percent_format"
+  ],
+  "pyflakes.checker.Checker._handle_string_dot_format": [
+    "<builtin>.any",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.range",
+    "<builtin>.set",
+    "<builtin>.sorted",
+    "<builtin>.str",
+    "<builtin>.str.join",
+    "<builtin>.tuple",
+    "pyflakes.checker.Checker._handle_string_dot_format._add_key",
+    "pyflakes.checker.Checker.report",
+    "string.Formatter.parse"
+  ],
+  "pyflakes.checker.Checker._handle_string_dot_format._add_key": [
+    "<builtin>.int",
+    "<builtin>.isinstance",
+    "<builtin>.set.add",
+    "<builtin>.str.partition",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker._in_doctest": [
+    "<builtin>.isinstance",
+    "<builtin>.len"
+  ],
+  "pyflakes.checker.Checker._in_postponed_annotation": [
+    "pyflakes.checker.Checker.annotationsFutureEnabled"
+  ],
+  "pyflakes.checker.Checker._in_try": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.getParent"
+  ],
+  "pyflakes.checker.Checker._match_target": [
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNodeStore"
+  ],
+  "pyflakes.checker.Checker._run_deferred": [
+    "collections.deque.popleft",
+    "functools.partial.__call__",
+    "pyflakes.checker.Checker.CLASSDEF.<lambda1>",
+    "pyflakes.checker.Checker.FUNCTIONDEF.<lambda1>",
+    "pyflakes.checker.Checker.LAMBDA.runFunction",
+    "pyflakes.checker.Checker.handle_annotation_always_deferred.<lambda1>",
+    "pyflakes.checker.in_string_annotation.in_annotation_func"
+  ],
+  "pyflakes.checker.Checker._type_param_scope": [
+    "contextlib.ExitStack",
+    "contextlib.ExitStack.enter_context",
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.in_scope"
+  ],
+  "pyflakes.checker.Checker._unknown_handler": [
+    "<builtin>.NotImplementedError",
+    "<builtin>.type",
+    "collections.abc.Mapping.get",
+    "pyflakes.checker.Checker.handleChildren"
+  ],
+  "pyflakes.checker.Checker.addBinding": [
+    "<builtin>.dict.get",
+    "<builtin>.dict.pop",
+    "<builtin>.dict.setdefault",
+    "<builtin>.isinstance",
+    "<builtin>.list.append",
+    "<builtin>.next",
+    "<builtin>.reversed",
+    "pyflakes.checker.Annotation.redefines",
+    "pyflakes.checker.Binding.redefines",
+    "pyflakes.checker.Checker.differentForks",
+    "pyflakes.checker.Checker.getParent",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope",
+    "pyflakes.checker.Definition.redefines",
+    "pyflakes.checker.Importation.redefines",
+    "pyflakes.checker.SubmoduleImportation.redefines",
+    "pyflakes.checker.is_typing_overload"
+  ],
+  "pyflakes.checker.Checker.annotationsFutureEnabled": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.checkDeadScopes": [
+    "<builtin>.dict.get",
+    "<builtin>.dict.items",
+    "<builtin>.dict.values",
+    "<builtin>.isinstance",
+    "<builtin>.list.append",
+    "<builtin>.set",
+    "<builtin>.sorted",
+    "<builtin>.str.join",
+    "os.path.basename",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.FunctionScope.unused_annotations",
+    "pyflakes.checker.FunctionScope.unused_assignments",
+    "pyflakes.checker.Importation.imported_name",
+    "pyflakes.checker.ImportationFrom.imported_name",
+    "pyflakes.checker.StarImportation.imported_name",
+    "pyflakes.checker.SubmoduleImportation.imported_name"
+  ],
+  "pyflakes.checker.Checker.deferFunction": [
+    "collections.deque.append"
+  ],
+  "pyflakes.checker.Checker.descendantOf": [
+    "pyflakes.checker.Checker.getCommonAncestor"
+  ],
+  "pyflakes.checker.Checker.differentForks": [
+    "pyflakes.checker.Checker.descendantOf",
+    "pyflakes.checker.Checker.getCommonAncestor",
+    "pyflakes.checker.getAlternatives"
+  ],
+  "pyflakes.checker.Checker.futuresAllowed": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.getCommonAncestor": [
+    "pyflakes.checker.Checker.getCommonAncestor"
+  ],
+  "pyflakes.checker.Checker.getDocstring": [
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.Checker.getNodeHandler": [
+    "<builtin>.getattr",
+    "<builtin>.str.upper"
+  ],
+  "pyflakes.checker.Checker.getParent": [
+    "<builtin>.hasattr"
+  ],
+  "pyflakes.checker.Checker.handleAnnotation": [
+    "pyflakes.checker.Checker.annotationsFutureEnabled",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.handle_annotation_always_deferred"
+  ],
+  "pyflakes.checker.Checker.handleChildren": [
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.iter_child_nodes"
+  ],
+  "pyflakes.checker.Checker.handleDoctests": [
+    "ast.parse",
+    "contextlib.contextmanager.helper",
+    "doctest.DocTestParser.get_examples",
+    "functools._lru_cache_wrapper.__call__",
+    "functools._lru_cache_wrapper.wrapper",
+    "pyflakes.checker.Builtin.__init__",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.getDocstring",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.in_scope",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker._doctest_parser"
+  ],
+  "pyflakes.checker.Checker.handleNode": [
+    "<builtin>.getattr",
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.ANNASSIGN",
+    "pyflakes.checker.Checker.ARG",
+    "pyflakes.checker.Checker.ARGUMENTS",
+    "pyflakes.checker.Checker.ASSERT",
+    "pyflakes.checker.Checker.ASSIGN",
+    "pyflakes.checker.Checker.AUGASSIGN",
+    "pyflakes.checker.Checker.BINOP",
+    "pyflakes.checker.Checker.CALL",
+    "pyflakes.checker.Checker.CLASSDEF",
+    "pyflakes.checker.Checker.COMPARE",
+    "pyflakes.checker.Checker.CONSTANT",
+    "pyflakes.checker.Checker.CONTINUE",
+    "pyflakes.checker.Checker.DICT",
+    "pyflakes.checker.Checker.EXCEPTHANDLER",
+    "pyflakes.checker.Checker.FOR",
+    "pyflakes.checker.Checker.FUNCTIONDEF",
+    "pyflakes.checker.Checker.GENERATOREXP",
+    "pyflakes.checker.Checker.GLOBAL",
+    "pyflakes.checker.Checker.IF",
+    "pyflakes.checker.Checker.IMPORT",
+    "pyflakes.checker.Checker.IMPORTFROM",
+    "pyflakes.checker.Checker.JOINEDSTR",
+    "pyflakes.checker.Checker.LAMBDA",
+    "pyflakes.checker.Checker.NAME",
+    "pyflakes.checker.Checker.RAISE",
+    "pyflakes.checker.Checker.RETURN",
+    "pyflakes.checker.Checker.SUBSCRIPT",
+    "pyflakes.checker.Checker.TEMPLATESTR",
+    "pyflakes.checker.Checker.TRY",
+    "pyflakes.checker.Checker.TUPLE",
+    "pyflakes.checker.Checker.TYPEALIAS",
+    "pyflakes.checker.Checker.TYPEVAR",
+    "pyflakes.checker.Checker.YIELD",
+    "pyflakes.checker.Checker._match_target",
+    "pyflakes.checker.Checker._unknown_handler",
+    "pyflakes.checker.Checker.futuresAllowed",
+    "pyflakes.checker.Checker.getNodeHandler",
+    "pyflakes.checker.Checker.handleChildren",
+    "pyflakes.checker.Checker.handleNodeStore",
+    "pyflakes.checker.Checker.ignore",
+    "pyflakes.checker.Checker.isDocstring"
+  ],
+  "pyflakes.checker.Checker.handleNodeDelete": [
+    "<builtin>.dict.pop",
+    "<builtin>.isinstance",
+    "pyflakes.checker.Checker.handleNodeDelete.on_conditional_branch",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope"
+  ],
+  "pyflakes.checker.Checker.handleNodeDelete.on_conditional_branch": [
+    "<builtin>.dict.get",
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.Checker.handleNodeLoad": [
+    "<builtin>.dict.get",
+    "<builtin>.dict.values",
+    "<builtin>.isinstance",
+    "<builtin>.list.append",
+    "<builtin>.reversed",
+    "<builtin>.sorted",
+    "<builtin>.str.join",
+    "os.path.basename",
+    "pyflakes.checker.Checker._in_postponed_annotation",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope",
+    "pyflakes.checker.Importation._has_alias",
+    "pyflakes.checker.getNodeName"
+  ],
+  "pyflakes.checker.Checker.handleNodeStore": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.Binding.__init__",
+    "pyflakes.checker.Checker.addBinding",
+    "pyflakes.checker.Checker.getParent",
+    "pyflakes.checker.Checker.isLiteralTupleUnpacking",
+    "pyflakes.checker.Checker.report",
+    "pyflakes.checker.Checker.scope",
+    "pyflakes.checker.ExportBinding.__init__",
+    "pyflakes.checker.getNodeName"
+  ],
+  "pyflakes.checker.Checker.handleStringAnnotation": [
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "ast.parse",
+    "ast.walk",
+    "pyflakes.checker.Checker.handleNode",
+    "pyflakes.checker.Checker.report"
+  ],
+  "pyflakes.checker.Checker.handle_annotation_always_deferred": [
+    "pyflakes.checker.Checker.deferFunction",
+    "pyflakes.checker.in_annotation"
+  ],
+  "pyflakes.checker.Checker.handle_annotation_always_deferred.<lambda1>": [
+    "pyflakes.checker.in_annotation.in_annotation_func"
+  ],
+  "pyflakes.checker.Checker.ignore": [],
+  "pyflakes.checker.Checker.in_scope": [
+    "<builtin>.dict.__init__",
+    "<builtin>.list.append",
+    "<builtin>.list.pop",
+    "pyflakes.checker.ClassScope.__init__",
+    "pyflakes.checker.FunctionScope.__init__"
+  ],
+  "pyflakes.checker.Checker.isDocstring": [
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.Checker.isLiteralTupleUnpacking": [
+    "<builtin>.hasattr",
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.Checker.report": [
+    "<builtin>.list.append",
+    "pyflakes.messages.DoctestSyntaxError.__init__",
+    "pyflakes.messages.DuplicateArgument.__init__",
+    "pyflakes.messages.EagerUseOfLazyImport.__init__",
+    "pyflakes.messages.ForwardAnnotationSyntaxError.__init__",
+    "pyflakes.messages.FutureFeatureNotDefined.__init__",
+    "pyflakes.messages.ImportShadowedByLoopVar.__init__",
+    "pyflakes.messages.ImportStarNotPermitted.__init__",
+    "pyflakes.messages.ImportStarUsage.__init__",
+    "pyflakes.messages.ImportStarUsed.__init__",
+    "pyflakes.messages.LazyImportStarNotPermitted.__init__",
+    "pyflakes.messages.Message.__init__",
+    "pyflakes.messages.MultiValueRepeatedKeyLiteral.__init__",
+    "pyflakes.messages.MultiValueRepeatedKeyVariable.__init__",
+    "pyflakes.messages.PercentFormatExtraNamedArguments.__init__",
+    "pyflakes.messages.PercentFormatInvalidFormat.__init__",
+    "pyflakes.messages.PercentFormatMissingArgument.__init__",
+    "pyflakes.messages.PercentFormatPositionalCountMismatch.__init__",
+    "pyflakes.messages.PercentFormatUnsupportedFormatCharacter.__init__",
+    "pyflakes.messages.RedefinedWhileUnused.__init__",
+    "pyflakes.messages.StringDotFormatExtraNamedArguments.__init__",
+    "pyflakes.messages.StringDotFormatExtraPositionalArguments.__init__",
+    "pyflakes.messages.StringDotFormatInvalidFormat.__init__",
+    "pyflakes.messages.StringDotFormatMissingArgument.__init__",
+    "pyflakes.messages.UndefinedExport.__init__",
+    "pyflakes.messages.UndefinedLocal.__init__",
+    "pyflakes.messages.UndefinedName.__init__",
+    "pyflakes.messages.UnusedAnnotation.__init__",
+    "pyflakes.messages.UnusedImport.__init__",
+    "pyflakes.messages.UnusedIndirectAssignment.__init__",
+    "pyflakes.messages.UnusedVariable.__init__"
+  ],
+  "pyflakes.checker.Checker.scope": [],
+  "pyflakes.checker.ClassScope.__init__": [
+    "<builtin>.dict.__init__",
+    "<builtin>.super"
+  ],
+  "pyflakes.checker.Definition.redefines": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "pyflakes.checker.Binding.redefines"
+  ],
+  "pyflakes.checker.ExportBinding.__init__": [
+    "<builtin>.isinstance",
+    "<builtin>.list",
+    "<builtin>.super",
+    "pyflakes.checker.Binding.__init__",
+    "pyflakes.checker.ExportBinding.__init__._add_to_names"
+  ],
+  "pyflakes.checker.ExportBinding.__init__._add_to_names": [
+    "<builtin>.isinstance",
+    "<builtin>.list.append"
+  ],
+  "pyflakes.checker.FunctionScope.__init__": [
+    "<builtin>.dict.__init__",
+    "<builtin>.super"
+  ],
+  "pyflakes.checker.FunctionScope.unused_annotations": [
+    "<builtin>.dict.items",
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.FunctionScope.unused_assignments": [
+    "<builtin>.dict.items",
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.FutureImportation.__init__": [
+    "<builtin>.super",
+    "pyflakes.checker.ImportationFrom.__init__"
+  ],
+  "pyflakes.checker.Importation.__init__": [
+    "<builtin>.super",
+    "pyflakes.checker.Binding.__init__"
+  ],
+  "pyflakes.checker.Importation._alias_s": [
+    "pyflakes.checker.Importation._has_alias"
+  ],
+  "pyflakes.checker.Importation._has_alias": [
+    "<builtin>.str.split"
+  ],
+  "pyflakes.checker.Importation._lazy_s": [],
+  "pyflakes.checker.Importation.imported_name": [
+    "pyflakes.checker.Importation._alias_s"
+  ],
+  "pyflakes.checker.Importation.redefines": [
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.Importation.source_statement": [
+    "pyflakes.checker.Importation._alias_s",
+    "pyflakes.checker.Importation._lazy_s"
+  ],
+  "pyflakes.checker.ImportationFrom.__init__": [
+    "<builtin>.str.endswith",
+    "<builtin>.super",
+    "pyflakes.checker.Importation.__init__"
+  ],
+  "pyflakes.checker.ImportationFrom.imported_name": [
+    "pyflakes.checker.Importation._alias_s"
+  ],
+  "pyflakes.checker.ImportationFrom.source_statement": [
+    "pyflakes.checker.Importation._alias_s",
+    "pyflakes.checker.Importation._lazy_s"
+  ],
+  "pyflakes.checker.Scope.__repr__": [
+    "<builtin>.dict.__repr__",
+    "<builtin>.id",
+    "pyflakes.checker.Binding.__repr__",
+    "pyflakes.checker.Builtin.__repr__"
+  ],
+  "pyflakes.checker.StarImportation.__init__": [
+    "<builtin>.super",
+    "pyflakes.checker.Importation.__init__"
+  ],
+  "pyflakes.checker.StarImportation.imported_name": [
+    "<builtin>.str.endswith",
+    "pyflakes.checker.StarImportation.source_statement"
+  ],
+  "pyflakes.checker.StarImportation.source_statement": [],
+  "pyflakes.checker.SubmoduleImportation.__init__": [
+    "<builtin>.isinstance",
+    "<builtin>.str.split",
+    "<builtin>.super",
+    "pyflakes.checker.Importation.__init__"
+  ],
+  "pyflakes.checker.SubmoduleImportation.imported_name": [],
+  "pyflakes.checker.SubmoduleImportation.redefines": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "pyflakes.checker.Importation.redefines"
+  ],
+  "pyflakes.checker.SubmoduleImportation.source_statement": [
+    "pyflakes.checker.Importation._lazy_s"
+  ],
+  "pyflakes.checker.VariableKey.__eq__": [],
+  "pyflakes.checker.VariableKey.__hash__": [
+    "<builtin>.hash"
+  ],
+  "pyflakes.checker.VariableKey.__init__": [],
+  "pyflakes.checker._custom_builtins": [
+    "<builtin>.frozenset",
+    "<builtin>.str.split",
+    "collections.abc.Mapping.get"
+  ],
+  "pyflakes.checker._doctest_parser": [
+    "doctest.DocTestParser"
+  ],
+  "pyflakes.checker._is_any_typing_member": [
+    "pyflakes.checker._is_typing_helper"
+  ],
+  "pyflakes.checker._is_any_typing_member.<lambda1>": [],
+  "pyflakes.checker._is_const_non_singleton": [
+    "pyflakes.checker._is_constant",
+    "pyflakes.checker._is_singleton"
+  ],
+  "pyflakes.checker._is_constant": [
+    "<builtin>.isinstance",
+    "pyflakes.checker._is_tuple_constant"
+  ],
+  "pyflakes.checker._is_name_or_attr": [
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker._is_singleton": [
+    "<builtin>.isinstance",
+    "<builtin>.type"
+  ],
+  "pyflakes.checker._is_tuple_constant": [
+    "<builtin>.all",
+    "<builtin>.isinstance",
+    "pyflakes.checker._is_constant"
+  ],
+  "pyflakes.checker._is_typing": [
+    "pyflakes.checker._is_typing_helper"
+  ],
+  "pyflakes.checker._is_typing.<lambda1>": [],
+  "pyflakes.checker._is_typing_helper": [
+    "<builtin>.isinstance",
+    "pyflakes.checker._is_any_typing_member.<lambda1>",
+    "pyflakes.checker._is_typing.<lambda1>",
+    "pyflakes.checker._is_typing_helper._bare_name_is_attr",
+    "pyflakes.checker._is_typing_helper._module_scope_is_typing"
+  ],
+  "pyflakes.checker._is_typing_helper._bare_name_is_attr": [
+    "<builtin>.isinstance",
+    "<builtin>.reversed",
+    "pyflakes.checker._is_any_typing_member.<lambda1>",
+    "pyflakes.checker._is_typing.<lambda1>"
+  ],
+  "pyflakes.checker._is_typing_helper._module_scope_is_typing": [
+    "<builtin>.isinstance",
+    "<builtin>.reversed"
+  ],
+  "pyflakes.checker._must_match": [
+    "re.Pattern.match"
+  ],
+  "pyflakes.checker.convert_to_value": [
+    "<builtin>.isinstance",
+    "<builtin>.tuple",
+    "pyflakes.checker.VariableKey.__init__",
+    "pyflakes.checker.convert_to_value"
+  ],
+  "pyflakes.checker.getAlternatives": [
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.getNodeName": [
+    "<builtin>.hasattr"
+  ],
+  "pyflakes.checker.in_annotation": [
+    "functools.partial.__call__",
+    "functools.wraps"
+  ],
+  "pyflakes.checker.in_annotation.in_annotation_func": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._enter_annotation",
+    "pyflakes.checker.Checker.handleAnnotation",
+    "pyflakes.checker.Checker.handleNode"
+  ],
+  "pyflakes.checker.in_string_annotation": [
+    "functools.partial.__call__",
+    "functools.wraps"
+  ],
+  "pyflakes.checker.in_string_annotation.in_annotation_func": [
+    "contextlib.contextmanager.helper",
+    "pyflakes.checker.Checker._enter_annotation",
+    "pyflakes.checker.Checker.handleStringAnnotation"
+  ],
+  "pyflakes.checker.is_notimplemented_name_node": [
+    "<builtin>.isinstance",
+    "pyflakes.checker.getNodeName"
+  ],
+  "pyflakes.checker.is_typing_overload": [
+    "<builtin>.any",
+    "<builtin>.isinstance",
+    "pyflakes.checker._is_typing"
+  ],
+  "pyflakes.checker.iter_child_nodes": [
+    "<builtin>.getattr",
+    "<builtin>.isinstance"
+  ],
+  "pyflakes.checker.iter_dict_children": [
+    "<builtin>.zip"
+  ],
+  "pyflakes.checker.parse_percent_format": [
+    "<builtin>.tuple",
+    "pyflakes.checker.parse_percent_format._parse_inner"
+  ],
+  "pyflakes.checker.parse_percent_format._parse_inner": [
+    "<builtin>.ValueError",
+    "<builtin>.len",
+    "<builtin>.str.index",
+    "pyflakes.checker._must_match",
+    "re.Match.end",
+    "re.Match.group",
+    "re.Pattern.match"
+  ],
+  "pyflakes.messages": [],
+  "pyflakes.messages.DoctestSyntaxError.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.DuplicateArgument.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.EagerUseOfLazyImport.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.ForwardAnnotationSyntaxError.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.FutureFeatureNotDefined.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.ImportShadowedByLoopVar.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.ImportStarNotPermitted.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.ImportStarUsage.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.ImportStarUsed.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.LazyImportStarNotPermitted.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.Message.__init__": [],
+  "pyflakes.messages.Message.__str__": [
+    "<builtin>.str.format"
+  ],
+  "pyflakes.messages.MultiValueRepeatedKeyLiteral.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.MultiValueRepeatedKeyVariable.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.PercentFormatExtraNamedArguments.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.PercentFormatInvalidFormat.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.PercentFormatMissingArgument.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.PercentFormatPositionalCountMismatch.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.PercentFormatUnsupportedFormatCharacter.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.RedefinedWhileUnused.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.StringDotFormatExtraNamedArguments.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.StringDotFormatExtraPositionalArguments.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.StringDotFormatInvalidFormat.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.StringDotFormatMissingArgument.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UndefinedExport.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UndefinedLocal.__init__": [
+    "<builtin>.str.format",
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UndefinedName.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UnusedAnnotation.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UnusedImport.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UnusedIndirectAssignment.__init__": [
+    "<builtin>.str.lower",
+    "<builtin>.type",
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.messages.UnusedVariable.__init__": [
+    "pyflakes.messages.Message.__init__"
+  ],
+  "pyflakes.reporter": [],
+  "pyflakes.reporter.Reporter.__init__": [],
+  "pyflakes.reporter.Reporter.flake": [
+    "<builtin>.str",
+    "io.TextIOWrapper.write",
+    "pyflakes.messages.Message.__str__"
+  ],
+  "pyflakes.reporter.Reporter.syntaxError": [
+    "<builtin>.max",
+    "<builtin>.str.splitlines",
+    "io.TextIOWrapper.write",
+    "re.sub"
+  ],
+  "pyflakes.reporter.Reporter.unexpectedError": [
+    "io.TextIOWrapper.write"
+  ],
+  "pyflakes.reporter._makeDefaultReporter": [
+    "pyflakes.reporter.Reporter.__init__"
+  ],
+  "pyflakes.scripts": [],
+  "pyflakes.scripts.pyflakes": []
+}

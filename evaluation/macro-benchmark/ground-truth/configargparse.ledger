@@ -1,0 +1,1371 @@
+# Call-site ledger of configargparse at 1829aa14c317374aa1467e1d01f99472282183ff.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# configargparse.md shows how this ledger applies them. Supported versions:
+# Python 3.6 and later (setup.py:125 python_requires=">=3.6"), so both sides
+# of the version branch at line 31 run, and Python 3.6's argparse counts.
+# setup.py also explicitly supports PyPy. Include CPython and PyPy >=3.6,
+# with no declared upper bound, in normal, -O and -OO modes (round-4
+# working configuration assumption; not an explicit user approval).
+#
+# The module replaces argparse._ActionsContainer.add_argument with its own
+# add_argument (line 2447), at import, before any parser exists; the
+# original stays reachable as original_add_argument_method (line 2444). So
+# self.add_argument(...) on any argparse container, also inside argparse
+# (ArgumentParser.__init__ adds -h/--help that way), runs
+# configargparse.add_argument.
+#
+# Values that the package defines for its roles (B2):
+# - config file parsers: an instance of any package ConfigFileParser class
+#   (ConfigFileParser itself is a plain class, public and instantiable);
+# - config streams: io.StringIO (line 1439) and the text file that the
+#   default config_file_open_func, the builtin open, returns
+#   (io.TextIOWrapper); streams that a client function returns are opaque;
+# - items of serialize() and the result of parse(): collections.OrderedDict
+#   (the docstrings at lines 113 and 124 fix it, and the package builds one).
+#
+# Package exception classes define no __init__: instantiating one runs the
+# __init__ of Exception, named through Exception, the nearest class outside
+# the package (as in pluggy).
+
+== configargparse
+
+[configargparse]
+32:47 call  ACTION_TYPES_THAT_DONT_NEED_A_VALUE.append(argparse.Boole...
+    -> <builtin>.list.append
+    note: ACTION_TYPES_THAT_DONT_NEED_A_VALUE is the list display of line 23; the branch runs on Python 3.9 and later
+39:44 call  tuple(ACTION_TYPES_THAT_DONT_NEED_A_VALUE)
+    -> <builtin>.tuple
+565:31 call  re.compile(r"(^\"(?:\\.|[^\"\\])*\"$)|" r"(^\'(?:\\.|[^\'...
+    -> re.compile
+567:38 call  re.compile( r"(^\"\"\"(\s+)?(([^\"]|\"([^\"]|\"[^\"]))*(\...
+    -> re.compile
+577:2 decorator  @functools.lru_cache(maxsize=256, typed=True)
+    -> functools.lru_cache.decorating_function
+    note: the decorator is the value that functools.lru_cache(maxsize=256, typed=True) returns: its local function decorating_function (functools.py), which wraps is_quoted in a _lru_cache_wrapper and copies its attributes (update_wrapper) without calling it
+577:21 call  functools.lru_cache(maxsize=256, typed=True)
+    -> functools.lru_cache
+
+[configargparse.<lambda1>]
+33:59 call  isinstance( action, argparse.BooleanOptionalAction )
+    -> <builtin>.isinstance
+
+[configargparse.init_argument_parser]
+56:25 call  ValueError( ( "kwargs besides 'name' can only be passed i...
+    -> <builtin>.ValueError
+64:22 call  kwargs.setdefault("formatter_class", argparse.ArgumentDef...
+    -> <builtin>.dict.setdefault
+    note: kwargs is the dict that the interpreter builds for **kwargs
+65:22 call  kwargs.setdefault("conflict_handler", "resolve")
+    -> <builtin>.dict.setdefault
+66:36 call  ArgumentParser(**kwargs)
+    -> configargparse.ArgumentParser.__init__
+
+[configargparse.get_argument_parser]
+78:11 call  len(kwargs)
+    -> <builtin>.len
+79:29 call  init_argument_parser(name, **kwargs)
+    -> configargparse.init_argument_parser
+
+[configargparse.ConfigFileParser.get_syntax_description]
+100:34 call  NotImplementedError("get_syntax_description(..) not imple...
+    -> <builtin>.NotImplementedError
+
+[configargparse.ConfigFileParser.parse]
+117:34 call  NotImplementedError("parse(..) not implemented")
+    -> <builtin>.NotImplementedError
+
+[configargparse.ConfigFileParser.serialize]
+131:34 call  NotImplementedError("serialize(..) not implemented")
+    -> <builtin>.NotImplementedError
+
+[configargparse._WriteOutConfigFileActionMixin.__call__]
+148:14 call  super(_WriteOutConfigFileActionMixin, self)
+    -> <builtin>.super
+148:61 call  super(_WriteOutConfigFileActionMixin, self).__call__( par...
+    -> argparse._StoreAction.__call__
+    reject *: self is an instance of the class that add_argument builds (line 2306) with the bases (_WriteOutConfigFileActionMixin, type(action)), and only when type(action) is an argparse._StoreAction (line 2302); super() skips the mixin and finds the __call__ of _StoreAction (argparse defines no subclass of it; a client subclass is client code). None of the candidates is in that MRO
+    note: argparse._StoreAction is private in argparse; the name is the canonical module and qualified name
+157:19 call  hasattr(parser, "_write_out_config_file_paths")
+    -> <builtin>.hasattr
+158:51 call  id(self)
+    -> <builtin>.id
+158:68 call  getattr( namespace, self.dest, values )
+    -> <builtin>.getattr
+
+[configargparse.DefaultConfigFileParser.parse]
+211:28 call  OrderedDict()
+    -> collections.OrderedDict
+212:33 call  enumerate(stream)
+    -> <builtin>.enumerate
+213:30 call  line.strip()
+    -> <builtin>.str.strip
+    note: line is a line of the stream: a str for the package's streams (io.StringIO, a text file from open); the lines of a client stream are opaque (B5)
+214:73 call  line.startswith("---")
+    -> <builtin>.str.startswith
+217:29 call  re.match( r"^(?P<key>[^:=;#\s]+)\s*" r'(?:(?P<equal>[:=\s...
+    -> re.match
+224:34 call  match.group("key")
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions.
+225:36 call  match.group("equal")
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions.
+226:36 call  match.group("value")
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions.
+227:38 call  match.group("comment")
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions.
+232:36 call  value.startswith("[")
+    -> <builtin>.str.startswith
+    note: value is a str: a group of the match, "" or "true"
+232:60 call  value.endswith("]")
+    -> <builtin>.str.endswith
+235:43 call  json.loads(value)
+    -> json.loads
+238:44 call  elem.strip()
+    -> <builtin>.str.strip
+238:76 call  value[1:-1].split(",")
+    -> <builtin>.str.split
+241:48 call  ConfigFileParserException( "Unexpected line {} in {}: {}"...
+    -> <builtin>.Exception.__init__
+    note: ConfigFileParserException defines no __init__; the first __init__ of its MRO is that of Exception, the nearest class outside the package
+242:58 call  "Unexpected line {} in {}: {}".format( i, getattr(stream,...
+    -> <builtin>.str.format
+243:35 call  getattr(stream, "name", "stream")
+    -> <builtin>.getattr
+
+[configargparse.DefaultConfigFileParser.serialize]
+250:21 call  StringIO()
+    -> io.StringIO
+251:38 call  items.items()
+    -> collections.OrderedDict.items
+    note: items is the OrderedDict of get_items_for_config_file_output (through write_config_file or CompositeConfigParser.serialize); the docstring at line 124 fixes OrderedDict for clients
+252:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+254:40 call  ", ".join(map(str, value))
+    -> <builtin>.str.join
+254:44 call  map(str, value)
+    -> <builtin>.map
+    note: str is the callable that map calls back: a builtin, not an edge
+258:36 call  "{}".format(value)
+    -> <builtin>.str.format
+263:30 call  str(key)
+    -> <builtin>.str
+265:37 call  ValueError( "Config file values can't contain newlines, s...
+    -> <builtin>.ValueError
+269:71 call  "Config file values can't contain newlines, so {} = {} " ...
+    -> <builtin>.str.format
+271:20 call  r.write("{} = {}\n".format(key, value))
+    -> io.StringIO.write
+271:39 call  "{} = {}\n".format(key, value)
+    -> <builtin>.str.format
+272:26 call  r.getvalue()
+    -> io.StringIO.getvalue
+
+[configargparse._keep_literal_or_convert_to_str]
+286:28 call  ast.literal_eval(repr(value))
+    -> ast.literal_eval
+286:33 call  repr(value)
+    -> <builtin>.repr
+290:15 call  str(value)
+    -> <builtin>.str
+
+[configargparse.ConfigparserConfigFileParser.parse]
+322:43 call  configparser.ConfigParser( delimiters=("=", ":"), allow_n...
+    -> configparser.ConfigParser
+335:31 call  config.read_string(stream.read())
+    -> configparser.ConfigParser.read_string
+335:43 call  stream.read()
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    note: stream is a package stream: the io.StringIO of parse_known_args (line 1439) or a text file that the default config_file_open_func open() returns (lines 2033, 2110); a stream from a client function is opaque (B5)
+337:44 call  ConfigFileParserException("Couldn't parse config file: %s...
+    -> <builtin>.Exception.__init__
+340:29 call  OrderedDict()
+    -> collections.OrderedDict
+341:39 call  config.sections()
+    -> configparser.ConfigParser.sections
+    note: config is the configparser.ConfigParser made at line 322; sections here is its method, not the attribute sections that TomlConfigParser and IniConfigParser assign (lines 684, 823)
+345:37 call  list(config[section].items())
+    -> <builtin>.list
+345:59 call  config[section].items()
+    -> configparser.SectionProxy.items
+    note: config[section] is a configparser.SectionProxy; items is the Mapping method that it inherits
+351:30 call  isinstance(e, configparser.InterpolationDepthError)
+    -> <builtin>.isinstance
+356:32 call  isinstance(e, configparser.InterpolationMissingOptionError)
+    -> <builtin>.isinstance
+367:48 call  ConfigFileParserException( "Couldn't parse config file va...
+    -> <builtin>.Exception.__init__
+368:74 call  "Couldn't parse config file value for {}: {}.".format( e....
+    -> <builtin>.str.format
+373:49 call  v.replace("\n", " ")
+    -> <builtin>.str.replace
+    note: v is a str value that configparser read
+373:68 call  v.replace("\n", " ").replace("\r", " ")
+    -> <builtin>.str.replace
+377:64 call  multiLine2SingleLine.split("[")
+    -> <builtin>.str.split
+380:57 call  ast.literal_eval(multiLine2SingleLine)
+    -> ast.literal_eval
+382:60 call  ConfigFileParserException( "Error evaluating list: " + st...
+    -> <builtin>.Exception.__init__
+384:38 call  str(e)
+    -> <builtin>.str
+
+[configargparse.ConfigparserConfigFileParser.serialize]
+395:43 call  configparser.ConfigParser( allow_no_value=False, inline_c...
+    -> configparser.ConfigParser
+403:29 call  OrderedDict()
+    -> collections.OrderedDict
+404:38 call  items.items()
+    -> collections.OrderedDict.items
+405:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+415:28 call  str( [ ( [_keep_literal_or_convert_to_str(e) for e in ele...
+    -> <builtin>.str
+418:61 call  _keep_literal_or_convert_to_str(e)
+    -> configargparse._keep_literal_or_convert_to_str
+419:42 call  isinstance(elem, list)
+    -> <builtin>.isinstance
+420:65 call  _keep_literal_or_convert_to_str(elem)
+    -> configargparse._keep_literal_or_convert_to_str
+430:28 call  str(value)
+    -> <builtin>.str
+430:43 call  str(value).replace("\n", " ")
+    -> <builtin>.str.replace
+430:62 call  str(value).replace("\n", " ").replace("\r", " ")
+    -> <builtin>.str.replace
+435:77 call  value.split("[")
+    -> <builtin>.str.split
+438:33 call  repr(value)
+    -> <builtin>.repr
+444:38 call  value.replace("#", "\\x23")
+    -> <builtin>.str.replace
+    note: value is a str: the str() of a list (line 415) or a repr() (line 438)
+444:60 call  value.replace("#", "\\x23").replace(";", "\\x3b")
+    -> <builtin>.str.replace
+445:27 call  re.search(r"\s[#;]", value)
+    -> re.search
+451:30 call  warnings.warn( "The value of {} contains a '#' or ';' aft...
+    -> warnings.warn
+456:71 call  "The value of {} contains a '#' or ';' after a space, whi...
+    -> <builtin>.str.format
+459:40 call  value.replace("%", "%%")
+    -> <builtin>.str.replace
+460:25 call  config.read_dict({"DEFAULT": values})
+    -> configparser.ConfigParser.read_dict
+461:26 call  StringIO()
+    -> io.StringIO
+464:21 call  config.write(stream, space_around_delimiters=False)
+    -> configparser.ConfigParser.write
+465:20 call  stream.seek(0)
+    -> io.StringIO.seek
+466:27 call  stream.read()
+    -> io.StringIO.read
+
+[configargparse.YAMLConfigFileParser._load_yaml]
+487:52 call  ConfigFileParserMissingDependency( "Could not import yaml...
+    -> <builtin>.Exception.__init__
+    note: ConfigFileParserMissingDependency and its base ConfigFileParserException define no __init__: the __init__ of Exception
+
+[configargparse.YAMLConfigFileParser.parse]
+503:46 call  self._load_yaml()
+    -> configargparse.YAMLConfigFileParser._load_yaml
+506:35 call  yaml.load(stream, Loader=SafeLoader)
+    -> yaml.load
+    note: yaml is the module that _load_yaml imports; SafeLoader is yaml.CSafeLoader or yaml.SafeLoader (optional import, both run); yaml.load instantiates the loader and reads the stream itself (library code)
+508:44 call  ConfigFileParserException("Couldn't parse config file: %s...
+    -> <builtin>.Exception.__init__
+510:26 call  isinstance(parsed_obj, dict)
+    -> <builtin>.isinstance
+511:44 call  ConfigFileParserException( "The config file doesn't appea...
+    -> <builtin>.Exception.__init__
+515:27 call  getattr(stream, "name", "stream")
+    -> <builtin>.getattr
+515:59 call  type(parsed_obj)
+    -> <builtin>.type
+518:29 call  OrderedDict()
+    -> collections.OrderedDict
+519:43 call  parsed_obj.items()
+    -> <builtin>.dict.items
+    note: parsed_obj is a dict: the isinstance test at line 510 guards the call
+520:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+525:34 call  str(value)
+    -> <builtin>.str
+
+[configargparse.YAMLConfigFileParser.serialize]
+533:42 call  self._load_yaml()
+    -> configargparse.YAMLConfigFileParser._load_yaml
+536:21 call  dict(items)
+    -> <builtin>.dict
+537:25 call  yaml.dump(items, default_flow_style=default_flow_style, D...
+    -> yaml.dump
+
+[configargparse.is_quoted]
+584:16 call  bool(_QUOTED_STR_REGEX.match(text))
+    -> <builtin>.bool
+584:40 call  _QUOTED_STR_REGEX.match(text)
+    -> re.Pattern.match
+    -> _sre.SRE_Pattern.match
+    note: On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions.
+585:24 call  bool(_TRIPLE_QUOTED_STR_REGEX.match(text))
+    -> <builtin>.bool
+585:55 call  _TRIPLE_QUOTED_STR_REGEX.match(text)
+    -> re.Pattern.match
+    -> _sre.SRE_Pattern.match
+    note: On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions.
+
+[configargparse.unquote_str]
+599:17 call  is_quoted(text, triple=triple)
+    -> functools._lru_cache_wrapper.__call__
+    -> functools._lru_cache_wrapper.wrapper
+    -> configargparse.is_quoted
+    note: is_quoted is cached at line 577; CPython calls functools._lru_cache_wrapper.__call__, while supported PyPy 3.11 / 7.3.20 calls the Python function functools._lru_cache_wrapper.wrapper (functools.py:577-619; hidden_applevel returns the same function). Both call configargparse.is_quoted on a cache miss.
+601:33 call  ast.literal_eval(text)
+    -> ast.literal_eval
+602:30 call  isinstance(s, str)
+    -> <builtin>.isinstance
+604:29 call  ValueError( f"Error trying to unquote the quoted string: ...
+    -> <builtin>.ValueError
+
+[configargparse.parse_toml_section_name]
+625:26 call  csv.reader([section_name], delimiter=".")
+    -> csv.reader
+627:27 call  section.append(unquote_str(a.strip(), triple=False))
+    -> <builtin>.list.append
+627:39 call  unquote_str(a.strip(), triple=False)
+    -> configargparse.unquote_str
+627:47 call  a.strip()
+    -> <builtin>.str.strip
+    note: a is a field of the csv reader: a str
+628:17 call  tuple(section)
+    -> <builtin>.tuple
+
+[configargparse.get_toml_section]
+636:39 call  parse_toml_section_name(section)
+    -> configargparse.parse_toml_section_name
+636:62 call  isinstance(section, str)
+    -> <builtin>.isinstance
+637:24 call  data.get(sections[0])
+    -> <builtin>.dict.get
+    note: data is TOML data as loaded by toml.load() (docstring, line 633): a dict, as tomllib.loads and toml.loads return (TomlConfigParser.parse, line 717). In the recursion (line 642) data is a truthy value of that dict; only a dict has get (a table); for a str or list the attribute lookup fails before any call
+642:32 call  get_toml_section(itemdata, sections)
+    -> configargparse.get_toml_section
+644:26 call  isinstance(itemdata, dict)
+    -> <builtin>.isinstance
+
+[configargparse.TomlConfigParser.__init__]
+683:14 call  super()
+    -> <builtin>.super
+683:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    reject *: super() in TomlConfigParser resolves to ConfigFileParser, which defines no __init__, then object: the method is object.__init__, named through object, the nearest base outside the package; the package defines no subclass of TomlConfigParser
+
+[configargparse.TomlConfigParser.parse]
+698:56 call  ConfigFileParserMissingDependency( "Could not import toml...
+    -> <builtin>.Exception.__init__
+705:34 call  stream.read()
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    note: stream is a package stream (see 335:43); a client stream is opaque
+707:26 call  isinstance(content, bytes)
+    -> <builtin>.isinstance
+708:41 call  content.decode("utf-8")
+    -> <builtin>.bytes.decode
+709:32 call  toml.loads(content)
+    -> tomllib.loads
+    -> toml.loads
+    note: toml is tomllib on Python 3.11 and later, else the toml package (optional import, lines 692-701): both sides run (judgement 2 of configargparse.md)
+711:44 call  ConfigFileParserException("Couldn't parse TOML file: %s" ...
+    -> <builtin>.Exception.__init__
+714:29 call  OrderedDict()
+    -> collections.OrderedDict
+717:36 call  get_toml_section(config, section)
+    -> configargparse.get_toml_section
+722:45 call  data.items()
+    -> <builtin>.dict.items
+    note: data is a dict: get_toml_section returns None or a value that passed isinstance(itemdata, dict) (line 644)
+723:34 call  isinstance(value, list)
+    -> <builtin>.isinstance
+728:42 call  str(value)
+    -> <builtin>.str
+
+[configargparse.TomlConfigParser.serialize]
+748:52 call  ConfigFileParserMissingDependency( "The 'toml' package is...
+    -> <builtin>.Exception.__init__
+756:30 call  toml.dumps(dict(items))
+    -> toml.dumps
+756:35 call  dict(items)
+    -> <builtin>.dict
+760:43 call  parse_toml_section_name(section_name)
+    -> configargparse.parse_toml_section_name
+765:36 call  enumerate(sections[:-1])
+    -> <builtin>.enumerate
+768:37 call  dict(items)
+    -> <builtin>.dict
+770:26 call  toml.dumps(result)
+    -> toml.dumps
+
+[configargparse.IniConfigParser.__init__]
+822:14 call  super()
+    -> <builtin>.super
+822:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    reject *: super() in IniConfigParser resolves to ConfigFileParser, which defines no __init__, then object: the method is object.__init__, named through object, the nearest base outside the package; the package defines no subclass of IniConfigParser
+
+[configargparse.IniConfigParser.parse]
+832:43 call  configparser.ConfigParser()
+    -> configparser.ConfigParser
+834:31 call  config.read_string(stream.read())
+    -> configparser.ConfigParser.read_string
+834:43 call  stream.read()
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    note: stream is a package stream (see 335:43); a client stream is opaque
+836:44 call  ConfigFileParserException("Couldn't parse INI file: %s" % e)
+    -> <builtin>.Exception.__init__
+839:29 call  OrderedDict()
+    -> collections.OrderedDict
+840:39 call  config.sections()
+    -> configparser.ConfigParser.sections
+    note: config is the configparser.ConfigParser made at line 832; sections here is its method, not the attribute sections that TomlConfigParser and IniConfigParser assign (lines 684, 823)
+843:46 call  config[section].items()
+    -> configparser.SectionProxy.items
+    note: config[section] is a configparser.SectionProxy
+844:34 call  v.strip()
+    -> <builtin>.str.strip
+    note: v is a str value that configparser read
+849:38 call  strip_v.startswith("[")
+    -> <builtin>.str.startswith
+849:64 call  strip_v.endswith("]")
+    -> <builtin>.str.endswith
+851:53 call  ast.literal_eval(strip_v)
+    -> ast.literal_eval
+854:56 call  ConfigFileParserException( "Error evaluating list: " + st...
+    -> <builtin>.Exception.__init__
+856:34 call  str(e)
+    -> <builtin>.str
+860:33 call  is_quoted(strip_v)
+    -> functools._lru_cache_wrapper.__call__
+    -> functools._lru_cache_wrapper.wrapper
+    -> configargparse.is_quoted
+    note: is_quoted is cached at line 577; the supported CPython/PyPy wrapper union and cache-miss callback are the same as at 599:17.
+863:52 call  unquote_str(strip_v)
+    -> configargparse.unquote_str
+866:60 call  ConfigFileParserException(str(e))
+    -> <builtin>.Exception.__init__
+866:64 call  str(e)
+    -> <builtin>.str
+868:73 call  v.rstrip("\n")
+    -> <builtin>.str.rstrip
+871:44 call  unquote_str(i)
+    -> configargparse.unquote_str
+871:70 call  strip_v.split("\n")
+    -> <builtin>.str.split
+875:60 call  ConfigFileParserException(str(e))
+    -> <builtin>.Exception.__init__
+875:64 call  str(e)
+    -> <builtin>.str
+
+[configargparse.IniConfigParser.serialize]
+895:43 call  configparser.ConfigParser()
+    -> configparser.ConfigParser
+902:31 call  config.add_section(section_name)
+    -> configparser.ConfigParser.add_section
+905:38 call  items.items()
+    -> collections.OrderedDict.items
+906:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+910:45 call  "\n".join(str(v) for v in value)
+    -> <builtin>.str.join
+910:49 call  str(v)
+    -> <builtin>.str
+913:32 call  str(value)
+    -> <builtin>.str
+915:28 call  str(value)
+    -> <builtin>.str
+917:23 call  config.set(section_name, key, value.replace("%", "%%"))
+    -> configparser.ConfigParser.set
+917:56 call  value.replace("%", "%%")
+    -> <builtin>.str.replace
+919:26 call  StringIO()
+    -> io.StringIO
+920:21 call  config.write(stream)
+    -> configparser.ConfigParser.write
+921:20 call  stream.seek(0)
+    -> io.StringIO.seek
+922:27 call  stream.read()
+    -> io.StringIO.read
+
+[configargparse.CompositeConfigParser.__init__]
+934:14 call  super()
+    -> <builtin>.super
+934:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    reject *: super() in CompositeConfigParser resolves to ConfigFileParser, which defines no __init__, then object: the method is object.__init__, named through object, the nearest base outside the package; the package defines no subclass of CompositeConfigParser
+935:50 call  p()
+    -> configargparse.TomlConfigParser.__call__
+    -> configargparse.IniConfigParser.__call__
+    -> configargparse.CompositeConfigParser.__call__
+    note: p is an element of config_parser_types, which the client gives. The docstring (line 927) and the module docstring (line 556) name ConfigFileParser instances, and the tests also pass classes (test_configargparse.py:3597-3601). Calling an instance of TomlConfigParser, IniConfigParser or CompositeConfigParser runs its __call__ (which returns the instance); the other package classes have no __call__. Calling a package class with no __init__ (DefaultConfigFileParser, ConfigparserConfigFileParser, YAMLConfigFileParser, ConfigFileParser) runs object.__init__: no edge. A CompositeConfigParser is a ConfigFileParser instance, so it fits too (judgement 4 of configargparse.md)
+    exclude configargparse.TomlConfigParser.__init__, configargparse.IniConfigParser.__init__, configargparse.CompositeConfigParser.__init__: calling one of these classes with no argument fails to bind the required argument (sections, config_parser_types) before __init__ runs
+    exclude configargparse._WriteOutConfigFileActionMixin.__call__: an argparse action is not a config file parser type
+939:43 call  isinstance(parser, IniConfigParser)
+    -> <builtin>.isinstance
+942:39 call  isinstance(parser, TomlConfigParser)
+    -> <builtin>.isinstance
+943:30 call  warnings.warn( "IniConfigParser was found before TomlConf...
+    -> warnings.warn
+
+[configargparse.CompositeConfigParser.parse]
+955:30 call  enumerate(self.parsers)
+    -> <builtin>.enumerate
+957:31 call  p.parse(stream)
+    -> configargparse.CompositeConfigParser.parse
+    -> configargparse.ConfigFileParser.parse
+    -> configargparse.ConfigparserConfigFileParser.parse
+    -> configargparse.DefaultConfigFileParser.parse
+    -> configargparse.IniConfigParser.parse
+    -> configargparse.TomlConfigParser.parse
+    -> configargparse.YAMLConfigFileParser.parse
+    note: p is an element of self.parsers (annotated list[ConfigFileParser], line 935), the results of p() in __init__: an instance of any package ConfigFileParser class (the __call__ of TomlConfigParser, IniConfigParser and CompositeConfigParser returns the instance; the other classes are instantiated), or a client parser (opaque). ConfigFileParser is a plain class, public and instantiable: its parse raises NotImplementedError. parse here is the method of the parser, not ArgumentParser.parse, which line 2486 binds to parse_args
+    exclude configargparse.ArgumentParser.parse_args: p is a config file parser, never an ArgumentParser, whose attribute parse is parse_args (line 2486)
+959:30 call  isinstance(e, ConfigFileParserMissingDependency)
+    -> <builtin>.isinstance
+962:34 call  warnings.warn( f"Cannot use parser {p.__class__.__name__}...
+    -> warnings.warn
+966:30 call  errors.append(e)
+    -> <builtin>.list.append
+969:27 call  len(self.parsers)
+    -> <builtin>.len
+971:36 call  stream.seek(0)
+    -> io.StringIO.seek
+    -> io.TextIOWrapper.seek
+    note: stream is a package stream (see 335:43); a client stream is opaque
+974:56 call  ConfigFileParserException( f"Error parsing config with {p...
+    -> <builtin>.Exception.__init__
+978:40 call  ConfigFileParserException( f"Error parsing config: {', '....
+    -> <builtin>.Exception.__init__
+979:47 call  ', '.join(repr(str(e)) for e in errors)
+    -> <builtin>.str.join
+979:52 call  repr(str(e))
+    -> <builtin>.repr
+979:56 call  str(e)
+    -> <builtin>.str
+
+[configargparse.CompositeConfigParser.get_syntax_description]
+994:35 call  enumerate(self.parsers)
+    -> <builtin>.enumerate
+995:50 call  guess_format_name(parser.__class__.__name__)
+    -> configargparse.CompositeConfigParser.get_syntax_description.guess_format_name
+995:110 call  parser.get_syntax_description()
+    -> configargparse.CompositeConfigParser.get_syntax_description
+    -> configargparse.ConfigFileParser.get_syntax_description
+    -> configargparse.ConfigparserConfigFileParser.get_syntax_description
+    -> configargparse.DefaultConfigFileParser.get_syntax_description
+    -> configargparse.IniConfigParser.get_syntax_description
+    -> configargparse.TomlConfigParser.get_syntax_description
+    -> configargparse.YAMLConfigFileParser.get_syntax_description
+    note: parser is an element of self.parsers: an instance of any package ConfigFileParser class (see 957:31)
+
+[configargparse.CompositeConfigParser.get_syntax_description.guess_format_name]
+985:32 call  classname.lower()
+    -> <builtin>.str.lower
+    note: classname is the __name__ of a class: a str
+986:23 call  classname.lower() .strip("_")
+    -> <builtin>.str.strip
+987:25 call  classname.lower() .strip("_") .replace("parser", "")
+    -> <builtin>.str.replace
+988:25 call  classname.lower() .strip("_") .replace("parser", "") .rep...
+    -> <builtin>.str.replace
+989:25 call  classname.lower() .strip("_") .replace("parser", "") .rep...
+    -> <builtin>.str.replace
+991:31 call  strip.upper()
+    -> <builtin>.str.upper
+
+[configargparse.CompositeConfigParser.serialize]
+1001:44 call  ConfigFileParserException( "No parsers configured in Comp...
+    -> <builtin>.Exception.__init__
+1005:41 call  self.parsers[0].serialize(items)
+    -> configargparse.CompositeConfigParser.serialize
+    -> configargparse.ConfigFileParser.serialize
+    -> configargparse.ConfigparserConfigFileParser.serialize
+    -> configargparse.DefaultConfigFileParser.serialize
+    -> configargparse.IniConfigParser.serialize
+    -> configargparse.TomlConfigParser.serialize
+    -> configargparse.YAMLConfigFileParser.serialize
+    note: self.parsers[0] is an instance of any package ConfigFileParser class (see 957:31)
+
+[configargparse.ArgumentParser.__init__]
+1089:42 call  kwargs.pop("add_config_file_help", True)
+    -> <builtin>.dict.pop
+    note: kwargs is the dict that the interpreter builds for **kwargs
+1090:38 call  kwargs.pop("add_env_var_help", True)
+    -> <builtin>.dict.pop
+1091:41 call  kwargs.pop("auto_env_var_prefix", None)
+    -> <builtin>.dict.pop
+1092:42 call  kwargs.pop("default_config_files", [])
+    -> <builtin>.dict.pop
+1093:53 call  kwargs.pop( "ignore_unknown_config_file_keys", False )
+    -> <builtin>.dict.pop
+1096:46 call  kwargs.pop( "config_file_parser_class", DefaultConfigFile...
+    -> <builtin>.dict.pop
+1099:50 call  kwargs.pop("args_for_setting_config_path", [])
+    -> <builtin>.dict.pop
+1100:44 call  kwargs.pop("config_arg_is_required", False)
+    -> <builtin>.dict.pop
+1101:45 call  kwargs.pop( "config_arg_help_message", "config file path" )
+    -> <builtin>.dict.pop
+1104:54 call  kwargs.pop( "args_for_writing_out_config_file", [] )
+    -> <builtin>.dict.pop
+1107:60 call  kwargs.pop( "write_out_config_file_arg_help_message", "ta...
+    -> <builtin>.dict.pop
+1114:43 call  kwargs.pop("config_file_open_func", open)
+    -> <builtin>.dict.pop
+1122:30 call  isinstance(value, (list, tuple))
+    -> <builtin>.isinstance
+1123:62 call  isinstance(value, str)
+    -> <builtin>.isinstance
+1124:32 call  TypeError("%s must be a list%s. Got: %r" % (name, hint, v...
+    -> <builtin>.TypeError
+1126:34 call  enumerate(default_config_files)
+    -> <builtin>.enumerate
+1127:31 call  isinstance(entry, (str, bytes, os.PathLike))
+    -> <builtin>.isinstance
+1127:77 call  callable(entry)
+    -> <builtin>.callable
+1128:32 call  TypeError( "default_config_files[%d] must be a string, by...
+    -> <builtin>.TypeError
+1134:24 call  callable(config_file_open_func)
+    -> <builtin>.callable
+1135:28 call  TypeError( "config_file_open_func must be callable. Got: ...
+    -> <builtin>.TypeError
+1148:26 call  isinstance(fc, type)
+    -> <builtin>.isinstance
+1148:55 call  issubclass(fc, argparse.HelpFormatter)
+    -> <builtin>.issubclass
+1153:30 call  issubclass(fc, ConfigFileParser)
+    -> <builtin>.issubclass
+1155:32 call  TypeError(msg)
+    -> <builtin>.TypeError
+1157:41 call  argparse.ArgumentParser.__init__(self, *args, **kwargs)
+    -> argparse.ArgumentParser.__init__
+    -> configargparse.add_argument
+    reject *: the call names the __init__ of argparse.ArgumentParser, the base outside the package
+    note: with add_help (the default) argparse.ArgumentParser.__init__ adds -h/--help through self.add_argument(...), which runs configargparse.add_argument, installed on argparse._ActionsContainer at import (line 2447)
+1161:63 call  DefaultConfigFileParser()
+    note: DefaultConfigFileParser defines no __init__, nor does ConfigFileParser: object.__init__, no edge
+1162:24 call  isinstance(config_file_parser_class, ConfigFileParser)
+    -> <builtin>.isinstance
+1164:24 call  isinstance(config_file_parser_class, type)
+    -> <builtin>.isinstance
+1164:71 call  issubclass( config_file_parser_class, ConfigFileParser )
+    -> <builtin>.issubclass
+1167:64 call  config_file_parser_class()
+    note: config_file_parser_class is a class, and a subclass of ConfigFileParser (lines 1164-1166): the default DefaultConfigFileParser, another package class, or a client class (opaque). A package class with no __init__ (DefaultConfigFileParser, ConfigparserConfigFileParser, YAMLConfigFileParser, ConfigFileParser) runs object.__init__: no edge. TomlConfigParser, IniConfigParser and CompositeConfigParser need an argument: the call fails to bind it before their __init__ runs. So the call reaches no package function
+    exclude configargparse.TomlConfigParser.__init__, configargparse.IniConfigParser.__init__, configargparse.CompositeConfigParser.__init__: called with no argument, these classes fail to bind the required argument before __init__ runs
+1169:28 call  TypeError( "config_file_parser_class must be a subclass o...
+    -> <builtin>.TypeError
+1180:30 call  self.add_argument( *args_for_setting_config_path, dest="c...
+    -> configargparse.add_argument
+    note: add_argument of an ArgumentParser is the attribute of argparse._ActionsContainer that line 2447 replaces with configargparse.add_argument at import; configargparse.ArgumentParser does not override it
+1189:30 call  self.add_argument( *args_for_writing_out_config_file, des...
+    -> configargparse.add_argument
+    note: as 1180:30
+
+[configargparse.ArgumentParser._find_insertion_index]
+1211:30 call  args.index("--")
+    -> <builtin>.list.index
+    note: args is the list that parse_known_args builds (lines 1327-1331, 1416, 1507)
+1213:51 call  self._find_subcommand_index(args)
+    -> configargparse.ArgumentParser._find_subcommand_index
+1218:32 call  enumerate(args)
+    -> <builtin>.enumerate
+1219:30 call  arg.startswith(tuple(self.prefix_chars))
+    -> <builtin>.str.startswith
+    note: arg is a command line arg: a str (parse_known_args docstring, line 1317; the synthesized args are strs)
+1219:36 call  tuple(self.prefix_chars)
+    -> <builtin>.tuple
+1226:15 call  any( a.is_positional_arg and a.nargs == argparse.REMAINDE...
+    -> <builtin>.any
+1231:19 call  len(args)
+    -> <builtin>.len
+
+[configargparse.ArgumentParser._find_subcommand_index]
+1243:26 call  isinstance(action, argparse._SubParsersAction)
+    -> <builtin>.isinstance
+1244:47 call  enumerate(args)
+    -> <builtin>.enumerate
+
+[configargparse.ArgumentParser._option_strings_that_override]
+1267:30 call  list(action.option_strings)
+    -> <builtin>.list
+
+[configargparse.ArgumentParser.parse_args]
+1289:43 call  self.parse_known_args( args=args, namespace=namespace, co...
+    -> configargparse.ArgumentParser.parse_known_args
+1298:58 call  " ".join(argv)
+    -> <builtin>.str.join
+1300:27 call  self.error(msg)
+    -> argparse.ArgumentParser.error
+    note: self is a configargparse ArgumentParser, which inherits error from argparse.ArgumentParser; error prints the usage (format_usage, not overridden) and exits
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets the attribute error only on arg_parser, the plain argparse.ArgumentParser of _open_config_files, which never leaves that function
+1302:36 call  ArgumentError(None, msg)
+    -> argparse.ArgumentError
+    note: ArgumentError is the module-level alias of argparse.ArgumentError (line 2454)
+
+[configargparse.ArgumentParser.parse_known_args]
+1328:24 call  isinstance(args, str)
+    -> <builtin>.isinstance
+1329:30 call  args.split()
+    -> <builtin>.str.split
+1331:24 call  list(args)
+    -> <builtin>.list
+1343:47 call  OrderedDict()
+    -> collections.OrderedDict
+1345:35 call  list(args)
+    -> <builtin>.list
+1351:65 call  self.get_possible_config_keys(a)
+    -> configargparse.ArgumentParser.get_possible_config_keys
+1357:34 call  isinstance(a, argparse._VersionAction)
+    -> <builtin>.isinstance
+1358:34 call  isinstance(a, argparse._HelpAction)
+    -> <builtin>.isinstance
+1360:73 call  config_file_keys[0].strip( self.prefix_chars )
+    -> <builtin>.str.strip
+    note: config_file_keys[0] is a str: an option string without its prefix (get_possible_config_keys)
+1365:33 call  (self._auto_env_var_prefix + stripped_config_file_key) .r...
+    -> <builtin>.str.replace
+    note: auto_env_var_prefix is a str (ArgumentParser.__init__ docstring, line 1029)
+1366:31 call  (self._auto_env_var_prefix + stripped_config_file_key) .r...
+    -> <builtin>.str.upper
+1371:39 call  OrderedDict()
+    -> collections.OrderedDict
+1372:35 call  set()
+    -> <builtin>.set
+1380:58 call  set()
+    -> <builtin>.set
+1387:44 call  already_on_command_line( args, self._option_strings_that_...
+    -> configargparse.already_on_command_line
+1388:57 call  self._option_strings_that_override(a)
+    -> configargparse.ArgumentParser._option_strings_that_override
+1399:42 call  isinstance(action, argparse._AppendAction)
+    -> <builtin>.isinstance
+1400:36 call  value.startswith("[")
+    -> <builtin>.str.startswith
+    note: value is env_vars[key]: a str of os.environ (the default) or of the dict of strs that a client passes (docstring, line 1319)
+1400:60 call  value.endswith("]")
+    -> <builtin>.str.endswith
+1403:43 call  json.loads(value)
+    -> json.loads
+1406:44 call  elem.strip()
+    -> <builtin>.str.strip
+1406:76 call  value[1:-1].split(",")
+    -> <builtin>.str.split
+1407:66 call  self.convert_item_to_command_line_arg(action, key, value)
+    -> configargparse.ArgumentParser.convert_item_to_command_line_arg
+1409:26 call  isinstance(action, ACTION_TYPES_THAT_DONT_NEED_A_VALUE)
+    -> <builtin>.isinstance
+1410:41 call  env_var_flag_actions.add(action)
+    -> <builtin>.set.add
+    note: env_var_flag_actions is the set made at line 1372
+    exclude configargparse.add_argument: line 2484 makes add an alias of add_argument on argparse._ActionsContainer, but env_var_flag_actions is a set
+1412:41 call  self._find_insertion_index(args)
+    -> configargparse.ArgumentParser._find_insertion_index
+1413:51 call  self._reject_write_out_config_file_args( env_var_args, "i...
+    -> configargparse.ArgumentParser._reject_write_out_config_file_args
+1414:80 call  self._reachable_parsers()
+    -> configargparse.ArgumentParser._reachable_parsers
+1417:63 call  flag_actions_set_by_higher_priority_sources.update(env_va...
+    -> <builtin>.set.update
+1422:32 call  any( a for a in self._actions if isinstance(a, argparse._...
+    -> <builtin>.any
+1423:51 call  isinstance(a, argparse._HelpAction)
+    -> <builtin>.isinstance
+1433:60 call  self.get_possible_config_keys(action)
+    -> configargparse.ArgumentParser.get_possible_config_keys
+1439:30 call  StringIO(config_file_contents)
+    -> io.StringIO
+1443:53 call  self._open_config_files(args)
+    -> configargparse.ArgumentParser._open_config_files
+1447:49 call  reversed(config_streams)
+    -> <builtin>.reversed
+1449:66 call  self._config_file_parser.parse(stream)
+    -> configargparse.CompositeConfigParser.parse
+    -> configargparse.ConfigFileParser.parse
+    -> configargparse.ConfigparserConfigFileParser.parse
+    -> configargparse.DefaultConfigFileParser.parse
+    -> configargparse.IniConfigParser.parse
+    -> configargparse.TomlConfigParser.parse
+    -> configargparse.YAMLConfigFileParser.parse
+    note: self._config_file_parser is set only in __init__ (lines 1161, 1163, 1167): a DefaultConfigFileParser (the default class, or None), the ConfigFileParser instance that the client passes, or an instance of the ConfigFileParser subclass that the client passes. Every package ConfigFileParser class fits, ConfigFileParser itself included (plain, public, instantiable); a client parser is opaque. parse here is the method of the config file parser, not ArgumentParser.parse (line 2486)
+    exclude configargparse.ArgumentParser.parse_args: self._config_file_parser is a config file parser, never an ArgumentParser, whose attribute parse is parse_args (line 2486)
+1451:31 call  self.error(str(e))
+    -> argparse.ArgumentParser.error
+    note: inherited from argparse.ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets error only on the plain argparse.ArgumentParser arg_parser of _open_config_files
+1451:35 call  str(e)
+    -> <builtin>.str
+1455:47 call  set()
+    -> <builtin>.set
+1456:53 call  config_items.items()
+    -> collections.OrderedDict.items
+    note: config_items is the result of parse(): an OrderedDict for every package parser, and documented as OrderedDict (line 113)
+1461:55 call  already_on_command_line( args, self._option_strings_that_...
+    -> configargparse.already_on_command_line
+1463:67 call  self._option_strings_that_override(action)
+    -> configargparse.ArgumentParser._option_strings_that_override
+1471:55 call  already_on_command_line( args, [ self.get_command_line_ke...
+    -> configargparse.already_on_command_line
+1474:94 call  self.get_command_line_key_for_unknown_config_file_setting...
+    -> configargparse.ArgumentParser.get_command_line_key_for_unknown_config_file_setting
+1488:77 call  self.convert_item_to_command_line_arg( action, key, value )
+    -> configargparse.ArgumentParser.convert_item_to_command_line_arg
+1491:38 call  isinstance(action, ACTION_TYPES_THAT_DONT_NEED_A_VALUE)
+    -> <builtin>.isinstance
+1492:57 call  config_file_flag_actions.add(action)
+    -> <builtin>.set.add
+    note: config_file_flag_actions is the set made at line 1455
+    exclude configargparse.add_argument: line 2484 makes add an alias of add_argument on argparse._ActionsContainer, but config_file_flag_actions is a set
+1498:79 call  OrderedDict()
+    -> collections.OrderedDict
+1501:49 call  self._find_insertion_index(args)
+    -> configargparse.ArgumentParser._find_insertion_index
+1502:59 call  self._reject_write_out_config_file_args( config_args, "in...
+    -> configargparse.ArgumentParser._reject_write_out_config_file_args
+1505:44 call  self._reachable_parsers()
+    -> configargparse.ArgumentParser._reachable_parsers
+1509:71 call  flag_actions_set_by_higher_priority_sources.update( confi...
+    -> <builtin>.set.update
+1518:31 call  hasattr(stream, "close")
+    -> <builtin>.hasattr
+1519:37 call  stream.close()
+    -> io.StringIO.close
+    -> io.TextIOWrapper.close
+    note: the streams are the io.StringIO of line 1439 and the streams of _open_config_files: text files of the default open(), or client streams (opaque)
+1524:39 call  OrderedDict()
+    -> collections.OrderedDict
+1530:40 call  already_on_command_line(args, action.option_strings, self...
+    -> configargparse.already_on_command_line
+1534:30 call  isinstance(action, ACTION_TYPES_THAT_DONT_NEED_A_VALUE)
+    -> <builtin>.isinstance
+1542:53 call  str(action.default)
+    -> <builtin>.str
+1548:56 call  OrderedDict()
+    -> collections.OrderedDict
+1549:75 call  argparse.ArgumentParser.parse_known_args( self, args=args...
+    -> argparse.ArgumentParser.parse_known_args
+    -> configargparse.ArgumentParser.parse_known_args
+    -> configargparse.ArgumentParser.format_help
+    -> configargparse._WriteOutConfigFileActionMixin.__call__
+    note: argparse's parse_known_args calls back package code: each action it takes is called as action(parser, namespace, values, option_string), which runs _WriteOutConfigFileActionMixin.__call__ for a write-out-config-file arg (line 2306); the -h action (_HelpAction) calls parser.print_help(), which calls self.format_help(), overridden here; a subparsers action (_SubParsersAction.__call__) calls subparser.parse_known_args(arg_strings, None) on the chosen subparser, a configargparse ArgumentParser when add_subparsers keeps its default parser_class type(self). The other methods that argparse calls on the parser (error, exit, format_usage, _get_formatter, _get_values, ...) are not overridden
+1554:65 call  self._write_out_config_file_paths.values()
+    -> collections.OrderedDict.values
+1561:31 call  self.write_config_file(namespace, output_file_paths, exit...
+    -> configargparse.ArgumentParser.write_config_file
+
+[configargparse.ArgumentParser._reject_write_out_config_file_args]
+1614:48 call  self._write_out_config_file_args(parsers)
+    -> configargparse.ArgumentParser._write_out_config_file_args
+1619:40 call  "".join( parser.fromfile_prefix_chars or "" for parser in...
+    -> <builtin>.str.join
+1622:48 call  self._write_out_config_file_args(_subparsers_of(parser))
+    -> configargparse.ArgumentParser._write_out_config_file_args
+1622:63 call  _subparsers_of(parser)
+    -> configargparse._subparsers_of
+1626:55 call  self._names_a_write_out_config_file_arg(arg_string, parsers)
+    -> configargparse.ArgumentParser._names_a_write_out_config_file_arg
+1627:27 call  self.error( "%s can only be set on the command line, not ...
+    -> argparse.ArgumentParser.error
+    note: inherited from argparse.ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets error only on the plain argparse.ArgumentParser arg_parser of _open_config_files
+1629:40 call  arg_string.split("=", 1)
+    -> <builtin>.str.split
+1636:27 call  self.error( "%s can't be used %s, since it would read com...
+    -> argparse.ArgumentParser.error
+    note: inherited from argparse.ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets error only on the plain argparse.ArgumentParser arg_parser of _open_config_files
+
+[configargparse.ArgumentParser._names_a_write_out_config_file_arg]
+1654:19 call  any( # a parser that isn't one of ours has no matcher of ...
+    -> <builtin>.any
+1657:20 call  getattr(parser, "_could_set_option", self._could_set_option)
+    -> <builtin>.getattr
+    reject configargparse.ArgumentParser._could_set_option: getattr returns the bound method as its default value without calling it; the call is 1657:73
+1657:73 call  getattr(parser, "_could_set_option", self._could_set_opti...
+    -> configargparse.ArgumentParser._could_set_option
+    note: the callee is parser._could_set_option when parser is a configargparse ArgumentParser, else self._could_set_option (the default of getattr): both are configargparse.ArgumentParser._could_set_option (a client subclass that overrides it is client code)
+1660:67 call  self._write_out_config_file_args(parsers)
+    -> configargparse.ArgumentParser._write_out_config_file_args
+
+[configargparse.ArgumentParser._reachable_parsers]
+1676:30 call  _subparsers_of(self)
+    -> configargparse._subparsers_of
+
+[configargparse.ArgumentParser._write_out_config_file_args]
+1693:23 call  getattr(action, "is_write_out_config_file_arg", False)
+    -> <builtin>.getattr
+
+[configargparse.ArgumentParser._could_set_option]
+1719:15 call  len(arg_string)
+    -> <builtin>.len
+1727:36 call  arg_string.split("=", 1)
+    -> <builtin>.str.split
+    note: arg_string is a synthesized command line arg (a str, convert_item_to_command_line_arg)
+1731:57 call  self._option_string_actions.get( bare_key, self._option_s...
+    -> <builtin>.dict.get
+    note: _option_string_actions is the dict that argparse._ActionsContainer.__init__ makes
+1732:54 call  self._option_string_actions.get(key)
+    -> <builtin>.dict.get
+1735:38 call  getattr(matched_action, "nargs", None)
+    -> <builtin>.getattr
+1746:66 call  option_string.startswith(key)
+    -> <builtin>.str.startswith
+1748:36 call  option_string.startswith(bare_key)
+    -> <builtin>.str.startswith
+1755:15 call  len(option_string)
+    -> <builtin>.len
+1765:29 call  arg_string.split("=", 1)
+    -> <builtin>.str.split
+1769:29 call  bundled.find(option_string[1])
+    -> <builtin>.str.find
+1773:19 call  all( getattr(self._option_string_actions.get(arg_string[0...
+    -> <builtin>.all
+1774:20 call  getattr(self._option_string_actions.get(arg_string[0] + c...
+    -> <builtin>.getattr
+1774:52 call  self._option_string_actions.get(arg_string[0] + c)
+    -> <builtin>.dict.get
+
+[configargparse.ArgumentParser.write_config_file]
+1793:65 call  self.get_items_for_config_file_output( self._source_to_se...
+    -> configargparse.ArgumentParser.get_items_for_config_file_output
+1796:63 call  self._config_file_parser.serialize(config_items)
+    -> configargparse.CompositeConfigParser.serialize
+    -> configargparse.ConfigFileParser.serialize
+    -> configargparse.ConfigparserConfigFileParser.serialize
+    -> configargparse.DefaultConfigFileParser.serialize
+    -> configargparse.IniConfigParser.serialize
+    -> configargparse.TomlConfigParser.serialize
+    -> configargparse.YAMLConfigFileParser.serialize
+    note: self._config_file_parser is an instance of any package ConfigFileParser class (see 1449:66)
+1799:53 call  self._config_file_open_func( output_file_path, "w" )
+    -> <builtin>.open
+    note: self._config_file_open_func is set only in __init__ (line 1140) from the keyword config_file_open_func, whose default is the builtin open (line 1114); a client function is a client callback (opaque)
+1802:42 call  output_file.write(file_contents)
+    -> io.TextIOWrapper.write
+    note: output_file is the text file that open(path, "w") returns; a client file object is opaque
+1804:37 call  ValueError( "Couldn't open {} for writing: {}".format(out...
+    -> <builtin>.ValueError
+1805:66 call  "Couldn't open {} for writing: {}".format(output_file_pat...
+    -> <builtin>.str.format
+1808:18 call  print("Wrote config file to " + ", ".join(output_file_pat...
+    -> <builtin>.print
+1808:54 call  ", ".join(output_file_paths)
+    -> <builtin>.str.join
+1810:26 call  self.exit(0)
+    -> argparse.ArgumentParser.exit
+
+[configargparse.ArgumentParser.get_command_line_key_for_unknown_config_file_setting]
+1823:45 call  key.strip(self.prefix_chars)
+    -> <builtin>.str.strip
+    note: key is a config file key, a str (docstring, line 1818)
+
+[configargparse.ArgumentParser.get_items_for_config_file_output]
+1839:40 call  OrderedDict()
+    -> collections.OrderedDict
+1840:57 call  source_to_settings.items()
+    -> collections.OrderedDict.items
+    -> <builtin>.dict.items
+    note: This public method accepts the documented dict of dicts (lines1339-1342,1566-1576,1833), including plain client dicts. The internal path at1794 supplies OrderedDicts; both concrete receiver names are admitted (B4).
+1844:69 call  self.get_possible_config_keys(action)
+    -> configargparse.ArgumentParser.get_possible_config_keys
+1848:52 call  already_on_command_line( existing_command_line_args, acti...
+    -> configargparse.already_on_command_line
+1854:40 call  getattr(parsed_namespace, action.dest, None)
+    -> <builtin>.getattr
+1857:75 call  _convert_parsed_value_to_config_file_value( action, value )
+    -> configargparse._convert_parsed_value_to_config_file_value
+1863:59 call  settings.items()
+    -> collections.OrderedDict.items
+    -> <builtin>.dict.items
+    note: This public method accepts the documented dict of dicts (lines1339-1342,1566-1576,1833), including plain client dicts. The internal path at1794 supplies OrderedDicts; both concrete receiver names are admitted (B4).
+1864:69 call  self.get_possible_config_keys(action)
+    -> configargparse.ArgumentParser.get_possible_config_keys
+1866:40 call  getattr(parsed_namespace, action.dest, None)
+    -> <builtin>.getattr
+1869:75 call  _convert_parsed_value_to_config_file_value( action, value )
+    -> configargparse._convert_parsed_value_to_config_file_value
+1873:35 call  source.startswith(_CONFIG_FILE_SOURCE_KEY)
+    -> <builtin>.str.startswith
+1874:59 call  settings.items()
+    -> collections.OrderedDict.items
+    -> <builtin>.dict.items
+    note: This public method accepts the documented dict of dicts (lines1339-1342,1566-1576,1833), including plain client dicts. The internal path at1794 supplies OrderedDicts; both concrete receiver names are admitted (B4).
+1877:59 call  settings.items()
+    -> collections.OrderedDict.items
+    -> <builtin>.dict.items
+    note: This public method accepts the documented dict of dicts (lines1339-1342,1566-1576,1833), including plain client dicts. The internal path at1794 supplies OrderedDicts; both concrete receiver names are admitted (B4).
+1878:69 call  self.get_possible_config_keys(action)
+    -> configargparse.ArgumentParser.get_possible_config_keys
+1880:40 call  getattr(parsed_namespace, action.dest, None)
+    -> <builtin>.getattr
+
+[configargparse.ArgumentParser.convert_item_to_command_line_arg]
+1903:74 call  self.get_command_line_key_for_unknown_config_file_setting...
+    -> configargparse.ArgumentParser.get_command_line_key_for_unknown_config_file_setting
+1906:46 call  is_boolean_optional_action(action)
+    -> configargparse.<lambda1>
+    -> configargparse.<lambda2>
+    note: is_boolean_optional_action is <lambda1> on Python 3.9 and later and <lambda2> before (line 31); both are supported versions (judgement 1 of configargparse.md)
+1910:45 call  isinstance( action, ACTION_TYPES_THAT_DONT_NEED_A_VALUE )
+    -> <builtin>.isinstance
+1913:30 call  isinstance( value, str )
+    -> <builtin>.isinstance
+1916:27 call  value.lower()
+    -> <builtin>.str.lower
+    note: value is documented as str or list (line 1895); package parsers can supply strings for boolean flags. The assert at line 1913 checks str in normal mode only. Under -O/-OO it is removed; built-in lists have no lower method, and client overrides/results stay opaque. The named target remains str.lower across the mode union.
+1917:50 call  is_boolean_optional_action(action)
+    -> configargparse.<lambda1>
+    -> configargparse.<lambda2>
+1918:32 call  args.append(command_line_key)
+    -> <builtin>.list.append
+1921:32 call  args.append(action.option_strings[0])
+    -> <builtin>.list.append
+1922:29 call  value.lower()
+    -> <builtin>.str.lower
+1924:50 call  is_boolean_optional_action(action)
+    -> configargparse.<lambda1>
+    -> configargparse.<lambda2>
+1928:32 call  args.append(action.option_strings[1])
+    -> <builtin>.list.append
+1929:28 call  isinstance(action, argparse._CountAction)
+    -> <builtin>.isinstance
+1931:57 call  int(value)
+    -> <builtin>.int
+1933:27 call  self.error( "Unexpected value for %s: '%s'. Expecting 'tr...
+    -> argparse.ArgumentParser.error
+    note: inherited from argparse.ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets error only on the plain argparse.ArgumentParser arg_parser of _open_config_files
+1937:24 call  isinstance(value, list)
+    -> <builtin>.isinstance
+1946:31 call  isinstance(action.nargs, int)
+    -> <builtin>.isinstance
+1949:44 call  isinstance(action, argparse._AppendAction)
+    -> <builtin>.isinstance
+1951:65 call  isinstance(list_elem, list)
+    -> <builtin>.isinstance
+1952:36 call  args.append(command_line_key)
+    -> <builtin>.list.append
+1954:40 call  args.append(str(sub_elem))
+    -> <builtin>.list.append
+1954:44 call  str(sub_elem)
+    -> <builtin>.str
+1956:36 call  args.append("%s=%s" % (command_line_key, str(list_elem)))
+    -> <builtin>.list.append
+1956:69 call  str(list_elem)
+    -> <builtin>.str
+1958:28 call  args.append(command_line_key)
+    -> <builtin>.list.append
+1960:32 call  args.append(str(list_elem))
+    -> <builtin>.list.append
+1960:36 call  str(list_elem)
+    -> <builtin>.str
+1962:27 call  self.error( ( "%s can't be set to a list '%s' unless its ...
+    -> argparse.ArgumentParser.error
+    note: inherited from argparse.ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets error only on the plain argparse.ArgumentParser arg_parser of _open_config_files
+1974:27 call  self.error( "%s can't have '--' as a list element, since ...
+    -> argparse.ArgumentParser.error
+    note: inherited from argparse.ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: line 2098 sets error only on the plain argparse.ArgumentParser arg_parser of _open_config_files
+1979:24 call  isinstance(value, str)
+    -> <builtin>.isinstance
+1980:24 call  args.append("%s=%s" % (command_line_key, value))
+    -> <builtin>.list.append
+1982:29 call  ValueError( "Unexpected value type {} for value: {}".form...
+    -> <builtin>.ValueError
+1983:64 call  "Unexpected value type {} for value: {}".format(type(valu...
+    -> <builtin>.str.format
+1983:69 call  type(value)
+    -> <builtin>.type
+
+[configargparse.ArgumentParser.get_possible_config_keys]
+1999:19 call  getattr(action, "is_write_out_config_file_arg", None)
+    -> <builtin>.getattr
+2003:19 call  any(arg.startswith(2 * c) for c in self.prefix_chars)
+    -> <builtin>.any
+2003:34 call  arg.startswith(2 * c)
+    -> <builtin>.str.startswith
+    note: arg is an option string of the action: a str
+
+[configargparse.ArgumentParser._open_config_files]
+2027:38 call  enumerate(self._default_config_files)
+    -> <builtin>.enumerate
+2028:30 call  isinstance(entry, (str, os.PathLike))
+    -> <builtin>.isinstance
+2032:39 call  glob.glob(os.path.expanduser(os.fspath(entry)))
+    -> glob.glob
+2032:58 call  os.path.expanduser(os.fspath(entry))
+    -> os.path.expanduser
+2032:68 call  os.fspath(entry)
+    -> os.fspath
+2033:44 call  config_files.append((self._config_file_open_func(f), f))
+    -> <builtin>.list.append
+2033:73 call  self._config_file_open_func(f)
+    -> <builtin>.open
+    note: self._config_file_open_func is the builtin open by default (line 1114); a client function is a client callback (opaque)
+2036:42 call  getattr(entry, "__name__", repr(entry))
+    -> <builtin>.getattr
+2036:66 call  repr(entry)
+    -> <builtin>.repr
+2038:39 call  entry()
+    note: entry is a zero-argument callable that the client puts in default_config_files (docstring, lines 1048-1055): a client callback. No package function is such a stream factory (B3)
+    exclude configargparse.TomlConfigParser.__call__, configargparse.IniConfigParser.__call__, configargparse.CompositeConfigParser.__call__: these take no argument but return a config file parser, not a stream; an arbitrary package callable where any callable is accepted is not considered (B3)
+2040:56 call  ConfigFileParserException( "default_config_files entry %r...
+    -> <builtin>.Exception.__init__
+2045:40 call  TypeError( "default_config_files entry %r returned None; ...
+    -> <builtin>.TypeError
+2056:32 call  getattr(stream, "name", None)
+    -> <builtin>.getattr
+2057:35 call  hasattr(stream, "name")
+    -> <builtin>.hasattr
+2063:40 call  config_files.append((stream, source_label))
+    -> <builtin>.list.append
+2064:35 call  hasattr(stream, "name")
+    -> <builtin>.hasattr
+2068:60 call  ConfigFileParserException( "default_config_files entry %r...
+    -> <builtin>.Exception.__init__
+2077:52 call  getattr(a, "is_config_file_arg", False)
+    -> <builtin>.getattr
+2086:53 call  argparse.ArgumentParser( prefix_chars=self.prefix_chars, ...
+    -> argparse.ArgumentParser
+    reject configargparse.ArgumentParser.__init__: the call instantiates argparse.ArgumentParser, the class outside the package; with add_help=False its __init__ adds no argument, so it does not call configargparse.add_argument back
+2090:39 call  arg_parser._add_action(action)
+    -> argparse.ArgumentParser._add_action
+    note: arg_parser is the plain argparse.ArgumentParser of line 2086
+2098:52 call  types.MethodType(error_method, arg_parser)
+    -> types.MethodType
+    reject configargparse.ArgumentParser._open_config_files.error_method: types.MethodType binds error_method to arg_parser without calling it
+2101:59 call  arg_parser.parse_known_args(args=command_line_args)
+    -> argparse.ArgumentParser.parse_known_args
+    -> configargparse.ArgumentParser._open_config_files.error_method
+    reject configargparse.ArgumentParser.parse_known_args: arg_parser is the plain argparse.ArgumentParser of line 2086, not a configargparse one
+    note: argparse calls self.error(...) on a parse error (a missing required config file arg, an invalid value); arg_parser.error is error_method (line 2098), so the call runs it. The one action of arg_parser is a config file arg, an argparse._StoreAction (line 2319), whose __call__ is library code
+2102:43 call  getattr(namespace, action.dest, None)
+    -> <builtin>.getattr
+2108:54 call  os.path.expanduser(user_config_file)
+    -> os.path.expanduser
+2110:57 call  self._config_file_open_func(user_config_file)
+    -> <builtin>.open
+    note: self._config_file_open_func is the builtin open by default (line 1114); a client function is a client callback (opaque)
+2112:31 call  self.error( "Unable to open config file: %s. Error: %s" %...
+    -> argparse.ArgumentParser.error
+    note: self is a configargparse ArgumentParser (see 1300:27)
+    exclude configargparse.ArgumentParser._open_config_files.error_method: error_method is set on arg_parser, not on self
+2114:49 call  str(e)
+    -> <builtin>.str
+2117:36 call  config_files.append((stream, user_config_file))
+    -> <builtin>.list.append
+2129:31 call  hasattr(cf, "close")
+    -> <builtin>.hasattr
+2130:33 call  cf.close()
+    -> io.TextIOWrapper.close
+    note: cf is a stream that this function opened: a text file of the default open(), or a stream from a client function (opaque)
+
+[configargparse.ArgumentParser.format_values]
+2149:21 call  StringIO()
+    -> io.StringIO
+2153:44 call  self._source_to_settings.items()
+    -> collections.OrderedDict.items
+2154:34 call  source.split("|", 1)
+    -> <builtin>.str.split
+2155:72 call  tuple(source[1:])
+    -> <builtin>.tuple
+2156:20 call  r.write(source)
+    -> io.StringIO.write
+2157:55 call  settings.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+    note: the settings of the command line source are the dict display of line 1346; the others are OrderedDicts (lines 1371, 1498, 1524)
+2159:28 call  r.write(" {:<19}{}\n".format(key + ":", value))
+    -> io.StringIO.write
+2159:50 call  " {:<19}{}\n".format(key + ":", value)
+    -> <builtin>.str.format
+2161:34 call  isinstance(value, str)
+    -> <builtin>.isinstance
+2162:32 call  r.write(" %s\n" % value)
+    -> io.StringIO.write
+2163:36 call  isinstance(value, list)
+    -> <builtin>.isinstance
+2164:32 call  r.write(" %s\n" % " ".join(value))
+    -> io.StringIO.write
+2164:52 call  " ".join(value)
+    -> <builtin>.str.join
+2166:26 call  r.getvalue()
+    -> io.StringIO.getvalue
+
+[configargparse.ArgumentParser.print_values]
+2170:19 call  file.write(self.format_values())
+    -> io.TextIOWrapper.write
+    note: file defaults to sys.stdout as the module is imported (line 2168), a text file io.TextIOWrapper in a normal interpreter; a file that the client passes is opaque (judgement 6 of configargparse.md)
+2170:38 call  self.format_values()
+    -> configargparse.ArgumentParser.format_values
+
+[configargparse.ArgumentParser.format_help]
+2183:49 call  self.get_possible_config_keys(a)
+    -> configargparse.ArgumentParser.get_possible_config_keys
+2191:52 call  getattr(a, "is_config_file_arg", False)
+    -> <builtin>.getattr
+2201:48 call  " or ".join( a.option_strings[0] for a in config_path_act...
+    -> <builtin>.str.join
+2221:44 call  tuple( _describe_default_config_file_entry(e) for e in de...
+    -> <builtin>.tuple
+2222:60 call  _describe_default_config_file_entry(e)
+    -> configargparse.ArgumentParser.format_help._describe_default_config_file_entry
+2225:50 call  " or ".join( described_files + tuple(filter(None, [config...
+    -> <builtin>.str.join
+2226:48 call  tuple(filter(None, [config_arg_string]))
+    -> <builtin>.tuple
+2226:55 call  filter(None, [config_arg_string])
+    -> <builtin>.filter
+2228:77 call  self._config_file_parser.get_syntax_description()
+    -> configargparse.CompositeConfigParser.get_syntax_description
+    -> configargparse.ConfigFileParser.get_syntax_description
+    -> configargparse.ConfigparserConfigFileParser.get_syntax_description
+    -> configargparse.DefaultConfigFileParser.get_syntax_description
+    -> configargparse.IniConfigParser.get_syntax_description
+    -> configargparse.TomlConfigParser.get_syntax_description
+    -> configargparse.YAMLConfigFileParser.get_syntax_description
+    note: self._config_file_parser is an instance of any package ConfigFileParser class (see 1449:66)
+2232:65 call  getattr(a, "env_var", None)
+    -> <builtin>.getattr
+2252:40 call  " which override ".join(value_sources)
+    -> <builtin>.str.join
+2255:25 call  max(self._get_formatter()._width, 11)
+    -> <builtin>.max
+2255:45 call  self._get_formatter()
+    -> argparse.ArgumentParser._get_formatter
+2256:28 call  textwrap.fill(msg, text_width)
+    -> textwrap.fill
+2258:51 call  argparse.ArgumentParser.format_help(self)
+    -> argparse.ArgumentParser.format_help
+    reject configargparse.ArgumentParser.format_help: the call names the method of argparse.ArgumentParser, the base outside the package; argparse's format_help calls no overridden method
+2259:28 call  "\n{}\n".format(msg)
+    -> <builtin>.str.format
+
+[configargparse.ArgumentParser.format_help._describe_default_config_file_entry]
+2214:38 call  isinstance(e, (str, os.PathLike))
+    -> <builtin>.isinstance
+2216:51 call  os.fsdecode(os.fspath(e))
+    -> os.fsdecode
+2216:61 call  os.fspath(e)
+    -> os.fspath
+2218:44 call  repr(e)
+    -> <builtin>.repr
+2219:39 call  getattr(e, "__name__", "<callable>")
+    -> <builtin>.getattr
+
+[configargparse.add_argument]
+2292:25 call  kwargs.pop("env_var", None)
+    -> <builtin>.dict.pop
+    note: kwargs is the dict that the interpreter builds for **kwargs
+2294:36 call  kwargs.pop("is_config_file_arg", None)
+    -> <builtin>.dict.pop
+2294:78 call  kwargs.pop( "is_config_file", None )
+    -> <builtin>.dict.pop
+2298:46 call  kwargs.pop("is_write_out_config_file_arg", None)
+    -> <builtin>.dict.pop
+2300:47 call  self.original_add_argument_method(*args, **kwargs)
+    -> argparse.ArgumentParser.original_add_argument_method
+    -> argparse._ArgumentGroup.original_add_argument_method
+    -> argparse._MutuallyExclusiveGroup.original_add_argument_method
+    note: original_add_argument_method holds the outside function saved at line 2444. Line 2447 replaces the old add_argument attribute, so the saved public attribute path is its name. Receivers are package ArgumentParser (named through argparse.ArgumentParser), _ArgumentGroup from add_argument_group, and _MutuallyExclusiveGroup from add_mutually_exclusive_group (tests/test_configargparse.py:468-476). No public API constructs a bare _ActionsContainer receiver. The original creates the action and adds it through _add_action; it calls no package function.
+    exclude configargparse.add_argument: original_add_argument_method holds the method saved before the replacement (line 2444), not this function
+2302:51 call  isinstance(action, argparse._StoreAction)
+    -> <builtin>.isinstance
+2306:32 call  type( type(action).__name__, (_WriteOutConfigFileActionMi...
+    -> <builtin>.type
+2307:17 call  type(action)
+    -> <builtin>.type
+2308:50 call  type(action)
+    -> <builtin>.type
+2318:25 call  ValueError("env_var can't be set for a positional arg.")
+    -> <builtin>.ValueError
+2319:52 call  isinstance(action, argparse._StoreAction)
+    -> <builtin>.isinstance
+2320:25 call  ValueError("arg with is_config_file_arg=True must have ac...
+    -> <builtin>.ValueError
+2323:26 call  isinstance(action, _WriteOutConfigFileActionMixin)
+    -> <builtin>.isinstance
+2324:29 call  ValueError(error_prefix + "must have action='store'")
+    -> <builtin>.ValueError
+2326:29 call  ValueError(error_prefix + "can't also have is_config_file...
+    -> <builtin>.ValueError
+2330:29 call  ValueError(error_prefix + "can't also have env_var set")
+    -> <builtin>.ValueError
+2336:29 call  ValueError(error_prefix + "can't be a positional arg")
+    -> <builtin>.ValueError
+
+[configargparse._subparsers_of]
+2353:19 call  set()
+    -> <builtin>.set
+2354:10 call  id(parser)
+    -> <builtin>.id
+2356:13 call  seen.add(id(parser))
+    -> <builtin>.set.add
+    note: seen is the set of line 2353, or the one that the recursive call (line 2363) passes; the package's callers (lines 1622, 1676) pass none
+    exclude configargparse.add_argument: line 2484 makes add an alias of add_argument on argparse._ActionsContainer, but seen is a set
+2356:16 call  id(parser)
+    -> <builtin>.id
+2359:26 call  getattr(parser, "_actions", [])
+    -> <builtin>.getattr
+2360:37 call  _dispatches_to_subparsers(action)
+    -> configargparse._dispatches_to_subparsers
+2361:51 call  action.choices.values()
+    -> <builtin>.dict.values
+    -> collections.OrderedDict.values
+    note: action.choices is the name-to-parser map of an argparse._SubParsersAction (a dict; an OrderedDict in Python 3.6's argparse) or a dict that the isinstance test at line 2387 checks (judgement 3 of configargparse.md)
+2362:30 call  isinstance(subparser, argparse.ArgumentParser)
+    -> <builtin>.isinstance
+2363:46 call  _subparsers_of(subparser, seen)
+    -> configargparse._subparsers_of
+
+[configargparse._dispatches_to_subparsers]
+2381:18 call  isinstance(action, argparse._SubParsersAction)
+    -> <builtin>.isinstance
+2384:19 call  getattr(action, "nargs", None)
+    -> <builtin>.getattr
+2387:21 call  isinstance(getattr(action, "choices", None), dict)
+    -> <builtin>.isinstance
+2387:29 call  getattr(action, "choices", None)
+    -> <builtin>.getattr
+
+[configargparse._convert_parsed_value_to_config_file_value]
+2407:18 call  isinstance(action, argparse._StoreConstAction)
+    -> <builtin>.isinstance
+2410:18 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+2411:20 call  str(value)
+    -> <builtin>.str
+2411:33 call  str(value).lower()
+    -> <builtin>.str.lower
+
+[configargparse.already_on_command_line]
+2429:59 call  arg_string.split("=", 1)
+    -> <builtin>.str.split
+    note: arg_string is a command line arg: a str
+2430:29 call  arg_names.append(option_string)
+    -> <builtin>.list.append
+2432:29 call  arg_names.append(arg_string)
+    -> <builtin>.list.append
+2434:15 call  any( potential_arg in arg_names for potential_arg in pote...
+    -> <builtin>.any

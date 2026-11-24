@@ -1,0 +1,1600 @@
+{
+  "edges": {
+    "fabric._version": {
+      "<builtin>.map": [
+        "fabric._version 2:27 call  map(str, __version_info__)"
+      ],
+      "<builtin>.str.join": [
+        "fabric._version 2:23 call  \".\".join(map(str, __version_info__))"
+      ]
+    },
+    "fabric.config": {
+      "<builtin>.staticmethod": [
+        "fabric.config 209:6 decorator  @staticmethod"
+      ]
+    },
+    "fabric.config.Config.__init__": {
+      "<builtin>.dict.get": [
+        "fabric.config 73:26 call  kwargs.get(\"lazy\", False)"
+      ],
+      "<builtin>.dict.pop": [
+        "fabric.config 72:32 call  kwargs.pop(\"ssh_config\", None)",
+        "fabric.config 74:45 call  kwargs.pop(\"runtime_ssh_path\", None)",
+        "fabric.config 75:33 call  kwargs.pop(\"system_ssh_path\", \"/etc/ssh/ssh_config\")",
+        "fabric.config 77:44 call  kwargs.pop(\"user_ssh_path\", \"~/.ssh/config\")"
+      ],
+      "<builtin>.super": [
+        "fabric.config 93:14 call  super(Config, self)"
+      ],
+      "fabric.config.Config.global_defaults": [
+        "fabric.config 93:37 call  super(Config, self).__init__(*args, **kwargs)"
+      ],
+      "fabric.config.Config.load_ssh_config": [
+        "fabric.config 97:33 call  self.load_ssh_config()"
+      ],
+      "fabric.config.Config.set_runtime_ssh_path": [
+        "fabric.config 74:34 call  self.set_runtime_ssh_path(kwargs.pop(\"runtime_ssh_path\", ..."
+      ],
+      "fabric.connection.Connection.__repr__": [
+        "fabric.config 93:37 call  super(Config, self).__init__(*args, **kwargs)"
+      ],
+      "invoke.config.Config.__init__": [
+        "fabric.config 93:37 call  super(Config, self).__init__(*args, **kwargs)"
+      ],
+      "invoke.config.Config._set": [
+        "fabric.config 76:18 call  self._set(_system_ssh_path=system_path)",
+        "fabric.config 77:18 call  self._set(_user_ssh_path=kwargs.pop(\"user_ssh_path\", \"~/....",
+        "fabric.config 83:18 call  self._set(_given_explicit_object=explicit)",
+        "fabric.config 89:18 call  self._set(base_ssh_config=ssh_config)"
+      ],
+      "paramiko.config.SSHConfig": [
+        "fabric.config 88:35 call  SSHConfig()"
+      ]
+    },
+    "fabric.config.Config._clone_init_kwargs": {
+      "<builtin>.dict": [
+        "fabric.config 166:20 call  dict(kwargs, ssh_config=new_config)"
+      ],
+      "<builtin>.super": [
+        "fabric.config 157:23 call  super(Config, self)"
+      ],
+      "copy.deepcopy": [
+        "fabric.config 165:43 call  copy.deepcopy(self.base_ssh_config._config)"
+      ],
+      "fabric.config.Config.global_defaults": [
+        "fabric.config 157:56 call  super(Config, self)._clone_init_kwargs(*args, **kw)"
+      ],
+      "invoke.config.Config._clone_init_kwargs": [
+        "fabric.config 157:56 call  super(Config, self)._clone_init_kwargs(*args, **kw)"
+      ],
+      "paramiko.config.SSHConfig": [
+        "fabric.config 162:31 call  SSHConfig()"
+      ]
+    },
+    "fabric.config.Config._load_ssh_file": {
+      "<builtin>.len": [
+        "fabric.config 200:28 call  len(self.base_ssh_config._config)",
+        "fabric.config 203:28 call  len(self.base_ssh_config._config)"
+      ],
+      "<builtin>.open": [
+        "fabric.config 201:22 call  open(path)"
+      ],
+      "<builtin>.str.format": [
+        "fabric.config 205:29 call  msg.format(new_rules - old_rules, path)"
+      ],
+      "logging.Logger.debug": [
+        "fabric.config 205:18 call  debug(msg.format(new_rules - old_rules, path))",
+        "fabric.config 207:18 call  debug(\"File not found, skipping\")"
+      ],
+      "os.path.isfile": [
+        "fabric.config 199:26 call  os.path.isfile(path)"
+      ],
+      "paramiko.config.SSHConfig.parse": [
+        "fabric.config 202:43 call  self.base_ssh_config.parse(fd)"
+      ]
+    },
+    "fabric.config.Config._load_ssh_files": {
+      "<builtin>.IOError": [
+        "fabric.config 185:30 call  IOError(errno.ENOENT, msg)"
+      ],
+      "<builtin>.str.format": [
+        "fabric.config 184:63 call  \"No such file or directory: {!r}\".format(path)"
+      ],
+      "fabric.config.Config._load_ssh_file": [
+        "fabric.config 186:32 call  self._load_ssh_file(os.path.expanduser(path))",
+        "fabric.config 189:36 call  self._load_ssh_file(os.path.expanduser(path))"
+      ],
+      "os.path.exists": [
+        "fabric.config 183:34 call  os.path.exists(path)"
+      ],
+      "os.path.expanduser": [
+        "fabric.config 186:51 call  os.path.expanduser(path)",
+        "fabric.config 189:55 call  os.path.expanduser(path)"
+      ]
+    },
+    "fabric.config.Config.clone": {
+      "<builtin>.getattr": [
+        "fabric.config 148:39 call  getattr(self, attr)"
+      ],
+      "<builtin>.setattr": [
+        "fabric.config 148:20 call  setattr(new, attr, getattr(self, attr))"
+      ],
+      "<builtin>.super": [
+        "fabric.config 139:20 call  super(Config, self)"
+      ],
+      "fabric.config.Config.__init__": [
+        "fabric.config 139:40 call  super(Config, self).clone(*args, **kwargs)"
+      ],
+      "fabric.config.Config._clone_init_kwargs": [
+        "fabric.config 139:40 call  super(Config, self).clone(*args, **kwargs)"
+      ],
+      "fabric.config.Config.load_ssh_config": [
+        "fabric.config 151:29 call  self.load_ssh_config()"
+      ],
+      "fabric.connection.Connection.__repr__": [
+        "fabric.config 139:40 call  super(Config, self).clone(*args, **kwargs)"
+      ],
+      "invoke.config.Config.clone": [
+        "fabric.config 139:40 call  super(Config, self).clone(*args, **kwargs)"
+      ]
+    },
+    "fabric.config.Config.global_defaults": {
+      "fabric.util.get_local_user": [
+        "fabric.config 250:35 call  get_local_user()"
+      ],
+      "invoke.config.Config.global_defaults": [
+        "fabric.config 235:48 call  InvokeConfig.global_defaults()"
+      ],
+      "invoke.config.merge_dicts": [
+        "fabric.config 252:20 call  merge_dicts(defaults, ours)"
+      ]
+    },
+    "fabric.config.Config.load_ssh_config": {
+      "fabric.config.Config._load_ssh_files": [
+        "fabric.config 127:33 call  self._load_ssh_files()"
+      ]
+    },
+    "fabric.config.Config.set_runtime_ssh_path": {
+      "invoke.config.Config._set": [
+        "fabric.config 108:18 call  self._set(_runtime_ssh_path=path)"
+      ]
+    },
+    "fabric.connection": {
+      "<builtin>.property": [
+        "fabric.connection 466:6 decorator  @property"
+      ],
+      "contextlib.contextmanager": [
+        "fabric.connection 680:6 decorator  @contextmanager",
+        "fabric.connection 779:6 decorator  @contextmanager"
+      ],
+      "decorator.decorator": [
+        "fabric.connection 27:2 decorator  @decorator"
+      ],
+      "decorator.decorator.dec": [
+        "fabric.connection 586:6 decorator  @opens",
+        "fabric.connection 593:6 decorator  @opens",
+        "fabric.connection 611:6 decorator  @opens",
+        "fabric.connection 639:6 decorator  @opens",
+        "fabric.connection 681:6 decorator  @opens",
+        "fabric.connection 780:6 decorator  @opens"
+      ],
+      "invoke.vendor.decorator.decorator": [
+        "fabric.connection 27:2 decorator  @decorator"
+      ]
+    },
+    "fabric.connection.Connection.__eq__": {
+      "<builtin>.isinstance": [
+        "fabric.connection 432:26 call  isinstance(other, Connection)"
+      ],
+      "fabric.connection.Connection._identity": [
+        "fabric.connection 434:30 call  self._identity()",
+        "fabric.connection 434:51 call  other._identity()"
+      ]
+    },
+    "fabric.connection.Connection.__exit__": {
+      "fabric.connection.Connection.close": [
+        "fabric.connection 584:19 call  self.close()"
+      ]
+    },
+    "fabric.connection.Connection.__hash__": {
+      "<builtin>.hash": [
+        "fabric.connection 442:20 call  hash(self._identity())"
+      ],
+      "fabric.connection.Connection._identity": [
+        "fabric.connection 442:35 call  self._identity()"
+      ]
+    },
+    "fabric.connection.Connection.__init__": {
+      "<builtin>.ValueError": [
+        "fabric.connection 271:33 call  ValueError(err.format(\"user\"))",
+        "fabric.connection 275:33 call  ValueError(err.format(\"port\"))"
+      ],
+      "<builtin>.int": [
+        "fabric.connection 296:32 call  int(self.ssh_config.get(\"port\", self.config.port))",
+        "fabric.connection 324:34 call  int(connect_timeout)"
+      ],
+      "<builtin>.isinstance": [
+        "fabric.connection 260:28 call  isinstance(config, Config)"
+      ],
+      "<builtin>.str.format": [
+        "fabric.connection 271:44 call  err.format(\"user\")",
+        "fabric.connection 275:44 call  err.format(\"port\")"
+      ],
+      "<builtin>.super": [
+        "fabric.connection 251:14 call  super(Connection, self)"
+      ],
+      "fabric.config.Config.__init__": [
+        "fabric.connection 256:28 call  Config()"
+      ],
+      "fabric.connection.Connection.derive_shorthand": [
+        "fabric.connection 266:42 call  self.derive_shorthand(host)"
+      ],
+      "fabric.connection.Connection.get_gateway": [
+        "fabric.connection 303:76 call  self.get_gateway()"
+      ],
+      "fabric.connection.Connection.resolve_connect_kwargs": [
+        "fabric.connection 330:58 call  self.resolve_connect_kwargs(connect_kwargs)"
+      ],
+      "invoke.Context.__init__": [
+        "fabric.connection 251:41 call  super(Connection, self).__init__(config=config)"
+      ],
+      "invoke.Context._set": [
+        "fabric.connection 262:18 call  self._set(_config=config)"
+      ],
+      "invoke.config.Config.clone": [
+        "fabric.connection 261:34 call  config.clone(into=Config)"
+      ],
+      "invoke.config.Config.clone.base_ssh_config.lookup": [
+        "fabric.connection 281:61 call  self.config.base_ssh_config.lookup(host)"
+      ],
+      "invoke.config.Config.clone.base_ssh_config.lookup.get": [
+        "fabric.connection 291:48 call  self.ssh_config.get(\"user\", self.config.user)",
+        "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)",
+        "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou..."
+      ],
+      "paramiko.client.AutoAddPolicy": [
+        "fabric.connection 334:57 call  AutoAddPolicy()"
+      ],
+      "paramiko.client.SSHClient": [
+        "fabric.connection 333:27 call  SSHClient()"
+      ],
+      "paramiko.client.SSHClient.set_missing_host_key_policy": [
+        "fabric.connection 334:43 call  client.set_missing_host_key_policy(AutoAddPolicy())"
+      ],
+      "paramiko.config.SSHConfig.lookup": [
+        "fabric.connection 281:61 call  self.config.base_ssh_config.lookup(host)"
+      ],
+      "paramiko.config.SSHConfig.lookup.get": [
+        "fabric.connection 291:48 call  self.ssh_config.get(\"user\", self.config.user)",
+        "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)",
+        "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou..."
+      ]
+    },
+    "fabric.connection.Connection.__lt__": {
+      "fabric.connection.Connection._identity": [
+        "fabric.connection 437:30 call  self._identity()",
+        "fabric.connection 437:50 call  other._identity()"
+      ]
+    },
+    "fabric.connection.Connection.__repr__": {
+      "<builtin>.isinstance": [
+        "fabric.connection 418:26 call  isinstance(self.gateway, string_types)"
+      ],
+      "<builtin>.list.append": [
+        "fabric.connection 405:24 call  bits.append((\"user\", self.user))",
+        "fabric.connection 409:24 call  bits.append((\"port\", self.port))",
+        "fabric.connection 420:24 call  bits.append((\"gw\", val))"
+      ],
+      "<builtin>.str.format": [
+        "fabric.connection 421:40 call  \"<Connection {}>\".format( \" \".join(\"{}={}\".format(*x) for...",
+        "fabric.connection 422:36 call  \"{}={}\".format(*x)"
+      ],
+      "<builtin>.str.join": [
+        "fabric.connection 422:21 call  \" \".join(\"{}={}\".format(*x) for x in bits)"
+      ]
+    },
+    "fabric.connection.Connection.close": {
+      "fabric.connection.Connection.is_connected": [
+        "fabric.connection 575:17 getattr  self.is_connected"
+      ],
+      "paramiko.agent.AgentRequestHandler.close": [
+        "fabric.connection 578:42 call  self._agent_handler.close()"
+      ],
+      "paramiko.client.SSHClient.close": [
+        "fabric.connection 576:30 call  self.client.close()"
+      ]
+    },
+    "fabric.connection.Connection.create_session": {
+      "paramiko.agent.AgentRequestHandler": [
+        "fabric.connection 590:54 call  AgentRequestHandler(channel)"
+      ],
+      "paramiko.client.SSHClient.get_transport.open_session": [
+        "fabric.connection 588:46 call  self.transport.open_session()"
+      ]
+    },
+    "fabric.connection.Connection.derive_shorthand": {
+      "<builtin>.int": [
+        "fabric.connection 462:23 call  int(port)"
+      ],
+      "<builtin>.list.pop": [
+        "fabric.connection 446:37 call  user_hostport.pop()",
+        "fabric.connection 458:33 call  host_port.pop(0)"
+      ],
+      "<builtin>.str.count": [
+        "fabric.connection 452:26 call  hostport.count(\":\")"
+      ],
+      "<builtin>.str.rsplit": [
+        "fabric.connection 445:43 call  host_string.rsplit(\"@\", 1)",
+        "fabric.connection 457:40 call  hostport.rsplit(\":\", 1)"
+      ]
+    },
+    "fabric.connection.Connection.forward_local": {
+      "fabric.tunnels.TunnelManager.__init__": [
+        "fabric.connection 736:32 call  TunnelManager( local_port=local_port, local_host=local_ho..."
+      ],
+      "fabric.tunnels.TunnelManager._run": [
+        "fabric.connection 745:22 call  manager.start()"
+      ],
+      "invoke.exceptions.ThreadException": [
+        "fabric.connection 772:42 call  ThreadException([wrapper])"
+      ],
+      "invoke.util.ExceptionHandlingThread.exception": [
+        "fabric.connection 767:40 call  manager.exception()"
+      ],
+      "invoke.util.ExceptionHandlingThread.join": [
+        "fabric.connection 755:25 call  manager.join()"
+      ],
+      "invoke.util.ExceptionHandlingThread.start": [
+        "fabric.connection 745:22 call  manager.start()"
+      ],
+      "threading.Event": [
+        "fabric.connection 735:25 call  Event()"
+      ],
+      "threading.Event.set": [
+        "fabric.connection 753:25 call  finished.set()"
+      ]
+    },
+    "fabric.connection.Connection.forward_remote": {
+      "paramiko.client.SSHClient.get_transport.cancel_port_forward": [
+        "fabric.connection 880:47 call  self.transport.cancel_port_forward( address=remote_host, ..."
+      ],
+      "paramiko.client.SSHClient.get_transport.request_port_forward": [
+        "fabric.connection 867:48 call  self.transport.request_port_forward( address=remote_host,..."
+      ]
+    },
+    "fabric.connection.Connection.forward_remote.callback": {
+      "<builtin>.list.append": [
+        "fabric.connection 861:27 call  tunnels.append(tunnel)"
+      ],
+      "fabric.tunnels.Tunnel.__init__": [
+        "fabric.connection 858:28 call  Tunnel(channel=channel, sock=sock, finished=Event())"
+      ],
+      "fabric.tunnels.Tunnel._run": [
+        "fabric.connection 859:25 call  tunnel.start()"
+      ],
+      "invoke.util.ExceptionHandlingThread.start": [
+        "fabric.connection 859:25 call  tunnel.start()"
+      ],
+      "socket.socket": [
+        "fabric.connection 852:33 call  socket.socket()"
+      ],
+      "socket.socket.connect": [
+        "fabric.connection 854:25 call  sock.connect((local_host, local_port))"
+      ],
+      "threading.Event": [
+        "fabric.connection 858:71 call  Event()"
+      ]
+    },
+    "fabric.connection.Connection.get": {
+      "fabric.transfer.Transfer.__init__": [
+        "fabric.connection 664:24 call  Transfer(self)"
+      ],
+      "fabric.transfer.Transfer.get": [
+        "fabric.connection 664:34 call  Transfer(self).get(*args, **kwargs)"
+      ]
+    },
+    "fabric.connection.Connection.get_gateway": {
+      "<builtin>.dict": [
+        "fabric.connection 388:30 call  dict(config=self.config.clone())"
+      ],
+      "<builtin>.reversed": [
+        "fabric.connection 376:28 call  reversed(self.ssh_config[\"proxyjump\"].split(\",\"))"
+      ],
+      "fabric.config.Config.clone": [
+        "fabric.connection 388:55 call  self.config.clone()"
+      ],
+      "fabric.connection.Connection.__init__": [
+        "fabric.connection 391:33 call  Connection(hop, **kwargs)"
+      ],
+      "fabric.connection.Connection.derive_shorthand": [
+        "fabric.connection 384:41 call  self.derive_shorthand(hop)"
+      ],
+      "invoke.config.Config.clone.clone": [
+        "fabric.connection 388:55 call  self.config.clone()"
+      ]
+    },
+    "fabric.connection.Connection.local": {
+      "<builtin>.super": [
+        "fabric.connection 637:21 call  super(Connection, self)"
+      ],
+      "invoke.Context.run": [
+        "fabric.connection 637:43 call  super(Connection, self).run(*args, **kwargs)"
+      ]
+    },
+    "fabric.connection.Connection.open": {
+      "<builtin>.ValueError": [
+        "fabric.connection 502:33 call  ValueError(err.format(key))",
+        "fabric.connection 508:29 call  ValueError(err.format(\"timeout\"))"
+      ],
+      "<builtin>.dict": [
+        "fabric.connection 510:22 call  dict( self.connect_kwargs, username=self.user, hostname=s..."
+      ],
+      "<builtin>.str.format": [
+        "fabric.connection 502:44 call  err.format(key)",
+        "fabric.connection 508:40 call  err.format(\"timeout\")"
+      ],
+      "<builtin>.str.split": [
+        "fabric.connection 500:18 call  \"\"\" hostname port username \"\"\".split()"
+      ],
+      "fabric.connection.Connection.is_connected": [
+        "fabric.connection 492:17 getattr  self.is_connected"
+      ],
+      "fabric.connection.Connection.open_gateway": [
+        "fabric.connection 517:47 call  self.open_gateway()"
+      ],
+      "paramiko.client.SSHClient.connect": [
+        "fabric.connection 524:28 call  self.client.connect(**kwargs)"
+      ],
+      "paramiko.client.SSHClient.get_transport": [
+        "fabric.connection 525:51 call  self.client.get_transport()"
+      ]
+    },
+    "fabric.connection.Connection.open_gateway": {
+      "<builtin>.int": [
+        "fabric.connection 560:38 call  int(self.port)"
+      ],
+      "<builtin>.isinstance": [
+        "fabric.connection 539:22 call  isinstance(self.gateway, string_types)"
+      ],
+      "<builtin>.str.format": [
+        "fabric.connection 545:49 call  dummy.format(self.host, self.gateway)"
+      ],
+      "fabric.connection.Connection.open": [
+        "fabric.connection 549:26 call  self.gateway.open()"
+      ],
+      "invoke.config.Config.clone.gateway.open": [
+        "fabric.connection 549:26 call  self.gateway.open()"
+      ],
+      "invoke.config.Config.clone.gateway.transport.open_channel": [
+        "fabric.connection 558:51 call  self.gateway.transport.open_channel( kind=\"direct-tcpip\",..."
+      ],
+      "invoke.vendor.six.StringIO": [
+        "fabric.connection 545:36 call  StringIO(dummy.format(self.host, self.gateway))"
+      ],
+      "paramiko.client.SSHClient.get_transport.open_channel": [
+        "fabric.connection 558:51 call  self.gateway.transport.open_channel( kind=\"direct-tcpip\",..."
+      ],
+      "paramiko.config.SSHConfig": [
+        "fabric.connection 543:33 call  SSHConfig()"
+      ],
+      "paramiko.config.SSHConfig.lookup": [
+        "fabric.connection 546:48 call  ssh_conf.lookup(self.host)"
+      ],
+      "paramiko.config.SSHConfig.parse": [
+        "fabric.connection 545:27 call  ssh_conf.parse(StringIO(dummy.format(self.host, self.gate..."
+      ],
+      "paramiko.proxy.ProxyCommand": [
+        "fabric.connection 546:32 call  ProxyCommand(ssh_conf.lookup(self.host)[\"proxycommand\"])"
+      ],
+      "six.StringIO": [
+        "fabric.connection 545:36 call  StringIO(dummy.format(self.host, self.gateway))"
+      ]
+    },
+    "fabric.connection.Connection.put": {
+      "fabric.transfer.Transfer.__init__": [
+        "fabric.connection 675:24 call  Transfer(self)"
+      ],
+      "fabric.transfer.Transfer.put": [
+        "fabric.connection 675:34 call  Transfer(self).put(*args, **kwargs)"
+      ]
+    },
+    "fabric.connection.Connection.resolve_connect_kwargs": {
+      "<builtin>.dict.get": [
+        "fabric.connection 354:43 call  connect_kwargs.get(\"key_filename\", [])"
+      ],
+      "<builtin>.dict.setdefault": [
+        "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])"
+      ],
+      "<builtin>.list.extend": [
+        "fabric.connection 364:50 call  connect_kwargs[\"key_filename\"].extend( self.ssh_config[\"i..."
+      ],
+      "invoke.config.Config.clone.connect_kwargs.setdefault": [
+        "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])"
+      ],
+      "invoke.config.DataProxy.setdefault": [
+        "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])"
+      ]
+    },
+    "fabric.connection.Connection.run": {
+      "fabric.runners.Remote._write_proc_stdin": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.generate_result": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.process_is_finished": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.read_proc_stderr": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.read_proc_stdout": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.returncode": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.send_interrupt": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.start": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.stop": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "invoke.Context._run": [
+        "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
+      ],
+      "invoke.Runner.__init__": [
+        "fabric.connection 608:44 call  self.config.runners.remote(self)"
+      ],
+      "invoke.config.Config.clone.runners.remote": [
+        "fabric.connection 608:44 call  self.config.runners.remote(self)"
+      ]
+    },
+    "fabric.connection.Connection.sftp": {
+      "paramiko.client.SSHClient.open_sftp": [
+        "fabric.connection 652:47 call  self.client.open_sftp()"
+      ]
+    },
+    "fabric.connection.Connection.sudo": {
+      "fabric.runners.Remote._write_proc_stdin": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.generate_result": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.process_is_finished": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.read_proc_stderr": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.read_proc_stdout": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.returncode": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.send_interrupt": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.start": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "fabric.runners.Remote.stop": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "invoke.Context._sudo": [
+        "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
+      ],
+      "invoke.Runner.__init__": [
+        "fabric.connection 623:44 call  self.config.runners.remote(self)"
+      ],
+      "invoke.config.Config.clone.runners.remote": [
+        "fabric.connection 623:44 call  self.config.runners.remote(self)"
+      ]
+    },
+    "fabric.connection.opens": {
+      "fabric.connection.Connection.create_session": [
+        "fabric.connection 30:18 call  method(self, *args, **kwargs)"
+      ],
+      "fabric.connection.Connection.forward_local": [
+        "fabric.connection 30:18 call  method(self, *args, **kwargs)"
+      ],
+      "fabric.connection.Connection.forward_remote": [
+        "fabric.connection 30:18 call  method(self, *args, **kwargs)"
+      ],
+      "fabric.connection.Connection.open": [
+        "fabric.connection 29:14 call  self.open()"
+      ],
+      "fabric.connection.Connection.run": [
+        "fabric.connection 30:18 call  method(self, *args, **kwargs)"
+      ],
+      "fabric.connection.Connection.sftp": [
+        "fabric.connection 30:18 call  method(self, *args, **kwargs)"
+      ],
+      "fabric.connection.Connection.sudo": [
+        "fabric.connection 30:18 call  method(self, *args, **kwargs)"
+      ]
+    },
+    "fabric.executor.ConnectionCall.make_context": {
+      "fabric.connection.Connection.__init__": [
+        "fabric.executor 84:26 call  Connection(host=self.host, config=config)"
+      ]
+    },
+    "fabric.executor.FabExecutor.expand_calls": {
+      "<builtin>.Exception.__init__": [
+        "fabric.executor 42:34 call  NothingToDo( \"Was told to run a command, but not given an..."
+      ],
+      "<builtin>.isinstance": [
+        "fabric.executor 19:26 call  isinstance(call, Task)"
+      ],
+      "<builtin>.list.append": [
+        "fabric.executor 30:27 call  ret.append(self.parameterize(call, host))",
+        "fabric.executor 34:27 call  ret.append(call)",
+        "fabric.executor 55:27 call  ret.append(self.parameterize(anon, host))"
+      ],
+      "<builtin>.list.extend": [
+        "fabric.executor 27:23 call  ret.extend(self.expand_calls(call.pre, apply_hosts=False))",
+        "fabric.executor 36:23 call  ret.extend(self.expand_calls(call.post, apply_hosts=False))"
+      ],
+      "<builtin>.str.split": [
+        "fabric.executor 17:35 call  host_str.split(\",\")"
+      ],
+      "fabric.executor.FabExecutor.expand_calls": [
+        "fabric.executor 27:41 call  self.expand_calls(call.pre, apply_hosts=False)",
+        "fabric.executor 36:41 call  self.expand_calls(call.post, apply_hosts=False)"
+      ],
+      "fabric.executor.FabExecutor.parameterize": [
+        "fabric.executor 30:45 call  self.parameterize(call, host)",
+        "fabric.executor 55:45 call  self.parameterize(anon, host)"
+      ],
+      "invoke.Call": [
+        "fabric.executor 20:28 call  Call(task=call)",
+        "fabric.executor 50:24 call  Call(Task(body=anonymous))"
+      ],
+      "invoke.Task": [
+        "fabric.executor 50:29 call  Task(body=anonymous)"
+      ]
+    },
+    "fabric.executor.FabExecutor.expand_calls.anonymous": {
+      "decorator.decorate.fun": [
+        "fabric.executor 48:22 call  c.run(self.core.remainder, in_stream=False)"
+      ],
+      "fabric.connection.opens": [
+        "fabric.executor 48:22 call  c.run(self.core.remainder, in_stream=False)"
+      ]
+    },
+    "fabric.executor.FabExecutor.parameterize": {
+      "<builtin>.str.format": [
+        "fabric.executor 62:57 call  \"Parameterizing {!r} for host {!r}\".format(call, host)"
+      ],
+      "invoke.Call.clone": [
+        "fabric.executor 65:27 call  call.clone(into=ConnectionCall)"
+      ],
+      "logging.Logger.debug": [
+        "fabric.executor 62:14 call  debug(\"Parameterizing {!r} for host {!r}\".format(call, ho..."
+      ]
+    },
+    "fabric.group": {
+      "<builtin>.classmethod": [
+        "fabric.group 72:6 decorator  @classmethod"
+      ],
+      "<builtin>.property": [
+        "fabric.group 252:6 decorator  @property",
+        "fabric.group 262:6 decorator  @property"
+      ]
+    },
+    "fabric.group.Group.__init__": {
+      "<builtin>.list.extend": [
+        "fabric.group 70:20 call  self.extend(map(Connection, hosts))"
+      ],
+      "<builtin>.map": [
+        "fabric.group 70:24 call  map(Connection, hosts)"
+      ],
+      "fabric.connection.Connection.__init__": [
+        "fabric.group 70:20 call  self.extend(map(Connection, hosts))",
+        "fabric.group 70:24 call  map(Connection, hosts)"
+      ]
+    },
+    "fabric.group.Group.from_connections": {
+      "<builtin>.list.extend": [
+        "fabric.group 82:21 call  group.extend(connections)"
+      ],
+      "fabric.group.Group.__init__": [
+        "fabric.group 81:20 call  cls()"
+      ]
+    },
+    "fabric.group.GroupResult.__init__": {
+      "<builtin>.object.__init__": [
+        "fabric.group 236:35 call  super(dict, self).__init__(*args, **kwargs)"
+      ],
+      "<builtin>.super": [
+        "fabric.group 236:14 call  super(dict, self)"
+      ]
+    },
+    "fabric.group.GroupResult._bifurcate": {
+      "<builtin>.dict.items": [
+        "fabric.group 246:37 call  self.items()"
+      ],
+      "<builtin>.isinstance": [
+        "fabric.group 247:26 call  isinstance(value, BaseException)"
+      ],
+      "fabric.connection.Connection.__eq__": [
+        "fabric.group 248:31 setitem  self._failures[key]",
+        "fabric.group 250:32 setitem  self._successes[key]"
+      ],
+      "fabric.connection.Connection.__hash__": [
+        "fabric.group 248:31 setitem  self._failures[key]",
+        "fabric.group 250:32 setitem  self._successes[key]"
+      ]
+    },
+    "fabric.group.GroupResult.failed": {
+      "fabric.group.GroupResult._bifurcate": [
+        "fabric.group 269:24 call  self._bifurcate()"
+      ]
+    },
+    "fabric.group.GroupResult.succeeded": {
+      "fabric.group.GroupResult._bifurcate": [
+        "fabric.group 259:24 call  self._bifurcate()"
+      ]
+    },
+    "fabric.group.SerialGroup.run": {
+      "decorator.decorate.fun": [
+        "fabric.group 148:39 call  cxn.run(*args, **kwargs)"
+      ],
+      "fabric.connection.Connection.__eq__": [
+        "fabric.group 148:24 setitem  results[cxn]",
+        "fabric.group 150:24 setitem  results[cxn]"
+      ],
+      "fabric.connection.Connection.__hash__": [
+        "fabric.group 148:24 setitem  results[cxn]",
+        "fabric.group 150:24 setitem  results[cxn]"
+      ],
+      "fabric.connection.opens": [
+        "fabric.group 148:39 call  cxn.run(*args, **kwargs)"
+      ],
+      "fabric.exceptions.GroupException.__init__": [
+        "fabric.group 153:33 call  GroupException(results)"
+      ],
+      "fabric.group.GroupResult.__init__": [
+        "fabric.group 144:30 call  GroupResult()"
+      ]
+    },
+    "fabric.group.ThreadingGroup.run": {
+      "<builtin>.dict": [
+        "fabric.group 175:29 call  dict(cxn=cxn, queue=queue, args=args, kwargs=kwargs)"
+      ],
+      "<builtin>.list.append": [
+        "fabric.group 179:27 call  threads.append(thread)"
+      ],
+      "fabric.exceptions.GroupException.__init__": [
+        "fabric.group 210:33 call  GroupException(results)"
+      ],
+      "fabric.group.GroupResult.__init__": [
+        "fabric.group 171:30 call  GroupResult()"
+      ],
+      "invoke.util.ExceptionHandlingThread": [
+        "fabric.group 176:45 call  ExceptionHandlingThread( target=thread_worker, kwargs=my_..."
+      ],
+      "invoke.util.ExceptionHandlingThread.exception": [
+        "fabric.group 202:39 call  thread.exception()"
+      ],
+      "invoke.util.ExceptionHandlingThread.join": [
+        "fabric.group 186:24 call  thread.join()"
+      ],
+      "invoke.util.ExceptionHandlingThread.start": [
+        "fabric.group 181:25 call  thread.start()"
+      ],
+      "invoke.vendor.six.moves.queue.Queue": [
+        "fabric.group 172:22 call  Queue()"
+      ],
+      "invoke.vendor.six.moves.queue.Queue.empty": [
+        "fabric.group 188:30 call  queue.empty()"
+      ],
+      "invoke.vendor.six.moves.queue.Queue.get": [
+        "fabric.group 190:36 call  queue.get(block=False)"
+      ],
+      "six.moves.queue.Queue": [
+        "fabric.group 172:22 call  Queue()"
+      ],
+      "six.moves.queue.Queue.empty": [
+        "fabric.group 188:30 call  queue.empty()"
+      ],
+      "six.moves.queue.Queue.get": [
+        "fabric.group 190:36 call  queue.get(block=False)"
+      ]
+    },
+    "fabric.main": {
+      "<builtin>.property": [
+        "fabric.main 56:6 decorator  @property"
+      ],
+      "fabric.main.make_program": [
+        "fabric.main 151:23 call  make_program()"
+      ]
+    },
+    "fabric.main.Fab.core_args": {
+      "<builtin>.super": [
+        "fabric.main 25:26 call  super(Fab, self)"
+      ],
+      "invoke.Argument": [
+        "fabric.main 27:21 call  Argument( names=(\"S\", \"ssh-config\"), help=\"Path to runtim...",
+        "fabric.main 31:21 call  Argument( names=(\"H\", \"hosts\"), help=\"Comma-separated hos...",
+        "fabric.main 35:21 call  Argument( names=(\"i\", \"identity\"), kind=list, # Same as O...",
+        "fabric.main 43:21 call  Argument( names=(\"prompt-for-login-password\",), kind=bool...",
+        "fabric.main 48:21 call  Argument( names=(\"prompt-for-passphrase\",), kind=bool, he..."
+      ],
+      "invoke.Program.core_args": [
+        "fabric.main 25:47 call  super(Fab, self).core_args()"
+      ]
+    },
+    "fabric.main.Fab.create_config": {
+      "fabric.config.Config.__init__": [
+        "fabric.main 95:40 call  self.config_class(lazy=True)"
+      ],
+      "fabric.connection.Connection.__repr__": [
+        "fabric.main 105:26 call  self.config.merge()"
+      ],
+      "invoke.config.Config": [
+        "fabric.main 95:40 call  self.config_class(lazy=True)"
+      ],
+      "invoke.config.Config.load_base_conf_files": [
+        "fabric.main 99:41 call  self.config.load_base_conf_files()"
+      ],
+      "invoke.config.Config.merge": [
+        "fabric.main 105:26 call  self.config.merge()"
+      ]
+    },
+    "fabric.main.Fab.load_collection": {
+      "<builtin>.super": [
+        "fabric.main 83:18 call  super(Fab, self)"
+      ],
+      "fabric.connection.Connection.__repr__": [
+        "fabric.main 83:45 call  super(Fab, self).load_collection()"
+      ],
+      "fabric.main.Fab._remainder_only": [
+        "fabric.main 76:17 getattr  self._remainder_only"
+      ],
+      "invoke.Collection": [
+        "fabric.main 81:41 call  Collection()"
+      ],
+      "invoke.Program.load_collection": [
+        "fabric.main 83:45 call  super(Fab, self).load_collection()"
+      ]
+    },
+    "fabric.main.Fab.no_tasks_given": {
+      "<builtin>.super": [
+        "fabric.main 89:18 call  super(Fab, self)"
+      ],
+      "fabric.main.Fab._remainder_only": [
+        "fabric.main 88:21 getattr  self._remainder_only"
+      ],
+      "fabric.main.Fab.core_args": [
+        "fabric.main 89:44 call  super(Fab, self).no_tasks_given()"
+      ],
+      "invoke.Program.no_tasks_given": [
+        "fabric.main 89:44 call  super(Fab, self).no_tasks_given()"
+      ]
+    },
+    "fabric.main.Fab.print_version": {
+      "<builtin>.print": [
+        "fabric.main 21:14 call  print(\"Paramiko {}\".format(paramiko))",
+        "fabric.main 22:14 call  print(\"Invoke {}\".format(invoke))"
+      ],
+      "<builtin>.str.format": [
+        "fabric.main 21:35 call  \"Paramiko {}\".format(paramiko)",
+        "fabric.main 22:33 call  \"Invoke {}\".format(invoke)"
+      ],
+      "<builtin>.super": [
+        "fabric.main 20:14 call  super(Fab, self)"
+      ],
+      "invoke.Program.print_version": [
+        "fabric.main 20:39 call  super(Fab, self).print_version()"
+      ]
+    },
+    "fabric.main.Fab.update_config": {
+      "<builtin>.super": [
+        "fabric.main 111:14 call  super(Fab, self)"
+      ],
+      "fabric.config.Config.load_ssh_config": [
+        "fabric.main 113:36 call  self.config.load_ssh_config()"
+      ],
+      "fabric.config.Config.set_runtime_ssh_path": [
+        "fabric.main 112:41 call  self.config.set_runtime_ssh_path(self.args[\"ssh-config\"]...."
+      ],
+      "fabric.connection.Connection.__repr__": [
+        "fabric.main 138:26 call  self.config.merge()"
+      ],
+      "getpass.getpass": [
+        "fabric.main 131:57 call  getpass.getpass(prompt)",
+        "fabric.main 134:59 call  getpass.getpass(prompt)"
+      ],
+      "invoke.Program.update_config": [
+        "fabric.main 111:39 call  super(Fab, self).update_config(merge=False)"
+      ],
+      "invoke.config.Config.merge": [
+        "fabric.main 138:26 call  self.config.merge()"
+      ]
+    },
+    "fabric.main.make_program": {
+      "invoke.Program.__init__": [
+        "fabric.main 143:15 call  Fab( name=\"Fabric\", version=fabric, executor_class=FabExe..."
+      ]
+    },
+    "fabric.runners": {
+      "<builtin>.property": [
+        "fabric.runners 43:6 decorator  @property"
+      ]
+    },
+    "fabric.runners.Remote._write_proc_stdin": {
+      "paramiko.client.SSHClient.get_transport.open_session.sendall": [
+        "fabric.runners 41:36 call  self.channel.sendall(data)"
+      ]
+    },
+    "fabric.runners.Remote.generate_result": {
+      "fabric.runners.Result.__init__": [
+        "fabric.runners 68:22 call  Result(**kwargs)"
+      ]
+    },
+    "fabric.runners.Remote.process_is_finished": {
+      "paramiko.client.SSHClient.get_transport.open_session.exit_status_ready": [
+        "fabric.runners 45:46 call  self.channel.exit_status_ready()"
+      ]
+    },
+    "fabric.runners.Remote.read_proc_stderr": {
+      "paramiko.client.SSHClient.get_transport.open_session.recv_stderr": [
+        "fabric.runners 38:40 call  self.channel.recv_stderr(num_bytes)"
+      ]
+    },
+    "fabric.runners.Remote.read_proc_stdout": {
+      "paramiko.client.SSHClient.get_transport.open_session.recv": [
+        "fabric.runners 35:33 call  self.channel.recv(num_bytes)"
+      ]
+    },
+    "fabric.runners.Remote.returncode": {
+      "paramiko.client.SSHClient.get_transport.open_session.recv_exit_status": [
+        "fabric.runners 64:45 call  self.channel.recv_exit_status()"
+      ]
+    },
+    "fabric.runners.Remote.send_interrupt": {
+      "paramiko.client.SSHClient.get_transport.open_session.send": [
+        "fabric.runners 59:30 call  self.channel.send(u\"\\x03\")"
+      ]
+    },
+    "fabric.runners.Remote.start": {
+      "decorator.decorate.fun": [
+        "fabric.runners 19:51 call  self.context.create_session()"
+      ],
+      "fabric.connection.opens": [
+        "fabric.runners 19:51 call  self.context.create_session()"
+      ],
+      "invoke.pty_size": [
+        "fabric.runners 21:34 call  pty_size()"
+      ],
+      "paramiko.client.SSHClient.get_transport.open_session.exec_command": [
+        "fabric.runners 32:34 call  self.channel.exec_command(command)"
+      ],
+      "paramiko.client.SSHClient.get_transport.open_session.get_pty": [
+        "fabric.runners 22:33 call  self.channel.get_pty(width=rows, height=cols)"
+      ],
+      "paramiko.client.SSHClient.get_transport.open_session.update_environment": [
+        "fabric.runners 29:40 call  self.channel.update_environment(env)"
+      ]
+    },
+    "fabric.runners.Remote.stop": {
+      "<builtin>.hasattr": [
+        "fabric.runners 71:19 call  hasattr(self, \"channel\")"
+      ],
+      "paramiko.client.SSHClient.get_transport.open_session.close": [
+        "fabric.runners 72:31 call  self.channel.close()"
+      ]
+    },
+    "fabric.runners.Result.__init__": {
+      "<builtin>.dict.pop": [
+        "fabric.runners 107:32 call  kwargs.pop(\"connection\")"
+      ],
+      "<builtin>.super": [
+        "fabric.runners 108:14 call  super(Result, self)"
+      ],
+      "invoke.Result.__init__": [
+        "fabric.runners 108:37 call  super(Result, self).__init__(**kwargs)"
+      ]
+    },
+    "fabric.transfer": {
+      "<builtin>.property": [
+        "fabric.transfer 31:6 decorator  @property"
+      ]
+    },
+    "fabric.transfer.Transfer.get": {
+      "<builtin>.ValueError": [
+        "fabric.transfer 104:29 call  ValueError(\"Remote path must not be empty!\")"
+      ],
+      "<builtin>.callable": [
+        "fabric.transfer 114:60 call  callable(local.write)"
+      ],
+      "<builtin>.hasattr": [
+        "fabric.transfer 114:31 call  hasattr(local, \"write\")"
+      ],
+      "fabric.transfer.Result.__init__": [
+        "fabric.transfer 139:22 call  Result( orig_remote=orig_remote, remote=remote, orig_loca..."
+      ],
+      "fabric.transfer.Transfer.sftp": [
+        "fabric.transfer 107:18 getattr  self.sftp",
+        "fabric.transfer 107:40 getattr  self.sftp",
+        "fabric.transfer 128:18 getattr  self.sftp",
+        "fabric.transfer 130:18 getattr  self.sftp",
+        "fabric.transfer 135:36 getattr  self.sftp"
+      ],
+      "os.chmod": [
+        "fabric.transfer 137:25 call  os.chmod(local, mode)"
+      ],
+      "os.path.abspath": [
+        "fabric.transfer 118:36 call  os.path.abspath(local)"
+      ],
+      "paramiko.client.SSHClient.open_sftp.get": [
+        "fabric.transfer 130:26 call  self.sftp.get(remotepath=remote, localpath=local)"
+      ],
+      "paramiko.client.SSHClient.open_sftp.getcwd": [
+        "fabric.transfer 107:29 call  self.sftp.getcwd()"
+      ],
+      "paramiko.client.SSHClient.open_sftp.getfo": [
+        "fabric.transfer 128:28 call  self.sftp.getfo(remotepath=remote, fl=local)"
+      ],
+      "paramiko.client.SSHClient.open_sftp.normalize": [
+        "fabric.transfer 107:54 call  self.sftp.normalize(\".\")"
+      ],
+      "paramiko.client.SSHClient.open_sftp.stat": [
+        "fabric.transfer 135:45 call  self.sftp.stat(remote)"
+      ],
+      "posixpath.basename": [
+        "fabric.transfer 116:39 call  posixpath.basename(remote)"
+      ],
+      "posixpath.join": [
+        "fabric.transfer 106:32 call  posixpath.join( self.sftp.getcwd() or self.sftp.normalize..."
+      ],
+      "stat.S_IMODE": [
+        "fabric.transfer 136:36 call  stat.S_IMODE(remote_mode)"
+      ]
+    },
+    "fabric.transfer.Transfer.is_remote_dir": {
+      "fabric.transfer.Transfer.sftp": [
+        "fabric.transfer 37:38 getattr  self.sftp"
+      ],
+      "paramiko.client.SSHClient.open_sftp.stat": [
+        "fabric.transfer 37:47 call  self.sftp.stat(path)"
+      ],
+      "stat.S_ISDIR": [
+        "fabric.transfer 37:32 call  stat.S_ISDIR(self.sftp.stat(path).st_mode)"
+      ]
+    },
+    "fabric.transfer.Transfer.put": {
+      "<builtin>.ValueError": [
+        "fabric.transfer 194:29 call  ValueError(\"Local path must not be empty!\")",
+        "fabric.transfer 206:33 call  ValueError( \"Must give non-empty remote path when local i...",
+        "fabric.transfer 219:37 call  ValueError( \"Can't put a file-like-object into a director...",
+        "fabric.transfer 225:37 call  ValueError( \"Somehow got an empty local file basename ({!..."
+      ],
+      "<builtin>.callable": [
+        "fabric.transfer 196:60 call  callable(local.write)"
+      ],
+      "<builtin>.getattr": [
+        "fabric.transfer 201:33 call  getattr(local, \"name\", None)"
+      ],
+      "<builtin>.hasattr": [
+        "fabric.transfer 196:31 call  hasattr(local, \"write\")"
+      ],
+      "<builtin>.str.format": [
+        "fabric.transfer 211:68 call  \"Massaged empty remote path into {!r}\".format(remote)",
+        "fabric.transfer 226:119 call  \"Somehow got an empty local file basename ({!r}) when upl...",
+        "fabric.transfer 237:29 call  msg.format(prejoined_remote, remote)",
+        "fabric.transfer 245:73 call  \"Massaged relative local path {!r} into {!r}\".format( ori...",
+        "fabric.transfer 259:29 call  msg.format(local, remote)",
+        "fabric.transfer 267:50 call  \"Uploading {!r} to {!r}\".format(local, remote)"
+      ],
+      "fabric.transfer.Result.__init__": [
+        "fabric.transfer 277:22 call  Result( orig_remote=orig_remote, remote=remote, orig_loca..."
+      ],
+      "fabric.transfer.Transfer.is_remote_dir": [
+        "fabric.transfer 212:32 call  self.is_remote_dir(remote)"
+      ],
+      "fabric.transfer.Transfer.sftp": [
+        "fabric.transfer 233:18 getattr  self.sftp",
+        "fabric.transfer 233:40 getattr  self.sftp",
+        "fabric.transfer 263:22 getattr  self.sftp",
+        "fabric.transfer 268:18 getattr  self.sftp",
+        "fabric.transfer 275:22 getattr  self.sftp"
+      ],
+      "logging.Logger.debug": [
+        "fabric.transfer 211:22 call  debug(\"Massaged empty remote path into {!r}\".format(remote))",
+        "fabric.transfer 237:18 call  debug(msg.format(prejoined_remote, remote))",
+        "fabric.transfer 244:22 call  debug( \"Massaged relative local path {!r} into {!r}\".form...",
+        "fabric.transfer 259:18 call  debug(msg.format(local, remote))",
+        "fabric.transfer 267:18 call  debug(\"Uploading {!r} to {!r}\".format(local, remote))"
+      ],
+      "os.path.abspath": [
+        "fabric.transfer 242:36 call  os.path.abspath(local)"
+      ],
+      "os.path.basename": [
+        "fabric.transfer 203:42 call  os.path.basename(local)"
+      ],
+      "os.stat": [
+        "fabric.transfer 273:37 call  os.stat(local)"
+      ],
+      "paramiko.client.SSHClient.open_sftp.chmod": [
+        "fabric.transfer 275:32 call  self.sftp.chmod(remote, mode)"
+      ],
+      "paramiko.client.SSHClient.open_sftp.getcwd": [
+        "fabric.transfer 233:29 call  self.sftp.getcwd()"
+      ],
+      "paramiko.client.SSHClient.open_sftp.normalize": [
+        "fabric.transfer 233:54 call  self.sftp.normalize(\".\")"
+      ],
+      "paramiko.client.SSHClient.open_sftp.put": [
+        "fabric.transfer 268:26 call  self.sftp.put(localpath=local, remotepath=remote)"
+      ],
+      "paramiko.client.SSHClient.open_sftp.putfo": [
+        "fabric.transfer 263:32 call  self.sftp.putfo(fl=local, remotepath=remote)"
+      ],
+      "posixpath.join": [
+        "fabric.transfer 216:40 call  posixpath.join(remote, local_base)",
+        "fabric.transfer 232:32 call  posixpath.join( self.sftp.getcwd() or self.sftp.normalize..."
+      ],
+      "stat.S_IMODE": [
+        "fabric.transfer 274:36 call  stat.S_IMODE(local_mode)"
+      ]
+    },
+    "fabric.transfer.Transfer.sftp": {
+      "decorator.decorate.fun": [
+        "fabric.transfer 33:36 call  self.connection.sftp()"
+      ],
+      "fabric.connection.opens": [
+        "fabric.transfer 33:36 call  self.connection.sftp()"
+      ]
+    },
+    "fabric.tunnels.Tunnel.__init__": {
+      "<builtin>.super": [
+        "fabric.tunnels 125:14 call  super(Tunnel, self)"
+      ],
+      "invoke.util.ExceptionHandlingThread.__init__": [
+        "fabric.tunnels 125:37 call  super(Tunnel, self).__init__()"
+      ]
+    },
+    "fabric.tunnels.Tunnel._run": {
+      "fabric.tunnels.Tunnel.read_and_write": [
+        "fabric.tunnels 133:53 call  self.read_and_write( self.sock, self.channel, self.socket...",
+        "fabric.tunnels 137:53 call  self.read_and_write( self.channel, self.sock, self.channe..."
+      ],
+      "paramiko.transport.Transport.open_channel.close": [
+        "fabric.tunnels 143:31 call  self.channel.close()"
+      ],
+      "select.select": [
+        "fabric.tunnels 131:40 call  select.select([self.sock, self.channel], [], [], 1)"
+      ],
+      "socket.socket.close": [
+        "fabric.tunnels 144:28 call  self.sock.close()"
+      ],
+      "threading.Event.is_set": [
+        "fabric.tunnels 130:43 call  self.finished.is_set()"
+      ]
+    },
+    "fabric.tunnels.Tunnel.read_and_write": {
+      "<builtin>.len": [
+        "fabric.tunnels 155:15 call  len(data)"
+      ],
+      "paramiko.transport.Transport.open_channel.recv": [
+        "fabric.tunnels 154:27 call  reader.recv(chunk_size)"
+      ],
+      "paramiko.transport.Transport.open_channel.sendall": [
+        "fabric.tunnels 157:23 call  writer.sendall(data)"
+      ],
+      "socket.socket.recv": [
+        "fabric.tunnels 154:27 call  reader.recv(chunk_size)"
+      ],
+      "socket.socket.sendall": [
+        "fabric.tunnels 157:23 call  writer.sendall(data)"
+      ]
+    },
+    "fabric.tunnels.TunnelManager.__init__": {
+      "<builtin>.super": [
+        "fabric.tunnels 42:14 call  super(TunnelManager, self)"
+      ],
+      "invoke.util.ExceptionHandlingThread.__init__": [
+        "fabric.tunnels 42:44 call  super(TunnelManager, self).__init__()"
+      ]
+    },
+    "fabric.tunnels.TunnelManager._run": {
+      "<builtin>.list.append": [
+        "fabric.tunnels 90:27 call  tunnels.append(tunnel)",
+        "fabric.tunnels 102:34 call  exceptions.append(wrapper)"
+      ],
+      "fabric.tunnels.Tunnel.__init__": [
+        "fabric.tunnels 88:28 call  Tunnel(channel=channel, sock=tun_sock, finished=finished)"
+      ],
+      "fabric.tunnels.Tunnel._run": [
+        "fabric.tunnels 89:25 call  tunnel.start()"
+      ],
+      "invoke.exceptions.ThreadException": [
+        "fabric.tunnels 105:34 call  ThreadException(exceptions)"
+      ],
+      "invoke.util.ExceptionHandlingThread.exception": [
+        "fabric.tunnels 100:39 call  tunnel.exception()"
+      ],
+      "invoke.util.ExceptionHandlingThread.join": [
+        "fabric.tunnels 99:24 call  tunnel.join()"
+      ],
+      "invoke.util.ExceptionHandlingThread.start": [
+        "fabric.tunnels 89:25 call  tunnel.start()"
+      ],
+      "paramiko.transport.Transport.open_channel": [
+        "fabric.tunnels 80:50 call  self.transport.open_channel( \"direct-tcpip\", self.remote_..."
+      ],
+      "socket.socket": [
+        "fabric.tunnels 53:29 call  socket.socket(socket.AF_INET, socket.SOCK_STREAM)"
+      ],
+      "socket.socket.accept": [
+        "fabric.tunnels 68:51 call  sock.accept()"
+      ],
+      "socket.socket.bind": [
+        "fabric.tunnels 60:18 call  sock.bind(self.local_address)"
+      ],
+      "socket.socket.close": [
+        "fabric.tunnels 109:19 call  sock.close()"
+      ],
+      "socket.socket.listen": [
+        "fabric.tunnels 61:20 call  sock.listen(1)"
+      ],
+      "socket.socket.setblocking": [
+        "fabric.tunnels 59:25 call  sock.setblocking(0)"
+      ],
+      "socket.socket.setsockopt": [
+        "fabric.tunnels 55:24 call  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)",
+        "fabric.tunnels 70:36 call  tun_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELA..."
+      ],
+      "threading.Event": [
+        "fabric.tunnels 87:29 call  Event()"
+      ],
+      "threading.Event.is_set": [
+        "fabric.tunnels 63:39 call  self.finished.is_set()"
+      ],
+      "threading.Event.set": [
+        "fabric.tunnels 98:32 call  tunnel.finished.set()"
+      ],
+      "time.sleep": [
+        "fabric.tunnels 74:31 call  time.sleep(0.01)"
+      ]
+    },
+    "fabric.util": {
+      "<builtin>.getattr": [
+        "fabric.util 10:27 call  getattr(log, x)"
+      ],
+      "<builtin>.globals": [
+        "fabric.util 10:12 call  globals()"
+      ],
+      "logging.getLogger": [
+        "fabric.util 8:24 call  logging.getLogger(\"fabric\")"
+      ]
+    },
+    "fabric.util.get_local_user": {
+      "getpass.getuser": [
+        "fabric.util 31:35 call  getpass.getuser()"
+      ],
+      "win32api.GetUserName": [
+        "fabric.util 44:44 call  win32api.GetUserName()"
+      ]
+    }
+  },
+  "notes": {
+    "fabric._version 2:27 call  map(str, __version_info__)": [
+      "map calls the builtin str, a library callable that library code calls back: no edge"
+    ],
+    "fabric.config 139:40 call  super(Config, self).clone(*args, **kwargs)": [
+      "Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3."
+    ],
+    "fabric.config 157:56 call  super(Config, self)._clone_init_kwargs(*args, **kw)": [
+      "The package names Fabric Config for the into role at connection.py:261. A public Fabric Config.clone can receive that admitted role and pass it through its explicit base clone; the base then calls this private helper with into=Config, which calls Config.global_defaults. The ordinary vanilla clone at261 itself is not transparent."
+    ],
+    "fabric.config 205:18 call  debug(msg.format(new_rules - old_rules, path))": [
+      "debug is the bound method log.debug of logging.getLogger(\"fabric\"), stored in the module globals of fabric.util (util.py:9-10)"
+    ],
+    "fabric.config 207:18 call  debug(\"File not found, skipping\")": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.config 93:37 call  super(Config, self).__init__(*args, **kwargs)": [
+      "Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3."
+    ],
+    "fabric.connection 251:41 call  super(Connection, self).__init__(config=config)": [
+      "Context.__init__ makes an invoke Config when config is None and stores it with _set; it calls no package code"
+    ],
+    "fabric.connection 261:34 call  config.clone(into=Config)": [
+      "The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub."
+    ],
+    "fabric.connection 27:2 decorator  @decorator": [
+      "optional import (connection.py:4-11): the vendored copy in invoke, or the decorator package; both sides run (J6). decorator(caller) generates the decorator function that the name opens then names; it does not call opens"
+    ],
+    "fabric.connection 281:61 call  self.config.base_ssh_config.lookup(host)": [
+      "Vanilla config.clone result is stored unchanged by inherited _set; direct attribute/call chain on this result retains the original imported clone path, alongside real Fabric Config SSHConfig path."
+    ],
+    "fabric.connection 291:48 call  self.ssh_config.get(\"user\", self.config.user)": [
+      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type."
+    ],
+    "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)": [
+      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type."
+    ],
+    "fabric.connection 30:18 call  method(self, *args, **kwargs)": [
+      "the original opens is called only by the wrappers that decorate() generated for the six methods decorated with @opens (586, 593, 611, 639, 681, 780); each wrapper passes its own undecorated method as method. forward_local and forward_remote are generator functions: the call makes the generator (J2)"
+    ],
+    "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou...": [
+      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type."
+    ],
+    "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])": [
+      "Plain DataProxy.setdefault does not invoke a package subclass definition; do not trace merge callbacks. Actual Fabric Config inherited lookup still supplies DataProxy. Vanilla cloned configuration supplies an additional direct stub chain."
+    ],
+    "fabric.connection 364:50 call  connect_kwargs[\"key_filename\"].extend( self.ssh_config[\"i...": [
+      "the key_filename value is a list: the [] of setdefault, the list of the -i flag (main.py:121-123), or the merged list of 358"
+    ],
+    "fabric.connection 388:55 call  self.config.clone()": [
+      "A Connection made from a vanilla InvokeConfig stores the ordinary clone result; the later .clone call extends that stub path. Actual FabricConfig receiver retains its package clone target."
+    ],
+    "fabric.connection 434:51 call  other._identity()": [
+      "other is a Connection (isinstance at 432)"
+    ],
+    "fabric.connection 437:50 call  other._identity()": [
+      "other is the other operand of a comparison of Connections; only a Connection has _identity"
+    ],
+    "fabric.connection 524:28 call  self.client.connect(**kwargs)": [
+      "SSHClient.connect is an ordinary missing-library call. It does not make a package definition through a base/decorator. Its internal transport thread and callback dispatch are therefore opaque."
+    ],
+    "fabric.connection 545:36 call  StringIO(dummy.format(self.host, self.gateway))": [
+      "Both optional imports are ordinary missing dependencies. Vendored/external six is not a package base/decorator at this call, so alias implementation cannot replace imported paths with io.StringIO."
+    ],
+    "fabric.connection 549:26 call  self.gateway.open()": [
+      "get_gateway may return the gateway attribute of an ordinary vanilla-config clone stub. Its explicit open method retains that direct attribute path; documented actual Connection gateway values retain the package open method."
+    ],
+    "fabric.connection 558:51 call  self.gateway.transport.open_channel( kind=\"direct-tcpip\",...": [
+      "Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain."
+    ],
+    "fabric.connection 586:6 decorator  @opens": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
+    ],
+    "fabric.connection 588:46 call  self.transport.open_session()": [
+      "Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain."
+    ],
+    "fabric.connection 593:6 decorator  @opens": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
+    ],
+    "fabric.connection 608:44 call  self.config.runners.remote(self)": [
+      "Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__."
+    ],
+    "fabric.connection 609:25 call  self._run(runner, command, **kwargs)": [
+      "Context._run calls runner.run, invoke's Runner.run on the Remote of 608, which calls back the Remote methods: start, the IO threads (read_proc_stdout, read_proc_stderr without a pty, _write_proc_stdin for stdin and watcher responses), process_is_finished in wait(), send_interrupt on KeyboardInterrupt, returncode, generate_result, and stop in its finally (J3)"
+    ],
+    "fabric.connection 611:6 decorator  @opens": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
+    ],
+    "fabric.connection 623:44 call  self.config.runners.remote(self)": [
+      "Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__."
+    ],
+    "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)": [
+      "Context._sudo calls runner.run with a FailingResponder watcher, whose responses go through _write_proc_stdin; the callbacks are those of 609 (J3)"
+    ],
+    "fabric.connection 637:43 call  super(Connection, self).run(*args, **kwargs)": [
+      "Context.run makes the runner of runners.local, invoke's Local (fabric changes only runners.remote), so no package method is called back"
+    ],
+    "fabric.connection 639:6 decorator  @opens": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
+    ],
+    "fabric.connection 681:6 decorator  @opens": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
+    ],
+    "fabric.connection 745:22 call  manager.start()": [
+      "start runs ExceptionHandlingThread.run in the new thread, which calls self._run(), TunnelManager._run; a thread's run belongs to the scope that starts it"
+    ],
+    "fabric.connection 780:6 decorator  @opens": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
+    ],
+    "fabric.connection 859:25 call  tunnel.start()": [
+      "start runs ExceptionHandlingThread.run in the new thread, which calls Tunnel._run"
+    ],
+    "fabric.connection 867:48 call  self.transport.request_port_forward( address=remote_host,...": [
+      "Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain."
+    ],
+    "fabric.connection 880:47 call  self.transport.cancel_port_forward( address=remote_host, ...": [
+      "Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain."
+    ],
+    "fabric.executor 42:34 call  NothingToDo( \"Was told to run a command, but not given an...": [
+      "NothingToDo defines no __init__; the first __init__ of its MRO is Exception's"
+    ],
+    "fabric.executor 48:22 call  c.run(self.core.remainder, in_stream=False)": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function."
+    ],
+    "fabric.executor 62:14 call  debug(\"Parameterizing {!r} for host {!r}\".format(call, ho...": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.executor 65:27 call  call.clone(into=ConnectionCall)": [
+      "Call.clone instantiates into, ConnectionCall, which inherits invoke's Call.__init__: library code that instantiates a package class runs no package __init__"
+    ],
+    "fabric.group 148:24 setitem  results[cxn]": [
+      "cxn is a Connection of the group; the dict calls __eq__ when two keys have equal hashes: two equal Connections of one group (Group(\"h\", \"h\")), or ports that differ by 2**61 - 1 (J8)"
+    ],
+    "fabric.group 148:39 call  cxn.run(*args, **kwargs)": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function."
+    ],
+    "fabric.group 150:24 setitem  results[cxn]": [
+      "as 148:24 (J8)"
+    ],
+    "fabric.group 172:22 call  Queue()": [
+      "Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations."
+    ],
+    "fabric.group 181:25 call  thread.start()": [
+      "This receiver is a plain missing ExceptionHandlingThread, not package Tunnel/TunnelManager. Other package subclasses of that base do not extend the narrow exception to this ordinary instance."
+    ],
+    "fabric.group 188:30 call  queue.empty()": [
+      "Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations."
+    ],
+    "fabric.group 190:36 call  queue.get(block=False)": [
+      "Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations."
+    ],
+    "fabric.group 236:35 call  super(dict, self).__init__(*args, **kwargs)": [
+      "with any argument, object.__init__ raises TypeError; the package calls GroupResult() without arguments (144, 171)"
+    ],
+    "fabric.group 248:31 setitem  self._failures[key]": [
+      "SerialGroup directly stores admitted Connections in GroupResult (group.py:148-150). Those keys reach _bifurcate; __eq__ runs on hash collisions (J8). ThreadingGroup result keys stay opaque."
+    ],
+    "fabric.group 250:32 setitem  self._successes[key]": [
+      "as 248:31 (J8)"
+    ],
+    "fabric.group 70:20 call  self.extend(map(Connection, hosts))": [
+      "on Python 3, map is lazy: list.extend iterates it and so calls Connection for each host"
+    ],
+    "fabric.group 70:24 call  map(Connection, hosts)": [
+      "on Python 2, map calls Connection for each host at once (J7)"
+    ],
+    "fabric.group 81:20 call  cls()": [
+      "cls is the class on which the classmethod is called: Group, SerialGroup or ThreadingGroup, which all inherit Group.__init__ (a client subclass is client code)"
+    ],
+    "fabric.main 105:26 call  self.config.merge()": [
+      "Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3."
+    ],
+    "fabric.main 111:39 call  super(Fab, self).update_config(merge=False)": [
+      "Program.update_config loads the overrides and the runtime file into the Config (load_overrides, set_runtime_path, load_runtime), which fabric does not override"
+    ],
+    "fabric.main 112:41 call  self.config.set_runtime_ssh_path(self.args[\"ssh-config\"]....": [
+      "A public Fab without config_class uses the inherited default Invoke Config, which lacks this Fabric method (invoke 1.0.0, 1.4.1 and 1.7.3: no such name in invoke/config.py): the load raises AttributeError and Python calls nothing, so no callee is named for it. The package's own Config keeps its target."
+    ],
+    "fabric.main 113:36 call  self.config.load_ssh_config()": [
+      "A public Fab without config_class uses the inherited default Invoke Config, which lacks this Fabric method (invoke 1.0.0, 1.4.1 and 1.7.3: no such name in invoke/config.py): the load raises AttributeError and Python calls nothing, so no callee is named for it. The package's own Config keeps its target."
+    ],
+    "fabric.main 138:26 call  self.config.merge()": [
+      "Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3."
+    ],
+    "fabric.main 143:15 call  Fab( name=\"Fabric\", version=fabric, executor_class=FabExe...": [
+      "Fab defines no __init__: the first __init__ of its MRO is invoke's Program.__init__, which stores its arguments"
+    ],
+    "fabric.main 21:14 call  print(\"Paramiko {}\".format(paramiko))": [
+      "a call on Python 3; on Python 2 this line is a print statement (J9)"
+    ],
+    "fabric.main 22:14 call  print(\"Invoke {}\".format(invoke))": [
+      "a call on Python 3; on Python 2 this line is a print statement (J9)"
+    ],
+    "fabric.main 83:45 call  super(Fab, self).load_collection()": [
+      "Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3."
+    ],
+    "fabric.main 89:44 call  super(Fab, self).no_tasks_given()": [
+      "Program.no_tasks_given calls self.print_help(), which reads the property initial_context, which calls self.core_args(): Fab.core_args (invoke 1.4.1 program.py:535-539, 658-666, 641-650; ruling A1)"
+    ],
+    "fabric.main 95:40 call  self.config_class(lazy=True)": [
+      "config_class is the argument of invoke's Program.__init__: fabric's Config in make_program (147); invoke's own Config, the default of Program.__init__, for a Fab made without config_class (J10)"
+    ],
+    "fabric.runners 19:51 call  self.context.create_session()": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function."
+    ],
+    "fabric.runners 22:33 call  self.channel.get_pty(width=rows, height=cols)": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 29:40 call  self.channel.update_environment(env)": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 32:34 call  self.channel.exec_command(command)": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 35:33 call  self.channel.recv(num_bytes)": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 38:40 call  self.channel.recv_stderr(num_bytes)": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 41:36 call  self.channel.sendall(data)": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 45:46 call  self.channel.exit_status_ready()": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 59:30 call  self.channel.send(u\"\\x03\")": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 64:45 call  self.channel.recv_exit_status()": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.runners 72:31 call  self.channel.close()": [
+      "Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain."
+    ],
+    "fabric.transfer 107:29 call  self.sftp.getcwd()": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 107:54 call  self.sftp.normalize(\".\")": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 128:28 call  self.sftp.getfo(remotepath=remote, fl=local)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 130:26 call  self.sftp.get(remotepath=remote, localpath=local)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 135:45 call  self.sftp.stat(remote)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 211:22 call  debug(\"Massaged empty remote path into {!r}\".format(remote))": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.transfer 233:29 call  self.sftp.getcwd()": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 233:54 call  self.sftp.normalize(\".\")": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 237:18 call  debug(msg.format(prejoined_remote, remote))": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.transfer 244:22 call  debug( \"Massaged relative local path {!r} into {!r}\".form...": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.transfer 259:18 call  debug(msg.format(local, remote))": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.transfer 263:32 call  self.sftp.putfo(fl=local, remotepath=remote)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 267:18 call  debug(\"Uploading {!r} to {!r}\".format(local, remote))": [
+      "debug is log.debug (util.py:9-10)"
+    ],
+    "fabric.transfer 268:26 call  self.sftp.put(localpath=local, remotepath=remote)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 275:32 call  self.sftp.chmod(remote, mode)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.transfer 33:36 call  self.connection.sftp()": [
+      "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function."
+    ],
+    "fabric.transfer 37:47 call  self.sftp.stat(path)": [
+      "Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain."
+    ],
+    "fabric.tunnels 130:43 call  self.finished.is_set()": [
+      "finished is the threading.Event that the package passes (tunnels.py:87, connection.py:858)"
+    ],
+    "fabric.tunnels 143:31 call  self.channel.close()": [
+      "TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains."
+    ],
+    "fabric.tunnels 154:27 call  reader.recv(chunk_size)": [
+      "TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains."
+    ],
+    "fabric.tunnels 157:23 call  writer.sendall(data)": [
+      "TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains."
+    ],
+    "fabric.tunnels 63:39 call  self.finished.is_set()": [
+      "finished is the threading.Event of Connection.forward_local (connection.py:735)"
+    ],
+    "fabric.tunnels 80:50 call  self.transport.open_channel( \"direct-tcpip\", self.remote_...": [
+      "TunnelManager documents its transport constructor parameter as paramiko.transport.Transport (tunnels.py:27); B4 fixes that input role before it is stored. The private _run method uses the stored parameter. Unlike a return-description, this concrete input contract fixes the receiver name; open_channel itself remains an ordinary missing-library call and its return retains the Transport.open_channel path."
+    ],
+    "fabric.tunnels 89:25 call  tunnel.start()": [
+      "start runs ExceptionHandlingThread.run in the new thread, which calls Tunnel._run"
+    ],
+    "fabric.util 44:44 call  win32api.GetUserName()": [
+      "Windows branch (util.py:39-44): on Python 2.7 and 3.4 to 3.6 on Windows, getpass.getuser raises ImportError (no pwd) when no user variable is set; Windows is a supported platform (setup.py classifiers). win32api (pywin32) is not installed: its name is the access path (J11)"
+    ]
+  },
+  "trace": null
+}

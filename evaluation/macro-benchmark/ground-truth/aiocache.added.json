@@ -1,0 +1,726 @@
+{
+  "edges": {
+    "aiocache": {
+      "logging.Logger.debug": [
+        "aiocache 16:17 call  logger.debug(\"redis not installed, RedisCache unavailable\")",
+        "aiocache 26:17 call  logger.debug(\"aiomcache not installed, Memcached unavaila..."
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._add": {
+      "aiomcache.Client.add": [
+        "aiocache.backends.memcached 67:40 call  self.client.add(key, value, exptime=ttl or 0)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._cas": {
+      "aiomcache.Client.cas": [
+        "aiocache.backends.memcached 49:37 call  self.client.cas(key, value, token, exptime=ttl or 0)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._clear": {
+      "aiomcache.Client.flush_all": [
+        "aiocache.backends.memcached 103:40 call  self.client.flush_all()"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._delete": {
+      "aiomcache.Client.delete": [
+        "aiocache.backends.memcached 97:45 call  self.client.delete(key)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._exists": {
+      "aiomcache.Client.append": [
+        "aiocache.backends.memcached 76:40 call  self.client.append(key, b\"\")"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._expire": {
+      "aiomcache.Client.touch": [
+        "aiocache.backends.memcached 94:39 call  self.client.touch(key, ttl)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._get": {
+      "aiomcache.Client.get": [
+        "aiocache.backends.memcached 20:38 call  self.client.get(key)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._gets": {
+      "aiomcache.Client.gets": [
+        "aiocache.backends.memcached 27:42 call  self.client.gets(key)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._increment": {
+      "aiomcache.Client.decr": [
+        "aiocache.backends.memcached 84:53 call  self.client.decr(key, abs(delta))"
+      ],
+      "aiomcache.Client.incr": [
+        "aiocache.backends.memcached 82:53 call  self.client.incr(key, delta)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._multi_get": {
+      "aiomcache.Client.multi_get": [
+        "aiocache.backends.memcached 32:49 call  self.client.multi_get(*keys)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._multi_set": {
+      "aiomcache.Client.set": [
+        "aiocache.backends.memcached 55:41 call  self.client.set(key, value, exptime=ttl or 0)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._raw": {
+      "<builtin>.bytes.decode": [
+        "aiocache.backends.memcached 110:36 call  value.decode(encoding)"
+      ],
+      "aiomcache.Client.get": [
+        "aiocache.backends.memcached 107:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ],
+      "aiomcache.Client.prepend": [
+        "aiocache.backends.memcached 107:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ],
+      "aiomcache.Client.set": [
+        "aiocache.backends.memcached 107:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._redlock_release": {
+      "aiocache.backends.memcached.MemcachedBackend._delete": [
+        "aiocache.backends.memcached 116:34 call  self._delete(key)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedBackend._set": {
+      "aiocache.backends.memcached.MemcachedBackend._cas": [
+        "aiocache.backends.memcached 42:35 call  self._cas(key, value, _cas_token, ttl=ttl, _conn=_conn)"
+      ],
+      "aiomcache.Client.set": [
+        "aiocache.backends.memcached 44:41 call  self.client.set(key, value, exptime=ttl or 0)"
+      ]
+    },
+    "aiocache.backends.memcached.MemcachedCache.__repr__": {
+      "<builtin>.str.format": [
+        "aiocache.backends.memcached 155:47 call  \"MemcachedCache ({}:{})\".format(self.endpoint, self.port)"
+      ]
+    },
+    "aiocache.backends.memory.SimpleMemoryBackend._expire": {
+      "asyncio.ProactorEventLoop.call_later": [
+        "aiocache.backends.memory 73:54 call  loop.call_later(ttl, self.__delete, key)"
+      ]
+    },
+    "aiocache.backends.memory.SimpleMemoryBackend._set": {
+      "asyncio.ProactorEventLoop.call_later": [
+        "aiocache.backends.memory 38:50 call  loop.call_later(ttl, self.__delete, key)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend.__init__": {
+      "warnings.warn": [
+        "aiocache.backends.redis 51:26 call  warnings.warn( \"Parameter 'pool_min_size' is deprecated s..."
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend.__multi_set_ttl": {
+      "<builtin>.int": [
+        "aiocache.backends.redis 135:28 call  int(ttl * 1000)"
+      ],
+      "redis.asyncio.Redis.pipeline": [
+        "aiocache.backends.redis 133:40 call  self.client.pipeline(transaction=True)"
+      ],
+      "redis.asyncio.client.Pipeline.execute": [
+        "aiocache.backends.redis 138:28 call  p.execute()"
+      ],
+      "redis.asyncio.client.Pipeline.execute_command": [
+        "aiocache.backends.redis 134:30 call  p.execute_command(\"MSET\", *flattened)"
+      ],
+      "redis.asyncio.client.Pipeline.expire": [
+        "aiocache.backends.redis 137:20 call  exp(key, time=ttl)"
+      ],
+      "redis.asyncio.client.Pipeline.pexpire": [
+        "aiocache.backends.redis 137:20 call  exp(key, time=ttl)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._add": {
+      "redis.asyncio.Redis.set": [
+        "aiocache.backends.redis 146:40 call  self.client.set(key, value, **kwargs)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._clear": {
+      "redis.asyncio.Redis.delete": [
+        "aiocache.backends.redis 173:41 call  self.client.delete(*keys)"
+      ],
+      "redis.asyncio.Redis.flushdb": [
+        "aiocache.backends.redis 175:38 call  self.client.flushdb()"
+      ],
+      "redis.asyncio.Redis.keys": [
+        "aiocache.backends.redis 171:42 call  self.client.keys(\"{}:*\".format(namespace))"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._delete": {
+      "redis.asyncio.Redis.delete": [
+        "aiocache.backends.redis 167:40 call  self.client.delete(key)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._exists": {
+      "redis.asyncio.Redis.exists": [
+        "aiocache.backends.redis 152:42 call  self.client.exists(key)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._expire": {
+      "redis.asyncio.Redis.expire": [
+        "aiocache.backends.redis 164:40 call  self.client.expire(key, ttl)"
+      ],
+      "redis.asyncio.Redis.persist": [
+        "aiocache.backends.redis 163:45 call  self.client.persist(key)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._get": {
+      "redis.asyncio.Redis.get": [
+        "aiocache.backends.redis 90:38 call  self.client.get(key)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._gets": {
+      "aiocache.backends.redis.RedisBackend._get": [
+        "aiocache.backends.redis 96:31 call  self._get(key, encoding=encoding, _conn=_conn)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._increment": {
+      "redis.asyncio.Redis.incrby": [
+        "aiocache.backends.redis 157:44 call  self.client.incrby(key, delta)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._multi_get": {
+      "<builtin>.bytes.decode": [
+        "aiocache.backends.redis 102:45 call  v.decode(encoding)"
+      ],
+      "redis.asyncio.Redis.mget": [
+        "aiocache.backends.redis 99:40 call  self.client.mget(*keys)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._multi_set": {
+      "redis.asyncio.Redis.execute_command": [
+        "aiocache.backends.redis 128:46 call  self.client.execute_command(\"MSET\", *flattened)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._raw": {
+      "<builtin>.bytes.decode": [
+        "aiocache.backends.redis 182:37 call  value.decode(encoding)",
+        "aiocache.backends.redis 184:54 call  v.decode(encoding)"
+      ],
+      "redis.asyncio.Redis.delete": [
+        "aiocache.backends.redis 179:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ],
+      "redis.asyncio.Redis.eval": [
+        "aiocache.backends.redis 179:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ],
+      "redis.asyncio.Redis.get": [
+        "aiocache.backends.redis 179:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ],
+      "redis.asyncio.Redis.keys": [
+        "aiocache.backends.redis 179:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ],
+      "redis.asyncio.Redis.set": [
+        "aiocache.backends.redis 179:52 call  getattr(self.client, command)(*args, **kwargs)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._redlock_release": {
+      "aiocache.backends.redis.RedisBackend._raw": [
+        "aiocache.backends.redis 188:31 call  self._raw(\"eval\", self.RELEASE_SCRIPT, 1, key, value)"
+      ]
+    },
+    "aiocache.backends.redis.RedisBackend._set": {
+      "<builtin>.int": [
+        "aiocache.backends.redis 110:22 call  int(ttl * 1000)"
+      ],
+      "aiocache.backends.redis.RedisBackend._cas": [
+        "aiocache.backends.redis 106:35 call  self._cas(key, value, _cas_token, ttl=ttl, _conn=_conn)"
+      ],
+      "redis.asyncio.Redis.psetex": [
+        "aiocache.backends.redis 111:44 call  self.client.psetex(key, ttl, value)"
+      ],
+      "redis.asyncio.Redis.set": [
+        "aiocache.backends.redis 108:41 call  self.client.set(key, value)"
+      ],
+      "redis.asyncio.Redis.setex": [
+        "aiocache.backends.redis 112:39 call  self.client.setex(key, ttl, value)"
+      ]
+    },
+    "aiocache.backends.redis.RedisCache.__repr__": {
+      "<builtin>.str.format": [
+        "aiocache.backends.redis 247:43 call  \"RedisCache ({}:{})\".format(self.endpoint, self.port)"
+      ]
+    },
+    "aiocache.base.BaseCache._gets": {
+      "<builtin>.NotImplementedError": [
+        "aiocache.base 208:34 call  NotImplementedError()"
+      ]
+    },
+    "aiocache.base.BaseCache._redlock_release": {
+      "<builtin>.NotImplementedError": [
+        "aiocache.base 482:34 call  NotImplementedError()"
+      ]
+    },
+    "aiocache.base.BaseCache.add": {
+      "aiocache.backends.memcached.MemcachedBackend._add": [
+        "aiocache.base 169:24 call  self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _..."
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 167:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._add": [
+        "aiocache.base 169:24 call  self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _..."
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 167:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._add": [
+        "aiocache.base 169:24 call  self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _..."
+      ],
+      "aiocache.serializers.serializers.BaseSerializer.dumps": [
+        "aiocache.base 169:38 call  dumps(value)"
+      ],
+      "aiocache.serializers.serializers.MsgPackSerializer.dumps": [
+        "aiocache.base 169:38 call  dumps(value)"
+      ]
+    },
+    "aiocache.base.BaseCache.clear": {
+      "aiocache.backends.memcached.MemcachedBackend._clear": [
+        "aiocache.base 446:32 call  self._clear(namespace, _conn=_conn)"
+      ],
+      "aiocache.backends.redis.RedisBackend._clear": [
+        "aiocache.base 446:32 call  self._clear(namespace, _conn=_conn)"
+      ],
+      "aiocache.base.BaseCache._clear": [
+        "aiocache.base 446:32 call  self._clear(namespace, _conn=_conn)"
+      ]
+    },
+    "aiocache.base.BaseCache.delete": {
+      "aiocache.backends.memcached.MemcachedBackend._delete": [
+        "aiocache.base 344:33 call  self._delete(ns_key, _conn=_conn)"
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 343:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._delete": [
+        "aiocache.base 344:33 call  self._delete(ns_key, _conn=_conn)"
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 343:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._delete": [
+        "aiocache.base 344:33 call  self._delete(ns_key, _conn=_conn)"
+      ]
+    },
+    "aiocache.base.BaseCache.exists": {
+      "aiocache.backends.memcached.MemcachedBackend._exists": [
+        "aiocache.base 369:33 call  self._exists(ns_key, _conn=_conn)"
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 368:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._exists": [
+        "aiocache.base 369:33 call  self._exists(ns_key, _conn=_conn)"
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 368:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._exists": [
+        "aiocache.base 369:33 call  self._exists(ns_key, _conn=_conn)"
+      ]
+    },
+    "aiocache.base.BaseCache.expire": {
+      "aiocache.backends.memcached.MemcachedBackend._expire": [
+        "aiocache.base 423:33 call  self._expire(ns_key, ttl, _conn=_conn)"
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 422:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._expire": [
+        "aiocache.base 423:33 call  self._expire(ns_key, ttl, _conn=_conn)"
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 422:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._expire": [
+        "aiocache.base 423:33 call  self._expire(ns_key, ttl, _conn=_conn)"
+      ]
+    },
+    "aiocache.base.BaseCache.get": {
+      "aiocache.backends.memcached.MemcachedBackend._get": [
+        "aiocache.base 199:38 call  self._get(ns_key, encoding=self.serializer.encoding, _con..."
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 197:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._get": [
+        "aiocache.base 199:38 call  self._get(ns_key, encoding=self.serializer.encoding, _con..."
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 197:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._get": [
+        "aiocache.base 199:38 call  self._get(ns_key, encoding=self.serializer.encoding, _con..."
+      ],
+      "aiocache.serializers.serializers.BaseSerializer.loads": [
+        "aiocache.base 199:22 call  loads(await self._get(ns_key, encoding=self.serializer.en..."
+      ],
+      "aiocache.serializers.serializers.MsgPackSerializer.loads": [
+        "aiocache.base 199:22 call  loads(await self._get(ns_key, encoding=self.serializer.en..."
+      ]
+    },
+    "aiocache.base.BaseCache.increment": {
+      "aiocache.backends.memcached.MemcachedBackend._increment": [
+        "aiocache.base 397:36 call  self._increment(ns_key, delta, _conn=_conn)"
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 396:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._increment": [
+        "aiocache.base 397:36 call  self._increment(ns_key, delta, _conn=_conn)"
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 396:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._increment": [
+        "aiocache.base 397:36 call  self._increment(ns_key, delta, _conn=_conn)"
+      ]
+    },
+    "aiocache.base.BaseCache.multi_get": {
+      "aiocache.backends.memcached.MemcachedBackend._multi_get": [
+        "aiocache.base 233:47 call  self._multi_get( ns_keys, encoding=self.serializer.encodi..."
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 230:34 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._multi_get": [
+        "aiocache.base 233:47 call  self._multi_get( ns_keys, encoding=self.serializer.encodi..."
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 230:34 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._multi_get": [
+        "aiocache.base 233:47 call  self._multi_get( ns_keys, encoding=self.serializer.encodi..."
+      ],
+      "aiocache.serializers.serializers.BaseSerializer.loads": [
+        "aiocache.base 232:18 call  loads(value)"
+      ],
+      "aiocache.serializers.serializers.MsgPackSerializer.loads": [
+        "aiocache.base 232:18 call  loads(value)"
+      ]
+    },
+    "aiocache.base.BaseCache.multi_set": {
+      "aiocache.backends.memcached.MemcachedBackend._multi_set": [
+        "aiocache.base 313:30 call  self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=..."
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 311:45 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._multi_set": [
+        "aiocache.base 313:30 call  self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=..."
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 311:45 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._multi_set": [
+        "aiocache.base 313:30 call  self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=..."
+      ],
+      "aiocache.serializers.serializers.BaseSerializer.dumps": [
+        "aiocache.base 311:71 call  dumps(value)"
+      ],
+      "aiocache.serializers.serializers.MsgPackSerializer.dumps": [
+        "aiocache.base 311:71 call  dumps(value)"
+      ]
+    },
+    "aiocache.base.BaseCache.raw": {
+      "aiocache.backends.memcached.MemcachedBackend._raw": [
+        "aiocache.base 472:30 call  self._raw( command, *args, encoding=self.serializer.encod..."
+      ],
+      "aiocache.backends.redis.RedisBackend._raw": [
+        "aiocache.base 472:30 call  self._raw( command, *args, encoding=self.serializer.encod..."
+      ],
+      "aiocache.base.BaseCache._raw": [
+        "aiocache.base 472:30 call  self._raw( command, *args, encoding=self.serializer.encod..."
+      ]
+    },
+    "aiocache.base.BaseCache.set": {
+      "aiocache.backends.memcached.MemcachedBackend._set": [
+        "aiocache.base 276:30 call  self._set( ns_key, dumps(value), ttl=self._get_ttl(ttl), ..."
+      ],
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.base 274:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.backends.redis.RedisBackend._set": [
+        "aiocache.base 276:30 call  self._set( ns_key, dumps(value), ttl=self._get_ttl(ttl), ..."
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.base 274:32 call  self.build_key(key, namespace=ns)"
+      ],
+      "aiocache.base.BaseCache._set": [
+        "aiocache.base 276:30 call  self._set( ns_key, dumps(value), ttl=self._get_ttl(ttl), ..."
+      ],
+      "aiocache.serializers.serializers.BaseSerializer.dumps": [
+        "aiocache.base 277:26 call  dumps(value)"
+      ],
+      "aiocache.serializers.serializers.MsgPackSerializer.dumps": [
+        "aiocache.base 277:26 call  dumps(value)"
+      ]
+    },
+    "aiocache.decorators.cached.__call__": {
+      "aiocache.factory.CacheHandler.get": [
+        "aiocache.decorators 94:36 call  caches.get(self.alias)"
+      ]
+    },
+    "aiocache.decorators.cached.decorator": {
+      "asyncio.create_task": [
+        "aiocache.decorators 134:36 call  asyncio.create_task(self.set_in_cache(key, result))"
+      ]
+    },
+    "aiocache.decorators.multi_cached.__call__": {
+      "aiocache.factory.CacheHandler.get": [
+        "aiocache.decorators 342:36 call  caches.get(self.alias)"
+      ]
+    },
+    "aiocache.decorators.multi_cached.decorator": {
+      "asyncio.create_task": [
+        "aiocache.decorators 399:36 call  asyncio.create_task(self.set_in_cache(to_cache, f, args, ..."
+      ]
+    },
+    "aiocache.factory.Cache.__new__": {
+      "aiocache.backends.memcached.MemcachedBackend.__init__": [
+        "aiocache.factory 68:26 call  instance.__init__(**kwargs)"
+      ],
+      "aiocache.backends.memory.SimpleMemoryBackend.__init__": [
+        "aiocache.factory 68:26 call  instance.__init__(**kwargs)"
+      ],
+      "aiocache.backends.redis.RedisBackend.__init__": [
+        "aiocache.factory 68:26 call  instance.__init__(**kwargs)"
+      ],
+      "aiocache.base.BaseCache.__init__": [
+        "aiocache.factory 68:26 call  instance.__init__(**kwargs)"
+      ]
+    },
+    "aiocache.factory.Cache.from_url": {
+      "aiocache.backends.memcached.MemcachedCache.parse_uri_path": [
+        "aiocache.factory 112:53 call  cache_class.parse_uri_path(parsed_url.path)"
+      ],
+      "aiocache.backends.memory.SimpleMemoryCache.parse_uri_path": [
+        "aiocache.factory 112:53 call  cache_class.parse_uri_path(parsed_url.path)"
+      ],
+      "aiocache.backends.redis.RedisCache.parse_uri_path": [
+        "aiocache.factory 112:53 call  cache_class.parse_uri_path(parsed_url.path)"
+      ]
+    },
+    "aiocache.factory._create_cache": {
+      "aiocache.backends.redis.RedisCache.__init__": [
+        "aiocache.factory 34:21 call  cache(serializer=serializer, plugins=plugins_instances, *..."
+      ]
+    },
+    "aiocache.lock.OptimisticLock.__init__": {
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.lock 139:44 call  self.client.build_key(key)"
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.lock 139:44 call  self.client.build_key(key)"
+      ]
+    },
+    "aiocache.lock.OptimisticLock._acquire": {
+      "aiocache.backends.memcached.MemcachedBackend._gets": [
+        "aiocache.lock 146:46 call  self.client._gets(self.ns_key)"
+      ],
+      "aiocache.backends.redis.RedisBackend._gets": [
+        "aiocache.lock 146:46 call  self.client._gets(self.ns_key)"
+      ],
+      "aiocache.base.BaseCache._gets": [
+        "aiocache.lock 146:46 call  self.client._gets(self.ns_key)"
+      ]
+    },
+    "aiocache.lock.RedLock.__init__": {
+      "aiocache.backends.memcached.MemcachedCache._build_key": [
+        "aiocache.lock 67:41 call  self.client.build_key(key + \"-lock\")"
+      ],
+      "aiocache.backends.redis.RedisCache._build_key": [
+        "aiocache.lock 67:41 call  self.client.build_key(key + \"-lock\")"
+      ]
+    },
+    "aiocache.lock.RedLock._acquire": {
+      "aiocache.backends.memcached.MemcachedBackend._add": [
+        "aiocache.lock 77:35 call  self.client._add(self.key, self._value, ttl=self.lease)"
+      ],
+      "aiocache.backends.redis.RedisBackend._add": [
+        "aiocache.lock 77:35 call  self.client._add(self.key, self._value, ttl=self.lease)"
+      ],
+      "aiocache.base.BaseCache._add": [
+        "aiocache.lock 77:35 call  self.client._add(self.key, self._value, ttl=self.lease)"
+      ]
+    },
+    "aiocache.lock.RedLock._release": {
+      "aiocache.backends.memcached.MemcachedBackend._redlock_release": [
+        "aiocache.lock 94:53 call  self.client._redlock_release(self.key, self._value)"
+      ],
+      "aiocache.backends.redis.RedisBackend._redlock_release": [
+        "aiocache.lock 94:53 call  self.client._redlock_release(self.key, self._value)"
+      ],
+      "aiocache.base.BaseCache._redlock_release": [
+        "aiocache.lock 94:53 call  self.client._redlock_release(self.key, self._value)"
+      ]
+    },
+    "aiocache.serializers": {
+      "logging.Logger.debug": [
+        "aiocache.serializers 17:17 call  logger.debug(\"msgpack not installed, MsgPackSerializer un..."
+      ]
+    },
+    "aiocache.serializers.serializers.JsonSerializer.dumps": {
+      "ujson.dumps": [
+        "aiocache.serializers.serializers 148:26 call  json.dumps(value)"
+      ]
+    },
+    "aiocache.serializers.serializers.JsonSerializer.loads": {
+      "ujson.loads": [
+        "aiocache.serializers.serializers 159:26 call  json.loads(value)"
+      ]
+    },
+    "aiocache.serializers.serializers.MsgPackSerializer.loads": {
+      "msgpack.loads": [
+        "aiocache.serializers.serializers 198:29 call  msgpack.loads(value, raw=raw, use_list=self.use_list)"
+      ]
+    }
+  },
+  "notes": {
+    "aiocache 16:17 call  logger.debug(\"redis not installed, RedisCache unavailable\")": [
+      "optional import of redis (__init__.py:13-21): both sides run (README default)"
+    ],
+    "aiocache 26:17 call  logger.debug(\"aiomcache not installed, Memcached unavaila...": [
+      "optional import of aiomcache (__init__.py:23-31): both sides run (README default)"
+    ],
+    "aiocache.backends.memcached 107:52 call  getattr(self.client, command)(*args, **kwargs)": [
+      "the method of the aiomcache.Client self.client that the command name selects. The command is a str that the client passes to BaseCache.raw; no package code passes one to MemcachedBackend._raw. By rule B2 the names in scope are those that the tests and documented examples pass: \"get\", \"set\", \"prepend\" (tests/acceptance/test_base.py:197-200, tests/ut/backends/test_memcached.py:210-217); see aiocache.md, J2"
+    ],
+    "aiocache.backends.memcached 110:36 call  value.decode(encoding)": [
+      "the command is \"get\" or \"multi_get\" (line 108); for \"get\", value is the bytes that aiomcache.Client.get returns"
+    ],
+    "aiocache.backends.memory 38:50 call  loop.call_later(ttl, self.__delete, key)": [
+      "The running stdlib loop has concrete public class asyncio.SelectorEventLoop on Unix and asyncio.ProactorEventLoop on Windows. Global outside-method naming uses the receiver class even when its method is inherited. The private Unix implementation has the explicit public SelectorEventLoop alias, so no defining-base fallback applies. asyncio.EventLoop is an alias of these same classes, not a third callee. The old project judgment selected the defining BaseEventLoop solely because it worked across Python versions; it cannot override the global rule."
+    ],
+    "aiocache.backends.memory 73:54 call  loop.call_later(ttl, self.__delete, key)": [
+      "The running stdlib loop has concrete public class asyncio.SelectorEventLoop on Unix and asyncio.ProactorEventLoop on Windows. Global outside-method naming uses the receiver class even when its method is inherited. The private Unix implementation has the explicit public SelectorEventLoop alias, so no defining-base fallback applies. asyncio.EventLoop is an alias of these same classes, not a third callee. The old project judgment selected the defining BaseEventLoop solely because it worked across Python versions; it cannot override the global rule."
+    ],
+    "aiocache.backends.redis 102:45 call  v.decode(encoding)": [
+      "the pool has decode_responses=False (redis.py:79), so the values of mget are bytes or None"
+    ],
+    "aiocache.backends.redis 134:30 call  p.execute_command(\"MSET\", *flattened)": [
+      "p is the redis.asyncio.client.Pipeline that Redis.pipeline returns; its __aenter__ returns itself"
+    ],
+    "aiocache.backends.redis 137:20 call  exp(key, time=ttl)": [
+      "exp is p.pexpire or p.expire (line 135), bound methods of the Pipeline p"
+    ],
+    "aiocache.backends.redis 179:52 call  getattr(self.client, command)(*args, **kwargs)": [
+      "the method of the redis.asyncio.Redis self.client that the command name selects. The package passes \"eval\" (RedisBackend._cas, redis.py:118; _redlock_release, redis.py:188); the other names are those that the client passes to BaseCache.raw, in scope by rule B2 as the tests and documented examples pass them: \"set\", \"get\", \"keys\", \"delete\" (tests/acceptance/test_base.py:238-242, tests/ut/backends/test_redis.py:224-225), \"get\" (examples/serializer_class.py:42, in docs/serializers.rst); see aiocache.md, J2"
+    ],
+    "aiocache.backends.redis 182:37 call  value.decode(encoding)": [
+      "command is \"get\" (line 181) and the pool has decode_responses=False, so value is bytes"
+    ],
+    "aiocache.backends.redis 184:54 call  v.decode(encoding)": [
+      "command is \"keys\" or \"mget\" (line 183): a list of bytes (decode_responses=False)"
+    ],
+    "aiocache.base 167:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 169:24 call  self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _...": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 169:38 call  dumps(value)": [
+      "dumps is dumps_fn (the client's callable, a client callback) or self._serializer.dumps (line 165). The serializer is one of the 6 serializers (documented as \"obj derived from BaseSerializer\", base.py:95; the defaults StringSerializer, NullSerializer, JsonSerializer) or a client object"
+    ],
+    "aiocache.base 197:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 199:22 call  loads(await self._get(ns_key, encoding=self.serializer.en...": [
+      "loads is loads_fn (the client's callable, a client callback) or self._serializer.loads (line 195): one of the 6 serializers or a client object"
+    ],
+    "aiocache.base 199:38 call  self._get(ns_key, encoding=self.serializer.encoding, _con...": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 230:34 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 232:18 call  loads(value)": [
+      "loads is loads_fn (the client's callable, a client callback) or self._serializer.loads (line 227): one of the 6 serializers or a client object"
+    ],
+    "aiocache.base 233:47 call  self._multi_get( ns_keys, encoding=self.serializer.encodi...": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 274:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 276:30 call  self._set( ns_key, dumps(value), ttl=self._get_ttl(ttl), ...": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 277:26 call  dumps(value)": [
+      "dumps is dumps_fn (the client's callable, a client callback) or self._serializer.dumps (line 272): one of the 6 serializers or a client object"
+    ],
+    "aiocache.base 311:45 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 311:71 call  dumps(value)": [
+      "dumps is dumps_fn (the client's callable, a client callback) or self._serializer.dumps (line 306): one of the 6 serializers or a client object"
+    ],
+    "aiocache.base 313:30 call  self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=...": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 343:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 344:33 call  self._delete(ns_key, _conn=_conn)": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 368:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 369:33 call  self._exists(ns_key, _conn=_conn)": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 396:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 397:36 call  self._increment(ns_key, delta, _conn=_conn)": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 422:32 call  self.build_key(key, namespace=ns)": [
+      "self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.base 423:33 call  self._expire(ns_key, ttl, _conn=_conn)": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 446:32 call  self._clear(namespace, _conn=_conn)": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.base 472:30 call  self._raw( command, *args, encoding=self.serializer.encod...": [
+      "self is one of the 7 caches"
+    ],
+    "aiocache.factory 112:53 call  cache_class.parse_uri_path(parsed_url.path)": [
+      "cache_class is a value of AIOCACHE_CACHES (Cache._get_cache_class, factory.py:73): SimpleMemoryCache, and RedisCache and MemcachedCache when redis and aiomcache are installed (__init__.py:11-31)"
+    ],
+    "aiocache.factory 34:21 call  cache(serializer=serializer, plugins=plugins_instances, *...": [
+      "cache is the cache class that the config names (a class, or its path that _class_from_string resolves), or a client class (a client callback). No annotation or check names a package class for this role, so rule B2 decides by the classes that the package, its tests and its documented examples put in a config: SimpleMemoryCache (the default config, factory.py:130; the docstring, factory.py:210, 234; tests/ut/test_factory.py:152-331; examples/cached_alias_config.py:8, which docs/configuration.rst:15 includes) and RedisCache (factory.py:216; tests/ut/test_factory.py:188-358; examples/cached_alias_config.py:14); see aiocache.md, J4 (lead ruling)"
+    ],
+    "aiocache.factory 68:26 call  instance.__init__(**kwargs)": [
+      "the issubclass check (line 63) names BaseCache for the role of cache_class (rule B2), so cache_class is any of the 7 caches, all public, or a client subclass"
+    ],
+    "aiocache.lock 139:44 call  self.client.build_key(key)": [
+      "client is a cache (annotation BaseCache); its build_key is key_builder or self._build_key (base.py:117): the client's callable (a client callback), or BaseCache._build_key or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.lock 146:46 call  self.client._gets(self.ns_key)": [
+      "self.client is one of the 7 caches (annotation BaseCache, lock.py:136)"
+    ],
+    "aiocache.lock 67:41 call  self.client.build_key(key + \"-lock\")": [
+      "client is a cache (annotation BaseCache); its build_key is key_builder or self._build_key (base.py:117): the client's callable (a client callback), or BaseCache._build_key or the override of MemcachedCache or RedisCache"
+    ],
+    "aiocache.lock 77:35 call  self.client._add(self.key, self._value, ttl=self.lease)": [
+      "self.client is one of the 7 caches (annotation BaseCache, lock.py:65)"
+    ],
+    "aiocache.lock 94:53 call  self.client._redlock_release(self.key, self._value)": [
+      "self.client is one of the 7 caches (annotation BaseCache, lock.py:65)"
+    ],
+    "aiocache.serializers 17:17 call  logger.debug(\"msgpack not installed, MsgPackSerializer un...": [
+      "optional import of msgpack (serializers/__init__.py:14-21): both sides run (README default)"
+    ],
+    "aiocache.serializers.serializers 148:26 call  json.dumps(value)": [
+      "optional import (serializers.py:7-11): json is ujson when it is installed, else the standard json; both sides run (README default)"
+    ],
+    "aiocache.serializers.serializers 159:26 call  json.loads(value)": [
+      "optional import (serializers.py:7-11): json is ujson when it is installed, else the standard json; both sides run (README default)"
+    ]
+  },
+  "trace": "dynamic/aiocache.json"
+}

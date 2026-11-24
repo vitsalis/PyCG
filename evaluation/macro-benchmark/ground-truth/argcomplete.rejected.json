@@ -1,0 +1,17 @@
+{
+  "argcomplete.finders.CompletionFinder.__call__": {
+    "sys.exit": "the tests pass sys.exit as exit_method (test/test.py:139); a function from outside the package that the client passes is a client callback (B2); the package's default is os._exit (finders.py:83)"
+  },
+  "argcomplete.finders.CompletionFinder.__init__": {
+    "<builtin>.dict.get": "os.environ.get at finders.py:76: the tests replace os.environ with a plain dict (os.environ.copy(), test/test.py:121 and :1063); the package's os.environ is an os._Environ (collections.abc.Mapping.get)"
+  },
+  "argcomplete.finders.CompletionFinder._complete_active_option": {
+    "<builtin>.dict.items": "completer_output.items() at finders.py:427: the test's completer c_url returns a dict (test/test.py:282, :303); an object that a client callback returns is opaque (B5), and no package completer returns a Mapping"
+  },
+  "argcomplete.finders.CompletionFinder.quote_completions": {
+    "<builtin>.dict.get": "os.environ.get at finders.py:552, :562, :567: the tests replace os.environ with a plain dict (test/test.py:121, :1063)"
+  },
+  "argcomplete.lexers.split_line": {
+    "<builtin>.dict.get": "os.environ.get at lexers.py:14: the tests replace os.environ with a plain dict (test/test.py:121, :1063)"
+  }
+}

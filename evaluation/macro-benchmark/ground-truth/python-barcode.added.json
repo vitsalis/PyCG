@@ -1,0 +1,418 @@
+{
+  "edges": {
+    "barcode.base.Barcode.__repr__": {
+      "barcode.codabar.CODABAR.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.codex.Code128.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.codex.Code39.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.codex.Gs1_128.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.codex.PZN7.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.ean.EuropeanArticleNumber13.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.ean.EuropeanArticleNumber8.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.itf.ITF.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ],
+      "barcode.upc.UniversalProductCodeA.get_fullcode": [
+        "barcode.base 48:63 call  self.get_fullcode()"
+      ]
+    },
+    "barcode.base.Barcode.render": {
+      "barcode.codabar.CODABAR.build": [
+        "barcode.base 112:31 call  self.build()"
+      ],
+      "barcode.codabar.CODABAR.get_fullcode": [
+        "barcode.base 110:52 call  self.get_fullcode()"
+      ],
+      "barcode.codex.Gs1_128.get_fullcode": [
+        "barcode.base 110:52 call  self.get_fullcode()"
+      ]
+    },
+    "barcode.base.Barcode.save": {
+      "barcode.base.Barcode.render": [
+        "barcode.base 76:29 call  self.render(options, text)",
+        "barcode.base 76:69 call  self.render(options)"
+      ],
+      "barcode.writer.BaseWriter.save": [
+        "barcode.base 78:32 call  self.writer.save(filename, output)"
+      ]
+    },
+    "barcode.base.Barcode.to_ascii": {
+      "<builtin>.len": [
+        "barcode.base 42:19 call  len(code_list)"
+      ],
+      "<builtin>.str.replace": [
+        "barcode.base 45:28 call  code.replace(\"1\", \"X\")",
+        "barcode.base 45:46 call  code.replace(\"1\", \"X\").replace(\"0\", \" \")"
+      ],
+      "barcode.codabar.CODABAR.build": [
+        "barcode.base 41:31 call  self.build()"
+      ],
+      "barcode.codex.Code128.build": [
+        "barcode.base 41:31 call  self.build()"
+      ],
+      "barcode.codex.Code39.build": [
+        "barcode.base 41:31 call  self.build()"
+      ],
+      "barcode.itf.ITF.build": [
+        "barcode.base 41:31 call  self.build()"
+      ]
+    },
+    "barcode.base.Barcode.write": {
+      "barcode.base.Barcode.render": [
+        "barcode.base 93:29 call  self.render(options, text)"
+      ],
+      "barcode.codex.Code128.render": [
+        "barcode.base 93:29 call  self.render(options, text)"
+      ],
+      "barcode.codex.Code39.render": [
+        "barcode.base 93:29 call  self.render(options, text)"
+      ],
+      "barcode.itf.ITF.render": [
+        "barcode.base 93:29 call  self.render(options, text)"
+      ],
+      "barcode.upc.UniversalProductCodeA.render": [
+        "barcode.base 93:29 call  self.render(options, text)"
+      ],
+      "barcode.writer.BaseWriter.write": [
+        "barcode.base 94:26 call  self.writer.write(output, fp)"
+      ]
+    },
+    "barcode.codabar.CODABAR.__init__": {
+      "barcode.writer.SVGWriter.__init__": [
+        "barcode.codabar 34:52 call  self.default_writer()"
+      ]
+    },
+    "barcode.codabar.CODABAR.build": {
+      "<builtin>.str.join": [
+        "barcode.codabar 54:29 call  \"n\".join( [codabar.CODES[c] for c in self.code[1:-1]] )"
+      ],
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.codabar 51:31 call  BarcodeError(\"Codabar should start with either A,B,C or D\")",
+        "barcode.codabar 58:40 call  IllegalCharacterError( \"Codabar can only contain numerics...",
+        "barcode.codabar 65:31 call  BarcodeError(\"Codabar should end with either A,B,C or D\")"
+      ]
+    },
+    "barcode.codex.Code128._convert": {
+      "<builtin>.RuntimeError": [
+        "barcode.codex 240:27 call  RuntimeError( f\"Character {char} could not be converted i..."
+      ]
+    },
+    "barcode.codex.Code128._new_charset": {
+      "<builtin>.ValueError": [
+        "barcode.codex 169:29 call  ValueError(f\"Already in charset {which}\")"
+      ]
+    },
+    "barcode.codex.Code128.encoded": {
+      "barcode.codex.Code128._build": [
+        "barcode.codex 162:27 call  self._build()"
+      ]
+    },
+    "barcode.codex.PZN7.__init__": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.codex 106:40 call  IllegalCharacterError(\"PZN can only contain numbers.\")",
+        "barcode.codex 108:38 call  NumberOfDigitsError( f\"PZN must have {self.digits} digits..."
+      ]
+    },
+    "barcode.codex.PZN7.calculate_checksum": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.codex 122:31 call  BarcodeError(\"Checksum can not be 10 for PZN.\")"
+      ]
+    },
+    "barcode.codex.check_code": {
+      "<builtin>.list.append": [
+        "barcode.codex 33:25 call  wrong.append(char)"
+      ],
+      "<builtin>.str.format": [
+        "barcode.codex 36:80 call  \"The following characters are not valid for {name}: {wron..."
+      ],
+      "<builtin>.str.join": [
+        "barcode.codex 37:43 call  \", \".join(wrong)"
+      ],
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.codex 35:36 call  IllegalCharacterError( \"The following characters are not ..."
+      ]
+    },
+    "barcode.ean.EuropeanArticleNumber13.__init__": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.ean 48:40 call  IllegalCharacterError(f\"EAN code can only contain numbers...",
+        "barcode.ean 51:38 call  NumberOfDigitsError( f\"EAN must have {self.digits} digits..."
+      ]
+    },
+    "barcode.ean.EuropeanArticleNumber13.to_ascii": {
+      "<builtin>.len": [
+        "barcode.ean 119:19 call  len(code_list)"
+      ],
+      "<builtin>.str.replace": [
+        "barcode.ean 122:28 call  code.replace(\"G\", \"|\")",
+        "barcode.ean 122:46 call  code.replace(\"G\", \"|\").replace(\"1\", \"|\")",
+        "barcode.ean 122:64 call  code.replace(\"G\", \"|\").replace(\"1\", \"|\").replace(\"0\", \" \")"
+      ],
+      "barcode.ean.EuropeanArticleNumber13.build": [
+        "barcode.ean 118:31 call  self.build()"
+      ],
+      "barcode.ean.EuropeanArticleNumber8.build": [
+        "barcode.ean 118:31 call  self.build()"
+      ]
+    },
+    "barcode.ean.JapanArticleNumber.__init__": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.ean 155:40 call  WrongCountryCodeError( \"Country code isn't between 450-46..."
+      ]
+    },
+    "barcode.generate": {
+      "<builtin>.open": [
+        "barcode 146:18 call  open(output, \"wb\")"
+      ]
+    },
+    "barcode.get": {
+      "barcode.codabar.CODABAR.__init__": [
+        "barcode 106:23 call  barcode(code, writer, **options)"
+      ],
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode 104:35 call  BarcodeNotFoundError(f\"The barcode {name!r} is not known.\")"
+      ]
+    },
+    "barcode.isxn.InternationalStandardBookNumber13.__init__": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.isxn 49:40 call  WrongCountryCodeError(\"ISBN must start with 978 or 979.\")",
+        "barcode.isxn 51:31 call  BarcodeError(\"ISBN must start with 97910 or 97911.\")"
+      ]
+    },
+    "barcode.itf.ITF.__init__": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.itf 36:40 call  IllegalCharacterError(\"ITF code can only contain numbers.\")"
+      ]
+    },
+    "barcode.pybarcode": {
+      "barcode.pybarcode.main": [
+        "barcode.pybarcode 103:9 call  main()"
+      ]
+    },
+    "barcode.pybarcode.create_barcode": {
+      "<builtin>.print": [
+        "barcode.pybarcode 46:10 call  print(f\"New barcode saved as {name}.\")"
+      ],
+      "<builtin>.str.lower": [
+        "barcode.pybarcode 32:38 call  args.barcode.lower()"
+      ],
+      "<builtin>.str.upper": [
+        "barcode.pybarcode 29:32 call  args.type.upper()"
+      ],
+      "argparse.ArgumentParser.error": [
+        "barcode.pybarcode 31:21 call  parser.error(f\"Unknown type {args.type}. Try list action ...",
+        "barcode.pybarcode 34:21 call  parser.error( f\"Unknown barcode {args.barcode}. Try list ..."
+      ],
+      "barcode.generate": [
+        "barcode.pybarcode 45:28 call  barcode.generate(args.barcode, args.code, writer, out, op..."
+      ],
+      "barcode.writer.ImageWriter.__init__": [
+        "barcode.pybarcode 40:41 call  ImageWriter()"
+      ],
+      "barcode.writer.SVGWriter.__init__": [
+        "barcode.pybarcode 43:27 call  SVGWriter()"
+      ],
+      "os.path.abspath": [
+        "barcode.pybarcode 44:43 call  os.path.abspath(args.output)"
+      ],
+      "os.path.normpath": [
+        "barcode.pybarcode 44:27 call  os.path.normpath(os.path.abspath(args.output))"
+      ]
+    },
+    "barcode.pybarcode.list_types": {
+      "<builtin>.print": [
+        "barcode.pybarcode 16:10 call  print(\"\\npython-barcode available barcode formats:\")",
+        "barcode.pybarcode 17:10 call  print(\", \".join(barcode.PROVIDED_BARCODES))",
+        "barcode.pybarcode 18:10 call  print(\"\\n\")",
+        "barcode.pybarcode 19:10 call  print(\"Available image formats\")",
+        "barcode.pybarcode 20:10 call  print(\"Standard: svg\")",
+        "barcode.pybarcode 22:14 call  print(\"Pillow:\", \", \".join(IMG_FORMATS))",
+        "barcode.pybarcode 24:14 call  print(\"Pillow: disabled\")",
+        "barcode.pybarcode 25:10 call  print(\"\\n\")"
+      ],
+      "<builtin>.str.join": [
+        "barcode.pybarcode 17:20 call  \", \".join(barcode.PROVIDED_BARCODES)",
+        "barcode.pybarcode 22:35 call  \", \".join(IMG_FORMATS)"
+      ]
+    },
+    "barcode.pybarcode.main": {
+      "<builtin>.list.append": [
+        "barcode.pybarcode 52:19 call  msg.append(\"Image output disabled (Pillow not found), --t...",
+        "barcode.pybarcode 54:19 call  msg.append( \"Image output enabled, use --type option to g..."
+      ],
+      "<builtin>.str.join": [
+        "barcode.pybarcode 59:73 call  \" \".join(msg)"
+      ],
+      "argparse.ArgumentParser": [
+        "barcode.pybarcode 58:28 call  ArgumentParser( description=\"Create standard barcodes via..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "barcode.pybarcode 61:24 call  parser.add_argument( \"-v\", \"--version\", action=\"version\",...",
+        "barcode.pybarcode 68:31 call  create_parser.add_argument(\"code\", help=\"Code to render a...",
+        "barcode.pybarcode 69:31 call  create_parser.add_argument( \"output\", help=\"Filename for ...",
+        "barcode.pybarcode 72:31 call  create_parser.add_argument( \"-c\", \"--compress\", action=\"s...",
+        "barcode.pybarcode 78:31 call  create_parser.add_argument( \"-b\", \"--barcode\", help=\"Barc...",
+        "barcode.pybarcode 81:31 call  create_parser.add_argument(\"--text\", help=\"Text to show u...",
+        "barcode.pybarcode 83:35 call  create_parser.add_argument( \"-t\", \"--type\", help=\"Type of..."
+      ],
+      "argparse.ArgumentParser.add_subparsers": [
+        "barcode.pybarcode 64:39 call  parser.add_subparsers(title=\"Actions\")"
+      ],
+      "argparse.ArgumentParser.error": [
+        "barcode.pybarcode 97:21 call  parser.error(\"You need to tell me what to do.\")"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "barcode.pybarcode 93:29 call  parser.parse_args()"
+      ],
+      "argparse.ArgumentParser.set_defaults": [
+        "barcode.pybarcode 89:29 call  list_parser.set_defaults(func=list_types)",
+        "barcode.pybarcode 90:31 call  create_parser.set_defaults( type=\"svg\", compress=False, f..."
+      ],
+      "argparse._SubParsersAction.add_parser": [
+        "barcode.pybarcode 65:42 call  subparsers.add_parser( \"create\", help=\"Create a barcode w...",
+        "barcode.pybarcode 86:40 call  subparsers.add_parser( \"list\", help=\"List available image..."
+      ],
+      "barcode.pybarcode.create_barcode": [
+        "barcode.pybarcode 99:13 call  func(args, parser)"
+      ],
+      "barcode.pybarcode.list_types": [
+        "barcode.pybarcode 99:13 call  func(args, parser)"
+      ]
+    },
+    "barcode.upc.UniversalProductCodeA.__init__": {
+      "barcode.errors.BarcodeError.__init__": [
+        "barcode.upc 40:40 call  IllegalCharacterError(\"UPC code can only contain numbers.\")",
+        "barcode.upc 42:38 call  NumberOfDigitsError( f\"UPC must have {self.digits} digits..."
+      ]
+    },
+    "barcode.upc.UniversalProductCodeA.to_ascii": {
+      "<builtin>.len": [
+        "barcode.upc 107:15 call  len(code_list)"
+      ],
+      "<builtin>.str.replace": [
+        "barcode.upc 110:28 call  code.replace(\"1\", \"|\")",
+        "barcode.upc 110:46 call  code.replace(\"1\", \"|\").replace(\"0\", \"_\")"
+      ],
+      "barcode.upc.UniversalProductCodeA.build": [
+        "barcode.upc 106:31 call  self.build()"
+      ]
+    },
+    "barcode.writer": {
+      "logging.Logger.info": [
+        "barcode.writer 41:13 call  log.info(\"Pillow not found. Image output disabled\")"
+      ],
+      "logging.getLogger": [
+        "barcode.writer 40:28 call  logging.getLogger(\"pyBarcode\")"
+      ]
+    },
+    "barcode.writer.BaseWriter.render": {
+      "<builtin>.NotImplementedError": [
+        "barcode.writer 235:38 call  NotImplementedError(\"Only one line of code is supported\")"
+      ]
+    },
+    "barcode.writer.ImageWriter._init": {
+      "<builtin>.NotImplementedError": [
+        "barcode.writer 449:42 call  NotImplementedError(\"Only one line of code is supported\")"
+      ]
+    },
+    "barcode.writer.SVGWriter._finish": {
+      "xml.dom.minidom.Document.toxml": [
+        "barcode.writer 390:40 call  self._document.toxml(encoding=\"UTF-8\")"
+      ]
+    },
+    "barcode.writer.SVGWriter._init": {
+      "<builtin>.NotImplementedError": [
+        "barcode.writer 326:38 call  NotImplementedError(\"Only one line of code is supported\")"
+      ]
+    },
+    "barcode.writer.SVGWriter.save": {
+      "gzip.GzipFile.close": [
+        "barcode.writer 401:24 call  f.close()"
+      ],
+      "gzip.GzipFile.write": [
+        "barcode.writer 400:24 call  f.write(output)"
+      ],
+      "gzip.open": [
+        "barcode.writer 399:27 call  gzip.open(_filename, \"wb\")"
+      ]
+    }
+  },
+  "notes": {
+    "barcode 104:35 call  BarcodeNotFoundError(f\"The barcode {name!r} is not known.\")": [
+      "BarcodeNotFoundError has no __init__ of its own; the first __init__ of its MRO is BarcodeError.__init__"
+    ],
+    "barcode 106:23 call  barcode(code, writer, **options)": [
+      "barcode is a value of __BARCODE_MAP (__init__.py:36-59): CODABAR, Code128, Code39, EAN13, EAN13_GUARD, EAN14, EAN8, EAN8_GUARD, ISBN13, Gs1_128, ISBN10, ISSN, ITF, JAN, PZN (= PZN7), UPCA. EAN14 (EuropeanArticleNumber14) and EAN8 (EuropeanArticleNumber8) inherit EuropeanArticleNumber13.__init__; every class binds (code, writer) and empty options"
+    ],
+    "barcode.base 110:52 call  self.get_fullcode()": [
+      "self is any package barcode: CODABAR inherits render, the other classes reach it through super().render"
+    ],
+    "barcode.base 76:29 call  self.render(options, text)": [
+      "Barcode.render for CODABAR, which does not override render"
+    ],
+    "barcode.base 78:32 call  self.writer.save(filename, output)": [
+      "BaseWriter is a receiver of its own methods (J3); its save raises NotImplementedError"
+    ],
+    "barcode.codabar 34:52 call  self.default_writer()": [
+      "Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it"
+    ],
+    "barcode.codabar 58:40 call  IllegalCharacterError( \"Codabar can only contain numerics...": [
+      "IllegalCharacterError has no __init__ of its own"
+    ],
+    "barcode.codex 169:29 call  ValueError(f\"Already in charset {which}\")": [
+      "A nominal str input may yield a str-subclass digit whose reflected addition supplies a client buffer. The buffer can report lengths 0,0,1 at the three package len calls. It therefore survives a successful C-to-B transition, without a prior exception, and makes the final _build branch request B again. The explicit ValueError constructor then runs. The client buffer stays opaque and contributes no named callback edges; only package control flow and the explicitly called builtin constructor are counted. The input, digit, and buffer are all nominal str instances. No client modifies a package attribute, calls a private method, reconstructs an instance, or reuses an object after an error."
+    ],
+    "barcode.codex 240:27 call  RuntimeError( f\"Character {char} could not be converted i...": [
+      "Code128 stores the annotated str input without normalization (151), validates by iteration (check_code 31), and later combines iteration (_build 257) with independent indexing (_maybe_switch_charset 190-191). A nominal str subclass may preserve ordinary iteration over A while returning a snowman from indexing. Construction passes; the indexed snowman is nonnumeric and in neither charset, so the current charset stays C. The ordinary iterated character A reaches _convert, is absent from charset C and is not numeric, so the explicit RuntimeError constructor runs. B5 leaves client methods and results opaque; it does not remove the package branch they permit. No package attribute assignment, private call, or failed-state reuse occurs."
+    ],
+    "barcode.codex 36:80 call  \"The following characters are not valid for {name}: {wron...": [
+      "the receiver is a str literal, so format is str.format (not the attribute format of ImageWriter); its fields are name (a str: the class attribute name at every package call) and the str that \", \".join returns"
+    ],
+    "barcode.pybarcode 29:32 call  args.type.upper()": [
+      "args is the argparse.Namespace that main passes (B2: the package's own call); its type is the default \"svg\" or the --type string. A client's args is opaque"
+    ],
+    "barcode.pybarcode 31:21 call  parser.error(f\"Unknown type {args.type}. Try list action ...": [
+      "parser is the ArgumentParser that main passes"
+    ],
+    "barcode.pybarcode 32:38 call  args.barcode.lower()": [
+      "args.barcode is the default \"code39\" or the --barcode string"
+    ],
+    "barcode.pybarcode 40:41 call  ImageWriter()": [
+      "the Pillow side of the optional import, where ImageWriter is the class (writer.py:420)"
+    ],
+    "barcode.pybarcode 65:42 call  subparsers.add_parser( \"create\", help=\"Create a barcode w...": [
+      "subparsers is the argparse._SubParsersAction that add_subparsers returns"
+    ],
+    "barcode.pybarcode 68:31 call  create_parser.add_argument(\"code\", help=\"Code to render a...": [
+      "create_parser is the ArgumentParser that add_parser makes (parser_class is the class of the main parser)"
+    ],
+    "barcode.pybarcode 93:29 call  parser.parse_args()": [
+      "no argument has a type= callable or an action of the package; the version action prints and exits"
+    ],
+    "barcode.pybarcode 99:13 call  func(args, parser)": [
+      "func is args.func, the default func that set_defaults gave the chosen sub-parser: list_types (line 89) or create_barcode (line 90)"
+    ],
+    "barcode.writer 390:40 call  self._document.toxml(encoding=\"UTF-8\")": [
+      "Document inherits toxml from Node; named by the class of the receiver"
+    ],
+    "barcode.writer 40:28 call  logging.getLogger(\"pyBarcode\")": [
+      "the side of the optional import without Pillow (writer.py:37-42); both sides run"
+    ],
+    "barcode.writer 41:13 call  log.info(\"Pillow not found. Image output disabled\")": [
+      "log is the logging.Logger that getLogger returns"
+    ]
+  },
+  "trace": "dynamic/python-barcode.json"
+}

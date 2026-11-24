@@ -1,0 +1,29 @@
+# The test environment of argcomplete 3.7.2 (batch 3): the full
+# closure on CPython 3.14, each file by version and SHA-256. argcomplete
+# itself is not installed: the trace uses the checkout projects/argcomplete.
+#   pip install --require-hashes --only-binary :all: --no-deps -r argcomplete.txt
+# "read" names the artifacts that the security scan downloaded and read (the
+# hash is that of the scanned file); "PyPI" names the hashes taken from
+# PyPI's JSON for that version (pinned by hash, not read).
+
+# PyPI.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# PyPI (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# PyPI (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# PyPI (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# PyPI (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+# Read. test/test.py imports it at the top, also when no shell test runs.
+pexpect==4.9.0 \
+    --hash=sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523
+# Read (pexpect requires ptyprocess>=0.5).
+ptyprocess==0.7.0 \
+    --hash=sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35

@@ -1,0 +1,1949 @@
+# Call-site ledger of aiocache at e673d62e98bf89b619e48f44cd68c96a30d95a1b.
+# Hand-written from the source; judgements in aiocache.md.
+#
+# Sets used below (see aiocache.md, "Value sites"):
+#   caches (7): BaseCache (a plain public class, its own receiver),
+#     SimpleMemoryBackend, SimpleMemoryCache, MemcachedBackend, MemcachedCache,
+#     RedisBackend, RedisCache. The backend methods _add, _get, ... exist in
+#     BaseCache (they raise NotImplementedError) and in the three *Backend
+#     classes; the *Cache classes inherit them.
+#   serializers (6): BaseSerializer (a plain public class), NullSerializer,
+#     StringSerializer, PickleSerializer, JsonSerializer, MsgPackSerializer.
+#   The alias-config role at factory.py:24 is narrower than the backend
+#   serializer-instance role: it has no MsgPackSerializer class witness.
+#   plugins (3): BasePlugin, TimingPlugin, HitMissRatioPlugin.
+#   command wrappers: base.py:141-456 decorate the 11 commands (add, get,
+#     multi_get, set, multi_set, delete, exists, increment, expire, clear,
+#     raw) with API.plugins, then API.timeout, then
+#     API.aiocache_enabled(...), then API.register. The class attribute of
+#     each command is the closure API.aiocache_enabled.enabled._enabled;
+#     cache.get(...) calls it, it calls API.timeout._timeout, which calls
+#     API.plugins._plugins, which calls the method (BaseCache.get). close is
+#     decorated with API.timeout only (base.py:484).
+default reject aiocache.base._Conn.__getattr__: _Conn.__getattr__ runs only for an attribute that normal lookup does not find on a _Conn object; no package site loads such an attribute from a _Conn: the receivers are caches, serializers, plugins, locks, decorators, clients of redis or aiomcache, modules, builtins and client objects, and the _Conn methods load only _cache and _conn, which _Conn.__init__ sets
+
+== aiocache
+
+[aiocache]
+9:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+16:17 call  logger.debug("redis not installed, RedisCache unavailable")
+    -> logging.Logger.debug
+    note: optional import of redis (__init__.py:13-21): both sides run (README default)
+26:17 call  logger.debug("aiomcache not installed, Memcached unavaila...
+    -> logging.Logger.debug
+    note: optional import of aiomcache (__init__.py:23-31): both sides run (README default)
+43:49 call  AIOCACHE_CACHES.values()
+    -> <builtin>.dict.values
+
+== aiocache.backends.memcached
+
+[aiocache.backends.memcached]
+146:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[aiocache.backends.memcached.MemcachedBackend.__init__]
+11:14 call  super()
+    -> <builtin>.super
+11:25 call  super().__init__(**kwargs)
+    -> aiocache.base.BaseCache.__init__
+    reject *: the base class of MemcachedBackend is BaseCache; super().__init__ is BaseCache.__init__
+14:29 call  int(pool_size)
+    -> <builtin>.int
+15:39 call  aiomcache.Client( self.endpoint, self.port, pool_size=sel...
+    -> aiomcache.Client
+
+[aiocache.backends.memcached.MemcachedBackend._get]
+20:38 call  self.client.get(key)
+    -> aiomcache.Client.get
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+23:28 call  value.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: value is the bytes that aiomcache.Client.get returns
+
+[aiocache.backends.memcached.MemcachedBackend._gets]
+26:25 call  key.encode()
+    -> <builtin>.str.encode
+26:41 call  isinstance(key, str)
+    -> <builtin>.isinstance
+27:42 call  self.client.gets(key)
+    -> aiomcache.Client.gets
+
+[aiocache.backends.memcached.MemcachedBackend._multi_get]
+32:49 call  self.client.multi_get(*keys)
+    -> aiomcache.Client.multi_get
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+34:30 call  values.append(value)
+    -> <builtin>.list.append
+36:30 call  values.append(value.decode(encoding))
+    -> <builtin>.list.append
+36:43 call  value.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: value is an item of the tuple that aiomcache.Client.multi_get returns: bytes or None
+
+[aiocache.backends.memcached.MemcachedBackend._set]
+40:29 call  value.encode()
+    -> <builtin>.str.encode
+40:45 call  isinstance(value, str)
+    -> <builtin>.isinstance
+42:35 call  self._cas(key, value, _cas_token, ttl=ttl, _conn=_conn)
+    -> aiocache.backends.memcached.MemcachedBackend._cas
+    reject aiocache.backends.redis.RedisBackend._cas: self is a MemcachedBackend or MemcachedCache
+44:41 call  self.client.set(key, value, exptime=ttl or 0)
+    -> aiomcache.Client.set
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+46:28 call  TypeError("aiomcache error: {}".format(str(e)))
+    -> <builtin>.TypeError
+46:57 call  "aiomcache error: {}".format(str(e))
+    -> <builtin>.str.format
+    reject *: the formatted value is the str that str(e) returns
+46:61 call  str(e)
+    -> <builtin>.str
+    reject *: e is an aiomcache ValidationException, not a cache
+
+[aiocache.backends.memcached.MemcachedBackend._cas]
+49:37 call  self.client.cas(key, value, token, exptime=ttl or 0)
+    -> aiomcache.Client.cas
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15), not an OptimisticLock
+
+[aiocache.backends.memcached.MemcachedBackend._multi_set]
+54:31 call  str.encode(value)
+    -> <builtin>.str.encode
+54:52 call  isinstance(value, str)
+    -> <builtin>.isinstance
+55:25 call  tasks.append(self.client.set(key, value, exptime=ttl or 0))
+    -> <builtin>.list.append
+55:41 call  self.client.set(key, value, exptime=ttl or 0)
+    -> aiomcache.Client.set
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+58:33 call  asyncio.gather(*tasks)
+    -> asyncio.gather
+60:28 call  TypeError("aiomcache error: {}".format(str(e)))
+    -> <builtin>.TypeError
+60:57 call  "aiomcache error: {}".format(str(e))
+    -> <builtin>.str.format
+    reject *: the formatted value is the str that str(e) returns
+60:61 call  str(e)
+    -> <builtin>.str
+    reject *: e is an aiomcache ValidationException, not a cache
+
+[aiocache.backends.memcached.MemcachedBackend._add]
+65:27 call  str.encode(value)
+    -> <builtin>.str.encode
+65:48 call  isinstance(value, str)
+    -> <builtin>.isinstance
+67:40 call  self.client.add(key, value, exptime=ttl or 0)
+    -> aiomcache.Client.add
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+69:28 call  TypeError("aiomcache error: {}".format(str(e)))
+    -> <builtin>.TypeError
+69:57 call  "aiomcache error: {}".format(str(e))
+    -> <builtin>.str.format
+    reject *: the formatted value is the str that str(e) returns
+69:61 call  str(e)
+    -> <builtin>.str
+    reject *: e is an aiomcache ValidationException, not a cache
+71:29 call  ValueError("Key {} already exists, use .set to update the...
+    -> <builtin>.ValueError
+71:90 call  "Key {} already exists, use .set to update the value".for...
+    -> <builtin>.str.format
+    reject *: key is the cache key (bytes from MemcachedCache._build_key, or the client's str key), not a cache
+
+[aiocache.backends.memcached.MemcachedBackend._exists]
+76:40 call  self.client.append(key, b"")
+    -> aiomcache.Client.append
+
+[aiocache.backends.memcached.MemcachedBackend._increment]
+82:53 call  self.client.incr(key, delta)
+    -> aiomcache.Client.incr
+84:53 call  self.client.decr(key, abs(delta))
+    -> aiomcache.Client.decr
+84:62 call  abs(delta)
+    -> <builtin>.abs
+86:34 call  str(e)
+    -> <builtin>.str
+    reject *: e is an aiomcache ClientException, not a cache
+87:32 call  self._set(key, str(delta).encode())
+    -> aiocache.backends.memcached.MemcachedBackend._set
+    reject *: self is a MemcachedBackend or MemcachedCache, which inherits MemcachedBackend._set
+87:41 call  str(delta)
+    -> <builtin>.str
+    reject *: delta is the int increment of BaseCache.increment
+87:55 call  str(delta).encode()
+    -> <builtin>.str.encode
+89:32 call  TypeError("aiomcache error: {}".format(str(e)))
+    -> <builtin>.TypeError
+89:61 call  "aiomcache error: {}".format(str(e))
+    -> <builtin>.str.format
+    reject *: the formatted value is the str that str(e) returns
+89:65 call  str(e)
+    -> <builtin>.str
+    reject *: e is an aiomcache ClientException, not a cache
+
+[aiocache.backends.memcached.MemcachedBackend._expire]
+94:39 call  self.client.touch(key, ttl)
+    -> aiomcache.Client.touch
+
+[aiocache.backends.memcached.MemcachedBackend._delete]
+97:45 call  self.client.delete(key)
+    -> aiomcache.Client.delete
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+
+[aiocache.backends.memcached.MemcachedBackend._clear]
+101:29 call  ValueError("MemcachedBackend doesnt support flushing by n...
+    -> <builtin>.ValueError
+103:40 call  self.client.flush_all()
+    -> aiomcache.Client.flush_all
+
+[aiocache.backends.memcached.MemcachedBackend._raw]
+107:30 call  getattr(self.client, command)
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is the aiomcache.Client self.client
+107:52 call  getattr(self.client, command)(*args, **kwargs)
+    -> aiomcache.Client.get
+    -> aiomcache.Client.set
+    -> aiomcache.Client.prepend
+    note: the method of the aiomcache.Client self.client that the command name selects. The command is a str that the client passes to BaseCache.raw; no package code passes one to MemcachedBackend._raw. By rule B2 the names in scope are those that the tests and documented examples pass: "get", "set", "prepend" (tests/acceptance/test_base.py:197-200, tests/ut/backends/test_memcached.py:210-217); see aiocache.md, J2
+110:36 call  value.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: the command is "get" or "multi_get" (line 108); for "get", value is the bytes that aiomcache.Client.get returns
+
+[aiocache.backends.memcached.MemcachedBackend._redlock_release]
+116:34 call  self._delete(key)
+    -> aiocache.backends.memcached.MemcachedBackend._delete
+    reject *: self is a MemcachedBackend or MemcachedCache, which inherits MemcachedBackend._delete
+
+[aiocache.backends.memcached.MemcachedBackend._close]
+119:32 call  self.client.close()
+    -> aiomcache.Client.close
+    reject *: self.client is the aiomcache.Client made in MemcachedBackend.__init__ (memcached.py:15)
+
+[aiocache.backends.memcached.MemcachedCache.__init__]
+144:14 call  super()
+    -> <builtin>.super
+144:25 call  super().__init__(serializer=serializer or JsonSerializer(...
+    -> aiocache.backends.memcached.MemcachedBackend.__init__
+    reject *: the base class of MemcachedCache is MemcachedBackend; super().__init__ is MemcachedBackend.__init__
+144:65 call  JsonSerializer()
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    note: JsonSerializer has no __init__ of its own; the first __init__ of its MRO is BaseSerializer.__init__
+
+[aiocache.backends.memcached.MemcachedCache._build_key]
+151:23 call  super()
+    -> <builtin>.super
+151:36 call  super()._build_key(key, namespace=namespace)
+    -> aiocache.base.BaseCache._build_key
+    reject *: the base class of MemcachedCache is MemcachedBackend, which inherits BaseCache._build_key
+151:70 call  super()._build_key(key, namespace=namespace).replace(" ",...
+    -> <builtin>.str.replace
+    note: BaseCache._build_key returns a str from str.format, or the client's key, documented as a str (base.py:150)
+152:26 call  str.encode(ns_key)
+    -> <builtin>.str.encode
+
+[aiocache.backends.memcached.MemcachedCache.__repr__]
+155:47 call  "MemcachedCache ({}:{})".format(self.endpoint, self.port)
+    -> <builtin>.str.format
+    reject *: the formatted values are the endpoint (a str) and the port (an int)
+
+== aiocache.backends.memory
+
+[aiocache.backends.memory]
+130:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[aiocache.backends.memory.SimpleMemoryBackend.__init__]
+14:14 call  super()
+    -> <builtin>.super
+14:25 call  super().__init__(**kwargs)
+    -> aiocache.base.BaseCache.__init__
+    reject *: the base class of SimpleMemoryBackend is BaseCache; super().__init__ is BaseCache.__init__
+
+[aiocache.backends.memory.SimpleMemoryBackend._get]
+20:31 call  self._cache.get(key)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of the backend (memory.py:16, 87)
+
+[aiocache.backends.memory.SimpleMemoryBackend._gets]
+23:31 call  self._get(key, encoding=encoding, _conn=_conn)
+    -> aiocache.backends.memory.SimpleMemoryBackend._get
+    reject *: self is a SimpleMemoryBackend or SimpleMemoryCache, which inherits SimpleMemoryBackend._get
+
+[aiocache.backends.memory.SimpleMemoryBackend._multi_get]
+26:32 call  self._cache.get(key)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of the backend (memory.py:16, 87)
+
+[aiocache.backends.memory.SimpleMemoryBackend._set]
+29:68 call  self._cache.get(key)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of the backend (memory.py:16, 87)
+33:39 call  self._handlers[key].cancel()
+    -> asyncio.TimerHandle.cancel
+    note: the handlers are the asyncio.TimerHandle objects that loop.call_later returns (memory.py:38, 73)
+37:44 call  asyncio.get_running_loop()
+    -> asyncio.get_running_loop
+38:50 call  loop.call_later(ttl, self.__delete, key)
+    reject aiocache.backends.memory.SimpleMemoryBackend.__delete: the event loop calls the callback later; an event loop callback belongs to the scope that runs the loop (micro-benchmark rule "Callbacks"), here the client
+    -> asyncio.ProactorEventLoop.call_later
+    -> asyncio.SelectorEventLoop.call_later
+    note: The running stdlib loop has concrete public class asyncio.SelectorEventLoop on Unix and asyncio.ProactorEventLoop on Windows. Global outside-method naming uses the receiver class even when its method is inherited. The private Unix implementation has the explicit public SelectorEventLoop alias, so no defining-base fallback applies. asyncio.EventLoop is an alias of these same classes, not a third callee. The old project judgment selected the defining BaseEventLoop solely because it worked across Python versions; it cannot override the global rule.
+
+[aiocache.backends.memory.SimpleMemoryBackend._multi_set]
+43:28 call  self._set(key, value, ttl=ttl)
+    -> aiocache.backends.memory.SimpleMemoryBackend._set
+    reject *: self is a SimpleMemoryBackend or SimpleMemoryCache, which inherits SimpleMemoryBackend._set
+
+[aiocache.backends.memory.SimpleMemoryBackend._add]
+48:29 call  ValueError("Key {} already exists, use .set to update the...
+    -> <builtin>.ValueError
+48:90 call  "Key {} already exists, use .set to update the value".for...
+    -> <builtin>.str.format
+    reject *: key is the cache key, a str (base.py:150), not a cache
+50:24 call  self._set(key, value, ttl=ttl)
+    -> aiocache.backends.memory.SimpleMemoryBackend._set
+    reject *: self is a SimpleMemoryBackend or SimpleMemoryCache, which inherits SimpleMemoryBackend._set
+
+[aiocache.backends.memory.SimpleMemoryBackend._increment]
+61:39 call  int(self._cache[key])
+    -> <builtin>.int
+63:32 call  TypeError("Value is not an integer")
+    -> <builtin>.TypeError
+
+[aiocache.backends.memory.SimpleMemoryBackend._expire]
+68:40 call  self._handlers.pop(key, None)
+    -> <builtin>.dict.pop
+70:30 call  handle.cancel()
+    -> asyncio.TimerHandle.cancel
+    note: handle is an asyncio.TimerHandle that loop.call_later returned (memory.py:38, 73)
+72:48 call  asyncio.get_running_loop()
+    -> asyncio.get_running_loop
+73:54 call  loop.call_later(ttl, self.__delete, key)
+    reject aiocache.backends.memory.SimpleMemoryBackend.__delete: the event loop calls the callback later; an event loop callback belongs to the scope that runs the loop (micro-benchmark rule "Callbacks"), here the client
+    -> asyncio.ProactorEventLoop.call_later
+    -> asyncio.SelectorEventLoop.call_later
+    note: The running stdlib loop has concrete public class asyncio.SelectorEventLoop on Unix and asyncio.ProactorEventLoop on Windows. Global outside-method naming uses the receiver class even when its method is inherited. The private Unix implementation has the explicit public SelectorEventLoop alias, so no defining-base fallback applies. asyncio.EventLoop is an alias of these same classes, not a third callee. The old project judgment selected the defining BaseEventLoop solely because it worked across Python versions; it cannot override the global rule.
+
+[aiocache.backends.memory.SimpleMemoryBackend._delete]
+79:29 call  self.__delete(key)
+    -> aiocache.backends.memory.SimpleMemoryBackend.__delete
+
+[aiocache.backends.memory.SimpleMemoryBackend._clear]
+83:28 call  list(self._cache)
+    -> <builtin>.list
+84:34 call  key.startswith(namespace)
+    -> <builtin>.str.startswith
+    note: the keys of self._cache are the keys that BaseCache._build_key made: str from str.format, or the client's key, documented as a str (base.py:150; rule B4)
+85:34 call  self.__delete(key)
+    -> aiocache.backends.memory.SimpleMemoryBackend.__delete
+
+[aiocache.backends.memory.SimpleMemoryBackend._raw]
+92:23 call  getattr(self._cache, command)
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is the dict self._cache
+92:45 call  getattr(self._cache, command)(*args, **kwargs)
+    -> <builtin>.dict.get
+    -> <builtin>.dict.keys
+    -> <builtin>.dict.setdefault
+    note: the method of the dict self._cache that the command name selects. The command is a str that the client passes to BaseCache.raw; no package code passes one to SimpleMemoryBackend._raw. By rule B2 the names in scope are those that the tests and documented examples pass: "setdefault", "get", "keys" (tests/acceptance/test_base.py:161-163, tests/ut/backends/test_memory.py:168); see aiocache.md, J2
+
+[aiocache.backends.memory.SimpleMemoryBackend._redlock_release]
+95:27 call  self._cache.get(key)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of the backend (memory.py:16, 87)
+96:33 call  self.__delete(key)
+    -> aiocache.backends.memory.SimpleMemoryBackend.__delete
+
+[aiocache.backends.memory.SimpleMemoryBackend.__delete]
+100:27 call  self._cache.pop(key, None)
+    -> <builtin>.dict.pop
+101:40 call  self._handlers.pop(key, None)
+    -> <builtin>.dict.pop
+103:30 call  handle.cancel()
+    -> asyncio.TimerHandle.cancel
+    note: handle is an asyncio.TimerHandle that loop.call_later returned (memory.py:38, 73)
+
+[aiocache.backends.memory.SimpleMemoryCache.__init__]
+128:14 call  super()
+    -> <builtin>.super
+128:25 call  super().__init__(serializer=serializer or NullSerializer(...
+    -> aiocache.backends.memory.SimpleMemoryBackend.__init__
+    reject *: the base class of SimpleMemoryCache is SimpleMemoryBackend; super().__init__ is SimpleMemoryBackend.__init__
+128:65 call  NullSerializer()
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    note: NullSerializer has no __init__ of its own; the first __init__ of its MRO is BaseSerializer.__init__
+
+== aiocache.backends.redis
+
+[aiocache.backends.redis]
+11:18 call  object()
+    -> <builtin>.object
+221:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[aiocache.backends.redis.RedisBackend.__init__]
+49:14 call  super()
+    -> <builtin>.super
+49:25 call  super().__init__(**kwargs)
+    -> aiocache.base.BaseCache.__init__
+    reject *: the base class of RedisBackend is BaseCache; super().__init__ is BaseCache.__init__
+51:26 call  warnings.warn( "Parameter 'pool_min_size' is deprecated s...
+    -> warnings.warn
+57:24 call  int(port)
+    -> <builtin>.int
+58:22 call  int(db)
+    -> <builtin>.int
+61:68 call  int(pool_max_size)
+    -> <builtin>.int
+63:18 call  float(create_connection_timeout)
+    -> <builtin>.float
+77:48 call  connection_pool_class( host=self.endpoint, port=self.port...
+    -> redis.asyncio.ConnectionPool
+    note: connection_pool_class is the client's class (a client callback) or, by default, redis.asyncio.ConnectionPool (line 76; `redis` is redis.asyncio, line 4)
+84:34 call  redis.Redis(connection_pool=connection_pool)
+    -> redis.asyncio.Redis
+
+[aiocache.backends.redis.RedisBackend._get]
+90:38 call  self.client.get(key)
+    -> redis.asyncio.Redis.get
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+93:28 call  value.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: the pool has decode_responses=False (redis.py:79), so redis returns bytes
+
+[aiocache.backends.redis.RedisBackend._gets]
+96:31 call  self._get(key, encoding=encoding, _conn=_conn)
+    -> aiocache.backends.redis.RedisBackend._get
+    reject *: self is a RedisBackend or RedisCache, which inherits RedisBackend._get
+
+[aiocache.backends.redis.RedisBackend._multi_get]
+99:40 call  self.client.mget(*keys)
+    -> redis.asyncio.Redis.mget
+102:45 call  v.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: the pool has decode_responses=False (redis.py:79), so the values of mget are bytes or None
+
+[aiocache.backends.redis.RedisBackend._set]
+106:35 call  self._cas(key, value, _cas_token, ttl=ttl, _conn=_conn)
+    -> aiocache.backends.redis.RedisBackend._cas
+    reject aiocache.backends.memcached.MemcachedBackend._cas: self is a RedisBackend or RedisCache
+108:41 call  self.client.set(key, value)
+    -> redis.asyncio.Redis.set
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+109:22 call  isinstance(ttl, float)
+    -> <builtin>.isinstance
+110:22 call  int(ttl * 1000)
+    -> <builtin>.int
+111:44 call  self.client.psetex(key, ttl, value)
+    -> redis.asyncio.Redis.psetex
+112:39 call  self.client.setex(key, ttl, value)
+    -> redis.asyncio.Redis.setex
+
+[aiocache.backends.redis.RedisBackend._cas]
+117:30 call  int(ttl * 1000)
+    -> <builtin>.int
+117:57 call  isinstance(ttl, float)
+    -> <builtin>.isinstance
+118:31 call  self._raw("eval", self.CAS_SCRIPT, 1, key, value, token, ...
+    -> aiocache.backends.redis.RedisBackend._raw
+    reject *: self is a RedisBackend or RedisCache, which inherits RedisBackend._raw
+
+[aiocache.backends.redis.RedisBackend._multi_set]
+123:25 call  list(itertools.chain.from_iterable((key, value) for key, ...
+    -> <builtin>.list
+123:55 call  itertools.chain.from_iterable((key, value) for key, value...
+    -> itertools.chain.from_iterable
+126:39 call  self.__multi_set_ttl(flattened, ttl)
+    -> aiocache.backends.redis.RedisBackend.__multi_set_ttl
+128:46 call  self.client.execute_command("MSET", *flattened)
+    -> redis.asyncio.Redis.execute_command
+
+[aiocache.backends.redis.RedisBackend.__multi_set_ttl]
+133:20 async-with  self.client.pipeline(transaction=True)
+    reject *: the context manager is the redis.asyncio.client.Pipeline that Redis.pipeline returns, not a package object
+133:40 call  self.client.pipeline(transaction=True)
+    -> redis.asyncio.Redis.pipeline
+134:30 call  p.execute_command("MSET", *flattened)
+    -> redis.asyncio.client.Pipeline.execute_command
+    note: p is the redis.asyncio.client.Pipeline that Redis.pipeline returns; its __aenter__ returns itself
+135:28 call  int(ttl * 1000)
+    -> <builtin>.int
+135:66 call  isinstance(ttl, float)
+    -> <builtin>.isinstance
+137:20 call  exp(key, time=ttl)
+    -> redis.asyncio.client.Pipeline.pexpire
+    -> redis.asyncio.client.Pipeline.expire
+    note: exp is p.pexpire or p.expire (line 135), bound methods of the Pipeline p
+138:28 call  p.execute()
+    -> redis.asyncio.client.Pipeline.execute
+
+[aiocache.backends.redis.RedisBackend._add]
+142:22 call  isinstance(ttl, float)
+    -> <builtin>.isinstance
+143:31 call  int(ttl * 1000)
+    -> <builtin>.int
+146:40 call  self.client.set(key, value, **kwargs)
+    -> redis.asyncio.Redis.set
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+148:29 call  ValueError("Key {} already exists, use .set to update the...
+    -> <builtin>.ValueError
+148:90 call  "Key {} already exists, use .set to update the value".for...
+    -> <builtin>.str.format
+    reject *: key is the cache key, a str (base.py:150), not a cache
+
+[aiocache.backends.redis.RedisBackend._exists]
+152:42 call  self.client.exists(key)
+    -> redis.asyncio.Redis.exists
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+153:20 call  bool(number)
+    -> <builtin>.bool
+
+[aiocache.backends.redis.RedisBackend._increment]
+157:44 call  self.client.incrby(key, delta)
+    -> redis.asyncio.Redis.incrby
+159:28 call  TypeError("Value is not an integer")
+    -> <builtin>.TypeError
+
+[aiocache.backends.redis.RedisBackend._expire]
+163:45 call  self.client.persist(key)
+    -> redis.asyncio.Redis.persist
+164:40 call  self.client.expire(key, ttl)
+    -> redis.asyncio.Redis.expire
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+
+[aiocache.backends.redis.RedisBackend._delete]
+167:40 call  self.client.delete(key)
+    -> redis.asyncio.Redis.delete
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+
+[aiocache.backends.redis.RedisBackend._clear]
+171:42 call  self.client.keys("{}:*".format(namespace))
+    -> redis.asyncio.Redis.keys
+171:56 call  "{}:*".format(namespace)
+    -> <builtin>.str.format
+    reject *: namespace is a str (base.py:439), not a cache
+173:41 call  self.client.delete(*keys)
+    -> redis.asyncio.Redis.delete
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+175:38 call  self.client.flushdb()
+    -> redis.asyncio.Redis.flushdb
+
+[aiocache.backends.redis.RedisBackend._raw]
+179:30 call  getattr(self.client, command)
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is the redis.asyncio.Redis self.client
+179:52 call  getattr(self.client, command)(*args, **kwargs)
+    -> redis.asyncio.Redis.eval
+    -> redis.asyncio.Redis.get
+    -> redis.asyncio.Redis.set
+    -> redis.asyncio.Redis.keys
+    -> redis.asyncio.Redis.delete
+    note: the method of the redis.asyncio.Redis self.client that the command name selects. The package passes "eval" (RedisBackend._cas, redis.py:118; _redlock_release, redis.py:188); the other names are those that the client passes to BaseCache.raw, in scope by rule B2 as the tests and documented examples pass them: "set", "get", "keys", "delete" (tests/acceptance/test_base.py:238-242, tests/ut/backends/test_redis.py:224-225), "get" (examples/serializer_class.py:42, in docs/serializers.rst); see aiocache.md, J2
+182:37 call  value.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: command is "get" (line 181) and the pool has decode_responses=False, so value is bytes
+184:54 call  v.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: command is "keys" or "mget" (line 183): a list of bytes (decode_responses=False)
+
+[aiocache.backends.redis.RedisBackend._redlock_release]
+188:31 call  self._raw("eval", self.RELEASE_SCRIPT, 1, key, value)
+    -> aiocache.backends.redis.RedisBackend._raw
+    reject *: self is a RedisBackend or RedisCache, which inherits RedisBackend._raw
+
+[aiocache.backends.redis.RedisBackend._close]
+191:32 call  self.client.close()
+    -> redis.asyncio.Redis.close
+    reject *: self.client is the redis.asyncio.Redis made in RedisBackend.__init__ (redis.py:84)
+
+[aiocache.backends.redis.RedisCache.__init__]
+219:14 call  super()
+    -> <builtin>.super
+219:25 call  super().__init__(serializer=serializer or JsonSerializer(...
+    -> aiocache.backends.redis.RedisBackend.__init__
+    reject *: the base class of RedisCache is RedisBackend; super().__init__ is RedisBackend.__init__
+219:65 call  JsonSerializer()
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    note: JsonSerializer has no __init__ of its own; the first __init__ of its MRO is BaseSerializer.__init__
+
+[aiocache.backends.redis.RedisCache.parse_uri_path]
+232:32 call  path[1:].split("/")
+    -> <builtin>.str.split
+
+[aiocache.backends.redis.RedisCache._build_key]
+239:35 call  "{}{}{}".format( namespace, ":" if namespace else "", _en...
+    -> <builtin>.str.format
+    reject *: the formatted values are the namespace (a str), a str literal and the client's key (a str, base.py:150, or an Enum's value), not a cache
+240:65 call  _ensure_key(key)
+    -> aiocache.base._ensure_key
+242:35 call  "{}{}{}".format( self.namespace, ":" if self.namespace el...
+    -> <builtin>.str.format
+    reject *: the formatted values are the namespace (a str), a str literal and the client's key (a str, base.py:150, or an Enum's value), not a cache
+243:75 call  _ensure_key(key)
+    -> aiocache.base._ensure_key
+
+[aiocache.backends.redis.RedisCache.__repr__]
+247:43 call  "RedisCache ({}:{})".format(self.endpoint, self.port)
+    -> <builtin>.str.format
+    reject *: the formatted values are the endpoint (a str) and the port (an int)
+
+== aiocache.base
+
+[aiocache.base]
+13:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+15:18 call  object()
+    -> <builtin>.object
+20:43 call  set()
+    -> <builtin>.set
+    reject aiocache.base.BaseCache.set: set in the body of class API is the builtin set, not the method of BaseCache
+22:6 decorator  @classmethod
+    -> <builtin>.classmethod
+27:6 decorator  @classmethod
+    -> <builtin>.classmethod
+31:6 decorator  @classmethod
+    -> <builtin>.classmethod
+52:6 decorator  @classmethod
+    -> <builtin>.classmethod
+70:6 decorator  @classmethod
+    -> <builtin>.classmethod
+125:6 decorator  @property
+    -> <builtin>.property
+129:6 decorator  @serializer.setter
+    -> <builtin>.property.setter
+133:6 decorator  @property
+    -> <builtin>.property
+137:6 decorator  @plugins.setter
+    -> <builtin>.property.setter
+141:6 decorator  @API.register
+    -> aiocache.base.API.register
+142:6 decorator  @API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+142:26 call  API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled
+143:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+144:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+144:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+177:6 decorator  @API.register
+    -> aiocache.base.API.register
+178:6 decorator  @API.aiocache_enabled()
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+178:26 call  API.aiocache_enabled()
+    -> aiocache.base.API.aiocache_enabled
+179:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+180:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+180:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+210:6 decorator  @API.register
+    -> aiocache.base.API.register
+211:6 decorator  @API.aiocache_enabled(fake_return=[])
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+211:26 call  API.aiocache_enabled(fake_return=[])
+    -> aiocache.base.API.aiocache_enabled
+212:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+213:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+213:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+249:6 decorator  @API.register
+    -> aiocache.base.API.register
+250:6 decorator  @API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+250:26 call  API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled
+251:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+252:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+252:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+286:6 decorator  @API.register
+    -> aiocache.base.API.register
+287:6 decorator  @API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+287:26 call  API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled
+288:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+289:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+289:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+326:6 decorator  @API.register
+    -> aiocache.base.API.register
+327:6 decorator  @API.aiocache_enabled(fake_return=0)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+327:26 call  API.aiocache_enabled(fake_return=0)
+    -> aiocache.base.API.aiocache_enabled
+328:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+329:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+329:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+351:6 decorator  @API.register
+    -> aiocache.base.API.register
+352:6 decorator  @API.aiocache_enabled(fake_return=False)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+352:26 call  API.aiocache_enabled(fake_return=False)
+    -> aiocache.base.API.aiocache_enabled
+353:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+354:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+354:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+376:6 decorator  @API.register
+    -> aiocache.base.API.register
+377:6 decorator  @API.aiocache_enabled(fake_return=1)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+377:26 call  API.aiocache_enabled(fake_return=1)
+    -> aiocache.base.API.aiocache_enabled
+378:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+379:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+379:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+404:6 decorator  @API.register
+    -> aiocache.base.API.register
+405:6 decorator  @API.aiocache_enabled(fake_return=False)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+405:26 call  API.aiocache_enabled(fake_return=False)
+    -> aiocache.base.API.aiocache_enabled
+406:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+407:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+407:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+430:6 decorator  @API.register
+    -> aiocache.base.API.register
+431:6 decorator  @API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+431:26 call  API.aiocache_enabled(fake_return=True)
+    -> aiocache.base.API.aiocache_enabled
+432:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+433:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+433:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+453:6 decorator  @API.register
+    -> aiocache.base.API.register
+454:6 decorator  @API.aiocache_enabled()
+    -> aiocache.base.API.aiocache_enabled.enabled
+    note: API.aiocache_enabled(...) returns its local function enabled (base.py:68)
+454:26 call  API.aiocache_enabled()
+    -> aiocache.base.API.aiocache_enabled
+455:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+456:6 decorator  @API.plugins
+    -> aiocache.base.API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is the classmethod at base.py:70-71; the property plugins belongs to BaseCache
+    note: API.plugins is the classmethod at base.py:70-71
+456:10 getattr  API.plugins
+    reject aiocache.base.BaseCache.plugins: the receiver is the class API, whose plugins is a classmethod; the property plugins belongs to BaseCache
+484:6 decorator  @API.timeout
+    -> aiocache.base.API.timeout
+    note: API.timeout is the classmethod at base.py:31-32; the instance attribute timeout of a cache (base.py:114) is another object
+545:6 decorator  @classmethod
+    -> <builtin>.classmethod
+561:12 call  setattr(_Conn, cmd.__name__, _Conn._inject_conn(cmd.__nam...
+    -> <builtin>.setattr
+561:52 call  _Conn._inject_conn(cmd.__name__)
+    -> aiocache.base._Conn._inject_conn
+
+[aiocache.base.API.register]
+24:21 call  API.CMDS.add(func)
+    -> <builtin>.set.add
+    reject *: API.CMDS is the set made at base.py:20
+
+[aiocache.base.API.unregister]
+29:25 call  API.CMDS.discard(func)
+    -> <builtin>.set.discard
+
+[aiocache.base.API.timeout]
+43:10 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+43:25 call  functools.wraps(func)
+    -> functools.wraps
+
+[aiocache.base.API.timeout._timeout]
+47:34 call  func(self, *args, **kwargs)
+    -> aiocache.base.API.plugins._plugins
+    -> aiocache.base.BaseCache.close
+    note: func is the function that API.timeout decorates: the closure API.plugins._plugins of each of the 11 commands (base.py:143-144, 179-180, ...), and BaseCache.close (base.py:484-485); a function that the client decorates with API.timeout is a client callback
+48:42 call  asyncio.wait_for(func(self, *args, **kwargs), timeout)
+    -> asyncio.wait_for
+48:47 call  func(self, *args, **kwargs)
+    -> aiocache.base.API.plugins._plugins
+    -> aiocache.base.BaseCache.close
+    note: func is the function that API.timeout decorates: the closure API.plugins._plugins of each of the 11 commands, and BaseCache.close (base.py:484-485); a function that the client decorates with API.timeout is a client callback
+
+[aiocache.base.API.aiocache_enabled.enabled]
+60:14 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+60:29 call  functools.wraps(func)
+    -> functools.wraps
+
+[aiocache.base.API.aiocache_enabled.enabled._enabled]
+62:29 call  os.getenv("AIOCACHE_DISABLE")
+    -> os.getenv
+64:34 call  func(*args, **kwargs)
+    -> aiocache.base.API.timeout._timeout
+    note: func is the function that enabled decorates: in the package, the closure API.timeout._timeout of each of the 11 commands (base.py:142-143, 178-179, ...); a function that the client decorates is a client callback
+
+[aiocache.base.API.plugins]
+72:10 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+72:25 call  functools.wraps(func)
+    -> functools.wraps
+
+[aiocache.base.API.plugins._plugins]
+74:35 call  time.monotonic()
+    -> time.monotonic
+75:32 getattr  self.plugins
+    -> aiocache.base.BaseCache.plugins
+    note: self is the cache whose command runs; plugins is the property of BaseCache
+76:30 call  getattr(plugin, "pre_{}".format(func.__name__))
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is a plugin of self.plugins (a BasePlugin, TimingPlugin, HitMissRatioPlugin or client object), never a _Conn
+76:54 call  "pre_{}".format(func.__name__)
+    -> <builtin>.str.format
+    reject *: func.__name__ is the str name of a command
+76:70 call  getattr(plugin, "pre_{}".format(func.__name__))(self, *ar...
+    -> aiocache.plugins.BasePlugin.do_nothing
+    note: plugin is an item of self.plugins: a BasePlugin, TimingPlugin or HitMissRatioPlugin (base.py:97, plugins.py), or a client object. func is one of the 11 commands, so the name is pre_<command>; plugins.py:19-21 sets every pre_<command> of BasePlugin to BasePlugin.do_nothing, and neither subclass defines a pre_ hook
+78:29 call  func(self, *args, **kwargs)
+    -> aiocache.base.BaseCache.add
+    -> aiocache.base.BaseCache.get
+    -> aiocache.base.BaseCache.multi_get
+    -> aiocache.base.BaseCache.set
+    -> aiocache.base.BaseCache.multi_set
+    -> aiocache.base.BaseCache.delete
+    -> aiocache.base.BaseCache.exists
+    -> aiocache.base.BaseCache.increment
+    -> aiocache.base.BaseCache.expire
+    -> aiocache.base.BaseCache.clear
+    -> aiocache.base.BaseCache.raw
+    note: func is the function that API.plugins decorates: in the package, the 11 command methods of BaseCache (base.py:144-145, 180-181, ...); a function that the client decorates is a client callback
+80:33 call  time.monotonic()
+    -> time.monotonic
+81:32 getattr  self.plugins
+    -> aiocache.base.BaseCache.plugins
+    note: self is the cache whose command runs; plugins is the property of BaseCache
+82:30 call  getattr(plugin, "post_{}".format(func.__name__))
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is a plugin of self.plugins (a BasePlugin, TimingPlugin, HitMissRatioPlugin or client object), never a _Conn
+82:55 call  "post_{}".format(func.__name__)
+    -> <builtin>.str.format
+    reject *: func.__name__ is the str name of a command
+82:71 call  getattr(plugin, "post_{}".format(func.__name__))( self, *...
+    -> aiocache.plugins.BasePlugin.do_nothing
+    -> aiocache.plugins.TimingPlugin.save_time.do_save_time
+    -> aiocache.plugins.HitMissRatioPlugin.post_get
+    -> aiocache.plugins.HitMissRatioPlugin.post_multi_get
+    note: plugin is an item of self.plugins: a BasePlugin, TimingPlugin or HitMissRatioPlugin, or a client object. The name is post_<command>: BasePlugin.do_nothing for every command (plugins.py:22-24), the do_save_time closure of TimingPlugin for every command (plugins.py:57-60), and HitMissRatioPlugin.post_get and post_multi_get (plugins.py:71, 85)
+
+[aiocache.base.BaseCache.__init__]
+114:29 call  float(timeout)
+    -> <builtin>.float
+116:25 call  float(ttl)
+    -> <builtin>.float
+120:14 setattr  self.serializer
+    -> aiocache.base.BaseCache.serializer
+    note: the setter of the property serializer (base.py:129-131)
+120:69 call  serializers.StringSerializer()
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    note: StringSerializer has no __init__ of its own; the first __init__ of its MRO is BaseSerializer.__init__
+123:14 setattr  self.plugins
+    -> aiocache.base.BaseCache.plugins
+    note: the setter of the property plugins (base.py:137-139)
+
+[aiocache.base.BaseCache.add]
+164:31 call  time.monotonic()
+    -> time.monotonic
+167:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+169:24 call  self._add(ns_key, dumps(value), ttl=self._get_ttl(ttl), _...
+    -> aiocache.base.BaseCache._add
+    -> aiocache.backends.memory.SimpleMemoryBackend._add
+    -> aiocache.backends.memcached.MemcachedBackend._add
+    -> aiocache.backends.redis.RedisBackend._add
+    note: self is one of the 7 caches
+169:38 call  dumps(value)
+    -> aiocache.serializers.serializers.BaseSerializer.dumps
+    -> aiocache.serializers.serializers.NullSerializer.dumps
+    -> aiocache.serializers.serializers.StringSerializer.dumps
+    -> aiocache.serializers.serializers.PickleSerializer.dumps
+    -> aiocache.serializers.serializers.JsonSerializer.dumps
+    -> aiocache.serializers.serializers.MsgPackSerializer.dumps
+    note: dumps is dumps_fn (the client's callable, a client callback) or self._serializer.dumps (line 165). The serializer is one of the 6 serializers (documented as "obj derived from BaseSerializer", base.py:95; the defaults StringSerializer, NullSerializer, JsonSerializer) or a client object
+169:64 call  self._get_ttl(ttl)
+    -> aiocache.base.BaseCache._get_ttl
+171:21 call  logger.debug("ADD %s %s (%.4f)s", ns_key, True, time.mono...
+    -> logging.Logger.debug
+171:71 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._add]
+175:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.get]
+194:31 call  time.monotonic()
+    -> time.monotonic
+197:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+199:22 call  loads(await self._get(ns_key, encoding=self.serializer.en...
+    -> aiocache.serializers.serializers.BaseSerializer.loads
+    -> aiocache.serializers.serializers.NullSerializer.loads
+    -> aiocache.serializers.serializers.StringSerializer.loads
+    -> aiocache.serializers.serializers.PickleSerializer.loads
+    -> aiocache.serializers.serializers.JsonSerializer.loads
+    -> aiocache.serializers.serializers.MsgPackSerializer.loads
+    note: loads is loads_fn (the client's callable, a client callback) or self._serializer.loads (line 195): one of the 6 serializers or a client object
+199:38 call  self._get(ns_key, encoding=self.serializer.encoding, _con...
+    -> aiocache.base.BaseCache._get
+    -> aiocache.backends.memory.SimpleMemoryBackend._get
+    -> aiocache.backends.memcached.MemcachedBackend._get
+    -> aiocache.backends.redis.RedisBackend._get
+    note: self is one of the 7 caches
+199:61 getattr  self.serializer
+    -> aiocache.base.BaseCache.serializer
+201:21 call  logger.debug("GET %s %s (%.4f)s", ns_key, value is not No...
+    -> logging.Logger.debug
+201:84 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._get]
+205:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache._gets]
+208:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.multi_get]
+226:31 call  time.monotonic()
+    -> time.monotonic
+230:34 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+232:18 call  loads(value)
+    -> aiocache.serializers.serializers.BaseSerializer.loads
+    -> aiocache.serializers.serializers.NullSerializer.loads
+    -> aiocache.serializers.serializers.StringSerializer.loads
+    -> aiocache.serializers.serializers.PickleSerializer.loads
+    -> aiocache.serializers.serializers.JsonSerializer.loads
+    -> aiocache.serializers.serializers.MsgPackSerializer.loads
+    note: loads is loads_fn (the client's callable, a client callback) or self._serializer.loads (line 227): one of the 6 serializers or a client object
+233:47 call  self._multi_get( ns_keys, encoding=self.serializer.encodi...
+    -> aiocache.base.BaseCache._multi_get
+    -> aiocache.backends.memory.SimpleMemoryBackend._multi_get
+    -> aiocache.backends.memcached.MemcachedBackend._multi_get
+    -> aiocache.backends.redis.RedisBackend._multi_get
+    note: self is one of the 7 caches
+234:40 getattr  self.serializer
+    -> aiocache.base.BaseCache.serializer
+238:21 call  logger.debug( "MULTI_GET %s %d (%.4f)s", ns_keys, len([va...
+    -> logging.Logger.debug
+241:16 call  len([value for value in values if value is not None])
+    -> <builtin>.len
+242:27 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._multi_get]
+247:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.set]
+271:31 call  time.monotonic()
+    -> time.monotonic
+274:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+276:30 call  self._set( ns_key, dumps(value), ttl=self._get_ttl(ttl), ...
+    -> aiocache.base.BaseCache._set
+    -> aiocache.backends.memory.SimpleMemoryBackend._set
+    -> aiocache.backends.memcached.MemcachedBackend._set
+    -> aiocache.backends.redis.RedisBackend._set
+    note: self is one of the 7 caches
+277:26 call  dumps(value)
+    -> aiocache.serializers.serializers.BaseSerializer.dumps
+    -> aiocache.serializers.serializers.NullSerializer.dumps
+    -> aiocache.serializers.serializers.StringSerializer.dumps
+    -> aiocache.serializers.serializers.PickleSerializer.dumps
+    -> aiocache.serializers.serializers.JsonSerializer.dumps
+    -> aiocache.serializers.serializers.MsgPackSerializer.dumps
+    note: dumps is dumps_fn (the client's callable, a client callback) or self._serializer.dumps (line 272): one of the 6 serializers or a client object
+277:52 call  self._get_ttl(ttl)
+    -> aiocache.base.BaseCache._get_ttl
+280:21 call  logger.debug("SET %s %d (%.4f)s", ns_key, True, time.mono...
+    -> logging.Logger.debug
+280:71 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._set]
+284:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.multi_set]
+305:31 call  time.monotonic()
+    -> time.monotonic
+311:29 call  tmp_pairs.append((self.build_key(key, namespace=ns), dump...
+    -> <builtin>.list.append
+311:45 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+311:71 call  dumps(value)
+    -> aiocache.serializers.serializers.BaseSerializer.dumps
+    -> aiocache.serializers.serializers.NullSerializer.dumps
+    -> aiocache.serializers.serializers.StringSerializer.dumps
+    -> aiocache.serializers.serializers.PickleSerializer.dumps
+    -> aiocache.serializers.serializers.JsonSerializer.dumps
+    -> aiocache.serializers.serializers.MsgPackSerializer.dumps
+    note: dumps is dumps_fn (the client's callable, a client callback) or self._serializer.dumps (line 306): one of the 6 serializers or a client object
+313:30 call  self._multi_set(tmp_pairs, ttl=self._get_ttl(ttl), _conn=...
+    -> aiocache.base.BaseCache._multi_set
+    -> aiocache.backends.memory.SimpleMemoryBackend._multi_set
+    -> aiocache.backends.memcached.MemcachedBackend._multi_set
+    -> aiocache.backends.redis.RedisBackend._multi_set
+    note: self is one of the 7 caches
+313:59 call  self._get_ttl(ttl)
+    -> aiocache.base.BaseCache._get_ttl
+315:21 call  logger.debug( "MULTI_SET %s %d (%.4f)s", [key for key, va...
+    -> logging.Logger.debug
+318:16 call  len(tmp_pairs)
+    -> <builtin>.len
+319:27 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._multi_set]
+324:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.delete]
+341:31 call  time.monotonic()
+    -> time.monotonic
+343:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+344:33 call  self._delete(ns_key, _conn=_conn)
+    -> aiocache.base.BaseCache._delete
+    -> aiocache.backends.memory.SimpleMemoryBackend._delete
+    -> aiocache.backends.memcached.MemcachedBackend._delete
+    -> aiocache.backends.redis.RedisBackend._delete
+    note: self is one of the 7 caches
+345:21 call  logger.debug("DELETE %s %d (%.4f)s", ns_key, ret, time.mo...
+    -> logging.Logger.debug
+345:73 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._delete]
+349:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.exists]
+366:31 call  time.monotonic()
+    -> time.monotonic
+368:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+369:33 call  self._exists(ns_key, _conn=_conn)
+    -> aiocache.base.BaseCache._exists
+    -> aiocache.backends.memory.SimpleMemoryBackend._exists
+    -> aiocache.backends.memcached.MemcachedBackend._exists
+    -> aiocache.backends.redis.RedisBackend._exists
+    note: self is one of the 7 caches
+370:21 call  logger.debug("EXISTS %s %d (%.4f)s", ns_key, ret, time.mo...
+    -> logging.Logger.debug
+370:73 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._exists]
+374:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.increment]
+394:31 call  time.monotonic()
+    -> time.monotonic
+396:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+397:36 call  self._increment(ns_key, delta, _conn=_conn)
+    -> aiocache.base.BaseCache._increment
+    -> aiocache.backends.memory.SimpleMemoryBackend._increment
+    -> aiocache.backends.memcached.MemcachedBackend._increment
+    -> aiocache.backends.redis.RedisBackend._increment
+    note: self is one of the 7 caches
+398:21 call  logger.debug("INCREMENT %s %d (%.4f)s", ns_key, ret, time...
+    -> logging.Logger.debug
+398:76 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._increment]
+402:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.expire]
+420:31 call  time.monotonic()
+    -> time.monotonic
+422:32 call  self.build_key(key, namespace=ns)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: self.build_key is key_builder or self._build_key (base.py:117). key_builder is the client's callable (a client callback); the package passes none. self._build_key is BaseCache._build_key, or the override of MemcachedCache or RedisCache
+423:33 call  self._expire(ns_key, ttl, _conn=_conn)
+    -> aiocache.base.BaseCache._expire
+    -> aiocache.backends.memory.SimpleMemoryBackend._expire
+    -> aiocache.backends.memcached.MemcachedBackend._expire
+    -> aiocache.backends.redis.RedisBackend._expire
+    note: self is one of the 7 caches
+424:21 call  logger.debug("EXPIRE %s %d (%.4f)s", ns_key, ret, time.mo...
+    -> logging.Logger.debug
+424:73 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._expire]
+428:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.clear]
+445:31 call  time.monotonic()
+    -> time.monotonic
+446:32 call  self._clear(namespace, _conn=_conn)
+    -> aiocache.base.BaseCache._clear
+    -> aiocache.backends.memory.SimpleMemoryBackend._clear
+    -> aiocache.backends.memcached.MemcachedBackend._clear
+    -> aiocache.backends.redis.RedisBackend._clear
+    note: self is one of the 7 caches
+447:21 call  logger.debug("CLEAR %s %d (%.4f)s", namespace, ret, time....
+    -> logging.Logger.debug
+447:75 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._clear]
+451:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.raw]
+471:31 call  time.monotonic()
+    -> time.monotonic
+472:30 call  self._raw( command, *args, encoding=self.serializer.encod...
+    -> aiocache.base.BaseCache._raw
+    -> aiocache.backends.memory.SimpleMemoryBackend._raw
+    -> aiocache.backends.memcached.MemcachedBackend._raw
+    -> aiocache.backends.redis.RedisBackend._raw
+    note: self is one of the 7 caches
+473:43 getattr  self.serializer
+    -> aiocache.base.BaseCache.serializer
+475:21 call  logger.debug("%s (%.4f)s", command, time.monotonic() - st...
+    -> logging.Logger.debug
+475:59 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._raw]
+479:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache._redlock_release]
+482:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[aiocache.base.BaseCache.close]
+493:31 call  time.monotonic()
+    -> time.monotonic
+494:32 call  self._close(*args, _conn=_conn, **kwargs)
+    -> aiocache.base.BaseCache._close
+    -> aiocache.backends.memcached.MemcachedBackend._close
+    -> aiocache.backends.redis.RedisBackend._close
+    note: self is one of the 7 caches; the memory backends inherit BaseCache._close
+495:21 call  logger.debug("CLOSE (%.4f)s", time.monotonic() - start)
+    -> logging.Logger.debug
+495:53 call  time.monotonic()
+    -> time.monotonic
+
+[aiocache.base.BaseCache._build_key]
+503:33 call  "{}{}".format(namespace, _ensure_key(key))
+    -> <builtin>.str.format
+    reject *: the formatted values are the namespace (a str) and the client's key (a str, base.py:150, or an Enum's value), not a cache
+503:56 call  _ensure_key(key)
+    -> aiocache.base._ensure_key
+505:33 call  "{}{}".format(self.namespace, _ensure_key(key))
+    -> <builtin>.str.format
+    reject *: the formatted values are the namespace (a str) and the client's key (a str, base.py:150, or an Enum's value), not a cache
+505:61 call  _ensure_key(key)
+    -> aiocache.base._ensure_key
+
+[aiocache.base.BaseCache.get_connection]
+512:21 call  _Conn(self)
+    -> aiocache.base._Conn.__init__
+
+[aiocache.base.BaseCache.__aexit__]
+527:25 call  self.close()
+    -> aiocache.base.API.timeout._timeout
+    reject aiocache.base.BaseCache.close: the attribute close of a cache is the wrapper that @API.timeout made (base.py:484); BaseCache.close runs from API.timeout._timeout
+    note: no cache class overrides close
+
+[aiocache.base._Conn.__aenter__]
+536:52 call  self._cache.acquire_conn()
+    -> aiocache.base.BaseCache.acquire_conn
+
+[aiocache.base._Conn.__aexit__]
+540:39 call  self._cache.release_conn(self._conn)
+    -> aiocache.base.BaseCache.release_conn
+
+[aiocache.base._Conn.__getattr__]
+543:44 call  self._cache.__getattribute__(name)
+    -> <builtin>.object.__getattribute__
+    -> aiocache.base.BaseCache.serializer
+    note: self._cache is the cache of BaseCache.get_connection (base.py:512); object.__getattribute__ runs the property that the name selects. name is the attribute that the client loads from the _Conn; by rule B2 the names in scope are those that the tests and documentation load: timeout, namespace and serializer (tests/ut/test_base.py:615-617). serializer is a property of BaseCache, whose getter object.__getattribute__ calls back; see aiocache.md, J3
+
+[aiocache.base._Conn._inject_conn._do_inject_conn]
+548:33 call  getattr(self._cache, cmd_name)
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver self._cache is the cache of the _Conn, not a _Conn
+548:56 call  getattr(self._cache, cmd_name)(*args, _conn=self._conn, *...
+    -> aiocache.base.API.aiocache_enabled.enabled._enabled
+    note: cmd_name is the name of a command of API.CMDS (base.py:560-561; _Conn is private and the package calls _inject_conn only there), so getattr returns the wrapper _enabled of that command, bound to the cache
+
+[aiocache.base._ensure_key]
+554:18 call  isinstance(key, Enum)
+    -> <builtin>.isinstance
+
+== aiocache.decorators
+
+[aiocache.decorators]
+11:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+
+[aiocache.decorators.cached.__call__]
+94:36 call  caches.get(self.alias)
+    -> aiocache.factory.CacheHandler.get
+    reject aiocache.base.BaseCache.get: caches is the CacheHandler made at factory.py:256, not a cache
+96:27 call  getattr(self, f'_{arg}', None)
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is the decorator object self
+96:37 format  {arg}
+    reject *: arg is a str of the tuple ("serializer", "namespace", "plugins")
+97:35 call  logger.warning(f"Using cache alias; ignoring '{arg}' argu...
+    -> logging.Logger.warning
+97:67 format  {arg}
+    reject *: arg is a str of the tuple ("serializer", "namespace", "plugins")
+99:36 call  _get_cache( cache=self._cache, serializer=self._serialize...
+    -> aiocache.decorators._get_cache
+    reject aiocache.base.API.plugins._plugins: the argument self._plugins is the plugins list given to cached, not the closure API.plugins._plugins; _get_cache does not call it
+107:10 decorator  @functools.wraps(f)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+107:25 call  functools.wraps(f)
+    -> functools.wraps
+
+[aiocache.decorators.cached.__call__.wrapper]
+109:40 call  self.decorator(f, *args, **kwargs)
+    -> aiocache.decorators.cached.decorator
+    -> aiocache.decorators.cached_stampede.decorator
+    reject aiocache.decorators.multi_cached.decorator: self is a cached or a cached_stampede (which inherits __call__); multi_cached has its own __call__
+    note: self is the cached object whose __call__ made this wrapper
+
+[aiocache.decorators.cached.decorator]
+117:33 call  self.get_cache_key(f, args, kwargs)
+    -> aiocache.decorators.cached.get_cache_key
+120:46 call  self.get_from_cache(key)
+    -> aiocache.decorators.cached.get_from_cache
+    reject aiocache.decorators.multi_cached.get_from_cache: self is a cached object
+124:25 call  f(*args, **kwargs)
+    note: f is the client's function that cached decorates (decorators.py:92, 109); the package decorates none of its own functions with cached, and the parameter takes any callable (rule B3), so no package callee
+126:32 call  self.skip_cache_func(result)
+    -> aiocache.decorators.cached.<lambda1>
+    note: skip_cache_func is the client's callable (a client callback) or the default lambda x: False of cached.__init__ (decorators.py:70)
+    exclude aiocache.decorators.multi_cached.<lambda1>: the default skip_cache_func of multi_cached (decorators.py:319) is set only on multi_cached objects
+131:40 call  self.set_in_cache(key, result)
+    -> aiocache.decorators.cached.set_in_cache
+    reject aiocache.decorators.multi_cached.set_in_cache: self is a cached object
+134:36 call  asyncio.create_task(self.set_in_cache(key, result))
+    -> asyncio.create_task
+134:54 call  self.set_in_cache(key, result)
+    -> aiocache.decorators.cached.set_in_cache
+    reject aiocache.decorators.multi_cached.set_in_cache: self is a cached object
+
+[aiocache.decorators.cached.get_cache_key]
+142:36 call  self.key_builder(f, *args, **kwargs)
+    note: key_builder is the client's callable (decorators.py:43, 80; the default is None); the package passes none, so no package callee (a client callback)
+    exclude aiocache.decorators.multi_cached.__init__.<lambda1>: the default key builder of multi_cached (decorators.py:328) is set only on multi_cached objects
+144:35 call  self._key_from_args(f, args, kwargs)
+    -> aiocache.decorators.cached._key_from_args
+
+[aiocache.decorators.cached._key_from_args]
+147:32 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+147:45 call  kwargs.items()
+    -> <builtin>.dict.items
+    note: kwargs is the dict of the **kwargs of the wrapper (decorators.py:108), a package value
+151:18 call  str(args[1:] if self.noself else args)
+    -> <builtin>.str
+    reject *: args are the client's arguments to the client's function; a cache passed there is an arbitrary package object where any object is accepted (rule B3)
+152:18 call  str(ordered_kwargs)
+    -> <builtin>.str
+    reject *: ordered_kwargs holds the client's keyword arguments to the client's function; a cache passed there is an arbitrary package object where any object is accepted (rule B3)
+
+[aiocache.decorators.cached.get_from_cache]
+157:40 call  self.cache.get(key)
+    -> aiocache.base.API.aiocache_enabled.enabled._enabled
+    reject aiocache.base.BaseCache.get: the attribute get of a cache is the wrapper _enabled that the decorators at base.py:177-180 made; BaseCache.get runs from API.plugins._plugins
+    reject aiocache.factory.CacheHandler.get: self.cache is a cache, not the CacheHandler
+    note: self.cache is the cache that cached.__call__ sets: caches.get(alias) or _get_cache(...) (decorators.py:94, 99)
+159:29 call  logger.exception("Couldn't retrieve %s, unexpected error"...
+    -> logging.Logger.exception
+
+[aiocache.decorators.cached.set_in_cache]
+164:33 call  self.cache.set(key, value, ttl=self.ttl)
+    -> aiocache.base.API.aiocache_enabled.enabled._enabled
+    reject aiocache.base.BaseCache.set: the attribute set of a cache is the wrapper _enabled that the decorators at base.py:249-252 made; BaseCache.set runs from API.plugins._plugins
+    note: self.cache is the cache that cached.__call__ sets (decorators.py:94, 99)
+166:29 call  logger.exception("Couldn't set %s in key %s, unexpected e...
+    -> logging.Logger.exception
+
+[aiocache.decorators.cached_stampede.__init__]
+212:14 call  super()
+    -> <builtin>.super
+212:25 call  super().__init__(**kwargs)
+    -> aiocache.decorators.cached.__init__
+    reject *: the base class of cached_stampede is cached; super().__init__ is cached.__init__
+
+[aiocache.decorators.cached_stampede.decorator]
+216:33 call  self.get_cache_key(f, args, kwargs)
+    -> aiocache.decorators.cached.get_cache_key
+218:42 call  self.get_from_cache(key)
+    -> aiocache.decorators.cached.get_from_cache
+    reject aiocache.decorators.multi_cached.get_from_cache: self is a cached_stampede, which inherits cached.get_from_cache
+222:20 async-with  RedLock(self.cache, key, self.lease)
+    -> aiocache.lock.RedLock.__aenter__
+    -> aiocache.lock.RedLock.__aexit__
+    reject *: the context manager is a RedLock
+222:27 call  RedLock(self.cache, key, self.lease)
+    -> aiocache.lock.RedLock.__init__
+223:46 call  self.get_from_cache(key)
+    -> aiocache.decorators.cached.get_from_cache
+    reject aiocache.decorators.multi_cached.get_from_cache: self is a cached_stampede, which inherits cached.get_from_cache
+227:29 call  f(*args, **kwargs)
+    note: f is the client's function that cached_stampede decorates (cached.__call__, decorators.py:109); the package decorates none of its own functions, and the parameter takes any callable (rule B3), so no package callee
+229:36 call  self.skip_cache_func(result)
+    -> aiocache.decorators.cached.<lambda1>
+    note: skip_cache_func is the client's callable (a client callback) or the default lambda x: False of cached.__init__ (decorators.py:70), which cached_stampede.__init__ reaches through super()
+    exclude aiocache.decorators.multi_cached.<lambda1>: the default skip_cache_func of multi_cached (decorators.py:319) is set only on multi_cached objects
+232:36 call  self.set_in_cache(key, result)
+    -> aiocache.decorators.cached.set_in_cache
+    reject aiocache.decorators.multi_cached.set_in_cache: self is a cached_stampede, which inherits cached.set_in_cache
+
+[aiocache.decorators._get_cache]
+238:17 call  Cache(cache, serializer=serializer, plugins=plugins, **ca...
+    -> aiocache.factory.Cache.__new__
+    note: Cache defines __new__ only; it returns an instance of cache_class, not of Cache, so type.__call__ runs no __init__ after it (Cache.__new__ calls __init__ itself, factory.py:68)
+
+[aiocache.decorators._get_args_dict]
+244:47 call  inspect.signature(func)
+    -> inspect.signature
+244:70 call  inspect.signature(func).parameters.items()
+    -> types.MappingProxyType.items
+    note: inspect.Signature.parameters is a mappingproxy
+248:31 call  dict(zip(args_names, args))
+    -> <builtin>.dict
+248:35 call  zip(args_names, args)
+    -> <builtin>.zip
+
+[aiocache.decorators.multi_cached.__call__]
+342:36 call  caches.get(self.alias)
+    -> aiocache.factory.CacheHandler.get
+    reject aiocache.base.BaseCache.get: caches is the CacheHandler made at factory.py:256, not a cache
+344:27 call  getattr(self, f'_{arg}', None)
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is the decorator object self
+344:37 format  {arg}
+    reject *: arg is a str of the tuple ("serializer", "namespace", "plugins")
+345:35 call  logger.warning(f"Using cache alias; ignoring '{arg}' argu...
+    -> logging.Logger.warning
+345:67 format  {arg}
+    reject *: arg is a str of the tuple ("serializer", "namespace", "plugins")
+347:36 call  _get_cache( cache=self._cache, serializer=self._serialize...
+    -> aiocache.decorators._get_cache
+    reject aiocache.base.API.plugins._plugins: the argument self._plugins is the plugins list given to multi_cached, not the closure API.plugins._plugins; _get_cache does not call it
+355:10 decorator  @functools.wraps(f)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+355:25 call  functools.wraps(f)
+    -> functools.wraps
+
+[aiocache.decorators.multi_cached.__call__.wrapper]
+357:40 call  self.decorator(f, *args, **kwargs)
+    -> aiocache.decorators.multi_cached.decorator
+    reject aiocache.decorators.cached.decorator, aiocache.decorators.cached_stampede.decorator: self is the multi_cached object whose __call__ made this wrapper
+
+[aiocache.decorators.multi_cached.decorator]
+367:57 call  self.get_cache_keys(f, args, kwargs)
+    -> aiocache.decorators.multi_cached.get_cache_keys
+370:47 call  self.get_from_cache(*keys)
+    -> aiocache.decorators.multi_cached.get_from_cache
+    reject aiocache.decorators.cached.get_from_cache: self is a multi_cached object
+371:34 call  zip(keys, values)
+    -> <builtin>.zip
+373:40 call  missing_keys.append(key)
+    -> <builtin>.list.append
+379:32 call  list(keys)
+    -> <builtin>.list
+386:25 call  f(*new_args, **kwargs)
+    note: f is the client's function that multi_cached decorates (decorators.py:340, 357); the package decorates none of its own functions, and the parameter takes any callable (rule B3), so no package callee
+387:22 call  result.update(partial)
+    note: result is what the client's function returns, a "dict-like structure" (decorators.py:253): an object that a client callback returns is opaque (rule B5), and "dict-like" does not fix a class (B4)
+389:50 call  result.items()
+    note: result is what the client's function returns, a "dict-like structure" (decorators.py:253): an object that a client callback returns is opaque (rule B5), and "dict-like" does not fix a class (B4)
+389:80 call  self.skip_cache_func(k, v)
+    -> aiocache.decorators.multi_cached.<lambda1>
+    note: skip_cache_func is the client's callable (a client callback) or the default lambda k, v: False of multi_cached.__init__ (decorators.py:319)
+    exclude aiocache.decorators.cached.<lambda1>: the default skip_cache_func of cached (decorators.py:70) is set only on cached objects
+396:40 call  self.set_in_cache(to_cache, f, args, kwargs)
+    -> aiocache.decorators.multi_cached.set_in_cache
+    reject aiocache.decorators.cached.set_in_cache: self is a multi_cached object
+399:36 call  asyncio.create_task(self.set_in_cache(to_cache, f, args, ...
+    -> asyncio.create_task
+399:54 call  self.set_in_cache(to_cache, f, args, kwargs)
+    -> aiocache.decorators.multi_cached.set_in_cache
+    reject aiocache.decorators.cached.set_in_cache: self is a multi_cached object
+
+[aiocache.decorators.multi_cached.get_cache_keys]
+404:35 call  _get_args_dict(f, args, kwargs)
+    -> aiocache.decorators._get_args_dict
+405:29 call  args_dict.get(self.keys_from_attr, [])
+    -> <builtin>.dict.get
+    reject *: args_dict is the dict that _get_args_dict returns (decorators.py:248)
+406:33 call  self.key_builder(key, f, *args, **kwargs)
+    -> aiocache.decorators.multi_cached.__init__.<lambda1>
+    note: key_builder is the client's callable (a client callback) or the default lambda of multi_cached.__init__ (decorators.py:328)
+409:24 call  list(args)
+    -> <builtin>.list
+412:42 call  args_names.index(self.keys_from_attr)
+    -> <builtin>.tuple.index
+    note: args_names is a slice of f.__code__.co_varnames (line 408), a tuple: f is the decorated function, whose code object the package reads (rule B4 by the concrete type); see aiocache.md, J5
+
+[aiocache.decorators.multi_cached.get_from_cache]
+421:48 call  self.cache.multi_get(keys)
+    -> aiocache.base.API.aiocache_enabled.enabled._enabled
+    reject aiocache.base.BaseCache.multi_get: the attribute multi_get of a cache is the wrapper _enabled that the decorators at base.py:210-213 made; BaseCache.multi_get runs from API.plugins._plugins
+    note: self.cache is the cache that multi_cached.__call__ sets (decorators.py:342, 347)
+424:29 call  logger.exception("Couldn't retrieve %s, unexpected error"...
+    -> logging.Logger.exception
+425:32 call  len(keys)
+    -> <builtin>.len
+
+[aiocache.decorators.multi_cached.set_in_cache]
+429:39 call  self.cache.multi_set( [(self.key_builder(k, fn, *fn_args,...
+    -> aiocache.base.API.aiocache_enabled.enabled._enabled
+    reject aiocache.base.BaseCache.multi_set: the attribute multi_set of a cache is the wrapper _enabled that the decorators at base.py:286-289 made; BaseCache.multi_set runs from API.plugins._plugins
+    note: self.cache is the cache that multi_cached.__call__ sets (decorators.py:342, 347)
+430:35 call  self.key_builder(k, fn, *fn_args, **fn_kwargs)
+    -> aiocache.decorators.multi_cached.__init__.<lambda1>
+    note: key_builder is the client's callable (a client callback) or the default lambda of multi_cached.__init__ (decorators.py:328)
+430:94 call  result.items()
+    -> <builtin>.dict.items
+    note: the package passes the dict to_cache, a dict comprehension (decorators.py:389, 396, 399); a mapping that a client passes is opaque (rule B5)
+434:29 call  logger.exception("Couldn't set %s, unexpected error", res...
+    -> logging.Logger.exception
+
+== aiocache.factory
+
+[aiocache.factory]
+11:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+59:32 call  AIOCACHE_CACHES.get("redis")
+    -> <builtin>.dict.get
+    reject *: AIOCACHE_CACHES is the dict of __init__.py:11
+60:36 call  AIOCACHE_CACHES.get("memcached")
+    -> <builtin>.dict.get
+    reject *: AIOCACHE_CACHES is the dict of __init__.py:11
+71:6 decorator  @classmethod
+    -> <builtin>.classmethod
+75:6 decorator  @classmethod
+    -> <builtin>.classmethod
+84:6 decorator  @classmethod
+    -> <builtin>.classmethod
+256:22 call  CacheHandler()
+    -> aiocache.factory.CacheHandler.__init__
+
+[aiocache.factory._class_from_string]
+15:34 call  class_path.split(".")
+    -> <builtin>.str.split
+16:36 call  class_path.rstrip(class_name)
+    -> <builtin>.str.rstrip
+16:55 call  class_path.rstrip(class_name).rstrip(".")
+    -> <builtin>.str.rstrip
+17:19 call  getattr(__import__(module_name, fromlist=[class_name]), c...
+    -> <builtin>.getattr
+    reject aiocache.base._Conn.__getattr__: the receiver is the module that __import__ returns
+17:30 call  __import__(module_name, fromlist=[class_name])
+    -> <builtin>.__import__
+
+[aiocache.factory._create_cache]
+22:29 call  serializer.pop("class")
+    -> <builtin>.dict.pop
+    note: serializer is the serializer entry of an alias config; the package's own default config holds a dict there (factory.py:131), reached through caches.get("default"); a config of the client is a "dict-like structure" (factory.py:205), opaque (rules B4, B5)
+23:33 call  _class_from_string(cls)
+    -> aiocache.factory._class_from_string
+23:52 call  isinstance(cls, str)
+    -> <builtin>.isinstance
+24:25 call  cls(**serializer)
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    -> aiocache.serializers.serializers.PickleSerializer.__init__
+    note: No package code, test or documented example puts MsgPackSerializer in an alias config. The default config names StringSerializer; config tests/examples name StringSerializer, NullSerializer, JsonSerializer and PickleSerializer. docs/serializers.rst:54 is an autoclass entry for backend serialization, not a config-class choice. Factory config uses Dict[str, object], no BaseSerializer type/check. The ledger admitted all six serializers by transferring the BaseCache.serializer role.
+
+29:29 call  plugin.pop("class")
+    note: plugin is an entry of the plugins list of an alias config; the package's default config has no plugins, and a config of the client is a "dict-like structure" (factory.py:205), opaque (rules B4, B5)
+30:37 call  _class_from_string(cls)
+    -> aiocache.factory._class_from_string
+30:56 call  isinstance(cls, str)
+    -> <builtin>.isinstance
+31:37 call  plugins_instances.append(cls(**plugin))
+    -> <builtin>.list.append
+31:41 call  cls(**plugin)
+    note: cls is a config-role plugin class: TimingPlugin or HitMissRatioPlugin (factory.py:223-224), or an opaque client class. The two named package classes inherit object.__init__, so their construction adds no edge. BasePlugin has no config-role witness here; its separate backend-plugin role does not broaden this input.
+33:31 call  _class_from_string(cache)
+    -> aiocache.factory._class_from_string
+33:52 call  isinstance(cache, str)
+    -> <builtin>.isinstance
+34:21 call  cache(serializer=serializer, plugins=plugins_instances, *...
+    -> aiocache.backends.memory.SimpleMemoryCache.__init__
+    -> aiocache.backends.redis.RedisCache.__init__
+    note: cache is the cache class that the config names (a class, or its path that _class_from_string resolves), or a client class (a client callback). No annotation or check names a package class for this role, so rule B2 decides by the classes that the package, its tests and its documented examples put in a config: SimpleMemoryCache (the default config, factory.py:130; the docstring, factory.py:210, 234; tests/ut/test_factory.py:152-331; examples/cached_alias_config.py:8, which docs/configuration.rst:15 includes) and RedisCache (factory.py:216; tests/ut/test_factory.py:188-358; examples/cached_alias_config.py:14); see aiocache.md, J4 (lead ruling)
+    exclude aiocache.base.BaseCache.__init__, aiocache.backends.memory.SimpleMemoryBackend.__init__, aiocache.backends.memcached.MemcachedBackend.__init__, aiocache.backends.memcached.MemcachedCache.__init__, aiocache.backends.redis.RedisBackend.__init__: no package code, test or documented example puts these classes in an alias config (MemcachedCache is in docs/caches.rst:81-84 only as an autoclass entry); the issubclass check of Cache.__new__ (factory.py:63) belongs to another parameter (lead ruling on J4)
+
+[aiocache.factory.Cache.__new__]
+63:43 call  issubclass(cache_class, BaseCache)
+    -> <builtin>.issubclass
+64:35 call  InvalidCacheType( "Invalid cache type, you can only use {...
+    -> <builtin>.Exception.__init__
+    note: InvalidCacheType (exceptions.py:1) has no __init__; the first __init__ of its MRO is that of Exception
+65:65 call  "Invalid cache type, you can only use {}".format(list(AIO...
+    -> <builtin>.str.format
+    reject *: the formatted value is a list of str (the keys of AIOCACHE_CACHES)
+65:70 call  list(AIOCACHE_CACHES.keys())
+    -> <builtin>.list
+65:91 call  AIOCACHE_CACHES.keys()
+    -> <builtin>.dict.keys
+67:39 call  cache_class.__new__(cache_class, **kwargs)
+    -> <builtin>.object.__new__
+    reject aiocache.factory.Cache.__new__: cache_class is a subclass of BaseCache (line 63), not of Cache; no cache class defines __new__, so this is object.__new__
+68:26 call  instance.__init__(**kwargs)
+    -> aiocache.base.BaseCache.__init__
+    -> aiocache.backends.memory.SimpleMemoryBackend.__init__
+    -> aiocache.backends.memory.SimpleMemoryCache.__init__
+    -> aiocache.backends.memcached.MemcachedBackend.__init__
+    -> aiocache.backends.memcached.MemcachedCache.__init__
+    -> aiocache.backends.redis.RedisBackend.__init__
+    -> aiocache.backends.redis.RedisCache.__init__
+    reject *: instance is an instance of cache_class, a subclass of BaseCache (line 63)
+    note: the issubclass check (line 63) names BaseCache for the role of cache_class (rule B2), so cache_class is any of the 7 caches, all public, or a client subclass
+
+[aiocache.factory.Cache.get_scheme_class]
+78:40 call  cls._get_cache_class(scheme)
+    -> aiocache.factory.Cache._get_cache_class
+80:35 call  InvalidCacheType( "Invalid cache type, you can only use {...
+    -> <builtin>.Exception.__init__
+    note: InvalidCacheType (exceptions.py:1) has no __init__; the first __init__ of its MRO is that of Exception
+81:65 call  "Invalid cache type, you can only use {}".format(list(AIO...
+    -> <builtin>.str.format
+    reject *: the formatted value is a list of str (the keys of AIOCACHE_CACHES)
+81:70 call  list(AIOCACHE_CACHES.keys())
+    -> <builtin>.list
+81:91 call  AIOCACHE_CACHES.keys()
+    -> <builtin>.dict.keys
+
+[aiocache.factory.Cache.from_url]
+107:43 call  urllib.parse.urlparse(url)
+    -> urllib.parse.urlparse
+108:22 call  dict(urllib.parse.parse_qsl(parsed_url.query))
+    -> <builtin>.dict
+108:45 call  urllib.parse.parse_qsl(parsed_url.query)
+    -> urllib.parse.parse_qsl
+109:45 call  Cache.get_scheme_class(parsed_url.scheme)
+    -> aiocache.factory.Cache.get_scheme_class
+112:26 call  kwargs.update(cache_class.parse_uri_path(parsed_url.path))
+    -> <builtin>.dict.update
+112:53 call  cache_class.parse_uri_path(parsed_url.path)
+    -> aiocache.backends.memory.SimpleMemoryCache.parse_uri_path
+    -> aiocache.backends.redis.RedisCache.parse_uri_path
+    -> aiocache.backends.memcached.MemcachedCache.parse_uri_path
+    note: cache_class is a value of AIOCACHE_CACHES (Cache._get_cache_class, factory.py:73): SimpleMemoryCache, and RedisCache and MemcachedCache when redis and aiomcache are installed (__init__.py:11-31)
+123:21 call  Cache(cache_class, **kwargs)
+    -> aiocache.factory.Cache.__new__
+    note: Cache defines __new__ only; it returns an instance of cache_class, so no __init__ of Cache runs after it
+
+[aiocache.factory.CacheHandler.get]
+170:39 call  self.get_alias_config(alias)
+    -> aiocache.factory.CacheHandler.get_alias_config
+171:30 call  _create_cache(**deepcopy(config))
+    -> aiocache.factory._create_cache
+171:41 call  deepcopy(config)
+    -> copy.deepcopy
+
+[aiocache.factory.CacheHandler.create]
+183:39 call  self.get_alias_config(alias)
+    -> aiocache.factory.CacheHandler.get_alias_config
+185:29 call  _create_cache(**{**config, **kwargs})
+    -> aiocache.factory._create_cache
+
+[aiocache.factory.CacheHandler.get_alias_config]
+188:33 call  self.get_config()
+    -> aiocache.factory.CacheHandler.get_config
+190:27 call  KeyError( "Could not find config for '{0}', ensure you in...
+    -> <builtin>.KeyError
+192:80 call  "Could not find config for '{0}', ensure you include {0} ...
+    -> <builtin>.str.format
+    reject *: alias is the str name of a cache alias (annotated str at factory.py:155, 175)
+
+[aiocache.factory.CacheHandler.get_config]
+201:24 call  deepcopy(self._config)
+    -> copy.deepcopy
+
+[aiocache.factory.CacheHandler.set_config]
+250:29 call  ValueError("default config must be provided")
+    -> <builtin>.ValueError
+251:39 call  config.keys()
+    -> <builtin>.dict.keys
+    note: A fresh CacheHandler stores the package-built default dict (factory.py:128-133), and get_config returns its deepcopy (197-201). docs/configuration.rst:6-10 and set_config's docstring name the same configuration role, so h.set_config(h.get_config()) reaches dict.keys. Arbitrary client dict-like values remain opaque (B2, B5).
+252:29 call  self._caches.pop(config_name, None)
+    -> <builtin>.dict.pop
+
+== aiocache.lock
+
+[aiocache.lock.RedLock.__init__]
+67:41 call  self.client.build_key(key + "-lock")
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: client is a cache (annotation BaseCache); its build_key is key_builder or self._build_key (base.py:117): the client's callable (a client callback), or BaseCache._build_key or the override of MemcachedCache or RedisCache
+
+[aiocache.lock.RedLock.__aenter__]
+72:35 call  self._acquire()
+    -> aiocache.lock.RedLock._acquire
+    reject aiocache.lock.OptimisticLock._acquire: self is a RedLock
+
+[aiocache.lock.RedLock._acquire]
+75:26 call  str(uuid.uuid4())
+    -> <builtin>.str
+    reject *: the argument is a uuid.UUID
+75:37 call  uuid.uuid4()
+    -> uuid.uuid4
+77:35 call  self.client._add(self.key, self._value, ttl=self.lease)
+    -> aiocache.base.BaseCache._add
+    -> aiocache.backends.memory.SimpleMemoryBackend._add
+    -> aiocache.backends.memcached.MemcachedBackend._add
+    -> aiocache.backends.redis.RedisBackend._add
+    note: self.client is one of the 7 caches (annotation BaseCache, lock.py:65)
+78:54 call  asyncio.Event()
+    -> asyncio.Event
+80:41 call  self._wait_for_release()
+    -> aiocache.lock.RedLock._wait_for_release
+
+[aiocache.lock.RedLock._wait_for_release]
+84:35 call  asyncio.wait_for(RedLock._EVENTS[self.key].wait(), self.l...
+    -> asyncio.wait_for
+84:66 call  RedLock._EVENTS[self.key].wait()
+    -> asyncio.Event.wait
+
+[aiocache.lock.RedLock.__aexit__]
+91:28 call  self._release()
+    -> aiocache.lock.RedLock._release
+
+[aiocache.lock.RedLock._release]
+94:53 call  self.client._redlock_release(self.key, self._value)
+    -> aiocache.base.BaseCache._redlock_release
+    -> aiocache.backends.memory.SimpleMemoryBackend._redlock_release
+    -> aiocache.backends.memcached.MemcachedBackend._redlock_release
+    -> aiocache.backends.redis.RedisBackend._redlock_release
+    note: self.client is one of the 7 caches (annotation BaseCache, lock.py:65)
+96:32 call  RedLock._EVENTS.pop(self.key)
+    -> <builtin>.dict.pop
+96:46 call  RedLock._EVENTS.pop(self.key).set()
+    -> asyncio.Event.set
+    reject aiocache.base.BaseCache.set: the receiver is the asyncio.Event that RedLock._acquire stored in _EVENTS (lock.py:78)
+
+[aiocache.lock.OptimisticLock.__init__]
+139:44 call  self.client.build_key(key)
+    -> aiocache.base.BaseCache._build_key
+    -> aiocache.backends.memcached.MemcachedCache._build_key
+    -> aiocache.backends.redis.RedisCache._build_key
+    note: client is a cache (annotation BaseCache); its build_key is key_builder or self._build_key (base.py:117): the client's callable (a client callback), or BaseCache._build_key or the override of MemcachedCache or RedisCache
+
+[aiocache.lock.OptimisticLock.__aenter__]
+143:35 call  self._acquire()
+    -> aiocache.lock.OptimisticLock._acquire
+    reject aiocache.lock.RedLock._acquire: self is an OptimisticLock
+
+[aiocache.lock.OptimisticLock._acquire]
+146:46 call  self.client._gets(self.ns_key)
+    -> aiocache.base.BaseCache._gets
+    -> aiocache.backends.memory.SimpleMemoryBackend._gets
+    -> aiocache.backends.memcached.MemcachedBackend._gets
+    -> aiocache.backends.redis.RedisBackend._gets
+    note: self.client is one of the 7 caches (annotation BaseCache, lock.py:136)
+
+[aiocache.lock.OptimisticLock.cas]
+160:40 call  self.client.set(self.key, value, _cas_token=self._token, ...
+    -> aiocache.base.API.aiocache_enabled.enabled._enabled
+    reject aiocache.base.BaseCache.set: the attribute set of a cache is the wrapper _enabled that the decorators at base.py:249-252 made; BaseCache.set runs from API.plugins._plugins
+    note: self.client is one of the 7 caches (annotation BaseCache, lock.py:136)
+162:38 call  OptimisticLockError("Value has changed since the lock sta...
+    -> <builtin>.Exception.__init__
+    note: OptimisticLockError (lock.py:166) has no __init__; the first __init__ of its MRO is that of Exception
+
+== aiocache.plugins
+
+[aiocache.plugins]
+10:6 decorator  @classmethod
+    -> <builtin>.classmethod
+19:20 call  BasePlugin.add_hook( BasePlugin.do_nothing, ["pre_{}".for...
+    -> aiocache.plugins.BasePlugin.add_hook
+    reject aiocache.plugins.BasePlugin.do_nothing: add_hook stores do_nothing as a class attribute with setattr; it does not call it
+20:44 call  "pre_{}".format(method.__name__)
+    -> <builtin>.str.format
+    reject *: method.__name__ is the str name of a command of API.CMDS
+22:20 call  BasePlugin.add_hook( BasePlugin.do_nothing, ["post_{}".fo...
+    -> aiocache.plugins.BasePlugin.add_hook
+    reject aiocache.plugins.BasePlugin.do_nothing: add_hook stores do_nothing as a class attribute with setattr; it does not call it
+23:45 call  "post_{}".format(method.__name__)
+    -> <builtin>.str.format
+    reject *: method.__name__ is the str name of a command of API.CMDS
+34:6 decorator  @classmethod
+    -> <builtin>.classmethod
+58:26 call  TimingPlugin.add_hook( TimingPlugin.save_time(method.__na...
+    -> aiocache.plugins.BasePlugin.add_hook
+    note: TimingPlugin inherits the classmethod add_hook of BasePlugin
+59:31 call  TimingPlugin.save_time(method.__name__)
+    -> aiocache.plugins.TimingPlugin.save_time
+59:67 call  "post_{}".format(method.__name__)
+    -> <builtin>.str.format
+    reject *: method.__name__ is the str name of a command of API.CMDS
+
+[aiocache.plugins.BasePlugin.add_hook]
+13:20 call  setattr(cls, hook, func)
+    -> <builtin>.setattr
+
+[aiocache.plugins.TimingPlugin.save_time.do_save_time]
+37:27 call  hasattr(client, "profiling")
+    -> <builtin>.hasattr
+    reject aiocache.base._Conn.__getattr__: the package passes a BaseCache instance through API.plugins._plugins (base.py:82-84); _do_inject_conn binds the command to that cache (base.py:548). Public hook calls and the publicly returned save_time closure also admit opaque client objects; no annotation, documented example or test gives _Conn this client role.
+40:50 call  client.profiling.get("{}_total".format(method), 0)
+    -> <builtin>.dict.get
+    reject *: client.profiling is the dict that do_save_time sets (plugins.py:38)
+40:68 call  "{}_total".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+41:48 call  client.profiling.get("{}_avg".format(method), 0)
+    -> <builtin>.dict.get
+    reject *: client.profiling is the dict that do_save_time sets (plugins.py:38)
+41:64 call  "{}_avg".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+42:48 call  client.profiling.get("{}_max".format(method), 0)
+    -> <builtin>.dict.get
+    reject *: client.profiling is the dict that do_save_time sets (plugins.py:38)
+42:64 call  "{}_max".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+43:48 call  client.profiling.get("{}_min".format(method))
+    -> <builtin>.dict.get
+    reject *: client.profiling is the dict that do_save_time sets (plugins.py:38)
+43:64 call  "{}_min".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+45:47 call  "{}_total".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+46:45 call  "{}_avg".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+49:45 call  "{}_max".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+49:60 call  max(took, previous_max)
+    -> <builtin>.max
+50:45 call  "{}_min".format(method)
+    -> <builtin>.str.format
+    reject *: method is the str name of a command (plugins.py:59)
+51:20 call  min(took, previous_min)
+    -> <builtin>.min
+
+[aiocache.plugins.HitMissRatioPlugin.post_get]
+72:23 call  hasattr(client, "hit_miss_ratio")
+    -> <builtin>.hasattr
+    reject aiocache.base._Conn.__getattr__: the package passes a BaseCache instance through API.plugins._plugins (base.py:82-84); _do_inject_conn binds the command to that cache (base.py:548). Public hook calls and the publicly returned save_time closure also admit opaque client objects; no annotation, documented example or test gives _Conn this client role.
+
+[aiocache.plugins.HitMissRatioPlugin.post_multi_get]
+86:23 call  hasattr(client, "hit_miss_ratio")
+    -> <builtin>.hasattr
+    reject aiocache.base._Conn.__getattr__: the package passes a BaseCache instance through API.plugins._plugins (base.py:82-84); _do_inject_conn binds the command to that cache (base.py:548). Public hook calls and the publicly returned save_time closure also admit opaque client objects; no annotation, documented example or test gives _Conn this client role.
+91:46 call  len(keys)
+    -> <builtin>.len
+
+== aiocache.serializers
+
+[aiocache.serializers]
+11:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+17:17 call  logger.debug("msgpack not installed, MsgPackSerializer un...
+    -> logging.Logger.debug
+    note: optional import of msgpack (serializers/__init__.py:14-21): both sides run (README default)
+
+== aiocache.serializers.serializers
+
+[aiocache.serializers.serializers]
+5:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+10:17 call  logger.debug("ujson module not found, using json")
+    -> logging.Logger.debug
+    note: optional import of ujson (serializers.py:7-11): both sides run (README default)
+17:17 call  logger.debug("msgpack not installed, MsgPackSerializer un...
+    -> logging.Logger.debug
+    note: optional import of msgpack (serializers.py:13-17): both sides run (README default)
+20:18 call  object()
+    -> <builtin>.object
+
+[aiocache.serializers.serializers.BaseSerializer.__init__]
+29:14 call  super()
+    -> <builtin>.super
+29:25 call  super().__init__(*args, **kwargs)
+    -> <builtin>.object.__init__
+    reject *: the MRO of every package serializer is the class, BaseSerializer, object; after BaseSerializer comes object, so super().__init__ is object.__init__ (a base after BaseSerializer in a client class's MRO is client code)
+
+[aiocache.serializers.serializers.BaseSerializer.dumps]
+33:34 call  NotImplementedError("dumps method must be implemented")
+    -> <builtin>.NotImplementedError
+
+[aiocache.serializers.serializers.BaseSerializer.loads]
+37:34 call  NotImplementedError("loads method must be implemented")
+    -> <builtin>.NotImplementedError
+
+[aiocache.serializers.serializers.StringSerializer.dumps]
+89:19 call  str(value)
+    -> <builtin>.str
+    reject *: value is the client's value to store; a cache stored as a value is an arbitrary package object where any object is accepted (rule B3)
+
+[aiocache.serializers.serializers.PickleSerializer.__init__]
+106:14 call  super()
+    -> <builtin>.super
+106:25 call  super().__init__(*args, **kwargs)
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    reject *: the base class of PickleSerializer is BaseSerializer; super().__init__ is BaseSerializer.__init__
+
+[aiocache.serializers.serializers.PickleSerializer.dumps]
+116:28 call  pickle.dumps(value, protocol=self.protocol)
+    -> pickle.dumps
+    reject *: pickle is the standard module; no package class defines __reduce__, __reduce_ex__ or __getstate__ that pickling would call
+    note: the value to store is the client's value; pickle calls no package code for it
+
+[aiocache.serializers.serializers.PickleSerializer.loads]
+127:28 call  pickle.loads(value)
+    -> pickle.loads
+    reject *: pickle is the standard module, not a serializer of the package
+
+[aiocache.serializers.serializers.JsonSerializer.dumps]
+148:26 call  json.dumps(value)
+    -> json.dumps
+    -> ujson.dumps
+    reject *: json is the module ujson or the standard json (serializers.py:7-11), not a serializer of the package
+    note: optional import (serializers.py:7-11): json is ujson when it is installed, else the standard json; both sides run (README default)
+
+[aiocache.serializers.serializers.JsonSerializer.loads]
+159:26 call  json.loads(value)
+    -> json.loads
+    -> ujson.loads
+    reject *: json is the module ujson or the standard json (serializers.py:7-11), not a serializer of the package
+    note: optional import (serializers.py:7-11): json is ujson when it is installed, else the standard json; both sides run (README default)
+
+[aiocache.serializers.serializers.MsgPackSerializer.__init__]
+175:31 call  RuntimeError("msgpack not installed, MsgPackSerializer un...
+    -> <builtin>.RuntimeError
+    note: msgpack is None when the optional import fails (serializers.py:13-17); both sides run (README default)
+177:14 call  super()
+    -> <builtin>.super
+177:25 call  super().__init__(*args, **kwargs)
+    -> aiocache.serializers.serializers.BaseSerializer.__init__
+    reject *: the base class of MsgPackSerializer is BaseSerializer; super().__init__ is BaseSerializer.__init__
+
+[aiocache.serializers.serializers.MsgPackSerializer.dumps]
+186:29 call  msgpack.dumps(value)
+    -> msgpack.dumps
+    reject *: msgpack is the third-party module, not a serializer of the package
+
+[aiocache.serializers.serializers.MsgPackSerializer.loads]
+198:29 call  msgpack.loads(value, raw=raw, use_list=self.use_list)
+    -> msgpack.loads
+    reject *: msgpack is the third-party module, not a serializer of the package

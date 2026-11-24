@@ -1,0 +1,28 @@
+# The test environment of markdown2 2.5.5 (batch 3): the full
+# closure on CPython 3.14, each file by version and SHA-256. markdown2
+# itself is not installed: the trace uses the checkout projects/markdown2.
+#   pip install --require-hashes --only-binary :all: --no-deps -r markdown2.txt
+# "read" names the artifacts that the security scan downloaded and read (the
+# hash is that of the scanned file); "PyPI" names the hashes taken from
+# PyPI's JSON for that version (pinned by hash, not read). wavedrom is not
+# installed: it has no wheel (sdist only), so its two cases are deselected.
+
+# PyPI.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# PyPI (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# PyPI (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# PyPI (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# PyPI (pytest; markdown2's extra code_syntax_highlighting). The version
+# current at the release of markdown2 2.5.5 (2026-03-02).
+pygments==2.19.2 \
+    --hash=sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b
+# Read (whole package). markdown2's extra latex.
+latex2mathml==3.78.1 \
+    --hash=sha256:f089b6d75e85b937f99693c93e8c16c0804008672c3dd2a3d25affd36f238100

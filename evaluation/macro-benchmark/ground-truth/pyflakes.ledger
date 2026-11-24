@@ -1,0 +1,2358 @@
+# Call-site ledger of pyflakes at 5324946c5d8602697f5df6d98ad162920b3e5d61 (4.1.0).
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md; pyflakes.md
+# shows how this ledger applies them and records each judgement. The package
+# supports Python 3.11 and later (setup.py: python_requires='>=3.11'); the
+# branches for 3.12 to 3.15 run. The checker dispatches on ast node classes by
+# name (getNodeHandler) and runs deferred callables (_run_deferred): see
+# pyflakes.md, "Node dispatch" and "Deferred functions".
+default reject pyflakes.checker.VariableKey.__eq__: no VariableKey is compared, hashed as a dict key or set element, or searched for at this site; VariableKey objects are made only by convert_to_value (checker.py:201), which only Checker.DICT calls; they are in its local lists keys and values and the Counters made from them (the DICT sites accept the candidate), and a VariableKey inside a tuple key also reaches the message_args of MultiValueRepeatedKeyLiteral (checker.py:1837), where it is formatted with %r (object.__repr__) and never compared
+default reject pyflakes.checker.VariableKey.__hash__: no VariableKey is hashed at this site (dict key, set element, subscript key); VariableKey objects are made only by convert_to_value (checker.py:201), which only Checker.DICT calls, and only the Counters of DICT hash them (those sites accept the candidate); a VariableKey inside a tuple key also reaches the message_args of MultiValueRepeatedKeyLiteral (checker.py:1837), where nothing hashes it
+default reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: no f-string placeholder or %-operand at this site is a binding, a scope or a message; the formatted values are str (names, module names, file names, error texts, the result of dict.__repr__), int or a class (each explicit site decides these candidates itself)
+
+== pyflakes.__main__
+
+[pyflakes.__main__]
+5:9 call  main(prog='pyflakes')
+    -> pyflakes.api.main
+
+== pyflakes.api
+
+[pyflakes.api]
+15:34 call  re.compile(br'^#!.*\bpython(3(\.\d+)?|w)?[dt]?\s')
+    -> re.compile
+
+[pyflakes.api.check]
+36:52 call  modReporter._makeDefaultReporter()
+    -> pyflakes.reporter._makeDefaultReporter
+39:25 call  ast.parse(codeString, filename=filename)
+    -> ast.parse
+41:29 call  reporter.syntaxError(filename, e.args[0], e.lineno, e.off...
+    -> pyflakes.reporter.Reporter.syntaxError
+    note: reporter is documented as a Reporter instance; the package passes the Reporter of _makeDefaultReporter (line 36, main); a subclass of the client is client code
+44:33 call  reporter.unexpectedError(filename, 'problem decoding sour...
+    -> pyflakes.reporter.Reporter.unexpectedError
+47:24 call  checker.Checker(tree, filename=filename)
+    -> pyflakes.checker.Checker.__init__
+48:20 call  w.messages.sort(key=lambda m: m.lineno)
+    -> <builtin>.list.sort
+    -> pyflakes.api.check.<lambda1>
+    note: w.messages is the list of Message objects of the Checker; list.sort calls the key lambda back
+50:23 call  reporter.flake(warning)
+    -> pyflakes.reporter.Reporter.flake
+51:15 call  len(w.messages)
+    -> <builtin>.len
+
+[pyflakes.api.checkPath]
+64:52 call  modReporter._makeDefaultReporter()
+    -> pyflakes.reporter._makeDefaultReporter
+66:18 call  open(filename, 'rb')
+    -> <builtin>.open
+67:29 call  f.read()
+    -> io.BufferedReader.read
+    note: open(filename, 'rb') returns an io.BufferedReader
+69:33 call  reporter.unexpectedError(filename, e.args[1])
+    -> pyflakes.reporter.Reporter.unexpectedError
+71:17 call  check(codestr, filename, reporter)
+    -> pyflakes.api.check
+
+[pyflakes.api.isPythonFile]
+76:25 call  filename.endswith('.py')
+    -> <builtin>.str.endswith
+    -> <builtin>.bytes.endswith
+    note: iterSourceCode(paths) documents an unannotated list of paths (96-103), with no str-only restriction. On a bytes directory path it calls os.walk(path) at106, obtains bytes names, and os.path.join(dirpath,filename) at108 creates a concrete bytes full_path. Its own isPythonFile(full_path) call at109 therefore reaches bytes.endswith at76. The str suffix binds to the builtin call and then raises TypeError within it; no edge requires successful return. This is a library-created result passed by the package, not a direct method call on an opaque client object. The second endswith at80 is not reached for bytes, but the edge is already present at76.
+
+80:25 call  filename.endswith("~")
+    -> <builtin>.str.endswith
+86:18 call  open(filename, 'rb')
+    -> <builtin>.open
+87:26 call  f.read(max_bytes)
+    -> io.BufferedReader.read
+93:38 call  PYTHON_SHEBANG_REGEX.match(text)
+    -> re.Pattern.match
+
+[pyflakes.api.iterSourceCode]
+105:25 call  os.path.isdir(path)
+    -> os.path.isdir
+106:56 call  os.walk(path)
+    -> os.walk
+108:45 call  os.path.join(dirpath, filename)
+    -> os.path.join
+109:36 call  isPythonFile(full_path)
+    -> pyflakes.api.isPythonFile
+
+[pyflakes.api.checkRecursive]
+126:37 call  iterSourceCode(paths)
+    -> pyflakes.api.iterSourceCode
+127:30 call  checkPath(sourcePath, reporter)
+    -> pyflakes.api.checkPath
+
+[pyflakes.api._exitOnSignal]
+140:28 call  getattr(signal, sigName)
+    -> <builtin>.getattr
+151:22 call  signal.signal(sigNumber, handler)
+    -> signal.signal
+    reject pyflakes.api._exitOnSignal.handler: signal.signal only stores the handler; SIGINT comes from the terminal and SIGPIPE from a reader that closed the pipe, and no package call waits for a signal while the handler is installed (README "Implicit calls"; Sublist3r judgement 6)
+
+[pyflakes.api._exitOnSignal.handler]
+148:17 call  sys.exit(message)
+    -> sys.exit
+
+[pyflakes.api._get_version]
+163:50 call  platform.python_version()
+    -> platform.python_version
+163:69 call  platform.system()
+    -> platform.system
+
+[pyflakes.api.main]
+171:18 call  _exitOnSignal('SIGINT', '... stopped')
+    -> pyflakes.api._exitOnSignal
+172:18 call  _exitOnSignal('SIGPIPE', 1)
+    -> pyflakes.api._exitOnSignal
+174:37 call  argparse.ArgumentParser(prog=prog, description='Check Pyt...
+    -> argparse.ArgumentParser
+176:24 call  parser.add_argument('-V', '--version', action='version', ...
+    -> argparse.ArgumentParser.add_argument
+176:82 call  _get_version()
+    -> pyflakes.api._get_version
+177:24 call  parser.add_argument('path', nargs='*', help='Path(s) of P...
+    -> argparse.ArgumentParser.add_argument
+179:29 call  parser.parse_args(args=args)
+    -> argparse.ArgumentParser.parse_args
+180:48 call  modReporter._makeDefaultReporter()
+    -> pyflakes.reporter._makeDefaultReporter
+182:34 call  checkRecursive(args, reporter)
+    -> pyflakes.api.checkRecursive
+184:25 call  check(sys.stdin.read(), '<stdin>', reporter)
+    -> pyflakes.api.check
+184:40 call  sys.stdin.read()
+    -> io.TextIOWrapper.read
+    note: the default sys.stdin, named by its class (README "Callees outside the package")
+185:21 call  SystemExit(warnings > 0)
+    -> <builtin>.SystemExit
+
+== pyflakes.checker
+
+[pyflakes.checker]
+21:15 call  hasattr(sys, 'pypy_version_info')
+    -> <builtin>.hasattr
+23:25 call  frozenset(dir(builtins))
+    -> <builtin>.frozenset
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are the str names of dir(builtins); no VariableKey
+23:29 call  dir(builtins)
+    -> <builtin>.dir
+30:2 decorator  @functools.cache
+    -> functools.cache
+    note: functools.cache wraps _custom_builtins in a functools._lru_cache_wrapper without calling it
+39:39 call  string.Formatter()
+    -> string.Formatter
+42:2 decorator  @functools.cache
+    -> functools.cache
+    note: functools.cache wraps _doctest_parser in a functools._lru_cache_wrapper without calling it
+89:28 call  re.compile(r'\(([^()]*)\)')
+    -> re.compile
+90:32 call  re.compile('[#0+ -]*')
+    -> re.compile
+91:22 call  re.compile(r'(?:\*|\d*)')
+    -> re.compile
+92:26 call  re.compile(r'(?:\.(?:\*|\d*))?')
+    -> re.compile
+93:23 call  re.compile('[hlL]?')
+    -> re.compile
+95:30 call  frozenset('diouxXeEfFgGcrsa%')
+    -> <builtin>.frozenset
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are the characters of a str; no VariableKey
+314:6 decorator  @property
+    -> <builtin>.property
+318:6 decorator  @property
+    -> <builtin>.property
+322:6 decorator  @property
+    -> <builtin>.property
+327:6 decorator  @property
+    -> <builtin>.property
+362:6 decorator  @property
+    -> <builtin>.property
+366:6 decorator  @property
+    -> <builtin>.property
+384:6 decorator  @property
+    -> <builtin>.property
+388:6 decorator  @property
+    -> <builtin>.property
+404:6 decorator  @property
+    -> <builtin>.property
+408:6 decorator  @property
+    -> <builtin>.property
+544:28 call  frozenset(( '__tracebackhide__', '__traceback_info__', '_...
+    -> <builtin>.frozenset
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are str literals; no VariableKey
+598:16 call  dir()
+    -> <builtin>.dir
+611:27 call  frozenset(('typing', 'typing_extensions'))
+    -> <builtin>.frozenset
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are str literals; no VariableKey
+786:6 decorator  @property
+    -> <builtin>.property
+793:6 decorator  @futuresAllowed.setter
+    -> <builtin>.property.setter
+799:6 decorator  @property
+    -> <builtin>.property
+804:6 decorator  @annotationsFutureEnabled.setter
+    -> <builtin>.property.setter
+810:6 decorator  @property
+    -> <builtin>.property
+814:6 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+1184:6 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+1192:6 decorator  @property
+    -> <builtin>.property
+1288:6 decorator  @in_string_annotation
+    -> pyflakes.checker.in_string_annotation
+1316:6 decorator  @in_annotation
+    -> pyflakes.checker.in_annotation
+2272:6 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+
+[pyflakes.checker._custom_builtins]
+32:25 call  os.environ.get('PYFLAKES_BUILTINS')
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, a private class; its get is inherited from collections.abc.Mapping (README: anytree config.py:6)
+34:25 call  frozenset(var.split(','))
+    -> <builtin>.frozenset
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are the str parts of the environment variable; no VariableKey
+34:35 call  var.split(',')
+    -> <builtin>.str.split
+36:25 call  frozenset()
+    -> <builtin>.frozenset
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: no argument; no VariableKey
+
+[pyflakes.checker._doctest_parser]
+45:33 call  doctest.DocTestParser()
+    -> doctest.DocTestParser
+
+[pyflakes.checker.getAlternatives]
+49:18 call  isinstance(n, ast.If)
+    -> <builtin>.isinstance
+51:20 call  isinstance(n, ast.Try)
+    -> <builtin>.isinstance
+53:20 call  isinstance(n, ast.Match)
+    -> <builtin>.isinstance
+
+[pyflakes.checker._is_singleton]
+62:19 call  isinstance(node, ast.Constant)
+    -> <builtin>.isinstance
+63:19 call  isinstance(node.value, (bool, type(Ellipsis), type(None)))
+    -> <builtin>.isinstance
+63:43 call  type(Ellipsis)
+    -> <builtin>.type
+63:59 call  type(None)
+    -> <builtin>.type
+
+[pyflakes.checker._is_tuple_constant]
+69:19 call  isinstance(node, ast.Tuple)
+    -> <builtin>.isinstance
+70:12 call  all(_is_constant(elt) for elt in node.elts)
+    -> <builtin>.all
+70:25 call  _is_constant(elt)
+    -> pyflakes.checker._is_constant
+
+[pyflakes.checker._is_constant]
+75:22 call  isinstance(node, ast.Constant)
+    -> <builtin>.isinstance
+75:64 call  _is_tuple_constant(node)
+    -> pyflakes.checker._is_tuple_constant
+
+[pyflakes.checker._is_const_non_singleton]
+79:24 call  _is_constant(node)
+    -> pyflakes.checker._is_constant
+79:52 call  _is_singleton(node)
+    -> pyflakes.checker._is_singleton
+
+[pyflakes.checker._is_name_or_attr]
+84:20 call  isinstance(node, ast.Name)
+    -> <builtin>.isinstance
+85:20 call  isinstance(node, ast.Attribute)
+    -> <builtin>.isinstance
+
+[pyflakes.checker._must_match]
+99:24 call  regex.match(string, pos)
+    -> re.Pattern.match
+    note: _must_match is called only by _parse_inner, with the compiled patterns of lines 90-93
+
+[pyflakes.checker.parse_percent_format]
+165:17 call  tuple(_parse_inner())
+    -> <builtin>.tuple
+165:30 call  _parse_inner()
+    -> pyflakes.checker.parse_percent_format._parse_inner
+
+[pyflakes.checker.parse_percent_format._parse_inner]
+116:22 call  len(s)
+    -> <builtin>.len
+119:32 call  s.index('%', i)
+    -> <builtin>.str.index
+    note: s is the str of a str constant (BINOP, line 1733 checks it); parse_percent_format documents it as the string component of a % format
+128:49 call  MAPPING_KEY_RE.match(s, i)
+    -> re.Pattern.match
+130:42 call  key_match.group(1)
+    -> re.Match.group
+131:38 call  key_match.end()
+    -> re.Match.end
+135:52 call  _must_match(CONVERSION_FLAG_RE, s, i)
+    -> pyflakes.checker._must_match
+136:62 call  conversion_flag_match.group()
+    -> re.Match.group
+137:46 call  conversion_flag_match.end()
+    -> re.Match.end
+139:42 call  _must_match(WIDTH_RE, s, i)
+    -> pyflakes.checker._must_match
+140:42 call  width_match.group()
+    -> re.Match.group
+141:36 call  width_match.end()
+    -> re.Match.end
+143:46 call  _must_match(PRECISION_RE, s, i)
+    -> pyflakes.checker._must_match
+144:50 call  precision_match.group()
+    -> re.Match.group
+145:40 call  precision_match.end()
+    -> re.Match.end
+148:32 call  _must_match(LENGTH_RE, s, i)
+    -> pyflakes.checker._must_match
+148:53 call  _must_match(LENGTH_RE, s, i).end()
+    -> re.Match.end
+153:37 call  ValueError('end-of-string while parsing format')
+    -> <builtin>.ValueError
+163:29 call  ValueError('end-of-string while parsing format')
+    -> <builtin>.ValueError
+
+[pyflakes.checker.iter_child_nodes]
+182:24 call  getattr(node, name, None)
+    -> <builtin>.getattr
+    note: name is a field name of an ast node class; ast fields are plain attributes, no package property
+183:22 call  isinstance(field, ast.AST)
+    -> <builtin>.isinstance
+185:24 call  isinstance(field, list)
+    -> <builtin>.isinstance
+187:30 call  isinstance(item, ast.AST)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.iter_dict_children]
+192:15 call  zip(node.keys, node.values)
+    -> <builtin>.zip
+
+[pyflakes.checker.convert_to_value]
+196:18 call  isinstance(item, ast.Constant)
+    -> <builtin>.isinstance
+198:20 call  isinstance(item, ast.Tuple)
+    -> <builtin>.isinstance
+199:21 call  tuple(convert_to_value(i) for i in item.elts)
+    -> <builtin>.tuple
+199:38 call  convert_to_value(i)
+    -> pyflakes.checker.convert_to_value
+200:20 call  isinstance(item, ast.Name)
+    -> <builtin>.isinstance
+201:27 call  VariableKey(item=item)
+    -> pyflakes.checker.VariableKey.__init__
+203:32 call  UnhandledKeyType()
+    note: UnhandledKeyType has no __init__; its first __init__ is object.__init__, so the call adds no edge
+
+[pyflakes.checker.is_notimplemented_name_node]
+207:22 call  isinstance(node, ast.Name)
+    -> <builtin>.isinstance
+207:54 call  getNodeName(node)
+    -> pyflakes.checker.getNodeName
+
+[pyflakes.checker.Binding.__repr__]
+228:66 call  '<{} object {!r} from line {!r} at 0x{:x}>'.format( self....
+    -> <builtin>.str.format
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: the fields are the class name and the binding's name (str), the line number and id(self) (int)
+232:15 call  id(self)
+    -> <builtin>.id
+
+[pyflakes.checker.Binding.redefines]
+236:26 call  isinstance(other, Definition)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Definition.redefines]
+245:18 call  super()
+    -> <builtin>.super
+245:30 call  super().redefines(other)
+    -> pyflakes.checker.Binding.redefines
+    reject *: super() in Definition.redefines finds the next class after Definition in the MRO of self, which is Binding for every subclass (Builtin, FunctionDefinition, ClassDefinition; the Importation classes override redefines and never reach this method through super)
+246:24 call  isinstance(other, Assignment)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Builtin.__init__]
+254:14 call  super()
+    -> <builtin>.super
+254:25 call  super().__init__(name, None)
+    -> pyflakes.checker.Binding.__init__
+    reject *: the class after Builtin in its MRO with an __init__ is Binding (Definition has none)
+
+[pyflakes.checker.Builtin.__repr__]
+257:51 call  '<{} object {!r} at 0x{:x}>'.format( self.__class__.__nam...
+    -> <builtin>.str.format
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: the fields are the class name and the name (str) and id(self) (int)
+260:15 call  id(self)
+    -> <builtin>.id
+
+[pyflakes.checker.VariableKey.__hash__]
+286:20 call  hash(self.name)
+    -> <builtin>.hash
+    reject pyflakes.checker.VariableKey.__hash__: the argument is the str name; hash() of a str runs str.__hash__
+
+[pyflakes.checker.Importation.__init__]
+302:14 call  super()
+    -> <builtin>.super
+302:25 call  super().__init__(name, source)
+    -> pyflakes.checker.Binding.__init__
+    reject *: for Importation and each of its subclasses, the class after Importation in the MRO with an __init__ is Binding (Definition has none)
+
+[pyflakes.checker.Importation.redefines]
+305:22 call  isinstance(other, SubmoduleImportation)
+    -> <builtin>.isinstance
+308:26 call  isinstance(other, Definition)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Importation._has_alias]
+312:39 call  self.fullName.split('.')
+    -> <builtin>.str.split
+
+[pyflakes.checker.Importation._alias_s]
+320:53 call  self._has_alias()
+    -> pyflakes.checker.Importation._has_alias
+
+[pyflakes.checker.Importation.source_statement]
+325:24 getattr  self._lazy_s
+    -> pyflakes.checker.Importation._lazy_s
+325:60 getattr  self._alias_s
+    -> pyflakes.checker.Importation._alias_s
+
+[pyflakes.checker.Importation.imported_name]
+330:39 getattr  self._alias_s
+    -> pyflakes.checker.Importation._alias_s
+
+[pyflakes.checker.SubmoduleImportation.__init__]
+352:57 call  isinstance(source, ast.Import)
+    -> <builtin>.isinstance
+353:34 call  name.split('.')
+    -> <builtin>.str.split
+354:14 call  super()
+    -> <builtin>.super
+354:25 call  super().__init__(package_name, source, is_lazy=is_lazy)
+    -> pyflakes.checker.Importation.__init__
+    reject *: the class after SubmoduleImportation in its MRO is Importation, which defines __init__
+
+[pyflakes.checker.SubmoduleImportation.redefines]
+358:22 call  isinstance(other, Importation)
+    -> <builtin>.isinstance
+360:21 call  super()
+    -> <builtin>.super
+360:33 call  super().redefines(other)
+    -> pyflakes.checker.Importation.redefines
+    reject *: SubmoduleImportation has no subclass; the class after it in the MRO is Importation, which defines redefines
+
+[pyflakes.checker.SubmoduleImportation.source_statement]
+364:24 getattr  self._lazy_s
+    -> pyflakes.checker.Importation._lazy_s
+
+[pyflakes.checker.ImportationFrom.__init__]
+377:27 call  module.endswith('.')
+    -> <builtin>.str.endswith
+382:14 call  super()
+    -> <builtin>.super
+382:25 call  super().__init__(name, source, full_name, is_lazy=is_lazy)
+    -> pyflakes.checker.Importation.__init__
+    reject *: for ImportationFrom and FutureImportation the class after ImportationFrom in the MRO is Importation, which defines __init__
+
+[pyflakes.checker.ImportationFrom.source_statement]
+386:24 getattr  self._lazy_s
+    -> pyflakes.checker.Importation._lazy_s
+386:80 getattr  self._alias_s
+    -> pyflakes.checker.Importation._alias_s
+
+[pyflakes.checker.ImportationFrom.imported_name]
+391:39 getattr  self._alias_s
+    -> pyflakes.checker.Importation._alias_s
+
+[pyflakes.checker.StarImportation.__init__]
+398:14 call  super()
+    -> <builtin>.super
+398:25 call  super().__init__('*', source, is_lazy=False)
+    -> pyflakes.checker.Importation.__init__
+    reject *: the class after StarImportation in its MRO is Importation, which defines __init__
+
+[pyflakes.checker.StarImportation.imported_name]
+411:34 call  self.fullName.endswith('.')
+    -> <builtin>.str.endswith
+412:25 getattr  self.source_statement
+    -> pyflakes.checker.StarImportation.source_statement
+    reject *: self is a StarImportation (it has no subclass), which defines source_statement
+
+[pyflakes.checker.FutureImportation.__init__]
+425:14 call  super()
+    -> <builtin>.super
+425:25 call  super().__init__(name, source, '__future__', is_lazy=False)
+    -> pyflakes.checker.ImportationFrom.__init__
+    reject *: the class after FutureImportation in its MRO is ImportationFrom, which defines __init__
+
+[pyflakes.checker.ExportBinding.__init__]
+489:45 call  isinstance(source, ast.AugAssign)
+    -> <builtin>.isinstance
+490:30 call  list(scope['__all__'].names)
+    -> <builtin>.list
+    note: scope['__all__'] is the ExportBinding that an earlier assignment to __all__ made (handleNodeStore, line 1151); names is its list of str
+499:22 call  isinstance(source.value, (ast.List, ast.Tuple))
+    -> <builtin>.isinstance
+500:26 call  _add_to_names(source.value)
+    -> pyflakes.checker.ExportBinding.__init__._add_to_names
+502:24 call  isinstance(source.value, ast.BinOp)
+    -> <builtin>.isinstance
+504:29 call  isinstance(currentValue.right, (ast.List, ast.Tuple))
+    -> <builtin>.isinstance
+507:30 call  _add_to_names(right)
+    -> pyflakes.checker.ExportBinding.__init__._add_to_names
+509:30 call  isinstance(left, ast.BinOp)
+    -> <builtin>.isinstance
+512:32 call  isinstance(left, (ast.List, ast.Tuple))
+    -> <builtin>.isinstance
+513:34 call  _add_to_names(left)
+    -> pyflakes.checker.ExportBinding.__init__._add_to_names
+519:14 call  super()
+    -> <builtin>.super
+519:25 call  super().__init__(name, source)
+    -> pyflakes.checker.Binding.__init__
+    reject *: ExportBinding has no subclass; the class after it in the MRO is Binding
+
+[pyflakes.checker.ExportBinding.__init__._add_to_names]
+496:30 call  isinstance(node, ast.Constant)
+    -> <builtin>.isinstance
+496:65 call  isinstance(node.value, str)
+    -> <builtin>.isinstance
+497:38 call  self.names.append(node.value)
+    -> <builtin>.list.append
+
+[pyflakes.checker.Scope.__repr__]
+527:39 call  id(self)
+    -> <builtin>.id
+527:63 call  dict.__repr__(self)
+    -> <builtin>.dict.__repr__
+    -> pyflakes.checker.Binding.__repr__
+    -> pyflakes.checker.Builtin.__repr__
+    reject pyflakes.checker.Scope.__repr__: the values of a scope are bindings, never scopes
+    note: dict.__repr__ calls repr() of each value of the scope back: the bindings that addBinding and GLOBAL store; a Builtin has its own __repr__, every other binding class inherits Binding.__repr__
+
+[pyflakes.checker.ClassScope.__init__]
+532:14 call  super()
+    -> <builtin>.super
+532:25 call  super().__init__()
+    -> <builtin>.dict.__init__
+    reject *: the class after ClassScope in its MRO is Scope, which has no __init__; the next is dict, outside the package
+
+[pyflakes.checker.FunctionScope.__init__]
+550:14 call  super()
+    -> <builtin>.super
+550:25 call  super().__init__()
+    -> <builtin>.dict.__init__
+    reject *: the class after FunctionScope in its MRO is Scope, which has no __init__; the next is dict, outside the package
+
+[pyflakes.checker.FunctionScope.unused_assignments]
+558:40 call  self.items()
+    -> <builtin>.dict.items
+563:31 call  isinstance(binding, Assignment)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.FunctionScope.unused_annotations]
+570:40 call  self.items()
+    -> <builtin>.dict.items
+571:47 call  isinstance(binding, Annotation)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.getNodeName]
+603:15 call  hasattr(node, 'id')
+    -> <builtin>.hasattr
+605:15 call  hasattr(node, 'name')
+    -> <builtin>.hasattr
+607:15 call  hasattr(node, 'rest')
+    -> <builtin>.hasattr
+
+[pyflakes.checker._is_typing_helper]
+647:23 call  isinstance(node, ast.Name)
+    -> <builtin>.isinstance
+648:31 call  _bare_name_is_attr(node.id)
+    -> pyflakes.checker._is_typing_helper._bare_name_is_attr
+650:23 call  isinstance(node, ast.Attribute)
+    -> <builtin>.isinstance
+651:23 call  isinstance(node.value, ast.Name)
+    -> <builtin>.isinstance
+652:36 call  _module_scope_is_typing(node.value.id)
+    -> pyflakes.checker._is_typing_helper._module_scope_is_typing
+653:29 call  is_name_match_fn(node.attr)
+    -> pyflakes.checker._is_typing.<lambda1>
+    -> pyflakes.checker._is_any_typing_member.<lambda1>
+    note: _is_typing_helper is private; its only callers pass the lambdas of _is_typing (line 666) and _is_any_typing_member (line 676)
+    # a value site: note where the callee comes from
+
+[pyflakes.checker._is_typing_helper._bare_name_is_attr]
+625:30 call  reversed(scope_stack)
+    -> <builtin>.reversed
+628:31 call  isinstance(scope[name], ImportationFrom)
+    -> <builtin>.isinstance
+630:37 call  is_name_match_fn(scope[name].real_name)
+    -> pyflakes.checker._is_typing.<lambda1>
+    -> pyflakes.checker._is_any_typing_member.<lambda1>
+    note: is_name_match_fn is the parameter of _is_typing_helper: the lambdas of _is_typing (line 666) and _is_any_typing_member (line 676)
+    # a value site: note where the callee comes from
+
+[pyflakes.checker._is_typing_helper._module_scope_is_typing]
+636:30 call  reversed(scope_stack)
+    -> <builtin>.reversed
+639:31 call  isinstance(scope[name], Importation)
+    -> <builtin>.isinstance
+
+[pyflakes.checker._is_typing]
+666:29 call  _is_typing_helper(node, lambda x: x == typing_attr, scope...
+    -> pyflakes.checker._is_typing_helper
+    reject pyflakes.checker._is_typing.<lambda1>: passed to the package function _is_typing_helper, which calls it itself (lines 630, 653); not called here
+
+[pyflakes.checker._is_any_typing_member]
+676:29 call  _is_typing_helper(node, lambda x: True, scope_stack)
+    -> pyflakes.checker._is_typing_helper
+    reject pyflakes.checker._is_any_typing_member.<lambda1>: passed to the package function _is_typing_helper, which calls it itself (lines 630, 653); not called here
+
+[pyflakes.checker.is_typing_overload]
+681:19 call  isinstance(value.source, (ast.FunctionDef, ast.AsyncFunct...
+    -> <builtin>.isinstance
+682:12 call  any( _is_typing(dec, 'overload', scope_stack) for dec in ...
+    -> <builtin>.any
+683:23 call  _is_typing(dec, 'overload', scope_stack)
+    -> pyflakes.checker._is_typing
+
+[pyflakes.checker.in_annotation]
+696:6 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+    # a value site: note where the callee comes from
+696:21 call  functools.wraps(func)
+    -> functools.wraps
+
+[pyflakes.checker.in_annotation.in_annotation_func]
+698:36 call  self._enter_annotation()
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+    note: _enter_annotation is decorated with @contextlib.contextmanager (line 1184): the call runs contextlib's helper, which calls the generator function back
+699:24 call  func(self, *args, **kwargs)
+    -> pyflakes.checker.Checker.handleAnnotation
+    -> pyflakes.checker.Checker.handleNode
+    note: func is the function that in_annotation decorated: Checker.handleAnnotation (decorator at line 1316) and Checker.handleNode (in_annotation(Checker.handleNode) at line 1313); in_annotation is public, and a function of the client that it decorates is client code
+    exclude pyflakes.checker.Checker.handleStringAnnotation: decorated by in_string_annotation (line 1288), not by in_annotation
+    # a value site: note where the callee comes from
+
+[pyflakes.checker.in_string_annotation]
+704:6 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+    # a value site: note where the callee comes from
+704:21 call  functools.wraps(func)
+    -> functools.wraps
+
+[pyflakes.checker.in_string_annotation.in_annotation_func]
+706:36 call  self._enter_annotation(AnnotationState.STRING)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+    note: _enter_annotation is decorated with @contextlib.contextmanager (line 1184)
+707:24 call  func(self, *args, **kwargs)
+    -> pyflakes.checker.Checker.handleStringAnnotation
+    note: func is the function that in_string_annotation decorated: only Checker.handleStringAnnotation (line 1288) in the package; a function of the client is client code
+    # a value site: note where the callee comes from
+
+[pyflakes.checker.Checker.__init__]
+735:43 call  collections.deque()
+    -> collections.deque
+739:56 call  _custom_builtins()
+    -> functools._lru_cache_wrapper.__call__
+    -> functools._lru_cache_wrapper.wrapper
+    -> pyflakes.checker._custom_builtins
+    note: _custom_builtins is the functools._lru_cache_wrapper of the decorator at line 30; the wrapper calls the function back on the first call (micro-benchmark decorators/functools_cache)
+    note: Pyflakes supports PyPy (setup.py classifier; tox pypy3). PyPy 7.3.20 implements Python 3.11.13 and ships no _functools accelerator; its functools.cache returns the nested functools._lru_cache_wrapper.wrapper function (functools.py:537,563-576,651-666). hidden_applevel marks the same function and returns it unchanged (interp_magic.py:73-78). The closure is an additional outside callee on this supported runtime; the CPython wrapper object and the package function callback remain.
+741:48 call  self.builtIns.union(builtins)
+    -> <builtin>.frozenset.union
+    note: self.builtIns is builtin_vars | _custom_builtins(), a frozenset
+750:48 call  type(tree)
+    -> <builtin>.type
+751:27 call  self.in_scope(scope_tp)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker.in_scope
+    note: in_scope is decorated with @contextlib.contextmanager (line 814)
+753:32 call  self.addBinding(None, Builtin(builtin))
+    -> pyflakes.checker.Checker.addBinding
+753:46 call  Builtin(builtin)
+    -> pyflakes.checker.Builtin.__init__
+    reject pyflakes.checker.Binding.__init__: Builtin defines __init__, the first in its MRO; Binding.__init__ is called from it through super() (line 254)
+754:32 call  self.handleChildren(tree)
+    -> pyflakes.checker.Checker.handleChildren
+755:31 call  self._run_deferred()
+    -> pyflakes.checker.Checker._run_deferred
+757:29 call  self.checkDeadScopes()
+    -> pyflakes.checker.Checker.checkDeadScopes
+
+[pyflakes.checker.Checker.deferFunction]
+768:30 call  self._deferred.append((callable, self.scopeStack[:], self...
+    -> collections.deque.append
+
+[pyflakes.checker.Checker._run_deferred]
+776:60 call  self._deferred.popleft()
+    -> collections.deque.popleft
+778:20 call  handler()
+    -> pyflakes.checker.Checker.handle_annotation_always_deferred.<lambda1>
+    -> functools.partial.__call__
+    -> pyflakes.checker.in_string_annotation.in_annotation_func
+    -> pyflakes.checker.Checker.LAMBDA.runFunction
+    -> pyflakes.checker.Checker.FUNCTIONDEF.<lambda1>
+    -> pyflakes.checker.Checker.CLASSDEF.<lambda1>
+    reject pyflakes.api._exitOnSignal.handler: handler here is a callable that deferFunction stored in self._deferred, never the signal handler of api.py
+    exclude pyflakes.checker.Checker.handleStringAnnotation: the partial calls the wrapper in_annotation_func of @in_string_annotation, which calls handleStringAnnotation (line 707)
+    exclude pyflakes.checker.Checker.handleDoctests: the lambdas of FUNCTIONDEF and CLASSDEF call it (lines 1978, 2051), not _run_deferred
+    note: handler is a callable that deferFunction stored: the lambda of handle_annotation_always_deferred (line 1314), the functools.partial of CONSTANT (line 1740), which calls back the bound self.handleStringAnnotation, that is the wrapper in_annotation_func of @in_string_annotation (line 1288), runFunction of LAMBDA (line 2023), and the lambdas of FUNCTIONDEF (line 1978) and CLASSDEF (line 2051); deferFunction is public, and a callable of the client is client code
+    # a value site: note where the callee comes from
+
+[pyflakes.checker.Checker._in_doctest]
+783:20 call  len(self.scopeStack)
+    -> <builtin>.len
+784:27 call  isinstance(self.scopeStack[1], DoctestScope)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Checker.futuresAllowed]
+789:23 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 789:29; isinstance does not call it
+789:29 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+790:18 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+796:22 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 796:28; isinstance does not call it
+796:28 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+797:18 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+
+[pyflakes.checker.Checker.annotationsFutureEnabled]
+802:26 call  isinstance(scope, ModuleScope)
+    -> <builtin>.isinstance
+807:26 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 807:32; isinstance does not call it
+807:32 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+808:14 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+
+[pyflakes.checker.Checker.in_scope]
+816:31 call  self.scopeStack.append(cls())
+    -> <builtin>.list.append
+816:35 call  cls()
+    -> pyflakes.checker.ClassScope.__init__
+    -> pyflakes.checker.FunctionScope.__init__
+    -> <builtin>.dict.__init__
+    note: cls is a scope class: the package passes ModuleScope, ClassScope, FunctionScope, ComprehensionScope and GeneratorScope (the values of _ast_node_scope, lines 714-724, at 751 and 1902), DoctestScope (1271), TypeScope (2276), ClassScope (2045) and FunctionScope (2017); ClassScope and FunctionScope define __init__, the others inherit dict.__init__ (Scope has none); in_scope is public, and a class of the client is client code
+    # a value site: note where the callee comes from
+820:35 call  self.deadScopes.append(self.scopeStack.pop())
+    -> <builtin>.list.append
+820:55 call  self.scopeStack.pop()
+    -> <builtin>.list.pop
+
+[pyflakes.checker.Checker.checkDeadScopes]
+828:26 call  isinstance(scope, (ClassScope, FunctionScope))
+    -> <builtin>.isinstance
+829:67 call  scope.indirect_assignments.items()
+    -> <builtin>.dict.items
+830:32 call  self.report(messages.UnusedIndirectAssignment, node, name)
+    -> pyflakes.checker.Checker.report
+833:26 call  isinstance(scope, ClassScope)
+    -> <builtin>.isinstance
+836:26 call  isinstance(scope, FunctionScope)
+    -> <builtin>.isinstance
+837:62 call  scope.unused_assignments()
+    -> pyflakes.checker.FunctionScope.unused_assignments
+838:32 call  self.report(messages.UnusedVariable, binding.source, name)
+    -> pyflakes.checker.Checker.report
+839:62 call  scope.unused_annotations()
+    -> pyflakes.checker.FunctionScope.unused_annotations
+840:32 call  self.report(messages.UnusedAnnotation, binding.source, name)
+    -> pyflakes.checker.Checker.report
+842:36 call  scope.get('__all__')
+    -> <builtin>.dict.get
+    note: scope is a Scope, a subclass of dict that inherits get
+843:46 call  isinstance(all_binding, ExportBinding)
+    -> <builtin>.isinstance
+847:32 call  set(all_binding.names)
+    -> <builtin>.set
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are the str names of an ExportBinding; no VariableKey
+857:36 call  os.path.basename(self.filename)
+    -> os.path.basename
+860:36 call  self.report(messages.UndefinedExport, scope['__all__'].so...
+    -> pyflakes.checker.Checker.report
+866:48 call  scope.values()
+    -> <builtin>.dict.values
+867:38 call  isinstance(binding, StarImportation)
+    -> <builtin>.isinstance
+869:45 call  from_list.append(binding.fullName)
+    -> <builtin>.list.append
+871:42 call  ', '.join(sorted(from_list))
+    -> <builtin>.str.join
+871:49 call  sorted(from_list)
+    -> <builtin>.sorted
+873:36 call  self.report(messages.ImportStarUsage, scope['__all__'].so...
+    -> pyflakes.checker.Checker.report
+877:38 call  scope.values()
+    -> <builtin>.dict.values
+878:30 call  isinstance(value, Importation)
+    -> <builtin>.isinstance
+880:36 call  self.report( messages.UnusedImport, value.source, value.i...
+    -> pyflakes.checker.Checker.report
+    reject pyflakes.checker.Importation.imported_name, pyflakes.checker.ImportationFrom.imported_name, pyflakes.checker.StarImportation.imported_name, pyflakes.checker.SubmoduleImportation.imported_name: the argument is the value of the property, read at 882:49; report does not call it
+882:49 getattr  value.imported_name
+    -> pyflakes.checker.Importation.imported_name
+    -> pyflakes.checker.ImportationFrom.imported_name
+    -> pyflakes.checker.StarImportation.imported_name
+    -> pyflakes.checker.SubmoduleImportation.imported_name
+    note: value is an Importation of any class (isinstance at 878): Importation, SubmoduleImportation, ImportationFrom and FutureImportation (which inherits ImportationFrom's), StarImportation
+885:40 call  self.report( messages.RedefinedWhileUnused, node, value.n...
+    -> pyflakes.checker.Checker.report
+
+[pyflakes.checker.Checker.report]
+891:29 call  self.messages.append(messageClass(self.filename, *args, *...
+    -> <builtin>.list.append
+891:42 call  messageClass(self.filename, *args, **kwargs)
+    -> pyflakes.messages.Message.__init__
+    -> pyflakes.messages.UnusedImport.__init__
+    -> pyflakes.messages.RedefinedWhileUnused.__init__
+    -> pyflakes.messages.ImportShadowedByLoopVar.__init__
+    -> pyflakes.messages.ImportStarNotPermitted.__init__
+    -> pyflakes.messages.ImportStarUsed.__init__
+    -> pyflakes.messages.ImportStarUsage.__init__
+    -> pyflakes.messages.UndefinedName.__init__
+    -> pyflakes.messages.DoctestSyntaxError.__init__
+    -> pyflakes.messages.UndefinedExport.__init__
+    -> pyflakes.messages.UndefinedLocal.__init__
+    -> pyflakes.messages.DuplicateArgument.__init__
+    -> pyflakes.messages.MultiValueRepeatedKeyLiteral.__init__
+    -> pyflakes.messages.MultiValueRepeatedKeyVariable.__init__
+    -> pyflakes.messages.FutureFeatureNotDefined.__init__
+    -> pyflakes.messages.UnusedVariable.__init__
+    -> pyflakes.messages.UnusedAnnotation.__init__
+    -> pyflakes.messages.UnusedIndirectAssignment.__init__
+    -> pyflakes.messages.ForwardAnnotationSyntaxError.__init__
+    -> pyflakes.messages.StringDotFormatExtraPositionalArguments.__init__
+    -> pyflakes.messages.StringDotFormatExtraNamedArguments.__init__
+    -> pyflakes.messages.StringDotFormatMissingArgument.__init__
+    -> pyflakes.messages.StringDotFormatInvalidFormat.__init__
+    -> pyflakes.messages.PercentFormatInvalidFormat.__init__
+    -> pyflakes.messages.PercentFormatUnsupportedFormatCharacter.__init__
+    -> pyflakes.messages.PercentFormatPositionalCountMismatch.__init__
+    -> pyflakes.messages.PercentFormatExtraNamedArguments.__init__
+    -> pyflakes.messages.PercentFormatMissingArgument.__init__
+    -> pyflakes.messages.EagerUseOfLazyImport.__init__
+    -> pyflakes.messages.LazyImportStarNotPermitted.__init__
+    note: messageClass is the message class that each self.report call of the checker passes: each of the 50 subclasses of Message is passed at least once (pyflakes.md, "Message dispatch"); the 29 classes with an __init__ run it, and the 21 without one run Message.__init__; report is public, and a class of the client is client code
+    # a value site: note where the callee comes from
+
+[pyflakes.checker.Checker.getParent]
+897:27 call  hasattr(node, 'elts')
+    -> <builtin>.hasattr
+897:57 call  hasattr(node, 'ctx')
+    -> <builtin>.hasattr
+
+[pyflakes.checker.Checker.getCommonAncestor]
+910:42 call  self.getCommonAncestor(self._parents[lnode], rnode, stop)
+    -> pyflakes.checker.Checker.getCommonAncestor
+912:42 call  self.getCommonAncestor(lnode, self._parents[rnode], stop)
+    -> pyflakes.checker.Checker.getCommonAncestor
+913:38 call  self.getCommonAncestor( self._parents[lnode], self._paren...
+    -> pyflakes.checker.Checker.getCommonAncestor
+
+[pyflakes.checker.Checker.descendantOf]
+921:38 call  self.getCommonAncestor(node, a, stop)
+    -> pyflakes.checker.Checker.getCommonAncestor
+
+[pyflakes.checker.Checker.differentForks]
+927:42 call  self.getCommonAncestor(lnode, rnode, self.root)
+    -> pyflakes.checker.Checker.getCommonAncestor
+928:32 call  getAlternatives(ancestor)
+    -> pyflakes.checker.getAlternatives
+931:37 call  self.descendantOf(lnode, items, ancestor)
+    -> pyflakes.checker.Checker.descendantOf
+932:37 call  self.descendantOf(rnode, items, ancestor)
+    -> pyflakes.checker.Checker.descendantOf
+
+[pyflakes.checker.Checker.addBinding]
+944:30 call  reversed(self.scopeStack)
+    -> <builtin>.reversed
+947:29 call  scope.get(value.name)
+    -> <builtin>.dict.get
+949:40 call  isinstance(existing, Builtin)
+    -> <builtin>.isinstance
+950:40 call  self.differentForks(node, existing.source)
+    -> pyflakes.checker.Checker.differentForks
+952:41 call  self.getParent(value.source)
+    -> pyflakes.checker.Checker.getParent
+953:26 call  isinstance(existing, Importation)
+    -> <builtin>.isinstance
+953:64 call  isinstance(parent_stmt, FOR_TYPES)
+    -> <builtin>.isinstance
+954:28 call  self.report(messages.ImportShadowedByLoopVar, node, value...
+    -> pyflakes.checker.Checker.report
+957:32 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+959:63 call  value.redefines(existing)
+    -> pyflakes.checker.Binding.redefines
+    -> pyflakes.checker.Definition.redefines
+    -> pyflakes.checker.Importation.redefines
+    -> pyflakes.checker.SubmoduleImportation.redefines
+    -> pyflakes.checker.Annotation.redefines
+    note: value is any binding that the package adds: Binding, Argument, Assignment, NamedExprAssignment and ExportBinding (Binding.redefines), FunctionDefinition and ClassDefinition (Definition.redefines), Importation, ImportationFrom, StarImportation and FutureImportation (Importation.redefines), SubmoduleImportation, Annotation
+960:57 call  isinstance(existing, Importation)
+    -> <builtin>.isinstance
+961:47 call  is_typing_overload(existing, self.scopeStack)
+    -> pyflakes.checker.is_typing_overload
+963:32 call  self.report(messages.RedefinedWhileUnused, node, value.na...
+    -> pyflakes.checker.Checker.report
+966:30 call  isinstance(scope, (ClassScope, FunctionScope))
+    -> <builtin>.isinstance
+967:51 call  scope.indirect_assignments.pop(value.name, None)
+    -> <builtin>.dict.pop
+969:28 call  isinstance(existing, Importation)
+    -> <builtin>.isinstance
+969:71 call  value.redefines(existing)
+    -> pyflakes.checker.Binding.redefines
+    -> pyflakes.checker.Definition.redefines
+    -> pyflakes.checker.Importation.redefines
+    -> pyflakes.checker.SubmoduleImportation.redefines
+    -> pyflakes.checker.Annotation.redefines
+    note: value is any binding that the package adds (see 959:63)
+970:42 call  existing.redefined.append(node)
+    -> <builtin>.list.append
+972:31 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+974:31 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+978:35 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+978:58 call  isinstance(value, Annotation)
+    -> <builtin>.isinstance
+979:26 call  isinstance(value, NamedExprAssignment)
+    -> <builtin>.isinstance
+981:29 call  next( scope for scope in reversed(self.scopeStack) if not...
+    -> <builtin>.next
+983:42 call  reversed(self.scopeStack)
+    -> <builtin>.reversed
+984:38 call  isinstance(scope, ComprehensionScope)
+    -> <builtin>.isinstance
+986:54 call  isinstance(scope[value.name], Annotation)
+    -> <builtin>.isinstance
+991:37 call  scope.setdefault(value.name, value)
+    -> <builtin>.dict.setdefault
+993:22 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+
+[pyflakes.checker.Checker._unknown_handler]
+1006:26 call  os.environ.get('PYFLAKES_ERROR_UNKNOWN')
+    -> collections.abc.Mapping.get
+    note: os.environ.get, named through the public class (see 32:25)
+1007:38 call  NotImplementedError(f'Unexpected type: {type(node)}')
+    -> <builtin>.NotImplementedError
+1007:63 call  type(node)
+    -> <builtin>.type
+1009:32 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.getNodeHandler]
+1015:49 call  node_class.__name__.upper()
+    -> <builtin>.str.upper
+1016:59 call  getattr( self, nodeType, self._unknown_handler, )
+    -> <builtin>.getattr
+    reject pyflakes.checker.Checker._unknown_handler: getattr returns the bound method as its default value and does not call it
+    note: nodeType is the upper-case name of an ast node class; every attribute of Checker with such a name is a function (the handlers, lines 1327-2285), never a property, so getattr runs no package code (pyflakes.md, "Node dispatch")
+
+[pyflakes.checker.Checker.handleNodeLoad]
+1022:27 call  getNodeName(node)
+    -> pyflakes.checker.getNodeName
+1036:30 call  reversed(self.scopeStack)
+    -> <builtin>.reversed
+1037:26 call  isinstance(scope, (FunctionScope, GeneratorScope))
+    -> <builtin>.isinstance
+1040:26 call  isinstance(scope, ClassScope)
+    -> <builtin>.isinstance
+1049:32 call  scope.get(name, None)
+    -> <builtin>.dict.get
+1050:26 call  isinstance(binding, Annotation)
+    -> <builtin>.isinstance
+1050:61 getattr  self._in_postponed_annotation
+    -> pyflakes.checker.Checker._in_postponed_annotation
+1051:42 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1054:48 call  isinstance(binding, Builtin)
+    -> <builtin>.isinstance
+1055:31 call  isinstance(parent, ast.BinOp)
+    -> <builtin>.isinstance
+1056:35 call  isinstance(parent.op, ast.RShift)
+    -> <builtin>.isinstance
+1057:32 call  self.report(messages.InvalidPrintSyntax, node)
+    -> pyflakes.checker.Checker.report
+1059:31 call  isinstance(binding, Importation)
+    -> <builtin>.isinstance
+1064:28 call  self.report(messages.EagerUseOfLazyImport, node, name, bi...
+    -> pyflakes.checker.Checker.report
+    note: version branch: binding.is_lazy is true only on Python 3.15 and later (IMPORT, line 2119); 3.15 is a supported version
+1067:42 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1073:30 call  isinstance(n, Importation)
+    -> <builtin>.isinstance
+1073:63 call  n._has_alias()
+    -> pyflakes.checker.Importation._has_alias
+1075:56 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1086:51 call  isinstance( scope, (TypeScope, ComprehensionScope), )
+    -> <builtin>.isinstance
+1093:34 call  reversed(self.scopeStack)
+    -> <builtin>.reversed
+1094:44 call  scope.values()
+    -> <builtin>.dict.values
+1095:34 call  isinstance(binding, StarImportation)
+    -> <builtin>.isinstance
+1097:46 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1098:41 call  from_list.append(binding.fullName)
+    -> <builtin>.list.append
+1101:34 call  ', '.join(sorted(from_list))
+    -> <builtin>.str.join
+1101:41 call  sorted(from_list)
+    -> <builtin>.sorted
+1102:24 call  self.report(messages.ImportStarUsage, node, name, from_list)
+    -> pyflakes.checker.Checker.report
+1105:51 call  os.path.basename(self.filename)
+    -> os.path.basename
+1109:63 call  isinstance(self.scope, ClassScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1109:69; isinstance does not call it
+1109:69 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1114:24 call  self.report(messages.UndefinedName, node, name)
+    -> pyflakes.checker.Checker.report
+
+[pyflakes.checker.Checker.handleNodeStore]
+1117:27 call  getNodeName(node)
+    -> pyflakes.checker.getNodeName
+1121:22 call  isinstance(self.scope, FunctionScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1121:28; isinstance does not call it
+1121:28 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1121:71 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1124:34 call  isinstance(scope, (FunctionScope, ModuleScope))
+    -> <builtin>.isinstance
+1130:45 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1132:32 call  self.report(messages.UndefinedLocal, scope[name].used[1],...
+    -> pyflakes.checker.Checker.report
+1136:37 call  self.getParent(node)
+    -> pyflakes.checker.Checker.getParent
+1137:22 call  isinstance(parent_stmt, ast.AnnAssign)
+    -> <builtin>.isinstance
+1138:33 call  Annotation(name, node)
+    -> pyflakes.checker.Binding.__init__
+1139:24 call  isinstance(parent_stmt, (FOR_TYPES, ast.comprehension))
+    -> <builtin>.isinstance
+1141:49 call  self.isLiteralTupleUnpacking(parent_stmt)
+    -> pyflakes.checker.Checker.isLiteralTupleUnpacking
+1142:30 call  Binding(name, node)
+    -> pyflakes.checker.Binding.__init__
+1145:27 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1145:33; isinstance does not call it
+1145:33 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1146:27 call  isinstance( self._parents[node], (ast.Assign, ast.AugAssi...
+    -> <builtin>.isinstance
+1151:36 call  ExportBinding(name, self._parents[node], self.scope)
+    -> pyflakes.checker.ExportBinding.__init__
+    reject pyflakes.checker.Binding.__init__: ExportBinding defines __init__, the first in its MRO; Binding.__init__ is called from it through super() (line 519)
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1151:69; ExportBinding.__init__ does not call it
+1151:69 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1152:24 call  isinstance(parent_stmt, ast.NamedExpr)
+    -> <builtin>.isinstance
+1153:42 call  NamedExprAssignment(name, node)
+    -> pyflakes.checker.Binding.__init__
+1155:33 call  Assignment(name, node)
+    -> pyflakes.checker.Binding.__init__
+1156:24 call  self.addBinding(node, binding)
+    -> pyflakes.checker.Checker.addBinding
+
+[pyflakes.checker.Checker.handleNodeDelete]
+1171:33 call  on_conditional_branch()
+    -> pyflakes.checker.Checker.handleNodeDelete.on_conditional_branch
+1176:22 call  isinstance(self.scope, (ClassScope, FunctionScope))
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1176:28; isinstance does not call it
+1176:28 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1177:18 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1177:48 call  self.scope.indirect_assignments.pop(node.id, None)
+    -> <builtin>.dict.pop
+1180:22 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1182:24 call  self.report(messages.UndefinedName, node, node.id)
+    -> pyflakes.checker.Checker.report
+
+[pyflakes.checker.Checker.handleNodeDelete.on_conditional_branch]
+1164:40 call  self._parents.get(node)
+    -> <builtin>.dict.get
+1166:30 call  isinstance(current, (ast.If, ast.While, ast.IfExp))
+    -> <builtin>.isinstance
+1168:44 call  self._parents.get(current)
+    -> <builtin>.dict.get
+
+[pyflakes.checker.Checker._in_postponed_annotation]
+1198:23 getattr  self.annotationsFutureEnabled
+    -> pyflakes.checker.Checker.annotationsFutureEnabled
+
+[pyflakes.checker.Checker.handleChildren]
+1203:37 call  iter_child_nodes(tree, omit=omit)
+    -> pyflakes.checker.iter_child_nodes
+1204:28 call  self.handleNode(node, tree)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.isLiteralTupleUnpacking]
+1207:22 call  isinstance(node, ast.Assign)
+    -> <builtin>.isinstance
+1209:31 call  hasattr(child, 'elts')
+    -> <builtin>.hasattr
+
+[pyflakes.checker.Checker.isDocstring]
+1219:23 call  isinstance(node, ast.Expr)
+    -> <builtin>.isinstance
+1220:23 call  isinstance(node.value, ast.Constant)
+    -> <builtin>.isinstance
+1221:23 call  isinstance(node.value.value, str)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Checker.getDocstring]
+1226:27 call  isinstance(node, ast.Expr)
+    -> <builtin>.isinstance
+1227:27 call  isinstance(node.value, ast.Constant)
+    -> <builtin>.isinstance
+1228:27 call  isinstance(node.value.value, str)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Checker.handleNode]
+1237:35 call  getattr(node, 'lineno', None)
+    -> <builtin>.getattr
+1241:22 getattr  self.futuresAllowed
+    -> pyflakes.checker.Checker.futuresAllowed
+1243:31 call  isinstance(node, ast.ImportFrom)
+    -> <builtin>.isinstance
+1244:37 call  self.isDocstring(node)
+    -> pyflakes.checker.Checker.isDocstring
+1246:18 setattr  self.futuresAllowed
+    -> pyflakes.checker.Checker.futuresAllowed
+    note: the setter of the property futuresAllowed (line 793), the same node as its getter
+1251:42 call  self.getNodeHandler(node.__class__)
+    -> pyflakes.checker.Checker.getNodeHandler
+1252:20 call  handler(node)
+    -> pyflakes.checker.Checker.handleChildren
+    -> pyflakes.checker.Checker.ignore
+    -> pyflakes.checker.Checker.FOR
+    -> pyflakes.checker.Checker.SUBSCRIPT
+    -> pyflakes.checker.Checker.CALL
+    -> pyflakes.checker.Checker.BINOP
+    -> pyflakes.checker.Checker.CONSTANT
+    -> pyflakes.checker.Checker.RAISE
+    -> pyflakes.checker.Checker.JOINEDSTR
+    -> pyflakes.checker.Checker.TEMPLATESTR
+    -> pyflakes.checker.Checker.DICT
+    -> pyflakes.checker.Checker.IF
+    -> pyflakes.checker.Checker.ASSERT
+    -> pyflakes.checker.Checker.GLOBAL
+    -> pyflakes.checker.Checker.GENERATOREXP
+    -> pyflakes.checker.Checker.NAME
+    -> pyflakes.checker.Checker.CONTINUE
+    -> pyflakes.checker.Checker.RETURN
+    -> pyflakes.checker.Checker.YIELD
+    -> pyflakes.checker.Checker.FUNCTIONDEF
+    -> pyflakes.checker.Checker.LAMBDA
+    -> pyflakes.checker.Checker.ARGUMENTS
+    -> pyflakes.checker.Checker.ARG
+    -> pyflakes.checker.Checker.CLASSDEF
+    -> pyflakes.checker.Checker.ASSIGN
+    -> pyflakes.checker.Checker.AUGASSIGN
+    -> pyflakes.checker.Checker.ANNASSIGN
+    -> pyflakes.checker.Checker.TYPEALIAS
+    -> pyflakes.checker.Checker.TUPLE
+    -> pyflakes.checker.Checker.IMPORT
+    -> pyflakes.checker.Checker.IMPORTFROM
+    -> pyflakes.checker.Checker.TRY
+    -> pyflakes.checker.Checker.EXCEPTHANDLER
+    -> pyflakes.checker.Checker.COMPARE
+    -> pyflakes.checker.Checker._match_target
+    -> pyflakes.checker.Checker.TYPEVAR
+    -> pyflakes.checker.Checker.handleNodeStore
+    -> pyflakes.checker.Checker._unknown_handler
+    reject pyflakes.api._exitOnSignal.handler: handler here is the node handler of getNodeHandler, never the signal handler of api.py
+    note: handler is what getNodeHandler returns for the class of node: the Checker attribute named by the class name in upper case, or _unknown_handler (line 1016). The ast classes that the parser makes on Python 3.11 to 3.15 select every handler function of the class body through the aliases of lines 1327-2285 (pyflakes.md, "Node dispatch"); _unknown_handler gets the TypeIgnore nodes that ast.parse(..., type_comments=True) puts in Module.type_ignores (judgement); a handler of a client subclass is client code
+    # a value site: note where the callee comes from
+
+[pyflakes.checker.Checker.handleDoctests]
+1258:57 call  self.getDocstring(node.body[0])
+    -> pyflakes.checker.Checker.getDocstring
+1259:53 call  _doctest_parser()
+    -> functools._lru_cache_wrapper.__call__
+    -> functools._lru_cache_wrapper.wrapper
+    -> pyflakes.checker._doctest_parser
+    note: _doctest_parser is the functools._lru_cache_wrapper of the decorator at line 42; it calls the function back on the first call
+    note: Pyflakes supports PyPy (setup.py classifier; tox pypy3). PyPy 7.3.20 implements Python 3.11.13 and ships no _functools accelerator; its functools.cache returns the nested functools._lru_cache_wrapper.wrapper function (functools.py:537,563-576,651-666). hidden_applevel marks the same function and returns it unchanged (interp_magic.py:73-78). The closure is an additional outside callee on this supported runtime; the CPython wrapper object and the package function callback remain.
+1259:55 call  _doctest_parser()(docstring)
+    -> doctest.DocTestParser.get_examples
+    note: _doctest_parser() returns the bound method get_examples of a doctest.DocTestParser (line 45)
+    # a value site: note where the callee comes from
+1271:27 call  self.in_scope(DoctestScope)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker.in_scope
+    note: in_scope is decorated with @contextlib.contextmanager (line 814)
+1273:32 call  self.addBinding(None, Builtin('_'))
+    -> pyflakes.checker.Checker.addBinding
+1273:46 call  Builtin('_')
+    -> pyflakes.checker.Builtin.__init__
+    reject pyflakes.checker.Binding.__init__: Builtin defines __init__, the first in its MRO; Binding.__init__ is called from it through super() (line 254)
+1276:37 call  ast.parse(example.source, "<doctest>")
+    -> ast.parse
+1280:32 call  self.report(messages.DoctestSyntaxError, node, position)
+    -> pyflakes.checker.Checker.report
+1284:40 call  self.handleChildren(tree)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.handleStringAnnotation]
+1291:29 call  ast.parse(s)
+    -> ast.parse
+1293:24 call  self.report(messages.ForwardAnnotationSyntaxError, node, s)
+    -> pyflakes.checker.Checker.report
+1297:15 call  len(body)
+    -> <builtin>.len
+1297:44 call  isinstance(body[0], ast.Expr)
+    -> <builtin>.isinstance
+1298:24 call  self.report(messages.ForwardAnnotationSyntaxError, node, s)
+    -> pyflakes.checker.Checker.report
+1302:35 call  ast.walk(parsed_annotation)
+    -> ast.walk
+1310:24 call  self.handleNode(parsed_annotation, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.handle_annotation_always_deferred]
+1313:27 call  in_annotation(Checker.handleNode)
+    -> pyflakes.checker.in_annotation
+    reject pyflakes.checker.Checker.handleNode: in_annotation wraps the function in in_annotation_func and does not call it
+1314:27 call  self.deferFunction(lambda: fn(self, annotation, parent))
+    -> pyflakes.checker.Checker.deferFunction
+    reject pyflakes.checker.Checker.handle_annotation_always_deferred.<lambda1>: deferFunction stores the lambda; _run_deferred calls it (line 778)
+
+[pyflakes.checker.Checker.handle_annotation_always_deferred.<lambda1>]
+1314:38 call  fn(self, annotation, parent)
+    -> pyflakes.checker.in_annotation.in_annotation_func
+    note: fn is the wrapper that in_annotation(Checker.handleNode) returns (line 1313): in_annotation's local function in_annotation_func
+    # a value site: note where the callee comes from
+
+[pyflakes.checker.Checker.handleAnnotation]
+1318:17 getattr  self.annotationsFutureEnabled
+    -> pyflakes.checker.Checker.annotationsFutureEnabled
+1319:51 call  self.handle_annotation_always_deferred(annotation, node)
+    -> pyflakes.checker.Checker.handle_annotation_always_deferred
+1321:28 call  self.handleNode(annotation, node)
+    -> pyflakes.checker.Checker.handleNode
+    note: version branch: Python 3.11 to 3.13 take it when the module has no `from __future__ import annotations`
+
+[pyflakes.checker.Checker.FOR]
+1332:24 call  self.handleNode(node.iter, node)
+    -> pyflakes.checker.Checker.handleNode
+1333:28 call  self.handleChildren(node, omit=('iter',))
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.SUBSCRIPT]
+1342:28 call  _is_name_or_attr(node.value, 'Literal')
+    -> pyflakes.checker._is_name_or_attr
+1343:28 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+1344:40 call  self._enter_annotation(AnnotationState.NONE)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+    note: _enter_annotation is decorated with @contextlib.contextmanager (line 1184)
+1345:32 call  self.handleNode(node.slice, node)
+    -> pyflakes.checker.Checker.handleNode
+1346:30 call  _is_name_or_attr(node.value, 'Annotated')
+    -> pyflakes.checker._is_name_or_attr
+1347:28 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+1349:26 call  isinstance(node.slice, ast.Tuple)
+    -> <builtin>.isinstance
+1355:42 call  len(slice_tuple.elts)
+    -> <builtin>.len
+1356:32 call  self.handleNode(node.slice, node)
+    -> pyflakes.checker.Checker.handleNode
+1359:32 call  self.handleNode(slice_tuple.elts[0], node)
+    -> pyflakes.checker.Checker.handleNode
+1361:44 call  self._enter_annotation(AnnotationState.NONE)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+1363:40 call  self.handleNode(arg, node)
+    -> pyflakes.checker.Checker.handleNode
+1365:28 call  self.handleNode(node.ctx, node)
+    -> pyflakes.checker.Checker.handleNode
+1367:37 call  _is_any_typing_member(node.value, self.scopeStack)
+    -> pyflakes.checker._is_any_typing_member
+1368:44 call  self._enter_annotation()
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+1369:40 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+1371:36 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker._handle_string_dot_format]
+1375:33 call  tuple(parse_format_string(node.func.value.value))
+    -> <builtin>.tuple
+1375:53 call  parse_format_string(node.func.value.value)
+    -> string.Formatter.parse
+    note: parse_format_string is the bound method parse of the string.Formatter made at line 39
+    # a value site: note where the callee comes from
+1377:24 call  self.report(messages.StringDotFormatInvalidFormat, node, e)
+    -> pyflakes.checker.Checker.report
+1383:37 call  set()
+    -> <builtin>.set
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: no argument; no VariableKey
+1384:32 call  set()
+    -> <builtin>.set
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: no argument; no VariableKey
+1426:24 call  _add_key(fmtkey)
+    -> pyflakes.checker.Checker._handle_string_dot_format._add_key
+1432:46 call  tuple(parse_format_string(spec))
+    -> <builtin>.tuple
+1432:66 call  parse_format_string(spec)
+    -> string.Formatter.parse
+    note: parse_format_string is the bound method parse of the string.Formatter made at line 39
+    # a value site: note where the callee comes from
+1434:32 call  self.report(messages.StringDotFormatInvalidFormat, node, e)
+    -> pyflakes.checker.Checker.report
+1440:36 call  self.report( messages.StringDotFormatInvalidFormat, node,...
+    -> pyflakes.checker.Checker.report
+1446:32 call  _add_key(spec_fmtkey)
+    -> pyflakes.checker.Checker._handle_string_dot_format._add_key
+1452:20 call  any(isinstance(arg, ast.Starred) for arg in node.args)
+    -> <builtin>.any
+1452:31 call  isinstance(arg, ast.Starred)
+    -> <builtin>.isinstance
+1454:20 call  any(kwd.arg is None for kwd in node.keywords)
+    -> <builtin>.any
+1458:38 call  set(range(len(node.args)))
+    -> <builtin>.set
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are the ints of a range; no VariableKey
+1458:44 call  range(len(node.args))
+    -> <builtin>.range
+1458:48 call  len(node.args)
+    -> <builtin>.len
+1470:24 call  self.report( messages.StringDotFormatExtraPositionalArgum...
+    -> pyflakes.checker.Checker.report
+1473:26 call  ', '.join(sorted(str(x) for x in extra_positional))
+    -> <builtin>.str.join
+1473:33 call  sorted(str(x) for x in extra_positional)
+    -> <builtin>.sorted
+1473:37 call  str(x)
+    -> <builtin>.str
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: x is an int position of a format argument
+1476:24 call  self.report( messages.StringDotFormatExtraNamedArguments,...
+    -> pyflakes.checker.Checker.report
+1479:26 call  ', '.join(sorted(extra_named))
+    -> <builtin>.str.join
+1479:33 call  sorted(extra_named)
+    -> <builtin>.sorted
+1482:24 call  self.report( messages.StringDotFormatMissingArgument, nod...
+    -> pyflakes.checker.Checker.report
+1485:26 call  ', '.join(sorted(str(x) for x in missing_arguments))
+    -> <builtin>.str.join
+1485:33 call  sorted(str(x) for x in missing_arguments)
+    -> <builtin>.sorted
+1485:37 call  str(x)
+    -> <builtin>.str
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: x is an int position or a str name of a placeholder
+
+[pyflakes.checker.Checker._handle_string_dot_format._add_key]
+1394:44 call  fmtkey.partition('.')
+    -> <builtin>.str.partition
+1395:44 call  fmtkey.partition('[')
+    -> <builtin>.str.partition
+1398:29 call  int(fmtkey)
+    -> <builtin>.int
+1403:32 call  self.report(messages.StringDotFormatMixingAutomatic, node)
+    -> pyflakes.checker.Checker.report
+1410:32 call  self.report(messages.StringDotFormatMixingAutomatic, node)
+    -> pyflakes.checker.Checker.report
+1418:26 call  isinstance(fmtkey, int)
+    -> <builtin>.isinstance
+1419:43 call  placeholder_positional.add(fmtkey)
+    -> <builtin>.set.add
+1421:38 call  placeholder_named.add(fmtkey)
+    -> <builtin>.set.add
+
+[pyflakes.checker.Checker.CALL]
+1490:27 call  isinstance(node.func, ast.Attribute)
+    -> <builtin>.isinstance
+1491:27 call  isinstance(node.func.value, ast.Constant)
+    -> <builtin>.isinstance
+1492:27 call  isinstance(node.func.value.value, str)
+    -> <builtin>.isinstance
+1495:43 call  self._handle_string_dot_format(node)
+    -> pyflakes.checker.Checker._handle_string_dot_format
+1513:22 call  _is_typing(node.func, 'cast', self.scopeStack)
+    -> pyflakes.checker._is_typing
+1514:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1517:25 call  _annotations(node.args[:1])
+    -> pyflakes.checker.Checker.CALL._annotations
+1518:29 call  _non_annotations(node.args[1:])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1523:32 call  _annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._annotation
+1525:36 call  _non_annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1527:24 call  _is_typing(node.func, 'assert_type', self.scopeStack)
+    -> pyflakes.checker._is_typing
+1528:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1531:29 call  _non_annotations(node.args[:1])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1532:25 call  _annotations(node.args[1:])
+    -> pyflakes.checker.Checker.CALL._annotations
+1533:29 call  _non_annotations(node.keywords)
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1535:24 call  _is_typing(node.func, 'TypeVar', self.scopeStack)
+    -> pyflakes.checker._is_typing
+1536:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1537:29 call  _non_annotations(node.args[:1])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1540:25 call  _annotations(node.args[1:])
+    -> pyflakes.checker.Checker.CALL._annotations
+1545:32 call  _annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._annotation
+1547:36 call  _non_annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1550:27 call  _is_typing(node.func, 'ParamSpec', self.scopeStack)
+    -> pyflakes.checker._is_typing
+1551:27 call  _is_typing(node.func, 'TypeVarTuple', self.scopeStack)
+    -> pyflakes.checker._is_typing
+1553:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1554:29 call  _non_annotations(node.args)
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1560:32 call  _annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._annotation
+1562:36 call  _non_annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1564:24 call  _is_typing(node.func, 'NewType', self.scopeStack)
+    -> pyflakes.checker._is_typing
+1565:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1566:29 call  _non_annotations(node.args[:1])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1569:25 call  _annotations(node.args[1:])
+    -> pyflakes.checker.Checker.CALL._annotations
+1573:32 call  _annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._annotation
+1575:36 call  _non_annotation(kwd)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1577:24 call  _is_typing(node.func, "TypedDict", self.scopeStack)
+    -> pyflakes.checker._is_typing
+1578:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1579:29 call  _non_annotations(node.args[:1])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1582:19 call  len(node.args)
+    -> <builtin>.len
+1582:49 call  isinstance(node.args[1], ast.Dict)
+    -> <builtin>.isinstance
+1583:47 call  iter_dict_children(node.args[1])
+    -> pyflakes.checker.iter_dict_children
+1584:36 call  _non_annotation(k)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1585:32 call  _annotation(v)
+    -> pyflakes.checker.Checker.CALL._annotation
+1586:33 call  _non_annotations(node.args[2:])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1588:33 call  _non_annotations(node.args[1:])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1592:33 call  _non_annotations(node.keywords)
+    -> pyflakes.checker.Checker.CALL._non_annotations
+    note: version branch: Python 3.13 and later
+1594:29 call  _annotations(node.keywords)
+    -> pyflakes.checker.Checker.CALL._annotations
+    note: version branch: Python 3.11 and 3.12
+1596:24 call  _is_typing(node.func, "NamedTuple", self.scopeStack)
+    -> pyflakes.checker._is_typing
+1597:28 call  _non_annotation(node.func)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1598:29 call  _non_annotations(node.args[:1])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1602:24 call  len(node.args)
+    -> <builtin>.len
+1603:31 call  isinstance(node.args[1], (ast.Tuple, ast.List))
+    -> <builtin>.isinstance
+1606:34 call  isinstance(elt, (ast.Tuple, ast.List))
+    -> <builtin>.isinstance
+1607:41 call  _non_annotations(elt.elts[:1])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1608:37 call  _annotations(elt.elts[1:])
+    -> pyflakes.checker.Checker.CALL._annotations
+1610:40 call  _non_annotation(elt)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+1611:33 call  _non_annotations(node.args[2:])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1613:33 call  _non_annotations(node.args[1:])
+    -> pyflakes.checker.Checker.CALL._non_annotations
+1617:33 call  _non_annotations(node.keywords)
+    -> pyflakes.checker.Checker.CALL._non_annotations
+    note: version branch: Python 3.15 and later
+1619:29 call  _annotations(node.keywords)
+    -> pyflakes.checker.Checker.CALL._annotations
+    note: version branch: Python 3.11 to 3.14
+1621:32 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.CALL._annotation]
+1498:40 call  self._enter_annotation(AnnotationState.BARE)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+    note: _enter_annotation is decorated with @contextlib.contextmanager (line 1184)
+1499:32 call  self.handleNode(n, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.CALL._annotations]
+1503:28 call  _annotation(n)
+    -> pyflakes.checker.Checker.CALL._annotation
+
+[pyflakes.checker.Checker.CALL._non_annotation]
+1506:40 call  self._enter_annotation(AnnotationState.NONE)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+1507:32 call  self.handleNode(n, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.CALL._non_annotations]
+1511:32 call  _non_annotation(n)
+    -> pyflakes.checker.Checker.CALL._non_annotation
+
+[pyflakes.checker.Checker._handle_percent_format]
+1625:48 call  parse_percent_format(node.left.value)
+    -> pyflakes.checker.parse_percent_format
+1627:24 call  self.report( messages.PercentFormatInvalidFormat, node, '...
+    -> pyflakes.checker.Checker.report
+1634:20 call  set()
+    -> <builtin>.set
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: no argument; no VariableKey
+1646:28 call  self.report( messages.PercentFormatUnsupportedFormatChara...
+    -> pyflakes.checker.Checker.report
+1658:36 call  self.report( messages.PercentFormatStarRequiresSequence, ...
+    -> pyflakes.checker.Checker.report
+1666:28 call  self.report( messages.PercentFormatMixedPositionalAndName...
+    -> pyflakes.checker.Checker.report
+1672:28 call  self.report( messages.PercentFormatMixedPositionalAndName...
+    -> pyflakes.checker.Checker.report
+1681:26 call  named.add(name)
+    -> <builtin>.set.add
+1684:27 call  isinstance(node.right, (ast.List, ast.Tuple))
+    -> <builtin>.isinstance
+1686:24 call  any( isinstance(elt, ast.Starred) for elt in node.right.e...
+    -> <builtin>.any
+1687:31 call  isinstance(elt, ast.Starred)
+    -> <builtin>.isinstance
+1691:37 call  len(node.right.elts)
+    -> <builtin>.len
+1693:28 call  self.report( messages.PercentFormatPositionalCountMismatc...
+    -> pyflakes.checker.Checker.report
+1700:28 call  self.report(messages.PercentFormatExpectedMapping, node)
+    -> pyflakes.checker.Checker.report
+1703:27 call  isinstance(node.right, ast.Dict)
+    -> <builtin>.isinstance
+1704:20 call  all( isinstance(k, ast.Constant) and isinstance(k.value, ...
+    -> <builtin>.all
+1705:31 call  isinstance(k, ast.Constant)
+    -> <builtin>.isinstance
+1705:63 call  isinstance(k.value, str)
+    -> <builtin>.isinstance
+1710:28 call  self.report(messages.PercentFormatExpectedSequence, node)
+    -> pyflakes.checker.Checker.report
+1717:28 call  self.report( messages.PercentFormatExtraNamedArguments, n...
+    -> pyflakes.checker.Checker.report
+1720:30 call  ', '.join(sorted(extra_keys))
+    -> <builtin>.str.join
+1720:37 call  sorted(extra_keys)
+    -> <builtin>.sorted
+1723:28 call  self.report( messages.PercentFormatMissingArgument, node,...
+    -> pyflakes.checker.Checker.report
+1726:30 call  ', '.join(sorted(missing_keys))
+    -> <builtin>.str.join
+1726:37 call  sorted(missing_keys)
+    -> <builtin>.sorted
+
+[pyflakes.checker.Checker.BINOP]
+1731:27 call  isinstance(node.op, ast.Mod)
+    -> <builtin>.isinstance
+1732:27 call  isinstance(node.left, ast.Constant)
+    -> <builtin>.isinstance
+1733:27 call  isinstance(node.left.value, str)
+    -> <builtin>.isinstance
+1735:40 call  self._handle_percent_format(node)
+    -> pyflakes.checker.Checker._handle_percent_format
+1736:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.CONSTANT]
+1739:22 call  isinstance(node.value, str)
+    -> <builtin>.isinstance
+1740:35 call  functools.partial( self.handleStringAnnotation, node.valu...
+    -> functools.partial
+    reject pyflakes.checker.Checker.handleStringAnnotation: functools.partial stores the bound method and does not call it; _run_deferred calls the partial (line 778)
+1747:31 call  self.deferFunction(fn)
+    -> pyflakes.checker.Checker.deferFunction
+
+[pyflakes.checker.Checker.RAISE]
+1762:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+1766:22 call  isinstance(arg, ast.Call)
+    -> <builtin>.isinstance
+1767:43 call  is_notimplemented_name_node(arg.func)
+    -> pyflakes.checker.is_notimplemented_name_node
+1769:28 call  self.report(messages.RaiseNotImplemented, node)
+    -> pyflakes.checker.Checker.report
+1770:41 call  is_notimplemented_name_node(arg)
+    -> pyflakes.checker.is_notimplemented_name_node
+1772:24 call  self.report(messages.RaiseNotImplemented, node)
+    -> pyflakes.checker.Checker.report
+
+[pyflakes.checker.Checker.JOINEDSTR]
+1784:24 call  any(isinstance(x, ast.FormattedValue) for x in node.values)
+    -> <builtin>.any
+1784:35 call  isinstance(x, ast.FormattedValue)
+    -> <builtin>.isinstance
+1786:24 call  self.report(messages.FStringMissingPlaceholders, node)
+    -> pyflakes.checker.Checker.report
+1790:32 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.TEMPLATESTR]
+1795:19 call  any(isinstance(x, ast.Interpolation) for x in node.values)
+    -> <builtin>.any
+1795:30 call  isinstance(x, ast.Interpolation)
+    -> <builtin>.isinstance
+1796:24 call  self.report(messages.TStringMissingPlaceholders, node)
+    -> pyflakes.checker.Checker.report
+1802:32 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.DICT]
+1813:29 call  convert_to_value(key)
+    -> pyflakes.checker.convert_to_value
+1816:41 call  collections.Counter(keys)
+    -> collections.Counter
+    -> pyflakes.checker.VariableKey.__hash__
+    -> pyflakes.checker.VariableKey.__eq__
+    note: keys holds the values of convert_to_value: constants, tuples of them, VariableKey and UnhandledKeyType objects. Counter hashes each key (a VariableKey, also inside a tuple, runs VariableKey.__hash__) and compares keys with equal hashes (two VariableKeys of one name, or a VariableKey and the str of its name, which has the same hash: VariableKey.__eq__ runs, reflected for the str)
+1818:51 call  key_counts.items()
+    -> collections.Counter.items
+1823:55 call  enumerate(keys)
+    -> <builtin>.enumerate
+1825:41 call  collections.Counter( convert_to_value(node.values[index])...
+    -> collections.Counter
+    -> pyflakes.checker.VariableKey.__hash__
+    -> pyflakes.checker.VariableKey.__eq__
+    note: the values of convert_to_value for the dict values: as for keys at 1816:41, a VariableKey for a Name value, also inside a tuple
+1826:33 call  convert_to_value(node.values[index])
+    -> pyflakes.checker.convert_to_value
+1829:19 call  any(count == 1 for value, count in values.items())
+    -> <builtin>.any
+1829:63 call  values.items()
+    -> collections.Counter.items
+1832:34 call  isinstance(key, VariableKey)
+    -> <builtin>.isinstance
+1833:36 call  self.report(messages.MultiValueRepeatedKeyVariable, key_n...
+    -> pyflakes.checker.Checker.report
+1837:36 call  self.report( messages.MultiValueRepeatedKeyLiteral, key_n...
+    -> pyflakes.checker.Checker.report
+1843:39 call  iter_dict_children(node)
+    -> pyflakes.checker.iter_dict_children
+1844:28 call  self.handleNode(k, node)
+    -> pyflakes.checker.Checker.handleNode
+1845:28 call  self.handleNode(v, node)
+    -> pyflakes.checker.Checker.handleNode
+1823:71 op  i_key == key
+    -> pyflakes.checker.VariableKey.__eq__
+    note: i_key and key are values of convert_to_value (see 1816:41); a VariableKey on either side, or inside a tuple, runs VariableKey.__eq__ (reflected when only the right one is a VariableKey)
+
+[pyflakes.checker.Checker.IF]
+1848:22 call  isinstance(node.test, ast.Tuple)
+    -> <builtin>.isinstance
+1849:24 call  self.report(messages.IfTuple, node)
+    -> pyflakes.checker.Checker.report
+1850:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.ASSERT]
+1855:22 call  isinstance(node.test, ast.Tuple)
+    -> <builtin>.isinstance
+1856:24 call  self.report(messages.AssertTuple, node)
+    -> pyflakes.checker.Checker.report
+1857:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.GLOBAL]
+1863:51 call  self._in_doctest()
+    -> pyflakes.checker.Checker._in_doctest
+1867:17 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1871:40 call  Assignment(node_name, node)
+    -> pyflakes.checker.Binding.__init__
+1878:31 call  isinstance(m, messages.UndefinedName)
+    -> <builtin>.isinstance
+1882:40 call  global_scope.setdefault(node_name, node_value)
+    -> <builtin>.dict.setdefault
+1889:22 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+
+[pyflakes.checker.Checker.GENERATOREXP]
+1895:24 call  self.handleNode(node.generators[0].iter, node.generators[0])
+    -> pyflakes.checker.Checker.handleNode
+1897:22 call  isinstance(node, ast.GeneratorExp)
+    -> <builtin>.isinstance
+1902:27 call  self.in_scope(scope_tp)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker.in_scope
+    note: in_scope is decorated with @contextlib.contextmanager (line 814)
+1903:32 call  self.handleChildren(node.generators[0], omit=('iter',))
+    -> pyflakes.checker.Checker.handleChildren
+1905:32 call  self.handleNode(gen, node)
+    -> pyflakes.checker.Checker.handleNode
+1906:32 call  self.handleChildren(node, omit=('generators',))
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.NAME]
+1915:22 call  isinstance(node.ctx, ast.Load)
+    -> <builtin>.isinstance
+1916:32 call  self.handleNodeLoad(node, self.getParent(node))
+    -> pyflakes.checker.Checker.handleNodeLoad
+1916:53 call  self.getParent(node)
+    -> pyflakes.checker.Checker.getParent
+1917:51 call  isinstance(self.scope, FunctionScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1917:57; isinstance does not call it
+1917:57 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1918:31 call  isinstance(self._parents[node], ast.Call)
+    -> <builtin>.isinstance
+1920:22 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1921:24 call  isinstance(node.ctx, ast.Store)
+    -> <builtin>.isinstance
+1922:33 call  self.handleNodeStore(node)
+    -> pyflakes.checker.Checker.handleNodeStore
+1923:24 call  isinstance(node.ctx, ast.Del)
+    -> <builtin>.isinstance
+1924:34 call  self.handleNodeDelete(node)
+    -> pyflakes.checker.Checker.handleNodeDelete
+1927:31 call  RuntimeError(f"Got impossible expression context: {node.c...
+    note: The only constructor call is the else after ctx is checked against ast.Load, ast.Store and ast.Del (1915-1927). Supported parser-produced Name contexts are exactly those three; no annotation admits an arbitrary hand-built context. The observed trace edge comes from test_undefined_names.py:824-832: ast.parse("x = 10") at829 followed by tree.body[0].targets[0].ctx = object() at831. That deliberately invalid client mutation is excluded by global B3. Rule A preserves function bodies but does not make impossible argument values admissible.
+
+[pyflakes.checker.Checker.CONTINUE]
+1936:26 call  isinstance(n, (ast.While, ast.For, ast.AsyncFor))
+    -> <builtin>.isinstance
+1940:26 call  isinstance(n, (ast.FunctionDef, ast.ClassDef))
+    -> <builtin>.isinstance
+1942:22 call  isinstance(node, ast.Continue)
+    -> <builtin>.isinstance
+1943:24 call  self.report(messages.ContinueOutsideLoop, node)
+    -> pyflakes.checker.Checker.report
+1945:24 call  self.report(messages.BreakOutsideLoop, node)
+    -> pyflakes.checker.Checker.report
+
+[pyflakes.checker.Checker.RETURN]
+1950:22 call  isinstance(self.scope, (ClassScope, ModuleScope))
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1950:28; isinstance does not call it
+1950:28 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1951:24 call  self.report(messages.ReturnOutsideFunction, node)
+    -> pyflakes.checker.Checker.report
+1954:24 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.YIELD]
+1957:22 call  isinstance(self.scope, (ClassScope, ModuleScope))
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1957:28; isinstance does not call it
+1957:28 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1958:24 call  self.report(messages.YieldOutsideFunction, node)
+    -> pyflakes.checker.Checker.report
+1961:24 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.FUNCTIONDEF]
+1967:28 call  self.handleNode(deco, node)
+    -> pyflakes.checker.Checker.handleNode
+1969:36 call  self._type_param_scope(node)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._type_param_scope
+    note: _type_param_scope is decorated with @contextlib.contextmanager (line 2272)
+1970:24 call  self.LAMBDA(node)
+    -> pyflakes.checker.Checker.LAMBDA
+1972:24 call  self.addBinding(node, FunctionDefinition(node.name, node))
+    -> pyflakes.checker.Checker.addBinding
+1972:49 call  FunctionDefinition(node.name, node)
+    -> pyflakes.checker.Binding.__init__
+1976:37 call  self._in_doctest()
+    -> pyflakes.checker.Checker._in_doctest
+1977:31 call  isinstance(self.scope, FunctionScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 1977:37; isinstance does not call it
+1977:37 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+1978:31 call  self.deferFunction(lambda: self.handleDoctests(node))
+    -> pyflakes.checker.Checker.deferFunction
+    reject pyflakes.checker.Checker.FUNCTIONDEF.<lambda1>: deferFunction stores the lambda; _run_deferred calls it (line 778)
+
+[pyflakes.checker.Checker.FUNCTIONDEF.<lambda1>]
+1978:59 call  self.handleDoctests(node)
+    -> pyflakes.checker.Checker.handleDoctests
+
+[pyflakes.checker.Checker.LAMBDA]
+1992:28 call  args.append(arg.arg)
+    -> <builtin>.list.append
+1993:35 call  annotations.append(arg.annotation)
+    -> <builtin>.list.append
+1999:24 call  args.append(wildcard.arg)
+    -> <builtin>.list.append
+2000:31 call  annotations.append(wildcard.annotation)
+    -> <builtin>.list.append
+2002:26 call  isinstance(node, ast.Lambda)
+    -> <builtin>.isinstance
+2003:31 call  annotations.append(node.returns)
+    -> <builtin>.list.append
+2005:15 call  len(set(args))
+    -> <builtin>.len
+2005:19 call  set(args)
+    -> <builtin>.set
+    reject pyflakes.checker.VariableKey.__eq__, pyflakes.checker.VariableKey.__hash__: the elements are the str argument names; no VariableKey
+2005:32 call  len(args)
+    -> <builtin>.len
+2006:40 call  enumerate(args)
+    -> <builtin>.enumerate
+2008:32 call  self.report(messages.DuplicateArgument, node, arg)
+    -> pyflakes.checker.Checker.report
+2011:34 call  self.handleAnnotation(annotation, node)
+    -> pyflakes.checker.in_annotation.in_annotation_func
+    reject pyflakes.checker.Checker.handleAnnotation: the attribute handleAnnotation of the class is the wrapper in_annotation_func that @in_annotation made (line 1316); the wrapper calls the decorated function (line 699)
+2014:28 call  self.handleNode(default, node)
+    -> pyflakes.checker.Checker.handleNode
+2023:27 call  self.deferFunction(runFunction)
+    -> pyflakes.checker.Checker.deferFunction
+    reject pyflakes.checker.Checker.LAMBDA.runFunction: deferFunction stores the function; _run_deferred calls it (line 778)
+
+[pyflakes.checker.Checker.LAMBDA.runFunction]
+2017:31 call  self.in_scope(FunctionScope)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker.in_scope
+    note: in_scope is decorated with @contextlib.contextmanager (line 814)
+2018:36 call  self.handleChildren( node, omit=('decorator_list', 'retur...
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.ARGUMENTS]
+2026:28 call  self.handleChildren(node, omit=('defaults', 'kw_defaults'))
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.ARG]
+2029:24 call  self.addBinding(node, Argument(node.arg, node))
+    -> pyflakes.checker.Checker.addBinding
+2029:39 call  Argument(node.arg, node)
+    -> pyflakes.checker.Binding.__init__
+
+[pyflakes.checker.Checker.CLASSDEF]
+2038:28 call  self.handleNode(deco, node)
+    -> pyflakes.checker.Checker.handleNode
+2040:36 call  self._type_param_scope(node)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._type_param_scope
+    note: _type_param_scope is decorated with @contextlib.contextmanager (line 2272)
+2042:32 call  self.handleNode(baseNode, node)
+    -> pyflakes.checker.Checker.handleNode
+2044:32 call  self.handleNode(keywordNode, node)
+    -> pyflakes.checker.Checker.handleNode
+2045:31 call  self.in_scope(ClassScope)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker.in_scope
+    note: in_scope is decorated with @contextlib.contextmanager (line 814)
+2049:45 call  self._in_doctest()
+    -> pyflakes.checker.Checker._in_doctest
+2050:39 call  isinstance(self.scope, FunctionScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 2050:45; isinstance does not call it
+2050:45 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2051:39 call  self.deferFunction(lambda: self.handleDoctests(node))
+    -> pyflakes.checker.Checker.deferFunction
+    reject pyflakes.checker.Checker.CLASSDEF.<lambda1>: deferFunction stores the lambda; _run_deferred calls it (line 778)
+2053:36 call  self.handleNode(stmt, node)
+    -> pyflakes.checker.Checker.handleNode
+2055:24 call  self.addBinding(node, ClassDefinition(node.name, node))
+    -> pyflakes.checker.Checker.addBinding
+2055:46 call  ClassDefinition(node.name, node)
+    -> pyflakes.checker.Binding.__init__
+
+[pyflakes.checker.Checker.CLASSDEF.<lambda1>]
+2051:67 call  self.handleDoctests(node)
+    -> pyflakes.checker.Checker.handleDoctests
+
+[pyflakes.checker.Checker.ASSIGN]
+2058:24 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+2059:28 call  self.handleChildren(node, omit=('value',))
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.AUGASSIGN]
+2064:28 call  self.handleNodeLoad(node.target, node)
+    -> pyflakes.checker.Checker.handleNodeLoad
+2065:24 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+2066:24 call  self.handleNode(node.target, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.ANNASSIGN]
+2069:30 call  self.handleAnnotation(node.annotation, node)
+    -> pyflakes.checker.in_annotation.in_annotation_func
+    reject pyflakes.checker.Checker.handleAnnotation: the attribute handleAnnotation of the class is the wrapper in_annotation_func that @in_annotation made (line 1316); the wrapper calls the decorated function (line 699)
+2073:26 call  _is_typing(node.annotation, 'TypeAlias', self.scopeStack)
+    -> pyflakes.checker._is_typing
+2074:44 call  self._enter_annotation(AnnotationState.BARE)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._enter_annotation
+    note: _enter_annotation is decorated with @contextlib.contextmanager (line 1184)
+2075:36 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+2077:32 call  self.handleNode(node.value, node)
+    -> pyflakes.checker.Checker.handleNode
+2078:24 call  self.handleNode(node.target, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.TYPEALIAS]
+2081:36 call  self._type_param_scope(node)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker._type_param_scope
+    note: _type_param_scope is decorated with @contextlib.contextmanager (line 2272)
+2082:51 call  self.handle_annotation_always_deferred(node.value, node)
+    -> pyflakes.checker.Checker.handle_annotation_always_deferred
+2083:24 call  self.handleNode(node.name, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.TUPLE]
+2086:22 call  isinstance(node.ctx, ast.Store)
+    -> <builtin>.isinstance
+2095:34 call  enumerate(node.elts)
+    -> <builtin>.enumerate
+2096:30 call  isinstance(n, ast.Starred)
+    -> <builtin>.isinstance
+2098:36 call  self.report(messages.TwoStarredExpressions, node)
+    -> pyflakes.checker.Checker.report
+2104:41 call  len(node.elts)
+    -> <builtin>.len
+2105:28 call  self.report(messages.TooManyExpressionsInStarredAssignmen...
+    -> pyflakes.checker.Checker.report
+2106:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker._in_try]
+2112:34 call  self.getParent(node)
+    -> pyflakes.checker.Checker.getParent
+2113:26 call  isinstance(node, (ast.Try, ast.TryStar, ast.ExceptHandler))
+    -> <builtin>.isinstance
+2115:28 call  isinstance(node, ast.Module)
+    -> <builtin>.isinstance
+
+[pyflakes.checker.Checker.IMPORT]
+2120:35 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 2120:41; isinstance does not call it
+2120:41 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2121:24 call  self.report(messages.LazyImportNotAtModuleScope, node)
+    -> pyflakes.checker.Checker.report
+    note: version branch: lazy is true only on Python 3.15 and later (line 2119)
+2123:35 call  self._in_try(node)
+    -> pyflakes.checker.Checker._in_try
+2124:24 call  self.report(messages.LazyImportNotAtModuleScope, node)
+    -> pyflakes.checker.Checker.report
+2129:51 call  SubmoduleImportation( alias.name, node, is_lazy=lazy, )
+    -> pyflakes.checker.SubmoduleImportation.__init__
+    reject pyflakes.checker.Importation.__init__, pyflakes.checker.Binding.__init__: SubmoduleImportation defines __init__, the first in its MRO; the others are called from it through super() (lines 354, 302)
+2135:42 call  Importation(name, node, alias.name, is_lazy=lazy)
+    -> pyflakes.checker.Importation.__init__
+    reject pyflakes.checker.Binding.__init__: Importation defines __init__, the first in its MRO; Binding.__init__ is called from it through super() (line 302)
+2136:28 call  self.addBinding(node, importation)
+    -> pyflakes.checker.Checker.addBinding
+
+[pyflakes.checker.Checker.IMPORTFROM]
+2140:25 getattr  self.futuresAllowed
+    -> pyflakes.checker.Checker.futuresAllowed
+2141:28 call  self.report(messages.LateFutureImport, node)
+    -> pyflakes.checker.Checker.report
+2143:18 setattr  self.futuresAllowed
+    -> pyflakes.checker.Checker.futuresAllowed
+    note: the setter of the property futuresAllowed (line 793)
+2146:35 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 2146:41; isinstance does not call it
+2146:41 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2147:24 call  self.report(messages.LazyImportNotAtModuleScope, node)
+    -> pyflakes.checker.Checker.report
+    note: version branch: lazy is true only on Python 3.15 and later (line 2145)
+2149:35 call  self._in_try(node)
+    -> pyflakes.checker.Checker._in_try
+2150:24 call  self.report(messages.LazyImportNotAtModuleScope, node)
+    -> pyflakes.checker.Checker.report
+2158:48 call  FutureImportation(name, node, self.scope)
+    -> pyflakes.checker.FutureImportation.__init__
+    reject pyflakes.checker.ImportationFrom.__init__, pyflakes.checker.Importation.__init__, pyflakes.checker.Binding.__init__: FutureImportation defines __init__, the first in its MRO; the others are called from it through super() (lines 425, 382, 302)
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 2158:66; FutureImportation.__init__ does not call it
+2158:66 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2160:32 call  self.report(messages.FutureFeatureNotDefined, node, alias...
+    -> pyflakes.checker.Checker.report
+    note: an unknown leading __future__ feature is rejected by ast.parse on CPython 3.14+, but this call is not version-guarded. A late import still reaches it: pass followed by from __future__ import invented. CPython 3.14 future.c stops its leading-future scan at pass, and AST preprocessing does not reject ImportFrom; checker.py:2159 then reports the unknown feature. Python 3.11 to 3.13 also admit a leading unknown future import. No graph pair changes.
+2163:26 setattr  self.annotationsFutureEnabled
+    -> pyflakes.checker.Checker.annotationsFutureEnabled
+    note: the setter of the property annotationsFutureEnabled (line 804)
+2165:34 call  isinstance(self.scope, ModuleScope)
+    -> <builtin>.isinstance
+    reject pyflakes.checker.Checker.scope: the argument is the value of the property, read at 2165:40; isinstance does not call it
+2165:40 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2166:32 call  self.report(messages.ImportStarNotPermitted, node, module)
+    -> pyflakes.checker.Checker.report
+2169:32 call  self.report(messages.LazyImportStarNotPermitted, node, mo...
+    -> pyflakes.checker.Checker.report
+    note: version branch: lazy is true only on Python 3.15 and later
+2172:22 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2173:28 call  self.report(messages.ImportStarUsed, node, module)
+    -> pyflakes.checker.Checker.report
+2174:46 call  StarImportation(module, node)
+    -> pyflakes.checker.StarImportation.__init__
+    reject pyflakes.checker.Importation.__init__, pyflakes.checker.Binding.__init__: StarImportation defines __init__, the first in its MRO; the others are called from it through super() (lines 398, 302)
+2176:46 call  ImportationFrom( name, node, module, alias.name, is_lazy=...
+    -> pyflakes.checker.ImportationFrom.__init__
+    reject pyflakes.checker.Importation.__init__, pyflakes.checker.Binding.__init__: ImportationFrom defines __init__, the first in its MRO; the others are called from it through super() (lines 382, 302)
+2180:28 call  self.addBinding(node, importation)
+    -> pyflakes.checker.Checker.addBinding
+
+[pyflakes.checker.Checker.TRY]
+2185:36 call  enumerate(node.handlers)
+    -> <builtin>.enumerate
+2186:26 call  isinstance(handler.type, ast.Tuple)
+    -> <builtin>.isinstance
+2188:41 call  handler_names.append(getNodeName(exc_type))
+    -> <builtin>.list.append
+2188:53 call  getNodeName(exc_type)
+    -> pyflakes.checker.getNodeName
+2190:37 call  handler_names.append(getNodeName(handler.type))
+    -> <builtin>.list.append
+2190:49 call  getNodeName(handler.type)
+    -> pyflakes.checker.getNodeName
+2192:48 call  len(node.handlers)
+    -> <builtin>.len
+2193:28 call  self.report(messages.DefaultExceptNotLast, handler)
+    -> pyflakes.checker.Checker.report
+2195:35 call  self.exceptHandlers.append(handler_names)
+    -> <builtin>.list.append
+2197:28 call  self.handleNode(child, node)
+    -> pyflakes.checker.Checker.handleNode
+2198:32 call  self.exceptHandlers.pop()
+    -> <builtin>.list.pop
+2200:28 call  self.handleChildren(node, omit='body')
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker.EXCEPTHANDLER]
+2206:32 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+2211:30 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2212:33 call  self.handleNodeStore(node)
+    -> pyflakes.checker.Checker.handleNodeStore
+2221:36 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2221:45 call  self.scope.pop(node.name)
+    -> <builtin>.dict.pop
+2225:29 call  self.handleNodeStore(node)
+    -> pyflakes.checker.Checker.handleNodeStore
+2226:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+2238:28 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+2238:37 call  self.scope.pop(node.name)
+    -> <builtin>.dict.pop
+2243:28 call  self.report(messages.UnusedVariable, node, node.name)
+    -> pyflakes.checker.Checker.report
+2247:18 getattr  self.scope
+    -> pyflakes.checker.Checker.scope
+
+[pyflakes.checker.Checker.COMPARE]
+2251:29 call  zip(node.ops, node.comparators)
+    -> <builtin>.zip
+2253:31 call  isinstance(op, (ast.Is, ast.IsNot))
+    -> <builtin>.isinstance
+2254:48 call  _is_const_non_singleton(left)
+    -> pyflakes.checker._is_const_non_singleton
+2255:48 call  _is_const_non_singleton(right)
+    -> pyflakes.checker._is_const_non_singleton
+2258:28 call  self.report(messages.IsLiteral, node)
+    -> pyflakes.checker.Checker.report
+2261:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker._match_target]
+2267:29 call  self.handleNodeStore(node)
+    -> pyflakes.checker.Checker.handleNodeStore
+2268:28 call  self.handleChildren(node)
+    -> pyflakes.checker.Checker.handleChildren
+
+[pyflakes.checker.Checker._type_param_scope]
+2274:34 call  contextlib.ExitStack()
+    -> contextlib.ExitStack
+2276:34 call  ctx.enter_context(self.in_scope(TypeScope))
+    -> contextlib.ExitStack.enter_context
+    note: enter_context calls __enter__ of the contextlib._GeneratorContextManager that in_scope returns, which resumes the generator in_scope; it calls no package function
+2276:48 call  self.in_scope(TypeScope)
+    -> contextlib.contextmanager.helper
+    -> pyflakes.checker.Checker.in_scope
+    note: in_scope is decorated with @contextlib.contextmanager (line 814); version branch: Python 3.12 and later
+2278:36 call  self.handleNode(param, node)
+    -> pyflakes.checker.Checker.handleNode
+
+[pyflakes.checker.Checker.TYPEVAR]
+2282:29 call  self.handleNodeStore(node)
+    -> pyflakes.checker.Checker.handleNodeStore
+2283:47 call  self.handle_annotation_always_deferred(node.bound, node)
+    -> pyflakes.checker.Checker.handle_annotation_always_deferred
+
+== pyflakes.messages
+
+[pyflakes.messages.Message.__str__]
+16:37 call  '{}:{}:{}: {}'.format(self.filename, self.lineno, self.co...
+    -> <builtin>.str.format
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: the fields are the file name (str), the line and column (int) and the formatted message (str)
+17:51 op  self.message % self.message_args
+    reject *: message_args holds what the message classes store: names, module names and lists of names (str), line numbers and counts (int), the type name of a Global or Nonlocal node (str), the key of a dict display (a constant, or a tuple of constants, VariableKey and UnhandledKeyType objects, which have no __repr__ or __str__), and a ValueError of string.Formatter; no binding, scope or message (a Message class that the client builds itself formats client objects)
+
+[pyflakes.messages.UnusedImport.__init__]
+24:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.RedefinedWhileUnused.__init__]
+32:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.ImportShadowedByLoopVar.__init__]
+40:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.ImportStarNotPermitted.__init__]
+48:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.ImportStarUsed.__init__]
+56:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.ImportStarUsage.__init__]
+64:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.UndefinedName.__init__]
+72:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.DoctestSyntaxError.__init__]
+80:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.UndefinedExport.__init__]
+89:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.UndefinedLocal.__init__]
+100:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+102:47 call  self.message.format(self.builtin)
+    -> <builtin>.str.format
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: the template and the argument are the str class attributes message and builtin
+105:47 call  self.message.format(self.default)
+    -> <builtin>.str.format
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__, pyflakes.messages.Message.__str__: the template and the argument are the str class attributes message and default
+
+[pyflakes.messages.DuplicateArgument.__init__]
+113:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.MultiValueRepeatedKeyLiteral.__init__]
+121:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.MultiValueRepeatedKeyVariable.__init__]
+129:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.FutureFeatureNotDefined.__init__]
+142:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.UnusedVariable.__init__]
+154:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.UnusedAnnotation.__init__]
+166:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.UnusedIndirectAssignment.__init__]
+175:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+176:34 call  type(loc)
+    -> <builtin>.type
+176:54 call  type(loc).__name__.lower()
+    -> <builtin>.str.lower
+
+[pyflakes.messages.ForwardAnnotationSyntaxError.__init__]
+248:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.StringDotFormatExtraPositionalArguments.__init__]
+276:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.StringDotFormatExtraNamedArguments.__init__]
+284:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.StringDotFormatMissingArgument.__init__]
+292:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.StringDotFormatInvalidFormat.__init__]
+304:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.PercentFormatInvalidFormat.__init__]
+312:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.PercentFormatUnsupportedFormatCharacter.__init__]
+324:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.PercentFormatPositionalCountMismatch.__init__]
+332:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.PercentFormatExtraNamedArguments.__init__]
+340:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.PercentFormatMissingArgument.__init__]
+348:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.EagerUseOfLazyImport.__init__]
+368:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+[pyflakes.messages.LazyImportStarNotPermitted.__init__]
+376:25 call  Message.__init__(self, filename, loc)
+    -> pyflakes.messages.Message.__init__
+    reject *: the explicit call names Message.__init__
+
+== pyflakes.reporter
+
+[pyflakes.reporter.Reporter.unexpectedError]
+37:27 call  self._stderr.write(f"{filename}: {msg}\n")
+    -> io.TextIOWrapper.write
+    note: _stderr is the errorStream of Reporter: a client file-like object (opaque, B5), or sys.stderr from _makeDefaultReporter (line 92), named by its class
+
+[pyflakes.reporter.Reporter.syntaxError]
+57:35 call  text.splitlines()
+    -> <builtin>.str.splitlines
+    note: text is documented as unicode (line 51) and is the text of a SyntaxError (api.py:41)
+61:21 call  max(lineno or 0, 1)
+    -> <builtin>.max
+65:25 call  max(offset, 1)
+    -> <builtin>.max
+66:31 call  self._stderr.write('%s:%d:%d: %s\n' % (filename, lineno, ...
+    -> io.TextIOWrapper.write
+69:31 call  self._stderr.write('%s:%d: %s\n' % (filename, lineno, msg))
+    -> io.TextIOWrapper.write
+72:31 call  self._stderr.write(line)
+    -> io.TextIOWrapper.write
+73:31 call  self._stderr.write('\n')
+    -> io.TextIOWrapper.write
+75:35 call  self._stderr.write(re.sub(r'\S', ' ', line[:offset - 1]) ...
+    -> io.TextIOWrapper.write
+75:42 call  re.sub(r'\S', ' ', line[:offset - 1])
+    -> re.sub
+
+[pyflakes.reporter.Reporter.flake]
+84:27 call  self._stdout.write(str(message))
+    -> io.TextIOWrapper.write
+    note: _stdout is the warningStream of Reporter: a client file-like object (opaque, B5), or sys.stdout from _makeDefaultReporter (line 92), named by its class
+84:31 call  str(message)
+    -> <builtin>.str
+    -> pyflakes.messages.Message.__str__
+    reject pyflakes.checker.Binding.__repr__, pyflakes.checker.Builtin.__repr__, pyflakes.checker.Scope.__repr__: message is documented as a pyflakes.messages.Message (line 82), and api.check passes the Messages of a Checker; no Message subclass overrides __str__
+85:27 call  self._stdout.write('\n')
+    -> io.TextIOWrapper.write
+
+[pyflakes.reporter._makeDefaultReporter]
+92:20 call  Reporter(sys.stdout, sys.stderr)
+    -> pyflakes.reporter.Reporter.__init__

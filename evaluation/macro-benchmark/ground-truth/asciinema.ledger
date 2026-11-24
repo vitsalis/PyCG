@@ -1,0 +1,1569 @@
+# Call-site ledger of asciinema at 350d5e9d8b7cee1be5db4091815942c9d035e7dc.
+# Hand-written from the source; judgements in asciinema.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md. The
+# package supports Python 3.4 and later (CHANGELOG drops 3.3; no upper bound) (setup.py exits on Python 2).
+# Values used below (asciinema.md, "Values"):
+#   env: the env of Config, get_config_home, load and the commands is the
+#     package default os.environ; os.environ.get is collections.abc.Mapping.get
+#     (earlier rulings: anytree, argcomplete, pypinyin). A mapping that a
+#     client passes (the tests pass dicts to Config) is opaque (B5).
+#   streams: open_url returns sys.stdin or a text file of open()
+#     (io.TextIOWrapper), or, for an http(s) URL, an encodings.utf_8.StreamReader
+#     over the http.client.HTTPResponse of urlopen or the gzip.GzipFile around
+#     it, or over the urllib.response.addinfourl of a redirect to an ftp URL.
+#     StreamReader has no close: its __getattr__ gives the close of the
+#     wrapped stream.
+#   asciicasts: open_from_url.__enter__ returns a v2.Asciicast or a v1.Asciicast.
+#   pty.record: the package passes it only the async_writer and the
+#     async_notifier of recorder.record (B2); the tests pass a client writer.
+#   async_worker.py: both sides of the optional import run (multiprocessing
+#     Process and Queue, or threading.Thread and queue.Queue).
+
+== asciinema
+
+[asciinema]
+7:22 call  ImportError('Python < 3 is unsupported.')
+    note: version branch __init__.py:6: only Python 2 takes it, and the package supports Python 3.4 and later (CHANGELOG drops 3.3; no upper bound); the branch does not run, so no edge
+
+[asciinema.record_asciicast]
+15:30 call  asciinema.recorder.record( path, command=command, append=...
+    -> asciinema.recorder.record
+    reject asciinema.pty.record: the path asciinema.recorder.record names the function record of the module asciinema.recorder
+
+== asciinema.__main__
+
+[asciinema.__main__]
+115:9 call  main()
+    -> asciinema.__main__.main
+    note: the if __name__ == '__main__' block is code of the module
+
+[asciinema.__main__.positive_float]
+16:18 call  float(value)
+    -> <builtin>.float
+18:41 call  argparse.ArgumentTypeError("must be positive")
+    -> argparse.ArgumentTypeError
+
+[asciinema.__main__.maybe_str]
+25:19 call  str(v)
+    -> <builtin>.str
+
+[asciinema.__main__.main]
+29:26 call  locale.nl_langinfo(locale.CODESET)
+    -> locale.nl_langinfo
+29:48 call  locale.nl_langinfo(locale.CODESET).upper()
+    -> <builtin>.str.upper
+30:14 call  print("asciinema needs an ASCII or UTF-8 character encodi...
+    -> <builtin>.print
+    reject asciinema.commands.command.Command.print: print here is the builtin; main is a module function
+31:17 call  sys.exit(1)
+    -> sys.exit
+34:26 call  config.load()
+    -> asciinema.config.load
+36:25 call  sys.stderr.write(str(e) + '\n')
+    -> io.TextIOWrapper.write
+    note: the default sys.stderr, a text stream named by its class (README)
+36:29 call  str(e)
+    -> <builtin>.str
+    note: e is a ConfigError, which defines no __str__
+37:17 call  sys.exit(1)
+    -> sys.exit
+40:37 call  argparse.ArgumentParser( description="Record and share yo...
+    -> argparse.ArgumentParser
+62:24 call  parser.add_argument('--version', action='version', versio...
+    -> argparse.ArgumentParser.add_argument
+64:39 call  parser.add_subparsers()
+    -> argparse.ArgumentParser.add_subparsers
+67:39 call  subparsers.add_parser('rec', help='Record terminal session')
+    -> argparse._SubParsersAction.add_parser
+    note: add_subparsers returns an argparse._SubParsersAction; add_parser returns an argparse.ArgumentParser (the class of parser)
+68:28 call  parser_rec.add_argument('--stdin', help='enable stdin rec...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.config.Config.record_stdin: the property runs at the getattr site 68:125; add_argument gets its value
+68:125 getattr  cfg.record_stdin
+    -> asciinema.config.Config.record_stdin
+    note: cfg is the Config that config.load() returns (line 34)
+69:28 call  parser_rec.add_argument('--append', help='append to exist...
+    -> argparse.ArgumentParser.add_argument
+70:28 call  parser_rec.add_argument('--raw', help='save only raw stdo...
+    -> argparse.ArgumentParser.add_argument
+71:28 call  parser_rec.add_argument('--overwrite', help='overwrite th...
+    -> argparse.ArgumentParser.add_argument
+72:28 call  parser_rec.add_argument('-c', '--command', help='command ...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.config.Config.record_command: the property runs at the getattr site 72:106; add_argument gets its value
+72:106 getattr  cfg.record_command
+    -> asciinema.config.Config.record_command
+73:28 call  parser_rec.add_argument('-e', '--env', help='list of envi...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.config.Config.record_env: the property runs at the getattr site 73:147; add_argument gets its value
+73:147 getattr  cfg.record_env
+    -> asciinema.config.Config.record_env
+74:28 call  parser_rec.add_argument('-t', '--title', help='title of t...
+    -> argparse.ArgumentParser.add_argument
+75:28 call  parser_rec.add_argument('-i', '--idle-time-limit', help='...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.__main__.positive_float: add_argument stores it as the type of the option; parse_args (103:29) calls it
+75:154 call  maybe_str(cfg.record_idle_time_limit)
+    -> asciinema.__main__.maybe_str
+    reject asciinema.config.Config.record_idle_time_limit: the property runs at the getattr site 75:159; maybe_str gets its value
+75:159 getattr  cfg.record_idle_time_limit
+    -> asciinema.config.Config.record_idle_time_limit
+76:28 call  parser_rec.add_argument('-y', '--yes', help='answer "yes"...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.config.Config.record_yes: the property runs at the getattr site 76:140; add_argument gets its value
+76:140 getattr  cfg.record_yes
+    -> asciinema.config.Config.record_yes
+77:28 call  parser_rec.add_argument('-q', '--quiet', help='be quiet, ...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.config.Config.record_quiet: the property runs at the getattr site 77:140; add_argument gets its value
+77:140 getattr  cfg.record_quiet
+    -> asciinema.config.Config.record_quiet
+78:28 call  parser_rec.add_argument('filename', nargs='?', default=''...
+    -> argparse.ArgumentParser.add_argument
+79:28 call  parser_rec.set_defaults(cmd=RecordCommand)
+    -> argparse.ArgumentParser.set_defaults
+82:40 call  subparsers.add_parser('play', help='Replay terminal sessi...
+    -> argparse._SubParsersAction.add_parser
+83:29 call  parser_play.add_argument('-i', '--idle-time-limit', help=...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.__main__.positive_float: add_argument stores it as the type of the option; parse_args (103:29) calls it
+83:162 call  maybe_str(cfg.play_idle_time_limit)
+    -> asciinema.__main__.maybe_str
+    reject asciinema.config.Config.play_idle_time_limit: the property runs at the getattr site 83:167; maybe_str gets its value
+83:167 getattr  cfg.play_idle_time_limit
+    -> asciinema.config.Config.play_idle_time_limit
+84:29 call  parser_play.add_argument('-s', '--speed', help='playback ...
+    -> argparse.ArgumentParser.add_argument
+    reject asciinema.__main__.positive_float: add_argument stores it as the type of the option; parse_args (103:29) calls it
+    reject asciinema.config.Config.play_speed: the property runs at the getattr site 84:125; add_argument gets its value
+84:125 getattr  cfg.play_speed
+    -> asciinema.config.Config.play_speed
+85:29 call  parser_play.add_argument('filename', help='local path, ht...
+    -> argparse.ArgumentParser.add_argument
+86:29 call  parser_play.set_defaults(cmd=PlayCommand)
+    -> argparse.ArgumentParser.set_defaults
+89:39 call  subparsers.add_parser('cat', help='Print full output of t...
+    -> argparse._SubParsersAction.add_parser
+90:28 call  parser_cat.add_argument('filename', help='local path, htt...
+    -> argparse.ArgumentParser.add_argument
+91:28 call  parser_cat.set_defaults(cmd=CatCommand)
+    -> argparse.ArgumentParser.set_defaults
+94:42 call  subparsers.add_parser('upload', help='Upload locally save...
+    -> argparse._SubParsersAction.add_parser
+95:31 call  parser_upload.add_argument('filename', help='filename or ...
+    -> argparse.ArgumentParser.add_argument
+96:31 call  parser_upload.set_defaults(cmd=UploadCommand)
+    -> argparse.ArgumentParser.set_defaults
+99:40 call  subparsers.add_parser('auth', help='Manage recordings on ...
+    -> argparse._SubParsersAction.add_parser
+100:29 call  parser_auth.set_defaults(cmd=AuthCommand)
+    -> argparse.ArgumentParser.set_defaults
+103:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    -> asciinema.__main__.positive_float
+    note: parse_args calls back positive_float, the type of -i (rec, play) and -s (play), on an option string of the command line and on a str default (maybe_str of a configured idle time limit, lines 75 and 83)
+105:15 call  hasattr(args, 'cmd')
+    -> <builtin>.hasattr
+106:27 call  args.cmd(args, cfg, os.environ)
+    -> asciinema.commands.record.RecordCommand.__init__
+    -> asciinema.commands.play.PlayCommand.__init__
+    -> asciinema.commands.cat.CatCommand.__init__
+    -> asciinema.commands.upload.UploadCommand.__init__
+    -> asciinema.commands.auth.AuthCommand.__init__
+    note: args.cmd is the class that set_defaults stores for the chosen subcommand (lines 79, 86, 91, 96, 100): RecordCommand, PlayCommand, CatCommand, UploadCommand or AuthCommand; each defines __init__
+    exclude asciinema.commands.command.Command.__init__: set_defaults never stores the base class Command; each subclass __init__ calls it itself
+107:31 call  command.execute()
+    -> asciinema.commands.auth.AuthCommand.execute
+    -> asciinema.commands.cat.CatCommand.execute
+    -> asciinema.commands.play.PlayCommand.execute
+    -> asciinema.commands.record.RecordCommand.execute
+    -> asciinema.commands.upload.UploadCommand.execute
+    note: command is an instance of one of the five classes of 106:27
+108:17 call  sys.exit(code)
+    -> sys.exit
+110:26 call  parser.print_help()
+    -> argparse.ArgumentParser.print_help
+111:17 call  sys.exit(1)
+    -> sys.exit
+
+== asciinema.api
+
+[asciinema.api.Api.__init__]
+21:92 call  URLLibHttpAdapter()
+    note: URLLibHttpAdapter defines no __init__ (object.__init__): no edge
+
+[asciinema.api.Api.hostname]
+24:24 call  urlparse(self.url)
+    -> urllib.parse.urlparse
+
+[asciinema.api.Api.auth_url]
+27:38 call  "{}/connect/{}".format(self.url, self.install_id)
+    -> <builtin>.str.format
+    reject asciinema.config.Config.install_id: self.install_id is the str that Api.__init__ stores (line 20), passed as a value to format
+27:54 getattr  self.install_id
+    reject asciinema.config.Config.install_id: the receiver is an Api, whose install_id is an instance attribute (line 20)
+
+[asciinema.api.Api.upload_url]
+30:42 call  "{}/api/asciicasts".format(self.url)
+    -> <builtin>.str.format
+
+[asciinema.api.Api.upload_asciicast]
+33:14 with  open(path, 'rb')
+    reject *: the context manager is the binary file of open() (io.BufferedReader); its __enter__ and __exit__ are outside the package
+33:18 call  open(path, 'rb')
+    -> <builtin>.open
+35:63 call  self.http_adapter.post( self.upload_url(), files={"asciic...
+    -> asciinema.urllib_http_adapter.URLLibHttpAdapter.post
+    reject asciinema.config.Config.install_id: self.install_id is the str that Api.__init__ stores (line 20), passed as password
+    note: self.http_adapter is the URLLibHttpAdapter of Api.__init__ (line 21); an adapter that a client passes is opaque (B5), and no package code passes one
+36:36 call  self.upload_url()
+    -> asciinema.api.Api.upload_url
+38:42 call  self._headers()
+    -> asciinema.api.Api._headers
+40:35 getattr  self.install_id
+    reject asciinema.config.Config.install_id: the receiver is an Api, whose install_id is an instance attribute (line 20)
+43:31 call  APIError(str(e))
+    -> <builtin>.Exception.__init__
+    note: APIError defines no __init__
+43:35 call  str(e)
+    -> <builtin>.str
+46:31 call  self._handle_error(status, body)
+    -> asciinema.api.Api._handle_error
+48:24 call  headers.get('content-type')
+    -> <builtin>.dict.get
+    note: headers is the dict that URLLibHttpAdapter.post returns (_parse_headers, or {} for an HTTPError)
+49:32 call  json.loads(body)
+    -> json.loads
+53:35 call  headers.get('Warning')
+    -> <builtin>.dict.get
+
+[asciinema.api.Api._headers]
+56:47 call  self._user_agent()
+    -> asciinema.api.Api._user_agent
+
+[asciinema.api.Api._user_agent]
+59:20 call  re.sub('([^-]+)-(.*)', '\\1/\\2', platform.platform())
+    -> re.sub
+59:65 call  platform.platform()
+    -> platform.platform
+62:73 call  platform.python_implementation()
+    -> platform.python_implementation
+63:66 call  platform.python_version()
+    -> platform.python_version
+
+[asciinema.api.Api._handle_error]
+77:27 call  errors.get(status)
+    -> <builtin>.dict.get
+85:23 call  APIError(error)
+    -> <builtin>.Exception.__init__
+
+== asciinema.asciicast
+
+[asciinema.asciicast.Parser.__init__]
+20:40 call  html.parser.HTMLParser.__init__(self)
+    -> html.parser.HTMLParser.__init__
+    reject *: an explicit call of the __init__ of the base class html.parser.HTMLParser, outside the package
+
+[asciinema.asciicast.Parser.handle_starttag]
+30:25 call  attrs.get('rel')
+    -> <builtin>.dict.get
+    note: attrs is the dict of line 26
+31:33 call  attrs.get('type')
+    -> <builtin>.dict.get
+33:41 call  attrs.get('href')
+    -> <builtin>.dict.get
+
+[asciinema.asciicast.open_url]
+40:22 call  url.startswith("ipfs://")
+    -> <builtin>.str.startswith
+    note: url is a str: the file name or URL of the command line (args.filename, through open_from_url), or the href of the HTML page (line 76); a value that a client passes is opaque
+42:24 call  url.startswith("dweb:/ipfs/")
+    -> <builtin>.str.startswith
+45:22 call  url.startswith("http:")
+    -> <builtin>.str.startswith
+45:49 call  url.startswith("https:")
+    -> <builtin>.str.startswith
+46:22 call  Request(url)
+    -> urllib.request.Request
+47:23 call  req.add_header('Accept-Encoding', 'gzip')
+    -> urllib.request.Request.add_header
+48:27 call  urlopen(req)
+    -> urllib.request.urlopen
+50:30 call  response.geturl()
+    -> http.client.HTTPResponse.geturl
+    -> urllib.response.addinfourl.geturl
+    note: urlopen of an http or https URL returns an http.client.HTTPResponse; when the server redirects to an ftp URL, which urllib's HTTPRedirectHandler.http_error_302 allows (schemes http, https, ftp), FTPHandler.ftp_open returns a urllib.response.addinfourl (lead's ruling, asciinema.md)
+53:29 call  gzip.open(body)
+    -> gzip.open
+55:39 call  codecs.getreader('utf-8')
+    -> codecs.getreader
+58:52 call  content_type.startswith('text/html')
+    -> <builtin>.str.startswith
+59:31 call  utf8_reader(body, errors='replace')
+    -> encodings.utf_8.StreamReader
+    note: utf8_reader is codecs.getreader('utf-8') (line 55), the class encodings.utf_8.StreamReader; the call makes an instance
+59:60 call  utf8_reader(body, errors='replace').read()
+    -> encodings.utf_8.StreamReader.read
+60:28 call  Parser()
+    -> asciinema.asciicast.Parser.__init__
+61:24 call  parser.feed(html)
+    -> html.parser.HTMLParser.feed
+    -> asciinema.asciicast.Parser.handle_starttag
+    note: Parser inherits feed from html.parser.HTMLParser, which calls back the handle_starttag of the Parser for each start tag (also through handle_startendtag)
+65:32 call  LoadError("""<link rel="alternate" type="application/x-as...
+    -> <builtin>.Exception.__init__
+68:36 call  urlparse(url)
+    -> urllib.parse.urlparse
+70:38 call  new_url.startswith("/")
+    -> <builtin>.str.startswith
+71:41 call  urlunparse((base_url[0], base_url[1], new_url, '', '', ''))
+    -> urllib.parse.urlunparse
+73:43 call  os.path.dirname(base_url[2])
+    -> os.path.dirname
+74:41 call  urlunparse((base_url[0], base_url[1], path, '', '', ''))
+    -> urllib.parse.urlunparse
+76:28 call  open_url(new_url)
+    -> asciinema.asciicast.open_url
+78:27 call  utf8_reader(body, errors='strict')
+    -> encodings.utf_8.StreamReader
+    note: utf8_reader is codecs.getreader('utf-8') (line 55), the class encodings.utf_8.StreamReader
+80:16 call  open(url, mode='rt', encoding='utf-8')
+    -> <builtin>.open
+
+[asciinema.asciicast.open_from_url.__enter__]
+91:33 call  open_url(self.url)
+    -> asciinema.asciicast.open_url
+92:44 call  self.file.readline()
+    -> io.TextIOWrapper.readline
+    -> encodings.utf_8.StreamReader.readline
+    note: self.file is what open_url returns: sys.stdin or a text file of open(), or an encodings.utf_8.StreamReader for an http(s) URL
+95:49 call  v2.open_from_file(first_line, self.file)
+    -> asciinema.asciicast.v2.open_from_file.__init__
+    reject asciinema.asciicast.v1.open_from_file.__init__: the class is v2.open_from_file
+96:46 call  self.context.__enter__()
+    -> asciinema.asciicast.v2.open_from_file.__enter__
+    reject *: self.context is the v2.open_from_file of line 95
+99:53 call  v1.open_from_file(first_line, self.file)
+    -> asciinema.asciicast.v1.open_from_file.__init__
+    reject asciinema.asciicast.v2.open_from_file.__init__: the class is v1.open_from_file
+100:50 call  self.context.__enter__()
+    -> asciinema.asciicast.v1.open_from_file.__enter__
+    reject *: self.context is the v1.open_from_file of line 99
+102:36 call  LoadError(self.FORMAT_ERROR)
+    -> <builtin>.Exception.__init__
+105:28 call  LoadError(str(e))
+    -> <builtin>.Exception.__init__
+105:32 call  str(e)
+    -> <builtin>.str
+
+[asciinema.asciicast.open_from_url.__exit__]
+108:30 call  self.context.__exit__(exc_type, exc_value, exc_traceback)
+    -> asciinema.asciicast.v1.open_from_file.__exit__
+    -> asciinema.asciicast.v2.open_from_file.__exit__
+    reject *: self.context is the v2 or v1 open_from_file that __enter__ made (lines 95, 99)
+
+== asciinema.asciicast.events
+
+[asciinema.asciicast.events.cap_relative_time]
+22:21 call  min(delay, time_limit)
+    -> <builtin>.min
+    note: in the generator expression, whose calls belong to cap_relative_time
+
+== asciinema.asciicast.raw
+
+[asciinema.asciicast.raw.writer.__init__]
+7:37 call  os.path.exists(path)
+    -> os.path.exists
+7:55 call  os.stat(path)
+    -> os.stat
+
+[asciinema.asciicast.raw.writer.__enter__]
+15:25 call  open(self.path, mode=self.mode, buffering=self.buffering)
+    -> <builtin>.open
+
+[asciinema.asciicast.raw.writer.__exit__]
+19:24 call  self.file.close()
+    -> io.FileIO.close
+    -> io.BufferedWriter.close
+    note: self.file is the binary file of open() in __enter__: an io.FileIO with the default buffering 0 (async_writer.run passes none), an io.BufferedWriter when a client passes another buffering (asciinema.md)
+
+[asciinema.asciicast.raw.writer.write_stdout]
+22:24 call  self.file.write(data)
+    -> io.FileIO.write
+    -> io.BufferedWriter.write
+    note: self.file is an io.FileIO (buffering 0, the default) or an io.BufferedWriter (another buffering of a client), see 19:24
+
+== asciinema.asciicast.v1
+
+[asciinema.asciicast.v1]
+24:6 decorator  @property
+    -> <builtin>.property
+
+[asciinema.asciicast.v1.Asciicast.v2_header]
+27:54 call  self.__attrs.items()
+    -> <builtin>.dict.items
+    note: attrs is the dict of json.loads that open_from_file.__enter__ passes (line 53); a client value is opaque
+
+[asciinema.asciicast.v1.Asciicast.events]
+35:34 call  self.stdout_events()
+    -> asciinema.asciicast.v1.Asciicast.stdout_events
+    reject asciinema.asciicast.v2.Asciicast.stdout_events: self is a v1.Asciicast
+
+[asciinema.asciicast.v1.Asciicast.stdout_events]
+38:32 call  to_absolute_time(self.__stdout_events())
+    -> asciinema.asciicast.events.to_absolute_time
+38:53 call  self.__stdout_events()
+    -> asciinema.asciicast.v1.Asciicast.__stdout_events
+
+[asciinema.asciicast.v1.open_from_file.__enter__]
+50:31 call  json.loads(self.first_line + self.file.read())
+    -> json.loads
+50:64 call  self.file.read()
+    -> io.TextIOWrapper.read
+    -> encodings.utf_8.StreamReader.read
+    note: self.file is the stream that open_from_url passes (line 99): sys.stdin or a text file of open(), or an encodings.utf_8.StreamReader; a client stream is opaque
+52:25 call  attrs.get('version')
+    -> <builtin>.dict.get
+53:33 call  Asciicast(attrs)
+    -> asciinema.asciicast.v1.Asciicast.__init__
+    reject asciinema.asciicast.v2.Asciicast.__init__: Asciicast is the class of this module v1
+55:32 call  LoadError(self.FORMAT_ERROR)
+    -> <builtin>.Exception.__init__
+57:28 call  LoadError(self.FORMAT_ERROR)
+    -> <builtin>.Exception.__init__
+
+[asciinema.asciicast.v1.open_from_file.__exit__]
+60:24 call  self.file.close()
+    -> io.TextIOWrapper.close
+    -> http.client.HTTPResponse.close
+    -> gzip.GzipFile.close
+    -> urllib.response.addinfourl.close
+    note: self.file is the stream of open_from_url (see 50:64). A text file or sys.stdin closes itself; an encodings.utf_8.StreamReader has no close, and codecs.StreamReader.__getattr__ returns the close of the stream it wraps: the http.client.HTTPResponse or the gzip.GzipFile of open_url (lines 48-53), or the urllib.response.addinfourl that urlopen returns when the server redirects to an ftp URL (urllib's redirect to ftp; asciicast/__init__.py:50:30)
+
+== asciinema.asciicast.v2
+
+[asciinema.asciicast.v2.Asciicast.__init__]
+22:42 call  header.get('idle_time_limit')
+    -> <builtin>.dict.get
+    note: header is the dict of json.loads in open_from_file.__enter__ (line 47); a client value is opaque
+
+[asciinema.asciicast.v2.Asciicast.events]
+26:29 call  json.loads(line)
+    -> json.loads
+
+[asciinema.asciicast.v2.Asciicast.stdout_events]
+29:44 call  self.events()
+    -> asciinema.asciicast.v2.Asciicast.events
+    reject asciinema.asciicast.v1.Asciicast.events: self is a v2.Asciicast
+
+[asciinema.asciicast.v2.build_from_header_and_file]
+35:21 call  Asciicast(f, header)
+    -> asciinema.asciicast.v2.Asciicast.__init__
+    reject asciinema.asciicast.v1.Asciicast.__init__: Asciicast is the class of this module v2
+
+[asciinema.asciicast.v2.open_from_file.__enter__]
+47:35 call  json.loads(self.first_line)
+    -> json.loads
+48:29 call  v2_header.get('version')
+    -> <builtin>.dict.get
+49:50 call  build_from_header_and_file(v2_header, self.file)
+    -> asciinema.asciicast.v2.build_from_header_and_file
+51:32 call  LoadError(self.FORMAT_ERROR)
+    -> <builtin>.Exception.__init__
+53:28 call  LoadError(self.FORMAT_ERROR)
+    -> <builtin>.Exception.__init__
+
+[asciinema.asciicast.v2.open_from_file.__exit__]
+56:24 call  self.file.close()
+    -> io.TextIOWrapper.close
+    -> http.client.HTTPResponse.close
+    -> gzip.GzipFile.close
+    -> urllib.response.addinfourl.close
+    note: self.file is the stream of open_from_url (line 95) or the text file of get_duration (line 62). A text file or sys.stdin closes itself; an encodings.utf_8.StreamReader has no close, and codecs.StreamReader.__getattr__ returns the close of the stream it wraps: the http.client.HTTPResponse or the gzip.GzipFile of open_url, or the urllib.response.addinfourl that urlopen returns when the server redirects to an ftp URL (urllib's redirect to ftp; asciicast/__init__.py:50:30)
+
+[asciinema.asciicast.v2.get_duration]
+60:10 with  open(path, mode='rt', encoding='utf-8')
+    reject *: the context manager is the text file of open(); its __enter__ and __exit__ are outside the package
+60:14 call  open(path, mode='rt', encoding='utf-8')
+    -> <builtin>.open
+61:32 call  f.readline()
+    -> io.TextIOWrapper.readline
+62:14 with  open_from_file(first_line, f)
+    -> asciinema.asciicast.v2.open_from_file.__enter__
+    -> asciinema.asciicast.v2.open_from_file.__exit__
+    reject *: the context manager is the v2.open_from_file of this module
+62:28 call  open_from_file(first_line, f)
+    -> asciinema.asciicast.v2.open_from_file.__init__
+    reject asciinema.asciicast.v1.open_from_file.__init__: open_from_file is the class of this module v2
+63:46 call  a.stdout_events()
+    -> asciinema.asciicast.v2.Asciicast.stdout_events
+    reject asciinema.asciicast.v1.Asciicast.stdout_events: a is the v2.Asciicast that v2.open_from_file.__enter__ returns (build_from_header_and_file)
+
+[asciinema.asciicast.v2.build_header]
+70:18 call  header.update(metadata)
+    -> <builtin>.dict.update
+74:16 call  type(header['width'])
+    -> <builtin>.type
+75:16 call  type(header['height'])
+    -> <builtin>.type
+78:20 call  type(header['timestamp'])
+    -> <builtin>.type
+78:56 call  type(header['timestamp'])
+    -> <builtin>.type
+
+[asciinema.asciicast.v2.writer.__init__]
+88:58 call  codecs.getincrementaldecoder('UTF-8')
+    -> codecs.getincrementaldecoder
+88:67 call  codecs.getincrementaldecoder('UTF-8')('replace')
+    -> encodings.utf_8.IncrementalDecoder
+    note: codecs.getincrementaldecoder('UTF-8') returns the class encodings.utf_8.IncrementalDecoder; the call makes an instance
+89:59 call  codecs.getincrementaldecoder('UTF-8')
+    -> codecs.getincrementaldecoder
+89:68 call  codecs.getincrementaldecoder('UTF-8')('replace')
+    -> encodings.utf_8.IncrementalDecoder
+    note: codecs.getincrementaldecoder('UTF-8') returns the class encodings.utf_8.IncrementalDecoder; the call makes an instance
+96:39 call  build_header(width, height, metadata or {})
+    -> asciinema.asciicast.v2.build_header
+
+[asciinema.asciicast.v2.writer.__enter__]
+99:25 call  open(self.path, mode=self.mode, buffering=self.buffering)
+    -> <builtin>.open
+102:30 call  self.__write_line(self.header)
+    -> asciinema.asciicast.v2.writer.__write_line
+
+[asciinema.asciicast.v2.writer.__exit__]
+107:24 call  self.file.close()
+    -> io.TextIOWrapper.close
+    note: self.file is the text file of open() in __enter__ (mode 'w' or 'a'; a text file with buffering 0 raises ValueError, so every buffering gives an io.TextIOWrapper)
+
+[asciinema.asciicast.v2.writer.write_stdout]
+110:16 call  type(data)
+    -> <builtin>.type
+111:31 call  data.encode(encoding='utf-8', errors='strict')
+    -> <builtin>.str.encode
+    reject asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode: data is a str (type(data) == str, line 110)
+112:42 call  self.stdout_decoder.decode(data)
+    -> encodings.utf_8.IncrementalDecoder.decode
+    note: self.stdout_decoder is the encodings.utf_8.IncrementalDecoder of __init__ (line 89)
+113:27 call  self.__write_event(ts, 'o', data)
+    -> asciinema.asciicast.v2.writer.__write_event
+
+[asciinema.asciicast.v2.writer.write_stdin]
+116:16 call  type(data)
+    -> <builtin>.type
+117:31 call  data.encode(encoding='utf-8', errors='strict')
+    -> <builtin>.str.encode
+    reject asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode: data is a str (type(data) == str, line 116)
+118:41 call  self.stdin_decoder.decode(data)
+    -> encodings.utf_8.IncrementalDecoder.decode
+    note: self.stdin_decoder is the encodings.utf_8.IncrementalDecoder of __init__ (line 88)
+119:27 call  self.__write_event(ts, 'i', data)
+    -> asciinema.asciicast.v2.writer.__write_event
+
+[asciinema.asciicast.v2.writer.__write_event]
+122:26 call  self.__write_line([round(ts, 6), etype, data])
+    -> asciinema.asciicast.v2.writer.__write_line
+122:33 call  round(ts, 6)
+    -> <builtin>.round
+
+[asciinema.asciicast.v2.writer.__write_line]
+125:26 call  json.dumps(obj, ensure_ascii=False, indent=None, separato...
+    -> json.dumps
+126:24 call  self.file.write(line + '\n')
+    -> io.TextIOWrapper.write
+    note: self.file is the text file of __enter__ (see 107:24)
+
+== asciinema.async_worker
+
+[asciinema.async_worker.async_worker.__init__]
+15:27 call  Queue()
+    -> multiprocessing.Queue
+    -> queue.Queue
+    note: optional import async_worker.py:1-9: Queue is multiprocessing.Queue, or queue.Queue where multiprocessing.synchronize cannot be imported; both sides run
+
+[asciinema.async_worker.async_worker.__enter__]
+18:31 call  Process(target=self.run)
+    -> multiprocessing.Process
+    -> threading.Thread
+    reject asciinema.async_worker.async_worker.run, asciinema.recorder.async_writer.run: the constructor stores the target; self.process.start() runs it (19:27)
+    note: optional import async_worker.py:1-9: Process is multiprocessing.Process, or threading.Thread; both sides run
+19:27 call  self.process.start()
+    -> multiprocessing.Process.start
+    -> threading.Thread.start
+    -> asciinema.async_worker.async_worker.run
+    -> asciinema.recorder.async_writer.run
+    note: start() runs the target self.run (callback, as Thread.start in the README): async_writer.run for an async_writer, async_worker.run for an async_notifier or a plain async_worker (public). With multiprocessing the target runs in the child process that start() forks; with threading in a thread
+
+[asciinema.async_worker.async_worker.__exit__]
+23:23 call  self.queue.put(None)
+    -> multiprocessing.queues.Queue.put
+    -> queue.Queue.put
+    note: self.queue is the queue of __init__: a multiprocessing.queues.Queue (what multiprocessing.Queue() returns) or a queue.Queue
+24:26 call  self.process.join()
+    -> multiprocessing.Process.join
+    -> threading.Thread.join
+
+[asciinema.async_worker.async_worker.enqueue]
+27:23 call  self.queue.put(payload)
+    -> multiprocessing.queues.Queue.put
+    -> queue.Queue.put
+
+[asciinema.async_worker.async_worker.run]
+30:28 call  iter(self.queue.get, None)
+    -> <builtin>.iter
+    reject asciinema.urllib_http_adapter.MultipartFormdataEncoder.iter: the callee is builtin iter, which stores the queue.get callable. The loop consumes that iterator and invokes the outside queue method; an outside callback has no graph edge.
+31:25 call  self.perform(payload)
+    -> asciinema.recorder.async_notifier.perform
+    note: this run runs for an async_notifier or a plain async_worker (async_writer overrides run); only async_notifier defines perform (a plain async_worker raises AttributeError)
+
+== asciinema.commands.auth
+
+[asciinema.commands.auth.AuthCommand.__init__]
+7:25 call  Command.__init__(self, args, config, env)
+    -> asciinema.commands.command.Command.__init__
+    reject *: an explicit call of the __init__ of the base class Command
+
+[asciinema.commands.auth.AuthCommand.execute]
+10:19 call  self.print('Open the following URL in a web browser to li...
+    -> asciinema.commands.command.Command.print
+16:40 call  self.api.hostname()
+    -> asciinema.api.Api.hostname
+16:61 call  self.api.auth_url()
+    -> asciinema.api.Api.auth_url
+16:82 call  self.api.hostname()
+    -> asciinema.api.Api.hostname
+
+== asciinema.commands.cat
+
+[asciinema.commands.cat.CatCommand.__init__]
+10:25 call  Command.__init__(self, args, config, env)
+    -> asciinema.commands.command.Command.__init__
+    reject *: an explicit call of the __init__ of the base class Command
+
+[asciinema.commands.cat.CatCommand.execute]
+15:18 with  asciicast.open_from_url(self.filename)
+    -> asciinema.asciicast.open_from_url.__enter__
+    -> asciinema.asciicast.open_from_url.__exit__
+    reject *: the context manager is an asciinema.asciicast.open_from_url
+15:41 call  asciicast.open_from_url(self.filename)
+    -> asciinema.asciicast.open_from_url.__init__
+16:54 call  a.stdout_events()
+    -> asciinema.asciicast.v1.Asciicast.stdout_events
+    -> asciinema.asciicast.v2.Asciicast.stdout_events
+    note: a is what open_from_url.__enter__ returns: a v2.Asciicast (v2 format) or a v1.Asciicast (v1 format)
+17:37 call  sys.stdout.write(text)
+    -> io.TextIOWrapper.write
+    note: the default sys.stdout, a text stream named by its class (README)
+18:37 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+21:29 call  self.print_error("printing failed: %s" % str(e))
+    -> asciinema.commands.command.Command.print_error
+21:57 call  str(e)
+    -> <builtin>.str
+
+== asciinema.commands.command
+
+[asciinema.commands.command.Command.__init__]
+10:23 call  Api(config.api_url, env.get("USER"), config.install_id)
+    -> asciinema.api.Api.__init__
+    reject asciinema.config.Config.api_url, asciinema.config.Config.install_id: the properties run at the getattr sites 10:31 and 10:64; Api gets their str values
+10:31 getattr  config.api_url
+    -> asciinema.config.Config.api_url
+    note: config is the Config of config.load() that __main__.main passes (line 106); a client config is opaque
+10:47 call  env.get("USER")
+    -> collections.abc.Mapping.get
+    note: env is os.environ, which __main__.main passes (line 106); a client mapping is opaque
+10:64 getattr  config.install_id
+    -> asciinema.config.Config.install_id
+
+[asciinema.commands.command.Command.print]
+14:18 call  print(text, file=file, end=end)
+    -> <builtin>.print
+    reject asciinema.commands.command.Command.print: print here is the builtin; the method name is not in the scope of its body
+
+[asciinema.commands.command.Command.print_info]
+17:19 call  self.print("\x1b[0;32masciinema: %s\x1b[0m" % text)
+    -> asciinema.commands.command.Command.print
+
+[asciinema.commands.command.Command.print_warning]
+20:19 call  self.print("\x1b[0;33masciinema: %s\x1b[0m" % text)
+    -> asciinema.commands.command.Command.print
+
+[asciinema.commands.command.Command.print_error]
+23:19 call  self.print("\x1b[0;31masciinema: %s\x1b[0m" % text, file=...
+    -> asciinema.commands.command.Command.print
+
+== asciinema.commands.play
+
+[asciinema.commands.play.PlayCommand.__init__]
+9:25 call  Command.__init__(self, args, config, env)
+    -> asciinema.commands.command.Command.__init__
+    reject *: an explicit call of the __init__ of the base class Command
+13:63 call  Player()
+    note: Player defines no __init__ (object.__init__): no edge
+
+[asciinema.commands.play.PlayCommand.execute]
+17:18 with  asciicast.open_from_url(self.filename)
+    -> asciinema.asciicast.open_from_url.__enter__
+    -> asciinema.asciicast.open_from_url.__exit__
+    reject *: the context manager is an asciinema.asciicast.open_from_url
+17:41 call  asciicast.open_from_url(self.filename)
+    -> asciinema.asciicast.open_from_url.__init__
+18:33 call  self.player.play(a, self.idle_time_limit, self.speed)
+    -> asciinema.player.Player.play
+    note: self.player is the Player of __init__ (line 13); a player that a client passes is opaque, and no package code passes one
+21:29 call  self.print_error("playback failed: %s" % str(e))
+    -> asciinema.commands.command.Command.print_error
+21:57 call  str(e)
+    -> <builtin>.str
+
+== asciinema.commands.record
+
+[asciinema.commands.record.RecordCommand.__init__]
+16:25 call  Command.__init__(self, args, config, env)
+    -> asciinema.commands.command.Command.__init__
+    reject *: an explicit call of the __init__ of the base class Command
+29:46 call  notifier.get_notifier(config.notifications_enabled, confi...
+    -> asciinema.notifier.get_notifier
+    reject asciinema.config.Config.notifications_command, asciinema.config.Config.notifications_enabled: the properties run at the getattr sites 29:54 and 29:84; get_notifier gets their values
+29:54 getattr  config.notifications_enabled
+    -> asciinema.config.Config.notifications_enabled
+    note: config is the Config of config.load() that __main__.main passes; a client config is opaque
+29:84 getattr  config.notifications_command
+    -> asciinema.config.Config.notifications_command
+
+[asciinema.commands.record.RecordCommand.execute]
+38:33 call  self.print_error("filename required when recording in raw...
+    -> asciinema.commands.command.Command.print_error
+41:42 call  _tmp_path()
+    -> asciinema.commands.record._tmp_path
+44:26 call  os.path.exists(self.filename)
+    -> os.path.exists
+45:29 call  os.access(self.filename, os.W_OK)
+    -> os.access
+46:33 call  self.print_error("can't write to %s" % self.filename)
+    -> asciinema.commands.command.Command.print_error
+49:23 call  os.stat(self.filename)
+    -> os.stat
+50:26 call  os.remove(self.filename)
+    -> os.remove
+53:25 call  os.stat(self.filename)
+    -> os.stat
+54:33 call  self.print_error("%s already exists, aborting" % self.fil...
+    -> asciinema.commands.command.Command.print_error
+55:33 call  self.print_error("use --append option if you want to appe...
+    -> asciinema.commands.command.Command.print_error
+59:28 call  self.print_info("appending to asciicast at %s" % self.fil...
+    -> asciinema.commands.command.Command.print_info
+61:28 call  self.print_info("recording asciicast to %s" % self.filename)
+    -> asciinema.commands.command.Command.print_info
+64:28 call  self.print_info("""exit opened program when you're done""")
+    -> asciinema.commands.command.Command.print_info
+66:28 call  self.print_info("""press <ctrl-d> or type "exit" when you...
+    -> asciinema.commands.command.Command.print_info
+68:22 call  filter(None, map((lambda var: var.strip()), self.env_whit...
+    -> <builtin>.filter
+    note: filter and map are lazy: the lambda runs when recorder.record iterates vars (recorder.py:37)
+68:32 call  map((lambda var: var.strip()), self.env_whitelist.split('...
+    -> <builtin>.map
+    reject asciinema.commands.record.RecordCommand.execute.<lambda1>: map is lazy; recorder.record calls the lambda when it iterates capture_env (recorder.py:37:70)
+68:84 call  self.env_whitelist.split(',')
+    -> <builtin>.str.split
+    note: env_whitelist is args.env, the str of -e or its default cfg.record_env (a str)
+71:28 call  recorder.record( self.filename, command=self.command, app...
+    -> asciinema.recorder.record
+    reject asciinema.pty.record: the path recorder.record names the function record of the module asciinema.recorder
+84:29 call  self.print_error("can only append to asciicast v2 format ...
+    -> asciinema.commands.command.Command.print_error
+87:24 call  self.print_info("recording finished")
+    -> asciinema.commands.command.Command.print_info
+91:32 call  self.print_info("press <enter> to upload to %s, <ctrl-c> ...
+    -> asciinema.commands.command.Command.print_info
+92:52 call  self.api.hostname()
+    -> asciinema.api.Api.hostname
+94:39 call  sys.stdin.readline()
+    -> io.TextIOWrapper.readline
+    note: the default sys.stdin, a text stream named by its class
+96:31 call  self.print("\r", end="")
+    -> asciinema.commands.command.Command.print
+97:36 call  self.print_info("asciicast saved to %s" % self.filename)
+    -> asciinema.commands.command.Command.print_info
+101:57 call  self.api.upload_asciicast(self.filename)
+    -> asciinema.api.Api.upload_asciicast
+104:39 call  self.print_warning(warn)
+    -> asciinema.commands.command.Command.print_warning
+106:26 call  os.remove(self.filename)
+    -> os.remove
+107:27 call  self.print(result.get('message') or result['url'])
+    -> asciinema.commands.command.Command.print
+107:38 call  result.get('message')
+    -> <builtin>.dict.get
+    note: result is the dict of Api.upload_asciicast: json.loads of a JSON object, or {'url': body}
+110:27 call  self.print("\r\x1b[A", end="")
+    -> asciinema.commands.command.Command.print
+111:33 call  self.print_error("upload failed: %s" % str(e))
+    -> asciinema.commands.command.Command.print_error
+111:59 call  str(e)
+    -> <builtin>.str
+112:33 call  self.print_error("retry later by running: asciinema uploa...
+    -> asciinema.commands.command.Command.print_error
+115:28 call  self.print_info("asciicast saved to %s" % self.filename)
+    -> asciinema.commands.command.Command.print_info
+
+[asciinema.commands.record.RecordCommand.execute.<lambda1>]
+68:55 call  var.strip()
+    -> <builtin>.str.strip
+    note: var is an element of self.env_whitelist.split(','), a str
+
+[asciinema.commands.record._tmp_path]
+121:32 call  tempfile.mkstemp(suffix='-ascii.cast')
+    -> tempfile.mkstemp
+122:13 call  os.close(fd)
+    -> os.close
+
+== asciinema.commands.upload
+
+[asciinema.commands.upload.UploadCommand.__init__]
+8:25 call  Command.__init__(self, args, config, env)
+    -> asciinema.commands.command.Command.__init__
+    reject *: an explicit call of the __init__ of the base class Command
+
+[asciinema.commands.upload.UploadCommand.execute]
+13:53 call  self.api.upload_asciicast(self.filename)
+    -> asciinema.api.Api.upload_asciicast
+16:35 call  self.print_warning(warn)
+    -> asciinema.commands.command.Command.print_warning
+18:23 call  self.print(result.get('message') or result['url'])
+    -> asciinema.commands.command.Command.print
+18:34 call  result.get('message')
+    -> <builtin>.dict.get
+    note: result is the dict of Api.upload_asciicast: json.loads of a JSON object, or {'url': body}
+21:29 call  self.print_error("upload failed: %s" % str(e))
+    -> asciinema.commands.command.Command.print_error
+21:55 call  str(e)
+    -> <builtin>.str
+25:29 call  self.print_error("upload failed: %s" % str(e))
+    -> asciinema.commands.command.Command.print_error
+25:55 call  str(e)
+    -> <builtin>.str
+26:29 call  self.print_error("retry later by running: asciinema uploa...
+    -> asciinema.commands.command.Command.print_error
+
+== asciinema.config
+
+[asciinema.config]
+71:6 decorator  @property
+    -> <builtin>.property
+80:6 decorator  @property
+    -> <builtin>.property
+87:6 decorator  @property
+    -> <builtin>.property
+91:6 decorator  @property
+    -> <builtin>.property
+95:6 decorator  @property
+    -> <builtin>.property
+99:6 decorator  @property
+    -> <builtin>.property
+104:6 decorator  @property
+    -> <builtin>.property
+108:6 decorator  @property
+    -> <builtin>.property
+112:6 decorator  @property
+    -> <builtin>.property
+117:6 decorator  @property
+    -> <builtin>.property
+121:6 decorator  @property
+    -> <builtin>.property
+125:6 decorator  @property
+    -> <builtin>.property
+
+[asciinema.config.Config.__init__]
+20:42 call  path.join(config_home, "config")
+    -> os.path.join
+21:41 call  path.join(self.config_home, 'install-id')
+    -> os.path.join
+22:48 call  configparser.ConfigParser()
+    -> configparser.ConfigParser
+23:25 call  self.config.read(self.config_file_path)
+    -> configparser.ConfigParser.read
+
+[asciinema.config.Config.upgrade]
+28:18 getattr  self.install_id
+    -> asciinema.config.Config.install_id
+30:34 call  self.__api_token()
+    -> asciinema.config.Config.__api_token
+30:57 call  self.__user_token()
+    -> asciinema.config.Config.__user_token
+30:84 call  self.__gen_install_id()
+    -> asciinema.config.Config.__gen_install_id
+31:35 call  self.__save_install_id(id)
+    -> asciinema.config.Config.__save_install_id
+33:32 call  dict(section)
+    -> <builtin>.dict
+33:82 call  self.config.items()
+    -> configparser.ConfigParser.items
+35:26 call  os.remove(self.config_file_path)
+    -> os.remove
+37:24 call  self.env.get('ASCIINEMA_API_TOKEN')
+    -> collections.abc.Mapping.get
+    note: self.env is os.environ, the default of Config.__init__ (line 24) and of load (line 153); a mapping that a client passes is opaque (the tests pass dicts, asciinema.rejected.json)
+38:30 call  ConfigError('ASCIINEMA_API_TOKEN variable is no longer su...
+    -> <builtin>.Exception.__init__
+
+[asciinema.config.Config.__read_install_id]
+42:23 call  path.isfile(p)
+    -> os.path.isfile
+43:18 with  open(p, 'r')
+    reject *: the context manager is the text file of open(); its __enter__ and __exit__ are outside the package
+43:22 call  open(p, 'r')
+    -> <builtin>.open
+44:30 call  f.read()
+    -> io.TextIOWrapper.read
+44:38 call  f.read().strip()
+    -> <builtin>.str.strip
+
+[asciinema.config.Config.__gen_install_id]
+47:19 call  str(uuid.uuid4())
+    -> <builtin>.str
+47:30 call  uuid.uuid4()
+    -> uuid.uuid4
+
+[asciinema.config.Config.__save_install_id]
+50:34 call  self.__create_config_home()
+    -> asciinema.config.Config.__create_config_home
+52:14 with  open(self.install_id_path, 'w')
+    reject *: the context manager is the text file of open(); its __enter__ and __exit__ are outside the package
+52:18 call  open(self.install_id_path, 'w')
+    -> <builtin>.open
+53:20 call  f.write(id)
+    -> io.TextIOWrapper.write
+
+[asciinema.config.Config.__create_config_home]
+56:27 call  path.exists(self.config_home)
+    -> os.path.exists
+57:24 call  os.makedirs(self.config_home)
+    -> os.makedirs
+
+[asciinema.config.Config.__api_token]
+61:35 call  self.config.get('api', 'token')
+    -> configparser.ConfigParser.get
+
+[asciinema.config.Config.__user_token]
+67:35 call  self.config.get('user', 'token')
+    -> configparser.ConfigParser.get
+
+[asciinema.config.Config.install_id]
+73:26 call  self.env.get('ASCIINEMA_INSTALL_ID')
+    -> collections.abc.Mapping.get
+    note: self.env is os.environ, the default (see 37:24); a client mapping is opaque
+73:76 call  self.__read_install_id()
+    -> asciinema.config.Config.__read_install_id
+78:30 call  ConfigError('no install ID found')
+    -> <builtin>.Exception.__init__
+
+[asciinema.config.Config.api_url]
+82:28 call  self.env.get( 'ASCIINEMA_API_URL', self.config.get('api',...
+    -> collections.abc.Mapping.get
+    note: self.env is os.environ, the default (see 37:24); a client mapping is opaque
+84:28 call  self.config.get('api', 'url', fallback=DEFAULT_API_URL)
+    -> configparser.ConfigParser.get
+
+[asciinema.config.Config.record_stdin]
+89:38 call  self.config.getboolean('record', 'stdin', fallback=False)
+    -> configparser.ConfigParser.getboolean
+
+[asciinema.config.Config.record_command]
+93:31 call  self.config.get('record', 'command', fallback=None)
+    -> configparser.ConfigParser.get
+
+[asciinema.config.Config.record_env]
+97:31 call  self.config.get('record', 'env', fallback=DEFAULT_RECORD_...
+    -> configparser.ConfigParser.get
+
+[asciinema.config.Config.record_idle_time_limit]
+101:40 call  self.config.getfloat('record', 'maxwait', fallback=None)
+    -> configparser.ConfigParser.getfloat
+102:36 call  self.config.getfloat('record', 'idle_time_limit', fallbac...
+    -> configparser.ConfigParser.getfloat
+
+[asciinema.config.Config.record_yes]
+106:38 call  self.config.getboolean('record', 'yes', fallback=False)
+    -> configparser.ConfigParser.getboolean
+
+[asciinema.config.Config.record_quiet]
+110:38 call  self.config.getboolean('record', 'quiet', fallback=False)
+    -> configparser.ConfigParser.getboolean
+
+[asciinema.config.Config.play_idle_time_limit]
+114:40 call  self.config.getfloat('play', 'maxwait', fallback=None)
+    -> configparser.ConfigParser.getfloat
+115:36 call  self.config.getfloat('play', 'idle_time_limit', fallback=...
+    -> configparser.ConfigParser.getfloat
+
+[asciinema.config.Config.play_speed]
+119:36 call  self.config.getfloat('play', 'speed', fallback=1.0)
+    -> configparser.ConfigParser.getfloat
+
+[asciinema.config.Config.notifications_enabled]
+123:38 call  self.config.getboolean('notifications', 'enabled', fallba...
+    -> configparser.ConfigParser.getboolean
+
+[asciinema.config.Config.notifications_command]
+127:31 call  self.config.get('notifications', 'command', fallback=None)
+    -> configparser.ConfigParser.get
+
+[asciinema.config.get_config_home]
+131:40 call  env.get("ASCIINEMA_CONFIG_HOME")
+    -> collections.abc.Mapping.get
+    note: env is os.environ, the default here and in load (line 153); a client mapping is opaque
+132:34 call  env.get("XDG_CONFIG_HOME")
+    -> collections.abc.Mapping.get
+133:23 call  env.get("HOME")
+    -> collections.abc.Mapping.get
+140:32 call  path.join(env_xdg_config_home, "asciinema")
+    -> os.path.join
+142:23 call  path.isfile(path.join(env_home, ".asciinema", "config"))
+    -> os.path.isfile
+142:33 call  path.join(env_home, ".asciinema", "config")
+    -> os.path.join
+144:36 call  path.join(env_home, ".asciinema")
+    -> os.path.join
+146:36 call  path.join(env_home, ".config", "asciinema")
+    -> os.path.join
+148:24 call  Exception("need $HOME or $XDG_CONFIG_HOME or $ASCIINEMA_C...
+    -> <builtin>.Exception
+
+[asciinema.config.load]
+154:20 call  Config(get_config_home(env), env)
+    -> asciinema.config.Config.__init__
+154:36 call  get_config_home(env)
+    -> asciinema.config.get_config_home
+155:19 call  config.upgrade()
+    -> asciinema.config.Config.upgrade
+
+== asciinema.notifier
+
+[asciinema.notifier.Notifier.is_available]
+8:28 call  shutil.which(self.cmd)
+    -> shutil.which
+
+[asciinema.notifier.Notifier.notify]
+11:23 call  subprocess.run(self.args(text), capture_output=True)
+    -> subprocess.run
+    reject *: the callee is the function subprocess.run, not a run method of the package
+    note: subprocess.run with capture_output exists on Python 3.7, a supported version (3.4 has no subprocess.run; 3.5 and 3.6 raise TypeError on capture_output)
+11:33 call  self.args(text)
+    -> asciinema.notifier.AppleScriptNotifier.args
+    -> asciinema.notifier.LibNotifyNotifier.args
+    -> asciinema.notifier.TerminalNotifier.args
+    note: self is a TerminalNotifier, AppleScriptNotifier or LibNotifyNotifier, which inherit notify (CustomCommandNotifier overrides it); a plain Notifier has no args
+
+[asciinema.notifier.Notifier.get_icon_path]
+16:28 call  os.path.join(os.path.dirname(os.path.realpath(__file__)),...
+    -> os.path.join
+16:44 call  os.path.dirname(os.path.realpath(__file__))
+    -> os.path.dirname
+16:61 call  os.path.realpath(__file__)
+    -> os.path.realpath
+18:26 call  os.path.exists(path)
+    -> os.path.exists
+
+[asciinema.notifier.AppleScriptNotifier.args]
+26:28 call  text.replace('"', '\\"')
+    -> <builtin>.str.replace
+    note: text is the str of _notify in pty.record ('Resumed recording', 'Paused recording'), through async_notifier
+27:93 call  'display notification "{}" with title "asciinema"'.format...
+    -> <builtin>.str.format
+
+[asciinema.notifier.LibNotifyNotifier.args]
+34:39 call  self.get_icon_path()
+    -> asciinema.notifier.Notifier.get_icon_path
+
+[asciinema.notifier.TerminalNotifier.args]
+46:39 call  self.get_icon_path()
+    -> asciinema.notifier.Notifier.get_icon_path
+
+[asciinema.notifier.CustomCommandNotifier.__init__]
+56:26 call  Notifier.__init__(self)
+    -> <builtin>.object.__init__
+    reject *: Notifier defines no __init__; the explicit call reaches object.__init__, named through the nearest base outside the package
+    note: Notifier.__init__ is object.__init__ (Notifier has no base class of the package and no __init__)
+
+[asciinema.notifier.CustomCommandNotifier.notify]
+61:30 call  os.environ.copy()
+    -> os._Environ.copy
+63:46 call  self.get_icon_path()
+    -> asciinema.notifier.Notifier.get_icon_path
+64:23 call  subprocess.run(args, env=env, capture_output=True)
+    -> subprocess.run
+    reject *: the callee is the function subprocess.run, not a run method of the package
+
+[asciinema.notifier.get_notifier]
+75:41 call  CustomCommandNotifier(command)
+    -> asciinema.notifier.CustomCommandNotifier.__init__
+78:22 call  c()
+    note: c is TerminalNotifier, AppleScriptNotifier or LibNotifyNotifier (the list of line 77); none defines __init__ (object.__init__), so the call reaches no package function
+    exclude asciinema.notifier.CustomCommandNotifier.__init__: the list of line 77 does not hold CustomCommandNotifier
+80:34 call  n.is_available()
+    -> asciinema.notifier.Notifier.is_available
+83:24 call  NoopNotifier()
+    note: NoopNotifier defines no __init__ (object.__init__): no edge
+
+== asciinema.player
+
+[asciinema.player.Player.play]
+13:25 call  open('/dev/tty')
+    -> <builtin>.open
+14:18 with  raw(stdin.fileno())
+    -> asciinema.term.raw.__enter__
+    -> asciinema.term.raw.__exit__
+    reject *: the context manager is an asciinema.term.raw
+14:21 call  raw(stdin.fileno())
+    -> asciinema.term.raw.__init__
+14:34 call  stdin.fileno()
+    -> io.TextIOWrapper.fileno
+15:27 call  self._play(asciicast, idle_time_limit, speed, stdin)
+    -> asciinema.player.Player._play
+17:23 call  self._play(asciicast, idle_time_limit, speed, None)
+    -> asciinema.player.Player._play
+
+[asciinema.player.Player._play]
+22:41 call  asciicast.stdout_events()
+    -> asciinema.asciicast.v1.Asciicast.stdout_events
+    -> asciinema.asciicast.v2.Asciicast.stdout_events
+    note: asciicast is what play gets: PlayCommand.execute passes the result of open_from_url.__enter__, a v2.Asciicast or a v1.Asciicast; a client object is opaque
+23:37 call  ev.to_relative_time(stdout)
+    -> asciinema.asciicast.events.to_relative_time
+24:38 call  ev.cap_relative_time(stdout, idle_time_limit)
+    -> asciinema.asciicast.events.cap_relative_time
+25:37 call  ev.to_absolute_time(stdout)
+    -> asciinema.asciicast.events.to_absolute_time
+26:33 call  ev.adjust_speed(stdout, speed)
+    -> asciinema.asciicast.events.adjust_speed
+28:30 call  time.time()
+    -> time.time
+34:35 call  time.time()
+    -> time.time
+39:45 call  read_blocking(stdin.fileno(), 1000)
+    -> asciinema.term.read_blocking
+39:58 call  stdin.fileno()
+    -> io.TextIOWrapper.fileno
+    note: stdin is the text file of open('/dev/tty') that play passes (line 15), or None, which the while test excludes
+47:63 call  time.time()
+    -> time.time
+52:51 call  time.time()
+    -> time.time
+56:41 call  read_blocking(stdin.fileno(), delay)
+    -> asciinema.term.read_blocking
+56:54 call  stdin.fileno()
+    -> io.TextIOWrapper.fileno
+67:47 call  time.time()
+    -> time.time
+74:29 call  sys.stdout.write(text)
+    -> io.TextIOWrapper.write
+    note: the default sys.stdout, a text stream named by its class (README)
+75:29 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+
+== asciinema.pty
+
+[asciinema.pty.record]
+132:30 call  pty.fork()
+    -> pty.fork
+135:19 call  os.execvpe(command[0], command, env)
+    -> os.execvpe
+    note: runs in the child process that pty.fork() makes; it replaces the child with the command
+137:29 call  os.pipe()
+    -> os.pipe
+138:24 call  fcntl.fcntl(pipe_w, fcntl.F_GETFL, 0)
+    -> fcntl.fcntl
+140:24 call  fcntl.fcntl(pipe_w, fcntl.F_SETFL, flags)
+    -> fcntl.fcntl
+142:25 call  signal.set_wakeup_fd(pipe_w)
+    -> signal.set_wakeup_fd
+144:28 call  _signals(map(lambda s: (s, lambda signal, frame: None), [...
+    -> asciinema.pty.record._signals
+144:32 call  map(lambda s: (s, lambda signal, frame: None), [signal.SI...
+    -> <builtin>.map
+    reject asciinema.pty.record.<lambda1>: map is lazy; _signals calls the lambda when it iterates signal_list (84:29)
+151:18 call  _set_pty_size()
+    -> asciinema.pty.record._set_pty_size
+153:27 call  time.time()
+    -> time.time
+155:10 with  raw(pty.STDIN_FILENO)
+    -> asciinema.term.raw.__enter__
+    -> asciinema.term.raw.__exit__
+    reject *: the context manager is an asciinema.term.raw
+155:13 call  raw(pty.STDIN_FILENO)
+    -> asciinema.term.raw.__init__
+157:18 call  _copy(pipe_r)
+    -> asciinema.pty.record._copy
+161:13 call  _signals(old_handlers)
+    -> asciinema.pty.record._signals
+163:15 call  os.waitpid(pid, 0)
+    -> os.waitpid
+
+[asciinema.pty.record._notify]
+25:28 call  notifier.notify(text)
+    -> asciinema.recorder.async_notifier.notify
+    reject *: notifier is the async_notifier that recorder.record passes (recorder.py:48-55); no package code, test or document passes another notifier to pty.record (B2)
+
+[asciinema.pty.record._set_pty_size]
+34:21 call  os.isatty(pty.STDOUT_FILENO)
+    -> os.isatty
+35:30 call  array.array('h', [0, 0, 0, 0])
+    -> array.array
+36:24 call  fcntl.ioctl(pty.STDOUT_FILENO, termios.TIOCGWINSZ, buf, T...
+    -> fcntl.ioctl
+38:30 call  array.array('h', [24, 80, 0, 0])
+    -> array.array
+40:20 call  fcntl.ioctl(master_fd, termios.TIOCSWINSZ, buf)
+    -> fcntl.ioctl
+
+[asciinema.pty.record._write_stdout]
+45:17 call  os.write(pty.STDOUT_FILENO, data)
+    -> os.write
+
+[asciinema.pty.record._handle_master_read]
+51:32 call  writer.write_stdout(time.time() - start_time, data)
+    -> asciinema.recorder.async_writer.write_stdout
+    reject asciinema.asciicast.raw.writer.write_stdout, asciinema.asciicast.v2.writer.write_stdout: writer is the async_writer that recorder.record passes (recorder.py:47-51); the tests pass a client object (FakeStdout); no package code passes a raw.writer or v2.writer to pty.record (B2)
+51:42 call  time.time()
+    -> time.time
+53:22 call  _write_stdout(data)
+    -> asciinema.pty.record._write_stdout
+
+[asciinema.pty.record._write_master]
+59:25 call  os.write(master_fd, data)
+    -> os.write
+
+[asciinema.pty.record._handle_stdin_read]
+70:53 call  time.time()
+    -> time.time
+72:24 call  _notify('Resumed recording')
+    -> asciinema.pty.record._notify
+74:39 call  time.time()
+    -> time.time
+75:24 call  _notify('Paused recording')
+    -> asciinema.pty.record._notify
+77:26 call  _write_master(data)
+    -> asciinema.pty.record._write_master
+80:35 call  writer.write_stdin(time.time() - start_time, data)
+    -> asciinema.recorder.async_writer.write_stdin
+    reject asciinema.asciicast.raw.writer.write_stdin, asciinema.asciicast.v2.writer.write_stdin: writer is the async_writer that recorder.record passes (see 51:32)
+80:45 call  time.time()
+    -> time.time
+
+[asciinema.pty.record._signals]
+84:29 iter  signal_list
+    -> asciinema.pty.record.<lambda1>
+    note: from record line 144, signal_list is map(<lambda1>, [...]): each step of the iteration calls the lambda (callback of map); from line 161 it is the list old_handlers
+85:32 call  old_handlers.append((sig, signal.signal(sig, handler)))
+    -> <builtin>.list.append
+    note: old_handlers is the local list of line 83 (the attribute append that the package assigns elsewhere belongs to other objects)
+85:52 call  signal.signal(sig, handler)
+    -> signal.signal
+
+[asciinema.pty.record._copy]
+99:49 call  select.select(fds, [], [])
+    -> select.select
+    -> asciinema.pty.record.<lambda1>.<lambda1>
+    note: the handlers that _signals installs (record line 144) are the inner lambda. A signal of the list (SIGWINCH, SIGCHLD, ...) interrupts this blocking select, which runs the Python handler (PyErr_CheckSignals on EINTR) before it retries (3.5+) or raises EINTR (3.4, caught at line 100): a callback of select. A signal at another point runs the handler in an unrelated frame, which is not an edge (asciinema.md)
+108:31 call  os.read(master_fd, 1024)
+    -> os.read
+110:31 call  fds.remove(master_fd)
+    -> <builtin>.list.remove
+112:40 call  _handle_master_read(data)
+    -> asciinema.pty.record._handle_master_read
+115:31 call  os.read(pty.STDIN_FILENO, 1024)
+    -> os.read
+117:31 call  fds.remove(pty.STDIN_FILENO)
+    -> <builtin>.list.remove
+119:39 call  _handle_stdin_read(data)
+    -> asciinema.pty.record._handle_stdin_read
+122:31 call  os.read(signal_fd, 1024)
+    -> os.read
+124:44 call  struct.unpack('%uB' % len(data), data)
+    -> struct.unpack
+124:56 call  len(data)
+    -> <builtin>.len
+127:37 call  os.close(master_fd)
+    -> os.close
+130:42 call  _set_pty_size()
+    -> asciinema.pty.record._set_pty_size
+
+== asciinema.recorder
+
+[asciinema.recorder.record]
+14:33 call  os.environ.get('SHELL')
+    -> collections.abc.Mapping.get
+17:38 call  os.environ.copy()
+    -> os._Environ.copy
+23:25 call  term.get_size()
+    -> asciinema.term.get_size
+28:25 call  int(time.time())
+    -> <builtin>.int
+28:35 call  time.time()
+    -> time.time
+31:25 call  full_metadata.update(metadata or {})
+    -> <builtin>.dict.update
+37:53 call  command_env.get(var)
+    -> <builtin>.dict.get
+    -> collections.abc.Mapping.get
+    note: command_env is the dict of os.environ.copy() (line 17) when the caller passes none, or os.environ, which RecordCommand passes (its env from __main__.main, line 106); a client mapping is opaque
+37:70 iter  capture_env
+    -> asciinema.commands.record.RecordCommand.execute.<lambda1>
+    note: RecordCommand.execute passes filter(None, map(<lambda1>, ...)) as capture_env (commands/record.py:68, 78): iterating it here calls the lambda (callback of map); the default is the list ['SHELL', 'TERM']; a client iterable is opaque
+44:26 call  os.stat(path)
+    -> os.stat
+45:38 call  v2.get_duration(path)
+    -> asciinema.asciicast.v2.get_duration
+47:10 with  async_writer(writer, path, full_metadata, append)
+    -> asciinema.async_worker.async_worker.__enter__
+    -> asciinema.async_worker.async_worker.__exit__
+    reject *: the context manager is an async_writer, which inherits __enter__ and __exit__ from async_worker
+47:22 call  async_writer(writer, path, full_metadata, append)
+    -> asciinema.recorder.async_writer.__init__
+    reject asciinema.async_worker.async_worker.__init__: async_writer defines __init__, which calls the base __init__ itself (line 61)
+48:14 with  async_notifier(notifier)
+    -> asciinema.async_worker.async_worker.__enter__
+    -> asciinema.async_worker.async_worker.__exit__
+    reject *: the context manager is an async_notifier, which inherits __enter__ and __exit__ from async_worker
+48:28 call  async_notifier(notifier)
+    -> asciinema.recorder.async_notifier.__init__
+    reject asciinema.async_worker.async_worker.__init__: async_notifier defines __init__, which calls the base __init__ itself (line 86)
+49:19 call  record( ['sh', '-c', command], w, command_env, rec_stdin,...
+    -> asciinema.pty.record
+    reject asciinema.recorder.record: record here is the parameter, which shadows this function
+    note: record is the parameter of line 12, whose default is pty.record; neither RecordCommand.execute (commands/record.py:71) nor record_asciicast (__init__.py:15) passes one; a client function is a client callback
+
+[asciinema.recorder.async_writer.__init__]
+61:30 call  async_worker.__init__(self)
+    -> asciinema.async_worker.async_worker.__init__
+    reject *: an explicit call of the __init__ of the base class async_worker
+
+[asciinema.recorder.async_writer.write_stdin]
+68:21 call  self.enqueue([ts, 'i', data])
+    -> asciinema.async_worker.async_worker.enqueue
+
+[asciinema.recorder.async_writer.write_stdout]
+71:21 call  self.enqueue([ts, 'o', data])
+    -> asciinema.async_worker.async_worker.enqueue
+
+[asciinema.recorder.async_writer.run]
+74:14 with  self.writer(self.path, metadata=self.metadata, append=sel...
+    -> asciinema.asciicast.raw.writer.__enter__
+    -> asciinema.asciicast.raw.writer.__exit__
+    -> asciinema.asciicast.v2.writer.__enter__
+    -> asciinema.asciicast.v2.writer.__exit__
+    reject *: the context manager is the raw.writer or v2.writer of 74:25
+74:25 call  self.writer(self.path, metadata=self.metadata, append=sel...
+    -> asciinema.asciicast.raw.writer.__init__
+    -> asciinema.asciicast.v2.writer.__init__
+    note: self.writer is set only in __init__ (line 62) from the writer that recorder.record passes (line 47): its default v2.writer (line 12), or raw.writer or v2.writer from RecordCommand (commands/record.py:28, 80); a client class is a client callback
+75:30 call  iter(self.queue.get, None)
+    -> <builtin>.iter
+    reject asciinema.urllib_http_adapter.MultipartFormdataEncoder.iter: the callee is builtin iter, which stores the queue.get callable. The loop consumes that iterator and invokes the outside queue method; an outside callback has no graph edge.
+79:35 call  w.write_stdout(ts, data)
+    -> asciinema.asciicast.raw.writer.write_stdout
+    -> asciinema.asciicast.v2.writer.write_stdout
+    reject asciinema.recorder.async_writer.write_stdout: w is the raw.writer or v2.writer that __enter__ returns (self)
+81:34 call  w.write_stdin(ts, data)
+    -> asciinema.asciicast.raw.writer.write_stdin
+    -> asciinema.asciicast.v2.writer.write_stdin
+    reject asciinema.recorder.async_writer.write_stdin: w is the raw.writer or v2.writer that __enter__ returns (self)
+
+[asciinema.recorder.async_notifier.__init__]
+86:30 call  async_worker.__init__(self)
+    -> asciinema.async_worker.async_worker.__init__
+    reject *: an explicit call of the __init__ of the base class async_worker
+
+[asciinema.recorder.async_notifier.notify]
+90:21 call  self.enqueue(text)
+    -> asciinema.async_worker.async_worker.enqueue
+
+[asciinema.recorder.async_notifier.perform]
+95:37 call  self.notifier.notify(text)
+    -> asciinema.notifier.CustomCommandNotifier.notify
+    -> asciinema.notifier.Notifier.notify
+    -> asciinema.notifier.NoopNotifier.notify
+    reject asciinema.recorder.async_notifier.notify: self.notifier is the notifier of recorder.record: what get_notifier returns (RecordCommand, commands/record.py:29, 81) or None; no package code passes an async_notifier there
+    note: get_notifier returns a CustomCommandNotifier, a TerminalNotifier, AppleScriptNotifier or LibNotifyNotifier (which inherit Notifier.notify), or a NoopNotifier; record_asciicast passes None, which the test at line 94 excludes; a client notifier is opaque
+
+== asciinema.term
+
+[asciinema.term.raw.__enter__]
+14:38 call  tty.tcgetattr(self.fd)
+    -> termios.tcgetattr
+    note: tty re-exports tcgetattr from termios (from termios import *); named where it is defined, as tty does not export it in __all__ (asciinema.md)
+15:23 call  tty.setraw(self.fd)
+    -> tty.setraw
+
+[asciinema.term.raw.__exit__]
+22:26 call  tty.tcsetattr(self.fd, tty.TCSAFLUSH, self.mode)
+    -> termios.tcsetattr
+    note: tty re-exports tcsetattr from termios; named where it is defined (see 14:38)
+
+[asciinema.term.read_blocking]
+26:27 call  select.select([fd], [], [], timeout)
+    -> select.select
+27:23 call  os.read(fd, 1024)
+    -> os.read
+
+[asciinema.term.get_size]
+35:12 call  int(subprocess.check_output(['tput', 'cols']))
+    -> <builtin>.int
+35:36 call  subprocess.check_output(['tput', 'cols'])
+    -> subprocess.check_output
+36:12 call  int(subprocess.check_output(['tput', 'lines']))
+    -> <builtin>.int
+36:36 call  subprocess.check_output(['tput', 'lines'])
+    -> subprocess.check_output
+
+== asciinema.urllib_http_adapter
+
+[asciinema.urllib_http_adapter]
+18:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[asciinema.urllib_http_adapter.MultipartFormdataEncoder.__init__]
+15:35 call  uuid.uuid4()
+    -> uuid.uuid4
+16:70 call  'multipart/form-data; boundary={}'.format(self.boundary)
+    -> <builtin>.str.format
+
+[asciinema.urllib_http_adapter.MultipartFormdataEncoder.u]
+20:55 call  isinstance(s, bytes)
+    -> <builtin>.isinstance
+21:25 call  s.decode('utf-8')
+    -> <builtin>.bytes.decode
+
+[asciinema.urllib_http_adapter.MultipartFormdataEncoder.iter]
+30:36 call  codecs.getencoder('utf-8')
+    -> codecs.getencoder
+31:41 call  fields.items()
+    -> <builtin>.dict.items
+    note: iter documents fields as a dict (urllib_http_adapter.py:26), so B4 admits dict.items for that parameter independently of the default {} of post. Api.upload_asciicast passes no fields.
+32:25 call  self.u(key)
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.u
+33:26 call  encoder('--{}\r\n'.format(self.boundary))
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), the encode function of the UTF-8 codec, encodings.utf_8.encode (codecs.utf_8_encode)
+33:44 call  '--{}\r\n'.format(self.boundary)
+    -> <builtin>.str.format
+34:26 call  encoder(self.u('Content-Disposition: form-data; name="{}"...
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+34:33 call  self.u('Content-Disposition: form-data; name="{}"\r\n')
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.u
+34:89 call  self.u('Content-Disposition: form-data; name="{}"\r\n').f...
+    -> <builtin>.str.format
+    note: u returns the str literal unchanged
+35:26 call  encoder('\r\n')
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+36:26 call  isinstance(value, int)
+    -> <builtin>.isinstance
+36:52 call  isinstance(value, float)
+    -> <builtin>.isinstance
+37:28 call  str(value)
+    -> <builtin>.str
+38:26 call  encoder(self.u(value))
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+38:33 call  self.u(value)
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.u
+39:26 call  encoder('\r\n')
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+40:49 call  files.items()
+    -> <builtin>.dict.items
+    note: iter documents files as a dict (urllib_http_adapter.py:27), so B4 admits dict.items. The package also supplies the dict of Api.upload_asciicast (api.py:37) or post's default {}. File-like values stored inside it remain opaque unless supplied by package code.
+42:25 call  self.u(key)
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.u
+43:30 call  self.u(filename)
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.u
+44:26 call  encoder('--{}\r\n'.format(self.boundary))
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+44:44 call  '--{}\r\n'.format(self.boundary)
+    -> <builtin>.str.format
+45:26 call  encoder(self.u('Content-Disposition: form-data; name="{}"...
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+45:33 call  self.u('Content-Disposition: form-data; name="{}"; filena...
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.u
+45:104 call  self.u('Content-Disposition: form-data; name="{}"; filena...
+    -> <builtin>.str.format
+    note: u returns the str literal unchanged
+46:26 call  encoder('Content-Type: application/octet-stream\r\n')
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+47:26 call  encoder('\r\n')
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+48:26 call  f.read()
+    -> io.BufferedReader.read
+    note: f is the file of the files entry: Api.upload_asciicast passes the binary file of open(path, 'rb') (api.py:33-37); a client file is opaque
+49:29 call  len(data)
+    -> <builtin>.len
+50:26 call  encoder('\r\n')
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+51:22 call  encoder('--{}--\r\n'.format(self.boundary))
+    -> encodings.utf_8.encode
+    note: encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode
+51:42 call  '--{}--\r\n'.format(self.boundary)
+    -> <builtin>.str.format
+
+[asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode]
+54:26 call  io.BytesIO()
+    -> io.BytesIO
+55:42 call  self.iter(fields, files)
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.iter
+56:23 call  body.write(chunk)
+    -> io.BytesIO.write
+57:48 call  body.getvalue()
+    -> io.BytesIO.getvalue
+
+[asciinema.urllib_http_adapter.URLLibHttpAdapter.post]
+63:54 call  MultipartFormdataEncoder()
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.__init__
+63:63 call  MultipartFormdataEncoder().encode(fields, files)
+    -> asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode
+65:31 call  headers.copy()
+    -> <builtin>.dict.copy
+    note: headers is the dict of Api._headers that Api.upload_asciicast passes, or the default {}; a client mapping is opaque
+70:46 call  base64.encodebytes(auth.encode('utf-8'))
+    -> base64.encodebytes
+70:58 call  auth.encode('utf-8')
+    -> <builtin>.str.encode
+    reject asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode: auth is the str of line 69
+73:26 call  Request(url, data=body, headers=headers, method="POST")
+    -> urllib.request.Request
+76:31 call  urlopen(request)
+    -> urllib.request.urlopen
+78:42 call  self._parse_headers(response)
+    -> asciinema.urllib_http_adapter.URLLibHttpAdapter._parse_headers
+79:33 call  response.read()
+    -> http.client.HTTPResponse.read
+    note: urlopen of the http(s) upload URL returns an http.client.HTTPResponse. An FTP addinfourl response cannot reach this read: old versions lack status, and modern versions lack getheaders, which _parse_headers calls first
+79:42 call  response.read().decode('utf-8')
+    -> <builtin>.bytes.decode
+83:26 call  e.read()
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    -> http.client.HTTPResponse.read
+    note: e is a urllib.error.HTTPError, an urllib.response.addinfourl around the failed response. On 3.5 and later, addbase is a tempfile._TemporaryFileWrapper, whose __getattr__ returns its local func_wrapper around the read of the response; on 3.4, addbase.__init__ binds read to the read of the response (asciinema.md)
+83:35 call  e.read().decode('utf-8')
+    -> <builtin>.bytes.decode
+85:38 call  HTTPConnectionError(str(e))
+    -> <builtin>.Exception.__init__
+85:42 call  str(e)
+    -> <builtin>.str
+
+[asciinema.urllib_http_adapter.URLLibHttpAdapter._parse_headers]
+91:40 call  response.getheaders()
+    -> http.client.HTTPResponse.getheaders
+92:28 call  k.lower()
+    -> <builtin>.str.lower

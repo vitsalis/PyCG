@@ -1,0 +1,1187 @@
+# Call-site ledger of python-barcode at sha256:665ed09516b0088b5593061c5ac8662caa0b08d56bdad328388b1cab39939ac5.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# python-barcode.md shows how this ledger applies them. Supported versions:
+# Python 3.9 and later (pyproject.toml requires-python ">=3.9"); Pillow is
+# optional (extra "images", unpinned), and both sides of the optional import
+# at writer.py:33-42 run.
+# Receivers: Barcode cannot be instantiated (its __init__ raises
+# NotImplementedError, base.py:37-38), so it is no receiver of its own
+# methods (judgement J1); every package barcode class overrides build and
+# get_fullcode. BaseWriter is a plain public class whose __init__ takes the
+# four callbacks, documented for subclassing (docs/writers.rst), so it is a
+# receiver of its own methods (J3). A writer's callbacks are the bound
+# methods that SVGWriter.__init__ and ImageWriter.__init__ pass, or client
+# callables (opaque); register_callback types its callback as a bare
+# Callable (B2: no package value).
+default reject barcode.base.Barcode.__repr__, barcode.codabar.CODABAR.__str__, barcode.codex.Code128.__str__, barcode.codex.Code39.__str__, barcode.ean.EuropeanArticleNumber13.__str__, barcode.errors.BarcodeError.__str__, barcode.isxn.InternationalStandardBookNumber10.__str__, barcode.isxn.InternationalStandardSerialNumber.__str__, barcode.itf.ITF.__str__, barcode.upc.UniversalProductCodeA.__str__: no barcode object and no BarcodeError is formatted, printed, converted by str() or repr(), or used with % at this site; the values in the f-strings, str.format fields and print calls are str, int and float values (codes, digits, checksums, file names, colours, sizes, the version string, argparse strings), and every % in the package is an integer modulo
+
+== barcode
+
+[barcode]
+61:25 call  list(__BARCODE_MAP)
+    -> <builtin>.list
+62:23 call  PROVIDED_BARCODES.sort()
+    -> <builtin>.list.sort
+65:2 decorator  @overload
+    -> typing.overload
+72:2 decorator  @overload
+    -> typing.overload
+
+[barcode.get]
+102:43 call  name.lower()
+    -> <builtin>.str.lower
+    note: name is annotated str
+104:35 call  BarcodeNotFoundError(f"The barcode {name!r} is not known.")
+    -> barcode.errors.BarcodeError.__init__
+    note: BarcodeNotFoundError has no __init__ of its own; the first __init__ of its MRO is BarcodeError.__init__
+106:23 call  barcode(code, writer, **options)
+    -> barcode.codabar.CODABAR.__init__
+    -> barcode.codex.Code128.__init__
+    -> barcode.codex.Code39.__init__
+    -> barcode.ean.EuropeanArticleNumber13.__init__
+    -> barcode.ean.EuropeanArticleNumber13WithGuard.__init__
+    -> barcode.isxn.InternationalStandardBookNumber13.__init__
+    -> barcode.codex.Gs1_128.__init__
+    -> barcode.isxn.InternationalStandardBookNumber10.__init__
+    -> barcode.isxn.InternationalStandardSerialNumber.__init__
+    -> barcode.itf.ITF.__init__
+    -> barcode.ean.JapanArticleNumber.__init__
+    -> barcode.codex.PZN7.__init__
+    -> barcode.upc.UniversalProductCodeA.__init__
+    -> barcode.ean.EuropeanArticleNumber8WithGuard.__init__
+    note: barcode is a value of __BARCODE_MAP (__init__.py:36-59): CODABAR, Code128, Code39, EAN13, EAN13_GUARD, EAN14, EAN8, EAN8_GUARD, ISBN13, Gs1_128, ISBN10, ISSN, ITF, JAN, PZN (= PZN7), UPCA. EAN14 (EuropeanArticleNumber14) and EAN8 (EuropeanArticleNumber8) inherit EuropeanArticleNumber13.__init__; every class binds (code, writer) and empty options
+    exclude barcode.base.Barcode.__init__: Barcode is not a value of __BARCODE_MAP, and every class of the map defines or inherits an __init__ below Barcode
+
+[barcode.get_class]
+112:23 call  get_barcode(name)
+    -> barcode.get
+    note: get_barcode is the module alias get_barcode = get (__init__.py:153)
+
+[barcode.generate]
+136:24 call  TypeError("'output' cannot be None")
+    -> <builtin>.TypeError
+138:46 call  Barcode.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); calling it runs SVGWriter.__init__
+    exclude barcode.writer.ImageWriter.__init__: no package class sets default_writer to ImageWriter
+139:23 call  writer.set_options(writer_options or {})
+    -> barcode.writer.BaseWriter.set_options
+    note: writer is the client's writer (annotated BaseWriter | None) or the SVGWriter of line 138; only BaseWriter defines set_options
+141:18 call  get(name, code, writer)
+    -> barcode.get
+143:18 call  isinstance(output, str)
+    -> <builtin>.isinstance
+144:28 call  barcode.save(output, writer_options, text)
+    -> barcode.base.Barcode.save
+    reject barcode.writer.BaseWriter.save, barcode.writer.ImageWriter.save, barcode.writer.SVGWriter.save: the receiver is the barcode that get returns for a str code; no barcode class overrides save
+145:18 call  isinstance(output, os.PathLike)
+    -> <builtin>.isinstance
+146:18 call  open(output, "wb")
+    -> <builtin>.open
+147:26 call  barcode.write(fp, writer_options, text)
+    -> barcode.base.Barcode.write
+    reject barcode.writer.BaseWriter.write, barcode.writer.ImageWriter.write, barcode.writer.SVGWriter.write: the receiver is the barcode that get returns; no barcode class overrides write
+149:18 call  barcode.write(output, writer_options, text)
+    -> barcode.base.Barcode.write
+    reject barcode.writer.BaseWriter.write, barcode.writer.ImageWriter.write, barcode.writer.SVGWriter.write: the receiver is the barcode that get returns; no barcode class overrides write
+
+== barcode.base
+
+[barcode.base.Barcode.to_ascii]
+41:31 call  self.build()
+    -> barcode.codabar.CODABAR.build
+    -> barcode.codex.Code128.build
+    -> barcode.codex.Code39.build
+    -> barcode.itf.ITF.build
+    reject barcode.base.Barcode.build: Barcode cannot be instantiated (its __init__ raises NotImplementedError), so self is a package subclass, and each subclass overrides build
+    reject barcode.ean.EuropeanArticleNumber13.build, barcode.ean.EuropeanArticleNumber8.build, barcode.upc.UniversalProductCodeA.build: self is a class that inherits Barcode.to_ascii (CODABAR, Code39, PZN7, PZN8, Code128, Gs1_128, ITF); the EAN family and UPCA override to_ascii
+42:19 call  len(code_list)
+    -> <builtin>.len
+43:31 call  RuntimeError("Code list must contain a single element.")
+    note: no callee: self is a package barcode (Barcode cannot be instantiated, J1), and every package build returns a list of one str (codabar.py:77, codex.py:81, 277, ean.py:111, 187, itf.py:70, upc.py:98), so this check never fails (judgement J7)
+45:28 call  code.replace("1", "X")
+    -> <builtin>.str.replace
+45:46 call  code.replace("1", "X").replace("0", " ")
+    -> <builtin>.str.replace
+
+[barcode.base.Barcode.__repr__]
+48:63 call  self.get_fullcode()
+    -> barcode.codabar.CODABAR.get_fullcode
+    -> barcode.codex.Code128.get_fullcode
+    -> barcode.codex.Code39.get_fullcode
+    -> barcode.codex.Gs1_128.get_fullcode
+    -> barcode.codex.PZN7.get_fullcode
+    -> barcode.ean.EuropeanArticleNumber13.get_fullcode
+    -> barcode.ean.EuropeanArticleNumber8.get_fullcode
+    -> barcode.itf.ITF.get_fullcode
+    -> barcode.upc.UniversalProductCodeA.get_fullcode
+    reject barcode.base.Barcode.get_fullcode: Barcode cannot be instantiated, and every package subclass overrides get_fullcode
+
+[barcode.base.Barcode.save]
+76:29 call  self.render(options, text)
+    -> barcode.base.Barcode.render
+    -> barcode.codex.Code128.render
+    -> barcode.codex.Code39.render
+    -> barcode.ean.EuropeanArticleNumber13.render
+    -> barcode.itf.ITF.render
+    -> barcode.upc.UniversalProductCodeA.render
+    reject barcode.writer.BaseWriter.render: the receiver is a barcode
+    note: Barcode.render for CODABAR, which does not override render
+76:69 call  self.render(options)
+    -> barcode.base.Barcode.render
+    -> barcode.codex.Code128.render
+    -> barcode.codex.Code39.render
+    -> barcode.ean.EuropeanArticleNumber13.render
+    -> barcode.itf.ITF.render
+    -> barcode.upc.UniversalProductCodeA.render
+    reject barcode.writer.BaseWriter.render: the receiver is a barcode
+78:32 call  self.writer.save(filename, output)
+    -> barcode.writer.BaseWriter.save
+    -> barcode.writer.ImageWriter.save
+    -> barcode.writer.SVGWriter.save
+    reject barcode.base.Barcode.save: self.writer is a writer (annotated BaseWriter, base.py:35)
+    note: BaseWriter is a receiver of its own methods (J3); its save raises NotImplementedError
+
+[barcode.base.Barcode.write]
+93:29 call  self.render(options, text)
+    -> barcode.base.Barcode.render
+    -> barcode.codex.Code128.render
+    -> barcode.codex.Code39.render
+    -> barcode.ean.EuropeanArticleNumber13.render
+    -> barcode.itf.ITF.render
+    -> barcode.upc.UniversalProductCodeA.render
+    reject barcode.writer.BaseWriter.render: the receiver is a barcode
+94:26 call  self.writer.write(output, fp)
+    -> barcode.writer.BaseWriter.write
+    -> barcode.writer.ImageWriter.write
+    -> barcode.writer.SVGWriter.write
+    reject barcode.base.Barcode.write: self.writer is a writer (annotated BaseWriter)
+
+[barcode.base.Barcode.render]
+104:51 call  self.default_writer_options.copy()
+    -> <builtin>.dict.copy
+    note: default_writer_options is a ClassVar[dict]; no package class rebinds it
+105:23 call  options.update(writer_options or {})
+    -> <builtin>.dict.update
+110:52 call  self.get_fullcode()
+    -> barcode.codabar.CODABAR.get_fullcode
+    -> barcode.codex.Code128.get_fullcode
+    -> barcode.codex.Code39.get_fullcode
+    -> barcode.codex.Gs1_128.get_fullcode
+    -> barcode.codex.PZN7.get_fullcode
+    -> barcode.ean.EuropeanArticleNumber13.get_fullcode
+    -> barcode.ean.EuropeanArticleNumber8.get_fullcode
+    -> barcode.itf.ITF.get_fullcode
+    -> barcode.upc.UniversalProductCodeA.get_fullcode
+    reject barcode.base.Barcode.get_fullcode: Barcode cannot be instantiated, and every package subclass overrides get_fullcode
+    note: self is any package barcode: CODABAR inherits render, the other classes reach it through super().render
+111:32 call  self.writer.set_options(options)
+    -> barcode.writer.BaseWriter.set_options
+112:31 call  self.build()
+    -> barcode.codabar.CODABAR.build
+    -> barcode.codex.Code128.build
+    -> barcode.codex.Code39.build
+    -> barcode.ean.EuropeanArticleNumber13.build
+    -> barcode.ean.EuropeanArticleNumber8.build
+    -> barcode.itf.ITF.build
+    -> barcode.upc.UniversalProductCodeA.build
+    reject barcode.base.Barcode.build: Barcode cannot be instantiated, and every package subclass overrides build
+113:19 call  len(code_list)
+    -> <builtin>.len
+114:31 call  RuntimeError("Code list must contain a single element.")
+    note: no callee: self is a package barcode (Barcode cannot be instantiated, J1), and every package build returns a list of one str (codabar.py:77, codex.py:81, 277, ean.py:111, 187, itf.py:70, upc.py:98), so this check never fails (judgement J7)
+116:34 call  self.writer.render([code])
+    -> barcode.writer.BaseWriter.render
+    reject barcode.base.Barcode.render, barcode.codex.Code128.render, barcode.codex.Code39.render, barcode.ean.EuropeanArticleNumber13.render, barcode.itf.ITF.render, barcode.upc.UniversalProductCodeA.render: self.writer is a writer; only BaseWriter defines render among the writers
+
+== barcode.charsets.code128
+
+[barcode.charsets.code128]
+24:11 call  tuple(string.digits)
+    -> <builtin>.tuple
+32:11 call  tuple(string.ascii_uppercase)
+    -> <builtin>.tuple
+86:11 call  tuple(string.ascii_lowercase)
+    -> <builtin>.tuple
+101:10 call  set(_common + _charset_a + _charset_b)
+    -> <builtin>.set
+102:32 call  enumerate(_charset_a)
+    -> <builtin>.enumerate
+103:32 call  enumerate(_charset_b)
+    -> <builtin>.enumerate
+
+== barcode.charsets.code39
+
+[barcode.charsets.code39]
+7:10 call  tuple(string.digits)
+    -> <builtin>.tuple
+8:12 call  tuple(string.ascii_uppercase)
+    -> <builtin>.tuple
+63:11 call  dict(zip(REF, enumerate(CODES)))
+    -> <builtin>.dict
+63:15 call  zip(REF, enumerate(CODES))
+    -> <builtin>.zip
+63:30 call  enumerate(CODES)
+    -> <builtin>.enumerate
+
+== barcode.codabar
+
+[barcode.codabar.CODABAR.__init__]
+34:52 call  self.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it
+
+[barcode.codabar.CODABAR.build]
+51:31 call  BarcodeError("Codabar should start with either A,B,C or D")
+    -> barcode.errors.BarcodeError.__init__
+54:29 call  "n".join( [codabar.CODES[c] for c in self.code[1:-1]] )
+    -> <builtin>.str.join
+58:40 call  IllegalCharacterError( "Codabar can only contain numerics...
+    -> barcode.errors.BarcodeError.__init__
+    note: IllegalCharacterError has no __init__ of its own
+65:31 call  BarcodeError("Codabar should end with either A,B,C or D")
+    -> barcode.errors.BarcodeError.__init__
+
+== barcode.codex
+
+[barcode.codex]
+160:6 decorator  @property
+    -> <builtin>.property
+
+[barcode.codex.check_code]
+33:25 call  wrong.append(char)
+    -> <builtin>.list.append
+35:36 call  IllegalCharacterError( "The following characters are not ...
+    -> barcode.errors.BarcodeError.__init__
+36:80 call  "The following characters are not valid for {name}: {wron...
+    -> <builtin>.str.format
+    note: the receiver is a str literal, so format is str.format (not the attribute format of ImageWriter); its fields are name (a str: the class attribute name at every package call) and the str that ", ".join returns
+37:43 call  ", ".join(wrong)
+    -> <builtin>.str.join
+
+[barcode.codex.Code39.__init__]
+55:31 call  code.upper()
+    -> <builtin>.str.upper
+    note: code is annotated str
+57:49 call  self.calculate_checksum()
+    -> barcode.codex.Code39.calculate_checksum
+    reject barcode.codex.PZN7.calculate_checksum: __init__ receives the object that is being made, with the arguments of that construction (lead's ruling on audit F1); a PZN7 or PZN8 reaches Code39.__init__ only through PZN7.__init__, which passes add_checksum=False (codex.py:113), so this branch runs only for a Code39; a client that calls __init__ again on a built object is not considered (judgement J5)
+    reject barcode.ean.EuropeanArticleNumber13.calculate_checksum, barcode.ean.EuropeanArticleNumber14.calculate_checksum, barcode.upc.UniversalProductCodeA.calculate_checksum: self is a Code39 or a subclass of it
+58:52 call  self.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it
+59:19 call  check_code(self.code, self.name, code39.REF)
+    -> barcode.codex.check_code
+
+[barcode.codex.Code39.calculate_checksum]
+69:20 call  sum(code39.MAP[x][0] for x in self.code)
+    -> <builtin>.sum
+70:37 call  code39.MAP.items()
+    -> <builtin>.dict.items
+
+[barcode.codex.Code39.build]
+78:25 call  chars.append(code39.MAP[char][1])
+    -> <builtin>.list.append
+79:21 call  chars.append(code39.EDGE)
+    -> <builtin>.list.append
+80:36 call  code39.MIDDLE.join(chars)
+    -> <builtin>.str.join
+
+[barcode.codex.Code39.render]
+85:23 call  options.update(writer_options or {})
+    -> <builtin>.dict.update
+86:21 call  super()
+    -> <builtin>.super
+86:30 call  super().render(options, text)
+    -> barcode.base.Barcode.render
+    reject *: super() in Code39 resolves render to Barcode.render (MRO Code39, Barcode)
+
+[barcode.codex.PZN7.__init__]
+105:27 call  pzn.isdigit()
+    -> <builtin>.str.isdigit
+    note: pzn is a slice of the client's str code
+106:40 call  IllegalCharacterError("PZN can only contain numbers.")
+    -> barcode.errors.BarcodeError.__init__
+107:15 call  len(pzn)
+    -> <builtin>.len
+108:38 call  NumberOfDigitsError( f"PZN must have {self.digits} digits...
+    -> barcode.errors.BarcodeError.__init__
+109:63 call  len(pzn)
+    -> <builtin>.len
+112:51 call  self.calculate_checksum()
+    -> barcode.codex.PZN7.calculate_checksum
+    reject barcode.codex.Code39.calculate_checksum: self is a PZN7 or PZN8, which inherit PZN7.calculate_checksum
+    reject barcode.ean.EuropeanArticleNumber13.calculate_checksum, barcode.ean.EuropeanArticleNumber14.calculate_checksum, barcode.upc.UniversalProductCodeA.calculate_checksum: self is a PZN7 or PZN8
+113:14 call  super()
+    -> <builtin>.super
+113:25 call  super().__init__(f"PZN-{self.pzn}", writer, add_checksum=...
+    -> barcode.codex.Code39.__init__
+    reject *: super() in PZN7 resolves __init__ to Code39.__init__ (MRO PZN7, Code39, Barcode)
+
+[barcode.codex.PZN7.calculate_checksum]
+119:19 call  sum(int(x) * int(y) for x, y in enumerate(self.pzn, start...
+    -> <builtin>.sum
+119:23 call  int(x)
+    -> <builtin>.int
+119:32 call  int(y)
+    -> <builtin>.int
+119:57 call  enumerate(self.pzn, start=2)
+    -> <builtin>.enumerate
+122:31 call  BarcodeError("Checksum can not be 10 for PZN.")
+    -> barcode.errors.BarcodeError.__init__
+
+[barcode.codex.Code128.__init__]
+152:52 call  self.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it
+155:19 call  check_code(self.code, self.name, code128.ALL)
+    -> barcode.codex.check_code
+
+[barcode.codex.Code128.encoded]
+162:27 call  self._build()
+    -> barcode.codex.Code128._build
+
+[barcode.codex.Code128._new_charset]
+169:29 call  ValueError(f"Already in charset {which}")
+    -> <builtin>.ValueError
+    note: A nominal str input may yield a str-subclass digit whose reflected addition supplies a client buffer. The buffer can report lengths 0,0,1 at the three package len calls. It therefore survives a successful C-to-B transition, without a prior exception, and makes the final _build branch request B again. The explicit ValueError constructor then runs. The client buffer stays opaque and contributes no named callback edges; only package control flow and the explicitly called builtin constructor are counted. The input, digit, and buffer are all nominal str instances. No client modifies a package attribute, calls a private method, reconstructs an instance, or reuses an object after an error.
+171:33 call  self._convert("TO_A")
+    -> barcode.codex.Code128._convert
+173:33 call  self._convert("TO_B")
+    -> barcode.codex.Code128._convert
+175:33 call  self._convert("TO_C")
+    -> barcode.codex.Code128._convert
+
+[barcode.codex.Code128._maybe_switch_charset]
+203:53 call  char.isdigit()
+    -> <builtin>.str.isdigit
+    note: char is a character of the str self.code
+204:39 call  self._is_char_fnc1_char(char)
+    -> barcode.codex.Code128._is_char_fnc1_char
+    -> barcode.codex.Gs1_128._is_char_fnc1_char
+    note: self is a Code128 or a Gs1_128
+207:42 call  self._new_charset("B")
+    -> barcode.codex.Code128._new_charset
+209:42 call  self._new_charset("A")
+    -> barcode.codex.Code128._new_charset
+210:19 call  len(self._buffer)
+    -> <builtin>.len
+211:29 call  codes.append(self._convert(self._buffer[0]))
+    -> <builtin>.list.append
+    note: codes is the list that _new_charset returns
+211:43 call  self._convert(self._buffer[0])
+    -> barcode.codex.Code128._convert
+214:25 call  look_next()
+    -> barcode.codex.Code128._maybe_switch_charset.look_next
+215:42 call  self._new_charset("C")
+    -> barcode.codex.Code128._new_charset
+217:42 call  self._new_charset("A")
+    -> barcode.codex.Code128._new_charset
+219:25 call  look_next()
+    -> barcode.codex.Code128._maybe_switch_charset.look_next
+220:42 call  self._new_charset("C")
+    -> barcode.codex.Code128._new_charset
+222:42 call  self._new_charset("B")
+    -> barcode.codex.Code128._new_charset
+
+[barcode.codex.Code128._maybe_switch_charset.look_next]
+196:29 call  c.isdigit()
+    -> <builtin>.str.isdigit
+
+[barcode.codex.Code128._convert]
+233:28 call  char.isdigit()
+    -> <builtin>.str.isdigit
+    note: char is a str: a character of self.code or of self._buffer, or a literal
+235:23 call  len(self._buffer)
+    -> <builtin>.len
+236:32 call  int(self._buffer)
+    -> <builtin>.int
+240:27 call  RuntimeError( f"Character {char} could not be converted i...
+    -> <builtin>.RuntimeError
+    note: Code128 stores the annotated str input without normalization (151), validates by iteration (check_code 31), and later combines iteration (_build 257) with independent indexing (_maybe_switch_charset 190-191). A nominal str subclass may preserve ordinary iteration over A while returning a snowman from indexing. Construction passes; the indexed snowman is nonnumeric and in neither charset, so the current charset stays C. The ordinary iterated character A reaches _convert, is absent from charset C and is not numeric, so the explicit RuntimeError constructor runs. B5 leaves client methods and results opaque; it does not remove the package branch they permit. No package attribute assignment, private call, or failed-state reuse occurs.
+
+[barcode.codex.Code128._calculate_checksum]
+251:37 call  enumerate(encoded[1:], start=1)
+    -> <builtin>.enumerate
+252:22 call  cs.append(i * code_num)
+    -> <builtin>.list.append
+253:19 call  sum(cs)
+    -> <builtin>.sum
+
+[barcode.codex.Code128._build]
+257:33 call  enumerate(self.code)
+    -> <builtin>.enumerate
+258:27 call  encoded.extend(self._maybe_switch_charset(i))
+    -> <builtin>.list.extend
+258:54 call  self._maybe_switch_charset(i)
+    -> barcode.codex.Code128._maybe_switch_charset
+259:37 call  self._convert(char)
+    -> barcode.codex.Code128._convert
+261:31 call  encoded.append(code_num)
+    -> <builtin>.list.append
+263:15 call  len(self._buffer)
+    -> <builtin>.len
+264:27 call  encoded.extend(self._new_charset("B"))
+    -> <builtin>.list.extend
+264:45 call  self._new_charset("B")
+    -> barcode.codex.Code128._new_charset
+265:27 call  encoded.append(self._convert(self._buffer[0]))
+    -> <builtin>.list.append
+265:41 call  self._convert(self._buffer[0])
+    -> barcode.codex.Code128._convert
+267:37 call  self._try_to_optimize(encoded)
+    -> barcode.codex.Code128._try_to_optimize
+
+[barcode.codex.Code128.build]
+270:30 call  self._build()
+    -> barcode.codex.Code128._build
+271:23 call  encoded.append(self._calculate_checksum(encoded))
+    -> <builtin>.list.append
+271:48 call  self._calculate_checksum(encoded)
+    -> barcode.codex.Code128._calculate_checksum
+    reject barcode.isxn.InternationalStandardBookNumber10._calculate_checksum, barcode.isxn.InternationalStandardSerialNumber._calculate_checksum: self is a Code128 or a Gs1_128
+
+[barcode.codex.Code128.render]
+281:23 call  options.update(writer_options or {})
+    -> <builtin>.dict.update
+282:21 call  super()
+    -> <builtin>.super
+282:30 call  super().render(options, text)
+    -> barcode.base.Barcode.render
+    reject *: super() in Code128 resolves render to Barcode.render (MRO Code128, Barcode)
+
+[barcode.codex.Gs1_128.__init__]
+299:14 call  super()
+    -> <builtin>.super
+299:25 call  super().__init__(code, writer)
+    -> barcode.codex.Code128.__init__
+    reject *: super() in Gs1_128 resolves __init__ to Code128.__init__ (MRO Gs1_128, Code128, Barcode)
+
+[barcode.codex.Gs1_128.get_fullcode]
+302:21 call  super()
+    -> <builtin>.super
+302:36 call  super().get_fullcode()
+    -> barcode.codex.Code128.get_fullcode
+    reject *: super() in Gs1_128 resolves get_fullcode to Code128.get_fullcode
+
+== barcode.ean
+
+[barcode.ean]
+151:31 call  list(range(450, 460))
+    -> <builtin>.list
+151:37 call  range(450, 460)
+    -> <builtin>.range
+151:55 call  list(range(490, 500))
+    -> <builtin>.list
+151:61 call  range(490, 500)
+    -> <builtin>.range
+
+[barcode.ean.EuropeanArticleNumber13.__init__]
+47:42 call  ean[: self.digits].isdigit()
+    -> <builtin>.str.isdigit
+    note: ean is annotated str; the package's own callers pass strs
+48:40 call  IllegalCharacterError(f"EAN code can only contain numbers...
+    -> barcode.errors.BarcodeError.__init__
+50:15 call  len(ean)
+    -> <builtin>.len
+51:38 call  NumberOfDigitsError( f"EAN must have {self.digits} digits...
+    -> barcode.errors.BarcodeError.__init__
+52:68 call  len(ean)
+    -> <builtin>.len
+58:19 call  len(ean)
+    -> <builtin>.len
+58:67 call  ean[self.digits].isdigit()
+    -> <builtin>.str.isdigit
+59:27 call  int(ean[self.digits])
+    -> <builtin>.int
+63:43 call  self.calculate_checksum(base)
+    -> barcode.ean.EuropeanArticleNumber13.calculate_checksum
+    -> barcode.ean.EuropeanArticleNumber14.calculate_checksum
+    reject barcode.codex.Code39.calculate_checksum, barcode.codex.PZN7.calculate_checksum, barcode.upc.UniversalProductCodeA.calculate_checksum: self is an EuropeanArticleNumber13 or a package subclass of it (EAN14 overrides calculate_checksum)
+69:42 call  _ean.EDGE.replace("1", "G")
+    -> <builtin>.str.replace
+70:46 call  _ean.MIDDLE.replace("1", "G")
+    -> <builtin>.str.replace
+74:52 call  self.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it
+
+[barcode.ean.EuropeanArticleNumber13.calculate_checksum]
+93:22 call  sum(int(x) for x in ean_without_checksum[-2::-2])
+    -> <builtin>.sum
+93:26 call  int(x)
+    -> <builtin>.int
+94:21 call  sum(int(x) for x in ean_without_checksum[-1::-2])
+    -> <builtin>.sum
+94:25 call  int(x)
+    -> <builtin>.int
+
+[barcode.ean.EuropeanArticleNumber13.build]
+104:40 call  int(self.ean[0])
+    -> <builtin>.int
+105:35 call  enumerate(self.ean[1:7])
+    -> <builtin>.enumerate
+106:47 call  int(number)
+    -> <builtin>.int
+109:40 call  int(number)
+    -> <builtin>.int
+
+[barcode.ean.EuropeanArticleNumber13.to_ascii]
+118:31 call  self.build()
+    -> barcode.ean.EuropeanArticleNumber13.build
+    -> barcode.ean.EuropeanArticleNumber8.build
+    reject barcode.base.Barcode.build, barcode.codabar.CODABAR.build, barcode.codex.Code128.build, barcode.codex.Code39.build, barcode.itf.ITF.build, barcode.upc.UniversalProductCodeA.build: self is an EuropeanArticleNumber13 or a package subclass of it (EAN8 overrides build)
+119:19 call  len(code_list)
+    -> <builtin>.len
+120:31 call  RuntimeError("Code list must contain a single element.")
+    note: no callee: self.build() is EuropeanArticleNumber13.build or EuropeanArticleNumber8.build, which return a list of one str (ean.py:111, 187), so this check never fails (judgement J7)
+122:28 call  code.replace("G", "|")
+    -> <builtin>.str.replace
+122:46 call  code.replace("G", "|").replace("1", "|")
+    -> <builtin>.str.replace
+122:64 call  code.replace("G", "|").replace("1", "|").replace("0", " ")
+    -> <builtin>.str.replace
+
+[barcode.ean.EuropeanArticleNumber13.render]
+126:23 call  options.update(writer_options or {})
+    -> <builtin>.dict.update
+127:21 call  super()
+    -> <builtin>.super
+127:30 call  super().render(options, text)
+    -> barcode.base.Barcode.render
+    reject *: super() in EuropeanArticleNumber13 resolves render to Barcode.render
+
+[barcode.ean.EuropeanArticleNumber13WithGuard.__init__]
+136:14 call  super()
+    -> <builtin>.super
+136:25 call  super().__init__(ean, writer, no_checksum, guardbar)
+    -> barcode.ean.EuropeanArticleNumber13.__init__
+    reject *: super() in EuropeanArticleNumber13WithGuard resolves __init__ to EuropeanArticleNumber13.__init__
+
+[barcode.ean.JapanArticleNumber.__init__]
+154:15 call  int(jan[:3])
+    -> <builtin>.int
+155:40 call  WrongCountryCodeError( "Country code isn't between 450-46...
+    -> barcode.errors.BarcodeError.__init__
+158:14 call  super()
+    -> <builtin>.super
+158:25 call  super().__init__(jan, *args, **kwargs)
+    -> barcode.ean.EuropeanArticleNumber13.__init__
+    reject *: super() in JapanArticleNumber resolves __init__ to EuropeanArticleNumber13.__init__
+
+[barcode.ean.EuropeanArticleNumber8.build]
+182:40 call  int(number)
+    -> <builtin>.int
+185:40 call  int(number)
+    -> <builtin>.int
+
+[barcode.ean.EuropeanArticleNumber8WithGuard.__init__]
+201:14 call  super()
+    -> <builtin>.super
+201:25 call  super().__init__(ean, writer, no_checksum, guardbar)
+    -> barcode.ean.EuropeanArticleNumber13.__init__
+    reject *: super() in EuropeanArticleNumber8WithGuard resolves __init__ to EuropeanArticleNumber13.__init__ (EuropeanArticleNumber8 defines no __init__)
+
+[barcode.ean.EuropeanArticleNumber14.calculate_checksum]
+224:22 call  sum(int(x) for x in ean_without_checksum[::2])
+    -> <builtin>.sum
+224:26 call  int(x)
+    -> <builtin>.int
+225:21 call  sum(int(x) for x in ean_without_checksum[1::2])
+    -> <builtin>.sum
+225:25 call  int(x)
+    -> <builtin>.int
+
+== barcode.isxn
+
+[barcode.isxn.InternationalStandardBookNumber13.__init__]
+46:28 call  isbn.replace("-", "")
+    -> <builtin>.str.replace
+    note: isbn is the client's str code (docstring "The isbn number as string"), or the str that ISBN10.__init__ passes
+49:40 call  WrongCountryCodeError("ISBN must start with 978 or 979.")
+    -> barcode.errors.BarcodeError.__init__
+51:31 call  BarcodeError("ISBN must start with 97910 or 97911.")
+    -> barcode.errors.BarcodeError.__init__
+52:14 call  super()
+    -> <builtin>.super
+52:25 call  super().__init__(isbn, writer, no_checksum, guardbar)
+    -> barcode.ean.EuropeanArticleNumber13.__init__
+    reject *: super() in InternationalStandardBookNumber13 resolves __init__ to EuropeanArticleNumber13.__init__ (also for an ISBN10 receiver)
+
+[barcode.isxn.InternationalStandardBookNumber10.__init__]
+71:28 call  isbn.replace("-", "")
+    -> <builtin>.str.replace
+73:14 call  super()
+    -> <builtin>.super
+73:25 call  super().__init__("978" + isbn, writer)
+    -> barcode.isxn.InternationalStandardBookNumber13.__init__
+    reject *: super() in InternationalStandardBookNumber10 resolves __init__ to InternationalStandardBookNumber13.__init__
+75:56 call  self._calculate_checksum()
+    -> barcode.isxn.InternationalStandardBookNumber10._calculate_checksum
+    reject barcode.codex.Code128._calculate_checksum, barcode.isxn.InternationalStandardSerialNumber._calculate_checksum: self is an InternationalStandardBookNumber10
+
+[barcode.isxn.InternationalStandardBookNumber10._calculate_checksum]
+78:18 call  sum(x * int(y) for x, y in enumerate(self.isbn10[:9], sta...
+    -> <builtin>.sum
+78:26 call  int(y)
+    -> <builtin>.int
+78:51 call  enumerate(self.isbn10[:9], start=1)
+    -> <builtin>.enumerate
+
+[barcode.isxn.InternationalStandardSerialNumber.__init__]
+104:28 call  issn.replace("-", "")
+    -> <builtin>.str.replace
+107:54 call  self._calculate_checksum()
+    -> barcode.isxn.InternationalStandardSerialNumber._calculate_checksum
+    reject barcode.codex.Code128._calculate_checksum, barcode.isxn.InternationalStandardBookNumber10._calculate_checksum: self is an InternationalStandardSerialNumber
+108:14 call  super()
+    -> <builtin>.super
+108:25 call  super().__init__(self.make_ean(), writer)
+    -> barcode.ean.EuropeanArticleNumber13.__init__
+    reject *: super() in InternationalStandardSerialNumber resolves __init__ to EuropeanArticleNumber13.__init__
+108:39 call  self.make_ean()
+    -> barcode.isxn.InternationalStandardSerialNumber.make_ean
+
+[barcode.isxn.InternationalStandardSerialNumber._calculate_checksum]
+113:18 call  sum(x * int(y) for x, y in enumerate(reversed(self.issn[:...
+    -> <builtin>.sum
+113:26 call  int(y)
+    -> <builtin>.int
+113:51 call  enumerate(reversed(self.issn[:7]), start=2)
+    -> <builtin>.enumerate
+113:60 call  reversed(self.issn[:7])
+    -> <builtin>.reversed
+
+[barcode.isxn.InternationalStandardSerialNumber.make_ean]
+122:63 call  self._calculate_checksum()
+    -> barcode.isxn.InternationalStandardSerialNumber._calculate_checksum
+    reject barcode.codex.Code128._calculate_checksum, barcode.isxn.InternationalStandardBookNumber10._calculate_checksum: self is an InternationalStandardSerialNumber
+
+== barcode.itf
+
+[barcode.itf.ITF.__init__]
+35:28 call  code.isdigit()
+    -> <builtin>.str.isdigit
+    note: code is the client's str ("ITF (Interleaved 2 of 5) numeric string")
+36:40 call  IllegalCharacterError("ITF code can only contain numbers.")
+    -> barcode.errors.BarcodeError.__init__
+38:15 call  len(code)
+    -> <builtin>.len
+41:52 call  self.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it
+
+[barcode.itf.ITF.build]
+53:23 call  range(0, len(self.code), 2)
+    -> <builtin>.range
+53:30 call  len(self.code)
+    -> <builtin>.len
+54:29 call  int(self.code[i])
+    -> <builtin>.int
+55:31 call  int(self.code[i + 1])
+    -> <builtin>.int
+56:27 call  range(5)
+    -> <builtin>.range
+57:55 call  itf.CODES[bars_digit][j].upper()
+    -> <builtin>.str.upper
+58:57 call  itf.CODES[spaces_digit][j].lower()
+    -> <builtin>.str.lower
+
+[barcode.itf.ITF.render]
+77:23 call  options.update(writer_options or {})
+    -> <builtin>.dict.update
+78:21 call  super()
+    -> <builtin>.super
+78:30 call  super().render(options, text)
+    -> barcode.base.Barcode.render
+    reject *: super() in ITF resolves render to Barcode.render
+
+== barcode.pybarcode
+
+[barcode.pybarcode]
+103:9 call  main()
+    -> barcode.pybarcode.main
+
+[barcode.pybarcode.list_types]
+16:10 call  print("\npython-barcode available barcode formats:")
+    -> <builtin>.print
+17:10 call  print(", ".join(barcode.PROVIDED_BARCODES))
+    -> <builtin>.print
+17:20 call  ", ".join(barcode.PROVIDED_BARCODES)
+    -> <builtin>.str.join
+18:10 call  print("\n")
+    -> <builtin>.print
+19:10 call  print("Available image formats")
+    -> <builtin>.print
+20:10 call  print("Standard: svg")
+    -> <builtin>.print
+22:14 call  print("Pillow:", ", ".join(IMG_FORMATS))
+    -> <builtin>.print
+22:35 call  ", ".join(IMG_FORMATS)
+    -> <builtin>.str.join
+24:14 call  print("Pillow: disabled")
+    -> <builtin>.print
+25:10 call  print("\n")
+    -> <builtin>.print
+
+[barcode.pybarcode.create_barcode]
+29:32 call  args.type.upper()
+    -> <builtin>.str.upper
+    note: args is the argparse.Namespace that main passes (B2: the package's own call); its type is the default "svg" or the --type string. A client's args is opaque
+31:21 call  parser.error(f"Unknown type {args.type}. Try list action ...
+    -> argparse.ArgumentParser.error
+    note: parser is the ArgumentParser that main passes
+32:38 call  args.barcode.lower()
+    -> <builtin>.str.lower
+    note: args.barcode is the default "code39" or the --barcode string
+34:21 call  parser.error( f"Unknown barcode {args.barcode}. Try list ...
+    -> argparse.ArgumentParser.error
+40:41 call  ImageWriter()
+    -> barcode.writer.ImageWriter.__init__
+    reject barcode.writer.BaseWriter.__init__: ImageWriter defines __init__ (it calls BaseWriter.__init__ itself)
+    note: the Pillow side of the optional import, where ImageWriter is the class (writer.py:420)
+43:27 call  SVGWriter()
+    -> barcode.writer.SVGWriter.__init__
+    reject barcode.writer.BaseWriter.__init__: SVGWriter defines __init__ (it calls BaseWriter.__init__ itself)
+44:27 call  os.path.normpath(os.path.abspath(args.output))
+    -> os.path.normpath
+44:43 call  os.path.abspath(args.output)
+    -> os.path.abspath
+45:28 call  barcode.generate(args.barcode, args.code, writer, out, op...
+    -> barcode.generate
+46:10 call  print(f"New barcode saved as {name}.")
+    -> <builtin>.print
+
+[barcode.pybarcode.main]
+52:19 call  msg.append("Image output disabled (Pillow not found), --t...
+    -> <builtin>.list.append
+54:19 call  msg.append( "Image output enabled, use --type option to g...
+    -> <builtin>.list.append
+58:28 call  ArgumentParser( description="Create standard barcodes via...
+    -> argparse.ArgumentParser
+59:73 call  " ".join(msg)
+    -> <builtin>.str.join
+61:24 call  parser.add_argument( "-v", "--version", action="version",...
+    -> argparse.ArgumentParser.add_argument
+64:39 call  parser.add_subparsers(title="Actions")
+    -> argparse.ArgumentParser.add_subparsers
+65:42 call  subparsers.add_parser( "create", help="Create a barcode w...
+    -> argparse._SubParsersAction.add_parser
+    note: subparsers is the argparse._SubParsersAction that add_subparsers returns
+68:31 call  create_parser.add_argument("code", help="Code to render a...
+    -> argparse.ArgumentParser.add_argument
+    note: create_parser is the ArgumentParser that add_parser makes (parser_class is the class of the main parser)
+69:31 call  create_parser.add_argument( "output", help="Filename for ...
+    -> argparse.ArgumentParser.add_argument
+72:31 call  create_parser.add_argument( "-c", "--compress", action="s...
+    -> argparse.ArgumentParser.add_argument
+78:31 call  create_parser.add_argument( "-b", "--barcode", help="Barc...
+    -> argparse.ArgumentParser.add_argument
+81:31 call  create_parser.add_argument("--text", help="Text to show u...
+    -> argparse.ArgumentParser.add_argument
+83:35 call  create_parser.add_argument( "-t", "--type", help="Type of...
+    -> argparse.ArgumentParser.add_argument
+86:40 call  subparsers.add_parser( "list", help="List available image...
+    -> argparse._SubParsersAction.add_parser
+89:29 call  list_parser.set_defaults(func=list_types)
+    -> argparse.ArgumentParser.set_defaults
+    reject barcode.pybarcode.list_types: set_defaults stores the function as a default; argparse never calls it (main calls it at line 99)
+90:31 call  create_parser.set_defaults( type="svg", compress=False, f...
+    -> argparse.ArgumentParser.set_defaults
+    reject barcode.pybarcode.create_barcode: set_defaults stores the function as a default; argparse never calls it (main calls it at line 99)
+93:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    note: no argument has a type= callable or an action of the package; the version action prints and exits
+97:21 call  parser.error("You need to tell me what to do.")
+    -> argparse.ArgumentParser.error
+99:13 call  func(args, parser)
+    -> barcode.pybarcode.create_barcode
+    -> barcode.pybarcode.list_types
+    note: func is args.func, the default func that set_defaults gave the chosen sub-parser: list_types (line 89) or create_barcode (line 90)
+
+== barcode.upc
+
+[barcode.upc.UniversalProductCodeA.__init__]
+39:27 call  upc.isdigit()
+    -> <builtin>.str.isdigit
+    note: upc is a slice of the client's str code ("The upc number as string")
+40:40 call  IllegalCharacterError("UPC code can only contain numbers.")
+    -> barcode.errors.BarcodeError.__init__
+41:15 call  len(upc)
+    -> <builtin>.len
+42:38 call  NumberOfDigitsError( f"UPC must have {self.digits} digits...
+    -> barcode.errors.BarcodeError.__init__
+43:63 call  len(upc)
+    -> <builtin>.len
+46:51 call  self.calculate_checksum()
+    -> barcode.upc.UniversalProductCodeA.calculate_checksum
+    reject barcode.codex.Code39.calculate_checksum, barcode.codex.PZN7.calculate_checksum, barcode.ean.EuropeanArticleNumber13.calculate_checksum, barcode.ean.EuropeanArticleNumber14.calculate_checksum: self is an UniversalProductCodeA (no package subclass)
+47:52 call  self.default_writer()
+    -> barcode.writer.SVGWriter.__init__
+    note: Barcode.default_writer is the class SVGWriter (base.py:21); no package class rebinds it
+
+[barcode.upc.UniversalProductCodeA.calculate_checksum]
+72:24 call  reduce(sum_, upc[::2])
+    -> functools.reduce
+    -> barcode.upc.UniversalProductCodeA.calculate_checksum.sum_
+    note: reduce calls back the local function sum_
+73:25 call  reduce(sum_, upc[1::2])
+    -> functools.reduce
+    -> barcode.upc.UniversalProductCodeA.calculate_checksum.sum_
+
+[barcode.upc.UniversalProductCodeA.calculate_checksum.sum_]
+69:23 call  int(x)
+    -> <builtin>.int
+69:32 call  int(y)
+    -> <builtin>.int
+
+[barcode.upc.UniversalProductCodeA.build]
+88:36 call  enumerate(self.upc[0:6])
+    -> <builtin>.enumerate
+89:40 call  int(number)
+    -> <builtin>.int
+94:40 call  int(number)
+    -> <builtin>.int
+
+[barcode.upc.UniversalProductCodeA.to_ascii]
+106:31 call  self.build()
+    -> barcode.upc.UniversalProductCodeA.build
+    reject barcode.base.Barcode.build, barcode.codabar.CODABAR.build, barcode.codex.Code128.build, barcode.codex.Code39.build, barcode.ean.EuropeanArticleNumber13.build, barcode.ean.EuropeanArticleNumber8.build, barcode.itf.ITF.build: self is an UniversalProductCodeA (no package subclass)
+107:15 call  len(code_list)
+    -> <builtin>.len
+108:31 call  RuntimeError("Code list must contain a single element.")
+    note: no callee: self.build() is UniversalProductCodeA.build, which returns a list of one str (upc.py:98), so this check never fails (judgement J7)
+110:28 call  code.replace("1", "|")
+    -> <builtin>.str.replace
+110:46 call  code.replace("1", "|").replace("0", "_")
+    -> <builtin>.str.replace
+
+[barcode.upc.UniversalProductCodeA.render]
+114:23 call  options.update(writer_options or {})
+    -> <builtin>.dict.update
+115:21 call  super()
+    -> <builtin>.super
+115:30 call  super().render(options, text)
+    -> barcode.base.Barcode.render
+    reject *: super() in UniversalProductCodeA resolves render to Barcode.render
+
+== barcode.writer
+
+[barcode.writer]
+40:28 call  logging.getLogger("pyBarcode")
+    -> logging.getLogger
+    note: the side of the optional import without Pillow (writer.py:37-42); both sides run
+41:13 call  log.info("Pillow not found. Image output disabled")
+    -> logging.Logger.info
+    note: log is the logging.Logger that getLogger returns
+75:23 call  os.path.dirname(os.path.abspath(__file__))
+    -> os.path.dirname
+75:39 call  os.path.abspath(__file__)
+    -> os.path.abspath
+
+[barcode.writer._set_attributes]
+54:39 call  attributes.items()
+    -> <builtin>.dict.items
+    note: attributes is the **kwargs dict
+55:29 call  element.setAttribute(key, value)
+    -> xml.dom.minidom.Element.setAttribute
+    note: _set_attributes is private; the package passes only minidom Elements: documentElement (line 68), self._root (335) and elements from Document.createElement (342, 351, 365, 382)
+
+[barcode.writer.create_svg_object]
+59:47 call  xml.dom.minidom.getDOMImplementation()
+    -> xml.dom.minidom.getDOMImplementation
+61:37 call  imp.createDocumentType( "svg", "-//W3C//DTD SVG 1.1//EN",...
+    -> xml.dom.minidom.DOMImplementation.createDocumentType
+    note: imp is the xml.dom.minidom.DOMImplementation that getDOMImplementation returns
+66:34 call  imp.createDocument(None, "svg", doctype if with_doctype e...
+    -> xml.dom.minidom.DOMImplementation.createDocument
+67:20 call  _set_attributes( document.documentElement, version="1.1",...
+    -> barcode.writer._set_attributes
+
+[barcode.writer.BaseWriter.__init__]
+129:38 call  os.path.join(PATH, "fonts", "DejaVuSansMono.ttf")
+    -> os.path.join
+
+[barcode.writer.BaseWriter.calculate_size]
+155:35 call  len(self.text.splitlines())
+    -> <builtin>.len
+155:56 call  self.text.splitlines()
+    -> <builtin>.str.splitlines
+    note: text is annotated str (writer.py:105); the package sets it from the str options of Barcode.render
+158:22 call  pt2mm(self.font_size)
+    -> barcode.writer.pt2mm
+
+[barcode.writer.BaseWriter.set_options]
+192:38 call  options.items()
+    -> <builtin>.dict.items
+    note: options is annotated dict
+193:29 call  key.lstrip("_")
+    -> <builtin>.str.lstrip
+    note: the keys of the options dicts are option names (str)
+194:23 call  hasattr(self, key)
+    -> <builtin>.hasattr
+    note: no writer class defines a property, a descriptor or __getattr__
+195:24 call  setattr(self, key, val)
+    -> <builtin>.setattr
+    note: no writer class defines __setattr__ or a data descriptor
+
+[barcode.writer.BaseWriter.packed]
+209:23 call  range(len(line) - 1)
+    -> <builtin>.range
+209:27 call  len(line)
+    -> <builtin>.len
+
+[barcode.writer.BaseWriter.render]
+231:42 call  self._callbacks["initialize"](code)
+    -> barcode.writer.ImageWriter._init
+    -> barcode.writer.SVGWriter._init
+    note: self._callbacks["initialize"] holds what BaseWriter.__init__ or register_callback stored: the bound method self._init that SVGWriter.__init__ (line 313) or ImageWriter.__init__ (line 434) passes, or a client callable (opaque); register_callback types its callback as a bare Callable (B2)
+234:15 call  len(code)
+    -> <builtin>.len
+235:38 call  NotImplementedError("Only one line of code is supported")
+    -> <builtin>.NotImplementedError
+247:46 call  self.packed(line)
+    -> barcode.writer.BaseWriter.packed
+    note: a generator function; the loop iterates the generator
+255:39 call  text["end"].append(xpos)
+    -> <builtin>.list.append
+    note: text is the dict display of line 240; its values are lists
+259:41 call  text["start"].append(xpos)
+    -> <builtin>.list.append
+264:44 call  self._callbacks["paint_module"]( xpos, ypos, self.module_...
+    -> barcode.writer.ImageWriter._paint_module
+    -> barcode.writer.SVGWriter._create_module
+    note: self._callbacks["paint_module"]: the bound method that SVGWriter.__init__ (self._create_module) or ImageWriter.__init__ (self._paint_module) passes, or a client callable (opaque)
+265:52 call  abs(mod)
+    -> <builtin>.abs
+267:44 call  abs(mod)
+    -> <builtin>.abs
+270:35 call  text["end"].append(xpos)
+    -> <builtin>.list.append
+281:46 call  self._callbacks["paint_text"](xpos, ypos)
+    -> barcode.writer.ImageWriter._paint_text
+    -> barcode.writer.SVGWriter._create_text
+    note: self._callbacks["paint_text"]: the bound method that SVGWriter.__init__ (self._create_text) or ImageWriter.__init__ (self._paint_text) passes, or a client callable (opaque)
+289:34 call  text["start"].pop(0)
+    -> <builtin>.list.pop
+290:32 call  zip(text["start"], text["end"])
+    -> <builtin>.zip
+291:40 call  text["xpos"].append(e + (s - e) / 2)
+    -> <builtin>.list.append
+294:36 call  text["xpos"].append(text["end"][-1] + 4 * self.module_width)
+    -> <builtin>.list.append
+296:30 call  pt2mm(self.font_size)
+    -> barcode.writer.pt2mm
+299:41 call  self.text.split(" ")
+    -> <builtin>.str.split
+300:39 call  zip(blocks, text["xpos"])
+    -> <builtin>.zip
+302:50 call  self._callbacks["paint_text"](xpos, ypos)
+    -> barcode.writer.ImageWriter._paint_text
+    -> barcode.writer.SVGWriter._create_text
+    note: self._callbacks["paint_text"], as at line 281
+304:41 call  self._callbacks["finish"]()
+    -> barcode.writer.ImageWriter._finish
+    -> barcode.writer.SVGWriter._finish
+    note: self._callbacks["finish"]: the bound method self._finish that SVGWriter.__init__ or ImageWriter.__init__ passes, or a client callable (opaque)
+
+[barcode.writer.SVGWriter.__init__]
+312:14 call  super()
+    -> <builtin>.super
+312:25 call  super().__init__( self._init, self._create_module, self._...
+    -> barcode.writer.BaseWriter.__init__
+    reject barcode.writer.SVGWriter._init, barcode.writer.SVGWriter._create_module, barcode.writer.SVGWriter._create_text, barcode.writer.SVGWriter._finish: BaseWriter.__init__ only stores the bound methods in self._callbacks; BaseWriter.render calls them later
+    reject *: super() in SVGWriter resolves __init__ to BaseWriter.__init__
+
+[barcode.writer.SVGWriter._init]
+325:15 call  len(code)
+    -> <builtin>.len
+326:38 call  NotImplementedError("Only one line of code is supported")
+    -> <builtin>.NotImplementedError
+328:44 call  self.calculate_size(len(line), 1)
+    -> barcode.writer.BaseWriter.calculate_size
+328:48 call  len(line)
+    -> <builtin>.len
+329:43 call  create_svg_object(self.with_doctype)
+    -> barcode.writer.create_svg_object
+332:33 call  SIZE.format(width)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73), so format is str.format, not the attribute format of ImageWriter; the field formats the float width
+333:34 call  SIZE.format(height)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float height
+335:24 call  _set_attributes(self._root, **attributes)
+    -> barcode.writer._set_attributes
+337:35 call  self._root.appendChild(self._document.createComment(COMME...
+    -> xml.dom.minidom.Element.appendChild
+    note: self._root is the documentElement of the minidom Document, an xml.dom.minidom.Element
+337:64 call  self._document.createComment(COMMENT)
+    -> xml.dom.minidom.Document.createComment
+    note: self._document is the xml.dom.minidom.Document of create_svg_object
+340:45 call  self._document.createElement("g")
+    -> xml.dom.minidom.Document.createElement
+342:24 call  _set_attributes(group, **attributes)
+    -> barcode.writer._set_attributes
+343:45 call  self._root.appendChild(group)
+    -> xml.dom.minidom.Element.appendChild
+345:54 call  self._document.createElement("rect")
+    -> xml.dom.minidom.Document.createElement
+351:28 call  _set_attributes(background, **attributes)
+    -> barcode.writer._set_attributes
+352:36 call  self._group.appendChild(background)
+    -> xml.dom.minidom.Element.appendChild
+    note: self._group is the element that appendChild returned at line 343
+
+[barcode.writer.SVGWriter._create_module]
+357:51 call  self._document.createElement("rect")
+    -> xml.dom.minidom.Document.createElement
+359:33 call  SIZE.format(xpos)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float xpos
+360:33 call  SIZE.format(ypos)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float ypos
+361:37 call  SIZE.format(width)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float width
+362:38 call  SIZE.format(self.module_height)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float module_height
+365:28 call  _set_attributes(element, **attributes)
+    -> barcode.writer._set_attributes
+366:36 call  self._group.appendChild(element)
+    -> xml.dom.minidom.Element.appendChild
+
+[barcode.writer.SVGWriter._create_text]
+372:41 call  barcodetext.split("\n")
+    -> <builtin>.str.split
+    note: barcodetext is self.human or self.text, both annotated str
+373:51 call  self._document.createElement("text")
+    -> xml.dom.minidom.Document.createElement
+375:33 call  SIZE.format(xpos)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float xpos
+376:33 call  SIZE.format(ypos)
+    -> <builtin>.str.format
+    note: SIZE is the module str "{0:.3f}mm" (line 73); the field formats the float ypos
+382:28 call  _set_attributes(element, **attributes)
+    -> barcode.writer._set_attributes
+383:57 call  self._document.createTextNode(subtext)
+    -> xml.dom.minidom.Document.createTextNode
+384:32 call  element.appendChild(text_element)
+    -> xml.dom.minidom.Element.appendChild
+385:36 call  self._group.appendChild(element)
+    -> xml.dom.minidom.Element.appendChild
+386:26 call  pt2mm(self.font_size)
+    -> barcode.writer.pt2mm
+
+[barcode.writer.SVGWriter._finish]
+390:40 call  self._document.toxml(encoding="UTF-8")
+    -> xml.dom.minidom.Document.toxml
+    note: Document inherits toxml from Node; named by the class of the receiver
+392:42 call  self._document.toprettyxml( indent=4 * " ", newl=os.lines...
+    -> xml.dom.minidom.Document.toprettyxml
+
+[barcode.writer.SVGWriter.save]
+399:27 call  gzip.open(_filename, "wb")
+    -> gzip.open
+400:24 call  f.write(output)
+    -> gzip.GzipFile.write
+    reject *: f is the gzip.GzipFile that gzip.open returns in mode "wb"
+401:24 call  f.close()
+    -> gzip.GzipFile.close
+404:22 call  open(_filename, "wb")
+    -> <builtin>.open
+405:24 call  f.write(output)
+    -> io.BufferedWriter.write
+    reject *: f is the io.BufferedWriter that open returns in mode "wb"
+
+[barcode.writer.SVGWriter.write]
+413:17 call  fp.write(content)
+    -> io.BufferedWriter.write
+    reject *: fp is a file-like object, not a barcode or a writer
+    note: fp is annotated BinaryIO, an abstract type (B4); a client's fp is opaque (B5). generate opens the file itself for an os.PathLike output (__init__.py:146) and passes it through Barcode.write (base.py:94), so fp can be that io.BufferedWriter (judgement J4)
+
+[barcode.writer.ImageWriter.__init__]
+433:18 call  super()
+    -> <builtin>.super
+433:29 call  super().__init__( self._init, self._paint_module, self._p...
+    -> barcode.writer.BaseWriter.__init__
+    reject barcode.writer.ImageWriter._init, barcode.writer.ImageWriter._paint_module, barcode.writer.ImageWriter._paint_text, barcode.writer.ImageWriter._finish: BaseWriter.__init__ only stores the bound methods in self._callbacks; BaseWriter.render calls them later
+    reject *: super() in ImageWriter resolves __init__ to BaseWriter.__init__
+
+[barcode.writer.ImageWriter._init]
+447:35 call  RuntimeError("Pillow not found. Cannot create image.")
+    note: no callee: ImageWriter exists only on the side of the optional import where the three PIL imports succeeded (writer.py:33-36, 416-420), so ImageDraw is never None when _init runs (judgement J2)
+448:19 call  len(code)
+    -> <builtin>.len
+449:42 call  NotImplementedError("Only one line of code is supported")
+    -> <builtin>.NotImplementedError
+451:48 call  self.calculate_size(len(line), 1)
+    -> barcode.writer.BaseWriter.calculate_size
+451:52 call  len(line)
+    -> <builtin>.len
+452:24 call  int(mm2px(width, self.dpi))
+    -> <builtin>.int
+452:30 call  mm2px(width, self.dpi)
+    -> barcode.writer.mm2px
+452:53 call  int(mm2px(height, self.dpi))
+    -> <builtin>.int
+452:59 call  mm2px(height, self.dpi)
+    -> barcode.writer.mm2px
+453:36 call  Image.new(self.mode, size, self.background)
+    -> PIL.Image.new
+454:40 call  ImageDraw.Draw(self._image)
+    -> PIL.ImageDraw.Draw
+
+[barcode.writer.ImageWriter._paint_module]
+458:23 call  mm2px(xpos, self.dpi)
+    -> barcode.writer.mm2px
+458:46 call  mm2px(ypos, self.dpi)
+    -> barcode.writer.mm2px
+460:26 call  mm2px(xpos + width, self.dpi)
+    -> barcode.writer.mm2px
+461:26 call  mm2px(ypos + self.module_height, self.dpi)
+    -> barcode.writer.mm2px
+464:33 call  self._draw.rectangle(size, outline=color, fill=color)
+    -> PIL.ImageDraw.ImageDraw.rectangle
+    note: self._draw is the PIL.ImageDraw.ImageDraw that ImageDraw.Draw returns for a PIL image (line 454)
+
+[barcode.writer.ImageWriter._paint_text]
+473:28 call  int(mm2px(pt2mm(self.font_size), self.dpi))
+    -> <builtin>.int
+473:34 call  mm2px(pt2mm(self.font_size), self.dpi)
+    -> barcode.writer.mm2px
+473:40 call  pt2mm(self.font_size)
+    -> barcode.writer.pt2mm
+476:38 call  ImageFont.truetype(self.font_path, font_size)
+    -> PIL.ImageFont.truetype
+477:45 call  barcodetext.split("\n")
+    -> <builtin>.str.split
+    note: barcodetext is self.human or self.text, both annotated str
+479:26 call  mm2px(xpos, self.dpi)
+    -> barcode.writer.mm2px
+480:26 call  mm2px(ypos, self.dpi)
+    -> barcode.writer.mm2px
+482:32 call  self._draw.text( pos, subtext, font=font, fill=self.foreg...
+    -> PIL.ImageDraw.ImageDraw.text
+    note: self._draw is the PIL.ImageDraw.ImageDraw of line 454, so text is its method, not the str attribute text of the writer
+485:30 call  pt2mm(self.font_size)
+    -> barcode.writer.pt2mm
+
+[barcode.writer.ImageWriter.save]
+491:55 call  self.format.lower()
+    -> <builtin>.str.lower
+    note: format is a str: the default "PNG" or an option (pybarcode passes args.type)
+492:24 call  output.save(filename, self.format.upper())
+    -> PIL.Image.Image.save
+    reject *: output is the rendered output of ImageWriter, the PIL.Image.Image that _finish returns (line 488); a client's output is opaque
+492:52 call  self.format.upper()
+    -> <builtin>.str.upper
+
+[barcode.writer.ImageWriter.write]
+500:25 call  content.save(fp, format=self.format)
+    -> PIL.Image.Image.save
+    reject *: content is the PIL.Image.Image that ImageWriter renders (_finish, line 488); a client's content is opaque

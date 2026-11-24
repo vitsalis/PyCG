@@ -1,0 +1,147 @@
+# The test environment of itables 2.9.1 (batch 4): the full closure on
+# CPython 3.14, each file by version and SHA-256. itables itself is not
+# installed: the trace uses the checkout projects/itables.
+#   pip install --require-hashes --only-binary :all: --no-deps -r itables.txt
+# "read" names the artifacts that the security scan downloaded and read (the
+# hash is that of the scanned file); "PyPI" names the hashes taken from
+# PyPI's JSON for that version (pinned by hash, not read).
+#
+# itables has no required dependency; its tests skip what an optional one
+# lacks. The set below is that of the CI job `pytest` (the extra test-all)
+# without the frameworks whose tests are left out (dash, anywidget,
+# streamlit, marimo, shiny), without the notebook tools (ipykernel,
+# nbconvert, jupytext), without the network (requests, world-bank-data) and
+# without the heavy optional backends (matplotlib, modin), but with pyarrow
+# and tzdata (the maintainer's decision of 2026-11-14, after a scan). Each
+# version is the newest release that is not yanked and was uploaded on or
+# before the tag date (2026-07-22), unless a comment says otherwise.
+# Platform wheels: the cp314 (or abi3) aarch64 wheels for Linux, manylinux
+# (glibc, the python:3.14-slim image) and musllinux; pyarrow has the
+# manylinux wheel only.
+
+# PyPI. 9.2.0, as for batch 3.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# PyPI (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# PyPI (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# PyPI (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# PyPI (pytest, ipython, ipython-pygments-lexers).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# PyPI. Extra pandas. Uploaded on the tag date; 3.0.4 is yanked ("Reported
+# segfaults with datetime-related functionality").
+pandas==3.0.5 \
+    --hash=sha256:960d3ebcf249f75206899fcd2c6de53f736b7265759ced0d3e559df0b8b709b0 \
+    --hash=sha256:e819dd5f62966b481a8cb649d3299ebd886a1ea91ed5a99bf7ce77c98d18ab94
+# PyPI (pandas).
+numpy==2.5.1 \
+    --hash=sha256:caf3e317d33d60c37986b452613f4ab51246d0691350c03d0cb4a898627f4a95 \
+    --hash=sha256:c12afb53450fa976d4c681c50a7423729a4c51c0465ed9f32b8a9cabbc472373
+# PyPI (pandas).
+python-dateutil==2.9.0.post0 \
+    --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+# PyPI (python-dateutil).
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274
+# PyPI. Extra samples; sample_pandas_dfs uses it when it is installed.
+pytz==2026.2 \
+    --hash=sha256:04156e608bee23d3792fd45c94ae47fae1036688e75032eea2e3bf0323d1f126
+# Read (the import of its runtime, polars/_plr.py). Extra polars.
+polars==1.42.1 \
+    --hash=sha256:3c0c65cdfa21a621650c4bdcbbccf93964d052fd766c3e70e84a55d961c259fd
+# PyPI (polars). The compiled runtime (module _polars_runtime_32), 51 MB.
+polars-runtime-32==1.42.1 \
+    --hash=sha256:635d9dbcae2302ae223afb395d5cd220bffa61a53d0ab6871d17c8bc830101cf \
+    --hash=sha256:f91f0b13588324905682809d270e1de5f1990c908721c8527657d77a044c9919
+# PyPI. Extra narwhals.
+narwhals==2.24.0 \
+    --hash=sha256:42fdedf44e5b2ca7505630d45b4ac3058f38d8485cba9fe1652ca23152df7489
+# PyPI. Extra notebook. With IPython, tests/conftest.py makes show() take
+# its HTML path, as in the CI.
+ipython==9.15.0 \
+    --hash=sha256:515ad9c3cdf0c932a5a9f6245419e8aba706b7bd03c3e1d3a1c83d9351d6aa6e
+# PyPI (ipython).
+ipython-pygments-lexers==1.1.1 \
+    --hash=sha256:a9462224a505ade19a605f71f8fa63c2048833ce50abc86768a0d81d876dc81c
+# PyPI (ipython).
+decorator==5.3.1 \
+    --hash=sha256:f47fe6fdbd2edd623ecfe36875d37aba411624e2670dd395dddae1358689bb3c
+# PyPI (ipython).
+jedi==0.20.0 \
+    --hash=sha256:7bdd9c2634f56713299976f4cbd59cb3fa92165cc5e05ea811fb253480728b67
+# PyPI (jedi).
+parso==0.8.7 \
+    --hash=sha256:a8926eb2a1b915486941fdbd31e86a4baf88fe8c210f25f2f35ecec5b574ca1c
+# PyPI (ipython).
+matplotlib-inline==0.2.2 \
+    --hash=sha256:3c821cf1c209f59fb2d2d64abbf5b23b67bcb2210d663f9918dd851c6da1fcf6
+# PyPI (ipython).
+pexpect==4.9.0 \
+    --hash=sha256:7236d1e080e4936be2dc3e326cec0af72acf9212a7e1d060210e70a47e253523
+# PyPI (pexpect).
+ptyprocess==0.7.0 \
+    --hash=sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35
+# PyPI (ipython).
+prompt-toolkit==3.0.52 \
+    --hash=sha256:9aac639a3bbd33284347de5ad8d68ecc044b91a762dc39b7c21095fcd6a19955
+# PyPI (prompt-toolkit).
+wcwidth==0.8.2 \
+    --hash=sha256:d63947694a0539a1d51e01eda7caf800c291020e6cdd7e28ad7b14dd33ad4f85
+# PyPI (ipython). A C extension (abi3).
+psutil==7.2.2 \
+    --hash=sha256:b0726cecd84f9474419d67252add4ac0cd9811b04d61123054b9fb6f57df6e9e \
+    --hash=sha256:fd04ef36b4a6d599bbdb225dd1d3f51e00105f6d48a28f006da7f9822f2606d8
+# PyPI (ipython).
+stack-data==0.6.3 \
+    --hash=sha256:d5558e0c25a4cb0853cddad3d77da9891a08cb85dd9f9f91b9f8cd66e511e695
+# PyPI (stack-data).
+executing==2.2.1 \
+    --hash=sha256:760643d3452b4d777d295bb167ccc74c64a81df23fb5e08eff250c425a4b2017
+# PyPI (stack-data).
+asttokens==3.0.2 \
+    --hash=sha256:9da13157f5b28becde0bd374fc677dcd3c290614264eff096f167c469cd9f933
+# PyPI (stack-data).
+pure-eval==0.2.3 \
+    --hash=sha256:1db8e35b67b3d218d818ae653e27f06c3aa420901fa7b081ca98cbedc874e0d0
+# PyPI (ipython, matplotlib-inline).
+traitlets==5.15.1 \
+    --hash=sha256:770a53705f84b81ac107e83a1b3328ff2dae16094d8fc3cfc004e4b22dfd8e92
+# PyPI. Extra check_type (tests/test_typing.py).
+typeguard==4.5.2 \
+    --hash=sha256:fcf9de18bd945cdb4c7b996e12b4c51ce83f92f191314a6d7cf1739586ec98cf
+# PyPI (typeguard).
+typing-extensions==4.16.0 \
+    --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+# PyPI. Extra config (tests/test_show_config.py).
+platformdirs==4.11.0 \
+    --hash=sha256:360ccded2b7fce0af0ff80cc8f5942a1c5d99b0e856033acb030bfc634709e74
+# PyPI. pandas's Styler needs it (tests/test_pandas_style.py); the CI gets
+# it through other extras (its job without the non-essential dependencies
+# uninstalls it).
+jinja2==3.1.6 \
+    --hash=sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67
+# PyPI (jinja2). A C extension.
+markupsafe==3.0.3 \
+    --hash=sha256:f34c41761022dd093b4b6896d4810782ffbabe30f2d443ff5f083e0cbbb8c737 \
+    --hash=sha256:ec15a59cf5af7be74194f7ab02d0f59a62bdcf1a537677ce67a2537c9b87fcda
+# Read (the scan of 2026-11-14). Extras other_dataframes, all and test-all.
+# polars's from_pandas needs it for the nullable columns of the sample frames
+# (tests/test_downsample.py, at collection). pandas imports it when it is
+# installed and then stores its text columns in Arrow, as in the project's
+# CI. A compiled library (the bundled Arrow C++ libraries); manylinux wheel
+# only.
+pyarrow==25.0.0 \
+    --hash=sha256:f57a39dbcb416345401c2e77a4373669b45fd111a1768e6cf267a7a0607ff0ec
+# Read (the scan of 2026-11-14). Data only: the time zone database that
+# zoneinfo reads when the system has none, as in the slim image
+# (tests/test_datatables_format.py::test_datatables_rows[datetime_with_tz_pd]
+# localizes to US/Eastern).
+tzdata==2026.3 \
+    --hash=sha256:dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931

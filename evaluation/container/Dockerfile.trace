@@ -1,0 +1,39 @@
+# The image in which a trace of one macro-benchmark project is recorded. It
+# holds CPython from the official image, the hash-pinned test requirements
+# of that one project, and the project's source from the inputs image
+# (Dockerfile.inputs, whose build checked it against its pin), at
+# /inputs/macro-benchmark/projects/NAME: not PyCG, not git.
+#
+# PYTHON_IMAGE is the base image by digest (python:3.14-slim@sha256:...)
+# and NAME the project; neither has a default, so the build fails without
+# them. `inputs` is the inputs image, a named context: the `trace` service
+# of compose.yaml gives it as `service:inputs`, trace.sh as
+# `docker-image://pycg-evaluation-inputs`.
+ARG PYTHON_IMAGE
+FROM ${PYTHON_IMAGE}
+ARG NAME
+RUN test -n "${NAME}"
+
+# The requirements file in the context: requirements.txt as trace.sh lays
+# it out; <name>.txt of macro-benchmark/requirements/ for the `trace`
+# service of compose.yaml.
+ARG REQUIREMENTS=requirements.txt
+COPY ${REQUIREMENTS} /opt/pycg-trace/requirements.txt
+
+# pip runs with no configuration and no variable of the image's environment.
+# It installs the full closure by hash, wheels only, and is then removed, so
+# that the image has exactly the distributions of the requirements file.
+RUN env -i PATH=/usr/local/bin:/usr/bin:/bin PIP_CONFIG_FILE=/dev/null \
+        python3 -m pip install --require-hashes --only-binary :all: --no-deps \
+        --no-cache-dir --disable-pip-version-check --no-input \
+        -r /opt/pycg-trace/requirements.txt \
+    && env -i PATH=/usr/local/bin:/usr/bin:/bin PIP_CONFIG_FILE=/dev/null \
+        python3 -m pip uninstall --yes --disable-pip-version-check pip \
+    && groupadd --gid 10001 runner \
+    && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /home/runner \
+        --shell /usr/sbin/nologin runner
+
+COPY --from=inputs /inputs/macro-benchmark/projects/${NAME} /inputs/macro-benchmark/projects/${NAME}
+
+USER 10001:10001
+WORKDIR /tmp

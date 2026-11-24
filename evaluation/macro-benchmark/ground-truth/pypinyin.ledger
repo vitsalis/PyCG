@@ -1,0 +1,1989 @@
+# Call-site ledger of pypinyin at df101577145af2eb1abe5656e592e34e3bb56d23.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md; pypinyin.md
+# shows how this ledger applies them. Current support is Python 2.7 and
+# Python >=3.4,<4 (README.rst:15; setup.py:75,90-105). CHANGELOG.rst:413-414
+# drops the guarantee for 2.6/3.3 despite the broader installer bound. CPython,
+# PyPy and explicitly supported IronPython are admitted (CHANGELOG.rst:542;
+# compat.py:12-17). Python 2 branches remain in scope; their builtin callees
+# use Python 3 counterparts (unicode -> str, str -> bytes). The .pyi stubs next to the
+# modules give the parameter types (B2, B4).
+# Converters: public DefaultConverter bodies also run on the package-created
+# _v2UConverter, _neutralToneWith5Converter and _toneSandhiConverter subclasses
+# that inherit them. B1 admits these receivers even where the package does not
+# call an inherited body. Client-created combined mixin classes remain opaque.
+
+default reject pypinyin.seg.mmseg.PrefixSet.__contains__: the container of this `in` or `not in` test is a str, list, tuple, set or dict, never a PrefixSet; the one test on a PrefixSet (Seg.cut, mmseg.py:33) accepts the candidate
+
+== pypinyin
+
+[pypinyin]
+56:24 call  x.encode('utf-8')
+    -> <builtin>.str.encode
+    note: Python 2 only (if PY2, __init__.py:54); current support includes CPython 2.7 (README.rst:15); there x is a unicode str (unicode_literals), so the callee is unicode.encode, named by its Python 3 counterpart str.encode (judgement in pypinyin.md)
+
+== pypinyin.__main__
+
+[pypinyin.__main__]
+6:9 call  main()
+    -> pypinyin.runner.main
+    reject pypinyin.tools.toneconvert.main: main is imported from pypinyin.runner (__main__.py:3)
+
+== pypinyin.compat
+
+[pypinyin.compat]
+8:19 call  len('\U00020000')
+    -> <builtin>.len
+12:21 call  getattr(sys, 'subversion', [''])
+    -> <builtin>.getattr
+
+[pypinyin.compat.callable_check]
+30:23 call  hasattr(obj, '__call__')
+    note: no edge (lead ruling, audit F2): this def is the except NameError fallback of compat.py:26-30, which runs only where the builtin callable is missing (Python 3.0 and 3.1, which requires-python excludes, setup.py:75); a def in a branch that no supported version takes makes no function, so its body has no edges, as for code under if TYPE_CHECKING:
+
+== pypinyin.constants
+
+[pypinyin.constants]
+15:18 call  os.environ.get('PYPINYIN_NO_PHRASES')
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, which inherits get from collections.abc.Mapping; os._Environ is private, so the method is named through collections.abc.Mapping
+25:22 call  os.environ.get('PYPINYIN_NO_DICT_COPY')
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, which inherits get from collections.abc.Mapping; os._Environ is private, so the method is named through collections.abc.Mapping
+26:35 call  PINYIN_DICT.copy()
+    -> <builtin>.dict.copy
+27:37 call  PHRASES_DICT.copy()
+    -> <builtin>.dict.copy
+30:22 call  re.compile(r'([aeoiuvnm])([1-4])$')
+    -> re.compile
+34:25 call  re.compile( r'^(?:[' r'\u3007' # 〇 r'\ue815-\ue864' r'\uf...
+    -> re.compile
+    note: SUPPORT_UCS4 (compat.py:8) is true on wide builds, including CPython 3.3 and later. This does not describe every Python implementation: pinned IronPython 3.4.2 uses UTF-16 string length and takes the false branch.
+58:25 call  re.compile( r'^(?:[' r'\u3007' # 〇 r'\ue815-\ue864' r'\uf...
+    -> re.compile
+    note: SUPPORT_UCS4 is false on narrow CPython 2.7 builds and pinned IronPython 3.4.2. IronPython len(string) and StringOps.__len__ return .NET UTF-16 Length, so the U+20000 literal has length two. Both re.compile relations remain valid; this is a note correction only.
+70:2 decorator  @unique
+    -> enum.unique
+
+== pypinyin.contrib.neutral_tone
+
+[pypinyin.contrib.neutral_tone]
+10:24 call  re.compile(r'\d')
+    -> re.compile
+
+[pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style]
+51:25 call  super(NeutralToneWith5Mixin, self)
+    -> <builtin>.super
+51:73 call  super(NeutralToneWith5Mixin, self).post_convert_style( ha...
+    -> pypinyin.converter.DefaultConverter.post_convert_style
+    reject pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style, pypinyin.contrib.uv.V2UMixin.post_convert_style, pypinyin.converter.UltimateConverter.post_convert_style: self is the package's _neutralToneWith5Converter (converter.py:338, MRO NeutralToneWith5Mixin, DefaultConverter), on which super(NeutralToneWith5Mixin, self) finds DefaultConverter.post_convert_style, or a bare NeutralToneWith5Mixin, on which it finds no method (AttributeError); other mixin orders are client subclasses, client code (rule B1)
+62:29 call  _re_number.search(converted_pinyin)
+    -> re.Pattern.search
+    -> _sre.SRE_Pattern.search
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+66:32 call  '{}5'.format(converted_pinyin)
+    -> <builtin>.str.format
+69:38 call  right_mark_index(converted_pinyin)
+    -> pypinyin.style._tone_rule.right_mark_index
+73:30 call  '{}5{}'.format(before, after)
+    -> <builtin>.str.format
+
+== pypinyin.contrib.tone_sandhi
+
+[pypinyin.contrib.tone_sandhi]
+8:21 call  re.compile(r'\d')
+    -> re.compile
+
+[pypinyin.contrib.tone_sandhi.ToneSandhiMixin.post_pinyin]
+22:20 call  super(ToneSandhiMixin, self)
+    -> <builtin>.super
+22:55 call  super(ToneSandhiMixin, self).post_pinyin( han, heteronym,...
+    -> pypinyin.converter.DefaultConverter.post_pinyin
+    reject pypinyin.contrib.tone_sandhi.ToneSandhiMixin.post_pinyin, pypinyin.converter.UltimateConverter.post_pinyin: self is the package's _toneSandhiConverter (converter.py:342, MRO ToneSandhiMixin, DefaultConverter), on which super(ToneSandhiMixin, self) finds DefaultConverter.post_pinyin, or a bare ToneSandhiMixin, on which it finds no method (AttributeError); client subclasses are client code (rule B1)
+27:39 call  self._third_tone(han, pinyin_list)
+    -> pypinyin.contrib.tone_sandhi.ToneSandhiMixin._third_tone
+28:31 call  self._bu(han, pinyin_list)
+    -> pypinyin.contrib.tone_sandhi.ToneSandhiMixin._bu
+29:31 call  self._yi(han, pinyin_list)
+    -> pypinyin.contrib.tone_sandhi.ToneSandhiMixin._yi
+
+[pypinyin.contrib.tone_sandhi.ToneSandhiMixin._third_tone]
+52:43 call  tone_to_tone2(x[0])
+    -> pypinyin.style._tone_convert.tone_to_tone2
+53:30 call  ''.join(tone2_pinyin_list)
+    -> <builtin>.str.join
+65:34 call  enumerate(tone2_pinyin_list)
+    -> <builtin>.enumerate
+67:53 call  v.replace('3', '2')
+    -> <builtin>.str.replace
+73:34 call  enumerate(tone2_pinyin_list)
+    -> <builtin>.enumerate
+77:53 call  v.replace('3', '2')
+    -> <builtin>.str.replace
+82:35 call  tone2_to_tone(x)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+[pypinyin.contrib.tone_sandhi.ToneSandhiMixin._bu]
+101:43 call  tone_to_tone2(x[0])
+    -> pypinyin.style._tone_convert.tone_to_tone2
+104:30 call  enumerate(han)
+    -> <builtin>.enumerate
+106:36 call  len(han)
+    -> <builtin>.len
+109:66 call  current_pinyin.replace('4', '2')
+    -> <builtin>.str.replace
+112:55 call  _re_num.sub('4', current_pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+115:51 call  _re_num.sub('4', current_pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+119:35 call  tone2_to_tone(x)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+[pypinyin.contrib.tone_sandhi.ToneSandhiMixin._yi]
+143:43 call  tone_to_tone2(x[0])
+    -> pypinyin.style._tone_convert.tone_to_tone2
+146:30 call  enumerate(han)
+    -> <builtin>.enumerate
+148:36 call  len(han)
+    -> <builtin>.len
+151:66 call  current_pinyin.replace('4', '2')
+    -> <builtin>.str.replace
+154:55 call  _re_num.sub('4', current_pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+157:51 call  _re_num.sub('1', current_pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+161:35 call  tone2_to_tone(x)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+== pypinyin.contrib.uv
+
+[pypinyin.contrib.uv.V2UMixin.post_convert_style]
+39:25 call  super(V2UMixin, self)
+    -> <builtin>.super
+39:60 call  super(V2UMixin, self).post_convert_style( han, orig_pinyi...
+    -> pypinyin.converter.DefaultConverter.post_convert_style
+    reject pypinyin.contrib.uv.V2UMixin.post_convert_style, pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style, pypinyin.converter.UltimateConverter.post_convert_style: self is the package's _v2UConverter (converter.py:334, MRO V2UMixin, DefaultConverter), on which super(V2UMixin, self) finds DefaultConverter.post_convert_style, or a bare V2UMixin, on which it finds no method (AttributeError); other mixin orders are client subclasses, client code (rule B1)
+45:40 call  converted_pinyin.replace('v', 'ü')
+    -> <builtin>.str.replace
+
+== pypinyin.converter
+
+[pypinyin.converter]
+20:14 call  auto_discover()
+    -> pypinyin.style.auto_discover
+
+[pypinyin.converter.DefaultConverter.convert]
+53:25 call  RE_HANS.match(words)
+    -> re.Pattern.match
+    -> _sre.SRE_Pattern.match
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+54:38 call  self._phrase_pinyin(words, style=style, heteronym=heteron...
+    -> pypinyin.converter.DefaultConverter._phrase_pinyin
+56:41 call  self.post_pinyin(words, heteronym, pys)
+    -> pypinyin.converter.DefaultConverter.post_pinyin
+    -> pypinyin.converter.UltimateConverter.post_pinyin
+    -> pypinyin.contrib.tone_sandhi.ToneSandhiMixin.post_pinyin
+    note: Public DefaultConverter.convert is inherited by the package subclass _toneSandhiConverter (converter.py:342); UltimateConverter constructs that subclass at converter.py:382. Global B1 includes instances of package subclasses inheriting a public method, limited to constructible instances. All three private converter classes are demonstrably constructed. When this inherited body runs on that receiver its hook dispatch reaches this callee. Rule A makes whether the package actually calls this inherited body irrelevant. This accepted edge follows B1 receiver scope, independently of observed package callers.
+
+60:38 call  self.convert_styles( pys, words, style, heteronym, errors...
+    -> pypinyin.converter.DefaultConverter.convert_styles
+64:38 call  self.handle_nopinyin(words, style=style, errors=errors, h...
+    -> pypinyin.converter.DefaultConverter.handle_nopinyin
+    reject pypinyin.core.handle_nopinyin: the receiver is self, a converter; core.handle_nopinyin is a module function
+67:27 call  pys.extend(py)
+    -> <builtin>.list.extend
+69:37 call  _remove_dup_and_empty(pys)
+    -> pypinyin.utils._remove_dup_and_empty
+
+[pypinyin.converter.DefaultConverter.convert_style]
+105:42 call  self.pre_convert_style( han, orig_pinyin, style=style, st...
+    -> pypinyin.converter.DefaultConverter.pre_convert_style
+112:47 call  self._convert_style( han, pinyin, style=style, strict=str...
+    -> pypinyin.converter.DefaultConverter._convert_style
+115:44 call  self.post_convert_style( han, pinyin, converted_pinyin, s...
+    -> pypinyin.converter.DefaultConverter.post_convert_style
+    -> pypinyin.converter.UltimateConverter.post_convert_style
+    -> pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style
+    -> pypinyin.contrib.uv.V2UMixin.post_convert_style
+    note: Public DefaultConverter.convert_style is inherited by the package subclass _v2UConverter (converter.py:334); UltimateConverter constructs that subclass at converter.py:362. Global B1 includes instances of package subclasses inheriting a public method, limited to constructible instances. All three private converter classes are demonstrably constructed. When this inherited body runs on that receiver its hook dispatch reaches this callee. Rule A makes whether the package actually calls this inherited body irrelevant. This accepted edge follows B1 receiver scope, independently of observed package callers.
+    note: Public DefaultConverter.convert_style is inherited by the package subclass _neutralToneWith5Converter (converter.py:338); UltimateConverter constructs that subclass at converter.py:368. Global B1 includes instances of package subclasses inheriting a public method, limited to constructible instances. All three private converter classes are demonstrably constructed. When this inherited body runs on that receiver its hook dispatch reaches this callee. Rule A makes whether the package actually calls this inherited body irrelevant. This accepted edge follows B1 receiver scope, independently of observed package callers.
+
+[pypinyin.converter.DefaultConverter.handle_nopinyin]
+176:44 call  self.pre_handle_nopinyin( chars, style, errors=errors, he...
+    -> pypinyin.converter.DefaultConverter.pre_handle_nopinyin
+183:46 call  self._convert_nopinyin_chars( pre_data, style, errors=err...
+    -> pypinyin.converter.DefaultConverter._convert_nopinyin_chars
+187:46 call  self.post_handle_nopinyin( chars, style, errors=errors, h...
+    -> pypinyin.converter.DefaultConverter.post_handle_nopinyin
+195:22 call  isinstance(py, list)
+    -> <builtin>.isinstance
+197:26 call  isinstance(py[0], list)
+    -> <builtin>.isinstance
+
+[pypinyin.converter.DefaultConverter._phrase_pinyin]
+256:35 call  deepcopy(PHRASES_DICT[phrase])
+    -> copy.deepcopy
+259:41 call  self._single_pinyin(han, style, heteronym, errors, strict)
+    -> pypinyin.converter.DefaultConverter._single_pinyin
+260:35 call  pinyin_list.extend(py)
+    -> <builtin>.list.extend
+
+[pypinyin.converter.DefaultConverter.convert_styles]
+267:35 call  enumerate(pinyin_list)
+    -> <builtin>.enumerate
+271:43 call  self.convert_style( han, orig_pinyin=x, style=style, stri...
+    -> pypinyin.converter.DefaultConverter.convert_style
+278:39 call  self.convert_style( han, orig_pinyin=orig_pinyin, style=s...
+    -> pypinyin.converter.DefaultConverter.convert_style
+
+[pypinyin.converter.DefaultConverter._single_pinyin]
+296:18 call  ord(han)
+    -> <builtin>.ord
+299:40 call  self.handle_nopinyin( han, style=style, errors=errors, he...
+    -> pypinyin.converter.DefaultConverter.handle_nopinyin
+    reject pypinyin.core.handle_nopinyin: the receiver is self, a converter; core.handle_nopinyin is a module function
+303:37 call  PINYIN_DICT[num].split(',')
+    -> <builtin>.str.split
+
+[pypinyin.converter.DefaultConverter._convert_style]
+312:29 call  convert_style(pinyin, style, strict, default=default, **k...
+    -> pypinyin.style.convert
+    reject pypinyin.converter.Converter.convert, pypinyin.converter.DefaultConverter.convert, pypinyin.converter.DefaultConverter.convert_style, pypinyin.style.initials.convert, pypinyin.tools.toneconvert.convert: convert_style here is the module function pypinyin.style.convert, imported under that name (converter.py:18), not the method DefaultConverter.convert_style
+
+[pypinyin.converter.DefaultConverter._convert_nopinyin_chars]
+318:26 call  callable_check(errors)
+    -> <builtin>.callable
+    reject pypinyin.compat.callable_check: compat.callable_check is the builtin callable (compat.py:27) on every supported version; the fallback def (compat.py:29) runs only where callable is missing (Python 3.0 and 3.1), which requires-python excludes (setup.py:75)
+319:26 call  errors(chars)
+    note: errors is the errors argument of the client (pinyin, lazy_pinyin, slug, Pinyin.pinyin, handle_nopinyin and the converter methods pass it on); its stub type is Union[Callable[[Text], Text], Text] (converter.pyi:12), a bare callable, so a callable errors is a client callback (rule B2); the package itself passes only strs ('default', and the choices of the CLI, runner.py:74)
+326:42 call  PinyinNotFoundException(chars)
+    -> pypinyin.exceptions.PinyinNotFoundException.__init__
+328:19 call  len(chars)
+    -> <builtin>.len
+329:31 call  ''.join(text_type('%x' % ord(x)) for x in chars)
+    -> <builtin>.str.join
+329:41 call  text_type('%x' % ord(x))
+    -> <builtin>.str
+    note: text_type is str on Python 3 (compat.py:20) and unicode on Python 2 (compat.py:23); the callee is named by its Python 3 name (judgement in pypinyin.md)
+329:52 call  ord(x)
+    -> <builtin>.ord
+331:33 call  text_type('%x' % ord(chars))
+    -> <builtin>.str
+    note: text_type is str on Python 3 (compat.py:20) and unicode on Python 2 (compat.py:23); the callee is named by its Python 3 name (judgement in pypinyin.md)
+331:44 call  ord(chars)
+    -> <builtin>.ord
+
+[pypinyin.converter.UltimateConverter.__init__]
+349:14 call  super(UltimateConverter, self)
+    -> <builtin>.super
+349:48 call  super(UltimateConverter, self).__init__(**kwargs)
+    -> pypinyin.converter.DefaultConverter.__init__
+    reject pypinyin.converter.UltimateConverter.__init__, pypinyin.core.Pinyin.__init__, pypinyin.exceptions.PinyinNotFoundException.__init__, pypinyin.seg.mmseg.PrefixSet.__init__, pypinyin.seg.mmseg.Seg.__init__: self is an UltimateConverter (no package subclass); super(UltimateConverter, self) finds DefaultConverter.__init__
+
+[pypinyin.converter.UltimateConverter.post_convert_style]
+356:26 call  super(UltimateConverter, self)
+    -> <builtin>.super
+356:70 call  super(UltimateConverter, self).post_convert_style( han, o...
+    -> pypinyin.converter.DefaultConverter.post_convert_style
+    reject pypinyin.converter.UltimateConverter.post_convert_style, pypinyin.contrib.uv.V2UMixin.post_convert_style, pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style: self is an UltimateConverter (no package subclass); super(UltimateConverter, self) finds DefaultConverter.post_convert_style
+362:38 call  _v2UConverter()
+    -> pypinyin.converter.DefaultConverter.__init__
+    note: _v2UConverter (V2UMixin, DefaultConverter) defines no __init__; the first __init__ of its MRO is DefaultConverter.__init__
+362:59 call  _v2UConverter().post_convert_style( han, orig_pinyin, con...
+    -> pypinyin.contrib.uv.V2UMixin.post_convert_style
+    reject pypinyin.converter.DefaultConverter.post_convert_style, pypinyin.converter.UltimateConverter.post_convert_style, pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style: the receiver is a new _v2UConverter, whose MRO finds V2UMixin.post_convert_style first; DefaultConverter.post_convert_style runs from it through super() (uv.py:39)
+368:51 call  _neutralToneWith5Converter()
+    -> pypinyin.converter.DefaultConverter.__init__
+    note: _neutralToneWith5Converter (NeutralToneWith5Mixin, DefaultConverter) defines no __init__; the first __init__ of its MRO is DefaultConverter.__init__
+368:72 call  _neutralToneWith5Converter().post_convert_style( han, ori...
+    -> pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style
+    reject pypinyin.converter.DefaultConverter.post_convert_style, pypinyin.converter.UltimateConverter.post_convert_style, pypinyin.contrib.uv.V2UMixin.post_convert_style: the receiver is a new _neutralToneWith5Converter, whose MRO finds NeutralToneWith5Mixin.post_convert_style first; DefaultConverter.post_convert_style runs from it through super() (neutral_tone.py:51)
+
+[pypinyin.converter.UltimateConverter.post_pinyin]
+376:26 call  super(UltimateConverter, self)
+    -> <builtin>.super
+376:63 call  super(UltimateConverter, self).post_pinyin( han, heterony...
+    -> pypinyin.converter.DefaultConverter.post_pinyin
+    reject pypinyin.converter.UltimateConverter.post_pinyin, pypinyin.contrib.tone_sandhi.ToneSandhiMixin.post_pinyin: self is an UltimateConverter (no package subclass); super(UltimateConverter, self) finds DefaultConverter.post_pinyin
+382:45 call  _toneSandhiConverter()
+    -> pypinyin.converter.DefaultConverter.__init__
+    note: _toneSandhiConverter (ToneSandhiMixin, DefaultConverter) defines no __init__; the first __init__ of its MRO is DefaultConverter.__init__
+382:59 call  _toneSandhiConverter().post_pinyin( han, heteronym, pinyi...
+    -> pypinyin.contrib.tone_sandhi.ToneSandhiMixin.post_pinyin
+    reject pypinyin.converter.DefaultConverter.post_pinyin, pypinyin.converter.UltimateConverter.post_pinyin: the receiver is a new _toneSandhiConverter, whose MRO finds ToneSandhiMixin.post_pinyin first; DefaultConverter.post_pinyin runs from it through super() (tone_sandhi.py:22)
+
+== pypinyin.core
+
+[pypinyin.core]
+195:36 call  DefaultConverter()
+    -> pypinyin.converter.DefaultConverter.__init__
+196:25 call  Pinyin(_default_convert)
+    -> pypinyin.core.Pinyin.__init__
+
+[pypinyin.core.load_single_dict]
+27:38 call  pinyin_dict.items()
+    -> <builtin>.dict.items
+28:30 call  tone2_to_tone(v)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+31:27 call  PINYIN_DICT.update(pinyin_dict)
+    -> <builtin>.dict.update
+33:18 call  mmseg.retrain(mmseg.seg)
+    -> pypinyin.seg.mmseg.retrain
+    reject pypinyin.core.Pinyin.seg, pypinyin.seg.simpleseg.seg: the argument mmseg.seg is the Seg object of mmseg.py:123; retrain calls its train method (mmseg.py:133), not the object
+
+[pypinyin.core.load_phrases_dict]
+44:43 call  phrases_dict.items()
+    -> <builtin>.dict.items
+46:21 call  list(map(tone2_to_tone, pys))
+    -> <builtin>.list
+    -> pypinyin.style._tone_convert.tone2_to_tone
+    note: On Python 3 list consumes the lazy map and invokes tone2_to_tone; Python 2 map invokes it eagerly. README ruling 12 permits either site within this function. Adding this consumer witness while retaining map46:25 is an allowed normalization, not a missing baseline callback.
+46:25 call  map(tone2_to_tone, pys)
+    -> <builtin>.map
+    -> pypinyin.style._tone_convert.tone2_to_tone
+    note: Python 2 map eagerly invokes tone2_to_tone; Python 3 list46:21 consumes the lazy map. README ruling 12 permits this map46:25 placement on either branch because construction and consumption share a function. tone2_to_tone is re-exported by pypinyin.contrib.tone_convert.
+51:28 call  PHRASES_DICT.update(phrases_dict)
+    -> <builtin>.dict.update
+53:18 call  mmseg.retrain(mmseg.seg)
+    -> pypinyin.seg.mmseg.retrain
+    reject pypinyin.core.Pinyin.seg, pypinyin.seg.simpleseg.seg: the argument mmseg.seg is the Seg object of mmseg.py:123; retrain calls its train method (mmseg.py:133), not the object
+
+[pypinyin.core.Pinyin.__init__]
+59:56 call  DefaultConverter()
+    -> pypinyin.converter.DefaultConverter.__init__
+
+[pypinyin.core.Pinyin.pinyin]
+90:22 call  isinstance(hans, text_type)
+    -> <builtin>.isinstance
+91:32 call  self.seg(hans)
+    -> pypinyin.core.Pinyin.seg
+    reject pypinyin.seg.simpleseg.seg: self is a Pinyin (no package subclass), and seg is its method; simpleseg.seg is a module function
+    note: the name seg is bound to a Seg object only at module level in pypinyin.seg.mmseg (mmseg.py:123); on a Pinyin, self.seg is the method Pinyin.seg (a client subclass that overrides it is client code)
+93:26 call  isinstance(self._converter, UltimateConverter)
+    -> <builtin>.isinstance
+94:31 call  isinstance(self._converter, ToneSandhiMixin)
+    -> <builtin>.isinstance
+97:41 call  RE_HANS.match(h)
+    -> re.Pattern.match
+    -> _sre.SRE_Pattern.match
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+98:40 call  han_list.extend(self.seg(h))
+    -> <builtin>.list.extend
+98:49 call  self.seg(h)
+    -> pypinyin.core.Pinyin.seg
+    reject pypinyin.seg.simpleseg.seg: self is a Pinyin (no package subclass), and seg is its method; simpleseg.seg is a module function
+    note: the name seg is bound to a Seg object only at module level in pypinyin.seg.mmseg (mmseg.py:123); on a Pinyin, self.seg is the method Pinyin.seg (a client subclass that overrides it is client code)
+100:40 call  han_list.append(h)
+    -> <builtin>.list.append
+102:33 call  chain(*(self.seg(x) for x in hans))
+    -> itertools.chain
+102:44 call  self.seg(x)
+    -> pypinyin.core.Pinyin.seg
+    reject pypinyin.seg.simpleseg.seg: self is a Pinyin (no package subclass), and seg is its method; simpleseg.seg is a module function
+    note: the name seg is bound to a Seg object only at module level in pypinyin.seg.mmseg (mmseg.py:123); on a Pinyin, self.seg is the method Pinyin.seg (a client subclass that overrides it is client code)
+106:23 call  pys.extend( self._converter.convert( words, style, hetero...
+    -> <builtin>.list.extend
+107:40 call  self._converter.convert( words, style, heteronym, errors,...
+    -> pypinyin.converter.DefaultConverter.convert
+    -> pypinyin.converter.Converter.convert
+    reject pypinyin.style.convert, pypinyin.style.initials.convert, pypinyin.tools.toneconvert.convert: the receiver is self._converter, a converter object, not a module
+    note: self._converter is the converter argument of Pinyin.__init__ (stub type Converter, core.pyi) or a new DefaultConverter: a DefaultConverter; an UltimateConverter (core.pinyin, core.lazy_pinyin), which inherits DefaultConverter.convert; or a plain Converter, a public class that is not abstract by abc, whose convert raises NotImplementedError (judgement in pypinyin.md); a client converter class is client code
+
+[pypinyin.core.Pinyin.lazy_pinyin]
+133:20 call  list( chain( *self.pinyin( hans, style=style, heteronym=F...
+    -> <builtin>.list
+134:18 call  chain( *self.pinyin( hans, style=style, heteronym=False, ...
+    -> itertools.chain
+135:29 call  self.pinyin( hans, style=style, heteronym=False, errors=e...
+    -> pypinyin.core.Pinyin.pinyin
+    reject pypinyin.core.pinyin: the receiver is self, a Pinyin; core.pinyin is a module function
+
+[pypinyin.core.Pinyin.seg]
+160:32 call  self.pre_seg(hans)
+    -> pypinyin.core.Pinyin.pre_seg
+161:22 call  isinstance(pre_data, list)
+    -> <builtin>.isinstance
+164:36 call  self.get_seg()
+    -> pypinyin.core.Pinyin.get_seg
+164:38 call  self.get_seg()(hans)
+    -> pypinyin.seg.simpleseg.seg
+    note: self.get_seg() is Pinyin.get_seg (self is a Pinyin, no package subclass), which returns seg, imported from pypinyin.seg.simpleseg (core.py:16); a client subclass that overrides get_seg is client code
+166:34 call  self.post_seg(hans, seg_data)
+    -> pypinyin.core.Pinyin.post_seg
+167:22 call  isinstance(post_data, list)
+    -> <builtin>.isinstance
+
+[pypinyin.core.to_fixed]
+201:42 call  _default_convert.convert_style( '', pinyin, style=style, ...
+    -> pypinyin.converter.DefaultConverter.convert_style
+
+[pypinyin.core.handle_nopinyin]
+210:44 call  _default_convert.handle_nopinyin( chars, style=None, erro...
+    -> pypinyin.converter.DefaultConverter.handle_nopinyin
+    reject pypinyin.core.handle_nopinyin: the receiver is _default_convert, the DefaultConverter of core.py:195
+
+[pypinyin.core.single_pinyin]
+216:43 call  _default_convert._single_pinyin( han, style, heteronym, e...
+    -> pypinyin.converter.DefaultConverter._single_pinyin
+
+[pypinyin.core.phrase_pinyin]
+222:43 call  _default_convert._phrase_pinyin( phrase, style, heteronym...
+    -> pypinyin.converter.DefaultConverter._phrase_pinyin
+
+[pypinyin.core.pinyin]
+279:21 call  Pinyin(UltimateConverter( v_to_u=v_to_u, neutral_tone_wit...
+    -> pypinyin.core.Pinyin.__init__
+279:39 call  UltimateConverter( v_to_u=v_to_u, neutral_tone_with_five=...
+    -> pypinyin.converter.UltimateConverter.__init__
+    reject pypinyin.converter.DefaultConverter.__init__: UltimateConverter defines its own __init__, the first of its MRO; DefaultConverter.__init__ runs from it through super() (converter.py:349)
+281:26 call  _pinyin.pinyin( hans, style=style, heteronym=heteronym, e...
+    -> pypinyin.core.Pinyin.pinyin
+    reject pypinyin.core.pinyin: the receiver is _pinyin, the Pinyin made at line 279
+
+[pypinyin.core.slug]
+319:26 call  separator.join( chain( *_default_pinyin.pinyin( hans, sty...
+    -> <builtin>.str.join
+320:14 call  chain( *_default_pinyin.pinyin( hans, style=style, hetero...
+    -> itertools.chain
+321:36 call  _default_pinyin.pinyin( hans, style=style, heteronym=hete...
+    -> pypinyin.core.Pinyin.pinyin
+    reject pypinyin.core.pinyin: the receiver is _default_pinyin, the Pinyin of core.py:196
+
+[pypinyin.core.lazy_pinyin]
+384:21 call  Pinyin(UltimateConverter( v_to_u=v_to_u, neutral_tone_wit...
+    -> pypinyin.core.Pinyin.__init__
+384:39 call  UltimateConverter( v_to_u=v_to_u, neutral_tone_with_five=...
+    -> pypinyin.converter.UltimateConverter.__init__
+    reject pypinyin.converter.DefaultConverter.__init__: UltimateConverter defines its own __init__, the first of its MRO; DefaultConverter.__init__ runs from it through super() (converter.py:349)
+387:31 call  _pinyin.lazy_pinyin( hans, style=style, errors=errors, st...
+    -> pypinyin.core.Pinyin.lazy_pinyin
+    reject pypinyin.core.lazy_pinyin: the receiver is _pinyin, the Pinyin made at line 384
+
+== pypinyin.exceptions
+
+[pypinyin.exceptions.PinyinNotFoundException.__init__]
+12:67 call  'No pinyin found for character "{}"'.format(chars)
+    -> <builtin>.str.format
+14:14 call  super(PinyinNotFoundException, self)
+    -> <builtin>.super
+14:54 call  super(PinyinNotFoundException, self).__init__(self.message)
+    -> <builtin>.Exception.__init__
+    reject *: self is a PinyinNotFoundException (no package subclass); super(PinyinNotFoundException, self) finds the __init__ of Exception, outside the package
+
+== pypinyin.phonetic_symbol
+
+[pypinyin.phonetic_symbol]
+53:31 call  dict((v, k) for k, v in phonetic_symbol.items())
+    -> <builtin>.dict
+53:72 call  phonetic_symbol.items()
+    -> <builtin>.dict.items
+
+== pypinyin.phrases_dict
+
+[pypinyin.phrases_dict]
+8:31 call  os.path.dirname(os.path.realpath(__file__))
+    -> os.path.dirname
+8:48 call  os.path.realpath(__file__)
+    -> os.path.realpath
+9:26 call  os.path.join(_current_dir, 'phrases_dict.json')
+    -> os.path.join
+20:19 call  _load_phrases_dict()
+    -> pypinyin.phrases_dict._load_phrases_dict
+
+[pypinyin.phrases_dict._load_phrases_dict]
+16:14 call  open(_json_path, encoding='utf8')
+    -> codecs.open
+    note: open is codecs.open, imported at line 4
+17:34 call  json.loads(fp.read())
+    -> json.loads
+17:42 call  fp.read()
+    -> codecs.StreamReaderWriter.read
+
+== pypinyin.pinyin_dict
+
+[pypinyin.pinyin_dict]
+8:31 call  os.path.dirname(os.path.realpath(__file__))
+    -> os.path.dirname
+8:48 call  os.path.realpath(__file__)
+    -> os.path.realpath
+9:26 call  os.path.join(_current_dir, 'pinyin_dict.json')
+    -> os.path.join
+22:18 call  _load_pinyin_dict()
+    -> pypinyin.pinyin_dict._load_pinyin_dict
+
+[pypinyin.pinyin_dict._load_pinyin_dict]
+15:14 call  open(_json_path, encoding='utf8')
+    -> codecs.open
+    note: open is codecs.open, imported at line 4
+16:33 call  json.loads(fp.read())
+    -> json.loads
+16:41 call  fp.read()
+    -> codecs.StreamReaderWriter.read
+17:33 call  pinyin_dict.copy()
+    -> <builtin>.dict.copy
+17:41 call  pinyin_dict.copy().items()
+    -> <builtin>.dict.items
+19:24 call  int(k)
+    -> <builtin>.int
+
+== pypinyin.runner
+
+[pypinyin.runner]
+144:9 call  main()
+    -> pypinyin.runner.main
+    reject pypinyin.tools.toneconvert.main: main here is the function of this module (runner.py:84)
+
+[pypinyin.runner.get_parser]
+52:28 call  ArgumentParser(description='convert chinese to pinyin.')
+    -> argparse.ArgumentParser
+53:24 call  parser.add_argument('-V', '--version', action='version', ...
+    -> argparse.ArgumentParser.add_argument
+54:49 call  '{0} {1}'.format( pypinyin.__title__, pypinyin.__version__ )
+    -> <builtin>.str.format
+58:24 call  parser.add_argument('-f', '--func', help='function name (...
+    -> argparse.ArgumentParser.add_argument
+63:24 call  parser.add_argument( '-s', '--style', help='pinyin style ...
+    -> argparse.ArgumentParser.add_argument
+65:52 call  'pinyin style (default: "{0}")'.format(default_style)
+    -> <builtin>.str.format
+66:31 call  style_map.keys()
+    -> <builtin>.dict.keys
+68:24 call  parser.add_argument('-p', '--separator', help='slug separ...
+    -> argparse.ArgumentParser.add_argument
+71:24 call  parser.add_argument('-e', '--errors', help=('how to handl...
+    -> argparse.ArgumentParser.add_argument
+77:24 call  parser.add_argument('-m', '--heteronym', help='enable het...
+    -> argparse.ArgumentParser.add_argument
+80:24 call  parser.add_argument('hans', nargs='+', help='chinese stri...
+    -> argparse.ArgumentParser.add_argument
+
+[pypinyin.runner.main]
+86:20 call  logging.disable(logging.CRITICAL)
+    -> logging.disable
+89:28 call  sys.stdin.isatty()
+    -> io.TextIOWrapper.isatty
+90:35 call  sys.stdin.read()
+    -> io.TextIOWrapper.read
+90:43 call  sys.stdin.read().strip()
+    -> <builtin>.str.strip
+95:20 call  args.append(pipe_data)
+    -> <builtin>.list.append
+98:24 call  get_parser()
+    -> pypinyin.runner.get_parser
+    reject pypinyin.tools.toneconvert.get_parser: get_parser here is the function of this module (runner.py:51)
+99:32 call  parser.parse_args(args)
+    -> argparse.ArgumentParser.parse_args
+102:23 call  han.decode(sys.stdin.encoding or 'utf-8')
+    -> <builtin>.bytes.decode
+    note: Python 2 only (if PY2, runner.py:100), which requires-python admits; there the arguments and the stdin data are byte strs (Python 2 str), so the callee is str.decode, named by its Python 3 counterpart bytes.decode (judgement in pypinyin.md)
+106:19 call  getattr(pypinyin, options.func)
+    -> <builtin>.getattr
+125:41 call  NullWriter()
+    note: NullWriter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+126:20 call  func(han, style=style, **kwargs)
+    -> pypinyin.core.pinyin
+    -> pypinyin.core.slug
+    note: func is getattr(pypinyin, options.func) (line 106), and argparse limits options.func to the choices 'pinyin' and 'slug' (line 60): pypinyin.pinyin and pypinyin.slug, imported from pypinyin.core (__init__.py:26)
+133:18 call  print('')
+    -> <builtin>.print
+134:35 call  isinstance(result, (list, tuple))
+    -> <builtin>.isinstance
+135:26 call  isinstance(result[0], (list, tuple))
+    -> <builtin>.isinstance
+136:22 call  print(' '.join([','.join(s) for s in result]))
+    -> <builtin>.print
+136:31 call  ' '.join([','.join(s) for s in result])
+    -> <builtin>.str.join
+136:41 call  ','.join(s)
+    -> <builtin>.str.join
+138:22 call  print(result)
+    -> <builtin>.print
+140:18 call  print(result)
+    -> <builtin>.print
+
+== pypinyin.seg.mmseg
+
+[pypinyin.seg.mmseg]
+104:18 call  PrefixSet()
+    -> pypinyin.seg.mmseg.PrefixSet.__init__
+105:12 call  p_set.train(PHRASES_DICT.keys())
+    -> pypinyin.seg.mmseg.PrefixSet.train
+    reject pypinyin.seg.mmseg.Seg.train: the receiver p_set is the PrefixSet of line 104
+105:30 call  PHRASES_DICT.keys()
+    -> <builtin>.dict.keys
+123:10 call  Seg(p_set, no_non_phrases=True)
+    -> pypinyin.seg.mmseg.Seg.__init__
+
+[pypinyin.seg.mmseg.Seg.cut]
+31:31 call  range(len(remain))
+    -> <builtin>.range
+31:35 call  len(remain)
+    -> <builtin>.len
+33:25 op  word in self._prefix_set
+    -> pypinyin.seg.mmseg.PrefixSet.__contains__
+    note: self._prefix_set is the prefix_set argument of Seg (type PrefixSet in the docstring and the stub; the package passes p_set, line 123); a container of a client is opaque
+55:52 call  len(matched)
+    -> <builtin>.len
+
+[pypinyin.seg.mmseg.Seg.train]
+81:31 call  self._prefix_set.train(words)
+    -> pypinyin.seg.mmseg.PrefixSet.train
+    reject pypinyin.seg.mmseg.Seg.train: self._prefix_set is the prefix_set argument of Seg (type PrefixSet in the docstring and the stub; the package passes p_set, line 123)
+
+[pypinyin.seg.mmseg.PrefixSet.__init__]
+86:24 call  set()
+    -> <builtin>.set
+
+[pypinyin.seg.mmseg.PrefixSet.train]
+97:31 call  range(len(word))
+    -> <builtin>.range
+97:35 call  len(word)
+    -> <builtin>.len
+98:30 call  self._set.add(word[:index + 1])
+    -> <builtin>.set.add
+
+[pypinyin.seg.mmseg.retrain]
+133:23 call  seg_instance.train(PHRASES_DICT.keys())
+    -> pypinyin.seg.mmseg.Seg.train
+    reject pypinyin.seg.mmseg.PrefixSet.train: seg_instance is a Seg (docstring, line 131, and stub); the package passes mmseg.seg (core.py:33, 53)
+133:41 call  PHRASES_DICT.keys()
+    -> <builtin>.dict.keys
+
+== pypinyin.seg.simpleseg
+
+[pypinyin.seg.simpleseg.seg]
+12:22 call  simple_seg(hans)
+    -> pypinyin.seg.simpleseg.simple_seg
+15:29 call  RE_HANS.match(x)
+    -> re.Pattern.match
+    -> _sre.SRE_Pattern.match
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+16:23 call  ret.append(x)
+    -> <builtin>.list.append
+18:23 call  ret.extend(list(mmseg.seg.cut(x)))
+    -> <builtin>.list.extend
+18:28 call  list(mmseg.seg.cut(x))
+    -> <builtin>.list
+18:42 call  mmseg.seg.cut(x)
+    -> pypinyin.seg.mmseg.Seg.cut
+20:23 call  ret.append(x)
+    -> <builtin>.list.append
+
+[pypinyin.seg.simpleseg.simple_seg]
+26:26 call  isinstance(hans, bytes_type)
+    -> <builtin>.isinstance
+29:18 call  isinstance(hans, text_type)
+    -> <builtin>.isinstance
+30:20 call  _seg(hans)
+    -> pypinyin.seg.simpleseg._seg
+32:20 call  list(hans)
+    -> <builtin>.list
+33:15 call  len(hans)
+    -> <builtin>.len
+34:30 call  simple_seg(hans[0])
+    -> pypinyin.seg.simpleseg.simple_seg
+35:20 call  list(chain(*[simple_seg(x) for x in hans]))
+    -> <builtin>.list
+35:26 call  chain(*[simple_seg(x) for x in hans])
+    -> itertools.chain
+35:39 call  simple_seg(x)
+    -> pypinyin.seg.simpleseg.simple_seg
+
+[pypinyin.seg.simpleseg._seg]
+44:26 call  enumerate(chars)
+    -> <builtin>.enumerate
+45:25 call  RE_HANS.match(c)
+    -> re.Pattern.match
+    -> _sre.SRE_Pattern.match
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+52:27 call  ret.append(s)
+    -> <builtin>.list.append
+63:27 call  ret.append(s)
+    -> <builtin>.list.append
+67:15 call  ret.append(s)
+    -> <builtin>.list.append
+
+== pypinyin.standard
+
+[pypinyin.standard]
+26:14 call  set(UV_MAP.keys())
+    -> <builtin>.set
+26:26 call  UV_MAP.keys()
+    -> <builtin>.dict.keys
+28:19 call  re.compile( r'^(j|q|x)({tones})(.*)$'.format( tones='|'.j...
+    -> re.compile
+29:37 call  r'^(j|q|x)({tones})(.*)$'.format( tones='|'.join(UV_MAP.k...
+    -> <builtin>.str.format
+30:23 call  '|'.join(UV_MAP.keys())
+    -> <builtin>.str.join
+30:35 call  UV_MAP.keys()
+    -> <builtin>.dict.keys
+31:14 call  set(['i', 'ī', 'í', 'ǐ', 'ì'])
+    -> <builtin>.set
+41:15 call  set(IU_MAP.keys())
+    -> <builtin>.set
+41:27 call  IU_MAP.keys()
+    -> <builtin>.dict.keys
+42:19 call  re.compile(r'^([a-z]+)({tones})$'.format(tones='|'.join(I...
+    -> re.compile
+42:49 call  r'^([a-z]+)({tones})$'.format(tones='|'.join(IU_TONES))
+    -> <builtin>.str.format
+42:64 call  '|'.join(IU_TONES)
+    -> <builtin>.str.join
+52:15 call  set(UI_MAP.keys())
+    -> <builtin>.set
+52:27 call  UI_MAP.keys()
+    -> <builtin>.dict.keys
+53:19 call  re.compile(r'([a-z]+)({tones})$'.format(tones='|'.join(UI...
+    -> re.compile
+53:48 call  r'([a-z]+)({tones})$'.format(tones='|'.join(UI_TONES))
+    -> <builtin>.str.format
+53:63 call  '|'.join(UI_TONES)
+    -> <builtin>.str.join
+63:15 call  set(UN_MAP.keys())
+    -> <builtin>.set
+63:27 call  UN_MAP.keys()
+    -> <builtin>.dict.keys
+64:19 call  re.compile(r'([a-z]+)({tones})$'.format(tones='|'.join(UN...
+    -> re.compile
+64:48 call  r'([a-z]+)({tones})$'.format(tones='|'.join(UN_TONES))
+    -> <builtin>.str.format
+64:63 call  '|'.join(UN_TONES)
+    -> <builtin>.str.join
+
+[pypinyin.standard.convert_zero_consonant]
+81:29 call  raw_pinyin.startswith('y')
+    -> <builtin>.str.startswith
+84:39 call  len(no_y_py)
+    -> <builtin>.len
+97:29 call  raw_pinyin.startswith('w')
+    -> <builtin>.str.startswith
+100:39 call  len(no_w_py)
+    -> <builtin>.len
+
+[pypinyin.standard.convert_uv]
+122:21 call  UV_RE.sub( lambda m: ''.join((m.group(1), UV_MAP[m.group(...
+    -> re.Pattern.sub
+    -> pypinyin.standard.convert_uv.<lambda1>
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_uv.<lambda1>]
+123:26 call  ''.join((m.group(1), UV_MAP[m.group(2)], m.group(3)))
+    -> <builtin>.str.join
+123:35 call  m.group(1)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+123:54 call  m.group(2)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+123:67 call  m.group(3)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_iou]
+133:21 call  IU_RE.sub(lambda m: m.group(1) + IU_MAP[m.group(2)], pinyin)
+    -> re.Pattern.sub
+    -> pypinyin.standard.convert_iou.<lambda1>
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_iou.<lambda1>]
+133:39 call  m.group(1)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+133:59 call  m.group(2)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_uei]
+142:21 call  UI_RE.sub(lambda m: m.group(1) + UI_MAP[m.group(2)], pinyin)
+    -> re.Pattern.sub
+    -> pypinyin.standard.convert_uei.<lambda1>
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_uei.<lambda1>]
+142:39 call  m.group(1)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+142:59 call  m.group(2)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_uen]
+151:21 call  UN_RE.sub(lambda m: m.group(1) + UN_MAP[m.group(2)], pinyin)
+    -> re.Pattern.sub
+    -> pypinyin.standard.convert_uen.<lambda1>
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_uen.<lambda1>]
+151:39 call  m.group(1)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+151:59 call  m.group(2)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.standard.convert_finals]
+156:36 call  convert_zero_consonant(pinyin)
+    -> pypinyin.standard.convert_zero_consonant
+157:24 call  convert_uv(pinyin)
+    -> pypinyin.standard.convert_uv
+158:25 call  convert_iou(pinyin)
+    -> pypinyin.standard.convert_iou
+159:25 call  convert_uei(pinyin)
+    -> pypinyin.standard.convert_uei
+160:25 call  convert_uen(pinyin)
+    -> pypinyin.standard.convert_uen
+
+== pypinyin.style
+
+[pypinyin.style.convert]
+26:32 call  _registry[style](pinyin, strict=strict, **kwargs)
+    -> pypinyin.style.initials.convert
+    -> pypinyin.style.others.OthersConverter.to_normal
+    -> pypinyin.style.others.OthersConverter.to_first_letter
+    -> pypinyin.style.tone.ToneConverter.to_tone
+    -> pypinyin.style.tone.ToneConverter.to_tone2
+    -> pypinyin.style.tone.ToneConverter.to_tone3
+    -> pypinyin.style.finals.FinalsConverter.to_finals
+    -> pypinyin.style.finals.FinalsConverter.to_finals_tone
+    -> pypinyin.style.finals.FinalsConverter.to_finals_tone2
+    -> pypinyin.style.finals.FinalsConverter.to_finals_tone3
+    -> pypinyin.style.bopomofo.BopomofoConverter.to_bopomofo
+    -> pypinyin.style.bopomofo.BopomofoConverter.to_bopomofo_first
+    -> pypinyin.style.cyrillic.CyrillicfoConverter.to_cyrillic
+    -> pypinyin.style.cyrillic.CyrillicfoConverter.to_cyrillic_first
+    -> pypinyin.style.wadegiles.to_wade_glides
+    -> pypinyin.style.gwoyeu.GwoyeuConverter.to_gwoyeu
+    -> pypinyin.style.braille_mainland.BrailleMainlandConverter.to_braille_mainland_tone
+    -> pypinyin.style.braille_mainland.BrailleMainlandConverter.to_braille_mainland
+    exclude pypinyin.style.register.decorator.wrapper: the decorator of register puts the undecorated function in _registry (line 53) and returns the wrapper, so the package never registers a wrapper
+    note: _registry maps each style to the function that the style modules register when auto_discover imports them (converter.py:20, which runs before any conversion): initials.convert by @register (initials.py:10), and the bound methods or functions of others.py:26-27, tone.py:32-34, finals.py:37-40, bopomofo.py:73-74, cyrillic.py:76-77, wadegiles.py:559, gwoyeu.py:77 and braille_mainland.py:92-93; a function that a client registers is a client callback
+
+[pypinyin.style.register.decorator]
+55:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+55:15 call  wraps(func)
+    -> functools.wraps
+
+[pypinyin.style.register.decorator.wrapper]
+57:24 call  func(pinyin, **kwargs)
+    -> pypinyin.style.initials.convert
+    note: func is the function that the decorator of register(style) decorates (line 52); in the package only initials.convert uses @register (initials.py:10); a function that a client decorates with @register is a client callback
+
+== pypinyin.style._constants
+
+[pypinyin.style._constants]
+77:60 call  phonetic_symbol.phonetic_symbol.copy()
+    -> <builtin>.dict.copy
+78:47 call  dict( (k, v) for k, v in PHONETIC_SYMBOL_DICT.items() if ...
+    -> <builtin>.dict
+80:43 call  PHONETIC_SYMBOL_DICT.items()
+    -> <builtin>.dict.items
+81:11 call  len(k)
+    -> <builtin>.len
+84:32 call  re.compile( r'[{0}]'.format( re.escape(''.join(x for x in...
+    -> re.compile
+85:20 call  r'[{0}]'.format( re.escape(''.join(x for x in PHONETIC_SY...
+    -> <builtin>.str.format
+86:18 call  re.escape(''.join(x for x in PHONETIC_SYMBOL_DICT if len(...
+    -> re.escape
+86:26 call  ''.join(x for x in PHONETIC_SYMBOL_DICT if len(x) == 1)
+    -> <builtin>.str.join
+86:65 call  len(x)
+    -> <builtin>.len
+91:22 call  re.compile(r'([aeoiuvnmêü])([1-5])$')
+    -> re.compile
+93:22 call  re.compile(r'^([a-zêü]+)([1-5])([a-zêü]*)$')
+    -> re.compile
+96:23 call  re.compile(r'\d')
+    -> re.compile
+
+== pypinyin.style._tone_convert
+
+[pypinyin.style._tone_convert]
+14:24 call  re.compile(r'\d')
+    -> re.compile
+
+[pypinyin.style._tone_convert.to_normal]
+44:22 call  tone_to_tone2(pinyin, v_to_u=True)
+    -> pypinyin.style._tone_convert.tone_to_tone2
+45:24 call  tone2_to_normal(s)
+    -> pypinyin.style._tone_convert.tone2_to_normal
+46:20 call  _fix_v_u(pinyin, s, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.to_tone]
+66:28 call  pinyin.replace('v', 'ü')
+    -> <builtin>.str.replace
+67:29 call  _re_number.search(pinyin)
+    -> re.Pattern.search
+    -> _sre.SRE_Pattern.search
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+70:22 call  tone_to_tone2(pinyin)
+    -> pypinyin.style._tone_convert.tone_to_tone2
+71:22 call  tone2_to_tone(s)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+[pypinyin.style._tone_convert.to_tone2]
+106:18 call  kwargs.get('neutral_tone_with_5', None)
+    -> <builtin>.dict.get
+108:28 call  pinyin.replace('5', '')
+    -> <builtin>.str.replace
+109:22 call  tone_to_tone3( pinyin, v_to_u=True, neutral_tone_with_fiv...
+    -> pypinyin.style._tone_convert.tone_to_tone3
+111:23 call  tone3_to_tone2(s)
+    -> pypinyin.style._tone_convert.tone3_to_tone2
+112:20 call  _fix_v_u(pinyin, s, v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.to_tone3]
+146:18 call  kwargs.get('neutral_tone_with_5', None)
+    -> <builtin>.dict.get
+148:28 call  pinyin.replace('5', '')
+    -> <builtin>.str.replace
+149:22 call  tone_to_tone2( pinyin, v_to_u=True, neutral_tone_with_fiv...
+    -> pypinyin.style._tone_convert.tone_to_tone2
+151:23 call  tone2_to_tone3(s)
+    -> pypinyin.style._tone_convert.tone2_to_tone3
+152:20 call  _fix_v_u(pinyin, s, v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.to_initials]
+177:24 call  get_initials(pinyin, strict=strict)
+    -> pypinyin.style._utils.get_initials
+
+[pypinyin.style._tone_convert.to_finals]
+204:45 call  replace_symbol_to_no_symbol(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_no_symbol
+204:61 call  replace_symbol_to_no_symbol(pinyin).replace('v', 'ü')
+    -> <builtin>.str.replace
+205:24 call  get_finals(new_pinyin, strict=strict)
+    -> pypinyin.style._utils.get_finals
+206:22 call  _fix_v_u(finals, finals, v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.to_finals_tone]
+230:29 call  to_finals_tone2(pinyin, strict=strict)
+    -> pypinyin.style._tone_convert.to_finals_tone2
+    reject pypinyin.style.finals.FinalsConverter.to_finals_tone2: to_finals_tone2 is the function of this module (line 237), not the method
+232:27 call  tone2_to_tone(finals)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+[pypinyin.style._tone_convert.to_finals_tone2]
+261:28 call  pinyin.replace('5', '')
+    -> <builtin>.str.replace
+262:29 call  to_finals_tone3(pinyin, strict=strict, v_to_u=v_to_u, neu...
+    -> pypinyin.style._tone_convert.to_finals_tone3
+    reject pypinyin.style.finals.FinalsConverter.to_finals_tone3: to_finals_tone3 is the function of this module (line 270), not the method
+265:28 call  tone3_to_tone2(finals, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert.tone3_to_tone2
+
+[pypinyin.style._tone_convert.to_finals_tone3]
+294:28 call  pinyin.replace('5', '')
+    -> <builtin>.str.replace
+295:23 call  to_finals(pinyin, strict=strict, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert.to_finals
+    reject pypinyin.style.finals.FinalsConverter.to_finals: to_finals is the function of this module (line 180), not the method
+299:33 call  _re_number.findall(replace_symbol_to_number(pinyin))
+    -> re.Pattern.findall
+    -> _sre.SRE_Pattern.findall
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+299:58 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+
+[pypinyin.style._tone_convert.tone_to_normal]
+331:22 call  tone_to_tone2(tone, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert.tone_to_tone2
+332:23 call  _re_number.sub('', s)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+333:19 call  _v_to_u(s, v_to_u)
+    -> pypinyin.style._tone_convert._v_to_u
+
+[pypinyin.style._tone_convert.tone_to_tone2]
+363:18 call  kwargs.get('neutral_tone_with_5', None)
+    -> <builtin>.dict.get
+365:26 call  tone_to_tone3( tone, v_to_u=v_to_u, neutral_tone_with_fiv...
+    -> pypinyin.style._tone_convert.tone_to_tone3
+367:23 call  tone3_to_tone2(tone3)
+    -> pypinyin.style._tone_convert.tone3_to_tone2
+368:19 call  _v_to_u(s, v_to_u)
+    -> pypinyin.style._tone_convert._v_to_u
+
+[pypinyin.style._tone_convert.tone_to_tone3]
+398:18 call  kwargs.get('neutral_tone_with_5', None)
+    -> <builtin>.dict.get
+400:31 call  converter.to_tone3(tone)
+    -> pypinyin.style.tone.ToneConverter.to_tone3
+    reject pypinyin.style._tone_convert.to_tone3: converter is the ToneConverter object of pypinyin.style.tone (tone.py:31, imported at line 8)
+401:23 call  _improve_tone3(tone3, neutral_tone_with_five=neutral_tone...
+    -> pypinyin.style._tone_convert._improve_tone3
+402:19 call  _v_to_u(s, v_to_u)
+    -> pypinyin.style._tone_convert._v_to_u
+
+[pypinyin.style._tone_convert.tone2_to_normal]
+424:23 call  _re_number.sub('', tone2)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+425:16 call  _v_to_u(s, v_to_u)
+    -> pypinyin.style._tone_convert._v_to_u
+426:20 call  _fix_v_u(tone2, s, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.tone2_to_tone]
+442:23 call  re.compile(RE_TONE2.pattern.replace('$', ''))
+    -> re.compile
+442:48 call  RE_TONE2.pattern.replace('$', '')
+    -> <builtin>.str.replace
+444:27 call  tone2.replace('ü', 'v')
+    -> <builtin>.str.replace
+444:45 call  tone2.replace('ü', 'v').replace('5', '')
+    -> <builtin>.str.replace
+444:62 call  tone2.replace('ü', 'v').replace('5', '').replace('0', '')
+    -> <builtin>.str.replace
+450:21 call  regex.sub(_replace, string)
+    -> re.Pattern.sub
+    -> pypinyin.style._tone_convert.tone2_to_tone._replace
+    reject pypinyin.style._utils.replace_symbol_to_number._replace: the callback is the local _replace of tone2_to_tone (line 446)
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+450:47 call  regex.sub(_replace, string).replace('v', 'ü')
+    -> <builtin>.str.replace
+
+[pypinyin.style._tone_convert.tone2_to_tone._replace]
+447:20 call  m.group(0)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+448:21 call  d.get(s)
+    -> <builtin>.dict.get
+
+[pypinyin.style._tone_convert.tone2_to_tone3]
+472:25 call  RE_TONE3.sub(r'\1\3\2', tone2)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+473:20 call  _fix_v_u(tone2, tone3, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.tone3_to_normal]
+495:23 call  _re_number.sub('', tone3)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+496:16 call  _v_to_u(s, v_to_u)
+    -> pypinyin.style._tone_convert._v_to_u
+497:20 call  _fix_v_u(tone3, s, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert.tone3_to_tone]
+513:27 call  tone3_to_tone2(tone3, v_to_u=True)
+    -> pypinyin.style._tone_convert.tone3_to_tone2
+514:25 call  tone2_to_tone(tone2)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+[pypinyin.style._tone_convert.tone3_to_tone2]
+536:38 call  tone3_to_normal(tone3)
+    -> pypinyin.style._tone_convert.tone3_to_normal
+537:34 call  right_mark_index(no_number_tone3)
+    -> pypinyin.style._tone_rule.right_mark_index
+539:25 call  len(no_number_tone3)
+    -> <builtin>.len
+543:37 call  _get_number_from_pinyin(tone3)
+    -> pypinyin.style._tone_convert._get_number_from_pinyin
+547:24 call  '{}{}{}'.format(before, number, after)
+    -> <builtin>.str.format
+548:20 call  _fix_v_u(tone3, s, v_to_u=v_to_u)
+    -> pypinyin.style._tone_convert._fix_v_u
+
+[pypinyin.style._tone_convert._improve_tone3]
+552:37 call  _get_number_from_pinyin(tone3)
+    -> pypinyin.style._tone_convert._get_number_from_pinyin
+554:29 call  '{}5'.format(tone3)
+    -> <builtin>.str.format
+
+[pypinyin.style._tone_convert._get_number_from_pinyin]
+559:33 call  _re_number.findall(pinyin)
+    -> re.Pattern.findall
+    -> _sre.SRE_Pattern.findall
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.style._tone_convert._v_to_u]
+570:26 call  pinyin.replace('v', 'ü')
+    -> <builtin>.str.replace
+
+[pypinyin.style._tone_convert._fix_v_u]
+575:30 call  new_py.replace('ü', 'v')
+    -> <builtin>.str.replace
+577:19 call  _v_to_u(new_py, replace=True)
+    -> pypinyin.style._tone_convert._v_to_u
+
+== pypinyin.style._tone_rule
+
+[pypinyin.style._tone_rule.right_mark_index]
+34:36 call  pinyin_no_tone.index('u')
+    -> <builtin>.str.index
+36:36 call  pinyin_no_tone.index('i')
+    -> <builtin>.str.index
+38:36 call  pinyin_no_tone.index('u')
+    -> <builtin>.str.index
+43:40 call  pinyin_no_tone.index(c)
+    -> <builtin>.str.index
+43:49 call  len(c)
+    -> <builtin>.len
+48:40 call  pinyin_no_tone.index(c)
+    -> <builtin>.str.index
+48:49 call  len(c)
+    -> <builtin>.len
+53:40 call  pinyin_no_tone.index(c)
+    -> <builtin>.str.index
+53:49 call  len(c)
+    -> <builtin>.len
+58:40 call  pinyin_no_tone.index(c)
+    -> <builtin>.str.index
+58:49 call  len(c)
+    -> <builtin>.len
+
+== pypinyin.style._utils
+
+[pypinyin.style._utils.get_initials]
+28:29 call  pinyin.startswith(i)
+    -> <builtin>.str.startswith
+
+[pypinyin.style._utils.get_finals]
+43:32 call  convert_finals(pinyin)
+    -> pypinyin.standard.convert_finals
+45:28 call  get_initials(pinyin, strict=strict)
+    -> pypinyin.style._utils.get_initials
+48:24 call  len(initials)
+    -> <builtin>.len
+53:32 call  get_initials(pinyin, strict=False)
+    -> pypinyin.style._utils.get_initials
+54:28 call  len(initials)
+    -> <builtin>.len
+
+[pypinyin.style._utils.replace_symbol_to_number]
+74:35 call  RE_PHONETIC_SYMBOL.sub(_replace, pinyin)
+    -> re.Pattern.sub
+    -> pypinyin.style._utils.replace_symbol_to_number._replace
+    reject pypinyin.style._tone_convert.tone2_to_tone._replace: the callback is the local _replace of replace_symbol_to_number (line 68)
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+75:68 call  PHONETIC_SYMBOL_DICT_KEY_LENGTH_NOT_ONE.items()
+    -> <builtin>.dict.items
+76:30 call  value.replace(symbol, to)
+    -> <builtin>.str.replace
+
+[pypinyin.style._utils.replace_symbol_to_number._replace]
+69:29 call  match.group(0)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.style._utils.replace_symbol_to_no_symbol]
+83:37 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+84:25 call  RE_NUMBER.sub('', value)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+== pypinyin.style.bopomofo
+
+[pypinyin.style.bopomofo]
+17:16 call  re.compile(r'^m(\d)$')
+    -> re.compile
+18:16 call  re.compile(r'^n(\d)$')
+    -> re.compile
+19:16 call  re.compile(r'^r5$')
+    -> re.compile
+20:16 call  re.compile(r'iu')
+    -> re.compile
+21:16 call  re.compile(r'ui')
+    -> re.compile
+22:16 call  re.compile(r'ong')
+    -> re.compile
+23:16 call  re.compile(r'^yi?')
+    -> re.compile
+24:16 call  re.compile(r'^wu?')
+    -> re.compile
+25:16 call  re.compile(r'iu')
+    -> re.compile
+26:16 call  re.compile(r'^([jqx])u')
+    -> re.compile
+27:16 call  re.compile(r'([iuv])n')
+    -> re.compile
+28:16 call  re.compile(r'^zhi?')
+    -> re.compile
+29:16 call  re.compile(r'^chi?')
+    -> re.compile
+30:16 call  re.compile(r'^shi?')
+    -> re.compile
+31:16 call  re.compile(r'^([zcsr])i')
+    -> re.compile
+32:16 call  re.compile(r'ai')
+    -> re.compile
+33:16 call  re.compile(r'ei')
+    -> re.compile
+34:16 call  re.compile(r'ao')
+    -> re.compile
+35:16 call  re.compile(r'ou')
+    -> re.compile
+36:16 call  re.compile(r'ang')
+    -> re.compile
+37:16 call  re.compile(r'eng')
+    -> re.compile
+38:16 call  re.compile(r'an')
+    -> re.compile
+39:16 call  re.compile(r'en')
+    -> re.compile
+40:16 call  re.compile(r'er')
+    -> re.compile
+41:16 call  re.compile(r'eh')
+    -> re.compile
+42:16 call  re.compile(r'([iv])e')
+    -> re.compile
+43:16 call  re.compile(r'([^0-4])$')
+    -> re.compile
+44:16 call  re.compile(r'1$')
+    -> re.compile
+46:22 call  dict(zip( 'bpmfdtnlgkhjqxZCSrzcsiuvaoeEAIOUMNKGR2340ê', '...
+    -> <builtin>.dict
+46:26 call  zip( 'bpmfdtnlgkhjqxZCSrzcsiuvaoeEAIOUMNKGR2340ê', 'ㄅㄆㄇㄈㄉ...
+    -> <builtin>.zip
+72:30 call  BopomofoConverter()
+    note: BopomofoConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+73:9 call  register(Style.BOPOMOFO, func=converter.to_bopomofo)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_bopomofo in _registry (style/__init__.py:48-50) and does not call it
+74:9 call  register(Style.BOPOMOFO_FIRST, func=converter.to_bopomofo...
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_bopomofo_first in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.bopomofo.BopomofoConverter.to_bopomofo]
+54:35 call  self._pre_convert(pinyin)
+    -> pypinyin.style.bopomofo.BopomofoConverter._pre_convert
+    reject pypinyin.style.cyrillic.CyrillicfoConverter._pre_convert, pypinyin.style.gwoyeu.GwoyeuConverter._pre_convert: self is a BopomofoConverter (no package subclass)
+57:33 call  find_re.sub(replace, pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+58:25 call  ''.join(BOPOMOFO_TABLE.get(x, x) for x in pinyin)
+    -> <builtin>.str.join
+58:44 call  BOPOMOFO_TABLE.get(x, x)
+    -> <builtin>.dict.get
+
+[pypinyin.style.bopomofo.BopomofoConverter.to_bopomofo_first]
+62:34 call  self.to_bopomofo(pinyin, **kwargs)
+    -> pypinyin.style.bopomofo.BopomofoConverter.to_bopomofo
+
+[pypinyin.style.bopomofo.BopomofoConverter._pre_convert]
+67:42 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+69:28 call  RE_TONE3.sub(r'\1\3\2', pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+== pypinyin.style.braille_mainland
+
+[pypinyin.style.braille_mainland]
+19:16 call  re.compile(r'iu')
+    -> re.compile
+20:16 call  re.compile(r'ui')
+    -> re.compile
+21:16 call  re.compile(r'un')
+    -> re.compile
+22:16 call  re.compile(r'ong')
+    -> re.compile
+23:16 call  re.compile(r'^yi?')
+    -> re.compile
+24:16 call  re.compile(r'^wu?')
+    -> re.compile
+25:16 call  re.compile(r'y')
+    -> re.compile
+26:16 call  re.compile(r'w')
+    -> re.compile
+27:16 call  re.compile(r'iu')
+    -> re.compile
+28:16 call  re.compile(r'^([jqx])u')
+    -> re.compile
+29:16 call  re.compile(r'([iuv])n')
+    -> re.compile
+30:16 call  re.compile(r'^zhi?')
+    -> re.compile
+31:16 call  re.compile(r'^chi?')
+    -> re.compile
+32:16 call  re.compile(r'^shi?')
+    -> re.compile
+33:16 call  re.compile(r'^([zcsr])i')
+    -> re.compile
+34:16 call  re.compile(r'iang')
+    -> re.compile
+35:16 call  re.compile(r'uang')
+    -> re.compile
+36:16 call  re.compile(r'ueng')
+    -> re.compile
+37:16 call  re.compile(r'iong')
+    -> re.compile
+38:16 call  re.compile(r'ang')
+    -> re.compile
+39:16 call  re.compile(r'eng')
+    -> re.compile
+40:16 call  re.compile(r'uai')
+    -> re.compile
+41:16 call  re.compile(r'iao')
+    -> re.compile
+42:16 call  re.compile(r'iou')
+    -> re.compile
+43:16 call  re.compile(r'ian')
+    -> re.compile
+44:16 call  re.compile(r'uan')
+    -> re.compile
+45:16 call  re.compile(r'van')
+    -> re.compile
+46:16 call  re.compile(r'uen')
+    -> re.compile
+47:16 call  re.compile(r'ing')
+    -> re.compile
+48:16 call  re.compile(r'ong')
+    -> re.compile
+49:16 call  re.compile(r'er')
+    -> re.compile
+50:16 call  re.compile(r'ai')
+    -> re.compile
+51:16 call  re.compile(r'ei')
+    -> re.compile
+52:16 call  re.compile(r'ao')
+    -> re.compile
+53:16 call  re.compile(r'ou')
+    -> re.compile
+54:16 call  re.compile(r'an')
+    -> re.compile
+55:16 call  re.compile(r'en')
+    -> re.compile
+56:16 call  re.compile(r'ia')
+    -> re.compile
+57:16 call  re.compile(r'ua')
+    -> re.compile
+58:16 call  re.compile(r'ie')
+    -> re.compile
+59:16 call  re.compile(r'uo')
+    -> re.compile
+60:16 call  re.compile(r've')
+    -> re.compile
+61:16 call  re.compile(r'ui')
+    -> re.compile
+62:16 call  re.compile(r'in')
+    -> re.compile
+63:16 call  re.compile(r'vn')
+    -> re.compile
+66:30 call  dict(zip( 'bpmfdtnlgkhjqxZCSrzcsiuvaoe1234', '⠃⠏⠍⠋⠙⠞⠝⠇⠛⠅⠓...
+    -> <builtin>.dict
+66:34 call  zip( 'bpmfdtnlgkhjqxZCSrzcsiuvaoe1234', '⠃⠏⠍⠋⠙⠞⠝⠇⠛⠅⠓⠛⠅⠓⠌⠟...
+    -> <builtin>.zip
+91:37 call  BrailleMainlandConverter()
+    note: BrailleMainlandConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+92:9 call  register(Style.BRAILLE_MAINLAND_TONE, func=converter.to_b...
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_braille_mainland_tone in _registry (style/__init__.py:48-50) and does not call it
+93:9 call  register(Style.BRAILLE_MAINLAND, func=converter.to_braill...
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_braille_mainland in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.braille_mainland.BrailleMainlandConverter.to_braille_mainland_tone]
+75:42 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+77:30 call  RE_TONE3.sub(r'\1\3\2', pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+79:33 call  find_re.sub(replace, pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+80:25 call  ''.join(BRAILLE_MAINLAND_TABLE.get(x, x) for x in pinyin)
+    -> <builtin>.str.join
+80:52 call  BRAILLE_MAINLAND_TABLE.get(x, x)
+    -> <builtin>.dict.get
+
+[pypinyin.style.braille_mainland.BrailleMainlandConverter.to_braille_mainland]
+84:45 call  replace_symbol_to_no_symbol(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_no_symbol
+86:33 call  find_re.sub(replace, pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+87:25 call  ''.join(BRAILLE_MAINLAND_TABLE.get(x, x) for x in pinyin)
+    -> <builtin>.str.join
+87:52 call  BRAILLE_MAINLAND_TABLE.get(x, x)
+    -> <builtin>.dict.get
+
+== pypinyin.style.cyrillic
+
+[pypinyin.style.cyrillic]
+17:16 call  re.compile(r'ong')
+    -> re.compile
+18:16 call  re.compile(r'([zcs])i')
+    -> re.compile
+19:16 call  re.compile(r'([xqj])u')
+    -> re.compile
+20:16 call  re.compile(r'^wu(.?)$')
+    -> re.compile
+21:16 call  re.compile(r'(.+)r(.?)$')
+    -> re.compile
+22:16 call  re.compile(r'^zh')
+    -> re.compile
+23:16 call  re.compile(r'^ch')
+    -> re.compile
+24:16 call  re.compile(r'^j')
+    -> re.compile
+25:16 call  re.compile(r'^z')
+    -> re.compile
+26:16 call  re.compile(r'^x')
+    -> re.compile
+27:16 call  re.compile(r'^sh')
+    -> re.compile
+28:16 call  re.compile(r'([^CSdst])uo')
+    -> re.compile
+29:16 call  re.compile(r'^y(.*)$')
+    -> re.compile
+30:16 call  re.compile(r'Iai')
+    -> re.compile
+31:16 call  re.compile(r'Ia')
+    -> re.compile
+32:16 call  re.compile(r'Ie')
+    -> re.compile
+33:16 call  re.compile(r'Ii')
+    -> re.compile
+34:16 call  re.compile(r'Iou')
+    -> re.compile
+35:16 call  re.compile(r'Iu')
+    -> re.compile
+36:16 call  re.compile(r'(.v)(\d?)$')
+    -> re.compile
+37:16 call  re.compile(r'Io')
+    -> re.compile
+38:16 call  re.compile(r'iu')
+    -> re.compile
+39:16 call  re.compile(r'ie')
+    -> re.compile
+40:16 call  re.compile(r'hui')
+    -> re.compile
+41:16 call  re.compile(r'ui')
+    -> re.compile
+42:16 call  re.compile(r'ai')
+    -> re.compile
+43:16 call  re.compile(r'ei')
+    -> re.compile
+44:16 call  re.compile(r'ia')
+    -> re.compile
+45:16 call  re.compile(r'(.*[^h])n([^g]?)$')
+    -> re.compile
+46:16 call  re.compile(r'(.*[^h])ng(.?)$')
+    -> re.compile
+47:16 call  re.compile(r'^v(\d?$)')
+    -> re.compile
+49:22 call  dict(zip( u'abwgdEOrZiIklmnopRstufhqcCSHTMUevAV', u'абвгд...
+    -> <builtin>.dict
+49:26 call  zip( u'abwgdEOrZiIklmnopRstufhqcCSHTMUevAV', u'абвгдеёжзи...
+    -> <builtin>.zip
+75:32 call  CyrillicfoConverter()
+    note: CyrillicfoConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+76:9 call  register(Style.CYRILLIC, func=converter.to_cyrillic)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_cyrillic in _registry (style/__init__.py:48-50) and does not call it
+77:9 call  register(Style.CYRILLIC_FIRST, func=converter.to_cyrillic...
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_cyrillic_first in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.cyrillic.CyrillicfoConverter.to_cyrillic]
+57:35 call  self._pre_convert(pinyin)
+    -> pypinyin.style.cyrillic.CyrillicfoConverter._pre_convert
+    reject pypinyin.style.bopomofo.BopomofoConverter._pre_convert, pypinyin.style.gwoyeu.GwoyeuConverter._pre_convert: self is a CyrillicfoConverter (no package subclass)
+60:33 call  find_re.sub(replace, pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+61:25 call  ''.join(CYRILLIC_TABLE.get(x, x) for x in pinyin)
+    -> <builtin>.str.join
+61:44 call  CYRILLIC_TABLE.get(x, x)
+    -> <builtin>.dict.get
+
+[pypinyin.style.cyrillic.CyrillicfoConverter.to_cyrillic_first]
+65:34 call  self.to_cyrillic(pinyin, **kwargs)
+    -> pypinyin.style.cyrillic.CyrillicfoConverter.to_cyrillic
+
+[pypinyin.style.cyrillic.CyrillicfoConverter._pre_convert]
+70:42 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+72:28 call  RE_TONE3.sub(r'\1\3\2', pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+== pypinyin.style.finals
+
+[pypinyin.style.finals]
+36:28 call  FinalsConverter()
+    note: FinalsConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+37:9 call  register(Style.FINALS, func=converter.to_finals)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_finals in _registry (style/__init__.py:48-50) and does not call it
+38:9 call  register(Style.FINALS_TONE, func=converter.to_finals_tone)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_finals_tone in _registry (style/__init__.py:48-50) and does not call it
+39:9 call  register(Style.FINALS_TONE2, func=converter.to_finals_tone2)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_finals_tone2 in _registry (style/__init__.py:48-50) and does not call it
+40:9 call  register(Style.FINALS_TONE3, func=converter.to_finals_tone3)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_finals_tone3 in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.finals.FinalsConverter.to_finals]
+21:25 call  to_finals(pinyin, strict=kwargs.get('strict', True))
+    -> pypinyin.style._tone_convert.to_finals
+    reject pypinyin.style.finals.FinalsConverter.to_finals: to_finals is the module function imported from pypinyin.style._tone_convert (finals.py:13), not the method
+21:51 call  kwargs.get('strict', True)
+    -> <builtin>.dict.get
+
+[pypinyin.style.finals.FinalsConverter.to_finals_tone]
+25:30 call  to_finals_tone(pinyin, strict=kwargs.get('strict', True))
+    -> pypinyin.style._tone_convert.to_finals_tone
+    reject pypinyin.style.finals.FinalsConverter.to_finals_tone: to_finals_tone is the module function imported from pypinyin.style._tone_convert (finals.py:13), not the method
+25:56 call  kwargs.get('strict', True)
+    -> <builtin>.dict.get
+
+[pypinyin.style.finals.FinalsConverter.to_finals_tone2]
+29:31 call  to_finals_tone2(pinyin, strict=kwargs.get('strict', True))
+    -> pypinyin.style._tone_convert.to_finals_tone2
+    reject pypinyin.style.finals.FinalsConverter.to_finals_tone2: to_finals_tone2 is the module function imported from pypinyin.style._tone_convert (finals.py:13), not the method
+29:57 call  kwargs.get('strict', True)
+    -> <builtin>.dict.get
+
+[pypinyin.style.finals.FinalsConverter.to_finals_tone3]
+33:31 call  to_finals_tone3(pinyin, strict=kwargs.get('strict', True))
+    -> pypinyin.style._tone_convert.to_finals_tone3
+    reject pypinyin.style.finals.FinalsConverter.to_finals_tone3: to_finals_tone3 is the module function imported from pypinyin.style._tone_convert (finals.py:13), not the method
+33:57 call  kwargs.get('strict', True)
+    -> <builtin>.dict.get
+
+== pypinyin.style.gwoyeu
+
+[pypinyin.style.gwoyeu]
+11:16 call  re.compile(r'^r5$')
+    -> re.compile
+12:16 call  re.compile(r'iu')
+    -> re.compile
+13:16 call  re.compile(r'ao')
+    -> re.compile
+14:16 call  re.compile(r'^yi?')
+    -> re.compile
+15:16 call  re.compile(r'^wu?')
+    -> re.compile
+16:16 call  re.compile(r'^([jqx])u')
+    -> re.compile
+17:16 call  re.compile(r'(?<![iy])u([in])')
+    -> re.compile
+18:16 call  re.compile(r'v')
+    -> re.compile
+19:16 call  re.compile(r'^([zcsr]h?)i')
+    -> re.compile
+20:16 call  re.compile(r'^zh')
+    -> re.compile
+21:16 call  re.compile(r'^z')
+    -> re.compile
+22:16 call  re.compile(r'^c(?!h)')
+    -> re.compile
+23:16 call  re.compile(r'^q')
+    -> re.compile
+24:16 call  re.compile(r'^x')
+    -> re.compile
+25:16 call  re.compile(r'er')
+    -> re.compile
+26:16 call  re.compile(r'5$')
+    -> re.compile
+27:16 call  re.compile(r'0$')
+    -> re.compile
+28:16 call  re.compile(r'^i(.*[34])$')
+    -> re.compile
+29:16 call  re.compile(r'^u(.*[34])$')
+    -> re.compile
+30:16 call  re.compile(r'^yi([aeu].*4)$')
+    -> re.compile
+31:16 call  re.compile(r'^wu([ae].*4)$')
+    -> re.compile
+35:16 call  re.compile(r'^([lmnr])(.+)1$')
+    -> re.compile
+36:16 call  re.compile(r'1$')
+    -> re.compile
+37:16 call  re.compile(r'^([lmnr])(.+)2$')
+    -> re.compile
+38:16 call  re.compile(r'^([^ae]*)i(ng?)*2$')
+    -> re.compile
+39:16 call  re.compile(r'^([^ao]*)u2$')
+    -> re.compile
+40:16 call  re.compile(r'^([^ae]*)i(.+)2$')
+    -> re.compile
+41:16 call  re.compile(r'^([^ao]*)u(.+)2$')
+    -> re.compile
+42:16 call  re.compile(r'([aeiouy]+)(.*)2$')
+    -> re.compile
+43:16 call  re.compile(r'^([^aeiou]*)([iu])(ng?)?3$')
+    -> re.compile
+44:16 call  re.compile(r'^([^eu]*)i(.*)3$')
+    -> re.compile
+45:16 call  re.compile(r'^(.*)u(.*)3$')
+    -> re.compile
+46:16 call  re.compile(r'([aeiouy])(.*)3$')
+    -> re.compile
+47:16 call  re.compile(r'^([^ae]*)i4$')
+    -> re.compile
+48:16 call  re.compile(r'^([^ao]*)u4$')
+    -> re.compile
+49:16 call  re.compile(r'i4$')
+    -> re.compile
+50:16 call  re.compile(r'u4$')
+    -> re.compile
+51:16 call  re.compile(r'l4$')
+    -> re.compile
+52:16 call  re.compile(r'ng4$')
+    -> re.compile
+53:16 call  re.compile(r'n4$')
+    -> re.compile
+54:16 call  re.compile(r'4$')
+    -> re.compile
+75:28 call  GwoyeuConverter()
+    note: GwoyeuConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+77:9 call  register(Style.GWOYEU, func=converter.to_gwoyeu)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_gwoyeu in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.gwoyeu.GwoyeuConverter._pre_convert]
+61:42 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+63:28 call  RE_TONE3.sub(r'\1\3\2', pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.style.gwoyeu.GwoyeuConverter.to_gwoyeu]
+66:35 call  self._pre_convert(pinyin)
+    -> pypinyin.style.gwoyeu.GwoyeuConverter._pre_convert
+    reject pypinyin.style.bopomofo.BopomofoConverter._pre_convert, pypinyin.style.cyrillic.CyrillicfoConverter._pre_convert: self is a GwoyeuConverter (no package subclass)
+68:33 call  find_re.sub(replace, pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+70:30 call  find_re.search(pinyin)
+    -> re.Pattern.search
+    -> _sre.SRE_Pattern.search
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+71:35 call  find_re.sub(replace, pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+== pypinyin.style.initials
+
+[pypinyin.style.initials]
+10:2 decorator  @register(Style.INITIALS)
+    -> pypinyin.style.register.decorator
+    note: register(Style.INITIALS) returns its local function decorator (style/__init__.py:52-60)
+10:10 call  register(Style.INITIALS)
+    -> pypinyin.style.register
+
+[pypinyin.style.initials.convert]
+12:24 call  kwargs.get('strict', True)
+    -> <builtin>.dict.get
+13:24 call  get_initials(pinyin, strict)
+    -> pypinyin.style._utils.get_initials
+
+== pypinyin.style.others
+
+[pypinyin.style.others]
+25:28 call  OthersConverter()
+    note: OthersConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+26:9 call  register(Style.NORMAL, func=converter.to_normal)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_normal in _registry (style/__init__.py:48-50) and does not call it
+27:9 call  register(Style.FIRST_LETTER, func=converter.to_first_letter)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_first_letter in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.others.OthersConverter.to_normal]
+16:45 call  replace_symbol_to_no_symbol(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_no_symbol
+
+[pypinyin.style.others.OthersConverter.to_first_letter]
+21:32 call  self.to_normal(pinyin)
+    -> pypinyin.style.others.OthersConverter.to_normal
+    reject pypinyin.style._tone_convert.to_normal: the receiver is self, an OthersConverter (no package subclass)
+
+== pypinyin.style.tone
+
+[pypinyin.style.tone]
+31:26 call  ToneConverter()
+    note: ToneConverter defines no __init__ and has no package base; object.__init__ runs, so there is no edge
+32:9 call  register(Style.TONE, func=converter.to_tone)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_tone in _registry (style/__init__.py:48-50) and does not call it
+33:9 call  register(Style.TONE2, func=converter.to_tone2)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_tone2 in _registry (style/__init__.py:48-50) and does not call it
+34:9 call  register(Style.TONE3, func=converter.to_tone3)
+    -> pypinyin.style.register
+    reject *: register stores the bound method converter.to_tone3 in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.tone.ToneConverter.to_tone2]
+22:42 call  replace_symbol_to_number(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_number
+
+[pypinyin.style.tone.ToneConverter.to_tone3]
+26:31 call  self.to_tone2(pinyin, **kwargs)
+    -> pypinyin.style.tone.ToneConverter.to_tone2
+    reject pypinyin.style._tone_convert.to_tone2: the receiver is self, a ToneConverter (no package subclass)
+28:28 call  RE_TONE3.sub(r'\1\3\2', pinyin)
+    -> re.Pattern.sub
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+== pypinyin.style.wadegiles
+
+[pypinyin.style.wadegiles]
+439:20 call  _convert_table.sort(key=lambda x: len(x[0]), reverse=True)
+    -> <builtin>.list.sort
+    -> pypinyin.style.wadegiles.<lambda1>
+465:20 call  _initial_table.sort(key=lambda x: len(x[0]), reverse=True)
+    -> <builtin>.list.sort
+    -> pypinyin.style.wadegiles.<lambda2>
+507:17 call  _tone_table.sort(key=lambda x: len(x[0]), reverse=True)
+    -> <builtin>.list.sort
+    -> pypinyin.style.wadegiles.<lambda3>
+524:19 call  _except_table.sort(key=lambda x: len(x[0]), reverse=True)
+    -> <builtin>.list.sort
+    -> pypinyin.style.wadegiles.<lambda4>
+559:9 call  register(Style.WADEGILES, func=to_wade_glides)
+    -> pypinyin.style.register
+    reject *: register stores the function to_wade_glides in _registry (style/__init__.py:48-50) and does not call it
+
+[pypinyin.style.wadegiles.<lambda1>]
+439:38 call  len(x[0])
+    -> <builtin>.len
+
+[pypinyin.style.wadegiles.<lambda2>]
+465:38 call  len(x[0])
+    -> <builtin>.len
+
+[pypinyin.style.wadegiles.<lambda3>]
+507:35 call  len(x[0])
+    -> <builtin>.len
+
+[pypinyin.style.wadegiles.<lambda4>]
+524:37 call  len(x[0])
+    -> <builtin>.len
+
+[pypinyin.style.wadegiles.to_wade_glides]
+528:41 call  replace_symbol_to_no_symbol(pinyin)
+    -> pypinyin.style._utils.replace_symbol_to_no_symbol
+528:57 call  replace_symbol_to_no_symbol(pinyin).replace('v', 'ü')
+    -> <builtin>.str.replace
+530:37 call  _convert_whole(pinyin, _except_table)
+    -> pypinyin.style.wadegiles._convert_whole
+532:29 call  _fixed_result(whole_converted)
+    -> pypinyin.style.wadegiles._fixed_result
+533:37 call  _convert_whole(pinyin, _convert_table)
+    -> pypinyin.style.wadegiles._convert_whole
+535:29 call  _fixed_result(whole_converted)
+    -> pypinyin.style.wadegiles._fixed_result
+537:28 call  get_initials(pinyin, strict=False)
+    -> pypinyin.style._utils.get_initials
+538:23 call  len(initials)
+    -> <builtin>.len
+540:30 call  _convert_whole(initials, _initial_table)
+    -> pypinyin.style.wadegiles._convert_whole
+541:27 call  _convert_whole(tones, _tone_table)
+    -> pypinyin.style.wadegiles._convert_whole
+543:25 call  _fixed_result('{}{}'.format(initials, tones))
+    -> pypinyin.style.wadegiles._fixed_result
+543:39 call  '{}{}'.format(initials, tones)
+    -> <builtin>.str.format
+
+[pypinyin.style.wadegiles._fixed_result]
+547:26 call  pinyin.replace('ü', 'v')
+    -> <builtin>.str.replace
+
+== pypinyin.tools.toneconvert
+
+[pypinyin.tools.toneconvert]
+26:23 call  re.compile( r'(?m)(^|\s|,)([1-5a-zêü{0}]+)'.format( re.es...
+    -> re.compile
+27:43 call  r'(?m)(^|\s|,)([1-5a-zêü{0}]+)'.format( re.escape( ''.joi...
+    -> <builtin>.str.format
+28:18 call  re.escape( ''.join(x for x in PHONETIC_SYMBOL_DICT if len...
+    -> re.escape
+29:20 call  ''.join(x for x in PHONETIC_SYMBOL_DICT if len(x) == 1)
+    -> <builtin>.str.join
+29:59 call  len(x)
+    -> <builtin>.len
+103:9 call  main(sys.argv[1:])
+    -> pypinyin.tools.toneconvert.main
+    reject pypinyin.runner.main: main here is the function of this module (toneconvert.py:87)
+
+[pypinyin.tools.toneconvert.re_sub]
+48:21 call  func(match_obj.group(2))
+    -> pypinyin.style._tone_convert.to_normal
+    -> pypinyin.style._tone_convert.to_tone
+    -> pypinyin.style._tone_convert.to_tone2
+    -> pypinyin.style._tone_convert.to_tone3
+    note: func is ACTIONS[action] (line 47); the dict of lines 33-43 holds to_normal, to_tone, to_tone2 and to_tone3, imported from pypinyin.contrib.tone_convert, which re-exports them from pypinyin.style._tone_convert; any other action raises KeyError
+48:37 call  match_obj.group(2)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+49:27 call  '{0}{1}'.format(match_obj.group(1), converted)
+    -> <builtin>.str.format
+49:43 call  match_obj.group(1)
+    -> re.Match.group
+    -> _sre.SRE_Match.group
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+[pypinyin.tools.toneconvert.prepare]
+53:62 call  PHONETIC_SYMBOL_DICT_KEY_LENGTH_NOT_ONE.items()
+    -> <builtin>.dict.items
+55:34 call  input.replace(k, v)
+    -> <builtin>.str.replace
+
+[pypinyin.tools.toneconvert.convert]
+62:23 call  prepare(item)
+    -> pypinyin.tools.toneconvert.prepare
+63:31 call  re_pinyin.sub(lambda m: re_sub(action, m), item)
+    -> re.Pattern.sub
+    -> pypinyin.tools.toneconvert.convert.<lambda1>
+    -> _sre.SRE_Pattern.sub
+    note: Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values.
+
+64:14 call  print(result)
+    -> <builtin>.print
+
+[pypinyin.tools.toneconvert.convert.<lambda1>]
+63:48 call  re_sub(action, m)
+    -> pypinyin.tools.toneconvert.re_sub
+
+[pypinyin.tools.toneconvert.get_parser]
+68:28 call  ArgumentParser()
+    -> argparse.ArgumentParser
+71:42 call  parser.add_subparsers()
+    -> argparse.ArgumentParser.add_subparsers
+    note: version branch (toneconvert.py:70): admitted Python 2.7 and Python 3.4-3.6 take it; CHANGELOG.rst:413-414 withdraws support for 2.6/3.3 despite the broader requires-python bound. The callee remains argparse.ArgumentParser.add_subparsers.
+73:42 call  parser.add_subparsers(required=True, title='subcommands')
+    -> argparse.ArgumentParser.add_subparsers
+    note: version branch (toneconvert.py:70): Python 3.7 and later take it
+75:28 call  ACTIONS.keys()
+    -> <builtin>.dict.keys
+76:27 call  key.replace('_', '-')
+    -> <builtin>.str.replace
+77:23 call  partial(convert, key)
+    -> functools.partial
+    reject *: partial stores convert and its first argument; the partial object calls convert later, from main (args.func(args), line 99)
+78:33 call  subparser.add_parser( name, help='call pypinyin.contrib.t...
+    -> argparse._SubParsersAction.add_parser
+80:78 call  'call pypinyin.contrib.tone_convert.{}() with inputs'.for...
+    -> <builtin>.str.format
+81:23 call  p.set_defaults(func=func)
+    -> argparse.ArgumentParser.set_defaults
+82:23 call  p.add_argument('inputs', nargs='+')
+    -> argparse.ArgumentParser.add_argument
+
+[pypinyin.tools.toneconvert.main]
+90:28 call  sys.stdin.isatty()
+    -> io.TextIOWrapper.isatty
+91:35 call  sys.stdin.read()
+    -> io.TextIOWrapper.read
+91:43 call  sys.stdin.read().strip()
+    -> <builtin>.str.strip
+95:20 call  argv.append(pipe_data)
+    -> <builtin>.list.append
+97:24 call  get_parser()
+    -> pypinyin.tools.toneconvert.get_parser
+    reject pypinyin.runner.get_parser: get_parser here is the function of this module (toneconvert.py:67)
+98:29 call  parser.parse_args(argv)
+    -> argparse.ArgumentParser.parse_args
+99:14 call  args.func(args)
+    -> functools.partial.__call__
+    -> pypinyin.tools.toneconvert.convert
+    note: args.func is the functools.partial(convert, key) that get_parser sets as the default func of each subcommand (lines 77, 81); calling it calls convert back
+
+== pypinyin.utils
+
+[pypinyin.utils._replace_tone2_style_dict_to_default]
+12:25 call  tone2_to_tone(string)
+    -> pypinyin.style._tone_convert.tone2_to_tone
+
+[pypinyin.utils._remove_dup_items]
+21:27 call  new_lst.append(item)
+    -> <builtin>.list.append
+
+[pypinyin.utils._remove_dup_and_empty]
+28:32 call  _remove_dup_items(lst, remove_empty=True)
+    -> pypinyin.utils._remove_dup_items
+30:32 call  new_lst_list.append(lst)
+    -> <builtin>.list.append
+32:32 call  new_lst_list.append([''])
+    -> <builtin>.list.append

@@ -1,0 +1,3286 @@
+# Call-site ledger of markdown2 at 150454e3ba02caa3994d19cb5a8344fc92f3ce13.
+# Hand-written from the source (lib/markdown2.py); judgements in markdown2.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# markdown2.md ("Scope rules") shows how this ledger applies them. In short:
+# - The methods that @mark_stage decorates (16, markdown2.py:579-2108) are
+#   bound to the closure mark_stage.wrapper.inner; a call self._do_x(...)
+#   runs inner, and inner runs the original through func (255:24).
+# - The module registers 20 extra classes at import (4325-4344). Public
+#   Extra.register also admits LinkProcessor and GFMItalicAndBoldProcessor
+#   to inner's stage lists; both are also instantiated directly (1556, 2055).
+#   ItalicAndBoldProcessor remains abstract.
+# - Receivers named by the code: self.md is the Markdown; patterns (class
+#   attributes and locals from re.compile) are re.Pattern, their results
+#   re.Match; text values are str; self.extras, self.urls, self.html_blocks
+#   and the other tables are dicts; the option values of extras are client
+#   objects, except where a TypedDict or an isinstance test fixes dict (B4).
+default reject markdown2._memoized.__repr__: no _memoized object is formatted or converted to a string at this site; the only _memoized objects are the module globals _xml_oneliner_re_from_tab_width and _hr_tag_re_from_tab_width (markdown2.py:4589, 4609), which the package only calls; the operands of %, str.format, f-strings, str() and print() are strs, ints, bools, floats, tuples of those, re.Match groups, Stage members or client values
+default reject markdown2.Admonitions.sub, markdown2.Alerts.sub, markdown2.FencedCodeBlocks.sub, markdown2.ItalicAndBoldProcessor.sub, markdown2.MiddleWordEm.sub, markdown2.PyShell.sub, markdown2.Tables.sub, markdown2.Wavedrom.sub, markdown2.WikiTables.sub: the call is re.sub or the sub method of a compiled re.Pattern (a class attribute, or a local that re.compile made), not the sub method of an extra; where an extra passes its own self.sub as the replacement callback, the site accepts that one method explicitly
+
+== markdown2
+
+[markdown2]
+113:23 call  '.'.join(map(str, __version_info__))
+    -> <builtin>.str.join
+113:27 call  map(str, __version_info__)
+    -> <builtin>.map
+141:24 call  logging.getLogger("markdown")
+    -> logging.getLogger
+146:22 call  urandom(16)
+    -> os.urandom
+153:33 call  _hash_text(ch)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+159:27 call  re.compile(r'&(?!%s)' % _AMPERSAND_BODY_RE)
+    -> re.compile
+160:35 call  re.compile(r'(?:\\\\)*\\&(%s)' % _AMPERSAND_BODY_RE)
+    -> re.compile
+214:22 call  auto()
+    -> enum.auto
+215:21 call  auto()
+    -> enum.auto
+216:21 call  auto()
+    -> enum.auto
+218:23 call  auto()
+    -> enum.auto
+219:19 call  auto()
+    -> enum.auto
+220:17 call  auto()
+    -> enum.auto
+221:23 call  auto()
+    -> enum.auto
+222:24 call  auto()
+    -> enum.auto
+223:22 call  auto()
+    -> enum.auto
+225:22 call  auto()
+    -> enum.auto
+226:22 call  auto()
+    -> enum.auto
+227:26 call  auto()
+    -> enum.auto
+228:17 call  auto()
+    -> enum.auto
+229:27 call  auto()
+    -> enum.auto
+231:23 call  auto()
+    -> enum.auto
+232:23 call  auto()
+    -> enum.auto
+307:34 call  re.compile(r"^[ \t]+$", re.M)
+    -> re.compile
+430:44 call  re.compile(r""" <(a) ( [^>]* href= # href is required ['"...
+    -> re.compile
+579:6 decorator  @mark_stage(Stage.POSTPROCESS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+579:16 call  mark_stage(Stage.POSTPROCESS)
+    -> markdown2.mark_stage
+587:6 decorator  @mark_stage(Stage.PREPROCESS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+587:16 call  mark_stage(Stage.PREPROCESS)
+    -> markdown2.mark_stage
+607:36 call  re.compile(r''' ^{0}( # optional opening fence (?: {1}:(?...
+    -> re.compile
+618:19 call  r''' ^{0}( # optional opening fence (?: {1}:(?:\n+[ \t]+....
+    -> <builtin>.str.format
+621:35 call  re.compile( r"^-(?:[ \t]*([^\n]*)(?:[ \t]*[:-][ \t]*(\S+)...
+    -> re.compile
+625:35 call  re.compile( r"^([^:\n]+)[ \t]*:[ \t]*([^\n]*)(?:((?:\n[ \...
+    -> re.compile
+628:42 call  re.compile(r'^---[\ \t]*\n', re.MULTILINE)
+    -> re.compile
+629:36 call  re.compile("^\n", re.MULTILINE)
+    -> re.compile
+705:42 call  re.compile(r"((?:<!--)?\s*-\*-)\s*(?:(\S[^\r\n]*?)([\r\n]...
+    -> re.compile
+714:39 call  re.compile(r"""^ (?P<prefix>(?:[^\r\n|\n|\r])*?) [\ \t]*L...
+    -> re.compile
+873:38 call  re.compile(r""" ( # save in \1 ^ # start of line (with re...
+    -> re.compile
+894:39 call  re.compile(r""" ( # save in \1 ^ # start of line (with re...
+    -> re.compile
+907:40 call  re.compile( r'''\s+markdown=("1"|'1')''')
+    -> re.compile
+961:6 decorator  @mark_stage(Stage.HASH_HTML)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+961:16 call  mark_stage(Stage.HASH_HTML)
+    -> markdown2.mark_stage
+1139:6 decorator  @mark_stage(Stage.LINK_DEFS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1139:16 call  mark_stage(Stage.LINK_DEFS)
+    -> markdown2.mark_stage
+1217:24 call  re.compile(r'^[ ]{0,3}([-_*])[ ]{0,2}(\1[ ]{0,2}){2,}$', ...
+    -> re.compile
+1219:6 decorator  @mark_stage(Stage.BLOCK_GAMUT)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1219:16 call  mark_stage(Stage.BLOCK_GAMUT)
+    -> markdown2.mark_stage
+1250:6 decorator  @mark_stage(Stage.SPAN_GAMUT)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1250:16 call  mark_stage(Stage.SPAN_GAMUT)
+    -> markdown2.mark_stage
+1277:41 call  re.compile(r""" ( \\* # escapes (?: # tag </? (?:\w+) # t...
+    -> re.compile
+1304:34 call  re.compile(r'^((?:\\\\)*(?!\\))')
+    -> re.compile
+1306:6 decorator  @mark_stage(Stage.ESCAPE_SPECIAL)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1306:16 call  mark_stage(Stage.ESCAPE_SPECIAL)
+    -> markdown2.mark_stage
+1348:6 decorator  @mark_stage(Stage.HASH_HTML)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1348:16 call  mark_stage(Stage.HASH_HTML)
+    -> markdown2.mark_stage
+1449:36 call  re.compile(r''' ( # \1 [ \t]+ (['"]) # quote char = \2 (?...
+    -> re.compile
+1458:44 call  re.compile(r''' # Match tail of: [text][id] [ ]? # one op...
+    -> re.compile
+1467:29 call  re.compile(r'\s*')
+    -> re.compile
+1469:38 call  re.compile(r'<(.*)>.*')
+    -> re.compile
+1496:30 call  re.compile(r''' data: # in format type/subtype;parameter=...
+    -> re.compile
+1528:6 decorator  @property
+    -> <builtin>.property
+1546:6 decorator  @mark_stage(Stage.LINKS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1546:16 call  mark_stage(Stage.LINKS)
+    -> markdown2.mark_stage
+1617:23 call  re.compile(_h_re_base % '*', re.X | re.M)
+    -> re.compile
+1618:36 call  re.compile(_h_re_base % '+', re.X | re.M)
+    -> re.compile
+1647:27 call  re.compile(r''' ^<h([1-6])(.*)> # \1 tag num, \2 attrs (....
+    -> re.compile
+1678:6 decorator  @mark_stage(Stage.HEADERS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1678:16 call  mark_stage(Stage.HEADERS)
+    -> markdown2.mark_stage
+1721:6 decorator  @mark_stage(Stage.LISTS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1721:16 call  mark_stage(Stage.LISTS)
+    -> markdown2.mark_stage
+1781:31 call  re.compile(r''' (\n)? # leading line = \1 (^[ \t]*) # lea...
+    -> re.compile
+1788:19 call  r''' (\n)? # leading line = \1 (^[ \t]*) # leading whites...
+    -> <builtin>.str.format
+1791:36 call  re.compile(r''' (\[[\ xX]\])[ \t]+ # tasklist marker = \1...
+    -> re.compile
+1952:6 decorator  @mark_stage(Stage.CODE_BLOCKS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1952:16 call  mark_stage(Stage.CODE_BLOCKS)
+    -> markdown2.mark_stage
+1979:31 call  re.compile(r''' (?<!\\) (`+) # \1 = Opening run of ` (?!`...
+    -> re.compile
+1994:6 decorator  @mark_stage(Stage.CODE_SPANS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+1994:16 call  mark_stage(Stage.CODE_SPANS)
+    -> markdown2.mark_stage
+2039:28 call  re.compile(r''' (?:_{1,}|\*{1,})? # ignore any leading em...
+    -> re.compile
+2049:24 call  re.compile(r"(\*|_)(?=\S)(.*?\S)\1", re.S)
+    -> re.compile
+2052:6 decorator  @mark_stage(Stage.ITALIC_AND_BOLD)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+2052:16 call  mark_stage(Stage.ITALIC_AND_BOLD)
+    -> markdown2.mark_stage
+2069:33 call  re.compile(_block_quote_base % '', re.M | re.X)
+    -> re.compile
+2070:41 call  re.compile(_block_quote_base % '[ \t]*?!?', re.M | re.X)
+    -> re.compile
+2071:34 call  re.compile('^[ \t]*>[ \t]?', re.M)
+    -> re.compile
+2072:42 call  re.compile('^[ \t]*>[ \t]*?![ \t]?', re.M)
+    -> re.compile
+2073:40 call  re.compile(r'\A(?:^[ \t]*>[ \t]*?!.*[\n\r]*)+\Z', re.M)
+    -> re.compile
+2074:36 call  re.compile(r'(\s*<pre>.+?</pre>)', re.S)
+    -> re.compile
+2099:6 decorator  @mark_stage(Stage.BLOCK_QUOTES)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+2099:16 call  mark_stage(Stage.BLOCK_QUOTES)
+    -> markdown2.mark_stage
+2108:6 decorator  @mark_stage(Stage.PARAGRAPHS)
+    -> markdown2.mark_stage.wrapper
+    note: the decorator is the local function wrapper that mark_stage(stage) returns (markdown2.py:239)
+2108:16 call  mark_stage(Stage.PARAGRAPHS)
+    -> markdown2.mark_stage
+2209:30 call  re.compile(r'<(?![a-z/?\$!])', re.I)
+    -> re.compile
+2210:30 call  re.compile(r'''(?<![a-z0-9?!/'"-])>''', re.I)
+    -> re.compile
+2227:37 call  re.compile(r"\\*<(!--|/?\w+?(?!\w)\s*?.+?(?:[\s/]+?|$))")
+    -> re.compile
+2252:31 call  re.compile(r'<((https?|ftp):[^\'">\s]+)>', re.I)
+    -> re.compile
+2257:37 call  re.compile(r""" < (?:mailto:)? ( [-.\w]+ \@ [-\w]+(\.[-\w...
+    -> re.compile
+2332:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+2379:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+2405:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+2465:6 decorator  @classmethod
+    -> <builtin>.classmethod
+2479:6 decorator  @classmethod
+    -> <builtin>.classmethod
+2510:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+2561:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+2582:44 call  tuple()
+    -> <builtin>.tuple
+2906:6 decorator  @functools.lru_cache(maxsize=512)
+    -> functools.lru_cache.decorating_function
+    note: the decorator is the local function decorating_function that functools.lru_cache(maxsize=...) returns; it wraps the method in a functools._lru_cache_wrapper and calls no package code
+2906:25 call  functools.lru_cache(maxsize=512)
+    -> functools.lru_cache
+2955:6 decorator  @functools.lru_cache(maxsize=64)
+    -> functools.lru_cache.decorating_function
+    note: the decorator is the local function decorating_function that functools.lru_cache(maxsize=...) returns; it wraps the method in a functools._lru_cache_wrapper and calls no package code
+2955:25 call  functools.lru_cache(maxsize=64)
+    -> functools.lru_cache
+3333:32 call  re.compile(r''' ^(\ *)\.\.\ (%s)::\ * # $1 leading indent...
+    -> re.compile
+3386:26 call  re.compile(r''' <blockquote>\s* <p> \[!(?P<type>NOTE|TIP|...
+    -> re.compile
+3519:38 call  re.compile(r''' (?:\n+|\A\n?|(?<=\n)) (^[ \t]*`{3,})\s{0,...
+    -> re.compile
+3639:35 call  re.compile(r'(?<!\$)\$(?!\$)(.*?)\$')
+    -> re.compile
+3640:35 call  re.compile(r'\$\$(.*?)\$\$', re.DOTALL)
+    -> re.compile
+3643:36 call  re.compile(r"<pre>(.*?)</pre>", re.DOTALL)
+    -> re.compile
+3644:28 call  re.compile(r'```(.*?)```', re.DOTALL)
+    -> re.compile
+3645:28 call  re.compile(r'(?<!`)(`)(.*?)(?<!`)\1(?!`)')
+    -> re.compile
+3692:32 call  re.compile(r'!?\[.*?\]\(.*?\)')
+    -> re.compile
+4016:42 call  re.compile(r"(?<!\S)'(?=\S)")
+    -> re.compile
+4017:42 call  re.compile(r'(?<!\S)"(?=\S)')
+    -> re.compile
+4018:42 call  re.compile(r"(?<=\S)'")
+    -> re.compile
+4019:42 call  re.compile(r'(?<=\S)"(?=(\s|,|;|\.|\?|!|$))')
+    -> re.compile
+4024:37 call  re.compile(r"'(\d\d)(?=(\s|,|;|\.|\?|!|$))")
+    -> re.compile
+4087:28 call  re.compile(r"~~(?=\S)(.+?)(?<=\S)~~", re.S)
+    -> re.compile
+4187:32 call  re.compile(r"\|\|\s?(.+?)\s?\|\|", re.S)
+    -> re.compile
+4203:31 call  re.compile(r"(?<!<!)--(?!>)(?=\S)(.+?)(?<=\S)(?<!<!)--(?!...
+    -> re.compile
+4325:21 call  Admonitions.register()
+    -> markdown2.Extra.register
+4326:16 call  Alerts.register()
+    -> markdown2.Extra.register
+4327:16 call  Breaks.register()
+    -> markdown2.Extra.register
+4328:22 call  CodeFriendly.register()
+    -> markdown2.Extra.register
+4329:26 call  FencedCodeBlocks.register()
+    -> markdown2.Extra.register
+4330:15 call  Latex.register()
+    -> markdown2.Extra.register
+4331:22 call  LinkPatterns.register()
+    -> markdown2.Extra.register
+4332:24 call  MarkdownInHTML.register()
+    -> markdown2.Extra.register
+4333:27 call  MarkdownFileLinks.register()
+    -> markdown2.Extra.register
+4334:22 call  MiddleWordEm.register()
+    -> markdown2.Extra.register
+4335:17 call  Mermaid.register()
+    -> markdown2.Extra.register
+4336:19 call  Numbering.register()
+    -> markdown2.Extra.register
+4337:17 call  PyShell.register()
+    -> markdown2.Extra.register
+4338:21 call  SmartyPants.register()
+    -> markdown2.Extra.register
+4339:16 call  Strike.register()
+    -> markdown2.Extra.register
+4340:16 call  Tables.register()
+    -> markdown2.Extra.register
+4341:25 call  TelegramSpoiler.register()
+    -> markdown2.Extra.register
+4342:19 call  Underline.register()
+    -> markdown2.Extra.register
+4343:18 call  Wavedrom.register()
+    -> markdown2.Extra.register
+4344:20 call  WikiTables.register()
+    -> markdown2.Extra.register
+4396:31 call  re.compile(r'[^\w\s-]')
+    -> re.compile
+4397:35 call  re.compile(r'[-\s]+')
+    -> re.compile
+4589:44 call  _memoized(_xml_oneliner_re_from_tab_width)
+    -> markdown2._memoized.__init__
+4609:38 call  _memoized(_hr_tag_re_from_tab_width)
+    -> markdown2._memoized.__init__
+4815:13 call  sys.exit(main(sys.argv))
+    -> sys.exit
+4815:18 call  main(sys.argv)
+    -> markdown2.main
+
+[markdown2._hash_text]
+150:27 call  sha256(SECRET_SALT + s.encode("utf-8"))
+    -> hashlib.sha256
+150:50 call  s.encode("utf-8")
+    -> <builtin>.str.encode
+150:70 call  sha256(SECRET_SALT + s.encode("utf-8")).hexdigest()
+    -> _hashlib.HASH.hexdigest
+    -> _sha256.sha256.hexdigest
+    -> _sha2.SHA256Type.hexdigest
+    note: The public hashlib.sha256 factory uses _hashlib.HASH with OpenSSL, or the builtin fallback without _hashlib/its algorithm. Supported CPython 3.9 and 3.11 define the fallback receiver as _sha256.sha256; 3.12 defines _sha2.SHA256Type. These concrete classes have no public hashlib class alias. Retained primary hashlib and C type/factory/hexdigest sources establish all three receivers.
+
+[markdown2.markdown_path]
+182:21 call  codecs.open(path, 'r', encoding)
+    -> codecs.open
+183:19 call  fp.read()
+    -> codecs.StreamReaderWriter.read
+    note: codecs.open with an encoding (a str, by the annotation of markdown_path) returns a codecs.StreamReaderWriter
+184:13 call  fp.close()
+    -> io.BufferedReader.close
+    note: codecs.StreamReaderWriter defines no close; its __getattr__ returns the close of its stream, the file that codecs.open opens in binary mode ('rb', an io.BufferedReader)
+185:20 call  Markdown(html4tags=html4tags, tab_width=tab_width, safe_m...
+    -> markdown2.Markdown.__init__
+190:57 call  Markdown(html4tags=html4tags, tab_width=tab_width, safe_m...
+    -> markdown2.Markdown.convert
+
+[markdown2.markdown]
+205:20 call  Markdown(html4tags=html4tags, tab_width=tab_width, safe_m...
+    -> markdown2.Markdown.__init__
+210:66 call  Markdown(html4tags=html4tags, tab_width=tab_width, safe_m...
+    -> markdown2.Markdown.convert
+
+[markdown2.mark_stage.wrapper]
+240:10 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+240:25 call  functools.wraps(func)
+    -> functools.wraps
+
+[markdown2.mark_stage.wrapper.inner]
+251:34 call  extra.test(text)
+    -> markdown2.Extra.test
+    -> markdown2.Admonitions.test
+    -> markdown2.CodeFriendly.test
+    -> markdown2.FencedCodeBlocks.test
+    -> markdown2.LinkPatterns.test
+    -> markdown2.MarkdownFileLinks.test
+    -> markdown2.MiddleWordEm.test
+    -> markdown2.Strike.test
+    -> markdown2.Underline.test
+    -> markdown2.Wavedrom.test
+    reject markdown2.Alerts.test, markdown2.MarkdownInHTML.test, markdown2.PyShell.test, markdown2.SmartyPants.test, markdown2.TelegramSpoiler.test, markdown2.WikiTables.test: these extras are never in Extra._exec_order[stage][0]: Alerts, MarkdownInHTML, PyShell, SmartyPants and TelegramSpoiler only run after a stage (their order has no "before" part, markdown2.py:3384, 3762, 3978, 4014, 4185), and WikiTables runs before Tables, which is only in the "after" list of LISTS (markdown2.py:4270, 4103)
+    reject markdown2.ItalicAndBoldProcessor.test: ItalicAndBoldProcessor is abstract and has no package subclass
+    -> markdown2.GFMItalicAndBoldProcessor.test
+    -> markdown2.LinkProcessor.test
+    note: The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own test method.
+
+252:41 call  extra.run(text)
+    -> markdown2.Admonitions.run
+    -> markdown2.CodeFriendly.run
+    -> markdown2.FencedCodeBlocks.run
+    -> markdown2.Latex.run
+    -> markdown2.LinkPatterns.run
+    -> markdown2.MarkdownFileLinks.run
+    -> markdown2.MiddleWordEm.run
+    -> markdown2.Numbering.run
+    -> markdown2.Strike.run
+    -> markdown2.Underline.run
+    -> markdown2.Wavedrom.run
+    reject markdown2.Alerts.run, markdown2.Breaks.run, markdown2.MarkdownInHTML.run, markdown2.PyShell.run, markdown2.SmartyPants.run, markdown2.Tables.run, markdown2.TelegramSpoiler.run, markdown2.WikiTables.run: these extras are never in Extra._exec_order[stage][0] (see 251:34; Breaks and Tables only run after a stage, markdown2.py:3422, 4103)
+    reject markdown2.Extra.run: abstract; every registered class defines run or inherits FencedCodeBlocks.run (Mermaid)
+    reject markdown2.ItalicAndBoldProcessor.run: ItalicAndBoldProcessor is abstract and has no package subclass
+    -> markdown2.GFMItalicAndBoldProcessor.run
+    -> markdown2.LinkProcessor.run
+    note: The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own run method.
+
+255:24 call  func(md, text, *args, **kwargs)
+    -> markdown2.Markdown.postprocess
+    -> markdown2.Markdown.preprocess
+    -> markdown2.Markdown._hash_html_blocks
+    -> markdown2.Markdown._strip_link_definitions
+    -> markdown2.Markdown._run_block_gamut
+    -> markdown2.Markdown._run_span_gamut
+    -> markdown2.Markdown._escape_special_chars
+    -> markdown2.Markdown._hash_html_spans
+    -> markdown2.Markdown._do_links
+    -> markdown2.Markdown._do_headers
+    -> markdown2.Markdown._do_lists
+    -> markdown2.Markdown._do_code_blocks
+    -> markdown2.Markdown._do_code_spans
+    -> markdown2.Markdown._do_italics_and_bold
+    -> markdown2.Markdown._do_block_quotes
+    -> markdown2.Markdown._form_paragraphs
+    note: func is the function that wrapper decorates (markdown2.py:239); mark_stage is applied only as a decorator, to these 16 methods of Markdown (markdown2.py:579-2108)
+263:34 call  extra.test(text)
+    -> markdown2.Extra.test
+    -> markdown2.Alerts.test
+    -> markdown2.CodeFriendly.test
+    -> markdown2.FencedCodeBlocks.test
+    -> markdown2.MarkdownInHTML.test
+    -> markdown2.MarkdownFileLinks.test
+    -> markdown2.MiddleWordEm.test
+    -> markdown2.PyShell.test
+    -> markdown2.SmartyPants.test
+    -> markdown2.TelegramSpoiler.test
+    -> markdown2.Wavedrom.test
+    -> markdown2.WikiTables.test
+    reject markdown2.Admonitions.test, markdown2.LinkPatterns.test, markdown2.Strike.test, markdown2.Underline.test: Admonitions, LinkPatterns, Strike and Underline are registered only to run before a stage (their order has no "after" part, markdown2.py:3329, 3689, 4085, 4201), so they are never in Extra._exec_order[stage][1]
+    reject markdown2.GFMItalicAndBoldProcessor.test, markdown2.ItalicAndBoldProcessor.test: GFMItalicAndBoldProcessor registers only before ITALIC_AND_BOLD, not after a stage; ItalicAndBoldProcessor is abstract
+    -> markdown2.LinkProcessor.test
+    note: The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own test method.
+
+264:41 call  extra.run(text)
+    -> markdown2.Alerts.run
+    -> markdown2.Breaks.run
+    -> markdown2.CodeFriendly.run
+    -> markdown2.FencedCodeBlocks.run
+    -> markdown2.Latex.run
+    -> markdown2.MarkdownInHTML.run
+    -> markdown2.MarkdownFileLinks.run
+    -> markdown2.MiddleWordEm.run
+    -> markdown2.PyShell.run
+    -> markdown2.SmartyPants.run
+    -> markdown2.Tables.run
+    -> markdown2.TelegramSpoiler.run
+    -> markdown2.Wavedrom.run
+    -> markdown2.WikiTables.run
+    reject markdown2.Admonitions.run, markdown2.LinkPatterns.run, markdown2.Numbering.run, markdown2.Strike.run, markdown2.Underline.run: these extras are registered only to run before a stage, never in Extra._exec_order[stage][1] (see 263:34; Numbering, markdown2.py:3913)
+    reject markdown2.Extra.run: abstract; every registered class defines run or inherits FencedCodeBlocks.run (Mermaid)
+    reject markdown2.GFMItalicAndBoldProcessor.run, markdown2.ItalicAndBoldProcessor.run: GFMItalicAndBoldProcessor registers only before ITALIC_AND_BOLD, not after a stage; ItalicAndBoldProcessor is abstract
+    -> markdown2.LinkProcessor.run
+    note: The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own run method.
+
+[markdown2.Markdown.__init__]
+337:19 call  getattr(self, 'extras', None)
+    -> <builtin>.getattr
+339:28 call  isinstance(self.extras, dict)
+    -> <builtin>.isinstance
+345:30 call  isinstance(extras, dict)
+    -> <builtin>.isinstance
+347:31 call  self.extras.update(extras)
+    -> <builtin>.dict.update
+348:26 call  isinstance(self.extras, dict)
+    -> <builtin>.isinstance
+357:57 call  self.extras["toc"].get("depth", 6)
+    note: self.extras["toc"] is the client's option value of the toc extra (extras is typed dict[str, Any]); the package itself stores only None, ints and strs there (lists of names, main() and the emacs file variables), and None takes the other branch. The client's mapping is opaque (rule B5): no outside callee
+360:30 call  isinstance(self.extras['header-ids'], dict)
+    -> <builtin>.isinstance
+368:35 call  self.extras.setdefault('breaks', {})
+    -> <builtin>.dict.setdefault
+378:36 call  MarkdownError("If the 'link-patterns' extra is used, an a...
+    -> <builtin>.Exception.__init__
+381:49 call  self.extras.copy()
+    -> <builtin>.dict.copy
+386:38 call  re.compile(r'^(\t|[ ]{1,%d})' % tab_width, re.M)
+    -> re.compile
+389:49 call  g_escape_table.copy()
+    -> <builtin>.dict.copy
+392:49 call  _hash_text('"')
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+393:49 call  _hash_text("'")
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.Markdown.reset]
+401:49 call  self._instance_extras.copy()
+    -> <builtin>.dict.copy
+402:27 call  self._setup_extras()
+    -> markdown2.Markdown._setup_extras
+
+[markdown2.Markdown._setup_extras]
+409:41 call  OrderedDict()
+    -> collections.OrderedDict
+411:47 call  _hash_text('<<footnote>>')
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+413:27 call  hasattr(self, '_count_from_header_id')
+    -> <builtin>.hasattr
+413:91 call  self.extras['header-ids'].get('reset-count', False)
+    -> <builtin>.dict.get
+414:57 call  defaultdict(int)
+    -> collections.defaultdict
+419:49 call  Extra._registry.items()
+    -> <builtin>.dict.items
+422:45 call  klass(self, (self.extras.get(name, {})))
+    -> markdown2.Extra.__init__
+    -> markdown2.CodeFriendly.__init__
+    -> markdown2.MarkdownFileLinks.__init__
+    -> markdown2.MiddleWordEm.__init__
+    exclude markdown2.ItalicAndBoldProcessor.__init__: ItalicAndBoldProcessor is abstract and has no package subclass; public registration of the concrete LinkProcessor is accepted
+    -> markdown2.LinkProcessor.__init__
+    note: LinkProcessor.register() is a public inherited classmethod. It stores the concrete package class under link-processor; _setup_extras invokes it with (self, options), which binds LinkProcessor.__init__(self,md,options). This accepted constructor follows public classmethod registration; the remaining exclusion concerns only abstract ItalicAndBoldProcessor.
+
+422:68 call  self.extras.get(name, {})
+    -> <builtin>.dict.get
+
+[markdown2.Markdown.convert]
+453:19 call  self.reset()
+    -> markdown2.Markdown.reset
+455:26 call  isinstance(text, str)
+    -> <builtin>.isinstance
+457:23 call  str(text, 'utf-8')
+    -> <builtin>.str
+461:53 call  self._emacs_oneliner_vars_pat.sub(self._emacs_vars_onelin...
+    -> re.Pattern.sub
+    -> markdown2.Markdown._emacs_vars_oneliner_sub
+462:46 call  self._get_emacs_vars(text)
+    -> markdown2.Markdown._get_emacs_vars
+464:38 call  re.compile("[ ,]+")
+    -> re.compile
+465:40 call  splitter.split(emacs_vars["markdown-extras"])
+    -> re.Pattern.split
+467:46 call  e.split('=', 1)
+    -> <builtin>.str.split
+469:39 call  int(earg)
+    -> <builtin>.int
+476:31 call  self._setup_extras()
+    -> markdown2.Markdown._setup_extras
+479:28 call  text.replace("\r\n", "\n")
+    -> <builtin>.str.replace
+480:28 call  text.replace("\r", "\n")
+    -> <builtin>.str.replace
+486:27 call  self._detab(text)
+    -> markdown2.Markdown._detab
+492:41 call  self._ws_only_line_re.sub("", text)
+    -> re.Pattern.sub
+496:42 call  self._extract_metadata(text)
+    -> markdown2.Markdown._extract_metadata
+498:31 call  self.preprocess(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown.preprocess: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+501:41 call  self._hash_html_spans(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._hash_html_spans: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+504:38 call  self._hash_html_blocks(text, raw=True)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._hash_html_blocks: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+511:52 call  self._strip_footnote_definitions(text)
+    -> markdown2.Markdown._strip_footnote_definitions
+512:44 call  self._strip_link_definitions(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._strip_link_definitions: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+514:37 call  self._run_block_gamut(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_block_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+517:44 call  self._do_footnote_marker(text)
+    -> markdown2.Markdown._do_footnote_marker
+518:39 call  self._add_footnotes(text)
+    -> markdown2.Markdown._add_footnotes
+520:32 call  self.postprocess(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown.postprocess: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+522:44 call  self._unescape_special_chars(text)
+    -> markdown2.Markdown._unescape_special_chars
+524:39 call  self._unhash_html_spans(text)
+    -> markdown2.Markdown._unhash_html_spans
+527:32 call  text.replace(self.html_removed_text, self.html_removed_te...
+    -> <builtin>.str.replace
+533:55 call  self._a_nofollow_or_blank_links.sub(r'<\1 rel="nofollow n...
+    -> re.Pattern.sub
+535:55 call  self._a_nofollow_or_blank_links.sub(r'<\1 rel="noopener" ...
+    -> re.Pattern.sub
+537:55 call  self._a_nofollow_or_blank_links.sub(r'<\1 rel="nofollow"\...
+    -> re.Pattern.sub
+540:45 call  self.extras['header-ids'].get('mixed')
+    -> <builtin>.dict.get
+551:31 call  self._toc.sort(key=toc_sort)
+    -> <builtin>.list.sort
+    -> markdown2.Markdown.convert.toc_sort
+552:48 call  calculate_toc_html(self._toc)
+    -> markdown2.calculate_toc_html
+555:86 call  self.extras['toc'].get('prepend', False)
+    note: self.extras['toc'] is the client's option value of the toc extra (see 357:57), an opaque client object (rule B5): no outside callee
+561:30 call  UnicodeWithAttrs(text)
+    note: UnicodeWithAttrs is a str subclass without __init__ or __new__; str.__new__ makes the object and the first __init__ of the MRO is object.__init__, so the call gives no edge
+
+[markdown2.Markdown.convert.toc_sort]
+544:38 call  re.search( # header tag, any attrs, the ID, any attrs, th...
+    -> re.search
+546:96 call  re.escape(entry[2])
+    -> re.escape
+549:39 call  match.start()
+    -> re.Match.start
+
+[markdown2.Markdown._do_footnote_marker]
+577:22 call  re.sub(r'%s-(.*?)(?=</a></sup>)' % self._footnote_marker,...
+    -> re.sub
+    -> markdown2.Markdown._do_footnote_marker.footnote_sub
+
+[markdown2.Markdown._do_footnote_marker.footnote_sub]
+572:36 call  match.group(1)
+    -> re.Match.group
+574:41 call  self.footnote_ids.append(normed_id)
+    -> <builtin>.list.append
+575:23 call  str(len(self.footnote_ids))
+    -> <builtin>.str
+575:27 call  len(self.footnote_ids)
+    -> <builtin>.len
+
+[markdown2.Markdown._extract_metadata]
+632:27 call  text.startswith("---")
+    -> <builtin>.str.startswith
+633:36 call  re.split(self._meta_data_fence_pattern, text, maxsplit=2)
+    -> re.split
+637:38 call  re.split(self._meta_data_newline, text, maxsplit=1)
+    -> re.split
+643:38 call  re.findall(self._meta_data_pattern, metadata_content)
+    -> re.findall
+685:30 call  item.split(":", 1)
+    -> <builtin>.str.split
+689:38 call  k.strip()
+    -> <builtin>.str.strip
+689:51 call  _dedent(v[3:])
+    -> markdown2._dedent
+689:64 call  _dedent(v[3:]).strip()
+    -> <builtin>.str.strip
+693:38 call  k.strip()
+    -> <builtin>.str.strip
+697:38 call  k.strip()
+    -> <builtin>.str.strip
+697:66 call  parse_structured_value(v)
+    -> markdown2.Markdown._extract_metadata.parse_structured_value
+701:38 call  k.strip()
+    -> <builtin>.str.strip
+701:51 call  v.strip()
+    -> <builtin>.str.strip
+
+[markdown2.Markdown._extract_metadata.parse_structured_value]
+648:30 call  value.lstrip()
+    -> <builtin>.str.lstrip
+649:31 call  value.replace(v[: len(value) - len(vs)], "\n")
+    -> <builtin>.str.replace
+649:39 call  len(value)
+    -> <builtin>.len
+649:52 call  len(vs)
+    -> <builtin>.len
+652:29 call  vs.startswith("-")
+    -> <builtin>.str.startswith
+657:40 call  re.findall(self._key_val_list_pat, vs)
+    -> re.findall
+659:33 call  r.append(match[0].strip())
+    -> <builtin>.list.append
+659:48 call  match[0].strip()
+    -> <builtin>.str.strip
+661:33 call  r.append(match[2].strip())
+    -> <builtin>.list.append
+661:48 call  match[2].strip()
+    -> <builtin>.str.strip
+663:33 call  r.append({match[0].strip(): match[1].strip()})
+    -> <builtin>.list.append
+663:49 call  match[0].strip()
+    -> <builtin>.str.strip
+663:67 call  match[1].strip()
+    -> <builtin>.str.strip
+665:33 call  r.append(parse_structured_value(match[2]))
+    -> <builtin>.list.append
+665:56 call  parse_structured_value(match[2])
+    -> markdown2.Markdown._extract_metadata.parse_structured_value
+675:35 call  match[0].strip()
+    -> <builtin>.str.strip
+676:39 call  match[1].strip()
+    -> <builtin>.str.strip
+678:52 call  parse_structured_value(match[2])
+    -> markdown2.Markdown._extract_metadata.parse_structured_value
+680:44 call  re.findall(self._key_val_dict_pat, vs)
+    -> re.findall
+
+[markdown2.Markdown._emacs_vars_oneliner_sub]
+722:23 call  match.group(1)
+    -> re.Match.group
+722:32 call  match.group(1).strip()
+    -> <builtin>.str.strip
+722:59 call  match.group(4)
+    -> re.Match.group
+722:68 call  match.group(4).strip()
+    -> <builtin>.str.strip
+723:33 call  re.findall(r'^\s*', match.group(1))
+    -> re.findall
+723:54 call  match.group(1)
+    -> re.Match.group
+724:33 call  re.findall(r'\s*$', match.group(4))
+    -> re.findall
+724:54 call  match.group(4)
+    -> re.Match.group
+725:50 call  '{}<!-- {} {} {} -->{}'.format(lead_ws, '-*-', match.grou...
+    -> <builtin>.str.format
+725:78 call  match.group(2)
+    -> re.Match.group
+725:87 call  match.group(2).strip()
+    -> <builtin>.str.strip
+727:32 call  match.span()
+    -> re.Match.span
+
+[markdown2.Markdown._get_emacs_vars]
+738:19 call  pow(2, 13)
+    -> <builtin>.pow
+743:57 call  self._emacs_oneliner_vars_pat.search(head)
+    -> re.Pattern.search
+745:45 call  match.group(2)
+    -> re.Match.group
+747:42 call  s.strip()
+    -> <builtin>.str.strip
+747:74 call  emacs_vars_str.split(';')
+    -> <builtin>.str.split
+748:45 call  s.strip()
+    -> <builtin>.str.strip
+749:23 call  len(emacs_var_strs)
+    -> <builtin>.len
+754:65 call  emacs_var_strs[0].strip()
+    -> <builtin>.str.strip
+758:66 call  emacs_var_str.strip()
+    -> <builtin>.str.strip
+758:74 call  emacs_var_str.strip().split(':', 1)
+    -> <builtin>.str.split
+760:38 call  log.debug("emacs variables error: malformed -*- " "line: ...
+    -> logging.Logger.debug
+765:50 call  variable.lower()
+    -> <builtin>.str.lower
+765:67 call  value.strip()
+    -> <builtin>.str.strip
+769:54 call  self._emacs_local_vars_pat.search(tail)
+    -> re.Pattern.search
+771:37 call  match.group("prefix")
+    -> re.Match.group
+772:37 call  match.group("suffix")
+    -> re.Match.group
+773:36 call  match.group("content")
+    -> re.Match.group
+773:58 call  match.group("content").splitlines(False)
+    -> <builtin>.str.splitlines
+779:41 call  enumerate(lines)
+    -> <builtin>.enumerate
+780:43 call  line.startswith(prefix)
+    -> <builtin>.str.startswith
+781:34 call  log.debug("emacs variables error: line '%s' " "does not u...
+    -> logging.Logger.debug
+787:32 call  len(lines)
+    -> <builtin>.len
+787:63 call  line.endswith(suffix)
+    -> <builtin>.str.endswith
+788:34 call  log.debug("emacs variables error: line '%s' " "does not u...
+    -> logging.Logger.debug
+797:40 call  len(prefix)
+    -> <builtin>.len
+799:42 call  len(suffix)
+    -> <builtin>.len
+800:38 call  line.strip()
+    -> <builtin>.str.strip
+803:41 call  line.endswith('\\')
+    -> <builtin>.str.endswith
+804:52 call  line[:-1].rstrip()
+    -> <builtin>.str.rstrip
+810:57 call  line.split(':', 1)
+    -> <builtin>.str.split
+812:38 call  log.debug("local variables error: missing colon " "in loc...
+    -> logging.Logger.debug
+817:44 call  value.strip()
+    -> <builtin>.str.strip
+818:42 call  value.endswith('\\')
+    -> <builtin>.str.endswith
+819:54 call  value[:-1].rstrip()
+    -> <builtin>.str.rstrip
+826:29 call  list(emacs_vars.items())
+    -> <builtin>.list
+826:46 call  emacs_vars.items()
+    -> <builtin>.dict.items
+827:19 call  len(val)
+    -> <builtin>.len
+827:48 call  val.startswith('"')
+    -> <builtin>.str.startswith
+827:70 call  val.endswith('"')
+    -> <builtin>.str.endswith
+828:33 call  val.startswith('"')
+    -> <builtin>.str.startswith
+828:55 call  val.endswith('"')
+    -> <builtin>.str.endswith
+
+[markdown2.Markdown._detab_line]
+839:36 call  line.split('\t', 1)
+    -> <builtin>.str.split
+840:47 call  len(chunk1)
+    -> <builtin>.len
+842:32 call  self._detab_line(output)
+    -> markdown2.Markdown._detab_line
+
+[markdown2.Markdown._detab]
+862:36 call  text.splitlines()
+    -> <builtin>.str.splitlines
+863:26 call  output.append(self._detab_line(line))
+    -> <builtin>.list.append
+863:43 call  self._detab_line(line)
+    -> markdown2.Markdown._detab_line
+864:25 call  '\n'.join(output)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._hash_html_block_sub]
+914:22 call  isinstance(match, str)
+    -> <builtin>.isinstance
+918:31 call  match.group(1)
+    -> re.Match.group
+920:34 call  match.group(2)
+    -> re.Match.group
+925:25 call  re.match(r'.*?<(\S).*?\s*>', html)
+    -> re.match
+928:26 call  m.group(1)
+    -> re.Match.group
+931:39 call  self._sanitize_html(html)
+    -> markdown2.Markdown._sanitize_html
+933:36 call  html.split('\n', 1)
+    -> <builtin>.str.split
+934:51 call  self._html_markdown_attr_re.search(first_line)
+    -> re.Pattern.search
+936:35 call  html.split('\n')
+    -> <builtin>.str.split
+938:29 call  list(filter(None, (re.split(r'(.*?<%s.*markdown=.*?>)' % ...
+    -> <builtin>.list
+938:36 call  filter(None, (re.split(r'(.*?<%s.*markdown=.*?>)' % tag, ...
+    -> <builtin>.filter
+938:52 call  re.split(r'(.*?<%s.*markdown=.*?>)' % tag, lines[0])
+    -> re.split
+940:42 call  list(filter(None, re.split(r'(\s*?</%s>.*?$)' % tag, line...
+    -> <builtin>.list
+940:49 call  filter(None, re.split(r'(\s*?</%s>.*?$)' % tag, lines[-1]))
+    -> <builtin>.filter
+940:64 call  re.split(r'(\s*?</%s>.*?$)' % tag, lines[-1])
+    -> re.split
+943:35 call  '\n'.join(lines[1:-1])
+    -> <builtin>.str.join
+946:49 call  m.start()
+    -> re.Match.start
+946:71 call  m.end()
+    -> re.Match.end
+948:35 call  _hash_text(first_line)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+950:35 call  _hash_text(last_line)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+952:31 call  ''.join(["\n\n", f_key, "\n\n", middle, "\n\n", l_key, "\...
+    -> <builtin>.str.join
+955:29 call  self.extras.get('header-ids', {})
+    -> <builtin>.dict.get
+955:51 call  self.extras.get('header-ids', {}).get('mixed')
+    -> <builtin>.dict.get
+955:85 call  self._h_tag_re.match(html)
+    -> re.Pattern.match
+956:38 call  self._h_tag_re.sub(self._h_tag_sub, html)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._h_tag_sub
+957:25 call  _hash_text(html)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.Markdown._hash_html_blocks]
+978:37 call  _curry(self._hash_html_block_sub, raw=raw)
+    -> markdown2._curry
+    reject markdown2.Markdown._hash_html_block_sub: _curry only stores the function in the closure result; result calls it later (markdown2.py:4417)
+991:42 call  self._strict_tag_block_sub(text, self._block_tags_a, hash...
+    -> markdown2.Markdown._strict_tag_block_sub
+994:46 call  self._liberal_tag_block_re.sub(hash_html_block_sub, text)
+    -> re.Pattern.sub
+    -> markdown2._curry.result
+    note: the replacement is hash_html_block_sub, the closure that _curry returns (markdown2.py:978); re calls it for each match
+998:42 call  self._strict_tag_block_sub( text, self._span_tags, # inli...
+    -> markdown2.Markdown._strict_tag_block_sub
+    reject markdown2.Markdown._hash_html_blocks.<lambda1>: _strict_tag_block_sub calls the lambda itself (callback(...) at markdown2.py:1120), an edge of that function
+1007:51 call  _hr_tag_re_from_tab_width(self.tab_width)
+    -> markdown2._memoized.__call__
+    reject markdown2._hr_tag_re_from_tab_width: the module name is rebound to _memoized(_hr_tag_re_from_tab_width) at markdown2.py:4609, so the call runs _memoized.__call__, which calls the function itself (markdown2.py:4558)
+    note: the name is the _memoized object of markdown2.py:4609
+1008:34 call  _hr_tag_re.sub(hash_html_block_sub, text)
+    -> re.Pattern.sub
+    -> markdown2._curry.result
+    note: the replacement is hash_html_block_sub, the closure that _curry returns (markdown2.py:978); re calls it for each match
+1016:43 call  text.index("<!--", start)
+    -> <builtin>.str.index
+1020:41 call  text.index("-->", start_idx)
+    -> <builtin>.str.index
+1030:35 call  range(self.tab_width - 1)
+    -> <builtin>.range
+1049:36 call  len(text)
+    -> <builtin>.len
+1060:47 call  self._sanitize_html(html)
+    -> markdown2.Markdown._sanitize_html
+1061:33 call  _hash_text(html)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+1073:63 call  _xml_oneliner_re_from_tab_width(self.tab_width)
+    -> markdown2._memoized.__call__
+    reject markdown2._xml_oneliner_re_from_tab_width: the module name is rebound to _memoized(_xml_oneliner_re_from_tab_width) at markdown2.py:4589, so the call runs _memoized.__call__, which calls the function itself (markdown2.py:4558)
+    note: the name is the _memoized object of markdown2.py:4589
+1074:40 call  _xml_oneliner_re.sub(hash_html_block_sub, text)
+    -> re.Pattern.sub
+    -> markdown2._curry.result
+    note: the replacement is hash_html_block_sub, the closure that _curry returns (markdown2.py:978); re calls it for each match
+
+[markdown2.Markdown._hash_html_blocks.<lambda1>]
+1001:42 call  hash_html_block_sub(self._run_span_gamut(t))
+    -> markdown2._curry.result
+    note: hash_html_block_sub is the closure that _curry returns (markdown2.py:978)
+1001:63 call  self._run_span_gamut(t)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+
+[markdown2.Markdown._strict_tag_block_sub]
+1100:37 call  text.splitlines(True)
+    -> <builtin>.str.splitlines
+1101:33 call  re.match( r'^(\s{{0,{}}})(?:</code>(?=</pre>))?(</?({})\b...
+    -> re.match
+1102:75 call  r'^(\s{{0,{}}})(?:</code>(?=</pre>))?(</?({})\b>?)'.forma...
+    -> <builtin>.str.format
+1107:36 call  chunk.startswith('%s</' % is_markup.group(1))
+    -> <builtin>.str.startswith
+1107:61 call  is_markup.group(1)
+    -> re.Match.group
+1111:43 call  self._tag_is_closed(is_markup.group(3), chunk)
+    -> markdown2.Markdown._tag_is_closed
+1111:59 call  is_markup.group(3)
+    -> re.Match.group
+1116:54 call  is_markup.group(3)
+    -> re.Match.group
+1120:37 call  callback(block.rstrip('\n'))
+    -> markdown2._curry.result
+    -> markdown2.Markdown._hash_html_blocks.<lambda1>
+    -> markdown2.MarkdownInHTML.run.callback
+    note: _strict_tag_block_sub is private; the package passes as callback the closure hash_html_block_sub from _curry (markdown2.py:991), the lambda of markdown2.py:1001 and the local function callback of MarkdownInHTML.run (markdown2.py:3771)
+1120:50 call  block.rstrip('\n')
+    -> <builtin>.str.rstrip
+
+[markdown2.Markdown._tag_is_closed]
+1131:15 call  len(re.findall('<%s(?:.*?)>' % tag_name, text))
+    -> <builtin>.len
+1131:26 call  re.findall('<%s(?:.*?)>' % tag_name, text)
+    -> re.findall
+1131:73 call  text.count('</%s>' % tag_name)
+    -> <builtin>.str.count
+1135:32 call  text.find(f'</{tag_name}')
+    -> <builtin>.str.find
+1136:31 call  text.find(f'<{tag_name}')
+    -> <builtin>.str.find
+
+[markdown2.Markdown._strip_link_definitions]
+1147:34 call  re.compile(r""" ^[ ]{0,%d}\[(.+)\]: # id = \1 [ \t]* \n? ...
+    -> re.compile
+1165:32 call  _link_def_re.sub(self._extract_link_def_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._extract_link_def_sub
+
+[markdown2.Markdown._extract_link_def_sub]
+1168:38 call  match.groups()
+    -> re.Match.groups
+1169:23 call  id.lower()
+    -> <builtin>.str.lower
+1170:54 call  self._encode_amps_and_angles(url)
+    -> markdown2.Markdown._encode_amps_and_angles
+
+[markdown2.Markdown._extract_footnote_def_sub]
+1176:32 call  match.groups()
+    -> re.Match.groups
+1177:23 call  _dedent(text, skip_first_line=not text.startswith('\n'))
+    -> markdown2._dedent
+1177:65 call  text.startswith('\n')
+    -> <builtin>.str.startswith
+1177:78 call  _dedent(text, skip_first_line=not text.startswith('\n'))....
+    -> <builtin>.str.strip
+1178:27 call  re.sub(r'\W', '-', id)
+    -> re.sub
+
+[markdown2.Markdown._strip_footnote_definitions]
+1200:37 call  re.compile(r''' ^[ ]{0,%d}\[\^(.+)\]: # id = \1 [ \t]* ( ...
+    -> re.compile
+1215:35 call  footnote_def_re.sub(self._extract_footnote_def_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._extract_footnote_def_sub
+
+[markdown2.Markdown._run_block_gamut]
+1224:32 call  self._do_headers(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_headers: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1232:22 call  re.sub(self._hr_re, hr, text)
+    -> re.sub
+1234:30 call  self._do_lists(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_lists: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1236:36 call  self._do_code_blocks(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_code_blocks: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1238:37 call  self._do_block_quotes(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_block_quotes: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1244:38 call  self._hash_html_blocks(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._hash_html_blocks: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1246:37 call  self._form_paragraphs(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._form_paragraphs: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+
+[markdown2.Markdown._run_span_gamut]
+1255:35 call  self._do_code_spans(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_code_spans: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1257:42 call  self._escape_special_chars(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._escape_special_chars: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1260:30 call  self._do_links(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_links: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1265:35 call  self._do_auto_links(text)
+    -> markdown2.Markdown._do_auto_links
+1267:44 call  self._encode_amps_and_angles(text)
+    -> markdown2.Markdown._encode_amps_and_angles
+1269:41 call  self._do_italics_and_bold(text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_italics_and_bold: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1272:22 call  re.sub(r" {2,}\n(?!\<(?:\/?(ul|ol|li))\>)", "<br%s\n" % s...
+    -> re.sub
+
+[markdown2.Markdown._escape_special_chars]
+1316:56 call  self._sorta_html_tokenize_re.split(text)
+    -> re.Pattern.split
+1319:62 call  self._is_unescaped_re.match(token)
+    -> re.Pattern.match
+1326:64 call  self._is_unescaped_re.split(token)
+    -> re.Pattern.split
+1327:31 call  escaped.append( escape_seq.replace('\\\\', self._escape_t...
+    -> <builtin>.list.append
+1328:39 call  escape_seq.replace('\\\\', self._escape_table['\\'])
+    -> <builtin>.str.replace
+1329:36 call  token.replace('*', self._escape_table['*'])
+    -> <builtin>.str.replace
+1330:36 call  token.replace('*', self._escape_table['*']) .replace('_',...
+    -> <builtin>.str.replace
+1333:31 call  escaped.append( self._encode_backslash_escapes( token.rep...
+    -> <builtin>.list.append
+1334:51 call  self._encode_backslash_escapes( token.replace('\\<', '&lt...
+    -> markdown2.Markdown._encode_backslash_escapes
+1335:38 call  token.replace('\\<', '&lt;')
+    -> <builtin>.str.replace
+1335:61 call  token.replace('\\<', '&lt;').replace('\\>', '&gt;')
+    -> <builtin>.str.replace
+1339:23 call  ''.join(escaped)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._is_auto_link]
+1342:52 call  self._auto_link_re.match(text)
+    -> re.Pattern.match
+1344:60 call  self._auto_email_link_re.match(text)
+    -> re.Pattern.match
+
+[markdown2.Markdown._hash_html_spans]
+1374:38 call  self._code_span_re.sub( lambda m: self._hash_span(m.strin...
+    -> re.Pattern.sub
+    -> markdown2.Markdown._hash_html_spans.<lambda1>
+1380:58 call  self._sorta_html_tokenize_re.split(text)
+    -> re.Pattern.split
+1382:26 call  len(split_tokens)
+    -> <builtin>.len
+1385:36 call  _is_code_span(index, token)
+    -> markdown2.Markdown._hash_html_spans._is_code_span
+1387:57 call  self._is_auto_link(token)
+    -> markdown2.Markdown._is_auto_link
+1388:41 call  _is_comment(token)
+    -> markdown2.Markdown._hash_html_spans._is_comment
+1390:34 call  tokens.append(self._hash_span(self._sanitize_html(is_comm...
+    -> <builtin>.list.append
+1390:50 call  self._hash_span(self._sanitize_html(is_comment.group(1)))
+    -> markdown2.Markdown._hash_span
+1390:70 call  self._sanitize_html(is_comment.group(1))
+    -> markdown2.Markdown._sanitize_html
+1390:87 call  is_comment.group(1)
+    -> re.Match.group
+1392:34 call  tokens.append(self._sanitize_html(is_comment.group(2)))
+    -> <builtin>.list.append
+1392:54 call  self._sanitize_html(is_comment.group(2))
+    -> markdown2.Markdown._sanitize_html
+1392:71 call  is_comment.group(2)
+    -> re.Match.group
+1393:34 call  tokens.append(self._hash_span(self._sanitize_html(is_comm...
+    -> <builtin>.list.append
+1393:50 call  self._hash_span(self._sanitize_html(is_comment.group(3)))
+    -> markdown2.Markdown._hash_span
+1393:70 call  self._sanitize_html(is_comment.group(3))
+    -> markdown2.Markdown._sanitize_html
+1393:87 call  is_comment.group(3)
+    -> re.Match.group
+1394:49 call  self._is_unescaped_re.match(token)
+    -> re.Pattern.match
+1396:34 call  tokens.append(self._escape_special_chars(token))
+    -> <builtin>.list.append
+1396:61 call  self._escape_special_chars(token)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._escape_special_chars: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1398:34 call  tokens.append(self._hash_span(self._sanitize_html(token)))
+    -> <builtin>.list.append
+1398:50 call  self._hash_span(self._sanitize_html(token))
+    -> markdown2.Markdown._hash_span
+1398:70 call  self._sanitize_html(token)
+    -> markdown2.Markdown._sanitize_html
+1401:30 call  tokens.extend(split_tokens[index: index + 3])
+    -> <builtin>.list.extend
+1405:30 call  tokens.append(self._encode_incomplete_tags(token))
+    -> <builtin>.list.append
+1405:59 call  self._encode_incomplete_tags(token)
+    -> markdown2.Markdown._encode_incomplete_tags
+1408:23 call  ''.join(tokens)
+    -> <builtin>.str.join
+1410:43 call  code_hashes.items()
+    -> <builtin>.dict.items
+1411:32 call  text.replace(key, code)
+    -> <builtin>.str.replace
+
+[markdown2.Markdown._hash_html_spans._is_code_span]
+1363:28 call  re.match(r'<code>md5-[A-Fa-f0-9]{32}</code>', ''.join(pee...
+    -> re.match
+1363:73 call  ''.join(peek_tokens)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._hash_html_spans._is_comment]
+1369:28 call  re.match(r'(<!--)(.*)(-->)', token)
+    -> re.match
+
+[markdown2.Markdown._hash_html_spans.<lambda1>]
+1375:38 call  self._hash_span(m.string[m.start(): m.end()], code_hashes)
+    -> markdown2.Markdown._hash_span
+1375:55 call  m.start()
+    -> re.Match.start
+1375:64 call  m.end()
+    -> re.Match.end
+
+[markdown2.Markdown._unhash_html_spans]
+1425:43 call  list(self.html_spans.items())
+    -> <builtin>.list
+1425:65 call  self.html_spans.items()
+    -> <builtin>.dict.items
+1426:40 call  text.replace(key, sanitized)
+    -> <builtin>.str.replace
+1428:38 call  list(self._code_table.items())
+    -> <builtin>.list
+1428:61 call  self._code_table.items()
+    -> <builtin>.dict.items
+1429:40 call  text.replace(key, code)
+    -> <builtin>.str.replace
+
+[markdown2.Markdown._sanitize_html]
+1443:30 call  s.replace(before, after)
+    -> <builtin>.str.replace
+1446:32 call  MarkdownError("invalid value for 'safe_mode': %r (must be...
+    -> <builtin>.Exception.__init__
+
+[markdown2.Markdown._find_non_whitespace]
+1475:39 call  self._whitespace.match(text, start)
+    -> re.Pattern.match
+1476:25 call  match.end()
+    -> re.Match.end
+1476:45 call  len(text)
+    note: no callee: self._whitespace is re.compile(r'\s*') (markdown2.py:1467), which matches the empty string at any position (a pos past the end is clamped to the end), so match is never None and len(text) never runs
+
+[markdown2.Markdown._find_balanced]
+1484:16 call  len(text)
+    -> <builtin>.len
+
+[markdown2.Markdown._protect_url]
+1515:43 call  self._data_url_re.match(url)
+    -> re.Pattern.match
+1518:34 call  data_url.group('mime')
+    -> re.Match.group
+1519:31 call  mime.startswith('image/')
+    -> <builtin>.str.startswith
+1519:60 call  data_url.group('token')
+    -> re.Match.group
+1521:31 call  _html_escape_url(url, safe_mode=self.safe_mode, charset=c...
+    -> markdown2._html_escape_url
+1522:25 call  _hash_text(url)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.Markdown._safe_href]
+1541:81 call  r'(?:[{}]+(?:\.[{}]+)*)(?:(?<!tel):\d+/?)?(?![^:/]*:/*)'....
+    -> <builtin>.str.format
+1544:26 call  re.compile(r'^(?:({})?({})({})|(#|\.{{,2}}/)({}))$'.forma...
+    -> re.compile
+1544:74 call  r'^(?:({})?({})({})|(#|\.{{,2}}/)({}))$'.format(self._saf...
+    -> <builtin>.str.format
+
+[markdown2.Markdown._do_links]
+1556:39 call  LinkProcessor(self, None)
+    -> markdown2.LinkProcessor.__init__
+    reject markdown2.Extra.__init__: LinkProcessor defines __init__, which runs first; it calls Extra.__init__ itself through super()
+1557:31 call  link_processor.test(text)
+    -> markdown2.LinkProcessor.test
+    reject *: link_processor is the LinkProcessor made at markdown2.py:1556
+1558:38 call  link_processor.run(text)
+    -> markdown2.LinkProcessor.run
+    reject *: link_processor is the LinkProcessor made at markdown2.py:1556
+
+[markdown2.Markdown.header_id_from_text]
+1580:29 call  _slugify(text)
+    -> markdown2._slugify
+1581:33 call  isinstance(prefix, str)
+    -> <builtin>.isinstance
+1585:20 call  len(header_id)
+    -> <builtin>.len
+
+[markdown2.Markdown._header_id_exists]
+1591:29 call  _slugify(text)
+    -> markdown2._slugify
+1592:47 call  self.extras['header-ids'].get('prefix')
+    -> <builtin>.dict.get
+1593:33 call  isinstance(prefix, str)
+    -> <builtin>.isinstance
+1595:69 op  header_id in map(lambda x: x[1], self._toc)
+    -> markdown2.Markdown._header_id_exists.<lambda1>
+    note: On supported Python >=3.9, membership consumes the lazy map and invokes the lambda on source-built TOC tuples. This ledger chooses the consumer placement as an allowed normalization; README ruling 12 also permits map1595:75 in this same function.
+1595:75 call  map(lambda x: x[1], self._toc)
+    -> <builtin>.map
+    reject markdown2.Markdown._header_id_exists.<lambda1>: this ledger chooses membership1595:69 to avoid duplicate attribution. README ruling 12 also permits this map1595:75 placement in the same function; the previous attribution was valid
+    note: map constructs a lazy iterator consumed by membership1595:69. README ruling 12 permits either site within _header_id_exists; this ledger records the consumer as an allowed normalization.
+
+[markdown2.Markdown._toc_add_entry]
+1602:25 call  self._toc.append((level, id, self._unescape_special_chars...
+    -> <builtin>.list.append
+1602:66 call  self._unescape_special_chars(name)
+    -> markdown2.Markdown._unescape_special_chars
+
+[markdown2.Markdown._h_sub]
+1622:23 call  match.group(1)
+    -> re.Match.group
+1622:54 call  match.group(3)
+    -> re.Match.group
+1623:31 call  match.group(1)
+    -> re.Match.group
+1624:25 call  match.group(1)
+    -> re.Match.group
+1626:45 call  match.group(3)
+    -> re.Match.group
+1627:39 call  match.group(2)
+    -> re.Match.group
+1630:20 call  len(match.group(5))
+    -> <builtin>.len
+1630:32 call  match.group(5)
+    -> re.Match.group
+1631:39 call  match.group(6)
+    -> re.Match.group
+1633:41 call  self.extras.get("demote-headers")
+    -> <builtin>.dict.get
+1635:20 call  min(n + demote_headers, 6)
+    -> <builtin>.min
+1638:49 call  self.header_id_from_text(header_group, self.extras["heade...
+    -> markdown2.Markdown.header_id_from_text
+1639:46 call  self.extras["header-ids"].get('prefix')
+    -> <builtin>.dict.get
+1642:36 call  self._run_span_gamut(header_group)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1644:32 call  self._toc_add_entry(n, header_id, html)
+    -> markdown2.Markdown._toc_add_entry
+
+[markdown2.Markdown._h_tag_sub]
+1655:40 call  match.start()
+    -> re.Match.start
+1655:53 call  match.end()
+    -> re.Match.end
+1656:22 call  int(match.group(1))
+    -> <builtin>.int
+1656:34 call  match.group(1)
+    -> re.Match.group
+1658:28 call  re.match(r'.*?id="(\S+)?".*', match.group(2) or '')
+    -> re.match
+1658:61 call  match.group(2)
+    -> re.Match.group
+1661:36 call  id_attr.group(1)
+    -> re.Match.group
+1662:32 call  id_attr.strip('\'" ')
+    -> <builtin>.str.strip
+1663:29 call  match.group(3)
+    -> re.Match.group
+1666:46 call  self._header_id_exists(id_attr)
+    -> markdown2.Markdown._header_id_exists
+1670:56 call  self.header_id_from_text(h_text, self.extras['header-ids'...
+    -> markdown2.Markdown.header_id_from_text
+1670:94 call  self.extras['header-ids'].get('prefix')
+    -> <builtin>.dict.get
+1672:32 call  self._toc_add_entry(h_level, header_id, h_text)
+    -> markdown2.Markdown._toc_add_entry
+
+[markdown2.Markdown._do_headers]
+1695:47 call  self._h_re_tag_friendly.sub(self._h_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._h_sub
+1696:30 call  self._h_re.sub(self._h_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._h_sub
+
+[markdown2.Markdown._list_sub]
+1704:26 call  match.group(1)
+    -> re.Match.group
+1705:31 call  match.group(4)
+    -> re.Match.group
+1707:44 call  match.group(4)
+    -> re.Match.group
+1709:51 call  match.group(4)
+    -> re.Match.group
+1713:60 call  self._html_class_str_from_tag(lst_type)
+    -> markdown2.Markdown._html_class_str_from_tag
+1715:42 call  self._process_list_items(lst)
+    -> markdown2.Markdown._process_list_items
+1717:46 call  "<{}{}>\n{}</{}>\n".format(lst_type, lst_opts, result, ls...
+    -> <builtin>.str.format
+1719:48 call  "<{}{}>\n{}</{}>\n\n".format(lst_type, lst_opts, result, ...
+    -> <builtin>.str.format
+
+[markdown2.Markdown._do_lists]
+1763:41 call  re.compile("^"+whole_list, re.X | re.M | re.S)
+    -> re.compile
+1765:41 call  re.compile(r"(?:(?<=\n\n)|\A\n?)"+whole_list, re.X | re.M...
+    -> re.compile
+1767:39 call  list_re.search(text, pos)
+    -> re.Pattern.search
+1769:32 call  hits.append((match.start(), match))
+    -> <builtin>.list.append
+1769:45 call  match.start()
+    -> re.Match.start
+1772:22 call  hits.sort()
+    -> <builtin>.list.sort
+1774:36 call  match.span()
+    -> re.Match.span
+1775:36 call  self._list_sub(match)
+    -> markdown2.Markdown._list_sub
+1777:30 call  len(middle)
+    -> <builtin>.len
+
+[markdown2.Markdown._task_list_item_sub]
+1799:29 call  match.group(1)
+    -> re.Match.group
+1800:32 call  match.group(2)
+    -> re.Match.group
+
+[markdown2.Markdown._list_item_sub]
+1811:27 call  match.group(4)
+    -> re.Match.group
+1812:35 call  match.group(1)
+    -> re.Match.group
+1814:41 call  self._uniform_outdent(item, min_outdent=' ', max_outdent=...
+    -> markdown2.Markdown._uniform_outdent
+1815:41 call  self._run_block_gamut(item)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_block_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1818:34 call  self._do_lists(self._uniform_outdent(item, min_outdent=' ...
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_lists: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1818:56 call  self._uniform_outdent(item, min_outdent=' ')
+    -> markdown2.Markdown._uniform_outdent
+1819:29 call  item.endswith('\n')
+    -> <builtin>.str.endswith
+1821:40 call  self._run_span_gamut(item)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+1822:47 call  len(match.group(5))
+    -> <builtin>.len
+1822:59 call  match.group(5)
+    -> re.Match.group
+1825:47 call  self._task_list_item_re.sub(self._task_list_item_sub, item)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._task_list_item_sub
+
+[markdown2.Markdown._process_list_items]
+1855:35 call  list_str.rstrip('\n')
+    -> <builtin>.str.rstrip
+1856:42 call  self._list_item_re.sub(self._list_item_sub, list_str)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._list_item_sub
+
+[markdown2.Markdown._get_pygments_lexer]
+1871:44 call  lexers.get_lexer_by_name(lexer_name)
+    -> pygments.lexers.get_lexer_by_name
+
+[markdown2.Markdown._color_with_pygments]
+1917:34 call  formatter_opts.setdefault("cssclass", "codehilite")
+    -> <builtin>.dict.setdefault
+1918:38 call  HtmlCodeFormatter(**formatter_opts)
+    -> pygments.formatters.HtmlFormatter.__init__
+    note: HtmlCodeFormatter (markdown2.py:1893) defines no __init__; the first __init__ of its MRO is that of pygments.formatters.HtmlFormatter, which calls none of the three methods of HtmlCodeFormatter
+1919:34 call  pygments.highlight(codeblock, lexer, formatter)
+    -> pygments.highlight
+    -> markdown2.Markdown._color_with_pygments.HtmlCodeFormatter.wrap
+    note: pygments.highlight formats with the HtmlCodeFormatter of markdown2.py:1918; HtmlFormatter.format_unencoded calls back its wrap method (wrap(source) from pygments 2.12 on, wrap(source, outfile) before)
+
+[markdown2.Markdown._color_with_pygments.HtmlCodeFormatter.wrap]
+1912:45 call  self._add_newline(self._wrap_pre(self._wrap_code(source)))
+    -> markdown2.Markdown._color_with_pygments.HtmlCodeFormatter._add_newline
+    note: self is the HtmlCodeFormatter made at markdown2.py:1918, the only instances of this local class
+1912:60 call  self._wrap_pre(self._wrap_code(source))
+    -> pygments.formatters.HtmlFormatter._wrap_pre
+    note: HtmlCodeFormatter inherits _wrap_pre from pygments.formatters.HtmlFormatter
+1912:76 call  self._wrap_code(source)
+    -> markdown2.Markdown._color_with_pygments.HtmlCodeFormatter._wrap_code
+1915:42 call  self._wrap_div(self._add_newline(self._wrap_pre(self._wra...
+    -> pygments.formatters.HtmlFormatter._wrap_div
+    note: pygments before 2.12 calls wrap(source, outfile); setup.py admits pygments>=2.7.3 (extra code_syntax_highlighting), so this branch runs on supported versions. HtmlCodeFormatter inherits _wrap_div
+1915:60 call  self._add_newline(self._wrap_pre(self._wrap_code(source)))
+    -> markdown2.Markdown._color_with_pygments.HtmlCodeFormatter._add_newline
+1915:75 call  self._wrap_pre(self._wrap_code(source))
+    -> pygments.formatters.HtmlFormatter._wrap_pre
+1915:91 call  self._wrap_code(source)
+    -> markdown2.Markdown._color_with_pygments.HtmlCodeFormatter._wrap_code
+
+[markdown2.Markdown._code_block_sub]
+1922:32 call  match.group(1)
+    -> re.Match.group
+1923:34 call  self._outdent(codeblock)
+    -> markdown2.Markdown._outdent
+1924:32 call  self._detab(codeblock)
+    -> markdown2.Markdown._detab
+1925:37 call  codeblock.lstrip('\n')
+    -> <builtin>.str.lstrip
+1926:37 call  codeblock.rstrip()
+    -> <builtin>.str.rstrip
+1928:54 call  self._html_class_str_from_tag("pre")
+    -> markdown2.Markdown._html_class_str_from_tag
+1929:55 call  self._html_class_str_from_tag("code")
+    -> markdown2.Markdown._html_class_str_from_tag
+1931:38 call  self._encode_code(codeblock)
+    -> markdown2.Markdown._encode_code
+1933:61 call  "\n<pre{}><code{}>{}\n</code></pre>\n".format( pre_class_...
+    -> <builtin>.str.format
+
+[markdown2.Markdown._html_class_str_from_tag]
+1947:26 call  isinstance(html_classes_from_tag, dict)
+    -> <builtin>.isinstance
+
+[markdown2.Markdown._do_code_blocks]
+1955:35 call  re.compile(r''' (?:\n\n|\A\n?) ( # $1 = the code block --...
+    -> re.compile
+1969:33 call  code_block_re.sub(self._code_block_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._code_block_sub
+
+[markdown2.Markdown._code_span_sub]
+1990:24 call  match.group(2)
+    -> re.Match.group
+1990:33 call  match.group(2).strip(" \t")
+    -> <builtin>.str.strip
+1991:30 call  self._encode_code(c)
+    -> markdown2.Markdown._encode_code
+1992:42 call  "<code{}>{}</code>".format(self._html_class_str_from_tag(...
+    -> <builtin>.str.format
+1992:72 call  self._html_class_str_from_tag("code")
+    -> markdown2.Markdown._html_class_str_from_tag
+
+[markdown2.Markdown._do_code_spans]
+2018:38 call  self._code_span_re.sub(self._code_span_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._code_span_sub
+
+[markdown2.Markdown._encode_code]
+2034:32 call  text.replace(before, after)
+    -> <builtin>.str.replace
+2035:28 call  _hash_text(text)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.Markdown._do_italics_and_bold]
+2055:60 call  GFMItalicAndBoldProcessor(self, None)
+    -> markdown2.Extra.__init__
+2056:36 call  self._iab_processor.test(text)
+    -> markdown2.GFMItalicAndBoldProcessor.test
+    reject *: self._iab_processor is the GFMItalicAndBoldProcessor made at markdown2.py:2055 (the class attribute is None until then)
+2057:43 call  self._iab_processor.run(text)
+    -> markdown2.GFMItalicAndBoldProcessor.run
+    reject *: self._iab_processor is the GFMItalicAndBoldProcessor made at markdown2.py:2055 (the class attribute is None until then)
+
+[markdown2.Markdown._dedent_two_spaces_sub]
+2076:22 call  re.sub(r'(?m)^ ', '', match.group(1))
+    -> re.sub
+2076:50 call  match.group(1)
+    -> re.Match.group
+
+[markdown2.Markdown._block_quote_sub]
+2079:25 call  match.group(1)
+    -> re.Match.group
+2080:84 call  self._bq_all_lines_spoilers.match(bq)
+    -> re.Pattern.match
+2083:51 call  self._bq_one_level_re_spoiler.sub('', bq)
+    -> re.Pattern.sub
+2085:43 call  self._bq_one_level_re.sub('', bq)
+    -> re.Pattern.sub
+2087:39 call  self._ws_only_line_re.sub('', bq)
+    -> re.Pattern.sub
+2088:35 call  self._run_block_gamut(bq)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_block_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+2090:20 call  re.sub('(?m)^', ' ', bq)
+    -> re.sub
+2092:41 call  self._html_pre_block_re.sub(self._dedent_two_spaces_sub, bq)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._dedent_two_spaces_sub
+
+[markdown2.Markdown._do_block_quotes]
+2104:52 call  self._block_quote_re_spoiler.sub(self._block_quote_sub, t...
+    -> re.Pattern.sub
+    -> markdown2.Markdown._block_quote_sub
+2106:44 call  self._block_quote_re.sub(self._block_quote_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._block_quote_sub
+
+[markdown2.Markdown._form_paragraphs]
+2111:26 call  text.strip('\n')
+    -> <builtin>.str.strip
+2115:33 call  enumerate(re.split(r"\n{2,}", text))
+    -> <builtin>.enumerate
+2115:42 call  re.split(r"\n{2,}", text)
+    -> re.split
+2118:29 call  grafs.append(self.html_blocks[graf])
+    -> <builtin>.list.append
+2124:51 call  self._list_item_re.search(graf + '\n')
+    -> re.Pattern.search
+2130:35 call  len(li.group(2))
+    -> <builtin>.len
+2130:44 call  li.group(2)
+    -> re.Match.group
+2132:46 call  li.group("next_marker")
+    -> re.Match.group
+2132:74 call  li.group("marker")
+    -> re.Match.group
+2132:100 call  li.group("next_marker")
+    -> re.Match.group
+2134:45 call  li.group("next_marker")
+    -> re.Match.group
+2137:41 call  li.start()
+    -> re.Match.start
+2138:54 call  self._do_lists(graf[start:])
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._do_lists: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+2138:75 call  self._do_lists(graf[start:]).rstrip("\n")
+    -> <builtin>.str.rstrip
+2139:36 call  re.match(r'^<(?:ul|ol).*?>', cuddled_list)
+    -> re.match
+2148:44 call  self._run_span_gamut(graf)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+2149:29 call  grafs.append("<p%s>" % self._html_class_str_from_tag('p')...
+    -> <builtin>.list.append
+2149:69 call  self._html_class_str_from_tag('p')
+    -> markdown2.Markdown._html_class_str_from_tag
+2149:88 call  graf.lstrip(" \t")
+    -> <builtin>.str.lstrip
+2152:33 call  grafs.append(cuddled_list)
+    -> <builtin>.list.append
+2154:27 call  "\n\n".join(grafs)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._add_footnotes]
+2172:35 call  self.footnote_ids.sort(key=lambda a: list(self.footnotes....
+    -> <builtin>.list.sort
+    -> markdown2.Markdown._add_footnotes.<lambda1>
+2173:35 call  enumerate(self.footnote_ids)
+    -> <builtin>.enumerate
+2175:34 call  footer.append('')
+    -> <builtin>.list.append
+2176:30 call  footer.append('<li id="fn-%s">' % id)
+    -> <builtin>.list.append
+2177:30 call  footer.append( # handle any nested footnote markers self....
+    -> <builtin>.list.append
+2179:45 call  self._do_footnote_marker( self._run_block_gamut(self.foot...
+    -> markdown2.Markdown._do_footnote_marker
+2180:46 call  self._run_block_gamut(self.footnotes[id])
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_block_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+2190:30 call  log.debug("Footnote error. `footnote_title` " "must inclu...
+    -> logging.Logger.debug
+2197:39 call  footer[-1].endswith("</p>")
+    -> <builtin>.str.endswith
+2198:50 call  len("</p>")
+    -> <builtin>.len
+2201:34 call  footer.append("\n<p>%s</p>" % backlink)
+    -> <builtin>.list.append
+2202:30 call  footer.append('</li>')
+    -> <builtin>.list.append
+2203:26 call  footer.append('</ol>')
+    -> <builtin>.list.append
+2204:26 call  footer.append('</div>')
+    -> <builtin>.list.append
+2205:45 call  '\n'.join(footer)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._add_footnotes.<lambda1>]
+2172:54 call  list(self.footnotes.keys())
+    -> <builtin>.list
+2172:74 call  self.footnotes.keys()
+    -> collections.OrderedDict.keys
+    note: self.footnotes is the OrderedDict of _setup_extras (markdown2.py:409)
+2172:83 call  list(self.footnotes.keys()).index(a)
+    -> <builtin>.list.index
+
+[markdown2.Markdown._encode_amps_and_angles]
+2215:33 call  _AMPERSAND_RE.sub('&amp;', text)
+    -> re.Pattern.sub
+2216:41 call  _ESCAPED_AMPERSAND_RE.sub(r'&amp;\1', text)
+    -> re.Pattern.sub
+2219:37 call  self._naked_lt_re.sub('&lt;', text)
+    -> re.Pattern.sub
+2224:37 call  self._naked_gt_re.sub('&gt;', text)
+    -> re.Pattern.sub
+
+[markdown2.Markdown._encode_incomplete_tags]
+2233:30 call  self._is_auto_link(text)
+    -> markdown2.Markdown._is_auto_link
+2243:44 call  self._incomplete_tags_re.sub(incomplete_tags_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._encode_incomplete_tags.incomplete_tags_sub
+
+[markdown2.Markdown._encode_incomplete_tags.incomplete_tags_sub]
+2237:31 call  match.group()
+    -> re.Match.group
+2239:47 call  self._is_unescaped_re.match(text)
+    -> re.Pattern.match
+2240:36 call  text.replace('\\<', '&lt;')
+    -> <builtin>.str.replace
+2241:32 call  text.replace('<', '&lt;')
+    -> <builtin>.str.replace
+
+[markdown2.Markdown._encode_backslash_escapes]
+2248:31 call  list(self._escape_table.items())
+    -> <builtin>.list
+2248:56 call  self._escape_table.items()
+    -> <builtin>.dict.items
+2249:32 call  text.replace("\\"+ch, escape)
+    -> <builtin>.str.replace
+
+[markdown2.Markdown._auto_link_sub]
+2254:25 call  match.group(1)
+    -> re.Match.group
+2255:44 call  '<a href="{}">{}</a>'.format(self._protect_url(g1), g1)
+    -> <builtin>.str.format
+2255:62 call  self._protect_url(g1)
+    -> markdown2.Markdown._protect_url
+
+[markdown2.Markdown._auto_email_link_sub]
+2268:42 call  self._encode_email_address( self._unescape_special_chars(...
+    -> markdown2.Markdown._encode_email_address
+2269:41 call  self._unescape_special_chars(match.group(1))
+    -> markdown2.Markdown._unescape_special_chars
+2269:53 call  match.group(1)
+    -> re.Match.group
+
+[markdown2.Markdown._do_auto_links]
+2272:38 call  self._auto_link_re.sub(self._auto_link_sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Markdown._auto_link_sub
+2273:44 call  self._auto_email_link_re.sub(self._auto_email_link_sub, t...
+    -> re.Pattern.sub
+    -> markdown2.Markdown._auto_email_link_sub
+
+[markdown2.Markdown._encode_email_address]
+2289:50 call  _xml_encode_email_char_at_random(ch)
+    -> markdown2._xml_encode_email_char_at_random
+2293:26 call  ''.join(chars)
+    -> <builtin>.str.join
+2293:42 call  ''.join(chars[7:])
+    -> <builtin>.str.join
+
+[markdown2.Markdown._unescape_special_chars]
+2298:24 call  tuple(self._escape_table.items())
+    -> <builtin>.tuple
+2298:49 call  self._escape_table.items()
+    -> <builtin>.dict.items
+2298:60 call  tuple(self._code_table.items())
+    -> <builtin>.tuple
+2298:83 call  self._code_table.items()
+    -> <builtin>.dict.items
+2300:25 call  tuple(tuple(reversed(i)) for i in self.html_blocks.items())
+    -> <builtin>.tuple
+2300:31 call  tuple(reversed(i))
+    -> <builtin>.tuple
+2300:40 call  reversed(i)
+    -> <builtin>.reversed
+2300:76 call  self.html_blocks.items()
+    -> <builtin>.dict.items
+2304:36 call  text.replace(hash, ch)
+    -> <builtin>.str.replace
+
+[markdown2.Markdown._outdent]
+2311:36 call  self._outdent_re.sub('', text)
+    -> re.Pattern.sub
+
+[markdown2.Markdown._hash_span]
+2325:25 call  _hash_text(text)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.Markdown._uniform_outdent]
+2349:23 call  re.findall(r'^[ \t]*', line)
+    -> re.findall
+2350:40 call  text.splitlines()
+    -> <builtin>.str.splitlines
+2359:22 call  min(whitespace_not_empty)
+    -> <builtin>.min
+2362:26 call  min([i for i in whitespace_not_empty if i >= min_outdent]...
+    -> <builtin>.min
+2364:26 call  min(outdent, max_outdent)
+    -> <builtin>.min
+2367:33 call  zip(whitespace, text.splitlines(True))
+    -> <builtin>.zip
+2367:61 call  text.splitlines(True)
+    -> <builtin>.str.splitlines
+2368:31 call  line.startswith(outdent)
+    -> <builtin>.str.startswith
+2370:33 call  outdented.append(line.replace(outdent, '', 1))
+    -> <builtin>.list.append
+2370:46 call  line.replace(outdent, '', 1)
+    -> <builtin>.str.replace
+2373:33 call  outdented.append(line.replace(line_ws, '', 1))
+    -> <builtin>.list.append
+2373:46 call  line.replace(line_ws, '', 1)
+    -> <builtin>.str.replace
+2375:33 call  outdented.append(line)
+    -> <builtin>.list.append
+2377:32 call  ''.join(outdented)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._uniform_indent]
+2396:36 call  text.splitlines(True)
+    -> <builtin>.str.splitlines
+2397:26 call  line.strip()
+    -> <builtin>.str.strip
+2398:30 call  blocks.append(indent + line)
+    -> <builtin>.list.append
+2400:30 call  blocks.append(line)
+    -> <builtin>.list.append
+2402:30 call  blocks.append('')
+    -> <builtin>.list.append
+2403:23 call  ''.join(blocks)
+    -> <builtin>.str.join
+
+[markdown2.Markdown._match_overlaps_substr]
+2410:36 call  re.finditer(re.escape(substr), text)
+    -> re.finditer
+2410:46 call  re.escape(substr)
+    -> re.escape
+2411:39 call  instance.span()
+    -> re.Match.span
+2412:36 call  match.start()
+    -> re.Match.start
+2414:34 call  match.end()
+    -> re.Match.end
+
+[markdown2.Extra.deregister]
+2473:51 call  Extra._exec_order.values()
+    -> <builtin>.dict.values
+2477:35 call  section.remove(cls)
+    -> <builtin>.list.remove
+
+[markdown2.Extra.register]
+2487:37 call  enumerate((*cls.order[0], *cls.order[1]))
+    -> <builtin>.enumerate
+2488:33 call  len(cls.order[0])
+    -> <builtin>.len
+2489:30 call  isinstance(item, Stage)
+    -> <builtin>.isinstance
+2489:58 call  issubclass(item, Extra)
+    -> <builtin>.issubclass
+2491:60 call  Extra._exec_order.values()
+    -> <builtin>.dict.values
+2495:53 call  section.index(item)
+    -> <builtin>.list.index
+2498:43 call  section.insert(to_index, cls)
+    -> <builtin>.list.insert
+2501:45 call  Extra._exec_order.setdefault(item, ([], []))
+    -> <builtin>.dict.setdefault
+2506:54 call  Extra._exec_order[item][0].insert(0, cls)
+    -> <builtin>.list.insert
+2508:54 call  Extra._exec_order[item][1].append(cls)
+    -> <builtin>.list.append
+
+[markdown2.ItalicAndBoldProcessor.__init__]
+2545:14 call  super()
+    -> <builtin>.super
+2545:25 call  super().__init__(md, options)
+    -> markdown2.Extra.__init__
+    reject *: super() in ItalicAndBoldProcessor resolves to Extra, which defines __init__
+
+[markdown2.ItalicAndBoldProcessor.run]
+2550:38 call  self.strong_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    reject markdown2.ItalicAndBoldProcessor.sub: ItalicAndBoldProcessor is abstract by abc (sub is an abstractmethod, markdown2.py:2561) and the package defines no subclass of it, so self is an instance of a client subclass, whose sub overrides this one (rule B1)
+2551:34 call  self.em_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    reject markdown2.ItalicAndBoldProcessor.sub: ItalicAndBoldProcessor is abstract by abc (sub is an abstractmethod, markdown2.py:2561) and the package defines no subclass of it, so self is an instance of a client subclass, whose sub overrides this one (rule B1)
+2557:57 call  self.hash_table.items()
+    -> <builtin>.dict.items
+2558:40 call  text.replace(key, substr)
+    -> <builtin>.str.replace
+
+[markdown2.ItalicAndBoldProcessor.sub]
+2564:40 call  match.start()
+    -> re.Match.start
+2564:53 call  match.end()
+    -> re.Match.end
+
+[markdown2.ItalicAndBoldProcessor.sub_hash]
+2567:42 call  match.start()
+    -> re.Match.start
+2567:55 call  match.end()
+    -> re.Match.end
+2568:34 call  self.md._hash_span(substr, self.hash_table)
+    -> markdown2.Markdown._hash_span
+
+[markdown2.ItalicAndBoldProcessor.test]
+2573:45 call  re.search(r'md5-[0-9a-z]{32}', text)
+    -> re.search
+
+[markdown2.GFMItalicAndBoldProcessor.run]
+2587:50 call  _hash_text(text)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+2588:35 call  _hash_text(text)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+2611:42 call  re.finditer(r'(\*+|_+)', text)
+    -> re.finditer
+2612:44 call  self._next_run(delim_runs_iter)
+    -> markdown2.GFMItalicAndBoldProcessor._next_run
+2616:48 call  self._next_run(delim_runs_iter)
+    -> markdown2.GFMItalicAndBoldProcessor._next_run
+2618:41 call  delim_run.group(1)
+    -> re.Match.group
+2625:46 call  opens[em_type].append(delim_run)
+    -> <builtin>.list.append
+2629:72 call  self.body_crosses_span_borders(opens[em_type][-1], delim_...
+    -> markdown2.GFMItalicAndBoldProcessor.body_crosses_span_borders
+2630:39 call  opens[em_type].pop(-1)
+    -> <builtin>.list.pop
+2633:46 call  opens[em_type].append(delim_run)
+    -> <builtin>.list.append
+2635:42 call  opens[em_type].pop(-1)
+    -> <builtin>.list.pop
+2637:30 call  open.start()
+    -> re.Match.start
+2649:56 call  unused_opens[em_type].pop(open, 0)
+    -> <builtin>.dict.pop
+2650:41 call  open.group(1)
+    -> re.Match.group
+2656:49 call  self.has_middle( open, delim_run, opens[em_type], unused_...
+    -> markdown2.GFMItalicAndBoldProcessor.has_middle
+2666:68 call  unused_opens[em_type].pop(open, 0)
+    -> <builtin>.dict.pop
+2667:53 call  open.group(1)
+    -> re.Match.group
+2668:75 call  self.should_process_imbalanced_delimiter_runs( open, deli...
+    -> markdown2.GFMItalicAndBoldProcessor.should_process_imbalanced_delimiter_runs
+2673:46 call  opens[em_type].append(open)
+    -> <builtin>.list.append
+2676:50 call  opens[em_type].append(delim_run)
+    -> <builtin>.list.append
+2678:58 call  unused_closes[em_type].append(delim_run)
+    -> <builtin>.list.append
+2682:30 call  tokens.append(delim_run.string[index: open.start() + open...
+    -> <builtin>.list.append
+2682:65 call  open.start()
+    -> re.Match.start
+2684:66 call  self.process_span( open, delim_run, middle, open_syntax=o...
+    -> markdown2.GFMItalicAndBoldProcessor.process_span
+    -> markdown2.CodeFriendly.process_span
+    note: self is a GFMItalicAndBoldProcessor (made at markdown2.py:2055) or a CodeFriendly, whose run calls this run through super() (markdown2.py:3457); MiddleWordEm overrides run and never calls this one
+2688:30 call  tokens.extend(span)
+    -> <builtin>.list.extend
+2691:50 call  len(syntax)
+    -> <builtin>.len
+2692:51 call  len(syntax)
+    -> <builtin>.len
+2695:42 call  opens[em_type].append(delim_run)
+    -> <builtin>.list.append
+2696:51 call  len(open_syntax)
+    -> <builtin>.len
+2700:55 call  prev_open.group(1)
+    -> re.Match.group
+2701:27 call  len(prev_open_syntax)
+    -> <builtin>.len
+2701:53 call  len(open_syntax)
+    -> <builtin>.len
+2705:40 call  delim_run.start()
+    -> re.Match.start
+2707:27 call  len(text)
+    -> <builtin>.len
+2708:30 call  tokens.append(text[index:])
+    -> <builtin>.list.append
+2710:27 call  ''.join(tokens)
+    -> <builtin>.str.join
+
+[markdown2.GFMItalicAndBoldProcessor.process_span]
+2734:42 call  cast(str, open.group(1))
+    -> typing.cast
+2734:58 call  open.group(1)
+    -> re.Match.group
+2735:37 call  middle.group(1)
+    -> re.Match.group
+2736:44 call  cast(str, close.group(1))
+    -> typing.cast
+2736:61 call  close.group(1)
+    -> re.Match.group
+2739:34 call  len(min(open_syntax, close_syntax))
+    -> <builtin>.len
+2739:38 call  min(open_syntax, close_syntax)
+    -> <builtin>.min
+2740:34 call  len(min(max(open_syntax, close_syntax), middle_syntax))
+    -> <builtin>.len
+2740:38 call  min(max(open_syntax, close_syntax), middle_syntax)
+    -> <builtin>.min
+2740:42 call  max(open_syntax, close_syntax)
+    -> <builtin>.max
+2755:40 call  len(middle_syntax)
+    -> <builtin>.len
+2757:30 call  tokens.append(f'<{inner_tag}>')
+    -> <builtin>.list.append
+2759:26 call  tokens.append(close.string[open.end(): middle.start()])
+    -> <builtin>.list.append
+2759:48 call  open.end()
+    -> re.Match.end
+2759:64 call  middle.start()
+    -> re.Match.start
+2762:30 call  tokens.append(f'</{inner_tag}>')
+    -> <builtin>.list.append
+2764:30 call  tokens.append(f'<{inner_tag}>')
+    -> <builtin>.list.append
+2766:26 call  tokens.append(close.string[middle.end(): close.start()])
+    -> <builtin>.list.append
+2766:50 call  middle.end()
+    -> re.Match.end
+2766:65 call  close.start()
+    -> re.Match.start
+2769:30 call  tokens.append(f'</{inner_tag}>')
+    -> <builtin>.list.append
+2772:26 call  tokens.append(close.string[open.end(): close.start()])
+    -> <builtin>.list.append
+2772:48 call  open.end()
+    -> re.Match.end
+2772:63 call  close.start()
+    -> re.Match.start
+2775:22 call  tokens.append( ('</strong>' * (outer_syntax_length // 2))...
+    -> <builtin>.list.append
+
+[markdown2.GFMItalicAndBoldProcessor.has_middle]
+2806:39 call  unused_opens.get(open, 0)
+    -> <builtin>.dict.get
+2807:33 call  open.group(1)
+    -> re.Match.group
+2809:29 call  close.group(1)
+    -> re.Match.group
+2814:46 call  self.body_crosses_span_borders(opens[-1], open)
+    -> markdown2.GFMItalicAndBoldProcessor.body_crosses_span_borders
+2819:29 call  opens.pop(-1)
+    -> <builtin>.list.pop
+2820:43 call  unused_opens.pop(open, 0)
+    -> <builtin>.dict.pop
+2821:37 call  open.group(1)
+    -> re.Match.group
+2831:26 call  next((i for i in unused_closes if open.end() < i.start() ...
+    -> <builtin>.next
+2831:64 call  open.end()
+    -> re.Match.end
+2831:76 call  i.start()
+    -> re.Match.start
+2831:92 call  close.start()
+    -> re.Match.start
+
+[markdown2.GFMItalicAndBoldProcessor.should_process_imbalanced_delimiter_runs]
+2855:39 call  unused_opens.get(open, 0)
+    -> <builtin>.dict.get
+2856:33 call  open.group(1)
+    -> re.Match.group
+2857:29 call  close.group(1)
+    -> re.Match.group
+2859:40 call  len(syntax)
+    -> <builtin>.len
+2865:56 call  next_delim_run[0].group(1)
+    -> re.Match.group
+2870:51 call  self.delimiter_left_or_right(close)
+    -> markdown2.GFMItalicAndBoldProcessor.delimiter_left_or_right
+
+[markdown2.GFMItalicAndBoldProcessor.delimiter_left_or_right]
+2902:35 call  max(0, delim_run.start() - 1)
+    -> <builtin>.max
+2902:54 call  delim_run.start()
+    -> re.Match.start
+2902:76 call  delim_run.end()
+    -> re.Match.end
+2904:45 call  self._delimiter_left_or_right(run, delim_run.group(1))
+    -> functools._lru_cache_wrapper.__call__
+    -> functools._lru_cache_wrapper.wrapper
+    -> markdown2.GFMItalicAndBoldProcessor._delimiter_left_or_right
+    note: @functools.lru_cache at markdown2.py:2906 returns a callable cache object on CPython (__call__) and a Python function on supported PyPy 3.11 / 7.3.20 (functools._lru_cache_wrapper.wrapper); bound to self, both call the original method on a cache miss. PyPy has no _functools accelerator; hidden_applevel returns the same function.
+2904:66 call  delim_run.group(1)
+    -> re.Match.group
+
+[markdown2.GFMItalicAndBoldProcessor._delimiter_left_or_right]
+2912:35 call  syntax.replace('*', r'\*')
+    -> <builtin>.str.replace
+2916:21 call  re.match(r'.*%s\S' % syntax_re, run, re.S)
+    -> re.match
+2919:25 call  re.match(r'.*%s[\s\w]' % syntax_re, run, re.S)
+    -> re.match
+2921:28 call  re.match(r'(^|[\s\W])%s([^\s\w]|$)' % syntax_re, run, re....
+    -> re.match
+2927:21 call  re.match(r'\S%s.*' % syntax_re, run, re.S)
+    -> re.match
+2930:25 call  re.match(r'[\s\w]%s.*' % syntax_re, run, re.S)
+    -> re.match
+2932:28 call  re.match(r'[^\s\w]%s(\s|[^\s\w]|$)' % syntax_re, run, re....
+    -> re.match
+
+[markdown2.GFMItalicAndBoldProcessor.body_crosses_span_borders]
+2949:36 call  open.end()
+    -> re.Match.end
+2949:51 call  close.start()
+    -> re.Match.start
+2950:15 call  len(text)
+    -> <builtin>.len
+2953:47 call  self._body_crosses_span_borders(text)
+    -> functools._lru_cache_wrapper.__call__
+    -> functools._lru_cache_wrapper.wrapper
+    -> markdown2.GFMItalicAndBoldProcessor._body_crosses_span_borders
+    note: @functools.lru_cache at markdown2.py:2955 returns a callable cache object on CPython (__call__) and a Python function on supported PyPy 3.11 / 7.3.20 (functools._lru_cache_wrapper.wrapper); bound to self, both call the original method on a cache miss. PyPy has no _functools accelerator; hidden_applevel returns the same function.
+
+[markdown2.GFMItalicAndBoldProcessor._body_crosses_span_borders]
+2958:23 call  set(re.findall(rf'</?({self.md._span_tags})', text))
+    -> <builtin>.set
+2958:34 call  re.findall(rf'</?({self.md._span_tags})', text)
+    -> re.findall
+2959:42 call  self.md._tag_is_closed(tag, text)
+    -> markdown2.Markdown._tag_is_closed
+
+[markdown2.GFMItalicAndBoldProcessor._next_run]
+2974:33 call  next(delim_runs_iter)
+    -> <builtin>.next
+2975:59 call  self.delimiter_left_or_right(delim_run)
+    -> markdown2.GFMItalicAndBoldProcessor.delimiter_left_or_right
+
+[markdown2.GFMItalicAndBoldProcessor.test]
+2982:26 call  text.count('*')
+    -> <builtin>.str.count
+2982:49 call  text.count('_')
+    -> <builtin>.str.count
+
+[markdown2.LinkProcessor.__init__]
+3002:14 call  super()
+    -> <builtin>.super
+3002:25 call  super().__init__(md, options)
+    -> markdown2.Extra.__init__
+    reject *: super() in LinkProcessor resolves to Extra, which defines __init__
+
+[markdown2.LinkProcessor.parse_inline_anchor_or_image]
+3022:43 call  self.md._find_non_whitespace(text, start_idx + 1)
+    -> markdown2.Markdown._find_non_whitespace
+3023:22 call  len(text)
+    -> <builtin>.len
+3028:45 call  self.md._find_balanced(text, end_idx+1, "<", ">")
+    -> markdown2.Markdown._find_balanced
+3029:41 call  self.md._find_balanced(text, end_idx, "(", ")")
+    -> markdown2.Markdown._find_balanced
+3030:50 call  self.md._inline_link_title.search(text, idx, end_idx)
+    -> re.Pattern.search
+3033:42 call  match.start()
+    -> re.Match.start
+3033:58 call  match.group("title")
+    -> re.Match.group
+3035:51 call  self.md._strip_anglebrackets.sub(r'\1', url)
+    -> re.Pattern.sub
+
+[markdown2.LinkProcessor.process_link_shortrefs]
+3055:34 call  re.match(r'[ ]?(?:\n[ ]*)?(?!\[)', text[start_idx:])
+    -> re.match
+3057:61 call  self.md._tail_of_reference_link_re.match(f'{text[:start_i...
+    -> re.Pattern.match
+3063:32 call  match.group("id")
+    -> re.Match.group
+3063:44 call  match.group("id").lower()
+    -> <builtin>.str.lower
+3063:65 call  link_text.lower()
+    -> <builtin>.str.lower
+
+[markdown2.LinkProcessor.parse_ref_anchor_or_ref_image]
+3090:54 call  self.process_link_shortrefs(text, link_text, start_idx)
+    -> markdown2.LinkProcessor.process_link_shortrefs
+3092:66 call  self.md._tail_of_reference_link_re.match(text, start_idx)
+    -> re.Pattern.match
+3097:30 call  match.group("id")
+    -> re.Match.group
+3097:42 call  match.group("id").lower()
+    -> <builtin>.str.lower
+3097:63 call  link_text.lower()
+    -> <builtin>.str.lower
+3099:31 call  self.md.urls.get(link_id)
+    -> <builtin>.dict.get
+3100:35 call  self.md.titles.get(link_id)
+    -> <builtin>.dict.get
+3101:32 call  match.end()
+    -> re.Match.end
+
+[markdown2.LinkProcessor.process_image]
+3121:57 call  self.md._html_class_str_from_tag("img")
+    -> markdown2.Markdown._html_class_str_from_tag
+3123:46 call  self.md._protect_url(url)
+    -> markdown2.Markdown._protect_url
+3124:40 call  self.md._hash_span(_xml_escape_attr(link_text))
+    -> markdown2.Markdown._hash_span
+3124:57 call  _xml_escape_attr(link_text)
+    -> markdown2._xml_escape_attr
+3127:27 call  len(result)
+    -> <builtin>.len
+
+[markdown2.LinkProcessor.process_anchor]
+3145:46 getattr  self.md._safe_href
+    -> markdown2.Markdown._safe_href
+3145:62 call  self.md._safe_href.match(url)
+    -> re.Pattern.match
+3148:59 call  self.md._protect_url(url)
+    -> markdown2.Markdown._protect_url
+3150:52 call  len(result_head)
+    -> <builtin>.len
+
+[markdown2.LinkProcessor.run]
+3179:39 call  text.index('[', curr_pos)
+    -> <builtin>.str.index
+3190:27 call  range( start_idx + 1, min(start_idx + MAX_LINK_TEXT_SENTI...
+    -> <builtin>.range
+3192:20 call  min(start_idx + MAX_LINK_TEXT_SENTINEL, len(text))
+    -> <builtin>.min
+3192:60 call  len(text)
+    -> <builtin>.len
+3210:53 call  self.md._hash_html_spans(link_text)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._hash_html_spans: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+3211:55 call  self.md._unhash_html_spans(link_text)
+    -> markdown2.Markdown._unhash_html_spans
+3214:70 call  link_text.startswith("^")
+    -> <builtin>.str.startswith
+3215:35 call  re.sub(r'\W', '-', link_text[1:])
+    -> re.sub
+3235:40 call  self.options.get('inline', True)
+    -> <builtin>.dict.get
+3239:59 call  self.parse_inline_anchor_or_image(text, link_text, p)
+    -> markdown2.LinkProcessor.parse_inline_anchor_or_image
+    -> markdown2.MarkdownFileLinks.parse_inline_anchor_or_image
+    note: self is a LinkProcessor (made at markdown2.py:1556) or a MarkdownFileLinks, whose run calls this run through super() (markdown2.py:3813)
+3246:49 call  self.md._unhash_html_spans(url, code=True)
+    -> markdown2.Markdown._unhash_html_spans
+3249:40 call  self.options.get('ref', True)
+    -> <builtin>.dict.get
+3253:60 call  self.parse_ref_anchor_or_ref_image(text, link_text, p)
+    -> markdown2.LinkProcessor.parse_ref_anchor_or_ref_image
+3269:25 call  url .replace('*', self.md._escape_table['*'])
+    -> <builtin>.str.replace
+3270:25 call  url .replace('*', self.md._escape_table['*']) .replace('_...
+    -> <builtin>.str.replace
+3274:37 call  _xml_escape_attr(title)
+    -> markdown2._xml_escape_attr
+3275:29 call  _xml_escape_attr(title) .replace('*', self.md._escape_tab...
+    -> <builtin>.str.replace
+3276:29 call  _xml_escape_attr(title) .replace('*', self.md._escape_tab...
+    -> <builtin>.str.replace
+3286:49 call  self.options.get('tags', ['img'])
+    -> <builtin>.dict.get
+3291:50 call  self.process_image(url, title_str, link_text)
+    -> markdown2.LinkProcessor.process_image
+3293:47 call  self.options.get('tags', ['a'])
+    -> <builtin>.dict.get
+3297:51 call  self.process_anchor(url, title_str, link_text)
+    -> markdown2.LinkProcessor.process_anchor
+3304:40 call  result.replace('"', self.md._escape_table['"'])
+    -> <builtin>.str.replace
+3310:49 call  len(result)
+    -> <builtin>.len
+
+[markdown2.Admonitions.test]
+3343:42 call  self.admonitions_re.search(text)
+    -> re.Pattern.search
+
+[markdown2.Admonitions.sub]
+3346:65 call  match.groups()
+    -> re.Match.groups
+3351:33 call  admonition_name.lower()
+    -> <builtin>.str.lower
+3354:71 call  admonition_name.lower()
+    -> <builtin>.str.lower
+3361:40 call  self.md._run_block_gamut("\n%s\n" % self.md._uniform_outd...
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_block_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+3361:76 call  self.md._uniform_outdent(body)
+    -> markdown2.Markdown._uniform_outdent
+3364:45 call  self.md._uniform_indent( '{}\n{}\n\n{}\n'.format(admoniti...
+    -> markdown2.Markdown._uniform_indent
+3365:36 call  '{}\n{}\n\n{}\n'.format(admonition_type, title, body)
+    -> <builtin>.str.format
+3369:61 call  '<aside class="{}">\n{}</aside>'.format(admonition_class,...
+    -> <builtin>.str.format
+3371:39 call  self.md._uniform_indent(admonition, lead_indent, False)
+    -> markdown2.Markdown._uniform_indent
+
+[markdown2.Admonitions.run]
+3374:39 call  self.admonitions_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Admonitions.sub
+
+[markdown2.Alerts.sub]
+3400:34 call  match["type"].lower()
+    -> <builtin>.str.lower
+3401:45 call  match['type'].title()
+    -> <builtin>.str.title
+3402:43 call  match["contents"].strip()
+    -> <builtin>.str.strip
+
+[markdown2.Alerts.run]
+3409:33 call  self.alert_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Alerts.sub
+
+[markdown2.Breaks.run]
+3426:40 call  self.options.get('on_backslash', False)
+    -> <builtin>.dict.get
+3427:38 call  self.options.get('on_newline', False)
+    -> <builtin>.dict.get
+3439:22 call  re.sub(pattern + r"\n(?!\<(?:\/?(ul|ol|li))\>)", break_ta...
+    -> re.sub
+
+[markdown2.CodeFriendly.__init__]
+3452:14 call  super()
+    -> <builtin>.super
+3452:25 call  super().__init__(md, options)
+    -> markdown2.Extra.__init__
+    reject *: super() in CodeFriendly resolves to GFMItalicAndBoldProcessor, which has no __init__; the next class of the MRO that has one is Extra
+
+[markdown2.CodeFriendly.run]
+3457:25 call  super()
+    -> <builtin>.super
+3457:31 call  super().run(text)
+    -> markdown2.GFMItalicAndBoldProcessor.run
+    reject *: super() in CodeFriendly resolves to GFMItalicAndBoldProcessor, which defines run
+3462:57 call  self.hash_table.items()
+    -> <builtin>.dict.items
+3463:40 call  text.replace(key, substr)
+    -> <builtin>.str.replace
+
+[markdown2.CodeFriendly.process_span]
+3470:38 call  open.start()
+    -> re.Match.start
+3470:51 call  close.end()
+    -> re.Match.end
+3471:42 call  cast(str, open.group(1))
+    -> typing.cast
+3471:58 call  open.group(1)
+    -> re.Match.group
+3472:44 call  cast(str, close.group(1))
+    -> typing.cast
+3472:61 call  close.group(1)
+    -> re.Match.group
+3476:26 call  re.sub(r'_+', lambda m: self._hash_text(m.group(0)), text)
+    -> re.sub
+    -> markdown2.CodeFriendly.process_span.<lambda1>
+3481:25 call  len(open_syntax)
+    -> <builtin>.len
+3481:44 call  len(close_syntax)
+    -> <builtin>.len
+3482:25 call  text[len(open_syntax): -len(close_syntax)] .replace('__',...
+    -> <builtin>.str.replace
+3482:47 call  self._hash_text('__')
+    -> markdown2.CodeFriendly._hash_text
+    reject markdown2._hash_text: self._hash_text is the method of CodeFriendly (self is a CodeFriendly; the package defines no subclass of it)
+3483:25 call  text[len(open_syntax): -len(close_syntax)] .replace('__',...
+    -> <builtin>.str.replace
+3483:46 call  self._hash_text('_')
+    -> markdown2.CodeFriendly._hash_text
+    reject markdown2._hash_text: self._hash_text is the method of CodeFriendly (self is a CodeFriendly; the package defines no subclass of it)
+3487:21 call  super()
+    -> <builtin>.super
+3487:36 call  super().process_span(open, close, middle, open_syntax, cl...
+    -> markdown2.GFMItalicAndBoldProcessor.process_span
+    reject markdown2.CodeFriendly.process_span: super() in CodeFriendly resolves to GFMItalicAndBoldProcessor, which defines process_span
+
+[markdown2.CodeFriendly.process_span.<lambda1>]
+3476:59 call  self._hash_text(m.group(0))
+    -> markdown2.CodeFriendly._hash_text
+    reject markdown2._hash_text: self._hash_text is the method of CodeFriendly (self is a CodeFriendly; the package defines no subclass of it)
+3476:67 call  m.group(0)
+    -> re.Match.group
+
+[markdown2.CodeFriendly._hash_text]
+3494:42 call  self.hash_table.values()
+    -> <builtin>.dict.values
+3495:25 call  tuple(self.hash_table.keys())
+    -> <builtin>.tuple
+3495:46 call  self.hash_table.keys()
+    -> <builtin>.dict.keys
+3495:55 call  tuple(self.hash_table.values())
+    -> <builtin>.tuple
+3495:78 call  self.hash_table.values()
+    -> <builtin>.dict.values
+3495:87 call  tuple(self.hash_table.values()).index(text)
+    -> <builtin>.tuple.index
+3498:28 call  _hash_text(self.name + text)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.CodeFriendly.test]
+3503:21 call  super()
+    -> <builtin>.super
+3503:28 call  super().test(text)
+    -> markdown2.GFMItalicAndBoldProcessor.test
+    reject *: super() in CodeFriendly resolves to GFMItalicAndBoldProcessor, which defines test
+3504:42 call  re.search(r'md5-[0-9a-z]{32}', text)
+    -> re.search
+
+[markdown2.FencedCodeBlocks._code_block_with_lexer_sub]
+3563:48 call  self.md._uniform_outdent(codeblock, max_outdent=leading_i...
+    -> markdown2.Markdown._uniform_outdent
+3565:32 call  unhash_code(codeblock)
+    -> markdown2.FencedCodeBlocks._code_block_with_lexer_sub.unhash_code
+3566:47 call  self.md._color_with_pygments(codeblock, lexer, **formatte...
+    -> markdown2.Markdown._color_with_pygments
+3570:39 call  self.md._uniform_indent(colored, leading_indent, True)
+    -> markdown2.Markdown._uniform_indent
+
+[markdown2.FencedCodeBlocks._code_block_with_lexer_sub.unhash_code]
+3552:39 call  list(self.md.html_spans.items())
+    -> <builtin>.list
+3552:64 call  self.md.html_spans.items()
+    -> <builtin>.dict.items
+3553:46 call  codeblock.replace(key, sanitized)
+    -> <builtin>.str.replace
+3560:46 call  codeblock.replace(old, new)
+    -> <builtin>.str.replace
+
+[markdown2.FencedCodeBlocks.tags]
+3583:53 call  self.md._html_class_str_from_tag('pre')
+    -> markdown2.Markdown._html_class_str_from_tag
+3585:58 call  ' class="{} language-{}"'.format(lexer_name, lexer_name)
+    -> <builtin>.str.format
+3587:58 call  self.md._html_class_str_from_tag('code')
+    -> markdown2.Markdown._html_class_str_from_tag
+3588:41 call  '<pre{}><code{}>'.format(pre_class, code_class)
+    -> <builtin>.str.format
+
+[markdown2.FencedCodeBlocks.sub]
+3591:33 call  match.group(2)
+    -> re.Match.group
+3592:32 call  match.group(3)
+    -> re.Match.group
+3596:52 call  match.start()
+    -> re.Match.start
+3597:38 call  re.search(r'\n*$', match.group())
+    -> re.search
+3597:59 call  match.group()
+    -> re.Match.group
+3597:68 call  re.search(r'\n*$', match.group()).group()
+    -> re.Match.group
+3601:48 call  self.md._get_pygments_lexer(lexer_name)
+    -> markdown2.Markdown._get_pygments_lexer
+3603:44 call  len(match.group(1))
+    -> <builtin>.len
+3603:56 call  match.group(1)
+    -> re.Match.group
+3603:66 call  len(match.group(1).lstrip())
+    -> <builtin>.len
+3603:78 call  match.group(1)
+    -> re.Match.group
+3603:88 call  match.group(1).lstrip()
+    -> <builtin>.str.lstrip
+3606:54 call  self._code_block_with_lexer_sub(codeblock, leading_indent...
+    -> markdown2.FencedCodeBlocks._code_block_with_lexer_sub
+3611:36 call  len(match.group(1))
+    -> <builtin>.len
+3611:48 call  match.group(1)
+    -> re.Match.group
+3611:58 call  len(match.group(1).lstrip())
+    -> <builtin>.len
+3611:70 call  match.group(1)
+    -> re.Match.group
+3611:80 call  match.group(1).lstrip()
+    -> <builtin>.str.lstrip
+3614:65 call  self.md._uniform_outdent(codeblock, max_outdent=leading_i...
+    -> markdown2.Markdown._uniform_outdent
+3616:41 call  self.md._encode_code(codeblock)
+    -> markdown2.Markdown._encode_code
+3618:25 call  self.tags(lexer_name)
+    -> markdown2.FencedCodeBlocks.tags
+    -> markdown2.Mermaid.tags
+    note: self is a FencedCodeBlocks or a Mermaid, which inherits sub and overrides tags
+
+[markdown2.FencedCodeBlocks.run]
+3629:45 call  self.fenced_code_block_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.FencedCodeBlocks.sub
+    note: self is a FencedCodeBlocks or a Mermaid, which inherits run and sub
+
+[markdown2.Latex._convert_single_match]
+3651:38 call  self.converter.convert(match.group(1))
+    -> latex2mathml.converter.convert
+    reject markdown2.Markdown.convert: self.converter is the module latex2mathml.converter (markdown2.py:3664); run sets it before it passes this method to re
+3651:50 call  match.group(1)
+    -> re.Match.group
+
+[markdown2.Latex._convert_double_match]
+3654:38 call  self.converter.convert(match.group(1).replace(r"\n", ''),...
+    -> latex2mathml.converter.convert
+    reject markdown2.Markdown.convert: self.converter is the module latex2mathml.converter (markdown2.py:3664); run sets it before it passes this method to re
+3654:50 call  match.group(1)
+    -> re.Match.group
+3654:61 call  match.group(1).replace(r"\n", '')
+    -> <builtin>.str.replace
+
+[markdown2.Latex.code_placeholder]
+3657:44 call  len(self.code_blocks)
+    -> <builtin>.len
+3658:52 call  match.group(0)
+    -> re.Match.group
+
+[markdown2.Latex.run]
+3666:30 call  ImportError('The "latex" extra requires the "latex2mathml...
+    -> <builtin>.ImportError
+3669:43 call  self._pre_code_block_re.sub(self.code_placeholder, text)
+    -> re.Pattern.sub
+    -> markdown2.Latex.code_placeholder
+3670:35 call  self._single_re.sub(self.code_placeholder, text)
+    -> re.Pattern.sub
+    -> markdown2.Latex.code_placeholder
+3671:35 call  self._triple_re.sub(self.code_placeholder, text)
+    -> re.Pattern.sub
+    -> markdown2.Latex.code_placeholder
+3673:42 call  self._single_dollar_re.sub(self._convert_single_match, text)
+    -> re.Pattern.sub
+    -> markdown2.Latex._convert_single_match
+3674:42 call  self._double_dollar_re.sub(self._convert_double_match, text)
+    -> re.Pattern.sub
+    -> markdown2.Latex._convert_double_match
+3677:62 call  self.code_blocks.items()
+    -> <builtin>.dict.items
+3678:32 call  text.replace(placeholder, code_block)
+    -> <builtin>.str.replace
+
+[markdown2.LinkPatterns.run]
+3698:40 call  regex.finditer(text)
+    -> re.Pattern.finditer
+3699:23 call  any(self.md._match_overlaps_substr(text, match, h) for h ...
+    -> <builtin>.any
+3699:54 call  self.md._match_overlaps_substr(text, match, h)
+    -> markdown2.Markdown._match_overlaps_substr
+3702:28 call  callable(repl)
+    -> <builtin>.callable
+3703:32 call  repl(match)
+    note: repl is the replacement of a link pattern that the client gives (link_patterns: Union[str, Callable[[re.Match[str]], str]], a bare callable); main() passes only strs (markdown2.py:4755-4760). A callable repl is a client callback: no edge
+3705:40 call  match.expand(repl)
+    -> re.Match.expand
+3706:36 call  replacements.append((match.span(), href))
+    -> <builtin>.list.append
+3706:48 call  match.span()
+    -> re.Match.span
+3707:47 call  reversed(replacements)
+    -> <builtin>.reversed
+3725:50 call  link_re.finditer(text)
+    -> re.Pattern.finditer
+3726:31 call  any((r[0] <= start and end <= r[1]) for r in match.regs)
+    -> <builtin>.any
+3739:33 call  href.replace('"', '&quot;')
+    -> <builtin>.str.replace
+3741:33 call  href.replace('"', '&quot;') # b/c of attr quote # To avoi...
+    -> <builtin>.str.replace
+3742:33 call  href.replace('"', '&quot;') # b/c of attr quote # To avoi...
+    -> <builtin>.str.replace
+3743:52 call  '<a href="{}">{}</a>'.format(escaped_href, text[start:end])
+    -> <builtin>.str.format
+3744:42 call  self.md._hash_span(link, link_from_hash)
+    -> markdown2.Markdown._hash_span
+3746:31 call  list(link_from_hash.items())
+    -> <builtin>.list
+3746:52 call  link_from_hash.items()
+    -> <builtin>.dict.items
+3747:32 call  text.replace(hash, link)
+    -> <builtin>.str.replace
+
+[markdown2.MarkdownInHTML.run]
+3771:45 call  self.md._strict_tag_block_sub(text, self.md._block_tags_a...
+    -> markdown2.Markdown._strict_tag_block_sub
+    reject markdown2.MarkdownInHTML.run.callback: _strict_tag_block_sub calls the function itself (callback(...) at markdown2.py:1120), an edge of that function
+
+[markdown2.MarkdownInHTML.run.callback]
+3766:53 call  self.md._uniform_outdent(block)
+    -> markdown2.Markdown._uniform_outdent
+3767:49 call  self.md._hash_html_block_sub(block)
+    -> markdown2.Markdown._hash_html_block_sub
+3768:44 call  self.md._uniform_indent(block, indent, include_empty_line...
+    -> markdown2.Markdown._uniform_indent
+
+[markdown2.MarkdownFileLinks.__init__]
+3795:14 call  super()
+    -> <builtin>.super
+3795:25 call  super().__init__(md, options)
+    -> markdown2.LinkProcessor.__init__
+    reject *: super() in MarkdownFileLinks resolves to LinkProcessor, which defines __init__
+
+[markdown2.MarkdownFileLinks.parse_inline_anchor_or_image]
+3798:23 call  super()
+    -> <builtin>.super
+3798:54 call  super().parse_inline_anchor_or_image(text, _link_text, st...
+    -> markdown2.LinkProcessor.parse_inline_anchor_or_image
+    reject markdown2.MarkdownFileLinks.parse_inline_anchor_or_image: super() in MarkdownFileLinks resolves to LinkProcessor
+3799:65 call  result[1].endswith('.md')
+    -> <builtin>.str.endswith
+3803:37 call  result[1].removesuffix('.md')
+    -> <builtin>.str.removesuffix
+
+[markdown2.MarkdownFileLinks.run]
+3807:78 call  self.options.get('link_defs', True)
+    -> <builtin>.dict.get
+3809:47 call  self.md.urls.items()
+    -> <builtin>.dict.items
+3810:32 call  url.endswith('.md')
+    -> <builtin>.str.endswith
+3811:57 call  url.removesuffix('.md')
+    -> <builtin>.str.removesuffix
+3813:21 call  super()
+    -> <builtin>.super
+3813:27 call  super().run(text)
+    -> markdown2.LinkProcessor.run
+    reject *: super() in MarkdownFileLinks resolves to LinkProcessor, which defines run
+
+[markdown2.MarkdownFileLinks.test]
+3816:21 call  super()
+    -> <builtin>.super
+3816:28 call  super().test(text)
+    -> markdown2.LinkProcessor.test
+    reject *: super() in MarkdownFileLinks resolves to LinkProcessor, which defines test
+
+[markdown2.Mermaid.tags]
+3826:21 call  super()
+    -> <builtin>.super
+3826:28 call  super().tags(lexer_name)
+    -> markdown2.FencedCodeBlocks.tags
+    reject markdown2.Mermaid.tags: super() in Mermaid resolves to FencedCodeBlocks
+    note: super().tags resolves to FencedCodeBlocks.tags in Mermaid.tags; annotation-only TypedDict tags creates no value binding.
+
+[markdown2.MiddleWordEm.__init__]
+3847:22 call  isinstance(options, bool)
+    -> <builtin>.isinstance
+3851:27 call  options.setdefault('allowed', True)
+    -> <builtin>.dict.setdefault
+    note: options is a dict: a bool becomes {'allowed': options} (markdown2.py:3848), None or another false value becomes {}, and the annotation Union[dict, bool, None] leaves only a dict otherwise
+3852:14 call  super()
+    -> <builtin>.super
+3852:25 call  super().__init__(md, options)
+    -> markdown2.Extra.__init__
+    reject *: super() in MiddleWordEm resolves to GFMItalicAndBoldProcessor, which has no __init__; the next class of the MRO that has one is Extra
+3854:34 call  '|'.join(md._escape_table.values())
+    -> <builtin>.str.join
+3854:58 call  md._escape_table.values()
+    -> <builtin>.dict.values
+3856:44 call  re.compile( r''' (?<!^) # To be middle of a word, it cann...
+    -> re.compile
+3873:28 call  _hash_text(self.name + '_')
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+3874:28 call  _hash_text(self.name + '*')
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+
+[markdown2.MiddleWordEm.run]
+3884:46 call  self.middle_word_em_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.MiddleWordEm.sub
+3888:32 call  text.replace(self.hash_table['_'], '_')
+    -> <builtin>.str.replace
+3889:32 call  text.replace(self.hash_table['*'], '*')
+    -> <builtin>.str.replace
+
+[markdown2.MiddleWordEm.sub]
+3895:25 call  super()
+    -> <builtin>.super
+3895:31 call  super().sub(match)
+    reject *: GFMItalicAndBoldProcessor, Extra and ABC define no sub, so super().sub raises AttributeError before any call (the package passes sub only as the callback of self.middle_word_em_re.sub, markdown2.py:3884, so only a client's own call of this public method reaches the branch)
+    note: no callee: the attribute lookup super().sub fails
+3897:29 call  match.group(1)
+    -> re.Match.group
+
+[markdown2.MiddleWordEm.test]
+3901:21 call  super()
+    -> <builtin>.super
+3901:28 call  super().test(text)
+    -> markdown2.GFMItalicAndBoldProcessor.test
+    reject *: super() in MiddleWordEm resolves to GFMItalicAndBoldProcessor, which defines test
+3902:42 call  re.search(r'md5-[0-9a-z]{32}', text)
+    -> re.search
+
+[markdown2.Numbering.run]
+3917:33 call  re.compile(r''' \[\#(\w+) # the counter. Open square plus...
+    -> re.compile
+3923:32 call  re.compile(r"\[@(\w+)\s*\]")
+    -> re.compile
+3929:42 call  regex_defns.finditer(text)
+    -> re.Pattern.finditer
+3931:19 call  len(match.groups())
+    -> <builtin>.len
+3931:32 call  match.groups()
+    -> re.Match.groups
+3933:34 call  match.group(1)
+    -> re.Match.group
+3934:38 call  match.group(2)
+    -> re.Match.group
+3934:47 call  match.group(2).strip()
+    -> <builtin>.str.strip
+3935:33 call  match.group(3)
+    -> re.Match.group
+3936:37 call  match.group(4)
+    -> re.Match.group
+3937:34 call  counters.get(counter, 1)
+    -> <builtin>.dict.get
+3939:32 call  replacements.append((match.start(0), definition_html.form...
+    -> <builtin>.list.append
+3939:45 call  match.start(0)
+    -> re.Match.start
+3940:56 call  definition_html.format(counter, ref_id, text_before, numb...
+    -> <builtin>.str.format
+3945:43 call  match.end(0)
+    -> re.Match.end
+3947:29 call  reversed(replacements)
+    -> <builtin>.reversed
+3954:30 call  reversed(list(regex_subs.finditer(text)))
+    -> <builtin>.reversed
+3954:35 call  list(regex_subs.finditer(text))
+    -> <builtin>.list
+3954:55 call  regex_subs.finditer(text)
+    -> re.Pattern.finditer
+3955:45 call  references.get(match.group(1), (None, None))
+    -> <builtin>.dict.get
+3955:57 call  match.group(1)
+    -> re.Match.group
+3957:45 call  reference_html.format(counter, match.group(1), number)
+    -> <builtin>.str.format
+3958:57 call  match.group(1)
+    -> re.Match.group
+3961:45 call  reference_html.format(match.group(1), 'countererror', '?'...
+    -> <builtin>.str.format
+3961:57 call  match.group(1)
+    -> re.Match.group
+3963:63 call  match.group(1)
+    -> re.Match.group
+3965:36 call  repl.replace('"', self.md._escape_table['"'])
+    -> <builtin>.str.replace
+3967:37 call  match.start()
+    -> re.Match.start
+3967:64 call  match.end()
+    -> re.Match.end
+
+[markdown2.PyShell.sub]
+3985:31 call  _dedent(match.group(0))
+    -> markdown2._dedent
+3985:43 call  match.group(0)
+    -> re.Match.group
+3986:67 call  self.md.extra_classes['fenced-code-blocks'].run("```pycon...
+    -> markdown2.FencedCodeBlocks.run
+    reject *: self.md.extra_classes['fenced-code-blocks'] is the instance of Extra._registry['fenced-code-blocks'], a FencedCodeBlocks (Mermaid is registered as 'mermaid'); the branch runs only when that extra is on (markdown2.py:3984)
+3988:28 call  match.group(0)
+    -> re.Match.group
+3988:42 call  match.group(0).splitlines(0)
+    -> <builtin>.str.splitlines
+3989:21 call  _dedentlines(lines)
+    -> markdown2._dedentlines
+3992:43 call  ('\n'+indent).join(lines)
+    -> <builtin>.str.join
+
+[markdown2.PyShell.run]
+3998:39 call  re.compile(r""" ^([ ]{0,%d})>>>[ ].*\n # first line ^(\1[...
+    -> re.compile
+4004:37 call  _pyshell_block_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.PyShell.sub
+
+[markdown2.SmartyPants.contractions]
+4030:44 call  self._apostrophe_year_re.sub(r"&#8217;\1", text)
+    -> re.Pattern.sub
+4032:32 call  text.replace("'%s" % c, "&#8217;%s" % c)
+    -> <builtin>.str.replace
+4033:32 call  text.replace("'%s" % c.capitalize(), "&#8217;%s" % c.capi...
+    -> <builtin>.str.replace
+4033:53 call  c.capitalize()
+    -> <builtin>.str.capitalize
+4034:43 call  c.capitalize()
+    -> <builtin>.str.capitalize
+
+[markdown2.SmartyPants.run]
+4048:37 call  self.contractions(text)
+    -> markdown2.SmartyPants.contractions
+4049:53 call  self._opening_single_quote_re.sub("&#8216;", text)
+    -> re.Pattern.sub
+4050:53 call  self._closing_single_quote_re.sub("&#8217;", text)
+    -> re.Pattern.sub
+4053:53 call  self._opening_double_quote_re.sub("&#8220;", text)
+    -> re.Pattern.sub
+4054:53 call  self._closing_double_quote_re.sub("&#8221;", text)
+    -> re.Pattern.sub
+4056:28 call  text.replace("---", "&#8212;")
+    -> <builtin>.str.replace
+4057:28 call  text.replace("--", "&#8211;")
+    -> <builtin>.str.replace
+4058:28 call  text.replace("...", "&#8230;")
+    -> <builtin>.str.replace
+4059:28 call  text.replace(" . . . ", "&#8230;")
+    -> <builtin>.str.replace
+4060:28 call  text.replace(". . .", "&#8230;")
+    -> <builtin>.str.replace
+4066:32 call  text.replace('class="footnote-ref&#8221;', 'class="footno...
+    -> <builtin>.str.replace
+
+[markdown2.SmartyPants.test]
+4071:19 call  any(i in text for i in ( "'", '"', '--', '...', '. . .' ))
+    -> <builtin>.any
+
+[markdown2.Strike.run]
+4090:35 call  self._strike_re.sub(r"<s>\1</s>", text)
+    -> re.Pattern.sub
+
+[markdown2.Tables.run]
+4110:30 call  re.compile(r''' (?:(?<=\n)|\A\n?) # leading blank line ^[...
+    -> re.compile
+4132:28 call  table_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Tables.sub
+
+[markdown2.Tables.sub]
+4140:45 call  match.groups()
+    -> re.Match.groups
+4143:23 call  re.sub(escape_bar_re, '|', cell.strip())
+    -> re.sub
+4143:54 call  cell.strip()
+    -> <builtin>.str.strip
+4143:78 call  re.split(split_bar_re, re.sub(trim_bar_re, "", re.sub(tri...
+    -> re.split
+4143:99 call  re.sub(trim_bar_re, "", re.sub(trim_space_re, "", underli...
+    -> re.sub
+4143:123 call  re.sub(trim_space_re, "", underline)
+    -> re.sub
+4145:38 call  enumerate(cols)
+    -> <builtin>.enumerate
+4154:65 call  self.md._html_class_str_from_tag('table')
+    -> markdown2.Markdown._html_class_str_from_tag
+4154:122 call  self.md._html_class_str_from_tag('thead')
+    -> markdown2.Markdown._html_class_str_from_tag
+4155:23 call  re.sub(escape_bar_re, '|', cell.strip())
+    -> re.sub
+4155:54 call  cell.strip()
+    -> <builtin>.str.strip
+4155:78 call  re.split(split_bar_re, re.sub(trim_bar_re, "", re.sub(tri...
+    -> re.split
+4155:99 call  re.sub(trim_bar_re, "", re.sub(trim_space_re, "", head))
+    -> re.sub
+4155:123 call  re.sub(trim_space_re, "", head)
+    -> re.sub
+4156:38 call  enumerate(cols)
+    -> <builtin>.enumerate
+4157:26 call  hlines.append(' <th{}>{}</th>'.format( align_from_col_idx...
+    -> <builtin>.list.append
+4157:51 call  ' <th{}>{}</th>'.format( align_from_col_idx.get(col_idx, ...
+    -> <builtin>.str.format
+4158:39 call  align_from_col_idx.get(col_idx, '')
+    -> <builtin>.dict.get
+4159:40 call  self.md._run_span_gamut(col)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+4161:22 call  hlines.append('</tr>')
+    -> <builtin>.list.append
+4162:22 call  hlines.append('</thead>')
+    -> <builtin>.list.append
+4165:26 call  body.strip('\n')
+    -> <builtin>.str.strip
+4167:26 call  hlines.append('<tbody>')
+    -> <builtin>.list.append
+4168:35 call  body.split('\n')
+    -> <builtin>.str.split
+4169:30 call  hlines.append('<tr>')
+    -> <builtin>.list.append
+4170:31 call  re.sub(escape_bar_re, '|', cell.strip())
+    -> re.sub
+4170:62 call  cell.strip()
+    -> <builtin>.str.strip
+4170:86 call  re.split(split_bar_re, re.sub(trim_bar_re, "", re.sub(tri...
+    -> re.split
+4170:107 call  re.sub(trim_bar_re, "", re.sub(trim_space_re, "", line))
+    -> re.sub
+4170:131 call  re.sub(trim_space_re, "", line)
+    -> re.sub
+4171:46 call  enumerate(cols)
+    -> <builtin>.enumerate
+4172:34 call  hlines.append(' <td{}>{}</td>'.format( align_from_col_idx...
+    -> <builtin>.list.append
+4172:59 call  ' <td{}>{}</td>'.format( align_from_col_idx.get(col_idx, ...
+    -> <builtin>.str.format
+4173:47 call  align_from_col_idx.get(col_idx, '')
+    -> <builtin>.dict.get
+4174:48 call  self.md._run_span_gamut(col)
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+4176:30 call  hlines.append('</tr>')
+    -> <builtin>.list.append
+4177:26 call  hlines.append('</tbody>')
+    -> <builtin>.list.append
+4178:22 call  hlines.append('</table>')
+    -> <builtin>.list.append
+4180:25 call  '\n'.join(hlines)
+    -> <builtin>.str.join
+
+[markdown2.TelegramSpoiler.run]
+4190:39 call  self._tg_spoiler_re.sub(r"<tg-spoiler>\1</tg-spoiler>", t...
+    -> re.Pattern.sub
+
+[markdown2.Underline.run]
+4206:38 call  self._underline_re.sub(r"<u>\1</u>", text)
+    -> re.Pattern.sub
+
+[markdown2.Wavedrom.test]
+4232:61 call  FencedCodeBlocks.fenced_code_block_re.search(text)
+    -> re.Pattern.search
+4233:44 call  match.group(2)
+    -> re.Match.group
+
+[markdown2.Wavedrom.sub]
+4237:54 call  self.md._uniform_outdent(match.group(3))
+    -> markdown2.Markdown._uniform_outdent
+4237:66 call  match.group(3)
+    -> re.Match.group
+4242:37 call  self.options.get('prefer_embed_svg', True)
+    -> <builtin>.dict.get
+4247:40 call  wavedrom.render(waves)
+    -> wavedrom.render
+    note: optional import (markdown2.py:4245-4250): both sides run. wavedrom has no wheel and is not in the test environment; its names are the access paths, as for a missing module
+4247:56 call  wavedrom.render(waves).tostring()
+    -> wavedrom.render.tostring
+    note: the method of the object that wavedrom.render returns, named by the access path as for a missing module (micro-benchmark README, "Missing modules"); see markdown2.md
+4253:50 call  _hash_text(waves)
+    -> markdown2._hash_text
+    reject *: the name _hash_text resolves to the module-level markdown2._hash_text
+4255:39 call  self.md._uniform_indent( '\n{}{}{}\n'.format(open_tag, se...
+    -> markdown2.Markdown._uniform_indent
+4256:32 call  '\n{}{}{}\n'.format(open_tag, self.md._escape_table[waves...
+    -> <builtin>.str.format
+
+[markdown2.Wavedrom.run]
+4261:57 call  FencedCodeBlocks.fenced_code_block_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.Wavedrom.sub
+
+[markdown2.WikiTables.run]
+4274:35 call  re.compile(r''' (?:(?<=\n\n)|\A\n?) # leading blank line ...
+    -> re.compile
+4279:33 call  wiki_table_re.sub(self.sub, text)
+    -> re.Pattern.sub
+    -> markdown2.WikiTables.sub
+
+[markdown2.WikiTables.sub]
+4282:28 call  match.group(0)
+    -> re.Match.group
+4282:37 call  match.group(0).strip()
+    -> <builtin>.str.strip
+4284:37 call  ttext.splitlines(0)
+    -> <builtin>.str.splitlines
+4285:30 call  line.strip()
+    -> <builtin>.str.strip
+4285:44 call  line.strip()[2:-2].strip()
+    -> <builtin>.str.strip
+4286:27 call  c.strip()
+    -> <builtin>.str.strip
+4286:47 call  re.split(r'(?<!\\)\|\|', line)
+    -> re.split
+4287:24 call  rows.append(row)
+    -> <builtin>.list.append
+4297:18 call  add_hline('<table%s>' % self.md._html_class_str_from_tag(...
+    -> markdown2.WikiTables.sub.add_hline
+4297:65 call  self.md._html_class_str_from_tag('table')
+    -> markdown2.Markdown._html_class_str_from_tag
+4299:41 call  re.match(r"^\s*~", rows[0][0])
+    -> re.match
+4300:22 call  add_hline('<thead%s>' % self.md._html_class_str_from_tag(...
+    -> markdown2.WikiTables.sub.add_hline
+4300:69 call  self.md._html_class_str_from_tag('thead')
+    -> markdown2.Markdown._html_class_str_from_tag
+4301:22 call  add_hline('<tr>', 2)
+    -> markdown2.WikiTables.sub.add_hline
+4303:26 call  add_hline(f"<th>{format_cell(cell)}</th>", 3)
+    -> markdown2.WikiTables.sub.add_hline
+4303:45 call  format_cell(cell)
+    -> markdown2.WikiTables.sub.format_cell
+4304:22 call  add_hline('</tr>', 2)
+    -> markdown2.WikiTables.sub.add_hline
+4305:22 call  add_hline('</thead>', 1)
+    -> markdown2.WikiTables.sub.add_hline
+4310:22 call  add_hline('<tbody>', 1)
+    -> markdown2.WikiTables.sub.add_hline
+4312:26 call  add_hline('<tr>', 2)
+    -> markdown2.WikiTables.sub.add_hline
+4314:30 call  add_hline(f'<td>{format_cell(cell)}</td>', 3)
+    -> markdown2.WikiTables.sub.add_hline
+4314:49 call  format_cell(cell)
+    -> markdown2.WikiTables.sub.format_cell
+4315:26 call  add_hline('</tr>', 2)
+    -> markdown2.WikiTables.sub.add_hline
+4316:22 call  add_hline('</tbody>', 1)
+    -> markdown2.WikiTables.sub.add_hline
+4317:18 call  add_hline('</table>')
+    -> markdown2.WikiTables.sub.add_hline
+4318:25 call  '\n'.join(hlines)
+    -> <builtin>.str.join
+
+[markdown2.WikiTables.sub.add_hline]
+4292:26 call  hlines.append((self.md.tab * indents) + line)
+    -> <builtin>.list.append
+
+[markdown2.WikiTables.sub.format_cell]
+4295:43 call  self.md._run_span_gamut(re.sub(r"^\s*~", "", cell).strip(...
+    -> markdown2.mark_stage.wrapper.inner
+    reject markdown2.Markdown._run_span_gamut: the method name is bound to the function inner that @mark_stage returns (markdown2.py:241); inner runs the original method through func (markdown2.py:255)
+4295:50 call  re.sub(r"^\s*~", "", cell)
+    -> re.sub
+4295:76 call  re.sub(r"^\s*~", "", cell).strip(" ")
+    -> <builtin>.str.strip
+
+[markdown2.calculate_toc_html]
+4367:25 call  lines.append("%s<ul>" % indent())
+    -> <builtin>.list.append
+4367:43 call  indent()
+    -> markdown2.calculate_toc_html.indent
+4368:27 call  h_stack.append(level)
+    -> <builtin>.list.append
+4373:28 call  h_stack.pop()
+    -> <builtin>.list.pop
+4374:42 call  lines[-1].endswith("</li>")
+    -> <builtin>.str.endswith
+4376:29 call  lines.append("%s</ul></li>" % indent())
+    -> <builtin>.list.append
+4376:53 call  indent()
+    -> markdown2.calculate_toc_html.indent
+4377:21 call  lines.append('{}<li><a href="#{}">{}</a>'.format( indent(...
+    -> <builtin>.list.append
+4377:57 call  '{}<li><a href="#{}">{}</a>'.format( indent(), id, name)
+    -> <builtin>.str.format
+4378:19 call  indent()
+    -> markdown2.calculate_toc_html.indent
+4379:14 call  len(h_stack)
+    -> <builtin>.len
+4380:20 call  h_stack.pop()
+    -> <builtin>.list.pop
+4381:34 call  lines[-1].endswith("</li>")
+    -> <builtin>.str.endswith
+4383:21 call  lines.append("%s</ul>" % indent())
+    -> <builtin>.list.append
+4383:40 call  indent()
+    -> markdown2.calculate_toc_html.indent
+4384:21 call  '\n'.join(lines)
+    -> <builtin>.str.join
+
+[markdown2.calculate_toc_html.indent]
+4362:27 call  len(h_stack)
+    -> <builtin>.len
+
+[markdown2._slugify]
+4406:34 call  unicodedata.normalize('NFKD', value)
+    -> unicodedata.normalize
+4406:56 call  unicodedata.normalize('NFKD', value).encode('utf-8', 'ign...
+    -> <builtin>.str.encode
+4406:82 call  unicodedata.normalize('NFKD', value).encode('utf-8', 'ign...
+    -> <builtin>.bytes.decode
+4407:34 call  _slugify_strip_re.sub('', value)
+    -> re.Pattern.sub
+4407:51 call  _slugify_strip_re.sub('', value).strip()
+    -> <builtin>.str.strip
+4407:59 call  _slugify_strip_re.sub('', value).strip().lower()
+    -> <builtin>.str.lower
+4408:37 call  _slugify_hyphenate_re.sub('-', value)
+    -> re.Pattern.sub
+
+[markdown2._curry.result]
+4415:31 call  kwargs.copy()
+    -> <builtin>.dict.copy
+4416:24 call  combined.update(kwrest)
+    -> <builtin>.dict.update
+4417:24 call  function(*args + rest, **combined)
+    -> markdown2.Markdown._hash_html_block_sub
+    note: function is the argument of _curry, a private function whose only call passes self._hash_html_block_sub (markdown2.py:978)
+
+[markdown2._regex_from_encoded_pattern]
+4427:20 call  s.startswith('/')
+    -> <builtin>.str.startswith
+4427:37 call  s.rfind('/')
+    -> <builtin>.str.rfind
+4429:22 call  s.rfind('/')
+    -> <builtin>.str.rfind
+4443:33 call  ValueError("unsupported regex flag: '%s' in '%s' " "(must...
+    -> <builtin>.ValueError
+4445:53 call  ''.join(list(flag_from_char.keys()))
+    -> <builtin>.str.join
+4445:58 call  list(flag_from_char.keys())
+    -> <builtin>.list
+4445:78 call  flag_from_char.keys()
+    -> <builtin>.dict.keys
+4446:26 call  re.compile(s[1:idx], flags)
+    -> re.compile
+4448:26 call  re.compile(re.escape(s))
+    -> re.compile
+4448:36 call  re.escape(s)
+    -> re.escape
+
+[markdown2._dedentlines]
+4466:14 call  print("dedent: dedent(..., tabsize=%d, skip_first_line=%r...
+    note: no callee: dead branch, DEBUG is the local constant False (markdown2.py:4464)
+4469:29 call  enumerate(lines)
+    -> <builtin>.enumerate
+4485:18 call  print("dedent: indent=%d: %r" % (indent, line))
+    note: no callee: dead branch, DEBUG is the local constant False (markdown2.py:4464)
+4489:25 call  min(margin, indent)
+    -> <builtin>.min
+4491:14 call  print("dedent: margin=%r" % margin)
+    note: no callee: dead branch, DEBUG is the local constant False (markdown2.py:4464)
+4494:33 call  enumerate(lines)
+    -> <builtin>.enumerate
+4498:35 call  enumerate(line)
+    -> <builtin>.enumerate
+4505:30 call  print("dedent: %r: EOL -> strip up to EOL" % line)
+    note: no callee: dead branch, DEBUG is the local constant False (markdown2.py:4464)
+4509:37 call  ValueError("unexpected non-whitespace char %r in " "line ...
+    note: no callee: the margin is the smallest indent of the lines that the first loop measures (markdown2.py:4469-4489), with the same rules for spaces and tabs; so the second loop reaches the margin, a line end or the end of the line before any other character, and this raise does not run
+4513:26 call  print("dedent: %r: %r -> removed %d/%d"\ % (line, ch, rem...
+    note: no callee: dead branch, DEBUG is the local constant False (markdown2.py:4464)
+
+[markdown2._dedent]
+4538:28 call  text.splitlines(True)
+    -> <builtin>.str.splitlines
+4539:17 call  _dedentlines(lines, tabsize=tabsize, skip_first_line=skip...
+    -> markdown2._dedentlines
+4540:19 call  ''.join(lines)
+    -> <builtin>.str.join
+
+[markdown2._memoized.__call__]
+4558:49 call  self.func(*args)
+    -> markdown2._xml_oneliner_re_from_tab_width
+    -> markdown2._hr_tag_re_from_tab_width
+    note: self.func is the function that the private class _memoized wraps; the package makes _memoized objects only at markdown2.py:4589 and 4609, around these two functions
+4563:29 call  self.func(*args)
+    -> markdown2._xml_oneliner_re_from_tab_width
+    -> markdown2._hr_tag_re_from_tab_width
+    note: self.func holds the two functions of markdown2.py:4589 and 4609 (see 4558:49). This call runs when self.cache[args] raises TypeError, for arguments that cannot be hashed: the argument is self.tab_width, annotated int, and a client int subclass with __hash__ = None fits that annotation and passes Markdown.__init__ (tab_width * " ", '%d' % tab_width, markdown2.py:326, 386); the annotation does not remove this branch (lead's ruling on audit F1)
+
+[markdown2._xml_oneliner_re_from_tab_width]
+4572:22 call  re.compile(r""" (?: (?<=\n\n) # Starting after a blank li...
+    -> re.compile
+
+[markdown2._hr_tag_re_from_tab_width]
+4593:22 call  re.compile(r""" (?: (?<=\n\n) # Starting after a blank li...
+    -> re.compile
+
+[markdown2._xml_escape_attr]
+4618:32 call  _AMPERSAND_RE.sub('&amp;', attr)
+    -> re.Pattern.sub
+4621:17 call  attr .replace('"', '&quot;')
+    -> <builtin>.str.replace
+4622:17 call  attr .replace('"', '&quot;') .replace('<', '&lt;')
+    -> <builtin>.str.replace
+4623:17 call  attr .replace('"', '&quot;') .replace('<', '&lt;') .repla...
+    -> <builtin>.str.replace
+4625:34 call  escaped.replace("'", "&#39;")
+    note: No callee: _xml_escape_attr is private and its only package callers (3124 and 3274) omit skip_single_quote, whose default is True. The guarded replacement cannot run under B2.
+
+[markdown2._xml_encode_email_char_at_random]
+4630:15 call  random()
+    -> random.random
+4638:29 call  hex(ord(ch))
+    -> <builtin>.hex
+4638:33 call  ord(ch)
+    -> <builtin>.ord
+4640:29 call  ord(ch)
+    -> <builtin>.ord
+
+[markdown2._html_escape_url]
+4656:17 call  attr .replace('"', '&quot;')
+    -> <builtin>.str.replace
+4657:17 call  attr .replace('"', '&quot;') .replace('<', '&lt;')
+    -> <builtin>.str.replace
+4658:17 call  attr .replace('"', '&quot;') .replace('<', '&lt;') .repla...
+    -> <builtin>.str.replace
+4660:34 call  escaped.replace("'", "&#39;")
+    -> <builtin>.str.replace
+
+[markdown2._test]
+4674:20 call  doctest.testmod()
+    -> doctest.testmod
+    -> markdown2.markdown
+    -> markdown2.Markdown.__init__
+    -> markdown2.Markdown.convert
+    -> markdown2.Markdown._detab
+    note: doctest.testmod() runs the examples in the docstrings of the module __main__. When markdown2 runs as a script with --self-test (the `if __name__ == "__main__"` block, markdown2.py:4814), that module is markdown2 itself; its examples (markdown2.py:22-29, 847-857) call markdown2.markdown, Markdown(), convert and _detab, which doctest calls back through exec. See markdown2.md
+
+[markdown2.main]
+4681:28 call  logging.basicConfig()
+    -> logging.basicConfig
+4683:37 call  argparse.ArgumentParser( prog="markdown2", description=cm...
+    -> argparse.ArgumentParser
+4687:24 call  parser.add_argument('--version', action='version', versio...
+    -> argparse.ArgumentParser.add_argument
+4689:24 call  parser.add_argument('paths', nargs='*', help=( 'optional ...
+    -> argparse.ArgumentParser.add_argument
+4694:24 call  parser.add_argument("-v", "--verbose", dest="log_level", ...
+    -> argparse.ArgumentParser.add_argument
+4697:24 call  parser.add_argument("--encoding", help="specify encoding ...
+    -> argparse.ArgumentParser.add_argument
+4699:24 call  parser.add_argument("--html4tags", action="store_true", d...
+    -> argparse.ArgumentParser.add_argument
+4701:24 call  parser.add_argument("-s", "--safe", metavar="MODE", dest=...
+    -> argparse.ArgumentParser.add_argument
+4705:24 call  parser.add_argument("-x", "--extras", action="append", he...
+    -> argparse.ArgumentParser.add_argument
+4708:24 call  parser.add_argument("--use-file-vars", help="Look for and...
+    -> argparse.ArgumentParser.add_argument
+4712:24 call  parser.add_argument("--link-patterns-file", help="path to...
+    -> argparse.ArgumentParser.add_argument
+4714:24 call  parser.add_argument("--self-test", action="store_true", h...
+    -> argparse.ArgumentParser.add_argument
+4716:24 call  parser.add_argument("--compare", action="store_true", hel...
+    -> argparse.ArgumentParser.add_argument
+4718:24 call  parser.add_argument('--output', type=str, help='output to...
+    -> argparse.ArgumentParser.add_argument
+4719:24 call  parser.set_defaults(log_level=logging.INFO, compare=False...
+    -> argparse.ArgumentParser.set_defaults
+4721:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    note: for help and version output argparse instantiates the formatter_class _NoReflowFormatter, whose __init__ comes from argparse.HelpFormatter (library code instantiating a package class: no edge); argparse never calls format_description, a method name of optparse, so no package code runs
+4723:17 call  log.setLevel(opts.log_level)
+    -> logging.Logger.setLevel
+4726:21 call  _test()
+    -> markdown2._test
+4731:34 call  re.compile("[,;: ]+")
+    -> re.compile
+4732:36 call  splitter.split(s)
+    -> re.Pattern.split
+4734:42 call  e.split('=', 1)
+    -> <builtin>.str.split
+4736:35 call  int(earg)
+    -> <builtin>.int
+4747:17 call  open(opts.link_patterns_file)
+    -> <builtin>.open
+4749:37 call  enumerate(f.readlines())
+    -> <builtin>.enumerate
+4749:49 call  f.readlines()
+    -> io.TextIOWrapper.readlines
+    note: f is the text file that open() returns (markdown2.py:4747)
+4750:34 call  line.strip()
+    -> <builtin>.str.strip
+4752:31 call  line.lstrip()
+    -> <builtin>.str.lstrip
+4752:44 call  line.lstrip().startswith("#")
+    -> <builtin>.str.startswith
+4755:44 call  line.rstrip()
+    -> <builtin>.str.rstrip
+4755:53 call  line.rstrip().rsplit(None, 1)
+    -> <builtin>.str.rsplit
+4757:40 call  MarkdownError("%s:%d: invalid link pattern line: %r" % (o...
+    -> <builtin>.Exception.__init__
+4759:37 call  link_patterns.append( (_regex_from_encoded_pattern(pat), ...
+    -> <builtin>.list.append
+4760:49 call  _regex_from_encoded_pattern(pat)
+    -> markdown2._regex_from_encoded_pattern
+4762:20 call  f.close()
+    -> io.TextIOWrapper.close
+4767:23 call  join(dirname(dirname(abspath(__file__))), "test", "Markdo...
+    -> os.path.join
+4767:31 call  dirname(dirname(abspath(__file__)))
+    -> os.path.dirname
+4767:39 call  dirname(abspath(__file__))
+    -> os.path.dirname
+4767:47 call  abspath(__file__)
+    -> os.path.abspath
+4773:34 call  sys.stdin.read()
+    -> io.TextIOWrapper.read
+4775:29 call  codecs.open(path, 'r', opts.encoding)
+    -> codecs.open
+4776:27 call  fp.read()
+    -> codecs.StreamReaderWriter.read
+    note: codecs.open with the encoding opts.encoding (a str: default "utf-8", or the --encoding argument) returns a codecs.StreamReaderWriter
+4777:21 call  fp.close()
+    -> io.BufferedReader.close
+    note: codecs.StreamReaderWriter defines no close; its __getattr__ returns the close of its stream, the file that codecs.open opens in binary mode ('rb', an io.BufferedReader)
+4780:18 call  print("==== Markdown.pl ====")
+    -> <builtin>.print
+4781:22 call  Popen('perl %s' % markdown_pl, shell=True, stdin=PIPE, st...
+    -> subprocess.Popen
+4782:26 call  p.stdin.write(text.encode('utf-8'))
+    -> io.BufferedWriter.write
+    note: p.stdin is the binary pipe (io.BufferedWriter) of Popen(..., stdin=PIPE) with the default bufsize
+4782:38 call  text.encode('utf-8')
+    -> <builtin>.str.encode
+4783:26 call  p.stdin.close()
+    -> io.BufferedWriter.close
+4784:38 call  p.stdout.read()
+    -> io.BufferedReader.read
+    note: p.stdout is the binary pipe (io.BufferedReader) of Popen(..., stdout=PIPE)
+4784:47 call  p.stdout.read().decode('utf-8')
+    -> <builtin>.bytes.decode
+4785:29 call  sys.stdout.write(perl_html)
+    -> io.TextIOWrapper.write
+4786:18 call  print("==== markdown2.py ====")
+    -> <builtin>.print
+4787:24 call  markdown(text, html4tags=opts.html4tags, safe_mode=opts.s...
+    -> markdown2.markdown
+4794:22 call  open(opts.output, 'w')
+    -> <builtin>.open
+4795:24 call  f.write(html)
+    -> io.TextIOWrapper.write
+    note: f is the text file that open(opts.output, 'w') returns
+4797:29 call  sys.stdout.write(html)
+    -> io.TextIOWrapper.write
+4799:22 call  log.debug("toc_html: " + str(html.toc_html.encode(sys.std...
+    -> logging.Logger.debug
+4800:20 call  str(html.toc_html.encode(sys.stdout.encoding or "utf-8", ...
+    -> <builtin>.str
+4800:41 call  html.toc_html.encode(sys.stdout.encoding or "utf-8", 'xml...
+    -> <builtin>.str.encode
+4802:28 call  join(dirname(dirname(abspath(__file__))), "test")
+    -> os.path.join
+4802:36 call  dirname(dirname(abspath(__file__)))
+    -> os.path.dirname
+4802:44 call  dirname(abspath(__file__))
+    -> os.path.dirname
+4802:52 call  abspath(__file__)
+    -> os.path.abspath
+4803:22 call  exists(join(test_dir, "test_markdown2.py"))
+    -> os.path.exists
+4803:27 call  join(test_dir, "test_markdown2.py")
+    -> os.path.join
+4804:32 call  sys.path.insert(0, test_dir)
+    -> <builtin>.list.insert
+4806:48 call  norm_html_from_html(html)
+    -> test_markdown2.norm_html_from_html
+4807:53 call  norm_html_from_html(perl_html)
+    -> test_markdown2.norm_html_from_html
+4811:18 call  print("==== match? %r ====" % (norm_perl_html == norm_html))
+    -> <builtin>.print

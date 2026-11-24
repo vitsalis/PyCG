@@ -1,0 +1,2242 @@
+# Call-site ledger of cachetools v8.0.0 (src/cachetools/, commit 1ce79efa552d1bdda70d144d401ef9105d999184).
+# Written by hand from the source and Python semantics; judgements and statistics in cachetools.md.
+# "Any package cache" below means an instance of Cache, FIFOCache, LFUCache, LRUCache, RRCache,
+# TTLCache, TLRUCache or func._UnboundTTLCache. The private _TimedCache is not created by clients
+# (cachetools.md, rule B1).
+
+default reject cachetools._TimedCache._Timer.__getattr__: Python calls __getattr__ only when the normal lookup fails on a _Timer instance. The package loads attributes of a _Timer only in _Timer's own methods (self.__timer, self.__nesting, self.__time), and they are always set when read: __timer and __nesting in __init__ (copy and unpickling also call _Timer(timer), through __reduce__ at __init__.py:411), __time before __nesting first becomes non-zero (__init__.py:400-404). Special methods (__call__, __enter__, __exit__) are looked up on the type. Every other receiver at these sites is not a _Timer; at the explicit call getattr(self.__timer, name) (__init__.py:414) the receiver is the raw timer, which is never a _Timer: _Timer is private, the package creates one only in _TimedCache.__init__ (__init__.py:418) and through _Timer.__reduce__ (__init__.py:411), both times around the raw timer, and another cache's .timer is not a value for the timer parameter (cachetools.md, rules B1, B2, B3)
+
+== cachetools
+
+[cachetools]
+28:1 class  class Cache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+31:22 call  object()
+    -> <builtin>.object
+158:6 decorator  @property
+    -> <builtin>.property
+163:6 decorator  @property
+    -> <builtin>.property
+168:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+174:1 class  class FIFOCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+208:1 class  class LFUCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+211:5 class  class _Link
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+294:1 class  class LRUCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+340:1 class  class RRCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+343:47 getattr  random.choice
+    reject cachetools.RRCache.choice: random.choice is an attribute of the module random, not of an RRCache
+349:6 decorator  @property
+    -> <builtin>.property
+385:1 class  class _TimedCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+388:5 class  class _Timer
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+430:6 decorator  @property
+    -> <builtin>.property
+436:6 decorator  @property
+    -> <builtin>.property
+463:1 class  class TTLCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+466:5 class  class _Link
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+553:6 decorator  @property
+    -> <builtin>.property
+605:1 class  class TLRUCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+610:6 decorator  @functools.total_ordering
+    -> functools.total_ordering
+    note: total_ordering reads _Item.__lt__ and adds __gt__, __le__ and __ge__; it calls none of them
+611:5 class  class _Item
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+683:6 decorator  @property
+    -> <builtin>.property
+744:1 class  class CacheInfo
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+744:39 call  collections.namedtuple("CacheInfo", "hits misses maxsize ...
+    -> collections.namedtuple
+749:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[cachetools.Cache.__init__]
+36:20 op  maxsize < 0
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+37:29 call  ValueError("maxsize must be non-negative")
+    -> <builtin>.ValueError
+40:17 getattr  self.getsizeof
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.getsizeof is the instance attribute of __init__.py:39 (no descriptor protocol) or the staticmethod Cache.getsizeof (__init__.py:168); no package subclass rebinds getsizeof
+40:40 getattr  Cache.getsizeof
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: Cache.getsizeof is the staticmethod of __init__.py:168; staticmethod.__get__ is builtin
+
+[cachetools.Cache.__repr__]
+47:50 op  "%s(%s, maxsize=%r, currsize=%r)" % ( type(self).__name__...
+    reject *: the operands are str (type(self).__name__ and repr(self.__data)), the maxsize that the client passed (a number; math.inf from func.py:15) and the currsize (an int, or a sum of the client's getsizeof results); %s and %r of them call no package __str__ or __repr__ (client values are opaque, rule B5)
+48:17 call  type(self)
+    -> <builtin>.type
+49:17 call  repr(self.__data)
+    -> <builtin>.repr
+    reject *: repr of the dict self.__data (__init__.py:42): its keys and values are client data (the client's keys or the tuples of a key function, and the values that the client stores)
+
+[cachetools.Cache.__getitem__]
+56:31 getitem  self.__data[key]
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+58:36 call  self.__missing__(key)
+    -> cachetools.Cache.__missing__
+    note: no package class overrides __missing__ (a client subclass may: a client callback)
+
+[cachetools.Cache.__setitem__]
+62:21 getattr  self.__size
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__size is None (the class attribute of __init__.py:33) or the dict of __init__.py:41
+65:24 op  maxsize < 1
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+66:33 call  ValueError("value too large")
+    -> <builtin>.ValueError
+67:22 op  key in data
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+68:21 setitem  data[key]
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+70:43 op  self.__currsize + 1 > maxsize
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+71:33 call  self.popitem()
+    -> cachetools.FIFOCache.popitem
+    -> cachetools.LFUCache.popitem
+    -> cachetools.LRUCache.popitem
+    -> cachetools.RRCache.popitem
+    -> cachetools.TTLCache.popitem
+    -> cachetools.TLRUCache.popitem
+    -> collections.abc.MutableMapping.popitem
+    -> cachetools.Cache.__iter__
+    -> cachetools.Cache.__getitem__
+    -> cachetools.Cache.__delitem__
+    note: dispatch on self: Cache.__setitem__ runs for every package cache (directly, or as cache_setitem of the subclasses' __setitem__); _UnboundTTLCache uses TTLCache.popitem. Cache itself does not define popitem: for a Cache it is MutableMapping.popitem, which calls back next(iter(self)) -> Cache.__iter__, self[key] -> Cache.__getitem__ and del self[key] -> Cache.__delitem__. _TimedCache defines no popitem either, but it is private: clients create only its subclasses, which define popitem
+72:21 setitem  data[key]
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+75:29 getattr  self.getsizeof
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.getsizeof is the instance attribute of __init__.py:39 (no descriptor protocol) or the staticmethod Cache.getsizeof (__init__.py:168); no package subclass rebinds getsizeof
+75:38 call  self.getsizeof(value)
+    reject cachetools.Cache.getsizeof: this branch runs only when self.__size is not None, and Cache.__init__ sets it only when self.getsizeof is not Cache.getsizeof (__init__.py:40-41)
+    note: self.getsizeof is then the client's getsizeof (the instance attribute of __init__.py:39) or the method of a client subclass: a client callback. No package value gets here: Cache.getsizeof, also reached as some_cache.getsizeof, is the same function and leaves self.__size None
+76:25 op  itemsize > maxsize
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+77:33 call  ValueError("value too large")
+    -> <builtin>.ValueError
+78:25 op  itemsize < 0
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+79:33 call  ValueError("value size must be non-negative")
+    -> <builtin>.ValueError
+80:20 op  key not in data
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+82:50 op  self.__currsize + diffsize > maxsize
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+83:33 call  self.popitem()
+    -> cachetools.FIFOCache.popitem
+    -> cachetools.LFUCache.popitem
+    -> cachetools.LRUCache.popitem
+    -> cachetools.RRCache.popitem
+    -> cachetools.TTLCache.popitem
+    -> cachetools.TLRUCache.popitem
+    -> collections.abc.MutableMapping.popitem
+    -> cachetools.Cache.__iter__
+    -> cachetools.Cache.__getitem__
+    -> cachetools.Cache.__delitem__
+    note: dispatch on self: Cache.__setitem__ runs for every package cache (directly, or as cache_setitem of the subclasses' __setitem__); _UnboundTTLCache uses TTLCache.popitem. Cache itself does not define popitem: for a Cache it is MutableMapping.popitem, which calls back next(iter(self)) -> Cache.__iter__, self[key] -> Cache.__getitem__ and del self[key] -> Cache.__delitem__. _TimedCache defines no popitem either, but it is private: clients create only its subclasses, which define popitem
+85:43 getitem  size[key]
+    reject *: the receiver is the dict self.__size (__init__.py:41)
+86:50 op  self.__currsize + diffsize > maxsize
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+87:33 call  self.popitem()
+    -> cachetools.FIFOCache.popitem
+    -> cachetools.LFUCache.popitem
+    -> cachetools.LRUCache.popitem
+    -> cachetools.RRCache.popitem
+    -> cachetools.TTLCache.popitem
+    -> cachetools.TLRUCache.popitem
+    -> collections.abc.MutableMapping.popitem
+    -> cachetools.Cache.__iter__
+    -> cachetools.Cache.__getitem__
+    -> cachetools.Cache.__delitem__
+    note: dispatch on self: Cache.__setitem__ runs for every package cache (directly, or as cache_setitem of the subclasses' __setitem__); _UnboundTTLCache uses TTLCache.popitem. Cache itself does not define popitem: for a Cache it is MutableMapping.popitem, which calls back next(iter(self)) -> Cache.__iter__, self[key] -> Cache.__getitem__ and del self[key] -> Cache.__delitem__. _TimedCache defines no popitem either, but it is private: clients create only its subclasses, which define popitem
+88:28 op  key not in data
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+90:17 setitem  data[key]
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+91:17 setitem  size[key]
+    reject *: the receiver is the dict self.__size (__init__.py:41)
+
+[cachetools.Cache.__delitem__]
+95:21 getattr  self.__size
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__size is None (the class attribute of __init__.py:33) or the dict of __init__.py:41
+97:28 delitem  self.__data[key]
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+100:32 call  size.pop(key)
+    -> <builtin>.dict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: size is the dict self.__size (__init__.py:41)
+101:28 delitem  self.__data[key]
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+
+[cachetools.Cache.__contains__]
+105:20 op  key in self.__data
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+
+[cachetools.Cache.__missing__]
+108:23 call  KeyError(key)
+    -> <builtin>.KeyError
+
+[cachetools.Cache.__iter__]
+111:20 call  iter(self.__data)
+    -> <builtin>.iter
+    reject *: the receiver is the dict self.__data (__init__.py:42); the keys are client data
+
+[cachetools.Cache.__len__]
+114:19 call  len(self.__data)
+    -> <builtin>.len
+    reject cachetools.Cache.__len__, cachetools._TimedCache.__len__: the argument is the dict self.__data (__init__.py:42)
+
+[cachetools.Cache.get]
+123:16 op  key in self
+    -> cachetools.Cache.__contains__
+    -> cachetools.TTLCache.__contains__
+    -> cachetools.TLRUCache.__contains__
+    reject *: every package cache has __contains__ (Cache's at __init__.py:104, or the TTLCache and TLRUCache overrides), so `in` never falls back to __iter__ or __getitem__
+    note: dispatch on self: Cache.get, pop and setdefault run for Cache, FIFOCache, LFUCache, LRUCache and RRCache directly, and for TTLCache, _UnboundTTLCache and TLRUCache through _TimedCache.get/pop/setdefault (__init__.py:443, 447, 451)
+124:24 getitem  self[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+
+[cachetools.Cache.pop]
+129:16 op  key in self
+    -> cachetools.Cache.__contains__
+    -> cachetools.TTLCache.__contains__
+    -> cachetools.TLRUCache.__contains__
+    reject *: every package cache has __contains__ (Cache's at __init__.py:104, or the TTLCache and TLRUCache overrides), so `in` never falls back to __iter__ or __getitem__
+    note: dispatch on self: Cache.get, pop and setdefault run for Cache, FIFOCache, LFUCache, LRUCache and RRCache directly, and for TTLCache, _UnboundTTLCache and TLRUCache through _TimedCache.get/pop/setdefault (__init__.py:443, 447, 451)
+130:25 getitem  self[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+131:21 delitem  self[key]
+    -> cachetools.Cache.__delitem__
+    -> cachetools.FIFOCache.__delitem__
+    -> cachetools.LFUCache.__delitem__
+    -> cachetools.LRUCache.__delitem__
+    -> cachetools.RRCache.__delitem__
+    -> cachetools.TTLCache.__delitem__
+    -> cachetools.TLRUCache.__delitem__
+132:30 getattr  self.__marker
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__marker is the object() of __init__.py:31
+133:27 call  KeyError(key)
+    -> <builtin>.KeyError
+
+[cachetools.Cache.setdefault]
+139:16 op  key in self
+    -> cachetools.Cache.__contains__
+    -> cachetools.TTLCache.__contains__
+    -> cachetools.TLRUCache.__contains__
+    reject *: every package cache has __contains__ (Cache's at __init__.py:104, or the TTLCache and TLRUCache overrides), so `in` never falls back to __iter__ or __getitem__
+    note: dispatch on self: Cache.get, pop and setdefault run for Cache, FIFOCache, LFUCache, LRUCache and RRCache directly, and for TTLCache, _UnboundTTLCache and TLRUCache through _TimedCache.get/pop/setdefault (__init__.py:443, 447, 451)
+140:25 getitem  self[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+142:17 setitem  self[key]
+    -> cachetools.Cache.__setitem__
+    -> cachetools.FIFOCache.__setitem__
+    -> cachetools.LFUCache.__setitem__
+    -> cachetools.LRUCache.__setitem__
+    -> cachetools.RRCache.__setitem__
+    -> cachetools.TTLCache.__setitem__
+    -> cachetools.TLRUCache.__setitem__
+
+[cachetools.Cache.clear]
+152:21 getattr  self.__size
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__size is None (the class attribute of __init__.py:33) or the dict of __init__.py:41
+154:23 call  size.clear()
+    -> <builtin>.dict.clear
+    reject *: size is the dict self.__size (__init__.py:41)
+155:26 call  self.__data.clear()
+    -> <builtin>.dict.clear
+    reject *: self.__data is the dict of __init__.py:42
+
+[cachetools.FIFOCache.__init__]
+178:23 call  Cache.__init__(self, maxsize, getsizeof)
+    -> cachetools.Cache.__init__
+    reject *: an explicit call of the function Cache.__init__
+179:47 call  collections.OrderedDict()
+    -> collections.OrderedDict
+
+[cachetools.FIFOCache.__setitem__]
+182:22 call  cache_setitem(self, key, value)
+    -> cachetools.Cache.__setitem__
+    note: cache_setitem is the default Cache.__setitem__ (__init__.py:181); the subscription self[key] = value passes only key and value, and no package code passes cache_setitem
+183:16 op  key in self.__order
+    reject *: self.__order is the OrderedDict of __init__.py:179
+184:37 call  self.__order.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+186:25 setitem  self.__order[key]
+    reject *: self.__order is the OrderedDict of __init__.py:179
+
+[cachetools.FIFOCache.__delitem__]
+189:22 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:188); del self[key] passes only key, and no package code passes cache_delitem
+190:25 delitem  self.__order[key]
+    reject *: self.__order is the OrderedDict of __init__.py:179
+
+[cachetools.FIFOCache.popitem]
+195:23 call  next(iter(self.__order))
+    -> <builtin>.next
+195:28 call  iter(self.__order)
+    -> <builtin>.iter
+    reject *: self.__order is the OrderedDict of __init__.py:179
+197:27 call  KeyError("%s is empty" % type(self).__name__)
+    -> <builtin>.KeyError
+197:42 op  "%s is empty" % type(self).__name__
+    reject *: the only operand, type(self).__name__, is a str; %s of a str calls no package __str__ or __repr__
+197:48 call  type(self)
+    -> <builtin>.type
+199:38 call  Cache.__getitem__(self, key)
+    -> cachetools.Cache.__getitem__
+    reject *: an explicit call of the function Cache.__getitem__
+200:21 delitem  self[key]
+    -> cachetools.FIFOCache.__delitem__
+    reject *: the receiver is a FIFOCache; no package class derives from FIFOCache
+
+[cachetools.FIFOCache.clear]
+204:20 call  Cache.clear(self)
+    -> cachetools.Cache.clear
+    reject *: an explicit call of the function Cache.clear
+205:27 call  self.__order.clear()
+    -> collections.OrderedDict.clear
+    reject *: self.__order is the OrderedDict of __init__.py:179
+
+[cachetools.LFUCache._Link.__init__]
+216:48 call  collections.OrderedDict()
+    -> collections.OrderedDict
+
+[cachetools.LFUCache.__init__]
+225:23 call  Cache.__init__(self, maxsize, getsizeof)
+    -> cachetools.Cache.__init__
+    reject *: an explicit call of the function Cache.__init__
+226:44 call  LFUCache._Link(0)
+    -> cachetools.LFUCache._Link.__init__
+    reject cachetools.TTLCache._Link.__init__: LFUCache._Link is the class of __init__.py:211
+
+[cachetools.LFUCache.__getitem__]
+231:30 call  cache_getitem(self, key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the default Cache.__getitem__ (__init__.py:230); the subscription self[key] passes only key, and no package code passes cache_getitem
+232:16 op  key in self.__links
+    reject *: self.__links is the dict of __init__.py:228
+233:25 call  self.__touch(key)
+    -> cachetools.LFUCache.__touch
+
+[cachetools.LFUCache.__setitem__]
+237:22 call  cache_setitem(self, key, value)
+    -> cachetools.Cache.__setitem__
+    note: cache_setitem is the default Cache.__setitem__ (__init__.py:236); the subscription passes only key and value, and no package code passes cache_setitem
+238:16 op  key in self.__links
+    reject *: self.__links is the dict of __init__.py:228
+239:25 call  self.__touch(key)
+    -> cachetools.LFUCache.__touch
+244:34 call  LFUCache._Link(1)
+    -> cachetools.LFUCache._Link.__init__
+    reject cachetools.TTLCache._Link.__init__: LFUCache._Link is the class of __init__.py:211
+248:18 setitem  link.keys[key]
+    reject *: link.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+249:21 setitem  self.__links[key]
+    reject *: self.__links is the dict of __init__.py:228
+
+[cachetools.LFUCache.__delitem__]
+252:22 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:251); del self[key] passes only key, and no package code passes cache_delitem
+253:32 call  self.__links.pop(key)
+    -> <builtin>.dict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: self.__links is the dict of __init__.py:228
+254:22 delitem  link.keys[key]
+    reject *: link.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+255:16 truth  link.keys
+    reject *: link.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+256:24 call  link.unlink()
+    -> cachetools.LFUCache._Link.unlink
+    reject cachetools.TTLCache._Link.unlink: link comes from self.__links, which holds only LFUCache._Link objects (__init__.py:244-249, 283-291)
+
+[cachetools.LFUCache.popitem]
+263:27 call  KeyError("%s is empty" % type(self).__name__)
+    -> <builtin>.KeyError
+263:42 op  "%s is empty" % type(self).__name__
+    reject *: the only operand, type(self).__name__, is a str; %s of a str calls no package __str__ or __repr__
+263:48 call  type(self)
+    -> <builtin>.type
+264:19 call  next(iter(curr.keys))
+    -> <builtin>.next
+264:24 call  iter(curr.keys)
+    -> <builtin>.iter
+    reject *: curr.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+265:34 call  Cache.__getitem__(self, key)
+    -> cachetools.Cache.__getitem__
+    reject *: an explicit call of the function Cache.__getitem__
+266:17 delitem  self[key]
+    -> cachetools.LFUCache.__delitem__
+    reject *: the receiver is an LFUCache; no package class derives from LFUCache
+
+[cachetools.LFUCache.clear]
+270:20 call  Cache.clear(self)
+    -> cachetools.Cache.clear
+    reject *: an explicit call of the function Cache.clear
+273:27 call  self.__links.clear()
+    -> <builtin>.dict.clear
+    reject *: self.__links is the dict of __init__.py:228
+
+[cachetools.LFUCache.__touch]
+277:28 getitem  self.__links[key]
+    reject *: self.__links is the dict of __init__.py:228
+280:19 call  len(link.keys)
+    -> <builtin>.len
+    reject cachetools.Cache.__len__, cachetools._TimedCache.__len__: link.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+283:34 call  LFUCache._Link(link.count + 1)
+    -> cachetools.LFUCache._Link.__init__
+    reject cachetools.TTLCache._Link.__init__: LFUCache._Link is the class of __init__.py:211
+287:18 setitem  curr.keys[key]
+    reject *: curr.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+288:22 delitem  link.keys[key]
+    reject *: link.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+289:16 truth  link.keys
+    reject *: link.keys is the OrderedDict of an LFUCache._Link (__init__.py:216)
+290:24 call  link.unlink()
+    -> cachetools.LFUCache._Link.unlink
+    reject cachetools.TTLCache._Link.unlink: link comes from self.__links, which holds only LFUCache._Link objects (__init__.py:244-249, 283-291)
+291:21 setitem  self.__links[key]
+    reject *: self.__links is the dict of __init__.py:228
+
+[cachetools.LRUCache.__init__]
+298:23 call  Cache.__init__(self, maxsize, getsizeof)
+    -> cachetools.Cache.__init__
+    reject *: an explicit call of the function Cache.__init__
+299:47 call  collections.OrderedDict()
+    -> collections.OrderedDict
+
+[cachetools.LRUCache.__getitem__]
+302:30 call  cache_getitem(self, key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the default Cache.__getitem__ (__init__.py:301); the subscription passes only key, and no package code passes cache_getitem
+304:37 call  self.__order.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+
+[cachetools.LRUCache.__setitem__]
+310:22 call  cache_setitem(self, key, value)
+    -> cachetools.Cache.__setitem__
+    note: cache_setitem is the default Cache.__setitem__ (__init__.py:309); the subscription passes only key and value, and no package code passes cache_setitem
+311:21 call  self.__touch(key)
+    -> cachetools.LRUCache.__touch
+
+[cachetools.LRUCache.__delitem__]
+314:22 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:313); del self[key] passes only key, and no package code passes cache_delitem
+315:25 delitem  self.__order[key]
+    reject *: self.__order is the OrderedDict of __init__.py:299
+
+[cachetools.LRUCache.popitem]
+320:23 call  next(iter(self.__order))
+    -> <builtin>.next
+320:28 call  iter(self.__order)
+    -> <builtin>.iter
+    reject *: self.__order is the OrderedDict of __init__.py:299
+322:27 call  KeyError("%s is empty" % type(self).__name__)
+    -> <builtin>.KeyError
+322:42 op  "%s is empty" % type(self).__name__
+    reject *: the only operand, type(self).__name__, is a str; %s of a str calls no package __str__ or __repr__
+322:48 call  type(self)
+    -> <builtin>.type
+324:38 call  Cache.__getitem__(self, key)
+    -> cachetools.Cache.__getitem__
+    reject *: an explicit call of the function Cache.__getitem__
+325:21 delitem  self[key]
+    -> cachetools.LRUCache.__delitem__
+    reject *: the receiver is an LRUCache; no package class derives from LRUCache
+
+[cachetools.LRUCache.clear]
+329:20 call  Cache.clear(self)
+    -> cachetools.Cache.clear
+    reject *: an explicit call of the function Cache.clear
+330:27 call  self.__order.clear()
+    -> collections.OrderedDict.clear
+    reject *: self.__order is the OrderedDict of __init__.py:299
+
+[cachetools.LRUCache.__touch]
+335:37 call  self.__order.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+337:25 setitem  self.__order[key]
+    reject *: self.__order is the OrderedDict of __init__.py:299
+
+[cachetools.RRCache.__init__]
+344:23 call  Cache.__init__(self, maxsize, getsizeof)
+    -> cachetools.Cache.__init__
+    reject *: an explicit call of the function Cache.__init__
+
+[cachetools.RRCache.__setitem__]
+355:22 call  cache_setitem(self, key, value)
+    -> cachetools.Cache.__setitem__
+    note: cache_setitem is the default Cache.__setitem__ (__init__.py:354); the subscription passes only key and value, and no package code passes cache_setitem
+356:16 op  key not in self.__index
+    reject *: self.__index is the dict of __init__.py:346
+357:25 setitem  self.__index[key]
+    reject *: self.__index is the dict of __init__.py:346
+357:36 call  len(self.__keys)
+    -> <builtin>.len
+    reject cachetools.Cache.__len__, cachetools._TimedCache.__len__: self.__keys is the list of __init__.py:347
+358:31 call  self.__keys.append(key)
+    -> <builtin>.list.append
+
+[cachetools.RRCache.__delitem__]
+361:22 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:360); del self[key] passes only key, and no package code passes cache_delitem
+362:33 call  self.__index.pop(key)
+    -> <builtin>.dict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: self.__index is the dict of __init__.py:346
+363:24 call  len(self.__keys)
+    -> <builtin>.len
+    reject cachetools.Cache.__len__, cachetools._TimedCache.__len__: self.__keys is the list of __init__.py:347
+364:31 getitem  self.__keys[-1]
+    reject *: self.__keys is the list of __init__.py:347
+365:24 setitem  self.__keys[index]
+    reject *: self.__keys is the list of __init__.py:347
+366:25 setitem  self.__index[last]
+    reject *: self.__index is the dict of __init__.py:346
+367:24 call  self.__keys.pop()
+    -> <builtin>.list.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: self.__keys is the list of __init__.py:347
+
+[cachetools.RRCache.popitem]
+372:16 truth  keys
+    reject *: keys is the list self.__keys (__init__.py:347)
+373:27 call  KeyError("%s is empty" % type(self).__name__)
+    -> <builtin>.KeyError
+373:42 op  "%s is empty" % type(self).__name__
+    reject *: the only operand, type(self).__name__, is a str; %s of a str calls no package __str__ or __repr__
+373:48 call  type(self)
+    -> <builtin>.type
+374:28 call  self.__choice(keys)
+    -> random.choice
+    note: self.__choice is the choice argument of RRCache.__init__ (__init__.py:345): the default random.choice (__init__.py:343, also the default of func.rr_cache, func.py:77), or the client's function (a client callback)
+375:34 call  Cache.__getitem__(self, key)
+    -> cachetools.Cache.__getitem__
+    reject *: an explicit call of the function Cache.__getitem__
+376:17 delitem  self[key]
+    -> cachetools.RRCache.__delitem__
+    reject *: the receiver is an RRCache; no package class derives from RRCache
+
+[cachetools.RRCache.clear]
+380:20 call  Cache.clear(self)
+    -> cachetools.Cache.clear
+    reject *: an explicit call of the function Cache.clear
+381:27 call  self.__index.clear()
+    -> <builtin>.dict.clear
+    reject *: self.__index is the dict of __init__.py:346
+382:24 delitem  self.__keys[:]
+    reject *: self.__keys is the list of __init__.py:347
+
+[cachetools._TimedCache._Timer.__call__]
+395:36 call  self.__timer()
+    -> time.monotonic
+    exclude cachetools._TimedCache._Timer.__call__: another cache's .timer is not a value for this role (rules B2, B3; see the note)
+    note: self.__timer is the timer argument of _TimedCache.__init__ (__init__.py:418): the default time.monotonic of TTLCache (__init__.py:482), TLRUCache (__init__.py:622) and func.ttl_cache (func.py:91), or the client's timer (a client callback). Another cache's public .timer (a _Timer) is not a value for this role (rule B2): the parameter is a bare Callable[[], _TT], the docs offer time.monotonic and datetime.now, no test or package code passes cache.timer, and _Timer.__reduce__ passes on the raw timer (__init__.py:411); so _Timer.__call__ is excluded
+
+[cachetools._TimedCache._Timer.__enter__]
+401:50 call  self.__timer()
+    -> time.monotonic
+    exclude cachetools._TimedCache._Timer.__call__: another cache's .timer is not a value for this role (rules B2, B3; see 395:36)
+    note: as at 395:36: time.monotonic is the package default; any other timer is the client's (a client callback); another cache's _Timer is not a value for this role (rule B2)
+
+[cachetools._TimedCache._Timer.__getattr__]
+414:27 call  getattr(self.__timer, name)
+    -> <builtin>.getattr
+    note: self.__timer is the raw timer (see 395:36): time.monotonic or the client's timer, never a _Timer (rule B2); so the default rejection decides _Timer.__getattr__ here
+
+[cachetools._TimedCache.__init__]
+417:23 call  Cache.__init__(self, maxsize, getsizeof)
+    -> cachetools.Cache.__init__
+    reject *: an explicit call of the function Cache.__init__
+418:42 call  _TimedCache._Timer(timer)
+    -> cachetools._TimedCache._Timer.__init__
+
+[cachetools._TimedCache.__repr__]
+421:14 with  self.__timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+422:24 call  self.expire(time)
+    -> cachetools.TTLCache.expire
+    -> cachetools.TLRUCache.expire
+    reject cachetools._TimedCache.expire: _TimedCache is private, so the receiver is a TTLCache, an _UnboundTTLCache or a TLRUCache (or a client subclass of them), and each inherits an override of expire; _TimedCache.expire is the abstract hook (cachetools.md, judgement 3, rule B1)
+    note: dispatch on self: TTLCache (and _UnboundTTLCache) and TLRUCache override expire
+423:30 call  cache_repr(self)
+    -> cachetools.Cache.__repr__
+    note: cache_repr is the default Cache.__repr__ (__init__.py:420); repr() passes no argument for it, and no package code passes cache_repr
+
+[cachetools._TimedCache.__len__]
+426:14 with  self.__timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+427:24 call  self.expire(time)
+    -> cachetools.TTLCache.expire
+    -> cachetools.TLRUCache.expire
+    reject cachetools._TimedCache.expire: _TimedCache is private, so the receiver is a TTLCache, an _UnboundTTLCache or a TLRUCache (or a client subclass of them), and each inherits an override of expire; _TimedCache.expire is the abstract hook (cachetools.md, judgement 3, rule B1)
+    note: dispatch on self: TTLCache (and _UnboundTTLCache) and TLRUCache override expire
+428:29 call  cache_len(self)
+    -> cachetools.Cache.__len__
+    note: cache_len is the default Cache.__len__ (__init__.py:425); len() passes no argument for it, and no package code passes cache_len
+
+[cachetools._TimedCache.currsize]
+432:14 with  self.__timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+433:24 call  self.expire(time)
+    -> cachetools.TTLCache.expire
+    -> cachetools.TLRUCache.expire
+    reject cachetools._TimedCache.expire: _TimedCache is private, so the receiver is a TTLCache, an _UnboundTTLCache or a TLRUCache (or a client subclass of them), and each inherits an override of expire; _TimedCache.expire is the abstract hook (cachetools.md, judgement 3, rule B1)
+    note: dispatch on self: TTLCache (and _UnboundTTLCache) and TLRUCache override expire
+434:25 call  super()
+    -> <builtin>.super
+434:28 getattr  super().currsize
+    -> cachetools.Cache.currsize
+    reject cachetools._TimedCache.currsize: super() in _TimedCache starts after _TimedCache in the MRO of the receiver (TTLCache, _UnboundTTLCache or TLRUCache): the next class that defines currsize is Cache
+
+[cachetools._TimedCache.get]
+442:14 with  self.__timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+443:29 call  Cache.get(self, *args, **kwargs)
+    -> cachetools.Cache.get
+    reject cachetools._TimedCache.get: an explicit call of the function Cache.get
+443:36 iter  *args
+    reject *: args is the tuple of the positional arguments
+443:45 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+
+[cachetools._TimedCache.pop]
+446:14 with  self.__timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+447:29 call  Cache.pop(self, *args, **kwargs)
+    -> cachetools.Cache.pop
+    reject cachetools._TimedCache.pop: an explicit call of the function Cache.pop
+447:36 iter  *args
+    reject *: args is the tuple of the positional arguments
+447:45 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+
+[cachetools._TimedCache.setdefault]
+450:14 with  self.__timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+451:36 call  Cache.setdefault(self, *args, **kwargs)
+    -> cachetools.Cache.setdefault
+    reject cachetools._TimedCache.setdefault: an explicit call of the function Cache.setdefault
+451:43 iter  *args
+    reject *: args is the tuple of the positional arguments
+451:52 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+
+[cachetools._TimedCache.clear]
+457:20 call  Cache.clear(self)
+    -> cachetools.Cache.clear
+    reject *: an explicit call of the function Cache.clear
+
+[cachetools.TTLCache.__init__]
+483:29 call  _TimedCache.__init__(self, maxsize, timer, getsizeof)
+    -> cachetools._TimedCache.__init__
+    reject *: an explicit call of the function _TimedCache.__init__
+484:44 call  TTLCache._Link()
+    -> cachetools.TTLCache._Link.__init__
+    reject cachetools.LFUCache._Link.__init__: TTLCache._Link is the class of __init__.py:466
+486:47 call  collections.OrderedDict()
+    -> collections.OrderedDict
+
+[cachetools.TTLCache.__contains__]
+491:32 getitem  self.__links[key]
+    reject *: self.__links is the OrderedDict of __init__.py:486
+495:25 getattr  self.timer
+    -> cachetools._TimedCache.timer
+495:30 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+495:33 op  self.timer() < link.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+
+[cachetools.TTLCache.__getitem__]
+500:25 getitem  links[key]
+    reject *: links is the OrderedDict self.__links (__init__.py:486)
+502:33 call  cache_getitem(self, key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the default Cache.__getitem__ (__init__.py:497); the subscription passes only key, and no package code passes cache_getitem
+503:26 call  links.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+504:17 getattr  self.timer
+    -> cachetools._TimedCache.timer
+504:22 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+504:25 op  self.timer() < link.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+505:33 call  cache_getitem(self, key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the default Cache.__getitem__ (__init__.py:497)
+507:36 call  self.__missing__(key)
+    -> cachetools.Cache.__missing__
+    note: the receiver is a TTLCache or an _UnboundTTLCache; neither overrides __missing__ (a client subclass may: a client callback)
+
+[cachetools.TTLCache.__setitem__]
+510:14 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+510:19 getattr  self.timer
+    -> cachetools._TimedCache.timer
+512:24 call  self.expire(time)
+    -> cachetools.TTLCache.expire
+    reject cachetools.TLRUCache.expire, cachetools._TimedCache.expire: the receiver is a TTLCache or an _UnboundTTLCache, which inherits TTLCache.expire
+513:26 call  cache_setitem(self, key, value)
+    -> cachetools.Cache.__setitem__
+    note: cache_setitem is the default Cache.__setitem__ (__init__.py:509); the subscription passes only key and value, and no package code passes cache_setitem
+515:25 call  links.get(key)
+    -> collections.OrderedDict.get
+    reject cachetools.Cache.get, cachetools._TimedCache.get: links is the OrderedDict self.__links (__init__.py:486)
+517:18 setitem  links[key]
+    reject *: links is the OrderedDict self.__links (__init__.py:486)
+517:47 call  TTLCache._Link(key)
+    -> cachetools.TTLCache._Link.__init__
+    reject cachetools.LFUCache._Link.__init__: TTLCache._Link is the class of __init__.py:466
+519:30 call  links.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+520:24 call  link.unlink()
+    -> cachetools.TTLCache._Link.unlink
+    reject cachetools.LFUCache._Link.unlink: link comes from self.__links, which holds only TTLCache._Link objects (__init__.py:517)
+
+[cachetools.TTLCache.__delitem__]
+527:22 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:526); del self[key] passes only key, and no package code passes cache_delitem
+528:32 call  self.__links.pop(key)
+    -> collections.OrderedDict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: self.__links is the OrderedDict of __init__.py:486
+529:20 call  link.unlink()
+    -> cachetools.TTLCache._Link.unlink
+    reject cachetools.LFUCache._Link.unlink: link comes from self.__links, which holds only TTLCache._Link objects (__init__.py:517)
+530:22 getattr  self.timer
+    -> cachetools._TimedCache.timer
+530:27 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+530:30 op  self.timer() < link.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+531:27 call  KeyError(key)
+    -> <builtin>.KeyError
+
+[cachetools.TTLCache.__iter__]
+538:18 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+538:23 getattr  self.timer
+    -> cachetools._TimedCache.timer
+539:25 op  time < curr.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+
+[cachetools.TTLCache.__setstate__]
+544:29 call  self.__dict__.update(state)
+    -> <builtin>.dict.update
+547:27 call  sorted(self.__links.values(), key=lambda obj: obj.expires)
+    -> <builtin>.sorted
+    -> cachetools.TTLCache.__setstate__.<lambda1>
+    reject *: sorted iterates over the values view of the OrderedDict self.__links and compares the keys that the lambda returns (expires: timer values plus ttl), not _Item objects
+547:47 call  self.__links.values()
+    -> collections.OrderedDict.values
+551:20 call  self.expire(self.timer())
+    -> cachetools.TTLCache.expire
+    reject cachetools.TLRUCache.expire, cachetools._TimedCache.expire: the receiver is a TTLCache or an _UnboundTTLCache, which inherits TTLCache.expire
+551:26 getattr  self.timer
+    -> cachetools._TimedCache.timer
+551:31 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+
+[cachetools.TTLCache.expire]
+564:25 getattr  self.timer
+    -> cachetools._TimedCache.timer
+564:30 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+567:33 op  time < curr.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+573:46 op  time < curr.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+574:27 call  expired.append((curr.key, cache_getitem(self, curr.key)))
+    -> <builtin>.list.append
+574:52 call  cache_getitem(self, curr.key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the local variable bound to Cache.__getitem__ at __init__.py:572
+575:26 call  cache_delitem(self, curr.key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the local variable bound to Cache.__delitem__ at __init__.py:571
+576:22 delitem  links[curr.key]
+    reject *: links is the OrderedDict self.__links (__init__.py:486, 569)
+578:24 call  curr.unlink()
+    -> cachetools.TTLCache._Link.unlink
+    reject cachetools.LFUCache._Link.unlink: curr is a TTLCache._Link of the list that starts at self.__root (__init__.py:484, 517)
+
+[cachetools.TTLCache.popitem]
+587:14 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+587:19 getattr  self.timer
+    -> cachetools._TimedCache.timer
+588:24 call  self.expire(time)
+    -> cachetools.TTLCache.expire
+    reject cachetools.TLRUCache.expire, cachetools._TimedCache.expire: the receiver is a TTLCache or an _UnboundTTLCache, which inherits TTLCache.expire
+590:27 call  next(iter(self.__links))
+    -> <builtin>.next
+590:32 call  iter(self.__links)
+    -> <builtin>.iter
+    reject *: self.__links is the OrderedDict of __init__.py:486
+592:31 call  KeyError("%s is empty" % type(self).__name__)
+    -> <builtin>.KeyError
+592:46 op  "%s is empty" % type(self).__name__
+    reject *: the only operand, type(self).__name__, is a str; %s of a str calls no package __str__ or __repr__
+592:52 call  type(self)
+    -> <builtin>.type
+594:42 call  Cache.__getitem__(self, key)
+    -> cachetools.Cache.__getitem__
+    reject *: an explicit call of the function Cache.__getitem__
+595:25 delitem  self[key]
+    -> cachetools.TTLCache.__delitem__
+    reject *: the receiver is a TTLCache or an _UnboundTTLCache, which inherits TTLCache.__delitem__
+
+[cachetools.TTLCache.clear]
+599:26 call  _TimedCache.clear(self)
+    -> cachetools._TimedCache.clear
+    reject *: an explicit call of the function _TimedCache.clear
+602:27 call  self.__links.clear()
+    -> collections.OrderedDict.clear
+    reject *: self.__links is the OrderedDict of __init__.py:486
+
+[cachetools.TLRUCache._Item.__lt__]
+620:33 op  self.expires < other.expires
+    reject *: compares the expires values (results of the client's ttu function), not _Item objects
+
+[cachetools.TLRUCache.__init__]
+623:29 call  _TimedCache.__init__(self, maxsize, timer, getsizeof)
+    -> cachetools._TimedCache.__init__
+    reject *: an explicit call of the function _TimedCache.__init__
+624:47 call  collections.OrderedDict()
+    -> collections.OrderedDict
+
+[cachetools.TLRUCache.__contains__]
+630:32 getitem  self.__items[key]
+    reject *: self.__items is the OrderedDict of __init__.py:624
+634:25 getattr  self.timer
+    -> cachetools._TimedCache.timer
+634:30 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+634:33 op  self.timer() < item.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+
+[cachetools.TLRUCache.__getitem__]
+639:25 getitem  items[key]
+    reject *: items is the OrderedDict self.__items (__init__.py:624)
+641:33 call  cache_getitem(self, key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the default Cache.__getitem__ (__init__.py:636); the subscription passes only key, and no package code passes cache_getitem
+642:26 call  items.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+643:17 getattr  self.timer
+    -> cachetools._TimedCache.timer
+643:22 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+643:25 op  self.timer() < item.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+644:33 call  cache_getitem(self, key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the default Cache.__getitem__ (__init__.py:636)
+646:36 call  self.__missing__(key)
+    -> cachetools.Cache.__missing__
+    note: the receiver is a TLRUCache, which does not override __missing__ (a client subclass may: a client callback)
+
+[cachetools.TLRUCache.__setitem__]
+649:14 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+649:19 getattr  self.timer
+    -> cachetools._TimedCache.timer
+650:24 call  self.expire(time)
+    -> cachetools.TLRUCache.expire
+    reject cachetools.TTLCache.expire, cachetools._TimedCache.expire: the receiver is a TLRUCache; no package class derives from TLRUCache
+651:33 call  self.__ttu(key, value, time)
+    note: self.__ttu is the ttu argument of TLRUCache.__init__ (__init__.py:626): a client function (no default; the package defines no ttu function): a client callback
+652:26 op  time < expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+655:38 call  self.__delitem(key)
+    -> cachetools.TLRUCache.__delitem
+656:26 call  cache_setitem(self, key, value)
+    -> cachetools.Cache.__setitem__
+    note: cache_setitem is the default Cache.__setitem__ (__init__.py:648); the subscription passes only key and value, and no package code passes cache_setitem
+660:25 call  items.get(key)
+    -> collections.OrderedDict.get
+    reject cachetools.Cache.get, cachetools._TimedCache.get: items is the OrderedDict self.__items (__init__.py:624)
+663:30 call  items.move_to_end(key)
+    -> collections.OrderedDict.move_to_end
+664:14 setitem  items[key]
+    reject *: items is the OrderedDict self.__items (__init__.py:624)
+664:44 call  TLRUCache._Item(key, expires)
+    -> cachetools.TLRUCache._Item.__init__
+665:23 call  heapq.heappush(self.__order, item)
+    -> heapq.heappush
+    -> cachetools.TLRUCache._Item.__lt__
+    note: heappush compares the new _Item with the items of the heap self.__order (a list of TLRUCache._Item, __init__.py:625, 664) with <, which calls _Item.__lt__
+
+[cachetools.TLRUCache.__delitem__]
+668:14 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+668:19 getattr  self.timer
+    -> cachetools._TimedCache.timer
+670:26 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:667); del self[key] passes only key, and no package code passes cache_delitem
+671:32 call  self.__items.pop(key)
+    -> collections.OrderedDict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: self.__items is the OrderedDict of __init__.py:624
+673:22 op  time < item.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+674:27 call  KeyError(key)
+    -> <builtin>.KeyError
+
+[cachetools.TLRUCache.__iter__]
+677:21 iter  self.__order
+    reject *: self.__order is the list of __init__.py:625 (or of __init__.py:699)
+679:18 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+679:23 getattr  self.timer
+    -> cachetools._TimedCache.timer
+680:25 op  time < curr.expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+680:48 truth  curr.removed
+    reject *: removed is a bool (__init__.py:617, 662, 672, 737)
+
+[cachetools.TLRUCache.expire]
+694:25 getattr  self.timer
+    -> cachetools._TimedCache.timer
+694:30 call  self.timer()
+    -> cachetools._TimedCache._Timer.__call__
+    reject cachetools._TimedCache.timer: the property runs at the attribute load self.timer of this line; this call calls the _Timer that it returns (__init__.py:418, 439)
+698:15 call  len(order)
+    -> <builtin>.len
+    reject *: order is the list self.__order (__init__.py:625, 699)
+698:23 op  len(order) > len(items) * self.__HEAP_CLEANUP_FACTOR
+    reject *: compares numbers (sizes, counts and maxsize), not _Item objects
+698:28 call  len(items)
+    -> <builtin>.len
+    reject *: items is the OrderedDict self.__items (__init__.py:624)
+698:43 getattr  self.__HEAP_CLEANUP_FACTOR
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__HEAP_CLEANUP_FACTOR is the int class attribute of __init__.py:608
+699:54 iter  order
+    reject *: order is the list self.__order (__init__.py:625)
+699:67 truth  item.removed
+    reject *: removed is a bool (__init__.py:617, 662, 672, 737)
+700:26 call  heapq.heapify(order)
+    -> heapq.heapify
+    -> cachetools.TLRUCache._Item.__lt__
+    note: heapify orders the list of TLRUCache._Item (__init__.py:699) with <, which calls _Item.__lt__
+701:16 truth  order
+    reject *: order is a list of TLRUCache._Item (__init__.py:625, 699)
+701:30 truth  order[0].removed
+    reject *: removed is a bool (__init__.py:617, 662, 672, 737)
+701:35 getitem  order[0]
+    reject *: order is a list of TLRUCache._Item (__init__.py:625, 699)
+701:56 op  time < order[0].expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+701:63 getitem  order[0]
+    reject *: order is a list of TLRUCache._Item (__init__.py:625, 699)
+706:15 truth  order
+    reject *: order is a list of TLRUCache._Item (__init__.py:625, 699)
+706:26 truth  order[0].removed
+    reject *: removed is a bool (__init__.py:617, 662, 672, 737)
+706:31 getitem  order[0]
+    reject *: order is a list of TLRUCache._Item (__init__.py:625, 699)
+706:56 op  time < order[0].expires
+    reject *: compares timer values (a value of the timer, or a value of the timer plus ttl or the result of ttu), not _Item objects
+706:63 getitem  order[0]
+    reject *: order is a list of TLRUCache._Item (__init__.py:625, 699)
+707:33 call  heapq.heappop(order)
+    -> heapq.heappop
+    -> cachetools.TLRUCache._Item.__lt__
+    note: heappop restores the heap of TLRUCache._Item with <, which calls _Item.__lt__
+708:20 truth  item.removed
+    reject *: removed is a bool (__init__.py:617, 662, 672, 737)
+709:31 call  expired.append((item.key, cache_getitem(self, item.key)))
+    -> <builtin>.list.append
+709:56 call  cache_getitem(self, item.key)
+    -> cachetools.Cache.__getitem__
+    note: cache_getitem is the local variable bound to Cache.__getitem__ at __init__.py:705
+710:30 call  cache_delitem(self, item.key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the local variable bound to Cache.__delitem__ at __init__.py:704
+711:26 delitem  items[item.key]
+    reject *: items is the OrderedDict self.__items (__init__.py:624, 695)
+
+[cachetools.TLRUCache.popitem]
+719:14 with  self.timer
+    -> cachetools._TimedCache._Timer.__enter__
+    -> cachetools._TimedCache._Timer.__exit__
+    note: the context manager is the _Timer that _TimedCache.__init__ creates (__init__.py:418)
+719:19 getattr  self.timer
+    -> cachetools._TimedCache.timer
+720:24 call  self.expire(time)
+    -> cachetools.TLRUCache.expire
+    reject cachetools.TTLCache.expire, cachetools._TimedCache.expire: the receiver is a TLRUCache; no package class derives from TLRUCache
+722:27 call  next(iter(self.__items))
+    -> <builtin>.next
+722:32 call  iter(self.__items)
+    -> <builtin>.iter
+    reject *: self.__items is the OrderedDict of __init__.py:624
+724:31 call  KeyError("%s is empty" % type(self).__name__)
+    -> <builtin>.KeyError
+724:46 op  "%s is empty" % type(self).__name__
+    reject *: the only operand, type(self).__name__, is a str; %s of a str calls no package __str__ or __repr__
+724:52 call  type(self)
+    -> <builtin>.type
+726:42 call  Cache.__getitem__(self, key)
+    -> cachetools.Cache.__getitem__
+    reject *: an explicit call of the function Cache.__getitem__
+727:25 delitem  self[key]
+    -> cachetools.TLRUCache.__delitem__
+    reject *: the receiver is a TLRUCache; no package class derives from TLRUCache
+
+[cachetools.TLRUCache.clear]
+731:26 call  _TimedCache.clear(self)
+    -> cachetools._TimedCache.clear
+    reject *: an explicit call of the function _TimedCache.clear
+732:27 call  self.__items.clear()
+    -> collections.OrderedDict.clear
+    reject *: self.__items is the OrderedDict of __init__.py:624
+733:25 delitem  self.__order[:]
+    reject *: self.__order is a list (__init__.py:625, 699)
+
+[cachetools.TLRUCache.__delitem]
+737:29 call  self.__items.pop(key)
+    -> collections.OrderedDict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: self.__items is the OrderedDict of __init__.py:624
+741:26 call  cache_delitem(self, key)
+    -> cachetools.Cache.__delitem__
+    note: cache_delitem is the default Cache.__delitem__ (__init__.py:735); the only call, self.__delitem(key) at __init__.py:655, passes only key
+
+[cachetools.CacheInfo._make_info]
+751:22 call  isinstance(cache, Cache)
+    -> <builtin>.isinstance
+752:23 call  cls(hits, misses, cache.maxsize, cache.currsize)
+    reject *: the properties maxsize and currsize run at the attribute loads 752:44 and 752:59; cls only stores their values
+    note: cls is CacheInfo: _make_info is reached only as CacheInfo._make_info (__init__.py:768, 782; called at _decorator.py:131, 169, 216). Instantiating CacheInfo runs the __new__ that collections.namedtuple generates (no node) and object.__init__: no edge, as in micro-benchmark stdlib_classes/namedtuple_methods
+752:44 getattr  cache.maxsize
+    -> cachetools.Cache.maxsize
+    -> cachetools.func._UnboundTTLCache.maxsize
+    note: cache is a Cache instance here (__init__.py:751): any package cache; _UnboundTTLCache (func.ttl_cache with maxsize=None) overrides maxsize
+752:59 getattr  cache.currsize
+    -> cachetools.Cache.currsize
+    -> cachetools._TimedCache.currsize
+    note: cache is a Cache instance here (__init__.py:751): TTLCache, TLRUCache and _UnboundTTLCache use _TimedCache.currsize, the other caches Cache.currsize
+754:23 call  cls(hits, misses, None, len(cache))
+    note: cls is CacheInfo (see 752:23): the __new__ that collections.namedtuple generates (no node) and object.__init__: no edge
+754:47 call  len(cache)
+    -> <builtin>.len
+    reject cachetools.Cache.__len__, cachetools._TimedCache.__len__: this branch runs only when cache is not a Cache (__init__.py:751): the dict of func.py:42, 56, 70, 84 or a client mapping (client code)
+
+[cachetools.cached]
+765:24 call  TypeError("cache must not be None")
+    -> <builtin>.TypeError
+
+[cachetools.cached.decorator]
+768:31 getattr  CacheInfo._make_info
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: _make_info is a classmethod (__init__.py:749); classmethod.__get__ is builtin
+768:45 truth  info
+    reject *: info is the client's flag (default False; func.py:28 passes True)
+769:24 call  _wrapper(func, cache, key, lock, condition, make_info)
+    -> cachetools._cached._wrapper
+    reject cachetools._cachedmethod._wrapper: the name is bound by `from ._cached import _wrapper` in cached (__init__.py:762)
+
+[cachetools.cachedmethod.decorator]
+782:31 getattr  CacheInfo._make_info
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: _make_info is a classmethod (__init__.py:749); classmethod.__get__ is builtin
+782:45 truth  info
+    reject *: info is the client's flag (default False)
+783:24 call  _wrapper(method, cache, key, lock, condition, make_info)
+    -> cachetools._cachedmethod._wrapper
+    reject cachetools._cached._wrapper: the name is bound by `from ._cachedmethod import _wrapper` in cachedmethod (__init__.py:779)
+
+== cachetools._cached
+
+[cachetools._cached]
+26:1 class  class _WrapperBase
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+49:1 class  class _BasicWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+55:1 class  class _LockedWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+61:1 class  class _ConditionWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+67:1 class  class _InfoWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+73:1 class  class _LockedInfoWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+79:1 class  class _ConditionInfoWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+
+[cachetools._cached._WrapperBase.__init__]
+32:33 call  functools.update_wrapper(self, func)
+    -> functools.update_wrapper
+
+[cachetools._cached._WrapperBase.__get__]
+40:57 call  types.MethodType(self, obj)
+    -> types.MethodType
+
+[cachetools._cached._WrapperBase.__repr__]
+46:26 format  {self.__wrapped__!r}
+    -> cachetools._cached._WrapperBase.__repr__
+    reject cachetools._cachedmethod._WrapperBase.__repr__, cachetools._descriptor._Unbound.__repr__: a product of cachedmethod is not a value for the decorated function of cached: no documentation, test or package code passes one there (rules B2, B3 in cachetools.md)
+    reject cachetools.Cache.__repr__, cachetools._TimedCache.__repr__: a cache is not callable, so it is never the decorated function
+    note: self.__wrapped__ is the decorated function that functools.update_wrapper stored (_cached.py:32): a client function (its repr is not package code), or a stacked wrapper of cached or func.py (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135), whose repr is _cached._WrapperBase.__repr__
+
+[cachetools._cached._BasicWrapper.__init__]
+51:30 call  _WrapperBase.__init__(self, func, cache, key)
+    -> cachetools._cached._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cached.py:29)
+52:29 call  _BasicMixin.__init__(self, func)
+    -> cachetools._decorator._BasicMixin.__init__
+    reject *: an explicit call of _BasicMixin.__init__ (imported from _decorator, _cached.py:17)
+
+[cachetools._cached._LockedWrapper.__init__]
+57:30 call  _WrapperBase.__init__(self, func, cache, key, lock)
+    -> cachetools._cached._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cached.py:29)
+58:30 call  _LockedMixin.__init__(self, func)
+    -> cachetools._decorator._LockedMixin.__init__
+    reject *: an explicit call of _LockedMixin.__init__ (imported from _decorator, _cached.py:22)
+
+[cachetools._cached._ConditionWrapper.__init__]
+63:30 call  _WrapperBase.__init__(self, func, cache, key, lock, cond)
+    -> cachetools._cached._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cached.py:29)
+64:33 call  _ConditionMixin.__init__(self, func)
+    -> cachetools._decorator._ConditionMixin.__init__
+    reject *: an explicit call of _ConditionMixin.__init__ (imported from _decorator, _cached.py:19)
+
+[cachetools._cached._InfoWrapper.__init__]
+69:30 call  _WrapperBase.__init__(self, func, cache, key)
+    -> cachetools._cached._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cached.py:29)
+70:28 call  _InfoMixin.__init__(self, func, info)
+    -> cachetools._decorator._InfoMixin.__init__
+    reject *: an explicit call of _InfoMixin.__init__ (imported from _decorator, _cached.py:20)
+
+[cachetools._cached._LockedInfoWrapper.__init__]
+75:30 call  _WrapperBase.__init__(self, func, cache, key, lock)
+    -> cachetools._cached._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cached.py:29)
+76:34 call  _LockedInfoMixin.__init__(self, func, info)
+    -> cachetools._decorator._LockedInfoMixin.__init__
+    reject *: an explicit call of _LockedInfoMixin.__init__ (imported from _decorator, _cached.py:21)
+
+[cachetools._cached._ConditionInfoWrapper.__init__]
+81:30 call  _WrapperBase.__init__(self, func, cache, key, lock, cond)
+    -> cachetools._cached._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cached.py:29)
+82:37 call  _ConditionInfoMixin.__init__(self, func, info)
+    -> cachetools._decorator._ConditionInfoMixin.__init__
+    reject *: an explicit call of _ConditionInfoMixin.__init__ (imported from _decorator, _cached.py:18)
+
+[cachetools._cached._wrapper]
+88:44 call  _ConditionInfoWrapper(func, cache, key, lock, cond, info)
+    -> cachetools._cached._ConditionInfoWrapper.__init__
+    reject *: _ConditionInfoWrapper is the class of _cached.py:79, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:81-82)
+90:44 call  _ConditionInfoWrapper(func, cache, key, cond, cond, info)
+    -> cachetools._cached._ConditionInfoWrapper.__init__
+    reject *: _ConditionInfoWrapper is the class of _cached.py:79, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:81-82)
+92:41 call  _LockedInfoWrapper(func, cache, key, lock, info)
+    -> cachetools._cached._LockedInfoWrapper.__init__
+    reject *: _LockedInfoWrapper is the class of _cached.py:73, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:75-76)
+94:35 call  _InfoWrapper(func, cache, key, info)
+    -> cachetools._cached._InfoWrapper.__init__
+    reject *: _InfoWrapper is the class of _cached.py:67, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:69-70)
+97:40 call  _ConditionWrapper(func, cache, key, lock, cond)
+    -> cachetools._cached._ConditionWrapper.__init__
+    reject *: _ConditionWrapper is the class of _cached.py:61, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:63-64)
+99:40 call  _ConditionWrapper(func, cache, key, cond, cond)
+    -> cachetools._cached._ConditionWrapper.__init__
+    reject *: _ConditionWrapper is the class of _cached.py:61, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:63-64)
+101:37 call  _LockedWrapper(func, cache, key, lock)
+    -> cachetools._cached._LockedWrapper.__init__
+    reject *: _LockedWrapper is the class of _cached.py:55, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:57-58)
+103:36 call  _BasicWrapper(func, cache, key)
+    -> cachetools._cached._BasicWrapper.__init__
+    reject *: _BasicWrapper is the class of _cached.py:49, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cached.py:51-52)
+
+== cachetools._cachedmethod
+
+[cachetools._cachedmethod]
+27:1 class  class _WrapperBase
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+50:6 decorator  @property
+    -> <builtin>.property
+54:6 decorator  @property
+    -> <builtin>.property
+58:6 decorator  @property
+    -> <builtin>.property
+62:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+67:1 class  class _BasicWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+73:1 class  class _LockedWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+79:1 class  class _ConditionWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+85:1 class  class _InfoWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+91:1 class  class _LockedInfoWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+97:1 class  class _ConditionInfoWrapper
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+
+[cachetools._cachedmethod._WrapperBase.__init__]
+31:33 call  functools.update_wrapper(self, method)
+    -> functools.update_wrapper
+35:58 getattr  self.__none
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__none is the staticmethod of _cachedmethod.py:62-64; staticmethod.__get__ is builtin
+36:58 getattr  self.__none
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: self.__none is the staticmethod of _cachedmethod.py:62-64; staticmethod.__get__ is builtin
+37:43 call  functools.partial(key, obj)
+    -> functools.partial
+    note: partial stores key and obj; key is called later through cache_key (_decorator.py:20, 43, 73, 111, 142, 181)
+
+[cachetools._cachedmethod._WrapperBase.__repr__]
+48:32 format  {wrapped!r}
+    reject *: wrapped is the method that cachedmethod decorated (update_wrapper, _cachedmethod.py:139 and 31, _descriptor.py:117): a client function, whose repr is not package code. No documentation, test or package code passes a cachetools wrapper or another product of cachedmethod to cachedmethod (rules B2, B3 in cachetools.md); a cache is not callable
+48:47 format  {object.__repr__(self.__obj)}
+    reject *: formats the str that object.__repr__ returns
+48:63 call  object.__repr__(self.__obj)
+    -> <builtin>.object.__repr__
+    reject *: object.__repr__ formats the name of the type and the address; it does not call the __repr__ of the object's class
+
+[cachetools._cachedmethod._WrapperBase.cache]
+52:28 call  self.__cache(self.__obj)
+    note: self.__cache is the cache argument of cachedmethod (_cachedmethod.py:34): a client callable that returns the cache of an instance; the package has no default and no such function: a client callback
+
+[cachetools._cachedmethod._WrapperBase.cache_lock]
+56:27 call  self.__lock(self.__obj)
+    -> cachetools._cachedmethod._WrapperBase.__none
+    note: self.__lock is the lock argument of cachedmethod, a client callable (a client callback), or self.__none (_cachedmethod.py:63) when lock is None (_cachedmethod.py:35)
+
+[cachetools._cachedmethod._WrapperBase.cache_condition]
+60:27 call  self.__cond(self.__obj)
+    -> cachetools._cachedmethod._WrapperBase.__none
+    note: self.__cond is the condition argument of cachedmethod, a client callable (a client callback), or self.__none (_cachedmethod.py:63) when it is None (_cachedmethod.py:36)
+
+[cachetools._cachedmethod._BasicWrapper.__init__]
+69:30 call  _WrapperBase.__init__(self, obj, descriptor, method, cach...
+    -> cachetools._cachedmethod._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cachedmethod.py:30)
+70:29 call  _BasicMixin.__init__(self, types.MethodType(method, obj))
+    -> cachetools._decorator._BasicMixin.__init__
+    reject *: an explicit call of _BasicMixin.__init__ (imported from _decorator, _cachedmethod.py:17)
+70:52 call  types.MethodType(method, obj)
+    -> types.MethodType
+
+[cachetools._cachedmethod._LockedWrapper.__init__]
+75:30 call  _WrapperBase.__init__(self, obj, descriptor, method, cach...
+    -> cachetools._cachedmethod._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cachedmethod.py:30)
+76:30 call  _LockedMixin.__init__(self, types.MethodType(method, obj))
+    -> cachetools._decorator._LockedMixin.__init__
+    reject *: an explicit call of _LockedMixin.__init__ (imported from _decorator, _cachedmethod.py:22)
+76:53 call  types.MethodType(method, obj)
+    -> types.MethodType
+
+[cachetools._cachedmethod._ConditionWrapper.__init__]
+81:30 call  _WrapperBase.__init__(self, obj, descriptor, method, cach...
+    -> cachetools._cachedmethod._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cachedmethod.py:30)
+82:33 call  _ConditionMixin.__init__(self, types.MethodType(method, o...
+    -> cachetools._decorator._ConditionMixin.__init__
+    reject *: an explicit call of _ConditionMixin.__init__ (imported from _decorator, _cachedmethod.py:19)
+82:56 call  types.MethodType(method, obj)
+    -> types.MethodType
+
+[cachetools._cachedmethod._InfoWrapper.__init__]
+87:30 call  _WrapperBase.__init__(self, obj, descriptor, method, cach...
+    -> cachetools._cachedmethod._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cachedmethod.py:30)
+88:28 call  _InfoMixin.__init__(self, types.MethodType(method, obj), ...
+    -> cachetools._decorator._InfoMixin.__init__
+    reject *: an explicit call of _InfoMixin.__init__ (imported from _decorator, _cachedmethod.py:20)
+88:51 call  types.MethodType(method, obj)
+    -> types.MethodType
+
+[cachetools._cachedmethod._LockedInfoWrapper.__init__]
+93:30 call  _WrapperBase.__init__(self, obj, descriptor, method, cach...
+    -> cachetools._cachedmethod._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cachedmethod.py:30)
+94:34 call  _LockedInfoMixin.__init__(self, types.MethodType(method, ...
+    -> cachetools._decorator._LockedInfoMixin.__init__
+    reject *: an explicit call of _LockedInfoMixin.__init__ (imported from _decorator, _cachedmethod.py:21)
+94:57 call  types.MethodType(method, obj)
+    -> types.MethodType
+
+[cachetools._cachedmethod._ConditionInfoWrapper.__init__]
+99:30 call  _WrapperBase.__init__(self, obj, descriptor, method, cach...
+    -> cachetools._cachedmethod._WrapperBase.__init__
+    reject *: an explicit call of _WrapperBase.__init__ of this module (_cachedmethod.py:30)
+100:37 call  _ConditionInfoMixin.__init__(self, types.MethodType(metho...
+    -> cachetools._decorator._ConditionInfoMixin.__init__
+    reject *: an explicit call of _ConditionInfoMixin.__init__ (imported from _decorator, _cachedmethod.py:18)
+100:60 call  types.MethodType(method, obj)
+    -> types.MethodType
+
+[cachetools._cachedmethod._wrapper]
+138:35 call  _MethodDescriptor(wrapper)
+    -> cachetools._descriptor._MethodDescriptor.__init__
+    reject *: the lambdas are stored, not called: _MethodDescriptor.__init__ assigns wrapper to self.__wrapper (_descriptor.py:17); _MethodDescriptor.__get__ calls it (_descriptor.py:54, 68)
+139:36 call  functools.update_wrapper(descriptor, method)
+    -> functools.update_wrapper
+
+[cachetools._cachedmethod._wrapper.<lambda1>]
+106:68 call  _ConditionInfoWrapper( obj, descriptor, method, cache, ke...
+    -> cachetools._cachedmethod._ConditionInfoWrapper.__init__
+    reject *: _ConditionInfoWrapper is the class of _cachedmethod.py:97, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:99-100)
+
+[cachetools._cachedmethod._wrapper.<lambda2>]
+110:68 call  _ConditionInfoWrapper( obj, descriptor, method, cache, ke...
+    -> cachetools._cachedmethod._ConditionInfoWrapper.__init__
+    reject *: _ConditionInfoWrapper is the class of _cachedmethod.py:97, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:99-100)
+
+[cachetools._cachedmethod._wrapper.<lambda3>]
+114:65 call  _LockedInfoWrapper( obj, descriptor, method, cache, key, ...
+    -> cachetools._cachedmethod._LockedInfoWrapper.__init__
+    reject *: _LockedInfoWrapper is the class of _cachedmethod.py:91, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:93-94)
+
+[cachetools._cachedmethod._wrapper.<lambda4>]
+118:59 call  _InfoWrapper( obj, descriptor, method, cache, key, info )
+    -> cachetools._cachedmethod._InfoWrapper.__init__
+    reject *: _InfoWrapper is the class of _cachedmethod.py:85, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:87-88)
+
+[cachetools._cachedmethod._wrapper.<lambda5>]
+123:64 call  _ConditionWrapper( obj, descriptor, method, cache, key, l...
+    -> cachetools._cachedmethod._ConditionWrapper.__init__
+    reject *: _ConditionWrapper is the class of _cachedmethod.py:79, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:81-82)
+
+[cachetools._cachedmethod._wrapper.<lambda6>]
+127:64 call  _ConditionWrapper( obj, descriptor, method, cache, key, c...
+    -> cachetools._cachedmethod._ConditionWrapper.__init__
+    reject *: _ConditionWrapper is the class of _cachedmethod.py:79, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:81-82)
+
+[cachetools._cachedmethod._wrapper.<lambda7>]
+131:61 call  _LockedWrapper( obj, descriptor, method, cache, key, lock )
+    -> cachetools._cachedmethod._LockedWrapper.__init__
+    reject *: _LockedWrapper is the class of _cachedmethod.py:73, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:75-76)
+
+[cachetools._cachedmethod._wrapper.<lambda8>]
+135:60 call  _BasicWrapper( obj, descriptor, method, cache, key )
+    -> cachetools._cachedmethod._BasicWrapper.__init__
+    reject *: _BasicWrapper is the class of _cachedmethod.py:67, whose own __init__ is the first in its MRO and calls the base __init__ methods itself (_cachedmethod.py:69-70)
+
+== cachetools._decorator
+
+[cachetools._decorator]
+14:1 class  class _BasicMixin
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+37:1 class  class _LockedMixin
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+66:1 class  class _ConditionMixin
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+103:1 class  class _InfoMixin
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+134:1 class  class _LockedInfoMixin
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+172:1 class  class _ConditionInfoMixin
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+
+[cachetools._decorator._BasicMixin.__call__]
+19:22 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+20:29 call  self.cache_key(*args, **kwargs)
+    -> cachetools.keys.hashkey
+    -> cachetools.keys.methodkey
+    -> cachetools.keys.typedkey
+    -> cachetools.keys.typedmethodkey
+    -> functools.partial.__call__
+    note: self.cache_key is the key of a _cached wrapper (_cached.py:34): default keys.hashkey (__init__.py:757), keys.typedkey or keys.hashkey from func._cache (func.py:27), or any key function of keys.py that the client passes (keys.methodkey and keys.typedmethodkey take the receiver that _cached._WrapperBase.__get__ binds). For a _cachedmethod wrapper it is functools.partial(key, obj) (_cachedmethod.py:37): functools.partial.__call__ calls back key (default keys.methodkey, __init__.py:774, or any keys.py function). A key function of the client is a client callback
+20:30 iter  *args
+    reject *: args is the tuple of the positional arguments
+20:39 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+23:25 getitem  cache[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+    note: cache is self.cache, the client's cache: any package cache, or a client mapping (a client object)
+26:26 call  self.__func(*args, **kwargs)
+    -> cachetools._decorator._BasicMixin.__call__
+    -> cachetools._decorator._LockedMixin.__call__
+    -> cachetools._decorator._ConditionMixin.__call__
+    -> cachetools._decorator._InfoMixin.__call__
+    -> cachetools._decorator._LockedInfoMixin.__call__
+    -> cachetools._decorator._ConditionInfoMixin.__call__
+    exclude cachetools._descriptor._Unbound.__call__: Cls.method of cachedmethod is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    exclude cachetools._descriptor._MethodDescriptor.__call__: the descriptor that cachedmethod returns is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    note: self.__func is the decorated callable (set in __init__): the func of _cached._wrapper, or types.MethodType(method, obj) for _cachedmethod (_cachedmethod.py:70-100), whose call calls method with obj. A client function is a client callback. The one package value for this role (rule B2) is a stacked wrapper of cached or func.py, which the source, the changelog and the tests pass (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135); its __call__ is one of the six mixins' __call__. The two exclusions above: the parameter is typed with the abstract Callable, which names no package type for the role, and no documentation, test or package code passes a product of cachedmethod (obj.method, Cls.method, the descriptor) as a decorated function, or a cachetools wrapper as the method of cachedmethod; such an object would be an arbitrary package object where any callable is accepted (rules B2, B3 in cachetools.md)
+26:27 iter  *args
+    reject *: args is the tuple of the positional arguments
+26:36 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+28:18 setitem  cache[key]
+    -> cachetools.Cache.__setitem__
+    -> cachetools.FIFOCache.__setitem__
+    -> cachetools.LFUCache.__setitem__
+    -> cachetools.LRUCache.__setitem__
+    -> cachetools.RRCache.__setitem__
+    -> cachetools.TTLCache.__setitem__
+    -> cachetools.TLRUCache.__setitem__
+    note: cache is self.cache, the client's cache: any package cache (_UnboundTTLCache inherits TTLCache.__setitem__), or a client mapping (a client object)
+
+[cachetools._decorator._BasicMixin.cache_clear]
+34:14 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+34:25 call  self.cache.clear()
+    -> cachetools.Cache.clear
+    -> cachetools.FIFOCache.clear
+    -> cachetools.LFUCache.clear
+    -> cachetools.LRUCache.clear
+    -> cachetools.RRCache.clear
+    -> cachetools.TTLCache.clear
+    -> cachetools.TLRUCache.clear
+    reject cachetools._TimedCache.clear: only a _TimedCache itself would use it; _TimedCache is private, and its subclasses TTLCache and TLRUCache override clear (they call _TimedCache.clear explicitly, __init__.py:599, 731)
+    note: self.cache is the client's cache: any package cache (each class's clear; _UnboundTTLCache inherits TTLCache.clear), or a client mapping (a client object)
+
+[cachetools._decorator._LockedMixin.__call__]
+42:22 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+43:29 call  self.cache_key(*args, **kwargs)
+    -> cachetools.keys.hashkey
+    -> cachetools.keys.methodkey
+    -> cachetools.keys.typedkey
+    -> cachetools.keys.typedmethodkey
+    -> functools.partial.__call__
+    note: self.cache_key is the key of a _cached wrapper (_cached.py:34): default keys.hashkey (__init__.py:757), keys.typedkey or keys.hashkey from func._cache (func.py:27), or any key function of keys.py that the client passes (keys.methodkey and keys.typedmethodkey take the receiver that _cached._WrapperBase.__get__ binds). For a _cachedmethod wrapper it is functools.partial(key, obj) (_cachedmethod.py:37): functools.partial.__call__ calls back key (default keys.methodkey, __init__.py:774, or any keys.py function). A key function of the client is a client callback
+43:30 iter  *args
+    reject *: args is the tuple of the positional arguments
+43:39 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+44:21 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+46:14 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+48:29 getitem  cache[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+51:26 call  self.__func(*args, **kwargs)
+    -> cachetools._decorator._BasicMixin.__call__
+    -> cachetools._decorator._LockedMixin.__call__
+    -> cachetools._decorator._ConditionMixin.__call__
+    -> cachetools._decorator._InfoMixin.__call__
+    -> cachetools._decorator._LockedInfoMixin.__call__
+    -> cachetools._decorator._ConditionInfoMixin.__call__
+    exclude cachetools._descriptor._Unbound.__call__: Cls.method of cachedmethod is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    exclude cachetools._descriptor._MethodDescriptor.__call__: the descriptor that cachedmethod returns is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    note: self.__func is the decorated callable (set in __init__): the func of _cached._wrapper, or types.MethodType(method, obj) for _cachedmethod (_cachedmethod.py:70-100), whose call calls method with obj. A client function is a client callback. The one package value for this role (rule B2) is a stacked wrapper of cached or func.py, which the source, the changelog and the tests pass (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135); its __call__ is one of the six mixins' __call__. The two exclusions above: the parameter is typed with the abstract Callable, which names no package type for the role, and no documentation, test or package code passes a product of cachedmethod (obj.method, Cls.method, the descriptor) as a decorated function, or a cachetools wrapper as the method of cachedmethod; such an object would be an arbitrary package object where any callable is accepted (rules B2, B3 in cachetools.md)
+51:27 iter  *args
+    reject *: args is the tuple of the positional arguments
+51:36 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+52:14 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+57:40 call  cache.setdefault(key, val)
+    -> cachetools.Cache.setdefault
+    -> cachetools._TimedCache.setdefault
+    note: cache is the client's cache: Cache, FIFOCache, LFUCache, LRUCache and RRCache inherit Cache.setdefault; TTLCache, TLRUCache and _UnboundTTLCache inherit _TimedCache.setdefault. A dict or other mapping of the client is a client object: func.py passes its dict only with a condition, to _ConditionInfoWrapper
+
+[cachetools._decorator._LockedMixin.cache_clear]
+62:14 with  self.cache_lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: self.cache_lock is the client's lock or the condition (the client's, or the threading.Condition of func.py:28: library code); no package object is a lock
+62:19 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+63:18 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+63:29 call  self.cache.clear()
+    -> cachetools.Cache.clear
+    -> cachetools.FIFOCache.clear
+    -> cachetools.LFUCache.clear
+    -> cachetools.LRUCache.clear
+    -> cachetools.RRCache.clear
+    -> cachetools.TTLCache.clear
+    -> cachetools.TLRUCache.clear
+    reject cachetools._TimedCache.clear: only a _TimedCache itself would use it; _TimedCache is private, and its subclasses TTLCache and TLRUCache override clear (they call _TimedCache.clear explicitly, __init__.py:599, 731)
+    note: self.cache is the client's cache: any package cache (each class's clear; _UnboundTTLCache inherits TTLCache.clear), or a client mapping (a client object)
+
+[cachetools._decorator._ConditionMixin.__init__]
+69:29 call  set()
+    -> <builtin>.set
+    reject *: set() has no argument to iterate
+
+[cachetools._decorator._ConditionMixin.__call__]
+72:22 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+73:29 call  self.cache_key(*args, **kwargs)
+    -> cachetools.keys.hashkey
+    -> cachetools.keys.methodkey
+    -> cachetools.keys.typedkey
+    -> cachetools.keys.typedmethodkey
+    -> functools.partial.__call__
+    note: self.cache_key is the key of a _cached wrapper (_cached.py:34): default keys.hashkey (__init__.py:757), keys.typedkey or keys.hashkey from func._cache (func.py:27), or any key function of keys.py that the client passes (keys.methodkey and keys.typedmethodkey take the receiver that _cached._WrapperBase.__get__ binds). For a _cachedmethod wrapper it is functools.partial(key, obj) (_cachedmethod.py:37): functools.partial.__call__ calls back key (default keys.methodkey, __init__.py:774, or any keys.py function). A key function of the client is a client callback
+73:30 iter  *args
+    reject *: args is the tuple of the positional arguments
+73:39 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+74:21 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+75:21 getattr  self.cache_condition
+    -> cachetools._cachedmethod._WrapperBase.cache_condition
+    note: an instance attribute for the wrappers of _cached (_cached.py:36), the property at _cachedmethod.py:59 for those of _cachedmethod
+77:14 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+79:23 op  key in self.__pending
+    reject *: self.__pending is the set of _decorator.py:69
+80:26 call  cond.wait()
+    note: cond is the condition that the client passes to cached or cachedmethod: _ConditionWrapper is created only with info=False, and func.py always passes info=True, so no package Condition gets here: a client object
+82:29 getitem  cache[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+84:35 call  self.__pending.add(key)
+    -> <builtin>.set.add
+86:30 call  self.__func(*args, **kwargs)
+    -> cachetools._decorator._BasicMixin.__call__
+    -> cachetools._decorator._LockedMixin.__call__
+    -> cachetools._decorator._ConditionMixin.__call__
+    -> cachetools._decorator._InfoMixin.__call__
+    -> cachetools._decorator._LockedInfoMixin.__call__
+    -> cachetools._decorator._ConditionInfoMixin.__call__
+    exclude cachetools._descriptor._Unbound.__call__: Cls.method of cachedmethod is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    exclude cachetools._descriptor._MethodDescriptor.__call__: the descriptor that cachedmethod returns is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    note: self.__func is the decorated callable (set in __init__): the func of _cached._wrapper, or types.MethodType(method, obj) for _cachedmethod (_cachedmethod.py:70-100), whose call calls method with obj. A client function is a client callback. The one package value for this role (rule B2) is a stacked wrapper of cached or func.py, which the source, the changelog and the tests pass (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135); its __call__ is one of the six mixins' __call__. The two exclusions above: the parameter is typed with the abstract Callable, which names no package type for the role, and no documentation, test or package code passes a product of cachedmethod (obj.method, Cls.method, the descriptor) as a decorated function, or a cachetools wrapper as the method of cachedmethod; such an object would be an arbitrary package object where any callable is accepted (rules B2, B3 in cachetools.md)
+86:31 iter  *args
+    reject *: args is the tuple of the positional arguments
+86:40 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+87:18 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+89:26 setitem  cache[key]
+    -> cachetools.Cache.__setitem__
+    -> cachetools.FIFOCache.__setitem__
+    -> cachetools.LFUCache.__setitem__
+    -> cachetools.LRUCache.__setitem__
+    -> cachetools.RRCache.__setitem__
+    -> cachetools.TTLCache.__setitem__
+    -> cachetools.TLRUCache.__setitem__
+94:18 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+95:38 call  self.__pending.remove(key)
+    -> <builtin>.set.remove
+96:32 call  cond.notify_all()
+    note: cond is the client's condition (see 80:26): a client object
+
+[cachetools._decorator._ConditionMixin.cache_clear]
+99:14 with  self.cache_lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: self.cache_lock is the client's lock or the condition (the client's, or the threading.Condition of func.py:28: library code); no package object is a lock
+99:19 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+100:18 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+100:29 call  self.cache.clear()
+    -> cachetools.Cache.clear
+    -> cachetools.FIFOCache.clear
+    -> cachetools.LFUCache.clear
+    -> cachetools.LRUCache.clear
+    -> cachetools.RRCache.clear
+    -> cachetools.TTLCache.clear
+    -> cachetools.TLRUCache.clear
+    reject cachetools._TimedCache.clear: only a _TimedCache itself would use it; _TimedCache is private, and its subclasses TTLCache and TLRUCache override clear (they call _TimedCache.clear explicitly, __init__.py:599, 731)
+    note: self.cache is the client's cache: any package cache (each class's clear; _UnboundTTLCache inherits TTLCache.clear), or a client mapping (a client object)
+
+[cachetools._decorator._InfoMixin.__call__]
+110:22 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+111:29 call  self.cache_key(*args, **kwargs)
+    -> cachetools.keys.hashkey
+    -> cachetools.keys.methodkey
+    -> cachetools.keys.typedkey
+    -> cachetools.keys.typedmethodkey
+    -> functools.partial.__call__
+    note: self.cache_key is the key of a _cached wrapper (_cached.py:34): default keys.hashkey (__init__.py:757), keys.typedkey or keys.hashkey from func._cache (func.py:27), or any key function of keys.py that the client passes (keys.methodkey and keys.typedmethodkey take the receiver that _cached._WrapperBase.__get__ binds). For a _cachedmethod wrapper it is functools.partial(key, obj) (_cachedmethod.py:37): functools.partial.__call__ calls back key (default keys.methodkey, __init__.py:774, or any keys.py function). A key function of the client is a client callback
+111:30 iter  *args
+    reject *: args is the tuple of the positional arguments
+111:39 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+114:27 getitem  cache[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+119:26 call  self.__func(*args, **kwargs)
+    -> cachetools._decorator._BasicMixin.__call__
+    -> cachetools._decorator._LockedMixin.__call__
+    -> cachetools._decorator._ConditionMixin.__call__
+    -> cachetools._decorator._InfoMixin.__call__
+    -> cachetools._decorator._LockedInfoMixin.__call__
+    -> cachetools._decorator._ConditionInfoMixin.__call__
+    exclude cachetools._descriptor._Unbound.__call__: Cls.method of cachedmethod is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    exclude cachetools._descriptor._MethodDescriptor.__call__: the descriptor that cachedmethod returns is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    note: self.__func is the decorated callable (set in __init__): the func of _cached._wrapper, or types.MethodType(method, obj) for _cachedmethod (_cachedmethod.py:70-100), whose call calls method with obj. A client function is a client callback. The one package value for this role (rule B2) is a stacked wrapper of cached or func.py, which the source, the changelog and the tests pass (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135); its __call__ is one of the six mixins' __call__. The two exclusions above: the parameter is typed with the abstract Callable, which names no package type for the role, and no documentation, test or package code passes a product of cachedmethod (obj.method, Cls.method, the descriptor) as a decorated function, or a cachetools wrapper as the method of cachedmethod; such an object would be an arbitrary package object where any callable is accepted (rules B2, B3 in cachetools.md)
+119:27 iter  *args
+    reject *: args is the tuple of the positional arguments
+119:36 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+121:18 setitem  cache[key]
+    -> cachetools.Cache.__setitem__
+    -> cachetools.FIFOCache.__setitem__
+    -> cachetools.LFUCache.__setitem__
+    -> cachetools.LRUCache.__setitem__
+    -> cachetools.RRCache.__setitem__
+    -> cachetools.TTLCache.__setitem__
+    -> cachetools.TLRUCache.__setitem__
+
+[cachetools._decorator._InfoMixin.cache_clear]
+127:14 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+127:25 call  self.cache.clear()
+    -> cachetools.Cache.clear
+    -> cachetools.FIFOCache.clear
+    -> cachetools.LFUCache.clear
+    -> cachetools.LRUCache.clear
+    -> cachetools.RRCache.clear
+    -> cachetools.TTLCache.clear
+    -> cachetools.TLRUCache.clear
+    reject cachetools._TimedCache.clear: only a _TimedCache itself would use it; _TimedCache is private, and its subclasses TTLCache and TLRUCache override clear (they call _TimedCache.clear explicitly, __init__.py:599, 731)
+    note: self.cache is the client's cache: any package cache (each class's clear; _UnboundTTLCache inherits TTLCache.clear), or a client mapping (a client object)
+
+[cachetools._decorator._InfoMixin.cache_info]
+131:27 call  self.__info(self.cache, self.__hits, self.__misses)
+    -> cachetools.CacheInfo._make_info
+    reject cachetools._cachedmethod._WrapperBase.cache: the property runs at the attribute load self.cache of this line; _make_info reads maxsize and currsize of the cache, not of the wrapper
+    note: self.__info is the info argument of __init__: _cached._wrapper and _cachedmethod._wrapper create the Info wrappers only when info is not None, and cached and cachedmethod pass make_info = CacheInfo._make_info (__init__.py:768, 782)
+131:33 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+
+[cachetools._decorator._LockedInfoMixin.__call__]
+141:22 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+142:29 call  self.cache_key(*args, **kwargs)
+    -> cachetools.keys.hashkey
+    -> cachetools.keys.methodkey
+    -> cachetools.keys.typedkey
+    -> cachetools.keys.typedmethodkey
+    -> functools.partial.__call__
+    note: self.cache_key is the key of a _cached wrapper (_cached.py:34): default keys.hashkey (__init__.py:757), keys.typedkey or keys.hashkey from func._cache (func.py:27), or any key function of keys.py that the client passes (keys.methodkey and keys.typedmethodkey take the receiver that _cached._WrapperBase.__get__ binds). For a _cachedmethod wrapper it is functools.partial(key, obj) (_cachedmethod.py:37): functools.partial.__call__ calls back key (default keys.methodkey, __init__.py:774, or any keys.py function). A key function of the client is a client callback
+142:30 iter  *args
+    reject *: args is the tuple of the positional arguments
+142:39 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+143:21 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+145:14 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+147:31 getitem  cache[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+152:26 call  self.__func(*args, **kwargs)
+    -> cachetools._decorator._BasicMixin.__call__
+    -> cachetools._decorator._LockedMixin.__call__
+    -> cachetools._decorator._ConditionMixin.__call__
+    -> cachetools._decorator._InfoMixin.__call__
+    -> cachetools._decorator._LockedInfoMixin.__call__
+    -> cachetools._decorator._ConditionInfoMixin.__call__
+    exclude cachetools._descriptor._Unbound.__call__: Cls.method of cachedmethod is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    exclude cachetools._descriptor._MethodDescriptor.__call__: the descriptor that cachedmethod returns is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    note: self.__func is the decorated callable (set in __init__): the func of _cached._wrapper, or types.MethodType(method, obj) for _cachedmethod (_cachedmethod.py:70-100), whose call calls method with obj. A client function is a client callback. The one package value for this role (rule B2) is a stacked wrapper of cached or func.py, which the source, the changelog and the tests pass (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135); its __call__ is one of the six mixins' __call__. The two exclusions above: the parameter is typed with the abstract Callable, which names no package type for the role, and no documentation, test or package code passes a product of cachedmethod (obj.method, Cls.method, the descriptor) as a decorated function, or a cachetools wrapper as the method of cachedmethod; such an object would be an arbitrary package object where any callable is accepted (rules B2, B3 in cachetools.md)
+152:27 iter  *args
+    reject *: args is the tuple of the positional arguments
+152:36 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+153:14 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+158:40 call  cache.setdefault(key, val)
+    -> cachetools.Cache.setdefault
+    -> cachetools._TimedCache.setdefault
+    note: cache is the client's cache: Cache, FIFOCache, LFUCache, LRUCache and RRCache inherit Cache.setdefault; TTLCache, TLRUCache and _UnboundTTLCache inherit _TimedCache.setdefault. A dict or other mapping of the client is a client object: func.py passes its dict only with a condition, to _ConditionInfoWrapper
+
+[cachetools._decorator._LockedInfoMixin.cache_clear]
+163:14 with  self.cache_lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: self.cache_lock is the client's lock or the condition (the client's, or the threading.Condition of func.py:28: library code); no package object is a lock
+163:19 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+164:18 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+164:29 call  self.cache.clear()
+    -> cachetools.Cache.clear
+    -> cachetools.FIFOCache.clear
+    -> cachetools.LFUCache.clear
+    -> cachetools.LRUCache.clear
+    -> cachetools.RRCache.clear
+    -> cachetools.TTLCache.clear
+    -> cachetools.TLRUCache.clear
+    reject cachetools._TimedCache.clear: only a _TimedCache itself would use it; _TimedCache is private, and its subclasses TTLCache and TLRUCache override clear (they call _TimedCache.clear explicitly, __init__.py:599, 731)
+    note: self.cache is the client's cache: any package cache (each class's clear; _UnboundTTLCache inherits TTLCache.clear), or a client mapping (a client object)
+
+[cachetools._decorator._LockedInfoMixin.cache_info]
+168:14 with  self.cache_lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: self.cache_lock is the client's lock or the condition (the client's, or the threading.Condition of func.py:28: library code); no package object is a lock
+168:19 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+169:31 call  self.__info(self.cache, self.__hits, self.__misses)
+    -> cachetools.CacheInfo._make_info
+    reject cachetools._cachedmethod._WrapperBase.cache: the property runs at the attribute load self.cache of this line; _make_info reads maxsize and currsize of the cache, not of the wrapper
+    note: self.__info is the info argument of __init__: _cached._wrapper and _cachedmethod._wrapper create the Info wrappers only when info is not None, and cached and cachedmethod pass make_info = CacheInfo._make_info (__init__.py:768, 782)
+169:37 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+
+[cachetools._decorator._ConditionInfoMixin.__init__]
+177:29 call  set()
+    -> <builtin>.set
+    reject *: set() has no argument to iterate
+
+[cachetools._decorator._ConditionInfoMixin.__call__]
+180:22 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+181:29 call  self.cache_key(*args, **kwargs)
+    -> cachetools.keys.hashkey
+    -> cachetools.keys.methodkey
+    -> cachetools.keys.typedkey
+    -> cachetools.keys.typedmethodkey
+    -> functools.partial.__call__
+    note: self.cache_key is the key of a _cached wrapper (_cached.py:34): default keys.hashkey (__init__.py:757), keys.typedkey or keys.hashkey from func._cache (func.py:27), or any key function of keys.py that the client passes (keys.methodkey and keys.typedmethodkey take the receiver that _cached._WrapperBase.__get__ binds). For a _cachedmethod wrapper it is functools.partial(key, obj) (_cachedmethod.py:37): functools.partial.__call__ calls back key (default keys.methodkey, __init__.py:774, or any keys.py function). A key function of the client is a client callback
+181:30 iter  *args
+    reject *: args is the tuple of the positional arguments
+181:39 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+182:21 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+183:21 getattr  self.cache_condition
+    -> cachetools._cachedmethod._WrapperBase.cache_condition
+    note: an instance attribute for the wrappers of _cached (_cached.py:36), the property at _cachedmethod.py:59 for those of _cachedmethod
+185:14 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+187:23 op  key in self.__pending
+    reject *: self.__pending is the set of _decorator.py:177
+188:26 call  cond.wait()
+    -> threading.Condition.wait
+    note: cond is the threading.Condition() of func._cache (func.py:28), which _cached._wrapper passes as lock and cond (_cached.py:90), or the client's condition (a client object)
+190:31 getitem  cache[key]
+    -> cachetools.Cache.__getitem__
+    -> cachetools.LFUCache.__getitem__
+    -> cachetools.LRUCache.__getitem__
+    -> cachetools.TTLCache.__getitem__
+    -> cachetools.TLRUCache.__getitem__
+    reject cachetools.Cache.__missing__: the subscription calls only type(x).__getitem__; Cache.__getitem__ (__init__.py:58) and the TTLCache/TLRUCache overrides call __missing__ themselves, and no package class is a dict subclass
+    note: cache can also be the dict of func.py:42, 56, 70, 84 (builtin code, no edge)
+194:35 call  self.__pending.add(key)
+    -> <builtin>.set.add
+197:30 call  self.__func(*args, **kwargs)
+    -> cachetools._decorator._BasicMixin.__call__
+    -> cachetools._decorator._LockedMixin.__call__
+    -> cachetools._decorator._ConditionMixin.__call__
+    -> cachetools._decorator._InfoMixin.__call__
+    -> cachetools._decorator._LockedInfoMixin.__call__
+    -> cachetools._decorator._ConditionInfoMixin.__call__
+    exclude cachetools._descriptor._Unbound.__call__: Cls.method of cachedmethod is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    exclude cachetools._descriptor._MethodDescriptor.__call__: the descriptor that cachedmethod returns is not a value for the decorated function: the parameter is a bare Callable, and no documentation, test or package code passes it there (rules B2, B3)
+    note: self.__func is the decorated callable (set in __init__): the func of _cached._wrapper, or types.MethodType(method, obj) for _cachedmethod (_cachedmethod.py:70-100), whose call calls method with obj. A client function is a client callback. The one package value for this role (rule B2) is a stacked wrapper of cached or func.py, which the source, the changelog and the tests pass (_cached.py:30-31, CHANGELOG.rst:98, tests/test_cached.py:352, tests/test_func.py:135); its __call__ is one of the six mixins' __call__. The two exclusions above: the parameter is typed with the abstract Callable, which names no package type for the role, and no documentation, test or package code passes a product of cachedmethod (obj.method, Cls.method, the descriptor) as a decorated function, or a cachetools wrapper as the method of cachedmethod; such an object would be an arbitrary package object where any callable is accepted (rules B2, B3 in cachetools.md)
+197:31 iter  *args
+    reject *: args is the tuple of the positional arguments
+197:40 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+198:18 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+200:26 setitem  cache[key]
+    -> cachetools.Cache.__setitem__
+    -> cachetools.FIFOCache.__setitem__
+    -> cachetools.LFUCache.__setitem__
+    -> cachetools.LRUCache.__setitem__
+    -> cachetools.RRCache.__setitem__
+    -> cachetools.TTLCache.__setitem__
+    -> cachetools.TLRUCache.__setitem__
+    note: cache can also be the dict of func.py:42, 56, 70, 84 (builtin code, no edge)
+205:18 with  lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: lock is the client's lock, or the condition when only a condition is given (_cached.py:90, 99; _cachedmethod.py:110, 127): the client's, or the threading.Condition of func.py:28 (library code); no package object is a lock
+206:38 call  self.__pending.remove(key)
+    -> <builtin>.set.remove
+207:32 call  cond.notify_all()
+    -> threading.Condition.notify_all
+    note: cond is the threading.Condition() of func._cache (func.py:28), or the client's condition (a client object)
+
+[cachetools._decorator._ConditionInfoMixin.cache_clear]
+210:14 with  self.cache_lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: self.cache_lock is the client's lock or the condition (the client's, or the threading.Condition of func.py:28: library code); no package object is a lock
+210:19 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+211:18 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+211:29 call  self.cache.clear()
+    -> cachetools.Cache.clear
+    -> cachetools.FIFOCache.clear
+    -> cachetools.LFUCache.clear
+    -> cachetools.LRUCache.clear
+    -> cachetools.RRCache.clear
+    -> cachetools.TTLCache.clear
+    -> cachetools.TLRUCache.clear
+    reject cachetools._TimedCache.clear: only a _TimedCache itself would use it; _TimedCache is private, and its subclasses TTLCache and TLRUCache override clear (they call _TimedCache.clear explicitly, __init__.py:599, 731)
+    note: self.cache is the client's cache: any package cache (each class's clear; _UnboundTTLCache inherits TTLCache.clear), or a client mapping (a client object)
+    -> <builtin>.dict.clear
+    note: func.py passes the dict {} as cache when maxsize is None (func.py:42, 56, 70, 84), with a condition and info=True: a _ConditionInfoWrapper
+
+[cachetools._decorator._ConditionInfoMixin.cache_info]
+215:14 with  self.cache_lock
+    reject cachetools._TimedCache._Timer.__enter__, cachetools._TimedCache._Timer.__exit__: self.cache_lock is the client's lock or the condition (the client's, or the threading.Condition of func.py:28: library code); no package object is a lock
+215:19 getattr  self.cache_lock
+    -> cachetools._cachedmethod._WrapperBase.cache_lock
+    note: an instance attribute for the wrappers of _cached (_cached.py:35), the property at _cachedmethod.py:55 for those of _cachedmethod
+216:31 call  self.__info(self.cache, self.__hits, self.__misses)
+    -> cachetools.CacheInfo._make_info
+    reject cachetools._cachedmethod._WrapperBase.cache: the property runs at the attribute load self.cache of this line; _make_info reads maxsize and currsize of the cache, not of the wrapper
+    note: self.__info is the info argument of __init__: _cached._wrapper and _cachedmethod._wrapper create the Info wrappers only when info is not None, and cached and cachedmethod pass make_info = CacheInfo._make_info (__init__.py:768, 782)
+216:37 getattr  self.cache
+    -> cachetools._cachedmethod._WrapperBase.cache
+    note: self is a wrapper of _cached (cache is the instance attribute of _cached.py:33: no call) or of _cachedmethod (cache is the property at _cachedmethod.py:51)
+
+== cachetools._descriptor
+
+[cachetools._descriptor]
+10:1 class  class _MethodDescriptor
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+77:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+108:1 class  class _Unbound
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+
+[cachetools._descriptor._MethodDescriptor.__set_name__]
+24:28 call  TypeError( "Cannot assign the same descriptor to two diff...
+    -> <builtin>.TypeError
+26:20 format  {self.__attrname!r}
+    reject *: self.__attrname is the str name of an earlier __set_name__ (_descriptor.py:22)
+26:44 format  {name!r}
+    reject *: name is the str attribute name that type.__new__ passes
+
+[cachetools._descriptor._MethodDescriptor.__get__]
+33:26 call  isinstance(obj, type)
+    -> <builtin>.isinstance
+36:30 call  self.__call__()
+    -> cachetools._descriptor._MethodDescriptor.__call__
+    reject *: the receiver is the _MethodDescriptor self
+    note: runs when __get__ reads, with a class as obj, a descriptor that never got __set_name__: on Python 3.11 and 3.12 through @classmethod (comment at _descriptor.py:34), and on every supported version for a descriptor assigned to an attribute of an existing metaclass (Meta.m = cachedmethod(c)(f), then Cls.m for a class Cls of metaclass Meta) (cachetools.md, judgement 1)
+38:28 call  TypeError(msg)
+    -> <builtin>.TypeError
+42:38 call  self.__get_unbound()
+    -> cachetools._descriptor._MethodDescriptor.__get_unbound
+44:20 iter  type(obj).__mro__
+    reject *: type(obj).__mro__ is a tuple of classes
+44:24 call  type(obj)
+    -> <builtin>.type
+45:25 op  attrname in cls.__dict__
+    reject *: cls.__dict__ is a mappingproxy; attrname is a str
+46:42 getitem  cls.__dict__[attrname]
+    reject *: cls.__dict__ is a mappingproxy
+54:37 call  self.__wrapper(obj, self)
+    -> cachetools._cachedmethod._wrapper.<lambda1>
+    -> cachetools._cachedmethod._wrapper.<lambda2>
+    -> cachetools._cachedmethod._wrapper.<lambda3>
+    -> cachetools._cachedmethod._wrapper.<lambda4>
+    -> cachetools._cachedmethod._wrapper.<lambda5>
+    -> cachetools._cachedmethod._wrapper.<lambda6>
+    -> cachetools._cachedmethod._wrapper.<lambda7>
+    -> cachetools._cachedmethod._wrapper.<lambda8>
+    note: self.__wrapper is the wrapper argument of __init__ (_descriptor.py:17); the only creation of a _MethodDescriptor, in _cachedmethod._wrapper (_cachedmethod.py:138), passes one of its eight lambdas (_cachedmethod.py:106-137)
+56:50 call  obj.__dict__.setdefault(attrname, wrapper)
+    reject cachetools.Cache.setdefault, cachetools._TimedCache.setdefault: obj.__dict__ is an attribute of the client's instance; a package cache there would be an arbitrary package object (rule B3 in cachetools.md)
+    note: Global B5: obj.__dict__ is a client attribute with only a mutable-mapping contract (docs/index.rst:588-592). Its setdefault result at _descriptor.py:63 is opaque, even when the argument is a package dict; subsequent get/setdefault returns are opaque too.
+58:43 call  self.__instance_dict_error(obj, e)
+    -> cachetools._descriptor._MethodDescriptor.__instance_dict_error
+63:51 call  obj.__dict__.setdefault("__cachetools_cachedmethods", {})
+    reject cachetools.Cache.setdefault, cachetools._TimedCache.setdefault: obj.__dict__ is an attribute of the client's instance; a package cache there would be an arbitrary package object (rule B3 in cachetools.md)
+    note: Global B5: obj.__dict__ is a client attribute with only a mutable-mapping contract (docs/index.rst:588-592). Its setdefault result at _descriptor.py:63 is opaque, even when the argument is a package dict; subsequent get/setdefault returns are opaque too.
+65:43 call  self.__instance_dict_error(obj, e)
+    -> cachetools._descriptor._MethodDescriptor.__instance_dict_error
+66:35 call  wrappers.get(self)
+    reject cachetools.Cache.get, cachetools._TimedCache.get: wrappers is the opaque result of a client method at _descriptor.py:63 (global B5)
+    note: Global B5: obj.__dict__ is a client attribute with only a mutable-mapping contract (docs/index.rst:588-592). Its setdefault result at _descriptor.py:63 is opaque, even when the argument is a package dict; subsequent get/setdefault returns are opaque too.
+68:41 call  self.__wrapper(obj, self)
+    -> cachetools._cachedmethod._wrapper.<lambda1>
+    -> cachetools._cachedmethod._wrapper.<lambda2>
+    -> cachetools._cachedmethod._wrapper.<lambda3>
+    -> cachetools._cachedmethod._wrapper.<lambda4>
+    -> cachetools._cachedmethod._wrapper.<lambda5>
+    -> cachetools._cachedmethod._wrapper.<lambda6>
+    -> cachetools._cachedmethod._wrapper.<lambda7>
+    -> cachetools._cachedmethod._wrapper.<lambda8>
+    note: as at 54:37: one of the eight lambdas of _cachedmethod._wrapper
+69:46 call  wrappers.setdefault(self, wrapper)
+    reject cachetools.Cache.setdefault, cachetools._TimedCache.setdefault: wrappers is the opaque result of a client method at _descriptor.py:63 (global B5)
+    note: Global B5: obj.__dict__ is a client attribute with only a mutable-mapping contract (docs/index.rst:588-592). Its setdefault result at _descriptor.py:63 is opaque, even when the argument is a package dict; subsequent get/setdefault returns are opaque too.
+
+[cachetools._descriptor._MethodDescriptor.__reduce__]
+75:22 getattr  self._lookup
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._MethodDescriptor.__get__, cachetools._descriptor._Unbound.__get__: _lookup is the staticmethod of _descriptor.py:77-79; staticmethod.__get__ is builtin
+
+[cachetools._descriptor._MethodDescriptor._lookup]
+79:30 getitem  owner.__dict__[name]
+    reject *: owner.__dict__ is the mappingproxy of a class
+
+[cachetools._descriptor._MethodDescriptor.__call__]
+83:24 call  TypeError("Decorating class methods is not supported")
+    -> <builtin>.TypeError
+
+[cachetools._descriptor._MethodDescriptor.__get_unbound]
+88:38 call  _Unbound(self)
+    -> cachetools._descriptor._Unbound.__init__
+
+[cachetools._descriptor._MethodDescriptor.__instance_dict_error]
+92:22 call  isinstance(error, AttributeError)
+    -> <builtin>.isinstance
+95:46 format  {type(obj).__name__!r}
+    reject *: formats the str __name__ of a type
+95:51 call  type(obj)
+    -> <builtin>.type
+96:37 format  {self.__attrname!r}
+    reject *: self.__attrname is the str name of __set_name__ (_descriptor.py:22)
+101:47 format  {type(obj).__name__!r}
+    reject *: formats the str __name__ of a type
+101:52 call  type(obj)
+    -> <builtin>.type
+103:27 format  {self.__attrname!r}
+    reject *: self.__attrname is the str name of __set_name__ (_descriptor.py:22)
+105:24 call  TypeError(msg)
+    -> <builtin>.TypeError
+
+[cachetools._descriptor._Unbound.__init__]
+117:33 call  functools.update_wrapper(self, descriptor.__wrapped__)
+    -> functools.update_wrapper
+
+[cachetools._descriptor._Unbound.__repr__]
+127:32 format  {wrapped!r}
+    reject *: wrapped is the method that cachedmethod decorated (update_wrapper, _cachedmethod.py:139 and 31, _descriptor.py:117): a client function, whose repr is not package code. No documentation, test or package code passes a cachetools wrapper or another product of cachedmethod to cachedmethod (rules B2, B3 in cachetools.md); a cache is not callable
+
+[cachetools._descriptor._Unbound.__get__]
+133:41 call  self.__descriptor.__get__(obj)
+    -> cachetools._descriptor._MethodDescriptor.__get__
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._Unbound.__get__: self.__descriptor is the _MethodDescriptor that created this _Unbound (_descriptor.py:88, 118)
+
+[cachetools._descriptor._Unbound.__call__]
+138:12 truth  args
+    reject *: args is the tuple of the positional arguments
+139:26 iter  args
+    reject *: args is the tuple of the positional arguments
+141:38 call  self.__pop_receiver(kwargs)
+    -> cachetools._descriptor._Unbound.__pop_receiver
+142:41 call  self.__descriptor.__get__(obj)
+    -> cachetools._descriptor._MethodDescriptor.__get__
+    reject cachetools._cached._WrapperBase.__get__, cachetools._descriptor._Unbound.__get__: self.__descriptor is the _MethodDescriptor that created this _Unbound (_descriptor.py:88, 118)
+142:46 call  self.__descriptor.__get__(obj)(*args, **kwargs)
+    -> cachetools._descriptor._Unbound.__call__
+    exclude cachetools._decorator._BasicMixin.__call__: The successful non-None receiver paths return opaque client method results (B5).
+    exclude cachetools._decorator._ConditionInfoMixin.__call__: The successful non-None receiver paths return opaque client method results (B5).
+    exclude cachetools._decorator._ConditionMixin.__call__: The successful non-None receiver paths return opaque client method results (B5).
+    exclude cachetools._decorator._InfoMixin.__call__: The successful non-None receiver paths return opaque client method results (B5).
+    exclude cachetools._decorator._LockedInfoMixin.__call__: The successful non-None receiver paths return opaque client method results (B5).
+    exclude cachetools._decorator._LockedMixin.__call__: The successful non-None receiver paths return opaque client method results (B5).
+    note: For obj None, __get__ returns the package _Unbound at line42, so its recursive __call__ remains. Every successful non-None path overwrites wrapper with a client method result at lines56,66 or69; B5 makes that result opaque.
+142:47 iter  *args
+    reject *: args is the list of the remaining positional arguments (_descriptor.py:139)
+142:56 mapping  **kwargs
+    reject *: kwargs is the dict of the keyword arguments
+
+[cachetools._descriptor._Unbound.__pop_receiver]
+151:29 call  next(iter(inspect.signature(self).parameters.values()))
+    -> <builtin>.next
+151:34 call  iter(inspect.signature(self).parameters.values())
+    -> <builtin>.iter
+    reject *: the argument is a values view of the mappingproxy Signature.parameters
+151:52 call  inspect.signature(self)
+    -> inspect.signature
+151:76 call  inspect.signature(self).parameters.values()
+    -> types.MappingProxyType.values
+158:30 call  kwargs.pop(self.__receiver)
+    -> <builtin>.dict.pop
+    reject cachetools.Cache.pop, cachetools._TimedCache.pop: kwargs is the dict of the keyword arguments of _Unbound.__call__
+161:28 call  TypeError(msg)
+    -> <builtin>.TypeError
+
+== cachetools.func
+
+[cachetools.func]
+13:1 class  class _UnboundTTLCache
+    reject cachetools._descriptor._MethodDescriptor.__set_name__: no attribute of this class body is a _MethodDescriptor (the package decorates none of its own methods with @cachedmethod), so type.__new__ calls no package __set_name__
+17:6 decorator  @property
+    -> <builtin>.property
+77:41 getattr  random.choice
+    reject cachetools.RRCache.choice: random.choice is an attribute of the module random, not of an RRCache
+
+[cachetools.func._UnboundTTLCache.__init__]
+15:26 call  TTLCache.__init__(self, math.inf, ttl, timer)
+    -> cachetools.TTLCache.__init__
+    reject *: an explicit call of the function TTLCache.__init__
+
+[cachetools.func._cache.decorator]
+27:32 truth  typed
+    reject *: typed is the client's flag (default False)
+28:25 call  cached(cache=cache, key=key, condition=Condition(), info=...
+    -> cachetools.cached
+28:67 call  Condition()
+    -> threading.Condition
+28:81 call  cached(cache=cache, key=key, condition=Condition(), info=...
+    -> cachetools.cached.decorator
+    note: cached(...) returns its nested function decorator (__init__.py:767-771)
+
+[cachetools.func.fifo_cache]
+42:22 call  _cache({}, None, typed)
+    -> cachetools.func._cache
+43:18 call  callable(maxsize)
+    -> <builtin>.callable
+44:22 call  _cache(FIFOCache(128), 128, typed)
+    -> cachetools.func._cache
+44:32 call  FIFOCache(128)
+    -> cachetools.FIFOCache.__init__
+    reject cachetools.Cache.__init__: FIFOCache defines __init__ (__init__.py:177), the first in its MRO; it calls Cache.__init__ itself
+44:50 call  _cache(FIFOCache(128), 128, typed)(maxsize)
+    -> cachetools.func._cache.decorator
+    note: _cache(...) returns its nested function decorator (func.py:23-32)
+46:22 call  _cache(FIFOCache(maxsize), maxsize, typed)
+    -> cachetools.func._cache
+46:32 call  FIFOCache(maxsize)
+    -> cachetools.FIFOCache.__init__
+    reject cachetools.Cache.__init__: FIFOCache defines __init__ (__init__.py:177), the first in its MRO; it calls Cache.__init__ itself
+
+[cachetools.func.lfu_cache]
+56:22 call  _cache({}, None, typed)
+    -> cachetools.func._cache
+57:18 call  callable(maxsize)
+    -> <builtin>.callable
+58:22 call  _cache(LFUCache(128), 128, typed)
+    -> cachetools.func._cache
+58:31 call  LFUCache(128)
+    -> cachetools.LFUCache.__init__
+    reject cachetools.Cache.__init__: LFUCache defines __init__ (__init__.py:224), the first in its MRO; it calls Cache.__init__ itself
+58:49 call  _cache(LFUCache(128), 128, typed)(maxsize)
+    -> cachetools.func._cache.decorator
+    note: _cache(...) returns its nested function decorator (func.py:23-32)
+60:22 call  _cache(LFUCache(maxsize), maxsize, typed)
+    -> cachetools.func._cache
+60:31 call  LFUCache(maxsize)
+    -> cachetools.LFUCache.__init__
+    reject cachetools.Cache.__init__: LFUCache defines __init__ (__init__.py:224), the first in its MRO; it calls Cache.__init__ itself
+
+[cachetools.func.lru_cache]
+70:22 call  _cache({}, None, typed)
+    -> cachetools.func._cache
+71:18 call  callable(maxsize)
+    -> <builtin>.callable
+72:22 call  _cache(LRUCache(128), 128, typed)
+    -> cachetools.func._cache
+72:31 call  LRUCache(128)
+    -> cachetools.LRUCache.__init__
+    reject cachetools.Cache.__init__: LRUCache defines __init__ (__init__.py:297), the first in its MRO; it calls Cache.__init__ itself
+72:49 call  _cache(LRUCache(128), 128, typed)(maxsize)
+    -> cachetools.func._cache.decorator
+    note: _cache(...) returns its nested function decorator (func.py:23-32)
+74:22 call  _cache(LRUCache(maxsize), maxsize, typed)
+    -> cachetools.func._cache
+74:31 call  LRUCache(maxsize)
+    -> cachetools.LRUCache.__init__
+    reject cachetools.Cache.__init__: LRUCache defines __init__ (__init__.py:297), the first in its MRO; it calls Cache.__init__ itself
+
+[cachetools.func.rr_cache]
+84:22 call  _cache({}, None, typed)
+    -> cachetools.func._cache
+85:18 call  callable(maxsize)
+    -> <builtin>.callable
+86:22 call  _cache(RRCache(128, choice), 128, typed)
+    -> cachetools.func._cache
+86:30 call  RRCache(128, choice)
+    -> cachetools.RRCache.__init__
+    reject cachetools.Cache.__init__: RRCache defines __init__ (__init__.py:343), the first in its MRO; it calls Cache.__init__ itself
+86:56 call  _cache(RRCache(128, choice), 128, typed)(maxsize)
+    -> cachetools.func._cache.decorator
+    note: _cache(...) returns its nested function decorator (func.py:23-32)
+88:22 call  _cache(RRCache(maxsize, choice), maxsize, typed)
+    -> cachetools.func._cache
+88:30 call  RRCache(maxsize, choice)
+    -> cachetools.RRCache.__init__
+    reject cachetools.Cache.__init__: RRCache defines __init__ (__init__.py:343), the first in its MRO; it calls Cache.__init__ itself
+
+[cachetools.func.ttl_cache]
+98:22 call  _cache(_UnboundTTLCache(ttl, timer), None, typed)
+    -> cachetools.func._cache
+98:39 call  _UnboundTTLCache(ttl, timer)
+    -> cachetools.func._UnboundTTLCache.__init__
+    reject *: _UnboundTTLCache defines __init__ (func.py:14), the first in its MRO; it calls TTLCache.__init__ itself
+99:18 call  callable(maxsize)
+    -> <builtin>.callable
+100:22 call  _cache(TTLCache(128, ttl, timer), 128, typed)
+    -> cachetools.func._cache
+100:31 call  TTLCache(128, ttl, timer)
+    -> cachetools.TTLCache.__init__
+    reject *: TTLCache defines __init__ (__init__.py:482), the first in its MRO; it calls _TimedCache.__init__ itself
+100:61 call  _cache(TTLCache(128, ttl, timer), 128, typed)(maxsize)
+    -> cachetools.func._cache.decorator
+    note: _cache(...) returns its nested function decorator (func.py:23-32)
+102:22 call  _cache(TTLCache(maxsize, ttl, timer), maxsize, typed)
+    -> cachetools.func._cache
+102:31 call  TTLCache(maxsize, ttl, timer)
+    -> cachetools.TTLCache.__init__
+    reject *: TTLCache defines __init__ (__init__.py:482), the first in its MRO; it calls _TimedCache.__init__ itself
+
+== cachetools.keys
+
+[cachetools.keys.hashkey]
+25:8 truth  kwargs
+    reject *: kwargs is the dict of the keyword arguments
+26:38 call  tuple(sorted(kwargs.items()))
+    -> <builtin>.tuple
+    reject *: the argument is the list that sorted returns
+26:45 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+    reject *: sorts the (name, value) pairs of the dict kwargs: the names are distinct str, so no value is compared
+26:58 call  kwargs.items()
+    -> <builtin>.dict.items
+
+[cachetools.keys.methodkey]
+34:8 truth  kwargs
+    reject *: kwargs is the dict of the keyword arguments
+35:38 call  tuple(sorted(kwargs.items()))
+    -> <builtin>.tuple
+    reject *: the argument is the list that sorted returns
+35:45 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+    reject *: sorts the (name, value) pairs of the dict kwargs: the names are distinct str, so no value is compared
+35:58 call  kwargs.items()
+    -> <builtin>.dict.items
+
+[cachetools.keys.typedkey]
+43:8 truth  kwargs
+    reject *: kwargs is the dict of the keyword arguments
+44:30 call  tuple(sorted(kwargs.items()))
+    -> <builtin>.tuple
+    reject *: the argument is the list that sorted returns
+44:37 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+    reject *: sorts the (name, value) pairs of the dict kwargs: the names are distinct str, so no value is compared
+44:50 call  kwargs.items()
+    -> <builtin>.dict.items
+46:21 call  tuple([type(v) for _, v in sorted_kwargs])
+    -> <builtin>.tuple
+    reject *: the argument is a list display
+46:27 call  type(v)
+    -> <builtin>.type
+46:35 iter  _, v
+    reject *: unpacks a (name, value) tuple of sorted_kwargs
+46:43 iter  sorted_kwargs
+    reject *: sorted_kwargs is the tuple of keys.py:44
+49:23 call  tuple(map(type, args))
+    -> <builtin>.tuple
+    reject *: the argument is a map object over the tuple args
+49:27 call  map(type, args)
+    -> <builtin>.map
+    reject *: map iterates over the tuple args and calls the builtin type
+
+[cachetools.keys.typedmethodkey]
+55:8 truth  kwargs
+    reject *: kwargs is the dict of the keyword arguments
+56:30 call  tuple(sorted(kwargs.items()))
+    -> <builtin>.tuple
+    reject *: the argument is the list that sorted returns
+56:37 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+    reject *: sorts the (name, value) pairs of the dict kwargs: the names are distinct str, so no value is compared
+56:50 call  kwargs.items()
+    -> <builtin>.dict.items
+58:21 call  tuple([type(v) for _, v in sorted_kwargs])
+    -> <builtin>.tuple
+    reject *: the argument is a list display
+58:27 call  type(v)
+    -> <builtin>.type
+58:35 iter  _, v
+    reject *: unpacks a (name, value) tuple of sorted_kwargs
+58:43 iter  sorted_kwargs
+    reject *: sorted_kwargs is the tuple of keys.py:56
+61:23 call  tuple(map(type, args))
+    -> <builtin>.tuple
+    reject *: the argument is a map object over the tuple args
+61:27 call  map(type, args)
+    -> <builtin>.map
+    reject *: map iterates over the tuple args and calls the builtin type

@@ -1,0 +1,86 @@
+# The test environment of structlog 26.1.0 (batch 5): the full
+# closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. structlog itself is not installed: the trace uses the checkout
+# projects/structlog.
+#   pip install --require-hashes --only-binary :all: --no-deps -r structlog.txt
+# "scan" names the files that the security scan of the set downloaded and
+# read (the hash is that of the scanned file, as its section 3 lists it);
+# "PyPI" names the hashes taken from PyPI's JSON for that version (pinned
+# by hash, not read). Every hash below was checked against PyPI's JSON for
+# its version on 2026-11-14.
+#
+# Each version but pytest's stack is the newest release that is not yanked
+# and was uploaded on or before the release of structlog (2026-06-06). The
+# set is upstream's dependency group tests (pytest, pytest-asyncio,
+# pytest-randomly, simplejson, time-machine) without pytest-randomly, and
+# Twisted with its closure (lead's decision: structlog.twisted is traced;
+# upstream runs Twisted in its 3.13 coverage environment). Not installed
+# (lead's decision): rich and greenlet (upstream's plain environment has
+# neither), colorama (Windows only), and never better-exceptions (its wheel
+# ships a .pth start-up hook). Where a distribution has a pure-Python wheel,
+# only that wheel is pinned (less native code). Platform wheels: the cp314
+# aarch64 wheels for Linux, manylinux (glibc, the python:3.14-slim image)
+# and musllinux.
+
+# PyPI. 9.2.0, as for batches 3 and 4 (the lead's
+# decision: one pytest stack for the set, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest, incremental).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# scan. tests/test_stdlib.py imports it, and the async tests need it;
+# loaded with -p, as the tracer turns off plugin autoloading.
+pytest-asyncio==1.4.0 \
+    --hash=sha256:933ca923a23075a87fb7070c0ec272a6848489824d887c85c812670932835aa1
+# scan. tests/processors/test_renderers.py imports it (time_machine.travel).
+# A C extension; no pure wheel. Its pytest plugin is not loaded.
+time-machine==3.2.0 \
+    --hash=sha256:92432610c05676edd5e6946a073c6f0c926923123ce7caee1018dc10782c713d \
+    --hash=sha256:c25586b62480eb77ef3d953fba273209478e1ef49654592cd6a52a68dfe56a67
+# scan. Two tests use it (they skip without it). The pure wheel only.
+simplejson==4.1.1 \
+    --hash=sha256:2ce92b3748f02423e26d2bfb636fb9d7a8f67c8f5854dcae69d350d123b2eee2
+
+# scan. structlog.twisted and tests/test_twisted.py (28 tests, which skip
+# without it). 26.4.0 has 8 advisories (IMAP, telnet, XML streams, IRC,
+# HTTP and DNS servers and clients); the tests use twisted.python.log and
+# Failure only, with no reactor and no network.
+twisted==26.4.0 \
+    --hash=sha256:dc25ea0ebf6511c24f03232ee9f4afa54b291c5d897990e3a39cc4d14a1ef4c0
+# scan (twisted).
+attrs==26.1.0 \
+    --hash=sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309
+# scan (twisted).
+automat==25.4.16 \
+    --hash=sha256:04e9bce696a8d5671ee698005af6e5a9fa15354140a87f4870744604dcdd3ba1
+# scan (twisted).
+constantly==23.10.4 \
+    --hash=sha256:3fd9b4d1c3dc1ec9757f3c52aef7e53ad9323dbe39f51dfd4c43853b68dfa3f9
+# scan (twisted).
+hyperlink==21.0.0 \
+    --hash=sha256:e6b14c37ecb73e89c77d78cdb4c2cc8f3fb59a885c5b3f819ff4ed80f25af1b4
+# scan (hyperlink: its wheel's METADATA requires idna>=2.5; PyPI's JSON
+# lists no requirement).
+idna==3.18 \
+    --hash=sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2
+# scan (twisted).
+incremental==24.11.0 \
+    --hash=sha256:a34450716b1c4341fe6676a0598e88a39e04189f4dce5dc96f656e040baa10b3
+# scan (twisted).
+typing-extensions==4.15.0 \
+    --hash=sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548
+# scan (twisted). A C extension: only a manylinux (glibc) wheel for CPython
+# 3.14 on aarch64.
+zope-interface==8.5 \
+    --hash=sha256:6c54725d818f1b57a7efb8b16528326e1f3c257b602b32393fd255c45af8799d

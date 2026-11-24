@@ -1,0 +1,13 @@
+{
+    "asyncstdlib._core.Awaitify.__call__": {
+        "contextlib._GeneratorContextManager.__exit__": "client callback: unittests/test_contextlib.py:331-333 push o = observe(), a context manager that the test builds with the standard contextlib.contextmanager; ExitStack.push wraps its __exit__ with awaitify (contextlib.py:335), and Awaitify.__call__ calls it (_core.py:122)"
+    },
+    "asyncstdlib.contextlib._AsyncGeneratorContextManager.__aenter__": {
+        "builtins.async_generator.__anext__": "client object: self.gen is the async generator of the test's own function that a.contextmanager decorates (contextlib.py:113, e.g. unittests/test_contextlib.py:27-29); a method call on a client object has no callee (scope rule B5), and the annotation AsyncGenerator is abstract (B4)"
+    },
+    "asyncstdlib.contextlib._AsyncGeneratorContextManager.__aexit__": {
+        "builtins.async_generator.__anext__": "client object: self.gen is the async generator of the test's own function that a.contextmanager decorates (contextlib.py:113); a method call on a client object has no callee (scope rule B5), and the annotation AsyncGenerator is abstract (B4)",
+        "builtins.async_generator.aclose": "client object: self.gen is the async generator of the test's own function that a.contextmanager decorates (contextlib.py:113, aclose at line 140); scope rules B5 and B4",
+        "builtins.async_generator.athrow": "client object: self.gen is the async generator of the test's own function that a.contextmanager decorates (contextlib.py:113, athrow at line 142); scope rules B5 and B4"
+    }
+}

@@ -1,0 +1,32 @@
+{
+    "bottle.BaseRequest.urlparts": {
+        "urllib.parse.SplitResult": "UrlSplitResult is a subclass of collections.namedtuple on declared Python2.7 and Python3.8+: its inherited __new__ is generated library code and __init__ is object.__init__. The global namedtuple/generated-library rule gives no named constructor edge. geturl is a separate ordinary method."
+    },
+    "bottle.Bottle._cast": {
+        "bottle.tob": "client callback: the route of test_outputfilter.py:24 returns map(tob, ...), a library object that the client built around a package function; next() in _cast iterates it (B5)"
+    },
+    "bottle.Bottle._handle": {
+        "wsgiref.validate.ErrorWrapper.flush": "client object: environ['wsgi.errors'] is the error stream of the tests' wsgiref validator (B5)",
+        "wsgiref.validate.ErrorWrapper.write": "client object: environ['wsgi.errors'] is the error stream of the tests' wsgiref validator (B5)"
+    },
+    "bottle.Bottle.wsgi": {
+        "wsgiref.validate.validator.lint_app.start_response_wrapper": "client callback: start_response is the callable of the tests' wsgiref validator"
+    },
+    "bottle.ConfigDict.__setitem__": {
+        "<builtin>.bool": "client callback: test_config.py:59 stores bool as the 'filter' meta field of a key",
+        "<builtin>.int": "client callback: test_config.py:60 stores int as the 'filter' meta field of a key"
+    },
+    "bottle.FileUpload._copy_file": {
+        "_io.BufferedRandom.write": "client object: write is the write of the file-like destination that the test passes to save()",
+        "_io.BufferedReader.read": "client object: self.file is the file that the test opens and passes to FileUpload (test_fileupload.py:45)",
+        "_io.BufferedReader.seek": "client object: self.file is the file that the test opens and passes to FileUpload (test_fileupload.py:45)",
+        "_io.BufferedReader.tell": "client object: self.file is the file that the test opens and passes to FileUpload (test_fileupload.py:45)",
+        "_io.BytesIO.write": "client object: write is the write of the BytesIO destination that the test passes to save() (test_fileupload.py:46-47)"
+    },
+    "bottle.WSGIFileWrapper.__iter__": {
+        "_io.BytesIO.read": "client object: the wrapped file is the BytesIO that a test route returns"
+    },
+    "bottle._closeiter.close": {
+        "builtins.generator.close": "client callback: the close callback is the close of the generator that a test route returns (_cast, line 1098)"
+    }
+}

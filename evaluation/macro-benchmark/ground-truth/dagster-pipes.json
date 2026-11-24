@@ -1,0 +1,654 @@
+{
+  "dagster_pipes": [
+    "<builtin>.classmethod",
+    "<builtin>.dict.keys",
+    "<builtin>.frozenset",
+    "<builtin>.property",
+    "abc.abstractmethod",
+    "argparse.ArgumentParser",
+    "argparse.ArgumentParser.add_argument",
+    "contextlib.contextmanager",
+    "dagster_pipes._env_var_to_cli_argument",
+    "typing.TypeVar",
+    "typing.final",
+    "typing.get_args"
+  ],
+  "dagster_pipes.ExcThread.join": [
+    "<builtin>.super",
+    "io.TextIOWrapper.write",
+    "queue.Queue.empty",
+    "queue.Queue.get",
+    "threading.Thread.join",
+    "traceback.format_exception"
+  ],
+  "dagster_pipes.ExcThread.run": [
+    "<builtin>.super",
+    "dagster_pipes.PipesStdioLogWriterChannel.handler",
+    "queue.Queue",
+    "queue.Queue.put",
+    "sys.exc_info",
+    "threading.Thread.run"
+  ],
+  "dagster_pipes.PipesAzureBlobStorageContextLoader.__init__": [],
+  "dagster_pipes.PipesAzureBlobStorageContextLoader.load_context": [
+    "azure.storage.blob.BlobServiceClient.get_blob_client",
+    "azure.storage.blob.BlobServiceClient.get_blob_client.download_blob",
+    "azure.storage.blob.BlobServiceClient.get_blob_client.download_blob.readall",
+    "azure.storage.blob.BlobServiceClient.get_blob_client.download_blob.readall.decode",
+    "dagster_pipes._assert_env_param_type",
+    "json.loads"
+  ],
+  "dagster_pipes.PipesAzureBlobStorageMessageWriter.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriter.__init__"
+  ],
+  "dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel": [
+    "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type",
+    "dagster_pipes._assert_opt_env_param_type"
+  ],
+  "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__"
+  ],
+  "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.upload_messages_chunk": [
+    "azure.storage.blob.BlobServiceClient.get_blob_client",
+    "azure.storage.blob.BlobServiceClient.get_blob_client.upload_blob",
+    "io.StringIO.read"
+  ],
+  "dagster_pipes.PipesBlobStoreMessageWriter.__init__": [],
+  "dagster_pipes.PipesBlobStoreMessageWriter.make_channel": [],
+  "dagster_pipes.PipesBlobStoreMessageWriter.open": [
+    "<builtin>.dict.get",
+    "contextlib.contextmanager.helper",
+    "contextlib.nullcontext",
+    "dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.buffered_upload_loop",
+    "dagster_pipes.PipesDbfsMessageWriter.make_channel",
+    "dagster_pipes.PipesDefaultLogWriter.__init__",
+    "dagster_pipes.PipesGCSMessageWriter.make_channel",
+    "dagster_pipes.PipesS3MessageWriter.make_channel",
+    "dagster_pipes.PipesStdioLogWriter.open",
+    "dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel"
+  ],
+  "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__": [
+    "queue.Queue"
+  ],
+  "dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop": [
+    "<builtin>.len",
+    "<builtin>.str.join",
+    "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.upload_messages_chunk",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.flush_messages",
+    "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.upload_messages_chunk",
+    "dagster_pipes.PipesGCSMessageWriterChannel.upload_messages_chunk",
+    "dagster_pipes.PipesS3MessageWriterChannel.upload_messages_chunk",
+    "datetime.datetime.now",
+    "io.StringIO",
+    "json.dumps",
+    "queue.Queue.empty",
+    "threading.Event.is_set",
+    "time.sleep"
+  ],
+  "dagster_pipes.PipesBlobStoreMessageWriterChannel.buffered_upload_loop": [
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop",
+    "threading.Event",
+    "threading.Event.set",
+    "threading.Thread",
+    "threading.Thread.join",
+    "threading.Thread.start"
+  ],
+  "dagster_pipes.PipesBlobStoreMessageWriterChannel.flush_messages": [
+    "<builtin>.list.append",
+    "queue.Queue.empty",
+    "queue.Queue.get"
+  ],
+  "dagster_pipes.PipesBlobStoreMessageWriterChannel.upload_messages_chunk": [],
+  "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message": [
+    "queue.Queue.put"
+  ],
+  "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__"
+  ],
+  "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.upload_messages_chunk": [
+    "<builtin>.open",
+    "io.StringIO.read",
+    "io.TextIOWrapper.write",
+    "os.path.join"
+  ],
+  "dagster_pipes.PipesBufferedStreamMessageWriterChannel.__init__": [],
+  "dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush": [
+    "io.TextIOWrapper.writelines",
+    "json.dumps"
+  ],
+  "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message": [
+    "<builtin>.list.append"
+  ],
+  "dagster_pipes.PipesCliArgsParamsLoader.__init__": [],
+  "dagster_pipes.PipesCliArgsParamsLoader.is_dagster_pipes_process": [],
+  "dagster_pipes.PipesCliArgsParamsLoader.load_context_params": [
+    "argparse.ArgumentParser.parse_known_args",
+    "dagster_pipes.decode_param"
+  ],
+  "dagster_pipes.PipesCliArgsParamsLoader.load_messages_params": [
+    "argparse.ArgumentParser.parse_known_args",
+    "dagster_pipes.decode_param"
+  ],
+  "dagster_pipes.PipesContext.__enter__": [],
+  "dagster_pipes.PipesContext.__exit__": [
+    "dagster_pipes.PipesContext.close",
+    "dagster_pipes._pipes_exc_from_tb",
+    "traceback.TracebackException"
+  ],
+  "dagster_pipes.PipesContext.__init__": [
+    "<builtin>.set",
+    "contextlib.ExitStack",
+    "contextlib.ExitStack.enter_context",
+    "contextlib.contextmanager.helper",
+    "dagster_pipes.PipesAzureBlobStorageContextLoader.load_context",
+    "dagster_pipes.PipesBlobStoreMessageWriter.open",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message",
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message",
+    "dagster_pipes.PipesCliArgsParamsLoader.load_context_params",
+    "dagster_pipes.PipesCliArgsParamsLoader.load_messages_params",
+    "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_context_params",
+    "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_messages_params",
+    "dagster_pipes.PipesDbfsContextLoader.load_context",
+    "dagster_pipes.PipesDefaultContextLoader.load_context",
+    "dagster_pipes.PipesDefaultMessageWriter.open",
+    "dagster_pipes.PipesFileMessageWriterChannel.write_message",
+    "dagster_pipes.PipesGCSContextLoader.load_context",
+    "dagster_pipes.PipesMappingParamsLoader.load_context_params",
+    "dagster_pipes.PipesMappingParamsLoader.load_messages_params",
+    "dagster_pipes.PipesMessageWriter.get_opened_payload",
+    "dagster_pipes.PipesPrefectLogsMessageWriter.open",
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message",
+    "dagster_pipes.PipesS3ContextLoader.load_context",
+    "dagster_pipes.PipesStreamMessageWriterChannel.write_message",
+    "dagster_pipes.PipesUnityCatalogVolumesContextLoader.load_context",
+    "dagster_pipes._PipesLogger.__init__",
+    "dagster_pipes._make_message"
+  ],
+  "dagster_pipes.PipesContext._write_message": [
+    "<builtin>.Exception.__init__",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message",
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message",
+    "dagster_pipes.PipesFileMessageWriterChannel.write_message",
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message",
+    "dagster_pipes.PipesStreamMessageWriterChannel.write_message",
+    "dagster_pipes._make_message"
+  ],
+  "dagster_pipes.PipesContext.asset_key": [
+    "dagster_pipes._assert_defined_asset_property",
+    "dagster_pipes._assert_single_asset"
+  ],
+  "dagster_pipes.PipesContext.asset_keys": [
+    "dagster_pipes._assert_defined_asset_property"
+  ],
+  "dagster_pipes.PipesContext.close": [
+    "contextlib.ExitStack.close",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message",
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message",
+    "dagster_pipes.PipesFileMessageWriterChannel.write_message",
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message",
+    "dagster_pipes.PipesStreamMessageWriterChannel.write_message",
+    "dagster_pipes._make_message"
+  ],
+  "dagster_pipes.PipesContext.code_version": [
+    "<builtin>.dict.values",
+    "<builtin>.iter",
+    "<builtin>.next",
+    "dagster_pipes._assert_defined_asset_property",
+    "dagster_pipes._assert_single_asset"
+  ],
+  "dagster_pipes.PipesContext.code_version_by_asset_key": [
+    "dagster_pipes._assert_defined_asset_property"
+  ],
+  "dagster_pipes.PipesContext.extras": [],
+  "dagster_pipes.PipesContext.get": [
+    "<builtin>.Exception"
+  ],
+  "dagster_pipes.PipesContext.get_extra": [
+    "dagster_pipes._assert_defined_extra"
+  ],
+  "dagster_pipes.PipesContext.is_asset_step": [],
+  "dagster_pipes.PipesContext.is_closed": [],
+  "dagster_pipes.PipesContext.is_initialized": [],
+  "dagster_pipes.PipesContext.is_partition_step": [],
+  "dagster_pipes.PipesContext.job_name": [],
+  "dagster_pipes.PipesContext.log": [],
+  "dagster_pipes.PipesContext.log_external_stream": [
+    "dagster_pipes.PipesContext._write_message"
+  ],
+  "dagster_pipes.PipesContext.partition_key": [
+    "dagster_pipes._assert_defined_partition_property"
+  ],
+  "dagster_pipes.PipesContext.partition_key_range": [
+    "dagster_pipes._assert_defined_partition_property"
+  ],
+  "dagster_pipes.PipesContext.partition_time_window": [
+    "dagster_pipes._assert_defined_partition_property"
+  ],
+  "dagster_pipes.PipesContext.provenance": [
+    "<builtin>.dict.values",
+    "<builtin>.iter",
+    "<builtin>.next",
+    "dagster_pipes._assert_defined_asset_property",
+    "dagster_pipes._assert_single_asset"
+  ],
+  "dagster_pipes.PipesContext.provenance_by_asset_key": [
+    "dagster_pipes._assert_defined_asset_property"
+  ],
+  "dagster_pipes.PipesContext.report_asset_check": [
+    "dagster_pipes.PipesContext._write_message",
+    "dagster_pipes._assert_param_type",
+    "dagster_pipes._normalize_param_metadata",
+    "dagster_pipes._resolve_optionally_passed_asset_key"
+  ],
+  "dagster_pipes.PipesContext.report_asset_materialization": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.set.add",
+    "dagster_pipes.PipesContext._write_message",
+    "dagster_pipes._assert_opt_param_type",
+    "dagster_pipes._normalize_param_metadata",
+    "dagster_pipes._resolve_optionally_passed_asset_key"
+  ],
+  "dagster_pipes.PipesContext.report_custom_message": [
+    "dagster_pipes.PipesContext._write_message"
+  ],
+  "dagster_pipes.PipesContext.retry_number": [],
+  "dagster_pipes.PipesContext.run_id": [],
+  "dagster_pipes.PipesContext.set": [],
+  "dagster_pipes.PipesContextLoader.load_context": [],
+  "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.__init__": [],
+  "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.is_dagster_pipes_process": [],
+  "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_context_params": [
+    "dagster_pipes.decode_param"
+  ],
+  "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_messages_params": [
+    "dagster_pipes.decode_param"
+  ],
+  "dagster_pipes.PipesDbfsContextLoader.load_context": [
+    "<builtin>.open",
+    "<builtin>.str.lstrip",
+    "dagster_pipes._assert_env_param_type",
+    "json.load",
+    "os.path.join"
+  ],
+  "dagster_pipes.PipesDbfsMessageWriter.get_opened_extras": [
+    "<builtin>.Exception.__init__",
+    "pyspark.sql.SparkSession.getActiveSession",
+    "pyspark.sql.SparkSession.getActiveSession.conf.get",
+    "warnings.warn"
+  ],
+  "dagster_pipes.PipesDbfsMessageWriter.make_channel": [
+    "<builtin>.str.lstrip",
+    "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type",
+    "os.path.join"
+  ],
+  "dagster_pipes.PipesDefaultContextLoader.load_context": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.open",
+    "dagster_pipes._assert_env_param_type",
+    "json.load",
+    "typing.cast"
+  ],
+  "dagster_pipes.PipesDefaultLogWriter.__init__": [
+    "<builtin>.super",
+    "abc.ABC.__init__"
+  ],
+  "dagster_pipes.PipesDefaultLogWriter.make_channel": [
+    "dagster_pipes.PipesDefaultLogWriter.message_channel",
+    "dagster_pipes.PipesDefaultLogWriterChannel.__init__"
+  ],
+  "dagster_pipes.PipesDefaultLogWriter.message_channel": [
+    "<builtin>.RuntimeError"
+  ],
+  "dagster_pipes.PipesDefaultLogWriterChannel.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesStdioLogWriterChannel.__init__"
+  ],
+  "dagster_pipes.PipesDefaultLogWriterChannel.write_chunk": [
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message",
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message",
+    "dagster_pipes.PipesFileMessageWriterChannel.write_message",
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message",
+    "dagster_pipes.PipesStreamMessageWriterChannel.write_message",
+    "dagster_pipes._make_message"
+  ],
+  "dagster_pipes.PipesDefaultMessageWriter.open": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.get",
+    "contextlib.contextmanager.helper",
+    "contextlib.nullcontext",
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.__init__",
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush",
+    "dagster_pipes.PipesDefaultLogWriter.__init__",
+    "dagster_pipes.PipesFileMessageWriterChannel.__init__",
+    "dagster_pipes.PipesStdioLogWriter.open",
+    "dagster_pipes.PipesStreamMessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type"
+  ],
+  "dagster_pipes.PipesEnvVarParamsLoader.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesMappingParamsLoader.__init__"
+  ],
+  "dagster_pipes.PipesFileMessageWriterChannel.__init__": [],
+  "dagster_pipes.PipesFileMessageWriterChannel.write_message": [
+    "<builtin>.open",
+    "io.TextIOWrapper.write",
+    "json.dumps"
+  ],
+  "dagster_pipes.PipesGCSContextLoader.__init__": [],
+  "dagster_pipes.PipesGCSContextLoader.load_context": [
+    "dagster_pipes._assert_env_param_type",
+    "google.cloud.storage.Client.get_bucket",
+    "google.cloud.storage.Client.get_bucket.blob",
+    "google.cloud.storage.Client.get_bucket.blob.download_as_bytes",
+    "google.cloud.storage.Client.get_bucket.blob.download_as_bytes.decode",
+    "json.loads"
+  ],
+  "dagster_pipes.PipesGCSMessageWriter.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriter.__init__"
+  ],
+  "dagster_pipes.PipesGCSMessageWriter.make_channel": [
+    "dagster_pipes.PipesGCSMessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type",
+    "dagster_pipes._assert_opt_env_param_type"
+  ],
+  "dagster_pipes.PipesGCSMessageWriterChannel.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__",
+    "google.cloud.storage.Client.get_bucket"
+  ],
+  "dagster_pipes.PipesGCSMessageWriterChannel.upload_messages_chunk": [
+    "google.cloud.storage.Client.get_bucket.blob",
+    "google.cloud.storage.Client.get_bucket.blob.upload_from_string",
+    "io.StringIO.read"
+  ],
+  "dagster_pipes.PipesLogWriter.get_opened_extras": [],
+  "dagster_pipes.PipesLogWriter.get_opened_payload": [
+    "dagster_pipes.PipesLogWriter.get_opened_extras"
+  ],
+  "dagster_pipes.PipesLogWriter.open": [],
+  "dagster_pipes.PipesLogWriterChannel.capture": [],
+  "dagster_pipes.PipesMappingParamsLoader.__init__": [],
+  "dagster_pipes.PipesMappingParamsLoader.is_dagster_pipes_process": [],
+  "dagster_pipes.PipesMappingParamsLoader.load_context_params": [
+    "dagster_pipes.decode_param"
+  ],
+  "dagster_pipes.PipesMappingParamsLoader.load_messages_params": [
+    "dagster_pipes.decode_param"
+  ],
+  "dagster_pipes.PipesMessageWriter.get_opened_extras": [],
+  "dagster_pipes.PipesMessageWriter.get_opened_payload": [
+    "dagster_pipes.PipesDbfsMessageWriter.get_opened_extras",
+    "dagster_pipes.PipesMessageWriter.get_opened_extras"
+  ],
+  "dagster_pipes.PipesMessageWriter.open": [],
+  "dagster_pipes.PipesMessageWriterChannel.write_message": [],
+  "dagster_pipes.PipesParamsLoader.is_dagster_pipes_process": [],
+  "dagster_pipes.PipesParamsLoader.load_context_params": [],
+  "dagster_pipes.PipesParamsLoader.load_messages_params": [],
+  "dagster_pipes.PipesPrefectLogsMessageWriter.open": [
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type",
+    "dagster_pipes._assert_opt_env_param_type",
+    "logging.getLogger"
+  ],
+  "dagster_pipes.PipesPrefectLogsMessageWriterChannel.__init__": [],
+  "dagster_pipes.PipesPrefectLogsMessageWriterChannel._oversize_replacement": [
+    "<builtin>.dict.get",
+    "dagster_pipes._make_message"
+  ],
+  "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message": [
+    "<builtin>.len",
+    "<builtin>.str.encode",
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel._oversize_replacement",
+    "dagster_pipes._PipesLoggerHandler.emit",
+    "json.dumps",
+    "logging.Logger.info"
+  ],
+  "dagster_pipes.PipesS3ContextLoader.__init__": [],
+  "dagster_pipes.PipesS3ContextLoader.load_context": [
+    "boto3.client.get_object",
+    "dagster_pipes._assert_env_param_type",
+    "json.loads"
+  ],
+  "dagster_pipes.PipesS3MessageWriter.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriter.__init__"
+  ],
+  "dagster_pipes.PipesS3MessageWriter.make_channel": [
+    "dagster_pipes.PipesS3MessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type",
+    "dagster_pipes._assert_opt_env_param_type"
+  ],
+  "dagster_pipes.PipesS3MessageWriterChannel.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__"
+  ],
+  "dagster_pipes.PipesS3MessageWriterChannel.upload_messages_chunk": [
+    "boto3.client.put_object",
+    "io.StringIO.read"
+  ],
+  "dagster_pipes.PipesStdioFileLogWriter.__init__": [
+    "<builtin>.super",
+    "abc.ABC.__init__"
+  ],
+  "dagster_pipes.PipesStdioFileLogWriter.make_channel": [
+    "dagster_pipes.PipesStdioFileLogWriterChannel.__init__",
+    "os.makedirs",
+    "os.path.join"
+  ],
+  "dagster_pipes.PipesStdioFileLogWriterChannel.__init__": [
+    "<builtin>.super",
+    "dagster_pipes.PipesStdioLogWriterChannel.__init__"
+  ],
+  "dagster_pipes.PipesStdioFileLogWriterChannel.write_chunk": [
+    "<builtin>.open",
+    "io.TextIOWrapper.write"
+  ],
+  "dagster_pipes.PipesStdioLogWriter.make_channel": [],
+  "dagster_pipes.PipesStdioLogWriter.open": [
+    "contextlib.ExitStack",
+    "contextlib.ExitStack.enter_context",
+    "contextlib.contextmanager.helper",
+    "dagster_pipes.PipesDefaultLogWriter.make_channel",
+    "dagster_pipes.PipesStdioFileLogWriter.make_channel",
+    "dagster_pipes.PipesStdioLogWriterChannel.capture"
+  ],
+  "dagster_pipes.PipesStdioLogWriterChannel.__init__": [
+    "queue.Queue"
+  ],
+  "dagster_pipes.PipesStdioLogWriterChannel.capture": [
+    "<builtin>.str",
+    "dagster_pipes.ExcThread.join",
+    "dagster_pipes.ExcThread.run",
+    "dagster_pipes.PipesStdioLogWriterChannel.name",
+    "dagster_pipes.PipesStdioLogWriterChannel.stdio",
+    "io.BufferedWriter.fileno",
+    "io.TextIOWrapper.fileno",
+    "io.TextIOWrapper.flush",
+    "io.TextIOWrapper.write",
+    "os.dup",
+    "os.dup2",
+    "queue.Queue.empty",
+    "queue.Queue.get",
+    "subprocess.Popen",
+    "subprocess.Popen.terminate",
+    "tempfile.NamedTemporaryFile",
+    "threading.Event",
+    "threading.Event.set",
+    "threading.Event.wait",
+    "threading.Thread.__init__",
+    "threading.Thread.start",
+    "time.sleep",
+    "typing.cast"
+  ],
+  "dagster_pipes.PipesStdioLogWriterChannel.handler": [
+    "<builtin>.open",
+    "dagster_pipes.PipesDefaultLogWriterChannel.write_chunk",
+    "dagster_pipes.PipesStdioFileLogWriterChannel.write_chunk",
+    "dagster_pipes.PipesStdioLogWriterChannel.name",
+    "io.TextIOWrapper.read",
+    "queue.Queue.put",
+    "threading.Event.is_set",
+    "threading.Event.set",
+    "time.sleep",
+    "time.time"
+  ],
+  "dagster_pipes.PipesStdioLogWriterChannel.name": [],
+  "dagster_pipes.PipesStdioLogWriterChannel.stdio": [
+    "<builtin>.ValueError",
+    "typing.cast"
+  ],
+  "dagster_pipes.PipesStdioLogWriterChannel.write_chunk": [],
+  "dagster_pipes.PipesStreamMessageWriterChannel.__init__": [],
+  "dagster_pipes.PipesStreamMessageWriterChannel.write_message": [
+    "io.TextIOWrapper.writelines",
+    "json.dumps"
+  ],
+  "dagster_pipes.PipesUnityCatalogVolumesContextLoader.load_context": [
+    "<builtin>.open",
+    "dagster_pipes._assert_env_param_type",
+    "json.load"
+  ],
+  "dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel": [
+    "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__",
+    "dagster_pipes._assert_env_param_type"
+  ],
+  "dagster_pipes._PipesLogger.__init__": [
+    "<builtin>.super",
+    "dagster_pipes._PipesLoggerHandler.__init__",
+    "logging.Logger.__init__",
+    "logging.Logger.addHandler"
+  ],
+  "dagster_pipes._PipesLoggerHandler.__init__": [
+    "<builtin>.super",
+    "logging.Handler.__init__"
+  ],
+  "dagster_pipes._PipesLoggerHandler.emit": [
+    "dagster_pipes.PipesContext._write_message",
+    "logging.LogRecord.getMessage"
+  ],
+  "dagster_pipes._assert_defined_asset_property": [
+    "dagster_pipes._assert_not_none"
+  ],
+  "dagster_pipes._assert_defined_extra": [
+    "<builtin>.Exception.__init__"
+  ],
+  "dagster_pipes._assert_defined_partition_property": [
+    "dagster_pipes._assert_not_none"
+  ],
+  "dagster_pipes._assert_env_param_type": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.get",
+    "<builtin>.isinstance",
+    "<builtin>.type"
+  ],
+  "dagster_pipes._assert_not_none": [
+    "<builtin>.Exception.__init__"
+  ],
+  "dagster_pipes._assert_opt_env_param_type": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.get",
+    "<builtin>.isinstance",
+    "<builtin>.type"
+  ],
+  "dagster_pipes._assert_opt_param_type": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.isinstance",
+    "<builtin>.type"
+  ],
+  "dagster_pipes._assert_opt_param_value": [
+    "<builtin>.Exception.__init__"
+  ],
+  "dagster_pipes._assert_param_type": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.isinstance",
+    "<builtin>.type"
+  ],
+  "dagster_pipes._assert_param_value": [
+    "<builtin>.Exception.__init__"
+  ],
+  "dagster_pipes._assert_single_asset": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.len"
+  ],
+  "dagster_pipes._assert_single_partition": [
+    "<builtin>.Exception.__init__"
+  ],
+  "dagster_pipes._emit_orchestration_inactive_warning": [
+    "warnings.warn"
+  ],
+  "dagster_pipes._env_var_to_cli_argument": [
+    "<builtin>.str.lower",
+    "<builtin>.str.replace"
+  ],
+  "dagster_pipes._get_mock": [
+    "unittest.mock.MagicMock"
+  ],
+  "dagster_pipes._json_serialize_param": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.type",
+    "json.dumps"
+  ],
+  "dagster_pipes._make_message": [],
+  "dagster_pipes._normalize_param_metadata": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.items",
+    "<builtin>.dict.keys",
+    "<builtin>.isinstance",
+    "<builtin>.type",
+    "dagster_pipes._assert_param_type",
+    "dagster_pipes._assert_param_value",
+    "typing.cast"
+  ],
+  "dagster_pipes._pipes_exc_from_tb": [
+    "<builtin>.dict.__init__",
+    "<builtin>.list",
+    "<builtin>.str.join",
+    "<builtin>.str.split",
+    "dagster_pipes._pipes_exc_from_tb",
+    "traceback.StackSummary.format",
+    "traceback.TracebackException.format_exception_only"
+  ],
+  "dagster_pipes._resolve_optionally_passed_asset_key": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.len",
+    "dagster_pipes._assert_opt_param_type"
+  ],
+  "dagster_pipes.decode_param": [
+    "<builtin>.bytes.decode",
+    "base64.b64decode",
+    "json.loads",
+    "zlib.decompress"
+  ],
+  "dagster_pipes.encode_param": [
+    "<builtin>.bytes.decode",
+    "<builtin>.str.encode",
+    "base64.b64encode",
+    "dagster_pipes._json_serialize_param",
+    "zlib.compress"
+  ],
+  "dagster_pipes.open_dagster_pipes": [
+    "dagster_pipes.PipesCliArgsParamsLoader.is_dagster_pipes_process",
+    "dagster_pipes.PipesContext.__init__",
+    "dagster_pipes.PipesContext.get",
+    "dagster_pipes.PipesContext.is_initialized",
+    "dagster_pipes.PipesContext.set",
+    "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.is_dagster_pipes_process",
+    "dagster_pipes.PipesEnvVarParamsLoader.__init__",
+    "dagster_pipes.PipesMappingParamsLoader.is_dagster_pipes_process",
+    "dagster_pipes._emit_orchestration_inactive_warning",
+    "dagster_pipes._get_mock"
+  ],
+  "dagster_pipes.to_asset_key_path": [
+    "<builtin>.list.append",
+    "<builtin>.str.join"
+  ],
+  "dagster_pipes.version": []
+}

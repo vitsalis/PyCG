@@ -1,0 +1,494 @@
+{
+  "edges": {
+    "autojump_data.entriefy": {
+      "<builtin>.dict.items": [
+        "autojump_data 48:39 call  data.items()"
+      ],
+      "<builtin>.dict.iteritems": [
+        "autojump_data 49:40 call  data.iteritems()"
+      ],
+      "<builtin>.map": [
+        "autojump_data 48:19 call  map(convert, data.items())"
+      ],
+      "autojump_utils.is_python3": [
+        "autojump_data 47:18 call  is_python3()"
+      ],
+      "itertools.imap": [
+        "autojump_data 49:16 call  imap(convert, data.iteritems())"
+      ]
+    },
+    "autojump_data.load": {
+      "<builtin>.dict": [
+        "autojump_data 81:24 call  dict( imap( tupleize, ifilter(correct_length, imap(parse,..."
+      ],
+      "<builtin>.filter": [
+        "autojump_data 84:28 call  ifilter(correct_length, imap(parse, f))"
+      ],
+      "<builtin>.map": [
+        "autojump_data 82:21 call  imap( tupleize, ifilter(correct_length, imap(parse, f)), )",
+        "autojump_data 84:49 call  imap(parse, f)"
+      ],
+      "autojump_data.load.<lambda1>": [
+        "autojump_data 84:49 call  imap(parse, f)"
+      ],
+      "autojump_data.load.<lambda2>": [
+        "autojump_data 84:28 call  ifilter(correct_length, imap(parse, f))"
+      ],
+      "autojump_data.load.<lambda3>": [
+        "autojump_data 82:21 call  imap( tupleize, ifilter(correct_length, imap(parse, f)), )"
+      ],
+      "autojump_data.load_backup": [
+        "autojump_data 88:27 call  load_backup(config)"
+      ],
+      "autojump_data.migrate_osx_xdg_data": [
+        "autojump_data 62:29 call  migrate_osx_xdg_data(config)"
+      ],
+      "autojump_utils.is_osx": [
+        "autojump_data 61:14 call  is_osx()"
+      ],
+      "codecs.open": [
+        "autojump_data 76:18 call  open( config['data_path'], 'r', encoding='utf-8', errors=..."
+      ],
+      "itertools.ifilter": [
+        "autojump_data 84:28 call  ifilter(correct_length, imap(parse, f))"
+      ],
+      "itertools.imap": [
+        "autojump_data 82:21 call  imap( tupleize, ifilter(correct_length, imap(parse, f)), )",
+        "autojump_data 84:49 call  imap(parse, f)"
+      ],
+      "os.path.exists": [
+        "autojump_data 61:35 call  os.path.exists(xdg_aj_home)",
+        "autojump_data 64:26 call  os.path.exists(config['data_path'])"
+      ],
+      "os.path.expanduser": [
+        "autojump_data 55:27 call  os.path.expanduser('~')"
+      ],
+      "os.path.join": [
+        "autojump_data 54:31 call  os.path.join( os.path.expanduser('~'), '.local', 'share',..."
+      ]
+    },
+    "autojump_data.load.<lambda1>": {
+      "<builtin>.str.split": [
+        "autojump_data 68:44 call  line.strip().split('\\t')"
+      ],
+      "<builtin>.str.strip": [
+        "autojump_data 68:36 call  line.strip()"
+      ]
+    },
+    "autojump_data.load.<lambda2>": {
+      "<builtin>.len": [
+        "autojump_data 70:35 call  len(x)"
+      ]
+    },
+    "autojump_data.load.<lambda3>": {
+      "<builtin>.float": [
+        "autojump_data 73:38 call  float(x[0])"
+      ]
+    },
+    "autojump_data.load_backup": {
+      "autojump_data.load": [
+        "autojump_data 94:20 call  load(config)"
+      ],
+      "autojump_utils.move_file": [
+        "autojump_data 93:18 call  move_file(config['backup_path'], config['data_path'])"
+      ],
+      "os.path.exists": [
+        "autojump_data 92:22 call  os.path.exists(config['backup_path'])"
+      ]
+    },
+    "autojump_data.migrate_osx_xdg_data": {
+      "<builtin>.len": [
+        "autojump_data 117:11 call  len(os.listdir(xdg_data_home))"
+      ],
+      "autojump_utils.is_osx": [
+        "autojump_data 103:18 call  is_osx()"
+      ],
+      "autojump_utils.move_file": [
+        "autojump_data 111:18 call  move_file(data_path, config['data_path'])",
+        "autojump_data 113:18 call  move_file(backup_path, config['backup_path'])"
+      ],
+      "os.listdir": [
+        "autojump_data 117:22 call  os.listdir(xdg_data_home)"
+      ],
+      "os.path.exists": [
+        "autojump_data 110:22 call  os.path.exists(data_path)",
+        "autojump_data 112:22 call  os.path.exists(backup_path)"
+      ],
+      "os.path.expanduser": [
+        "autojump_data 105:52 call  os.path.expanduser('~')"
+      ],
+      "os.path.join": [
+        "autojump_data 105:33 call  os.path.join(os.path.expanduser('~'), '.local', 'share')",
+        "autojump_data 106:31 call  os.path.join(xdg_data_home, 'autojump')",
+        "autojump_data 107:29 call  os.path.join(xdg_aj_home, 'autojump.txt')",
+        "autojump_data 108:31 call  os.path.join(xdg_aj_home, 'autojump.txt.bak')"
+      ],
+      "shutil.rmtree": [
+        "autojump_data 116:18 call  shutil.rmtree(xdg_aj_home)",
+        "autojump_data 118:22 call  shutil.rmtree(xdg_data_home)"
+      ]
+    },
+    "autojump_data.save": {
+      "<builtin>.print": [
+        "autojump_data 139:14 call  print('Error saving autojump data (disk full?)' % ex, fil..."
+      ],
+      "autojump_utils.create_dir": [
+        "autojump_data 124:15 call  create_dir(data_dir)"
+      ],
+      "autojump_utils.move_file": [
+        "autojump_data 143:14 call  move_file(temp.name, config['data_path'])"
+      ],
+      "autojump_utils.unico": [
+        "autojump_data 134:30 call  unico('%s\\t%s\\n' % (weight, path))"
+      ],
+      "codecs.StreamReaderWriter.write": [
+        "autojump_data 134:24 call  f.write(unico('%s\\t%s\\n' % (weight, path)))"
+      ],
+      "codecs.open": [
+        "autojump_data 132:18 call  open(temp.name, 'w', encoding='utf-8', errors='replace')"
+      ],
+      "io.BufferedRandom.close": [
+        "autojump_data 130:19 call  temp.close()"
+      ],
+      "io.BufferedWriter.flush": [
+        "autojump_data 136:20 call  f.flush()"
+      ],
+      "os.fsync": [
+        "autojump_data 137:21 call  os.fsync(f)"
+      ],
+      "os.path.dirname": [
+        "autojump_data 123:31 call  os.path.dirname(config['data_path'])"
+      ],
+      "os.path.exists": [
+        "autojump_data 146:26 call  os.path.exists(config['backup_path'])"
+      ],
+      "os.path.getmtime": [
+        "autojump_data 147:39 call  os.path.getmtime(config['backup_path'])"
+      ],
+      "shutil.copy": [
+        "autojump_data 148:20 call  shutil.copy(config['data_path'], config['backup_path'])"
+      ],
+      "sys.exit": [
+        "autojump_data 140:17 call  sys.exit(1)"
+      ],
+      "tempfile.NamedTemporaryFile": [
+        "autojump_data 128:34 call  NamedTemporaryFile(delete=False, dir=data_dir)"
+      ],
+      "tempfile._TemporaryFileWrapper.close": [
+        "autojump_data 130:19 call  temp.close()"
+      ],
+      "time.time": [
+        "autojump_data 147:18 call  time()"
+      ]
+    },
+    "autojump_match.match_anywhere": {
+      "itertools.ifilter": [
+        "autojump_match 46:19 call  ifilter(found, haystack)"
+      ],
+      "itertools.imap": [
+        "autojump_match 39:41 call  imap(re.escape, needles)"
+      ]
+    },
+    "autojump_match.match_consecutive": {
+      "itertools.ifilter": [
+        "autojump_match 88:19 call  ifilter(found, haystack)"
+      ],
+      "itertools.imap": [
+        "autojump_match 81:43 call  imap(re.escape, needles)"
+      ]
+    },
+    "autojump_match.match_fuzzy": {
+      "<builtin>.filter": [
+        "autojump_match 129:19 call  ifilter(meets_threshold, haystack)"
+      ],
+      "<builtin>.str.lower": [
+        "autojump_match 117:37 call  last(needles).lower()"
+      ],
+      "autojump_utils.last": [
+        "autojump_match 117:22 call  last(needles)",
+        "autojump_match 123:22 call  last(needles)"
+      ],
+      "itertools.ifilter": [
+        "autojump_match 129:19 call  ifilter(meets_threshold, haystack)"
+      ]
+    },
+    "autojump_match.match_fuzzy.<lambda1>": {
+      "autojump_utils.last": [
+        "autojump_match 115:32 call  last(os.path.split(path))"
+      ],
+      "os.path.split": [
+        "autojump_match 115:46 call  os.path.split(path)"
+      ]
+    },
+    "autojump_match.match_fuzzy.<lambda2>": {
+      "<builtin>.str.lower": [
+        "autojump_match 120:39 call  entry.path.lower()"
+      ],
+      "autojump_match.match_fuzzy.<lambda1>": [
+        "autojump_match 120:22 call  end_dir(entry.path.lower())"
+      ],
+      "difflib.SequenceMatcher": [
+        "autojump_match 118:54 call  SequenceMatcher( a=needle, b=end_dir(entry.path.lower()), )"
+      ],
+      "difflib.SequenceMatcher.ratio": [
+        "autojump_match 121:16 call  SequenceMatcher( a=needle, b=end_dir(entry.path.lower()),..."
+      ]
+    },
+    "autojump_match.match_fuzzy.<lambda3>": {
+      "autojump_match.match_fuzzy.<lambda1>": [
+        "autojump_match 126:22 call  end_dir(entry.path)"
+      ],
+      "difflib.SequenceMatcher": [
+        "autojump_match 124:54 call  SequenceMatcher( a=needle, b=end_dir(entry.path), )"
+      ],
+      "difflib.SequenceMatcher.ratio": [
+        "autojump_match 127:16 call  SequenceMatcher( a=needle, b=end_dir(entry.path), ).ratio()"
+      ]
+    },
+    "autojump_match.match_fuzzy.<lambda4>": {
+      "autojump_match.match_fuzzy.<lambda2>": [
+        "autojump_match 128:50 call  match_percent(entry)"
+      ],
+      "autojump_match.match_fuzzy.<lambda3>": [
+        "autojump_match 128:50 call  match_percent(entry)"
+      ]
+    },
+    "autojump_utils.create_dir": {
+      "os.makedirs": [
+        "autojump_utils 24:20 call  os.makedirs(path)"
+      ]
+    },
+    "autojump_utils.encode_local": {
+      "<builtin>.bytes.encode": [
+        "autojump_utils 34:25 call  string.encode(sys.getfilesystemencoding() or 'utf-8')"
+      ],
+      "<builtin>.str.encode": [
+        "autojump_utils 34:25 call  string.encode(sys.getfilesystemencoding() or 'utf-8')"
+      ],
+      "autojump_utils.is_python3": [
+        "autojump_utils 32:18 call  is_python3()"
+      ],
+      "sys.getfilesystemencoding": [
+        "autojump_utils 34:51 call  sys.getfilesystemencoding()"
+      ]
+    },
+    "autojump_utils.get_pwd": {
+      "<builtin>.print": [
+        "autojump_utils 78:14 call  print('Current directory no longer exists.', file=sys.std..."
+      ],
+      "os.getcwd": [
+        "autojump_utils 76:26 call  os.getcwdu()"
+      ],
+      "os.getcwdu": [
+        "autojump_utils 76:26 call  os.getcwdu()"
+      ]
+    },
+    "autojump_utils.get_tab_entry_info": {
+      "_sre.SRE_Match.group": [
+        "autojump_utils 63:36 call  match_needle.group(1)",
+        "autojump_utils 66:38 call  match_index.group(1)",
+        "autojump_utils 69:32 call  match_path.group(1)"
+      ]
+    },
+    "autojump_utils.has_uppercase": {
+      "<builtin>.str": [
+        "autojump_utils 85:64 call  unicode(string)"
+      ],
+      "unicodedata.category": [
+        "autojump_utils 85:36 call  unicodedata.category(c)"
+      ]
+    },
+    "autojump_utils.is_autojump_sourced": {
+      "os.getenv": [
+        "autojump_utils 93:28 call  os.getenv('AUTOJUMP_SOURCED')"
+      ]
+    },
+    "autojump_utils.is_linux": {
+      "platform.system": [
+        "autojump_utils 105:27 call  platform.system()"
+      ]
+    },
+    "autojump_utils.is_osx": {
+      "platform.system": [
+        "autojump_utils 109:27 call  platform.system()"
+      ]
+    },
+    "autojump_utils.is_windows": {
+      "platform.system": [
+        "autojump_utils 113:27 call  platform.system()"
+      ]
+    },
+    "autojump_utils.last": {
+      "builtins.list_iterator.next": [
+        "autojump_utils 125:30 call  it.next()"
+      ],
+      "builtins.tuple_iterator.__next__": [
+        "autojump_utils 122:34 call  it.__next__()"
+      ],
+      "builtins.tuple_iterator.next": [
+        "autojump_utils 125:30 call  it.next()"
+      ]
+    },
+    "autojump_utils.move_file": {
+      "autojump_utils.is_windows": [
+        "autojump_utils 137:18 call  is_windows()"
+      ],
+      "os.path.exists": [
+        "autojump_utils 137:39 call  os.path.exists(dst)"
+      ],
+      "os.remove": [
+        "autojump_utils 139:18 call  os.remove(dst)"
+      ],
+      "shutil.move": [
+        "autojump_utils 140:16 call  shutil.move(src, dst)"
+      ]
+    },
+    "autojump_utils.print_entry": {
+      "autojump_utils.print_local": [
+        "autojump_utils 144:16 call  print_local('%.1f:\\t%s' % (entry.weight, entry.path))"
+      ]
+    },
+    "autojump_utils.print_local": {
+      "<builtin>.print": [
+        "autojump_utils 148:10 call  print(encode_local(string))"
+      ],
+      "autojump_utils.encode_local": [
+        "autojump_utils 148:23 call  encode_local(string)"
+      ]
+    },
+    "autojump_utils.print_tab_menu": {
+      "<builtin>.enumerate": [
+        "autojump_utils 160:30 call  enumerate(tab_entries)"
+      ],
+      "autojump_utils.print_local": [
+        "autojump_utils 161:20 call  print_local( '%s%s%d%s%s' % ( needle, separator, i + 1, s..."
+      ]
+    },
+    "autojump_utils.sanitize": {
+      "itertools.imap": [
+        "autojump_utils 175:21 call  imap(clean, directories)"
+      ]
+    },
+    "autojump_utils.surround_quotes": {
+      "autojump_utils.in_bash": [
+        "autojump_utils 196:15 call  in_bash()"
+      ]
+    },
+    "autojump_utils.unico": {
+      "<builtin>.isinstance": [
+        "autojump_utils 209:39 call  isinstance(string, unicode)"
+      ],
+      "<builtin>.str": [
+        "autojump_utils 210:23 call  unicode(string, encoding='utf-8', errors='replace')"
+      ]
+    }
+  },
+  "notes": {
+    "autojump_data 130:19 call  temp.close()": [
+      "Supported Python 3.3 on Windows constructs tempfile._TemporaryFileWrapper without its close method: the method definition is inside if _os.name != 'nt' (Lib/tempfile.py:373-386). __getattr__ at 349-357 forwards close to its file. NamedTemporaryFile defaults to mode w+b and buffering=-1 (398), invokes _io.open at 434 and wraps that file at 437. The updating binary mode selects BufferedRandom and returns that buffer (Modules/_io/_iomodule.c:416-439). Thus the explicit temp.close() enters io.BufferedRandom.close. The existing wrapper.close edge remains valid on other supported runtimes. This is an actual supported Python 3 variant, independent of Python-2-to-Python-3 name normalization."
+    ],
+    "autojump_data 132:18 call  open(temp.name, 'w', encoding='utf-8', errors='replace')": [
+      "open is codecs.open, imported at line 8; it returns a codecs.StreamReaderWriter around the file that it opens in mode 'wb'"
+    ],
+    "autojump_data 136:20 call  f.flush()": [
+      "codecs.StreamReaderWriter defines no flush; its __getattr__ returns the flush of its stream, the file that codecs.open opens in mode 'wb' (an io.BufferedWriter)"
+    ],
+    "autojump_data 139:14 call  print('Error saving autojump data (disk full?)' % ex, fil...": [
+      "The untyped data.items() client callback at line 133 may raise an IOError subclass defining __getitem__. The except IOError handler catches it. CPython PyMapping_Check regards an object with mp_subscript as a mapping (Objects/abstract.c:2287-2292). PyUnicode_Format sets ctx.dict for this non-tuple non-str mapping (Objects/unicodeobject.c:14391-14394); its unused-argument error applies only when ctx.dict is null (14423-14427). Therefore the constant format string succeeds and print is entered. The callback and exception remain unnamed; their control-flow effects are admitted. A writable directory and ordinary config suffice; no package mutation or failed-object reuse is involved."
+    ],
+    "autojump_data 140:17 call  sys.exit(1)": [
+      "The same MappingError witness as save -> print makes the formatting expression succeed. With normal writable stderr, print returns, then sys.exit(1) is entered. SystemExit being raised after entry does not remove this edge."
+    ],
+    "autojump_data 48:39 call  data.items()": [
+      "data is a dict: the docstring says \"Converts a dictionary into an iterator of entries\" (B4)"
+    ],
+    "autojump_data 49:16 call  imap(convert, data.iteritems())": [
+      "line 49 runs only on Python 2 (is_python3() returns at line 48), where imap is itertools.imap (line 25)"
+    ],
+    "autojump_data 49:40 call  data.iteritems()": [
+      "Python 2 only; data is a dict (docstring, B4); the Python 3 name of the type is dict (autojump.md, judgement 2)"
+    ],
+    "autojump_data 68:36 call  line.strip()": [
+      "line is a line of the codecs.StreamReaderWriter of line 76 (utf-8): a str (unicode on Python 2, whose Python 3 name is str)"
+    ],
+    "autojump_data 76:18 call  open( config['data_path'], 'r', encoding='utf-8', errors=...": [
+      "open is codecs.open, imported at line 8; it returns a codecs.StreamReaderWriter"
+    ],
+    "autojump_data 81:24 call  dict( imap( tupleize, ifilter(correct_length, imap(parse,...": [
+      "dict() iterates the chain of map and filter objects, which calls parse, correct_length and tupleize back; those callees are put at the imap and ifilter sites (82:21, 84:28, 84:49)"
+    ],
+    "autojump_data 82:21 call  imap( tupleize, ifilter(correct_length, imap(parse, f)), )": [
+      "imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 20-25); both versions are supported. tupleize is the lambda of line 73; dict() at 81:24 iterates the result in load"
+    ],
+    "autojump_data 84:28 call  ifilter(correct_length, imap(parse, f))": [
+      "ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 20-25). correct_length is the lambda of line 70; dict() at 81:24 iterates the chain in load"
+    ],
+    "autojump_data 84:49 call  imap(parse, f)": [
+      "imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 20-25). parse is the lambda of line 68; dict() at 81:24 iterates the chain in load"
+    ],
+    "autojump_match 117:37 call  last(needles).lower()": [
+      "needles is a list of str: the docstring example gives needles = ['foo', 'bar'] (B4; autojump.md, judgement 3); last returns its last item"
+    ],
+    "autojump_match 120:22 call  end_dir(entry.path.lower())": [
+      "end_dir is the lambda of line 115, a local name bound once"
+    ],
+    "autojump_match 120:39 call  entry.path.lower()": [
+      "entry is an item of haystack; the docstring example gives entries (path='/foo/bar/baz', weight=11), whose path is a str (B4; autojump.md, judgement 3)"
+    ],
+    "autojump_match 126:22 call  end_dir(entry.path)": [
+      "end_dir is the lambda of line 115, a local name bound once"
+    ],
+    "autojump_match 128:50 call  match_percent(entry)": [
+      "match_percent is the lambda of line 118 when ignore_case is true, else that of line 124; meets_threshold closes over it, so either one is called"
+    ],
+    "autojump_match 129:19 call  ifilter(meets_threshold, haystack)": [
+      "ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 11-17)"
+    ],
+    "autojump_match 39:41 call  imap(re.escape, needles)": [
+      "imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 11-17); both versions are supported"
+    ],
+    "autojump_match 46:19 call  ifilter(found, haystack)": [
+      "ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 11-17)"
+    ],
+    "autojump_match 81:43 call  imap(re.escape, needles)": [
+      "imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 11-17)"
+    ],
+    "autojump_match 88:19 call  ifilter(found, haystack)": [
+      "ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 11-17)"
+    ],
+    "autojump_utils 122:34 call  it.__next__()": [
+      "the package passes xs: a tuple from os.path.split (autojump_match.py:115) and needles, a list by the docstring example of match_fuzzy (autojump_match.py:97); other values are client iterables (opaque, B5). The iterator types are named as the trace names them (autojump.md, judgements 1 and 3)"
+    ],
+    "autojump_utils 125:30 call  it.next()": [
+      "Python 2 only; the same iterables as at 122:34; the Python 2 types listiterator and tupleiterator get their Python 3 names, the method keeps its name (autojump.md, judgement 2)"
+    ],
+    "autojump_utils 175:21 call  imap(clean, directories)": [
+      "imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 14-18). clean is the lambda of line 174; list() at 175:16 iterates the result in sanitize"
+    ],
+    "autojump_utils 209:39 call  isinstance(string, unicode)": [
+      "Python 2 only (the and short-circuits on Python 3)"
+    ],
+    "autojump_utils 210:23 call  unicode(string, encoding='utf-8', errors='replace')": [
+      "Python 2 only; the builtin unicode, whose Python 3 name is str"
+    ],
+    "autojump_utils 34:25 call  string.encode(sys.getfilesystemencoding() or 'utf-8')": [
+      "Python 2 only (line 33 returns on Python 3). The docstring \"Converts string\" (line 31) names a Python 2 string: a unicode, whose Python 3 name is str, or a str, whose Python 3 name is bytes. The package's own % strings that reach it through print_local (print_entry, line 144; print_tab_menu, lines 162-168) are a Python 2 str when the entry's path is not a unicode (autojump.md, judgement 2)"
+    ],
+    "autojump_utils 63:36 call  match_needle.group(1)": [
+      "On supported Python 3.3, re.search returns _sre.SRE_Match. Modules/_sre.c defines SRE_MODULE as sre at 52-53 and Match_Type.tp_name as _sre.SRE_Match at 3614. Lib/re.py has no public Match class alias. CPython 3.6 retains the same fallback spelling, while 3.7 introduces re.Match (Lib/re.py:263) and the C type name re.Match (Modules/_sre.c:2685). The global version rule retains the older fallback where the later public path does not exist. Each matching input branch directly calls group; re.Match.group remains valid for newer versions."
+    ],
+    "autojump_utils 66:38 call  match_index.group(1)": [
+      "the same admitted historical and modern regex receiver names as 63:36"
+    ],
+    "autojump_utils 69:32 call  match_path.group(1)": [
+      "the same admitted historical and modern regex receiver names as 63:36"
+    ],
+    "autojump_utils 76:26 call  os.getcwdu()": [
+      "on Python 3, line 16 binds os.getcwdu to os.getcwd when the module is imported; on Python 2, os.getcwdu is the function of os (autojump.md, judgement 2)"
+    ],
+    "autojump_utils 85:64 call  unicode(string)": [
+      "Python 2 only; the builtin unicode, whose Python 3 name is str"
+    ]
+  },
+  "trace": "dynamic/autojump.json"
+}

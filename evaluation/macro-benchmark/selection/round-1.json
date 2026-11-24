@@ -1,0 +1,689 @@
+{
+  "complete": true,
+  "constants": {
+    "CI_FILES": [
+      ".github/workflows/",
+      ".travis.yml",
+      ".gitlab-ci.yml",
+      ".circleci/",
+      "azure-pipelines.yml"
+    ],
+    "FILTERS": [
+      "rank",
+      "stub-name",
+      "release",
+      "pure-python",
+      "requires-python",
+      "licence",
+      "no-dependency",
+      "size",
+      "source",
+      "history",
+      "ci",
+      "tests",
+      "released-code",
+      "github"
+    ],
+    "FRAME_PYTHON": [
+      3,
+      15
+    ],
+    "GITHUB_API": "https://api.github.com/repos/{owner}/{repo}",
+    "GITHUB_FACTS": [
+      "archived",
+      "created_at",
+      "fork",
+      "forks_count",
+      "full_name",
+      "open_issues_count",
+      "pushed_at",
+      "stargazers_count",
+      "subscribers_count"
+    ],
+    "MAINTAINED_YEARS": 3,
+    "MARKER_ENVIRONMENT": {
+      "extra": "",
+      "implementation_name": "cpython",
+      "os_name": "posix",
+      "platform_python_implementation": "CPython",
+      "platform_system": "Linux",
+      "python_full_version": "3.14.0",
+      "python_version": "3.14",
+      "sys_platform": "linux"
+    },
+    "MAX_BLOB_BYTES": 4194304,
+    "MAX_CODE_LINES": 4000,
+    "MAX_DIFFERING_PERCENT": 5,
+    "MIN_AUTHORS": 2,
+    "MIN_CODE_LINES": 800,
+    "MIN_COMMITS": 100,
+    "MIN_STARS": 500,
+    "PERMISSIVE_CLASSIFIERS": [
+      "License :: OSI Approved :: Apache Software License",
+      "License :: OSI Approved :: BSD License",
+      "License :: OSI Approved :: ISC License (ISCL)",
+      "License :: OSI Approved :: MIT License",
+      "License :: OSI Approved :: Python Software Foundation License",
+      "License :: OSI Approved :: The Unlicense (Unlicense)",
+      "License :: OSI Approved :: Zero-Clause BSD (0BSD)"
+    ],
+    "PERMISSIVE_LICENCES": [
+      "0BSD",
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "ISC",
+      "MIT",
+      "PSF-2.0",
+      "Unlicense"
+    ],
+    "PURE_WHEEL_TAGS": [
+      "py3-none-any",
+      "py2.py3-none-any"
+    ],
+    "PYPI_PROJECT": "https://pypi.org/pypi/{name}/json",
+    "PYPI_RELEASE": "https://pypi.org/pypi/{name}/{version}/json",
+    "RANK_CUTOFF": 5000,
+    "STRATA": 5,
+    "STUB_PREFIXES": [
+      "types-"
+    ],
+    "STUB_SUFFIXES": [
+      "-stubs"
+    ],
+    "TAG_FORMS": [
+      "{version}",
+      "v{version}",
+      "{name}-{version}",
+      "release-{version}"
+    ],
+    "TARGET_PYTHON": "3.14.0",
+    "TEST_DIRS": [
+      "tests",
+      "test",
+      "testing",
+      "unittests"
+    ],
+    "TEST_FILES": [
+      "test_*.py",
+      "*_test.py"
+    ],
+    "TRANSPORT_SETTINGS": [
+      "http."
+    ]
+  },
+  "dropped": [],
+  "frame": {
+    "file": "frame.json",
+    "sha256": "901447044e59a51cc87d0af631fb5f31dfa0a64ac565cf30ed5c95ffb8eebf90"
+  },
+  "list": {
+    "date": "2026-11-01",
+    "file": "top-pypi-packages-2026-11-01.json",
+    "rows": 15000,
+    "sha256": "3e958a64ebe1de0b6a4ab4c6b465d481f350fd1dfa926c639add36eb34dabc1e"
+  },
+  "order": [
+    "pypinyin",
+    "tenacity",
+    "argcomplete",
+    "marshmallow",
+    "sh",
+    "markdown2",
+    "platformdirs",
+    "aiocache",
+    "netaddr",
+    "tinytag",
+    "path",
+    "python-multipart",
+    "anytree",
+    "tinydb",
+    "pypandoc",
+    "jmespath",
+    "pyusb",
+    "pluggy",
+    "tabulate",
+    "toolz",
+    "mss",
+    "attrs",
+    "automat",
+    "pyshp",
+    "vulture",
+    "nodeenv",
+    "avro",
+    "itables",
+    "flit-core",
+    "loguru",
+    "pyrate-limiter",
+    "cloudpathlib",
+    "django-environ",
+    "websocket-client",
+    "bottle",
+    "jsonpickle",
+    "configargparse",
+    "cloudpickle",
+    "tablib",
+    "more-itertools",
+    "cerberus",
+    "python-barcode",
+    "honcho",
+    "validators",
+    "m3u8",
+    "structlog",
+    "pymysql",
+    "pyjwt",
+    "cachetools",
+    "pyflakes",
+    "json-repair",
+    "fastjsonschema",
+    "dill",
+    "textdistance",
+    "h11",
+    "django-constance",
+    "prometheus-client",
+    "einops",
+    "whitenoise",
+    "funcy",
+    "dagster-pipes",
+    "asgiref",
+    "pubchempy",
+    "secure",
+    "uncertainties",
+    "pgvector",
+    "sqlparse",
+    "pyfiglet",
+    "segno"
+  ],
+  "round": 1,
+  "seed": 11587147701662812314,
+  "selected": [
+    "aiocache",
+    "argcomplete",
+    "pypinyin",
+    "markdown2",
+    "netaddr"
+  ],
+  "strata": [
+    {
+      "examined": [
+        {
+          "name": "aiocache",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 1236,
+      "members": [
+        "tinydb",
+        "cloudpickle",
+        "pyfiglet",
+        "honcho",
+        "django-environ",
+        "pypandoc",
+        "whitenoise",
+        "path",
+        "pubchempy",
+        "vulture",
+        "dagster-pipes",
+        "python-multipart",
+        "h11",
+        "aiocache"
+      ],
+      "min_code_lines": 809,
+      "selected": {
+        "facts": {
+          "authors": 44,
+          "ci": [
+            ".github/workflows/auto-merge.yml",
+            ".github/workflows/ci.yml",
+            ".github/workflows/codeql.yml"
+          ],
+          "code_lines": 1236,
+          "commit": "e673d62e98bf89b619e48f44cd68c96a30d95a1b",
+          "commits": 519,
+          "github": {
+            "archived": false,
+            "created_at": "2016-09-30T09:25:51Z",
+            "fork": false,
+            "forks_count": 187,
+            "full_name": "aio-libs/aiocache",
+            "license": "BSD-3-Clause",
+            "open_issues_count": 77,
+            "pushed_at": "2026-06-28T20:08:27Z",
+            "stargazers_count": 1437,
+            "subscribers_count": 15
+          },
+          "licence": "BSD-3-Clause",
+          "licence_source": "GitHub",
+          "release": "0.12.3",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 1236,
+            "source_root": "."
+          },
+          "repository": "https://github.com/aio-libs/aiocache",
+          "tag": "v0.12.3",
+          "tag_object": "cfc8a63107e0b80452671eb684b11b867cf940ca",
+          "test_code_lines": 3003,
+          "test_files": [
+            "tests/acceptance/test_base.py",
+            "tests/acceptance/test_decorators.py",
+            "tests/acceptance/test_factory.py",
+            "tests/acceptance/test_lock.py",
+            "tests/acceptance/test_plugins.py",
+            "tests/acceptance/test_serializers.py",
+            "tests/performance/test_concurrency.py",
+            "tests/performance/test_footprint.py",
+            "tests/ut/backends/test_memcached.py",
+            "tests/ut/backends/test_memory.py",
+            "tests/ut/backends/test_redis.py",
+            "tests/ut/test_base.py",
+            "tests/ut/test_decorators.py",
+            "tests/ut/test_exceptions.py",
+            "tests/ut/test_factory.py",
+            "tests/ut/test_lock.py",
+            "tests/ut/test_plugins.py",
+            "tests/ut/test_serializers.py"
+          ],
+          "test_ratio": 2.43,
+          "top_level": [
+            "aiocache"
+          ],
+          "uploaded": "2024-09-25",
+          "wheel": {
+            "filename": "aiocache-0.12.3-py2.py3-none-any.whl",
+            "sha256": "889086fc24710f431937b87ad3720a289f7fc31c4fd8b68e9f918b9bacd8270d",
+            "url": "https://files.pythonhosted.org/packages/37/d7/15d67e05b235d1ed8c3ce61688fe4d84130e72af1657acadfaac3479f4cf/aiocache-0.12.3-py2.py3-none-any.whl"
+          }
+        },
+        "name": "aiocache",
+        "rank": 1491
+      },
+      "stratum": 1
+    },
+    {
+      "examined": [
+        {
+          "name": "tenacity",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "argcomplete",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 1559,
+      "members": [
+        "django-constance",
+        "asgiref",
+        "jmespath",
+        "pgvector",
+        "fastjsonschema",
+        "pluggy",
+        "anytree",
+        "cachetools",
+        "validators",
+        "configargparse",
+        "argcomplete",
+        "tenacity",
+        "uncertainties",
+        "funcy"
+      ],
+      "min_code_lines": 1239,
+      "selected": {
+        "facts": {
+          "authors": 91,
+          "ci": [
+            ".github/workflows/ci.yml",
+            ".github/workflows/release.yml"
+          ],
+          "code_lines": 1506,
+          "commit": "0571dc489d9543b40f1bcbc6cbac4377906b76fd",
+          "commits": 860,
+          "github": {
+            "archived": false,
+            "created_at": "2012-11-19T15:37:34Z",
+            "fork": false,
+            "forks_count": 157,
+            "full_name": "kislyuk/argcomplete",
+            "license": "Apache-2.0",
+            "open_issues_count": 69,
+            "pushed_at": "2026-11-11T16:34:02Z",
+            "stargazers_count": 1593,
+            "subscribers_count": 29
+          },
+          "licence": "License :: OSI Approved :: Apache Software License",
+          "licence_source": "classifiers",
+          "release": "3.7.2",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 1506,
+            "source_root": "."
+          },
+          "repository": "https://github.com/kislyuk/argcomplete",
+          "tag": "v3.7.2",
+          "tag_object": "c8e8f34b1416fab6c7a65d9f3d2a13b92c9c8e2b",
+          "test_code_lines": 55,
+          "test_files": [
+            "test/test_contrib_shells.py"
+          ],
+          "test_ratio": 0.037,
+          "top_level": [
+            "argcomplete"
+          ],
+          "uploaded": "2026-08-06",
+          "wheel": {
+            "filename": "argcomplete-3.7.2-py3-none-any.whl",
+            "sha256": "6029205678bdd9c1c728a155f5f9ecf5812393f969eef58807641a2bc2aa5b19",
+            "url": "https://files.pythonhosted.org/packages/46/bd/551ee6af426af84ca33e02622be722925c196608e9127d731ef17c47f06e/argcomplete-3.7.2-py3-none-any.whl"
+          }
+        },
+        "name": "argcomplete",
+        "rank": 392
+      },
+      "stratum": 2
+    },
+    {
+      "examined": [
+        {
+          "name": "pypinyin",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 2256,
+      "members": [
+        "python-barcode",
+        "textdistance",
+        "tabulate",
+        "nodeenv",
+        "einops",
+        "pyflakes",
+        "m3u8",
+        "secure",
+        "cerberus",
+        "toolz",
+        "sh",
+        "pyjwt",
+        "tinytag",
+        "pypinyin"
+      ],
+      "min_code_lines": 1596,
+      "selected": {
+        "facts": {
+          "authors": 31,
+          "ci": [
+            ".circleci/config.yml",
+            ".github/workflows/ci.yml"
+          ],
+          "code_lines": 2256,
+          "commit": "df101577145af2eb1abe5656e592e34e3bb56d23",
+          "commits": 851,
+          "github": {
+            "archived": false,
+            "created_at": "2013-09-14T14:01:40Z",
+            "fork": false,
+            "forks_count": 632,
+            "full_name": "mozillazg/python-pinyin",
+            "license": "MIT",
+            "open_issues_count": 42,
+            "pushed_at": "2026-11-01T14:51:40Z",
+            "stargazers_count": 5394,
+            "subscribers_count": 94
+          },
+          "licence": "License :: OSI Approved :: MIT License",
+          "licence_source": "classifiers",
+          "release": "0.55.0",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 2256,
+            "source_root": "."
+          },
+          "repository": "https://github.com/mozillazg/python-pinyin",
+          "tag": "v0.55.0",
+          "tag_object": "f8a1794649e26b1bceec1dcf13ad01ab9a7df58a",
+          "test_code_lines": 2716,
+          "test_files": [
+            "tests/contrib/test_mmseg.py",
+            "tests/contrib/test_neutral_tone.py",
+            "tests/contrib/test_tone_convert.py",
+            "tests/contrib/test_tone_rule.py",
+            "tests/contrib/test_tone_sandhi.py",
+            "tests/contrib/test_uv.py",
+            "tests/test_cmd.py",
+            "tests/test_converter.py",
+            "tests/test_core_cls.py",
+            "tests/test_env.py",
+            "tests/test_others.py",
+            "tests/test_pinyin.py",
+            "tests/test_standard.py",
+            "tests/test_style.py"
+          ],
+          "test_ratio": 1.204,
+          "top_level": [
+            "pypinyin"
+          ],
+          "uploaded": "2025-07-20",
+          "wheel": {
+            "filename": "pypinyin-0.55.0-py2.py3-none-any.whl",
+            "sha256": "d53b1e8ad2cdb815fb2cb604ed3123372f5a28c6f447571244aca36fc62a286f",
+            "url": "https://files.pythonhosted.org/packages/b9/7b/4cabc76fcc21c3c7d5c671d8783984d30ac9d3bb387c4ba784fca3cdfa3a/pypinyin-0.55.0-py2.py3-none-any.whl"
+          }
+        },
+        "name": "pypinyin",
+        "rank": 2788
+      },
+      "stratum": 3
+    },
+    {
+      "examined": [
+        {
+          "name": "marshmallow",
+          "reason": "used: macro-benchmark-heldout/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "markdown2",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 3074,
+      "members": [
+        "platformdirs",
+        "pyrate-limiter",
+        "tablib",
+        "jsonpickle",
+        "more-itertools",
+        "websocket-client",
+        "automat",
+        "flit-core",
+        "marshmallow",
+        "loguru",
+        "sqlparse",
+        "markdown2",
+        "bottle",
+        "pymysql"
+      ],
+      "min_code_lines": 2267,
+      "selected": {
+        "facts": {
+          "authors": 89,
+          "ci": [
+            ".github/workflows/python.yaml"
+          ],
+          "code_lines": 3018,
+          "commit": "150454e3ba02caa3994d19cb5a8344fc92f3ce13",
+          "commits": 1352,
+          "github": {
+            "archived": false,
+            "created_at": "2011-01-31T00:30:02Z",
+            "fork": false,
+            "forks_count": 483,
+            "full_name": "trentm/python-markdown2",
+            "license": "NOASSERTION",
+            "open_issues_count": 102,
+            "pushed_at": "2026-11-10T21:33:22Z",
+            "stargazers_count": 2823,
+            "subscribers_count": 57
+          },
+          "licence": "MIT",
+          "licence_source": "license",
+          "release": "2.5.5",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 3018,
+            "source_root": "lib"
+          },
+          "repository": "https://github.com/trentm/python-markdown2",
+          "tag": "2.5.5",
+          "tag_object": "64cbfc4af041a4bc6e7ea9f94d60203af1534478",
+          "test_code_lines": 404,
+          "test_files": [
+            "test/test_markdown2.py"
+          ],
+          "test_ratio": 0.134,
+          "top_level": [
+            "markdown2"
+          ],
+          "uploaded": "2026-03-02",
+          "wheel": {
+            "filename": "markdown2-2.5.5-py3-none-any.whl",
+            "sha256": "be798587e09d1f52d2e4d96a649c4b82a778c75f9929aad52a2c95747fa26941",
+            "url": "https://files.pythonhosted.org/packages/43/af/4b3891eb0a49d6cfd5cbf3e9bf514c943afc2b0f13e2c57cc57cd88ecc21/markdown2-2.5.5-py3-none-any.whl"
+          }
+        },
+        "name": "markdown2",
+        "rank": 1413
+      },
+      "stratum": 4
+    },
+    {
+      "examined": [
+        {
+          "name": "netaddr",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 3880,
+      "members": [
+        "itables",
+        "segno",
+        "structlog",
+        "pyusb",
+        "attrs",
+        "mss",
+        "json-repair",
+        "netaddr",
+        "pyshp",
+        "prometheus-client",
+        "avro",
+        "cloudpathlib",
+        "dill"
+      ],
+      "min_code_lines": 3117,
+      "selected": {
+        "facts": {
+          "authors": 52,
+          "ci": [
+            ".github/workflows/ci.yml"
+          ],
+          "code_lines": 3486,
+          "commit": "85a7b25304732785ddee31be3a644a77a243a978",
+          "commits": 810,
+          "github": {
+            "archived": false,
+            "created_at": "2010-05-24T23:14:56Z",
+            "fork": false,
+            "forks_count": 180,
+            "full_name": "netaddr/netaddr",
+            "license": "NOASSERTION",
+            "open_issues_count": 46,
+            "pushed_at": "2024-07-05T23:39:56Z",
+            "stargazers_count": 831,
+            "subscribers_count": 37
+          },
+          "licence": "License :: OSI Approved :: BSD License",
+          "licence_source": "classifiers",
+          "release": "1.3.0",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 6644,
+            "source_root": "."
+          },
+          "repository": "https://github.com/netaddr/netaddr",
+          "tag": "1.3.0",
+          "tag_object": "1e20a337c1590f6fe0389db74e3b3af13a4a522d",
+          "test_code_lines": 3155,
+          "test_files": [
+            "netaddr/tests/core/test_pubsub.py",
+            "netaddr/tests/eui/test_eui.py",
+            "netaddr/tests/eui/test_ieee_parsers.py",
+            "netaddr/tests/ip/test_cidr_v4.py",
+            "netaddr/tests/ip/test_cidr_v6.py",
+            "netaddr/tests/ip/test_dns.py",
+            "netaddr/tests/ip/test_ip.py",
+            "netaddr/tests/ip/test_ip_categories.py",
+            "netaddr/tests/ip/test_ip_comparisons.py",
+            "netaddr/tests/ip/test_ip_globs.py",
+            "netaddr/tests/ip/test_ip_network_categories.py",
+            "netaddr/tests/ip/test_ip_ranges.py",
+            "netaddr/tests/ip/test_ip_rfc1924.py",
+            "netaddr/tests/ip/test_ip_sets.py",
+            "netaddr/tests/ip/test_ip_splitter.py",
+            "netaddr/tests/ip/test_ip_v4.py",
+            "netaddr/tests/ip/test_ip_v4_v6_conversions.py",
+            "netaddr/tests/ip/test_ip_v6.py",
+            "netaddr/tests/ip/test_network_ops.py",
+            "netaddr/tests/ip/test_nmap.py",
+            "netaddr/tests/ip/test_old_specs.py",
+            "netaddr/tests/ip/test_platform_osx.py",
+            "netaddr/tests/ip/test_socket_module_fallback.py",
+            "netaddr/tests/strategy/test_eui48_strategy.py",
+            "netaddr/tests/strategy/test_ipv4_strategy.py",
+            "netaddr/tests/strategy/test_ipv6_strategy.py",
+            "netaddr/tests/test_netaddr.py"
+          ],
+          "test_ratio": 0.905,
+          "top_level": [
+            "netaddr"
+          ],
+          "uploaded": "2024-05-28",
+          "wheel": {
+            "filename": "netaddr-1.3.0-py3-none-any.whl",
+            "sha256": "c2c6a8ebe5554ce33b7d5b3a306b71bbb373e000bbbf2350dd5213cc56e3dbbe",
+            "url": "https://files.pythonhosted.org/packages/12/cc/f4fe2c7ce68b92cbf5b2d379ca366e1edae38cccaad00f69f529b460c3ef/netaddr-1.3.0-py3-none-any.whl"
+          }
+        },
+        "name": "netaddr",
+        "rank": 1284
+      },
+      "stratum": 5
+    }
+  ],
+  "used": {
+    "anytree": "used: macro-benchmark-heldout/projects.toml",
+    "asciinema": "excluded: the 2021 macro-benchmark",
+    "asyncstdlib": "used: macro-benchmark-heldout/projects.toml",
+    "autojump": "excluded: the 2021 macro-benchmark",
+    "cachetools": "used: macro-benchmark/projects.toml",
+    "configargparse": "used: macro-benchmark-heldout/projects.toml",
+    "fabric": "excluded: the 2021 macro-benchmark",
+    "face-classification": "excluded: the 2021 macro-benchmark",
+    "h11": "used: macro-benchmark/projects.toml",
+    "hypothesis": "excluded: the scalability runs",
+    "jmespath": "used: macro-benchmark/projects.toml",
+    "loguru": "excluded: the pilot of the test-selection client",
+    "marshmallow": "used: macro-benchmark-heldout/projects.toml",
+    "packaging": "excluded: the scalability runs",
+    "pluggy": "used: macro-benchmark/projects.toml",
+    "pygments": "excluded: the scalability runs",
+    "pytest": "excluded: the scalability runs (its package _pytest)",
+    "sqlparse": "used: macro-benchmark-heldout/projects.toml",
+    "sublist3r": "excluded: the 2021 macro-benchmark",
+    "tenacity": "used: macro-benchmark/projects.toml"
+  }
+}

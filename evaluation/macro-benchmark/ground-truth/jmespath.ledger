@@ -1,0 +1,1563 @@
+# Call-site ledger of jmespath at 6ff419a8b171d055a9bfc6904605bceb8b7a80ef.
+# Written by hand from the source and Python semantics; judgements and dispatch sets in jmespath.md.
+
+== jmespath
+
+[jmespath.compile]
+8:25 call  parser.Parser()
+    -> jmespath.parser.Parser.__init__
+8:33 call  parser.Parser().parse(expression)
+    -> jmespath.parser.Parser.parse
+    note: the receiver is the Parser created by parser.Parser() on the same line
+
+[jmespath.search]
+12:25 call  parser.Parser()
+    -> jmespath.parser.Parser.__init__
+12:33 call  parser.Parser().parse(expression)
+    -> jmespath.parser.Parser.parse
+    note: the receiver is the Parser created by parser.Parser() on the same line
+12:52 call  parser.Parser().parse(expression).search(data, options=op...
+    -> jmespath.parser.ParsedResult.search
+    reject jmespath.search: the receiver is what Parser.parse returns: a ParsedResult from _CACHE (parser.py:84), which holds only results of _do_parse, or from _do_parse -> _parse (ParsedResult at parser.py:127)
+
+== jmespath.compat
+
+[jmespath.compat.get_methods]
+18:43 call  inspect.getmembers(cls, predicate=inspect.isfunction)
+    -> inspect.getmembers
+    note: cls is a class whose metaclass is FunctionRegistry (functions.py:55). The predicate inspect.isfunction is library code, and getmembers reads plain class attributes: the package defines no descriptor, __getattr__ or __dir__ that it could call back
+
+== jmespath.exceptions
+
+[jmespath.exceptions]
+8:2 decorator  @with_str_method
+    -> jmespath.compat.with_str_method
+31:2 decorator  @with_str_method
+    -> jmespath.compat.with_str_method
+47:2 decorator  @with_str_method
+    -> jmespath.compat.with_str_method
+65:2 decorator  @with_str_method
+    -> jmespath.compat.with_str_method
+88:2 decorator  @with_str_method
+    -> jmespath.compat.with_str_method
+99:2 decorator  @with_str_method
+    -> jmespath.compat.with_str_method
+
+[jmespath.exceptions.ParseError.__init__]
+13:14 call  super(ParseError, self)
+    -> <builtin>.super
+13:41 call  super(ParseError, self).__init__(lex_position, token_valu...
+    -> <builtin>.ValueError.__init__
+    reject *: super(...) skips to the class after it in the MRO: JMESPathError defines no __init__, so the call reaches ValueError.__init__ (the base of JMESPathError, exceptions.py:4)
+16:43 call  token_type.upper()
+    -> <builtin>.str.upper
+    note: token_type is a token type string (parser.py) or the message string that LexerError.__init__ passes (exceptions.py:53)
+
+[jmespath.exceptions.ParseError.__str__]
+26:58 op  '%s: Parse error at column %s, ' 'token "%s" (%s), for ex...
+    reject *: the operands are self.msg (a message string), self.lex_position (an int), self.token_value (a token value: a string, an int, or a JSON value that json.loads makes (lexer.py:163-184); never a package object), self.token_type (a token type string, upper-cased at exceptions.py:16), self.expression (None or the expression string, parser.py:115) and underline (a string); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+
+[jmespath.exceptions.IncompleteExpressionError.set_expression]
+35:32 call  len(expression)
+    -> <builtin>.len
+
+[jmespath.exceptions.IncompleteExpressionError.__str__]
+44:24 op  'Invalid jmespath expression: Incomplete expression:\n' '...
+    reject *: the operands are self.expression (the expression string that set_expression stores, parser.py:112) and underline (a string); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+
+[jmespath.exceptions.LexerError.__init__]
+53:14 call  super(LexerError, self)
+    -> <builtin>.super
+53:41 call  super(LexerError, self).__init__(lexer_position, lexer_va...
+    -> jmespath.exceptions.ParseError.__init__
+    reject *: super(LexerError, self) resolves to the next class in the MRO of a LexerError, ParseError, which defines __init__ (exceptions.py:11)
+
+[jmespath.exceptions.LexerError.__str__]
+61:55 op  'Bad jmespath expression: %s:\n%s\n%s' % ( self.message, ...
+    reject *: the operands are self.message (a message string of the lexer), self.expression (None or the expression string, parser.py:109) and underline (a string); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+
+[jmespath.exceptions.ArityError.__str__]
+75:31 op  "Expected %s %s for function %s(), " "received %s" % ( se...
+    reject *: the operands are the ints expected_arity and actual_arity (len() at functions.py:89-90), the string that _pluralize returns, and function_name (the function name string of the AST node); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+77:36 call  self._pluralize('argument', self.expected_arity)
+    -> jmespath.exceptions.ArityError._pluralize
+
+[jmespath.exceptions.VariadictArityError.__str__]
+92:31 op  "Expected at least %s %s for function %s(), " "received %...
+    reject *: the operands are the ints expected_arity and actual_arity (len() at functions.py:86-87), the string that _pluralize returns, and function_name (the function name string of the AST node); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+94:36 call  self._pluralize('argument', self.expected_arity)
+    -> jmespath.exceptions.ArityError._pluralize
+
+[jmespath.exceptions.JMESPathTypeError.__str__]
+110:55 op  'In function %s(), invalid type for value: %s, ' 'expecte...
+    reject *: the operands are function_name (a string), current_value (an argument of a JMESPath function: a JSON value, or an _Expression, which has no __str__ or __repr__; a list formats its items with repr), expected_types (a list of type name strings) and actual_type (a string). A package exception or ParsedResult that a client puts into its data is not considered; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+
+[jmespath.exceptions.EmptyExpressionError.__init__]
+117:14 call  super(EmptyExpressionError, self)
+    -> <builtin>.super
+117:51 call  super(EmptyExpressionError, self).__init__( "Invalid JMES...
+    -> <builtin>.ValueError.__init__
+    reject *: super(...) skips to the class after it in the MRO: JMESPathError defines no __init__, so the call reaches ValueError.__init__ (the base of JMESPathError, exceptions.py:4)
+
+== jmespath.functions
+
+[jmespath.functions]
+67:1 class  class Functions
+    -> jmespath.functions.FunctionRegistry.__init__
+    note: the class statement calls the metaclass FunctionRegistry
+164:6 decorator  @signature({'types': ['number']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+164:15 call  signature({'types': ['number']})
+    -> jmespath.functions.signature
+168:6 decorator  @signature({'types': ['array-number']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+168:15 call  signature({'types': ['array-number']})
+    -> jmespath.functions.signature
+175:6 decorator  @signature({'types': [], 'variadic': True})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+175:15 call  signature({'types': [], 'variadic': True})
+    -> jmespath.functions.signature
+181:6 decorator  @signature({'types': []})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+181:15 call  signature({'types': []})
+    -> jmespath.functions.signature
+188:6 decorator  @signature({'types': []})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+188:15 call  signature({'types': []})
+    -> jmespath.functions.signature
+196:6 decorator  @signature({'types': []})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+196:15 call  signature({'types': []})
+    -> jmespath.functions.signature
+213:6 decorator  @signature({'types': ['array', 'string']}, {'types': []})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+213:15 call  signature({'types': ['array', 'string']}, {'types': []})
+    -> jmespath.functions.signature
+217:6 decorator  @signature({'types': ['string', 'array', 'object']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+217:15 call  signature({'types': ['string', 'array', 'object']})
+    -> jmespath.functions.signature
+221:6 decorator  @signature({'types': ['string']}, {'types': ['string']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+221:15 call  signature({'types': ['string']}, {'types': ['string']})
+    -> jmespath.functions.signature
+225:6 decorator  @signature({'types': ['string']}, {'types': ['string']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+225:15 call  signature({'types': ['string']}, {'types': ['string']})
+    -> jmespath.functions.signature
+229:6 decorator  @signature({'types': ['array', 'string']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+229:15 call  signature({'types': ['array', 'string']})
+    -> jmespath.functions.signature
+236:6 decorator  @signature({"types": ['number']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+236:15 call  signature({"types": ['number']})
+    -> jmespath.functions.signature
+240:6 decorator  @signature({"types": ['number']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+240:15 call  signature({"types": ['number']})
+    -> jmespath.functions.signature
+244:6 decorator  @signature({"types": ['string']}, {"types": ['array-strin...
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+244:15 call  signature({"types": ['string']}, {"types": ['array-string...
+    -> jmespath.functions.signature
+248:6 decorator  @signature({'types': ['expref']}, {'types': ['array']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+248:15 call  signature({'types': ['expref']}, {'types': ['array']})
+    -> jmespath.functions.signature
+255:6 decorator  @signature({"types": ['array-number', 'array-string']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+255:15 call  signature({"types": ['array-number', 'array-string']})
+    -> jmespath.functions.signature
+262:6 decorator  @signature({"types": ["object"], "variadic": True})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+262:15 call  signature({"types": ["object"], "variadic": True})
+    -> jmespath.functions.signature
+269:6 decorator  @signature({"types": ['array-number', 'array-string']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+269:15 call  signature({"types": ['array-number', 'array-string']})
+    -> jmespath.functions.signature
+276:6 decorator  @signature({"types": ['array-string', 'array-number']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+276:15 call  signature({"types": ['array-string', 'array-number']})
+    -> jmespath.functions.signature
+280:6 decorator  @signature({"types": ['array-number']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+280:15 call  signature({"types": ['array-number']})
+    -> jmespath.functions.signature
+284:6 decorator  @signature({"types": ['object']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+284:15 call  signature({"types": ['object']})
+    -> jmespath.functions.signature
+290:6 decorator  @signature({"types": ['object']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+290:15 call  signature({"types": ['object']})
+    -> jmespath.functions.signature
+294:6 decorator  @signature({'types': []})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+294:15 call  signature({'types': []})
+    -> jmespath.functions.signature
+309:6 decorator  @signature({'types': ['array']}, {'types': ['expref']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+309:15 call  signature({'types': ['array']}, {'types': ['expref']})
+    -> jmespath.functions.signature
+329:6 decorator  @signature({'types': ['array']}, {'types': ['expref']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+329:15 call  signature({'types': ['array']}, {'types': ['expref']})
+    -> jmespath.functions.signature
+339:6 decorator  @signature({'types': ['array']}, {'types': ['expref']})
+    -> jmespath.functions.signature._record_signature
+    note: the decorator is the closure that signature(...) returns
+339:15 call  signature({'types': ['array']}, {'types': ['expref']})
+    -> jmespath.functions.signature
+
+[jmespath.functions.FunctionRegistry.__init__]
+47:37 call  cls._populate_function_table()
+    -> jmespath.functions.FunctionRegistry._populate_function_table
+48:14 call  super(FunctionRegistry, cls)
+    -> <builtin>.super
+48:46 call  super(FunctionRegistry, cls).__init__(name, bases, attrs)
+    -> <builtin>.type.__init__
+    reject *: cls is a class whose metaclass is FunctionRegistry; super(FunctionRegistry, cls).__init__ is type.__init__ (FunctionRegistry derives from type)
+
+[jmespath.functions.FunctionRegistry._populate_function_table]
+55:40 call  get_methods(cls)
+    -> jmespath.compat.get_methods
+56:35 call  name.startswith('_func_')
+    -> <builtin>.str.startswith
+58:32 call  getattr(method, 'signature', None)
+    -> <builtin>.getattr
+
+[jmespath.functions.Functions.call_function]
+76:50 call  exceptions.UnknownFunctionError( "Unknown function: %s()"...
+    -> <builtin>.ValueError.__init__
+    note: UnknownFunctionError and JMESPathError define no __init__; the first __init__ in the MRO is that of ValueError
+77:42 op  "Unknown function: %s()" % function_name
+    reject *: function_name is the function name string of the AST node (visitor.py:171); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+80:33 call  self._validate_arguments(resolved_args, signature, functi...
+    -> jmespath.functions.Functions._validate_arguments
+81:24 call  function(self, *resolved_args)
+    -> jmespath.functions.Functions._func_abs
+    -> jmespath.functions.Functions._func_avg
+    -> jmespath.functions.Functions._func_not_null
+    -> jmespath.functions.Functions._func_to_array
+    -> jmespath.functions.Functions._func_to_string
+    -> jmespath.functions.Functions._func_to_number
+    -> jmespath.functions.Functions._func_contains
+    -> jmespath.functions.Functions._func_length
+    -> jmespath.functions.Functions._func_ends_with
+    -> jmespath.functions.Functions._func_starts_with
+    -> jmespath.functions.Functions._func_reverse
+    -> jmespath.functions.Functions._func_ceil
+    -> jmespath.functions.Functions._func_floor
+    -> jmespath.functions.Functions._func_join
+    -> jmespath.functions.Functions._func_map
+    -> jmespath.functions.Functions._func_max
+    -> jmespath.functions.Functions._func_merge
+    -> jmespath.functions.Functions._func_min
+    -> jmespath.functions.Functions._func_sort
+    -> jmespath.functions.Functions._func_sum
+    -> jmespath.functions.Functions._func_keys
+    -> jmespath.functions.Functions._func_values
+    -> jmespath.functions.Functions._func_type
+    -> jmespath.functions.Functions._func_sort_by
+    -> jmespath.functions.Functions._func_min_by
+    -> jmespath.functions.Functions._func_max_by
+    note: function is self.FUNCTION_TABLE[function_name]['function'] (functions.py:74, 78). The metaclass FunctionRegistry builds FUNCTION_TABLE when it creates a class (functions.py:50-64): every function attribute (inspect.getmembers with inspect.isfunction, compat.py:18, inherited ones included) whose name starts with _func_ and that has the attribute 'signature' that @signature sets (functions.py:38-42).
+    note: The package creates one such class, Functions (functions.py:67), with 26 decorated _func_* methods (all its _func_* methods; every one has @signature). A client subclass passed as Options(custom_functions=...) inherits them; its own _func_* methods are client code. Callees: the 26 Functions._func_* methods
+
+[jmespath.functions.Functions._validate_arguments]
+84:43 call  signature[-1].get('variadic')
+    -> <builtin>.dict.get
+    note: signature is the tuple of dicts that @signature recorded
+85:19 call  len(args)
+    -> <builtin>.len
+85:31 call  len(signature)
+    -> <builtin>.len
+86:53 call  exceptions.VariadictArityError( len(signature), len(args)...
+    -> jmespath.exceptions.ArityError.__init__
+    reject jmespath.exceptions.ParseError.__init__: the first __init__ in the MRO is ArityError.__init__ (exceptions.py:67), which does not call super().__init__
+87:24 call  len(signature)
+    -> <builtin>.len
+87:40 call  len(args)
+    -> <builtin>.len
+88:17 call  len(args)
+    -> <builtin>.len
+88:30 call  len(signature)
+    -> <builtin>.len
+89:40 call  exceptions.ArityError( len(signature), len(args), functio...
+    -> jmespath.exceptions.ArityError.__init__
+    reject jmespath.exceptions.ParseError.__init__: the first __init__ in the MRO is ArityError.__init__ (exceptions.py:67), which does not call super().__init__
+90:20 call  len(signature)
+    -> <builtin>.len
+90:36 call  len(args)
+    -> <builtin>.len
+91:32 call  self._type_check(args, signature, function_name)
+    -> jmespath.functions.Functions._type_check
+
+[jmespath.functions.Functions._type_check]
+94:23 call  range(len(signature))
+    -> <builtin>.range
+94:27 call  len(signature)
+    -> <builtin>.len
+97:40 call  self._type_check_single(actual[i], allowed_types, functio...
+    -> jmespath.functions.Functions._type_check_single
+
+[jmespath.functions.Functions._type_check_single]
+104:68 call  self._get_allowed_pytypes(types)
+    -> jmespath.functions.Functions._get_allowed_pytypes
+109:31 call  type(current)
+    -> <builtin>.type
+111:47 call  exceptions.JMESPathTypeError( function_name, current, sel...
+    -> jmespath.exceptions.JMESPathTypeError.__init__
+113:47 call  self._convert_to_jmespath_type(actual_typename)
+    -> jmespath.functions.Functions._convert_to_jmespath_type
+120:32 call  self._subtype_check(current, allowed_subtypes, types, fun...
+    -> jmespath.functions.Functions._subtype_check
+
+[jmespath.functions.Functions._get_allowed_pytypes]
+127:28 call  t.split('-', 1)
+    -> <builtin>.str.split
+    note: t is a type name string of the signature (functions.py:126)
+128:19 call  len(type_)
+    -> <builtin>.len
+130:40 call  allowed_subtypes.append(REVERSE_TYPES_MAP[subtype])
+    -> <builtin>.list.append
+133:33 call  allowed_types.extend(REVERSE_TYPES_MAP[type_])
+    -> <builtin>.list.extend
+
+[jmespath.functions.Functions._subtype_check]
+137:15 call  len(allowed_subtypes)
+    -> <builtin>.len
+142:39 call  type(element)
+    -> <builtin>.type
+144:55 call  exceptions.JMESPathTypeError( function_name, element, act...
+    -> jmespath.exceptions.JMESPathTypeError.__init__
+146:17 call  len(allowed_subtypes)
+    -> <builtin>.len
+150:25 call  type(current[0])
+    -> <builtin>.type
+156:51 call  exceptions.JMESPathTypeError( function_name, current[0], ...
+    -> jmespath.exceptions.JMESPathTypeError.__init__
+159:39 call  type(element)
+    -> <builtin>.type
+161:55 call  exceptions.JMESPathTypeError( function_name, element, act...
+    -> jmespath.exceptions.JMESPathTypeError.__init__
+
+[jmespath.functions.Functions._func_abs]
+166:19 call  abs(arg)
+    -> <builtin>.abs
+
+[jmespath.functions.Functions._func_avg]
+171:23 call  sum(arg)
+    -> <builtin>.sum
+171:34 call  len(arg)
+    -> <builtin>.len
+
+[jmespath.functions.Functions._func_to_array]
+183:22 call  isinstance(arg, list)
+    -> <builtin>.isinstance
+
+[jmespath.functions.Functions._func_to_string]
+190:22 call  isinstance(arg, STRING_TYPE)
+    -> <builtin>.isinstance
+193:30 call  json.dumps(arg, separators=(',', ':'), default=str)
+    -> json.dumps
+    note: default=str: json calls the builtin str for an object that it cannot encode; a builtin that library code calls is not an edge. Here the package produces only JSON values and _Expression objects (to_string(&foo)), and _Expression has no __str__ or __repr__. A package exception or ParsedResult inside client JSON data would reach a package __str__ or __repr__ through str, but that is not considered (rule B3)
+
+[jmespath.functions.Functions._func_to_number]
+198:22 call  isinstance(arg, (list, dict, bool))
+    -> <builtin>.isinstance
+202:24 call  isinstance(arg, (int, float))
+    -> <builtin>.isinstance
+206:27 call  int(arg)
+    -> <builtin>.int
+209:33 call  float(arg)
+    -> <builtin>.float
+
+[jmespath.functions.Functions._func_length]
+219:19 call  len(arg)
+    -> <builtin>.len
+
+[jmespath.functions.Functions._func_ends_with]
+223:31 call  search.endswith(suffix)
+    -> <builtin>.str.endswith
+    note: search passed the 'string' type check (type name str)
+
+[jmespath.functions.Functions._func_starts_with]
+227:33 call  search.startswith(suffix)
+    -> <builtin>.str.startswith
+    note: search passed the 'string' type check (type name str)
+
+[jmespath.functions.Functions._func_reverse]
+231:22 call  isinstance(arg, STRING_TYPE)
+    -> <builtin>.isinstance
+234:24 call  list(reversed(arg))
+    -> <builtin>.list
+234:33 call  reversed(arg)
+    -> <builtin>.reversed
+
+[jmespath.functions.Functions._func_ceil]
+238:25 call  math.ceil(arg)
+    -> math.ceil
+
+[jmespath.functions.Functions._func_floor]
+242:26 call  math.floor(arg)
+    -> math.floor
+
+[jmespath.functions.Functions._func_join]
+246:30 call  separator.join(array)
+    -> <builtin>.str.join
+    note: separator passed the 'string' type check (type name str)
+
+[jmespath.functions.Functions._func_map]
+252:26 call  result.append(expref.visit(expref.expression, element))
+    -> <builtin>.list.append
+252:39 call  expref.visit(expref.expression, element)
+    -> jmespath.visitor._Expression.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor.Visitor.visit: expref passed the 'expref' type check of the signature, which accepts only an object whose type is named _Expression (REVERSE_TYPES_MAP, functions.py:34); the package creates these only at visitor.py:164
+
+[jmespath.functions.Functions._func_max]
+258:23 call  max(arg)
+    -> <builtin>.max
+
+[jmespath.functions.Functions._func_merge]
+266:26 call  merged.update(arg)
+    -> <builtin>.dict.update
+    note: merged is the dict display at functions.py:264
+
+[jmespath.functions.Functions._func_min]
+272:23 call  min(arg)
+    -> <builtin>.min
+
+[jmespath.functions.Functions._func_sort]
+278:20 call  list(sorted(arg))
+    -> <builtin>.list
+278:27 call  sorted(arg)
+    -> <builtin>.sorted
+
+[jmespath.functions.Functions._func_sum]
+282:19 call  sum(arg)
+    -> <builtin>.sum
+
+[jmespath.functions.Functions._func_keys]
+288:20 call  list(arg.keys())
+    -> <builtin>.list
+288:29 call  arg.keys()
+    -> <builtin>.dict.keys
+    note: arg passed the 'object' type check: a dict (from the data, from _func_merge, or from multi-select hash with the default dict_cls); an OrderedDict comes only from the client
+
+[jmespath.functions.Functions._func_values]
+292:20 call  list(arg.values())
+    -> <builtin>.list
+292:31 call  arg.values()
+    -> <builtin>.dict.values
+    note: arg passed the 'object' type check: a dict (from the data, from _func_merge, or from multi-select hash with the default dict_cls); an OrderedDict comes only from the client
+
+[jmespath.functions.Functions._func_type]
+296:22 call  isinstance(arg, STRING_TYPE)
+    -> <builtin>.isinstance
+298:24 call  isinstance(arg, bool)
+    -> <builtin>.isinstance
+300:24 call  isinstance(arg, list)
+    -> <builtin>.isinstance
+302:24 call  isinstance(arg, dict)
+    -> <builtin>.isinstance
+304:24 call  isinstance(arg, (float, int))
+    -> <builtin>.isinstance
+
+[jmespath.functions.Functions._func_sort_by]
+319:55 call  self._convert_to_jmespath_type( type(expref.visit(expref....
+    -> jmespath.functions.Functions._convert_to_jmespath_type
+320:17 call  type(expref.visit(expref.expression, array[0]))
+    -> <builtin>.type
+320:30 call  expref.visit(expref.expression, array[0])
+    -> jmespath.visitor._Expression.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor.Visitor.visit: expref passed the 'expref' type check of the signature, which accepts only an object whose type is named _Expression (REVERSE_TYPES_MAP, functions.py:34); the package creates these only at visitor.py:164
+322:47 call  exceptions.JMESPathTypeError( 'sort_by', array[0], requir...
+    -> jmespath.exceptions.JMESPathTypeError.__init__
+324:40 call  self._create_key_func(expref, [required_type], 'sort_by')
+    -> jmespath.functions.Functions._create_key_func
+327:20 call  list(sorted(array, key=keyfunc))
+    -> <builtin>.list
+327:27 call  sorted(array, key=keyfunc)
+    -> <builtin>.sorted
+    -> jmespath.functions.Functions._create_key_func.keyfunc
+    note: keyfunc is the closure that self._create_key_func returns (functions.py:350, 359); the builtin calls it back for each element
+
+[jmespath.functions.Functions._func_min_by]
+331:40 call  self._create_key_func(expref, ['number', 'string'], 'min_...
+    -> jmespath.functions.Functions._create_key_func
+335:23 call  min(array, key=keyfunc)
+    -> <builtin>.min
+    -> jmespath.functions.Functions._create_key_func.keyfunc
+    note: keyfunc is the closure that self._create_key_func returns (functions.py:350, 359); the builtin calls it back for each element
+
+[jmespath.functions.Functions._func_max_by]
+341:40 call  self._create_key_func(expref, ['number', 'string'], 'max_...
+    -> jmespath.functions.Functions._create_key_func
+345:23 call  max(array, key=keyfunc)
+    -> <builtin>.max
+    -> jmespath.functions.Functions._create_key_func.keyfunc
+    note: keyfunc is the closure that self._create_key_func returns (functions.py:350, 359); the builtin calls it back for each element
+
+[jmespath.functions.Functions._create_key_func.keyfunc]
+351:34 call  expref.visit(expref.expression, x)
+    -> jmespath.visitor._Expression.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor.Visitor.visit: expref is the expref argument of _func_sort_by, _func_min_by or _func_max_by, captured by the closure; expref passed the 'expref' type check of the signature, which accepts only an object whose type is named _Expression (REVERSE_TYPES_MAP, functions.py:34); the package creates these only at visitor.py:164
+352:35 call  type(result)
+    -> <builtin>.type
+353:59 call  self._convert_to_jmespath_type(actual_typename)
+    -> jmespath.functions.Functions._convert_to_jmespath_type
+356:51 call  exceptions.JMESPathTypeError( function_name, result, jmes...
+    -> jmespath.exceptions.JMESPathTypeError.__init__
+
+[jmespath.functions.Functions._convert_to_jmespath_type]
+362:29 call  TYPES_MAP.get(pyobject, 'unknown')
+    -> <builtin>.dict.get
+    note: TYPES_MAP is the dict at functions.py:10
+
+== jmespath.lexer
+
+[jmespath.lexer]
+9:27 call  set(string.ascii_letters + '_')
+    -> <builtin>.set
+10:27 call  set(string.ascii_letters + string.digits + '_')
+    -> <builtin>.set
+11:23 call  set(string.digits)
+    -> <builtin>.set
+12:21 call  set(" \t\n\r")
+    -> <builtin>.set
+
+[jmespath.lexer.Lexer.tokenize]
+27:40 call  self._initialize_for_expression(expression)
+    -> jmespath.lexer.Lexer._initialize_for_expression
+33:27 call  self._next()
+    -> jmespath.lexer.Lexer._next
+37:33 call  self._next()
+    -> jmespath.lexer.Lexer._next
+40:58 call  len(buff)
+    -> <builtin>.len
+42:27 call  self._next()
+    -> jmespath.lexer.Lexer._next
+45:39 call  self._next()
+    -> jmespath.lexer.Lexer._next
+47:31 call  self._next()
+    -> jmespath.lexer.Lexer._next
+51:31 call  self._next()
+    -> jmespath.lexer.Lexer._next
+58:55 call  self._consume_raw_string_literal()
+    -> jmespath.lexer.Lexer._consume_raw_string_literal
+60:42 call  self._match_or_else('|', 'or', 'pipe')
+    -> jmespath.lexer.Lexer._match_or_else
+62:42 call  self._match_or_else('&', 'and', 'expref')
+    -> jmespath.lexer.Lexer._match_or_else
+64:44 call  self._consume_literal()
+    -> jmespath.lexer.Lexer._consume_literal
+67:44 call  self._consume_number()
+    -> jmespath.lexer.Lexer._consume_number
+68:54 call  int(buff)
+    -> <builtin>.int
+69:58 call  len(buff)
+    -> <builtin>.len
+73:44 call  self._consume_number()
+    -> jmespath.lexer.Lexer._consume_number
+74:23 call  len(buff)
+    -> <builtin>.len
+75:58 call  int(buff)
+    -> <builtin>.int
+76:62 call  len(buff)
+    -> <builtin>.len
+78:37 call  LexerError(lexer_position=start, lexer_value=buff, messag...
+    -> jmespath.exceptions.LexerError.__init__
+    reject jmespath.exceptions.ParseError.__init__: LexerError defines its own __init__ (exceptions.py:49); ParseError.__init__ runs from there through super (exceptions.py:53)
+80:67 op  "Unknown token '%s'" % buff
+    reject *: buff is the string that _consume_number builds (lexer.py:113-118); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+82:54 call  self._consume_quoted_identifier()
+    -> jmespath.lexer.Lexer._consume_quoted_identifier
+84:42 call  self._match_or_else('=', 'lte', 'lt')
+    -> jmespath.lexer.Lexer._match_or_else
+86:42 call  self._match_or_else('=', 'gte', 'gt')
+    -> jmespath.lexer.Lexer._match_or_else
+88:42 call  self._match_or_else('=', 'ne', 'not')
+    -> jmespath.lexer.Lexer._match_or_else
+90:30 call  self._next()
+    -> jmespath.lexer.Lexer._next
+93:31 call  self._next()
+    -> jmespath.lexer.Lexer._next
+102:37 call  LexerError( lexer_position=position, lexer_value='=', mes...
+    -> jmespath.exceptions.LexerError.__init__
+    reject jmespath.exceptions.ParseError.__init__: LexerError defines its own __init__ (exceptions.py:49); ParseError.__init__ runs from there through super (exceptions.py:53)
+107:33 call  LexerError(lexer_position=self._position, lexer_value=sel...
+    -> jmespath.exceptions.LexerError.__init__
+    reject jmespath.exceptions.ParseError.__init__: LexerError defines its own __init__ (exceptions.py:49); ParseError.__init__ runs from there through super (exceptions.py:53)
+109:61 op  "Unknown token %s" % self._current
+    reject *: self._current is one character of the expression string (lexer.py:126, 134); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+
+[jmespath.lexer.Lexer._consume_number]
+116:25 call  self._next()
+    -> jmespath.lexer.Lexer._next
+
+[jmespath.lexer.Lexer._initialize_for_expression]
+122:39 call  EmptyExpressionError()
+    -> jmespath.exceptions.EmptyExpressionError.__init__
+125:27 call  list(self._expression)
+    -> <builtin>.list
+    reject jmespath.parser.Parser._expression: self is a Lexer; self._expression is the expression string assigned at lexer.py:124, not Parser._expression
+127:27 call  len(self._expression)
+    -> <builtin>.len
+    reject jmespath.parser.Parser._expression: self is a Lexer; self._expression is the expression string assigned at lexer.py:124, not Parser._expression
+
+[jmespath.lexer.Lexer._consume_until]
+142:19 call  self._next()
+    -> jmespath.lexer.Lexer._next
+146:27 call  self._next()
+    -> jmespath.lexer.Lexer._next
+149:33 call  LexerError(lexer_position=start, lexer_value=self._expres...
+    -> jmespath.exceptions.LexerError.__init__
+    reject jmespath.exceptions.ParseError.__init__: LexerError defines its own __init__ (exceptions.py:49); ParseError.__init__ runs from there through super (exceptions.py:53)
+151:66 op  "Unclosed %s delimiter" % delimiter
+    reject *: delimiter is one of the string literals that the lexer passes (lexer.py:160, 181, 194); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+153:23 call  self._next()
+    -> jmespath.lexer.Lexer._next
+155:19 call  self._next()
+    -> jmespath.lexer.Lexer._next
+
+[jmespath.lexer.Lexer._consume_literal]
+160:37 call  self._consume_until('`')
+    -> jmespath.lexer.Lexer._consume_until
+160:50 call  self._consume_until('`').replace('\\`', '`')
+    -> <builtin>.str.replace
+    note: _consume_until returns the string buff (lexer.py:156)
+163:32 call  loads(lexeme)
+    -> json.loads
+    note: from json import loads (lexer.py:3)
+168:36 call  loads('"%s"' % lexeme.lstrip())
+    -> json.loads
+    note: from json import loads (lexer.py:3)
+168:44 op  '"%s"' % lexeme.lstrip()
+    reject *: the operand is the string that str.lstrip returns; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+168:59 call  lexeme.lstrip()
+    -> <builtin>.str.lstrip
+169:30 call  warnings.warn("deprecated string literal syntax", Pending...
+    -> warnings.warn
+172:33 call  LexerError(lexer_position=start, lexer_value=self._expres...
+    -> jmespath.exceptions.LexerError.__init__
+    reject jmespath.exceptions.ParseError.__init__: LexerError defines its own __init__ (exceptions.py:49); ParseError.__init__ runs from there through super (exceptions.py:53)
+174:57 op  "Bad token %s" % lexeme
+    reject *: lexeme is the string from _consume_until (lexer.py:160); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+
+[jmespath.lexer.Lexer._consume_quoted_identifier]
+181:43 call  self._consume_until('"')
+    -> jmespath.lexer.Lexer._consume_until
+184:64 call  loads(lexeme)
+    -> json.loads
+    note: from json import loads (lexer.py:3)
+187:32 call  str(e)
+    -> <builtin>.str
+    reject *: e is the ValueError (json.JSONDecodeError) that json.loads raises at lexer.py:184, not a package exception or ParsedResult
+187:41 call  str(e).split(':')
+    -> <builtin>.str.split
+188:29 call  LexerError(lexer_position=start, lexer_value=lexeme, mess...
+    -> jmespath.exceptions.LexerError.__init__
+    reject jmespath.exceptions.ParseError.__init__: LexerError defines its own __init__ (exceptions.py:49); ParseError.__init__ runs from there through super (exceptions.py:53)
+
+[jmespath.lexer.Lexer._consume_raw_string_literal]
+194:37 call  self._consume_until("'")
+    -> jmespath.lexer.Lexer._consume_until
+194:50 call  self._consume_until("'").replace("\\'", "'")
+    -> <builtin>.str.replace
+    note: _consume_until returns the string buff (lexer.py:156)
+
+[jmespath.lexer.Lexer._match_or_else]
+202:31 call  self._next()
+    -> jmespath.lexer.Lexer._next
+204:23 call  self._next()
+    -> jmespath.lexer.Lexer._next
+
+== jmespath.parser
+
+[jmespath.parser]
+502:6 decorator  @classmethod
+    -> <builtin>.classmethod
+508:2 decorator  @with_repr_method
+    -> jmespath.compat.with_repr_method
+
+[jmespath.parser.Parser.parse]
+87:39 call  self._do_parse(expression)
+    -> jmespath.parser.Parser._do_parse
+88:15 call  len(self._CACHE)
+    -> <builtin>.len
+90:37 call  next(iter(self._CACHE))
+    -> <builtin>.next
+90:42 call  iter(self._CACHE)
+    -> <builtin>.iter
+
+[jmespath.parser.Parser._do_parse]
+107:31 call  self._parse(expression)
+    -> jmespath.parser.Parser._parse
+112:29 call  e.set_expression(expression)
+    -> jmespath.exceptions.IncompleteExpressionError.set_expression
+    note: e is the IncompleteExpressionError caught at parser.py:111
+
+[jmespath.parser.Parser._parse]
+119:37 call  lexer.Lexer()
+    note: Lexer defines no __init__ (lexer.py:8-208); its first __init__ in the MRO is object.__init__: no edge
+119:48 call  lexer.Lexer().tokenize(expression)
+    -> jmespath.lexer.Lexer.tokenize
+    note: the receiver is the Lexer created on the same line
+120:28 call  list(self.tokenizer)
+    -> <builtin>.list
+    note: self.tokenizer is the generator that Lexer.tokenize returned at parser.py:119; the calls of its body belong to Lexer.tokenize, which the call at 119:48 reaches
+122:34 call  self._expression(binding_power=0)
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+123:35 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+124:38 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+125:40 call  exceptions.ParseError(t['start'], t['value'], t['type'], ...
+    -> jmespath.exceptions.ParseError.__init__
+126:64 op  "Unexpected token: %s" % t['value']
+    reject *: t['value'] is a token value: a string, an int, or a JSON value that json.loads makes (lexer.py:163-184); never a package object; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+127:28 call  ParsedResult(expression, parsed)
+    -> jmespath.parser.ParsedResult.__init__
+
+[jmespath.parser.Parser._expression]
+130:43 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+131:22 call  self._advance()
+    -> jmespath.parser.Parser._advance
+132:31 call  getattr( self, '_token_nud_%s' % left_token['type'], self...
+    -> <builtin>.getattr
+    reject jmespath.parser.Parser._error_nud_token: getattr returns its default without calling it; the call is at parser.py:135
+133:35 op  '_token_nud_%s' % left_token['type']
+    reject *: left_token['type'] is a token type string from Lexer.tokenize; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+135:28 call  nud_function(left_token)
+    -> jmespath.parser.Parser._token_nud_literal
+    -> jmespath.parser.Parser._token_nud_unquoted_identifier
+    -> jmespath.parser.Parser._token_nud_quoted_identifier
+    -> jmespath.parser.Parser._token_nud_star
+    -> jmespath.parser.Parser._token_nud_filter
+    -> jmespath.parser.Parser._token_nud_lbrace
+    -> jmespath.parser.Parser._token_nud_lparen
+    -> jmespath.parser.Parser._token_nud_flatten
+    -> jmespath.parser.Parser._token_nud_not
+    -> jmespath.parser.Parser._token_nud_lbracket
+    -> jmespath.parser.Parser._token_nud_current
+    -> jmespath.parser.Parser._token_nud_expref
+    -> jmespath.parser.Parser._error_nud_token
+    note: nud_function is getattr(self, '_token_nud_' + type of the token, self._error_nud_token) (parser.py:132). The token types are those that Lexer.tokenize yields: the values of SIMPLE_TOKENS (lexer.py:13-24) and unquoted_identifier, flatten, filter, lbracket, literal, or, pipe, and, expref, number, quoted_identifier, lte, lt, gte, gt, ne, not, eq, eof.
+    note: Parser defines _token_nud_ for 12 of them (literal, unquoted_identifier, quoted_identifier, star, filter, lbrace, lparen, flatten, not, lbracket, current, expref: every 'def _token_nud_' of parser.py); every other type gets the default _error_nud_token. Callees: the 12 _token_nud_* methods and _error_nud_token
+136:44 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+138:26 call  getattr(self, '_token_led_%s' % current_token, None)
+    -> <builtin>.getattr
+138:49 op  '_token_led_%s' % current_token
+    reject *: current_token is a token type string (Parser._current_token); no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+140:52 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+141:38 call  self._error_led_token(error_token)
+    -> jmespath.parser.Parser._error_led_token
+143:30 call  self._advance()
+    -> jmespath.parser.Parser._advance
+144:27 call  led(left)
+    -> jmespath.parser.Parser._token_led_dot
+    -> jmespath.parser.Parser._token_led_pipe
+    -> jmespath.parser.Parser._token_led_or
+    -> jmespath.parser.Parser._token_led_and
+    -> jmespath.parser.Parser._token_led_lparen
+    -> jmespath.parser.Parser._token_led_filter
+    -> jmespath.parser.Parser._token_led_eq
+    -> jmespath.parser.Parser._token_led_ne
+    -> jmespath.parser.Parser._token_led_gt
+    -> jmespath.parser.Parser._token_led_gte
+    -> jmespath.parser.Parser._token_led_lt
+    -> jmespath.parser.Parser._token_led_lte
+    -> jmespath.parser.Parser._token_led_flatten
+    -> jmespath.parser.Parser._token_led_lbracket
+    note: led is getattr(self, '_token_led_' + type of the current token, None) (parser.py:138), called only if it is not None. The loop runs while the binding power of the token (BINDING_POWER, parser.py:36-67) is above the current one: pipe, or, and, eq, gt, lt, gte, lte, ne, flatten, star, filter, dot, not, lbrace, lbracket, lparen.
+    note: Parser defines _token_led_ for 14 of them (dot, pipe, or, and, lparen, filter, eq, ne, gt, gte, lt, lte, flatten, lbracket: every 'def _token_led_' of parser.py); star, not and lbrace have none and go to _error_led_token (parser.py:141). Callees: the 14 _token_led_* methods
+145:52 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+
+[jmespath.parser.Parser._token_nud_literal]
+149:27 call  ast.literal(token['value'])
+    -> jmespath.ast.literal
+
+[jmespath.parser.Parser._token_nud_unquoted_identifier]
+152:25 call  ast.field(token['value'])
+    -> jmespath.ast.field
+
+[jmespath.parser.Parser._token_nud_quoted_identifier]
+155:26 call  ast.field(token['value'])
+    -> jmespath.ast.field
+158:31 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+159:38 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+160:40 call  exceptions.ParseError( 0, t['value'], t['type'], 'Quoted ...
+    -> jmespath.exceptions.ParseError.__init__
+
+[jmespath.parser.Parser._token_nud_star]
+166:28 call  ast.identity()
+    -> jmespath.ast.identity
+167:31 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+168:33 call  ast.identity()
+    -> jmespath.ast.identity
+170:47 call  self._parse_projection_rhs(self.BINDING_POWER['star'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+171:36 call  ast.value_projection(left, right)
+    -> jmespath.ast.value_projection
+
+[jmespath.parser.Parser._token_nud_filter]
+174:38 call  self._token_led_filter(ast.identity())
+    -> jmespath.parser.Parser._token_led_filter
+174:51 call  ast.identity()
+    -> jmespath.ast.identity
+
+[jmespath.parser.Parser._token_nud_lbrace]
+177:45 call  self._parse_multi_select_hash()
+    -> jmespath.parser.Parser._parse_multi_select_hash
+
+[jmespath.parser.Parser._token_nud_lparen]
+180:38 call  self._expression()
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+181:20 call  self._match('rparen')
+    -> jmespath.parser.Parser._match
+
+[jmespath.parser.Parser._token_nud_flatten]
+185:27 call  ast.flatten(ast.identity())
+    -> jmespath.ast.flatten
+185:40 call  ast.identity()
+    -> jmespath.ast.identity
+186:43 call  self._parse_projection_rhs( self.BINDING_POWER['flatten'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+188:30 call  ast.projection(left, right)
+    -> jmespath.ast.projection
+
+[jmespath.parser.Parser._token_nud_not]
+191:32 call  self._expression(self.BINDING_POWER['not'])
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+192:34 call  ast.not_expression(expr)
+    -> jmespath.ast.not_expression
+
+[jmespath.parser.Parser._token_nud_lbracket]
+195:31 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+196:49 call  self._parse_index_expression()
+    -> jmespath.parser.Parser._parse_index_expression
+201:42 call  self._project_if_slice(ast.identity(), right)
+    -> jmespath.parser.Parser._project_if_slice
+201:55 call  ast.identity()
+    -> jmespath.ast.identity
+202:33 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+203:32 call  self._lookahead(1)
+    -> jmespath.parser.Parser._lookahead
+204:26 call  self._advance()
+    -> jmespath.parser.Parser._advance
+205:26 call  self._advance()
+    -> jmespath.parser.Parser._advance
+206:47 call  self._parse_projection_rhs(self.BINDING_POWER['star'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+207:34 call  ast.projection(ast.identity(), right)
+    -> jmespath.ast.projection
+207:47 call  ast.identity()
+    -> jmespath.ast.identity
+209:49 call  self._parse_multi_select_list()
+    -> jmespath.parser.Parser._parse_multi_select_list
+
+[jmespath.parser.Parser._parse_index_expression]
+216:28 call  self._lookahead(0)
+    -> jmespath.parser.Parser._lookahead
+217:32 call  self._lookahead(1)
+    -> jmespath.parser.Parser._lookahead
+218:48 call  self._parse_slice_expression()
+    -> jmespath.parser.Parser._parse_slice_expression
+221:29 call  ast.index(self._lookahead_token(0)['value'])
+    -> jmespath.ast.index
+221:51 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+222:26 call  self._advance()
+    -> jmespath.parser.Parser._advance
+223:24 call  self._match('rbracket')
+    -> jmespath.parser.Parser._match
+
+[jmespath.parser.Parser._parse_slice_expression]
+232:44 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+237:54 call  self._raise_parse_error_for_token( self._lookahead_token(...
+    -> jmespath.parser.Parser._raise_parse_error_for_token
+238:46 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+239:30 call  self._advance()
+    -> jmespath.parser.Parser._advance
+241:53 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+242:30 call  self._advance()
+    -> jmespath.parser.Parser._advance
+244:50 call  self._raise_parse_error_for_token( self._lookahead_token(...
+    -> jmespath.parser.Parser._raise_parse_error_for_token
+245:42 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+246:48 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+247:20 call  self._match('rbracket')
+    -> jmespath.parser.Parser._match
+248:25 call  ast.slice(*parts)
+    -> jmespath.ast.slice
+
+[jmespath.parser.Parser._token_nud_current]
+251:32 call  ast.current_node()
+    -> jmespath.ast.current_node
+
+[jmespath.parser.Parser._token_nud_expref]
+254:38 call  self._expression(self.BINDING_POWER['expref'])
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+255:26 call  ast.expref(expression)
+    -> jmespath.ast.expref
+
+[jmespath.parser.Parser._token_led_dot]
+258:35 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+259:40 call  self._parse_dot_rhs(self.BINDING_POWER['dot'])
+    -> jmespath.parser.Parser._parse_dot_rhs
+261:40 call  left['children'].append(right)
+    -> <builtin>.list.append
+    note: left['children'] is the children list of a node dict that jmespath.ast builds
+264:41 call  ast.subexpression([left, right])
+    -> jmespath.ast.subexpression
+267:26 call  self._advance()
+    -> jmespath.parser.Parser._advance
+268:47 call  self._parse_projection_rhs( self.BINDING_POWER['dot'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+270:40 call  ast.value_projection(left, right)
+    -> jmespath.ast.value_projection
+
+[jmespath.parser.Parser._token_led_pipe]
+273:33 call  self._expression(self.BINDING_POWER['pipe'])
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+274:24 call  ast.pipe(left, right)
+    -> jmespath.ast.pipe
+
+[jmespath.parser.Parser._token_led_or]
+277:33 call  self._expression(self.BINDING_POWER['or'])
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+278:33 call  ast.or_expression(left, right)
+    -> jmespath.ast.or_expression
+
+[jmespath.parser.Parser._token_led_and]
+281:33 call  self._expression(self.BINDING_POWER['and'])
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+282:34 call  ast.and_expression(left, right)
+    -> jmespath.ast.and_expression
+
+[jmespath.parser.Parser._token_led_lparen]
+289:43 call  self._lookahead_token(-2)
+    -> jmespath.parser.Parser._lookahead_token
+290:40 call  exceptions.ParseError( prev_t['start'], prev_t['value'], ...
+    -> jmespath.exceptions.ParseError.__init__
+292:46 op  "Invalid function name '%s'" % prev_t['value']
+    reject *: prev_t['value'] is a token value: a string, an int, or a JSON value that json.loads makes (lexer.py:163-184); never a package object; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+295:38 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+296:42 call  self._expression()
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+297:35 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+298:28 call  self._match('comma')
+    -> jmespath.parser.Parser._match
+299:24 call  args.append(expression)
+    -> <builtin>.list.append
+300:20 call  self._match('rparen')
+    -> jmespath.parser.Parser._match
+301:48 call  ast.function_expression(name, args)
+    -> jmespath.ast.function_expression
+
+[jmespath.parser.Parser._token_led_filter]
+306:37 call  self._expression(0)
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+307:20 call  self._match('rbracket')
+    -> jmespath.parser.Parser._match
+308:31 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+309:33 call  ast.identity()
+    -> jmespath.ast.identity
+311:47 call  self._parse_projection_rhs(self.BINDING_POWER['filter'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+312:37 call  ast.filter_projection(left, right, condition)
+    -> jmespath.ast.filter_projection
+
+[jmespath.parser.Parser._token_led_eq]
+315:38 call  self._parse_comparator(left, 'eq')
+    -> jmespath.parser.Parser._parse_comparator
+
+[jmespath.parser.Parser._token_led_ne]
+318:38 call  self._parse_comparator(left, 'ne')
+    -> jmespath.parser.Parser._parse_comparator
+
+[jmespath.parser.Parser._token_led_gt]
+321:38 call  self._parse_comparator(left, 'gt')
+    -> jmespath.parser.Parser._parse_comparator
+
+[jmespath.parser.Parser._token_led_gte]
+324:38 call  self._parse_comparator(left, 'gte')
+    -> jmespath.parser.Parser._parse_comparator
+
+[jmespath.parser.Parser._token_led_lt]
+327:38 call  self._parse_comparator(left, 'lt')
+    -> jmespath.parser.Parser._parse_comparator
+
+[jmespath.parser.Parser._token_led_lte]
+330:38 call  self._parse_comparator(left, 'lte')
+    -> jmespath.parser.Parser._parse_comparator
+
+[jmespath.parser.Parser._token_led_flatten]
+333:27 call  ast.flatten(left)
+    -> jmespath.ast.flatten
+334:43 call  self._parse_projection_rhs( self.BINDING_POWER['flatten'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+336:30 call  ast.projection(left, right)
+    -> jmespath.ast.projection
+
+[jmespath.parser.Parser._token_led_lbracket]
+339:38 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+341:49 call  self._parse_index_expression()
+    -> jmespath.parser.Parser._parse_index_expression
+346:40 call  left['children'].append(right)
+    -> <builtin>.list.append
+    note: left['children'] is the children list of a node dict that jmespath.ast builds
+349:46 call  self._project_if_slice(left, right)
+    -> jmespath.parser.Parser._project_if_slice
+352:24 call  self._match('star')
+    -> jmespath.parser.Parser._match
+353:24 call  self._match('rbracket')
+    -> jmespath.parser.Parser._match
+354:47 call  self._parse_projection_rhs(self.BINDING_POWER['star'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+355:34 call  ast.projection(left, right)
+    -> jmespath.ast.projection
+
+[jmespath.parser.Parser._project_if_slice]
+358:42 call  ast.index_expression([left, right])
+    -> jmespath.ast.index_expression
+360:34 call  ast.projection( index_expr, self._parse_projection_rhs(se...
+    -> jmespath.ast.projection
+362:43 call  self._parse_projection_rhs(self.BINDING_POWER['star'])
+    -> jmespath.parser.Parser._parse_projection_rhs
+
+[jmespath.parser.Parser._parse_comparator]
+367:33 call  self._expression(self.BINDING_POWER[comparator])
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+368:30 call  ast.comparator(comparator, left, right)
+    -> jmespath.ast.comparator
+
+[jmespath.parser.Parser._parse_multi_select_list]
+373:42 call  self._expression()
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+374:31 call  expressions.append(expression)
+    -> <builtin>.list.append
+375:35 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+378:28 call  self._match('comma')
+    -> jmespath.parser.Parser._match
+379:20 call  self._match('rbracket')
+    -> jmespath.parser.Parser._match
+380:37 call  ast.multi_select_list(expressions)
+    -> jmespath.ast.multi_select_list
+
+[jmespath.parser.Parser._parse_multi_select_hash]
+385:46 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+388:40 call  self._match_multiple_tokens( token_types=['quoted_identif...
+    -> jmespath.parser.Parser._match_multiple_tokens
+391:24 call  self._match('colon')
+    -> jmespath.parser.Parser._match
+392:37 call  self._expression(0)
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+393:36 call  ast.key_val_pair(key_name=key_name, node=value)
+    -> jmespath.ast.key_val_pair
+394:25 call  pairs.append(node)
+    -> <builtin>.list.append
+395:35 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+396:28 call  self._match('comma')
+    -> jmespath.parser.Parser._match
+397:37 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+398:28 call  self._match('rbrace')
+    -> jmespath.parser.Parser._match
+400:37 call  ast.multi_select_dict(nodes=pairs)
+    -> jmespath.ast.multi_select_dict
+
+[jmespath.parser.Parser._parse_projection_rhs]
+404:50 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+406:33 call  ast.identity()
+    -> jmespath.ast.identity
+407:33 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+408:37 call  self._expression(binding_power)
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+409:33 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+410:37 call  self._expression(binding_power)
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+411:33 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+412:24 call  self._match('dot')
+    -> jmespath.parser.Parser._match
+413:40 call  self._parse_dot_rhs(binding_power)
+    -> jmespath.parser.Parser._parse_dot_rhs
+415:46 call  self._raise_parse_error_for_token(self._lookahead_token(0...
+    -> jmespath.parser.Parser._raise_parse_error_for_token
+415:68 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+
+[jmespath.parser.Parser._parse_dot_rhs]
+428:40 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+431:36 call  self._expression(binding_power)
+    -> jmespath.parser.Parser._expression
+    note: self is a Parser. Parser assigns no attribute _expression: the only assignment, self._expression = expression at lexer.py:124, is on a Lexer. So the attribute is the method Parser._expression
+433:24 call  self._match('lbracket')
+    -> jmespath.parser.Parser._match
+434:49 call  self._parse_multi_select_list()
+    -> jmespath.parser.Parser._parse_multi_select_list
+436:24 call  self._match('lbrace')
+    -> jmespath.parser.Parser._match
+437:49 call  self._parse_multi_select_hash()
+    -> jmespath.parser.Parser._parse_multi_select_hash
+439:38 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+443:42 op  "Expecting: %s, got: %s" % (allowed, t['type'])
+    reject *: allowed is a list of strings (parser.py:440) and t['type'] a token type string; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+445:46 call  self._raise_parse_error_for_token(t, msg)
+    -> jmespath.parser.Parser._raise_parse_error_for_token
+
+[jmespath.parser.Parser._error_nud_token]
+449:55 call  exceptions.IncompleteExpressionError( token['start'], tok...
+    -> jmespath.exceptions.ParseError.__init__
+    note: IncompleteExpressionError defines no __init__; the first in its MRO is ParseError.__init__
+451:42 call  self._raise_parse_error_for_token(token, 'invalid token')
+    -> jmespath.parser.Parser._raise_parse_error_for_token
+
+[jmespath.parser.Parser._error_led_token]
+454:42 call  self._raise_parse_error_for_token(token, 'invalid token')
+    -> jmespath.parser.Parser._raise_parse_error_for_token
+
+[jmespath.parser.Parser._match]
+458:31 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+460:26 call  self._advance()
+    -> jmespath.parser.Parser._advance
+462:46 call  self._raise_parse_error_maybe_eof( token_type, self._look...
+    -> jmespath.parser.Parser._raise_parse_error_maybe_eof
+463:50 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+
+[jmespath.parser.Parser._match_multiple_tokens]
+466:31 call  self._current_token()
+    -> jmespath.parser.Parser._current_token
+467:46 call  self._raise_parse_error_maybe_eof( token_types, self._loo...
+    -> jmespath.parser.Parser._raise_parse_error_maybe_eof
+468:51 call  self._lookahead_token(0)
+    -> jmespath.parser.Parser._lookahead_token
+469:22 call  self._advance()
+    -> jmespath.parser.Parser._advance
+
+[jmespath.parser.Parser._raise_parse_error_for_token]
+487:36 call  exceptions.ParseError(lex_position, actual_value, actual_...
+    -> jmespath.exceptions.ParseError.__init__
+
+[jmespath.parser.Parser._raise_parse_error_maybe_eof]
+495:55 call  exceptions.IncompleteExpressionError( lex_position, actua...
+    -> jmespath.exceptions.ParseError.__init__
+    note: IncompleteExpressionError defines no __init__; the first in its MRO is ParseError.__init__
+497:44 op  'Expecting: %s, got: %s' % (expected_type, actual_type)
+    reject *: expected_type is a token type string or a list of them (parser.py:462, 467) and actual_type a token type string; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+499:36 call  exceptions.ParseError( lex_position, actual_value, actual...
+    -> jmespath.exceptions.ParseError.__init__
+
+[jmespath.parser.Parser.purge]
+505:25 call  cls._CACHE.clear()
+    -> <builtin>.dict.clear
+    note: _CACHE is the dict at parser.py:73
+
+[jmespath.parser.ParsedResult.search]
+515:46 call  visitor.TreeInterpreter(options)
+    -> jmespath.visitor.TreeInterpreter.__init__
+    reject jmespath.visitor.Visitor.__init__: TreeInterpreter defines __init__; Visitor.__init__ runs from there through super (visitor.py:113)
+516:35 call  interpreter.visit(self.parsed, value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: interpreter is the TreeInterpreter created at parser.py:515, which inherits Visitor.visit
+
+[jmespath.parser.ParsedResult._render_dot_file]
+529:43 call  visitor.GraphvizVisitor()
+    -> jmespath.visitor.GraphvizVisitor.__init__
+    reject jmespath.visitor.Visitor.__init__: GraphvizVisitor defines __init__; Visitor.__init__ runs from there through super (visitor.py:309)
+530:34 call  renderer.visit(self.parsed)
+    -> jmespath.visitor.GraphvizVisitor.visit
+    reject jmespath.visitor.Visitor.visit, jmespath.visitor._Expression.visit: renderer is the GraphvizVisitor created at parser.py:529, which overrides visit
+
+[jmespath.parser.ParsedResult.__repr__]
+534:20 call  repr(self.parsed)
+    -> <builtin>.repr
+    reject jmespath.parser.ParsedResult.__repr__: self.parsed is the AST that Parser._parse stores (parser.py:127): node dicts built by jmespath.ast that hold strings, numbers and JSON literal values; the package never puts a ParsedResult into an AST, and a client that passes one as parsed is not considered (rule B3)
+
+== jmespath.visitor
+
+[jmespath.visitor._equals]
+9:31 call  _is_special_number_case(x, y)
+    -> jmespath.visitor._is_special_number_case
+
+[jmespath.visitor._is_special_number_case]
+32:25 call  _is_actual_number(x)
+    -> jmespath.visitor._is_actual_number
+33:26 call  isinstance(y, bool)
+    -> <builtin>.isinstance
+34:27 call  _is_actual_number(y)
+    -> jmespath.visitor._is_actual_number
+35:26 call  isinstance(x, bool)
+    -> <builtin>.isinstance
+
+[jmespath.visitor._is_comparable]
+43:29 call  _is_actual_number(x)
+    -> jmespath.visitor._is_actual_number
+43:46 call  isinstance(x, string_type)
+    -> <builtin>.isinstance
+
+[jmespath.visitor._is_actual_number]
+54:18 call  isinstance(x, bool)
+    -> <builtin>.isinstance
+56:22 call  isinstance(x, Number)
+    -> <builtin>.isinstance
+
+[jmespath.visitor._Expression.visit]
+80:38 call  self.interpreter.visit(node, *args, **kwargs)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self.interpreter is the TreeInterpreter passed at visitor.py:164, the only place that creates an _Expression; it inherits Visitor.visit
+
+[jmespath.visitor.Visitor.visit]
+89:40 call  self._method_cache.get(node_type)
+    -> <builtin>.dict.get
+    note: _method_cache is the dict of Visitor.__init__ (visitor.py:85)
+91:29 call  getattr( self, 'visit_%s' % node['type'], self.default_vi...
+    -> <builtin>.getattr
+    reject jmespath.visitor.TreeInterpreter.default_visit, jmespath.visitor.Visitor.default_visit: getattr returns its default without calling it; the call is at visitor.py:94
+92:34 op  'visit_%s' % node['type']
+    reject *: node['type'] is a node type string of jmespath.ast; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+94:22 call  method(node, *args, **kwargs)
+    -> jmespath.visitor.TreeInterpreter.visit_subexpression
+    -> jmespath.visitor.TreeInterpreter.visit_field
+    -> jmespath.visitor.TreeInterpreter.visit_comparator
+    -> jmespath.visitor.TreeInterpreter.visit_current
+    -> jmespath.visitor.TreeInterpreter.visit_expref
+    -> jmespath.visitor.TreeInterpreter.visit_function_expression
+    -> jmespath.visitor.TreeInterpreter.visit_filter_projection
+    -> jmespath.visitor.TreeInterpreter.visit_flatten
+    -> jmespath.visitor.TreeInterpreter.visit_identity
+    -> jmespath.visitor.TreeInterpreter.visit_index
+    -> jmespath.visitor.TreeInterpreter.visit_index_expression
+    -> jmespath.visitor.TreeInterpreter.visit_slice
+    -> jmespath.visitor.TreeInterpreter.visit_key_val_pair
+    -> jmespath.visitor.TreeInterpreter.visit_literal
+    -> jmespath.visitor.TreeInterpreter.visit_multi_select_dict
+    -> jmespath.visitor.TreeInterpreter.visit_multi_select_list
+    -> jmespath.visitor.TreeInterpreter.visit_or_expression
+    -> jmespath.visitor.TreeInterpreter.visit_and_expression
+    -> jmespath.visitor.TreeInterpreter.visit_not_expression
+    -> jmespath.visitor.TreeInterpreter.visit_pipe
+    -> jmespath.visitor.TreeInterpreter.visit_projection
+    -> jmespath.visitor.TreeInterpreter.visit_value_projection
+    -> jmespath.visitor.Visitor.default_visit
+    note: method is getattr(self, 'visit_' + node['type'], self.default_visit) (visitor.py:91), kept per node type in self._method_cache (visitor.py:89, 93). Visitor.visit runs on a TreeInterpreter (ParsedResult.search, parser.py:516; _Expression.visit, visitor.py:80; the self.visit calls of TreeInterpreter), or on a plain Visitor or a client subclass of it; GraphvizVisitor overrides visit (visitor.py:313).
+    note: The parser builds only the 22 node types of jmespath.ast (comparator, current, expref, function_expression, field, filter_projection, flatten, identity, index, index_expression, key_val_pair, literal, multi_select_dict, multi_select_list, or_expression, and_expression, not_expression, pipe, projection, subexpression, slice, value_projection), and TreeInterpreter defines visit_ for each (every 'def visit_' of visitor.py). Callees: the 22 TreeInterpreter.visit_* methods.
+    note: Also Visitor.default_visit: self can be a plain Visitor, because Visitor is a public class that a client can instantiate (rules B1, C), and a plain Visitor has no visit_* method, so any node type reaches its default_visit. No test runs it.
+    exclude jmespath.visitor.TreeInterpreter.default_visit: on a TreeInterpreter the getattr default runs only for a node type without a visit_ method, and the parser makes no such node type; a hand-built AST with one is not considered (rule B3)
+
+[jmespath.visitor.Visitor.default_visit]
+97:34 call  NotImplementedError("default_visit")
+    -> <builtin>.NotImplementedError
+
+[jmespath.visitor.TreeInterpreter.<lambda1>]
+103:39 call  _equals(x, y)
+    -> jmespath.visitor._equals
+
+[jmespath.visitor.TreeInterpreter.__init__]
+113:14 call  super(TreeInterpreter, self)
+    -> <builtin>.super
+113:46 call  super(TreeInterpreter, self).__init__()
+    -> jmespath.visitor.Visitor.__init__
+    reject *: super(TreeInterpreter, self) resolves to the next class in the MRO of a TreeInterpreter, Visitor (visitor.py:84)
+116:30 call  Options()
+    -> jmespath.visitor.Options.__init__
+123:50 call  functions.Functions()
+    note: Functions defines no __init__, and its metaclass FunctionRegistry defines no __call__ (functions.py:45-70): type.__call__ runs object.__init__, no edge
+
+[jmespath.visitor.TreeInterpreter.default_visit]
+126:34 call  NotImplementedError(node['type'])
+    -> <builtin>.NotImplementedError
+
+[jmespath.visitor.TreeInterpreter.visit_subexpression]
+131:32 call  self.visit(node, result)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_field]
+136:29 call  value.get(node['value'])
+    -> <builtin>.dict.get
+    note: value is the current JSON value; .get exists only on a dict, and other values raise AttributeError (visitor.py:137). The package itself makes dicts that reach here: a multi-select hash with the default dict_cls (visitor.py:233) and the result of merge() (functions.py:264). An OrderedDict comes only from the client and inherits dict.get
+
+[jmespath.visitor.TreeInterpreter.visit_comparator]
+144:35 call  comparator_func( self.visit(node['children'][0], value), ...
+    -> jmespath.visitor._equals
+    -> jmespath.visitor.TreeInterpreter.<lambda1>
+    note: comparator_func is self.COMPARATOR_FUNC[node['value']] (visitor.py:142), the class table at visitor.py:101-108 with the keys eq, ne, lt, gt, lte and gte; any other key raises KeyError there. The parser stores only these six names (Parser._parse_comparator, parser.py:314-330, 368). This branch runs only for eq and ne (_EQUALITY_OPS, visitor.py:109, 143): _equals and the lambda of ne (visitor.py:103)
+145:27 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+146:27 call  self.visit(node['children'][1], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+152:30 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+153:31 call  self.visit(node['children'][1], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+155:35 call  _is_comparable(left)
+    -> jmespath.visitor._is_comparable
+156:35 call  _is_comparable(right)
+    -> jmespath.visitor._is_comparable
+158:35 call  comparator_func(left, right)
+    -> operator.lt
+    -> operator.gt
+    -> operator.le
+    -> operator.ge
+    note: comparator_func is self.COMPARATOR_FUNC[node['value']] (visitor.py:142), the class table at visitor.py:101-108 with the keys eq, ne, lt, gt, lte and gte; any other key raises KeyError there. The parser stores only these six names (Parser._parse_comparator, parser.py:314-330, 368). This branch runs for lt, gt, lte and gte: operator.lt, operator.gt, operator.le and operator.ge (visitor.py:104-107)
+
+[jmespath.visitor.TreeInterpreter.visit_expref]
+164:27 call  _Expression(node['children'][0], self)
+    -> jmespath.visitor._Expression.__init__
+
+[jmespath.visitor.TreeInterpreter.visit_function_expression]
+169:33 call  self.visit(child, value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+170:33 call  resolved_args.append(current)
+    -> <builtin>.list.append
+171:45 call  self._functions.call_function(node['value'], resolved_args)
+    -> jmespath.functions.Functions.call_function
+    note: self._functions is functions.Functions() (visitor.py:123) or Options.custom_functions (visitor.py:121), a client object; the documented use is a subclass of Functions, which inherits call_function
+
+[jmespath.visitor.TreeInterpreter.visit_filter_projection]
+174:26 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+175:26 call  isinstance(base, list)
+    -> <builtin>.isinstance
+180:29 call  self._is_true(self.visit(comparator_node, element))
+    -> jmespath.visitor.TreeInterpreter._is_true
+180:40 call  self.visit(comparator_node, element)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+181:37 call  self.visit(node['children'][1], element)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+183:37 call  collected.append(current)
+    -> <builtin>.list.append
+
+[jmespath.visitor.TreeInterpreter.visit_flatten]
+187:26 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+188:26 call  isinstance(base, list)
+    -> <builtin>.isinstance
+193:26 call  isinstance(element, list)
+    -> <builtin>.isinstance
+194:35 call  merged_list.extend(element)
+    -> <builtin>.list.extend
+196:35 call  merged_list.append(element)
+    -> <builtin>.list.append
+
+[jmespath.visitor.TreeInterpreter.visit_index]
+205:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+
+[jmespath.visitor.TreeInterpreter.visit_index_expression]
+215:32 call  self.visit(node, result)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_slice]
+219:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+221:18 call  slice(*node['children'])
+    -> <builtin>.slice
+    reject jmespath.ast.slice: visitor.py does not import jmespath.ast; slice is the builtin
+
+[jmespath.visitor.TreeInterpreter.visit_key_val_pair]
+225:26 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_multi_select_dict]
+233:35 call  self._dict_cls()
+    -> <builtin>.dict
+    note: self._dict_cls is self.MAP_TYPE, the class attribute dict of TreeInterpreter (visitor.py:110, 114), unless Options.dict_cls is set (visitor.py:118-119). That class comes from the client and is out of scope (the tests pass collections.OrderedDict, see jmespath.rejected.json). The package default: <builtin>.dict
+235:51 call  self.visit(child, value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_multi_select_list]
+243:29 call  collected.append(self.visit(child, value))
+    -> <builtin>.list.append
+243:40 call  self.visit(child, value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_or_expression]
+247:29 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+248:26 call  self._is_false(matched)
+    -> jmespath.visitor.TreeInterpreter._is_false
+249:33 call  self.visit(node['children'][1], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_and_expression]
+253:29 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+254:26 call  self._is_false(matched)
+    -> jmespath.visitor.TreeInterpreter._is_false
+256:26 call  self.visit(node['children'][1], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_not_expression]
+259:37 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+260:29 call  _is_actual_number(original_result)
+    -> jmespath.visitor._is_actual_number
+
+[jmespath.visitor.TreeInterpreter.visit_pipe]
+269:32 call  self.visit(node, result)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+
+[jmespath.visitor.TreeInterpreter.visit_projection]
+273:26 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+274:26 call  isinstance(base, list)
+    -> <builtin>.isinstance
+278:33 call  self.visit(node['children'][1], element)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+280:33 call  collected.append(current)
+    -> <builtin>.list.append
+
+[jmespath.visitor.TreeInterpreter.visit_value_projection]
+284:26 call  self.visit(node['children'][0], value)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+286:31 call  base.values()
+    -> <builtin>.dict.values
+    note: base is the value of the left child; a dict has values(), other values raise AttributeError (visitor.py:287). The package itself makes dicts that reach here: a multi-select hash with the default dict_cls (visitor.py:233) and the result of merge() (functions.py:264)
+291:33 call  self.visit(node['children'][1], element)
+    -> jmespath.visitor.Visitor.visit
+    reject jmespath.visitor.GraphvizVisitor.visit, jmespath.visitor._Expression.visit: self is a constructible TreeInterpreter under B1/C, including direct public calls; it inherits Visitor.visit, and GraphvizVisitor and _Expression are not in its MRO
+293:33 call  collected.append(current)
+    -> <builtin>.list.append
+
+[jmespath.visitor.TreeInterpreter._is_true]
+304:34 call  self._is_false(value)
+    -> jmespath.visitor.TreeInterpreter._is_false
+
+[jmespath.visitor.GraphvizVisitor.__init__]
+309:14 call  super(GraphvizVisitor, self)
+    -> <builtin>.super
+309:46 call  super(GraphvizVisitor, self).__init__()
+    -> jmespath.visitor.Visitor.__init__
+    reject *: super(GraphvizVisitor, self) resolves to the next class in the MRO of a GraphvizVisitor, Visitor (visitor.py:84)
+
+[jmespath.visitor.GraphvizVisitor.visit]
+314:27 call  self._lines.append('digraph AST {')
+    -> <builtin>.list.append
+    note: self._lines is the list of GraphvizVisitor.__init__ (visitor.py:310)
+315:26 op  '%s%s' % (node['type'], self._count)
+    reject *: node['type'] is a node type string and self._count an int; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+317:20 call  self._visit(node, current)
+    -> jmespath.visitor.GraphvizVisitor._visit
+318:27 call  self._lines.append('}')
+    -> <builtin>.list.append
+    note: self._lines is the list of GraphvizVisitor.__init__ (visitor.py:310)
+319:25 call  '\n'.join(self._lines)
+    -> <builtin>.str.join
+
+[jmespath.visitor.GraphvizVisitor._visit]
+322:27 call  self._lines.append('%s [label="%s(%s)"]' % ( current, nod...
+    -> <builtin>.list.append
+    note: self._lines is the list of GraphvizVisitor.__init__ (visitor.py:310)
+322:50 op  '%s [label="%s(%s)"]' % ( current, node['type'], node.get...
+    reject *: current is a string, node['type'] a node type string, and node.get('value', '') a node value: a string, an int, or a JSON value that json.loads makes for a literal; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+323:44 call  node.get('value', '')
+    -> <builtin>.dict.get
+    note: node is an AST node dict of jmespath.ast
+324:30 call  node.get('children', [])
+    -> <builtin>.dict.get
+    note: node is an AST node dict of jmespath.ast
+325:33 op  '%s%s' % (child['type'], self._count)
+    reject *: child['type'] is a node type string and self._count an int; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+327:31 call  self._lines.append(' %s -> %s' % (current, child_name))
+    -> <builtin>.list.append
+    note: self._lines is the list of GraphvizVisitor.__init__ (visitor.py:310)
+327:45 op  ' %s -> %s' % (current, child_name)
+    reject *: current and child_name are strings built at visitor.py:315 and 325; no operand is an instance of a package class with __str__ or __repr__ (rules B2, B3)
+328:24 call  self._visit(child, child_name)
+    -> jmespath.visitor.GraphvizVisitor._visit

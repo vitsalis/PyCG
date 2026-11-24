@@ -1,0 +1,61 @@
+{
+  "edges": {
+    "h11._connection.Connection.__init__": {
+      "h11._util.Sentinel.__repr__": [
+        "h11._connection 175:63 format  {our_role!r}"
+      ]
+    },
+    "h11._headers.Headers.__repr__": {
+      "<builtin>.list": [
+        "h11._headers 117:43 call  list(self)"
+      ],
+      "<builtin>.repr": [
+        "h11._headers 117:38 call  repr(list(self))"
+      ],
+      "h11._headers.Headers.__getitem__": [
+        "h11._headers 117:43 call  list(self)"
+      ],
+      "h11._headers.Headers.__len__": [
+        "h11._headers 117:43 call  list(self)"
+      ]
+    },
+    "h11._headers.get_comma_header": {
+      "<builtin>.str.lower": [
+        "h11._headers 248:52 call  found_raw_value.lower()"
+      ],
+      "<builtin>.str.split": [
+        "h11._headers 249:59 call  found_raw_value.split(b\",\")"
+      ]
+    },
+    "h11._headers.normalize_and_validate": {
+      "<builtin>.str.lower": [
+        "h11._headers 171:26 call  name.lower()",
+        "h11._headers 196:32 call  value.lower()"
+      ],
+      "<builtin>.str.split": [
+        "h11._headers 173:64 call  value.split(b\",\")"
+      ]
+    }
+  },
+  "notes": {
+    "h11._connection 175:63 format  {our_role!r}": [
+      "reached when the client passes a role other than CLIENT or SERVER"
+    ],
+    "h11._headers 171:26 call  name.lower()": [
+      "normal construction normalizes names to bytes; with -O/-OO the assertions at 167-168 are removed, and a public event constructor with headers=[('X', 'v')], _parsed=True passes a str name directly to lower. A str subclass remains admitted by that annotation."
+    ],
+    "h11._headers 173:64 call  value.split(b\",\")": [
+      "under -O/-OO, public headers=[(Name('content-length'), '1')], _parsed=True admits a str subclass Name whose lower result compares equal to b'content-length'. Its client method/result remain opaque; their control-flow effect reaches split on the concrete str value. str.split binds the bytes separator, enters its builtin body and raises TypeError; no str.strip follows."
+    ],
+    "h11._headers 196:32 call  value.lower()": [
+      "under -O/-OO, the same admitted str-subclass name witness can select b'transfer-encoding' while its raw value is the str 'chunked'. lower runs before the str result fails comparison with b'chunked' and LocalProtocolError is raised. No failed event is reused."
+    ],
+    "h11._headers 248:52 call  found_raw_value.lower()": [
+      "normal Headers values are bytes. Under -O/-OO, Request(method=b'GET', target=b'/', headers=[(Name('host'), 'x'), (Name('connection'), 'close')], _parsed=True) completes when the str-subclass name's lower result compares equal to its bytes spelling. Sending this request enters _keep_alive and this function. The stored raw value 'close' is a concrete str from the constructor; the opaque client name result only controls the comparison."
+    ],
+    "h11._headers 249:59 call  found_raw_value.split(b\",\")": [
+      "the optimized-mode Request witness at 248 reaches this call with the exact str returned by str.lower. str.split accepts the positional separator during binding and raises TypeError inside its body because the separator is bytes. No str.strip or later append is reached on that witness."
+    ]
+  },
+  "trace": "dynamic/h11.json"
+}

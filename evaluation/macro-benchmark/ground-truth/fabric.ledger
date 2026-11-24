@@ -1,0 +1,1196 @@
+# Call-site ledger of fabric at 34edfe4a1cc9e3d72c3cc41490673db29afe7bbb.
+# Source-only; no trace. Current global missing-library rules apply, including
+# the narrow exception for actual package base/decorator definitions.
+# Ordinary Paramiko, six and plain Invoke objects keep imported call/attribute
+# paths and do not call package callbacks. Unpacked/subscripted results are
+# opaque. Concrete parameter documentation remains B4: Config inputs and the
+# TunnelManager Transport role. Package return descriptions do not override
+# missing-result provenance. Judgements: fabric.md J1-J14.
+# Invoke bases of package Config/Connection/Remote/Fab/tunnel classes and
+# decorator4/5 package wrappers are source-checked at the pinned versions.
+# Constructor parameter boundaries prevent recursive clone-path unrolling.
+default reject fabric.connection.Connection.__eq__: no operand of this comparison or `in` test, and no key of this subscript, is a Connection: they are str (dict keys of kwargs, config and ssh_config data, CLI argument names, host and user strings), int (list indexes, lengths, ports), tuples of str and int (_identity), or sockets and opaque outside values of select's result; only source-admitted GroupResult key sites (group.py) accept the candidate
+default reject fabric.connection.Connection.__hash__: no Connection is hashed here: the keys of these subscripts, dict stores and `in` tests are str (kwargs, config and ssh_config data, CLI argument names, globals) or int list indexes, and the `in r` tests search a list of sockets and opaque outside values, which hashes nothing; only source-admitted GroupResult key sites (group.py) accept the candidate
+
+== fabric._version
+
+[fabric._version]
+2:23 call  ".".join(map(str, __version_info__))
+    -> <builtin>.str.join
+2:27 call  map(str, __version_info__)
+    -> <builtin>.map
+    note: map calls the builtin str, a library callable that library code calls back: no edge
+
+== fabric.config
+
+[fabric.config]
+209:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[fabric.config.Config.__init__]
+72:32 call  kwargs.pop("ssh_config", None)
+    -> <builtin>.dict.pop
+73:26 call  kwargs.get("lazy", False)
+    -> <builtin>.dict.get
+    reject *: kwargs is the dict of keyword arguments
+74:34 call  self.set_runtime_ssh_path(kwargs.pop("runtime_ssh_path", ...
+    -> fabric.config.Config.set_runtime_ssh_path
+74:45 call  kwargs.pop("runtime_ssh_path", None)
+    -> <builtin>.dict.pop
+75:33 call  kwargs.pop("system_ssh_path", "/etc/ssh/ssh_config")
+    -> <builtin>.dict.pop
+76:18 call  self._set(_system_ssh_path=system_path)
+    -> invoke.config.Config._set
+77:18 call  self._set(_user_ssh_path=kwargs.pop("user_ssh_path", "~/....
+    -> invoke.config.Config._set
+77:44 call  kwargs.pop("user_ssh_path", "~/.ssh/config")
+    -> <builtin>.dict.pop
+83:18 call  self._set(_given_explicit_object=explicit)
+    -> invoke.config.Config._set
+88:35 call  SSHConfig()
+    -> paramiko.config.SSHConfig
+89:18 call  self._set(base_ssh_config=ssh_config)
+    -> invoke.config.Config._set
+93:14 call  super(Config, self)
+    -> <builtin>.super
+93:37 call  super(Config, self).__init__(*args, **kwargs)
+    -> fabric.config.Config.global_defaults
+    -> fabric.connection.Connection.__repr__
+    -> invoke.config.Config.__init__
+    reject *: super() in Config skips to invoke's Config.__init__; no package __init__ runs here
+    note: Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3.
+97:33 call  self.load_ssh_config()
+    -> fabric.config.Config.load_ssh_config
+
+[fabric.config.Config.set_runtime_ssh_path]
+108:18 call  self._set(_runtime_ssh_path=path)
+    -> invoke.config.Config._set
+
+[fabric.config.Config.load_ssh_config]
+127:33 call  self._load_ssh_files()
+    -> fabric.config.Config._load_ssh_files
+
+[fabric.config.Config.clone]
+139:20 call  super(Config, self)
+    -> <builtin>.super
+139:40 call  super(Config, self).clone(*args, **kwargs)
+    -> fabric.config.Config.__init__
+    -> fabric.config.Config._clone_init_kwargs
+    -> fabric.connection.Connection.__repr__
+    -> invoke.config.Config.clone
+    reject fabric.config.Config.clone: super() in Config skips to invoke's Config.clone
+    note: Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3.
+148:20 call  setattr(new, attr, getattr(self, attr))
+    -> <builtin>.setattr
+148:39 call  getattr(self, attr)
+    -> <builtin>.getattr
+151:29 call  self.load_ssh_config()
+    -> fabric.config.Config.load_ssh_config
+
+[fabric.config.Config._clone_init_kwargs]
+157:23 call  super(Config, self)
+    -> <builtin>.super
+157:56 call  super(Config, self)._clone_init_kwargs(*args, **kw)
+    -> invoke.config.Config._clone_init_kwargs
+    -> fabric.config.Config.global_defaults
+    reject fabric.config.Config._clone_init_kwargs: super() in Config skips to invoke's Config._clone_init_kwargs
+    note: The package names Fabric Config for the into role at connection.py:261. A public Fabric Config.clone can receive that admitted role and pass it through its explicit base clone; the base then calls this private helper with into=Config, which calls Config.global_defaults. The ordinary vanilla clone at261 itself is not transparent.
+162:31 call  SSHConfig()
+    -> paramiko.config.SSHConfig
+165:43 call  copy.deepcopy(self.base_ssh_config._config)
+    -> copy.deepcopy
+166:20 call  dict(kwargs, ssh_config=new_config)
+    -> <builtin>.dict
+
+[fabric.config.Config._load_ssh_files]
+183:34 call  os.path.exists(path)
+    -> os.path.exists
+184:63 call  "No such file or directory: {!r}".format(path)
+    -> <builtin>.str.format
+    reject *: path is the runtime SSH config path, a str
+185:30 call  IOError(errno.ENOENT, msg)
+    -> <builtin>.IOError
+186:32 call  self._load_ssh_file(os.path.expanduser(path))
+    -> fabric.config.Config._load_ssh_file
+186:51 call  os.path.expanduser(path)
+    -> os.path.expanduser
+189:36 call  self._load_ssh_file(os.path.expanduser(path))
+    -> fabric.config.Config._load_ssh_file
+189:55 call  os.path.expanduser(path)
+    -> os.path.expanduser
+
+[fabric.config.Config._load_ssh_file]
+199:26 call  os.path.isfile(path)
+    -> os.path.isfile
+200:28 call  len(self.base_ssh_config._config)
+    -> <builtin>.len
+201:18 with  open(path)
+    reject *: the context manager is the file object that open() returns
+201:22 call  open(path)
+    -> <builtin>.open
+    reject fabric.connection.Connection.open: the name open here is the builtin; Config has no open method
+202:43 call  self.base_ssh_config.parse(fd)
+    -> paramiko.config.SSHConfig.parse
+203:28 call  len(self.base_ssh_config._config)
+    -> <builtin>.len
+205:18 call  debug(msg.format(new_rules - old_rules, path))
+    -> logging.Logger.debug
+    note: debug is the bound method log.debug of logging.getLogger("fabric"), stored in the module globals of fabric.util (util.py:9-10)
+205:29 call  msg.format(new_rules - old_rules, path)
+    -> <builtin>.str.format
+    reject *: the arguments are an int and a str path
+207:18 call  debug("File not found, skipping")
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+
+[fabric.config.Config.global_defaults]
+235:48 call  InvokeConfig.global_defaults()
+    -> invoke.config.Config.global_defaults
+    reject fabric.config.Config.global_defaults: the receiver is invoke's Config class (imported as InvokeConfig)
+250:35 call  get_local_user()
+    -> fabric.util.get_local_user
+252:20 call  merge_dicts(defaults, ours)
+    -> invoke.config.merge_dicts
+
+== fabric.connection
+
+[fabric.connection]
+27:2 decorator  @decorator
+    -> invoke.vendor.decorator.decorator
+    -> decorator.decorator
+    note: optional import (connection.py:4-11): the vendored copy in invoke, or the decorator package; both sides run (J6). decorator(caller) generates the decorator function that the name opens then names; it does not call opens
+466:6 decorator  @property
+    -> <builtin>.property
+586:6 decorator  @opens
+    -> decorator.decorator.dec
+    reject fabric.connection.opens: the name opens names the decorator function that decorator() generated (27:2); it wraps the method with decorate() and does not call the original opens, which runs only when the wrapped method is called
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation.
+593:6 decorator  @opens
+    -> decorator.decorator.dec
+    reject fabric.connection.opens: the name opens names the decorator function that decorator() generated (27:2); it wraps the method with decorate() and does not call the original opens, which runs only when the wrapped method is called
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation.
+611:6 decorator  @opens
+    -> decorator.decorator.dec
+    reject fabric.connection.opens: the name opens names the decorator function that decorator() generated (27:2); it wraps the method with decorate() and does not call the original opens, which runs only when the wrapped method is called
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation.
+639:6 decorator  @opens
+    -> decorator.decorator.dec
+    reject fabric.connection.opens: the name opens names the decorator function that decorator() generated (27:2); it wraps the method with decorate() and does not call the original opens, which runs only when the wrapped method is called
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation.
+680:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+681:6 decorator  @opens
+    -> decorator.decorator.dec
+    reject fabric.connection.opens: the name opens names the decorator function that decorator() generated (27:2); it wraps the method with decorate() and does not call the original opens, which runs only when the wrapped method is called
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation.
+779:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+780:6 decorator  @opens
+    -> decorator.decorator.dec
+    reject fabric.connection.opens: the name opens names the decorator function that decorator() generated (27:2); it wraps the method with decorate() and does not call the original opens, which runs only when the wrapped method is called
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation.
+
+[fabric.connection.opens]
+29:14 call  self.open()
+    -> fabric.connection.Connection.open
+30:18 call  method(self, *args, **kwargs)
+    -> fabric.connection.Connection.create_session
+    -> fabric.connection.Connection.run
+    -> fabric.connection.Connection.sudo
+    -> fabric.connection.Connection.sftp
+    -> fabric.connection.Connection.forward_local
+    -> fabric.connection.Connection.forward_remote
+    note: the original opens is called only by the wrappers that decorate() generated for the six methods decorated with @opens (586, 593, 611, 639, 681, 780); each wrapper passes its own undecorated method as method. forward_local and forward_remote are generator functions: the call makes the generator (J2)
+
+[fabric.connection.Connection.__init__]
+251:14 call  super(Connection, self)
+    -> <builtin>.super
+251:41 call  super(Connection, self).__init__(config=config)
+    -> invoke.Context.__init__
+    reject *: super() in Connection skips to invoke's Context.__init__
+    note: Context.__init__ makes an invoke Config when config is None and stores it with _set; it calls no package code
+256:28 call  Config()
+    -> fabric.config.Config.__init__
+260:28 call  isinstance(config, Config)
+    -> <builtin>.isinstance
+261:34 call  config.clone(into=Config)
+    -> invoke.config.Config.clone
+    reject *: The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub.
+    note: The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub.
+262:18 call  self._set(_config=config)
+    -> invoke.Context._set
+266:42 call  self.derive_shorthand(host)
+    -> fabric.connection.Connection.derive_shorthand
+271:33 call  ValueError(err.format("user"))
+    -> <builtin>.ValueError
+271:44 call  err.format("user")
+    -> <builtin>.str.format
+    reject *: the argument is a str
+275:33 call  ValueError(err.format("port"))
+    -> <builtin>.ValueError
+275:44 call  err.format("port")
+    -> <builtin>.str.format
+    reject *: the argument is a str
+281:61 call  self.config.base_ssh_config.lookup(host)
+    -> invoke.config.Config.clone.base_ssh_config.lookup
+    -> paramiko.config.SSHConfig.lookup
+    note: Vanilla config.clone result is stored unchanged by inherited _set; direct attribute/call chain on this result retains the original imported clone path, alongside real Fabric Config SSHConfig path.
+291:48 call  self.ssh_config.get("user", self.config.user)
+    -> invoke.config.Config.clone.base_ssh_config.lookup.get
+    -> paramiko.config.SSHConfig.lookup.get
+    reject *: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+    note: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+296:32 call  int(self.ssh_config.get("port", self.config.port))
+    -> <builtin>.int
+296:52 call  self.ssh_config.get("port", self.config.port)
+    -> invoke.config.Config.clone.base_ssh_config.lookup.get
+    -> paramiko.config.SSHConfig.lookup.get
+    reject *: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+    note: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+303:76 call  self.get_gateway()
+    -> fabric.connection.Connection.get_gateway
+320:50 call  self.ssh_config.get( "connecttimeout", self.config.timeou...
+    -> invoke.config.Config.clone.base_ssh_config.lookup.get
+    -> paramiko.config.SSHConfig.lookup.get
+    reject *: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+    note: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+324:34 call  int(connect_timeout)
+    -> <builtin>.int
+330:58 call  self.resolve_connect_kwargs(connect_kwargs)
+    -> fabric.connection.Connection.resolve_connect_kwargs
+333:27 call  SSHClient()
+    -> paramiko.client.SSHClient
+334:43 call  client.set_missing_host_key_policy(AutoAddPolicy())
+    -> paramiko.client.SSHClient.set_missing_host_key_policy
+334:57 call  AutoAddPolicy()
+    -> paramiko.client.AutoAddPolicy
+
+[fabric.connection.Connection.resolve_connect_kwargs]
+354:43 call  connect_kwargs.get("key_filename", [])
+    -> <builtin>.dict.get
+    reject *: connect_kwargs is the dict that the client passes (documented as dict, connection.py:219); the package passes none
+363:38 call  connect_kwargs.setdefault("key_filename", [])
+    -> <builtin>.dict.setdefault
+    -> invoke.config.Config.clone.connect_kwargs.setdefault
+    -> invoke.config.DataProxy.setdefault
+    note: Plain DataProxy.setdefault does not invoke a package subclass definition; do not trace merge callbacks. Actual Fabric Config inherited lookup still supplies DataProxy. Vanilla cloned configuration supplies an additional direct stub chain.
+364:50 call  connect_kwargs["key_filename"].extend( self.ssh_config["i...
+    -> <builtin>.list.extend
+    note: the key_filename value is a list: the [] of setdefault, the list of the -i flag (main.py:121-123), or the merged list of 358
+
+[fabric.connection.Connection.get_gateway]
+376:28 call  reversed(self.ssh_config["proxyjump"].split(","))
+    -> <builtin>.reversed
+376:63 call  self.ssh_config["proxyjump"].split(",")
+    note: ssh_config is a missing lookup result. Its subscript is opaque, and no concrete parameter contract fixes that returned member as str. ProxyJump output descriptions do not override subscript provenance.
+384:41 call  self.derive_shorthand(hop)
+    -> fabric.connection.Connection.derive_shorthand
+388:30 call  dict(config=self.config.clone())
+    -> <builtin>.dict
+388:55 call  self.config.clone()
+    -> fabric.config.Config.clone
+    -> invoke.config.Config.clone.clone
+    note: A Connection made from a vanilla InvokeConfig stores the ordinary clone result; the later .clone call extends that stub path. Actual FabricConfig receiver retains its package clone target.
+391:33 call  Connection(hop, **kwargs)
+    -> fabric.connection.Connection.__init__
+
+[fabric.connection.Connection.__repr__]
+405:24 call  bits.append(("user", self.user))
+    -> <builtin>.list.append
+409:24 call  bits.append(("port", self.port))
+    -> <builtin>.list.append
+418:26 call  isinstance(self.gateway, string_types)
+    -> <builtin>.isinstance
+420:24 call  bits.append(("gw", val))
+    -> <builtin>.list.append
+421:40 call  "<Connection {}>".format( " ".join("{}={}".format(*x) for...
+    -> <builtin>.str.format
+    reject *: the argument is the str that str.join returns
+422:21 call  " ".join("{}={}".format(*x) for x in bits)
+    -> <builtin>.str.join
+422:36 call  "{}={}".format(*x)
+    -> <builtin>.str.format
+    reject *: the fields are str names and the host and user (str), the port (int) or the gateway kind (str)
+
+[fabric.connection.Connection.__eq__]
+432:26 call  isinstance(other, Connection)
+    -> <builtin>.isinstance
+434:30 call  self._identity()
+    -> fabric.connection.Connection._identity
+434:51 call  other._identity()
+    -> fabric.connection.Connection._identity
+    note: other is a Connection (isinstance at 432)
+
+[fabric.connection.Connection.__lt__]
+437:30 call  self._identity()
+    -> fabric.connection.Connection._identity
+437:33 op  self._identity() < other._identity()
+    reject *: both operands are tuples of str and int (_identity)
+437:50 call  other._identity()
+    -> fabric.connection.Connection._identity
+    note: other is the other operand of a comparison of Connections; only a Connection has _identity
+
+[fabric.connection.Connection.__hash__]
+442:20 call  hash(self._identity())
+    -> <builtin>.hash
+    reject *: the argument is a tuple of str and int
+442:35 call  self._identity()
+    -> fabric.connection.Connection._identity
+
+[fabric.connection.Connection.derive_shorthand]
+445:43 call  host_string.rsplit("@", 1)
+    -> <builtin>.str.rsplit
+446:37 call  user_hostport.pop()
+    -> <builtin>.list.pop
+452:26 call  hostport.count(":")
+    -> <builtin>.str.count
+452:32 op  hostport.count(":") > 1
+    reject *: both operands are ints
+457:40 call  hostport.rsplit(":", 1)
+    -> <builtin>.str.rsplit
+458:33 call  host_port.pop(0)
+    -> <builtin>.list.pop
+462:23 call  int(port)
+    -> <builtin>.int
+
+[fabric.connection.Connection.open]
+492:17 getattr  self.is_connected
+    -> fabric.connection.Connection.is_connected
+500:18 call  """ hostname port username """.split()
+    -> <builtin>.str.split
+502:33 call  ValueError(err.format(key))
+    -> <builtin>.ValueError
+502:44 call  err.format(key)
+    -> <builtin>.str.format
+    reject *: key is a str
+508:29 call  ValueError(err.format("timeout"))
+    -> <builtin>.ValueError
+508:40 call  err.format("timeout")
+    -> <builtin>.str.format
+    reject *: the argument is a str
+510:22 call  dict( self.connect_kwargs, username=self.user, hostname=s...
+    -> <builtin>.dict
+517:47 call  self.open_gateway()
+    -> fabric.connection.Connection.open_gateway
+524:28 call  self.client.connect(**kwargs)
+    -> paramiko.client.SSHClient.connect
+    note: SSHClient.connect is an ordinary missing-library call. It does not make a package definition through a base/decorator. Its internal transport thread and callback dispatch are therefore opaque.
+525:51 call  self.client.get_transport()
+    -> paramiko.client.SSHClient.get_transport
+
+[fabric.connection.Connection.open_gateway]
+539:22 call  isinstance(self.gateway, string_types)
+    -> <builtin>.isinstance
+543:33 call  SSHConfig()
+    -> paramiko.config.SSHConfig
+545:27 call  ssh_conf.parse(StringIO(dummy.format(self.host, self.gate...
+    -> paramiko.config.SSHConfig.parse
+545:36 call  StringIO(dummy.format(self.host, self.gateway))
+    -> invoke.vendor.six.StringIO
+    -> six.StringIO
+    note: Both optional imports are ordinary missing dependencies. Vendored/external six is not a package base/decorator at this call, so alias implementation cannot replace imported paths with io.StringIO.
+545:49 call  dummy.format(self.host, self.gateway)
+    -> <builtin>.str.format
+    reject *: host and gateway are str here (isinstance at 539)
+546:32 call  ProxyCommand(ssh_conf.lookup(self.host)["proxycommand"])
+    -> paramiko.proxy.ProxyCommand
+546:48 call  ssh_conf.lookup(self.host)
+    -> paramiko.config.SSHConfig.lookup
+549:26 call  self.gateway.open()
+    -> fabric.connection.Connection.open
+    -> invoke.config.Config.clone.gateway.open
+    note: get_gateway may return the gateway attribute of an ordinary vanilla-config clone stub. Its explicit open method retains that direct attribute path; documented actual Connection gateway values retain the package open method.
+558:51 call  self.gateway.transport.open_channel( kind="direct-tcpip",...
+    -> invoke.config.Config.clone.gateway.transport.open_channel
+    -> paramiko.client.SSHClient.get_transport.open_channel
+    note: Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.
+560:38 call  int(self.port)
+    -> <builtin>.int
+
+[fabric.connection.Connection.close]
+575:17 getattr  self.is_connected
+    -> fabric.connection.Connection.is_connected
+576:30 call  self.client.close()
+    -> paramiko.client.SSHClient.close
+    reject fabric.connection.Connection.close: the receiver is the SSHClient of Connection.__init__ (333-335)
+578:42 call  self._agent_handler.close()
+    -> paramiko.agent.AgentRequestHandler.close
+    reject fabric.connection.Connection.close: the receiver is the AgentRequestHandler of create_session (590)
+
+[fabric.connection.Connection.__exit__]
+584:19 call  self.close()
+    -> fabric.connection.Connection.close
+
+[fabric.connection.Connection.create_session]
+588:46 call  self.transport.open_session()
+    -> paramiko.client.SSHClient.get_transport.open_session
+    note: Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.
+590:54 call  AgentRequestHandler(channel)
+    -> paramiko.agent.AgentRequestHandler
+
+[fabric.connection.Connection.run]
+608:44 call  self.config.runners.remote(self)
+    -> invoke.Runner.__init__
+    -> invoke.config.Config.clone.runners.remote
+    note: Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__.
+609:25 call  self._run(runner, command, **kwargs)
+    -> invoke.Context._run
+    -> fabric.runners.Remote.start
+    -> fabric.runners.Remote.read_proc_stdout
+    -> fabric.runners.Remote.read_proc_stderr
+    -> fabric.runners.Remote._write_proc_stdin
+    -> fabric.runners.Remote.process_is_finished
+    -> fabric.runners.Remote.send_interrupt
+    -> fabric.runners.Remote.returncode
+    -> fabric.runners.Remote.generate_result
+    -> fabric.runners.Remote.stop
+    reject *: _run is invoke's Context._run (Connection does not override it); the receiver is a Connection, not a thread
+    note: Context._run calls runner.run, invoke's Runner.run on the Remote of 608, which calls back the Remote methods: start, the IO threads (read_proc_stdout, read_proc_stderr without a pty, _write_proc_stdin for stdin and watcher responses), process_is_finished in wait(), send_interrupt on KeyboardInterrupt, returncode, generate_result, and stop in its finally (J3)
+
+[fabric.connection.Connection.sudo]
+623:44 call  self.config.runners.remote(self)
+    -> invoke.Runner.__init__
+    -> invoke.config.Config.clone.runners.remote
+    note: Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__.
+624:26 call  self._sudo(runner, command, **kwargs)
+    -> invoke.Context._sudo
+    -> fabric.runners.Remote.start
+    -> fabric.runners.Remote.read_proc_stdout
+    -> fabric.runners.Remote.read_proc_stderr
+    -> fabric.runners.Remote._write_proc_stdin
+    -> fabric.runners.Remote.process_is_finished
+    -> fabric.runners.Remote.send_interrupt
+    -> fabric.runners.Remote.returncode
+    -> fabric.runners.Remote.generate_result
+    -> fabric.runners.Remote.stop
+    note: Context._sudo calls runner.run with a FailingResponder watcher, whose responses go through _write_proc_stdin; the callbacks are those of 609 (J3)
+
+[fabric.connection.Connection.local]
+637:21 call  super(Connection, self)
+    -> <builtin>.super
+637:43 call  super(Connection, self).run(*args, **kwargs)
+    -> invoke.Context.run
+    reject *: super() in Connection skips to invoke's Context.run
+    note: Context.run makes the runner of runners.local, invoke's Local (fabric changes only runners.remote), so no package method is called back
+
+[fabric.connection.Connection.sftp]
+652:47 call  self.client.open_sftp()
+    -> paramiko.client.SSHClient.open_sftp
+
+[fabric.connection.Connection.get]
+664:24 call  Transfer(self)
+    -> fabric.transfer.Transfer.__init__
+664:34 call  Transfer(self).get(*args, **kwargs)
+    -> fabric.transfer.Transfer.get
+    reject fabric.connection.Connection.get, fabric.group.Group.get: the receiver is the Transfer of 664:24
+
+[fabric.connection.Connection.put]
+675:24 call  Transfer(self)
+    -> fabric.transfer.Transfer.__init__
+675:34 call  Transfer(self).put(*args, **kwargs)
+    -> fabric.transfer.Transfer.put
+    reject fabric.connection.Connection.put: the receiver is the Transfer of 675:24
+
+[fabric.connection.Connection.forward_local]
+735:25 call  Event()
+    -> threading.Event
+736:32 call  TunnelManager( local_port=local_port, local_host=local_ho...
+    -> fabric.tunnels.TunnelManager.__init__
+745:22 call  manager.start()
+    -> invoke.util.ExceptionHandlingThread.start
+    -> fabric.tunnels.TunnelManager._run
+    reject fabric.runners.Remote.start: the receiver is the TunnelManager of 736
+    note: start runs ExceptionHandlingThread.run in the new thread, which calls self._run(), TunnelManager._run; a thread's run belongs to the scope that starts it
+753:25 call  finished.set()
+    -> threading.Event.set
+755:25 call  manager.join()
+    -> invoke.util.ExceptionHandlingThread.join
+767:40 call  manager.exception()
+    -> invoke.util.ExceptionHandlingThread.exception
+772:42 call  ThreadException([wrapper])
+    -> invoke.exceptions.ThreadException
+
+[fabric.connection.Connection.forward_remote]
+867:48 call  self.transport.request_port_forward( address=remote_host,...
+    -> paramiko.client.SSHClient.get_transport.request_port_forward
+    reject *: Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.
+    note: Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.
+878:36 call  tunnel.finished.set()
+    note: The enclosing tunnels list starts empty and only the nested callback appends to it. Ordinary missing request_port_forward supplies no callback execution, so this function has no tunnel receiver in its cleanup loop. Rule A independently preserves the nested callback body without executing it here.
+879:28 call  tunnel.join()
+    note: The enclosing tunnels list starts empty and only the nested callback appends to it. Ordinary missing request_port_forward supplies no callback execution, so this function has no tunnel receiver in its cleanup loop. Rule A independently preserves the nested callback body without executing it here.
+880:47 call  self.transport.cancel_port_forward( address=remote_host, ...
+    -> paramiko.client.SSHClient.get_transport.cancel_port_forward
+    note: Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.
+
+[fabric.connection.Connection.forward_remote.callback]
+852:33 call  socket.socket()
+    -> socket.socket
+854:25 call  sock.connect((local_host, local_port))
+    -> socket.socket.connect
+858:28 call  Tunnel(channel=channel, sock=sock, finished=Event())
+    -> fabric.tunnels.Tunnel.__init__
+858:71 call  Event()
+    -> threading.Event
+859:25 call  tunnel.start()
+    -> invoke.util.ExceptionHandlingThread.start
+    -> fabric.tunnels.Tunnel._run
+    reject fabric.runners.Remote.start: the receiver is the Tunnel of 858
+    note: start runs ExceptionHandlingThread.run in the new thread, which calls Tunnel._run
+861:27 call  tunnels.append(tunnel)
+    -> <builtin>.list.append
+
+== fabric.executor
+
+[fabric.executor.FabExecutor.expand_calls]
+17:35 call  host_str.split(",")
+    -> <builtin>.str.split
+19:26 call  isinstance(call, Task)
+    -> <builtin>.isinstance
+20:28 call  Call(task=call)
+    -> invoke.Call
+27:23 call  ret.extend(self.expand_calls(call.pre, apply_hosts=False))
+    -> <builtin>.list.extend
+27:41 call  self.expand_calls(call.pre, apply_hosts=False)
+    -> fabric.executor.FabExecutor.expand_calls
+30:27 call  ret.append(self.parameterize(call, host))
+    -> <builtin>.list.append
+30:45 call  self.parameterize(call, host)
+    -> fabric.executor.FabExecutor.parameterize
+34:27 call  ret.append(call)
+    -> <builtin>.list.append
+36:23 call  ret.extend(self.expand_calls(call.post, apply_hosts=False))
+    -> <builtin>.list.extend
+36:41 call  self.expand_calls(call.post, apply_hosts=False)
+    -> fabric.executor.FabExecutor.expand_calls
+42:34 call  NothingToDo( "Was told to run a command, but not given an...
+    -> <builtin>.Exception.__init__
+    note: NothingToDo defines no __init__; the first __init__ of its MRO is Exception's
+50:24 call  Call(Task(body=anonymous))
+    -> invoke.Call
+50:29 call  Task(body=anonymous)
+    -> invoke.Task
+    reject fabric.executor.FabExecutor.expand_calls.anonymous: Task stores the body; invoke's Executor.execute calls it when the task runs, under Program.run, which the client calls
+55:27 call  ret.append(self.parameterize(anon, host))
+    -> <builtin>.list.append
+55:45 call  self.parameterize(anon, host)
+    -> fabric.executor.FabExecutor.parameterize
+
+[fabric.executor.FabExecutor.expand_calls.anonymous]
+48:22 call  c.run(self.core.remainder, in_stream=False)
+    -> decorator.decorate.fun
+    -> fabric.connection.opens
+    reject fabric.connection.Connection.run: c.run is the wrapper that decorate() generated for @opens (593); the wrapper calls opens, which calls Connection.run (30:18) (J2)
+    reject fabric.group.Group.run: c is a Connection
+    reject fabric.group.SerialGroup.run: c is a Connection
+    reject fabric.group.ThreadingGroup.run: c is a Connection
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function.
+
+[fabric.executor.FabExecutor.parameterize]
+62:14 call  debug("Parameterizing {!r} for host {!r}".format(call, ho...
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+62:57 call  "Parameterizing {!r} for host {!r}".format(call, host)
+    -> <builtin>.str.format
+    reject *: call is an invoke Call, whose repr is invoke's, and host is a str
+65:27 call  call.clone(into=ConnectionCall)
+    -> invoke.Call.clone
+    reject fabric.config.Config.clone: the receiver is an invoke Call
+    note: Call.clone instantiates into, ConnectionCall, which inherits invoke's Call.__init__: library code that instantiates a package class runs no package __init__
+
+[fabric.executor.ConnectionCall.make_context]
+84:26 call  Connection(host=self.host, config=config)
+    -> fabric.connection.Connection.__init__
+
+== fabric.group
+
+[fabric.group]
+72:6 decorator  @classmethod
+    -> <builtin>.classmethod
+252:6 decorator  @property
+    -> <builtin>.property
+262:6 decorator  @property
+    -> <builtin>.property
+
+[fabric.group.Group.__init__]
+70:20 call  self.extend(map(Connection, hosts))
+    -> <builtin>.list.extend
+    -> fabric.connection.Connection.__init__
+    note: on Python 3, map is lazy: list.extend iterates it and so calls Connection for each host
+70:24 call  map(Connection, hosts)
+    -> <builtin>.map
+    -> fabric.connection.Connection.__init__
+    note: on Python 2, map calls Connection for each host at once (J7)
+
+[fabric.group.Group.from_connections]
+81:20 call  cls()
+    -> fabric.group.Group.__init__
+    note: cls is the class on which the classmethod is called: Group, SerialGroup or ThreadingGroup, which all inherit Group.__init__ (a client subclass is client code)
+82:21 call  group.extend(connections)
+    -> <builtin>.list.extend
+
+[fabric.group.SerialGroup.run]
+144:30 call  GroupResult()
+    -> fabric.group.GroupResult.__init__
+148:24 setitem  results[cxn]
+    -> fabric.connection.Connection.__hash__
+    -> fabric.connection.Connection.__eq__
+    note: cxn is a Connection of the group; the dict calls __eq__ when two keys have equal hashes: two equal Connections of one group (Group("h", "h")), or ports that differ by 2**61 - 1 (J8)
+148:39 call  cxn.run(*args, **kwargs)
+    -> decorator.decorate.fun
+    -> fabric.connection.opens
+    reject fabric.connection.Connection.run: cxn.run is the wrapper that decorate() generated for @opens (593); the wrapper calls opens, which calls Connection.run (30:18) (J2)
+    reject fabric.group.Group.run: cxn is a Connection of the group
+    reject fabric.group.SerialGroup.run: cxn is a Connection of the group
+    reject fabric.group.ThreadingGroup.run: cxn is a Connection of the group
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function.
+150:24 setitem  results[cxn]
+    -> fabric.connection.Connection.__hash__
+    -> fabric.connection.Connection.__eq__
+    note: as 148:24 (J8)
+153:33 call  GroupException(results)
+    -> fabric.exceptions.GroupException.__init__
+
+[fabric.group.thread_worker]
+158:21 call  cxn.run(*args, **kwargs)
+    reject *: thread_worker has no concrete parameter annotations or documentation. Missing ordinary ExceptionHandlingThread stores an opaque target/kwargs and supplies no callback flow. Rule A keeps its body but B2/B5 do not infer Connection or Queue from parameter names or unexecuted library dispatch.
+    note: thread_worker has no concrete parameter annotations or documentation. Missing ordinary ExceptionHandlingThread stores an opaque target/kwargs and supplies no callback flow. Rule A keeps its body but B2/B5 do not infer Connection or Queue from parameter names or unexecuted library dispatch.
+160:14 call  queue.put((cxn, result))
+    reject *: thread_worker has no concrete parameter annotations or documentation. Missing ordinary ExceptionHandlingThread stores an opaque target/kwargs and supplies no callback flow. Rule A keeps its body but B2/B5 do not infer Connection or Queue from parameter names or unexecuted library dispatch.
+    note: thread_worker has no concrete parameter annotations or documentation. Missing ordinary ExceptionHandlingThread stores an opaque target/kwargs and supplies no callback flow. Rule A keeps its body but B2/B5 do not infer Connection or Queue from parameter names or unexecuted library dispatch.
+
+[fabric.group.ThreadingGroup.run]
+171:30 call  GroupResult()
+    -> fabric.group.GroupResult.__init__
+172:22 call  Queue()
+    -> invoke.vendor.six.moves.queue.Queue
+    -> six.moves.queue.Queue
+    note: Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations.
+175:29 call  dict(cxn=cxn, queue=queue, args=args, kwargs=kwargs)
+    -> <builtin>.dict
+176:45 call  ExceptionHandlingThread( target=thread_worker, kwargs=my_...
+    -> invoke.util.ExceptionHandlingThread
+    reject fabric.group.thread_worker: this plain missing ExceptionHandlingThread stores target/kwargs opaquely; neither construction nor its ordinary start call supplies a package callback under the global missing-library rule
+179:27 call  threads.append(thread)
+    -> <builtin>.list.append
+181:25 call  thread.start()
+    -> invoke.util.ExceptionHandlingThread.start
+    reject *: This receiver is a plain missing ExceptionHandlingThread, not package Tunnel/TunnelManager. Other package subclasses of that base do not extend the narrow exception to this ordinary instance.
+    note: This receiver is a plain missing ExceptionHandlingThread, not package Tunnel/TunnelManager. Other package subclasses of that base do not extend the narrow exception to this ordinary instance.
+186:24 call  thread.join()
+    -> invoke.util.ExceptionHandlingThread.join
+188:30 call  queue.empty()
+    -> invoke.vendor.six.moves.queue.Queue.empty
+    -> six.moves.queue.Queue.empty
+    note: Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations.
+190:36 call  queue.get(block=False)
+    -> invoke.vendor.six.moves.queue.Queue.get
+    -> six.moves.queue.Queue.get
+    reject *: Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations.
+    note: Queue imports come through ordinary missing vendored/external six.moves paths. Keep constructor and direct method chains under both imports, without reading alias implementations.
+194:20 setitem  results[cxn]
+    reject *: Queue.get tuple unpacking or ExceptionHandlingThread.exception().kwargs subscripts are opaque missing-library results. Neither returned cxn nor key has an admitted Connection input type at these sites; output descriptions of GroupResult do not override provenance.
+    note: Queue.get tuple unpacking or ExceptionHandlingThread.exception().kwargs subscripts are opaque missing-library results. Neither returned cxn nor key has an admitted Connection input type at these sites; output descriptions of GroupResult do not override provenance.
+202:39 call  thread.exception()
+    -> invoke.util.ExceptionHandlingThread.exception
+207:24 setitem  results[cxn]
+    reject *: Queue.get tuple unpacking or ExceptionHandlingThread.exception().kwargs subscripts are opaque missing-library results. Neither returned cxn nor key has an admitted Connection input type at these sites; output descriptions of GroupResult do not override provenance.
+    note: Queue.get tuple unpacking or ExceptionHandlingThread.exception().kwargs subscripts are opaque missing-library results. Neither returned cxn nor key has an admitted Connection input type at these sites; output descriptions of GroupResult do not override provenance.
+210:33 call  GroupException(results)
+    -> fabric.exceptions.GroupException.__init__
+
+[fabric.group.GroupResult.__init__]
+236:14 call  super(dict, self)
+    -> <builtin>.super
+236:35 call  super(dict, self).__init__(*args, **kwargs)
+    -> <builtin>.object.__init__
+    reject *: super(dict, self) skips GroupResult and dict; the next class of the MRO is object, outside the package
+    note: with any argument, object.__init__ raises TypeError; the package calls GroupResult() without arguments (144, 171)
+
+[fabric.group.GroupResult._bifurcate]
+246:37 call  self.items()
+    -> <builtin>.dict.items
+247:26 call  isinstance(value, BaseException)
+    -> <builtin>.isinstance
+248:31 setitem  self._failures[key]
+    -> fabric.connection.Connection.__hash__
+    -> fabric.connection.Connection.__eq__
+    note: SerialGroup directly stores admitted Connections in GroupResult (group.py:148-150). Those keys reach _bifurcate; __eq__ runs on hash collisions (J8). ThreadingGroup result keys stay opaque.
+250:32 setitem  self._successes[key]
+    -> fabric.connection.Connection.__hash__
+    -> fabric.connection.Connection.__eq__
+    note: as 248:31 (J8)
+
+[fabric.group.GroupResult.succeeded]
+259:24 call  self._bifurcate()
+    -> fabric.group.GroupResult._bifurcate
+
+[fabric.group.GroupResult.failed]
+269:24 call  self._bifurcate()
+    -> fabric.group.GroupResult._bifurcate
+
+== fabric.main
+
+[fabric.main]
+56:6 decorator  @property
+    -> <builtin>.property
+151:23 call  make_program()
+    -> fabric.main.make_program
+
+[fabric.main.Fab.print_version]
+20:14 call  super(Fab, self)
+    -> <builtin>.super
+20:39 call  super(Fab, self).print_version()
+    -> invoke.Program.print_version
+    reject fabric.main.Fab.print_version: super() in Fab skips to invoke's Program
+21:14 call  print("Paramiko {}".format(paramiko))
+    -> <builtin>.print
+    reject *: the argument is a str
+    note: a call on Python 3; on Python 2 this line is a print statement (J9)
+21:35 call  "Paramiko {}".format(paramiko)
+    -> <builtin>.str.format
+    reject *: paramiko is paramiko.__version__, a str
+22:14 call  print("Invoke {}".format(invoke))
+    -> <builtin>.print
+    reject *: the argument is a str
+    note: a call on Python 3; on Python 2 this line is a print statement (J9)
+22:33 call  "Invoke {}".format(invoke)
+    -> <builtin>.str.format
+    reject *: invoke is invoke.__version__, a str
+
+[fabric.main.Fab.core_args]
+25:26 call  super(Fab, self)
+    -> <builtin>.super
+25:47 call  super(Fab, self).core_args()
+    -> invoke.Program.core_args
+    reject fabric.main.Fab.core_args: super() in Fab skips to invoke's Program
+27:21 call  Argument( names=("S", "ssh-config"), help="Path to runtim...
+    -> invoke.Argument
+31:21 call  Argument( names=("H", "hosts"), help="Comma-separated hos...
+    -> invoke.Argument
+35:21 call  Argument( names=("i", "identity"), kind=list, # Same as O...
+    -> invoke.Argument
+43:21 call  Argument( names=("prompt-for-login-password",), kind=bool...
+    -> invoke.Argument
+48:21 call  Argument( names=("prompt-for-passphrase",), kind=bool, he...
+    -> invoke.Argument
+
+[fabric.main.Fab.load_collection]
+76:17 getattr  self._remainder_only
+    -> fabric.main.Fab._remainder_only
+81:41 call  Collection()
+    -> invoke.Collection
+83:18 call  super(Fab, self)
+    -> <builtin>.super
+83:45 call  super(Fab, self).load_collection()
+    -> fabric.connection.Connection.__repr__
+    -> invoke.Program.load_collection
+    reject fabric.main.Fab.load_collection: super() in Fab skips to invoke's Program
+    note: Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3.
+
+[fabric.main.Fab.no_tasks_given]
+88:21 getattr  self._remainder_only
+    -> fabric.main.Fab._remainder_only
+89:18 call  super(Fab, self)
+    -> <builtin>.super
+89:44 call  super(Fab, self).no_tasks_given()
+    -> invoke.Program.no_tasks_given
+    -> fabric.main.Fab.core_args
+    reject fabric.main.Fab.no_tasks_given: super() in Fab skips to invoke's Program
+    note: Program.no_tasks_given calls self.print_help(), which reads the property initial_context, which calls self.core_args(): Fab.core_args (invoke 1.4.1 program.py:535-539, 658-666, 641-650; ruling A1)
+
+[fabric.main.Fab.create_config]
+95:40 call  self.config_class(lazy=True)
+    -> fabric.config.Config.__init__
+    -> invoke.config.Config
+    note: config_class is the argument of invoke's Program.__init__: fabric's Config in make_program (147); invoke's own Config, the default of Program.__init__, for a Fab made without config_class (J10)
+99:41 call  self.config.load_base_conf_files()
+    -> invoke.config.Config.load_base_conf_files
+105:26 call  self.config.merge()
+    -> fabric.connection.Connection.__repr__
+    -> invoke.config.Config.merge
+    note: Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3.
+
+[fabric.main.Fab.update_config]
+111:14 call  super(Fab, self)
+    -> <builtin>.super
+111:39 call  super(Fab, self).update_config(merge=False)
+    -> invoke.Program.update_config
+    reject fabric.main.Fab.update_config: super() in Fab skips to invoke's Program
+    note: Program.update_config loads the overrides and the runtime file into the Config (load_overrides, set_runtime_path, load_runtime), which fabric does not override
+112:41 call  self.config.set_runtime_ssh_path(self.args["ssh-config"]....
+    -> fabric.config.Config.set_runtime_ssh_path
+    note: A public Fab without config_class uses the inherited default Invoke Config, which lacks this Fabric method (invoke 1.0.0, 1.4.1 and 1.7.3: no such name in invoke/config.py): the load raises AttributeError and Python calls nothing, so no callee is named for it. The package's own Config keeps its target.
+113:36 call  self.config.load_ssh_config()
+    -> fabric.config.Config.load_ssh_config
+    note: A public Fab without config_class uses the inherited default Invoke Config, which lacks this Fabric method (invoke 1.0.0, 1.4.1 and 1.7.3: no such name in invoke/config.py): the load raises AttributeError and Python calls nothing, so no callee is named for it. The package's own Config keeps its target.
+131:57 call  getpass.getpass(prompt)
+    -> getpass.getpass
+134:59 call  getpass.getpass(prompt)
+    -> getpass.getpass
+138:26 call  self.config.merge()
+    -> fabric.connection.Connection.__repr__
+    -> invoke.config.Config.merge
+    note: Invoke Config.merge formats Defaults, Collection-driven, Environment, Overrides and Modifications with {!r}, and _merge_file formats loaded file data. A Connection in the documented gateway configuration role is therefore repr-ed inside Invoke. Gateway accepts Connection explicitly (connection.py197-198; configuration.rst88-89; tests/connection.py233-239), so this is a package value supplied for its intended role. The nearest package caller owns the callback; do not propagate it through an intervening package method. Source: pinned invoke1.4.1 config.py935-976; Config clone/init/merge behavior also checked in1.0.0 and1.7.3.
+
+[fabric.main.make_program]
+143:15 call  Fab( name="Fabric", version=fabric, executor_class=FabExe...
+    -> invoke.Program.__init__
+    note: Fab defines no __init__: the first __init__ of its MRO is invoke's Program.__init__, which stores its arguments
+
+== fabric.runners
+
+[fabric.runners]
+43:6 decorator  @property
+    -> <builtin>.property
+
+[fabric.runners.Remote.start]
+19:51 call  self.context.create_session()
+    -> decorator.decorate.fun
+    -> fabric.connection.opens
+    reject fabric.connection.Connection.create_session: create_session is the wrapper that decorate() generated for @opens (586); the wrapper calls opens, which calls Connection.create_session (30:18) (J2)
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function.
+21:34 call  pty_size()
+    -> invoke.pty_size
+22:33 call  self.channel.get_pty(width=rows, height=cols)
+    -> paramiko.client.SSHClient.get_transport.open_session.get_pty
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+29:40 call  self.channel.update_environment(env)
+    -> paramiko.client.SSHClient.get_transport.open_session.update_environment
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+32:34 call  self.channel.exec_command(command)
+    -> paramiko.client.SSHClient.get_transport.open_session.exec_command
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote.read_proc_stdout]
+35:33 call  self.channel.recv(num_bytes)
+    -> paramiko.client.SSHClient.get_transport.open_session.recv
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote.read_proc_stderr]
+38:40 call  self.channel.recv_stderr(num_bytes)
+    -> paramiko.client.SSHClient.get_transport.open_session.recv_stderr
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote._write_proc_stdin]
+41:36 call  self.channel.sendall(data)
+    -> paramiko.client.SSHClient.get_transport.open_session.sendall
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote.process_is_finished]
+45:46 call  self.channel.exit_status_ready()
+    -> paramiko.client.SSHClient.get_transport.open_session.exit_status_ready
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote.send_interrupt]
+59:30 call  self.channel.send(u"\x03")
+    -> paramiko.client.SSHClient.get_transport.open_session.send
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote.returncode]
+64:45 call  self.channel.recv_exit_status()
+    -> paramiko.client.SSHClient.get_transport.open_session.recv_exit_status
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Remote.generate_result]
+68:22 call  Result(**kwargs)
+    -> fabric.runners.Result.__init__
+    reject fabric.transfer.Result.__init__: the name Result here is the class of this module (runners.py:95)
+
+[fabric.runners.Remote.stop]
+71:19 call  hasattr(self, "channel")
+    -> <builtin>.hasattr
+72:31 call  self.channel.close()
+    -> paramiko.client.SSHClient.get_transport.open_session.close
+    reject *: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+    note: Remote.channel comes from Connection.create_session, which returns ordinary transport.open_session result. No concrete parameter annotation supplies Channel; retain the direct SSHClient.get_transport.open_session chain.
+
+[fabric.runners.Result.__init__]
+107:32 call  kwargs.pop("connection")
+    -> <builtin>.dict.pop
+108:14 call  super(Result, self)
+    -> <builtin>.super
+108:37 call  super(Result, self).__init__(**kwargs)
+    -> invoke.Result.__init__
+    reject *: super() in Result skips to invoke's Result.__init__, which stores its arguments
+
+== fabric.transfer
+
+[fabric.transfer]
+31:6 decorator  @property
+    -> <builtin>.property
+
+[fabric.transfer.Transfer.sftp]
+33:32 getattr  self.connection.sftp
+    reject fabric.transfer.Transfer.sftp: self.connection is a Connection, whose sftp is a method, not this property
+33:36 call  self.connection.sftp()
+    -> decorator.decorate.fun
+    -> fabric.connection.opens
+    reject fabric.connection.Connection.sftp: sftp is the wrapper that decorate() generated for @opens (639); the wrapper calls opens, which calls Connection.sftp (30:18) (J2)
+    reject fabric.transfer.Transfer.sftp: the receiver is a Connection; Transfer.sftp is a property
+    note: The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py229-233 is the synchronous fun closure used because opens is an ordinary synchronous function.
+
+[fabric.transfer.Transfer.is_remote_dir]
+37:32 call  stat.S_ISDIR(self.sftp.stat(path).st_mode)
+    -> stat.S_ISDIR
+37:38 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+37:47 call  self.sftp.stat(path)
+    -> paramiko.client.SSHClient.open_sftp.stat
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+
+[fabric.transfer.Transfer.get]
+104:29 call  ValueError("Remote path must not be empty!")
+    -> <builtin>.ValueError
+106:32 call  posixpath.join( self.sftp.getcwd() or self.sftp.normalize...
+    -> posixpath.join
+107:18 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+107:29 call  self.sftp.getcwd()
+    -> paramiko.client.SSHClient.open_sftp.getcwd
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+107:40 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+107:54 call  self.sftp.normalize(".")
+    -> paramiko.client.SSHClient.open_sftp.normalize
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+114:31 call  hasattr(local, "write")
+    -> <builtin>.hasattr
+114:60 call  callable(local.write)
+    -> <builtin>.callable
+116:39 call  posixpath.basename(remote)
+    -> posixpath.basename
+118:36 call  os.path.abspath(local)
+    -> os.path.abspath
+128:18 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+128:28 call  self.sftp.getfo(remotepath=remote, fl=local)
+    -> paramiko.client.SSHClient.open_sftp.getfo
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+130:18 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+130:26 call  self.sftp.get(remotepath=remote, localpath=local)
+    -> paramiko.client.SSHClient.open_sftp.get
+    reject *: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+135:36 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+135:45 call  self.sftp.stat(remote)
+    -> paramiko.client.SSHClient.open_sftp.stat
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+136:36 call  stat.S_IMODE(remote_mode)
+    -> stat.S_IMODE
+137:25 call  os.chmod(local, mode)
+    -> os.chmod
+139:22 call  Result( orig_remote=orig_remote, remote=remote, orig_loca...
+    -> fabric.transfer.Result.__init__
+    reject fabric.runners.Result.__init__: the name Result here is the class of this module (transfer.py:286)
+
+[fabric.transfer.Transfer.put]
+194:29 call  ValueError("Local path must not be empty!")
+    -> <builtin>.ValueError
+196:31 call  hasattr(local, "write")
+    -> <builtin>.hasattr
+196:60 call  callable(local.write)
+    -> <builtin>.callable
+201:33 call  getattr(local, "name", None)
+    -> <builtin>.getattr
+203:42 call  os.path.basename(local)
+    -> os.path.basename
+206:33 call  ValueError( "Must give non-empty remote path when local i...
+    -> <builtin>.ValueError
+211:22 call  debug("Massaged empty remote path into {!r}".format(remote))
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+211:68 call  "Massaged empty remote path into {!r}".format(remote)
+    -> <builtin>.str.format
+    reject *: remote is the str basename of the local path
+212:32 call  self.is_remote_dir(remote)
+    -> fabric.transfer.Transfer.is_remote_dir
+216:40 call  posixpath.join(remote, local_base)
+    -> posixpath.join
+219:37 call  ValueError( "Can't put a file-like-object into a director...
+    -> <builtin>.ValueError
+225:37 call  ValueError( "Somehow got an empty local file basename ({!...
+    -> <builtin>.ValueError
+226:119 call  "Somehow got an empty local file basename ({!r}) when upl...
+    -> <builtin>.str.format
+    reject *: local_base is the empty str basename of a path, and remote a str
+232:32 call  posixpath.join( self.sftp.getcwd() or self.sftp.normalize...
+    -> posixpath.join
+233:18 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+233:29 call  self.sftp.getcwd()
+    -> paramiko.client.SSHClient.open_sftp.getcwd
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+233:40 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+233:54 call  self.sftp.normalize(".")
+    -> paramiko.client.SSHClient.open_sftp.normalize
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+237:18 call  debug(msg.format(prejoined_remote, remote))
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+237:29 call  msg.format(prejoined_remote, remote)
+    -> <builtin>.str.format
+    reject *: both arguments are str paths
+242:36 call  os.path.abspath(local)
+    -> os.path.abspath
+244:22 call  debug( "Massaged relative local path {!r} into {!r}".form...
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+245:73 call  "Massaged relative local path {!r} into {!r}".format( ori...
+    -> <builtin>.str.format
+    reject *: both arguments are str paths
+259:18 call  debug(msg.format(local, remote))
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+259:29 call  msg.format(local, remote)
+    -> <builtin>.str.format
+    reject *: local is the client's file-like object, whose repr is client code, and remote a str
+260:33 call  local.tell()
+    note: no callee: local is the client's file-like object (documented only as "a file-like object", transfer.py:152), opaque (B5)
+262:27 call  local.seek(0)
+    note: no callee: local is the client's file-like object, opaque (B5)
+263:22 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+263:32 call  self.sftp.putfo(fl=local, remotepath=remote)
+    -> paramiko.client.SSHClient.open_sftp.putfo
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+265:27 call  local.seek(pointer)
+    note: no callee: local is the client's file-like object, opaque (B5)
+267:18 call  debug("Uploading {!r} to {!r}".format(local, remote))
+    -> logging.Logger.debug
+    note: debug is log.debug (util.py:9-10)
+267:50 call  "Uploading {!r} to {!r}".format(local, remote)
+    -> <builtin>.str.format
+    reject *: both arguments are str paths
+268:18 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+268:26 call  self.sftp.put(localpath=local, remotepath=remote)
+    -> paramiko.client.SSHClient.open_sftp.put
+    reject *: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+273:37 call  os.stat(local)
+    -> os.stat
+274:36 call  stat.S_IMODE(local_mode)
+    -> stat.S_IMODE
+275:22 getattr  self.sftp
+    -> fabric.transfer.Transfer.sftp
+275:32 call  self.sftp.chmod(remote, mode)
+    -> paramiko.client.SSHClient.open_sftp.chmod
+    note: Connection.sftp stores ordinary SSHClient.open_sftp result. Its package-return description does not override missing-library provenance; downstream explicit methods keep direct imported call/attribute chain.
+277:22 call  Result( orig_remote=orig_remote, remote=remote, orig_loca...
+    -> fabric.transfer.Result.__init__
+    reject fabric.runners.Result.__init__: the name Result here is the class of this module (transfer.py:286)
+
+== fabric.tunnels
+
+[fabric.tunnels.TunnelManager.__init__]
+42:14 call  super(TunnelManager, self)
+    -> <builtin>.super
+42:44 call  super(TunnelManager, self).__init__()
+    -> invoke.util.ExceptionHandlingThread.__init__
+    reject *: super() in TunnelManager skips to invoke's ExceptionHandlingThread.__init__
+
+[fabric.tunnels.TunnelManager._run]
+53:29 call  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    -> socket.socket
+55:24 call  sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    -> socket.socket.setsockopt
+59:25 call  sock.setblocking(0)
+    -> socket.socket.setblocking
+60:18 call  sock.bind(self.local_address)
+    -> socket.socket.bind
+61:20 call  sock.listen(1)
+    -> socket.socket.listen
+63:39 call  self.finished.is_set()
+    -> threading.Event.is_set
+    note: finished is the threading.Event of Connection.forward_local (connection.py:735)
+68:51 call  sock.accept()
+    -> socket.socket.accept
+70:36 call  tun_sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELA...
+    -> socket.socket.setsockopt
+74:31 call  time.sleep(0.01)
+    -> time.sleep
+80:50 call  self.transport.open_channel( "direct-tcpip", self.remote_...
+    -> paramiko.transport.Transport.open_channel
+    note: TunnelManager documents its transport constructor parameter as paramiko.transport.Transport (tunnels.py:27); B4 fixes that input role before it is stored. The private _run method uses the stored parameter. Unlike a return-description, this concrete input contract fixes the receiver name; open_channel itself remains an ordinary missing-library call and its return retains the Transport.open_channel path.
+87:29 call  Event()
+    -> threading.Event
+88:28 call  Tunnel(channel=channel, sock=tun_sock, finished=finished)
+    -> fabric.tunnels.Tunnel.__init__
+89:25 call  tunnel.start()
+    -> invoke.util.ExceptionHandlingThread.start
+    -> fabric.tunnels.Tunnel._run
+    reject fabric.runners.Remote.start: the receiver is the Tunnel of 88
+    note: start runs ExceptionHandlingThread.run in the new thread, which calls Tunnel._run
+90:27 call  tunnels.append(tunnel)
+    -> <builtin>.list.append
+98:32 call  tunnel.finished.set()
+    -> threading.Event.set
+99:24 call  tunnel.join()
+    -> invoke.util.ExceptionHandlingThread.join
+100:39 call  tunnel.exception()
+    -> invoke.util.ExceptionHandlingThread.exception
+102:34 call  exceptions.append(wrapper)
+    -> <builtin>.list.append
+105:34 call  ThreadException(exceptions)
+    -> invoke.exceptions.ThreadException
+109:19 call  sock.close()
+    -> socket.socket.close
+    reject fabric.connection.Connection.close: the receiver is the listening socket of 53
+
+[fabric.tunnels.Tunnel.__init__]
+125:14 call  super(Tunnel, self)
+    -> <builtin>.super
+125:37 call  super(Tunnel, self).__init__()
+    -> invoke.util.ExceptionHandlingThread.__init__
+    reject *: super() in Tunnel skips to invoke's ExceptionHandlingThread.__init__
+
+[fabric.tunnels.Tunnel._run]
+130:43 call  self.finished.is_set()
+    -> threading.Event.is_set
+    note: finished is the threading.Event that the package passes (tunnels.py:87, connection.py:858)
+131:40 call  select.select([self.sock, self.channel], [], [], 1)
+    -> select.select
+133:53 call  self.read_and_write( self.sock, self.channel, self.socket...
+    -> fabric.tunnels.Tunnel.read_and_write
+137:53 call  self.read_and_write( self.channel, self.sock, self.channe...
+    -> fabric.tunnels.Tunnel.read_and_write
+143:31 call  self.channel.close()
+    -> paramiko.transport.Transport.open_channel.close
+    reject *: TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains.
+    note: TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains.
+144:28 call  self.sock.close()
+    -> socket.socket.close
+    reject fabric.connection.Connection.close: the receiver is a socket (tunnels.py:68, connection.py:852)
+
+[fabric.tunnels.Tunnel.read_and_write]
+154:27 call  reader.recv(chunk_size)
+    -> paramiko.transport.Transport.open_channel.recv
+    -> socket.socket.recv
+    note: TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains.
+155:15 call  len(data)
+    -> <builtin>.len
+157:23 call  writer.sendall(data)
+    -> paramiko.transport.Transport.open_channel.sendall
+    -> socket.socket.sendall
+    note: TunnelManager constructor documentation fixes its transport parameter as concrete paramiko.transport.Transport under B4. It stores that parameter; ordinary open_channel returns an imported-path stub passed to Tunnel and read_and_write. The forward_remote handler parameter is opaque, adding no Channel class. Package-created socket method remains.
+
+== fabric.util
+
+[fabric.util]
+8:24 call  logging.getLogger("fabric")
+    -> logging.getLogger
+10:12 call  globals()
+    -> <builtin>.globals
+10:27 call  getattr(log, x)
+    -> <builtin>.getattr
+
+[fabric.util.get_local_user]
+31:35 call  getpass.getuser()
+    -> getpass.getuser
+44:44 call  win32api.GetUserName()
+    -> win32api.GetUserName
+    note: Windows branch (util.py:39-44): on Python 2.7 and 3.4 to 3.6 on Windows, getpass.getuser raises ImportError (no pwd) when no user variable is set; Windows is a supported platform (setup.py classifiers). win32api (pywin32) is not installed: its name is the access path (J11)

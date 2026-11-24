@@ -1,0 +1,40 @@
+{
+  "marshmallow.fields.Field.deserialize": {
+    "<builtin>.int": "client callback: func(value) (fields.py:375) calls the client's pre_load callable; tests/test_fields.py:702 passes pre_load=[str.strip, int]",
+    "<builtin>.str": "client callback: func(value) and func(output) (fields.py:375, 386) call the client's pre_load and post_load callables; tests/test_fields.py:655, 669 pass pre_load=str and tests/test_fields.py:677 post_load=str",
+    "<builtin>.str.strip": "client callback: func(value) (fields.py:375) calls the client's pre_load callable; tests/test_fields.py:702 passes pre_load=[str.strip, int]"
+  },
+  "marshmallow.fields.Mapping._serialize": {
+    "<builtin>.dict.items": "client object: value.items() (fields.py:1669, 1673) on the client's mapping, typed _MappingT, bound to the abstract collections.abc.Mapping (rules B4, B5); tests/test_serialization.py:442-452 serialize dicts with Dict fields with keys or values"
+  },
+  "marshmallow.fields.Nested.schema": {
+    "abc.GeneratedSchema": "naming artefact of the trace, not a client callback (lead ruling): the tracer names a class that the package creates at run time with type(). schema_class(...) (fields.py:594) instantiates the Schema subclass that Schema.from_dict makes from the client's dict (fields.py:566; tests/test_fields.py:295-301 pass a dict as nested); type() takes its __module__ from the frame of abc.ABCMeta.__new__, hence the name abc.GeneratedSchema. The graph has the Schema.__init__ edge that this instantiation runs",
+    "marshmallow.fields.Field.__init__": "client value: nested() (fields.py:563) calls the field class that tests/test_schema.py:1943 passes as nested (fields.Nested(fields.String)) to check that Nested.schema then raises ValueError (fields.py:587-591); the Callable arm of the annotation names no package value (rules B2, B3)"
+  },
+  "marshmallow.fields._resolve_field_instance": {
+    "<builtin>.BaseException.__init__": "an implicit site (`raise` of a package class without a call) has only package callees; the first __init__ in the MRO is <builtin>.TypeError.__init__, outside the package (macro-benchmark README, 'Call sites and candidates'). The sites are `raise _FieldInstanceResolutionError` at fields.py:102, 105; tests/test_serialization.py:867, 873 make List raise it"
+  },
+  "marshmallow.schema.Schema._do_load": {
+    "marshmallow.exceptions.ValidationError.normalized_messages": "client exception: err.normalized_messages() at schema.py:885,938 operates on an exception escaping the client pre_load/post_load hook through _invoke_load_processors/_invoke_processors. Global B5 explicitly treats callback exceptions as opaque client values."
+  },
+  "marshmallow.schema.Schema._init_fields": {
+    "collections.OrderedDict": "client callback: self.dict_class() (schema.py:1012, 1018) calls the client's dict_class; tests/test_schema.py:2541-2546 set dict_class = OrderedDict on their schema; the package default is dict (schema.py:310)",
+    "collections.OrderedDict.items": "client object: fields_dict.items(), dump_fields.items() and load_fields.items() (schema.py:1019, 1027, 1039) on the OrderedDicts that the client's dict_class makes (tests/test_schema.py:2541-2546)"
+  },
+  "marshmallow.schema.Schema._serialize": {
+    "collections.OrderedDict": "client callback: self.dict_class() (schema.py:539) calls the client's dict_class; tests/test_schema.py:2541-2546 set dict_class = OrderedDict; the package default is dict (schema.py:310)",
+    "collections.OrderedDict.items": "client object: self.dump_fields.items() (schema.py:540) on the OrderedDict that the client's dict_class made (tests/test_schema.py:2541-2546)"
+  },
+  "marshmallow.schema.Schema.dumps": {
+    "simplejson.dumps": "client callback: self.opts.render_module.dumps (schema.py:595) calls the client's render module; tests/base.py:221 sets Meta.render_module = simplejson; the package default is json (schema.py:215)"
+  },
+  "marshmallow.schema.Schema.loads": {
+    "simplejson.loads": "client callback: self.opts.render_module.loads (schema.py:770) calls the client's render module; tests/base.py:221 sets Meta.render_module = simplejson; the package default is json (schema.py:215)"
+  },
+  "marshmallow.utils.is_aware": {
+    "zoneinfo.ZoneInfo.utcoffset": "client object: datetime.tzinfo.utcoffset (utils.py:36) on the tzinfo of the client's datetime; tests/base.py:15, 127 give User.updated the tzinfo ZoneInfo('America/Chicago'). The package's own aware datetimes have a datetime.timezone (rule B5)"
+  },
+  "marshmallow.validate.Length.__call__": {
+    "marshmallow.constants._Missing.__len__": "client callback return: len(value) at validate.py:431 sees missing in tests/test_deserialization.py:1020-1025 only because the client Function deserialize callback returns it. Global B5 keeps callback results opaque; no independent direct argument role admits missing."
+  }
+}

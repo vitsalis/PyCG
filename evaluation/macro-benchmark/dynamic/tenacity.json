@@ -1,0 +1,1179 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__"
+    ],
+    "<builtin>.BaseException.with_traceback": [
+      "<builtin>.Exception.with_traceback"
+    ],
+    "<builtin>.RuntimeError": [
+      "threading.ThreadError"
+    ],
+    "<builtin>.str": [
+      "tornado.escape.unicode_type",
+      "tornado.httputil.unicode_type",
+      "tornado.log.basestring_type",
+      "tornado.log.unicode_type",
+      "tornado.routing.basestring_type",
+      "tornado.routing.unicode_type",
+      "tornado.template.unicode_type",
+      "tornado.testing.basestring_type",
+      "tornado.util.basestring_type",
+      "tornado.util.unicode_type",
+      "tornado.web.unicode_type",
+      "typing.Text"
+    ],
+    "<builtin>.str.join": [
+      "tornado.escape.unicode_type.join",
+      "tornado.httputil.unicode_type.join",
+      "tornado.log.basestring_type.join",
+      "tornado.log.unicode_type.join",
+      "tornado.routing.basestring_type.join",
+      "tornado.routing.unicode_type.join",
+      "tornado.template.unicode_type.join",
+      "tornado.testing.basestring_type.join",
+      "tornado.util.basestring_type.join",
+      "tornado.util.unicode_type.join",
+      "tornado.web.unicode_type.join",
+      "typing.Text.join"
+    ],
+    "<builtin>.str.rstrip": [
+      "tornado.escape.unicode_type.rstrip",
+      "tornado.httputil.unicode_type.rstrip",
+      "tornado.log.basestring_type.rstrip",
+      "tornado.log.unicode_type.rstrip",
+      "tornado.routing.basestring_type.rstrip",
+      "tornado.routing.unicode_type.rstrip",
+      "tornado.template.unicode_type.rstrip",
+      "tornado.testing.basestring_type.rstrip",
+      "tornado.util.basestring_type.rstrip",
+      "tornado.util.unicode_type.rstrip",
+      "tornado.web.unicode_type.rstrip",
+      "typing.Text.rstrip"
+    ],
+    "_random.Random.random": [
+      "random.Random.random",
+      "random.random"
+    ],
+    "_thread._local": [
+      "threading.local"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "abc.abstractmethod": [
+      "selectors.abstractmethod"
+    ],
+    "asyncio.tasks.sleep": [
+      "asyncio.sleep"
+    ],
+    "concurrent.futures._base.Future.__init__": [
+      "concurrent.futures.Future.__init__"
+    ],
+    "concurrent.futures._base.Future.exception": [
+      "concurrent.futures.Future.exception"
+    ],
+    "concurrent.futures._base.Future.result": [
+      "concurrent.futures.Future.result"
+    ],
+    "concurrent.futures._base.Future.set_exception": [
+      "concurrent.futures.Future.set_exception"
+    ],
+    "concurrent.futures._base.Future.set_result": [
+      "concurrent.futures.Future.set_result"
+    ],
+    "functools.partial.__call__": [
+      "tornado.routing.partial.__call__"
+    ],
+    "functools.wraps": [
+      "unittest.result.wraps",
+      "unittest.signals.wraps"
+    ],
+    "inspect.isclass": [
+      "tornado.web.isclass"
+    ],
+    "random.Random.uniform": [
+      "random.uniform"
+    ],
+    "re.Pattern.match": [
+      "tornado.iostream.Pattern.match",
+      "tornado.routing.Pattern.match"
+    ],
+    "sniffio._impl.current_async_library": [
+      "sniffio.current_async_library"
+    ],
+    "trio._timeouts.sleep": [
+      "trio.sleep"
+    ],
+    "typing.TypeVar": [
+      "tornado.ioloop.TypeVar",
+      "tornado.iostream.TypeVar",
+      "tornado.platform.asyncio.TypeVar",
+      "tornado.web.TypeVar"
+    ],
+    "typing.cast": [
+      "tornado.http1connection.cast",
+      "tornado.httpclient.cast",
+      "tornado.log.cast",
+      "tornado.web.cast"
+    ],
+    "typing.overload": [
+      "tornado.gen.overload",
+      "tornado.routing.overload",
+      "tornado.web.overload"
+    ]
+  },
+  "commit": "4410996dd9a96864a2733ce0778bcaa112b72811",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "attrs": "26.1.0",
+    "idna": "3.20",
+    "iniconfig": "2.3.1",
+    "outcome": "1.3.0.post0",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0",
+    "sniffio": "1.3.1",
+    "sortedcontainers": "2.4.0",
+    "tornado": "6.6",
+    "trio": "0.34.0"
+  },
+  "dropped": {
+    "client_callbacks": 118,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "tenacity": [
+      "<builtin>.classmethod",
+      "<builtin>.object",
+      "<builtin>.property",
+      "abc.abstractmethod",
+      "dataclasses.dataclass",
+      "dataclasses.dataclass.wrap",
+      "dataclasses.field",
+      "tenacity._has_tornado",
+      "tenacity.retry.retry_if_exception_type.__init__",
+      "tenacity.wait.wait_none.__init__",
+      "typing.ParamSpec",
+      "typing.TypeVar",
+      "typing.overload",
+      "typing.override"
+    ],
+    "tenacity.AttemptManager.__aexit__": [
+      "tenacity.AttemptManager.__exit__"
+    ],
+    "tenacity.AttemptManager.__exit__": [
+      "tenacity.RetryCallState.set_exception",
+      "tenacity.RetryCallState.set_result"
+    ],
+    "tenacity.BaseRetrying.__getstate__": [
+      "<builtin>.dict.items"
+    ],
+    "tenacity.BaseRetrying.__init__": [
+      "_thread._local",
+      "tenacity._is_no_wait",
+      "tenacity.wait.wait_none.__init__"
+    ],
+    "tenacity.BaseRetrying.__iter__": [
+      "<builtin>.isinstance",
+      "concurrent.futures._base.Future.exception",
+      "tenacity.AttemptManager.__init__",
+      "tenacity.BaseRetrying.begin",
+      "tenacity.BaseRetrying.iter",
+      "tenacity.Future.failed",
+      "tenacity.RetryCallState.__init__",
+      "tenacity.RetryCallState.prepare_for_next_attempt",
+      "tenacity.nap.sleep"
+    ],
+    "tenacity.BaseRetrying.__repr__": [
+      "<builtin>.id"
+    ],
+    "tenacity.BaseRetrying.__setstate__": [
+      "<builtin>.dict.update",
+      "_thread._local"
+    ],
+    "tenacity.BaseRetrying._add_action_func": [
+      "<builtin>.list.append",
+      "tenacity.BaseRetrying.iter_state"
+    ],
+    "tenacity.BaseRetrying._begin_iter": [
+      "<builtin>.isinstance",
+      "concurrent.futures._base.Future.exception",
+      "tenacity.BaseRetrying._add_action_func",
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.Future.failed",
+      "tenacity.IterState.reset",
+      "tenacity.asyncio.AsyncRetrying._add_action_func"
+    ],
+    "tenacity.BaseRetrying._post_retry_check_actions": [
+      "tenacity.BaseRetrying._add_action_func",
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.asyncio.AsyncRetrying._add_action_func"
+    ],
+    "tenacity.BaseRetrying._post_retry_check_actions.<lambda1>": [
+      "concurrent.futures._base.Future.result"
+    ],
+    "tenacity.BaseRetrying._post_stop_check_actions": [
+      "tenacity.BaseRetrying._add_action_func",
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.asyncio.AsyncRetrying._add_action_func"
+    ],
+    "tenacity.BaseRetrying._post_stop_check_actions.exc_check": [
+      "<builtin>.ValueError",
+      "concurrent.futures._base.Future.exception",
+      "tenacity.RetryError.__init__",
+      "tenacity.RetryError.reraise",
+      "typing.cast"
+    ],
+    "tenacity.BaseRetrying._post_stop_check_actions.next_action": [
+      "tenacity.BaseRetrying.statistics",
+      "tenacity.RetryAction.__init__"
+    ],
+    "tenacity.BaseRetrying._run_retry": [
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.retry._retry_never.__call__",
+      "tenacity.retry.retry_any.__call__",
+      "tenacity.retry.retry_if_exception.__call__",
+      "tenacity.retry.retry_if_exception_cause_type.__call__",
+      "tenacity.retry.retry_if_not_exception_message.__call__",
+      "tenacity.retry.retry_if_result.__call__",
+      "tenacity.retry.retry_unless_exception_type.__call__"
+    ],
+    "tenacity.BaseRetrying._run_stop": [
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.BaseRetrying.statistics",
+      "tenacity.RetryCallState.seconds_since_start",
+      "tenacity.stop._stop_never.__call__",
+      "tenacity.stop.stop_after_attempt.__call__"
+    ],
+    "tenacity.BaseRetrying._run_wait": [
+      "tenacity.wait.wait_chain.__call__",
+      "tenacity.wait.wait_fixed.__call__"
+    ],
+    "tenacity.BaseRetrying.begin": [
+      "<builtin>.dict.clear",
+      "tenacity.BaseRetrying.statistics",
+      "time.monotonic"
+    ],
+    "tenacity.BaseRetrying.copy": [
+      "tenacity.BaseRetrying.__init__",
+      "tenacity._first_set",
+      "tenacity.asyncio.AsyncRetrying.__init__",
+      "tenacity.tornadoweb.TornadoRetrying.__init__"
+    ],
+    "tenacity.BaseRetrying.iter": [
+      "tenacity.BaseRetrying._begin_iter",
+      "tenacity.BaseRetrying._begin_iter.<lambda1>",
+      "tenacity.BaseRetrying._post_retry_check_actions",
+      "tenacity.BaseRetrying._post_retry_check_actions.<lambda1>",
+      "tenacity.BaseRetrying._post_stop_check_actions",
+      "tenacity.BaseRetrying._post_stop_check_actions.<lambda1>",
+      "tenacity.BaseRetrying._post_stop_check_actions.exc_check",
+      "tenacity.BaseRetrying._post_stop_check_actions.next_action",
+      "tenacity.BaseRetrying._run_retry",
+      "tenacity.BaseRetrying._run_stop",
+      "tenacity.BaseRetrying._run_wait",
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.after.after_nothing",
+      "tenacity.before.before_log.log_it",
+      "tenacity.before.before_nothing",
+      "tenacity.before_sleep.before_sleep_log.log_it"
+    ],
+    "tenacity.BaseRetrying.iter_state": [
+      "<builtin>.hasattr"
+    ],
+    "tenacity.BaseRetrying.statistics": [
+      "<builtin>.hasattr",
+      "typing.cast"
+    ],
+    "tenacity.BaseRetrying.wraps": [
+      "functools.partial.__call__",
+      "functools.wraps",
+      "typing.cast"
+    ],
+    "tenacity.BaseRetrying.wraps.retry_with": [
+      "tenacity.BaseRetrying.copy",
+      "tenacity.BaseRetrying.wraps",
+      "tenacity.asyncio.AsyncRetrying.wraps"
+    ],
+    "tenacity.BaseRetrying.wraps.wrapped_f": [
+      "<builtin>.dict.clear",
+      "tenacity.BaseRetrying.copy",
+      "tenacity.Retrying.__call__"
+    ],
+    "tenacity.Future.__init__": [
+      "<builtin>.super",
+      "concurrent.futures._base.Future.__init__"
+    ],
+    "tenacity.Future.construct": [
+      "concurrent.futures._base.Future.set_exception",
+      "concurrent.futures._base.Future.set_result",
+      "tenacity.Future.__init__"
+    ],
+    "tenacity.Future.failed": [
+      "concurrent.futures._base.Future.exception"
+    ],
+    "tenacity.RetryAction.__init__": [
+      "<builtin>.float"
+    ],
+    "tenacity.RetryCallState.__init__": [
+      "time.monotonic"
+    ],
+    "tenacity.RetryCallState.__repr__": [
+      "<builtin>.float",
+      "<builtin>.id",
+      "<builtin>.round",
+      "concurrent.futures._base.Future.exception",
+      "concurrent.futures._base.Future.result",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.RetryCallState.get_fn_name": [
+      "<builtin>.str",
+      "tenacity.BaseRetrying.__str__",
+      "tenacity._utils.get_callback_name"
+    ],
+    "tenacity.RetryCallState.set_exception": [
+      "concurrent.futures._base.Future.set_exception",
+      "tenacity.Future.__init__",
+      "time.monotonic"
+    ],
+    "tenacity.RetryCallState.set_result": [
+      "concurrent.futures._base.Future.set_result",
+      "tenacity.Future.__init__",
+      "time.monotonic"
+    ],
+    "tenacity.RetryError.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.super"
+    ],
+    "tenacity.RetryError.reraise": [
+      "<builtin>.BaseException.with_traceback",
+      "<builtin>.isinstance",
+      "concurrent.futures._base.Future.exception",
+      "concurrent.futures._base.Future.result",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.Retrying.__call__": [
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "sys.exc_info",
+      "tenacity.BaseRetrying.begin",
+      "tenacity.BaseRetrying.iter",
+      "tenacity.RetryCallState.__init__",
+      "tenacity.RetryCallState.prepare_for_next_attempt",
+      "tenacity.RetryCallState.set_exception",
+      "tenacity.RetryCallState.set_result",
+      "tenacity.nap.sleep"
+    ],
+    "tenacity._utils.find_ordinal": [
+      "tenacity._utils.find_ordinal"
+    ],
+    "tenacity._utils.get_callback_name": [
+      "<builtin>.list.append",
+      "<builtin>.list.insert",
+      "<builtin>.str.join",
+      "contextlib.suppress"
+    ],
+    "tenacity._utils.is_coroutine_callable": [
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "inspect.isclass",
+      "inspect.iscoroutinefunction"
+    ],
+    "tenacity._utils.to_ordinal": [
+      "tenacity._utils.find_ordinal"
+    ],
+    "tenacity._utils.to_seconds": [
+      "<builtin>.float",
+      "<builtin>.isinstance",
+      "datetime.timedelta.total_seconds"
+    ],
+    "tenacity._utils.wrap_to_async_func": [
+      "tenacity._utils.is_coroutine_callable"
+    ],
+    "tenacity._utils.wrap_to_async_func.inner": [
+      "tenacity.BaseRetrying._begin_iter.<lambda1>",
+      "tenacity.BaseRetrying._post_retry_check_actions",
+      "tenacity.BaseRetrying._post_retry_check_actions.<lambda1>",
+      "tenacity.BaseRetrying._post_stop_check_actions",
+      "tenacity.BaseRetrying._post_stop_check_actions.<lambda1>",
+      "tenacity.BaseRetrying._post_stop_check_actions.exc_check",
+      "tenacity.BaseRetrying._post_stop_check_actions.next_action",
+      "tenacity.after.after_nothing",
+      "tenacity.before.before_nothing",
+      "tenacity.retry.retry_if_exception.__call__",
+      "tenacity.retry.retry_if_result.__call__",
+      "tenacity.stop._stop_never.__call__",
+      "tenacity.stop.stop_after_attempt.__call__",
+      "tenacity.wait.wait_fixed.__call__"
+    ],
+    "tenacity.after.after_log.log_it": [
+      "tenacity.RetryCallState.get_fn_name",
+      "tenacity.RetryCallState.seconds_since_start",
+      "tenacity._utils.to_ordinal",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "tenacity.asyncio": [
+      "tenacity.retry.retry_if_exception_type.__init__",
+      "tenacity.wait.wait_none.__init__",
+      "typing.ParamSpec",
+      "typing.TypeVar",
+      "typing.override"
+    ],
+    "tenacity.asyncio.AsyncRetrying.__aiter__": [
+      "tenacity.BaseRetrying.begin",
+      "tenacity.RetryCallState.__init__"
+    ],
+    "tenacity.asyncio.AsyncRetrying.__anext__": [
+      "<builtin>.isinstance",
+      "concurrent.futures._base.Future.exception",
+      "tenacity.AttemptManager.__init__",
+      "tenacity.Future.failed",
+      "tenacity.RetryCallState.prepare_for_next_attempt",
+      "tenacity.asyncio.AsyncRetrying.iter",
+      "tenacity.asyncio._portable_async_sleep"
+    ],
+    "tenacity.asyncio.AsyncRetrying.__call__": [
+      "<builtin>.isinstance",
+      "sys.exc_info",
+      "tenacity.BaseRetrying.begin",
+      "tenacity.RetryCallState.__init__",
+      "tenacity.RetryCallState.prepare_for_next_attempt",
+      "tenacity.RetryCallState.set_exception",
+      "tenacity.RetryCallState.set_result",
+      "tenacity._utils.is_coroutine_callable",
+      "tenacity.asyncio.AsyncRetrying.iter",
+      "tenacity.asyncio._portable_async_sleep",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "tenacity.asyncio.AsyncRetrying.__init__": [
+      "<builtin>.super",
+      "tenacity.BaseRetrying.__init__"
+    ],
+    "tenacity.asyncio.AsyncRetrying.__iter__": [
+      "<builtin>.TypeError"
+    ],
+    "tenacity.asyncio.AsyncRetrying._add_action_func": [
+      "<builtin>.list.append",
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity._utils.wrap_to_async_func"
+    ],
+    "tenacity.asyncio.AsyncRetrying._run_retry": [
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity._utils.wrap_to_async_func",
+      "tenacity._utils.wrap_to_async_func.inner",
+      "tenacity.asyncio.retry.retry_all.__call__",
+      "tenacity.asyncio.retry.retry_any.__call__",
+      "tenacity.asyncio.retry.retry_if_exception.__call__",
+      "tenacity.asyncio.retry.retry_if_result.__call__"
+    ],
+    "tenacity.asyncio.AsyncRetrying._run_stop": [
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity.BaseRetrying.statistics",
+      "tenacity.RetryCallState.seconds_since_start",
+      "tenacity._utils.wrap_to_async_func",
+      "tenacity._utils.wrap_to_async_func.inner"
+    ],
+    "tenacity.asyncio.AsyncRetrying._run_wait": [
+      "tenacity._utils.wrap_to_async_func",
+      "tenacity._utils.wrap_to_async_func.inner"
+    ],
+    "tenacity.asyncio.AsyncRetrying.iter": [
+      "tenacity.BaseRetrying._begin_iter",
+      "tenacity.BaseRetrying.iter_state",
+      "tenacity._utils.wrap_to_async_func.inner",
+      "tenacity.asyncio.AsyncRetrying._run_retry",
+      "tenacity.asyncio.AsyncRetrying._run_stop",
+      "tenacity.asyncio.AsyncRetrying._run_wait"
+    ],
+    "tenacity.asyncio.AsyncRetrying.wraps": [
+      "<builtin>.super",
+      "functools.partial.__call__",
+      "functools.wraps",
+      "tenacity.BaseRetrying.wraps",
+      "typing.cast"
+    ],
+    "tenacity.asyncio.AsyncRetrying.wraps.async_wrapped": [
+      "<builtin>.dict.clear",
+      "tenacity.BaseRetrying.copy",
+      "tenacity.asyncio.AsyncRetrying.__call__"
+    ],
+    "tenacity.asyncio._portable_async_sleep": [
+      "asyncio.tasks.sleep",
+      "sniffio._impl.current_async_library",
+      "trio._timeouts.sleep"
+    ],
+    "tenacity.asyncio.retry": [
+      "abc.abstractmethod",
+      "typing.override"
+    ],
+    "tenacity.asyncio.retry.async_retry_base.__and__": [
+      "tenacity.asyncio.retry.retry_all.__init__"
+    ],
+    "tenacity.asyncio.retry.async_retry_base.__or__": [
+      "tenacity.asyncio.retry.retry_any.__init__"
+    ],
+    "tenacity.asyncio.retry.async_retry_base.__rand__": [
+      "tenacity.asyncio.retry.retry_all.__init__"
+    ],
+    "tenacity.asyncio.retry.async_retry_base.__ror__": [
+      "tenacity.asyncio.retry.retry_any.__init__"
+    ],
+    "tenacity.asyncio.retry.retry_all.__call__": [
+      "tenacity._utils.wrap_to_async_func",
+      "tenacity._utils.wrap_to_async_func.inner",
+      "tenacity.asyncio.retry.retry_if_result.__call__"
+    ],
+    "tenacity.asyncio.retry.retry_any.__call__": [
+      "tenacity._utils.wrap_to_async_func",
+      "tenacity._utils.wrap_to_async_func.inner",
+      "tenacity.asyncio.retry.retry_if_exception.__call__",
+      "tenacity.asyncio.retry.retry_if_result.__call__"
+    ],
+    "tenacity.asyncio.retry.retry_if_exception.__call__": [
+      "concurrent.futures._base.Future.exception",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.asyncio.retry.retry_if_result.__call__": [
+      "concurrent.futures._base.Future.result",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.before.before_log.log_it": [
+      "tenacity.RetryCallState.get_fn_name",
+      "tenacity._utils.to_ordinal",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "tenacity.before_sleep.before_sleep_log.log_it": [
+      "<builtin>.str.join",
+      "<builtin>.str.rstrip",
+      "<builtin>.type",
+      "concurrent.futures._base.Future.exception",
+      "concurrent.futures._base.Future.result",
+      "logging.Logger.log",
+      "tenacity.Future.failed",
+      "tenacity.RetryCallState.get_fn_name",
+      "traceback.format_exception"
+    ],
+    "tenacity.nap.sleep": [
+      "time.sleep"
+    ],
+    "tenacity.retry": [
+      "<builtin>.callable",
+      "<builtin>.len",
+      "abc.abstractmethod",
+      "tenacity.retry",
+      "tenacity.retry.wrap",
+      "typing.override"
+    ],
+    "tenacity.retry.retry_all.__call__": [
+      "<builtin>.all",
+      "tenacity.retry.retry_if_result.__call__"
+    ],
+    "tenacity.retry.retry_any.__call__": [
+      "<builtin>.any",
+      "tenacity.retry.retry_if_exception.__call__",
+      "tenacity.retry.retry_if_result.__call__"
+    ],
+    "tenacity.retry.retry_base.__and__": [
+      "<builtin>.isinstance",
+      "tenacity.asyncio.retry.async_retry_base.__rand__",
+      "tenacity.retry.retry_all.__init__",
+      "tenacity.retry.retry_base.__rand__"
+    ],
+    "tenacity.retry.retry_base.__or__": [
+      "<builtin>.isinstance",
+      "tenacity.asyncio.retry.async_retry_base.__ror__",
+      "tenacity.retry.retry_any.__init__",
+      "tenacity.retry.retry_base.__ror__"
+    ],
+    "tenacity.retry.retry_base.__rand__": [
+      "<builtin>.isinstance",
+      "tenacity.retry.retry_all.__init__"
+    ],
+    "tenacity.retry.retry_base.__ror__": [
+      "<builtin>.isinstance",
+      "tenacity.retry.retry_any.__init__"
+    ],
+    "tenacity.retry.retry_if_exception.__call__": [
+      "concurrent.futures._base.Future.exception",
+      "tenacity.Future.failed",
+      "tenacity.retry.retry_if_exception_message._check",
+      "tenacity.retry.retry_if_exception_type._check",
+      "tenacity.retry.retry_if_not_exception_type._check"
+    ],
+    "tenacity.retry.retry_if_exception_cause_type.__call__": [
+      "<builtin>.id",
+      "<builtin>.isinstance",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "concurrent.futures._base.Future.exception",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.retry.retry_if_exception_message.__init__": [
+      "<builtin>.TypeError",
+      "<builtin>.super",
+      "re.compile",
+      "tenacity.retry.retry_if_exception.__init__"
+    ],
+    "tenacity.retry.retry_if_exception_message._check": [
+      "<builtin>.bool",
+      "<builtin>.str",
+      "re.Pattern.match"
+    ],
+    "tenacity.retry.retry_if_exception_type.__init__": [
+      "<builtin>.super",
+      "tenacity.retry.retry_if_exception.__init__"
+    ],
+    "tenacity.retry.retry_if_exception_type._check": [
+      "<builtin>.isinstance"
+    ],
+    "tenacity.retry.retry_if_not_exception_message.__call__": [
+      "concurrent.futures._base.Future.exception",
+      "tenacity.Future.failed",
+      "tenacity.retry.retry_if_not_exception_message._check"
+    ],
+    "tenacity.retry.retry_if_not_exception_message._check": [
+      "<builtin>.super",
+      "tenacity.retry.retry_if_exception_message._check"
+    ],
+    "tenacity.retry.retry_if_not_exception_type.__init__": [
+      "<builtin>.super",
+      "tenacity.retry.retry_if_exception.__init__"
+    ],
+    "tenacity.retry.retry_if_not_exception_type._check": [
+      "<builtin>.isinstance"
+    ],
+    "tenacity.retry.retry_if_not_result.__call__": [
+      "concurrent.futures._base.Future.result",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.retry.retry_if_result.__call__": [
+      "concurrent.futures._base.Future.result",
+      "tenacity.Future.failed"
+    ],
+    "tenacity.retry.retry_unless_exception_type.__call__": [
+      "concurrent.futures._base.Future.exception",
+      "tenacity.Future.failed",
+      "tenacity.retry.retry_unless_exception_type._check"
+    ],
+    "tenacity.retry.retry_unless_exception_type.__init__": [
+      "<builtin>.super",
+      "tenacity.retry.retry_if_exception.__init__"
+    ],
+    "tenacity.retry.retry_unless_exception_type._check": [
+      "<builtin>.isinstance"
+    ],
+    "tenacity.retry.wrap": [
+      "<builtin>.dict.get",
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "tenacity.BaseRetrying.__init__",
+      "tenacity.BaseRetrying.wraps",
+      "tenacity._has_tornado",
+      "tenacity._utils.is_coroutine_callable",
+      "tenacity.asyncio.AsyncRetrying.__init__",
+      "tenacity.asyncio.AsyncRetrying.wraps",
+      "tenacity.tornadoweb.TornadoRetrying.__init__",
+      "tornado.gen.is_coroutine_function"
+    ],
+    "tenacity.stop": [
+      "abc.abstractmethod",
+      "typing.override"
+    ],
+    "tenacity.stop.stop_after_delay.__call__": [
+      "tenacity.RetryCallState.seconds_since_start"
+    ],
+    "tenacity.stop.stop_after_delay.__init__": [
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.stop.stop_all.__call__": [
+      "<builtin>.all",
+      "tenacity.stop.stop_after_attempt.__call__",
+      "tenacity.stop.stop_after_delay.__call__"
+    ],
+    "tenacity.stop.stop_any.__call__": [
+      "<builtin>.any",
+      "tenacity.stop.stop_after_attempt.__call__",
+      "tenacity.stop.stop_after_delay.__call__"
+    ],
+    "tenacity.stop.stop_base.__and__": [
+      "tenacity.stop.stop_all.__init__"
+    ],
+    "tenacity.stop.stop_base.__or__": [
+      "tenacity.stop.stop_any.__init__"
+    ],
+    "tenacity.stop.stop_before_delay.__call__": [
+      "tenacity.RetryCallState.seconds_since_start"
+    ],
+    "tenacity.stop.stop_before_delay.__init__": [
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.tornadoweb": [
+      "tornado.gen.coroutine",
+      "typing.TypeVar",
+      "typing.override"
+    ],
+    "tenacity.tornadoweb.TornadoRetrying.__call__": [
+      "<builtin>.isinstance",
+      "sys.exc_info",
+      "tenacity.BaseRetrying.begin",
+      "tenacity.BaseRetrying.iter",
+      "tenacity.RetryCallState.__init__",
+      "tenacity.RetryCallState.prepare_for_next_attempt",
+      "tenacity.RetryCallState.set_exception",
+      "tenacity.RetryCallState.set_result",
+      "tornado.gen.Return",
+      "tornado.gen.coroutine.wrapper",
+      "tornado.gen.sleep"
+    ],
+    "tenacity.tornadoweb.TornadoRetrying.__init__": [
+      "<builtin>.super",
+      "tenacity.BaseRetrying.__init__"
+    ],
+    "tenacity.wait": [
+      "abc.abstractmethod",
+      "typing.override"
+    ],
+    "tenacity.wait.wait_base.__add__": [
+      "tenacity.wait.wait_combine.__init__"
+    ],
+    "tenacity.wait.wait_base.__radd__": [
+      "<builtin>.isinstance",
+      "tenacity.wait.wait_combine.__init__"
+    ],
+    "tenacity.wait.wait_chain.__call__": [
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.min",
+      "tenacity.wait.wait_fixed.__call__"
+    ],
+    "tenacity.wait.wait_chain.__init__": [
+      "<builtin>.ValueError"
+    ],
+    "tenacity.wait.wait_combine.__call__": [
+      "<builtin>.float",
+      "<builtin>.sum",
+      "tenacity.wait.wait_combine.__call__",
+      "tenacity.wait.wait_fixed.__call__",
+      "tenacity.wait.wait_random.__call__"
+    ],
+    "tenacity.wait.wait_exception.__call__": [
+      "<builtin>.RuntimeError",
+      "concurrent.futures._base.Future.exception"
+    ],
+    "tenacity.wait.wait_exponential.__call__": [
+      "<builtin>.max",
+      "<builtin>.min",
+      "math.isfinite",
+      "math.log"
+    ],
+    "tenacity.wait.wait_exponential.__init__": [
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.wait.wait_exponential_jitter.__call__": [
+      "<builtin>.max",
+      "<builtin>.min",
+      "random.Random.uniform"
+    ],
+    "tenacity.wait.wait_exponential_jitter.__init__": [
+      "<builtin>.ValueError",
+      "_warnings.warn",
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.wait.wait_fixed.__init__": [
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.wait.wait_incrementing.__call__": [
+      "<builtin>.max",
+      "<builtin>.min"
+    ],
+    "tenacity.wait.wait_incrementing.__init__": [
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.wait.wait_none.__init__": [
+      "<builtin>.super",
+      "tenacity.wait.wait_fixed.__init__"
+    ],
+    "tenacity.wait.wait_random.__call__": [
+      "_random.Random.random"
+    ],
+    "tenacity.wait.wait_random.__init__": [
+      "tenacity._utils.to_seconds"
+    ],
+    "tenacity.wait.wait_random_exponential.__call__": [
+      "<builtin>.super",
+      "random.Random.uniform",
+      "tenacity.wait.wait_exponential.__call__"
+    ]
+  },
+  "executed": [
+    "tenacity.AttemptManager.__aenter__",
+    "tenacity.AttemptManager.__aexit__",
+    "tenacity.AttemptManager.__enter__",
+    "tenacity.AttemptManager.__exit__",
+    "tenacity.AttemptManager.__init__",
+    "tenacity.BaseRetrying.__getstate__",
+    "tenacity.BaseRetrying.__init__",
+    "tenacity.BaseRetrying.__iter__",
+    "tenacity.BaseRetrying.__repr__",
+    "tenacity.BaseRetrying.__setstate__",
+    "tenacity.BaseRetrying.__str__",
+    "tenacity.BaseRetrying._add_action_func",
+    "tenacity.BaseRetrying._begin_iter",
+    "tenacity.BaseRetrying._begin_iter.<lambda1>",
+    "tenacity.BaseRetrying._post_retry_check_actions",
+    "tenacity.BaseRetrying._post_retry_check_actions.<lambda1>",
+    "tenacity.BaseRetrying._post_stop_check_actions",
+    "tenacity.BaseRetrying._post_stop_check_actions.<lambda1>",
+    "tenacity.BaseRetrying._post_stop_check_actions.exc_check",
+    "tenacity.BaseRetrying._post_stop_check_actions.next_action",
+    "tenacity.BaseRetrying._run_retry",
+    "tenacity.BaseRetrying._run_stop",
+    "tenacity.BaseRetrying._run_wait",
+    "tenacity.BaseRetrying.begin",
+    "tenacity.BaseRetrying.copy",
+    "tenacity.BaseRetrying.iter",
+    "tenacity.BaseRetrying.iter_state",
+    "tenacity.BaseRetrying.statistics",
+    "tenacity.BaseRetrying.wraps",
+    "tenacity.BaseRetrying.wraps.retry_with",
+    "tenacity.BaseRetrying.wraps.wrapped_f",
+    "tenacity.Future.__init__",
+    "tenacity.Future.construct",
+    "tenacity.Future.failed",
+    "tenacity.IterState.reset",
+    "tenacity.RetryAction.__init__",
+    "tenacity.RetryCallState.__init__",
+    "tenacity.RetryCallState.__repr__",
+    "tenacity.RetryCallState.get_fn_name",
+    "tenacity.RetryCallState.prepare_for_next_attempt",
+    "tenacity.RetryCallState.seconds_since_start",
+    "tenacity.RetryCallState.set_exception",
+    "tenacity.RetryCallState.set_result",
+    "tenacity.RetryError.__init__",
+    "tenacity.RetryError.__str__",
+    "tenacity.RetryError.reraise",
+    "tenacity.Retrying.__call__",
+    "tenacity._first_set",
+    "tenacity._has_tornado",
+    "tenacity._is_no_wait",
+    "tenacity._utils.find_ordinal",
+    "tenacity._utils.get_callback_name",
+    "tenacity._utils.is_coroutine_callable",
+    "tenacity._utils.to_ordinal",
+    "tenacity._utils.to_seconds",
+    "tenacity._utils.wrap_to_async_func",
+    "tenacity._utils.wrap_to_async_func.inner",
+    "tenacity.after.after_log",
+    "tenacity.after.after_log.log_it",
+    "tenacity.after.after_nothing",
+    "tenacity.asyncio.AsyncRetrying.__aiter__",
+    "tenacity.asyncio.AsyncRetrying.__anext__",
+    "tenacity.asyncio.AsyncRetrying.__call__",
+    "tenacity.asyncio.AsyncRetrying.__init__",
+    "tenacity.asyncio.AsyncRetrying.__iter__",
+    "tenacity.asyncio.AsyncRetrying._add_action_func",
+    "tenacity.asyncio.AsyncRetrying._run_retry",
+    "tenacity.asyncio.AsyncRetrying._run_stop",
+    "tenacity.asyncio.AsyncRetrying._run_wait",
+    "tenacity.asyncio.AsyncRetrying.iter",
+    "tenacity.asyncio.AsyncRetrying.wraps",
+    "tenacity.asyncio.AsyncRetrying.wraps.async_wrapped",
+    "tenacity.asyncio._portable_async_sleep",
+    "tenacity.asyncio.retry.async_retry_base.__and__",
+    "tenacity.asyncio.retry.async_retry_base.__or__",
+    "tenacity.asyncio.retry.async_retry_base.__rand__",
+    "tenacity.asyncio.retry.async_retry_base.__ror__",
+    "tenacity.asyncio.retry.retry_all.__call__",
+    "tenacity.asyncio.retry.retry_all.__init__",
+    "tenacity.asyncio.retry.retry_any.__call__",
+    "tenacity.asyncio.retry.retry_any.__init__",
+    "tenacity.asyncio.retry.retry_if_exception.__call__",
+    "tenacity.asyncio.retry.retry_if_exception.__init__",
+    "tenacity.asyncio.retry.retry_if_result.__call__",
+    "tenacity.asyncio.retry.retry_if_result.__init__",
+    "tenacity.before.before_log",
+    "tenacity.before.before_log.log_it",
+    "tenacity.before.before_nothing",
+    "tenacity.before_sleep.before_sleep_log",
+    "tenacity.before_sleep.before_sleep_log.log_it",
+    "tenacity.nap.sleep",
+    "tenacity.retry",
+    "tenacity.retry._retry_never.__call__",
+    "tenacity.retry.retry_all.__call__",
+    "tenacity.retry.retry_all.__init__",
+    "tenacity.retry.retry_any.__call__",
+    "tenacity.retry.retry_any.__init__",
+    "tenacity.retry.retry_base.__and__",
+    "tenacity.retry.retry_base.__or__",
+    "tenacity.retry.retry_base.__rand__",
+    "tenacity.retry.retry_base.__ror__",
+    "tenacity.retry.retry_if_exception.__call__",
+    "tenacity.retry.retry_if_exception.__init__",
+    "tenacity.retry.retry_if_exception_cause_type.__call__",
+    "tenacity.retry.retry_if_exception_cause_type.__init__",
+    "tenacity.retry.retry_if_exception_message.__init__",
+    "tenacity.retry.retry_if_exception_message._check",
+    "tenacity.retry.retry_if_exception_type.__init__",
+    "tenacity.retry.retry_if_exception_type._check",
+    "tenacity.retry.retry_if_not_exception_message.__call__",
+    "tenacity.retry.retry_if_not_exception_message._check",
+    "tenacity.retry.retry_if_not_exception_type.__init__",
+    "tenacity.retry.retry_if_not_exception_type._check",
+    "tenacity.retry.retry_if_not_result.__call__",
+    "tenacity.retry.retry_if_not_result.__init__",
+    "tenacity.retry.retry_if_result.__call__",
+    "tenacity.retry.retry_if_result.__init__",
+    "tenacity.retry.retry_unless_exception_type.__call__",
+    "tenacity.retry.retry_unless_exception_type.__init__",
+    "tenacity.retry.retry_unless_exception_type._check",
+    "tenacity.retry.wrap",
+    "tenacity.stop._stop_never.__call__",
+    "tenacity.stop.stop_after_attempt.__call__",
+    "tenacity.stop.stop_after_attempt.__init__",
+    "tenacity.stop.stop_after_delay.__call__",
+    "tenacity.stop.stop_after_delay.__init__",
+    "tenacity.stop.stop_all.__call__",
+    "tenacity.stop.stop_all.__init__",
+    "tenacity.stop.stop_any.__call__",
+    "tenacity.stop.stop_any.__init__",
+    "tenacity.stop.stop_base.__and__",
+    "tenacity.stop.stop_base.__or__",
+    "tenacity.stop.stop_before_delay.__call__",
+    "tenacity.stop.stop_before_delay.__init__",
+    "tenacity.tornadoweb.TornadoRetrying.__call__",
+    "tenacity.tornadoweb.TornadoRetrying.__init__",
+    "tenacity.wait.wait_base.__add__",
+    "tenacity.wait.wait_base.__radd__",
+    "tenacity.wait.wait_chain.__call__",
+    "tenacity.wait.wait_chain.__init__",
+    "tenacity.wait.wait_combine.__call__",
+    "tenacity.wait.wait_combine.__init__",
+    "tenacity.wait.wait_exception.__call__",
+    "tenacity.wait.wait_exception.__init__",
+    "tenacity.wait.wait_exponential.__call__",
+    "tenacity.wait.wait_exponential.__init__",
+    "tenacity.wait.wait_exponential_jitter.__call__",
+    "tenacity.wait.wait_exponential_jitter.__init__",
+    "tenacity.wait.wait_fixed.__call__",
+    "tenacity.wait.wait_fixed.__init__",
+    "tenacity.wait.wait_incrementing.__call__",
+    "tenacity.wait.wait_incrementing.__init__",
+    "tenacity.wait.wait_none.__init__",
+    "tenacity.wait.wait_random.__call__",
+    "tenacity.wait.wait_random.__init__",
+    "tenacity.wait.wait_random_exponential.__call__"
+  ],
+  "functions": [
+    "tenacity.AttemptManager.__aenter__",
+    "tenacity.AttemptManager.__aexit__",
+    "tenacity.AttemptManager.__enter__",
+    "tenacity.AttemptManager.__exit__",
+    "tenacity.AttemptManager.__init__",
+    "tenacity.BaseAction.__repr__",
+    "tenacity.BaseAction.__str__",
+    "tenacity.BaseRetrying.__call__",
+    "tenacity.BaseRetrying.__getstate__",
+    "tenacity.BaseRetrying.__init__",
+    "tenacity.BaseRetrying.__iter__",
+    "tenacity.BaseRetrying.__repr__",
+    "tenacity.BaseRetrying.__setstate__",
+    "tenacity.BaseRetrying.__str__",
+    "tenacity.BaseRetrying._add_action_func",
+    "tenacity.BaseRetrying._begin_iter",
+    "tenacity.BaseRetrying._begin_iter.<lambda1>",
+    "tenacity.BaseRetrying._post_retry_check_actions",
+    "tenacity.BaseRetrying._post_retry_check_actions.<lambda1>",
+    "tenacity.BaseRetrying._post_stop_check_actions",
+    "tenacity.BaseRetrying._post_stop_check_actions.<lambda1>",
+    "tenacity.BaseRetrying._post_stop_check_actions.exc_check",
+    "tenacity.BaseRetrying._post_stop_check_actions.next_action",
+    "tenacity.BaseRetrying._run_retry",
+    "tenacity.BaseRetrying._run_stop",
+    "tenacity.BaseRetrying._run_wait",
+    "tenacity.BaseRetrying.begin",
+    "tenacity.BaseRetrying.copy",
+    "tenacity.BaseRetrying.iter",
+    "tenacity.BaseRetrying.iter_state",
+    "tenacity.BaseRetrying.statistics",
+    "tenacity.BaseRetrying.wraps",
+    "tenacity.BaseRetrying.wraps.retry_with",
+    "tenacity.BaseRetrying.wraps.wrapped_f",
+    "tenacity.Future.__init__",
+    "tenacity.Future.construct",
+    "tenacity.Future.failed",
+    "tenacity.IterState.reset",
+    "tenacity.RetryAction.__init__",
+    "tenacity.RetryCallState.__init__",
+    "tenacity.RetryCallState.__repr__",
+    "tenacity.RetryCallState.get_fn_name",
+    "tenacity.RetryCallState.prepare_for_next_attempt",
+    "tenacity.RetryCallState.seconds_since_start",
+    "tenacity.RetryCallState.set_exception",
+    "tenacity.RetryCallState.set_result",
+    "tenacity.RetryError.__init__",
+    "tenacity.RetryError.__str__",
+    "tenacity.RetryError.reraise",
+    "tenacity.Retrying.__call__",
+    "tenacity._AsyncRetryDecorator.__call__",
+    "tenacity._RetryDecorated.__call__",
+    "tenacity._RetryDecorated.__get__",
+    "tenacity._RetryDecorated.retry_with",
+    "tenacity._first_set",
+    "tenacity._has_tornado",
+    "tenacity._is_no_wait",
+    "tenacity._utils.LoggerProtocol.log",
+    "tenacity._utils.find_ordinal",
+    "tenacity._utils.get_callback_name",
+    "tenacity._utils.is_coroutine_callable",
+    "tenacity._utils.override",
+    "tenacity._utils.to_ordinal",
+    "tenacity._utils.to_seconds",
+    "tenacity._utils.wrap_to_async_func",
+    "tenacity._utils.wrap_to_async_func.inner",
+    "tenacity.after.after_log",
+    "tenacity.after.after_log.log_it",
+    "tenacity.after.after_nothing",
+    "tenacity.asyncio.AsyncRetrying.__aiter__",
+    "tenacity.asyncio.AsyncRetrying.__anext__",
+    "tenacity.asyncio.AsyncRetrying.__call__",
+    "tenacity.asyncio.AsyncRetrying.__init__",
+    "tenacity.asyncio.AsyncRetrying.__iter__",
+    "tenacity.asyncio.AsyncRetrying._add_action_func",
+    "tenacity.asyncio.AsyncRetrying._run_retry",
+    "tenacity.asyncio.AsyncRetrying._run_stop",
+    "tenacity.asyncio.AsyncRetrying._run_wait",
+    "tenacity.asyncio.AsyncRetrying.iter",
+    "tenacity.asyncio.AsyncRetrying.wraps",
+    "tenacity.asyncio.AsyncRetrying.wraps.async_wrapped",
+    "tenacity.asyncio._portable_async_sleep",
+    "tenacity.asyncio.retry.async_retry_base.__and__",
+    "tenacity.asyncio.retry.async_retry_base.__call__",
+    "tenacity.asyncio.retry.async_retry_base.__or__",
+    "tenacity.asyncio.retry.async_retry_base.__rand__",
+    "tenacity.asyncio.retry.async_retry_base.__ror__",
+    "tenacity.asyncio.retry.retry_all.__call__",
+    "tenacity.asyncio.retry.retry_all.__init__",
+    "tenacity.asyncio.retry.retry_all.__rand__",
+    "tenacity.asyncio.retry.retry_any.__call__",
+    "tenacity.asyncio.retry.retry_any.__init__",
+    "tenacity.asyncio.retry.retry_any.__ror__",
+    "tenacity.asyncio.retry.retry_if_exception.__call__",
+    "tenacity.asyncio.retry.retry_if_exception.__init__",
+    "tenacity.asyncio.retry.retry_if_result.__call__",
+    "tenacity.asyncio.retry.retry_if_result.__init__",
+    "tenacity.before.before_log",
+    "tenacity.before.before_log.log_it",
+    "tenacity.before.before_nothing",
+    "tenacity.before_sleep.before_sleep_log",
+    "tenacity.before_sleep.before_sleep_log.log_it",
+    "tenacity.before_sleep.before_sleep_nothing",
+    "tenacity.nap.sleep",
+    "tenacity.nap.sleep_using_event.__call__",
+    "tenacity.nap.sleep_using_event.__init__",
+    "tenacity.retry",
+    "tenacity.retry._retry_always.__call__",
+    "tenacity.retry._retry_never.__call__",
+    "tenacity.retry.retry_all.__call__",
+    "tenacity.retry.retry_all.__init__",
+    "tenacity.retry.retry_all.__rand__",
+    "tenacity.retry.retry_any.__call__",
+    "tenacity.retry.retry_any.__init__",
+    "tenacity.retry.retry_any.__ror__",
+    "tenacity.retry.retry_base.__and__",
+    "tenacity.retry.retry_base.__call__",
+    "tenacity.retry.retry_base.__or__",
+    "tenacity.retry.retry_base.__rand__",
+    "tenacity.retry.retry_base.__ror__",
+    "tenacity.retry.retry_if_exception.__call__",
+    "tenacity.retry.retry_if_exception.__init__",
+    "tenacity.retry.retry_if_exception_cause_type.__call__",
+    "tenacity.retry.retry_if_exception_cause_type.__init__",
+    "tenacity.retry.retry_if_exception_message.__init__",
+    "tenacity.retry.retry_if_exception_message._check",
+    "tenacity.retry.retry_if_exception_type.__init__",
+    "tenacity.retry.retry_if_exception_type._check",
+    "tenacity.retry.retry_if_not_exception_message.__call__",
+    "tenacity.retry.retry_if_not_exception_message._check",
+    "tenacity.retry.retry_if_not_exception_type.__init__",
+    "tenacity.retry.retry_if_not_exception_type._check",
+    "tenacity.retry.retry_if_not_result.__call__",
+    "tenacity.retry.retry_if_not_result.__init__",
+    "tenacity.retry.retry_if_result.__call__",
+    "tenacity.retry.retry_if_result.__init__",
+    "tenacity.retry.retry_unless_exception_type.__call__",
+    "tenacity.retry.retry_unless_exception_type.__init__",
+    "tenacity.retry.retry_unless_exception_type._check",
+    "tenacity.retry.wrap",
+    "tenacity.stop._stop_never.__call__",
+    "tenacity.stop.stop_after_attempt.__call__",
+    "tenacity.stop.stop_after_attempt.__init__",
+    "tenacity.stop.stop_after_delay.__call__",
+    "tenacity.stop.stop_after_delay.__init__",
+    "tenacity.stop.stop_all.__call__",
+    "tenacity.stop.stop_all.__init__",
+    "tenacity.stop.stop_any.__call__",
+    "tenacity.stop.stop_any.__init__",
+    "tenacity.stop.stop_base.__and__",
+    "tenacity.stop.stop_base.__call__",
+    "tenacity.stop.stop_base.__or__",
+    "tenacity.stop.stop_before_delay.__call__",
+    "tenacity.stop.stop_before_delay.__init__",
+    "tenacity.stop.stop_when_event_set.__call__",
+    "tenacity.stop.stop_when_event_set.__init__",
+    "tenacity.tornadoweb.TornadoRetrying.__call__",
+    "tenacity.tornadoweb.TornadoRetrying.__init__",
+    "tenacity.wait.wait_base.__add__",
+    "tenacity.wait.wait_base.__call__",
+    "tenacity.wait.wait_base.__radd__",
+    "tenacity.wait.wait_chain.__call__",
+    "tenacity.wait.wait_chain.__init__",
+    "tenacity.wait.wait_combine.__call__",
+    "tenacity.wait.wait_combine.__init__",
+    "tenacity.wait.wait_exception.__call__",
+    "tenacity.wait.wait_exception.__init__",
+    "tenacity.wait.wait_exponential.__call__",
+    "tenacity.wait.wait_exponential.__init__",
+    "tenacity.wait.wait_exponential_jitter.__call__",
+    "tenacity.wait.wait_exponential_jitter.__init__",
+    "tenacity.wait.wait_fixed.__call__",
+    "tenacity.wait.wait_fixed.__init__",
+    "tenacity.wait.wait_incrementing.__call__",
+    "tenacity.wait.wait_incrementing.__init__",
+    "tenacity.wait.wait_none.__init__",
+    "tenacity.wait.wait_random.__call__",
+    "tenacity.wait.wait_random.__init__",
+    "tenacity.wait.wait_random_exponential.__call__"
+  ],
+  "modules": [
+    "tenacity",
+    "tenacity._utils",
+    "tenacity.after",
+    "tenacity.asyncio",
+    "tenacity.asyncio.retry",
+    "tenacity.before",
+    "tenacity.before_sleep",
+    "tenacity.nap",
+    "tenacity.retry",
+    "tenacity.stop",
+    "tenacity.tornadoweb",
+    "tenacity.wait"
+  ],
+  "project": "tenacity",
+  "pytest": {
+    "config": "pyproject.toml",
+    "rootdir": "."
+  },
+  "python": "3.14.9",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 185,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

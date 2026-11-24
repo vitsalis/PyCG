@@ -1,0 +1,2271 @@
+# Call-site ledger of face_classification at 2f152a227c528567924fa1c7587a2e6b8eb43309.
+# See macro-benchmark/README.md for the conventions and
+# face_classification.md for the judgements (referred to by number below).
+#
+# An application: seven scripts and three packages under src/, which import
+# each other as top-level modules. No trace: the ground truth comes from
+# reading only. Ordinary unavailable-library operations retain imported
+# attribute/call paths; their results do not establish concrete classes.
+# REQUIREMENTS.txt pins and the Dockerfile's unpinned installations both
+# contribute admitted configurations; the commit date is not a version cap.
+# Actual decorators applied to package definitions use the narrow
+# definition-time exception. Untyped client objects remain opaque (B5).
+# Apart from their explicit constructors, package classes define no special
+# methods, properties or metaclasses; every required site is explicit.
+
+== image_emotion_gender_demo
+
+[image_emotion_gender_demo]
+21:28 call  get_labels('fer2013')
+    -> utils.datasets.get_labels
+22:27 call  get_labels('imdb')
+    -> utils.datasets.get_labels
+32:38 call  load_detection_model(detection_model_path)
+    -> utils.inference.load_detection_model
+33:32 call  load_model(emotion_model_path, compile=False)
+    -> keras.models.load_model
+34:31 call  load_model(gender_model_path, compile=False)
+    -> keras.models.load_model
+41:23 call  load_image(image_path, grayscale=False)
+    -> utils.inference.load_image
+    reject utils.grad_cam.load_image: the name binds utils.inference.load_image by its import
+42:24 call  load_image(image_path, grayscale=True)
+    -> utils.inference.load_image
+    reject utils.grad_cam.load_image: the name binds utils.inference.load_image by its import
+43:24 call  np.squeeze(gray_image)
+    -> numpy.squeeze
+44:31 call  gray_image.astype('uint8')
+    -> numpy.squeeze.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The immediately preceding assignment is np.squeeze(gray_image).
+46:21 call  detect_faces(face_detection, gray_image)
+    -> utils.inference.detect_faces
+48:35 call  apply_offsets(face_coordinates, gender_offsets)
+    -> utils.inference.apply_offsets
+51:35 call  apply_offsets(face_coordinates, emotion_offsets)
+    -> utils.inference.apply_offsets
+55:30 call  cv2.resize(rgb_face, (gender_target_size))
+    -> cv2.resize
+56:31 call  cv2.resize(gray_face, (emotion_target_size))
+    -> cv2.resize
+60:32 call  preprocess_input(rgb_face, False)
+    -> utils.preprocessor.preprocess_input
+61:30 call  np.expand_dims(rgb_face, 0)
+    -> numpy.expand_dims
+62:50 call  gender_classifier.predict(rgb_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path. Additional source: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+63:33 call  np.argmax(gender_prediction)
+    -> numpy.argmax
+66:33 call  preprocess_input(gray_face, True)
+    -> utils.preprocessor.preprocess_input
+67:31 call  np.expand_dims(gray_face, 0)
+    -> numpy.expand_dims
+68:31 call  np.expand_dims(gray_face, -1)
+    -> numpy.expand_dims
+69:34 call  np.argmax(emotion_classifier.predict(gray_face))
+    -> numpy.argmax
+69:61 call  emotion_classifier.predict(gray_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path. Additional source: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+77:22 call  draw_bounding_box(face_coordinates, rgb_image, color)
+    -> utils.inference.draw_bounding_box
+78:14 call  draw_text(face_coordinates, rgb_image, gender_text, color...
+    -> utils.inference.draw_text
+79:14 call  draw_text(face_coordinates, rgb_image, emotion_text, colo...
+    -> utils.inference.draw_text
+81:25 call  cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    -> cv2.cvtColor
+82:12 call  cv2.imwrite('../images/predicted_test_image.png', bgr_image)
+    -> cv2.imwrite
+
+== image_gradcam_demo
+
+[image_gradcam_demo]
+26:24 call  get_labels('fer2013')
+    -> utils.datasets.get_labels
+31:24 call  get_labels('imdb')
+    reject utils.datasets.get_labels: unreachable: task is the constant 'emotion' (line 24), so the elif branch at line 30 never runs (judgement 3)
+    note: unreachable (judgement 3)
+39:19 call  load_model(model_filename, compile=False)
+    -> keras.models.load_model
+41:38 call  load_detection_model(detection_model_path)
+    -> utils.inference.load_detection_model
+44:23 call  load_image(image_path, grayscale=False)
+    -> utils.inference.load_image
+    reject utils.grad_cam.load_image: the name binds utils.inference.load_image by its import
+45:24 call  load_image(image_path, grayscale=True)
+    -> utils.inference.load_image
+    reject utils.grad_cam.load_image: the name binds utils.inference.load_image by its import
+46:24 call  np.squeeze(gray_image)
+    -> numpy.squeeze
+47:31 call  gray_image.astype('uint8')
+    -> numpy.squeeze.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The immediately preceding assignment is np.squeeze(gray_image).
+48:21 call  detect_faces(face_detection, gray_image)
+    -> utils.inference.detect_faces
+53:35 call  apply_offsets(face_coordinates, offsets)
+    -> utils.inference.apply_offsets
+56:35 call  apply_offsets(face_coordinates, offsets)
+    -> utils.inference.apply_offsets
+61:31 call  cv2.resize(gray_face, (target_size))
+    -> cv2.resize
+64:33 call  preprocess_input(gray_face, True)
+    -> utils.preprocessor.preprocess_input
+65:31 call  np.expand_dims(gray_face, 0)
+    -> numpy.expand_dims
+66:31 call  np.expand_dims(gray_face, -1)
+    -> numpy.expand_dims
+69:32 call  np.argmax(model.predict(gray_face))
+    -> numpy.argmax
+69:46 call  model.predict(gray_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+72:50 call  compile_gradient_function(model, predicted_class, 'conv2d...
+    -> utils.grad_cam.compile_gradient_function
+74:22 call  register_gradient()
+    -> utils.grad_cam.register_gradient
+75:35 call  modify_backprop(model, 'GuidedBackProp', task)
+    -> utils.grad_cam.modify_backprop
+76:50 call  compile_saliency_function(guided_model, 'conv2d_7')
+    -> utils.grad_cam.compile_saliency_function
+78:51 call  calculate_guided_gradient_CAM(gray_face, gradient_functio...
+    -> utils.grad_cam.calculate_guided_gradient_CAM
+80:32 call  cv2.resize(guided_gradCAM, (x2-x1, y2-y1))
+    -> cv2.resize
+81:35 call  np.repeat(guided_gradCAM[:, :, np.newaxis], 3, axis=2)
+    -> numpy.repeat
+83:22 call  draw_bounding_box((x1, y1, x2 - x1, y2 - y1), rgb_image, ...
+    -> utils.inference.draw_bounding_box
+84:25 call  cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    -> cv2.cvtColor
+85:12 call  cv2.imwrite('../images/guided_gradCAM.png', bgr_image)
+    -> cv2.imwrite
+
+== models.cnn
+
+[models.cnn]
+357:23 call  simple_CNN((48, 48, 1), num_classes)
+    -> models.cnn.simple_CNN
+358:18 call  model.summary()
+    -> keras.models.Sequential.summary
+    note: model retains the keras.models.Sequential constructor access path returned by simple_CNN (line 16)
+
+[models.cnn.simple_CNN]
+16:23 call  Sequential()
+    -> keras.models.Sequential
+17:14 call  model.add(Convolution2D(filters=16, kernel_size=(7, 7), p...
+    -> keras.models.Sequential.add
+17:28 call  Convolution2D(filters=16, kernel_size=(7, 7), padding='sa...
+    -> keras.layers.Convolution2D
+19:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+19:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+20:14 call  model.add(Convolution2D(filters=16, kernel_size=(7, 7), p...
+    -> keras.models.Sequential.add
+20:28 call  Convolution2D(filters=16, kernel_size=(7, 7), padding='sa...
+    -> keras.layers.Convolution2D
+21:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+21:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+22:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+22:25 call  Activation('relu')
+    -> keras.layers.Activation
+23:14 call  model.add(AveragePooling2D(pool_size=(2, 2), padding='sam...
+    -> keras.models.Sequential.add
+23:31 call  AveragePooling2D(pool_size=(2, 2), padding='same')
+    -> keras.layers.AveragePooling2D
+24:14 call  model.add(Dropout(.5))
+    -> keras.models.Sequential.add
+24:22 call  Dropout(.5)
+    -> keras.layers.Dropout
+26:14 call  model.add(Convolution2D(filters=32, kernel_size=(5, 5), p...
+    -> keras.models.Sequential.add
+26:28 call  Convolution2D(filters=32, kernel_size=(5, 5), padding='sa...
+    -> keras.layers.Convolution2D
+27:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+27:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+28:14 call  model.add(Convolution2D(filters=32, kernel_size=(5, 5), p...
+    -> keras.models.Sequential.add
+28:28 call  Convolution2D(filters=32, kernel_size=(5, 5), padding='sa...
+    -> keras.layers.Convolution2D
+29:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+29:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+30:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+30:25 call  Activation('relu')
+    -> keras.layers.Activation
+31:14 call  model.add(AveragePooling2D(pool_size=(2, 2), padding='sam...
+    -> keras.models.Sequential.add
+31:31 call  AveragePooling2D(pool_size=(2, 2), padding='same')
+    -> keras.layers.AveragePooling2D
+32:14 call  model.add(Dropout(.5))
+    -> keras.models.Sequential.add
+32:22 call  Dropout(.5)
+    -> keras.layers.Dropout
+34:14 call  model.add(Convolution2D(filters=64, kernel_size=(3, 3), p...
+    -> keras.models.Sequential.add
+34:28 call  Convolution2D(filters=64, kernel_size=(3, 3), padding='sa...
+    -> keras.layers.Convolution2D
+35:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+35:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+36:14 call  model.add(Convolution2D(filters=64, kernel_size=(3, 3), p...
+    -> keras.models.Sequential.add
+36:28 call  Convolution2D(filters=64, kernel_size=(3, 3), padding='sa...
+    -> keras.layers.Convolution2D
+37:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+37:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+38:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+38:25 call  Activation('relu')
+    -> keras.layers.Activation
+39:14 call  model.add(AveragePooling2D(pool_size=(2, 2), padding='sam...
+    -> keras.models.Sequential.add
+39:31 call  AveragePooling2D(pool_size=(2, 2), padding='same')
+    -> keras.layers.AveragePooling2D
+40:14 call  model.add(Dropout(.5))
+    -> keras.models.Sequential.add
+40:22 call  Dropout(.5)
+    -> keras.layers.Dropout
+42:14 call  model.add(Convolution2D(filters=128, kernel_size=(3, 3), ...
+    -> keras.models.Sequential.add
+42:28 call  Convolution2D(filters=128, kernel_size=(3, 3), padding='s...
+    -> keras.layers.Convolution2D
+43:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+43:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+44:14 call  model.add(Convolution2D(filters=128, kernel_size=(3, 3), ...
+    -> keras.models.Sequential.add
+44:28 call  Convolution2D(filters=128, kernel_size=(3, 3), padding='s...
+    -> keras.layers.Convolution2D
+45:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+45:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+46:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+46:25 call  Activation('relu')
+    -> keras.layers.Activation
+47:14 call  model.add(AveragePooling2D(pool_size=(2, 2), padding='sam...
+    -> keras.models.Sequential.add
+47:31 call  AveragePooling2D(pool_size=(2, 2), padding='same')
+    -> keras.layers.AveragePooling2D
+48:14 call  model.add(Dropout(.5))
+    -> keras.models.Sequential.add
+48:22 call  Dropout(.5)
+    -> keras.layers.Dropout
+50:14 call  model.add(Convolution2D(filters=256, kernel_size=(3, 3), ...
+    -> keras.models.Sequential.add
+50:28 call  Convolution2D(filters=256, kernel_size=(3, 3), padding='s...
+    -> keras.layers.Convolution2D
+51:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+51:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+52:14 call  model.add(Convolution2D( filters=num_classes, kernel_size...
+    -> keras.models.Sequential.add
+52:28 call  Convolution2D( filters=num_classes, kernel_size=(3, 3), p...
+    -> keras.layers.Convolution2D
+54:14 call  model.add(GlobalAveragePooling2D())
+    -> keras.models.Sequential.add
+54:37 call  GlobalAveragePooling2D()
+    -> keras.layers.GlobalAveragePooling2D
+55:14 call  model.add(Activation('softmax', name='predictions'))
+    -> keras.models.Sequential.add
+55:25 call  Activation('softmax', name='predictions')
+    -> keras.layers.Activation
+
+[models.cnn.simpler_CNN]
+61:23 call  Sequential()
+    -> keras.models.Sequential
+62:14 call  model.add(Convolution2D(filters=16, kernel_size=(5, 5), p...
+    -> keras.models.Sequential.add
+62:28 call  Convolution2D(filters=16, kernel_size=(5, 5), padding='sa...
+    -> keras.layers.Convolution2D
+64:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+64:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+65:14 call  model.add(Convolution2D(filters=16, kernel_size=(5, 5), s...
+    -> keras.models.Sequential.add
+65:28 call  Convolution2D(filters=16, kernel_size=(5, 5), strides=(2,...
+    -> keras.layers.Convolution2D
+67:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+67:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+68:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+68:25 call  Activation('relu')
+    -> keras.layers.Activation
+69:14 call  model.add(Dropout(.25))
+    -> keras.models.Sequential.add
+69:22 call  Dropout(.25)
+    -> keras.layers.Dropout
+71:14 call  model.add(Convolution2D(filters=32, kernel_size=(5, 5), p...
+    -> keras.models.Sequential.add
+71:28 call  Convolution2D(filters=32, kernel_size=(5, 5), padding='sa...
+    -> keras.layers.Convolution2D
+72:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+72:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+73:14 call  model.add(Convolution2D(filters=32, kernel_size=(5, 5), s...
+    -> keras.models.Sequential.add
+73:28 call  Convolution2D(filters=32, kernel_size=(5, 5), strides=(2,...
+    -> keras.layers.Convolution2D
+75:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+75:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+76:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+76:25 call  Activation('relu')
+    -> keras.layers.Activation
+77:14 call  model.add(Dropout(.25))
+    -> keras.models.Sequential.add
+77:22 call  Dropout(.25)
+    -> keras.layers.Dropout
+79:14 call  model.add(Convolution2D(filters=64, kernel_size=(3, 3), p...
+    -> keras.models.Sequential.add
+79:28 call  Convolution2D(filters=64, kernel_size=(3, 3), padding='sa...
+    -> keras.layers.Convolution2D
+80:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+80:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+81:14 call  model.add(Convolution2D(filters=64, kernel_size=(3, 3), s...
+    -> keras.models.Sequential.add
+81:28 call  Convolution2D(filters=64, kernel_size=(3, 3), strides=(2,...
+    -> keras.layers.Convolution2D
+83:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+83:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+84:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+84:25 call  Activation('relu')
+    -> keras.layers.Activation
+85:14 call  model.add(Dropout(.25))
+    -> keras.models.Sequential.add
+85:22 call  Dropout(.25)
+    -> keras.layers.Dropout
+87:14 call  model.add(Convolution2D(filters=64, kernel_size=(1, 1), p...
+    -> keras.models.Sequential.add
+87:28 call  Convolution2D(filters=64, kernel_size=(1, 1), padding='sa...
+    -> keras.layers.Convolution2D
+88:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+88:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+89:14 call  model.add(Convolution2D(filters=128, kernel_size=(3, 3), ...
+    -> keras.models.Sequential.add
+89:28 call  Convolution2D(filters=128, kernel_size=(3, 3), strides=(2...
+    -> keras.layers.Convolution2D
+91:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+91:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+92:14 call  model.add(Activation('relu'))
+    -> keras.models.Sequential.add
+92:25 call  Activation('relu')
+    -> keras.layers.Activation
+93:14 call  model.add(Dropout(.25))
+    -> keras.models.Sequential.add
+93:22 call  Dropout(.25)
+    -> keras.layers.Dropout
+95:14 call  model.add(Convolution2D(filters=256, kernel_size=(1, 1), ...
+    -> keras.models.Sequential.add
+95:28 call  Convolution2D(filters=256, kernel_size=(1, 1), padding='s...
+    -> keras.layers.Convolution2D
+96:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+96:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+97:14 call  model.add(Convolution2D(filters=128, kernel_size=(3, 3), ...
+    -> keras.models.Sequential.add
+97:28 call  Convolution2D(filters=128, kernel_size=(3, 3), strides=(2...
+    -> keras.layers.Convolution2D
+100:14 call  model.add(Convolution2D(filters=256, kernel_size=(1, 1), ...
+    -> keras.models.Sequential.add
+100:28 call  Convolution2D(filters=256, kernel_size=(1, 1), padding='s...
+    -> keras.layers.Convolution2D
+101:14 call  model.add(BatchNormalization())
+    -> keras.models.Sequential.add
+101:33 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+102:14 call  model.add(Convolution2D(filters=num_classes, kernel_size=...
+    -> keras.models.Sequential.add
+102:28 call  Convolution2D(filters=num_classes, kernel_size=(3, 3), st...
+    -> keras.layers.Convolution2D
+105:14 call  model.add(Flatten())
+    -> keras.models.Sequential.add
+105:22 call  Flatten()
+    -> keras.layers.Flatten
+107:14 call  model.add(Activation('softmax', name='predictions'))
+    -> keras.models.Sequential.add
+107:25 call  Activation('softmax', name='predictions')
+    -> keras.layers.Activation
+
+[models.cnn.tiny_XCEPTION]
+112:24 call  l2(l2_regularization)
+    -> keras.regularizers.l2
+115:22 call  Input(input_shape)
+    -> keras.layers.Input
+116:15 call  Conv2D(5, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+117:31 call  Conv2D(5, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+118:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+118:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+119:19 call  Activation('relu')
+    -> keras.layers.Activation
+119:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+120:15 call  Conv2D(5, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+121:31 call  Conv2D(5, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+122:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+122:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+123:19 call  Activation('relu')
+    -> keras.layers.Activation
+123:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+126:22 call  Conv2D(8, (1, 1), strides=(2, 2), padding='same', use_bia...
+    -> keras.layers.Conv2D
+127:54 call  Conv2D(8, (1, 1), strides=(2, 2), padding='same', use_bia...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+128:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+128:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+130:24 call  SeparableConv2D(8, (3, 3), padding='same', kernel_regular...
+    -> keras.layers.SeparableConv2D
+132:40 call  SeparableConv2D(8, (3, 3), padding='same', kernel_regular...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+133:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+133:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+134:19 call  Activation('relu')
+    -> keras.layers.Activation
+134:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+135:24 call  SeparableConv2D(8, (3, 3), padding='same', kernel_regular...
+    -> keras.layers.SeparableConv2D
+137:40 call  SeparableConv2D(8, (3, 3), padding='same', kernel_regular...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+138:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+138:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+140:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+140:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+141:19 call  layers.add([x, residual])
+    -> keras.layers.add
+144:22 call  Conv2D(16, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+145:54 call  Conv2D(16, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+146:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+146:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+148:24 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+150:40 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+151:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+151:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+152:19 call  Activation('relu')
+    -> keras.layers.Activation
+152:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+153:24 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+155:40 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+156:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+156:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+158:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+158:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+159:19 call  layers.add([x, residual])
+    -> keras.layers.add
+162:22 call  Conv2D(32, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+163:54 call  Conv2D(32, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+164:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+164:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+166:24 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+168:40 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+169:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+169:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+170:19 call  Activation('relu')
+    -> keras.layers.Activation
+170:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+171:24 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+173:40 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+174:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+174:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+176:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+176:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+177:19 call  layers.add([x, residual])
+    -> keras.layers.add
+180:22 call  Conv2D(64, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+181:54 call  Conv2D(64, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+182:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+182:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+184:24 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+186:40 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+187:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+187:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+188:19 call  Activation('relu')
+    -> keras.layers.Activation
+188:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+189:24 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+191:40 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+192:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+192:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+194:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+194:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+195:19 call  layers.add([x, residual])
+    -> keras.layers.add
+197:15 call  Conv2D(num_classes, (3, 3), # kernel_regularizer=regulari...
+    -> keras.layers.Conv2D
+199:31 call  Conv2D(num_classes, (3, 3), # kernel_regularizer=regulari...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+200:31 call  GlobalAveragePooling2D()
+    -> keras.layers.GlobalAveragePooling2D
+200:33 call  GlobalAveragePooling2D()(x)
+    -> keras.layers.GlobalAveragePooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.GlobalAveragePooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+201:24 call  Activation('softmax', name='predictions')
+    -> keras.layers.Activation
+201:55 call  Activation('softmax', name='predictions')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+203:18 call  Model(img_input, output)
+    -> keras.models.Model
+
+[models.cnn.mini_XCEPTION]
+208:24 call  l2(l2_regularization)
+    -> keras.regularizers.l2
+211:22 call  Input(input_shape)
+    -> keras.layers.Input
+212:15 call  Conv2D(8, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+213:31 call  Conv2D(8, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+214:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+214:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+215:19 call  Activation('relu')
+    -> keras.layers.Activation
+215:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+216:15 call  Conv2D(8, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+217:31 call  Conv2D(8, (3, 3), strides=(1, 1), kernel_regularizer=regu...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+218:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+218:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+219:19 call  Activation('relu')
+    -> keras.layers.Activation
+219:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+222:22 call  Conv2D(16, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+223:54 call  Conv2D(16, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+224:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+224:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+226:24 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+228:40 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+229:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+229:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+230:19 call  Activation('relu')
+    -> keras.layers.Activation
+230:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+231:24 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+233:40 call  SeparableConv2D(16, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+234:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+234:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+236:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+236:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+237:19 call  layers.add([x, residual])
+    -> keras.layers.add
+240:22 call  Conv2D(32, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+241:54 call  Conv2D(32, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+242:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+242:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+244:24 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+246:40 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+247:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+247:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+248:19 call  Activation('relu')
+    -> keras.layers.Activation
+248:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+249:24 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+251:40 call  SeparableConv2D(32, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+252:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+252:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+254:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+254:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+255:19 call  layers.add([x, residual])
+    -> keras.layers.add
+258:22 call  Conv2D(64, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+259:54 call  Conv2D(64, (1, 1), strides=(2, 2), padding='same', use_bi...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+260:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+260:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+262:24 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+264:40 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+265:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+265:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+266:19 call  Activation('relu')
+    -> keras.layers.Activation
+266:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+267:24 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+269:40 call  SeparableConv2D(64, (3, 3), padding='same', kernel_regula...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+270:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+270:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+272:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+272:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+273:19 call  layers.add([x, residual])
+    -> keras.layers.add
+276:22 call  Conv2D(128, (1, 1), strides=(2, 2), padding='same', use_b...
+    -> keras.layers.Conv2D
+277:54 call  Conv2D(128, (1, 1), strides=(2, 2), padding='same', use_b...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+278:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+278:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+280:24 call  SeparableConv2D(128, (3, 3), padding='same', kernel_regul...
+    -> keras.layers.SeparableConv2D
+282:40 call  SeparableConv2D(128, (3, 3), padding='same', kernel_regul...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+283:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+283:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+284:19 call  Activation('relu')
+    -> keras.layers.Activation
+284:27 call  Activation('relu')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+285:24 call  SeparableConv2D(128, (3, 3), padding='same', kernel_regul...
+    -> keras.layers.SeparableConv2D
+287:40 call  SeparableConv2D(128, (3, 3), padding='same', kernel_regul...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+288:27 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+288:29 call  BatchNormalization()(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+290:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+290:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+291:19 call  layers.add([x, residual])
+    -> keras.layers.add
+293:15 call  Conv2D(num_classes, (3, 3), # kernel_regularizer=regulari...
+    -> keras.layers.Conv2D
+295:31 call  Conv2D(num_classes, (3, 3), # kernel_regularizer=regulari...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+296:31 call  GlobalAveragePooling2D()
+    -> keras.layers.GlobalAveragePooling2D
+296:33 call  GlobalAveragePooling2D()(x)
+    -> keras.layers.GlobalAveragePooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.GlobalAveragePooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+297:24 call  Activation('softmax', name='predictions')
+    -> keras.layers.Activation
+297:55 call  Activation('softmax', name='predictions')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+299:18 call  Model(img_input, output)
+    -> keras.models.Model
+
+[models.cnn.big_XCEPTION]
+304:22 call  Input(input_shape)
+    -> keras.layers.Input
+305:15 call  Conv2D(32, (3, 3), strides=(2, 2), use_bias=False)
+    -> keras.layers.Conv2D
+305:59 call  Conv2D(32, (3, 3), strides=(2, 2), use_bias=False)(img_in...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+306:27 call  BatchNormalization(name='block1_conv1_bn')
+    -> keras.layers.BatchNormalization
+306:51 call  BatchNormalization(name='block1_conv1_bn')(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+307:19 call  Activation('relu', name='block1_conv1_act')
+    -> keras.layers.Activation
+307:52 call  Activation('relu', name='block1_conv1_act')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+308:15 call  Conv2D(64, (3, 3), use_bias=False)
+    -> keras.layers.Conv2D
+308:43 call  Conv2D(64, (3, 3), use_bias=False)(x)
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+309:27 call  BatchNormalization(name='block1_conv2_bn')
+    -> keras.layers.BatchNormalization
+309:51 call  BatchNormalization(name='block1_conv2_bn')(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+310:19 call  Activation('relu', name='block1_conv2_act')
+    -> keras.layers.Activation
+310:52 call  Activation('relu', name='block1_conv2_act')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+312:22 call  Conv2D(128, (1, 1), strides=(2, 2), padding='same', use_b...
+    -> keras.layers.Conv2D
+313:54 call  Conv2D(128, (1, 1), strides=(2, 2), padding='same', use_b...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+314:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+314:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+316:24 call  SeparableConv2D(128, (3, 3), padding='same', use_bias=False)
+    -> keras.layers.SeparableConv2D
+316:69 call  SeparableConv2D(128, (3, 3), padding='same', use_bias=Fal...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+317:27 call  BatchNormalization(name='block2_sepconv1_bn')
+    -> keras.layers.BatchNormalization
+317:54 call  BatchNormalization(name='block2_sepconv1_bn')(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+318:19 call  Activation('relu', name='block2_sepconv2_act')
+    -> keras.layers.Activation
+318:55 call  Activation('relu', name='block2_sepconv2_act')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+319:24 call  SeparableConv2D(128, (3, 3), padding='same', use_bias=False)
+    -> keras.layers.SeparableConv2D
+319:69 call  SeparableConv2D(128, (3, 3), padding='same', use_bias=Fal...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+320:27 call  BatchNormalization(name='block2_sepconv2_bn')
+    -> keras.layers.BatchNormalization
+320:54 call  BatchNormalization(name='block2_sepconv2_bn')(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+322:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+322:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+323:19 call  layers.add([x, residual])
+    -> keras.layers.add
+325:22 call  Conv2D(256, (1, 1), strides=(2, 2), padding='same', use_b...
+    -> keras.layers.Conv2D
+326:54 call  Conv2D(256, (1, 1), strides=(2, 2), padding='same', use_b...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+327:34 call  BatchNormalization()
+    -> keras.layers.BatchNormalization
+327:36 call  BatchNormalization()(residual)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+329:19 call  Activation('relu', name='block3_sepconv1_act')
+    -> keras.layers.Activation
+329:55 call  Activation('relu', name='block3_sepconv1_act')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+330:24 call  SeparableConv2D(256, (3, 3), padding='same', use_bias=False)
+    -> keras.layers.SeparableConv2D
+330:69 call  SeparableConv2D(256, (3, 3), padding='same', use_bias=Fal...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+331:27 call  BatchNormalization(name='block3_sepconv1_bn')
+    -> keras.layers.BatchNormalization
+331:54 call  BatchNormalization(name='block3_sepconv1_bn')(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+332:19 call  Activation('relu', name='block3_sepconv2_act')
+    -> keras.layers.Activation
+332:55 call  Activation('relu', name='block3_sepconv2_act')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+333:24 call  SeparableConv2D(256, (3, 3), padding='same', use_bias=False)
+    -> keras.layers.SeparableConv2D
+333:69 call  SeparableConv2D(256, (3, 3), padding='same', use_bias=Fal...
+    -> keras.layers.SeparableConv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.SeparableConv2D stub as its inner constructor. The correct pair already exists for that constructor.
+334:27 call  BatchNormalization(name='block3_sepconv2_bn')
+    -> keras.layers.BatchNormalization
+334:54 call  BatchNormalization(name='block3_sepconv2_bn')(x)
+    -> keras.layers.BatchNormalization
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.BatchNormalization stub as its inner constructor. The correct pair already exists for that constructor.
+336:21 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')
+    -> keras.layers.MaxPooling2D
+336:61 call  MaxPooling2D((3, 3), strides=(2, 2), padding='same')(x)
+    -> keras.layers.MaxPooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.MaxPooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+337:19 call  layers.add([x, residual])
+    -> keras.layers.add
+338:15 call  Conv2D(num_classes, (3, 3), # kernel_regularizer=regulari...
+    -> keras.layers.Conv2D
+340:31 call  Conv2D(num_classes, (3, 3), # kernel_regularizer=regulari...
+    -> keras.layers.Conv2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Conv2D stub as its inner constructor. The correct pair already exists for that constructor.
+341:31 call  GlobalAveragePooling2D()
+    -> keras.layers.GlobalAveragePooling2D
+341:33 call  GlobalAveragePooling2D()(x)
+    -> keras.layers.GlobalAveragePooling2D
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.GlobalAveragePooling2D stub as its inner constructor. The correct pair already exists for that constructor.
+342:24 call  Activation('softmax', name='predictions')
+    -> keras.layers.Activation
+342:55 call  Activation('softmax', name='predictions')(x)
+    -> keras.layers.Activation
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The outer layer call is the same keras.layers.Activation stub as its inner constructor. The correct pair already exists for that constructor.
+344:18 call  Model(img_input, output)
+    -> keras.models.Model
+
+== train_emotion_classifier
+
+[train_emotion_classifier]
+29:36 call  ImageDataGenerator( featurewise_center=False, featurewise...
+    -> keras.preprocessing.image.ImageDataGenerator
+39:22 call  mini_XCEPTION(input_shape, num_classes)
+    -> models.cnn.mini_XCEPTION
+40:14 call  model.compile(optimizer='adam', loss='categorical_crossen...
+    -> keras.models.Model.compile
+    note: model retains the keras.models.Model constructor access path returned by mini_XCEPTION (models/cnn.py:299)
+42:14 call  model.summary()
+    -> keras.models.Model.summary
+47:10 call  print('Training dataset:', dataset_name)
+    -> <builtin>.print
+51:27 call  CSVLogger(log_file_path, append=False)
+    -> keras.callbacks.CSVLogger
+52:31 call  EarlyStopping('val_loss', patience=patience)
+    -> keras.callbacks.EarlyStopping
+53:34 call  ReduceLROnPlateau('val_loss', factor=0.1, patience=int(pa...
+    -> keras.callbacks.ReduceLROnPlateau
+54:47 call  int(patience/4)
+    -> <builtin>.int
+57:39 call  ModelCheckpoint(model_names, 'val_loss', verbose=1, save_...
+    -> keras.callbacks.ModelCheckpoint
+62:30 call  DataManager(dataset_name, image_size=input_shape[:2])
+    -> utils.datasets.DataManager.__init__
+63:43 call  data_loader.get_data()
+    -> utils.datasets.DataManager.get_data
+64:29 call  preprocess_input(faces)
+    -> utils.preprocessor.preprocess_input
+66:38 call  split_data(faces, emotions, validation_split)
+    -> utils.datasets.split_data
+68:24 call  model.fit_generator(data_generator.flow(train_faces, trai...
+    -> keras.models.Model.fit_generator
+    note: ordinary missing-library fit_generator exposes no package callback under the global rule
+68:44 call  data_generator.flow(train_faces, train_emotions, batch_size)
+    -> keras.preprocessing.image.ImageDataGenerator.flow
+    reject utils.data_augmentation.ImageGenerator.flow: data_generator is the keras ImageDataGenerator of line 29, not a package ImageGenerator
+70:44 call  len(train_faces)
+    -> <builtin>.len
+
+== train_gender_classifier
+
+[train_gender_classifier]
+32:26 call  DataManager(dataset_name)
+    -> utils.datasets.DataManager.__init__
+33:41 call  data_loader.get_data()
+    -> utils.datasets.DataManager.get_data
+34:39 call  split_imdb_data(ground_truth_data, validation_split)
+    -> utils.datasets.split_imdb_data
+35:6 call  print('Number of training samples:', len(train_keys))
+    -> <builtin>.print
+35:41 call  len(train_keys)
+    -> <builtin>.len
+36:6 call  print('Number of validation samples:', len(val_keys))
+    -> <builtin>.print
+36:43 call  len(val_keys)
+    -> <builtin>.len
+37:33 call  ImageGenerator(ground_truth_data, batch_size, input_shape...
+    -> utils.data_augmentation.ImageGenerator.__init__
+46:22 call  mini_XCEPTION(input_shape, num_classes)
+    -> models.cnn.mini_XCEPTION
+47:14 call  model.compile(optimizer='adam', loss='categorical_crossen...
+    -> keras.models.Model.compile
+    note: model retains the keras.models.Model constructor access path returned by mini_XCEPTION (models/cnn.py:299)
+50:14 call  model.summary()
+    -> keras.models.Model.summary
+53:27 call  EarlyStopping('val_loss', patience=patience)
+    -> keras.callbacks.EarlyStopping
+54:30 call  ReduceLROnPlateau('val_loss', factor=0.1, patience=int(pa...
+    -> keras.callbacks.ReduceLROnPlateau
+55:43 call  int(patience/2)
+    -> <builtin>.int
+56:23 call  CSVLogger(log_file_path, append=False)
+    -> keras.callbacks.CSVLogger
+58:35 call  ModelCheckpoint(model_names, monitor='val_loss', verbose=...
+    -> keras.callbacks.ModelCheckpoint
+66:20 call  model.fit_generator(image_generator.flow(mode='train'), s...
+    -> keras.models.Model.fit_generator
+    note: the explicit generator creations at 66:41 and 70:57 name ImageGenerator.flow regardless of later consumption; the ordinary missing-library fit_generator call exposes no iteration or package callback
+66:41 call  image_generator.flow(mode='train')
+    -> utils.data_augmentation.ImageGenerator.flow
+67:40 call  int(len(train_keys) / batch_size)
+    -> <builtin>.int
+67:44 call  len(train_keys)
+    -> <builtin>.len
+70:57 call  image_generator.flow('val')
+    -> utils.data_augmentation.ImageGenerator.flow
+71:41 call  int(len(val_keys) / batch_size)
+    -> <builtin>.int
+71:45 call  len(val_keys)
+    -> <builtin>.len
+
+== utils.data_augmentation
+
+[utils.data_augmentation.ImageGenerator.__init__]
+47:37 call  self.color_jitter.append(self.saturation)
+    -> <builtin>.list.append
+    reject utils.data_augmentation.ImageGenerator.saturation: list.append stores the bound method; ImageGenerator.transform calls it at 156:33
+50:37 call  self.color_jitter.append(self.brightness)
+    -> <builtin>.list.append
+    reject utils.data_augmentation.ImageGenerator.brightness: list.append stores the bound method; ImageGenerator.transform calls it at 156:33
+53:37 call  self.color_jitter.append(self.contrast)
+    -> <builtin>.list.append
+    reject utils.data_augmentation.ImageGenerator.contrast: list.append stores the bound method; ImageGenerator.transform calls it at 156:33
+
+[utils.data_augmentation.ImageGenerator._do_random_crop]
+66:37 call  np.random.uniform(0, self.translation_factor * width)
+    -> numpy.random.uniform
+67:37 call  np.random.uniform(0, self.translation_factor * height)
+    -> numpy.random.uniform
+68:26 call  np.array([x_offset, y_offset])
+    -> numpy.array
+69:41 call  np.random.uniform(self.zoom_range[0], self.zoom_range[1])
+    -> numpy.random.uniform
+71:31 call  np.array([[scale_factor, 0], [0, scale_factor]])
+    -> numpy.array
+74:34 call  np.rollaxis(image_array, axis=-1, start=0)
+    -> numpy.rollaxis
+75:60 call  ndi.interpolation.affine_transform(image_channel, crop_ma...
+    -> scipy.ndimage.interpolation.affine_transform
+79:31 call  np.stack(image_channel, axis=0)
+    -> numpy.stack
+80:34 call  np.rollaxis(image_array, 0, 3)
+    -> numpy.rollaxis
+
+[utils.data_augmentation.ImageGenerator.do_random_rotation]
+88:37 call  np.random.uniform(0, self.translation_factor * width)
+    -> numpy.random.uniform
+89:37 call  np.random.uniform(0, self.translation_factor * height)
+    -> numpy.random.uniform
+90:26 call  np.array([x_offset, y_offset])
+    -> numpy.array
+91:41 call  np.random.uniform(self.zoom_range[0], self.zoom_range[1])
+    -> numpy.random.uniform
+93:31 call  np.array([[scale_factor, 0], [0, scale_factor]])
+    -> numpy.array
+96:34 call  np.rollaxis(image_array, axis=-1, start=0)
+    -> numpy.rollaxis
+97:60 call  ndi.interpolation.affine_transform(image_channel, crop_ma...
+    -> scipy.ndimage.interpolation.affine_transform
+101:31 call  np.stack(image_channel, axis=0)
+    -> numpy.stack
+102:34 call  np.rollaxis(image_array, 0, 3)
+    -> numpy.rollaxis
+
+[utils.data_augmentation.ImageGenerator._gray_scale]
+106:31 call  image_array.dot([0.299, 0.587, 0.114])
+    -> numpy.clip.dot
+    -> numpy.rollaxis.astype.dot
+    -> scipy.misc.imresize.astype.dot
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. flow creates an imresize result, optionally replaces it with _do_random_crop -> np.rollaxis, and calls astype before transform. Color jitter can preserve that value or return np.clip; constructor options can skip earlier jitter methods.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. flow creates an imresize result, optionally replaces it with _do_random_crop -> np.rollaxis, and calls astype before transform. Color jitter can preserve that value or return np.clip; constructor options can skip earlier jitter methods. The private _gray_scale receives this exact package-produced value from saturation/contrast through transform.
+
+[utils.data_augmentation.ImageGenerator.saturation]
+109:38 call  self._gray_scale(image_array)
+    -> utils.data_augmentation.ImageGenerator._gray_scale
+110:39 call  np.random.random()
+    -> numpy.random.random
+114:23 call  np.clip(image_array, 0, 255)
+    -> numpy.clip
+
+[utils.data_augmentation.ImageGenerator.brightness]
+117:37 call  np.random.random()
+    -> numpy.random.random
+120:23 call  np.clip(image_array, 0, 255)
+    -> numpy.clip
+
+[utils.data_augmentation.ImageGenerator.contrast]
+123:39 call  self._gray_scale(image_array)
+    -> utils.data_augmentation.ImageGenerator._gray_scale
+123:57 call  self._gray_scale(image_array).mean()
+    -> numpy.clip.dot.mean
+    -> numpy.rollaxis.astype.dot.mean
+    -> scipy.misc.imresize.astype.dot.mean
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. _gray_scale returns image_array.dot directly, and contrast calls mean on that returned stub.
+124:35 call  np.ones_like(image_array)
+    -> numpy.ones_like
+125:37 call  np.random.random()
+    -> numpy.random.random
+128:23 call  np.clip(image_array, 0, 255)
+    -> numpy.clip
+
+[utils.data_augmentation.ImageGenerator.lighting]
+131:35 call  np.cov(image_array.reshape(-1, 3) / 255.0, rowvar=False)
+    -> numpy.cov
+131:55 call  image_array.reshape(-1, 3)
+    -> numpy.clip.reshape
+    -> numpy.rollaxis.astype.reshape
+    -> scipy.misc.imresize.astype.reshape
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. transform invokes lighting before either optional flip; its input is the initial converted image or a prior jitter np.clip result.
+133:53 call  np.linalg.eigh(covariance_matrix)
+    -> numpy.linalg.eigh
+134:32 call  np.random.randn(3)
+    -> numpy.random.randn
+135:34 call  eigen_vectors.dot(eigen_values * noise)
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. eigen_vectors is unpacked from np.linalg.eigh; no concrete receiver or access path survives that unpacking.
+137:23 call  np.clip(image_array, 0, 255)
+    -> numpy.clip
+
+[utils.data_augmentation.ImageGenerator.horizontal_flip]
+140:28 call  np.random.random()
+    -> numpy.random.random
+
+[utils.data_augmentation.ImageGenerator.vertical_flip]
+147:29 call  np.random.random()
+    -> numpy.random.random
+
+[utils.data_augmentation.ImageGenerator.transform]
+154:16 call  shuffle(self.color_jitter)
+    -> random.shuffle
+156:33 call  jitter(image_array)
+    -> utils.data_augmentation.ImageGenerator.saturation
+    -> utils.data_augmentation.ImageGenerator.brightness
+    -> utils.data_augmentation.ImageGenerator.contrast
+    note: jitter iterates self.color_jitter, which only __init__ fills, with the bound methods saturation, brightness and contrast (lines 47, 50, 53)
+159:40 call  self.lighting(image_array)
+    -> utils.data_augmentation.ImageGenerator.lighting
+162:60 call  self.horizontal_flip(image_array, box_corners)
+    -> utils.data_augmentation.ImageGenerator.horizontal_flip
+166:58 call  self.vertical_flip(image_array, box_corners)
+    -> utils.data_augmentation.ImageGenerator.vertical_flip
+
+[utils.data_augmentation.ImageGenerator.preprocess_images]
+171:32 call  preprocess_input(image_array)
+    -> utils.preprocessor.preprocess_input
+
+[utils.data_augmentation.ImageGenerator.flow]
+176:28 call  shuffle(self.train_keys)
+    -> random.shuffle
+179:28 call  shuffle(self.validation_keys)
+    -> random.shuffle
+182:36 call  Exception('invalid mode: %s' % mode)
+    -> <builtin>.Exception
+188:41 call  imread(image_path)
+    -> utils.preprocessor._imread
+189:43 call  imresize(image_array, self.image_size)
+    -> utils.preprocessor._imresize
+191:45 call  len(image_array.shape)
+    -> <builtin>.len
+198:59 call  self._do_random_crop(image_array)
+    -> utils.data_augmentation.ImageGenerator._do_random_crop
+200:53 call  image_array.astype('float32')
+    -> numpy.rollaxis.astype
+    -> scipy.misc.imresize.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. imresize is utils.preprocessor._imresize, which directly returns scipy.misc.imresize.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The optional _do_random_crop directly returns its final np.rollaxis value.
+203:71 call  self.transform( image_array, ground_truth)
+    -> utils.data_augmentation.ImageGenerator.transform
+207:75 call  self.ground_truth_transformer.assign_boxes( ground_truth)
+    note: ground_truth_transformer is a client object (B5): the package passes None (train_gender_classifier.py:39), so only a client transformer reaches this call, and its method is client code
+210:57 call  self.transform(image_array)
+    -> utils.data_augmentation.ImageGenerator.transform
+213:51 call  cv2.cvtColor( image_array.astype('uint8'), cv2.COLOR_RGB2...
+    -> cv2.cvtColor
+214:51 call  image_array.astype('uint8')
+    -> numpy.clip.astype
+    -> numpy.rollaxis.astype.astype
+    -> scipy.misc.imresize.astype.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. With color jitter and lighting disabled and no selected flips, transform returns its input unchanged; the grayscale branch converts that converted image again.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The same identity transform can receive the optional crop result after its first conversion.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. A jitter or lighting method returns np.clip, and unselected flips preserve it until grayscale conversion.
+215:59 call  cv2.cvtColor( image_array.astype('uint8'), cv2.COLOR_RGB2...
+    -> cv2.cvtColor.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The grayscale call explicitly converts the cv2.cvtColor result.
+216:53 call  np.expand_dims(image_array, -1)
+    -> numpy.expand_dims
+218:34 call  inputs.append(image_array)
+    -> <builtin>.list.append
+    note: inputs is a list here: it is [] at line 184 and again at line 230 after np.asarray
+219:35 call  targets.append(ground_truth)
+    -> <builtin>.list.append
+220:27 call  len(targets)
+    -> <builtin>.len
+221:44 call  np.asarray(inputs)
+    -> numpy.asarray
+222:45 call  np.asarray(targets)
+    -> numpy.asarray
+224:49 call  to_categorical(targets)
+    -> utils.preprocessor.to_categorical
+226:60 call  self.preprocess_images(inputs)
+    -> utils.data_augmentation.ImageGenerator.preprocess_images
+227:59 call  self._wrap_in_dictionary(inputs, targets)
+    -> utils.data_augmentation.ImageGenerator._wrap_in_dictionary
+229:59 call  self._wrap_in_dictionary(inputs, targets)
+    -> utils.data_augmentation.ImageGenerator._wrap_in_dictionary
+
+== utils.datasets
+
+[utils.datasets.DataManager.__init__]
+27:28 call  Exception( 'Incorrect dataset name, please input imdb or ...
+    -> <builtin>.Exception
+
+[utils.datasets.DataManager.get_data]
+32:48 call  self._load_imdb()
+    -> utils.datasets.DataManager._load_imdb
+34:51 call  self._load_fer2013()
+    -> utils.datasets.DataManager._load_fer2013
+36:48 call  self._load_KDEF()
+    -> utils.datasets.DataManager._load_KDEF
+
+[utils.datasets.DataManager._load_imdb]
+41:26 call  loadmat(self.dataset_path)
+    -> scipy.io.loadmat
+47:42 call  np.isnan(second_face_score)
+    -> numpy.isnan
+48:45 call  np.logical_not(np.isnan(gender_classes))
+    -> numpy.logical_not
+48:54 call  np.isnan(gender_classes)
+    -> numpy.isnan
+49:30 call  np.logical_and(face_score_mask, second_face_score_mask)
+    -> numpy.logical_and
+50:30 call  np.logical_and(mask, unknown_gender_mask)
+    -> numpy.logical_and
+52:53 call  gender_classes[mask].tolist()
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The value comes from repeated loadmat dictionary/array subscripts; it has no stub access path.
+54:36 call  range(image_names_array.shape[0])
+    -> <builtin>.range
+56:31 call  image_names.append(image_name)
+    -> <builtin>.list.append
+57:20 call  dict(zip(image_names, gender_classes))
+    -> <builtin>.dict
+57:24 call  zip(image_names, gender_classes)
+    -> <builtin>.zip
+
+[utils.datasets.DataManager._load_fer2013]
+60:27 call  pd.read_csv(self.dataset_path)
+    -> pandas.read_csv
+61:39 call  data['pixels'].tolist()
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. data is pd.read_csv output and data["pixels"] is an unnamed subscript result.
+65:24 call  int(pixel)
+    -> <builtin>.int
+65:65 call  pixel_sequence.split(' ')
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. pixel_sequence is iterated from the unknown tolist result of data["pixels"]. Neither package documentation nor annotation independently fixes this value as str.
+66:30 call  np.asarray(face)
+    -> numpy.asarray
+66:44 call  np.asarray(face).reshape(width, height)
+    -> numpy.asarray.reshape
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The source directly calls np.asarray(face).reshape(width,height).
+67:30 call  cv2.resize(face.astype('uint8'), self.image_size)
+    -> cv2.resize
+67:42 call  face.astype('uint8')
+    -> numpy.asarray.reshape.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. face is the immediately preceding np.asarray(...).reshape result.
+68:25 call  faces.append(face.astype('float32'))
+    -> <builtin>.list.append
+68:37 call  face.astype('float32')
+    -> cv2.resize.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. After cv2.resize assigns face, faces.append calls face.astype.
+69:27 call  np.asarray(faces)
+    -> numpy.asarray
+70:31 call  np.expand_dims(faces, -1)
+    -> numpy.expand_dims
+71:34 call  pd.get_dummies(data['emotion'])
+    -> pandas.get_dummies
+71:61 call  pd.get_dummies(data['emotion']).as_matrix()
+    -> pandas.get_dummies.as_matrix
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The source calls pd.get_dummies(...).as_matrix directly.
+
+[utils.datasets.DataManager._load_KDEF]
+75:40 call  get_class_to_arg(self.dataset_name)
+    -> utils.datasets.get_class_to_arg
+76:26 call  len(class_to_arg)
+    -> <builtin>.len
+79:53 call  os.walk(self.dataset_path)
+    -> os.walk
+81:34 call  filename.lower()
+    -> <builtin>.bytes.lower
+    -> <builtin>.str.lower
+    note: DataManager accepts an untyped dataset_path. With dataset_name="KDEF" and a bytes filesystem path, os.walk yields bytes filenames. lower enters bytes.lower; endswith enters bytes.endswith and then rejects its str suffix inside the builtin. Global binding-before-entry rule does not exclude a builtin body TypeError.
+81:45 call  filename.lower().endswith(('.jpg'))
+    -> <builtin>.bytes.endswith
+    -> <builtin>.str.endswith
+    note: DataManager accepts an untyped dataset_path. With dataset_name="KDEF" and a bytes filesystem path, os.walk yields bytes filenames. lower enters bytes.lower; endswith enters bytes.endswith and then rejects its str suffix inside the builtin. Global binding-before-entry rule does not exclude a builtin body TypeError.
+82:38 call  file_paths.append(os.path.join(folder, filename))
+    -> <builtin>.list.append
+82:51 call  os.path.join(folder, filename)
+    -> os.path.join
+84:24 call  len(file_paths)
+    -> <builtin>.len
+86:25 call  np.zeros(shape=(num_faces, y_size, x_size))
+    -> numpy.zeros
+87:28 call  np.zeros(shape=(num_faces, num_classes))
+    -> numpy.zeros
+88:45 call  enumerate(file_paths)
+    -> <builtin>.enumerate
+89:37 call  cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+    -> cv2.imread
+90:37 call  cv2.resize(image_array, (y_size, x_size))
+    -> cv2.resize
+92:45 call  os.path.basename(file_path)
+    -> os.path.basename
+101:31 call  np.expand_dims(faces, -1)
+    -> numpy.expand_dims
+
+[utils.datasets.get_labels]
+114:24 call  Exception('Invalid dataset name')
+    -> <builtin>.Exception
+
+[utils.datasets.get_class_to_arg]
+126:24 call  Exception('Invalid dataset name')
+    -> <builtin>.Exception
+
+[utils.datasets.split_imdb_data]
+130:31 call  sorted(ground_truth_data.keys())
+    -> <builtin>.sorted
+130:54 call  ground_truth_data.keys()
+    -> <builtin>.dict.keys
+    note: the package passes the dict that DataManager._load_imdb returns (train_gender_classifier.py:33-34); a client mapping is opaque (B5)
+132:16 call  shuffle(ground_truth_keys)
+    -> random.shuffle
+134:20 call  int(training_split * len(ground_truth_keys))
+    -> <builtin>.int
+134:41 call  len(ground_truth_keys)
+    -> <builtin>.len
+
+[utils.datasets.split_data]
+141:22 call  len(x)
+    -> <builtin>.len
+142:28 call  int((1 - validation_split)*num_samples)
+    -> <builtin>.int
+
+== utils.grad_cam
+
+[utils.grad_cam]
+172:24 call  pickle.load(open('faces.pkl', 'rb'))
+    -> pickle.load
+172:29 call  open('faces.pkl', 'rb')
+    -> <builtin>.open
+176:23 call  load_model(model_filename)
+    -> keras.models.load_model
+178:36 call  load_image(face)
+    -> utils.grad_cam.load_image
+    reject utils.inference.load_image: the name is the function that this module defines
+179:32 call  model.predict(preprocessed_input)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+180:32 call  np.argmax(predictions)
+    -> numpy.argmax
+181:50 call  compile_gradient_function( model, predicted_class, 'conv2...
+    -> utils.grad_cam.compile_gradient_function
+183:22 call  register_gradient()
+    -> utils.grad_cam.register_gradient
+184:35 call  modify_backprop(model, 'GuidedBackProp')
+    reject utils.grad_cam.modify_backprop: modify_backprop takes three arguments and the call passes two (task is missing): TypeError before the callee starts (judgement 1)
+    note: no edge: the call cannot bind its arguments
+185:50 call  compile_saliency_function(guided_model)
+    reject utils.grad_cam.compile_saliency_function: unreachable: modify_backprop(model, 'GuidedBackProp') at 184:35 always raises TypeError, so the rest of the __main__ block never runs (judgement 1)
+    note: unreachable (judgement 1)
+186:51 call  calculate_guided_gradient_CAM( preprocessed_input, gradie...
+    reject utils.grad_cam.calculate_guided_gradient_CAM: unreachable after the TypeError at 184:35 (judgement 1)
+    note: unreachable (judgement 1)
+189:16 call  cv2.imwrite('guided_gradCAM.jpg', guided_gradCAM)
+    note: unreachable after the TypeError at 184:35 (judgement 1)
+
+[utils.grad_cam.reset_optimizer_weights]
+16:22 call  h5py.File(model_filename, 'r+')
+    -> h5py.File
+18:16 call  model.close()
+    -> h5py.File.close
+    note: model is the h5py.File of line 16
+
+[utils.grad_cam.target_category_loss]
+22:23 call  tf.multiply(x, K.one_hot([category_index], num_classes))
+    -> tensorflow.multiply
+22:36 call  K.one_hot([category_index], num_classes)
+    -> keras.backend.one_hot
+
+[utils.grad_cam.normalize]
+31:23 call  K.sqrt(K.mean(K.square(x)))
+    -> keras.backend.sqrt
+31:30 call  K.mean(K.square(x))
+    -> keras.backend.mean
+31:39 call  K.square(x)
+    -> keras.backend.square
+
+[utils.grad_cam.load_image]
+35:33 call  np.expand_dims(image_array, axis=0)
+    -> numpy.expand_dims
+36:35 call  preprocess_input(image_array)
+    -> utils.preprocessor.preprocess_input
+
+[utils.grad_cam.register_gradient]
+42:10 decorator  @ops.RegisterGradient("GuidedBackProp")
+    -> tensorflow.RegisterGradient.__call__
+    note: the decorator is the RegisterGradient instance that the call at 42:30 creates; its __call__ registers _GuidedBackProp in the gradient registry and does not call it; the method is named through the documented class tf.RegisterGradient (audit N1)
+42:30 call  ops.RegisterGradient("GuidedBackProp")
+    -> tensorflow.python.framework.ops.RegisterGradient
+
+[utils.grad_cam.register_gradient._GuidedBackProp]
+45:50 call  tf.cast(gradient > 0., dtype)
+    -> tensorflow.cast
+46:39 call  tf.cast(op.inputs[0] > 0., dtype)
+    -> tensorflow.cast
+
+[utils.grad_cam.compile_saliency_function]
+52:35 call  model.get_layer(activation_layer)
+    -> keras.models.load_model.get_layer
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. modify_backprop returns load_model directly, and package scripts pass that return as model.
+53:23 call  K.max(layer_output, axis=3)
+    -> keras.backend.max
+54:27 call  K.gradients(K.sum(max_output), input_image)
+    -> keras.backend.gradients
+    note: Pinned TensorFlow RegisterGradient.__call__ registers and returns f unchanged (ops.py1594–1597). It creates no wrapper around this package function. Decorator evaluation is inspected under the definition exception, but the ordinary missing keras.backend.gradients call does not become transparent and calls no callback under the global rule.
+54:33 call  K.sum(max_output)
+    -> keras.backend.sum
+55:22 call  K.function([input_image, K.learning_phase()], [saliency])
+    -> keras.backend.function
+55:53 call  K.learning_phase()
+    -> keras.backend.learning_phase
+
+[utils.grad_cam.modify_backprop]
+59:33 call  tf.get_default_graph()
+    -> tensorflow.get_default_graph
+60:37 call  graph.gradient_override_map({'Relu': name})
+    -> tensorflow.get_default_graph.gradient_override_map
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The graph is explicitly assigned tf.get_default_graph().
+64:40 call  hasattr(layer, 'activation')
+    -> <builtin>.hasattr
+78:31 call  load_model(model_path, compile=False)
+    -> keras.models.load_model
+
+[utils.grad_cam.deprocess_image]
+86:15 call  np.ndim(x)
+    -> numpy.ndim
+87:23 call  np.squeeze(x)
+    -> numpy.squeeze
+89:19 call  x.mean()
+    -> numpy.squeeze.mean
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. When the first branch runs x is explicitly replaced by np.squeeze(x). Initial x from saliency subscripts or arithmetic remains unnamed.
+90:19 call  x.std()
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is x-x.mean(), an arithmetic result without an outside access path; neither input annotations nor docs establish a concrete class.
+95:16 call  np.clip(x, 0, 1)
+    -> numpy.clip
+99:28 call  K.image_dim_ordering()
+    -> keras.backend.image_dim_ordering
+100:24 call  x.transpose((1, 2, 0))
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The immediately prior receiver value is x*255. The earlier np.clip does not name the result of that arithmetic operation.
+101:16 call  np.clip(x, 0, 255)
+    -> numpy.clip
+101:34 call  np.clip(x, 0, 255).astype('uint8')
+    -> numpy.clip.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The source explicitly calls np.clip(x,0,255).astype.
+
+[utils.grad_cam.compile_gradient_function]
+106:23 call  Sequential()
+    -> keras.models.Sequential
+107:14 call  model.add(input_model)
+    -> keras.models.Sequential.add
+111:14 call  model.add(Lambda(target_layer, output_shape=target_catego...
+    -> keras.models.Sequential.add
+    note: The callback is only stored in missing keras.layers.core.Lambda, then handed to missing Sequential.add. Neither is a Python decorator or base defining the analysed package. Global missing-library rule says it calls nothing back. The function body retains its own edges under A.
+111:21 call  Lambda(target_layer, output_shape=target_category_loss_ou...
+    -> keras.layers.core.Lambda
+    reject utils.grad_cam.compile_gradient_function.<lambda1>, utils.grad_cam.target_category_loss_output_shape: ordinary missing-library calls expose no callbacks; neither Lambda nor Sequential.add is a decorator or base defining package code (judgement 7)
+114:17 call  K.sum(model.layers[-1].output)
+    -> keras.backend.sum
+115:44 call  model.layers[0].get_layer(layer_name)
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. model.layers[0] is a subscript of the missing Sequential value, so get_layer has no named callee.
+116:26 call  normalize(K.gradients(loss, conv_output)[0])
+    -> utils.grad_cam.normalize
+116:38 call  K.gradients(loss, conv_output)
+    -> keras.backend.gradients
+    exclude utils.grad_cam.register_gradient._GuidedBackProp: ordinary missing keras.backend.gradients exposes no callback; the definition-time RegisterGradient exception does not make dispatch transparent (judgement 6)
+117:35 call  K.function([model.layers[0].input, K.learning_phase()], [...
+    -> keras.backend.function
+117:76 call  K.learning_phase()
+    -> keras.backend.learning_phase
+
+[utils.grad_cam.compile_gradient_function.<lambda1>]
+110:50 call  target_category_loss(x, category_index, num_classes)
+    -> utils.grad_cam.target_category_loss
+
+[utils.grad_cam.calculate_gradient_weighted_CAM]
+123:52 call  gradient_function([image, False])
+    -> keras.backend.function
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The package passes the explicit K.function result to this callable parameter. Calling a missing-library returned instance uses the same stub path.
+125:22 call  np.mean(evaluated_gradients, axis=(0, 1))
+    -> numpy.mean
+126:18 call  np.ones(output.shape[0: 2], dtype=np.float32)
+    -> numpy.ones
+127:40 call  enumerate(weights)
+    -> <builtin>.enumerate
+129:21 call  cv2.resize(CAM, (64, 64))
+    -> cv2.resize
+130:21 call  np.maximum(CAM, 0)
+    -> numpy.maximum
+131:27 call  np.max(CAM)
+    -> numpy.max
+135:27 call  np.min(image)
+    -> numpy.min
+136:23 call  np.minimum(image, 255)
+    -> numpy.minimum
+138:28 call  cv2.applyColorMap(np.uint8(255 * heatmap), cv2.COLORMAP_JET)
+    -> cv2.applyColorMap
+138:37 call  np.uint8(255 * heatmap)
+    -> numpy.uint8
+139:21 call  np.float32(CAM)
+    -> numpy.float32
+139:39 call  np.float32(image)
+    -> numpy.float32
+140:29 call  np.max(CAM)
+    -> numpy.max
+141:20 call  np.uint8(CAM)
+    -> numpy.uint8
+
+[utils.grad_cam.calculate_guided_gradient_CAM]
+146:51 call  calculate_gradient_weighted_CAM( gradient_function, prepr...
+    -> utils.grad_cam.calculate_gradient_weighted_CAM
+148:33 call  saliency_function([preprocessed_input, 0])
+    -> keras.backend.function
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The package passes the explicit K.function result to this callable parameter. Calling a missing-library returned instance uses the same stub path.
+151:27 call  deprocess_image(saliency[0])
+    -> utils.grad_cam.deprocess_image
+
+[utils.grad_cam.calculate_guided_gradient_CAM_v2]
+158:51 call  calculate_gradient_weighted_CAM( gradient_function, prepr...
+    -> utils.grad_cam.calculate_gradient_weighted_CAM
+160:25 call  np.squeeze(heatmap)
+    -> numpy.squeeze
+161:25 call  cv2.resize(heatmap.astype('uint8'), target_size)
+    -> cv2.resize
+161:40 call  heatmap.astype('uint8')
+    -> numpy.squeeze.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. Both heatmap and saliency are explicitly refreshed by np.squeeze immediately before astype.
+162:33 call  saliency_function([preprocessed_input, 0])
+    note: no package code calls calculate_guided_gradient_CAM_v2 and nothing documents saliency_function as the role of calculate_guided_gradient_CAM's parameter, so saliency_function is a client callable, opaque by B5: no callee (judgement 8, lead's ruling on audit F1)
+163:26 call  np.squeeze(saliency[0])
+    -> numpy.squeeze
+164:26 call  cv2.resize(saliency.astype('uint8'), target_size)
+    -> cv2.resize
+164:42 call  saliency.astype('uint8')
+    -> numpy.squeeze.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. Both heatmap and saliency are explicitly refreshed by np.squeeze immediately before astype.
+166:30 call  deprocess_image(gradCAM)
+    -> utils.grad_cam.deprocess_image
+167:26 call  np.expand_dims(gradCAM, -1)
+    -> numpy.expand_dims
+
+== utils.inference
+
+[utils.inference.load_image]
+7:31 call  image.load_img(image_path, grayscale, target_size)
+    -> keras.preprocessing.image.load_img
+8:30 call  image.img_to_array(pil_image)
+    -> keras.preprocessing.image.img_to_array
+
+[utils.inference.load_detection_model]
+11:44 call  cv2.CascadeClassifier(model_path)
+    -> cv2.CascadeClassifier
+
+[utils.inference.detect_faces]
+15:44 call  detection_model.detectMultiScale(gray_image_array, 1.3, 5)
+    -> cv2.CascadeClassifier.detectMultiScale
+    note: the package passes the classifier of load_detection_model (cv2.CascadeClassifier); a client object is opaque (B5)
+
+[utils.inference.draw_bounding_box]
+19:18 call  cv2.rectangle(image_array, (x, y), (x + w, y + h), color, 2)
+    -> cv2.rectangle
+
+[utils.inference.draw_text]
+29:16 call  cv2.putText(image_array, text, (x + x_offset, y + y_offse...
+    -> cv2.putText
+
+[utils.inference.get_colors]
+34:24 call  plt.cm.hsv(np.linspace(0, 1, num_classes))
+    -> matplotlib.pyplot.cm.hsv
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The actual imported path is matplotlib.pyplot, followed by .cm.hsv; missing-module naming does not resolve a re-export alias.
+34:36 call  np.linspace(0, 1, num_classes)
+    -> numpy.linspace
+34:63 call  plt.cm.hsv(np.linspace(0, 1, num_classes)).tolist()
+    -> matplotlib.pyplot.cm.hsv.tolist
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The source calls tolist directly on plt.cm.hsv(...).
+35:24 call  np.asarray(colors)
+    -> numpy.asarray
+
+== utils.preprocessor
+
+[utils.preprocessor.preprocess_input]
+6:17 call  x.astype('float32')
+    -> cv2.resize.astype
+    -> numpy.asarray.astype
+    -> numpy.expand_dims.astype
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. Image and video scripts pass their cv2.resize return directly into preprocess_input.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. grad_cam.load_image, video_emotion_gender_demo, and DataManager faces pass np.expand_dims outputs.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. ImageGenerator.flow feeds np.asarray(inputs) to preprocess_images -> preprocess_input.
+
+[utils.preprocessor._imread]
+15:22 call  imread(image_name)
+    -> scipy.misc.imread
+
+[utils.preprocessor._imresize]
+19:24 call  imresize(image_array, size)
+    -> scipy.misc.imresize
+
+[utils.preprocessor.to_categorical]
+23:33 call  np.asarray(integer_classes, dtype='int')
+    -> numpy.asarray
+25:27 call  np.zeros((num_samples, num_classes))
+    -> numpy.zeros
+26:26 call  np.arange(num_samples)
+    -> numpy.arange
+
+== utils.visualizer
+
+[utils.visualizer]
+138:31 call  get_labels(dataset_name)
+    reject utils.datasets.get_labels: unreachable: `from utils.utils import get_labels` at line 131 raises ImportError (the checkout has no utils/utils.py), so the rest of the __main__ block never runs (judgement 2)
+    note: unreachable (judgement 2)
+141:24 call  pickle.load(open('faces.pkl', 'rb'))
+    note: unreachable after the ImportError at line 131 (judgement 2)
+141:29 call  open('faces.pkl', 'rb')
+    note: unreachable after the ImportError at line 131 (judgement 2)
+142:27 call  pickle.load(open('emotions.pkl', 'rb'))
+    note: unreachable after the ImportError at line 131 (judgement 2)
+142:32 call  open('emotions.pkl', 'rb')
+    note: unreachable after the ImportError at line 131 (judgement 2)
+143:18 call  pretty_imshow(plt.gca(), make_mosaic(faces[:4], 2, 2), cm...
+    note: unreachable after the ImportError at line 131 (judgement 2)
+    reject utils.visualizer.pretty_imshow: unreachable after the ImportError at line 131 (judgement 2)
+143:26 call  plt.gca()
+    note: unreachable after the ImportError at line 131 (judgement 2)
+143:41 call  make_mosaic(faces[:4], 2, 2)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+    reject utils.visualizer.make_mosaic: unreachable after the ImportError at line 131 (judgement 2)
+144:13 call  plt.show()
+    note: unreachable after the ImportError at line 131 (judgement 2)
+160:23 call  load_model('../trained_models/emotion_models/simple_CNN.9...
+    note: unreachable after the ImportError at line 131 (judgement 2)
+161:48 call  model.layers[2].get_weights()
+    note: unreachable after the ImportError at line 131 (judgement 2)
+163:38 call  np.squeeze(kernel_conv1_weights)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+164:39 call  np.rollaxis(kernel_conv1_weights, 2, 0)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+165:42 call  np.expand_dims(kernel_conv1_weights, -1)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+167:19 call  int(np.ceil(np.sqrt(num_kernels)))
+    note: unreachable after the ImportError at line 131 (judgement 2)
+167:27 call  np.ceil(np.sqrt(num_kernels))
+    note: unreachable after the ImportError at line 131 (judgement 2)
+167:35 call  np.sqrt(num_kernels)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+168:10 call  print('Box size:', box_size)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+170:10 call  print('Kernel shape', kernel_conv1_weights.shape)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+171:15 call  plt.figure(figsize=(15, 15))
+    note: unreachable after the ImportError at line 131 (judgement 2)
+172:14 call  plt.title('conv1 weights')
+    note: unreachable after the ImportError at line 131 (judgement 2)
+173:18 call  pretty_imshow( plt.gca(), make_mosaic(kernel_conv1_weight...
+    note: unreachable after the ImportError at line 131 (judgement 2)
+    reject utils.visualizer.pretty_imshow: unreachable after the ImportError at line 131 (judgement 2)
+174:20 call  plt.gca()
+    note: unreachable after the ImportError at line 131 (judgement 2)
+175:24 call  make_mosaic(kernel_conv1_weights, box_size, box_size)
+    note: unreachable after the ImportError at line 131 (judgement 2)
+    reject utils.visualizer.make_mosaic: unreachable after the ImportError at line 131 (judgement 2)
+177:13 call  plt.show()
+    note: unreachable after the ImportError at line 131 (judgement 2)
+
+[utils.visualizer.make_mosaic]
+9:21 call  len(images)
+    -> <builtin>.len
+11:27 call  ma.masked_all( (num_rows * image_shape[0] + (num_rows - 1...
+    -> numpy.ma.masked_all
+17:27 call  range(num_images)
+    -> <builtin>.range
+18:18 call  int(np.floor(image_arg / num_cols))
+    -> <builtin>.int
+18:27 call  np.floor(image_arg / num_cols)
+    -> numpy.floor
+20:27 call  np.squeeze(images[image_arg])
+    -> numpy.squeeze
+
+[utils.visualizer.make_mosaic_v2]
+29:24 call  np.squeeze(images)
+    -> numpy.squeeze
+32:23 call  int(np.ceil(np.sqrt(num_images)))
+    -> <builtin>.int
+32:31 call  np.ceil(np.sqrt(num_images))
+    -> numpy.ceil
+32:39 call  np.sqrt(num_images)
+    -> numpy.sqrt
+36:22 call  np.empty(shape=(num_mosaic_pixel_rows, num_mosaic_pixel_c...
+    -> numpy.empty
+39:27 call  range(num_images)
+    -> <builtin>.range
+
+[utils.visualizer.pretty_imshow]
+57:24 call  data.min()
+    -> numpy.squeeze.min
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. display_image explicitly sets face=np.squeeze(face) and passes it to pretty_imshow as data.
+59:24 call  data.max()
+    -> numpy.squeeze.max
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. display_image explicitly sets face=np.squeeze(face) and passes it to pretty_imshow as data.
+61:34 call  make_axes_locatable(axis)
+    -> mpl_toolkits.axes_grid1.make_axes_locatable
+62:30 call  divider.append_axes('right', size='5%', pad=0.05)
+    -> mpl_toolkits.axes_grid1.make_axes_locatable.append_axes
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. divider is the explicit make_axes_locatable return.
+63:24 call  axis.imshow(data, vmin=vmin, vmax=vmax, interpolation='ne...
+    -> matplotlib.pyplot.gca.imshow
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. display_image passes plt.gca() as the axis.
+65:17 call  plt.colorbar(image, cax=cax)
+    -> matplotlib.pyplot.colorbar
+
+[utils.visualizer.normal_imshow]
+73:24 call  data.min()
+    note: no package code calls normal_imshow: data is a client object (B5)
+75:24 call  data.max()
+    note: no package code calls normal_imshow: data is a client object (B5)
+76:24 call  axis.imshow(data, vmin=vmin, vmax=vmax, interpolation='ne...
+    note: no package code calls normal_imshow: axis is a client object (B5)
+79:17 call  plt.axis('off')
+    -> matplotlib.pyplot.axis
+
+[utils.visualizer.display_image]
+86:24 call  Exception('Provide class decoder')
+    -> <builtin>.Exception
+87:22 call  np.squeeze(face)
+    -> numpy.squeeze
+89:11 call  len(face.shape)
+    -> <builtin>.len
+91:15 call  plt.figure()
+    -> matplotlib.pyplot.figure
+93:30 call  np.argmax(class_vector)
+    -> numpy.argmax
+95:18 call  plt.title(class_name)
+    -> matplotlib.pyplot.title
+97:22 call  pretty_imshow(plt.gca(), face, cmap=color_map)
+    -> utils.visualizer.pretty_imshow
+97:30 call  plt.gca()
+    -> matplotlib.pyplot.gca
+99:19 call  plt.imshow(face, color_map)
+    -> matplotlib.pyplot.imshow
+
+[utils.visualizer.draw_mosaic]
+106:24 call  Exception('Provide class decoder')
+    -> <builtin>.Exception
+108:38 call  plt.subplots(num_rows, num_cols)
+    -> matplotlib.pyplot.subplots
+109:27 call  figure.set_size_inches(8, 8, forward=True)
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. figure and axis_array are unpacked from plt.subplots; axis_array is then indexed. Neither result has a concrete named receiver under the missing-module rule.
+112:32 call  range(len(class_vectors))
+    -> <builtin>.range
+112:36 call  len(class_vectors)
+    -> <builtin>.len
+113:34 call  np.argmax(class_vectors[vector_arg])
+    -> numpy.argmax
+115:26 call  titles.append(class_name)
+    -> <builtin>.list.append
+118:25 call  range(num_rows)
+    -> <builtin>.range
+119:29 call  range(num_cols)
+    -> <builtin>.range
+121:31 call  np.squeeze(image)
+    -> numpy.squeeze
+122:46 call  axis_array[row_arg, col_arg].axis('off')
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. figure and axis_array are unpacked from plt.subplots; axis_array is then indexed. Neither result has a concrete named receiver under the missing-module rule.
+123:48 call  axis_array[row_arg, col_arg].imshow(image, cmap=cmap)
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. figure and axis_array are unpacked from plt.subplots; axis_array is then indexed. Neither result has a concrete named receiver under the missing-module rule.
+124:51 call  axis_array[row_arg, col_arg].set_title(titles[image_arg])
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. figure and axis_array are unpacked from plt.subplots; axis_array is then indexed. Neither result has a concrete named receiver under the missing-module rule.
+126:21 call  plt.tight_layout()
+    -> matplotlib.pyplot.tight_layout
+
+== video_emotion_color_demo
+
+[video_emotion_color_demo]
+18:28 call  get_labels('fer2013')
+    -> utils.datasets.get_labels
+25:38 call  load_detection_model(detection_model_path)
+    -> utils.inference.load_detection_model
+26:32 call  load_model(emotion_model_path, compile=False)
+    -> keras.models.load_model
+35:16 call  cv2.namedWindow('window_frame')
+    -> cv2.namedWindow
+36:33 call  cv2.VideoCapture(0)
+    -> cv2.VideoCapture
+38:35 call  video_capture.read()
+    -> cv2.VideoCapture.read
+39:30 call  cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
+    -> cv2.cvtColor
+40:29 call  cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
+    -> cv2.cvtColor
+41:25 call  detect_faces(face_detection, gray_image)
+    -> utils.inference.detect_faces
+45:39 call  apply_offsets(face_coordinates, emotion_offsets)
+    -> utils.inference.apply_offsets
+48:35 call  cv2.resize(gray_face, (emotion_target_size))
+    -> cv2.resize
+52:37 call  preprocess_input(gray_face, True)
+    -> utils.preprocessor.preprocess_input
+53:35 call  np.expand_dims(gray_face, 0)
+    -> numpy.expand_dims
+54:35 call  np.expand_dims(gray_face, -1)
+    -> numpy.expand_dims
+55:56 call  emotion_classifier.predict(gray_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+56:37 call  np.max(emotion_prediction)
+    -> numpy.max
+57:38 call  np.argmax(emotion_prediction)
+    -> numpy.argmax
+59:30 call  emotion_window.append(emotion_text)
+    -> <builtin>.list.append
+61:15 call  len(emotion_window)
+    -> <builtin>.len
+62:31 call  emotion_window.pop(0)
+    -> <builtin>.list.pop
+64:32 call  mode(emotion_window)
+    -> statistics.mode
+69:53 call  np.asarray((255, 0, 0))
+    -> numpy.asarray
+71:53 call  np.asarray((0, 0, 255))
+    -> numpy.asarray
+73:53 call  np.asarray((255, 255, 0))
+    -> numpy.asarray
+75:53 call  np.asarray((0, 255, 255))
+    -> numpy.asarray
+77:53 call  np.asarray((0, 255, 0))
+    -> numpy.asarray
+79:29 call  color.astype(int)
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. color is emotion_probability*np.asarray(...), an arithmetic result. The subsequent astype and tolist cannot establish a concrete library class from that unknown receiver.
+80:29 call  color.tolist()
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. color is emotion_probability*np.asarray(...), an arithmetic result. The subsequent astype and tolist cannot establish a concrete library class from that unknown receiver.
+82:26 call  draw_bounding_box(face_coordinates, rgb_image, color)
+    -> utils.inference.draw_bounding_box
+83:18 call  draw_text(face_coordinates, rgb_image, emotion_mode, colo...
+    -> utils.inference.draw_text
+86:29 call  cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    -> cv2.cvtColor
+87:15 call  cv2.imshow('window_frame', bgr_image)
+    -> cv2.imshow
+88:19 call  cv2.waitKey(1)
+    -> cv2.waitKey
+88:36 call  ord('q')
+    -> <builtin>.ord
+90:22 call  video_capture.release()
+    -> cv2.VideoCapture.release
+91:22 call  cv2.destroyAllWindows()
+    -> cv2.destroyAllWindows
+
+== video_emotion_gender_demo
+
+[video_emotion_gender_demo]
+19:28 call  get_labels('fer2013')
+    -> utils.datasets.get_labels
+20:27 call  get_labels('imdb')
+    -> utils.datasets.get_labels
+29:38 call  load_detection_model(detection_model_path)
+    -> utils.inference.load_detection_model
+30:32 call  load_model(emotion_model_path, compile=False)
+    -> keras.models.load_model
+31:31 call  load_model(gender_model_path, compile=False)
+    -> keras.models.load_model
+42:16 call  cv2.namedWindow('window_frame')
+    -> cv2.namedWindow
+43:33 call  cv2.VideoCapture(0)
+    -> cv2.VideoCapture
+46:35 call  video_capture.read()
+    -> cv2.VideoCapture.read
+47:30 call  cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
+    -> cv2.cvtColor
+48:29 call  cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
+    -> cv2.cvtColor
+49:25 call  detect_faces(face_detection, gray_image)
+    -> utils.inference.detect_faces
+53:39 call  apply_offsets(face_coordinates, gender_offsets)
+    -> utils.inference.apply_offsets
+56:39 call  apply_offsets(face_coordinates, emotion_offsets)
+    -> utils.inference.apply_offsets
+59:34 call  cv2.resize(rgb_face, (gender_target_size))
+    -> cv2.resize
+60:35 call  cv2.resize(gray_face, (emotion_target_size))
+    -> cv2.resize
+63:37 call  preprocess_input(gray_face, False)
+    -> utils.preprocessor.preprocess_input
+64:35 call  np.expand_dims(gray_face, 0)
+    -> numpy.expand_dims
+65:35 call  np.expand_dims(gray_face, -1)
+    -> numpy.expand_dims
+66:38 call  np.argmax(emotion_classifier.predict(gray_face))
+    -> numpy.argmax
+66:65 call  emotion_classifier.predict(gray_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path. Additional source: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+68:30 call  emotion_window.append(emotion_text)
+    -> <builtin>.list.append
+70:34 call  np.expand_dims(rgb_face, 0)
+    -> numpy.expand_dims
+71:36 call  preprocess_input(rgb_face, False)
+    -> utils.preprocessor.preprocess_input
+72:54 call  gender_classifier.predict(rgb_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path. Additional source: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+73:37 call  np.argmax(gender_prediction)
+    -> numpy.argmax
+75:29 call  gender_window.append(gender_text)
+    -> <builtin>.list.append
+77:15 call  len(gender_window)
+    -> <builtin>.len
+78:31 call  emotion_window.pop(0)
+    -> <builtin>.list.pop
+79:30 call  gender_window.pop(0)
+    -> <builtin>.list.pop
+81:32 call  mode(emotion_window)
+    -> statistics.mode
+82:31 call  mode(gender_window)
+    -> statistics.mode
+91:26 call  draw_bounding_box(face_coordinates, rgb_image, color)
+    -> utils.inference.draw_bounding_box
+92:18 call  draw_text(face_coordinates, rgb_image, gender_mode, color...
+    -> utils.inference.draw_text
+94:18 call  draw_text(face_coordinates, rgb_image, emotion_mode, colo...
+    -> utils.inference.draw_text
+97:29 call  cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    -> cv2.cvtColor
+98:15 call  cv2.imshow('window_frame', bgr_image)
+    -> cv2.imshow
+99:19 call  cv2.waitKey(1)
+    -> cv2.waitKey
+99:36 call  ord('q')
+    -> <builtin>.ord
+101:22 call  video_capture.release()
+    -> cv2.VideoCapture.release
+102:22 call  cv2.destroyAllWindows()
+    -> cv2.destroyAllWindows
+
+== video_gradcam_demo
+
+[video_gradcam_demo]
+24:36 call  get_class_to_arg('imdb')
+    reject utils.datasets.get_class_to_arg: unreachable: task is the constant 'emotion' (line 21), so the branch at line 22 never runs (judgement 3)
+    note: unreachable (judgement 3)
+31:36 call  get_class_to_arg('fer2013')
+    -> utils.datasets.get_class_to_arg
+36:19 call  load_model(model_filename, compile=False)
+    -> keras.models.load_model
+37:46 call  compile_gradient_function(model, predicted_class, 'conv2d...
+    -> utils.grad_cam.compile_gradient_function
+38:18 call  register_gradient()
+    -> utils.grad_cam.register_gradient
+39:31 call  modify_backprop(model, 'GuidedBackProp', task)
+    -> utils.grad_cam.modify_backprop
+40:46 call  compile_saliency_function(guided_model, 'conv2d_7')
+    -> utils.grad_cam.compile_saliency_function
+44:38 call  load_detection_model(detection_model_path)
+    -> utils.inference.load_detection_model
+54:16 call  cv2.namedWindow('window_frame')
+    -> cv2.namedWindow
+55:33 call  cv2.VideoCapture(0)
+    -> cv2.VideoCapture
+57:35 call  video_capture.read()
+    -> cv2.VideoCapture.read
+58:30 call  cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
+    -> cv2.cvtColor
+59:29 call  cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
+    -> cv2.cvtColor
+60:25 call  detect_faces(face_detection, gray_image)
+    -> utils.inference.detect_faces
+64:39 call  apply_offsets(face_coordinates, offsets)
+    -> utils.inference.apply_offsets
+67:35 call  cv2.resize(gray_face, (target_size))
+    -> cv2.resize
+71:37 call  preprocess_input(gray_face, True)
+    -> utils.preprocessor.preprocess_input
+72:35 call  np.expand_dims(gray_face, 0)
+    -> numpy.expand_dims
+73:35 call  np.expand_dims(gray_face, -1)
+    -> numpy.expand_dims
+74:55 call  calculate_guided_gradient_CAM(gray_face, gradient_functio...
+    -> utils.grad_cam.calculate_guided_gradient_CAM
+76:36 call  cv2.resize(guided_gradCAM, (x2-x1, y2-y1))
+    -> cv2.resize
+78:43 call  np.repeat(guided_gradCAM[:, :, np.newaxis], 3, axis=2)
+    -> numpy.repeat
+83:26 call  draw_bounding_box((x1, y1, x2 - x1, y2 - y1), rgb_image, ...
+    -> utils.inference.draw_bounding_box
+84:29 call  cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    -> cv2.cvtColor
+86:19 call  cv2.imshow('window_frame', bgr_image)
+    -> cv2.imshow
+89:19 call  cv2.waitKey(1)
+    -> cv2.waitKey
+89:36 call  ord('q')
+    -> <builtin>.ord
+
+== web.emotion_gender_processor
+
+[web.emotion_gender_processor.process_image]
+25:36 call  get_labels('fer2013')
+    -> utils.datasets.get_labels
+26:35 call  get_labels('imdb')
+    -> utils.datasets.get_labels
+36:46 call  load_detection_model(detection_model_path)
+    -> utils.inference.load_detection_model
+37:40 call  load_model(emotion_model_path, compile=False)
+    -> keras.models.load_model
+38:39 call  load_model(gender_model_path, compile=False)
+    -> keras.models.load_model
+45:36 call  np.fromstring(image, np.uint8)
+    -> numpy.fromstring
+46:39 call  cv2.imdecode(image_array, cv2.IMREAD_UNCHANGED)
+    -> cv2.imdecode
+48:33 call  cv2.cvtColor(unchanged_image, cv2.COLOR_BGR2RGB)
+    -> cv2.cvtColor
+49:34 call  cv2.cvtColor(unchanged_image, cv2.COLOR_BGR2GRAY)
+    -> cv2.cvtColor
+51:29 call  detect_faces(face_detection, gray_image)
+    -> utils.inference.detect_faces
+53:43 call  apply_offsets(face_coordinates, gender_offsets)
+    -> utils.inference.apply_offsets
+56:43 call  apply_offsets(face_coordinates, emotion_offsets)
+    -> utils.inference.apply_offsets
+60:38 call  cv2.resize(rgb_face, (gender_target_size))
+    -> cv2.resize
+61:39 call  cv2.resize(gray_face, (emotion_target_size))
+    -> cv2.resize
+65:40 call  preprocess_input(rgb_face, False)
+    -> utils.preprocessor.preprocess_input
+66:38 call  np.expand_dims(rgb_face, 0)
+    -> numpy.expand_dims
+67:58 call  gender_classifier.predict(rgb_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path. Additional source: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+68:41 call  np.argmax(gender_prediction)
+    -> numpy.argmax
+71:41 call  preprocess_input(gray_face, True)
+    -> utils.preprocessor.preprocess_input
+72:39 call  np.expand_dims(gray_face, 0)
+    -> numpy.expand_dims
+73:39 call  np.expand_dims(gray_face, -1)
+    -> numpy.expand_dims
+74:42 call  np.argmax(emotion_classifier.predict(gray_face))
+    -> numpy.argmax
+74:69 call  emotion_classifier.predict(gray_face)
+    -> keras.models.load_model.predict
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule.
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path. Additional source: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. The receiver is assigned by load_model; stored HDF5 configuration cannot supply a concrete class under the missing-module rule. Both model files flow through the same imported keras.models.load_model path.
+82:30 call  draw_bounding_box(face_coordinates, rgb_image, color)
+    -> utils.inference.draw_bounding_box
+83:22 call  draw_text(face_coordinates, rgb_image, gender_text, color...
+    -> utils.inference.draw_text
+84:22 call  draw_text(face_coordinates, rgb_image, emotion_text, colo...
+    -> utils.inference.draw_text
+86:22 call  logging.error('Error in emotion gender processor: "{0}"'....
+    -> logging.error
+86:72 call  'Error in emotion gender processor: "{0}"'.format(err)
+    -> <builtin>.str.format
+    note: err is an Exception of keras, numpy, cv2 or the builtins; no package class is formatted
+88:29 call  cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    -> cv2.cvtColor
+91:26 call  os.path.exists(dirname)
+    -> os.path.exists
+92:17 call  os.mkdir(dirname)
+    -> os.mkdir
+94:16 call  cv2.imwrite(os.path.join(dirname, 'predicted_image.png'),...
+    -> cv2.imwrite
+94:29 call  os.path.join(dirname, 'predicted_image.png')
+    -> os.path.join
+
+== web.faces
+
+[web.faces]
+6:12 call  Flask(__name__)
+    -> flask.Flask
+8:2 decorator  @app.route('/')
+    -> flask.app.Flask.route.decorator
+    -> flask.sansio.scaffold.Scaffold.route.decorator
+    -> flask.scaffold.Scaffold.route.decorator
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 2.0.0 source defines this identity-returning registration closure in flask.scaffold.Scaffold.route. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 3.1.2 source defines this identity-returning registration closure in flask.sansio.scaffold.Scaffold.route. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+8:11 call  app.route('/')
+    -> flask.Flask.route
+12:2 decorator  @app.route('/classifyImage', methods=['POST'])
+    -> flask.app.Flask.route.decorator
+    -> flask.sansio.scaffold.Scaffold.route.decorator
+    -> flask.scaffold.Scaffold.route.decorator
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 2.0.0 source defines this identity-returning registration closure in flask.scaffold.Scaffold.route. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 3.1.2 source defines this identity-returning registration closure in flask.sansio.scaffold.Scaffold.route. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+12:11 call  app.route('/classifyImage', methods=['POST'])
+    -> flask.Flask.route
+22:2 decorator  @app.errorhandler(400)
+    -> flask.app.Flask.errorhandler.decorator
+    -> flask.sansio.scaffold.Scaffold.errorhandler.decorator
+    -> flask.scaffold.Scaffold.errorhandler.decorator
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 2.0.0 source defines this identity-returning registration closure in flask.scaffold.Scaffold.errorhandler. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 3.1.2 source defines this identity-returning registration closure in flask.sansio.scaffold.Scaffold.errorhandler. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+22:18 call  app.errorhandler(400)
+    -> flask.Flask.errorhandler
+26:2 decorator  @app.errorhandler(404)
+    -> flask.app.Flask.errorhandler.decorator
+    -> flask.sansio.scaffold.Scaffold.errorhandler.decorator
+    -> flask.scaffold.Scaffold.errorhandler.decorator
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 2.0.0 source defines this identity-returning registration closure in flask.scaffold.Scaffold.errorhandler. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+    note: Flask is unpinned in the Dockerfile. The Python-3-supported Flask 3.1.2 source defines this identity-returning registration closure in flask.sansio.scaffold.Scaffold.errorhandler. The definition-through-library exception permits reading these decorators; supported-version union requires this lexical closure name alongside the Flask 1.0 name.
+26:18 call  app.errorhandler(404)
+    -> flask.Flask.errorhandler
+31:12 call  app.run(debug=True, host='0.0.0.0', port=8084)
+    -> flask.Flask.run
+    note: Pinned Flask route/errorhandler decorators register and return f unchanged (Flask1.0 app.py1246–1250,1313–1315; analogous pinned2.0/3.1 sources). There is no installed wrapper requiring library execution to call the definition. The independent ordinary missing Flask.run call calls nothing back. The definition exception does not make every framework operation transparent.
+
+[web.faces.index]
+10:20 call  redirect("https://ekholabs.ai", code=302)
+    -> flask.redirect
+
+[web.faces.upload]
+15:44 call  request.files['image'].read()
+    note: Global missing-library rule: ordinary calls use the imported access path, including calls of returned stub instances. No unavailable library runtime class is inferred. A subscript, unpacked item, or arithmetic result of an unavailable library has no independently named access path. This fixes names without freezing control flow to the executable stub implementation. flask.request.files["image"] is a missing-library subscript. The client framework did not fix a concrete stream type in project docs; no named read callee remains.
+16:35 call  eg_processor.process_image(image)
+    -> web.emotion_gender_processor.process_image
+17:25 call  send_file('/ekholabs/face-classifier/result/predicted_ima...
+    -> flask.send_file
+19:22 call  logging.error('An error has occurred whilst processing th...
+    -> logging.error
+19:87 call  'An error has occurred whilst processing the file: "{0}"'...
+    -> <builtin>.str.format
+    note: err is an Exception; no package class is formatted
+20:14 call  abort(400)
+    -> flask.abort
+
+[web.faces.bad_request]
+24:25 call  make_response(jsonify({'error': 'We cannot process the fi...
+    -> flask.make_response
+24:33 call  jsonify({'error': 'We cannot process the file sent in the...
+    -> flask.jsonify
+
+[web.faces.not_found]
+28:25 call  make_response(jsonify({'error': 'Resource no found.'}), 404)
+    -> flask.make_response
+28:33 call  jsonify({'error': 'Resource no found.'})
+    -> flask.jsonify

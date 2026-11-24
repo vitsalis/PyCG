@@ -1,0 +1,80 @@
+# The test environment of whitenoise 6.12.0 (batch 5): the full
+# closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. whitenoise itself is not installed: the trace uses the checkout
+# projects/whitenoise.
+#   pip install --require-hashes --only-binary :all: --no-deps -r whitenoise.txt
+# "scan" names the files that the security scan of the set downloaded and
+# read (the hash is that of the scanned file, as its section 3 lists it);
+# "PyPI" names the hashes taken from PyPI's JSON for that version (pinned
+# by hash, not read). Every hash below was checked against PyPI's JSON for
+# its version on 2026-11-14.
+#
+# Each version but pytest's stack is the newest release that is not yanked
+# and was uploaded on or before the release of whitenoise (2026-02-27); for
+# Django, requests and brotli these are also the versions of upstream's
+# uv.lock at the tag. Where a distribution has a pure-Python wheel, only that
+# wheel is pinned (less native code). Platform wheels: the cp314 aarch64
+# wheels for Linux, manylinux (glibc, the python:3.14-slim image) and
+# musllinux. The old pins have advisories (as the scan counts them: Django
+# 20, sqlparse 5, urllib3 5, requests, idna, certifi and brotli 1 each); the
+# run meets none of them: the test server and client talk over loopback,
+# with the files of the checkout (lead's decision: the rule of the earlier
+# sets stands, no exception for brotli). Not installed: coverage and
+# pytest-randomly (upstream's dependency group test).
+
+# PyPI. 9.2.0, as for batches 3 and 4 (the lead's
+# decision: one pytest stack for the set, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# scan. tests/conftest.py sets up Django; the middleware, the storage
+# classes and runserver_nostatic are Django components.
+django==6.0.2 \
+    --hash=sha256:610dd3b13d15ec3f1e1d257caedd751db8033c5ad8ea0e2d1219a8acf446ecc6
+# scan (django).
+asgiref==3.11.1 \
+    --hash=sha256:e8667a091e69529631969fd45dc268fa79b99c92c5fcdda727757e52146ec133
+# scan (django).
+sqlparse==0.5.5 \
+    --hash=sha256:12a08b3bf3eec877c519589833aed092e2444e68240a3577e8e26148acc7b1ba
+# PyPI. A time zone database for Django (USE_TZ = True, TIME_ZONE by
+# default America/Chicago): python:3.14-slim has none, and Django requires
+# tzdata only on Windows (lead's decision). Data only.
+tzdata==2025.3 \
+    --hash=sha256:06a47e5700f3081aab02b2e513160914ff0694bce9947d6b76ebd6bf57cfc5d1
+# scan. tests/utils.py sends the requests to the test server.
+requests==2.32.5 \
+    --hash=sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6
+# scan (requests). The pure wheel only.
+charset-normalizer==3.4.4 \
+    --hash=sha256:7a32c560861a02ff789ad905a2fe94e3f840803362c84fecf1851cb4cf3dc37f
+# scan (requests).
+idna==3.11 \
+    --hash=sha256:771a87f49d9defaf64091e6e6fe9c18d4833f140bd19464795bc32d966ca37ea
+# scan (requests).
+urllib3==2.6.3 \
+    --hash=sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4
+# scan (requests). Upstream's uv.lock pins 2026.1.4; 2026.2.25 is the
+# release current at the date.
+certifi==2026.2.25 \
+    --hash=sha256:027692e4402ad994f1c42e52a4997a9763c646b73e4096e4d5d6db8af1d6f0fa
+# scan. The extra brotli, as upstream's tox environments: without it
+# test_get_brotli and test_compressed_static_files_storage fail and the
+# .br branch of the compressor never runs. A C extension; no pure wheel.
+# 1.2.0 has CVE-2026-111497 (the decoder, for a crafted stream; fixed in
+# 1.2.1): urllib3 decodes only what the package's own compressor made.
+brotli==1.2.0 \
+    --hash=sha256:963a08f3bebd8b75ac57661045402da15991468a621f014be54e50f53a58d19e \
+    --hash=sha256:7547369c4392b47d30a3467fe8c3330b4f2e0f7730e45e3103d7d636678a808b

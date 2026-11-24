@@ -32,14 +32,21 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 path = "pycg/__init__.py"
 
+[tool.hatch.build.targets.sdist]
+exclude = ["/evaluation/**"]
+
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "evaluation/tests"]
 filterwarnings = ["error"]
 empty_parameter_set_mark = "fail_at_collect"
 
 [tool.ruff]
 line-length = 88
-extend-exclude = ["micro-benchmark/snippets", "tests/fixtures"]
+extend-exclude = [
+    "micro-benchmark/snippets",
+    "tests/fixtures",
+    "evaluation/macro-benchmark/projects",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]

@@ -1,0 +1,12 @@
+{
+    "autojump_utils.first": {
+        "builtins.list_iterator.__next__": "client object: it is the iterator of xs, the list that the test passes (tests/unit/autojump_utils_test.py:99, first([])); no package code calls first and nothing documents xs, so xs is opaque (scope rule B5; autojump_utils.py:41)",
+        "builtins.range_iterator.__next__": "client object: it is the iterator of xs, the range that the test passes (tests/unit/autojump_utils_test.py:98, first(xrange(5)), with xrange = range at line 27); no package code calls first and nothing documents xs, so xs is opaque (scope rule B5; autojump_utils.py:41)"
+    },
+    "autojump_utils.has_uppercase": {
+        "<builtin>.str.isupper": "client object: ch is an item of string, the str that the test passes (tests/unit/autojump_utils_test.py:68-71, has_uppercase('Foo')); has_uppercase has no docstring, a parameter's name is not documentation, and no package code calls it, so string is opaque (scope rule B5; ruling on audit F1; autojump_utils.py:84)"
+    },
+    "autojump_utils.last": {
+        "builtins.range_iterator.__next__": "client object: it is the iterator of the range that the test passes (tests/unit/autojump_utils_test.py:108, last(xrange(4)), with xrange = range at line 27); the package passes last only a tuple and a list (autojump_match.py:115, 117, 123), so a range is a client iterable, opaque (scope rule B5; autojump_utils.py:122)"
+    }
+}

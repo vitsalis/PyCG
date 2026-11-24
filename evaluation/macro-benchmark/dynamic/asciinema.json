@@ -1,0 +1,410 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "_io.TextIOWrapper.close": [
+      "io.TextIOWrapper.close"
+    ],
+    "_io.TextIOWrapper.read": [
+      "io.TextIOWrapper.read"
+    ],
+    "_io.TextIOWrapper.write": [
+      "io.TextIOWrapper.write"
+    ],
+    "_signal.set_wakeup_fd": [
+      "signal.set_wakeup_fd"
+    ],
+    "array.array": [
+      "array.ArrayType"
+    ],
+    "codecs.BufferedIncrementalDecoder.decode": [
+      "encodings.utf_8.IncrementalDecoder.decode"
+    ],
+    "configparser.RawConfigParser.get": [
+      "configparser.ConfigParser.get"
+    ],
+    "configparser.RawConfigParser.getboolean": [
+      "configparser.ConfigParser.getboolean"
+    ],
+    "configparser.RawConfigParser.getfloat": [
+      "configparser.ConfigParser.getfloat"
+    ],
+    "configparser.RawConfigParser.items": [
+      "configparser.ConfigParser.items"
+    ],
+    "configparser.RawConfigParser.read": [
+      "configparser.ConfigParser.read"
+    ],
+    "genericpath.exists": [
+      "ntpath.exists",
+      "os.path.exists",
+      "posixpath.exists"
+    ],
+    "genericpath.isfile": [
+      "ntpath.isfile",
+      "os.path.isfile",
+      "posixpath.isfile"
+    ],
+    "posix.isatty": [
+      "os.isatty"
+    ],
+    "posix.pipe": [
+      "os.pipe"
+    ],
+    "posix.read": [
+      "os.read"
+    ],
+    "posix.remove": [
+      "os.remove"
+    ],
+    "posix.waitpid": [
+      "os.waitpid"
+    ],
+    "posix.write": [
+      "os.write"
+    ],
+    "posixpath.join": [
+      "os.path.join"
+    ]
+  },
+  "commit": "350d5e9d8b7cee1be5db4091815942c9d035e7dc",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 1,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "asciinema.asciicast.v1": [
+      "<builtin>.property"
+    ],
+    "asciinema.asciicast.v2.build_header": [
+      "<builtin>.dict.update",
+      "<builtin>.type"
+    ],
+    "asciinema.asciicast.v2.writer.__enter__": [
+      "<builtin>.open",
+      "asciinema.asciicast.v2.writer.__write_line"
+    ],
+    "asciinema.asciicast.v2.writer.__exit__": [
+      "_io.TextIOWrapper.close"
+    ],
+    "asciinema.asciicast.v2.writer.__init__": [
+      "asciinema.asciicast.v2.build_header",
+      "codecs.getincrementaldecoder",
+      "encodings.utf_8.IncrementalDecoder"
+    ],
+    "asciinema.asciicast.v2.writer.__write_event": [
+      "<builtin>.round",
+      "asciinema.asciicast.v2.writer.__write_line"
+    ],
+    "asciinema.asciicast.v2.writer.__write_line": [
+      "_io.TextIOWrapper.write",
+      "json.dumps"
+    ],
+    "asciinema.asciicast.v2.writer.write_stdout": [
+      "<builtin>.str.encode",
+      "<builtin>.type",
+      "asciinema.asciicast.v2.writer.__write_event",
+      "codecs.BufferedIncrementalDecoder.decode"
+    ],
+    "asciinema.config": [
+      "<builtin>.property"
+    ],
+    "asciinema.config.Config.__api_token": [
+      "configparser.RawConfigParser.get"
+    ],
+    "asciinema.config.Config.__create_config_home": [
+      "genericpath.exists"
+    ],
+    "asciinema.config.Config.__gen_install_id": [
+      "<builtin>.str",
+      "uuid.uuid4"
+    ],
+    "asciinema.config.Config.__init__": [
+      "configparser.ConfigParser",
+      "configparser.RawConfigParser.read",
+      "posixpath.join"
+    ],
+    "asciinema.config.Config.__read_install_id": [
+      "<builtin>.open",
+      "<builtin>.str.strip",
+      "_io.TextIOWrapper.read",
+      "genericpath.isfile"
+    ],
+    "asciinema.config.Config.__save_install_id": [
+      "<builtin>.open",
+      "_io.TextIOWrapper.write",
+      "asciinema.config.Config.__create_config_home"
+    ],
+    "asciinema.config.Config.__user_token": [
+      "configparser.RawConfigParser.get"
+    ],
+    "asciinema.config.Config.api_url": [
+      "<builtin>.dict.get",
+      "configparser.RawConfigParser.get"
+    ],
+    "asciinema.config.Config.install_id": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.dict.get",
+      "asciinema.config.Config.__read_install_id"
+    ],
+    "asciinema.config.Config.notifications_command": [
+      "configparser.RawConfigParser.get"
+    ],
+    "asciinema.config.Config.notifications_enabled": [
+      "configparser.RawConfigParser.getboolean"
+    ],
+    "asciinema.config.Config.play_idle_time_limit": [
+      "configparser.RawConfigParser.getfloat"
+    ],
+    "asciinema.config.Config.record_command": [
+      "configparser.RawConfigParser.get"
+    ],
+    "asciinema.config.Config.record_env": [
+      "configparser.RawConfigParser.get"
+    ],
+    "asciinema.config.Config.record_idle_time_limit": [
+      "configparser.RawConfigParser.getfloat"
+    ],
+    "asciinema.config.Config.record_quiet": [
+      "configparser.RawConfigParser.getboolean"
+    ],
+    "asciinema.config.Config.record_stdin": [
+      "configparser.RawConfigParser.getboolean"
+    ],
+    "asciinema.config.Config.record_yes": [
+      "configparser.RawConfigParser.getboolean"
+    ],
+    "asciinema.config.Config.upgrade": [
+      "<builtin>.dict",
+      "<builtin>.dict.get",
+      "asciinema.config.Config.__api_token",
+      "asciinema.config.Config.__gen_install_id",
+      "asciinema.config.Config.__save_install_id",
+      "asciinema.config.Config.__user_token",
+      "asciinema.config.Config.install_id",
+      "configparser.RawConfigParser.items",
+      "posix.remove"
+    ],
+    "asciinema.pty.record": [
+      "<builtin>.map",
+      "_signal.set_wakeup_fd",
+      "asciinema.pty.record._copy",
+      "asciinema.pty.record._set_pty_size",
+      "asciinema.pty.record._signals",
+      "asciinema.term.raw.__enter__",
+      "asciinema.term.raw.__exit__",
+      "asciinema.term.raw.__init__",
+      "fcntl.fcntl",
+      "posix.pipe",
+      "posix.waitpid",
+      "pty.fork",
+      "time.time"
+    ],
+    "asciinema.pty.record._copy": [
+      "<builtin>.list.remove",
+      "asciinema.pty.record.<lambda1>.<lambda1>",
+      "asciinema.pty.record._handle_master_read",
+      "posix.read",
+      "select.select"
+    ],
+    "asciinema.pty.record._handle_master_read": [
+      "asciinema.pty.record._write_stdout",
+      "time.time"
+    ],
+    "asciinema.pty.record._set_pty_size": [
+      "array.array",
+      "fcntl.ioctl",
+      "posix.isatty"
+    ],
+    "asciinema.pty.record._signals": [
+      "<builtin>.list.append",
+      "asciinema.pty.record.<lambda1>",
+      "signal.signal"
+    ],
+    "asciinema.pty.record._write_stdout": [
+      "posix.write"
+    ],
+    "asciinema.term.raw.__enter__": [
+      "termios.tcgetattr"
+    ]
+  },
+  "executed": [
+    "asciinema.asciicast.v2.build_header",
+    "asciinema.asciicast.v2.writer.__enter__",
+    "asciinema.asciicast.v2.writer.__exit__",
+    "asciinema.asciicast.v2.writer.__init__",
+    "asciinema.asciicast.v2.writer.__write_event",
+    "asciinema.asciicast.v2.writer.__write_line",
+    "asciinema.asciicast.v2.writer.write_stdout",
+    "asciinema.config.Config.__api_token",
+    "asciinema.config.Config.__create_config_home",
+    "asciinema.config.Config.__gen_install_id",
+    "asciinema.config.Config.__init__",
+    "asciinema.config.Config.__read_install_id",
+    "asciinema.config.Config.__save_install_id",
+    "asciinema.config.Config.__user_token",
+    "asciinema.config.Config.api_url",
+    "asciinema.config.Config.install_id",
+    "asciinema.config.Config.notifications_command",
+    "asciinema.config.Config.notifications_enabled",
+    "asciinema.config.Config.play_idle_time_limit",
+    "asciinema.config.Config.record_command",
+    "asciinema.config.Config.record_env",
+    "asciinema.config.Config.record_idle_time_limit",
+    "asciinema.config.Config.record_quiet",
+    "asciinema.config.Config.record_stdin",
+    "asciinema.config.Config.record_yes",
+    "asciinema.config.Config.upgrade",
+    "asciinema.pty.record",
+    "asciinema.pty.record.<lambda1>",
+    "asciinema.pty.record.<lambda1>.<lambda1>",
+    "asciinema.pty.record._copy",
+    "asciinema.pty.record._handle_master_read",
+    "asciinema.pty.record._set_pty_size",
+    "asciinema.pty.record._signals",
+    "asciinema.pty.record._write_stdout",
+    "asciinema.term.raw.__enter__",
+    "asciinema.term.raw.__exit__",
+    "asciinema.term.raw.__init__"
+  ],
+  "functions": [
+    "asciinema.asciicast.Parser.__init__",
+    "asciinema.asciicast.Parser.handle_starttag",
+    "asciinema.asciicast.events.adjust_speed",
+    "asciinema.asciicast.events.cap_relative_time",
+    "asciinema.asciicast.events.to_absolute_time",
+    "asciinema.asciicast.events.to_relative_time",
+    "asciinema.asciicast.open_from_url.__enter__",
+    "asciinema.asciicast.open_from_url.__exit__",
+    "asciinema.asciicast.open_from_url.__init__",
+    "asciinema.asciicast.open_url",
+    "asciinema.asciicast.v1.Asciicast.__init__",
+    "asciinema.asciicast.v1.Asciicast.__stdout_events",
+    "asciinema.asciicast.v1.Asciicast.events",
+    "asciinema.asciicast.v1.Asciicast.stdout_events",
+    "asciinema.asciicast.v1.Asciicast.v2_header",
+    "asciinema.asciicast.v1.open_from_file.__enter__",
+    "asciinema.asciicast.v1.open_from_file.__exit__",
+    "asciinema.asciicast.v1.open_from_file.__init__",
+    "asciinema.asciicast.v2.Asciicast.__init__",
+    "asciinema.asciicast.v2.Asciicast.events",
+    "asciinema.asciicast.v2.Asciicast.stdout_events",
+    "asciinema.asciicast.v2.build_from_header_and_file",
+    "asciinema.asciicast.v2.build_header",
+    "asciinema.asciicast.v2.get_duration",
+    "asciinema.asciicast.v2.open_from_file.__enter__",
+    "asciinema.asciicast.v2.open_from_file.__exit__",
+    "asciinema.asciicast.v2.open_from_file.__init__",
+    "asciinema.asciicast.v2.writer.__enter__",
+    "asciinema.asciicast.v2.writer.__exit__",
+    "asciinema.asciicast.v2.writer.__init__",
+    "asciinema.asciicast.v2.writer.__write_event",
+    "asciinema.asciicast.v2.writer.__write_line",
+    "asciinema.asciicast.v2.writer.write_stdin",
+    "asciinema.asciicast.v2.writer.write_stdout",
+    "asciinema.async_worker.async_worker.__enter__",
+    "asciinema.async_worker.async_worker.__exit__",
+    "asciinema.async_worker.async_worker.__init__",
+    "asciinema.async_worker.async_worker.enqueue",
+    "asciinema.async_worker.async_worker.run",
+    "asciinema.config.Config.__api_token",
+    "asciinema.config.Config.__create_config_home",
+    "asciinema.config.Config.__gen_install_id",
+    "asciinema.config.Config.__init__",
+    "asciinema.config.Config.__read_install_id",
+    "asciinema.config.Config.__save_install_id",
+    "asciinema.config.Config.__user_token",
+    "asciinema.config.Config.api_url",
+    "asciinema.config.Config.install_id",
+    "asciinema.config.Config.notifications_command",
+    "asciinema.config.Config.notifications_enabled",
+    "asciinema.config.Config.play_idle_time_limit",
+    "asciinema.config.Config.play_speed",
+    "asciinema.config.Config.record_command",
+    "asciinema.config.Config.record_env",
+    "asciinema.config.Config.record_idle_time_limit",
+    "asciinema.config.Config.record_quiet",
+    "asciinema.config.Config.record_stdin",
+    "asciinema.config.Config.record_yes",
+    "asciinema.config.Config.upgrade",
+    "asciinema.config.get_config_home",
+    "asciinema.config.load",
+    "asciinema.pty.record",
+    "asciinema.pty.record.<lambda1>",
+    "asciinema.pty.record.<lambda1>.<lambda1>",
+    "asciinema.pty.record._copy",
+    "asciinema.pty.record._handle_master_read",
+    "asciinema.pty.record._handle_stdin_read",
+    "asciinema.pty.record._notify",
+    "asciinema.pty.record._set_pty_size",
+    "asciinema.pty.record._signals",
+    "asciinema.pty.record._write_master",
+    "asciinema.pty.record._write_stdout",
+    "asciinema.record_asciicast",
+    "asciinema.recorder.async_notifier.__init__",
+    "asciinema.recorder.async_notifier.notify",
+    "asciinema.recorder.async_notifier.perform",
+    "asciinema.recorder.async_writer.__init__",
+    "asciinema.recorder.async_writer.run",
+    "asciinema.recorder.async_writer.write_stdin",
+    "asciinema.recorder.async_writer.write_stdout",
+    "asciinema.recorder.record",
+    "asciinema.term.get_size",
+    "asciinema.term.raw.__enter__",
+    "asciinema.term.raw.__exit__",
+    "asciinema.term.raw.__init__",
+    "asciinema.term.read_blocking"
+  ],
+  "modules": [
+    "asciinema",
+    "asciinema.asciicast",
+    "asciinema.asciicast.events",
+    "asciinema.asciicast.v1",
+    "asciinema.asciicast.v2",
+    "asciinema.async_worker",
+    "asciinema.config",
+    "asciinema.pty",
+    "asciinema.recorder",
+    "asciinema.term"
+  ],
+  "plugins": [
+    "plugins/nose_tools.py"
+  ],
+  "project": "asciinema",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 26,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

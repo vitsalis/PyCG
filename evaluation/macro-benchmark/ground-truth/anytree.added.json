@@ -1,0 +1,622 @@
+{
+  "edges": {
+    "anytree.cachedsearch": {
+      "fastcache.clru_cache": [
+        "anytree.cachedsearch 31:8 call  _cache(CACHE_SIZE)",
+        "anytree.cachedsearch 37:8 call  _cache(CACHE_SIZE)",
+        "anytree.cachedsearch 43:8 call  _cache(CACHE_SIZE)",
+        "anytree.cachedsearch 49:8 call  _cache(CACHE_SIZE)"
+      ],
+      "fastcache.lru.__call__": [
+        "anytree.cachedsearch 31:2 decorator  @_cache(CACHE_SIZE)",
+        "anytree.cachedsearch 37:2 decorator  @_cache(CACHE_SIZE)",
+        "anytree.cachedsearch 43:2 decorator  @_cache(CACHE_SIZE)",
+        "anytree.cachedsearch 49:2 decorator  @_cache(CACHE_SIZE)"
+      ]
+    },
+    "anytree.exporter.dictexporter.DictExporter.__export": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.exporter.dictexporter 68:45 getattr  node.children"
+      ]
+    },
+    "anytree.exporter.dotexporter.DotExporter.__iter_edges": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.exporter.dotexporter 246:31 getattr  node.children"
+      ]
+    },
+    "anytree.exporter.dotexporter.DotExporter._default_nodenamefunc": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.exporter.dotexporter 200:21 getattr  node.name"
+      ]
+    },
+    "anytree.exporter.dotexporter.DotExporter.to_picture": {
+      "<builtin>.str.encode": [
+        "anytree.exporter.dotexporter 294:51 call  (f\"{line}\\n\").encode()"
+      ],
+      "anytree.exporter.dotexporter.DotExporter.__iter__": [
+        "anytree.exporter.dotexporter 293:25 iter  self"
+      ],
+      "logging.Logger.warning": [
+        "anytree.exporter.dotexporter 302:48 call  logging.getLogger(__name__).warning(\"Could not remove tem..."
+      ],
+      "logging.getLogger": [
+        "anytree.exporter.dotexporter 302:30 call  logging.getLogger(__name__)"
+      ],
+      "os.path.splitext": [
+        "anytree.exporter.dotexporter 290:35 call  path.splitext(filename)"
+      ],
+      "os.remove": [
+        "anytree.exporter.dotexporter 299:19 call  remove(dotfilename)"
+      ],
+      "subprocess.check_call": [
+        "anytree.exporter.dotexporter 297:23 call  check_call(cmd)"
+      ],
+      "tempfile.NamedTemporaryFile": [
+        "anytree.exporter.dotexporter 291:32 call  NamedTemporaryFile(\"wb\", delete=False)"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "anytree.exporter.dotexporter 294:30 call  dotfile.write((f\"{line}\\n\").encode())",
+        "anytree.exporter.dotexporter 295:26 call  dotfile.flush()"
+      ]
+    },
+    "anytree.exporter.dotexporter.UniqueDotExporter._default_nodeattrfunc": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.exporter.dotexporter 458:31 getattr  node.name"
+      ]
+    },
+    "anytree.exporter.mermaidexporter.MermaidExporter.__iter_edges": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.exporter.mermaidexporter 200:31 getattr  node.children"
+      ]
+    },
+    "anytree.exporter.mermaidexporter.MermaidExporter._default_nodefunc": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.exporter.mermaidexporter 172:46 getattr  node.name"
+      ]
+    },
+    "anytree.importer.dictimporter.DictImporter.__import": {
+      "<builtin>.isinstance": [
+        "anytree.importer.dictimporter 42:30 call  isinstance(data, dict)"
+      ]
+    },
+    "anytree.iterators.abstractiter.AbstractIter.__init": {
+      "anytree.iterators.abstractiter.AbstractIter._iter": [
+        "anytree.iterators.abstractiter 27:26 call  self._iter(children, filter_, stop, maxlevel)"
+      ]
+    },
+    "anytree.iterators.levelordergroupiter.LevelOrderGroupIter._get_grandchildren": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.iterators.levelordergroupiter 58:78 getattr  child.children"
+      ]
+    },
+    "anytree.iterators.levelorderiter.LevelOrderIter._iter": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.iterators.levelorderiter 52:71 getattr  child.children"
+      ]
+    },
+    "anytree.iterators.zigzaggroupiter.ZigZagGroupIter._iter": {
+      "<builtin>.len": [
+        "anytree.iterators.zigzaggroupiter 52:27 call  len(children)"
+      ]
+    },
+    "anytree.node.lightnodemixin.LightNodeMixin.__attach": {
+      "<builtin>.any": [
+        "anytree.node.lightnodemixin 164:31 call  any(child is self for child in parentchildren)"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.lightnodemixin 162:37 getattr  parent.__children_or_empty"
+      ]
+    },
+    "anytree.node.lightnodemixin.LightNodeMixin.__check_loop": {
+      "anytree.node.nodemixin.NodeMixin.iter_path_reverse": [
+        "anytree.node.lightnodemixin 141:69 call  node.iter_path_reverse()"
+      ]
+    },
+    "anytree.node.lightnodemixin.LightNodeMixin.__detach": {
+      "<builtin>.any": [
+        "anytree.node.lightnodemixin 151:27 call  any(child is self for child in parentchildren)"
+      ]
+    },
+    "anytree.node.lightnodemixin.LightNodeMixin.children": {
+      "<builtin>.len": [
+        "anytree.node.lightnodemixin 253:27 call  len(self.children)",
+        "anytree.node.lightnodemixin 253:49 call  len(children)",
+        "anytree.node.lightnodemixin 266:23 call  len(self.children)"
+      ]
+    },
+    "anytree.node.node.Node.__repr__": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.node 80:68 getattr  node.name"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.__attach": {
+      "<builtin>.any": [
+        "anytree.node.nodemixin 162:31 call  any(child is self for child in parentchildren)"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.__check_children": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.node.nodemixin 237:41 format  {child!r}"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.node.nodemixin 237:41 format  {child!r}"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.__check_loop": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.node.nodemixin 138:37 op  msg % (self,)",
+        "anytree.node.nodemixin 141:37 op  msg % (self, node)"
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse": [
+        "anytree.node.nodemixin 139:69 call  node.iter_path_reverse()"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.node.nodemixin 138:37 op  msg % (self,)",
+        "anytree.node.nodemixin 141:37 op  msg % (self, node)"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.__detach": {
+      "<builtin>.any": [
+        "anytree.node.nodemixin 149:27 call  any(child is self for child in parentchildren)"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__": [
+        "anytree.node.nodemixin 151:20 setattr  parent.__children",
+        "anytree.node.nodemixin 152:18 setattr  self.__parent"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.ancestors": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.nodemixin 348:28 getattr  self.parent.path"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.anchestors": {
+      "anytree.node.nodemixin.NodeMixin.ancestors": [
+        "anytree.node.nodemixin 359:21 getattr  self.ancestors"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.nodemixin 359:21 getattr  self.ancestors"
+      ],
+      "warnings.warn": [
+        "anytree.node.nodemixin 358:22 call  warnings.warn(\".anchestors was a typo and will be removed..."
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.children": {
+      "<builtin>.len": [
+        "anytree.node.nodemixin 254:27 call  len(self.children)",
+        "anytree.node.nodemixin 254:49 call  len(children)",
+        "anytree.node.nodemixin 267:23 call  len(self.children)"
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.parent": [
+        "anytree.node.nodemixin 251:23 setattr  child.parent"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__": [
+        "anytree.node.nodemixin 251:23 setattr  child.parent",
+        "anytree.node.nodemixin 256:18 setattr  self.children",
+        "anytree.node.nodemixin 265:19 setattr  child.parent"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.height": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.nodemixin 499:30 getattr  child.height"
+      ]
+    },
+    "anytree.node.nodemixin.NodeMixin.path": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.nodemixin 298:21 getattr  self._path"
+      ]
+    },
+    "anytree.node.symlinknode.SymlinkNode.__repr__": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.node.symlinknode 53:33 call  repr(self.target)"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.node.symlinknode 53:33 call  repr(self.target)"
+      ]
+    },
+    "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": {
+      "anytree.node.nodemixin.NodeMixin._path": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.ancestors": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.anchestors": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.depth": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.descendants": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.height": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.leaves": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.path": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.root": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.siblings": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.nodemixin.NodeMixin.size": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)"
+      ]
+    },
+    "anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__": {
+      "anytree.node.nodemixin.NodeMixin.children": [
+        "anytree.node.symlinknodemixin 56:32 call  super().__setattr__(name, value)"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__": [
+        "anytree.node.symlinknodemixin 58:20 call  setattr(self.target, name, value)"
+      ]
+    },
+    "anytree.render.AbstractStyle.__init__": {
+      "<builtin>.len": [
+        "anytree.render 37:23 call  len(cont)",
+        "anytree.render 37:36 call  len(vertical)",
+        "anytree.render 37:53 call  len(end)"
+      ]
+    },
+    "anytree.render.RenderTree.__init__": {
+      "anytree.render.AsciiStyle.__init__": [
+        "anytree.render 265:26 call  style()"
+      ],
+      "anytree.render.ContRoundStyle.__init__": [
+        "anytree.render 265:26 call  style()"
+      ],
+      "anytree.render.ContStyle.__init__": [
+        "anytree.render 265:26 call  style()"
+      ]
+    },
+    "anytree.render.RenderTree.__next": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.render 278:29 getattr  node.children"
+      ]
+    },
+    "anytree.render.RenderTree.__repr__": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.render 307:21 call  repr(self.node)"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.render 307:21 call  repr(self.node)"
+      ]
+    },
+    "anytree.render.RenderTree.by_attr.get": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.render 344:35 call  getattr(row.node, attrname, \"\")"
+      ]
+    },
+    "anytree.resolver.ChildResolverError.__init__": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.resolver 344:63 call  \"{!r} has no child {}. Children are: {}.\".format(node, ch..."
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.resolver 343:60 getattr  node.children"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.resolver 344:63 call  \"{!r} has no child {}. Children are: {}.\".format(node, ch..."
+      ]
+    },
+    "anytree.resolver.Resolver.__find": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.resolver 275:27 getattr  node.children"
+      ]
+    },
+    "anytree.resolver.Resolver.__get": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.resolver 124:27 getattr  node.children"
+      ]
+    },
+    "anytree.resolver.Resolver.__glob": {
+      "anytree.node.lightnodemixin.LightNodeMixin.parent": [
+        "anytree.resolver 246:27 getattr  node.parent"
+      ]
+    },
+    "anytree.resolver.Resolver.__start": {
+      "anytree.node.lightnodemixin.LightNodeMixin.root": [
+        "anytree.resolver 218:25 getattr  node.root"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.resolver 218:25 getattr  node.root"
+      ]
+    },
+    "anytree.resolver.Resolver.get": {
+      "anytree.node.lightnodemixin.LightNodeMixin.parent": [
+        "anytree.resolver 110:31 getattr  node.parent"
+      ]
+    },
+    "anytree.resolver.RootResolverError.__init__": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.resolver 336:43 format  {root!r}"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.resolver 336:43 format  {root!r}"
+      ]
+    },
+    "anytree.resolver._getattr": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.resolver 349:23 call  getattr(node, name, None)"
+      ]
+    },
+    "anytree.search.CountError.__init__": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.search 243:30 call  repr(result)"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.search 243:30 call  repr(result)"
+      ]
+    },
+    "anytree.search._filter_by_name": {
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.search 234:23 call  getattr(node, name)"
+      ]
+    },
+    "anytree.util.commonancestors": {
+      "anytree.node.lightnodemixin.LightNodeMixin.ancestors": [
+        "anytree.util 26:23 getattr  node.ancestors"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.util 26:23 getattr  node.ancestors"
+      ]
+    },
+    "anytree.util.leftsibling": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.util 56:33 getattr  node.parent.children"
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.parent": [
+        "anytree.util 55:13 getattr  node.parent",
+        "anytree.util 56:26 getattr  node.parent"
+      ]
+    },
+    "anytree.util.rightsibling": {
+      "anytree.node.lightnodemixin.LightNodeMixin.children": [
+        "anytree.util 82:33 getattr  node.parent.children"
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.parent": [
+        "anytree.util 81:13 getattr  node.parent",
+        "anytree.util 82:26 getattr  node.parent"
+      ]
+    },
+    "anytree.walker.Walker.walk": {
+      "anytree.node.anynode.AnyNode.__repr__": [
+        "anytree.walker 69:21 format  {start!r}",
+        "anytree.walker 69:35 format  {end!r}"
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.path": [
+        "anytree.walker 66:27 getattr  start.path",
+        "anytree.walker 67:23 getattr  end.path"
+      ],
+      "anytree.node.lightnodemixin.LightNodeMixin.root": [
+        "anytree.walker 68:18 getattr  start.root",
+        "anytree.walker 68:34 getattr  end.root",
+        "anytree.walker 74:39 getattr  start.root"
+      ],
+      "anytree.node.symlinknode.SymlinkNode.__repr__": [
+        "anytree.walker 69:21 format  {start!r}",
+        "anytree.walker 69:35 format  {end!r}"
+      ],
+      "anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__": [
+        "anytree.walker 66:27 getattr  start.path",
+        "anytree.walker 67:23 getattr  end.path",
+        "anytree.walker 68:18 getattr  start.root",
+        "anytree.walker 68:34 getattr  end.root",
+        "anytree.walker 74:39 getattr  start.root"
+      ]
+    }
+  },
+  "notes": {
+    "anytree.cachedsearch 31:2 decorator  @_cache(CACHE_SIZE)": [
+      "The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache."
+    ],
+    "anytree.cachedsearch 31:8 call  _cache(CACHE_SIZE)": [
+      "optional import (cachedsearch.py:10-13), both sides run (judgement J5)"
+    ],
+    "anytree.cachedsearch 37:2 decorator  @_cache(CACHE_SIZE)": [
+      "The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache."
+    ],
+    "anytree.cachedsearch 43:2 decorator  @_cache(CACHE_SIZE)": [
+      "The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache."
+    ],
+    "anytree.cachedsearch 49:2 decorator  @_cache(CACHE_SIZE)": [
+      "The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache."
+    ],
+    "anytree.exporter.dictexporter 68:45 getattr  node.children": [
+      "node is a tree node of either family (the root that the client exports, then its children)"
+    ],
+    "anytree.exporter.dotexporter 200:21 getattr  node.name": [
+      "for a SymlinkNode, name lives in the target (symlinknode.py:47), so normal lookup fails and __getattr__ forwards it"
+    ],
+    "anytree.exporter.dotexporter 246:31 getattr  node.children": [
+      "node is a tree node of either family that PreOrderIter yields"
+    ],
+    "anytree.exporter.dotexporter 294:30 call  dotfile.write((f\"{line}\\n\").encode())": [
+      "the wrapper's __getattr__ returns the local function func_wrapper around the method of the underlying file"
+    ],
+    "anytree.exporter.dotexporter 295:26 call  dotfile.flush()": [
+      "as at 294:30"
+    ],
+    "anytree.exporter.dotexporter 458:31 getattr  node.name": [
+      "for a SymlinkNode, name lives in the target, so __getattr__ forwards it"
+    ],
+    "anytree.exporter.mermaidexporter 172:46 getattr  node.name": [
+      "for a SymlinkNode, name lives in the target, so __getattr__ forwards it"
+    ],
+    "anytree.exporter.mermaidexporter 200:31 getattr  node.children": [
+      "node is a tree node of either family that PreOrderIter yields"
+    ],
+    "anytree.iterators.abstractiter 27:26 call  self._iter(children, filter_, stop, maxlevel)": [
+      "self is an AbstractIter (public, and instantiable: its _iter raises NotImplementedError) or one of the five public iterator classes, each of which defines _iter. AbstractIter._iter only raises NotImplementedError, PostOrderIter._iter returns the generator of PostOrderIter.__next, and the other four are generator functions"
+    ],
+    "anytree.iterators.levelordergroupiter 58:78 getattr  child.children": [
+      "child is a tree node of either family"
+    ],
+    "anytree.iterators.levelorderiter 52:71 getattr  child.children": [
+      "child is a tree node of either family"
+    ],
+    "anytree.node.lightnodemixin 141:69 call  node.iter_path_reverse()": [
+      "node is the new parent: a LightNodeMixin node, or the NodeMixin-family node that NodeMixin.children passes when the client gives it a LightNodeMixin child (nodemixin.py:230, 251; lead, B2: an isinstance check names the type for the role; judgement J1)"
+    ],
+    "anytree.node.lightnodemixin 151:27 call  any(child is self for child in parentchildren)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.lightnodemixin 162:37 getattr  parent.__children_or_empty": [
+      "parent is a LightNodeMixin node, or the NodeMixin-family node that NodeMixin.children passes (nodemixin.py:230, 251; lead, B2: an isinstance check names the type for the role; judgement J1). A NodeMixin-family node lacks _LightNodeMixin__children_or_empty: normal lookup fails, so a SymlinkNode calls its __getattr__, which forwards the name to its target and fails there too (judgement J3); for the other classes the AttributeError ends the attach"
+    ],
+    "anytree.node.lightnodemixin 164:31 call  any(child is self for child in parentchildren)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.lightnodemixin 253:27 call  len(self.children)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.lightnodemixin 266:23 call  len(self.children)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.node 80:68 getattr  node.name": [
+      "node is a node of self.path: the ancestors of a Node can be SymlinkNodes (symlinknode.py:24 attaches a Node under one), whose name lives in the target, so __getattr__ forwards it"
+    ],
+    "anytree.node.nodemixin 139:69 call  node.iter_path_reverse()": [
+      "node is the new parent that the setter checked with isinstance(value, (NodeMixin, LightNodeMixin)) (line 122): a NodeMixin-family node or a LightNodeMixin node (lead, B2: an isinstance check names the type for the role; judgement J1); the attach that follows fails for a LightNodeMixin parent (line 160)"
+    ],
+    "anytree.node.nodemixin 149:27 call  any(child is self for child in parentchildren)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.nodemixin 151:20 setattr  parent.__children": [
+      "parent is the current parent, a NodeMixin-family node, also a SymlinkNode (symlinknode.py:24)"
+    ],
+    "anytree.node.nodemixin 152:18 setattr  self.__parent": [
+      "self can be a SymlinkNode"
+    ],
+    "anytree.node.nodemixin 162:31 call  any(child is self for child in parentchildren)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.nodemixin 251:23 setattr  child.parent": [
+      "child is a child that __check_children checked with isinstance(child, (NodeMixin, LightNodeMixin)) (line 230): a NodeMixin-family node, or a LightNodeMixin node, whose setter runs and fails in its __attach (lead, B2: an isinstance check names the type for the role; judgement J1). For a SymlinkNode child, its __setattr__ runs and calls the property setter through object.__setattr__ (symlinknodemixin.py:56)"
+    ],
+    "anytree.node.nodemixin 254:27 call  len(self.children)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.nodemixin 256:18 setattr  self.children": [
+      "for a SymlinkNode self, its __setattr__ runs and calls the property setter through object.__setattr__"
+    ],
+    "anytree.node.nodemixin 265:19 setattr  child.parent": [
+      "for a SymlinkNode child, its __setattr__ runs and calls the property setter through object.__setattr__"
+    ],
+    "anytree.node.nodemixin 267:23 call  len(self.children)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.node.nodemixin 298:21 getattr  self._path": [
+      "R4-F1/W1: First public s.path reaches self._path; the opaque parent getter raises and the exact package link forwards to its concrete Node target. See anytree.md."
+    ],
+    "anytree.node.nodemixin 348:28 getattr  self.parent.path": [
+      "R4-F1/W2: The parent is an exact package link; both its _path and target._path fail, so outer path lookup invokes fallback. The concrete target.path body is entered even though it then raises. W2 uses a client-owned flag after successful construction. See anytree.md."
+    ],
+    "anytree.node.nodemixin 359:21 getattr  self.ancestors": [
+      "R4-F1/W3: The exact link ancestors getter fails at its client parent.path; self.ancestors then falls back to the concrete Node target. See anytree.md."
+    ],
+    "anytree.node.nodemixin 499:30 getattr  child.height": [
+      "R4-F1/W6: The child is an exact package link whose height getter fails at its own opaque child.height; target.height is reached through fallback. See anytree.md."
+    ],
+    "anytree.node.symlinknode 53:33 call  repr(self.target)": [
+      "the target is a NodeMixin-family node: the docs and tests link Nodes, and it can be another SymlinkNode; a LightNodeMixin node is not a target (judgement J3; lead)"
+    ],
+    "anytree.node.symlinknodemixin 52:23 call  getattr(self.target, name)": [
+      "R4-F1: A concrete SymlinkNode property can raise AttributeError through a client parent/child getter; fallback forwards the same property name to its concrete Node target. The eleven admitted properties and exact first-operation witnesses W1-W7 are recorded in anytree.md. This does not admit arbitrary client-selected property names or a client SymlinkNode receiver.",
+      "A missing data name forwards recursively for a nested SymlinkNode target. A found property can also fail on the link through a client ancestor/child getter, then forwarding enters the concrete Node target property (R4-F1). Existing protected storage and arbitrary client names remain excluded."
+    ],
+    "anytree.node.symlinknodemixin 56:32 call  super().__setattr__(name, value)": [
+      "for name \"parent\" or \"children\", object.__setattr__ finds the data descriptor of NodeMixin and calls its setter back; for target and the two private names it stores the value"
+    ],
+    "anytree.node.symlinknodemixin 58:20 call  setattr(self.target, name, value)": [
+      "the target is a NodeMixin-family node; when it is another SymlinkNode (judgement J3), setattr calls its __setattr__. The name is never parent or children here (line 55), so no property setter of a Node target runs"
+    ],
+    "anytree.render 265:26 call  style()": [
+      "style is not an AbstractStyle instance here, so it is a style class: the docs pass DoubleStyle (render.py:134); the package's style classes are the four subclasses; client classes are client code"
+    ],
+    "anytree.render 278:29 getattr  node.children": [
+      "node is a tree node of either family (the docs render LightNodeMixin trees, lightnodemixin.py:45)"
+    ],
+    "anytree.render 307:21 call  repr(self.node)": [
+      "self.node is the root node that the client renders"
+    ],
+    "anytree.render 344:35 call  getattr(row.node, attrname, \"\")": [
+      "attrname names a data attribute of the nodes (default \"name\"; docs: lines, id, foo); for a SymlinkNode it lives in the target, so getattr calls __getattr__. A name of a node property is not considered (judgement J4)"
+    ],
+    "anytree.render 37:23 call  len(cont)": [
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ],
+    "anytree.resolver 110:31 getattr  node.parent": [
+      "node is a tree node of either family"
+    ],
+    "anytree.resolver 124:27 getattr  node.children": [
+      "node is a tree node of either family"
+    ],
+    "anytree.resolver 218:25 getattr  node.root": [
+      "R4-F1/W1: Resolver.get(s, /t) reads the exact link root; its opaque parent.parent raises, so fallback returns the concrete target t. See anytree.md.",
+      "node is a tree node of either family"
+    ],
+    "anytree.resolver 246:27 getattr  node.parent": [
+      "node is a tree node of either family"
+    ],
+    "anytree.resolver 275:27 getattr  node.children": [
+      "node is a tree node of either family"
+    ],
+    "anytree.resolver 343:60 getattr  node.children": [
+      "node is a tree node of either family"
+    ],
+    "anytree.resolver 344:63 call  \"{!r} has no child {}. Children are: {}.\".format(node, ch...": [
+      "the {!r} field formats node, a tree node; child is a part of the str path and the last field a str"
+    ],
+    "anytree.resolver 349:23 call  getattr(node, name, None)": [
+      "name is the resolver's pathattr, a data attribute (default \"name\"); for a SymlinkNode it lives in the target, so getattr calls __getattr__ (judgement J4)"
+    ],
+    "anytree.search 234:23 call  getattr(node, name)": [
+      "name is a data attribute of the nodes (default \"name\"; tests: foo); for a SymlinkNode it lives in the target, so getattr calls __getattr__ (judgement J4)"
+    ],
+    "anytree.search 243:30 call  repr(result)": [
+      "result is the tuple of found nodes (search.py:221); repr() of the tuple calls repr() of each node"
+    ],
+    "anytree.util 26:23 getattr  node.ancestors": [
+      "R4-F1/W3: commonancestors(s) reads the exact link ancestors; its opaque parent.path raises and fallback enters target.ancestors. See anytree.md.",
+      "node is a tree node of either family"
+    ],
+    "anytree.util 55:13 getattr  node.parent": [
+      "node is a tree node of either family"
+    ],
+    "anytree.util 56:33 getattr  node.parent.children": [
+      "the parent of node, a node of the same family (judgement J1)"
+    ],
+    "anytree.util 81:13 getattr  node.parent": [
+      "node is a tree node of either family"
+    ],
+    "anytree.util 82:33 getattr  node.parent.children": [
+      "the parent of node, a node of the same family (judgement J1)"
+    ],
+    "anytree.walker 66:27 getattr  start.path": [
+      "R4-F1/W2: start is the exact package link; both inner _path lookups fail, then outer path fallback enters concrete target.path before the lookup raises. See anytree.md.",
+      "start and end are tree nodes of either family"
+    ],
+    "anytree.walker 67:23 getattr  end.path": [
+      "R4-F1/W2: start is an ordinary node with a successful path; end is the exact package link whose outer path lookup falls back after both inner _path lookups fail. See anytree.md."
+    ],
+    "anytree.walker 68:18 getattr  start.root": [
+      "R4-F1/W1: start=s and end=t. Both path reads succeed through inner _path repair; start.root then falls back to target.root. See anytree.md."
+    ],
+    "anytree.walker 68:34 getattr  end.root": [
+      "R4-F1/W1: start=t and end=s. Both path reads succeed through inner _path repair; end.root then falls back to target.root. See anytree.md."
+    ],
+    "anytree.walker 74:39 getattr  start.root": [
+      "R4-F1/W1: start=s/end=t; paths repair via inner _path fallback, roots match t, common is (t,). Normal mode with ANYTREE_ASSERTIONS=1 reads start.root again and invokes fallback. See anytree.md.",
+      "runs only when ANYTREE_ASSERTIONS is set (config.py:6)"
+    ]
+  },
+  "trace": "dynamic/anytree.json"
+}

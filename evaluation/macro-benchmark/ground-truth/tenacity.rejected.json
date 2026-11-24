@@ -1,0 +1,26 @@
+{
+  "tenacity.BaseRetrying._post_stop_check_actions.exc_check": {
+    "<builtin>.ValueError": "client callback: tests/test_tenacity.py:1811 passes the builtin ValueError as retry_error_cls; the package's own retry_error_cls is RetryError"
+  },
+  "tenacity.RetryError.reraise": {
+    "<builtin>.BaseException.with_traceback": "Round 4: the call can execute, but cause is a client-origin exception attribute value and stays opaque under B5. No package code constructs the cause; isinstance(exc, TryAgain) checks exc, not cause. The alternate public RetryCallState.set_exception witness admits the outer package TryAgain through BaseException, but does not type its cause as a concrete outside receiver under B4. The universal exception-family contract alone does not supply that package input role."
+  },
+  "tenacity.Retrying.__call__": {
+    "<builtin>.list.append": "client callback: tests/test_tenacity.py:543 and :610 pass the bound method append of a test list as sleep (called at __init__.py:560)"
+  },
+  "tenacity.after.after_log.log_it": {
+    "unittest.mock.CallableMixin.__call__": "client callback: tests/test_after.py:30-31 pass a MagicMock as the logger of after_log (logger.log, after.py:39)"
+  },
+  "tenacity.asyncio.AsyncRetrying.__call__": {
+    "unittest.mock.CallableMixin.__call__": "client callback: tests/test_asyncio.py:644 passes a mock.AsyncMock as sleep (await self.sleep(do), asyncio/__init__.py:139)"
+  },
+  "tenacity.before.before_log.log_it": {
+    "unittest.mock.CallableMixin.__call__": "client callback: tests/test_tenacity.py:165-166 pass a MagicMock as the logger of before_log (logger.log, before.py:36)"
+  },
+  "tenacity.before_sleep.before_sleep_log.log_it": {
+    "logging.Logger.log": "client callback: tests/test_tenacity.py:1893 and later pass a logging.Logger as the logger of before_sleep_log (logger.log, before_sleep.py:64); the package supplies no logger"
+  },
+  "tenacity.tornadoweb.TornadoRetrying.__call__": {
+    "tornado.gen.coroutine.wrapper": "client callback: tests/test_tornado.py:29-31 and :36-39 retry functions of the tests decorated with tornado.gen.coroutine; fn(*args, **kwargs) at tornadoweb.py:55 calls tornado's wrapper of the client's function"
+  }
+}

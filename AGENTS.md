@@ -13,14 +13,17 @@ It never imports or executes the code it analyses. Keep it that way.
 | `tests/test_micro_benchmark.py` | Runs every micro-benchmark case against its expected call graph |
 | `micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json` |
 | `docs/design.md` | The design of the analysis: what it models, its rules, termination, open problems |
+| `evaluation/` | Measures PyCG: the runner, the scorer and their tests (`evaluation/README.md`, `evaluation/AGENTS.md`) |
+| `evaluation/macro-benchmark/` | 30 real packages with hand-written ground truths and traces |
 
 ## Commands
 
 ```
-uv sync                 # create the environment
-uv run make test        # all tests
-uv run make lint        # ruff check and format check
-uv run make format      # apply formatting
+make setup              # create the environment (uv sync --locked)
+make test               # all tests: the engine's and the evaluation's
+make lint               # ruff check and format check
+make format             # apply formatting
+make eval               # measure this commit on both benchmarks (Docker)
 uv run pytest -k classes/call   # one benchmark case
 ```
 
@@ -43,7 +46,9 @@ not add one without discussion.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
 - Record every measurable result (benchmark numbers, bugs found in ground
   truth, design decisions and their reasons) in the commit message of the
-  change.
+  change. Benchmark numbers come from `make eval` on a clean commit.
+- **The evaluation measures PyCG only.** Work under `evaluation/` follows
+  `evaluation/AGENTS.md`: third-party code runs only in Docker.
 
 ## Workflow
 
