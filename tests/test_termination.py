@@ -24,6 +24,8 @@ from programs import analysed, no_rule_sees_what_is_opaque
 from pycg.analysis import solver
 from pycg.formats import dumps
 
+pytestmark = pytest.mark.slow
+
 SEED = 20261111
 RANDOM_PROGRAMS = 500
 SECONDS_PER_PROGRAM = 5

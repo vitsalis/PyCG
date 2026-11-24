@@ -35,6 +35,8 @@ from pycg.analysis.model import BUILTIN_MODULE, Signature
 from pycg.analysis.semantics import Analysis
 from pycg.analysis.solver import Constraint, Node, Solver
 
+pytestmark = pytest.mark.slow
+
 NODES = 8
 OBJECTS = 6
 KINDS = 3

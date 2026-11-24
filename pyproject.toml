@@ -37,6 +37,7 @@ exclude = ["/evaluation/**"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "evaluation/tests"]
+markers = ["slow: a module that takes seconds; make check leaves it out"]
 filterwarnings = ["error"]
 empty_parameter_set_mark = "fail_at_collect"
 

@@ -8,6 +8,7 @@ EVAL_JOBS ?= $(shell nproc)
 BASE ?=
 SUMMARY ?= /dev/stdout
 LABELS ?= /dev/stdout
+OUTPUTS ?= /dev/stdout
 GIT_COMMON = $(abspath $(shell git rev-parse --git-common-dir))
 COMMIT = $(shell git rev-parse --short=10 HEAD)
 RESULT = $(EVAL_OUT)/pycg-$(COMMIT)
@@ -57,9 +58,9 @@ diff -rq -x runs.json -x result.json $(RESULT) $(RESULT)-seed1
 @echo "the graphs of hash seeds 0 and 1 are byte-identical"
 endef
 
-.PHONY: setup test lint format eval-inputs eval eval-record eval-diff eval-determinism \
+.PHONY: setup test lint check format eval-inputs eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-compare \
-	eval-same-graphs eval-labels
+	eval-same-graphs eval-labels eval-changes
 
 setup:
 	uv sync --locked
@@ -70,6 +71,9 @@ test:
 lint:
 	$(RUN) ruff check $(LINTED)
 	$(RUN) ruff format --check $(LINTED)
+
+check:
+	$(RUN) python tools/check.py $(if $(FULL),--full) $(if $(BASE),--base $(BASE))
 
 format:
 	$(RUN) ruff check --select I --fix $(LINTED)
@@ -133,3 +137,7 @@ eval-labels: eval-inputs
 	$(LABELER) $(RESULT)/result.json $(BASE_RESULT)/result.json \
 		$(EVAL_OUT)/changed-$(COMMIT).txt $(EVAL_OUT)/labels-$(COMMIT).txt >> $(SUMMARY)
 	cat $(EVAL_OUT)/labels-$(COMMIT).txt >> $(LABELS)
+
+eval-changes:
+	$(need_base)
+	python3 -I tools/check.py --base $(BASE) --detect-eval $(OUTPUTS) >> $(SUMMARY)
