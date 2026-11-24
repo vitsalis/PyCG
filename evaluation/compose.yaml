@@ -17,7 +17,7 @@
 # The file is plain YAML: mappings, lists of scalars, JSON lists, and the
 # anchors below; tests/test_compose.py reads it without a YAML library.
 
-name: pycg-evaluation
+name: pycg
 
 # The one pin of the Python image, by digest: the image of the traces of
 # the macro-benchmark (its test-environments/*.installed.txt name it).
@@ -44,7 +44,7 @@ services:
   # macro-benchmark/README.md that read the sources.
   inputs:
     <<: *sealed
-    image: pycg-evaluation-inputs
+    image: pycg-inputs
     build:
       context: ..
       dockerfile: evaluation/container/Dockerfile.inputs
