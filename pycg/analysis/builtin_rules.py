@@ -1137,7 +1137,7 @@ def _signature(text):
     keyword_only = [arg.arg for arg in arguments.kwonlyargs]
     signature = Signature(
         positional=positional,
-        positional_only=len(arguments.posonlyargs),
+        positional_only_count=len(arguments.posonlyargs),
         keyword_only=keyword_only,
         vararg=arguments.vararg.arg if arguments.vararg else None,
         kwarg=arguments.kwarg.arg if arguments.kwarg else None,

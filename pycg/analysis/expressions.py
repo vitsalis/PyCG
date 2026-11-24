@@ -11,7 +11,7 @@ import ast
 import operator as operators
 import string
 
-from .flow import FALSE, LITERALS, TRUE, UNKNOWN, literals_of, truth_of, values_of
+from .flow import FALSE, LITERAL_TYPES, TRUE, UNKNOWN, literals_of, truth_of, values_of
 
 # The modules whose `TYPE_CHECKING` is false at run time (and true only for
 # a type checker).
@@ -168,7 +168,7 @@ class Expressions:
 
     def _literals(self, node):
         """The literal values that the evaluated expression `node` may have
-        (see `LITERALS` in flow.py), or None if it may have another."""
+        (see `LITERAL_TYPES` in flow.py), or None if it may have another."""
         return self._facts(node)[1]
 
     def _facts(self, node):
@@ -178,7 +178,7 @@ class Expressions:
             return facts
         if type(node) is ast.Constant:
             value = node.value
-            if isinstance(value, LITERALS):
+            if isinstance(value, LITERAL_TYPES):
                 return (TRUE if value else FALSE, literals_of(value))
             return (TRUE if value else FALSE, None)
         return (UNKNOWN, None)

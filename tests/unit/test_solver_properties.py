@@ -309,7 +309,7 @@ def variant(request, monkeypatch):
     in the same order when hypothesis shrinks it."""
     name = request.param
     if name == "sweep always":
-        monkeypatch.setattr(solver_module, "_MIN_SWEEP", 1)
+        monkeypatch.setattr(solver_module, "_SWEEP_NEW_OBJECTS_MIN", 1)
         return solver_module.Order, None
     if name.startswith("small cap, "):
         return ORDERS[name.removeprefix("small cap, ")], 2

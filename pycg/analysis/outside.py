@@ -1378,7 +1378,7 @@ def _signature(parameters):
     positional = [p[0] for p in parameters if p[1] in ("/", "")]
     return Signature(
         positional=positional,
-        positional_only=sum(1 for p in parameters if p[1] == "/"),
+        positional_only_count=sum(1 for p in parameters if p[1] == "/"),
         keyword_only=[p[0] for p in parameters if p[1] == "k"],
         vararg=next((p[0] for p in parameters if p[1] == "*"), None),
         kwarg=next((p[0] for p in parameters if p[1] == "**"), None),

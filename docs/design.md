@@ -182,22 +182,23 @@ test.
 ## Pipeline and modules
 
 1. **Module discovery** (`program.py`, `imports.py`). Start from the entry
-   modules and resolve each import against the package root on the file
-   system. Modules inside the root are analysed; every other module is
-   outside code. The package root is `--package`, or else the deepest
-   directory that contains every entry module; module names are relative
-   to it. A module that cannot be read or parsed is analysed as an empty
-   module, and the output reports it as failed. An import that finds a
-   binary module file under the root (an extension module) gives the
-   outside module of that name. Of several files of one module name, one
-   rule picks the module, for imports and entry points alike, whatever
-   their order: the package, then the module file, then the binaries
-   (`imports._candidates`), then the files that only entry points name
-   (`a.pyw`, a script without a suffix), by path; the output lists the
-   others as shadowed. The stub `x.pyi` beside a module file `x.py` is
-   read for annotations and for the bases of its classes only (see *A
-   module's own stub*); a stub is never a module. The
-   other rules of imports are under *Imports*.
+   modules and resolve each import against the package root on the file system.
+   Modules inside the root are analysed; every other module is outside code. The
+   package root is `--package`, or else the deepest directory that contains
+   every entry module; module names are relative to it. A module that cannot be
+   read or parsed is analysed as an empty module, and the output reports it as
+   failed; the warnings that Python gives about the analysed code as it parses
+   it (an invalid escape sequence) are not the analysis' concern and are
+   silenced. An import that finds a binary module file under the root (an
+   extension module) gives the outside module of that name. Of several files of
+   one module name, one rule picks the module, for imports and entry points
+   alike, whatever their order: the package, then the module file, then the
+   binaries (`imports._candidates`), then the files that only entry points name
+   (`a.pyw`, a script without a suffix), by path; the output lists the others as
+   shadowed. The stub `x.pyi` beside a module file `x.py` is read for
+   annotations and for the bases of its classes only (see *A module's own
+   stub*); a stub is never a module. The other rules of imports are under
+   *Imports*.
 2. **Scopes** (`scopes.py`). A light pass over each AST decides which scope
    binds each name, by Python's rules computed from the AST (not from
    `symtable`, whose tables differ between versions). It names every scope
@@ -250,7 +251,13 @@ stubs is one table, `builtin_models.py`.
 ### Objects
 
 An object is identified by the place that creates it, never by the name it
-is bound to.
+is bound to. Objects compare by identity; the analysis interns the ones
+that can be created more than once (modules, externals, instances, bound
+methods). A creation site is `module:line:column#end_line:end_column`: the
+end tells apart the constructs that start at the same place (`a.b.c`,
+`(a + b) + c`), and the name of an object takes the part before `#`. A
+program has many constants (pygments: 84k), so a `Const` has no fields
+and computes its name when asked.
 
 | Object | Identity | Notes |
 |---|---|---|
@@ -372,18 +379,20 @@ A call acts on each object of its callee:
 
 ### Arguments
 
-Positional arguments before the first unpacked one bind by position; extra
-ones go to the `*args` tuple, one field per position. An unpacked list or
-tuple keeps the positions of its elements; any other unpacked iterable,
-and every argument after it, may bind to any later position. Keyword
-arguments bind by name (not to positional-only parameters); the others go
-to the `**kwargs` dict, keyed by name. An unpacked dict binds its constant
-keys by name and its other elements to every parameter that accepts
-keywords. A default flows into its parameter at each call that may omit
-the argument, and into the parameters of an entry point (idea 4). A
-receiver binds to the first parameter, or, for a method with only `*args`
-(`def run(*args)`, a forwarding wrapper), to `args[0]`, before the
-arguments.
+Positional arguments before the first unpacked one bind by position; extra ones
+go to the `*args` tuple, one field per position. An unpacked list or tuple keeps
+the positions of its elements; any other unpacked iterable, and every argument
+after it, may bind to any later position. Keyword arguments bind by name (not to
+positional-only parameters); the others go to the `**kwargs` dict, keyed by
+name. An unpacked dict binds its constant keys by name and its other elements to
+every parameter that accepts keywords. A keyword argument whose value the
+analysis does not track still gives `**kwargs` its key. The elements of a
+callee's `*args` and `**kwargs` exist only once something is passed to them: the
+elements of an unpacked argument at unknown positions or keys bind once it has
+gathered something. A default flows into its parameter at each call that may
+omit the argument, and into the parameters of an entry point (idea 4). A
+receiver binds to the first parameter, or, for a method with only `*args` (`def
+run(*args)`, a forwarding wrapper), to `args[0]`, before the arguments.
 
 **A call that cannot bind its arguments gives no edge.** Python raises
 `TypeError` before the callee starts (`macro-benchmark/README.md` of the
@@ -754,7 +763,16 @@ Two mechanisms keep the cost close to the size of the result:
   computed once and remembered: when many nodes hold the same set and
   receive the same delta, they share one union. The table is rebuilt from
   the sets that nodes hold when the sets created since the last rebuild
-  hold more objects than those that survived it.
+  hold more objects than those that survived it, and at the earliest when
+  they hold 2^20 objects (`_SWEEP_NEW_OBJECTS_MIN`). Many nodes hold and
+  receive the same sets, so the order of the objects of a set is kept with
+  it; and many constraints that act on a few kinds of objects
+  (`Constraint.kinds`) are applied to the same large sets (each lookup in
+  a dict reads the keys of the dict for the instances among them), so the
+  objects of those kinds are selected once and kept, for a set of at
+  least 32 objects (`_KIND_SELECTION_OBJECTS_MIN`): for a smaller one,
+  looking the selection up costs more than the constraint's own test of
+  each object.
 - **Cycle collapsing.** The nodes of a cycle of subset edges hold the same
   set at the fixpoint. When a successor already holds the same set as the
   node that sends to it (with hash consing, the same object), the edge may
@@ -783,7 +801,18 @@ Two mechanisms keep the cost close to the size of the result:
 
 A constant node (the value of a literal or a definition) holds one object
 and never gets another; edges and constraints on it act at once and are
-not kept. Its set stays in the table of sets. A chain of constraints that
+not kept. Its set stays in the table of sets. A program has many of them
+(pygments: 116k), so a constant keeps only its set. A program has
+millions of nodes with a successor, and most have one: a node keeps its
+one successor itself, and a dict (successor to whether the edge started a
+search for cycles) only for more. It has millions of `Each` constraints
+too: of a bound method one keeps the function and the object, not the
+method that Python makes for each use, and of one result node the node,
+not a tuple. The solver counts its work in measures that do not depend on
+the machine (`Solver.work`): objects written into new sets (a set that is
+reused copies nothing), constraint applications, subset edges, nodes
+processed, nodes merged, and nodes and edges walked by searches for
+cycles. A chain of constraints that
 attach constraints to nodes that already hold objects would nest calls
 without bound; past 50 nested attachments (see *Bounds*), the application
 waits for the solve. The rules that walk a class hierarchy (the MROs of a
@@ -915,7 +944,8 @@ and the iterations read it; the end of the body and each `continue` add
 edges into the head nodes, which exist already, so the AST is walked once.
 The loop ends where its test is false (for `for`, at the start of an
 iteration), which is where the `else` block runs; each `break` leaves to
-after the `else` block.
+after the `else` block. A `break` or `continue` outside a loop, a syntax
+error, only ends its path.
 
 ### Exceptions, `finally` and `with`
 
@@ -951,7 +981,10 @@ truth of a literal or of a tuple display; that of another name read in
 order; and that of `not`, `and`, `or` and conditional expressions of
 those. A list, set or dict display has none, because the container may
 change; a decorated definition, a loop head and the value of a call have
-none either. Definitions that meet join their truths. `a or b` gives `a`
+none either. A truth is two bits (`TRUE`, `FALSE` in `flow.py`): the
+value may be true, it may be false; a definition with no value has
+neither, and one whose truth is not known has both. Definitions that meet
+join their truths. `a or b` gives `a`
 only if `a` may be true, and evaluates `b` only if `a` may be false (`and`
 the other way round); a conditional expression evaluates the arm whose
 truth its test may have. An operand or an arm that is not evaluated gives
@@ -961,8 +994,10 @@ statements but not in its functions, which another module may run after
 it changes `DEBUG`.
 
 A definition also records the literal values that the name may have (str,
-bytes, int, float, bool and `None`, each with its type, since `True` and
-`1` are equal but not the same object), from literals, names, `not`,
+bytes, int, float, bool and `None`, which are immutable and compare by
+value in the same way on every supported Python; each with its type, since
+`True` and `1`, or `False`, `0` and `0.0`, are equal and hash alike but
+`is` tells them apart), from literals, names, `not`,
 `and`, `or`, comparisons and conditional expressions of those; any other
 value makes them unknown. A comparison of literals whose values decide it
 gives a known bool: `==`, `!=`, `<`, `<=`, `>`, `>=`, `is` and `is not`
@@ -1291,19 +1326,21 @@ imports under its own name, `pkg._vendor.requests`).
 
 ### Stub data
 
-The stubs of typeshed are read as data. `tools/generate_stubs.py`, a
-development tool that is not installed and uses the standard library
-only, reads the stubs of one pinned typeshed commit with `ast`, importing
-and executing none: the standard library (`stdlib/`) and every
-third-party distribution (`stubs/`, all of them: 201 at the pinned commit).
-It writes one JSON file per top-level module into
-`pycg/analysis/stub_data/`, those of the distributions into its
+The stubs of typeshed are read as data. `tools/generate_stubs.py`, a development
+tool that is not installed and uses the standard library only, reads the stubs
+of one pinned typeshed commit with `ast`, importing and executing none: the
+standard library (`stdlib/`) and every third-party distribution (`stubs/`, all
+of them: 201 at the pinned commit). It writes one JSON file per top-level module
+into `pycg/analysis/stub_data/`, those of the distributions into its
 `third_party/` directory, with the commit, each distribution's version and
-typeshed's licence (Apache-2.0). `pycg/analysis/stubs.py` reads a file when
-the analysis first asks for one of its modules, once per process, and
-describes the format; a program that imports no third-party module reads
-no third-party data. Nothing is imported, and the data depends neither on
-the running Python nor on what is installed where the tool runs.
+typeshed's licence (Apache-2.0). `pycg/analysis/stubs.py` reads a file when the
+analysis first asks for one of its modules, once per process (the format is
+under *Format of the stub data*); a program that imports no third-party module
+reads no third-party data. The rules ask the same questions of the data (a
+module, a definition, a member of a class) at every object and site, and the
+data does not change, so `Stubs` finds each answer once and shares it: a caller
+does not change it. Nothing is imported, and the data depends neither on the
+running Python nor on what is installed where the tool runs.
 
 Which stub gives a module:
 
@@ -1384,7 +1421,8 @@ member: its class), `TypeGuard` and `TypeIs` are `bool`, and `Annotated`,
 `ClassVar`, `Final`, `Required`, `NotRequired` and `ReadOnly` are the type
 that they wrap; a variable without a type (`x: Final = 1`) has the type of
 its value. Lookups on a class walk a C3 order of
-its bases in every version, ending with `object`.
+its bases in every version, ending with `object`; a base that the stubs do
+not have is left out.
 
 One fact of Python corrects the data: the two mixin methods of
 `collections.abc` that return `self`, `Iterator.__iter__` and
@@ -1413,6 +1451,46 @@ declared `Self` by typeshed.
   own `.pyi` files) are not read: the result must not depend on what is
   installed. The analysed package's own stubs are read for annotations
   (see *A module's own stub*).
+
+#### Format of the stub data
+
+A file is `{"modules": {name: module}}` with every module of one
+top-level module (`os`, `os.path`). A module is `{"names": {name: entry},
+"all": [...]}`; `all` is its `__all__`. The data is the union of every
+Python version and platform. Every entry has a kind `k`:
+
+| `k` | Entry | Keys |
+|---|---|---|
+| `"f"` | function or method | `s`, its signatures (the overloads, of every version); `d`, `"classmethod"` or `"staticmethod"`; `x`, abstract |
+| `"c"` | class | `b`, its base classes (types, without `Generic` and `Protocol`); `m`, its members (entries); `tp`, its type parameters (type variable names); `proto`, a protocol; `final`; `tco`, a class that exists only in stubs (`@type_check_only`); `meta`, its metaclass; `pub`, its public name where it is not its definition path |
+| `"p"` | property | `t`, its type; `set`, it has a setter; `x`, abstract |
+| `"v"` | variable or attribute | `t`, its type |
+| `"r"` | reference | `to`, the definitions it may be, each `[module, qualified name]` (an empty name for a module); `also`, for a definition that another version or platform re-exports from elsewhere, those places |
+
+A signature has `p`, its parameters, `r`, the type of its result, and `a`
+if it is a coroutine function (`async def`). A parameter is `[name, kind,
+default, type]`: kind `"/"` positional-only, `""` positional or keyword,
+`"*"` the `*args` parameter, `"k"` keyword-only, `"**"` the `**kwargs`
+parameter; default 1 if it has one. Imports, re-exports and assignments
+of names are references; a name that platforms or versions bind
+differently has every definition. The target of a reference is never
+itself a reference.
+
+A *definition path* is the module that defines something, then its
+qualified name (`re.Pattern.match`, `asyncio.events.AbstractEventLoop`).
+A type is null (unknown: `Any`, or what the generator dropped), a string,
+or a list:
+
+| Type | Meaning |
+|---|---|
+| `"module.Class"` | an instance of that class (its definition path) |
+| `"*none"` | `None`, or no value |
+| `"*self"` | the type of the receiver |
+| `["module.Class", arg, ...]` | an instance of a generic class with its type arguments, `"..."` for the variadic part of a tuple |
+| `["\|", type, ...]` | a union |
+| `["*type", type]` | the class itself (`type[C]`) |
+| `["*call", result, params]` | a callable, with the types of its parameters, or null when they are not listed |
+| `["*var", name]`, `["*var", name, bound]`, `["*var", name, union, "c"]` | a type variable, with its bound, or the union of its constraints (`AnyStr`: the variable is one of them) |
 
 ### Typed outside values
 
@@ -1706,15 +1784,16 @@ method of the analysed objects it gets (`Thread.start` and `run`,
 
 ### Selected standard-library operations
 
-A table of operations of the standard library (`LIBRARY_ITERATION`, keyed
-by the canonical stub definition and the exact parameters whose arguments
-they iterate) calls the iteration methods of what they get, as CPython
-3.12 to 3.15 does (probed with an iterable apart from its iterator). The
-stubs cannot state it: `islice`, `chain`, `groupby` and `product` have one
-shape there (no bases, `__iter__` and `__next__`), but `product` makes a
-tuple of its argument at once and the others do not. A name that only
-looks like an operation (a package function `islice`) is not one; an
-alias is.
+A table of operations of the standard library (`LIBRARY_ITERATION`, keyed by the
+canonical stub definition and the exact parameters whose arguments they iterate,
+or `*` for every parameter that the stub types as `typing.Iterable`,
+`typing.Iterator` or `typing.Collection`, at its top level or in an arm of a
+union) calls the iteration methods of what they get, as CPython 3.12 to 3.15
+does (probed with an iterable apart from its iterator). The stubs cannot state
+it: `islice`, `chain`, `groupby` and `product` have one shape there (no bases,
+`__iter__` and `__next__`), but `product` makes a tuple of its argument at once
+and the others do not. A name that only looks like an operation (a package
+function `islice`) is not one; an alias is.
 
 | Operation | At the call | Where the object is advanced |
 |---|---|---|
@@ -2167,16 +2246,17 @@ other form, defines no names.
 
 #### Alternative hierarchies
 
-A base expression that may refer to several
-classes (`A if flag else B`, or a name bound by `try`/`except` imports)
-gives alternative hierarchies, not multiple inheritance. A class has one
-MRO per choice of one candidate per base expression (and of one MRO per
-candidate), and a lookup is the union of the first definition in each.
-`object` as a candidate means that the base may be absent: `class C(A if
-flag else object)` has the MROs `[C, A]` and `[C]`. A hierarchy without a
-C3 order falls back to the MROs of its bases, left to right. A class is
-never its own base. `<builtin>.object` is never a base: it is the implicit
-root of every class.
+A base expression that may refer to several classes (`A if flag else B`, or a
+name bound by `try`/`except` imports) gives alternative hierarchies, not
+multiple inheritance. A class has one MRO per choice of one candidate per base
+expression (and of one MRO per candidate), and a lookup is the union of the
+first definition in each. `object` as a candidate means that the base may be
+absent: `class C(A if flag else object)` has the MROs `[C, A]` and `[C]`. A
+hierarchy without a C3 order, which Python would reject, still gets an order:
+the class and then the MROs of its bases, left to right, each class at its first
+position. A class is never its own base, nor is a base whose MRO already
+contains the class; a repeated base counts once. `<builtin>.object` is never a
+base: it is the implicit root of every class.
 
 - A class gets its MROs (it is *ready*) only when each of its base
   expressions holds a ready candidate, an external, or no base (`object`,
@@ -2748,44 +2828,41 @@ and a suffix cannot state) and for a str constant (`"Visit".lower()`).
 
 ### Namespaces read by reflection
 
-`C.__dict__` and `vars(C)` of an analysed class give its namespace: a dict,
-one per class, whose keys are the names that the class body binds (see
-*The class statement*) and the names that stores assign on the class, and
-whose element under each name gets, by an edge, what the class field of
-that name holds. The field is the node that loads read, so a name that a
-store adds later, or a value that reaches the field later, is in the dict
-in every order of the solve. It holds what the body binds, not what a load
-gives: the plain function, and the `staticmethod` or `classmethod` object,
-which a call runs as its function (a static method; Python 3.10 made it
-callable) or not at all (a class method, which Python refuses to call).
-The names of the bases are not in it. The
-namespace is a dict as any other, so `items()`, `values()`, `keys()`,
-iteration (the names, as str constants that `getattr` then loads, see
-*Computed attribute names*), a subscript with a constant name and the
-unpacking in `for name, member in vars(C).items()` work on it. It is not
-exact for class tests, since Python gives a `mappingproxy` for a class.
-The rule applies where the `__dict__` that Python finds on a metaclass of
-the class may be the default one, `type`'s (`Hierarchy.default_member`).
-The walk follows each candidate MRO of the metaclass, and the first class
-that defines `__dict__` decides: `type` means the default; an analysed
-class whose body binds the name, or an outside class whose stub class
-defines it before its stub MRO reaches `type`, means another definition;
-an outside class that only inherits it from `object` lets the walk go on,
-since `object` comes last in Python's MRO; an outside class without stubs
-may define it. By the stubs, `type` supplies `__dict__` (and Python's
-`type` its own `__dir__`, which the stubs leave to `object`), and `object`
-supplies `__dir__` and `__dict__`. So `M(type, Hidden)` keeps the
-defaults and `M(Hidden, type)` does not. As for a lookup, the rule applies
-if some candidate MRO reaches the default first: the answer only turns
-from no to yes as MROs are added, as the solve needs, and a hierarchy
-that Python does not build may add members
+`C.__dict__` and `vars(C)` of an analysed class give its namespace: a dict, one
+per class, whose keys are the names that the class body binds (see *The class
+statement*) and the names that stores assign on the class, and whose element
+under each name gets, by an edge, what the class field of that name holds. The
+field is the node that loads read, so a name that a store adds later, or a value
+that reaches the field later, is in the dict in every order of the solve; where
+the set of names saturates, the elements of the dict get the saturated value. It
+holds what the body binds, not what a load gives: the plain function, and the
+`staticmethod` or `classmethod` object, which a call runs as its function (a
+static method; Python 3.10 made it callable) or not at all (a class method,
+which Python refuses to call). The names of the bases are not in it. The
+namespace is a dict as any other, so `items()`, `values()`, `keys()`, iteration
+(the names, as str constants that `getattr` then loads, see *Computed attribute
+names*), a subscript with a constant name and the unpacking in `for name, member
+in vars(C).items()` work on it. It is not exact for class tests, since Python
+gives a `mappingproxy` for a class. The rule applies where the `__dict__` that
+Python finds on a metaclass of the class may be the default one, `type`'s
+(`Hierarchy.default_member`). The walk follows each candidate MRO of the
+metaclass, and the first class that defines `__dict__` decides: `type` means the
+default; an analysed class whose body binds the name, or an outside class whose
+stub class defines it before its stub MRO reaches `type`, means another
+definition; an outside class that only inherits it from `object` lets the walk
+go on, since `object` comes last in Python's MRO; an outside class without stubs
+may define it. By the stubs, `type` supplies `__dict__` (and Python's `type` its
+own `__dir__`, which the stubs leave to `object`), and `object` supplies
+`__dir__` and `__dict__`. So `M(type, Hidden)` keeps the defaults and `M(Hidden,
+type)` does not. As for a lookup, the rule applies if some candidate MRO reaches
+the default first: the answer only turns from no to yes as MROs are added, as
+the solve needs, and a hierarchy that Python does not build may add members
 (`test_any_candidate_mro_that_reaches_the_default_applies_the_rule`). A
-metaclass that defines its own `__dict__` gives that attribute instead,
-and the rule adds nothing; a class body's own `__dict__` is not in the
-way, since the descriptor of the metaclass wins. Of the common outside metaclasses, `type`, `abc.ABCMeta`,
-`typing._ProtocolMeta` (protocols) and `enum.EnumMeta` define no
-`__dict__` of their own in the stubs; a `NamedTuple` class is made by
-`type`.
+metaclass that defines its own `__dict__` gives that attribute instead, and the
+rule adds nothing; a class body's own `__dict__` is not in the way, since the
+descriptor of the metaclass wins. Of the common outside metaclasses, `type`,
+`abc.ABCMeta`, `typing._ProtocolMeta` (protocols) and `enum.EnumMeta` define no
+`__dict__` of their own in the stubs; a `NamedTuple` class is made by `type`.
 
 `inspect.getmembers(x)` of a class or an instance gives an exact list of
 exact (name, value) pairs: the names of the class (of its class, for an
@@ -3396,8 +3473,11 @@ the pattern holds (`matching.py`, from the language reference):
 Literal values decide what may match (see *Value choice*): a case runs only
 if its pattern may match a literal subject (a literal value pattern
 compares with `==`, `None`, `True` and `False` with `is`; a sequence or
-mapping pattern never matches a literal, a class pattern may) and its guard
-may hold, and the cases after one that always matches do not run.
+mapping pattern never matches a literal, since `match` takes no str or
+bytes for a sequence; a class pattern may) and its guard may hold, and the
+cases after one that always matches do not run. A case whose pattern
+matches but whose guard fails leaves what the pattern bound to the cases
+after it.
 Otherwise every case may run, whatever the length or the keys of the
 containers that the subject holds.
 
@@ -3441,7 +3521,26 @@ their stubs declare.
 ### Imports
 
 **Module discovery.** An import resolves against the package root (see
-*Pipeline and modules*).
+*Pipeline and modules*). Resolution reads only the file system: it never
+imports or executes code, and never reads or changes `sys.path` or
+`sys.modules`. A directory's names are read from its listing, once per
+analysis, so a name matches case-sensitively also on a case-insensitive
+file system, and a directory named like a file is not that file.
+`from a import b` imports the module `a.b` if it exists, else `b` is an
+attribute of `a`; the `*` of a star import is never a module, and a plain
+module has no submodules. The packages on the path of an import are
+imported even when the module is missing, since Python runs them before
+the import fails. A relative import that goes beyond the top-level
+package imports nothing: the package root is not a package. In an
+absolute import, the modules that are built-in or frozen in every
+supported Python (`BUILTIN_OR_FROZEN_MODULES` of `imports.py`: the
+intersection of `sys.builtin_module_names` and
+`_imp._frozen_module_names()` over 3.12 to 3.15, static and shared builds,
+computed once) come before any file, as in Python, also for submodules
+(`importlib` is not frozen, `importlib.util` is): such a module is outside
+code, and no absolute import reaches an analysed module of that name. The
+set is a constant, so the result does not depend on the Python that runs
+the analysis.
 
 **Literal imports.** `importlib.import_module("a.b")` and `__import__("a.b")`
 with a str literal are imports too, where the called name is, in the scope
@@ -3956,7 +4055,7 @@ closure of the standard library. The document records it (`tool.cap`).
 | Steps of an outside name past its root (`MAX_EXTERNAL_STEPS`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
 | Receivers that a call passes before its arguments (`MAX_RECEIVERS`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |
 | Layers of generic arguments in the stub data (`GENERIC_ARGUMENT_DEPTH_MAX` of `tools/generate_stubs.py`) | 2 | Termination and size: the types of recursive aliases nest without end, and the containers of stubbed results are keyed by the position in the type | A deeper argument keeps its class without its type arguments (see *Stub data*) |
-| Nested attachments of constraints in the solver (`_MAX_NESTING`) | 50 | The Python stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
+| Nested attachments of constraints in the solver (`_ATTACH_NESTING_MAX`) | 50 | The Python stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
 | Objects that a node holds (the cap, a parameter; `DEFAULT_CAP`) | 5,000 by default; any positive integer, or none | Cost and precision: a hub of generic code (a parameter that every strategy of a library reaches) costs its size times its constraints, and its calls are noise; real registries (the lexers of pygments) stay under it | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, stores into it are dropped. What it stood for is lost: code reached only through it is code that no analysed code calls, and a set it would have filled holds less, so a rule that depends on how much a set holds (nothing, or at most four computed names) may apply where it would not without the cap and add edges (`leaf -> fallback`, `main -> C.a` in *The solver*). The bound of hierarchies counts candidates too, but fewer candidates give a part of the hierarchies, which the exhaustive order over-approximates: it adds none; the bound of receivers counts the receivers that a call passes, not the objects of a set. A rule that widens a value adds one object (the pattern rule for a class member, see *Computed attribute names*), so a node saturates one object sooner: at a cap of 1 such a widening may lose a call that the analysis without it keeps |
 
 Without a cap (`cap=None`, `--cap none`) no node saturates, and the

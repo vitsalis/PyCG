@@ -30,7 +30,7 @@ from .model import (
     Wrapper,
     base_order,
 )
-from .mro import linearizations, merged_order
+from .mro import exhaustive_order, linearizations
 from .outside import outside_name
 from .solver import Constraint, Each, Node, Watch, Witness
 from .stubs import Stubs, class_names
@@ -630,7 +630,7 @@ class Hierarchy:
             return
         cls.keyword[obj] = None
         if isinstance(obj, Class):
-            obj.metaclass_of[cls] = None
+            obj.metaclass_candidate_of[cls] = None
         self._update_mros(cls)
 
     def _decide_metaclasses(self, cls):
@@ -689,9 +689,9 @@ class Hierarchy:
         """A store outside the body assigns `name` on the class `cls`: an
         abstract method that it replaces no longer counts, for `cls` and its
         subclasses (see `_concrete`)."""
-        if name in cls.stored_names:
+        if name in cls.stored_names_outside_body:
             return
-        cls.stored_names.add(name)
+        cls.stored_names_outside_body.add(name)
         pending, seen = [cls], set()
         while pending:
             current = pending.pop()
@@ -808,8 +808,8 @@ class Hierarchy:
                 names = {
                     name: made
                     and name in base.abstract_methods
-                    and name not in base.stored_names
-                    for name in base.defines | base.stored_names
+                    and name not in base.stored_names_outside_body
+                    for name in base.defines | base.stored_names_outside_body
                 }
             elif isinstance(base, External) and self.stub_definitions(base):
                 made = self._made_by_abc(base)
@@ -960,7 +960,7 @@ class Hierarchy:
                     self._walk_mro(cls, attr, receiver, result, after, unless)
                 self._decide_metaclasses(cls)
                 queue.extend(cls.subclasses)
-                queue.extend(cls.metaclass_of)
+                queue.extend(cls.metaclass_candidate_of)
                 continue
             mros, exhaustive = self._compute_mros(cls)
             if _shape(mros, exhaustive) == _shape(cls.mros, cls.exhaustive):
@@ -979,7 +979,7 @@ class Hierarchy:
                     self._walk_exhaustive(cls, new, attr, receiver, result, None, ())
             self._decide_metaclasses(cls)
             queue.extend(cls.subclasses)
-            queue.extend(cls.metaclass_of)
+            queue.extend(cls.metaclass_candidate_of)
             # Whether the classes of this metaclass are made by ABCMeta may
             # change (see `_made_by_abc`).
             queue.extend(cls.metaclass_users)
@@ -1009,7 +1009,7 @@ class Hierarchy:
             mros = linearizations(cls, slots, _mros_of, MAX_HIERARCHIES)
             if mros is not None:
                 return sorted(mros, key=_canonical), False
-        return [merged_order(cls, slots, _mros_of)], True
+        return [exhaustive_order(cls, slots, _mros_of)], True
 
 
 def _resolved(cls):
