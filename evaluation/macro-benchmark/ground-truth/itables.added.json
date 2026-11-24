@@ -1,0 +1,1504 @@
+{
+  "edges": {
+    "itables.config.get_config_file": {
+      "<builtin>.FileNotFoundError": [
+        "itables.config 42:36 call  FileNotFoundError( f\"ITables config file was not found: I..."
+      ],
+      "pathlib.Path": [
+        "itables.config 40:27 call  Path(config_file)",
+        "itables.config 48:13 call  Path(path)"
+      ],
+      "pathlib.WindowsPath.exists": [
+        "itables.config 41:34 call  config_file.exists()",
+        "itables.config 54:30 call  config_file.exists()",
+        "itables.config 57:30 call  config_file.exists()",
+        "itables.config 70:30 call  config_file.exists()"
+      ],
+      "tomli.load": [
+        "itables.config 61:38 call  tomllib.load(fp)"
+      ]
+    },
+    "itables.config.load_config_file": {
+      "<builtin>.ImportError": [
+        "itables.config 78:26 call  ImportError( f\"Either tomllib or tomli is required to loa..."
+      ],
+      "tomli.load": [
+        "itables.config 85:34 call  tomllib.load(fp)"
+      ]
+    },
+    "itables.config.set_options_from_config_file": {
+      "<builtin>.dict.items": [
+        "itables.config 106:39 call  config.items()"
+      ],
+      "itables.config.load_config_file": [
+        "itables.config 105:34 call  load_config_file(config_file)"
+      ]
+    },
+    "itables.datatables_format._format_narwhals_series": {
+      "<builtin>.dict.get": [
+        "itables.datatables_format 200:57 call  category_to_rank.get(v, 0)"
+      ],
+      "<builtin>.enumerate": [
+        "itables.datatables_format 198:63 call  enumerate(categories)"
+      ],
+      "<builtin>.isinstance": [
+        "itables.datatables_format 196:18 call  isinstance(dtype, (nw.Categorical, nw.Enum))"
+      ],
+      "itables.datatables_format._narwhals_categories": [
+        "itables.datatables_format 197:42 call  _narwhals_categories(x)"
+      ],
+      "narwhals.Array.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Binary.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Categorical.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Date.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Datetime.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Decimal.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Duration.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Enum.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Float16.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Float32.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Float64.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Int128.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.List.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Object.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Series.to_list": [
+        "itables.datatables_format 200:82 call  x.to_list()"
+      ],
+      "narwhals.String.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Struct.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Time.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.UInt128.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ],
+      "narwhals.Unknown.is_float": [
+        "itables.datatables_format 178:22 call  dtype.is_float()",
+        "itables.datatables_format 185:22 call  dtype.is_float()"
+      ]
+    },
+    "itables.datatables_format._format_polars_series": {
+      "<builtin>.str": [
+        "itables.datatables_format 138:29 call  str(v)"
+      ],
+      "polars.Array.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Binary.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Date.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Extension.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Int128.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Null.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Object.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.Time.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "polars.UInt128.is_float": [
+        "itables.datatables_format 103:22 call  dtype.is_float()",
+        "itables.datatables_format 143:22 call  dtype.is_float()"
+      ],
+      "warnings.warn": [
+        "itables.datatables_format 133:30 call  warnings.warn( \"Polars private formatting method '_s.get_..."
+      ]
+    },
+    "itables.datatables_format._narwhals_categories": {
+      "<builtin>.getattr": [
+        "itables.datatables_format 72:29 call  getattr(x.dtype, \"categories\", None)"
+      ],
+      "<builtin>.isinstance": [
+        "itables.datatables_format 70:18 call  isinstance(x.dtype, nw.Enum)"
+      ],
+      "<builtin>.list": [
+        "itables.datatables_format 74:24 call  list(categories)"
+      ],
+      "<builtin>.sorted": [
+        "itables.datatables_format 75:18 call  sorted(x.unique().drop_nulls().to_list())"
+      ],
+      "narwhals.Series.drop_nulls": [
+        "itables.datatables_format 75:40 call  x.unique().drop_nulls()"
+      ],
+      "narwhals.Series.to_list": [
+        "itables.datatables_format 75:50 call  x.unique().drop_nulls().to_list()"
+      ],
+      "narwhals.Series.unique": [
+        "itables.datatables_format 75:27 call  x.unique()"
+      ]
+    },
+    "itables.datatables_format.datatables_rows": {
+      "pandas.Series.items": [
+        "itables.datatables_format 298:48 call  df.items()"
+      ]
+    },
+    "itables.datatables_format.generate_encoder.TableValuesEncoder.default": {
+      "json.JSONEncoder.default": [
+        "itables.datatables_format 236:48 call  json.JSONEncoder.default(self, o)"
+      ]
+    },
+    "itables.downsample._downsample": {
+      "<builtin>.TypeError": [
+        "itables.downsample 137:28 call  TypeError(f\"Unsupported DataFrame type: {df_module_name}\")",
+        "itables.downsample 151:28 call  TypeError(f\"Unsupported DataFrame type: {df_module_name}\")"
+      ]
+    },
+    "itables.downsample.as_nbytes": {
+      "<builtin>.ValueError": [
+        "itables.downsample 33:25 call  ValueError( f\"You probably don't want to display \" f\"a ta..."
+      ]
+    },
+    "itables.downsample.nbytes": {
+      "pandas.Series.items": [
+        "itables.downsample 18:56 call  df.items()"
+      ],
+      "polars.Series.estimated_size": [
+        "itables.downsample 21:33 call  df.estimated_size()"
+      ]
+    },
+    "itables.interactive": {
+      "itables.javascript.init_notebook_mode": [
+        "itables.interactive 5:19 call  init_notebook_mode()"
+      ]
+    },
+    "itables.javascript": {
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables.javascript 409:21 getitem  Unpack[ITableOptions]",
+        "itables.javascript 696:21 getitem  Unpack[ITableOptions]",
+        "itables.javascript 931:21 getitem  Unpack[ITableOptions]",
+        "itables.javascript 1127:21 getitem  Unpack[ITableOptions]",
+        "itables.javascript 1404:21 getitem  Unpack[ITableOptions]",
+        "itables.javascript 1774:21 getitem  Unpack[ITableOptions]"
+      ]
+    },
+    "itables.javascript._add_cell_borders.add_style": {
+      "re.Pattern.sub": [
+        "itables.javascript 764:39 call  _STYLE_ATTR_RE.sub( f' style=\"{_CELL_STYLE};{style_match...."
+      ]
+    },
+    "itables.javascript._caption_as_row": {
+      "itables.javascript._caption_as_row.<lambda1>": [
+        "itables.javascript 824:34 call  _TABLE_OPEN_RE.sub( lambda mm: mm.group(0) + f\"<thead>{ro..."
+      ],
+      "re.Pattern.sub": [
+        "itables.javascript 824:34 call  _TABLE_OPEN_RE.sub( lambda mm: mm.group(0) + f\"<thead>{ro..."
+      ]
+    },
+    "itables.javascript._caption_as_row.<lambda1>": {
+      "re.Match.group": [
+        "itables.javascript 825:32 call  mm.group(0)"
+      ]
+    },
+    "itables.javascript._datatables_repr_": {
+      "itables.javascript.to_html_datatable": [
+        "itables.javascript 403:29 call  to_html_datatable(df, connected=_CONNECTED)"
+      ]
+    },
+    "itables.javascript._flat_header": {
+      "<builtin>.str.format": [
+        "itables.javascript 350:43 call  \"<th>{}</th>\".format(index)",
+        "itables.javascript 353:39 call  \"<th>{}</th>\".format(column)"
+      ]
+    },
+    "itables.javascript._html_display_is_supported": {
+      "IPython.get_ipython": [
+        "itables.javascript 1764:24 call  get_ipython()"
+      ]
+    },
+    "itables.javascript._markdown_table.format_row": {
+      "<builtin>.len": [
+        "itables.javascript 519:36 call  len(widths)"
+      ]
+    },
+    "itables.javascript._raise_if_javascript_code": {
+      "<builtin>.TypeError": [
+        "itables.javascript 1388:24 call  TypeError(f\"Javascript code can't be passed to the extens..."
+      ],
+      "<builtin>.dict.items": [
+        "itables.javascript 1391:39 call  values.items()"
+      ],
+      "<builtin>.enumerate": [
+        "itables.javascript 1396:34 call  enumerate(values)"
+      ],
+      "<builtin>.isinstance": [
+        "itables.javascript 1387:18 call  isinstance(values, (JavascriptCode, JavascriptFunction))",
+        "itables.javascript 1390:18 call  isinstance(values, dict)",
+        "itables.javascript 1395:18 call  isinstance(values, list)"
+      ],
+      "itables.javascript._raise_if_javascript_code": [
+        "itables.javascript 1392:38 call  _raise_if_javascript_code(value, f\"{context}/{key}\")",
+        "itables.javascript 1397:38 call  _raise_if_javascript_code(value, f\"{context}/{i}\")"
+      ]
+    },
+    "itables.javascript._remove_columns_with_render_in_columndefs": {
+      "<builtin>.set.clear": [
+        "itables.javascript 1022:29 call  column_set.clear()"
+      ]
+    },
+    "itables.javascript._table_header": {
+      "itables.javascript._flat_header": [
+        "itables.javascript 332:21 call  _flat_header(df, show_index)",
+        "itables.javascript 336:57 call  _flat_header(df, show_index)"
+      ],
+      "itables.javascript._tfoot_from_thead": [
+        "itables.javascript 338:62 call  _tfoot_from_thead(thead)"
+      ]
+    },
+    "itables.javascript._table_header.format_dtype": {
+      "polars.Array._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Binary._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Date._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Extension._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Int128._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Int16._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Int32._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Int8._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Null._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Object._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.Time._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.UInt128._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.UInt16._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ],
+      "polars.UInt8._string_repr": [
+        "itables.javascript 295:42 call  dtype._string_repr()"
+      ]
+    },
+    "itables.javascript.check_table_id": {
+      "<builtin>.TypeError": [
+        "itables.javascript 1483:24 call  TypeError( \"tableId has been deprecated, please use table..."
+      ]
+    },
+    "itables.javascript.generate_init_offline_itables_html": {
+      "<builtin>.bytes.decode": [
+        "itables.javascript 231:58 call  b64encode(dt_src.encode(\"utf-8\")).decode(\"ascii\")",
+        "itables.javascript 232:58 call  b64encode(dt_css.encode(\"utf-8\")).decode(\"ascii\")"
+      ],
+      "<builtin>.str.encode": [
+        "itables.javascript 231:41 call  dt_src.encode(\"utf-8\")",
+        "itables.javascript 232:41 call  dt_css.encode(\"utf-8\")"
+      ],
+      "base64.b64encode": [
+        "itables.javascript 231:27 call  b64encode(dt_src.encode(\"utf-8\"))",
+        "itables.javascript 232:27 call  b64encode(dt_css.encode(\"utf-8\"))"
+      ],
+      "itables.javascript._itables_ready_event": [
+        "itables.javascript 242:74 call  _itables_ready_event()"
+      ],
+      "itables.javascript._itables_underscore_version": [
+        "itables.javascript 238:36 call  _itables_underscore_version()"
+      ],
+      "itables.javascript.get_animated_logo": [
+        "itables.javascript 252:19 call  get_animated_logo(opt.display_logo_when_loading)"
+      ],
+      "itables.javascript.replace_value": [
+        "itables.javascript 235:39 call  replace_value( init_notebook_mode, \"_itables_underscore_v...",
+        "itables.javascript 241:39 call  replace_value( init_notebook_mode, \"itables-version-ready...",
+        "itables.javascript 244:39 call  replace_value(init_notebook_mode, \"dt_src_b64\", dt_src_b64)",
+        "itables.javascript 245:39 call  replace_value(init_notebook_mode, \"dt_css_b64\", dt_css_b64)"
+      ],
+      "itables.utils.read_package_file": [
+        "itables.javascript 234:43 call  read_package_file(\"html/init_notebook_offline.html\")"
+      ],
+      "pathlib.Path": [
+        "itables.javascript 227:21 call  Path(dt_bundle)"
+      ],
+      "pathlib.PosixPath.read_text": [
+        "itables.javascript 229:33 call  dt_bundle.read_text(encoding=\"utf-8\")",
+        "itables.javascript 230:53 call  dt_bundle.with_suffix(\".css\").read_text(encoding=\"utf-8\")"
+      ],
+      "pathlib.PosixPath.with_suffix": [
+        "itables.javascript 230:35 call  dt_bundle.with_suffix(\".css\")"
+      ],
+      "pathlib.WindowsPath.read_text": [
+        "itables.javascript 229:33 call  dt_bundle.read_text(encoding=\"utf-8\")",
+        "itables.javascript 230:53 call  dt_bundle.with_suffix(\".css\").read_text(encoding=\"utf-8\")"
+      ],
+      "pathlib.WindowsPath.with_suffix": [
+        "itables.javascript 230:35 call  dt_bundle.with_suffix(\".css\")"
+      ]
+    },
+    "itables.javascript.get_categorical_columns_to_be_represented_through_their_rank": {
+      "itables.datatables_format._narwhals_categories": [
+        "itables.javascript 1109:36 call  _narwhals_categories(nw_df[col])"
+      ],
+      "pandas.DatetimeIndex.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.Float64Index.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.Int64Index.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.IntervalIndex.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.PeriodIndex.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.RangeIndex.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.Series.items": [
+        "itables.javascript 1092:48 call  df.items()"
+      ],
+      "pandas.TimedeltaIndex.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ],
+      "pandas.UInt64Index.tolist": [
+        "itables.javascript 1091:39 call  x.cat.categories.tolist()"
+      ]
+    },
+    "itables.javascript.get_compact_classes": {
+      "<builtin>.TypeError": [
+        "itables.javascript 88:24 call  TypeError(f\"classes must be a string or a list, not {type..."
+      ],
+      "<builtin>.str.join": [
+        "itables.javascript 86:24 call  \" \".join(classes)"
+      ],
+      "<builtin>.type": [
+        "itables.javascript 88:72 call  type(classes)"
+      ]
+    },
+    "itables.javascript.get_compact_style": {
+      "<builtin>.TypeError": [
+        "itables.javascript 108:24 call  TypeError(f\"style must be a string or a dict, not {type(s..."
+      ],
+      "<builtin>.type": [
+        "itables.javascript 108:70 call  type(style)"
+      ]
+    },
+    "itables.javascript.get_expanded_classes": {
+      "<builtin>.TypeError": [
+        "itables.javascript 98:24 call  TypeError(f\"classes must be a string or a list, not {type..."
+      ],
+      "<builtin>.type": [
+        "itables.javascript 98:72 call  type(classes)"
+      ]
+    },
+    "itables.javascript.get_expanded_style": {
+      "<builtin>.TypeError": [
+        "itables.javascript 121:24 call  TypeError(f\"style must be a string or a dict, not {type(s..."
+      ],
+      "<builtin>.dict": [
+        "itables.javascript 114:20 call  dict(**style)"
+      ],
+      "<builtin>.type": [
+        "itables.javascript 121:70 call  type(style)"
+      ]
+    },
+    "itables.javascript.get_float_columns_to_be_formatted_in_python": {
+      "narwhals.Array.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Binary.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Boolean.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Categorical.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Date.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Datetime.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Decimal.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Duration.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Enum.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Float16.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Float32.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Float64.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Int128.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Int16.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Int32.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Int64.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Int8.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.List.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Object.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.String.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Struct.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Time.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.UInt128.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.UInt16.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.UInt32.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.UInt64.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.UInt8.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "narwhals.Unknown.is_float": [
+        "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()"
+      ],
+      "polars.Array.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Binary.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Date.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Extension.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Int128.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Int16.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Int32.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Int8.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Null.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Object.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.Time.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.UInt128.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.UInt16.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ],
+      "polars.UInt8.is_float": [
+        "itables.javascript 1050:76 call  df[col].dtype.is_float()"
+      ]
+    },
+    "itables.javascript.get_itable_arguments": {
+      "<builtin>.TypeError": [
+        "itables.javascript 1133:24 call  TypeError( \"The argument 'import_jquery' was removed in I...",
+        "itables.javascript 1194:28 call  TypeError( \"Narwhals is required to render DataFrames oth..."
+      ],
+      "itables.javascript.warn_if_selected_rows_are_not_visible": [
+        "itables.javascript 1243:77 call  warn_if_selected_rows_are_not_visible( dt_args[\"selected_..."
+      ],
+      "pandas._config.config.CallableDynamicDoc.__call__": [
+        "itables.javascript 1181:35 call  pd.get_option(\"display.max_columns\")"
+      ],
+      "polars.Config.state": [
+        "itables.javascript 1185:61 call  pl.Config.state()"
+      ]
+    },
+    "itables.javascript.init_notebook_mode": {
+      "IPython.display.HTML": [
+        "itables.javascript 213:17 call  HTML(init_datatables)",
+        "itables.javascript 216:21 call  HTML(generate_init_offline_itables_html(dt_bundle))"
+      ],
+      "IPython.display.display": [
+        "itables.javascript 213:12 call  display(HTML(init_datatables))",
+        "itables.javascript 216:16 call  display(HTML(generate_init_offline_itables_html(dt_bundle)))"
+      ],
+      "itables.javascript._itables_underscore_version": [
+        "itables.javascript 206:42 call  _itables_underscore_version()"
+      ],
+      "itables.javascript.generate_init_offline_itables_html": [
+        "itables.javascript 216:56 call  generate_init_offline_itables_html(dt_bundle)"
+      ],
+      "itables.javascript.replace_value": [
+        "itables.javascript 209:40 call  replace_value(init_datatables, connected_import, local_im..."
+      ],
+      "itables.javascript.set_itables_repr_html_methods": [
+        "itables.javascript 195:34 call  set_itables_repr_html_methods(all_interactive)"
+      ],
+      "itables.utils.read_package_file": [
+        "itables.javascript 197:40 call  read_package_file(\"html/init_datatables.html\")"
+      ],
+      "warnings.warn": [
+        "itables.javascript 189:22 call  warnings.warn( \"The offline mode for itables is not suppo..."
+      ]
+    },
+    "itables.javascript.safe_reset_index": {
+      "<builtin>.str.format": [
+        "itables.javascript 1745:37 call  \"index{}\".format(i)"
+      ],
+      "pandas.CategoricalIndex.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.DatetimeIndex.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.Float64Index.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.Index.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.Int64Index.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.IntervalIndex.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.PeriodIndex.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.RangeIndex.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.TimedeltaIndex.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ],
+      "pandas.UInt64Index.get_level_values": [
+        "itables.javascript 1742:42 call  df.index.get_level_values(i)"
+      ]
+    },
+    "itables.javascript.set_default_options": {
+      "<builtin>.TypeError": [
+        "itables.javascript 1520:24 call  TypeError( f\"These options are not available with {use_to..."
+      ],
+      "<builtin>.ValueError": [
+        "itables.javascript 1553:29 call  ValueError( \"Please don't pass an option with a value equ..."
+      ],
+      "<builtin>.str.format": [
+        "itables.javascript 1554:92 call  \"Please don't pass an option with a value equal to None (..."
+      ],
+      "<builtin>.str.join": [
+        "itables.javascript 1540:37 call  \" \".join(kwargs[\"classes\"])",
+        "itables.javascript 1543:35 call  \";\".join(f\"{k}:{v}\" for k, v in kwargs[\"style\"].items())"
+      ],
+      "<builtin>.str.replace": [
+        "itables.javascript 1549:50 call  kwargs[\"style\"].replace(\"margin:auto\", \"margin:0\")"
+      ]
+    },
+    "itables.javascript.set_itables_repr_html_methods": {
+      "<builtin>.hasattr": [
+        "itables.javascript 140:23 call  hasattr(pd.Series, \"_repr_html_\")",
+        "itables.javascript 169:23 call  hasattr(pl.Series, \"_repr_html_\")"
+      ]
+    },
+    "itables.javascript.warn_if_selected_rows_are_not_visible": {
+      "<builtin>.IndexError": [
+        "itables.javascript 1443:25 call  IndexError(\"Selected rows out of range\")"
+      ],
+      "<builtin>.TypeError": [
+        "itables.javascript 1438:24 call  TypeError(\"Selected rows must be integers\")"
+      ],
+      "<builtin>.all": [
+        "itables.javascript 1437:15 call  all(isinstance(i, int) for i in selected_rows)"
+      ],
+      "<builtin>.any": [
+        "itables.javascript 1455:50 call  any( bottom_limit <= i < top_limit for i in selected_rows )"
+      ],
+      "<builtin>.isinstance": [
+        "itables.javascript 1437:26 call  isinstance(i, int)"
+      ],
+      "<builtin>.len": [
+        "itables.javascript 1460:62 call  len(not_shown)"
+      ],
+      "<builtin>.max": [
+        "itables.javascript 1441:38 call  max(selected_rows)"
+      ],
+      "<builtin>.min": [
+        "itables.javascript 1441:12 call  min(selected_rows)"
+      ],
+      "<builtin>.str": [
+        "itables.javascript 1460:17 call  str(i)"
+      ],
+      "<builtin>.str.join": [
+        "itables.javascript 1459:30 call  \", \".join( [str(i) for i in not_shown[:6]] + ([\"...\"] if ..."
+      ],
+      "warnings.warn": [
+        "itables.javascript 1462:22 call  warnings.warn( f\"This table has been downsampled, see htt..."
+      ]
+    },
+    "itables.sample_dfs.get_countries": {
+      "<builtin>.ImportError": [
+        "itables.sample_dfs 23:22 call  ImportError(\"No supported dataframe library is available.\")"
+      ],
+      "itables.sample_polars_dfs.get_countries": [
+        "itables.sample_dfs 22:47 call  sample_polars_dfs.get_countries(html, climate_zone)"
+      ]
+    },
+    "itables.sample_dfs.get_dict_of_test_dfs": {
+      "<builtin>.dict.update": [
+        "itables.sample_dfs 29:19 call  dfs.update(sample_pandas_dfs.get_dict_of_test_dfs())",
+        "itables.sample_dfs 31:19 call  dfs.update(sample_polars_dfs.get_dict_of_test_dfs())"
+      ],
+      "itables.sample_pandas_dfs.get_dict_of_test_dfs": [
+        "itables.sample_dfs 29:58 call  sample_pandas_dfs.get_dict_of_test_dfs()"
+      ],
+      "itables.sample_polars_dfs.get_dict_of_test_dfs": [
+        "itables.sample_dfs 31:58 call  sample_polars_dfs.get_dict_of_test_dfs()"
+      ]
+    },
+    "itables.sample_pandas_dfs.generate_random_df": {
+      "numpy.random.choice": [
+        "itables.sample_pandas_dfs 368:29 call  np.random.choice(column_types, size=columns)"
+      ]
+    },
+    "itables.sample_pandas_dfs.generate_random_series": {
+      "<builtin>.NotImplementedError": [
+        "itables.sample_pandas_dfs 361:30 call  NotImplementedError(type)"
+      ],
+      "numpy.random.binomial": [
+        "itables.sample_pandas_dfs 327:44 call  np.random.binomial(n=1, p=0.5, size=rows)",
+        "itables.sample_pandas_dfs 330:33 call  np.random.binomial(n=1, p=0.1, size=rows)",
+        "itables.sample_pandas_dfs 336:33 call  np.random.binomial(n=1, p=0.1, size=rows)",
+        "itables.sample_pandas_dfs 340:33 call  np.random.binomial(n=1, p=0.05, size=rows)",
+        "itables.sample_pandas_dfs 341:33 call  np.random.binomial(n=1, p=0.05, size=rows)",
+        "itables.sample_pandas_dfs 342:33 call  np.random.binomial(n=1, p=0.05, size=rows)",
+        "itables.sample_pandas_dfs 351:33 call  np.random.binomial(n=1, p=0.1, size=rows)"
+      ],
+      "numpy.random.geometric": [
+        "itables.sample_pandas_dfs 333:45 call  np.random.geometric(p=0.1, size=rows)"
+      ],
+      "numpy.random.normal": [
+        "itables.sample_pandas_dfs 339:39 call  np.random.normal(size=rows)"
+      ],
+      "numpy.random.uniform": [
+        "itables.sample_pandas_dfs 354:69 call  np.random.uniform( 0, 1, rows )"
+      ]
+    },
+    "itables.sample_pandas_dfs.get_countries": {
+      "numpy._ArrayFunctionDispatcher.__call__": [
+        "itables.sample_pandas_dfs 65:38 call  np.where( df[\"latitude\"].abs() < 23.43615, \"Tropical\", np...",
+        "itables.sample_pandas_dfs 68:21 call  np.where( df[\"latitude\"].abs() < 35, \"Sub-tropical\", # Ar...",
+        "itables.sample_pandas_dfs 72:25 call  np.where(df[\"latitude\"].abs() < 64, \"Temperate\", \"Frigid\")",
+        "itables.sample_pandas_dfs 75:36 call  np.where(df[\"latitude\"] > 0, \"North\", \"South\")"
+      ],
+      "numpy.where": [
+        "itables.sample_pandas_dfs 65:38 call  np.where( df[\"latitude\"].abs() < 23.43615, \"Tropical\", np...",
+        "itables.sample_pandas_dfs 68:21 call  np.where( df[\"latitude\"].abs() < 35, \"Sub-tropical\", # Ar...",
+        "itables.sample_pandas_dfs 72:25 call  np.where(df[\"latitude\"].abs() < 64, \"Temperate\", \"Frigid\")",
+        "itables.sample_pandas_dfs 75:36 call  np.where(df[\"latitude\"] > 0, \"North\", \"South\")"
+      ],
+      "pandas.Series.abs": [
+        "itables.sample_pandas_dfs 66:31 call  df[\"latitude\"].abs()",
+        "itables.sample_pandas_dfs 69:35 call  df[\"latitude\"].abs()",
+        "itables.sample_pandas_dfs 72:44 call  df[\"latitude\"].abs()"
+      ]
+    },
+    "itables.sample_pandas_dfs.get_dict_of_test_dfs": {
+      "numpy.linspace": [
+        "itables.sample_pandas_dfs 114:39 call  np.linspace(start=0.0, stop=1.0, num=N * M)",
+        "itables.sample_pandas_dfs 242:37 call  np.linspace(5.0, 0.0, N)"
+      ],
+      "numpy.reshape": [
+        "itables.sample_pandas_dfs 114:27 call  np.reshape(np.linspace(start=0.0, stop=1.0, num=N * M), (..."
+      ]
+    },
+    "itables.sample_pandas_dfs.get_pandas_styler": {
+      "<builtin>.str.format": [
+        "itables.sample_pandas_dfs 407:59 call  \"The sinus of {:.6f} is {:.6f}\".format(t, np.sin(t))",
+        "itables.sample_pandas_dfs 408:61 call  \"The cosinus of {:.6f} is {:.6f}\".format(t, np.cos(t))"
+      ],
+      "numpy._ArrayFunctionDispatcher.__call__": [
+        "itables.sample_pandas_dfs 389:20 call  np.linspace(0, math.pi, 21)"
+      ],
+      "numpy.linspace": [
+        "itables.sample_pandas_dfs 389:20 call  np.linspace(0, math.pi, 21)"
+      ],
+      "numpy.ufunc.__call__": [
+        "itables.sample_pandas_dfs 391:23 call  np.sin(x)",
+        "itables.sample_pandas_dfs 391:41 call  np.cos(x)",
+        "itables.sample_pandas_dfs 407:69 call  np.sin(t)",
+        "itables.sample_pandas_dfs 408:71 call  np.cos(t)"
+      ],
+      "pandas.DataFrame": [
+        "itables.sample_pandas_dfs 390:22 call  pd.DataFrame( {\"sin\": np.sin(x), \"cos\": np.cos(x)}, index...",
+        "itables.sample_pandas_dfs 405:25 call  pd.DataFrame( { \"sin\": [\"The sinus of {:.6f} is {:.6f}\".f..."
+      ],
+      "pandas.Index": [
+        "itables.sample_pandas_dfs 391:61 call  pd.Index(x, name=\"alpha\")"
+      ],
+      "pandas.io.formats.style.Styler.background_gradient": [
+        "itables.sample_pandas_dfs 395:26 call  s.background_gradient(axis=None, cmap=\"YlOrRd\")"
+      ],
+      "pandas.io.formats.style.Styler.format": [
+        "itables.sample_pandas_dfs 396:13 call  s.format(\"{:.3f}\")"
+      ],
+      "pandas.io.formats.style.Styler.format_index": [
+        "itables.sample_pandas_dfs 397:19 call  s.format_index(\"{:.3f}\")"
+      ],
+      "pandas.io.formats.style.Styler.set_caption": [
+        "itables.sample_pandas_dfs 399:18 call  s.set_caption( \"A Pandas Styler object with background co..."
+      ],
+      "pandas.io.formats.style.Styler.set_table_styles": [
+        "itables.sample_pandas_dfs 401:23 call  s.set_caption( \"A Pandas Styler object with background co..."
+      ],
+      "pandas.io.formats.style.Styler.set_tooltips": [
+        "itables.sample_pandas_dfs 413:23 call  s.set_tooltips(ttips)"
+      ]
+    },
+    "itables.sample_polars_dfs.get_countries": {
+      "itables.sample_polars_dfs.get_countries.<lambda1>": [
+        "itables.sample_polars_dfs 28:29 call  df.with_columns( pl.struct([\"iso2Code\", \"country\"]) .map_..."
+      ],
+      "itables.sample_polars_dfs.get_countries.<lambda2>": [
+        "itables.sample_polars_dfs 40:29 call  df.with_columns( pl.col(\"country\") .map_elements( lambda ..."
+      ],
+      "itables.sample_polars_dfs.get_countries.<lambda3>": [
+        "itables.sample_polars_dfs 50:29 call  df.with_columns( pl.col(\"capital\") .map_elements( lambda ..."
+      ],
+      "polars.Expr.abs": [
+        "itables.sample_polars_dfs 64:43 call  pl.col(\"latitude\").abs()",
+        "itables.sample_polars_dfs 66:41 call  pl.col(\"latitude\").abs()",
+        "itables.sample_polars_dfs 69:41 call  pl.col(\"latitude\").abs()"
+      ],
+      "polars.col": [
+        "itables.sample_polars_dfs 18:32 call  pl.col(\"iso2Code\")",
+        "itables.sample_polars_dfs 20:15 call  pl.col(\"region\")",
+        "itables.sample_polars_dfs 21:17 call  pl.col(\"country\")",
+        "itables.sample_polars_dfs 22:17 call  pl.col(\"capital\")",
+        "itables.sample_polars_dfs 23:17 call  pl.col(\"longitude\")",
+        "itables.sample_polars_dfs 24:17 call  pl.col(\"latitude\")",
+        "itables.sample_polars_dfs 41:19 call  pl.col(\"country\")",
+        "itables.sample_polars_dfs 51:19 call  pl.col(\"capital\")",
+        "itables.sample_polars_dfs 64:27 call  pl.col(\"latitude\")",
+        "itables.sample_polars_dfs 66:25 call  pl.col(\"latitude\")",
+        "itables.sample_polars_dfs 69:25 call  pl.col(\"latitude\")",
+        "itables.sample_polars_dfs 75:27 call  pl.col(\"latitude\")"
+      ],
+      "polars.expr.whenthen.ChainedThen.otherwise": [
+        "itables.sample_polars_dfs 71:23 call  pl.when(pl.col(\"latitude\").abs() < 23.43615) .then(pl.lit..."
+      ],
+      "polars.expr.whenthen.ChainedThen.when": [
+        "itables.sample_polars_dfs 69:18 call  pl.when(pl.col(\"latitude\").abs() < 23.43615) .then(pl.lit..."
+      ],
+      "polars.expr.whenthen.ChainedWhen.then": [
+        "itables.sample_polars_dfs 67:18 call  pl.when(pl.col(\"latitude\").abs() < 23.43615) .then(pl.lit...",
+        "itables.sample_polars_dfs 70:18 call  pl.when(pl.col(\"latitude\").abs() < 23.43615) .then(pl.lit..."
+      ],
+      "polars.expr.whenthen.Then.otherwise": [
+        "itables.sample_polars_dfs 77:23 call  pl.when(pl.col(\"latitude\") > 0) .then(pl.lit(\"North\")) .o..."
+      ],
+      "polars.expr.whenthen.Then.when": [
+        "itables.sample_polars_dfs 66:18 call  pl.when(pl.col(\"latitude\").abs() < 23.43615) .then(pl.lit..."
+      ],
+      "polars.expr.whenthen.When.then": [
+        "itables.sample_polars_dfs 65:18 call  pl.when(pl.col(\"latitude\").abs() < 23.43615) .then(pl.lit...",
+        "itables.sample_polars_dfs 76:18 call  pl.when(pl.col(\"latitude\") > 0) .then(pl.lit(\"North\"))"
+      ],
+      "polars.lit": [
+        "itables.sample_polars_dfs 65:25 call  pl.lit(\"Tropical\")",
+        "itables.sample_polars_dfs 67:25 call  pl.lit(\"Sub-tropical\")",
+        "itables.sample_polars_dfs 70:25 call  pl.lit(\"Temperate\")",
+        "itables.sample_polars_dfs 71:30 call  pl.lit(\"Frigid\")",
+        "itables.sample_polars_dfs 76:25 call  pl.lit(\"North\")",
+        "itables.sample_polars_dfs 77:30 call  pl.lit(\"South\")"
+      ],
+      "polars.when": [
+        "itables.sample_polars_dfs 64:20 call  pl.when(pl.col(\"latitude\").abs() < 23.43615)",
+        "itables.sample_polars_dfs 75:20 call  pl.when(pl.col(\"latitude\") > 0)"
+      ]
+    },
+    "itables.shiny": {
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables.shiny 42:21 getitem  Unpack[ITableOptions]"
+      ]
+    },
+    "itables.shiny.DT": {
+      "<builtin>.dict.get": [
+        "itables.shiny 45:37 call  kwargs.get(\"connected\", _CONNECTED)"
+      ],
+      "<builtin>.str.endswith": [
+        "itables.shiny 58:25 call  html.endswith(script_end)"
+      ],
+      "<builtin>.str.removesuffix": [
+        "itables.shiny 74:29 call  html.removesuffix(script_end)"
+      ],
+      "<builtin>.str.replace": [
+        "itables.shiny 52:24 call  html.replace(\"<code>init_notebook_mode</code>\", \"<code>in..."
+      ],
+      "itables.javascript.replace_value": [
+        "itables.shiny 59:25 call  replace_value( html, \"new ITable(table, dt_args);\", \"let ..."
+      ],
+      "itables.javascript.to_html_datatable": [
+        "itables.shiny 46:29 call  to_html_datatable( df, caption, **kwargs, )"
+      ]
+    },
+    "itables.shiny.init_itables": {
+      "itables.javascript.generate_init_offline_itables_html": [
+        "itables.shiny 34:64 call  generate_init_offline_itables_html(dt_bundle)"
+      ],
+      "itables.utils.read_package_file": [
+        "itables.shiny 31:29 call  read_package_file(\"html/init_datatables.html\")"
+      ]
+    },
+    "itables.show_config": {
+      "itables.show_config.show_config": [
+        "itables.show_config 34:16 call  show_config(Path.cwd())"
+      ],
+      "pathlib.Path.cwd": [
+        "itables.show_config 34:25 call  Path.cwd()"
+      ]
+    },
+    "itables.streamlit": {
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables.streamlit 26:21 getitem  Unpack[ITableOptions]"
+      ],
+      "itables.utils.find_package_file": [
+        "itables.streamlit 10:35 call  find_package_file(\"itables_for_streamlit\")"
+      ],
+      "pathlib.PosixPath.read_text": [
+        "itables.streamlit 11:54 call  (_component_dir / \"index.js\").read_text(encoding=\"utf-8\")",
+        "itables.streamlit 12:56 call  (_component_dir / \"index.css\").read_text(encoding=\"utf-8\")"
+      ],
+      "pathlib.WindowsPath.read_text": [
+        "itables.streamlit 11:54 call  (_component_dir / \"index.js\").read_text(encoding=\"utf-8\")",
+        "itables.streamlit 12:56 call  (_component_dir / \"index.css\").read_text(encoding=\"utf-8\")"
+      ],
+      "streamlit.components.v2.component": [
+        "itables.streamlit 14:49 call  components.component( \"itables.itables_for_streamlit\", js..."
+      ]
+    },
+    "itables.streamlit.interactive_table": {
+      "itables.javascript.get_itables_extension_arguments": [
+        "itables.streamlit 29:58 call  get_itables_extension_arguments(df, caption, **kwargs)"
+      ],
+      "streamlit.components.v2.component": [
+        "itables.streamlit 30:37 call  _streamlit_component_func( key=key, data={\"dt_args\": dt_a..."
+      ]
+    },
+    "itables.typing": {
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables.typing 129:28 getitem  NotRequired[ Union[ Sequence[Union[int, str, Mapping[str,...",
+        "itables.typing 135:28 getitem  NotRequired[int]",
+        "itables.typing 136:23 getitem  NotRequired[ Union[Sequence[Sequence[Union[int, str]]], M...",
+        "itables.typing 139:24 getitem  NotRequired[Mapping[str, Union[None, str, Mapping[str, An...",
+        "itables.typing 140:28 getitem  NotRequired[Sequence[Mapping[str, Any]]]",
+        "itables.typing 141:26 getitem  NotRequired[Union[bool, Mapping[str, bool]]]",
+        "itables.typing 142:24 getitem  NotRequired[bool]",
+        "itables.typing 143:27 getitem  NotRequired[bool]",
+        "itables.typing 144:25 getitem  NotRequired[bool]",
+        "itables.typing 145:25 getitem  NotRequired[str]",
+        "itables.typing 146:32 getitem  NotRequired[bool]",
+        "itables.typing 147:26 getitem  NotRequired[Mapping[str, str]]",
+        "itables.typing 148:24 getitem  NotRequired[Mapping[str, Any]]",
+        "itables.typing 149:28 getitem  NotRequired[Sequence[Any]]",
+        "itables.typing 150:30 getitem  NotRequired[JavascriptFunction]",
+        "itables.typing 151:32 getitem  NotRequired[JavascriptFunction]",
+        "itables.typing 152:30 getitem  NotRequired[JavascriptFunction]",
+        "itables.typing 153:27 getitem  NotRequired[bool]",
+        "itables.typing 154:31 getitem  NotRequired[int]",
+        "itables.typing 155:29 getitem  NotRequired[bool]",
+        "itables.typing 158:25 getitem  NotRequired[Sequence[Union[str, Mapping[str, Any]]]]",
+        "itables.typing 159:28 getitem  NotRequired[Union[bool, Mapping[str, Any]]]",
+        "itables.typing 160:26 getitem  NotRequired[Union[bool, Mapping[str, Any]]]",
+        "itables.typing 161:31 getitem  NotRequired[Any]",
+        "itables.typing 162:30 getitem  NotRequired[Mapping[Literal[\"left\", \"right\", \"start\", \"en...",
+        "itables.typing 163:29 getitem  NotRequired[ Union[ bool, Mapping[ Literal[\"header\", \"foo...",
+        "itables.typing 172:29 getitem  NotRequired[Mapping[str, Any]]",
+        "itables.typing 173:31 getitem  NotRequired[Mapping[str, Any]]",
+        "itables.typing 174:26 getitem  NotRequired[Mapping[str, Any]]",
+        "itables.typing 175:24 getitem  NotRequired[Union[bool, str, Mapping[str, str]]]",
+        "itables.typing 176:22 getitem  NotRequired[bool]",
+        "itables.typing 185:25 getitem  NotRequired[Union[str, Sequence[str]]]",
+        "itables.typing 186:23 getitem  NotRequired[Union[str, dict[str, str]]]",
+        "itables.typing 187:21 getitem  NotRequired[str]",
+        "itables.typing 188:31 getitem  NotRequired[Sequence[int]]",
+        "itables.typing 190:27 getitem  NotRequired[Union[bool, Literal[\"auto\"]]]",
+        "itables.typing 191:29 getitem  NotRequired[Union[bool, Literal[\"auto\"]]]",
+        "itables.typing 192:30 getitem  NotRequired[bool]",
+        "itables.typing 194:26 getitem  NotRequired[Union[int, str]]",
+        "itables.typing 195:25 getitem  NotRequired[int]",
+        "itables.typing 196:28 getitem  NotRequired[int]",
+        "itables.typing 198:28 getitem  NotRequired[bool]",
+        "itables.typing 199:41 getitem  NotRequired[Union[bool, Literal[\"auto\"]]]",
+        "itables.typing 200:40 getitem  NotRequired[Union[bool, Literal[\"auto\"]]]",
+        "itables.typing 202:26 getitem  NotRequired[str]",
+        "itables.typing 203:24 getitem  NotRequired[str]",
+        "itables.typing 204:27 getitem  NotRequired[Union[str, Path]]",
+        "itables.typing 205:27 getitem  NotRequired[bool]",
+        "itables.typing 206:43 getitem  NotRequired[bool]",
+        "itables.typing 208:24 getitem  NotRequired[bool]",
+        "itables.typing 210:42 getitem  NotRequired[bool]",
+        "itables.typing 211:52 getitem  NotRequired[bool]",
+        "itables.typing 212:50 getitem  NotRequired[bool]",
+        "itables.typing 213:45 getitem  NotRequired[bool]",
+        "itables.typing 214:48 getitem  NotRequired[bool]",
+        "itables.typing 215:48 getitem  NotRequired[bool]",
+        "itables.typing 217:32 getitem  NotRequired[Literal[False, \"header\", \"footer\"]]",
+        "itables.typing 219:29 getitem  NotRequired[bool]",
+        "itables.typing 228:25 getitem  NotRequired[str]",
+        "itables.typing 229:25 getitem  NotRequired[Union[str, Sequence[str]]]",
+        "itables.typing 230:23 getitem  NotRequired[Union[str, dict[str, str]]]",
+        "itables.typing 232:27 getitem  NotRequired[str]",
+        "itables.typing 233:28 getitem  NotRequired[str]",
+        "itables.typing 234:29 getitem  NotRequired[str]",
+        "itables.typing 236:31 getitem  NotRequired[Sequence[int]]",
+        "itables.typing 237:36 getitem  NotRequired[int]",
+        "itables.typing 238:39 getitem  NotRequired[int]",
+        "itables.typing 240:38 getitem  NotRequired[str]",
+        "itables.typing 241:48 getitem  NotRequired[bool]",
+        "itables.typing 243:32 getitem  NotRequired[Literal[False, \"header\", \"footer\"]]",
+        "itables.typing 244:38 getitem  NotRequired[Sequence[Sequence[Union[int, str]]]]",
+        "itables.typing 248:27 getitem  NotRequired[bool]",
+        "itables.typing 249:24 getitem  NotRequired[str]",
+        "itables.typing 250:43 getitem  NotRequired[bool]"
+      ]
+    },
+    "itables.typing.check_itable_argument_types": {
+      "<builtin>.ImportError": [
+        "itables.typing 323:26 call  ImportError( \"The `warn_on_unexpected_option_type` option..."
+      ]
+    },
+    "itables.widget": {
+      "<builtin>.property": [
+        "itables.widget 129:6 decorator  @property",
+        "itables.widget 137:6 decorator  @property"
+      ],
+      "<builtin>.property.setter": [
+        "itables.widget 133:6 decorator  @df.setter",
+        "itables.widget 141:6 decorator  @style.setter"
+      ],
+      "importlib.metadata.version": [
+        "itables.widget 12:45 call  importlib.metadata.version(\"itables_anywidget\")"
+      ],
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables.widget 38:25 getitem  Unpack[ITableOptions]",
+        "itables.widget 55:25 getitem  Unpack[ITableOptions]"
+      ],
+      "pathlib.Path": [
+        "itables.widget 18:24 call  pathlib.Path(__file__)",
+        "itables.widget 19:24 call  pathlib.Path(__file__)"
+      ],
+      "traitlets.Dict": [
+        "itables.widget 32:30 call  traitlets.Dict()"
+      ],
+      "traitlets.Dict.tag": [
+        "itables.widget 32:36 call  traitlets.Dict().tag(sync=True)"
+      ],
+      "traitlets.Int": [
+        "itables.widget 24:49 call  traitlets.Int()"
+      ],
+      "traitlets.List": [
+        "itables.widget 24:35 call  traitlets.List(traitlets.Int())"
+      ],
+      "traitlets.List.tag": [
+        "itables.widget 24:56 call  traitlets.List(traitlets.Int()).tag(sync=True)"
+      ],
+      "traitlets.Unicode": [
+        "itables.widget 22:32 call  traitlets.Unicode()",
+        "itables.widget 23:32 call  traitlets.Unicode()",
+        "itables.widget 28:31 call  traitlets.Unicode()"
+      ],
+      "traitlets.Unicode.tag": [
+        "itables.widget 22:38 call  traitlets.Unicode().tag(sync=True)",
+        "itables.widget 23:38 call  traitlets.Unicode().tag(sync=True)",
+        "itables.widget 28:37 call  traitlets.Unicode().tag(sync=True)"
+      ]
+    },
+    "itables.widget.ITable.__init__": {
+      "<builtin>.dict.pop": [
+        "itables.widget 43:38 call  other_args.pop(\"caption\")",
+        "itables.widget 44:38 call  other_args.pop(\"classes\")",
+        "itables.widget 45:37 call  other_args.pop(\"style\")",
+        "itables.widget 46:44 call  other_args.pop(\"selected_rows\")"
+      ],
+      "<builtin>.super": [
+        "itables.widget 40:14 call  super()"
+      ],
+      "anywidget.AnyWidget.__init__": [
+        "itables.widget 40:25 call  super().__init__()"
+      ],
+      "itables.javascript.get_itables_extension_arguments": [
+        "itables.widget 41:62 call  get_itables_extension_arguments(df, caption, **kwargs)"
+      ]
+    },
+    "itables.widget.ITable.df": {
+      "itables.widget.ITable.update": [
+        "itables.widget 135:20 call  self.update(df)"
+      ]
+    },
+    "itables.widget.ITable.update": {
+      "<builtin>.dict.copy": [
+        "itables.widget 62:41 call  self._dt_args.copy()"
+      ],
+      "<builtin>.dict.items": [
+        "itables.widget 63:44 call  kwargs.items()",
+        "itables.widget 119:40 call  dt_args.items()"
+      ],
+      "<builtin>.dict.pop": [
+        "itables.widget 83:38 call  other_args.pop(\"classes\")",
+        "itables.widget 84:37 call  other_args.pop(\"style\")",
+        "itables.widget 85:38 call  other_args.pop(\"caption\")",
+        "itables.widget 91:24 call  dt_args.pop(\"table_html\", None)",
+        "itables.widget 127:44 call  other_args.pop(\"selected_rows\")"
+      ],
+      "<builtin>.list": [
+        "itables.widget 63:31 call  list(kwargs.items())"
+      ],
+      "itables.javascript.get_itables_extension_arguments": [
+        "itables.widget 81:62 call  get_itables_extension_arguments(df, caption, **kwargs)"
+      ],
+      "itables.widget.ITable.style": [
+        "itables.widget 78:36 getattr  self.style"
+      ]
+    },
+    "itables_for_dash": {
+      "<builtin>.dict.items": [
+        "itables_for_dash 21:12 call  { \"async-ITable.js\": {\"async\": True}, \"async-ITable.js.ma..."
+      ],
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables_for_dash 39:25 getitem  Unpack[ITableOptions]"
+      ]
+    },
+    "itables_for_dash.ITable": {
+      "<builtin>.setattr": [
+        "itables_for_dash.ITable 76:8 call  setattr(ITable, \"__init__\", _explicitize_args(ITable.__in..."
+      ],
+      "dash.development.base_component._explicitize_args": [
+        "itables_for_dash.ITable 76:46 call  _explicitize_args(ITable.__init__)"
+      ]
+    },
+    "itables_for_dash.ITable.ITable.__init__": {
+      "<builtin>.TypeError": [
+        "itables_for_dash.ITable 71:32 call  TypeError( 'Required argument `' + k + '` was not specifi..."
+      ],
+      "<builtin>.dict.pop": [
+        "itables_for_dash.ITable 64:36 call  kwargs.pop('_explicit_args')"
+      ],
+      "<builtin>.dict.update": [
+        "itables_for_dash.ITable 66:23 call  _locals.update(kwargs)"
+      ],
+      "<builtin>.locals": [
+        "itables_for_dash.ITable 65:25 call  locals()"
+      ],
+      "<builtin>.super": [
+        "itables_for_dash.ITable 74:14 call  super(ITable, self)"
+      ],
+      "dash.development.base_component.Component.__init__": [
+        "itables_for_dash.ITable 74:37 call  super(ITable, self).__init__(**args)"
+      ]
+    },
+    "itables_for_dash.ITable.__init__": {
+      "<builtin>.ValueError": [
+        "itables_for_dash 52:29 call  ValueError(\"The id must be a string.\")",
+        "itables_for_dash 54:29 call  ValueError(\"The id cannot be an empty string.\")"
+      ],
+      "<builtin>.isinstance": [
+        "itables_for_dash 51:26 call  isinstance(id, str)"
+      ],
+      "<builtin>.super": [
+        "itables_for_dash 56:21 call  super()"
+      ],
+      "dash.development.base_component._explicitize_args.wrapper": [
+        "itables_for_dash 56:32 call  super().__init__( # pyright: ignore[reportUnknownMemberTy..."
+      ],
+      "itables_for_dash.ITable.ITable.__init__": [
+        "itables_for_dash 56:32 call  super().__init__( # pyright: ignore[reportUnknownMemberTy..."
+      ],
+      "itables_for_dash.properties.get_itable_component_kwargs": [
+        "itables_for_dash 57:49 call  get_itable_component_kwargs(df, caption, **kwargs)"
+      ]
+    },
+    "itables_for_dash.properties": {
+      "itables.typing._SubscriptableFallback.__getitem__": [
+        "itables_for_dash.properties 23:21 getitem  Unpack[ITableOptions]",
+        "itables_for_dash.properties 57:21 getitem  Unpack[ITableOptions]"
+      ]
+    },
+    "itables_for_dash.properties.ITableOutputs": {
+      "dash.Output": [
+        "itables_for_dash.properties 50:19 call  Output(id, key)"
+      ]
+    },
+    "itables_for_dash.properties.get_itable_component_kwargs": {
+      "<builtin>.dict.pop": [
+        "itables_for_dash.properties 30:46 call  other_args.pop(\"style\")",
+        "itables_for_dash.properties 36:39 call  style.pop(key)"
+      ],
+      "<builtin>.len": [
+        "itables_for_dash.properties 34:15 call  len(words)"
+      ],
+      "<builtin>.str.capitalize": [
+        "itables_for_dash.properties 35:57 call  word.capitalize()"
+      ],
+      "<builtin>.str.join": [
+        "itables_for_dash.properties 35:41 call  \"\".join(word.capitalize() for word in words[1:])"
+      ],
+      "<builtin>.str.split": [
+        "itables_for_dash.properties 33:26 call  key.split(\"-\")"
+      ],
+      "itables.javascript.get_expanded_style": [
+        "itables_for_dash.properties 30:31 call  get_expanded_style(other_args.pop(\"style\"))"
+      ],
+      "itables.javascript.get_itables_extension_arguments": [
+        "itables_for_dash.properties 28:58 call  get_itables_extension_arguments(df, caption, **kwargs)"
+      ]
+    },
+    "itables_for_dash.properties.updated_itable_outputs": {
+      "<builtin>.dict.pop": [
+        "itables_for_dash.properties 80:31 call  updated_properties.pop(k)"
+      ],
+      "itables_for_dash.properties.get_itable_component_kwargs": [
+        "itables_for_dash.properties 63:53 call  get_itable_component_kwargs(df, caption, **kwargs)"
+      ],
+      "typing.cast": [
+        "itables_for_dash.properties 76:35 call  cast(DTForITablesOptions, updated_properties[\"dt_args\"])"
+      ]
+    }
+  },
+  "notes": {
+    "itables.config 106:39 call  config.items()": [
+      "load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables"
+    ],
+    "itables.config 41:34 call  config_file.exists()": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.config 54:30 call  config_file.exists()": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.config 57:30 call  config_file.exists()": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.config 61:38 call  tomllib.load(fp)": [
+      "optional import (config.py:16-22): tomllib on Python 3.11 and later, tomli before (not installed in the test environment, named as a missing module); both sides run"
+    ],
+    "itables.config 70:30 call  config_file.exists()": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.config 85:34 call  tomllib.load(fp)": [
+      "optional import (config.py:16-22), as at 61:38"
+    ],
+    "itables.datatables_format 103:22 call  dtype.is_float()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.datatables_format 143:22 call  dtype.is_float()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.datatables_format 178:22 call  dtype.is_float()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.datatables_format 185:22 call  dtype.is_float()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.datatables_format 298:48 call  df.items()": [
+      "df is of a type that DataFrameOrSeries documents (typing.py:54-57, B4) and of the module pandas: a DataFrame or a Series (a Styler has no items and raises AttributeError)"
+    ],
+    "itables.datatables_format 75:27 call  x.unique()": [
+      "x is a narwhals Series (callers: _format_narwhals_series 197:42 and javascript.py:1109, both on a narwhals DataFrame made by narwhals.from_native)"
+    ],
+    "itables.downsample 18:56 call  df.items()": [
+      "df is a documented data frame type (B4) of the module pandas, or a pandas DataFrame that get_itable_arguments made from a numpy array (javascript.py:1162; it keeps the module name numpy); a numpy array has no items"
+    ],
+    "itables.downsample 21:33 call  df.estimated_size()": [
+      "df is a polars DataFrame or Series (documented, B4) or the narwhals DataFrame that get_itable_arguments makes for other libraries (javascript.py:1198) and passes through downsample"
+    ],
+    "itables.javascript 1022:29 call  column_set.clear()": [
+      "column_set is a set: the set comprehension of get_float_columns_to_be_formatted_in_python, or set(categorical_columns.keys()) at 1118"
+    ],
+    "itables.javascript 1050:76 call  df[col].dtype.is_float()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.javascript 1058:82 call  nw_df[col].dtype.is_float()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.javascript 1091:39 call  x.cat.categories.tolist()": [
+      "A categorical column can use this concrete Index as its categories. pandas3.0.5 CategoricalDtype.validate_categories563-596 preserves Index subclasses; only CategoricalIndex is unwrapped. Numeric classes are present in admitted pandas1.5.3. Therefore the explicit categories.tolist() uses this receiver name."
+    ],
+    "itables.javascript 1092:48 call  df.items()": [
+      "df is a documented data frame type (B4) of the module pandas: a DataFrame or a Series (get_itable_arguments passes a DataFrame)"
+    ],
+    "itables.javascript 1127:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.javascript 114:20 call  dict(**style)": [
+      "style is a client Mapping (abstract, B4); the package's callers pass a str (html_table_from_template after set_default_options, properties.py:30 after get_compact_style)"
+    ],
+    "itables.javascript 1181:35 call  pd.get_option(\"display.max_columns\")": [
+      "pandas1.5.3 _config/config.py411 assigns get_option=CallableDynamicDoc(_get_option,...); __call__ at262 dispatches the wrapped function. The package declares no pandas minimum. New pandas3.0.5 exports a plain function, so existing pandas.get_option remains."
+    ],
+    "itables.javascript 1404:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.javascript 1742:42 call  df.index.get_level_values(i)": [
+      "A documented pandas DataFrame may have this concrete index. Giving the index a name already present among columns makes reset_index raise and enters the recovery loop. Inherited get_level_values is named through the actual receiver. pandas1.5.3 numeric.py368/386/404 supplies the three legacy numeric index classes."
+    ],
+    "itables.javascript 1774:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.javascript 229:33 call  dt_bundle.read_text(encoding=\"utf-8\")": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.javascript 230:35 call  dt_bundle.with_suffix(\".css\")": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.javascript 230:53 call  dt_bundle.with_suffix(\".css\").read_text(encoding=\"utf-8\")": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.javascript 295:42 call  dtype._string_repr()": [
+      "The receiver is a concrete dtype of a documented frame column, never an instance of the generic dtype base. Polars1.42.1 datatypes/classes.py133/227 and public exports; Narwhals2.24.0 _polars/utils.py115-181 constructs concrete dtypes. Formatting functions return before is_float for Boolean and eight <=64-bit integer types. Float-column discovery does not. Polars0.19.19 classes.py422 defines the historical Utf8 class. Unknown is a real Narwhals fallback; Polars Unknown is only an inference request (Series.__init__275), not a final eager dtype."
+    ],
+    "itables.javascript 409:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.javascript 696:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.javascript 931:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.sample_pandas_dfs 114:27 call  np.reshape(np.linspace(start=0.0, stop=1.0, num=N * M), (...": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 114:39 call  np.linspace(start=0.0, stop=1.0, num=N * M)": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 242:37 call  np.linspace(5.0, 0.0, N)": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 327:44 call  np.random.binomial(n=1, p=0.5, size=rows)": [
+      "numpy.random.binomial and the other numpy.random functions are named by their module path, as random.random (tenacity, markdown2); the trace names these compiled methods _cython_3_2_8.cython_function_or_method.__call__, a naming artefact (itables.rejected.json)"
+    ],
+    "itables.sample_pandas_dfs 389:20 call  np.linspace(0, math.pi, 21)": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 391:23 call  np.sin(x)": [
+      "numpy.sin and numpy.cos are numpy.ufunc instances: the call is numpy.ufunc.__call__ (micro-benchmark, \"Calls of instances\")"
+    ],
+    "itables.sample_pandas_dfs 65:38 call  np.where( df[\"latitude\"].abs() < 23.43615, \"Tropical\", np...": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 68:21 call  np.where( df[\"latitude\"].abs() < 35, \"Sub-tropical\", # Ar...": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 72:25 call  np.where(df[\"latitude\"].abs() < 64, \"Temperate\", \"Frigid\")": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_pandas_dfs 75:36 call  np.where(df[\"latitude\"] > 0, \"North\", \"South\")": [
+      "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."
+    ],
+    "itables.sample_polars_dfs 18:32 call  pl.col(\"iso2Code\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 20:15 call  pl.col(\"region\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 21:17 call  pl.col(\"country\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 22:17 call  pl.col(\"capital\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 23:17 call  pl.col(\"longitude\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 24:17 call  pl.col(\"latitude\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 28:29 call  df.with_columns( pl.struct([\"iso2Code\", \"country\"]) .map_...": [
+      "polars evaluates the expression here and calls the function that map_elements stored in it (30:26) for each row"
+    ],
+    "itables.sample_polars_dfs 40:29 call  df.with_columns( pl.col(\"country\") .map_elements( lambda ...": [
+      "polars evaluates the expression here and calls the function that map_elements stored in it (42:26)"
+    ],
+    "itables.sample_polars_dfs 41:19 call  pl.col(\"country\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 50:29 call  df.with_columns( pl.col(\"capital\") .map_elements( lambda ...": [
+      "polars evaluates the expression here and calls the function that map_elements stored in it (52:26)"
+    ],
+    "itables.sample_polars_dfs 51:19 call  pl.col(\"capital\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 64:27 call  pl.col(\"latitude\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 66:25 call  pl.col(\"latitude\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 69:25 call  pl.col(\"latitude\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.sample_polars_dfs 75:27 call  pl.col(\"latitude\")": [
+      "Polars0.18.15 functions/lazy.py42 defines plain col and root __init__.py92 exports it. Polars0.19.19 functions/col.py333 instead exports the ColumnFactory class whose __new__145 returns an Expr; ordinary outside class calls also use the imported class path. The preceding read_csv/rename pipeline exists on these versions. Retain latest polars.functions.col.Col.__call__."
+    ],
+    "itables.shiny 42:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.show_config 34:16 call  show_config(Path.cwd())": [
+      "the block under `if __name__ == \"__main__\":` is code of the module"
+    ],
+    "itables.streamlit 11:54 call  (_component_dir / \"index.js\").read_text(encoding=\"utf-8\")": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.streamlit 12:56 call  (_component_dir / \"index.css\").read_text(encoding=\"utf-8\")": [
+      "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
+    ],
+    "itables.streamlit 14:49 call  components.component( \"itables.itables_for_streamlit\", js...": [
+      "streamlit is absent from the installed test dependencies: this ordinary component call keeps its missing-module access path even when source is readable (README, \"Callees outside the package\")."
+    ],
+    "itables.streamlit 26:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.streamlit 30:37 call  _streamlit_component_func( key=key, data={\"dt_args\": dt_a...": [
+      "_streamlit_component_func is what the stub streamlit.components.v2.component returned at 14:49, an instance of that stub; calling it is a call of the stub (micro-benchmark case external/decorator)"
+    ],
+    "itables.typing 129:28 getitem  NotRequired[ Union[ Sequence[Union[int, str, Mapping[str,...": [
+      "NotRequired is the _SubscriptableFallback instance (typing.py:35-40) on Python 3.9 and 3.10 when `from typing_extensions import NotRequired, Unpack` fails; before Python 3.14 the annotations of a class body are evaluated when it runs; judgement J1"
+    ],
+    "itables.widget 38:25 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.widget 40:25 call  super().__init__()": [
+      "anywidget is not installed in the test environment. Its AnyWidget base initializer was read, never run, with ipywidgets and traitlets: it invokes no ITable method or property here. The explicit super call keeps the nearest outside base name anywidget.AnyWidget.__init__."
+    ],
+    "itables.widget 55:25 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables.widget 62:41 call  self._dt_args.copy()": [
+      "_dt_args is the private trait that __init__ and update set to the dicts of get_itables_extension_arguments (48, 125)"
+    ],
+    "itables_for_dash 39:25 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables_for_dash 56:32 call  super().__init__( # pyright: ignore[reportUnknownMemberTy...": [
+      "the wrapper adds _explicit_args to the keyword arguments and calls the generated __init__ back: `return func(*args, **kwargs)` (dash 4.4.1, dash/development/base_component.py:496-504, read; judgement J4)"
+    ],
+    "itables_for_dash.properties 23:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ],
+    "itables_for_dash.properties 50:19 call  Output(id, key)": [
+      "dash is absent from the installed test dependencies: ordinary Output calls keep their missing-module access path even though Dash source is read for the separate package-definition exception."
+    ],
+    "itables_for_dash.properties 57:21 getitem  Unpack[ITableOptions]": [
+      "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
+    ]
+  },
+  "trace": "dynamic/itables.json"
+}

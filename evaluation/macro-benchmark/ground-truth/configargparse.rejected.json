@@ -1,0 +1,20 @@
+{
+    "configargparse.ArgumentParser.__init__": {
+        "unittest.mock.CallableMixin.__call__": "client callback: tests/test_configargparse.py:1148 patches argparse.ArgumentParser.__init__ with a MagicMock, which the explicit base call at configargparse.py:1157 then runs"
+    },
+    "configargparse.ArgumentParser.print_values": {
+        "_io.StringIO.write": "client object: tests/test_configargparse.py:1246-1247 pass a StringIO as file (file.write, configargparse.py:2170); the package's own value is the default sys.stdout"
+    },
+    "configargparse.ConfigparserConfigFileParser.serialize": {
+        "<builtin>.dict.items": "client object: tests/test_configargparse.py:4436 and :4446 pass a plain dict as items (items.items(), configargparse.py:404); the docstring (configargparse.py:124) and the package's own calls give an OrderedDict"
+    },
+    "configargparse.IniConfigParser.serialize": {
+        "<builtin>.dict.items": "client object: tests/test_configargparse.py:3582 passes a plain dict as items (items.items(), configargparse.py:905); the docstring (configargparse.py:124) and the package's own calls give an OrderedDict"
+    },
+    "configargparse.TomlConfigParser.parse": {
+        "_io.BytesIO.read": "client object: tests/test_configargparse.py:3487-3496 (test_binary_read_works) pass a BytesIO stream to parse (stream.read(), configargparse.py:705); the package's own streams are io.StringIO and text files from open()"
+    },
+    "configargparse.add_argument": {
+        "argparse._ActionsContainer.add_argument": "Naming artifact: configargparse.py:2444-2447 saves the original method as original_add_argument_method and replaces argparse._ActionsContainer.add_argument with configargparse.add_argument. The call at :2300:47 runs the saved method, named through argparse.ArgumentParser, argparse._ArgumentGroup, or argparse._MutuallyExclusiveGroup. The trace records the original definition name, which no longer resolves to this outside callable; replacement graph edges use those saved attribute paths."
+    }
+}

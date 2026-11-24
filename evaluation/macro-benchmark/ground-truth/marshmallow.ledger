@@ -1,0 +1,2751 @@
+# Call-site ledger of marshmallow at a38b7f6842042e65fd1a485ed152ca99f87880c0.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# marshmallow.md shows how this ledger applies them. Fields: the concrete
+# package field classes are every public class of fields.py except the
+# abstract Number, Mapping and the private _TemporalField; a Field receiver
+# without a narrower type dispatches over all of them (marshmallow.md,
+# "Dispatch sets"). OrderedSet (Schema.set_class) reaches the only and
+# exclude options, because Nested.schema passes OrderedSets there; it is not
+# a value of load_only, dump_only, partial or schemes (lead, B2: the
+# abstract AbstractSet of types.StrSequenceOrSet names a package class only
+# where the package implements it for that role). `missing` is the single
+# _Missing instance.
+default reject marshmallow.orderedset.OrderedSet.__eq__: no operand of a comparison or `in` test, no element that `in`, set() or a builtin compares, and no dict key in the package is an OrderedSet; OrderedSet defines __eq__ without __hash__, so it is unhashable and is never a key or set element; the compared values are strs, bools, ints, None, tags, unknown options, field names, error messages and client data
+default reject marshmallow.orderedset.OrderedSet.__iter__: the iterated, unpacked or converted value at this site is not an OrderedSet: it is a tuple, list, dict, dict view, builtin set, str, generator, mappingproxy, enum class, the client's data or a client iterable typed with the abstract Iterable (B3); an `in` test calls __contains__, which OrderedSet defines, never __iter__; the OrderedSet sites (the only and exclude options, Schema._init_fields and OrderedSet's own methods) accept the candidate explicitly
+default reject marshmallow.orderedset.OrderedSet.__len__: the value that this site tests for truth or measures is not an OrderedSet: it is a bool, str, int, None, list, tuple, dict, builtin set, Field, Schema, class, function, regex match or client data; the OrderedSet sites accept the candidate explicitly
+default reject marshmallow.orderedset.OrderedSet.__contains__: the right operand of this `in` test is a str, dict, list, tuple, builtin set, mapping or client iterable, not an OrderedSet; only OrderedSet's own methods use `in` on an OrderedSet, through collections.abc (no candidate site)
+default reject marshmallow.constants._Missing.__bool__: the package never tests `missing` for truth: it compares it with `is` (fields.py:297, 321, 324, 369; schema.py:542, 652, 687, 1157, 1171), stores it as a default (load_default, dump_default, get_value's default) and returns it from Method._serialize; no truth test, `and`, `or`, `not`, any(), all() or bool() in the package operates on it
+default reject marshmallow.constants._Missing.__len__: `missing` reaches no len(), list(), tuple() or truth test at this site; the Length.__call__ test at validate.py:431 receives it only through an opaque client callback result and rejects the candidate explicitly (B5); _Missing defines __bool__, so a truth test of missing would call __bool__, not __len__
+default reject marshmallow.constants._Missing.__repr__, marshmallow.fields.Field.__repr__, marshmallow.orderedset.OrderedSet.__repr__, marshmallow.schema.Schema.__repr__, marshmallow.validate.Validator.__repr__: the value that this f-string field formats is a str, bool, int, None, class, class name, re.Pattern, dict or list of messages, or a client value (the input of a field or validator, a client's comparable, bound, choice or attribute), not a package object with __repr__; the fields that format a package object (Field.__repr__, And._repr_args, Schema._init_fields) accept their candidates explicitly
+
+== marshmallow.class_registry
+
+[marshmallow.class_registry]
+72:2 decorator  @typing.overload
+    -> typing.overload
+76:2 decorator  @typing.overload
+    -> typing.overload
+
+[marshmallow.class_registry.register]
+57:42 call  any( each.__module__ == module for each in _registry[clas...
+    -> <builtin>.any
+    reject *: the argument is a generator of the bools that `each.__module__ == module` gives; any() iterates the generator and tests bools
+60:36 call  _registry[classname].append(cls)
+    -> <builtin>.list.append
+    note: the values of _registry are lists (class_registry.py:62, 66, 69)
+66:29 call  _registry.setdefault(fullpath, [])
+    -> <builtin>.dict.setdefault
+66:50 call  _registry.setdefault(fullpath, []).append(cls)
+    -> <builtin>.list.append
+
+[marshmallow.class_registry.get_class]
+91:28 call  RegistryError( f"Class with name {classname!r} was not fo...
+    -> <builtin>.NameError.__init__
+    note: RegistryError (exceptions.py:59) defines no __init__; the first __init__ in its MRO is that of NameError
+95:11 call  len(classes)
+    -> <builtin>.len
+    reject *: classes is a list of _registry
+98:28 call  RegistryError( f"Multiple classes with name {classname!r}...
+    -> <builtin>.NameError.__init__
+    note: RegistryError defines no __init__; the first __init__ in its MRO is that of NameError
+
+== marshmallow.constants
+
+[marshmallow.constants]
+25:33 call  _Missing()
+    note: _Missing (constants.py:8) defines no __init__ or __new__; object.__init__ runs: no edge
+
+== marshmallow.decorators
+
+[marshmallow.decorators.validates]
+94:20 call  set_hook(None, VALIDATES, field_names=field_names)
+    -> marshmallow.decorators.set_hook
+
+[marshmallow.decorators.validates_schema]
+124:20 call  set_hook( fn, VALIDATES_SCHEMA, many=pass_collection, pas...
+    -> marshmallow.decorators.set_hook
+
+[marshmallow.decorators.pre_dump]
+149:20 call  set_hook(fn, PRE_DUMP, many=pass_collection)
+    -> marshmallow.decorators.set_hook
+
+[marshmallow.decorators.post_dump]
+172:20 call  set_hook(fn, POST_DUMP, many=pass_collection, pass_origin...
+    -> marshmallow.decorators.set_hook
+
+[marshmallow.decorators.pre_load]
+193:20 call  set_hook(fn, PRE_LOAD, many=pass_collection)
+    -> marshmallow.decorators.set_hook
+
+[marshmallow.decorators.post_load]
+218:20 call  set_hook(fn, POST_LOAD, many=pass_collection, pass_origin...
+    -> marshmallow.decorators.set_hook
+
+[marshmallow.decorators.set_hook]
+240:33 call  functools.partial(set_hook, tag=tag, many=many, **kwargs)
+    -> functools.partial
+    reject marshmallow.decorators.set_hook: functools.partial only stores set_hook and its arguments; the partial is the decorator that the client applies (`@pre_load(pass_collection=True)`), so set_hook runs from client code
+    note: functools is the standard-library module; the partial object is returned to the client
+244:27 call  typing.cast("MarshmallowHook", fn)
+    -> typing.cast
+248:66 call  defaultdict(list)
+    -> collections.defaultdict
+252:32 call  hook_config[tag].append((many, kwargs))
+    -> <builtin>.list.append
+    note: hook_config is the defaultdict(list) that set_hook stores on the function (decorators.py:248)
+
+== marshmallow.error_store
+
+[marshmallow.error_store.ErrorStore.store_error]
+21:35 call  copy_containers(messages)
+    -> marshmallow.error_store.copy_containers
+22:50 call  isinstance(messages, dict)
+    -> <builtin>.isinstance
+26:35 call  merge_errors(self.errors, messages)
+    -> marshmallow.error_store.merge_errors
+
+[marshmallow.error_store.copy_containers]
+30:18 call  isinstance(errors, list)
+    -> <builtin>.isinstance
+31:32 call  copy_containers(val)
+    -> marshmallow.error_store.copy_containers
+32:18 call  isinstance(errors, dict)
+    -> <builtin>.isinstance
+33:37 call  copy_containers(val)
+    -> marshmallow.error_store.copy_containers
+33:71 call  errors.items()
+    -> <builtin>.dict.items
+    -> collections.defaultdict.items
+    note: Mapping._deserialize constructs collections.defaultdict at fields1684, raises ValidationError(errors) at1716; Schema._deserialize.getter -> _call_and_store catches it at524 -> ErrorStore.store_error -> copy_containers receives the defaultdict before normalizing. Method name uses receiver class even though dict implements it. Keep dict.items too.
+
+[marshmallow.error_store.merge_errors]
+47:18 call  isinstance(errors1, list)
+    -> <builtin>.isinstance
+48:22 call  isinstance(errors2, list)
+    -> <builtin>.isinstance
+49:27 call  errors1.extend(errors2)
+    -> <builtin>.list.extend
+51:22 call  isinstance(errors2, dict)
+    -> <builtin>.isinstance
+52:43 call  merge_errors(errors1, errors2.get(SCHEMA))
+    -> marshmallow.error_store.merge_errors
+52:64 call  errors2.get(SCHEMA)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: errors2 is a dict (isinstance at error_store.py:51), not the Context class
+54:23 call  errors1.append(errors2)
+    -> <builtin>.list.append
+56:18 call  isinstance(errors1, dict)
+    -> <builtin>.isinstance
+57:22 call  isinstance(errors2, dict)
+    -> <builtin>.isinstance
+58:42 call  errors2.items()
+    -> <builtin>.dict.items
+60:48 call  merge_errors(errors1[key], val)
+    -> marshmallow.error_store.merge_errors
+64:39 call  merge_errors(errors1.get(SCHEMA), errors2)
+    -> marshmallow.error_store.merge_errors
+64:51 call  errors1.get(SCHEMA)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: errors1 is a dict (isinstance at error_store.py:56), not the Context class
+66:18 call  isinstance(errors2, list)
+    -> <builtin>.isinstance
+68:18 call  isinstance(errors2, dict)
+    -> <builtin>.isinstance
+69:39 call  merge_errors(errors1, errors2.get(SCHEMA))
+    -> marshmallow.error_store.merge_errors
+69:60 call  errors2.get(SCHEMA)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: errors2 is a dict (isinstance at error_store.py:68), not the Context class
+
+== marshmallow.exceptions
+
+[marshmallow.exceptions]
+49:6 decorator  @property
+    -> <builtin>.property
+
+[marshmallow.exceptions.ValidationError.__init__]
+37:48 call  isinstance(message, (str, bytes))
+    -> <builtin>.isinstance
+42:14 call  super()
+    -> <builtin>.super
+42:25 call  super().__init__(message)
+    -> <builtin>.Exception.__init__
+    reject *: super() of ValidationError is MarshmallowError, which defines no __init__; the next __init__ in the MRO is that of Exception (exceptions.py:11)
+
+[marshmallow.exceptions.ValidationError.normalized_messages]
+45:52 call  isinstance(self.messages, dict)
+    -> <builtin>.isinstance
+
+[marshmallow.exceptions.ValidationError.messages_dict]
+51:26 call  isinstance(self.messages, dict)
+    -> <builtin>.isinstance
+52:28 call  TypeError( "cannot access 'messages_dict' when 'messages'...
+    -> <builtin>.TypeError
+54:23 call  type(self.messages)
+    -> <builtin>.type
+
+== marshmallow.experimental.context
+
+[marshmallow.experimental.context]
+40:27 call  typing.TypeVar("_ContextT")
+    -> typing.TypeVar
+41:27 call  typing.TypeVar("_DefaultT")
+    -> typing.TypeVar
+42:66 call  contextvars.ContextVar("context")
+    -> contextvars.ContextVar
+62:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[marshmallow.experimental.context.Context.__enter__]
+56:42 call  _CURRENT_CONTEXT.set(self.context)
+    -> contextvars.ContextVar.set
+
+[marshmallow.experimental.context.Context.__exit__]
+60:31 call  _CURRENT_CONTEXT.reset(typing.cast("contextvars.Token", s...
+    -> contextvars.ContextVar.reset
+60:43 call  typing.cast("contextvars.Token", self.token)
+    -> typing.cast
+
+[marshmallow.experimental.context.Context.get]
+70:40 call  _CURRENT_CONTEXT.get(default)
+    -> contextvars.ContextVar.get
+    reject marshmallow.experimental.context.Context.get: the receiver is the module's ContextVar _CURRENT_CONTEXT (context.py:42)
+71:36 call  _CURRENT_CONTEXT.get()
+    -> contextvars.ContextVar.get
+    reject marshmallow.experimental.context.Context.get: the receiver is the module's ContextVar _CURRENT_CONTEXT (context.py:42)
+
+== marshmallow.fields
+
+[marshmallow.fields]
+72:28 call  typing.TypeVar("_InternalT")
+    -> typing.TypeVar
+73:29 call  typing.TypeVar( "_ProcessorT", bound=types.PostLoadCallab...
+    -> typing.TypeVar
+272:6 decorator  @property
+    -> <builtin>.property
+331:6 decorator  @typing.overload
+    -> typing.overload
+341:6 decorator  @typing.overload
+    -> typing.overload
+447:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+554:6 decorator  @property
+    -> <builtin>.property
+698:6 decorator  @property
+    -> <builtin>.property
+936:23 call  typing.TypeVar("_NumT")
+    -> typing.TypeVar
+953:6 decorator  @property
+    -> <builtin>.property
+954:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+1233:20 call  typing.TypeVar("_D", dt.datetime, dt.date, dt.time)
+    -> typing.TypeVar
+1295:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1296:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+1340:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1446:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1481:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1580:27 call  typing.TypeVar("_MappingT", bound=_Mapping)
+    -> typing.TypeVar
+1602:6 decorator  @property
+    -> <builtin>.property
+1603:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+1910:24 call  typing.TypeVar("_EnumT", bound=EnumType)
+    -> typing.TypeVar
+2102:27 call  typing.TypeVar("_ContantT")
+    -> typing.TypeVar
+
+[marshmallow.fields._resolve_field_instance]
+100:18 call  isinstance(cls_or_instance, type)
+    -> <builtin>.isinstance
+101:26 call  issubclass(cls_or_instance, Field)
+    -> <builtin>.issubclass
+103:31 call  cls_or_instance()
+    -> marshmallow.fields.Field.__init__
+    -> marshmallow.fields.Integer.__init__
+    -> marshmallow.fields.Float.__init__
+    -> marshmallow.fields.Decimal.__init__
+    -> marshmallow.fields.Boolean.__init__
+    -> marshmallow.fields._TemporalField.__init__
+    -> marshmallow.fields.NaiveDateTime.__init__
+    -> marshmallow.fields.AwareDateTime.__init__
+    -> marshmallow.fields.TimeDelta.__init__
+    -> marshmallow.fields.Mapping.__init__
+    -> marshmallow.fields.Url.__init__
+    -> marshmallow.fields.Email.__init__
+    -> marshmallow.fields.IP.__init__
+    -> marshmallow.fields.IPInterface.__init__
+    -> marshmallow.fields.Method.__init__
+    -> marshmallow.fields.Function.__init__
+    exclude marshmallow.fields.Nested.__init__, marshmallow.fields.Pluck.__init__, marshmallow.fields.List.__init__, marshmallow.fields.Tuple.__init__, marshmallow.fields.Enum.__init__, marshmallow.fields.Constant.__init__: these classes take required positional arguments; called with none, they raise TypeError before their __init__ body runs
+    exclude marshmallow.fields.Number.__init__: Number is abstract (num_type, fields.py:953-955); only its subclasses run it, through their own __init__
+    note: cls_or_instance is a Field subclass (issubclass at fields.py:101): the field class that the client passes to List, Tuple, Dict (keys, values) or Enum (by_value), annotated type[Field]. Every concrete package field class that can be instantiated without arguments fits: Field, Raw, String, UUID, Boolean (Field.__init__ or their own), Integer, Float, Decimal, DateTime, Time, Date (_TemporalField.__init__), NaiveDateTime, AwareDateTime, TimeDelta, Dict (Mapping.__init__), Url, Email, IP, IPv4, IPv6 (IP.__init__), IPInterface, IPv4Interface, IPv6Interface (IPInterface.__init__), Method, Function. A client subclass runs client code
+104:22 call  isinstance(cls_or_instance, Field)
+    -> <builtin>.isinstance
+
+[marshmallow.fields.Field.__init__]
+207:53 call  self._normalize_processors(validate, param="validate")
+    -> marshmallow.fields.Field._normalize_processors
+208:51 call  self._normalize_processors(pre_load, param="pre_load")
+    -> marshmallow.fields.Field._normalize_processors
+209:52 call  self._normalize_processors(post_load, param="post_load")
+    -> marshmallow.fields.Field._normalize_processors
+217:29 call  ValueError("'load_default' must not be set for required f...
+    -> <builtin>.ValueError
+224:28 call  reversed(self.__class__.__mro__)
+    -> <builtin>.reversed
+    reject *: the argument is the tuple __mro__ of the field's class
+225:28 call  messages.update(getattr(cls, "default_error_messages", {}))
+    -> <builtin>.dict.update
+225:36 call  getattr(cls, "default_error_messages", {})
+    -> <builtin>.getattr
+226:24 call  messages.update(error_messages or {})
+    -> <builtin>.dict.update
+
+[marshmallow.fields.Field.__repr__]
+235:62 format  {self.dump_default!r}
+    -> marshmallow.constants._Missing.__repr__
+    reject *: dump_default is missing (the default, fields.py:184) or the client's default value, never a field, schema, set or validator
+    note: repr() of missing runs _Missing.__repr__
+237:24 format  {self.validate}
+    -> marshmallow.validate.Validator.__repr__
+    reject *: validate is the client's validator or iterable of validators, or None; the package values for this role are the validators of validate.py, not missing, a field, a schema or an OrderedSet
+    note: format() of a validator falls back to str(), then to Validator.__repr__ (no validator defines __str__ or __format__); a list or tuple of validators formats each element with repr(). The package's tests and documentation pass validators of validate.py as validate= (Field docstring, fields.py:128)
+239:28 format  {self.load_default}
+    -> marshmallow.constants._Missing.__repr__
+    reject *: load_default is missing (the default, fields.py:183) or the client's default value
+    note: format() of missing falls back to str(), then to _Missing.__repr__
+
+[marshmallow.fields.Field.__deepcopy__]
+244:25 call  copy.copy(self)
+    -> copy.copy
+    note: copy.copy of a field finds no __copy__ and copies through object.__reduce_ex__: no package callback
+
+[marshmallow.fields.Field.get_value]
+264:29 call  accessor_func(obj, check_key, default)
+    -> marshmallow.utils.get_value
+    -> marshmallow.schema.Schema.get_attribute
+    note: accessor_func is the accessor argument or utils.get_value (fields.py:262). Field.serialize passes its accessor through (fields.py:320); Schema._serialize passes the bound method Schema.get_attribute (schema.py:541). The bare Callable annotation names no other package value; a client accessor or a client override of get_attribute is client code
+
+[marshmallow.fields.Field._validate]
+270:14 getattr  self._validate_all
+    -> marshmallow.fields.Field._validate_all
+270:27 call  self._validate_all(value)
+    -> marshmallow.validate.And.__call__
+    reject marshmallow.fields.Field._validate_all: the property runs at the attribute load 270:14; the call calls the And object that it returns (fields.py:274)
+
+[marshmallow.fields.Field._validate_all]
+274:19 call  And(*self.validators)
+    -> marshmallow.validate.And.__init__
+
+[marshmallow.fields.Field.make_error]
+288:33 call  AssertionError(message)
+    -> <builtin>.AssertionError
+289:22 call  isinstance(msg, (str, bytes))
+    -> <builtin>.isinstance
+290:29 call  msg.format(**kwargs)
+    -> <builtin>.str.format
+    reject *: the arguments are those of the field's own make_error calls: input (the client's raw input value), type (a class name), obj_type and awareness (str constants) and choices (the str choices_text); no package object is formatted (B3)
+    note: msg is an error message of self.error_messages, a str here (a bytes message has no format method and raises AttributeError)
+291:31 call  ValidationError(msg)
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.fields.Field._validate_missing]
+298:34 call  self.make_error("required")
+    -> marshmallow.fields.Field.make_error
+300:34 call  self.make_error("null")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Field.serialize]
+320:35 call  self.get_value(obj, attr, accessor=accessor)
+    -> marshmallow.fields.Field.get_value
+    reject marshmallow.utils.get_value: the receiver is a Field
+323:32 call  default()
+    note: default is the dump_default of the field, here a callable that the client passes (fields.py:115: "May be a value or a callable"); the package defines no default callable: client code
+323:46 call  callable(default)
+    -> <builtin>.callable
+328:31 call  self._serialize(value, attr, obj, **kwargs)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver is a Field
+    note: self is any concrete field (every field class inherits serialize); each _serialize is the one of a concrete class (Number's for Integer, Float, Decimal; _TemporalField's for DateTime, NaiveDateTime, AwareDateTime, Time, Date; Mapping's for Dict; Field's for Field, Raw, Boolean)
+
+[marshmallow.fields.Field.deserialize]
+368:31 call  self._validate_missing(value)
+    -> marshmallow.fields.Field._validate_missing
+    -> marshmallow.fields.Constant._validate_missing
+371:25 call  _miss()
+    note: _miss is the load_default of the field, here a callable that the client passes (fields.py:117); the package defines no default callable: client code
+371:39 call  callable(_miss)
+    -> <builtin>.callable
+375:25 call  func(value)
+    note: func is a pre_load callable that the client passes (fields.py:132; types.PreLoadCallable is a bare Callable): client code
+380:35 call  self._deserialize(value, attr, data, **kwargs)
+    -> marshmallow.fields.AwareDateTime._deserialize
+    -> marshmallow.fields.Boolean._deserialize
+    -> marshmallow.fields.Constant._deserialize
+    -> marshmallow.fields.Enum._deserialize
+    -> marshmallow.fields.Field._deserialize
+    -> marshmallow.fields.Function._deserialize
+    -> marshmallow.fields.IP._deserialize
+    -> marshmallow.fields.IPInterface._deserialize
+    -> marshmallow.fields.List._deserialize
+    -> marshmallow.fields.Mapping._deserialize
+    -> marshmallow.fields.Method._deserialize
+    -> marshmallow.fields.NaiveDateTime._deserialize
+    -> marshmallow.fields.Nested._deserialize
+    -> marshmallow.fields.Number._deserialize
+    -> marshmallow.fields.Pluck._deserialize
+    -> marshmallow.fields.String._deserialize
+    -> marshmallow.fields.TimeDelta._deserialize
+    -> marshmallow.fields.Tuple._deserialize
+    -> marshmallow.fields.UUID._deserialize
+    -> marshmallow.fields._TemporalField._deserialize
+    reject marshmallow.schema.Schema._deserialize: the receiver is a Field
+    note: self is any concrete field; _TemporalField's for DateTime, Time, Date; Number's for Integer, Float, Decimal; Mapping's for Dict; Field's for Field, Raw
+382:23 call  self._validate(output)
+    -> marshmallow.fields.Field._validate
+386:26 call  func(output)
+    note: func is a post_load callable that the client passes (fields.py:135; types.PostLoadCallable is a bare Callable): client code
+
+[marshmallow.fields.Field._bind_to_schema]
+401:43 call  isinstance(self.parent, Field)
+    -> <builtin>.isinstance
+
+[marshmallow.fields.Field._normalize_processors]
+455:20 call  callable(processors)
+    -> <builtin>.callable
+457:44 call  utils.is_iterable_but_not_string(processors)
+    -> marshmallow.utils.is_iterable_but_not_string
+458:24 call  list(processors)
+    -> <builtin>.list
+    reject *: processors is the client's iterable of validators or processors (abstract Iterable, B3)
+459:25 call  ValueError( f"The '{param}' parameter must be a callable ...
+    -> <builtin>.ValueError
+
+[marshmallow.fields.Nested.__init__]
+540:69 call  utils.is_sequence_but_not_string(only)
+    -> marshmallow.utils.is_sequence_but_not_string
+541:43 call  StringNotCollectionError('"only" should be a collection o...
+    -> <builtin>.TypeError.__init__
+    note: StringNotCollectionError (exceptions.py:65) defines no __init__; its bases are MarshmallowError and TypeError, so the first __init__ in its MRO is that of TypeError
+542:48 call  utils.is_sequence_but_not_string(exclude)
+    -> marshmallow.utils.is_sequence_but_not_string
+543:43 call  StringNotCollectionError( '"exclude" should be a collecti...
+    -> <builtin>.TypeError.__init__
+    note: StringNotCollectionError defines no __init__; the first __init__ in its MRO is that of TypeError
+552:14 call  super()
+    -> <builtin>.super
+552:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Nested in the MRO of Nested and of Pluck is Field
+
+[marshmallow.fields.Nested.schema]
+562:24 call  callable(nested)
+    -> <builtin>.callable
+562:51 call  isinstance(nested, SchemaMeta)
+    -> <builtin>.isinstance
+563:32 call  nested()
+    note: nested is the callable that the client passes as the nested argument (a lambda that returns a schema, class, name or dict; fields.py:505); the Callable arm of the annotation names no package value, a Schema class is excluded by the isinstance test, and a Schema instance or dict is not callable: client code
+565:26 call  isinstance(nested, dict)
+    -> <builtin>.isinstance
+566:42 call  Schema.from_dict(nested)
+    -> marshmallow.schema.Schema.from_dict
+568:26 call  isinstance(nested, Schema)
+    -> <builtin>.isinstance
+569:41 call  copy.copy(nested)
+    -> copy.copy
+    note: copy.copy of a Schema finds no __copy__ and copies through object.__reduce_ex__: no package callback
+571:40 call  typing.cast("type[set]", self._schema.set_class)
+    -> typing.cast
+576:60 call  self._schema.fields.keys()
+    -> <builtin>.dict.keys
+    note: fields of a Schema is the dict that _init_fields makes (dict_class, dict by default; schema.py:1012, 1051)
+577:50 call  set_class(self.only)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the set_class of the nested schema (fields.py:571): Schema.set_class, OrderedSet (schema.py:309); a client override is client code
+577:62 op  set_class(self.only) & set_class(original)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: both operands are OrderedSets; collections.abc.Set.__and__ builds its generator over the right operand (iter() of an OrderedSet) and passes it to _from_iterable, which calls OrderedSet(it)
+577:73 call  set_class(original)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the nested schema's set_class, OrderedSet by default (see 577:50); original is the schema's only (an OrderedSet) or the keys of its fields
+580:53 call  set_class(self.exclude)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the nested schema's set_class, OrderedSet by default (see 577:50)
+580:68 op  set_class(self.exclude) | set_class(original)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: collections.abc.Set.__or__ passes a generator over both operands to _from_iterable, which calls OrderedSet(it); the generator iterates the operands inside OrderedSet.__init__
+580:79 call  set_class(original)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the nested schema's set_class, OrderedSet by default (see 577:50); original is the schema's exclude, an OrderedSet or a builtin set
+578:20 truth  self.exclude
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: exclude of a bound Nested field is the client's sequence or the OrderedSet that Schema.__apply_nested_option sets on the schema's copy of the field (schema.py:980), also through List and Dict (fields.py:763, 1647); OrderedSet defines no __bool__, so the truth test calls __len__
+583:42 call  self._schema._init_fields()
+    -> marshmallow.schema.Schema._init_fields
+585:30 call  isinstance(nested, type)
+    -> <builtin>.isinstance
+585:59 call  issubclass(nested, Schema)
+    -> <builtin>.issubclass
+587:36 call  isinstance(nested, (str, bytes))
+    -> <builtin>.isinstance
+588:37 call  ValueError( "`Nested` fields must be passed a " f"`Schema...
+    -> <builtin>.ValueError
+593:60 call  class_registry.get_class(nested, all=False)
+    -> marshmallow.class_registry.get_class
+594:44 call  schema_class( many=bool(self.many), only=self.only, exclu...
+    -> marshmallow.schema.Schema.__init__
+    note: schema_class is a Schema class: the class that the client passes (issubclass at fields.py:585), Schema itself among them, or the class that class_registry.get_class returns (a class that SchemaMeta registered); instantiating it runs Schema.__init__ unless a client subclass overrides it (client code)
+595:30 call  bool(self.many)
+    -> <builtin>.bool
+    reject *: many of a Nested field is a bool or None (fields.py:535)
+598:61 call  self._nested_normalized_option("load_only")
+    -> marshmallow.fields.Nested._nested_normalized_option
+599:61 call  self._nested_normalized_option("dump_only")
+    -> marshmallow.fields.Nested._nested_normalized_option
+
+[marshmallow.fields.Nested._nested_normalized_option]
+606:24 call  field.split(nested_field, 1)
+    -> <builtin>.str.split
+607:33 call  getattr(self.root, option_name, set())
+    -> <builtin>.getattr
+607:61 call  set()
+    -> <builtin>.set
+    reject *: set() has no argument
+608:32 call  field.startswith(nested_field)
+    -> <builtin>.str.startswith
+
+[marshmallow.fields.Nested._serialize]
+614:23 getattr  self.schema
+    -> marshmallow.fields.Nested.schema
+618:27 call  schema.dump(nested_obj, many=many)
+    -> marshmallow.schema.Schema.dump
+
+[marshmallow.fields.Nested._test_collection]
+621:21 getattr  self.schema
+    -> marshmallow.fields.Nested.schema
+622:44 call  utils.is_collection(value)
+    -> marshmallow.utils.is_collection
+623:34 call  self.make_error("type", input=value, type=value.__class__...
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Nested._load]
+631:31 getattr  self.schema
+    -> marshmallow.fields.Nested.schema
+631:42 call  self.schema.load(value, unknown=self.unknown, partial=par...
+    -> marshmallow.schema.Schema.load
+633:34 call  ValidationError( error.messages, valid_data=error.valid_d...
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.fields.Nested._deserialize]
+654:30 call  self._test_collection(value)
+    -> marshmallow.fields.Nested._test_collection
+655:26 call  self._load(value, partial=partial)
+    -> marshmallow.fields.Nested._load
+
+[marshmallow.fields.Pluck.__init__]
+693:14 call  super()
+    -> <builtin>.super
+693:25 call  super().__init__( nested, only=(field_name,), many=many, ...
+    -> marshmallow.fields.Nested.__init__
+    reject *: the class after Pluck in its MRO is Nested
+
+[marshmallow.fields.Pluck._field_data_key]
+700:27 getattr  self.schema
+    -> marshmallow.fields.Nested.schema
+
+[marshmallow.fields.Pluck._serialize]
+706:20 call  super()
+    -> <builtin>.super
+706:33 call  super()._serialize(nested_obj, attr, obj, **kwargs)
+    -> marshmallow.fields.Nested._serialize
+    reject *: the class after Pluck in its MRO is Nested
+710:31 call  utils.pluck(ret, key=self._field_data_key)
+    -> marshmallow.utils.pluck
+    reject marshmallow.fields.Pluck._field_data_key: the property runs at the attribute load 710:46; utils.pluck receives its str value
+710:46 getattr  self._field_data_key
+    -> marshmallow.fields.Pluck._field_data_key
+711:25 getattr  self._field_data_key
+    -> marshmallow.fields.Pluck._field_data_key
+
+[marshmallow.fields.Pluck._deserialize]
+714:30 call  self._test_collection(value)
+    -> marshmallow.fields.Nested._test_collection
+716:28 getattr  self._field_data_key
+    -> marshmallow.fields.Pluck._field_data_key
+718:27 getattr  self._field_data_key
+    -> marshmallow.fields.Pluck._field_data_key
+719:26 call  self._load(value, partial=partial)
+    -> marshmallow.fields.Nested._load
+
+[marshmallow.fields.List.__init__]
+745:14 call  super()
+    -> <builtin>.super
+745:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after List in its MRO is Field
+747:68 call  _resolve_field_instance(cls_or_instance)
+    -> marshmallow.fields._resolve_field_instance
+749:29 call  ValueError( "The list elements must be a subclass or inst...
+    -> <builtin>.ValueError
+753:22 call  isinstance(self.inner, Nested)
+    -> <builtin>.isinstance
+
+[marshmallow.fields.List._bind_to_schema]
+758:14 call  super()
+    -> <builtin>.super
+758:32 call  super()._bind_to_schema(field_name, parent)
+    -> marshmallow.fields.Field._bind_to_schema
+    reject *: the class after List in its MRO is Field
+759:35 call  copy.deepcopy(self.inner)
+    -> copy.deepcopy
+    -> marshmallow.fields.Field.__deepcopy__
+    note: inner is a Field (fields.py:747); copy.deepcopy calls back its __deepcopy__, which every field inherits from Field
+760:35 call  self.inner._bind_to_schema(field_name, self)
+    -> marshmallow.fields.Field._bind_to_schema
+    -> marshmallow.fields.List._bind_to_schema
+    -> marshmallow.fields.Mapping._bind_to_schema
+    -> marshmallow.fields.Method._bind_to_schema
+    -> marshmallow.fields.Tuple._bind_to_schema
+    -> marshmallow.fields._TemporalField._bind_to_schema
+    note: inner is any concrete field (List, Tuple, Dict, Method and the temporal fields override _bind_to_schema)
+761:22 call  isinstance(self.inner, Nested)
+    -> <builtin>.isinstance
+
+[marshmallow.fields.List._serialize]
+768:38 call  self.inner._serialize(each, attr, obj, **kwargs)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver inner is a Field
+    note: inner is any concrete field (fields.py:747)
+
+[marshmallow.fields.List._deserialize]
+771:35 call  utils.is_collection(value)
+    -> marshmallow.utils.is_collection
+772:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+776:35 call  enumerate(value)
+    -> <builtin>.enumerate
+    reject *: value is the client's input collection (B3, B5)
+778:30 call  result.append(self.inner.deserialize(each, **kwargs))
+    -> <builtin>.list.append
+778:53 call  self.inner.deserialize(each, **kwargs)
+    -> marshmallow.fields.Field.deserialize
+781:34 call  result.append(typing.cast("_InternalT", error.valid_data))
+    -> <builtin>.list.append
+781:46 call  typing.cast("_InternalT", error.valid_data)
+    -> typing.cast
+782:30 call  errors.update({idx: error.messages})
+    -> <builtin>.dict.update
+784:34 call  ValidationError(errors, valid_data=result)
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.fields.Tuple.__init__]
+816:14 call  super()
+    -> <builtin>.super
+816:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Tuple in its MRO is Field
+817:35 call  utils.is_collection(tuple_fields)
+    -> marshmallow.utils.is_collection
+818:29 call  ValueError( "tuple_fields must be an iterable of Field cl...
+    -> <builtin>.ValueError
+824:40 call  _resolve_field_instance(cls_or_instance)
+    -> marshmallow.fields._resolve_field_instance
+828:29 call  ValueError( 'Elements of "tuple_fields" must be subclasse...
+    -> <builtin>.ValueError
+833:38 call  Length(equal=len(self.tuple_fields))
+    -> marshmallow.validate.Length.__init__
+833:48 call  len(self.tuple_fields)
+    -> <builtin>.len
+    reject *: tuple_fields is the list built at fields.py:823
+
+[marshmallow.fields.Tuple._bind_to_schema]
+836:14 call  super()
+    -> <builtin>.super
+836:32 call  super()._bind_to_schema(field_name, parent)
+    -> marshmallow.fields.Field._bind_to_schema
+    reject *: the class after Tuple in its MRO is Field
+839:38 call  copy.deepcopy(field)
+    -> copy.deepcopy
+    -> marshmallow.fields.Field.__deepcopy__
+    note: field is a Field (fields.py:824); copy.deepcopy calls back its __deepcopy__
+840:38 call  new_field._bind_to_schema(field_name, self)
+    -> marshmallow.fields.Field._bind_to_schema
+    -> marshmallow.fields.List._bind_to_schema
+    -> marshmallow.fields.Mapping._bind_to_schema
+    -> marshmallow.fields.Method._bind_to_schema
+    -> marshmallow.fields.Tuple._bind_to_schema
+    -> marshmallow.fields._TemporalField._bind_to_schema
+    note: new_field is a copy of any concrete field
+841:36 call  new_tuple_fields.append(new_field)
+    -> <builtin>.list.append
+
+[marshmallow.fields.Tuple._serialize]
+851:21 call  tuple( field._serialize(each, attr, obj, **kwargs) for fi...
+    -> <builtin>.tuple
+    reject *: the argument is a generator expression
+852:29 call  field._serialize(each, attr, obj, **kwargs)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver is a Field of tuple_fields
+    note: field is any concrete field (fields.py:824)
+853:35 call  zip(self.tuple_fields, value, strict=True)
+    -> <builtin>.zip
+    reject *: tuple_fields is a list of fields; value is the client's tuple (B5)
+
+[marshmallow.fields.Tuple._deserialize]
+863:48 call  utils.is_sequence_but_not_string(value)
+    -> marshmallow.utils.is_sequence_but_not_string
+864:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+866:29 call  self.validate_length(value)
+    -> marshmallow.validate.Length.__call__
+    note: validate_length is the Length validator that Tuple.__init__ makes (fields.py:833)
+871:44 call  enumerate(zip(self.tuple_fields, value, strict=True))
+    -> <builtin>.enumerate
+    reject *: the argument is a zip object
+871:48 call  zip(self.tuple_fields, value, strict=True)
+    -> <builtin>.zip
+    reject *: tuple_fields is a list of fields; value is the client's sequence (B5)
+873:30 call  result.append(field.deserialize(each, **kwargs))
+    -> <builtin>.list.append
+873:48 call  field.deserialize(each, **kwargs)
+    -> marshmallow.fields.Field.deserialize
+876:34 call  result.append(error.valid_data)
+    -> <builtin>.list.append
+877:30 call  errors.update({idx: error.messages})
+    -> <builtin>.dict.update
+879:34 call  ValidationError(errors, valid_data=result)
+    -> marshmallow.exceptions.ValidationError.__init__
+881:21 call  tuple(result)
+    -> <builtin>.tuple
+    reject *: result is a list
+
+[marshmallow.fields.String._serialize]
+899:38 call  utils.ensure_text_type(value)
+    -> marshmallow.utils.ensure_text_type
+
+[marshmallow.fields.String._deserialize]
+902:26 call  isinstance(value, (str, bytes))
+    -> <builtin>.isinstance
+903:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+905:42 call  utils.ensure_text_type(value)
+    -> marshmallow.utils.ensure_text_type
+907:34 call  self.make_error("invalid_utf8")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.UUID._validated]
+918:22 call  isinstance(value, uuid.UUID)
+    -> <builtin>.isinstance
+921:26 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+921:48 call  len(value)
+    -> <builtin>.len
+    reject *: value is bytes here (isinstance at fields.py:921)
+922:33 call  uuid.UUID(bytes=value)
+    -> uuid.UUID
+    reject marshmallow.fields.Field.__init__: uuid.UUID is the standard-library class of the module uuid, not the field
+923:29 call  uuid.UUID(value)
+    -> uuid.UUID
+    reject marshmallow.fields.Field.__init__: uuid.UUID is the standard-library class of the module uuid, not the field
+925:34 call  self.make_error("invalid_uuid")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.UUID._serialize]
+930:19 call  str(value)
+    -> <builtin>.str
+    reject *: value is the attribute value that a UUID field serializes, a uuid.UUID or the client's value (B3)
+
+[marshmallow.fields.UUID._deserialize]
+933:31 call  self._validated(value)
+    -> marshmallow.fields.UUID._validated
+    reject *: the receiver is a UUID field; UUID has no package subclass and the other candidates are methods of the number fields
+
+[marshmallow.fields.Number.__init__]
+965:14 call  super()
+    -> <builtin>.super
+965:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Number in the MRO of Integer, Float and Decimal is Field
+
+[marshmallow.fields.Number._format_num]
+969:21 getattr  self.num_type
+    reject marshmallow.fields.Number.num_type: the receiver is an Integer or a Float (Decimal overrides _format_num, fields.py:1120), whose class attribute num_type (int, float) replaces the abstract property; a subclass without num_type cannot be instantiated
+969:29 call  self.num_type(value)
+    -> <builtin>.int
+    -> <builtin>.float
+    reject marshmallow.fields.Number.num_type: num_type is the class attribute of Integer (int, fields.py:1005) or Float (float, fields.py:1036), not the abstract property
+    note: self is an Integer or a Float: Decimal overrides _format_num, and Number is abstract. A client subclass's num_type is client code
+
+[marshmallow.fields.Number._validated]
+975:34 call  self.make_error("invalid", input=value)
+    -> marshmallow.fields.Field.make_error
+977:36 call  self._format_num(value)
+    -> marshmallow.fields.Number._format_num
+    -> marshmallow.fields.Decimal._format_num
+    note: Number._validated runs for Integer, Float and Decimal (through their super() calls, fields.py:1024, 1054, 1132); Decimal overrides _format_num
+979:34 call  self.make_error("invalid", input=value)
+    -> marshmallow.fields.Field.make_error
+981:34 call  self.make_error("too_large", input=value)
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Number._to_string]
+984:19 call  str(value)
+    -> <builtin>.str
+    reject *: value is the int or float that _format_num returns (Number._to_string runs for Integer and Float; Decimal overrides it)
+
+[marshmallow.fields.Number._serialize]
+990:38 call  self._format_num(value)
+    -> marshmallow.fields.Number._format_num
+    -> marshmallow.fields.Decimal._format_num
+    note: self is an Integer, Float or Decimal
+991:31 call  self._to_string(ret)
+    -> marshmallow.fields.Number._to_string
+    -> marshmallow.fields.Decimal._to_string
+    note: self is an Integer, Float or Decimal
+
+[marshmallow.fields.Number._deserialize]
+994:31 call  self._validated(value)
+    -> marshmallow.fields.Integer._validated
+    -> marshmallow.fields.Float._validated
+    -> marshmallow.fields.Decimal._validated
+    reject marshmallow.fields.Number._validated: Number is abstract and Integer, Float and Decimal all override _validated
+    reject marshmallow.fields.UUID._validated: the receiver is a number field, not a UUID field
+
+[marshmallow.fields.Integer.__init__]
+1018:14 call  super()
+    -> <builtin>.super
+1018:25 call  super().__init__(as_string=as_string, **kwargs)
+    -> marshmallow.fields.Number.__init__
+    reject *: the class after Integer in its MRO is Number
+
+[marshmallow.fields.Integer._validated]
+1022:42 call  isinstance(value, numbers.Integral)
+    -> <builtin>.isinstance
+1023:34 call  self.make_error("invalid", input=value)
+    -> marshmallow.fields.Field.make_error
+1024:21 call  super()
+    -> <builtin>.super
+1024:34 call  super()._validated(value)
+    -> marshmallow.fields.Number._validated
+    reject *: the class after Integer in its MRO is Number
+
+[marshmallow.fields.Float.__init__]
+1051:14 call  super()
+    -> <builtin>.super
+1051:25 call  super().__init__(as_string=as_string, **kwargs)
+    -> marshmallow.fields.Number.__init__
+    reject *: the class after Float in its MRO is Number
+
+[marshmallow.fields.Float._validated]
+1054:20 call  super()
+    -> <builtin>.super
+1054:33 call  super()._validated(value)
+    -> marshmallow.fields.Number._validated
+    reject *: the class after Float in its MRO is Number
+1056:26 call  math.isnan(num)
+    -> math.isnan
+1056:47 call  float("inf")
+    -> <builtin>.float
+1056:70 call  float("-inf")
+    -> <builtin>.float
+1057:38 call  self.make_error("special")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Decimal.__init__]
+1113:28 call  decimal.Decimal((0, (1,), -places))
+    -> decimal.Decimal
+    reject marshmallow.fields.Decimal.__init__, marshmallow.fields.Number.__init__, marshmallow.fields.Field.__init__: decimal.Decimal is the standard-library class of the module decimal, not the field
+1117:14 call  super()
+    -> <builtin>.super
+1117:25 call  super().__init__(as_string=as_string, **kwargs)
+    -> marshmallow.fields.Number.__init__
+    reject *: the class after Decimal in its MRO is Number
+
+[marshmallow.fields.Decimal._format_num]
+1121:30 call  decimal.Decimal(str(value))
+    -> decimal.Decimal
+    reject marshmallow.fields.Decimal.__init__, marshmallow.fields.Number.__init__, marshmallow.fields.Field.__init__: decimal.Decimal is the standard-library class, not the field
+1121:34 call  str(value)
+    -> <builtin>.str
+    reject *: value is the number or str that the client gives to a Decimal field (B3)
+1123:26 call  num.is_nan()
+    -> decimal.Decimal.is_nan
+1124:39 call  decimal.Decimal("NaN")
+    -> decimal.Decimal
+    reject marshmallow.fields.Decimal.__init__, marshmallow.fields.Number.__init__, marshmallow.fields.Field.__init__: decimal.Decimal is the standard-library class, not the field
+1125:53 call  num.is_finite()
+    -> decimal.Decimal.is_finite
+1126:31 call  num.quantize(self.places, rounding=self.rounding)
+    -> decimal.Decimal.quantize
+
+[marshmallow.fields.Decimal._validated]
+1132:24 call  super()
+    -> <builtin>.super
+1132:37 call  super()._validated(value)
+    -> marshmallow.fields.Number._validated
+    reject *: the class after Decimal in its MRO is Number
+1134:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+1135:46 call  num.is_nan()
+    -> decimal.Decimal.is_nan
+    note: num is the decimal.Decimal that Decimal._format_num returns
+1135:67 call  num.is_infinite()
+    -> decimal.Decimal.is_infinite
+1136:34 call  self.make_error("special")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Decimal._to_string]
+1141:22 call  format(value, "f")
+    -> <builtin>.format
+    reject *: value is the decimal.Decimal that _format_num returns
+
+[marshmallow.fields.Boolean.__init__]
+1207:14 call  super()
+    -> <builtin>.super
+1207:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Boolean in its MRO is Field
+1210:30 call  set(truthy)
+    -> <builtin>.set
+    reject *: truthy is the client's iterable of values (abstract Iterable, B3)
+1212:29 call  set(falsy)
+    -> <builtin>.set
+    reject *: falsy is the client's iterable of values (abstract Iterable, B3)
+
+[marshmallow.fields.Boolean._deserialize]
+1222:24 call  bool(value)
+    -> <builtin>.bool
+    reject *: value is the client's raw input value (B3)
+1229:34 call  self.make_error("invalid", input=value)
+    -> marshmallow.fields.Field.make_error
+1230:30 call  self.make_error("invalid", input=value)
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields._TemporalField.__init__]
+1257:14 call  super()
+    -> <builtin>.super
+1257:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after _TemporalField in the MRO of the temporal fields is Field
+
+[marshmallow.fields._TemporalField._bind_to_schema]
+1264:14 call  super()
+    -> <builtin>.super
+1264:32 call  super()._bind_to_schema(field_name, parent)
+    -> marshmallow.fields.Field._bind_to_schema
+    reject *: the class after _TemporalField in the MRO of the temporal fields is Field
+1267:23 call  getattr(self.root.opts, self.SCHEMA_OPTS_VAR_NAME)
+    -> <builtin>.getattr
+
+[marshmallow.fields._TemporalField._serialize]
+1275:51 call  self.SERIALIZATION_FUNCS.get(data_format)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: SERIALIZATION_FUNCS is a dict class attribute (fields.py:1316, 1430, 1465)
+1277:31 call  format_func(value)
+    -> datetime.datetime.isoformat
+    -> email.utils.format_datetime
+    -> marshmallow.utils.timestamp
+    -> marshmallow.utils.timestamp_ms
+    -> datetime.time.isoformat
+    -> datetime.date.isoformat
+    note: format_func is a value of SERIALIZATION_FUNCS: DateTime and its subclasses (fields.py:1316-1323), Time (1430-1433), Date (1465-1468); a client subclass's table is client code
+1278:30 call  value.strftime(data_format)
+    -> datetime.date.strftime
+    -> datetime.time.strftime
+    -> datetime.datetime.strftime
+    note: Global outside-method naming uses the receiver class even for inherited methods. _D and DateTime/NaiveDateTime/AwareDateTime fix datetime.datetime; custom format reaches value.strftime. Keep date.strftime and time.strftime too. Judgement 7 cannot override global naming.
+
+[marshmallow.fields._TemporalField._deserialize]
+1281:42 call  getattr(dt, self.OBJ_TYPE)
+    -> <builtin>.getattr
+1282:22 call  isinstance(value, internal_type)
+    -> <builtin>.isinstance
+1285:46 call  self.DESERIALIZATION_FUNCS.get(data_format)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: DESERIALIZATION_FUNCS is a dict class attribute (fields.py:1325, 1435, 1470)
+1288:28 call  func(value)
+    -> datetime.datetime.fromisoformat
+    -> email.utils.parsedate_to_datetime
+    -> marshmallow.utils.from_timestamp
+    -> marshmallow.utils.from_timestamp_ms
+    -> datetime.time.fromisoformat
+    -> datetime.date.fromisoformat
+    note: func is a value of DESERIALIZATION_FUNCS: DateTime and its subclasses (fields.py:1325-1332), Time (1435-1438), Date (1470-1473); a client subclass's table is client code
+1289:49 call  self._make_object_from_format(value, data_format)
+    -> marshmallow.fields.DateTime._make_object_from_format
+    -> marshmallow.fields.Time._make_object_from_format
+    -> marshmallow.fields.Date._make_object_from_format
+    reject marshmallow.fields._TemporalField._make_object_from_format: the abstract stub; DateTime (also for NaiveDateTime and AwareDateTime), Time and Date define it, and _TemporalField cannot be instantiated
+1291:34 call  self.make_error( "invalid", input=value, obj_type=self.OB...
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.DateTime._make_object_from_format]
+1342:36 call  dt.datetime.strptime(value, data_format)
+    -> datetime.datetime.strptime
+
+[marshmallow.fields.NaiveDateTime.__init__]
+1367:14 call  super()
+    -> <builtin>.super
+1367:25 call  super().__init__(format=format, **kwargs)
+    -> marshmallow.fields._TemporalField.__init__
+    reject *: the class after NaiveDateTime in its MRO is DateTime, which defines no __init__; the next is _TemporalField
+
+[marshmallow.fields.NaiveDateTime._deserialize]
+1371:20 call  super()
+    -> <builtin>.super
+1371:35 call  super()._deserialize(value, attr, data, **kwargs)
+    -> marshmallow.fields._TemporalField._deserialize
+    reject *: DateTime, the class after NaiveDateTime in its MRO, defines no _deserialize; the next is _TemporalField
+1372:26 call  utils.is_aware(ret)
+    -> marshmallow.utils.is_aware
+1374:38 call  self.make_error( "invalid_awareness", awareness=self.AWAR...
+    -> marshmallow.fields.Field.make_error
+1379:33 call  ret.astimezone(self.timezone)
+    -> datetime.datetime.astimezone
+    note: ret is the datetime that _TemporalField._deserialize returns (annotation _D, a datetime for DateTime fields)
+1379:56 call  ret.astimezone(self.timezone).replace(tzinfo=None)
+    -> datetime.datetime.replace
+
+[marshmallow.fields.AwareDateTime.__init__]
+1404:14 call  super()
+    -> <builtin>.super
+1404:25 call  super().__init__(format=format, **kwargs)
+    -> marshmallow.fields._TemporalField.__init__
+    reject *: the class after AwareDateTime in its MRO is DateTime, which defines no __init__; the next is _TemporalField
+
+[marshmallow.fields.AwareDateTime._deserialize]
+1408:20 call  super()
+    -> <builtin>.super
+1408:35 call  super()._deserialize(value, attr, data, **kwargs)
+    -> marshmallow.fields._TemporalField._deserialize
+    reject *: DateTime, the class after AwareDateTime in its MRO, defines no _deserialize; the next is _TemporalField
+1409:30 call  utils.is_aware(ret)
+    -> marshmallow.utils.is_aware
+1411:38 call  self.make_error( "invalid_awareness", awareness=self.AWAR...
+    -> marshmallow.fields.Field.make_error
+1416:30 call  ret.replace(tzinfo=self.default_timezone)
+    -> datetime.datetime.replace
+    note: ret is the datetime that _TemporalField._deserialize returns
+
+[marshmallow.fields.Time._make_object_from_format]
+1448:36 call  dt.datetime.strptime(value, data_format)
+    -> datetime.datetime.strptime
+1448:61 call  dt.datetime.strptime(value, data_format).time()
+    -> datetime.datetime.time
+
+[marshmallow.fields.Date._make_object_from_format]
+1483:36 call  dt.datetime.strptime(value, data_format)
+    -> datetime.datetime.strptime
+1483:61 call  dt.datetime.strptime(value, data_format).date()
+    -> datetime.datetime.date
+
+[marshmallow.fields.TimeDelta.__init__]
+1543:36 call  precision.lower()
+    -> <builtin>.str.lower
+1546:30 call  ", ".join(self._unit_to_microseconds_mapping)
+    -> <builtin>.str.join
+1548:29 call  ValueError(msg)
+    -> <builtin>.ValueError
+1551:14 call  super()
+    -> <builtin>.super
+1551:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after TimeDelta in its MRO is Field
+
+[marshmallow.fields.TimeDelta._serialize]
+1558:60 call  utils.timedelta_to_microseconds(value)
+    -> marshmallow.utils.timedelta_to_microseconds
+
+[marshmallow.fields.TimeDelta._deserialize]
+1563:22 call  isinstance(value, dt.timedelta)
+    -> <builtin>.isinstance
+1566:26 call  float(value)
+    -> <builtin>.float
+1568:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+1573:32 call  dt.timedelta(**kwargs)
+    -> datetime.timedelta
+1577:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Mapping.__init__]
+1615:14 call  super()
+    -> <builtin>.super
+1615:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Mapping in the MRO of Dict is Field
+1620:57 call  _resolve_field_instance(keys)
+    -> marshmallow.fields._resolve_field_instance
+1622:33 call  ValueError( '"keys" must be a subclass or instance of mar...
+    -> <builtin>.ValueError
+1630:59 call  _resolve_field_instance(values)
+    -> marshmallow.fields._resolve_field_instance
+1632:33 call  ValueError( '"values" must be a subclass or instance of '...
+    -> <builtin>.ValueError
+1636:26 call  isinstance(self.value_field, Nested)
+    -> <builtin>.isinstance
+
+[marshmallow.fields.Mapping._bind_to_schema]
+1641:14 call  super()
+    -> <builtin>.super
+1641:32 call  super()._bind_to_schema(field_name, parent)
+    -> marshmallow.fields.Field._bind_to_schema
+    reject *: the class after Mapping in the MRO of Dict is Field
+1643:45 call  copy.deepcopy(self.value_field)
+    -> copy.deepcopy
+    -> marshmallow.fields.Field.__deepcopy__
+    note: value_field is a Field (fields.py:1630); copy.deepcopy calls back its __deepcopy__
+1644:45 call  self.value_field._bind_to_schema(field_name, self)
+    -> marshmallow.fields.Field._bind_to_schema
+    -> marshmallow.fields.List._bind_to_schema
+    -> marshmallow.fields.Mapping._bind_to_schema
+    -> marshmallow.fields.Method._bind_to_schema
+    -> marshmallow.fields.Tuple._bind_to_schema
+    -> marshmallow.fields._TemporalField._bind_to_schema
+    note: value_field is a copy of any concrete field
+1645:22 call  isinstance(self.value_field, Nested)
+    -> <builtin>.isinstance
+1649:43 call  copy.deepcopy(self.key_field)
+    -> copy.deepcopy
+    -> marshmallow.fields.Field.__deepcopy__
+    note: key_field is a Field (fields.py:1620); copy.deepcopy calls back its __deepcopy__
+1650:43 call  self.key_field._bind_to_schema(field_name, self)
+    -> marshmallow.fields.Field._bind_to_schema
+    -> marshmallow.fields.List._bind_to_schema
+    -> marshmallow.fields.Mapping._bind_to_schema
+    -> marshmallow.fields.Method._bind_to_schema
+    -> marshmallow.fields.Tuple._bind_to_schema
+    -> marshmallow.fields._TemporalField._bind_to_schema
+    note: key_field is a copy of any concrete field
+
+[marshmallow.fields.Mapping._serialize]
+1656:25 getattr  self.mapping_type
+    reject marshmallow.fields.Mapping.mapping_type: the receiver is a Dict, whose class attribute mapping_type (dict, fields.py:1733) replaces the abstract property; Mapping cannot be instantiated
+1656:37 call  self.mapping_type(value)
+    -> <builtin>.dict
+    reject marshmallow.fields.Mapping.mapping_type: mapping_type is the class attribute dict of Dict (fields.py:1733), not the abstract property
+    note: self is a Dict (Mapping is abstract); a client subclass's mapping_type is client code. dict() of the client's mapping calls client code
+1663:45 call  self.key_field._serialize(k, None, None, **kwargs)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver key_field is a Field
+    note: key_field is any concrete field (fields.py:1620)
+1667:23 getattr  self.mapping_type
+    reject marshmallow.fields.Mapping.mapping_type: the receiver is a Dict, whose class attribute mapping_type replaces the abstract property
+1667:35 call  self.mapping_type()
+    -> <builtin>.dict
+    reject marshmallow.fields.Mapping.mapping_type: mapping_type is the class attribute dict of Dict, not the abstract property
+    note: self is a Dict (see 1656:37)
+1669:36 call  value.items()
+    note: value is the client's mapping that the field serializes (annotation _MappingT, bound to the abstract collections.abc.Mapping): its items is client code (B4, B5)
+1673:36 call  value.items()
+    note: value is the client's mapping (abstract Mapping, B4, B5): its items is client code
+1674:62 call  self.value_field._serialize(v, None, None, **kwargs)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver value_field is a Field
+    note: value_field is any concrete field (fields.py:1630)
+
+[marshmallow.fields.Mapping._deserialize]
+1679:26 call  isinstance(value, _Mapping)
+    -> <builtin>.isinstance
+1680:34 call  self.make_error("invalid")
+    -> marshmallow.fields.Field.make_error
+1682:37 call  self.mapping_type(value)
+    -> <builtin>.dict
+    reject marshmallow.fields.Mapping.mapping_type: mapping_type is the class attribute dict of Dict, not the abstract property
+    note: self is a Dict (see 1656:37)
+1682:25 getattr  self.mapping_type
+    reject marshmallow.fields.Mapping.mapping_type: the receiver is a Dict, whose class attribute mapping_type replaces the abstract property
+1684:41 call  collections.defaultdict(dict)
+    -> collections.defaultdict
+1693:59 call  self.key_field.deserialize(key, **kwargs)
+    -> marshmallow.fields.Field.deserialize
+1698:35 call  self.mapping_type()
+    -> <builtin>.dict
+    reject marshmallow.fields.Mapping.mapping_type: mapping_type is the class attribute dict of Dict, not the abstract property
+    note: self is a Dict (see 1656:37)
+1698:23 getattr  self.mapping_type
+    reject marshmallow.fields.Mapping.mapping_type: the receiver is a Dict, whose class attribute mapping_type replaces the abstract property
+1700:36 call  value.items()
+    -> <builtin>.dict.items
+    note: default json.loads in Schema.loads builds nested dicts. Schema.load -> _do_load -> _deserialize -> Field.deserialize passes a nested dict here; a Dict key field reaches 1700:36 and a value field reaches 1704:40. Client mappings remain opaque (B5).
+1704:40 call  value.items()
+    -> <builtin>.dict.items
+    note: default json.loads in Schema.loads builds nested dicts. Schema.load -> _do_load -> _deserialize -> Field.deserialize passes a nested dict here; a Dict key field reaches 1700:36 and a value field reaches 1704:40. Client mappings remain opaque (B5).
+1706:61 call  self.value_field.deserialize(val, **kwargs)
+    -> marshmallow.fields.Field.deserialize
+1716:34 call  ValidationError(errors, valid_data=result)
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.fields.Url.__init__]
+1760:14 call  super()
+    -> <builtin>.super
+1760:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Url in its MRO is String, which defines no __init__; the next is Field
+1766:26 call  isinstance(self.error_messages["invalid"], str)
+    -> <builtin>.isinstance
+1767:29 call  ValueError('"invalid" error message must be a string.')
+    -> <builtin>.ValueError
+1768:33 call  validate.URL( relative=self.relative, absolute=self.absol...
+    -> marshmallow.validate.URL.__init__
+    note: validate is the module marshmallow.validate (fields.py:19); validate.URL is the validator class (validate.py:88), not the alias fields.URL of Url
+1775:31 call  self.validators.insert(0, validator)
+    -> <builtin>.list.insert
+    note: validators is the list that _normalize_processors returns (fields.py:207, 454-458)
+
+[marshmallow.fields.Email.__init__]
+1789:14 call  super()
+    -> <builtin>.super
+1789:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Email in its MRO is String, which defines no __init__; the next is Field
+1791:26 call  isinstance(self.error_messages["invalid"], str)
+    -> <builtin>.isinstance
+1792:29 call  ValueError('"invalid" error message must be a string.')
+    -> <builtin>.ValueError
+1793:35 call  validate.Email(error=self.error_messages["invalid"])
+    -> marshmallow.validate.Email.__init__
+    reject marshmallow.fields.Email.__init__, marshmallow.fields.Field.__init__: validate is the module marshmallow.validate; validate.Email is the validator class (validate.py:247), not the field
+1794:31 call  self.validators.insert(0, validator)
+    -> <builtin>.list.insert
+
+[marshmallow.fields.IP.__init__]
+1811:14 call  super()
+    -> <builtin>.super
+1811:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after IP in the MRO of IP, IPv4 and IPv6 is Field
+
+[marshmallow.fields.IP._deserialize]
+1825:72 call  (self.DESERIALIZATION_CLASS or ipaddress.ip_address)( uti...
+    -> ipaddress.ip_address
+    -> ipaddress.IPv4Address
+    -> ipaddress.IPv6Address
+    note: DESERIALIZATION_CLASS is None for IP (fields.py:1808), so ipaddress.ip_address; ipaddress.IPv4Address for IPv4 (1840) and ipaddress.IPv6Address for IPv6 (1851)
+1826:39 call  utils.ensure_text_type(value)
+    -> marshmallow.utils.ensure_text_type
+1829:34 call  self.make_error("invalid_ip")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.IPInterface.__init__]
+1873:14 call  super()
+    -> <builtin>.super
+1873:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after IPInterface in the MRO of the interface fields is Field
+
+[marshmallow.fields.IPInterface._deserialize]
+1887:74 call  (self.DESERIALIZATION_CLASS or ipaddress.ip_interface)( u...
+    -> ipaddress.ip_interface
+    -> ipaddress.IPv4Interface
+    -> ipaddress.IPv6Interface
+    note: DESERIALIZATION_CLASS is None for IPInterface (fields.py:1870), so ipaddress.ip_interface; ipaddress.IPv4Interface for IPv4Interface (1899) and ipaddress.IPv6Interface for IPv6Interface (1907)
+1888:39 call  utils.ensure_text_type(value)
+    -> marshmallow.utils.ensure_text_type
+1891:34 call  self.make_error("invalid_ip_interface")
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Enum.__init__]
+1939:14 call  super()
+    -> <builtin>.super
+1939:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Enum in its MRO is Field
+1945:39 call  String()
+    -> marshmallow.fields.Field.__init__
+    note: String defines no __init__; the first __init__ in its MRO is Field.__init__
+1946:42 call  ", ".join( str(self.field._serialize(m, None, None)) for ...
+    -> <builtin>.str.join
+1947:20 call  str(self.field._serialize(m, None, None))
+    -> <builtin>.str
+    reject *: the argument is the str that String._serialize returns for a member name
+1947:42 call  self.field._serialize(m, None, None)
+    -> marshmallow.fields.String._serialize
+    reject *: self.field is the String made at fields.py:1945
+1952:33 call  Raw()
+    -> marshmallow.fields.Field.__init__
+    note: Raw defines no __init__; the first __init__ in its MRO is Field.__init__
+1955:57 call  _resolve_field_instance(by_value)
+    -> marshmallow.fields._resolve_field_instance
+1957:37 call  ValueError( '"by_value" must be either a bool or a subcla...
+    -> <builtin>.ValueError
+1961:42 call  ", ".join( str(self.field._serialize(m.value, None, None)...
+    -> <builtin>.str.join
+1962:20 call  str(self.field._serialize(m.value, None, None))
+    -> marshmallow.constants._Missing.__repr__
+    -> <builtin>.str
+    reject *: no _serialize of a field returns a field, schema, OrderedSet or validator; the values of the client's enum are client objects (B3)
+    note: self.field is Raw or the field that the client passes as by_value (annotation Field | type[Field]: any package field). Method._serialize returns missing when the Method field has no serialize method (fields.py:2041), directly or inside the list, tuple or dict of a List, Tuple or Dict field; str() of missing, or repr() of the container, runs _Missing.__repr__
+1962:42 call  self.field._serialize(m.value, None, None)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver is a Field
+    note: self.field is Raw (fields.py:1952) or the field of by_value (annotation Field | type[Field]), any concrete field
+1964:50 call  any(m.value is None for m in enum)
+    -> <builtin>.any
+    reject *: the argument is a generator of bools
+
+[marshmallow.fields.Enum._serialize]
+1976:37 call  self.field._serialize(val, attr, obj, **kwargs)
+    -> marshmallow.fields.Constant._serialize
+    -> marshmallow.fields.Enum._serialize
+    -> marshmallow.fields.Field._serialize
+    -> marshmallow.fields.Function._serialize
+    -> marshmallow.fields.IP._serialize
+    -> marshmallow.fields.IPInterface._serialize
+    -> marshmallow.fields.List._serialize
+    -> marshmallow.fields.Mapping._serialize
+    -> marshmallow.fields.Method._serialize
+    -> marshmallow.fields.Nested._serialize
+    -> marshmallow.fields.Number._serialize
+    -> marshmallow.fields.Pluck._serialize
+    -> marshmallow.fields.String._serialize
+    -> marshmallow.fields.TimeDelta._serialize
+    -> marshmallow.fields.Tuple._serialize
+    -> marshmallow.fields.UUID._serialize
+    -> marshmallow.fields._TemporalField._serialize
+    reject marshmallow.schema.Schema._serialize: the receiver is a Field
+    note: self.field is the String or Raw that Enum.__init__ makes, or the field of by_value (any concrete field)
+
+[marshmallow.fields.Enum._deserialize]
+1979:22 call  isinstance(value, self.enum)
+    -> <builtin>.isinstance
+1981:38 call  self.field._deserialize(value, attr, data, **kwargs)
+    -> marshmallow.fields.AwareDateTime._deserialize
+    -> marshmallow.fields.Boolean._deserialize
+    -> marshmallow.fields.Constant._deserialize
+    -> marshmallow.fields.Enum._deserialize
+    -> marshmallow.fields.Field._deserialize
+    -> marshmallow.fields.Function._deserialize
+    -> marshmallow.fields.IP._deserialize
+    -> marshmallow.fields.IPInterface._deserialize
+    -> marshmallow.fields.List._deserialize
+    -> marshmallow.fields.Mapping._deserialize
+    -> marshmallow.fields.Method._deserialize
+    -> marshmallow.fields.NaiveDateTime._deserialize
+    -> marshmallow.fields.Nested._deserialize
+    -> marshmallow.fields.Number._deserialize
+    -> marshmallow.fields.Pluck._deserialize
+    -> marshmallow.fields.String._deserialize
+    -> marshmallow.fields.TimeDelta._deserialize
+    -> marshmallow.fields.Tuple._deserialize
+    -> marshmallow.fields.UUID._deserialize
+    -> marshmallow.fields._TemporalField._deserialize
+    reject marshmallow.schema.Schema._deserialize: the receiver is a Field
+    note: self.field is the String or Raw that Enum.__init__ makes, or the field of by_value (any concrete field)
+1984:33 call  self.enum(val)
+    note: self.enum is the client's Enum subclass (annotation type[_EnumT], bound to enum.Enum, fields.py:1934); a call of a class is named by the class, here a client class: client code (B5)
+1986:38 call  self.make_error("unknown", choices=self.choices_text)
+    -> marshmallow.fields.Field.make_error
+1990:34 call  self.make_error("unknown", choices=self.choices_text)
+    -> marshmallow.fields.Field.make_error
+
+[marshmallow.fields.Method.__init__]
+2017:35 call  bool(serialize)
+    -> <builtin>.bool
+    reject *: serialize is a method name, a str or None (fields.py:2012)
+2017:59 call  bool(deserialize)
+    -> <builtin>.bool
+    reject *: deserialize is a method name, a str or None (fields.py:2013)
+2018:35 call  bool(deserialize)
+    -> <builtin>.bool
+    reject *: deserialize is a method name, a str or None
+2018:61 call  bool(serialize)
+    -> <builtin>.bool
+    reject *: serialize is a method name, a str or None
+2019:14 call  super()
+    -> <builtin>.super
+2019:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Method in its MRO is Field
+
+[marshmallow.fields.Method._bind_to_schema]
+2027:61 call  utils.callable_or_raise( getattr(parent, self.serialize_m...
+    -> marshmallow.utils.callable_or_raise
+2028:24 call  getattr(parent, self.serialize_method_name)
+    -> <builtin>.getattr
+2032:63 call  utils.callable_or_raise( getattr(parent, self.deserialize...
+    -> marshmallow.utils.callable_or_raise
+2033:24 call  getattr(parent, self.deserialize_method_name)
+    -> <builtin>.getattr
+2036:14 call  super()
+    -> <builtin>.super
+2036:32 call  super()._bind_to_schema(field_name, parent)
+    -> marshmallow.fields.Field._bind_to_schema
+    reject *: the class after Method in its MRO is Field
+
+[marshmallow.fields.Method._serialize]
+2040:42 call  self._serialize_method(obj)
+    note: _serialize_method is the bound method of the schema that the client names (fields.py:2027-2029): a method of the client's schema; the package defines no method for this role (B3): client code
+
+[marshmallow.fields.Method._deserialize]
+2045:44 call  self._deserialize_method(value)
+    note: _deserialize_method is the bound method of the schema that the client names (fields.py:2032-2034): client code (B3)
+
+[marshmallow.fields.Function.__init__]
+2087:35 call  bool(serialize)
+    -> <builtin>.bool
+    reject *: serialize is the client's callable or None (bare Callable annotation)
+2087:59 call  bool(deserialize)
+    -> <builtin>.bool
+    reject *: deserialize is the client's callable or None (bare Callable annotation)
+2088:35 call  bool(deserialize)
+    -> <builtin>.bool
+    reject *: deserialize is the client's callable or None
+2088:61 call  bool(serialize)
+    -> <builtin>.bool
+    reject *: serialize is the client's callable or None
+2089:14 call  super()
+    -> <builtin>.super
+2089:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Function in its MRO is Field
+2090:68 call  utils.callable_or_raise(serialize)
+    -> marshmallow.utils.callable_or_raise
+2091:72 call  utils.callable_or_raise(deserialize)
+    -> marshmallow.utils.callable_or_raise
+
+[marshmallow.fields.Function._serialize]
+2094:35 call  self.serialize_func(obj)
+    note: serialize_func is the callable that the client passes as serialize (fields.py:2090; bare Callable annotation): client code
+
+[marshmallow.fields.Function._deserialize]
+2098:41 call  self.deserialize_func(value)
+    note: deserialize_func is the callable that the client passes as deserialize (fields.py:2091; bare Callable annotation): client code
+
+[marshmallow.fields.Constant.__init__]
+2116:14 call  super()
+    -> <builtin>.super
+2116:25 call  super().__init__(**kwargs)
+    -> marshmallow.fields.Field.__init__
+    reject *: the class after Constant in its MRO is Field
+2122:22 call  kwargs.get("allow_none")
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: kwargs is the dict of keyword arguments of Constant.__init__
+
+[marshmallow.fields.Constant._validate_missing]
+2129:34 call  self.make_error("null")
+    -> marshmallow.fields.Field.make_error
+
+== marshmallow.orderedset
+
+[marshmallow.orderedset]
+85:19 call  OrderedSet("abracadaba")
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: lines 85-89 are the `if __name__ == "__main__":` block (orderedset.py:84); it runs when the module runs as a script (python -m marshmallow.orderedset), see marshmallow.md, judgement 1
+86:19 call  OrderedSet("simsalabim")
+    -> marshmallow.orderedset.OrderedSet.__init__
+87:10 call  print(s | t)
+    -> <builtin>.print
+    -> marshmallow.orderedset.OrderedSet.__repr__
+    reject *: the printed value is the OrderedSet that `s | t` makes
+    note: print() calls str() of the OrderedSet; OrderedSet defines no __str__, so object.__str__ calls OrderedSet.__repr__
+87:13 op  s | t
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: collections.abc.Set.__or__ passes a generator over both OrderedSets to _from_iterable, which calls OrderedSet(it); the generator runs inside OrderedSet.__init__
+88:10 call  print(s & t)
+    -> <builtin>.print
+    -> marshmallow.orderedset.OrderedSet.__repr__
+    reject *: the printed value is the OrderedSet that `s & t` makes
+88:13 op  s & t
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: collections.abc.Set.__and__ builds its generator over t (iter() of an OrderedSet) and calls OrderedSet(it) through _from_iterable
+89:10 call  print(s - t)
+    -> <builtin>.print
+    -> marshmallow.orderedset.OrderedSet.__repr__
+    reject *: the printed value is the OrderedSet that `s - t` makes
+89:13 op  s - t
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: collections.abc.Set.__sub__ builds its generator over s (iter() of an OrderedSet) and calls OrderedSet(it) through _from_iterable
+
+[marshmallow.orderedset.OrderedSet.__init__]
+32:18 op  self |= iterable
+    -> marshmallow.orderedset.OrderedSet.add
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    -> marshmallow.orderedset.OrderedSet.__contains__
+    note: collections.abc.MutableSet.__ior__ iterates iterable and calls self.add for each value. iterable is an OrderedSet at schema.py:995 and fields.py:577, 580 (iter() runs OrderedSet.__iter__), or the generator that Set.__and__, __sub__ and __or__ pass through _from_iterable: it tests `value in self` or `value not in other` on an OrderedSet (OrderedSet.__contains__) and Set.__or__'s generator iterates both OrderedSet operands (OrderedSet.__iter__)
+
+[marshmallow.orderedset.OrderedSet.__len__]
+35:19 call  len(self.map)
+    -> <builtin>.len
+    reject *: map is a dict (orderedset.py:30)
+
+[marshmallow.orderedset.OrderedSet.discard]
+48:43 call  self.map.pop(key)
+    -> <builtin>.dict.pop
+    reject marshmallow.orderedset.OrderedSet.pop: map is a dict (orderedset.py:30), not an OrderedSet
+
+[marshmallow.orderedset.OrderedSet.pop]
+67:16 truth  self
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: self is an OrderedSet; it defines no __bool__, so the truth test calls __len__
+68:27 call  KeyError("set is empty")
+    -> <builtin>.KeyError
+70:21 call  self.discard(key)
+    -> marshmallow.orderedset.OrderedSet.discard
+
+[marshmallow.orderedset.OrderedSet.__repr__]
+74:16 truth  self
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: OrderedSet defines no __bool__, so the truth test calls __len__
+76:49 call  list(self)
+    -> <builtin>.list
+    -> marshmallow.orderedset.OrderedSet.__len__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: list() asks the OrderedSet for its length (length hint, __len__), then iterates it
+
+[marshmallow.orderedset.OrderedSet.__eq__]
+79:22 call  isinstance(other, OrderedSet)
+    -> <builtin>.isinstance
+80:23 call  len(self)
+    -> <builtin>.len
+    -> marshmallow.orderedset.OrderedSet.__len__
+80:36 call  len(other)
+    -> <builtin>.len
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: other is an OrderedSet here (isinstance at orderedset.py:79)
+80:52 call  list(self)
+    -> <builtin>.list
+    -> marshmallow.orderedset.OrderedSet.__len__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+80:66 call  list(other)
+    -> <builtin>.list
+    -> marshmallow.orderedset.OrderedSet.__len__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: other is an OrderedSet here (isinstance at orderedset.py:79)
+81:19 call  set(self)
+    -> <builtin>.set
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    reject marshmallow.orderedset.OrderedSet.__eq__: set() hashes the elements of the OrderedSet, which are never OrderedSets (OrderedSet is unhashable)
+81:32 call  set(other)
+    -> <builtin>.set
+    reject *: other is not an OrderedSet here (isinstance at orderedset.py:79 failed): a client object (B5)
+
+== marshmallow.schema
+
+[marshmallow.schema]
+132:6 decorator  @classmethod
+    -> <builtin>.classmethod
+225:1 class  class Schema
+    -> marshmallow.schema.SchemaMeta.__new__
+    -> marshmallow.schema.SchemaMeta.__init__
+    note: metaclass=SchemaMeta; type.__call__ runs SchemaMeta.__new__, then SchemaMeta.__init__
+453:6 decorator  @classmethod
+    -> <builtin>.classmethod
+510:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[marshmallow.schema._get_fields]
+52:47 call  attrs.items()
+    -> <builtin>.dict.items
+    -> types.MappingProxyType.items
+    note: attrs is the class namespace dict of SchemaMeta.__new__ (schema.py:108), or, from _get_fields_by_mro (schema.py:81), the dict _declared_fields of a schema base or the mappingproxy __dict__ of another base (object at least: mro[:0:-1] keeps object)
+53:22 call  isinstance(field_value, type)
+    -> <builtin>.isinstance
+53:56 call  issubclass(field_value, ma_fields.Field)
+    -> <builtin>.issubclass
+54:28 call  TypeError( f'Field for "{field_name}" must be declared as...
+    -> <builtin>.TypeError
+59:22 call  isinstance(field_value, ma_fields.Field)
+    -> <builtin>.isinstance
+60:23 call  ret.append((field_name, field_value))
+    -> <builtin>.list.append
+
+[marshmallow.schema._get_fields_by_mro]
+73:25 call  inspect.getmro(klass)
+    -> inspect.getmro
+77:28 call  functools.reduce( operator.iadd, ( _get_fields( getattr(b...
+    -> functools.reduce
+    note: reduce calls back operator.iadd (library code, no edge); the _get_fields calls of the generator are the sites 80:24 and 81:24
+80:24 call  _get_fields( getattr(base, "_declared_fields", base.__dic...
+    -> marshmallow.schema._get_fields
+81:24 call  getattr(base, "_declared_fields", base.__dict__)
+    -> <builtin>.getattr
+
+[marshmallow.schema.SchemaMeta.__new__]
+107:25 call  attrs.get("Meta")
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: attrs is the class namespace dict (annotation dict[str, Any])
+108:33 call  _get_fields(attrs)
+    -> marshmallow.schema._get_fields
+113:22 call  super()
+    -> <builtin>.super
+113:32 call  super().__new__(mcs, name, bases, attrs)
+    -> abc.ABCMeta.__new__
+    reject marshmallow.schema.SchemaMeta.__new__: super() of SchemaMeta is ABCMeta
+114:46 call  _get_fields_by_mro(klass)
+    -> marshmallow.schema._get_fields_by_mro
+119:41 call  klass.OPTIONS_CLASS(meta)
+    -> marshmallow.schema.SchemaOpts.__init__
+    note: OPTIONS_CLASS is the class attribute of Schema, SchemaOpts (schema.py:307); a client subclass of SchemaOpts that defines no __init__ also runs SchemaOpts.__init__ here, one that defines it runs client code
+121:27 call  list(klass.opts.include.items())
+    -> <builtin>.list
+    reject *: the argument is a dict_items view
+121:52 call  klass.opts.include.items()
+    -> <builtin>.dict.items
+    note: include is the Meta option, annotated dict[str, Field] (schema.py:367); SchemaOpts defaults it to {} (schema.py:217)
+124:57 call  mcs.get_declared_fields( klass=klass, cls_fields=cls_fiel...
+    -> marshmallow.schema.SchemaMeta.get_declared_fields
+
+[marshmallow.schema.SchemaMeta.get_declared_fields]
+150:24 call  dict_cls(inherited_fields + cls_fields)
+    -> <builtin>.dict
+    note: dict_cls is annotated type[dict]; its default and the package's own call (schema.py:128) pass dict; another class that a client passes is client code
+
+[marshmallow.schema.SchemaMeta.__init__]
+153:14 call  super()
+    -> <builtin>.super
+153:25 call  super().__init__(name, bases, attrs)
+    -> abc.ABCMeta.__init__
+    reject *: super() of SchemaMeta is ABCMeta, which defines no __init__; type.__init__ runs, named through ABCMeta, the nearest base outside the package
+155:36 call  class_registry.register(name, cls)
+    -> marshmallow.class_registry.register
+    note: class_registry is the module marshmallow.class_registry (schema.py:21)
+156:39 call  cls.resolve_hooks()
+    -> marshmallow.schema.SchemaMeta.resolve_hooks
+    note: cls is the class that SchemaMeta makes; resolve_hooks is a method of its metaclass
+
+[marshmallow.schema.SchemaMeta.resolve_hooks]
+164:29 call  inspect.getmro(cls)
+    -> inspect.getmro
+166:69 call  defaultdict(list)
+    -> collections.defaultdict
+168:29 call  dir(cls)
+    -> <builtin>.dir
+192:53 call  hook_config.items()
+    -> collections.defaultdict.items
+    note: hook_config is the defaultdict that set_hook stores as __marshmallow_hook__ (decorators.py:248)
+195:38 call  hooks[tag].extend( (attr_name, many, kwargs) for many, kw...
+    -> <builtin>.list.extend
+
+[marshmallow.schema.SchemaOpts.__init__]
+206:30 call  getattr(meta, "fields", ())
+    -> <builtin>.getattr
+207:26 call  isinstance(self.fields, (list, tuple))
+    -> <builtin>.isinstance
+208:29 call  ValueError("`fields` option must be a list or tuple.")
+    -> <builtin>.ValueError
+209:31 call  getattr(meta, "exclude", ())
+    -> <builtin>.getattr
+210:26 call  isinstance(self.exclude, (list, tuple))
+    -> <builtin>.isinstance
+211:29 call  ValueError("`exclude` must be a list or tuple.")
+    -> <builtin>.ValueError
+212:34 call  getattr(meta, "dateformat", None)
+    -> <builtin>.getattr
+213:38 call  getattr(meta, "datetimeformat", None)
+    -> <builtin>.getattr
+214:34 call  getattr(meta, "timeformat", None)
+    -> <builtin>.getattr
+215:37 call  getattr(meta, "render_module", json)
+    -> <builtin>.getattr
+216:36 call  getattr(meta, "index_errors", True)
+    -> <builtin>.getattr
+217:31 call  getattr(meta, "include", {})
+    -> <builtin>.getattr
+218:33 call  getattr(meta, "load_only", ())
+    -> <builtin>.getattr
+219:33 call  getattr(meta, "dump_only", ())
+    -> <builtin>.getattr
+220:31 call  getattr(meta, "unknown", RAISE)
+    -> <builtin>.getattr
+221:32 call  getattr(meta, "register", True)
+    -> <builtin>.getattr
+222:28 call  getattr(meta, "many", False)
+    -> <builtin>.getattr
+
+[marshmallow.schema.Schema.__init__]
+420:50 call  is_collection(only)
+    -> marshmallow.utils.is_collection
+421:43 call  StringNotCollectionError('"only" should be a list of stri...
+    -> <builtin>.TypeError.__init__
+    note: StringNotCollectionError defines no __init__; the first __init__ in its MRO is that of TypeError
+422:29 call  is_collection(exclude)
+    -> marshmallow.utils.is_collection
+423:43 call  StringNotCollectionError('"exclude" should be a list of s...
+    -> <builtin>.TypeError.__init__
+    note: StringNotCollectionError defines no __init__; the first __init__ in its MRO is that of TypeError
+425:45 call  copy.deepcopy(self._declared_fields)
+    -> copy.deepcopy
+    -> marshmallow.fields.Field.__deepcopy__
+    note: _declared_fields is a dict of fields (schema.py:124-129, 315); copy.deepcopy of the dict calls back the __deepcopy__ of each field, which every field inherits from Field
+428:76 call  set( self.opts.exclude )
+    -> <builtin>.set
+    reject *: opts.exclude is a list or tuple (SchemaOpts checks it, schema.py:210)
+430:16 call  set(exclude)
+    -> <builtin>.set
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    reject marshmallow.orderedset.OrderedSet.__eq__: set() hashes the elements, field names (strs), not OrderedSets
+    note: Nested.schema passes the exclude of a bound Nested field, an OrderedSet after Schema.__apply_nested_option (fields.py:597, schema.py:980)
+431:29 call  set(load_only)
+    -> <builtin>.set
+    reject *: load_only is the client's sequence or set of field names, or the list that Nested.schema passes (fields.py:598); OrderedSet is not a value of load_only (lead, B2: the abstract AbstractSet of the annotation names a package class only where the package implements it for that role)
+431:47 call  set(self.opts.load_only)
+    -> <builtin>.set
+    reject *: opts.load_only is the Meta option, a tuple or list (annotation, schema.py:393)
+432:29 call  set(dump_only)
+    -> <builtin>.set
+    reject *: dump_only is the client's sequence or set of field names, or the list that Nested.schema passes (fields.py:599); OrderedSet is not a value of dump_only (lead, B2, as at 431:29)
+432:47 call  set(self.opts.dump_only)
+    -> <builtin>.set
+    reject *: opts.dump_only is the Meta option, a tuple or list (annotation, schema.py:395)
+437:39 call  self._normalize_nested_options()
+    -> marshmallow.schema.Schema._normalize_nested_options
+442:26 call  self._init_fields()
+    -> marshmallow.schema.Schema._init_fields
+444:24 call  messages.update(self._default_error_messages)
+    -> <builtin>.dict.update
+445:28 call  reversed(self.__class__.__mro__)
+    -> <builtin>.reversed
+    reject *: the argument is the tuple __mro__ of the schema's class
+446:28 call  messages.update(getattr(cls, "error_messages", {}))
+    -> <builtin>.dict.update
+446:36 call  getattr(cls, "error_messages", {})
+    -> <builtin>.getattr
+447:24 call  messages.update(self.error_messages or {})
+    -> <builtin>.dict.update
+
+[marshmallow.schema.Schema.from_dict]
+479:20 call  type( "GeneratedMeta", (getattr(cls, "Meta", object),), {...
+    -> <builtin>.type
+    note: the base is the Meta class of the schema (plain classes), so type() makes the class without package code
+480:38 call  getattr(cls, "Meta", object)
+    -> <builtin>.getattr
+482:20 call  type(name, (cls,), {**fields.copy(), "Meta": Meta})
+    -> <builtin>.type
+    -> marshmallow.schema.SchemaMeta.__new__
+    -> marshmallow.schema.SchemaMeta.__init__
+    note: cls is a Schema class, so the metaclass of the new class is SchemaMeta: type.__new__ passes the call to SchemaMeta.__new__, and type.__call__ then runs SchemaMeta.__init__ on the class, an instance of type
+482:49 call  fields.copy()
+    -> <builtin>.dict.copy
+    note: fields is annotated dict[str, Field] (schema.py:456)
+
+[marshmallow.schema.Schema.get_attribute]
+506:25 call  get_value(obj, attr, default)
+    -> marshmallow.utils.get_value
+    reject marshmallow.fields.Field.get_value: get_value is the function that schema.py:36 imports from marshmallow.utils
+
+[marshmallow.schema.Schema._call_and_store]
+522:32 call  getter_func(data)
+    -> marshmallow.schema.Schema._deserialize.getter
+    -> functools.partial.__call__
+    note: getter_func is the local function getter of Schema._deserialize (schema.py:670, 681) or the functools.partial do_validate of _invoke_field_validators (schema.py:1141, 1151, 1166); the partial calls the client's @validates method (the package defines no hook): client code
+524:36 call  error_store.store_error(error.messages, field_name, index...
+    -> marshmallow.error_store.ErrorStore.store_error
+527:40 truth  missing
+    reject *: missing is the right operand of `or` in a return value: Python returns it without testing its truth
+
+[marshmallow.schema.Schema._serialize]
+538:36 call  self._serialize(d, many=False)
+    -> marshmallow.schema.Schema._serialize
+    reject *: the receiver is a Schema, not a field
+539:30 call  self.dict_class()
+    -> <builtin>.dict
+    note: dict_class is the class attribute of Schema, dict (schema.py:310); a client override is client code
+540:59 call  self.dump_fields.items()
+    -> <builtin>.dict.items
+    note: dump_fields is the dict that _init_fields makes (dict_class, schema.py:1018)
+541:40 call  field_obj.serialize(attr_name, obj, accessor=self.get_att...
+    -> marshmallow.fields.Field.serialize
+    reject marshmallow.schema.Schema.get_attribute: the bound method is only passed as the accessor; Field.get_value calls it (fields.py:264)
+
+[marshmallow.schema.Schema.dump]
+564:51 call  bool(many)
+    -> <builtin>.bool
+    reject *: many is a bool (annotation bool | None; None takes the other branch)
+566:57 call  self._invoke_dump_processors( PRE_DUMP, obj, many=many, o...
+    -> marshmallow.schema.Schema._invoke_dump_processors
+572:33 call  self._serialize(processed_obj, many=many)
+    -> marshmallow.schema.Schema._serialize
+    reject *: the receiver is a Schema, not a field
+575:50 call  self._invoke_dump_processors( POST_DUMP, result, many=man...
+    -> marshmallow.schema.Schema._invoke_dump_processors
+
+[marshmallow.schema.Schema.dumps]
+594:31 call  self.dump(obj, many=many)
+    -> marshmallow.schema.Schema.dump
+595:45 call  self.opts.render_module.dumps(serialized, *args, **kwargs)
+    -> json.dumps
+    reject marshmallow.schema.Schema.dumps: the receiver is the render module, not a schema
+    reject marshmallow.types.RenderModule.dumps: RenderModule is a typing.Protocol that the package never instantiates (a stub)
+    note: render_module is the Meta option; SchemaOpts defaults it to the module json (schema.py:215; documented default, schema.py:388-390). Another module that the client sets (simplejson in the tests) is a client callback
+
+[marshmallow.schema.Schema._deserialize]
+625:46 call  is_sequence_but_not_string(data)
+    -> marshmallow.utils.is_sequence_but_not_string
+626:40 call  error_store.store_error([self.error_messages["type"]], in...
+    -> marshmallow.error_store.ErrorStore.store_error
+630:38 call  self._deserialize( d, error_store=error_store, many=False...
+    -> marshmallow.schema.Schema._deserialize
+    reject *: the receiver is a Schema, not a field
+638:44 call  enumerate(data)
+    -> <builtin>.enumerate
+    reject *: data is the client's input sequence, the result of a client pre_load hook, or the list of dicts that Pluck._deserialize builds (fields.py:716); none is an OrderedSet
+641:32 call  self.dict_class()
+    -> <builtin>.dict
+    note: dict_class is the class attribute of Schema, dict (schema.py:310); a client override is client code
+643:26 call  isinstance(data, Mapping)
+    -> <builtin>.isinstance
+644:36 call  error_store.store_error([self.error_messages["type"]], in...
+    -> marshmallow.error_store.ErrorStore.store_error
+646:50 call  is_collection(partial)
+    -> marshmallow.utils.is_collection
+647:63 call  self.load_fields.items()
+    -> <builtin>.dict.items
+    note: load_fields is the dict that _init_fields makes (dict_class, schema.py:1018)
+651:37 call  data.get(field_name, missing)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: data is a mapping (isinstance at schema.py:643), not the Context class
+    note: data is the client's mapping (abstract Mapping: its get is client code, B4, B5) or the dict that Pluck._deserialize builds (fields.py:716, 718)
+655:61 op  attr_name in partial
+    reject *: partial is the client's sequence or set of field names, or the list sub_partial of schema.py:663-666; OrderedSet is not a value of partial (lead, B2: the abstract AbstractSet of types.StrSequenceOrSet names a package class only where the package implements it for that role)
+662:37 call  len(prefix)
+    -> <builtin>.len
+    reject *: prefix is a str
+664:49 iter  partial
+    reject *: partial is the client's sequence or set of field names, or a list (schema.py:666); OrderedSet is not a value of partial (lead, B2, as at 655:61)
+664:72 call  f.startswith(prefix)
+    -> <builtin>.str.startswith
+680:45 call  self._call_and_store( getter_func=getter, data=raw_value,...
+    -> marshmallow.schema.Schema._call_and_store
+    reject marshmallow.schema.Schema._deserialize.getter: getter is only passed as getter_func; _call_and_store calls it (schema.py:522)
+689:30 call  set_value(ret_d, key, value)
+    -> marshmallow.utils.set_value
+693:72 call  self.load_fields.items()
+    -> <builtin>.dict.items
+695:31 call  set(data)
+    -> <builtin>.set
+    reject *: data is the client's mapping (its iteration is client code, B5) or the dict that Pluck._deserialize builds; its keys are not OrderedSets
+700:48 call  error_store.store_error( [self.error_messages["unknown"]]...
+    -> marshmallow.error_store.ErrorStore.store_error
+
+[marshmallow.schema.Schema._deserialize.getter]
+673:49 call  field_obj.deserialize( val, field_name, data, **d_kwargs, )
+    -> marshmallow.fields.Field.deserialize
+
+[marshmallow.schema.Schema.load]
+734:29 call  self._do_load( data, many=many, partial=partial, unknown=...
+    -> marshmallow.schema.Schema._do_load
+
+[marshmallow.schema.Schema.loads]
+770:45 call  self.opts.render_module.loads(s, **kwargs)
+    -> json.loads
+    reject marshmallow.schema.Schema.loads: the receiver is the render module, not a schema
+    reject marshmallow.types.RenderModule.loads: RenderModule is a typing.Protocol that the package never instantiates (a stub)
+    note: render_module is the Meta option, the module json by default (schema.py:215); another module that the client sets (simplejson in the tests) is a client callback
+771:25 call  self.load(data, many=many, partial=partial, unknown=unknown)
+    -> marshmallow.schema.Schema.load
+
+[marshmallow.schema.Schema._run_validator]
+788:31 call  validator_func( output, original_data, partial=partial, m...
+    note: validator_func is the bound @validates_schema method that _invoke_schema_validators gets with getattr (schema.py:1189); the package defines no such hook: client code
+792:31 call  validator_func(output, partial=partial, many=many, unknow...
+    note: validator_func is the bound @validates_schema method of the client's schema (schema.py:1189): client code
+813:36 call  error_store.store_error(err.messages, data_key, index=index)
+    -> marshmallow.error_store.ErrorStore.store_error
+
+[marshmallow.schema.Schema.validate]
+835:26 call  self._do_load(data, many=many, partial=partial, postproce...
+    -> marshmallow.schema.Schema._do_load
+837:31 call  typing.cast("dict[str, list[str]]", exc.messages)
+    -> typing.cast
+
+[marshmallow.schema.Schema._do_load]
+867:33 call  ErrorStore()
+    -> marshmallow.error_store.ErrorStore.__init__
+869:51 call  bool(many)
+    -> <builtin>.bool
+    reject *: many is a bool (annotation bool | None; None takes the other branch)
+876:62 call  self._invoke_load_processors( PRE_LOAD, data, many=many, ...
+    -> marshmallow.schema.Schema._invoke_load_processors
+885:49 call  err.normalized_messages()
+    reject marshmallow.exceptions.ValidationError.normalized_messages: Both Schema._do_load except blocks surround _invoke_load_processors, which only dispatches client hook methods. A ValidationError escaping one is a client value by global B5. The catch does not make its method a package callee.
+    note: Both Schema._do_load except blocks surround _invoke_load_processors, which only dispatches client hook methods. A ValidationError escaping one is a client value by global B5. The catch does not make its method a package callee.
+891:39 call  self._deserialize( processed_data, error_store=error_stor...
+    -> marshmallow.schema.Schema._deserialize
+    reject *: the receiver is a Schema, not a field
+899:42 call  self._invoke_field_validators( error_store=error_store, d...
+    -> marshmallow.schema.Schema._invoke_field_validators
+904:36 call  bool(error_store.errors)
+    -> <builtin>.bool
+    reject *: errors of the ErrorStore is a dict (error_store.py:15, 26)
+905:47 call  self._invoke_schema_validators( error_store=error_store, ...
+    -> marshmallow.schema.Schema._invoke_schema_validators
+915:47 call  self._invoke_schema_validators( error_store=error_store, ...
+    -> marshmallow.schema.Schema._invoke_schema_validators
+929:58 call  self._invoke_load_processors( POST_LOAD, result, many=man...
+    -> marshmallow.schema.Schema._invoke_load_processors
+938:53 call  err.normalized_messages()
+    reject marshmallow.exceptions.ValidationError.normalized_messages: Both Schema._do_load except blocks surround _invoke_load_processors, which only dispatches client hook methods. A ValidationError escaping one is a client value by global B5. The catch does not make its method a package callee.
+    note: Both Schema._do_load except blocks surround _invoke_load_processors, which only dispatches client hook methods. A ValidationError escaping one is a client value by global B5. The catch does not make its method a package callee.
+940:34 call  ValidationError(errors, data=data, valid_data=result)
+    -> marshmallow.exceptions.ValidationError.__init__
+941:30 call  self.handle_error(exc, data, many=many, partial=partial)
+    -> marshmallow.schema.Schema.handle_error
+
+[marshmallow.schema.Schema._normalize_nested_options]
+952:39 call  self.__apply_nested_option("only", self.only, "intersecti...
+    -> marshmallow.schema.Schema.__apply_nested_option
+954:39 call  self.set_class([field.split(".", 1)[0] for field in self....
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the class attribute of Schema, OrderedSet (schema.py:309); a client override is client code
+954:52 call  field.split(".", 1)
+    -> <builtin>.str.split
+954:77 iter  self.only
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: only is the client's option or the OrderedSet only of a bound Nested field that Nested.schema passes (fields.py:596)
+957:39 call  self.__apply_nested_option("exclude", self.exclude, "union")
+    -> marshmallow.schema.Schema.__apply_nested_option
+959:42 call  self.set_class( [field for field in self.exclude if "." n...
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the class attribute of Schema, OrderedSet (schema.py:309); a client override is client code
+
+[marshmallow.schema.Schema.__apply_nested_option]
+966:36 call  name.split(".", 1)
+    -> <builtin>.str.split
+966:57 iter  field_names
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: field_names is self.only (an OrderedSet possible, see 954:77) or self.exclude (a builtin set, schema.py:428)
+968:37 call  defaultdict(list)
+    -> collections.defaultdict
+970:42 call  nested_options[parent].append(nested_names)
+    -> <builtin>.list.append
+972:33 call  iter(nested_options.items())
+    -> <builtin>.iter
+    reject *: the argument is a dict_items view
+972:54 call  nested_options.items()
+    -> collections.defaultdict.items
+    note: nested_options is the defaultdict of schema.py:968
+973:41 call  self.set_class(options)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the class attribute of Schema, OrderedSet (schema.py:309); a client override is client code
+974:39 call  getattr(self.declared_fields[key], option_name, ())
+    -> <builtin>.getattr
+975:16 truth  original_options
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: A publicly reused bound Field can already hold OrderedSet.only/exclude. Field.__deepcopy__ calls copy.copy at fields244, so that state survives Schema.__init__ copying declarations at425. Thus original_options at974 can be OrderedSet and its truth test at975 calls __len__. No client internal mutation, direct private call, or failed schema is required.
+977:33 op  new_options |= self.set_class(original_options)
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    -> marshmallow.orderedset.OrderedSet.add
+    note: new_options is an OrderedSet (973:41); collections.abc.MutableSet.__ior__ iterates the right OrderedSet and calls new_options.add
+977:50 call  self.set_class(original_options)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the class attribute of Schema, OrderedSet (schema.py:309)
+979:33 op  new_options &= self.set_class(original_options)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    -> marshmallow.orderedset.OrderedSet.discard
+    note: collections.abc.MutableSet.__iand__ computes new_options - it (Set.__sub__: a generator over iter(new_options), passed to _from_iterable, which calls OrderedSet(it)), iterates the result and calls new_options.discard
+979:50 call  self.set_class(original_options)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the class attribute of Schema, OrderedSet (schema.py:309)
+980:20 call  setattr(self.declared_fields[key], option_name, new_options)
+    -> <builtin>.setattr
+
+[marshmallow.schema.Schema._init_fields]
+987:51 call  self.set_class(self.opts.fields)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is the class attribute of Schema, OrderedSet (schema.py:309); a client override is client code
+989:51 call  self.set_class(self.declared_fields.keys())
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is OrderedSet (schema.py:309)
+989:77 call  self.declared_fields.keys()
+    -> <builtin>.dict.keys
+    note: declared_fields is the deep copy of the dict _declared_fields (schema.py:425)
+991:40 call  self.set_class()
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is OrderedSet (schema.py:309)
+995:73 call  self.set_class(self.only)
+    -> marshmallow.orderedset.OrderedSet.__init__
+    note: set_class is OrderedSet (schema.py:309)
+997:28 op  invalid_fields |= field_names - available_field_names
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    -> marshmallow.orderedset.OrderedSet.add
+    note: invalid_fields is an OrderedSet (991:40); collections.abc.MutableSet.__ior__ iterates the OrderedSet on the right and calls add
+997:43 op  field_names - available_field_names
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: both operands are OrderedSets; collections.abc.Set.__sub__ builds its generator over iter(field_names) and calls OrderedSet(it) through _from_iterable
+1002:12 truth  self.exclude
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: exclude is the OrderedSet that _normalize_nested_options makes (schema.py:959) or that Nested.schema sets (fields.py:580), else the empty builtin set of schema.py:428; OrderedSet defines no __bool__
+1005:39 op  field_names - self.exclude
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: field_names is an OrderedSet and exclude an OrderedSet (see 1002:12); collections.abc.Set.__sub__ builds its generator over iter(field_names) and calls OrderedSet(it)
+1006:28 op  invalid_fields |= self.exclude - available_field_names
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    -> marshmallow.orderedset.OrderedSet.add
+    note: collections.abc.MutableSet.__ior__ iterates the OrderedSet on the right and calls invalid_fields.add
+1006:44 op  self.exclude - available_field_names
+    -> marshmallow.orderedset.OrderedSet.__init__
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: exclude is an OrderedSet here (see 1002:12); collections.abc.Set.__sub__ builds its generator over iter(exclude) and calls OrderedSet(it)
+1008:12 truth  invalid_fields
+    -> marshmallow.orderedset.OrderedSet.__len__
+    note: invalid_fields is the OrderedSet of 991:40; OrderedSet defines no __bool__
+1009:44 format  {self}
+    -> marshmallow.schema.Schema.__repr__
+    reject *: self is a Schema
+    note: format() of a schema falls back to str(), then to Schema.__repr__; a client override of __repr__ is client code
+1009:52 format  {invalid_fields}
+    -> marshmallow.orderedset.OrderedSet.__repr__
+    reject *: invalid_fields is an OrderedSet
+    note: format() of an OrderedSet falls back to str(), then to OrderedSet.__repr__
+1010:29 call  ValueError(message)
+    -> <builtin>.ValueError
+1012:38 call  self.dict_class()
+    -> <builtin>.dict
+    note: dict_class is the class attribute of Schema, dict (schema.py:310); a client override is client code
+1013:27 iter  field_names
+    -> marshmallow.orderedset.OrderedSet.__iter__
+    note: field_names is an OrderedSet (schema.py:987-1005)
+1015:29 call  self._bind_field(field_name, field_obj)
+    -> marshmallow.schema.Schema._bind_field
+1018:51 call  self.dict_class()
+    -> <builtin>.dict
+    note: dict_class is dict (schema.py:310)
+1018:70 call  self.dict_class()
+    -> <builtin>.dict
+    note: dict_class is dict (schema.py:310)
+1019:55 call  fields_dict.items()
+    -> <builtin>.dict.items
+1027:53 call  dump_fields.items()
+    -> <builtin>.dict.items
+1029:15 call  len(dump_data_keys)
+    -> <builtin>.len
+    reject *: dump_data_keys is a list
+1029:38 call  len(set(dump_data_keys))
+    -> <builtin>.len
+    reject *: the argument is a builtin set
+1029:42 call  set(dump_data_keys)
+    -> <builtin>.set
+    reject *: dump_data_keys is a list of strs
+1031:66 call  dump_data_keys.count(x)
+    -> <builtin>.list.count
+1033:29 call  ValueError( "The data_key argument for one or more fields...
+    -> <builtin>.ValueError
+1037:44 call  list(data_keys_duplicates)
+    -> <builtin>.list
+    reject *: data_keys_duplicates is a builtin set
+1039:84 call  load_fields.items()
+    -> <builtin>.dict.items
+1040:15 call  len(load_attributes)
+    -> <builtin>.len
+    reject *: load_attributes is a list
+1040:39 call  len(set(load_attributes))
+    -> <builtin>.len
+    reject *: the argument is a builtin set
+1040:43 call  set(load_attributes)
+    -> <builtin>.set
+    reject *: load_attributes is a list of strs
+1042:68 call  load_attributes.count(x)
+    -> <builtin>.list.count
+1044:29 call  ValueError( "The attribute argument for one or more field...
+    -> <builtin>.ValueError
+1048:45 call  list(attributes_duplicates)
+    -> <builtin>.list
+    reject *: attributes_duplicates is a builtin set
+
+[marshmallow.schema.Schema._bind_field]
+1073:34 call  field_obj._bind_to_schema(field_name, self)
+    -> marshmallow.fields.Field._bind_to_schema
+    -> marshmallow.fields.List._bind_to_schema
+    -> marshmallow.fields.Mapping._bind_to_schema
+    -> marshmallow.fields.Method._bind_to_schema
+    -> marshmallow.fields.Tuple._bind_to_schema
+    -> marshmallow.fields._TemporalField._bind_to_schema
+    note: field_obj is any declared field of the schema
+1074:27 call  self.on_bind_field(field_name, field_obj)
+    -> marshmallow.schema.Schema.on_bind_field
+
+[marshmallow.schema.Schema._invoke_dump_processors]
+1082:39 call  self._invoke_processors( tag, pass_collection=False, data...
+    -> marshmallow.schema.Schema._invoke_processors
+1089:39 call  self._invoke_processors( tag, pass_collection=True, data=...
+    -> marshmallow.schema.Schema._invoke_processors
+
+[marshmallow.schema.Schema._invoke_load_processors]
+1105:39 call  self._invoke_processors( tag, pass_collection=True, data=...
+    -> marshmallow.schema.Schema._invoke_processors
+1114:39 call  self._invoke_processors( tag, pass_collection=False, data...
+    -> marshmallow.schema.Schema._invoke_processors
+
+[marshmallow.schema.Schema._invoke_field_validators]
+1126:32 call  getattr(self, attr_name)
+    -> <builtin>.getattr
+1136:37 call  ValueError(f'"{field_name}" field does not exist.')
+    -> <builtin>.ValueError
+1141:48 call  functools.partial(validator, data_key=data_key)
+    -> functools.partial
+    note: functools.partial only stores the client's @validates method; _call_and_store calls the partial (schema.py:522)
+1144:47 call  enumerate(data)
+    -> <builtin>.enumerate
+    reject *: data is the list of dicts that _deserialize returns (schema.py:629)
+1150:67 call  self._call_and_store( getter_func=do_validate, data=value...
+    -> marshmallow.schema.Schema._call_and_store
+1158:41 call  item.pop(field_name, None)
+    -> <builtin>.dict.pop
+    reject marshmallow.orderedset.OrderedSet.pop: item is a dict that _deserialize makes (dict_class, schema.py:641), not an OrderedSet
+1165:63 call  self._call_and_store( getter_func=do_validate, data=value...
+    -> marshmallow.schema.Schema._call_and_store
+1172:37 call  data.pop(field_name, None)
+    -> <builtin>.dict.pop
+    reject marshmallow.orderedset.OrderedSet.pop: data is the dict that _deserialize makes (schema.py:641), not an OrderedSet
+
+[marshmallow.schema.Schema._invoke_schema_validators]
+1189:32 call  getattr(self, attr_name)
+    -> <builtin>.getattr
+1192:49 call  validator_kwargs.get("pass_original", False)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: validator_kwargs is the dict of keyword arguments that set_hook stores (decorators.py:252)
+1195:51 call  enumerate( zip(data, original_data, strict=True) )
+    -> <builtin>.enumerate
+    reject *: the argument is a zip object
+1196:24 call  zip(data, original_data, strict=True)
+    -> <builtin>.zip
+    reject *: data is the list that _deserialize returns; original_data is the client's input (B5)
+1198:40 call  self._run_validator( validator, item, original_data=orig,...
+    -> marshmallow.schema.Schema._run_validator
+1210:36 call  self._run_validator( validator, data, original_data=origi...
+    -> marshmallow.schema.Schema._run_validator
+
+[marshmallow.schema.Schema._invoke_processors]
+1235:32 call  getattr(self, attr_name)
+    -> <builtin>.getattr
+1236:49 call  processor_kwargs.get("pass_original", False)
+    -> <builtin>.dict.get
+    reject marshmallow.experimental.context.Context.get: processor_kwargs is the dict of keyword arguments that set_hook stores (decorators.py:252)
+1241:34 call  processor(item, original, many=many, **kwargs)
+    note: processor is the bound pre_dump, post_dump, pre_load or post_load method of the client's schema (getattr at schema.py:1235); the package defines no hook: client code
+1242:58 call  zip_longest(data, original_data)
+    -> itertools.zip_longest
+1245:38 call  processor(item, many=many, **kwargs)
+    note: processor is the bound hook method of the client's schema (schema.py:1235): client code
+1247:33 call  processor(data, original_data, many=many, **kwargs)
+    note: processor is the bound hook method of the client's schema (schema.py:1235): client code
+1249:33 call  processor(data, many=many, **kwargs)
+    note: processor is the bound hook method of the client's schema (schema.py:1235): client code
+
+== marshmallow.types
+
+[marshmallow.types]
+12:19 call  typing.TypeVar("T")
+    -> typing.TypeVar
+
+== marshmallow.utils
+
+[marshmallow.utils.is_generator]
+15:39 call  inspect.isgeneratorfunction(obj)
+    -> inspect.isgeneratorfunction
+15:67 call  inspect.isgenerator(obj)
+    -> inspect.isgenerator
+
+[marshmallow.utils.is_iterable_but_not_string]
+20:20 call  hasattr(obj, "__iter__")
+    -> <builtin>.hasattr
+20:53 call  hasattr(obj, "strip")
+    -> <builtin>.hasattr
+20:84 call  is_generator(obj)
+    -> marshmallow.utils.is_generator
+
+[marshmallow.utils.is_sequence_but_not_string]
+25:22 call  isinstance(obj, Sequence)
+    -> <builtin>.isinstance
+25:56 call  isinstance(obj, (str, bytes))
+    -> <builtin>.isinstance
+
+[marshmallow.utils.is_collection]
+30:38 call  is_iterable_but_not_string(obj)
+    -> marshmallow.utils.is_iterable_but_not_string
+30:62 call  isinstance(obj, Mapping)
+    -> <builtin>.isinstance
+
+[marshmallow.utils.is_aware]
+36:66 call  datetime.tzinfo.utcoffset(datetime)
+    -> datetime.timezone.utcoffset
+    note: datetime is annotated dt.datetime; its tzinfo is the abstract dt.tzinfo. The aware datetimes that the package makes have a datetime.timezone: dt.datetime.fromisoformat and email.utils.parsedate_to_datetime with an offset, dt.datetime.strptime with %z (fields.py:1326-1328, 1342), which _TemporalField._deserialize returns to NaiveDateTime._deserialize and AwareDateTime._deserialize (fields.py:1371-1372, 1408-1409). The tzinfo of a client's datetime is client code (B5)
+
+[marshmallow.utils.from_timestamp]
+42:25 call  ValueError("Not a valid POSIX timestamp")
+    -> <builtin>.ValueError
+43:18 call  float(value)
+    -> <builtin>.float
+45:25 call  ValueError("Not a valid POSIX timestamp")
+    -> <builtin>.ValueError
+50:41 call  dt.datetime.fromtimestamp(value, tz=dt.UTC)
+    -> datetime.datetime.fromtimestamp
+50:67 call  dt.datetime.fromtimestamp(value, tz=dt.UTC).replace(tzinf...
+    -> datetime.datetime.replace
+52:25 call  ValueError("Timestamp is too large")
+    -> <builtin>.ValueError
+54:25 call  ValueError("Error converting value to datetime")
+    -> <builtin>.ValueError
+
+[marshmallow.utils.from_timestamp_ms]
+59:25 call  ValueError("Not a valid POSIX timestamp")
+    -> <builtin>.ValueError
+60:18 call  float(value)
+    -> <builtin>.float
+61:26 call  from_timestamp(value / 1000)
+    -> marshmallow.utils.from_timestamp
+
+[marshmallow.utils.timestamp]
+67:20 call  is_aware(value)
+    -> marshmallow.utils.is_aware
+69:30 call  value.replace(tzinfo=dt.UTC)
+    -> datetime.datetime.replace
+70:27 call  value.timestamp()
+    -> datetime.datetime.timestamp
+    reject marshmallow.utils.timestamp: value is a datetime (annotation dt.datetime), and timestamp is its method
+
+[marshmallow.utils.timestamp_ms]
+74:21 call  timestamp(value)
+    -> marshmallow.utils.timestamp
+
+[marshmallow.utils.ensure_text_type]
+78:18 call  isinstance(val, bytes)
+    -> <builtin>.isinstance
+79:25 call  val.decode("utf-8")
+    -> <builtin>.bytes.decode
+80:15 call  str(val)
+    -> <builtin>.str
+    reject *: val is annotated str | bytes; String._serialize and the IP fields pass the client's value (B3), never a package object
+
+[marshmallow.utils.get_value]
+109:27 call  key.split(".")
+    -> <builtin>.str.split
+110:37 call  _get_value_for_key(obj, k, default)
+    -> marshmallow.utils._get_value_for_key
+112:33 call  _get_value_for_key(obj, key, default)
+    -> marshmallow.utils._get_value_for_key
+
+[marshmallow.utils._get_value_for_key]
+117:19 call  hasattr(obj, "__getitem__")
+    -> <builtin>.hasattr
+118:23 call  getattr(obj, key, default)
+    -> <builtin>.getattr
+123:23 call  getattr(obj, key, default)
+    -> <builtin>.getattr
+
+[marshmallow.utils.set_value]
+138:31 call  key.split(".", 1)
+    -> <builtin>.str.split
+139:32 call  dct.setdefault(head, {})
+    -> <builtin>.dict.setdefault
+    note: dct is annotated dict; Schema._deserialize passes the dict it makes (schema.py:641, 689)
+140:26 call  isinstance(target, dict)
+    -> <builtin>.isinstance
+141:29 call  ValueError( f"Cannot set {key} in {head} due to existing ...
+    -> <builtin>.ValueError
+144:18 call  set_value(target, rest, value)
+    -> marshmallow.utils.set_value
+
+[marshmallow.utils.callable_or_raise]
+151:20 call  callable(obj)
+    -> <builtin>.callable
+152:24 call  TypeError(f"Object {obj!r} is not callable.")
+    -> <builtin>.TypeError
+152:34 format  {obj!r}
+    reject *: obj is the client's serialize or deserialize callable (Function) or the attribute of the schema that a Method field names (fields.py:2028, 2033); a non-callable package attribute named as a method (the dict fields, the OrderedSet exclude) is a value that the package never produces for that role (B3)
+
+== marshmallow.validate
+
+[marshmallow.validate]
+15:20 call  typing.TypeVar("_T")
+    -> typing.TypeVar
+41:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+188:27 call  RegexMemoizer()
+    -> marshmallow.validate.URL.RegexMemoizer.__init__
+254:28 call  re.compile( r"(^[-!#$%&'*+/=?^`{}|~\w]+(\.[-!#$%&'*+/=?^`...
+    -> re.compile
+262:30 call  re.compile( # domain r"(?:[A-Z0-9" + _UNICODE_LETTERS + r...
+    -> re.compile
+380:25 call  typing.TypeVar("_SizedT", bound=typing.Sized)
+    -> typing.TypeVar
+511:6 decorator  @typing.overload
+    -> typing.overload
+514:6 decorator  @typing.overload
+    -> typing.overload
+
+[marshmallow.validate.Validator.__repr__]
+30:31 call  self._repr_args()
+    -> marshmallow.validate.And._repr_args
+    -> marshmallow.validate.URL._repr_args
+    -> marshmallow.validate.Validator._repr_args
+    -> marshmallow.validate.Range._repr_args
+    -> marshmallow.validate.Length._repr_args
+    -> marshmallow.validate.Equal._repr_args
+    -> marshmallow.validate.Regexp._repr_args
+    -> marshmallow.validate.Predicate._repr_args
+    -> marshmallow.validate.NoneOf._repr_args
+    -> marshmallow.validate.OneOf._repr_args
+    note: self is any concrete validator (Validator is abstract): Email uses Validator._repr_args, ContainsNoneOf NoneOf's, ContainsOnly OneOf's
+
+[marshmallow.validate.And.__init__]
+66:32 call  tuple(validators)
+    -> <builtin>.tuple
+    reject *: validators is the tuple of positional arguments
+
+[marshmallow.validate.And._repr_args]
+69:29 format  {self.validators!r}
+    -> marshmallow.validate.Validator.__repr__
+    reject *: validators holds validators: client callables and the validators of validate.py, never missing, a field, a schema or an OrderedSet
+    note: repr() of the tuple calls repr() of each validator; the package puts validators of validate.py in an And (Field._validate_all, fields.py:274, with the URL and Email validators of fields.py:1768, 1793), and the docstring example passes validate.Range (validate.py:58)
+
+[marshmallow.validate.And.__call__]
+76:26 call  validator(value)
+    -> marshmallow.validate.And.__call__
+    -> marshmallow.validate.URL.__call__
+    -> marshmallow.validate.Email.__call__
+    -> marshmallow.validate.Range.__call__
+    -> marshmallow.validate.Length.__call__
+    -> marshmallow.validate.Equal.__call__
+    -> marshmallow.validate.Regexp.__call__
+    -> marshmallow.validate.Predicate.__call__
+    -> marshmallow.validate.NoneOf.__call__
+    -> marshmallow.validate.OneOf.__call__
+    -> marshmallow.validate.ContainsOnly.__call__
+    -> marshmallow.validate.ContainsNoneOf.__call__
+    exclude marshmallow.validate.Validator.__call__: the abstract stub; Validator cannot be instantiated
+    exclude marshmallow.validate.URL.RegexMemoizer.__call__: takes keyword-only arguments and returns a pattern; the package never uses it as a validator (B3)
+    note: validators are the field's validators (Field._validate_all, fields.py:274): the client's callables, the URL and Email validators that fields.Url and fields.Email insert (fields.py:1775, 1794), and the validators of validate.py that the client passes as validate= (documented, fields.py:128; the And docstring passes validate.Range, validate.py:58). types.Validator is a bare Callable, so no other package function is in scope
+78:30 call  kwargs.update(err.kwargs)
+    -> <builtin>.dict.update
+79:30 call  isinstance(err.messages, dict)
+    -> <builtin>.isinstance
+80:34 call  errors.append(err.messages)
+    -> <builtin>.list.append
+82:34 call  errors.extend(err.messages)
+    -> <builtin>.list.extend
+84:34 call  ValidationError(errors, **kwargs)
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.validate.URL.RegexMemoizer._regex_generator]
+134:41 call  hostname_variants.append( r"(?:[A-Z0-9" + _UNICODE_LETTER...
+    -> <builtin>.list.append
+144:36 call  "".join( ( # scheme (e.g. 'https://', 'ftp://', etc) # th...
+    -> <builtin>.str.join
+155:29 call  "|".join(hostname_variants)
+    -> <builtin>.str.join
+175:30 call  re.compile("".join(parts), re.IGNORECASE)
+    -> re.compile
+175:38 call  "".join(parts)
+    -> <builtin>.str.join
+
+[marshmallow.validate.URL.RegexMemoizer.__call__]
+182:60 call  self._regex_generator( relative=relative, absolute=absolu...
+    -> marshmallow.validate.URL.RegexMemoizer._regex_generator
+
+[marshmallow.validate.URL.__init__]
+203:29 call  ValueError( "URL validation cannot set both relative and ...
+    -> <builtin>.ValueError
+209:32 call  s.lower()
+    -> <builtin>.str.lower
+209:44 iter  schemes
+    reject *: schemes is the client's sequence or set of schemes, which fields.Url passes through (fields.py:1771); OrderedSet is not a value of schemes (lead, B2: the abstract AbstractSet of types.StrSequenceOrSet names a package class only where the package implements it for that role)
+209:56 truth  schemes
+    reject *: schemes is the client's sequence or set of schemes, or None; OrderedSet is not a value of schemes (lead, B2, as at 209:44)
+
+[marshmallow.validate.URL._format_error]
+216:33 call  self.error.format(input=value)
+    -> <builtin>.str.format
+    reject *: value is the str that the URL validator checks (annotation str); no package object is formatted
+    note: error is the str message of URL.__init__ (validate.py:208)
+
+[marshmallow.validate.URL.__call__]
+219:37 call  self._format_error(value)
+    -> marshmallow.validate.URL._format_error
+    reject *: the receiver is a URL validator; URL has no package subclass
+221:34 call  ValidationError(message)
+    -> marshmallow.exceptions.ValidationError.__init__
+226:33 call  value.split("://", maxsplit=1)
+    -> <builtin>.str.split
+226:61 call  value.split("://", maxsplit=1)[0].lower()
+    -> <builtin>.str.lower
+228:38 call  ValidationError(message)
+    -> marshmallow.exceptions.ValidationError.__init__
+230:28 call  self._regex( relative=self.relative, absolute=self.absolu...
+    -> marshmallow.validate.URL.RegexMemoizer.__call__
+    note: _regex is the class attribute RegexMemoizer() of URL (validate.py:188)
+236:44 call  value.lower()
+    -> <builtin>.str.lower
+236:57 call  value.lower().startswith("file:///")
+    -> <builtin>.str.startswith
+237:35 call  regex.search("file://localhost/" + value[8:])
+    -> re.Pattern.search
+239:35 call  regex.search(value)
+    -> re.Pattern.search
+242:34 call  ValidationError(message)
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.validate.Email._format_error]
+283:33 call  self.error.format(input=value)
+    -> <builtin>.str.format
+    reject *: value is the str that the Email validator checks (annotation str)
+    note: error is the str message of Email.__init__ (validate.py:280)
+
+[marshmallow.validate.Email.__call__]
+286:37 call  self._format_error(value)
+    -> marshmallow.validate.Email._format_error
+    reject *: the receiver is an Email validator; Email has no package subclass
+289:34 call  ValidationError(message)
+    -> marshmallow.exceptions.ValidationError.__init__
+291:46 call  value.rsplit("@", 1)
+    -> <builtin>.str.rsplit
+293:37 call  self.USER_REGEX.match(user_part)
+    -> re.Pattern.match
+294:34 call  ValidationError(message)
+    -> marshmallow.exceptions.ValidationError.__init__
+297:43 call  self.DOMAIN_REGEX.match(domain_part)
+    -> re.Pattern.match
+298:38 call  ValidationError(message)
+    -> marshmallow.exceptions.ValidationError.__init__
+
+[marshmallow.validate.Range.__init__]
+347:51 call  self.message_min.format( min_op=self.message_gte if self....
+    -> <builtin>.str.format
+    reject *: min_op is one of the str class attributes message_gte and message_gt
+    note: message_min is the str class attribute of Range (validate.py:322)
+350:51 call  self.message_max.format( max_op=self.message_lte if self....
+    -> <builtin>.str.format
+    reject *: max_op is one of the str class attributes message_lte and message_lt
+    note: message_max is the str class attribute of Range (validate.py:323)
+353:51 call  self.message_all.format( min_op=self.message_gte if self....
+    -> <builtin>.str.format
+    reject *: min_op and max_op are str class attributes
+    note: message_all is the str class attribute of Range (validate.py:324)
+
+[marshmallow.validate.Range._format_error]
+362:46 call  (self.error or message).format(input=value, min=self.min,...
+    -> <builtin>.str.format
+    reject *: value, min and max are client values (annotation Any, B3)
+    note: the template is the client's str error or one of the str messages of Range.__init__ (validate.py:347-356)
+
+[marshmallow.validate.Range.__call__]
+369:34 call  ValidationError(self._format_error(value, message))
+    -> marshmallow.exceptions.ValidationError.__init__
+369:53 call  self._format_error(value, message)
+    -> marshmallow.validate.Range._format_error
+    reject *: the receiver is a Range validator; Range has no package subclass
+375:34 call  ValidationError(self._format_error(value, message))
+    -> marshmallow.exceptions.ValidationError.__init__
+375:53 call  self._format_error(value, message)
+    -> marshmallow.validate.Range._format_error
+    reject *: the receiver is a Range validator; Range has no package subclass
+
+[marshmallow.validate.Length.__init__]
+411:37 call  any([min, max])
+    -> <builtin>.any
+    reject *: the list holds ints or None (annotation int | None)
+412:29 call  ValueError( "The `equal` parameter was provided, maximum ...
+    -> <builtin>.ValueError
+
+[marshmallow.validate.Length._format_error]
+426:46 call  (self.error or message).format( input=value, min=self.min...
+    -> <builtin>.str.format
+    reject *: value is a deserialized builtin container or an opaque client value (B3/B5); min, max and equal are ints or None
+    reject marshmallow.constants._Missing.__repr__: The only tests supplying missing to Length do so as the result of the client Function deserialize callback (test_deserialization.py:1020-1025). B5 keeps that result opaque. No direct Length(missing), Constant(missing), or documented direct role was found. _Missing only defines __len__; structural Sized compatibility alone does not admit a package value under B2. The private _format_error receives only Length.__call__ values and cannot reintroduce the excluded provenance.
+    note: The only tests supplying missing to Length do so as the result of the client Function deserialize callback (test_deserialization.py:1020-1025). B5 keeps that result opaque. No direct Length(missing), Constant(missing), or documented direct role was found. _Missing only defines __len__; structural Sized compatibility alone does not admit a package value under B2. The private _format_error receives only Length.__call__ values and cannot reintroduce the excluded provenance.
+
+[marshmallow.validate.Length.__call__]
+431:21 call  len(value)
+    -> <builtin>.len
+    reject marshmallow.orderedset.OrderedSet.__len__: no field deserializes to an OrderedSet, and OrderedSet is not a value that the package produces for a validator (B3)
+    reject marshmallow.constants._Missing.__len__: The only tests supplying missing to Length do so as the result of the client Function deserialize callback (test_deserialization.py:1020-1025). B5 keeps that result opaque. No direct Length(missing), Constant(missing), or documented direct role was found. _Missing only defines __len__; structural Sized compatibility alone does not admit a package value under B2. The private _format_error receives only Length.__call__ values and cannot reintroduce the excluded provenance.
+    note: The only tests supplying missing to Length do so as the result of the client Function deserialize callback (test_deserialization.py:1020-1025). B5 keeps that result opaque. No direct Length(missing), Constant(missing), or documented direct role was found. _Missing only defines __len__; structural Sized compatibility alone does not admit a package value under B2. The private _format_error receives only Length.__call__ values and cannot reintroduce the excluded provenance.
+435:38 call  ValidationError(self._format_error(value, self.message_eq...
+    -> marshmallow.exceptions.ValidationError.__init__
+435:57 call  self._format_error(value, self.message_equal)
+    -> marshmallow.validate.Length._format_error
+    reject *: the receiver is a Length validator; Length has no package subclass
+440:34 call  ValidationError(self._format_error(value, message))
+    -> marshmallow.exceptions.ValidationError.__init__
+440:53 call  self._format_error(value, message)
+    -> marshmallow.validate.Length._format_error
+    reject *: the receiver is a Length validator; Length has no package subclass
+444:34 call  ValidationError(self._format_error(value, message))
+    -> marshmallow.exceptions.ValidationError.__init__
+444:53 call  self._format_error(value, message)
+    -> marshmallow.validate.Length._format_error
+    reject *: the receiver is a Length validator; Length has no package subclass
+
+[marshmallow.validate.Equal._format_error]
+468:33 call  self.error.format(input=value, other=self.comparable)
+    -> <builtin>.str.format
+    reject *: value and comparable are client values (B3)
+    note: error is the str message of Equal.__init__ (validate.py:462)
+
+[marshmallow.validate.Equal.__call__]
+472:34 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+472:53 call  self._format_error(value)
+    -> marshmallow.validate.Equal._format_error
+    reject *: the receiver is an Equal validator; Equal has no package subclass
+
+[marshmallow.validate.Regexp.__init__]
+501:23 call  re.compile(regex, flags)
+    -> re.compile
+501:51 call  isinstance(regex, (str, bytes))
+    -> <builtin>.isinstance
+
+[marshmallow.validate.Regexp._format_error]
+509:33 call  self.error.format(input=value, regex=self.regex.pattern)
+    -> <builtin>.str.format
+    reject *: value is a str or bytes (annotation); the pattern is a str or bytes
+    note: error is the str message of Regexp.__init__ (validate.py:503)
+
+[marshmallow.validate.Regexp.__call__]
+518:28 call  self.regex.match(value)
+    -> re.Pattern.match
+    note: regex is the re.Pattern that re.compile makes or that the client passes (annotation re.Pattern, validate.py:495)
+519:34 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+519:53 call  self._format_error(value)
+    -> marshmallow.validate.Regexp._format_error
+    reject *: the receiver is a Regexp validator; Regexp has no package subclass
+
+[marshmallow.validate.Predicate._format_error]
+547:33 call  self.error.format(input=value, method=self.method)
+    -> <builtin>.str.format
+    reject *: value is the client's value (B3); method is a str
+    note: error is the str message of Predicate.__init__ (validate.py:540)
+
+[marshmallow.validate.Predicate.__call__]
+550:25 call  getattr(value, self.method)
+    -> <builtin>.getattr
+552:22 call  method(**self.kwargs)
+    note: method is the method named self.method of the client's value (getattr at validate.py:550): client code (B5)
+553:34 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+553:53 call  self._format_error(value)
+    -> marshmallow.validate.Predicate._format_error
+    reject *: the receiver is a Predicate validator; Predicate has no package subclass
+
+[marshmallow.validate.NoneOf.__init__]
+570:37 call  ", ".join(str(each) for each in self.iterable)
+    -> <builtin>.str.join
+570:41 call  str(each)
+    -> <builtin>.str
+    reject *: each is an element of the client's iterable (abstract Iterable, B3)
+
+[marshmallow.validate.NoneOf._format_error]
+577:33 call  self.error.format(input=value, values=self.values_text)
+    -> <builtin>.str.format
+    reject *: value is the client's value or the str that ContainsNoneOf._format_error passes; values_text is a str
+    note: error is the str message of NoneOf.__init__ (validate.py:571)
+
+[marshmallow.validate.NoneOf.__call__]
+582:38 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+582:57 call  self._format_error(value)
+    -> marshmallow.validate.NoneOf._format_error
+    reject *: the receiver is a NoneOf; ContainsNoneOf overrides __call__, so NoneOf.__call__ never runs on it
+
+[marshmallow.validate.OneOf.__init__]
+608:38 call  ", ".join(str(choice) for choice in self.choices)
+    -> <builtin>.str.join
+608:42 call  str(choice)
+    -> <builtin>.str
+    reject *: choice is an element of the client's choices (abstract Iterable, B3)
+610:37 call  ", ".join(str(label) for label in self.labels)
+    -> <builtin>.str.join
+610:41 call  str(label)
+    -> <builtin>.str
+    reject *: label is an element of the client's labels (Iterable[str])
+
+[marshmallow.validate.OneOf._format_error]
+617:33 call  self.error.format( input=value, choices=self.choices_text...
+    -> <builtin>.str.format
+    reject *: value is the client's value or the str that ContainsOnly._format_error passes; choices_text and labels_text are strs
+    note: error is the str message of OneOf.__init__ (validate.py:611)
+
+[marshmallow.validate.OneOf.__call__]
+624:38 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+624:57 call  self._format_error(value)
+    -> marshmallow.validate.OneOf._format_error
+    reject *: the receiver is a OneOf; ContainsOnly overrides __call__, so OneOf.__call__ never runs on it
+626:34 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+626:53 call  self._format_error(value)
+    -> marshmallow.validate.OneOf._format_error
+    reject *: the receiver is a OneOf; ContainsOnly overrides __call__
+
+[marshmallow.validate.OneOf.options]
+643:46 call  callable(valuegetter)
+    -> <builtin>.callable
+643:75 call  attrgetter(valuegetter)
+    -> operator.attrgetter
+644:24 call  tuple(self.choices)
+    -> <builtin>.tuple
+    reject *: choices is the client's iterable (abstract Iterable, B3)
+645:23 call  tuple(self.labels)
+    -> <builtin>.tuple
+    reject *: labels is the client's iterable of strs, or the empty list of validate.py:609
+647:37 call  len(choices)
+    -> <builtin>.len
+    reject *: choices is a tuple
+647:61 call  max( 0, len(choices) - len(labels) )
+    -> <builtin>.max
+    reject *: the arguments are ints
+648:19 call  len(choices)
+    -> <builtin>.len
+    reject *: choices is a tuple
+648:34 call  len(labels)
+    -> <builtin>.len
+    reject *: labels is a tuple
+652:25 call  valuegetter(choice)
+    -> <builtin>.str
+    -> operator.attrgetter.__call__
+    note: valuegetter is the default str (validate.py:632), the operator.attrgetter that options makes from a str (validate.py:643), or the client's callable (client code)
+653:37 call  zip(choices, padded_labels, strict=True)
+    -> <builtin>.zip
+    reject *: choices and padded_labels are tuples
+
+[marshmallow.validate.ContainsOnly._format_error]
+676:31 call  ", ".join(str(val) for val in value)
+    -> <builtin>.str.join
+676:35 call  str(val)
+    -> <builtin>.str
+    reject *: val is an element of the client's sequence (B3)
+677:21 call  super()
+    -> <builtin>.super
+677:37 call  super()._format_error(value_text)
+    -> marshmallow.validate.OneOf._format_error
+    reject *: the class after ContainsOnly in its MRO is OneOf
+
+[marshmallow.validate.ContainsOnly.__call__]
+683:38 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+683:57 call  self._format_error(value)
+    -> marshmallow.validate.ContainsOnly._format_error
+    reject *: the receiver is a ContainsOnly; it has no package subclass
+
+[marshmallow.validate.ContainsNoneOf._format_error]
+701:31 call  ", ".join(str(val) for val in value)
+    -> <builtin>.str.join
+701:35 call  str(val)
+    -> <builtin>.str
+    reject *: val is an element of the client's sequence (B3)
+702:21 call  super()
+    -> <builtin>.super
+702:37 call  super()._format_error(value_text)
+    -> marshmallow.validate.NoneOf._format_error
+    reject *: the class after ContainsNoneOf in its MRO is NoneOf
+
+[marshmallow.validate.ContainsNoneOf.__call__]
+707:38 call  ValidationError(self._format_error(value))
+    -> marshmallow.exceptions.ValidationError.__init__
+707:57 call  self._format_error(value)
+    -> marshmallow.validate.ContainsNoneOf._format_error
+    reject *: the receiver is a ContainsNoneOf; it has no package subclass

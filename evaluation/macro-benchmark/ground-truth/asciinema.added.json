@@ -1,0 +1,1596 @@
+{
+  "edges": {
+    "asciinema.__main__": {
+      "asciinema.__main__.main": [
+        "asciinema.__main__ 115:9 call  main()"
+      ]
+    },
+    "asciinema.__main__.main": {
+      "<builtin>.hasattr": [
+        "asciinema.__main__ 105:15 call  hasattr(args, 'cmd')"
+      ],
+      "<builtin>.print": [
+        "asciinema.__main__ 30:14 call  print(\"asciinema needs an ASCII or UTF-8 character encodi..."
+      ],
+      "<builtin>.str": [
+        "asciinema.__main__ 36:29 call  str(e)"
+      ],
+      "<builtin>.str.upper": [
+        "asciinema.__main__ 29:48 call  locale.nl_langinfo(locale.CODESET).upper()"
+      ],
+      "argparse.ArgumentParser": [
+        "asciinema.__main__ 40:37 call  argparse.ArgumentParser( description=\"Record and share yo..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "asciinema.__main__ 62:24 call  parser.add_argument('--version', action='version', versio...",
+        "asciinema.__main__ 68:28 call  parser_rec.add_argument('--stdin', help='enable stdin rec...",
+        "asciinema.__main__ 69:28 call  parser_rec.add_argument('--append', help='append to exist...",
+        "asciinema.__main__ 70:28 call  parser_rec.add_argument('--raw', help='save only raw stdo...",
+        "asciinema.__main__ 71:28 call  parser_rec.add_argument('--overwrite', help='overwrite th...",
+        "asciinema.__main__ 72:28 call  parser_rec.add_argument('-c', '--command', help='command ...",
+        "asciinema.__main__ 73:28 call  parser_rec.add_argument('-e', '--env', help='list of envi...",
+        "asciinema.__main__ 74:28 call  parser_rec.add_argument('-t', '--title', help='title of t...",
+        "asciinema.__main__ 75:28 call  parser_rec.add_argument('-i', '--idle-time-limit', help='...",
+        "asciinema.__main__ 76:28 call  parser_rec.add_argument('-y', '--yes', help='answer \"yes\"...",
+        "asciinema.__main__ 77:28 call  parser_rec.add_argument('-q', '--quiet', help='be quiet, ...",
+        "asciinema.__main__ 78:28 call  parser_rec.add_argument('filename', nargs='?', default=''...",
+        "asciinema.__main__ 83:29 call  parser_play.add_argument('-i', '--idle-time-limit', help=...",
+        "asciinema.__main__ 84:29 call  parser_play.add_argument('-s', '--speed', help='playback ...",
+        "asciinema.__main__ 85:29 call  parser_play.add_argument('filename', help='local path, ht...",
+        "asciinema.__main__ 90:28 call  parser_cat.add_argument('filename', help='local path, htt...",
+        "asciinema.__main__ 95:31 call  parser_upload.add_argument('filename', help='filename or ..."
+      ],
+      "argparse.ArgumentParser.add_subparsers": [
+        "asciinema.__main__ 64:39 call  parser.add_subparsers()"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "asciinema.__main__ 103:29 call  parser.parse_args()"
+      ],
+      "argparse.ArgumentParser.print_help": [
+        "asciinema.__main__ 110:26 call  parser.print_help()"
+      ],
+      "argparse.ArgumentParser.set_defaults": [
+        "asciinema.__main__ 79:28 call  parser_rec.set_defaults(cmd=RecordCommand)",
+        "asciinema.__main__ 86:29 call  parser_play.set_defaults(cmd=PlayCommand)",
+        "asciinema.__main__ 91:28 call  parser_cat.set_defaults(cmd=CatCommand)",
+        "asciinema.__main__ 96:31 call  parser_upload.set_defaults(cmd=UploadCommand)",
+        "asciinema.__main__ 100:29 call  parser_auth.set_defaults(cmd=AuthCommand)"
+      ],
+      "argparse._SubParsersAction.add_parser": [
+        "asciinema.__main__ 67:39 call  subparsers.add_parser('rec', help='Record terminal session')",
+        "asciinema.__main__ 82:40 call  subparsers.add_parser('play', help='Replay terminal sessi...",
+        "asciinema.__main__ 89:39 call  subparsers.add_parser('cat', help='Print full output of t...",
+        "asciinema.__main__ 94:42 call  subparsers.add_parser('upload', help='Upload locally save...",
+        "asciinema.__main__ 99:40 call  subparsers.add_parser('auth', help='Manage recordings on ..."
+      ],
+      "asciinema.__main__.maybe_str": [
+        "asciinema.__main__ 75:154 call  maybe_str(cfg.record_idle_time_limit)",
+        "asciinema.__main__ 83:162 call  maybe_str(cfg.play_idle_time_limit)"
+      ],
+      "asciinema.__main__.positive_float": [
+        "asciinema.__main__ 103:29 call  parser.parse_args()"
+      ],
+      "asciinema.commands.auth.AuthCommand.__init__": [
+        "asciinema.__main__ 106:27 call  args.cmd(args, cfg, os.environ)"
+      ],
+      "asciinema.commands.auth.AuthCommand.execute": [
+        "asciinema.__main__ 107:31 call  command.execute()"
+      ],
+      "asciinema.commands.cat.CatCommand.__init__": [
+        "asciinema.__main__ 106:27 call  args.cmd(args, cfg, os.environ)"
+      ],
+      "asciinema.commands.cat.CatCommand.execute": [
+        "asciinema.__main__ 107:31 call  command.execute()"
+      ],
+      "asciinema.commands.play.PlayCommand.__init__": [
+        "asciinema.__main__ 106:27 call  args.cmd(args, cfg, os.environ)"
+      ],
+      "asciinema.commands.play.PlayCommand.execute": [
+        "asciinema.__main__ 107:31 call  command.execute()"
+      ],
+      "asciinema.commands.record.RecordCommand.__init__": [
+        "asciinema.__main__ 106:27 call  args.cmd(args, cfg, os.environ)"
+      ],
+      "asciinema.commands.record.RecordCommand.execute": [
+        "asciinema.__main__ 107:31 call  command.execute()"
+      ],
+      "asciinema.commands.upload.UploadCommand.__init__": [
+        "asciinema.__main__ 106:27 call  args.cmd(args, cfg, os.environ)"
+      ],
+      "asciinema.commands.upload.UploadCommand.execute": [
+        "asciinema.__main__ 107:31 call  command.execute()"
+      ],
+      "asciinema.config.Config.play_idle_time_limit": [
+        "asciinema.__main__ 83:167 getattr  cfg.play_idle_time_limit"
+      ],
+      "asciinema.config.Config.play_speed": [
+        "asciinema.__main__ 84:125 getattr  cfg.play_speed"
+      ],
+      "asciinema.config.Config.record_command": [
+        "asciinema.__main__ 72:106 getattr  cfg.record_command"
+      ],
+      "asciinema.config.Config.record_env": [
+        "asciinema.__main__ 73:147 getattr  cfg.record_env"
+      ],
+      "asciinema.config.Config.record_idle_time_limit": [
+        "asciinema.__main__ 75:159 getattr  cfg.record_idle_time_limit"
+      ],
+      "asciinema.config.Config.record_quiet": [
+        "asciinema.__main__ 77:140 getattr  cfg.record_quiet"
+      ],
+      "asciinema.config.Config.record_stdin": [
+        "asciinema.__main__ 68:125 getattr  cfg.record_stdin"
+      ],
+      "asciinema.config.Config.record_yes": [
+        "asciinema.__main__ 76:140 getattr  cfg.record_yes"
+      ],
+      "asciinema.config.load": [
+        "asciinema.__main__ 34:26 call  config.load()"
+      ],
+      "io.TextIOWrapper.write": [
+        "asciinema.__main__ 36:25 call  sys.stderr.write(str(e) + '\\n')"
+      ],
+      "locale.nl_langinfo": [
+        "asciinema.__main__ 29:26 call  locale.nl_langinfo(locale.CODESET)"
+      ],
+      "sys.exit": [
+        "asciinema.__main__ 31:17 call  sys.exit(1)",
+        "asciinema.__main__ 37:17 call  sys.exit(1)",
+        "asciinema.__main__ 108:17 call  sys.exit(code)",
+        "asciinema.__main__ 111:17 call  sys.exit(1)"
+      ]
+    },
+    "asciinema.__main__.maybe_str": {
+      "<builtin>.str": [
+        "asciinema.__main__ 25:19 call  str(v)"
+      ]
+    },
+    "asciinema.__main__.positive_float": {
+      "<builtin>.float": [
+        "asciinema.__main__ 16:18 call  float(value)"
+      ],
+      "argparse.ArgumentTypeError": [
+        "asciinema.__main__ 18:41 call  argparse.ArgumentTypeError(\"must be positive\")"
+      ]
+    },
+    "asciinema.api.Api._handle_error": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.api 85:23 call  APIError(error)"
+      ],
+      "<builtin>.dict.get": [
+        "asciinema.api 77:27 call  errors.get(status)"
+      ]
+    },
+    "asciinema.api.Api._headers": {
+      "asciinema.api.Api._user_agent": [
+        "asciinema.api 56:47 call  self._user_agent()"
+      ]
+    },
+    "asciinema.api.Api._user_agent": {
+      "platform.platform": [
+        "asciinema.api 59:65 call  platform.platform()"
+      ],
+      "platform.python_implementation": [
+        "asciinema.api 62:73 call  platform.python_implementation()"
+      ],
+      "platform.python_version": [
+        "asciinema.api 63:66 call  platform.python_version()"
+      ],
+      "re.sub": [
+        "asciinema.api 59:20 call  re.sub('([^-]+)-(.*)', '\\\\1/\\\\2', platform.platform())"
+      ]
+    },
+    "asciinema.api.Api.auth_url": {
+      "<builtin>.str.format": [
+        "asciinema.api 27:38 call  \"{}/connect/{}\".format(self.url, self.install_id)"
+      ]
+    },
+    "asciinema.api.Api.hostname": {
+      "urllib.parse.urlparse": [
+        "asciinema.api 24:24 call  urlparse(self.url)"
+      ]
+    },
+    "asciinema.api.Api.upload_asciicast": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.api 43:31 call  APIError(str(e))"
+      ],
+      "<builtin>.dict.get": [
+        "asciinema.api 48:24 call  headers.get('content-type')",
+        "asciinema.api 53:35 call  headers.get('Warning')"
+      ],
+      "<builtin>.open": [
+        "asciinema.api 33:18 call  open(path, 'rb')"
+      ],
+      "<builtin>.str": [
+        "asciinema.api 43:35 call  str(e)"
+      ],
+      "asciinema.api.Api._handle_error": [
+        "asciinema.api 46:31 call  self._handle_error(status, body)"
+      ],
+      "asciinema.api.Api._headers": [
+        "asciinema.api 38:42 call  self._headers()"
+      ],
+      "asciinema.api.Api.upload_url": [
+        "asciinema.api 36:36 call  self.upload_url()"
+      ],
+      "asciinema.urllib_http_adapter.URLLibHttpAdapter.post": [
+        "asciinema.api 35:63 call  self.http_adapter.post( self.upload_url(), files={\"asciic..."
+      ],
+      "json.loads": [
+        "asciinema.api 49:32 call  json.loads(body)"
+      ]
+    },
+    "asciinema.api.Api.upload_url": {
+      "<builtin>.str.format": [
+        "asciinema.api 30:42 call  \"{}/api/asciicasts\".format(self.url)"
+      ]
+    },
+    "asciinema.asciicast.Parser.__init__": {
+      "html.parser.HTMLParser.__init__": [
+        "asciinema.asciicast 20:40 call  html.parser.HTMLParser.__init__(self)"
+      ]
+    },
+    "asciinema.asciicast.Parser.handle_starttag": {
+      "<builtin>.dict.get": [
+        "asciinema.asciicast 30:25 call  attrs.get('rel')",
+        "asciinema.asciicast 31:33 call  attrs.get('type')",
+        "asciinema.asciicast 33:41 call  attrs.get('href')"
+      ]
+    },
+    "asciinema.asciicast.events.cap_relative_time": {
+      "<builtin>.min": [
+        "asciinema.asciicast.events 22:21 call  min(delay, time_limit)"
+      ]
+    },
+    "asciinema.asciicast.open_from_url.__enter__": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.asciicast 102:36 call  LoadError(self.FORMAT_ERROR)",
+        "asciinema.asciicast 105:28 call  LoadError(str(e))"
+      ],
+      "<builtin>.str": [
+        "asciinema.asciicast 105:32 call  str(e)"
+      ],
+      "asciinema.asciicast.open_url": [
+        "asciinema.asciicast 91:33 call  open_url(self.url)"
+      ],
+      "asciinema.asciicast.v1.open_from_file.__enter__": [
+        "asciinema.asciicast 100:50 call  self.context.__enter__()"
+      ],
+      "asciinema.asciicast.v1.open_from_file.__init__": [
+        "asciinema.asciicast 99:53 call  v1.open_from_file(first_line, self.file)"
+      ],
+      "asciinema.asciicast.v2.open_from_file.__enter__": [
+        "asciinema.asciicast 96:46 call  self.context.__enter__()"
+      ],
+      "asciinema.asciicast.v2.open_from_file.__init__": [
+        "asciinema.asciicast 95:49 call  v2.open_from_file(first_line, self.file)"
+      ],
+      "encodings.utf_8.StreamReader.readline": [
+        "asciinema.asciicast 92:44 call  self.file.readline()"
+      ],
+      "io.TextIOWrapper.readline": [
+        "asciinema.asciicast 92:44 call  self.file.readline()"
+      ]
+    },
+    "asciinema.asciicast.open_from_url.__exit__": {
+      "asciinema.asciicast.v1.open_from_file.__exit__": [
+        "asciinema.asciicast 108:30 call  self.context.__exit__(exc_type, exc_value, exc_traceback)"
+      ],
+      "asciinema.asciicast.v2.open_from_file.__exit__": [
+        "asciinema.asciicast 108:30 call  self.context.__exit__(exc_type, exc_value, exc_traceback)"
+      ]
+    },
+    "asciinema.asciicast.open_url": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.asciicast 65:32 call  LoadError(\"\"\"<link rel=\"alternate\" type=\"application/x-as..."
+      ],
+      "<builtin>.open": [
+        "asciinema.asciicast 80:16 call  open(url, mode='rt', encoding='utf-8')"
+      ],
+      "<builtin>.str.startswith": [
+        "asciinema.asciicast 40:22 call  url.startswith(\"ipfs://\")",
+        "asciinema.asciicast 42:24 call  url.startswith(\"dweb:/ipfs/\")",
+        "asciinema.asciicast 45:22 call  url.startswith(\"http:\")",
+        "asciinema.asciicast 45:49 call  url.startswith(\"https:\")",
+        "asciinema.asciicast 58:52 call  content_type.startswith('text/html')",
+        "asciinema.asciicast 70:38 call  new_url.startswith(\"/\")"
+      ],
+      "asciinema.asciicast.Parser.__init__": [
+        "asciinema.asciicast 60:28 call  Parser()"
+      ],
+      "asciinema.asciicast.Parser.handle_starttag": [
+        "asciinema.asciicast 61:24 call  parser.feed(html)"
+      ],
+      "asciinema.asciicast.open_url": [
+        "asciinema.asciicast 76:28 call  open_url(new_url)"
+      ],
+      "codecs.getreader": [
+        "asciinema.asciicast 55:39 call  codecs.getreader('utf-8')"
+      ],
+      "encodings.utf_8.StreamReader": [
+        "asciinema.asciicast 59:31 call  utf8_reader(body, errors='replace')",
+        "asciinema.asciicast 78:27 call  utf8_reader(body, errors='strict')"
+      ],
+      "encodings.utf_8.StreamReader.read": [
+        "asciinema.asciicast 59:60 call  utf8_reader(body, errors='replace').read()"
+      ],
+      "gzip.open": [
+        "asciinema.asciicast 53:29 call  gzip.open(body)"
+      ],
+      "html.parser.HTMLParser.feed": [
+        "asciinema.asciicast 61:24 call  parser.feed(html)"
+      ],
+      "http.client.HTTPResponse.geturl": [
+        "asciinema.asciicast 50:30 call  response.geturl()"
+      ],
+      "os.path.dirname": [
+        "asciinema.asciicast 73:43 call  os.path.dirname(base_url[2])"
+      ],
+      "urllib.parse.urlparse": [
+        "asciinema.asciicast 68:36 call  urlparse(url)"
+      ],
+      "urllib.parse.urlunparse": [
+        "asciinema.asciicast 71:41 call  urlunparse((base_url[0], base_url[1], new_url, '', '', ''))",
+        "asciinema.asciicast 74:41 call  urlunparse((base_url[0], base_url[1], path, '', '', ''))"
+      ],
+      "urllib.request.Request": [
+        "asciinema.asciicast 46:22 call  Request(url)"
+      ],
+      "urllib.request.Request.add_header": [
+        "asciinema.asciicast 47:23 call  req.add_header('Accept-Encoding', 'gzip')"
+      ],
+      "urllib.request.urlopen": [
+        "asciinema.asciicast 48:27 call  urlopen(req)"
+      ],
+      "urllib.response.addinfourl.geturl": [
+        "asciinema.asciicast 50:30 call  response.geturl()"
+      ]
+    },
+    "asciinema.asciicast.raw.writer.__enter__": {
+      "<builtin>.open": [
+        "asciinema.asciicast.raw 15:25 call  open(self.path, mode=self.mode, buffering=self.buffering)"
+      ]
+    },
+    "asciinema.asciicast.raw.writer.__exit__": {
+      "io.BufferedWriter.close": [
+        "asciinema.asciicast.raw 19:24 call  self.file.close()"
+      ],
+      "io.FileIO.close": [
+        "asciinema.asciicast.raw 19:24 call  self.file.close()"
+      ]
+    },
+    "asciinema.asciicast.raw.writer.__init__": {
+      "os.path.exists": [
+        "asciinema.asciicast.raw 7:37 call  os.path.exists(path)"
+      ],
+      "os.stat": [
+        "asciinema.asciicast.raw 7:55 call  os.stat(path)"
+      ]
+    },
+    "asciinema.asciicast.raw.writer.write_stdout": {
+      "io.BufferedWriter.write": [
+        "asciinema.asciicast.raw 22:24 call  self.file.write(data)"
+      ],
+      "io.FileIO.write": [
+        "asciinema.asciicast.raw 22:24 call  self.file.write(data)"
+      ]
+    },
+    "asciinema.asciicast.v1.Asciicast.events": {
+      "asciinema.asciicast.v1.Asciicast.stdout_events": [
+        "asciinema.asciicast.v1 35:34 call  self.stdout_events()"
+      ]
+    },
+    "asciinema.asciicast.v1.Asciicast.stdout_events": {
+      "asciinema.asciicast.events.to_absolute_time": [
+        "asciinema.asciicast.v1 38:32 call  to_absolute_time(self.__stdout_events())"
+      ],
+      "asciinema.asciicast.v1.Asciicast.__stdout_events": [
+        "asciinema.asciicast.v1 38:53 call  self.__stdout_events()"
+      ]
+    },
+    "asciinema.asciicast.v1.Asciicast.v2_header": {
+      "<builtin>.dict.items": [
+        "asciinema.asciicast.v1 27:54 call  self.__attrs.items()"
+      ]
+    },
+    "asciinema.asciicast.v1.open_from_file.__enter__": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.asciicast.v1 55:32 call  LoadError(self.FORMAT_ERROR)",
+        "asciinema.asciicast.v1 57:28 call  LoadError(self.FORMAT_ERROR)"
+      ],
+      "<builtin>.dict.get": [
+        "asciinema.asciicast.v1 52:25 call  attrs.get('version')"
+      ],
+      "asciinema.asciicast.v1.Asciicast.__init__": [
+        "asciinema.asciicast.v1 53:33 call  Asciicast(attrs)"
+      ],
+      "encodings.utf_8.StreamReader.read": [
+        "asciinema.asciicast.v1 50:64 call  self.file.read()"
+      ],
+      "io.TextIOWrapper.read": [
+        "asciinema.asciicast.v1 50:64 call  self.file.read()"
+      ],
+      "json.loads": [
+        "asciinema.asciicast.v1 50:31 call  json.loads(self.first_line + self.file.read())"
+      ]
+    },
+    "asciinema.asciicast.v1.open_from_file.__exit__": {
+      "gzip.GzipFile.close": [
+        "asciinema.asciicast.v1 60:24 call  self.file.close()"
+      ],
+      "http.client.HTTPResponse.close": [
+        "asciinema.asciicast.v1 60:24 call  self.file.close()"
+      ],
+      "io.TextIOWrapper.close": [
+        "asciinema.asciicast.v1 60:24 call  self.file.close()"
+      ],
+      "urllib.response.addinfourl.close": [
+        "asciinema.asciicast.v1 60:24 call  self.file.close()"
+      ]
+    },
+    "asciinema.asciicast.v2.Asciicast.__init__": {
+      "<builtin>.dict.get": [
+        "asciinema.asciicast.v2 22:42 call  header.get('idle_time_limit')"
+      ]
+    },
+    "asciinema.asciicast.v2.Asciicast.events": {
+      "json.loads": [
+        "asciinema.asciicast.v2 26:29 call  json.loads(line)"
+      ]
+    },
+    "asciinema.asciicast.v2.Asciicast.stdout_events": {
+      "asciinema.asciicast.v2.Asciicast.events": [
+        "asciinema.asciicast.v2 29:44 call  self.events()"
+      ]
+    },
+    "asciinema.asciicast.v2.build_from_header_and_file": {
+      "asciinema.asciicast.v2.Asciicast.__init__": [
+        "asciinema.asciicast.v2 35:21 call  Asciicast(f, header)"
+      ]
+    },
+    "asciinema.asciicast.v2.get_duration": {
+      "<builtin>.open": [
+        "asciinema.asciicast.v2 60:14 call  open(path, mode='rt', encoding='utf-8')"
+      ],
+      "asciinema.asciicast.v2.Asciicast.stdout_events": [
+        "asciinema.asciicast.v2 63:46 call  a.stdout_events()"
+      ],
+      "asciinema.asciicast.v2.open_from_file.__enter__": [
+        "asciinema.asciicast.v2 62:14 with  open_from_file(first_line, f)"
+      ],
+      "asciinema.asciicast.v2.open_from_file.__exit__": [
+        "asciinema.asciicast.v2 62:14 with  open_from_file(first_line, f)"
+      ],
+      "asciinema.asciicast.v2.open_from_file.__init__": [
+        "asciinema.asciicast.v2 62:28 call  open_from_file(first_line, f)"
+      ],
+      "io.TextIOWrapper.readline": [
+        "asciinema.asciicast.v2 61:32 call  f.readline()"
+      ]
+    },
+    "asciinema.asciicast.v2.open_from_file.__enter__": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.asciicast.v2 51:32 call  LoadError(self.FORMAT_ERROR)",
+        "asciinema.asciicast.v2 53:28 call  LoadError(self.FORMAT_ERROR)"
+      ],
+      "<builtin>.dict.get": [
+        "asciinema.asciicast.v2 48:29 call  v2_header.get('version')"
+      ],
+      "asciinema.asciicast.v2.build_from_header_and_file": [
+        "asciinema.asciicast.v2 49:50 call  build_from_header_and_file(v2_header, self.file)"
+      ],
+      "json.loads": [
+        "asciinema.asciicast.v2 47:35 call  json.loads(self.first_line)"
+      ]
+    },
+    "asciinema.asciicast.v2.open_from_file.__exit__": {
+      "gzip.GzipFile.close": [
+        "asciinema.asciicast.v2 56:24 call  self.file.close()"
+      ],
+      "http.client.HTTPResponse.close": [
+        "asciinema.asciicast.v2 56:24 call  self.file.close()"
+      ],
+      "io.TextIOWrapper.close": [
+        "asciinema.asciicast.v2 56:24 call  self.file.close()"
+      ],
+      "urllib.response.addinfourl.close": [
+        "asciinema.asciicast.v2 56:24 call  self.file.close()"
+      ]
+    },
+    "asciinema.asciicast.v2.writer.write_stdin": {
+      "<builtin>.str.encode": [
+        "asciinema.asciicast.v2 117:31 call  data.encode(encoding='utf-8', errors='strict')"
+      ],
+      "<builtin>.type": [
+        "asciinema.asciicast.v2 116:16 call  type(data)"
+      ],
+      "asciinema.asciicast.v2.writer.__write_event": [
+        "asciinema.asciicast.v2 119:27 call  self.__write_event(ts, 'i', data)"
+      ],
+      "encodings.utf_8.IncrementalDecoder.decode": [
+        "asciinema.asciicast.v2 118:41 call  self.stdin_decoder.decode(data)"
+      ]
+    },
+    "asciinema.async_worker.async_worker.__enter__": {
+      "asciinema.async_worker.async_worker.run": [
+        "asciinema.async_worker 19:27 call  self.process.start()"
+      ],
+      "asciinema.recorder.async_writer.run": [
+        "asciinema.async_worker 19:27 call  self.process.start()"
+      ],
+      "multiprocessing.Process": [
+        "asciinema.async_worker 18:31 call  Process(target=self.run)"
+      ],
+      "multiprocessing.Process.start": [
+        "asciinema.async_worker 19:27 call  self.process.start()"
+      ],
+      "threading.Thread": [
+        "asciinema.async_worker 18:31 call  Process(target=self.run)"
+      ],
+      "threading.Thread.start": [
+        "asciinema.async_worker 19:27 call  self.process.start()"
+      ]
+    },
+    "asciinema.async_worker.async_worker.__exit__": {
+      "multiprocessing.Process.join": [
+        "asciinema.async_worker 24:26 call  self.process.join()"
+      ],
+      "multiprocessing.queues.Queue.put": [
+        "asciinema.async_worker 23:23 call  self.queue.put(None)"
+      ],
+      "queue.Queue.put": [
+        "asciinema.async_worker 23:23 call  self.queue.put(None)"
+      ],
+      "threading.Thread.join": [
+        "asciinema.async_worker 24:26 call  self.process.join()"
+      ]
+    },
+    "asciinema.async_worker.async_worker.__init__": {
+      "multiprocessing.Queue": [
+        "asciinema.async_worker 15:27 call  Queue()"
+      ],
+      "queue.Queue": [
+        "asciinema.async_worker 15:27 call  Queue()"
+      ]
+    },
+    "asciinema.async_worker.async_worker.enqueue": {
+      "multiprocessing.queues.Queue.put": [
+        "asciinema.async_worker 27:23 call  self.queue.put(payload)"
+      ],
+      "queue.Queue.put": [
+        "asciinema.async_worker 27:23 call  self.queue.put(payload)"
+      ]
+    },
+    "asciinema.async_worker.async_worker.run": {
+      "<builtin>.iter": [
+        "asciinema.async_worker 30:28 call  iter(self.queue.get, None)"
+      ],
+      "asciinema.recorder.async_notifier.perform": [
+        "asciinema.async_worker 31:25 call  self.perform(payload)"
+      ]
+    },
+    "asciinema.commands.auth.AuthCommand.__init__": {
+      "asciinema.commands.command.Command.__init__": [
+        "asciinema.commands.auth 7:25 call  Command.__init__(self, args, config, env)"
+      ]
+    },
+    "asciinema.commands.auth.AuthCommand.execute": {
+      "asciinema.api.Api.auth_url": [
+        "asciinema.commands.auth 16:61 call  self.api.auth_url()"
+      ],
+      "asciinema.api.Api.hostname": [
+        "asciinema.commands.auth 16:40 call  self.api.hostname()",
+        "asciinema.commands.auth 16:82 call  self.api.hostname()"
+      ],
+      "asciinema.commands.command.Command.print": [
+        "asciinema.commands.auth 10:19 call  self.print('Open the following URL in a web browser to li..."
+      ]
+    },
+    "asciinema.commands.cat.CatCommand.__init__": {
+      "asciinema.commands.command.Command.__init__": [
+        "asciinema.commands.cat 10:25 call  Command.__init__(self, args, config, env)"
+      ]
+    },
+    "asciinema.commands.cat.CatCommand.execute": {
+      "<builtin>.str": [
+        "asciinema.commands.cat 21:57 call  str(e)"
+      ],
+      "asciinema.asciicast.open_from_url.__enter__": [
+        "asciinema.commands.cat 15:18 with  asciicast.open_from_url(self.filename)"
+      ],
+      "asciinema.asciicast.open_from_url.__exit__": [
+        "asciinema.commands.cat 15:18 with  asciicast.open_from_url(self.filename)"
+      ],
+      "asciinema.asciicast.open_from_url.__init__": [
+        "asciinema.commands.cat 15:41 call  asciicast.open_from_url(self.filename)"
+      ],
+      "asciinema.asciicast.v1.Asciicast.stdout_events": [
+        "asciinema.commands.cat 16:54 call  a.stdout_events()"
+      ],
+      "asciinema.asciicast.v2.Asciicast.stdout_events": [
+        "asciinema.commands.cat 16:54 call  a.stdout_events()"
+      ],
+      "asciinema.commands.command.Command.print_error": [
+        "asciinema.commands.cat 21:29 call  self.print_error(\"printing failed: %s\" % str(e))"
+      ],
+      "io.TextIOWrapper.flush": [
+        "asciinema.commands.cat 18:37 call  sys.stdout.flush()"
+      ],
+      "io.TextIOWrapper.write": [
+        "asciinema.commands.cat 17:37 call  sys.stdout.write(text)"
+      ]
+    },
+    "asciinema.commands.command.Command.__init__": {
+      "asciinema.api.Api.__init__": [
+        "asciinema.commands.command 10:23 call  Api(config.api_url, env.get(\"USER\"), config.install_id)"
+      ],
+      "asciinema.config.Config.api_url": [
+        "asciinema.commands.command 10:31 getattr  config.api_url"
+      ],
+      "asciinema.config.Config.install_id": [
+        "asciinema.commands.command 10:64 getattr  config.install_id"
+      ],
+      "collections.abc.Mapping.get": [
+        "asciinema.commands.command 10:47 call  env.get(\"USER\")"
+      ]
+    },
+    "asciinema.commands.command.Command.print": {
+      "<builtin>.print": [
+        "asciinema.commands.command 14:18 call  print(text, file=file, end=end)"
+      ]
+    },
+    "asciinema.commands.command.Command.print_error": {
+      "asciinema.commands.command.Command.print": [
+        "asciinema.commands.command 23:19 call  self.print(\"\\x1b[0;31masciinema: %s\\x1b[0m\" % text, file=..."
+      ]
+    },
+    "asciinema.commands.command.Command.print_info": {
+      "asciinema.commands.command.Command.print": [
+        "asciinema.commands.command 17:19 call  self.print(\"\\x1b[0;32masciinema: %s\\x1b[0m\" % text)"
+      ]
+    },
+    "asciinema.commands.command.Command.print_warning": {
+      "asciinema.commands.command.Command.print": [
+        "asciinema.commands.command 20:19 call  self.print(\"\\x1b[0;33masciinema: %s\\x1b[0m\" % text)"
+      ]
+    },
+    "asciinema.commands.play.PlayCommand.__init__": {
+      "asciinema.commands.command.Command.__init__": [
+        "asciinema.commands.play 9:25 call  Command.__init__(self, args, config, env)"
+      ]
+    },
+    "asciinema.commands.play.PlayCommand.execute": {
+      "<builtin>.str": [
+        "asciinema.commands.play 21:57 call  str(e)"
+      ],
+      "asciinema.asciicast.open_from_url.__enter__": [
+        "asciinema.commands.play 17:18 with  asciicast.open_from_url(self.filename)"
+      ],
+      "asciinema.asciicast.open_from_url.__exit__": [
+        "asciinema.commands.play 17:18 with  asciicast.open_from_url(self.filename)"
+      ],
+      "asciinema.asciicast.open_from_url.__init__": [
+        "asciinema.commands.play 17:41 call  asciicast.open_from_url(self.filename)"
+      ],
+      "asciinema.commands.command.Command.print_error": [
+        "asciinema.commands.play 21:29 call  self.print_error(\"playback failed: %s\" % str(e))"
+      ],
+      "asciinema.player.Player.play": [
+        "asciinema.commands.play 18:33 call  self.player.play(a, self.idle_time_limit, self.speed)"
+      ]
+    },
+    "asciinema.commands.record.RecordCommand.__init__": {
+      "asciinema.commands.command.Command.__init__": [
+        "asciinema.commands.record 16:25 call  Command.__init__(self, args, config, env)"
+      ],
+      "asciinema.config.Config.notifications_command": [
+        "asciinema.commands.record 29:84 getattr  config.notifications_command"
+      ],
+      "asciinema.config.Config.notifications_enabled": [
+        "asciinema.commands.record 29:54 getattr  config.notifications_enabled"
+      ],
+      "asciinema.notifier.get_notifier": [
+        "asciinema.commands.record 29:46 call  notifier.get_notifier(config.notifications_enabled, confi..."
+      ]
+    },
+    "asciinema.commands.record.RecordCommand.execute": {
+      "<builtin>.dict.get": [
+        "asciinema.commands.record 107:38 call  result.get('message')"
+      ],
+      "<builtin>.filter": [
+        "asciinema.commands.record 68:22 call  filter(None, map((lambda var: var.strip()), self.env_whit..."
+      ],
+      "<builtin>.map": [
+        "asciinema.commands.record 68:32 call  map((lambda var: var.strip()), self.env_whitelist.split('..."
+      ],
+      "<builtin>.str": [
+        "asciinema.commands.record 111:59 call  str(e)"
+      ],
+      "<builtin>.str.split": [
+        "asciinema.commands.record 68:84 call  self.env_whitelist.split(',')"
+      ],
+      "asciinema.api.Api.hostname": [
+        "asciinema.commands.record 92:52 call  self.api.hostname()"
+      ],
+      "asciinema.api.Api.upload_asciicast": [
+        "asciinema.commands.record 101:57 call  self.api.upload_asciicast(self.filename)"
+      ],
+      "asciinema.commands.command.Command.print": [
+        "asciinema.commands.record 96:31 call  self.print(\"\\r\", end=\"\")",
+        "asciinema.commands.record 107:27 call  self.print(result.get('message') or result['url'])",
+        "asciinema.commands.record 110:27 call  self.print(\"\\r\\x1b[A\", end=\"\")"
+      ],
+      "asciinema.commands.command.Command.print_error": [
+        "asciinema.commands.record 38:33 call  self.print_error(\"filename required when recording in raw...",
+        "asciinema.commands.record 46:33 call  self.print_error(\"can't write to %s\" % self.filename)",
+        "asciinema.commands.record 54:33 call  self.print_error(\"%s already exists, aborting\" % self.fil...",
+        "asciinema.commands.record 55:33 call  self.print_error(\"use --append option if you want to appe...",
+        "asciinema.commands.record 84:29 call  self.print_error(\"can only append to asciicast v2 format ...",
+        "asciinema.commands.record 111:33 call  self.print_error(\"upload failed: %s\" % str(e))",
+        "asciinema.commands.record 112:33 call  self.print_error(\"retry later by running: asciinema uploa..."
+      ],
+      "asciinema.commands.command.Command.print_info": [
+        "asciinema.commands.record 59:28 call  self.print_info(\"appending to asciicast at %s\" % self.fil...",
+        "asciinema.commands.record 61:28 call  self.print_info(\"recording asciicast to %s\" % self.filename)",
+        "asciinema.commands.record 64:28 call  self.print_info(\"\"\"exit opened program when you're done\"\"\")",
+        "asciinema.commands.record 66:28 call  self.print_info(\"\"\"press <ctrl-d> or type \"exit\" when you...",
+        "asciinema.commands.record 87:24 call  self.print_info(\"recording finished\")",
+        "asciinema.commands.record 91:32 call  self.print_info(\"press <enter> to upload to %s, <ctrl-c> ...",
+        "asciinema.commands.record 97:36 call  self.print_info(\"asciicast saved to %s\" % self.filename)",
+        "asciinema.commands.record 115:28 call  self.print_info(\"asciicast saved to %s\" % self.filename)"
+      ],
+      "asciinema.commands.command.Command.print_warning": [
+        "asciinema.commands.record 104:39 call  self.print_warning(warn)"
+      ],
+      "asciinema.commands.record._tmp_path": [
+        "asciinema.commands.record 41:42 call  _tmp_path()"
+      ],
+      "asciinema.recorder.record": [
+        "asciinema.commands.record 71:28 call  recorder.record( self.filename, command=self.command, app..."
+      ],
+      "io.TextIOWrapper.readline": [
+        "asciinema.commands.record 94:39 call  sys.stdin.readline()"
+      ],
+      "os.access": [
+        "asciinema.commands.record 45:29 call  os.access(self.filename, os.W_OK)"
+      ],
+      "os.path.exists": [
+        "asciinema.commands.record 44:26 call  os.path.exists(self.filename)"
+      ],
+      "os.remove": [
+        "asciinema.commands.record 50:26 call  os.remove(self.filename)",
+        "asciinema.commands.record 106:26 call  os.remove(self.filename)"
+      ],
+      "os.stat": [
+        "asciinema.commands.record 49:23 call  os.stat(self.filename)",
+        "asciinema.commands.record 53:25 call  os.stat(self.filename)"
+      ]
+    },
+    "asciinema.commands.record.RecordCommand.execute.<lambda1>": {
+      "<builtin>.str.strip": [
+        "asciinema.commands.record 68:55 call  var.strip()"
+      ]
+    },
+    "asciinema.commands.record._tmp_path": {
+      "os.close": [
+        "asciinema.commands.record 122:13 call  os.close(fd)"
+      ],
+      "tempfile.mkstemp": [
+        "asciinema.commands.record 121:32 call  tempfile.mkstemp(suffix='-ascii.cast')"
+      ]
+    },
+    "asciinema.commands.upload.UploadCommand.__init__": {
+      "asciinema.commands.command.Command.__init__": [
+        "asciinema.commands.upload 8:25 call  Command.__init__(self, args, config, env)"
+      ]
+    },
+    "asciinema.commands.upload.UploadCommand.execute": {
+      "<builtin>.dict.get": [
+        "asciinema.commands.upload 18:34 call  result.get('message')"
+      ],
+      "<builtin>.str": [
+        "asciinema.commands.upload 21:55 call  str(e)",
+        "asciinema.commands.upload 25:55 call  str(e)"
+      ],
+      "asciinema.api.Api.upload_asciicast": [
+        "asciinema.commands.upload 13:53 call  self.api.upload_asciicast(self.filename)"
+      ],
+      "asciinema.commands.command.Command.print": [
+        "asciinema.commands.upload 18:23 call  self.print(result.get('message') or result['url'])"
+      ],
+      "asciinema.commands.command.Command.print_error": [
+        "asciinema.commands.upload 21:29 call  self.print_error(\"upload failed: %s\" % str(e))",
+        "asciinema.commands.upload 25:29 call  self.print_error(\"upload failed: %s\" % str(e))",
+        "asciinema.commands.upload 26:29 call  self.print_error(\"retry later by running: asciinema uploa..."
+      ],
+      "asciinema.commands.command.Command.print_warning": [
+        "asciinema.commands.upload 16:35 call  self.print_warning(warn)"
+      ]
+    },
+    "asciinema.config.Config.__create_config_home": {
+      "os.makedirs": [
+        "asciinema.config 57:24 call  os.makedirs(self.config_home)"
+      ]
+    },
+    "asciinema.config.Config.api_url": {
+      "collections.abc.Mapping.get": [
+        "asciinema.config 82:28 call  self.env.get( 'ASCIINEMA_API_URL', self.config.get('api',..."
+      ]
+    },
+    "asciinema.config.Config.install_id": {
+      "collections.abc.Mapping.get": [
+        "asciinema.config 73:26 call  self.env.get('ASCIINEMA_INSTALL_ID')"
+      ]
+    },
+    "asciinema.config.Config.play_speed": {
+      "configparser.ConfigParser.getfloat": [
+        "asciinema.config 119:36 call  self.config.getfloat('play', 'speed', fallback=1.0)"
+      ]
+    },
+    "asciinema.config.Config.upgrade": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.config 38:30 call  ConfigError('ASCIINEMA_API_TOKEN variable is no longer su..."
+      ],
+      "collections.abc.Mapping.get": [
+        "asciinema.config 37:24 call  self.env.get('ASCIINEMA_API_TOKEN')"
+      ]
+    },
+    "asciinema.config.get_config_home": {
+      "<builtin>.Exception": [
+        "asciinema.config 148:24 call  Exception(\"need $HOME or $XDG_CONFIG_HOME or $ASCIINEMA_C..."
+      ],
+      "collections.abc.Mapping.get": [
+        "asciinema.config 131:40 call  env.get(\"ASCIINEMA_CONFIG_HOME\")",
+        "asciinema.config 132:34 call  env.get(\"XDG_CONFIG_HOME\")",
+        "asciinema.config 133:23 call  env.get(\"HOME\")"
+      ],
+      "os.path.isfile": [
+        "asciinema.config 142:23 call  path.isfile(path.join(env_home, \".asciinema\", \"config\"))"
+      ],
+      "os.path.join": [
+        "asciinema.config 140:32 call  path.join(env_xdg_config_home, \"asciinema\")",
+        "asciinema.config 142:33 call  path.join(env_home, \".asciinema\", \"config\")",
+        "asciinema.config 144:36 call  path.join(env_home, \".asciinema\")",
+        "asciinema.config 146:36 call  path.join(env_home, \".config\", \"asciinema\")"
+      ]
+    },
+    "asciinema.config.load": {
+      "asciinema.config.Config.__init__": [
+        "asciinema.config 154:20 call  Config(get_config_home(env), env)"
+      ],
+      "asciinema.config.Config.upgrade": [
+        "asciinema.config 155:19 call  config.upgrade()"
+      ],
+      "asciinema.config.get_config_home": [
+        "asciinema.config 154:36 call  get_config_home(env)"
+      ]
+    },
+    "asciinema.notifier.AppleScriptNotifier.args": {
+      "<builtin>.str.format": [
+        "asciinema.notifier 27:93 call  'display notification \"{}\" with title \"asciinema\"'.format..."
+      ],
+      "<builtin>.str.replace": [
+        "asciinema.notifier 26:28 call  text.replace('\"', '\\\\\"')"
+      ]
+    },
+    "asciinema.notifier.CustomCommandNotifier.__init__": {
+      "<builtin>.object.__init__": [
+        "asciinema.notifier 56:26 call  Notifier.__init__(self)"
+      ]
+    },
+    "asciinema.notifier.CustomCommandNotifier.notify": {
+      "asciinema.notifier.Notifier.get_icon_path": [
+        "asciinema.notifier 63:46 call  self.get_icon_path()"
+      ],
+      "os._Environ.copy": [
+        "asciinema.notifier 61:30 call  os.environ.copy()"
+      ],
+      "subprocess.run": [
+        "asciinema.notifier 64:23 call  subprocess.run(args, env=env, capture_output=True)"
+      ]
+    },
+    "asciinema.notifier.LibNotifyNotifier.args": {
+      "asciinema.notifier.Notifier.get_icon_path": [
+        "asciinema.notifier 34:39 call  self.get_icon_path()"
+      ]
+    },
+    "asciinema.notifier.Notifier.get_icon_path": {
+      "os.path.dirname": [
+        "asciinema.notifier 16:44 call  os.path.dirname(os.path.realpath(__file__))"
+      ],
+      "os.path.exists": [
+        "asciinema.notifier 18:26 call  os.path.exists(path)"
+      ],
+      "os.path.join": [
+        "asciinema.notifier 16:28 call  os.path.join(os.path.dirname(os.path.realpath(__file__)),..."
+      ],
+      "os.path.realpath": [
+        "asciinema.notifier 16:61 call  os.path.realpath(__file__)"
+      ]
+    },
+    "asciinema.notifier.Notifier.is_available": {
+      "shutil.which": [
+        "asciinema.notifier 8:28 call  shutil.which(self.cmd)"
+      ]
+    },
+    "asciinema.notifier.Notifier.notify": {
+      "asciinema.notifier.AppleScriptNotifier.args": [
+        "asciinema.notifier 11:33 call  self.args(text)"
+      ],
+      "asciinema.notifier.LibNotifyNotifier.args": [
+        "asciinema.notifier 11:33 call  self.args(text)"
+      ],
+      "asciinema.notifier.TerminalNotifier.args": [
+        "asciinema.notifier 11:33 call  self.args(text)"
+      ],
+      "subprocess.run": [
+        "asciinema.notifier 11:23 call  subprocess.run(self.args(text), capture_output=True)"
+      ]
+    },
+    "asciinema.notifier.TerminalNotifier.args": {
+      "asciinema.notifier.Notifier.get_icon_path": [
+        "asciinema.notifier 46:39 call  self.get_icon_path()"
+      ]
+    },
+    "asciinema.notifier.get_notifier": {
+      "asciinema.notifier.CustomCommandNotifier.__init__": [
+        "asciinema.notifier 75:41 call  CustomCommandNotifier(command)"
+      ],
+      "asciinema.notifier.Notifier.is_available": [
+        "asciinema.notifier 80:34 call  n.is_available()"
+      ]
+    },
+    "asciinema.player.Player._play": {
+      "asciinema.asciicast.events.adjust_speed": [
+        "asciinema.player 26:33 call  ev.adjust_speed(stdout, speed)"
+      ],
+      "asciinema.asciicast.events.cap_relative_time": [
+        "asciinema.player 24:38 call  ev.cap_relative_time(stdout, idle_time_limit)"
+      ],
+      "asciinema.asciicast.events.to_absolute_time": [
+        "asciinema.player 25:37 call  ev.to_absolute_time(stdout)"
+      ],
+      "asciinema.asciicast.events.to_relative_time": [
+        "asciinema.player 23:37 call  ev.to_relative_time(stdout)"
+      ],
+      "asciinema.asciicast.v1.Asciicast.stdout_events": [
+        "asciinema.player 22:41 call  asciicast.stdout_events()"
+      ],
+      "asciinema.asciicast.v2.Asciicast.stdout_events": [
+        "asciinema.player 22:41 call  asciicast.stdout_events()"
+      ],
+      "asciinema.term.read_blocking": [
+        "asciinema.player 39:45 call  read_blocking(stdin.fileno(), 1000)",
+        "asciinema.player 56:41 call  read_blocking(stdin.fileno(), delay)"
+      ],
+      "io.TextIOWrapper.fileno": [
+        "asciinema.player 39:58 call  stdin.fileno()",
+        "asciinema.player 56:54 call  stdin.fileno()"
+      ],
+      "io.TextIOWrapper.flush": [
+        "asciinema.player 75:29 call  sys.stdout.flush()"
+      ],
+      "io.TextIOWrapper.write": [
+        "asciinema.player 74:29 call  sys.stdout.write(text)"
+      ],
+      "time.time": [
+        "asciinema.player 28:30 call  time.time()",
+        "asciinema.player 34:35 call  time.time()",
+        "asciinema.player 47:63 call  time.time()",
+        "asciinema.player 52:51 call  time.time()",
+        "asciinema.player 67:47 call  time.time()"
+      ]
+    },
+    "asciinema.player.Player.play": {
+      "<builtin>.open": [
+        "asciinema.player 13:25 call  open('/dev/tty')"
+      ],
+      "asciinema.player.Player._play": [
+        "asciinema.player 15:27 call  self._play(asciicast, idle_time_limit, speed, stdin)",
+        "asciinema.player 17:23 call  self._play(asciicast, idle_time_limit, speed, None)"
+      ],
+      "asciinema.term.raw.__enter__": [
+        "asciinema.player 14:18 with  raw(stdin.fileno())"
+      ],
+      "asciinema.term.raw.__exit__": [
+        "asciinema.player 14:18 with  raw(stdin.fileno())"
+      ],
+      "asciinema.term.raw.__init__": [
+        "asciinema.player 14:21 call  raw(stdin.fileno())"
+      ],
+      "io.TextIOWrapper.fileno": [
+        "asciinema.player 14:34 call  stdin.fileno()"
+      ]
+    },
+    "asciinema.pty.record": {
+      "os.execvpe": [
+        "asciinema.pty 135:19 call  os.execvpe(command[0], command, env)"
+      ]
+    },
+    "asciinema.pty.record._copy": {
+      "<builtin>.len": [
+        "asciinema.pty 124:56 call  len(data)"
+      ],
+      "asciinema.pty.record._handle_stdin_read": [
+        "asciinema.pty 119:39 call  _handle_stdin_read(data)"
+      ],
+      "asciinema.pty.record._set_pty_size": [
+        "asciinema.pty 130:42 call  _set_pty_size()"
+      ],
+      "os.close": [
+        "asciinema.pty 127:37 call  os.close(master_fd)"
+      ],
+      "struct.unpack": [
+        "asciinema.pty 124:44 call  struct.unpack('%uB' % len(data), data)"
+      ]
+    },
+    "asciinema.pty.record._handle_master_read": {
+      "asciinema.recorder.async_writer.write_stdout": [
+        "asciinema.pty 51:32 call  writer.write_stdout(time.time() - start_time, data)"
+      ]
+    },
+    "asciinema.pty.record._handle_stdin_read": {
+      "asciinema.pty.record._notify": [
+        "asciinema.pty 72:24 call  _notify('Resumed recording')",
+        "asciinema.pty 75:24 call  _notify('Paused recording')"
+      ],
+      "asciinema.pty.record._write_master": [
+        "asciinema.pty 77:26 call  _write_master(data)"
+      ],
+      "asciinema.recorder.async_writer.write_stdin": [
+        "asciinema.pty 80:35 call  writer.write_stdin(time.time() - start_time, data)"
+      ],
+      "time.time": [
+        "asciinema.pty 70:53 call  time.time()",
+        "asciinema.pty 74:39 call  time.time()",
+        "asciinema.pty 80:45 call  time.time()"
+      ]
+    },
+    "asciinema.pty.record._notify": {
+      "asciinema.recorder.async_notifier.notify": [
+        "asciinema.pty 25:28 call  notifier.notify(text)"
+      ]
+    },
+    "asciinema.pty.record._write_master": {
+      "os.write": [
+        "asciinema.pty 59:25 call  os.write(master_fd, data)"
+      ]
+    },
+    "asciinema.record_asciicast": {
+      "asciinema.recorder.record": [
+        "asciinema 15:30 call  asciinema.recorder.record( path, command=command, append=..."
+      ]
+    },
+    "asciinema.recorder.async_notifier.__init__": {
+      "asciinema.async_worker.async_worker.__init__": [
+        "asciinema.recorder 86:30 call  async_worker.__init__(self)"
+      ]
+    },
+    "asciinema.recorder.async_notifier.notify": {
+      "asciinema.async_worker.async_worker.enqueue": [
+        "asciinema.recorder 90:21 call  self.enqueue(text)"
+      ]
+    },
+    "asciinema.recorder.async_notifier.perform": {
+      "asciinema.notifier.CustomCommandNotifier.notify": [
+        "asciinema.recorder 95:37 call  self.notifier.notify(text)"
+      ],
+      "asciinema.notifier.NoopNotifier.notify": [
+        "asciinema.recorder 95:37 call  self.notifier.notify(text)"
+      ],
+      "asciinema.notifier.Notifier.notify": [
+        "asciinema.recorder 95:37 call  self.notifier.notify(text)"
+      ]
+    },
+    "asciinema.recorder.async_writer.__init__": {
+      "asciinema.async_worker.async_worker.__init__": [
+        "asciinema.recorder 61:30 call  async_worker.__init__(self)"
+      ]
+    },
+    "asciinema.recorder.async_writer.run": {
+      "<builtin>.iter": [
+        "asciinema.recorder 75:30 call  iter(self.queue.get, None)"
+      ],
+      "asciinema.asciicast.raw.writer.__enter__": [
+        "asciinema.recorder 74:14 with  self.writer(self.path, metadata=self.metadata, append=sel..."
+      ],
+      "asciinema.asciicast.raw.writer.__exit__": [
+        "asciinema.recorder 74:14 with  self.writer(self.path, metadata=self.metadata, append=sel..."
+      ],
+      "asciinema.asciicast.raw.writer.__init__": [
+        "asciinema.recorder 74:25 call  self.writer(self.path, metadata=self.metadata, append=sel..."
+      ],
+      "asciinema.asciicast.raw.writer.write_stdin": [
+        "asciinema.recorder 81:34 call  w.write_stdin(ts, data)"
+      ],
+      "asciinema.asciicast.raw.writer.write_stdout": [
+        "asciinema.recorder 79:35 call  w.write_stdout(ts, data)"
+      ],
+      "asciinema.asciicast.v2.writer.__enter__": [
+        "asciinema.recorder 74:14 with  self.writer(self.path, metadata=self.metadata, append=sel..."
+      ],
+      "asciinema.asciicast.v2.writer.__exit__": [
+        "asciinema.recorder 74:14 with  self.writer(self.path, metadata=self.metadata, append=sel..."
+      ],
+      "asciinema.asciicast.v2.writer.__init__": [
+        "asciinema.recorder 74:25 call  self.writer(self.path, metadata=self.metadata, append=sel..."
+      ],
+      "asciinema.asciicast.v2.writer.write_stdin": [
+        "asciinema.recorder 81:34 call  w.write_stdin(ts, data)"
+      ],
+      "asciinema.asciicast.v2.writer.write_stdout": [
+        "asciinema.recorder 79:35 call  w.write_stdout(ts, data)"
+      ]
+    },
+    "asciinema.recorder.async_writer.write_stdin": {
+      "asciinema.async_worker.async_worker.enqueue": [
+        "asciinema.recorder 68:21 call  self.enqueue([ts, 'i', data])"
+      ]
+    },
+    "asciinema.recorder.async_writer.write_stdout": {
+      "asciinema.async_worker.async_worker.enqueue": [
+        "asciinema.recorder 71:21 call  self.enqueue([ts, 'o', data])"
+      ]
+    },
+    "asciinema.recorder.record": {
+      "<builtin>.dict.get": [
+        "asciinema.recorder 37:53 call  command_env.get(var)"
+      ],
+      "<builtin>.dict.update": [
+        "asciinema.recorder 31:25 call  full_metadata.update(metadata or {})"
+      ],
+      "<builtin>.int": [
+        "asciinema.recorder 28:25 call  int(time.time())"
+      ],
+      "asciinema.asciicast.v2.get_duration": [
+        "asciinema.recorder 45:38 call  v2.get_duration(path)"
+      ],
+      "asciinema.async_worker.async_worker.__enter__": [
+        "asciinema.recorder 47:10 with  async_writer(writer, path, full_metadata, append)",
+        "asciinema.recorder 48:14 with  async_notifier(notifier)"
+      ],
+      "asciinema.async_worker.async_worker.__exit__": [
+        "asciinema.recorder 47:10 with  async_writer(writer, path, full_metadata, append)",
+        "asciinema.recorder 48:14 with  async_notifier(notifier)"
+      ],
+      "asciinema.commands.record.RecordCommand.execute.<lambda1>": [
+        "asciinema.recorder 37:70 iter  capture_env"
+      ],
+      "asciinema.pty.record": [
+        "asciinema.recorder 49:19 call  record( ['sh', '-c', command], w, command_env, rec_stdin,..."
+      ],
+      "asciinema.recorder.async_notifier.__init__": [
+        "asciinema.recorder 48:28 call  async_notifier(notifier)"
+      ],
+      "asciinema.recorder.async_writer.__init__": [
+        "asciinema.recorder 47:22 call  async_writer(writer, path, full_metadata, append)"
+      ],
+      "asciinema.term.get_size": [
+        "asciinema.recorder 23:25 call  term.get_size()"
+      ],
+      "collections.abc.Mapping.get": [
+        "asciinema.recorder 14:33 call  os.environ.get('SHELL')",
+        "asciinema.recorder 37:53 call  command_env.get(var)"
+      ],
+      "os._Environ.copy": [
+        "asciinema.recorder 17:38 call  os.environ.copy()"
+      ],
+      "os.stat": [
+        "asciinema.recorder 44:26 call  os.stat(path)"
+      ],
+      "time.time": [
+        "asciinema.recorder 28:35 call  time.time()"
+      ]
+    },
+    "asciinema.term.get_size": {
+      "<builtin>.int": [
+        "asciinema.term 35:12 call  int(subprocess.check_output(['tput', 'cols']))",
+        "asciinema.term 36:12 call  int(subprocess.check_output(['tput', 'lines']))"
+      ],
+      "subprocess.check_output": [
+        "asciinema.term 35:36 call  subprocess.check_output(['tput', 'cols'])",
+        "asciinema.term 36:36 call  subprocess.check_output(['tput', 'lines'])"
+      ]
+    },
+    "asciinema.term.raw.__enter__": {
+      "tty.setraw": [
+        "asciinema.term 15:23 call  tty.setraw(self.fd)"
+      ]
+    },
+    "asciinema.term.raw.__exit__": {
+      "termios.tcsetattr": [
+        "asciinema.term 22:26 call  tty.tcsetattr(self.fd, tty.TCSAFLUSH, self.mode)"
+      ]
+    },
+    "asciinema.term.read_blocking": {
+      "os.read": [
+        "asciinema.term 27:23 call  os.read(fd, 1024)"
+      ],
+      "select.select": [
+        "asciinema.term 26:27 call  select.select([fd], [], [], timeout)"
+      ]
+    },
+    "asciinema.urllib_http_adapter": {
+      "<builtin>.classmethod": [
+        "asciinema.urllib_http_adapter 18:6 decorator  @classmethod"
+      ]
+    },
+    "asciinema.urllib_http_adapter.MultipartFormdataEncoder.__init__": {
+      "<builtin>.str.format": [
+        "asciinema.urllib_http_adapter 16:70 call  'multipart/form-data; boundary={}'.format(self.boundary)"
+      ],
+      "uuid.uuid4": [
+        "asciinema.urllib_http_adapter 15:35 call  uuid.uuid4()"
+      ]
+    },
+    "asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode": {
+      "asciinema.urllib_http_adapter.MultipartFormdataEncoder.iter": [
+        "asciinema.urllib_http_adapter 55:42 call  self.iter(fields, files)"
+      ],
+      "io.BytesIO": [
+        "asciinema.urllib_http_adapter 54:26 call  io.BytesIO()"
+      ],
+      "io.BytesIO.getvalue": [
+        "asciinema.urllib_http_adapter 57:48 call  body.getvalue()"
+      ],
+      "io.BytesIO.write": [
+        "asciinema.urllib_http_adapter 56:23 call  body.write(chunk)"
+      ]
+    },
+    "asciinema.urllib_http_adapter.MultipartFormdataEncoder.iter": {
+      "<builtin>.dict.items": [
+        "asciinema.urllib_http_adapter 31:41 call  fields.items()",
+        "asciinema.urllib_http_adapter 40:49 call  files.items()"
+      ],
+      "<builtin>.isinstance": [
+        "asciinema.urllib_http_adapter 36:26 call  isinstance(value, int)",
+        "asciinema.urllib_http_adapter 36:52 call  isinstance(value, float)"
+      ],
+      "<builtin>.len": [
+        "asciinema.urllib_http_adapter 49:29 call  len(data)"
+      ],
+      "<builtin>.str": [
+        "asciinema.urllib_http_adapter 37:28 call  str(value)"
+      ],
+      "<builtin>.str.format": [
+        "asciinema.urllib_http_adapter 33:44 call  '--{}\\r\\n'.format(self.boundary)",
+        "asciinema.urllib_http_adapter 34:89 call  self.u('Content-Disposition: form-data; name=\"{}\"\\r\\n').f...",
+        "asciinema.urllib_http_adapter 44:44 call  '--{}\\r\\n'.format(self.boundary)",
+        "asciinema.urllib_http_adapter 45:104 call  self.u('Content-Disposition: form-data; name=\"{}\"; filena...",
+        "asciinema.urllib_http_adapter 51:42 call  '--{}--\\r\\n'.format(self.boundary)"
+      ],
+      "asciinema.urllib_http_adapter.MultipartFormdataEncoder.u": [
+        "asciinema.urllib_http_adapter 32:25 call  self.u(key)",
+        "asciinema.urllib_http_adapter 34:33 call  self.u('Content-Disposition: form-data; name=\"{}\"\\r\\n')",
+        "asciinema.urllib_http_adapter 38:33 call  self.u(value)",
+        "asciinema.urllib_http_adapter 42:25 call  self.u(key)",
+        "asciinema.urllib_http_adapter 43:30 call  self.u(filename)",
+        "asciinema.urllib_http_adapter 45:33 call  self.u('Content-Disposition: form-data; name=\"{}\"; filena..."
+      ],
+      "codecs.getencoder": [
+        "asciinema.urllib_http_adapter 30:36 call  codecs.getencoder('utf-8')"
+      ],
+      "encodings.utf_8.encode": [
+        "asciinema.urllib_http_adapter 33:26 call  encoder('--{}\\r\\n'.format(self.boundary))",
+        "asciinema.urllib_http_adapter 34:26 call  encoder(self.u('Content-Disposition: form-data; name=\"{}\"...",
+        "asciinema.urllib_http_adapter 35:26 call  encoder('\\r\\n')",
+        "asciinema.urllib_http_adapter 38:26 call  encoder(self.u(value))",
+        "asciinema.urllib_http_adapter 39:26 call  encoder('\\r\\n')",
+        "asciinema.urllib_http_adapter 44:26 call  encoder('--{}\\r\\n'.format(self.boundary))",
+        "asciinema.urllib_http_adapter 45:26 call  encoder(self.u('Content-Disposition: form-data; name=\"{}\"...",
+        "asciinema.urllib_http_adapter 46:26 call  encoder('Content-Type: application/octet-stream\\r\\n')",
+        "asciinema.urllib_http_adapter 47:26 call  encoder('\\r\\n')",
+        "asciinema.urllib_http_adapter 50:26 call  encoder('\\r\\n')",
+        "asciinema.urllib_http_adapter 51:22 call  encoder('--{}--\\r\\n'.format(self.boundary))"
+      ],
+      "io.BufferedReader.read": [
+        "asciinema.urllib_http_adapter 48:26 call  f.read()"
+      ]
+    },
+    "asciinema.urllib_http_adapter.MultipartFormdataEncoder.u": {
+      "<builtin>.bytes.decode": [
+        "asciinema.urllib_http_adapter 21:25 call  s.decode('utf-8')"
+      ],
+      "<builtin>.isinstance": [
+        "asciinema.urllib_http_adapter 20:55 call  isinstance(s, bytes)"
+      ]
+    },
+    "asciinema.urllib_http_adapter.URLLibHttpAdapter._parse_headers": {
+      "<builtin>.str.lower": [
+        "asciinema.urllib_http_adapter 92:28 call  k.lower()"
+      ],
+      "http.client.HTTPResponse.getheaders": [
+        "asciinema.urllib_http_adapter 91:40 call  response.getheaders()"
+      ]
+    },
+    "asciinema.urllib_http_adapter.URLLibHttpAdapter.post": {
+      "<builtin>.Exception.__init__": [
+        "asciinema.urllib_http_adapter 85:38 call  HTTPConnectionError(str(e))"
+      ],
+      "<builtin>.bytes.decode": [
+        "asciinema.urllib_http_adapter 79:42 call  response.read().decode('utf-8')",
+        "asciinema.urllib_http_adapter 83:35 call  e.read().decode('utf-8')"
+      ],
+      "<builtin>.dict.copy": [
+        "asciinema.urllib_http_adapter 65:31 call  headers.copy()"
+      ],
+      "<builtin>.str": [
+        "asciinema.urllib_http_adapter 85:42 call  str(e)"
+      ],
+      "<builtin>.str.encode": [
+        "asciinema.urllib_http_adapter 70:58 call  auth.encode('utf-8')"
+      ],
+      "asciinema.urllib_http_adapter.MultipartFormdataEncoder.__init__": [
+        "asciinema.urllib_http_adapter 63:54 call  MultipartFormdataEncoder()"
+      ],
+      "asciinema.urllib_http_adapter.MultipartFormdataEncoder.encode": [
+        "asciinema.urllib_http_adapter 63:63 call  MultipartFormdataEncoder().encode(fields, files)"
+      ],
+      "asciinema.urllib_http_adapter.URLLibHttpAdapter._parse_headers": [
+        "asciinema.urllib_http_adapter 78:42 call  self._parse_headers(response)"
+      ],
+      "base64.encodebytes": [
+        "asciinema.urllib_http_adapter 70:46 call  base64.encodebytes(auth.encode('utf-8'))"
+      ],
+      "http.client.HTTPResponse.read": [
+        "asciinema.urllib_http_adapter 79:33 call  response.read()",
+        "asciinema.urllib_http_adapter 83:26 call  e.read()"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "asciinema.urllib_http_adapter 83:26 call  e.read()"
+      ],
+      "urllib.request.Request": [
+        "asciinema.urllib_http_adapter 73:26 call  Request(url, data=body, headers=headers, method=\"POST\")"
+      ],
+      "urllib.request.urlopen": [
+        "asciinema.urllib_http_adapter 76:31 call  urlopen(request)"
+      ]
+    }
+  },
+  "notes": {
+    "asciinema.__main__ 103:29 call  parser.parse_args()": [
+      "parse_args calls back positive_float, the type of -i (rec, play) and -s (play), on an option string of the command line and on a str default (maybe_str of a configured idle time limit, lines 75 and 83)"
+    ],
+    "asciinema.__main__ 106:27 call  args.cmd(args, cfg, os.environ)": [
+      "args.cmd is the class that set_defaults stores for the chosen subcommand (lines 79, 86, 91, 96, 100): RecordCommand, PlayCommand, CatCommand, UploadCommand or AuthCommand; each defines __init__"
+    ],
+    "asciinema.__main__ 107:31 call  command.execute()": [
+      "command is an instance of one of the five classes of 106:27"
+    ],
+    "asciinema.__main__ 115:9 call  main()": [
+      "the if __name__ == '__main__' block is code of the module"
+    ],
+    "asciinema.__main__ 36:25 call  sys.stderr.write(str(e) + '\\n')": [
+      "the default sys.stderr, a text stream named by its class (README)"
+    ],
+    "asciinema.__main__ 36:29 call  str(e)": [
+      "e is a ConfigError, which defines no __str__"
+    ],
+    "asciinema.__main__ 67:39 call  subparsers.add_parser('rec', help='Record terminal session')": [
+      "add_subparsers returns an argparse._SubParsersAction; add_parser returns an argparse.ArgumentParser (the class of parser)"
+    ],
+    "asciinema.__main__ 68:125 getattr  cfg.record_stdin": [
+      "cfg is the Config that config.load() returns (line 34)"
+    ],
+    "asciinema.api 35:63 call  self.http_adapter.post( self.upload_url(), files={\"asciic...": [
+      "self.http_adapter is the URLLibHttpAdapter of Api.__init__ (line 21); an adapter that a client passes is opaque (B5), and no package code passes one"
+    ],
+    "asciinema.api 43:31 call  APIError(str(e))": [
+      "APIError defines no __init__"
+    ],
+    "asciinema.api 48:24 call  headers.get('content-type')": [
+      "headers is the dict that URLLibHttpAdapter.post returns (_parse_headers, or {} for an HTTPError)"
+    ],
+    "asciinema.asciicast 30:25 call  attrs.get('rel')": [
+      "attrs is the dict of line 26"
+    ],
+    "asciinema.asciicast 40:22 call  url.startswith(\"ipfs://\")": [
+      "url is a str: the file name or URL of the command line (args.filename, through open_from_url), or the href of the HTML page (line 76); a value that a client passes is opaque"
+    ],
+    "asciinema.asciicast 50:30 call  response.geturl()": [
+      "urlopen of an http or https URL returns an http.client.HTTPResponse; when the server redirects to an ftp URL, which urllib's HTTPRedirectHandler.http_error_302 allows (schemes http, https, ftp), FTPHandler.ftp_open returns a urllib.response.addinfourl (lead's ruling, asciinema.md)"
+    ],
+    "asciinema.asciicast 59:31 call  utf8_reader(body, errors='replace')": [
+      "utf8_reader is codecs.getreader('utf-8') (line 55), the class encodings.utf_8.StreamReader; the call makes an instance"
+    ],
+    "asciinema.asciicast 61:24 call  parser.feed(html)": [
+      "Parser inherits feed from html.parser.HTMLParser, which calls back the handle_starttag of the Parser for each start tag (also through handle_startendtag)"
+    ],
+    "asciinema.asciicast 78:27 call  utf8_reader(body, errors='strict')": [
+      "utf8_reader is codecs.getreader('utf-8') (line 55), the class encodings.utf_8.StreamReader"
+    ],
+    "asciinema.asciicast 92:44 call  self.file.readline()": [
+      "self.file is what open_url returns: sys.stdin or a text file of open(), or an encodings.utf_8.StreamReader for an http(s) URL"
+    ],
+    "asciinema.asciicast.events 22:21 call  min(delay, time_limit)": [
+      "in the generator expression, whose calls belong to cap_relative_time"
+    ],
+    "asciinema.asciicast.raw 19:24 call  self.file.close()": [
+      "self.file is the binary file of open() in __enter__: an io.FileIO with the default buffering 0 (async_writer.run passes none), an io.BufferedWriter when a client passes another buffering (asciinema.md)"
+    ],
+    "asciinema.asciicast.raw 22:24 call  self.file.write(data)": [
+      "self.file is an io.FileIO (buffering 0, the default) or an io.BufferedWriter (another buffering of a client), see 19:24"
+    ],
+    "asciinema.asciicast.v1 27:54 call  self.__attrs.items()": [
+      "attrs is the dict of json.loads that open_from_file.__enter__ passes (line 53); a client value is opaque"
+    ],
+    "asciinema.asciicast.v1 50:64 call  self.file.read()": [
+      "self.file is the stream that open_from_url passes (line 99): sys.stdin or a text file of open(), or an encodings.utf_8.StreamReader; a client stream is opaque"
+    ],
+    "asciinema.asciicast.v1 60:24 call  self.file.close()": [
+      "self.file is the stream of open_from_url (see 50:64). A text file or sys.stdin closes itself; an encodings.utf_8.StreamReader has no close, and codecs.StreamReader.__getattr__ returns the close of the stream it wraps: the http.client.HTTPResponse or the gzip.GzipFile of open_url (lines 48-53), or the urllib.response.addinfourl that urlopen returns when the server redirects to an ftp URL (urllib's redirect to ftp; asciicast/__init__.py:50:30)"
+    ],
+    "asciinema.asciicast.v2 118:41 call  self.stdin_decoder.decode(data)": [
+      "self.stdin_decoder is the encodings.utf_8.IncrementalDecoder of __init__ (line 88)"
+    ],
+    "asciinema.asciicast.v2 22:42 call  header.get('idle_time_limit')": [
+      "header is the dict of json.loads in open_from_file.__enter__ (line 47); a client value is opaque"
+    ],
+    "asciinema.asciicast.v2 56:24 call  self.file.close()": [
+      "self.file is the stream of open_from_url (line 95) or the text file of get_duration (line 62). A text file or sys.stdin closes itself; an encodings.utf_8.StreamReader has no close, and codecs.StreamReader.__getattr__ returns the close of the stream it wraps: the http.client.HTTPResponse or the gzip.GzipFile of open_url, or the urllib.response.addinfourl that urlopen returns when the server redirects to an ftp URL (urllib's redirect to ftp; asciicast/__init__.py:50:30)"
+    ],
+    "asciinema.async_worker 15:27 call  Queue()": [
+      "optional import async_worker.py:1-9: Queue is multiprocessing.Queue, or queue.Queue where multiprocessing.synchronize cannot be imported; both sides run"
+    ],
+    "asciinema.async_worker 18:31 call  Process(target=self.run)": [
+      "optional import async_worker.py:1-9: Process is multiprocessing.Process, or threading.Thread; both sides run"
+    ],
+    "asciinema.async_worker 19:27 call  self.process.start()": [
+      "start() runs the target self.run (callback, as Thread.start in the README): async_writer.run for an async_writer, async_worker.run for an async_notifier or a plain async_worker (public). With multiprocessing the target runs in the child process that start() forks; with threading in a thread"
+    ],
+    "asciinema.async_worker 23:23 call  self.queue.put(None)": [
+      "self.queue is the queue of __init__: a multiprocessing.queues.Queue (what multiprocessing.Queue() returns) or a queue.Queue"
+    ],
+    "asciinema.async_worker 31:25 call  self.perform(payload)": [
+      "this run runs for an async_notifier or a plain async_worker (async_writer overrides run); only async_notifier defines perform (a plain async_worker raises AttributeError)"
+    ],
+    "asciinema.commands.cat 16:54 call  a.stdout_events()": [
+      "a is what open_from_url.__enter__ returns: a v2.Asciicast (v2 format) or a v1.Asciicast (v1 format)"
+    ],
+    "asciinema.commands.cat 17:37 call  sys.stdout.write(text)": [
+      "the default sys.stdout, a text stream named by its class (README)"
+    ],
+    "asciinema.commands.command 10:31 getattr  config.api_url": [
+      "config is the Config of config.load() that __main__.main passes (line 106); a client config is opaque"
+    ],
+    "asciinema.commands.command 10:47 call  env.get(\"USER\")": [
+      "env is os.environ, which __main__.main passes (line 106); a client mapping is opaque"
+    ],
+    "asciinema.commands.play 18:33 call  self.player.play(a, self.idle_time_limit, self.speed)": [
+      "self.player is the Player of __init__ (line 13); a player that a client passes is opaque, and no package code passes one"
+    ],
+    "asciinema.commands.record 107:38 call  result.get('message')": [
+      "result is the dict of Api.upload_asciicast: json.loads of a JSON object, or {'url': body}"
+    ],
+    "asciinema.commands.record 29:54 getattr  config.notifications_enabled": [
+      "config is the Config of config.load() that __main__.main passes; a client config is opaque"
+    ],
+    "asciinema.commands.record 68:22 call  filter(None, map((lambda var: var.strip()), self.env_whit...": [
+      "filter and map are lazy: the lambda runs when recorder.record iterates vars (recorder.py:37)"
+    ],
+    "asciinema.commands.record 68:55 call  var.strip()": [
+      "var is an element of self.env_whitelist.split(','), a str"
+    ],
+    "asciinema.commands.record 68:84 call  self.env_whitelist.split(',')": [
+      "env_whitelist is args.env, the str of -e or its default cfg.record_env (a str)"
+    ],
+    "asciinema.commands.record 94:39 call  sys.stdin.readline()": [
+      "the default sys.stdin, a text stream named by its class"
+    ],
+    "asciinema.commands.upload 18:34 call  result.get('message')": [
+      "result is the dict of Api.upload_asciicast: json.loads of a JSON object, or {'url': body}"
+    ],
+    "asciinema.config 131:40 call  env.get(\"ASCIINEMA_CONFIG_HOME\")": [
+      "env is os.environ, the default here and in load (line 153); a client mapping is opaque"
+    ],
+    "asciinema.config 37:24 call  self.env.get('ASCIINEMA_API_TOKEN')": [
+      "self.env is os.environ, the default of Config.__init__ (line 24) and of load (line 153); a mapping that a client passes is opaque (the tests pass dicts, asciinema.rejected.json)"
+    ],
+    "asciinema.config 73:26 call  self.env.get('ASCIINEMA_INSTALL_ID')": [
+      "self.env is os.environ, the default (see 37:24); a client mapping is opaque"
+    ],
+    "asciinema.config 82:28 call  self.env.get( 'ASCIINEMA_API_URL', self.config.get('api',...": [
+      "self.env is os.environ, the default (see 37:24); a client mapping is opaque"
+    ],
+    "asciinema.notifier 11:23 call  subprocess.run(self.args(text), capture_output=True)": [
+      "subprocess.run with capture_output exists on Python 3.7, a supported version (3.4 has no subprocess.run; 3.5 and 3.6 raise TypeError on capture_output)"
+    ],
+    "asciinema.notifier 11:33 call  self.args(text)": [
+      "self is a TerminalNotifier, AppleScriptNotifier or LibNotifyNotifier, which inherit notify (CustomCommandNotifier overrides it); a plain Notifier has no args"
+    ],
+    "asciinema.notifier 26:28 call  text.replace('\"', '\\\\\"')": [
+      "text is the str of _notify in pty.record ('Resumed recording', 'Paused recording'), through async_notifier"
+    ],
+    "asciinema.notifier 56:26 call  Notifier.__init__(self)": [
+      "Notifier.__init__ is object.__init__ (Notifier has no base class of the package and no __init__)"
+    ],
+    "asciinema.player 22:41 call  asciicast.stdout_events()": [
+      "asciicast is what play gets: PlayCommand.execute passes the result of open_from_url.__enter__, a v2.Asciicast or a v1.Asciicast; a client object is opaque"
+    ],
+    "asciinema.player 39:58 call  stdin.fileno()": [
+      "stdin is the text file of open('/dev/tty') that play passes (line 15), or None, which the while test excludes"
+    ],
+    "asciinema.player 74:29 call  sys.stdout.write(text)": [
+      "the default sys.stdout, a text stream named by its class (README)"
+    ],
+    "asciinema.pty 135:19 call  os.execvpe(command[0], command, env)": [
+      "runs in the child process that pty.fork() makes; it replaces the child with the command"
+    ],
+    "asciinema.recorder 37:53 call  command_env.get(var)": [
+      "command_env is the dict of os.environ.copy() (line 17) when the caller passes none, or os.environ, which RecordCommand passes (its env from __main__.main, line 106); a client mapping is opaque"
+    ],
+    "asciinema.recorder 37:70 iter  capture_env": [
+      "RecordCommand.execute passes filter(None, map(<lambda1>, ...)) as capture_env (commands/record.py:68, 78): iterating it here calls the lambda (callback of map); the default is the list ['SHELL', 'TERM']; a client iterable is opaque"
+    ],
+    "asciinema.recorder 49:19 call  record( ['sh', '-c', command], w, command_env, rec_stdin,...": [
+      "record is the parameter of line 12, whose default is pty.record; neither RecordCommand.execute (commands/record.py:71) nor record_asciicast (__init__.py:15) passes one; a client function is a client callback"
+    ],
+    "asciinema.recorder 74:25 call  self.writer(self.path, metadata=self.metadata, append=sel...": [
+      "self.writer is set only in __init__ (line 62) from the writer that recorder.record passes (line 47): its default v2.writer (line 12), or raw.writer or v2.writer from RecordCommand (commands/record.py:28, 80); a client class is a client callback"
+    ],
+    "asciinema.recorder 95:37 call  self.notifier.notify(text)": [
+      "get_notifier returns a CustomCommandNotifier, a TerminalNotifier, AppleScriptNotifier or LibNotifyNotifier (which inherit Notifier.notify), or a NoopNotifier; record_asciicast passes None, which the test at line 94 excludes; a client notifier is opaque"
+    ],
+    "asciinema.term 22:26 call  tty.tcsetattr(self.fd, tty.TCSAFLUSH, self.mode)": [
+      "tty re-exports tcsetattr from termios; named where it is defined (see 14:38)"
+    ],
+    "asciinema.urllib_http_adapter 31:41 call  fields.items()": [
+      "iter documents fields as a dict (urllib_http_adapter.py:26), so B4 admits dict.items for that parameter independently of the default {} of post. Api.upload_asciicast passes no fields."
+    ],
+    "asciinema.urllib_http_adapter 33:26 call  encoder('--{}\\r\\n'.format(self.boundary))": [
+      "encoder is codecs.getencoder('utf-8') (line 30), the encode function of the UTF-8 codec, encodings.utf_8.encode (codecs.utf_8_encode)"
+    ],
+    "asciinema.urllib_http_adapter 34:26 call  encoder(self.u('Content-Disposition: form-data; name=\"{}\"...": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 34:89 call  self.u('Content-Disposition: form-data; name=\"{}\"\\r\\n').f...": [
+      "u returns the str literal unchanged"
+    ],
+    "asciinema.urllib_http_adapter 35:26 call  encoder('\\r\\n')": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 38:26 call  encoder(self.u(value))": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 39:26 call  encoder('\\r\\n')": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 40:49 call  files.items()": [
+      "iter documents files as a dict (urllib_http_adapter.py:27), so B4 admits dict.items. The package also supplies the dict of Api.upload_asciicast (api.py:37) or post's default {}. File-like values stored inside it remain opaque unless supplied by package code."
+    ],
+    "asciinema.urllib_http_adapter 44:26 call  encoder('--{}\\r\\n'.format(self.boundary))": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 45:104 call  self.u('Content-Disposition: form-data; name=\"{}\"; filena...": [
+      "u returns the str literal unchanged"
+    ],
+    "asciinema.urllib_http_adapter 45:26 call  encoder(self.u('Content-Disposition: form-data; name=\"{}\"...": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 46:26 call  encoder('Content-Type: application/octet-stream\\r\\n')": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 47:26 call  encoder('\\r\\n')": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 48:26 call  f.read()": [
+      "f is the file of the files entry: Api.upload_asciicast passes the binary file of open(path, 'rb') (api.py:33-37); a client file is opaque"
+    ],
+    "asciinema.urllib_http_adapter 50:26 call  encoder('\\r\\n')": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 51:22 call  encoder('--{}--\\r\\n'.format(self.boundary))": [
+      "encoder is codecs.getencoder('utf-8') (line 30), encodings.utf_8.encode"
+    ],
+    "asciinema.urllib_http_adapter 65:31 call  headers.copy()": [
+      "headers is the dict of Api._headers that Api.upload_asciicast passes, or the default {}; a client mapping is opaque"
+    ],
+    "asciinema.urllib_http_adapter 79:33 call  response.read()": [
+      "urlopen of the http(s) upload URL returns an http.client.HTTPResponse. An FTP addinfourl response cannot reach this read: old versions lack status, and modern versions lack getheaders, which _parse_headers calls first"
+    ],
+    "asciinema.urllib_http_adapter 83:26 call  e.read()": [
+      "e is a urllib.error.HTTPError, an urllib.response.addinfourl around the failed response. On 3.5 and later, addbase is a tempfile._TemporaryFileWrapper, whose __getattr__ returns its local func_wrapper around the read of the response; on 3.4, addbase.__init__ binds read to the read of the response (asciinema.md)"
+    ]
+  },
+  "trace": "dynamic/asciinema.json"
+}

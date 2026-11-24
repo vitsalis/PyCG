@@ -1,0 +1,31 @@
+# The test environment of configargparse v1.9.0 (batch 2):
+# the full closure on CPython 3.14, each file by version and SHA-256.
+# configargparse itself is not installed: the trace uses the checkout
+# projects/configargparse.
+#   pip install --require-hashes --only-binary :all: --no-deps -r configargparse.txt
+# "PyPI" names the hashes taken from PyPI's JSON for that version (pinned by
+# hash, not read). The versions are those of the trace that was recorded
+# outside a container (dynamic/configargparse.json, "distributions").
+
+# PyPI. setup.py tests_require lists pytest, unpinned.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# PyPI (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# PyPI (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# PyPI (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# PyPI (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+# PyPI. setup.py extra "yaml". The aarch64 wheel for Linux
+# (manylinux: a C extension).
+pyyaml==6.0.3 \
+    --hash=sha256:501a031947e3a9025ed4405a168e6ef5ae3126c59f90ce0cd6f2bfc477be31b7
+# PyPI. setup.py extra "toml".
+toml==0.10.2 \
+    --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b

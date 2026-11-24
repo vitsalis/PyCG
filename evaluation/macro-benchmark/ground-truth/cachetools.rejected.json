@@ -1,0 +1,47 @@
+{
+  "cachetools.Cache.__setitem__": {
+    "<builtin>.len": "self.getsizeof(value) (__init__.py:75) calls the client's getsizeof: tests/test_ttl.py:285 and tests/test_tlru.py:417 pass getsizeof=len"
+  },
+  "cachetools.RRCache.popitem": {
+    "<builtin>.max": "self.__choice(keys) (__init__.py:374) calls the client's choice: tests/test_rr.py:93 passes choice=max",
+    "<builtin>.min": "self.__choice(keys) (__init__.py:374) calls the client's choice: tests/test_rr.py:13, 38, 60, 93 and tests/test_func.py:196 pass choice=min"
+  },
+  "cachetools._TimedCache._Timer.__call__": {
+    "datetime.datetime.now": "self.__timer() (__init__.py:395) calls the client's timer: tests/test_ttl.py:220, tests/test_tlru.py:362 and tests/test_func.py:267 pass timer=datetime.now"
+  },
+  "cachetools._TimedCache._Timer.__enter__": {
+    "datetime.datetime.now": "self.__timer() (__init__.py:401) calls the client's timer: tests/test_ttl.py:220, tests/test_tlru.py:362 and tests/test_func.py:267 pass timer=datetime.now"
+  },
+  "cachetools._decorator._BasicMixin.cache_clear": {
+    "<builtin>.dict.clear": "self.cache.clear() (_decorator.py:34) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache; the package passes its dict only to _ConditionInfoWrapper (func.py)"
+  },
+  "cachetools._decorator._ConditionMixin.__call__": {
+    "threading.Condition.notify_all": "cond.notify_all() (_decorator.py:96) on the client's condition: tests/test_threading.py passes threading.Condition() and its subclass WaitCondition with info=False; the package creates a Condition only with info=True (func.py:28)"
+  },
+  "cachetools._decorator._ConditionMixin.cache_clear": {
+    "<builtin>.dict.clear": "self.cache.clear() (_decorator.py:100) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache; the package passes its dict only to _ConditionInfoWrapper (func.py)"
+  },
+  "cachetools._decorator._InfoMixin.cache_clear": {
+    "<builtin>.dict.clear": "self.cache.clear() (_decorator.py:127) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache; the package passes its dict only to _ConditionInfoWrapper (func.py)"
+  },
+  "cachetools._decorator._LockedInfoMixin.__call__": {
+    "<builtin>.dict.setdefault": "cache.setdefault(key, val) (_decorator.py:158) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache with a lock; the package passes its dict only with a condition (func.py)"
+  },
+  "cachetools._decorator._LockedInfoMixin.cache_clear": {
+    "<builtin>.dict.clear": "self.cache.clear() (_decorator.py:164) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache; the package passes its dict only to _ConditionInfoWrapper (func.py)"
+  },
+  "cachetools._decorator._LockedMixin.__call__": {
+    "<builtin>.dict.setdefault": "cache.setdefault(key, val) (_decorator.py:57) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache with a lock; the package passes its dict only with a condition (func.py)"
+  },
+  "cachetools._decorator._LockedMixin.cache_clear": {
+    "<builtin>.dict.clear": "self.cache.clear() (_decorator.py:63) on the client's cache: tests/test_cached.py:501 (DictTest) and tests/test_cachedmethod.py:967 (DictMethodTest) pass a dict as cache; the package passes its dict only to _ConditionInfoWrapper (func.py)"
+  },
+  "cachetools._descriptor._MethodDescriptor.__get__": {
+    "<builtin>.dict.get": "At _descriptor.py:63, wrappers is assigned the return of obj.__dict__.setdefault. The receiver is an attribute of the client instance, with only a mutable-mapping contract (docs/index.rst:588-592). Under global B5 the method and its returned value are opaque. Passing a package-created {} as an argument does not establish the type or identity of the returned object. Thus the subsequent explicit wrappers method call has no concrete outside callee. The other obj.__dict__.setdefault sites at lines56 and63 are also opaque, and provide no alternative witness for dict.setdefault.",
+    "<builtin>.dict.setdefault": "At _descriptor.py:63, wrappers is assigned the return of obj.__dict__.setdefault. The receiver is an attribute of the client instance, with only a mutable-mapping contract (docs/index.rst:588-592). Under global B5 the method and its returned value are opaque. Passing a package-created {} as an argument does not establish the type or identity of the returned object. Thus the subsequent explicit wrappers method call has no concrete outside callee. The other obj.__dict__.setdefault sites at lines56 and63 are also opaque, and provide no alternative witness for dict.setdefault."
+  },
+  "cachetools._descriptor._Unbound.__call__": {
+    "cachetools._decorator._BasicMixin.__call__": "At _descriptor.py:142, the outer call receives the result of _MethodDescriptor.__get__. Every successful obj-is-not-None path returns an opaque client result: the ordinary path overwrites wrapper with obj.__dict__.setdefault at line56; the super path obtains wrappers through the opaque call at line63, then takes wrapper from its get at line66 or overwrites a newly created wrapper with its setdefault result at line69. Exceptions at lines58/65 always raise through __instance_dict_error and cannot expose the earlier package wrapper. Therefore B5 excludes inferring any of the six mixin __call__ targets from this outer call. Its sole alternative source site is the same line142; none avoids the client-result boundary. The obj-is-None path directly returns a package _Unbound at line42, so the recursive _Unbound.__call__ edge remains supported.",
+    "cachetools._decorator._InfoMixin.__call__": "At _descriptor.py:142, the outer call receives the result of _MethodDescriptor.__get__. Every successful obj-is-not-None path returns an opaque client result: the ordinary path overwrites wrapper with obj.__dict__.setdefault at line56; the super path obtains wrappers through the opaque call at line63, then takes wrapper from its get at line66 or overwrites a newly created wrapper with its setdefault result at line69. Exceptions at lines58/65 always raise through __instance_dict_error and cannot expose the earlier package wrapper. Therefore B5 excludes inferring any of the six mixin __call__ targets from this outer call. Its sole alternative source site is the same line142; none avoids the client-result boundary. The obj-is-None path directly returns a package _Unbound at line42, so the recursive _Unbound.__call__ edge remains supported."
+  }
+}

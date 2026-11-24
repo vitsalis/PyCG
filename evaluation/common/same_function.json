@@ -1,0 +1,249 @@
+{
+ "about": "Groups of names of one function of the standard library: score.py counts every name of a group as its representative, for every tool and both graphs, outside the analysed package. A group is here only if its names are one object on every supported CPython (3.12 to 3.15; tests/test_same_function_table.py checks the interpreter that runs it). A person reviews each group and writes its source. Keep the groups sorted by representative and the names sorted.",
+ "groups": [
+  {
+   "representative": "<builtin>.BaseException.with_traceback",
+   "names": [
+    "<builtin>.BaseException.with_traceback",
+    "<builtin>.RuntimeError.with_traceback"
+   ],
+   "source": "Objects/exceptions.c: RuntimeError inherits with_traceback from BaseException"
+  },
+  {
+   "representative": "argparse.HelpFormatter._expand_help",
+   "names": [
+    "argparse.HelpFormatter._expand_help",
+    "argparse.RawDescriptionHelpFormatter._expand_help"
+   ],
+   "source": "Lib/argparse.py: RawDescriptionHelpFormatter subclasses HelpFormatter, which defines _expand_help"
+  },
+  {
+   "representative": "argparse._ActionsContainer.add_argument",
+   "names": [
+    "argparse.ArgumentParser.add_argument",
+    "argparse._ActionsContainer.add_argument",
+    "argparse._ArgumentGroup.add_argument"
+   ],
+   "source": "Lib/argparse.py: ArgumentParser and _ArgumentGroup subclass _ActionsContainer, which defines add_argument"
+  },
+  {
+   "representative": "argparse._StoreConstAction.__call__",
+   "names": [
+    "argparse._StoreConstAction.__call__",
+    "argparse._StoreFalseAction.__call__",
+    "argparse._StoreTrueAction.__call__"
+   ],
+   "source": "Lib/argparse.py: _StoreTrueAction and _StoreFalseAction subclass _StoreConstAction, which defines __call__"
+  },
+  {
+   "representative": "collections.abc.Mapping.get",
+   "names": [
+    "collections.abc.Mapping.get",
+    "os._Environ.get"
+   ],
+   "source": "Lib/os.py: _Environ subclasses MutableMapping, which inherits get from Mapping (Lib/_collections_abc.py)"
+  },
+  {
+   "representative": "copy.Error",
+   "names": [
+    "copy.Error",
+    "copy.error"
+   ],
+   "source": "Lib/copy.py: `error = Error`, one class with two names"
+  },
+  {
+   "representative": "email.message.Message.get_content_charset",
+   "names": [
+    "email.message.Message.get_content_charset",
+    "http.client.HTTPMessage.get_content_charset"
+   ],
+   "source": "Lib/http/client.py: HTTPMessage subclasses email.message.Message, which defines get_content_charset"
+  },
+  {
+   "representative": "logging.Logger.addHandler",
+   "names": [
+    "logging.Logger.addHandler",
+    "logging.RootLogger.addHandler"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines addHandler"
+  },
+  {
+   "representative": "logging.Logger.callHandlers",
+   "names": [
+    "logging.Logger.callHandlers",
+    "logging.RootLogger.callHandlers"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines callHandlers"
+  },
+  {
+   "representative": "logging.Logger.critical",
+   "names": [
+    "logging.Logger.critical",
+    "logging.RootLogger.critical"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines critical"
+  },
+  {
+   "representative": "logging.Logger.debug",
+   "names": [
+    "logging.Logger.debug",
+    "logging.RootLogger.debug"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines debug"
+  },
+  {
+   "representative": "logging.Logger.error",
+   "names": [
+    "logging.Logger.error",
+    "logging.RootLogger.error"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines error"
+  },
+  {
+   "representative": "logging.Logger.exception",
+   "names": [
+    "logging.Logger.exception",
+    "logging.RootLogger.exception"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines exception"
+  },
+  {
+   "representative": "logging.Logger.findCaller",
+   "names": [
+    "logging.Logger.findCaller",
+    "logging.RootLogger.findCaller"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines findCaller"
+  },
+  {
+   "representative": "logging.Logger.getChild",
+   "names": [
+    "logging.Logger.getChild",
+    "logging.RootLogger.getChild"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines getChild"
+  },
+  {
+   "representative": "logging.Logger.getEffectiveLevel",
+   "names": [
+    "logging.Logger.getEffectiveLevel",
+    "logging.RootLogger.getEffectiveLevel"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines getEffectiveLevel"
+  },
+  {
+   "representative": "logging.Logger.handle",
+   "names": [
+    "logging.Logger.handle",
+    "logging.RootLogger.handle"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines handle"
+  },
+  {
+   "representative": "logging.Logger.hasHandlers",
+   "names": [
+    "logging.Logger.hasHandlers",
+    "logging.RootLogger.hasHandlers"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines hasHandlers"
+  },
+  {
+   "representative": "logging.Logger.info",
+   "names": [
+    "logging.Logger.info",
+    "logging.RootLogger.info"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines info"
+  },
+  {
+   "representative": "logging.Logger.isEnabledFor",
+   "names": [
+    "logging.Logger.isEnabledFor",
+    "logging.RootLogger.isEnabledFor"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines isEnabledFor"
+  },
+  {
+   "representative": "logging.Logger.makeRecord",
+   "names": [
+    "logging.Logger.makeRecord",
+    "logging.RootLogger.makeRecord"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines makeRecord"
+  },
+  {
+   "representative": "logging.Logger.removeHandler",
+   "names": [
+    "logging.Logger.removeHandler",
+    "logging.RootLogger.removeHandler"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines removeHandler"
+  },
+  {
+   "representative": "logging.Logger.setLevel",
+   "names": [
+    "logging.Logger.setLevel",
+    "logging.RootLogger.setLevel"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines setLevel"
+  },
+  {
+   "representative": "logging.Logger.warning",
+   "names": [
+    "logging.Logger.warning",
+    "logging.RootLogger.warning"
+   ],
+   "source": "Lib/logging/__init__.py: RootLogger subclasses Logger, which defines warning"
+  },
+  {
+   "representative": "pathlib.Path.exists",
+   "names": [
+    "pathlib.Path.exists",
+    "pathlib.WindowsPath.exists"
+   ],
+   "source": "Lib/pathlib: PosixPath and WindowsPath subclass Path and define no exists of their own"
+  },
+  {
+   "representative": "pathlib.Path.open",
+   "names": [
+    "pathlib.Path.open",
+    "pathlib.WindowsPath.open"
+   ],
+   "source": "Lib/pathlib: PosixPath and WindowsPath subclass Path and define no open of their own"
+  },
+  {
+   "representative": "pathlib.Path.read_text",
+   "names": [
+    "pathlib.Path.read_text",
+    "pathlib.PosixPath.read_text",
+    "pathlib.WindowsPath.read_text"
+   ],
+   "source": "Lib/pathlib: PosixPath and WindowsPath subclass Path and define no read_text of their own"
+  },
+  {
+   "representative": "pathlib.Path.with_suffix",
+   "names": [
+    "pathlib.Path.with_suffix",
+    "pathlib.PosixPath.with_suffix",
+    "pathlib.WindowsPath.with_suffix"
+   ],
+   "source": "Lib/pathlib: PosixPath and WindowsPath subclass Path and define no with_suffix of their own"
+  },
+  {
+   "representative": "pathlib.PurePath.joinpath",
+   "names": [
+    "pathlib.PurePath.joinpath",
+    "pathlib.WindowsPath.joinpath"
+   ],
+   "source": "Lib/pathlib: WindowsPath subclasses Path and PureWindowsPath, which inherit joinpath from PurePath"
+  },
+  {
+   "representative": "urllib.parse._ResultMixinStr.encode",
+   "names": [
+    "urllib.parse.SplitResult.encode",
+    "urllib.parse._ResultMixinStr.encode"
+   ],
+   "source": "Lib/urllib/parse.py: SplitResult inherits encode from _ResultMixinStr through _NetlocResultMixinStr"
+  }
+ ]
+}

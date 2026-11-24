@@ -1,0 +1,459 @@
+{
+  "edges": {
+    "pypinyin": {
+      "<builtin>.str.encode": [
+        "pypinyin 56:24 call  x.encode('utf-8')"
+      ]
+    },
+    "pypinyin.__main__": {
+      "pypinyin.runner.main": [
+        "pypinyin.__main__ 6:9 call  main()"
+      ]
+    },
+    "pypinyin.contrib.neutral_tone.NeutralToneWith5Mixin.post_convert_style": {
+      "_sre.SRE_Pattern.search": [
+        "pypinyin.contrib.neutral_tone 62:29 call  _re_number.search(converted_pinyin)"
+      ]
+    },
+    "pypinyin.contrib.tone_sandhi.ToneSandhiMixin._bu": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.contrib.tone_sandhi 112:55 call  _re_num.sub('4', current_pinyin)",
+        "pypinyin.contrib.tone_sandhi 115:51 call  _re_num.sub('4', current_pinyin)"
+      ]
+    },
+    "pypinyin.contrib.tone_sandhi.ToneSandhiMixin._yi": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.contrib.tone_sandhi 154:55 call  _re_num.sub('4', current_pinyin)",
+        "pypinyin.contrib.tone_sandhi 157:51 call  _re_num.sub('1', current_pinyin)"
+      ]
+    },
+    "pypinyin.converter.DefaultConverter.convert": {
+      "_sre.SRE_Pattern.match": [
+        "pypinyin.converter 53:25 call  RE_HANS.match(words)"
+      ]
+    },
+    "pypinyin.core.Pinyin.pinyin": {
+      "_sre.SRE_Pattern.match": [
+        "pypinyin.core 97:41 call  RE_HANS.match(h)"
+      ],
+      "pypinyin.converter.Converter.convert": [
+        "pypinyin.core 107:40 call  self._converter.convert( words, style, heteronym, errors,..."
+      ]
+    },
+    "pypinyin.runner": {
+      "pypinyin.runner.main": [
+        "pypinyin.runner 144:9 call  main()"
+      ]
+    },
+    "pypinyin.runner.main": {
+      "<builtin>.bytes.decode": [
+        "pypinyin.runner 102:23 call  han.decode(sys.stdin.encoding or 'utf-8')"
+      ],
+      "<builtin>.getattr": [
+        "pypinyin.runner 106:19 call  getattr(pypinyin, options.func)"
+      ],
+      "<builtin>.isinstance": [
+        "pypinyin.runner 134:35 call  isinstance(result, (list, tuple))",
+        "pypinyin.runner 135:26 call  isinstance(result[0], (list, tuple))"
+      ],
+      "<builtin>.list.append": [
+        "pypinyin.runner 95:20 call  args.append(pipe_data)"
+      ],
+      "<builtin>.print": [
+        "pypinyin.runner 133:18 call  print('')",
+        "pypinyin.runner 136:22 call  print(' '.join([','.join(s) for s in result]))",
+        "pypinyin.runner 138:22 call  print(result)",
+        "pypinyin.runner 140:18 call  print(result)"
+      ],
+      "<builtin>.str.join": [
+        "pypinyin.runner 136:31 call  ' '.join([','.join(s) for s in result])",
+        "pypinyin.runner 136:41 call  ','.join(s)"
+      ],
+      "<builtin>.str.strip": [
+        "pypinyin.runner 90:43 call  sys.stdin.read().strip()"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "pypinyin.runner 99:32 call  parser.parse_args(args)"
+      ],
+      "io.TextIOWrapper.isatty": [
+        "pypinyin.runner 89:28 call  sys.stdin.isatty()"
+      ],
+      "io.TextIOWrapper.read": [
+        "pypinyin.runner 90:35 call  sys.stdin.read()"
+      ],
+      "logging.disable": [
+        "pypinyin.runner 86:20 call  logging.disable(logging.CRITICAL)"
+      ],
+      "pypinyin.core.pinyin": [
+        "pypinyin.runner 126:20 call  func(han, style=style, **kwargs)"
+      ],
+      "pypinyin.core.slug": [
+        "pypinyin.runner 126:20 call  func(han, style=style, **kwargs)"
+      ],
+      "pypinyin.runner.get_parser": [
+        "pypinyin.runner 98:24 call  get_parser()"
+      ]
+    },
+    "pypinyin.seg.simpleseg._seg": {
+      "_sre.SRE_Pattern.match": [
+        "pypinyin.seg.simpleseg 45:25 call  RE_HANS.match(c)"
+      ]
+    },
+    "pypinyin.seg.simpleseg.seg": {
+      "_sre.SRE_Pattern.match": [
+        "pypinyin.seg.simpleseg 15:29 call  RE_HANS.match(x)"
+      ]
+    },
+    "pypinyin.standard.convert_iou": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.standard 133:21 call  IU_RE.sub(lambda m: m.group(1) + IU_MAP[m.group(2)], pinyin)"
+      ]
+    },
+    "pypinyin.standard.convert_iou.<lambda1>": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.standard 133:39 call  m.group(1)",
+        "pypinyin.standard 133:59 call  m.group(2)"
+      ]
+    },
+    "pypinyin.standard.convert_uei": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.standard 142:21 call  UI_RE.sub(lambda m: m.group(1) + UI_MAP[m.group(2)], pinyin)"
+      ]
+    },
+    "pypinyin.standard.convert_uei.<lambda1>": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.standard 142:39 call  m.group(1)",
+        "pypinyin.standard 142:59 call  m.group(2)"
+      ]
+    },
+    "pypinyin.standard.convert_uen": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.standard 151:21 call  UN_RE.sub(lambda m: m.group(1) + UN_MAP[m.group(2)], pinyin)"
+      ]
+    },
+    "pypinyin.standard.convert_uen.<lambda1>": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.standard 151:39 call  m.group(1)",
+        "pypinyin.standard 151:59 call  m.group(2)"
+      ]
+    },
+    "pypinyin.standard.convert_uv": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.standard 122:21 call  UV_RE.sub( lambda m: ''.join((m.group(1), UV_MAP[m.group(..."
+      ]
+    },
+    "pypinyin.standard.convert_uv.<lambda1>": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.standard 123:35 call  m.group(1)",
+        "pypinyin.standard 123:54 call  m.group(2)",
+        "pypinyin.standard 123:67 call  m.group(3)"
+      ]
+    },
+    "pypinyin.style._tone_convert._get_number_from_pinyin": {
+      "_sre.SRE_Pattern.findall": [
+        "pypinyin.style._tone_convert 559:33 call  _re_number.findall(pinyin)"
+      ]
+    },
+    "pypinyin.style._tone_convert.to_finals_tone3": {
+      "_sre.SRE_Pattern.findall": [
+        "pypinyin.style._tone_convert 299:33 call  _re_number.findall(replace_symbol_to_number(pinyin))"
+      ]
+    },
+    "pypinyin.style._tone_convert.to_tone": {
+      "_sre.SRE_Pattern.search": [
+        "pypinyin.style._tone_convert 67:29 call  _re_number.search(pinyin)"
+      ]
+    },
+    "pypinyin.style._tone_convert.tone2_to_normal": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._tone_convert 424:23 call  _re_number.sub('', tone2)"
+      ]
+    },
+    "pypinyin.style._tone_convert.tone2_to_tone": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._tone_convert 450:21 call  regex.sub(_replace, string)"
+      ]
+    },
+    "pypinyin.style._tone_convert.tone2_to_tone._replace": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.style._tone_convert 447:20 call  m.group(0)"
+      ]
+    },
+    "pypinyin.style._tone_convert.tone2_to_tone3": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._tone_convert 472:25 call  RE_TONE3.sub(r'\\1\\3\\2', tone2)"
+      ]
+    },
+    "pypinyin.style._tone_convert.tone3_to_normal": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._tone_convert 495:23 call  _re_number.sub('', tone3)"
+      ]
+    },
+    "pypinyin.style._tone_convert.tone_to_normal": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._tone_convert 332:23 call  _re_number.sub('', s)"
+      ]
+    },
+    "pypinyin.style._utils.replace_symbol_to_no_symbol": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._utils 84:25 call  RE_NUMBER.sub('', value)"
+      ]
+    },
+    "pypinyin.style._utils.replace_symbol_to_number": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style._utils 74:35 call  RE_PHONETIC_SYMBOL.sub(_replace, pinyin)"
+      ]
+    },
+    "pypinyin.style._utils.replace_symbol_to_number._replace": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.style._utils 69:29 call  match.group(0)"
+      ]
+    },
+    "pypinyin.style.bopomofo.BopomofoConverter._pre_convert": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.bopomofo 69:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)"
+      ]
+    },
+    "pypinyin.style.bopomofo.BopomofoConverter.to_bopomofo": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.bopomofo 57:33 call  find_re.sub(replace, pinyin)"
+      ]
+    },
+    "pypinyin.style.braille_mainland.BrailleMainlandConverter.to_braille_mainland": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.braille_mainland 86:33 call  find_re.sub(replace, pinyin)"
+      ]
+    },
+    "pypinyin.style.braille_mainland.BrailleMainlandConverter.to_braille_mainland_tone": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.braille_mainland 77:30 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)",
+        "pypinyin.style.braille_mainland 79:33 call  find_re.sub(replace, pinyin)"
+      ]
+    },
+    "pypinyin.style.cyrillic.CyrillicfoConverter._pre_convert": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.cyrillic 72:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)"
+      ]
+    },
+    "pypinyin.style.cyrillic.CyrillicfoConverter.to_cyrillic": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.cyrillic 60:33 call  find_re.sub(replace, pinyin)"
+      ]
+    },
+    "pypinyin.style.gwoyeu.GwoyeuConverter._pre_convert": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.gwoyeu 63:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)"
+      ]
+    },
+    "pypinyin.style.gwoyeu.GwoyeuConverter.to_gwoyeu": {
+      "_sre.SRE_Pattern.search": [
+        "pypinyin.style.gwoyeu 70:30 call  find_re.search(pinyin)"
+      ],
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.gwoyeu 68:33 call  find_re.sub(replace, pinyin)",
+        "pypinyin.style.gwoyeu 71:35 call  find_re.sub(replace, pinyin)"
+      ]
+    },
+    "pypinyin.style.register.decorator.wrapper": {
+      "pypinyin.style.initials.convert": [
+        "pypinyin.style 57:24 call  func(pinyin, **kwargs)"
+      ]
+    },
+    "pypinyin.style.tone.ToneConverter.to_tone3": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.style.tone 28:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)"
+      ]
+    },
+    "pypinyin.tools.toneconvert": {
+      "pypinyin.tools.toneconvert.main": [
+        "pypinyin.tools.toneconvert 103:9 call  main(sys.argv[1:])"
+      ]
+    },
+    "pypinyin.tools.toneconvert.convert": {
+      "_sre.SRE_Pattern.sub": [
+        "pypinyin.tools.toneconvert 63:31 call  re_pinyin.sub(lambda m: re_sub(action, m), item)"
+      ]
+    },
+    "pypinyin.tools.toneconvert.main": {
+      "<builtin>.list.append": [
+        "pypinyin.tools.toneconvert 95:20 call  argv.append(pipe_data)"
+      ]
+    },
+    "pypinyin.tools.toneconvert.re_sub": {
+      "_sre.SRE_Match.group": [
+        "pypinyin.tools.toneconvert 48:37 call  match_obj.group(2)",
+        "pypinyin.tools.toneconvert 49:43 call  match_obj.group(1)"
+      ]
+    },
+    "pypinyin.utils._replace_tone2_style_dict_to_default": {
+      "pypinyin.style._tone_convert.tone2_to_tone": [
+        "pypinyin.utils 12:25 call  tone2_to_tone(string)"
+      ]
+    }
+  },
+  "notes": {
+    "pypinyin 56:24 call  x.encode('utf-8')": [
+      "Python 2 only (if PY2, __init__.py:54); current support includes CPython 2.7 (README.rst:15); there x is a unicode str (unicode_literals), so the callee is unicode.encode, named by its Python 3 counterpart str.encode (judgement in pypinyin.md)"
+    ],
+    "pypinyin.contrib.neutral_tone 62:29 call  _re_number.search(converted_pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.contrib.tone_sandhi 112:55 call  _re_num.sub('4', current_pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.contrib.tone_sandhi 115:51 call  _re_num.sub('4', current_pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.contrib.tone_sandhi 154:55 call  _re_num.sub('4', current_pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.contrib.tone_sandhi 157:51 call  _re_num.sub('1', current_pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.converter 53:25 call  RE_HANS.match(words)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.core 107:40 call  self._converter.convert( words, style, heteronym, errors,...": [
+      "self._converter is the converter argument of Pinyin.__init__ (stub type Converter, core.pyi) or a new DefaultConverter: a DefaultConverter; an UltimateConverter (core.pinyin, core.lazy_pinyin), which inherits DefaultConverter.convert; or a plain Converter, a public class that is not abstract by abc, whose convert raises NotImplementedError (judgement in pypinyin.md); a client converter class is client code"
+    ],
+    "pypinyin.core 97:41 call  RE_HANS.match(h)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.runner 102:23 call  han.decode(sys.stdin.encoding or 'utf-8')": [
+      "Python 2 only (if PY2, runner.py:100), which requires-python admits; there the arguments and the stdin data are byte strs (Python 2 str), so the callee is str.decode, named by its Python 3 counterpart bytes.decode (judgement in pypinyin.md)"
+    ],
+    "pypinyin.runner 126:20 call  func(han, style=style, **kwargs)": [
+      "func is getattr(pypinyin, options.func) (line 106), and argparse limits options.func to the choices 'pinyin' and 'slug' (line 60): pypinyin.pinyin and pypinyin.slug, imported from pypinyin.core (__init__.py:26)"
+    ],
+    "pypinyin.seg.simpleseg 15:29 call  RE_HANS.match(x)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.seg.simpleseg 45:25 call  RE_HANS.match(c)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 122:21 call  UV_RE.sub( lambda m: ''.join((m.group(1), UV_MAP[m.group(...": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 123:35 call  m.group(1)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 123:54 call  m.group(2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 123:67 call  m.group(3)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 133:21 call  IU_RE.sub(lambda m: m.group(1) + IU_MAP[m.group(2)], pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 133:39 call  m.group(1)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 133:59 call  m.group(2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 142:21 call  UI_RE.sub(lambda m: m.group(1) + UI_MAP[m.group(2)], pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 142:39 call  m.group(1)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 142:59 call  m.group(2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 151:21 call  UN_RE.sub(lambda m: m.group(1) + UN_MAP[m.group(2)], pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 151:39 call  m.group(1)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.standard 151:59 call  m.group(2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style 57:24 call  func(pinyin, **kwargs)": [
+      "func is the function that the decorator of register(style) decorates (line 52); in the package only initials.convert uses @register (initials.py:10); a function that a client decorates with @register is a client callback"
+    ],
+    "pypinyin.style._tone_convert 299:33 call  _re_number.findall(replace_symbol_to_number(pinyin))": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 332:23 call  _re_number.sub('', s)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 424:23 call  _re_number.sub('', tone2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 447:20 call  m.group(0)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 450:21 call  regex.sub(_replace, string)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 472:25 call  RE_TONE3.sub(r'\\1\\3\\2', tone2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 495:23 call  _re_number.sub('', tone3)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 559:33 call  _re_number.findall(pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._tone_convert 67:29 call  _re_number.search(pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._utils 69:29 call  match.group(0)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._utils 74:35 call  RE_PHONETIC_SYMBOL.sub(_replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style._utils 84:25 call  RE_NUMBER.sub('', value)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.bopomofo 57:33 call  find_re.sub(replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.bopomofo 69:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.braille_mainland 77:30 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.braille_mainland 79:33 call  find_re.sub(replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.braille_mainland 86:33 call  find_re.sub(replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.cyrillic 60:33 call  find_re.sub(replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.cyrillic 72:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.gwoyeu 63:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.gwoyeu 68:33 call  find_re.sub(replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.gwoyeu 70:30 call  find_re.search(pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.gwoyeu 71:35 call  find_re.sub(replace, pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.style.tone 28:28 call  RE_TONE3.sub(r'\\1\\3\\2', pinyin)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.tools.toneconvert 48:37 call  match_obj.group(2)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.tools.toneconvert 49:43 call  match_obj.group(1)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ],
+    "pypinyin.tools.toneconvert 63:31 call  re_pinyin.sub(lambda m: re_sub(action, m), item)": [
+      "Regex receivers are package-owned re.compile products: constants.RE_HANS, standard UV/IU/UI/UN_RE, style._constants patterns, _tone_convert._re_number/local regex, contrib number patterns, replacement-table compiled patterns, and tools.toneconvert.re_pinyin. Match values are supplied by those own re operations to package replacement callbacks, not injected client values."
+    ]
+  },
+  "trace": "dynamic/pypinyin.json"
+}

@@ -1,0 +1,1431 @@
+# Call-site ledger of Sublist3r at 3f5fc6da0142540c56e97c98f9925bb7d0855fb5.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# Ground truth from reading only: the project has no tests, so there is no
+# trace. Analysed: sublist3r.py (module sublist3r) and subbrute/ (modules
+# subbrute and subbrute.subbrute). Supported: Python 2.7 and Python 3
+# (setup.py >=2.7 and README; 3.4 recommended, no ceiling), on Linux and
+# on Windows (the README documents the
+# installation on Windows). The scope rules A, B1-B5 and C are in
+# macro-benchmark/README.md; Sublist3r.md shows how this ledger applies them
+# and records each judgement.
+#
+# Outside callees of code that runs on both Python versions have their
+# Python 3 names: urlparse.urlparse and urllib.unquote of Python 2 are
+# urllib.parse.urlparse and urllib.parse.unquote. On Windows,
+# subbrute.py:33-36 rebinds multiprocessing.Process to threading.Thread
+# when sublist3r imports subbrute, so the process classes are thread classes
+# there: each Process call also has its threading.Thread name.
+# No default rejections: no candidate has 50 or more sites.
+
+== subbrute.subbrute
+
+[subbrute.subbrute]
+33:28 call  sys.platform.startswith('win')
+    -> <builtin>.str.startswith
+359:24 call  re.compile(r"((?<=[\s])[a-zA-Z0-9_-]+\.(?:[a-zA-Z0-9_-]+\...
+    -> re.compile
+374:26 call  re.compile("([a-zA-Z0-9_-]*\.[a-zA-Z0-9_-]*\.[a-zA-Z0-9_-...
+    -> re.compile
+554:15 call  getattr(sys, 'frozen', False)
+    -> <builtin>.getattr
+    note: the if __name__ == "__main__" block (lines 553-633) is code of the module subbrute.subbrute and keeps its edges (README, "Edges")
+556:36 call  os.path.dirname(sys.executable)
+    -> os.path.dirname
+    note: runs when sys.frozen is true (line 554), in a frozen executable (cx_Freeze on Windows, line 555): a way to run the module on a supported version and platform, so the branch runs (audit F2; Sublist3r.md, judgement 15)
+557:39 call  multiprocessing.freeze_support()
+    -> multiprocessing.freeze_support
+    note: the frozen branch of line 554, as at 556:36 (Sublist3r.md, judgement 15)
+560:36 call  os.path.dirname(os.path.realpath(__file__))
+    -> os.path.dirname
+560:53 call  os.path.realpath(__file__)
+    -> os.path.realpath
+561:35 call  optparse.OptionParser("usage: %prog [options] target")
+    -> optparse.OptionParser
+562:22 call  parser.add_option("-s", "--subs", dest = "subs", default ...
+    -> optparse.OptionParser.add_option
+562:76 call  os.path.join(base_path, "names.txt")
+    -> os.path.join
+564:22 call  parser.add_option("-r", "--resolvers", dest = "resolvers"...
+    -> optparse.OptionParser.add_option
+564:86 call  os.path.join(base_path, "resolvers.txt")
+    -> os.path.join
+566:22 call  parser.add_option("-t", "--targets_file", dest = "targets...
+    -> optparse.OptionParser.add_option
+568:22 call  parser.add_option("-o", "--output", dest = "output", defa...
+    -> optparse.OptionParser.add_option
+569:22 call  parser.add_option("-j", "--json", dest="json", default = ...
+    -> optparse.OptionParser.add_option
+570:22 call  parser.add_option("-a", "-A", action = 'store_true', dest...
+    -> optparse.OptionParser.add_option
+572:22 call  parser.add_option("--type", dest = "type", default = Fals...
+    -> optparse.OptionParser.add_option
+574:22 call  parser.add_option("-c", "--process_count", dest = "proces...
+    -> optparse.OptionParser.add_option
+577:22 call  parser.add_option("-f", "--filter_subs", dest = "filter",...
+    -> optparse.OptionParser.add_option
+579:22 call  parser.add_option("-v", "--verbose", action = 'store_true...
+    -> optparse.OptionParser.add_option
+581:40 call  parser.parse_args()
+    -> optparse.OptionParser.parse_args
+    reject sublist3r.parse_args: parser is the optparse.OptionParser made at line 561; the call is its method parse_args, not the function parse_args of sublist3r; no option has a callback
+586:11 call  len(args)
+    -> <builtin>.len
+587:21 call  parser.error("You must provie a target. Use -h for help.")
+    -> optparse.OptionParser.error
+    reject subbrute.subbrute.error: parser is the optparse.OptionParser made at line 561; the call is its method error, not the module function error
+    exclude sublist3r.parser_error: the package assigns parser_error only to the error attribute of sublist3r's own argparse parser (sublist3r.py:96), never to this optparse parser
+    note: value site by name, because sublist3r.py:96 assigns an attribute named error; here parser is subbrute's own optparse.OptionParser (line 561), whose error attribute is never assigned, so the call is OptionParser.error
+591:36 call  extract_subdomains(options.filter)
+    -> subbrute.subbrute.extract_subdomains
+592:18 call  print(d)
+    -> <builtin>.print
+593:17 call  sys.exit()
+    -> sys.exit
+596:29 call  check_open(options.targets)
+    -> subbrute.subbrute.check_open
+603:27 call  open(options.output, "w")
+    -> <builtin>.open
+605:18 call  error("Failed writing to file:", options.output)
+    -> subbrute.subbrute.error
+610:31 call  open(options.json, "w")
+    -> <builtin>.open
+612:18 call  error("Failed writing to file:", options.json)
+    -> subbrute.subbrute.error
+618:26 call  str(options.type)
+    -> <builtin>.str
+618:46 call  str(options.type).upper()
+    -> <builtin>.str.upper
+622:30 call  target.strip()
+    -> <builtin>.str.strip
+    note: targets is the list of lines that check_open reads (line 596) or the list of command-line arguments of optparse (line 598): str values
+632:18 call  print(target, record_type, options.subs, options.resolver...
+    -> <builtin>.print
+633:25 call  print_target(target, record_type, options.subs, options.r...
+    -> subbrute.subbrute.print_target
+
+[subbrute.subbrute.verify_nameservers.__init__]
+41:41 call  multiprocessing.Process.__init__(self, target = self.run)
+    -> multiprocessing.Process.__init__
+    -> threading.Thread.__init__
+    reject subbrute.subbrute.verify_nameservers.run: Process.__init__ (Thread.__init__ on Windows) stores the target and does not call it; start() runs the run method of the class, which overrides BaseProcess.run (Thread.run) and never calls the stored target
+    reject *: the call names the __init__ of multiprocessing.Process, outside the package (threading.Thread.__init__ on Windows, where subbrute.py:33-36 rebinds multiprocessing.Process to threading.Thread); no package __init__ runs
+    note: threading.Thread.__init__ on Windows only (subbrute.py:33-36 rebinds multiprocessing.Process before the class statement runs)
+43:20 call  signal_init()
+    -> subbrute.subbrute.signal_init
+54:41 call  dns.resolver.Resolver()
+    -> dns.resolver.Resolver
+70:27 call  resolver.query(self.most_popular_website, self.record_type)
+    -> dns.resolver.Resolver.query
+73:45 call  dns.resolver.Resolver()
+    -> dns.resolver.Resolver
+
+[subbrute.subbrute.verify_nameservers.add_nameserver]
+84:36 call  self.resolver_q.put(nameserver, timeout = 1)
+    -> multiprocessing.queues.Queue.put
+    note: resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)
+85:22 call  trace("Added nameserver:", nameserver)
+    -> subbrute.subbrute.trace
+88:24 call  type(e)
+    -> <builtin>.type
+88:48 call  str(type(e))
+    -> <builtin>.str
+88:53 call  type(e)
+    -> <builtin>.type
+
+[subbrute.subbrute.verify_nameservers.verify]
+97:34 call  server.strip()
+    -> <builtin>.str.strip
+    note: resolver_list contains the str lines that check_open reads (run, line 426), which supports str.strip here. The other package argument, backup_resolver, comes from resolver.nameservers + a list at line 62; missing-library arithmetic gives no concrete result type. Client inputs also remain opaque.
+105:47 call  self.find_wildcards(self.target)
+    -> subbrute.subbrute.verify_nameservers.find_wildcards
+108:48 call  self.add_nameserver(server)
+    -> subbrute.subbrute.verify_nameservers.add_nameserver
+111:34 call  trace("Rejected nameserver - wildcard:", server)
+    -> subbrute.subbrute.trace
+114:26 call  trace("Rejected nameserver - unreliable:", server, type(e))
+    -> subbrute.subbrute.trace
+114:76 call  type(e)
+    -> <builtin>.type
+
+[subbrute.subbrute.verify_nameservers.run]
+119:23 call  random.shuffle(self.resolver_list)
+    -> random.shuffle
+120:27 call  self.verify(self.resolver_list)
+    -> subbrute.subbrute.verify_nameservers.verify
+122:29 call  sys.stderr.write('Warning: No nameservers found, trying f...
+    -> io.TextIOWrapper.write
+    note: sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule)
+124:24 call  self.verify(self.backup_resolver)
+    -> subbrute.subbrute.verify_nameservers.verify
+127:32 call  self.resolver_q.put(False, timeout = 1)
+    -> multiprocessing.queues.Queue.put
+    note: resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)
+
+[subbrute.subbrute.verify_nameservers.find_wildcards]
+141:44 call  self.resolver.query(uuid.uuid4().hex + ".com", "A")
+    -> dns.resolver.Resolver.query
+141:55 call  uuid.uuid4()
+    -> uuid.uuid4
+142:20 call  len(wildtest)
+    -> <builtin>.len
+143:22 call  trace("Spam DNS detected:", host)
+    -> subbrute.subbrute.trace
+154:51 call  uuid.uuid4()
+    -> uuid.uuid4
+155:47 call  self.resolver.query(testdomain, self.record_type)
+    -> dns.resolver.Resolver.query
+159:32 call  str(w)
+    -> <builtin>.str
+166:24 call  type(e)
+    -> <builtin>.type
+166:60 call  type(e)
+    -> <builtin>.type
+171:26 call  trace("wildcard exception:", self.resolver.nameservers, t...
+    -> subbrute.subbrute.trace
+171:81 call  type(e)
+    -> <builtin>.type
+
+[subbrute.subbrute.lookup.__init__]
+180:41 call  multiprocessing.Process.__init__(self, target = self.run)
+    -> multiprocessing.Process.__init__
+    -> threading.Thread.__init__
+    reject subbrute.subbrute.lookup.run: Process.__init__ (Thread.__init__ on Windows) stores the target and does not call it; start() runs the run method of the class, which overrides BaseProcess.run (Thread.run) and never calls the stored target
+    reject *: the call names the __init__ of multiprocessing.Process, outside the package (threading.Thread.__init__ on Windows, where subbrute.py:33-36 rebinds multiprocessing.Process to threading.Thread); no package __init__ runs
+    note: threading.Thread.__init__ on Windows only (subbrute.py:33-36 rebinds multiprocessing.Process before the class statement runs)
+181:20 call  signal_init()
+    -> subbrute.subbrute.signal_init
+189:46 call  dns.resolver.Resolver()
+    -> dns.resolver.Resolver
+
+[subbrute.subbrute.lookup.get_ns]
+196:46 call  self.resolver_q.get_nowait()
+    -> multiprocessing.queues.Queue.get_nowait
+    note: resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)
+199:36 call  self.resolver_q.put(False)
+    note: no edge: the branch never runs. ret is the one-element list built at line 196, and a list never compares equal to False, so line 199 is dead code (Sublist3r.md, judgement 7)
+
+[subbrute.subbrute.lookup.get_ns_blocking]
+207:35 call  self.resolver_q.get()
+    -> multiprocessing.queues.Queue.get
+    note: resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)
+209:18 call  trace("get_ns_blocking - Resolver list is empty.")
+    reject subbrute.subbrute.trace: the branch never runs: ret is the one-element list built at line 207, and a list never compares equal to False
+    note: no edge: dead code (Sublist3r.md, judgement 7)
+211:32 call  self.resolver_q.put(False)
+    note: no edge: the branch never runs. ret is the one-element list built at line 207, and a list never compares equal to False (Sublist3r.md, judgement 7)
+
+[subbrute.subbrute.lookup.check]
+216:14 call  trace("Checking:", host)
+    -> subbrute.subbrute.trace
+219:15 call  len(self.resolver.nameservers)
+    -> <builtin>.len
+221:53 call  self.get_ns()
+    -> subbrute.subbrute.lookup.get_ns
+227:47 call  self.resolver.query(host)
+    -> dns.resolver.Resolver.query
+229:42 call  extract_hosts(str(resp.response), self.domain)
+    -> subbrute.subbrute.extract_hosts
+229:46 call  str(resp.response)
+    -> <builtin>.str
+233:34 call  trace("Found host with spider:", h)
+    -> subbrute.subbrute.trace
+234:42 call  self.in_q.put((h, record_type, 0))
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+238:35 call  range(20)
+    -> <builtin>.range
+240:55 call  self.resolver.query(host, record_type)
+    -> dns.resolver.Resolver.query
+245:39 call  str(resp[0])
+    -> <builtin>.str
+245:55 call  str(resp[0]).rstrip(".")
+    -> <builtin>.str.rstrip
+246:48 call  cname_record.append(host)
+    -> <builtin>.list.append
+251:47 call  self.resolver.query(host, record_type)
+    -> dns.resolver.Resolver.query
+254:24 call  type(e)
+    -> <builtin>.type
+258:34 call  self.in_q.put((host, record_type, 0))
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+259:70 call  self.get_ns_blocking()
+    -> subbrute.subbrute.lookup.get_ns_blocking
+261:26 call  type(e)
+    -> <builtin>.type
+264:26 call  type(e)
+    -> <builtin>.type
+267:30 call  trace("NoAnswer retry")
+    -> subbrute.subbrute.trace
+270:26 call  type(e)
+    -> <builtin>.type
+271:26 call  trace("lookup failure:", host, retries)
+    -> subbrute.subbrute.trace
+281:42 call  self.in_q.put((host, record_type, retries + 1))
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+285:26 call  type(e)
+    -> <builtin>.type
+289:26 call  type(e)
+    -> <builtin>.type
+292:34 call  self.in_q.put((host, record_type, 0))
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+294:26 call  type(e)
+    -> <builtin>.type
+295:26 call  error("DNS record type not supported:", record_type)
+    -> subbrute.subbrute.error
+297:26 call  trace("Problem processing host:", host)
+    -> subbrute.subbrute.trace
+
+[subbrute.subbrute.lookup.run]
+303:58 call  self.get_ns_blocking()
+    -> subbrute.subbrute.lookup.get_ns_blocking
+306:33 call  self.in_q.get()
+    -> multiprocessing.queues.Queue.get
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+311:41 call  self.in_q.get(blocking = False)
+    note: no edge for the package-owned Queue: multiprocessing.queues.Queue.get takes block and timeout, so blocking fails argument binding; the bare except catches it. An opaque client queue may accept blocking but gives no named callee (Sublist3r.md, judgement 8)
+314:38 call  self.in_q.put(False)
+    note: no edge: package-owned Queue fails at line 311 before this site; an opaque client queue may reach its own unnamed put (Sublist3r.md, judgement 8)
+316:26 call  trace('End of work queue')
+    -> subbrute.subbrute.trace
+323:30 call  self.in_q.put(False)
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+325:31 call  self.out_q.put(False)
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+328:23 call  len(work)
+    -> <builtin>.len
+331:42 call  self.check(hostname, record_type, timeout_retries)
+    -> subbrute.subbrute.lookup.check
+334:42 call  self.check(hostname, record_type)
+    -> subbrute.subbrute.lookup.check
+335:33 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+    note: sys.stdout is the default stdout stream, an io.TextIOWrapper (README naming rule)
+336:22 call  trace(response)
+    -> subbrute.subbrute.trace
+343:32 call  str(a)
+    -> <builtin>.str
+345:34 call  trace("resovled wildcard:", hostname)
+    -> subbrute.subbrute.trace
+350:51 call  found_addresses.append(a)
+    -> <builtin>.list.append
+354:39 call  self.out_q.put(result)
+    -> multiprocessing.queues.Queue.put
+    note: in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)
+
+[subbrute.subbrute.extract_hosts]
+364:23 call  re.findall(host_match, data)
+    -> re.findall
+366:25 call  fh.rstrip(".")
+    -> <builtin>.str.rstrip
+368:25 call  host.endswith(hostname)
+    -> <builtin>.str.endswith
+369:23 call  ret.append(host)
+    -> <builtin>.list.append
+
+[subbrute.subbrute.extract_subdomains]
+379:20 call  open(file_name)
+    -> <builtin>.open
+379:36 call  open(file_name).read()
+    -> io.TextIOWrapper.read
+380:23 call  re.findall(domain_match, sub_file)
+    -> re.findall
+383:18 call  i.find(".")
+    -> <builtin>.str.find
+384:24 call  i.split(".")
+    -> <builtin>.str.split
+386:28 call  len(p[-1])
+    -> <builtin>.len
+391:19 call  len(p)
+    -> <builtin>.len
+392:22 call  trace(str(p), " : ", i)
+    -> subbrute.subbrute.trace
+392:26 call  str(p)
+    -> <builtin>.str
+396:36 call  q.lower()
+    -> <builtin>.str.lower
+404:25 call  sorted(subs.keys(), key = lambda x: subs[x], reverse = True)
+    -> <builtin>.sorted
+    -> subbrute.subbrute.extract_subdomains.<lambda1>
+    note: sorted calls the key function, the lambda of line 404, back (callback rule)
+404:35 call  subs.keys()
+    -> <builtin>.dict.keys
+
+[subbrute.subbrute.print_target]
+410:8 call  run(target, record_type, subdomains, resolve_list, proces...
+    -> subbrute.subbrute.run
+    reject *: run is a global name in subbrute.subbrute: the module-level generator function run (line 424); the methods named run are not module globals
+    note: run is a generator function; this call makes a generator that nothing iterates, and the call is still an edge (README, "Edges")
+411:22 call  run(target, record_type, subdomains, resolve_list, proces...
+    -> subbrute.subbrute.run
+    reject *: run is a global name in subbrute.subbrute: the module-level generator function run (line 424); the methods named run are not module globals
+416:51 call  ",".join(response)
+    -> <builtin>.str.join
+416:67 call  ",".join(response).strip(",")
+    -> <builtin>.str.strip
+419:22 call  print(result)
+    -> <builtin>.print
+420:35 call  subdomains_list.append(result)
+    -> <builtin>.list.append
+422:16 call  set(subdomains_list)
+    -> <builtin>.set
+
+[subbrute.subbrute.run]
+425:28 call  check_open(subdomains)
+    -> subbrute.subbrute.check_open
+426:30 call  check_open(resolve_list)
+    -> subbrute.subbrute.check_open
+427:12 call  len(resolve_list)
+    -> <builtin>.len
+428:25 call  sys.stderr.write('Warning: Fewer than 16 resovlers per th...
+    -> io.TextIOWrapper.write
+    note: sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule)
+433:44 call  multiprocessing.Manager()
+    -> multiprocessing.Manager
+433:51 call  multiprocessing.Manager().dict()
+    -> multiprocessing.managers.SyncManager.dict
+    note: multiprocessing.Manager() returns a started multiprocessing.managers.SyncManager; its method dict is registered by SyncManager.register('dict', ...) (Sublist3r.md, judgement 10)
+434:51 call  multiprocessing.Manager()
+    -> multiprocessing.Manager
+434:58 call  multiprocessing.Manager().dict()
+    -> multiprocessing.managers.SyncManager.dict
+435:33 call  multiprocessing.Queue()
+    -> multiprocessing.Queue
+436:34 call  multiprocessing.Queue()
+    -> multiprocessing.Queue
+438:38 call  multiprocessing.Queue(maxsize = 2)
+    -> multiprocessing.Queue
+441:49 call  verify_nameservers(target, record_type, resolve_q, resolv...
+    -> subbrute.subbrute.verify_nameservers.__init__
+442:34 call  verify_nameservers_proc.start()
+    -> multiprocessing.Process.start
+    -> threading.Thread.start
+    -> subbrute.subbrute.verify_nameservers.run
+    note: start() runs the run method of the verify_nameservers object in a new process (in a new thread on Windows, where the class derives from threading.Thread); by the callback rule run belongs to the scope that calls start(). verify_nameservers.run overrides BaseProcess.run, so the stored target is not called
+444:13 call  in_q.put((target, record_type))
+    -> multiprocessing.queues.Queue.put
+448:16 call  str(s)
+    -> <builtin>.str
+448:25 call  str(s).strip()
+    -> <builtin>.str.strip
+450:22 call  s.find(",")
+    -> <builtin>.str.find
+453:26 call  s.split(",")
+    -> <builtin>.str.split
+454:30 call  s.endswith(target)
+    -> <builtin>.str.endswith
+462:25 call  in_q.put(work)
+    -> multiprocessing.queues.Queue.put
+464:13 call  in_q.put(False)
+    -> multiprocessing.queues.Queue.put
+465:19 call  range(process_count)
+    -> <builtin>.range
+466:24 call  lookup(in_q, out_q, resolve_q, target, wildcards, spider_...
+    -> subbrute.subbrute.lookup.__init__
+467:21 call  worker.start()
+    -> multiprocessing.Process.start
+    -> threading.Thread.start
+    -> subbrute.subbrute.lookup.run
+    note: start() runs the run method of the lookup object in a new process (a new thread on Windows); by the callback rule run belongs to the scope that calls start()
+472:31 call  out_q.get(True, 10)
+    -> multiprocessing.queues.Queue.get
+481:20 call  type(e)
+    -> <builtin>.type
+481:45 call  str(type(e))
+    -> <builtin>.str
+481:50 call  type(e)
+    -> <builtin>.type
+488:10 call  trace("killing nameserver process")
+    -> subbrute.subbrute.trace
+491:17 call  killproc(pid = verify_nameservers_proc.pid)
+    -> subbrute.subbrute.killproc
+494:36 call  verify_nameservers_proc.end()
+    -> subbrute.subbrute.verify_nameservers.end
+    note: reached when killproc fails, and always on Windows, where the thread object has no attribute pid and line 491 raises AttributeError
+495:10 call  trace("End")
+    -> subbrute.subbrute.trace
+
+[subbrute.subbrute.killproc]
+502:24 call  os.getpid()
+    -> os.getpid
+503:31 call  sys.platform.startswith('win')
+    -> <builtin>.str.startswith
+506:42 call  kernel32.OpenProcess(1, 0, pid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only. ctypes.windll.kernel32 is a ctypes.WinDLL; kernel32.OpenProcess is an instance of the class _FuncPtr that CDLL.__init__ defines for each library, and the call is its __call__ (Sublist3r.md, judgement 11)
+507:38 call  kernel32.TerminateProcess(handle, 0)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; the same function pointer class as at line 506
+512:16 call  os.kill(pid, 9)
+    -> os.kill
+
+[subbrute.subbrute.trace]
+519:29 call  sys.stderr.write(str(a))
+    -> io.TextIOWrapper.write
+    note: sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule). trace writes only when the module global verbose is true, which the __main__ block sets from -v (line 584)
+519:33 call  str(a)
+    -> <builtin>.str
+520:29 call  sys.stderr.write(" ")
+    -> io.TextIOWrapper.write
+521:25 call  sys.stderr.write("\n")
+    -> io.TextIOWrapper.write
+
+[subbrute.subbrute.error]
+525:25 call  sys.stderr.write(str(a))
+    -> io.TextIOWrapper.write
+    note: sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule)
+525:29 call  str(a)
+    -> <builtin>.str
+526:25 call  sys.stderr.write(" ")
+    -> io.TextIOWrapper.write
+527:21 call  sys.stderr.write("\n")
+    -> io.TextIOWrapper.write
+528:13 call  sys.exit(1)
+    -> sys.exit
+
+[subbrute.subbrute.check_open]
+534:19 call  open(input_file)
+    -> <builtin>.open
+534:41 call  open(input_file).readlines()
+    -> io.TextIOWrapper.readlines
+536:14 call  error("File not found:", input_file)
+    -> subbrute.subbrute.error
+537:15 call  len(ret)
+    -> <builtin>.len
+538:14 call  error("File is empty:", input_file)
+    -> subbrute.subbrute.error
+
+[subbrute.subbrute.signal_init]
+545:18 call  signal.signal(signal.SIGINT, killproc)
+    -> signal.signal
+    reject subbrute.subbrute.killproc: signal.signal stores the handler; it does not invoke it. The global rule attributes a signal callback only to a package call that waits for that installed signal. Sublist3r has no such wait site, and its own os.kill sends uncatchable SIGKILL; arbitrary asynchronous delivery adds no edge (Sublist3r.md, judgement 6)
+547:22 call  signal.signal(signal.SIGTSTP, killproc)
+    -> signal.signal
+    reject subbrute.subbrute.killproc: signal.signal stores the handler; it does not invoke it. The global rule attributes a signal callback only to a package call that waits for that installed signal. Sublist3r has no such wait site, and its own os.kill sends uncatchable SIGKILL; arbitrary asynchronous delivery adds no edge (Sublist3r.md, judgement 6)
+    note: POSIX only: on Windows the signal module has no SIGTSTP, the argument raises AttributeError and the bare except passes
+548:22 call  signal.signal(signal.SIGQUIT, killproc)
+    -> signal.signal
+    reject subbrute.subbrute.killproc: signal.signal stores the handler; it does not invoke it. The global rule attributes a signal callback only to a package call that waits for that installed signal. Sublist3r has no such wait site, and its own os.kill sends uncatchable SIGKILL; arbitrary asynchronous delivery adds no edge (Sublist3r.md, judgement 6)
+
+== sublist3r
+
+[sublist3r]
+37:47 call  requests.packages.urllib3.disable_warnings()
+    -> requests.packages.urllib3.disable_warnings
+    note: ordinary missing-library call, named by the imported path at line 36; dependency aliases or vendoring do not change this path (Sublist3r.md, judgement 12)
+42:37 call  sys.platform.startswith('win')
+    -> <builtin>.str.startswith
+54:35 call  win_unicode_console.enable()
+    -> win_unicode_console.enable
+    note: Windows only (is_windows, line 42); the README documents Windows (Sublist3r.md, judgement 3)
+55:22 call  colorama.init()
+    -> colorama.init
+    note: Windows only, as line 54
+58:14 call  print("[!] Error: Coloring libraries not installed, no co...
+    -> <builtin>.print
+260:99 call  threading.Lock()
+    -> threading.Lock
+    note: the default value of the parameter lock, evaluated once when the def statement runs at module level
+1001:16 call  interactive()
+    -> sublist3r.interactive
+
+[sublist3r.banner]
+75:10 call  print("""%s ____ _ _ _ _ _____ / ___| _ _| |__ | (_)___| ...
+    -> <builtin>.print
+
+[sublist3r.parser_error]
+87:11 call  banner()
+    -> sublist3r.banner
+88:10 call  print("Usage: python " + sys.argv[0] + " [Options] use -h...
+    -> <builtin>.print
+89:10 call  print(R + "Error: " + errmsg + W)
+    -> <builtin>.print
+90:13 call  sys.exit()
+    -> sys.exit
+
+[sublist3r.parse_args]
+95:37 call  argparse.ArgumentParser(epilog='\tExample: \r\npython ' +...
+    -> argparse.ArgumentParser
+98:24 call  parser.add_argument('-d', '--domain', help="Domain name t...
+    -> argparse.ArgumentParser.add_argument
+99:24 call  parser.add_argument('-b', '--bruteforce', help='Enable th...
+    -> argparse.ArgumentParser.add_argument
+100:24 call  parser.add_argument('-p', '--ports', help='Scan the found...
+    -> argparse.ArgumentParser.add_argument
+101:24 call  parser.add_argument('-v', '--verbose', help='Enable Verbo...
+    -> argparse.ArgumentParser.add_argument
+102:24 call  parser.add_argument('-t', '--threads', help='Number of th...
+    -> argparse.ArgumentParser.add_argument
+103:24 call  parser.add_argument('-e', '--engines', help='Specify a co...
+    -> argparse.ArgumentParser.add_argument
+104:24 call  parser.add_argument('-o', '--output', help='Save the resu...
+    -> argparse.ArgumentParser.add_argument
+105:24 call  parser.add_argument('-n', '--no-color', help='Output with...
+    -> argparse.ArgumentParser.add_argument
+106:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    -> sublist3r.parser_error
+    reject sublist3r.parse_args: parser is the argparse.ArgumentParser made at line 95; the call is its method parse_args
+    note: line 96 binds the instance attribute parser.error to the function parser_error. argparse calls self.error(message) when the command line does not parse (the required -d is missing, -t is not an int, an unknown option), so parse_args calls parser_error back (callback rule; Sublist3r.md, judgement 5)
+
+[sublist3r.write_file]
+111:10 call  print("%s[-] Saving results to file: %s%s%s%s" % (Y, W, R...
+    -> <builtin>.print
+112:14 call  open(str(filename), 'wt')
+    -> <builtin>.open
+112:18 call  str(filename)
+    -> <builtin>.str
+114:20 call  f.write(subdomain + os.linesep)
+    -> io.TextIOWrapper.write
+    note: f is the stream that open() returns in text mode
+
+[sublist3r.subdomain_sorting_key]
+137:27 call  hostname.split('.')
+    -> <builtin>.str.split
+
+[sublist3r.enumratorBase.__init__]
+146:40 call  urlparse.urlparse(domain)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+147:40 call  requests.Session()
+    -> requests.Session
+160:26 call  self.print_banner()
+    -> sublist3r.enumratorBase.print_banner
+
+[sublist3r.enumratorBase.print_]
+164:18 call  print(text)
+    -> <builtin>.print
+
+[sublist3r.enumratorBase.print_banner]
+169:20 call  self.print_(G + "[-] Searching now in %s.." % (self.engin...
+    -> sublist3r.enumratorBase.print_
+
+[sublist3r.enumratorBase.send_req]
+174:35 call  self.base_url.format(query=query, page_no=page_no)
+    -> <builtin>.str.format
+176:36 call  self.session.get(url, headers=self.headers, timeout=self....
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+179:33 call  self.get_response(resp)
+    -> sublist3r.enumratorBase.get_response
+
+[sublist3r.enumratorBase.get_response]
+184:40 call  hasattr(response, "text")
+    -> <builtin>.hasattr
+
+[sublist3r.enumratorBase.enumerate]
+227:40 call  self.generate_query()
+    -> sublist3r.AskEnum.generate_query
+    -> sublist3r.BaiduEnum.generate_query
+    -> sublist3r.BingEnum.generate_query
+    -> sublist3r.GoogleEnum.generate_query
+    -> sublist3r.YahooEnum.generate_query
+    -> sublist3r.enumratorBase.generate_query
+    note: self is an enumratorBase, an enumratorBaseThreaded (plain public classes, B1) or one of the five engines that inherit enumerate (Google, Yahoo, Ask, Bing, Baidu); the six other engines override enumerate. enumratorBase.generate_query returns None, so for the two base classes line 228 raises AttributeError and the later sites of this function run only for the five engines
+228:32 call  query.count(self.domain)
+    -> <builtin>.str.count
+232:41 call  self.check_max_subdomains(count)
+    -> sublist3r.enumratorBase.check_max_subdomains
+233:40 call  self.get_page(page_no)
+    -> sublist3r.AskEnum.get_page
+    -> sublist3r.YahooEnum.get_page
+    -> sublist3r.enumratorBase.get_page
+    note: Google, Bing and Baidu inherit enumratorBase.get_page
+235:36 call  self.check_max_pages(page_no)
+    -> sublist3r.enumratorBase.check_max_pages
+237:33 call  self.send_req(query, page_no)
+    -> sublist3r.enumratorBase.send_req
+    reject sublist3r.Virustotal.send_req: Virustotal overrides enumerate, so this method never runs on a Virustotal; the five engines that reach this line inherit enumratorBase.send_req
+240:46 call  self.check_response_errors(resp)
+    -> sublist3r.BaiduEnum.check_response_errors
+    -> sublist3r.GoogleEnum.check_response_errors
+    -> sublist3r.enumratorBase.check_response_errors
+    note: Yahoo, Ask and Bing inherit enumratorBase.check_response_errors
+242:41 call  self.extract_domains(resp)
+    -> sublist3r.AskEnum.extract_domains
+    -> sublist3r.BaiduEnum.extract_domains
+    -> sublist3r.BingEnum.extract_domains
+    -> sublist3r.GoogleEnum.extract_domains
+    -> sublist3r.YahooEnum.extract_domains
+    reject sublist3r.CrtSearch.extract_domains, sublist3r.DNSdumpster.extract_domains, sublist3r.NetcraftEnum.extract_domains, sublist3r.PassiveDNS.extract_domains, sublist3r.ThreatCrowd.extract_domains, sublist3r.Virustotal.extract_domains: these engines override enumerate, so this method never runs on them
+    reject sublist3r.enumratorBase.extract_domains: only the five engines that inherit enumerate reach this line (a plain enumratorBase or enumratorBaseThreaded fails at line 228), and each overrides extract_domains
+247:40 call  self.get_page(page_no)
+    -> sublist3r.AskEnum.get_page
+    -> sublist3r.YahooEnum.get_page
+    -> sublist3r.enumratorBase.get_page
+254:30 call  self.should_sleep()
+    -> sublist3r.BaiduEnum.should_sleep
+    -> sublist3r.GoogleEnum.should_sleep
+    -> sublist3r.YahooEnum.should_sleep
+    -> sublist3r.enumratorBase.should_sleep
+    note: Ask and Bing inherit enumratorBase.should_sleep
+
+[sublist3r.enumratorBaseThreaded.__init__]
+262:31 call  enumratorBase.__init__(self, base_url, engine_name, domai...
+    -> sublist3r.enumratorBase.__init__
+    reject *: the call names enumratorBase.__init__ explicitly
+263:41 call  multiprocessing.Process.__init__(self)
+    -> multiprocessing.Process.__init__
+    -> threading.Thread.__init__
+    reject *: the call names the __init__ of multiprocessing.Process, outside the package (threading.Thread.__init__ on Windows, where subbrute.py:33-36 rebinds multiprocessing.Process to threading.Thread); no package __init__ runs
+    note: threading.Thread.__init__ on Windows only: sublist3r imports subbrute (line 21) before the class statement, and subbrute.py:33-36 rebinds multiprocessing.Process to threading.Thread there (Sublist3r.md, judgement 3)
+
+[sublist3r.enumratorBaseThreaded.run]
+269:37 call  self.enumerate()
+    -> sublist3r.CrtSearch.enumerate
+    -> sublist3r.DNSdumpster.enumerate
+    -> sublist3r.NetcraftEnum.enumerate
+    -> sublist3r.PassiveDNS.enumerate
+    -> sublist3r.ThreatCrowd.enumerate
+    -> sublist3r.Virustotal.enumerate
+    -> sublist3r.enumratorBase.enumerate
+    note: self is an enumratorBaseThreaded or one of the 11 engines; six override enumerate, the others inherit enumratorBase.enumerate
+271:26 call  self.q.append(domain)
+    -> <builtin>.list.append
+    note: The package-owned q is a manager ListProxy on non-Windows. Its append is generated by MakeProxyType through exec, not a source-defined library function. CPython3.4 managers.py858–877,1053–1064 and local3.15 managers.py965–984,1164–1176 show the same generated method. Global ground-truth conventions explicitly exclude generated library functions, with this exact ListProxy.append example. Keep the Windows builtin list.append edge.
+
+[sublist3r.GoogleEnum.__init__]
+281:14 call  super(GoogleEnum, self)
+    -> <builtin>.super
+281:41 call  super(GoogleEnum, self).__init__(base_url, self.engine_na...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.GoogleEnum.extract_domains]
+286:26 call  list()
+    -> <builtin>.list
+287:31 call  re.compile('<cite.*?>(.*?)<\/cite>')
+    -> re.compile
+289:43 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+291:30 call  re.sub('<span.*>', '', link)
+    -> re.sub
+292:39 call  link.startswith('http')
+    -> <builtin>.str.startswith
+294:46 call  urlparse.urlparse(link)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+297:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+298:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+298:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.GoogleEnum.check_response_errors]
+304:17 call  type(resp)
+    -> <builtin>.type
+304:38 call  type(resp)
+    -> <builtin>.type
+    note: on Python 3 the name unicode is undefined; it is loaded after this call, so the call runs and NameError follows when resp is not a str
+305:24 call  self.print_(R + "[!] Error: Google probably now is blocki...
+    -> sublist3r.enumratorBase.print_
+306:24 call  self.print_(R + "[~] Finished now the Google Enumeration ...
+    -> sublist3r.enumratorBase.print_
+
+[sublist3r.GoogleEnum.should_sleep]
+311:19 call  time.sleep(5)
+    -> time.sleep
+
+[sublist3r.GoogleEnum.generate_query]
+317:30 call  ' -'.join(self.subdomains[:self.MAX_DOMAINS - 2])
+    -> <builtin>.str.join
+318:31 call  fmt.format(domain=self.domain, found=found)
+    -> <builtin>.str.format
+320:57 call  "site:{domain} -www.{domain}".format(domain=self.domain)
+    -> <builtin>.str.format
+
+[sublist3r.YahooEnum.__init__]
+331:14 call  super(YahooEnum, self)
+    -> <builtin>.super
+331:40 call  super(YahooEnum, self).__init__(base_url, self.engine_nam...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.YahooEnum.extract_domains]
+336:32 call  re.compile('<span class=" fz-.*? fw-m fc-12th wr-bw.*?">(...
+    -> re.compile
+337:31 call  re.compile('<span class="txt"><span class=" cite fw-xl fz...
+    -> re.compile
+340:38 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+341:40 call  link_regx2.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+344:30 call  re.sub("<(\/)?b>", "", link)
+    -> re.sub
+345:39 call  link.startswith('http')
+    -> <builtin>.str.startswith
+347:46 call  urlparse.urlparse(link)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+348:42 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+352:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+353:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+353:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.YahooEnum.generate_query]
+368:37 call  ' -domain:'.join(self.subdomains[:77])
+    -> <builtin>.str.join
+369:31 call  fmt.format(domain=self.domain, found=found)
+    -> <builtin>.str.format
+371:43 call  "site:{domain}".format(domain=self.domain)
+    -> <builtin>.str.format
+
+[sublist3r.AskEnum.__init__]
+382:39 call  enumratorBaseThreaded.__init__(self, base_url, self.engin...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: the call names enumratorBaseThreaded.__init__ explicitly
+
+[sublist3r.AskEnum.extract_domains]
+387:26 call  list()
+    -> <builtin>.list
+388:31 call  re.compile('<p class="web-result-url">(.*?)</p>')
+    -> re.compile
+390:43 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+392:39 call  link.startswith('http')
+    -> <builtin>.str.startswith
+394:46 call  urlparse.urlparse(link)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+397:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+398:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+398:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.AskEnum.generate_query]
+410:30 call  ' -'.join(self.subdomains[:self.MAX_DOMAINS])
+    -> <builtin>.str.join
+411:31 call  fmt.format(domain=self.domain, found=found)
+    -> <builtin>.str.format
+413:57 call  "site:{domain} -www.{domain}".format(domain=self.domain)
+    -> <builtin>.str.format
+
+[sublist3r.BingEnum.__init__]
+425:39 call  enumratorBaseThreaded.__init__(self, base_url, self.engin...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: the call names enumratorBaseThreaded.__init__ explicitly
+
+[sublist3r.BingEnum.extract_domains]
+431:26 call  list()
+    -> <builtin>.list
+432:31 call  re.compile('<li class="b_algo"><h2><a href="(.*?)"')
+    -> re.compile
+433:32 call  re.compile('<div class="b_title"><h2><a href="(.*?)"')
+    -> re.compile
+435:38 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+436:40 call  link_regx2.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+440:30 call  re.sub('<(\/)?strong>|<span.*?>|<|>', '', link)
+    -> re.sub
+441:39 call  link.startswith('http')
+    -> <builtin>.str.startswith
+443:46 call  urlparse.urlparse(link)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+446:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+447:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+447:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.BingEnum.generate_query]
+456:30 call  ' -'.join(self.subdomains[:self.MAX_DOMAINS])
+    -> <builtin>.str.join
+457:31 call  fmt.format(domain=self.domain, found=found)
+    -> <builtin>.str.format
+459:59 call  "domain:{domain} -www.{domain}".format(domain=self.domain)
+    -> <builtin>.str.format
+
+[sublist3r.BaiduEnum.__init__]
+470:39 call  enumratorBaseThreaded.__init__(self, base_url, self.engin...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: the call names enumratorBaseThreaded.__init__ explicitly
+
+[sublist3r.BaiduEnum.extract_domains]
+476:21 call  list()
+    -> <builtin>.list
+479:31 call  re.compile('<a.*?class="c-showurl".*?>(.*?)</a>')
+    -> re.compile
+481:38 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+483:30 call  re.sub('<.*?>|>|<|&nbsp;', '', link)
+    -> re.sub
+484:39 call  link.startswith('http')
+    -> <builtin>.str.startswith
+486:46 call  urlparse.urlparse(link)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+487:38 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+488:42 call  subdomain_list.append(subdomain)
+    -> <builtin>.list.append
+492:40 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+493:47 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+493:63 call  subdomain.strip()
+    -> <builtin>.str.strip
+497:45 call  self.findsubs(subdomain_list)
+    -> sublist3r.BaiduEnum.findsubs
+
+[sublist3r.BaiduEnum.findsubs]
+501:24 call  Counter(subdomains)
+    -> collections.Counter
+502:25 call  max(count, key=count.get)
+    -> <builtin>.max
+    note: max calls the key count.get, a method of the Counter (library code calling library code: no edge)
+503:18 call  count.pop(subdomain1, "None")
+    -> collections.Counter.pop
+504:25 call  max(count, key=count.get)
+    -> <builtin>.max
+
+[sublist3r.BaiduEnum.should_sleep]
+511:19 call  time.sleep(random.randint(2, 5))
+    -> time.sleep
+511:34 call  random.randint(2, 5)
+    -> random.randint
+
+[sublist3r.BaiduEnum.generate_query]
+516:35 call  ' -site:'.join(self.querydomain)
+    -> <builtin>.str.join
+517:77 call  "site:{domain} -site:www.{domain} -site:{found} ".format(...
+    -> <builtin>.str.format
+519:62 call  "site:{domain} -site:www.{domain}".format(domain=self.dom...
+    -> <builtin>.str.format
+
+[sublist3r.NetcraftEnum.__init__]
+528:35 call  threading.Lock()
+    -> threading.Lock
+529:14 call  super(NetcraftEnum, self)
+    -> <builtin>.super
+529:43 call  super(NetcraftEnum, self).__init__(self.base_url, self.en...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.NetcraftEnum.req]
+536:36 call  self.session.get(url, headers=self.headers, timeout=self....
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+538:24 call  self.print_(e)
+    -> sublist3r.enumratorBase.print_
+
+[sublist3r.NetcraftEnum.get_next]
+543:31 call  re.compile('<A href="(.*?)"><b>Next page</b></a>')
+    -> re.compile
+544:33 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+545:22 call  re.sub('host=.*?%s' % self.domain, 'host=%s' % self.domai...
+    -> re.sub
+
+[sublist3r.NetcraftEnum.create_cookies]
+550:23 call  dict()
+    -> <builtin>.dict
+551:44 call  cookie.find(';')
+    note: enumerate passes self.req(...).headers into get_cookies; req returns requests.Session.get output from a missing module. get_cookies subscripts headers["set-cookie"] and passes that unnamed result as cookie. The cookie.find call and the subsequent slice.split call have no concrete receiver under the global rules. create_cookies is unannotated and has no documentation fixing a str parameter. Its client values remain opaque. urllib.parse.unquote is known stdlib code and can return concrete str, so downstream str.encode remains supported.
+551:56 call  cookie[0:cookie.find(';')].split("=")
+    note: enumerate passes self.req(...).headers into get_cookies; req returns requests.Session.get output from a missing module. get_cookies subscripts headers["set-cookie"] and passes that unnamed result as cookie. The cookie.find call and the subsequent slice.split call have no concrete receiver under the global rules. create_cookies is unannotated and has no documentation fixing a str parameter. Its client values remain opaque. urllib.parse.unquote is known stdlib code and can return concrete str, so downstream str.encode remains supported.
+554:68 call  hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-...
+    -> hashlib.sha1
+554:83 call  urllib.unquote(cookies_list[1])
+    -> urllib.parse.unquote
+    note: urllib is urllib.parse on Python 3 and the module urllib on Python 2 (lines 26-31); the call has its Python 3 name
+554:107 call  urllib.unquote(cookies_list[1]).encode('utf-8')
+    -> <builtin>.str.encode
+554:127 call  hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-...
+    -> _hashlib.HASH.hexdigest
+    -> _sha1.sha1.hexdigest
+    note: hashlib is standard-library code. Its admitted builtin SHA-1 fallback returns the concrete type _sha1.sha1 when OpenSSL or its SHA-1 constructor is unavailable; retain both that hexdigest and the distinct OpenSSL _hashlib.HASH method. CPython 3.4/3.12 source and the 3.12 hashlib documentation support this configuration (Sublist3r.md, judgement 11; pass-2 report).
+
+[sublist3r.NetcraftEnum.get_cookies]
+559:42 call  self.create_cookies(headers['set-cookie'])
+    -> sublist3r.NetcraftEnum.create_cookies
+
+[sublist3r.NetcraftEnum.enumerate]
+565:41 call  self.base_url.format(domain='example.com')
+    -> <builtin>.str.format
+566:24 call  self.req(start_url)
+    -> sublist3r.NetcraftEnum.req
+    reject *: self is a NetcraftEnum; no package class derives from NetcraftEnum
+567:35 call  self.get_cookies(resp.headers)
+    -> sublist3r.NetcraftEnum.get_cookies
+568:35 call  self.base_url.format(domain=self.domain)
+    -> <builtin>.str.format
+570:37 call  self.get_response(self.req(url, cookies))
+    -> sublist3r.enumratorBase.get_response
+570:46 call  self.req(url, cookies)
+    -> sublist3r.NetcraftEnum.req
+    reject *: self is a NetcraftEnum; no package class derives from NetcraftEnum
+571:33 call  self.extract_domains(resp)
+    -> sublist3r.NetcraftEnum.extract_domains
+    reject *: self is a NetcraftEnum; no package class derives from NetcraftEnum
+575:32 call  self.get_next(resp)
+    -> sublist3r.NetcraftEnum.get_next
+
+[sublist3r.NetcraftEnum.extract_domains]
+578:26 call  list()
+    -> <builtin>.list
+579:31 call  re.compile('<a href="http://toolbar.netcraft.com/site_rep...
+    -> re.compile
+581:43 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+583:46 call  urlparse.urlparse(link)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+584:42 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+588:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+589:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+589:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.DNSdumpster.__init__]
+602:47 call  threading.BoundedSemaphore(value=self.threads)
+    -> threading.BoundedSemaphore
+604:14 call  super(DNSdumpster, self)
+    -> <builtin>.super
+604:42 call  super(DNSdumpster, self).__init__(base_url, self.engine_n...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.DNSdumpster.check_host]
+609:41 call  dns.resolver.Resolver()
+    -> dns.resolver.Resolver
+611:26 call  self.lock.acquire()
+    -> _thread.LockType.acquire
+    note: DNSdumpster assigns BoundedSemaphore then its parent initializer overwrites self.lock with the default threading.Lock() from sublist3r.py260. The historical CPython3.4 _thread documentation42–44 publicly exposes its concrete type as _thread.LockType. Thus _thread.lock is only the runtime tp_name, not the required public import path. CPython3.13 threading.py38,120 aliases threading.Lock to that same _thread.LockType; this is one class with two aliases, not an additional target. Use the stable documented _thread.LockType path across admitted versions.
+613:32 call  Resolver.query(host, 'A')
+    -> dns.resolver.Resolver.query
+613:54 call  Resolver.query(host, 'A')[0].to_text()
+    note: Resolver is the imported missing dns.resolver.Resolver stub. query has its explicit stub path, but query(...)[0] is a missing-library subscript and has no named receiver. The old judgment inferred an IN A record class from memory, contrary to the global missing-module rule. Neither project documentation nor an annotation fixes a concrete record class. The call site remains possible but has no named callee.
+616:32 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, host))
+    -> sublist3r.enumratorBase.print_
+618:44 call  self.live_subdomains.append(host)
+    -> <builtin>.list.append
+621:26 call  self.lock.release()
+    -> _thread.LockType.release
+    note: DNSdumpster assigns BoundedSemaphore then its parent initializer overwrites self.lock with the default threading.Lock() from sublist3r.py260. The historical CPython3.4 _thread documentation42–44 publicly exposes its concrete type as _thread.LockType. Thus _thread.lock is only the runtime tp_name, not the required public import path. CPython3.13 threading.py38,120 aliases threading.Lock to that same _thread.LockType; this is one class with two aliases, not an additional target. Use the stable documented _thread.LockType path across admitted versions.
+
+[sublist3r.DNSdumpster.req]
+626:23 call  dict(self.headers)
+    -> <builtin>.dict
+630:40 call  self.session.get(url, headers=headers, timeout=self.timeout)
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+632:41 call  self.session.post(url, data=params, headers=headers, time...
+    -> requests.Session.post
+634:24 call  self.print_(e)
+    -> sublist3r.enumratorBase.print_
+636:33 call  self.get_response(resp)
+    -> sublist3r.enumratorBase.get_response
+
+[sublist3r.DNSdumpster.get_csrftoken]
+639:32 call  re.compile('<input type="hidden" name="csrfmiddlewaretoke...
+    -> re.compile
+640:35 call  csrf_regex.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+641:27 call  token.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.DNSdumpster.enumerate]
+644:24 call  self.req('GET', self.base_url)
+    -> sublist3r.DNSdumpster.req
+    reject *: self is a DNSdumpster; no package class derives from DNSdumpster
+645:35 call  self.get_csrftoken(resp)
+    -> sublist3r.DNSdumpster.get_csrftoken
+647:29 call  self.req('POST', self.base_url, params)
+    -> sublist3r.DNSdumpster.req
+    reject *: self is a DNSdumpster; no package class derives from DNSdumpster
+648:29 call  self.extract_domains(post_resp)
+    -> sublist3r.DNSdumpster.extract_domains
+    reject *: self is a DNSdumpster; no package class derives from DNSdumpster
+650:33 call  threading.Thread(target=self.check_host, args=(subdomain,))
+    -> threading.Thread
+    reject sublist3r.DNSdumpster.check_host: threading.Thread stores the target; t.start() at line 651 runs it
+651:20 call  t.start()
+    -> threading.Thread.start
+    -> sublist3r.DNSdumpster.check_host
+    note: start() runs the target self.check_host of the Thread made at line 650 (callback rule: the target belongs to the scope that calls start())
+652:19 call  t.join()
+    -> threading.Thread.join
+
+[sublist3r.DNSdumpster.extract_domains]
+656:31 call  re.compile('<a name="hostanchor"><\/a>Host Records.*?<tab...
+    -> re.compile
+657:32 call  re.compile('<td class="col-md-4">(.*?)<br>', re.S)
+    -> re.compile
+660:44 call  tbl_regex.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+663:40 call  link_regex.findall(results_tbl)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+664:21 call  list(set(links_list))
+    -> <builtin>.list
+664:25 call  set(links_list)
+    -> <builtin>.set
+666:35 call  link.strip()
+    -> <builtin>.str.strip
+667:38 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+670:39 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+670:55 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.Virustotal.__init__]
+679:35 call  threading.Lock()
+    -> threading.Lock
+681:14 call  super(Virustotal, self)
+    -> <builtin>.super
+681:41 call  super(Virustotal, self).__init__(base_url, self.engine_na...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+682:40 call  self.base_url.format(domain=self.domain)
+    -> <builtin>.str.format
+
+[sublist3r.Virustotal.send_req]
+688:36 call  self.session.get(url, headers=self.headers, timeout=self....
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+690:24 call  self.print_(e)
+    -> sublist3r.enumratorBase.print_
+693:33 call  self.get_response(resp)
+    -> sublist3r.enumratorBase.get_response
+
+[sublist3r.Virustotal.enumerate]
+698:33 call  self.send_req(self.url)
+    -> sublist3r.Virustotal.send_req
+    reject sublist3r.enumratorBase.send_req: self is a Virustotal, which overrides send_req; no package class derives from Virustotal
+699:30 call  json.loads(resp)
+    -> json.loads
+701:28 call  self.print_(R + "[!] Error: Virustotal probably now is bl...
+    -> sublist3r.enumratorBase.print_
+707:33 call  self.extract_domains(resp)
+    -> sublist3r.Virustotal.extract_domains
+    reject *: self is a Virustotal; no package class derives from Virustotal
+
+[sublist3r.Virustotal.extract_domains]
+716:46 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+720:40 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+721:47 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+721:63 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.ThreatCrowd.__init__]
+731:35 call  threading.Lock()
+    -> threading.Lock
+733:14 call  super(ThreatCrowd, self)
+    -> <builtin>.super
+733:42 call  super(ThreatCrowd, self).__init__(base_url, self.engine_n...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.ThreatCrowd.req]
+738:36 call  self.session.get(url, headers=self.headers, timeout=self....
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+742:33 call  self.get_response(resp)
+    -> sublist3r.enumratorBase.get_response
+
+[sublist3r.ThreatCrowd.enumerate]
+745:35 call  self.base_url.format(domain=self.domain)
+    -> <builtin>.str.format
+746:24 call  self.req(url)
+    -> sublist3r.ThreatCrowd.req
+    reject *: self is a ThreatCrowd; no package class derives from ThreatCrowd
+747:29 call  self.extract_domains(resp)
+    -> sublist3r.ThreatCrowd.extract_domains
+    reject *: self is a ThreatCrowd; no package class derives from ThreatCrowd
+
+[sublist3r.ThreatCrowd.extract_domains]
+752:31 call  json.loads(resp)
+    -> json.loads
+754:39 call  link.strip()
+    -> <builtin>.str.strip
+755:42 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+759:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+760:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+760:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.CrtSearch.__init__]
+770:35 call  threading.Lock()
+    -> threading.Lock
+772:14 call  super(CrtSearch, self)
+    -> <builtin>.super
+772:40 call  super(CrtSearch, self).__init__(base_url, self.engine_nam...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.CrtSearch.req]
+777:36 call  self.session.get(url, headers=self.headers, timeout=self....
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+781:33 call  self.get_response(resp)
+    -> sublist3r.enumratorBase.get_response
+
+[sublist3r.CrtSearch.enumerate]
+784:35 call  self.base_url.format(domain=self.domain)
+    -> <builtin>.str.format
+785:24 call  self.req(url)
+    -> sublist3r.CrtSearch.req
+    reject *: self is a CrtSearch; no package class derives from CrtSearch
+787:33 call  self.extract_domains(resp)
+    -> sublist3r.CrtSearch.extract_domains
+    reject *: self is a CrtSearch; no package class derives from CrtSearch
+
+[sublist3r.CrtSearch.extract_domains]
+791:31 call  re.compile('<TD>(.*?)</TD>')
+    -> re.compile
+793:38 call  link_regx.findall(resp)
+    -> _sre.SRE_Pattern.findall
+    -> re.Pattern.findall
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+795:39 call  link.strip()
+    -> <builtin>.str.strip
+796:42 call  subdomain.endswith(self.domain)
+    -> <builtin>.str.endswith
+800:57 call  subdomain.find('@')
+    -> <builtin>.str.find
+804:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+805:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+805:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.PassiveDNS.__init__]
+815:35 call  threading.Lock()
+    -> threading.Lock
+817:14 call  super(PassiveDNS, self)
+    -> <builtin>.super
+817:41 call  super(PassiveDNS, self).__init__(base_url, self.engine_na...
+    -> sublist3r.enumratorBaseThreaded.__init__
+    reject *: super(...) finds __init__ in the MRO of the receiver after the named class: enumratorBaseThreaded.__init__ (no package class derives from an engine class)
+
+[sublist3r.PassiveDNS.req]
+822:36 call  self.session.get(url, headers=self.headers, timeout=self....
+    -> requests.Session.get
+    note: self.session is the requests.Session that enumratorBase.__init__ makes (line 147)
+826:33 call  self.get_response(resp)
+    -> sublist3r.enumratorBase.get_response
+
+[sublist3r.PassiveDNS.enumerate]
+829:35 call  self.base_url.format(domain=self.domain)
+    -> <builtin>.str.format
+830:24 call  self.req(url)
+    -> sublist3r.PassiveDNS.req
+    reject *: self is a PassiveDNS; no package class derives from PassiveDNS
+834:29 call  self.extract_domains(resp)
+    -> sublist3r.PassiveDNS.extract_domains
+    reject *: self is a PassiveDNS; no package class derives from PassiveDNS
+
+[sublist3r.PassiveDNS.extract_domains]
+839:36 call  json.loads(resp)
+    -> json.loads
+843:36 call  self.print_("%s%s: %s%s" % (R, self.engine_name, W, subdo...
+    -> sublist3r.enumratorBase.print_
+844:43 call  self.subdomains.append(subdomain.strip())
+    -> <builtin>.list.append
+844:59 call  subdomain.strip()
+    -> <builtin>.str.strip
+
+[sublist3r.portscan.__init__]
+854:47 call  threading.BoundedSemaphore(value=self.threads)
+    -> threading.BoundedSemaphore
+
+[sublist3r.portscan.port_scan]
+858:26 call  self.lock.acquire()
+    -> threading.BoundedSemaphore.acquire
+    -> threading._BoundedSemaphore.acquire
+    note: Python3.2 is admitted by python_requires>=2.7 and the README unrestricted Python3 support;3.4 is a recommendation, not a minimum. CPython3.2.6 threading.py366–369 defines BoundedSemaphore as a factory returning _BoundedSemaphore. The receiver class inherits private _Semaphore; acquire is inherited from322 and release is defined375. There is no public concrete superclass or class alias: the public BoundedSemaphore name is a function on this version. Name the actual receiver threading._BoundedSemaphore. Preserve modern threading.BoundedSemaphore for versions where it is the public class.
+861:34 call  socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    -> socket.socket
+862:29 call  s.settimeout(2)
+    -> socket.socket.settimeout
+863:38 call  s.connect_ex((host, int(port)))
+    -> socket.socket.connect_ex
+863:49 call  int(port)
+    -> <builtin>.int
+865:37 call  openports.append(port)
+    -> <builtin>.list.append
+866:24 call  s.close()
+    -> socket.socket.close
+869:26 call  self.lock.release()
+    -> threading.BoundedSemaphore.release
+    -> threading._BoundedSemaphore.release
+    note: Python3.2 is admitted by python_requires>=2.7 and the README unrestricted Python3 support;3.4 is a recommendation, not a minimum. CPython3.2.6 threading.py366–369 defines BoundedSemaphore as a factory returning _BoundedSemaphore. The receiver class inherits private _Semaphore; acquire is inherited from322 and release is defined375. There is no public concrete superclass or class alias: the public BoundedSemaphore name is a function on this version. Name the actual receiver threading._BoundedSemaphore. Preserve modern threading.BoundedSemaphore for versions where it is the public class.
+870:15 call  len(openports)
+    -> <builtin>.len
+871:18 call  print("%s%s%s - %sFound open ports:%s %s%s%s" % (G, host,...
+    -> <builtin>.print
+871:92 call  ', '.join(openports)
+    -> <builtin>.str.join
+
+[sublist3r.portscan.run]
+875:33 call  threading.Thread(target=self.port_scan, args=(subdomain, ...
+    -> threading.Thread
+    reject sublist3r.portscan.port_scan: threading.Thread stores the target; t.start() at line 876 runs it
+876:20 call  t.start()
+    -> threading.Thread.start
+    -> sublist3r.portscan.port_scan
+    note: start() runs the target self.port_scan of the Thread made at line 875 (callback rule)
+
+[sublist3r.main]
+880:26 call  set()
+    -> <builtin>.set
+881:22 call  set()
+    -> <builtin>.set
+884:32 call  list()
+    -> <builtin>.list
+    note: Windows only (is_windows)
+886:51 call  multiprocessing.Manager()
+    -> multiprocessing.Manager
+886:58 call  multiprocessing.Manager().list()
+    -> multiprocessing.managers.SyncManager.list
+    note: multiprocessing.Manager() returns a started multiprocessing.managers.SyncManager; its method list is registered by SyncManager.register('list', ...) (Sublist3r.md, judgement 10)
+893:30 call  re.compile("^(http|https)?[a-zA-Z0-9]+([\-\.]{1}[a-zA-Z0-...
+    -> re.compile
+894:30 call  domain_check.match(domain)
+    -> _sre.SRE_Pattern.match
+    -> re.Pattern.match
+    note: The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750–2752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime.
+896:18 call  print(R + "Error: Please enter a valid domain" + W)
+    -> <builtin>.print
+899:29 call  domain.startswith('http://')
+    -> <builtin>.str.startswith
+    note: domain is a str: interactive passes the -d argument, and the README documents main('yahoo.com', ...)
+899:65 call  domain.startswith('https://')
+    note: no edge for ordinary str: the regex check excludes : and /, so the first startswith makes or short-circuit. A stateful client startswith may reach this call, but that client method is opaque and adds no named edge (Sublist3r.md, judgement 14)
+902:38 call  urlparse.urlparse(domain)
+    -> urllib.parse.urlparse
+    note: urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name
+905:14 call  print(B + "[-] Enumerating subdomains now for %s" % parse...
+    -> <builtin>.print
+908:14 call  print(Y + "[-] verbosity is enabled, will show the subdom...
+    -> <builtin>.print
+932:32 call  engines.split(',')
+    -> <builtin>.str.split
+    note: engines is None or a str of comma-separated names (the -e argument; README, "engines")
+934:28 call  engine.lower()
+    -> <builtin>.str.lower
+935:35 call  chosenEnums.append(supported_engines[engine.lower()])
+    -> <builtin>.list.append
+935:66 call  engine.lower()
+    -> <builtin>.str.lower
+938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo...
+    -> sublist3r.AskEnum.__init__
+    -> sublist3r.BaiduEnum.__init__
+    -> sublist3r.BingEnum.__init__
+    -> sublist3r.CrtSearch.__init__
+    -> sublist3r.DNSdumpster.__init__
+    -> sublist3r.GoogleEnum.__init__
+    -> sublist3r.NetcraftEnum.__init__
+    -> sublist3r.PassiveDNS.__init__
+    -> sublist3r.ThreatCrowd.__init__
+    -> sublist3r.Virustotal.__init__
+    -> sublist3r.YahooEnum.__init__
+    exclude sublist3r.enumratorBase.__init__, sublist3r.enumratorBaseThreaded.__init__, sublist3r.portscan.__init__: chosenEnums holds only the 11 engine classes, each of which defines __init__; the base initialisers run inside those, not from this call
+    note: enum is each class in chosenEnums: the 11 engine classes of the default list (lines 926-930), or the values of supported_engines (lines 910-921) that the -e names select, the same 11 classes. The call instantiates the class and runs its own __init__
+940:19 call  enum.start()
+    -> multiprocessing.Process.start
+    -> threading.Thread.start
+    -> sublist3r.enumratorBaseThreaded.run
+    note: enum is an engine object, a subclass of enumratorBaseThreaded, which derives from multiprocessing.Process (threading.Thread on Windows). start() runs its run method, enumratorBaseThreaded.run (no engine overrides run), in a new process (a thread on Windows); callback rule
+942:18 call  enum.join()
+    -> multiprocessing.Process.join
+    -> threading.Thread.join
+    note: threading.Thread.join on Windows only
+944:21 call  set(subdomains_queue)
+    -> <builtin>.set
+946:24 call  search_list.add(subdomain)
+    -> <builtin>.set.add
+950:18 call  print(G + "[-] Starting bruteforce module now using subbr...
+    -> <builtin>.print
+952:39 call  os.path.dirname(os.path.realpath(__file__))
+    -> os.path.dirname
+952:56 call  os.path.realpath(__file__)
+    -> os.path.realpath
+953:28 call  os.path.join(path_to_file, 'subbrute', 'names.txt')
+    -> os.path.join
+954:33 call  os.path.join(path_to_file, 'subbrute', 'resolvers.txt')
+    -> os.path.join
+958:48 call  subbrute.print_target(parsed_domain.netloc, record_type, ...
+    -> subbrute.subbrute.print_target
+960:35 call  search_list.union(bruteforce_list)
+    -> <builtin>.set.union
+963:28 call  sorted(subdomains, key=subdomain_sorting_key)
+    -> <builtin>.sorted
+    -> sublist3r.subdomain_sorting_key
+    note: sorted calls the key function subdomain_sorting_key back (callback rule)
+966:23 call  write_file(savefile, subdomains)
+    -> sublist3r.write_file
+969:18 call  print(Y + "[-] Total Unique Subdomains Found: %s" % len(s...
+    -> <builtin>.print
+969:68 call  len(subdomains)
+    -> <builtin>.len
+973:22 call  print(G + "[-] Start port scan now for the following port...
+    -> <builtin>.print
+974:32 call  ports.split(',')
+    -> <builtin>.str.split
+975:29 call  portscan(subdomains, ports)
+    -> sublist3r.portscan.__init__
+976:22 call  pscan.run()
+    -> sublist3r.portscan.run
+    reject *: pscan is the portscan made at line 975
+980:22 call  print(G + subdomain + W)
+    -> <builtin>.print
+
+[sublist3r.interactive]
+985:22 call  parse_args()
+    -> sublist3r.parse_args
+996:17 call  no_color()
+    -> sublist3r.no_color
+997:11 call  banner()
+    -> sublist3r.banner
+998:15 call  main(domain, threads, savefile, ports, silent=False, verb...
+    -> sublist3r.main

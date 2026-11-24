@@ -1,0 +1,12 @@
+{
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count": {
+        "pyrate_limiter.abstracts.algorithm.StateAlgorithm.consumed": "client subclass: self.algorithm.consumed (state_bucket.py:196) runs StateAlgorithm.consumed only on an instance of the test's class HalfRate(StateAlgorithm) (tests/test_gcra.py:602), which overrides only initial and step; StateAlgorithm is abstract by abc, the package's own StateAlgorithms (GCRA, TokenBucket) override consumed, and a client class is client code (rule B1)"
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting": {
+        "pyrate_limiter.abstracts.algorithm.Algorithm.max_weight": "client subclass: self.algorithm.max_weight (state_bucket.py:144) runs Algorithm.max_weight only on an instance of the test's StateAlgorithm subclasses (HalfRate, tests/test_gcra.py:602, and the like), which do not override it; the package's own StateAlgorithms (GCRA, TokenBucket) use GCRA.max_weight, and a client class is client code (rule B1)"
+    },
+    "pyrate_limiter.limiter.Limiter._handle_async_result._cancel_if_pending": {
+        "_asyncio.Task.cancel": "client object: tests/test_limiter.py:145-148 passes an asyncio Task that the test creates (asyncio.create_task(asyncio.sleep(1))) straight to the private _handle_async_result; every awaitable that the package itself passes there is a coroutine, so asyncio.isfuture is never true for a package value (judgement 11, rule B5)",
+        "_asyncio.Task.done": "client object: the same test's Task (tests/test_limiter.py:145-148); judgement 11, rule B5"
+    }
+}

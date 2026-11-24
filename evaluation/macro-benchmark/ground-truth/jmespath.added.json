@@ -1,0 +1,48 @@
+{
+  "edges": {
+    "jmespath.functions.Functions._func_keys": {
+      "<builtin>.dict.keys": [
+        "jmespath.functions 288:29 call  arg.keys()"
+      ]
+    },
+    "jmespath.functions.Functions._func_values": {
+      "<builtin>.dict.values": [
+        "jmespath.functions 292:31 call  arg.values()"
+      ]
+    },
+    "jmespath.parser.ParsedResult.__repr__": {
+      "<builtin>.repr": [
+        "jmespath.parser 534:20 call  repr(self.parsed)"
+      ]
+    },
+    "jmespath.visitor.TreeInterpreter.default_visit": {
+      "<builtin>.NotImplementedError": [
+        "jmespath.visitor 126:34 call  NotImplementedError(node['type'])"
+      ]
+    },
+    "jmespath.visitor.Visitor.default_visit": {
+      "<builtin>.NotImplementedError": [
+        "jmespath.visitor 97:34 call  NotImplementedError(\"default_visit\")"
+      ]
+    },
+    "jmespath.visitor.Visitor.visit": {
+      "jmespath.visitor.Visitor.default_visit": [
+        "jmespath.visitor 94:22 call  method(node, *args, **kwargs)"
+      ]
+    }
+  },
+  "notes": {
+    "jmespath.functions 288:29 call  arg.keys()": [
+      "arg passed the 'object' type check: a dict (from the data, from _func_merge, or from multi-select hash with the default dict_cls); an OrderedDict comes only from the client"
+    ],
+    "jmespath.functions 292:31 call  arg.values()": [
+      "arg passed the 'object' type check: a dict (from the data, from _func_merge, or from multi-select hash with the default dict_cls); an OrderedDict comes only from the client"
+    ],
+    "jmespath.visitor 94:22 call  method(node, *args, **kwargs)": [
+      "method is getattr(self, 'visit_' + node['type'], self.default_visit) (visitor.py:91), kept per node type in self._method_cache (visitor.py:89, 93). Visitor.visit runs on a TreeInterpreter (ParsedResult.search, parser.py:516; _Expression.visit, visitor.py:80; the self.visit calls of TreeInterpreter), or on a plain Visitor or a client subclass of it; GraphvizVisitor overrides visit (visitor.py:313).",
+      "The parser builds only the 22 node types of jmespath.ast (comparator, current, expref, function_expression, field, filter_projection, flatten, identity, index, index_expression, key_val_pair, literal, multi_select_dict, multi_select_list, or_expression, and_expression, not_expression, pipe, projection, subexpression, slice, value_projection), and TreeInterpreter defines visit_ for each (every 'def visit_' of visitor.py). Callees: the 22 TreeInterpreter.visit_* methods.",
+      "Also Visitor.default_visit: self can be a plain Visitor, because Visitor is a public class that a client can instantiate (rules B1, C), and a plain Visitor has no visit_* method, so any node type reaches its default_visit. No test runs it."
+    ]
+  },
+  "trace": "dynamic/jmespath.json"
+}

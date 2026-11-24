@@ -1,0 +1,2023 @@
+# Call-site ledger of tenacity at 4410996dd9a96864a2733ce0778bcaa112b72811.
+# Hand-written from the source; judgements in tenacity.md.
+#
+# Strategy sets used below (the package values a client can pass for a role,
+# plus the package defaults; see tenacity.md, "Open-set dispatch"):
+#   stop (7): the __call__ of stop_any, stop_all, _stop_never,
+#     stop_when_event_set, stop_after_attempt, stop_after_delay,
+#     stop_before_delay (stop_base.__call__ is abstract).
+#   wait (9): the __call__ of wait_fixed (also wait_none), wait_random,
+#     wait_combine, wait_chain, wait_exception, wait_incrementing,
+#     wait_exponential, wait_random_exponential, wait_exponential_jitter.
+#   sync retry (10): the __call__ of _retry_never, _retry_always,
+#     retry_if_exception (also _type, _not_exception_type, _exception_message),
+#     retry_unless_exception_type, retry_if_exception_cause_type,
+#     retry_if_result, retry_if_not_result, retry_if_not_exception_message,
+#     retry_any, retry_all.
+#   async retry (4): the __call__ of tenacity.asyncio.retry.retry_if_exception,
+#     retry_if_result, retry_any, retry_all.
+#   hooks (6): before_nothing, before_log.log_it, after_nothing,
+#     after_log.log_it, before_sleep_nothing, before_sleep_log.log_it.
+#   sleep: tenacity.nap.sleep, sleep_using_event.__call__, and the default of
+#     the class: _portable_async_sleep (AsyncRetrying), tornado.gen.sleep
+#     (TornadoRetrying).
+default reject tenacity._RetryDecorated.__get__: _RetryDecorated is a typing.Protocol that the package never instantiates (only t.cast names it), and both of its __get__ definitions are @t.overload stubs; no class attribute that an attribute load finds is an instance of it, so its __get__ never runs
+default reject tenacity.retry.retry_base.__or__, tenacity.retry.retry_base.__ror__, tenacity.retry.retry_any.__ror__, tenacity.asyncio.retry.async_retry_base.__or__, tenacity.asyncio.retry.async_retry_base.__ror__, tenacity.asyncio.retry.retry_any.__ror__, tenacity.stop.stop_base.__or__: every `|` in the package is a type union in an annotation or a type alias; its operands are classes (type.__or__), typing forms, TypeVars or None, never instances of the strategy classes whose __or__/__ror__ are instance methods
+default reject tenacity.BaseRetrying.__iter__, tenacity.asyncio.AsyncRetrying.__iter__: no for loop, comprehension, star-unpacking, `in` test or builtin that can iterate (any, all, sum, set, min, max) in the package operates on a retrying object; they operate on tuples (*args, *dargs, retries, stops, wait_funcs, REPR_FIELDS), the actions list of IterState, dict views, sys.modules, a set, generator expressions over those tuples, nothing (set()), or several numbers (every min and max gets two or more numeric arguments, so it iterates nothing)
+default reject tenacity.wait.wait_base.__add__, tenacity.wait.wait_base.__radd__: every `+`, `+=` and sum() in the package adds numbers (floats that wait strategies return, statistics counters, attempt numbers) or tuples (WRAPPER_ASSIGNMENTS), never wait strategies
+
+== tenacity
+
+[tenacity]
+114:29 call  t.TypeVar("WrappedFnReturnT")
+    -> typing.TypeVar
+115:22 call  t.TypeVar("WrappedFn", bound=t.Callable[..., t.Any])
+    -> typing.TypeVar
+116:16 call  t.ParamSpec("P")
+    -> typing.ParamSpec
+117:14 call  t.TypeVar("R")
+    -> typing.TypeVar
+120:2 decorator  @dataclasses.dataclass(slots=True)
+    -> dataclasses.dataclass.wrap
+    note: the decorator is the closure `wrap` that dataclasses.dataclass(slots=True) returns (120:23)
+120:23 call  dataclasses.dataclass(slots=True)
+    -> dataclasses.dataclass
+122:77 call  dataclasses.field( default_factory=list )
+    -> dataclasses.field
+140:19 call  object()
+    -> <builtin>.object
+163:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+170:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+183:16 call  object()
+    -> <builtin>.object
+219:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+263:38 call  wait_none()
+    -> tenacity.wait.wait_none.__init__
+    reject tenacity.wait.wait_fixed.__init__: wait_none defines its own __init__, the first in its MRO; wait_fixed.__init__ is called from it (wait.py:76)
+    note: default value of BaseRetrying.__init__, evaluated when the class body runs
+264:54 call  retry_if_exception_type()
+    -> tenacity.retry.retry_if_exception_type.__init__
+    reject tenacity.retry.retry_if_exception.__init__: called from retry_if_exception_type.__init__ through super() (retry.py:116), not here
+    reject tenacity.asyncio.retry.retry_if_exception.__init__: another class; the name here is tenacity.retry.retry_if_exception_type (imported at line 44)
+    note: default value of BaseRetrying.__init__, evaluated when the class body runs
+332:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+336:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+349:6 decorator  @property
+    -> <builtin>.property
+375:6 decorator  @property
+    -> <builtin>.property
+523:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+536:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+572:6 decorator  @property
+    -> <builtin>.property
+577:6 decorator  @classmethod
+    -> <builtin>.classmethod
+635:6 decorator  @property
+    -> <builtin>.property
+664:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+704:6 decorator  @t.overload
+    -> typing.overload
+708:6 decorator  @t.overload
+    -> typing.overload
+715:6 decorator  @t.overload
+    -> typing.overload
+719:6 decorator  @t.overload
+    -> typing.overload
+723:6 decorator  @t.overload
+    -> typing.overload
+727:6 decorator  @t.overload
+    -> typing.overload
+733:2 decorator  @t.overload
+    -> typing.overload
+737:2 decorator  @t.overload
+    -> typing.overload
+755:2 decorator  @t.overload
+    -> typing.overload
+759:34 call  wait_none()
+    -> tenacity.wait.wait_none.__init__
+    reject tenacity.wait.wait_fixed.__init__: wait_none defines its own __init__, the first in its MRO; wait_fixed.__init__ is called from it (wait.py:76)
+    note: default value in the third @overload signature of retry, evaluated when the module runs
+760:78 call  retry_if_exception_type()
+    -> tenacity.retry.retry_if_exception_type.__init__
+    reject tenacity.retry.retry_if_exception.__init__: called from retry_if_exception_type.__init__ through super() (retry.py:116), not here
+    reject tenacity.asyncio.retry.retry_if_exception.__init__: another class; the name here is tenacity.retry.retry_if_exception_type (imported at line 44)
+    note: default value in the third @overload signature of retry, evaluated when the module runs
+812:16 call  _has_tornado()
+    -> tenacity._has_tornado
+
+[tenacity.BaseAction.__repr__]
+165:30 call  ", ".join( f"{field}={getattr(self, field)!r}" for field ...
+    -> <builtin>.str.join
+166:15 format  {field}
+    reject *: field is a str from REPR_FIELDS
+166:23 format  {getattr(self, field)!r}
+    reject *: the attributes that REPR_FIELDS names hold plain values: the only one, RetryAction.sleep, is a float (line 180)
+166:31 call  getattr(self, field)
+    -> <builtin>.getattr
+168:18 format  {self.__class__.__name__}
+    reject *: a class name, a str
+168:44 format  {state_str}
+    reject *: state_str is the str that str.join returns (line 165)
+
+[tenacity.BaseAction.__str__]
+172:20 call  repr(self)
+    -> <builtin>.repr
+    -> tenacity.BaseAction.__repr__
+    reject *: self is a BaseAction (RetryAction); the first __repr__ in its MRO is BaseAction.__repr__
+
+[tenacity.RetryAction.__init__]
+180:27 call  float(sleep)
+    -> <builtin>.float
+
+[tenacity.RetryError.__init__]
+204:14 call  super()
+    -> <builtin>.super
+204:25 call  super().__init__(last_attempt)
+    -> <builtin>.Exception.__init__
+    reject *: the base of RetryError is Exception; no package class is in its MRO after it
+
+[tenacity.RetryError.reraise]
+207:30 getattr  self.last_attempt.failed
+    -> tenacity.Future.failed
+208:46 call  self.last_attempt.exception()
+    -> concurrent.futures.Future.exception
+212:26 call  isinstance(exc, TryAgain)
+    -> <builtin>.isinstance
+215:47 call  cause.with_traceback(cause.__traceback__)
+    note: Round 4: the call can execute, but cause is a client-origin exception attribute value and stays opaque under B5. No package code constructs the cause; isinstance(exc, TryAgain) checks exc, not cause. The alternate public RetryCallState.set_exception witness admits the outer package TryAgain through BaseException, but does not type its cause as a concrete outside receiver under B4. The universal exception-family contract alone does not supply that package input role.
+216:43 call  self.last_attempt.result()
+    -> concurrent.futures.Future.result
+
+[tenacity.RetryError.__str__]
+221:18 format  {self.__class__.__name__}
+    reject *: a class name, a str
+221:44 format  {self.last_attempt}
+    reject *: last_attempt is a tenacity.Future (exc_check passes rs.outcome, line 480), which defines no __format__, __str__ or __repr__; concurrent.futures.Future.__repr__ formats it
+
+[tenacity.AttemptManager.__exit__]
+240:43 call  self.retry_state.set_exception((exc_type, exc_value, trac...
+    -> tenacity.RetryCallState.set_exception
+243:36 call  self.retry_state.set_result(None)
+    -> tenacity.RetryCallState.set_result
+
+[tenacity.AttemptManager.__aexit__]
+255:29 call  self.__exit__(exc_type, exc_value, traceback)
+    -> tenacity.AttemptManager.__exit__
+
+[tenacity.BaseRetrying.__init__]
+276:30 call  wait_none()
+    -> tenacity.wait.wait_none.__init__
+    reject tenacity.wait.wait_fixed.__init__: wait_none defines its own __init__, the first in its MRO; wait_fixed.__init__ is called from it (wait.py:76)
+276:47 call  _is_no_wait(wait)
+    -> tenacity._is_no_wait
+282:38 call  threading.local()
+    -> threading.local
+
+[tenacity.BaseRetrying.copy]
+306:30 call  self.__class__( sleep=_first_set(sleep, self.sleep), stop...
+    -> tenacity.BaseRetrying.__init__
+    -> tenacity.asyncio.AsyncRetrying.__init__
+    -> tenacity.tornadoweb.TornadoRetrying.__init__
+    note: self.__class__ is the class of the retrying object: Retrying (no __init__ of its own, so BaseRetrying.__init__), AsyncRetrying or TornadoRetrying; BaseRetrying is abstract, and client subclasses are client code
+307:29 call  _first_set(sleep, self.sleep)
+    -> tenacity._first_set
+    reject tenacity.nap.sleep: `sleep` here is the parameter of copy (a sleep function or _unset), not the module function; _first_set does not call its arguments
+308:28 call  _first_set(stop, self.stop)
+    -> tenacity._first_set
+309:28 call  _first_set(wait, self.wait)
+    -> tenacity._first_set
+310:29 call  _first_set(retry, self.retry)
+    -> tenacity._first_set
+    reject tenacity.retry: `retry` here is the parameter of copy (a strategy or _unset), not the decorator function; _first_set does not call its arguments
+311:30 call  _first_set(before, self.before)
+    -> tenacity._first_set
+312:29 call  _first_set(after, self.after)
+    -> tenacity._first_set
+313:36 call  _first_set(before_sleep, self.before_sleep)
+    -> tenacity._first_set
+314:31 call  _first_set(reraise, self.reraise)
+    -> tenacity._first_set
+    reject tenacity.RetryError.reraise: `reraise` here is the bool parameter of copy, and self.reraise a bool attribute
+315:39 call  _first_set(retry_error_cls, self.retry_error_cls)
+    -> tenacity._first_set
+316:44 call  _first_set( retry_error_callback, self.retry_error_callba...
+    -> tenacity._first_set
+319:28 call  _first_set(name, self._name)
+    -> tenacity._first_set
+320:31 call  _first_set(enabled, self.enabled)
+    -> tenacity._first_set
+
+[tenacity.BaseRetrying.__getstate__]
+326:53 call  self.__dict__.items()
+    -> <builtin>.dict.items
+
+[tenacity.BaseRetrying.__setstate__]
+329:29 call  self.__dict__.update(state)
+    -> <builtin>.dict.update
+330:38 call  threading.local()
+    -> threading.local
+
+[tenacity.BaseRetrying.__repr__]
+339:16 format  {self.__class__.__name__}
+    reject *: a class name, a str
+339:54 format  {id(self):x}
+    reject *: id() returns an int
+339:57 call  id(self)
+    -> <builtin>.id
+340:20 format  {self.stop}
+    reject *: self.stop is a stop strategy or a client callable; no stop class defines __format__, __str__ or __repr__
+341:20 format  {self.wait}
+    reject *: self.wait is a wait strategy or a client callable; no wait class defines __format__, __str__ or __repr__
+342:21 format  {self.sleep}
+    reject *: self.sleep is nap.sleep, a sleep_using_event, _portable_async_sleep, tornado.gen.sleep or a client callable; none defines __format__, __str__ or __repr__
+343:21 format  {self.retry}
+    reject *: self.retry is a retry strategy or a client callable; no retry class defines __format__, __str__ or __repr__
+344:22 format  {self.before}
+    reject *: self.before is a function (before_nothing, before_log's log_it, a client callable) or None
+345:21 format  {self.after}
+    reject *: self.after is a function (after_nothing, after_log's log_it, a client callable) or None
+346:20 format  {self._name!r}
+    reject *: _name is a str or None
+
+[tenacity.BaseRetrying.statistics]
+371:23 call  hasattr(self._local, "statistics")
+    -> <builtin>.hasattr
+    reject tenacity.BaseRetrying.statistics: the attribute is looked up on self._local, a threading.local, not on a retrying object
+372:44 call  t.cast("dict[str, t.Any]", {})
+    -> typing.cast
+373:28 getattr  self._local.statistics
+    reject tenacity.BaseRetrying.statistics: the receiver is self._local, a threading.local (line 282)
+
+[tenacity.BaseRetrying.iter_state]
+377:23 call  hasattr(self._local, "iter_state")
+    -> <builtin>.hasattr
+    reject tenacity.BaseRetrying.iter_state: the attribute is looked up on self._local, a threading.local, not on a retrying object
+378:47 call  IterState()
+    note: IterState is a dataclass (line 120): its __init__ is generated by dataclasses and has no node; the list() of its default_factory is a call of that generated code, not an edge
+379:28 getattr  self._local.iter_state
+    reject tenacity.BaseRetrying.iter_state: the receiver is self._local, a threading.local (line 282)
+
+[tenacity.BaseRetrying.wraps]
+387:10 decorator  @functools.wraps( f, functools.WRAPPER_ASSIGNMENTS + ("__...
+    -> functools.partial.__call__
+    reject *: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls none of these functions
+387:25 call  functools.wraps( f, functools.WRAPPER_ASSIGNMENTS + ("__d...
+    -> functools.wraps
+    reject *: the callee is functools.wraps of the standard library, not a method named wraps
+414:22 call  t.cast("_RetryDecorated[P, R]", wrapped_f)
+    -> typing.cast
+    reject tenacity.BaseRetrying.wraps.wrapped_f: typing.cast returns its argument and does not call it
+
+[tenacity.BaseRetrying.wraps.wrapped_f]
+392:25 call  f(*args, **kw)
+    note: f is the function that wraps() decorates: the client's function, passed by retry.wrap (line 805), by retry_with (line 407, the same f) or by the client calling wraps(); a client callback. The parameter takes any callable and the package provides no value for this role, so no package callee (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+395:29 call  self.copy()
+    -> tenacity.BaseRetrying.copy
+400:31 getattr  wrapped_f.statistics
+    reject tenacity.BaseRetrying.statistics: the receiver is the function wrapped_f; statistics is the dict attribute set at line 412
+401:24 call  stats.clear()
+    -> <builtin>.dict.clear
+404:24 call  copy(f, *args, **kw)
+    note: Round 4 pinned definition-decorator evidence: Tornado 6.6 tornado/gen.py SHA-256 d08e2d46799f1e5a4c2fb7aec291829a57a2b5a9ecde22b363235b4d4dadd3c2, coroutine.wrapper at line 206 calls ctx_run(func, *args, **kwargs) at line 212. The wrapper and its package generator callback are both callees here. Ordinary Tornado calls remain missing-library paths.
+    -> tenacity.Retrying.__call__
+    -> tornado.gen.coroutine.wrapper
+    -> tenacity.tornadoweb.TornadoRetrying.__call__
+    -> tenacity.asyncio.AsyncRetrying.__call__
+    reject tenacity.BaseRetrying.copy: copy is the local variable that holds the result of self.copy() (line 395), a retrying object; calling it calls the __call__ of its class
+    note: copy has the class of self (BaseRetrying.copy, line 306), the object whose wraps() made this closure: a Retrying or TornadoRetrying (they inherit wraps), or an AsyncRetrying, because AsyncRetrying.wraps calls BaseRetrying.wraps through super() (asyncio/__init__.py:212). Retrying: Retrying.__call__. TornadoRetrying: its __call__ is decorated with tornado.gen.coroutine (tornadoweb.py:40), so the call runs tornado.gen.coroutine.wrapper, which calls the generator function TornadoRetrying.__call__ back. AsyncRetrying: its __call__, a coroutine function. AsyncRetrying.wraps returns async_wrapped and drops this wrapped_f, but by scope rule A whether the function is called does not matter (tenacity.md)
+
+[tenacity.BaseRetrying.wraps.retry_with]
+407:29 call  self.copy(*args, **kwargs)
+    -> tenacity.BaseRetrying.copy
+407:52 call  self.copy(*args, **kwargs).wraps(f)
+    -> tenacity.BaseRetrying.wraps
+    -> tenacity.asyncio.AsyncRetrying.wraps
+    note: the copy has the class of self: Retrying or TornadoRetrying (BaseRetrying.wraps), or AsyncRetrying, whose wraps() calls BaseRetrying.wraps through super() and keeps this retry_with (asyncio/__init__.py:236)
+
+[tenacity.BaseRetrying.begin]
+417:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+417:30 call  self.statistics.clear()
+    -> <builtin>.dict.clear
+418:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+418:55 call  time.monotonic()
+    -> time.monotonic
+419:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+420:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+421:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+
+[tenacity.BaseRetrying._add_action_func]
+424:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+424:39 call  self.iter_state.actions.append(fn)
+    -> <builtin>.list.append
+
+[tenacity.BaseRetrying._run_retry]
+427:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+427:54 call  self.retry(retry_state)
+    -> tenacity.retry._retry_never.__call__
+    -> tenacity.retry._retry_always.__call__
+    -> tenacity.retry.retry_if_exception.__call__
+    -> tenacity.retry.retry_unless_exception_type.__call__
+    -> tenacity.retry.retry_if_exception_cause_type.__call__
+    -> tenacity.retry.retry_if_result.__call__
+    -> tenacity.retry.retry_if_not_result.__call__
+    -> tenacity.retry.retry_if_not_exception_message.__call__
+    -> tenacity.retry.retry_any.__call__
+    -> tenacity.retry.retry_all.__call__
+    -> tenacity.asyncio.retry.retry_if_exception.__call__
+    -> tenacity.asyncio.retry.retry_if_result.__call__
+    -> tenacity.asyncio.retry.retry_any.__call__
+    -> tenacity.asyncio.retry.retry_all.__call__
+    reject tenacity.retry: self.retry is the retry strategy attribute, not the decorator function tenacity.retry
+    note: self.retry is set only by BaseRetrying.__init__ (line 277) from its `retry` argument: the default retry_if_exception_type() (line 264), AsyncRetrying's default (asyncio/__init__.py:83), copy() (line 310), retry.wrap (lines 795-803, from the client's dkw), or any strategy the client passes. This method runs for Retrying and TornadoRetrying objects (AsyncRetrying overrides it). Callees: the sync retry set (10) and the async retry set (4): the public tenacity.asyncio strategies subclass retry_base, the base-class arm of the annotation RetryBaseT (line 264, retry.py:63), and the sync @overload of retry names their type tasyncio.retry.RetryBaseT, whose base-class arm is async_retry_base (line 760; scope rule B2); their __call__ is a coroutine function, called here and never awaited
+    note: retry_if_exception_type, retry_if_not_exception_type and retry_if_exception_message inherit retry_if_exception.__call__; plain callables of the client are client callbacks
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B2: RetryBaseT is retry_base | Callable[[RetryCallState], bool] (retry.py:63); stop and wait strategies fit only the bare Callable arm, which names no package value, and the API reference offers them for stop and wait
+
+[tenacity.BaseRetrying._run_wait]
+430:47 call  self.wait(retry_state)
+    -> tenacity.wait.wait_fixed.__call__
+    -> tenacity.wait.wait_random.__call__
+    -> tenacity.wait.wait_combine.__call__
+    -> tenacity.wait.wait_chain.__call__
+    -> tenacity.wait.wait_exception.__call__
+    -> tenacity.wait.wait_incrementing.__call__
+    -> tenacity.wait.wait_exponential.__call__
+    -> tenacity.wait.wait_random_exponential.__call__
+    -> tenacity.wait.wait_exponential_jitter.__call__
+    note: self.wait is set only by BaseRetrying.__init__ (line 276): the client's wait strategy, or wait_none() (default, line 263; also when _is_no_wait accepts None or 0), whose __call__ is wait_fixed.__call__. This method runs for Retrying and TornadoRetrying objects (AsyncRetrying overrides it). Callees: the wait set (9); plain callables of the client are client callbacks
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__: scope rule B2: WaitBaseT is wait_base | Callable[[RetryCallState], float | int] (wait.py:58); stop and retry strategies fit only the bare Callable arm, which names no package value
+
+[tenacity.BaseRetrying._run_stop]
+433:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+433:68 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+434:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+434:52 call  self.stop(retry_state)
+    -> tenacity.stop.stop_any.__call__
+    -> tenacity.stop.stop_all.__call__
+    -> tenacity.stop._stop_never.__call__
+    -> tenacity.stop.stop_when_event_set.__call__
+    -> tenacity.stop.stop_after_attempt.__call__
+    -> tenacity.stop.stop_after_delay.__call__
+    -> tenacity.stop.stop_before_delay.__call__
+    note: self.stop is set only by BaseRetrying.__init__ (line 275): the default stop_never (line 262; asyncio/__init__.py:81), copy() (line 308), or any stop strategy the client passes. This method runs for Retrying and TornadoRetrying objects (AsyncRetrying overrides it). Callees: the stop set (7); plain callables of the client are client callbacks
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B2: StopBaseT is stop_base | Callable[[RetryCallState], bool] (stop.py:42); retry and wait strategies fit only the bare Callable arm, which names no package value
+
+[tenacity.BaseRetrying.iter]
+437:25 call  self._begin_iter(retry_state)
+    -> tenacity.BaseRetrying._begin_iter
+439:28 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+440:28 call  action(retry_state)
+    -> tenacity.BaseRetrying._begin_iter.<lambda1>
+    -> tenacity.BaseRetrying._run_retry
+    -> tenacity.BaseRetrying._post_retry_check_actions
+    -> tenacity.BaseRetrying._post_retry_check_actions.<lambda1>
+    -> tenacity.BaseRetrying._run_wait
+    -> tenacity.BaseRetrying._run_stop
+    -> tenacity.BaseRetrying._post_stop_check_actions
+    -> tenacity.BaseRetrying._post_stop_check_actions.exc_check
+    -> tenacity.BaseRetrying._post_stop_check_actions.next_action
+    -> tenacity.BaseRetrying._post_stop_check_actions.<lambda1>
+    -> tenacity.before.before_nothing
+    -> tenacity.before.before_log.log_it
+    -> tenacity.after.after_nothing
+    -> tenacity.after.after_log.log_it
+    -> tenacity.before_sleep.before_sleep_nothing
+    -> tenacity.before_sleep.before_sleep_log.log_it
+    note: action is an entry of iter_state.actions; this iter runs for Retrying and TornadoRetrying objects, whose _add_action_func is BaseRetrying._add_action_func (line 424): it appends fn unchanged. The 14 calls of _add_action_func (lines 449-500) append: self.before; the lambda of line 450; the bound methods self._run_retry, self._post_retry_check_actions, self._run_wait, self._run_stop, self._post_stop_check_actions (the BaseRetrying ones: these classes do not override them); the lambdas of lines 462 and 500; self.after; self.retry_error_callback; exc_check; next_action; self.before_sleep
+    note: before, after and before_sleep: defaults before_nothing, after_nothing, None (lines 265-267), or a hook that the API reference offers for that argument of tenacity.retry (doc/source/api.rst:23-45: the before, after and before_sleep modules), passed on by retry.wrap (lines 791-803): the hook set (6). retry_error_callback: the package offers no value for it (default None; its bare Callable annotation names none). Client callables are client callbacks
+    exclude tenacity.asyncio.AsyncRetrying._run_retry, tenacity.asyncio.AsyncRetrying._run_wait, tenacity.asyncio.AsyncRetrying._run_stop: scope rule B1: this iter runs for Retrying and TornadoRetrying; AsyncRetrying overrides iter, and its _run_* never reach these actions
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__, tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__: scope rule B2: before, after, before_sleep and retry_error_callback are typed as bare Callables (__init__.py:265-270), which name no package value; the API reference offers the hooks for before, after and before_sleep and nothing for retry_error_callback, and never the strategies
+
+[tenacity.BaseRetrying._begin_iter]
+444:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+444:30 call  self.iter_state.reset()
+    -> tenacity.IterState.reset
+449:38 call  self._add_action_func(self.before)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    note: _begin_iter runs from BaseRetrying.iter and from AsyncRetrying.iter (asyncio/__init__.py:168), so self._add_action_func is either one
+450:34 call  self._add_action_func(lambda rs: DoAttempt())
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._begin_iter.<lambda1>: stored in the actions list; iter() calls it later (line 440, asyncio/__init__.py:171 through wrap_to_async_func.inner)
+453:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+453:49 getattr  fut.failed
+    -> tenacity.Future.failed
+453:70 call  isinstance( fut.exception(), TryAgain )
+    -> <builtin>.isinstance
+454:26 call  fut.exception()
+    -> concurrent.futures.Future.exception
+456:21 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+457:34 call  self._add_action_func(self._run_retry)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._run_retry, tenacity.asyncio.AsyncRetrying._run_retry: the bound method is stored in the actions list; iter() calls it later
+458:30 call  self._add_action_func(self._post_retry_check_actions)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._post_retry_check_actions: the bound method is stored in the actions list; iter() calls it later
+
+[tenacity.BaseRetrying._begin_iter.<lambda1>]
+450:55 call  DoAttempt()
+    note: DoAttempt defines no __init__ and has no base but object: object.__init__, no edge
+
+[tenacity.BaseRetrying._post_retry_check_actions]
+461:22 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+461:59 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+462:34 call  self._add_action_func(lambda rs: rs.outcome.result())
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._post_retry_check_actions.<lambda1>: stored in the actions list; iter() calls it later
+    note: this method is itself an action, called from BaseRetrying.iter or (through wrap_to_async_func.inner) for AsyncRetrying, so self._add_action_func is either one
+466:34 call  self._add_action_func(self.after)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+468:30 call  self._add_action_func(self._run_wait)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._run_wait, tenacity.asyncio.AsyncRetrying._run_wait: the bound method is stored in the actions list; iter() calls it later
+469:30 call  self._add_action_func(self._run_stop)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._run_stop, tenacity.asyncio.AsyncRetrying._run_stop: the bound method is stored in the actions list; iter() calls it later
+470:30 call  self._add_action_func(self._post_stop_check_actions)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._post_stop_check_actions: the bound method is stored in the actions list; iter() calls it later
+
+[tenacity.BaseRetrying._post_retry_check_actions.<lambda1>]
+462:63 call  rs.outcome.result()
+    -> concurrent.futures.Future.result
+
+[tenacity.BaseRetrying._post_stop_check_actions]
+473:17 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+475:38 call  self._add_action_func(self.retry_error_callback)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    note: this method is itself an action, called from BaseRetrying.iter or (through wrap_to_async_func.inner) for AsyncRetrying, so self._add_action_func is either one
+485:34 call  self._add_action_func(exc_check)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._post_stop_check_actions.exc_check: stored in the actions list; iter() calls it later
+495:30 call  self._add_action_func(next_action)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._post_stop_check_actions.next_action: stored in the actions list; iter() calls it later
+498:34 call  self._add_action_func(self.before_sleep)
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+500:30 call  self._add_action_func(lambda rs: DoSleep(rs.upcoming_sleep))
+    -> tenacity.BaseRetrying._add_action_func
+    -> tenacity.asyncio.AsyncRetrying._add_action_func
+    reject tenacity.BaseRetrying._post_stop_check_actions.<lambda1>: stored in the actions list; iter() calls it later
+
+[tenacity.BaseRetrying._post_stop_check_actions.exc_check]
+479:29 call  t.cast("Future", rs.outcome)
+    -> typing.cast
+480:49 call  self.retry_error_cls(fut)
+    -> tenacity.RetryError.__init__
+    note: self.retry_error_cls is set only by BaseRetrying.__init__ (line 283): the default RetryError (line 269; asyncio/__init__.py:91), copy() (line 315), or a class of the client (type[RetryError]: a client subclass is client code). RetryError is the only package class of that type
+482:38 call  retry_exc.reraise()
+    -> tenacity.RetryError.reraise
+    note: retry_exc is the instance of self.retry_error_cls made at line 480: a RetryError (client subclasses are client code)
+483:51 call  fut.exception()
+    -> concurrent.futures.Future.exception
+
+[tenacity.BaseRetrying._post_stop_check_actions.next_action]
+490:41 call  RetryAction(sleep)
+    -> tenacity.RetryAction.__init__
+492:18 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+493:18 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+
+[tenacity.BaseRetrying._post_stop_check_actions.<lambda1>]
+500:49 call  DoSleep(rs.upcoming_sleep)
+    note: DoSleep subclasses float and defines no __init__; the first __init__ in its MRO is object.__init__ (float.__new__ makes the value): no edge
+
+[tenacity.BaseRetrying.__iter__]
+504:41 call  RetryCallState(self, fn=None, args=(), kwargs={})
+    -> tenacity.RetryCallState.__init__
+505:33 call  AttemptManager(retry_state=retry_state)
+    -> tenacity.AttemptManager.__init__
+506:72 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+507:52 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+510:19 call  self.begin()
+    -> tenacity.BaseRetrying.begin
+512:37 call  RetryCallState(self, fn=None, args=(), kwargs={})
+    -> tenacity.RetryCallState.__init__
+514:27 call  self.iter(retry_state=retry_state)
+    -> tenacity.BaseRetrying.iter
+    reject tenacity.asyncio.AsyncRetrying.iter: AsyncRetrying overrides __iter__ (asyncio/__init__.py:175), so this generator runs for Retrying and TornadoRetrying objects, whose iter is BaseRetrying.iter
+515:26 call  isinstance(do, DoAttempt)
+    -> <builtin>.isinstance
+516:37 call  AttemptManager(retry_state=retry_state)
+    -> tenacity.AttemptManager.__init__
+517:28 call  isinstance(do, DoSleep)
+    -> <builtin>.isinstance
+518:53 call  retry_state.prepare_for_next_attempt()
+    -> tenacity.RetryCallState.prepare_for_next_attempt
+519:27 call  self.sleep(do)
+    -> tenacity.nap.sleep
+    -> tenacity.nap.sleep_using_event.__call__
+    -> tornado.gen.sleep
+    note: self.sleep is set by BaseRetrying.__init__ (line 274) and again by TornadoRetrying.__init__ (tornadoweb.py:38). This generator runs for Retrying (default nap.sleep, line 261) and TornadoRetrying (default tornado.gen.sleep, tornadoweb.py:34; the call returns a future that the loop drops). The API reference offers the nap functions, nap.sleep and sleep_using_event (its __call__), as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to Retrying or TornadoRetrying (lines 791-803): scope rule B2. Other callables are client callbacks
+    exclude tenacity.asyncio._portable_async_sleep: private (scope rule C), so only a default: it is AsyncRetrying's, and AsyncRetrying overrides __iter__ (scope rule B1)
+
+[tenacity.Retrying.__call__]
+544:22 call  fn(*args, **kwargs)
+    note: fn is the function to retry: the client's function, passed by the client or by wrapped_f (line 404, its f); a client callback. The parameter takes any callable and the package provides no value for this role, so no package callee (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+546:19 call  self.begin()
+    -> tenacity.BaseRetrying.begin
+548:37 call  RetryCallState(retry_object=self, fn=fn, args=args, kwarg...
+    -> tenacity.RetryCallState.__init__
+550:27 call  self.iter(retry_state=retry_state)
+    -> tenacity.BaseRetrying.iter
+    reject tenacity.asyncio.AsyncRetrying.iter: self is a Retrying, whose iter is BaseRetrying.iter
+551:26 call  isinstance(do, DoAttempt)
+    -> <builtin>.isinstance
+553:32 call  fn(*args, **kwargs)
+    note: the same fn as line 544: the client's function, a client callback; no package value for this role (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+555:46 call  retry_state.set_exception(sys.exc_info())
+    -> tenacity.RetryCallState.set_exception
+555:59 call  sys.exc_info()
+    -> sys.exc_info
+557:43 call  retry_state.set_result(result)
+    -> tenacity.RetryCallState.set_result
+558:28 call  isinstance(do, DoSleep)
+    -> <builtin>.isinstance
+559:53 call  retry_state.prepare_for_next_attempt()
+    -> tenacity.RetryCallState.prepare_for_next_attempt
+560:27 call  self.sleep(do)
+    -> tenacity.nap.sleep
+    -> tenacity.nap.sleep_using_event.__call__
+    note: self.sleep is set by BaseRetrying.__init__ (line 274): for a Retrying the default nap.sleep (line 261), copy() (line 307), or the client's sleep. The API reference offers the nap functions, nap.sleep and sleep_using_event (its __call__), as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to Retrying (line 803): scope rule B2. Other callables are client callbacks
+    exclude tenacity.asyncio._portable_async_sleep: private (scope rule C), so only a default, and it is the default of AsyncRetrying, not of Retrying
+
+[tenacity.Future.__init__]
+569:14 call  super()
+    -> <builtin>.super
+569:25 call  super().__init__()
+    -> concurrent.futures.Future.__init__
+    reject *: the base of tenacity.Future is concurrent.futures.Future (`futures.Future`, line 565); no package class follows it in the MRO
+
+[tenacity.Future.failed]
+575:30 call  self.exception()
+    -> concurrent.futures.Future.exception
+
+[tenacity.Future.construct]
+582:18 call  cls(attempt_number)
+    -> tenacity.Future.__init__
+    note: cls is the class that the classmethod is called on: tenacity.Future (client subclasses are client code)
+584:30 call  fut.set_exception(value)
+    -> concurrent.futures.Future.set_exception
+    reject tenacity.RetryCallState.set_exception: fut is a tenacity.Future (line 582), which inherits set_exception from concurrent.futures.Future
+586:27 call  fut.set_result(value)
+    -> concurrent.futures.Future.set_result
+    reject tenacity.RetryCallState.set_result: fut is a tenacity.Future (line 582), which inherits set_result from concurrent.futures.Future
+
+[tenacity.RetryCallState.__init__]
+601:41 call  time.monotonic()
+    -> time.monotonic
+
+[tenacity.RetryCallState.get_fn_name]
+632:44 call  _utils.get_callback_name(self.fn)
+    -> tenacity._utils.get_callback_name
+633:19 call  str(self.retry_object)
+    -> <builtin>.str
+    -> tenacity.BaseRetrying.__str__
+    reject *: retry_object is the retrying object that made this RetryCallState (Retrying, AsyncRetrying or TornadoRetrying; lines 504, 512, 548, asyncio/__init__.py:124, 180, 185, tornadoweb.py:50); none overrides BaseRetrying.__str__
+
+[tenacity.RetryCallState.set_result]
+648:28 call  time.monotonic()
+    -> time.monotonic
+649:21 call  Future(self.attempt_number)
+    -> tenacity.Future.__init__
+650:23 call  fut.set_result(val)
+    -> concurrent.futures.Future.set_result
+    reject tenacity.RetryCallState.set_result: fut is the tenacity.Future of line 649, which inherits set_result from concurrent.futures.Future
+
+[tenacity.RetryCallState.set_exception]
+659:28 call  time.monotonic()
+    -> time.monotonic
+660:21 call  Future(self.attempt_number)
+    -> tenacity.Future.__init__
+661:26 call  fut.set_exception(exc_info[1])
+    -> concurrent.futures.Future.set_exception
+    reject tenacity.RetryCallState.set_exception: fut is the tenacity.Future of line 660, which inherits set_exception from concurrent.futures.Future
+
+[tenacity.RetryCallState.__repr__]
+668:27 getattr  self.outcome.failed
+    -> tenacity.Future.failed
+669:47 call  self.outcome.exception()
+    -> concurrent.futures.Future.exception
+670:32 format  {exception.__class__.__name__}
+    reject *: a class name, a str
+670:63 format  {exception}
+    -> tenacity.RetryError.__str__
+    reject *: opaque client data, or a RetryError stored through the public typed RetryCallState.set_exception API; among package classes only RetryError defines __str__ (TryAgain inherits it from BaseException)
+    note: the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used.
+672:33 format  {self.outcome.result()}
+    reject *: the return value of the retried function: client data, which the package does not produce
+672:53 call  self.outcome.result()
+    -> concurrent.futures.Future.result
+674:22 call  float(round(self.idle_for, 2))
+    -> <builtin>.float
+674:28 call  round(self.idle_for, 2)
+    -> <builtin>.round
+676:19 format  {clsname}
+    reject *: a class name, a str
+676:29 format  {id(self)}
+    reject *: id() returns an int
+676:32 call  id(self)
+    -> <builtin>.id
+676:50 format  {self.attempt_number}
+    reject *: attempt_number is an int
+676:83 format  {slept}
+    reject *: slept is a float (line 674)
+676:105 format  {result}
+    reject *: result is a str (lines 667-672)
+
+[tenacity.retry]
+780:11 call  len(dargs)
+    -> <builtin>.len
+780:36 call  callable(dargs[0])
+    -> <builtin>.callable
+781:21 call  retry()
+    -> tenacity.retry
+781:23 call  retry()(dargs[0])
+    -> tenacity.retry.wrap
+    note: retry() returns its closure wrap (line 807)
+
+[tenacity.retry.wrap]
+784:22 call  isinstance(f, retry_base)
+    -> <builtin>.isinstance
+785:26 call  warnings.warn( f"Got retry_base instance ({f.__class__.__...
+    -> warnings.warn
+    note: runs only when f is a retry_base instance (line 784). A package strategy as the function to retry is out of scope (scope rule B3 in tenacity.md), but a client may pass an instance of its own retry_base subclass as the function (a client object, rule B2), and that execution reaches this call
+786:44 format  {f.__class__.__name__}
+    reject *: a class name, a str
+787:76 format  {f.__class__.__name__}
+    reject *: a class name, a str
+791:24 call  dkw.get("sleep")
+    -> <builtin>.dict.get
+792:40 call  _utils.is_coroutine_callable(f)
+    -> tenacity._utils.is_coroutine_callable
+793:63 call  _utils.is_coroutine_callable(sleep)
+    -> tenacity._utils.is_coroutine_callable
+795:30 call  AsyncRetrying(*dargs, **dkw)
+    -> tenacity.asyncio.AsyncRetrying.__init__
+    reject tenacity.BaseRetrying.__init__: AsyncRetrying defines __init__, the first in its MRO; it calls BaseRetrying.__init__ through super() (asyncio/__init__.py:97)
+797:25 call  _has_tornado()
+    -> tenacity._has_tornado
+798:24 call  hasattr(tornado.gen, "is_coroutine_function")
+    -> <builtin>.hasattr
+799:50 call  tornado.gen.is_coroutine_function(f)
+    -> tornado.gen.is_coroutine_function
+801:32 call  TornadoRetrying(*dargs, **dkw)
+    -> tenacity.tornadoweb.TornadoRetrying.__init__
+    reject tenacity.BaseRetrying.__init__: TornadoRetrying defines __init__, the first in its MRO; it calls BaseRetrying.__init__ through super() (tornadoweb.py:37)
+    note: optional import (lines 87-90, 812-813): TornadoRetrying is bound only when tornado imports; _has_tornado() guards this call
+803:25 call  Retrying(*dargs, **dkw)
+    -> tenacity.BaseRetrying.__init__
+805:23 call  r.wraps(f)
+    -> tenacity.BaseRetrying.wraps
+    -> tenacity.asyncio.AsyncRetrying.wraps
+    note: r is the AsyncRetrying, TornadoRetrying or Retrying made at lines 795-803; only AsyncRetrying overrides wraps
+
+== tenacity._utils
+
+[tenacity._utils]
+32:24 call  typing.TypeVar("_F", bound=typing.Callable[..., typing.Any])
+    -> typing.TypeVar
+    note: version branch at line 29: this else branch runs on Python 3.10 and 3.11
+
+[tenacity._utils.override]
+40:14 with  contextlib.suppress(AttributeError, TypeError)
+    reject *: the context manager is a contextlib.suppress (line 40), not an AttemptManager
+40:33 call  contextlib.suppress(AttributeError, TypeError)
+    -> contextlib.suppress
+
+[tenacity._utils.find_ordinal]
+64:23 op  pos_num % 100
+    reject *: numeric modulo, not string formatting: pos_num is an int (`pos_num: int`, line 61; the package passes RetryCallState.attempt_number, an int counter, through to_ordinal, after.py:43 and before.py:39; _utils is private, scope rule C), so `%` is int.__mod__
+77:24 call  find_ordinal(pos_num % 10)
+    -> tenacity._utils.find_ordinal
+77:33 op  pos_num % 10
+    reject *: numeric modulo, not string formatting: pos_num is an int (see 64:23), so `%` is int.__mod__
+
+[tenacity._utils.to_ordinal]
+81:14 format  {pos_num}
+    reject *: pos_num is an int (an attempt number)
+81:23 format  {find_ordinal(pos_num)}
+    reject *: find_ordinal returns a str
+81:36 call  find_ordinal(pos_num)
+    -> tenacity._utils.find_ordinal
+
+[tenacity._utils.get_callback_name]
+91:24 call  segments.append(cb.__qualname__)
+    -> <builtin>.list.append
+93:14 with  contextlib.suppress(AttributeError)
+    reject *: the context manager is a contextlib.suppress (line 93), not an AttemptManager
+93:33 call  contextlib.suppress(AttributeError)
+    -> contextlib.suppress
+94:28 call  segments.append(cb.__name__)
+    -> <builtin>.list.append
+96:20 call  repr(cb)
+    -> <builtin>.repr
+    reject *: cb is RetryCallState.fn (the only caller is get_fn_name, __init__.py:632), the function to retry: a client callable; the package provides no value for that role (scope rule B3 in tenacity.md)
+97:10 with  contextlib.suppress(AttributeError)
+    reject *: the context manager is a contextlib.suppress (line 97), not an AttemptManager
+97:29 call  contextlib.suppress(AttributeError)
+    -> contextlib.suppress
+100:28 call  segments.insert(0, cb.__module__)
+    -> <builtin>.list.insert
+101:20 call  ".".join(segments)
+    -> <builtin>.str.join
+
+[tenacity._utils.to_seconds]
+108:17 call  float( time_unit.total_seconds() if isinstance(time_unit,...
+    -> <builtin>.float
+109:32 call  time_unit.total_seconds()
+    -> datetime.timedelta.total_seconds
+109:48 call  isinstance(time_unit, timedelta)
+    -> <builtin>.isinstance
+
+[tenacity._utils.is_coroutine_callable]
+114:23 call  inspect.isclass(call)
+    -> inspect.isclass
+116:35 call  inspect.iscoroutinefunction(call)
+    -> inspect.iscoroutinefunction
+118:30 call  isinstance(call, functools.partial)
+    -> <builtin>.isinstance
+119:42 call  getattr(call, "__call__", None)
+    -> <builtin>.getattr
+120:39 call  inspect.iscoroutinefunction(dunder_call)
+    -> inspect.iscoroutinefunction
+
+[tenacity._utils.wrap_to_async_func]
+126:29 call  is_coroutine_callable(call)
+    -> tenacity._utils.is_coroutine_callable
+
+[tenacity._utils.wrap_to_async_func.inner]
+130:20 call  call(*args, **kwargs)
+    -> tenacity.BaseRetrying._begin_iter.<lambda1>
+    -> tenacity.BaseRetrying._post_retry_check_actions
+    -> tenacity.BaseRetrying._post_retry_check_actions.<lambda1>
+    -> tenacity.BaseRetrying._post_stop_check_actions
+    -> tenacity.BaseRetrying._post_stop_check_actions.exc_check
+    -> tenacity.BaseRetrying._post_stop_check_actions.next_action
+    -> tenacity.BaseRetrying._post_stop_check_actions.<lambda1>
+    -> tenacity.before.before_nothing
+    -> tenacity.before.before_log.log_it
+    -> tenacity.after.after_nothing
+    -> tenacity.after.after_log.log_it
+    -> tenacity.before_sleep.before_sleep_nothing
+    -> tenacity.before_sleep.before_sleep_log.log_it
+    -> tenacity.stop.stop_any.__call__
+    -> tenacity.stop.stop_all.__call__
+    -> tenacity.stop._stop_never.__call__
+    -> tenacity.stop.stop_when_event_set.__call__
+    -> tenacity.stop.stop_after_attempt.__call__
+    -> tenacity.stop.stop_after_delay.__call__
+    -> tenacity.stop.stop_before_delay.__call__
+    -> tenacity.wait.wait_fixed.__call__
+    -> tenacity.wait.wait_random.__call__
+    -> tenacity.wait.wait_combine.__call__
+    -> tenacity.wait.wait_chain.__call__
+    -> tenacity.wait.wait_exception.__call__
+    -> tenacity.wait.wait_incrementing.__call__
+    -> tenacity.wait.wait_exponential.__call__
+    -> tenacity.wait.wait_random_exponential.__call__
+    -> tenacity.wait.wait_exponential_jitter.__call__
+    -> tenacity.retry._retry_never.__call__
+    -> tenacity.retry._retry_always.__call__
+    -> tenacity.retry.retry_if_exception.__call__
+    -> tenacity.retry.retry_unless_exception_type.__call__
+    -> tenacity.retry.retry_if_exception_cause_type.__call__
+    -> tenacity.retry.retry_if_result.__call__
+    -> tenacity.retry.retry_if_not_result.__call__
+    -> tenacity.retry.retry_if_not_exception_message.__call__
+    -> tenacity.retry.retry_any.__call__
+    -> tenacity.retry.retry_all.__call__
+    note: call is the argument of wrap_to_async_func when is_coroutine_callable(call) is false (line 126). wrap_to_async_func is called by AsyncRetrying._add_action_func (asyncio/__init__.py:145) with every action of an AsyncRetrying (the 14 _add_action_func calls of __init__.py:449-500), by AsyncRetrying._run_retry, _run_wait and _run_stop with self.retry, self.wait and self.stop (asyncio/__init__.py:149, 155, 162), and by the async retry_any and retry_all with each operand (asyncio/retry.py:113, 137)
+    note: not coroutine callables, so wrapped: the lambdas of __init__.py:450, 462 and 500, the bound methods _post_retry_check_actions and _post_stop_check_actions, exc_check, next_action, the hook set (6), the stop set (7), the wait set (9) and the sync retry set (10). Coroutine callables are returned unwrapped and never reach here: AsyncRetrying._run_retry, _run_wait, _run_stop and the async retry strategies (their __call__ is async). Client callables are client callbacks
+    exclude tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.asyncio.AsyncRetrying._run_retry, tenacity.asyncio.AsyncRetrying._run_wait, tenacity.asyncio.AsyncRetrying._run_stop: coroutine callables: wrap_to_async_func returns them unwrapped (_utils.py:126-127), so the caller of wrap_to_async_func(x)(...) calls them, not inner
+    exclude tenacity.BaseRetrying._run_retry, tenacity.BaseRetrying._run_wait, tenacity.BaseRetrying._run_stop: scope rule B1: only an AsyncRetrying adds actions through wrap_to_async_func, and its _run_* are the async overrides
+
+== tenacity.after
+
+[tenacity.after.after_log.log_it]
+37:42 call  retry_state.get_fn_name()
+    -> tenacity.RetryCallState.get_fn_name
+38:28 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+39:19 call  logger.log( log_level, f"Finished call to '{fn_name}' " f...
+    reject tenacity._utils.LoggerProtocol.log: LoggerProtocol is a typing.Protocol that only annotates the parameter; logger is the object the client passes to after_log
+    note: logger is the client's logger, typed with the typing.Protocol _utils.LoggerProtocol (_utils.py:51), which does not fix its class: a client object, opaque, so the call has no callee (scope rules B4, B5 in tenacity.md)
+41:33 format  {fn_name}
+    reject *: get_fn_name returns a str
+42:21 format  {sec_format % secs if secs is not None else '?'}
+    reject *: a str (a %-formatted float, or '?')
+42:33 op  sec_format % secs
+    reject *: the only operand is secs, a float: retry_state.seconds_since_start (line 38) is a difference of time.monotonic() values (__init__.py:636-639), and None is excluded on this line; whatever conversions the client's sec_format string has, they format a float, never a package object
+43:28 format  {_utils.to_ordinal(retry_state.attempt_number)}
+    reject *: to_ordinal returns a str
+43:46 call  _utils.to_ordinal(retry_state.attempt_number)
+    -> tenacity._utils.to_ordinal
+
+== tenacity.asyncio
+
+[tenacity.asyncio]
+51:29 call  t.TypeVar("WrappedFnReturnT")
+    -> typing.TypeVar
+52:22 call  t.TypeVar("WrappedFn", bound=t.Callable[..., t.Awaitable[...
+    -> typing.TypeVar
+53:16 call  t.ParamSpec("P")
+    -> typing.ParamSpec
+54:14 call  t.TypeVar("R")
+    -> typing.TypeVar
+82:52 call  tenacity.wait.wait_none()
+    -> tenacity.wait.wait_none.__init__
+    reject tenacity.wait.wait_fixed.__init__: wait_none defines its own __init__, the first in its MRO; wait_fixed.__init__ is called from it (wait.py:76)
+    note: default value of AsyncRetrying.__init__, evaluated when the class body runs
+83:80 call  tenacity.retry_if_exception_type()
+    -> tenacity.retry.retry_if_exception_type.__init__
+    reject tenacity.retry.retry_if_exception.__init__: called from retry_if_exception_type.__init__ through super() (retry.py:116), not here
+    reject tenacity.asyncio.retry.retry_if_exception.__init__: tenacity.retry_if_exception_type is the sync class of tenacity/retry.py
+    note: default value of AsyncRetrying.__init__, evaluated when the class body runs
+112:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+143:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+147:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+153:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+159:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+166:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+174:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+210:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+
+[tenacity.asyncio._portable_async_sleep]
+66:41 call  sniffio.current_async_library()
+    -> sniffio.current_async_library
+    note: optional import (line 61): sniffio and trio are imported only when trio is already in sys.modules; both sides of the branch run
+67:30 call  trio.sleep(seconds)
+    -> trio.sleep
+    reject tenacity.nap.sleep: the callee is trio.sleep of the trio module
+    note: trio is the module imported at line 64 (only when trio is in sys.modules and sniffio reports trio); trio.sleep is a coroutine function, called here
+72:25 call  asyncio.sleep(seconds)
+    -> asyncio.sleep
+    reject tenacity.nap.sleep: the callee is asyncio.sleep of the asyncio module
+    note: asyncio is the standard module imported at line 70; asyncio.sleep is a coroutine function, called here
+
+[tenacity.asyncio.AsyncRetrying.__init__]
+97:14 call  super()
+    -> <builtin>.super
+97:25 call  super().__init__( sleep=sleep, # type: ignore[arg-type] s...
+    -> tenacity.BaseRetrying.__init__
+    reject *: super() in AsyncRetrying resolves to BaseRetrying, whose __init__ this is
+
+[tenacity.asyncio.AsyncRetrying.__call__]
+116:48 call  _utils.is_coroutine_callable(fn)
+    -> tenacity._utils.is_coroutine_callable
+119:32 call  fn(*args, **kwargs)
+    note: fn is the function to retry: the client's function, passed by the client or by async_wrapped (line 232, its fn); a client callback. The parameter takes any callable and the package provides no value for this role, so no package callee (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+120:22 call  fn(*args, **kwargs)
+    note: the same fn as line 119, when it is not a coroutine callable: the client's function, a client callback; no package value for this role (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+122:19 call  self.begin()
+    -> tenacity.BaseRetrying.begin
+124:37 call  RetryCallState(retry_object=self, fn=fn, args=args, kwarg...
+    -> tenacity.RetryCallState.__init__
+126:33 call  self.iter(retry_state=retry_state)
+    -> tenacity.asyncio.AsyncRetrying.iter
+    reject tenacity.BaseRetrying.iter: self is an AsyncRetrying, which overrides iter (line 167)
+127:26 call  isinstance(do, DoAttempt)
+    -> <builtin>.isinstance
+130:42 call  fn(*args, **kwargs)
+    note: the same fn as line 119, when is_coroutine_callable(fn): the client's function, a client callback; no package value for this role (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+132:36 call  fn(*args, **kwargs)
+    note: the same fn as line 120, when it is not a coroutine callable: the client's function, a client callback; no package value for this role (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+134:46 call  retry_state.set_exception(sys.exc_info())
+    -> tenacity.RetryCallState.set_exception
+134:59 call  sys.exc_info()
+    -> sys.exc_info
+136:43 call  retry_state.set_result(result)
+    -> tenacity.RetryCallState.set_result
+137:28 call  isinstance(do, DoSleep)
+    -> <builtin>.isinstance
+138:53 call  retry_state.prepare_for_next_attempt()
+    -> tenacity.RetryCallState.prepare_for_next_attempt
+139:33 call  self.sleep(do)
+    -> tenacity.asyncio._portable_async_sleep
+    -> tenacity.nap.sleep
+    -> tenacity.nap.sleep_using_event.__call__
+    note: self.sleep is set by BaseRetrying.__init__ (__init__.py:274) from AsyncRetrying.__init__: the default _portable_async_sleep (line 80), copy(), or the client's sleep. The API reference offers the nap functions, nap.sleep and sleep_using_event (its __call__), as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to AsyncRetrying for a coroutine function (__init__.py:791-795): scope rule B2 (the bare Callable annotation of lines 78-79 is not the evidence). They are called here, then `await None` raises TypeError. Client callables (asyncio.sleep, trio.sleep, shown in the docs) are client callbacks
+
+[tenacity.asyncio.AsyncRetrying._add_action_func]
+145:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+145:39 call  self.iter_state.actions.append(_utils.wrap_to_async_func(...
+    -> <builtin>.list.append
+145:65 call  _utils.wrap_to_async_func(fn)
+    -> tenacity._utils.wrap_to_async_func
+
+[tenacity.asyncio.AsyncRetrying._run_retry]
+149:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+149:75 call  _utils.wrap_to_async_func(self.retry)
+    -> tenacity._utils.wrap_to_async_func
+    reject tenacity.retry: the argument is self.retry, the strategy attribute, not the decorator function tenacity.retry; wrap_to_async_func does not call it
+149:87 call  _utils.wrap_to_async_func(self.retry)( retry_state )
+    -> tenacity._utils.wrap_to_async_func.inner
+    -> tenacity.asyncio.retry.retry_if_exception.__call__
+    -> tenacity.asyncio.retry.retry_if_result.__call__
+    -> tenacity.asyncio.retry.retry_any.__call__
+    -> tenacity.asyncio.retry.retry_all.__call__
+    note: the callee is what wrap_to_async_func(self.retry) returns: self.retry itself if it is a coroutine callable (the async retry set, 4), else the coroutine function inner, which calls self.retry when awaited (the sync retry set, from _utils.py:130). self.retry: the default retry_if_exception_type() (line 83), copy(), or the client's strategy
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__: not coroutine callables: wrap_to_async_func wraps them in inner, which calls them (_utils.py:130)
+
+[tenacity.asyncio.AsyncRetrying._run_wait]
+155:69 call  _utils.wrap_to_async_func(self.wait)
+    -> tenacity._utils.wrap_to_async_func
+155:80 call  _utils.wrap_to_async_func(self.wait)( retry_state )
+    -> tenacity._utils.wrap_to_async_func.inner
+    note: the callee is what wrap_to_async_func(self.wait) returns: inner for every package wait strategy (none is a coroutine callable; inner calls them, _utils.py:130); self.wait itself only for an async callable of the client
+    exclude tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: not coroutine callables: wrap_to_async_func wraps them in inner, which calls them (_utils.py:130)
+
+[tenacity.asyncio.AsyncRetrying._run_stop]
+161:14 getattr  self.statistics
+    -> tenacity.BaseRetrying.statistics
+161:68 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+162:14 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+162:74 call  _utils.wrap_to_async_func(self.stop)
+    -> tenacity._utils.wrap_to_async_func
+162:85 call  _utils.wrap_to_async_func(self.stop)( retry_state )
+    -> tenacity._utils.wrap_to_async_func.inner
+    note: the callee is what wrap_to_async_func(self.stop) returns: inner for every package stop strategy (none is a coroutine callable; inner calls them, _utils.py:130); self.stop itself only for an async callable of the client
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__: not coroutine callables: wrap_to_async_func wraps them in inner, which calls them (_utils.py:130)
+
+[tenacity.asyncio.AsyncRetrying.iter]
+168:25 call  self._begin_iter(retry_state)
+    -> tenacity.BaseRetrying._begin_iter
+170:28 getattr  self.iter_state
+    -> tenacity.BaseRetrying.iter_state
+171:34 call  action(retry_state)
+    -> tenacity._utils.wrap_to_async_func.inner
+    -> tenacity.asyncio.AsyncRetrying._run_retry
+    -> tenacity.asyncio.AsyncRetrying._run_wait
+    -> tenacity.asyncio.AsyncRetrying._run_stop
+    note: action is an entry of iter_state.actions, appended by AsyncRetrying._add_action_func (line 145) as wrap_to_async_func(fn) for the 14 _add_action_func calls of __init__.py:449-500. The bound methods self._run_retry, self._run_wait and self._run_stop are the async overrides of this class: coroutine callables, kept as they are. Every other package action (lambdas, _post_*_check_actions, exc_check, next_action, the hook set) is wrapped in inner, which calls it (_utils.py:130). Async hooks of the client are client callbacks
+    exclude tenacity.BaseRetrying._begin_iter.<lambda1>, tenacity.BaseRetrying._post_retry_check_actions, tenacity.BaseRetrying._post_retry_check_actions.<lambda1>, tenacity.BaseRetrying._post_stop_check_actions, tenacity.BaseRetrying._post_stop_check_actions.exc_check, tenacity.BaseRetrying._post_stop_check_actions.next_action, tenacity.BaseRetrying._post_stop_check_actions.<lambda1>, tenacity.before.before_nothing, tenacity.before.before_log.log_it, tenacity.after.after_nothing, tenacity.after.after_log.log_it, tenacity.before_sleep.before_sleep_nothing, tenacity.before_sleep.before_sleep_log.log_it: not coroutine callables: AsyncRetrying._add_action_func wraps them in inner (asyncio/__init__.py:145), which calls them (_utils.py:130)
+    exclude tenacity.BaseRetrying._run_retry, tenacity.BaseRetrying._run_wait, tenacity.BaseRetrying._run_stop: scope rule B1: on an AsyncRetrying, self._run_retry, _run_wait and _run_stop are the async overrides
+
+[tenacity.asyncio.AsyncRetrying.__iter__]
+176:24 call  TypeError("AsyncRetrying object is not iterable")
+    -> <builtin>.TypeError
+
+[tenacity.asyncio.AsyncRetrying.__aiter__]
+180:47 call  RetryCallState(self, fn=None, args=(), kwargs={})
+    -> tenacity.RetryCallState.__init__
+184:19 call  self.begin()
+    -> tenacity.BaseRetrying.begin
+185:43 call  RetryCallState(self, fn=None, args=(), kwargs={})
+    -> tenacity.RetryCallState.__init__
+
+[tenacity.asyncio.AsyncRetrying.__anext__]
+192:52 getattr  outcome.failed
+    -> tenacity.Future.failed
+193:44 call  outcome.exception()
+    -> concurrent.futures.Future.exception
+196:34 call  AttemptManager(retry_state=self._retry_state)
+    -> tenacity.AttemptManager.__init__
+199:33 call  self.iter(retry_state=self._retry_state)
+    -> tenacity.asyncio.AsyncRetrying.iter
+    reject tenacity.BaseRetrying.iter: self is an AsyncRetrying, which overrides iter (line 167)
+202:26 call  isinstance(do, DoAttempt)
+    -> <builtin>.isinstance
+203:38 call  AttemptManager(retry_state=self._retry_state)
+    -> tenacity.AttemptManager.__init__
+204:26 call  isinstance(do, DoSleep)
+    -> <builtin>.isinstance
+205:59 call  self._retry_state.prepare_for_next_attempt()
+    -> tenacity.RetryCallState.prepare_for_next_attempt
+206:33 call  self.sleep(do)
+    -> tenacity.asyncio._portable_async_sleep
+    -> tenacity.nap.sleep
+    -> tenacity.nap.sleep_using_event.__call__
+    note: the same self.sleep as line 139: the default _portable_async_sleep (line 80), or the client's sleep; the nap functions reach it as at line 139 (API reference, doc/source/api.rst:53-54, and retry.wrap passing **dkw, __init__.py:791-795) and are called, then `await None` raises TypeError. Client callables are client callbacks
+
+[tenacity.asyncio.AsyncRetrying.wraps]
+212:24 call  super()
+    -> <builtin>.super
+212:32 call  super().wraps(fn)
+    -> tenacity.BaseRetrying.wraps
+    reject tenacity.asyncio.AsyncRetrying.wraps: super() in AsyncRetrying resolves to BaseRetrying
+215:10 decorator  @functools.wraps( fn, functools.WRAPPER_ASSIGNMENTS + ("_...
+    -> functools.partial.__call__
+    reject *: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls none of these functions
+215:25 call  functools.wraps( fn, functools.WRAPPER_ASSIGNMENTS + ("__...
+    -> functools.wraps
+    reject *: the callee is functools.wraps of the standard library, not a method named wraps
+239:22 call  t.cast("_RetryDecorated[P, R]", async_wrapped)
+    -> typing.cast
+    reject tenacity.asyncio.AsyncRetrying.wraps.async_wrapped: typing.cast returns its argument and does not call it
+
+[tenacity.asyncio.AsyncRetrying.wraps.async_wrapped]
+220:32 call  fn(*args, **kwargs)
+    note: fn is the function that AsyncRetrying.wraps decorates: the client's function, passed by retry.wrap (__init__.py:805; a coroutine function, or any function when the sleep is a coroutine callable) or by retry_with (__init__.py:407); a client callback. The parameter takes any callable and the package provides no value for this role, so no package callee (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+223:29 call  self.copy()
+    -> tenacity.BaseRetrying.copy
+228:35 getattr  async_wrapped.statistics
+    reject tenacity.BaseRetrying.statistics: the receiver is the function async_wrapped; statistics is the dict attribute set at line 237
+229:24 call  stats.clear()
+    -> <builtin>.dict.clear
+232:30 call  copy(fn, *args, **kwargs)
+    -> tenacity.asyncio.AsyncRetrying.__call__
+    reject tenacity.BaseRetrying.copy: copy is the local variable that holds the result of self.copy() (line 223), a retrying object; calling it calls the __call__ of its class
+    note: copy has the class of self (BaseRetrying.copy, __init__.py:306), an AsyncRetrying: async_wrapped exists only in AsyncRetrying.wraps
+
+== tenacity.asyncio.retry
+
+[tenacity.asyncio.retry]
+29:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+30:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+34:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+40:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+46:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+52:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+72:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+93:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+109:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+118:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+133:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+142:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+
+[tenacity.asyncio.retry.async_retry_base.__and__]
+38:25 call  retry_all(self, other)
+    -> tenacity.asyncio.retry.retry_all.__init__
+    reject tenacity.retry.retry_all.__init__: retry_all here is the class of this module (line 127)
+
+[tenacity.asyncio.retry.async_retry_base.__rand__]
+44:25 call  retry_all(other, self)
+    -> tenacity.asyncio.retry.retry_all.__init__
+    reject tenacity.retry.retry_all.__init__: retry_all here is the class of this module (line 127)
+
+[tenacity.asyncio.retry.async_retry_base.__or__]
+50:25 call  retry_any(self, other)
+    -> tenacity.asyncio.retry.retry_any.__init__
+    reject tenacity.retry.retry_any.__init__: retry_any here is the class of this module (line 103)
+
+[tenacity.asyncio.retry.async_retry_base.__ror__]
+56:25 call  retry_any(other, self)
+    -> tenacity.asyncio.retry.retry_any.__init__
+    reject tenacity.retry.retry_any.__init__: retry_any here is the class of this module (line 103)
+
+[tenacity.asyncio.retry.retry_if_exception.__call__]
+75:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+77:32 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+78:54 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+80:35 call  RuntimeError("outcome failed but the exception is None")
+    note: Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required.
+    -> <builtin>.RuntimeError
+81:40 call  self.predicate(exception)
+    note: self.predicate is set only by __init__ (line 70) from the client's argument, an async predicate; no package function or subclass supplies one: a client callback
+
+[tenacity.asyncio.retry.retry_if_result.__call__]
+96:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+98:36 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+99:40 call  self.predicate(retry_state.outcome.result())
+    note: self.predicate is set only by __init__ (line 91) from the client's argument, an async predicate; no package function or subclass supplies one: a client callback
+99:67 call  retry_state.outcome.result()
+    -> concurrent.futures.Future.result
+
+[tenacity.asyncio.retry.retry_any.__call__]
+113:63 call  _utils.wrap_to_async_func(r)
+    -> tenacity._utils.wrap_to_async_func
+113:66 call  _utils.wrap_to_async_func(r)(retry_state)
+    -> tenacity._utils.wrap_to_async_func.inner
+    -> tenacity.asyncio.retry.retry_if_exception.__call__
+    -> tenacity.asyncio.retry.retry_if_result.__call__
+    -> tenacity.asyncio.retry.retry_any.__call__
+    -> tenacity.asyncio.retry.retry_all.__call__
+    note: r is an operand of this retry_any (line 107): any retry strategy, from the client or from the operators of async_retry_base and __ror__ (lines 50, 56, 123, 124). The callee is r itself if it is a coroutine callable (the async retry set, 4), else inner, which calls r (the sync retry set, from _utils.py:130)
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__: not coroutine callables: wrap_to_async_func wraps them in inner, which calls them (_utils.py:130)
+
+[tenacity.asyncio.retry.retry_any.__ror__]
+122:22 call  isinstance(other, retry_any)
+    -> <builtin>.isinstance
+123:29 call  retry_any(*other.retries, *self.retries)
+    -> tenacity.asyncio.retry.retry_any.__init__
+    reject tenacity.retry.retry_any.__init__: retry_any here is the class of this module (line 103)
+124:25 call  retry_any(other, *self.retries)
+    -> tenacity.asyncio.retry.retry_any.__init__
+    reject tenacity.retry.retry_any.__init__: retry_any here is the class of this module (line 103)
+
+[tenacity.asyncio.retry.retry_all.__call__]
+137:64 call  _utils.wrap_to_async_func(r)
+    -> tenacity._utils.wrap_to_async_func
+137:67 call  _utils.wrap_to_async_func(r)(retry_state)
+    -> tenacity._utils.wrap_to_async_func.inner
+    -> tenacity.asyncio.retry.retry_if_exception.__call__
+    -> tenacity.asyncio.retry.retry_if_result.__call__
+    -> tenacity.asyncio.retry.retry_any.__call__
+    -> tenacity.asyncio.retry.retry_all.__call__
+    note: r is an operand of this retry_all (line 131): any retry strategy, from the client or from the operators of async_retry_base and __rand__ (lines 38, 44, 147, 148). The callee is r itself if it is a coroutine callable (the async retry set, 4), else inner, which calls r (the sync retry set, from _utils.py:130)
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__: not coroutine callables: wrap_to_async_func wraps them in inner, which calls them (_utils.py:130)
+
+[tenacity.asyncio.retry.retry_all.__rand__]
+146:22 call  isinstance(other, retry_all)
+    -> <builtin>.isinstance
+147:29 call  retry_all(*other.retries, *self.retries)
+    -> tenacity.asyncio.retry.retry_all.__init__
+    reject tenacity.retry.retry_all.__init__: retry_all here is the class of this module (line 127)
+148:25 call  retry_all(other, *self.retries)
+    -> tenacity.asyncio.retry.retry_all.__init__
+    reject tenacity.retry.retry_all.__init__: retry_all here is the class of this module (line 127)
+
+== tenacity.before
+
+[tenacity.before.before_log.log_it]
+35:42 call  retry_state.get_fn_name()
+    -> tenacity.RetryCallState.get_fn_name
+36:19 call  logger.log( log_level, f"Starting call to '{fn_name}', " ...
+    reject tenacity._utils.LoggerProtocol.log: LoggerProtocol is a typing.Protocol that only annotates the parameter; logger is the object the client passes to before_log
+    note: logger is the client's logger, typed with the typing.Protocol _utils.LoggerProtocol (_utils.py:51), which does not fix its class: a client object, opaque, so the call has no callee (scope rules B4, B5 in tenacity.md)
+38:33 format  {fn_name}
+    reject *: get_fn_name returns a str
+39:27 format  {_utils.to_ordinal(retry_state.attempt_number)}
+    reject *: to_ordinal returns a str
+39:45 call  _utils.to_ordinal(retry_state.attempt_number)
+    -> tenacity._utils.to_ordinal
+
+== tenacity.before_sleep
+
+[tenacity.before_sleep.before_sleep_log.log_it]
+40:31 call  RuntimeError("log_it() called before outcome was set")
+    -> <builtin>.RuntimeError
+43:31 call  RuntimeError("log_it() called before next_action was set")
+    -> <builtin>.RuntimeError
+45:32 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+46:47 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+47:39 format  {ex.__class__.__name__}
+    reject *: a class name, a str
+47:64 format  {ex}
+    -> tenacity.RetryError.__str__
+    reject *: ex is opaque client data, or a RetryError stored through the public typed RetryCallState.set_exception API; among package classes only RetryError defines __str__ (TryAgain inherits it from BaseException)
+    note: the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used.
+49:65 call  retry_state.outcome.result()
+    -> concurrent.futures.Future.result
+51:42 call  retry_state.get_fn_name()
+    -> tenacity.RetryCallState.get_fn_name
+54:24 format  {fn_name}
+    reject *: get_fn_name returns a str
+55:18 format  {sec_format % retry_state.next_action.sleep}
+    reject *: a str (a %-formatted float)
+55:30 op  sec_format % retry_state.next_action.sleep
+    reject *: the only operand is retry_state.next_action.sleep, a float: next_action is annotated RetryAction | None (__init__.py:620), is not None here (line 42), and RetryAction.__init__ stores float(sleep) (__init__.py:180); whatever conversions the client's sec_format string has, they format a float, never a package object
+55:77 format  {verb}
+    reject *: verb is a str literal (lines 47, 49)
+55:84 format  {value}
+    reject *: value is a str (line 47) or the return value of the retried function (line 49): client data, which the package does not produce
+58:45 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+59:47 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+61:29 call  "".join(traceback.format_exception(type(ex), ex, ex.__tra...
+    -> <builtin>.str.join
+61:56 call  traceback.format_exception(type(ex), ex, ex.__traceback__)
+    -> traceback.format_exception
+    -> tenacity.RetryError.__str__
+    note: the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used.
+61:61 call  type(ex)
+    -> <builtin>.type
+62:25 format  {msg}
+    reject *: msg is a str (line 53)
+62:32 format  {tb.rstrip()}
+    reject *: str.rstrip returns a str
+62:42 call  tb.rstrip()
+    -> <builtin>.str.rstrip
+64:19 call  logger.log(log_level, msg)
+    reject tenacity._utils.LoggerProtocol.log: LoggerProtocol is a typing.Protocol that only annotates the parameter; logger is the object the client passes to before_sleep_log
+    note: logger is the client's logger, typed with the typing.Protocol _utils.LoggerProtocol (_utils.py:51), which does not fix its class: a client object, opaque, so the call has no callee (scope rules B4, B5 in tenacity.md)
+
+== tenacity.nap
+
+[tenacity.nap.sleep]
+31:15 call  time.sleep(seconds)
+    -> time.sleep
+    reject tenacity.nap.sleep: the callee is time.sleep of the time module
+    note: time is the standard module imported at line 18
+
+[tenacity.nap.sleep_using_event.__call__]
+43:24 call  self.event.wait(timeout=timeout)
+    -> threading.Event.wait
+    note: self.event is set only by __init__ (line 38) from the client's argument, annotated `event: "threading.Event"` (line 37): a concrete type outside the package fixes the class of the receiver (scope rule B4 in tenacity.md)
+
+== tenacity.retry
+
+[tenacity.retry]
+30:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+69:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+74:27 call  _retry_never()
+    note: _retry_never defines no __init__, nor do retry_base and abc.ABC: object.__init__, no edge
+80:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+85:29 call  _retry_always()
+    note: _retry_always defines no __init__, nor do retry_base and abc.ABC: object.__init__, no edge
+94:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+151:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+180:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+206:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+222:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+266:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+270:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+290:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+294:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+307:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+311:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+
+[tenacity.retry.retry_base.__and__]
+35:22 call  isinstance(other, retry_base)
+    -> <builtin>.isinstance
+36:34 call  other.__rand__(self)
+    -> tenacity.retry.retry_base.__rand__
+    -> tenacity.retry.retry_all.__rand__
+    -> tenacity.asyncio.retry.async_retry_base.__rand__
+    -> tenacity.asyncio.retry.retry_all.__rand__
+    note: other is a retry_base instance (line 35): a sync strategy (retry_base.__rand__; retry_all overrides it) or an async one (async_retry_base.__rand__; the async retry_all overrides it)
+38:22 call  isinstance(self, retry_all)
+    -> <builtin>.isinstance
+39:29 call  retry_all(*self.retries, other)
+    -> tenacity.retry.retry_all.__init__
+    reject tenacity.asyncio.retry.retry_all.__init__: retry_all here is the class of this module (line 301)
+40:25 call  retry_all(self, other)
+    -> tenacity.retry.retry_all.__init__
+    reject tenacity.asyncio.retry.retry_all.__init__: retry_all here is the class of this module (line 301)
+
+[tenacity.retry.retry_base.__rand__]
+44:22 call  isinstance(other, retry_all)
+    -> <builtin>.isinstance
+45:29 call  retry_all(*other.retries, self)
+    -> tenacity.retry.retry_all.__init__
+    reject tenacity.asyncio.retry.retry_all.__init__: retry_all here is the class of this module (line 301)
+46:25 call  retry_all(other, self)
+    -> tenacity.retry.retry_all.__init__
+    reject tenacity.asyncio.retry.retry_all.__init__: retry_all here is the class of this module (line 301)
+
+[tenacity.retry.retry_base.__or__]
+49:22 call  isinstance(other, retry_base)
+    -> <builtin>.isinstance
+50:33 call  other.__ror__(self)
+    -> tenacity.retry.retry_base.__ror__
+    -> tenacity.retry.retry_any.__ror__
+    -> tenacity.asyncio.retry.async_retry_base.__ror__
+    -> tenacity.asyncio.retry.retry_any.__ror__
+    note: other is a retry_base instance (line 49): a sync strategy (retry_base.__ror__; retry_any overrides it) or an async one (async_retry_base.__ror__; the async retry_any overrides it). The default rejection of __ror__ (for `|` in annotations) does not apply: this entry accepts them
+52:22 call  isinstance(self, retry_any)
+    -> <builtin>.isinstance
+53:29 call  retry_any(*self.retries, other)
+    -> tenacity.retry.retry_any.__init__
+    reject tenacity.asyncio.retry.retry_any.__init__: retry_any here is the class of this module (line 284)
+54:25 call  retry_any(self, other)
+    -> tenacity.retry.retry_any.__init__
+    reject tenacity.asyncio.retry.retry_any.__init__: retry_any here is the class of this module (line 284)
+
+[tenacity.retry.retry_base.__ror__]
+58:22 call  isinstance(other, retry_any)
+    -> <builtin>.isinstance
+59:29 call  retry_any(*other.retries, self)
+    -> tenacity.retry.retry_any.__init__
+    reject tenacity.asyncio.retry.retry_any.__init__: retry_any here is the class of this module (line 284)
+60:25 call  retry_any(other, self)
+    -> tenacity.retry.retry_any.__init__
+    reject tenacity.asyncio.retry.retry_any.__init__: retry_any here is the class of this module (line 284)
+
+[tenacity.retry.retry_if_exception.__call__]
+97:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+99:32 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+100:54 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+102:35 call  RuntimeError("outcome failed but the exception is None")
+    note: Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required.
+    -> <builtin>.RuntimeError
+103:34 call  self.predicate(exception)
+    -> tenacity.retry.retry_if_exception_type._check
+    -> tenacity.retry.retry_if_not_exception_type._check
+    -> tenacity.retry.retry_if_exception_message._check
+    note: self.predicate is set only by retry_if_exception.__init__ (line 92): the client's predicate (a client callback), or self._check from the subclasses (lines 116, 131, 146, 254). This __call__ runs for retry_if_exception, retry_if_exception_type, retry_if_not_exception_type and retry_if_exception_message objects; retry_unless_exception_type and retry_if_not_exception_message override __call__ (lines 152, 271), so their _check is called there
+    exclude tenacity.retry.retry_unless_exception_type._check, tenacity.retry.retry_if_not_exception_message._check: scope rule B1: their classes override __call__ (retry.py:152, 271), so this __call__ never runs with their predicate
+
+[tenacity.retry.retry_if_exception_type.__init__]
+116:14 call  super()
+    -> <builtin>.super
+116:25 call  super().__init__(self._check)
+    -> tenacity.retry.retry_if_exception.__init__
+    reject *: super() in retry_if_exception_type resolves to retry_if_exception; it stores self._check and does not call it
+
+[tenacity.retry.retry_if_exception_type._check]
+119:26 call  isinstance(e, self.exception_types)
+    -> <builtin>.isinstance
+
+[tenacity.retry.retry_if_not_exception_type.__init__]
+131:14 call  super()
+    -> <builtin>.super
+131:25 call  super().__init__(self._check)
+    -> tenacity.retry.retry_if_exception.__init__
+    reject *: super() in retry_if_not_exception_type resolves to retry_if_exception; it stores self._check and does not call it
+
+[tenacity.retry.retry_if_not_exception_type._check]
+134:30 call  isinstance(e, self.exception_types)
+    -> <builtin>.isinstance
+
+[tenacity.retry.retry_unless_exception_type.__init__]
+146:14 call  super()
+    -> <builtin>.super
+146:25 call  super().__init__(self._check)
+    -> tenacity.retry.retry_if_exception.__init__
+    reject *: super() in retry_unless_exception_type resolves to retry_if_exception; it stores self._check and does not call it
+
+[tenacity.retry.retry_unless_exception_type._check]
+149:30 call  isinstance(e, self.exception_types)
+    -> <builtin>.isinstance
+
+[tenacity.retry.retry_unless_exception_type.__call__]
+154:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+157:36 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+160:50 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+162:31 call  RuntimeError("outcome failed but the exception is None")
+    note: Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required.
+    -> <builtin>.RuntimeError
+163:30 call  self.predicate(exception)
+    -> tenacity.retry.retry_unless_exception_type._check
+    note: self is a retry_unless_exception_type, whose __init__ passes self._check as the predicate (line 146): retry_unless_exception_type._check (client subclasses are client code)
+
+[tenacity.retry.retry_if_exception_cause_type.__call__]
+183:31 call  RuntimeError("__call__ called before outcome was set")
+    -> <builtin>.RuntimeError
+185:32 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+186:48 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+190:33 call  set()
+    -> <builtin>.set
+191:41 call  id(exc)
+    -> <builtin>.id
+192:25 call  seen.add(id(exc))
+    -> <builtin>.set.add
+192:28 call  id(exc)
+    -> <builtin>.id
+193:30 call  isinstance(exc.__cause__, self.exception_cause_types)
+    -> <builtin>.isinstance
+
+[tenacity.retry.retry_if_result.__call__]
+209:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+211:36 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+212:34 call  self.predicate(retry_state.outcome.result())
+    note: self.predicate is set only by __init__ (line 204) from the client's argument; no package function or subclass supplies one: a client callback
+212:61 call  retry_state.outcome.result()
+    -> concurrent.futures.Future.result
+
+[tenacity.retry.retry_if_not_result.__call__]
+225:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+227:36 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+228:38 call  self.predicate(retry_state.outcome.result())
+    note: self.predicate is set only by __init__ (line 220) from the client's argument; no package function or subclass supplies one: a client callback
+228:65 call  retry_state.outcome.result()
+    -> concurrent.futures.Future.result
+
+[tenacity.retry.retry_if_exception_message.__init__]
+241:28 call  TypeError( f"{self.__class__.__name__}() takes either 'me...
+    -> <builtin>.TypeError
+242:19 format  {self.__class__.__name__}
+    reject *: a class name, a str
+246:28 call  TypeError( f"{self.__class__.__name__}() missing 1 requir...
+    -> <builtin>.TypeError
+247:19 format  {self.__class__.__name__}
+    reject *: a class name, a str
+252:23 call  re.compile(match)
+    -> re.compile
+254:14 call  super()
+    -> <builtin>.super
+254:25 call  super().__init__(self._check)
+    -> tenacity.retry.retry_if_exception.__init__
+    reject *: super() in retry_if_exception_message resolves to retry_if_exception; it stores self._check and does not call it
+
+[tenacity.retry.retry_if_exception_message._check]
+258:39 call  str(exception)
+    -> <builtin>.str
+    -> tenacity.RetryError.__str__
+    reject *: exception is opaque client data, or a RetryError stored through the public typed RetryCallState.set_exception API; among package classes only RetryError defines __str__
+    note: the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used.
+260:20 call  bool(self.match.match(str(exception)))
+    -> <builtin>.bool
+260:37 call  self.match.match(str(exception))
+    -> re.Pattern.match
+    note: self.match is the compiled pattern of re.compile (line 252), a re.Pattern
+260:41 call  str(exception)
+    -> <builtin>.str
+    -> tenacity.RetryError.__str__
+    reject *: exception is opaque client data, or a RetryError stored through the public typed RetryCallState.set_exception API; among package classes only RetryError defines __str__
+    note: RetryCallState.set_exception accepts a tuple containing BaseException; RetryError is the package exception for that role. A client can construct RetryError with a completed Future, set it through this public method, then call repr(state), the public message retry strategies, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter creates next_action itself. These source paths reach all five formatting sites without treating an exception escaping a client callback as package data.
+
+[tenacity.retry.retry_if_not_exception_message._check]
+268:25 call  super()
+    -> <builtin>.super
+268:34 call  super()._check(exception)
+    -> tenacity.retry.retry_if_exception_message._check
+    reject *: super() in retry_if_not_exception_message resolves to retry_if_exception_message
+
+[tenacity.retry.retry_if_not_exception_message.__call__]
+273:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+275:36 getattr  retry_state.outcome.failed
+    -> tenacity.Future.failed
+278:50 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+280:31 call  RuntimeError("outcome failed but the exception is None")
+    note: Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required.
+    -> <builtin>.RuntimeError
+281:30 call  self.predicate(exception)
+    -> tenacity.retry.retry_if_not_exception_message._check
+    note: self is a retry_if_not_exception_message, whose inherited __init__ passes self._check as the predicate (line 254): retry_if_not_exception_message._check (client subclasses are client code)
+
+[tenacity.retry.retry_any.__call__]
+292:19 call  any(r(retry_state) for r in self.retries)
+    -> <builtin>.any
+292:21 call  r(retry_state)
+    -> tenacity.retry._retry_never.__call__
+    -> tenacity.retry._retry_always.__call__
+    -> tenacity.retry.retry_if_exception.__call__
+    -> tenacity.retry.retry_unless_exception_type.__call__
+    -> tenacity.retry.retry_if_exception_cause_type.__call__
+    -> tenacity.retry.retry_if_result.__call__
+    -> tenacity.retry.retry_if_not_result.__call__
+    -> tenacity.retry.retry_if_not_exception_message.__call__
+    -> tenacity.retry.retry_any.__call__
+    -> tenacity.retry.retry_all.__call__
+    -> tenacity.asyncio.retry.retry_if_exception.__call__
+    -> tenacity.asyncio.retry.retry_if_result.__call__
+    -> tenacity.asyncio.retry.retry_any.__call__
+    -> tenacity.asyncio.retry.retry_all.__call__
+    note: r is an operand of this retry_any (line 288, `*retries: RetryBaseT`): any retry strategy, from the client or from retry_base.__or__/__ror__ and retry_any.__ror__ (lines 53, 54, 59, 60, 297, 298), which receive sync strategies and plain callables. The operators put async strategies in the async retry_any, but the client can pass them to this constructor (they are retry_base instances): their __call__ is a coroutine function, called here and never awaited. Plain callables are client callbacks
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B2: the operands are RetryBaseT (retry.py:287); stop and wait strategies fit only its bare Callable arm
+
+[tenacity.retry.retry_any.__ror__]
+296:22 call  isinstance(other, retry_any)
+    -> <builtin>.isinstance
+297:29 call  retry_any(*other.retries, *self.retries)
+    -> tenacity.retry.retry_any.__init__
+    reject tenacity.asyncio.retry.retry_any.__init__: retry_any here is the class of this module (line 284)
+298:25 call  retry_any(other, *self.retries)
+    -> tenacity.retry.retry_any.__init__
+    reject tenacity.asyncio.retry.retry_any.__init__: retry_any here is the class of this module (line 284)
+
+[tenacity.retry.retry_all.__call__]
+309:19 call  all(r(retry_state) for r in self.retries)
+    -> <builtin>.all
+309:21 call  r(retry_state)
+    -> tenacity.retry._retry_never.__call__
+    -> tenacity.retry._retry_always.__call__
+    -> tenacity.retry.retry_if_exception.__call__
+    -> tenacity.retry.retry_unless_exception_type.__call__
+    -> tenacity.retry.retry_if_exception_cause_type.__call__
+    -> tenacity.retry.retry_if_result.__call__
+    -> tenacity.retry.retry_if_not_result.__call__
+    -> tenacity.retry.retry_if_not_exception_message.__call__
+    -> tenacity.retry.retry_any.__call__
+    -> tenacity.retry.retry_all.__call__
+    -> tenacity.asyncio.retry.retry_if_exception.__call__
+    -> tenacity.asyncio.retry.retry_if_result.__call__
+    -> tenacity.asyncio.retry.retry_any.__call__
+    -> tenacity.asyncio.retry.retry_all.__call__
+    note: r is an operand of this retry_all (line 305, `*retries: RetryBaseT`): any retry strategy, from the client or from retry_base.__and__/__rand__ and retry_all.__rand__ (lines 39, 40, 45, 46, 314, 315), which receive sync strategies and plain callables. The operators put async strategies in the async retry_all, but the client can pass them to this constructor (they are retry_base instances): their __call__ is a coroutine function, called here and never awaited. Plain callables are client callbacks
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B2: the operands are RetryBaseT (retry.py:304); stop and wait strategies fit only its bare Callable arm
+
+[tenacity.retry.retry_all.__rand__]
+313:22 call  isinstance(other, retry_all)
+    -> <builtin>.isinstance
+314:29 call  retry_all(*other.retries, *self.retries)
+    -> tenacity.retry.retry_all.__init__
+    reject tenacity.asyncio.retry.retry_all.__init__: retry_all here is the class of this module (line 301)
+315:25 call  retry_all(other, *self.retries)
+    -> tenacity.retry.retry_all.__init__
+    reject tenacity.asyncio.retry.retry_all.__init__: retry_all here is the class of this module (line 301)
+
+== tenacity.stop
+
+[tenacity.stop]
+31:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+51:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+62:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+70:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+75:25 call  _stop_never()
+    note: _stop_never defines no __init__, nor do stop_base and abc.ABC: object.__init__, no edge
+84:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+95:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+113:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+131:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+
+[tenacity.stop.stop_base.__and__]
+36:24 call  stop_all(self, other)
+    -> tenacity.stop.stop_all.__init__
+
+[tenacity.stop.stop_base.__or__]
+39:24 call  stop_any(self, other)
+    -> tenacity.stop.stop_any.__init__
+
+[tenacity.stop.stop_any.__call__]
+53:19 call  any(x(retry_state) for x in self.stops)
+    -> <builtin>.any
+53:21 call  x(retry_state)
+    -> tenacity.stop.stop_any.__call__
+    -> tenacity.stop.stop_all.__call__
+    -> tenacity.stop._stop_never.__call__
+    -> tenacity.stop.stop_when_event_set.__call__
+    -> tenacity.stop.stop_after_attempt.__call__
+    -> tenacity.stop.stop_after_delay.__call__
+    -> tenacity.stop.stop_before_delay.__call__
+    note: x is an operand of this stop_any (line 49): any stop strategy, from the client or from stop_base.__or__ (line 39), whose operands are stop strategies, also stop_any and stop_all themselves; the stop set (7). Plain callables are client callbacks
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B2: the operands are stop_base (stop.py:48); retry and wait strategies are not stop_base instances
+
+[tenacity.stop.stop_all.__call__]
+64:19 call  all(x(retry_state) for x in self.stops)
+    -> <builtin>.all
+64:21 call  x(retry_state)
+    -> tenacity.stop.stop_any.__call__
+    -> tenacity.stop.stop_all.__call__
+    -> tenacity.stop._stop_never.__call__
+    -> tenacity.stop.stop_when_event_set.__call__
+    -> tenacity.stop.stop_after_attempt.__call__
+    -> tenacity.stop.stop_after_delay.__call__
+    -> tenacity.stop.stop_before_delay.__call__
+    note: x is an operand of this stop_all (line 60): any stop strategy, from the client or from stop_base.__and__ (line 36), whose operands are stop strategies, also stop_any and stop_all themselves; the stop set (7). Plain callables are client callbacks
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B2: the operands are stop_base (stop.py:59); retry and wait strategies are not stop_base instances
+
+[tenacity.stop.stop_when_event_set.__call__]
+86:33 call  self.event.is_set()
+    -> threading.Event.is_set
+    note: self.event is set only by __init__ (line 82) from the client's argument, annotated `event: "threading.Event"` (line 81): a concrete type outside the package fixes the class of the receiver (scope rule B4 in tenacity.md)
+
+[tenacity.stop.stop_after_delay.__init__]
+111:43 call  _utils.to_seconds(max_delay)
+    -> tenacity._utils.to_seconds
+
+[tenacity.stop.stop_after_delay.__call__]
+115:24 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+116:31 call  RuntimeError("__call__() called but seconds_since_start i...
+    -> <builtin>.RuntimeError
+117:28 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+
+[tenacity.stop.stop_before_delay.__init__]
+129:43 call  _utils.to_seconds(max_delay)
+    -> tenacity._utils.to_seconds
+
+[tenacity.stop.stop_before_delay.__call__]
+133:24 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+134:31 call  RuntimeError("__call__() called but seconds_since_start i...
+    -> <builtin>.RuntimeError
+136:25 getattr  retry_state.seconds_since_start
+    -> tenacity.RetryCallState.seconds_since_start
+
+== tenacity.tornadoweb
+
+[tenacity.tornadoweb]
+26:26 call  typing.TypeVar("_RetValT")
+    -> typing.TypeVar
+40:6 decorator  @gen.coroutine
+    -> tornado.gen.coroutine
+41:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+
+[tenacity.tornadoweb.TornadoRetrying.__init__]
+37:14 call  super()
+    -> <builtin>.super
+37:25 call  super().__init__(**kwargs)
+    -> tenacity.BaseRetrying.__init__
+    reject *: super() in TornadoRetrying resolves to BaseRetrying, whose __init__ this is
+
+[tenacity.tornadoweb.TornadoRetrying.__call__]
+48:19 call  self.begin()
+    -> tenacity.BaseRetrying.begin
+50:37 call  RetryCallState(retry_object=self, fn=fn, args=args, kwarg...
+    -> tenacity.RetryCallState.__init__
+52:27 call  self.iter(retry_state=retry_state)
+    -> tenacity.BaseRetrying.iter
+    reject tenacity.asyncio.AsyncRetrying.iter: self is a TornadoRetrying, whose iter is BaseRetrying.iter
+53:26 call  isinstance(do, DoAttempt)
+    -> <builtin>.isinstance
+55:38 call  fn(*args, **kwargs)
+    note: fn is the function to retry: the client's function (usually a tornado coroutine, whose tornado.gen.coroutine.wrapper is client-supplied), passed by the client or by wrapped_f (__init__.py:404); a client callback. The parameter takes any callable and the package provides no value for this role, so no package callee (scope rule B3 in tenacity.md)
+    exclude tenacity.BaseRetrying.wraps.wrapped_f, tenacity.asyncio.AsyncRetrying.wraps.async_wrapped, tenacity.Retrying.__call__, tenacity.asyncio.AsyncRetrying.__call__, tenacity.tornadoweb.TornadoRetrying.__call__: scope rule B3: an already decorated wrapper or a retrying object passed as the function to retry is a package object where any callable is accepted; the package never passes one there
+    exclude tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__, tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.wait.wait_fixed.__call__, tenacity.wait.wait_random.__call__, tenacity.wait.wait_combine.__call__, tenacity.wait.wait_chain.__call__, tenacity.wait.wait_exception.__call__, tenacity.wait.wait_incrementing.__call__, tenacity.wait.wait_exponential.__call__, tenacity.wait.wait_random_exponential.__call__, tenacity.wait.wait_exponential_jitter.__call__: scope rule B3: a strategy as the function to retry (@retry(stop_after_attempt(3)), or the retry_base case that retry.wrap warns about, __init__.py:784) is not considered
+57:46 call  retry_state.set_exception(sys.exc_info())
+    -> tenacity.RetryCallState.set_exception
+57:59 call  sys.exc_info()
+    -> sys.exc_info
+59:43 call  retry_state.set_result(result)
+    -> tenacity.RetryCallState.set_result
+60:28 call  isinstance(do, DoSleep)
+    -> <builtin>.isinstance
+61:53 call  retry_state.prepare_for_next_attempt()
+    -> tenacity.RetryCallState.prepare_for_next_attempt
+62:33 call  self.sleep(do)
+    -> tornado.gen.sleep
+    -> tenacity.nap.sleep
+    -> tenacity.nap.sleep_using_event.__call__
+    note: self.sleep is set by TornadoRetrying.__init__ (line 38): the default tornado.gen.sleep (line 34), copy(), or the client's sleep. The nap functions nap.sleep and sleep_using_event (its __call__) reach here through retry: the API reference offers them as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to TornadoRetrying for a tornado coroutine (__init__.py:791-801), so the package itself passes them here (scope rule B2 in tenacity.md; the bare Callable annotations of retry's @overload, __init__.py:757, and of line 34 are not the evidence). Other callables are client callbacks
+    exclude tenacity.asyncio._portable_async_sleep: private (scope rule C), so only a default, and it is the default of AsyncRetrying, not of TornadoRetrying
+64:33 call  gen.Return(do)
+    -> tornado.gen.Return
+
+== tenacity.wait
+
+[tenacity.wait]
+33:6 decorator  @abc.abstractmethod
+    -> abc.abstractmethod
+67:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+88:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+101:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+131:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+167:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+195:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+226:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+273:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+319:6 decorator  @override
+    -> typing.override
+    -> tenacity._utils.override
+    note: version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11
+
+[tenacity.wait.wait_base.__add__]
+38:28 call  wait_combine(self, other)
+    -> tenacity.wait.wait_combine.__init__
+
+[tenacity.wait.wait_base.__radd__]
+45:22 call  isinstance(other, int)
+    -> <builtin>.isinstance
+55:28 call  wait_combine(self, other)
+    -> tenacity.wait.wait_combine.__init__
+
+[tenacity.wait.wait_fixed.__init__]
+65:44 call  _utils.to_seconds(wait)
+    -> tenacity._utils.to_seconds
+
+[tenacity.wait.wait_none.__init__]
+76:14 call  super()
+    -> <builtin>.super
+76:25 call  super().__init__(0)
+    -> tenacity.wait.wait_fixed.__init__
+    reject *: super() in wait_none resolves to wait_fixed, whose __init__ this is
+
+[tenacity.wait.wait_random.__init__]
+85:49 call  _utils.to_seconds(min)
+    -> tenacity._utils.to_seconds
+86:49 call  _utils.to_seconds(max)
+    -> tenacity._utils.to_seconds
+
+[tenacity.wait.wait_random.__call__]
+91:26 call  random.random()
+    -> random.random
+
+[tenacity.wait.wait_combine.__call__]
+107:21 call  float(sum(x(retry_state) for x in self.wait_funcs))
+    -> <builtin>.float
+107:25 call  sum(x(retry_state) for x in self.wait_funcs)
+    -> <builtin>.sum
+    reject tenacity.wait.wait_base.__add__, tenacity.wait.wait_base.__radd__: sum adds the values that x(retry_state) returns, never a wait strategy: every package wait strategy returns a number (to_seconds gives a float, line 65 and others; random.random/uniform, max/min of numbers, float(sum(...)); wait_chain and wait_exception pass on another strategy's number or the client predicate's, typed float, line 164), and a client callable of WaitBaseT returns float | int (line 58); so neither wait_base.__radd__ (with the start 0) nor __add__ runs
+    reject tenacity.BaseRetrying.__iter__, tenacity.asyncio.AsyncRetrying.__iter__: sum iterates the generator expression of this line, not a retrying object
+107:27 call  x(retry_state)
+    -> tenacity.wait.wait_fixed.__call__
+    -> tenacity.wait.wait_random.__call__
+    -> tenacity.wait.wait_combine.__call__
+    -> tenacity.wait.wait_chain.__call__
+    -> tenacity.wait.wait_exception.__call__
+    -> tenacity.wait.wait_incrementing.__call__
+    -> tenacity.wait.wait_exponential.__call__
+    -> tenacity.wait.wait_random_exponential.__call__
+    -> tenacity.wait.wait_exponential_jitter.__call__
+    note: x is an operand of this wait_combine (line 99, `*strategies: WaitBaseT`): any wait strategy, from the client or from wait_base.__add__/__radd__ (lines 38, 55), whose operands are wait strategies (also wait_combine itself) and plain callables; the wait set (9). Plain callables are client callbacks
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__: scope rule B2: the operands are WaitBaseT (wait.py:98); stop and retry strategies fit only its bare Callable arm
+
+[tenacity.wait.wait_chain.__init__]
+128:29 call  ValueError("wait_chain() requires at least one strategy")
+    -> <builtin>.ValueError
+
+[tenacity.wait.wait_chain.__call__]
+133:27 call  min(max(retry_state.attempt_number, 1), len(self.strategi...
+    -> <builtin>.min
+133:31 call  max(retry_state.attempt_number, 1)
+    -> <builtin>.max
+133:67 call  len(self.strategies)
+    -> <builtin>.len
+135:25 call  wait_func(retry_state=retry_state)
+    -> tenacity.wait.wait_fixed.__call__
+    -> tenacity.wait.wait_random.__call__
+    -> tenacity.wait.wait_combine.__call__
+    -> tenacity.wait.wait_chain.__call__
+    -> tenacity.wait.wait_exception.__call__
+    -> tenacity.wait.wait_incrementing.__call__
+    -> tenacity.wait.wait_exponential.__call__
+    -> tenacity.wait.wait_random_exponential.__call__
+    -> tenacity.wait.wait_exponential_jitter.__call__
+    note: wait_func is an entry of self.strategies, the arguments of this wait_chain (line 129, `*strategies: wait_base`): any wait strategy the client passes, also wait_chain and wait_combine; the wait set (9). Plain callables are client callbacks
+    exclude tenacity.stop.stop_any.__call__, tenacity.stop.stop_all.__call__, tenacity.stop._stop_never.__call__, tenacity.stop.stop_when_event_set.__call__, tenacity.stop.stop_after_attempt.__call__, tenacity.stop.stop_after_delay.__call__, tenacity.stop.stop_before_delay.__call__, tenacity.retry._retry_never.__call__, tenacity.retry._retry_always.__call__, tenacity.retry.retry_if_exception.__call__, tenacity.retry.retry_unless_exception_type.__call__, tenacity.retry.retry_if_exception_cause_type.__call__, tenacity.retry.retry_if_result.__call__, tenacity.retry.retry_if_not_result.__call__, tenacity.retry.retry_if_not_exception_message.__call__, tenacity.retry.retry_any.__call__, tenacity.retry.retry_all.__call__, tenacity.asyncio.retry.retry_if_exception.__call__, tenacity.asyncio.retry.retry_if_result.__call__, tenacity.asyncio.retry.retry_any.__call__, tenacity.asyncio.retry.retry_all.__call__: scope rule B2: the strategies are wait_base (wait.py:126); stop and retry strategies are not wait_base instances
+
+[tenacity.wait.wait_exception.__call__]
+170:31 call  RuntimeError("__call__() called before outcome was set")
+    -> <builtin>.RuntimeError
+172:50 call  retry_state.outcome.exception()
+    -> concurrent.futures.Future.exception
+174:31 call  RuntimeError("outcome failed but the exception is None")
+    -> <builtin>.RuntimeError
+175:30 call  self.predicate(exception)
+    note: self.predicate is set only by __init__ (line 165) from the client's argument; no package function or subclass supplies one: a client callback
+
+[tenacity.wait.wait_incrementing.__init__]
+191:39 call  _utils.to_seconds(start)
+    -> tenacity._utils.to_seconds
+192:43 call  _utils.to_seconds(increment)
+    -> tenacity._utils.to_seconds
+193:37 call  _utils.to_seconds(max)
+    -> tenacity._utils.to_seconds
+
+[tenacity.wait.wait_incrementing.__call__]
+198:19 call  max(0, min(result, self.max))
+    -> <builtin>.max
+198:26 call  min(result, self.max)
+    -> <builtin>.min
+
+[tenacity.wait.wait_exponential.__init__]
+222:37 call  _utils.to_seconds(min)
+    -> tenacity._utils.to_seconds
+223:37 call  _utils.to_seconds(max)
+    -> tenacity._utils.to_seconds
+
+[tenacity.wait.wait_exponential.__call__]
+233:30 call  math.isfinite(self.max)
+    -> math.isfinite
+235:23 call  math.log(self.max, self.exp_base)
+    -> math.log
+    reject tenacity._utils.LoggerProtocol.log: the callee is math.log of the math module
+236:23 call  math.log(self.multiplier, self.exp_base)
+    -> math.log
+    reject tenacity._utils.LoggerProtocol.log: the callee is math.log of the math module
+238:23 call  max(max(0, self.min), self.max)
+    -> <builtin>.max
+238:27 call  max(0, self.min)
+    -> <builtin>.max
+244:19 call  max(max(0, self.min), min(result, self.max))
+    -> <builtin>.max
+244:23 call  max(0, self.min)
+    -> <builtin>.max
+244:41 call  min(result, self.max)
+    -> <builtin>.min
+
+[tenacity.wait.wait_random_exponential.__call__]
+275:21 call  super()
+    -> <builtin>.super
+275:32 call  super().__call__(retry_state=retry_state)
+    -> tenacity.wait.wait_exponential.__call__
+    reject *: super() in wait_random_exponential resolves to wait_exponential, whose __call__ this is
+276:30 call  random.uniform(self.min, high)
+    -> random.uniform
+
+[tenacity.wait.wait_exponential_jitter.__init__]
+301:29 call  ValueError( "Cannot specify both 'initial' and 'multiplie...
+    -> <builtin>.ValueError
+306:26 call  warnings.warn( "The 'initial' parameter is deprecated, us...
+    -> warnings.warn
+314:37 call  _utils.to_seconds(max)
+    -> tenacity._utils.to_seconds
+316:40 call  _utils.to_seconds(jitter)
+    -> tenacity._utils.to_seconds
+317:37 call  _utils.to_seconds(min)
+    -> tenacity._utils.to_seconds
+
+[tenacity.wait.wait_exponential_jitter.__call__]
+321:32 call  random.uniform(0, self.jitter)
+    -> random.uniform
+327:19 call  max(max(0, self.min), min(result, self.max))
+    -> <builtin>.max
+327:23 call  max(0, self.min)
+    -> <builtin>.max
+327:41 call  min(result, self.max)
+    -> <builtin>.min

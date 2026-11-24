@@ -1,0 +1,912 @@
+{
+  "edges": {
+    "tenacity": {
+      "tenacity._utils.override": [
+        "tenacity 163:6 decorator  @override",
+        "tenacity 170:6 decorator  @override",
+        "tenacity 219:6 decorator  @override",
+        "tenacity 332:6 decorator  @override",
+        "tenacity 336:6 decorator  @override",
+        "tenacity 536:6 decorator  @override",
+        "tenacity 664:6 decorator  @override"
+      ]
+    },
+    "tenacity.BaseAction.__repr__": {
+      "<builtin>.getattr": [
+        "tenacity 166:31 call  getattr(self, field)"
+      ],
+      "<builtin>.str.join": [
+        "tenacity 165:30 call  \", \".join( f\"{field}={getattr(self, field)!r}\" for field ..."
+      ]
+    },
+    "tenacity.BaseAction.__str__": {
+      "<builtin>.repr": [
+        "tenacity 172:20 call  repr(self)"
+      ],
+      "tenacity.BaseAction.__repr__": [
+        "tenacity 172:20 call  repr(self)"
+      ]
+    },
+    "tenacity.BaseRetrying.__iter__": {
+      "tenacity.nap.sleep_using_event.__call__": [
+        "tenacity 519:27 call  self.sleep(do)"
+      ],
+      "tornado.gen.sleep": [
+        "tenacity 519:27 call  self.sleep(do)"
+      ]
+    },
+    "tenacity.BaseRetrying._run_retry": {
+      "tenacity.asyncio.retry.retry_all.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_any.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_exception.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_result.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ],
+      "tenacity.retry._retry_always.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ],
+      "tenacity.retry.retry_all.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ],
+      "tenacity.retry.retry_if_not_result.__call__": [
+        "tenacity 427:54 call  self.retry(retry_state)"
+      ]
+    },
+    "tenacity.BaseRetrying._run_stop": {
+      "tenacity.stop.stop_after_delay.__call__": [
+        "tenacity 434:52 call  self.stop(retry_state)"
+      ],
+      "tenacity.stop.stop_all.__call__": [
+        "tenacity 434:52 call  self.stop(retry_state)"
+      ],
+      "tenacity.stop.stop_any.__call__": [
+        "tenacity 434:52 call  self.stop(retry_state)"
+      ],
+      "tenacity.stop.stop_before_delay.__call__": [
+        "tenacity 434:52 call  self.stop(retry_state)"
+      ],
+      "tenacity.stop.stop_when_event_set.__call__": [
+        "tenacity 434:52 call  self.stop(retry_state)"
+      ]
+    },
+    "tenacity.BaseRetrying._run_wait": {
+      "tenacity.wait.wait_combine.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ],
+      "tenacity.wait.wait_exception.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ],
+      "tenacity.wait.wait_exponential.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ],
+      "tenacity.wait.wait_exponential_jitter.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ],
+      "tenacity.wait.wait_incrementing.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ],
+      "tenacity.wait.wait_random.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ],
+      "tenacity.wait.wait_random_exponential.__call__": [
+        "tenacity 430:47 call  self.wait(retry_state)"
+      ]
+    },
+    "tenacity.BaseRetrying.iter": {
+      "tenacity.after.after_log.log_it": [
+        "tenacity 440:28 call  action(retry_state)"
+      ],
+      "tenacity.before_sleep.before_sleep_nothing": [
+        "tenacity 440:28 call  action(retry_state)"
+      ]
+    },
+    "tenacity.BaseRetrying.wraps.wrapped_f": {
+      "tenacity.asyncio.AsyncRetrying.__call__": [
+        "tenacity 404:24 call  copy(f, *args, **kw)"
+      ],
+      "tenacity.tornadoweb.TornadoRetrying.__call__": [
+        "tenacity 404:24 call  copy(f, *args, **kw)"
+      ],
+      "tornado.gen.coroutine.wrapper": [
+        "tenacity 404:24 call  copy(f, *args, **kw)"
+      ]
+    },
+    "tenacity.RetryCallState.__repr__": {
+      "tenacity.RetryError.__str__": [
+        "tenacity 670:63 format  {exception}"
+      ]
+    },
+    "tenacity.Retrying.__call__": {
+      "tenacity.nap.sleep_using_event.__call__": [
+        "tenacity 560:27 call  self.sleep(do)"
+      ]
+    },
+    "tenacity._utils": {
+      "typing.TypeVar": [
+        "tenacity._utils 32:24 call  typing.TypeVar(\"_F\", bound=typing.Callable[..., typing.Any])"
+      ]
+    },
+    "tenacity._utils.get_callback_name": {
+      "<builtin>.repr": [
+        "tenacity._utils 96:20 call  repr(cb)"
+      ]
+    },
+    "tenacity._utils.override": {
+      "contextlib.suppress": [
+        "tenacity._utils 40:33 call  contextlib.suppress(AttributeError, TypeError)"
+      ]
+    },
+    "tenacity._utils.wrap_to_async_func.inner": {
+      "tenacity.after.after_log.log_it": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.before.before_log.log_it": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.before_sleep.before_sleep_log.log_it": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.before_sleep.before_sleep_nothing": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry._retry_always.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry._retry_never.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry.retry_all.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry.retry_any.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry.retry_if_exception_cause_type.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry.retry_if_not_exception_message.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry.retry_if_not_result.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.retry.retry_unless_exception_type.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.stop.stop_after_delay.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.stop.stop_all.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.stop.stop_any.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.stop.stop_before_delay.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.stop.stop_when_event_set.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_chain.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_combine.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_exception.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_exponential.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_exponential_jitter.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_incrementing.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_random.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ],
+      "tenacity.wait.wait_random_exponential.__call__": [
+        "tenacity._utils 130:20 call  call(*args, **kwargs)"
+      ]
+    },
+    "tenacity.asyncio": {
+      "tenacity._utils.override": [
+        "tenacity.asyncio 112:6 decorator  @override",
+        "tenacity.asyncio 143:6 decorator  @override",
+        "tenacity.asyncio 147:6 decorator  @override",
+        "tenacity.asyncio 153:6 decorator  @override",
+        "tenacity.asyncio 159:6 decorator  @override",
+        "tenacity.asyncio 166:6 decorator  @override",
+        "tenacity.asyncio 174:6 decorator  @override",
+        "tenacity.asyncio 210:6 decorator  @override"
+      ]
+    },
+    "tenacity.asyncio.AsyncRetrying.__anext__": {
+      "tenacity.nap.sleep": [
+        "tenacity.asyncio 206:33 call  self.sleep(do)"
+      ],
+      "tenacity.nap.sleep_using_event.__call__": [
+        "tenacity.asyncio 206:33 call  self.sleep(do)"
+      ]
+    },
+    "tenacity.asyncio.AsyncRetrying.__call__": {
+      "tenacity.nap.sleep": [
+        "tenacity.asyncio 139:33 call  self.sleep(do)"
+      ],
+      "tenacity.nap.sleep_using_event.__call__": [
+        "tenacity.asyncio 139:33 call  self.sleep(do)"
+      ]
+    },
+    "tenacity.asyncio.retry": {
+      "tenacity._utils.override": [
+        "tenacity.asyncio.retry 30:6 decorator  @override",
+        "tenacity.asyncio.retry 34:6 decorator  @override",
+        "tenacity.asyncio.retry 40:6 decorator  @override",
+        "tenacity.asyncio.retry 46:6 decorator  @override",
+        "tenacity.asyncio.retry 52:6 decorator  @override",
+        "tenacity.asyncio.retry 72:6 decorator  @override",
+        "tenacity.asyncio.retry 93:6 decorator  @override",
+        "tenacity.asyncio.retry 109:6 decorator  @override",
+        "tenacity.asyncio.retry 118:6 decorator  @override",
+        "tenacity.asyncio.retry 133:6 decorator  @override",
+        "tenacity.asyncio.retry 142:6 decorator  @override"
+      ]
+    },
+    "tenacity.asyncio.retry.retry_all.__call__": {
+      "tenacity.asyncio.retry.retry_all.__call__": [
+        "tenacity.asyncio.retry 137:67 call  _utils.wrap_to_async_func(r)(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_any.__call__": [
+        "tenacity.asyncio.retry 137:67 call  _utils.wrap_to_async_func(r)(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_exception.__call__": [
+        "tenacity.asyncio.retry 137:67 call  _utils.wrap_to_async_func(r)(retry_state)"
+      ]
+    },
+    "tenacity.asyncio.retry.retry_all.__rand__": {
+      "<builtin>.isinstance": [
+        "tenacity.asyncio.retry 146:22 call  isinstance(other, retry_all)"
+      ],
+      "tenacity.asyncio.retry.retry_all.__init__": [
+        "tenacity.asyncio.retry 147:29 call  retry_all(*other.retries, *self.retries)",
+        "tenacity.asyncio.retry 148:25 call  retry_all(other, *self.retries)"
+      ]
+    },
+    "tenacity.asyncio.retry.retry_any.__call__": {
+      "tenacity.asyncio.retry.retry_all.__call__": [
+        "tenacity.asyncio.retry 113:66 call  _utils.wrap_to_async_func(r)(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_any.__call__": [
+        "tenacity.asyncio.retry 113:66 call  _utils.wrap_to_async_func(r)(retry_state)"
+      ]
+    },
+    "tenacity.asyncio.retry.retry_any.__ror__": {
+      "<builtin>.isinstance": [
+        "tenacity.asyncio.retry 122:22 call  isinstance(other, retry_any)"
+      ],
+      "tenacity.asyncio.retry.retry_any.__init__": [
+        "tenacity.asyncio.retry 123:29 call  retry_any(*other.retries, *self.retries)",
+        "tenacity.asyncio.retry 124:25 call  retry_any(other, *self.retries)"
+      ]
+    },
+    "tenacity.asyncio.retry.retry_if_exception.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.asyncio.retry 75:31 call  RuntimeError(\"__call__() called before outcome was set\")",
+        "tenacity.asyncio.retry 80:35 call  RuntimeError(\"outcome failed but the exception is None\")"
+      ]
+    },
+    "tenacity.asyncio.retry.retry_if_result.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.asyncio.retry 96:31 call  RuntimeError(\"__call__() called before outcome was set\")"
+      ]
+    },
+    "tenacity.before_sleep.before_sleep_log.log_it": {
+      "<builtin>.RuntimeError": [
+        "tenacity.before_sleep 40:31 call  RuntimeError(\"log_it() called before outcome was set\")",
+        "tenacity.before_sleep 43:31 call  RuntimeError(\"log_it() called before next_action was set\")"
+      ],
+      "tenacity.RetryError.__str__": [
+        "tenacity.before_sleep 47:64 format  {ex}",
+        "tenacity.before_sleep 61:56 call  traceback.format_exception(type(ex), ex, ex.__traceback__)"
+      ]
+    },
+    "tenacity.nap.sleep_using_event.__call__": {
+      "threading.Event.wait": [
+        "tenacity.nap 43:24 call  self.event.wait(timeout=timeout)"
+      ]
+    },
+    "tenacity.retry": {
+      "tenacity._utils.override": [
+        "tenacity.retry 69:6 decorator  @override",
+        "tenacity.retry 80:6 decorator  @override",
+        "tenacity.retry 94:6 decorator  @override",
+        "tenacity.retry 151:6 decorator  @override",
+        "tenacity.retry 180:6 decorator  @override",
+        "tenacity.retry 206:6 decorator  @override",
+        "tenacity.retry 222:6 decorator  @override",
+        "tenacity.retry 266:6 decorator  @override",
+        "tenacity.retry 270:6 decorator  @override",
+        "tenacity.retry 290:6 decorator  @override",
+        "tenacity.retry 294:6 decorator  @override",
+        "tenacity.retry 307:6 decorator  @override",
+        "tenacity.retry 311:6 decorator  @override"
+      ]
+    },
+    "tenacity.retry.retry_all.__call__": {
+      "tenacity.asyncio.retry.retry_all.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_any.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_exception.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_result.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry._retry_always.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry._retry_never.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_all.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_any.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_exception.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_exception_cause_type.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_not_exception_message.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_not_result.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_unless_exception_type.__call__": [
+        "tenacity.retry 309:21 call  r(retry_state)"
+      ]
+    },
+    "tenacity.retry.retry_all.__rand__": {
+      "<builtin>.isinstance": [
+        "tenacity.retry 313:22 call  isinstance(other, retry_all)"
+      ],
+      "tenacity.retry.retry_all.__init__": [
+        "tenacity.retry 314:29 call  retry_all(*other.retries, *self.retries)",
+        "tenacity.retry 315:25 call  retry_all(other, *self.retries)"
+      ]
+    },
+    "tenacity.retry.retry_any.__call__": {
+      "tenacity.asyncio.retry.retry_all.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_any.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_exception.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.asyncio.retry.retry_if_result.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry._retry_always.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry._retry_never.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_all.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_any.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_exception_cause_type.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_not_exception_message.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_if_not_result.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ],
+      "tenacity.retry.retry_unless_exception_type.__call__": [
+        "tenacity.retry 292:21 call  r(retry_state)"
+      ]
+    },
+    "tenacity.retry.retry_any.__ror__": {
+      "<builtin>.isinstance": [
+        "tenacity.retry 296:22 call  isinstance(other, retry_any)"
+      ],
+      "tenacity.retry.retry_any.__init__": [
+        "tenacity.retry 297:29 call  retry_any(*other.retries, *self.retries)",
+        "tenacity.retry 298:25 call  retry_any(other, *self.retries)"
+      ]
+    },
+    "tenacity.retry.retry_base.__and__": {
+      "tenacity.asyncio.retry.retry_all.__rand__": [
+        "tenacity.retry 36:34 call  other.__rand__(self)"
+      ],
+      "tenacity.retry.retry_all.__rand__": [
+        "tenacity.retry 36:34 call  other.__rand__(self)"
+      ]
+    },
+    "tenacity.retry.retry_base.__or__": {
+      "tenacity.asyncio.retry.retry_any.__ror__": [
+        "tenacity.retry 50:33 call  other.__ror__(self)"
+      ],
+      "tenacity.retry.retry_any.__ror__": [
+        "tenacity.retry 50:33 call  other.__ror__(self)"
+      ]
+    },
+    "tenacity.retry.retry_if_exception.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.retry 97:31 call  RuntimeError(\"__call__() called before outcome was set\")",
+        "tenacity.retry 102:35 call  RuntimeError(\"outcome failed but the exception is None\")"
+      ]
+    },
+    "tenacity.retry.retry_if_exception_cause_type.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.retry 183:31 call  RuntimeError(\"__call__ called before outcome was set\")"
+      ]
+    },
+    "tenacity.retry.retry_if_exception_message._check": {
+      "tenacity.RetryError.__str__": [
+        "tenacity.retry 258:39 call  str(exception)",
+        "tenacity.retry 260:41 call  str(exception)"
+      ]
+    },
+    "tenacity.retry.retry_if_not_exception_message.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.retry 273:31 call  RuntimeError(\"__call__() called before outcome was set\")",
+        "tenacity.retry 280:31 call  RuntimeError(\"outcome failed but the exception is None\")"
+      ]
+    },
+    "tenacity.retry.retry_if_not_result.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.retry 225:31 call  RuntimeError(\"__call__() called before outcome was set\")"
+      ]
+    },
+    "tenacity.retry.retry_if_result.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.retry 209:31 call  RuntimeError(\"__call__() called before outcome was set\")"
+      ]
+    },
+    "tenacity.retry.retry_unless_exception_type.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.retry 154:31 call  RuntimeError(\"__call__() called before outcome was set\")",
+        "tenacity.retry 162:31 call  RuntimeError(\"outcome failed but the exception is None\")"
+      ]
+    },
+    "tenacity.retry.wrap": {
+      "warnings.warn": [
+        "tenacity 785:26 call  warnings.warn( f\"Got retry_base instance ({f.__class__.__..."
+      ]
+    },
+    "tenacity.stop": {
+      "tenacity._utils.override": [
+        "tenacity.stop 51:6 decorator  @override",
+        "tenacity.stop 62:6 decorator  @override",
+        "tenacity.stop 70:6 decorator  @override",
+        "tenacity.stop 84:6 decorator  @override",
+        "tenacity.stop 95:6 decorator  @override",
+        "tenacity.stop 113:6 decorator  @override",
+        "tenacity.stop 131:6 decorator  @override"
+      ]
+    },
+    "tenacity.stop.stop_after_delay.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.stop 116:31 call  RuntimeError(\"__call__() called but seconds_since_start i..."
+      ]
+    },
+    "tenacity.stop.stop_all.__call__": {
+      "tenacity.stop._stop_never.__call__": [
+        "tenacity.stop 64:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_all.__call__": [
+        "tenacity.stop 64:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_any.__call__": [
+        "tenacity.stop 64:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_before_delay.__call__": [
+        "tenacity.stop 64:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_when_event_set.__call__": [
+        "tenacity.stop 64:21 call  x(retry_state)"
+      ]
+    },
+    "tenacity.stop.stop_any.__call__": {
+      "tenacity.stop._stop_never.__call__": [
+        "tenacity.stop 53:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_all.__call__": [
+        "tenacity.stop 53:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_any.__call__": [
+        "tenacity.stop 53:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_before_delay.__call__": [
+        "tenacity.stop 53:21 call  x(retry_state)"
+      ],
+      "tenacity.stop.stop_when_event_set.__call__": [
+        "tenacity.stop 53:21 call  x(retry_state)"
+      ]
+    },
+    "tenacity.stop.stop_before_delay.__call__": {
+      "<builtin>.RuntimeError": [
+        "tenacity.stop 134:31 call  RuntimeError(\"__call__() called but seconds_since_start i..."
+      ]
+    },
+    "tenacity.stop.stop_when_event_set.__call__": {
+      "threading.Event.is_set": [
+        "tenacity.stop 86:33 call  self.event.is_set()"
+      ]
+    },
+    "tenacity.tornadoweb": {
+      "tenacity._utils.override": [
+        "tenacity.tornadoweb 41:6 decorator  @override"
+      ]
+    },
+    "tenacity.tornadoweb.TornadoRetrying.__call__": {
+      "tenacity.nap.sleep": [
+        "tenacity.tornadoweb 62:33 call  self.sleep(do)"
+      ],
+      "tenacity.nap.sleep_using_event.__call__": [
+        "tenacity.tornadoweb 62:33 call  self.sleep(do)"
+      ]
+    },
+    "tenacity.wait": {
+      "tenacity._utils.override": [
+        "tenacity.wait 67:6 decorator  @override",
+        "tenacity.wait 88:6 decorator  @override",
+        "tenacity.wait 101:6 decorator  @override",
+        "tenacity.wait 131:6 decorator  @override",
+        "tenacity.wait 167:6 decorator  @override",
+        "tenacity.wait 195:6 decorator  @override",
+        "tenacity.wait 226:6 decorator  @override",
+        "tenacity.wait 273:6 decorator  @override",
+        "tenacity.wait 319:6 decorator  @override"
+      ]
+    },
+    "tenacity.wait.wait_chain.__call__": {
+      "tenacity.wait.wait_chain.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_combine.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_exception.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_exponential.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_exponential_jitter.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_incrementing.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_random.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ],
+      "tenacity.wait.wait_random_exponential.__call__": [
+        "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)"
+      ]
+    },
+    "tenacity.wait.wait_combine.__call__": {
+      "tenacity.wait.wait_chain.__call__": [
+        "tenacity.wait 107:27 call  x(retry_state)"
+      ],
+      "tenacity.wait.wait_exception.__call__": [
+        "tenacity.wait 107:27 call  x(retry_state)"
+      ],
+      "tenacity.wait.wait_exponential.__call__": [
+        "tenacity.wait 107:27 call  x(retry_state)"
+      ],
+      "tenacity.wait.wait_exponential_jitter.__call__": [
+        "tenacity.wait 107:27 call  x(retry_state)"
+      ],
+      "tenacity.wait.wait_incrementing.__call__": [
+        "tenacity.wait 107:27 call  x(retry_state)"
+      ],
+      "tenacity.wait.wait_random_exponential.__call__": [
+        "tenacity.wait 107:27 call  x(retry_state)"
+      ]
+    }
+  },
+  "notes": {
+    "tenacity 163:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 170:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 219:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 332:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 336:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 404:24 call  copy(f, *args, **kw)": [
+      "Round 4 pinned definition-decorator evidence: Tornado 6.6 tornado/gen.py SHA-256 d08e2d46799f1e5a4c2fb7aec291829a57a2b5a9ecde22b363235b4d4dadd3c2, coroutine.wrapper at line 206 calls ctx_run(func, *args, **kwargs) at line 212. The wrapper and its package generator callback are both callees here. Ordinary Tornado calls remain missing-library paths.",
+      "copy has the class of self (BaseRetrying.copy, line 306), the object whose wraps() made this closure: a Retrying or TornadoRetrying (they inherit wraps), or an AsyncRetrying, because AsyncRetrying.wraps calls BaseRetrying.wraps through super() (asyncio/__init__.py:212). Retrying: Retrying.__call__. TornadoRetrying: its __call__ is decorated with tornado.gen.coroutine (tornadoweb.py:40), so the call runs tornado.gen.coroutine.wrapper, which calls the generator function TornadoRetrying.__call__ back. AsyncRetrying: its __call__, a coroutine function. AsyncRetrying.wraps returns async_wrapped and drops this wrapped_f, but by scope rule A whether the function is called does not matter (tenacity.md)"
+    ],
+    "tenacity 427:54 call  self.retry(retry_state)": [
+      "self.retry is set only by BaseRetrying.__init__ (line 277) from its `retry` argument: the default retry_if_exception_type() (line 264), AsyncRetrying's default (asyncio/__init__.py:83), copy() (line 310), retry.wrap (lines 795-803, from the client's dkw), or any strategy the client passes. This method runs for Retrying and TornadoRetrying objects (AsyncRetrying overrides it). Callees: the sync retry set (10) and the async retry set (4): the public tenacity.asyncio strategies subclass retry_base, the base-class arm of the annotation RetryBaseT (line 264, retry.py:63), and the sync @overload of retry names their type tasyncio.retry.RetryBaseT, whose base-class arm is async_retry_base (line 760; scope rule B2); their __call__ is a coroutine function, called here and never awaited",
+      "retry_if_exception_type, retry_if_not_exception_type and retry_if_exception_message inherit retry_if_exception.__call__; plain callables of the client are client callbacks"
+    ],
+    "tenacity 430:47 call  self.wait(retry_state)": [
+      "self.wait is set only by BaseRetrying.__init__ (line 276): the client's wait strategy, or wait_none() (default, line 263; also when _is_no_wait accepts None or 0), whose __call__ is wait_fixed.__call__. This method runs for Retrying and TornadoRetrying objects (AsyncRetrying overrides it). Callees: the wait set (9); plain callables of the client are client callbacks"
+    ],
+    "tenacity 434:52 call  self.stop(retry_state)": [
+      "self.stop is set only by BaseRetrying.__init__ (line 275): the default stop_never (line 262; asyncio/__init__.py:81), copy() (line 308), or any stop strategy the client passes. This method runs for Retrying and TornadoRetrying objects (AsyncRetrying overrides it). Callees: the stop set (7); plain callables of the client are client callbacks"
+    ],
+    "tenacity 440:28 call  action(retry_state)": [
+      "action is an entry of iter_state.actions; this iter runs for Retrying and TornadoRetrying objects, whose _add_action_func is BaseRetrying._add_action_func (line 424): it appends fn unchanged. The 14 calls of _add_action_func (lines 449-500) append: self.before; the lambda of line 450; the bound methods self._run_retry, self._post_retry_check_actions, self._run_wait, self._run_stop, self._post_stop_check_actions (the BaseRetrying ones: these classes do not override them); the lambdas of lines 462 and 500; self.after; self.retry_error_callback; exc_check; next_action; self.before_sleep",
+      "before, after and before_sleep: defaults before_nothing, after_nothing, None (lines 265-267), or a hook that the API reference offers for that argument of tenacity.retry (doc/source/api.rst:23-45: the before, after and before_sleep modules), passed on by retry.wrap (lines 791-803): the hook set (6). retry_error_callback: the package offers no value for it (default None; its bare Callable annotation names none). Client callables are client callbacks"
+    ],
+    "tenacity 519:27 call  self.sleep(do)": [
+      "self.sleep is set by BaseRetrying.__init__ (line 274) and again by TornadoRetrying.__init__ (tornadoweb.py:38). This generator runs for Retrying (default nap.sleep, line 261) and TornadoRetrying (default tornado.gen.sleep, tornadoweb.py:34; the call returns a future that the loop drops). The API reference offers the nap functions, nap.sleep and sleep_using_event (its __call__), as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to Retrying or TornadoRetrying (lines 791-803): scope rule B2. Other callables are client callbacks"
+    ],
+    "tenacity 536:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 560:27 call  self.sleep(do)": [
+      "self.sleep is set by BaseRetrying.__init__ (line 274): for a Retrying the default nap.sleep (line 261), copy() (line 307), or the client's sleep. The API reference offers the nap functions, nap.sleep and sleep_using_event (its __call__), as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to Retrying (line 803): scope rule B2. Other callables are client callbacks"
+    ],
+    "tenacity 664:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity 670:63 format  {exception}": [
+      "the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used."
+    ],
+    "tenacity 785:26 call  warnings.warn( f\"Got retry_base instance ({f.__class__.__...": [
+      "runs only when f is a retry_base instance (line 784). A package strategy as the function to retry is out of scope (scope rule B3 in tenacity.md), but a client may pass an instance of its own retry_base subclass as the function (a client object, rule B2), and that execution reaches this call"
+    ],
+    "tenacity._utils 130:20 call  call(*args, **kwargs)": [
+      "call is the argument of wrap_to_async_func when is_coroutine_callable(call) is false (line 126). wrap_to_async_func is called by AsyncRetrying._add_action_func (asyncio/__init__.py:145) with every action of an AsyncRetrying (the 14 _add_action_func calls of __init__.py:449-500), by AsyncRetrying._run_retry, _run_wait and _run_stop with self.retry, self.wait and self.stop (asyncio/__init__.py:149, 155, 162), and by the async retry_any and retry_all with each operand (asyncio/retry.py:113, 137)",
+      "not coroutine callables, so wrapped: the lambdas of __init__.py:450, 462 and 500, the bound methods _post_retry_check_actions and _post_stop_check_actions, exc_check, next_action, the hook set (6), the stop set (7), the wait set (9) and the sync retry set (10). Coroutine callables are returned unwrapped and never reach here: AsyncRetrying._run_retry, _run_wait, _run_stop and the async retry strategies (their __call__ is async). Client callables are client callbacks"
+    ],
+    "tenacity._utils 32:24 call  typing.TypeVar(\"_F\", bound=typing.Callable[..., typing.Any])": [
+      "version branch at line 29: this else branch runs on Python 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 112:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 139:33 call  self.sleep(do)": [
+      "self.sleep is set by BaseRetrying.__init__ (__init__.py:274) from AsyncRetrying.__init__: the default _portable_async_sleep (line 80), copy(), or the client's sleep. The API reference offers the nap functions, nap.sleep and sleep_using_event (its __call__), as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to AsyncRetrying for a coroutine function (__init__.py:791-795): scope rule B2 (the bare Callable annotation of lines 78-79 is not the evidence). They are called here, then `await None` raises TypeError. Client callables (asyncio.sleep, trio.sleep, shown in the docs) are client callbacks"
+    ],
+    "tenacity.asyncio 143:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 147:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 153:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 159:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 166:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 174:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio 206:33 call  self.sleep(do)": [
+      "the same self.sleep as line 139: the default _portable_async_sleep (line 80), or the client's sleep; the nap functions reach it as at line 139 (API reference, doc/source/api.rst:53-54, and retry.wrap passing **dkw, __init__.py:791-795) and are called, then `await None` raises TypeError. Client callables are client callbacks"
+    ],
+    "tenacity.asyncio 210:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 109:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 113:66 call  _utils.wrap_to_async_func(r)(retry_state)": [
+      "r is an operand of this retry_any (line 107): any retry strategy, from the client or from the operators of async_retry_base and __ror__ (lines 50, 56, 123, 124). The callee is r itself if it is a coroutine callable (the async retry set, 4), else inner, which calls r (the sync retry set, from _utils.py:130)"
+    ],
+    "tenacity.asyncio.retry 118:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 133:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 137:67 call  _utils.wrap_to_async_func(r)(retry_state)": [
+      "r is an operand of this retry_all (line 131): any retry strategy, from the client or from the operators of async_retry_base and __rand__ (lines 38, 44, 147, 148). The callee is r itself if it is a coroutine callable (the async retry set, 4), else inner, which calls r (the sync retry set, from _utils.py:130)"
+    ],
+    "tenacity.asyncio.retry 142:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 30:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 34:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 40:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 46:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 52:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 72:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.asyncio.retry 80:35 call  RuntimeError(\"outcome failed but the exception is None\")": [
+      "Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required."
+    ],
+    "tenacity.asyncio.retry 93:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.before_sleep 47:64 format  {ex}": [
+      "the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used."
+    ],
+    "tenacity.before_sleep 61:56 call  traceback.format_exception(type(ex), ex, ex.__traceback__)": [
+      "the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used."
+    ],
+    "tenacity.nap 43:24 call  self.event.wait(timeout=timeout)": [
+      "self.event is set only by __init__ (line 38) from the client's argument, annotated `event: \"threading.Event\"` (line 37): a concrete type outside the package fixes the class of the receiver (scope rule B4 in tenacity.md)"
+    ],
+    "tenacity.retry 102:35 call  RuntimeError(\"outcome failed but the exception is None\")": [
+      "Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required."
+    ],
+    "tenacity.retry 151:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 162:31 call  RuntimeError(\"outcome failed but the exception is None\")": [
+      "Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required."
+    ],
+    "tenacity.retry 180:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 206:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 222:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 258:39 call  str(exception)": [
+      "the public RetryCallState.set_exception method accepts BaseException and admits package RetryError. Construct it with a completed Future, store it through set_exception, then use repr(state), a public message retry strategy, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter sets next_action itself before the hook. No exception escaping an opaque client callback is used."
+    ],
+    "tenacity.retry 260:41 call  str(exception)": [
+      "RetryCallState.set_exception accepts a tuple containing BaseException; RetryError is the package exception for that role. A client can construct RetryError with a completed Future, set it through this public method, then call repr(state), the public message retry strategies, or controller.begin(); controller.iter(state) with retry_always and before_sleep_log. iter creates next_action itself. These source paths reach all five formatting sites without treating an exception escaping a client callback as package data."
+    ],
+    "tenacity.retry 266:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 270:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 280:31 call  RuntimeError(\"outcome failed but the exception is None\")": [
+      "Round 4: this guard is reachable with a client Future subclass whose exception() returns different values on successive calls, assigned through the public RetryCallState.outcome path used by tests/test_tenacity.py:77. The first failed-property check observes an exception, and the following exception() returns None. B5 keeps the client override opaque but permits its control-flow effects; no failed-object reuse or package-internal mutation is required."
+    ],
+    "tenacity.retry 290:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 292:21 call  r(retry_state)": [
+      "r is an operand of this retry_any (line 288, `*retries: RetryBaseT`): any retry strategy, from the client or from retry_base.__or__/__ror__ and retry_any.__ror__ (lines 53, 54, 59, 60, 297, 298), which receive sync strategies and plain callables. The operators put async strategies in the async retry_any, but the client can pass them to this constructor (they are retry_base instances): their __call__ is a coroutine function, called here and never awaited. Plain callables are client callbacks"
+    ],
+    "tenacity.retry 294:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 307:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 309:21 call  r(retry_state)": [
+      "r is an operand of this retry_all (line 305, `*retries: RetryBaseT`): any retry strategy, from the client or from retry_base.__and__/__rand__ and retry_all.__rand__ (lines 39, 40, 45, 46, 314, 315), which receive sync strategies and plain callables. The operators put async strategies in the async retry_all, but the client can pass them to this constructor (they are retry_base instances): their __call__ is a coroutine function, called here and never awaited. Plain callables are client callbacks"
+    ],
+    "tenacity.retry 311:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 36:34 call  other.__rand__(self)": [
+      "other is a retry_base instance (line 35): a sync strategy (retry_base.__rand__; retry_all overrides it) or an async one (async_retry_base.__rand__; the async retry_all overrides it)"
+    ],
+    "tenacity.retry 50:33 call  other.__ror__(self)": [
+      "other is a retry_base instance (line 49): a sync strategy (retry_base.__ror__; retry_any overrides it) or an async one (async_retry_base.__ror__; the async retry_any overrides it). The default rejection of __ror__ (for `|` in annotations) does not apply: this entry accepts them"
+    ],
+    "tenacity.retry 69:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 80:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.retry 94:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 113:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 131:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 51:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 53:21 call  x(retry_state)": [
+      "x is an operand of this stop_any (line 49): any stop strategy, from the client or from stop_base.__or__ (line 39), whose operands are stop strategies, also stop_any and stop_all themselves; the stop set (7). Plain callables are client callbacks"
+    ],
+    "tenacity.stop 62:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 64:21 call  x(retry_state)": [
+      "x is an operand of this stop_all (line 60): any stop strategy, from the client or from stop_base.__and__ (line 36), whose operands are stop strategies, also stop_any and stop_all themselves; the stop set (7). Plain callables are client callbacks"
+    ],
+    "tenacity.stop 70:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 84:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.stop 86:33 call  self.event.is_set()": [
+      "self.event is set only by __init__ (line 82) from the client's argument, annotated `event: \"threading.Event\"` (line 81): a concrete type outside the package fixes the class of the receiver (scope rule B4 in tenacity.md)"
+    ],
+    "tenacity.stop 95:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.tornadoweb 41:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.tornadoweb 62:33 call  self.sleep(do)": [
+      "self.sleep is set by TornadoRetrying.__init__ (line 38): the default tornado.gen.sleep (line 34), copy(), or the client's sleep. The nap functions nap.sleep and sleep_using_event (its __call__) reach here through retry: the API reference offers them as the sleep argument of tenacity.retry (doc/source/api.rst:53-54), and retry.wrap passes **dkw unchanged to TornadoRetrying for a tornado coroutine (__init__.py:791-801), so the package itself passes them here (scope rule B2 in tenacity.md; the bare Callable annotations of retry's @overload, __init__.py:757, and of line 34 are not the evidence). Other callables are client callbacks"
+    ],
+    "tenacity.wait 101:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 107:27 call  x(retry_state)": [
+      "x is an operand of this wait_combine (line 99, `*strategies: WaitBaseT`): any wait strategy, from the client or from wait_base.__add__/__radd__ (lines 38, 55), whose operands are wait strategies (also wait_combine itself) and plain callables; the wait set (9). Plain callables are client callbacks"
+    ],
+    "tenacity.wait 131:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 135:25 call  wait_func(retry_state=retry_state)": [
+      "wait_func is an entry of self.strategies, the arguments of this wait_chain (line 129, `*strategies: wait_base`): any wait strategy the client passes, also wait_chain and wait_combine; the wait set (9). Plain callables are client callbacks"
+    ],
+    "tenacity.wait 167:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 195:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 226:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 273:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 319:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 67:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ],
+    "tenacity.wait 88:6 decorator  @override": [
+      "version branch _utils.py:29: typing.override on 3.12+, the backport _utils.override on 3.10 and 3.11"
+    ]
+  },
+  "trace": "dynamic/tenacity.json"
+}

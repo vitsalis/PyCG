@@ -1,0 +1,1008 @@
+# Call-site ledger of whitenoise at 1e3a30bc9e6b82c79a03d35532a7ba72715918df.
+# Hand-written from the source; judgements in whitenoise.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# whitenoise.md ("Scope rules") shows how this ledger applies them. The
+# module-level definitions and their methods are public (rule C). Private
+# compression and sorting callbacks receive their package callers' values;
+# the regex lambda is public through the immutable_file_test instance
+# attribute and retains that predicate role. Public parameters admit opaque
+# client objects (B5), package values for their role, and package defaults
+# (B2). The WSGI environ and Django's request.META are builtin dicts (B4).
+# A directly nested WhiteNoise is a package value in the documented WSGI
+# application role. Client-defined applications, server response/file-wrapper
+# callables, client header/predicate callables, and Django's get_response
+# handler remain opaque (B5). Django names are those of the Django
+# 6.0.2 wheel that the test environment pins (read, never run), named through
+# the base class that the package names.
+
+== whitenoise.base
+
+[whitenoise.base]
+86:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+174:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+187:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+196:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[whitenoise.base.WhiteNoise.__init__]
+56:24 call  isinstance(index_file, str)
+    -> <builtin>.isinstance
+62:28 call  callable(immutable_file_test)
+    -> <builtin>.callable
+63:35 call  re.compile(immutable_file_test)
+    -> re.compile
+68:38 call  MediaTypes(extra_types=mimetypes)
+    -> whitenoise.media_types.MediaTypes.__init__
+73:27 call  self.add_files(root, prefix)
+    -> whitenoise.base.WhiteNoise.add_files
+
+[whitenoise.base.WhiteNoise.__init__.<lambda1>]
+64:66 call  bool(regex.search(url))
+    -> <builtin>.bool
+    note: the argument is the re.Match or None that Pattern.search returns
+64:79 call  regex.search(url)
+    -> re.Pattern.search
+    note: regex is the re.Pattern that re.compile returns at line 63
+
+[whitenoise.base.WhiteNoise.__call__]
+76:32 call  decode_path_info(environ.get("PATH_INFO", ""))
+    -> whitenoise.string_utils.decode_path_info
+76:44 call  environ.get("PATH_INFO", "")
+    -> <builtin>.dict.get
+    note: environ is the WSGI environ, a builtin dict (PEP 3333)
+78:41 call  self.find_file(path)
+    -> whitenoise.base.WhiteNoise.find_file
+80:41 call  self.files.get(path)
+    -> <builtin>.dict.get
+    note: self.files is the dict made in __init__ (line 70)
+82:36 call  self.application(environ, start_response)
+    -> whitenoise.base.WhiteNoise.__call__
+    note: docs/base.rst35 defines application as the WSGI application role, and154 explicitly identifies WhiteNoise itself as a WSGI application. Lines1-24 say it wraps any WSGI application. Directly nesting the public wrapper therefore reuses a package value for its documented role; no forwarding client callback or opaque returned package value is needed.
+84:30 call  self.serve(static_file, environ, start_response)
+    -> whitenoise.base.WhiteNoise.serve
+    reject whitenoise.middleware.WhiteNoiseMiddleware.serve: self is a WhiteNoise; WhiteNoiseMiddleware overrides __call__ (middleware.py:116) and never calls this method on itself (B1)
+
+[whitenoise.base.WhiteNoise.serve]
+88:44 call  static_file.get_response(environ["REQUEST_METHOD"], environ)
+    -> whitenoise.responders.Redirect.get_response
+    -> whitenoise.responders.StaticFile.get_response
+    note: a value site. static_file comes from __call__: a value of self.files or the result of find_file. add_file_to_dictionary stores Redirect objects (self.redirect) and StaticFile objects (self.get_static_file); find_file returns one of the two (find_file_at_path)
+90:23 call  start_response(status_line, list(response.headers))
+    note: a value site. start_response is the WSGI server's callable (PEP 3333), a client callable (B5, as in bottle); the trace's wsgiref.handlers.BaseHandler.start_response is rejected
+90:41 call  list(response.headers)
+    -> <builtin>.list
+    note: response.headers is a list of tuples (Headers.items() or a list display in responders.py)
+92:39 call  environ.get("wsgi.file_wrapper", FileWrapper)
+    -> <builtin>.dict.get
+93:32 call  file_wrapper(response.file)
+    -> wsgiref.util.FileWrapper
+    note: a value site. file_wrapper is the server's wsgi.file_wrapper (a client object, B5) or the package default wsgiref.util.FileWrapper (line 92). FileWrapper.__init__ only stores the file and binds its close; it calls no method of the file
+
+[whitenoise.base.WhiteNoise.add_files]
+98:31 call  os.path.abspath(root)
+    -> os.path.abspath
+99:27 call  root.rstrip(os.path.sep)
+    -> <builtin>.str.rstrip
+    note: root is the str that os.path.abspath returns
+100:47 call  ensure_leading_trailing_slash(prefix)
+    -> whitenoise.string_utils.ensure_leading_trailing_slash
+105:36 call  self.directories.insert(0, (root, prefix))
+    -> <builtin>.list.insert
+107:29 call  os.path.isdir(root)
+    -> os.path.isdir
+108:45 call  self.update_files_dictionary(root, prefix)
+    -> whitenoise.base.WhiteNoise.update_files_dictionary
+110:30 call  warnings.warn(f"No directory at: {root}", stacklevel=3)
+    -> warnings.warn
+
+[whitenoise.base.WhiteNoise.update_files_dictionary]
+115:26 call  dict(scantree(root))
+    -> <builtin>.dict
+    note: dict iterates the generator of scantree, whose edges belong to the call at 115:35
+115:35 call  scantree(root)
+    -> whitenoise.base.scantree
+117:37 call  len(root)
+    -> <builtin>.len
+118:49 call  relative_path.replace("\\", "/")
+    -> <builtin>.bytes.replace
+    -> <builtin>.str.replace
+    note: This public helper has no annotation or documentation fixing root to str. scantree passes root to os.scandir; with a bytes directory path, DirEntry.path is a library-created bytes path. The slicing at117 preserves bytes. The replace call at118 enters bytes.replace before raising TypeError because its two replacement arguments are strs. This is not a direct method call on an opaque client object.
+120:40 call  self.add_file_to_dictionary(url, path, stat_cache=stat_ca...
+    -> whitenoise.base.WhiteNoise.add_file_to_dictionary
+
+[whitenoise.base.WhiteNoise.add_file_to_dictionary]
+123:38 call  self.is_compressed_variant(path, stat_cache=stat_cache)
+    -> whitenoise.base.WhiteNoise.is_compressed_variant
+125:56 call  url.endswith("/" + self.index_file)
+    -> <builtin>.str.endswith
+126:35 call  len(self.index_file)
+    -> <builtin>.len
+127:46 call  index_url.rstrip("/")
+    -> <builtin>.str.rstrip
+128:44 call  self.redirect(url, index_url)
+    -> whitenoise.base.WhiteNoise.redirect
+129:55 call  self.redirect(index_no_slash, index_url)
+    -> whitenoise.base.WhiteNoise.redirect
+131:43 call  self.get_static_file(path, url, stat_cache=stat_cache)
+    -> whitenoise.base.WhiteNoise.get_static_file
+
+[whitenoise.base.WhiteNoise.find_file]
+136:52 call  url.endswith("/")
+    -> <builtin>.str.endswith
+138:37 call  self.url_is_canonical(url)
+    -> whitenoise.base.WhiteNoise.url_is_canonical
+140:49 call  self.candidate_paths_for_url(url)
+    -> whitenoise.base.WhiteNoise.candidate_paths_for_url
+    -> whitenoise.middleware.WhiteNoiseMiddleware.candidate_paths_for_url
+    note: self is a WhiteNoise or a WhiteNoiseMiddleware, which inherits find_file and calls it (middleware.py:118); both methods are generator functions
+142:46 call  self.find_file_at_path(path, url)
+    -> whitenoise.base.WhiteNoise.find_file_at_path
+
+[whitenoise.base.WhiteNoise.candidate_paths_for_url]
+148:30 call  url.startswith(prefix)
+    -> <builtin>.str.startswith
+149:36 call  os.path.join(root, url[len(prefix) :])
+    -> os.path.join
+149:50 call  len(prefix)
+    -> <builtin>.len
+150:41 call  self.path_is_child_of(path, root)
+    -> whitenoise.base.WhiteNoise.path_is_child_of
+
+[whitenoise.base.WhiteNoise.find_file_at_path]
+154:38 call  self.is_compressed_variant(path)
+    -> whitenoise.base.WhiteNoise.is_compressed_variant
+155:35 call  MissingFileError(path)
+    -> <builtin>.Exception.__init__
+    note: responders.MissingFileError (imported at line 14) has no __init__ in the package; the first __init__ of its MRO is Exception's
+158:28 call  url.endswith("/")
+    -> <builtin>.str.endswith
+159:36 call  os.path.join(path, self.index_file)
+    -> os.path.join
+160:44 call  self.get_static_file(path, url)
+    -> whitenoise.base.WhiteNoise.get_static_file
+161:30 call  url.endswith("/" + self.index_file)
+    -> <builtin>.str.endswith
+162:34 call  os.path.isfile(path)
+    -> os.path.isfile
+163:41 call  self.redirect(url, url[: -len(self.index_file)])
+    -> whitenoise.base.WhiteNoise.redirect
+163:57 call  len(self.index_file)
+    -> <builtin>.len
+166:48 call  self.get_static_file(path, url)
+    -> whitenoise.base.WhiteNoise.get_static_file
+168:38 call  os.path.isfile(os.path.join(path, self.index_file))
+    -> os.path.isfile
+168:51 call  os.path.join(path, self.index_file)
+    -> os.path.join
+169:45 call  self.redirect(url, url + "/")
+    -> whitenoise.base.WhiteNoise.redirect
+170:35 call  MissingFileError(path)
+    -> <builtin>.Exception.__init__
+172:36 call  self.get_static_file(path, url)
+    -> whitenoise.base.WhiteNoise.get_static_file
+
+[whitenoise.base.WhiteNoise.url_is_canonical]
+182:30 call  normpath(url)
+    -> posixpath.normpath
+183:24 call  url.endswith("/")
+    -> <builtin>.str.endswith
+
+[whitenoise.base.WhiteNoise.path_is_child_of]
+190:38 call  os.path.commonpath((path, root))
+    -> os.path.commonpath
+
+[whitenoise.base.WhiteNoise.is_compressed_variant]
+201:38 call  os.path.isfile(uncompressed_path)
+    -> os.path.isfile
+
+[whitenoise.base.WhiteNoise.get_static_file]
+208:53 call  os.path.exists(path)
+    -> os.path.exists
+209:35 call  MissingFileError(path)
+    -> <builtin>.Exception.__init__
+210:26 call  Headers([])
+    -> wsgiref.headers.Headers
+211:30 call  self.add_mime_headers(headers, path, url)
+    -> whitenoise.base.WhiteNoise.add_mime_headers
+212:31 call  self.add_cache_headers(headers, path, url)
+    -> whitenoise.base.WhiteNoise.add_cache_headers
+216:38 call  self.add_headers_function(headers, path, url)
+    note: a value site. add_headers_function is the client's function (docs/base.rst:242, docs/django.rst:381; the tests pass a test function); its annotation is a bare Callable, which names no package value (B2), and the package default None is tested at line 215. WhiteNoiseMiddleware passes settings.WHITENOISE_ADD_HEADERS_FUNCTION, also the client's. No callee (B5)
+217:26 call  StaticFile( path, headers.items(), stat_cache=stat_cache,...
+    -> whitenoise.responders.StaticFile.__init__
+219:26 call  headers.items()
+    -> wsgiref.headers.Headers.items
+
+[whitenoise.base.WhiteNoise.add_mime_headers]
+225:47 call  self.media_types.get_type(path)
+    -> whitenoise.media_types.MediaTypes.get_type
+226:33 call  media_type.startswith("text/")
+    -> <builtin>.str.startswith
+    note: get_type returns a str value of types_map (the defaults, or extra_types typed dict[str, str])
+227:37 call  str(self.charset)
+    -> <builtin>.str
+230:27 call  headers.add_header("Content-Type", str(media_type), **par...
+    -> wsgiref.headers.Headers.add_header
+230:47 call  str(media_type)
+    -> <builtin>.str
+
+[whitenoise.base.WhiteNoise.add_cache_headers]
+233:36 call  self.immutable_file_test(path, url)
+    -> whitenoise.base.WhiteNoise.__init__.<lambda1>
+    -> whitenoise.base.WhiteNoise.immutable_file_test
+    -> whitenoise.middleware.WhiteNoiseMiddleware.immutable_file_test
+    note: a value site. Without an immutable_file_test argument, self.immutable_file_test is the method of the class of self: WhiteNoise.immutable_file_test, or WhiteNoiseMiddleware.immutable_file_test for a middleware (it inherits add_cache_headers). With a str (the regex form of docs/base.rst:280, or WHITENOISE_IMMUTABLE_FILE_TEST), __init__ stores the lambda of line 64. A client function is opaque (B5)
+
+[whitenoise.base.WhiteNoise.redirect]
+253:42 call  from_url.split("/")
+    -> <builtin>.str.split
+257:29 call  ValueError(f"Cannot handle redirect: {from_url} > {to_url}")
+    -> <builtin>.ValueError
+262:24 call  Redirect(relative_url, headers=headers)
+    -> whitenoise.responders.Redirect.__init__
+
+[whitenoise.base.scantree]
+269:28 call  os.scandir(root)
+    -> os.scandir
+270:24 call  entry.is_dir()
+    -> os.DirEntry.is_dir
+271:32 call  scantree(entry.path)
+    -> whitenoise.base.scantree
+273:41 call  entry.stat()
+    -> os.DirEntry.stat
+
+== whitenoise.compress
+
+[whitenoise.compress]
+66:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+100:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+111:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+198:21 call  SystemExit(main())
+    -> <builtin>.SystemExit
+    note: module code under if __name__ == "__main__" (python -m whitenoise.compress); the block is code of its module
+198:26 call  main()
+    -> whitenoise.compress.main
+
+[whitenoise.compress.Compressor.__init__]
+60:50 call  self.get_extension_re(extensions)
+    -> whitenoise.compress.Compressor.get_extension_re
+
+[whitenoise.compress.Compressor.get_extension_re]
+69:30 call  re.compile("^$")
+    -> re.compile
+71:30 call  re.compile( r"\.({})$".format("|".join(map(re.escape, ext...
+    -> re.compile
+72:34 call  r"\.({})$".format("|".join(map(re.escape, extensions)))
+    -> <builtin>.str.format
+    note: the formatted value is the str that join returns
+72:43 call  "|".join(map(re.escape, extensions))
+    -> <builtin>.str.join
+    note: join iterates the map, which calls re.escape: a library callable that library code calls back is no edge
+72:47 call  map(re.escape, extensions)
+    -> <builtin>.map
+
+[whitenoise.compress.Compressor.should_compress]
+76:44 call  self.extension_re.search(filename)
+    -> re.Pattern.search
+
+[whitenoise.compress.Compressor.compress]
+83:18 call  open(path, "rb")
+    -> <builtin>.open
+84:35 call  os.fstat(f.fileno())
+    -> os.fstat
+84:44 call  f.fileno()
+    -> io.BufferedReader.fileno
+85:26 call  f.read()
+    -> io.BufferedReader.read
+    reject whitenoise.responders.SlicedFile.read: f is the io.BufferedReader that open(path, "rb") returns at 83:18
+86:19 call  len(data)
+    -> <builtin>.len
+88:46 call  self.compress_brotli(data)
+    -> whitenoise.compress.Compressor.compress_brotli
+89:46 call  self.is_compressed_effectively("Brotli", path, size, comp...
+    -> whitenoise.compress.Compressor.is_compressed_effectively
+90:33 call  filenames.append(self.write_data(path, compressed, ".br",...
+    -> <builtin>.list.append
+90:49 call  self.write_data(path, compressed, ".br", stat_result)
+    -> whitenoise.compress.Compressor.write_data
+95:44 call  self.compress_gzip(data)
+    -> whitenoise.compress.Compressor.compress_gzip
+96:46 call  self.is_compressed_effectively("Gzip", path, size, compre...
+    -> whitenoise.compress.Compressor.is_compressed_effectively
+97:33 call  filenames.append(self.write_data(path, compressed, ".gz",...
+    -> <builtin>.list.append
+97:49 call  self.write_data(path, compressed, ".gz", stat_result)
+    -> whitenoise.compress.Compressor.write_data
+
+[whitenoise.compress.Compressor.compress_gzip]
+102:25 call  BytesIO()
+    -> io.BytesIO
+105:27 call  gzip.GzipFile( filename="", mode="wb", fileobj=output, co...
+    -> gzip.GzipFile
+108:26 call  gz_file.write(data)
+    -> gzip.GzipFile.write
+109:31 call  output.getvalue()
+    -> io.BytesIO.getvalue
+
+[whitenoise.compress.Compressor.compress_brotli]
+113:31 call  brotli.compress(data)
+    -> brotli.compress
+    reject whitenoise.compress.Compressor.compress: brotli is the module of the optional brotli distribution (the import at line 11), not a Compressor
+    note: optional import (lines 10-15); with brotli installed (the extra brotli) the call runs, and Compressor.compress calls this method only when brotli_installed is true
+
+[whitenoise.compress.Compressor.is_compressed_effectively]
+116:30 call  len(data)
+    -> <builtin>.len
+123:21 call  self.log( f"{encoding_name} compressed {path} ({orig_size...
+    -> <builtin>.print
+    -> whitenoise.compress.Compressor.log
+    note: a value site. With quiet=True, __init__ sets no instance attribute log, so self.log is the method Compressor.log (the storages create quiet compressors, storage.py:34 and 144). Otherwise self.log is the log argument: the package default print (main passes no log, line 173), or a client value (opaque, B5)
+127:21 call  self.log(f"Skipping {path} ({encoding_name} compression n...
+    -> <builtin>.print
+    -> whitenoise.compress.Compressor.log
+    note: a value site; the values as at 123:21
+
+[whitenoise.compress.Compressor.write_data]
+132:18 call  open(filename, "wb")
+    -> <builtin>.open
+133:20 call  f.write(data)
+    -> io.BufferedWriter.write
+134:17 call  os.utime(filename, (stat_result.st_atime, stat_result.st_...
+    -> os.utime
+
+[whitenoise.compress.main]
+139:37 call  argparse.ArgumentParser( description="Search for all file...
+    -> argparse.ArgumentParser
+145:24 call  parser.add_argument( "-q", "--quiet", help="Don't produce...
+    -> argparse.ArgumentParser.add_argument
+148:24 call  parser.add_argument( "--no-gzip", help="Don't produce gzi...
+    -> argparse.ArgumentParser.add_argument
+154:24 call  parser.add_argument( "--no-brotli", help="Don't produce b...
+    -> argparse.ArgumentParser.add_argument
+160:24 call  parser.add_argument("root", help="Path root from which to...
+    -> argparse.ArgumentParser.add_argument
+161:32 call  ", ".join(Compressor.SKIP_COMPRESS_EXTENSIONS)
+    -> <builtin>.str.join
+162:24 call  parser.add_argument( "extensions", nargs="*", help=( "Fil...
+    -> argparse.ArgumentParser.add_argument
+171:29 call  parser.parse_args(argv)
+    -> argparse.ArgumentParser.parse_args
+173:28 call  Compressor( extensions=args.extensions, use_gzip=args.use...
+    -> whitenoise.compress.Compressor.__init__
+180:28 call  ThreadPoolExecutor()
+    -> concurrent.futures.ThreadPoolExecutor
+182:45 call  os.walk(args.root)
+    -> os.walk
+184:46 call  compressor.should_compress(filename)
+    -> whitenoise.compress.Compressor.should_compress
+185:35 call  futures.append( executor.submit( compressor.compress, os....
+    -> <builtin>.list.append
+186:40 call  executor.submit( compressor.compress, os.path.join(dirpat...
+    -> concurrent.futures.ThreadPoolExecutor.submit
+    -> whitenoise.compress.Compressor.compress
+    note: submit starts the pool's worker threads, which call compressor.compress: the call back belongs to this site (the trace misses calls of threads that a library starts, T1)
+187:62 call  os.path.join(dirpath, filename)
+    -> os.path.join
+191:35 call  as_completed(futures)
+    -> concurrent.futures.as_completed
+192:26 call  future.result()
+    -> concurrent.futures.Future.result
+
+== whitenoise.media_types
+
+[whitenoise.media_types.MediaTypes.__init__]
+10:39 call  default_types()
+    -> whitenoise.media_types.default_types
+12:34 call  self.types_map.update(extra_types)
+    -> <builtin>.dict.update
+    note: extra_types is typed dict[str, str] | None (B4)
+
+[whitenoise.media_types.MediaTypes.get_type]
+15:32 call  os.path.basename(path)
+    -> os.path.basename
+15:44 call  os.path.basename(path).lower()
+    -> <builtin>.str.lower
+16:40 call  self.types_map.get(name)
+    -> <builtin>.dict.get
+19:37 call  os.path.splitext(name)
+    -> os.path.splitext
+20:34 call  self.types_map.get(extension, "application/octet-stream")
+    -> <builtin>.dict.get
+
+== whitenoise.middleware
+
+[whitenoise.middleware]
+125:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[whitenoise.middleware.WhiteNoiseMiddleware.__init__]
+75:14 call  super()
+    -> <builtin>.super
+75:25 call  super().__init__( application=None, autorefresh=autorefre...
+    -> whitenoise.base.WhiteNoise.__init__
+    reject *: super() in WhiteNoiseMiddleware resolves to the next class of its MRO, WhiteNoise
+95:42 call  urlparse(settings.STATIC_URL or "")
+    -> urllib.parse.urlparse
+97:64 call  settings.FORCE_SCRIPT_NAME.rstrip("/")
+    -> <builtin>.str.rstrip
+    note: FORCE_SCRIPT_NAME is a str or None (Django's settings reference); the branch runs only for a str
+98:49 call  self.static_prefix.startswith(script_name)
+    -> <builtin>.str.startswith
+    note: self.static_prefix is the path str of urlparse's result (line 95)
+99:64 call  len(script_name)
+    -> <builtin>.len
+100:59 call  ensure_leading_trailing_slash(self.static_prefix)
+    -> whitenoise.string_utils.ensure_leading_trailing_slash
+104:27 call  self.add_files(self.static_root, prefix=self.static_prefix)
+    -> whitenoise.base.WhiteNoise.add_files
+111:27 call  self.add_files(root)
+    -> whitenoise.base.WhiteNoise.add_files
+114:40 call  self.add_files_from_finders()
+    -> whitenoise.middleware.WhiteNoiseMiddleware.add_files_from_finders
+
+[whitenoise.middleware.WhiteNoiseMiddleware.__call__]
+118:41 call  self.find_file(request.path_info)
+    -> whitenoise.base.WhiteNoise.find_file
+120:41 call  self.files.get(request.path_info)
+    -> <builtin>.dict.get
+122:30 call  self.serve(static_file, request)
+    -> whitenoise.middleware.WhiteNoiseMiddleware.serve
+    reject whitenoise.base.WhiteNoise.serve: self is a WhiteNoiseMiddleware, whose serve overrides WhiteNoise.serve; the package has no subclass of WhiteNoiseMiddleware
+123:33 call  self.get_response(request)
+    reject whitenoise.responders.Redirect.get_response, whitenoise.responders.StaticFile.get_response: self.get_response is the instance attribute that __init__ sets from its get_response parameter (line 37), not a method of a responder
+    note: a value site. get_response is the next handler of the middleware chain, which Django's BaseHandler.load_middleware passes to the middleware; a client callable (B5), as a WSGI server's start_response. The package default None is never called (it raises TypeError before any callee). No callee; the trace's django.core.handlers.exception.convert_exception_to_response.inner is rejected
+
+[whitenoise.middleware.WhiteNoiseMiddleware.serve]
+127:44 call  static_file.get_response(request.method, request.META)
+    -> whitenoise.responders.Redirect.get_response
+    -> whitenoise.responders.StaticFile.get_response
+    note: a value site. static_file comes from __call__: a value of self.files or the result of find_file, a Redirect or a StaticFile (see base.py 88:44)
+128:21 call  int(response.status)
+    -> <builtin>.int
+129:47 call  WhiteNoiseFileResponse(response.file or (), status=status)
+    -> django.http.FileResponse.__init__
+    -> whitenoise.middleware.WhiteNoiseFileResponse.set_headers
+    note: WhiteNoiseFileResponse has no __init__, so the first __init__ of its MRO is Django's FileResponse.__init__. Through StreamingHttpResponse's streaming_content setter, FileResponse._set_streaming_content calls self.set_headers(filelike) when the content has a read attribute (response.file is an io.BufferedReader or a SlicedFile); the override WhiteNoiseFileResponse.set_headers runs. For () (a response without a file: a HEAD request, a 302, 304, 405 or 416 response) it is not called
+
+[whitenoise.middleware.WhiteNoiseMiddleware.add_files_from_finders]
+138:42 call  finders.get_finders()
+    -> django.contrib.staticfiles.finders.get_finders
+139:45 call  finder.list(None)
+    -> django.contrib.staticfiles.finders.AppDirectoriesFinder.list
+    -> django.contrib.staticfiles.finders.FileSystemFinder.list
+    note: get_finders yields the finders of settings.STATICFILES_FINDERS; Django's default (global_settings.py) names FileSystemFinder and AppDirectoriesFinder. A finder that the client's settings name is client configuration (opaque, B5); see whitenoise.md, judgement 2
+140:34 call  getattr(storage, "prefix", None)
+    -> <builtin>.getattr
+140:72 call  (getattr(storage, "prefix", None) or "").strip("/")
+    -> <builtin>.str.strip
+141:30 call  "".join( ( self.static_prefix, prefix, "/" if prefix else...
+    -> <builtin>.str.join
+146:37 call  path.replace("\\", "/")
+    -> <builtin>.str.replace
+150:33 call  files.setdefault(url, storage.path(path))
+    -> <builtin>.dict.setdefault
+150:51 call  storage.path(path)
+    -> django.core.files.storage.FileSystemStorage.path
+    note: a value site. storage is the storage that the default finders' list yields with each path: FileSystemFinder makes FileSystemStorage objects (finders.py:105) and AppDirectoriesFinder uses storage_class = FileSystemStorage (finders.py:204). The attribute path that the package assigns (FileEntry.path) belongs to another class
+151:36 call  os.stat(path)
+    -> os.stat
+151:67 call  files.values()
+    -> <builtin>.dict.values
+152:37 call  files.items()
+    -> <builtin>.dict.items
+153:40 call  self.add_file_to_dictionary(url, path, stat_cache=stat_ca...
+    -> whitenoise.base.WhiteNoise.add_file_to_dictionary
+
+[whitenoise.middleware.WhiteNoiseMiddleware.candidate_paths_for_url]
+156:47 call  url.startswith(self.static_prefix)
+    -> <builtin>.str.startswith
+157:32 call  finders.find(url[len(self.static_prefix) :])
+    -> django.contrib.staticfiles.finders.find
+157:40 call  len(self.static_prefix)
+    -> <builtin>.len
+160:22 call  super()
+    -> <builtin>.super
+160:48 call  super().candidate_paths_for_url(url)
+    -> whitenoise.base.WhiteNoise.candidate_paths_for_url
+    reject whitenoise.middleware.WhiteNoiseMiddleware.candidate_paths_for_url: super() in WhiteNoiseMiddleware resolves to WhiteNoise
+
+[whitenoise.middleware.WhiteNoiseMiddleware.immutable_file_test]
+170:30 call  url.startswith(self.static_prefix)
+    -> <builtin>.str.startswith
+172:23 call  len(self.static_prefix)
+    -> <builtin>.len
+173:55 call  self.get_name_without_hash(name)
+    -> whitenoise.middleware.WhiteNoiseMiddleware.get_name_without_hash
+176:41 call  self.get_static_url(name_without_hash)
+    -> whitenoise.middleware.WhiteNoiseMiddleware.get_static_url
+180:20 call  bool(static_url and basename(static_url) == basename(url))
+    -> <builtin>.bool
+180:44 call  basename(static_url)
+    -> posixpath.basename
+180:68 call  basename(url)
+    -> posixpath.basename
+
+[whitenoise.middleware.WhiteNoiseMiddleware.get_name_without_hash]
+191:47 call  os.path.splitext(filename)
+    -> os.path.splitext
+192:32 call  os.path.splitext(name_with_hash)
+    -> os.path.splitext
+
+[whitenoise.middleware.WhiteNoiseMiddleware.get_static_url]
+197:40 getattr  staticfiles_storage.url
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.__init__
+    note: added by hand (no candidate by name). staticfiles_storage is Django's ConfiguredStorage, a LazyObject: the first attribute load runs _setup, which makes the storage of STORAGES["staticfiles"] (storages[...] -> create_storage -> storage_cls()). With the documented backend CompressedManifestStaticFilesStorage (docs/django.rst:90, the tests' settings), its __init__ runs. In a fresh process the middleware's own __init__ makes the first load (add_files -> get_static_file -> add_cache_headers -> immutable_file_test, for a hashed file name); the tests make it earlier in collectstatic, so the trace does not have the edge. See whitenoise.md, judgement 3
+197:43 call  staticfiles_storage.url(name)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.url
+    -> django.contrib.staticfiles.storage.StaticFilesStorage.url
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name
+    note: the storage of STORAGES["staticfiles"]: the package's CompressedManifestStaticFilesStorage (url from HashedFilesMixin, named through ManifestStaticFilesStorage) or CompressedStaticFilesStorage, and Django's default StaticFilesStorage (url from FileSystemStorage, named through StaticFilesStorage). For CompressedManifestStaticFilesStorage with DEBUG false, url calls ManifestFilesMixin.stored_name; with manifest_strict false (WHITENOISE_MANIFEST_STRICT = False, docs/django.rst:491) and a name that the manifest lacks, stored_name calls self.hashed_name, the package override (storage.py:115). See whitenoise.md, judgement 4
+
+== whitenoise.responders
+
+[whitenoise.responders]
+24:32 call  Response( status=HTTPStatus.METHOD_NOT_ALLOWED, headers=[...
+    -> whitenoise.responders.Response.__init__
+126:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+144:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+154:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+184:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+194:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+267:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[whitenoise.responders.SlicedFile.__init__]
+50:21 call  fileobj.seek(start)
+    -> io.BufferedReader.seek
+    note: the package passes the io.BufferedReader that StaticFile.get_response opens (line 86, through get_range_response, line 111); a client's file is opaque (B5): the trace's _io.BytesIO.seek (test_responders.py:18) is rejected
+
+[whitenoise.responders.SlicedFile.read]
+60:23 call  min(size, self.remaining)
+    -> <builtin>.min
+61:33 call  self.fileobj.read(size)
+    -> io.BufferedReader.read
+    reject whitenoise.responders.SlicedFile.read: self.fileobj is the io.BufferedReader that the package passes (line 111); the package never wraps a SlicedFile in a SlicedFile
+62:30 call  len(data)
+    -> <builtin>.len
+
+[whitenoise.responders.SlicedFile.close]
+66:14 call  super()
+    -> <builtin>.super
+66:22 call  super().close()
+    -> io.BufferedIOBase.close
+    reject whitenoise.responders.SlicedFile.close: super() in SlicedFile resolves to its base io.BufferedIOBase, outside the package (the method is IOBase.close, which calls flush, not package code)
+67:27 call  self.fileobj.close()
+    -> io.BufferedReader.close
+    reject whitenoise.responders.SlicedFile.close: self.fileobj is the io.BufferedReader that the package passes (line 111)
+
+[whitenoise.responders.StaticFile.__init__]
+72:36 call  self.get_file_stats(path, encodings, stat_cache)
+    -> whitenoise.responders.StaticFile.get_file_stats
+73:35 call  self.get_headers(headers, files)
+    -> whitenoise.responders.StaticFile.get_headers
+74:39 call  parsedate(headers["Last-Modified"])
+    -> email.utils.parsedate
+76:68 call  self.get_not_modified_response(headers)
+    -> whitenoise.responders.StaticFile.get_not_modified_response
+77:50 call  self.get_alternatives(headers, files)
+    -> whitenoise.responders.StaticFile.get_alternatives
+
+[whitenoise.responders.StaticFile.get_response]
+82:32 call  self.is_not_modified(request_headers)
+    -> whitenoise.responders.StaticFile.is_not_modified
+84:50 call  self.get_path_and_headers(request_headers)
+    -> whitenoise.responders.StaticFile.get_path_and_headers
+86:31 call  open(path, "rb")
+    -> <builtin>.open
+89:43 call  request_headers.get("HTTP_RANGE")
+    -> <builtin>.dict.get
+    note: request_headers is the WSGI environ (base.py:88) or Django's request.META (middleware.py:127), builtin dicts (B4)
+92:47 call  self.get_range_response(range_header, headers, file_handle)
+    -> whitenoise.responders.StaticFile.get_range_response
+98:24 call  Response(HTTPStatus.OK, headers, file_handle)
+    -> whitenoise.responders.Response.__init__
+
+[whitenoise.responders.StaticFile.get_range_response]
+104:27 call  int(item[1])
+    -> <builtin>.int
+106:31 call  headers.append(item)
+    -> <builtin>.list.append
+107:41 call  self.get_byte_range(range_header, size)
+    -> whitenoise.responders.StaticFile.get_byte_range
+109:59 call  self.get_range_not_satisfiable_response(file_handle, size)
+    -> whitenoise.responders.StaticFile.get_range_not_satisfiable_response
+111:37 call  SlicedFile(file_handle, start, end)
+    -> whitenoise.responders.SlicedFile.__init__
+112:23 call  headers.append(("Content-Range", f"bytes {start}-{end}/{s...
+    -> <builtin>.list.append
+113:23 call  headers.append(("Content-Length", str(end - start + 1)))
+    -> <builtin>.list.append
+113:46 call  str(end - start + 1)
+    -> <builtin>.str
+114:24 call  Response(HTTPStatus.PARTIAL_CONTENT, headers, file_handle)
+    -> whitenoise.responders.Response.__init__
+
+[whitenoise.responders.StaticFile.get_byte_range]
+117:43 call  self.parse_byte_range(range_header)
+    -> whitenoise.responders.StaticFile.parse_byte_range
+119:24 call  max(start + size, 0)
+    -> <builtin>.max
+123:22 call  min(end, size - 1)
+    -> <builtin>.min
+
+[whitenoise.responders.StaticFile.parse_byte_range]
+128:50 call  range_header.strip()
+    -> <builtin>.str.strip
+    note: range_header is the str value of HTTP_RANGE in the environ
+128:62 call  range_header.strip().partition("=")
+    -> <builtin>.str.partition
+130:29 call  ValueError()
+    -> <builtin>.ValueError
+133:51 call  range_spec.strip()
+    -> <builtin>.str.strip
+133:63 call  range_spec.strip().partition("-")
+    -> <builtin>.str.partition
+135:29 call  ValueError()
+    -> <builtin>.ValueError
+137:25 call  int(end_str)
+    -> <builtin>.int
+140:24 call  int(start_str)
+    -> <builtin>.int
+141:22 call  int(end_str)
+    -> <builtin>.int
+
+[whitenoise.responders.StaticFile.get_range_not_satisfiable_response]
+147:30 call  file_handle.close()
+    -> io.BufferedReader.close
+    reject whitenoise.responders.SlicedFile.close: file_handle is the io.BufferedReader that get_response opens; get_range_response calls this method (line 109) before it wraps the handle in a SlicedFile (line 111)
+148:24 call  Response( HTTPStatus.REQUESTED_RANGE_NOT_SATISFIABLE, [("...
+    -> whitenoise.responders.Response.__init__
+
+[whitenoise.responders.StaticFile.get_file_stats]
+157:33 call  FileEntry(path, stat_cache)
+    -> whitenoise.responders.FileEntry.__init__
+159:54 call  encodings.items()
+    -> <builtin>.dict.items
+    note: the package passes a dict display as encodings (base.py:221)
+161:48 call  FileEntry(alt_path, stat_cache)
+    -> whitenoise.responders.FileEntry.__init__
+
+[whitenoise.responders.StaticFile.get_headers]
+167:26 call  Headers(headers_list)
+    -> wsgiref.headers.Headers
+169:15 call  len(files)
+    -> <builtin>.len
+176:54 call  formatdate(mtime, usegmt=True)
+    -> email.utils.formatdate
+178:38 call  parsedate(headers["Last-Modified"])
+    -> email.utils.parsedate
+180:32 call  int(mktime(last_modified))
+    -> <builtin>.int
+180:39 call  mktime(last_modified)
+    -> time.mktime
+
+[whitenoise.responders.StaticFile.get_not_modified_response]
+189:44 call  not_modified_headers.append((key, headers[key]))
+    -> <builtin>.list.append
+190:24 call  Response( status=HTTPStatus.NOT_MODIFIED, headers=not_mod...
+    -> whitenoise.responders.Response.__init__
+
+[whitenoise.responders.StaticFile.get_alternatives]
+198:31 call  sorted(files.items(), key=lambda i: i[1].size)
+    -> <builtin>.sorted
+    -> whitenoise.responders.StaticFile.get_alternatives.<lambda1>
+198:43 call  files.items()
+    -> <builtin>.dict.items
+200:30 call  Headers(base_headers.items())
+    -> wsgiref.headers.Headers
+200:49 call  base_headers.items()
+    -> wsgiref.headers.Headers.items
+    note: base_headers is the wsgiref Headers that get_headers returns (line 73)
+201:44 call  str(file_entry.size)
+    -> <builtin>.str
+204:41 call  re.compile(rf"\b{encoding}\b")
+    -> re.compile
+206:41 call  re.compile("")
+    -> re.compile
+207:32 call  alternatives.append((encoding_re, file_entry.path, header...
+    -> <builtin>.list.append
+207:77 call  headers.items()
+    -> wsgiref.headers.Headers.items
+
+[whitenoise.responders.StaticFile.is_not_modified]
+211:44 call  request_headers.get("HTTP_IF_NONE_MATCH")
+    -> <builtin>.dict.get
+220:38 call  parsedate(last_requested)
+    -> email.utils.parsedate
+
+[whitenoise.responders.StaticFile.get_path_and_headers]
+226:46 call  request_headers.get("HTTP_ACCEPT_ENCODING", "")
+    -> <builtin>.dict.get
+231:34 call  encoding_re.search(accept_encoding)
+    -> re.Pattern.search
+
+[whitenoise.responders.Redirect.__init__]
+237:23 call  list(headers.items())
+    -> <builtin>.list
+237:37 call  headers.items()
+    -> <builtin>.dict.items
+    note: the package passes a dict as headers (base.py:259 and 261)
+238:23 call  headers.append(("Location", quote(location.encode("utf8"))))
+    -> <builtin>.list.append
+238:42 call  quote(location.encode("utf8"))
+    -> urllib.parse.quote
+238:58 call  location.encode("utf8")
+    -> <builtin>.str.encode
+239:33 call  Response(HTTPStatus.FOUND, headers, None)
+    -> whitenoise.responders.Response.__init__
+
+[whitenoise.responders.FileEntry.__init__]
+263:38 call  self.stat_regular_file(path, stat_function)
+    -> whitenoise.responders.FileEntry.stat_regular_file
+
+[whitenoise.responders.FileEntry.stat_regular_file]
+274:40 call  stat_function(path)
+    -> <builtin>.dict.__getitem__
+    -> os.stat
+    note: a value site. stat_function comes only from FileEntry.__init__ (line 262): os.stat, or the bound __getitem__ of the dict stat_cache (scantree's results, base.py:115, or add_files_from_finders' dict, middleware.py:151)
+276:35 call  MissingFileError(path)
+    -> <builtin>.Exception.__init__
+279:39 call  MissingFileError(path)
+    -> <builtin>.Exception.__init__
+282:28 call  stat.S_ISREG(stat_result.st_mode)
+    -> stat.S_ISREG
+283:28 call  stat.S_ISDIR(stat_result.st_mode)
+    -> stat.S_ISDIR
+284:39 call  IsDirectoryError(f"Path is a directory: {path}")
+    -> <builtin>.Exception.__init__
+286:43 call  NotARegularFileError(f"Not a regular file: {path}")
+    -> <builtin>.Exception.__init__
+
+== whitenoise.runserver_nostatic.management.commands.runserver
+
+[whitenoise.runserver_nostatic.management.commands.runserver]
+43:46 call  get_next_runserver_command()
+    -> whitenoise.runserver_nostatic.management.commands.runserver.get_next_runserver_command
+
+[whitenoise.runserver_nostatic.management.commands.runserver.get_next_runserver_command]
+21:44 call  get_lower_priority_apps()
+    -> whitenoise.runserver_nostatic.management.commands.runserver.get_lower_priority_apps
+24:33 call  import_module(module_path)
+    -> importlib.import_module
+
+[whitenoise.runserver_nostatic.management.commands.runserver.get_lower_priority_apps]
+33:29 call  ".".join(__name__.split(".")[:-3])
+    -> <builtin>.str.join
+33:44 call  __name__.split(".")
+    -> <builtin>.str.split
+35:43 call  apps.get_app_configs()
+    -> django.apps.registry.Apps.get_app_configs
+
+[whitenoise.runserver_nostatic.management.commands.runserver.Command.add_arguments]
+48:14 call  super()
+    -> <builtin>.super
+48:30 call  super().add_arguments(parser)
+    -> django.contrib.staticfiles.management.commands.runserver.Command.add_arguments
+    -> django.core.management.commands.runserver.Command.add_arguments
+    reject whitenoise.runserver_nostatic.management.commands.runserver.Command.add_arguments: super() in Command resolves to its base RunserverCommand, a Django command class
+    note: RunserverCommand (line 43) is the runserver Command of the first app below whitenoise.runserver_nostatic in INSTALLED_APPS that has one, else django.core's (the package's own fallback, line 40). The documented setup puts django.contrib.staticfiles below it (docs/django.rst:220-225). A third-party runserver (Channels, say) is client configuration (B5)
+49:30 call  parser.get_default("use_static_handler")
+    -> django.core.management.base.CommandParser.get_default
+    note: parser is the CommandParser that Django's BaseCommand.create_parser makes and passes to add_arguments (B4, as the WSGI environ)
+50:32 call  parser.set_defaults(use_static_handler=False)
+    -> django.core.management.base.CommandParser.set_defaults
+
+== whitenoise.storage
+
+[whitenoise.storage]
+127:6 decorator  @property
+    -> <builtin>.property
+188:31 call  re.compile(r"^The file '(.+)' could not be found")
+    -> re.compile
+190:33 call  textwrap.dedent( """\ {orig_message} The {ext} file '{fil...
+    -> textwrap.dedent
+
+[whitenoise.storage.CompressedStaticFilesStorage.post_process]
+33:29 call  getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", ...
+    -> <builtin>.getattr
+34:49 call  self.create_compressor(extensions=extensions, quiet=True)
+    -> whitenoise.storage.CompressedStaticFilesStorage.create_compressor
+    reject whitenoise.storage.CompressedManifestStaticFilesStorage.create_compressor: self is a CompressedStaticFilesStorage; CompressedManifestStaticFilesStorage is not a subclass of it (its base is ManifestStaticFilesStorage)
+45:32 call  ThreadPoolExecutor()
+    -> concurrent.futures.ThreadPoolExecutor
+47:32 call  executor.submit(_compress_path, path)
+    -> concurrent.futures.ThreadPoolExecutor.submit
+    -> whitenoise.storage.CompressedStaticFilesStorage.post_process._compress_path
+    reject whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files._compress_path: _compress_path here is the local function of this post_process (line 36)
+    note: submit starts the pool's worker threads, which call _compress_path (T1: the trace misses calls of threads that a library starts). The generator expression runs in as_completed (51:39); its calls belong to post_process
+49:51 call  self.compressor.should_compress(path)
+    -> whitenoise.compress.Compressor.should_compress
+51:39 call  as_completed(futures)
+    -> concurrent.futures.as_completed
+52:41 call  future.result()
+    -> concurrent.futures.Future.result
+
+[whitenoise.storage.CompressedStaticFilesStorage.post_process._compress_path]
+38:34 call  self.path(path)
+    -> django.contrib.staticfiles.storage.StaticFilesStorage.path
+    note: a value site. self is the CompressedStaticFilesStorage of the enclosing post_process, whose path is StaticFilesStorage.path (inherited); the attribute path that the package assigns (FileEntry.path) belongs to another class
+39:29 call  len(full_path)
+    -> <builtin>.len
+39:46 call  len(path)
+    -> <builtin>.len
+40:60 call  self.compressor.compress(full_path)
+    -> whitenoise.compress.Compressor.compress
+42:34 call  compressed.append((path, compressed_name, True))
+    -> <builtin>.list.append
+
+[whitenoise.storage.CompressedStaticFilesStorage.create_compressor]
+55:26 call  Compressor(**kwargs)
+    -> whitenoise.compress.Compressor.__init__
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.__init__]
+72:34 call  getattr(settings, "WHITENOISE_MANIFEST_STRICT", None)
+    -> <builtin>.getattr
+75:14 call  super()
+    -> <builtin>.super
+75:25 call  super().__init__(*args, **kwargs)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.__init__
+    reject *: super() in CompressedManifestStaticFilesStorage resolves to ManifestStaticFilesStorage, outside the package (the method is ManifestFilesMixin.__init__, which calls no package override)
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.post_process]
+78:22 call  super()
+    -> <builtin>.super
+78:37 call  super().post_process(*args, **kwargs)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.post_process
+    reject whitenoise.storage.CompressedManifestStaticFilesStorage.post_process, whitenoise.storage.CompressedStaticFilesStorage.post_process: super() resolves to ManifestStaticFilesStorage, outside the package
+    note: ManifestFilesMixin.post_process is a generator function: the call runs none of its body. post_process_with_compression iterates it (98:45); this method also iterates it at 84:45 when its first dry_run truth test is true. A client object may then test false inside Django, so that iteration can call hashed_name (see 84:45)
+80:26 call  kwargs.get("dry_run")
+    -> <builtin>.dict.get
+81:55 call  self.post_process_with_compression(files)
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.post_process_with_compression
+84:45 iter  files
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name
+    note: The local explanation assumes repeated dry_run truth tests agree. Public post_process accepts unannotated **kwargs. A client dry_run object can be truthy at the wrapper test80 and falsy at Django HashedFilesMixin.post_process290. The wrapper then iterates the library generator itself at84, and Django _post_process356 calls the package hashed_name override. Client __bool__ calls remain unnamed, but their control-flow results are not assumed constant. Django4.2/5.2 storage source has the same relevant order.
+85:26 call  isinstance(processed, Exception)
+    -> <builtin>.isinstance
+86:56 call  self.make_helpful_exception(processed, name)
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.make_helpful_exception
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.post_process_with_compression]
+96:24 call  set()
+    -> <builtin>.set
+97:38 call  self.start_tracking_new_files(new_files)
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.start_tracking_new_files
+98:45 iter  files
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name
+    note: added by hand (no candidate by name). files is the generator of ManifestFilesMixin.post_process (line 78). Iterating it runs HashedFilesMixin.post_process and _post_process, which call self.hashed_name (storage.py:356 and 391 of Django, and _stored_name through url_converter): the package override. The trace has the edge
+99:46 call  isinstance(processed, Exception)
+    -> <builtin>.isinstance
+100:45 call  self.clean_name(name)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.clean_name
+102:37 call  self.stop_tracking_new_files()
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.stop_tracking_new_files
+103:29 call  set(hashed_names.keys())
+    -> <builtin>.set
+103:47 call  hashed_names.keys()
+    -> <builtin>.dict.keys
+104:27 call  set(hashed_names.values())
+    -> <builtin>.set
+104:47 call  hashed_names.values()
+    -> <builtin>.dict.values
+105:17 getattr  self.keep_only_hashed_files
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.keep_only_hashed_files
+109:34 call  set()
+    -> <builtin>.set
+111:26 call  self.delete_files(files_to_delete)
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.delete_files
+112:57 call  self.compress_files(files_to_compress)
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name]
+116:21 call  super()
+    -> <builtin>.super
+116:35 call  super().hashed_name(*args, **kwargs)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.hashed_name
+    reject whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name: super() resolves to ManifestStaticFilesStorage, outside the package (the method is HashedFilesMixin.hashed_name, which calls no package override)
+118:32 call  self._new_files.add(self.clean_name(name))
+    -> <builtin>.set.add
+    note: self._new_files is the set of post_process_with_compression (lines 96-97), or None (the branch does not run)
+118:48 call  self.clean_name(name)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.clean_name
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.keep_only_hashed_files]
+129:23 call  getattr(settings, "WHITENOISE_KEEP_ONLY_HASHED_FILES", Fa...
+    -> <builtin>.getattr
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.delete_files]
+134:26 call  os.unlink(self.path(name))
+    -> os.unlink
+134:36 call  self.path(name)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.path
+    note: a value site. self is a CompressedManifestStaticFilesStorage, whose path is StaticFilesStorage.path (inherited), named through ManifestStaticFilesStorage; FileEntry.path belongs to another class
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.create_compressor]
+140:26 call  Compressor(**kwargs)
+    -> whitenoise.compress.Compressor.__init__
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files]
+143:29 call  getattr(settings, "WHITENOISE_SKIP_COMPRESS_EXTENSIONS", ...
+    -> <builtin>.getattr
+144:49 call  self.create_compressor(extensions=extensions, quiet=True)
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.create_compressor
+    reject whitenoise.storage.CompressedStaticFilesStorage.create_compressor: self is a CompressedManifestStaticFilesStorage, which is not a subclass of CompressedStaticFilesStorage
+155:32 call  ThreadPoolExecutor()
+    -> concurrent.futures.ThreadPoolExecutor
+157:32 call  executor.submit(_compress_path, path)
+    -> concurrent.futures.ThreadPoolExecutor.submit
+    -> whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files._compress_path
+    reject whitenoise.storage.CompressedStaticFilesStorage.post_process._compress_path: _compress_path here is the local function of this compress_files (line 146)
+    note: submit starts the pool's worker threads, which call _compress_path (T1). The generator expression runs in as_completed (161:39); its calls belong to compress_files
+159:51 call  self.compressor.should_compress(path)
+    -> whitenoise.compress.Compressor.should_compress
+161:39 call  as_completed(futures)
+    -> concurrent.futures.as_completed
+162:41 call  future.result()
+    -> concurrent.futures.Future.result
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files._compress_path]
+148:34 call  self.path(path)
+    -> django.contrib.staticfiles.storage.ManifestStaticFilesStorage.path
+    note: a value site. self is the CompressedManifestStaticFilesStorage of the enclosing compress_files; path is StaticFilesStorage.path (inherited), named through ManifestStaticFilesStorage; FileEntry.path belongs to another class
+149:29 call  len(full_path)
+    -> <builtin>.len
+149:46 call  len(path)
+    -> <builtin>.len
+150:60 call  self.compressor.compress(full_path)
+    -> whitenoise.compress.Compressor.compress
+152:34 call  compressed.append((path, compressed_name))
+    -> <builtin>.list.append
+
+[whitenoise.storage.CompressedManifestStaticFilesStorage.make_helpful_exception]
+173:22 call  isinstance(exception, ValueError)
+    -> <builtin>.isinstance
+174:47 call  len(exception.args)
+    -> <builtin>.len
+176:46 call  self._error_msg_re.search(message)
+    -> re.Pattern.search
+178:45 call  os.path.splitext(name)
+    -> os.path.splitext
+178:61 call  os.path.splitext(name)[1].lstrip(".")
+    -> <builtin>.bytes.lstrip
+    -> <builtin>.str.lstrip
+    note: The public name parameter has no annotation or documentation fixing its concrete path type. For a matching ValueError and a bytes name, os.path.splitext produces a bytes extension. Calling its lstrip with the literal str "." enters bytes.lstrip before TypeError. The following upper call is not reached on this path and adds no bytes.upper edge.
+178:72 call  os.path.splitext(name)[1].lstrip(".").upper()
+    -> <builtin>.str.upper
+179:49 call  self._error_msg.format( orig_message=message, filename=na...
+    -> <builtin>.str.format
+    note: _error_msg is the str of line 190; the fields are strs (the message, the name, a match group, the extension)
+182:40 call  match.group(1)
+    -> re.Match.group
+185:45 call  MissingFileError(message)
+    -> <builtin>.ValueError.__init__
+    note: storage.MissingFileError (line 58) has no __init__ in the package; the first __init__ of its MRO is ValueError's
+
+== whitenoise.string_utils
+
+[whitenoise.string_utils.decode_path_info]
+8:28 call  path_info.encode("iso-8859-1", "replace")
+    -> <builtin>.str.encode
+    note: path_info is PATH_INFO of the environ, a str (PEP 3333)
+8:60 call  path_info.encode("iso-8859-1", "replace").decode("utf-8",...
+    -> <builtin>.bytes.decode
+
+[whitenoise.string_utils.ensure_leading_trailing_slash]
+12:30 call  (path or "").strip("/")
+    -> <builtin>.str.strip

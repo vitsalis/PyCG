@@ -1,0 +1,116 @@
+{
+    "funcy.calc._memory_decorator.decorator.wrapper": {
+        "<builtin>.len": "client callback: the tests pass len as key_func (test_calc.py:79)"
+    },
+    "funcy.colls.join": {
+        "collections.defaultdict.copy": "client object: the tests' own defaultdicts (test_colls.py:70-72); join is \"Same as merge\", whose entry names dicts, not defaultdicts, so a client defaultdict is opaque (ruling R2)"
+    },
+    "funcy.colls.join_with": {
+        "<builtin>.sum": "client callback: the tests pass sum as f (test_colls.py:88, 93; test_funcs.py:52)"
+    },
+    "funcy.colls.select_values.<lambda1>": {
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 as pred (test_colls.py:150); the tracer names the WhateverCode call by the int method it ends in"
+    },
+    "funcy.colls.walk_keys.pair_f": {
+        "<builtin>.str.upper": "client callback: the tests pass str.upper as f (test_colls.py:118)"
+    },
+    "funcy.colls.walk_values.pair_f": {
+        "<builtin>.int.__rmul__": "client callback: the tests pass whatever's _ * 2 as f (test_colls.py:122)",
+        "<builtin>.len": "client callback: the tests pass len as f (test_colls.py:127)"
+    },
+    "funcy.debug.log_calls": {
+        "<builtin>.list.append": "client callback: the tests pass log.append as print_func (test_debug.py:15, 31, 55)"
+    },
+    "funcy.debug.log_durations.__exit__": {
+        "<builtin>.list.append": "client callback: the tests pass log.append as print_func (test_debug.py:139, 141, 153)"
+    },
+    "funcy.debug.log_errors.__exit__": {
+        "<builtin>.list.append": "client callback: the tests pass log.append as print_func (test_debug.py:69, 83, 88)"
+    },
+    "funcy.debug.log_iter_durations": {
+        "<builtin>.list.append": "client callback: the tests pass log.append as print_func (test_debug.py:162)"
+    },
+    "funcy.decorators.Call.__call__": {
+        "<builtin>.str.upper": "client callback: the tests decorate str.upper (test_decorators.py:118)"
+    },
+    "funcy.flow.ignore.decorator.wrapper": {
+        "<builtin>.int": "client callback: the tests pass int to silent (test_flow.py:7-9)",
+        "<builtin>.str.upper": "client callback: the tests pass str.upper to silent (test_flow.py:11)"
+    },
+    "funcy.flow.post_processing": {
+        "<builtin>.max": "client callback: the tests pass max as func (test_flow.py:185)"
+    },
+    "funcy.flow.retry": {
+        "<builtin>.list.append": "client object: the tests replace time.sleep with timeouts.append (test_flow.py:92), so time.sleep(...) at flow.py:109 calls the list's append"
+    },
+    "funcy.funcs.autocurry.autocurried": {
+        "<builtin>.complex": "client callback: the tests autocurry complex (test_funcs.py:124)",
+        "<builtin>.int": "client callback: the tests autocurry int (test_funcs.py:126, 156)",
+        "<builtin>.iter": "client callback: the tests autocurry iter (test_funcs.py:136)",
+        "<builtin>.str.split": "client callback: the tests autocurry str.split (test_funcs.py:128)"
+    },
+    "funcy.funcs.caller.<lambda1>": {
+        "<builtin>.sum": "client callback: the tests call caller([1, 2]) with sum (test_funcs.py:12)"
+    },
+    "funcy.funcs.compose.<lambda1>.<lambda1>": {
+        "<builtin>.int": "client callback: the tests compose int (test_funcs.py:173)",
+        "<builtin>.int.__radd__": "client callback: the tests compose whatever's _ + 1 (test_funcs.py:168)",
+        "<builtin>.int.__rmul__": "client callback: the tests compose whatever's _ * 2 (test_funcs.py:167)",
+        "<builtin>.len": "client callback: walk_values(len, dd) composes the tests' len with the defaultdict's factory (test_colls.py:127, colls.py:36)",
+        "<builtin>.str": "client callback: the tests compose str (test_funcs.py:172)"
+    },
+    "funcy.funcs.curry.<lambda1>.<lambda1>": {
+        "_operator.add": "client callback: the tests curry operator.__add__ (test_funcs.py:44, 45)"
+    },
+    "funcy.funcs.iffy.<lambda1>": {
+        "<builtin>.int.__radd__": "client callback: the tests pass whatever's _ + 1 (test_funcs.py:196)",
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 (test_funcs.py:192, 193, 195)",
+        "<builtin>.int.__rmul__": "client callback: the tests pass whatever's _ * 2 (test_funcs.py:192-197)",
+        "<builtin>.int.__rtruediv__": "client callback: the tests pass whatever's _ / 2 (test_funcs.py:192)",
+        "<builtin>.str.upper": "client callback: the tests pass str.upper as action (test_funcs.py:198)"
+    },
+    "funcy.funcs.juxt.<lambda1>": {
+        "<builtin>.int.__radd__": "client callback: the tests pass whatever's _ + 1 to some_fn (test_funcolls.py:20)",
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 to all_fn ... one_fn (test_funcolls.py:8-17)",
+        "<builtin>.int.__rmul__": "client callback: the tests pass whatever's _ * 0 and _ * 2 to some_fn (test_funcolls.py:20)",
+        "<builtin>.int.__rsub__": "client callback: the tests pass whatever's _ - 1 to some_fn (test_funcolls.py:20)"
+    },
+    "funcy.funcs.ljuxt.<lambda1>": {
+        "<builtin>.int.__radd__": "client callback: the tests pass whatever's _ + 1 (test_funcs.py:189)",
+        "<builtin>.int.__rsub__": "client callback: the tests pass whatever's _ - 1 (test_funcs.py:189)",
+        "_operator.add": "client callback: the tests pass operator.__add__ (test_funcs.py:188)",
+        "_operator.sub": "client callback: the tests pass operator.__sub__ (test_funcs.py:188)"
+    },
+    "funcy.funcs.rcurry.<lambda1>.<lambda1>": {
+        "<builtin>.str.endswith": "client callback: the tests rcurry str.endswith (test_funcs.py:57)",
+        "_operator.sub": "client callback: the tests rcurry operator.__sub__ (test_funcs.py:55)"
+    },
+    "funcy.funcs.rpartial.<lambda1>": {
+        "<builtin>.pow": "client callback: the tests pass pow (test_funcs.py:34)",
+        "_operator.sub": "client callback: the tests pass operator.__sub__ (test_funcs.py:33)"
+    },
+    "funcy.seqs.count_by": {
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 (test_seqs.py:151)"
+    },
+    "funcy.seqs.distinct": {
+        "<builtin>.len": "client callback: the tests pass len as key (test_seqs.py:122)"
+    },
+    "funcy.seqs.group_by": {
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 (test_seqs.py:141)"
+    },
+    "funcy.seqs.iterate": {
+        "<builtin>.int.__rmul__": "client callback: the tests pass whatever's _ * 2 (test_seqs.py:16)"
+    },
+    "funcy.seqs.lsplit": {
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 (test_seqs.py:130)"
+    },
+    "funcy.seqs.split": {
+        "<builtin>.int.__rmod__": "client callback: the tests pass whatever's _ % 2 (test_seqs.py:127)"
+    },
+    "funcy.tree.tree_leaves": {
+        "<builtin>.range": "client callback: the tests pass range as children (test_tree.py:11)"
+    },
+    "funcy.tree.tree_nodes": {
+        "<builtin>.range": "client callback: the tests pass range as children (test_tree.py:23)"
+    }
+}

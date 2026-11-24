@@ -1,0 +1,2022 @@
+# Call-site ledger of anytree at 2e0a1b956172654d75aff93277ce3d883355e0bf.
+# Hand-written from the source; judgements in anytree.md.
+#
+# Value sets used below (see anytree.md, "Value sets"):
+#   nodes: a parameter that takes a tree node gets a node of the NodeMixin
+#     family (NodeMixin, Node, AnyNode, SymlinkNodeMixin, SymlinkNode, client
+#     subclasses) or of the LightNodeMixin family (LightNodeMixin, client
+#     subclasses). A tree has nodes of one family: attaching a node to a
+#     node of the other family raises AttributeError in __attach (judgement
+#     J1). The calls before that failure count only where an isinstance
+#     check of the package admits the other family: a LightNodeMixin node as
+#     the value of NodeMixin.parent (nodemixin.py:122) and as a child given
+#     to NodeMixin.children (nodemixin.py:230); then the NodeMixin node that
+#     NodeMixin.children passes to LightNodeMixin.parent (lead, B2: an
+#     isinstance check names the type for the role).
+#   node reprs: repr() of a NodeMixin-family node runs Node.__repr__,
+#     AnyNode.__repr__ or SymlinkNode.__repr__; LightNodeMixin and NodeMixin
+#     define no __repr__.
+#   SymlinkNode: its __getattr__ runs where normal lookup fails (an attribute
+#     that lives in the target, such as name, or an unset _NodeMixin__parent
+#     or _NodeMixin__children probed by hasattr); its __setattr__ runs for
+#     every attribute assignment on it. The target of a SymlinkNode is a
+#     NodeMixin-family node, also another SymlinkNode, never a
+#     LightNodeMixin node (judgement J3; lead).
+#   iterator filter_: AbstractIter.__default_filter (default), plus, for
+#     PreOrderIter only, the filters the package passes: DotExporter._default_filter,
+#     MermaidExporter.__iter__.<lambda1>, NodeMixin.leaves.<lambda1>,
+#     LightNodeMixin.leaves.<lambda1>, search.findall_by_attr.<lambda1>,
+#     search.find_by_attr.<lambda1>. iterator stop: AbstractIter.__default_stop,
+#     plus MermaidExporter.__iter__.<lambda2> (passed to PreOrderIter).
+default reject anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__: the receiver is not a SymlinkNodeMixin instance (Python calls __getattr__ only on instances of classes that have it in their MRO), or it is one and normal lookup finds the attribute: a class attribute of NodeMixin or SymlinkNodeMixin (method, property, separator, __dict__, __class__) or an instance attribute that is set (target); a found NodeMixin property can still raise AttributeError through a client parent/child getter (R4-F1), and the affected concrete-SymlinkNode sites accept the fallback explicitly; the sites where a SymlinkNode can lack the attribute accept the candidate explicitly
+default reject anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__: the object whose attribute is assigned is not a SymlinkNodeMixin instance (an iterator, exporter, importer, style, resolver, exception, AnyNode, Node or LightNodeMixin); the sites where a SymlinkNode can be the object accept the candidate explicitly
+default reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: the iterated, unpacked, searched or converted value is a list, tuple, set, dict, dict view, str, generator, zip object or the *args/**kwargs of a call, never a tree iterator, RenderTree or exporter; the sites that iterate one accept the candidates explicitly
+default reject anytree.render.RenderTree.__repr__, anytree.render.RenderTree.__str__: no package code converts, formats or compares a RenderTree; the operands are strs, ints, nodes, styles and client values
+default reject anytree.render.AbstractStyle.__repr__: no package code formats a style except RenderTree.__repr__ ({self.style!r}), which accepts the candidate explicitly
+default reject anytree.node.node.Node.__repr__, anytree.node.anynode.AnyNode.__repr__, anytree.node.symlinknode.SymlinkNode.__repr__: the converted or formatted value is not a node of the NodeMixin family (a str, int, None, a client value or a LightNodeMixin node, whose class has no package __repr__); the sites that format a node accept the candidates explicitly
+
+== anytree.cachedsearch
+
+[anytree.cachedsearch]
+31:2 decorator  @_cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache.decorator
+    -> fastcache.lru.__call__
+    note: The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache.
+31:8 call  _cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache
+    -> fastcache.clru_cache
+    note: optional import (cachedsearch.py:10-13), both sides run (judgement J5)
+37:2 decorator  @_cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache.decorator
+    -> fastcache.lru.__call__
+    note: The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache.
+37:8 call  _cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache
+    -> fastcache.clru_cache
+43:2 decorator  @_cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache.decorator
+    -> fastcache.lru.__call__
+    note: The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache.
+43:8 call  _cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache
+    -> fastcache.clru_cache
+49:2 decorator  @_cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache.decorator
+    -> fastcache.lru.__call__
+    note: The package-definition decorator exception uses the admitted implementation: fastcache.clru_cache(32) returns fastcache.lru, whose tp_call wraps the function (_lrucache.c:942-1048,1187; fastcache1.1.0). The optional fallback applies _cache.decorator. The separate factory call keeps the ordinary missing-library access path fastcache.clru_cache.
+49:8 call  _cache(CACHE_SIZE)
+    -> anytree.cachedsearch._cache
+    -> fastcache.clru_cache
+
+[anytree.cachedsearch._cache.decorator]
+19:14 decorator  @wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package function
+19:19 call  wraps(func)
+    -> functools.wraps
+
+[anytree.cachedsearch._cache.decorator.wrapped]
+21:28 call  func(*args, **kwargs)
+    -> anytree.cachedsearch.findall
+    -> anytree.cachedsearch.findall_by_attr
+    -> anytree.cachedsearch.find
+    -> anytree.cachedsearch.find_by_attr
+    note: func is the function that decorator() wraps; _cache is private and the package applies it only to the four functions of this module (lines 31, 37, 43, 49)
+
+[anytree.cachedsearch.findall]
+34:26 call  search.findall(node, filter_=filter_, stop=stop, maxlevel...
+    -> anytree.search.findall
+    reject anytree.cachedsearch.findall: the receiver is the module anytree.search
+
+[anytree.cachedsearch.findall_by_attr]
+40:34 call  search.findall_by_attr(node, value, name=name, maxlevel=m...
+    -> anytree.search.findall_by_attr
+    reject anytree.cachedsearch.findall_by_attr: the receiver is the module anytree.search
+
+[anytree.cachedsearch.find]
+46:23 call  search.find(node, filter_=filter_, stop=stop, maxlevel=ma...
+    -> anytree.search.find
+    reject anytree.cachedsearch.find: the receiver is the module anytree.search
+
+[anytree.cachedsearch.find_by_attr]
+52:31 call  search.find_by_attr(node, value, name=name, maxlevel=maxl...
+    -> anytree.search.find_by_attr
+    reject anytree.cachedsearch.find_by_attr: the receiver is the module anytree.search
+
+== anytree.config
+
+[anytree.config]
+6:18 call  bool(int(os.environ.get("ANYTREE_ASSERTIONS", "0")))
+    -> <builtin>.bool
+6:22 call  int(os.environ.get("ANYTREE_ASSERTIONS", "0"))
+    -> <builtin>.int
+6:37 call  os.environ.get("ANYTREE_ASSERTIONS", "0")
+    -> collections.abc.Mapping.get
+    reject *: the receiver is os.environ, an os._Environ mapping, which inherits get from collections.abc.Mapping
+    note: os._Environ is private; the method is named through collections.abc.Mapping, the public class of its MRO that defines get
+
+== anytree.dotexport
+
+[anytree.dotexport.RenderTreeGraph.__init__]
+9:22 call  warnings.warn( ("anytree.RenderTreeGraph has moved. Use a...
+    -> warnings.warn
+14:14 call  super()
+    -> <builtin>.super
+14:25 call  super().__init__(*args, **kwargs)
+    -> anytree.exporter.dotexporter.DotExporter.__init__
+    reject *: super() in RenderTreeGraph, whose base is DotExporter, finds DotExporter.__init__
+
+== anytree.exporter.dictexporter
+
+[anytree.exporter.dictexporter]
+74:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.exporter.dictexporter.DictExporter.export]
+59:29 call  self.__export(node, self.dictcls, attriter, self.childiter)
+    -> anytree.exporter.dictexporter.DictExporter.__export
+
+[anytree.exporter.dictexporter.DictExporter.__export]
+62:31 call  attriter(self._iter_attr_values(node))
+    -> anytree.exporter.dictexporter.DictExporter.export.<lambda1>
+    note: attriter comes from export (line 58): self.attriter, a client callable (the docs and tests pass lambdas), or the default lambda of line 58; __export is private and only export and itself call it
+62:54 call  self._iter_attr_values(node)
+    -> anytree.exporter.dictexporter.DictExporter._iter_attr_values
+63:23 call  dictcls(attr_values)
+    -> <builtin>.dict
+    note: dictcls is self.dictcls (line 59): the default dict (line 50) or a class of the client (docs: "class used as dictionary"); the package offers no other value
+67:30 call  self.__export(child, dictcls, attriter, childiter, level=...
+    -> anytree.exporter.dictexporter.DictExporter.__export
+68:39 call  childiter(node.children)
+    -> <builtin>.list
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 68:45; childiter receives the tuple it returns
+    note: childiter is self.childiter (line 59): the default list (line 50) or a client callable (the docs pass a lambda); the package offers no other value
+68:45 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family (the root that the client exports, then its children)
+
+[anytree.exporter.dictexporter.DictExporter._iter_attr_values]
+77:40 call  node.__dict__.items()
+    -> <builtin>.dict.items
+
+== anytree.exporter.dotexporter
+
+[anytree.exporter.dotexporter]
+11:21 call  re.compile(r'["\\]')
+    -> re.compile
+198:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+202:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+207:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+212:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+217:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+304:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+456:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.exporter.dotexporter.DotExporter._default_nodenamefunc]
+200:21 getattr  node.name
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: for a SymlinkNode, name lives in the target (symlinknode.py:47), so normal lookup fails and __getattr__ forwards it
+
+[anytree.exporter.dotexporter.DotExporter.__iter__]
+196:27 call  self.__iter(indent, nodenamefunc, nodeattrfunc, edgeattrf...
+    -> anytree.exporter.dotexporter.DotExporter.__iter
+    note: self.__iter is the method DotExporter.__iter (_DotExporter__iter), inherited by UniqueDotExporter and RenderTreeGraph; the attribute that AbstractIter assigns (_AbstractIter__iter) is another name
+
+[anytree.exporter.dotexporter.DotExporter.__iter]
+224:39 call  self.__iter_options(indent)
+    -> anytree.exporter.dotexporter.DotExporter.__iter_options
+225:37 call  self.__iter_nodes(indent, nodenamefunc, nodeattrfunc, fil...
+    -> anytree.exporter.dotexporter.DotExporter.__iter_nodes
+226:37 call  self.__iter_edges(indent, nodenamefunc, edgeattrfunc, edg...
+    -> anytree.exporter.dotexporter.DotExporter.__iter_edges
+
+[anytree.exporter.dotexporter.DotExporter.__iter_nodes]
+236:21 iter  PreOrderIter(self.node, filter_=filter_, stop=self.stop, ...
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    reject anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: the iterable is a PreOrderIter
+236:33 call  PreOrderIter(self.node, filter_=filter_, stop=self.stop, ...
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+    note: PreOrderIter defines no __init__; filter_ and stop are stored and called by PreOrderIter._iter and AbstractIter._get_children
+237:36 call  nodenamefunc(node)
+    -> anytree.exporter.dotexporter.DotExporter._default_nodenamefunc
+    -> anytree.exporter.dotexporter.UniqueDotExporter._default_nodenamefunc
+    note: nodenamefunc comes from __iter__ (line 191): the client's nodenamefunc, or self._default_nodenamefunc: the static DotExporter one for DotExporter and RenderTreeGraph objects, the bound UniqueDotExporter one for UniqueDotExporter objects
+238:36 call  nodeattrfunc(node)
+    -> anytree.exporter.dotexporter.DotExporter._default_nodeattrfunc
+    -> anytree.exporter.dotexporter.UniqueDotExporter._default_nodeattrfunc
+    note: nodeattrfunc comes from __iter__ (line 192): the client's nodeattrfunc, or self._default_nodeattrfunc of DotExporter or UniqueDotExporter
+240:46 call  DotExporter.esc(nodename)
+    -> anytree.exporter.dotexporter.DotExporter.esc
+    reject anytree.exporter.mermaidexporter.MermaidExporter.esc: the receiver is the class DotExporter
+
+[anytree.exporter.dotexporter.DotExporter.__iter_edges]
+244:21 iter  PreOrderIter(self.node, filter_=filter_, stop=self.stop, ...
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    reject anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: the iterable is a PreOrderIter
+244:33 call  PreOrderIter(self.node, filter_=filter_, stop=self.stop, ...
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+245:36 call  nodenamefunc(node)
+    -> anytree.exporter.dotexporter.DotExporter._default_nodenamefunc
+    -> anytree.exporter.dotexporter.UniqueDotExporter._default_nodenamefunc
+    note: nodenamefunc comes from __iter__ (line 191), as at 237:36
+246:31 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family that PreOrderIter yields
+247:31 call  filter_(child)
+    -> anytree.exporter.dotexporter.DotExporter._default_filter
+    note: filter_ comes from __iter__ (line 195): the client's filter_ or self._default_filter (DotExporter's, inherited by the subclasses)
+249:41 call  nodenamefunc(child)
+    -> anytree.exporter.dotexporter.DotExporter._default_nodenamefunc
+    -> anytree.exporter.dotexporter.UniqueDotExporter._default_nodenamefunc
+    note: nodenamefunc comes from __iter__ (line 191), as at 237:36
+250:40 call  edgeattrfunc(node, child)
+    -> anytree.exporter.dotexporter.DotExporter._default_edgeattrfunc
+    note: edgeattrfunc comes from __iter__ (line 193): the client's edgeattrfunc or self._default_edgeattrfunc (DotExporter's; no subclass overrides it)
+251:40 call  edgetypefunc(node, child)
+    -> anytree.exporter.dotexporter.DotExporter._default_edgetypefunc
+    note: edgetypefunc comes from __iter__ (line 194): the client's edgetypefunc or self._default_edgetypefunc (DotExporter's; no subclass overrides it)
+253:50 call  DotExporter.esc(nodename)
+    -> anytree.exporter.dotexporter.DotExporter.esc
+    reject anytree.exporter.mermaidexporter.MermaidExporter.esc: the receiver is the class DotExporter
+253:91 call  DotExporter.esc(childname)
+    -> anytree.exporter.dotexporter.DotExporter.esc
+    reject anytree.exporter.mermaidexporter.MermaidExporter.esc: the receiver is the class DotExporter
+
+[anytree.exporter.dotexporter.DotExporter.to_dotfile]
+278:25 call  codecs.open(filename, "w", "utf-8")
+    -> codecs.open
+279:25 iter  self
+    -> anytree.exporter.dotexporter.DotExporter.__iter__
+    reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.render.RenderTree.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: self is a DotExporter, UniqueDotExporter or RenderTreeGraph, which all have DotExporter.__iter__; it returns a generator
+280:27 call  file.write(f"{line}\n")
+    -> codecs.StreamReaderWriter.write
+    reject anytree.exporter.jsonexporter.JsonExporter.write: file is the codecs.StreamReaderWriter that codecs.open returns
+    note: line is a str that DotExporter.__iter yields
+
+[anytree.exporter.dotexporter.DotExporter.to_picture]
+290:35 call  path.splitext(filename)
+    -> os.path.splitext
+291:32 call  NamedTemporaryFile("wb", delete=False)
+    -> tempfile.NamedTemporaryFile
+293:25 iter  self
+    -> anytree.exporter.dotexporter.DotExporter.__iter__
+    reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.render.RenderTree.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: self is a DotExporter, UniqueDotExporter or RenderTreeGraph, which all have DotExporter.__iter__; it returns a generator
+294:30 call  dotfile.write((f"{line}\n").encode())
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    reject anytree.exporter.jsonexporter.JsonExporter.write: dotfile is the tempfile._TemporaryFileWrapper of NamedTemporaryFile
+    note: the wrapper's __getattr__ returns the local function func_wrapper around the method of the underlying file
+294:51 call  (f"{line}\n").encode()
+    -> <builtin>.str.encode
+295:26 call  dotfile.flush()
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 294:30
+297:23 call  check_call(cmd)
+    -> subprocess.check_call
+299:19 call  remove(dotfilename)
+    -> os.remove
+302:30 call  logging.getLogger(__name__)
+    -> logging.getLogger
+302:48 call  logging.getLogger(__name__).warning("Could not remove tem...
+    -> logging.Logger.warning
+
+[anytree.exporter.dotexporter.DotExporter.esc]
+307:27 call  _RE_ESC.sub(lambda m: rf"\{m.group(0)}", str(value))
+    -> re.Pattern.sub
+    -> anytree.exporter.dotexporter.DotExporter.esc.<lambda1>
+    note: _RE_ESC is the re.Pattern of line 11; sub calls the lambda back for each match
+307:60 call  str(value)
+    -> <builtin>.str
+    note: value is a node name (a client value), the hex str of UniqueDotExporter._default_nodenamefunc, or what a client nodenamefunc returns
+
+[anytree.exporter.dotexporter.DotExporter.esc.<lambda1>]
+307:50 call  m.group(0)
+    -> re.Match.group
+
+[anytree.exporter.dotexporter.UniqueDotExporter.__init__]
+430:14 call  super()
+    -> <builtin>.super
+430:25 call  super().__init__( node, graph=graph, name=name, options=o...
+    -> anytree.exporter.dotexporter.DotExporter.__init__
+    reject *: super() in UniqueDotExporter, whose base is DotExporter, finds DotExporter.__init__
+445:46 call  itertools.count()
+    -> itertools.count
+
+[anytree.exporter.dotexporter.UniqueDotExporter._default_nodenamefunc]
+449:21 call  id(node)
+    -> <builtin>.id
+453:50 call  next(self.__node_counter)
+    -> <builtin>.next
+    note: self.__node_counter is the itertools.count of line 445
+454:19 call  hex(num)
+    -> <builtin>.hex
+
+[anytree.exporter.dotexporter.UniqueDotExporter._default_nodeattrfunc]
+458:31 getattr  node.name
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: for a SymlinkNode, name lives in the target, so __getattr__ forwards it
+
+== anytree.exporter.jsonexporter
+
+[anytree.exporter.jsonexporter.JsonExporter._export]
+60:57 call  DictExporter()
+    -> anytree.exporter.dictexporter.DictExporter.__init__
+63:35 call  dictexporter.export(node)
+    -> anytree.exporter.dictexporter.DictExporter.export
+    reject anytree.exporter.jsonexporter.JsonExporter.export: dictexporter is the client's DictExporter (the documented role, "Dictionary Exporter used (see DictExporter)") or the DictExporter() of line 60
+
+[anytree.exporter.jsonexporter.JsonExporter.export]
+67:28 call  self._export(node)
+    -> anytree.exporter.jsonexporter.JsonExporter._export
+68:26 call  json.dumps(data, **self.kwargs)
+    -> json.dumps
+
+[anytree.exporter.jsonexporter.JsonExporter.write]
+72:28 call  self._export(node)
+    -> anytree.exporter.jsonexporter.JsonExporter._export
+73:25 call  json.dump(data, filehandle, **self.kwargs)
+    -> json.dump
+
+== anytree.exporter.mermaidexporter
+
+[anytree.exporter.mermaidexporter]
+7:21 call  re.compile(r'["\\]')
+    -> re.compile
+169:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+174:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+230:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.exporter.mermaidexporter.MermaidExporter.__init__]
+148:46 call  itertools.count()
+    -> itertools.count
+
+[anytree.exporter.mermaidexporter.MermaidExporter.__iter__]
+158:27 call  self.__iter(indent, nodenamefunc, nodefunc, edgefunc, fil...
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter
+    note: self.__iter is the method MermaidExporter.__iter (_MermaidExporter__iter); the attribute that AbstractIter assigns (_AbstractIter__iter) is another name
+
+[anytree.exporter.mermaidexporter.MermaidExporter._default_nodenamefunc]
+162:21 call  id(node)
+    -> <builtin>.id
+166:50 call  next(self.__node_counter)
+    -> <builtin>.next
+    note: self.__node_counter is the itertools.count of line 148
+
+[anytree.exporter.mermaidexporter.MermaidExporter._default_nodefunc]
+172:40 call  MermaidExporter.esc(node.name)
+    -> anytree.exporter.mermaidexporter.MermaidExporter.esc
+    reject anytree.exporter.dotexporter.DotExporter.esc: the receiver is the class MermaidExporter
+172:46 getattr  node.name
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: for a SymlinkNode, name lives in the target, so __getattr__ forwards it
+
+[anytree.exporter.mermaidexporter.MermaidExporter.__iter]
+181:39 call  self.__iter_options(indent)
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter_options
+182:37 call  self.__iter_nodes(indent, nodenamefunc, nodefunc, filter_...
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter_nodes
+183:37 call  self.__iter_edges(indent, nodenamefunc, edgefunc, filter_...
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter_edges
+
+[anytree.exporter.mermaidexporter.MermaidExporter.__iter_nodes]
+192:21 iter  PreOrderIter(self.node, filter_=filter_, stop=stop, maxle...
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    reject anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: the iterable is a PreOrderIter
+192:33 call  PreOrderIter(self.node, filter_=filter_, stop=stop, maxle...
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+193:36 call  nodenamefunc(node)
+    -> anytree.exporter.mermaidexporter.MermaidExporter._default_nodenamefunc
+    note: nodenamefunc comes from __iter__ (line 153): the client's nodenamefunc or the bound MermaidExporter._default_nodenamefunc
+194:48 call  nodefunc(node)
+    -> anytree.exporter.mermaidexporter.MermaidExporter._default_nodefunc
+    note: nodefunc comes from __iter__ (line 154): the client's nodefunc or MermaidExporter._default_nodefunc
+
+[anytree.exporter.mermaidexporter.MermaidExporter.__iter_edges]
+198:21 iter  PreOrderIter(self.node, filter_=filter_, stop=stop, maxle...
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    reject anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: the iterable is a PreOrderIter
+198:33 call  PreOrderIter(self.node, filter_=filter_, stop=stop, maxle...
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+199:36 call  nodenamefunc(node)
+    -> anytree.exporter.mermaidexporter.MermaidExporter._default_nodenamefunc
+    note: nodenamefunc comes from __iter__ (line 153), as at 193:36
+200:31 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family that PreOrderIter yields
+201:27 call  filter_(child)
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter__.<lambda1>
+    note: filter_ comes from __iter__ (line 156): the client's filter_ or the lambda of line 156
+201:47 call  stop(child)
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter__.<lambda2>
+    note: stop comes from __iter__ (line 157): the client's stop or the lambda of line 157
+202:45 call  nodenamefunc(child)
+    -> anytree.exporter.mermaidexporter.MermaidExporter._default_nodenamefunc
+    note: nodenamefunc comes from __iter__ (line 153), as at 193:36
+203:36 call  edgefunc(node, child)
+    -> anytree.exporter.mermaidexporter.MermaidExporter._default_edgefunc
+    note: edgefunc comes from __iter__ (line 155): the client's edgefunc or MermaidExporter._default_edgefunc
+
+[anytree.exporter.mermaidexporter.MermaidExporter.to_file]
+224:25 call  codecs.open(filename, "w", "utf-8")
+    -> codecs.open
+225:23 call  file.write("```mermaid\n")
+    -> codecs.StreamReaderWriter.write
+    reject anytree.exporter.jsonexporter.JsonExporter.write: file is the codecs.StreamReaderWriter that codecs.open returns
+226:25 iter  self
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter__
+    reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__: self is a MermaidExporter; its __iter__ returns a generator
+227:27 call  file.write(f"{line}\n")
+    -> codecs.StreamReaderWriter.write
+    reject anytree.exporter.jsonexporter.JsonExporter.write: file is the codecs.StreamReaderWriter that codecs.open returns
+228:23 call  file.write("```")
+    -> codecs.StreamReaderWriter.write
+    reject anytree.exporter.jsonexporter.JsonExporter.write: file is the codecs.StreamReaderWriter that codecs.open returns
+
+[anytree.exporter.mermaidexporter.MermaidExporter.esc]
+233:27 call  _RE_ESC.sub(lambda m: rf"\{m.group(0)}", str(value))
+    -> re.Pattern.sub
+    -> anytree.exporter.mermaidexporter.MermaidExporter.esc.<lambda1>
+    note: _RE_ESC is the re.Pattern of line 7; sub calls the lambda back for each match
+233:60 call  str(value)
+    -> <builtin>.str
+    note: value is a node name, a client value
+
+[anytree.exporter.mermaidexporter.MermaidExporter.esc.<lambda1>]
+233:50 call  m.group(0)
+    -> re.Match.group
+
+== anytree.importer.dictimporter
+
+[anytree.importer.dictimporter.DictImporter.import_]
+38:29 call  self.__import(data)
+    -> anytree.importer.dictimporter.DictImporter.__import
+
+[anytree.importer.dictimporter.DictImporter.__import]
+42:30 call  isinstance(data, dict)
+    -> <builtin>.isinstance
+44:21 call  dict(data)
+    -> <builtin>.dict
+    note: data is a dict (documented; the assertion of line 42 checks it); dict() copies it without calling package code
+45:29 call  attrs.pop("children", [])
+    -> <builtin>.dict.pop
+46:28 call  self.nodecls(parent=parent, **attrs)
+    -> anytree.node.anynode.AnyNode.__init__
+    -> anytree.node.node.Node.__init__
+    exclude anytree.node.symlinknode.SymlinkNode.__init__: no package code, test or documented example passes SymlinkNode as nodecls (rules B2, B3)
+    note: self.nodecls is set only by __init__ (line 34): the default AnyNode, or the class of the client; the tests pass Node (tests/test_dictimporter.py:44)
+48:26 call  self.__import(child, parent=node)
+    -> anytree.importer.dictimporter.DictImporter.__import
+
+== anytree.importer.jsonimporter
+
+[anytree.importer.jsonimporter.JsonImporter.__import]
+56:57 call  DictImporter()
+    -> anytree.importer.dictimporter.DictImporter.__init__
+57:36 call  dictimporter.import_(data)
+    -> anytree.importer.dictimporter.DictImporter.import_
+    reject anytree.importer.jsonimporter.JsonImporter.import_: dictimporter is the client's DictImporter (the documented role, "Dictionary Importer used (see DictImporter)") or the DictImporter() of line 56
+
+[anytree.importer.jsonimporter.JsonImporter.import_]
+61:29 call  self.__import(json.loads(data, **self.kwargs))
+    -> anytree.importer.jsonimporter.JsonImporter.__import
+61:40 call  json.loads(data, **self.kwargs)
+    -> json.loads
+
+[anytree.importer.jsonimporter.JsonImporter.read]
+65:29 call  self.__import(json.load(filehandle, **self.kwargs))
+    -> anytree.importer.jsonimporter.JsonImporter.__import
+65:39 call  json.load(filehandle, **self.kwargs)
+    -> json.load
+
+== anytree.iterators.abstractiter
+
+[anytree.iterators.abstractiter]
+29:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+34:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+47:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+51:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+55:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.iterators.abstractiter.AbstractIter.__init]
+26:54 call  AbstractIter._abort_at_level(1, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter._abort_at_level
+26:99 call  AbstractIter._get_children([node], stop)
+    -> anytree.iterators.abstractiter.AbstractIter._get_children
+27:26 call  self._iter(children, filter_, stop, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter._iter
+    -> anytree.iterators.levelordergroupiter.LevelOrderGroupIter._iter
+    -> anytree.iterators.levelorderiter.LevelOrderIter._iter
+    -> anytree.iterators.postorderiter.PostOrderIter._iter
+    -> anytree.iterators.preorderiter.PreOrderIter._iter
+    -> anytree.iterators.zigzaggroupiter.ZigZagGroupIter._iter
+    note: self is an AbstractIter (public, and instantiable: its _iter raises NotImplementedError) or one of the five public iterator classes, each of which defines _iter. AbstractIter._iter only raises NotImplementedError, PostOrderIter._iter returns the generator of PostOrderIter.__next, and the other four are generator functions
+
+[anytree.iterators.abstractiter.AbstractIter.__next__]
+44:38 call  self.__init()
+    -> anytree.iterators.abstractiter.AbstractIter.__init
+45:20 call  next(self.__iter)
+    -> <builtin>.next
+    reject anytree.iterators.abstractiter.AbstractIter.__next__: self.__iter is a generator, not a tree iterator
+
+[anytree.iterators.abstractiter.AbstractIter._get_children]
+57:56 call  stop(child)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_stop
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter__.<lambda2>
+    note: stop is the stop that __init resolved (line 25: the iterator's stop or AbstractIter.__default_stop), passed by __init (line 26) and by the _iter functions of LevelOrderGroupIter, LevelOrderIter and PostOrderIter. The package passes MermaidExporter's default lambda as stop to PreOrderIter (mermaidexporter.py:192, 198); every other stop is the client's
+
+== anytree.iterators.levelordergroupiter
+
+[anytree.iterators.levelordergroupiter]
+44:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+54:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.iterators.levelordergroupiter.LevelOrderGroupIter._iter]
+48:24 call  tuple(child for child in children if filter_(child))
+    -> <builtin>.tuple
+48:63 call  filter_(child)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_filter
+    note: filter_ is the filter that AbstractIter.__init resolved: the client's filter_ or AbstractIter.__default_filter (line 24). LevelOrderGroupIter is created by the client or by ZigZagGroupIter._iter (zigzaggroupiter.py:53), which passes its own resolved filter; the package passes no other filter to these classes
+50:44 call  AbstractIter._abort_at_level(level, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter._abort_at_level
+52:62 call  LevelOrderGroupIter._get_grandchildren(children, stop)
+    -> anytree.iterators.levelordergroupiter.LevelOrderGroupIter._get_grandchildren
+
+[anytree.iterators.levelordergroupiter.LevelOrderGroupIter._get_grandchildren]
+58:71 call  AbstractIter._get_children(child.children, stop)
+    -> anytree.iterators.abstractiter.AbstractIter._get_children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 58:78; _get_children receives the tuple
+58:78 getattr  child.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: child is a tree node of either family
+
+== anytree.iterators.levelorderiter
+
+[anytree.iterators.levelorderiter]
+38:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.iterators.levelorderiter.LevelOrderIter._iter]
+44:44 call  AbstractIter._abort_at_level(level, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter._abort_at_level
+46:31 call  filter_(child)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_filter
+    note: filter_ is the client's filter_ or AbstractIter.__default_filter (abstractiter.py:24); the package never creates a LevelOrderIter
+50:31 call  filter_(child)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_filter
+    note: as at 46:31
+52:64 call  AbstractIter._get_children(child.children, stop)
+    -> anytree.iterators.abstractiter.AbstractIter._get_children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 52:71; _get_children receives the tuple
+52:71 getattr  child.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: child is a tree node of either family
+
+== anytree.iterators.postorderiter
+
+[anytree.iterators.postorderiter]
+38:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+42:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.iterators.postorderiter.PostOrderIter._iter]
+40:36 call  PostOrderIter.__next(children, 1, filter_, stop, maxlevel)
+    -> anytree.iterators.postorderiter.PostOrderIter.__next
+
+[anytree.iterators.postorderiter.PostOrderIter.__next]
+44:44 call  AbstractIter._abort_at_level(level, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter._abort_at_level
+46:59 call  AbstractIter._get_children(child.children, stop)
+    -> anytree.iterators.abstractiter.AbstractIter._get_children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 46:66; _get_children receives the tuple
+46:66 getattr  child.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: child is a tree node of either family
+47:48 call  PostOrderIter.__next(grandchildren, level + 1, filter_, s...
+    -> anytree.iterators.postorderiter.PostOrderIter.__next
+48:27 call  filter_(child)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_filter
+    note: filter_ is the client's filter_ or AbstractIter.__default_filter (abstractiter.py:24); the package never creates a PostOrderIter
+
+== anytree.iterators.preorderiter
+
+[anytree.iterators.preorderiter]
+41:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.iterators.preorderiter.PreOrderIter._iter]
+44:20 call  stop(child_)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_stop
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter__.<lambda2>
+    note: stop is the client's stop, AbstractIter.__default_stop (abstractiter.py:25), or the stop the package passes to PreOrderIter: MermaidExporter's default lambda (mermaidexporter.py:192, 198). DotExporter, search and the node classes pass the client's stop or none
+46:23 call  filter_(child_)
+    -> anytree.iterators.abstractiter.AbstractIter.__default_filter
+    -> anytree.exporter.dotexporter.DotExporter._default_filter
+    -> anytree.exporter.mermaidexporter.MermaidExporter.__iter__.<lambda1>
+    -> anytree.node.nodemixin.NodeMixin.leaves.<lambda1>
+    -> anytree.node.lightnodemixin.LightNodeMixin.leaves.<lambda1>
+    -> anytree.search.findall_by_attr.<lambda1>
+    -> anytree.search.find_by_attr.<lambda1>
+    note: filter_ is the client's filter_, AbstractIter.__default_filter (abstractiter.py:24), or a filter the package passes to PreOrderIter: DotExporter's default (dotexporter.py:236, 244), MermaidExporter's default lambda (mermaidexporter.py:192, 198), the lambdas of the leaves properties (nodemixin.py:443, lightnodemixin.py:431) and of findall_by_attr and find_by_attr (search.py:113, 212)
+48:48 call  AbstractIter._abort_at_level(2, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter._abort_at_level
+50:46 call  PreOrderIter._iter(child_.children, filter_, stop, descen...
+    -> anytree.iterators.preorderiter.PreOrderIter._iter
+    reject anytree.iterators.abstractiter.AbstractIter._iter, anytree.iterators.levelordergroupiter.LevelOrderGroupIter._iter, anytree.iterators.levelorderiter.LevelOrderIter._iter, anytree.iterators.postorderiter.PostOrderIter._iter, anytree.iterators.zigzaggroupiter.ZigZagGroupIter._iter: the receiver is the class PreOrderIter
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 50:54; _iter receives the tuple
+50:54 getattr  child_.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: child_ is a tree node of either family
+
+== anytree.iterators.zigzaggroupiter
+
+[anytree.iterators.zigzaggroupiter]
+48:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.iterators.zigzaggroupiter.ZigZagGroupIter._iter]
+52:27 call  len(children)
+    -> <builtin>.len
+53:40 call  LevelOrderGroupIter(children[0], filter_, stop, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+56:31 call  next(_iter)
+    -> <builtin>.next
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: _iter is the LevelOrderGroupIter of line 53; next() calls its __next__ (AbstractIter's)
+57:32 call  tuple(reversed(next(_iter)))
+    -> <builtin>.tuple
+57:41 call  reversed(next(_iter))
+    -> <builtin>.reversed
+57:46 call  next(_iter)
+    -> <builtin>.next
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: as at 56:31
+
+== anytree.node.anynode
+
+[anytree.node.anynode.AnyNode.__init__]
+94:29 call  self.__dict__.update(kwargs)
+    -> <builtin>.dict.update
+95:14 setattr  self.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: self is an AnyNode, a NodeMixin
+97:18 setattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is an AnyNode, a NodeMixin
+
+[anytree.node.anynode.AnyNode.__repr__]
+100:21 call  _repr(self)
+    -> anytree.node.util._repr
+
+== anytree.node.lightnodemixin
+
+[anytree.node.lightnodemixin]
+85:6 decorator  @property
+    -> <builtin>.property
+125:6 decorator  @parent.setter
+    -> <builtin>.property.setter
+171:6 decorator  @property
+    -> <builtin>.property
+177:6 decorator  @property
+    -> <builtin>.property
+228:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+239:6 decorator  @children.setter
+    -> <builtin>.property.setter
+259:6 decorator  @children.deleter
+    -> <builtin>.property.deleter
+281:6 decorator  @property
+    -> <builtin>.property
+325:6 decorator  @property
+    -> <builtin>.property
+329:6 decorator  @property
+    -> <builtin>.property
+349:6 decorator  @property
+    -> <builtin>.property
+369:6 decorator  @property
+    -> <builtin>.property
+390:6 decorator  @property
+    -> <builtin>.property
+415:6 decorator  @property
+    -> <builtin>.property
+433:6 decorator  @property
+    -> <builtin>.property
+451:6 decorator  @property
+    -> <builtin>.property
+469:6 decorator  @property
+    -> <builtin>.property
+490:6 decorator  @property
+    -> <builtin>.property
+512:6 decorator  @property
+    -> <builtin>.property
+
+[anytree.node.lightnodemixin.LightNodeMixin.parent]
+121:19 call  hasattr(self, "_LightNodeMixin__parent")
+    -> <builtin>.hasattr
+127:19 call  hasattr(self, "_LightNodeMixin__parent")
+    -> <builtin>.hasattr
+132:30 call  self.__check_loop(value)
+    -> anytree.node.lightnodemixin.LightNodeMixin.__check_loop
+133:26 call  self.__detach(parent)
+    -> anytree.node.lightnodemixin.LightNodeMixin.__detach
+134:26 call  self.__attach(value)
+    -> anytree.node.lightnodemixin.LightNodeMixin.__attach
+
+[anytree.node.lightnodemixin.LightNodeMixin.__check_loop]
+140:32 call  LoopError(msg % (self,))
+    -> <builtin>.RuntimeError.__init__
+    note: LoopError and its base TreeError define no __init__; the first __init__ of the MRO is that of RuntimeError, the nearest class outside the package
+141:19 call  any(child is self for child in node.iter_path_reverse())
+    -> <builtin>.any
+141:69 call  node.iter_path_reverse()
+    -> anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse
+    -> anytree.node.nodemixin.NodeMixin.iter_path_reverse
+    note: node is the new parent: a LightNodeMixin node, or the NodeMixin-family node that NodeMixin.children passes when the client gives it a LightNodeMixin child (nodemixin.py:230, 251; lead, B2: an isinstance check names the type for the role; judgement J1)
+143:32 call  LoopError(msg % (self, node))
+    -> <builtin>.RuntimeError.__init__
+
+[anytree.node.lightnodemixin.LightNodeMixin.__detach]
+148:29 call  self._pre_detach(parent)
+    -> anytree.node.lightnodemixin.LightNodeMixin._pre_detach
+    reject anytree.node.nodemixin.NodeMixin._pre_detach: self is a LightNodeMixin
+149:37 getattr  parent.__children_or_empty
+    -> anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty
+151:27 call  any(child is self for child in parentchildren)
+    -> <builtin>.any
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+156:30 call  self._post_detach(parent)
+    -> anytree.node.lightnodemixin.LightNodeMixin._post_detach
+    reject anytree.node.nodemixin.NodeMixin._post_detach: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.__attach]
+161:29 call  self._pre_attach(parent)
+    -> anytree.node.lightnodemixin.LightNodeMixin._pre_attach
+    reject anytree.node.nodemixin.NodeMixin._pre_attach: self is a LightNodeMixin
+162:37 getattr  parent.__children_or_empty
+    -> anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: parent is a LightNodeMixin node, or the NodeMixin-family node that NodeMixin.children passes (nodemixin.py:230, 251; lead, B2: an isinstance check names the type for the role; judgement J1). A NodeMixin-family node lacks _LightNodeMixin__children_or_empty: normal lookup fails, so a SymlinkNode calls its __getattr__, which forwards the name to its target and fails there too (judgement J3); for the other classes the AttributeError ends the attach
+164:31 call  any(child is self for child in parentchildren)
+    -> <builtin>.any
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+166:34 call  parentchildren.append(self)
+    -> <builtin>.list.append
+    note: parentchildren is the list of __children_or_empty (line 175)
+169:30 call  self._post_attach(parent)
+    -> anytree.node.lightnodemixin.LightNodeMixin._post_attach
+    reject anytree.node.nodemixin.NodeMixin._post_attach: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty]
+173:23 call  hasattr(self, "_LightNodeMixin__children")
+    -> <builtin>.hasattr
+
+[anytree.node.lightnodemixin.LightNodeMixin.children]
+226:21 call  tuple(self.__children_or_empty)
+    -> <builtin>.tuple
+    reject anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty: the property runs at its getattr site 226:27; tuple() receives the list
+226:27 getattr  self.__children_or_empty
+    -> anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty
+242:25 call  tuple(children)
+    -> <builtin>.tuple
+    note: children is the client's iterable of nodes
+243:40 call  LightNodeMixin.__check_children(children)
+    -> anytree.node.lightnodemixin.LightNodeMixin.__check_children
+245:29 getattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+246:18 delattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+248:38 call  self._pre_attach_children(children)
+    -> anytree.node.lightnodemixin.LightNodeMixin._pre_attach_children
+    reject anytree.node.nodemixin.NodeMixin._pre_attach_children: self is a LightNodeMixin
+250:23 setattr  child.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: the children of a LightNodeMixin node are LightNodeMixin nodes (judgement J1)
+251:39 call  self._post_attach_children(children)
+    -> anytree.node.lightnodemixin.LightNodeMixin._post_attach_children
+    reject anytree.node.nodemixin.NodeMixin._post_attach_children: self is a LightNodeMixin
+253:27 call  len(self.children)
+    -> <builtin>.len
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 253:33; len() receives the tuple
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+253:33 getattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+253:49 call  len(children)
+    -> <builtin>.len
+255:18 setattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+261:25 getattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+262:34 call  self._pre_detach_children(children)
+    -> anytree.node.lightnodemixin.LightNodeMixin._pre_detach_children
+    reject anytree.node.nodemixin.NodeMixin._pre_detach_children: self is a LightNodeMixin
+263:27 getattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+264:19 setattr  child.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: the children of a LightNodeMixin node are LightNodeMixin nodes (judgement J1)
+266:23 call  len(self.children)
+    -> <builtin>.len
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 266:29; len() receives the tuple
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+266:29 getattr  self.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: self is a LightNodeMixin
+267:35 call  self._post_detach_children(children)
+    -> anytree.node.lightnodemixin.LightNodeMixin._post_detach_children
+    reject anytree.node.nodemixin.NodeMixin._post_detach_children: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.__check_children]
+230:19 call  set()
+    -> <builtin>.set
+232:25 call  id(child)
+    -> <builtin>.id
+234:25 call  seen.add(childid)
+    -> <builtin>.set.add
+237:32 call  TreeError(msg)
+    -> <builtin>.RuntimeError.__init__
+    note: TreeError defines no __init__; the first __init__ of its MRO is that of RuntimeError
+
+[anytree.node.lightnodemixin.LightNodeMixin.path]
+297:21 getattr  self._path
+    -> anytree.node.lightnodemixin.LightNodeMixin._path
+    reject anytree.node.nodemixin.NodeMixin._path: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse]
+323:25 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: node is self or one of its ancestors, LightNodeMixin nodes (judgement J1)
+
+[anytree.node.lightnodemixin.LightNodeMixin._path]
+327:21 call  tuple(reversed(list(self.iter_path_reverse())))
+    -> <builtin>.tuple
+327:30 call  reversed(list(self.iter_path_reverse()))
+    -> <builtin>.reversed
+327:35 call  list(self.iter_path_reverse())
+    -> <builtin>.list
+327:58 call  self.iter_path_reverse()
+    -> anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse
+    reject anytree.node.nodemixin.NodeMixin.iter_path_reverse: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.ancestors]
+345:17 getattr  self.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: self is a LightNodeMixin
+347:21 getattr  self.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: self is a LightNodeMixin
+347:28 getattr  self.parent.path
+    -> anytree.node.lightnodemixin.LightNodeMixin.path
+    reject anytree.node.nodemixin.NodeMixin.path: the parent of a LightNodeMixin node is a LightNodeMixin node (judgement J1)
+
+[anytree.node.lightnodemixin.LightNodeMixin.descendants]
+367:21 call  tuple(PreOrderIter(self))
+    -> <builtin>.tuple
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: tuple() iterates the PreOrderIter: iter() calls __iter__, then __next__ until StopIteration
+367:34 call  PreOrderIter(self)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+
+[anytree.node.lightnodemixin.LightNodeMixin.root]
+386:20 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: node is self or one of its ancestors, LightNodeMixin nodes (judgement J1)
+387:25 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: node is self or one of its ancestors, LightNodeMixin nodes (judgement J1)
+
+[anytree.node.lightnodemixin.LightNodeMixin.siblings]
+410:23 getattr  self.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: self is a LightNodeMixin
+413:21 call  tuple(node for node in parent.children if node is not self)
+    -> <builtin>.tuple
+413:46 getattr  parent.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    reject anytree.node.nodemixin.NodeMixin.children: the parent of a LightNodeMixin node is a LightNodeMixin node (judgement J1)
+
+[anytree.node.lightnodemixin.LightNodeMixin.leaves]
+431:21 call  tuple(PreOrderIter(self, filter_=lambda node: node.is_leaf))
+    -> <builtin>.tuple
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: tuple() iterates the PreOrderIter: iter() calls __iter__, then __next__ until StopIteration
+431:34 call  PreOrderIter(self, filter_=lambda node: node.is_leaf)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+    reject anytree.node.lightnodemixin.LightNodeMixin.leaves.<lambda1>: AbstractIter.__init__ only stores it; PreOrderIter._iter calls it (preorderiter.py:46)
+
+[anytree.node.lightnodemixin.LightNodeMixin.leaves.<lambda1>]
+431:67 getattr  node.is_leaf
+    -> anytree.node.lightnodemixin.LightNodeMixin.is_leaf
+    reject anytree.node.nodemixin.NodeMixin.is_leaf: node is a node of the LightNodeMixin tree under self (judgement J1)
+
+[anytree.node.lightnodemixin.LightNodeMixin.is_leaf]
+449:19 call  len(self.__children_or_empty)
+    -> <builtin>.len
+    reject anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty: the property runs at its getattr site 449:25; len() receives the list
+449:25 getattr  self.__children_or_empty
+    -> anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty
+
+[anytree.node.lightnodemixin.LightNodeMixin.is_root]
+467:21 getattr  self.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    reject anytree.node.nodemixin.NodeMixin.parent: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.height]
+485:25 getattr  self.__children_or_empty
+    -> anytree.node.lightnodemixin.LightNodeMixin.__children_or_empty
+487:23 call  max(child.height for child in children)
+    -> <builtin>.max
+487:30 getattr  child.height
+    -> anytree.node.lightnodemixin.LightNodeMixin.height
+    reject anytree.node.nodemixin.NodeMixin.height: the children of a LightNodeMixin node are LightNodeMixin nodes (judgement J1)
+
+[anytree.node.lightnodemixin.LightNodeMixin.depth]
+508:34 call  enumerate(self.iter_path_reverse())
+    -> <builtin>.enumerate
+508:57 call  self.iter_path_reverse()
+    -> anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse
+    reject anytree.node.nodemixin.NodeMixin.iter_path_reverse: self is a LightNodeMixin
+
+[anytree.node.lightnodemixin.LightNodeMixin.size]
+534:33 call  enumerate(PreOrderIter(self), 1)
+    -> <builtin>.enumerate
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: construction calls AbstractIter.__iter__; only the enclosing for loop later calls AbstractIter.__next__. The site finder suppresses a separate for-iteration site for builtin enumerate. The 534:13 iter site is tuple unpacking, not iterator consumption. Both callbacks stay here under the global same-function construction/consumption convention
+534:46 call  PreOrderIter(self)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+
+== anytree.node.node
+
+[anytree.node.node.Node.__init__]
+73:29 call  self.__dict__.update(kwargs)
+    -> <builtin>.dict.update
+75:14 setattr  self.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: self is a Node, a NodeMixin
+77:18 setattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a Node, a NodeMixin
+
+[anytree.node.node.Node.__repr__]
+80:30 call  "{!r}".format(self.separator.join([""] + [str(node.name) ...
+    -> <builtin>.str.format
+    note: the formatted value is the str that str.join returns
+80:50 call  self.separator.join([""] + [str(node.name) for node in se...
+    -> <builtin>.str.join
+    note: separator is the str class attribute "/" (nodemixin.py:78), or a str that a client subclass sets (tests/test_node_sep.py)
+80:62 call  str(node.name)
+    -> <builtin>.str
+    note: name is the client's value ("A name or any other object", node.py:10)
+80:68 getattr  node.name
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: node is a node of self.path: the ancestors of a Node can be SymlinkNodes (symlinknode.py:24 attaches a Node under one), whose name lives in the target, so __getattr__ forwards it
+80:91 getattr  self.path
+    -> anytree.node.nodemixin.NodeMixin.path
+    reject anytree.node.lightnodemixin.LightNodeMixin.path: self is a Node, a NodeMixin
+81:21 call  _repr(self, args=args, nameblacklist=["name"])
+    -> anytree.node.util._repr
+
+== anytree.node.nodemixin
+
+[anytree.node.nodemixin]
+80:6 decorator  @property
+    -> <builtin>.property
+120:6 decorator  @parent.setter
+    -> <builtin>.property.setter
+169:6 decorator  @property
+    -> <builtin>.property
+175:6 decorator  @property
+    -> <builtin>.property
+226:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+240:6 decorator  @children.setter
+    -> <builtin>.property.setter
+260:6 decorator  @children.deleter
+    -> <builtin>.property.deleter
+282:6 decorator  @property
+    -> <builtin>.property
+326:6 decorator  @property
+    -> <builtin>.property
+330:6 decorator  @property
+    -> <builtin>.property
+350:6 decorator  @property
+    -> <builtin>.property
+361:6 decorator  @property
+    -> <builtin>.property
+381:6 decorator  @property
+    -> <builtin>.property
+402:6 decorator  @property
+    -> <builtin>.property
+427:6 decorator  @property
+    -> <builtin>.property
+445:6 decorator  @property
+    -> <builtin>.property
+463:6 decorator  @property
+    -> <builtin>.property
+481:6 decorator  @property
+    -> <builtin>.property
+502:6 decorator  @property
+    -> <builtin>.property
+524:6 decorator  @property
+    -> <builtin>.property
+
+[anytree.node.nodemixin.NodeMixin.parent]
+116:19 call  hasattr(self, "_NodeMixin__parent")
+    -> <builtin>.hasattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: for a SymlinkNode whose parent was never set (SymlinkNode(target) with parent None), normal lookup fails and hasattr calls its __getattr__, which raises AttributeError (symlinknodemixin.py:49), so hasattr returns False
+122:48 call  isinstance(value, (NodeMixin, LightNodeMixin))
+    -> <builtin>.isinstance
+124:28 call  TreeError(msg)
+    -> <builtin>.RuntimeError.__init__
+    note: TreeError defines no __init__; the first __init__ of its MRO is that of RuntimeError
+125:19 call  hasattr(self, "_NodeMixin__parent")
+    -> <builtin>.hasattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: as at 116:19; SymlinkNode.__init__ (symlinknode.py:48) reaches this setter before the parent is set
+130:30 call  self.__check_loop(value)
+    -> anytree.node.nodemixin.NodeMixin.__check_loop
+131:26 call  self.__detach(parent)
+    -> anytree.node.nodemixin.NodeMixin.__detach
+132:26 call  self.__attach(value)
+    -> anytree.node.nodemixin.NodeMixin.__attach
+
+[anytree.node.nodemixin.NodeMixin.__check_loop]
+138:32 call  LoopError(msg % (self,))
+    -> <builtin>.RuntimeError.__init__
+    note: LoopError and its base TreeError define no __init__; the first __init__ of the MRO is that of RuntimeError
+138:37 op  msg % (self,)
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    reject anytree.render.AbstractStyle.__repr__, anytree.render.RenderTree.__repr__, anytree.render.RenderTree.__str__: %r formats self, a NodeMixin-family node
+139:19 call  any(child is self for child in node.iter_path_reverse())
+    -> <builtin>.any
+139:69 call  node.iter_path_reverse()
+    -> anytree.node.nodemixin.NodeMixin.iter_path_reverse
+    -> anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse
+    note: node is the new parent that the setter checked with isinstance(value, (NodeMixin, LightNodeMixin)) (line 122): a NodeMixin-family node or a LightNodeMixin node (lead, B2: an isinstance check names the type for the role; judgement J1); the attach that follows fails for a LightNodeMixin parent (line 160)
+141:32 call  LoopError(msg % (self, node))
+    -> <builtin>.RuntimeError.__init__
+141:37 op  msg % (self, node)
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    reject anytree.render.AbstractStyle.__repr__, anytree.render.RenderTree.__repr__, anytree.render.RenderTree.__str__: %r formats self and node, NodeMixin-family nodes
+
+[anytree.node.nodemixin.NodeMixin.__detach]
+146:29 call  self._pre_detach(parent)
+    -> anytree.node.nodemixin.NodeMixin._pre_detach
+    reject anytree.node.lightnodemixin.LightNodeMixin._pre_detach: self is a NodeMixin
+147:37 getattr  parent.__children_or_empty
+    -> anytree.node.nodemixin.NodeMixin.__children_or_empty
+149:27 call  any(child is self for child in parentchildren)
+    -> <builtin>.any
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+151:20 setattr  parent.__children
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    note: parent is the current parent, a NodeMixin-family node, also a SymlinkNode (symlinknode.py:24)
+152:18 setattr  self.__parent
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    note: self can be a SymlinkNode
+154:30 call  self._post_detach(parent)
+    -> anytree.node.nodemixin.NodeMixin._post_detach
+    reject anytree.node.lightnodemixin.LightNodeMixin._post_detach: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.__attach]
+159:29 call  self._pre_attach(parent)
+    -> anytree.node.nodemixin.NodeMixin._pre_attach
+    reject anytree.node.lightnodemixin.LightNodeMixin._pre_attach: self is a NodeMixin
+160:37 getattr  parent.__children_or_empty
+    -> anytree.node.nodemixin.NodeMixin.__children_or_empty
+162:31 call  any(child is self for child in parentchildren)
+    -> <builtin>.any
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+164:34 call  parentchildren.append(self)
+    -> <builtin>.list.append
+    note: parentchildren is the list of __children_or_empty (line 173)
+165:18 setattr  self.__parent
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    note: self can be a SymlinkNode
+167:30 call  self._post_attach(parent)
+    -> anytree.node.nodemixin.NodeMixin._post_attach
+    reject anytree.node.lightnodemixin.LightNodeMixin._post_attach: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.__children_or_empty]
+171:23 call  hasattr(self, "_NodeMixin__children")
+    -> <builtin>.hasattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: for a SymlinkNode without children, normal lookup fails and hasattr calls its __getattr__, which raises AttributeError (symlinknodemixin.py:49)
+172:18 setattr  self.__children
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    note: self can be a SymlinkNode
+
+[anytree.node.nodemixin.NodeMixin.children]
+224:21 call  tuple(self.__children_or_empty)
+    -> <builtin>.tuple
+    reject anytree.node.nodemixin.NodeMixin.__children_or_empty: the property runs at its getattr site 224:27; tuple() receives the list
+224:27 getattr  self.__children_or_empty
+    -> anytree.node.nodemixin.NodeMixin.__children_or_empty
+243:25 call  tuple(children)
+    -> <builtin>.tuple
+    note: children is the client's iterable of nodes
+244:35 call  NodeMixin.__check_children(children)
+    -> anytree.node.nodemixin.NodeMixin.__check_children
+246:29 getattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+247:18 delattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+    note: SymlinkNodeMixin defines no __delattr__, so for a SymlinkNode object.__delattr__ runs the deleter too
+249:38 call  self._pre_attach_children(children)
+    -> anytree.node.nodemixin.NodeMixin._pre_attach_children
+    reject anytree.node.lightnodemixin.LightNodeMixin._pre_attach_children: self is a NodeMixin
+251:23 setattr  child.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    note: child is a child that __check_children checked with isinstance(child, (NodeMixin, LightNodeMixin)) (line 230): a NodeMixin-family node, or a LightNodeMixin node, whose setter runs and fails in its __attach (lead, B2: an isinstance check names the type for the role; judgement J1). For a SymlinkNode child, its __setattr__ runs and calls the property setter through object.__setattr__ (symlinknodemixin.py:56)
+252:39 call  self._post_attach_children(children)
+    -> anytree.node.nodemixin.NodeMixin._post_attach_children
+    reject anytree.node.lightnodemixin.LightNodeMixin._post_attach_children: self is a NodeMixin
+254:27 call  len(self.children)
+    -> <builtin>.len
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 254:33; len() receives the tuple
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+254:33 getattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+254:49 call  len(children)
+    -> <builtin>.len
+256:18 setattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+    note: for a SymlinkNode self, its __setattr__ runs and calls the property setter through object.__setattr__
+262:25 getattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+263:34 call  self._pre_detach_children(children)
+    -> anytree.node.nodemixin.NodeMixin._pre_detach_children
+    reject anytree.node.lightnodemixin.LightNodeMixin._pre_detach_children: self is a NodeMixin
+264:27 getattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+265:19 setattr  child.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: the children of a NodeMixin node are NodeMixin-family nodes (judgement J1)
+    note: for a SymlinkNode child, its __setattr__ runs and calls the property setter through object.__setattr__
+267:23 call  len(self.children)
+    -> <builtin>.len
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: the property runs at its getattr site 267:29; len() receives the tuple
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+267:29 getattr  self.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: self is a NodeMixin
+268:35 call  self._post_detach_children(children)
+    -> anytree.node.nodemixin.NodeMixin._post_detach_children
+    reject anytree.node.lightnodemixin.LightNodeMixin._post_detach_children: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.__check_children]
+228:19 call  set()
+    -> <builtin>.set
+230:30 call  isinstance(child, (NodeMixin, LightNodeMixin))
+    -> <builtin>.isinstance
+232:32 call  TreeError(msg)
+    -> <builtin>.RuntimeError.__init__
+    note: TreeError defines no __init__; the first __init__ of its MRO is that of RuntimeError
+233:25 call  id(child)
+    -> <builtin>.id
+235:25 call  seen.add(childid)
+    -> <builtin>.set.add
+237:41 format  {child!r}
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    reject anytree.render.AbstractStyle.__repr__, anytree.render.RenderTree.__repr__: child is a node given twice, a NodeMixin-family node
+238:32 call  TreeError(msg)
+    -> <builtin>.RuntimeError.__init__
+
+[anytree.node.nodemixin.NodeMixin.path]
+298:21 getattr  self._path
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W1: First public s.path reaches self._path; the opaque parent getter raises and the exact package link forwards to its concrete Node target. See anytree.md.
+    -> anytree.node.nodemixin.NodeMixin._path
+    reject anytree.node.lightnodemixin.LightNodeMixin._path: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.iter_path_reverse]
+324:25 getattr  node.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: node is self or one of its ancestors, NodeMixin-family nodes (judgement J1)
+
+[anytree.node.nodemixin.NodeMixin._path]
+328:21 call  tuple(reversed(list(self.iter_path_reverse())))
+    -> <builtin>.tuple
+328:30 call  reversed(list(self.iter_path_reverse()))
+    -> <builtin>.reversed
+328:35 call  list(self.iter_path_reverse())
+    -> <builtin>.list
+328:58 call  self.iter_path_reverse()
+    -> anytree.node.nodemixin.NodeMixin.iter_path_reverse
+    reject anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.ancestors]
+346:17 getattr  self.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: self is a NodeMixin
+348:21 getattr  self.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: self is a NodeMixin
+348:28 getattr  self.parent.path
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W2: The parent is an exact package link; both its _path and target._path fail, so outer path lookup invokes fallback. The concrete target.path body is entered even though it then raises. W2 uses a client-owned flag after successful construction. See anytree.md.
+    -> anytree.node.nodemixin.NodeMixin.path
+    reject anytree.node.lightnodemixin.LightNodeMixin.path: the parent of a NodeMixin node is a NodeMixin-family node (judgement J1)
+
+[anytree.node.nodemixin.NodeMixin.anchestors]
+358:22 call  warnings.warn(".anchestors was a typo and will be removed...
+    -> warnings.warn
+359:21 getattr  self.ancestors
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W3: The exact link ancestors getter fails at its client parent.path; self.ancestors then falls back to the concrete Node target. See anytree.md.
+    -> anytree.node.nodemixin.NodeMixin.ancestors
+    reject anytree.node.lightnodemixin.LightNodeMixin.ancestors: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.descendants]
+379:21 call  tuple(PreOrderIter(self))
+    -> <builtin>.tuple
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: tuple() iterates the PreOrderIter: iter() calls __iter__, then __next__ until StopIteration
+379:34 call  PreOrderIter(self)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+
+[anytree.node.nodemixin.NodeMixin.root]
+398:20 getattr  node.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: node is self or one of its ancestors, NodeMixin-family nodes (judgement J1)
+399:25 getattr  node.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: node is self or one of its ancestors, NodeMixin-family nodes (judgement J1)
+
+[anytree.node.nodemixin.NodeMixin.siblings]
+422:23 getattr  self.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: self is a NodeMixin
+425:21 call  tuple(node for node in parent.children if node is not self)
+    -> <builtin>.tuple
+425:46 getattr  parent.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject anytree.node.lightnodemixin.LightNodeMixin.children: the parent of a NodeMixin node is a NodeMixin-family node (judgement J1)
+
+[anytree.node.nodemixin.NodeMixin.leaves]
+443:21 call  tuple(PreOrderIter(self, filter_=lambda node: node.is_leaf))
+    -> <builtin>.tuple
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: tuple() iterates the PreOrderIter: iter() calls __iter__, then __next__ until StopIteration
+443:34 call  PreOrderIter(self, filter_=lambda node: node.is_leaf)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+    reject anytree.node.nodemixin.NodeMixin.leaves.<lambda1>: AbstractIter.__init__ only stores it; PreOrderIter._iter calls it (preorderiter.py:46)
+
+[anytree.node.nodemixin.NodeMixin.leaves.<lambda1>]
+443:67 getattr  node.is_leaf
+    -> anytree.node.nodemixin.NodeMixin.is_leaf
+    reject anytree.node.lightnodemixin.LightNodeMixin.is_leaf: node is a node of the NodeMixin tree under self (judgement J1)
+
+[anytree.node.nodemixin.NodeMixin.is_leaf]
+461:19 call  len(self.__children_or_empty)
+    -> <builtin>.len
+    reject anytree.node.nodemixin.NodeMixin.__children_or_empty: the property runs at its getattr site 461:25; len() receives the list
+461:25 getattr  self.__children_or_empty
+    -> anytree.node.nodemixin.NodeMixin.__children_or_empty
+
+[anytree.node.nodemixin.NodeMixin.is_root]
+479:21 getattr  self.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.height]
+497:25 getattr  self.__children_or_empty
+    -> anytree.node.nodemixin.NodeMixin.__children_or_empty
+499:23 call  max(child.height for child in children)
+    -> <builtin>.max
+499:30 getattr  child.height
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W6: The child is an exact package link whose height getter fails at its own opaque child.height; target.height is reached through fallback. See anytree.md.
+    -> anytree.node.nodemixin.NodeMixin.height
+    reject anytree.node.lightnodemixin.LightNodeMixin.height: the children of a NodeMixin node are NodeMixin-family nodes (judgement J1)
+
+[anytree.node.nodemixin.NodeMixin.depth]
+520:34 call  enumerate(self.iter_path_reverse())
+    -> <builtin>.enumerate
+520:57 call  self.iter_path_reverse()
+    -> anytree.node.nodemixin.NodeMixin.iter_path_reverse
+    reject anytree.node.lightnodemixin.LightNodeMixin.iter_path_reverse: self is a NodeMixin
+
+[anytree.node.nodemixin.NodeMixin.size]
+546:33 call  enumerate(PreOrderIter(self), 1)
+    -> <builtin>.enumerate
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: construction calls AbstractIter.__iter__; only the enclosing for loop later calls AbstractIter.__next__. The site finder suppresses a separate for-iteration site for builtin enumerate. The 546:13 iter site is tuple unpacking, not iterator consumption. Both callbacks stay here under the global same-function construction/consumption convention
+546:46 call  PreOrderIter(self)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+
+== anytree.node.symlinknode
+
+[anytree.node.symlinknode.SymlinkNode.__init__]
+46:14 setattr  self.target
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+47:36 call  self.target.__dict__.update(kwargs)
+    -> <builtin>.dict.update
+48:14 setattr  self.parent
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    reject anytree.node.lightnodemixin.LightNodeMixin.parent, anytree.node.nodemixin.NodeMixin.parent: type(self).__setattr__ is SymlinkNodeMixin.__setattr__; it runs the property setter NodeMixin.parent through object.__setattr__ (symlinknodemixin.py:56)
+50:18 setattr  self.children
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    reject anytree.node.lightnodemixin.LightNodeMixin.children, anytree.node.nodemixin.NodeMixin.children: type(self).__setattr__ is SymlinkNodeMixin.__setattr__; it runs the property setter NodeMixin.children through object.__setattr__ (symlinknodemixin.py:56)
+
+[anytree.node.symlinknode.SymlinkNode.__repr__]
+53:21 call  _repr(self, [repr(self.target)], nameblacklist=("target",))
+    -> anytree.node.util._repr
+53:33 call  repr(self.target)
+    -> <builtin>.repr
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    note: the target is a NodeMixin-family node: the docs and tests link Nodes, and it can be another SymlinkNode; a LightNodeMixin node is not a target (judgement J3; lead)
+
+== anytree.node.symlinknodemixin
+
+[anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__]
+49:25 call  super()
+    -> <builtin>.super
+49:39 call  super().__getattr__(name)
+    note: no call happens: super() skips SymlinkNodeMixin, and neither NodeMixin nor object defines __getattr__, so the attribute lookup raises AttributeError before any call; hasattr turns it into False (nodemixin.py:116, 125, 171). A client class with a __getattr__ later in its MRO would be client code
+51:33 call  AttributeError(name)
+    -> <builtin>.AttributeError
+52:23 call  getattr(self.target, name)
+    -> anytree.node.nodemixin.NodeMixin._path
+    -> anytree.node.nodemixin.NodeMixin.ancestors
+    -> anytree.node.nodemixin.NodeMixin.anchestors
+    -> anytree.node.nodemixin.NodeMixin.depth
+    -> anytree.node.nodemixin.NodeMixin.descendants
+    -> anytree.node.nodemixin.NodeMixin.height
+    -> anytree.node.nodemixin.NodeMixin.leaves
+    -> anytree.node.nodemixin.NodeMixin.path
+    -> anytree.node.nodemixin.NodeMixin.root
+    -> anytree.node.nodemixin.NodeMixin.siblings
+    -> anytree.node.nodemixin.NodeMixin.size
+    note: R4-F1: A concrete SymlinkNode property can raise AttributeError through a client parent/child getter; fallback forwards the same property name to its concrete Node target. The eleven admitted properties and exact first-operation witnesses W1-W7 are recorded in anytree.md. This does not admit arbitrary client-selected property names or a client SymlinkNode receiver.
+    -> <builtin>.getattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: A missing data name forwards recursively for a nested SymlinkNode target. A found property can also fail on the link through a client ancestor/child getter, then forwarding enters the concrete Node target property (R4-F1). Existing protected storage and arbitrary client names remain excluded.
+
+[anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__]
+56:18 call  super()
+    -> <builtin>.super
+56:32 call  super().__setattr__(name, value)
+    -> <builtin>.object.__setattr__
+    -> anytree.node.nodemixin.NodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.children
+    reject *: super() skips SymlinkNodeMixin; NodeMixin defines no __setattr__, so the method is object.__setattr__, named through object, the nearest class outside the package
+    note: for name "parent" or "children", object.__setattr__ finds the data descriptor of NodeMixin and calls its setter back; for target and the two private names it stores the value
+58:20 call  setattr(self.target, name, value)
+    -> <builtin>.setattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__setattr__
+    note: the target is a NodeMixin-family node; when it is another SymlinkNode (judgement J3), setattr calls its __setattr__. The name is never parent or children here (line 55), so no property setter of a Node target runs
+
+== anytree.node.util
+
+[anytree.node.util._repr]
+5:29 call  filter( lambda item: not item[0].startswith("_") and item...
+    -> <builtin>.filter
+    -> anytree.node.util._repr.<lambda1>
+    note: filter construction only stores the predicate; the enclosing for loop later calls the lambda. The site finder suppresses a separate for-iteration site for builtin filter. The 5:9 iter site is tuple unpacking, not filter consumption. The callback stays here under the global same-function construction/consumption convention
+7:15 call  sorted(node.__dict__.items(), key=lambda item: item[0])
+    -> <builtin>.sorted
+    -> anytree.node.util._repr.<lambda2>
+7:35 call  node.__dict__.items()
+    -> <builtin>.dict.items
+9:20 call  args.append(f"{key}={value!r}")
+    -> <builtin>.list.append
+    note: args is the list that Node.__repr__ or SymlinkNode.__repr__ passes, or a new list (line 3)
+10:27 call  "{}({})".format(classname, ", ".join(args))
+    -> <builtin>.str.format
+    note: the formatted values are strs
+10:48 call  ", ".join(args)
+    -> <builtin>.str.join
+
+[anytree.node.util._repr.<lambda1>]
+6:44 call  item[0].startswith("_")
+    -> <builtin>.str.startswith
+
+== anytree.render
+
+[anytree.render]
+15:29 call  collections.namedtuple("Row", ("pre", "fill", "node"))
+    -> collections.namedtuple
+41:6 decorator  @property
+    -> <builtin>.property
+97:23 call  ContStyle()
+    -> anytree.render.ContStyle.__init__
+    reject anytree.render.AbstractStyle.__init__: ContStyle defines __init__; AbstractStyle.__init__ runs from its super() call (line 94)
+284:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.render.AbstractStyle.__init__]
+32:14 call  super()
+    -> <builtin>.super
+32:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    reject *: super() in AbstractStyle, whose only base is object, finds object.__init__, named through object
+37:23 call  len(cont)
+    -> <builtin>.len
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+37:36 call  len(vertical)
+    -> <builtin>.len
+37:53 call  len(end)
+    -> <builtin>.len
+
+[anytree.render.AbstractStyle.empty]
+44:25 call  len(self.end)
+    -> <builtin>.len
+
+[anytree.render.AsciiStyle.__init__]
+71:14 call  super()
+    -> <builtin>.super
+71:25 call  super().__init__("| ", "|-- ", "+-- ")
+    -> anytree.render.AbstractStyle.__init__
+    reject *: super() in AsciiStyle, whose base is AbstractStyle, finds AbstractStyle.__init__
+
+[anytree.render.ContStyle.__init__]
+94:14 call  super()
+    -> <builtin>.super
+94:25 call  super().__init__("\u2502 ", "\u251c\u2500\u2500 ", "\u251...
+    -> anytree.render.AbstractStyle.__init__
+    reject *: super() in ContStyle, whose base is AbstractStyle, finds AbstractStyle.__init__
+
+[anytree.render.ContRoundStyle.__init__]
+120:14 call  super()
+    -> <builtin>.super
+120:25 call  super().__init__("\u2502 ", "\u251c\u2500\u2500 ", "\u257...
+    -> anytree.render.AbstractStyle.__init__
+    reject *: super() in ContRoundStyle, whose base is AbstractStyle, finds AbstractStyle.__init__
+
+[anytree.render.DoubleStyle.__init__]
+144:14 call  super()
+    -> <builtin>.super
+144:25 call  super().__init__("\u2551 ", "\u2560\u2550\u2550 ", "\u255...
+    -> anytree.render.AbstractStyle.__init__
+    reject *: super() in DoubleStyle, whose base is AbstractStyle, finds AbstractStyle.__init__
+
+[anytree.render.RenderTree.__init__]
+264:26 call  isinstance(style, AbstractStyle)
+    -> <builtin>.isinstance
+265:26 call  style()
+    -> anytree.render.AsciiStyle.__init__
+    -> anytree.render.ContStyle.__init__
+    -> anytree.render.ContRoundStyle.__init__
+    -> anytree.render.DoubleStyle.__init__
+    exclude anytree.render.AbstractStyle.__init__: AbstractStyle() fails when Python binds the arguments (vertical, cont and end are required), before the function runs
+    note: style is not an AbstractStyle instance here, so it is a style class: the docs pass DoubleStyle (render.py:134); the package's style classes are the four subclasses; client classes are client code
+
+[anytree.render.RenderTree.__iter__]
+272:27 call  self.__next(self.node, ())
+    -> anytree.render.RenderTree.__next
+
+[anytree.render.RenderTree.__next]
+275:32 call  RenderTree.__item(node, continues, self.style)
+    -> anytree.render.RenderTree.__item
+278:29 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family (the docs render LightNodeMixin trees, lightnodemixin.py:45)
+280:42 call  self.childiter(children)
+    -> <builtin>.list
+    note: self.childiter is set only by __init__ (line 268): the default list (line 263) or a client callable (the docs pass reversed and a function, the tests a lambda); the package offers no other value
+281:47 call  _is_last(children)
+    -> anytree.render._is_last
+282:43 call  self.__next(child, (*continues, not is_last), level=level)
+    -> anytree.render.RenderTree.__next
+
+[anytree.render.RenderTree.__item]
+287:23 call  Row("", "", node)
+    note: Row is the class that collections.namedtuple made (line 15): its __new__ is generated code (no node) and its __init__ is object.__init__, so no edge (micro-benchmark stdlib_classes/namedtuple_methods)
+288:52 getattr  style.empty
+    -> anytree.render.AbstractStyle.empty
+    note: style is self.style, an instance of AbstractStyle or of a subclass (RenderTree.__init__ makes one of a class)
+289:25 call  "".join(items[:-1])
+    -> <builtin>.str.join
+292:23 call  "".join(items)
+    -> <builtin>.str.join
+293:19 call  Row(pre, fill, node)
+    note: as at 287:23
+
+[anytree.render.RenderTree.__str__]
+303:25 call  "\n".join(get())
+    -> <builtin>.str.join
+303:29 call  get()
+    -> anytree.render.RenderTree.__str__.get
+    reject anytree.render.RenderTree.by_attr.get, anytree.resolver.Resolver.get: get is the local generator function of __str__
+
+[anytree.render.RenderTree.__str__.get]
+297:24 iter  self
+    -> anytree.render.RenderTree.__iter__
+    reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: self is the RenderTree; its __iter__ returns a generator
+298:29 call  repr(row.node)
+    -> <builtin>.repr
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    note: row.node is a node of the rendered tree; a LightNodeMixin node has no package __repr__
+298:50 call  repr(row.node).splitlines()
+    -> <builtin>.str.splitlines
+
+[anytree.render.RenderTree.__repr__]
+307:21 call  repr(self.node)
+    -> <builtin>.repr
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    note: self.node is the root node that the client renders
+307:42 format  {self.style!r}
+    -> anytree.render.AbstractStyle.__repr__
+    reject anytree.node.anynode.AnyNode.__repr__, anytree.node.node.Node.__repr__, anytree.node.symlinknode.SymlinkNode.__repr__, anytree.render.RenderTree.__repr__: self.style is an AbstractStyle instance (line 264-267)
+308:31 call  "{}({})".format(classname, ", ".join(args))
+    -> <builtin>.str.format
+    note: the formatted values are strs
+308:52 call  ", ".join(args)
+    -> <builtin>.str.join
+
+[anytree.render.RenderTree.by_attr]
+347:25 call  "\n".join(get())
+    -> <builtin>.str.join
+347:29 call  get()
+    -> anytree.render.RenderTree.by_attr.get
+    reject anytree.render.RenderTree.__str__.get, anytree.resolver.Resolver.get: get is the local generator function of by_attr
+
+[anytree.render.RenderTree.by_attr.get]
+338:24 call  callable(attrname)
+    -> <builtin>.callable
+339:28 iter  self
+    -> anytree.render.RenderTree.__iter__
+    reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: self is the RenderTree; its __iter__ returns a generator
+340:36 call  attrname(row.node)
+    note: attrname is the client's callable (the docs and tests pass lambdas); the package passes none, its default is the str "name"
+341:47 call  _format_row_any(row, attr)
+    -> anytree.render._format_row_any
+343:28 iter  self
+    -> anytree.render.RenderTree.__iter__
+    reject anytree.iterators.abstractiter.AbstractIter.__iter__, anytree.iterators.abstractiter.AbstractIter.__next__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: self is the RenderTree; its __iter__ returns a generator
+344:35 call  getattr(row.node, attrname, "")
+    -> <builtin>.getattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: attrname names a data attribute of the nodes (default "name"; docs: lines, id, foo); for a SymlinkNode it lives in the target, so getattr calls __getattr__. A name of a node property is not considered (judgement J4)
+345:47 call  _format_row_any(row, attr)
+    -> anytree.render._format_row_any
+
+[anytree.render._format_row_any]
+351:18 call  isinstance(attr, (list, tuple))
+    -> <builtin>.isinstance
+354:20 call  str(attr)
+    -> <builtin>.str
+    reject anytree.node.anynode.AnyNode.__repr__: attr is client data or a callback return, opaque under B3/B5.
+    reject anytree.node.node.Node.__repr__: attr is client data or a callback return, opaque under B3/B5.
+    reject anytree.node.symlinknode.SymlinkNode.__repr__: attr is client data or a callback return, opaque under B3/B5.
+    note: Global B5 makes the result of attrname(row.node) opaque, including the test identity lambda. The other branch returns arbitrary node data, excluded by B3. Thus str(attr) has no package repr callee. J4 cannot override the global rule.
+354:37 call  str(attr).splitlines()
+    -> <builtin>.str.splitlines
+
+[anytree.render._is_last]
+361:17 call  iter(iterable)
+    -> <builtin>.iter
+    note: iterable is what childiter returns: a list by default, or the client's iterable
+363:24 call  next(iter_)
+    -> <builtin>.next
+370:32 call  next(iter_)
+    -> <builtin>.next
+
+== anytree.resolver
+
+[anytree.resolver]
+288:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+312:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.resolver.Resolver.__init__]
+23:14 call  super()
+    -> <builtin>.super
+23:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    reject *: super() in Resolver, whose only base is object, finds object.__init__, named through object
+
+[anytree.resolver.Resolver.get]
+105:35 call  self.__start(node, path, self.__cmp)
+    -> anytree.resolver.Resolver.__start
+    reject anytree.resolver.Resolver.__cmp: __start calls the bound method itself (line 226), an edge of __start
+110:31 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    note: node is a tree node of either family
+114:44 call  RootResolverError(node)
+    -> anytree.resolver.RootResolverError.__init__
+    reject anytree.resolver.ResolverError.__init__: RootResolverError defines __init__; ResolverError.__init__ runs from its super() call (line 337)
+119:34 call  self.__get(node, part)
+    -> anytree.resolver.Resolver.__get
+
+[anytree.resolver.Resolver.__get]
+123:22 call  str(name)
+    -> <builtin>.str
+    note: name is a part of the str path (str.split, line 215)
+124:27 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family
+125:26 call  self.__cmp(_getattr(child, self.pathattr), namestr)
+    -> anytree.resolver.Resolver.__cmp
+125:35 call  _getattr(child, self.pathattr)
+    -> anytree.resolver._getattr
+129:33 call  ChildResolverError(node, name, self.pathattr)
+    -> anytree.resolver.ChildResolverError.__init__
+    reject anytree.resolver.ResolverError.__init__: ChildResolverError defines __init__; ResolverError.__init__ runs from its super() call (line 345)
+
+[anytree.resolver.Resolver.glob]
+208:35 call  self.__start(node, path, self.__match)
+    -> anytree.resolver.Resolver.__start
+    reject anytree.resolver.Resolver.__match: __start calls the bound method itself (line 226), an edge of __start
+211:27 call  self.__glob(node, parts)
+    -> anytree.resolver.Resolver.__glob
+
+[anytree.resolver.Resolver.__start]
+215:27 call  path.split(sep)
+    -> <builtin>.str.split
+    note: path is a str (the docs pass str literals, the method splits it with the str separator)
+217:27 call  path.startswith(sep)
+    -> <builtin>.str.startswith
+218:25 getattr  node.root
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W1: Resolver.get(s, /t) reads the exact link root; its opaque parent.parent raises, so fallback returns the concrete target t. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.root
+    -> anytree.node.nodemixin.NodeMixin.root
+    note: node is a tree node of either family
+219:32 call  _getattr(node, self.pathattr)
+    -> anytree.resolver._getattr
+220:22 call  parts.pop(0)
+    -> <builtin>.list.pop
+225:36 call  ResolverError(node, "", msg % (sep, str(rootpart)))
+    -> anytree.resolver.ResolverError.__init__
+225:62 call  str(rootpart)
+    -> <builtin>.str
+226:24 call  cmp_(rootpart, parts[0])
+    -> anytree.resolver.Resolver.__cmp
+    -> anytree.resolver.Resolver.__match
+    note: __start is private; get passes the bound method self.__cmp (line 105) and glob passes self.__match (line 208)
+230:36 call  ResolverError(node, "", msg % (sep, parts[0], sep, str(ro...
+    -> anytree.resolver.ResolverError.__init__
+230:77 call  str(rootpart)
+    -> <builtin>.str
+231:22 call  parts.pop(0)
+    -> <builtin>.list.pop
+
+[anytree.resolver.Resolver.__glob]
+246:27 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    note: node is a tree node of either family
+250:40 call  RootResolverError(node)
+    -> anytree.resolver.RootResolverError.__init__
+    reject anytree.resolver.ResolverError.__init__: RootResolverError defines __init__; ResolverError.__init__ runs from its super() call (line 337)
+251:31 call  self.__glob(parent, remainder)
+    -> anytree.resolver.Resolver.__glob
+254:31 call  self.__glob(node, remainder)
+    -> anytree.resolver.Resolver.__glob
+259:28 iter  PreOrderIter(node)
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    reject anytree.render.RenderTree.__iter__, anytree.exporter.dotexporter.DotExporter.__iter__, anytree.exporter.mermaidexporter.MermaidExporter.__iter__: the iterable is a PreOrderIter
+259:40 call  PreOrderIter(node)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+261:45 call  self.__glob(subnode, remainder)
+    -> anytree.resolver.Resolver.__glob
+263:43 call  matches.append(match)
+    -> <builtin>.list.append
+268:30 call  self.__find(node, name, remainder)
+    -> anytree.resolver.Resolver.__find
+269:52 call  Resolver.is_wildcard(name)
+    -> anytree.resolver.Resolver.is_wildcard
+270:37 call  ChildResolverError(node, name, self.pathattr)
+    -> anytree.resolver.ChildResolverError.__init__
+    reject anytree.resolver.ResolverError.__init__: ChildResolverError defines __init__; ResolverError.__init__ runs from its super() call (line 345)
+
+[anytree.resolver.Resolver.__find]
+275:27 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family
+276:28 call  _getattr(child, self.pathattr)
+    -> anytree.resolver._getattr
+278:32 call  self.__match(name, pat)
+    -> anytree.resolver.Resolver.__match
+280:47 call  self.__glob(child, remainder)
+    -> anytree.resolver.Resolver.__glob
+282:39 call  matches.append(child)
+    -> <builtin>.list.append
+284:44 call  Resolver.is_wildcard(pat)
+    -> anytree.resolver.Resolver.is_wildcard
+
+[anytree.resolver.Resolver.__match]
+298:39 call  Resolver.__translate(pat)
+    -> anytree.resolver.Resolver.__translate
+299:19 call  len(Resolver._match_cache)
+    -> <builtin>.len
+300:44 call  Resolver._match_cache.clear()
+    -> <builtin>.dict.clear
+304:59 call  re.compile(res, flags=flags)
+    -> re.compile
+305:28 call  re_pat.match(name)
+    -> re.Pattern.match
+    note: re_pat is a compiled pattern of re.compile (line 304) kept in the dict _match_cache
+
+[anytree.resolver.Resolver.__cmp]
+309:30 call  name.upper()
+    -> <builtin>.str.upper
+    note: name is the str that _getattr returns
+309:45 call  pat.upper()
+    -> <builtin>.str.upper
+    note: pat is a part of the str path, or the str that str() made of it (line 123)
+
+[anytree.resolver.Resolver.__translate]
+321:36 call  re.escape(char)
+    -> re.escape
+
+[anytree.resolver.ResolverError.__init__]
+328:14 call  super()
+    -> <builtin>.super
+328:25 call  super().__init__(msg)
+    -> <builtin>.RuntimeError.__init__
+    reject *: super() in ResolverError, whose base is RuntimeError, finds RuntimeError.__init__
+
+[anytree.resolver.RootResolverError.__init__]
+336:43 format  {root!r}
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    reject anytree.render.AbstractStyle.__repr__, anytree.render.RenderTree.__repr__: root is the tree node that Resolver.get or __glob cannot go above
+337:14 call  super()
+    -> <builtin>.super
+337:25 call  super().__init__(root, None, msg)
+    -> anytree.resolver.ResolverError.__init__
+    reject *: super() in RootResolverError, whose base is ResolverError, finds ResolverError.__init__
+
+[anytree.resolver.ChildResolverError.__init__]
+343:22 call  repr(_getattr(c, pathattr))
+    -> <builtin>.repr
+    note: the argument is the str that _getattr returns
+343:31 call  _getattr(c, pathattr)
+    -> anytree.resolver._getattr
+343:60 getattr  node.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: node is a tree node of either family
+344:63 call  "{!r} has no child {}. Children are: {}.".format(node, ch...
+    -> <builtin>.str.format
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    note: the {!r} field formats node, a tree node; child is a part of the str path and the last field a str
+344:86 call  ", ".join(names)
+    -> <builtin>.str.join
+345:14 call  super()
+    -> <builtin>.super
+345:25 call  super().__init__(node, child, msg)
+    -> anytree.resolver.ResolverError.__init__
+    reject *: super() in ChildResolverError, whose base is ResolverError, finds ResolverError.__init__
+
+[anytree.resolver._getattr]
+349:15 call  str(getattr(node, name, None))
+    -> <builtin>.str
+    note: the argument is the value of a data attribute of the node (client data) or None (judgement J4)
+349:23 call  getattr(node, name, None)
+    -> <builtin>.getattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: name is the resolver's pathattr, a data attribute (default "name"); for a SymlinkNode it lives in the target, so getattr calls __getattr__ (judgement J4)
+
+== anytree.search
+
+[anytree.search.findall]
+66:20 call  _findall(node, filter_=filter_, stop=stop, maxlevel=maxle...
+    -> anytree.search._findall
+
+[anytree.search.findall_by_attr]
+111:20 call  _findall( node, filter_=lambda n: _filter_by_name(n, name...
+    -> anytree.search._findall
+    reject anytree.search.findall_by_attr.<lambda1>: _findall passes it on to PreOrderIter, whose _iter calls it (preorderiter.py:46)
+
+[anytree.search.findall_by_attr.<lambda1>]
+113:42 call  _filter_by_name(n, name, value)
+    -> anytree.search._filter_by_name
+
+[anytree.search.find]
+165:17 call  _find(node, filter_=filter_, stop=stop, maxlevel=maxlevel)
+    -> anytree.search._find
+
+[anytree.search.find_by_attr]
+212:17 call  _find(node, filter_=lambda n: _filter_by_name(n, name, va...
+    -> anytree.search._find
+    reject anytree.search.find_by_attr.<lambda1>: _find passes it on to PreOrderIter, whose _iter calls it (preorderiter.py:46)
+
+[anytree.search.find_by_attr.<lambda1>]
+212:57 call  _filter_by_name(n, name, value)
+    -> anytree.search._filter_by_name
+
+[anytree.search._find]
+216:21 call  _findall(node, filter_, stop=stop, maxlevel=maxlevel, max...
+    -> anytree.search._findall
+
+[anytree.search._findall]
+221:19 call  tuple(PreOrderIter(node, filter_, stop, maxlevel))
+    -> <builtin>.tuple
+    -> anytree.iterators.abstractiter.AbstractIter.__iter__
+    -> anytree.iterators.abstractiter.AbstractIter.__next__
+    note: tuple() iterates the PreOrderIter: iter() calls __iter__, then __next__ until StopIteration
+221:32 call  PreOrderIter(node, filter_, stop, maxlevel)
+    -> anytree.iterators.abstractiter.AbstractIter.__init__
+222:20 call  len(result)
+    -> <builtin>.len
+225:25 call  CountError(msg % (mincount, resultlen), result)
+    -> anytree.search.CountError.__init__
+228:25 call  CountError(msg % (maxcount, resultlen), result)
+    -> anytree.search.CountError.__init__
+
+[anytree.search._filter_by_name]
+234:23 call  getattr(node, name)
+    -> <builtin>.getattr
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: name is a data attribute of the nodes (default "name"; tests: foo); for a SymlinkNode it lives in the target, so getattr calls __getattr__ (judgement J4)
+
+[anytree.search.CountError.__init__]
+243:30 call  repr(result)
+    -> <builtin>.repr
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    note: result is the tuple of found nodes (search.py:221); repr() of the tuple calls repr() of each node
+244:14 call  super()
+    -> <builtin>.super
+244:25 call  super().__init__(msg)
+    -> <builtin>.RuntimeError.__init__
+    reject *: super() in CountError, whose base is RuntimeError, finds RuntimeError.__init__
+
+== anytree.util
+
+[anytree.util.commonancestors]
+26:23 getattr  node.ancestors
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W3: commonancestors(s) reads the exact link ancestors; its opaque parent.path raises and fallback enters target.ancestors. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.ancestors
+    -> anytree.node.nodemixin.NodeMixin.ancestors
+    note: node is a tree node of either family
+28:27 call  zip(*ancestors)
+    -> <builtin>.zip
+30:15 call  all(parentnode is p for p in parentnodes[1:])
+    -> <builtin>.all
+31:26 call  common.append(parentnode)
+    -> <builtin>.list.append
+34:17 call  tuple(common)
+    -> <builtin>.tuple
+
+[anytree.util.leftsibling]
+55:13 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    note: node is a tree node of either family
+56:26 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+56:33 getattr  node.parent.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: the parent of node, a node of the same family (judgement J1)
+57:30 call  pchildren.index(node)
+    -> <builtin>.tuple.index
+    note: pchildren is the tuple that the children property returns
+
+[anytree.util.rightsibling]
+81:13 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+    note: node is a tree node of either family
+82:26 getattr  node.parent
+    -> anytree.node.lightnodemixin.LightNodeMixin.parent
+    -> anytree.node.nodemixin.NodeMixin.parent
+82:33 getattr  node.parent.children
+    -> anytree.node.lightnodemixin.LightNodeMixin.children
+    -> anytree.node.nodemixin.NodeMixin.children
+    note: the parent of node, a node of the same family (judgement J1)
+83:30 call  pchildren.index(node)
+    -> <builtin>.tuple.index
+    note: pchildren is the tuple that the children property returns
+
+== anytree.walker
+
+[anytree.walker]
+7:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+88:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[anytree.walker.Walker.walk]
+66:27 getattr  start.path
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W2: start is the exact package link; both inner _path lookups fail, then outer path fallback enters concrete target.path before the lookup raises. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.path
+    -> anytree.node.nodemixin.NodeMixin.path
+    note: start and end are tree nodes of either family
+67:23 getattr  end.path
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W2: start is an ordinary node with a successful path; end is the exact package link whose outer path lookup falls back after both inner _path lookups fail. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.path
+    -> anytree.node.nodemixin.NodeMixin.path
+68:18 getattr  start.root
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W1: start=s and end=t. Both path reads succeed through inner _path repair; start.root then falls back to target.root. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.root
+    -> anytree.node.nodemixin.NodeMixin.root
+68:34 getattr  end.root
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W1: start=t and end=s. Both path reads succeed through inner _path repair; end.root then falls back to target.root. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.root
+    -> anytree.node.nodemixin.NodeMixin.root
+69:21 format  {start!r}
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    reject anytree.render.AbstractStyle.__repr__, anytree.render.RenderTree.__repr__: start is a tree node
+69:35 format  {end!r}
+    -> anytree.node.anynode.AnyNode.__repr__
+    -> anytree.node.node.Node.__repr__
+    -> anytree.node.symlinknode.SymlinkNode.__repr__
+    reject anytree.render.AbstractStyle.__repr__, anytree.render.RenderTree.__repr__: end is a tree node
+70:28 call  WalkError(msg)
+    -> <builtin>.RuntimeError.__init__
+    note: WalkError defines no __init__; the first __init__ of its MRO is that of RuntimeError
+72:38 call  Walker.__calc_common(startpath, endpath)
+    -> anytree.walker.Walker.__calc_common
+74:39 getattr  start.root
+    -> anytree.node.symlinknodemixin.SymlinkNodeMixin.__getattr__
+    note: R4-F1/W1: start=s/end=t; paths repair via inner _path fallback, roots match t, common is (t,). Normal mode with ANYTREE_ASSERTIONS=1 reads start.root again and invokes fallback. See anytree.md.
+    -> anytree.node.lightnodemixin.LightNodeMixin.root
+    -> anytree.node.nodemixin.NodeMixin.root
+    note: runs only when ANYTREE_ASSERTIONS is set (config.py:6)
+75:25 call  len(common)
+    -> <builtin>.len
+80:28 call  tuple(reversed(startpath[len_common:]))
+    -> <builtin>.tuple
+80:37 call  reversed(startpath[len_common:])
+    -> <builtin>.reversed
+
+[anytree.walker.Walker.__calc_common]
+90:21 call  tuple(si for si, ei in zip(start, end) if si is ei)
+    -> <builtin>.tuple
+90:42 call  zip(start, end)
+    -> <builtin>.zip

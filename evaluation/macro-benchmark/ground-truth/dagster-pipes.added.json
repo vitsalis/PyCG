@@ -1,0 +1,1073 @@
+{
+  "edges": {
+    "dagster_pipes.ExcThread.join": {
+      "io.TextIOWrapper.write": [
+        "dagster_pipes 779:29 call  sys.stderr.write(traceback.format_exception(*exc_info))"
+      ],
+      "queue.Queue.get": [
+        "dagster_pipes 778:43 call  self.exceptions.get()"
+      ],
+      "traceback.format_exception": [
+        "dagster_pipes 779:56 call  traceback.format_exception(*exc_info)"
+      ]
+    },
+    "dagster_pipes.ExcThread.run": {
+      "queue.Queue.put": [
+        "dagster_pipes 772:32 call  self.exceptions.put(sys.exc_info())"
+      ],
+      "sys.exc_info": [
+        "dagster_pipes 772:45 call  sys.exc_info()"
+      ]
+    },
+    "dagster_pipes.PipesAzureBlobStorageContextLoader.load_context": {
+      "azure.storage.blob.BlobServiceClient.get_blob_client": [
+        "dagster_pipes 1351:42 call  self._client.get_blob_client(bucket, key)"
+      ],
+      "azure.storage.blob.BlobServiceClient.get_blob_client.download_blob": [
+        "dagster_pipes 1352:44 call  blob_client.download_blob()"
+      ],
+      "azure.storage.blob.BlobServiceClient.get_blob_client.download_blob.readall": [
+        "dagster_pipes 1352:54 call  blob_client.download_blob().readall()"
+      ],
+      "azure.storage.blob.BlobServiceClient.get_blob_client.download_blob.readall.decode": [
+        "dagster_pipes 1353:36 call  obj.decode(\"utf-8\")"
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1349:40 call  _assert_env_param_type(params, \"bucket\", str, self.__clas...",
+        "dagster_pipes 1350:37 call  _assert_env_param_type(params, \"key\", str, self.__class__)"
+      ],
+      "json.loads": [
+        "dagster_pipes 1353:25 call  json.loads(obj.decode(\"utf-8\"))"
+      ]
+    },
+    "dagster_pipes.PipesAzureBlobStorageMessageWriter.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1366:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriter.__init__": [
+        "dagster_pipes 1366:25 call  super().__init__(interval=interval)"
+      ]
+    },
+    "dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel": {
+      "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.__init__": [
+        "dagster_pipes 1375:57 call  PipesAzureBlobStorageMessageWriterChannel( client=self._c..."
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1373:40 call  _assert_env_param_type(params, \"bucket\", str, self.__clas..."
+      ],
+      "dagster_pipes._assert_opt_env_param_type": [
+        "dagster_pipes 1374:48 call  _assert_opt_env_param_type(params, \"key_prefix\", str, sel..."
+      ]
+    },
+    "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1395:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__": [
+        "dagster_pipes 1395:25 call  super().__init__(interval=interval)"
+      ]
+    },
+    "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.upload_messages_chunk": {
+      "azure.storage.blob.BlobServiceClient.get_blob_client": [
+        "dagster_pipes 1402:42 call  self._client.get_blob_client(self._bucket, key)"
+      ],
+      "azure.storage.blob.BlobServiceClient.get_blob_client.upload_blob": [
+        "dagster_pipes 1403:36 call  blob_client.upload_blob(payload.read())"
+      ],
+      "io.StringIO.read": [
+        "dagster_pipes 1403:49 call  payload.read()"
+      ]
+    },
+    "dagster_pipes.PipesBlobStoreMessageWriter.open": {
+      "<builtin>.dict.get": [
+        "dagster_pipes 646:26 call  params.get(self.INCLUDE_STDIO_IN_MESSAGES_KEY)",
+        "dagster_pipes 650:31 call  params.get(PipesLogWriter.LOG_WRITER_KEY, {})"
+      ],
+      "contextlib.contextmanager.helper": [
+        "dagster_pipes 645:42 call  channel.buffered_upload_loop()",
+        "dagster_pipes 649:56 call  log_writer.open( params.get(PipesLogWriter.LOG_WRITER_KEY..."
+      ],
+      "contextlib.nullcontext": [
+        "dagster_pipes 653:52 call  nullcontext()"
+      ],
+      "dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel": [
+        "dagster_pipes 644:36 call  self.make_channel(params)"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.buffered_upload_loop": [
+        "dagster_pipes 645:42 call  channel.buffered_upload_loop()"
+      ],
+      "dagster_pipes.PipesDbfsMessageWriter.make_channel": [
+        "dagster_pipes 644:36 call  self.make_channel(params)"
+      ],
+      "dagster_pipes.PipesDefaultLogWriter.__init__": [
+        "dagster_pipes 647:51 call  PipesDefaultLogWriter(message_channel=channel)"
+      ],
+      "dagster_pipes.PipesGCSMessageWriter.make_channel": [
+        "dagster_pipes 644:36 call  self.make_channel(params)"
+      ],
+      "dagster_pipes.PipesS3MessageWriter.make_channel": [
+        "dagster_pipes 644:36 call  self.make_channel(params)"
+      ],
+      "dagster_pipes.PipesStdioLogWriter.open": [
+        "dagster_pipes 649:56 call  log_writer.open( params.get(PipesLogWriter.LOG_WRITER_KEY..."
+      ],
+      "dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel": [
+        "dagster_pipes 644:36 call  self.make_channel(params)"
+      ]
+    },
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__": {
+      "queue.Queue": [
+        "dagster_pipes 667:50 call  Queue()"
+      ]
+    },
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop": {
+      "<builtin>.len": [
+        "dagster_pipes 705:23 call  len(payload)"
+      ],
+      "<builtin>.str.join": [
+        "dagster_pipes 704:36 call  \"\\n\".join([json.dumps(message) for message in self.flush_..."
+      ],
+      "dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.upload_messages_chunk": [
+        "dagster_pipes 706:47 call  self.upload_messages_chunk(StringIO(payload), self._counter)"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.flush_messages": [
+        "dagster_pipes 704:92 call  self.flush_messages()"
+      ],
+      "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.upload_messages_chunk": [
+        "dagster_pipes 706:47 call  self.upload_messages_chunk(StringIO(payload), self._counter)"
+      ],
+      "dagster_pipes.PipesGCSMessageWriterChannel.upload_messages_chunk": [
+        "dagster_pipes 706:47 call  self.upload_messages_chunk(StringIO(payload), self._counter)"
+      ],
+      "dagster_pipes.PipesS3MessageWriterChannel.upload_messages_chunk": [
+        "dagster_pipes 706:47 call  self.upload_messages_chunk(StringIO(payload), self._counter)"
+      ],
+      "datetime.datetime.now": [
+        "dagster_pipes 696:53 call  datetime.datetime.now()",
+        "dagster_pipes 698:40 call  datetime.datetime.now()"
+      ],
+      "io.StringIO": [
+        "dagster_pipes 706:56 call  StringIO(payload)"
+      ],
+      "json.dumps": [
+        "dagster_pipes 704:48 call  json.dumps(message)"
+      ],
+      "queue.Queue.empty": [
+        "dagster_pipes 699:34 call  self._buffer.empty()"
+      ],
+      "threading.Event.is_set": [
+        "dagster_pipes 699:65 call  is_session_closed.is_set()",
+        "dagster_pipes 702:41 call  is_session_closed.is_set()"
+      ],
+      "time.sleep": [
+        "dagster_pipes 709:23 call  time.sleep(1)"
+      ]
+    },
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.buffered_upload_loop": {
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop": [
+        "dagster_pipes 688:25 call  thread.start()"
+      ],
+      "threading.Event": [
+        "dagster_pipes 685:34 call  Event()"
+      ],
+      "threading.Event.set": [
+        "dagster_pipes 691:34 call  is_session_closed.set()"
+      ],
+      "threading.Thread": [
+        "dagster_pipes 687:28 call  Thread(target=self._upload_loop, args=(is_session_closed,..."
+      ],
+      "threading.Thread.join": [
+        "dagster_pipes 693:28 call  thread.join(timeout=60)"
+      ],
+      "threading.Thread.start": [
+        "dagster_pipes 688:25 call  thread.start()"
+      ]
+    },
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.flush_messages": {
+      "<builtin>.list.append": [
+        "dagster_pipes 676:25 call  items.append(self._buffer.get())"
+      ],
+      "queue.Queue.empty": [
+        "dagster_pipes 675:37 call  self._buffer.empty()"
+      ],
+      "queue.Queue.get": [
+        "dagster_pipes 676:42 call  self._buffer.get()"
+      ]
+    },
+    "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message": {
+      "queue.Queue.put": [
+        "dagster_pipes 671:25 call  self._buffer.put(message)"
+      ]
+    },
+    "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 720:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__": [
+        "dagster_pipes 720:25 call  super().__init__(interval=interval)"
+      ]
+    },
+    "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.upload_messages_chunk": {
+      "<builtin>.open": [
+        "dagster_pipes 725:18 call  open(message_path, \"w\", encoding=\"utf-8\")"
+      ],
+      "io.StringIO.read": [
+        "dagster_pipes 726:33 call  payload.read()"
+      ],
+      "io.TextIOWrapper.write": [
+        "dagster_pipes 726:20 call  f.write(payload.read())"
+      ],
+      "os.path.join": [
+        "dagster_pipes 724:36 call  os.path.join(self._path, f\"{index}.json\")"
+      ]
+    },
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush": {
+      "io.TextIOWrapper.writelines": [
+        "dagster_pipes 1017:36 call  self._stream.writelines((json.dumps(message), \"\\n\"))"
+      ],
+      "json.dumps": [
+        "dagster_pipes 1017:48 call  json.dumps(message)"
+      ]
+    },
+    "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message": {
+      "<builtin>.list.append": [
+        "dagster_pipes 1013:28 call  self._buffer.append(message)"
+      ]
+    },
+    "dagster_pipes.PipesCliArgsParamsLoader.load_context_params": {
+      "argparse.ArgumentParser.parse_known_args": [
+        "dagster_pipes 1130:47 call  self.parser.parse_known_args()"
+      ],
+      "dagster_pipes.decode_param": [
+        "dagster_pipes 1131:28 call  decode_param(args.dagster_pipes_context)"
+      ]
+    },
+    "dagster_pipes.PipesCliArgsParamsLoader.load_messages_params": {
+      "argparse.ArgumentParser.parse_known_args": [
+        "dagster_pipes 1134:47 call  self.parser.parse_known_args()"
+      ],
+      "dagster_pipes.decode_param": [
+        "dagster_pipes 1135:28 call  decode_param(args.dagster_pipes_messages)"
+      ]
+    },
+    "dagster_pipes.PipesContext.__exit__": {
+      "dagster_pipes.PipesContext.close": [
+        "dagster_pipes 1713:19 call  self.close(exc)"
+      ],
+      "dagster_pipes._pipes_exc_from_tb": [
+        "dagster_pipes 1710:37 call  _pipes_exc_from_tb(TracebackException(exc_type, exc_value..."
+      ],
+      "traceback.TracebackException": [
+        "dagster_pipes 1710:56 call  TracebackException(exc_type, exc_value, traceback)"
+      ]
+    },
+    "dagster_pipes.PipesContext.__init__": {
+      "dagster_pipes.PipesAzureBlobStorageContextLoader.load_context": [
+        "dagster_pipes 1695:78 call  context_loader.load_context(context_params)"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriter.open": [
+        "dagster_pipes 1696:81 call  message_writer.open(messages_params)"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message": [
+        "dagster_pipes 1698:44 call  self._message_channel.write_message(_make_message(\"opened..."
+      ],
+      "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1698:44 call  self._message_channel.write_message(_make_message(\"opened..."
+      ],
+      "dagster_pipes.PipesCliArgsParamsLoader.load_context_params": [
+        "dagster_pipes 1692:59 call  params_loader.load_context_params()"
+      ],
+      "dagster_pipes.PipesCliArgsParamsLoader.load_messages_params": [
+        "dagster_pipes 1693:61 call  params_loader.load_messages_params()"
+      ],
+      "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_context_params": [
+        "dagster_pipes 1692:59 call  params_loader.load_context_params()"
+      ],
+      "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_messages_params": [
+        "dagster_pipes 1693:61 call  params_loader.load_messages_params()"
+      ],
+      "dagster_pipes.PipesDbfsContextLoader.load_context": [
+        "dagster_pipes 1695:78 call  context_loader.load_context(context_params)"
+      ],
+      "dagster_pipes.PipesDefaultContextLoader.load_context": [
+        "dagster_pipes 1695:78 call  context_loader.load_context(context_params)"
+      ],
+      "dagster_pipes.PipesDefaultMessageWriter.open": [
+        "dagster_pipes 1696:81 call  message_writer.open(messages_params)"
+      ],
+      "dagster_pipes.PipesFileMessageWriterChannel.write_message": [
+        "dagster_pipes 1698:44 call  self._message_channel.write_message(_make_message(\"opened..."
+      ],
+      "dagster_pipes.PipesGCSContextLoader.load_context": [
+        "dagster_pipes 1695:78 call  context_loader.load_context(context_params)"
+      ],
+      "dagster_pipes.PipesMappingParamsLoader.load_context_params": [
+        "dagster_pipes 1692:59 call  params_loader.load_context_params()"
+      ],
+      "dagster_pipes.PipesMappingParamsLoader.load_messages_params": [
+        "dagster_pipes 1693:61 call  params_loader.load_messages_params()"
+      ],
+      "dagster_pipes.PipesMessageWriter.get_opened_payload": [
+        "dagster_pipes 1697:59 call  message_writer.get_opened_payload()"
+      ],
+      "dagster_pipes.PipesPrefectLogsMessageWriter.open": [
+        "dagster_pipes 1696:81 call  message_writer.open(messages_params)"
+      ],
+      "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message": [
+        "dagster_pipes 1698:44 call  self._message_channel.write_message(_make_message(\"opened..."
+      ],
+      "dagster_pipes.PipesS3ContextLoader.load_context": [
+        "dagster_pipes 1695:78 call  context_loader.load_context(context_params)"
+      ],
+      "dagster_pipes.PipesStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1698:44 call  self._message_channel.write_message(_make_message(\"opened..."
+      ],
+      "dagster_pipes.PipesUnityCatalogVolumesContextLoader.load_context": [
+        "dagster_pipes 1695:78 call  context_loader.load_context(context_params)"
+      ]
+    },
+    "dagster_pipes.PipesContext._write_message": {
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message": [
+        "dagster_pipes 1738:44 call  self._message_channel.write_message(message)"
+      ],
+      "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1738:44 call  self._message_channel.write_message(message)"
+      ],
+      "dagster_pipes.PipesFileMessageWriterChannel.write_message": [
+        "dagster_pipes 1738:44 call  self._message_channel.write_message(message)"
+      ],
+      "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message": [
+        "dagster_pipes 1738:44 call  self._message_channel.write_message(message)"
+      ],
+      "dagster_pipes.PipesStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1738:44 call  self._message_channel.write_message(message)"
+      ]
+    },
+    "dagster_pipes.PipesContext.close": {
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message": [
+        "dagster_pipes 1725:48 call  self._message_channel.write_message(_make_message(\"closed..."
+      ],
+      "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1725:48 call  self._message_channel.write_message(_make_message(\"closed..."
+      ],
+      "dagster_pipes.PipesFileMessageWriterChannel.write_message": [
+        "dagster_pipes 1725:48 call  self._message_channel.write_message(_make_message(\"closed..."
+      ],
+      "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message": [
+        "dagster_pipes 1725:48 call  self._message_channel.write_message(_make_message(\"closed..."
+      ],
+      "dagster_pipes.PipesStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1725:48 call  self._message_channel.write_message(_make_message(\"closed..."
+      ]
+    },
+    "dagster_pipes.PipesContext.get": {
+      "<builtin>.Exception": [
+        "dagster_pipes 1681:28 call  Exception( \"PipesContext has not been initialized. You mu..."
+      ]
+    },
+    "dagster_pipes.PipesContext.log_external_stream": {
+      "dagster_pipes.PipesContext._write_message": [
+        "dagster_pipes 1974:28 call  self._write_message( \"log_external_stream\", {\"stream\": st..."
+      ]
+    },
+    "dagster_pipes.PipesContext.report_custom_message": {
+      "dagster_pipes.PipesContext._write_message": [
+        "dagster_pipes 1971:28 call  self._write_message(\"report_custom_message\", {\"payload\": ..."
+      ]
+    },
+    "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_context_params": {
+      "dagster_pipes.decode_param": [
+        "dagster_pipes 1524:28 call  decode_param(self.widgets.get(DAGSTER_PIPES_CONTEXT_WIDGE..."
+      ]
+    },
+    "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_messages_params": {
+      "dagster_pipes.decode_param": [
+        "dagster_pipes 1527:28 call  decode_param(self.widgets.get(DAGSTER_PIPES_MESSAGES_WIDG..."
+      ]
+    },
+    "dagster_pipes.PipesDbfsContextLoader.load_context": {
+      "<builtin>.open": [
+        "dagster_pipes 1418:18 call  open(path, encoding=\"utf-8\")"
+      ],
+      "<builtin>.str.lstrip": [
+        "dagster_pipes 1417:59 call  unmounted_path.lstrip(\"/\")"
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1416:48 call  _assert_env_param_type(params, \"path\", str, self.__class__)"
+      ],
+      "json.load": [
+        "dagster_pipes 1419:28 call  json.load(f)"
+      ],
+      "os.path.join": [
+        "dagster_pipes 1417:28 call  os.path.join(\"/dbfs\", unmounted_path.lstrip(\"/\"))"
+      ]
+    },
+    "dagster_pipes.PipesDbfsMessageWriter.get_opened_extras": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 1451:36 call  DagsterPipesError( \"`PipesDbfsMessageWriter` requires pys...",
+        "dagster_pipes 1457:36 call  DagsterPipesError( \"`PipesDbfsMessageWriter` expects an a..."
+      ],
+      "pyspark.sql.SparkSession.getActiveSession": [
+        "dagster_pipes 1455:46 call  SparkSession.getActiveSession()"
+      ],
+      "pyspark.sql.SparkSession.getActiveSession.conf.get": [
+        "dagster_pipes 1461:30 call  spark.conf.get(\"spark.databricks.clusterUsageTags.cluster...",
+        "dagster_pipes 1462:57 call  spark.conf.get( \"spark.databricks.clusterUsageTags.cluste...",
+        "dagster_pipes 1465:44 call  spark.conf.get(\"spark.databricks.clusterUsageTags.cluster..."
+      ],
+      "warnings.warn": [
+        "dagster_pipes 1470:26 call  warnings.warn( \"A Py4JJavaError was thrown while reading ..."
+      ]
+    },
+    "dagster_pipes.PipesDbfsMessageWriter.make_channel": {
+      "<builtin>.str.lstrip": [
+        "dagster_pipes 1431:61 call  unmounted_path.lstrip(\"/\")"
+      ],
+      "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__": [
+        "dagster_pipes 1430:59 call  PipesBufferedFilesystemMessageWriterChannel( path=os.path..."
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1429:48 call  _assert_env_param_type(params, \"path\", str, self.__class__)"
+      ],
+      "os.path.join": [
+        "dagster_pipes 1431:30 call  os.path.join(\"/dbfs\", unmounted_path.lstrip(\"/\"))"
+      ]
+    },
+    "dagster_pipes.PipesDefaultContextLoader.load_context": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 757:36 call  DagsterPipesError( f'Invalid params for {self.__class__._..."
+      ],
+      "<builtin>.open": [
+        "dagster_pipes 750:22 call  open(path, encoding=\"utf-8\")"
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 749:42 call  _assert_env_param_type(params, self.FILE_PATH_KEY, str, s...",
+        "dagster_pipes 754:42 call  _assert_env_param_type(params, self.DIRECT_KEY, dict, sel..."
+      ],
+      "json.load": [
+        "dagster_pipes 751:33 call  json.load(f)"
+      ],
+      "typing.cast": [
+        "dagster_pipes 755:23 call  cast(\"PipesContextData\", data)"
+      ]
+    },
+    "dagster_pipes.PipesDefaultLogWriter.message_channel": {
+      "<builtin>.RuntimeError": [
+        "dagster_pipes 1054:31 call  RuntimeError(\"message_channel is not set\")"
+      ]
+    },
+    "dagster_pipes.PipesDefaultLogWriterChannel.write_chunk": {
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message": [
+        "dagster_pipes 1035:43 call  self.message_channel.write_message( _make_message( method..."
+      ],
+      "dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1035:43 call  self.message_channel.write_message( _make_message( method..."
+      ],
+      "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message": [
+        "dagster_pipes 1035:43 call  self.message_channel.write_message( _make_message( method..."
+      ],
+      "dagster_pipes.PipesStreamMessageWriterChannel.write_message": [
+        "dagster_pipes 1035:43 call  self.message_channel.write_message( _make_message( method..."
+      ]
+    },
+    "dagster_pipes.PipesDefaultMessageWriter.open": {
+      "<builtin>.dict.get": [
+        "dagster_pipes 937:26 call  params.get(self.INCLUDE_STDIO_IN_MESSAGES_KEY)",
+        "dagster_pipes 940:31 call  params.get(PipesLogWriter.LOG_WRITER_KEY, {})"
+      ],
+      "contextlib.contextmanager.helper": [
+        "dagster_pipes 939:56 call  log_writer.open( params.get(PipesLogWriter.LOG_WRITER_KEY..."
+      ],
+      "contextlib.nullcontext": [
+        "dagster_pipes 943:52 call  nullcontext()"
+      ],
+      "dagster_pipes.PipesBufferedStreamMessageWriterChannel.__init__": [
+        "dagster_pipes 968:62 call  PipesBufferedStreamMessageWriterChannel(target)"
+      ],
+      "dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush": [
+        "dagster_pipes 972:30 call  channel.flush()"
+      ],
+      "dagster_pipes.PipesDefaultLogWriter.__init__": [
+        "dagster_pipes 938:51 call  PipesDefaultLogWriter(message_channel=channel)"
+      ],
+      "dagster_pipes.PipesFileMessageWriterChannel.__init__": [
+        "dagster_pipes 936:52 call  PipesFileMessageWriterChannel(path)"
+      ],
+      "dagster_pipes.PipesStdioLogWriter.open": [
+        "dagster_pipes 939:56 call  log_writer.open( params.get(PipesLogWriter.LOG_WRITER_KEY..."
+      ],
+      "dagster_pipes.PipesStreamMessageWriterChannel.__init__": [
+        "dagster_pipes 957:50 call  PipesStreamMessageWriterChannel(target)"
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 935:42 call  _assert_env_param_type(params, self.FILE_PATH_KEY, str, s...",
+        "dagster_pipes 948:44 call  _assert_env_param_type(params, self.STDIO_KEY, str, self....",
+        "dagster_pipes 960:44 call  _assert_env_param_type(params, self.BUFFERED_STDIO_KEY, s..."
+      ]
+    },
+    "dagster_pipes.PipesEnvVarParamsLoader.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1096:14 call  super()"
+      ],
+      "dagster_pipes.PipesMappingParamsLoader.__init__": [
+        "dagster_pipes 1096:25 call  super().__init__(mapping=os.environ)"
+      ]
+    },
+    "dagster_pipes.PipesGCSContextLoader.load_context": {
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1275:40 call  _assert_env_param_type(params, \"bucket\", str, self.__clas...",
+        "dagster_pipes 1276:37 call  _assert_env_param_type(params, \"key\", str, self.__class__)"
+      ],
+      "google.cloud.storage.Client.get_bucket": [
+        "dagster_pipes 1277:38 call  self._client.get_bucket(bucket)"
+      ],
+      "google.cloud.storage.Client.get_bucket.blob": [
+        "dagster_pipes 1277:51 call  self._client.get_bucket(bucket).blob(key)"
+      ],
+      "google.cloud.storage.Client.get_bucket.blob.download_as_bytes": [
+        "dagster_pipes 1277:74 call  self._client.get_bucket(bucket).blob(key).download_as_byt..."
+      ],
+      "google.cloud.storage.Client.get_bucket.blob.download_as_bytes.decode": [
+        "dagster_pipes 1278:36 call  obj.decode(\"utf-8\")"
+      ],
+      "json.loads": [
+        "dagster_pipes 1278:25 call  json.loads(obj.decode(\"utf-8\"))"
+      ]
+    },
+    "dagster_pipes.PipesGCSMessageWriter.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1290:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriter.__init__": [
+        "dagster_pipes 1290:25 call  super().__init__(interval=interval)"
+      ]
+    },
+    "dagster_pipes.PipesGCSMessageWriter.make_channel": {
+      "dagster_pipes.PipesGCSMessageWriterChannel.__init__": [
+        "dagster_pipes 1299:44 call  PipesGCSMessageWriterChannel( client=self._client, bucket..."
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1297:40 call  _assert_env_param_type(params, \"bucket\", str, self.__clas..."
+      ],
+      "dagster_pipes._assert_opt_env_param_type": [
+        "dagster_pipes 1298:48 call  _assert_opt_env_param_type(params, \"key_prefix\", str, sel..."
+      ]
+    },
+    "dagster_pipes.PipesGCSMessageWriterChannel.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1320:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__": [
+        "dagster_pipes 1320:25 call  super().__init__(interval=interval)"
+      ],
+      "google.cloud.storage.Client.get_bucket": [
+        "dagster_pipes 1325:51 call  self._client.get_bucket(self._bucket)"
+      ]
+    },
+    "dagster_pipes.PipesGCSMessageWriterChannel.upload_messages_chunk": {
+      "google.cloud.storage.Client.get_bucket.blob": [
+        "dagster_pipes 1329:30 call  self._gcp_bucket.blob(key)"
+      ],
+      "google.cloud.storage.Client.get_bucket.blob.upload_from_string": [
+        "dagster_pipes 1329:54 call  self._gcp_bucket.blob(key).upload_from_string(payload.rea..."
+      ],
+      "io.StringIO.read": [
+        "dagster_pipes 1329:67 call  payload.read()"
+      ]
+    },
+    "dagster_pipes.PipesLogWriter.get_opened_payload": {
+      "dagster_pipes.PipesLogWriter.get_opened_extras": [
+        "dagster_pipes 540:49 call  self.get_opened_extras()"
+      ]
+    },
+    "dagster_pipes.PipesMappingParamsLoader.load_context_params": {
+      "dagster_pipes.decode_param": [
+        "dagster_pipes 1085:28 call  decode_param(raw_value)"
+      ]
+    },
+    "dagster_pipes.PipesMappingParamsLoader.load_messages_params": {
+      "dagster_pipes.decode_param": [
+        "dagster_pipes 1089:28 call  decode_param(raw_value)"
+      ]
+    },
+    "dagster_pipes.PipesMessageWriter.get_opened_payload": {
+      "dagster_pipes.PipesDbfsMessageWriter.get_opened_extras": [
+        "dagster_pipes 573:49 call  self.get_opened_extras()"
+      ],
+      "dagster_pipes.PipesMessageWriter.get_opened_extras": [
+        "dagster_pipes 573:49 call  self.get_opened_extras()"
+      ]
+    },
+    "dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message": {
+      "dagster_pipes._PipesLoggerHandler.emit": [
+        "dagster_pipes 1578:26 call  self._logger.info(line)"
+      ]
+    },
+    "dagster_pipes.PipesS3ContextLoader.load_context": {
+      "boto3.client.get_object": [
+        "dagster_pipes 1199:38 call  self._client.get_object(Bucket=bucket, Key=key)"
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1197:40 call  _assert_env_param_type(params, \"bucket\", str, self.__clas...",
+        "dagster_pipes 1198:37 call  _assert_env_param_type(params, \"key\", str, self.__class__)"
+      ],
+      "json.loads": [
+        "dagster_pipes 1200:25 call  json.loads(obj[\"Body\"].read().decode(\"utf-8\"))"
+      ]
+    },
+    "dagster_pipes.PipesS3MessageWriter.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1213:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriter.__init__": [
+        "dagster_pipes 1213:25 call  super().__init__(interval=interval)"
+      ]
+    },
+    "dagster_pipes.PipesS3MessageWriter.make_channel": {
+      "dagster_pipes.PipesS3MessageWriterChannel.__init__": [
+        "dagster_pipes 1224:43 call  PipesS3MessageWriterChannel( client=self._client, bucket=..."
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1222:40 call  _assert_env_param_type(params, \"bucket\", str, self.__clas..."
+      ],
+      "dagster_pipes._assert_opt_env_param_type": [
+        "dagster_pipes 1223:48 call  _assert_opt_env_param_type(params, \"key_prefix\", str, sel..."
+      ]
+    },
+    "dagster_pipes.PipesS3MessageWriterChannel.__init__": {
+      "<builtin>.super": [
+        "dagster_pipes 1244:14 call  super()"
+      ],
+      "dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__": [
+        "dagster_pipes 1244:25 call  super().__init__(interval=interval)"
+      ]
+    },
+    "dagster_pipes.PipesS3MessageWriterChannel.upload_messages_chunk": {
+      "boto3.client.put_object": [
+        "dagster_pipes 1251:32 call  self._client.put_object( Body=payload.read(), Bucket=self..."
+      ],
+      "io.StringIO.read": [
+        "dagster_pipes 1252:30 call  payload.read()"
+      ]
+    },
+    "dagster_pipes.PipesStdioLogWriter.open": {
+      "dagster_pipes.PipesStdioLogWriterChannel.capture": [
+        "dagster_pipes 799:55 call  stdout_channel.capture()",
+        "dagster_pipes 800:55 call  stderr_channel.capture()"
+      ]
+    },
+    "dagster_pipes.PipesStdioLogWriterChannel.capture": {
+      "queue.Queue.get": [
+        "dagster_pipes 879:61 call  self.error_messages.get()"
+      ]
+    },
+    "dagster_pipes.PipesStdioLogWriterChannel.handler": {
+      "dagster_pipes.PipesStdioLogWriterChannel.name": [
+        "dagster_pipes 904:73 getattr  self.name"
+      ],
+      "queue.Queue.put": [
+        "dagster_pipes 904:44 call  self.error_messages.put(f\"Exception in thread {self.name}..."
+      ]
+    },
+    "dagster_pipes.PipesStdioLogWriterChannel.stdio": {
+      "<builtin>.ValueError": [
+        "dagster_pipes 832:29 call  ValueError(f\"stream must be 'stdout' or 'stderr', got {se..."
+      ]
+    },
+    "dagster_pipes.PipesStreamMessageWriterChannel.write_message": {
+      "io.TextIOWrapper.writelines": [
+        "dagster_pipes 1000:32 call  self._stream.writelines((json.dumps(message), \"\\n\"))"
+      ],
+      "json.dumps": [
+        "dagster_pipes 1000:44 call  json.dumps(message)"
+      ]
+    },
+    "dagster_pipes.PipesUnityCatalogVolumesContextLoader.load_context": {
+      "<builtin>.open": [
+        "dagster_pipes 1489:18 call  open(path, encoding=\"utf-8\")"
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1488:38 call  _assert_env_param_type(params, \"path\", str, self.__class__)"
+      ],
+      "json.load": [
+        "dagster_pipes 1490:28 call  json.load(f)"
+      ]
+    },
+    "dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel": {
+      "dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__": [
+        "dagster_pipes 1503:59 call  PipesBufferedFilesystemMessageWriterChannel( path=path, i..."
+      ],
+      "dagster_pipes._assert_env_param_type": [
+        "dagster_pipes 1502:38 call  _assert_env_param_type(params, \"path\", str, self.__class__)"
+      ]
+    },
+    "dagster_pipes._assert_opt_env_param_type": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 339:32 call  DagsterPipesError( f\"Invalid type for parameter `{key}` p..."
+      ],
+      "<builtin>.type": [
+        "dagster_pipes 341:82 call  type(value)"
+      ]
+    },
+    "dagster_pipes._assert_opt_param_type": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 315:32 call  DagsterPipesError( f\"Invalid type for parameter `{param}`..."
+      ],
+      "<builtin>.type": [
+        "dagster_pipes 317:55 call  type(value)"
+      ]
+    },
+    "dagster_pipes._assert_opt_param_value": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 359:32 call  DagsterPipesError( f\"Invalid value for parameter `{param}..."
+      ]
+    },
+    "dagster_pipes._assert_param_type": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 306:32 call  DagsterPipesError( f\"Invalid type for parameter `{param}`..."
+      ],
+      "<builtin>.type": [
+        "dagster_pipes 308:22 call  type(value)"
+      ]
+    },
+    "dagster_pipes._assert_param_value": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 348:32 call  DagsterPipesError( f\"Invalid value for parameter `{param}..."
+      ]
+    },
+    "dagster_pipes._assert_single_partition": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 295:32 call  DagsterPipesError(f\"`{key}` is undefined. Current step ta..."
+      ]
+    },
+    "dagster_pipes._emit_orchestration_inactive_warning": {
+      "warnings.warn": [
+        "dagster_pipes 446:18 call  warnings.warn( \"This process was not launched by a Dagste..."
+      ]
+    },
+    "dagster_pipes._get_mock": {
+      "unittest.mock.MagicMock": [
+        "dagster_pipes 457:21 call  MagicMock()"
+      ]
+    },
+    "dagster_pipes._json_serialize_param": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 370:32 call  DagsterPipesError( f\"Invalid type for parameter `{param}`..."
+      ],
+      "<builtin>.type": [
+        "dagster_pipes 372:32 call  type(value)"
+      ],
+      "json.dumps": [
+        "dagster_pipes 368:32 call  json.dumps(value)"
+      ]
+    },
+    "dagster_pipes._normalize_param_metadata": {
+      "<builtin>.Exception.__init__": [
+        "dagster_pipes 390:36 call  DagsterPipesError( f\"Invalid type for parameter `{param}`...",
+        "dagster_pipes 396:40 call  DagsterPipesError( f\"Invalid type for parameter `{param}`..."
+      ],
+      "<builtin>.type": [
+        "dagster_pipes 392:58 call  type(key)"
+      ]
+    },
+    "dagster_pipes._pipes_exc_from_tb": {
+      "<builtin>.dict.__init__": [
+        "dagster_pipes 483:26 call  PipesException( message=\"\".join(list(tb.format_exception_..."
+      ],
+      "<builtin>.list": [
+        "dagster_pipes 484:29 call  list(tb.format_exception_only())"
+      ],
+      "<builtin>.str.join": [
+        "dagster_pipes 484:24 call  \"\".join(list(tb.format_exception_only()))"
+      ],
+      "<builtin>.str.split": [
+        "dagster_pipes 479:37 call  tb.exc_type_str.split(\".\")"
+      ],
+      "dagster_pipes._pipes_exc_from_tb": [
+        "dagster_pipes 487:33 call  _pipes_exc_from_tb(tb.__cause__)",
+        "dagster_pipes 488:35 call  _pipes_exc_from_tb(tb.__context__)"
+      ],
+      "traceback.StackSummary.format": [
+        "dagster_pipes 485:30 call  tb.stack.format()"
+      ],
+      "traceback.TracebackException.format_exception_only": [
+        "dagster_pipes 484:54 call  tb.format_exception_only()"
+      ]
+    },
+    "dagster_pipes.decode_param": {
+      "<builtin>.bytes.decode": [
+        "dagster_pipes 437:42 call  decompressed.decode(\"utf-8\")"
+      ],
+      "base64.b64decode": [
+        "dagster_pipes 435:31 call  base64.b64decode(value)"
+      ],
+      "json.loads": [
+        "dagster_pipes 437:22 call  json.loads(decompressed.decode(\"utf-8\"))"
+      ],
+      "zlib.decompress": [
+        "dagster_pipes 436:35 call  zlib.decompress(decoded)"
+      ]
+    },
+    "dagster_pipes.encode_param": {
+      "<builtin>.bytes.decode": [
+        "dagster_pipes 422:26 call  encoded.decode(\"utf-8\")"
+      ],
+      "<builtin>.str.encode": [
+        "dagster_pipes 420:49 call  serialized.encode(\"utf-8\")"
+      ],
+      "base64.b64encode": [
+        "dagster_pipes 421:31 call  base64.b64encode(compressed)"
+      ],
+      "dagster_pipes._json_serialize_param": [
+        "dagster_pipes 419:39 call  _json_serialize_param(value, \"encode_param\", \"value\")"
+      ],
+      "zlib.compress": [
+        "dagster_pipes 420:31 call  zlib.compress(serialized.encode(\"utf-8\"))"
+      ]
+    },
+    "dagster_pipes.open_dagster_pipes": {
+      "dagster_pipes.PipesCliArgsParamsLoader.is_dagster_pipes_process": [
+        "dagster_pipes 1640:46 call  params_loader.is_dagster_pipes_process()"
+      ],
+      "dagster_pipes.PipesContext.__init__": [
+        "dagster_pipes 1643:31 call  PipesContext(params_loader, context_loader, message_writer)"
+      ],
+      "dagster_pipes.PipesContext.get": [
+        "dagster_pipes 1637:32 call  PipesContext.get()"
+      ],
+      "dagster_pipes.PipesContext.is_initialized": [
+        "dagster_pipes 1636:35 call  PipesContext.is_initialized()"
+      ],
+      "dagster_pipes.PipesContext.set": [
+        "dagster_pipes 1647:21 call  PipesContext.set(context)"
+      ],
+      "dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.is_dagster_pipes_process": [
+        "dagster_pipes 1640:46 call  params_loader.is_dagster_pipes_process()"
+      ],
+      "dagster_pipes.PipesEnvVarParamsLoader.__init__": [
+        "dagster_pipes 1639:61 call  PipesEnvVarParamsLoader()"
+      ],
+      "dagster_pipes.PipesMappingParamsLoader.is_dagster_pipes_process": [
+        "dagster_pipes 1640:46 call  params_loader.is_dagster_pipes_process()"
+      ],
+      "dagster_pipes._emit_orchestration_inactive_warning": [
+        "dagster_pipes 1645:45 call  _emit_orchestration_inactive_warning()"
+      ],
+      "dagster_pipes._get_mock": [
+        "dagster_pipes 1646:28 call  _get_mock()"
+      ]
+    }
+  },
+  "notes": {
+    "dagster_pipes 1000:32 call  self._stream.writelines((json.dumps(message), \"\\n\"))": [
+      "self._stream is sys.stderr or sys.stdout, selected at 955 and passed to the stream channel by PipesDefaultMessageWriter.open; the default streams are named by their class (README), and a client's abstract TextIO is opaque."
+    ],
+    "dagster_pipes 1017:36 call  self._stream.writelines((json.dumps(message), \"\\n\"))": [
+      "self._stream is sys.stderr or sys.stdout, selected at 967 and passed to the buffered stream channel by PipesDefaultMessageWriter.open; the default streams are named by their class (README), and a client's abstract TextIO is opaque."
+    ],
+    "dagster_pipes 1035:43 call  self.message_channel.write_message( _make_message( method...": [
+      "self.message_channel is annotated PipesMessageWriterChannel (1026); every concrete package channel fits (B2). The package passes the channel of PipesBlobStoreMessageWriter.open and PipesDefaultMessageWriter.open through PipesDefaultLogWriter; a client channel is opaque"
+    ],
+    "dagster_pipes 1054:31 call  RuntimeError(\"message_channel is not set\")": [
+      "reached when a client passes None as message_channel"
+    ],
+    "dagster_pipes 1130:47 call  self.parser.parse_known_args()": [
+      "self.parser is DAGSTER_PIPES_CLI_PARSER (1106), set in __init__"
+    ],
+    "dagster_pipes 1134:47 call  self.parser.parse_known_args()": [
+      "self.parser is DAGSTER_PIPES_CLI_PARSER (1106), set in __init__"
+    ],
+    "dagster_pipes 1199:38 call  self._client.get_object(Bucket=bucket, Key=key)": [
+      "missing module (judgement 3): client is annotated Any, so its docstring fixes the type, a boto3.client(\"s3\") object; boto3 is not installed, and the expression has the shape of ext.client().get(), so the callee is the stub boto3.client.get_object; the real class has no public name: botocore makes it at run time"
+    ],
+    "dagster_pipes 1251:32 call  self._client.put_object( Body=payload.read(), Bucket=self...": [
+      "missing module (judgement 3): client is annotated Any, so its docstring fixes the type, a boto3.client(\"s3\") object; boto3 is not installed, and the expression has the shape of ext.client().get(), so the callee is the stub boto3.client.put_object; the real class has no public name: botocore makes it at run time"
+    ],
+    "dagster_pipes 1252:30 call  payload.read()": [
+      "payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque"
+    ],
+    "dagster_pipes 1277:38 call  self._client.get_bucket(bucket)": [
+      "missing module (judgement 4): self._client is annotated google.cloud.storage.Client (imported under TYPE_CHECKING); google-cloud-storage is not installed, so the callee is named by the micro-benchmark rules for a missing module"
+    ],
+    "dagster_pipes 1277:51 call  self._client.get_bucket(bucket).blob(key)": [
+      "missing module (judgement 4): calling a stub returns an instance of it; the real class is google.cloud.storage.Bucket"
+    ],
+    "dagster_pipes 1277:74 call  self._client.get_bucket(bucket).blob(key).download_as_byt...": [
+      "missing module (judgement 4); the real class is google.cloud.storage.Blob"
+    ],
+    "dagster_pipes 1278:36 call  obj.decode(\"utf-8\")": [
+      "missing module (judgement 4): obj is an instance of the stub; the real value is bytes (bytes.decode)"
+    ],
+    "dagster_pipes 1325:51 call  self._client.get_bucket(self._bucket)": [
+      "missing module (judgement 4): self._client is annotated google.cloud.storage.Client (imported under TYPE_CHECKING); google-cloud-storage is not installed, so the callee is named by the micro-benchmark rules for a missing module"
+    ],
+    "dagster_pipes 1329:30 call  self._gcp_bucket.blob(key)": [
+      "missing module (judgement 4): self._gcp_bucket is an instance of the stub google.cloud.storage.Client.get_bucket (1325); the real class is google.cloud.storage.Bucket"
+    ],
+    "dagster_pipes 1329:54 call  self._gcp_bucket.blob(key).upload_from_string(payload.rea...": [
+      "missing module (judgement 4); the real class is google.cloud.storage.Blob"
+    ],
+    "dagster_pipes 1329:67 call  payload.read()": [
+      "payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque"
+    ],
+    "dagster_pipes 1351:42 call  self._client.get_blob_client(bucket, key)": [
+      "judgement 3: client is annotated Any, so its docstring fixes the type, an azure.storage.blob.BlobServiceClient; azure-storage-blob is not installed: named as a missing module (judgement 4)"
+    ],
+    "dagster_pipes 1352:44 call  blob_client.download_blob()": [
+      "missing module (judgements 3, 4): blob_client is the instance of the stub get_blob_client that the with statement gives; the real class is azure.storage.blob.BlobClient"
+    ],
+    "dagster_pipes 1352:54 call  blob_client.download_blob().readall()": [
+      "missing module (judgements 3, 4); the real class is azure.storage.blob.StorageStreamDownloader"
+    ],
+    "dagster_pipes 1353:36 call  obj.decode(\"utf-8\")": [
+      "missing module (judgements 3, 4): obj is an instance of the stub; the real value is bytes (bytes.decode)"
+    ],
+    "dagster_pipes 1402:42 call  self._client.get_blob_client(self._bucket, key)": [
+      "judgement 3: client is annotated Any, so its docstring fixes the type, an azure.storage.blob.BlobServiceClient; azure-storage-blob is not installed: named as a missing module (judgement 4)"
+    ],
+    "dagster_pipes 1403:36 call  blob_client.upload_blob(payload.read())": [
+      "missing module (judgements 3, 4): blob_client is the instance of the stub get_blob_client that the with statement gives; the real class is azure.storage.blob.BlobClient"
+    ],
+    "dagster_pipes 1403:49 call  payload.read()": [
+      "payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque"
+    ],
+    "dagster_pipes 1417:59 call  unmounted_path.lstrip(\"/\")": [
+      "unmounted_path is a str (isinstance check in _assert_env_param_type)"
+    ],
+    "dagster_pipes 1431:61 call  unmounted_path.lstrip(\"/\")": [
+      "unmounted_path is a str (isinstance check in _assert_env_param_type)"
+    ],
+    "dagster_pipes 1451:36 call  DagsterPipesError( \"`PipesDbfsMessageWriter` requires pys...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception",
+      "optional import 1447-1453: the except side runs where pyspark or py4j cannot be imported"
+    ],
+    "dagster_pipes 1455:46 call  SparkSession.getActiveSession()": [
+      "optional import 1447-1453, both sides run; pyspark is not installed: named as a missing module (judgement 5)"
+    ],
+    "dagster_pipes 1457:36 call  DagsterPipesError( \"`PipesDbfsMessageWriter` expects an a...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception",
+      "reached when pyspark has no active session (the real getActiveSession returns None then)"
+    ],
+    "dagster_pipes 1461:30 call  spark.conf.get(\"spark.databricks.clusterUsageTags.cluster...": [
+      "missing module (judgement 5): spark is an instance of the stub pyspark.sql.SparkSession.getActiveSession; the real class of spark.conf is pyspark.sql.conf.RuntimeConfig"
+    ],
+    "dagster_pipes 1462:57 call  spark.conf.get( \"spark.databricks.clusterUsageTags.cluste...": [
+      "missing module (judgement 5): spark is an instance of the stub pyspark.sql.SparkSession.getActiveSession; the real class of spark.conf is pyspark.sql.conf.RuntimeConfig"
+    ],
+    "dagster_pipes 1465:44 call  spark.conf.get(\"spark.databricks.clusterUsageTags.cluster...": [
+      "missing module (judgement 5): spark is an instance of the stub pyspark.sql.SparkSession.getActiveSession; the real class of spark.conf is pyspark.sql.conf.RuntimeConfig"
+    ],
+    "dagster_pipes 1578:26 call  self._logger.info(line)": [
+      "The public constructor accepts logger: logging.Logger (1569), and _PipesLogger subclasses logging.Logger for precisely that role (460). PipesContext constructs the logger (1699), which installs _PipesLoggerHandler (463), and exposes it through public log (1979-1981). A client may reuse context.log as the public channel constructor logger. Logger.info dispatches to the package-installed handler emit. A separately initialized file-backed context avoids recursive feedback; setting its public logger level to logging.INFO enables this path. This is a package-created logger and handler reused through the public constructor role (B2/B5)."
+    ],
+    "dagster_pipes 1640:46 call  params_loader.is_dagster_pipes_process()": [
+      "params_loader is a PipesParamsLoader (annotation): PipesMappingParamsLoader (also as PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or PipesDatabricksNotebookWidgetsParamsLoader; a client loader is opaque (the tests pass a MagicMock)"
+    ],
+    "dagster_pipes 1692:59 call  params_loader.load_context_params()": [
+      "params_loader is a PipesParamsLoader (annotation): PipesMappingParamsLoader (also as PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or PipesDatabricksNotebookWidgetsParamsLoader; a client loader is opaque (the tests pass a MagicMock)"
+    ],
+    "dagster_pipes 1693:61 call  params_loader.load_messages_params()": [
+      "params_loader is a PipesParamsLoader (annotation): PipesMappingParamsLoader (also as PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or PipesDatabricksNotebookWidgetsParamsLoader; a client loader is opaque (the tests pass a MagicMock)"
+    ],
+    "dagster_pipes 1695:78 call  context_loader.load_context(context_params)": [
+      "context_loader is a PipesContextLoader (annotation); the concrete package loaders are the six below, each with its own load_context; a client loader is opaque"
+    ],
+    "dagster_pipes 1696:81 call  message_writer.open(messages_params)": [
+      "message_writer is a PipesMessageWriter (annotation): PipesDefaultMessageWriter, the five blob store writers (S3, GCS, Azure, DBFS, Unity Catalog Volumes), which inherit PipesBlobStoreMessageWriter.open, or PipesPrefectLogsMessageWriter; a client writer is opaque"
+    ],
+    "dagster_pipes 1698:44 call  self._message_channel.write_message(_make_message(\"opened...": [
+      "self._message_channel is what message_writer.open yields (1696): PipesFileMessageWriterChannel, PipesStreamMessageWriterChannel or PipesBufferedStreamMessageWriterChannel (PipesDefaultMessageWriter.open), the channel of make_channel for the five blob store writers (S3, GCS and Azure channels, PipesBufferedFilesystemMessageWriterChannel: all inherit PipesBlobStoreMessageWriterChannel.write_message), or PipesPrefectLogsMessageWriterChannel; a client writer's channel is opaque (B5)"
+    ],
+    "dagster_pipes 1713:19 call  self.close(exc)": [
+      "self is a PipesContext (no package subclass)"
+    ],
+    "dagster_pipes 1725:48 call  self._message_channel.write_message(_make_message(\"closed...": [
+      "self._message_channel is what message_writer.open yields (1696): PipesFileMessageWriterChannel, PipesStreamMessageWriterChannel or PipesBufferedStreamMessageWriterChannel (PipesDefaultMessageWriter.open), the channel of make_channel for the five blob store writers (S3, GCS and Azure channels, PipesBufferedFilesystemMessageWriterChannel: all inherit PipesBlobStoreMessageWriterChannel.write_message), or PipesPrefectLogsMessageWriterChannel; a client writer's channel is opaque (B5)"
+    ],
+    "dagster_pipes 1738:44 call  self._message_channel.write_message(message)": [
+      "self._message_channel is what message_writer.open yields (1696): PipesFileMessageWriterChannel, PipesStreamMessageWriterChannel or PipesBufferedStreamMessageWriterChannel (PipesDefaultMessageWriter.open), the channel of make_channel for the five blob store writers (S3, GCS and Azure channels, PipesBufferedFilesystemMessageWriterChannel: all inherit PipesBlobStoreMessageWriterChannel.write_message), or PipesPrefectLogsMessageWriterChannel; a client writer's channel is opaque (B5)"
+    ],
+    "dagster_pipes 295:32 call  DagsterPipesError(f\"`{key}` is undefined. Current step ta...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 306:32 call  DagsterPipesError( f\"Invalid type for parameter `{param}`...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 315:32 call  DagsterPipesError( f\"Invalid type for parameter `{param}`...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 339:32 call  DagsterPipesError( f\"Invalid type for parameter `{key}` p...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 348:32 call  DagsterPipesError( f\"Invalid value for parameter `{param}...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 359:32 call  DagsterPipesError( f\"Invalid value for parameter `{param}...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 370:32 call  DagsterPipesError( f\"Invalid type for parameter `{param}`...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 390:36 call  DagsterPipesError( f\"Invalid type for parameter `{param}`...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 396:40 call  DagsterPipesError( f\"Invalid type for parameter `{param}`...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 420:49 call  serialized.encode(\"utf-8\")": [
+      "serialized is the str that json.dumps returns"
+    ],
+    "dagster_pipes 422:26 call  encoded.decode(\"utf-8\")": [
+      "encoded is the bytes that base64.b64encode returns"
+    ],
+    "dagster_pipes 437:42 call  decompressed.decode(\"utf-8\")": [
+      "decompressed is the bytes that zlib.decompress returns"
+    ],
+    "dagster_pipes 479:37 call  tb.exc_type_str.split(\".\")": [
+      "version branch 478: Python 3.13 and later (supported) take it; TracebackException.exc_type_str is a str"
+    ],
+    "dagster_pipes 483:26 call  PipesException( message=\"\".join(list(tb.format_exception_...": [
+      "PipesException is a TypedDict (line 179). typing._TypedDictMeta.__call__ delegates to dict, which constructs the result. The benchmark names this construction <builtin>.dict.__init__, as specified by micro-benchmark type_hints/typed_dict_call; it is not an ordinary type.__call__ on a package subclass."
+    ],
+    "dagster_pipes 484:54 call  tb.format_exception_only()": [
+      "tb is a traceback.TracebackException (annotation; 1710 makes it)"
+    ],
+    "dagster_pipes 485:30 call  tb.stack.format()": [
+      "tb.stack is the traceback.StackSummary of the TracebackException"
+    ],
+    "dagster_pipes 573:49 call  self.get_opened_extras()": [
+      "self is a message writer: PipesDbfsMessageWriter overrides get_opened_extras; the other package writers inherit PipesMessageWriter.get_opened_extras"
+    ],
+    "dagster_pipes 645:42 call  channel.buffered_upload_loop()": [
+      "channel is a blob store channel of make_channel (S3, GCS, Azure, PipesBufferedFilesystemMessageWriterChannel); all inherit buffered_upload_loop, a @contextmanager method"
+    ],
+    "dagster_pipes 646:26 call  params.get(self.INCLUDE_STDIO_IN_MESSAGES_KEY)": [
+      "params is the dict that decode_param (json.loads) makes from the orchestration's params, passed by PipesContext.__init__; a client mapping is opaque (B4: PipesParams is the abstract Mapping, B5)"
+    ],
+    "dagster_pipes 688:25 call  thread.start()": [
+      "start() runs the target self._upload_loop of the Thread of 687 (callback rule: the target belongs to the scope that calls start())"
+    ],
+    "dagster_pipes 726:20 call  f.write(payload.read())": [
+      "f is the stream that the builtin open returns in text mode"
+    ],
+    "dagster_pipes 726:33 call  payload.read()": [
+      "payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque"
+    ],
+    "dagster_pipes 757:36 call  DagsterPipesError( f'Invalid params for {self.__class__._...": [
+      "DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "dagster_pipes 779:29 call  sys.stderr.write(traceback.format_exception(*exc_info))": [
+      "the default sys.stderr, named by its class (README)"
+    ],
+    "dagster_pipes 832:29 call  ValueError(f\"stream must be 'stdout' or 'stderr', got {se...": [
+      "reached when a client makes a channel with another stream value"
+    ],
+    "dagster_pipes 904:73 getattr  self.name": [
+      "self is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel; neither overrides name"
+    ],
+    "dagster_pipes 937:26 call  params.get(self.INCLUDE_STDIO_IN_MESSAGES_KEY)": [
+      "params is the dict that decode_param (json.loads) makes from the orchestration's params, passed by PipesContext.__init__; a client mapping is opaque (B4: PipesParams is the abstract Mapping, B5)"
+    ]
+  },
+  "trace": "dynamic/dagster-pipes.json"
+}

@@ -1,0 +1,17 @@
+{
+  "whitenoise.base.WhiteNoise.__call__": {
+    "wsgiref.simple_server.demo_app": "client callback: application is the client's WSGI application; the tests pass wsgiref.simple_server.demo_app (test_whitenoise.py:56)"
+  },
+  "whitenoise.base.WhiteNoise.serve": {
+    "wsgiref.handlers.BaseHandler.start_response": "client callback: start_response is the WSGI server's callable (PEP 3333), here that of the tests' wsgiref server (tests/utils.py:28)"
+  },
+  "whitenoise.middleware.WhiteNoiseMiddleware.__call__": {
+    "django.core.handlers.exception.convert_exception_to_response.inner": "client callback: get_response is the next handler that Django's BaseHandler.load_middleware passes to the middleware, as a WSGI server's start_response (B5)"
+  },
+  "whitenoise.responders.SlicedFile.__init__": {
+    "_io.BytesIO.seek": "client object: fileobj is the BytesIO that test_responders.py:18 passes (B5)"
+  },
+  "whitenoise.responders.SlicedFile.close": {
+    "_io.BytesIO.close": "client object: self.fileobj is the BytesIO that test_responders.py:18 passes (B5)"
+  }
+}

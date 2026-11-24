@@ -1,0 +1,42 @@
+# The test environment of python-barcode 0.16.1 (batch 5): the full
+# closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. python-barcode itself is not installed: the trace uses its sdist,
+# unpacked by trace.sh.
+#   pip install --require-hashes --only-binary :all: --no-deps -r python-barcode.txt
+# "scan" names the files that the security scan of the set downloaded and
+# read (the hash is that of the scanned file, as its section 3 lists it);
+# "PyPI" names the hashes taken from PyPI's JSON for that version (pinned
+# by hash, not read). Every hash below was checked against PyPI's JSON for
+# its version on 2026-11-14. tox.ini installs pytest and pytest-cov, and
+# Pillow in the environment py-images; pytest-cov is not needed.
+
+# PyPI. 9.2.0, as for batches 3 and 4 (the lead's
+# decision: one pytest stack for the set, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# scan. The image writer (barcode.writer.ImageWriter exists only with
+# Pillow), as upstream's environment py-images (lead's decision). The
+# version current at the release of python-barcode (2025-08-27). A C
+# extension with bundled libraries: the cp314 aarch64 wheels for Linux,
+# manylinux (glibc, two tags; the python:3.14-slim image) and musllinux.
+# 11.3.0 has many advisories (59 as the scan counts them, most in the
+# decoders of image and font files); the run only draws text with the
+# package's own font and writes PNG and JPEG files: it opens no foreign
+# image (lead's decision: the rule of the earlier sets stands).
+pillow==11.3.0 \
+    --hash=sha256:0743841cabd3dba6a83f38a92672cccbd69af56e3e91777b0ee7f4dba4385632 \
+    --hash=sha256:41742638139424703b4d01665b807c6468e23e699e8e90cffefe291c5832b027 \
+    --hash=sha256:7966e38dcd0fa11ca390aed7c6f20454443581d758242023cf36fcb319b1a874

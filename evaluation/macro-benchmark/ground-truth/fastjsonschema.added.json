@@ -1,0 +1,339 @@
+{
+  "edges": {
+    "fastjsonschema.__main__": {
+      "fastjsonschema.__main__.main": [
+        "fastjsonschema.__main__ 19:9 call  main()"
+      ]
+    },
+    "fastjsonschema.__main__.main": {
+      "<builtin>.len": [
+        "fastjsonschema.__main__ 8:11 call  len(sys.argv)"
+      ],
+      "<builtin>.print": [
+        "fastjsonschema.__main__ 15:10 call  print(code)"
+      ],
+      "fastjsonschema.compile_to_code": [
+        "fastjsonschema.__main__ 14:27 call  compile_to_code(definition)"
+      ],
+      "io.TextIOWrapper.read": [
+        "fastjsonschema.__main__ 11:36 call  sys.stdin.read()"
+      ],
+      "json.loads": [
+        "fastjsonschema.__main__ 13:28 call  json.loads(definition)"
+      ]
+    },
+    "fastjsonschema.compile": {
+      "<builtin>.type": [
+        "fastjsonschema 294:9 call  exec(code_generator.func_code, global_state)"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04._enum_value_matches": {
+      "<builtin>.dict.items": [
+        "fastjsonschema.draft04 147:45 call  value.items()"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04.generate_any_of": {
+      "fastjsonschema.generator.CodeGenerator.trial_validation": [
+        "fastjsonschema.draft04 206:47 call  self.trial_validation()"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04.generate_maximum": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.draft04 359:52 call  JsonSchemaDefinitionException('maximum must be a number')"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04.generate_minimum": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.draft04 348:52 call  JsonSchemaDefinitionException('minimum must be a number')"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04.generate_not": {
+      "fastjsonschema.generator.CodeGenerator.trial_validation": [
+        "fastjsonschema.draft04 269:43 call  self.trial_validation()"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04.generate_one_of": {
+      "fastjsonschema.generator.CodeGenerator.trial_validation": [
+        "fastjsonschema.draft04 237:47 call  self.trial_validation()"
+      ]
+    },
+    "fastjsonschema.draft04.CodeGeneratorDraft04.generate_type": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.draft04 97:48 call  JsonSchemaDefinitionException('Unknown type')"
+      ]
+    },
+    "fastjsonschema.draft06.CodeGeneratorDraft06.generate_contains": {
+      "fastjsonschema.generator.CodeGenerator.trial_validation": [
+        "fastjsonschema.draft06 193:51 call  self.trial_validation()"
+      ]
+    },
+    "fastjsonschema.draft06.CodeGeneratorDraft06.generate_property_names": {
+      "fastjsonschema.generator.CodeGenerator.trial_validation": [
+        "fastjsonschema.draft06 152:55 call  self.trial_validation()"
+      ]
+    },
+    "fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_encoding": {
+      "fastjsonschema.generator.CodeGenerator.exc": [
+        "fastjsonschema.draft07 113:29 call  self.exc('{name} must be encoded by base64')",
+        "fastjsonschema.draft07 115:29 call  self.exc('contentEncoding must be base64')"
+      ],
+      "fastjsonschema.indent.Indent.__enter__": [
+        "fastjsonschema.draft07 108:18 with  self.l('if isinstance({variable}, str):')",
+        "fastjsonschema.draft07 109:22 with  self.l('try:')",
+        "fastjsonschema.draft07 112:22 with  self.l('except Exception:')",
+        "fastjsonschema.draft07 114:22 with  self.l('if {variable} == \"\":')"
+      ],
+      "fastjsonschema.indent.Indent.__exit__": [
+        "fastjsonschema.draft07 108:18 with  self.l('if isinstance({variable}, str):')",
+        "fastjsonschema.draft07 109:22 with  self.l('try:')",
+        "fastjsonschema.draft07 112:22 with  self.l('except Exception:')",
+        "fastjsonschema.draft07 114:22 with  self.l('if {variable} == \"\":')"
+      ],
+      "fastjsonschema.indent.indent.wrapper": [
+        "fastjsonschema.draft07 108:24 call  self.l('if isinstance({variable}, str):')",
+        "fastjsonschema.draft07 109:28 call  self.l('try:')",
+        "fastjsonschema.draft07 110:27 call  self.l('import base64')",
+        "fastjsonschema.draft07 111:27 call  self.l('{variable} = base64.b64decode({variable})')",
+        "fastjsonschema.draft07 112:28 call  self.l('except Exception:')",
+        "fastjsonschema.draft07 114:28 call  self.l('if {variable} == \"\":')"
+      ]
+    },
+    "fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_media_type": {
+      "fastjsonschema.generator.CodeGenerator.exc": [
+        "fastjsonschema.draft07 132:29 call  self.exc('{name} must encoded by utf8')",
+        "fastjsonschema.draft07 138:29 call  self.exc('{name} must be valid JSON')"
+      ],
+      "fastjsonschema.indent.Indent.__enter__": [
+        "fastjsonschema.draft07 128:18 with  self.l('if isinstance({variable}, bytes):')",
+        "fastjsonschema.draft07 129:22 with  self.l('try:')",
+        "fastjsonschema.draft07 131:22 with  self.l('except Exception:')",
+        "fastjsonschema.draft07 133:18 with  self.l('if isinstance({variable}, str):')",
+        "fastjsonschema.draft07 134:22 with  self.l('try:')",
+        "fastjsonschema.draft07 137:22 with  self.l('except Exception:')"
+      ],
+      "fastjsonschema.indent.Indent.__exit__": [
+        "fastjsonschema.draft07 128:18 with  self.l('if isinstance({variable}, bytes):')",
+        "fastjsonschema.draft07 129:22 with  self.l('try:')",
+        "fastjsonschema.draft07 131:22 with  self.l('except Exception:')",
+        "fastjsonschema.draft07 133:18 with  self.l('if isinstance({variable}, str):')",
+        "fastjsonschema.draft07 134:22 with  self.l('try:')",
+        "fastjsonschema.draft07 137:22 with  self.l('except Exception:')"
+      ],
+      "fastjsonschema.indent.indent.wrapper": [
+        "fastjsonschema.draft07 128:24 call  self.l('if isinstance({variable}, bytes):')",
+        "fastjsonschema.draft07 129:28 call  self.l('try:')",
+        "fastjsonschema.draft07 130:27 call  self.l('{variable} = {variable}.decode(\"utf-8\")')",
+        "fastjsonschema.draft07 131:28 call  self.l('except Exception:')",
+        "fastjsonschema.draft07 133:24 call  self.l('if isinstance({variable}, str):')",
+        "fastjsonschema.draft07 134:28 call  self.l('try:')",
+        "fastjsonschema.draft07 135:27 call  self.l('import json')",
+        "fastjsonschema.draft07 136:27 call  self.l('{variable} = json.loads({variable})')",
+        "fastjsonschema.draft07 137:28 call  self.l('except Exception:')"
+      ]
+    },
+    "fastjsonschema.draft07.CodeGeneratorDraft07.generate_if_then_else": {
+      "fastjsonschema.generator.CodeGenerator.trial_validation": [
+        "fastjsonschema.draft07 63:39 call  self.trial_validation()"
+      ]
+    },
+    "fastjsonschema.generator.CodeGenerator._expand_refs": {
+      "fastjsonschema.ref_resolver.RefResolver.resolving": [
+        "fastjsonschema.generator 332:42 call  self._resolver.resolving(definition[\"$ref\"])"
+      ]
+    },
+    "fastjsonschema.generator.CodeGenerator._generate_func_code_block": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.generator 198:48 call  JsonSchemaDefinitionException(\"definition must be an obje..."
+      ]
+    },
+    "fastjsonschema.generator.CodeGenerator.generate_ref": {
+      "fastjsonschema.ref_resolver.RefResolver.in_scope": [
+        "fastjsonschema.generator 227:37 call  self._resolver.in_scope(self._definition['$ref'])"
+      ]
+    },
+    "fastjsonschema.generator.CodeGenerator.generate_validation_function": {
+      "fastjsonschema.ref_resolver.RefResolver.resolving": [
+        "fastjsonschema.generator 154:38 call  self._resolver.resolving(uri)"
+      ]
+    },
+    "fastjsonschema.generator.CodeGenerator.run_generate_functions": {
+      "fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_encoding": [
+        "fastjsonschema.generator 209:21 call  func()"
+      ],
+      "fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_media_type": [
+        "fastjsonschema.generator 209:21 call  func()"
+      ]
+    },
+    "fastjsonschema.ref_resolver.RefResolver.resolving": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.ref_resolver 171:56 call  JsonSchemaDefinitionException('Unresolvable ref: {}'.form..."
+      ],
+      "<builtin>.str.format": [
+        "fastjsonschema.ref_resolver 171:86 call  'Unresolvable ref: {}'.format(fragment)"
+      ],
+      "fastjsonschema.ref_resolver.RefResolver.in_scope": [
+        "fastjsonschema.ref_resolver 164:31 call  self.in_scope(document_uri)"
+      ]
+    },
+    "fastjsonschema.ref_resolver.RefResolver.walk": {
+      "fastjsonschema.ref_resolver.RefResolver.in_scope": [
+        "fastjsonschema.ref_resolver 211:31 call  self.in_scope(get_id(node))"
+      ]
+    },
+    "fastjsonschema.ref_resolver.normalize": {
+      "urllib.parse.urlsplit": [
+        "fastjsonschema.ref_resolver 52:29 call  urlparse.urlsplit(uri)"
+      ]
+    },
+    "fastjsonschema.ref_resolver.resolve_path": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.ref_resolver 47:48 call  JsonSchemaDefinitionException('Unresolvable ref: {}'.form..."
+      ],
+      "<builtin>.int": [
+        "fastjsonschema.ref_resolver 43:32 call  int(part)"
+      ],
+      "<builtin>.str.format": [
+        "fastjsonschema.ref_resolver 47:78 call  'Unresolvable ref: {}'.format(part)"
+      ]
+    },
+    "fastjsonschema.ref_resolver.resolve_remote": {
+      "<builtin>.ValueError.__init__": [
+        "fastjsonschema.ref_resolver 75:52 call  JsonSchemaDefinitionException('{} failed to decode'.forma..."
+      ],
+      "<builtin>.bytes.decode": [
+        "fastjsonschema.ref_resolver 73:59 call  response.read().decode(encoding)"
+      ],
+      "<builtin>.str.format": [
+        "fastjsonschema.ref_resolver 75:81 call  '{} failed to decode'.format(uri)"
+      ],
+      "email.message.Message.get_content_charset": [
+        "fastjsonschema.ref_resolver 71:59 call  response.info().get_content_charset()"
+      ],
+      "http.client.HTTPMessage.get_content_charset": [
+        "fastjsonschema.ref_resolver 71:59 call  response.info().get_content_charset()"
+      ],
+      "http.client.HTTPResponse.info": [
+        "fastjsonschema.ref_resolver 71:37 call  response.info()"
+      ],
+      "http.client.HTTPResponse.read": [
+        "fastjsonschema.ref_resolver 73:50 call  response.read()"
+      ],
+      "json.loads": [
+        "fastjsonschema.ref_resolver 73:36 call  json.loads(response.read().decode(encoding),)"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "fastjsonschema.ref_resolver 73:50 call  response.read()"
+      ],
+      "urllib.parse.urlsplit": [
+        "fastjsonschema.ref_resolver 64:31 call  urlparse.urlsplit(uri)"
+      ],
+      "urllib.request.urlopen": [
+        "fastjsonschema.ref_resolver 70:21 call  urlopen(uri)"
+      ],
+      "urllib.response.addinfourl.info": [
+        "fastjsonschema.ref_resolver 71:37 call  response.info()"
+      ]
+    },
+    "fastjsonschema.validate": {
+      "fastjsonschema.exceptions.JsonSchemaValuesException.__init__": [
+        "fastjsonschema 172:108 call  compile(definition, handlers, formats, use_default, use_f..."
+      ],
+      "functools.partial.__call__": [
+        "fastjsonschema 172:108 call  compile(definition, handlers, formats, use_default, use_f..."
+      ]
+    }
+  },
+  "notes": {
+    "fastjsonschema 172:108 call  compile(definition, handlers, formats, use_default, use_f...": [
+      "the callee is what compile returns (__init__.py:294-298): the validation function that exec defined from the generated code, which has no node (code outside the package, as in micro-benchmark dynamic/exec_defines_function), or, when formats is not empty, a functools.partial of it. The generated function instantiates the package classes JsonSchemaValueException (every failed rule: `raise` or `errors.append`, generator.py:308-324) and JsonSchemaValuesException (fast_fail=False: generator.py:160, 245-246 catch and re-raise through $ref functions); these package __init__ methods are callbacks of this site. Its other calls (isinstance, len, re patterns, Decimal, the client's custom formats) are outside the package"
+    ],
+    "fastjsonschema 294:9 call  exec(code_generator.func_code, global_state)": [
+      "the generated module code is `NoneType = type(None)` (generator.py:139) followed by the def statements of the validation functions; calls in a string passed to exec belong to the scope that calls exec (micro-benchmark \"Scopes without a node\", dynamic/exec_in_function), so type(None) is an edge of compile. The defs evaluate only the defaults {} and None. The functions are not called here"
+    ],
+    "fastjsonschema.__main__ 11:36 call  sys.stdin.read()": [
+      "the default sys.stdin, a text stream named by its class"
+    ],
+    "fastjsonschema.__main__ 19:9 call  main()": [
+      "the `if __name__ == '__main__':` block is code of the module"
+    ],
+    "fastjsonschema.draft04 147:45 call  value.items()": [
+      "value passed the isinstance check for dict"
+    ],
+    "fastjsonschema.draft04 206:47 call  self.trial_validation()": [
+      "trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.draft04 237:47 call  self.trial_validation()": [
+      "trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.draft04 269:43 call  self.trial_validation()": [
+      "trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.draft04 348:52 call  JsonSchemaDefinitionException('minimum must be a number')": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ],
+    "fastjsonschema.draft04 359:52 call  JsonSchemaDefinitionException('maximum must be a number')": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ],
+    "fastjsonschema.draft04 97:48 call  JsonSchemaDefinitionException('Unknown type')": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ],
+    "fastjsonschema.draft06 152:55 call  self.trial_validation()": [
+      "trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.draft06 193:51 call  self.trial_validation()": [
+      "trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.draft07 63:39 call  self.trial_validation()": [
+      "trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.generator 154:38 call  self._resolver.resolving(uri)": [
+      "resolving is decorated with @contextmanager (ref_resolver.py:141): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.generator 198:48 call  JsonSchemaDefinitionException(\"definition must be an obje...": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ],
+    "fastjsonschema.generator 209:21 call  func()": [
+      "func is a bound method of self from _json_keywords_to_function, which only the __init__ methods of the generators fill (draft04.py:49-75, draft06.py:30-36, draft07.py:35-39). For a CodeGeneratorDraft06, 07 or 2019, self.generate_type, generate_minimum and generate_maximum bind CodeGeneratorDraft06's overrides; for a CodeGeneratorDraft04, its own. CodeGeneratorDraft2019 adds no keyword"
+    ],
+    "fastjsonschema.generator 227:37 call  self._resolver.in_scope(self._definition['$ref'])": [
+      "in_scope is decorated with @contextmanager (ref_resolver.py:129): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.generator 332:42 call  self._resolver.resolving(definition[\"$ref\"])": [
+      "resolving is decorated with @contextmanager (ref_resolver.py:141): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.ref_resolver 164:31 call  self.in_scope(document_uri)": [
+      "in_scope is decorated with @contextmanager (ref_resolver.py:129): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.ref_resolver 171:56 call  JsonSchemaDefinitionException('Unresolvable ref: {}'.form...": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ],
+    "fastjsonschema.ref_resolver 211:31 call  self.in_scope(get_id(node))": [
+      "in_scope is decorated with @contextmanager (ref_resolver.py:129): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "fastjsonschema.ref_resolver 47:48 call  JsonSchemaDefinitionException('Unresolvable ref: {}'.form...": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ],
+    "fastjsonschema.ref_resolver 52:29 call  urlparse.urlsplit(uri)": [
+      "on Python 3.10 urlsplit is a plain function; from 3.11 on it is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code; read in the CPython sources of 3.10 to 3.15)"
+    ],
+    "fastjsonschema.ref_resolver 64:31 call  urlparse.urlsplit(uri)": [
+      "on Python 3.10 urlsplit is a plain function; from 3.11 on it is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code; read in the CPython sources of 3.10 to 3.15)"
+    ],
+    "fastjsonschema.ref_resolver 70:21 call  urlopen(uri)": [
+      "the documented fallback when no handler is given for the scheme (__init__.py:225-227: \"for example http, https, or file URLs\")"
+    ],
+    "fastjsonschema.ref_resolver 71:37 call  response.info()": [
+      "urlopen returns an http.client.HTTPResponse for http and https, and a urllib.response.addinfourl for file, ftp and data URLs (urllib.request FileHandler, FTPHandler, DataHandler); the file URLs are documented (__init__.py:226-227)"
+    ],
+    "fastjsonschema.ref_resolver 71:59 call  response.info().get_content_charset()": [
+      "HTTPResponse.info returns its http.client.HTTPMessage; addinfourl.info returns the email.message.Message that urllib's file, ftp and data handlers make with email.message_from_string"
+    ],
+    "fastjsonschema.ref_resolver 73:50 call  response.read()": [
+      "addinfourl defines no read: its base tempfile._TemporaryFileWrapper delegates through __getattr__, which returns its local func_wrapper around the read of the wrapped file (named where it is defined, asciinema judgement 9)"
+    ],
+    "fastjsonschema.ref_resolver 75:52 call  JsonSchemaDefinitionException('{} failed to decode'.forma...": [
+      "JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError"
+    ]
+  },
+  "trace": "dynamic/fastjsonschema.json"
+}

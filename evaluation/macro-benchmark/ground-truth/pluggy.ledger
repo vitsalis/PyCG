@@ -1,0 +1,1254 @@
+# Call-site ledger of pluggy at 4c7f6365f2dde09c11e72db67d0f615231d64c19.
+# Hand-written from the source; judgements and statistics in pluggy.md.
+#
+# Recurring facts that the reasons below refer to:
+# - The hook relay (PluginManager.hook, a HookRelay) holds only HookCallers:
+#   the package sets its attributes only at _manager.py:248 and :357, both
+#   with a HookCaller. A _SubsetHookCaller exists only as the return value of
+#   PluginManager.subset_hook_caller (_manager.py:648), given to the client.
+# - Plugins, hook specification namespaces, hook implementation functions,
+#   hook arguments and results, call_extra methods, result callbacks, trace
+#   arguments, writers and processors are objects of the client. The API
+#   takes any object there; the package passes none of its own objects in
+#   these roles, so their special methods are client code (see pluggy.md,
+#   "Objects of the client").
+# - HookCaller.__repr__, _SubsetHookCaller.__repr__ and HookImpl.__repr__ are
+#   the only package methods that formatting can reach.
+default reject pluggy._caller.HookRelay.__getattr__: defined only under `if TYPE_CHECKING:` (_caller.py:42-44), which does not run, so HookRelay has no __getattr__ at run time
+default reject pluggy.__getattr__: the module __getattr__ of `pluggy` runs only for an attribute that the module's dict lacks, on the module object `pluggy` itself; no package code names that module after __init__.py:32 defines the function (the relative imports of the submodules run earlier, during the import of the package), and a receiver that the client supplies (a plugin, a hook function, a namespace of hook specifications) is never that module: it would be an arbitrary package object where any object, callable, module or class is accepted (rule B3)
+default reject pluggy._compat.DistFacade.__getattr__: runs only for an attribute that normal lookup does not find on a DistFacade instance; at _compat.py 39:29 and 43:32 the receiver is a DistFacade, but the attribute is the slot _dist, which __init__ always sets, so normal lookup finds it; at every other site that this default decides, the receiver is not a DistFacade: DistFacade instances come only from list_plugin_distinfo (_manager.py:539), which gives them to the client, and a client that passes one where any object is accepted (as a plugin or a hook function) passes an arbitrary package object (rule B3)
+
+== pluggy
+
+[pluggy.__getattr__]
+36:23 call  version("pluggy")
+    -> importlib.metadata.version
+38:25 call  AttributeError(f"module {__name__} has no attribute {name...
+    -> <builtin>.AttributeError
+38:35 format  {__name__}
+    reject *: __name__ is the module name "pluggy", a str
+38:63 format  {name!r}
+    reject *: name is the attribute name that the client asked for, a str
+
+== pluggy._caller
+
+[pluggy._caller]
+32:2 decorator  @final
+    -> typing.final
+305:6 decorator  @property
+    -> <builtin>.property
+313:6 decorator  @property
+    -> <builtin>.property
+317:6 decorator  @property
+    -> <builtin>.property
+
+[pluggy._caller.HookCaller.__init__]
+91:35 call  self.set_specification(specmodule_or_class, spec_opts)
+    -> pluggy._caller.HookCaller.set_specification
+    note: self is a HookCaller (or a client subclass); _SubsetHookCaller.__init__ does not call HookCaller.__init__, and nothing overrides set_specification
+
+[pluggy._caller.HookCaller.has_spec]
+95:21 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: has_spec is public; the client can call it on the _SubsetHookCaller that subset_hook_caller returns, where spec is a property
+
+[pluggy._caller.HookCaller.set_specification]
+103:17 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: set_specification is public; on a _SubsetHookCaller, self.spec is the property. If present it raises ValueError at 104; if absent HookSpec(...) at 108 runs before assignment fails because the property has no setter.
+104:29 call  ValueError( f"Hook {self.spec.name!r} is already register...
+    -> <builtin>.ValueError
+105:24 format  {self.spec.name!r}
+    reject *: HookSpec.name is the hook name, a str
+105:30 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 103:17, self can be a _SubsetHookCaller
+106:36 format  {self.spec.namespace}
+    reject *: HookSpec.namespace is the module or class of the client's hook specifications
+106:42 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 103:17, self can be a _SubsetHookCaller
+108:29 call  HookSpec(specmodule_or_class, self.name, spec_opts)
+    -> pluggy._decorators.HookSpec.__init__
+109:25 call  spec_opts.get("historic")
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: spec_opts is a HookspecOpts dict (from _get_marker_opts, _manager.py:119, which returns only dicts)
+
+[pluggy._caller.HookCaller.is_historic]
+114:21 getattr  self._call_history
+    -> pluggy._caller._SubsetHookCaller._call_history
+    note: is_historic is public and is called on self by __call__, call_extra and _maybe_apply_history; self can be the _SubsetHookCaller of subset_hook_caller
+
+[pluggy._caller.HookCaller._remove_plugin]
+118:44 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: _remove_plugin is private, so self is what the package's calls pass (rule B1): its only call (_manager.py:317) is on a hook caller from get_hookcallers, which reads the hook relay (self.hook.__dict__, _manager.py:565), and the package fills the relay only with HookCaller objects (_manager.py:248, :357); its _hookimpls is the HookCaller slot
+119:15 call  len(remaining)
+    -> <builtin>.len
+119:33 call  len(self._hookimpls)
+    -> <builtin>.len
+    reject pluggy._caller._SubsetHookCaller._hookimpls: the argument is the list that self._hookimpls evaluates to; the attribute load is decided at 119:39
+119:39 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 118:44
+120:29 call  ValueError(f"plugin {plugin!r} not found")
+    -> <builtin>.ValueError
+120:39 format  {plugin!r}
+    reject *: plugin is the client's plugin object given to unregister
+121:14 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 118:44
+
+[pluggy._caller.HookCaller.get_hookimpls]
+125:21 getattr  self._hookimpls
+    -> pluggy._caller._SubsetHookCaller._hookimpls
+    note: get_hookimpls is public; the client can call it on the _SubsetHookCaller of subset_hook_caller
+125:36 call  self._hookimpls.copy()
+    -> <builtin>.list.copy
+
+[pluggy._caller.HookCaller._add_hookimpl]
+129:35 call  enumerate(self._hookimpls)
+    -> <builtin>.enumerate
+    reject pluggy._caller._SubsetHookCaller._hookimpls: the argument is the list that self._hookimpls evaluates to; the attribute load is decided at 129:41
+129:41 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: _add_hookimpl is private, so self is what the package's calls pass (rule B1): its only call (_manager.py:255) is on a hook caller taken from the hook relay (:236, :245, or new at :247), which the package fills only with HookCaller objects (_manager.py:248, :357); its _hookimpls is the HookCaller slot
+134:29 call  len(self._hookimpls)
+    -> <builtin>.len
+    reject pluggy._caller._SubsetHookCaller._hookimpls: the argument is the list that self._hookimpls evaluates to; the attribute load is decided at 134:35
+134:35 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 129:41
+136:41 call  len(self._hookimpls)
+    -> <builtin>.len
+    reject pluggy._caller._SubsetHookCaller._hookimpls: the argument is the list that self._hookimpls evaluates to; the attribute load is decided at 136:47
+136:47 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 129:41
+141:18 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 129:41
+141:35 call  self._hookimpls.insert(start, hookimpl)
+    -> <builtin>.list.insert
+143:18 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 129:41
+143:35 call  self._hookimpls.insert(end, hookimpl)
+    -> <builtin>.list.insert
+147:39 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 129:41
+149:18 getattr  self._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self is a HookCaller of the hook relay, as at 129:41
+149:35 call  self._hookimpls.insert(i + 1, hookimpl)
+    -> <builtin>.list.insert
+
+[pluggy._caller.HookCaller.__repr__]
+152:30 format  {self.name!r}
+    reject *: self.name is the hook name, a str
+
+[pluggy._caller.HookCaller._apply_defaults]
+155:17 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: called on self by __call__, call_historic and call_extra, which the client can call on the _SubsetHookCaller of subset_hook_caller
+155:42 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 155:17
+157:24 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 155:17
+
+[pluggy._caller.HookCaller._verify_all_args_are_provided]
+161:17 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: called on self by __call__, call_historic and call_extra, which the client can call on the _SubsetHookCaller of subset_hook_caller
+162:33 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 161:17
+164:42 call  ", ".join( repr(argname) for argname in self.spec.argname...
+    -> <builtin>.str.join
+165:29 call  repr(argname)
+    -> <builtin>.repr
+    reject *: argname is a str of HookSpec.argnames (from the code object, _decorators.py:295)
+166:45 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 161:17
+171:34 call  warnings.warn( f"Argument(s) {notincall} which are declar...
+    -> warnings.warn
+172:39 format  {notincall}
+    reject *: notincall is the str built at 164:42
+
+[pluggy._caller.HookCaller.__call__]
+190:36 call  self.is_historic()
+    -> pluggy._caller.HookCaller.is_historic
+    note: neither _SubsetHookCaller nor any other package class overrides is_historic
+193:43 call  self._apply_defaults(kwargs)
+    -> pluggy._caller.HookCaller._apply_defaults
+194:43 call  self._verify_all_args_are_provided(call_kwargs)
+    -> pluggy._caller.HookCaller._verify_all_args_are_provided
+195:28 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: the client calls the _SubsetHookCaller of subset_hook_caller like any HookCaller
+195:41 call  self.spec.opts.get("firstresult", False)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: HookSpec.opts is the HookspecOpts dict given to HookSpec.__init__ (_decorators.py:354)
+195:72 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 195:28
+197:30 call  self._hookexec( self.name, self._hookimpls.copy(), call_k...
+    -> pluggy._manager.PluginManager._hookexec
+    exclude pluggy._execution._multicall: it has the signature of an executor, but no package code passes it as hook_execute, the annotation _HookExec is a bare Callable (rule B2), and a client does not build a HookCaller: HookCaller.__init__ is ":meta private:" (rule C)
+    note: self._hookexec is set only by HookCaller.__init__ (_caller.py:77, the hook_execute argument) and _SubsetHookCaller.__init__ (_caller.py:303, copied from the HookCaller it wraps). HookCaller.__init__ is ":meta private:" (rule C), so the HookCallers are those of the package: _manager.py:247 and :356, both with self._hookexec, the bound method PluginManager._hookexec; subset_hook_caller wraps one of them (rule B1)
+198:29 getattr  self._hookimpls
+    -> pluggy._caller._SubsetHookCaller._hookimpls
+    note: as at 195:28
+198:44 call  self._hookimpls.copy()
+    -> <builtin>.list.copy
+
+[pluggy._caller.HookCaller.call_historic]
+214:21 getattr  self._call_history
+    -> pluggy._caller._SubsetHookCaller._call_history
+    note: call_historic is public; the client can call it on the _SubsetHookCaller of subset_hook_caller
+216:38 call  self._apply_defaults(kwargs)
+    -> pluggy._caller.HookCaller._apply_defaults
+217:43 call  self._verify_all_args_are_provided(kwargs)
+    -> pluggy._caller.HookCaller._verify_all_args_are_provided
+218:14 getattr  self._call_history
+    -> pluggy._caller._SubsetHookCaller._call_history
+    note: as at 214:21
+218:34 call  self._call_history.append((kwargs, result_callback))
+    -> <builtin>.list.append
+222:29 call  self._hookexec(self.name, self._hookimpls.copy(), kwargs,...
+    -> pluggy._manager.PluginManager._hookexec
+    exclude pluggy._execution._multicall: as at 197:30, no package code passes it as hook_execute, and a client does not build a HookCaller (rule C)
+    note: the same values as at 197:30: PluginManager._hookexec, set by HookCaller.__init__ from _manager.py:247 or :356, or copied by _SubsetHookCaller.__init__ (_caller.py:303)
+222:46 getattr  self._hookimpls
+    -> pluggy._caller._SubsetHookCaller._hookimpls
+    note: as at 214:21
+222:61 call  self._hookimpls.copy()
+    -> <builtin>.list.copy
+225:22 call  isinstance(res, list)
+    -> <builtin>.isinstance
+227:32 call  result_callback(x)
+    note: result_callback is the argument of call_historic, annotated as a bare Callable; no package code, test or documented example passes a package function there (rule B2). Only client callbacks reach this site (list.append in the tests: see pluggy.rejected.json)
+
+[pluggy._caller.HookCaller.call_extra]
+235:36 call  self.is_historic()
+    -> pluggy._caller.HookCaller.is_historic
+238:38 call  self._apply_defaults(kwargs)
+    -> pluggy._caller.HookCaller._apply_defaults
+239:43 call  self._verify_all_args_are_provided(kwargs)
+    -> pluggy._caller.HookCaller._verify_all_args_are_provided
+248:26 getattr  self._hookimpls
+    -> pluggy._caller._SubsetHookCaller._hookimpls
+    note: call_extra is public; the client can call it on the _SubsetHookCaller of subset_hook_caller
+248:41 call  self._hookimpls.copy()
+    -> <builtin>.list.copy
+250:32 call  HookImpl(None, "<temp>", method, opts)
+    -> pluggy._impl.HookImpl.__init__
+252:20 call  len(hookimpls)
+    -> <builtin>.len
+260:29 call  hookimpls.insert(i + 1, hookimpl)
+    -> <builtin>.list.insert
+261:28 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 248:26
+261:41 call  self.spec.opts.get("firstresult", False)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: HookSpec.opts is the HookspecOpts dict given to HookSpec.__init__ (_decorators.py:354)
+261:72 getattr  self.spec
+    -> pluggy._caller._SubsetHookCaller.spec
+    note: as at 248:26
+262:30 call  self._hookexec(self.name, hookimpls, kwargs, firstresult)
+    -> pluggy._manager.PluginManager._hookexec
+    exclude pluggy._execution._multicall: as at 197:30, no package code passes it as hook_execute, and a client does not build a HookCaller (rule C)
+    note: the same values as at 197:30: PluginManager._hookexec, set by HookCaller.__init__ from _manager.py:247 or :356, or copied by _SubsetHookCaller.__init__ (_caller.py:303)
+
+[pluggy._caller.HookCaller._maybe_apply_history]
+266:28 call  self.is_historic()
+    -> pluggy._caller.HookCaller.is_historic
+267:25 getattr  self._call_history
+    reject pluggy._caller._SubsetHookCaller._call_history: _maybe_apply_history is private, so self is what the package's calls pass (rule B1): its only call (_manager.py:254) is on a hook caller taken from the hook relay (:236, :245, or new at :247), which the package fills only with HookCaller objects (_manager.py:248, :357); its _call_history is the HookCaller slot
+268:49 getattr  self._call_history
+    reject pluggy._caller._SubsetHookCaller._call_history: self is a HookCaller of the hook relay, as at 267:25
+269:37 call  self._hookexec(self.name, [method], kwargs, False)
+    -> pluggy._manager.PluginManager._hookexec
+    exclude pluggy._execution._multicall: as at 197:30, no package code passes it as hook_execute, and a client does not build a HookCaller (rule C)
+    note: the same values as at 197:30: PluginManager._hookexec, set by HookCaller.__init__ from _manager.py:247 or :356, or copied by _SubsetHookCaller.__init__ (_caller.py:303)
+272:38 call  isinstance(res, list)
+    -> <builtin>.isinstance
+273:36 call  result_callback(res[0])
+    note: result_callback comes from self._call_history, which only call_historic fills (_caller.py:218) with its argument result_callback, a bare Callable for which the package passes no value (rule B2). Only client callbacks reach this site (list.append in the tests: see pluggy.rejected.json)
+
+[pluggy._caller._SubsetHookCaller._hookimpls]
+309:36 getattr  self._orig._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: self._orig is set only by _SubsetHookCaller.__init__ (_caller.py:300); _SubsetHookCaller is private, so its instances are those that the package makes (rule B1), all at _manager.py:648 with a HookCaller of the hook relay (637:35), never a _SubsetHookCaller; its _hookimpls is the HookCaller slot
+
+[pluggy._caller._SubsetHookCaller.spec]
+315:27 getattr  self._orig.spec
+    reject pluggy._caller._SubsetHookCaller.spec: self._orig is set only by _SubsetHookCaller.__init__ (_caller.py:300); _SubsetHookCaller is private, so its instances are those that the package makes (rule B1), all at _manager.py:648 with a HookCaller of the hook relay (637:35), never a _SubsetHookCaller; its spec is the HookCaller slot
+
+[pluggy._caller._SubsetHookCaller._call_history]
+319:27 getattr  self._orig._call_history
+    reject pluggy._caller._SubsetHookCaller._call_history: self._orig is set only by _SubsetHookCaller.__init__ (_caller.py:300); _SubsetHookCaller is private, so its instances are those that the package makes (rule B1), all at _manager.py:648 with a HookCaller of the hook relay (637:35), never a _SubsetHookCaller; its _call_history is the HookCaller slot
+
+[pluggy._caller._SubsetHookCaller.__repr__]
+322:37 format  {self.name!r}
+    reject *: self.name is the hook name, a str (_caller.py:302)
+
+== pluggy._compat
+
+[pluggy._compat]
+27:6 decorator  @property
+    -> <builtin>.property
+
+[pluggy._compat.DistFacade.project_name]
+34:26 getattr  self.metadata
+    -> pluggy._compat.DistFacade.__getattr__
+    note: self is a DistFacade; DistFacade defines no `metadata` (its only slot is _dist), so normal lookup fails and DistFacade.__getattr__ runs
+
+[pluggy._compat.DistFacade.__getattr__]
+39:23 call  getattr(self._dist, attr)
+    -> <builtin>.getattr
+    note: self._dist is the importlib.metadata.Distribution given to DistFacade (from importlib.metadata.distributions(), _manager.py:511), not a package object
+
+[pluggy._compat.DistFacade.__dir__]
+43:22 call  sorted(dir(self._dist) + ["_dist", "project_name"])
+    -> <builtin>.sorted
+43:26 call  dir(self._dist)
+    -> <builtin>.dir
+    reject pluggy._compat.DistFacade.__dir__: self._dist is the importlib.metadata.Distribution given to DistFacade (from importlib.metadata.distributions(), _manager.py:511), not a DistFacade
+
+== pluggy._config
+
+[pluggy._config.normalize_hookimpl_opts]
+49:20 call  opts.setdefault("tryfirst", False)
+    -> <builtin>.dict.setdefault
+    note: opts is the HookimplOpts dict that parse_hookimpl_opts returns (_get_marker_opts returns only dicts, _manager.py:119)
+50:20 call  opts.setdefault("trylast", False)
+    -> <builtin>.dict.setdefault
+51:20 call  opts.setdefault("wrapper", False)
+    -> <builtin>.dict.setdefault
+52:20 call  opts.setdefault("hookwrapper", False)
+    -> <builtin>.dict.setdefault
+53:20 call  opts.setdefault("optionalhook", False)
+    -> <builtin>.dict.setdefault
+54:20 call  opts.setdefault("specname", None)
+    -> <builtin>.dict.setdefault
+
+== pluggy._decorators
+
+[pluggy._decorators]
+24:13 call  TypeVar("_F", bound=Callable[..., object])
+    -> typing.TypeVar
+29:2 decorator  @final
+    -> typing.final
+43:6 decorator  @overload
+    -> typing.overload
+53:6 decorator  @overload
+    -> typing.overload
+116:2 decorator  @final
+    -> typing.final
+130:6 decorator  @overload
+    -> typing.overload
+142:6 decorator  @overload
+    -> typing.overload
+239:50 call  frozenset( { # pytest-timeout >=2.3.2 has the fix, but is...
+    -> <builtin>.frozenset
+328:2 decorator  @final
+    -> typing.final
+
+[pluggy._decorators.HookspecMarker.__call__]
+111:41 call  setattr_hookspec_opts(function)
+    -> pluggy._decorators.HookspecMarker.__call__.setattr_hookspec_opts
+    note: the closure defined at line 98; when function is None, line 113 returns it to the client, whose later call is client code
+
+[pluggy._decorators.HookspecMarker.__call__.setattr_hookspec_opts]
+100:33 call  ValueError("cannot have a historic firstresult hook")
+    -> <builtin>.ValueError
+107:20 call  setattr(func, self.project_name + "_spec", opts)
+    -> <builtin>.setattr
+107:32 getattr  self.project_name
+    reject pluggy._compat.DistFacade.project_name: self is the HookspecMarker of the enclosing __call__; project_name is its slot
+
+[pluggy._decorators.HookimplMarker.__call__]
+230:41 call  setattr_hookimpl_opts(function)
+    -> pluggy._decorators.HookimplMarker.__call__.setattr_hookimpl_opts
+    note: the closure defined at line 215; when function is None, line 228 returns it to the client, whose later call is client code
+
+[pluggy._decorators.HookimplMarker.__call__.setattr_hookimpl_opts]
+224:20 call  setattr(func, self.project_name + "_impl", opts)
+    -> <builtin>.setattr
+224:32 getattr  self.project_name
+    reject pluggy._compat.DistFacade.project_name: self is the HookimplMarker of the enclosing __call__; project_name is its slot
+
+[pluggy._decorators.varnames]
+265:23 call  inspect.isclass(func)
+    -> inspect.isclass
+271:31 call  inspect.isroutine(func)
+    -> inspect.isroutine
+275:27 call  getattr(func, "__call__", func)
+    -> <builtin>.getattr
+    note: func is a hook implementation or specification function of the client (from HookImpl.__init__, _impl.py:53, or HookSpec.__init__, _decorators.py:349)
+280:24 call  inspect.ismethod(func)
+    -> inspect.ismethod
+282:26 call  inspect.unwrap(func)
+    -> inspect.unwrap
+283:24 call  inspect.ismethod(func)
+    -> inspect.ismethod
+300:21 call  len(defaults)
+    -> <builtin>.len
+310:28 call  qualname.rsplit("<locals>.", maxsplit=1)
+    -> <builtin>.str.rsplit
+316:26 call  warnings.warn( f"{qualname} is a method but its first par...
+    -> warnings.warn
+317:19 format  {qualname}
+    reject *: qualname is func.__qualname__, a str
+318:20 format  {args[0]!r}
+    reject *: args[0] is a parameter name from code.co_varnames, a str
+
+[pluggy._decorators.HookSpec.__init__]
+345:55 call  getattr(namespace, name)
+    -> <builtin>.getattr
+    reject pluggy.__getattr__: namespace is never the module pluggy. Its annotation _Namespace (ModuleType | type) admits any module or class: like a bare Callable, it names no package value for the role of a namespace of hook specifications, so a package module given there is an arbitrary package object (rules B2, B3). Also, through add_hookspecs, name is a name that _static_hook_attr found in the namespace (_manager.py:351, :388), so normal lookup finds it
+    reject pluggy._caller.HookRelay.__getattr__: defined only under `if TYPE_CHECKING:`; namespace is a module or a class, never a HookRelay instance
+    reject pluggy._compat.DistFacade.__getattr__: namespace is a module or a class, never a DistFacade instance; on a class, attribute lookup goes through the metaclass, not through the instance method DistFacade.__getattr__
+    note: namespace is the client's module or class of hook specifications (rule B5)
+346:40 call  inspect.isclass(namespace)
+    -> inspect.isclass
+346:70 call  isinstance( inspect.getattr_static(namespace, name), stat...
+    -> <builtin>.isinstance
+347:35 call  inspect.getattr_static(namespace, name)
+    -> inspect.getattr_static
+349:50 call  varnames( self.function, legacy_noself=legacy_noself )
+    -> pluggy._decorators.varnames
+352:34 call  inspect.unwrap(self.function)
+    -> inspect.unwrap
+353:34 call  dict(zip(self.kwargnames, defaults or ()))
+    -> <builtin>.dict
+353:38 call  zip(self.kwargnames, defaults or ())
+    -> <builtin>.zip
+355:37 call  opts.get("warn_on_impl")
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: opts is the HookspecOpts dict given by set_specification (_caller.py:108)
+356:42 call  opts.get("warn_on_impl_args")
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: opts is the HookspecOpts dict given by set_specification (_caller.py:108)
+
+== pluggy._execution
+
+[pluggy._execution.run_old_style_hookwrapper]
+37:33 call  hook_impl.function(*args)
+    note: hook_impl.function is the function given to HookImpl.__init__ (_impl.py:52): a function or bound method that register finds on the client's plugin (_manager.py:233-234); call_extra makes no old-style wrappers (_caller.py:240-250). No package function is a hook implementation: only client callbacks reach this site (an old-style hookwrapper, a generator function of the client)
+39:33 call  hook_impl.function(*args, **kwargs)
+    note: the same values as at 37:33: only client hook implementation functions reach this site
+41:24 call  cast(Teardown, res)
+    note: under `if TYPE_CHECKING:` (_execution.py:40), which does not run
+45:13 call  next(teardown)
+    -> <builtin>.next
+    note: teardown is the client's hookwrapper generator; its body is client code
+47:24 call  _raise_wrapfail(teardown, "did not yield")
+    -> pluggy._execution._raise_wrapfail
+50:24 call  Result(res, None)
+    -> pluggy._result.Result.__init__
+52:24 call  Result(None, exc)
+    -> pluggy._result.Result.__init__
+54:22 call  teardown.send(result)
+    note: Global B5: teardown is the result of a client hookwrapper callback at _execution.py:37 or39. Its methods remain opaque; the abstract Generator annotation and the documented single-yield contract do not name a concrete receiver.
+58:33 call  _warn_teardown_exception(hook_name, hook_impl, e)
+    -> pluggy._execution._warn_teardown_exception
+61:24 call  _raise_wrapfail(teardown, "has second yield")
+    -> pluggy._execution._raise_wrapfail
+63:23 call  teardown.close()
+    note: Global B5: teardown is the result of a client hookwrapper callback at _execution.py:37 or39. Its methods remain opaque; the abstract Generator annotation and the documented single-yield contract do not name a concrete receiver.
+64:29 call  result.get_result()
+    -> pluggy._result.Result.get_result
+
+[pluggy._execution._raise_wrapfail]
+72:23 call  RuntimeError( f"wrap_controller at {co.co_name!r} {co.co_...
+    -> <builtin>.RuntimeError
+73:30 format  {co.co_name!r}
+    reject *: co is the code object of the generator (gi_code); co_name is a str
+73:45 format  {co.co_filename}
+    reject *: co_filename of a code object is a str
+73:62 format  {co.co_firstlineno}
+    reject *: co_firstlineno of a code object is an int
+73:82 format  {msg}
+    reject *: msg is a str constant of the callers (_execution.py:47, :61, :143, :192)
+
+[pluggy._execution._warn_teardown_exception]
+82:19 format  {hook_impl.plugin_name}
+    reject *: HookImpl.plugin_name is a str (the name given to register, or "<temp>")
+82:50 format  {hook_name}
+    reject *: hook_name is the hook name, a str
+83:11 format  {type(e).__name__}
+    reject *: the __name__ of a class is a str
+83:16 call  type(e)
+    -> <builtin>.type
+83:31 format  {e}
+    reject *: e is the exception that a hookwrapper teardown raised, a BaseException; HookCaller, _SubsetHookCaller and HookImpl are not exceptions, and the package exceptions (HookCallError, PluginValidationError) define no formatting methods
+86:18 call  warnings.warn(PluggyTeardownRaisedWarning(msg), stackleve...
+    -> warnings.warn
+86:46 call  PluggyTeardownRaisedWarning(msg)
+    -> <builtin>.UserWarning.__init__
+    note: PluggyTeardownRaisedWarning and PluggyWarning define no __init__; the first __init__ of the MRO is that of UserWarning, the nearest class outside the package
+
+[pluggy._execution._multicall]
+105:34 call  reversed(hook_impls)
+    -> <builtin>.reversed
+117:36 call  HookCallError( f"hook call must provide argument {e.args[...
+    -> <builtin>.Exception.__init__
+    note: HookCallError defines no __init__; the first __init__ of its MRO is that of Exception, the nearest class outside the package
+118:55 format  {e.args[0]!r}
+    reject *: e is the KeyError of caller_kwargs[argname]; args[0] is argname, a str of HookImpl.argnames or kwargnames
+122:57 call  run_old_style_hookwrapper( hook_impl, hook_name, args, kw...
+    -> pluggy._execution.run_old_style_hookwrapper
+    note: a generator function: the edge comes from this scope, which calls it; its body runs at the next() of 126:21 and the send/throw/close of 167:39, 175:43 and 180:34; its single yield prevents it from reaching the close at 184:31
+126:21 call  next(function_gen)
+    -> <builtin>.next
+    exclude pluggy._execution.run_old_style_hookwrapper: function_gen is its generator, whose body runs here; by the generator rule the edge comes from 122:57, which calls the generator function
+127:33 call  teardowns.append(function_gen)
+    -> <builtin>.list.append
+131:45 call  hook_impl.function(*args)
+    note: hook_impl.function is the function given to HookImpl.__init__ (_impl.py:52): a function or bound method that register finds on the client's plugin (_manager.py:233-234) or a method that the client passes to call_extra (_caller.py:250). No package function is a hook implementation: only client callbacks reach this site (a new-style wrapper, a generator function of the client)
+133:45 call  hook_impl.function(*args, **kwargs)
+    note: the same values as at 131:45: only client hook implementation functions reach this site
+137:40 call  cast(Generator[None, object, object], res)
+    note: under `if TYPE_CHECKING:` (_execution.py:136), which does not run
+141:25 call  next(function_gen)
+    -> <builtin>.next
+    note: function_gen is the generator of the client's new-style wrapper; its body is client code
+143:36 call  _raise_wrapfail(function_gen, "did not yield")
+    -> pluggy._execution._raise_wrapfail
+144:33 call  teardowns.append(function_gen)
+    -> <builtin>.list.append
+147:45 call  hook_impl.function(*args)
+    note: the same values as at 131:45: only client hook implementation functions reach this site (the plain hook implementations)
+149:45 call  hook_impl.function(*args, **kwargs)
+    note: the same values as at 131:45: only client hook implementation functions reach this site
+151:35 call  results.append(res)
+    -> <builtin>.list.append
+163:33 call  reversed(teardowns)
+    -> <builtin>.reversed
+167:39 call  teardown.throw(exception)
+    -> types.GeneratorType.throw
+    exclude pluggy._execution.run_old_style_hookwrapper: teardown can be its generator, whose body resumes here; by the generator rule the edge comes from 122:57, which calls the generator function
+    note: teardown is a generator: of run_old_style_hookwrapper (126:21; its body is the package's, an edge of run_old_style_hookwrapper) or of a client's new-style wrapper (141:25)
+172:39 call  isinstance(exception, StopIteration)
+    -> <builtin>.isinstance
+175:43 call  teardown.close()
+    -> types.GeneratorType.close
+    exclude pluggy._execution.run_old_style_hookwrapper: teardown can be its generator, whose body resumes here; by the generator rule the edge comes from 122:57, which calls the generator function
+180:34 call  teardown.send(result)
+    -> types.GeneratorType.send
+    exclude pluggy._execution.run_old_style_hookwrapper: teardown can be its generator, whose body resumes here; by the generator rule the edge comes from 122:57, which calls the generator function
+184:31 call  teardown.close()
+    note: run_old_style_hookwrapper yields exactly once. Resuming it at 167:39 or 180:34 finishes or raises, and control leaves before this site. Only an opaque client new-style wrapper result reaches this close call (B5).
+192:28 call  _raise_wrapfail(teardown, "has second yield")
+    -> pluggy._execution._raise_wrapfail
+
+== pluggy._impl
+
+[pluggy._impl]
+19:13 call  TypeVar("_T")
+    -> typing.TypeVar
+25:2 decorator  @final
+    -> typing.final
+
+[pluggy._impl.HookImpl.__init__]
+53:40 call  varnames(self.function)
+    -> pluggy._decorators.varnames
+
+[pluggy._impl.HookImpl.__repr__]
+81:40 format  {self.plugin_name!r}
+    reject *: plugin_name is a str (the name given to register, or "<temp>" from call_extra)
+81:69 format  {self.plugin!r}
+    reject *: plugin is the client's plugin object, or None from call_extra (_caller.py:250)
+
+== pluggy._manager
+
+[pluggy._manager]
+52:24 call  object()
+    -> <builtin>.object
+
+[pluggy._manager._warn_for_function]
+43:16 call  cast(types.FunctionType, function)
+    -> typing.cast
+44:27 call  warnings.warn_explicit( warning, type(warning), lineno=fu...
+    -> warnings.warn_explicit
+46:13 call  type(warning)
+    -> <builtin>.type
+
+[pluggy._manager._instance_dict]
+58:48 call  object.__getattribute__(obj, "__dict__")
+    -> <builtin>.object.__getattribute__
+61:39 call  isinstance(instance_dict, dict)
+    -> <builtin>.isinstance
+
+[pluggy._manager._static_hook_attr]
+80:28 call  inspect.isclass(obj)
+    -> inspect.isclass
+80:53 call  inspect.ismodule(obj)
+    -> inspect.ismodule
+84:31 call  _instance_dict(obj)
+    -> pluggy._manager._instance_dict
+84:40 call  _instance_dict(obj).get(name, _ABSENT)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: the receiver is the dict that _instance_dict returns (it returns only dicts, _manager.py:60-61)
+86:42 call  inspect.getattr_static(obj, name, None)
+    -> inspect.getattr_static
+87:26 call  isinstance(slot, types.MemberDescriptorType)
+    -> <builtin>.isinstance
+90:41 call  slot.__get__(obj, type(obj))
+    -> types.MemberDescriptorType.__get__
+    note: slot is a types.MemberDescriptorType (checked at line 87)
+90:51 call  type(obj)
+    -> <builtin>.type
+94:26 call  isinstance(value, types.MethodType)
+    -> <builtin>.isinstance
+96:34 call  inspect.isfunction(value)
+    -> inspect.isfunction
+100:44 call  inspect.getattr_static(obj, name, None)
+    -> inspect.getattr_static
+101:18 call  isinstance(static, staticmethod)
+    -> <builtin>.isinstance
+103:18 call  isinstance(static, classmethod)
+    -> <builtin>.isinstance
+104:39 call  inspect.isclass(obj)
+    -> inspect.isclass
+104:54 call  type(obj)
+    -> <builtin>.type
+105:28 call  cast(Callable[..., object], static.__get__(owner, owner))
+    -> typing.cast
+105:66 call  static.__get__(owner, owner)
+    -> <builtin>.classmethod.__get__
+    note: static is a classmethod (checked at line 103) that wraps a client function
+106:18 call  isinstance(static, types.MethodType)
+    -> <builtin>.isinstance
+108:26 call  inspect.isfunction(static)
+    -> inspect.isfunction
+109:27 call  inspect.isclass(obj)
+    -> inspect.isclass
+109:52 call  inspect.ismodule(obj)
+    -> inspect.ismodule
+111:38 call  static.__get__(obj, type(obj))
+    -> types.FunctionType.__get__
+    note: static is a plain function (inspect.isfunction, line 108)
+111:48 call  type(obj)
+    -> <builtin>.type
+
+[pluggy._manager._get_marker_opts]
+117:19 call  getattr(holder, attrname, None)
+    -> <builtin>.getattr
+    note: holder is found[0] of _static_hook_attr: a client function, a staticmethod or classmethod object, or the function of a bound method
+119:34 call  isinstance(opts, dict)
+    -> <builtin>.isinstance
+120:19 call  getattr(holder, "__func__", None)
+    -> <builtin>.getattr
+122:23 call  getattr(func, attrname, None)
+    -> <builtin>.getattr
+124:38 call  isinstance(opts, dict)
+    -> <builtin>.isinstance
+
+[pluggy._manager.PluginValidationError.__init__]
+136:14 call  super()
+    -> <builtin>.super
+136:25 call  super().__init__(message)
+    -> <builtin>.Exception.__init__
+    reject *: super() in PluginValidationError, whose only base is Exception, finds the __init__ of Exception (that of BaseException), named through Exception
+
+[pluggy._manager.PluginManager.__init__]
+167:37 call  HookRelay()
+    -> pluggy._caller.HookRelay.__init__
+169:70 call  _tracing.TagTracer()
+    -> pluggy._tracing.TagTracer.__init__
+169:76 call  _tracing.TagTracer().get( "pluginmanage" )
+    -> pluggy._tracing.TagTracer.get
+    reject pluggy._tracing.TagTracerSub.get: the receiver is the TagTracer made at 169:70
+
+[pluggy._manager.PluginManager._hookexec]
+183:36 call  self._inner_hookexec(hook_name, methods, kwargs, firstres...
+    -> pluggy._execution._multicall
+    -> pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec
+    note: self._inner_hookexec is set only at _manager.py:172 (_multicall, imported through pluggy._callers), :600 (the closure traced_hookexec of add_hookcall_monitoring, also through enable_tracing) and :603 (undo restores the earlier value, one of these). Clients do not set this private attribute
+
+[pluggy._manager.PluginManager.register]
+204:54 call  self.get_canonical_name(plugin)
+    -> pluggy._manager.PluginManager.get_canonical_name
+207:37 call  self._name2plugin.get(plugin_name, -1)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: self._name2plugin is the dict made at _manager.py:161
+209:29 call  ValueError( "Plugin name already registered: " f"{plugin_...
+    -> <builtin>.ValueError
+211:19 format  {plugin_name}
+    reject *: plugin_name is a str (the given name or get_canonical_name)
+211:33 format  {plugin}
+    reject *: plugin is the client's plugin object
+211:43 format  {self._name2plugin}
+    reject *: a dict of plugin names to the client's plugin objects (or None for blocked names)
+214:46 call  self._name2plugin.values()
+    -> <builtin>.dict.values
+215:29 call  ValueError( "Plugin already registered under a different ...
+    -> <builtin>.ValueError
+217:19 format  {plugin_name}
+    reject *: plugin_name is a str (the given name or get_canonical_name)
+217:33 format  {plugin}
+    reject *: plugin is the client's plugin object
+217:43 format  {self._name2plugin}
+    reject *: a dict of plugin names to the client's plugin objects (or None for blocked names)
+223:29 call  dir(plugin)
+    -> <builtin>.dir
+    reject pluggy._compat.DistFacade.__dir__: plugin is the client's plugin object; the package never registers a DistFacade (see pluggy.md, "Objects of the client")
+224:53 call  self.parse_hookimpl_opts(plugin, attr_name)
+    -> pluggy._manager.PluginManager.parse_hookimpl_opts
+    note: subclasses of the client can override parse_hookimpl_opts (client code); no package class does
+226:40 call  normalize_hookimpl_opts(hookimpl_opts)
+    -> pluggy._config.normalize_hookimpl_opts
+227:42 call  _static_hook_attr(plugin, attr_name)
+    -> pluggy._manager._static_hook_attr
+231:23 format  {plugin!r}
+    reject *: plugin is the client's plugin object
+231:34 format  {attr_name}
+    reject *: attr_name is a str from dir(plugin)
+234:36 call  HookImpl(plugin, plugin_name, method, hookimpl_opts)
+    -> pluggy._impl.HookImpl.__init__
+235:46 call  hookimpl_opts.get("specname")
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: hookimpl_opts is the HookimplOpts dict from parse_hookimpl_opts (_get_marker_opts returns only dicts)
+236:50 call  getattr(self.hook, hook_name, None)
+    -> <builtin>.getattr
+238:54 call  hook.has_spec()
+    -> pluggy._caller.HookCaller.has_spec
+    note: hook is a HookCaller of the hook relay
+239:38 call  self._verify_hook(hook, hookimpl)
+    -> pluggy._manager.PluginManager._verify_hook
+241:33 call  hookimpls.append((hook_name, hookimpl, verified))
+    -> <builtin>.list.append
+245:27 call  getattr(self.hook, hook_name, None)
+    -> <builtin>.getattr
+247:34 call  HookCaller(hook_name, self._hookexec)
+    -> pluggy._caller.HookCaller.__init__
+    reject pluggy._manager.PluginManager._hookexec: HookCaller.__init__ only stores it (_caller.py:77); the self._hookexec(...) sites of _caller.py call it
+248:24 call  setattr(self.hook, hook_name, hook)
+    -> <builtin>.setattr
+249:48 call  hook.has_spec()
+    -> pluggy._caller.HookCaller.has_spec
+253:34 call  self._verify_hook(hook, hookimpl)
+    -> pluggy._manager.PluginManager._verify_hook
+254:38 call  hook._maybe_apply_history(hookimpl)
+    -> pluggy._caller.HookCaller._maybe_apply_history
+255:31 call  hook._add_hookimpl(hookimpl)
+    -> pluggy._caller.HookCaller._add_hookimpl
+
+[pluggy._manager.PluginManager.parse_hookimpl_opts]
+273:34 call  _static_hook_attr(plugin, name)
+    -> pluggy._manager._static_hook_attr
+276:20 call  cast( HookimplOpts | None, _get_marker_opts(found[0], sel...
+    -> typing.cast
+278:29 call  _get_marker_opts(found[0], self.project_name + "_impl")
+    -> pluggy._manager._get_marker_opts
+278:45 getattr  self.project_name
+    reject pluggy._compat.DistFacade.project_name: self is a PluginManager; project_name is an instance attribute (_manager.py:160)
+
+[pluggy._manager.PluginManager.unregister]
+293:33 call  self.get_name(plugin)
+    -> pluggy._manager.PluginManager.get_name
+297:37 call  self.get_plugin(name)
+    -> pluggy._manager.PluginManager.get_plugin
+303:54 call  self._name2plugin.get(name)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: self._name2plugin is the dict made at _manager.py:161
+304:44 call  self.get_name(plugin)
+    -> pluggy._manager.PluginManager.get_name
+308:33 call  ValueError( f"Plugin name {name!r} and plugin {plugin!r} ...
+    -> <builtin>.ValueError
+309:35 format  {name!r}
+    reject *: name is a plugin name, a str
+309:55 format  {plugin!r}
+    reject *: plugin is the client's plugin object
+310:47 format  {registered_plugin!r}
+    reject *: a value of self._name2plugin: the client's plugin object
+311:48 format  {registered_name!r}
+    reject *: get_name returns a plugin name, a str, or None
+314:43 call  self.get_hookcallers(plugin)
+    -> pluggy._manager.PluginManager.get_hookcallers
+317:42 call  hookcaller._remove_plugin(plugin)
+    -> pluggy._caller.HookCaller._remove_plugin
+    note: hookcaller is a HookCaller of the hook relay (get_hookcallers, _manager.py:565)
+320:33 call  self._name2plugin.get(name)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: self._name2plugin is the dict made at _manager.py:161
+
+[pluggy._manager.PluginManager.set_blocked]
+327:24 call  self.unregister(name=name)
+    -> pluggy._manager.PluginManager.unregister
+
+[pluggy._manager.PluginManager.unblock]
+339:33 call  self._name2plugin.get(name, -1)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: self._name2plugin is the dict made at _manager.py:161
+
+[pluggy._manager.PluginManager.add_hookspecs]
+351:24 call  dir(module_or_class)
+    -> <builtin>.dir
+    reject pluggy._compat.DistFacade.__dir__: module_or_class is the client's module or class; dir() of a class or module uses type.__dir__ or module.__dir__, never the instance method DistFacade.__dir__
+352:49 call  self.parse_hookspec_opts(module_or_class, name)
+    -> pluggy._manager.PluginManager.parse_hookspec_opts
+354:48 call  getattr(self.hook, name, None)
+    -> <builtin>.getattr
+356:36 call  HookCaller(name, self._hookexec, module_or_class, spec_opts)
+    -> pluggy._caller.HookCaller.__init__
+    reject pluggy._manager.PluginManager._hookexec: HookCaller.__init__ only stores it (_caller.py:77); the self._hookexec(...) sites of _caller.py call it
+357:28 call  setattr(self.hook, name, hc)
+    -> <builtin>.setattr
+360:41 call  hc.set_specification(module_or_class, spec_opts)
+    -> pluggy._caller.HookCaller.set_specification
+    note: hc is a HookCaller of the hook relay
+361:57 call  hc.get_hookimpls()
+    -> pluggy._caller.HookCaller.get_hookimpls
+362:42 call  self._verify_hook(hc, hookfunction)
+    -> pluggy._manager.PluginManager._verify_hook
+363:29 call  names.append(name)
+    -> <builtin>.list.append
+366:29 call  ValueError( f"did not find any {self.project_name!r} hook...
+    -> <builtin>.ValueError
+367:36 format  {self.project_name!r}
+    reject *: project_name is the str given to PluginManager
+367:42 getattr  self.project_name
+    reject pluggy._compat.DistFacade.project_name: self is a PluginManager; project_name is an instance attribute (_manager.py:160)
+367:67 format  {module_or_class!r}
+    reject *: module_or_class is the client's module or class; its repr is that of type or module
+
+[pluggy._manager.PluginManager.parse_hookspec_opts]
+388:34 call  _static_hook_attr(module_or_class, name)
+    -> pluggy._manager._static_hook_attr
+391:20 call  cast( HookspecOpts | None, _get_marker_opts(found[0], sel...
+    -> typing.cast
+393:29 call  _get_marker_opts(found[0], self.project_name + "_spec")
+    -> pluggy._manager._get_marker_opts
+393:45 getattr  self.project_name
+    reject pluggy._compat.DistFacade.project_name: self is a PluginManager; project_name is an instance attribute (_manager.py:160)
+
+[pluggy._manager.PluginManager.get_plugins]
+398:52 call  self._name2plugin.values()
+    -> <builtin>.dict.values
+
+[pluggy._manager.PluginManager.is_registered]
+402:19 call  any(plugin == val for val in self._name2plugin.values())
+    -> <builtin>.any
+402:69 call  self._name2plugin.values()
+    -> <builtin>.dict.values
+
+[pluggy._manager.PluginManager.get_canonical_name]
+412:35 call  getattr(plugin, "__name__", None)
+    -> <builtin>.getattr
+    note: plugin is the client's plugin object (see pluggy.md, "Objects of the client")
+413:27 call  str(id(plugin))
+    -> <builtin>.str
+    reject *: the argument is the int that id() returns
+413:30 call  id(plugin)
+    -> <builtin>.id
+
+[pluggy._manager.PluginManager.get_plugin]
+417:37 call  self._name2plugin.get(name)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: self._name2plugin is the dict made at _manager.py:161
+
+[pluggy._manager.PluginManager.has_plugin]
+421:31 call  self.get_plugin(name)
+    -> pluggy._manager.PluginManager.get_plugin
+
+[pluggy._manager.PluginManager.get_name]
+426:49 call  self._name2plugin.items()
+    -> <builtin>.dict.items
+
+[pluggy._manager.PluginManager._verify_hook]
+432:28 call  hook.is_historic()
+    -> pluggy._caller.HookCaller.is_historic
+433:40 call  PluginValidationError( hookimpl.plugin, f"Plugin {hookimp...
+    -> pluggy._manager.PluginValidationError.__init__
+435:26 format  {hookimpl.plugin_name!r}
+    reject *: plugin_name is a str
+435:57 format  {hook.name!r}
+    reject *: the hook name, a str
+439:21 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: _verify_hook is private, so hook is what the package's calls pass (rule B1): _manager.py:239 and :253 pass a hook caller taken from the hook relay (:236, :245), :362 one taken from the relay (:354), and the package fills the relay only with HookCaller objects (_manager.py:248, :357); its spec is the HookCaller slot
+440:17 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: hook is a HookCaller of the hook relay, as at 439:21
+441:31 call  _warn_for_function(hook.spec.warn_on_impl, hookimpl.funct...
+    -> pluggy._manager._warn_for_function
+441:37 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: hook is a HookCaller of the hook relay, as at 439:21
+444:24 call  set(hookimpl.argnames)
+    -> <builtin>.set
+445:16 call  set(hook.spec.argnames)
+    -> <builtin>.set
+445:22 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: hook is a HookCaller of the hook relay, as at 439:21
+445:42 call  set(hook.spec.kwargnames)
+    -> <builtin>.set
+445:48 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: hook is a HookCaller of the hook relay, as at 439:21
+448:40 call  PluginValidationError( hookimpl.plugin, f"Plugin {hookimp...
+    -> pluggy._manager.PluginValidationError.__init__
+450:26 format  {hookimpl.plugin_name!r}
+    reject *: plugin_name is a str
+450:60 format  {hook.name!r}
+    reject *: the hook name, a str
+451:40 format  {_formatdef(hookimpl.function)}
+    reject *: _formatdef returns a str
+451:51 call  _formatdef(hookimpl.function)
+    -> pluggy._manager._formatdef
+452:31 format  {notinspec}
+    reject *: notinspec is a set of parameter names (str)
+456:17 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: hook is a HookCaller of the hook relay, as at 439:21
+458:40 getattr  hook.spec
+    reject pluggy._caller._SubsetHookCaller.spec: hook is a HookCaller of the hook relay, as at 439:21
+458:66 call  hook.spec.warn_on_impl_args.get(hookimpl_argname)
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: warn_on_impl_args is the client's mapping of argument names to warnings, given to HookspecMarker.__call__ and passed on unchanged (_decorators.py:105, :356), not a tracer
+    note: no callee (scope rules B4 and B5 in pluggy.md): warn_on_impl_args is annotated with the abstract type Mapping[str, Warning] (_decorators.py:69), which does not fix the class of the object; the package passes it on without a copy or a check, so it is an opaque client object and its get is client code. The tests pass a dict: the trace edge to <builtin>.dict.get is in pluggy.rejected.json
+460:39 call  _warn_for_function(argname_warning, hookimpl.function)
+    -> pluggy._manager._warn_for_function
+464:46 call  inspect.isgeneratorfunction(hookimpl.function)
+    -> inspect.isgeneratorfunction
+465:40 call  PluginValidationError( hookimpl.plugin, f"Plugin {hookimp...
+    -> pluggy._manager.PluginValidationError.__init__
+467:26 format  {hookimpl.plugin_name!r}
+    reject *: plugin_name is a str
+467:60 format  {hook.name!r}
+    reject *: the hook name, a str
+468:40 format  {_formatdef(hookimpl.function)}
+    reject *: _formatdef returns a str
+468:51 call  _formatdef(hookimpl.function)
+    -> pluggy._manager._formatdef
+474:40 call  PluginValidationError( hookimpl.plugin, f"Plugin {hookimp...
+    -> pluggy._manager.PluginValidationError.__init__
+476:26 format  {hookimpl.plugin_name!r}
+    reject *: plugin_name is a str
+476:60 format  {hook.name!r}
+    reject *: the hook name, a str
+477:40 format  {_formatdef(hookimpl.function)}
+    reject *: _formatdef returns a str
+477:51 call  _formatdef(hookimpl.function)
+    -> pluggy._manager._formatdef
+
+[pluggy._manager.PluginManager.check_pending]
+488:39 call  getattr(self.hook, name)
+    -> <builtin>.getattr
+489:33 call  hook.has_spec()
+    -> pluggy._caller.HookCaller.has_spec
+    note: hook is a HookCaller of the hook relay (a value of self.hook.__dict__)
+490:51 call  hook.get_hookimpls()
+    -> pluggy._caller.HookCaller.get_hookimpls
+492:52 call  PluginValidationError( hookimpl.plugin, f"unknown hook {n...
+    -> pluggy._manager.PluginValidationError.__init__
+494:44 format  {name!r}
+    reject *: name is a key of self.hook.__dict__, a str
+494:63 format  {hookimpl.plugin!r}
+    reject *: HookImpl.plugin is the client's plugin object (register, _manager.py:234)
+
+[pluggy._manager.PluginManager.load_setuptools_entrypoints]
+511:25 call  list(importlib.metadata.distributions())
+    -> <builtin>.list
+511:58 call  importlib.metadata.distributions()
+    -> importlib.metadata.distributions
+517:39 call  self.has_plugin(ep.name)
+    -> pluggy._manager.PluginManager.has_plugin
+518:39 call  self.is_blocked(ep.name)
+    -> pluggy._manager.PluginManager.is_blocked
+521:33 call  ep.load()
+    -> importlib.metadata.EntryPoint.load
+    note: ep is an importlib.metadata.EntryPoint of dist.entry_points; load() imports the plugin of another distribution (client code)
+522:30 call  self.register(plugin, name=ep.name)
+    -> pluggy._manager.PluginManager.register
+523:45 call  self._plugin_distinfo.append((plugin, dist))
+    -> <builtin>.list.append
+
+[pluggy._manager.PluginManager.list_plugin_distinfo]
+539:36 call  DistFacade(dist)
+    -> pluggy._compat.DistFacade.__init__
+
+[pluggy._manager.PluginManager.list_plugin_distributions]
+549:20 call  list(self._plugin_distinfo)
+    -> <builtin>.list
+
+[pluggy._manager.PluginManager.list_name_plugin]
+553:20 call  list(self._name2plugin.items())
+    -> <builtin>.list
+553:44 call  self._name2plugin.items()
+    -> <builtin>.dict.items
+
+[pluggy._manager.PluginManager.get_hookcallers]
+562:25 call  self.get_name(plugin)
+    -> pluggy._manager.PluginManager.get_name
+565:52 call  self.hook.__dict__.values()
+    -> <builtin>.dict.values
+566:19 call  any(impl.plugin is plugin for impl in hookcaller.get_hook...
+    -> <builtin>.any
+566:78 call  hookcaller.get_hookimpls()
+    -> pluggy._caller.HookCaller.get_hookimpls
+    note: hookcaller is a HookCaller of the hook relay (a value of self.hook.__dict__)
+567:35 call  hookcallers.append(hookcaller)
+    -> <builtin>.list.append
+
+[pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec]
+593:19 call  before(hook_name, hook_impls, caller_kwargs)
+    -> pluggy._manager.PluginManager.enable_tracing.before
+    note: before is the argument of add_hookcall_monitoring; the package passes enable_tracing.before (_manager.py:630); the other values are client callbacks
+594:39 call  Result.from_call( lambda: oldcall(hook_name, hook_impls, ...
+    -> pluggy._result.Result.from_call
+    reject pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec.<lambda1>: Result.from_call, a package function, calls it (_result.py:62); this scope does not
+597:18 call  after(outcome, hook_name, hook_impls, caller_kwargs)
+    -> pluggy._manager.PluginManager.enable_tracing.after
+    note: after is the argument of add_hookcall_monitoring; the package passes enable_tracing.after (_manager.py:630); the other values are client callbacks
+598:38 call  outcome.get_result()
+    -> pluggy._result.Result.get_result
+
+[pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec.<lambda1>]
+595:32 call  oldcall(hook_name, hook_impls, caller_kwargs, firstresult)
+    -> pluggy._execution._multicall
+    -> pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec
+    note: oldcall is self._inner_hookexec when add_hookcall_monitoring ran (_manager.py:585): _multicall (set at :172), or the traced_hookexec of an earlier add_hookcall_monitoring or enable_tracing (set at :600; :603 restores an earlier value)
+
+[pluggy._manager.PluginManager.enable_tracing]
+612:40 call  self.trace.root.get("hook")
+    -> pluggy._tracing.TagTracer.get
+    reject pluggy._tracing.TagTracerSub.get: self.trace is the TagTracerSub made at _manager.py:169 and its root is the TagTracer made there (TagTracerSub.root is always a TagTracer: _tracing.py:94, :147)
+630:44 call  self.add_hookcall_monitoring(before, after)
+    -> pluggy._manager.PluginManager.add_hookcall_monitoring
+    reject pluggy._manager.PluginManager.enable_tracing.after, pluggy._manager.PluginManager.enable_tracing.before: add_hookcall_monitoring only stores them in the closure traced_hookexec, which calls them later (593:19, 597:18)
+
+[pluggy._manager.PluginManager.enable_tracing.before]
+618:22 call  hooktrace(hook_name, kwargs)
+    -> pluggy._tracing.TagTracerSub.__call__
+    note: hooktrace is the TagTracerSub that TagTracer.get returns at _manager.py:612 (_tracing.py:94); calling it runs TagTracerSub.__call__
+
+[pluggy._manager.PluginManager.enable_tracing.after]
+626:24 getattr  outcome.exception
+    -> pluggy._result.Result.exception
+    note: outcome is the Result of Result.from_call that traced_hookexec passes (_manager.py:594, :597)
+627:26 call  hooktrace("finish", hook_name, "-->", outcome.get_result())
+    -> pluggy._tracing.TagTracerSub.__call__
+    note: hooktrace is the TagTracerSub that TagTracer.get returns at _manager.py:612 (_tracing.py:94); calling it runs TagTracerSub.__call__
+627:73 call  outcome.get_result()
+    -> pluggy._result.Result.get_result
+
+[pluggy._manager.PluginManager.subset_hook_caller]
+637:35 call  getattr(self.hook, name)
+    -> <builtin>.getattr
+638:32 call  set(remove_plugins)
+    -> <builtin>.set
+641:46 call  plugins_to_remove.intersection_update( hookimpl.plugin fo...
+    -> <builtin>.set.intersection_update
+642:50 getattr  orig._hookimpls
+    reject pluggy._caller._SubsetHookCaller._hookimpls: orig is a value of the hook relay (637:35), whose attributes the package sets only to new HookCallers (_manager.py:248, :357); a client that puts another object there passes an arbitrary package object (rule B3); its _hookimpls is the HookCaller slot
+648:33 call  _SubsetHookCaller(orig, plugins_to_remove)
+    -> pluggy._caller._SubsetHookCaller.__init__
+    reject pluggy._caller.HookCaller.__init__: _SubsetHookCaller defines __init__ (_caller.py:299), which does not call HookCaller.__init__
+
+[pluggy._manager._formatdef]
+652:14 format  {func.__name__}
+    reject *: the __name__ of a function is a str
+652:29 format  {inspect.signature(func)}
+    reject *: an inspect.Signature
+652:47 call  inspect.signature(func)
+    -> inspect.signature
+
+== pluggy._result
+
+[pluggy._result]
+17:21 call  TypeVar("ResultType")
+    -> typing.TypeVar
+24:2 decorator  @final
+    -> typing.final
+42:6 decorator  @property
+    -> <builtin>.property
+51:6 decorator  @property
+    -> <builtin>.property
+56:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[pluggy._result.Result.excinfo]
+49:25 call  type(exc)
+    -> <builtin>.type
+
+[pluggy._result.Result.from_call]
+62:26 call  func()
+    -> pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec.<lambda1>
+    note: func is the argument of from_call, annotated as a bare Callable; from_call is ":meta private:", so only the package calls it (rule C), and the package passes only the lambda of _manager.py:595 (rule B2)
+65:19 call  cls(result, exception)
+    -> pluggy._result.Result.__init__
+    note: cls is Result: from_call is a classmethod that the package calls as Result.from_call (_manager.py:594); Result defines __init__
+
+[pluggy._result.Result.get_result]
+101:24 call  cast(ResultType, self._result)
+    -> typing.cast
+103:37 call  exc.with_traceback(tb)
+    -> <builtin>.BaseException.with_traceback
+    -> <builtin>.Exception.with_traceback
+    -> <builtin>.RuntimeError.with_traceback
+    -> <builtin>.UserWarning.with_traceback
+    note: annotated client exceptions admit BaseException.with_traceback. Package-created HookCallError, RuntimeError from _raise_wrapfail, and PluggyTeardownRaisedWarning raised by warnings-as-errors also flow through _multicall and Result.from_call into this Result. Their nearest outside receiver classes are Exception, RuntimeError and UserWarning respectively; B4 does not erase package-produced values.
+
+== pluggy._tracing
+
+[pluggy._tracing._describe_failure]
+20:24 call  repr(exc)
+    -> <builtin>.repr
+    reject *: exc is the Exception that str() or repr() of a traced value raised; HookCaller, _SubsetHookCaller and HookImpl are not exceptions
+22:36 format  {type(exc).__name__}
+    reject *: the __name__ of a class is a str
+22:41 call  type(exc)
+    -> <builtin>.type
+23:16 call  type(obj)
+    -> <builtin>.type
+24:16 format  {exc_info}
+    reject *: exc_info is a str (20:24 or 22)
+24:37 format  {func}
+    reject *: func is the str "str" or "repr" (_tracing.py:47, :83)
+24:47 format  {name}
+    reject *: name is the __name__ of a class, a str
+24:66 format  {id(obj):x}
+    reject *: the int that id() returns
+24:69 call  id(obj)
+    -> <builtin>.id
+
+[pluggy._tracing._escape_surrogates]
+34:20 call  text.isascii()
+    -> <builtin>.str.isascii
+36:23 call  text.encode("utf-8", "backslashreplace")
+    -> <builtin>.str.encode
+36:59 call  text.encode("utf-8", "backslashreplace").decode("utf-8")
+    -> <builtin>.bytes.decode
+
+[pluggy._tracing._safe_str]
+45:19 call  str(obj)
+    -> <builtin>.str
+    reject *: obj is a traced value: a positional argument of a trace call (via map, 103:31) or a value of its trailing dict (via _render_value). The package's own trace calls (_manager.py:618, :627) pass the hook name, constant strs, the keyword arguments of the hook call and the result of the client's hook implementations; the other trace calls are the client's, with the client's objects (see pluggy.md, "Objects of the client")
+47:33 call  _describe_failure(exc, obj, "str")
+    -> pluggy._tracing._describe_failure
+48:30 call  _escape_surrogates(text)
+    -> pluggy._tracing._escape_surrogates
+
+[pluggy._tracing._is_plain_token]
+53:16 call  bool(text)
+    -> <builtin>.bool
+53:43 call  text.isprintable()
+    -> <builtin>.str.isprintable
+
+[pluggy._tracing._format_block]
+58:15 format  {indent}
+    reject *: indent is a str of spaces (_tracing.py:104)
+58:29 format  {line}
+    reject *: line is a str of str.splitlines (_tracing.py:112)
+
+[pluggy._tracing._render_value]
+64:18 call  isinstance(obj, (enum.Enum, os.PathLike))
+    -> <builtin>.isinstance
+65:26 call  _safe_repr(obj)
+    -> pluggy._tracing._safe_repr
+66:18 call  isinstance(obj, str)
+    -> <builtin>.isinstance
+67:15 call  len(obj.splitlines())
+    -> <builtin>.len
+67:30 call  obj.splitlines()
+    -> <builtin>.str.splitlines
+    note: obj is a str (checked at line 66)
+68:29 call  _safe_str(obj)
+    -> pluggy._tracing._safe_str
+69:27 call  _is_plain_token(obj)
+    -> pluggy._tracing._is_plain_token
+70:29 call  _safe_str(obj)
+    -> pluggy._tracing._safe_str
+71:26 call  _safe_repr(obj)
+    -> pluggy._tracing._safe_repr
+72:21 call  _safe_str(obj)
+    -> pluggy._tracing._safe_str
+
+[pluggy._tracing._safe_repr]
+81:20 call  repr(obj)
+    -> <builtin>.repr
+    reject *: obj is a traced value that _render_value passes: a value of the trailing dict of a trace call, which for the package's own trace call (_manager.py:618) is the keyword arguments of the hook call, else the client's dict; all are the client's objects (see pluggy.md, "Objects of the client")
+83:33 call  _describe_failure(exc, obj, "repr")
+    -> pluggy._tracing._describe_failure
+84:30 call  _escape_surrogates(text)
+    -> pluggy._tracing._escape_surrogates
+
+[pluggy._tracing.TagTracer.get]
+94:28 call  TagTracerSub(self, (name,))
+    -> pluggy._tracing.TagTracerSub.__init__
+
+[pluggy._tracing.TagTracer._format_message]
+97:22 call  isinstance(args[-1], dict)
+    -> <builtin>.isinstance
+103:27 call  " ".join(map(_safe_str, args))
+    -> <builtin>.str.join
+    -> pluggy._tracing._safe_str
+    note: str.join consumes the lazy map and calls _safe_str. This ledger chooses the consumer placement as an allowed normalization; README ruling 12 also permits map103:31 in this same function.
+103:31 call  map(_safe_str, args)
+    -> <builtin>.map
+    reject pluggy._tracing._safe_str: this ledger chooses join103:27 to avoid duplicate attribution. README ruling 12 also permits this map103:31 placement in the same function; the previous attribution was valid.
+106:20 format  {indent}
+    reject *: indent is a str of spaces (line 104)
+106:28 format  {content}
+    reject *: content is the str of line 103
+106:39 format  {':'.join(tags)}
+    reject *: str.join returns a str
+106:48 call  ':'.join(tags)
+    -> <builtin>.str.join
+108:39 call  extra.items()
+    -> <builtin>.dict.items
+    note: extra is a dict (checked at line 97) or the empty dict of line 101
+109:37 call  _render_value(value)
+    -> pluggy._tracing._render_value
+112:39 call  rendered.splitlines()
+    -> <builtin>.str.splitlines
+114:29 call  lines.append(f"{indent} {name}: {rendered}\n")
+    -> <builtin>.list.append
+114:32 format  {indent}
+    reject *: indent is a str of spaces (line 104)
+114:44 format  {name}
+    reject *: name is a key of the trailing dict of a trace call: a keyword name (str) for the package's own trace call (_manager.py:618), else a key of the client's dict
+114:52 format  {rendered}
+    reject *: rendered is the str of _render_value
+116:29 call  lines.append(f"{indent} {name}:\n")
+    -> <builtin>.list.append
+116:32 format  {indent}
+    reject *: indent is a str of spaces (line 104)
+116:44 format  {name}
+    reject *: name is a key of the trailing dict of a trace call: a keyword name (str) for the package's own trace call (_manager.py:618), else a key of the client's dict
+117:29 call  lines.extend(_format_block(indent, body))
+    -> <builtin>.list.extend
+117:43 call  _format_block(indent, body)
+    -> pluggy._tracing._format_block
+119:23 call  "".join(lines)
+    -> <builtin>.str.join
+
+[pluggy._tracing.TagTracer._processmessage]
+123:25 call  self._writer(self._format_message(tags, args))
+    note: self._writer is None (_tracing.py:90) or the argument of setwriter (_tracing.py:128), a bare Callable; no package code passes a package function there (rule B2). Only client callbacks reach this site (print in the documentation, list.append in the tests: see pluggy.rejected.json)
+123:46 call  self._format_message(tags, args)
+    -> pluggy._tracing.TagTracer._format_message
+124:44 call  self._tags2proc.get(tags)
+    -> <builtin>.dict.get
+    reject pluggy._tracing.TagTracer.get, pluggy._tracing.TagTracerSub.get: self._tags2proc is the dict made at _tracing.py:89
+125:22 call  processor(tags, args)
+    note: processor is a value of self._tags2proc, which only setprocessor fills (_tracing.py:135) with its argument, a bare Callable; no package code passes a package function there (rule B2). Only client callbacks reach this site
+
+[pluggy._tracing.TagTracer.setprocessor]
+131:22 call  isinstance(tags, str)
+    -> <builtin>.isinstance
+132:25 call  tuple(tags.split(":"))
+    -> <builtin>.tuple
+132:36 call  tags.split(":")
+    -> <builtin>.str.split
+134:30 call  isinstance(tags, tuple)
+    -> <builtin>.isinstance
+
+[pluggy._tracing.TagTracerSub.__call__]
+144:34 call  self.root._processmessage(self.tags, args)
+    -> pluggy._tracing.TagTracer._processmessage
+    note: self.root is always a TagTracer (_tracing.py:94, :147)
+
+[pluggy._tracing.TagTracerSub.get]
+147:30 call  self.__class__(self.root, self.tags + (name,))
+    -> pluggy._tracing.TagTracerSub.__init__
+    note: self.__class__ is TagTracerSub (or a client subclass); instantiating it runs TagTracerSub.__init__
+
+== pluggy._warnings
+
+[pluggy._warnings]
+10:2 decorator  @final
+    -> typing.final

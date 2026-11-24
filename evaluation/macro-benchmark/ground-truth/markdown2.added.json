@@ -1,0 +1,578 @@
+{
+  "edges": {
+    "markdown2": {
+      "markdown2.main": [
+        "markdown2 4815:18 call  main(sys.argv)"
+      ],
+      "sys.exit": [
+        "markdown2 4815:13 call  sys.exit(main(sys.argv))"
+      ]
+    },
+    "markdown2.CodeFriendly.process_span": {
+      "re.Match.group": [
+        "markdown2 3471:58 call  open.group(1)",
+        "markdown2 3472:61 call  close.group(1)"
+      ],
+      "typing.cast": [
+        "markdown2 3471:42 call  cast(str, open.group(1))",
+        "markdown2 3472:44 call  cast(str, close.group(1))"
+      ]
+    },
+    "markdown2.Extra.deregister": {
+      "<builtin>.dict.values": [
+        "markdown2 2473:51 call  Extra._exec_order.values()"
+      ],
+      "<builtin>.list.remove": [
+        "markdown2 2477:35 call  section.remove(cls)"
+      ]
+    },
+    "markdown2.GFMItalicAndBoldProcessor.body_crosses_span_borders": {
+      "functools._lru_cache_wrapper.wrapper": [
+        "markdown2 2953:47 call  self._body_crosses_span_borders(text)"
+      ]
+    },
+    "markdown2.GFMItalicAndBoldProcessor.delimiter_left_or_right": {
+      "functools._lru_cache_wrapper.wrapper": [
+        "markdown2 2904:45 call  self._delimiter_left_or_right(run, delim_run.group(1))"
+      ]
+    },
+    "markdown2.GFMItalicAndBoldProcessor.process_span": {
+      "typing.cast": [
+        "markdown2 2734:42 call  cast(str, open.group(1))",
+        "markdown2 2736:44 call  cast(str, close.group(1))"
+      ]
+    },
+    "markdown2.ItalicAndBoldProcessor.__init__": {
+      "<builtin>.super": [
+        "markdown2 2545:14 call  super()"
+      ],
+      "markdown2.Extra.__init__": [
+        "markdown2 2545:25 call  super().__init__(md, options)"
+      ]
+    },
+    "markdown2.ItalicAndBoldProcessor.run": {
+      "<builtin>.dict.items": [
+        "markdown2 2557:57 call  self.hash_table.items()"
+      ],
+      "<builtin>.str.replace": [
+        "markdown2 2558:40 call  text.replace(key, substr)"
+      ],
+      "re.Pattern.sub": [
+        "markdown2 2550:38 call  self.strong_re.sub(self.sub, text)",
+        "markdown2 2551:34 call  self.em_re.sub(self.sub, text)"
+      ]
+    },
+    "markdown2.ItalicAndBoldProcessor.sub": {
+      "re.Match.end": [
+        "markdown2 2564:53 call  match.end()"
+      ],
+      "re.Match.start": [
+        "markdown2 2564:40 call  match.start()"
+      ]
+    },
+    "markdown2.ItalicAndBoldProcessor.sub_hash": {
+      "markdown2.Markdown._hash_span": [
+        "markdown2 2568:34 call  self.md._hash_span(substr, self.hash_table)"
+      ],
+      "re.Match.end": [
+        "markdown2 2567:55 call  match.end()"
+      ],
+      "re.Match.start": [
+        "markdown2 2567:42 call  match.start()"
+      ]
+    },
+    "markdown2.ItalicAndBoldProcessor.test": {
+      "re.search": [
+        "markdown2 2573:45 call  re.search(r'md5-[0-9a-z]{32}', text)"
+      ]
+    },
+    "markdown2.Latex.run": {
+      "<builtin>.ImportError": [
+        "markdown2 3666:30 call  ImportError('The \"latex\" extra requires the \"latex2mathml..."
+      ]
+    },
+    "markdown2.Markdown.__init__": {
+      "<builtin>.Exception.__init__": [
+        "markdown2 378:36 call  MarkdownError(\"If the 'link-patterns' extra is used, an a..."
+      ]
+    },
+    "markdown2.Markdown._add_footnotes": {
+      "logging.Logger.debug": [
+        "markdown2 2190:30 call  log.debug(\"Footnote error. `footnote_title` \" \"must inclu..."
+      ]
+    },
+    "markdown2.Markdown._color_with_pygments.HtmlCodeFormatter.wrap": {
+      "pygments.formatters.HtmlFormatter._wrap_div": [
+        "markdown2 1915:42 call  self._wrap_div(self._add_newline(self._wrap_pre(self._wra..."
+      ]
+    },
+    "markdown2.Markdown._get_emacs_vars": {
+      "<builtin>.str.rstrip": [
+        "markdown2 804:52 call  line[:-1].rstrip()",
+        "markdown2 819:54 call  value[:-1].rstrip()"
+      ],
+      "logging.Logger.debug": [
+        "markdown2 760:38 call  log.debug(\"emacs variables error: malformed -*- \" \"line: ...",
+        "markdown2 781:34 call  log.debug(\"emacs variables error: line '%s' \" \"does not u...",
+        "markdown2 788:34 call  log.debug(\"emacs variables error: line '%s' \" \"does not u...",
+        "markdown2 812:38 call  log.debug(\"local variables error: missing colon \" \"in loc..."
+      ]
+    },
+    "markdown2.Markdown._hash_html_block_sub": {
+      "markdown2.Markdown._sanitize_html": [
+        "markdown2 931:39 call  self._sanitize_html(html)"
+      ]
+    },
+    "markdown2.Markdown._hash_html_blocks": {
+      "markdown2.Markdown._sanitize_html": [
+        "markdown2 1060:47 call  self._sanitize_html(html)"
+      ]
+    },
+    "markdown2.Markdown._header_id_exists": {
+      "<builtin>.isinstance": [
+        "markdown2 1593:33 call  isinstance(prefix, str)"
+      ]
+    },
+    "markdown2.Markdown._sanitize_html": {
+      "<builtin>.Exception.__init__": [
+        "markdown2 1446:32 call  MarkdownError(\"invalid value for 'safe_mode': %r (must be..."
+      ]
+    },
+    "markdown2.Markdown._setup_extras": {
+      "markdown2.LinkProcessor.__init__": [
+        "markdown2 422:45 call  klass(self, (self.extras.get(name, {})))"
+      ]
+    },
+    "markdown2.Markdown.convert": {
+      "<builtin>.int": [
+        "markdown2 469:39 call  int(earg)"
+      ],
+      "<builtin>.str": [
+        "markdown2 457:23 call  str(text, 'utf-8')"
+      ],
+      "<builtin>.str.split": [
+        "markdown2 467:46 call  e.split('=', 1)"
+      ]
+    },
+    "markdown2.Mermaid.tags": {
+      "<builtin>.super": [
+        "markdown2 3826:21 call  super()"
+      ],
+      "markdown2.FencedCodeBlocks.tags": [
+        "markdown2 3826:28 call  super().tags(lexer_name)"
+      ]
+    },
+    "markdown2.MiddleWordEm.sub": {
+      "<builtin>.super": [
+        "markdown2 3895:25 call  super()"
+      ]
+    },
+    "markdown2.Numbering.run": {
+      "<builtin>.dict.get": [
+        "markdown2 3937:34 call  counters.get(counter, 1)",
+        "markdown2 3955:45 call  references.get(match.group(1), (None, None))"
+      ],
+      "<builtin>.len": [
+        "markdown2 3931:19 call  len(match.groups())"
+      ],
+      "<builtin>.list.append": [
+        "markdown2 3939:32 call  replacements.append((match.start(0), definition_html.form..."
+      ],
+      "<builtin>.str.format": [
+        "markdown2 3940:56 call  definition_html.format(counter, ref_id, text_before, numb...",
+        "markdown2 3957:45 call  reference_html.format(counter, match.group(1), number)",
+        "markdown2 3961:45 call  reference_html.format(match.group(1), 'countererror', '?'..."
+      ],
+      "<builtin>.str.replace": [
+        "markdown2 3965:36 call  repl.replace('\"', self.md._escape_table['\"'])"
+      ],
+      "<builtin>.str.strip": [
+        "markdown2 3934:47 call  match.group(2).strip()"
+      ],
+      "re.Match.end": [
+        "markdown2 3945:43 call  match.end(0)",
+        "markdown2 3967:64 call  match.end()"
+      ],
+      "re.Match.group": [
+        "markdown2 3933:34 call  match.group(1)",
+        "markdown2 3934:38 call  match.group(2)",
+        "markdown2 3935:33 call  match.group(3)",
+        "markdown2 3936:37 call  match.group(4)",
+        "markdown2 3955:57 call  match.group(1)",
+        "markdown2 3958:57 call  match.group(1)",
+        "markdown2 3961:57 call  match.group(1)",
+        "markdown2 3963:63 call  match.group(1)"
+      ],
+      "re.Match.groups": [
+        "markdown2 3931:32 call  match.groups()"
+      ],
+      "re.Match.start": [
+        "markdown2 3939:45 call  match.start(0)",
+        "markdown2 3967:37 call  match.start()"
+      ]
+    },
+    "markdown2.Wavedrom.run": {
+      "markdown2.Wavedrom.sub": [
+        "markdown2 4261:57 call  FencedCodeBlocks.fenced_code_block_re.sub(self.sub, text)"
+      ],
+      "re.Pattern.sub": [
+        "markdown2 4261:57 call  FencedCodeBlocks.fenced_code_block_re.sub(self.sub, text)"
+      ]
+    },
+    "markdown2.Wavedrom.sub": {
+      "<builtin>.dict.get": [
+        "markdown2 4242:37 call  self.options.get('prefer_embed_svg', True)"
+      ],
+      "<builtin>.str.format": [
+        "markdown2 4256:32 call  '\\n{}{}{}\\n'.format(open_tag, self.md._escape_table[waves..."
+      ],
+      "markdown2.Markdown._uniform_indent": [
+        "markdown2 4255:39 call  self.md._uniform_indent( '\\n{}{}{}\\n'.format(open_tag, se..."
+      ],
+      "markdown2.Markdown._uniform_outdent": [
+        "markdown2 4237:54 call  self.md._uniform_outdent(match.group(3))"
+      ],
+      "markdown2._hash_text": [
+        "markdown2 4253:50 call  _hash_text(waves)"
+      ],
+      "re.Match.group": [
+        "markdown2 4237:66 call  match.group(3)"
+      ],
+      "wavedrom.render": [
+        "markdown2 4247:40 call  wavedrom.render(waves)"
+      ],
+      "wavedrom.render.tostring": [
+        "markdown2 4247:56 call  wavedrom.render(waves).tostring()"
+      ]
+    },
+    "markdown2.Wavedrom.test": {
+      "re.Match.group": [
+        "markdown2 4233:44 call  match.group(2)"
+      ],
+      "re.Pattern.search": [
+        "markdown2 4232:61 call  FencedCodeBlocks.fenced_code_block_re.search(text)"
+      ]
+    },
+    "markdown2._hash_text": {
+      "_sha2.SHA256Type.hexdigest": [
+        "markdown2 150:70 call  sha256(SECRET_SALT + s.encode(\"utf-8\")).hexdigest()"
+      ],
+      "_sha256.sha256.hexdigest": [
+        "markdown2 150:70 call  sha256(SECRET_SALT + s.encode(\"utf-8\")).hexdigest()"
+      ]
+    },
+    "markdown2._regex_from_encoded_pattern": {
+      "<builtin>.ValueError": [
+        "markdown2 4443:33 call  ValueError(\"unsupported regex flag: '%s' in '%s' \" \"(must..."
+      ],
+      "<builtin>.dict.keys": [
+        "markdown2 4445:78 call  flag_from_char.keys()"
+      ],
+      "<builtin>.list": [
+        "markdown2 4445:58 call  list(flag_from_char.keys())"
+      ],
+      "<builtin>.str.join": [
+        "markdown2 4445:53 call  ''.join(list(flag_from_char.keys()))"
+      ],
+      "<builtin>.str.rfind": [
+        "markdown2 4427:37 call  s.rfind('/')",
+        "markdown2 4429:22 call  s.rfind('/')"
+      ],
+      "<builtin>.str.startswith": [
+        "markdown2 4427:20 call  s.startswith('/')"
+      ],
+      "re.compile": [
+        "markdown2 4446:26 call  re.compile(s[1:idx], flags)",
+        "markdown2 4448:26 call  re.compile(re.escape(s))"
+      ],
+      "re.escape": [
+        "markdown2 4448:36 call  re.escape(s)"
+      ]
+    },
+    "markdown2._test": {
+      "doctest.testmod": [
+        "markdown2 4674:20 call  doctest.testmod()"
+      ],
+      "markdown2.Markdown.__init__": [
+        "markdown2 4674:20 call  doctest.testmod()"
+      ],
+      "markdown2.Markdown._detab": [
+        "markdown2 4674:20 call  doctest.testmod()"
+      ],
+      "markdown2.Markdown.convert": [
+        "markdown2 4674:20 call  doctest.testmod()"
+      ],
+      "markdown2.markdown": [
+        "markdown2 4674:20 call  doctest.testmod()"
+      ]
+    },
+    "markdown2.main": {
+      "<builtin>.Exception.__init__": [
+        "markdown2 4757:40 call  MarkdownError(\"%s:%d: invalid link pattern line: %r\" % (o..."
+      ],
+      "<builtin>.bytes.decode": [
+        "markdown2 4784:47 call  p.stdout.read().decode('utf-8')"
+      ],
+      "<builtin>.enumerate": [
+        "markdown2 4749:37 call  enumerate(f.readlines())"
+      ],
+      "<builtin>.int": [
+        "markdown2 4736:35 call  int(earg)"
+      ],
+      "<builtin>.list.append": [
+        "markdown2 4759:37 call  link_patterns.append( (_regex_from_encoded_pattern(pat), ..."
+      ],
+      "<builtin>.list.insert": [
+        "markdown2 4804:32 call  sys.path.insert(0, test_dir)"
+      ],
+      "<builtin>.open": [
+        "markdown2 4747:17 call  open(opts.link_patterns_file)",
+        "markdown2 4794:22 call  open(opts.output, 'w')"
+      ],
+      "<builtin>.print": [
+        "markdown2 4780:18 call  print(\"==== Markdown.pl ====\")",
+        "markdown2 4786:18 call  print(\"==== markdown2.py ====\")",
+        "markdown2 4811:18 call  print(\"==== match? %r ====\" % (norm_perl_html == norm_html))"
+      ],
+      "<builtin>.str": [
+        "markdown2 4800:20 call  str(html.toc_html.encode(sys.stdout.encoding or \"utf-8\", ..."
+      ],
+      "<builtin>.str.encode": [
+        "markdown2 4782:38 call  text.encode('utf-8')",
+        "markdown2 4800:41 call  html.toc_html.encode(sys.stdout.encoding or \"utf-8\", 'xml..."
+      ],
+      "<builtin>.str.lstrip": [
+        "markdown2 4752:31 call  line.lstrip()"
+      ],
+      "<builtin>.str.rsplit": [
+        "markdown2 4755:53 call  line.rstrip().rsplit(None, 1)"
+      ],
+      "<builtin>.str.rstrip": [
+        "markdown2 4755:44 call  line.rstrip()"
+      ],
+      "<builtin>.str.split": [
+        "markdown2 4734:42 call  e.split('=', 1)"
+      ],
+      "<builtin>.str.startswith": [
+        "markdown2 4752:44 call  line.lstrip().startswith(\"#\")"
+      ],
+      "<builtin>.str.strip": [
+        "markdown2 4750:34 call  line.strip()"
+      ],
+      "argparse.ArgumentParser": [
+        "markdown2 4683:37 call  argparse.ArgumentParser( prog=\"markdown2\", description=cm..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "markdown2 4687:24 call  parser.add_argument('--version', action='version', versio...",
+        "markdown2 4689:24 call  parser.add_argument('paths', nargs='*', help=( 'optional ...",
+        "markdown2 4694:24 call  parser.add_argument(\"-v\", \"--verbose\", dest=\"log_level\", ...",
+        "markdown2 4697:24 call  parser.add_argument(\"--encoding\", help=\"specify encoding ...",
+        "markdown2 4699:24 call  parser.add_argument(\"--html4tags\", action=\"store_true\", d...",
+        "markdown2 4701:24 call  parser.add_argument(\"-s\", \"--safe\", metavar=\"MODE\", dest=...",
+        "markdown2 4705:24 call  parser.add_argument(\"-x\", \"--extras\", action=\"append\", he...",
+        "markdown2 4708:24 call  parser.add_argument(\"--use-file-vars\", help=\"Look for and...",
+        "markdown2 4712:24 call  parser.add_argument(\"--link-patterns-file\", help=\"path to...",
+        "markdown2 4714:24 call  parser.add_argument(\"--self-test\", action=\"store_true\", h...",
+        "markdown2 4716:24 call  parser.add_argument(\"--compare\", action=\"store_true\", hel...",
+        "markdown2 4718:24 call  parser.add_argument('--output', type=str, help='output to..."
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "markdown2 4721:29 call  parser.parse_args()"
+      ],
+      "argparse.ArgumentParser.set_defaults": [
+        "markdown2 4719:24 call  parser.set_defaults(log_level=logging.INFO, compare=False..."
+      ],
+      "codecs.StreamReaderWriter.read": [
+        "markdown2 4776:27 call  fp.read()"
+      ],
+      "codecs.open": [
+        "markdown2 4775:29 call  codecs.open(path, 'r', opts.encoding)"
+      ],
+      "io.BufferedReader.close": [
+        "markdown2 4777:21 call  fp.close()"
+      ],
+      "io.BufferedReader.read": [
+        "markdown2 4784:38 call  p.stdout.read()"
+      ],
+      "io.BufferedWriter.close": [
+        "markdown2 4783:26 call  p.stdin.close()"
+      ],
+      "io.BufferedWriter.write": [
+        "markdown2 4782:26 call  p.stdin.write(text.encode('utf-8'))"
+      ],
+      "io.TextIOWrapper.close": [
+        "markdown2 4762:20 call  f.close()"
+      ],
+      "io.TextIOWrapper.read": [
+        "markdown2 4773:34 call  sys.stdin.read()"
+      ],
+      "io.TextIOWrapper.readlines": [
+        "markdown2 4749:49 call  f.readlines()"
+      ],
+      "io.TextIOWrapper.write": [
+        "markdown2 4785:29 call  sys.stdout.write(perl_html)",
+        "markdown2 4795:24 call  f.write(html)",
+        "markdown2 4797:29 call  sys.stdout.write(html)"
+      ],
+      "logging.Logger.debug": [
+        "markdown2 4799:22 call  log.debug(\"toc_html: \" + str(html.toc_html.encode(sys.std..."
+      ],
+      "logging.Logger.setLevel": [
+        "markdown2 4723:17 call  log.setLevel(opts.log_level)"
+      ],
+      "logging.basicConfig": [
+        "markdown2 4681:28 call  logging.basicConfig()"
+      ],
+      "markdown2._regex_from_encoded_pattern": [
+        "markdown2 4760:49 call  _regex_from_encoded_pattern(pat)"
+      ],
+      "markdown2._test": [
+        "markdown2 4726:21 call  _test()"
+      ],
+      "markdown2.markdown": [
+        "markdown2 4787:24 call  markdown(text, html4tags=opts.html4tags, safe_mode=opts.s..."
+      ],
+      "os.path.abspath": [
+        "markdown2 4767:47 call  abspath(__file__)",
+        "markdown2 4802:52 call  abspath(__file__)"
+      ],
+      "os.path.dirname": [
+        "markdown2 4767:31 call  dirname(dirname(abspath(__file__)))",
+        "markdown2 4767:39 call  dirname(abspath(__file__))",
+        "markdown2 4802:36 call  dirname(dirname(abspath(__file__)))",
+        "markdown2 4802:44 call  dirname(abspath(__file__))"
+      ],
+      "os.path.exists": [
+        "markdown2 4803:22 call  exists(join(test_dir, \"test_markdown2.py\"))"
+      ],
+      "os.path.join": [
+        "markdown2 4767:23 call  join(dirname(dirname(abspath(__file__))), \"test\", \"Markdo...",
+        "markdown2 4802:28 call  join(dirname(dirname(abspath(__file__))), \"test\")",
+        "markdown2 4803:27 call  join(test_dir, \"test_markdown2.py\")"
+      ],
+      "re.Pattern.split": [
+        "markdown2 4732:36 call  splitter.split(s)"
+      ],
+      "re.compile": [
+        "markdown2 4731:34 call  re.compile(\"[,;: ]+\")"
+      ],
+      "subprocess.Popen": [
+        "markdown2 4781:22 call  Popen('perl %s' % markdown_pl, shell=True, stdin=PIPE, st..."
+      ],
+      "test_markdown2.norm_html_from_html": [
+        "markdown2 4806:48 call  norm_html_from_html(html)",
+        "markdown2 4807:53 call  norm_html_from_html(perl_html)"
+      ]
+    },
+    "markdown2.mark_stage.wrapper.inner": {
+      "markdown2.GFMItalicAndBoldProcessor.run": [
+        "markdown2 252:41 call  extra.run(text)"
+      ],
+      "markdown2.GFMItalicAndBoldProcessor.test": [
+        "markdown2 251:34 call  extra.test(text)"
+      ],
+      "markdown2.LinkProcessor.run": [
+        "markdown2 252:41 call  extra.run(text)",
+        "markdown2 264:41 call  extra.run(text)"
+      ],
+      "markdown2.LinkProcessor.test": [
+        "markdown2 251:34 call  extra.test(text)",
+        "markdown2 263:34 call  extra.test(text)"
+      ],
+      "markdown2.Wavedrom.run": [
+        "markdown2 252:41 call  extra.run(text)",
+        "markdown2 264:41 call  extra.run(text)"
+      ],
+      "markdown2.Wavedrom.test": [
+        "markdown2 251:34 call  extra.test(text)",
+        "markdown2 263:34 call  extra.test(text)"
+      ]
+    },
+    "markdown2.markdown_path": {
+      "codecs.StreamReaderWriter.read": [
+        "markdown2 183:19 call  fp.read()"
+      ],
+      "codecs.open": [
+        "markdown2 182:21 call  codecs.open(path, 'r', encoding)"
+      ],
+      "io.BufferedReader.close": [
+        "markdown2 184:13 call  fp.close()"
+      ],
+      "markdown2.Markdown.__init__": [
+        "markdown2 185:20 call  Markdown(html4tags=html4tags, tab_width=tab_width, safe_m..."
+      ],
+      "markdown2.Markdown.convert": [
+        "markdown2 190:57 call  Markdown(html4tags=html4tags, tab_width=tab_width, safe_m..."
+      ]
+    }
+  },
+  "notes": {
+    "markdown2 150:70 call  sha256(SECRET_SALT + s.encode(\"utf-8\")).hexdigest()": [
+      "The public hashlib.sha256 factory uses _hashlib.HASH with OpenSSL, or the builtin fallback without _hashlib/its algorithm. Supported CPython 3.9 and 3.11 define the fallback receiver as _sha256.sha256; 3.12 defines _sha2.SHA256Type. These concrete classes have no public hashlib class alias. Retained primary hashlib and C type/factory/hexdigest sources establish all three receivers."
+    ],
+    "markdown2 183:19 call  fp.read()": [
+      "codecs.open with an encoding (a str, by the annotation of markdown_path) returns a codecs.StreamReaderWriter"
+    ],
+    "markdown2 184:13 call  fp.close()": [
+      "codecs.StreamReaderWriter defines no close; its __getattr__ returns the close of its stream, the file that codecs.open opens in binary mode ('rb', an io.BufferedReader)"
+    ],
+    "markdown2 1915:42 call  self._wrap_div(self._add_newline(self._wrap_pre(self._wra...": [
+      "pygments before 2.12 calls wrap(source, outfile); setup.py admits pygments>=2.7.3 (extra code_syntax_highlighting), so this branch runs on supported versions. HtmlCodeFormatter inherits _wrap_div"
+    ],
+    "markdown2 251:34 call  extra.test(text)": [
+      "The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own test method."
+    ],
+    "markdown2 252:41 call  extra.run(text)": [
+      "The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own run method."
+    ],
+    "markdown2 263:34 call  extra.test(text)": [
+      "The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own test method."
+    ],
+    "markdown2 264:41 call  extra.run(text)": [
+      "The public concrete class inherits public Extra.register. Its classmethod receiver is a package class under B1, not an arbitrary bare Callable argument under B2. register stores that class and its fixed order; _setup_extras constructs it when its public name is enabled. inner calls its own run method."
+    ],
+    "markdown2 2904:45 call  self._delimiter_left_or_right(run, delim_run.group(1))": [
+      "@functools.lru_cache at markdown2.py:2906 returns a callable cache object on CPython (__call__) and a Python function on supported PyPy 3.11 / 7.3.20 (functools._lru_cache_wrapper.wrapper); bound to self, both call the original method on a cache miss. PyPy has no _functools accelerator; hidden_applevel returns the same function."
+    ],
+    "markdown2 2953:47 call  self._body_crosses_span_borders(text)": [
+      "@functools.lru_cache at markdown2.py:2955 returns a callable cache object on CPython (__call__) and a Python function on supported PyPy 3.11 / 7.3.20 (functools._lru_cache_wrapper.wrapper); bound to self, both call the original method on a cache miss. PyPy has no _functools accelerator; hidden_applevel returns the same function."
+    ],
+    "markdown2 3826:28 call  super().tags(lexer_name)": [
+      "super().tags resolves to FencedCodeBlocks.tags in Mermaid.tags; annotation-only TypedDict tags creates no value binding."
+    ],
+    "markdown2 422:45 call  klass(self, (self.extras.get(name, {})))": [
+      "LinkProcessor.register() is a public inherited classmethod. It stores the concrete package class under link-processor; _setup_extras invokes it with (self, options), which binds LinkProcessor.__init__(self,md,options). This accepted constructor follows public classmethod registration; the remaining exclusion concerns only abstract ItalicAndBoldProcessor."
+    ],
+    "markdown2 4247:40 call  wavedrom.render(waves)": [
+      "optional import (markdown2.py:4245-4250): both sides run. wavedrom has no wheel and is not in the test environment; its names are the access paths, as for a missing module"
+    ],
+    "markdown2 4247:56 call  wavedrom.render(waves).tostring()": [
+      "the method of the object that wavedrom.render returns, named by the access path as for a missing module (micro-benchmark README, \"Missing modules\"); see markdown2.md"
+    ],
+    "markdown2 4674:20 call  doctest.testmod()": [
+      "doctest.testmod() runs the examples in the docstrings of the module __main__. When markdown2 runs as a script with --self-test (the `if __name__ == \"__main__\"` block, markdown2.py:4814), that module is markdown2 itself; its examples (markdown2.py:22-29, 847-857) call markdown2.markdown, Markdown(), convert and _detab, which doctest calls back through exec. See markdown2.md"
+    ],
+    "markdown2 4721:29 call  parser.parse_args()": [
+      "for help and version output argparse instantiates the formatter_class _NoReflowFormatter, whose __init__ comes from argparse.HelpFormatter (library code instantiating a package class: no edge); argparse never calls format_description, a method name of optparse, so no package code runs"
+    ],
+    "markdown2 4749:49 call  f.readlines()": [
+      "f is the text file that open() returns (markdown2.py:4747)"
+    ],
+    "markdown2 4776:27 call  fp.read()": [
+      "codecs.open with the encoding opts.encoding (a str: default \"utf-8\", or the --encoding argument) returns a codecs.StreamReaderWriter"
+    ],
+    "markdown2 4777:21 call  fp.close()": [
+      "codecs.StreamReaderWriter defines no close; its __getattr__ returns the close of its stream, the file that codecs.open opens in binary mode ('rb', an io.BufferedReader)"
+    ],
+    "markdown2 4782:26 call  p.stdin.write(text.encode('utf-8'))": [
+      "p.stdin is the binary pipe (io.BufferedWriter) of Popen(..., stdin=PIPE) with the default bufsize"
+    ],
+    "markdown2 4784:38 call  p.stdout.read()": [
+      "p.stdout is the binary pipe (io.BufferedReader) of Popen(..., stdout=PIPE)"
+    ],
+    "markdown2 4795:24 call  f.write(html)": [
+      "f is the text file that open(opts.output, 'w') returns"
+    ]
+  },
+  "trace": "dynamic/markdown2.json"
+}

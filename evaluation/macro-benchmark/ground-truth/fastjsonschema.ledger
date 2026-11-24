@@ -1,0 +1,2056 @@
+# Call-site ledger of fastjsonschema at 9d3f5ee74d0749ef4abf695f370437aca5f9d56c (v2.22.3).
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# fastjsonschema.md has the judgements. In short:
+# - CodeGenerator.l is decorated with @indent (generator.py:250): every
+#   self.l(...) calls fastjsonschema.indent.indent.wrapper, which calls l back
+#   (indent.py:10) and returns an Indent; `with self.l(...)` therefore runs
+#   Indent.__enter__ and Indent.__exit__.
+# - The generated validation code that compile() runs with exec has no node
+#   (README scope ruling 4; micro-benchmark "Nodes"). The call in its module
+#   code, type(None), belongs to compile (micro-benchmark "Scopes without a
+#   node"); the package classes that the generated functions instantiate
+#   (JsonSchemaValueException, JsonSchemaValuesException) are callbacks of the
+#   package site that calls a generated function (validate, __init__.py:172).
+# - Schemas are JSON values: `definition` is annotated dict[str, Any] | bool
+#   (B4), and its sub-schemas are dicts (JSON objects), lists, strs, numbers,
+#   bools and None, as the documentation's examples and json.loads give them.
+# - The code generators that the package makes are CodeGeneratorDraft04, 06,
+#   07 and 2019 (_get_code_generator_class); the tests also make a
+#   CodeGeneratorDraft07 without a resolver (tests/conftest.py:25).
+default reject fastjsonschema.generator.CodeGenerator.l: CodeGenerator.l is decorated with @indent (generator.py:250), so the class attribute l is the function wrapper that indent returns; every self.l(...) calls fastjsonschema.indent.indent.wrapper, and only wrapper calls the original l back, through its parameter func (indent.py:10)
+
+== fastjsonschema
+
+[fastjsonschema.validate]
+172:19 call  compile(definition, handlers, formats, use_default, use_f...
+    -> fastjsonschema.compile
+    note: the module function compile shadows the builtin compile (__init__.py:177)
+172:108 call  compile(definition, handlers, formats, use_default, use_f...
+    -> functools.partial.__call__
+    -> fastjsonschema.exceptions.JsonSchemaValueException.__init__
+    -> fastjsonschema.exceptions.JsonSchemaValuesException.__init__
+    note: the callee is what compile returns (__init__.py:294-298): the validation function that exec defined from the generated code, which has no node (code outside the package, as in micro-benchmark dynamic/exec_defines_function), or, when formats is not empty, a functools.partial of it. The generated function instantiates the package classes JsonSchemaValueException (every failed rule: `raise` or `errors.append`, generator.py:308-324) and JsonSchemaValuesException (fast_fail=False: generator.py:160, 245-246 catch and re-raise through $ref functions); these package __init__ methods are callbacks of this site. Its other calls (isinstance, len, re patterns, Decimal, the client's custom formats) are outside the package
+
+[fastjsonschema.compile]
+283:40 call  _factory( definition, handlers, formats, use_default, use...
+    -> fastjsonschema._factory
+292:35 getattr  code_generator.global_state
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.global_state
+    reject fastjsonschema.generator.CodeGenerator.global_state: code_generator is an instance of the class that _get_code_generator_class returns (CodeGeneratorDraft04, 06, 07 or 2019); all four inherit CodeGeneratorDraft04.global_state, which calls CodeGenerator.global_state itself (draft04.py:80)
+294:9 call  exec(code_generator.func_code, global_state)
+    -> <builtin>.exec
+    -> <builtin>.type
+    reject fastjsonschema.generator.CodeGenerator.func_code: the argument is the str that the property returned at 294:25; exec does not call it
+    note: the generated module code is `NoneType = type(None)` (generator.py:139) followed by the def statements of the validation functions; calls in a string passed to exec belong to the scope that calls exec (micro-benchmark "Scopes without a node", dynamic/exec_in_function), so type(None) is an edge of compile. The defs evaluate only the defaults {} and None. The functions are not called here
+294:25 getattr  code_generator.func_code
+    -> fastjsonschema.generator.CodeGenerator.func_code
+295:48 call  resolver.get_scope_name()
+    -> fastjsonschema.ref_resolver.RefResolver.get_scope_name
+    note: resolver is the RefResolver that _factory made with RefResolver.from_schema
+297:30 call  update_wrapper(partial(func, custom_formats=formats), func)
+    -> functools.update_wrapper
+    note: update_wrapper copies attributes of the generated function to the partial and returns the partial
+297:38 call  partial(func, custom_formats=formats)
+    -> functools.partial
+    note: func is the generated validation function; partial stores it and does not call it
+
+[fastjsonschema.compile_to_code]
+336:33 call  _factory( definition, handlers, formats, use_default, use...
+    -> fastjsonschema._factory
+347:24 getattr  code_generator.global_state_code
+    -> fastjsonschema.generator.CodeGenerator.global_state_code
+348:24 getattr  code_generator.func_code
+    -> fastjsonschema.generator.CodeGenerator.func_code
+
+[fastjsonschema._factory]
+361:39 call  RefResolver.from_schema(definition, handlers=handlers, st...
+    -> fastjsonschema.ref_resolver.RefResolver.from_schema
+362:47 call  _get_code_generator_class(definition)
+    -> fastjsonschema._get_code_generator_class
+362:59 call  _get_code_generator_class(definition)( definition, resolv...
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.__init__
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.__init__
+    -> fastjsonschema.draft07.CodeGeneratorDraft07.__init__
+    note: _get_code_generator_class returns CodeGeneratorDraft04, CodeGeneratorDraft06, CodeGeneratorDraft07 or CodeGeneratorDraft2019 (__init__.py:374-386); CodeGeneratorDraft2019 inherits the __init__ of CodeGeneratorDraft07
+
+[fastjsonschema._get_code_generator_class]
+376:18 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+377:36 call  schema.get('$schema', '')
+    -> <builtin>.dict.get
+    note: schema passed the isinstance check for dict (line 376)
+
+== fastjsonschema.__main__
+
+[fastjsonschema.__main__]
+19:9 call  main()
+    -> fastjsonschema.__main__.main
+    note: the `if __name__ == '__main__':` block is code of the module
+
+[fastjsonschema.__main__.main]
+8:11 call  len(sys.argv)
+    -> <builtin>.len
+11:36 call  sys.stdin.read()
+    -> io.TextIOWrapper.read
+    note: the default sys.stdin, a text stream named by its class
+13:28 call  json.loads(definition)
+    -> json.loads
+14:27 call  compile_to_code(definition)
+    -> fastjsonschema.compile_to_code
+15:10 call  print(code)
+    -> <builtin>.print
+
+== fastjsonschema.draft04
+
+[fastjsonschema.draft04]
+18:27 call  re.compile(r"(?<!\\)\$")
+    -> re.compile
+    reject fastjsonschema.compile: the call is the standard library's re.compile, an attribute of the module re
+78:6 decorator  @property
+    -> <builtin>.property
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.__init__]
+45:14 call  super()
+    -> <builtin>.super
+45:25 call  super().__init__(definition, resolver, detailed_exception...
+    -> fastjsonschema.generator.CodeGenerator.__init__
+    reject *: super() in CodeGeneratorDraft04 skips to the next class of the MRO, CodeGenerator, whose __init__ runs
+49:47 call  self._json_keywords_to_function.update(( ('type', self.ge...
+    -> collections.OrderedDict.update
+    note: _json_keywords_to_function is the OrderedDict of CodeGenerator.__init__ (generator.py:78); update stores the bound methods and does not call them
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.global_state]
+80:20 call  super()
+    -> <builtin>.super
+80:23 getattr  super().global_state
+    -> fastjsonschema.generator.CodeGenerator.global_state
+    reject fastjsonschema.draft04.CodeGeneratorDraft04.global_state: super() in CodeGeneratorDraft04 skips to CodeGenerator
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_type]
+93:29 call  enforce_list(self._definition['type'])
+    -> fastjsonschema.generator.enforce_list
+95:37 call  ', '.join(JSON_TYPE_TO_PYTHON_TYPE[t] for t in types)
+    -> <builtin>.str.join
+97:48 call  JsonSchemaDefinitionException('Unknown type')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+101:62 call  ' or isinstance({variable}, bool)'.format(variable=self._...
+    -> <builtin>.str.format
+103:14 with  self.l('if not isinstance({variable}, ({})){}:', python_t...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+103:20 call  self.l('if not isinstance({variable}, ({})){}:', python_t...
+    -> fastjsonschema.indent.indent.wrapper
+104:21 call  self.exc('{name} must be {}', ' or '.join(types), rule='t...
+    -> fastjsonschema.generator.CodeGenerator.exc
+104:54 call  ' or '.join(types)
+    -> <builtin>.str.join
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_enum]
+117:26 call  isinstance(enum, (list, tuple))
+    -> <builtin>.isinstance
+118:48 call  JsonSchemaDefinitionException('enum must be an array')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+119:30 call  ' or '.join(self._enum_value_matches(self._variable, valu...
+    -> <builtin>.str.join
+119:55 call  self._enum_value_matches(self._variable, value)
+    -> fastjsonschema.draft04.CodeGeneratorDraft04._enum_value_matches
+121:18 with  self.l('if not ({}):', matches)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+121:24 call  self.l('if not ({}):', matches)
+    -> fastjsonschema.indent.indent.wrapper
+122:25 call  self.exc('{name} must be one of {}', self.e(enum), rule='...
+    -> fastjsonschema.generator.CodeGenerator.exc
+122:60 call  self.e(enum)
+    -> fastjsonschema.generator.CodeGenerator.e
+124:18 with  self.l('if True:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+124:24 call  self.l('if True:')
+    -> fastjsonschema.indent.indent.wrapper
+125:25 call  self.exc('{name} must be one of {}', self.e(enum), rule='...
+    -> fastjsonschema.generator.CodeGenerator.exc
+125:60 call  self.e(enum)
+    -> fastjsonschema.generator.CodeGenerator.e
+
+[fastjsonschema.draft04.CodeGeneratorDraft04._enum_value_matches]
+128:22 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+129:71 call  'isinstance({var}, bool) and {var} is {val}'.format(var=v...
+    -> <builtin>.str.format
+129:89 call  repr(value)
+    -> <builtin>.repr
+130:22 call  isinstance(value, (int, float))
+    -> <builtin>.isinstance
+130:62 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+133:21 call  ( 'isinstance({var}, (int, float)) and not isinstance({va...
+    -> <builtin>.str.format
+133:39 call  repr(value)
+    -> <builtin>.repr
+135:42 call  '{var} is None'.format(var=var)
+    -> <builtin>.str.format
+136:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+137:70 call  'isinstance({var}, str) and {var} == {val}'.format(var=va...
+    -> <builtin>.str.format
+137:88 call  repr(value)
+    -> <builtin>.repr
+138:22 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+140:70 call  'isinstance({var}, dict) and not {var}'.format(var=var)
+    -> <builtin>.str.format
+141:38 call  ' and '.join( '{key!r} in {var} and {match}'.format( key=...
+    -> <builtin>.str.join
+142:54 call  '{key!r} in {var} and {match}'.format( key=key, var=var, ...
+    -> <builtin>.str.format
+145:51 call  self._enum_value_matches('{var}[{key!r}]'.format(var=var,...
+    -> fastjsonschema.draft04.CodeGeneratorDraft04._enum_value_matches
+145:75 call  '{var}[{key!r}]'.format(var=var, key=key)
+    -> <builtin>.str.format
+147:45 call  value.items()
+    -> <builtin>.dict.items
+    note: value passed the isinstance check for dict
+149:90 call  'isinstance({var}, dict) and len({var}) == {size} and {ch...
+    -> <builtin>.str.format
+150:34 call  len(value)
+    -> <builtin>.len
+152:22 call  isinstance(value, (list, tuple))
+    -> <builtin>.isinstance
+154:79 call  'isinstance({var}, (list, tuple)) and not {var}'.format(v...
+    -> <builtin>.str.format
+155:39 call  ' and '.join( self._enum_value_matches('{var}[{index}]'.f...
+    -> <builtin>.str.join
+156:41 call  self._enum_value_matches('{var}[{index}]'.format(var=var,...
+    -> fastjsonschema.draft04.CodeGeneratorDraft04._enum_value_matches
+156:65 call  '{var}[{index}]'.format(var=var, index=index)
+    -> <builtin>.str.format
+157:45 call  enumerate(value)
+    -> <builtin>.enumerate
+159:99 call  'isinstance({var}, (list, tuple)) and len({var}) == {size...
+    -> <builtin>.str.format
+160:34 call  len(value)
+    -> <builtin>.len
+162:39 call  '{var} == {val}'.format(var=var, val=repr(value))
+    -> <builtin>.str.format
+162:57 call  repr(value)
+    -> <builtin>.repr
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_all_of]
+181:42 call  self.generate_func_code_block(definition_item, self._vari...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_any_of]
+201:15 call  self.l('{variable}_any_of_count{count} = 0', count=count)
+    -> fastjsonschema.indent.indent.wrapper
+204:18 with  self.l('if not {variable}_any_of_count{count}:', count=co...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+204:24 call  self.l('if not {variable}_any_of_count{count}:', count=co...
+    -> fastjsonschema.indent.indent.wrapper
+205:22 with  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+205:28 call  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.indent.wrapper
+206:26 with  self.trial_validation()
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+206:47 call  self.trial_validation()
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.generator.CodeGenerator.trial_validation
+    note: trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back
+207:54 call  self.generate_func_code_block(definition_item, self._vari...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+208:27 call  self.l('{variable}_any_of_count{count} += 1', count=count)
+    -> fastjsonschema.indent.indent.wrapper
+209:23 call  self.l('except {}: pass', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.indent.wrapper
+211:14 with  self.l('if not {variable}_any_of_count{count}:', count=co...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+211:20 call  self.l('if not {variable}_any_of_count{count}:', count=co...
+    -> fastjsonschema.indent.indent.wrapper
+212:21 call  self.exc('{name} cannot be validated by any definition', ...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_one_of]
+232:15 call  self.l('{variable}_one_of_count{count} = 0', count=count)
+    -> fastjsonschema.indent.indent.wrapper
+235:18 with  self.l('if {variable}_one_of_count{count} < 2:', count=co...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+235:24 call  self.l('if {variable}_one_of_count{count} < 2:', count=co...
+    -> fastjsonschema.indent.indent.wrapper
+236:22 with  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+236:28 call  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.indent.wrapper
+237:26 with  self.trial_validation()
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+237:47 call  self.trial_validation()
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.generator.CodeGenerator.trial_validation
+    note: trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back
+238:54 call  self.generate_func_code_block(definition_item, self._vari...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+239:27 call  self.l('{variable}_one_of_count{count} += 1', count=count)
+    -> fastjsonschema.indent.indent.wrapper
+240:23 call  self.l('except {}: pass', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.indent.wrapper
+242:14 with  self.l('if {variable}_one_of_count{count} != 1:', count=c...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+242:20 call  self.l('if {variable}_one_of_count{count} != 1:', count=c...
+    -> fastjsonschema.indent.indent.wrapper
+244:21 call  self.exc('{name} must be valid exactly by one definition'...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_not]
+261:21 call  self.exc('{name} must not be there', rule='not')
+    -> fastjsonschema.generator.CodeGenerator.exc
+265:21 call  self.exc('{name} must NOT match a disallowed definition',...
+    -> fastjsonschema.generator.CodeGenerator.exc
+267:18 with  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+267:24 call  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.indent.wrapper
+268:31 call  len(self._code)
+    -> <builtin>.len
+269:22 with  self.trial_validation()
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+269:43 call  self.trial_validation()
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.generator.CodeGenerator.trial_validation
+    note: trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back
+270:50 call  self.generate_func_code_block(not_definition, self._varia...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+271:23 call  len(self._code)
+    -> <builtin>.len
+272:27 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+273:19 call  self.l('except {}: pass', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.indent.wrapper
+274:18 with  self.l('else:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+274:24 call  self.l('else:')
+    -> fastjsonschema.indent.indent.wrapper
+275:25 call  self.exc('{name} must NOT match a disallowed definition',...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_min_length]
+278:14 with  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+278:20 call  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.indent.wrapper
+279:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+280:30 call  isinstance(self._definition['minLength'], (int, float))
+    -> <builtin>.isinstance
+281:52 call  JsonSchemaDefinitionException('minLength must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+282:18 with  self.l('if {variable}_len < {minLength}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+282:24 call  self.l('if {variable}_len < {minLength}:')
+    -> fastjsonschema.indent.indent.wrapper
+283:25 call  self.exc('{name} must be longer than or equal to {minLeng...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_max_length]
+286:14 with  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+286:20 call  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.indent.wrapper
+287:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+288:30 call  isinstance(self._definition['maxLength'], (int, float))
+    -> <builtin>.isinstance
+289:52 call  JsonSchemaDefinitionException('maxLength must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+290:18 with  self.l('if {variable}_len > {maxLength}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+290:24 call  self.l('if {variable}_len > {maxLength}:')
+    -> fastjsonschema.indent.indent.wrapper
+291:25 call  self.exc('{name} must be shorter than or equal to {maxLen...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_pattern]
+294:14 with  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+294:20 call  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.indent.wrapper
+296:34 call  self.e(pattern)
+    -> fastjsonschema.generator.CodeGenerator.e
+297:60 call  DOLLAR_FINDER.sub(r'\\Z', pattern)
+    -> re.Pattern.sub
+    note: DOLLAR_FINDER is the compiled pattern of line 18
+298:56 call  re.compile(end_of_string_fixed_pattern)
+    -> re.compile
+    reject fastjsonschema.compile: the call is the standard library's re.compile, an attribute of the module re
+299:18 with  self.l('if not REGEX_PATTERNS[{}].search({variable}):', r...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+299:24 call  self.l('if not REGEX_PATTERNS[{}].search({variable}):', r...
+    -> fastjsonschema.indent.indent.wrapper
+299:78 call  repr(pattern)
+    -> <builtin>.repr
+300:25 call  self.exc('{name} must match pattern {}', safe_pattern, ru...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_format]
+317:14 with  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+317:20 call  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.indent.wrapper
+321:30 call  isinstance(custom_format, str)
+    -> <builtin>.isinstance
+322:42 call  self._generate_format(format_, format_ + '_re_pattern', c...
+    -> fastjsonschema.draft04.CodeGeneratorDraft04._generate_format
+324:26 with  self.l('if not custom_formats["{}"]({variable}):', format_)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+324:32 call  self.l('if not custom_formats["{}"]({variable}):', format_)
+    -> fastjsonschema.indent.indent.wrapper
+325:33 call  self.exc('{name} must be {}', format_, rule='format')
+    -> fastjsonschema.generator.CodeGenerator.exc
+328:38 call  self._generate_format(format_, format_ + '_re_pattern', f...
+    -> fastjsonschema.draft04.CodeGeneratorDraft04._generate_format
+332:22 with  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+332:28 call  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.indent.wrapper
+333:27 call  self.l('re.compile({variable})')
+    -> fastjsonschema.indent.indent.wrapper
+334:22 with  self.l('except Exception:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+334:28 call  self.l('except Exception:')
+    -> fastjsonschema.indent.indent.wrapper
+335:29 call  self.exc('{name} must be a valid regex', rule='format')
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04._generate_format]
+341:64 call  re.compile(regexp)
+    -> re.compile
+    reject fastjsonschema.compile: the call is the standard library's re.compile, an attribute of the module re
+342:18 with  self.l('if not REGEX_PATTERNS["{}"].match({variable}):', ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+342:24 call  self.l('if not REGEX_PATTERNS["{}"].match({variable}):', ...
+    -> fastjsonschema.indent.indent.wrapper
+343:25 call  self.exc('{name} must be {}', format_name, rule='format')
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_minimum]
+346:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+346:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+347:30 call  isinstance(self._definition['minimum'], (int, float, deci...
+    -> <builtin>.isinstance
+348:52 call  JsonSchemaDefinitionException('minimum must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+349:36 call  self._definition.get('exclusiveMinimum', False)
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+350:22 with  self.l('if {variable} <= {minimum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+350:28 call  self.l('if {variable} <= {minimum}:')
+    -> fastjsonschema.indent.indent.wrapper
+351:29 call  self.exc('{name} must be bigger than {minimum}', rule='mi...
+    -> fastjsonschema.generator.CodeGenerator.exc
+353:22 with  self.l('if {variable} < {minimum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+353:28 call  self.l('if {variable} < {minimum}:')
+    -> fastjsonschema.indent.indent.wrapper
+354:29 call  self.exc('{name} must be bigger than or equal to {minimum...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_maximum]
+357:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+357:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+358:30 call  isinstance(self._definition['maximum'], (int, float, deci...
+    -> <builtin>.isinstance
+359:52 call  JsonSchemaDefinitionException('maximum must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+360:36 call  self._definition.get('exclusiveMaximum', False)
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+361:22 with  self.l('if {variable} >= {maximum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+361:28 call  self.l('if {variable} >= {maximum}:')
+    -> fastjsonschema.indent.indent.wrapper
+362:29 call  self.exc('{name} must be smaller than {maximum}', rule='m...
+    -> fastjsonschema.generator.CodeGenerator.exc
+364:22 with  self.l('if {variable} > {maximum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+364:28 call  self.l('if {variable} > {maximum}:')
+    -> fastjsonschema.indent.indent.wrapper
+365:29 call  self.exc('{name} must be smaller than or equal to {maximu...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_multiple_of]
+368:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+368:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+369:30 call  isinstance(self._definition['multipleOf'], (int, float, d...
+    -> <builtin>.isinstance
+370:52 call  JsonSchemaDefinitionException('multipleOf must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+372:18 with  self.l('if isinstance({variable}, int) and isinstance({mu...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+372:24 call  self.l('if isinstance({variable}, int) and isinstance({mu...
+    -> fastjsonschema.indent.indent.wrapper
+373:22 with  self.l('if {variable} % {multipleOf} != 0:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+373:28 call  self.l('if {variable} % {multipleOf} != 0:')
+    -> fastjsonschema.indent.indent.wrapper
+374:29 call  self.exc('{name} must be multiple of {multipleOf}', rule=...
+    -> fastjsonschema.generator.CodeGenerator.exc
+375:18 with  self.l('else:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+375:24 call  self.l('else:')
+    -> fastjsonschema.indent.indent.wrapper
+378:30 call  isinstance(self._definition['multipleOf'], float)
+    -> <builtin>.isinstance
+379:27 call  self.l('quotient = Decimal(repr({variable})) / Decimal(re...
+    -> fastjsonschema.indent.indent.wrapper
+381:27 call  self.l('quotient = {variable} / {multipleOf}')
+    -> fastjsonschema.indent.indent.wrapper
+382:22 with  self.l('if int(quotient) != quotient:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+382:28 call  self.l('if int(quotient) != quotient:')
+    -> fastjsonschema.indent.indent.wrapper
+383:29 call  self.exc('{name} must be multiple of {multipleOf}', rule=...
+    -> fastjsonschema.generator.CodeGenerator.exc
+385:22 with  self.l('if {variable} / {multipleOf} == float("inf"):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+385:28 call  self.l('if {variable} / {multipleOf} == float("inf"):')
+    -> fastjsonschema.indent.indent.wrapper
+386:29 call  self.exc('inifinity reached', rule='multipleOf')
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_min_items]
+389:37 call  self.create_variable_is_list()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_list
+390:14 with  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+390:20 call  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.indent.wrapper
+391:30 call  isinstance(self._definition['minItems'], (int, float))
+    -> <builtin>.isinstance
+392:52 call  JsonSchemaDefinitionException('minItems must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+393:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+394:18 with  self.l('if {variable}_len < {minItems}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+394:24 call  self.l('if {variable}_len < {minItems}:')
+    -> fastjsonschema.indent.indent.wrapper
+395:25 call  self.exc('{name} must contain at least {minItems} items',...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_max_items]
+398:37 call  self.create_variable_is_list()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_list
+399:14 with  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+399:20 call  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.indent.wrapper
+400:30 call  isinstance(self._definition['maxItems'], (int, float))
+    -> <builtin>.isinstance
+401:52 call  JsonSchemaDefinitionException('maxItems must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+402:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+403:18 with  self.l('if {variable}_len > {maxItems}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+403:24 call  self.l('if {variable}_len > {maxItems}:')
+    -> fastjsonschema.indent.indent.wrapper
+404:25 call  self.exc('{name} must contain less than or equal to {maxI...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_unique_items]
+425:37 call  self.create_variable_is_list()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_list
+426:14 with  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+426:20 call  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.indent.wrapper
+427:19 call  self.l( 'def fn(var): ' 'return frozenset(dict((k, fn(v))...
+    -> fastjsonschema.indent.indent.wrapper
+435:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+436:18 with  self.l('if {variable}_len > len(set(fn({variable}_x) for ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+436:24 call  self.l('if {variable}_len > len(set(fn({variable}_x) for ...
+    -> fastjsonschema.indent.indent.wrapper
+437:25 call  self.exc('{name} must contain unique items', rule='unique...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_items]
+461:37 call  self.create_variable_is_list()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_list
+462:14 with  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+462:20 call  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.indent.wrapper
+463:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+465:22 with  self.l('if {variable}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+465:28 call  self.l('if {variable}:')
+    -> fastjsonschema.indent.indent.wrapper
+466:29 call  self.exc('{name} must not be there', rule='items')
+    -> fastjsonschema.generator.CodeGenerator.exc
+467:28 call  isinstance(items_definition, list)
+    -> <builtin>.isinstance
+468:54 call  enumerate(items_definition)
+    -> <builtin>.enumerate
+469:26 with  self.l('if {variable}_len > {}:', idx)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+469:32 call  self.l('if {variable}_len > {}:', idx)
+    -> fastjsonschema.indent.indent.wrapper
+470:31 call  self.l('{variable}__{0} = {variable}[{0}]', idx)
+    -> fastjsonschema.indent.indent.wrapper
+471:54 call  self.generate_func_code_block( item_definition, '{}__{}'....
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+473:44 call  '{}__{}'.format(self._variable, idx)
+    -> <builtin>.str.format
+474:44 call  '{}[{}]'.format(self._variable_name, idx)
+    -> <builtin>.str.format
+476:56 call  isinstance(item_definition, dict)
+    -> <builtin>.isinstance
+477:31 call  self.l('else: {variable}.append({})', repr_default(item_d...
+    -> fastjsonschema.indent.indent.wrapper
+477:75 call  repr_default(item_definition['default'])
+    -> fastjsonschema.generator.repr_default
+481:30 with  self.l('if {variable}_len > {}:', len(items_definition))
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+481:36 call  self.l('if {variable}_len > {}:', len(items_definition))
+    -> fastjsonschema.indent.indent.wrapper
+481:67 call  len(items_definition)
+    -> <builtin>.len
+482:37 call  self.exc('{name} must contain only specified items', rule...
+    -> fastjsonschema.generator.CodeGenerator.exc
+484:30 with  self.l('for {variable}_x, {variable}_item in enumerate({v...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+484:36 call  self.l('for {variable}_x, {variable}_item in enumerate({v...
+    -> fastjsonschema.indent.indent.wrapper
+484:114 call  len(items_definition)
+    -> <builtin>.len
+485:43 call  len(self._code)
+    -> <builtin>.len
+486:58 call  self.generate_func_code_block( self._definition['addition...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+488:49 call  '{}_item'.format(self._variable)
+    -> <builtin>.str.format
+489:54 call  '{}[{{{}_x}}]'.format(self._variable_name, self._variable)
+    -> <builtin>.str.format
+491:35 call  len(self._code)
+    -> <builtin>.len
+492:39 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+495:26 with  self.l('for {variable}_x, {variable}_item in enumerate({v...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+495:32 call  self.l('for {variable}_x, {variable}_item in enumerate({v...
+    -> fastjsonschema.indent.indent.wrapper
+496:39 call  len(self._code)
+    -> <builtin>.len
+497:54 call  self.generate_func_code_block( items_definition, '{}_item...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+499:45 call  '{}_item'.format(self._variable)
+    -> <builtin>.str.format
+500:50 call  '{}[{{{}_x}}]'.format(self._variable_name, self._variable)
+    -> <builtin>.str.format
+502:31 call  len(self._code)
+    -> <builtin>.len
+503:35 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_min_properties]
+506:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+507:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+507:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+508:30 call  isinstance(self._definition['minProperties'], (int, float))
+    -> <builtin>.isinstance
+509:52 call  JsonSchemaDefinitionException('minProperties must be a nu...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+510:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+511:18 with  self.l('if {variable}_len < {minProperties}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+511:24 call  self.l('if {variable}_len < {minProperties}:')
+    -> fastjsonschema.indent.indent.wrapper
+512:25 call  self.exc('{name} must contain at least {minProperties} pr...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_max_properties]
+515:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+516:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+516:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+517:30 call  isinstance(self._definition['maxProperties'], (int, float))
+    -> <builtin>.isinstance
+518:52 call  JsonSchemaDefinitionException('maxProperties must be a nu...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+519:45 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+520:18 with  self.l('if {variable}_len > {maxProperties}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+520:24 call  self.l('if {variable}_len > {maxProperties}:')
+    -> fastjsonschema.indent.indent.wrapper
+521:25 call  self.exc('{name} must contain less than or equal to {maxP...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_required]
+524:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+525:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+525:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+526:30 call  isinstance(self._definition['required'], (list, tuple))
+    -> <builtin>.isinstance
+527:52 call  JsonSchemaDefinitionException('required must be an array')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+528:19 call  len(self._definition['required'])
+    -> <builtin>.len
+528:56 call  len(set(self._definition['required']))
+    -> <builtin>.len
+528:60 call  set(self._definition['required'])
+    -> <builtin>.set
+529:52 call  JsonSchemaDefinitionException('required must contain uniq...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+530:40 call  self._definition.get('additionalProperties', True)
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+535:57 call  self._definition.get('properties', {})
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+536:36 call  any(re.search(regex, prop) for regex in self._definition....
+    -> <builtin>.any
+536:46 call  re.search(regex, prop)
+    -> re.search
+536:93 call  self._definition.get('patternProperties', {})
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+539:56 call  JsonSchemaDefinitionException('{}: items {} are required ...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+539:107 call  '{}: items {} are required but not allowed'.format(self._...
+    -> <builtin>.str.format
+540:19 call  self.l('{variable}__missing_keys = set({required}) - {var...
+    -> fastjsonschema.indent.indent.wrapper
+541:18 with  self.l('if {variable}__missing_keys:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+541:24 call  self.l('if {variable}__missing_keys:')
+    -> fastjsonschema.indent.indent.wrapper
+543:25 call  self.exc('{name} must contain ', self.e(self._definition[...
+    -> fastjsonschema.generator.CodeGenerator.exc
+543:56 call  self.e(self._definition['required'])
+    -> fastjsonschema.generator.CodeGenerator.e
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_properties]
+559:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+560:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+560:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+561:38 call  self.create_variable_keys()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_keys
+562:77 call  self._definition['properties'].items()
+    -> <builtin>.dict.items
+    note: the value of this keyword in the schema dict is a JSON object, a dict
+563:34 call  re.sub(r'($[^a-zA-Z]|[^a-zA-Z0-9])', '', key)
+    -> re.sub
+564:34 call  isinstance(prop_definition, (dict, bool))
+    -> <builtin>.isinstance
+565:56 call  JsonSchemaDefinitionException('{}[{}] must be object'.for...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+565:87 call  '{}[{}] must be object'.format(self._variable, key_name)
+    -> <builtin>.str.format
+566:22 with  self.l('if "{}" in {variable}_keys:', self.e(key))
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+566:28 call  self.l('if "{}" in {variable}_keys:', self.e(key))
+    -> fastjsonschema.indent.indent.wrapper
+566:66 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+567:27 call  self.l('{variable}_keys.remove("{}")', self.e(key))
+    -> fastjsonschema.indent.indent.wrapper
+567:66 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+568:27 call  self.l('{variable}__{0} = {variable}["{1}"]', key_name, s...
+    -> fastjsonschema.indent.indent.wrapper
+568:83 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+569:50 call  self.generate_func_code_block( prop_definition, '{}__{}'....
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+571:40 call  '{}__{}'.format(self._variable, key_name)
+    -> <builtin>.str.format
+572:39 call  '{}.{}'.format(self._variable_name, self.e(key).replace('...
+    -> <builtin>.str.format
+572:67 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+572:80 call  self.e(key).replace('{', '{{')
+    -> <builtin>.str.replace
+    note: CodeGenerator.e returns a str
+572:99 call  self.e(key).replace('{', '{{').replace('}', '}}')
+    -> <builtin>.str.replace
+    note: CodeGenerator.e returns a str
+575:52 call  isinstance(prop_definition, dict)
+    -> <builtin>.isinstance
+576:27 call  self.l('else: {variable}["{}"] = {}', self.e(key), repr_d...
+    -> fastjsonschema.indent.indent.wrapper
+576:65 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+576:84 call  repr_default(prop_definition['default'])
+    -> fastjsonschema.generator.repr_default
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_pattern_properties]
+592:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+593:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+593:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+594:38 call  self.create_variable_keys()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_keys
+598:69 call  pattern_prop_definition.items()
+    -> <builtin>.dict.items
+    note: pattern_prop_definition is the patternProperties object of the schema, a dict
+599:60 call  re.compile(pattern)
+    -> re.compile
+    reject fastjsonschema.compile: the call is the standard library's re.compile, an attribute of the module re
+600:18 with  self.l('for {variable}_key, {variable}_val in {variable}....
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+600:24 call  self.l('for {variable}_key, {variable}_val in {variable}....
+    -> fastjsonschema.indent.indent.wrapper
+601:87 call  self._definition['patternProperties'].items()
+    -> <builtin>.dict.items
+    note: the value of this keyword in the schema dict is a JSON object, a dict
+602:26 with  self.l('if REGEX_PATTERNS[{}].search({variable}_key):', r...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+602:32 call  self.l('if REGEX_PATTERNS[{}].search({variable}_key):', r...
+    -> fastjsonschema.indent.indent.wrapper
+602:86 call  repr(pattern)
+    -> <builtin>.repr
+603:30 with  self.l('if {variable}_key in {variable}_keys:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+603:36 call  self.l('if {variable}_key in {variable}_keys:')
+    -> fastjsonschema.indent.indent.wrapper
+604:35 call  self.l('{variable}_keys.remove({variable}_key)')
+    -> fastjsonschema.indent.indent.wrapper
+605:54 call  self.generate_func_code_block( definition, '{}_val'.forma...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+607:44 call  '{}_val'.format(self._variable)
+    -> <builtin>.str.format
+608:51 call  '{}.{{{}_key}}'.format(self._variable_name, self._variable)
+    -> <builtin>.str.format
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_additional_properties]
+628:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+629:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+629:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+630:38 call  self.create_variable_keys()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_keys
+635:39 call  list(self._definition.get("properties", {}).keys())
+    -> <builtin>.list
+635:60 call  self._definition.get("properties", {})
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+635:83 call  self._definition.get("properties", {}).keys()
+    -> <builtin>.dict.keys
+    note: the properties object of the schema, a dict, or the default {}
+636:22 with  self.l('for {variable}_key in {variable}_keys:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+636:28 call  self.l('for {variable}_key in {variable}_keys:')
+    -> fastjsonschema.indent.indent.wrapper
+637:26 with  self.l('if {variable}_key not in {}:', properties_keys)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+637:32 call  self.l('if {variable}_key not in {}:', properties_keys)
+    -> fastjsonschema.indent.indent.wrapper
+638:31 call  self.l('{variable}_value = {variable}.get({variable}_key)')
+    -> fastjsonschema.indent.indent.wrapper
+639:54 call  self.generate_func_code_block( add_prop_definition, '{}_v...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+641:46 call  '{}_value'.format(self._variable)
+    -> <builtin>.str.format
+642:51 call  '{}.{{{}_key}}'.format(self._variable_name, self._variable)
+    -> <builtin>.str.format
+645:22 with  self.l('if {variable}_keys:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+645:28 call  self.l('if {variable}_keys:')
+    -> fastjsonschema.indent.indent.wrapper
+646:29 call  self.exc('{name} must not contain "+str({variable}_keys)+...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft04.CodeGeneratorDraft04.generate_dependencies]
+666:37 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+667:14 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+667:20 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+669:70 call  self._definition["dependencies"].items()
+    -> <builtin>.dict.items
+    note: the value of this keyword in the schema dict is a JSON object, a dict
+673:22 with  self.l('if "{}" in {variable}:', self.e(key))
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+673:28 call  self.l('if "{}" in {variable}:', self.e(key))
+    -> fastjsonschema.indent.indent.wrapper
+673:61 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+675:33 call  self.exc('{} in {name} must not be there', self.e(key), r...
+    -> fastjsonschema.generator.CodeGenerator.exc
+675:74 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+676:36 call  isinstance(values, list)
+    -> <builtin>.isinstance
+678:34 with  self.l('if "{}" not in {variable}:', self.e(value))
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+678:40 call  self.l('if "{}" not in {variable}:', self.e(value))
+    -> fastjsonschema.indent.indent.wrapper
+678:77 call  self.e(value)
+    -> fastjsonschema.generator.CodeGenerator.e
+679:41 call  self.exc('{name} missing dependency {} for {}', self.e(va...
+    -> fastjsonschema.generator.CodeGenerator.exc
+679:87 call  self.e(value)
+    -> fastjsonschema.generator.CodeGenerator.e
+679:102 call  self.e(key)
+    -> fastjsonschema.generator.CodeGenerator.e
+681:39 call  len(self._code)
+    -> <builtin>.len
+682:54 call  self.generate_func_code_block(values, self._variable, sel...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+683:31 call  len(self._code)
+    -> <builtin>.len
+684:35 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+686:23 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+
+== fastjsonschema.draft06
+
+[fastjsonschema.draft06]
+8:25 call  dict(CodeGeneratorDraft04.FORMAT_REGEXS, **{ 'json-pointe...
+    -> <builtin>.dict
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.__init__]
+29:14 call  super()
+    -> <builtin>.super
+29:25 call  super().__init__(definition, resolver, formats, use_defau...
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.__init__
+    reject *: super() in CodeGeneratorDraft06 skips to CodeGeneratorDraft04, whose __init__ runs
+30:47 call  self._json_keywords_to_function.update(( ('exclusiveMinim...
+    -> collections.OrderedDict.update
+    note: _json_keywords_to_function is the OrderedDict of CodeGenerator.__init__ (generator.py:78); update stores the bound methods and does not call them
+
+[fastjsonschema.draft06.CodeGeneratorDraft06._generate_func_code_block]
+39:22 call  isinstance(definition, bool)
+    -> <builtin>.isinstance
+40:48 call  self.generate_boolean_schema()
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_boolean_schema
+43:37 call  self.generate_ref()
+    -> fastjsonschema.generator.CodeGenerator.generate_ref
+44:43 call  self.run_generate_functions(definition)
+    -> fastjsonschema.generator.CodeGenerator.run_generate_functions
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_boolean_schema]
+52:19 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+54:21 call  self.exc('{name} must not be there')
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_type]
+67:29 call  enforce_list(self._definition['type'])
+    -> fastjsonschema.generator.enforce_list
+69:37 call  ', '.join(JSON_TYPE_TO_PYTHON_TYPE[t] for t in types)
+    -> <builtin>.str.join
+71:48 call  JsonSchemaDefinitionException('Unknown type')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+76:99 call  ' and not (isinstance({variable}, float) and {variable}.i...
+    -> <builtin>.str.format
+81:63 call  ' or isinstance({variable}, bool)'.format(variable=self._...
+    -> <builtin>.str.format
+83:14 with  self.l('if not isinstance({variable}, ({})){}:', python_t...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+83:20 call  self.l('if not isinstance({variable}, ({})){}:', python_t...
+    -> fastjsonschema.indent.indent.wrapper
+84:21 call  self.exc('{name} must be {}', ' or '.join(types), rule='t...
+    -> fastjsonschema.generator.CodeGenerator.exc
+84:54 call  ' or '.join(types)
+    -> <builtin>.str.join
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_minimum]
+91:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+91:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+92:30 call  isinstance(self._definition['minimum'], (int, float, deci...
+    -> <builtin>.isinstance
+93:52 call  JsonSchemaDefinitionException('minimum must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+94:18 with  self.l('if {variable} < {minimum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+94:24 call  self.l('if {variable} < {minimum}:')
+    -> fastjsonschema.indent.indent.wrapper
+95:25 call  self.exc('{name} must be bigger than or equal to {minimum...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_maximum]
+102:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+102:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+103:30 call  isinstance(self._definition['maximum'], (int, float, deci...
+    -> <builtin>.isinstance
+104:52 call  JsonSchemaDefinitionException('maximum must be a number')
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+105:18 with  self.l('if {variable} > {maximum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+105:24 call  self.l('if {variable} > {maximum}:')
+    -> fastjsonschema.indent.indent.wrapper
+106:25 call  self.exc('{name} must be smaller than or equal to {maximu...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_exclusive_minimum]
+109:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+109:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+110:30 call  isinstance(self._definition['exclusiveMinimum'], (int, fl...
+    -> <builtin>.isinstance
+111:52 call  JsonSchemaDefinitionException('exclusiveMinimum must be a...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+112:18 with  self.l('if {variable} <= {exclusiveMinimum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+112:24 call  self.l('if {variable} <= {exclusiveMinimum}:')
+    -> fastjsonschema.indent.indent.wrapper
+113:25 call  self.exc('{name} must be bigger than {exclusiveMinimum}',...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_exclusive_maximum]
+116:14 with  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+116:20 call  self.l('if isinstance({variable}, (int, float, Decimal)) ...
+    -> fastjsonschema.indent.indent.wrapper
+117:30 call  isinstance(self._definition['exclusiveMaximum'], (int, fl...
+    -> <builtin>.isinstance
+118:52 call  JsonSchemaDefinitionException('exclusiveMaximum must be a...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+119:18 with  self.l('if {variable} >= {exclusiveMaximum}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+119:24 call  self.l('if {variable} >= {exclusiveMaximum}:')
+    -> fastjsonschema.indent.indent.wrapper
+120:25 call  self.exc('{name} must be smaller than {exclusiveMaximum}'...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_property_names]
+136:57 call  self._definition.get('propertyNames', {})
+    -> <builtin>.dict.get
+    note: self._definition is the current schema object, a dict (generate_* runs only for a dict definition: _generate_func_code_block)
+140:41 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+141:18 with  self.l('if {variable}_is_dict and {variable}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+141:24 call  self.l('if {variable}_is_dict and {variable}:')
+    -> fastjsonschema.indent.indent.wrapper
+142:25 call  self.exc('{name} must not be there', rule='propertyNames')
+    -> fastjsonschema.generator.CodeGenerator.exc
+144:41 call  self.create_variable_is_dict()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_dict
+145:18 with  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+145:24 call  self.l('if {variable}_is_dict:')
+    -> fastjsonschema.indent.indent.wrapper
+146:49 call  self.create_variable_with_length()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_with_length
+147:22 with  self.l('if {variable}_len != 0:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+147:28 call  self.l('if {variable}_len != 0:')
+    -> fastjsonschema.indent.indent.wrapper
+148:27 call  self.l('{variable}_property_names = True')
+    -> fastjsonschema.indent.indent.wrapper
+149:26 with  self.l('for {variable}_key in {variable}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+149:32 call  self.l('for {variable}_key in {variable}:')
+    -> fastjsonschema.indent.indent.wrapper
+150:30 with  self.l('try:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+150:36 call  self.l('try:')
+    -> fastjsonschema.indent.indent.wrapper
+151:43 call  len(self._code)
+    -> <builtin>.len
+152:34 with  self.trial_validation()
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+152:55 call  self.trial_validation()
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.generator.CodeGenerator.trial_validation
+    note: trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back
+153:62 call  self.generate_func_code_block( property_names_definition,...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+155:52 call  '{}_key'.format(self._variable)
+    -> <builtin>.str.format
+159:35 call  len(self._code)
+    -> <builtin>.len
+160:39 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+161:30 with  self.l('except {}:', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+161:36 call  self.l('except {}:', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.indent.wrapper
+162:35 call  self.l('{variable}_property_names = False')
+    -> fastjsonschema.indent.indent.wrapper
+163:26 with  self.l('if not {variable}_property_names:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+163:32 call  self.l('if not {variable}_property_names:')
+    -> fastjsonschema.indent.indent.wrapper
+164:33 call  self.exc('{name} must be named by propertyName definition...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_contains]
+180:37 call  self.create_variable_is_list()
+    -> fastjsonschema.generator.CodeGenerator.create_variable_is_list
+181:14 with  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+181:20 call  self.l('if {variable}_is_list:')
+    -> fastjsonschema.indent.indent.wrapper
+185:25 call  self.exc('{name} is always invalid', rule='contains')
+    -> fastjsonschema.generator.CodeGenerator.exc
+187:22 with  self.l('if not {variable}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+187:28 call  self.l('if not {variable}:')
+    -> fastjsonschema.indent.indent.wrapper
+188:29 call  self.exc('{name} must not be empty', rule='contains')
+    -> fastjsonschema.generator.CodeGenerator.exc
+190:23 call  self.l('{variable}_contains = False')
+    -> fastjsonschema.indent.indent.wrapper
+191:22 with  self.l('for {variable}_key in {variable}:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+191:28 call  self.l('for {variable}_key in {variable}:')
+    -> fastjsonschema.indent.indent.wrapper
+192:26 with  self.l('try:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+192:32 call  self.l('try:')
+    -> fastjsonschema.indent.indent.wrapper
+193:30 with  self.trial_validation()
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+193:51 call  self.trial_validation()
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.generator.CodeGenerator.trial_validation
+    note: trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back
+194:58 call  self.generate_func_code_block( contains_definition, '{}_k...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+196:48 call  '{}_key'.format(self._variable)
+    -> <builtin>.str.format
+200:31 call  self.l('{variable}_contains = True')
+    -> fastjsonschema.indent.indent.wrapper
+201:31 call  self.l('break')
+    -> fastjsonschema.indent.indent.wrapper
+202:27 call  self.l('except {}: pass', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.indent.wrapper
+204:22 with  self.l('if not {variable}_contains:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+204:28 call  self.l('if not {variable}_contains:')
+    -> fastjsonschema.indent.indent.wrapper
+205:29 call  self.exc('{name} must contain one of contains definition'...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft06.CodeGeneratorDraft06.generate_const]
+220:41 call  self._enum_value_matches(self._variable, const)
+    -> fastjsonschema.draft04.CodeGeneratorDraft04._enum_value_matches
+221:14 with  self.l('if not ({}):', match)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+221:20 call  self.l('if not ({}):', match)
+    -> fastjsonschema.indent.indent.wrapper
+222:21 call  self.exc('{name} must be same as const definition: {defin...
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+== fastjsonschema.draft07
+
+[fastjsonschema.draft07]
+7:25 call  dict(CodeGeneratorDraft06.FORMAT_REGEXS, **{ 'date': r'^(...
+    -> <builtin>.dict
+
+[fastjsonschema.draft07.CodeGeneratorDraft07.__init__]
+33:14 call  super()
+    -> <builtin>.super
+33:25 call  super().__init__(definition, resolver, formats, use_defau...
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.__init__
+    reject *: super() in CodeGeneratorDraft07 skips to CodeGeneratorDraft06, whose __init__ runs
+35:47 call  self._json_keywords_to_function.update(( ('if', self.gene...
+    -> collections.OrderedDict.update
+    note: _json_keywords_to_function is the OrderedDict of CodeGenerator.__init__ (generator.py:78); update stores the bound methods and does not call them
+
+[fastjsonschema.draft07.CodeGeneratorDraft07.generate_if_then_else]
+61:14 with  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+61:20 call  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.indent.wrapper
+62:27 call  len(self._code)
+    -> <builtin>.len
+63:18 with  self.trial_validation()
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+63:39 call  self.trial_validation()
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.generator.CodeGenerator.trial_validation
+    note: trial_validation is decorated with @contextmanager (generator.py:183): the call runs contextlib's helper, which calls the generator function back
+64:46 call  self.generate_func_code_block( self._definition['if'], se...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+70:19 call  len(self._code)
+    -> <builtin>.len
+71:23 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+72:14 with  self.l('except {}:', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+72:20 call  self.l('except {}:', VALIDATION_EXCEPTIONS)
+    -> fastjsonschema.indent.indent.wrapper
+74:31 call  len(self._code)
+    -> <builtin>.len
+75:46 call  self.generate_func_code_block( self._definition['else'], ...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+81:23 call  len(self._code)
+    -> <builtin>.len
+82:27 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+84:23 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+86:18 with  self.l('else:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+86:24 call  self.l('else:')
+    -> fastjsonschema.indent.indent.wrapper
+87:31 call  len(self._code)
+    -> <builtin>.len
+88:46 call  self.generate_func_code_block( self._definition['then'], ...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+94:23 call  len(self._code)
+    -> <builtin>.len
+95:27 call  self.l('pass')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_encoding]
+108:18 with  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+108:24 call  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.indent.wrapper
+109:22 with  self.l('try:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+109:28 call  self.l('try:')
+    -> fastjsonschema.indent.indent.wrapper
+110:27 call  self.l('import base64')
+    -> fastjsonschema.indent.indent.wrapper
+111:27 call  self.l('{variable} = base64.b64decode({variable})')
+    -> fastjsonschema.indent.indent.wrapper
+112:22 with  self.l('except Exception:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+112:28 call  self.l('except Exception:')
+    -> fastjsonschema.indent.indent.wrapper
+113:29 call  self.exc('{name} must be encoded by base64')
+    -> fastjsonschema.generator.CodeGenerator.exc
+114:22 with  self.l('if {variable} == "":')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+114:28 call  self.l('if {variable} == "":')
+    -> fastjsonschema.indent.indent.wrapper
+115:29 call  self.exc('contentEncoding must be base64')
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+[fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_media_type]
+128:18 with  self.l('if isinstance({variable}, bytes):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+128:24 call  self.l('if isinstance({variable}, bytes):')
+    -> fastjsonschema.indent.indent.wrapper
+129:22 with  self.l('try:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+129:28 call  self.l('try:')
+    -> fastjsonschema.indent.indent.wrapper
+130:27 call  self.l('{variable} = {variable}.decode("utf-8")')
+    -> fastjsonschema.indent.indent.wrapper
+131:22 with  self.l('except Exception:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+131:28 call  self.l('except Exception:')
+    -> fastjsonschema.indent.indent.wrapper
+132:29 call  self.exc('{name} must encoded by utf8')
+    -> fastjsonschema.generator.CodeGenerator.exc
+133:18 with  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+133:24 call  self.l('if isinstance({variable}, str):')
+    -> fastjsonschema.indent.indent.wrapper
+134:22 with  self.l('try:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+134:28 call  self.l('try:')
+    -> fastjsonschema.indent.indent.wrapper
+135:27 call  self.l('import json')
+    -> fastjsonschema.indent.indent.wrapper
+136:27 call  self.l('{variable} = json.loads({variable})')
+    -> fastjsonschema.indent.indent.wrapper
+137:22 with  self.l('except Exception:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+137:28 call  self.l('except Exception:')
+    -> fastjsonschema.indent.indent.wrapper
+138:29 call  self.exc('{name} must be valid JSON')
+    -> fastjsonschema.generator.CodeGenerator.exc
+
+== fastjsonschema.draft2019
+
+[fastjsonschema.draft2019]
+5:25 call  dict(CodeGeneratorDraft07.FORMAT_REGEXS, **{ 'uuid': r'^[...
+    -> <builtin>.dict
+
+== fastjsonschema.exceptions
+
+[fastjsonschema.exceptions]
+5:22 call  re.compile(r'[\.\[\]]+')
+    -> re.compile
+    reject fastjsonschema.compile: the call is the standard library's re.compile, an attribute of the module re
+46:6 decorator  @property
+    -> <builtin>.property
+50:6 decorator  @property
+    -> <builtin>.property
+
+[fastjsonschema.exceptions.JsonSchemaValueException.__init__]
+39:14 call  super()
+    -> <builtin>.super
+39:25 call  super().__init__(message)
+    -> <builtin>.ValueError.__init__
+    reject *: super() skips to JsonSchemaException, which defines no __init__, so the call reaches ValueError.__init__ (the base of JsonSchemaException, exceptions.py:8)
+
+[fastjsonschema.exceptions.JsonSchemaValueException.path]
+48:48 call  SPLIT_RE.split(self.name or '')
+    -> re.Pattern.split
+    note: SPLIT_RE is the compiled pattern of line 5
+
+[fastjsonschema.exceptions.JsonSchemaValueException.rule_definition]
+54:35 call  self.definition.get(self.rule)
+    -> <builtin>.dict.get
+    note: definition is what the generated code passes: the dict literal that repr_default writes for the expanded schema (generator.py:322-324); for a boolean schema it is False and the `not self.definition` test returns first. A definition that a client passes to the constructor itself is opaque (B5)
+
+[fastjsonschema.exceptions.JsonSchemaValuesException.__init__]
+67:33 call  '; '.join(error.message for error in errors)
+    -> <builtin>.str.join
+68:14 call  super()
+    -> <builtin>.super
+68:25 call  super().__init__(self.message)
+    -> <builtin>.ValueError.__init__
+    reject *: super() skips to JsonSchemaException, which defines no __init__, so the call reaches ValueError.__init__ (the base of JsonSchemaException, exceptions.py:8)
+
+== fastjsonschema.generator
+
+[fastjsonschema.generator]
+80:6 decorator  @property
+    -> <builtin>.property
+89:6 decorator  @property
+    -> <builtin>.property
+106:6 decorator  @property
+    -> <builtin>.property
+183:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+250:6 decorator  @indent
+    -> fastjsonschema.indent.indent
+
+[fastjsonschema.generator.enforce_list]
+16:18 call  isinstance(variable, list)
+    -> <builtin>.isinstance
+
+[fastjsonschema.generator.CodeGenerator.__init__]
+69:46 call  set()
+    -> <builtin>.set
+72:47 call  RefResolver.from_schema(definition, store={})
+    -> fastjsonschema.ref_resolver.RefResolver.from_schema
+    note: reached when no resolver is given: the tests make CodeGeneratorDraft07(definition, formats=..., use_formats=...) (tests/conftest.py:25)
+76:65 call  self._resolver.get_uri()
+    -> fastjsonschema.ref_resolver.RefResolver.get_uri
+    note: self._resolver is the RefResolver that _factory passes or that line 72 makes
+76:100 call  self._resolver.get_scope_name()
+    -> fastjsonschema.ref_resolver.RefResolver.get_scope_name
+78:54 call  OrderedDict()
+    -> collections.OrderedDict
+
+[fastjsonschema.generator.CodeGenerator.func_code]
+85:33 call  self._generate_func_code()
+    -> fastjsonschema.generator.CodeGenerator._generate_func_code
+87:25 call  '\n'.join(self._code)
+    -> <builtin>.str.join
+
+[fastjsonschema.generator.CodeGenerator.global_state]
+96:33 call  self._generate_func_code()
+    -> fastjsonschema.generator.CodeGenerator._generate_func_code
+98:20 call  dict( **self._extra_imports_objects, REGEX_PATTERNS=self....
+    -> <builtin>.dict
+    note: the keyword values are a dict, the module re and the two exception classes; dict() stores them and calls none
+
+[fastjsonschema.generator.CodeGenerator.global_state_code]
+112:33 call  self._generate_func_code()
+    -> fastjsonschema.generator.CodeGenerator._generate_func_code
+115:29 call  '\n'.join(self._extra_imports_lines + [ 'from fastjsonsch...
+    -> <builtin>.str.join
+120:25 call  '\n'.join(self._extra_imports_lines + [ 'import re', 'fro...
+    -> <builtin>.str.join
+125:52 call  serialize_regexes(self._compile_regexps)
+    -> fastjsonschema.generator.serialize_regexes
+
+[fastjsonschema.generator.CodeGenerator._generate_func_code]
+132:36 call  self.generate_func_code()
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code
+
+[fastjsonschema.generator.CodeGenerator.generate_func_code]
+139:15 call  self.l('NoneType = type(None)')
+    -> fastjsonschema.indent.indent.wrapper
+145:66 call  self._needed_validation_functions.popitem()
+    -> <builtin>.dict.popitem
+    note: _needed_validation_functions is the dict of __init__ (line 67)
+146:46 call  self.generate_validation_function(uri, name)
+    -> fastjsonschema.generator.CodeGenerator.generate_validation_function
+
+[fastjsonschema.generator.CodeGenerator.generate_validation_function]
+152:44 call  self._validation_functions_done.add(uri)
+    -> <builtin>.set.add
+    note: _validation_functions_done is the set of __init__ (line 69)
+153:15 call  self.l('')
+    -> fastjsonschema.indent.indent.wrapper
+154:14 with  self._resolver.resolving(uri)
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+154:38 call  self._resolver.resolving(uri)
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.ref_resolver.RefResolver.resolving
+    note: resolving is decorated with @contextmanager (ref_resolver.py:141): the call runs contextlib's helper, which calls the generator function back
+155:18 with  self.l('def {}(data, custom_formats={{}}, name_prefix=Non...
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+155:24 call  self.l('def {}(data, custom_formats={{}}, name_prefix=Non...
+    -> fastjsonschema.indent.indent.wrapper
+157:27 call  self.l('errors = []')
+    -> fastjsonschema.indent.indent.wrapper
+158:46 call  self.generate_func_code_block(definition, 'data', 'data',...
+    -> fastjsonschema.generator.CodeGenerator.generate_func_code_block
+160:27 call  self.l('if errors: raise JsonSchemaValuesException(errors)')
+    -> fastjsonschema.indent.indent.wrapper
+161:23 call  self.l('return data')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.generator.CodeGenerator.generate_func_code_block]
+175:47 call  self._generate_func_code_block(definition)
+    -> fastjsonschema.generator.CodeGenerator._generate_func_code_block
+    -> fastjsonschema.draft06.CodeGeneratorDraft06._generate_func_code_block
+    note: self is a CodeGeneratorDraft04 (CodeGenerator's method) or a CodeGeneratorDraft06, 07 or 2019 (CodeGeneratorDraft06's override)
+
+[fastjsonschema.generator.CodeGenerator._generate_func_code_block]
+197:26 call  isinstance(definition, dict)
+    -> <builtin>.isinstance
+198:48 call  JsonSchemaDefinitionException("definition must be an obje...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+201:37 call  self.generate_ref()
+    -> fastjsonschema.generator.CodeGenerator.generate_ref
+202:43 call  self.run_generate_functions(definition)
+    -> fastjsonschema.generator.CodeGenerator.run_generate_functions
+
+[fastjsonschema.generator.CodeGenerator.run_generate_functions]
+207:63 call  self._json_keywords_to_function.items()
+    -> collections.OrderedDict.items
+    note: _json_keywords_to_function is the OrderedDict of __init__ (line 78)
+209:21 call  func()
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_additional_properties
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_all_of
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_any_of
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_dependencies
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_enum
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_format
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_items
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_max_items
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_max_length
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_max_properties
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_maximum
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_min_items
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_min_length
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_min_properties
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_minimum
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_multiple_of
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_not
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_one_of
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_pattern
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_pattern_properties
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_properties
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_required
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_type
+    -> fastjsonschema.draft04.CodeGeneratorDraft04.generate_unique_items
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_const
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_contains
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_exclusive_maximum
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_exclusive_minimum
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_maximum
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_minimum
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_property_names
+    -> fastjsonschema.draft06.CodeGeneratorDraft06.generate_type
+    -> fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_encoding
+    -> fastjsonschema.draft07.CodeGeneratorDraft07.generate_content_media_type
+    -> fastjsonschema.draft07.CodeGeneratorDraft07.generate_if_then_else
+    note: func is a bound method of self from _json_keywords_to_function, which only the __init__ methods of the generators fill (draft04.py:49-75, draft06.py:30-36, draft07.py:35-39). For a CodeGeneratorDraft06, 07 or 2019, self.generate_type, generate_minimum and generate_maximum bind CodeGeneratorDraft06's overrides; for a CodeGeneratorDraft04, its own. CodeGeneratorDraft2019 adds no keyword
+
+[fastjsonschema.generator.CodeGenerator.generate_ref]
+227:14 with  self._resolver.in_scope(self._definition['$ref'])
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+227:37 call  self._resolver.in_scope(self._definition['$ref'])
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.ref_resolver.RefResolver.in_scope
+    note: in_scope is decorated with @contextmanager (ref_resolver.py:129): the call runs contextlib's helper, which calls the generator function back
+228:49 call  self._resolver.get_scope_name()
+    -> fastjsonschema.ref_resolver.RefResolver.get_scope_name
+229:41 call  self._resolver.get_uri()
+    -> fastjsonschema.ref_resolver.RefResolver.get_uri
+233:50 call  self._variable_name.startswith("data")
+    -> <builtin>.str.startswith
+235:63 call  '(name_prefix or "data") + "{}"'.format(path)
+    -> <builtin>.str.format
+239:23 call  self.l('{}({variable}, custom_formats, {name_arg})', name...
+    -> fastjsonschema.indent.indent.wrapper
+243:22 with  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+243:28 call  self.l('try:', optimize=False)
+    -> fastjsonschema.indent.indent.wrapper
+244:27 call  self.l('{}({variable}, custom_formats, {name_arg})', name...
+    -> fastjsonschema.indent.indent.wrapper
+245:22 with  self.l('except JsonSchemaValuesException as e:')
+    -> fastjsonschema.indent.Indent.__enter__
+    -> fastjsonschema.indent.Indent.__exit__
+245:28 call  self.l('except JsonSchemaValuesException as e:')
+    -> fastjsonschema.indent.indent.wrapper
+246:27 call  self.l('errors.extend(e.errors)')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.generator.CodeGenerator.l]
+274:35 call  name.startswith('data')
+    -> <builtin>.str.startswith
+279:23 call  dict( self._definition if self._definition and self._defi...
+    -> <builtin>.dict
+    note: the first argument is the current schema dict or {}; dict() copies it and calls no package code
+285:27 call  line.format(*args, **context)
+    -> <builtin>.str.format
+    note: line is a str template of the package; the fields format strs, ints, the JSON values of the schema and lists of strs, never a package object
+286:28 call  line.replace('\n', '\\n')
+    -> <builtin>.str.replace
+286:49 call  line.replace('\n', '\\n').replace('\r', '\\r')
+    -> <builtin>.str.replace
+287:26 call  self._code.append(spaces + line)
+    -> <builtin>.list.append
+    note: _code is the list of __init__ (line 38)
+
+[fastjsonschema.generator.CodeGenerator.e]
+298:22 call  isinstance(string, str)
+    -> <builtin>.isinstance
+299:33 call  string.encode('unicode_escape')
+    -> <builtin>.str.encode
+299:58 call  string.encode('unicode_escape').decode('ascii')
+    -> <builtin>.bytes.decode
+299:75 call  string.encode('unicode_escape').decode('ascii').replace('...
+    -> <builtin>.str.replace
+300:19 call  str(string)
+    -> <builtin>.str
+    note: string is a JSON value of the schema (a number, bool, None, list or dict); str() of it runs no package code
+300:35 call  str(string).replace('"', '\\"')
+    -> <builtin>.str.replace
+
+[fastjsonschema.generator.CodeGenerator.exc]
+308:23 call  self.l('raise JsonSchemaValueException("'+msg+'")', *args)
+    -> fastjsonschema.indent.indent.wrapper
+310:23 call  self.l('errors.append(JsonSchemaValueException("'+msg+'")...
+    -> fastjsonschema.indent.indent.wrapper
+322:39 call  self._expand_refs(self._definition)
+    -> fastjsonschema.generator.CodeGenerator._expand_refs
+323:33 call  self.e(definition.get(rule) if isinstance(definition, dic...
+    -> fastjsonschema.generator.CodeGenerator.e
+323:48 call  definition.get(rule)
+    -> <builtin>.dict.get
+    note: definition passed the isinstance check for dict (323:68)
+323:68 call  isinstance(definition, dict)
+    -> <builtin>.isinstance
+324:15 call  self.l(msg, *args, definition=repr_default(definition), r...
+    -> fastjsonschema.indent.indent.wrapper
+324:51 call  repr_default(definition)
+    -> fastjsonschema.generator.repr_default
+324:74 call  repr(rule)
+    -> <builtin>.repr
+
+[fastjsonschema.generator.CodeGenerator._expand_refs]
+327:22 call  isinstance(definition, list)
+    -> <builtin>.isinstance
+328:38 call  self._expand_refs(v)
+    -> fastjsonschema.generator.CodeGenerator._expand_refs
+329:26 call  isinstance(definition, dict)
+    -> <builtin>.isinstance
+331:47 call  isinstance(definition["$ref"], str)
+    -> <builtin>.isinstance
+332:18 with  self._resolver.resolving(definition["$ref"])
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+332:42 call  self._resolver.resolving(definition["$ref"])
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.ref_resolver.RefResolver.resolving
+    note: resolving is decorated with @contextmanager (ref_resolver.py:141): the call runs contextlib's helper, which calls the generator function back
+334:37 call  self._expand_refs(v)
+    -> fastjsonschema.generator.CodeGenerator._expand_refs
+334:69 call  definition.items()
+    -> <builtin>.dict.items
+    note: definition passed the isinstance check for dict (line 329)
+
+[fastjsonschema.generator.CodeGenerator._is_variable_in_scope]
+342:36 call  self._variables.get(variable_name)
+    -> <builtin>.dict.get
+    note: _variables is a dict (__init__, line 54, and generate_func_code_block)
+345:21 call  tuple(self._scope_stack[:len(scope)])
+    -> <builtin>.tuple
+345:44 call  len(scope)
+    -> <builtin>.len
+
+[fastjsonschema.generator.CodeGenerator.create_variable_with_length]
+354:40 call  '{}_len'.format(self._variable)
+    -> <builtin>.str.format
+355:38 call  self._is_variable_in_scope(variable_name)
+    -> fastjsonschema.generator.CodeGenerator._is_variable_in_scope
+357:47 call  tuple(self._scope_stack)
+    -> <builtin>.tuple
+358:15 call  self.l('{variable}_len = len({variable})')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.generator.CodeGenerator.create_variable_keys]
+365:41 call  '{}_keys'.format(self._variable)
+    -> <builtin>.str.format
+366:38 call  self._is_variable_in_scope(variable_name)
+    -> fastjsonschema.generator.CodeGenerator._is_variable_in_scope
+368:47 call  tuple(self._scope_stack)
+    -> <builtin>.tuple
+369:15 call  self.l('{variable}_keys = set({variable}.keys())')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.generator.CodeGenerator.create_variable_is_list]
+376:44 call  '{}_is_list'.format(self._variable)
+    -> <builtin>.str.format
+377:38 call  self._is_variable_in_scope(variable_name)
+    -> fastjsonschema.generator.CodeGenerator._is_variable_in_scope
+379:47 call  tuple(self._scope_stack)
+    -> <builtin>.tuple
+380:15 call  self.l('{variable}_is_list = isinstance({variable}, (list...
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.generator.CodeGenerator.create_variable_is_dict]
+387:44 call  '{}_is_dict'.format(self._variable)
+    -> <builtin>.str.format
+388:38 call  self._is_variable_in_scope(variable_name)
+    -> fastjsonschema.generator.CodeGenerator._is_variable_in_scope
+390:47 call  tuple(self._scope_stack)
+    -> <builtin>.tuple
+391:15 call  self.l('{variable}_is_dict = isinstance({variable}, dict)')
+    -> fastjsonschema.indent.indent.wrapper
+
+[fastjsonschema.generator.serialize_regexes]
+398:13 call  repr(k)
+    -> <builtin>.repr
+398:36 call  repr_regex(v)
+    -> fastjsonschema.generator.repr_regex
+399:40 call  patterns_dict.items()
+    -> <builtin>.dict.items
+    note: patterns_dict is the dict _compile_regexps (line 125); the tests pass a dict too (tests/test_pattern_serialization.py:52)
+401:38 call  ",\n ".join(regex_patterns)
+    -> <builtin>.str.join
+
+[fastjsonschema.generator.repr_default]
+412:18 call  isinstance(value, float)
+    -> <builtin>.isinstance
+412:71 call  float('inf')
+    -> <builtin>.float
+412:85 call  float('-inf')
+    -> <builtin>.float
+413:36 call  "float({!r})".format(str(value))
+    -> <builtin>.str.format
+413:40 call  str(value)
+    -> <builtin>.str
+414:18 call  isinstance(value, list)
+    -> <builtin>.isinstance
+415:31 call  ', '.join(repr_default(item) for item in value)
+    -> <builtin>.str.join
+415:44 call  repr_default(item)
+    -> fastjsonschema.generator.repr_default
+416:18 call  isinstance(value, tuple)
+    -> <builtin>.isinstance
+417:29 call  ''.join(repr_default(item) + ', ' for item in value)
+    -> <builtin>.str.join
+417:42 call  repr_default(item)
+    -> fastjsonschema.generator.repr_default
+418:18 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+419:31 call  ', '.join( '{}: {}'.format(repr_default(k), repr_default(...
+    -> <builtin>.str.join
+420:28 call  '{}: {}'.format(repr_default(k), repr_default(v))
+    -> <builtin>.str.format
+420:41 call  repr_default(k)
+    -> fastjsonschema.generator.repr_default
+420:58 call  repr_default(v)
+    -> fastjsonschema.generator.repr_default
+420:86 call  value.items()
+    -> <builtin>.dict.items
+    note: value passed the isinstance check for dict (line 418)
+422:16 call  repr(value)
+    -> <builtin>.repr
+    note: value is a JSON value of the schema (a str, number, bool or None here), never a package object
+
+[fastjsonschema.generator.repr_regex]
+427:23 call  " | ".join(f"re.{f}" for f in all_flags if regex.flags & ...
+    -> <builtin>.str.join
+427:77 call  getattr(re, f)
+    -> <builtin>.getattr
+429:39 call  "re.compile({!r}{})".format(regex.pattern, flags)
+    -> <builtin>.str.format
+    note: regex is a compiled re.Pattern of _compile_regexps; regex.pattern is a str and regex.flags is numeric; the local flags value passed to str.format is the string built at lines 427-428
+
+== fastjsonschema.indent
+
+[fastjsonschema.indent.indent.wrapper]
+10:20 call  func(self, line, *args, **kwds)
+    -> fastjsonschema.generator.CodeGenerator.l
+    note: func is the function that indent decorates; the package applies @indent once, to CodeGenerator.l (generator.py:250)
+15:27 call  self._code.pop()
+    -> <builtin>.list.pop
+    note: self is a code generator; _code is its list (generator.py:38)
+17:22 call  Indent(self, line, merged=merged)
+    -> fastjsonschema.indent.Indent.__init__
+
+[fastjsonschema.indent.Indent.__enter__]
+37:42 call  self.instance._scope_stack.append(scope)
+    -> <builtin>.list.append
+    note: _scope_stack is the list of CodeGenerator.__init__ (generator.py:55)
+
+[fastjsonschema.indent.Indent.__exit__]
+41:74 call  self.instance._scope_stack.pop()
+    -> <builtin>.list.pop
+
+== fastjsonschema.ref_resolver
+
+[fastjsonschema.ref_resolver]
+22:28 call  min(500, sys.getrecursionlimit() // 2)
+    -> <builtin>.min
+22:55 call  sys.getrecursionlimit()
+    -> sys.getrecursionlimit
+112:6 decorator  @classmethod
+    -> <builtin>.classmethod
+129:6 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+141:6 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+
+[fastjsonschema.ref_resolver.get_id]
+29:22 call  schema.get('$id', schema.get('id', ''))
+    -> <builtin>.dict.get
+    note: schema is annotated dict[str, Any] (B4); the package calls get_id only on a dict (from_schema checks it, walk recurses only into dicts)
+29:40 call  schema.get('id', '')
+    -> <builtin>.dict.get
+
+[fastjsonschema.ref_resolver.resolve_path]
+38:31 call  fragment.lstrip('/')
+    -> <builtin>.str.lstrip
+    note: fragment is annotated str; the package passes the fragment of urldefrag (line 148)
+39:20 call  unquote(fragment)
+    -> urllib.parse.unquote
+39:36 call  unquote(fragment).split('/')
+    -> <builtin>.str.split
+41:28 call  part.replace('~1', '/')
+    -> <builtin>.str.replace
+41:47 call  part.replace('~1', '/').replace('~0', '~')
+    -> <builtin>.str.replace
+42:22 call  isinstance(schema, list)
+    -> <builtin>.isinstance
+43:32 call  int(part)
+    -> <builtin>.int
+47:48 call  JsonSchemaDefinitionException('Unresolvable ref: {}'.form...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+47:78 call  'Unresolvable ref: {}'.format(part)
+    -> <builtin>.str.format
+
+[fastjsonschema.ref_resolver.normalize]
+52:29 call  urlparse.urlsplit(uri)
+    -> urllib.parse.urlsplit
+    -> functools._lru_cache_wrapper.__call__
+    note: on Python 3.10 urlsplit is a plain function; from 3.11 on it is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code; read in the CPython sources of 3.10 to 3.15)
+52:41 call  urlparse.urlsplit(uri).geturl()
+    -> urllib.parse.SplitResult.geturl
+    note: uri is annotated str, so urlsplit returns a SplitResult
+
+[fastjsonschema.ref_resolver.resolve_remote]
+64:31 call  urlparse.urlsplit(uri)
+    -> urllib.parse.urlsplit
+    -> functools._lru_cache_wrapper.__call__
+    note: on Python 3.10 urlsplit is a plain function; from 3.11 on it is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code; read in the CPython sources of 3.10 to 3.15)
+66:34 call  handlers[scheme](uri)
+    note: handlers maps a scheme to a client callable (annotated Mapping[str, Callable[[str], Any]], a bare callable: no package value, B2); the package's default is {}, where this branch never runs. The call is client behaviour (B5)
+70:14 with  urlopen(uri)
+    reject *: the context manager is the response of urlopen (http.client.HTTPResponse or urllib.response.addinfourl); its __enter__ and __exit__ are outside the package
+70:21 call  urlopen(uri)
+    -> urllib.request.urlopen
+    note: the documented fallback when no handler is given for the scheme (__init__.py:225-227: "for example http, https, or file URLs")
+71:37 call  response.info()
+    -> http.client.HTTPResponse.info
+    -> urllib.response.addinfourl.info
+    note: urlopen returns an http.client.HTTPResponse for http and https, and a urllib.response.addinfourl for file, ftp and data URLs (urllib.request FileHandler, FTPHandler, DataHandler); the file URLs are documented (__init__.py:226-227)
+71:59 call  response.info().get_content_charset()
+    -> http.client.HTTPMessage.get_content_charset
+    -> email.message.Message.get_content_charset
+    note: HTTPResponse.info returns its http.client.HTTPMessage; addinfourl.info returns the email.message.Message that urllib's file, ftp and data handlers make with email.message_from_string
+73:36 call  json.loads(response.read().decode(encoding),)
+    -> json.loads
+73:50 call  response.read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: addinfourl defines no read: its base tempfile._TemporaryFileWrapper delegates through __getattr__, which returns its local func_wrapper around the read of the wrapped file (named where it is defined, asciinema judgement 9)
+73:59 call  response.read().decode(encoding)
+    -> <builtin>.bytes.decode
+75:52 call  JsonSchemaDefinitionException('{} failed to decode'.forma...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+75:81 call  '{} failed to decode'.format(uri)
+    -> <builtin>.str.format
+
+[fastjsonschema.ref_resolver.RefResolver.__init__]
+108:42 call  set()
+    -> <builtin>.set
+109:18 call  self.walk(schema)
+    -> fastjsonschema.ref_resolver.RefResolver.walk
+110:30 call  self._walked_uris.add(normalize(base_uri) if base_uri els...
+    -> <builtin>.set.add
+110:40 call  normalize(base_uri)
+    -> fastjsonschema.ref_resolver.normalize
+
+[fastjsonschema.ref_resolver.RefResolver.from_schema]
+122:19 call  cls( get_id(schema) if isinstance(schema, dict) else '', ...
+    -> fastjsonschema.ref_resolver.RefResolver.__init__
+    note: cls is RefResolver: the package calls from_schema only on RefResolver (__init__.py:361, generator.py:72), and the package defines no subclass of it; a client subclass is client code
+123:19 call  get_id(schema)
+    -> fastjsonschema.ref_resolver.get_id
+123:41 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+
+[fastjsonschema.ref_resolver.RefResolver.in_scope]
+135:49 call  urlparse.urljoin(old_scope, scope)
+    -> urllib.parse.urljoin
+
+[fastjsonschema.ref_resolver.RefResolver.resolving]
+147:35 call  urlparse.urljoin(self.resolution_scope, ref)
+    -> urllib.parse.urljoin
+148:43 call  urlparse.urldefrag(new_uri)
+    -> urllib.parse.urldefrag
+152:29 call  normalize(uri)
+    -> fastjsonschema.ref_resolver.normalize
+153:42 call  normalize(uri)
+    -> fastjsonschema.ref_resolver.normalize
+157:36 call  resolve_remote(uri, self.handlers)
+    -> fastjsonschema.ref_resolver.resolve_remote
+159:37 call  normalize(uri)
+    -> fastjsonschema.ref_resolver.normalize
+164:18 with  self.in_scope(document_uri)
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+164:31 call  self.in_scope(document_uri)
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.ref_resolver.RefResolver.in_scope
+    note: in_scope is decorated with @contextmanager (ref_resolver.py:129): the call runs contextlib's helper, which calls the generator function back
+165:36 call  self._ensure_walked(document_uri, schema)
+    -> fastjsonschema.ref_resolver.RefResolver._ensure_walked
+166:56 call  fragment.startswith('/')
+    -> <builtin>.str.startswith
+167:43 call  normalize(urlparse.urljoin(document_uri, '#' + fragment))
+    -> fastjsonschema.ref_resolver.normalize
+167:60 call  urlparse.urljoin(document_uri, '#' + fragment)
+    -> urllib.parse.urljoin
+171:56 call  JsonSchemaDefinitionException('Unresolvable ref: {}'.form...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+171:86 call  'Unresolvable ref: {}'.format(fragment)
+    -> <builtin>.str.format
+172:35 call  resolve_path(schema, fragment)
+    -> fastjsonschema.ref_resolver.resolve_path
+
+[fastjsonschema.ref_resolver.RefResolver._ensure_walked]
+177:31 call  normalize(uri)
+    -> fastjsonschema.ref_resolver.normalize
+180:18 call  self.walk(schema, rewrite_refs=False)
+    -> fastjsonschema.ref_resolver.RefResolver.walk
+181:30 call  self._walked_uris.add(normalized)
+    -> <builtin>.set.add
+
+[fastjsonschema.ref_resolver.RefResolver.get_uri]
+184:25 call  normalize(self.resolution_scope)
+    -> fastjsonschema.ref_resolver.normalize
+
+[fastjsonschema.ref_resolver.RefResolver.get_scope_name]
+190:37 call  unquote(self.resolution_scope)
+    -> urllib.parse.unquote
+190:68 call  unquote(self.resolution_scope).replace('~1', '_')
+    -> <builtin>.str.replace
+190:87 call  unquote(self.resolution_scope).replace('~1', '_').replace...
+    -> <builtin>.str.replace
+190:106 call  unquote(self.resolution_scope).replace('~1', '_').replace...
+    -> <builtin>.str.replace
+191:22 call  re.sub(r'($[^a-zA-Z]|[^a-zA-Z0-9])', '_', name)
+    -> re.sub
+192:26 call  name.lower()
+    -> <builtin>.str.lower
+192:35 call  name.lower().rstrip('_')
+    -> <builtin>.str.rstrip
+
+[fastjsonschema.ref_resolver.RefResolver.walk]
+200:48 call  JsonSchemaDefinitionException( 'Schema is too deeply nest...
+    -> <builtin>.ValueError.__init__
+    note: JsonSchemaDefinitionException and JsonSchemaException define no __init__; the first __init__ in the MRO is that of ValueError
+201:75 call  'Schema is too deeply nested (maximum depth is {})'.forma...
+    -> <builtin>.str.format
+204:22 call  isinstance(node, bool)
+    -> <builtin>.isinstance
+206:43 call  isinstance(node['$ref'], str)
+    -> <builtin>.isinstance
+209:48 call  urlparse.urljoin(self.resolution_scope, ref)
+    -> urllib.parse.urljoin
+210:60 call  isinstance(get_id(node), str)
+    -> <builtin>.isinstance
+210:67 call  get_id(node)
+    -> fastjsonschema.ref_resolver.get_id
+211:18 with  self.in_scope(get_id(node))
+    reject *: the context manager is the contextlib._GeneratorContextManager that the @contextmanager method returns; its __enter__ and __exit__ are outside the package and resume the generator, whose function is a callee of the call site
+211:31 call  self.in_scope(get_id(node))
+    -> contextlib.contextmanager.helper
+    -> fastjsonschema.ref_resolver.RefResolver.in_scope
+    note: in_scope is decorated with @contextmanager (ref_resolver.py:129): the call runs contextlib's helper, which calls the generator function back
+211:38 call  get_id(node)
+    -> fastjsonschema.ref_resolver.get_id
+212:37 call  normalize(self.resolution_scope)
+    -> fastjsonschema.ref_resolver.normalize
+213:42 call  node.items()
+    -> <builtin>.dict.items
+    note: node is annotated dict[str, Any] | bool and is not a bool here (line 204); walk recurses only into dicts (B4)
+214:34 call  isinstance(item, dict)
+    -> <builtin>.isinstance
+215:34 call  self.walk(item, depth + 1, rewrite_refs)
+    -> fastjsonschema.ref_resolver.RefResolver.walk
+217:38 call  node.items()
+    -> <builtin>.dict.items
+    note: node is annotated dict[str, Any] | bool and is not a bool here (line 204); walk recurses only into dicts (B4)
+218:30 call  isinstance(item, dict)
+    -> <builtin>.isinstance
+219:30 call  self.walk(item, depth + 1, rewrite_refs)
+    -> fastjsonschema.ref_resolver.RefResolver.walk

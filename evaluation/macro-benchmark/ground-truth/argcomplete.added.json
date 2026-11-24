@@ -1,0 +1,648 @@
+{
+  "edges": {
+    "argcomplete._check_console_script": {
+      "<builtin>.str": [
+        "argcomplete._check_console_script 65:21 call  str(e)"
+      ],
+      "argcomplete._check_console_script.main": [
+        "argcomplete._check_console_script 63:13 call  main()"
+      ],
+      "sys.exit": [
+        "argcomplete._check_console_script 65:17 call  sys.exit(str(e))"
+      ]
+    },
+    "argcomplete._check_console_script.main": {
+      "<builtin>.RuntimeError.__init__": [
+        "argcomplete._check_console_script 42:40 call  ArgcompleteMarkerNotFound(\"no entry point found matching ...",
+        "argcomplete._check_console_script 50:40 call  ArgcompleteMarkerNotFound(\"does not appear to be a consol...",
+        "argcomplete._check_console_script 52:40 call  ArgcompleteMarkerNotFound(\"does not appear to be a consol...",
+        "argcomplete._check_console_script 58:40 call  ArgcompleteMarkerNotFound(\"marker not found\")"
+      ],
+      "<builtin>.open": [
+        "argcomplete._check_console_script 47:14 call  open(script_path)",
+        "argcomplete._check_console_script 55:14 call  open(find(module_name, return_package=True))"
+      ],
+      "<builtin>.str.format": [
+        "argcomplete._check_console_script 49:34 call  \"from {} import {}\".format(module_name, function_name)",
+        "argcomplete._check_console_script 51:31 call  \"sys.exit({}())\".format(function_name)"
+      ],
+      "<builtin>.str.split": [
+        "argcomplete._check_console_script 44:57 call  entry_point.value.split(\":\", 1)"
+      ],
+      "argcomplete._check_module.find": [
+        "argcomplete._check_console_script 55:19 call  find(module_name, return_package=True)"
+      ],
+      "importlib.metadata.entry_points": [
+        "argcomplete._check_console_script 32:64 call  importlib_entry_points()"
+      ],
+      "io.TextIOWrapper.read": [
+        "argcomplete._check_console_script 48:24 call  f.read()",
+        "argcomplete._check_console_script 56:22 call  f.read(1024)"
+      ],
+      "os.path.basename": [
+        "argcomplete._check_console_script 30:28 call  os.path.basename(script_path)"
+      ]
+    },
+    "argcomplete._check_module": {
+      "<builtin>.str": [
+        "argcomplete._check_module 72:21 call  str(e)"
+      ],
+      "argcomplete._check_module.main": [
+        "argcomplete._check_module 70:13 call  main()"
+      ],
+      "sys.exit": [
+        "argcomplete._check_module 72:17 call  sys.exit(str(e))"
+      ]
+    },
+    "argcomplete._check_module.main": {
+      "<builtin>.RuntimeError.__init__": [
+        "argcomplete._check_module 52:40 call  ArgcompleteMarkerNotFound(\"missing argument on the comman...",
+        "argcomplete._check_module 59:40 call  ArgcompleteMarkerNotFound(\"cannot open file\")",
+        "argcomplete._check_module 65:40 call  ArgcompleteMarkerNotFound(\"marker not found\")"
+      ],
+      "argcomplete._check_module.find": [
+        "argcomplete._check_module 54:20 call  find(name)"
+      ],
+      "io.TextIOWrapper.read": [
+        "argcomplete._check_module 62:23 call  fp.read(1024)"
+      ],
+      "tokenize.open": [
+        "argcomplete._check_module 57:27 call  tokenize.open(filename)"
+      ]
+    },
+    "argcomplete.completers.BaseCompleter.__call__": {
+      "<builtin>.NotImplementedError": [
+        "argcomplete.completers 31:34 call  NotImplementedError(\"This method should be implemented by..."
+      ]
+    },
+    "argcomplete.completers.FilesCompleter.__init__": {
+      "<builtin>.bytes.lstrip": [
+        "argcomplete.completers 65:38 call  x.lstrip(\"*\")"
+      ],
+      "<builtin>.str.lstrip": [
+        "argcomplete.completers 65:38 call  x.lstrip(\"*\")",
+        "argcomplete.completers 65:50 call  x.lstrip(\"*\").lstrip(\".\")"
+      ]
+    },
+    "argcomplete.finders.CompletionFinder.__call__": {
+      "<builtin>.open": [
+        "argcomplete.finders 141:37 call  open(filename, \"w\")"
+      ],
+      "collections.abc.Mapping.get": [
+        "argcomplete.finders 138:38 call  os.environ.get(\"_ARGCOMPLETE_STDOUT_FILENAME\")",
+        "argcomplete.finders 152:29 call  os.environ.get(\"_ARGCOMPLETE_IFS\", \"\\013\")",
+        "argcomplete.finders 157:29 call  os.environ.get(\"_ARGCOMPLETE_DFS\")",
+        "argcomplete.finders 198:26 call  os.environ.get(\"_ARGCOMPLETE_SHELL\")"
+      ],
+      "os._exit": [
+        "argcomplete.finders 148:28 call  exit_method(1)",
+        "argcomplete.finders 155:24 call  exit_method(1)",
+        "argcomplete.finders 160:24 call  exit_method(1)",
+        "argcomplete.finders 205:20 call  exit_method(0)"
+      ],
+      "os.fdopen": [
+        "argcomplete.finders 145:42 call  os.fdopen(8, \"w\")"
+      ]
+    },
+    "argcomplete.finders.CompletionFinder._complete_active_option": {
+      "<builtin>.range": [
+        "argcomplete.finders 441:35 call  range(9999)"
+      ],
+      "argcomplete.completers.BaseCompleter.__call__": [
+        "argcomplete.finders 423:49 call  completer( prefix=cword_prefix, action=active_action, par..."
+      ],
+      "argcomplete.completers.SuppressCompleter.suppress": [
+        "argcomplete.finders 419:83 call  completer.suppress()"
+      ],
+      "argcomplete.completers._FilteredFilesCompleter.__call__": [
+        "argcomplete.finders 423:49 call  completer( prefix=cword_prefix, action=active_action, par..."
+      ]
+    },
+    "argcomplete.finders.CompletionFinder._get_action_help": {
+      "argparse.HelpFormatter": [
+        "argcomplete.finders 311:72 call  self._parser.formatter_class(prog=self._parser.prog)"
+      ],
+      "argparse.HelpFormatter._expand_help": [
+        "argcomplete.finders 312:39 call  formatters._expand_help(action)"
+      ],
+      "argparse.RawDescriptionHelpFormatter": [
+        "argcomplete.finders 311:72 call  self._parser.formatter_class(prog=self._parser.prog)"
+      ],
+      "argparse.RawDescriptionHelpFormatter._expand_help": [
+        "argcomplete.finders 312:39 call  formatters._expand_help(action)"
+      ]
+    },
+    "argcomplete.finders.CompletionFinder._get_completions": {
+      "argcomplete.io.mute_stderr": [
+        "argcomplete.finders 228:29 call  mute_stderr()"
+      ]
+    },
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__": {
+      "argparse._CountAction.__call__": [
+        "argcomplete.finders 290:48 call  self._orig_callable(parser, namespace, values, option_str..."
+      ],
+      "argparse._HelpAction.__call__": [
+        "argcomplete.finders 281:48 call  self._orig_callable(parser, namespace, values, option_str..."
+      ],
+      "argparse._StoreFalseAction.__call__": [
+        "argcomplete.finders 290:48 call  self._orig_callable(parser, namespace, values, option_str..."
+      ],
+      "argparse._StoreTrueAction.__call__": [
+        "argcomplete.finders 281:48 call  self._orig_callable(parser, namespace, values, option_str...",
+        "argcomplete.finders 290:48 call  self._orig_callable(parser, namespace, values, option_str..."
+      ]
+    },
+    "argcomplete.io.debug": {
+      "<builtin>.print": [
+        "argcomplete.io 13:14 call  print(file=debug_stream, *args)"
+      ]
+    },
+    "argcomplete.io.mute_stdout": {
+      "<builtin>.open": [
+        "argcomplete.io 19:22 call  open(os.devnull, \"w\")"
+      ]
+    },
+    "argcomplete.lexers.split_line": {
+      "<builtin>.Exception.__init__": [
+        "argcomplete.lexers 57:43 call  ArgcompleteException(msg)"
+      ]
+    },
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args": {
+      "<builtin>.str": [
+        "argcomplete.packages._argparse 344:28 call  str(_get_action_name(action))"
+      ],
+      "argparse.ArgumentParser._read_args_from_files": [
+        "argcomplete.packages._argparse 90:53 call  self._read_args_from_files(arg_strings)"
+      ]
+    },
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional": {
+      "argparse.ArgumentError": [
+        "argcomplete.packages._argparse 210:48 call  ArgumentError(action, msg % explicit_arg)",
+        "argcomplete.packages._argparse 224:44 call  ArgumentError(action, msg % explicit_arg)"
+      ],
+      "gettext.gettext": [
+        "argcomplete.packages._argparse 209:42 call  gettext('ignored explicit argument %r')",
+        "argcomplete.packages._argparse 223:38 call  gettext('ignored explicit argument %r')"
+      ]
+    },
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action": {
+      "argparse.ArgumentError": [
+        "argcomplete.packages._argparse 148:44 call  ArgumentError(action, msg % action_name)"
+      ],
+      "argparse._HelpAction.__call__": [
+        "argcomplete.packages._argparse 154:27 call  action(self, namespace, argument_values, option_string)"
+      ],
+      "argparse._get_action_name": [
+        "argcomplete.packages._argparse 147:55 call  _get_action_name(conflict_action)"
+      ],
+      "gettext.gettext": [
+        "argcomplete.packages._argparse 146:38 call  gettext('not allowed with argument %s')"
+      ]
+    },
+    "argcomplete.packages._shlex.shlex.__next__": {
+      "argcomplete.packages._shlex.shlex.get_token": [
+        "argcomplete.packages._shlex 307:31 call  self.get_token()"
+      ]
+    },
+    "argcomplete.packages._shlex.shlex.pop_source": {
+      "collections.deque.popleft": [
+        "argcomplete.packages._shlex 98:75 call  self.filestack.popleft()"
+      ],
+      "io.StringIO.close": [
+        "argcomplete.packages._shlex 97:28 call  self.instream.close()"
+      ]
+    },
+    "argcomplete.packages._shlex.shlex.push_source": {
+      "<builtin>.isinstance": [
+        "argcomplete.packages._shlex 83:22 call  isinstance(newstream, str)"
+      ],
+      "collections.deque.appendleft": [
+        "argcomplete.packages._shlex 85:34 call  self.filestack.appendleft((self.infile, self.instream, se..."
+      ],
+      "io.StringIO": [
+        "argcomplete.packages._shlex 84:33 call  StringIO(newstream)"
+      ]
+    },
+    "argcomplete.packages._shlex.shlex.push_token": {
+      "collections.deque.appendleft": [
+        "argcomplete.packages._shlex 78:33 call  self.pushback.appendleft(tok)"
+      ]
+    },
+    "argcomplete.packages._shlex.shlex.read_token": {
+      "io.StringIO.readline": [
+        "argcomplete.packages._shlex 162:43 call  self.instream.readline()",
+        "argcomplete.packages._shlex 233:43 call  self.instream.readline()"
+      ]
+    },
+    "argcomplete.packages._shlex.shlex.sourcehook": {
+      "<builtin>.isinstance": [
+        "argcomplete.packages._shlex 291:22 call  isinstance(self.infile, str)"
+      ],
+      "<builtin>.open": [
+        "argcomplete.packages._shlex 293:30 call  open(newfile, \"r\")"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete": {
+      "argcomplete.finders.CompletionFinder.__call__": [
+        "argcomplete.scripts.activate_global_python_argcomplete 41:25 call  argcomplete.autocomplete(parser)"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.main": [
+        "argcomplete.scripts.activate_global_python_argcomplete 195:18 call  main()"
+      ],
+      "argparse.ArgumentParser": [
+        "argcomplete.scripts.activate_global_python_argcomplete 35:58 call  argparse.ArgumentParser( description=__doc__, formatter_c..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "argcomplete.scripts.activate_global_python_argcomplete 38:20 call  parser.add_argument(\"-y\", \"--yes\", help=\"automatically an...",
+        "argcomplete.scripts.activate_global_python_argcomplete 39:20 call  parser.add_argument(\"--dest\", help='Specify the shell com...",
+        "argcomplete.scripts.activate_global_python_argcomplete 40:20 call  parser.add_argument(\"--user\", help=\"Install into user dir..."
+      ],
+      "sys.exit": [
+        "argcomplete.scripts.activate_global_python_argcomplete 195:13 call  sys.exit(main())"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.add_zsh_system_dir_to_fpath_for_user": {
+      "<builtin>.bytes.decode": [
+        "argcomplete.scripts.activate_global_python_argcomplete 151:41 call  fpath_output.decode()"
+      ],
+      "<builtin>.str.splitlines": [
+        "argcomplete.scripts.activate_global_python_argcomplete 151:54 call  fpath_output.decode().splitlines()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_zsh_system_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 149:44 call  get_zsh_system_dir()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.link_zsh_user_rcfile": [
+        "argcomplete.scripts.activate_global_python_argcomplete 154:29 call  link_zsh_user_rcfile(zsh_fpath=zsh_system_dir)"
+      ],
+      "collections.abc.Mapping.get": [
+        "argcomplete.scripts.activate_global_python_argcomplete 146:35 call  os.environ.get(\"SHELL\", \"\")"
+      ],
+      "subprocess.check_output": [
+        "argcomplete.scripts.activate_global_python_argcomplete 150:47 call  subprocess.check_output([os.environ[\"SHELL\"], \"-c\", 'prin..."
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.append_to_config_file": {
+      "<builtin>.open": [
+        "argcomplete.scripts.activate_global_python_argcomplete 113:18 call  open(path, 'r')",
+        "argcomplete.scripts.activate_global_python_argcomplete 124:14 call  open(path, \"a\")"
+      ],
+      "<builtin>.print": [
+        "argcomplete.scripts.activate_global_python_argcomplete 115:22 call  print(f\"The code already exists in the file {path}.\", fil...",
+        "argcomplete.scripts.activate_global_python_argcomplete 117:14 call  print(f\"argcomplete needs to append to the file {path}. T...",
+        "argcomplete.scripts.activate_global_python_argcomplete 119:18 call  print(\">\", line, file=sys.stderr)",
+        "argcomplete.scripts.activate_global_python_argcomplete 121:18 call  print(\"Not added.\", file=sys.stderr)",
+        "argcomplete.scripts.activate_global_python_argcomplete 123:10 call  print(f\"Adding shellcode to {path}...\", file=sys.stderr)",
+        "argcomplete.scripts.activate_global_python_argcomplete 126:10 call  print(\"Added.\", file=sys.stderr)"
+      ],
+      "<builtin>.str.splitlines": [
+        "argcomplete.scripts.activate_global_python_argcomplete 118:41 call  shellcode.splitlines()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_consent": [
+        "argcomplete.scripts.activate_global_python_argcomplete 120:27 call  get_consent()"
+      ],
+      "io.TextIOWrapper.read": [
+        "argcomplete.scripts.activate_global_python_argcomplete 114:36 call  fh.read()"
+      ],
+      "io.TextIOWrapper.write": [
+        "argcomplete.scripts.activate_global_python_argcomplete 125:17 call  fh.write(shellcode)"
+      ],
+      "os.path.exists": [
+        "argcomplete.scripts.activate_global_python_argcomplete 112:22 call  os.path.exists(path)"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.get_activator_dir": {
+      "os.path.abspath": [
+        "argcomplete.scripts.activate_global_python_argcomplete 66:40 call  os.path.abspath(os.path.dirname(argcomplete.__file__))"
+      ],
+      "os.path.dirname": [
+        "argcomplete.scripts.activate_global_python_argcomplete 66:56 call  os.path.dirname(argcomplete.__file__)"
+      ],
+      "os.path.join": [
+        "argcomplete.scripts.activate_global_python_argcomplete 66:24 call  os.path.join(os.path.abspath(os.path.dirname(argcomplete...."
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.get_activator_path": {
+      "argcomplete.scripts.activate_global_python_argcomplete.get_activator_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 70:42 call  get_activator_dir()"
+      ],
+      "os.path.join": [
+        "argcomplete.scripts.activate_global_python_argcomplete 70:24 call  os.path.join(get_activator_dir(), \"_python-argcomplete\")"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.get_bash_system_dir": {
+      "argcomplete.scripts.activate_global_python_argcomplete.get_local_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 60:32 call  get_local_dir()"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.get_consent": {
+      "<builtin>.input": [
+        "argcomplete.scripts.activate_global_python_argcomplete 102:20 call  input(\"OK to proceed? [y/n] \")"
+      ],
+      "<builtin>.print": [
+        "argcomplete.scripts.activate_global_python_argcomplete 104:18 call  print('Please answer \"yes\" or \"no\".', file=sys.stderr)"
+      ],
+      "<builtin>.str.lower": [
+        "argcomplete.scripts.activate_global_python_argcomplete 103:21 call  res.lower()",
+        "argcomplete.scripts.activate_global_python_argcomplete 105:23 call  res.lower()"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.get_local_dir": {
+      "<builtin>.bytes.decode": [
+        "argcomplete.scripts.activate_global_python_argcomplete 47:68 call  subprocess.check_output([\"brew\", \"--prefix\"]).decode()"
+      ],
+      "<builtin>.str.strip": [
+        "argcomplete.scripts.activate_global_python_argcomplete 47:76 call  subprocess.check_output([\"brew\", \"--prefix\"]).decode().st..."
+      ],
+      "subprocess.check_output": [
+        "argcomplete.scripts.activate_global_python_argcomplete 47:39 call  subprocess.check_output([\"brew\", \"--prefix\"])"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.get_zsh_system_dir": {
+      "argcomplete.scripts.activate_global_python_argcomplete.get_local_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 53:28 call  get_local_dir()"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.install_to_destination": {
+      "<builtin>.open": [
+        "argcomplete.scripts.activate_global_python_argcomplete 76:18 call  open(activator)"
+      ],
+      "<builtin>.print": [
+        "argcomplete.scripts.activate_global_python_argcomplete 88:14 call  print(f\"Installing {activator} to {dest}...\", file=sys.st...",
+        "argcomplete.scripts.activate_global_python_argcomplete 90:14 call  print(\"Installed.\", file=sys.stderr)"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_activator_path": [
+        "argcomplete.scripts.activate_global_python_argcomplete 74:35 call  get_activator_path()"
+      ],
+      "argparse.ArgumentParser.error": [
+        "argcomplete.scripts.activate_global_python_argcomplete 84:25 call  parser.error( f\"path {destdir} does not exist and could n...",
+        "argcomplete.scripts.activate_global_python_argcomplete 92:21 call  parser.error( f\"while installing to {dest}: {e}. Please r..."
+      ],
+      "io.TextIOWrapper.read": [
+        "argcomplete.scripts.activate_global_python_argcomplete 77:37 call  fh.read()"
+      ],
+      "io.TextIOWrapper.write": [
+        "argcomplete.scripts.activate_global_python_argcomplete 77:29 call  sys.stdout.write(fh.read())"
+      ],
+      "os.makedirs": [
+        "argcomplete.scripts.activate_global_python_argcomplete 82:24 call  os.makedirs(destdir, exist_ok=True)"
+      ],
+      "os.path.dirname": [
+        "argcomplete.scripts.activate_global_python_argcomplete 79:30 call  os.path.dirname(dest)"
+      ],
+      "os.path.exists": [
+        "argcomplete.scripts.activate_global_python_argcomplete 80:26 call  os.path.exists(destdir)"
+      ],
+      "shutil.copy": [
+        "argcomplete.scripts.activate_global_python_argcomplete 89:20 call  shutil.copy(activator, dest)"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.link_bash_user_rcfile": {
+      "<builtin>.str.format": [
+        "argcomplete.scripts.activate_global_python_argcomplete 136:75 call  bash_shellcode.format(activator=get_activator_path())"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.append_to_config_file": [
+        "argcomplete.scripts.activate_global_python_argcomplete 136:26 call  append_to_config_file(bash_completion_user_file, bash_she..."
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_activator_path": [
+        "argcomplete.scripts.activate_global_python_argcomplete 136:104 call  get_activator_path()"
+      ],
+      "os.path.expanduser": [
+        "argcomplete.scripts.activate_global_python_argcomplete 135:51 call  os.path.expanduser(\"~/.bash_completion\")"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.link_user_rcfiles": {
+      "argcomplete.scripts.activate_global_python_argcomplete.link_bash_user_rcfile": [
+        "argcomplete.scripts.activate_global_python_argcomplete 142:26 call  link_bash_user_rcfile()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.link_zsh_user_rcfile": [
+        "argcomplete.scripts.activate_global_python_argcomplete 141:25 call  link_zsh_user_rcfile()"
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.link_zsh_user_rcfile": {
+      "<builtin>.str.format": [
+        "argcomplete.scripts.activate_global_python_argcomplete 131:59 call  zsh_shellcode.format(zsh_fpath=zsh_fpath or get_activator..."
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.append_to_config_file": [
+        "argcomplete.scripts.activate_global_python_argcomplete 131:26 call  append_to_config_file(zsh_rcfile, zsh_shellcode.format(zs..."
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_activator_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 131:100 call  get_activator_dir()"
+      ],
+      "collections.abc.Mapping.get": [
+        "argcomplete.scripts.activate_global_python_argcomplete 130:64 call  os.environ.get(\"ZDOTDIR\", \"~\")"
+      ],
+      "os.path.expanduser": [
+        "argcomplete.scripts.activate_global_python_argcomplete 130:49 call  os.path.expanduser(os.environ.get(\"ZDOTDIR\", \"~\"))"
+      ],
+      "os.path.join": [
+        "argcomplete.scripts.activate_global_python_argcomplete 130:30 call  os.path.join(os.path.expanduser(os.environ.get(\"ZDOTDIR\",..."
+      ]
+    },
+    "argcomplete.scripts.activate_global_python_argcomplete.main": {
+      "<builtin>.list.append": [
+        "argcomplete.scripts.activate_global_python_argcomplete 168:28 call  destinations.append(args.dest)",
+        "argcomplete.scripts.activate_global_python_argcomplete 182:28 call  destinations.append(f\"{get_zsh_system_dir()}/_python-argc...",
+        "argcomplete.scripts.activate_global_python_argcomplete 183:28 call  destinations.append(f\"{get_bash_system_dir()}/python-argc..."
+      ],
+      "<builtin>.print": [
+        "argcomplete.scripts.activate_global_python_argcomplete 170:14 call  print( \"Argcomplete was installed in the user site local ...",
+        "argcomplete.scripts.activate_global_python_argcomplete 176:14 call  print(\"Argcomplete was installed in a virtual environment...",
+        "argcomplete.scripts.activate_global_python_argcomplete 181:14 call  print(\"Defaulting to system-wide installation.\", file=sys...",
+        "argcomplete.scripts.activate_global_python_argcomplete 191:14 call  print(\"Please restart your shell or source the installed ..."
+      ],
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args": [
+        "argcomplete.scripts.activate_global_python_argcomplete 161:29 call  parser.parse_args()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.add_zsh_system_dir_to_fpath_for_user": [
+        "argcomplete.scripts.activate_global_python_argcomplete 188:41 call  add_zsh_system_dir_to_fpath_for_user()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_bash_system_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 183:51 call  get_bash_system_dir()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.get_zsh_system_dir": [
+        "argcomplete.scripts.activate_global_python_argcomplete 182:50 call  get_zsh_system_dir()"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.install_to_destination": [
+        "argcomplete.scripts.activate_global_python_argcomplete 186:31 call  install_to_destination(destination)"
+      ],
+      "argcomplete.scripts.activate_global_python_argcomplete.link_user_rcfiles": [
+        "argcomplete.scripts.activate_global_python_argcomplete 174:26 call  link_user_rcfiles()",
+        "argcomplete.scripts.activate_global_python_argcomplete 177:26 call  link_user_rcfiles()",
+        "argcomplete.scripts.activate_global_python_argcomplete 179:26 call  link_user_rcfiles()"
+      ],
+      "argparse.ArgumentParser.error": [
+        "argcomplete.scripts.activate_global_python_argcomplete 167:25 call  parser.error(f\"directory {args.dest} was specified via --..."
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "argcomplete.scripts.activate_global_python_argcomplete 161:29 call  parser.parse_args()"
+      ],
+      "os.path.exists": [
+        "argcomplete.scripts.activate_global_python_argcomplete 166:51 call  os.path.exists(args.dest)"
+      ]
+    },
+    "argcomplete.scripts.register_python_argcomplete": {
+      "argcomplete.scripts.register_python_argcomplete.main": [
+        "argcomplete.scripts.register_python_argcomplete 79:18 call  main()"
+      ],
+      "sys.exit": [
+        "argcomplete.scripts.register_python_argcomplete 79:13 call  sys.exit(main())"
+      ]
+    },
+    "argcomplete.scripts.register_python_argcomplete.main": {
+      "<builtin>.len": [
+        "argcomplete.scripts.register_python_argcomplete 65:11 call  len(sys.argv)"
+      ],
+      "argcomplete.finders.CompletionFinder.__call__": [
+        "argcomplete.scripts.register_python_argcomplete 63:29 call  argcomplete.autocomplete(parser)"
+      ],
+      "argcomplete.shell_integration.shellcode": [
+        "argcomplete.scripts.register_python_argcomplete 72:30 call  argcomplete.shellcode( args.executable, args.use_defaults..."
+      ],
+      "argparse.ArgumentParser": [
+        "argcomplete.scripts.register_python_argcomplete 36:37 call  argparse.ArgumentParser(description=__doc__, formatter_cl..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "argcomplete.scripts.register_python_argcomplete 38:24 call  parser.add_argument( \"--no-defaults\", dest=\"use_defaults\"...",
+        "argcomplete.scripts.register_python_argcomplete 45:24 call  parser.add_argument( \"--complete-arguments\", nargs=argpar...",
+        "argcomplete.scripts.register_python_argcomplete 50:24 call  parser.add_argument( \"-s\", \"--shell\", choices=(\"bash\", \"z...",
+        "argcomplete.scripts.register_python_argcomplete 57:24 call  parser.add_argument( \"-e\", \"--external-argcomplete-script...",
+        "argcomplete.scripts.register_python_argcomplete 61:24 call  parser.add_argument(\"executable\", nargs=\"+\", help=\"execut..."
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "argcomplete.scripts.register_python_argcomplete 69:29 call  parser.parse_args()"
+      ],
+      "argparse.ArgumentParser.print_help": [
+        "argcomplete.scripts.register_python_argcomplete 66:26 call  parser.print_help()"
+      ],
+      "io.TextIOWrapper.write": [
+        "argcomplete.scripts.register_python_argcomplete 71:21 call  sys.stdout.write( argcomplete.shellcode( args.executable,..."
+      ],
+      "sys.exit": [
+        "argcomplete.scripts.register_python_argcomplete 67:17 call  sys.exit(1)"
+      ]
+    }
+  },
+  "notes": {
+    "argcomplete._check_console_script 42:40 call  ArgcompleteMarkerNotFound(\"no entry point found matching ...": [
+      "ArgcompleteMarkerNotFound (_check_module.py:16) defines no __init__; the first __init__ of its MRO is RuntimeError's"
+    ],
+    "argcomplete._check_console_script 44:57 call  entry_point.value.split(\":\", 1)": [
+      "entry_point is an importlib.metadata.EntryPoint; its value is a str"
+    ],
+    "argcomplete._check_console_script 48:24 call  f.read()": [
+      "f is the text file that open() returns"
+    ],
+    "argcomplete._check_console_script 56:22 call  f.read(1024)": [
+      "f is the text file that open() returns"
+    ],
+    "argcomplete._check_console_script 63:13 call  main()": [
+      "the `if __name__ == \"__main__\":` block is code of the module (README, Edges)"
+    ],
+    "argcomplete._check_console_script 65:21 call  str(e)": [
+      "e is an ArgcompleteMarkerNotFound, a RuntimeError subclass without __str__; str() runs BaseException.__str__ (outside, implicit)"
+    ],
+    "argcomplete._check_module 62:23 call  fp.read(1024)": [
+      "fp is the text file that tokenize.open returns"
+    ],
+    "argcomplete._check_module 70:13 call  main()": [
+      "the `if __name__ == \"__main__\":` block is code of the module (README, Edges)"
+    ],
+    "argcomplete._check_module 72:21 call  str(e)": [
+      "e is an ArgcompleteMarkerNotFound, a RuntimeError subclass without __str__"
+    ],
+    "argcomplete.completers 65:38 call  x.lstrip(\"*\")": [
+      "Line62 deliberately accepts bytes and line63 wraps it in a list. The first lstrip at65 invokes bytes.lstrip with one positional argument. Its argument-content type check raises TypeError inside the callable; this is not missing/duplicate argument binding. The second lstrip is not reached for this input. The str annotation does not remove the intentional bytes branch."
+    ],
+    "argcomplete.finders 148:28 call  exit_method(1)": [
+      "exit_method is the default os._exit (line 83); the package passes no other (scripts call autocomplete(parser) without it). A function that the client passes (sys.exit, which the docstring suggests) is a client callback (B2)"
+    ],
+    "argcomplete.finders 155:24 call  exit_method(1)": [
+      "exit_method is the default os._exit (see 148:28); a client function is a client callback"
+    ],
+    "argcomplete.finders 160:24 call  exit_method(1)": [
+      "exit_method is the default os._exit (see 148:28); a client function is a client callback"
+    ],
+    "argcomplete.finders 205:20 call  exit_method(0)": [
+      "exit_method is the default os._exit (see 148:28); a client function is a client callback"
+    ],
+    "argcomplete.finders 228:29 call  mute_stderr()": [
+      "mute_stderr is decorated with @contextlib.contextmanager (io.py:26): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "argcomplete.finders 281:48 call  self._orig_callable(parser, namespace, values, option_str...": [
+      "The public script parser can be reused after CompletionFinder(parser).rl_complete patches its actions and returns with completing=False. main parses the process command line: --help reaches the saved _HelpAction; --dest reaches _StoreAction; --yes or --user reaches _StoreTrueAction. All are package-created actions (activate_global_python_argcomplete.py:35,38-40,161), and the full arguments bind at this site. Arbitrary client-created actions remain opaque."
+    ],
+    "argcomplete.finders 290:48 call  self._orig_callable(parser, namespace, values, option_str...": [
+      "line 286 checks that the original class is in safe_actions (lines 18-26): _StoreAction, _StoreConstAction, _StoreTrueAction, _StoreFalseAction, _AppendAction, _AppendConstAction, _CountAction. Each function is named by the class of the receiver, also where it inherits the method (README, \"Callees outside the package\"; lead's ruling N1): _StoreTrueAction and _StoreFalseAction inherit _StoreConstAction.__call__. A class that a client adds to safe_actions (documented at line 117) is a client value"
+    ],
+    "argcomplete.finders 311:72 call  self._parser.formatter_class(prog=self._parser.prog)": [
+      "The exposed script parser is created by the package with RawDescriptionHelpFormatter. A client can use its public add_argument method to add a percent-bearing help string, then run the public CompletionFinder.rl_complete API. The line306 shortcut no longer applies. The known package-created formatter configuration reaches line311. This is not an arbitrary formatter supplied by a client, nor an inference from the result annotation."
+    ],
+    "argcomplete.finders 312:39 call  formatters._expand_help(action)": [
+      "In FN5 the formatter instance is concretely RawDescriptionHelpFormatter. Its inherited _expand_help is named through that concrete receiver class by the global outside-callee convention. HelpFormatter._expand_help remains for the ordinary default. The result annotation permits this subclass; it does not rename a concrete package-created receiver to its base."
+    ],
+    "argcomplete.finders 419:83 call  completer.suppress()": [
+      "completer is a SuppressCompleter (isinstance); a client subclass is client code"
+    ],
+    "argcomplete.finders 423:49 call  completer( prefix=cword_prefix, action=active_action, par...": [
+      "completer is action.completer (line 410), a ChoicesCompleter made at line 414, or self.default_completer. The default_completer annotation BaseCompleter (lines 61/89) admits constructible public BaseCompleter, ChoicesCompleter, FilesCompleter, DirectoriesCompleter (inherits _FilteredFilesCompleter.__call__) and SuppressCompleter instances. BaseCompleter is not abstract; its __call__ raises NotImplementedError. Separately, README.rst documents ChoicesCompleter and EnvironCompleter assignments to action.completer, and test/test.py:221 assigns SuppressCompleter. These role witnesses are not interchangeable. SuppressCompleter stops at lines 419-420 before this call. Client functions and objects stay opaque (B5)."
+    ],
+    "argcomplete.io 13:14 call  print(file=debug_stream, *args)": [
+      "the arguments are strs, lists, dicts, argparse objects, classes and exceptions; no package class defines __str__ or __repr__"
+    ],
+    "argcomplete.lexers 57:43 call  ArgcompleteException(msg)": [
+      "ArgcompleteException (exceptions.py:1) defines no __init__; the first __init__ of its MRO is Exception's"
+    ],
+    "argcomplete.packages._argparse 154:27 call  action(self, namespace, argument_values, option_string)": [
+      "finders.py16 exports the package class as argcomplete.finders.IntrospectiveArgumentParser, a public access path with no private declaration. Its inherited ArgumentParser constructor internally makes the default help action. CompletionFinder.patch returns at261-262 for this receiver, so its default action stays native. nargs=0 produces [] at _get_values, and take_action invokes the help action. This is an internally constructed default on a package instance, not an action supplied by a client."
+    ],
+    "argcomplete.packages._argparse 90:53 call  self._read_args_from_files(arg_strings)": [
+      "self is a dynamically patched parser (finders.py:266) or a directly constructed IntrospectiveArgumentParser, public through argcomplete.finders. patch returns without changing the latter (finders.py:261-262). Both inherit this method from argparse.ArgumentParser; a client override stays client code (B4, B5)."
+    ],
+    "argcomplete.packages._shlex 162:43 call  self.instream.readline()": [
+      "a # at the start of a word (commenters is '#', line 38)"
+    ],
+    "argcomplete.packages._shlex 233:43 call  self.instream.readline()": [
+      "a # inside a word (line 232 comes before line 254)"
+    ],
+    "argcomplete.packages._shlex 291:22 call  isinstance(self.infile, str)": [
+      "the package never calls sourcehook (its only call, get_token line 115, never runs); its receiver is the lexer of split_line, the only shlex of the package (B1: a private class has only the instances that the package makes), whose infile is None (line 29: the lexer gets no infile; only push_source and pop_source, never called, set it). newfile stays open (a parameter). Lead's ruling on judgement 2"
+    ],
+    "argcomplete.packages._shlex 307:31 call  self.get_token()": [
+      "the package never iterates a shlex; __next__ keeps its body edge (rule A)"
+    ],
+    "argcomplete.packages._shlex 97:28 call  self.instream.close()": [
+      "the package never calls pop_source; its receiver is the lexer of split_line, the only shlex of the package (B1: a private class has only the instances that the package makes), whose instream is the io.StringIO of line 26 (the lexer gets a str). sys.stdin (line 31) needs instream=None, which the package never passes, and the file of sourcehook is pushed only at line 118, which never runs (judgement 1). Lead's ruling on judgement 2"
+    ],
+    "argcomplete.scripts.activate_global_python_argcomplete 118:41 call  shellcode.splitlines()": [
+      "shellcode is annotated str (line 111)"
+    ],
+    "argcomplete.scripts.activate_global_python_argcomplete 161:29 call  parser.parse_args()": [
+      "The module exposes its package-created parser under the public name parser. In a fresh process with _ARGCOMPLETE initially absent, importing the module returns. A public CompletionFinder(parser).rl_complete call patches it and returns. main then invokes parse_args on that same parser; argparse calls the package override. No reload, deletion, private access, or attribute assignment is needed. The assertion that scripts always parse unpatched parsers fails for public reuse."
+    ],
+    "argcomplete.scripts.activate_global_python_argcomplete 195:18 call  main()": [
+      "the `if __name__ == \"__main__\":` block is code of the module (README, Edges)"
+    ],
+    "argcomplete.scripts.activate_global_python_argcomplete 41:25 call  argcomplete.autocomplete(parser)": [
+      "argcomplete.autocomplete is the CompletionFinder instance that argcomplete/__init__.py:12 binds; calling it runs CompletionFinder.__call__"
+    ],
+    "argcomplete.scripts.activate_global_python_argcomplete 77:29 call  sys.stdout.write(fh.read())": [
+      "the default sys.stdout is an io.TextIOWrapper"
+    ],
+    "argcomplete.scripts.activate_global_python_argcomplete 84:25 call  parser.error( f\"path {destdir} does not exist and could n...": [
+      "parser is the module's argparse.ArgumentParser (line 35)"
+    ],
+    "argcomplete.scripts.register_python_argcomplete 63:29 call  argcomplete.autocomplete(parser)": [
+      "argcomplete.autocomplete is the CompletionFinder instance that argcomplete/__init__.py:12 binds; calling it runs CompletionFinder.__call__"
+    ],
+    "argcomplete.scripts.register_python_argcomplete 69:29 call  parser.parse_args()": [
+      "autocomplete(parser) (line 63) patches the parser only when it completes, and then ends the process (finders.py:205), so this parse calls no package code back"
+    ],
+    "argcomplete.scripts.register_python_argcomplete 71:21 call  sys.stdout.write( argcomplete.shellcode( args.executable,...": [
+      "the default sys.stdout is an io.TextIOWrapper"
+    ],
+    "argcomplete.scripts.register_python_argcomplete 79:18 call  main()": [
+      "the `if __name__ == \"__main__\":` block is code of the module (README, Edges)"
+    ]
+  },
+  "trace": "dynamic/argcomplete.json"
+}

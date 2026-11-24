@@ -1,0 +1,1397 @@
+{
+  "edges": {
+    "netaddr.cli": {
+      "netaddr.cli.main": [
+        "netaddr.cli 107:9 call  main()"
+      ]
+    },
+    "netaddr.cli.info": {
+      "<builtin>.dict.items": [
+        "netaddr.cli 102:37 call  output.items()"
+      ],
+      "<builtin>.hex": [
+        "netaddr.cli 92:32 call  hex(network.network)"
+      ],
+      "<builtin>.int": [
+        "netaddr.cli 91:36 call  int(network.network)"
+      ],
+      "<builtin>.len": [
+        "netaddr.cli 101:26 call  len(label)",
+        "netaddr.cli 103:49 call  len(label)"
+      ],
+      "<builtin>.max": [
+        "netaddr.cli 101:22 call  max(len(label) for label in output)"
+      ],
+      "<builtin>.print": [
+        "netaddr.cli 80:14 call  print(f'{network_input} is not a valid network')",
+        "netaddr.cli 83:10 call  print('IP network information')",
+        "netaddr.cli 84:10 call  print()",
+        "netaddr.cli 103:14 call  print(f'{label}{\" \" * (label_width - len(label))} {value}')"
+      ],
+      "<builtin>.str": [
+        "netaddr.cli 88:20 call  str(network)"
+      ],
+      "netaddr.ip.BaseIP.version": [
+        "netaddr.cli 95:54 getattr  network.version"
+      ],
+      "netaddr.ip.IPAddress.__index__": [
+        "netaddr.cli 92:32 call  hex(network.network)"
+      ],
+      "netaddr.ip.IPAddress.__init__": [
+        "netaddr.cli 96:30 call  IPAddress(network.first)",
+        "netaddr.cli 96:57 call  IPAddress(network.last)",
+        "netaddr.cli 98:37 call  IPAddress(first_usable)",
+        "netaddr.cli 98:63 call  IPAddress(last_usable)"
+      ],
+      "netaddr.ip.IPAddress.__int__": [
+        "netaddr.cli 91:36 call  int(network.network)"
+      ],
+      "netaddr.ip.IPAddress.__str__": [
+        "netaddr.cli 96:20 format  {IPAddress(network.first)}",
+        "netaddr.cli 96:47 format  {IPAddress(network.last)}",
+        "netaddr.cli 98:27 format  {IPAddress(first_usable)}",
+        "netaddr.cli 98:53 format  {IPAddress(last_usable)}",
+        "netaddr.cli 103:59 format  {value}"
+      ],
+      "netaddr.ip.IPAddress.bits": [
+        "netaddr.cli 90:52 call  network.network.bits()",
+        "netaddr.cli 94:53 call  network.netmask.bits()"
+      ],
+      "netaddr.ip.IPListMixin.size": [
+        "netaddr.cli 97:36 getattr  network.size"
+      ],
+      "netaddr.ip.IPNetwork.__init__": [
+        "netaddr.cli 78:28 call  IPNetwork(network_input)"
+      ],
+      "netaddr.ip.IPNetwork.__str__": [
+        "netaddr.cli 88:20 call  str(network)"
+      ],
+      "netaddr.ip.IPNetwork._usable_range": [
+        "netaddr.cli 86:54 call  network._usable_range()"
+      ],
+      "netaddr.ip.IPNetwork.broadcast": [
+        "netaddr.cli 95:33 getattr  network.broadcast"
+      ],
+      "netaddr.ip.IPNetwork.cidr": [
+        "netaddr.cli 78:44 getattr  IPNetwork(network_input).cidr"
+      ],
+      "netaddr.ip.IPNetwork.first": [
+        "netaddr.cli 96:39 getattr  network.first"
+      ],
+      "netaddr.ip.IPNetwork.last": [
+        "netaddr.cli 96:66 getattr  network.last"
+      ],
+      "netaddr.ip.IPNetwork.netmask": [
+        "netaddr.cli 93:32 getattr  network.netmask",
+        "netaddr.cli 94:41 getattr  network.netmask"
+      ],
+      "netaddr.ip.IPNetwork.network": [
+        "netaddr.cli 89:31 getattr  network.network",
+        "netaddr.cli 90:40 getattr  network.network",
+        "netaddr.cli 91:45 getattr  network.network",
+        "netaddr.cli 92:41 getattr  network.network"
+      ],
+      "sys.exit": [
+        "netaddr.cli 81:17 call  sys.exit(1)"
+      ]
+    },
+    "netaddr.cli.main": {
+      "<builtin>.print": [
+        "netaddr.cli 32:10 call  print(ASCII_ART_LOGO)"
+      ],
+      "argparse.ArgumentParser": [
+        "netaddr.cli 34:37 call  argparse.ArgumentParser( prog='netaddr', description='The..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "netaddr.cli 43:29 call  parser_info.add_argument('network', help='The IP network ..."
+      ],
+      "argparse.ArgumentParser.add_subparsers": [
+        "netaddr.cli 37:39 call  parser.add_subparsers(dest='command')"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "netaddr.cli 44:29 call  parser.parse_args()"
+      ],
+      "argparse._SubParsersAction.add_parser": [
+        "netaddr.cli 39:41 call  subparsers.add_parser( 'shell', help='Start an interactiv...",
+        "netaddr.cli 42:40 call  subparsers.add_parser('info', help='Display information a..."
+      ],
+      "netaddr.cli.info": [
+        "netaddr.cli 49:13 call  info(args.network)"
+      ],
+      "netaddr.cli.shell": [
+        "netaddr.cli 47:14 call  shell()"
+      ]
+    },
+    "netaddr.cli.shell": {
+      "<builtin>.locals": [
+        "netaddr.cli 73:17 call  locals()"
+      ],
+      "<builtin>.print": [
+        "netaddr.cli 67:14 call  print()"
+      ],
+      "netaddr.cli.shell.shell": [
+        "netaddr.cli 73:10 call  shell(locals(), banner, exit_msg)"
+      ]
+    },
+    "netaddr.cli.shell.shell": {
+      "<builtin>.str.join": [
+        "netaddr.cli 71:36 call  '\\n'.join([banner, notice, ''])"
+      ],
+      "IPython.terminal.embed.InteractiveShellEmbed": [
+        "netaddr.cli 64:34 call  InteractiveShellEmbed(banner1=banner, exit_msg=exit_msg, ...",
+        "netaddr.cli 64:94 call  InteractiveShellEmbed(banner1=banner, exit_msg=exit_msg, ..."
+      ],
+      "code.interact": [
+        "netaddr.cli 71:26 call  code.interact('\\n'.join([banner, notice, '']), local=name..."
+      ]
+    },
+    "netaddr.compat._open_binary": {
+      "pathlib.WindowsPath.joinpath": [
+        "netaddr.compat 13:55 call  importlib.resources.files(pkg).joinpath(res)"
+      ],
+      "pathlib.WindowsPath.open": [
+        "netaddr.compat 13:65 call  importlib.resources.files(pkg).joinpath(res).open('rb')"
+      ],
+      "zipfile.Path.joinpath": [
+        "netaddr.compat 13:55 call  importlib.resources.files(pkg).joinpath(res)"
+      ],
+      "zipfile.Path.open": [
+        "netaddr.compat 13:65 call  importlib.resources.files(pkg).joinpath(res).open('rb')"
+      ]
+    },
+    "netaddr.contrib.subnet_splitter.SubnetSplitter.extract_subnet": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.contrib.subnet_splitter 33:48 call  self._subnets.union(set(cidr_exclude(cidr, cidr_merge(sub...",
+        "netaddr.contrib.subnet_splitter 33:52 call  set(cidr_exclude(cidr, cidr_merge(subnets)[0]))"
+      ]
+    },
+    "netaddr.contrib.subnet_splitter.SubnetSplitter.remove_subnet": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.contrib.subnet_splitter 43:29 call  self._subnets.remove(ip_network)"
+      ]
+    },
+    "netaddr.core.DictDotLookup.__iter__": {
+      "<builtin>.dict.keys": [
+        "netaddr.core 182:34 call  self.__dict__.keys()"
+      ]
+    },
+    "netaddr.core.PrettyPrinter.update": {
+      "pprint.pformat": [
+        "netaddr.core 101:38 call  _pprint.pformat(data)"
+      ]
+    },
+    "netaddr.core.Publisher.detach": {
+      "<builtin>.list.remove": [
+        "netaddr.core 138:36 call  self.subscribers.remove(subscriber)"
+      ]
+    },
+    "netaddr.core.Subscriber.update": {
+      "<builtin>.NotImplementedError": [
+        "netaddr.core 68:34 call  NotImplementedError('cannot invoke virtual method!')"
+      ]
+    },
+    "netaddr.eui.EUI.__eq__": {
+      "netaddr.eui.EUI.__init__": [
+        "netaddr.eui 559:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.EUI.__ge__": {
+      "<builtin>.isinstance": [
+        "netaddr.eui 617:26 call  isinstance(other, EUI)"
+      ],
+      "netaddr.eui.EUI.__init__": [
+        "netaddr.eui 619:39 call  self.__class__(other)"
+      ],
+      "netaddr.eui.EUI.version": [
+        "netaddr.eui 622:22 getattr  self.version",
+        "netaddr.eui 622:54 getattr  other.version"
+      ]
+    },
+    "netaddr.eui.EUI.__getitem__": {
+      "<builtin>.IndexError": [
+        "netaddr.eui 516:33 call  IndexError('index out range for address type!')"
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.eui 522:28 call  TypeError('unsupported type %r!' % (idx,))"
+      ]
+    },
+    "netaddr.eui.EUI.__gt__": {
+      "<builtin>.isinstance": [
+        "netaddr.eui 605:26 call  isinstance(other, EUI)"
+      ],
+      "netaddr.eui.EUI.__init__": [
+        "netaddr.eui 607:39 call  self.__class__(other)"
+      ],
+      "netaddr.eui.EUI.version": [
+        "netaddr.eui 610:22 getattr  self.version",
+        "netaddr.eui 610:53 getattr  other.version"
+      ]
+    },
+    "netaddr.eui.EUI.__hash__": {
+      "<builtin>.hash": [
+        "netaddr.eui 550:20 call  hash((self.version, self._value))"
+      ],
+      "netaddr.eui.EUI.version": [
+        "netaddr.eui 550:27 getattr  self.version"
+      ]
+    },
+    "netaddr.eui.EUI.__init__": {
+      "<builtin>.ValueError": [
+        "netaddr.eui 352:33 call  ValueError('cannot switch EUI versions using ' 'copy cons...",
+        "netaddr.eui 364:33 call  ValueError('unsupported EUI version %r' % version)"
+      ],
+      "netaddr.eui.EUI._get_dialect": [
+        "netaddr.eui 355:44 getattr  addr.dialect"
+      ]
+    },
+    "netaddr.eui.EUI.__le__": {
+      "<builtin>.isinstance": [
+        "netaddr.eui 593:26 call  isinstance(other, EUI)"
+      ],
+      "netaddr.eui.EUI.__init__": [
+        "netaddr.eui 595:39 call  self.__class__(other)"
+      ],
+      "netaddr.eui.EUI.version": [
+        "netaddr.eui 598:22 getattr  self.version",
+        "netaddr.eui 598:54 getattr  other.version"
+      ]
+    },
+    "netaddr.eui.EUI.__lt__": {
+      "netaddr.eui.EUI.__init__": [
+        "netaddr.eui 583:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.EUI.__ne__": {
+      "netaddr.eui.EUI.__init__": [
+        "netaddr.eui 571:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.EUI.__setitem__": {
+      "<builtin>.IndexError": [
+        "netaddr.eui 534:29 call  IndexError('index %d outside address type boundary!' % (i...",
+        "netaddr.eui 540:29 call  IndexError( 'value %d outside word size maximum of %d bit..."
+      ],
+      "<builtin>.NotImplementedError": [
+        "netaddr.eui 528:38 call  NotImplementedError('settable slices are not supported!')"
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.eui 531:28 call  TypeError('index not an integer!')",
+        "netaddr.eui 537:28 call  TypeError('value not an integer!')"
+      ],
+      "<builtin>.isinstance": [
+        "netaddr.eui 526:22 call  isinstance(idx, slice)",
+        "netaddr.eui 530:26 call  isinstance(idx, int)",
+        "netaddr.eui 536:26 call  isinstance(value, int)"
+      ],
+      "<builtin>.list": [
+        "netaddr.eui 544:21 call  list(self._module.int_to_words(self._value, self._dialect))"
+      ],
+      "netaddr.strategy.eui48.int_to_words": [
+        "netaddr.eui 544:47 call  self._module.int_to_words(self._value, self._dialect)"
+      ],
+      "netaddr.strategy.eui48.words_to_int": [
+        "netaddr.eui 546:48 call  self._module.words_to_int(words)"
+      ],
+      "netaddr.strategy.eui64.int_to_words": [
+        "netaddr.eui 544:47 call  self._module.int_to_words(self._value, self._dialect)"
+      ],
+      "netaddr.strategy.eui64.words_to_int": [
+        "netaddr.eui 546:48 call  self._module.words_to_int(words)"
+      ]
+    },
+    "netaddr.eui.EUI.__setstate__": {
+      "<builtin>.ValueError": [
+        "netaddr.eui 397:29 call  ValueError('unpickling failed for object state: %s' % (st..."
+      ]
+    },
+    "netaddr.eui.EUI._set_value": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.eui 422:38 call  AddrFormatError('failed to detect EUI version: %r' % (val...",
+        "netaddr.eui 429:42 call  AddrFormatError( 'address %r is not an EUIv%d' % (value, ...",
+        "netaddr.eui 436:42 call  AddrFormatError('bad address format: %r' % (value,))"
+      ]
+    },
+    "netaddr.eui.EUI._validate_dialect": {
+      "<builtin>.TypeError": [
+        "netaddr.eui 458:32 call  TypeError('custom dialects should subclass mac_eui48!')"
+      ]
+    },
+    "netaddr.eui.EUI.format": {
+      "netaddr.strategy.eui64.int_to_str": [
+        "netaddr.eui 733:39 call  self._module.int_to_str(self._value, validated_dialect)"
+      ]
+    },
+    "netaddr.eui.EUI.info": {
+      "netaddr.core.DictDotLookup.__init__": [
+        "netaddr.eui 720:29 call  DictDotLookup(data)"
+      ],
+      "netaddr.eui.EUI.iab": [
+        "netaddr.eui 718:32 getattr  self.iab"
+      ],
+      "netaddr.eui.EUI.is_iab": [
+        "netaddr.eui 717:23 call  self.is_iab()"
+      ],
+      "netaddr.eui.EUI.oui": [
+        "netaddr.eui 716:29 getattr  self.oui"
+      ],
+      "netaddr.eui.IAB.registration": [
+        "netaddr.eui 718:48 call  self.iab.registration()"
+      ],
+      "netaddr.eui.OUI.registration": [
+        "netaddr.eui 716:45 call  self.oui.registration()"
+      ]
+    },
+    "netaddr.eui.EUI.packed": {
+      "netaddr.strategy.eui48.int_to_packed": [
+        "netaddr.eui 636:42 call  self._module.int_to_packed(self._value)"
+      ]
+    },
+    "netaddr.eui.EUI.words": {
+      "netaddr.strategy.eui48.int_to_words": [
+        "netaddr.eui 641:41 call  self._module.int_to_words(self._value)"
+      ],
+      "netaddr.strategy.eui64.int_to_words": [
+        "netaddr.eui 641:41 call  self._module.int_to_words(self._value)"
+      ]
+    },
+    "netaddr.eui.IAB.__eq__": {
+      "netaddr.eui.IAB.__init__": [
+        "netaddr.eui 259:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.IAB.__init__": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.eui 254:37 call  NotRegisteredError('IAB %r not unregistered!' % (iab,))"
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.eui 241:28 call  TypeError('unexpected IAB format: %r!' % (iab,))"
+      ],
+      "importlib.resources.open_binary": [
+        "netaddr.eui 245:30 call  _open_binary(__package__, 'iab.txt')"
+      ],
+      "io.BytesIO.close": [
+        "netaddr.eui 252:21 call  fh.close()"
+      ],
+      "io.BytesIO.read": [
+        "netaddr.eui 250:27 call  fh.read(size)"
+      ],
+      "io.BytesIO.seek": [
+        "netaddr.eui 249:20 call  fh.seek(offset)"
+      ],
+      "zipfile.ZipExtFile.close": [
+        "netaddr.eui 252:21 call  fh.close()"
+      ],
+      "zipfile.ZipExtFile.read": [
+        "netaddr.eui 250:27 call  fh.read(size)"
+      ],
+      "zipfile.ZipExtFile.seek": [
+        "netaddr.eui 249:20 call  fh.seek(offset)"
+      ]
+    },
+    "netaddr.eui.IAB.__ne__": {
+      "<builtin>.isinstance": [
+        "netaddr.eui 265:26 call  isinstance(other, IAB)"
+      ],
+      "netaddr.eui.IAB.__init__": [
+        "netaddr.eui 267:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.IAB.split_iab_mac": {
+      "<builtin>.ValueError": [
+        "netaddr.eui 198:33 call  ValueError('%r is not a strict IAB!' % hex(user_bits))",
+        "netaddr.eui 200:29 call  ValueError('%r is not an IAB address!' % hex(eui_int))"
+      ],
+      "<builtin>.hex": [
+        "netaddr.eui 198:65 call  hex(user_bits)",
+        "netaddr.eui 200:63 call  hex(eui_int)"
+      ]
+    },
+    "netaddr.eui.OUI.__eq__": {
+      "netaddr.eui.OUI.__init__": [
+        "netaddr.eui 93:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.OUI.__init__": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.eui 85:37 call  NotRegisteredError('OUI %r not registered!' % (oui,))"
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.eui 74:28 call  TypeError('unexpected OUI format: %r' % (oui,))"
+      ],
+      "<builtin>.ValueError": [
+        "netaddr.eui 72:33 call  ValueError('OUI int outside expected range: %r' % (oui,))"
+      ],
+      "importlib.resources.open_binary": [
+        "netaddr.eui 78:30 call  _open_binary(__package__, 'oui.txt')"
+      ],
+      "io.BytesIO.close": [
+        "netaddr.eui 83:21 call  fh.close()"
+      ],
+      "io.BytesIO.read": [
+        "netaddr.eui 81:31 call  fh.read(size)"
+      ],
+      "io.BytesIO.seek": [
+        "netaddr.eui 80:24 call  fh.seek(offset)"
+      ],
+      "zipfile.ZipExtFile.close": [
+        "netaddr.eui 83:21 call  fh.close()"
+      ],
+      "zipfile.ZipExtFile.read": [
+        "netaddr.eui 81:31 call  fh.read(size)"
+      ],
+      "zipfile.ZipExtFile.seek": [
+        "netaddr.eui 80:24 call  fh.seek(offset)"
+      ]
+    },
+    "netaddr.eui.OUI.__ne__": {
+      "<builtin>.isinstance": [
+        "netaddr.eui 99:26 call  isinstance(other, OUI)"
+      ],
+      "netaddr.eui.OUI.__init__": [
+        "netaddr.eui 101:39 call  self.__class__(other)"
+      ]
+    },
+    "netaddr.eui.ieee": {
+      "netaddr.eui.ieee.create_indices": [
+        "netaddr.eui.ieee 293:19 call  create_indices()"
+      ]
+    },
+    "netaddr.eui.ieee.FileIndexer.__init__": {
+      "<builtin>.open": [
+        "netaddr.eui.ieee 65:27 call  open(index_file, 'w')"
+      ]
+    },
+    "netaddr.eui.ieee.IABIndexParser.__init__": {
+      "<builtin>.open": [
+        "netaddr.eui.ieee 197:27 call  open(ieee_file, 'rb')"
+      ]
+    },
+    "netaddr.eui.ieee.OUIIndexParser.__init__": {
+      "<builtin>.open": [
+        "netaddr.eui.ieee 113:27 call  open(ieee_file, 'rb')"
+      ]
+    },
+    "netaddr.eui.ieee.create_index_from_registry": {
+      "netaddr.core.Publisher.attach": [
+        "netaddr.eui.ieee 256:22 call  oui_parser.attach(FileIndexer(index_path))"
+      ],
+      "netaddr.eui.ieee.FileIndexer.__init__": [
+        "netaddr.eui.ieee 256:34 call  FileIndexer(index_path)"
+      ],
+      "netaddr.eui.ieee.IABIndexParser.__init__": [
+        "netaddr.eui.ieee 255:24 call  parser(registry_fh)"
+      ],
+      "netaddr.eui.ieee.IABIndexParser.parse": [
+        "netaddr.eui.ieee 257:21 call  oui_parser.parse()"
+      ],
+      "netaddr.eui.ieee.OUIIndexParser.__init__": [
+        "netaddr.eui.ieee 255:24 call  parser(registry_fh)"
+      ],
+      "netaddr.eui.ieee.OUIIndexParser.parse": [
+        "netaddr.eui.ieee 257:21 call  oui_parser.parse()"
+      ]
+    },
+    "netaddr.eui.ieee.create_indices": {
+      "netaddr.eui.ieee.create_index_from_registry": [
+        "netaddr.eui.ieee 262:31 call  create_index_from_registry( _path.join(_path.dirname(__fi...",
+        "netaddr.eui.ieee 267:31 call  create_index_from_registry( _path.join(_path.dirname(__fi..."
+      ],
+      "os.path.dirname": [
+        "netaddr.eui.ieee 263:33 call  _path.dirname(__file__)",
+        "netaddr.eui.ieee 264:33 call  _path.dirname(__file__)",
+        "netaddr.eui.ieee 268:33 call  _path.dirname(__file__)",
+        "netaddr.eui.ieee 269:33 call  _path.dirname(__file__)"
+      ],
+      "os.path.join": [
+        "netaddr.eui.ieee 263:19 call  _path.join(_path.dirname(__file__), 'oui.txt')",
+        "netaddr.eui.ieee 264:19 call  _path.join(_path.dirname(__file__), 'oui.idx')",
+        "netaddr.eui.ieee 268:19 call  _path.join(_path.dirname(__file__), 'iab.txt')",
+        "netaddr.eui.ieee 269:19 call  _path.join(_path.dirname(__file__), 'iab.idx')"
+      ]
+    },
+    "netaddr.eui.ieee.load_index": {
+      "io.BytesIO.close": [
+        "netaddr.eui.ieee 282:17 call  fp.close()"
+      ],
+      "zipfile.ZipExtFile.close": [
+        "netaddr.eui.ieee 282:17 call  fp.close()"
+      ]
+    },
+    "netaddr.eui.ieee.load_indices": {
+      "importlib.resources.open_binary": [
+        "netaddr.eui.ieee 287:39 call  _open_binary(__package__, 'oui.idx')",
+        "netaddr.eui.ieee 288:39 call  _open_binary(__package__, 'iab.idx')"
+      ]
+    },
+    "netaddr.fbsocket._inet_pton_af_inet": {
+      "<builtin>.bytes.join": [
+        "netaddr.fbsocket 133:28 call  b''.join(words)"
+      ],
+      "<builtin>.int": [
+        "netaddr.fbsocket 126:32 call  int(token)"
+      ],
+      "<builtin>.list.append": [
+        "netaddr.fbsocket 132:29 call  words.append(_pack('B', octet))"
+      ],
+      "<builtin>.str.startswith": [
+        "netaddr.fbsocket 123:36 call  token.startswith('0x')",
+        "netaddr.fbsocket 123:63 call  token.startswith('0')"
+      ],
+      "struct.pack": [
+        "netaddr.fbsocket 132:35 call  _pack('B', octet)"
+      ]
+    },
+    "netaddr.fbsocket.inet_ntop": {
+      "<builtin>.int": [
+        "netaddr.fbsocket 97:45 call  int(i, 16)"
+      ],
+      "netaddr.fbsocket.inet_ntoa": [
+        "netaddr.fbsocket 98:33 call  inet_ntoa(packed_ipv4)"
+      ],
+      "struct.pack": [
+        "netaddr.fbsocket 97:32 call  _pack('>2H', *[int(i, 16) for i in tokens[-2:]])"
+      ]
+    },
+    "netaddr.fbsocket.inet_pton": {
+      "<builtin>.list.append": [
+        "netaddr.fbsocket 182:32 call  l_suffix.append('%x' % _unpack('>H', ipv4_str[0:2])[0])",
+        "netaddr.fbsocket 183:32 call  l_suffix.append('%x' % _unpack('>H', ipv4_str[2:4])[0])",
+        "netaddr.fbsocket 222:34 call  tokens.append('%x' % _unpack('>H', ipv4_str[0:2])[0])",
+        "netaddr.fbsocket 223:34 call  tokens.append('%x' % _unpack('>H', ipv4_str[2:4])[0])"
+      ],
+      "<builtin>.list.pop": [
+        "netaddr.fbsocket 181:59 call  l_suffix.pop()",
+        "netaddr.fbsocket 221:61 call  tokens.pop()"
+      ],
+      "<builtin>.range": [
+        "netaddr.fbsocket 194:54 call  range(gap_size)"
+      ],
+      "<builtin>.str.encode": [
+        "netaddr.fbsocket 163:37 call  '\\x00'.encode()",
+        "netaddr.fbsocket 194:37 call  '\\x00\\x00'.encode()"
+      ],
+      "<builtin>.str.lower": [
+        "netaddr.fbsocket 214:45 call  ipv6_prefix[-1].lower()"
+      ],
+      "struct.unpack": [
+        "netaddr.fbsocket 182:47 call  _unpack('>H', ipv4_str[0:2])",
+        "netaddr.fbsocket 183:47 call  _unpack('>H', ipv4_str[2:4])",
+        "netaddr.fbsocket 222:49 call  _unpack('>H', ipv4_str[0:2])",
+        "netaddr.fbsocket 223:49 call  _unpack('>H', ipv4_str[2:4])"
+      ]
+    },
+    "netaddr.ip.BaseIP.__ge__": {
+      "netaddr.ip.IPNetwork.sort_key": [
+        "netaddr.ip 139:33 call  self.sort_key()",
+        "netaddr.ip 139:53 call  other.sort_key()"
+      ],
+      "netaddr.ip.IPRange.sort_key": [
+        "netaddr.ip 139:33 call  self.sort_key()",
+        "netaddr.ip 139:53 call  other.sort_key()"
+      ]
+    },
+    "netaddr.ip.BaseIP.__gt__": {
+      "netaddr.ip.IPRange.sort_key": [
+        "netaddr.ip 127:33 call  self.sort_key()",
+        "netaddr.ip 127:52 call  other.sort_key()"
+      ]
+    },
+    "netaddr.ip.BaseIP.__le__": {
+      "netaddr.ip.IPNetwork.sort_key": [
+        "netaddr.ip 115:33 call  self.sort_key()",
+        "netaddr.ip 115:53 call  other.sort_key()"
+      ],
+      "netaddr.ip.IPRange.sort_key": [
+        "netaddr.ip 115:33 call  self.sort_key()",
+        "netaddr.ip 115:53 call  other.sort_key()"
+      ]
+    },
+    "netaddr.ip.BaseIP._set_value": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip 41:34 call  AddrFormatError( 'value out of bounds for an %s address!'..."
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.ip 39:28 call  TypeError('int argument expected, not %s' % type(value))"
+      ],
+      "<builtin>.type": [
+        "netaddr.ip 39:67 call  type(value)"
+      ]
+    },
+    "netaddr.ip.IPAddress.__add__": {
+      "<builtin>.IndexError": [
+        "netaddr.ip 463:25 call  IndexError('result outside valid IP address boundary!')"
+      ]
+    },
+    "netaddr.ip.IPAddress.__lshift__": {
+      "netaddr.ip.IPAddress.__init__": [
+        "netaddr.ip 658:30 call  self.__class__(self._value << numbits, self._module.version)"
+      ]
+    },
+    "netaddr.ip.IPAddress.__rshift__": {
+      "netaddr.ip.IPAddress.__init__": [
+        "netaddr.ip 667:30 call  self.__class__(self._value >> numbits, self._module.version)"
+      ]
+    },
+    "netaddr.ip.IPAddress.__setstate__": {
+      "<builtin>.ValueError": [
+        "netaddr.ip 375:29 call  ValueError('unpickling failed for object state: %s' % str..."
+      ],
+      "<builtin>.str": [
+        "netaddr.ip 375:76 call  str(state)"
+      ]
+    },
+    "netaddr.ip.IPAddress.__sub__": {
+      "<builtin>.IndexError": [
+        "netaddr.ip 479:25 call  IndexError('result outside valid IP address boundary!')"
+      ]
+    },
+    "netaddr.ip.IPAddress.format": {
+      "<builtin>.TypeError": [
+        "netaddr.ip 621:32 call  TypeError('custom dialects should subclass ipv6_verbose!')"
+      ],
+      "<builtin>.hasattr": [
+        "netaddr.ip 620:27 call  hasattr(dialect, 'word_fmt')"
+      ]
+    },
+    "netaddr.ip.IPAddress.ipv4": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip 578:42 call  AddrConversionError( 'IPv6 address %s unsuitable for ' 'c..."
+      ],
+      "netaddr.ip.IPAddress.__str__": [
+        "netaddr.ip 579:77 op  'IPv6 address %s unsuitable for ' 'conversion to IPv4!' %..."
+      ]
+    },
+    "netaddr.ip.IPAddress.netmask_bits": {
+      "<builtin>.ValueError": [
+        "netaddr.ip 403:29 call  ValueError('Unexpected mask length %d for address type!' ..."
+      ]
+    },
+    "netaddr.ip.IPAddress.packed": {
+      "netaddr.strategy.ipv6.int_to_packed": [
+        "netaddr.ip 536:42 call  self._module.int_to_packed(self._value)"
+      ]
+    },
+    "netaddr.ip.IPListMixin.__contains__": {
+      "<builtin>.isinstance": [
+        "netaddr.ip 860:22 call  isinstance(other, BaseIP)",
+        "netaddr.ip 863:26 call  isinstance(other, IPAddress)"
+      ],
+      "netaddr.ip.IPAddress.__init__": [
+        "netaddr.ip 869:25 call  IPAddress(other)"
+      ],
+      "netaddr.ip.IPNetwork.first": [
+        "netaddr.ip 866:26 getattr  other.first"
+      ],
+      "netaddr.ip.IPNetwork.last": [
+        "netaddr.ip 866:56 getattr  other.last"
+      ],
+      "netaddr.ip.IPRange.first": [
+        "netaddr.ip 866:26 getattr  other.first"
+      ],
+      "netaddr.ip.IPRange.last": [
+        "netaddr.ip 866:56 getattr  other.last"
+      ]
+    },
+    "netaddr.ip.IPNetwork.__iadd__": {
+      "<builtin>.IndexError": [
+        "netaddr.ip 1187:29 call  IndexError('increment exceeds address boundary!')",
+        "netaddr.ip 1189:29 call  IndexError('increment is less than zero!')"
+      ]
+    },
+    "netaddr.ip.IPNetwork.__isub__": {
+      "<builtin>.IndexError": [
+        "netaddr.ip 1208:29 call  IndexError('decrement is less than zero!')",
+        "netaddr.ip 1210:29 call  IndexError('decrement exceeds address boundary!')"
+      ]
+    },
+    "netaddr.ip.IPNetwork.__setstate__": {
+      "<builtin>.ValueError": [
+        "netaddr.ip 1069:29 call  ValueError('unpickling failed for object state %s' % (sta...",
+        "netaddr.ip 1074:29 call  ValueError('unpickling failed for object state %s' % (sta..."
+      ]
+    },
+    "netaddr.ip.IPNetwork._set_prefixlen": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip 1080:34 call  AddrFormatError('invalid prefix for an %s address!' % sel..."
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.ip 1078:28 call  TypeError('int argument expected, not %s' % type(value))"
+      ],
+      "<builtin>.type": [
+        "netaddr.ip 1078:67 call  type(value)"
+      ]
+    },
+    "netaddr.ip.IPNetwork.ipv4": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip 1280:42 call  AddrConversionError( 'IPv6 address %s unsuitable for ' 'c..."
+      ],
+      "netaddr.ip.IPNetwork.__str__": [
+        "netaddr.ip 1281:77 op  'IPv6 address %s unsuitable for ' 'conversion to IPv4!' %..."
+      ]
+    },
+    "netaddr.ip.IPNetwork.netmask": {
+      "<builtin>.ValueError": [
+        "netaddr.ip 1140:29 call  ValueError('IP version mismatch: %s and %s' % (ip, self))",
+        "netaddr.ip 1143:29 call  ValueError('Invalid subnet mask specified: %s' % str(value))"
+      ],
+      "<builtin>.str": [
+        "netaddr.ip 1143:71 call  str(value)"
+      ],
+      "netaddr.ip.IPAddress.__str__": [
+        "netaddr.ip 1140:63 op  'IP version mismatch: %s and %s' % (ip, self)"
+      ],
+      "netaddr.ip.IPNetwork.__str__": [
+        "netaddr.ip 1140:63 op  'IP version mismatch: %s and %s' % (ip, self)"
+      ]
+    },
+    "netaddr.ip.IPNetwork.supernet": {
+      "<builtin>.ValueError": [
+        "netaddr.ip 1347:29 call  ValueError( 'CIDR prefix /%d invalid for IPv%d!' % (prefi..."
+      ]
+    },
+    "netaddr.ip.IPRange.__contains__": {
+      "netaddr.ip.IPAddress.__init__": [
+        "netaddr.ip 1514:25 call  IPAddress(other)"
+      ],
+      "netaddr.ip.IPRange.__contains__": [
+        "netaddr.ip 1514:33 op  IPAddress(other) in self"
+      ]
+    },
+    "netaddr.ip.all_matching_cidrs": {
+      "<builtin>.TypeError": [
+        "netaddr.ip 1975:24 call  TypeError('IP address/subnet sequence expected, not %r!' ..."
+      ]
+    },
+    "netaddr.ip.cidr_abbrev_to_verbose.classful_prefix": {
+      "<builtin>.IndexError": [
+        "netaddr.ip 1597:29 call  IndexError('Invalid octet: %r!' % octet)"
+      ]
+    },
+    "netaddr.ip.cidr_merge": {
+      "<builtin>.ValueError": [
+        "netaddr.ip 1667:25 call  ValueError('A sequence or iterator is expected!')"
+      ],
+      "netaddr.ip.BaseIP.__lt__": [
+        "netaddr.ip 1679:16 call  ranges.sort()"
+      ]
+    },
+    "netaddr.ip.glob.IPGlob.__getstate__": {
+      "<builtin>.super": [
+        "netaddr.ip.glob 287:21 call  super(IPGlob, self)"
+      ],
+      "netaddr.ip.IPRange.__getstate__": [
+        "netaddr.ip.glob 287:48 call  super(IPGlob, self).__getstate__()"
+      ]
+    },
+    "netaddr.ip.glob.IPGlob.__repr__": {
+      "netaddr.ip.glob.IPGlob._get_glob": [
+        "netaddr.ip.glob 309:60 getattr  self.glob"
+      ]
+    },
+    "netaddr.ip.glob.IPGlob.__setstate__": {
+      "<builtin>.super": [
+        "netaddr.ip.glob 291:14 call  super(IPGlob, self)"
+      ],
+      "netaddr.ip.IPRange.__setstate__": [
+        "netaddr.ip.glob 291:41 call  super(IPGlob, self).__setstate__(state)"
+      ],
+      "netaddr.ip.glob.IPGlob._set_glob": [
+        "netaddr.ip.glob 292:14 setattr  self.glob"
+      ],
+      "netaddr.ip.glob.iprange_to_globs": [
+        "netaddr.ip.glob 292:37 call  iprange_to_globs(self._start, self._end)"
+      ]
+    },
+    "netaddr.ip.glob.IPGlob.__str__": {
+      "netaddr.ip.glob.IPGlob._get_glob": [
+        "netaddr.ip.glob 305:28 getattr  self.glob"
+      ]
+    },
+    "netaddr.ip.glob.cidr_to_glob": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip.glob 227:34 call  AddrConversionError('bad CIDR to IP glob conversion!')"
+      ]
+    },
+    "netaddr.ip.glob.glob_to_iprange": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip.glob 109:30 call  AddrFormatError('not a recognised IP glob range: %r!' % (..."
+      ]
+    },
+    "netaddr.ip.glob.glob_to_iptuple": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip.glob 79:30 call  AddrFormatError('not a recognised IP glob range: %r!' % (..."
+      ]
+    },
+    "netaddr.ip.iana.DictUpdater.update": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.ip.iana 346:21 setitem  self.dct[cidr]",
+        "netaddr.ip.iana 349:21 setitem  self.dct[cidr]",
+        "netaddr.ip.iana 352:21 setitem  self.dct[cidr]"
+      ]
+    },
+    "netaddr.ip.iana.load_info": {
+      "importlib.resources.open_binary": [
+        "netaddr.ip.iana 372:35 call  _open_binary(__package__, 'ipv4-address-space.xml')",
+        "netaddr.ip.iana 376:35 call  _open_binary(__package__, 'ipv6-address-space.xml')",
+        "netaddr.ip.iana 381:21 call  _open_binary(__package__, 'ipv6-unicast-address-assignmen...",
+        "netaddr.ip.iana 386:41 call  _open_binary(__package__, 'multicast-addresses.xml')"
+      ]
+    },
+    "netaddr.ip.iana.pprint_info": {
+      "<builtin>.len": [
+        "netaddr.ip.iana 399:27 call  len(category)",
+        "netaddr.ip.iana 401:27 call  len(category)"
+      ],
+      "<builtin>.sorted": [
+        "netaddr.ip.iana 398:27 call  sorted(IANA_INFO)",
+        "netaddr.ip.iana 403:30 call  sorted(ipranges)"
+      ],
+      "io.TextIOWrapper.write": [
+        "netaddr.ip.iana 399:17 call  fh.write('-' * len(category) + '\\n')",
+        "netaddr.ip.iana 400:17 call  fh.write(category + '\\n')",
+        "netaddr.ip.iana 401:17 call  fh.write('-' * len(category) + '\\n')"
+      ],
+      "netaddr.ip.BaseIP.__hash__": [
+        "netaddr.ip.iana 404:31 getitem  ipranges[iprange]"
+      ],
+      "netaddr.ip.BaseIP.__lt__": [
+        "netaddr.ip.iana 403:30 call  sorted(ipranges)"
+      ],
+      "netaddr.ip.IPNetwork.__repr__": [
+        "netaddr.ip.iana 405:30 op  '%-45r' % (iprange)"
+      ]
+    },
+    "netaddr.ip.iter_iprange": {
+      "<builtin>.TypeError": [
+        "netaddr.ip 1842:24 call  TypeError('start and stop IP versions do not match!')"
+      ],
+      "<builtin>.ValueError": [
+        "netaddr.ip 1847:25 call  ValueError('step argument cannot be zero')"
+      ]
+    },
+    "netaddr.ip.iter_unique_ips": {
+      "netaddr.ip.IPListMixin.__iter__": [
+        "netaddr.ip 1563:19 iter  cidr"
+      ],
+      "netaddr.ip.cidr_merge": [
+        "netaddr.ip 1562:27 call  cidr_merge(args)"
+      ]
+    },
+    "netaddr.ip.largest_matching_cidr": {
+      "<builtin>.TypeError": [
+        "netaddr.ip 1949:24 call  TypeError('IP address/subnet sequence expected, not %r!' ..."
+      ]
+    },
+    "netaddr.ip.nmap._generate_nmap_octet_ranges": {
+      "<builtin>.ValueError": [
+        "netaddr.ip.nmap 54:25 call  ValueError('nmap target specification cannot be blank!')"
+      ]
+    },
+    "netaddr.ip.parse_ip_network": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.ip 883:34 call  AddrFormatError('invalid %s tuple!' % module.family_name)",
+        "netaddr.ip 887:34 call  AddrFormatError('invalid address value for %s tuple!' % m...",
+        "netaddr.ip 889:34 call  AddrFormatError('invalid prefix for %s tuple!' % module.f...",
+        "netaddr.ip 920:38 call  AddrFormatError('addr %r is not a valid IPNetwork!' % addr)",
+        "netaddr.ip 923:34 call  AddrFormatError('invalid prefix for %s address!' % module..."
+      ],
+      "<builtin>.TypeError": [
+        "netaddr.ip 925:24 call  TypeError('unexpected type %s for addr arg' % type(addr))"
+      ],
+      "<builtin>.type": [
+        "netaddr.ip 925:65 call  type(addr)"
+      ]
+    },
+    "netaddr.ip.sets.IPSet.__eq__": {
+      "netaddr.ip.BaseIP.__hash__": [
+        "netaddr.ip.sets 426:32 op  self._cidrs == other._cidrs"
+      ]
+    },
+    "netaddr.ip.sets.IPSet.__lt__": {
+      "netaddr.ip.sets.IPSet.issubset": [
+        "netaddr.ip.sets 452:56 call  self.issubset(other)"
+      ]
+    },
+    "netaddr.ip.sets.IPSet.__ne__": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.ip.sets 438:32 op  self._cidrs != other._cidrs"
+      ],
+      "netaddr.ip.BaseIP.__hash__": [
+        "netaddr.ip.sets 438:32 op  self._cidrs != other._cidrs"
+      ]
+    },
+    "netaddr.ip.sets.IPSet.__setstate__": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.ip.sets 129:36 call  dict.fromkeys( (IPNetwork((value, prefixlen), version=ver..."
+      ]
+    },
+    "netaddr.ip.sets.IPSet.compact": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.ip.sets 213:36 call  dict.fromkeys(cidrs, True)"
+      ]
+    },
+    "netaddr.ip.sets.IPSet.copy": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.ip.sets 370:31 call  obj_copy._cidrs.update(self._cidrs)"
+      ]
+    },
+    "netaddr.ip.sets.IPSet.remove": {
+      "netaddr.ip.BaseIP.__eq__": [
+        "netaddr.ip.sets 341:28 delitem  self._cidrs[matching_cidr]",
+        "netaddr.ip.sets 343:28 setitem  self._cidrs[cidr]"
+      ]
+    },
+    "netaddr.ip.smallest_matching_cidr": {
+      "<builtin>.TypeError": [
+        "netaddr.ip 1921:24 call  TypeError('IP address/subnet sequence expected, not %r!' ..."
+      ]
+    },
+    "netaddr.ip.spanning_cidr": {
+      "<builtin>.TypeError": [
+        "netaddr.ip 1810:24 call  TypeError('IP sequence cannot contain both IPv4 and IPv6!')"
+      ],
+      "<builtin>.ValueError": [
+        "netaddr.ip 1793:25 call  ValueError('IP sequence must contain at least 2 elements!')"
+      ]
+    },
+    "netaddr.strategy.bin_to_int": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy 270:25 call  ValueError('not a valid Python binary string: %r!' % (bin..."
+      ]
+    },
+    "netaddr.strategy.bits_to_int": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy 154:25 call  ValueError('invalid readable binary string: %r!' % (bits,))"
+      ]
+    },
+    "netaddr.strategy.eui48.bin_to_int": {
+      "netaddr.strategy.bin_to_int": [
+        "netaddr.strategy.eui48 295:23 call  _bin_to_int(bin_val, width)"
+      ]
+    },
+    "netaddr.strategy.eui48.str_to_int": {
+      "<builtin>.TypeError": [
+        "netaddr.strategy.eui48 178:24 call  TypeError('%r is not str() or unicode()!' % (addr,))"
+      ]
+    },
+    "netaddr.strategy.eui48.valid_bin": {
+      "netaddr.strategy.valid_bin": [
+        "netaddr.strategy.eui48 287:22 call  _valid_bin(bin_val, width)"
+      ]
+    },
+    "netaddr.strategy.eui48.valid_bits": {
+      "netaddr.strategy.valid_bits": [
+        "netaddr.strategy.eui48 269:23 call  _valid_bits(bits, width, dialect.word_sep)"
+      ]
+    },
+    "netaddr.strategy.eui48.valid_words": {
+      "netaddr.strategy.valid_words": [
+        "netaddr.strategy.eui48 251:24 call  _valid_words(words, dialect.word_size, dialect.num_words)"
+      ]
+    },
+    "netaddr.strategy.eui64.bin_to_int": {
+      "netaddr.strategy.bin_to_int": [
+        "netaddr.strategy.eui64 273:23 call  _bin_to_int(bin_val, width)"
+      ]
+    },
+    "netaddr.strategy.eui64.bits_to_int": {
+      "netaddr.strategy.bits_to_int": [
+        "netaddr.strategy.eui64 253:24 call  _bits_to_int(bits, width, dialect.word_sep)"
+      ]
+    },
+    "netaddr.strategy.eui64.packed_to_int": {
+      "<builtin>.enumerate": [
+        "netaddr.strategy.eui64 218:28 call  enumerate(reversed(words))"
+      ],
+      "<builtin>.list": [
+        "netaddr.strategy.eui64 215:17 call  list(_struct.unpack('>8B', packed_int))"
+      ],
+      "<builtin>.reversed": [
+        "netaddr.strategy.eui64 218:37 call  reversed(words)"
+      ],
+      "struct.unpack": [
+        "netaddr.strategy.eui64 215:32 call  _struct.unpack('>8B', packed_int)"
+      ]
+    },
+    "netaddr.strategy.eui64.str_to_int": {
+      "<builtin>.Exception.__init__": [
+        "netaddr.strategy.eui64 158:30 call  AddrFormatError('invalid IEEE EUI-64 identifier: %r!' % (..."
+      ]
+    },
+    "netaddr.strategy.eui64.valid_bin": {
+      "netaddr.strategy.valid_bin": [
+        "netaddr.strategy.eui64 265:22 call  _valid_bin(bin_val, width)"
+      ]
+    },
+    "netaddr.strategy.eui64.valid_bits": {
+      "netaddr.strategy.valid_bits": [
+        "netaddr.strategy.eui64 247:23 call  _valid_bits(bits, width, dialect.word_sep)"
+      ]
+    },
+    "netaddr.strategy.eui64.valid_words": {
+      "netaddr.strategy.valid_words": [
+        "netaddr.strategy.eui64 229:24 call  _valid_words(words, dialect.word_size, dialect.num_words)"
+      ]
+    },
+    "netaddr.strategy.eui64.words_to_int": {
+      "netaddr.strategy.words_to_int": [
+        "netaddr.strategy.eui64 241:25 call  _words_to_int(words, dialect.word_size, dialect.num_words)"
+      ]
+    },
+    "netaddr.strategy.int_to_bin": {
+      "<builtin>.IndexError": [
+        "netaddr.strategy 254:25 call  IndexError('binary string out of bounds: %s!' % (bin_val,))"
+      ]
+    },
+    "netaddr.strategy.int_to_bits": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy 191:29 call  ValueError('word separator is not a string: %r!' % (word_..."
+      ]
+    },
+    "netaddr.strategy.int_to_words": {
+      "<builtin>.IndexError": [
+        "netaddr.strategy 72:25 call  IndexError('integer out of bounds: %r!' % hex(int_val))"
+      ],
+      "<builtin>.hex": [
+        "netaddr.strategy 72:60 call  hex(int_val)"
+      ]
+    },
+    "netaddr.strategy.ipv4.int_to_str": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy.ipv4 153:25 call  ValueError('%r is not a valid 32-bit unsigned integer!' %..."
+      ]
+    },
+    "netaddr.strategy.ipv4.int_to_words": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy.ipv4 202:25 call  ValueError( '%r is not a valid integer value supported by..."
+      ]
+    },
+    "netaddr.strategy.ipv4.str_to_int": {
+      "netaddr.fbsocket.inet_pton": [
+        "netaddr.strategy.ipv4 128:32 call  _inet_pton(AF_INET, addr)"
+      ]
+    },
+    "netaddr.strategy.ipv4.valid_bits": {
+      "netaddr.strategy.valid_bits": [
+        "netaddr.strategy.ipv4 221:23 call  _valid_bits(bits, width, word_sep)"
+      ]
+    },
+    "netaddr.strategy.ipv4.words_to_int": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy.ipv4 216:25 call  ValueError('%r is not a valid octet list for an IPv4 addr..."
+      ]
+    },
+    "netaddr.strategy.ipv6": {
+      "<builtin>.Exception": [
+        "netaddr.strategy.ipv6 19:24 call  Exception('IPv6 disabled')"
+      ]
+    },
+    "netaddr.strategy.ipv6.bin_to_int": {
+      "netaddr.strategy.bin_to_int": [
+        "netaddr.strategy.ipv6 266:23 call  _bin_to_int(bin_val, width)"
+      ]
+    },
+    "netaddr.strategy.ipv6.int_to_str": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy.ipv6 177:25 call  ValueError('%r is not a valid 128-bit unsigned integer!' ..."
+      ],
+      "netaddr.fbsocket.inet_ntop": [
+        "netaddr.strategy.ipv6 170:30 call  _inet_ntop(AF_INET6, packed_int)"
+      ]
+    },
+    "netaddr.strategy.ipv6.str_to_int": {
+      "netaddr.fbsocket.inet_pton": [
+        "netaddr.strategy.ipv6 146:32 call  _inet_pton(AF_INET6, addr)"
+      ]
+    },
+    "netaddr.strategy.ipv6.valid_bin": {
+      "netaddr.strategy.valid_bin": [
+        "netaddr.strategy.ipv6 258:22 call  _valid_bin(bin_val, width)"
+      ]
+    },
+    "netaddr.strategy.ipv6.valid_bits": {
+      "netaddr.strategy.valid_bits": [
+        "netaddr.strategy.ipv6 244:23 call  _valid_bits(bits, width, word_sep)"
+      ]
+    },
+    "netaddr.strategy.ipv6.valid_str": {
+      "netaddr.fbsocket.inet_pton": [
+        "netaddr.strategy.ipv6 130:19 call  _inet_pton(AF_INET6, addr)"
+      ]
+    },
+    "netaddr.strategy.ipv6.valid_words": {
+      "netaddr.strategy.valid_words": [
+        "netaddr.strategy.ipv6 228:24 call  _valid_words(words, word_size, num_words)"
+      ]
+    },
+    "netaddr.strategy.words_to_int": {
+      "<builtin>.ValueError": [
+        "netaddr.strategy 97:25 call  ValueError('invalid integer word sequence: %r!' % (words,))"
+      ]
+    }
+  },
+  "notes": {
+    "netaddr.cli 103:59 format  {value}": [
+      "the values of output are strs, ints, None and the IPAddress objects network.network, network.netmask and network.broadcast"
+    ],
+    "netaddr.cli 107:9 call  main()": [
+      "under `if __name__ == '__main__':`, code of the module (README)"
+    ],
+    "netaddr.cli 43:29 call  parser_info.add_argument('network', help='The IP network ...": [
+      "add_parser returns an ArgumentParser (the parser class of the subparsers action)"
+    ],
+    "netaddr.cli 64:34 call  InteractiveShellEmbed(banner1=banner, exit_msg=exit_msg, ...": [
+      "the IPython side of the optional import cli.py:60-61 (IPython is the optional dependency nicer-shell)"
+    ],
+    "netaddr.cli 64:94 call  InteractiveShellEmbed(banner1=banner, exit_msg=exit_msg, ...": [
+      "IPython is absent from trace distributions and requirements/netaddr.installed.txt. Both ordinary calls in InteractiveShellEmbed(...)() have the missing-module stub path IPython.terminal.embed.InteractiveShellEmbed. The existing edge to that path remains. No package definition is built through this library, so the source-reading exception does not apply."
+    ],
+    "netaddr.cli 71:26 call  code.interact('\\n'.join([banner, notice, '']), local=name...": [
+      "the fallback side of the optional import (ImportError of IPython)"
+    ],
+    "netaddr.cli 73:10 call  shell(locals(), banner, exit_msg)": [
+      "optional import cli.py:60-71: both definitions of the local shell are one node (README: both sides of an optional import run)"
+    ],
+    "netaddr.cli 88:20 call  str(network)": [
+      "network is the IPNetwork that .cidr returns"
+    ],
+    "netaddr.cli 96:20 format  {IPAddress(network.first)}": [
+      "format() of an IPAddress falls back to object.__format__, which calls str()"
+    ],
+    "netaddr.compat 13:55 call  importlib.resources.files(pkg).joinpath(res)": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.compat 13:65 call  importlib.resources.files(pkg).joinpath(res).open('rb')": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.contrib.subnet_splitter 33:48 call  self._subnets.union(set(cidr_exclude(cidr, cidr_merge(sub...": [
+      "set.union reuses the stored hashes; two IPv6 networks can have the same hash (ints reduce modulo 2**61 - 1), and the set then compares them with __eq__"
+    ],
+    "netaddr.contrib.subnet_splitter 33:52 call  set(cidr_exclude(cidr, cidr_merge(subnets)[0]))": [
+      "the set hashes the IPNetwork objects that cidr_exclude returns; two IPv6 networks can have the same hash (ints reduce modulo 2**61 - 1), and the set then compares them with __eq__"
+    ],
+    "netaddr.contrib.subnet_splitter 43:29 call  self._subnets.remove(ip_network)": [
+      "remove_subnet is public: a client can pass an IPNetwork equal to, but not the same object as, a member, and the set then calls __eq__"
+    ],
+    "netaddr.core 101:38 call  _pprint.pformat(data)": [
+      "PrettyPrinter.update has no package caller or admitted package-created receiver. A retains the body; fallback data is opaque client data (B5), so pformat has no package callback."
+    ],
+    "netaddr.core 138:36 call  self.subscribers.remove(subscriber)": [
+      "The stored subscribers are the FileIndexer and DictUpdater objects registered by package code; neither defines a package __eq__. This uncalled detach body admits an opaque fallback subscriber argument, not a package-created PrettyPrinter."
+    ],
+    "netaddr.eui 101:39 call  self.__class__(other)": [
+      "self.__class__ is OUI: the package defines no subclass of OUI"
+    ],
+    "netaddr.eui 245:30 call  _open_binary(__package__, 'iab.txt')": [
+      "version branch compat.py:10 (see 78:30)"
+    ],
+    "netaddr.eui 249:20 call  fh.seek(offset)": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui 250:27 call  fh.read(size)": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui 252:21 call  fh.close()": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui 259:39 call  self.__class__(other)": [
+      "self.__class__ is IAB: the package defines no subclass of IAB"
+    ],
+    "netaddr.eui 267:39 call  self.__class__(other)": [
+      "self.__class__ is IAB: the package defines no subclass of IAB"
+    ],
+    "netaddr.eui 355:44 getattr  addr.dialect": [
+      "addr is an EUI (copy constructor)"
+    ],
+    "netaddr.eui 550:20 call  hash((self.version, self._value))": [
+      "the tuple holds two ints"
+    ],
+    "netaddr.eui 559:39 call  self.__class__(other)": [
+      "self.__class__ is EUI: the package defines no subclass of EUI"
+    ],
+    "netaddr.eui 571:39 call  self.__class__(other)": [
+      "self.__class__ is EUI: the package defines no subclass of EUI"
+    ],
+    "netaddr.eui 583:39 call  self.__class__(other)": [
+      "self.__class__ is EUI: the package defines no subclass of EUI"
+    ],
+    "netaddr.eui 595:39 call  self.__class__(other)": [
+      "self.__class__ is EUI: the package defines no subclass of EUI"
+    ],
+    "netaddr.eui 607:39 call  self.__class__(other)": [
+      "self.__class__ is EUI: the package defines no subclass of EUI"
+    ],
+    "netaddr.eui 619:39 call  self.__class__(other)": [
+      "self.__class__ is EUI: the package defines no subclass of EUI"
+    ],
+    "netaddr.eui 78:30 call  _open_binary(__package__, 'oui.txt')": [
+      "version branch compat.py:10: _open_binary is the package function on Python 3.9 and later, and importlib.resources.open_binary on 3.7 and 3.8 (no importlib.resources.files)"
+    ],
+    "netaddr.eui 80:24 call  fh.seek(offset)": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui 81:31 call  fh.read(size)": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui 83:21 call  fh.close()": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui 85:37 call  NotRegisteredError('OUI %r not registered!' % (oui,))": [
+      "NotRegisteredError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "netaddr.eui 93:39 call  self.__class__(other)": [
+      "self.__class__ is OUI: the package defines no subclass of OUI"
+    ],
+    "netaddr.eui.ieee 255:24 call  parser(registry_fh)": [
+      "The private create_index_from_registry receives exactly OUIIndexParser or IABIndexParser from create_indices (ieee.py:265, 270). No hypothetical client parser class is admitted."
+    ],
+    "netaddr.eui.ieee 282:17 call  fp.close()": [
+      "The bundled resource can be loaded from a normal directory or a zip-imported package. CPython 3.7/3.8 open_binary returns io.BytesIO for zip resources; on 3.9+ files returns zipfile.Path for zip resources and Path.open(rb) returns zipfile.ZipExtFile. Directory resources retain io.BufferedReader. These are interpreter-owned concrete values (B4), not client file-like inputs."
+    ],
+    "netaddr.eui.ieee 287:39 call  _open_binary(__package__, 'oui.idx')": [
+      "version branch compat.py:10: the package function on 3.9 and later, importlib.resources.open_binary on 3.7 and 3.8"
+    ],
+    "netaddr.eui.ieee 288:39 call  _open_binary(__package__, 'iab.idx')": [
+      "version branch compat.py:10 (see 287:39)"
+    ],
+    "netaddr.eui.ieee 293:19 call  create_indices()": [
+      "under `if __name__ == '__main__':`, code of the module (README); the else branch loads the indices on import"
+    ],
+    "netaddr.ip 1140:63 op  'IP version mismatch: %s and %s' % (ip, self)": [
+      "%s of the IPAddress ip and of the IPNetwork self"
+    ],
+    "netaddr.ip 1143:71 call  str(value)": [
+      "value is the str or int that the client assigns (tests and documentation, tutorial_01.rst:123); no package object is documented for it"
+    ],
+    "netaddr.ip 115:33 call  self.sort_key()": [
+      "BaseIP is documented private (docs/source/api.rst:5-12) and has no own instance. The public IPAddress, IPNetwork and IPRange/IPGlob receivers override key and sort_key, so only subclass dispatch is admitted (B1)."
+    ],
+    "netaddr.ip 127:33 call  self.sort_key()": [
+      "BaseIP is documented private (docs/source/api.rst:5-12) and has no own instance. The public IPAddress, IPNetwork and IPRange/IPGlob receivers override key and sort_key, so only subclass dispatch is admitted (B1)."
+    ],
+    "netaddr.ip 1281:77 op  'IPv6 address %s unsuitable for ' 'conversion to IPv4!' %...": [
+      "%s of the IPNetwork itself (it has __getitem__, so % takes it as a mapping, and %s formats the whole operand)"
+    ],
+    "netaddr.ip 139:33 call  self.sort_key()": [
+      "BaseIP is documented private (docs/source/api.rst:5-12) and has no own instance. The public IPAddress, IPNetwork and IPRange/IPGlob receivers override key and sort_key, so only subclass dispatch is admitted (B1)."
+    ],
+    "netaddr.ip 1514:33 op  IPAddress(other) in self": [
+      "self is an IPRange or an IPGlob, which inherits __contains__"
+    ],
+    "netaddr.ip 1563:19 iter  cidr": [
+      "cidr_merge returns IPNetwork objects"
+    ],
+    "netaddr.ip 1679:16 call  ranges.sort()": [
+      "Public documented assignment network.value (tutorial_01.rst111) preserves an int subclass at BaseIP._set_value:43. Let a and b be IPNetwork(0.0.0.1/32), b.value be a client int subclass of1 whose __and__ returns1 the first time and2 thereafter. The range tuples cache (4,1,1,a) and (4,1,1,b). Sorting compares b/a: BaseIP.__eq__ recomputes b.key as (4,2,1), a.key as (4,1,1), then tuple ordering invokes BaseIP.__lt__. Package net objects remain directly stored; no callback-return package provenance is assumed. Witness derived from source, never executed."
+    ],
+    "netaddr.ip 375:76 call  str(state)": [
+      "state is the pickled tuple of two ints"
+    ],
+    "netaddr.ip 403:29 call  ValueError('Unexpected mask length %d for address type!' ...": [
+      "Retained error witness: the documented IPNetwork.value setter admits int subclasses, and IPAddress copies that value through its BaseIP check. An int subclass with underlying value 1 can make xor return the IPv4 max int (is_netmask succeeds), make & 1 return 0, and make right shifts return itself for the first 32 iterations then plain 1. netmask_bits then computes mask_length = -1 and calls ValueError. Client overrides remain opaque; no package internals or failed objects are changed."
+    ],
+    "netaddr.ip 41:34 call  AddrFormatError( 'value out of bounds for an %s address!'...": [
+      "AddrFormatError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "netaddr.ip 578:42 call  AddrConversionError( 'IPv6 address %s unsuitable for ' 'c...": [
+      "AddrConversionError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "netaddr.ip 579:77 op  'IPv6 address %s unsuitable for ' 'conversion to IPv4!' %...": [
+      "%s of the IPAddress itself"
+    ],
+    "netaddr.ip 658:30 call  self.__class__(self._value << numbits, self._module.version)": [
+      "self.__class__ is IPAddress: the package defines no subclass of IPAddress"
+    ],
+    "netaddr.ip 667:30 call  self.__class__(self._value >> numbits, self._module.version)": [
+      "self.__class__ is IPAddress: the package defines no subclass of IPAddress"
+    ],
+    "netaddr.ip 863:26 call  isinstance(other, IPAddress)": [
+      "The uncalled-private fallback admits opaque client self, whose _module.version can pass the prior check. The explicit isinstance call can therefore run (A, B)."
+    ],
+    "netaddr.ip 866:26 getattr  other.first": [
+      "The uncalled-private fallback leaves self opaque. The isinstance(other, BaseIP) check admits public IPNetwork and IPRange/IPGlob objects in the other role, so their first/last properties can run after the version check (A, B1, B2)."
+    ],
+    "netaddr.ip 866:56 getattr  other.last": [
+      "The uncalled-private fallback leaves self opaque. The isinstance(other, BaseIP) check admits public IPNetwork and IPRange/IPGlob objects in the other role, so their first/last properties can run after the version check (A, B1, B2)."
+    ],
+    "netaddr.ip.glob 227:34 call  AddrConversionError('bad CIDR to IP glob conversion!')": [
+      "Retained error witness: assign IPNetwork(\"0.0.0.0/24\").value an int subclass with underlying value 0 whose & returns 0 and | returns 258. cidr_to_glob copies the network value; its first/last indexing normalizes endpoints to IPAddress(0) and IPAddress(258). The non-CIDR interval needs multiple globs and this constructor runs. The documented public setter and copy input suffice; client overrides themselves stay opaque."
+    ],
+    "netaddr.ip.glob 79:30 call  AddrFormatError('not a recognised IP glob range: %r!' % (...": [
+      "AddrFormatError defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "netaddr.ip.iana 346:21 setitem  self.dct[cidr]": [
+      "DictUpdater is private and stores only the bundled IANA records. On supported CPython 3.7 the old 32-bit tuple hash collides for IPv4 000/8 and 016/8; insertion therefore compares package IPNetwork keys with __eq__. See netaddr.md J9 and the pass-2 bundled-key hash evidence. Clients cannot add arbitrary records through this private API."
+    ],
+    "netaddr.ip.iana 349:21 setitem  self.dct[cidr]": [
+      "The bundled IPv6 records 0000::/8 and 0100::/8 collide under the old 32-bit tuple hash on supported CPython 3.7. The private updater needs no arbitrary client records to reach equality (netaddr.md J9)."
+    ],
+    "netaddr.ip.iana 352:21 setitem  self.dct[cidr]": [
+      "The bundled IPv6-unicast records 2400::/12 and 2600::/12 collide under the old 32-bit and 64-bit tuple hashes on supported CPython 3.7. The private updater therefore compares package keys without arbitrary client updates (netaddr.md J9)."
+    ],
+    "netaddr.ip.iana 372:35 call  _open_binary(__package__, 'ipv4-address-space.xml')": [
+      "version branch compat.py:10: the package function on 3.9 and later, importlib.resources.open_binary on 3.7 and 3.8"
+    ],
+    "netaddr.ip.iana 376:35 call  _open_binary(__package__, 'ipv6-address-space.xml')": [
+      "version branch compat.py:10 (see 372:35)"
+    ],
+    "netaddr.ip.iana 381:21 call  _open_binary(__package__, 'ipv6-unicast-address-assignmen...": [
+      "version branch compat.py:10 (see 372:35)"
+    ],
+    "netaddr.ip.iana 386:41 call  _open_binary(__package__, 'multicast-addresses.xml')": [
+      "version branch compat.py:10 (see 372:35)"
+    ],
+    "netaddr.ip.iana 398:27 call  sorted(IANA_INFO)": [
+      "the keys of IANA_INFO are strs"
+    ],
+    "netaddr.ip.iana 399:17 call  fh.write('-' * len(category) + '\\n')": [
+      "fh is the client's file-like object (opaque, B5) or the default sys.stdout (named by its class, README)"
+    ],
+    "netaddr.ip.iana 403:30 call  sorted(ipranges)": [
+      "only the first category, 'IPv4', is reached (see 405:21); its keys are IPNetwork objects"
+    ],
+    "netaddr.ip.iana 404:31 getitem  ipranges[iprange]": [
+      "The first sorted category is IPv4. Its first sorted key 000/8 was inserted first and is found by identity at its initial slot, including after ordered resizes; no equality callback precedes the following str-plus-dict failure (J7)."
+    ],
+    "netaddr.ip.iana 405:30 op  '%-45r' % (iprange)": [
+      "Only the first bundled IPv4 key, an IPNetwork, reaches this formatting site before str-plus-dict raises. DictUpdater is private, so clients cannot insert IPAddress or IPRange keys for this role (J7, C)."
+    ],
+    "netaddr.ip.sets 129:36 call  dict.fromkeys( (IPNetwork((value, prefixlen), version=ver...": [
+      "the keys are IPNetwork objects; two IPv6 networks can have the same hash (ints reduce modulo 2**61 - 1, so (6, 2**64, 2**65 - 1) and (6, 8, 15) collide), and the dict or set then compares the colliding keys with __eq__"
+    ],
+    "netaddr.ip.sets 213:36 call  dict.fromkeys(cidrs, True)": [
+      "the keys are IPNetwork objects; two IPv6 networks can have the same hash (ints reduce modulo 2**61 - 1, so (6, 2**64, 2**65 - 1) and (6, 8, 15) collide), and the dict or set then compares the colliding keys with __eq__"
+    ],
+    "netaddr.ip.sets 341:28 delitem  self._cidrs[matching_cidr]": [
+      "the keys are IPNetwork objects; two IPv6 networks can have the same hash (ints reduce modulo 2**61 - 1, so (6, 2**64, 2**65 - 1) and (6, 8, 15) collide), and the dict or set then compares the colliding keys with __eq__"
+    ],
+    "netaddr.ip.sets 343:28 setitem  self._cidrs[cidr]": [
+      "the keys are IPNetwork objects; two IPv6 networks can have the same hash (ints reduce modulo 2**61 - 1, so (6, 2**64, 2**65 - 1) and (6, 8, 15) collide), and the dict or set then compares the colliding keys with __eq__"
+    ],
+    "netaddr.ip.sets 370:31 call  obj_copy._cidrs.update(self._cidrs)": [
+      "CPython 3.7 dict.update inserts the IPNetwork keys with stored hashes and compares colliding keys with __eq__. Later versions can clone a clean source dict without comparisons; the insertion fallback remains available for sources with deleted entries. The concrete 3.7 witness suffices; no new __hash__ call occurs."
+    ],
+    "netaddr.ip.sets 426:32 op  self._cidrs == other._cidrs": [
+      "CPython may reuse stored hashes, but supported PyPy 3.11 v7.3.20 DictStrategy._eq looks each key up with w_other.getitem(w_key), which invokes space.hash_w through ObjectDictStrategy r_dict.get. Two separately constructed nonempty IPSet([\"10.0.0.0/24\"]) objects witness BaseIP.__hash__ as well as BaseIP.__eq__. See judgement 17 and pinned PyPy source evidence."
+    ],
+    "netaddr.ip.sets 438:32 op  self._cidrs != other._cidrs": [
+      "PyPy dict descr_ne is negate(descr_eq); the same nonempty two-IPSet witness follows DictStrategy._eq -> w_other.getitem -> r_dict.get -> BaseIP.__hash__. Key equality also runs. See judgement 17."
+    ],
+    "netaddr.strategy.ipv4 128:32 call  _inet_pton(AF_INET, addr)": [
+      "platform branch ipv4.py:14: on win32 and cygwin _inet_pton is netaddr.fbsocket.inet_pton, elsewhere socket.inet_pton; both platforms are supported (OS Independent), so both are callees"
+    ],
+    "netaddr.strategy.ipv6 130:19 call  _inet_pton(AF_INET6, addr)": [
+      "optional import ipv6.py:14-26: _socket.inet_pton, or netaddr.fbsocket.inet_pton where the socket module lacks IPv6 support; both sides count"
+    ],
+    "netaddr.strategy.ipv6 146:32 call  _inet_pton(AF_INET6, addr)": [
+      "optional import ipv6.py:14-26 (see 130:19)"
+    ],
+    "netaddr.strategy.ipv6 170:30 call  _inet_ntop(AF_INET6, packed_int)": [
+      "optional import ipv6.py:14-26: _socket.inet_ntop, or netaddr.fbsocket.inet_ntop where the socket module lacks IPv6 support; both sides count"
+    ],
+    "netaddr.strategy.ipv6 19:24 call  Exception('IPv6 disabled')": [
+      "optional import ipv6.py:14-26: runs on a Python built without IPv6 support; both sides of the optional import count (README)"
+    ]
+  },
+  "trace": "dynamic/netaddr.json"
+}

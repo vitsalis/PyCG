@@ -1,0 +1,1385 @@
+{
+  "edges": {
+    "pyrate_limiter.abstracts.algorithm.GCRA.decode": {
+      "<builtin>.int": [
+        "pyrate_limiter.abstracts.algorithm 286:25 call  int(value)"
+      ],
+      "<builtin>.tuple": [
+        "pyrate_limiter.abstracts.algorithm 286:21 call  tuple(int(value) for value in values)"
+      ]
+    },
+    "pyrate_limiter.abstracts.algorithm.LogAlgorithm.decide": {
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put.peek_timestamp": [
+        "pyrate_limiter.abstracts.algorithm 116:62 call  peek_timestamp(offset)"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.__exit__": {
+      "pyrate_limiter.buckets.postgres.PostgresBucket.close": [
+        "pyrate_limiter.abstracts.bucket 210:19 call  self.close()"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.close": [
+        "pyrate_limiter.abstracts.bucket 210:19 call  self.close()"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.now": {
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteClock.now": [
+        "pyrate_limiter.abstracts.bucket 66:31 call  self._clock.now()"
+      ],
+      "pyrate_limiter.clocks.MonotonicAsyncClock.now": [
+        "pyrate_limiter.abstracts.bucket 66:31 call  self._clock.now()"
+      ],
+      "pyrate_limiter.clocks.PostgresClock.now": [
+        "pyrate_limiter.abstracts.bucket 66:31 call  self._clock.now()"
+      ],
+      "pyrate_limiter.clocks.WallClock.now": [
+        "pyrate_limiter.abstracts.bucket 66:31 call  self._clock.now()"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.put_decision": {
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put": [
+        "pyrate_limiter.abstracts.bucket 104:26 call  self.put(item)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.abstracts.bucket 104:26 call  self.put(item)"
+      ],
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put": [
+        "pyrate_limiter.abstracts.bucket 104:26 call  self.put(item)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put": [
+        "pyrate_limiter.abstracts.bucket 104:26 call  self.put(item)"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.AbstractBucket.waiting": {
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.retry_after": [
+        "pyrate_limiter.abstracts.bucket 167:47 call  self._algorithm.retry_after(self.failing_rate, item.times..."
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.peek": [
+        "pyrate_limiter.abstracts.bucket 169:31 call  self.peek(offset)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek": [
+        "pyrate_limiter.abstracts.bucket 169:31 call  self.peek(offset)"
+      ],
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.peek": [
+        "pyrate_limiter.abstracts.bucket 169:31 call  self.peek(offset)"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.BucketFactory.__del__": {
+      "<builtin>.type": [
+        "pyrate_limiter.abstracts.bucket 430:74 call  type(e)"
+      ],
+      "logging.Logger.debug": [
+        "pyrate_limiter.abstracts.bucket 430:29 call  logger.debug(\"Exception %s (%s) deleting bucket %r\", type..."
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.BucketFactory.close": {
+      "<builtin>.type": [
+        "pyrate_limiter.abstracts.bucket 450:69 call  type(e)",
+        "pyrate_limiter.abstracts.bucket 457:73 call  type(e)"
+      ],
+      "logging.Logger.info": [
+        "pyrate_limiter.abstracts.bucket 450:24 call  logger.info(\"Exception %s (%s) deleting bucket %r\", type(...",
+        "pyrate_limiter.abstracts.bucket 457:28 call  logger.info(\"Exception %s (%s) deleting bucket %r\", type(..."
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.close": [
+        "pyrate_limiter.abstracts.bucket 455:29 call  bucket.close()"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.BucketFactory.create": {
+      "pyrate_limiter.abstracts.bucket.BucketFactory.schedule_leak": [
+        "pyrate_limiter.abstracts.bucket 381:27 call  self.schedule_leak(bucket)"
+      ],
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.__init__": [
+        "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)"
+      ],
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__init__": [
+        "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.__init__": [
+        "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.__init__": [
+        "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)"
+      ],
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.__init__": [
+        "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.__init__": [
+        "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.Leaker._leak": {
+      "logging.Logger.debug": [
+        "pyrate_limiter.abstracts.bucket 301:29 call  logger.debug(\"Leak task stopped due to event loop shutdow..."
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.leak": [
+        "pyrate_limiter.abstracts.bucket 292:39 call  bucket.leak(now)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.leak": [
+        "pyrate_limiter.abstracts.bucket 292:39 call  bucket.leak(now)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.now": [
+        "pyrate_limiter.abstracts.bucket 286:37 call  bucket.now()"
+      ]
+    },
+    "pyrate_limiter.abstracts.bucket.Leaker.register": {
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.leak": [
+        "pyrate_limiter.abstracts.bucket 253:35 call  bucket.leak(0)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.leak": [
+        "pyrate_limiter.abstracts.bucket 253:35 call  bucket.leak(0)"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._algorithm": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._algorithm": [
+        "pyrate_limiter.abstracts.wrappers 87:28 getattr  self.bucket._algorithm"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._last_wait": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper._last_wait": [
+        "pyrate_limiter.abstracts.wrappers 83:28 getattr  self.bucket._last_wait"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.count": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.count": [
+        "pyrate_limiter.abstracts.wrappers 30:35 call  self.bucket.count()"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.count": [
+        "pyrate_limiter.abstracts.wrappers 30:35 call  self.bucket.count()"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.count": [
+        "pyrate_limiter.abstracts.wrappers 30:35 call  self.bucket.count()"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.failing_rate": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.failing_rate": [
+        "pyrate_limiter.abstracts.wrappers 78:28 getattr  self.bucket.failing_rate"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.flush": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.flush": [
+        "pyrate_limiter.abstracts.wrappers 47:35 call  self.bucket.flush()"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.flush": [
+        "pyrate_limiter.abstracts.wrappers 47:35 call  self.bucket.flush()"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.flush": [
+        "pyrate_limiter.abstracts.wrappers 47:35 call  self.bucket.flush()"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.flush": [
+        "pyrate_limiter.abstracts.wrappers 47:35 call  self.bucket.flush()"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.leak": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.leak": [
+        "pyrate_limiter.abstracts.wrappers 38:34 call  self.bucket.leak(current_timestamp)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.leak": [
+        "pyrate_limiter.abstracts.wrappers 38:34 call  self.bucket.leak(current_timestamp)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.leak": [
+        "pyrate_limiter.abstracts.wrappers 38:34 call  self.bucket.leak(current_timestamp)"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.now": [
+        "pyrate_limiter.abstracts.wrappers 74:31 call  self.bucket.now()"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.now": [
+        "pyrate_limiter.abstracts.wrappers 74:31 call  self.bucket.now()"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.peek": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.peek": [
+        "pyrate_limiter.abstracts.wrappers 56:32 call  self.bucket.peek(index)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.peek": [
+        "pyrate_limiter.abstracts.wrappers 56:32 call  self.bucket.peek(index)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek": [
+        "pyrate_limiter.abstracts.wrappers 56:32 call  self.bucket.peek(index)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.peek": [
+        "pyrate_limiter.abstracts.wrappers 56:32 call  self.bucket.peek(index)"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put": [
+        "pyrate_limiter.abstracts.wrappers 22:33 call  self.bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.abstracts.wrappers 22:33 call  self.bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+        "pyrate_limiter.abstracts.wrappers 22:33 call  self.bucket.put(item)"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.rates": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.rates": [
+        "pyrate_limiter.abstracts.wrappers 91:28 getattr  self.bucket.rates",
+        "pyrate_limiter.abstracts.wrappers 96:21 setattr  self.bucket.rates"
+      ]
+    },
+    "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting": [
+        "pyrate_limiter.abstracts.wrappers 65:35 call  self.bucket.waiting(item)"
+      ]
+    },
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__init__": {
+      "<builtin>.ValueError": [
+        "pyrate_limiter.buckets.mp_bucket 28:29 call  ValueError(\"items must be a ListProxy\")"
+      ]
+    },
+    "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.__setstate__": {
+      "<builtin>.dict.update": [
+        "pyrate_limiter.buckets.mp_bucket 60:29 call  self.__dict__.update(state)"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.__init__": {
+      "<builtin>.len": [
+        "pyrate_limiter.buckets.postgres 115:53 call  len(self.rates)"
+      ],
+      "<builtin>.str.lower": [
+        "pyrate_limiter.buckets.postgres 90:33 call  table.lower()"
+      ],
+      "psycopg.sql.Identifier": [
+        "pyrate_limiter.buckets.postgres 104:29 call  sql.Identifier(self._full_tbl)",
+        "pyrate_limiter.buckets.postgres 105:36 call  sql.Identifier(f\"timestampindex_{self.table}\")"
+      ],
+      "psycopg.sql.SQL": [
+        "pyrate_limiter.buckets.postgres 106:39 call  sql.SQL(Queries.CREATE_BUCKET_TABLE)",
+        "pyrate_limiter.buckets.postgres 107:39 call  sql.SQL(Queries.CREATE_INDEX_ON_TIMESTAMP)",
+        "pyrate_limiter.buckets.postgres 108:31 call  sql.SQL(Queries.LOCK_TABLE)",
+        "pyrate_limiter.buckets.postgres 109:32 call  sql.SQL(Queries.COUNT)",
+        "pyrate_limiter.buckets.postgres 114:26 call  sql.SQL(\"COUNT(*) FILTER (WHERE item_timestamp >= TO_TIME...",
+        "pyrate_limiter.buckets.postgres 115:26 call  sql.SQL(\", \")",
+        "pyrate_limiter.buckets.postgres 116:40 call  sql.SQL(\"SELECT {fields} FROM {table}\")",
+        "pyrate_limiter.buckets.postgres 117:30 call  sql.SQL(Queries.PUT)",
+        "pyrate_limiter.buckets.postgres 118:32 call  sql.SQL(Queries.FLUSH)",
+        "pyrate_limiter.buckets.postgres 119:31 call  sql.SQL(Queries.PEEK)",
+        "pyrate_limiter.buckets.postgres 120:31 call  sql.SQL(Queries.LEAK)",
+        "pyrate_limiter.buckets.postgres 121:37 call  sql.SQL(Queries.LEAK_COUNT)"
+      ],
+      "psycopg.sql.SQL.format": [
+        "pyrate_limiter.buckets.postgres 106:75 call  sql.SQL(Queries.CREATE_BUCKET_TABLE).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 107:81 call  sql.SQL(Queries.CREATE_INDEX_ON_TIMESTAMP).format(index=i...",
+        "pyrate_limiter.buckets.postgres 108:58 call  sql.SQL(Queries.LOCK_TABLE).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 109:54 call  sql.SQL(Queries.COUNT).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 116:79 call  sql.SQL(\"SELECT {fields} FROM {table}\").format(fields=_fi...",
+        "pyrate_limiter.buckets.postgres 117:50 call  sql.SQL(Queries.PUT).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 118:54 call  sql.SQL(Queries.FLUSH).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 119:52 call  sql.SQL(Queries.PEEK).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 120:52 call  sql.SQL(Queries.LEAK).format(table=tbl)",
+        "pyrate_limiter.buckets.postgres 121:64 call  sql.SQL(Queries.LEAK_COUNT).format(table=tbl)"
+      ],
+      "psycopg.sql.SQL.join": [
+        "pyrate_limiter.buckets.postgres 115:37 call  sql.SQL(\", \").join([_filter] * len(self.rates))"
+      ],
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates": [
+        "pyrate_limiter.buckets.postgres 97:14 setattr  self.rates",
+        "pyrate_limiter.buckets.postgres 115:59 getattr  self.rates"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._create_table": [
+        "pyrate_limiter.buckets.postgres 123:27 call  self._create_table()"
+      ],
+      "pyrate_limiter.clocks.PostgresClock.__init__": [
+        "pyrate_limiter.buckets.postgres 89:36 call  PostgresClock(pool)"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket._create_table": {
+      "contextlib.contextmanager.helper": [
+        "pyrate_limiter.buckets.postgres 131:28 call  self._get_conn()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 132:25 call  conn.execute(\"SELECT pg_advisory_xact_lock(%s)\", (advisor...",
+        "pyrate_limiter.buckets.postgres 133:25 call  conn.execute(self._q_create_table)",
+        "pyrate_limiter.buckets.postgres 134:25 call  conn.execute(self._q_create_index)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": [
+        "pyrate_limiter.buckets.postgres 131:28 call  self._get_conn()"
+      ],
+      "pyrate_limiter.buckets.postgres.advisory_lock_id": [
+        "pyrate_limiter.buckets.postgres 132:79 call  advisory_lock_id(self._full_tbl)"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": {
+      "psycopg_pool.ConnectionPool.connection": [
+        "pyrate_limiter.buckets.postgres 127:34 call  self.pool.connection()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.close": {
+      "logging.Logger.debug": [
+        "pyrate_limiter.buckets.postgres 263:29 call  logger.debug(\"Exception closing pool, %s\", e)"
+      ],
+      "psycopg_pool.ConnectionPool.close": [
+        "pyrate_limiter.buckets.postgres 261:32 call  self.pool.close()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.count": {
+      "<builtin>.int": [
+        "pyrate_limiter.buckets.postgres 238:24 call  int(result[0])"
+      ],
+      "contextlib.contextmanager.helper": [
+        "pyrate_limiter.buckets.postgres 234:28 call  self._get_conn()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 235:31 call  conn.execute(self._q_count)"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.fetchone": [
+        "pyrate_limiter.buckets.postgres 236:34 call  cur.fetchone()"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": [
+        "pyrate_limiter.buckets.postgres 234:28 call  self._get_conn()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.flush": {
+      "contextlib.contextmanager.helper": [
+        "pyrate_limiter.buckets.postgres 224:28 call  self._get_conn()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 225:25 call  conn.execute(self._q_flush)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": [
+        "pyrate_limiter.buckets.postgres 224:28 call  self._get_conn()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.leak": {
+      "<builtin>.int": [
+        "pyrate_limiter.buckets.postgres 216:28 call  int(result[0])"
+      ],
+      "contextlib.contextmanager.helper": [
+        "pyrate_limiter.buckets.postgres 210:28 call  self._get_conn()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 211:31 call  conn.execute(self._q_leak_count, (lower_bound_seconds,))",
+        "pyrate_limiter.buckets.postgres 215:29 call  conn.execute(self._q_leak, (lower_bound_seconds,))"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.fetchone": [
+        "pyrate_limiter.buckets.postgres 212:34 call  cur.fetchone()"
+      ],
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound": [
+        "pyrate_limiter.buckets.postgres 202:49 call  self._algorithm.leak_bound(self.rates, current_timestamp)"
+      ],
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates": [
+        "pyrate_limiter.buckets.postgres 202:55 getattr  self.rates"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": [
+        "pyrate_limiter.buckets.postgres 210:28 call  self._get_conn()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.peek": {
+      "<builtin>.int": [
+        "pyrate_limiter.buckets.postgres 253:57 call  int(result[1])",
+        "pyrate_limiter.buckets.postgres 253:73 call  int(result[2])"
+      ],
+      "contextlib.contextmanager.helper": [
+        "pyrate_limiter.buckets.postgres 249:28 call  self._get_conn()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 250:31 call  conn.execute(self._q_peek, (index,))"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.fetchone": [
+        "pyrate_limiter.buckets.postgres 251:34 call  cur.fetchone()"
+      ],
+      "pyrate_limiter.abstracts.rate.RateItem.__init__": [
+        "pyrate_limiter.buckets.postgres 254:32 call  RateItem(name=name, weight=weight, timestamp=timestamp)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": [
+        "pyrate_limiter.buckets.postgres 249:28 call  self._get_conn()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.put": {
+      "contextlib.contextmanager.helper": [
+        "pyrate_limiter.buckets.postgres 147:28 call  self._get_conn()"
+      ],
+      "logging.Logger.debug": [
+        "pyrate_limiter.buckets.postgres 162:29 call  logger.debug(\"LockNotAvailable\")"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 160:29 call  conn.execute(self._q_lock)",
+        "pyrate_limiter.buckets.postgres 168:31 call  conn.execute(self._q_count_windows, params)",
+        "pyrate_limiter.buckets.postgres 192:25 call  conn.execute(self._q_put, (item.name, item.weight, item_t..."
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.close": [
+        "pyrate_limiter.buckets.postgres 170:22 call  cur.close()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.fetchone": [
+        "pyrate_limiter.buckets.postgres 169:34 call  cur.fetchone()"
+      ],
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start": [
+        "pyrate_limiter.buckets.postgres 167:51 call  self._algorithm.window_start(rate, item.timestamp)"
+      ],
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.decide": [
+        "pyrate_limiter.buckets.postgres 180:46 call  self._algorithm.decide( self.rates, counts, item.weight, ..."
+      ],
+      "pyrate_limiter.abstracts.algorithm.SlidingWindowLog.window_start": [
+        "pyrate_limiter.buckets.postgres 167:51 call  self._algorithm.window_start(rate, item.timestamp)"
+      ],
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record": [
+        "pyrate_limiter.buckets.postgres 143:32 call  self._record(item, ADMITTED)",
+        "pyrate_limiter.buckets.postgres 164:29 call  self._record(item, Decision(failing_rate=self.rates[0]))",
+        "pyrate_limiter.buckets.postgres 188:32 call  self._record(item, decision)"
+      ],
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates": [
+        "pyrate_limiter.buckets.postgres 164:63 getattr  self.rates",
+        "pyrate_limiter.buckets.postgres 167:98 getattr  self.rates",
+        "pyrate_limiter.buckets.postgres 181:22 getattr  self.rates"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket._get_conn": [
+        "pyrate_limiter.buckets.postgres 147:28 call  self._get_conn()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.PostgresBucket.put.peek_timestamp": {
+      "<builtin>.int": [
+        "pyrate_limiter.buckets.postgres 178:57 call  int(peek_row[2])"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute": [
+        "pyrate_limiter.buckets.postgres 174:40 call  conn.execute(self._q_peek, (offset,))"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.close": [
+        "pyrate_limiter.buckets.postgres 176:31 call  peek_cur.close()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.execute.fetchone": [
+        "pyrate_limiter.buckets.postgres 175:45 call  peek_cur.fetchone()"
+      ]
+    },
+    "pyrate_limiter.buckets.postgres.advisory_lock_id": {
+      "<builtin>.str.encode": [
+        "pyrate_limiter.buckets.postgres 24:35 call  table.encode()"
+      ],
+      "zlib.crc32": [
+        "pyrate_limiter.buckets.postgres 24:22 call  zlib.crc32(table.encode())"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert": {
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.window_start": [
+        "pyrate_limiter.buckets.redis_bucket 152:49 call  self._algorithm.window_start(rate, item.timestamp)"
+      ],
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.blocking_offset": [
+        "pyrate_limiter.buckets.redis_bucket 149:53 call  self._algorithm.blocking_offset(rate, item.weight)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_async": [
+        "pyrate_limiter.buckets.redis_bucket 184:29 call  _handle_async(reply)"
+      ],
+      "redis.Redis.evalsha": [
+        "pyrate_limiter.buckets.redis_bucket 158:35 call  self.redis.evalsha(self.script_hash, len(keys), *keys, *a..."
+      ],
+      "redis.asyncio.Redis.evalsha": [
+        "pyrate_limiter.buckets.redis_bucket 158:35 call  self.redis.evalsha(self.script_hash, len(keys), *keys, *a..."
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_async": {
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_sync": [
+        "pyrate_limiter.buckets.redis_bucket 182:32 call  _handle_sync(await pending)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket._check_and_insert._handle_sync": {
+      "pyrate_limiter.abstracts.algorithm.FixedWindow.retry_after": [
+        "pyrate_limiter.buckets.redis_bucket 178:59 call  self._algorithm.retry_after(rate, item.timestamp, blocking)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.count": {
+      "redis.Redis.zcard": [
+        "pyrate_limiter.buckets.redis_bucket 214:32 call  self.redis.zcard(self.bucket_key)"
+      ],
+      "redis.asyncio.Redis.zcard": [
+        "pyrate_limiter.buckets.redis_bucket 214:32 call  self.redis.zcard(self.bucket_key)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.flush": {
+      "redis.Redis.delete": [
+        "pyrate_limiter.buckets.redis_bucket 211:33 call  self.redis.delete(self.bucket_key)"
+      ],
+      "redis.asyncio.Redis.delete": [
+        "pyrate_limiter.buckets.redis_bucket 211:33 call  self.redis.delete(self.bucket_key)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.init": {
+      "inspect.isawaitable": [
+        "pyrate_limiter.buckets.redis_bucket 119:23 call  isawaitable(script_hash)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.__init__": [
+        "pyrate_limiter.buckets.redis_bucket 128:19 call  cls(rates, redis, bucket_key, script_hash, algorithm)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.init._async_init": [
+        "pyrate_limiter.buckets.redis_bucket 126:31 call  _async_init()"
+      ],
+      "redis.Redis.script_load": [
+        "pyrate_limiter.buckets.redis_bucket 117:40 call  redis.script_load(LuaScript.PUT_ITEM)"
+      ],
+      "redis.asyncio.Redis.script_load": [
+        "pyrate_limiter.buckets.redis_bucket 117:40 call  redis.script_load(LuaScript.PUT_ITEM)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.init._async_init": {
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.__init__": [
+        "pyrate_limiter.buckets.redis_bucket 124:27 call  cls(rates, redis, bucket_key, script_hash, algorithm)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.leak": {
+      "pyrate_limiter.abstracts.algorithm.LogAlgorithm.leak_bound": [
+        "pyrate_limiter.buckets.redis_bucket 205:39 call  self._algorithm.leak_bound(self.rates, current_timestamp)"
+      ],
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates": [
+        "pyrate_limiter.buckets.redis_bucket 205:45 getattr  self.rates"
+      ],
+      "redis.Redis.zremrangebyscore": [
+        "pyrate_limiter.buckets.redis_bucket 202:43 call  self.redis.zremrangebyscore( self.bucket_key, 0, self._al..."
+      ],
+      "redis.asyncio.Redis.zremrangebyscore": [
+        "pyrate_limiter.buckets.redis_bucket 202:43 call  self.redis.zremrangebyscore( self.bucket_key, 0, self._al..."
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.now": {
+      "time.time_ns": [
+        "pyrate_limiter.buckets.redis_bucket 107:23 call  time_ns()"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek": {
+      "<builtin>.isinstance": [
+        "pyrate_limiter.buckets.redis_bucket 245:26 call  isinstance(items, list)"
+      ],
+      "inspect.isawaitable": [
+        "pyrate_limiter.buckets.redis_bucket 236:23 call  isawaitable(items)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._awaiting": [
+        "pyrate_limiter.buckets.redis_bucket 243:29 call  _awaiting()"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._handle_items": [
+        "pyrate_limiter.buckets.redis_bucket 246:29 call  _handle_items(items)"
+      ],
+      "redis.Redis.zrange": [
+        "pyrate_limiter.buckets.redis_bucket 217:34 call  self.redis.zrange( self.bucket_key, -1 - index, -1 - inde..."
+      ],
+      "redis.asyncio.Redis.zrange": [
+        "pyrate_limiter.buckets.redis_bucket 217:34 call  self.redis.zrange( self.bucket_key, -1 - index, -1 - inde..."
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._awaiting": {
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._handle_items": [
+        "pyrate_limiter.buckets.redis_bucket 241:37 call  _handle_items(items)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.peek._handle_items": {
+      "<builtin>.str": [
+        "pyrate_limiter.buckets.redis_bucket 233:42 call  str(item[0])"
+      ],
+      "pyrate_limiter.abstracts.rate.RateItem.__init__": [
+        "pyrate_limiter.buckets.redis_bucket 233:33 call  RateItem(name=str(item[0]), timestamp=item[1])"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": {
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put._handle_async": [
+        "pyrate_limiter.buckets.redis_bucket 195:33 call  _handle_async()"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_bucket.RedisBucket.put._handle_async": {
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record": [
+        "pyrate_limiter.buckets.redis_bucket 193:36 call  self._record(item, await decision)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._decision": {
+      "<builtin>.int": [
+        "pyrate_limiter.buckets.redis_state 99:33 call  int(reply[0])",
+        "pyrate_limiter.buckets.redis_state 99:48 call  int(reply[1])"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._parse": {
+      "<builtin>.any": [
+        "pyrate_limiter.buckets.redis_state 124:29 call  any(value is None for value in stored)"
+      ],
+      "<builtin>.bytes.decode": [
+        "pyrate_limiter.buckets.redis_state 128:46 call  value.decode()"
+      ],
+      "<builtin>.isinstance": [
+        "pyrate_limiter.buckets.redis_state 128:62 call  isinstance(value, bytes)"
+      ],
+      "pyrate_limiter.abstracts.algorithm.GCRA.decode": [
+        "pyrate_limiter.buckets.redis_state 128:32 call  algorithm.decode([value.decode() if isinstance(value, byt..."
+      ],
+      "pyrate_limiter.abstracts.algorithm.GCRA.initial": [
+        "pyrate_limiter.buckets.redis_state 125:37 call  algorithm.initial(rates)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._script": {
+      "<builtin>.TypeError": [
+        "pyrate_limiter.buckets.redis_state 57:28 call  TypeError(f\"{type(algorithm).__name__} has no Redis imple..."
+      ],
+      "<builtin>.dict.get": [
+        "pyrate_limiter.buckets.redis_state 59:35 call  self._scripts.get(lua)"
+      ],
+      "<builtin>.type": [
+        "pyrate_limiter.buckets.redis_state 57:36 call  type(algorithm)"
+      ],
+      "pyrate_limiter.abstracts.algorithm.GCRA.redis_script": [
+        "pyrate_limiter.buckets.redis_state 54:37 call  algorithm.redis_script()"
+      ],
+      "redis.Redis.register_script": [
+        "pyrate_limiter.buckets.redis_state 62:48 call  self.redis.register_script(lua)"
+      ],
+      "redis.asyncio.Redis.register_script": [
+        "pyrate_limiter.buckets.redis_state 62:48 call  self.redis.register_script(lua)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore._ttl_for": {
+      "<builtin>.max": [
+        "pyrate_limiter.buckets.redis_state 77:19 call  max(ceil(2 * rate.burst * rate.interval / rate.limit) for..."
+      ],
+      "math.ceil": [
+        "pyrate_limiter.buckets.redis_state 77:24 call  ceil(2 * rate.burst * rate.interval / rate.limit)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.check": {
+      "<builtin>.len": [
+        "pyrate_limiter.buckets.redis_state 83:80 call  len(rates)"
+      ],
+      "<builtin>.list.extend": [
+        "pyrate_limiter.buckets.redis_state 84:20 call  args.extend(algorithm.redis_args(rates))"
+      ],
+      "inspect.isawaitable": [
+        "pyrate_limiter.buckets.redis_state 88:23 call  isawaitable(reply)"
+      ],
+      "pyrate_limiter.abstracts.algorithm.GCRA.redis_args": [
+        "pyrate_limiter.buckets.redis_state 84:41 call  algorithm.redis_args(rates)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore._decision": [
+        "pyrate_limiter.buckets.redis_state 95:30 call  self._decision(rates, reply)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore._script": [
+        "pyrate_limiter.buckets.redis_state 86:29 call  self._script(algorithm)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore._ttl_for": [
+        "pyrate_limiter.buckets.redis_state 83:68 call  self._ttl_for(rates)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.check._await_decision": [
+        "pyrate_limiter.buckets.redis_state 93:35 call  _await_decision()"
+      ],
+      "redis.Redis.register_script": [
+        "pyrate_limiter.buckets.redis_state 86:40 call  self._script(algorithm)(keys=[self.key], args=args, clien..."
+      ],
+      "redis.asyncio.Redis.register_script": [
+        "pyrate_limiter.buckets.redis_state 86:40 call  self._script(algorithm)(keys=[self.key], args=args, clien..."
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.check._await_decision": {
+      "pyrate_limiter.buckets.redis_state.RedisStateStore._decision": [
+        "pyrate_limiter.buckets.redis_state 91:38 call  self._decision(rates, await reply)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.read": {
+      "<builtin>.len": [
+        "pyrate_limiter.buckets.redis_state 110:59 call  len(rates)"
+      ],
+      "<builtin>.range": [
+        "pyrate_limiter.buckets.redis_state 110:55 call  range(len(rates))"
+      ],
+      "inspect.isawaitable": [
+        "pyrate_limiter.buckets.redis_state 113:23 call  isawaitable(stored)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore._parse": [
+        "pyrate_limiter.buckets.redis_state 120:27 call  self._parse(algorithm, rates, stored)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.read._await_state": [
+        "pyrate_limiter.buckets.redis_state 118:32 call  _await_state()"
+      ],
+      "redis.Redis.hmget": [
+        "pyrate_limiter.buckets.redis_state 111:34 call  self.redis.hmget(self.key, fields)"
+      ],
+      "redis.asyncio.Redis.hmget": [
+        "pyrate_limiter.buckets.redis_state 111:34 call  self.redis.hmget(self.key, fields)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.read._await_state": {
+      "pyrate_limiter.buckets.redis_state.RedisStateStore._parse": [
+        "pyrate_limiter.buckets.redis_state 116:35 call  self._parse(algorithm, rates, await stored)"
+      ]
+    },
+    "pyrate_limiter.buckets.redis_state.RedisStateStore.reset": {
+      "inspect.isawaitable": [
+        "pyrate_limiter.buckets.redis_state 133:23 call  isawaitable(deleted)"
+      ],
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.reset._await_reset": [
+        "pyrate_limiter.buckets.redis_state 138:32 call  _await_reset()"
+      ],
+      "redis.Redis.delete": [
+        "pyrate_limiter.buckets.redis_state 131:36 call  self.redis.delete(self.key)"
+      ],
+      "redis.asyncio.Redis.delete": [
+        "pyrate_limiter.buckets.redis_state 131:36 call  self.redis.delete(self.key)"
+      ]
+    },
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.close": {
+      "logging.Logger.debug": [
+        "pyrate_limiter.buckets.sqlite_bucket 222:33 call  logger.debug(\"Exception %s closing sql connection\", e)"
+      ]
+    },
+    "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.init_from_file": {
+      "<builtin>.ImportError": [
+        "pyrate_limiter.buckets.sqlite_bucket 256:34 call  ImportError(\"filelock is required for file locking. Pleas..."
+      ],
+      "<builtin>.ValueError": [
+        "pyrate_limiter.buckets.sqlite_bucket 235:29 call  ValueError(\"db_path must be specified when using use_file..."
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count": {
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.read": [
+        "pyrate_limiter.buckets.state_bucket 187:32 call  self.store.read(self.algorithm, self.rates)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.count._await_count": [
+        "pyrate_limiter.buckets.state_bucket 194:32 call  _await_count()"
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.count._await_count": {
+      "pyrate_limiter.abstracts.algorithm.GCRA.consumed": [
+        "pyrate_limiter.buckets.state_bucket 192:47 call  self.algorithm.consumed(self.rates, await state, now)"
+      ],
+      "pyrate_limiter.abstracts.bucket.AbstractBucket.rates": [
+        "pyrate_limiter.buckets.state_bucket 192:53 getattr  self.rates"
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.flush": {
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.reset": [
+        "pyrate_limiter.buckets.state_bucket 182:32 call  self.store.reset()"
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.put": {
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.check": [
+        "pyrate_limiter.buckets.state_bucket 121:36 call  self.store.check(self.algorithm, self.rates, item.timesta..."
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put._await_decision": [
+        "pyrate_limiter.buckets.state_bucket 128:35 call  _await_decision()"
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.put._await_decision": {
+      "pyrate_limiter.abstracts.bucket.AbstractBucket._record": [
+        "pyrate_limiter.buckets.state_bucket 126:36 call  self._record(item, await decision)"
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting": {
+      "pyrate_limiter.buckets.redis_state.RedisStateStore.read": [
+        "pyrate_limiter.buckets.state_bucket 152:32 call  self.store.read(self.algorithm, self.rates)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.MultiprocessStateStore.read": [
+        "pyrate_limiter.buckets.state_bucket 152:32 call  self.store.read(self.algorithm, self.rates)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.waiting._await_wait": [
+        "pyrate_limiter.buckets.state_bucket 159:31 call  _await_wait()"
+      ]
+    },
+    "pyrate_limiter.buckets.state_bucket.StateBucket.waiting._await_wait": {
+      "pyrate_limiter.buckets.state_bucket.StateBucket._replay": [
+        "pyrate_limiter.buckets.state_bucket 157:36 call  self._replay(await state, item)"
+      ]
+    },
+    "pyrate_limiter.clocks.PostgresClock.now": {
+      "psycopg_pool.ConnectionPool.connection": [
+        "pyrate_limiter.clocks 82:37 call  self.pool.connection()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.cursor": [
+        "pyrate_limiter.clocks 87:34 call  connection.cursor()"
+      ],
+      "psycopg_pool.ConnectionPool.connection.cursor.execute": [
+        "pyrate_limiter.clocks 89:31 call  cursor.execute(query)"
+      ],
+      "psycopg_pool.ConnectionPool.connection.cursor.fetchone": [
+        "pyrate_limiter.clocks 90:38 call  cursor.fetchone()"
+      ],
+      "pyrate_limiter.clocks.AbstractClock._get_wall_ms": [
+        "pyrate_limiter.clocks 103:33 call  self._get_wall_ms()"
+      ]
+    },
+    "pyrate_limiter.extras.aiohttp_limiter": {
+      "logging.getLogger": [
+        "pyrate_limiter.extras.aiohttp_limiter 7:27 call  logging.getLogger(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.aiohttp_limiter.RateLimitedSession.__aexit__": {
+      "aiohttp.ClientSession.close": [
+        "pyrate_limiter.extras.aiohttp_limiter 91:34 call  self._session.close()"
+      ]
+    },
+    "pyrate_limiter.extras.aiohttp_limiter.RateLimitedSession.__init__": {
+      "aiohttp.ClientSession": [
+        "pyrate_limiter.extras.aiohttp_limiter 34:46 call  aiohttp.ClientSession(**kwargs)"
+      ]
+    },
+    "pyrate_limiter.extras.aiohttp_limiter.RateLimitedSession.close": {
+      "aiohttp.ClientSession.close": [
+        "pyrate_limiter.extras.aiohttp_limiter 102:34 call  self._session.close()"
+      ]
+    },
+    "pyrate_limiter.extras.aiohttp_limiter.RateLimitedSession.get": {
+      "aiohttp.ClientSession.get": [
+        "pyrate_limiter.extras.aiohttp_limiter 52:39 call  self._session.get(*a, **k)"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire_async": [
+        "pyrate_limiter.extras.aiohttp_limiter 51:46 call  self._limiter.try_acquire_async(self.name)"
+      ]
+    },
+    "pyrate_limiter.extras.aiohttp_limiter.RateLimitedSession.post": {
+      "aiohttp.ClientSession.post": [
+        "pyrate_limiter.extras.aiohttp_limiter 69:40 call  self._session.post(*a, **k)"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire_async": [
+        "pyrate_limiter.extras.aiohttp_limiter 68:46 call  self._limiter.try_acquire_async(self.name)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx2_limiter": {
+      "logging.getLogger": [
+        "pyrate_limiter.extras.httpx2_limiter 7:27 call  logging.getLogger(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx2_limiter.AsyncRateLimiterTransport.__init__": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx2_limiter 80:14 call  super()"
+      ],
+      "httpx2.AsyncHTTPTransport.__init__": [
+        "pyrate_limiter.extras.httpx2_limiter 80:25 call  super().__init__(**kwargs)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx2_limiter.AsyncRateLimiterTransport.handle_async_request": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx2_limiter 105:31 call  super()"
+      ],
+      "httpx2.AsyncHTTPTransport.handle_async_request": [
+        "pyrate_limiter.extras.httpx2_limiter 105:54 call  super().handle_async_request(request, **kwargs)"
+      ],
+      "logging.Logger.debug": [
+        "pyrate_limiter.extras.httpx2_limiter 104:21 call  logger.debug(\"Acquired lock\")"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire_async": [
+        "pyrate_limiter.extras.httpx2_limiter 102:45 call  self.limiter.try_acquire_async(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx2_limiter.RateLimiterTransport.__init__": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx2_limiter 31:14 call  super()"
+      ],
+      "httpx2.HTTPTransport.__init__": [
+        "pyrate_limiter.extras.httpx2_limiter 31:25 call  super().__init__(**kwargs)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx2_limiter.RateLimiterTransport.handle_request": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx2_limiter 56:21 call  super()"
+      ],
+      "httpx2.HTTPTransport.handle_request": [
+        "pyrate_limiter.extras.httpx2_limiter 56:38 call  super().handle_request(request, **kwargs)"
+      ],
+      "logging.Logger.debug": [
+        "pyrate_limiter.extras.httpx2_limiter 55:21 call  logger.debug(\"Acquired lock\")"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire": [
+        "pyrate_limiter.extras.httpx2_limiter 53:33 call  self.limiter.try_acquire(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx_limiter": {
+      "logging.getLogger": [
+        "pyrate_limiter.extras.httpx_limiter 7:27 call  logging.getLogger(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx_limiter.AsyncRateLimiterTransport.__init__": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx_limiter 80:14 call  super()"
+      ],
+      "httpx.AsyncHTTPTransport.__init__": [
+        "pyrate_limiter.extras.httpx_limiter 80:25 call  super().__init__(**kwargs)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx_limiter.AsyncRateLimiterTransport.handle_async_request": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx_limiter 105:31 call  super()"
+      ],
+      "httpx.AsyncHTTPTransport.handle_async_request": [
+        "pyrate_limiter.extras.httpx_limiter 105:54 call  super().handle_async_request(request, **kwargs)"
+      ],
+      "logging.Logger.debug": [
+        "pyrate_limiter.extras.httpx_limiter 104:21 call  logger.debug(\"Acquired lock\")"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire_async": [
+        "pyrate_limiter.extras.httpx_limiter 102:45 call  self.limiter.try_acquire_async(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx_limiter.RateLimiterTransport.__init__": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx_limiter 31:14 call  super()"
+      ],
+      "httpx.HTTPTransport.__init__": [
+        "pyrate_limiter.extras.httpx_limiter 31:25 call  super().__init__(**kwargs)"
+      ]
+    },
+    "pyrate_limiter.extras.httpx_limiter.RateLimiterTransport.handle_request": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.httpx_limiter 56:21 call  super()"
+      ],
+      "httpx.HTTPTransport.handle_request": [
+        "pyrate_limiter.extras.httpx_limiter 56:38 call  super().handle_request(request, **kwargs)"
+      ],
+      "logging.Logger.debug": [
+        "pyrate_limiter.extras.httpx_limiter 55:21 call  logger.debug(\"Acquired lock\")"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire": [
+        "pyrate_limiter.extras.httpx_limiter 53:33 call  self.limiter.try_acquire(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.requests_limiter": {
+      "logging.getLogger": [
+        "pyrate_limiter.extras.requests_limiter 8:27 call  logging.getLogger(__name__)"
+      ]
+    },
+    "pyrate_limiter.extras.requests_limiter.RateLimitedRequestsSession.__init__": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.requests_limiter 27:14 call  super()"
+      ],
+      "requests.Session.__init__": [
+        "pyrate_limiter.extras.requests_limiter 27:25 call  super().__init__()"
+      ]
+    },
+    "pyrate_limiter.extras.requests_limiter.RateLimitedRequestsSession.close": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.requests_limiter 50:21 call  super()"
+      ],
+      "requests.Session.close": [
+        "pyrate_limiter.extras.requests_limiter 50:29 call  super().close()"
+      ]
+    },
+    "pyrate_limiter.extras.requests_limiter.RateLimitedRequestsSession.request": {
+      "<builtin>.super": [
+        "pyrate_limiter.extras.requests_limiter 44:21 call  super()"
+      ],
+      "pyrate_limiter.limiter.Limiter.try_acquire": [
+        "pyrate_limiter.extras.requests_limiter 43:34 call  self._limiter.try_acquire(self._name)"
+      ],
+      "requests.Session.request": [
+        "pyrate_limiter.extras.requests_limiter 44:31 call  super().request(method, url, *args, **kwargs)"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter._blocking_retry_sync": {
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.limiter 357:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+        "pyrate_limiter.limiter 357:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.waiting": [
+        "pyrate_limiter.limiter 370:43 call  bucket.waiting(item)"
+      ],
+      "pyrate_limiter.limiter.Limiter._handle_async_result": [
+        "pyrate_limiter.limiter 362:53 call  self._handle_async_result( self._wait_after_async_put(buc..."
+      ],
+      "pyrate_limiter.limiter.Limiter._wait_after_async_put": [
+        "pyrate_limiter.limiter 363:51 call  self._wait_after_async_put(bucket, item, re_acquire, bloc..."
+      ],
+      "pyrate_limiter.limiter.combined_lock": [
+        "pyrate_limiter.limiter 356:31 call  combined_lock(self.lock, blocking=True, timeout=remaining)"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter._cleanup_awaitable": {
+      "<builtin>.callable": [
+        "pyrate_limiter.limiter 566:20 call  callable(cancel)",
+        "pyrate_limiter.limiter 570:20 call  callable(close)"
+      ],
+      "<builtin>.getattr": [
+        "pyrate_limiter.limiter 565:25 call  getattr(awaitable, \"cancel\", None)",
+        "pyrate_limiter.limiter 569:24 call  getattr(awaitable, \"close\", None)"
+      ],
+      "asyncio.isfuture": [
+        "pyrate_limiter.limiter 557:28 call  asyncio.isfuture(awaitable)"
+      ],
+      "inspect.iscoroutine": [
+        "pyrate_limiter.limiter 561:23 call  iscoroutine(awaitable)"
+      ],
+      "types.CoroutineType.close": [
+        "pyrate_limiter.limiter 562:28 call  awaitable.close()"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter._delay_waiter": {
+      "<builtin>.TimeoutError": [
+        "pyrate_limiter.limiter 270:39 call  TimeoutError()"
+      ],
+      "pyrate_limiter.buckets.in_memory_bucket.InMemoryBucket.put": [
+        "pyrate_limiter.limiter 273:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put": [
+        "pyrate_limiter.limiter 273:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.limiter 273:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+        "pyrate_limiter.limiter 273:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put": [
+        "pyrate_limiter.limiter 273:40 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put": [
+        "pyrate_limiter.limiter 273:40 call  bucket.put(item)"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter._delay_waiter._resume_async": {
+      "pyrate_limiter.limiter.Limiter._delay_waiter": [
+        "pyrate_limiter.limiter 282:55 call  self._delay_waiter( bucket, item, blocking=blocking, _for..."
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter._delay_waiter._retry_async": {
+      "<builtin>.TimeoutError": [
+        "pyrate_limiter.limiter 226:47 call  TimeoutError()",
+        "pyrate_limiter.limiter 238:43 call  TimeoutError()"
+      ],
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.waiting": [
+        "pyrate_limiter.limiter 248:43 call  bucket.waiting(item)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.limiter 244:35 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+        "pyrate_limiter.limiter 244:35 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.waiting": [
+        "pyrate_limiter.limiter 248:43 call  bucket.waiting(item)"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter._try_acquire": {
+      "<builtin>.RuntimeError": [
+        "pyrate_limiter.limiter 601:39 call  RuntimeError(\"Can't use async bucket with sync decorator\")",
+        "pyrate_limiter.limiter 610:39 call  RuntimeError(\"Can't use async bucket with sync decorator\")",
+        "pyrate_limiter.limiter 621:35 call  RuntimeError(\"Can't use async bucket with sync decorator\")",
+        "pyrate_limiter.limiter 628:39 call  RuntimeError(\"Can't use async bucket with sync decorator\")"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.limiter 623:33 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+        "pyrate_limiter.limiter 623:33 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.limiter.Limiter._cleanup_awaitable": [
+        "pyrate_limiter.limiter 600:44 call  self._cleanup_awaitable(item)",
+        "pyrate_limiter.limiter 609:44 call  self._cleanup_awaitable(bucket)",
+        "pyrate_limiter.limiter 627:44 call  self._cleanup_awaitable(acquire)"
+      ],
+      "pyrate_limiter.limiter.combined_lock": [
+        "pyrate_limiter.limiter 588:27 call  combined_lock(self.lock, blocking=blocking, timeout=timeout)"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter.as_decorator.deco.wrapper": {
+      "pyrate_limiter.limiter.Limiter._cleanup_awaitable": [
+        "pyrate_limiter.limiter 687:52 call  self._cleanup_awaitable(r)"
+      ]
+    },
+    "pyrate_limiter.limiter.Limiter.handle_bucket_put": {
+      "pyrate_limiter.abstracts.wrappers.BucketAsyncWrapper.put": [
+        "pyrate_limiter.limiter 303:29 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.mp_bucket.MultiprocessBucket.put": [
+        "pyrate_limiter.limiter 303:29 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.postgres.PostgresBucket.put": [
+        "pyrate_limiter.limiter 303:29 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.put": [
+        "pyrate_limiter.limiter 303:29 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.sqlite_bucket.SQLiteBucket.put": [
+        "pyrate_limiter.limiter 303:29 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.buckets.state_bucket.StateBucket.put": [
+        "pyrate_limiter.limiter 303:29 call  bucket.put(item)"
+      ],
+      "pyrate_limiter.limiter.Limiter._wait_after_async_put": [
+        "pyrate_limiter.limiter 306:46 call  self._wait_after_async_put(bucket, item, acquire, blockin..."
+      ]
+    },
+    "pyrate_limiter.limiter.SingleBucketFactory.wrap_item": {
+      "pyrate_limiter.buckets.redis_bucket.RedisBucket.now": [
+        "pyrate_limiter.limiter 46:30 call  self.bucket.now()"
+      ]
+    }
+  },
+  "notes": {
+    "pyrate_limiter.abstracts.algorithm 116:62 call  peek_timestamp(offset)": [
+      "peek_timestamp is typed as a bare Callable (no evidence for a package value, B2); the package's own calls of decide pass the local function peek_timestamp of PostgresBucket.put (postgres.py:185) and the bound method SQLiteBucket._peek_timestamp (sqlite_bucket.py:142); other callables are client callbacks"
+    ],
+    "pyrate_limiter.abstracts.bucket 104:26 call  self.put(item)": [
+      "every package bucket inherits put_decision"
+    ],
+    "pyrate_limiter.abstracts.bucket 167:47 call  self._algorithm.retry_after(self.failing_rate, item.times...": [
+      "RateItem.__init__ retains its int-typed weight unchanged (rate.py:65-68). An int subclass is an admitted nominal int value. Two public put calls first fill the bucket and then record a denial with weight 2. waiting with weight Weight(1) passes positivity/max-weight checks, differs from the recorded weight, and therefore evaluates SlidingWindowLog.blocking_offset. Its rate.limit - weight at algorithm.py:140 dispatches the client subtype reflected subtraction, which can return None. The offset-is-None arm directly calls the known package SlidingWindowLog.retry_after at bucket.py:167. Client arithmetic and its return stay unnamed under B5; their control-flow effect does not erase the package call. No internal assignment, failed object reuse or client subclass of a package class is required."
+    ],
+    "pyrate_limiter.abstracts.bucket 169:31 call  self.peek(offset)": [
+      "self is an InMemoryBucket, MultiprocessBucket (inherits InMemoryBucket.peek), RedisBucket, PostgresBucket or SQLiteBucket"
+    ],
+    "pyrate_limiter.abstracts.bucket 210:19 call  self.close()": [
+      "self is any package bucket; InMemoryBucket, MultiprocessBucket, RedisBucket and BucketAsyncWrapper inherit AbstractBucket.close"
+    ],
+    "pyrate_limiter.abstracts.bucket 253:35 call  bucket.leak(0)": [
+      "reached only when bucket.is_async is None (judgement 5): a RedisBucket (it keeps AbstractBucket.is_async = None) or a StateBucket whose store has is_async None (RedisStateStore, state_bucket.py:114); InMemoryBucket, MultiprocessBucket, SQLiteBucket and PostgresBucket set False, BucketAsyncWrapper True, and the local stores False"
+    ],
+    "pyrate_limiter.abstracts.bucket 286:37 call  bucket.now()": [
+      "bucket is a registered bucket: any package bucket (register is typed AbstractBucket); InMemoryBucket, MultiprocessBucket, StateBucket and PostgresBucket inherit AbstractBucket.now"
+    ],
+    "pyrate_limiter.abstracts.bucket 292:39 call  bucket.leak(now)": [
+      "any registered package bucket"
+    ],
+    "pyrate_limiter.abstracts.bucket 380:30 call  bucket_class(*args, **kwargs)": [
+      "bucket_class is typed Type[AbstractBucket]: every concrete package bucket class fits (B2); the package never calls create, the README's PerNameFactory passes InMemoryBucket; AbstractBucket itself is abstract and cannot be instantiated"
+    ],
+    "pyrate_limiter.abstracts.bucket 430:29 call  logger.debug(\"Exception %s (%s) deleting bucket %r\", type...": [
+      "the arguments are a str, an exception and a bucket, whose repr is object.__repr__ (no package bucket defines __repr__ or __str__)"
+    ],
+    "pyrate_limiter.abstracts.bucket 450:24 call  logger.info(\"Exception %s (%s) deleting bucket %r\", type(...": [
+      "the arguments are a str, an exception and the Leaker, whose repr is object.__repr__"
+    ],
+    "pyrate_limiter.abstracts.bucket 455:29 call  bucket.close()": [
+      "bucket is any package bucket that the factory holds; InMemoryBucket, MultiprocessBucket, RedisBucket and BucketAsyncWrapper inherit AbstractBucket.close"
+    ],
+    "pyrate_limiter.abstracts.bucket 457:28 call  logger.info(\"Exception %s (%s) deleting bucket %r\", type(...": [
+      "the arguments are a str, an exception and a bucket (object.__repr__)"
+    ],
+    "pyrate_limiter.abstracts.bucket 66:31 call  self._clock.now()": [
+      "self is an InMemoryBucket, MultiprocessBucket, StateBucket or PostgresBucket (the other buckets override now). self._clock is the class default MonotonicClock() (bucket.py:29), MonotonicClock() (mp_bucket.py:33), StateBucket's clock argument (typed Optional[AbstractClock]) or its store's default_clock (MonotonicClock, or WallClock for RedisStateStore), PostgresClock(pool) (postgres.py:89), or a clock that the client assigns: the README documents `bucket._clock = <clock>` for the buckets that delegate to self._clock, and the attribute is typed AbstractClock (bucket.py:29), so every concrete package clock fits (B2)"
+    ],
+    "pyrate_limiter.abstracts.wrappers 22:33 call  self.bucket.put(item)": [
+      "self.bucket is the wrapped bucket (typed AbstractBucket, checked with isinstance at line 18): any package bucket, also another BucketAsyncWrapper (judgement 6)"
+    ],
+    "pyrate_limiter.abstracts.wrappers 30:35 call  self.bucket.count()": [
+      "any package bucket; MultiprocessBucket inherits InMemoryBucket.count"
+    ],
+    "pyrate_limiter.abstracts.wrappers 38:34 call  self.bucket.leak(current_timestamp)": [
+      "any package bucket"
+    ],
+    "pyrate_limiter.abstracts.wrappers 47:35 call  self.bucket.flush()": [
+      "any package bucket; MultiprocessBucket inherits InMemoryBucket.flush"
+    ],
+    "pyrate_limiter.abstracts.wrappers 56:32 call  self.bucket.peek(index)": [
+      "any package bucket; MultiprocessBucket inherits InMemoryBucket.peek"
+    ],
+    "pyrate_limiter.abstracts.wrappers 65:35 call  self.bucket.waiting(item)": [
+      "any package bucket; the log buckets inherit AbstractBucket.waiting"
+    ],
+    "pyrate_limiter.abstracts.wrappers 74:31 call  self.bucket.now()": [
+      "any package bucket; InMemoryBucket, MultiprocessBucket, StateBucket and PostgresBucket inherit AbstractBucket.now"
+    ],
+    "pyrate_limiter.abstracts.wrappers 78:28 getattr  self.bucket.failing_rate": [
+      "the wrapped bucket can be another BucketAsyncWrapper (judgement 6); for the other buckets failing_rate is an attribute"
+    ],
+    "pyrate_limiter.abstracts.wrappers 83:28 getattr  self.bucket._last_wait": [
+      "the wrapped bucket can be another BucketAsyncWrapper (judgement 6)"
+    ],
+    "pyrate_limiter.abstracts.wrappers 87:28 getattr  self.bucket._algorithm": [
+      "the wrapped bucket can be another BucketAsyncWrapper (judgement 6)"
+    ],
+    "pyrate_limiter.abstracts.wrappers 91:28 getattr  self.bucket.rates": [
+      "any package bucket; all but BucketAsyncWrapper inherit the AbstractBucket property"
+    ],
+    "pyrate_limiter.abstracts.wrappers 96:21 setattr  self.bucket.rates": [
+      "the setter of the wrapped bucket's property (getter and setter are one node)"
+    ],
+    "pyrate_limiter.buckets.postgres 104:29 call  sql.Identifier(self._full_tbl)": [
+      "missing module (judgement 7): psycopg is not installed in the test environment; `from psycopg import sql` (line 87) makes sql the stub psycopg.sql"
+    ],
+    "pyrate_limiter.buckets.postgres 106:75 call  sql.SQL(Queries.CREATE_BUCKET_TABLE).format(table=tbl)": [
+      "missing module: format of an instance of the stub psycopg.sql.SQL; the fields are psycopg Identifiers, no package object"
+    ],
+    "pyrate_limiter.buckets.postgres 127:34 call  self.pool.connection()": [
+      "missing module (judgement 7): pool is typed psycopg_pool.ConnectionPool (imported under TYPE_CHECKING, line 28); psycopg_pool is not installed, so the callee is named by the micro-benchmark rules for a missing module; the real result is a psycopg.Connection"
+    ],
+    "pyrate_limiter.buckets.postgres 131:28 call  self._get_conn()": [
+      "_get_conn is decorated with @contextmanager (line 125): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "pyrate_limiter.buckets.postgres 132:25 call  conn.execute(\"SELECT pg_advisory_xact_lock(%s)\", (advisor...": [
+      "missing module: conn is the instance of the stub psycopg_pool.ConnectionPool.connection that the with statement of _get_conn gives and yields (line 127)"
+    ],
+    "pyrate_limiter.buckets.postgres 147:28 call  self._get_conn()": [
+      "@contextmanager (line 125)"
+    ],
+    "pyrate_limiter.buckets.postgres 160:29 call  conn.execute(self._q_lock)": [
+      "missing module: conn is the stub instance yielded by _get_conn"
+    ],
+    "pyrate_limiter.buckets.postgres 162:29 call  logger.debug(\"LockNotAvailable\")": [
+      "reached when the database refuses the NOWAIT lock (psycopg raises LockNotAvailable): a branch that the library's answer decides runs (README, missing modules)"
+    ],
+    "pyrate_limiter.buckets.postgres 167:51 call  self._algorithm.window_start(rate, item.timestamp)": [
+      "SlidingWindowLog (default) or the algorithm argument, typed Optional[LogAlgorithm]"
+    ],
+    "pyrate_limiter.buckets.postgres 169:34 call  cur.fetchone()": [
+      "missing module: cur is the instance of the stub that conn.execute returns (the real class is psycopg.Cursor)"
+    ],
+    "pyrate_limiter.buckets.postgres 170:22 call  cur.close()": [
+      "missing module: cur is a stub instance (a psycopg cursor)"
+    ],
+    "pyrate_limiter.buckets.postgres 174:40 call  conn.execute(self._q_peek, (offset,))": [
+      "missing module: conn is the stub instance of the enclosing put (line 147)"
+    ],
+    "pyrate_limiter.buckets.postgres 180:46 call  self._algorithm.decide( self.rates, counts, item.weight, ...": [
+      "decide calls peek_timestamp back itself (its edge, algorithm.py:116)"
+    ],
+    "pyrate_limiter.buckets.postgres 210:28 call  self._get_conn()": [
+      "@contextmanager (line 125)"
+    ],
+    "pyrate_limiter.buckets.postgres 224:28 call  self._get_conn()": [
+      "@contextmanager (line 125)"
+    ],
+    "pyrate_limiter.buckets.postgres 234:28 call  self._get_conn()": [
+      "@contextmanager (line 125)"
+    ],
+    "pyrate_limiter.buckets.postgres 249:28 call  self._get_conn()": [
+      "@contextmanager (line 125)"
+    ],
+    "pyrate_limiter.buckets.postgres 24:35 call  table.encode()": [
+      "table is typed str"
+    ],
+    "pyrate_limiter.buckets.postgres 261:32 call  self.pool.close()": [
+      "missing module (judgement 7): pool is typed psycopg_pool.ConnectionPool"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 117:40 call  redis.script_load(LuaScript.PUT_ITEM)": [
+      "missing module (judgement 7): redis is typed Union[Redis, AsyncRedis] (redis.Redis and redis.asyncio.Redis, imported under TYPE_CHECKING); redis is not installed, so each class is named as a stub, and the method has both names"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 124:27 call  cls(rates, redis, bucket_key, script_hash, algorithm)": [
+      "cls of the enclosing classmethod: RedisBucket"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 128:19 call  cls(rates, redis, bucket_key, script_hash, algorithm)": [
+      "cls is RedisBucket (the package defines no subclass; the README's RedisTimeBucket is client code)"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 149:53 call  self._algorithm.blocking_offset(rate, item.weight)": [
+      "SlidingWindowLog (default) or FixedWindow (inherits LogAlgorithm.blocking_offset)"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 158:35 call  self.redis.evalsha(self.script_hash, len(keys), *keys, *a...": [
+      "missing module (judgement 7): self.redis is typed Union[Redis, AsyncRedis]"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 202:43 call  self.redis.zremrangebyscore( self.bucket_key, 0, self._al...": [
+      "missing module (judgement 7)"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 211:33 call  self.redis.delete(self.bucket_key)": [
+      "missing module (judgement 7)"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 214:32 call  self.redis.zcard(self.bucket_key)": [
+      "missing module (judgement 7)"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 217:34 call  self.redis.zrange( self.bucket_key, -1 - index, -1 - inde...": [
+      "missing module (judgement 7); the score_cast_func int is a builtin that the library calls back, no edge"
+    ],
+    "pyrate_limiter.buckets.redis_bucket 233:42 call  str(item[0])": [
+      "item[0] is the sorted-set member that redis returns (bytes or str)"
+    ],
+    "pyrate_limiter.buckets.redis_state 111:34 call  self.redis.hmget(self.key, fields)": [
+      "missing module (judgement 7)"
+    ],
+    "pyrate_limiter.buckets.redis_state 125:37 call  algorithm.initial(rates)": [
+      "algorithm is typed StateAlgorithm: GCRA or TokenBucket"
+    ],
+    "pyrate_limiter.buckets.redis_state 128:46 call  value.decode()": [
+      "value is bytes (isinstance at 128:62)"
+    ],
+    "pyrate_limiter.buckets.redis_state 131:36 call  self.redis.delete(self.key)": [
+      "missing module (judgement 7)"
+    ],
+    "pyrate_limiter.buckets.redis_state 54:37 call  algorithm.redis_script()": [
+      "algorithm is typed StateAlgorithm: the package's concrete ones are GCRA and TokenBucket (StateBucket's default GCRA() or its algorithm argument)"
+    ],
+    "pyrate_limiter.buckets.redis_state 57:28 call  TypeError(f\"{type(algorithm).__name__} has no Redis imple...": [
+      "reached for a client StateAlgorithm whose redis_script returns None"
+    ],
+    "pyrate_limiter.buckets.redis_state 62:48 call  self.redis.register_script(lua)": [
+      "missing module (judgement 7): self.redis is typed Union[\"Redis\", \"AsyncRedis\"]"
+    ],
+    "pyrate_limiter.buckets.redis_state 84:41 call  algorithm.redis_args(rates)": [
+      "algorithm is the StateBucket's algorithm: GCRA or TokenBucket"
+    ],
+    "pyrate_limiter.buckets.redis_state 86:40 call  self._script(algorithm)(keys=[self.key], args=args, clien...": [
+      "missing module (judgement 8): _script returns what self.redis.register_script returned (line 62, kept in self._scripts): an instance of the stub redis.Redis.register_script or redis.asyncio.Redis.register_script; calling an instance of a stub is a call of that stub (micro-benchmark external/decorator). The real object is a redis Script whose __call__ runs EVALSHA"
+    ],
+    "pyrate_limiter.buckets.sqlite_bucket 256:34 call  ImportError(\"filelock is required for file locking. Pleas...": [
+      "optional import of filelock (lines 250-256): both sides run (README default)"
+    ],
+    "pyrate_limiter.buckets.state_bucket 121:36 call  self.store.check(self.algorithm, self.rates, item.timesta...": [
+      "self.store is InMemoryStateStore() (default) or the store argument, typed Optional[StateStore]: the package's three concrete stores (StateStore is abstract by abc)"
+    ],
+    "pyrate_limiter.clocks 82:37 call  self.pool.connection()": [
+      "missing module (judgement 7): pool is typed \"ConnectionPool\" of psycopg_pool (imported under TYPE_CHECKING); psycopg_pool is not installed"
+    ],
+    "pyrate_limiter.clocks 87:34 call  connection.cursor()": [
+      "missing module: connection is the stub instance that the with item gives (a psycopg.Connection in reality)"
+    ],
+    "pyrate_limiter.extras.aiohttp_limiter 34:46 call  aiohttp.ClientSession(**kwargs)": [
+      "missing module (judgement 7): aiohttp is not installed in the test environment; the package only uses it, no package definition is made through it"
+    ],
+    "pyrate_limiter.extras.aiohttp_limiter 51:46 call  self._limiter.try_acquire_async(self.name)": [
+      "limiter is typed Limiter (the package defines no subclass)"
+    ],
+    "pyrate_limiter.extras.aiohttp_limiter 52:39 call  self._session.get(*a, **k)": [
+      "missing module: self._session is the instance of the stub aiohttp.ClientSession made in __init__"
+    ],
+    "pyrate_limiter.extras.httpx2_limiter 105:54 call  super().handle_async_request(request, **kwargs)": [
+      "read from httpx2 2.15.1 (judgement 9): a coroutine function that awaits the connection pool, no method of self"
+    ],
+    "pyrate_limiter.extras.httpx2_limiter 31:25 call  super().__init__(**kwargs)": [
+      "the base class httpx2.HTTPTransport is a definition made through a library that is not installed; read from httpx2 2.15.1 (judgement 9): its __init__ calls no method that the package overrides"
+    ],
+    "pyrate_limiter.extras.httpx2_limiter 53:33 call  self.limiter.try_acquire(__name__)": [
+      "limiter is typed Limiter"
+    ],
+    "pyrate_limiter.extras.httpx2_limiter 56:38 call  super().handle_request(request, **kwargs)": [
+      "read from httpx2 2.15.1 (judgement 9): it calls the connection pool, no method of self"
+    ],
+    "pyrate_limiter.extras.httpx2_limiter 80:25 call  super().__init__(**kwargs)": [
+      "read from httpx2 2.15.1 (judgement 9)"
+    ],
+    "pyrate_limiter.extras.httpx_limiter 105:54 call  super().handle_async_request(request, **kwargs)": [
+      "read from httpx 0.28.1 (judgement 9): a coroutine function that awaits the connection pool, no method of self"
+    ],
+    "pyrate_limiter.extras.httpx_limiter 31:25 call  super().__init__(**kwargs)": [
+      "the base class httpx.HTTPTransport is a definition made through a library that is not installed; read from httpx 0.28.1 (judgement 9): its __init__ calls no method that the package overrides"
+    ],
+    "pyrate_limiter.extras.httpx_limiter 53:33 call  self.limiter.try_acquire(__name__)": [
+      "limiter is typed Limiter"
+    ],
+    "pyrate_limiter.extras.httpx_limiter 56:38 call  super().handle_request(request, **kwargs)": [
+      "read from httpx 0.28.1 (judgement 9): it calls the connection pool, no method of self"
+    ],
+    "pyrate_limiter.extras.httpx_limiter 80:25 call  super().__init__(**kwargs)": [
+      "read from httpx 0.28.1 (judgement 9)"
+    ],
+    "pyrate_limiter.extras.requests_limiter 27:25 call  super().__init__()": [
+      "the base class requests.Session is a definition made through a library that is not installed; read from requests 2.34.2 (judgement 9): Session.__init__ calls self.mount, which the package does not override"
+    ],
+    "pyrate_limiter.extras.requests_limiter 43:34 call  self._limiter.try_acquire(self._name)": [
+      "limiter is typed \"Limiter\""
+    ],
+    "pyrate_limiter.extras.requests_limiter 44:31 call  super().request(method, url, *args, **kwargs)": [
+      "read from requests 2.34.2 (judgement 9): Session.request calls self.prepare_request, self.merge_environment_settings and self.send, none of which the package overrides (it overrides request, close and __init__)"
+    ],
+    "pyrate_limiter.extras.requests_limiter 50:29 call  super().close()": [
+      "read from requests 2.34.2 (judgement 9): it closes the adapters"
+    ],
+    "pyrate_limiter.limiter 244:35 call  bucket.put(item)": [
+      "bucket of the enclosing _delay_waiter: any package bucket"
+    ],
+    "pyrate_limiter.limiter 273:40 call  bucket.put(item)": [
+      "this loop runs only when waiting returned a plain int and _force_async is False (line 219): every package bucket but BucketAsyncWrapper, whose waiting is a coroutine function (judgement 10)"
+    ],
+    "pyrate_limiter.limiter 303:29 call  bucket.put(item)": [
+      "bucket is typed AbstractBucket: any package bucket"
+    ],
+    "pyrate_limiter.limiter 356:31 call  combined_lock(self.lock, blocking=True, timeout=remaining)": [
+      "combined_lock is decorated with @contextmanager (line 74): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "pyrate_limiter.limiter 357:40 call  bucket.put(item)": [
+      "the only caller, _try_acquire (line 658), passes a bucket whose first put returned a plain value (line 625): every package bucket but BucketAsyncWrapper, whose put is a coroutine function (judgement 10)"
+    ],
+    "pyrate_limiter.limiter 370:43 call  bucket.waiting(item)": [
+      "as at 357:40 (judgement 10)"
+    ],
+    "pyrate_limiter.limiter 46:30 call  self.bucket.now()": [
+      "self.bucket is the bucket of __init__, typed AbstractBucket: any package bucket; InMemoryBucket, MultiprocessBucket, StateBucket and PostgresBucket inherit AbstractBucket.now"
+    ],
+    "pyrate_limiter.limiter 562:28 call  awaitable.close()": [
+      "awaitable is a coroutine (iscoroutine at 561): the wrap_async coroutine of SingleBucketFactory.wrap_item, a coroutine of an async bucket's put, or the coroutine that _try_acquire returns to the sync decorator"
+    ],
+    "pyrate_limiter.limiter 588:27 call  combined_lock(self.lock, blocking=blocking, timeout=timeout)": [
+      "@contextmanager (line 74): contextlib's helper calls the generator function back"
+    ],
+    "pyrate_limiter.limiter 623:33 call  bucket.put(item)": [
+      "bucket is the factory's bucket (isinstance AbstractBucket at line 613): any package bucket"
+    ]
+  },
+  "trace": "dynamic/pyrate-limiter.json"
+}

@@ -1,0 +1,1378 @@
+# Call-site ledger of argcomplete at 0571dc489d9543b40f1bcbc6cbac4377906b76fd.
+# Hand-written from the source; judgements in argcomplete.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# argcomplete.md shows how this ledger applies them. In short:
+# - The parser that a client passes is an argparse.ArgumentParser (annotation,
+#   finders.py:40, :56, :81; B4): a method call on it is an edge to the
+#   argparse method. Its actions are argparse objects that the client's
+#   add_argument calls made: a package check can fix their class
+#   (issubclass at finders.py:282, the safe_actions set at :286). The
+#   package-created default help action and the public script parser actions
+#   also retain concrete classes; arbitrary client-created actions stay opaque.
+# - _patch_argument_parser (finders.py:245) gives each parser that it patches
+#   a class with the bases (IntrospectiveArgumentParser, the old class), and
+#   each action of it the class IntrospectAction (a subclass of the old class
+#   of the action). argparse's parse_known_args then calls back
+#   IntrospectiveArgumentParser._parse_known_args, which calls each action.
+# - Completer roles are separate (B2). default_completer is annotated
+#   BaseCompleter and admits its constructible public package subclasses
+#   and BaseCompleter itself. action.completer has the ChoicesCompleter/
+#   EnvironCompleter documented assignments and the SuppressCompleter test
+#   assignment. The package also constructs ChoicesCompleter from choices.
+#   A client function is a client callback.
+# - packages._shlex.shlex is private (rule C). The package makes one shlex,
+#   the lexer of split_line (lexers.py:12-14), with posix=True,
+#   whitespace_split=True, debug=0, source=None, no punctuation_chars, and the
+#   lexer never leaves split_line. Sites that need another state never run
+#   (B1 with B2: stored values; lead's rulings on judgements 1 and 2): in
+#   __init__, get_token and read_token, and also in the methods that the
+#   package never calls (push_token, push_source, pop_source, sourcehook),
+#   whose receiver is the same lexer (debug 0, infile None, instream a StringIO).
+# - An inherited method of an outside object is named by the class of the
+#   receiver (README; lead's ruling N1 at finders.py:290).
+# - The tests replace os.environ with a dict and pass sys.exit as exit_method:
+#   those trace edges are in argcomplete.rejected.json.
+default reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: no shlex object is iterated, unpacked or searched with `in` at this site; the package makes one shlex, the lexer of split_line (lexers.py:12), and reads it only with get_token (lexers.py:39); the iterated and searched values are strs, lists, tuples, dicts, sets, dict views, deques, generators, os.environ, argparse objects and the lines of files
+
+== argcomplete
+
+[argcomplete]
+12:50 call  CompletionFinder()
+    -> argcomplete.finders.CompletionFinder.__init__
+
+== argcomplete._check_console_script
+
+[argcomplete._check_console_script]
+63:13 call  main()
+    -> argcomplete._check_console_script.main
+    reject *: main is this module's own function (line 24)
+    note: the `if __name__ == "__main__":` block is code of the module (README, Edges)
+65:17 call  sys.exit(str(e))
+    -> sys.exit
+65:21 call  str(e)
+    -> <builtin>.str
+    note: e is an ArgcompleteMarkerNotFound, a RuntimeError subclass without __str__; str() runs BaseException.__str__ (outside, implicit)
+
+[argcomplete._check_console_script.main]
+30:28 call  os.path.basename(script_path)
+    -> os.path.basename
+32:64 call  importlib_entry_points()
+    -> importlib.metadata.entry_points
+42:40 call  ArgcompleteMarkerNotFound("no entry point found matching ...
+    -> <builtin>.RuntimeError.__init__
+    note: ArgcompleteMarkerNotFound (_check_module.py:16) defines no __init__; the first __init__ of its MRO is RuntimeError's
+44:57 call  entry_point.value.split(":", 1)
+    -> <builtin>.str.split
+    note: entry_point is an importlib.metadata.EntryPoint; its value is a str
+47:14 call  open(script_path)
+    -> <builtin>.open
+48:24 call  f.read()
+    -> io.TextIOWrapper.read
+    note: f is the text file that open() returns
+49:34 call  "from {} import {}".format(module_name, function_name)
+    -> <builtin>.str.format
+50:40 call  ArgcompleteMarkerNotFound("does not appear to be a consol...
+    -> <builtin>.RuntimeError.__init__
+51:31 call  "sys.exit({}())".format(function_name)
+    -> <builtin>.str.format
+52:40 call  ArgcompleteMarkerNotFound("does not appear to be a consol...
+    -> <builtin>.RuntimeError.__init__
+55:14 call  open(find(module_name, return_package=True))
+    -> <builtin>.open
+55:19 call  find(module_name, return_package=True)
+    -> argcomplete._check_module.find
+56:22 call  f.read(1024)
+    -> io.TextIOWrapper.read
+    note: f is the text file that open() returns
+58:40 call  ArgcompleteMarkerNotFound("marker not found")
+    -> <builtin>.RuntimeError.__init__
+
+== argcomplete._check_module
+
+[argcomplete._check_module]
+70:13 call  main()
+    -> argcomplete._check_module.main
+    reject *: main is this module's own function (line 48)
+    note: the `if __name__ == "__main__":` block is code of the module (README, Edges)
+72:17 call  sys.exit(str(e))
+    -> sys.exit
+72:21 call  str(e)
+    -> <builtin>.str
+    note: e is an ArgcompleteMarkerNotFound, a RuntimeError subclass without __str__
+
+[argcomplete._check_module.find]
+21:23 call  name.split(".")
+    -> <builtin>.str.split
+    note: name is a module name: sys.argv[1] (line 50) or the module part of an entry point value (_check_console_script.py:44)
+23:39 call  range(len(names))
+    -> <builtin>.range
+23:43 call  len(names)
+    -> <builtin>.len
+24:25 call  find_spec(".".join(names[: package_name_boundary + 1]))
+    -> importlib.util.find_spec
+24:34 call  ".".join(names[: package_name_boundary + 1])
+    -> <builtin>.str.join
+29:40 call  ArgcompleteMarkerNotFound('no module named "{}"'.format(n...
+    -> <builtin>.RuntimeError.__init__
+    note: ArgcompleteMarkerNotFound (line 16) defines no __init__; the first __init__ of its MRO is RuntimeError's
+29:70 call  'no module named "{}"'.format(names[0])
+    -> <builtin>.str.format
+31:40 call  ArgcompleteMarkerNotFound("cannot locate file")
+    -> <builtin>.RuntimeError.__init__
+33:15 call  len(names)
+    -> <builtin>.len
+34:44 call  ArgcompleteMarkerNotFound("{} is not a package".format(na...
+    -> <builtin>.RuntimeError.__init__
+34:73 call  "{} is not a package".format(names[0])
+    -> <builtin>.str.format
+36:11 call  len(spec.submodule_search_locations)
+    -> <builtin>.len
+37:40 call  ArgcompleteMarkerNotFound("expecting one search location")
+    -> <builtin>.RuntimeError.__init__
+38:24 call  os.path.join(spec.submodule_search_locations[0], *names[p...
+    -> os.path.join
+39:21 call  os.path.isdir(path)
+    -> os.path.isdir
+43:28 call  os.path.join(path, filename)
+    -> os.path.join
+
+[argcomplete._check_module.main]
+52:40 call  ArgcompleteMarkerNotFound("missing argument on the comman...
+    -> <builtin>.RuntimeError.__init__
+54:20 call  find(name)
+    -> argcomplete._check_module.find
+57:27 call  tokenize.open(filename)
+    -> tokenize.open
+59:40 call  ArgcompleteMarkerNotFound("cannot open file")
+    -> <builtin>.RuntimeError.__init__
+62:23 call  fp.read(1024)
+    -> io.TextIOWrapper.read
+    note: fp is the text file that tokenize.open returns
+65:40 call  ArgcompleteMarkerNotFound("marker not found")
+    -> <builtin>.RuntimeError.__init__
+
+== argcomplete.completers
+
+[argcomplete.completers]
+49:61 call  ChoicesCompleter(os.environ)
+    -> argcomplete.completers.ChoicesCompleter.__init__
+
+[argcomplete.completers._call]
+18:39 call  subprocess.check_output(*args, **kwargs)
+    -> subprocess.check_output
+18:67 call  subprocess.check_output(*args, **kwargs).splitlines()
+    -> <builtin>.str.splitlines
+    note: _call sets universal_newlines=True (line 16), so check_output returns a str
+
+[argcomplete.completers.BaseCompleter.__call__]
+31:34 call  NotImplementedError("This method should be implemented by...
+    -> <builtin>.NotImplementedError
+
+[argcomplete.completers.ChoicesCompleter._convert]
+41:26 call  isinstance(choice, str)
+    -> <builtin>.isinstance
+42:25 call  str(choice)
+    -> <builtin>.str
+    note: choice is a key or an element of the choices that the client or argparse gives; no package class defines __str__
+
+[argcomplete.completers.ChoicesCompleter.__call__]
+46:30 call  self._convert(c)
+    -> argcomplete.completers.ChoicesCompleter._convert
+
+[argcomplete.completers.FilesCompleter.__init__]
+62:22 call  isinstance(allowednames, (str, bytes))
+    -> <builtin>.isinstance
+65:38 call  x.lstrip("*")
+    -> <builtin>.str.lstrip
+    -> <builtin>.bytes.lstrip
+    note: Line62 deliberately accepts bytes and line63 wraps it in a list. The first lstrip at65 invokes bytes.lstrip with one positional argument. Its argument-content type check raises TypeError inside the callable; this is not missing/duplicate argument binding. The second lstrip is not reached for this input. The str annotation does not remove the intentional bytes branch.
+
+65:50 call  x.lstrip("*").lstrip(".")
+    -> <builtin>.str.lstrip
+
+[argcomplete.completers.FilesCompleter.__call__]
+76:30 call  _call( ["bash", "-c", "bind; compgen -A directory -- {p}"...
+    -> argcomplete.completers._call
+77:78 call  "bind; compgen -A directory -- {p}".format(p=quote(prefix))
+    -> <builtin>.str.format
+77:86 call  quote(prefix)
+    -> shlex.quote
+82:36 call  _call( ["bash", "-c", "bind; compgen -A file -X '!*.{0}' ...
+    -> argcomplete.completers._call
+83:85 call  "bind; compgen -A file -X '!*.{0}' -- {p}".format(x, p=qu...
+    -> <builtin>.str.format
+83:96 call  quote(prefix)
+    -> shlex.quote
+87:32 call  _call( ["bash", "-c", "bind; compgen -A file -- {p}".form...
+    -> argcomplete.completers._call
+88:69 call  "bind; compgen -A file -- {p}".format(p=quote(prefix))
+    -> <builtin>.str.format
+88:77 call  quote(prefix)
+    -> shlex.quote
+90:29 call  _call( ["bash", "-c", "bind; compgen -A directory -- {p}"...
+    -> argcomplete.completers._call
+91:74 call  "bind; compgen -A directory -- {p}".format(p=quote(prefix))
+    -> <builtin>.str.format
+91:82 call  quote(prefix)
+    -> shlex.quote
+94:30 call  list(set(completion) - set(anticomp))
+    -> <builtin>.list
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: the argument is a set (the difference of two sets of strs)
+94:34 call  set(completion)
+    -> <builtin>.set
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: completion is a list of strs
+94:52 call  set(anticomp)
+    -> <builtin>.set
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: anticomp is the list of strs that _call returns
+
+[argcomplete.completers._FilteredFilesCompleter.__call__]
+120:45 call  os.path.expanduser(prefix)
+    -> os.path.expanduser
+121:37 call  os.path.dirname(expanded_prefix)
+    -> os.path.dirname
+123:31 call  os.listdir(target_dir or ".")
+    -> os.listdir
+126:43 call  os.path.basename(expanded_prefix)
+    -> os.path.basename
+129:35 call  name.startswith(incomplete_part)
+    -> <builtin>.str.startswith
+131:37 call  os.path.join(target_dir, name)
+    -> os.path.join
+132:34 call  self.predicate(candidate)
+    -> os.path.isdir
+    note: self.predicate is set only at line 112, from the predicate parameter of _FilteredFilesCompleter.__init__; _FilteredFilesCompleter is private (rule C), and its only package caller, DirectoriesCompleter.__init__ (line 139), passes os.path.isdir
+134:51 call  os.path.isdir(candidate)
+    -> os.path.isdir
+
+[argcomplete.completers.DirectoriesCompleter.__init__]
+139:41 call  _FilteredFilesCompleter.__init__(self, predicate=os.path....
+    -> argcomplete.completers._FilteredFilesCompleter.__init__
+    reject *: the call names _FilteredFilesCompleter.__init__ explicitly
+
+== argcomplete.finders
+
+[argcomplete.finders]
+61:58 call  FilesCompleter()
+    -> argcomplete.completers.FilesCompleter.__init__
+    note: a default value, evaluated when the module defines CompletionFinder.__init__
+89:58 call  FilesCompleter()
+    -> argcomplete.completers.FilesCompleter.__init__
+    note: a default value, evaluated when the module defines CompletionFinder.__call__
+360:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+627:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[argcomplete.finders.default_validator]
+30:33 call  completion.startswith(prefix)
+    -> <builtin>.str.startswith
+    note: completion is annotated str (line 29)
+
+[argcomplete.finders.CompletionFinder.__init__]
+76:42 call  os.environ.get("_ARGCOMPLETE_SUPPRESS_SPACE")
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, which inherits get from collections.abc.Mapping (os._Environ is private; anytree precedent)
+
+[argcomplete.finders.CompletionFinder.__call__]
+121:22 call  self.__init__( # type: ignore argument_parser, always_com...
+    -> argcomplete.finders.CompletionFinder.__init__
+    reject *: self is a CompletionFinder or an ExclusiveCompletionFinder, which inherits __init__; a client subclass is client code
+135:32 call  self._init_debug_stream()
+    -> argcomplete.finders.CompletionFinder._init_debug_stream
+138:38 call  os.environ.get("_ARGCOMPLETE_STDOUT_FILENAME")
+    -> collections.abc.Mapping.get
+140:22 call  debug("Using output file {}".format(filename))
+    -> argcomplete.io.debug
+140:52 call  "Using output file {}".format(filename)
+    -> <builtin>.str.format
+141:37 call  open(filename, "w")
+    -> <builtin>.open
+145:42 call  os.fdopen(8, "w")
+    -> os.fdopen
+147:22 call  debug("Unable to open fd 8 for writing, quitting")
+    -> argcomplete.io.debug
+148:28 call  exit_method(1)
+    -> os._exit
+    note: exit_method is the default os._exit (line 83); the package passes no other (scripts call autocomplete(parser) without it). A function that the client passes (sys.exit, which the docstring suggests) is a client callback (B2)
+152:29 call  os.environ.get("_ARGCOMPLETE_IFS", "\013")
+    -> collections.abc.Mapping.get
+153:15 call  len(ifs)
+    -> <builtin>.len
+154:18 call  debug("Invalid value for IFS, quitting [{v}]".format(v=ifs))
+    -> argcomplete.io.debug
+154:65 call  "Invalid value for IFS, quitting [{v}]".format(v=ifs)
+    -> <builtin>.str.format
+155:24 call  exit_method(1)
+    -> os._exit
+    note: exit_method is the default os._exit (see 148:28); a client function is a client callback
+157:29 call  os.environ.get("_ARGCOMPLETE_DFS")
+    -> collections.abc.Mapping.get
+158:23 call  len(dfs)
+    -> <builtin>.len
+159:18 call  debug("Invalid value for DFS, quitting [{v}]".format(v=dfs))
+    -> argcomplete.io.debug
+159:65 call  "Invalid value for DFS, quitting [{v}]".format(v=dfs)
+    -> <builtin>.str.format
+160:24 call  exit_method(1)
+    -> os._exit
+    note: exit_method is the default os._exit (see 148:28); a client function is a client callback
+163:25 call  int(os.environ["COMP_POINT"])
+    -> <builtin>.int
+165:96 call  split_line(comp_line, comp_point)
+    -> argcomplete.lexers.split_line
+172:20 call  int(os.environ["_ARGCOMPLETE"])
+    -> <builtin>.int
+178:30 call  comp_words.append(cword_prefix.split("=", 1)[0])
+    -> <builtin>.list.append
+    note: comp_words is a slice of the list words that split_line returns
+178:49 call  cword_prefix.split("=", 1)
+    -> <builtin>.str.split
+180:14 call  debug( "\nLINE: {!r}".format(comp_line), "\nPOINT: {!r}"....
+    -> argcomplete.io.debug
+181:34 call  "\nLINE: {!r}".format(comp_line)
+    -> <builtin>.str.format
+    note: {!r} of a str
+182:35 call  "\nPOINT: {!r}".format(comp_point)
+    -> <builtin>.str.format
+    note: {!r} of an int
+183:38 call  "\nPREQUOTE: {!r}".format(cword_prequote)
+    -> <builtin>.str.format
+184:36 call  "\nPREFIX: {!r}".format(cword_prefix)
+    -> <builtin>.str.format
+185:36 call  "\nSUFFIX: {!r}".format(cword_suffix)
+    -> <builtin>.str.format
+190:44 call  self._get_completions(comp_words, cword_prefix, cword_pre...
+    -> argcomplete.finders.CompletionFinder._get_completions
+194:35 call  value.replace(ifs, " ")
+    -> <builtin>.str.replace
+    note: value is a help string of _display_completions, annotated dict[str, str] (line 47)
+194:112 call  self._display_completions.items()
+    -> <builtin>.dict.items
+196:36 call  dfs.join((key, display_completions.get(key) or ""))
+    -> <builtin>.str.join
+196:66 call  display_completions.get(key)
+    -> <builtin>.dict.get
+198:26 call  os.environ.get("_ARGCOMPLETE_SHELL")
+    -> collections.abc.Mapping.get
+199:64 call  self._display_completions.get(c)
+    -> <builtin>.dict.get
+201:14 call  debug("\nReturning completions:", completions)
+    -> argcomplete.io.debug
+202:28 call  output_stream.write(ifs.join(completions))
+    -> io.TextIOWrapper.write
+    note: output_stream is the text file of open() (line 141) or of os.fdopen(8) (line 145); a stream that the client passes (TextIO, abstract) is opaque (B4, B5)
+202:37 call  ifs.join(completions)
+    -> <builtin>.str.join
+203:28 call  output_stream.flush()
+    -> io.TextIOWrapper.flush
+    note: see 202:28
+204:31 call  _io.debug_stream.flush()
+    -> io.TextIOWrapper.flush
+    note: argcomplete.io.debug_stream is sys.stderr (io.py:8) or the text file of os.fdopen(9) that _init_debug_stream (line 215) sets; the default sys.stderr is an io.TextIOWrapper
+205:20 call  exit_method(0)
+    -> os._exit
+    note: exit_method is the default os._exit (see 148:28); a client function is a client callback
+
+[argcomplete.finders.CompletionFinder._init_debug_stream]
+215:41 call  os.fdopen(9, "w")
+    -> os.fdopen
+218:14 call  debug()
+    -> argcomplete.io.debug
+
+[argcomplete.finders.CompletionFinder._get_completions]
+221:53 call  self._patch_argument_parser()
+    -> argcomplete.finders.CompletionFinder._patch_argument_parser
+223:41 call  argparse.Namespace()
+    -> argparse.Namespace
+227:18 call  debug("invoking parser with", comp_words[1:])
+    -> argcomplete.io.debug
+228:29 call  mute_stderr()
+    -> contextlib.contextmanager.helper
+    -> argcomplete.io.mute_stderr
+    note: mute_stderr is decorated with @contextlib.contextmanager (io.py:26): the call runs contextlib's helper, which calls the generator function back
+230:50 call  self._parser.parse_known_args(comp_words[1:], namespace=p...
+    -> argparse.ArgumentParser.parse_known_args
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args
+    note: self._parser is the client's argparse.ArgumentParser (B4), patched at line 221: its class has the bases (IntrospectiveArgumentParser, the old class), so argparse's parse_known_args calls back IntrospectiveArgumentParser._parse_known_args. No other method that argparse calls on the parser here (error, exit, format_usage, _get_formatter) is a package method
+231:18 call  debug("parsed args:", a)
+    -> argcomplete.io.debug
+233:18 call  debug("\nexception", type(e), str(e), "while parsing args")
+    -> argcomplete.io.debug
+233:38 call  type(e)
+    -> <builtin>.type
+233:46 call  str(e)
+    -> <builtin>.str
+    note: e is any exception of the parse; no package class defines __str__
+240:47 call  self.collect_completions(active_parsers, parsed_args, cwo...
+    -> argcomplete.finders.CompletionFinder.collect_completions
+241:46 call  self.filter_completions(completions)
+    -> argcomplete.finders.CompletionFinder.filter_completions
+242:45 call  self.quote_completions(completions, cword_prequote, last_...
+    -> argcomplete.finders.CompletionFinder.quote_completions
+
+[argcomplete.finders.CompletionFinder._patch_argument_parser]
+296:14 call  patch(self._parser)
+    -> argcomplete.finders.CompletionFinder._patch_argument_parser.patch
+298:14 call  debug("Active parsers:", self.active_parsers)
+    -> argcomplete.io.debug
+299:14 call  debug("Visited positionals:", self.visited_positionals)
+    -> argcomplete.io.debug
+
+[argcomplete.finders.CompletionFinder._patch_argument_parser.patch]
+258:49 call  completer.visited_positionals.append(parser)
+    -> <builtin>.list.append
+259:44 call  completer.active_parsers.append(parser)
+    -> <builtin>.list.append
+261:26 call  isinstance(parser, IntrospectiveArgumentParser)
+    -> <builtin>.isinstance
+266:36 call  type(classname, (IntrospectiveArgumentParser, parser.__cl...
+    -> <builtin>.type
+    note: the new class has the bases IntrospectiveArgumentParser and the parser's class; no package base defines __init_subclass__ and the metaclass is type, so no package code runs
+269:27 call  hasattr(action, "_orig_class")
+    -> <builtin>.hasattr
+
+[argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__]
+275:30 call  debug("Action stub called on", self)
+    -> argcomplete.io.debug
+276:30 call  debug("\targs:", parser, namespace, values, option_string)
+    -> argcomplete.io.debug
+277:30 call  debug("\torig class:", self._orig_class)
+    -> argcomplete.io.debug
+278:30 call  debug("\torig callable:", self._orig_callable)
+    -> argcomplete.io.debug
+281:48 call  self._orig_callable(parser, namespace, values, option_str...
+    exclude argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__: patch skips an action that already has _orig_class (line 269), so the original class is never an IntrospectAction
+    -> argparse._HelpAction.__call__
+    -> argparse._StoreAction.__call__
+    -> argparse._StoreTrueAction.__call__
+    note: The public script parser can be reused after CompletionFinder(parser).rl_complete patches its actions and returns with completing=False. main parses the process command line: --help reaches the saved _HelpAction; --dest reaches _StoreAction; --yes or --user reaches _StoreTrueAction. All are package-created actions (activate_global_python_argcomplete.py:35,38-40,161), and the full arguments bind at this site. Arbitrary client-created actions remain opaque.
+
+282:40 call  issubclass(self._orig_class, argparse._SubParsersAction)
+    -> <builtin>.issubclass
+283:34 call  debug("orig class is a subparsers action: patching and ru...
+    -> argcomplete.io.debug
+284:34 call  patch(self._name_parser_map[values[0]])
+    -> argcomplete.finders.CompletionFinder._patch_argument_parser.patch
+    note: patch is the enclosing function of the class body (a free variable)
+285:48 call  self._orig_callable(parser, namespace, values, option_str...
+    -> argparse._SubParsersAction.__call__
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args
+    note: line 282 checks that the original class is argparse._SubParsersAction or a subclass (B4: a client subclass is client code), so self._orig_callable is _SubParsersAction.__call__. It calls subparser.parse_known_args on self._name_parser_map[values[0]], the parser that line 284 has just patched, so argparse calls back IntrospectiveArgumentParser._parse_known_args
+    exclude argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__: the original class is never an IntrospectAction (line 269)
+288:69 call  completer.visited_positionals.append(self)
+    -> <builtin>.list.append
+290:48 call  self._orig_callable(parser, namespace, values, option_str...
+    -> argparse._StoreAction.__call__
+    -> argparse._StoreConstAction.__call__
+    -> argparse._StoreTrueAction.__call__
+    -> argparse._StoreFalseAction.__call__
+    -> argparse._AppendAction.__call__
+    -> argparse._AppendConstAction.__call__
+    -> argparse._CountAction.__call__
+    note: line 286 checks that the original class is in safe_actions (lines 18-26): _StoreAction, _StoreConstAction, _StoreTrueAction, _StoreFalseAction, _AppendAction, _AppendConstAction, _CountAction. Each function is named by the class of the receiver, also where it inherits the method (README, "Callees outside the package"; lead's ruling N1): _StoreTrueAction and _StoreFalseAction inherit _StoreConstAction.__call__. A class that a client adds to safe_actions (documented at line 117) is a client value
+    exclude argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__: the original class is never an IntrospectAction (line 269)
+
+[argcomplete.finders.CompletionFinder._get_action_help]
+311:72 call  self._parser.formatter_class(prog=self._parser.prog)
+    -> argparse.HelpFormatter
+    -> argparse.RawDescriptionHelpFormatter
+    note: The exposed script parser is created by the package with RawDescriptionHelpFormatter. A client can use its public add_argument method to add a percent-bearing help string, then run the public CompletionFinder.rl_complete API. The line306 shortcut no longer applies. The known package-created formatter configuration reaches line311. This is not an arbitrary formatter supplied by a client, nor an inference from the result annotation.
+
+312:39 call  formatters._expand_help(action)
+    -> argparse.HelpFormatter._expand_help
+    -> argparse.RawDescriptionHelpFormatter._expand_help
+    note: In FN5 the formatter instance is concretely RawDescriptionHelpFormatter. Its inherited _expand_help is named through that concrete receiver class by the global outside-callee convention. HelpFormatter._expand_help remains for the ordinary default. The result annotation permits this subclass; it does not rename a concrete package-created receiver to its base.
+
+[argcomplete.finders.CompletionFinder._get_subparser_completions]
+316:39 call  parser.choices.keys()
+    -> <builtin>.dict.keys
+    note: parser is the _SubParsersAction next_positional (isinstance at line 474); its choices is its _name_parser_map, a dict
+318:41 call  aliases_by_parser.setdefault(p, [])
+    -> <builtin>.dict.setdefault
+318:55 call  aliases_by_parser.setdefault(p, []).append(key)
+    -> <builtin>.list.append
+320:45 call  parser._get_subactions()
+    -> argparse._SubParsersAction._get_subactions
+322:36 call  alias.startswith(cword_prefix)
+    -> <builtin>.str.startswith
+323:77 call  self._get_action_help(action)
+    -> argcomplete.finders.CompletionFinder._get_action_help
+325:64 call  parser.choices.keys()
+    -> <builtin>.dict.keys
+325:87 call  subcmd.startswith(cword_prefix)
+    -> <builtin>.str.startswith
+
+[argcomplete.finders.CompletionFinder._include_options]
+329:15 call  len(cword_prefix)
+    -> <builtin>.len
+330:75 call  opt.startswith(cword_prefix)
+    -> <builtin>.str.startswith
+331:65 call  len(opt)
+    -> <builtin>.len
+332:66 call  len(opt)
+    -> <builtin>.len
+
+[argcomplete.finders.CompletionFinder._get_option_completions]
+343:48 call  option_string.startswith(cword_prefix)
+    -> <builtin>.str.startswith
+344:89 call  self._get_action_help(action)
+    -> argcomplete.finders.CompletionFinder._get_action_help
+349:36 call  getattr(action, "completer", None)
+    -> <builtin>.getattr
+350:30 call  isinstance(completer, SuppressCompleter)
+    -> <builtin>.isinstance
+350:83 call  completer.suppress()
+    -> argcomplete.completers.SuppressCompleter.suppress
+    note: completer is a SuppressCompleter (isinstance); a client subclass is client code
+354:40 call  self._action_allowed(action, parser)
+    -> argcomplete.finders.CompletionFinder._action_allowed
+    -> argcomplete.finders.ExclusiveCompletionFinder._action_allowed
+    note: self is a CompletionFinder or an ExclusiveCompletionFinder (both public; B1)
+356:30 call  isinstance(action, argparse._SubParsersAction)
+    -> <builtin>.isinstance
+357:60 call  self._include_options(action, cword_prefix)
+    -> argcomplete.finders.CompletionFinder._include_options
+
+[argcomplete.finders.CompletionFinder._action_allowed]
+364:60 call  parser._action_conflicts.get(action, [])
+    -> <builtin>.dict.get
+    note: parser._action_conflicts is the dict that IntrospectiveArgumentParser._parse_known_args sets (_argparse.py:95)
+
+[argcomplete.finders.CompletionFinder._complete_active_option]
+370:14 call  debug("Active actions (L={l}): {a}".format(l=len(parser.a...
+    -> argcomplete.io.debug
+370:51 call  "Active actions (L={l}): {a}".format(l=len(parser.active_...
+    -> <builtin>.str.format
+    note: the fields are an int and a list of argparse actions (repr from argparse; IntrospectAction defines no __repr__)
+370:57 call  len(parser.active_actions)
+    -> <builtin>.len
+374:79 call  action_is_greedy(x, isoptional)
+    -> argcomplete.packages._argparse.action_is_greedy
+376:23 call  len(greedy_actions)
+    -> <builtin>.len
+379:18 call  debug("Resetting completions because", greedy_actions[0],...
+    -> argcomplete.io.debug
+387:74 call  cword_prefix.partition("=")
+    -> <builtin>.str.partition
+396:34 call  action_is_open(active_action)
+    -> argcomplete.packages._argparse.action_is_open
+404:43 call  action_is_satisfied(active_action)
+    -> argcomplete.packages._argparse.action_is_satisfied
+404:81 call  action_is_open(active_action)
+    -> argcomplete.packages._argparse.action_is_open
+405:30 call  debug("Skipping", active_action)
+    -> argcomplete.io.debug
+408:18 call  debug("Activating completion for", active_action, active_...
+    -> argcomplete.io.debug
+410:32 call  getattr(active_action, "completer", None)
+    -> <builtin>.getattr
+413:72 call  isinstance(active_action, argparse._SubParsersAction)
+    -> <builtin>.isinstance
+414:49 call  ChoicesCompleter(active_action.choices)
+    -> argcomplete.completers.ChoicesCompleter.__init__
+415:36 call  isinstance(active_action, argparse._SubParsersAction)
+    -> <builtin>.isinstance
+419:30 call  isinstance(completer, SuppressCompleter)
+    -> <builtin>.isinstance
+419:83 call  completer.suppress()
+    -> argcomplete.completers.SuppressCompleter.suppress
+    note: completer is a SuppressCompleter (isinstance); a client subclass is client code
+422:28 call  callable(completer)
+    -> <builtin>.callable
+423:49 call  completer( prefix=cword_prefix, action=active_action, par...
+    -> argcomplete.completers.BaseCompleter.__call__
+    -> argcomplete.completers.ChoicesCompleter.__call__
+    -> argcomplete.completers.FilesCompleter.__call__
+    -> argcomplete.completers._FilteredFilesCompleter.__call__
+    note: completer is action.completer (line 410), a ChoicesCompleter made at line 414, or self.default_completer. The default_completer annotation BaseCompleter (lines 61/89) admits constructible public BaseCompleter, ChoicesCompleter, FilesCompleter, DirectoriesCompleter (inherits _FilteredFilesCompleter.__call__) and SuppressCompleter instances. BaseCompleter is not abstract; its __call__ raises NotImplementedError. Separately, README.rst documents ChoicesCompleter and EnvironCompleter assignments to action.completer, and test/test.py:221 assigns SuppressCompleter. These role witnesses are not interchangeable. SuppressCompleter stops at lines 419-420 before this call. Client functions and objects stay opaque (B5).
+426:34 call  isinstance(completer_output, Mapping)
+    -> <builtin>.isinstance
+427:78 call  completer_output.items()
+    note: completer_output is a Mapping only when a client completer returns one; the package completers return a generator (ChoicesCompleter, _FilteredFilesCompleter) or a list (FilesCompleter), and BaseCompleter.__call__ raises. An object that a client callback returns is opaque (B5)
+428:46 call  self.validator(completion, cword_prefix)
+    -> argcomplete.finders.default_validator
+    note: self.validator is set only in __init__ (line 70): the validator parameter, or default_validator when it is None. A function that the client passes is a client callback (B2)
+429:51 call  completions.append(completion)
+    -> <builtin>.list.append
+    note: completions is the list of collect_completions (line 462) or the new list of line 381
+433:46 call  self.validator(completion, cword_prefix)
+    -> argcomplete.finders.default_validator
+    note: self.validator: default_validator or a client callback (see 428:46)
+434:51 call  completions.append(completion)
+    -> <builtin>.list.append
+435:46 call  isinstance(completer, ChoicesCompleter)
+    -> <builtin>.isinstance
+436:98 call  self._get_action_help(active_action)
+    -> argcomplete.finders.CompletionFinder._get_action_help
+440:26 call  debug("Completer is not callable, trying the readline com...
+    -> argcomplete.io.debug
+441:35 call  range(9999)
+    -> <builtin>.range
+442:61 call  completer.complete(cword_prefix, i)
+    note: completer is not callable here (line 422); every package completer is callable, so it is a client object (readline protocol), and opaque (B5)
+445:42 call  self.validator(next_completion, cword_prefix)
+    -> argcomplete.finders.default_validator
+    note: self.validator: default_validator or a client callback (see 428:46)
+447:47 call  completions.append(next_completion)
+    -> <builtin>.list.append
+450:22 call  debug("Completions:", completions)
+    -> argcomplete.io.debug
+
+[argcomplete.finders.CompletionFinder.collect_completions]
+464:14 call  debug("all active parsers:", active_parsers)
+    -> argcomplete.io.debug
+466:14 call  debug("active_parser:", active_parser)
+    -> argcomplete.io.debug
+467:48 call  len(cword_prefix)
+    -> <builtin>.len
+468:56 call  self._get_option_completions(active_parser, cword_prefix)
+    -> argcomplete.finders.CompletionFinder._get_option_completions
+469:14 call  debug("optional options:", completions)
+    -> argcomplete.io.debug
+471:52 call  self._get_next_positional()
+    -> argcomplete.finders.CompletionFinder._get_next_positional
+472:14 call  debug("next_positional:", next_positional)
+    -> argcomplete.io.debug
+474:22 call  isinstance(next_positional, argparse._SubParsersAction)
+    -> <builtin>.isinstance
+475:59 call  self._get_subparser_completions(next_positional, cword_pr...
+    -> argcomplete.finders.CompletionFinder._get_subparser_completions
+477:51 call  self._complete_active_option( active_parser, next_positio...
+    -> argcomplete.finders.CompletionFinder._complete_active_option
+480:14 call  debug("active options:", completions)
+    -> argcomplete.io.debug
+481:14 call  debug("display completions:", self._display_completions)
+    -> argcomplete.io.debug
+
+[argcomplete.finders.CompletionFinder._get_next_positional]
+492:64 call  active_parser._get_positional_actions()
+    -> argparse.ArgumentParser._get_positional_actions
+    note: active_parser is the last parser that patch appended (line 259): the client's parser or a subparser of it
+500:23 call  range(len(all_positionals))
+    -> <builtin>.range
+500:27 call  len(all_positionals)
+    -> <builtin>.len
+504:23 call  len(all_positionals)
+    -> <builtin>.len
+
+[argcomplete.finders.CompletionFinder.filter_completions]
+522:44 call  filtered_completions.append(completion)
+    -> <builtin>.list.append
+
+[argcomplete.finders.CompletionFinder.quote_completions]
+552:26 call  os.environ.get("_ARGCOMPLETE_SHELL")
+    -> collections.abc.Mapping.get
+559:37 call  c.replace("'", r"'\''")
+    -> <builtin>.str.replace
+562:26 call  os.environ.get("_ARGCOMPLETE_SHELL")
+    -> collections.abc.Mapping.get
+564:50 call  special_chars.replace('`', '')
+    -> <builtin>.str.replace
+567:30 call  os.environ.get("_ARGCOMPLETE_SHELL")
+    -> collections.abc.Mapping.get
+575:64 call  escaped_completion.replace(char, escape_char + char)
+    -> <builtin>.str.replace
+576:39 call  escaped_completions.append(escaped_completion)
+    -> <builtin>.list.append
+585:19 call  len(escaped_completions)
+    -> <builtin>.len
+
+[argcomplete.finders.CompletionFinder.rl_complete]
+609:97 call  split_line(text)
+    -> argcomplete.lexers.split_line
+610:30 call  comp_words.insert(0, sys.argv[0])
+    -> <builtin>.list.insert
+611:44 call  self._get_completions(comp_words, cword_prefix, cword_pre...
+    -> argcomplete.finders.CompletionFinder._get_completions
+612:49 call  len(cword_prefix)
+    -> <builtin>.len
+614:23 call  len(self._rl_matches)
+    -> <builtin>.len
+
+[argcomplete.finders.ExclusiveCompletionFinder._action_allowed]
+629:48 call  CompletionFinder._action_allowed(action, parser)
+    -> argcomplete.finders.CompletionFinder._action_allowed
+    reject argcomplete.finders.ExclusiveCompletionFinder._action_allowed: the call names CompletionFinder._action_allowed explicitly
+
+== argcomplete.io
+
+[argcomplete.io]
+16:2 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+26:2 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+
+[argcomplete.io.debug]
+13:14 call  print(file=debug_stream, *args)
+    -> <builtin>.print
+    note: the arguments are strs, lists, dicts, argparse objects, classes and exceptions; no package class defines __str__ or __repr__
+
+[argcomplete.io.mute_stdout]
+19:22 call  open(os.devnull, "w")
+    -> <builtin>.open
+
+[argcomplete.io.mute_stderr]
+29:22 call  open(os.devnull, "w")
+    -> <builtin>.open
+33:25 call  sys.stderr.close()
+    -> io.TextIOWrapper.close
+    note: sys.stderr is the text file that line 29 opened
+
+[argcomplete.io.warn]
+42:10 call  print(file=debug_stream)
+    -> <builtin>.print
+43:10 call  print(file=debug_stream, *args)
+    -> <builtin>.print
+
+== argcomplete.lexers
+
+[argcomplete.lexers.split_line]
+10:20 call  len(line)
+    -> <builtin>.len
+12:25 call  _shlex.shlex(line, posix=True)
+    -> argcomplete.packages._shlex.shlex.__init__
+14:38 call  os.environ.get("_ARGCOMPLETE_COMP_WORDBREAKS", "")
+    -> collections.abc.Mapping.get
+39:35 call  lexer.get_token()
+    -> argcomplete.packages._shlex.shlex.get_token
+44:35 call  lexer.instream.tell()
+    -> io.StringIO.tell
+    note: lexer.instream is the io.StringIO that shlex.__init__ makes from the str line (_shlex.py:26)
+45:22 call  debug("word", word, "split, lexer state: '{s}'".format(s=...
+    -> argcomplete.io.debug
+45:71 call  "split, lexer state: '{s}'".format(s=lexer.state)
+    -> <builtin>.str.format
+46:34 call  split_word(word)
+    -> argcomplete.lexers.split_line.split_word
+47:25 call  words.append(word)
+    -> <builtin>.list.append
+49:18 call  debug("word", lexer.token, "split (lexer stopped, state: ...
+    -> argcomplete.io.debug
+49:84 call  "split (lexer stopped, state: '{s}')".format(s=lexer.state)
+    -> <builtin>.str.format
+50:35 call  lexer.instream.tell()
+    -> io.StringIO.tell
+51:34 call  split_word(lexer.token)
+    -> argcomplete.lexers.split_line.split_word
+57:43 call  ArgcompleteException(msg)
+    -> <builtin>.Exception.__init__
+    note: ArgcompleteException (exceptions.py:1) defines no __init__; the first __init__ of its MRO is Exception's
+
+[argcomplete.lexers.split_line.split_word]
+19:28 call  len(word)
+    -> <builtin>.len
+19:64 call  lexer.instream.tell()
+    -> io.StringIO.tell
+20:22 call  isinstance(lexer.state, (str, bytes))
+    -> <builtin>.isinstance
+22:31 call  len(word)
+    -> <builtin>.len
+23:18 call  debug("In trailing whitespace")
+    -> argcomplete.io.debug
+24:25 call  words.append(word)
+    -> <builtin>.list.append
+
+== argcomplete.packages._argparse
+
+[argcomplete.packages._argparse.action_is_satisfied]
+35:47 call  _num_consumed_args.get(action, 0)
+    -> <builtin>.dict.get
+48:22 call  isinstance(action.nargs, int)
+    -> <builtin>.isinstance
+
+[argcomplete.packages._argparse.action_is_open]
+54:47 call  _num_consumed_args.get(action, 0)
+    -> <builtin>.dict.get
+61:22 call  isinstance(action.nargs, int)
+    -> <builtin>.isinstance
+
+[argcomplete.packages._argparse.action_is_greedy]
+69:47 call  _num_consumed_args.get(action, 0)
+    -> <builtin>.dict.get
+72:54 call  action_is_satisfied(action)
+    -> argcomplete.packages._argparse.action_is_satisfied
+
+[argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args]
+85:33 call  _num_consumed_args.clear()
+    -> <builtin>.dict.clear
+90:53 call  self._read_args_from_files(arg_strings)
+    -> argparse.ArgumentParser._read_args_from_files
+    note: self is a dynamically patched parser (finders.py:266) or a directly constructed IntrospectiveArgumentParser, public through argcomplete.finders. patch returns without changing the latter (finders.py:261-262). Both inherit this method from argparse.ArgumentParser; a client override stays client code (B4, B5).
+98:45 call  enumerate(mutex_group._group_actions)
+    -> <builtin>.enumerate
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: the argument is the list _group_actions of an argparse group
+99:56 call  action_conflicts.setdefault(mutex_action, [])
+    -> <builtin>.dict.setdefault
+100:33 call  conflicts.extend(group_actions[:i])
+    -> <builtin>.list.extend
+101:33 call  conflicts.extend(group_actions[i + 1 :])
+    -> <builtin>.list.extend
+108:32 call  iter(arg_strings)
+    -> <builtin>.iter
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: arg_strings is a list of strs (argparse's parse_known_args makes it a list; _read_args_from_files returns a list)
+109:39 call  enumerate(arg_strings_iter)
+    -> <builtin>.enumerate
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: arg_strings_iter is a list iterator (line 108)
+112:48 call  arg_string_pattern_parts.append('-')
+    -> <builtin>.list.append
+114:52 call  arg_string_pattern_parts.append('A')
+    -> <builtin>.list.append
+119:52 call  self._parse_optional(arg_string)
+    -> argparse.ArgumentParser._parse_optional
+123:52 call  cast(_OptionTupleEntry, option_tuple)
+    -> typing.cast
+125:48 call  arg_string_pattern_parts.append(pattern)
+    -> <builtin>.list.append
+128:38 call  ''.join(arg_string_pattern_parts)
+    -> <builtin>.str.join
+131:40 call  set()
+    -> <builtin>.set
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: set() gets no argument
+132:52 call  set()
+    -> <builtin>.set
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: set() gets no argument
+258:51 call  self._get_positional_actions()
+    -> argparse.ArgumentParser._get_positional_actions
+287:42 call  max(option_string_indices)
+    -> <builtin>.max
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: option_string_indices is a dict with int keys
+292:43 call  min([index for index in option_string_indices if index >=...
+    -> <builtin>.min
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: the argument is a list of ints
+294:60 call  consume_positionals(start_index)
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals
+308:30 call  extras.extend(strings)
+    -> <builtin>.list.extend
+312:43 call  consume_optional(start_index)
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional
+315:41 call  consume_positionals(start_index)
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals
+318:22 call  extras.extend(arg_strings[stop_index:])
+    -> <builtin>.list.extend
+324:39 call  self.active_actions.append(positionals[0])
+    -> <builtin>.list.append
+325:23 call  self.error(gettext('too few arguments'))
+    -> argparse.ArgumentParser.error
+325:31 call  gettext('too few arguments')
+    -> gettext.gettext
+331:44 call  _get_action_name(action)
+    -> argparse._get_action_name
+332:31 call  self.error(gettext('argument %s is required') % name)
+    -> argparse.ArgumentParser.error
+332:39 call  gettext('argument %s is required')
+    -> gettext.gettext
+344:28 call  str(_get_action_name(action))
+    -> <builtin>.str
+344:45 call  _get_action_name(action)
+    -> argparse._get_action_name
+346:34 call  gettext('one of the arguments %s is required')
+    -> gettext.gettext
+347:31 call  self.error(msg % ' '.join(names))
+    -> argparse.ArgumentParser.error
+347:46 call  ' '.join(names)
+    -> <builtin>.str.join
+
+[argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action]
+136:29 call  seen_actions.add(action)
+    -> <builtin>.set.add
+137:47 call  self._get_values(action, argument_strings)
+    -> argparse.ArgumentParser._get_values
+143:45 call  seen_non_default_actions.add(action)
+    -> <builtin>.set.add
+144:60 call  action_conflicts.get(action, [])
+    -> <builtin>.dict.get
+146:38 call  gettext('not allowed with argument %s')
+    -> gettext.gettext
+147:55 call  _get_action_name(conflict_action)
+    -> argparse._get_action_name
+148:44 call  ArgumentError(action, msg % action_name)
+    -> argparse.ArgumentError
+152:61 call  isinstance(action, _SubParsersAction)
+    -> <builtin>.isinstance
+154:27 call  action(self, namespace, argument_values, option_string)
+    -> argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__
+    -> argparse._HelpAction.__call__
+    note: finders.py16 exports the package class as argcomplete.finders.IntrospectiveArgumentParser, a public access path with no private declaration. Its inherited ArgumentParser constructor internally makes the default help action. CompletionFinder.patch returns at261-262 for this receiver, so its default action stays native. nargs=0 produces [] at _get_values, and take_action invokes the help action. This is an internally constructed default on a package instance, not an action supplied by a client.
+
+160:34 call  isinstance(action, _SubParsersAction)
+    -> <builtin>.isinstance
+162:47 call  vars(subnamespace)
+    -> <builtin>.vars
+162:67 call  vars(subnamespace).items()
+    -> <builtin>.dict.items
+163:36 call  setattr(namespace, key, value)
+    -> <builtin>.setattr
+
+[argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional]
+171:26 call  isinstance(raw_option_tuple, list)
+    -> <builtin>.isinstance
+175:19 call  len(option_tuple)
+    -> <builtin>.len
+187:34 call  extras.append(arg_strings[start_index])
+    -> <builtin>.list.append
+193:47 call  match_argument(action, 'A')
+    -> argparse.ArgumentParser._match_argument
+    note: match_argument is self._match_argument (line 182), the argparse method of the patched parser
+200:45 call  action_tuples.append((action, [], option_string))
+    -> <builtin>.list.append
+209:42 call  gettext('ignored explicit argument %r')
+    -> gettext.gettext
+210:48 call  ArgumentError(action, msg % explicit_arg)
+    -> argparse.ArgumentError
+217:45 call  action_tuples.append((action, args, option_string))
+    -> <builtin>.list.append
+223:38 call  gettext('ignored explicit argument %r')
+    -> gettext.gettext
+224:44 call  ArgumentError(action, msg % explicit_arg)
+    -> argparse.ArgumentError
+234:47 call  match_argument(action, selected_patterns)
+    -> argparse.ArgumentParser._match_argument
+    note: match_argument is self._match_argument (line 182)
+241:53 call  len(args)
+    -> <builtin>.len
+242:42 call  action_is_open(action)
+    -> argcomplete.packages._argparse.action_is_open
+243:51 call  self.active_actions.remove(action)
+    -> <builtin>.list.remove
+246:41 call  action_tuples.append((action, args, option_string))
+    -> <builtin>.list.append
+253:28 call  take_action(optional_action, args, option_string)
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action
+
+[argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals]
+265:39 call  match_partial(positionals, selected_pattern)
+    -> argparse.ArgumentParser._match_arguments_partial
+    note: match_partial is self._match_arguments_partial (line 263), the argparse method of the patched parser
+269:41 call  zip(positionals, arg_counts)
+    -> <builtin>.zip
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: positionals is a list of actions and arg_counts the list that _match_arguments_partial returns
+270:43 call  self.active_actions.append(action)
+    -> <builtin>.list.append
+271:41 call  zip(positionals, arg_counts)
+    -> <builtin>.zip
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: positionals is a list of actions and arg_counts the list that _match_arguments_partial returns
+274:49 call  len(args)
+    -> <builtin>.len
+275:28 call  take_action(action, args)
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action
+279:45 call  len(arg_counts)
+    -> <builtin>.len
+
+== argcomplete.packages._shlex
+
+[argcomplete.packages._shlex.shlex.__init__]
+25:22 call  isinstance(instream, str)
+    -> <builtin>.isinstance
+26:32 call  StringIO(instream)
+    -> io.StringIO
+50:37 call  deque()
+    -> collections.deque
+54:38 call  deque()
+    -> collections.deque
+63:48 call  deque()
+    note: never runs: punctuation_chars is always False; the only package call (lexers.py:12) passes none, and shlex is private (rule C). Judgement 1 of argcomplete.md
+67:41 call  self.wordchars.maketrans(dict.fromkeys(punctuation_chars))
+    note: never runs: punctuation_chars is always False (see 63:48)
+67:55 call  dict.fromkeys(punctuation_chars)
+    note: never runs: punctuation_chars is always False (see 63:48)
+68:54 call  self.wordchars.translate(t)
+    note: never runs: punctuation_chars is always False (see 63:48)
+
+[argcomplete.packages._shlex.shlex.push_token]
+77:18 call  print("shlex: pushing token " + repr(tok))
+    note: never runs: self.debug is always 0 (line 52); the package never calls push_token, and its receiver is still the lexer of split_line, the only shlex of the package (B1: a private class has only the instances that the package makes). Lead's ruling on judgement 2
+77:49 call  repr(tok)
+    note: never runs: self.debug is always 0 (see 77:18)
+78:33 call  self.pushback.appendleft(tok)
+    -> collections.deque.appendleft
+
+[argcomplete.packages._shlex.shlex.push_source]
+83:22 call  isinstance(newstream, str)
+    -> <builtin>.isinstance
+84:33 call  StringIO(newstream)
+    -> io.StringIO
+85:34 call  self.filestack.appendleft((self.infile, self.instream, se...
+    -> collections.deque.appendleft
+91:22 call  print('shlex: pushing to file %s' % (self.infile,))
+    note: never runs: self.debug is always 0 (line 52); the package never calls push_source (its only call, get_token line 118, never runs), and its receiver is the lexer of split_line, the only shlex of the package (B1: a private class has only the instances that the package makes). Lead's ruling on judgement 2
+93:22 call  print('shlex: pushing to stream %s' % (self.instream,))
+    note: never runs: self.debug is always 0 (see 91:22)
+
+[argcomplete.packages._shlex.shlex.pop_source]
+97:28 call  self.instream.close()
+    -> io.StringIO.close
+    note: the package never calls pop_source; its receiver is the lexer of split_line, the only shlex of the package (B1: a private class has only the instances that the package makes), whose instream is the io.StringIO of line 26 (the lexer gets a str). sys.stdin (line 31) needs instream=None, which the package never passes, and the file of sourcehook is pushed only at line 118, which never runs (judgement 1). Lead's ruling on judgement 2
+98:75 call  self.filestack.popleft()
+    -> collections.deque.popleft
+100:18 call  print('shlex: popping to %s, line %d' % (self.instream, s...
+    note: never runs: self.debug is always 0 (line 52; see 97:28)
+
+[argcomplete.packages._shlex.shlex.get_token]
+106:40 call  self.pushback.popleft()
+    note: never runs: self.pushback is always empty on the lexer of split_line; only push_token (never called) and line 263 (never reached, see 263:49) fill it. Judgement 1 of argcomplete.md
+108:22 call  print("shlex: popping token " + repr(tok))
+    note: never runs: self.pushback is always empty (see 106:40), and self.debug is always 0 (line 52; the package never sets it)
+108:53 call  repr(tok)
+    note: never runs (see 108:22)
+111:30 call  self.read_token()
+    -> argcomplete.packages._shlex.shlex.read_token
+115:39 call  self.sourcehook(self.read_token())
+    note: never runs: self.source is always None (line 55; the package never sets it). Judgement 1 of argcomplete.md
+    reject argcomplete.packages._shlex.shlex.sourcehook: the line never runs (self.source is always None)
+115:55 call  self.read_token()
+    note: never runs: self.source is always None (see 115:39)
+    reject argcomplete.packages._shlex.shlex.read_token: the line never runs (self.source is always None)
+118:37 call  self.push_source(newstream, newfile)
+    note: never runs: self.source is always None (see 115:39)
+    reject argcomplete.packages._shlex.shlex.push_source: the line never runs (self.source is always None)
+119:37 call  self.get_token()
+    note: never runs: self.source is always None (see 115:39)
+    reject argcomplete.packages._shlex.shlex.get_token: the line never runs (self.source is always None)
+125:32 call  self.pop_source()
+    note: never runs: self.filestack is always empty on the lexer of split_line (only push_source fills it, and the package never calls it), so line 123 returns. Judgement 1 of argcomplete.md
+    reject argcomplete.packages._shlex.shlex.pop_source: the line never runs (self.filestack is always empty)
+126:37 call  self.get_token()
+    note: never runs: self.filestack is always empty (see 125:32)
+    reject argcomplete.packages._shlex.shlex.get_token: the line never runs (self.filestack is always empty)
+130:22 call  print("shlex: token=" + repr(raw))
+    note: never runs: self.debug is always 0 (line 52; the package never sets it). Judgement 1 of argcomplete.md
+130:45 call  repr(raw)
+    note: never runs: self.debug is always 0 (see 130:22)
+132:22 call  print("shlex: token=EOF")
+    note: never runs: self.debug is always 0 (see 130:22)
+
+[argcomplete.packages._shlex.shlex.read_token]
+140:52 call  self._pushback_chars.pop()
+    note: never runs: self.punctuation_chars is always '' (see 63:48), so line 139 is false. Judgement 1 of argcomplete.md
+142:46 call  self.instream.read(1)
+    -> io.StringIO.read
+    note: self.instream is the io.StringIO of line 26 (the lexer of split_line gets a str)
+146:22 call  print("shlex: in state %r I see character: %r" % (self.st...
+    note: never runs: self.debug is always 0 (see 130:22)
+156:30 call  print("shlex: I see whitespace in whitespace state")
+    note: never runs: self.debug is always 0 (see 130:22)
+162:43 call  self.instream.readline()
+    -> io.StringIO.readline
+    note: a # at the start of a word (commenters is '#', line 38)
+182:54 call  len(self.token)
+    -> <builtin>.len
+193:30 call  print("shlex: I see EOF in quotes state")
+    note: never runs: self.debug is always 0 (see 130:22)
+195:37 call  ValueError("No closing quotation")
+    -> <builtin>.ValueError
+211:30 call  print("shlex: I see EOF in escape state")
+    note: never runs: self.debug is always 0 (see 130:22)
+213:37 call  ValueError("No escaped character")
+    -> <builtin>.ValueError
+226:30 call  print("shlex: I see whitespace in word state")
+    note: never runs: self.debug is always 0 (see 130:22)
+233:43 call  self.instream.readline()
+    -> io.StringIO.readline
+    note: a # inside a word (line 232 comes before line 254)
+251:56 call  self._pushback_chars.append(nextchar)
+    note: never runs: the state 'c' is set only at line 172, which needs punctuation chars (see 140:52)
+258:54 call  len(self.token)
+    -> <builtin>.len
+261:52 call  self._pushback_chars.append(nextchar)
+    note: never runs: split_line sets whitespace_split = True (lexers.py:13), so the test of line 254 always holds and this branch is never taken. Judgement 1 of argcomplete.md
+263:49 call  self.pushback.appendleft(nextchar)
+    note: never runs: the test of line 254 always holds (see 261:52)
+265:30 call  print("shlex: I see punctuation in word state")
+    note: never runs: the test of line 254 always holds (see 261:52), and self.debug is always 0
+277:22 call  print("shlex: raw token=" + repr(result))
+    note: never runs: self.debug is always 0 (see 130:22)
+277:49 call  repr(result)
+    note: never runs: self.debug is always 0 (see 130:22)
+279:22 call  print("shlex: raw token=EOF")
+    note: never runs: self.debug is always 0 (see 130:22)
+
+[argcomplete.packages._shlex.shlex.sourcehook]
+291:22 call  isinstance(self.infile, str)
+    -> <builtin>.isinstance
+    note: the package never calls sourcehook (its only call, get_token line 115, never runs); its receiver is the lexer of split_line, the only shlex of the package (B1: a private class has only the instances that the package makes), whose infile is None (line 29: the lexer gets no infile; only push_source and pop_source, never called, set it). newfile stays open (a parameter). Lead's ruling on judgement 2
+291:62 call  os.path.isabs(newfile)
+    note: never runs: self.infile is None (see 291:22), so isinstance(self.infile, str) is False and the `and` stops
+292:35 call  os.path.join(os.path.dirname(self.infile), newfile)
+    note: never runs: self.infile is None (see 291:22)
+292:51 call  os.path.dirname(self.infile)
+    note: never runs: self.infile is None (see 291:22)
+293:30 call  open(newfile, "r")
+    -> <builtin>.open
+
+[argcomplete.packages._shlex.shlex.__next__]
+307:31 call  self.get_token()
+    -> argcomplete.packages._shlex.shlex.get_token
+    note: the package never iterates a shlex; __next__ keeps its body edge (rule A)
+
+== argcomplete.scripts.activate_global_python_argcomplete
+
+[argcomplete.scripts.activate_global_python_argcomplete]
+35:58 call  argparse.ArgumentParser( description=__doc__, formatter_c...
+    -> argparse.ArgumentParser
+38:20 call  parser.add_argument("-y", "--yes", help="automatically an...
+    -> argparse.ArgumentParser.add_argument
+39:20 call  parser.add_argument("--dest", help='Specify the shell com...
+    -> argparse.ArgumentParser.add_argument
+40:20 call  parser.add_argument("--user", help="Install into user dir...
+    -> argparse.ArgumentParser.add_argument
+41:25 call  argcomplete.autocomplete(parser)
+    -> argcomplete.finders.CompletionFinder.__call__
+    note: argcomplete.autocomplete is the CompletionFinder instance that argcomplete/__init__.py:12 binds; calling it runs CompletionFinder.__call__
+195:13 call  sys.exit(main())
+    -> sys.exit
+195:18 call  main()
+    -> argcomplete.scripts.activate_global_python_argcomplete.main
+    reject *: main is this module's own function (line 159)
+    note: the `if __name__ == "__main__":` block is code of the module (README, Edges)
+
+[argcomplete.scripts.activate_global_python_argcomplete.get_local_dir]
+47:39 call  subprocess.check_output(["brew", "--prefix"])
+    -> subprocess.check_output
+47:68 call  subprocess.check_output(["brew", "--prefix"]).decode()
+    -> <builtin>.bytes.decode
+47:76 call  subprocess.check_output(["brew", "--prefix"]).decode().st...
+    -> <builtin>.str.strip
+
+[argcomplete.scripts.activate_global_python_argcomplete.get_zsh_system_dir]
+53:28 call  get_local_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_local_dir
+
+[argcomplete.scripts.activate_global_python_argcomplete.get_bash_system_dir]
+60:32 call  get_local_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_local_dir
+
+[argcomplete.scripts.activate_global_python_argcomplete.get_activator_dir]
+66:24 call  os.path.join(os.path.abspath(os.path.dirname(argcomplete....
+    -> os.path.join
+66:40 call  os.path.abspath(os.path.dirname(argcomplete.__file__))
+    -> os.path.abspath
+66:56 call  os.path.dirname(argcomplete.__file__)
+    -> os.path.dirname
+
+[argcomplete.scripts.activate_global_python_argcomplete.get_activator_path]
+70:24 call  os.path.join(get_activator_dir(), "_python-argcomplete")
+    -> os.path.join
+70:42 call  get_activator_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_activator_dir
+
+[argcomplete.scripts.activate_global_python_argcomplete.install_to_destination]
+74:35 call  get_activator_path()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_activator_path
+76:18 call  open(activator)
+    -> <builtin>.open
+77:29 call  sys.stdout.write(fh.read())
+    -> io.TextIOWrapper.write
+    note: the default sys.stdout is an io.TextIOWrapper
+77:37 call  fh.read()
+    -> io.TextIOWrapper.read
+79:30 call  os.path.dirname(dest)
+    -> os.path.dirname
+80:26 call  os.path.exists(destdir)
+    -> os.path.exists
+82:24 call  os.makedirs(destdir, exist_ok=True)
+    -> os.makedirs
+84:25 call  parser.error( f"path {destdir} does not exist and could n...
+    -> argparse.ArgumentParser.error
+    note: parser is the module's argparse.ArgumentParser (line 35)
+88:14 call  print(f"Installing {activator} to {dest}...", file=sys.st...
+    -> <builtin>.print
+89:20 call  shutil.copy(activator, dest)
+    -> shutil.copy
+90:14 call  print("Installed.", file=sys.stderr)
+    -> <builtin>.print
+92:21 call  parser.error( f"while installing to {dest}: {e}. Please r...
+    -> argparse.ArgumentParser.error
+
+[argcomplete.scripts.activate_global_python_argcomplete.get_consent]
+102:20 call  input("OK to proceed? [y/n] ")
+    -> <builtin>.input
+103:21 call  res.lower()
+    -> <builtin>.str.lower
+104:18 call  print('Please answer "yes" or "no".', file=sys.stderr)
+    -> <builtin>.print
+105:23 call  res.lower()
+    -> <builtin>.str.lower
+
+[argcomplete.scripts.activate_global_python_argcomplete.append_to_config_file]
+112:22 call  os.path.exists(path)
+    -> os.path.exists
+113:18 call  open(path, 'r')
+    -> <builtin>.open
+114:36 call  fh.read()
+    -> io.TextIOWrapper.read
+115:22 call  print(f"The code already exists in the file {path}.", fil...
+    -> <builtin>.print
+117:14 call  print(f"argcomplete needs to append to the file {path}. T...
+    -> <builtin>.print
+118:41 call  shellcode.splitlines()
+    -> <builtin>.str.splitlines
+    note: shellcode is annotated str (line 111)
+119:18 call  print(">", line, file=sys.stderr)
+    -> <builtin>.print
+120:27 call  get_consent()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_consent
+121:18 call  print("Not added.", file=sys.stderr)
+    -> <builtin>.print
+123:10 call  print(f"Adding shellcode to {path}...", file=sys.stderr)
+    -> <builtin>.print
+124:14 call  open(path, "a")
+    -> <builtin>.open
+125:17 call  fh.write(shellcode)
+    -> io.TextIOWrapper.write
+126:10 call  print("Added.", file=sys.stderr)
+    -> <builtin>.print
+
+[argcomplete.scripts.activate_global_python_argcomplete.link_zsh_user_rcfile]
+130:30 call  os.path.join(os.path.expanduser(os.environ.get("ZDOTDIR",...
+    -> os.path.join
+130:49 call  os.path.expanduser(os.environ.get("ZDOTDIR", "~"))
+    -> os.path.expanduser
+130:64 call  os.environ.get("ZDOTDIR", "~")
+    -> collections.abc.Mapping.get
+131:26 call  append_to_config_file(zsh_rcfile, zsh_shellcode.format(zs...
+    -> argcomplete.scripts.activate_global_python_argcomplete.append_to_config_file
+131:59 call  zsh_shellcode.format(zsh_fpath=zsh_fpath or get_activator...
+    -> <builtin>.str.format
+131:100 call  get_activator_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_activator_dir
+
+[argcomplete.scripts.activate_global_python_argcomplete.link_bash_user_rcfile]
+135:51 call  os.path.expanduser("~/.bash_completion")
+    -> os.path.expanduser
+136:26 call  append_to_config_file(bash_completion_user_file, bash_she...
+    -> argcomplete.scripts.activate_global_python_argcomplete.append_to_config_file
+136:75 call  bash_shellcode.format(activator=get_activator_path())
+    -> <builtin>.str.format
+136:104 call  get_activator_path()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_activator_path
+
+[argcomplete.scripts.activate_global_python_argcomplete.link_user_rcfiles]
+141:25 call  link_zsh_user_rcfile()
+    -> argcomplete.scripts.activate_global_python_argcomplete.link_zsh_user_rcfile
+142:26 call  link_bash_user_rcfile()
+    -> argcomplete.scripts.activate_global_python_argcomplete.link_bash_user_rcfile
+
+[argcomplete.scripts.activate_global_python_argcomplete.add_zsh_system_dir_to_fpath_for_user]
+146:35 call  os.environ.get("SHELL", "")
+    -> collections.abc.Mapping.get
+149:44 call  get_zsh_system_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_zsh_system_dir
+150:47 call  subprocess.check_output([os.environ["SHELL"], "-c", 'prin...
+    -> subprocess.check_output
+151:41 call  fpath_output.decode()
+    -> <builtin>.bytes.decode
+151:54 call  fpath_output.decode().splitlines()
+    -> <builtin>.str.splitlines
+154:29 call  link_zsh_user_rcfile(zsh_fpath=zsh_system_dir)
+    -> argcomplete.scripts.activate_global_python_argcomplete.link_zsh_user_rcfile
+
+[argcomplete.scripts.activate_global_python_argcomplete.main]
+161:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    -> argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args
+    note: The module exposes its package-created parser under the public name parser. In a fresh process with _ARGCOMPLETE initially absent, importing the module returns. A public CompletionFinder(parser).rl_complete call patches it and returns. main then invokes parse_args on that same parser; argparse calls the package override. No reload, deletion, private access, or attribute assignment is needed. The assertion that scripts always parse unpatched parsers fails for public reuse.
+
+166:51 call  os.path.exists(args.dest)
+    -> os.path.exists
+167:25 call  parser.error(f"directory {args.dest} was specified via --...
+    -> argparse.ArgumentParser.error
+168:28 call  destinations.append(args.dest)
+    -> <builtin>.list.append
+170:14 call  print( "Argcomplete was installed in the user site local ...
+    -> <builtin>.print
+174:26 call  link_user_rcfiles()
+    -> argcomplete.scripts.activate_global_python_argcomplete.link_user_rcfiles
+176:14 call  print("Argcomplete was installed in a virtual environment...
+    -> <builtin>.print
+177:26 call  link_user_rcfiles()
+    -> argcomplete.scripts.activate_global_python_argcomplete.link_user_rcfiles
+179:26 call  link_user_rcfiles()
+    -> argcomplete.scripts.activate_global_python_argcomplete.link_user_rcfiles
+181:14 call  print("Defaulting to system-wide installation.", file=sys...
+    -> <builtin>.print
+182:28 call  destinations.append(f"{get_zsh_system_dir()}/_python-argc...
+    -> <builtin>.list.append
+182:50 call  get_zsh_system_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_zsh_system_dir
+183:28 call  destinations.append(f"{get_bash_system_dir()}/python-argc...
+    -> <builtin>.list.append
+183:51 call  get_bash_system_dir()
+    -> argcomplete.scripts.activate_global_python_argcomplete.get_bash_system_dir
+186:31 call  install_to_destination(destination)
+    -> argcomplete.scripts.activate_global_python_argcomplete.install_to_destination
+188:41 call  add_zsh_system_dir_to_fpath_for_user()
+    -> argcomplete.scripts.activate_global_python_argcomplete.add_zsh_system_dir_to_fpath_for_user
+191:14 call  print("Please restart your shell or source the installed ...
+    -> <builtin>.print
+
+== argcomplete.scripts.register_python_argcomplete
+
+[argcomplete.scripts.register_python_argcomplete]
+79:13 call  sys.exit(main())
+    -> sys.exit
+79:18 call  main()
+    -> argcomplete.scripts.register_python_argcomplete.main
+    reject *: main is this module's own function (line 35)
+    note: the `if __name__ == "__main__":` block is code of the module (README, Edges)
+
+[argcomplete.scripts.register_python_argcomplete.main]
+36:37 call  argparse.ArgumentParser(description=__doc__, formatter_cl...
+    -> argparse.ArgumentParser
+38:24 call  parser.add_argument( "--no-defaults", dest="use_defaults"...
+    -> argparse.ArgumentParser.add_argument
+45:24 call  parser.add_argument( "--complete-arguments", nargs=argpar...
+    -> argparse.ArgumentParser.add_argument
+50:24 call  parser.add_argument( "-s", "--shell", choices=("bash", "z...
+    -> argparse.ArgumentParser.add_argument
+57:24 call  parser.add_argument( "-e", "--external-argcomplete-script...
+    -> argparse.ArgumentParser.add_argument
+61:24 call  parser.add_argument("executable", nargs="+", help="execut...
+    -> argparse.ArgumentParser.add_argument
+63:29 call  argcomplete.autocomplete(parser)
+    -> argcomplete.finders.CompletionFinder.__call__
+    note: argcomplete.autocomplete is the CompletionFinder instance that argcomplete/__init__.py:12 binds; calling it runs CompletionFinder.__call__
+65:11 call  len(sys.argv)
+    -> <builtin>.len
+66:26 call  parser.print_help()
+    -> argparse.ArgumentParser.print_help
+67:17 call  sys.exit(1)
+    -> sys.exit
+69:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    note: autocomplete(parser) (line 63) patches the parser only when it completes, and then ends the process (finders.py:205), so this parse calls no package code back
+71:21 call  sys.stdout.write( argcomplete.shellcode( args.executable,...
+    -> io.TextIOWrapper.write
+    note: the default sys.stdout is an io.TextIOWrapper
+72:30 call  argcomplete.shellcode( args.executable, args.use_defaults...
+    -> argcomplete.shell_integration.shellcode
+
+== argcomplete.shell_integration
+
+[argcomplete.shell_integration.shellcode]
+163:36 call  " ".join(complete_arguments)
+    -> <builtin>.str.join
+166:36 call  quote(i)
+    -> shlex.quote
+167:36 call  " ".join(quoted_executables)
+    -> <builtin>.str.join
+171:51 call  script.replace(" ", "_SPACE_")
+    -> <builtin>.str.replace
+    note: script is argcomplete_script, annotated str | None (line 144), here not empty
+175:31 call  dict( complete_opts=complete_options, executables=executa...
+    -> <builtin>.dict
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: dict() gets only keyword arguments
+186:47 call  executable.replace("/", "_")
+    -> <builtin>.str.replace
+    note: executable is an element of executables, annotated Iterable[str] (line 140)
+188:36 call  dict( executable=executable, argcomplete_script=script, c...
+    -> <builtin>.dict
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: dict() gets only keyword arguments
+198:43 call  dict(executable=executable, argcomplete_script=script)
+    -> <builtin>.dict
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: dict() gets only keyword arguments
+207:36 call  shell_codes.get(shell, "")
+    -> <builtin>.dict.get
+207:54 call  dict(executable=executable, argcomplete_script=script)
+    -> <builtin>.dict
+    reject argcomplete.packages._shlex.shlex.__iter__, argcomplete.packages._shlex.shlex.__next__: dict() gets only keyword arguments

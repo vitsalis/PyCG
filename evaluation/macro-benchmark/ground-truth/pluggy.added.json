@@ -1,0 +1,84 @@
+{
+  "edges": {
+    "pluggy._caller.HookCaller.call_extra": {
+      "pluggy._caller._SubsetHookCaller._hookimpls": [
+        "pluggy._caller 248:26 getattr  self._hookimpls"
+      ],
+      "pluggy._caller._SubsetHookCaller.spec": [
+        "pluggy._caller 261:28 getattr  self.spec",
+        "pluggy._caller 261:72 getattr  self.spec"
+      ]
+    },
+    "pluggy._caller.HookCaller.get_hookimpls": {
+      "pluggy._caller._SubsetHookCaller._hookimpls": [
+        "pluggy._caller 125:21 getattr  self._hookimpls"
+      ]
+    },
+    "pluggy._caller.HookCaller.has_spec": {
+      "pluggy._caller._SubsetHookCaller.spec": [
+        "pluggy._caller 95:21 getattr  self.spec"
+      ]
+    },
+    "pluggy._caller.HookCaller.set_specification": {
+      "pluggy._caller._SubsetHookCaller.spec": [
+        "pluggy._caller 103:17 getattr  self.spec",
+        "pluggy._caller 105:30 getattr  self.spec",
+        "pluggy._caller 106:42 getattr  self.spec"
+      ]
+    },
+    "pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec.<lambda1>": {
+      "pluggy._manager.PluginManager.add_hookcall_monitoring.traced_hookexec": [
+        "pluggy._manager 595:32 call  oldcall(hook_name, hook_impls, caller_kwargs, firstresult)"
+      ]
+    },
+    "pluggy._manager.PluginManager.load_setuptools_entrypoints": {
+      "importlib.metadata.EntryPoint.load": [
+        "pluggy._manager 521:33 call  ep.load()"
+      ],
+      "importlib.metadata.distributions": [
+        "pluggy._manager 511:58 call  importlib.metadata.distributions()"
+      ]
+    },
+    "pluggy._result.Result.get_result": {
+      "<builtin>.RuntimeError.with_traceback": [
+        "pluggy._result 103:37 call  exc.with_traceback(tb)"
+      ]
+    }
+  },
+  "notes": {
+    "pluggy._caller 103:17 getattr  self.spec": [
+      "set_specification is public; on a _SubsetHookCaller, self.spec is the property. If present it raises ValueError at 104; if absent HookSpec(...) at 108 runs before assignment fails because the property has no setter."
+    ],
+    "pluggy._caller 105:30 getattr  self.spec": [
+      "as at 103:17, self can be a _SubsetHookCaller"
+    ],
+    "pluggy._caller 106:42 getattr  self.spec": [
+      "as at 103:17, self can be a _SubsetHookCaller"
+    ],
+    "pluggy._caller 125:21 getattr  self._hookimpls": [
+      "get_hookimpls is public; the client can call it on the _SubsetHookCaller of subset_hook_caller"
+    ],
+    "pluggy._caller 248:26 getattr  self._hookimpls": [
+      "call_extra is public; the client can call it on the _SubsetHookCaller of subset_hook_caller"
+    ],
+    "pluggy._caller 261:28 getattr  self.spec": [
+      "as at 248:26"
+    ],
+    "pluggy._caller 261:72 getattr  self.spec": [
+      "as at 248:26"
+    ],
+    "pluggy._caller 95:21 getattr  self.spec": [
+      "has_spec is public; the client can call it on the _SubsetHookCaller that subset_hook_caller returns, where spec is a property"
+    ],
+    "pluggy._manager 521:33 call  ep.load()": [
+      "ep is an importlib.metadata.EntryPoint of dist.entry_points; load() imports the plugin of another distribution (client code)"
+    ],
+    "pluggy._manager 595:32 call  oldcall(hook_name, hook_impls, caller_kwargs, firstresult)": [
+      "oldcall is self._inner_hookexec when add_hookcall_monitoring ran (_manager.py:585): _multicall (set at :172), or the traced_hookexec of an earlier add_hookcall_monitoring or enable_tracing (set at :600; :603 restores an earlier value)"
+    ],
+    "pluggy._result 103:37 call  exc.with_traceback(tb)": [
+      "annotated client exceptions admit BaseException.with_traceback. Package-created HookCallError, RuntimeError from _raise_wrapfail, and PluggyTeardownRaisedWarning raised by warnings-as-errors also flow through _multicall and Result.from_call into this Result. Their nearest outside receiver classes are Exception, RuntimeError and UserWarning respectively; B4 does not erase package-produced values."
+    ]
+  },
+  "trace": "dynamic/pluggy.json"
+}

@@ -1,0 +1,1947 @@
+{
+  "edges": {
+    "subbrute.subbrute": {
+      "<builtin>.getattr": [
+        "subbrute.subbrute 554:15 call  getattr(sys, 'frozen', False)"
+      ],
+      "<builtin>.len": [
+        "subbrute.subbrute 586:11 call  len(args)"
+      ],
+      "<builtin>.open": [
+        "subbrute.subbrute 603:27 call  open(options.output, \"w\")",
+        "subbrute.subbrute 610:31 call  open(options.json, \"w\")"
+      ],
+      "<builtin>.print": [
+        "subbrute.subbrute 592:18 call  print(d)",
+        "subbrute.subbrute 632:18 call  print(target, record_type, options.subs, options.resolver..."
+      ],
+      "<builtin>.str": [
+        "subbrute.subbrute 618:26 call  str(options.type)"
+      ],
+      "<builtin>.str.startswith": [
+        "subbrute.subbrute 33:28 call  sys.platform.startswith('win')"
+      ],
+      "<builtin>.str.strip": [
+        "subbrute.subbrute 622:30 call  target.strip()"
+      ],
+      "<builtin>.str.upper": [
+        "subbrute.subbrute 618:46 call  str(options.type).upper()"
+      ],
+      "multiprocessing.freeze_support": [
+        "subbrute.subbrute 557:39 call  multiprocessing.freeze_support()"
+      ],
+      "optparse.OptionParser": [
+        "subbrute.subbrute 561:35 call  optparse.OptionParser(\"usage: %prog [options] target\")"
+      ],
+      "optparse.OptionParser.add_option": [
+        "subbrute.subbrute 562:22 call  parser.add_option(\"-s\", \"--subs\", dest = \"subs\", default ...",
+        "subbrute.subbrute 564:22 call  parser.add_option(\"-r\", \"--resolvers\", dest = \"resolvers\"...",
+        "subbrute.subbrute 566:22 call  parser.add_option(\"-t\", \"--targets_file\", dest = \"targets...",
+        "subbrute.subbrute 568:22 call  parser.add_option(\"-o\", \"--output\", dest = \"output\", defa...",
+        "subbrute.subbrute 569:22 call  parser.add_option(\"-j\", \"--json\", dest=\"json\", default = ...",
+        "subbrute.subbrute 570:22 call  parser.add_option(\"-a\", \"-A\", action = 'store_true', dest...",
+        "subbrute.subbrute 572:22 call  parser.add_option(\"--type\", dest = \"type\", default = Fals...",
+        "subbrute.subbrute 574:22 call  parser.add_option(\"-c\", \"--process_count\", dest = \"proces...",
+        "subbrute.subbrute 577:22 call  parser.add_option(\"-f\", \"--filter_subs\", dest = \"filter\",...",
+        "subbrute.subbrute 579:22 call  parser.add_option(\"-v\", \"--verbose\", action = 'store_true..."
+      ],
+      "optparse.OptionParser.error": [
+        "subbrute.subbrute 587:21 call  parser.error(\"You must provie a target. Use -h for help.\")"
+      ],
+      "optparse.OptionParser.parse_args": [
+        "subbrute.subbrute 581:40 call  parser.parse_args()"
+      ],
+      "os.path.dirname": [
+        "subbrute.subbrute 556:36 call  os.path.dirname(sys.executable)",
+        "subbrute.subbrute 560:36 call  os.path.dirname(os.path.realpath(__file__))"
+      ],
+      "os.path.join": [
+        "subbrute.subbrute 562:76 call  os.path.join(base_path, \"names.txt\")",
+        "subbrute.subbrute 564:86 call  os.path.join(base_path, \"resolvers.txt\")"
+      ],
+      "os.path.realpath": [
+        "subbrute.subbrute 560:53 call  os.path.realpath(__file__)"
+      ],
+      "re.compile": [
+        "subbrute.subbrute 359:24 call  re.compile(r\"((?<=[\\s])[a-zA-Z0-9_-]+\\.(?:[a-zA-Z0-9_-]+\\...",
+        "subbrute.subbrute 374:26 call  re.compile(\"([a-zA-Z0-9_-]*\\.[a-zA-Z0-9_-]*\\.[a-zA-Z0-9_-..."
+      ],
+      "subbrute.subbrute.check_open": [
+        "subbrute.subbrute 596:29 call  check_open(options.targets)"
+      ],
+      "subbrute.subbrute.error": [
+        "subbrute.subbrute 605:18 call  error(\"Failed writing to file:\", options.output)",
+        "subbrute.subbrute 612:18 call  error(\"Failed writing to file:\", options.json)"
+      ],
+      "subbrute.subbrute.extract_subdomains": [
+        "subbrute.subbrute 591:36 call  extract_subdomains(options.filter)"
+      ],
+      "subbrute.subbrute.print_target": [
+        "subbrute.subbrute 633:25 call  print_target(target, record_type, options.subs, options.r..."
+      ],
+      "sys.exit": [
+        "subbrute.subbrute 593:17 call  sys.exit()"
+      ]
+    },
+    "subbrute.subbrute.check_open": {
+      "<builtin>.len": [
+        "subbrute.subbrute 537:15 call  len(ret)"
+      ],
+      "<builtin>.open": [
+        "subbrute.subbrute 534:19 call  open(input_file)"
+      ],
+      "io.TextIOWrapper.readlines": [
+        "subbrute.subbrute 534:41 call  open(input_file).readlines()"
+      ],
+      "subbrute.subbrute.error": [
+        "subbrute.subbrute 536:14 call  error(\"File not found:\", input_file)",
+        "subbrute.subbrute 538:14 call  error(\"File is empty:\", input_file)"
+      ]
+    },
+    "subbrute.subbrute.error": {
+      "<builtin>.str": [
+        "subbrute.subbrute 525:29 call  str(a)"
+      ],
+      "io.TextIOWrapper.write": [
+        "subbrute.subbrute 525:25 call  sys.stderr.write(str(a))",
+        "subbrute.subbrute 526:25 call  sys.stderr.write(\" \")",
+        "subbrute.subbrute 527:21 call  sys.stderr.write(\"\\n\")"
+      ],
+      "sys.exit": [
+        "subbrute.subbrute 528:13 call  sys.exit(1)"
+      ]
+    },
+    "subbrute.subbrute.extract_hosts": {
+      "<builtin>.list.append": [
+        "subbrute.subbrute 369:23 call  ret.append(host)"
+      ],
+      "<builtin>.str.endswith": [
+        "subbrute.subbrute 368:25 call  host.endswith(hostname)"
+      ],
+      "<builtin>.str.rstrip": [
+        "subbrute.subbrute 366:25 call  fh.rstrip(\".\")"
+      ],
+      "re.findall": [
+        "subbrute.subbrute 364:23 call  re.findall(host_match, data)"
+      ]
+    },
+    "subbrute.subbrute.extract_subdomains": {
+      "<builtin>.dict.keys": [
+        "subbrute.subbrute 404:35 call  subs.keys()"
+      ],
+      "<builtin>.len": [
+        "subbrute.subbrute 386:28 call  len(p[-1])",
+        "subbrute.subbrute 391:19 call  len(p)"
+      ],
+      "<builtin>.open": [
+        "subbrute.subbrute 379:20 call  open(file_name)"
+      ],
+      "<builtin>.sorted": [
+        "subbrute.subbrute 404:25 call  sorted(subs.keys(), key = lambda x: subs[x], reverse = True)"
+      ],
+      "<builtin>.str": [
+        "subbrute.subbrute 392:26 call  str(p)"
+      ],
+      "<builtin>.str.find": [
+        "subbrute.subbrute 383:18 call  i.find(\".\")"
+      ],
+      "<builtin>.str.lower": [
+        "subbrute.subbrute 396:36 call  q.lower()"
+      ],
+      "<builtin>.str.split": [
+        "subbrute.subbrute 384:24 call  i.split(\".\")"
+      ],
+      "io.TextIOWrapper.read": [
+        "subbrute.subbrute 379:36 call  open(file_name).read()"
+      ],
+      "re.findall": [
+        "subbrute.subbrute 380:23 call  re.findall(domain_match, sub_file)"
+      ],
+      "subbrute.subbrute.extract_subdomains.<lambda1>": [
+        "subbrute.subbrute 404:25 call  sorted(subs.keys(), key = lambda x: subs[x], reverse = True)"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 392:22 call  trace(str(p), \" : \", i)"
+      ]
+    },
+    "subbrute.subbrute.killproc": {
+      "<builtin>.str.startswith": [
+        "subbrute.subbrute 503:31 call  sys.platform.startswith('win')"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "subbrute.subbrute 506:42 call  kernel32.OpenProcess(1, 0, pid)",
+        "subbrute.subbrute 507:38 call  kernel32.TerminateProcess(handle, 0)"
+      ],
+      "os.getpid": [
+        "subbrute.subbrute 502:24 call  os.getpid()"
+      ],
+      "os.kill": [
+        "subbrute.subbrute 512:16 call  os.kill(pid, 9)"
+      ]
+    },
+    "subbrute.subbrute.lookup.__init__": {
+      "dns.resolver.Resolver": [
+        "subbrute.subbrute 189:46 call  dns.resolver.Resolver()"
+      ],
+      "multiprocessing.Process.__init__": [
+        "subbrute.subbrute 180:41 call  multiprocessing.Process.__init__(self, target = self.run)"
+      ],
+      "subbrute.subbrute.signal_init": [
+        "subbrute.subbrute 181:20 call  signal_init()"
+      ],
+      "threading.Thread.__init__": [
+        "subbrute.subbrute 180:41 call  multiprocessing.Process.__init__(self, target = self.run)"
+      ]
+    },
+    "subbrute.subbrute.lookup.check": {
+      "<builtin>.len": [
+        "subbrute.subbrute 219:15 call  len(self.resolver.nameservers)"
+      ],
+      "<builtin>.list.append": [
+        "subbrute.subbrute 246:48 call  cname_record.append(host)"
+      ],
+      "<builtin>.range": [
+        "subbrute.subbrute 238:35 call  range(20)"
+      ],
+      "<builtin>.str": [
+        "subbrute.subbrute 229:46 call  str(resp.response)",
+        "subbrute.subbrute 245:39 call  str(resp[0])"
+      ],
+      "<builtin>.str.rstrip": [
+        "subbrute.subbrute 245:55 call  str(resp[0]).rstrip(\".\")"
+      ],
+      "<builtin>.type": [
+        "subbrute.subbrute 254:24 call  type(e)",
+        "subbrute.subbrute 261:26 call  type(e)",
+        "subbrute.subbrute 264:26 call  type(e)",
+        "subbrute.subbrute 270:26 call  type(e)",
+        "subbrute.subbrute 285:26 call  type(e)",
+        "subbrute.subbrute 289:26 call  type(e)",
+        "subbrute.subbrute 294:26 call  type(e)"
+      ],
+      "dns.resolver.Resolver.query": [
+        "subbrute.subbrute 227:47 call  self.resolver.query(host)",
+        "subbrute.subbrute 240:55 call  self.resolver.query(host, record_type)",
+        "subbrute.subbrute 251:47 call  self.resolver.query(host, record_type)"
+      ],
+      "multiprocessing.queues.Queue.put": [
+        "subbrute.subbrute 234:42 call  self.in_q.put((h, record_type, 0))",
+        "subbrute.subbrute 258:34 call  self.in_q.put((host, record_type, 0))",
+        "subbrute.subbrute 281:42 call  self.in_q.put((host, record_type, retries + 1))",
+        "subbrute.subbrute 292:34 call  self.in_q.put((host, record_type, 0))"
+      ],
+      "subbrute.subbrute.error": [
+        "subbrute.subbrute 295:26 call  error(\"DNS record type not supported:\", record_type)"
+      ],
+      "subbrute.subbrute.extract_hosts": [
+        "subbrute.subbrute 229:42 call  extract_hosts(str(resp.response), self.domain)"
+      ],
+      "subbrute.subbrute.lookup.get_ns": [
+        "subbrute.subbrute 221:53 call  self.get_ns()"
+      ],
+      "subbrute.subbrute.lookup.get_ns_blocking": [
+        "subbrute.subbrute 259:70 call  self.get_ns_blocking()"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 216:14 call  trace(\"Checking:\", host)",
+        "subbrute.subbrute 233:34 call  trace(\"Found host with spider:\", h)",
+        "subbrute.subbrute 267:30 call  trace(\"NoAnswer retry\")",
+        "subbrute.subbrute 271:26 call  trace(\"lookup failure:\", host, retries)",
+        "subbrute.subbrute 297:26 call  trace(\"Problem processing host:\", host)"
+      ]
+    },
+    "subbrute.subbrute.lookup.get_ns": {
+      "multiprocessing.queues.Queue.get_nowait": [
+        "subbrute.subbrute 196:46 call  self.resolver_q.get_nowait()"
+      ]
+    },
+    "subbrute.subbrute.lookup.get_ns_blocking": {
+      "multiprocessing.queues.Queue.get": [
+        "subbrute.subbrute 207:35 call  self.resolver_q.get()"
+      ]
+    },
+    "subbrute.subbrute.lookup.run": {
+      "<builtin>.len": [
+        "subbrute.subbrute 328:23 call  len(work)"
+      ],
+      "<builtin>.list.append": [
+        "subbrute.subbrute 350:51 call  found_addresses.append(a)"
+      ],
+      "<builtin>.str": [
+        "subbrute.subbrute 343:32 call  str(a)"
+      ],
+      "io.TextIOWrapper.flush": [
+        "subbrute.subbrute 335:33 call  sys.stdout.flush()"
+      ],
+      "multiprocessing.queues.Queue.get": [
+        "subbrute.subbrute 306:33 call  self.in_q.get()"
+      ],
+      "multiprocessing.queues.Queue.put": [
+        "subbrute.subbrute 323:30 call  self.in_q.put(False)",
+        "subbrute.subbrute 325:31 call  self.out_q.put(False)",
+        "subbrute.subbrute 354:39 call  self.out_q.put(result)"
+      ],
+      "subbrute.subbrute.lookup.check": [
+        "subbrute.subbrute 331:42 call  self.check(hostname, record_type, timeout_retries)",
+        "subbrute.subbrute 334:42 call  self.check(hostname, record_type)"
+      ],
+      "subbrute.subbrute.lookup.get_ns_blocking": [
+        "subbrute.subbrute 303:58 call  self.get_ns_blocking()"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 316:26 call  trace('End of work queue')",
+        "subbrute.subbrute 336:22 call  trace(response)",
+        "subbrute.subbrute 345:34 call  trace(\"resovled wildcard:\", hostname)"
+      ]
+    },
+    "subbrute.subbrute.print_target": {
+      "<builtin>.list.append": [
+        "subbrute.subbrute 420:35 call  subdomains_list.append(result)"
+      ],
+      "<builtin>.print": [
+        "subbrute.subbrute 419:22 call  print(result)"
+      ],
+      "<builtin>.set": [
+        "subbrute.subbrute 422:16 call  set(subdomains_list)"
+      ],
+      "<builtin>.str.join": [
+        "subbrute.subbrute 416:51 call  \",\".join(response)"
+      ],
+      "<builtin>.str.strip": [
+        "subbrute.subbrute 416:67 call  \",\".join(response).strip(\",\")"
+      ],
+      "subbrute.subbrute.run": [
+        "subbrute.subbrute 410:8 call  run(target, record_type, subdomains, resolve_list, proces...",
+        "subbrute.subbrute 411:22 call  run(target, record_type, subdomains, resolve_list, proces..."
+      ]
+    },
+    "subbrute.subbrute.run": {
+      "<builtin>.len": [
+        "subbrute.subbrute 427:12 call  len(resolve_list)"
+      ],
+      "<builtin>.range": [
+        "subbrute.subbrute 465:19 call  range(process_count)"
+      ],
+      "<builtin>.str": [
+        "subbrute.subbrute 448:16 call  str(s)",
+        "subbrute.subbrute 481:45 call  str(type(e))"
+      ],
+      "<builtin>.str.endswith": [
+        "subbrute.subbrute 454:30 call  s.endswith(target)"
+      ],
+      "<builtin>.str.find": [
+        "subbrute.subbrute 450:22 call  s.find(\",\")"
+      ],
+      "<builtin>.str.split": [
+        "subbrute.subbrute 453:26 call  s.split(\",\")"
+      ],
+      "<builtin>.str.strip": [
+        "subbrute.subbrute 448:25 call  str(s).strip()"
+      ],
+      "<builtin>.type": [
+        "subbrute.subbrute 481:20 call  type(e)",
+        "subbrute.subbrute 481:50 call  type(e)"
+      ],
+      "io.TextIOWrapper.write": [
+        "subbrute.subbrute 428:25 call  sys.stderr.write('Warning: Fewer than 16 resovlers per th..."
+      ],
+      "multiprocessing.Manager": [
+        "subbrute.subbrute 433:44 call  multiprocessing.Manager()",
+        "subbrute.subbrute 434:51 call  multiprocessing.Manager()"
+      ],
+      "multiprocessing.Process.start": [
+        "subbrute.subbrute 442:34 call  verify_nameservers_proc.start()",
+        "subbrute.subbrute 467:21 call  worker.start()"
+      ],
+      "multiprocessing.Queue": [
+        "subbrute.subbrute 435:33 call  multiprocessing.Queue()",
+        "subbrute.subbrute 436:34 call  multiprocessing.Queue()",
+        "subbrute.subbrute 438:38 call  multiprocessing.Queue(maxsize = 2)"
+      ],
+      "multiprocessing.managers.SyncManager.dict": [
+        "subbrute.subbrute 433:51 call  multiprocessing.Manager().dict()",
+        "subbrute.subbrute 434:58 call  multiprocessing.Manager().dict()"
+      ],
+      "multiprocessing.queues.Queue.get": [
+        "subbrute.subbrute 472:31 call  out_q.get(True, 10)"
+      ],
+      "multiprocessing.queues.Queue.put": [
+        "subbrute.subbrute 444:13 call  in_q.put((target, record_type))",
+        "subbrute.subbrute 462:25 call  in_q.put(work)",
+        "subbrute.subbrute 464:13 call  in_q.put(False)"
+      ],
+      "subbrute.subbrute.check_open": [
+        "subbrute.subbrute 425:28 call  check_open(subdomains)",
+        "subbrute.subbrute 426:30 call  check_open(resolve_list)"
+      ],
+      "subbrute.subbrute.killproc": [
+        "subbrute.subbrute 491:17 call  killproc(pid = verify_nameservers_proc.pid)"
+      ],
+      "subbrute.subbrute.lookup.__init__": [
+        "subbrute.subbrute 466:24 call  lookup(in_q, out_q, resolve_q, target, wildcards, spider_..."
+      ],
+      "subbrute.subbrute.lookup.run": [
+        "subbrute.subbrute 467:21 call  worker.start()"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 488:10 call  trace(\"killing nameserver process\")",
+        "subbrute.subbrute 495:10 call  trace(\"End\")"
+      ],
+      "subbrute.subbrute.verify_nameservers.__init__": [
+        "subbrute.subbrute 441:49 call  verify_nameservers(target, record_type, resolve_q, resolv..."
+      ],
+      "subbrute.subbrute.verify_nameservers.end": [
+        "subbrute.subbrute 494:36 call  verify_nameservers_proc.end()"
+      ],
+      "subbrute.subbrute.verify_nameservers.run": [
+        "subbrute.subbrute 442:34 call  verify_nameservers_proc.start()"
+      ],
+      "threading.Thread.start": [
+        "subbrute.subbrute 442:34 call  verify_nameservers_proc.start()",
+        "subbrute.subbrute 467:21 call  worker.start()"
+      ]
+    },
+    "subbrute.subbrute.signal_init": {
+      "signal.signal": [
+        "subbrute.subbrute 545:18 call  signal.signal(signal.SIGINT, killproc)",
+        "subbrute.subbrute 547:22 call  signal.signal(signal.SIGTSTP, killproc)",
+        "subbrute.subbrute 548:22 call  signal.signal(signal.SIGQUIT, killproc)"
+      ]
+    },
+    "subbrute.subbrute.trace": {
+      "<builtin>.str": [
+        "subbrute.subbrute 519:33 call  str(a)"
+      ],
+      "io.TextIOWrapper.write": [
+        "subbrute.subbrute 519:29 call  sys.stderr.write(str(a))",
+        "subbrute.subbrute 520:29 call  sys.stderr.write(\" \")",
+        "subbrute.subbrute 521:25 call  sys.stderr.write(\"\\n\")"
+      ]
+    },
+    "subbrute.subbrute.verify_nameservers.__init__": {
+      "dns.resolver.Resolver": [
+        "subbrute.subbrute 54:41 call  dns.resolver.Resolver()",
+        "subbrute.subbrute 73:45 call  dns.resolver.Resolver()"
+      ],
+      "dns.resolver.Resolver.query": [
+        "subbrute.subbrute 70:27 call  resolver.query(self.most_popular_website, self.record_type)"
+      ],
+      "multiprocessing.Process.__init__": [
+        "subbrute.subbrute 41:41 call  multiprocessing.Process.__init__(self, target = self.run)"
+      ],
+      "subbrute.subbrute.signal_init": [
+        "subbrute.subbrute 43:20 call  signal_init()"
+      ],
+      "threading.Thread.__init__": [
+        "subbrute.subbrute 41:41 call  multiprocessing.Process.__init__(self, target = self.run)"
+      ]
+    },
+    "subbrute.subbrute.verify_nameservers.add_nameserver": {
+      "<builtin>.str": [
+        "subbrute.subbrute 88:48 call  str(type(e))"
+      ],
+      "<builtin>.type": [
+        "subbrute.subbrute 88:24 call  type(e)",
+        "subbrute.subbrute 88:53 call  type(e)"
+      ],
+      "multiprocessing.queues.Queue.put": [
+        "subbrute.subbrute 84:36 call  self.resolver_q.put(nameserver, timeout = 1)"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 85:22 call  trace(\"Added nameserver:\", nameserver)"
+      ]
+    },
+    "subbrute.subbrute.verify_nameservers.find_wildcards": {
+      "<builtin>.len": [
+        "subbrute.subbrute 142:20 call  len(wildtest)"
+      ],
+      "<builtin>.str": [
+        "subbrute.subbrute 159:32 call  str(w)"
+      ],
+      "<builtin>.type": [
+        "subbrute.subbrute 166:24 call  type(e)",
+        "subbrute.subbrute 166:60 call  type(e)",
+        "subbrute.subbrute 171:81 call  type(e)"
+      ],
+      "dns.resolver.Resolver.query": [
+        "subbrute.subbrute 141:44 call  self.resolver.query(uuid.uuid4().hex + \".com\", \"A\")",
+        "subbrute.subbrute 155:47 call  self.resolver.query(testdomain, self.record_type)"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 143:22 call  trace(\"Spam DNS detected:\", host)",
+        "subbrute.subbrute 171:26 call  trace(\"wildcard exception:\", self.resolver.nameservers, t..."
+      ],
+      "uuid.uuid4": [
+        "subbrute.subbrute 141:55 call  uuid.uuid4()",
+        "subbrute.subbrute 154:51 call  uuid.uuid4()"
+      ]
+    },
+    "subbrute.subbrute.verify_nameservers.run": {
+      "io.TextIOWrapper.write": [
+        "subbrute.subbrute 122:29 call  sys.stderr.write('Warning: No nameservers found, trying f..."
+      ],
+      "multiprocessing.queues.Queue.put": [
+        "subbrute.subbrute 127:32 call  self.resolver_q.put(False, timeout = 1)"
+      ],
+      "random.shuffle": [
+        "subbrute.subbrute 119:23 call  random.shuffle(self.resolver_list)"
+      ],
+      "subbrute.subbrute.verify_nameservers.verify": [
+        "subbrute.subbrute 120:27 call  self.verify(self.resolver_list)",
+        "subbrute.subbrute 124:24 call  self.verify(self.backup_resolver)"
+      ]
+    },
+    "subbrute.subbrute.verify_nameservers.verify": {
+      "<builtin>.str.strip": [
+        "subbrute.subbrute 97:34 call  server.strip()"
+      ],
+      "<builtin>.type": [
+        "subbrute.subbrute 114:76 call  type(e)"
+      ],
+      "subbrute.subbrute.trace": [
+        "subbrute.subbrute 111:34 call  trace(\"Rejected nameserver - wildcard:\", server)",
+        "subbrute.subbrute 114:26 call  trace(\"Rejected nameserver - unreliable:\", server, type(e))"
+      ],
+      "subbrute.subbrute.verify_nameservers.add_nameserver": [
+        "subbrute.subbrute 108:48 call  self.add_nameserver(server)"
+      ],
+      "subbrute.subbrute.verify_nameservers.find_wildcards": [
+        "subbrute.subbrute 105:47 call  self.find_wildcards(self.target)"
+      ]
+    },
+    "sublist3r": {
+      "<builtin>.print": [
+        "sublist3r 58:14 call  print(\"[!] Error: Coloring libraries not installed, no co..."
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 42:37 call  sys.platform.startswith('win')"
+      ],
+      "colorama.init": [
+        "sublist3r 55:22 call  colorama.init()"
+      ],
+      "requests.packages.urllib3.disable_warnings": [
+        "sublist3r 37:47 call  requests.packages.urllib3.disable_warnings()"
+      ],
+      "sublist3r.interactive": [
+        "sublist3r 1001:16 call  interactive()"
+      ],
+      "threading.Lock": [
+        "sublist3r 260:99 call  threading.Lock()"
+      ],
+      "win_unicode_console.enable": [
+        "sublist3r 54:35 call  win_unicode_console.enable()"
+      ]
+    },
+    "sublist3r.AskEnum.__init__": {
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 382:39 call  enumratorBaseThreaded.__init__(self, base_url, self.engin..."
+      ]
+    },
+    "sublist3r.AskEnum.extract_domains": {
+      "<builtin>.list": [
+        "sublist3r 387:26 call  list()"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 398:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 392:39 call  link.startswith('http')"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 398:59 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 390:43 call  link_regx.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 390:43 call  link_regx.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 388:31 call  re.compile('<p class=\"web-result-url\">(.*?)</p>')"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 397:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 394:46 call  urlparse.urlparse(link)"
+      ]
+    },
+    "sublist3r.AskEnum.generate_query": {
+      "<builtin>.str.format": [
+        "sublist3r 411:31 call  fmt.format(domain=self.domain, found=found)",
+        "sublist3r 413:57 call  \"site:{domain} -www.{domain}\".format(domain=self.domain)"
+      ],
+      "<builtin>.str.join": [
+        "sublist3r 410:30 call  ' -'.join(self.subdomains[:self.MAX_DOMAINS])"
+      ]
+    },
+    "sublist3r.BaiduEnum.__init__": {
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 470:39 call  enumratorBaseThreaded.__init__(self, base_url, self.engin..."
+      ]
+    },
+    "sublist3r.BaiduEnum.extract_domains": {
+      "<builtin>.list": [
+        "sublist3r 476:21 call  list()"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 488:42 call  subdomain_list.append(subdomain)",
+        "sublist3r 493:47 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 487:38 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 484:39 call  link.startswith('http')"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 493:63 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 481:38 call  link_regx.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 481:38 call  link_regx.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 479:31 call  re.compile('<a.*?class=\"c-showurl\".*?>(.*?)</a>')"
+      ],
+      "re.sub": [
+        "sublist3r 483:30 call  re.sub('<.*?>|>|<|&nbsp;', '', link)"
+      ],
+      "sublist3r.BaiduEnum.findsubs": [
+        "sublist3r 497:45 call  self.findsubs(subdomain_list)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 492:40 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 486:46 call  urlparse.urlparse(link)"
+      ]
+    },
+    "sublist3r.BaiduEnum.findsubs": {
+      "<builtin>.max": [
+        "sublist3r 502:25 call  max(count, key=count.get)",
+        "sublist3r 504:25 call  max(count, key=count.get)"
+      ],
+      "collections.Counter": [
+        "sublist3r 501:24 call  Counter(subdomains)"
+      ],
+      "collections.Counter.pop": [
+        "sublist3r 503:18 call  count.pop(subdomain1, \"None\")"
+      ]
+    },
+    "sublist3r.BaiduEnum.generate_query": {
+      "<builtin>.str.format": [
+        "sublist3r 517:77 call  \"site:{domain} -site:www.{domain} -site:{found} \".format(...",
+        "sublist3r 519:62 call  \"site:{domain} -site:www.{domain}\".format(domain=self.dom..."
+      ],
+      "<builtin>.str.join": [
+        "sublist3r 516:35 call  ' -site:'.join(self.querydomain)"
+      ]
+    },
+    "sublist3r.BaiduEnum.should_sleep": {
+      "random.randint": [
+        "sublist3r 511:34 call  random.randint(2, 5)"
+      ],
+      "time.sleep": [
+        "sublist3r 511:19 call  time.sleep(random.randint(2, 5))"
+      ]
+    },
+    "sublist3r.BingEnum.__init__": {
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 425:39 call  enumratorBaseThreaded.__init__(self, base_url, self.engin..."
+      ]
+    },
+    "sublist3r.BingEnum.extract_domains": {
+      "<builtin>.list": [
+        "sublist3r 431:26 call  list()"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 447:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 441:39 call  link.startswith('http')"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 447:59 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 435:38 call  link_regx.findall(resp)",
+        "sublist3r 436:40 call  link_regx2.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 435:38 call  link_regx.findall(resp)",
+        "sublist3r 436:40 call  link_regx2.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 432:31 call  re.compile('<li class=\"b_algo\"><h2><a href=\"(.*?)\"')",
+        "sublist3r 433:32 call  re.compile('<div class=\"b_title\"><h2><a href=\"(.*?)\"')"
+      ],
+      "re.sub": [
+        "sublist3r 440:30 call  re.sub('<(\\/)?strong>|<span.*?>|<|>', '', link)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 446:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 443:46 call  urlparse.urlparse(link)"
+      ]
+    },
+    "sublist3r.BingEnum.generate_query": {
+      "<builtin>.str.format": [
+        "sublist3r 457:31 call  fmt.format(domain=self.domain, found=found)",
+        "sublist3r 459:59 call  \"domain:{domain} -www.{domain}\".format(domain=self.domain)"
+      ],
+      "<builtin>.str.join": [
+        "sublist3r 456:30 call  ' -'.join(self.subdomains[:self.MAX_DOMAINS])"
+      ]
+    },
+    "sublist3r.CrtSearch.__init__": {
+      "<builtin>.super": [
+        "sublist3r 772:14 call  super(CrtSearch, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 772:40 call  super(CrtSearch, self).__init__(base_url, self.engine_nam..."
+      ],
+      "threading.Lock": [
+        "sublist3r 770:35 call  threading.Lock()"
+      ]
+    },
+    "sublist3r.CrtSearch.enumerate": {
+      "<builtin>.str.format": [
+        "sublist3r 784:35 call  self.base_url.format(domain=self.domain)"
+      ],
+      "sublist3r.CrtSearch.extract_domains": [
+        "sublist3r 787:33 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.CrtSearch.req": [
+        "sublist3r 785:24 call  self.req(url)"
+      ]
+    },
+    "sublist3r.CrtSearch.extract_domains": {
+      "<builtin>.list.append": [
+        "sublist3r 805:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 796:42 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.find": [
+        "sublist3r 800:57 call  subdomain.find('@')"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 795:39 call  link.strip()",
+        "sublist3r 805:59 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 793:38 call  link_regx.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 793:38 call  link_regx.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 791:31 call  re.compile('<TD>(.*?)</TD>')"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 804:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ]
+    },
+    "sublist3r.CrtSearch.req": {
+      "requests.Session.get": [
+        "sublist3r 777:36 call  self.session.get(url, headers=self.headers, timeout=self...."
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 781:33 call  self.get_response(resp)"
+      ]
+    },
+    "sublist3r.DNSdumpster.__init__": {
+      "<builtin>.super": [
+        "sublist3r 604:14 call  super(DNSdumpster, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 604:42 call  super(DNSdumpster, self).__init__(base_url, self.engine_n..."
+      ],
+      "threading.BoundedSemaphore": [
+        "sublist3r 602:47 call  threading.BoundedSemaphore(value=self.threads)"
+      ]
+    },
+    "sublist3r.DNSdumpster.check_host": {
+      "<builtin>.list.append": [
+        "sublist3r 618:44 call  self.live_subdomains.append(host)"
+      ],
+      "_thread.LockType.acquire": [
+        "sublist3r 611:26 call  self.lock.acquire()"
+      ],
+      "_thread.LockType.release": [
+        "sublist3r 621:26 call  self.lock.release()"
+      ],
+      "dns.resolver.Resolver": [
+        "sublist3r 609:41 call  dns.resolver.Resolver()"
+      ],
+      "dns.resolver.Resolver.query": [
+        "sublist3r 613:32 call  Resolver.query(host, 'A')"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 616:32 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, host))"
+      ]
+    },
+    "sublist3r.DNSdumpster.enumerate": {
+      "sublist3r.DNSdumpster.check_host": [
+        "sublist3r 651:20 call  t.start()"
+      ],
+      "sublist3r.DNSdumpster.extract_domains": [
+        "sublist3r 648:29 call  self.extract_domains(post_resp)"
+      ],
+      "sublist3r.DNSdumpster.get_csrftoken": [
+        "sublist3r 645:35 call  self.get_csrftoken(resp)"
+      ],
+      "sublist3r.DNSdumpster.req": [
+        "sublist3r 644:24 call  self.req('GET', self.base_url)",
+        "sublist3r 647:29 call  self.req('POST', self.base_url, params)"
+      ],
+      "threading.Thread": [
+        "sublist3r 650:33 call  threading.Thread(target=self.check_host, args=(subdomain,))"
+      ],
+      "threading.Thread.join": [
+        "sublist3r 652:19 call  t.join()"
+      ],
+      "threading.Thread.start": [
+        "sublist3r 651:20 call  t.start()"
+      ]
+    },
+    "sublist3r.DNSdumpster.extract_domains": {
+      "<builtin>.list": [
+        "sublist3r 664:21 call  list(set(links_list))"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 670:39 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.set": [
+        "sublist3r 664:25 call  set(links_list)"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 667:38 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 666:35 call  link.strip()",
+        "sublist3r 670:55 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 660:44 call  tbl_regex.findall(resp)",
+        "sublist3r 663:40 call  link_regex.findall(results_tbl)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 660:44 call  tbl_regex.findall(resp)",
+        "sublist3r 663:40 call  link_regex.findall(results_tbl)"
+      ],
+      "re.compile": [
+        "sublist3r 656:31 call  re.compile('<a name=\"hostanchor\"><\\/a>Host Records.*?<tab...",
+        "sublist3r 657:32 call  re.compile('<td class=\"col-md-4\">(.*?)<br>', re.S)"
+      ]
+    },
+    "sublist3r.DNSdumpster.get_csrftoken": {
+      "<builtin>.str.strip": [
+        "sublist3r 641:27 call  token.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 640:35 call  csrf_regex.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 640:35 call  csrf_regex.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 639:32 call  re.compile('<input type=\"hidden\" name=\"csrfmiddlewaretoke..."
+      ]
+    },
+    "sublist3r.DNSdumpster.req": {
+      "<builtin>.dict": [
+        "sublist3r 626:23 call  dict(self.headers)"
+      ],
+      "requests.Session.get": [
+        "sublist3r 630:40 call  self.session.get(url, headers=headers, timeout=self.timeout)"
+      ],
+      "requests.Session.post": [
+        "sublist3r 632:41 call  self.session.post(url, data=params, headers=headers, time..."
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 636:33 call  self.get_response(resp)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 634:24 call  self.print_(e)"
+      ]
+    },
+    "sublist3r.GoogleEnum.__init__": {
+      "<builtin>.super": [
+        "sublist3r 281:14 call  super(GoogleEnum, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 281:41 call  super(GoogleEnum, self).__init__(base_url, self.engine_na..."
+      ]
+    },
+    "sublist3r.GoogleEnum.check_response_errors": {
+      "<builtin>.type": [
+        "sublist3r 304:17 call  type(resp)",
+        "sublist3r 304:38 call  type(resp)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 305:24 call  self.print_(R + \"[!] Error: Google probably now is blocki...",
+        "sublist3r 306:24 call  self.print_(R + \"[~] Finished now the Google Enumeration ..."
+      ]
+    },
+    "sublist3r.GoogleEnum.extract_domains": {
+      "<builtin>.list": [
+        "sublist3r 286:26 call  list()"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 298:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 292:39 call  link.startswith('http')"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 298:59 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 289:43 call  link_regx.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 289:43 call  link_regx.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 287:31 call  re.compile('<cite.*?>(.*?)<\\/cite>')"
+      ],
+      "re.sub": [
+        "sublist3r 291:30 call  re.sub('<span.*>', '', link)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 297:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 294:46 call  urlparse.urlparse(link)"
+      ]
+    },
+    "sublist3r.GoogleEnum.generate_query": {
+      "<builtin>.str.format": [
+        "sublist3r 318:31 call  fmt.format(domain=self.domain, found=found)",
+        "sublist3r 320:57 call  \"site:{domain} -www.{domain}\".format(domain=self.domain)"
+      ],
+      "<builtin>.str.join": [
+        "sublist3r 317:30 call  ' -'.join(self.subdomains[:self.MAX_DOMAINS - 2])"
+      ]
+    },
+    "sublist3r.GoogleEnum.should_sleep": {
+      "time.sleep": [
+        "sublist3r 311:19 call  time.sleep(5)"
+      ]
+    },
+    "sublist3r.NetcraftEnum.__init__": {
+      "<builtin>.super": [
+        "sublist3r 529:14 call  super(NetcraftEnum, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 529:43 call  super(NetcraftEnum, self).__init__(self.base_url, self.en..."
+      ],
+      "threading.Lock": [
+        "sublist3r 528:35 call  threading.Lock()"
+      ]
+    },
+    "sublist3r.NetcraftEnum.create_cookies": {
+      "<builtin>.dict": [
+        "sublist3r 550:23 call  dict()"
+      ],
+      "<builtin>.str.encode": [
+        "sublist3r 554:107 call  urllib.unquote(cookies_list[1]).encode('utf-8')"
+      ],
+      "_hashlib.HASH.hexdigest": [
+        "sublist3r 554:127 call  hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-..."
+      ],
+      "_sha1.sha1.hexdigest": [
+        "sublist3r 554:127 call  hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-..."
+      ],
+      "hashlib.sha1": [
+        "sublist3r 554:68 call  hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-..."
+      ],
+      "urllib.parse.unquote": [
+        "sublist3r 554:83 call  urllib.unquote(cookies_list[1])"
+      ]
+    },
+    "sublist3r.NetcraftEnum.enumerate": {
+      "<builtin>.str.format": [
+        "sublist3r 565:41 call  self.base_url.format(domain='example.com')",
+        "sublist3r 568:35 call  self.base_url.format(domain=self.domain)"
+      ],
+      "sublist3r.NetcraftEnum.extract_domains": [
+        "sublist3r 571:33 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.NetcraftEnum.get_cookies": [
+        "sublist3r 567:35 call  self.get_cookies(resp.headers)"
+      ],
+      "sublist3r.NetcraftEnum.get_next": [
+        "sublist3r 575:32 call  self.get_next(resp)"
+      ],
+      "sublist3r.NetcraftEnum.req": [
+        "sublist3r 566:24 call  self.req(start_url)",
+        "sublist3r 570:46 call  self.req(url, cookies)"
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 570:37 call  self.get_response(self.req(url, cookies))"
+      ]
+    },
+    "sublist3r.NetcraftEnum.extract_domains": {
+      "<builtin>.list": [
+        "sublist3r 578:26 call  list()"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 589:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 584:42 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 589:59 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 581:43 call  link_regx.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 581:43 call  link_regx.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 579:31 call  re.compile('<a href=\"http://toolbar.netcraft.com/site_rep..."
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 588:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 583:46 call  urlparse.urlparse(link)"
+      ]
+    },
+    "sublist3r.NetcraftEnum.get_cookies": {
+      "sublist3r.NetcraftEnum.create_cookies": [
+        "sublist3r 559:42 call  self.create_cookies(headers['set-cookie'])"
+      ]
+    },
+    "sublist3r.NetcraftEnum.get_next": {
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 544:33 call  link_regx.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 544:33 call  link_regx.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 543:31 call  re.compile('<A href=\"(.*?)\"><b>Next page</b></a>')"
+      ],
+      "re.sub": [
+        "sublist3r 545:22 call  re.sub('host=.*?%s' % self.domain, 'host=%s' % self.domai..."
+      ]
+    },
+    "sublist3r.NetcraftEnum.req": {
+      "requests.Session.get": [
+        "sublist3r 536:36 call  self.session.get(url, headers=self.headers, timeout=self...."
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 538:24 call  self.print_(e)"
+      ]
+    },
+    "sublist3r.PassiveDNS.__init__": {
+      "<builtin>.super": [
+        "sublist3r 817:14 call  super(PassiveDNS, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 817:41 call  super(PassiveDNS, self).__init__(base_url, self.engine_na..."
+      ],
+      "threading.Lock": [
+        "sublist3r 815:35 call  threading.Lock()"
+      ]
+    },
+    "sublist3r.PassiveDNS.enumerate": {
+      "<builtin>.str.format": [
+        "sublist3r 829:35 call  self.base_url.format(domain=self.domain)"
+      ],
+      "sublist3r.PassiveDNS.extract_domains": [
+        "sublist3r 834:29 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.PassiveDNS.req": [
+        "sublist3r 830:24 call  self.req(url)"
+      ]
+    },
+    "sublist3r.PassiveDNS.extract_domains": {
+      "<builtin>.list.append": [
+        "sublist3r 844:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 844:59 call  subdomain.strip()"
+      ],
+      "json.loads": [
+        "sublist3r 839:36 call  json.loads(resp)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 843:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ]
+    },
+    "sublist3r.PassiveDNS.req": {
+      "requests.Session.get": [
+        "sublist3r 822:36 call  self.session.get(url, headers=self.headers, timeout=self...."
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 826:33 call  self.get_response(resp)"
+      ]
+    },
+    "sublist3r.ThreatCrowd.__init__": {
+      "<builtin>.super": [
+        "sublist3r 733:14 call  super(ThreatCrowd, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 733:42 call  super(ThreatCrowd, self).__init__(base_url, self.engine_n..."
+      ],
+      "threading.Lock": [
+        "sublist3r 731:35 call  threading.Lock()"
+      ]
+    },
+    "sublist3r.ThreatCrowd.enumerate": {
+      "<builtin>.str.format": [
+        "sublist3r 745:35 call  self.base_url.format(domain=self.domain)"
+      ],
+      "sublist3r.ThreatCrowd.extract_domains": [
+        "sublist3r 747:29 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.ThreatCrowd.req": [
+        "sublist3r 746:24 call  self.req(url)"
+      ]
+    },
+    "sublist3r.ThreatCrowd.extract_domains": {
+      "<builtin>.list.append": [
+        "sublist3r 760:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 755:42 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 754:39 call  link.strip()",
+        "sublist3r 760:59 call  subdomain.strip()"
+      ],
+      "json.loads": [
+        "sublist3r 752:31 call  json.loads(resp)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 759:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ]
+    },
+    "sublist3r.ThreatCrowd.req": {
+      "requests.Session.get": [
+        "sublist3r 738:36 call  self.session.get(url, headers=self.headers, timeout=self...."
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 742:33 call  self.get_response(resp)"
+      ]
+    },
+    "sublist3r.Virustotal.__init__": {
+      "<builtin>.str.format": [
+        "sublist3r 682:40 call  self.base_url.format(domain=self.domain)"
+      ],
+      "<builtin>.super": [
+        "sublist3r 681:14 call  super(Virustotal, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 681:41 call  super(Virustotal, self).__init__(base_url, self.engine_na..."
+      ],
+      "threading.Lock": [
+        "sublist3r 679:35 call  threading.Lock()"
+      ]
+    },
+    "sublist3r.Virustotal.enumerate": {
+      "json.loads": [
+        "sublist3r 699:30 call  json.loads(resp)"
+      ],
+      "sublist3r.Virustotal.extract_domains": [
+        "sublist3r 707:33 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.Virustotal.send_req": [
+        "sublist3r 698:33 call  self.send_req(self.url)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 701:28 call  self.print_(R + \"[!] Error: Virustotal probably now is bl..."
+      ]
+    },
+    "sublist3r.Virustotal.extract_domains": {
+      "<builtin>.list.append": [
+        "sublist3r 721:47 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 716:46 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 721:63 call  subdomain.strip()"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 720:40 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ]
+    },
+    "sublist3r.Virustotal.send_req": {
+      "requests.Session.get": [
+        "sublist3r 688:36 call  self.session.get(url, headers=self.headers, timeout=self...."
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 693:33 call  self.get_response(resp)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 690:24 call  self.print_(e)"
+      ]
+    },
+    "sublist3r.YahooEnum.__init__": {
+      "<builtin>.super": [
+        "sublist3r 331:14 call  super(YahooEnum, self)"
+      ],
+      "sublist3r.enumratorBaseThreaded.__init__": [
+        "sublist3r 331:40 call  super(YahooEnum, self).__init__(base_url, self.engine_nam..."
+      ]
+    },
+    "sublist3r.YahooEnum.extract_domains": {
+      "<builtin>.list.append": [
+        "sublist3r 353:43 call  self.subdomains.append(subdomain.strip())"
+      ],
+      "<builtin>.str.endswith": [
+        "sublist3r 348:42 call  subdomain.endswith(self.domain)"
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 345:39 call  link.startswith('http')"
+      ],
+      "<builtin>.str.strip": [
+        "sublist3r 353:59 call  subdomain.strip()"
+      ],
+      "_sre.SRE_Pattern.findall": [
+        "sublist3r 340:38 call  link_regx.findall(resp)",
+        "sublist3r 341:40 call  link_regx2.findall(resp)"
+      ],
+      "re.Pattern.findall": [
+        "sublist3r 340:38 call  link_regx.findall(resp)",
+        "sublist3r 341:40 call  link_regx2.findall(resp)"
+      ],
+      "re.compile": [
+        "sublist3r 336:32 call  re.compile('<span class=\" fz-.*? fw-m fc-12th wr-bw.*?\">(...",
+        "sublist3r 337:31 call  re.compile('<span class=\"txt\"><span class=\" cite fw-xl fz..."
+      ],
+      "re.sub": [
+        "sublist3r 344:30 call  re.sub(\"<(\\/)?b>\", \"\", link)"
+      ],
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 352:36 call  self.print_(\"%s%s: %s%s\" % (R, self.engine_name, W, subdo..."
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 347:46 call  urlparse.urlparse(link)"
+      ]
+    },
+    "sublist3r.YahooEnum.generate_query": {
+      "<builtin>.str.format": [
+        "sublist3r 369:31 call  fmt.format(domain=self.domain, found=found)",
+        "sublist3r 371:43 call  \"site:{domain}\".format(domain=self.domain)"
+      ],
+      "<builtin>.str.join": [
+        "sublist3r 368:37 call  ' -domain:'.join(self.subdomains[:77])"
+      ]
+    },
+    "sublist3r.banner": {
+      "<builtin>.print": [
+        "sublist3r 75:10 call  print(\"\"\"%s ____ _ _ _ _ _____ / ___| _ _| |__ | (_)___| ..."
+      ]
+    },
+    "sublist3r.enumratorBase.__init__": {
+      "requests.Session": [
+        "sublist3r 147:40 call  requests.Session()"
+      ],
+      "sublist3r.enumratorBase.print_banner": [
+        "sublist3r 160:26 call  self.print_banner()"
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 146:40 call  urlparse.urlparse(domain)"
+      ]
+    },
+    "sublist3r.enumratorBase.enumerate": {
+      "<builtin>.str.count": [
+        "sublist3r 228:32 call  query.count(self.domain)"
+      ],
+      "sublist3r.AskEnum.extract_domains": [
+        "sublist3r 242:41 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.AskEnum.generate_query": [
+        "sublist3r 227:40 call  self.generate_query()"
+      ],
+      "sublist3r.AskEnum.get_page": [
+        "sublist3r 233:40 call  self.get_page(page_no)",
+        "sublist3r 247:40 call  self.get_page(page_no)"
+      ],
+      "sublist3r.BaiduEnum.check_response_errors": [
+        "sublist3r 240:46 call  self.check_response_errors(resp)"
+      ],
+      "sublist3r.BaiduEnum.extract_domains": [
+        "sublist3r 242:41 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.BaiduEnum.generate_query": [
+        "sublist3r 227:40 call  self.generate_query()"
+      ],
+      "sublist3r.BaiduEnum.should_sleep": [
+        "sublist3r 254:30 call  self.should_sleep()"
+      ],
+      "sublist3r.BingEnum.extract_domains": [
+        "sublist3r 242:41 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.BingEnum.generate_query": [
+        "sublist3r 227:40 call  self.generate_query()"
+      ],
+      "sublist3r.GoogleEnum.check_response_errors": [
+        "sublist3r 240:46 call  self.check_response_errors(resp)"
+      ],
+      "sublist3r.GoogleEnum.extract_domains": [
+        "sublist3r 242:41 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.GoogleEnum.generate_query": [
+        "sublist3r 227:40 call  self.generate_query()"
+      ],
+      "sublist3r.GoogleEnum.should_sleep": [
+        "sublist3r 254:30 call  self.should_sleep()"
+      ],
+      "sublist3r.YahooEnum.extract_domains": [
+        "sublist3r 242:41 call  self.extract_domains(resp)"
+      ],
+      "sublist3r.YahooEnum.generate_query": [
+        "sublist3r 227:40 call  self.generate_query()"
+      ],
+      "sublist3r.YahooEnum.get_page": [
+        "sublist3r 233:40 call  self.get_page(page_no)",
+        "sublist3r 247:40 call  self.get_page(page_no)"
+      ],
+      "sublist3r.YahooEnum.should_sleep": [
+        "sublist3r 254:30 call  self.should_sleep()"
+      ],
+      "sublist3r.enumratorBase.check_max_pages": [
+        "sublist3r 235:36 call  self.check_max_pages(page_no)"
+      ],
+      "sublist3r.enumratorBase.check_max_subdomains": [
+        "sublist3r 232:41 call  self.check_max_subdomains(count)"
+      ],
+      "sublist3r.enumratorBase.check_response_errors": [
+        "sublist3r 240:46 call  self.check_response_errors(resp)"
+      ],
+      "sublist3r.enumratorBase.generate_query": [
+        "sublist3r 227:40 call  self.generate_query()"
+      ],
+      "sublist3r.enumratorBase.get_page": [
+        "sublist3r 233:40 call  self.get_page(page_no)",
+        "sublist3r 247:40 call  self.get_page(page_no)"
+      ],
+      "sublist3r.enumratorBase.send_req": [
+        "sublist3r 237:33 call  self.send_req(query, page_no)"
+      ],
+      "sublist3r.enumratorBase.should_sleep": [
+        "sublist3r 254:30 call  self.should_sleep()"
+      ]
+    },
+    "sublist3r.enumratorBase.get_response": {
+      "<builtin>.hasattr": [
+        "sublist3r 184:40 call  hasattr(response, \"text\")"
+      ]
+    },
+    "sublist3r.enumratorBase.print_": {
+      "<builtin>.print": [
+        "sublist3r 164:18 call  print(text)"
+      ]
+    },
+    "sublist3r.enumratorBase.print_banner": {
+      "sublist3r.enumratorBase.print_": [
+        "sublist3r 169:20 call  self.print_(G + \"[-] Searching now in %s..\" % (self.engin..."
+      ]
+    },
+    "sublist3r.enumratorBase.send_req": {
+      "<builtin>.str.format": [
+        "sublist3r 174:35 call  self.base_url.format(query=query, page_no=page_no)"
+      ],
+      "requests.Session.get": [
+        "sublist3r 176:36 call  self.session.get(url, headers=self.headers, timeout=self...."
+      ],
+      "sublist3r.enumratorBase.get_response": [
+        "sublist3r 179:33 call  self.get_response(resp)"
+      ]
+    },
+    "sublist3r.enumratorBaseThreaded.__init__": {
+      "multiprocessing.Process.__init__": [
+        "sublist3r 263:41 call  multiprocessing.Process.__init__(self)"
+      ],
+      "sublist3r.enumratorBase.__init__": [
+        "sublist3r 262:31 call  enumratorBase.__init__(self, base_url, engine_name, domai..."
+      ],
+      "threading.Thread.__init__": [
+        "sublist3r 263:41 call  multiprocessing.Process.__init__(self)"
+      ]
+    },
+    "sublist3r.enumratorBaseThreaded.run": {
+      "<builtin>.list.append": [
+        "sublist3r 271:26 call  self.q.append(domain)"
+      ],
+      "sublist3r.CrtSearch.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ],
+      "sublist3r.DNSdumpster.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ],
+      "sublist3r.NetcraftEnum.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ],
+      "sublist3r.PassiveDNS.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ],
+      "sublist3r.ThreatCrowd.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ],
+      "sublist3r.Virustotal.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ],
+      "sublist3r.enumratorBase.enumerate": [
+        "sublist3r 269:37 call  self.enumerate()"
+      ]
+    },
+    "sublist3r.interactive": {
+      "sublist3r.banner": [
+        "sublist3r 997:11 call  banner()"
+      ],
+      "sublist3r.main": [
+        "sublist3r 998:15 call  main(domain, threads, savefile, ports, silent=False, verb..."
+      ],
+      "sublist3r.no_color": [
+        "sublist3r 996:17 call  no_color()"
+      ],
+      "sublist3r.parse_args": [
+        "sublist3r 985:22 call  parse_args()"
+      ]
+    },
+    "sublist3r.main": {
+      "<builtin>.len": [
+        "sublist3r 969:68 call  len(subdomains)"
+      ],
+      "<builtin>.list": [
+        "sublist3r 884:32 call  list()"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 935:35 call  chosenEnums.append(supported_engines[engine.lower()])"
+      ],
+      "<builtin>.print": [
+        "sublist3r 896:18 call  print(R + \"Error: Please enter a valid domain\" + W)",
+        "sublist3r 905:14 call  print(B + \"[-] Enumerating subdomains now for %s\" % parse...",
+        "sublist3r 908:14 call  print(Y + \"[-] verbosity is enabled, will show the subdom...",
+        "sublist3r 950:18 call  print(G + \"[-] Starting bruteforce module now using subbr...",
+        "sublist3r 969:18 call  print(Y + \"[-] Total Unique Subdomains Found: %s\" % len(s...",
+        "sublist3r 973:22 call  print(G + \"[-] Start port scan now for the following port...",
+        "sublist3r 980:22 call  print(G + subdomain + W)"
+      ],
+      "<builtin>.set": [
+        "sublist3r 880:26 call  set()",
+        "sublist3r 881:22 call  set()",
+        "sublist3r 944:21 call  set(subdomains_queue)"
+      ],
+      "<builtin>.set.add": [
+        "sublist3r 946:24 call  search_list.add(subdomain)"
+      ],
+      "<builtin>.set.union": [
+        "sublist3r 960:35 call  search_list.union(bruteforce_list)"
+      ],
+      "<builtin>.sorted": [
+        "sublist3r 963:28 call  sorted(subdomains, key=subdomain_sorting_key)"
+      ],
+      "<builtin>.str.lower": [
+        "sublist3r 934:28 call  engine.lower()",
+        "sublist3r 935:66 call  engine.lower()"
+      ],
+      "<builtin>.str.split": [
+        "sublist3r 932:32 call  engines.split(',')",
+        "sublist3r 974:32 call  ports.split(',')"
+      ],
+      "<builtin>.str.startswith": [
+        "sublist3r 899:29 call  domain.startswith('http://')"
+      ],
+      "_sre.SRE_Pattern.match": [
+        "sublist3r 894:30 call  domain_check.match(domain)"
+      ],
+      "multiprocessing.Manager": [
+        "sublist3r 886:51 call  multiprocessing.Manager()"
+      ],
+      "multiprocessing.Process.join": [
+        "sublist3r 942:18 call  enum.join()"
+      ],
+      "multiprocessing.Process.start": [
+        "sublist3r 940:19 call  enum.start()"
+      ],
+      "multiprocessing.managers.SyncManager.list": [
+        "sublist3r 886:58 call  multiprocessing.Manager().list()"
+      ],
+      "os.path.dirname": [
+        "sublist3r 952:39 call  os.path.dirname(os.path.realpath(__file__))"
+      ],
+      "os.path.join": [
+        "sublist3r 953:28 call  os.path.join(path_to_file, 'subbrute', 'names.txt')",
+        "sublist3r 954:33 call  os.path.join(path_to_file, 'subbrute', 'resolvers.txt')"
+      ],
+      "os.path.realpath": [
+        "sublist3r 952:56 call  os.path.realpath(__file__)"
+      ],
+      "re.Pattern.match": [
+        "sublist3r 894:30 call  domain_check.match(domain)"
+      ],
+      "re.compile": [
+        "sublist3r 893:30 call  re.compile(\"^(http|https)?[a-zA-Z0-9]+([\\-\\.]{1}[a-zA-Z0-..."
+      ],
+      "subbrute.subbrute.print_target": [
+        "sublist3r 958:48 call  subbrute.print_target(parsed_domain.netloc, record_type, ..."
+      ],
+      "sublist3r.AskEnum.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.BaiduEnum.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.BingEnum.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.CrtSearch.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.DNSdumpster.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.GoogleEnum.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.NetcraftEnum.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.PassiveDNS.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.ThreatCrowd.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.Virustotal.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.YahooEnum.__init__": [
+        "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo..."
+      ],
+      "sublist3r.enumratorBaseThreaded.run": [
+        "sublist3r 940:19 call  enum.start()"
+      ],
+      "sublist3r.portscan.__init__": [
+        "sublist3r 975:29 call  portscan(subdomains, ports)"
+      ],
+      "sublist3r.portscan.run": [
+        "sublist3r 976:22 call  pscan.run()"
+      ],
+      "sublist3r.subdomain_sorting_key": [
+        "sublist3r 963:28 call  sorted(subdomains, key=subdomain_sorting_key)"
+      ],
+      "sublist3r.write_file": [
+        "sublist3r 966:23 call  write_file(savefile, subdomains)"
+      ],
+      "threading.Thread.join": [
+        "sublist3r 942:18 call  enum.join()"
+      ],
+      "threading.Thread.start": [
+        "sublist3r 940:19 call  enum.start()"
+      ],
+      "urllib.parse.urlparse": [
+        "sublist3r 902:38 call  urlparse.urlparse(domain)"
+      ]
+    },
+    "sublist3r.parse_args": {
+      "argparse.ArgumentParser": [
+        "sublist3r 95:37 call  argparse.ArgumentParser(epilog='\\tExample: \\r\\npython ' +..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "sublist3r 98:24 call  parser.add_argument('-d', '--domain', help=\"Domain name t...",
+        "sublist3r 99:24 call  parser.add_argument('-b', '--bruteforce', help='Enable th...",
+        "sublist3r 100:24 call  parser.add_argument('-p', '--ports', help='Scan the found...",
+        "sublist3r 101:24 call  parser.add_argument('-v', '--verbose', help='Enable Verbo...",
+        "sublist3r 102:24 call  parser.add_argument('-t', '--threads', help='Number of th...",
+        "sublist3r 103:24 call  parser.add_argument('-e', '--engines', help='Specify a co...",
+        "sublist3r 104:24 call  parser.add_argument('-o', '--output', help='Save the resu...",
+        "sublist3r 105:24 call  parser.add_argument('-n', '--no-color', help='Output with..."
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "sublist3r 106:29 call  parser.parse_args()"
+      ],
+      "sublist3r.parser_error": [
+        "sublist3r 106:29 call  parser.parse_args()"
+      ]
+    },
+    "sublist3r.parser_error": {
+      "<builtin>.print": [
+        "sublist3r 88:10 call  print(\"Usage: python \" + sys.argv[0] + \" [Options] use -h...",
+        "sublist3r 89:10 call  print(R + \"Error: \" + errmsg + W)"
+      ],
+      "sublist3r.banner": [
+        "sublist3r 87:11 call  banner()"
+      ],
+      "sys.exit": [
+        "sublist3r 90:13 call  sys.exit()"
+      ]
+    },
+    "sublist3r.portscan.__init__": {
+      "threading.BoundedSemaphore": [
+        "sublist3r 854:47 call  threading.BoundedSemaphore(value=self.threads)"
+      ]
+    },
+    "sublist3r.portscan.port_scan": {
+      "<builtin>.int": [
+        "sublist3r 863:49 call  int(port)"
+      ],
+      "<builtin>.len": [
+        "sublist3r 870:15 call  len(openports)"
+      ],
+      "<builtin>.list.append": [
+        "sublist3r 865:37 call  openports.append(port)"
+      ],
+      "<builtin>.print": [
+        "sublist3r 871:18 call  print(\"%s%s%s - %sFound open ports:%s %s%s%s\" % (G, host,..."
+      ],
+      "<builtin>.str.join": [
+        "sublist3r 871:92 call  ', '.join(openports)"
+      ],
+      "socket.socket": [
+        "sublist3r 861:34 call  socket.socket(socket.AF_INET, socket.SOCK_STREAM)"
+      ],
+      "socket.socket.close": [
+        "sublist3r 866:24 call  s.close()"
+      ],
+      "socket.socket.connect_ex": [
+        "sublist3r 863:38 call  s.connect_ex((host, int(port)))"
+      ],
+      "socket.socket.settimeout": [
+        "sublist3r 862:29 call  s.settimeout(2)"
+      ],
+      "threading.BoundedSemaphore.acquire": [
+        "sublist3r 858:26 call  self.lock.acquire()"
+      ],
+      "threading.BoundedSemaphore.release": [
+        "sublist3r 869:26 call  self.lock.release()"
+      ],
+      "threading._BoundedSemaphore.acquire": [
+        "sublist3r 858:26 call  self.lock.acquire()"
+      ],
+      "threading._BoundedSemaphore.release": [
+        "sublist3r 869:26 call  self.lock.release()"
+      ]
+    },
+    "sublist3r.portscan.run": {
+      "sublist3r.portscan.port_scan": [
+        "sublist3r 876:20 call  t.start()"
+      ],
+      "threading.Thread": [
+        "sublist3r 875:33 call  threading.Thread(target=self.port_scan, args=(subdomain, ..."
+      ],
+      "threading.Thread.start": [
+        "sublist3r 876:20 call  t.start()"
+      ]
+    },
+    "sublist3r.subdomain_sorting_key": {
+      "<builtin>.str.split": [
+        "sublist3r 137:27 call  hostname.split('.')"
+      ]
+    },
+    "sublist3r.write_file": {
+      "<builtin>.open": [
+        "sublist3r 112:14 call  open(str(filename), 'wt')"
+      ],
+      "<builtin>.print": [
+        "sublist3r 111:10 call  print(\"%s[-] Saving results to file: %s%s%s%s\" % (Y, W, R..."
+      ],
+      "<builtin>.str": [
+        "sublist3r 112:18 call  str(filename)"
+      ],
+      "io.TextIOWrapper.write": [
+        "sublist3r 114:20 call  f.write(subdomain + os.linesep)"
+      ]
+    }
+  },
+  "notes": {
+    "subbrute.subbrute 122:29 call  sys.stderr.write('Warning: No nameservers found, trying f...": [
+      "sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule)"
+    ],
+    "subbrute.subbrute 127:32 call  self.resolver_q.put(False, timeout = 1)": [
+      "resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)"
+    ],
+    "subbrute.subbrute 180:41 call  multiprocessing.Process.__init__(self, target = self.run)": [
+      "threading.Thread.__init__ on Windows only (subbrute.py:33-36 rebinds multiprocessing.Process before the class statement runs)"
+    ],
+    "subbrute.subbrute 196:46 call  self.resolver_q.get_nowait()": [
+      "resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)"
+    ],
+    "subbrute.subbrute 207:35 call  self.resolver_q.get()": [
+      "resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)"
+    ],
+    "subbrute.subbrute 234:42 call  self.in_q.put((h, record_type, 0))": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 258:34 call  self.in_q.put((host, record_type, 0))": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 281:42 call  self.in_q.put((host, record_type, retries + 1))": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 292:34 call  self.in_q.put((host, record_type, 0))": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 306:33 call  self.in_q.get()": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 323:30 call  self.in_q.put(False)": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 325:31 call  self.out_q.put(False)": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 335:33 call  sys.stdout.flush()": [
+      "sys.stdout is the default stdout stream, an io.TextIOWrapper (README naming rule)"
+    ],
+    "subbrute.subbrute 354:39 call  self.out_q.put(result)": [
+      "in_q and out_q are the multiprocessing.Queue objects that run() makes (lines 435, 436) and passes to lookup; a client's queue is opaque (B5)"
+    ],
+    "subbrute.subbrute 404:25 call  sorted(subs.keys(), key = lambda x: subs[x], reverse = True)": [
+      "sorted calls the key function, the lambda of line 404, back (callback rule)"
+    ],
+    "subbrute.subbrute 410:8 call  run(target, record_type, subdomains, resolve_list, proces...": [
+      "run is a generator function; this call makes a generator that nothing iterates, and the call is still an edge (README, \"Edges\")"
+    ],
+    "subbrute.subbrute 41:41 call  multiprocessing.Process.__init__(self, target = self.run)": [
+      "threading.Thread.__init__ on Windows only (subbrute.py:33-36 rebinds multiprocessing.Process before the class statement runs)"
+    ],
+    "subbrute.subbrute 428:25 call  sys.stderr.write('Warning: Fewer than 16 resovlers per th...": [
+      "sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule)"
+    ],
+    "subbrute.subbrute 433:51 call  multiprocessing.Manager().dict()": [
+      "multiprocessing.Manager() returns a started multiprocessing.managers.SyncManager; its method dict is registered by SyncManager.register('dict', ...) (Sublist3r.md, judgement 10)"
+    ],
+    "subbrute.subbrute 442:34 call  verify_nameservers_proc.start()": [
+      "start() runs the run method of the verify_nameservers object in a new process (in a new thread on Windows, where the class derives from threading.Thread); by the callback rule run belongs to the scope that calls start(). verify_nameservers.run overrides BaseProcess.run, so the stored target is not called"
+    ],
+    "subbrute.subbrute 467:21 call  worker.start()": [
+      "start() runs the run method of the lookup object in a new process (a new thread on Windows); by the callback rule run belongs to the scope that calls start()"
+    ],
+    "subbrute.subbrute 494:36 call  verify_nameservers_proc.end()": [
+      "reached when killproc fails, and always on Windows, where the thread object has no attribute pid and line 491 raises AttributeError"
+    ],
+    "subbrute.subbrute 506:42 call  kernel32.OpenProcess(1, 0, pid)": [
+      "Windows only. ctypes.windll.kernel32 is a ctypes.WinDLL; kernel32.OpenProcess is an instance of the class _FuncPtr that CDLL.__init__ defines for each library, and the call is its __call__ (Sublist3r.md, judgement 11)"
+    ],
+    "subbrute.subbrute 507:38 call  kernel32.TerminateProcess(handle, 0)": [
+      "Windows only; the same function pointer class as at line 506"
+    ],
+    "subbrute.subbrute 519:29 call  sys.stderr.write(str(a))": [
+      "sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule). trace writes only when the module global verbose is true, which the __main__ block sets from -v (line 584)"
+    ],
+    "subbrute.subbrute 525:25 call  sys.stderr.write(str(a))": [
+      "sys.stderr is the default stderr stream, an io.TextIOWrapper (README naming rule)"
+    ],
+    "subbrute.subbrute 547:22 call  signal.signal(signal.SIGTSTP, killproc)": [
+      "POSIX only: on Windows the signal module has no SIGTSTP, the argument raises AttributeError and the bare except passes"
+    ],
+    "subbrute.subbrute 554:15 call  getattr(sys, 'frozen', False)": [
+      "the if __name__ == \"__main__\" block (lines 553-633) is code of the module subbrute.subbrute and keeps its edges (README, \"Edges\")"
+    ],
+    "subbrute.subbrute 556:36 call  os.path.dirname(sys.executable)": [
+      "runs when sys.frozen is true (line 554), in a frozen executable (cx_Freeze on Windows, line 555): a way to run the module on a supported version and platform, so the branch runs (audit F2; Sublist3r.md, judgement 15)"
+    ],
+    "subbrute.subbrute 557:39 call  multiprocessing.freeze_support()": [
+      "the frozen branch of line 554, as at 556:36 (Sublist3r.md, judgement 15)"
+    ],
+    "subbrute.subbrute 587:21 call  parser.error(\"You must provie a target. Use -h for help.\")": [
+      "value site by name, because sublist3r.py:96 assigns an attribute named error; here parser is subbrute's own optparse.OptionParser (line 561), whose error attribute is never assigned, so the call is OptionParser.error"
+    ],
+    "subbrute.subbrute 622:30 call  target.strip()": [
+      "targets is the list of lines that check_open reads (line 596) or the list of command-line arguments of optparse (line 598): str values"
+    ],
+    "subbrute.subbrute 84:36 call  self.resolver_q.put(nameserver, timeout = 1)": [
+      "resolver_q is the multiprocessing.Queue(maxsize = 2) that run() makes (line 438) and passes to verify_nameservers and lookup; a client that builds these public classes passes its own queue (opaque, B5)"
+    ],
+    "subbrute.subbrute 97:34 call  server.strip()": [
+      "resolver_list contains the str lines that check_open reads (run, line 426), which supports str.strip here. The other package argument, backup_resolver, comes from resolver.nameservers + a list at line 62; missing-library arithmetic gives no concrete result type. Client inputs also remain opaque."
+    ],
+    "sublist3r 106:29 call  parser.parse_args()": [
+      "line 96 binds the instance attribute parser.error to the function parser_error. argparse calls self.error(message) when the command line does not parse (the required -d is missing, -t is not an int, an unknown option), so parse_args calls parser_error back (callback rule; Sublist3r.md, judgement 5)"
+    ],
+    "sublist3r 114:20 call  f.write(subdomain + os.linesep)": [
+      "f is the stream that open() returns in text mode"
+    ],
+    "sublist3r 146:40 call  urlparse.urlparse(domain)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 176:36 call  self.session.get(url, headers=self.headers, timeout=self....": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 227:40 call  self.generate_query()": [
+      "self is an enumratorBase, an enumratorBaseThreaded (plain public classes, B1) or one of the five engines that inherit enumerate (Google, Yahoo, Ask, Bing, Baidu); the six other engines override enumerate. enumratorBase.generate_query returns None, so for the two base classes line 228 raises AttributeError and the later sites of this function run only for the five engines"
+    ],
+    "sublist3r 233:40 call  self.get_page(page_no)": [
+      "Google, Bing and Baidu inherit enumratorBase.get_page"
+    ],
+    "sublist3r 240:46 call  self.check_response_errors(resp)": [
+      "Yahoo, Ask and Bing inherit enumratorBase.check_response_errors"
+    ],
+    "sublist3r 254:30 call  self.should_sleep()": [
+      "Ask and Bing inherit enumratorBase.should_sleep"
+    ],
+    "sublist3r 260:99 call  threading.Lock()": [
+      "the default value of the parameter lock, evaluated once when the def statement runs at module level"
+    ],
+    "sublist3r 263:41 call  multiprocessing.Process.__init__(self)": [
+      "threading.Thread.__init__ on Windows only: sublist3r imports subbrute (line 21) before the class statement, and subbrute.py:33-36 rebinds multiprocessing.Process to threading.Thread there (Sublist3r.md, judgement 3)"
+    ],
+    "sublist3r 269:37 call  self.enumerate()": [
+      "self is an enumratorBaseThreaded or one of the 11 engines; six override enumerate, the others inherit enumratorBase.enumerate"
+    ],
+    "sublist3r 271:26 call  self.q.append(domain)": [
+      "The package-owned q is a manager ListProxy on non-Windows. Its append is generated by MakeProxyType through exec, not a source-defined library function. CPython3.4 managers.py858\u2013877,1053\u20131064 and local3.15 managers.py965\u2013984,1164\u20131176 show the same generated method. Global ground-truth conventions explicitly exclude generated library functions, with this exact ListProxy.append example. Keep the Windows builtin list.append edge."
+    ],
+    "sublist3r 289:43 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 294:46 call  urlparse.urlparse(link)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 304:38 call  type(resp)": [
+      "on Python 3 the name unicode is undefined; it is loaded after this call, so the call runs and NameError follows when resp is not a str"
+    ],
+    "sublist3r 340:38 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 341:40 call  link_regx2.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 347:46 call  urlparse.urlparse(link)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 37:47 call  requests.packages.urllib3.disable_warnings()": [
+      "ordinary missing-library call, named by the imported path at line 36; dependency aliases or vendoring do not change this path (Sublist3r.md, judgement 12)"
+    ],
+    "sublist3r 390:43 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 394:46 call  urlparse.urlparse(link)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 435:38 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 436:40 call  link_regx2.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 443:46 call  urlparse.urlparse(link)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 481:38 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 486:46 call  urlparse.urlparse(link)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 502:25 call  max(count, key=count.get)": [
+      "max calls the key count.get, a method of the Counter (library code calling library code: no edge)"
+    ],
+    "sublist3r 536:36 call  self.session.get(url, headers=self.headers, timeout=self....": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 544:33 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 54:35 call  win_unicode_console.enable()": [
+      "Windows only (is_windows, line 42); the README documents Windows (Sublist3r.md, judgement 3)"
+    ],
+    "sublist3r 554:127 call  hashlib.sha1(urllib.unquote(cookies_list[1]).encode('utf-...": [
+      "hashlib is standard-library code. Its admitted builtin SHA-1 fallback returns the concrete type _sha1.sha1 when OpenSSL or its SHA-1 constructor is unavailable; retain both that hexdigest and the distinct OpenSSL _hashlib.HASH method. CPython 3.4/3.12 source and the 3.12 hashlib documentation support this configuration (Sublist3r.md, judgement 11; pass-2 report)."
+    ],
+    "sublist3r 554:83 call  urllib.unquote(cookies_list[1])": [
+      "urllib is urllib.parse on Python 3 and the module urllib on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 55:22 call  colorama.init()": [
+      "Windows only, as line 54"
+    ],
+    "sublist3r 581:43 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 583:46 call  urlparse.urlparse(link)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 611:26 call  self.lock.acquire()": [
+      "DNSdumpster assigns BoundedSemaphore then its parent initializer overwrites self.lock with the default threading.Lock() from sublist3r.py260. The historical CPython3.4 _thread documentation42\u201344 publicly exposes its concrete type as _thread.LockType. Thus _thread.lock is only the runtime tp_name, not the required public import path. CPython3.13 threading.py38,120 aliases threading.Lock to that same _thread.LockType; this is one class with two aliases, not an additional target. Use the stable documented _thread.LockType path across admitted versions."
+    ],
+    "sublist3r 621:26 call  self.lock.release()": [
+      "DNSdumpster assigns BoundedSemaphore then its parent initializer overwrites self.lock with the default threading.Lock() from sublist3r.py260. The historical CPython3.4 _thread documentation42\u201344 publicly exposes its concrete type as _thread.LockType. Thus _thread.lock is only the runtime tp_name, not the required public import path. CPython3.13 threading.py38,120 aliases threading.Lock to that same _thread.LockType; this is one class with two aliases, not an additional target. Use the stable documented _thread.LockType path across admitted versions."
+    ],
+    "sublist3r 630:40 call  self.session.get(url, headers=headers, timeout=self.timeout)": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 640:35 call  csrf_regex.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 651:20 call  t.start()": [
+      "start() runs the target self.check_host of the Thread made at line 650 (callback rule: the target belongs to the scope that calls start())"
+    ],
+    "sublist3r 660:44 call  tbl_regex.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 663:40 call  link_regex.findall(results_tbl)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 688:36 call  self.session.get(url, headers=self.headers, timeout=self....": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 738:36 call  self.session.get(url, headers=self.headers, timeout=self....": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 777:36 call  self.session.get(url, headers=self.headers, timeout=self....": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 793:38 call  link_regx.findall(resp)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 822:36 call  self.session.get(url, headers=self.headers, timeout=self....": [
+      "self.session is the requests.Session that enumratorBase.__init__ makes (line 147)"
+    ],
+    "sublist3r 858:26 call  self.lock.acquire()": [
+      "Python3.2 is admitted by python_requires>=2.7 and the README unrestricted Python3 support;3.4 is a recommendation, not a minimum. CPython3.2.6 threading.py366\u2013369 defines BoundedSemaphore as a factory returning _BoundedSemaphore. The receiver class inherits private _Semaphore; acquire is inherited from322 and release is defined375. There is no public concrete superclass or class alias: the public BoundedSemaphore name is a function on this version. Name the actual receiver threading._BoundedSemaphore. Preserve modern threading.BoundedSemaphore for versions where it is the public class."
+    ],
+    "sublist3r 869:26 call  self.lock.release()": [
+      "Python3.2 is admitted by python_requires>=2.7 and the README unrestricted Python3 support;3.4 is a recommendation, not a minimum. CPython3.2.6 threading.py366\u2013369 defines BoundedSemaphore as a factory returning _BoundedSemaphore. The receiver class inherits private _Semaphore; acquire is inherited from322 and release is defined375. There is no public concrete superclass or class alias: the public BoundedSemaphore name is a function on this version. Name the actual receiver threading._BoundedSemaphore. Preserve modern threading.BoundedSemaphore for versions where it is the public class."
+    ],
+    "sublist3r 876:20 call  t.start()": [
+      "start() runs the target self.port_scan of the Thread made at line 875 (callback rule)"
+    ],
+    "sublist3r 884:32 call  list()": [
+      "Windows only (is_windows)"
+    ],
+    "sublist3r 886:58 call  multiprocessing.Manager().list()": [
+      "multiprocessing.Manager() returns a started multiprocessing.managers.SyncManager; its method list is registered by SyncManager.register('list', ...) (Sublist3r.md, judgement 10)"
+    ],
+    "sublist3r 894:30 call  domain_check.match(domain)": [
+      "The package permits Python3 before3.7: python_requires >=2.7 and README says Python2 and Python3, with3.4 only recommended. CPython3.6 _sre.c2750\u20132752 names the actual pattern type _sre.SRE_Pattern; re.py has no public re.Pattern alias. CPython3.7 exposes re.Pattern and changes the type name. Each listed call uses its own re.compile result. Keep modern re.Pattern and add the historical name; these are version alternatives, not duplicate aliases on one runtime."
+    ],
+    "sublist3r 899:29 call  domain.startswith('http://')": [
+      "domain is a str: interactive passes the -d argument, and the README documents main('yahoo.com', ...)"
+    ],
+    "sublist3r 902:38 call  urlparse.urlparse(domain)": [
+      "urlparse is urllib.parse on Python 3 and the module urlparse on Python 2 (lines 26-31); the call has its Python 3 name"
+    ],
+    "sublist3r 932:32 call  engines.split(',')": [
+      "engines is None or a str of comma-separated names (the -e argument; README, \"engines\")"
+    ],
+    "sublist3r 938:18 call  enum(domain, [], q=subdomains_queue, silent=silent, verbo...": [
+      "enum is each class in chosenEnums: the 11 engine classes of the default list (lines 926-930), or the values of supported_engines (lines 910-921) that the -e names select, the same 11 classes. The call instantiates the class and runs its own __init__"
+    ],
+    "sublist3r 940:19 call  enum.start()": [
+      "enum is an engine object, a subclass of enumratorBaseThreaded, which derives from multiprocessing.Process (threading.Thread on Windows). start() runs its run method, enumratorBaseThreaded.run (no engine overrides run), in a new process (a thread on Windows); callback rule"
+    ],
+    "sublist3r 942:18 call  enum.join()": [
+      "threading.Thread.join on Windows only"
+    ],
+    "sublist3r 963:28 call  sorted(subdomains, key=subdomain_sorting_key)": [
+      "sorted calls the key function subdomain_sorting_key back (callback rule)"
+    ]
+  },
+  "trace": null
+}

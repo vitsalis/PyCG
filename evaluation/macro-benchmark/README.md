@@ -1,0 +1,2467 @@
+# Macro-benchmark
+
+Thirty real Python packages at pinned releases, in six batches of five
+(`projects.toml`, `batch`). Each package gets a
+hand-written call graph of its source, the ground truth. It is written as a
+call-site ledger: one entry per place in the source that can call a
+function, with the callees of that site. A naive list of candidate callees
+by name, for every site, protects the ledger against missing edges by
+construction. To check a ground truth further, `trace.py` records the calls
+that the package makes while its own test suite runs. A trace is a lower
+bound: every edge of the trace must be in the ground truth. The ground truth
+also has the calls that no test makes.
+
+The first full audit (audit record `2026-11-15/README.md`) reviewed all 17,618
+original edges and corrected 122 false positives and 453 missed edges.
+The second full audit (audit record `2026-11-15/pass-2/README.md`) reviewed the
+resulting 17,949 edges under the same global rules. It removes 70 false
+positives and adds 60 missed edges, giving 17,939 edges on the same 5,464
+nodes. Its separate added-edge file and application patch preserve the
+changes for review.
+
+The third full audit (audit record `2026-11-15/pass-3/README.md`) reviewed those
+17,939 edges under the same global rules. It removes one false positive
+and adds 124 missed edges, giving 18,062 edges on the same 5,464 nodes.
+Its reports, added-edge register, patch and retained evidence preserve the
+changes for review. Its 124 missed edges triggered the fourth audit.
+
+The fourth full audit (audit record `2026-11-16/pass-4/README.md`) reviewed all
+18,062 baseline edges. It removes 1 false positive and adds
+60 missed edges, giving 18,121 edges on the same 5,464 nodes.
+It also corrects 22 independent metadata groups. The audit retains
+source models, coverage records, edge witnesses, independent reviews and
+an exact patch. Its added-edge register (audit record `2026-11-16/pass-4/added-edges.json`)
+records every added pair. The dated batch tables below remain historical;
+the fourth audit gives the current counts for all 30 projects.
+Neither revised threshold is exceeded, so the repeat loop stops after this round.
+
+After the audit, one correction: fabric's ground truth named
+`invoke.config.Config.set_runtime_ssh_path` and `.load_ssh_config` for the
+`self.config` of a `Fab` without `config_class` (`main.py:112-113`). invoke's
+`Config` has neither method (invoke 1.0.0, 1.4.1, 1.7.3), so Python calls
+nothing there. The two callees left the ledger; the ground truths have
+18,119 edges.
+
+The audit records (the reports, registers, patches and evidence of the four
+rounds) are not in this repository: they hold copies of third-party sources.
+The maintainer keeps them. A reference to an "audit record" names a file of
+those records.
+
+The repeat rule was revised on 2026-11-16: after a complete audit, repeat
+only if it finds more than 100 missed edges or more than 20 false positives.
+The thresholds are strict; exactly 100 missed edges or 20 false positives
+do not trigger another round.
+
+## Layout
+
+```
+evaluation/macro-benchmark/
+├── projects.toml                  # The 30 projects: pin, licence, analysed source, tests, batch
+├── projects/                      # Empty: a copy of the sources, for reading only, goes here (not in git)
+├── requirements/<name>.txt        # The test environment, pinned by hash (to record the trace again)
+├── requirements/<name>.installed.txt  # What the container of the trace had installed
+├── dynamic/<name>.json            # The trace: the calls made while the test suite runs (trace.py)
+├── ground-truth/<name>.json       # The call graph: what scoring reads
+├── ground-truth/<name>.ledger     # Its source: the call-site ledger
+├── ground-truth/<name>.rejected.json  # Trace edges that are not package edges (optional)
+├── ground-truth/<name>.added.json # Graph edges that the trace does not have, generated
+├── ground-truth/<name>.md         # Judgements (optional)
+├── ground-truth/<name>.audit.md   # The blind audit
+├── plugins/                       # pytest plugins that three traces need
+├── selection/                     # How batches 3 to 5 were drawn: list, exclusions, frame, round logs
+├── projects.py                    # Reads projects.toml; where the sources of the projects are
+├── sites.py                       # Finds the call sites and their candidates (ast only)
+├── ledger.py                      # Reads and checks a ledger, makes its graph
+├── check.py                       # Command line: checks, skeletons, reports
+├── trace.py                       # Makes dynamic/<name>.json
+└── draw.py                        # Chooses the packages of a new batch
+```
+
+To score a tool you need `projects.toml`, `ground-truth/<name>.json`,
+`dynamic/<name>.json` (its aliases match names) and the tool's graph. To
+run a tool you also need the sources, which the inputs image holds (see
+"Getting the sources"). To record a trace again you need
+`requirements/` and the `trace` service (see "Re-recording a trace").
+
+The ledger is the source of truth. `ground-truth/<name>.json` is generated
+from it (`check.py --write`) and committed, so that a scorer needs neither
+the ledger nor the tools. The checker fails if the two differ. So does
+`ground-truth/<name>.added.json`, from the ledger and the trace (see
+"Construction"). A ground truth is not regenerated by a command of the
+evaluation: it is the trace, minus the edges that a reviewer rejected,
+plus the edges that a reviewer added, and then audited blind.
+
+The audit files, the judgement files and the round logs are records of
+their time. They name a batch by its former directory:
+`macro-benchmark` or "the development set" (batch 1),
+`macro-benchmark-heldout` (batch 2), `-heldout-2` (batch 3), `-heldout-3`
+(batch 4), `-heldout-4` (batch 5) and `macro-benchmark-2021` (the ICSE
+2021 set); "held-out set" N is batch N + 1. See "How the benchmark grew".
+
+## Construction
+
+The ground truth of a project has two parts, and the benchmark keeps both:
+
+```
+graph = (trace - rejected) + added
+```
+
+- **Trace** (`dynamic/<name>.json`): the calls that the package made while
+  its test suite ran (see "Traces"). This part is reproducible: the
+  `trace` service records it again in a container, from the pinned source
+  and the pinned test environment, and compares the edges: `NAME=<name>
+  docker compose -f evaluation/compose.yaml run --rm trace --compare` (see
+  "Re-recording a trace").
+- **Rejected** (`ground-truth/<name>.rejected.json`): the trace edges that
+  are not edges of the package (rule A), each with its reason.
+- **Added** (`ground-truth/<name>.added.json`): the edges of the graph that
+  the trace does not have. Agents found them by reading the source, with
+  the method of "Writing a ground truth" and "Auditing a ground truth". This
+  part is not reproducible: each edge is a judgement. The ledger records
+  each judgement, and this README states the method.
+
+`check.py --write` writes the added edges beside the graph, from the ledger
+and the trace, with sorted keys and the formatting of the graph:
+
+```json
+{
+  "edges": {
+    "h11._connection.Connection.__init__": {
+      "h11._util.Sentinel.__repr__": [
+        "h11._connection 175:63 format  {our_role!r}"
+      ]
+    },
+    "h11._headers.Headers.__repr__": {
+      "<builtin>.repr": ["h11._headers 117:38 call  repr(list(self))"]
+    }
+  },
+  "notes": {
+    "h11._connection 175:63 format  {our_role!r}": [
+      "reached when the client passes a role other than CLIENT or SERVER"
+    ]
+  },
+  "trace": "dynamic/h11.json"
+}
+```
+
+`edges` maps each caller to its added callees, and each callee to its
+sites: the ledger entries that give the edge, in source order. A site is
+written as in the ledger, after its module (`== h11._headers`, then
+`117:38 call  repr(list(self))`), so that a reader can go from an edge to
+the entry that decided it. `notes` has the notes of these entries; the
+other items of an entry (its rejections, exclusions) stay in the ledger
+only. Every edge of a graph comes from a ledger entry: a default rejection
+only removes candidates, and no convention makes an edge without an entry.
+So every added edge has at least one site.
+
+"Traced" is a match of names in the stored trace: a graph edge `f -> g`
+is traced if the trace has an edge of the same caller `f` whose callee is
+`g`, or has `g` among its other names (`aliases`; the check of the trace
+edges matches names in the same way, see "Format of `dynamic/<name>.json`").
+So a graph edge `f -> os.path.join` is traced, not added, if the trace has
+`f -> posixpath.join` with the alias `os.path.join`. A match of names is
+not a proof that each call ran, and the limits of the trace apply (see
+"What the tracer does" and "Limits" under "Traces"):
+
+- Two closures of one qualified name share their aliases in the trace, so
+  a graph edge can match the trace edge of its sibling.
+- The tracer drops calls whose caller it cannot know and the calls of
+  client callbacks, by design, and misses the calls of tracer defect T1.
+  So a call that ran can be among the added edges.
+- One traced pair of caller and callee covers every site of that pair: the
+  other sites of the pair are not added edges, whether or not they ran.
+
+A project without a trace (three projects of the ICSE 2021 set) has
+`"trace": null`, and all its edges are added; no empty trace file stands
+in for the trace. It can have no rejected edges: nothing was traced.
+
+The checker fails if the file is missing, or is not the one that the ledger
+and the trace give. It also checks the identity edge by edge: each graph
+edge is traced or added, not both; each added edge is in the graph; each
+trace edge is in the graph or rejected, not both under any of its names;
+and no rejected edge is in the graph. To
+count the parts:
+
+```sh
+python -I evaluation/macro-benchmark/check.py --origin [--benchmark-dir DIR] [PROJECT ...]
+```
+
+It reads only the committed files (the graph, the added edges, the trace
+and the rejected edges; no ledger, no source), checks the identity and
+prints a Markdown table: per project, the trace edges, the rejected edges,
+the traced edges in the graph, the added edges and the graph edges, each
+set of graph edges with its edges inside and outside the package. Graph
+edges = traced edges in the graph + added edges. The trace edges are not
+always the traced edges in the graph plus the rejected ones: one trace edge
+can match two names in the graph (bottle, batch 4:
+`BaseResponse.copy -> <builtin>.dict.items` and
+`http.cookies.SimpleCookie.items` are both the traced `dict.items`).
+
+## Projects
+
+The 30 projects are in one `projects.toml`. Each has a `batch`: 1 to 5, in
+the order in which the batches were built, or `icse-2021` for the five
+projects of PyCG's ICSE 2021 evaluation. A command takes project names, so
+a batch is its five names.
+
+### How the benchmark grew
+
+The benchmark was built in batches of five projects. Batch 1 is the five
+projects that the analysis was first developed on. Each later batch (2 to
+5) was measured once, by a frozen engine, before anyone read its false
+positives and false negatives. Then they were read and labelled, the
+analysis was improved on them, and the next batch was built. So every
+batch was used for development in the end. The five projects of the ICSE
+2021 set were added between batches 3 and 4. The batches stopped by the
+maintainer's rule: when every rule that no decision blocks, measured
+together on the newest batch, gains less than one point of precision and
+of recall. Batch 5 met it.
+
+Batches 1 and 2 were chosen before `draw.py` existed. Batches 3, 4 and 5
+were drawn by `draw.py` in rounds 1, 2 and 3 (`selection/round-N.json`;
+see "Choosing a new batch").
+
+### Batch 1
+
+| Project | Release | Licence | Analysed source | Modules | Functions (lambdas) | Classes | Calls | Ledger sites | With candidates | Value sites |
+|---|---|---|---|---|---|---|---|---|---|---|
+| jmespath | 1.1.0 | MIT | `jmespath/` | 8 | 182 (1) | 19 | 461 | 519 | 375 | 22 |
+| tenacity | 9.2.1 | Apache-2.0 | `tenacity/` | 12 | 179 (3) | 56 | 415 | 767 | 542 | 46 |
+| cachetools | v8.0.0 | MIT | `src/cachetools/` | 7 | 174 (10) | 37 | 359 | 1122 | 962 | 53 |
+| pluggy | 1.7.0 | MIT | `src/pluggy/` | 13 | 101 (1) | 18 | 320 | 795 | 600 | 23 |
+| h11 | v0.16.0 | MIT | `h11/` without `h11/tests/` | 11 | 89 (0) | 38 | 352 | 759 | 582 | 23 |
+
+The counts are those of the site finder after it learned the accessors of
+`property(...)` and stopped counting annotations without a value.
+
+"Ledger sites" are the sites that need an entry without default rejections,
+"Value sites" those whose callee is a value (see below).
+`python -I evaluation/macro-benchmark/check.py` prints
+these numbers, with the sites by kind. `projects.toml` has the commits, the
+test commands and the notes on each project.
+
+A security scan of these five sources and of the five of batch 2
+was made on 2026-11-14 (read only; Claude Opus 5.5, the
+maintainer's choice for this scan). These two batches date from before the
+rule that a scan comes before the first run, so this scan came after their
+traces. It found nothing malicious: the ten are safe to run in the trace
+container as configured. For each, the files rebuild the git tree of the
+pinned commit. Its notes: the tests of h11, anytree and sqlparse that open
+a socket or start a process are the ones already deselected; pluggy ships
+`CLAUDE.md` and `.claude/settings.json` (data, not instructions);
+configargparse's suite imports CPython's `test` package where it exists,
+which the slim image does not have.
+
+### Getting the sources
+
+**The rule** (the maintainer, 2026-11-14): git and every download run only
+inside a container. The threat is a vulnerability of git that a clone could
+trigger on the machine that runs it. So the repository holds no copy of a
+project and no submodule of one: `projects.toml` pins each project by
+its `repository` and full `commit` (or an sdist by its URL and SHA-256),
+and that pin is the only lock. The build of the inputs image
+(`evaluation/container/Dockerfile.inputs`) fetches each pinned commit
+(`evaluation/container/fetch.py`: `git fetch --depth 1`, https only, no
+hooks, no submodules) and writes its files as plain files, without
+`.git`, into `/inputs/macro-benchmark/projects/<name>`; an sdist is
+downloaded, checked against its SHA-256 and unpacked with tarfile's
+`data` filter, and the archive is not kept. A project that is not its pin
+fails the build. The trace image of a project copies its source from
+there when it is built; `projects.py` reads them there in an image
+(`projects.sources`), and in `projects/` beside `projects.toml` elsewhere.
+`load_projects` refuses a project whose link leaves its directory.
+
+**The scope.** The build of the inputs image is trusted to write what it
+fetched. A defence against a compromised build is not a goal.
+
+To read the sources on the host (to write a ledger, say), copy them out of
+the inputs image into `projects/`, which git ignores. `make eval` makes the
+same copy, and runs PyCG on it in a container. No service reads it:
+
+```sh
+C="docker compose -f evaluation/compose.yaml"
+P=evaluation/macro-benchmark/projects
+$C build inputs
+mkdir -p "$P"
+$C run --rm -v "$PWD/$P:/repo/$P" inputs cp -RP /inputs/macro-benchmark/projects/. "$P/"
+```
+
+**Traces: first recording and container check.** The five traces of
+batch 1 were recorded outside a container, on the maintainer's machine
+(macOS on Apple silicon), with CPython 3.14.9 (the `python` of each
+trace; the traces of batch 2 of the next day name a uv-managed build) and a
+virtual environment per project that had exactly the pins of `test_requirements`
+(pytest 9.2.0 and its four dependencies; tenacity also tornado 6.6, trio
+0.34.0 and trio's five dependencies), before the container runner existed.
+The whole evaluation now runs in containers, so each package is traced
+again in a container and its trace compared with the
+committed one (`trace_helper.py compare`; see "Re-recording a trace"). `requirements/<name>.txt` pins the versions of the first
+traces. The re-trace is a check: it does not replace the committed traces.
+Result (2026-11-14, CPython 3.14.10 in the container against 3.14.9 in
+the first traces): for each of the five packages the same tests pass and
+the two traces have exactly the same edges.
+
+| Project | Tests | Edges, committed | Edges, container | Only in one |
+|---|---|---|---|---|
+| jmespath | 991 passed, 1 skipped | 428 | 428 | 0 |
+| tenacity | 185 passed | 412 | 412 | 0 |
+| cachetools | 416 passed | 517 | 517 | 0 |
+| pluggy | 219 passed | 272 | 272 | 0 |
+| h11 | 76 passed, 2 deselected | 281 | 281 | 0 |
+
+### Batch 2
+
+Five other packages. `trace.py` and `check.py` take `--benchmark-dir DIR`
+for another directory with the same layout (default: this directory; the
+trace container and the tests use one); the tools assume nothing about the
+projects. A project name is one path component of letters, digits, `_`,
+`-` and `.` (`projects.py` refuses any other): it names `projects/<name>`
+and the files of its results.
+
+The five ground truths were written and audited as those of batch 1
+(see "Writing a ground truth" and "Auditing a ground truth"), without any
+result of the analysis. The columns are those of the
+tables of batch 1 ("Batch 1" above, "Ground truths" below).
+
+| Project | Release | Licence | Analysed source | Modules | Functions (lambdas) | Classes | Calls | Ledger sites | With candidates | Value sites |
+|---|---|---|---|---|---|---|---|---|---|---|
+| marshmallow | 4.4.0 | MIT | `src/marshmallow/` | 14 | 234 (0) | 65 | 756 | 1337 | 944 | 71 |
+| asyncstdlib | v3.14.0 | MIT | `asyncstdlib/` | 11 | 201 (2) | 36 | 399 | 1463 | 1247 | 55 |
+| configargparse | v1.9.0 | MIT | `configargparse.py` | 1 | 67 (2) | 12 | 517 | 518 | 78 | 27 |
+| sqlparse | 0.6.1 | BSD-3-Clause | `sqlparse/` | 21 | 223 (6) | 44 | 838 | 3508 | 3137 | 62 |
+| anytree | 2.13.0 | Apache-2.0 | `src/anytree/` | 33 | 190 (11) | 35 | 385 | 1083 | 871 | 33 |
+
+| Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| marshmallow | 248 | 831 (461 / 370) | 687 (82.7%) | 144 | 15 | 224 of 234 | 830 | 71 | 11 (531) | 4 |
+| asyncstdlib | 212 | 659 (475 / 184) | 413 (62.7%) | 246 | 5 | 178 of 201 | 572 | 55 | 17 (947) | 0 |
+| configargparse | 68 | 401 (94 / 307) | 331 (82.5%) | 70 | 5 | 58 of 67 | 518 | 27 | 0 (0) | 18 |
+| sqlparse | 244 | 696 (439 / 257) | 660 (94.8%) | 36 | 2 | 216 of 223 | 1000 | 62 | 13 (2576) | 3 |
+| anytree | 223 | 565 (354 / 211) | 486 (86.0%) | 79 | 0 | 187 of 190 | 572 | 33 | 13 (656) | 2 |
+| **All** | **995** | **3152 (1823 / 1329)** | **2577 (81.8%)** | **575** | **27** | **863 of 915** | **3492** | **248** | **54 (4710)** | **27** |
+
+The counts are those of the site finder after it learned the accessors of
+`property(...)` and stopped counting annotations without a value.
+
+The audits re-derived a sample of sites blind and changed these edges:
+
+| Project | Sites re-derived blind | Disagreements | Edges changed by the audit |
+|---|---|---|---|
+| marshmallow | 136 | 1 (auditor error) | -4 (835 to 831) |
+| asyncstdlib | 121 | 2 (1 auditor error, 1 writer edge that cannot happen) | -2 (661 to 659: the edge and the same case at a second site) |
+| configargparse | 96 | 0 | 0 (401) |
+| sqlparse | 132 | 0 | 0 (696) |
+| anytree | 103 | 0 | 0 (565) |
+| **All** | **588** | **3** | **-6** |
+
+**Traces: first recording and container check.** The five traces of
+batch 2 were recorded outside a container, on
+the maintainer's machine (macOS on Apple silicon), with a uv-managed
+CPython 3.14.9, which has no `test` package (configargparse needs that),
+and a virtual environment per project with exactly the pins of
+`test_requirements`, before the container runner existed. Each package is
+traced again in a container and its trace compared with the committed one,
+as for batch 1; `requirements/<name>.txt` pins the versions of
+the first traces. The re-trace is a check: it does not replace the
+committed traces, and it shows trace edges, not results of the analysis.
+Result (2026-11-14, CPython 3.14.10 in the container): for each of the
+five packages the same tests pass and the two traces have exactly the
+same edges.
+
+| Project | Tests | Edges, committed | Edges, container | Only in one |
+|---|---|---|---|---|
+| marshmallow | 1192 passed | 702 | 702 | 0 |
+| asyncstdlib | 398 passed, 4 skipped | 418 | 418 | 0 |
+| configargparse | 182 passed, 5 xfailed | 336 | 336 | 0 |
+| sqlparse | 535 passed, 2 xfailed, 1 xpassed, 2 deselected | 662 | 662 | 0 |
+| anytree | 162 passed, 1 deselected | 486 | 486 | 0 |
+
+### Batch 3
+
+Five packages that `draw.py` drew in round 1
+(`selection/round-1.json`, one per size stratum; see "Choosing a new batch").
+`plugins/testlib_cases.py` is a pytest plugin of markdown2.
+
+| Project | Release | Licence | Analysed source | Code lines (draw) |
+|---|---|---|---|---|
+| aiocache | v0.12.3 | BSD-3-Clause | `aiocache/` | 1236 |
+| argcomplete | v3.7.2 | Apache-2.0 | `argcomplete/` | 1506 |
+| pypinyin | v0.55.0 | MIT | `pypinyin/` without `pypinyin/__pyinstaller/` | 2256 |
+| markdown2 | 2.5.5 | MIT | `lib/markdown2.py` | 3018 |
+| netaddr | 1.3.0 | BSD-3-Clause | `netaddr/` without `netaddr/tests/` | 3486 |
+
+A security scan of the five checkouts came before any run. The tests run
+only as the scan recommends, in a container (see "Recording traces in a
+container"); `projects.toml` holds each restriction with its reason:
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| aiocache | `tests/ut`, `tests/acceptance` with `-m "not redis and not memcached"`; plugins pytest-asyncio and pytest-mock by `-p`, `-o asyncio_mode=auto` | `tests/performance` (an HTTP server, Apache Bench, live Redis and memcached); the tests marked `redis` or `memcached` (they connect to local services); `setup.cfg` as configuration (pytest-cov writes into the checkout, warnings are errors); two `test_cache_write_doesnt_wait_for_future` tests, which fail on Python 3.13 and later with or without the tracer (an autospecced async method records its call only when it runs) |
+| argcomplete | the five in-process classes of `test/test.py`, by node id, with `--capture=sys -p no:faulthandler` (the package opens and closes file descriptor 9, which pytest's fd capture holds) | the real-shell classes (interactive bash and zsh under a pty, `pip install` from PyPI; their completions run in child processes, which the tracer does not see) |
+| pypinyin | `tests`, `pypinyin` with `--doctest-modules -s`, as its `pytest.ini` (a command reads stdin, which pytest's capture refuses) | `pypinyin/__pyinstaller` (a PyInstaller hook); `pytest.ini` as configuration (its addopts need pytest-cov) |
+| markdown2 | `test/test_markdown2.py` with the plugin `plugins/testlib_cases.py`, which calls the project's own case generator `test_cases()` | the 17 `knownfailure` cases, the 2 `wavedrom` cases (wavedrom has no wheel), the 2 `pygments<2.14` cases (the harness's own filters), and the timing test `test_slow_hr` |
+| netaddr | `netaddr` and the three tutorials, with the project's `pytest.ini` | nothing |
+
+**Provenance.** Each project's test dependencies are installed from
+`requirements/<name>.txt`, which lists the full closure by version and
+SHA-256, with pip's `--require-hashes --only-binary :all: --no-deps`; the
+hash of each dependency that the security scan read is that of the file it
+read, and the others come from PyPI's JSON for that version. Before each
+run, `trace.sh` checks that the commit of `projects.toml` is that of the
+round log (the build of the inputs image checked the source against that
+commit), and the container checks, without importing it, that the package
+is found in the copy of that source and nowhere in the environment. After each run, `trace.sh` checks that the
+distributions of the container are exactly those of the requirements file
+and writes them to `requirements/<name>.installed.txt`.
+
+The traces were recorded in containers from
+`python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f`
+(CPython 3.14.10, linux/aarch64). Each package was traced twice, and both
+runs gave the same bytes for `dynamic/<name>.json` and
+`requirements/<name>.installed.txt`.
+
+| Project | Passed | Skipped | Expected failures | Deselected | Failed | Trace edges | Functions run |
+|---|---|---|---|---|---|---|---|
+| aiocache | 540 | 0 | 0 | 264 | 0 | 469 | 173 |
+| argcomplete | 52 | 0 | 1 | 0 | 0 | 211 | 49 |
+| pypinyin | 985 | 2 | 0 | 0 | 0 | 435 | 132 |
+| markdown2 | 244 | 0 | 0 | 22 | 0 | 753 | 180 |
+| netaddr | 351 | 1 | 0 | 0 | 0 | 960 | 312 |
+
+aiocache's deselected tests are the 262 that `-m` leaves out (Redis and
+memcached) and the 2 of `deselect`.
+
+| Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| aiocache | 190 | 563 (254 / 309) | 415 (73.7%) | 148 | 54 | 173 of 177 | 576 | 68 | 1 (627) | 5 |
+| argcomplete | 89 | 334 (91 / 243) | 206 (61.7%) | 128 | 5 | 49 of 74 | 516 | 18 | 1 (131) | 3 |
+| pypinyin | 181 | 452 (207 / 245) | 430 (95.1%) | 22 | 5 | 132 of 138 | 670 | 10 | 1 (33) | 1 |
+| markdown2 | 197 | 872 (281 / 591) | 752 (86.2%) | 120 | 1 | 180 of 196 | 1316 | 13 | 2 (241) | 1 |
+| netaddr | 382 | 1219 (629 / 590) | 960 (78.8%) | 259 | 0 | 312 of 362 | 1708 | 43 | 25 (1820) | 0 |
+| **All** | **1039** | **3440 (1462 / 1978)** | **2763 (80.3%)** | **677** | **65** | **846 of 947** | **4786** | **152** | **30 (2852)** | **10** |
+
+The counts are those of the site finder after it learned the accessors of
+`property(...)` and stopped counting annotations without a value.
+
+Of aiocache's 54 rejected trace edges, 50 are calls of the mocks that its
+tests put in place of clients, serializers and plugins; 54 of its edges
+from reading are in the Redis and memcached backends, which the tests
+mock. argcomplete's tests run only its in-process part.
+
+The audits re-derived a sample of sites blind and changed these edges:
+
+| Project | Sites re-derived blind | Disagreements | Edges changed by the audit |
+|---|---|---|---|
+| aiocache | 131 | 5 (3 auditor errors, 1 naming, 1 writer callees that the rules do not support) | -5 (568 to 563, with a ruling on B2) |
+| argcomplete | 88 | 6 (3 auditor errors, 2 naming, 1 writer edge that cannot happen) | -6 (340 to 334: -8 with a ruling on B1, +2 by the naming rule) |
+| pypinyin | 79 | 0 | -1 (453 to 452, with a ruling on version branches) |
+| markdown2 | 124 | 2 (1 auditor error, 1 site where the writer missed callees that the graph already had) | 0 (872) |
+| netaddr | 112 | 0 | 0 (1219) |
+| **All** | **534** | **13** | **-12** |
+
+markdown2's writer drafted the plain ledger entries with a script of its
+own that applies the naming rules to receiver names, and reviewed each
+entry; its auditor therefore re-derived 40 more plain sites, and all agree.
+netaddr binds five attributes with `property(...)` and not with a
+decorator; the site finder of that time proposed no candidate for their
+loads and stores, so writer and auditor each listed these 37 sites with a
+scan of their own, and all are in the ledger.
+
+### The ICSE 2021 set
+
+The five projects of the
+macro-benchmark of PyCG's ICSE 2021 evaluation (Salis et al., ICSE 2021),
+at the commits of its artifact (`vitsalis/pycg-evaluation` at `ce37eb5`,
+its tag `evaluation-2021`). Their batch is `icse-2021`. The
+analysis was developed on them, as on batch 1. Their ground truths are
+new: they follow the conventions of this README and do not use the 2021
+ground truths, which miss real calls, hold names that name no function,
+were completed from the output of tools, and count vendored code and
+tests. Three of the projects
+are GPL: the repository holds none of their code, and the build of the
+inputs image fetches them as every other project. Only autojump's
+commit is a release tag; the other entries have no `tag`.
+`requirements/` holds the test environments of autojump and asciinema, and
+`plugins/nose_tools.py` is a pytest plugin of asciinema.
+
+| Project | Commit | Licence | Analysed source | Modules | Code lines | Functions (lambdas) | Classes | Python (declared) |
+|---|---|---|---|---|---|---|---|---|
+| autojump | `06e082c` (release-v22.5.3) | GPL-3.0-or-later | `bin/autojump_data.py`, `bin/autojump_match.py`, `bin/autojump_utils.py` (root `bin`) | 3 | 270 | 43 (11) | 0 | 2.6+, 3.3+ |
+| fabric | `34edfe4` (2.0.5 and 11 commits) | BSD-2-Clause | `fabric/` | 12 | 865 | 81 (0) | 17 | 2.7, 3.4+ |
+| asciinema | `350d5e9` (after v2.0.0) | GPL-3.0-or-later | `asciinema/` | 24 | 1150 | 137 (3) | 35 | 3.4+ |
+| face_classification | `2f152a2` | MIT | `src/` without `src/__init__.py` (root `src`) | 19 | 1455 | 65 (1) | 2 | 3 |
+| Sublist3r | `3f5fc6d` | GPL-2.0-only | `sublist3r.py`, `subbrute/` | 3 | 1249 | 99 (1) | 16 | 2.7, 3 |
+
+Code lines are counted as `draw.py` counts them. Four projects are
+applications, not packages: the analysed source is the program's own
+modules, under the root from which they import each other. Tests,
+documentation, site configuration, setup and install scripts, maintainer
+tasks and vendored copies are not analysed, as in the other batches. The 2021
+selections were wider: autojump's had `bin/autojump_argparse.py`, a
+vendored argparse 1.2.1 (425 of its 537 edges); fabric's had
+`integration/` (tests), `sites/` (Sphinx configuration) and `tasks.py`
+(123 of its 381 edges have a caller in the first two); Sublist3r's had
+`setup.py`. The notes of `projects.toml` give each choice.
+
+A security scan of the five checkouts came first. Two projects have a test
+run; the other three get a ground truth from reading only. An entry without
+`pytest_args` and `test_requirements` has no test run: `trace.py` refuses
+it, and `projects.py` refuses an entry that has only one of the two.
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| autojump | `tests/unit` (32 tests by reading), with mock 5.2.0 | nothing (`tests/integration/` is empty); no test calls a function of `autojump_data` |
+| asciinema | `tests` (26 tests by reading), with the plugin `plugins/nose_tools.py`: nose 1.3.7 does not import on Python 3.12 and later | `tests/integration.sh` and `tests/distros.sh` (the command line in subprocesses, Docker builds) |
+| fabric | none | fabric requires invoke<2.0, and invoke 1.x imports `imp`, which Python 3.12 removed |
+| face_classification | none | no tests; dependencies of 2017 (keras 2.0.5, tensorflow 1.1.0) without wheels for Python 3.14 |
+| Sublist3r | none | no tests; it queries search engines, DNS resolvers and the ports of other hosts |
+
+The maintainer approved the projects and the two test runs
+(2026-11-14). The
+traces were recorded in the container of batch 3 (same
+image), each twice with the same bytes.
+
+| Project | Passed | Skipped | Expected failures | Failed | Trace edges | Functions run |
+|---|---|---|---|---|---|---|
+| autojump | 23 | 5 | 4 | 0 | 37 | 17 of 43 |
+| asciinema | 26 | 0 | 0 | 0 | 84 | 37 of 137 |
+
+The lead's rulings on the scope:
+
+1. autojump's main script, `bin/autojump` (248 code lines, 17 functions
+   with 6 lambdas), has no `.py` suffix. The tools read `.py` files only,
+   so the entry leaves it out, as the 2021 selection did: a stated limit
+   of the set. For the scope rules the script is a client: what it passes
+   does not fix the type of an undocumented parameter.
+2. Sublist3r's `subbrute/` is a modified copy of TheRook's subbrute that
+   `setup.py` installs as a package of Sublist3r. The entry analyses it,
+   as argcomplete's `packages/_shlex.py`.
+3. face_classification: the entry analyses the seven scripts (module code
+   only). `web/faces.py` imports `emotion_gender_processor` as a top-level
+   module; it is named `web.emotion_gender_processor`.
+4. Callees outside the package in code that cannot run now are named by
+   the versions that the project admits at its commit. fabric's were
+   checked against the sources of invoke 1.4.1 and paramiko 2.7.1 (PyPI
+   archives, read only). face_classification's (keras 2.0.5, tensorflow
+   1.1.0) could not be read: 11 names, 21 edges, have a receiver class
+   that is a guess (`ground-truth/face_classification.md`), and the edges
+   after each script's first `load_model` assume that this keras accepts
+   `compile=False`.
+
+| Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions | Edges of the 2021 ground truth |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| autojump | 46 | 131 (35 / 96) | 33 (25.2%) | 98 | 4 | 17 of 43 | 139 | 12 | 0 (0) | 0 | 537 |
+| asciinema | 161 | 428 (174 / 254) | 81 (18.9%) | 347 | 3 | 37 of 137 | 518 | 20 | 0 (0) | 2 | 341 |
+| fabric | 93 | 341 (100 / 241) | no trace | 341 | - | - | 375 | 4 | 2 (106) | 0 | 381 |
+| face_classification | 84 | 485 (103 / 382) | no trace | 485 | - | - | 912 | 117 | 0 (0) | 1 | 435 |
+| Sublist3r | 102 | 447 (143 / 304) | no trace | 447 | - | - | 513 | 2 | 0 (0) | 2 | 406 |
+| **All** | **486** | **1832 (555 / 1277)** | **114** | **1718** | **7** | **54 of 180** | **2457** | **155** | **2 (106)** | **5** | **2100** |
+
+The numbers of the last column are sizes only: the new ground truths were
+written without the 2021 files, and the scopes differ (see above), so the
+two columns do not count the same thing. Most of this set comes from
+reading: three projects have no trace and the two traces cover a quarter
+and a fifth of their graphs. The audits therefore re-derived more sites:
+
+| Project | Sites re-derived blind | Disagreements | Edges changed by the audit |
+|---|---|---|---|
+| autojump | 139 (all) | 5 (1 auditor error, 2 naming, 2 sites of one ruling) | -2 (133 to 131: the main script is a client) |
+| asciinema | 120 | 2 (auditor naming errors) | +3 (425 to 428: a redirect from http to ftp) |
+| fabric | 103 | 2 (1 missed edge, 1 naming) | +1 (340 to 341: +1 called back by invoke, -1 one class under two names, +1 a name by library version) |
+| face_classification | 138 | 0 | -1 (486 to 485) |
+| Sublist3r | 102 | 0 | 0 (447) |
+| **All** | **602** | **9** | **+1** |
+
+face_classification's writer drafted the ledger with a script of its own
+from the resolved imports; its auditor read every plain entry outside
+`models/cnn.py` against the source. Two iteration sites of asciinema go
+over a lazy `map` of a package lambda, for which the site finder proposes
+no candidate (see "Limits of the site finder").
+
+### Batch 4
+
+The five packages that `draw.py` drew in round 2
+(`selection/round-2.json`, one per size stratum). The maintainer approved the projects
+and their test runs as the security scan recommends (2026-11-14).
+
+| Project | Release | Licence | Source | Analysed source | Code lines (draw) |
+|---|---|---|---|---|---|
+| dagster-pipes | 1.13.28 | Apache-2.0 | sdist from PyPI | `dagster_pipes/` | 1180 |
+| fastjsonschema | v2.22.3 | BSD-3-Clause | git | `fastjsonschema/` | 1277 |
+| pyflakes | 4.1.0 | MIT | git | `pyflakes/` without `pyflakes/test/` | 1889 |
+| bottle | 0.13.4 | MIT | git | `bottle.py` | 3052 |
+| itables | v2.9.1 | MIT | git | `itables/`, `itables_for_dash/` (root `src`) | 3117 |
+
+dagster-pipes is the directory `python_modules/dagster-pipes` of the dagster
+monorepo, whose release tag the draw pinned (1.13.28 at commit `273178a5`).
+A checkout of the monorepo would fetch 1.46 GiB; by the maintainer's
+ruling the benchmark holds the package as its sdist instead (see "A project held
+as an sdist" under "Recording traces in a container"):
+`dagster_pipes-1.13.28.tar.gz`, SHA-256 `f785c2ee…`. Unpacked, its files
+other than `PKG-INFO` and `.gitignore` (the monorepo's root file, which the
+build adds) are the 14 files of the directory at the tag, byte for byte:
+their git tree is `a27c35a0…`, the tree of `python_modules/dagster-pipes`
+at commit `273178a5` (security scan). The build of the inputs image checks
+the file's SHA-256 and unpacks it into
+`/inputs/macro-benchmark/projects/dagster-pipes/` (the archive is not
+kept), and `trace_helper.py` checks that its name names the release of the
+round log.
+
+A security scan of the five sources came first; it read them and ran
+nothing. A second, independent scan (Claude Fable 5.2) read them again and
+agreed with every verdict. The tests run only as the scans recommend, in
+the container of batch 3; `projects.toml` holds each
+restriction with its reason:
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| dagster-pipes | `dagster_pipes_tests` (20 tests by reading) | the pipes tests of dagster core and of the integration libraries (not in the sdist; they need the dagster framework, and many start subprocesses, cloud clients or clusters) |
+| fastjsonschema | `tests` with `-m "not benchmark"`, as its `tox.ini` (137 test functions by reading, many parametrized) | the 2 benchmarks (pytest-benchmark); the 4 tests that the JSON-Schema-Test-Suite submodule parametrizes collect nothing, as in the project's CI, which does not check out submodules (the maintainer's ruling: the suite is not added) |
+| pyflakes | `pyflakes/test` (791 tests by reading, with the classes that rerun others in doctest mode) | the 5 `IntegrationTests`: they run `python -m pyflakes` in a subprocess, which writes bytecode into the checkout and which the tracer does not see (`TestMain` runs the same cases in the test process) |
+| bottle | `test` (377 tests), with Mako and Jinja2 for the template adapters | nothing |
+| itables | 16 test files (143 test functions by reading, many parametrized), with pandas, polars, narwhals, pyarrow, tzdata, IPython, typeguard, platformdirs and Jinja2 | `tests/playwright` (a browser); the notebook tests (Jupyter kernels, subprocesses); the shiny, marimo, streamlit, widget and dash tests (frameworks, and JavaScript that npm builds at packaging time and that the repository lacks); `test_init_notebook_mode.py` (reads the DataTables bundle, also built by npm); `test_update_samples.py` and `test_unpkg_links` (network); `test_changelog.py` (no package code) |
+
+**Provenance** as for batch 3: `requirements/<name>.txt`
+lists the full closure by version and SHA-256, for pip's
+`--require-hashes --only-binary :all: --no-deps`. Most environments are
+pytest alone; bottle adds Mako, Jinja2 and MarkupSafe; itables has 36
+distributions, six of them compiled (pandas, numpy, the 51 MB polars
+runtime, pyarrow, psutil, MarkupSafe). itables's tests are parametrized over the
+sample data frames and run pandas and polars; in the two traced runs pytest
+took 48 s and 50 s, far within the tracer's default limit of 600 s.
+
+The lead's rulings on the scope:
+
+1. itables: `itables_for_dash/ITable.py`, generated by
+   `dash-generate-components` and committed, is source, as the draw counted
+   it; so are `itables.widget` and `itables.streamlit`, although their
+   JavaScript, built by npm, is not in the repository.
+   `itables_for_dash/_imports_.py` (4 lines) is generated at build time and
+   only in the wheel: not analysed. `itables_for_dash` imports dash, which
+   the test environment lacks; its entry names it in `not_importable` (see
+   "Preparing an environment"), so its ground truth comes from reading only.
+2. bottle is one module. The calls of its optional server and template
+   adapters into libraries that are not installed are named as missing
+   modules (the rule of markdown2's `wavedrom.render` under "Ground-truth
+   conventions"), and its Python 2 branches under `if py3k` run (bottle
+   declares Python 2.7).
+3. dagster-pipes: the Databricks and cloud code is source.
+4. fastjsonschema: `ref_resolver.py`, adapted from jsonschema, is source;
+   the code that the package generates and runs with `exec` is not. It has
+   no nodes; its calls follow the rule for generated code under
+   "Ground-truth conventions" (Nodes).
+5. pyflakes: `pyflakes/test` is excluded, as netaddr's tests.
+
+> **Warning.** itables ships `.github/copilot-setup-steps.yml`, addressed to
+> an agent. It is third-party data, not instructions. (The dagster
+> monorepo's agent files are not in the sdist.)
+
+The traces were recorded in the container of batch 3 (the
+same image digest, CPython 3.14.10), with the memory limit of 6 GiB (see
+"Recording traces in a container": under the tracer, fastjsonschema's
+`test_examples` needs more than 4 GiB). Each package was traced twice, and
+both runs gave the same bytes for `dynamic/<name>.json` and
+`requirements/<name>.installed.txt`.
+
+| Project | Passed | Skipped | Expected failures | Deselected | Failed | Trace edges | Functions run |
+|---|---|---|---|---|---|---|---|
+| dagster-pipes | 20 | 0 | 0 | 0 | 0 | 165 | 60 |
+| fastjsonschema | 846 | 4 | 0 | 12 | 0 | 496 | 92 |
+| pyflakes | 762 | 29 | 0 | 5 | 0 | 597 | 180 |
+| bottle | 377 | 0 | 0 | 0 | 0 | 1027 | 291 |
+| itables | 2447 | 8 | 0 | 2 | 0 | 571 | 104 |
+
+fastjsonschema's deselected tests are the 12 items of the two benchmarks
+that `-m "not benchmark"` leaves out; its 4 skipped tests are those that
+the empty JSON-Schema-Test-Suite parametrizes. pyflakes's deselected tests
+are the 5 `IntegrationTests` of `deselect`, and itables's 2 come from its
+`deselect` entry (the trace recorded for the first measurement, without pyarrow and
+tzdata, had 2343 passed, 12 skipped, 3 deselected and 566 edges).
+
+What the traces do not cover:
+
+- dagster-pipes: the package's own 20 tests run 60 of its 148 functions.
+  The cloud, Databricks, CLI and environment code runs in no test, so 231
+  of its 393 edges come from reading only.
+- itables: the run has the 16 test files of the table above. The first
+  traces had neither pyarrow nor tzdata, so `tests/test_downsample.py` and
+  the time-zone case did not run. After the first measurement, the trace of itables was
+  recorded again with the two libraries, on the maintainer's decision of
+  2026-11-14. With pyarrow, pandas stores its text columns in Arrow, as in
+  the project's CI. `itables_for_dash` is in `not_importable`: no test runs
+  it, and all its edges come from reading only.
+- Every trace misses the calls of the tracer defect T1 (see "Limits" under
+  "Traces"). The ground truths add these edges from reading: 12 of
+  fastjsonschema's 53 edges from reading only, and 15 of pyflakes's 49.
+
+| Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| dagster-pipes | 150 | 393 (164 / 229) | 162 (41.2%) | 231 | 3 | 60 of 148 | 454 | 0 | 5 (60) | 1 |
+| fastjsonschema | 106 | 548 (314 / 234) | 495 (90.3%) | 53 | 1 | 92 of 95 | 771 | 6 | 1 (159) | 0 |
+| pyflakes | 197 | 642 (376 / 266) | 593 (92.4%) | 49 | 4 | 180 of 189 | 837 | 14 | 6 (423) | 3 |
+| bottle | 386 | 1461 (608 / 853) | 1013 (69.3%) | 448 | 15 | 291 of 385 | 1836 | 181 | 46 (12946) | 0 |
+| itables | 150 | 776 (188 / 588) | 570 (73.5%) | 206 | 2 | 104 of 129 | 1361 | 6 | 1 (706) | 0 |
+| **All** | **989** | **3820 (1650 / 2170)** | **2833 (74.2%)** | **987** | **25** | **727 of 946** | **5259** | **207** | **59 (14294)** | **4** |
+
+The rejected trace edges are calls of the tests' own objects: `MagicMock`
+objects (dagster-pipes), a dict's `__getitem__` passed as a handler
+(fastjsonschema), `StringIO` streams (pyflakes), the tests' streams, files
+and callbacks (bottle). itables's 2 are naming artefacts: the tracer names
+the `numpy.random` functions `_cython_3_2_8.cython_function_or_method.__call__`.
+bottle's writer filled some entries with scratch rules (the calls of
+builtins and of a fixed list of standard-library functions, four
+decorators, and some attribute loads and stores, among them those of the
+thread-local attributes) and reviewed each generated entry against the
+source; all other entries were written by hand.
+
+The audits re-derived a sample of sites blind. In itables one candidate,
+`_SubscriptableFallback.__getitem__`, sits at 793 of the 1989 sites, and in
+bottle 1601 of the 4413 sites are attribute loads, so both auditors drew
+the sample by kind. The audits and the lead's rulings changed these edges:
+
+| Project | Sites re-derived blind | Agreements | Findings (ids of the audit file) | Edges changed by the audit | Edges changed by the rulings |
+|---|---|---|---|---|---|
+| dagster-pipes | 70 (no value site) | 70 | L1, L2 (rulings), W1 (wording), R1, R2 (README) | 0 (385) | +8 (385 to 393: ruling 1) |
+| fastjsonschema | 76 | 76 | R1, R2 (README), V1 (a fact the auditor could not check), T1 (tool) | 0 (548) | 0 |
+| pyflakes | 84 | 84 | J1 (ruling), A1 (wording), R1 (remark) | 0 (642) | 0 |
+| bottle | 251 | 246 (4 auditor errors, 1 placement only) | F1, F2 (missed edges), R1 (placement), N1 to N3 (rulings) | +8 (1454 to 1462: F1 +6, F2 +2) | 0 |
+| itables | 76 | 74 (2 auditor errors) | F1, F2, R1 (rulings) | 0 (776) | 0 |
+| **All** | **557** | **550** | | **+8** | **+8** |
+
+No audit found an edge of a writer that cannot happen.
+
+The lead's rulings on the ground truths of this set (each general rule is
+also stated at its place in the conventions below):
+
+1. `Any` (dagster-pipes judgement 3, audit L1; itables J2 and J3, audit
+   R1): an annotation of `Any` states no type, so the documentation can fix
+   a concrete outside type (B4). The lead's first ruling on L1 (`Any`
+   decides as `object`: the client objects are opaque) was reversed, so
+   that one rule holds for the set. dagster-pipes: +8 outside edges, 385 to
+   393: +6 at the Azure sites (`__init__.py:1351` to `1353`, `1402`,
+   `1403`), named as a missing module, and +2 at the S3 sites
+   (`boto3.client.get_object`, `1199:38`; `boto3.client.put_object`,
+   `1251:32`). The three `widgets.get` sites keep no callee (the docstring
+   names no class), and so do `obj["Body"].read()` and its `.decode`
+   (`1200:42`, `1200:51`: the subscript of a missing-module value). itables:
+   no change.
+2. Missing modules (dagster-pipes judgements 4 and 5, audit L2): the rule
+   fixes names only; a branch that the library's answer decides still runs
+   (`spark is None`, `1457:36`; `except Py4JJavaError`, `1470:26`). The 7
+   GCS edges and the pyspark edge keep their missing-module names: no
+   change.
+3. Generated code (fastjsonschema, "The generated code"; audit R1): a
+   function that `exec` defines has no node; a call in the exec'd module
+   code belongs to the function that calls `exec` (`compile ->
+   <builtin>.type`, `__init__.py:294:9`); a package function that a
+   generated validator calls belongs to the site that calls the validator
+   (`validate -> JsonSchemaValueException.__init__` and
+   `JsonSchemaValuesException.__init__`, `__init__.py:172:108`). No change.
+4. Two kinds of callee by version (fastjsonschema judgement 2, audits R2
+   and V1): `urlsplit` is a plain function on Python 3.10 and an
+   `lru_cache` wrapper from 3.11, so `ref_resolver.py:52:29` and `64:31`
+   name `urllib.parse.urlsplit` and `functools._lru_cache_wrapper.__call__`.
+   The writer's reading of the CPython 3.10 to 3.12 sources is kept. No
+   change.
+5. fastjsonschema: no default rejection for `Indent.__enter__` and
+   `__exit__`, which are callees at 103 of their 115 `with` sites. No
+   change.
+6. Parser options (pyflakes judgement 1, audit J1): a client tree from
+   `ast.parse(..., type_comments=True)` holds `TypeIgnore` nodes, which have
+   no handler, so `handler(node)` at `checker.py:1252:20` keeps
+   `Checker._unknown_handler` (B3). 1 edge stays.
+7. Declared requirements (itables J1, audit F1): the versions of a
+   dependency that a package admits are decided by its own declared
+   requirements, so the `NotRequired`/`Unpack` fallback of `typing.py:26-40`
+   runs in all seven modules that use it. 4 edges stay (the modules
+   `itables.streamlit`, `itables.widget`, `itables_for_dash` and
+   `itables_for_dash.properties` -> `_SubscriptableFallback.__getitem__`).
+8. A definition made through a missing library (itables J4, audit F2):
+   dash's `_explicitize_args` on the generated `ITable.__init__` was read
+   from the dash 4.4.1 wheel (SHA-256 in `itables.md`), never run, and
+   confirmed J4: `super().__init__(...)` at `itables_for_dash/__init__.py:56:32`
+   has `dash.development.base_component._explicitize_args.wrapper` and
+   `itables_for_dash.ITable.ITable.__init__`. No change.
+9. bottle, N1 (`_raise`, `bottle.py:119:19`): an exception that escapes a
+   client callback is a client value. No change.
+10. bottle, N2 (the view wrapper, `bottle.py:4524:31`): the result of a
+    client callback is a client object (B5); an `isinstance` against an
+    outside abstract type (`DictMixin`) names no package class for it. No
+    change.
+11. bottle, N3 (judgement J2): library behaviour that differs between
+    Python 2 and 3 without a branch in the package is named for Python 3.
+    No change.
+12. bottle, R1 (`bottle.py:584:40`, `1093:28`, `1226:31`) and F1: where a
+    lazy `map` or `filter` is built and iterated in one function, the place
+    of its callback in that function does not matter; where library code
+    iterates it, or an application's output, the package site that hands
+    it to the library is the caller. F1 (+6 inside edges: wsgiref under
+    `WSGIRefServer.run` and `CGIServer.run`) and F2 (+2 inside edges: the
+    Python 2 `tzinfo.fromutc` calls back `_UTC.utcoffset` and `_UTC.dst`,
+    `bottle.py:1806:48`) were accepted.
+
+**Corrections to bottle after the first measurement (2026-11-14).** The analysis
+of the false positives and false negatives of round 3 named three doubts about bottle's ground truth and did not
+edit it. A second auditor, who had not seen the first audit, derived four
+sites blind; the writer checked each and applied three rulings. The bottle
+row of the table of ground truths above is the committed graph, as
+corrected on 2026-11-14: **1461 edges (608 inside, 853 outside)**, 1013
+(69.3%) confirmed by the trace, 448 from reading only. At the first measurement it had
+1462 edges (611 / 851), 449 from reading only, and the batch 3821 edges
+(1653 / 2168), 988 from reading only. The other columns of the row did not
+change: the corrections changed callees and rejections only, at sites that
+had entries.
+
+13. bottle, a call that cannot bind (`bottle.py:3613:13`, `3682:13`):
+    `depr(0, 13, msg)` passes three arguments and `depr` needs four, so
+    Python raises `TypeError` on every version and path. The convention
+    already says so ("Edges", "Judgements"): the call has no edge and the
+    code after it has no edges. A `def` after such a call never runs and
+    makes no function, so `FapwsServer.run.app` has no edges. The first
+    audit missed it: neither site was in its sample, and no exhaustive
+    check looks at argument counts. -12 edges (4 inside, 8 outside).
+14. bottle, `BaseResponse.__iter__` (`bottle.py:1696:20`): the package
+    itself stores a `WSGIFileWrapper` as a body (`_mount_wsgi`, line 737,
+    for a mounted Bottle whose route returns a file, when the environ has
+    no `wsgi.file_wrapper`), so B2 gives `WSGIFileWrapper.__iter__` at
+    this site. The default rejection ("the package never iterates one")
+    stays for the other sites. +1 inside edge.
+15. bottle, Python 2 values (ruling 2 against ruling 11): **a value that
+    a Python-2-only branch of the package makes keeps its Python 2 type
+    where it flows**, and its builtin callees take the Python 3 name of
+    that type. `tonat = tob` (line 160) makes header values, the
+    Content-Disposition value and the POST body Python 2 `str`, which is
+    `bytes` by its Python 3 name. Ruling 11 covers library behaviour that
+    differs without a branch in the package; here a branch of the package
+    makes the difference. The ledger already took this view at
+    `bottle.py:2770` (`fname.decode`, `<builtin>.bytes.decode`). +10
+    outside edges (`bytes.strip`, `split`, `lower`, `replace` in
+    `BaseResponse.__repr__`, `.charset`, `_MultipartPart.finish_header`,
+    `_parse_http_header`, `_parse_qsl`), next to the `str` callees.
+    Values from the environ and the cookies stay `str`.
+
+### Batch 5
+
+The five packages that `draw.py` drew in round 3
+(`selection/round-3.json`, one per size stratum): the last batch (see "How
+the benchmark grew"). `plugins/outputs_cleanup.py` is a pytest plugin of
+python-barcode.
+
+| Project | Release | Licence | Source | Analysed source | Code lines (draw) |
+|---|---|---|---|---|---|
+| whitenoise | 6.12.0 | MIT | git | `whitenoise/` (root `src`) | 1056 |
+| funcy | 2.1 | BSD-3-Clause | git | `funcy/` | 1559 |
+| python-barcode | v0.16.1 | MIT | sdist from PyPI | `barcode/` | 1596 |
+| pyrate-limiter | v4.5.1 | MIT | git | `pyrate_limiter/` | 2296 |
+| structlog | 26.1.0 | MIT OR Apache-2.0 | git | `structlog/` (root `src`) | 3223 |
+
+The draw pinned python-barcode's tag v0.16.1 at commit `cf58852b`. The
+checkout at the tag cannot be imported: three modules import
+`barcode/version.py`, which setuptools-scm writes at build time. By the
+lead's decision the benchmark holds the package as its sdist, as dagster-pipes
+(see "A project held as an sdist" under "Recording
+traces in a container"): `python_barcode-0.16.1.tar.gz`, SHA-256
+`665ed095…`, 59 files, regular files and directories only. It holds every
+file of the tag, equal by git blob hash (`setup.cfg` apart: whitespace and
+an `[egg_info]` section), and adds `barcode/version.py` (assignments
+only), `PKG-INFO` and the `egg-info` directory (security scan).
+The build of the inputs image checks the file's SHA-256 and unpacks it into
+`/inputs/macro-benchmark/projects/python-barcode/` (the archive is not
+kept), and `trace_helper.py` checks that its name names the release of the
+round log.
+
+A security scan of the five sources came first (Claude Fable 5.2); it read
+them and ran nothing, and found nothing malicious. The tests run only as it
+recommends and as the lead decided (below), in the container of batch 3; `projects.toml` holds each restriction with its reason:
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| whitenoise | `tests` (89 test functions by reading), with Django, requests, brotli and tzdata; a WSGI test server on 127.0.0.1 | nothing (`scripts/`, which can fetch a file and rewrite a module, is not collected) |
+| funcy | `tests` (209 test functions by reading), with whatever | nothing |
+| python-barcode | `tests` (29 test functions by reading, one with 14 parameters), with Pillow and the plugin `plugins/outputs_cleanup.py`: 19 items (21 with Pillow) write into `tests/test_outputs/`, and the plugin removes exactly what is new there at the end of the session | nothing; `setup.cfg` is not the configuration (its addopts need pytest-cov) |
+| pyrate-limiter | `tests` with pytest-asyncio by `-p` and its two keys by `-o`, and filelock | `tests/test_multiprocessing.py` (worker processes, which the tracer does not see); `tests/test_aiohttp_limiter.py` (aiohttp is not installed); `test_advisory_lock_id_is_the_same_in_every_process` (two child interpreters, which write bytecode into the checkout copy); `examples/` and `benchmarks/` (HTTPS to httpbin.org, Redis, PostgreSQL). Without redis and psycopg the Redis and PostgreSQL tests skip; `pyproject.toml` is not the configuration (keys of pytest-retry) |
+| structlog | `tests` with pytest-asyncio by `-p` and its two keys by `-o`, time-machine, simplejson, and Twisted with its closure | the 4 tests of `tests/test_packaging.py` that ask `importlib.metadata` for the installed distribution (the trace uses the checkout); the tests that need Rich, greenlet or better-exceptions skip (not installed) |
+
+**Provenance** as for batch 3: `requirements/<name>.txt`
+lists the full closure for CPython 3.14 on Linux aarch64 by version and
+SHA-256, for pip's `--require-hashes --only-binary :all: --no-deps`. Every
+hash was checked against PyPI's JSON for its version (2026-11-14); each
+file says which hashes the scan read and which were looked up on PyPI
+(pytest 9.2.0 and tzdata). Where a distribution has a pure-Python wheel,
+only that wheel is pinned (charset-normalizer, simplejson), so that the
+environment has less native code. whitenoise has 15 distributions, one of
+them compiled (brotli); funcy 6, none; python-barcode 6, one (Pillow, with
+its bundled libraries); pyrate-limiter 7, none; structlog 17, two
+(time-machine, zope.interface).
+
+The lead's decisions on the points that the scan left open:
+
+1. python-barcode is held as its PyPI sdist, as dagster-pipes: the
+   checkout at the tag cannot be imported. A drawn package is not
+   replaced. The other four are git sources at the draw's commits.
+2. python-barcode's 19 test items that write into `tests/test_outputs/`
+   run: without them only `test_generate_with_bytesio` would render a
+   barcode through a writer, and Pillow would be of no use. The plugin
+   `plugins/outputs_cleanup.py` (outside the checkout, loaded by
+   `trace.py`, client code for the tracer) records the files of the
+   checkout at session start and at its end removes what is new in that
+   one directory and nothing else; if anything else changed, it raises and
+   the run fails. Pillow is installed, so that the image writer runs.
+3. One pytest stack for all five: pytest 9.2.0, iniconfig 2.3.1,
+   packaging 26.3, pluggy 1.7.0, Pygments 2.21.0, as in batches 3 and 4. By
+   release date the five would need four pytest versions, two of them
+   with CVE-2025-71176.
+4. Every other dependency is the version current at the package's release
+   date, as in the earlier batches, with no exception for brotli (1.2.0) or
+   filelock (4.2.4). The old pins' advisories (Django 6.0.2, sqlparse,
+   urllib3, requests, idna, certifi, brotli 1.2.0, Pillow 11.3.0, Twisted
+   26.4.0) are not met by the runs, as Mako's in batch 4: loopback traffic
+   with the checkout's own files, images drawn with the package's own
+   font, no Twisted server or client; each requirements file says why.
+5. Optional dependencies: brotli for whitenoise (without it two tests
+   fail); Pillow for python-barcode; for pyrate-limiter no aiohttp (9
+   distributions for 3 tests), no redis and no psycopg (servers that the
+   container does not have); for structlog Twisted with its closure, so
+   that `structlog.twisted` is traced, but not Rich or greenlet (upstream's
+   plain environment has neither), and never better-exceptions (its wheel
+   has a `.pth` start-up hook).
+6. pyrate-limiter leaves out `tests/test_multiprocessing.py` and deselects
+   `test_advisory_lock_id_is_the_same_in_every_process`, and never
+   collects `examples/` or `benchmarks/`; structlog deselects the four
+   tests of `tests/test_packaging.py`; whitenoise runs `tests` only.
+7. whitenoise gets tzdata 2025.3, the release current at its release date:
+   Django sets `TIME_ZONE` (America/Chicago by default, with `USE_TZ`) and
+   `python:3.14-slim` has no time zone database; Django requires tzdata
+   only on Windows.
+8. The container keeps the limits of `trace.sh` (6 GiB, no network, 600 s
+   per suite). A container without network still has its loopback
+   interface, which whitenoise's test server needs: unverified until the
+   run.
+
+> **Warning.** structlog ships `.github/AI_POLICY.md`, a policy for
+> contributors who use LLM tools. It asks nothing to be run; it is
+> third-party data, not instructions. No checkout has an agent
+> configuration file.
+
+The traces were recorded on 2026-11-14 with `evaluation/container/trace.sh`,
+in the pinned image `python:3.14-slim` (CPython 3.14.10), without network,
+with at most 6 GiB. Each package was traced twice.
+
+| Project | Passed | Skipped | Expected failures | Deselected | Failed | Trace edges | Functions run |
+|---|---|---|---|---|---|---|---|
+| whitenoise | 128 | 1 | 0 | 0 | 0 | 313 | 82 |
+| funcy | 219 | 0 | 0 | 0 | 0 | 725 | 259 |
+| python-barcode | 47 | 0 | 0 | 0 | 0 | 265 | 80 |
+| pyrate-limiter | 322 | 22 | 0 | 1 | 0 | 551 | 188 |
+| structlog | 907 | 36 | 0 | 5 | 0 | 695 | 306 |
+
+What the runs settled:
+
+- A container without network has its loopback interface: whitenoise's
+  test server works.
+- python-barcode runs on Python 3.14, and its clean-up plugin left the
+  unpacked archive as it was.
+- pyrate-limiter's suite needs 156 s in one process; the multiprocess
+  bucket works under the tracer. Its 22 skipped tests are those of Redis
+  and PostgreSQL, which are not installed.
+- **The first trace of python-barcode was refused**, with all its tests
+  passed: the sdist carries `python_barcode.egg-info`, its source
+  directory is on the path, and so the tracer listed python-barcode as an
+  installed distribution that the requirements file does not name. The
+  tracer now leaves out a distribution whose metadata lies in the
+  project's own directory (it is not an installation).
+- **structlog: one test more is deselected**,
+  `tests/test_tracebacks.py::test_recursive`. It exhausts the recursion
+  limit on purpose and compares the traceback with one stack; under the
+  tracer a second `RecursionError` is raised in the tracer's own hook, and
+  the test fails. It failed in the first run only because of the tracer.
+  The trace has the same 695 edges with and without it.
+- **Two runs of one package gave the same bytes** for
+  `dynamic/<name>.json` and `requirements/<name>.installed.txt`, with one
+  exception: the first run of pyrate-limiter counted 76 dropped call-backs
+  of the tests and the three later runs 74. The edges, the functions run
+  and the test counts were equal in all four runs. The count is not part
+  of the graph; the cause of the difference was not found (the suite has
+  timing-dependent tests). The committed trace is the last run.
+
+What the traces do not cover:
+
+- pyrate-limiter: the Redis and PostgreSQL tests skip, and no test imports
+  `pyrate_limiter.extras`. 171 of its 284 edges from reading only have a
+  caller in that code.
+- python-barcode: no test imports `barcode.pybarcode`, the command line. 23
+  of its 83 edges from reading only are there.
+- structlog: Rich, greenlet, colorama and better-exceptions are not
+  installed. Their calls are named as missing modules (see "Callees outside
+  the package"), and the code that uses them runs in no test.
+- Every trace misses the calls of the tracer defect T1 (see "Limits" under
+  "Traces"). The ground truths add these edges from reading: 3 of
+  whitenoise's 15 edges from reading only (the functions that its thread
+  pools run), and 2 of pyrate-limiter's 284 (`combined_lock`, a
+  `@contextmanager` generator function).
+
+| Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| whitenoise | 94 | 323 (97 / 226) | 308 (95.4%) | 15 | 5 | 82 of 82 | 362 | 15 | 0 (0) | 0 |
+| funcy | 305 | 869 (400 / 469) | 674 (77.6%) | 195 | 52 | 259 of 289 | 812 | 112 | 9 (1248) | 3 |
+| python-barcode | 126 | 347 (158 / 189) | 264 (76.1%) | 83 | 1 | 80 of 107 | 390 | 25 | 10 (662) | 2 |
+| pyrate-limiter | 288 | 831 (411 / 420) | 547 (65.8%) | 284 | 4 | 188 of 263 | 905 | 19 | 8 (539) | 0 |
+| structlog | 367 | 828 (400 / 428) | 680 (82.1%) | 148 | 15 | 306 of 346 | 904 | 88 | 21 (7536) | 0 |
+| **All** | **1180** | **3198 (1466 / 1732)** | **2473 (77.3%)** | **725** | **77** | **915 of 1087** | **3373** | **259** | **48 (9985)** | **5** |
+
+The rejected trace edges are calls of client objects, most of them the
+tests' own: the tests' WSGI application and `BytesIO` objects, the test
+server's `start_response` and Django's `get_response` (whitenoise, ruling
+3); the callables and objects that the tests pass in, among them their own
+`defaultdict` (funcy, ruling 7); a `BytesIO` (python-barcode); a test's
+subclass of an abstract state algorithm and a test's own `asyncio.Task`
+(pyrate-limiter); `Mock` objects and the tests' streams (structlog). Three
+of structlog's are `BaseException.__init__` of a `raise` without a call,
+an implicit call of code outside the package.
+
+The audits re-derived a sample of sites blind: a seeded draw of 70 sites
+and every value site. No auditor drew by kind, and each audit says why (in
+structlog 1019 of the 2519 sites are attribute loads, but its 88 value
+sites are explicit calls, so explicit sites dominate the sample). The
+audits and the lead's rulings changed these edges:
+
+| Project | Sites re-derived blind | Agreements | Findings (ids of the audit file) | Edges changed by the audit | Edges changed by the rulings |
+|---|---|---|---|---|---|
+| whitenoise | 84 (70 drawn, 15 value sites, 1 in both) | 84 | L1, L2 (rulings), W1 to W3 (wording), R1, R2 (README) | 0 (323) | 0 |
+| funcy | 173 (70 drawn, 112 value sites, 9 in both) | 144 (5 auditor errors, 21 judgement differences, 1 missed edge, 2 entries with callees that cannot reach the site) | F1 (missed edge), F2 (ledger entries), R1, R2 (rulings), R3 (README) | +1 (890 to 891: F1) | -22 (891 to 869: ruling 7) |
+| python-barcode | 94 (70 drawn, 25 value sites, 1 in both) | 90 (4 auditor errors) | F1 (ruling), W1 (wording), R1 (remark), R2 (stale text) | 0 (348) | -1 (348 to 347: ruling 2) |
+| pyrate-limiter | 87 (70 drawn, 19 value sites, 2 in both) | 87 | J3, J5, J6, J8, J12 (rulings), W1, W2 (wording), R1 to R4 (README) | 0 (831) | 0 |
+| structlog | 156 (70 drawn, 88 value sites, 2 in both) | 152 (3 auditor errors of naming, 1 incomplete answer) | F1, F2 (missed edges), L1 to L4 (rulings) | +7 (821 to 828: F1 +6, F2 +1) | 0 |
+| **All** | **594** | **557** | | **+8 (3213 to 3221)** | **-23 (3221 to 3198)** |
+
+No audit found an edge of a graph that cannot happen. funcy's F2 corrected
+two ledger entries whose edges the graph keeps through another site. The
+writers' graphs had 3213 edges; after the audits and the rulings the set
+has 3198 (1466 inside, 1732 outside). The binding check (step 3 of
+"Auditing a ground truth": every call of a package function against the
+callee's signature) was run after the audits, by one more agent, on the
+corrected graphs: 1637 pairs of a site and a package callee (whitenoise
+106, funcy 436, python-barcode 192, pyrate-limiter 440, structlog 463).
+1543 bind; 94 depend on a client's arguments and bind for the package's
+own calls or for some client call; none cannot bind. No edge changed.
+
+The lead's rulings on the ground truths of this set (each general rule is
+also stated at its place in the conventions below):
+
+1. A call-back through library code (structlog L1, judgements 4 and 5;
+   pyrate-limiter J3; whitenoise judgements 3 to 6): when a package call
+   hands an object to library code, or starts library code that dispatches
+   to an object which the package's documented setup registers, and the
+   library then calls a package function, the package function that makes
+   the library call is the caller. It generalises ruling 12 of the third
+   set. No change: structlog keeps `ProcessorFormatter.format` at
+   `_base.py:224:54`, `stdlib.py:374:28` and `400:34`, and the two Twisted
+   observers at `_base.py:224:54`; pyrate-limiter keeps `Rate.__repr__` at
+   `logger.info("... %s", rates)`, `limiter.py:182:24` (logging formats the
+   record lazily); whitenoise keeps the four call-backs of Django
+   (`middleware.py:197:40`, `197:43`, `129:47`; `storage.py:98:45`).
+2. A client's assignment to a public attribute (pyrate-limiter J5,
+   `bucket.py:253:35`; python-barcode J6 and audit R1, `codex.py:240:27`): a
+   client uses the public API (constructor arguments, methods); a client's
+   assignment to a public attribute of a package object counts only where
+   the package's documentation or tests make that assignment.
+   pyrate-limiter: no change (the probe `bucket.leak(0)` keeps
+   `RedisBucket.leak` and `StateBucket.leak`). python-barcode: nothing
+   assigns `code` on a built `Code128`, so `Code128._convert ->
+   <builtin>.RuntimeError` goes, -1 (348 to 347).
+3. whitenoise, audit L1 (judgement 1; `middleware.py:123:33`,
+   `runserver.py:49:30`, `50:32`): a server or framework that calls the
+   package is a client. A callable it passes is a client callback. An object
+   whose type its documented API fixes is named by that type (B4). This
+   extends the bottle precedent to Django: `get_response` has no callee,
+   `request.META` is a dict, and the parser of `add_arguments` is Django's
+   `CommandParser`. No change; the trace edge to
+   `convert_exception_to_response.inner` stays rejected.
+4. whitenoise, audit L2 (judgement 2; `middleware.py:139:45`, `150:51`,
+   `197:43`; `runserver.py:48:30`): when library code picks an object from
+   the client's configuration, the library's defaults and the
+   configurations that the package documents are in scope; any other
+   configured class is client code. No change: 3 edges rest on Django's
+   defaults alone (`FileSystemFinder.list`, `AppDirectoriesFinder.list`,
+   `FileSystemStorage.path`), and the trace has all 3.
+5. funcy, audit R3 and F1 (`funcs.py:110:49`): an expression in the
+   documentation that passes a package function in a role is a documented
+   example, in prose as in a code block. `docs/primitives.rst:19` calls
+   `notnone` "a shortcut for `complement(isnone)`": +1 inside edge,
+   `compose.<lambda1>.<lambda1> -> funcy.primitives.isnone`.
+6. funcy, audit R1 (judgement J3; `funcmakers.py:22`, `objects.py:47`,
+   `52`): where the documentation names a concrete type for a client value
+   ("set", "property"), the value is named by that type (B4), although the
+   code tests an abstract class. No change: the 15 edges to
+   `<builtin>.set.__contains__` and the 2 to `<builtin>.property.__get__`
+   and `__set__` stay.
+7. funcy, audit R2 (judgement J6): documentation is read one entry at a
+   time: a type list in one function's entry names client collections for
+   that function only. -22 edges (891 to 869), each checked by the writer
+   (for example `empty` and `walk_values` -> `set`, `tuple`,
+   `OrderedDict`). 1 trace edge moves to the rejected edges:
+   `join -> collections.defaultdict.copy`, the tests' own value.
+8. python-barcode, audit F1 (judgement J5; `codex.py:57:49`): `__init__`
+   receives the object being made; its receivers are the instances whose
+   construction reaches it, with the arguments the construction passes. A
+   client that calls `__init__` again on a built object is not considered.
+   No edge `Code39.__init__ -> PZN7.calculate_checksum`: no change.
+9. python-barcode, audit W1 (`codex.py:169:29`): B3 ("an object left
+   behind after an error") covers any exception that leaves the object
+   half-changed, a failed lookup too. No change: the `ValueError` of
+   `_new_charset` has no edge.
+10. python-barcode, judgement J1 (`base.py:37-38`): a class whose own
+    `__init__` always raises has no instance, so `Barcode` is no receiver
+    of its own methods (B1). No change.
+11. python-barcode, judgement J7: a check that cannot fail under the
+    package's own values has no callee (the precedents are markdown2's
+    judgement J6 and Sublist3r's `sublist3r.py:899`). No change: the five
+    checks at `base.py:43`, `114`, `ean.py:120`, `upc.py:108` and
+    `codex.py:169` keep no callee.
+12. pyrate-limiter, judgement J12 (`in_memory_bucket.py:75:34`, `77:34`): a
+    library function that the library defines with `exec` has no name and
+    no edge (`ListProxy.append` and `.extend` of
+    `multiprocessing.managers`). No change.
+13. pyrate-limiter, judgement J8 (`redis_state.py:86:40`): a call of a stub
+    instance is named by the stub's path, as `validate.py` does
+    (`redis.Redis.register_script`, `redis.asyncio.Redis.register_script`).
+    No change.
+14. pyrate-limiter, judgement J6 (`wrappers.py:17-96`): a
+    `BucketAsyncWrapper` that wraps a `BucketAsyncWrapper` stays; the
+    annotation and the `isinstance` check admit it. No change (its 11 self
+    edges stay).
+15. structlog, audit F1 and L3 (judgement 6; `tracebacks.py:173:32`):
+    accepted. `to_repr` formats frame locals; the package's own raising
+    frames hold package objects (B2): the locals of the package's own
+    frames, on a raise that the package documents or makes on purpose, are
+    in the role. +6 inside edges (`__repr__` of `BoundLoggerBase`,
+    `_ThreadLocalDictWrapper`, `PrintLogger`, `WriteLogger`, `BytesLogger`,
+    `CapturingLogger`), each checked by the writer (which function, which
+    documented exception).
+16. structlog, audit F2 and judgement 5 (Twisted's call-backs;
+    `twisted.py:248:51`): verified against the pinned Twisted 26.4.0 wheel,
+    read as a zip from the security scan's cache, never run. F2 accepted,
+    +1 inside edge (`JSONLogObserverWrapper.__call__ ->
+    ReprWrapper.__repr__`); the 5 edges of judgement 5 stay.
+17. structlog, audit L2 (judgement 8; `_config.py:355:38`, `410:32`,
+    `threadlocal.py:123:50`, `196:66`): B4. `type[Context]` fixes `dict`,
+    so `<builtin>.dict` stays at the four sites. No change.
+18. structlog, audit L4 (judgement 9; `processors.py:675:44`): a package
+    Protocol names the classes that the package documents as its
+    implementations. `ExceptionPrettyPrinter.__call__ ->
+    ExceptionDictTransformer.__call__` stays. No change.
+
+**For the record.** The pyrate-limiter writer downloaded three wheels from
+PyPI to read them (requests 2.34.2, httpx 0.28.1, httpx2 2.15.1; judgement
+9). It only read them; its brief did not allow network use. The auditor
+confirmed judgement 9 from local copies of the same releases. The
+structlog writer and auditor read the pinned Twisted 26.4.0 wheel, and the
+whitenoise writer and auditor the pinned Django 6.0.2 wheel, from the
+security scan's cache: as zip files, with their hashes checked against the
+pins, and nothing run. The whitenoise writer ran a few read-only commands
+with its working directory inside the checkout; nothing was run or written
+there, and the checkout is clean.
+
+### Ground truths
+
+| Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| jmespath | 190 | 430 (310 / 120) | 424 (98.6%) | 6 | 4 | 179 of 182 | 519 | 22 | 0 (0) | 1 |
+| tenacity | 190 | 560 (361 / 199) | 405 (72.3%) | 155 | 7 | 156 of 179 | 592 | 46 | 12 (192) | 42 |
+| cachetools | 181 | 623 (465 / 158) | 504 (80.9%) | 119 | 13 | 173 of 174 | 671 | 53 | 1 (512) | 14 |
+| pluggy | 114 | 277 (112 / 165) | 269 (97.1%) | 8 | 3 | 100 of 101 | 455 | 23 | 3 (402) | 9 |
+| h11 | 100 | 286 (150 / 136) | 281 (98.3%) | 5 | 0 | 85 of 89 | 472 | 23 | 2 (287) | 6 |
+| **All** | **775** | **2176 (1398 / 778)** | **1883 (86.5%)** | **293** | **27** | **693 of 725** | **2709** | **167** | **18 (1393)** | **72** |
+
+The counts are those of the site finder after it learned the accessors of
+`property(...)` and stopped counting annotations without a value.
+
+"Confirmed by the trace": ground-truth edges that the trace of the test
+suite has; every other trace edge is rejected (rule A), here a client
+callback. "Default
+rejections (sites)": the defaults, and the sites they decide, counted as
+candidate-site pairs: a site that two defaults decide counts twice (bottle,
+in batch 4: 46 defaults decide 12946 pairs). "Exclusions":
+`exclude` lines.
+
+The audits (see "Auditing a ground truth") re-derived a sample of sites
+blind and changed these edges:
+
+| Project | Sites re-derived blind | Disagreements | Edges changed by the rules (writer) | Edges changed by the audit |
+|---|---|---|---|---|
+| jmespath | 79 | 0 | 0 | -1 (431 to 430) |
+| tenacity | 123 | 2 (1 auditor error, 1 convention) | -10 (567 to 557) | +3 (to 560) |
+| cachetools | 133 | 10 (9 writer edges that cannot happen, 1 auditor error) | -15 (655 to 640) | -17 (to 623) |
+| pluggy | 80 | 0 | 0 | -1 (278 to 277, with a ruling on B4 and B5) |
+| h11 | 81 | 0 | 0 | 0 (286) |
+| **All** | **496** | **12** | **-25** | **-16** |
+
+## Choosing a new batch
+
+Batches 1 and 2 were chosen by hand. A further batch is chosen by
+`draw.py`, so that another person can run the choice again (Baltes and
+Ralph, EMSE 2022: write down each stage of the sampling and archive the
+script). It has two steps: a quality-filtered **frame**, computed once from
+a fixed public list and frozen; and a seeded **draw** from the frame,
+stratified by size. A claim about a drawn batch holds for the frame, not for all
+of PyPI. The thresholds are named constants at the top of the script; the
+frame and the round logs record them.
+
+**List.** `selection/top-pypi-packages-2026-11-01.json` is the 30-day
+download list of hugovk/top-pypi-packages (`top-pypi-packages.min.json` at
+its tag `2026.11`; 15,000 projects, collected from the public ClickHouse
+PyPI dataset). The list date D is its `last_update` date. The rank of a
+project is its position in the list (1: the most downloaded).
+
+**Frame.** `draw.py frame` evaluates the projects of the list in rank order
+through the filters below, cheap ones first; the first failure ends a
+project. It writes `selection/frame.json`: the SHA-256, date and size of
+the list, the constants, the funnel (per filter, how many projects reached
+it and how many it rejected), and, for every project up to the rank
+cut-off, its rank and either the filter that failed and why, or the facts
+of a pass. The projects beyond the cut-off are counted in the funnel only.
+The frame does not depend on the sets already built: a project of an
+existing set or of `selection/excluded.txt` is evaluated like any other,
+and only the draw skips it.
+
+| # | Filter | A project passes if | Source |
+|---|---|---|---|
+| 1 | `rank` | its rank is at most 5,000 | SWE-bench (Jimenez et al., ICLR 2024) starts from the top 5,000 downloads; PyXray (Alexopoulos et al., ICSE 2026) uses the download list |
+| 2 | `stub-name` | its name is not `types-*` or `*-stubs` | ours: a stub package has no code to analyse |
+| 3 | `release` | its latest release that is neither yanked nor a pre-release and was uploaded on or before D (version order of PEP 440) was uploaded in the 3 years before D | CPyGraph (Chen and Li, arXiv 2026) uses the same window; Alfadel et al. (EMSE 2023) and JARVIS (Huang et al., arXiv 2024) require recent activity |
+| 4 | `pure-python` | that release has an sdist and a wheel, and every wheel is `py3-none-any` or `py2.py3-none-any` | Pynguin (Lukasczyk et al., EMSE 2023); CPyGraph |
+| 5 | `requires-python` | its `requires_python` admits Python 3.14.0 (no `requires_python` admits it) | ours: the tracer needs Python 3.14 |
+| 6 | `licence` | the licence that PyPI states is permissive: every licence of `license_expression`, else every `License ::` classifier, else a `license` field that is one identifier. A licence that PyPI does not state (no field, or a field of free text) is decided by filter 14 | SWE-bench; CodeSearchNet (Husain et al., arXiv 2019); DaCapo (Blackburn et al., OOPSLA 2006) |
+| 7 | `no-dependency` | no `requires_dist` entry applies on CPython 3.14 on Linux without an extra; a marker with another variable fails | ours, with no precedent in the literature: the ground truth covers the package without outside code. It removes the frameworks and applications that build on other packages: a threat to representativeness |
+| 8 | `size` | the wheel has the SHA-256 that PyPI gives, can be read as a zip (member names that decode, no encrypted or unreadable `.py` member), has no member path that is absolute or has `..`, and 800 to 4,000 code lines in its `.py` files outside `*.dist-info`, `*.data` and directories named `tests`, `test`, `testing`, `unittests` | PyCG (Salis et al., ICSE 2021) used projects of fewer than 3,500 lines |
+| 9 | `source` | `project_urls` and `home_page` name one GitHub repository, which has the tag `X`, `vX`, `<name>-X` or `release-X` of the release X (`git ls-remote`) | ours: the release must be cloned from its tag |
+| 10 | `history` | at the tag, at least 100 commits and at least 2 distinct commit authors (by author e-mail, without case), from the history of the tag, fetched without blobs | Alfadel et al. (EMSE 2023): at least 100 commits and 2 developers; Kalliamvakou et al. (EMSE 2016): avoid personal projects by the number of committers |
+| 11 | `ci` | at the tag, a file below `.github/workflows/` or `.circleci/`, or a file `.travis.yml`, `.gitlab-ci.yml` or `azure-pipelines.yml` at the root (`tox.ini` is not enough) | reaper's CI dimension (Munaiah et al., EMSE 2017); OpenSSF Scorecard, CI-Tests check |
+| 12 | `tests` | at the tag, a file `test_*.py` or `*_test.py` anywhere (also in the package) holds a test, by a rule on the text that is the same on every Python version: a `def test...(` on one line, with or without type parameters (`def test_x[T](`), or a `class` line without type parameters whose bases name something that ends in `TestCase` (`class C(unittest.TestCase`), in a file that decodes as UTF-8. The rule reads text, so such a line inside a string, or `TestCase` in a comment of the bases, counts too; type parameters over several lines, and a class with type parameters, do not count: limits of the rule. A test file over 4 MiB is not read and does not count. The ratio of the code lines of those files to the package's code lines is recorded | JARVIS; DynaPyt (Eghbali and Pradel, ESEC/FSE 2022); DyPyBench (Bouzenia et al., FSE 2024) require runnable tests; reaper's unit-test dimension |
+| 13 | `released-code` | the `.py` files of the wheel that are missing from the checkout or differ from it hold at most 5% of the wheel's code lines (a version file written at build time passes); the checkout root is searched (`.` or `src`, say), and the differing files are recorded | ours: the tag must be the released code |
+| 14 | `github` | the repository has at least 500 stars, is not archived and is not a fork; when PyPI stated no licence, GitHub's detected licence (`license.spdx_id`) is permissive | DyPyBench (500 stars); CodeSearchNet and Alfadel et al. (no forks); last, because of the API limit |
+
+A code line is a line of a token of a statement that is not a string
+statement; blank lines and comments are not code. A string statement (a
+docstring, say) starts its logical line and has only string literals, not
+formatted ones, and parentheses: `"doc"`, `("a" "b")`. A string on the line
+of `def f():`, or after a `;`, does not start its logical line, so its lines
+are code. (The hand selection counted in the same way, without these
+precisions.) The facts of a pass are those that a builder needs:
+the release and its upload date, the wheel URL and SHA-256, the repository,
+tag and commit, the code lines and top-level import names, the commits and
+authors, the CI files, the test files and the test-to-code ratio, the files
+that differ from the release, the licence and where it comes from (PyPI's
+expression, classifiers or field, or GitHub), and the GitHub facts (stars,
+forks, watchers, open issues, archived, fork, created, last push). The
+GitHub facts are **as fetched** by the run (the REST API without a token),
+not as of D: stars move. The frame records no fetch time.
+
+**Draw.** `draw.py draw --round N` reads the frame and the list, never the
+network, and refuses a list whose SHA-256 is not the frame's. It sorts the
+passing projects by code lines, ties by name, and cuts them into 5 strata
+of equal count; when the count is not a multiple of 5, the first (count
+mod 5) strata, those of the smallest projects, have one project more
+(CPyGraph's size strata; Nagappan et al., ESEC/FSE 2013, name size as the
+main dimension for program analysis). The seed of round N is the first 8
+bytes, as a big-endian integer, of SHA-256(the bytes of the list file +
+`\n` + `round N`); the order is `random.Random(seed).shuffle()` of the
+passing names, sorted by name. The batch is, for each stratum in turn, the
+first project of the order that is in the stratum and is neither in the
+benchmark (the `projects.toml` of this directory and
+of each `--used DIR`), nor in `selection/excluded.txt` (the 2021 benchmark,
+the packages of the scalability runs), nor dropped. Names are compared as
+PyPI compares them (PEP 503). `--drop NAME=REASON` (repeated) marks a
+project that was drawn but dropped at a later stage (the security scan, a
+test suite that cannot run in the tracer's environment, the maintainer's
+veto); the draw takes the next project of the order in its stratum.
+
+The draw writes `selection/round-<N>.json`: the list and the frame (their
+SHA-256), the round, the seed, the constants, the projects already used,
+the order, and per stratum its members, its bounds in code lines, the
+projects examined in order with the reason of each skip, and the project
+selected with its facts from the frame. The frame and the logs have sorted
+keys and no time of the run (the dates in them are facts of the list, of
+the releases and of the repositories): a rerun from the same cache writes
+the same bytes.
+
+```sh
+python -I evaluation/macro-benchmark/draw.py frame --work ~/draw-work
+python -I evaluation/macro-benchmark/draw.py draw --round 1
+python -I evaluation/macro-benchmark/draw.py draw --round 1 \
+    --drop "name=the test suite does not run in the tracer's environment"
+python -I evaluation/macro-benchmark/draw.py check sqlparse==0.6.1 --work ~/draw-work
+```
+
+`check NAME[==VERSION]` evaluates every filter on named projects, all of
+them even after a failure. It writes no frame and no round log, but it
+fills the cache. Every network access (PyPI JSON, the wheel, the GitHub
+API, `git ls-remote`, `git fetch`) is cached under `--work`: an
+interrupted `frame` resumes where it stopped, a rerun reads the cache, and
+`--offline` fails rather than fetch. A response that arrives cut is
+continued with a `Range` request, and a failed request is tried again a
+fixed number of times; a network failure stops the run and is never
+recorded as a result. When the GitHub API answers that its limit of
+requests is reached, the script reads the reset time from the answer, says
+so, waits, and goes on; it uses no token. PyPI and GitHub answer with
+their state of the day: a release yanked after D changes the answer of a
+run with an empty cache.
+
+Nothing of a project is installed, imported or run. The wheel is read as a
+zip. The release tag is fetched by its explicit ref (`refs/tags/<tag>`, so
+a branch of the same name cannot take its place) into bare repositories,
+and peeled to its commit; the frame records both. Its files are read from
+git's object store: nothing is checked out, so no hook, filter or
+line-ending conversion applies, and git runs without the user's and the
+system's configuration and without the caller's `GIT_*` variables (no
+submodules, no LFS content). The history is fetched without blobs; the
+tree of the tag is fetched whole (depth 1), with all its blobs. From that
+store, the filters read only the blobs that they need: the test-file
+candidates and the files whose path ends in a module path of the wheel.
+Each one goes to the cache as one checked record (object, type, size and
+delimiter, and git's exit status). A blob over 4 MiB (`MAX_BLOB_BYTES`) is
+downloaded with the tree but not read: such a test file does not count for
+`tests`, and such a module differs for `released-code`.
+
+`draw.py` reaches the network and runs git on third-party
+repositories: run it in the target `maintain` of
+`evaluation/container/Dockerfile.inputs` (git, the CA certificates, and uv
+for the Python 3.15 that `frame` and `check` need), with the repository
+read-only and only `selection/` and the work directory writable.
+
+Only the caller's `http.*` git settings pass to git, as given (a setting
+without a value stays without one) and in the order in which git applies
+them (the indexed `GIT_CONFIG_KEY_n` first, `GIT_CONFIG_PARAMETERS` last),
+so that the last one of a key wins as it does for the caller: a proxy may
+need them, as this repository's sandbox needs `http.proxyAuthMethod`.
+
+`frame` and `check` run only on Python 3.15 (`FRAME_PYTHON`), and refuse
+any other version; the frame records the version. The code-line count uses
+the tokenizer of the running Python, and tokenizers differ between versions
+on valid code: a t-string with a comment in a replacement field is one
+string token before 3.14 and several tokens, with a comment, from 3.14 on,
+so the same file has another count. A file that the tokenizer cannot read
+counts its non-blank lines. `draw` reads only the frame and runs on Python
+3.12 to 3.15.
+
+The literature also suggests filters that the procedure does not use: a
+documentation filter (no Python benchmark uses one), strata by PyPI topic,
+"Development Status" classifiers, GitHub Release objects (many projects
+only tag), age or release-count thresholds, and a filter on recent commits
+(it rejects finished, widely used libraries).
+
+## Ground-truth conventions
+
+The names and edge rules are those of
+[`micro-benchmark/README.md`](../micro-benchmark/README.md). These are the
+differences:
+
+- **Scope.** The analysed source is the importable package: the `packages`
+  of `projects.toml` (package directories, or module files such as
+  `configargparse.py`), without the `exclude` paths. Tests, documentation,
+  benchmarks, examples and setup scripts are not analysed. Module names are
+  relative to the `root` directory of the project:
+  `jmespath.parser.Parser.parse`, `cachetools.keys.hashkey` for
+  `src/cachetools/keys.py` (`root = "src"`), and `configargparse.ArgParser`
+  for a module file at the root.
+- **Nodes.** The keys are the modules of the analysed source and every
+  function and lambda defined in them, also the ones that no execution
+  calls. Callees outside the package are not keys. A module and a function
+  can get the same name; they are then one node (tenacity: the module
+  `tenacity/retry.py` and the function `retry` in `tenacity/__init__.py`
+  are both `tenacity.retry`). Code that the package generates and runs with
+  `exec` is not analysed source: a function that it defines has no node, a
+  call in the module code that `exec` runs belongs to the function that
+  calls `exec`, and a package function that a generated function calls
+  belongs to the package site that calls the generated function
+  (micro-benchmark `dynamic/exec_in_function` and
+  `dynamic/exec_defines_function`; fastjsonschema: `compile ->
+  <builtin>.type` at `__init__.py:294`, and `validate ->
+  JsonSchemaValueException.__init__` at `__init__.py:172`, where `validate`
+  calls the generated validator; bottle: the templates that
+  `SimpleTemplate.execute` runs, `bottle.py:4259`). A library function that
+  the library defines with `exec` has no name and no edge (pyrate-limiter:
+  `ListProxy.append` and `.extend` of `multiprocessing.managers`,
+  `in_memory_bucket.py:75` and `77`).
+- **Edges.** An edge `A -> B` exists if the code of `A` can call `B` when `A`
+  runs, on any Python version that the release supports
+  (`requires-python`). Which calls the code can make is decided by the scope
+  rules below. A coroutine function or generator function that the package
+  calls is a callee of that call site, whether or not the package awaits or
+  iterates the result (the micro-benchmark rule). A call that cannot bind
+  its arguments raises `TypeError` before the callee starts: no edge
+  (configargparse: `p()` at `configargparse.py:935` on a parser class whose
+  `__init__` needs an argument; anytree: `style()` at `render.py:265` on
+  `AbstractStyle`). An `if __name__ == "__main__":` block is code of its
+  module, which keeps its edges (marshmallow `orderedset.py:84`). An edge
+  that depends on what ran earlier in the process counts if some program
+  that uses only the public API makes it in a fresh process: sqlparse's
+  `_TokenType.__getattr__` creates a token type at its first load and
+  caches it (`tokens.py:26`), and `sqlparse.split("select 1")` makes the
+  first load of `Comment.Multiline` at `statement_splitter.py:188`. A state
+  that only a client's change to package internals makes, such as reloading
+  a module or deleting a cached object, is not considered.
+- **Callees outside the package.** Builtins, the standard library and
+  third-party packages are callees, named by the micro-benchmark rules
+  ("Name outside the snippet"). A scorer can restrict the comparison to the
+  edges inside the package. A builtin or library callable that library code
+  calls back is not an edge (`str` in `json.dumps(data, default=str)`). An
+  inherited `__init__`, and an explicit `super().__init__()` that reaches
+  code outside the package, are named through the nearest base outside the
+  package (`<builtin>.ValueError.__init__`, `abc.ABC.__init__`). A stream
+  that `open()` returns, and the default `sys.stdout` and `sys.stderr`, are
+  named by their class: `io.TextIOWrapper.write` in text mode
+  (configargparse `configargparse.py:1802` and `:2170`). A method of an
+  outside object is named by the class of the receiver, also when that class
+  inherits it: `collections.defaultdict.items` (marshmallow `schema.py:192`),
+  `collections.OrderedDict.get` (cachetools `__init__.py:515`), also when
+  both classes are private (argcomplete:
+  `argparse._StoreTrueAction.__call__`, `finders.py:290`). A call into a
+  third-party module that is not installed is named as a missing module by
+  the micro-benchmark rules (markdown2: `wavedrom.render`,
+  `markdown2.py:4247`), also when a copy of the library can be read
+  (dagster-pipes, bottle, pyrate-limiter). A call of an instance of a stub
+  is named by the stub's path, as `validate.py` does (pyrate-limiter: the
+  call of a registered redis script, `redis_state.py:86`, is
+  `redis.Redis.register_script` and `redis.asyncio.Redis.register_script`).
+  The rule fixes names only: a branch that the library's answer decides
+  still runs (dagster-pipes: `spark is None` and `except Py4JJavaError`,
+  `__init__.py:1457` and `1470`), and a missing library calls nothing back.
+  The exception: where a definition of the analysed package is made
+  through the library (a base class, a decorator on a package function),
+  so that a call of that
+  definition goes through library code, that code is read, never run, from
+  the release that the project admits, pinned by SHA-256 in the judgements
+  file (itables: dash 4.4.1's `_explicitize_args` on the generated
+  `ITable.__init__`, `itables_for_dash/__init__.py:56`; Fabric reads Invoke
+  bases and the decorators through which its definitions are made). Reading
+  another method of the same library, or an ordinary library used by that
+  package, does not extend this exception. A documented expression of a missing
+  module is named by its access path (dagster-pipes: "A boto3.client("s3")
+  object" gives `boto3.client.get_object`, `__init__.py:1199`), but the
+  subscript of a missing-module value is not named, so a call on it has no
+  callee (`obj["Body"].read()`, `__init__.py:1200`). A method that a private class
+  inherits from a public class is named through that public class
+  (`collections.abc.Mapping.get` for `os.environ.get`, anytree
+  `config.py:6`); a function that a module re-exports without listing it
+  in `__all__` is named where it is defined (asciinema:
+  `termios.tcsetattr` for `tty.tcsetattr`, `term.py:22`); a builtin type
+  without a public path is named as the tracer names it (autojump:
+  `builtins.list_iterator.__next__`). One class reached through two
+  import paths is one callee when the class is known. This does not resolve
+  aliases inside missing libraries: those calls retain their imported paths.
+  Where admitted versions give a known concrete receiver two classes,
+  the method has both class names. So does a
+  callee that is a plain function on one supported version and a wrapper
+  object on another (fastjsonschema: `urllib.parse.urlsplit` and
+  `functools._lru_cache_wrapper.__call__`, `ref_resolver.py:52` and `64`;
+  `urlsplit` has `lru_cache` from Python 3.11). A call of a
+  `NamedTuple` class, or of a `collections.namedtuple` class, adds no edge:
+  its `__new__` is generated code and its `__init__` is `object.__init__`
+  (asyncstdlib `CacheInfo`, `_lrucache.py:341`; anytree `Row`,
+  `render.py:287`). This also applies to generated constructors outside
+  the package, such as `urllib.parse.SplitResult`.
+- **Implicit calls.** An implicit site has only package callees (see "The
+  ledger"). Two cases differ from the micro-benchmark. A `raise` of a
+  package class without a call adds no edge when the first `__init__` of its
+  MRO is outside the package: `raise _FieldInstanceResolutionError` in
+  marshmallow (`fields.py:102`), whose first `__init__` is that of
+  `TypeError`; the micro-benchmark names that `__init__`
+  (`<builtin>.TypeError.__init__`). A `__del__` that runs because a function
+  drops the last reference to an object is not an edge (asyncstdlib:
+  `zip_longest` can drop the last reference to a `TeePeer`, whose `__del__`
+  then runs, `itertools.py:554-566`); the micro-benchmark has a case for it
+  (`classes/del_on_last_reference`). A signal handler that the package
+  installs is a callee only of the package call where the package waits
+  for the signal while the handler is installed (asciinema: the blocking
+  `select.select` at `pty.py:99`, which the trace has); `signal.signal`
+  only stores it, and a signal that arrives anywhere else is no edge
+  (Sublist3r: `killproc`, `subbrute.py`). A method that a decorator of a
+  library wraps in generated code is reached as Python runs it: the call
+  has the package's wrapper function as its callee, and that function
+  calls the method; the generated code has no node (fabric: `@opens` on
+  six methods of `Connection`, `connection.py:30`).
+- **Judgements.** Calls under `if TYPE_CHECKING:`, in branches on the Python
+  version and behind optional imports are judged case by case. The default:
+  code under `if TYPE_CHECKING:` does not run; a version branch runs if a
+  supported version takes it; both sides of an optional import run. Record
+  each judgement, with file and line, in `ground-truth/<name>.md`, and as a
+  note at the site. The supported versions are those that the package
+  declares: where it declares Python 2, a branch that only Python 2 takes
+  runs, and its builtin callees have the Python 3 name of the type
+  (pypinyin: `<builtin>.str.encode`, `__init__.py:56`;
+  `<builtin>.bytes.decode`, `runner.py:102`). Library behaviour that
+  differs between Python 2 and 3 without a branch in the package is named
+  for Python 3 (bottle: the methods of a `NamedTemporaryFile`, judgement
+  J2). A branch on the version of a
+  dependency runs if a version that the package admits takes it (markdown2:
+  the pygments branch at `markdown2.py:1915`). Which versions the package
+  admits is decided by its own declared requirements, not by those of other
+  libraries that a module imports first (itables: the `NotRequired` and
+  `Unpack` fallback of `typing.py:26-40` runs in all seven modules that use
+  it, also in those that first import dash, streamlit or anywidget). A
+  branch on the platform runs
+  if a platform that the package supports takes it (netaddr:
+  `strategy/ipv4.py:14`). A branch that only an unsupported version takes
+  does not run, also when its test is not a version test (netaddr: the
+  `except NameError` around `bin()`, `strategy/__init__.py:242`), and a
+  `def` in such a branch makes no function, so its body has no edges
+  (pypinyin: `compat.callable_check`, `compat.py:26-30`). A function that
+  only Python 2 has keeps its Python 2 name (autojump: `itertools.imap`,
+  `os.getcwdu`, `<builtin>.dict.iteritems`); a function of a module that
+  Python 3 renamed is the same function and has its Python 3 name only
+  (Sublist3r: `urllib.parse.urlparse` for `urlparse.urlparse`). This does not
+  resolve a module alias hidden inside an ordinary missing dependency.
+  A branch for a frozen interpreter runs (Sublist3r:
+  `sys.frozen`, `subbrute.py:556`). A branch that a server's answer
+  decides runs (asciinema: urllib follows a redirect from http to ftp and
+  returns a `urllib.response.addinfourl`, `asciicast/__init__.py:50`).
+  Code that runs only after a call that cannot bind its arguments, or
+  after an import of a module of the analysed root that the checkout
+  lacks, has no edges (face_classification: `grad_cam.py:184`,
+  `visualizer.py:131`).
+
+## Scope rules
+
+The audits of batches 1 and 2 established these rules; later audits
+clarified them. They apply to all 30 projects. A project judgement records
+how its ledger applies the global rules and cannot override them. The
+2026-11-15 audit (audit record `2026-11-15/README.md`) applies them to every
+project, including the historical ICSE 2021 set.
+
+**A. Edges are per function.** The edges of a function `A` are the calls
+that the code of `A` can make when `A` runs. Whether and how `A` itself gets
+called does not matter: every function, public or private, tested or not,
+reachable from the public API or not, keeps the out-edges of its body. A
+trace edge is rejected only when its callee is a value that a client
+supplied, when it is an implicit call of code outside the package (see
+"Implicit calls" above), when a direct test invocation of a private API
+supplies receivers or arguments excluded by B1/B2 and C, when the call
+uses a generated namedtuple constructor excluded above, or when the trace
+names the callee wrongly: a naming artefact (marshmallow:
+`schema_class(...)` at `fields.py:594` makes an instance of a class that
+`Schema.from_dict` creates with `type()`, and the tracer names that class
+`abc.GeneratedSchema`). Rule A is about whether a function runs: it keeps
+the edges of its body even if nothing calls it. It is not about which
+values reach its parameters; that is rule B. The private-input rejection
+category does not impose public-API reachability: an uncalled private body
+still uses the fallback parameter rules stated in B.
+
+**B. The values that can reach a call site when `A` runs limit its edges.**
+
+For a public function or method (rule C), the receiver and the arguments
+are what a client or the package can pass. For a private function or
+method, which clients do not call, they are what the package's own calls of
+it pass: pluggy calls `HookCaller._add_hookimpl` only on callers taken from
+the hook relay (`_manager.py:255`), which holds only `HookCaller` objects,
+so its `self` is never a `_SubsetHookCaller`. If the package never calls a
+private function, its parameters are judged as for a public one, so that
+rule A still gives its body edges. What the package's own calls pass counts
+in full: tenacity's `wrapped_f` has an `AsyncRetrying` as `self`, because
+`AsyncRetrying.wraps` builds it through `super().wraps`.
+
+- **B1. Receivers.** `self` in a method of class `C` is an instance of `C`,
+  of a package subclass that inherits the method, or of a subclass that
+  calls the method explicitly on itself (`Cache.__setitem__(self, ...)`,
+  `super()`), limited to instances that the package or a client can create.
+  A client creates instances of public classes; a private class is
+  instantiated only where the package does it. A class that cannot be
+  instantiated (abstract by `abc`, a `Protocol`) is not a receiver, and
+  neither is a class whose own `__init__` always raises: it has no instance
+  (python-barcode: `Barcode.__init__` raises `NotImplementedError`,
+  `base.py:37-38`). A base class that the package documents for
+  subclassing is judged on the class itself: a plain public class is a
+  receiver of its own methods; a class that is abstract by `abc` or a
+  `Protocol` is not, and the client's
+  subclasses are client code (asyncstdlib: `ContextDecorator`,
+  `contextlib.py:64`, is abstract by `abc`, so its `_recreate_cm` is no
+  callee at `contextlib.py:103`). Where the package makes every instance of
+  a private class in one state, a branch that this state never takes adds
+  no edge, also in a method of that class that the package never calls
+  (argcomplete: the one lexer of its private `shlex` has `debug` 0 and no
+  input file, so the debug `print` calls and `sourcehook`'s path calls are
+  no edges, `packages/_shlex.py`). A check that cannot fail under the
+  package's own values has no callee (python-barcode: the `RuntimeError` at
+  `base.py:43`, `114`, `ean.py:120` and `upc.py:108` runs only if a package
+  `build` returns a list whose length is not 1, and none does; earlier
+  cases: markdown2 judgement J6, Sublist3r `sublist3r.py:899`). B1
+  limits which package classes `self` can be; an object that the client
+  passes explicitly as `self` to an unbound method of a public class
+  (`Cls.method(obj, ...)`) is a client object and opaque (B5), unless it is
+  a package instance that fits B1. `__init__` receives the object that is
+  being made: its receivers are the instances whose construction reaches
+  it, with the arguments that the construction passes. A client that calls
+  `__init__` again on a built object is not considered (python-barcode: a
+  `PZN7` reaches `Code39.__init__` only from `PZN7.__init__`, with
+  `add_checksum=False`, so `PZN7.calculate_checksum` is no callee at
+  `codex.py:57`).
+- **B2. Arguments and stored values.** The values of a parameter, and of
+  what is fed from it, are client objects, the values that the package
+  defines for that parameter's role, and the package's defaults. A package
+  value is in scope for a role when the parameter's annotation names its
+  type or a base class that the package implements for that purpose, when
+  the documentation names it for that role (tenacity's API reference: the
+  nap functions "can be used as the `sleep` keyword argument"), or when the
+  package's own code, tests or documented examples pass it there. A file
+  under `examples/` that no document includes is not a documented example.
+  An expression in the documentation that passes a package function in a
+  role is a documented example, in prose as in a code block (funcy:
+  `docs/primitives.rst:19` calls `notnone` "a shortcut for
+  `complement(isnone)`", so `isnone` is a callee at `funcs.py:110`).
+  A check on another parameter does not decide a role (aiocache: the cache
+  class of a configuration, called at `factory.py:34`, is one that the
+  tests and documented examples put there, not every class that the
+  `issubclass` check of `Cache.__new__` admits). A string of the client
+  that selects a method of an outside object that the package made names
+  the methods that the package, its tests and its documented examples pass
+  (aiocache: the command of `raw`, `memory.py:92`). A client uses the
+  public API (constructor arguments, methods): a client's assignment to a
+  public attribute of a package object counts only where the package's
+  documentation or tests make that assignment (pyrate-limiter: nothing
+  assigns `is_async`, so the probe `bucket.leak(0)` at `bucket.py:253`
+  reaches only the buckets whose class leaves it `None`; python-barcode:
+  a client cannot assign `code` on a built `Code128` merely because the
+  attribute is public). This does not make an admitted `str` subclass
+  behave like an exact `str`: a first build can reach the `RuntimeError`
+  at `codex.py:240` through its overridden indexing, without assigning an
+  attribute (see the 2026-11-15 audit). Where the package formats the locals
+  of a traceback's frames, the locals of the package's own frames, on a raise
+  that the package documents or makes on purpose, are package values;
+  client frames stay opaque (structlog: `to_repr`, `tracebacks.py:173`,
+  calls the `__repr__` of six package classes).
+  When a parameter has an annotation, the annotation decides which package
+  values fit (`our_role: Type[Sentinel]` admits any sentinel class). An
+  `isinstance` check that admits a package class for a parameter or a
+  stored value names that class for the role, as an annotation does
+  (anytree: the `NodeMixin.parent` setter admits a `LightNodeMixin` node,
+  `nodemixin.py:122`, and so does the `children` setter for each child,
+  `nodemixin.py:230`). An abstract type from outside the package in an
+  annotation (`AsyncIterator`, `AbstractSet`, a `Protocol`) names a package
+  class only if the class subclasses it or is registered with it, not if
+  the class only has its methods, and only for a role for which the package
+  implements that type: asyncstdlib's iterators fit its iterable
+  parameters, which its documentation makes one role
+  (`docs/source/notes/iter_scope.rst:17`); marshmallow's `OrderedSet` is a
+  set for `only` and `exclude`, but not for the `AbstractSet` arm of
+  `partial` or `schemes` (`types.py:15`), where nothing passes one. A
+  `Protocol` of the package names the classes that the package documents
+  as its implementations (structlog: `ExceptionTransformer` names
+  `ExceptionDictTransformer`, `processors.py:675`). A value
+  that a test passes only to check that the package refuses it is out of
+  scope when the annotation excludes it (marshmallow: a field class as
+  `nested`, refused at `fields.py:587`). When the documented type and the
+  annotation of a parameter differ, the annotation decides; the
+  documentation adds package values only by naming them for the role or
+  through documented examples that pass them. In a
+  union of a package base class and a bare `Callable`, only the base-class
+  arm names package values. A stub or annotation that types a parameter as
+  a bare callable is not evidence for any package value. An annotation that
+  admits any module or any class (`ModuleType`, `type`, `object`) names no
+  package value, as a bare callable does, and neither does `Any`. A value from
+  outside the package that the client passes is a client callback, whatever
+  the documentation shows (`dict_cls=collections.OrderedDict`,
+  `setwriter(print)`).
+- **B3. Not considered:** an arbitrary package object passed where any
+  object or any callable is accepted, and a value that the package never
+  produces for that role (a hand-built syntax tree with a node type that the
+  parser never makes; a strategy as the function to retry). A node that the
+  parser makes under one of its options is a node that the parser makes
+  (pyflakes: `ast.parse(..., type_comments=True)` gives `TypeIgnore` nodes,
+  which have no handler, so `handler(node)` calls
+  `Checker._unknown_handler`, `checker.py:1252`). Where an
+  annotation exists, it decides (B2), not what the package produces. An
+  attribute name that the client supplies is not taken to name a package
+  property (anytree: `getattr(node, name)` at `render.py:344`,
+  `resolver.py:349` and `search.py:234` runs no property), unless the tests
+  or the documented examples use the name (aiocache: `conn.serializer`
+  through `_Conn.__getattr__`, `base.py:543`, which the trace has). An object that
+  the package leaves behind after it raised an error to refuse it is not
+  considered (configargparse: `add_argument` raises at
+  `configargparse.py:2318-2336`, after the action is already in the
+  parser). This holds for any exception that leaves an object half-changed,
+  a failed lookup too: the object is not used again. This excludes a retry
+  after python-barcode's `KeyError` at `codex.py:211`, but not a first-build
+  witness with an admitted client subclass whose length results vary: that
+  witness reaches `_new_charset`'s `ValueError` at `codex.py:169` (see the
+  2026-11-15 audit).
+- **B4. Concrete outside types.** When a parameter's annotation or
+  documentation fixes a concrete type from outside the package (`dict`,
+  `list`, `str`, `bytes`, `logging.Logger`, `threading.Event`; a
+  `TypedDict` counts as `dict`), a method call on it is an edge to that
+  type's method. A value whose class the package checks with `isinstance`
+  before the call has that concrete type. When an annotation and the
+  documentation both exist and differ, the annotation decides (as in B2).
+  An annotation of `Any` states no type (PEP 484 gives an unannotated
+  parameter the type `Any`; `object`, by contrast, states that every object
+  is accepted): a parameter or alias annotated `Any` is judged as one
+  without an annotation, so its documentation can fix a concrete outside
+  type (itables: the alias `DataFrameOrSeries`, `typing.py:54-57`;
+  dagster-pipes: "An azure.storage.blob.BlobServiceClient object",
+  `__init__.py:1341`). A documented class that has no public path cannot
+  be named: the site keeps a note and no callee.
+  An abstract type (`Mapping`,
+  `Iterable`, `Callable`, a `Protocol`, "any context manager") does not fix
+  the class. But where the documentation names a concrete type for a client
+  value, the value is named by that type, although the code tests an
+  abstract class (funcy: "set" in `docs/extended_fns.rst` gives
+  `<builtin>.set.__contains__`, although `make_func` tests
+  `collections.abc.Set`, `funcmakers.py:22`). Documentation is read one
+  entry at a time: a type list in one function's entry names client
+  collections for that function only (funcy: the types of the `merge` and
+  `walk_keys` entries do not name the collections of `empty` or
+  `update_in`). A `type[T]` of a concrete outside type `T` fixes `T`
+  (structlog: `type[Context]`, which is `type[dict]`, `_config.py:355`).
+  The `.pyi` stubs that a package ships next to its modules count as
+  annotations (pypinyin). An annotation names the methods of a
+  value; it does not remove a branch that the code takes on purpose for
+  another client value (markdown2: `str(text, 'utf-8')` in `convert`,
+  `markdown2.py:457`, although `text` is annotated `str`).
+- **B5. Client objects are opaque.** A method call on a client-supplied
+  object, or on one of its attributes, has no outside callee, and what the
+  object calls when the package uses it is client behaviour. This holds also
+  for a library object that the client built around a package object
+  (`itertools.chain(event.headers, ...)`), and for an object that a client
+  callback returns (asyncstdlib: `self.gen`, the generator that the
+  client's function returns, `contextlib.py:113`). The callback rule (a
+  package function that library code calls back is a callee of the package
+  site that made the library call) applies to library objects that the
+  package creates or passes. Where library code iterates a lazy `map` or
+  `filter`, or the output of an application, the package site that hands it
+  to the library is the caller (bottle: wsgiref iterates and closes the
+  application's output under `WSGIRefServer.run` and `CGIServer.run`,
+  `bottle.py:3532` and `3495`). In general, when a package call hands an
+  object to library code, or starts library code that dispatches to an
+  object which the package's documented setup registers, and the library
+  then calls a package function, the package function that makes the
+  library call is the caller (structlog: logging calls back
+  `ProcessorFormatter.format` on a handler of the documented setup,
+  `_base.py:224`; pyrate-limiter: logging formats the record of
+  `logger.info("... %s", rates)` and calls `Rate.__repr__`,
+  `limiter.py:182`; whitenoise: Django's `FileResponse.__init__` calls back
+  `set_headers`, `middleware.py:129`). An exception that escapes a client
+  callback is a client value (bottle: `_raise`, `bottle.py:119`). The result
+  of a client callback stays a client object even where an `isinstance`
+  against an outside abstract type would admit a package class (bottle:
+  `isinstance(result, (dict, DictMixin))` in the view wrapper,
+  `bottle.py:4522`). A server or framework that calls the package is a
+  client: a callable that it passes is a client callback, and an object
+  whose type its documented API fixes is named by that type, as in B4
+  (whitenoise, after bottle: Django's `get_response` has no callee,
+  `middleware.py:123`; `request.META` is a dict; the parser of
+  `add_arguments` is Django's `CommandParser`). When library code picks an
+  object from the client's configuration, the library's defaults and the
+  configurations that the package documents are in scope; any other
+  configured class is client code (whitenoise: Django's default finders
+  and their `FileSystemStorage`, `middleware.py:139` and `150`; the
+  package's two documented storage classes and Django's default
+  `StaticFilesStorage`, `middleware.py:197`). A value that the interpreter
+  builds for the call of the package function itself (`**kwargs`, `*args`)
+  is a package value.
+
+**C. "Public" is judged on the access path.** A class or function is public
+if a client can reach it through a path with no component that starts with
+an underscore; dunder names such as `__init__` and `__call__` do not count
+as underscore components. `pluggy.PluginManager` is public, although
+`pluggy._manager` defines it. A class or function on a public path is
+still private if its docstring or the documentation marks it private
+(`:meta private:`, as on `pluggy.HookCaller.__init__`).
+
+
+### Clarifications from the full audit (2026-11-15)
+
+These interpretations apply to every project; the
+decision record (audit record `2026-11-15/scope-adjudications.json`) gives evidence.
+
+- **Factory outputs (B2).** When documentation names a package factory's
+  output for an input role, the output is admitted with the factory's
+  public arguments. An example does not restrict those arguments to its
+  one value. The output must be constructible through that public API;
+  this does not admit hidden closures or arbitrary package callables.
+  If the factory returns its argument unchanged, that value still counts
+  only when it is admitted for the factory input and the consumer admits
+  that factory output (funcy: one-argument `compose`).
+- **Input and stored-value annotations (B2).** A field annotation does
+  not replace the public parameter's contract when source or tests
+  explicitly establish another admitted value for that input
+  (structlog: `CapturingLogger` passed to the inherited bound-logger
+  constructor, whose `logger` parameter is `WrappedLogger`, an `Any` alias).
+- **Forwarded attribute names (B3).** A tested or documented name on an
+  admitted receiver remains admitted when a package proxy forwards that
+  same name to that receiver. The proxy must construct or hold the receiver
+  under B2, and normal lookup must reach the forwarding code. This does not
+  admit all property names or arbitrary client callback results
+  (structlog: six stdlib bound-logger properties through its lazy proxy).
+- **Outside names.** A Python function wrapper installed at a public
+  outside attribute keeps that attribute path. A callable wrapper object
+  uses its concrete class's `__call__`. A direct alias of a class is a
+  class path; a factory returning a different subclass is not that
+  subclass's name (`Path` produces `PosixPath` or `WindowsPath`).
+- **Concrete types (B4).** A concrete annotation does not admit arbitrary
+  out-of-contract types. Explicit handling of another type still counts.
+  A builtin call that enters its body counts even if that body raises;
+  argument binding failure before entry gives no edge.
+- **Client control flow (B5).** Client methods and callback results stay
+  opaque, but their effects on control flow count. An admitted subclass
+  can override operations; repeated truth or length checks need not agree.
+  A witness must use the public API without modifying package internals
+  or reusing an object left half-changed by a failure.
+- **Versions and configuration.** Use CPython and alternative interpreter
+  implementations that the release explicitly supports. A Python-version
+  declaration alone does not admit another implementation. Apply the same
+  declared version bounds and explicit support drops to each implementation.
+  Include names across the release's admitted Python 3 versions. The final classifier is not an upper bound;
+  an explicit support drop overrides a stale classifier. Retain an older
+  fallback name where that runtime lacks the later public path. Do not
+  add two aliases for one class on the same runtime. Documented interpreter
+  or library configuration counts when it changes a package-owned default
+  or value (`-u` changes the binary standard streams; hashlib's documented
+  fallback changes the concrete SHA-1 receiver). This includes ordinary
+  zip imports supported by `importlib.resources` for a package's own
+  resources (netaddr). The configuration need not be repeated in each
+  package's documentation. Client-injected loaders and streams stay opaque.
+  This audit includes normal and optimized execution (`-O`, `-OO`) as a
+  working assumption. Keep the union of their edges: assertions and `__debug__`-dependent code can be
+  absent under `-O`, and docstrings under `-OO`. These modes do not relax
+  the input-role, client-opacity or failed-object rules above.
+- **Missing libraries.** Reading a library does not make ordinary calls
+  transparent. The base/decorator exception applies where the package
+  definition actually goes through library code. A decorator that only
+  registers a function does not make later framework dispatch transparent.
+  Subscript, unpacked and arithmetic results have no inferred stub path;
+  direct attribute/call chains retain their imported access path.
+
+The earlier batch-5 rulings that excluded both Code128 error edges are
+superseded by the first-build subclass witnesses in this audit. The rules
+against arbitrary attribute assignment and failed-object reuse still
+apply. Earlier batch tables and audit narratives retain their dated counts.
+
+## Call sites and candidates
+
+`sites.py` reads the source with `ast` and `tokenize` and finds every call
+site. A site belongs to the node that its calls belong to (a call in a class
+body belongs to the enclosing function or module). It is identified by its
+module, the position of the token that makes the call (line and column from
+1, in characters), and its kind:
+
+| Kind | Site | Position | Candidates by name |
+|---|---|---|---|
+| `call` | `f(...)`, `x.m(...)` | `(` | functions named `f` or `m` (also through `from m import g as f`); for a class named so, its `__init__` and `__new__` and those of its package bases, and the `__call__` of its package metaclass; for `f(...)(...)`, the functions defined in functions named `f` and the `__call__` of classes named `f`; package functions and lambdas passed as arguments (callbacks); for builtins such as `len`, `sorted`, `str`, the special methods they call; for `t.format(...)` and `t.format_map(...)`, what the fields of the template `t` call (as for `format`, and `__getattr__`, `__getitem__` for `{0.a}`, `{0[k]}`) |
+| `decorator` | `@d` | `d` | as for a call of `d` |
+| `class` | `class C(...)` | `class` | `__init_subclass__` of package bases; `__new__`, `__init__`, `__prepare__` of the package metaclass; every `__set_name__` |
+| `with`, `async-with` | each item | the item | `__enter__`, `__exit__` (`__aenter__`, `__aexit__`) |
+| `iter`, `async-iter` | `for`, comprehension, `yield from`, `*x`, unpacking | the iterable or target | `__iter__`, `__next__`, `__getitem__` (`__aiter__`, `__anext__`); not generator functions |
+| `mapping` | `**x` | `x` | `keys`, `__getitem__` |
+| `await` | `await x` | `await` | `__await__` |
+| `op` | binary, unary, comparison, augmented assignment | the operator | `__add__` and `__radd__` for `+` (and `__iadd__` for `+=`), `__eq__` for `==`, for `in` `__contains__` and the iteration methods of the container and `__hash__` and `__eq__` of the element (a dict or set looks it up as a key), and so on; for `t % x` also what the conversions of `t` call: `%s` `__str__` and `__repr__`, `%r` `__repr__`, `%d` `__int__` and `__index__`, `%x` `__index__`, `%f` `__float__` and `__index__`, `%(k)` `__getitem__`, bytes `%s` `__bytes__` (all of them when `t` is not a literal) |
+| `getitem`, `setitem`, `delitem` | `x[k]` | `[` | `__getitem__`, `__missing__`, `__class_getitem__` (`__setitem__`, `__delitem__`); `__hash__`, `__eq__`, `__index__` of keys |
+| `getattr`, `setattr`, `delattr` | `x.a` | `a` | properties named `a`: the decorated functions, and the accessors of `a = property(fget, fset, fdel)` in a class body, by position or keyword, when they are lambdas or functions of that class body (load: `fget`, store: `fset`, delete: `fdel`); `__get__` (`__set__`, `__delete__`) if a class body binds `a` by an assignment or a decorated `def`; every `__getattr__`, `__getattribute__` (`__setattr__`, `__delattr__`) |
+| `truth` | `if`, `while`, `assert`, `and`, `or`, `not`, conditional expressions | the tested expression | `__bool__`, `__len__` |
+| `format` | `{x}` in an f-string | `{` | `__format__`, `__str__`, `__repr__` (`!r`: `__repr__`) |
+| `raise` | `raise C` without a call | `C` | what instantiating a class named `C` runs (as for `call`) |
+| `match` | class, mapping and sequence patterns | the pattern | `__instancecheck__`; `keys`, `get`, `__getitem__`, `__len__`; `__len__` and the iteration methods |
+
+The rules are naive on purpose: a candidate is any package function with a
+matching name, wherever it is defined. Names match as Python stores them: a
+private name `__x` in the body of class `C` is `_C__x` (name mangling), so
+`self.__walk()` in `C` proposes only `C.__walk`. A subscripted base
+(`class String(Field[str])`) is the base `Field`. A module-level alias
+(`nullcontext = NullContext`) is not followed, and neither is a class-body
+alias (`__radd__ = __add__`). An annotation without a value
+(`tags: List[str]`) binds nothing: the name is no value, no descriptor and
+no attribute for `__set_name__`. A dict or set calls `__eq__` of a key when
+two keys have the same hash, also when no two are equal: CPython hashes
+integers modulo 2**61 - 1, so two IPv6 networks of netaddr can collide,
+and its sets and dicts of networks call `BaseIP.__eq__` (the trace has
+`IPSet.__init__ -> BaseIP.__eq__`). `update` and `union` from a dict or a
+set reuse the stored hashes and call no `__hash__`. Some sites are not sites,
+because the object is builtin by its syntax: iteration over a display
+(`[a, b]`), a comprehension or `range()`, `enumerate()` and similar
+builtins; `**` of a dict display or of `globals()`; the truth value of a
+comparison, a constant or `isinstance()` and similar builtins. Annotations
+are sites unless the module has `from __future__ import annotations`: the
+supported versions before 3.14 evaluate them when the function is defined.
+Annotations of local variables are never evaluated.
+
+An explicit site (`call`, `decorator`) always needs a ledger entry. Any other
+site needs one only if it has candidates; the skeleton leaves out the
+implicit sites without candidates, and `check.py --report <name>
+--without-candidates` lists them (`netaddr.ip
+[netaddr.ip.IPNetwork.__getstate__] 1053:21 getattr  self._value`), to find
+a site whose callee no candidate names. A **value site** is a call whose
+callee is a value, with no name to match: a parameter or variable (`cb()`),
+an attribute that the package assigns a value to (`self._reader(...)`), the
+class of an object (`self.__class__(...)`, `type(self)(...)`), or another
+expression (`table[k](...)`). The test is by name too: a call `x.f(...)` is
+a value site if the package assigns a value to an attribute `f` anywhere, or
+to a name `f` in a module or class body (sqlparse: every `sql.Token(...)`,
+because `tokens.py:35` binds the name `Token` to a token type). A value
+site can also have candidates by name, when a package function has the name
+of the attribute (`self.stop(...)` and a function `stop`); it then needs
+both the decisions and the note. Its entry needs a note on where the values
+come from. These are the sites where a missing edge is most likely.
+
+**Limits of the site finder.** It follows an accessor of `property(...)`
+only when it is a lambda or a function of the same class body. It proposes
+no candidate for the accessors of a property that a factory function makes
+(bottle: `_local_property()` returns a `property` whose accessors are its
+local functions; about 100 loads and stores of the thread-local `request` and `response`
+call its `fget` or `fset`, and the writer found them by hand, judgement
+J1). Iterating a
+lazy `map` or `filter` object calls its function, but a package function
+or lambda passed to `map` or `filter` is a candidate only at that call (a
+callback): where another site iterates the object, it gets no candidate.
+List the iteration sites with `check.py --report <name>
+--without-candidates`, and add an entry by hand where one iterates such an
+object (asciinema: `pty.py:84:29` and `recorder.py:37:70` iterate
+parameters that hold a `map` and a `filter` of a package lambda). Where one
+function builds and iterates the object, the edge is the same wherever in
+that function the callback is placed (bottle: `map(tob, ...)` at
+`bottle.py:1226:31`); where library code iterates it, the callback belongs
+to the package site that hands the object to the library (B5). Two other
+library objects call package code later, at a site with no candidate by
+name: a lazy library object that is set up at its first attribute load
+(whitenoise: the first load of Django's `staticfiles_storage` makes the
+package's storage and runs its `__init__`, `middleware.py:197:40`), and a
+library generator that calls package overrides when it is iterated
+(whitenoise: Django's `post_process` generator calls the package's
+`hashed_name`, `storage.py:98:45`). Add these entries by hand. Where a
+default-rejected candidate sits on every iteration site,
+`--report --without-candidates` lists none of these sites (each has a
+candidate), and the skeleton leaves them out (the default decides them):
+list them with `check.py --report <name> --default <candidate>` (funcy:
+`CacheMemory.__getitem__`).
+
+## The ledger
+
+```
+# Comments start with #.
+default reject cachetools._TimedCache._Timer.__getattr__: ...  (see below)
+== jmespath.parser                       the module (file) of the sites below
+[jmespath.parser.Parser.parse]           the node that their calls belong to
+102:31 call  self._parse(expression)     line:column kind text
+    -> jmespath.parser.Parser._parse     a callee
+    reject jmespath.lexer.Lexer._parse: the receiver is a Parser
+    reject *: the receiver is a Parser   every other candidate
+    exclude jmespath.ast.field: why      a node considered, not a candidate
+    note: where the callee comes from
+    undecided jmespath.foo._parse        not decided yet (skeleton)
+    undecided                            callees outside the package not written yet
+```
+
+The site lines come from the skeleton; do not edit them. A rejection names
+one or more candidates, separated by commas, then a colon and the reason.
+`reject *` rejects every candidate that is not a callee. An exclusion
+records a package node that the writer considered and left out at a site
+where it is not a candidate (mostly at value sites, for the auditor): it
+needs a reason, must be a node, and must not be a candidate or a callee of
+the site. The callees of a
+site include what the callee calls back (the key function that `sorted`
+calls, the `run` method that `Thread.start` starts). An implicit site has
+only package callees: implicit calls of code outside the package are not
+edges. Several entries of one node give its edges in the graph.
+
+**Default rejections.** A candidate that is wrong at almost every site where
+it is proposed can be rejected once, with one reason, before the first
+module line:
+
+```
+default reject cachetools._TimedCache._Timer.__getattr__: only reached for attributes that _Timer does not define, on receivers of type _Timer
+```
+
+The default decides that candidate at every site where no entry accepts or
+rejects it; a `reject *` at a site also decides it there. An implicit site
+whose candidates the defaults all decide needs no entry; at an explicit site
+the entry stays, for the callees outside the package. To accept the
+candidate at a site, write `->` for it in that site's entry. If the skeleton
+left the site out, take its line from `check.py --report <name> --default
+<candidate>`: each listed site shows its module, its node and its site line
+(`shop.items [shop.items.Basket.walk] 46:20 iter  self.items`); put the site
+line under `== <module>` and `[<node>]`. Each
+default needs a reason, and one that decides no site (a typo, or a
+candidate that every entry decides itself) is an error. The candidate rule
+stays the same: a default only records one decision for many sites, and the
+report lists them for review.
+
+`check.py` reports: a site that needs an entry and has none; an entry with
+no such site (a stale position) or with another text; a candidate that is
+neither a callee nor rejected; a rejected name that is not a candidate; an
+exclusion of a candidate, of a callee or of a name that is not a node; an
+`undecided` line; a value site without a note; an explicit
+site with no callees and no note; an outside callee at an implicit site; a
+callee in the package that is not a node; a default rejection that decides
+no site; a graph file that is not the graph of the ledger; and an added-edges
+file that is missing or is not the one of the ledger and the trace, or
+that breaks the identity of "Construction".
+
+## Writing a ground truth
+
+1. Start from the skeleton. It lists every site that needs an entry, with its
+   candidates `undecided`:
+
+   ```sh
+   python -I evaluation/macro-benchmark/check.py --skeleton <name> > evaluation/macro-benchmark/ground-truth/<name>.ledger
+   ```
+
+   The size report (`check.py <name>`) shows where a few candidates make
+   many sites, such as a `__getattr__` that every attribute load proposes:
+   it lists each candidate of 50 or more sites, with its number of sites.
+   For those, write the default rejections first, in a ledger with only
+   them, and make the skeleton again: it keeps the default rejections of the
+   existing ledger and leaves out what they decide. Write it to another file
+   first (the shell empties the target of `>` before the command reads it):
+
+   ```sh
+   python -I evaluation/macro-benchmark/check.py --skeleton <name> > <name>.ledger.new
+   mv <name>.ledger.new evaluation/macro-benchmark/ground-truth/<name>.ledger
+   ```
+
+2. Read every function of the analysed source. For each site, write its
+   callees under the conventions above, and decide each candidate: a callee,
+   or rejected with a reason. For an explicit site, also write the callees
+   outside the package, then delete its bare `undecided` line. Never use the
+   output of PyCG or of any other static analysis tool.
+3. Generate the graph and the added edges, and check, until there are no
+   errors:
+
+   ```sh
+   python -I evaluation/macro-benchmark/check.py --write <name>
+   ```
+
+4. With `dynamic/<name>.json`, the checker also reports each trace edge that
+   the graph does not have, and a trace of another commit. Resolve every
+   missing trace edge: add it at the site that makes the call, or, if it is
+   a client callback that the tracer cannot recognise (an object from
+   outside the package that the tests pass in) or another edge that rule A
+   rejects, add it to `ground-truth/<name>.rejected.json` with the reason:
+
+   ```json
+   {"jmespath.visitor.TreeInterpreter.visit_multi_select_dict":
+       {"collections.OrderedDict": "the tests pass OrderedDict as dict_cls"}}
+   ```
+
+   The checker reports a rejected edge that the trace does not have, or that
+   the graph has. After a change to the ledger or to the trace, run
+   `check.py --write` again: the added edges depend on both.
+
+The checker also prints statistics: the edges of the ground truth, the share
+that the trace confirms, and the functions that the tests run.
+
+## Auditing a ground truth
+
+Each ground truth was audited by an agent other than its writer, in this
+order:
+
+1. **Blind re-derivation.** From a skeleton made without the ledger, the
+   auditor numbers the sites in (line, column) order, module by module,
+   draws a seeded random sample of them
+   (`random.Random(20261111)`, 60 to 80 sites) and adds every value site.
+   For each, the auditor writes the callees from the source alone, before
+   opening the ledger, then compares and classifies each difference: the
+   writer missed an edge, the writer has an edge that cannot happen, naming
+   only, or the auditor was wrong. Where one kind of site or one candidate
+   dominates the skeleton, the auditor draws the sample by kind and says so
+   in the audit (in sqlparse, 44 of the 70 sites of a plain draw were
+   attribute loads, and only 19 were explicit calls; in itables,
+   `_SubscriptableFallback.__getitem__` is a candidate at 793 of 1989
+   sites).
+2. **Exhaustive checks** of what a sample cannot test: every dispatch set
+   (the receivers of each method over the class hierarchy, the values of each
+   strategy or callback role), every site that a default rejection decides,
+   the functions that no site calls, special methods and properties, every
+   rejection and note, the callees outside the package, and the rejected
+   trace edges.
+3. **Binding check.** Check every call whose callee is a package function
+   against the callee's signature, and find each call that cannot bind its
+   arguments (no edge, and the code after it has no edges; see "Edges" and
+   "Judgements"). A sample cannot do this: the second audit of bottle
+   (batch 4, ruling 13) found two such calls, `bottle.py:3613`
+   and `3682`, that the first audit's draw of 70 sites did not hold. The
+   step was added after that audit; in batch 5 it found
+   none.
+4. **Findings** go to `ground-truth/<name>.audit.md`, each with a severity
+   and the evidence (file and line). The writer applies them, or answers why
+   not; the auditor re-checks the committed ledger and graph.
+
+An `<name>.audit.md` records the audit against the ledger as it was then.
+Where later rulings or tool changes moved a count or a decision, the
+ledger, the generated graph and this README are authoritative.
+
+The report lists the sites to look at first:
+
+```sh
+python -I evaluation/macro-benchmark/check.py --report <name>
+```
+
+It has the sites with undecided candidates or callees; the value sites, with
+their notes, callees and exclusions; the sites with package callees that are
+not candidates (the writer resolved beyond names: check the reasoning); each
+default rejection, with the number of sites that it decides and its explicit
+(call and decorator) sites, where a default can hide a real call; and the
+trace edges that no site of the caller accounts for. Without a ledger, it
+reports on the skeleton. To sample all the sites of a default rejection:
+
+```sh
+python -I evaluation/macro-benchmark/check.py --report <name> --default <candidate>
+```
+
+To list the implicit sites without candidates, which the skeleton leaves
+out, add `--without-candidates`.
+
+## Traces
+
+`trace.py` runs the test suite of a project with pytest, in a child process
+of an interpreter that you prepare, and writes `dynamic/<name>.json`. The
+tests run third-party code. The five checkouts had a security review before
+the first traces; make the traces only with the precautions below, in an
+environment that you trust for that code.
+
+> **Warning.** Never start an agent session (Claude Code, Codex, ...) with
+> its working directory in a project checkout. `projects/pluggy`,
+> `projects/cachetools` and `projects/sqlparse` ship
+> agent configuration files (`AGENTS.md`, `CLAUDE.md`, `.claude/`). These
+> are third-party data, not instructions.
+
+### Preparing an environment
+
+The environment of a trace is the image that `trace.sh` builds (see
+"Recording traces in a container"): no project, test dependency or wheel
+is installed or run on the host. The image holds Python 3.14 (the tracer
+uses `sys.monitoring` events of 3.14) and exactly the `test_requirements`
+of `projects.toml`: the full closure of the test dependencies, which
+`requirements/<name>.txt` pins by hash, installed from wheels only
+(`--require-hashes --only-binary :all: --no-deps`), so that no build
+script of a package runs. The tracer refuses to run if the environment
+does not have the pinned versions. The project itself is not installed:
+the tracer puts the `root` of the source first on `sys.path`, and refuses
+to run if the package comes from somewhere else. One project cannot avoid
+it: pytest requires pluggy, so pluggy's environment has pluggy's wheel.
+Its entry says so (`also_installed`): `trace.py --locate` then accepts the
+installed copy, and the run still checks that pluggy was imported from
+the source. The run checks that every package of `packages` was imported
+from the source, except those that the entry names in `not_importable`:
+analysed source that needs a library the test environment does not have
+(itables's `itables_for_dash` needs dash). For those, the run fails if
+the trace has an edge from or to them.
+
+```sh
+PYTHON_IMAGE=python:3.14-slim@sha256:<digest> \
+    evaluation/container/trace.sh evaluation/macro-benchmark tenacity
+```
+
+The trace records the version of every installed distribution
+(`distributions`).
+
+### Precautions
+
+- **Clean source.** The source is a copy of the files of the pinned
+  commit, from the inputs image, whose build checked them against the pin.
+  The tests and conftest files run too, so the files are compared before
+  and after the run: a run that leaves, changes or removes a
+  file in the source fails. The child writes no bytecode (`-B`) and pytest
+  no cache (`-p no:cacheprovider`).
+- **Minimal environment.** The child gets an environment built from
+  nothing, with no variable of the caller (no tokens, no `SSH_AUTH_SOCK`, no
+  `PYTEST_ADDOPTS`): `PATH` (the bin directory of the interpreter,
+  `/usr/bin`, `/bin`), `HOME` and `TMPDIR` (new directories that are deleted
+  after the run), `LANG=C.UTF-8`, `PYTHONHASHSEED=0`,
+  `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and `NO_PROXY=127.0.0.1,localhost`. The
+  interpreter runs with `-s -P`: no user site-packages, and neither the
+  script directory nor the working directory on `sys.path`. Its stdin is
+  `/dev/null`, so that code that reads stdin when it is not a terminal
+  reads nothing, whoever starts the run.
+- **Configuration of the project only.** pytest runs with the checkout as
+  rootdir and as the limit for `conftest.py` files (`--rootdir`,
+  `--confcutdir`), and with `-c` set to the project's own configuration
+  file (`pytest_config`: tenacity, pluggy) or to `/dev/null` (the others):
+  pytest then takes no configuration file from a parent directory, such as
+  the `pyproject.toml` of this repository. The trace records the rootdir and
+  the configuration file that pytest used (`pytest`); the tracer fails if
+  they are not these.
+- **Only the listed tests.** `pytest_args` names the test paths, so that
+  pytest collects nothing else (a bare `pytest` in jmespath would also
+  collect `extra/test_hypothesis.py`). `deselect` removes tests, each with a
+  reason (h11: `test_against_stdlib_http.py` binds a TCP server on
+  127.0.0.1). The trace records them and counts the deselected tests. A
+  project without `pytest_args` has no test run, and the tracer refuses it.
+- **Plugins outside the checkout.** `plugins` lists pytest plugins that
+  the run needs and the project does not have: `.py` files of the benchmark
+  directory, outside `projects/`, so that no test can change them. The
+  child imports each one by its path (not through `sys.path`) after the
+  tracer starts, and passes it to pytest; its code is client code. The
+  trace records them (`plugins`). markdown2's plugin calls the project's
+  own case generator, which only its harness calls.
+- **Time limit.** The parent stops the run after `--timeout` seconds
+  (default 600). The child runs in its own process group; after the run,
+  or when it is stopped, every process left in that group (a server that a
+  test started) is killed.
+
+### What the tracer does
+
+1. It checks the checkout and the environment (see Precautions).
+2. In the child, it starts the tracer of `micro-benchmark/validate.py`,
+   imports pytest and the `plugins`, and runs `pytest <pytest_args> -c
+   <config> --rootdir=. --confcutdir=. -p no:cacheprovider
+   --continue-on-collection-errors [--deselect=...]` in the checkout.
+3. It names the calls with the validator's rules. The code that runs is in
+   three zones: the package; library code (the standard library, builtins,
+   and the installed `dependencies` of `projects.toml`); and client code
+   (all other code: tests, conftest files, pytest, its plugins, the tracer).
+   - **Callers** are the modules and functions of the package. A package
+     function that client code calls has no caller. Library frames between
+     two package frames are transparent: a callback from a builtin belongs to
+     the package scope that called the builtin. A client frame ends the
+     search: what a test callback calls is not an edge of the package.
+   - **Callees** are package functions (every invocation, also implicit
+     ones) and, for call expressions, code outside the package. A callee
+     defined in client code is dropped and counted in
+     `dropped.client_callbacks`. A call in a thread that
+     `threading.Thread.start` did not start has no caller and is counted in
+     `dropped.unknown_caller`.
+   - Threads, generators and coroutines follow the validator.
+4. After the run, it checks that the package was imported from the checkout
+   and traced from its first import, that pytest used the expected rootdir
+   and configuration, that pytest finished with exit status 0 or 1, and that
+   the checkout is still clean. Failing and skipped tests do not stop the
+   trace. If a check fails, it writes no file.
+
+**pluggy.** pytest imports pluggy. With `src` first on `sys.path`, pytest
+runs on the pinned source, which the tracer starts to watch before pytest is
+imported. The trace therefore also has the calls that pytest's own plugin
+system makes in pluggy. They are real calls of the package. pytest's hook
+implementations are client callbacks.
+
+### Re-recording a trace
+
+A trace is the reproducible half of a ground truth. To record the trace of
+a project again you need Docker with Compose, `requirements/<name>.txt`
+(the pinned test environment) and the inputs image, which holds the
+source. 27 projects have a trace; fabric, face_classification and
+Sublist3r have no test run.
+
+```sh
+C="docker compose -f evaluation/compose.yaml"
+# 1. Every input by its pin, the source of the project among them (the
+#    only step that downloads third-party code).
+$C build inputs
+# 2. The image of the project: CPython, its pinned test requirements and
+#    its source from the inputs image.
+NAME=jmespath $C build trace
+# 3. Run its tests under the tracer, without network; compare the new
+#    trace with the committed one.
+NAME=jmespath $C run --rm trace --compare
+```
+
+Step 3 copies the source of jmespath out of the image, runs the
+tests under the tracer, checks the new trace (its format, the project and
+the pin, exactly the distributions of the requirements file) and writes
+`evaluation/results/trace/jmespath.json` and `jmespath.installed.txt`.
+`--compare` prints the Python version, the test counts and the number of
+edges of both traces, the distributions that differ and the edges that
+only one trace has, and exits with 0 only if the edge sets are equal. The
+committed `dynamic/jmespath.json` is never changed by the service.
+
+To replace a committed trace (after a change of the tracer, of the test
+selection or of the environment), copy the two files and check the ground
+truth against the new trace. `check.py` reads the source too: run it in
+the inputs image, which holds the sources, or on the host (Python 3.14
+or later) on the copy of the sources out of the inputs image (see "Getting
+the sources"); `check.py --write` writes `ground-truth/`, so it runs on the
+host:
+
+```sh
+B=evaluation/macro-benchmark
+cp evaluation/results/trace/jmespath.json $B/dynamic/jmespath.json
+cp evaluation/results/trace/jmespath.installed.txt $B/requirements/
+$C run --rm inputs python3 -I -B /repo/$B/check.py jmespath   # in the image
+python3 -I $B/check.py jmespath                                # on the host, on the copy
+```
+
+`check.py` fails for each new trace edge that is neither in the graph nor
+rejected: a reviewer then adds it to the ledger or rejects it with a
+reason (see "Writing a ground truth"), and `check.py --write` writes the
+graph and the added edges again. No command regenerates a ground truth.
+
+**Repeatability.** On 2026-11-15 each of the 27 traced projects was traced
+5 more times with `NAME=<project> $C run --rm trace --compare`, on
+linux/aarch64 with CPython 3.14.10, the platform of the committed traces.
+132 of the 135 runs give exactly the committed edges. The 3 others are runs
+of asciinema: each misses one edge, `asciinema.pty.record._copy ->
+asciinema.pty.record.<lambda1>.<lambda1>`, a callback whose call depends on
+the timing of a pseudo-terminal. No run gives an edge that the committed
+trace lacks. A trace edge is an edge of any run, so each committed trace is
+the union of its six recordings, and the traces stay as they are.
+
+### Recording traces in a container
+
+The traces of batch 3 and of every later batch were recorded in Docker
+containers, not on the host: nothing of these packages or of their test
+dependencies is installed or run on the host. The `trace` service above is
+the way to do it with Docker only. `evaluation/container/trace.sh` is the
+maintainers' own script for the same run: it runs Docker from the host,
+needs Python on the host for its checks, and writes the trace into
+`dynamic/`. It takes the source from the inputs image
+(`pycg-evaluation-inputs`: build it first with `$C build inputs`), a
+benchmark directory and one project that has `requirements/<name>.txt`:
+
+```sh
+PYTHON_IMAGE=python:3.14-slim@sha256:<digest> \
+    evaluation/container/trace.sh evaluation/macro-benchmark aiocache
+```
+
+`--dry-run` prints the commands and runs no container; it only
+checks the pin. The script:
+
+1. checks that the commit of `projects.toml` is that of the round log that
+   drew the project (`trace_helper.py check-pin`); for a project held as an
+   sdist (see below), that the sdist of `projects.toml` names the release
+   of the round log;
+2. builds the image `pycg-trace-<name>:<tag>` from
+   `evaluation/container/Dockerfile.trace`, the requirements file (with
+   the Dockerfile the only files of the build context) and the project's
+   source from the inputs image (the named context `inputs`). The tag is
+   12 hex digits of the SHA-256 of the two files and the base image. The
+   base image is given by digest in `PYTHON_IMAGE` (the script refuses to
+   run without it). The image has the official CPython 3.14 and the
+   hash-pinned closure, installed by pip with no configuration (pip is
+   then removed), and the project's source at
+   `/inputs/macro-benchmark/projects/<name>`; not PyCG, and a user with the
+   fixed uid 10001;
+3. copies `trace.py`, `projects.py`, `micro-benchmark/validate.py`,
+   `evaluation/container/entry.sh`, the `projects.toml` and the project's
+   plugins into a temporary directory, and makes an empty output
+   directory;
+4. runs `entry.sh` in the container. It copies the source to a work
+   directory on a tmpfs, prints the interpreter, runs `trace.py --locate`
+   (the package must be found in the copy and nowhere in the
+   environment, by the finders, without importing it), and runs
+   `trace.py`: the tracer compares the copy's files before and after the
+   run;
+5. checks the trace (a regular file under 64 MiB, the keys and types that
+   `trace.py` writes, in its format, of this project and commit, and with
+   exactly the distributions of the requirements file), copies it to
+   `dynamic/<name>.json`, writes the distributions to
+   `requirements/<name>.installed.txt`, and prints the test counts;
+6. removes the temporary directories, and the container if a step failed.
+   A failure names the step.
+
+The container runs with `--network none --read-only --cap-drop ALL
+--security-opt no-new-privileges --pids-limit 512 --memory 6g
+--memory-swap 6g --cpus 4 --user 10001:10001`, a tmpfs on `/tmp` (1 GB)
+and on `/home/runner` (256 MB), and `HOME=/home/runner`,
+`PYTHONHASHSEED=0`, `PYTHONDONTWRITEBYTECODE=1`. The memory limit was 4
+GiB until batch 4: under the tracer, fastjsonschema's
+`test_examples`, which compiles a 3.4 MB schema, went over it and the
+container killed the tracer; at 6 GiB it passes, within the 7.7 GiB of
+the Docker VM that recorded the traces. It has exactly two
+mounts: the tracer directory (read-only) and the output directory. The repository, the project's source, the home directory and
+the Docker socket are not mounted; there is no `--privileged`, `--pid`,
+`--ipc` or host network. The image is built with network access (pip
+downloads the wheels); the tests run without any. Docker gets only `PATH`,
+`HOME`, `DOCKER_HOST` and `DOCKER_CONFIG` of the caller's environment. The
+digest of the base image is recorded in each `requirements/<name>.installed.txt`.
+Inside the container the tracer works as described above; the trace names
+code relative to the package root, as on the host, so a trace from a
+container has the same format.
+
+**Re-tracing with `trace.sh` to check committed traces.** `trace.sh` writes
+`dynamic/<name>.json` and `requirements/<name>.installed.txt` in the
+benchmark directory that it is given. To keep the committed traces, give it
+a scratch directory with a copy of `projects.toml` and `requirements/`
+(the source comes from the inputs image). Then compare each new trace
+with the committed one:
+
+```sh
+python3 -I evaluation/container/trace_helper.py compare \
+    evaluation/macro-benchmark/dynamic/jmespath.json "$scratch/dynamic/jmespath.json"
+```
+
+It prints the Python version, the test counts and the number of edges of
+both traces, the distributions that differ, and the edges that only one
+trace has, counted by caller module and by callee kind (`package`: a
+function of the package; `builtin`; `library`: the standard library and
+the dependencies), then listed. It exits with 0 only if the edge sets are
+equal.
+
+**A project held as an sdist.** An entry may name, in place of
+`repository`, `tag` and `commit`, a source archive from PyPI: `sdist` (its
+file name, ending in `.tar.gz`), `sdist_url` (an https URL that ends in that
+name) and `sdist_sha256`; `projects.py` refuses an entry with both forms or
+with an incomplete one. The archive is not kept: the build of the inputs
+image downloads it, checks its SHA-256 and unpacks it into
+`/inputs/macro-benchmark/projects/<name>`, where `check.py`, `sites.py`
+and the runner read the source as they read a checkout. The
+unpacking (`fetch.unpack_sdist`) uses tarfile's `data` filter (no absolute
+path, no `..`, no link out, no device), and every member must be under the
+top directory that the file name names (`dagster_pipes-1.13.28/`).
+`trace.py` records `sha256:<hash>` as its `commit`; `check.py` compares
+that with the entry.
+
+### Format of `dynamic/<name>.json`
+
+| Key | Content |
+|---|---|
+| `edges` | Sorted adjacency list `{caller: [callees]}` |
+| `aliases` | `{callee: [names]}`: other names of a callee outside the package |
+| `modules`, `functions` | The package modules that ran, and the functions and lambdas defined in them |
+| `executed` | The package functions that ran: called, started (also a generator or coroutine that the interpreter drives) or with out-edges |
+| `tests` | Pytest exit status, and the tests by outcome as pytest's summary line counts them (passed, failed, errors, skipped, xfailed, xpassed, deselected): a passing subtest of a `unittest` test is not a test |
+| `pytest`, `deselect` | The rootdir and configuration file that pytest used (relative to the checkout); the deselected tests with their reasons |
+| `plugins` | Only for a project with `plugins`: their paths, relative to the benchmark directory |
+| `dropped` | `client_callbacks` and `unknown_caller` (see above) |
+| `project`, `commit`, `python`, `distributions` | The source and the environment of the trace; for a project held as an sdist, `commit` is `sha256:` and the SHA-256 of the archive |
+
+A callee outside the package has a canonical name: where it is defined. A
+function is named by its module and qualified name without `<locals>`
+(`posixpath.join`), a class by its module and qualified name, a builtin by
+`<builtin>.` and its name, and a method of a builtin type by the type that
+defines it (`<builtin>.dict.get`).
+
+The child also finds the other names that resolve to the same object, so
+that the checker can match `os.path.join` in the ground truth with
+`posixpath.join` in the trace without importing anything. The names are the
+paths through the library modules that are loaded at the end of the run:
+`module.name`, and `module.Class.name` where the class defines the name or
+is in the MRO of a package class or of an object whose method the package
+called. Only public names count: those in `__all__` if the module has one,
+else those that do not start with an underscore. The checker accepts a
+ground-truth callee if it is the canonical name or one of these names.
+
+The output is deterministic for one environment. Another interpreter or
+other versions of the installed packages can give another trace.
+
+### Limits
+
+- The limits of the validator apply (see the micro-benchmark README). For
+  example, a generator function that builtin code starts has no caller in
+  the trace (marshmallow's `OrderedSet.__iter__` under `iter()`), nor has a
+  coroutine `__call__` of an instance whose coroutine starts in client code
+  (asyncstdlib `_lrucache.py:156`). These edges come from reading only.
+- **Tracer defect T1**, a known limit of every committed trace. `trace.py`
+  overrides the validator's `on_call` and calls `super().on_call(...)`,
+  which adds a frame, so the validator's `sys._getframe(1)`
+  (`micro-benchmark/validate.py:439` and `449`) reads the frame of
+  `trace.py`, not the frame that made the call. So every trace misses the
+  calls in module code that `exec` runs (fastjsonschema: `compile ->
+  <builtin>.type`), the call of a `@contextmanager` generator function by
+  `contextlib` (sqlparse's `utils.indent`; 11 edges of fastjsonschema, 15
+  of pyflakes), and the calls of a thread that library code starts. The
+  cause is in `trace.py`, not in the validator, which handles these cases
+  itself. The ground truths are not affected: their writers add these
+  edges from reading. The "confirmed by the trace" counts are lower than
+  they would be. The fix comes after round 2: fix and test the tracer,
+  re-trace every project in containers, check that the edges of each old trace
+  are a subset of the new one, and update the counts and this text. It was
+  not made earlier, so that the traces of a batch did not change while its
+  ground truths were written.
+- `aliases` is keyed by the canonical name of a callee outside the package
+  (`trace.py`, `result`). Two outside functions of one canonical name (two
+  closures that a factory makes, say) share one list of other names, so a
+  graph edge can match the trace edge of the other function (found by the
+  review of the added edges, 2026-11-14; see "Construction").
+- An object from outside the package that the tests pass in (a builtin
+  function, a standard-library class, `functools.partial`) cannot be told
+  apart from one that the package chooses. Its calls are in the trace; reject
+  them with a reason.
+- A ground-truth name that resolves to the callee through another path (a
+  private module, a class that the package does not name) does not match.
+  The checker lists the names that do.

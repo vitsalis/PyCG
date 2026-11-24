@@ -1,0 +1,1312 @@
+# Call-site ledger of h11 at 1c5b07581f058886c8bdd87adababd7d959dc7ca.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md; h11.md
+# ("Scope rules") shows how this ledger applies them. Arguments are client
+# objects (opaque, B5) or package values that fit the parameter's annotation,
+# or that the package's code or tests pass there (B2): a parameter typed
+# Type[Sentinel] can receive any sentinel class of the package, a parameter
+# typed bytes-like receives no package object. The client never gets a
+# ReceiveBuffer (Connection._receive_buffer is private; trailing_data
+# returns bytes), and never a reader or writer object.
+default reject h11._headers.Headers.__getitem__: no Headers object is subscripted, iterated, unpacked, searched or converted at this site; the operand is a typing construct in an annotation, or a dict, list, tuple, set, str, bytes, bytearray, re.Match, generator or ReceiveBuffer (the Headers sites accept the candidate explicitly)
+default reject h11._headers.Headers.__eq__: no operand of this comparison, `in` test, set construction or dict key lookup is a Headers object; the compared values are bytes, bytearrays, ints, strs, lists, tuples, dicts, sets, sentinel classes or event classes, and Headers is unhashable (it defines __eq__ without __hash__), so it is never a dict key or set element
+
+== h11._abnf
+
+[h11._abnf]
+57:66 call  r"{field_vchar}+(?:[ \t]+{field_vchar}+)*".format(**globa...
+    -> <builtin>.str.format
+    note: the receiver is a str literal; the formatted values are the module's str globals
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+57:76 call  globals()
+    -> <builtin>.globals
+61:43 call  r"({field_content})?".format(**globals())
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+61:53 call  globals()
+    -> <builtin>.globals
+69:20 call  r"(?P<field_name>{field_name})" r":" r"{OWS}" r"(?P<field...
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+69:30 call  globals()
+    -> <builtin>.globals
+83:36 call  r"{vchar}+".format(**globals())
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+83:46 call  globals()
+    -> <builtin>.globals
+90:29 call  r"(?P<method>{method})" r" " r"(?P<target>{request_target...
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+90:39 call  globals()
+    -> <builtin>.globals
+99:55 call  r"([ \t]|{vchar_or_obs_text})*".format(**globals())
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+99:65 call  globals()
+    -> <builtin>.globals
+109:48 call  r"{http_version}" r" " r"(?P<status_code>{status_code})" ...
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+109:58 call  globals()
+    -> <builtin>.globals
+118:42 call  r"({HEXDIG}){{1,20}}".format(**globals())
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+118:52 call  globals()
+    -> <builtin>.globals
+128:24 call  r"(?P<chunk_size>{chunk_size})" r"(?P<chunk_ext>{chunk_ex...
+    -> <builtin>.str.format
+    reject *: the fields name module-level str constants of _abnf (OWS, field_vchar, field_content, ...); formatting a str runs no package code
+129:18 call  globals()
+    -> <builtin>.globals
+
+== h11._connection
+
+[h11._connection]
+51:1 class  class NEED_DATA
+    -> h11._util.Sentinel.__new__
+    note: metaclass=Sentinel; type.__call__ runs Sentinel.__new__, then type.__init__ (outside, no edge)
+55:1 class  class PAUSED
+    -> h11._util.Sentinel.__new__
+206:6 decorator  @property
+    -> <builtin>.property
+217:6 decorator  @property
+    -> <builtin>.property
+224:6 decorator  @property
+    -> <builtin>.property
+231:6 decorator  @property
+    -> <builtin>.property
+353:6 decorator  @property
+    -> <builtin>.property
+503:6 decorator  @overload
+    -> typing.overload
+507:6 decorator  @overload
+    -> typing.overload
+513:6 decorator  @overload
+    -> typing.overload
+
+[h11._connection._keep_alive]
+85:34 call  get_comma_header(event.headers, b"connection")
+    -> h11._headers.get_comma_header
+88:15 call  getattr(event, "http_version", b"1.1")
+    -> <builtin>.getattr
+    note: http_version is a __slots__ member of Request and Response; no package property or __getattr__ runs
+
+[h11._connection._body_framing]
+100:16 call  type(event)
+    -> <builtin>.type
+114:12 call  type(event)
+    -> <builtin>.type
+127:42 call  get_comma_header(event.headers, b"transfer-encoding")
+    -> h11._headers.get_comma_header
+128:8 truth  transfer_encodings
+    reject *: transfer_encodings is the list that get_comma_header returns
+133:39 call  get_comma_header(event.headers, b"content-length")
+    -> h11._headers.get_comma_header
+134:8 truth  content_lengths
+    reject *: content_lengths is the list that get_comma_header returns
+135:39 call  int(content_lengths[0])
+    -> <builtin>.int
+138:12 call  type(event)
+    -> <builtin>.type
+
+[h11._connection.Connection.__init__]
+175:29 call  ValueError(f"expected CLIENT or SERVER, not {our_role!r}")
+    -> <builtin>.ValueError
+175:63 format  {our_role!r}
+    -> h11._util.Sentinel.__repr__
+    reject h11._headers.Headers.__repr__: our_role is typed Type[Sentinel]; the package values of that type are the sentinel classes (e.g. h11.IDLE passed by mistake), whose type is themselves, so repr() runs Sentinel.__repr__; a Headers object is not a role
+    note: reached when the client passes a role other than CLIENT or SERVER
+182:39 call  ConnectionState()
+    -> h11._state.ConnectionState.__init__
+186:43 call  self._get_io_object(self.our_role, None, WRITERS)
+    -> h11._connection.Connection._get_io_object
+187:43 call  self._get_io_object(self.their_role, None, READERS)
+    -> h11._connection.Connection._get_io_object
+190:45 call  ReceiveBuffer()
+    -> h11._receivebuffer.ReceiveBuffer.__init__
+
+[h11._connection.Connection.states]
+215:20 call  dict(self._cstate.states)
+    -> <builtin>.dict
+    reject h11._connection.Connection.states: the argument is the dict attribute states of the ConnectionState self._cstate, not the property Connection.states
+    reject h11._headers.Headers.__getitem__: the argument is the dict states, which dict() copies without calling package code
+215:34 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+
+[h11._connection.Connection.our_state]
+222:29 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+
+[h11._connection.Connection.their_state]
+229:29 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+
+[h11._connection.Connection.they_are_waiting_for_100_continue]
+233:46 truth  self.client_is_waiting_for_100_continue
+    reject *: client_is_waiting_for_100_continue is a bool
+
+[h11._connection.Connection.start_next_cycle]
+247:26 call  dict(self._cstate.states)
+    -> <builtin>.dict
+    reject h11._connection.Connection.states: the argument is the dict attribute states of the ConnectionState self._cstate, not the property Connection.states
+    reject h11._headers.Headers.__getitem__: the argument is the dict states, which dict() copies without calling package code
+247:40 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+248:38 call  self._cstate.start_next_cycle()
+    -> h11._state.ConnectionState.start_next_cycle
+    reject h11._connection.Connection.start_next_cycle: the receiver self._cstate is the ConnectionState made in Connection.__init__
+252:20 truth  self.client_is_waiting_for_100_continue
+    reject *: client_is_waiting_for_100_continue is a bool
+253:39 call  self._respond_to_state_changes(old_states)
+    -> h11._connection.Connection._respond_to_state_changes
+
+[h11._connection.Connection._process_error]
+256:26 call  dict(self._cstate.states)
+    -> <builtin>.dict
+    reject h11._connection.Connection.states: the argument is the dict attribute states of the ConnectionState self._cstate, not the property Connection.states
+    reject h11._headers.Headers.__getitem__: the argument is the dict states, which dict() copies without calling package code
+256:40 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+257:35 call  self._cstate.process_error(role)
+    -> h11._state.ConnectionState.process_error
+258:39 call  self._respond_to_state_changes(old_states)
+    -> h11._connection.Connection._respond_to_state_changes
+
+[h11._connection.Connection._server_switch_event]
+261:16 call  type(event)
+    -> <builtin>.type
+263:16 call  type(event)
+    -> <builtin>.type
+
+[h11._connection.Connection._process_event]
+275:26 call  dict(self._cstate.states)
+    -> <builtin>.dict
+    reject h11._connection.Connection.states: the argument is the dict attribute states of the ConnectionState self._cstate, not the property Connection.states
+    reject h11._headers.Headers.__getitem__: the argument is the dict states, which dict() copies without calling package code
+275:40 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+276:35 call  type(event)
+    -> <builtin>.type
+278:60 call  self._cstate.process_client_switch_proposal(_SWITCH_CONNECT)
+    -> h11._state.ConnectionState.process_client_switch_proposal
+279:16 truth  get_comma_header(event.headers, b"upgrade")
+    reject *: the value is the list that get_comma_header returns
+279:32 call  get_comma_header(event.headers, b"upgrade")
+    -> h11._headers.get_comma_header
+280:60 call  self._cstate.process_client_switch_proposal(_SWITCH_UPGRADE)
+    -> h11._state.ConnectionState.process_client_switch_proposal
+283:60 call  self._server_switch_event(event)
+    -> h11._connection.Connection._server_switch_event
+284:35 call  self._cstate.process_event(role, type(event), server_swit...
+    -> h11._state.ConnectionState.process_event
+284:46 call  type(event)
+    -> <builtin>.type
+288:16 call  type(event)
+    -> <builtin>.type
+291:44 call  type(event)
+    -> <builtin>.type
+296:25 call  cast(Union[Request, Response, InformationalResponse], event)
+    -> typing.cast
+305:16 call  type(event)
+    -> <builtin>.type
+305:55 truth  _keep_alive( cast(Union[Request, Response], event) )
+    reject *: _keep_alive returns a bool
+305:66 call  _keep_alive( cast(Union[Request, Response], event) )
+    -> h11._connection._keep_alive
+306:17 call  cast(Union[Request, Response], event)
+    -> typing.cast
+308:53 call  self._cstate.process_keep_alive_disabled()
+    -> h11._state.ConnectionState.process_keep_alive_disabled
+311:16 call  type(event)
+    -> <builtin>.type
+311:39 truth  has_expect_100_continue(event)
+    reject *: has_expect_100_continue returns a bool
+311:62 call  has_expect_100_continue(event)
+    -> h11._headers.has_expect_100_continue
+313:16 call  type(event)
+    -> <builtin>.type
+315:35 call  type(event)
+    -> <builtin>.type
+318:39 call  self._respond_to_state_changes(old_states, event)
+    -> h11._connection.Connection._respond_to_state_changes
+
+[h11._connection.Connection._get_io_object]
+327:30 getattr  self._cstate.states
+    reject h11._connection.Connection.states: the receiver self._cstate is a ConnectionState, whose states is an instance attribute (a dict)
+331:47 call  _body_framing( cast(bytes, self._request_method), cast(Un...
+    -> h11._connection._body_framing
+332:21 call  cast(bytes, self._request_method)
+    -> typing.cast
+332:56 call  cast(Union[Request, Response], event)
+    -> typing.cast
+334:52 call  io_dict[SEND_BODY][framing_type](*args)
+    -> h11._readers.ChunkedReader.__init__
+    -> h11._readers.ContentLengthReader.__init__
+    -> h11._writers.ContentLengthWriter.__init__
+    note: io_dict is READERS or WRITERS (the only arguments, at _connection.py:186, 187, 349, 351). READERS[SEND_BODY] (_readers.py:245) holds the classes ChunkedReader, ContentLengthReader, Http10Reader; WRITERS[SEND_BODY] (_writers.py:140) holds ChunkedWriter, ContentLengthWriter, Http10Writer. framing_type comes from _body_framing and is "chunked", "content-length" or "http/1.0"; all six are reachable (the client reads a response with any framing; a server writes http/1.0 framing to an HTTP/1.0 peer). The call instantiates the class: ChunkedReader.__init__, ContentLengthReader.__init__ and ContentLengthWriter.__init__ run; Http10Reader, ChunkedWriter (through BodyWriter) and Http10Writer have object.__init__, so they give no edge
+338:31 call  io_dict.get((role, state))
+    -> <builtin>.dict.get
+    note: io_dict is the dict READERS or WRITERS; the keys are tuples of sentinel classes, whose hash and equality are type's
+
+[h11._connection.Connection._respond_to_state_changes]
+348:17 getattr  self.our_state
+    -> h11._connection.Connection.our_state
+349:47 call  self._get_io_object(self.our_role, event, WRITERS)
+    -> h11._connection.Connection._get_io_object
+350:17 getattr  self.their_state
+    -> h11._connection.Connection.their_state
+351:47 call  self._get_io_object(self.their_role, event, READERS)
+    -> h11._connection.Connection._get_io_object
+
+[h11._connection.Connection.trailing_data]
+362:22 call  bytes(self._receive_buffer)
+    -> <builtin>.bytes
+    -> h11._receivebuffer.ReceiveBuffer.__bytes__
+    note: self._receive_buffer is the ReceiveBuffer made in __init__; bytes() calls its __bytes__
+    reject h11._headers.Headers.__getitem__: the argument is the ReceiveBuffer self._receive_buffer; bytes() uses its __bytes__
+
+[h11._connection.Connection.receive_data]
+403:12 truth  data
+    reject *: data is annotated bytes and documented as bytes received from the socket. Clients can obtain Headers from event.headers, but Headers does not fit this parameter role; ReceiveBuffer is private and is not returned to clients.
+404:16 truth  self._receive_buffer_closed
+    reject *: _receive_buffer_closed is a bool
+405:35 call  RuntimeError("received close, then received more data?")
+    -> <builtin>.RuntimeError
+406:34 op  self._receive_buffer += data
+    -> h11._receivebuffer.ReceiveBuffer.__iadd__
+    note: self._receive_buffer is the ReceiveBuffer made in __init__
+
+[h11._connection.Connection._extract_next_receive_event]
+413:22 getattr  self.their_state
+    -> h11._connection.Connection.their_state
+418:30 truth  self._receive_buffer
+    -> h11._receivebuffer.ReceiveBuffer.__bool__
+    reject h11._receivebuffer.ReceiveBuffer.__len__: ReceiveBuffer defines __bool__, so the truth test does not call __len__ (ReceiveBuffer.__bool__ calls it)
+    reject h11._headers.Headers.__bool__, h11._headers.Headers.__len__: the receiver is the ReceiveBuffer self._receive_buffer
+423:29 call  self._reader(self._receive_buffer)
+    -> h11._readers.maybe_read_from_IDLE_client
+    -> h11._readers.maybe_read_from_SEND_RESPONSE_server
+    -> h11._readers.expect_nothing
+    -> h11._readers.ChunkedReader.__call__
+    -> h11._readers.ContentLengthReader.__call__
+    -> h11._readers.Http10Reader.__call__
+    note: self._reader is assigned only at _connection.py:187 and 351, both from _get_io_object(self.their_role, event, READERS). _get_io_object returns READERS.get((role, state)) (_connection.py:338), whose values (_readers.py:235-244) are the functions maybe_read_from_IDLE_client, maybe_read_from_SEND_RESPONSE_server and expect_nothing (or None, excluded by the assert), or an instance of READERS[SEND_BODY][framing] (_connection.py:334): ChunkedReader, ContentLengthReader, Http10Reader, whose __call__ runs. Every table entry is reachable: a server reads requests (CLIENT, IDLE), a client reads responses (SERVER, IDLE / SEND_RESPONSE), both read EOF in DONE/MUST_CLOSE/CLOSED, and bodies have the three framings
+    exclude h11._writers.write_request, h11._writers.write_any_response, h11._writers.BodyWriter.__call__: _get_io_object serves both tables, but self._reader is assigned only from READERS (_connection.py:187, 351)
+425:20 truth  self._receive_buffer
+    -> h11._receivebuffer.ReceiveBuffer.__bool__
+    reject h11._receivebuffer.ReceiveBuffer.__len__: ReceiveBuffer defines __bool__, so the truth test does not call __len__ (ReceiveBuffer.__bool__ calls it)
+    reject h11._headers.Headers.__bool__, h11._headers.Headers.__len__: the receiver is the ReceiveBuffer self._receive_buffer
+425:45 truth  self._receive_buffer_closed
+    reject *: _receive_buffer_closed is a bool
+430:27 call  hasattr(self._reader, "read_eof")
+    -> <builtin>.hasattr
+431:50 call  self._reader.read_eof()
+    -> h11._readers.ChunkedReader.read_eof
+    -> h11._readers.ContentLengthReader.read_eof
+    -> h11._readers.Http10Reader.read_eof
+    note: self._reader comes from READERS (see 423:29); only the three body reader classes define read_eof, and hasattr guards the call; all three are reachable when the peer closes during a body
+433:45 call  ConnectionClosed()
+    note: ConnectionClosed (_events.py:357) has the __init__ that dataclass generates, which has no node and gives no edge; it has no fields and no __post_init__, so it calls no package code
+
+[h11._connection.Connection.next_event]
+478:17 getattr  self.their_state
+    -> h11._connection.Connection.their_state
+479:38 call  RemoteProtocolError("Can't receive data when peer state i...
+    -> h11._util.ProtocolError.__init__
+    note: docs/source/api.rst:478-486 specifies the terminal ERROR state after a receive failure and guarantees that later next_event calls raise; test_connection.py:905-918 exercises this API state. _process_error deliberately completes the ERROR transition. This witness does not admit arbitrary reuse of half-changed failed objects.
+481:53 call  self._extract_next_receive_event()
+    -> h11._connection.Connection._extract_next_receive_event
+483:36 call  self._process_event(self.their_role, cast(Event, event))
+    -> h11._connection.Connection._process_event
+483:58 call  cast(Event, event)
+    -> typing.cast
+485:23 call  len(self._receive_buffer)
+    -> <builtin>.len
+    -> h11._receivebuffer.ReceiveBuffer.__len__
+    reject h11._headers.Headers.__len__: the argument is the ReceiveBuffer self._receive_buffer
+488:46 call  RemoteProtocolError( "Receive buffer too long", error_sta...
+    -> h11._util.ProtocolError.__init__
+491:20 truth  self._receive_buffer_closed
+    reject *: _receive_buffer_closed is a bool
+494:46 call  RemoteProtocolError("peer unexpectedly closed connection")
+    -> h11._util.ProtocolError.__init__
+497:32 call  self._process_error(self.their_role)
+    -> h11._connection.Connection._process_error
+498:26 call  isinstance(exc, LocalProtocolError)
+    -> <builtin>.isinstance
+499:54 call  exc._reraise_as_remote_protocol_error()
+    -> h11._util.LocalProtocolError._reraise_as_remote_protocol_error
+
+[h11._connection.Connection.send]
+538:52 call  self.send_with_data_passthrough(event)
+    -> h11._connection.Connection.send_with_data_passthrough
+542:28 call  b"".join(data_list)
+    -> <builtin>.bytes.join
+
+[h11._connection.Connection.send_with_data_passthrough]
+552:17 getattr  self.our_state
+    -> h11._connection.Connection.our_state
+553:37 call  LocalProtocolError("Can't send data when our state is ERR...
+    -> h11._util.ProtocolError.__init__
+555:20 call  type(event)
+    -> <builtin>.type
+556:68 call  self._clean_up_response_headers_for_sending(event)
+    -> h11._connection.Connection._clean_up_response_headers_for_sending
+563:32 call  self._process_event(self.our_role, event)
+    -> h11._connection.Connection._process_event
+564:20 call  type(event)
+    -> <builtin>.type
+571:23 call  writer(event, data_list.append)
+    -> h11._writers.write_request
+    -> h11._writers.write_any_response
+    -> h11._writers.BodyWriter.__call__
+    note: writer is self._writer, assigned only at _connection.py:186 and 349 from _get_io_object(self.our_role, event, WRITERS). That returns WRITERS.get((role, state)) (_connection.py:338), whose values (_writers.py:136-139) are the functions write_request and write_any_response (or None, when _process_event has raised), or an instance of WRITERS[SEND_BODY][framing] (_connection.py:334): ChunkedWriter, ContentLengthWriter or Http10Writer, which all inherit BodyWriter.__call__. A client writes requests, a server writes responses, both write bodies
+    exclude h11._readers.maybe_read_from_IDLE_client, h11._readers.maybe_read_from_SEND_RESPONSE_server, h11._readers.expect_nothing, h11._readers.ChunkedReader.__call__, h11._readers.ContentLengthReader.__call__, h11._readers.Http10Reader.__call__: _get_io_object serves both tables, but self._writer is assigned only from WRITERS (_connection.py:186, 349)
+574:32 call  self._process_error(self.our_role)
+    -> h11._connection.Connection._process_error
+
+[h11._connection.Connection.send_failed]
+585:28 call  self._process_error(self.our_role)
+    -> h11._connection.Connection._process_error
+
+[h11._connection.Connection._clean_up_response_headers_for_sending]
+603:20 call  type(response)
+    -> <builtin>.type
+615:43 call  cast(bytes, self._request_method)
+    -> typing.cast
+618:40 call  _body_framing(method_for_choosing_headers, response)
+    -> h11._connection._body_framing
+631:39 call  set_comma_header(headers, b"content-length", [])
+    -> h11._headers.set_comma_header
+637:43 call  set_comma_header(headers, b"transfer-encoding", [])
+    -> h11._headers.set_comma_header
+645:43 call  set_comma_header(headers, b"transfer-encoding", [b"chunke...
+    -> h11._headers.set_comma_header
+647:16 truth  self._cstate.keep_alive
+    reject *: ConnectionState.keep_alive is a bool
+647:43 truth  need_close
+    reject *: need_close is a bool
+649:29 call  set(get_comma_header(headers, b"connection"))
+    -> <builtin>.set
+    reject h11._headers.Headers.__getitem__, h11._headers.Headers.__eq__: the argument is the list of bytes that get_comma_header returns
+649:46 call  get_comma_header(headers, b"connection")
+    -> h11._headers.get_comma_header
+650:31 call  connection.discard(b"keep-alive")
+    -> <builtin>.set.discard
+651:27 call  connection.add(b"close")
+    -> <builtin>.set.add
+652:39 call  set_comma_header(headers, b"connection", sorted(connection))
+    -> h11._headers.set_comma_header
+652:70 call  sorted(connection)
+    -> <builtin>.sorted
+    reject h11._headers.Headers.__getitem__: the argument is the set of bytes connection (649); sorted() compares bytes
+654:24 call  Response( headers=headers, status_code=response.status_co...
+    -> h11._events._ResponseBase.__init__
+
+== h11._events
+
+[h11._events]
+28:23 call  re.compile(method.encode("ascii"))
+    -> re.compile
+28:37 call  method.encode("ascii")
+    -> <builtin>.str.encode
+29:31 call  re.compile(request_target.encode("ascii"))
+    -> re.compile
+29:53 call  request_target.encode("ascii")
+    -> <builtin>.str.encode
+40:2 decorator  @dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: dataclass(...) with keyword arguments only returns its local function wrap (all supported versions); wrap(cls) processes the class and calls no package code (no field defaults, init=False, no __set_name__)
+40:11 call  dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass
+128:2 decorator  @dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: the value of dataclass(init=False, frozen=True), the local function wrap
+128:11 call  dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass
+175:2 decorator  @dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: the value of dataclass(init=False, frozen=True), the local function wrap
+175:11 call  dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass
+217:2 decorator  @dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: the value of dataclass(init=False, frozen=True), the local function wrap
+217:11 call  dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass
+259:2 decorator  @dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: the value of dataclass(init=False, frozen=True), the local function wrap
+259:11 call  dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass
+315:2 decorator  @dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: the value of dataclass(init=False, frozen=True), the local function wrap
+315:11 call  dataclass(init=False, frozen=True)
+    -> dataclasses.dataclass
+357:2 decorator  @dataclass(frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: the value of dataclass(frozen=True), the local function wrap; it generates ConnectionClosed.__init__ (no node)
+357:11 call  dataclass(frozen=True)
+    -> dataclasses.dataclass
+
+[h11._events.Request.__init__]
+91:14 call  super()
+    -> <builtin>.super
+91:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: super() in Request skips to Event, which defines no __init__, then ABC: the method is object.__init__, named through ABC, the nearest class outside the package in the MRO
+92:22 call  isinstance(headers, Headers)
+    -> <builtin>.isinstance
+93:31 call  object.__setattr__(self, "headers", headers)
+    -> <builtin>.object.__setattr__
+95:31 call  object.__setattr__( self, "headers", normalize_and_valida...
+    -> <builtin>.object.__setattr__
+96:56 call  normalize_and_validate(headers, _parsed=_parsed)
+    -> h11._headers.normalize_and_validate
+98:16 truth  _parsed
+    reject *: _parsed is a bool
+99:31 call  object.__setattr__(self, "method", bytesify(method))
+    -> <builtin>.object.__setattr__
+99:56 call  bytesify(method)
+    -> h11._util.bytesify
+100:31 call  object.__setattr__(self, "target", bytesify(target))
+    -> <builtin>.object.__setattr__
+100:56 call  bytesify(target)
+    -> h11._util.bytesify
+101:31 call  object.__setattr__(self, "http_version", bytesify(http_ve...
+    -> <builtin>.object.__setattr__
+101:62 call  bytesify(http_version)
+    -> h11._util.bytesify
+103:31 call  object.__setattr__(self, "method", method)
+    -> <builtin>.object.__setattr__
+104:31 call  object.__setattr__(self, "target", target)
+    -> <builtin>.object.__setattr__
+105:31 call  object.__setattr__(self, "http_version", http_version)
+    -> <builtin>.object.__setattr__
+113:28 iter  self.headers
+    -> h11._headers.Headers.__getitem__
+    note: self.headers is always a Headers (set at 93 or 95); its __iter__ is the Sequence mixin, which calls __getitem__ until IndexError
+115:28 op  host_count += 1
+    reject h11._receivebuffer.ReceiveBuffer.__iadd__: host_count is an int
+117:37 call  LocalProtocolError("Missing mandatory Host: header")
+    -> h11._util.ProtocolError.__init__
+119:37 call  LocalProtocolError("Found multiple Host: headers")
+    -> h11._util.ProtocolError.__init__
+121:17 call  validate(method_re, self.method, "Illegal method characte...
+    -> h11._util.validate
+122:17 call  validate(request_target_re, self.target, "Illegal target ...
+    -> h11._util.validate
+
+[h11._events._ResponseBase.__init__]
+146:14 call  super()
+    -> <builtin>.super
+146:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: super() in _ResponseBase skips to Event, which defines no __init__, then ABC: the method is object.__init__, named through ABC, the nearest class outside the package in the MRO
+147:22 call  isinstance(headers, Headers)
+    -> <builtin>.isinstance
+148:31 call  object.__setattr__(self, "headers", headers)
+    -> <builtin>.object.__setattr__
+150:31 call  object.__setattr__( self, "headers", normalize_and_valida...
+    -> <builtin>.object.__setattr__
+151:56 call  normalize_and_validate(headers, _parsed=_parsed)
+    -> h11._headers.normalize_and_validate
+153:16 truth  _parsed
+    reject *: _parsed is a bool
+154:31 call  object.__setattr__(self, "reason", bytesify(reason))
+    -> <builtin>.object.__setattr__
+154:56 call  bytesify(reason)
+    -> h11._util.bytesify
+155:31 call  object.__setattr__(self, "http_version", bytesify(http_ve...
+    -> <builtin>.object.__setattr__
+155:62 call  bytesify(http_version)
+    -> h11._util.bytesify
+156:30 call  isinstance(status_code, int)
+    -> <builtin>.isinstance
+157:41 call  LocalProtocolError("status code must be integer")
+    -> h11._util.ProtocolError.__init__
+160:31 call  object.__setattr__(self, "status_code", int(status_code))
+    -> <builtin>.object.__setattr__
+160:56 call  int(status_code)
+    -> <builtin>.int
+162:31 call  object.__setattr__(self, "reason", reason)
+    -> <builtin>.object.__setattr__
+163:31 call  object.__setattr__(self, "http_version", http_version)
+    -> <builtin>.object.__setattr__
+164:31 call  object.__setattr__(self, "status_code", status_code)
+    -> <builtin>.object.__setattr__
+166:27 call  self.__post_init__()
+    -> h11._events.InformationalResponse.__post_init__
+    -> h11._events.Response.__post_init__
+    reject h11._events._ResponseBase.__post_init__: self is always an InformationalResponse or a Response, which both override __post_init__; the private _ResponseBase is never instantiated (the package instantiates only Response at _connection.py:654 and class_ at _readers.py:113, which is InformationalResponse or Response)
+
+[h11._events.InformationalResponse.__post_init__]
+208:37 call  LocalProtocolError( "InformationalResponse status_code sh...
+    -> h11._util.ProtocolError.__init__
+210:44 call  "InformationalResponse status_code should be in range " "...
+    -> <builtin>.str.format
+    reject *: the only argument is self.status_code, an int (int(status_code) at _events.py:160, or the int that the reader parsed at _readers.py:109)
+
+[h11._events.Response.__post_init__]
+249:37 call  LocalProtocolError( "Response status_code should be in ra...
+    -> h11._util.ProtocolError.__init__
+250:85 call  "Response status_code should be in range [200, 1000), not...
+    -> <builtin>.str.format
+    reject *: the only argument is self.status_code, an int (int(status_code) at _events.py:160, or the int that the reader parsed at _readers.py:109)
+
+[h11._events.Data.__init__]
+302:27 call  object.__setattr__(self, "data", data)
+    -> <builtin>.object.__setattr__
+303:27 call  object.__setattr__(self, "chunk_start", chunk_start)
+    -> <builtin>.object.__setattr__
+304:27 call  object.__setattr__(self, "chunk_end", chunk_end)
+    -> <builtin>.object.__setattr__
+
+[h11._events.EndOfMessage.__init__]
+345:14 call  super()
+    -> <builtin>.super
+345:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: super() in EndOfMessage skips to Event, which defines no __init__, then ABC: the method is object.__init__, named through ABC, the nearest class outside the package in the MRO
+347:30 call  Headers([])
+    -> h11._headers.Headers.__init__
+348:28 call  isinstance(headers, Headers)
+    -> <builtin>.isinstance
+349:45 call  normalize_and_validate(headers, _parsed=_parsed)
+    -> h11._headers.normalize_and_validate
+351:27 call  object.__setattr__(self, "headers", headers)
+    -> <builtin>.object.__setattr__
+
+== h11._headers
+
+[h11._headers]
+7:4 truth  TYPE_CHECKING
+    reject *: TYPE_CHECKING is the bool typing.TYPE_CHECKING
+72:32 call  re.compile(rb"[0-9]+")
+    -> re.compile
+73:28 call  re.compile(field_name.encode("ascii"))
+    -> re.compile
+73:46 call  field_name.encode("ascii")
+    -> <builtin>.str.encode
+74:29 call  re.compile(field_value.encode("ascii"))
+    -> re.compile
+74:48 call  field_value.encode("ascii")
+    -> <builtin>.str.encode
+135:2 decorator  @overload
+    -> typing.overload
+140:2 decorator  @overload
+    -> typing.overload
+145:2 decorator  @overload
+    -> typing.overload
+
+[h11._headers.Headers.__bool__]
+108:20 call  bool(self._full_items)
+    -> <builtin>.bool
+    reject *: the argument is the list self._full_items
+
+[h11._headers.Headers.__eq__]
+111:20 call  list(self)
+    -> <builtin>.list
+    -> h11._headers.Headers.__len__
+    -> h11._headers.Headers.__getitem__
+    reject h11._receivebuffer.ReceiveBuffer.__len__: self is a Headers
+    note: list() takes the length hint from Headers.__len__ and iterates with the Sequence mixin __iter__, which calls Headers.__getitem__
+111:34 call  list(other)
+    -> <builtin>.list
+    -> h11._headers.Headers.__len__
+    -> h11._headers.Headers.__getitem__
+    reject h11._receivebuffer.ReceiveBuffer.__len__: other is what the client compares the headers with (a list of pairs, or the Headers of another event when two events are compared); the client cannot obtain a ReceiveBuffer
+    note: other is a Headers when the dataclass __eq__ of two events compares their headers fields
+
+[h11._headers.Headers.__len__]
+114:19 call  len(self._full_items)
+    -> <builtin>.len
+    reject *: the argument is the list self._full_items
+
+[h11._headers.Headers.__repr__]
+117:32 op  "<Headers(%s)>" % repr(list(self))
+    reject *: the operand of %s is the str that repr() returns
+117:38 call  repr(list(self))
+    -> <builtin>.repr
+    reject *: the argument is a list of header pairs, normally bytes; optimized _parsed=True can retain strings or their client subclasses, which add no package repr target
+117:43 call  list(self)
+    -> <builtin>.list
+    -> h11._headers.Headers.__len__
+    -> h11._headers.Headers.__getitem__
+    reject h11._receivebuffer.ReceiveBuffer.__len__: self is a Headers
+
+[h11._headers.normalize_and_validate]
+158:24 iter  headers
+    reject h11._headers.Headers.__getitem__: headers is never a Headers here: the event constructors keep a Headers without calling this function (isinstance checks at _events.py:92, 147, 348); the package passes lists (the readers' lists of pairs, _readers.py:87, 114, 161, and the list of set_comma_header); an iterable that the client supplies is opaque (rule B5): what it calls when this loop iterates it is client behaviour, whatever it is built from (also an iterator over a Headers, such as itertools.chain(req.headers, extra))
+    exclude h11._headers.Headers.__len__: reversed(req.headers) or another client iterator over a Headers is a client object (rule B5); the package passes lists here
+162:16 truth  _parsed
+    reject *: _parsed is a bool
+163:28 call  bytesify(name)
+    -> h11._util.bytesify
+164:29 call  bytesify(value)
+    -> h11._util.bytesify
+165:21 call  validate(_field_name_re, name, "Illegal header name {!r}"...
+    -> h11._util.validate
+166:21 call  validate(_field_value_re, value, "Illegal header value {!...
+    -> h11._util.validate
+167:26 call  isinstance(name, bytes)
+    -> <builtin>.isinstance
+168:26 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+171:26 call  name.lower()
+    -> <builtin>.bytes.lower
+    -> <builtin>.str.lower
+    note: normal construction normalizes names to bytes; with -O/-OO the assertions at 167-168 are removed, and a public event constructor with headers=[('X', 'v')], _parsed=True passes a str name directly to lower. A str subclass remains admitted by that annotation.
+173:36 call  length.strip()
+    -> <builtin>.bytes.strip
+173:64 call  value.split(b",")
+    -> <builtin>.bytes.split
+    -> <builtin>.str.split
+    note: under -O/-OO, public headers=[(Name('content-length'), '1')], _parsed=True admits a str subclass Name whose lower result compares equal to b'content-length'. Its client method/result remain opaque; their control-flow effect reaches split on the concrete str value. str.split binds the bytes separator, enters its builtin body and raises TypeError; no str.strip follows.
+174:19 call  len(lengths)
+    -> <builtin>.len
+    reject *: the argument is the set lengths
+175:41 call  LocalProtocolError("conflicting Content-Length headers")
+    -> h11._util.ProtocolError.__init__
+176:32 call  lengths.pop()
+    -> <builtin>.set.pop
+177:21 call  validate(_content_length_re, value, "bad Content-Length")
+    -> h11._util.validate
+178:19 call  len(value)
+    -> <builtin>.len
+    reject *: value is bytes
+179:41 call  LocalProtocolError("bad Content-Length")
+    -> h11._util.ProtocolError.__init__
+182:35 call  new_headers.append((raw_name, name, value))
+    -> <builtin>.list.append
+184:41 call  LocalProtocolError("conflicting Content-Length headers")
+    -> h11._util.ProtocolError.__init__
+190:16 truth  saw_transfer_encoding
+    reject *: saw_transfer_encoding is a bool
+191:41 call  LocalProtocolError( "multiple Transfer-Encoding headers",...
+    -> h11._util.ProtocolError.__init__
+196:32 call  value.lower()
+    -> <builtin>.bytes.lower
+    -> <builtin>.str.lower
+    note: under -O/-OO, the same admitted str-subclass name witness can select b'transfer-encoding' while its raw value is the str 'chunked'. lower runs before the str result fails comparison with b'chunked' and LocalProtocolError is raised. No failed event is reused.
+198:41 call  LocalProtocolError( "Only Transfer-Encoding: chunked is s...
+    -> h11._util.ProtocolError.__init__
+203:31 call  new_headers.append((raw_name, name, value))
+    -> <builtin>.list.append
+205:31 call  new_headers.append((raw_name, name, value))
+    -> <builtin>.list.append
+206:19 call  Headers(new_headers)
+    -> h11._headers.Headers.__init__
+
+[h11._headers.get_comma_header]
+248:52 call  found_raw_value.lower()
+    -> <builtin>.bytes.lower
+    -> <builtin>.str.lower
+    note: normal Headers values are bytes. Under -O/-OO, Request(method=b'GET', target=b'/', headers=[(Name('host'), 'x'), (Name('connection'), 'close')], _parsed=True) completes when the str-subclass name's lower result compares equal to its bytes spelling. Sending this request enters _keep_alive and this function. The stored raw value 'close' is a concrete str from the constructor; the opaque client name result only controls the comparison.
+249:59 call  found_raw_value.split(b",")
+    -> <builtin>.bytes.split
+    -> <builtin>.str.split
+    note: the optimized-mode Request witness at 248 reaches this call with the exact str returned by str.lower. str.split accepts the positional separator during binding and raises TypeError inside its body because the separator is bytes. No str.strip or later append is reached on that witness.
+250:60 call  found_split_value.strip()
+    -> <builtin>.bytes.strip
+251:20 truth  found_split_value
+    reject *: found_split_value is bytes
+252:31 call  out.append(found_split_value)
+    -> <builtin>.list.append
+
+[h11._headers.set_comma_header]
+269:31 call  new_headers.append((found_raw_name, found_raw_value))
+    -> <builtin>.list.append
+271:27 call  new_headers.append((name.title(), new_value))
+    -> <builtin>.list.append
+271:39 call  name.title()
+    -> <builtin>.bytes.title
+272:34 call  normalize_and_validate(new_headers)
+    -> h11._headers.normalize_and_validate
+
+[h11._headers.has_expect_100_continue]
+281:30 call  get_comma_header(request.headers, b"expect")
+    -> h11._headers.get_comma_header
+
+== h11._readers
+
+[h11._readers]
+39:29 call  re.compile(header_field.encode("ascii"))
+    -> re.compile
+39:49 call  header_field.encode("ascii")
+    -> <builtin>.str.encode
+40:25 call  re.compile(rb"[ \t]+")
+    -> re.compile
+72:29 call  re.compile(request_line.encode("ascii"))
+    -> re.compile
+72:49 call  request_line.encode("ascii")
+    -> <builtin>.str.encode
+91:28 call  re.compile(status_line.encode("ascii"))
+    -> re.compile
+91:47 call  status_line.encode("ascii")
+    -> <builtin>.str.encode
+145:29 call  re.compile(chunk_header.encode("ascii"))
+    -> re.compile
+145:49 call  chunk_header.encode("ascii")
+    -> <builtin>.str.encode
+
+[h11._readers._obsolete_line_fold]
+44:14 call  iter(lines)
+    -> <builtin>.iter
+    note: lines is a list of bytearrays from ReceiveBuffer.maybe_extract_lines
+    reject h11._headers.Headers.__getitem__: lines is a list: _obsolete_line_fold is private, its only package caller (_readers.py:67) passes on the lists of _readers.py:87, 114 (slices) and 161; the list of bytes in the direct private-helper test (test_io.py:322) is outside this actual-call input domain
+47:34 call  obs_fold_re.match(line)
+    -> re.Pattern.match
+48:12 truth  match
+    reject *: match is a re.Match or None
+50:41 call  LocalProtocolError("continuation line at start of headers")
+    -> h11._util.ProtocolError.__init__
+51:30 call  isinstance(last, bytearray)
+    -> <builtin>.isinstance
+53:33 call  bytearray(last)
+    note: At _readers.py:53, bytearray(last) is a defensive branch reached only by a direct call of the private helper with bytes (test_io.py:316-326). Global scope B/C limits its parameters to package calls: ReceiveBuffer.maybe_extract_lines yields bytearray lines; _decode_header_lines forwards those unchanged. Thus last is already bytearray whenever the cast condition is tested.
+54:18 op  last += b" "
+    reject h11._receivebuffer.ReceiveBuffer.__iadd__: last is already a bytearray from ReceiveBuffer.maybe_extract_lines; the cast at53 is unreachable for package callers
+55:18 op  last += line[match.end() :]
+    reject h11._receivebuffer.ReceiveBuffer.__iadd__: last is already a bytearray from ReceiveBuffer.maybe_extract_lines; the cast at53 is unreachable for package callers
+55:35 call  match.end()
+    -> re.Match.end
+
+[h11._readers._decode_header_lines]
+67:36 call  _obsolete_line_fold(lines)
+    -> h11._readers._obsolete_line_fold
+68:27 call  validate(header_field_re, line, "illegal header line: {!r...
+    -> h11._util.validate
+
+[h11._readers.maybe_read_from_IDLE_client]
+76:36 call  buf.maybe_extract_lines()
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_lines
+    note: buf is always Connection._receive_buffer (_connection.py:423), a ReceiveBuffer
+78:12 truth  buf.is_next_line_obviously_invalid_request_line()
+    reject *: the method returns a bool
+78:59 call  buf.is_next_line_obviously_invalid_request_line()
+    -> h11._receivebuffer.ReceiveBuffer.is_next_line_obviously_invalid_request_line
+79:37 call  LocalProtocolError("illegal request line")
+    -> h11._util.ProtocolError.__init__
+81:12 truth  lines
+    reject *: lines is the list that maybe_extract_lines returns
+82:33 call  LocalProtocolError("no request line received")
+    -> h11._util.ProtocolError.__init__
+83:23 call  validate( request_line_re, lines[0], "illegal request lin...
+    -> h11._util.validate
+86:19 call  Request( headers=list(_decode_header_lines(lines[1:])), _...
+    -> h11._events.Request.__init__
+87:21 call  list(_decode_header_lines(lines[1:]))
+    -> <builtin>.list
+    reject *: the argument is the generator of _decode_header_lines
+87:42 call  _decode_header_lines(lines[1:])
+    -> h11._readers._decode_header_lines
+
+[h11._readers.maybe_read_from_SEND_RESPONSE_server]
+97:36 call  buf.maybe_extract_lines()
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_lines
+    note: buf is always Connection._receive_buffer (_connection.py:423), a ReceiveBuffer
+99:12 truth  buf.is_next_line_obviously_invalid_request_line()
+    reject *: the method returns a bool
+99:59 call  buf.is_next_line_obviously_invalid_request_line()
+    -> h11._receivebuffer.ReceiveBuffer.is_next_line_obviously_invalid_request_line
+100:37 call  LocalProtocolError("illegal request line")
+    -> h11._util.ProtocolError.__init__
+102:12 truth  lines
+    reject *: lines is the list that maybe_extract_lines returns
+103:33 call  LocalProtocolError("no response line received")
+    -> h11._util.ProtocolError.__init__
+104:23 call  validate(status_line_re, lines[0], "illegal status line: ...
+    -> h11._util.validate
+109:22 call  int(matches["status_code"])
+    -> <builtin>.int
+113:18 call  class_( headers=list(_decode_header_lines(lines[1:])), _p...
+    -> h11._events._ResponseBase.__init__
+    note: class_ is InformationalResponse or Response (_readers.py:110-112); both inherit _ResponseBase.__init__
+    exclude h11._events.Request.__init__, h11._events.EndOfMessage.__init__, h11._events.Data.__init__: class_ is only InformationalResponse or Response (_readers.py:110-112)
+114:21 call  list(_decode_header_lines(lines[1:]))
+    -> <builtin>.list
+    reject *: the argument is the generator of _decode_header_lines
+114:42 call  _decode_header_lines(lines[1:])
+    -> h11._readers._decode_header_lines
+
+[h11._readers.ContentLengthReader.__call__]
+129:32 call  EndOfMessage()
+    -> h11._events.EndOfMessage.__init__
+130:41 call  buf.maybe_extract_at_most(self._remaining)
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most
+    note: buf is always Connection._receive_buffer (_connection.py:423), a ReceiveBuffer
+133:31 call  len(data)
+    -> <builtin>.len
+    reject *: data is the bytearray that maybe_extract_at_most returns
+134:20 call  Data(data=data)
+    -> h11._events.Data.__init__
+
+[h11._readers.ContentLengthReader.read_eof]
+137:34 call  RemoteProtocolError( "peer closed connection without send...
+    -> h11._util.ProtocolError.__init__
+139:54 call  "peer closed connection without sending complete message ...
+    -> <builtin>.str.format
+    reject *: the arguments are ints (self._length - self._remaining, self._length)
+
+[h11._readers.ChunkedReader.__call__]
+157:12 truth  self._reading_trailer
+    reject *: _reading_trailer is a bool
+158:44 call  buf.maybe_extract_lines()
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_lines
+    note: buf is always Connection._receive_buffer (_connection.py:423), a ReceiveBuffer
+161:32 call  EndOfMessage(headers=list(_decode_header_lines(lines)))
+    -> h11._events.EndOfMessage.__init__
+161:45 call  list(_decode_header_lines(lines))
+    -> <builtin>.list
+    reject *: the argument is the generator of _decode_header_lines
+161:66 call  _decode_header_lines(lines)
+    -> h11._readers._decode_header_lines
+162:12 truth  self._bytes_to_discard
+    reject *: _bytes_to_discard is bytes
+163:45 call  buf.maybe_extract_at_most(len(self._bytes_to_discard))
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most
+163:49 call  len(self._bytes_to_discard)
+    -> <builtin>.len
+    reject *: _bytes_to_discard is bytes
+166:52 call  len(data)
+    -> <builtin>.len
+    reject *: data is the bytearray that maybe_extract_at_most returns
+167:41 call  LocalProtocolError( f"malformed chunk footer: {data!r} (e...
+    -> h11._util.ProtocolError.__init__
+168:47 format  {data!r}
+    reject *: data is a bytearray
+168:66 format  {self._bytes_to_discard!r}
+    reject *: _bytes_to_discard is bytes
+170:64 call  len(data)
+    -> <builtin>.len
+    reject *: data is the bytearray that maybe_extract_at_most returns
+171:16 truth  self._bytes_to_discard
+    reject *: _bytes_to_discard is bytes
+177:55 call  buf.maybe_extract_next_line()
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_next_line
+180:31 call  validate( chunk_header_re, chunk_header, "illegal chunk h...
+    -> h11._util.validate
+187:39 call  int(matches["chunk_size"], base=16)
+    -> <builtin>.int
+190:28 call  self(buf)
+    -> h11._readers.ChunkedReader.__call__
+    note: self is this ChunkedReader; calling it runs ChunkedReader.__call__ again (to read the trailer)
+    exclude h11._readers.ContentLengthReader.__call__, h11._readers.Http10Reader.__call__, h11._writers.BodyWriter.__call__: self is a ChunkedReader, and the package defines no subclass of it
+195:41 call  buf.maybe_extract_at_most(self._bytes_in_chunk)
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most
+198:36 call  len(data)
+    -> <builtin>.len
+    reject *: data is the bytearray that maybe_extract_at_most returns
+204:20 call  Data(data=data, chunk_start=chunk_start, chunk_end=chunk_...
+    -> h11._events.Data.__init__
+
+[h11._readers.ChunkedReader.read_eof]
+207:34 call  RemoteProtocolError( "peer closed connection without send...
+    -> h11._util.ProtocolError.__init__
+
+[h11._readers.Http10Reader.__call__]
+215:41 call  buf.maybe_extract_at_most(999999999)
+    -> h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most
+    note: buf is always Connection._receive_buffer (_connection.py:423), a ReceiveBuffer
+218:20 call  Data(data=data)
+    -> h11._events.Data.__init__
+
+[h11._readers.Http10Reader.read_eof]
+221:28 call  EndOfMessage()
+    -> h11._events.EndOfMessage.__init__
+
+[h11._readers.expect_nothing]
+225:8 truth  buf
+    -> h11._receivebuffer.ReceiveBuffer.__bool__
+    reject h11._receivebuffer.ReceiveBuffer.__len__: ReceiveBuffer defines __bool__, so the truth test does not call __len__ (ReceiveBuffer.__bool__ calls it)
+    reject h11._headers.Headers.__bool__, h11._headers.Headers.__len__: buf is always Connection._receive_buffer (_connection.py:423), a ReceiveBuffer
+226:33 call  LocalProtocolError("Got data when expecting EOF")
+    -> h11._util.ProtocolError.__init__
+
+== h11._receivebuffer
+
+[h11._receivebuffer]
+44:30 call  re.compile(b"\n\r?\n", re.MULTILINE)
+    -> re.compile
+
+[h11._receivebuffer.ReceiveBuffer.__init__]
+49:31 call  bytearray()
+    -> <builtin>.bytearray
+
+[h11._receivebuffer.ReceiveBuffer.__iadd__]
+54:20 op  self._data += byteslike
+    reject h11._receivebuffer.ReceiveBuffer.__iadd__: self._data is a bytearray
+
+[h11._receivebuffer.ReceiveBuffer.__bool__]
+58:20 call  bool(len(self))
+    -> <builtin>.bool
+    reject *: the argument is the int that len returns
+58:24 call  len(self)
+    -> <builtin>.len
+    -> h11._receivebuffer.ReceiveBuffer.__len__
+    reject h11._headers.Headers.__len__: self is a ReceiveBuffer
+
+[h11._receivebuffer.ReceiveBuffer.__len__]
+61:19 call  len(self._data)
+    -> <builtin>.len
+    reject *: self._data is a bytearray
+
+[h11._receivebuffer.ReceiveBuffer.__bytes__]
+65:21 call  bytes(self._data)
+    -> <builtin>.bytes
+    reject h11._receivebuffer.ReceiveBuffer.__bytes__: self._data is a bytearray
+    reject h11._headers.Headers.__getitem__: the argument is the bytearray self._data
+
+[h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most]
+82:16 truth  out
+    reject *: out is a bytearray slice of self._data
+85:29 call  self._extract(count)
+    -> h11._receivebuffer.ReceiveBuffer._extract
+
+[h11._receivebuffer.ReceiveBuffer.maybe_extract_next_line]
+92:33 call  max(0, self._next_line_search - 1)
+    -> <builtin>.max
+    reject h11._headers.Headers.__getitem__: the arguments are ints
+93:38 call  self._data.find(b"\r\n", search_start_index)
+    -> <builtin>.bytearray.find
+96:41 call  len(self._data)
+    -> <builtin>.len
+    reject *: self._data is a bytearray
+102:29 call  self._extract(idx)
+    -> h11._receivebuffer.ReceiveBuffer._extract
+
+[h11._receivebuffer.ReceiveBuffer.maybe_extract_lines]
+110:26 call  self._extract(1)
+    -> h11._receivebuffer.ReceiveBuffer._extract
+114:26 call  self._extract(2)
+    -> h11._receivebuffer.ReceiveBuffer._extract
+118:40 call  blank_line_regex.search(self._data, self._multiple_lines_...
+    -> re.Pattern.search
+120:46 call  max(0, len(self._data) - 2)
+    -> <builtin>.max
+    reject h11._headers.Headers.__getitem__: the arguments are ints
+120:53 call  len(self._data)
+    -> <builtin>.len
+    reject *: self._data is a bytearray
+124:25 call  match.span(0)
+    -> re.Match.span
+125:28 call  self._extract(idx)
+    -> h11._receivebuffer.ReceiveBuffer._extract
+126:26 call  out.split(b"\n")
+    -> <builtin>.bytearray.split
+129:16 truth  line.endswith(b"\r")
+    reject *: endswith returns a bool
+129:29 call  line.endswith(b"\r")
+    -> <builtin>.bytearray.endswith
+
+== h11._state
+
+[h11._state]
+134:1 class  class CLIENT
+    -> h11._util.Sentinel.__new__
+    note: metaclass=Sentinel; type.__call__ runs Sentinel.__new__, then type.__init__ (outside, no edge)
+138:1 class  class SERVER
+    -> h11._util.Sentinel.__new__
+143:1 class  class IDLE
+    -> h11._util.Sentinel.__new__
+147:1 class  class SEND_RESPONSE
+    -> h11._util.Sentinel.__new__
+151:1 class  class SEND_BODY
+    -> h11._util.Sentinel.__new__
+155:1 class  class DONE
+    -> h11._util.Sentinel.__new__
+159:1 class  class MUST_CLOSE
+    -> h11._util.Sentinel.__new__
+163:1 class  class CLOSED
+    -> h11._util.Sentinel.__new__
+167:1 class  class ERROR
+    -> h11._util.Sentinel.__new__
+172:1 class  class MIGHT_SWITCH_PROTOCOL
+    -> h11._util.Sentinel.__new__
+176:1 class  class SWITCHED_PROTOCOL
+    -> h11._util.Sentinel.__new__
+180:1 class  class _SWITCH_UPGRADE
+    -> h11._util.Sentinel.__new__
+184:1 class  class _SWITCH_CONNECT
+    -> h11._util.Sentinel.__new__
+
+[h11._state.ConnectionState.__init__]
+259:65 call  set()
+    -> <builtin>.set
+    reject h11._headers.Headers.__getitem__, h11._headers.Headers.__eq__: set() has no argument
+
+[h11._state.ConnectionState.process_error]
+264:14 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+265:47 call  self._fire_state_triggered_transitions()
+    -> h11._state.ConnectionState._fire_state_triggered_transitions
+
+[h11._state.ConnectionState.process_keep_alive_disabled]
+269:47 call  self._fire_state_triggered_transitions()
+    -> h11._state.ConnectionState._fire_state_triggered_transitions
+
+[h11._state.ConnectionState.process_client_switch_proposal]
+272:42 call  self.pending_switch_proposals.add(switch_event)
+    -> <builtin>.set.add
+273:47 call  self._fire_state_triggered_transitions()
+    -> h11._state.ConnectionState._fire_state_triggered_transitions
+
+[h11._state.ConnectionState.process_event]
+285:41 call  LocalProtocolError( "Received server _SWITCH_UPGRADE even...
+    -> h11._util.ProtocolError.__init__
+290:48 call  set()
+    -> <builtin>.set
+    reject h11._headers.Headers.__getitem__, h11._headers.Headers.__eq__: set() has no argument
+291:47 call  self._fire_event_triggered_transitions(role, _event_type)
+    -> h11._state.ConnectionState._fire_event_triggered_transitions
+296:51 call  self._fire_event_triggered_transitions(SERVER, (Request, ...
+    -> h11._state.ConnectionState._fire_event_triggered_transitions
+297:47 call  self._fire_state_triggered_transitions()
+    -> h11._state.ConnectionState._fire_state_triggered_transitions
+
+[h11._state.ConnectionState._fire_event_triggered_transitions]
+304:22 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+308:30 call  cast(Type[Event], event_type)
+    -> typing.cast
+309:37 call  LocalProtocolError( "can't handle event type {} when role...
+    -> h11._util.ProtocolError.__init__
+310:78 call  "can't handle event type {} when role={} and state={}".fo...
+    -> <builtin>.str.format
+    -> h11._util.Sentinel.__repr__
+    note: role and self.states[role] are sentinel classes; str.format calls format(), then str(), then repr() on them, and the type of a sentinel is itself (Sentinel.__new__ sets __class__), so Sentinel.__repr__ runs
+    reject h11._headers.Headers.__repr__: the arguments are event_type.__name__ (a str) and sentinel classes; no Headers is formatted
+311:53 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+314:14 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+
+[h11._state.ConnectionState._fire_state_triggered_transitions]
+319:32 call  dict(self.states)
+    -> <builtin>.dict
+    reject h11._connection.Connection.states: the argument is the dict attribute states of this ConnectionState, not the property Connection.states
+    reject h11._headers.Headers.__getitem__: the argument is the dict states, which dict() copies without calling package code
+319:38 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+334:16 truth  self.pending_switch_proposals
+    reject *: pending_switch_proposals is a set
+335:25 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+336:26 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+338:20 truth  self.pending_switch_proposals
+    reject *: pending_switch_proposals is a set
+339:25 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+340:26 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+342:20 truth  self.keep_alive
+    reject *: keep_alive is a bool
+344:29 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+345:30 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+348:33 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+348:54 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+349:54 call  STATE_TRIGGERED_TRANSITIONS.get(joint_state, {})
+    -> <builtin>.dict.get
+350:18 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+350:31 call  self.states.update(changes)
+    -> <builtin>.dict.update
+352:21 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+
+[h11._state.ConnectionState.start_next_cycle]
+357:17 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+358:37 call  LocalProtocolError( f"not in a reusable state. self.state...
+    -> h11._util.ProtocolError.__init__
+359:56 format  {self.states}
+    -> h11._util.Sentinel.__repr__
+    reject h11._headers.Headers.__repr__: self.states is a dict from sentinel classes to sentinel classes
+    note: formatting the dict calls repr() on its keys and values, the sentinel classes, whose type is themselves, so Sentinel.__repr__ runs
+359:62 getattr  self.states
+    reject h11._connection.Connection.states: the receiver is a ConnectionState, whose states is an instance attribute (a dict)
+363:16 truth  self.keep_alive
+    reject *: keep_alive is a bool
+364:20 truth  self.pending_switch_proposals
+    reject *: pending_switch_proposals is a set
+
+== h11._util
+
+[h11._util]
+104:22 call  TypeVar("_T_Sentinel", bound="Sentinel")
+    -> typing.TypeVar
+
+[h11._util.ProtocolError.__init__]
+42:16 call  type(self)
+    -> <builtin>.type
+43:28 call  TypeError("tried to directly instantiate ProtocolError")
+    -> <builtin>.TypeError
+44:27 call  Exception.__init__(self, msg)
+    -> <builtin>.Exception.__init__
+    reject *: the receiver is the builtin class Exception
+
+[h11._util.validate]
+87:28 call  regex.fullmatch(data)
+    -> re.Pattern.fullmatch
+    note: every caller passes a pattern that the package compiled with re.compile at module level
+88:12 truth  match
+    reject *: match is a re.Match or None
+89:12 truth  format_args
+    reject *: format_args is a tuple
+90:29 call  msg.format(*format_args)
+    -> <builtin>.str.format
+    note: msg is a str literal of the caller; format_args hold bytes and bytearrays, whose repr is builtin
+    reject *: format_args never hold a package object: validate is private (no public path reaches h11._util.validate); its package callers pass no argument (_events.py:121, 122, _headers.py:177) or the checked data itself, header names and values as bytes (_headers.py:165, 166) and buffer lines as bytearrays (_readers.py:68, 83, 104, 180), with literal templates whose fields are {!r}; the direct private-helper test int (test_util.py:80) is outside the package-call input domain
+91:33 call  LocalProtocolError(msg)
+    -> h11._util.ProtocolError.__init__
+92:27 call  match.groupdict()
+    -> re.Match.groupdict
+
+[h11._util.Sentinel.__new__]
+116:18 call  super()
+    -> <builtin>.super
+116:28 call  super().__new__(cls, name, bases, namespace, **kwds)
+    -> <builtin>.type.__new__
+    reject h11._util.Sentinel.__new__: super() in Sentinel skips Sentinel; the next class in the MRO of the metaclass is type
+
+[h11._util.bytesify]
+129:12 call  type(s)
+    -> <builtin>.type
+131:18 call  isinstance(s, str)
+    -> <builtin>.isinstance
+132:21 call  s.encode("ascii")
+    -> <builtin>.str.encode
+133:18 call  isinstance(s, int)
+    -> <builtin>.isinstance
+134:24 call  TypeError("expected bytes-like object, not int")
+    -> <builtin>.TypeError
+135:17 call  bytes(s)
+    -> <builtin>.bytes
+    reject h11._receivebuffer.ReceiveBuffer.__bytes__, h11._headers.Headers.__getitem__: s is a method, target, HTTP version, reason or header field that the client passed, typed bytes, bytearray, memoryview or str; the client cannot obtain a ReceiveBuffer, and a Headers is not a field value
+    exclude h11._headers.Headers.__len__: bytes() of an iterable takes its length hint, but s is never a Headers (rule B2: s is annotated Union[bytes, bytearray, memoryview, int, str]; see the rejection above)
+
+== h11._writers
+
+[h11._writers.write_headers]
+29:18 call  write(b"%s: %s\r\n" % (raw_name, value))
+    -> <builtin>.list.append
+    note: write is a parameter; every chain of calls starts at _connection.py:571, which passes data_list.append, the append method of a new list (write_request, write_any_response and BodyWriter.__call__ pass it on, to write_headers and the send_data/send_eom methods)
+29:33 op  b"%s: %s\r\n" % (raw_name, value)
+    reject h11._receivebuffer.ReceiveBuffer.__bytes__: raw_name and value come from Headers._full_items, normally bytes; optimized _parsed=True can retain strings or their client subclasses, whose conversion is opaque B5 or fails bytes formatting, not a ReceiveBuffer conversion
+32:18 call  write(b"%s: %s\r\n" % (raw_name, value))
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see 29:18)
+32:33 op  b"%s: %s\r\n" % (raw_name, value)
+    reject h11._receivebuffer.ReceiveBuffer.__bytes__: raw_name and value come from Headers._full_items, normally bytes; optimized _parsed=True can retain strings or their client subclasses, whose conversion is opaque B5 or fails bytes formatting, not a ReceiveBuffer conversion
+33:10 call  write(b"\r\n")
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see 29:18)
+
+[h11._writers.write_request]
+38:33 call  LocalProtocolError("I only send HTTP/1.1")
+    -> h11._util.ProtocolError.__init__
+39:10 call  write(b"%s %s HTTP/1.1\r\n" % (request.method, request.ta...
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see 29:18)
+39:33 op  b"%s %s HTTP/1.1\r\n" % (request.method, request.target)
+    reject h11._receivebuffer.ReceiveBuffer.__bytes__: method and target are bytes (bytesify at _events.py:99-100, or re.Match groups when parsed)
+40:18 call  write_headers(request.headers, write)
+    -> h11._writers.write_headers
+
+[h11._writers.write_any_response]
+48:33 call  LocalProtocolError("I only send HTTP/1.1")
+    -> h11._util.ProtocolError.__init__
+49:23 call  str(response.status_code)
+    -> <builtin>.str
+    reject *: status_code is an int (_events.py:160 converts it; parsed codes come from int() at _readers.py:109)
+49:52 call  str(response.status_code).encode("ascii")
+    -> <builtin>.str.encode
+58:10 call  write(b"HTTP/1.1 %s %s\r\n" % (status_bytes, response.rea...
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see 29:18)
+58:33 op  b"HTTP/1.1 %s %s\r\n" % (status_bytes, response.reason)
+    reject h11._receivebuffer.ReceiveBuffer.__bytes__: status_bytes is bytes from str.encode; reason is normally bytes, while a public InformationalResponse with _parsed=True may retain str and fail bytes formatting; neither role admits ReceiveBuffer
+59:18 call  write_headers(response.headers, write)
+    -> h11._writers.write_headers
+
+[h11._writers.BodyWriter.__call__]
+64:16 call  type(event)
+    -> <builtin>.type
+65:27 call  self.send_data(event.data, write)
+    -> h11._writers.ChunkedWriter.send_data
+    -> h11._writers.ContentLengthWriter.send_data
+    -> h11._writers.Http10Writer.send_data
+    reject h11._writers.BodyWriter.send_data: self is a ChunkedWriter, ContentLengthWriter or Http10Writer (the classes of WRITERS[SEND_BODY], instantiated at _connection.py:334), which all override send_data; BodyWriter itself is never instantiated
+66:18 call  type(event)
+    -> <builtin>.type
+67:26 call  self.send_eom(event.headers, write)
+    -> h11._writers.ChunkedWriter.send_eom
+    -> h11._writers.ContentLengthWriter.send_eom
+    -> h11._writers.Http10Writer.send_eom
+    reject h11._writers.BodyWriter.send_eom: self is a ChunkedWriter, ContentLengthWriter or Http10Writer (the classes of WRITERS[SEND_BODY], instantiated at _connection.py:334), which all override send_eom; BodyWriter itself is never instantiated
+
+[h11._writers.ContentLengthWriter.send_data]
+89:28 call  len(data)
+    -> <builtin>.len
+    reject *: data is the Data.data object that the client passed to send (bytes-like, or the client's own placeholder object); the client cannot obtain a ReceiveBuffer, and a Headers is not body data
+91:37 call  LocalProtocolError("Too much data for declared Content-Le...
+    -> h11._util.ProtocolError.__init__
+92:14 call  write(data)
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see write_headers 29:18)
+
+[h11._writers.ContentLengthWriter.send_eom]
+96:37 call  LocalProtocolError("Too little data for declared Content-...
+    -> h11._util.ProtocolError.__init__
+97:12 truth  headers
+    -> h11._headers.Headers.__bool__
+    reject h11._headers.Headers.__len__: Headers defines __bool__, so the truth test does not call __len__
+    reject h11._receivebuffer.ReceiveBuffer.__bool__, h11._receivebuffer.ReceiveBuffer.__len__: headers is EndOfMessage.headers, always a Headers (_events.py:347-351)
+98:37 call  LocalProtocolError("Content-Length and trailers don't mix")
+    -> h11._util.ProtocolError.__init__
+
+[h11._writers.ChunkedWriter.send_data]
+105:16 truth  data
+    reject *: data is the Data.data object that the client passed to send (bytes-like, or the client's own placeholder object); the client cannot obtain a ReceiveBuffer, and a Headers is not body data
+107:14 call  write(b"%x\r\n" % len(data))
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see write_headers 29:18)
+107:30 call  len(data)
+    -> <builtin>.len
+    reject *: data is the Data.data object that the client passed to send (bytes-like, or the client's own placeholder object); the client cannot obtain a ReceiveBuffer, and a Headers is not body data
+108:14 call  write(data)
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see write_headers 29:18)
+109:14 call  write(b"\r\n")
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see write_headers 29:18)
+
+[h11._writers.ChunkedWriter.send_eom]
+112:14 call  write(b"0\r\n")
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see write_headers 29:18)
+113:22 call  write_headers(headers, write)
+    -> h11._writers.write_headers
+
+[h11._writers.Http10Writer.send_data]
+118:14 call  write(data)
+    -> <builtin>.list.append
+    note: write is data_list.append from _connection.py:571 (see write_headers 29:18)
+
+[h11._writers.Http10Writer.send_eom]
+121:12 truth  headers
+    -> h11._headers.Headers.__bool__
+    reject h11._headers.Headers.__len__: Headers defines __bool__, so the truth test does not call __len__
+    reject h11._receivebuffer.ReceiveBuffer.__bool__, h11._receivebuffer.ReceiveBuffer.__len__: headers is EndOfMessage.headers, always a Headers (_events.py:347-351)
+122:37 call  LocalProtocolError("can't send trailers to HTTP/1.0 client")
+    -> h11._util.ProtocolError.__init__

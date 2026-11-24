@@ -1,0 +1,91 @@
+# The services of the macro-benchmark, with Docker only.
+#
+#   docker compose -f evaluation/compose.yaml build inputs          # every pinned source
+#   NAME=jmespath docker compose -f evaluation/compose.yaml run --rm trace --compare
+#
+# The one rule of the network: every download, and every git command on
+# third-party content, runs in the build of the inputs image
+# (container/Dockerfile.inputs); the trace image takes its project's source
+# from it at its own build. No service has network, and nothing runs on
+# the host. A new trace goes to evaluation/results/trace/, the only host
+# path that a service writes. See evaluation/macro-benchmark/README.md
+# ("Re-recording a trace").
+#
+# A service runs as user 1000:1000. If that is not your user on Linux:
+#   export EVAL_UID=$(id -u) EVAL_GID=$(id -g)
+#
+# The file is plain YAML: mappings, lists of scalars, JSON lists, and the
+# anchors below; tests/test_compose.py reads it without a YAML library.
+
+name: pycg-evaluation
+
+# The one pin of the Python image, by digest: the image of the traces of
+# the macro-benchmark (its requirements/*.installed.txt name it).
+x-python-image: &python-image python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+
+# What every service of this file has: no network, a read-only root, no
+# capability, a non-root user (the caller's, so that the files it writes
+# are the caller's), tmpfs scratch, the repository read-only.
+x-sealed: &sealed
+  network_mode: none
+  read_only: true
+  user: "${EVAL_UID:-1000}:${EVAL_GID:-1000}"
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+  pids_limit: 512
+  cpus: 4
+
+services:
+  # The sources of the macro-benchmark (container/Dockerfile.inputs),
+  # fetched when the image is built. The trace image takes its project's
+  # source from it. A run of it serves the commands of
+  # macro-benchmark/README.md that read the sources.
+  inputs:
+    <<: *sealed
+    image: pycg-evaluation-inputs
+    build:
+      context: ..
+      dockerfile: evaluation/container/Dockerfile.inputs
+      args:
+        PYTHON_IMAGE: *python-image
+    mem_limit: 2g
+    memswap_limit: 2g
+    tmpfs:
+      - /tmp:size=256m
+    environment:
+      HOME: /tmp
+      PYTHONDONTWRITEBYTECODE: "1"
+    working_dir: /repo
+    volumes:
+      - ..:/repo:ro
+
+  # The re-trace of one macro project (container/trace_entry.py).
+  trace:
+    <<: *sealed
+    image: pycg-trace-${NAME:-unset}
+    build:
+      context: macro-benchmark/requirements
+      dockerfile: ../../container/Dockerfile.trace
+      additional_contexts:
+        inputs: service:inputs
+      args:
+        PYTHON_IMAGE: *python-image
+        NAME: ${NAME:-unset}
+        REQUIREMENTS: ${NAME:-unset}.txt
+    mem_limit: 6g
+    memswap_limit: 6g
+    tmpfs:
+      - /tmp:size=1g
+      - /home/runner:size=256m
+    environment:
+      HOME: /home/runner
+      PYTHONHASHSEED: "0"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHON_IMAGE: *python-image
+    volumes:
+      - ..:/repo:ro
+      # only its own directory: a test suite writes nowhere else
+      - ./results/trace:/results/trace
+    entrypoint: ["python3", "-I", "-B", "/repo/evaluation/container/trace_entry.py", "${NAME:-unset}"]

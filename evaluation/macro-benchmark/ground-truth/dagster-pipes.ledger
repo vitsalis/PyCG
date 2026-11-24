@@ -1,0 +1,1391 @@
+# Call-site ledger of dagster-pipes 1.13.28 (sdist, SHA-256 f785c2ee...).
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The analysed source is dagster_pipes/__init__.py and dagster_pipes/version.py
+# (requires-python >=3.10,<3.15). dagster-pipes.md shows how this ledger
+# applies the scope rules A, B1-B5 and C. In short:
+# - The abstract classes (abc) are PipesContextLoader, PipesLogWriterChannel,
+#   PipesLogWriter, PipesMessageWriter, PipesMessageWriterChannel,
+#   PipesParamsLoader, PipesBlobStoreMessageWriter,
+#   PipesBlobStoreMessageWriterChannel, PipesStdioLogWriter and
+#   PipesStdioLogWriterChannel. They are no receivers; every concrete package
+#   subclass overrides each of their abstract methods.
+# - The roles (B2, by annotation): a message writer (PipesMessageWriter) is
+#   one of PipesDefaultMessageWriter, the five blob store writers (S3, GCS,
+#   Azure, DBFS, Unity Catalog Volumes) and PipesPrefectLogsMessageWriter; a
+#   message channel (PipesMessageWriterChannel) is one of the four blob store
+#   channels (which inherit write_message), PipesFileMessageWriterChannel,
+#   PipesStreamMessageWriterChannel, PipesBufferedStreamMessageWriterChannel
+#   and PipesPrefectLogsMessageWriterChannel; a context loader is one of the
+#   six concrete loaders; a params loader is PipesMappingParamsLoader (and
+#   PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or
+#   PipesDatabricksNotebookWidgetsParamsLoader.
+# - params (PipesParams, an abstract Mapping) is the dict that decode_param
+#   (json) makes when the package passes it, or a client mapping (opaque, B5).
+# - The S3 and Azure clients and the Databricks widgets are annotated Any,
+#   which states no type, so their docstrings decide (judgement 3): the
+#   Azure client is a BlobServiceClient, the S3 client is boto3.client("s3");
+#   the widgets' docstring names no class. The GCS client is annotated
+#   google.cloud.storage.Client. google-cloud-storage, azure-storage-blob,
+#   boto3 and pyspark are not installed and are named as missing modules
+#   (judgements 4 and 5).
+# - A call of a method decorated with @contextmanager runs
+#   contextlib.contextmanager.helper, which calls the generator function back.
+default reject dagster_pipes.PipesContext.__enter__, dagster_pipes.PipesContext.__exit__: no with statement in the package enters a PipesContext; its items are files from the builtin open, a tempfile wrapper, ExitStacks, a contextlib.nullcontext, the _GeneratorContextManager objects of the package's @contextmanager methods, and the blob clients of the client's Azure client
+default reject dagster_pipes.PipesContext.get: the receiver of this get is not the class PipesContext: it is a dict (the params that decode_param or json makes, a message's params, an exception dict), a queue.Queue, the client's widgets object or a pyspark configuration; only PipesContext.get() in open_dagster_pipes (1637:32) accepts it
+default reject dagster_pipes.PipesContext.set: this set is threading.Event.set or the builtin set(); only PipesContext.set(context) in open_dagster_pipes (1647:21) accepts it
+default reject dagster_pipes.ExcThread.join: the receiver of this join is a str separator, os.path, a plain threading.Thread (693:28) or super() in ExcThread.join, which skips ExcThread; only thread.join() in PipesStdioLogWriterChannel.capture (870:28), on the ExcThread of line 850, accepts it
+
+== dagster_pipes
+
+[dagster_pipes]
+225:13 call  TypeVar("_T")
+    -> typing.TypeVar
+377:33 call  frozenset(PipesMetadataValue.__annotations__.keys())
+    -> <builtin>.frozenset
+377:73 call  PipesMetadataValue.__annotations__.keys()
+    -> <builtin>.dict.keys
+    note: the __annotations__ of the TypedDict class PipesMetadataValue is a dict
+378:28 call  frozenset(get_args(PipesMetadataType))
+    -> <builtin>.frozenset
+378:37 call  get_args(PipesMetadataType)
+    -> typing.get_args
+498:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+499:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+515:27 call  TypeVar("T_MessageChannel", bound="PipesMessageWriterChan...
+    -> typing.TypeVar
+519:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+520:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+524:23 call  TypeVar("T_LogChannel", bound=PipesLogWriterChannel)
+    -> typing.TypeVar
+534:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+535:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+538:6 decorator  @final
+    -> typing.final
+547:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+548:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+564:6 decorator  @final
+    -> typing.final
+588:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+603:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+609:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+613:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+618:42 call  TypeVar( "T_BlobStoreMessageWriterChannel", bound="PipesB...
+    -> typing.TypeVar
+632:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+658:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+679:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+682:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+746:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+787:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+793:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+816:6 decorator  @property
+    -> <builtin>.property
+820:6 decorator  @property
+    -> <builtin>.property
+834:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+911:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+932:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1051:6 decorator  @property
+    -> <builtin>.property
+1103:62 call  _env_var_to_cli_argument(DAGSTER_PIPES_CONTEXT_ENV_VAR)
+    -> dagster_pipes._env_var_to_cli_argument
+1104:63 call  _env_var_to_cli_argument(DAGSTER_PIPES_MESSAGES_ENV_VAR)
+    -> dagster_pipes._env_var_to_cli_argument
+1106:51 call  argparse.ArgumentParser(description="Dagster Pipes CLI in...
+    -> argparse.ArgumentParser
+1107:38 call  DAGSTER_PIPES_CLI_PARSER.add_argument( DAGSTER_PIPES_CONT...
+    -> argparse.ArgumentParser.add_argument
+1112:38 call  DAGSTER_PIPES_CLI_PARSER.add_argument( DAGSTER_PIPES_MESS...
+    -> argparse.ArgumentParser.add_argument
+1195:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1273:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1347:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1414:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1486:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1550:6 decorator  @contextmanager
+    -> contextlib.contextmanager
+1667:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1672:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1677:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1729:6 decorator  @property
+    -> <builtin>.property
+1744:6 decorator  @property
+    -> <builtin>.property
+1749:6 decorator  @property
+    -> <builtin>.property
+1758:6 decorator  @property
+    -> <builtin>.property
+1766:6 decorator  @property
+    -> <builtin>.property
+1777:6 decorator  @property
+    -> <builtin>.property
+1787:6 decorator  @property
+    -> <builtin>.property
+1798:6 decorator  @property
+    -> <builtin>.property
+1808:6 decorator  @property
+    -> <builtin>.property
+1813:6 decorator  @property
+    -> <builtin>.property
+1823:6 decorator  @property
+    -> <builtin>.property
+1833:6 decorator  @property
+    -> <builtin>.property
+1846:6 decorator  @property
+    -> <builtin>.property
+1851:6 decorator  @property
+    -> <builtin>.property
+1858:6 decorator  @property
+    -> <builtin>.property
+1874:6 decorator  @property
+    -> <builtin>.property
+1978:6 decorator  @property
+    -> <builtin>.property
+
+[dagster_pipes.to_asset_key_path]
+209:32 call  current_part.append(char)
+    -> <builtin>.list.append
+214:25 call  parts.append("".join(current_part))
+    -> <builtin>.list.append
+214:33 call  "".join(current_part)
+    -> <builtin>.str.join
+217:32 call  current_part.append(char)
+    -> <builtin>.list.append
+220:21 call  parts.append("".join(current_part))
+    -> <builtin>.list.append
+220:29 call  "".join(current_part)
+    -> <builtin>.str.join
+
+[dagster_pipes._assert_not_none]
+238:32 call  DagsterPipesError(f"Missing required property: {desc}")
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._assert_defined_asset_property]
+243:28 call  _assert_not_none(value, f"`{key}` is undefined. Current s...
+    -> dagster_pipes._assert_not_none
+
+[dagster_pipes._assert_single_asset]
+250:11 call  len(asset_keys)
+    -> <builtin>.len
+    note: asset_keys is the list of the context data (json) or the client's sequence; no package class defines __len__
+251:32 call  DagsterPipesError(f"`{key}` is undefined. Current step ta...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._resolve_optionally_passed_asset_key]
+259:39 call  _assert_opt_param_type(asset_key, str, method, "asset_key")
+    -> dagster_pipes._assert_opt_param_type
+264:36 call  DagsterPipesError( f"Invalid asset key. Expected one of `...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+268:19 call  len(defined_asset_keys)
+    -> <builtin>.len
+269:40 call  DagsterPipesError( f"Calling `{method}` without passing a...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+276:32 call  DagsterPipesError( f"Calling `{method}` without passing a...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._assert_defined_partition_property]
+285:28 call  _assert_not_none( value, f"`{key}` is undefined. Current ...
+    -> dagster_pipes._assert_not_none
+
+[dagster_pipes._assert_single_partition]
+295:32 call  DagsterPipesError(f"`{key}` is undefined. Current step ta...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._assert_defined_extra]
+300:32 call  DagsterPipesError(f"Extra `{key}` is undefined. Extras mu...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._assert_param_type]
+305:22 call  isinstance(value, expected_type)
+    -> <builtin>.isinstance
+306:32 call  DagsterPipesError( f"Invalid type for parameter `{param}`...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+308:22 call  type(value)
+    -> <builtin>.type
+
+[dagster_pipes._assert_opt_param_type]
+314:23 call  isinstance(value, expected_type)
+    -> <builtin>.isinstance
+315:32 call  DagsterPipesError( f"Invalid type for parameter `{param}`...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+317:55 call  type(value)
+    -> <builtin>.type
+
+[dagster_pipes._assert_env_param_type]
+325:27 call  env_params.get(key)
+    -> <builtin>.dict.get
+    note: env_params is the params of a loader's load_context, a writer's open or make_channel: the dict that decode_param makes, or a client mapping (opaque, B5)
+326:22 call  isinstance(value, expected_type)
+    -> <builtin>.isinstance
+327:32 call  DagsterPipesError( f"Invalid type for parameter `{key}` p...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+329:72 call  type(value)
+    -> <builtin>.type
+
+[dagster_pipes._assert_opt_env_param_type]
+337:27 call  env_params.get(key)
+    -> <builtin>.dict.get
+    note: env_params is the params of a loader's load_context, a writer's open or make_channel: the dict that decode_param makes, or a client mapping (opaque, B5)
+338:44 call  isinstance(value, expected_type)
+    -> <builtin>.isinstance
+339:32 call  DagsterPipesError( f"Invalid type for parameter `{key}` p...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+341:82 call  type(value)
+    -> <builtin>.type
+
+[dagster_pipes._assert_param_value]
+348:32 call  DagsterPipesError( f"Invalid value for parameter `{param}...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._assert_opt_param_value]
+359:32 call  DagsterPipesError( f"Invalid value for parameter `{param}...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes._json_serialize_param]
+368:32 call  json.dumps(value)
+    -> json.dumps
+370:32 call  DagsterPipesError( f"Invalid type for parameter `{param}`...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+372:32 call  type(value)
+    -> <builtin>.type
+
+[dagster_pipes._normalize_param_metadata]
+386:23 call  _assert_param_type(metadata, dict, method, param)
+    -> dagster_pipes._assert_param_type
+388:37 call  metadata.items()
+    -> <builtin>.dict.items
+    note: _assert_param_type (386) raised unless metadata is a dict (B4: isinstance check)
+389:26 call  isinstance(key, str)
+    -> <builtin>.isinstance
+390:36 call  DagsterPipesError( f"Invalid type for parameter `{param}`...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+392:58 call  type(key)
+    -> <builtin>.type
+394:24 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+395:32 call  value.keys()
+    -> <builtin>.dict.keys
+    note: value is a dict (isinstance at 394)
+396:40 call  DagsterPipesError( f"Invalid type for parameter `{param}`...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+401:31 call  cast("PipesMetadataValue", value)
+    -> typing.cast
+402:32 call  _assert_param_value(typed_value["type"], _METADATA_TYPES,...
+    -> dagster_pipes._assert_param_value
+
+[dagster_pipes.encode_param]
+419:39 call  _json_serialize_param(value, "encode_param", "value")
+    -> dagster_pipes._json_serialize_param
+420:31 call  zlib.compress(serialized.encode("utf-8"))
+    -> zlib.compress
+420:49 call  serialized.encode("utf-8")
+    -> <builtin>.str.encode
+    note: serialized is the str that json.dumps returns
+421:31 call  base64.b64encode(compressed)
+    -> base64.b64encode
+422:26 call  encoded.decode("utf-8")
+    -> <builtin>.bytes.decode
+    note: encoded is the bytes that base64.b64encode returns
+
+[dagster_pipes.decode_param]
+435:31 call  base64.b64decode(value)
+    -> base64.b64decode
+436:35 call  zlib.decompress(decoded)
+    -> zlib.decompress
+437:22 call  json.loads(decompressed.decode("utf-8"))
+    -> json.loads
+437:42 call  decompressed.decode("utf-8")
+    -> <builtin>.bytes.decode
+    note: decompressed is the bytes that zlib.decompress returns
+
+[dagster_pipes._emit_orchestration_inactive_warning]
+446:18 call  warnings.warn( "This process was not launched by a Dagste...
+    -> warnings.warn
+
+[dagster_pipes._get_mock]
+457:21 call  MagicMock()
+    -> unittest.mock.MagicMock
+
+[dagster_pipes._PipesLogger.__init__]
+462:14 call  super()
+    -> <builtin>.super
+462:25 call  super().__init__(name="dagster-pipes")
+    -> logging.Logger.__init__
+    reject *: super() in _PipesLogger skips _PipesLogger; the next class of its MRO that defines __init__ is logging.Logger
+463:24 call  self.addHandler(_PipesLoggerHandler(context))
+    -> logging.Logger.addHandler
+463:44 call  _PipesLoggerHandler(context)
+    -> dagster_pipes._PipesLoggerHandler.__init__
+
+[dagster_pipes._PipesLoggerHandler.__init__]
+468:14 call  super()
+    -> <builtin>.super
+468:25 call  super().__init__()
+    -> logging.Handler.__init__
+    reject *: super() in _PipesLoggerHandler skips _PipesLoggerHandler; the next class of its MRO that defines __init__ is logging.Handler
+
+[dagster_pipes._PipesLoggerHandler.emit]
+472:37 call  self._context._write_message( # noqa: SLF001 "log", {"mes...
+    -> dagster_pipes.PipesContext._write_message
+    note: self._context is the PipesContext that made the _PipesLogger (1699); _PipesLoggerHandler is private and made only at 463
+473:49 call  record.getMessage()
+    -> logging.LogRecord.getMessage
+
+[dagster_pipes._pipes_exc_from_tb]
+479:37 call  tb.exc_type_str.split(".")
+    -> <builtin>.str.split
+    note: version branch 478: Python 3.13 and later (supported) take it; TracebackException.exc_type_str is a str
+483:26 call  PipesException( message="".join(list(tb.format_exception_...
+    -> <builtin>.dict.__init__
+    note: PipesException is a TypedDict (line 179). typing._TypedDictMeta.__call__ delegates to dict, which constructs the result. The benchmark names this construction <builtin>.dict.__init__, as specified by micro-benchmark type_hints/typed_dict_call; it is not an ordinary type.__call__ on a package subclass.
+484:24 call  "".join(list(tb.format_exception_only()))
+    -> <builtin>.str.join
+484:29 call  list(tb.format_exception_only())
+    -> <builtin>.list
+484:54 call  tb.format_exception_only()
+    -> traceback.TracebackException.format_exception_only
+    note: tb is a traceback.TracebackException (annotation; 1710 makes it)
+485:30 call  tb.stack.format()
+    -> traceback.StackSummary.format
+    note: tb.stack is the traceback.StackSummary of the TracebackException
+487:33 call  _pipes_exc_from_tb(tb.__cause__)
+    -> dagster_pipes._pipes_exc_from_tb
+488:35 call  _pipes_exc_from_tb(tb.__context__)
+    -> dagster_pipes._pipes_exc_from_tb
+
+[dagster_pipes.PipesLogWriter.get_opened_payload]
+540:49 call  self.get_opened_extras()
+    -> dagster_pipes.PipesLogWriter.get_opened_extras
+    reject dagster_pipes.PipesDbfsMessageWriter.get_opened_extras, dagster_pipes.PipesMessageWriter.get_opened_extras: self is a log writer (PipesDefaultLogWriter or PipesStdioFileLogWriter), which inherits PipesLogWriter.get_opened_extras; message writers are another hierarchy
+
+[dagster_pipes.PipesMessageWriter.get_opened_payload]
+573:49 call  self.get_opened_extras()
+    -> dagster_pipes.PipesDbfsMessageWriter.get_opened_extras
+    -> dagster_pipes.PipesMessageWriter.get_opened_extras
+    reject dagster_pipes.PipesLogWriter.get_opened_extras: self is a message writer, not a log writer
+    note: self is a message writer: PipesDbfsMessageWriter overrides get_opened_extras; the other package writers inherit PipesMessageWriter.get_opened_extras
+
+[dagster_pipes.PipesBlobStoreMessageWriter.open]
+644:36 call  self.make_channel(params)
+    -> dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel
+    -> dagster_pipes.PipesDbfsMessageWriter.make_channel
+    -> dagster_pipes.PipesGCSMessageWriter.make_channel
+    -> dagster_pipes.PipesS3MessageWriter.make_channel
+    -> dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel
+    reject dagster_pipes.PipesBlobStoreMessageWriter.make_channel: PipesBlobStoreMessageWriter is abstract, and its five package subclasses override make_channel
+    reject dagster_pipes.PipesDefaultLogWriter.make_channel, dagster_pipes.PipesStdioFileLogWriter.make_channel, dagster_pipes.PipesStdioLogWriter.make_channel: self is a blob store message writer, not a log writer
+645:42 call  channel.buffered_upload_loop()
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.buffered_upload_loop
+    note: channel is a blob store channel of make_channel (S3, GCS, Azure, PipesBufferedFilesystemMessageWriterChannel); all inherit buffered_upload_loop, a @contextmanager method
+646:26 call  params.get(self.INCLUDE_STDIO_IN_MESSAGES_KEY)
+    -> <builtin>.dict.get
+    note: params is the dict that decode_param (json.loads) makes from the orchestration's params, passed by PipesContext.__init__; a client mapping is opaque (B4: PipesParams is the abstract Mapping, B5)
+647:51 call  PipesDefaultLogWriter(message_channel=channel)
+    -> dagster_pipes.PipesDefaultLogWriter.__init__
+649:56 call  log_writer.open( params.get(PipesLogWriter.LOG_WRITER_KEY...
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesStdioLogWriter.open
+    reject dagster_pipes.PipesBlobStoreMessageWriter.open, dagster_pipes.PipesDefaultMessageWriter.open, dagster_pipes.PipesMessageWriter.open, dagster_pipes.PipesPrefectLogsMessageWriter.open: log_writer is the PipesDefaultLogWriter of the line above, a log writer
+    reject dagster_pipes.PipesLogWriter.open: PipesLogWriter is abstract; PipesDefaultLogWriter inherits PipesStdioLogWriter.open
+650:31 call  params.get(PipesLogWriter.LOG_WRITER_KEY, {})
+    -> <builtin>.dict.get
+653:52 call  nullcontext()
+    -> contextlib.nullcontext
+
+[dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__]
+667:50 call  Queue()
+    -> queue.Queue
+
+[dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message]
+671:25 call  self._buffer.put(message)
+    -> queue.Queue.put
+
+[dagster_pipes.PipesBlobStoreMessageWriterChannel.flush_messages]
+675:37 call  self._buffer.empty()
+    -> queue.Queue.empty
+676:25 call  items.append(self._buffer.get())
+    -> <builtin>.list.append
+676:42 call  self._buffer.get()
+    -> queue.Queue.get
+
+[dagster_pipes.PipesBlobStoreMessageWriterChannel.buffered_upload_loop]
+685:34 call  Event()
+    -> threading.Event
+687:28 call  Thread(target=self._upload_loop, args=(is_session_closed,...
+    -> threading.Thread
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop: Thread stores the target; thread.start() (688:25) runs it
+688:25 call  thread.start()
+    -> threading.Thread.start
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop
+    note: start() runs the target self._upload_loop of the Thread of 687 (callback rule: the target belongs to the scope that calls start())
+691:34 call  is_session_closed.set()
+    -> threading.Event.set
+693:28 call  thread.join(timeout=60)
+    -> threading.Thread.join
+
+[dagster_pipes.PipesBlobStoreMessageWriterChannel._upload_loop]
+696:53 call  datetime.datetime.now()
+    -> datetime.datetime.now
+698:40 call  datetime.datetime.now()
+    -> datetime.datetime.now
+699:34 call  self._buffer.empty()
+    -> queue.Queue.empty
+699:65 call  is_session_closed.is_set()
+    -> threading.Event.is_set
+702:41 call  is_session_closed.is_set()
+    -> threading.Event.is_set
+704:36 call  "\n".join([json.dumps(message) for message in self.flush_...
+    -> <builtin>.str.join
+704:48 call  json.dumps(message)
+    -> json.dumps
+704:92 call  self.flush_messages()
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.flush_messages
+705:23 call  len(payload)
+    -> <builtin>.len
+706:47 call  self.upload_messages_chunk(StringIO(payload), self._counter)
+    -> dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.upload_messages_chunk
+    -> dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.upload_messages_chunk
+    -> dagster_pipes.PipesGCSMessageWriterChannel.upload_messages_chunk
+    -> dagster_pipes.PipesS3MessageWriterChannel.upload_messages_chunk
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel.upload_messages_chunk: PipesBlobStoreMessageWriterChannel is abstract, and its four package subclasses override the method
+706:56 call  StringIO(payload)
+    -> io.StringIO
+709:23 call  time.sleep(1)
+    -> time.sleep
+
+[dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__]
+720:14 call  super()
+    -> <builtin>.super
+720:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__
+    reject *: super() in PipesBufferedFilesystemMessageWriterChannel skips PipesBufferedFilesystemMessageWriterChannel; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriterChannel
+
+[dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.upload_messages_chunk]
+724:36 call  os.path.join(self._path, f"{index}.json")
+    -> os.path.join
+725:18 call  open(message_path, "w", encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+726:20 call  f.write(payload.read())
+    -> io.TextIOWrapper.write
+    note: f is the stream that the builtin open returns in text mode
+726:33 call  payload.read()
+    -> io.StringIO.read
+    note: payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque
+
+[dagster_pipes.PipesDefaultContextLoader.load_context]
+749:42 call  _assert_env_param_type(params, self.FILE_PATH_KEY, str, s...
+    -> dagster_pipes._assert_env_param_type
+750:22 call  open(path, encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+751:33 call  json.load(f)
+    -> json.load
+754:42 call  _assert_env_param_type(params, self.DIRECT_KEY, dict, sel...
+    -> dagster_pipes._assert_env_param_type
+755:23 call  cast("PipesContextData", data)
+    -> typing.cast
+757:36 call  DagsterPipesError( f'Invalid params for {self.__class__._...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes.ExcThread.run]
+767:32 call  Queue()
+    -> queue.Queue
+770:18 call  super()
+    -> <builtin>.super
+770:24 call  super().run(*args, **kwargs)
+    -> threading.Thread.run
+    -> dagster_pipes.PipesStdioLogWriterChannel.handler
+    reject dagster_pipes.ExcThread.run: super() in ExcThread skips ExcThread; the method is threading.Thread.run
+    note: Thread.run calls the target; the package's only target is self.handler of PipesStdioLogWriterChannel.capture (850); a client's target is a client callback
+772:32 call  self.exceptions.put(sys.exc_info())
+    -> queue.Queue.put
+772:45 call  sys.exc_info()
+    -> sys.exc_info
+
+[dagster_pipes.ExcThread.join]
+775:14 call  super()
+    -> <builtin>.super
+775:21 call  super().join(*args, **kwargs)
+    -> threading.Thread.join
+777:40 call  self.exceptions.empty()
+    -> queue.Queue.empty
+778:43 call  self.exceptions.get()
+    -> queue.Queue.get
+779:29 call  sys.stderr.write(traceback.format_exception(*exc_info))
+    -> io.TextIOWrapper.write
+    note: the default sys.stderr, named by its class (README)
+779:56 call  traceback.format_exception(*exc_info)
+    -> traceback.format_exception
+
+[dagster_pipes.PipesStdioLogWriter.open]
+795:23 call  ExitStack()
+    -> contextlib.ExitStack
+796:47 call  self.make_channel(params, stream="stdout")
+    -> dagster_pipes.PipesDefaultLogWriter.make_channel
+    -> dagster_pipes.PipesStdioFileLogWriter.make_channel
+    reject dagster_pipes.PipesStdioLogWriter.make_channel: PipesStdioLogWriter is abstract, and both package subclasses override make_channel
+    reject dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel, dagster_pipes.PipesBlobStoreMessageWriter.make_channel, dagster_pipes.PipesDbfsMessageWriter.make_channel, dagster_pipes.PipesGCSMessageWriter.make_channel, dagster_pipes.PipesS3MessageWriter.make_channel, dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel: self is a log writer, not a message writer
+797:47 call  self.make_channel(params, stream="stderr")
+    -> dagster_pipes.PipesDefaultLogWriter.make_channel
+    -> dagster_pipes.PipesStdioFileLogWriter.make_channel
+    reject dagster_pipes.PipesStdioLogWriter.make_channel: PipesStdioLogWriter is abstract, and both package subclasses override make_channel
+    reject dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel, dagster_pipes.PipesBlobStoreMessageWriter.make_channel, dagster_pipes.PipesDbfsMessageWriter.make_channel, dagster_pipes.PipesGCSMessageWriter.make_channel, dagster_pipes.PipesS3MessageWriter.make_channel, dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel: self is a log writer, not a message writer
+799:32 call  stack.enter_context(stdout_channel.capture())
+    -> contextlib.ExitStack.enter_context
+799:55 call  stdout_channel.capture()
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesStdioLogWriterChannel.capture
+    reject dagster_pipes.PipesLogWriterChannel.capture: abstract; the channel is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel (make_channel), which inherit PipesStdioLogWriterChannel.capture
+800:32 call  stack.enter_context(stderr_channel.capture())
+    -> contextlib.ExitStack.enter_context
+800:55 call  stderr_channel.capture()
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesStdioLogWriterChannel.capture
+    reject dagster_pipes.PipesLogWriterChannel.capture: abstract; the channel is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel (make_channel), which inherit PipesStdioLogWriterChannel.capture
+
+[dagster_pipes.PipesStdioLogWriterChannel.__init__]
+814:36 call  Queue()
+    -> queue.Queue
+
+[dagster_pipes.PipesStdioLogWriterChannel.stdio]
+828:24 call  cast("TextIOWrapper", sys.__stdout__)
+    -> typing.cast
+830:24 call  cast("TextIOWrapper", sys.__stderr__)
+    -> typing.cast
+832:29 call  ValueError(f"stream must be 'stdout' or 'stderr', got {se...
+    -> <builtin>.ValueError
+    note: reached when a client makes a channel with another stream value
+
+[dagster_pipes.PipesStdioLogWriterChannel.capture]
+836:41 call  tempfile.NamedTemporaryFile()
+    -> tempfile.NamedTemporaryFile
+837:29 call  sys.stderr.write(f"Starting {self.name}\n")
+    -> io.TextIOWrapper.write
+    note: the default sys.stderr, named by its class (README)
+837:47 getattr  self.name
+    -> dagster_pipes.PipesStdioLogWriterChannel.name
+    note: self is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel; neither overrides name
+839:61 call  Event()
+    -> threading.Event
+839:70 call  Event()
+    -> threading.Event
+841:35 call  subprocess.Popen(["tee", str(temp_file.name)], stdin=subp...
+    -> subprocess.Popen
+841:47 call  str(temp_file.name)
+    -> <builtin>.str
+    reject *: the argument is the str file name of the tempfile wrapper, not the property name
+841:58 getattr  temp_file.name
+    reject *: temp_file is the tempfile wrapper of 836, whose name is a str attribute
+846:33 getattr  self.stdio
+    -> dagster_pipes.PipesStdioLogWriterChannel.stdio
+846:45 call  self.stdio.fileno()
+    -> io.TextIOWrapper.fileno
+    note: self.stdio is sys.__stdout__ or sys.__stderr__, named by its class (README)
+847:29 call  os.dup(stdio_fileno)
+    -> os.dup
+848:20 call  os.dup2(cast("IO[bytes]", tee.stdin).fileno(), stdio_fileno)
+    -> os.dup2
+848:25 call  cast("IO[bytes]", tee.stdin)
+    -> typing.cast
+848:56 call  cast("IO[bytes]", tee.stdin).fileno()
+    -> io.BufferedWriter.fileno
+    note: tee.stdin is the stream that Popen makes for stdin=PIPE in binary mode with the default buffering: an io.BufferedWriter
+850:31 call  ExcThread( target=self.handler, args=( temp_file.name, ca...
+    -> threading.Thread.__init__
+    reject dagster_pipes.PipesStdioLogWriterChannel.handler: Thread.__init__ stores the target; thread.start() (862:29) starts ExcThread.run, which runs it
+    reject dagster_pipes.PipesStdioLogWriterChannel.name: the argument is the str that the property returned at 858:27
+    note: ExcThread defines no __init__; the first __init__ of its MRO is that of threading.Thread
+853:31 getattr  temp_file.name
+    reject *: temp_file is the tempfile wrapper of 836, whose name is a str attribute
+858:27 getattr  self.name
+    -> dagster_pipes.PipesStdioLogWriterChannel.name
+    note: self is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel; neither overrides name
+862:29 call  thread.start()
+    -> threading.Thread.start
+    -> dagster_pipes.ExcThread.run
+    note: start() runs the run method of the thread in a new thread (callback rule); ExcThread overrides run
+863:39 call  capturing_started.wait()
+    -> threading.Event.wait
+866:22 getattr  self.stdio
+    -> dagster_pipes.PipesStdioLogWriterChannel.stdio
+866:33 call  self.stdio.flush()
+    -> io.TextIOWrapper.flush
+    reject dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush: the receiver is sys.__stdout__ or sys.__stderr__ (the stdio property)
+867:27 call  time.sleep(self.WAIT_FOR_TEE_SECONDS)
+    -> time.sleep
+868:30 call  tee.terminate()
+    -> subprocess.Popen.terminate
+869:42 call  capturing_should_stop.set()
+    -> threading.Event.set
+870:28 call  thread.join()
+    -> dagster_pipes.ExcThread.join
+    note: thread is the ExcThread of 850
+874:24 call  os.dup2(prev_fd, stdio_fileno)
+    -> os.dup2
+876:33 call  sys.stderr.write(f"Stopped {self.name}\n")
+    -> io.TextIOWrapper.write
+    note: the default sys.stderr, named by its class (README)
+876:50 getattr  self.name
+    -> dagster_pipes.PipesStdioLogWriterChannel.name
+    note: self is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel; neither overrides name
+878:52 call  self.error_messages.empty()
+    -> queue.Queue.empty
+879:37 call  sys.stderr.write(self.error_messages.get())
+    -> io.TextIOWrapper.write
+    note: the default sys.stderr, named by its class (README)
+879:61 call  self.error_messages.get()
+    -> queue.Queue.get
+
+[dagster_pipes.PipesStdioLogWriterChannel.handler]
+887:18 call  open(path, encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+892:30 call  time.time()
+    -> time.time
+895:44 call  input_file.read()
+    -> io.TextIOWrapper.read
+    note: input_file is the stream that the builtin open returns in text mode
+898:41 call  self.write_chunk(chunk)
+    -> dagster_pipes.PipesDefaultLogWriterChannel.write_chunk
+    -> dagster_pipes.PipesStdioFileLogWriterChannel.write_chunk
+    reject dagster_pipes.PipesStdioLogWriterChannel.write_chunk: PipesStdioLogWriterChannel is abstract, and both package subclasses override write_chunk
+900:52 call  capturing_started.is_set()
+    -> threading.Event.is_set
+901:46 call  capturing_started.set()
+    -> threading.Event.set
+904:44 call  self.error_messages.put(f"Exception in thread {self.name}...
+    -> queue.Queue.put
+904:73 getattr  self.name
+    -> dagster_pipes.PipesStdioLogWriterChannel.name
+    note: self is a PipesDefaultLogWriterChannel or PipesStdioFileLogWriterChannel; neither overrides name
+906:48 call  capturing_should_stop.is_set()
+    -> threading.Event.is_set
+907:55 call  time.time()
+    -> time.time
+909:27 call  time.sleep(self.interval)
+    -> time.sleep
+
+[dagster_pipes.PipesDefaultMessageWriter.open]
+935:42 call  _assert_env_param_type(params, self.FILE_PATH_KEY, str, s...
+    -> dagster_pipes._assert_env_param_type
+936:52 call  PipesFileMessageWriterChannel(path)
+    -> dagster_pipes.PipesFileMessageWriterChannel.__init__
+937:26 call  params.get(self.INCLUDE_STDIO_IN_MESSAGES_KEY)
+    -> <builtin>.dict.get
+    note: params is the dict that decode_param (json.loads) makes from the orchestration's params, passed by PipesContext.__init__; a client mapping is opaque (B4: PipesParams is the abstract Mapping, B5)
+938:51 call  PipesDefaultLogWriter(message_channel=channel)
+    -> dagster_pipes.PipesDefaultLogWriter.__init__
+939:56 call  log_writer.open( params.get(PipesLogWriter.LOG_WRITER_KEY...
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesStdioLogWriter.open
+    reject dagster_pipes.PipesBlobStoreMessageWriter.open, dagster_pipes.PipesDefaultMessageWriter.open, dagster_pipes.PipesMessageWriter.open, dagster_pipes.PipesPrefectLogsMessageWriter.open: log_writer is the PipesDefaultLogWriter of the line above, a log writer
+    reject dagster_pipes.PipesLogWriter.open: PipesLogWriter is abstract; PipesDefaultLogWriter inherits PipesStdioLogWriter.open
+940:31 call  params.get(PipesLogWriter.LOG_WRITER_KEY, {})
+    -> <builtin>.dict.get
+943:52 call  nullcontext()
+    -> contextlib.nullcontext
+948:44 call  _assert_env_param_type(params, self.STDIO_KEY, str, self....
+    -> dagster_pipes._assert_env_param_type
+950:40 call  DagsterPipesError( f'Invalid value for key "std", expecte...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+957:50 call  PipesStreamMessageWriterChannel(target)
+    -> dagster_pipes.PipesStreamMessageWriterChannel.__init__
+960:44 call  _assert_env_param_type(params, self.BUFFERED_STDIO_KEY, s...
+    -> dagster_pipes._assert_env_param_type
+962:40 call  DagsterPipesError( f'Invalid value for key "std", expecte...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+968:62 call  PipesBufferedStreamMessageWriterChannel(target)
+    -> dagster_pipes.PipesBufferedStreamMessageWriterChannel.__init__
+972:30 call  channel.flush()
+    -> dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush
+975:36 call  DagsterPipesError( f'Invalid params for {self.__class__._...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+
+[dagster_pipes.PipesFileMessageWriterChannel.write_message]
+989:18 call  open(self._path, "a", encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+990:20 call  f.write(json.dumps(message) + "\n")
+    -> io.TextIOWrapper.write
+    note: f is the stream that the builtin open returns in text mode
+990:31 call  json.dumps(message)
+    -> json.dumps
+
+[dagster_pipes.PipesStreamMessageWriterChannel.write_message]
+1000:32 call  self._stream.writelines((json.dumps(message), "\n"))
+    -> io.TextIOWrapper.writelines
+    note: self._stream is sys.stderr or sys.stdout, selected at 955 and passed to the stream channel by PipesDefaultMessageWriter.open; the default streams are named by their class (README), and a client's abstract TextIO is opaque.
+1000:44 call  json.dumps(message)
+    -> json.dumps
+
+[dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message]
+1013:28 call  self._buffer.append(message)
+    -> <builtin>.list.append
+
+[dagster_pipes.PipesBufferedStreamMessageWriterChannel.flush]
+1017:36 call  self._stream.writelines((json.dumps(message), "\n"))
+    -> io.TextIOWrapper.writelines
+    note: self._stream is sys.stderr or sys.stdout, selected at 967 and passed to the buffered stream channel by PipesDefaultMessageWriter.open; the default streams are named by their class (README), and a client's abstract TextIO is opaque.
+1017:48 call  json.dumps(message)
+    -> json.dumps
+
+[dagster_pipes.PipesDefaultLogWriterChannel.__init__]
+1032:14 call  super()
+    -> <builtin>.super
+1032:25 call  super().__init__(interval=interval, stream=stream, name=n...
+    -> dagster_pipes.PipesStdioLogWriterChannel.__init__
+    reject *: super() in PipesDefaultLogWriterChannel skips PipesDefaultLogWriterChannel; the next class of its MRO that defines __init__ is PipesStdioLogWriterChannel
+
+[dagster_pipes.PipesDefaultLogWriterChannel.write_chunk]
+1035:14 getattr  self.message_channel
+    reject *: self is a PipesDefaultLogWriterChannel, whose message_channel is an instance attribute (1031), not the property of PipesDefaultLogWriter
+1035:43 call  self.message_channel.write_message( _make_message( method...
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message
+    -> dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message
+    -> dagster_pipes.PipesFileMessageWriterChannel.write_message
+    -> dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message
+    -> dagster_pipes.PipesStreamMessageWriterChannel.write_message
+    reject dagster_pipes.PipesMessageWriterChannel.write_message: PipesMessageWriterChannel is abstract, and every concrete channel overrides write_message or inherits it from PipesBlobStoreMessageWriterChannel
+    note: self.message_channel is annotated PipesMessageWriterChannel (1026); every concrete package channel fits (B2). The package passes the channel of PipesBlobStoreMessageWriter.open and PipesDefaultMessageWriter.open through PipesDefaultLogWriter; a client channel is opaque
+1036:26 call  _make_message( method="log_external_stream", params={"str...
+    -> dagster_pipes._make_message
+
+[dagster_pipes.PipesDefaultLogWriter.__init__]
+1049:14 call  super()
+    -> <builtin>.super
+1049:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: super() in PipesDefaultLogWriter skips PipesDefaultLogWriter; no class after it in the MRO (PipesStdioLogWriter, PipesLogWriter, ABC, Generic) defines __init__ before object: the method is object.__init__, named through ABC, the nearest class outside the package
+
+[dagster_pipes.PipesDefaultLogWriter.message_channel]
+1054:31 call  RuntimeError("message_channel is not set")
+    -> <builtin>.RuntimeError
+    note: reached when a client passes None as message_channel
+
+[dagster_pipes.PipesDefaultLogWriter.make_channel]
+1061:44 call  PipesDefaultLogWriterChannel( message_channel=self.messag...
+    -> dagster_pipes.PipesDefaultLogWriterChannel.__init__
+    reject dagster_pipes.PipesStdioLogWriterChannel.__init__: called from PipesDefaultLogWriterChannel.__init__ through super() (1032), not here
+    reject dagster_pipes.PipesDefaultLogWriter.message_channel: the argument is the channel that the property returned at 1062:34
+1062:34 getattr  self.message_channel
+    -> dagster_pipes.PipesDefaultLogWriter.message_channel
+    note: self is a PipesDefaultLogWriter (no package subclass)
+
+[dagster_pipes.PipesMappingParamsLoader.load_context_params]
+1085:28 call  decode_param(raw_value)
+    -> dagster_pipes.decode_param
+
+[dagster_pipes.PipesMappingParamsLoader.load_messages_params]
+1089:28 call  decode_param(raw_value)
+    -> dagster_pipes.decode_param
+
+[dagster_pipes.PipesEnvVarParamsLoader.__init__]
+1096:14 call  super()
+    -> <builtin>.super
+1096:25 call  super().__init__(mapping=os.environ)
+    -> dagster_pipes.PipesMappingParamsLoader.__init__
+    reject *: super() in PipesEnvVarParamsLoader skips PipesEnvVarParamsLoader; the next class of its MRO that defines __init__ is PipesMappingParamsLoader
+
+[dagster_pipes._env_var_to_cli_argument]
+1100:32 call  f"--{env_var}".lower()
+    -> <builtin>.str.lower
+1100:42 call  f"--{env_var}".lower().replace("_", "-")
+    -> <builtin>.str.replace
+
+[dagster_pipes.PipesCliArgsParamsLoader.load_context_params]
+1130:47 call  self.parser.parse_known_args()
+    -> argparse.ArgumentParser.parse_known_args
+    note: self.parser is DAGSTER_PIPES_CLI_PARSER (1106), set in __init__
+1131:28 call  decode_param(args.dagster_pipes_context)
+    -> dagster_pipes.decode_param
+
+[dagster_pipes.PipesCliArgsParamsLoader.load_messages_params]
+1134:47 call  self.parser.parse_known_args()
+    -> argparse.ArgumentParser.parse_known_args
+    note: self.parser is DAGSTER_PIPES_CLI_PARSER (1106), set in __init__
+1135:28 call  decode_param(args.dagster_pipes_messages)
+    -> dagster_pipes.decode_param
+
+[dagster_pipes.PipesStdioFileLogWriterChannel.__init__]
+1146:14 call  super()
+    -> <builtin>.super
+1146:25 call  super().__init__(interval=interval, stream=stream, name=n...
+    -> dagster_pipes.PipesStdioLogWriterChannel.__init__
+    reject *: super() in PipesStdioFileLogWriterChannel skips PipesStdioFileLogWriterChannel; the next class of its MRO that defines __init__ is PipesStdioLogWriterChannel
+
+[dagster_pipes.PipesStdioFileLogWriterChannel.write_chunk]
+1150:18 call  open(self.output_path, "a", encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+1151:23 call  file.write(chunk)
+    -> io.TextIOWrapper.write
+    note: file is the stream that the builtin open returns in text mode
+
+[dagster_pipes.PipesStdioFileLogWriter.__init__]
+1162:14 call  super()
+    -> <builtin>.super
+1162:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: super() in PipesStdioFileLogWriter skips PipesStdioFileLogWriter; no class after it in the MRO (PipesStdioLogWriter, PipesLogWriter, ABC, Generic) defines __init__ before object: the method is object.__init__, named through ABC, the nearest class outside the package
+
+[dagster_pipes.PipesStdioFileLogWriter.make_channel]
+1170:20 call  os.makedirs(logs_dir, exist_ok=True)
+    -> os.makedirs
+1171:35 call  os.path.join(os.path.join(logs_dir), stream)
+    -> os.path.join
+1171:48 call  os.path.join(logs_dir)
+    -> os.path.join
+1172:46 call  PipesStdioFileLogWriterChannel( output_path=output_path, ...
+    -> dagster_pipes.PipesStdioFileLogWriterChannel.__init__
+    reject dagster_pipes.PipesStdioLogWriterChannel.__init__: called from PipesStdioFileLogWriterChannel.__init__ through super() (1146), not here
+
+[dagster_pipes.PipesS3ContextLoader.load_context]
+1197:40 call  _assert_env_param_type(params, "bucket", str, self.__clas...
+    -> dagster_pipes._assert_env_param_type
+1198:37 call  _assert_env_param_type(params, "key", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1199:38 call  self._client.get_object(Bucket=bucket, Key=key)
+    -> boto3.client.get_object
+    note: missing module (judgement 3): client is annotated Any, so its docstring fixes the type, a boto3.client("s3") object; boto3 is not installed, and the expression has the shape of ext.client().get(), so the callee is the stub boto3.client.get_object; the real class has no public name: botocore makes it at run time
+1200:25 call  json.loads(obj["Body"].read().decode("utf-8"))
+    -> json.loads
+1200:42 call  obj["Body"].read()
+    note: no callee (judgement 3): obj is the result of the stub boto3.client.get_object (1199:38); the rules for a missing module do not define the subscript obj["Body"] of a stub value, so nothing derived from it is named
+1200:51 call  obj["Body"].read().decode("utf-8")
+    note: no callee (judgement 3): the value comes from obj["Body"], the subscript of a missing-module value, which the rules do not define (1200:42)
+
+[dagster_pipes.PipesS3MessageWriter.__init__]
+1213:14 call  super()
+    -> <builtin>.super
+1213:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriter.__init__
+    reject *: super() in PipesS3MessageWriter skips PipesS3MessageWriter; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriter
+
+[dagster_pipes.PipesS3MessageWriter.make_channel]
+1222:40 call  _assert_env_param_type(params, "bucket", str, self.__clas...
+    -> dagster_pipes._assert_env_param_type
+1223:48 call  _assert_opt_env_param_type(params, "key_prefix", str, sel...
+    -> dagster_pipes._assert_opt_env_param_type
+1224:43 call  PipesS3MessageWriterChannel( client=self._client, bucket=...
+    -> dagster_pipes.PipesS3MessageWriterChannel.__init__
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__: called from PipesS3MessageWriterChannel.__init__ through super() (1244), not here
+
+[dagster_pipes.PipesS3MessageWriterChannel.__init__]
+1244:14 call  super()
+    -> <builtin>.super
+1244:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__
+    reject *: super() in PipesS3MessageWriterChannel skips PipesS3MessageWriterChannel; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriterChannel
+
+[dagster_pipes.PipesS3MessageWriterChannel.upload_messages_chunk]
+1251:32 call  self._client.put_object( Body=payload.read(), Bucket=self...
+    -> boto3.client.put_object
+    note: missing module (judgement 3): client is annotated Any, so its docstring fixes the type, a boto3.client("s3") object; boto3 is not installed, and the expression has the shape of ext.client().get(), so the callee is the stub boto3.client.put_object; the real class has no public name: botocore makes it at run time
+1252:30 call  payload.read()
+    -> io.StringIO.read
+    note: payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque
+
+[dagster_pipes.PipesGCSContextLoader.load_context]
+1275:40 call  _assert_env_param_type(params, "bucket", str, self.__clas...
+    -> dagster_pipes._assert_env_param_type
+1276:37 call  _assert_env_param_type(params, "key", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1277:38 call  self._client.get_bucket(bucket)
+    -> google.cloud.storage.Client.get_bucket
+    note: missing module (judgement 4): self._client is annotated google.cloud.storage.Client (imported under TYPE_CHECKING); google-cloud-storage is not installed, so the callee is named by the micro-benchmark rules for a missing module
+1277:51 call  self._client.get_bucket(bucket).blob(key)
+    -> google.cloud.storage.Client.get_bucket.blob
+    note: missing module (judgement 4): calling a stub returns an instance of it; the real class is google.cloud.storage.Bucket
+1277:74 call  self._client.get_bucket(bucket).blob(key).download_as_byt...
+    -> google.cloud.storage.Client.get_bucket.blob.download_as_bytes
+    note: missing module (judgement 4); the real class is google.cloud.storage.Blob
+1278:25 call  json.loads(obj.decode("utf-8"))
+    -> json.loads
+1278:36 call  obj.decode("utf-8")
+    -> google.cloud.storage.Client.get_bucket.blob.download_as_bytes.decode
+    note: missing module (judgement 4): obj is an instance of the stub; the real value is bytes (bytes.decode)
+
+[dagster_pipes.PipesGCSMessageWriter.__init__]
+1290:14 call  super()
+    -> <builtin>.super
+1290:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriter.__init__
+    reject *: super() in PipesGCSMessageWriter skips PipesGCSMessageWriter; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriter
+
+[dagster_pipes.PipesGCSMessageWriter.make_channel]
+1297:40 call  _assert_env_param_type(params, "bucket", str, self.__clas...
+    -> dagster_pipes._assert_env_param_type
+1298:48 call  _assert_opt_env_param_type(params, "key_prefix", str, sel...
+    -> dagster_pipes._assert_opt_env_param_type
+1299:44 call  PipesGCSMessageWriterChannel( client=self._client, bucket...
+    -> dagster_pipes.PipesGCSMessageWriterChannel.__init__
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__: called from PipesGCSMessageWriterChannel.__init__ through super() (1320), not here
+
+[dagster_pipes.PipesGCSMessageWriterChannel.__init__]
+1320:14 call  super()
+    -> <builtin>.super
+1320:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__
+    reject *: super() in PipesGCSMessageWriterChannel skips PipesGCSMessageWriterChannel; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriterChannel
+1325:51 call  self._client.get_bucket(self._bucket)
+    -> google.cloud.storage.Client.get_bucket
+    note: missing module (judgement 4): self._client is annotated google.cloud.storage.Client (imported under TYPE_CHECKING); google-cloud-storage is not installed, so the callee is named by the micro-benchmark rules for a missing module
+
+[dagster_pipes.PipesGCSMessageWriterChannel.upload_messages_chunk]
+1329:30 call  self._gcp_bucket.blob(key)
+    -> google.cloud.storage.Client.get_bucket.blob
+    note: missing module (judgement 4): self._gcp_bucket is an instance of the stub google.cloud.storage.Client.get_bucket (1325); the real class is google.cloud.storage.Bucket
+1329:54 call  self._gcp_bucket.blob(key).upload_from_string(payload.rea...
+    -> google.cloud.storage.Client.get_bucket.blob.upload_from_string
+    note: missing module (judgement 4); the real class is google.cloud.storage.Blob
+1329:67 call  payload.read()
+    -> io.StringIO.read
+    note: payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque
+
+[dagster_pipes.PipesAzureBlobStorageContextLoader.load_context]
+1349:40 call  _assert_env_param_type(params, "bucket", str, self.__clas...
+    -> dagster_pipes._assert_env_param_type
+1350:37 call  _assert_env_param_type(params, "key", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1351:42 call  self._client.get_blob_client(bucket, key)
+    -> azure.storage.blob.BlobServiceClient.get_blob_client
+    note: judgement 3: client is annotated Any, so its docstring fixes the type, an azure.storage.blob.BlobServiceClient; azure-storage-blob is not installed: named as a missing module (judgement 4)
+1352:44 call  blob_client.download_blob()
+    -> azure.storage.blob.BlobServiceClient.get_blob_client.download_blob
+    note: missing module (judgements 3, 4): blob_client is the instance of the stub get_blob_client that the with statement gives; the real class is azure.storage.blob.BlobClient
+1352:54 call  blob_client.download_blob().readall()
+    -> azure.storage.blob.BlobServiceClient.get_blob_client.download_blob.readall
+    note: missing module (judgements 3, 4); the real class is azure.storage.blob.StorageStreamDownloader
+1353:25 call  json.loads(obj.decode("utf-8"))
+    -> json.loads
+1353:36 call  obj.decode("utf-8")
+    -> azure.storage.blob.BlobServiceClient.get_blob_client.download_blob.readall.decode
+    note: missing module (judgements 3, 4): obj is an instance of the stub; the real value is bytes (bytes.decode)
+
+[dagster_pipes.PipesAzureBlobStorageMessageWriter.__init__]
+1366:14 call  super()
+    -> <builtin>.super
+1366:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriter.__init__
+    reject *: super() in PipesAzureBlobStorageMessageWriter skips PipesAzureBlobStorageMessageWriter; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriter
+
+[dagster_pipes.PipesAzureBlobStorageMessageWriter.make_channel]
+1373:40 call  _assert_env_param_type(params, "bucket", str, self.__clas...
+    -> dagster_pipes._assert_env_param_type
+1374:48 call  _assert_opt_env_param_type(params, "key_prefix", str, sel...
+    -> dagster_pipes._assert_opt_env_param_type
+1375:57 call  PipesAzureBlobStorageMessageWriterChannel( client=self._c...
+    -> dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.__init__
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__: called from PipesAzureBlobStorageMessageWriterChannel.__init__ through super() (1395), not here
+
+[dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.__init__]
+1395:14 call  super()
+    -> <builtin>.super
+1395:25 call  super().__init__(interval=interval)
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__
+    reject *: super() in PipesAzureBlobStorageMessageWriterChannel skips PipesAzureBlobStorageMessageWriterChannel; the next class of its MRO that defines __init__ is PipesBlobStoreMessageWriterChannel
+
+[dagster_pipes.PipesAzureBlobStorageMessageWriterChannel.upload_messages_chunk]
+1402:42 call  self._client.get_blob_client(self._bucket, key)
+    -> azure.storage.blob.BlobServiceClient.get_blob_client
+    note: judgement 3: client is annotated Any, so its docstring fixes the type, an azure.storage.blob.BlobServiceClient; azure-storage-blob is not installed: named as a missing module (judgement 4)
+1403:36 call  blob_client.upload_blob(payload.read())
+    -> azure.storage.blob.BlobServiceClient.get_blob_client.upload_blob
+    note: missing module (judgements 3, 4): blob_client is the instance of the stub get_blob_client that the with statement gives; the real class is azure.storage.blob.BlobClient
+1403:49 call  payload.read()
+    -> io.StringIO.read
+    note: payload is the io.StringIO that _upload_loop passes (706:47); a client's IO is opaque
+
+[dagster_pipes.PipesDbfsContextLoader.load_context]
+1416:48 call  _assert_env_param_type(params, "path", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1417:28 call  os.path.join("/dbfs", unmounted_path.lstrip("/"))
+    -> os.path.join
+1417:59 call  unmounted_path.lstrip("/")
+    -> <builtin>.str.lstrip
+    note: unmounted_path is a str (isinstance check in _assert_env_param_type)
+1418:18 call  open(path, encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+1419:28 call  json.load(f)
+    -> json.load
+
+[dagster_pipes.PipesDbfsMessageWriter.make_channel]
+1429:48 call  _assert_env_param_type(params, "path", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1430:59 call  PipesBufferedFilesystemMessageWriterChannel( path=os.path...
+    -> dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__: called from PipesBufferedFilesystemMessageWriterChannel.__init__ through super() (720), not here
+1431:30 call  os.path.join("/dbfs", unmounted_path.lstrip("/"))
+    -> os.path.join
+1431:61 call  unmounted_path.lstrip("/")
+    -> <builtin>.str.lstrip
+    note: unmounted_path is a str (isinstance check in _assert_env_param_type)
+
+[dagster_pipes.PipesDbfsMessageWriter.get_opened_extras]
+1451:36 call  DagsterPipesError( "`PipesDbfsMessageWriter` requires pys...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+    note: optional import 1447-1453: the except side runs where pyspark or py4j cannot be imported
+1455:46 call  SparkSession.getActiveSession()
+    -> pyspark.sql.SparkSession.getActiveSession
+    note: optional import 1447-1453, both sides run; pyspark is not installed: named as a missing module (judgement 5)
+1457:36 call  DagsterPipesError( "`PipesDbfsMessageWriter` expects an a...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+    note: reached when pyspark has no active session (the real getActiveSession returns None then)
+1461:30 call  spark.conf.get("spark.databricks.clusterUsageTags.cluster...
+    -> pyspark.sql.SparkSession.getActiveSession.conf.get
+    note: missing module (judgement 5): spark is an instance of the stub pyspark.sql.SparkSession.getActiveSession; the real class of spark.conf is pyspark.sql.conf.RuntimeConfig
+1462:57 call  spark.conf.get( "spark.databricks.clusterUsageTags.cluste...
+    -> pyspark.sql.SparkSession.getActiveSession.conf.get
+    note: missing module (judgement 5): spark is an instance of the stub pyspark.sql.SparkSession.getActiveSession; the real class of spark.conf is pyspark.sql.conf.RuntimeConfig
+1465:44 call  spark.conf.get("spark.databricks.clusterUsageTags.cluster...
+    -> pyspark.sql.SparkSession.getActiveSession.conf.get
+    note: missing module (judgement 5): spark is an instance of the stub pyspark.sql.SparkSession.getActiveSession; the real class of spark.conf is pyspark.sql.conf.RuntimeConfig
+1470:26 call  warnings.warn( "A Py4JJavaError was thrown while reading ...
+    -> warnings.warn
+
+[dagster_pipes.PipesUnityCatalogVolumesContextLoader.load_context]
+1488:38 call  _assert_env_param_type(params, "path", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1489:18 call  open(path, encoding="utf-8")
+    -> <builtin>.open
+    reject *: the name open here is the builtin open, not a method of a writer
+1490:28 call  json.load(f)
+    -> json.load
+
+[dagster_pipes.PipesUnityCatalogVolumesMessageWriter.make_channel]
+1502:38 call  _assert_env_param_type(params, "path", str, self.__class__)
+    -> dagster_pipes._assert_env_param_type
+1503:59 call  PipesBufferedFilesystemMessageWriterChannel( path=path, i...
+    -> dagster_pipes.PipesBufferedFilesystemMessageWriterChannel.__init__
+    reject dagster_pipes.PipesBlobStoreMessageWriterChannel.__init__: called from PipesBufferedFilesystemMessageWriterChannel.__init__ through super() (720), not here
+
+[dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.is_dagster_pipes_process]
+1521:32 call  self.widgets.get(DAGSTER_PIPES_CONTEXT_WIDGET_KEY)
+    note: no callee (judgement 3): widgets is annotated Any, and no docstring names its class (the class docstring says only "widgets (base params) in a Databricks Notebook"): a client object (B5)
+
+[dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_context_params]
+1524:28 call  decode_param(self.widgets.get(DAGSTER_PIPES_CONTEXT_WIDGE...
+    -> dagster_pipes.decode_param
+1524:45 call  self.widgets.get(DAGSTER_PIPES_CONTEXT_WIDGET_KEY)
+    note: no callee (judgement 3): widgets is annotated Any, and no docstring names its class (the class docstring says only "widgets (base params) in a Databricks Notebook"): a client object (B5)
+
+[dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_messages_params]
+1527:28 call  decode_param(self.widgets.get(DAGSTER_PIPES_MESSAGES_WIDG...
+    -> dagster_pipes.decode_param
+1527:45 call  self.widgets.get(DAGSTER_PIPES_MESSAGES_WIDGET_KEY)
+    note: no callee (judgement 3): widgets is annotated Any, and no docstring names its class (the class docstring says only "widgets (base params) in a Databricks Notebook"): a client object (B5)
+
+[dagster_pipes.PipesPrefectLogsMessageWriter.open]
+1552:31 call  _assert_env_param_type(params, self.PREFECT_LOGS_KEY, boo...
+    -> dagster_pipes._assert_env_param_type
+1553:55 call  _assert_opt_env_param_type( params, self.MAX_MESSAGE_BYTE...
+    -> dagster_pipes._assert_opt_env_param_type
+1556:51 call  PipesPrefectLogsMessageWriterChannel( logger=logging.getL...
+    -> dagster_pipes.PipesPrefectLogsMessageWriterChannel.__init__
+1557:37 call  logging.getLogger(self.LOGGER_NAME)
+    -> logging.getLogger
+
+[dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message]
+1574:26 call  json.dumps(message)
+    -> json.dumps
+1575:19 call  len(line.encode("utf-8"))
+    -> <builtin>.len
+1575:31 call  line.encode("utf-8")
+    -> <builtin>.str.encode
+    note: line is the str that json.dumps returns
+1577:30 call  json.dumps(self._oversize_replacement(message, size))
+    -> json.dumps
+1577:57 call  self._oversize_replacement(message, size)
+    -> dagster_pipes.PipesPrefectLogsMessageWriterChannel._oversize_replacement
+1578:26 call  self._logger.info(line)
+    -> logging.Logger.info
+    -> dagster_pipes._PipesLoggerHandler.emit
+    note: The public constructor accepts logger: logging.Logger (1569), and _PipesLogger subclasses logging.Logger for precisely that role (460). PipesContext constructs the logger (1699), which installs _PipesLoggerHandler (463), and exposes it through public log (1979-1981). A client may reuse context.log as the public channel constructor logger. Logger.info dispatches to the package-installed handler emit. A separately initialized file-backed context avoids recursive feedback; setting its public logger level to logging.INFO enables this path. This is a package-created logger and handler reused through the public constructor role (B2/B5).
+
+[dagster_pipes.PipesPrefectLogsMessageWriterChannel._oversize_replacement]
+1588:48 call  (message["params"] or {}).get("exception")
+    -> <builtin>.dict.get
+    note: message['params'] is the dict of a package message (_make_message with a dict display), or {}; a client's mapping is opaque
+1589:33 call  _make_message( "closed", { "exception": { "message": erro...
+    -> dagster_pipes._make_message
+1595:40 call  exc.get("name")
+    -> <builtin>.dict.get
+    note: exc is the exception dict of the message (a PipesException TypedDict, a dict: B4) or {}
+1601:29 call  _make_message("log", {"message": error, "level": "ERROR"})
+    -> dagster_pipes._make_message
+
+[dagster_pipes.open_dagster_pipes]
+1636:35 call  PipesContext.is_initialized()
+    -> dagster_pipes.PipesContext.is_initialized
+1637:32 call  PipesContext.get()
+    -> dagster_pipes.PipesContext.get
+1639:61 call  PipesEnvVarParamsLoader()
+    -> dagster_pipes.PipesEnvVarParamsLoader.__init__
+    reject dagster_pipes.PipesMappingParamsLoader.__init__: called from PipesEnvVarParamsLoader.__init__ through super() (1096), not here
+1640:46 call  params_loader.is_dagster_pipes_process()
+    -> dagster_pipes.PipesCliArgsParamsLoader.is_dagster_pipes_process
+    -> dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.is_dagster_pipes_process
+    -> dagster_pipes.PipesMappingParamsLoader.is_dagster_pipes_process
+    reject dagster_pipes.PipesParamsLoader.is_dagster_pipes_process: abstract; every concrete params loader overrides it or inherits it from PipesMappingParamsLoader
+    note: params_loader is a PipesParamsLoader (annotation): PipesMappingParamsLoader (also as PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or PipesDatabricksNotebookWidgetsParamsLoader; a client loader is opaque (the tests pass a MagicMock)
+1641:69 call  PipesDefaultContextLoader()
+    note: no callee: PipesDefaultContextLoader and its bases PipesContextLoader and ABC define no __init__; the method is object.__init__
+1642:69 call  PipesDefaultMessageWriter()
+    note: no callee: PipesDefaultMessageWriter and its bases PipesMessageWriter, ABC and Generic define no __init__; the method is object.__init__
+1643:31 call  PipesContext(params_loader, context_loader, message_writer)
+    -> dagster_pipes.PipesContext.__init__
+1645:45 call  _emit_orchestration_inactive_warning()
+    -> dagster_pipes._emit_orchestration_inactive_warning
+1646:28 call  _get_mock()
+    -> dagster_pipes._get_mock
+1647:21 call  PipesContext.set(context)
+    -> dagster_pipes.PipesContext.set
+
+[dagster_pipes.PipesContext.get]
+1681:28 call  Exception( "PipesContext has not been initialized. You mu...
+    -> <builtin>.Exception
+
+[dagster_pipes.PipesContext.__init__]
+1692:59 call  params_loader.load_context_params()
+    -> dagster_pipes.PipesCliArgsParamsLoader.load_context_params
+    -> dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_context_params
+    -> dagster_pipes.PipesMappingParamsLoader.load_context_params
+    reject dagster_pipes.PipesParamsLoader.load_context_params: abstract; every concrete params loader overrides it or inherits it from PipesMappingParamsLoader
+    note: params_loader is a PipesParamsLoader (annotation): PipesMappingParamsLoader (also as PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or PipesDatabricksNotebookWidgetsParamsLoader; a client loader is opaque (the tests pass a MagicMock)
+1693:61 call  params_loader.load_messages_params()
+    -> dagster_pipes.PipesCliArgsParamsLoader.load_messages_params
+    -> dagster_pipes.PipesDatabricksNotebookWidgetsParamsLoader.load_messages_params
+    -> dagster_pipes.PipesMappingParamsLoader.load_messages_params
+    reject dagster_pipes.PipesParamsLoader.load_messages_params: abstract; every concrete params loader overrides it or inherits it from PipesMappingParamsLoader
+    note: params_loader is a PipesParamsLoader (annotation): PipesMappingParamsLoader (also as PipesEnvVarParamsLoader), PipesCliArgsParamsLoader or PipesDatabricksNotebookWidgetsParamsLoader; a client loader is opaque (the tests pass a MagicMock)
+1694:35 call  ExitStack()
+    -> contextlib.ExitStack
+1695:50 call  self._io_stack.enter_context(context_loader.load_context(...
+    -> contextlib.ExitStack.enter_context
+1695:78 call  context_loader.load_context(context_params)
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesAzureBlobStorageContextLoader.load_context
+    -> dagster_pipes.PipesDbfsContextLoader.load_context
+    -> dagster_pipes.PipesDefaultContextLoader.load_context
+    -> dagster_pipes.PipesGCSContextLoader.load_context
+    -> dagster_pipes.PipesS3ContextLoader.load_context
+    -> dagster_pipes.PipesUnityCatalogVolumesContextLoader.load_context
+    reject dagster_pipes.PipesContextLoader.load_context: PipesContextLoader is abstract, and every concrete loader overrides load_context
+    note: context_loader is a PipesContextLoader (annotation); the concrete package loaders are the six below, each with its own load_context; a client loader is opaque
+1696:61 call  self._io_stack.enter_context(message_writer.open(messages...
+    -> contextlib.ExitStack.enter_context
+1696:81 call  message_writer.open(messages_params)
+    -> contextlib.contextmanager.helper
+    -> dagster_pipes.PipesBlobStoreMessageWriter.open
+    -> dagster_pipes.PipesDefaultMessageWriter.open
+    -> dagster_pipes.PipesPrefectLogsMessageWriter.open
+    reject dagster_pipes.PipesMessageWriter.open: PipesMessageWriter is abstract, and every concrete message writer overrides open or inherits it from PipesBlobStoreMessageWriter
+    reject dagster_pipes.PipesLogWriter.open, dagster_pipes.PipesStdioLogWriter.open: a log writer is not a PipesMessageWriter
+    note: message_writer is a PipesMessageWriter (annotation): PipesDefaultMessageWriter, the five blob store writers (S3, GCS, Azure, DBFS, Unity Catalog Volumes), which inherit PipesBlobStoreMessageWriter.open, or PipesPrefectLogsMessageWriter; a client writer is opaque
+1697:59 call  message_writer.get_opened_payload()
+    -> dagster_pipes.PipesMessageWriter.get_opened_payload
+    reject dagster_pipes.PipesLogWriter.get_opened_payload: message_writer is a message writer, which inherits PipesMessageWriter.get_opened_payload (final)
+1698:44 call  self._message_channel.write_message(_make_message("opened...
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message
+    -> dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message
+    -> dagster_pipes.PipesFileMessageWriterChannel.write_message
+    -> dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message
+    -> dagster_pipes.PipesStreamMessageWriterChannel.write_message
+    reject dagster_pipes.PipesMessageWriterChannel.write_message: PipesMessageWriterChannel is abstract, and every concrete channel overrides write_message or inherits it from PipesBlobStoreMessageWriterChannel
+    note: self._message_channel is what message_writer.open yields (1696): PipesFileMessageWriterChannel, PipesStreamMessageWriterChannel or PipesBufferedStreamMessageWriterChannel (PipesDefaultMessageWriter.open), the channel of make_channel for the five blob store writers (S3, GCS and Azure channels, PipesBufferedFilesystemMessageWriterChannel: all inherit PipesBlobStoreMessageWriterChannel.write_message), or PipesPrefectLogsMessageWriterChannel; a client writer's channel is opaque (B5)
+1698:58 call  _make_message("opened", opened_payload)
+    -> dagster_pipes._make_message
+1699:36 call  _PipesLogger(self)
+    -> dagster_pipes._PipesLogger.__init__
+1700:50 call  set()
+    -> <builtin>.set
+
+[dagster_pipes.PipesContext.__exit__]
+1710:37 call  _pipes_exc_from_tb(TracebackException(exc_type, exc_value...
+    -> dagster_pipes._pipes_exc_from_tb
+1710:56 call  TracebackException(exc_type, exc_value, traceback)
+    -> traceback.TracebackException
+1713:19 call  self.close(exc)
+    -> dagster_pipes.PipesContext.close
+    note: self is a PipesContext (no package subclass)
+
+[dagster_pipes.PipesContext.close]
+1725:48 call  self._message_channel.write_message(_make_message("closed...
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message
+    -> dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message
+    -> dagster_pipes.PipesFileMessageWriterChannel.write_message
+    -> dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message
+    -> dagster_pipes.PipesStreamMessageWriterChannel.write_message
+    reject dagster_pipes.PipesMessageWriterChannel.write_message: PipesMessageWriterChannel is abstract, and every concrete channel overrides write_message or inherits it from PipesBlobStoreMessageWriterChannel
+    note: self._message_channel is what message_writer.open yields (1696): PipesFileMessageWriterChannel, PipesStreamMessageWriterChannel or PipesBufferedStreamMessageWriterChannel (PipesDefaultMessageWriter.open), the channel of make_channel for the five blob store writers (S3, GCS and Azure channels, PipesBufferedFilesystemMessageWriterChannel: all inherit PipesBlobStoreMessageWriterChannel.write_message), or PipesPrefectLogsMessageWriterChannel; a client writer's channel is opaque (B5)
+1725:62 call  _make_message("closed", payload)
+    -> dagster_pipes._make_message
+1726:33 call  self._io_stack.close()
+    -> contextlib.ExitStack.close
+    reject *: the receiver is the ExitStack of 1694, not a PipesContext
+
+[dagster_pipes.PipesContext._write_message]
+1736:36 call  DagsterPipesError("Cannot send message after pipes contex...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+1737:32 call  _make_message(method, params)
+    -> dagster_pipes._make_message
+1738:44 call  self._message_channel.write_message(message)
+    -> dagster_pipes.PipesBlobStoreMessageWriterChannel.write_message
+    -> dagster_pipes.PipesBufferedStreamMessageWriterChannel.write_message
+    -> dagster_pipes.PipesFileMessageWriterChannel.write_message
+    -> dagster_pipes.PipesPrefectLogsMessageWriterChannel.write_message
+    -> dagster_pipes.PipesStreamMessageWriterChannel.write_message
+    reject dagster_pipes.PipesMessageWriterChannel.write_message: PipesMessageWriterChannel is abstract, and every concrete channel overrides write_message or inherits it from PipesBlobStoreMessageWriterChannel
+    note: self._message_channel is what message_writer.open yields (1696): PipesFileMessageWriterChannel, PipesStreamMessageWriterChannel or PipesBufferedStreamMessageWriterChannel (PipesDefaultMessageWriter.open), the channel of make_channel for the five blob store writers (S3, GCS and Azure channels, PipesBufferedFilesystemMessageWriterChannel: all inherit PipesBlobStoreMessageWriterChannel.write_message), or PipesPrefectLogsMessageWriterChannel; a client writer's channel is opaque (B5)
+
+[dagster_pipes.PipesContext.asset_key]
+1754:52 call  _assert_defined_asset_property(self._data["asset_keys"], ...
+    -> dagster_pipes._assert_defined_asset_property
+1755:29 call  _assert_single_asset(self._data, "asset_key")
+    -> dagster_pipes._assert_single_asset
+
+[dagster_pipes.PipesContext.asset_keys]
+1763:52 call  _assert_defined_asset_property(self._data["asset_keys"], ...
+    -> dagster_pipes._assert_defined_asset_property
+
+[dagster_pipes.PipesContext.provenance]
+1771:65 call  _assert_defined_asset_property( self._data["provenance_by...
+    -> dagster_pipes._assert_defined_asset_property
+1774:29 call  _assert_single_asset(self._data, "provenance")
+    -> dagster_pipes._assert_single_asset
+1775:20 call  next(iter(provenance_by_asset_key.values()))
+    -> <builtin>.next
+1775:25 call  iter(provenance_by_asset_key.values())
+    -> <builtin>.iter
+1775:56 call  provenance_by_asset_key.values()
+    -> <builtin>.dict.values
+    note: the mapping comes from the context data: a dict that json makes (the package loaders) or the client's data (opaque)
+
+[dagster_pipes.PipesContext.provenance_by_asset_key]
+1782:65 call  _assert_defined_asset_property( self._data["provenance_by...
+    -> dagster_pipes._assert_defined_asset_property
+
+[dagster_pipes.PipesContext.code_version]
+1792:67 call  _assert_defined_asset_property( self._data["code_version_...
+    -> dagster_pipes._assert_defined_asset_property
+1795:29 call  _assert_single_asset(self._data, "code_version")
+    -> dagster_pipes._assert_single_asset
+1796:20 call  next(iter(code_version_by_asset_key.values()))
+    -> <builtin>.next
+1796:25 call  iter(code_version_by_asset_key.values())
+    -> <builtin>.iter
+1796:58 call  code_version_by_asset_key.values()
+    -> <builtin>.dict.values
+    note: the mapping comes from the context data: a dict that json makes (the package loaders) or the client's data (opaque)
+
+[dagster_pipes.PipesContext.code_version_by_asset_key]
+1803:67 call  _assert_defined_asset_property( self._data["code_version_...
+    -> dagster_pipes._assert_defined_asset_property
+
+[dagster_pipes.PipesContext.partition_key]
+1818:59 call  _assert_defined_partition_property( self._data["partition...
+    -> dagster_pipes._assert_defined_partition_property
+
+[dagster_pipes.PipesContext.partition_key_range]
+1828:65 call  _assert_defined_partition_property( self._data["partition...
+    -> dagster_pipes._assert_defined_partition_property
+
+[dagster_pipes.PipesContext.partition_time_window]
+1841:43 call  _assert_defined_partition_property( self._data["partition...
+    -> dagster_pipes._assert_defined_partition_property
+
+[dagster_pipes.PipesContext.get_extra]
+1872:37 call  _assert_defined_extra(self._data["extras"], key)
+    -> dagster_pipes._assert_defined_extra
+
+[dagster_pipes.PipesContext.report_asset_materialization]
+1899:57 call  _resolve_optionally_passed_asset_key( self._data, asset_k...
+    -> dagster_pipes._resolve_optionally_passed_asset_key
+1903:36 call  DagsterPipesError( f"Calling `report_asset_materializatio...
+    -> <builtin>.Exception.__init__
+    note: DagsterPipesError defines no __init__; the first __init__ of its MRO is that of Exception
+1909:38 call  _normalize_param_metadata(metadata, "report_asset_materia...
+    -> dagster_pipes._normalize_param_metadata
+1913:46 call  _assert_opt_param_type( data_version, str, "report_asset_...
+    -> dagster_pipes._assert_opt_param_type
+1916:28 call  self._write_message( "report_asset_materialization", {"as...
+    -> dagster_pipes.PipesContext._write_message
+1920:38 call  self._materialized_assets.add(asset_key)
+    -> <builtin>.set.add
+
+[dagster_pipes.PipesContext.report_asset_check]
+1943:57 call  _resolve_optionally_passed_asset_key( self._data, asset_k...
+    -> dagster_pipes._resolve_optionally_passed_asset_key
+1946:40 call  _assert_param_type(check_name, str, "report_asset_check",...
+    -> dagster_pipes._assert_param_type
+1947:36 call  _assert_param_type(passed, bool, "report_asset_check", "p...
+    -> dagster_pipes._assert_param_type
+1949:38 call  _normalize_param_metadata(metadata, "report_asset_check",...
+    -> dagster_pipes._normalize_param_metadata
+1953:28 call  self._write_message( "report_asset_check", { "asset_key":...
+    -> dagster_pipes.PipesContext._write_message
+
+[dagster_pipes.PipesContext.report_custom_message]
+1971:28 call  self._write_message("report_custom_message", {"payload": ...
+    -> dagster_pipes.PipesContext._write_message
+
+[dagster_pipes.PipesContext.log_external_stream]
+1974:28 call  self._write_message( "log_external_stream", {"stream": st...
+    -> dagster_pipes.PipesContext._write_message

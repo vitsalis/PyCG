@@ -1,0 +1,17 @@
+{
+    "pyflakes.api.main": {
+        "_io.StringIO.read": "client object: TestMain replaces sys.stdin with an io.StringIO (pyflakes/test/test_api.py:53); the package reads the default sys.stdin, an io.TextIOWrapper"
+    },
+    "pyflakes.checker.Checker.NAME": {
+        "<builtin>.RuntimeError": "Global-scope audit 2026-11-15: The only constructor call is the else after ctx is checked against ast.Load, ast.Store and ast.Del (1915-1927). Supported parser-produced Name contexts are exactly those three; no annotation admits an arbitrary hand-built context. The observed trace edge comes from test_undefined_names.py:824-832: ast.parse(\"x = 10\") at829 followed by tree.body[0].targets[0].ctx = object() at831. That deliberately invalid client mutation is excluded by global B3. Rule A preserves function bodies but does not make impossible argument values admissible."
+    },
+    "pyflakes.reporter.Reporter.flake": {
+        "_io.StringIO.write": "client object: the tests pass io.StringIO streams to Reporter, and TestMain replaces sys.stdout with one (pyflakes/test/test_api.py:61, 307); the package's own stream is the default sys.stdout, an io.TextIOWrapper"
+    },
+    "pyflakes.reporter.Reporter.syntaxError": {
+        "_io.StringIO.write": "client object: the tests pass io.StringIO streams to Reporter, and TestMain replaces sys.stderr with one (pyflakes/test/test_api.py:62, 239); the package's own stream is the default sys.stderr, an io.TextIOWrapper"
+    },
+    "pyflakes.reporter.Reporter.unexpectedError": {
+        "_io.StringIO.write": "client object: the tests pass io.StringIO streams to Reporter, and TestMain replaces sys.stderr with one (pyflakes/test/test_api.py:62, 253); the package's own stream is the default sys.stderr, an io.TextIOWrapper"
+    }
+}

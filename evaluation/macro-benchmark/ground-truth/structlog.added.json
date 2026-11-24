@@ -1,0 +1,1183 @@
+{
+  "edges": {
+    "structlog.__getattr__": {
+      "<builtin>.str.rstrip": [
+        "structlog 126:60 call  meta[\"Author-email\"].split(\"<\", 1)[1].rstrip(\">\")"
+      ],
+      "<builtin>.str.split": [
+        "structlog 123:41 call  meta[\"Project-URL\"].split(\" \", 1)",
+        "structlog 126:42 call  meta[\"Author-email\"].split(\"<\", 1)"
+      ],
+      "importlib.metadata.metadata": [
+        "structlog 120:20 call  metadata(\"structlog\")"
+      ],
+      "importlib.metadata.version": [
+        "structlog 118:23 call  version(\"structlog\")"
+      ],
+      "warnings.warn": [
+        "structlog 110:22 call  warnings.warn( f\"Accessing structlog.{name} is deprecated..."
+      ]
+    },
+    "structlog._base.BoundLoggerBase.__eq__": {
+      "structlog._config.BoundLoggerLazyProxy._context": [
+        "structlog._base 67:43 getattr  other._context"
+      ],
+      "structlog.threadlocal._ThreadLocalDictWrapper.__eq__": [
+        "structlog._base 67:34 op  self._context == other._context"
+      ]
+    },
+    "structlog._base.BoundLoggerBase.__repr__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__repr__": [
+        "structlog._base 63:53 format  {self._context!r}"
+      ]
+    },
+    "structlog._base.BoundLoggerBase._process_event": {
+      "structlog.processors.EventRenamer.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.processors.ExceptionPrettyPrinter.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.processors.LogfmtRenderer.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.processors.MaybeTimeStamper.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.processors.UnicodeDecoder.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.processors.UnicodeEncoder.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.stdlib.ExtraAdder.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.stdlib.PositionalArgumentsFormatter.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.stdlib.ProcessorFormatter.remove_processors_meta": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.stdlib.add_log_level_number": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.stdlib.add_logger_name": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.stdlib.filter_by_level": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog._base 168:41 getattr  self._context.copy"
+      ],
+      "structlog.threadlocal.merge_threadlocal": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ],
+      "structlog.twisted.JSONRenderer.__call__": [
+        "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)"
+      ]
+    },
+    "structlog._base.BoundLoggerBase._proxy_to_logger": {
+      "logging.Logger.critical": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.Logger.debug": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.Logger.error": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.RootLogger.critical": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.RootLogger.debug": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.RootLogger.error": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.RootLogger.exception": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.RootLogger.info": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "logging.RootLogger.warning": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "structlog._output.BytesLogger.msg": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "structlog._output.WriteLogger.msg": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "structlog.twisted.JSONLogObserverWrapper.__call__": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "structlog.twisted.PlainFileLogObserver.__call__": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "structlog.twisted.ReprWrapper.__repr__": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "twisted.python.log.LogPublisher.msg": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ],
+      "twisted.python.log.err": [
+        "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)"
+      ]
+    },
+    "structlog._base.BoundLoggerBase.new": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog._base 117:23 getattr  self._context.clear"
+      ]
+    },
+    "structlog._base.BoundLoggerBase.try_unbind": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog._base 105:25 getattr  bl._context.pop"
+      ]
+    },
+    "structlog._base.BoundLoggerBase.unbind": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__delitem__": [
+        "structlog._base 93:28 delitem  bl._context[key]"
+      ]
+    },
+    "structlog._base.get_context": {
+      "structlog.stdlib.AsyncBoundLogger._context": [
+        "structlog._base 245:25 getattr  bound_logger._context"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.__getattr__": {
+      "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": [
+        "structlog._config 424:23 call  self.bind()"
+      ],
+      "structlog._generic.BoundLogger.__getattr__": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ],
+      "structlog.stdlib.BoundLogger.disabled": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ],
+      "structlog.stdlib.BoundLogger.handlers": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ],
+      "structlog.stdlib.BoundLogger.level": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ],
+      "structlog.stdlib.BoundLogger.name": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ],
+      "structlog.stdlib.BoundLogger.parent": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ],
+      "structlog.stdlib.BoundLogger.propagate": [
+        "structlog._config 426:23 call  getattr(bl, name)"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.__repr__": {
+      "structlog._output.BytesLogger.__repr__": [
+        "structlog._config 343:44 format  {self._logger!r}"
+      ],
+      "structlog._output.PrintLogger.__repr__": [
+        "structlog._config 343:44 format  {self._logger!r}"
+      ],
+      "structlog._output.WriteLogger.__repr__": [
+        "structlog._config 343:44 format  {self._logger!r}"
+      ],
+      "structlog.testing.CapturingLogger.__repr__": [
+        "structlog._config 343:44 format  {self._logger!r}"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.bind": {
+      "structlog._output.BytesLoggerFactory.__call__": [
+        "structlog._config 361:45 call  _CONFIG.logger_factory(*self._logger_factory_args)"
+      ],
+      "structlog._output.WriteLoggerFactory.__call__": [
+        "structlog._config 361:45 call  _CONFIG.logger_factory(*self._logger_factory_args)"
+      ],
+      "structlog.testing.ReturnLoggerFactory.__call__": [
+        "structlog._config 361:45 call  _CONFIG.logger_factory(*self._logger_factory_args)"
+      ],
+      "structlog.twisted.LoggerFactory.__call__": [
+        "structlog._config 361:45 call  _CONFIG.logger_factory(*self._logger_factory_args)"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": {
+      "structlog.stdlib.BoundLogger.bind": [
+        "structlog._config 382:35 call  logger.bind(**new_values)"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.new": {
+      "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": [
+        "structlog._config 414:25 call  self.bind(**new_values)"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.try_unbind": {
+      "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": [
+        "structlog._config 403:25 call  self.bind()"
+      ],
+      "structlog.stdlib.AsyncBoundLogger.try_unbind": [
+        "structlog._config 403:38 call  self.bind().try_unbind(*keys)"
+      ],
+      "structlog.stdlib.BoundLogger.try_unbind": [
+        "structlog._config 403:38 call  self.bind().try_unbind(*keys)"
+      ]
+    },
+    "structlog._config.BoundLoggerLazyProxy.unbind": {
+      "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": [
+        "structlog._config 400:25 call  self.bind()"
+      ],
+      "structlog.stdlib.AsyncBoundLogger.unbind": [
+        "structlog._config 400:34 call  self.bind().unbind(*keys)"
+      ],
+      "structlog.stdlib.BoundLogger.unbind": [
+        "structlog._config 400:34 call  self.bind().unbind(*keys)"
+      ]
+    },
+    "structlog._greenlets.GreenThreadLocal.__delattr__": {
+      "<builtin>.AttributeError": [
+        "structlog._greenlets 44:33 call  AttributeError(name)"
+      ],
+      "greenlet.getcurrent": [
+        "structlog._greenlets 40:25 call  getcurrent()"
+      ]
+    },
+    "structlog._greenlets.GreenThreadLocal.__getattr__": {
+      "<builtin>.AttributeError": [
+        "structlog._greenlets 33:33 call  AttributeError(name)"
+      ],
+      "greenlet.getcurrent": [
+        "structlog._greenlets 29:25 call  getcurrent()"
+      ]
+    },
+    "structlog._greenlets.GreenThreadLocal.__init__": {
+      "weakref.WeakKeyDictionary": [
+        "structlog._greenlets 26:55 call  WeakKeyDictionary()"
+      ]
+    },
+    "structlog._greenlets.GreenThreadLocal.__setattr__": {
+      "greenlet.getcurrent": [
+        "structlog._greenlets 36:25 call  getcurrent()"
+      ],
+      "weakref.WeakKeyDictionary.setdefault": [
+        "structlog._greenlets 37:34 call  self._weakdict.setdefault(key, {})"
+      ]
+    },
+    "structlog._native._make_filtering_bound_logger.alog": {
+      "asyncio.ProactorEventLoop.run_in_executor": [
+        "structlog._native 235:70 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ],
+      "structlog._native._make_filtering_bound_logger.alog.<lambda1>": [
+        "structlog._native 235:70 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ]
+    },
+    "structlog._native._make_filtering_bound_logger.make_method.ameth": {
+      "asyncio.ProactorEventLoop.run_in_executor": [
+        "structlog._native 191:65 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ],
+      "structlog._native._make_filtering_bound_logger.make_method.ameth.<lambda1>": [
+        "structlog._native 191:65 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ]
+    },
+    "structlog._native.aexception": {
+      "asyncio.ProactorEventLoop.run_in_executor": [
+        "structlog._native 72:66 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ],
+      "structlog._native.aexception.<lambda1>": [
+        "structlog._native 72:66 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ]
+    },
+    "structlog._native.aexception.<lambda1>.<lambda1>": {
+      "structlog._native._nop": [
+        "structlog._native 74:47 call  self.error(event, *args, **kw)"
+      ]
+    },
+    "structlog._native.exception": {
+      "structlog._native._nop": [
+        "structlog._native 49:22 call  self.error(event, *args, **kw)"
+      ]
+    },
+    "structlog._output.BytesLogger.msg": {
+      "_io._WindowsConsoleIO.flush": [
+        "structlog._output 348:24 call  self._flush()"
+      ],
+      "_io._WindowsConsoleIO.write": [
+        "structlog._output 347:24 call  self._write(message + b\"\\n\")"
+      ]
+    },
+    "structlog.contextvars.get_merged_contextvars": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.contextvars 77:15 call  ctx.update(structlog.get_context(bound_logger))"
+      ]
+    },
+    "structlog.dev": {
+      "warnings.warn": [
+        "structlog.dev 535:18 call  warnings.warn( \"better-exceptions support is deprecated a..."
+      ]
+    },
+    "structlog.dev.ConsoleRenderer.__call__": {
+      "structlog.dev.RichTracebackFormatter.__call__": [
+        "structlog.dev 956:38 call  self._exception_formatter(sio, exc_info)"
+      ],
+      "structlog.dev.better_traceback": [
+        "structlog.dev 956:38 call  self._exception_formatter(sio, exc_info)"
+      ],
+      "structlog.dev.rich_traceback": [
+        "structlog.dev 956:38 call  self._exception_formatter(sio, exc_info)"
+      ]
+    },
+    "structlog.dev.RichTracebackFormatter.__call__": {
+      "<builtin>.hasattr": [
+        "structlog.dev 463:19 call  hasattr(tb, \"code_width\")"
+      ],
+      "io.StringIO.write": [
+        "structlog.dev 443:18 call  sio.write(\"\\n\")"
+      ],
+      "rich.console.Console": [
+        "structlog.dev 445:26 call  Console( file=sio, color_system=self.color_system, width=..."
+      ],
+      "rich.console.Console.print": [
+        "structlog.dev 466:22 call  console.print(tb)"
+      ],
+      "rich.traceback.Traceback.from_exception": [
+        "structlog.dev 448:38 call  Traceback.from_exception( *exc_info, show_locals=self.sho..."
+      ],
+      "warnings.warn": [
+        "structlog.dev 436:26 call  warnings.warn( \"Use None to use the terminal width instea..."
+      ]
+    },
+    "structlog.dev._init_terminal": {
+      "<builtin>.SystemError": [
+        "structlog.dev 88:30 call  SystemError( _MISSING.format( who=who + \" with `colors=Tr..."
+      ],
+      "<builtin>.str.format": [
+        "structlog.dev 89:32 call  _MISSING.format( who=who + \" with `colors=True` on Window..."
+      ],
+      "colorama.deinit": [
+        "structlog.dev 97:28 call  colorama.deinit()"
+      ],
+      "colorama.init": [
+        "structlog.dev 98:26 call  colorama.init(strip=False)",
+        "structlog.dev 100:26 call  colorama.init()"
+      ]
+    },
+    "structlog.dev.better_traceback": {
+      "<builtin>.str.join": [
+        "structlog.dev 525:29 call  \"\".join(better_exceptions.format_exception(*exc_info))"
+      ],
+      "better_exceptions.format_exception": [
+        "structlog.dev 525:64 call  better_exceptions.format_exception(*exc_info)"
+      ],
+      "io.StringIO.write": [
+        "structlog.dev 525:14 call  sio.write(\"\\n\" + \"\".join(better_exceptions.format_excepti..."
+      ],
+      "warnings.warn": [
+        "structlog.dev 519:18 call  warnings.warn( \"better-exceptions support is deprecated a..."
+      ]
+    },
+    "structlog.processors.ExceptionPrettyPrinter.__call__": {
+      "structlog.tracebacks.ExceptionDictTransformer.__call__": [
+        "structlog.processors 675:44 call  self.format_exception(exc_info)"
+      ]
+    },
+    "structlog.processors._json_fallback_handler": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.processors 363:20 getattr  obj._dict"
+      ]
+    },
+    "structlog.stdlib.AsyncBoundLogger._dispatch_to_sync": {
+      "asyncio.ProactorEventLoop.run_in_executor": [
+        "structlog.stdlib 673:61 call  asyncio.get_running_loop().run_in_executor( self._executo..."
+      ],
+      "structlog.stdlib.AsyncBoundLogger._dispatch_to_sync.<lambda1>": [
+        "structlog.stdlib 673:61 call  asyncio.get_running_loop().run_in_executor( self._executo..."
+      ]
+    },
+    "structlog.stdlib.BoundLogger._dispatch_to_sync": {
+      "asyncio.ProactorEventLoop.run_in_executor": [
+        "structlog.stdlib 465:61 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ],
+      "structlog.stdlib.BoundLogger._dispatch_to_sync.<lambda1>": [
+        "structlog.stdlib 465:61 call  asyncio.get_running_loop().run_in_executor( None, lambda:..."
+      ]
+    },
+    "structlog.stdlib.BoundLogger.addHandler": {
+      "logging.Logger.addHandler": [
+        "structlog.stdlib 380:32 call  self._logger.addHandler(hdlr)"
+      ],
+      "logging.RootLogger.addHandler": [
+        "structlog.stdlib 380:32 call  self._logger.addHandler(hdlr)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 380:22 getattr  self._logger.addHandler"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 380:32 call  self._logger.addHandler(hdlr)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.callHandlers": {
+      "logging.Logger.callHandlers": [
+        "structlog.stdlib 400:34 call  self._logger.callHandlers(record)"
+      ],
+      "logging.RootLogger.callHandlers": [
+        "structlog.stdlib 400:34 call  self._logger.callHandlers(record)"
+      ],
+      "structlog.stdlib.ProcessorFormatter.format": [
+        "structlog.stdlib 400:34 call  self._logger.callHandlers(record)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 400:22 getattr  self._logger.callHandlers"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 400:34 call  self._logger.callHandlers(record)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.disabled": {
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 331:29 getattr  self._logger.disabled"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.findCaller": {
+      "logging.Logger.findCaller": [
+        "structlog.stdlib 347:39 call  self._logger.findCaller( stack_info=stack_info, stackleve..."
+      ],
+      "logging.RootLogger.findCaller": [
+        "structlog.stdlib 347:39 call  self._logger.findCaller( stack_info=stack_info, stackleve..."
+      ],
+      "structlog.stdlib._FixedFindCallerLogger.findCaller": [
+        "structlog.stdlib 347:39 call  self._logger.findCaller( stack_info=stack_info, stackleve..."
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 347:29 getattr  self._logger.findCaller"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 347:39 call  self._logger.findCaller( stack_info=stack_info, stackleve..."
+      ]
+    },
+    "structlog.stdlib.BoundLogger.getChild": {
+      "logging.Logger.getChild": [
+        "structlog.stdlib 444:37 call  self._logger.getChild(suffix)"
+      ],
+      "logging.RootLogger.getChild": [
+        "structlog.stdlib 444:37 call  self._logger.getChild(suffix)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 444:29 getattr  self._logger.getChild"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 444:37 call  self._logger.getChild(suffix)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.getEffectiveLevel": {
+      "logging.RootLogger.getEffectiveLevel": [
+        "structlog.stdlib 407:46 call  self._logger.getEffectiveLevel()"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 407:29 getattr  self._logger.getEffectiveLevel"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 407:46 call  self._logger.getEffectiveLevel()"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.get_effective_level": {
+      "logging.RootLogger.getEffectiveLevel": [
+        "structlog.stdlib 438:46 call  self._logger.getEffectiveLevel()"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 438:29 getattr  self._logger.getEffectiveLevel"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 438:46 call  self._logger.getEffectiveLevel()"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.handle": {
+      "logging.Logger.handle": [
+        "structlog.stdlib 374:28 call  self._logger.handle(record)"
+      ],
+      "logging.RootLogger.handle": [
+        "structlog.stdlib 374:28 call  self._logger.handle(record)"
+      ],
+      "structlog.stdlib.ProcessorFormatter.format": [
+        "structlog.stdlib 374:28 call  self._logger.handle(record)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 374:22 getattr  self._logger.handle"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 374:28 call  self._logger.handle(record)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.handlers": {
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 324:29 getattr  self._logger.handlers"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.hasHandlers": {
+      "logging.Logger.hasHandlers": [
+        "structlog.stdlib 394:40 call  self._logger.hasHandlers()"
+      ],
+      "logging.RootLogger.hasHandlers": [
+        "structlog.stdlib 394:40 call  self._logger.hasHandlers()"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 394:29 getattr  self._logger.hasHandlers"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 394:40 call  self._logger.hasHandlers()"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.isEnabledFor": {
+      "logging.Logger.isEnabledFor": [
+        "structlog.stdlib 413:41 call  self._logger.isEnabledFor(level)"
+      ],
+      "logging.RootLogger.isEnabledFor": [
+        "structlog.stdlib 413:41 call  self._logger.isEnabledFor(level)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 413:29 getattr  self._logger.isEnabledFor"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 413:41 call  self._logger.isEnabledFor(level)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.is_enabled_for": {
+      "logging.RootLogger.isEnabledFor": [
+        "structlog.stdlib 429:41 call  self._logger.isEnabledFor(level)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 429:29 getattr  self._logger.isEnabledFor"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 429:41 call  self._logger.isEnabledFor(level)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.level": {
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 303:29 getattr  self._logger.level"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.makeRecord": {
+      "logging.Logger.makeRecord": [
+        "structlog.stdlib 366:39 call  self._logger.makeRecord( name, level, fn, lno, msg, args,..."
+      ],
+      "logging.RootLogger.makeRecord": [
+        "structlog.stdlib 366:39 call  self._logger.makeRecord( name, level, fn, lno, msg, args,..."
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 366:29 getattr  self._logger.makeRecord"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 366:39 call  self._logger.makeRecord( name, level, fn, lno, msg, args,..."
+      ]
+    },
+    "structlog.stdlib.BoundLogger.name": {
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 296:29 getattr  self._logger.name"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.parent": {
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 310:29 getattr  self._logger.parent"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.propagate": {
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 317:29 getattr  self._logger.propagate"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.removeHandler": {
+      "logging.Logger.removeHandler": [
+        "structlog.stdlib 386:35 call  self._logger.removeHandler(hdlr)"
+      ],
+      "logging.RootLogger.removeHandler": [
+        "structlog.stdlib 386:35 call  self._logger.removeHandler(hdlr)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 386:22 getattr  self._logger.removeHandler"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 386:35 call  self._logger.removeHandler(hdlr)"
+      ]
+    },
+    "structlog.stdlib.BoundLogger.setLevel": {
+      "logging.Logger.setLevel": [
+        "structlog.stdlib 337:30 call  self._logger.setLevel(level)"
+      ],
+      "logging.RootLogger.setLevel": [
+        "structlog.stdlib 337:30 call  self._logger.setLevel(level)"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__": [
+        "structlog.stdlib 337:22 getattr  self._logger.setLevel"
+      ],
+      "structlog.testing.CapturingLogger.__getattr__.log": [
+        "structlog.stdlib 337:30 call  self._logger.setLevel(level)"
+      ]
+    },
+    "structlog.stdlib.ProcessorFormatter.format": {
+      "structlog.contextvars.merge_contextvars": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.dev.set_exc_info": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.EventRenamer.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.ExceptionPrettyPrinter.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.ExceptionRenderer.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.LogfmtRenderer.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.MaybeTimeStamper.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.StackInfoRenderer.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.TimeStamper.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.UnicodeDecoder.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.processors.UnicodeEncoder.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.stdlib.PositionalArgumentsFormatter.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.stdlib.ProcessorFormatter.wrap_for_formatter": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.stdlib.add_log_level_number": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.stdlib.render_to_log_args_and_kwargs": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.stdlib.render_to_log_kwargs": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.testing.LogCapture.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.threadlocal.merge_threadlocal": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.twisted.EventAdapter.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.twisted.JSONRenderer.__call__": [
+        "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)",
+        "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)"
+      ],
+      "structlog.twisted.ReprWrapper.__repr__": [
+        "structlog.stdlib 1216:30 call  super().format(record)"
+      ]
+    },
+    "structlog.stdlib.filter_by_level": {
+      "logging.RootLogger.getEffectiveLevel": [
+        "structlog.stdlib 836:67 call  logger.getEffectiveLevel()"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__delitem__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 219:14 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 225:29 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__init__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 184:18 getattr  self._dict",
+        "structlog.threadlocal 186:18 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__iter__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 213:21 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__len__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 222:21 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__repr__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 201:51 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper.__setitem__": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 216:14 getattr  self._dict"
+      ]
+    },
+    "structlog.threadlocal._ThreadLocalDictWrapper._dict": {
+      "structlog._greenlets.GreenThreadLocal.__getattr__": [
+        "structlog.threadlocal 194:39 getattr  self.__class__._tl.dict_",
+        "structlog.threadlocal 198:39 getattr  self.__class__._tl.dict_"
+      ],
+      "structlog._greenlets.GreenThreadLocal.__setattr__": [
+        "structlog.threadlocal 196:32 setattr  self.__class__._tl.dict_"
+      ]
+    },
+    "structlog.threadlocal.as_immutable": {
+      "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": [
+        "structlog.threadlocal 120:29 call  logger.bind()"
+      ],
+      "structlog._greenlets.GreenThreadLocal.__getattr__": [
+        "structlog.threadlocal 123:35 getattr  logger._context._tl.dict_"
+      ],
+      "structlog.stdlib.AsyncBoundLogger._context": [
+        "structlog.threadlocal 123:22 getattr  logger._context",
+        "structlog.threadlocal 124:20 getattr  logger._context"
+      ]
+    },
+    "structlog.threadlocal.get_merged_threadlocal": {
+      "structlog.threadlocal._ThreadLocalDictWrapper.__getattr__": [
+        "structlog.threadlocal 252:15 call  ctx.update(structlog.get_context(bound_logger))"
+      ]
+    },
+    "structlog.threadlocal.tmp_bind": {
+      "structlog._config.BoundLoggerLazyProxy.bind.finalized_bind": [
+        "structlog.threadlocal 152:29 call  logger.bind()"
+      ],
+      "structlog.stdlib.AsyncBoundLogger._context": [
+        "structlog.threadlocal 154:34 getattr  as_immutable(logger)._context",
+        "structlog.threadlocal 158:16 getattr  logger._context",
+        "structlog.threadlocal 159:16 getattr  logger._context"
+      ],
+      "structlog.stdlib.AsyncBoundLogger.bind": [
+        "structlog.threadlocal 156:26 call  logger.bind(**tmp_values)"
+      ],
+      "structlog.stdlib.BoundLogger.bind": [
+        "structlog.threadlocal 156:26 call  logger.bind(**tmp_values)"
+      ]
+    },
+    "structlog.threadlocal.wrap_dict": {
+      "structlog._greenlets.GreenThreadLocal.__init__": [
+        "structlog.threadlocal 96:30 call  ThreadLocal()"
+      ]
+    },
+    "structlog.tracebacks.extract": {
+      "<builtin>.dict.items": [
+        "structlog.tracebacks 332:57 call  frame_summary.f_locals.items()"
+      ],
+      "types.FrameLocalsProxyType.items": [
+        "structlog.tracebacks 332:57 call  frame_summary.f_locals.items()"
+      ]
+    },
+    "structlog.tracebacks.to_repr": {
+      "rich.pretty.traverse": [
+        "structlog.tracebacks 158:40 call  rich.pretty.traverse( obj, max_length=max_length, max_str..."
+      ],
+      "rich.pretty.traverse.render": [
+        "structlog.tracebacks 160:17 call  rich.pretty.traverse( obj, max_length=max_length, max_str..."
+      ],
+      "structlog._base.BoundLoggerBase.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ],
+      "structlog._output.BytesLogger.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ],
+      "structlog._output.PrintLogger.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ],
+      "structlog._output.WriteLogger.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ],
+      "structlog.testing.CapturingLogger.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ],
+      "structlog.threadlocal._ThreadLocalDictWrapper.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ],
+      "structlog.twisted.ReprWrapper.__repr__": [
+        "structlog.tracebacks 173:32 call  repr(obj)"
+      ]
+    },
+    "structlog.twisted.EventAdapter.__call__": {
+      "structlog.dev.ConsoleRenderer.__call__": [
+        "structlog.twisted 326:47 call  self._dictRenderer(logger, name, eventDict)",
+        "structlog.twisted 330:34 call  self._dictRenderer(logger, name, eventDict)"
+      ],
+      "structlog.twisted.JSONRenderer.__call__": [
+        "structlog.twisted 326:47 call  self._dictRenderer(logger, name, eventDict)",
+        "structlog.twisted 330:34 call  self._dictRenderer(logger, name, eventDict)"
+      ]
+    },
+    "structlog.twisted.JSONLogObserverWrapper.__call__": {
+      "structlog.twisted.JSONLogObserverWrapper.__call__": [
+        "structlog.twisted 257:30 call  self._observer(eventDict)"
+      ],
+      "structlog.twisted.PlainFileLogObserver.__call__": [
+        "structlog.twisted 257:30 call  self._observer(eventDict)"
+      ],
+      "structlog.twisted.ReprWrapper.__repr__": [
+        "structlog.twisted 248:51 call  textFromEventDict( eventDict # type: ignore[arg-type] )"
+      ]
+    },
+    "structlog.twisted.PlainFileLogObserver.__call__": {
+      "io.TextIOWrapper.flush": [
+        "structlog.twisted 222:20 call  self._flush()"
+      ],
+      "io.TextIOWrapper.write": [
+        "structlog.twisted 218:20 call  self._write( textFromEventDict(eventDict) # type: ignore[..."
+      ],
+      "structlog.twisted.ReprWrapper.__repr__": [
+        "structlog.twisted 219:30 call  textFromEventDict(eventDict)"
+      ]
+    }
+  },
+  "notes": {
+    "structlog 110:22 call  warnings.warn( f\"Accessing structlog.{name} is deprecated...": [
+      "warnings.warn of the standard library (a value site only because classes of the package bind an attribute warn)"
+    ],
+    "structlog 123:41 call  meta[\"Project-URL\"].split(\" \", 1)": [
+      "meta[\"Project-URL\"] is a header value of the metadata message, a str"
+    ],
+    "structlog._base 174:30 call  proc(self._logger, method_name, event_dict)": [
+      "proc is an entry of self._processors: the processors given to wrap_logger or configure, default _BUILTIN_DEFAULT_PROCESSORS (_config.py:37: merge_contextvars, add_log_level, StackInfoRenderer, set_exc_info, TimeStamper, ConsoleRenderer); the processor set P of the header, which the documentation names as processors; client callables are client callbacks"
+    ],
+    "structlog._base 224:54 call  getattr(self._logger, method_name)(*args, **kw)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers."
+    ],
+    "structlog._base 245:25 getattr  bound_logger._context": [
+      "bound_logger is a bound logger or a proxy (BindableLogger): a BoundLoggerBase holds _context as an instance attribute; a proxy and an AsyncBoundLogger have the property _context"
+    ],
+    "structlog._base 67:43 getattr  other._context": [
+      "docs/bound-loggers.md:169-184 creates log with wrap_logger, log2 with log.bind(x=42), and explicitly evaluates log == log2. The first value is a BoundLoggerLazyProxy and the second a generic BoundLogger. object.__eq__ on the proxy returns NotImplemented for distinct values, so the reflected BoundLoggerBase.__eq__ receives other=proxy and reads its _context property. This exact documented role defeats the ledger rejection of proxies as arbitrary comparison values."
+    ],
+    "structlog._base 93:28 delitem  bl._context[key]": [
+      "bl._context is a dict (outside, no edge) or a wrap_dict instance (C)"
+    ],
+    "structlog._config 361:45 call  _CONFIG.logger_factory(*self._logger_factory_args)": [
+      "the logger_factory of configure, default PrintLoggerFactory() (_config.py:59): the factories set F of the header, which their docstrings and docs/ name for logger_factory, and the class PrintLogger, which tests/test_stdlib.py:1651 passes; client callables are client callbacks"
+    ],
+    "structlog._config 382:35 call  logger.bind(**new_values)": [
+      "logger is the bound logger of line 371 (BL): stdlib.BoundLogger and AsyncBoundLogger define bind, the other classes inherit BoundLoggerBase.bind"
+    ],
+    "structlog._config 400:25 call  self.bind()": [
+      "self.bind is the method BoundLoggerLazyProxy.bind, or the closure finalized_bind that bind stores on the instance when the logger is cached (line 390)"
+    ],
+    "structlog._config 403:25 call  self.bind()": [
+      "self.bind is the method BoundLoggerLazyProxy.bind, or the closure finalized_bind stored at line 390"
+    ],
+    "structlog._config 414:25 call  self.bind(**new_values)": [
+      "self.bind is the method BoundLoggerLazyProxy.bind, or the closure finalized_bind stored at line 390"
+    ],
+    "structlog._config 424:23 call  self.bind()": [
+      "self.bind is the method BoundLoggerLazyProxy.bind, or the closure finalized_bind stored at line 390"
+    ],
+    "structlog._config 426:23 call  getattr(bl, name)": [
+      "name is the attribute that the client asked the proxy for. tests/test_stdlib.py:239-252 uses getattr(bl, attribute_name) for name, level, parent, propagate, handlers and disabled. The lazy proxy delegates that same public bound-logger interface after bind(), which can construct stdlib.BoundLogger (docs/standard-library.md). These exact names satisfy B3's test/documented-name exception. The proxy's own _context property is found before __getattr__ and supplies no further property edge here."
+    ],
+    "structlog._greenlets 29:25 call  getcurrent()": [
+      "greenlet is not installed: a missing module (optional import, threadlocal.py:37)"
+    ],
+    "structlog._native 191:65 call  asyncio.get_running_loop().run_in_executor( None, lambda:...": [
+      "BaseEventLoop defines the inherited method but is not the concrete running loop that standard asyncio creates. Both supported platform implementations have public concrete aliases, SelectorEventLoop and ProactorEventLoop. The global rule names methods through the concrete receiver, not the class defining an inherited method. Custom client loops remain opaque.",
+      "Standard asyncio creates a concrete SelectorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site.",
+      "Standard asyncio creates a concrete ProactorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site."
+    ],
+    "structlog._native 235:70 call  asyncio.get_running_loop().run_in_executor( None, lambda:...": [
+      "BaseEventLoop defines the inherited method but is not the concrete running loop that standard asyncio creates. Both supported platform implementations have public concrete aliases, SelectorEventLoop and ProactorEventLoop. The global rule names methods through the concrete receiver, not the class defining an inherited method. Custom client loops remain opaque.",
+      "Standard asyncio creates a concrete SelectorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site.",
+      "Standard asyncio creates a concrete ProactorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site."
+    ],
+    "structlog._native 49:22 call  self.error(event, *args, **kw)": [
+      "self.error is meths[\"error\"] of the filtering class: the closure meth for the level ERROR, or _nop when the class filters at CRITICAL (make_method, line 166)"
+    ],
+    "structlog._native 72:66 call  asyncio.get_running_loop().run_in_executor( None, lambda:...": [
+      "BaseEventLoop defines the inherited method but is not the concrete running loop that standard asyncio creates. Both supported platform implementations have public concrete aliases, SelectorEventLoop and ProactorEventLoop. The global rule names methods through the concrete receiver, not the class defining an inherited method. Custom client loops remain opaque.",
+      "Standard asyncio creates a concrete SelectorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site.",
+      "Standard asyncio creates a concrete ProactorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site."
+    ],
+    "structlog._native 74:47 call  self.error(event, *args, **kw)": [
+      "self.error is meths[\"error\"]: the closure meth for ERROR, or _nop when the class filters at CRITICAL"
+    ],
+    "structlog._output 347:24 call  self._write(message + b\"\\n\")": [
+      "BytesLogger defaults its file to sys.stdout.buffer and stores its bound write/flush methods. Standard CPython -u or PYTHONUNBUFFERED disables buffering: create_stdio opens wb with buffering=0, then wraps that raw stream in TextIOWrapper. On ordinary file descriptors the raw receiver is io.FileIO; on a Windows console it is _io._WindowsConsoleIO. These are interpreter-created defaults, with no client stream injection. Name the explicit method through its concrete class. io.RawIOBase is a separately defined registered ABC, not the actual class or MRO public alias of _io._WindowsConsoleIO."
+    ],
+    "structlog._output 348:24 call  self._flush()": [
+      "BytesLogger defaults its file to sys.stdout.buffer and stores its bound write/flush methods. Standard CPython -u or PYTHONUNBUFFERED disables buffering: create_stdio opens wb with buffering=0, then wraps that raw stream in TextIOWrapper. On ordinary file descriptors the raw receiver is io.FileIO; on a Windows console it is _io._WindowsConsoleIO. These are interpreter-created defaults, with no client stream injection. Name the explicit method through its concrete class. io.RawIOBase is a separately defined registered ABC, not the actual class or MRO public alias of _io._WindowsConsoleIO."
+    ],
+    "structlog.contextvars 77:15 call  ctx.update(structlog.get_context(bound_logger))": [
+      "ctx is the dict of get_contextvars; the argument is the context of the bound logger (C): a dict, or a wrap_dict instance, on which dict.update looks up keys, which only __getattr__ finds (then dict.update fails with TypeError if the context is not empty, because the wrapper has no __getitem__)"
+    ],
+    "structlog.dev 436:26 call  warnings.warn( \"Use None to use the terminal width instea...": [
+      "warnings.warn of the standard library"
+    ],
+    "structlog.dev 443:18 call  sio.write(\"\\n\")": [
+      "sio is the StringIO of ConsoleRenderer.__call__ (line 946)"
+    ],
+    "structlog.dev 445:26 call  Console( file=sio, color_system=self.color_system, width=...": [
+      "rich is not installed: a missing module (optional import, line 48)"
+    ],
+    "structlog.dev 519:18 call  warnings.warn( \"better-exceptions support is deprecated a...": [
+      "warnings.warn of the standard library"
+    ],
+    "structlog.dev 525:14 call  sio.write(\"\\n\" + \"\".join(better_exceptions.format_excepti...": [
+      "sio is the StringIO of ConsoleRenderer.__call__ (line 946)"
+    ],
+    "structlog.dev 525:64 call  better_exceptions.format_exception(*exc_info)": [
+      "better_exceptions is not installed: a missing module (optional import, line 43); a value site only because ExceptionRenderer and ExceptionPrettyPrinter bind an attribute format_exception"
+    ],
+    "structlog.dev 535:18 call  warnings.warn( \"better-exceptions support is deprecated a...": [
+      "warnings.warn of the standard library; the branch where better_exceptions is importable and rich is not"
+    ],
+    "structlog.dev 88:30 call  SystemError( _MISSING.format( who=who + \" with `colors=Tr...": [
+      "the Windows definition (platform branch, line 70; structlog supports Windows with colorama); both definitions are the one node _init_terminal"
+    ],
+    "structlog.dev 956:38 call  self._exception_formatter(sio, exc_info)": [
+      "self._exception_formatter is set by the exception_formatter setter: the default default_exception_formatter or default_monochrome_exception_formatter (lines 528-544: rich_traceback and rich_monochrome_traceback, RichTracebackFormatter objects, with rich; better_traceback with better-exceptions only; plain_traceback otherwise), or the client's formatter: the docstring names plain_traceback and RichTracebackFormatter objects such as rich_traceback (without rich, the function rich_traceback, which raises); client callables are client callbacks"
+    ],
+    "structlog.dev 97:28 call  colorama.deinit()": [
+      "colorama is not installed: a missing module (optional import, line 38)"
+    ],
+    "structlog.processors 363:20 getattr  obj._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque.",
+      "obj is a _ThreadLocalDictWrapper after the isinstance check"
+    ],
+    "structlog.processors 675:44 call  self.format_exception(exc_info)": [
+      "self.format_exception is the exception_formatter of __init__ (typed ExceptionTransformer, the package's Protocol, whose docstring names ExceptionPrettyPrinter): the default _format_exception (line 660) or the package's transformer ExceptionDictTransformer; client callables are client callbacks"
+    ],
+    "structlog.stdlib 1190:42 call  proc(logger, meth_name, ed)": [
+      "proc is an entry of self.foreign_pre_chain, the client's processors (P of the header); client callables are client callbacks"
+    ],
+    "structlog.stdlib 1202:19 call  p(logger, meth_name, ed)": [
+      "p is an entry of self.processors: the processors argument, or (self.remove_processors_meta, processor) for the single processor (line 1122); the processor set P of the header; client callables are client callbacks"
+    ],
+    "structlog.stdlib 1216:30 call  super().format(record)": [
+      "ProcessorFormatter accepts the documented processor role, including twisted.JSONRenderer. That processor returns a package-created tuple containing a ReprWrapper. The explicit non-str handling warns but continues, stores the tuple in record.msg, and calls logging.Formatter.format. Pinned logging source calls LogRecord.getMessage, whose str(record.msg) recursively repr-formats the tuple member. This is a package object handed to library code by format, so format owns the callback."
+    ],
+    "structlog.stdlib 296:29 getattr  self._logger.name": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 303:29 getattr  self._logger.level": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 310:29 getattr  self._logger.parent": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 317:29 getattr  self._logger.propagate": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 324:29 getattr  self._logger.handlers": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 331:29 getattr  self._logger.disabled": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 337:22 getattr  self._logger.setLevel": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 337:30 call  self._logger.setLevel(level)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 347:29 getattr  self._logger.findCaller": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 347:39 call  self._logger.findCaller( stack_info=stack_info, stackleve...": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 366:29 getattr  self._logger.makeRecord": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 366:39 call  self._logger.makeRecord( name, level, fn, lno, msg, args,...": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 374:22 getattr  self._logger.handle": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 374:28 call  self._logger.handle(record)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 380:22 getattr  self._logger.addHandler": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 380:32 call  self._logger.addHandler(hdlr)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 386:22 getattr  self._logger.removeHandler": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 386:35 call  self._logger.removeHandler(hdlr)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 394:29 getattr  self._logger.hasHandlers": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 394:40 call  self._logger.hasHandlers()": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 400:22 getattr  self._logger.callHandlers": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 400:34 call  self._logger.callHandlers(record)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 407:29 getattr  self._logger.getEffectiveLevel": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 407:46 call  self._logger.getEffectiveLevel()": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 413:29 getattr  self._logger.isEnabledFor": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 413:41 call  self._logger.isEnabledFor(level)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 429:29 getattr  self._logger.isEnabledFor": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 429:41 call  self._logger.isEnabledFor(level)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 438:29 getattr  self._logger.getEffectiveLevel": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 438:46 call  self._logger.getEffectiveLevel()": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 444:29 getattr  self._logger.getChild": [
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 444:37 call  self._logger.getChild(suffix)": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers.",
+      "tests/test_stdlib.py:59-63,389 constructs stdlib.BoundLogger with cl, the CapturingLogger from tests/conftest.py:69-71. The inherited BoundLoggerBase constructor stores this explicitly tested role value in _logger. Its valid instance reaches every public passthrough body under scope A, despite the class field annotation. CapturingLogger supports every missing name; its returned log closure accepts *args and **kw."
+    ],
+    "structlog.stdlib 465:61 call  asyncio.get_running_loop().run_in_executor( None, lambda:...": [
+      "BaseEventLoop defines the inherited method but is not the concrete running loop that standard asyncio creates. Both supported platform implementations have public concrete aliases, SelectorEventLoop and ProactorEventLoop. The global rule names methods through the concrete receiver, not the class defining an inherited method. Custom client loops remain opaque.",
+      "Standard asyncio creates a concrete SelectorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site.",
+      "Standard asyncio creates a concrete ProactorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site."
+    ],
+    "structlog.stdlib 673:61 call  asyncio.get_running_loop().run_in_executor( self._executo...": [
+      "BaseEventLoop defines the inherited method but is not the concrete running loop that standard asyncio creates. Both supported platform implementations have public concrete aliases, SelectorEventLoop and ProactorEventLoop. The global rule names methods through the concrete receiver, not the class defining an inherited method. Custom client loops remain opaque.",
+      "Standard asyncio creates a concrete SelectorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site.",
+      "Standard asyncio creates a concrete ProactorEventLoop on an admitted platform. This function obtains that running loop and explicitly calls run_in_executor. Its implementation is inherited from BaseEventLoop, but the macro naming rule uses the concrete receiver public alias. The package lambda remains a separate callback edge at the scheduling site."
+    ],
+    "structlog.stdlib 836:67 call  logger.getEffectiveLevel()": [
+      "LoggerFactory.__call__ explicitly calls logging.getLogger(args[0]) at stdlib.py:758. Its documented optional logger-name argument admits the empty string, and logging.getLogger(\"\") returns the RootLogger singleton. This is a concrete library value produced by the package factory, not a client-injected logger. It flows through configure/get_logger into the wrapped-logger role and the stdlib wrapper and processors. Name each explicit method call through RootLogger; ordinary Logger edges remain valid for non-root receivers."
+    ],
+    "structlog.threadlocal 120:29 call  logger.bind()": [
+      "logger is a BoundLoggerLazyProxy: its bind is the method, or the closure finalized_bind that a caching proxy stores on itself (_config.py:390)"
+    ],
+    "structlog.threadlocal 123:22 getattr  logger._context": [
+      "logger is a bound logger (BL): a BoundLoggerBase holds _context as an instance attribute, an AsyncBoundLogger has the property _context"
+    ],
+    "structlog.threadlocal 152:29 call  logger.bind()": [
+      "logger is a BoundLoggerLazyProxy: its bind is the method, or the closure finalized_bind stored at _config.py:390"
+    ],
+    "structlog.threadlocal 154:34 getattr  as_immutable(logger)._context": [
+      "as_immutable returns the new BoundLoggerBase (instance attribute _context, line 131) or, after an AttributeError, its argument, which can be an AsyncBoundLogger (property _context)"
+    ],
+    "structlog.threadlocal 156:26 call  logger.bind(**tmp_values)": [
+      "logger is a bound logger (BL): stdlib.BoundLogger and AsyncBoundLogger define bind, the others inherit BoundLoggerBase.bind"
+    ],
+    "structlog.threadlocal 184:18 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 186:18 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 201:51 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 213:21 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 216:14 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 219:14 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 222:21 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 225:29 getattr  self._dict": [
+      "The public wrap_dict dict_class parameter accepts a dict subclass. Its constructor may raise AttributeError while _dict lazily initializes storage. Python immediately invokes this wrapper __getattr__ in the same attribute lookup. For a completed wrapper, use first access in a fresh thread; for __init__, use its initial construction. No private-state mutation or reuse after a failed operation is needed. See round-4 same-lookup witnesses; client constructor code stays opaque."
+    ],
+    "structlog.threadlocal 252:15 call  ctx.update(structlog.get_context(bound_logger))": [
+      "ctx is a dict copy; the argument is the context of the bound logger (C): a dict, or a wrap_dict instance, on which dict.update looks up keys, which only __getattr__ finds"
+    ],
+    "structlog.threadlocal 96:30 call  ThreadLocal()": [
+      "ThreadLocal is what _determine_threadlocal returns (line 47): threading.local, or GreenThreadLocal when greenlet is importable (optional import, line 37: both sides run)"
+    ],
+    "structlog.tracebacks 158:40 call  rich.pretty.traverse( obj, max_length=max_length, max_str...": [
+      "rich is not installed: a missing module (optional import, line 28); a missing library calls nothing back"
+    ],
+    "structlog.tracebacks 160:17 call  rich.pretty.traverse( obj, max_length=max_length, max_str...": [
+      "render() on the result of the stub rich.pretty.traverse"
+    ],
+    "structlog.tracebacks 173:32 call  repr(obj)": [
+      "ProcessorFormatter.format intentionally warns when the final processor returns a non-str. With the public warnings filter set to error for RuntimeWarning, this deliberate package warning becomes an exception whose package frame retains ed, the tuple containing the ReprWrapper created by twisted.JSONRenderer. ExceptionDictTransformer includes package-frame locals on deliberate raises under B2, and its fallback repr(tuple) reaches ReprWrapper.__repr__. The formatter object is not reused after the failure, and client frame values remain opaque."
+    ],
+    "structlog.tracebacks 332:57 call  frame_summary.f_locals.items()": [
+      "On CPython3.15.2 the public types.FrameLocalsProxyType alias names the type of optimized-frame f_locals, so the explicit items() method uses that public class path. CPython3.13.0 has the proxy but no types alias, so existing builtins.FrameLocalsProxy.items fallback remains valid for that version; Python3.10-3.12 retains dict.items. Version-specific names are unioned."
+    ],
+    "structlog.twisted 218:20 call  self._write( textFromEventDict(eventDict) # type: ignore[...": [
+      "self._write is the write method of the file given to __init__ (line 214): sys.stdout in plainJSONStdOutLogger (line 282), an io.TextIOWrapper; other files are client objects"
+    ],
+    "structlog.twisted 219:30 call  textFromEventDict(eventDict)": [
+      "textFromEventDict (twisted/python/log.py:401 and 438, read from the pinned wheel) joins reflect.safe_str(), that is str(), of the message items; in the documented setup (twisted.JSONRenderer with plainJSONStdOutLogger) the message is the ReprWrapper that twisted.JSONRenderer returns, whose str() falls back to its __repr__"
+    ],
+    "structlog.twisted 222:20 call  self._flush()": [
+      "self._flush is the flush method of the file of __init__ (line 215): sys.stdout in plainJSONStdOutLogger"
+    ],
+    "structlog.twisted 248:51 call  textFromEventDict( eventDict # type: ignore[arg-type] )": [
+      "only for events without the key _structlog. EventAdapter with the twisted JSONRenderer as dictRenderer (twisted.py:326) calls log.err(_stuff=failure, _why=((ReprWrapper(...),), {\"_structlog\": True})); err publishes the event with failure, why and isError and an empty message, and no key _structlog. textFromEventDict then takes its error branch and applies reflect.safe_str to why (twisted/python/log.py:420-424, pinned wheel): str() of the tuple calls ReprWrapper.__repr__ (audit F2)"
+    ],
+    "structlog.twisted 257:30 call  self._observer(eventDict)": [
+      "The observer parameter documentation names ILogObserver. Both PlainFileLogObserver and JSONLogObserverWrapper are explicitly registered implementations through @implementer(ILogObserver). B2 therefore admits the wrapper itself in this observer role. Public nested construction passes its event to the inner wrapper, which sees _structlog already present and forwards it."
+    ],
+    "structlog.twisted 326:47 call  self._dictRenderer(logger, name, eventDict)": [
+      "self._dictRenderer is the dictRenderer of __init__ or the default _BUILTIN_DEFAULT_PROCESSORS[-1], a ConsoleRenderer (line 309); docs/twisted.md:47 passes a KeyValueRenderer and the docstring names the twisted JSONRenderer; its annotation is a bare Callable; client callables are client callbacks"
+    ],
+    "structlog.twisted 330:34 call  self._dictRenderer(logger, name, eventDict)": [
+      "as at 326:47"
+    ]
+  },
+  "trace": "dynamic/structlog.json"
+}

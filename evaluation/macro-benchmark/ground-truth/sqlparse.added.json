@@ -1,0 +1,308 @@
+{
+  "edges": {
+    "sqlparse.__main__": {
+      "sqlparse.cli.main": [
+        "sqlparse.__main__ 22:18 call  main()"
+      ],
+      "sys.exit": [
+        "sqlparse.__main__ 22:13 call  sys.exit(main())"
+      ]
+    },
+    "sqlparse.cli.create_parser": {
+      "argparse._ArgumentGroup.add_argument": [
+        "sqlparse.cli 65:23 call  group.add_argument( '-k', '--keywords', metavar='CHOICE',...",
+        "sqlparse.cli 73:23 call  group.add_argument( '-i', '--identifiers', metavar='CHOIC...",
+        "sqlparse.cli 81:23 call  group.add_argument( '-l', '--language', metavar='LANG', d...",
+        "sqlparse.cli 89:23 call  group.add_argument( '--strip-comments', dest='strip_comme...",
+        "sqlparse.cli 96:23 call  group.add_argument( '-r', '--reindent', dest='reindent', ...",
+        "sqlparse.cli 103:23 call  group.add_argument( '--indent_width', dest='indent_width'...",
+        "sqlparse.cli 110:23 call  group.add_argument( '--indent_after_first', dest='indent_...",
+        "sqlparse.cli 117:23 call  group.add_argument( '--indent_columns', dest='indent_colu...",
+        "sqlparse.cli 124:23 call  group.add_argument( '-a', '--reindent_aligned', action='s...",
+        "sqlparse.cli 130:23 call  group.add_argument( '-s', '--use_space_around_operators',...",
+        "sqlparse.cli 136:23 call  group.add_argument( '--wrap_after', dest='wrap_after', de...",
+        "sqlparse.cli 143:23 call  group.add_argument( '--comma_first', dest='comma_first', ...",
+        "sqlparse.cli 150:23 call  group.add_argument( '--compact', dest='compact', default=...",
+        "sqlparse.cli 157:23 call  group.add_argument( '--encoding', dest='encoding', defaul..."
+      ]
+    },
+    "sqlparse.engine.filter_stack.FilterStack.run": {
+      "<builtin>.Exception.__init__": [
+        "sqlparse.engine.filter_stack 51:32 call  SQLParseError('Maximum recursion depth exceeded')"
+      ]
+    },
+    "sqlparse.engine.grouping._group": {
+      "<builtin>.Exception.__init__": [
+        "sqlparse.engine.grouping 505:28 call  SQLParseError( f\"Maximum grouping depth exceeded ({MAX_GR...",
+        "sqlparse.engine.grouping 512:28 call  SQLParseError( f\"Maximum number of tokens exceeded ({MAX_..."
+      ]
+    },
+    "sqlparse.engine.grouping.group_where": {
+      "sqlparse.sql.SquareBrackets._groupable_tokens": [
+        "sqlparse.engine.grouping 360:25 getattr  tlist._groupable_tokens"
+      ]
+    },
+    "sqlparse.engine.statement_splitter.StatementSplitter.process": {
+      "sqlparse.tokens._TokenType.__getattr__": [
+        "sqlparse.engine.statement_splitter 188:43 getattr  T.Comment.Multiline"
+      ]
+    },
+    "sqlparse.filters.aligned_indent.AlignedIndentFilter._process_default": {
+      "sqlparse.utils.offset": [
+        "sqlparse.filters.aligned_indent 129:24 call  offset(self, offset_)"
+      ]
+    },
+    "sqlparse.filters.aligned_indent.AlignedIndentFilter._process_parenthesis": {
+      "sqlparse.utils.indent": [
+        "sqlparse.filters.aligned_indent 53:24 call  indent(self)"
+      ]
+    },
+    "sqlparse.filters.others.StripCommentsFilter._process": {
+      "sqlparse.tokens._TokenType.__getattr__": [
+        "sqlparse.filters.others 35:32 getattr  T.Comment.Multiline",
+        "sqlparse.filters.others 35:42 getattr  T.Comment.Multiline.Hint"
+      ]
+    },
+    "sqlparse.filters.others.StripWhitespaceFilter._stripws_identifierlist": {
+      "<builtin>.list.remove": [
+        "sqlparse.filters.others 105:36 call  tlist.tokens.remove(last_nl)"
+      ]
+    },
+    "sqlparse.filters.output.OutputFilter.process": {
+      "sqlparse.filters.output.OutputFilter._process": [
+        "sqlparse.filters.output 30:36 call  self._process(stmt.tokens, varname, has_nl)"
+      ]
+    },
+    "sqlparse.filters.reindent.ReindentFilter._process_case": {
+      "sqlparse.utils.offset": [
+        "sqlparse.filters.reindent 238:20 call  offset(self, self._get_offset(tlist[0]))",
+        "sqlparse.filters.reindent 239:24 call  offset(self, self._get_offset(first))",
+        "sqlparse.filters.reindent 250:28 call  offset(self, len(\"WHEN \"))"
+      ]
+    },
+    "sqlparse.filters.reindent.ReindentFilter._process_identifierlist": {
+      "sqlparse.utils.indent": [
+        "sqlparse.filters.reindent 219:55 call  indent(self)"
+      ],
+      "sqlparse.utils.offset": [
+        "sqlparse.filters.reindent 180:24 call  offset(self, num_offset)",
+        "sqlparse.filters.reindent 219:24 call  offset(self, adjusted_offset)"
+      ]
+    },
+    "sqlparse.filters.reindent.ReindentFilter._process_parenthesis": {
+      "sqlparse.utils.indent": [
+        "sqlparse.filters.reindent 161:20 call  indent(self, 1 if is_dml_dll else 0)"
+      ],
+      "sqlparse.utils.offset": [
+        "sqlparse.filters.reindent 163:24 call  offset(self, self._get_offset(first) + 1)"
+      ]
+    },
+    "sqlparse.filters.reindent.ReindentFilter._process_where": {
+      "sqlparse.utils.indent": [
+        "sqlparse.filters.reindent 151:20 call  indent(self)"
+      ]
+    },
+    "sqlparse.filters.right_margin.RightMarginFilter._process": {
+      "<builtin>.len": [
+        "sqlparse.filters.right_margin 35:23 call  len(self.line)",
+        "sqlparse.filters.right_margin 35:40 call  len(val)"
+      ],
+      "<builtin>.str": [
+        "sqlparse.filters.right_margin 34:26 call  str(token)"
+      ],
+      "<builtin>.str.endswith": [
+        "sqlparse.filters.right_margin 27:40 call  token.value.endswith('\\n')"
+      ],
+      "<builtin>.str.splitlines": [
+        "sqlparse.filters.right_margin 30:55 call  token.value.splitlines()"
+      ],
+      "<builtin>.type": [
+        "sqlparse.filters.right_margin 31:41 call  type(token)"
+      ],
+      "re.Match.group": [
+        "sqlparse.filters.right_margin 38:45 call  match.group()"
+      ],
+      "re.search": [
+        "sqlparse.filters.right_margin 36:38 call  re.search(r'^ +', self.line)"
+      ],
+      "sqlparse.filters.right_margin.RightMarginFilter._process": [
+        "sqlparse.filters.right_margin 32:45 call  self._process(token, token.tokens)"
+      ],
+      "sqlparse.sql.Token.__init__": [
+        "sqlparse.filters.right_margin 41:36 call  sql.Token(T.Whitespace, f'\\n{indent}')"
+      ],
+      "sqlparse.sql.Token.__str__": [
+        "sqlparse.filters.right_margin 34:26 call  str(token)"
+      ]
+    },
+    "sqlparse.keywords.find_delimited_spans": {
+      "sqlparse.tokens._TokenType.__getattr__": [
+        "sqlparse.keywords 108:55 getattr  tokens.Comment.Multiline",
+        "sqlparse.keywords 108:65 getattr  tokens.Comment.Multiline.Hint",
+        "sqlparse.keywords 111:55 getattr  tokens.Comment.Multiline"
+      ]
+    },
+    "sqlparse.lexer.Lexer.get_tokens": {
+      "<builtin>.TypeError": [
+        "sqlparse.lexer 133:28 call  TypeError(f\"Expected text or file-like object, got {type(..."
+      ],
+      "<builtin>.type": [
+        "sqlparse.lexer 133:75 call  type(text)"
+      ]
+    },
+    "sqlparse.sql.Comment.is_multiline": {
+      "sqlparse.tokens._TokenType.__getattr__": [
+        "sqlparse.sql 554:66 getattr  T.Comment.Multiline"
+      ]
+    },
+    "sqlparse.sql.TokenList.get_name": {
+      "sqlparse.sql.TokenList.get_alias": [
+        "sqlparse.sql 378:30 call  self.get_alias()"
+      ],
+      "sqlparse.sql.TokenList.get_real_name": [
+        "sqlparse.sql 378:54 call  self.get_real_name()"
+      ]
+    },
+    "sqlparse.sql.TokenList.has_alias": {
+      "sqlparse.sql.TokenList.get_alias": [
+        "sqlparse.sql 365:30 call  self.get_alias()"
+      ]
+    },
+    "sqlparse.sql.TokenList.insert_after": {
+      "<builtin>.list.append": [
+        "sqlparse.sql 359:31 call  self.tokens.append(token)"
+      ]
+    },
+    "sqlparse.sql.TokenList.token_index": {
+      "sqlparse.sql.TokenList.token_index": [
+        "sqlparse.sql 312:70 call  self.token_index(start)"
+      ]
+    }
+  },
+  "notes": {
+    "sqlparse.__main__ 22:13 call  sys.exit(main())": [
+      "the module body runs only for `python -m sqlparse` (__name__ == '__main__'); rule A keeps its edges"
+    ],
+    "sqlparse.cli 103:23 call  group.add_argument( '--indent_width', dest='indent_width'...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 110:23 call  group.add_argument( '--indent_after_first', dest='indent_...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 117:23 call  group.add_argument( '--indent_columns', dest='indent_colu...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 124:23 call  group.add_argument( '-a', '--reindent_aligned', action='s...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 130:23 call  group.add_argument( '-s', '--use_space_around_operators',...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 136:23 call  group.add_argument( '--wrap_after', dest='wrap_after', de...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 143:23 call  group.add_argument( '--comma_first', dest='comma_first', ...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 150:23 call  group.add_argument( '--compact', dest='compact', default=...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 157:23 call  group.add_argument( '--encoding', dest='encoding', defaul...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 65:23 call  group.add_argument( '-k', '--keywords', metavar='CHOICE',...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 73:23 call  group.add_argument( '-i', '--identifiers', metavar='CHOIC...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 81:23 call  group.add_argument( '-l', '--language', metavar='LANG', d...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 89:23 call  group.add_argument( '--strip-comments', dest='strip_comme...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.cli 96:23 call  group.add_argument( '-r', '--reindent', dest='reindent', ...": [
+      "group is the _ArgumentGroup returned by parser.add_argument_group at63. Global outside-method naming uses this concrete receiver even for its inherited add_argument method; ArgumentParser is a sibling, not its public ancestor."
+    ],
+    "sqlparse.engine.filter_stack 51:32 call  SQLParseError('Maximum recursion depth exceeded')": [
+      "SQLParseError defines no __init__; Exception.__init__ runs"
+    ],
+    "sqlparse.engine.grouping 360:25 getattr  tlist._groupable_tokens": [
+      "tlist is the Statement or any group below it except a Where (recurse(sql.Where) does not enter Where groups); group_brackets and group_parenthesis have made SquareBrackets and Parenthesis groups by then"
+    ],
+    "sqlparse.engine.grouping 505:28 call  SQLParseError( f\"Maximum grouping depth exceeded ({MAX_GR...": [
+      "SQLParseError defines no __init__; Exception.__init__ runs"
+    ],
+    "sqlparse.engine.statement_splitter 188:43 getattr  T.Comment.Multiline": [
+      "no module code creates Comment.Multiline; the first load in a run, here or at keywords.py:108, 111, others.py:35 or sql.py:554, calls __getattr__ (sqlparse.md, token types)"
+    ],
+    "sqlparse.filters.aligned_indent 129:24 call  offset(self, offset_)": [
+      "offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.aligned_indent 53:24 call  indent(self)": [
+      "indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.others 105:36 call  tlist.tokens.remove(last_nl)": [
+      "list.remove compares with ==; Token defines no __eq__ (identity)"
+    ],
+    "sqlparse.filters.others 35:32 getattr  T.Comment.Multiline": [
+      "no module code creates Comment.Multiline; the first load in a run, here or at keywords.py:108, 111, statement_splitter.py:188 or sql.py:554, calls __getattr__ (sqlparse.md, token types)"
+    ],
+    "sqlparse.filters.others 35:42 getattr  T.Comment.Multiline.Hint": [
+      "no module code creates Comment.Multiline.Hint; the first load in a run, here or at keywords.py:108, calls __getattr__ (sqlparse.md, token types)"
+    ],
+    "sqlparse.filters.output 30:36 call  self._process(stmt.tokens, varname, has_nl)": [
+      "OutputFilter is public (sqlparse.filters.output.OutputFilter) and not abstract by abc, so a client can make one; its _process raises NotImplementedError (sqlparse.md, judgement on OutputFilter). The two subclass methods are generator functions, called here"
+    ],
+    "sqlparse.filters.reindent 151:20 call  indent(self)": [
+      "indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.reindent 161:20 call  indent(self, 1 if is_dml_dll else 0)": [
+      "indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.reindent 163:24 call  offset(self, self._get_offset(first) + 1)": [
+      "offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.reindent 180:24 call  offset(self, num_offset)": [
+      "offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.reindent 219:24 call  offset(self, adjusted_offset)": [
+      "offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.reindent 219:55 call  indent(self)": [
+      "indent is decorated with @contextmanager (utils.py:124): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.reindent 238:20 call  offset(self, self._get_offset(tlist[0]))": [
+      "offset is decorated with @contextmanager (utils.py:117): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "sqlparse.filters.right_margin 32:45 call  self._process(token, token.tokens)": [
+      "_process is a generator function; the call makes the generator that replaces token.tokens"
+    ],
+    "sqlparse.filters.right_margin 41:36 call  sql.Token(T.Whitespace, f'\\n{indent}')": [
+      "sql.Token is the class Token of the module sqlparse.sql, not the token type tokens.Token (an instance of _TokenType, which the site finder sees as a value)"
+    ],
+    "sqlparse.keywords 108:55 getattr  tokens.Comment.Multiline": [
+      "no module code creates Comment.Multiline; the first load in a run, here or at 111:55, statement_splitter.py:188, others.py:35 or sql.py:554, calls __getattr__ (sqlparse.md, token types)"
+    ],
+    "sqlparse.keywords 108:65 getattr  tokens.Comment.Multiline.Hint": [
+      "no module code creates Comment.Multiline.Hint; the first load in a run, here or at others.py:35, calls __getattr__ (sqlparse.md, token types)"
+    ],
+    "sqlparse.keywords 111:55 getattr  tokens.Comment.Multiline": [
+      "no module code creates Comment.Multiline; the first load in a run, here or at 108:55, statement_splitter.py:188, others.py:35 or sql.py:554, calls __getattr__ (sqlparse.md, token types)"
+    ],
+    "sqlparse.sql 365:30 call  self.get_alias()": [
+      "has_alias is public on every group: Identifier and Function take get_alias from NameAliasMixin, the other classes from TokenList"
+    ],
+    "sqlparse.sql 378:30 call  self.get_alias()": [
+      "self is any group: Identifier and Function take get_alias from NameAliasMixin, the other classes from TokenList (get_name is also reached from _get_first_name for an Identifier or Function)"
+    ],
+    "sqlparse.sql 378:54 call  self.get_real_name()": [
+      "self is any group: Identifier and Function take get_real_name from NameAliasMixin, the other classes from TokenList"
+    ],
+    "sqlparse.sql 554:66 getattr  T.Comment.Multiline": [
+      "no module code creates Comment.Multiline; the first load in a run, here or at keywords.py:108, 111, statement_splitter.py:188 or others.py:35, calls __getattr__ (sqlparse.md, token types)"
+    ]
+  },
+  "trace": "dynamic/sqlparse.json"
+}

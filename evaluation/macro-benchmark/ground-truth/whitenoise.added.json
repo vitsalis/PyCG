@@ -1,0 +1,138 @@
+{
+  "edges": {
+    "whitenoise.base.WhiteNoise.__call__": {
+      "whitenoise.base.WhiteNoise.__call__": [
+        "whitenoise.base 82:36 call  self.application(environ, start_response)"
+      ]
+    },
+    "whitenoise.base.WhiteNoise.add_cache_headers": {
+      "whitenoise.base.WhiteNoise.__init__.<lambda1>": [
+        "whitenoise.base 233:36 call  self.immutable_file_test(path, url)"
+      ]
+    },
+    "whitenoise.base.WhiteNoise.find_file": {
+      "<builtin>.str.endswith": [
+        "whitenoise.base 136:52 call  url.endswith(\"/\")"
+      ]
+    },
+    "whitenoise.base.WhiteNoise.redirect": {
+      "<builtin>.ValueError": [
+        "whitenoise.base 257:29 call  ValueError(f\"Cannot handle redirect: {from_url} > {to_url}\")"
+      ]
+    },
+    "whitenoise.base.WhiteNoise.update_files_dictionary": {
+      "<builtin>.bytes.replace": [
+        "whitenoise.base 118:49 call  relative_path.replace(\"\\\\\", \"/\")"
+      ]
+    },
+    "whitenoise.compress": {
+      "<builtin>.SystemExit": [
+        "whitenoise.compress 198:21 call  SystemExit(main())"
+      ],
+      "whitenoise.compress.main": [
+        "whitenoise.compress 198:26 call  main()"
+      ]
+    },
+    "whitenoise.compress.Compressor.is_compressed_effectively": {
+      "<builtin>.print": [
+        "whitenoise.compress 123:21 call  self.log( f\"{encoding_name} compressed {path} ({orig_size...",
+        "whitenoise.compress 127:21 call  self.log(f\"Skipping {path} ({encoding_name} compression n..."
+      ]
+    },
+    "whitenoise.compress.main": {
+      "whitenoise.compress.Compressor.compress": [
+        "whitenoise.compress 186:40 call  executor.submit( compressor.compress, os.path.join(dirpat..."
+      ]
+    },
+    "whitenoise.middleware.WhiteNoiseMiddleware.get_static_url": {
+      "django.contrib.staticfiles.storage.StaticFilesStorage.url": [
+        "whitenoise.middleware 197:43 call  staticfiles_storage.url(name)"
+      ],
+      "whitenoise.storage.CompressedManifestStaticFilesStorage.__init__": [
+        "whitenoise.middleware 197:40 getattr  staticfiles_storage.url"
+      ],
+      "whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name": [
+        "whitenoise.middleware 197:43 call  staticfiles_storage.url(name)"
+      ]
+    },
+    "whitenoise.responders.StaticFile.parse_byte_range": {
+      "<builtin>.ValueError": [
+        "whitenoise.responders 130:29 call  ValueError()",
+        "whitenoise.responders 135:29 call  ValueError()"
+      ]
+    },
+    "whitenoise.runserver_nostatic.management.commands.runserver.Command.add_arguments": {
+      "django.core.management.commands.runserver.Command.add_arguments": [
+        "whitenoise.runserver_nostatic.management.commands.runserver 48:30 call  super().add_arguments(parser)"
+      ]
+    },
+    "whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files": {
+      "whitenoise.storage.CompressedManifestStaticFilesStorage.compress_files._compress_path": [
+        "whitenoise.storage 157:32 call  executor.submit(_compress_path, path)"
+      ]
+    },
+    "whitenoise.storage.CompressedManifestStaticFilesStorage.make_helpful_exception": {
+      "<builtin>.bytes.lstrip": [
+        "whitenoise.storage 178:61 call  os.path.splitext(name)[1].lstrip(\".\")"
+      ]
+    },
+    "whitenoise.storage.CompressedManifestStaticFilesStorage.post_process": {
+      "whitenoise.storage.CompressedManifestStaticFilesStorage.hashed_name": [
+        "whitenoise.storage 84:45 iter  files"
+      ],
+      "whitenoise.storage.CompressedManifestStaticFilesStorage.make_helpful_exception": [
+        "whitenoise.storage 86:56 call  self.make_helpful_exception(processed, name)"
+      ]
+    },
+    "whitenoise.storage.CompressedStaticFilesStorage.post_process": {
+      "whitenoise.storage.CompressedStaticFilesStorage.post_process._compress_path": [
+        "whitenoise.storage 47:32 call  executor.submit(_compress_path, path)"
+      ]
+    }
+  },
+  "notes": {
+    "whitenoise.base 118:49 call  relative_path.replace(\"\\\\\", \"/\")": [
+      "This public helper has no annotation or documentation fixing root to str. scantree passes root to os.scandir; with a bytes directory path, DirEntry.path is a library-created bytes path. The slicing at117 preserves bytes. The replace call at118 enters bytes.replace before raising TypeError because its two replacement arguments are strs. This is not a direct method call on an opaque client object."
+    ],
+    "whitenoise.base 233:36 call  self.immutable_file_test(path, url)": [
+      "a value site. Without an immutable_file_test argument, self.immutable_file_test is the method of the class of self: WhiteNoise.immutable_file_test, or WhiteNoiseMiddleware.immutable_file_test for a middleware (it inherits add_cache_headers). With a str (the regex form of docs/base.rst:280, or WHITENOISE_IMMUTABLE_FILE_TEST), __init__ stores the lambda of line 64. A client function is opaque (B5)"
+    ],
+    "whitenoise.base 82:36 call  self.application(environ, start_response)": [
+      "docs/base.rst35 defines application as the WSGI application role, and154 explicitly identifies WhiteNoise itself as a WSGI application. Lines1-24 say it wraps any WSGI application. Directly nesting the public wrapper therefore reuses a package value for its documented role; no forwarding client callback or opaque returned package value is needed."
+    ],
+    "whitenoise.compress 123:21 call  self.log( f\"{encoding_name} compressed {path} ({orig_size...": [
+      "a value site. With quiet=True, __init__ sets no instance attribute log, so self.log is the method Compressor.log (the storages create quiet compressors, storage.py:34 and 144). Otherwise self.log is the log argument: the package default print (main passes no log, line 173), or a client value (opaque, B5)"
+    ],
+    "whitenoise.compress 127:21 call  self.log(f\"Skipping {path} ({encoding_name} compression n...": [
+      "a value site; the values as at 123:21"
+    ],
+    "whitenoise.compress 186:40 call  executor.submit( compressor.compress, os.path.join(dirpat...": [
+      "submit starts the pool's worker threads, which call compressor.compress: the call back belongs to this site (the trace misses calls of threads that a library starts, T1)"
+    ],
+    "whitenoise.compress 198:21 call  SystemExit(main())": [
+      "module code under if __name__ == \"__main__\" (python -m whitenoise.compress); the block is code of its module"
+    ],
+    "whitenoise.middleware 197:40 getattr  staticfiles_storage.url": [
+      "added by hand (no candidate by name). staticfiles_storage is Django's ConfiguredStorage, a LazyObject: the first attribute load runs _setup, which makes the storage of STORAGES[\"staticfiles\"] (storages[...] -> create_storage -> storage_cls()). With the documented backend CompressedManifestStaticFilesStorage (docs/django.rst:90, the tests' settings), its __init__ runs. In a fresh process the middleware's own __init__ makes the first load (add_files -> get_static_file -> add_cache_headers -> immutable_file_test, for a hashed file name); the tests make it earlier in collectstatic, so the trace does not have the edge. See whitenoise.md, judgement 3"
+    ],
+    "whitenoise.middleware 197:43 call  staticfiles_storage.url(name)": [
+      "the storage of STORAGES[\"staticfiles\"]: the package's CompressedManifestStaticFilesStorage (url from HashedFilesMixin, named through ManifestStaticFilesStorage) or CompressedStaticFilesStorage, and Django's default StaticFilesStorage (url from FileSystemStorage, named through StaticFilesStorage). For CompressedManifestStaticFilesStorage with DEBUG false, url calls ManifestFilesMixin.stored_name; with manifest_strict false (WHITENOISE_MANIFEST_STRICT = False, docs/django.rst:491) and a name that the manifest lacks, stored_name calls self.hashed_name, the package override (storage.py:115). See whitenoise.md, judgement 4"
+    ],
+    "whitenoise.runserver_nostatic.management.commands.runserver 48:30 call  super().add_arguments(parser)": [
+      "RunserverCommand (line 43) is the runserver Command of the first app below whitenoise.runserver_nostatic in INSTALLED_APPS that has one, else django.core's (the package's own fallback, line 40). The documented setup puts django.contrib.staticfiles below it (docs/django.rst:220-225). A third-party runserver (Channels, say) is client configuration (B5)"
+    ],
+    "whitenoise.storage 157:32 call  executor.submit(_compress_path, path)": [
+      "submit starts the pool's worker threads, which call _compress_path (T1). The generator expression runs in as_completed (161:39); its calls belong to compress_files"
+    ],
+    "whitenoise.storage 178:61 call  os.path.splitext(name)[1].lstrip(\".\")": [
+      "The public name parameter has no annotation or documentation fixing its concrete path type. For a matching ValueError and a bytes name, os.path.splitext produces a bytes extension. Calling its lstrip with the literal str \".\" enters bytes.lstrip before TypeError. The following upper call is not reached on this path and adds no bytes.upper edge."
+    ],
+    "whitenoise.storage 47:32 call  executor.submit(_compress_path, path)": [
+      "submit starts the pool's worker threads, which call _compress_path (T1: the trace misses calls of threads that a library starts). The generator expression runs in as_completed (51:39); its calls belong to post_process"
+    ],
+    "whitenoise.storage 84:45 iter  files": [
+      "The local explanation assumes repeated dry_run truth tests agree. Public post_process accepts unannotated **kwargs. A client dry_run object can be truthy at the wrapper test80 and falsy at Django HashedFilesMixin.post_process290. The wrapper then iterates the library generator itself at84, and Django _post_process356 calls the package hashed_name override. Client __bool__ calls remain unnamed, but their control-flow results are not assumed constant. Django4.2/5.2 storage source has the same relevant order."
+    ]
+  },
+  "trace": "dynamic/whitenoise.json"
+}

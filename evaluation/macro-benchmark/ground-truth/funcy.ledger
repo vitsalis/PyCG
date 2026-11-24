@@ -1,0 +1,2942 @@
+# Call-site ledger of funcy at 04aafae9a7390cce610b45b5dca3a630e43c1713.
+# Hand-written from the source; judgements in funcy.md.
+default reject funcy.calc.CacheMemory.__getitem__: no CacheMemory is subscripted, iterated, unpacked, searched or converted at this site; CacheMemory is made only by cache() and lives in the closure of _memory_decorator, whose wrapper subscripts it (calc.py:52, accepted there); the operands here are dicts, lists, tuples, strs, sets, sys.modules, code objects, iterators or client collections, and handing wrapper.memory to another function is an arbitrary package object where any object is accepted (B3); dict.get, dict.pop and dict iteration on a CacheMemory do not call __getitem__
+default reject funcy.calc.CacheMemory.__setitem__: no CacheMemory is the target of this item assignment; the only CacheMemory store is memory[key] = ... in _memory_decorator's wrapper (calc.py:55, accepted there); the targets here are dicts, lists, instance __dict__s or client collections (B3)
+default reject funcy.decorators.Call.__getattr__: Call.__getattr__ runs only for an attribute that a Call instance lacks; the package reads only _func, _args, _kwargs and __dict__ of a Call, which its __init__ sets or the type provides, and at the other sites the receiver is not a Call (a module, a function, a class, a str, a dict, a code object, a regex, a partial, a client object)
+default reject funcy.objects.LazyObject.__getattr__: no receiver of this attribute load is a LazyObject; the package never makes one (LazyObject is a public class that only clients instantiate), and passing one to another funcy function is an arbitrary package object where any object is accepted (B3); inside LazyObject, _init and _setup are found without __getattr__, and after _setup the instance has the class of the made object
+default reject funcy.objects.LazyObject.__setattr__: no target of this attribute store is a LazyObject (the package never makes one; B3); the stores are on functions, wrappers, Call, CacheMemory and context-manager instances, a cls passed to monkey, and the inner functions of the decorators
+default reject funcy.primitives.EmptyType.__repr__: EMPTY, the only EmptyType, is a default marker that every function tests with `is` and never formats, prints or converts; the formatted values here are strs, ints, floats, exceptions, names, labels and client values
+default reject funcy.decorators.Call.__str__, funcy.decorators.Call.__repr__: no Call is formatted or converted here, except "<Call %s>" % self in Call.__repr__ (decorators.py:85, accepted there); the formatted values are strs, numbers, exceptions, names and client arguments and results
+default reject funcy.objects.wrap_prop.decorator.WrapperProp.__repr__: no other site formats a WrapperProp; nested wrap_prop explicitly accepts it at objects.py:40
+#
+# Conventions of this ledger (funcy.md has the judgements, J1 to J12):
+# - Supported versions: Python 3.4 and later, CPython and PyPy (README.rst,
+#   setup.py classifiers; no python_requires). Both lzip definitions and the
+#   nullcontext fallback run (J2).
+# - make_func(f) (funcmakers.py:10) returns: a callable f itself; for None
+#   make_func.<lambda1>; for a str, bytes or regex re_finder.<lambda2>; for an
+#   int or slice an operator.itemgetter; for a mapping its __getitem__ (an
+#   abstract Mapping is opaque under B4, but docs/funcs.rst:179 gives compose
+#   a concrete dict, adding its direct __getitem__ call); for a set its __contains__, named
+#   <builtin>.set.__contains__ by the "set" of docs/extended_fns.rst (J3).
+#   make_pred(f) is the same with bool for None and re_tester.<lambda1> for a
+#   str. A direct call of the result has these callees; where library code
+#   (map, filter, groupby, a factory) calls it back, only the package lambdas
+#   are edges (bool, an itemgetter, set.__contains__ called back are not).
+# - Roles (B2, J1): a callback parameter of one docs entry (a function and its
+#   list or iterator flavour, documented together, e.g. map/lmap). Its package
+#   values are those that the package's own code, the tests (tests/) and the
+#   documented examples (docs/*.rst, README.rst) pass there. Client callables
+#   (lambdas, whatever's _ expressions, builtins, bound methods, partials) are
+#   opaque.
+# - A lazy map, filter, filterfalse, takewhile, dropwhile, chain or groupby
+#   that the package builds with a package callback calls it in the package
+#   function that iterates it (list(), set(), next(), a factory, a for loop);
+#   this ledger places the edge at that call (J4). README ruling12 also allows
+#   a map/filter callback at construction when the same function consumes it.
+#   The exception does not extend to groupby. A lazy object returned to the client
+#   gives no package edge; where the documentation hands it back to another
+#   funcy function, that function makes the call (J5).
+
+== funcy
+
+[funcy]
+21:15 call  lcat(sys.modules['funcy.' + m].__all__ for m in modules)
+    -> funcy.seqs.lcat
+    note: lcat comes from `from .seqs import *`; the generator expression reads the __all__ lists of the submodules
+
+== funcy._inspect
+
+[funcy._inspect]
+10:41 call  platform.python_implementation()
+    -> platform.python_implementation
+46:24 call  ARGS['builtins'].update(dict.fromkeys(two_arg_funcs.split...
+    -> <builtin>.dict.update
+46:38 call  dict.fromkeys(two_arg_funcs.split(), '**')
+    -> <builtin>.dict.fromkeys
+46:58 call  two_arg_funcs.split()
+    -> <builtin>.str.split
+    reject funcy.seqs.split: two_arg_funcs is a str literal; this is str.split
+62:25 call  ARGS['itertools'].update(dict.fromkeys(two_arg_funcs.spli...
+    -> <builtin>.dict.update
+62:39 call  dict.fromkeys(two_arg_funcs.split(), '**')
+    -> <builtin>.dict.fromkeys
+62:59 call  two_arg_funcs.split()
+    -> <builtin>.str.split
+    reject funcy.seqs.split: two_arg_funcs is a str literal; this is str.split
+77:24 call  ARGS['operator'].update(dict.fromkeys(two_arg_funcs.split...
+    -> <builtin>.dict.update
+77:38 call  dict.fromkeys(two_arg_funcs.split(), '**')
+    -> <builtin>.dict.fromkeys
+77:58 call  two_arg_funcs.split()
+    -> <builtin>.str.split
+    reject funcy.seqs.split: two_arg_funcs is a str literal; this is str.split
+78:24 call  ARGS['operator'].update([ ('__%s__' % op.strip('_'), args...
+    -> <builtin>.dict.update
+79:25 call  op.strip('_')
+    -> <builtin>.str.strip
+79:76 call  ARGS['operator'].items()
+    -> <builtin>.dict.items
+84:18 call  set(ARGS)
+    -> <builtin>.set
+97:18 call  namedtuple("Spec", "max_n names req_n req_names varkw")
+    -> collections.namedtuple
+
+[funcy._inspect.get_spec]
+101:19 call  getattr(func, '__original__', None)
+    -> <builtin>.getattr
+101:57 call  unwrap(func)
+    -> inspect.unwrap
+    note: unwrap is inspect.unwrap, re-exported by funcy.decorators
+107:18 call  getattr(func, '__module__', None)
+    -> <builtin>.getattr
+109:30 call  ARGS[mod].get(func.__name__, '*')
+    -> <builtin>.dict.get
+110:48 call  _spec.partition('-')
+    -> <builtin>.str.partition
+    reject funcy.seqs.partition: _spec is a str of the ARGS tables; this is str.partition
+111:31 call  re.findall(r'\w+|\*', required)
+    -> re.findall
+112:20 call  len(req_names)
+    -> <builtin>.len
+112:37 call  len(optional)
+    -> <builtin>.len
+113:20 call  len(req_names)
+    -> <builtin>.len
+114:20 call  Spec(max_n=max_n, names=set(), req_n=req_n, req_names=set...
+    note: Spec is the collections.namedtuple class of line 97; calling a namedtuple class adds no edge (generated __new__, object.__init__)
+114:43 call  set()
+    -> <builtin>.set
+114:73 call  set(req_names)
+    -> <builtin>.set
+117:20 call  isinstance(func, type)
+    -> <builtin>.isinstance
+119:27 call  getattr(func.__init__, '__objclass__', None)
+    -> <builtin>.getattr
+    reject *: getattr reads __objclass__ of the class's __init__; it calls no __init__
+121:28 call  get_spec(objclass)
+    -> funcy._inspect.get_spec
+123:24 call  get_spec(func.__init__)
+    -> funcy._inspect.get_spec
+    reject funcy.calc.CacheMemory.__init__, funcy.debug.LabeledContextDecorator.__init__, funcy.debug.log_durations.__init__, funcy.debug.log_errors.__init__, funcy.decorators.Call.__init__, funcy.flow.nullcontext.__init__, funcy.objects.LazyObject.__init__, funcy.objects.cached_property.__init__: func.__init__ is passed to get_spec, which introspects it (unwrap, __code__, signature) and never calls it
+125:29 call  spec._replace(max_n=spec.max_n - 1, names=spec.names - se...
+    -> collections.namedtuple._replace
+    note: spec is a Spec namedtuple; _replace is the local function of collections.namedtuple
+128:33 call  hasattr(func, '__code__')
+    -> <builtin>.hasattr
+129:29 call  _code_to_spec(func)
+    -> funcy._inspect._code_to_spec
+133:28 call  signature(func)
+    -> inspect.signature
+136:29 call  ValueError('Unable to introspect %s() arguments' % (getat...
+    -> <builtin>.ValueError
+137:27 call  getattr(func, '__qualname__', None)
+    -> <builtin>.getattr
+137:66 call  getattr(func, '__name__', func)
+    -> <builtin>.getattr
+139:47 call  _sig_to_spec(sig)
+    -> funcy._inspect._sig_to_spec
+
+[funcy._inspect._code_to_spec]
+147:23 call  getattr(func, '__defaults__', None)
+    -> <builtin>.getattr
+148:21 call  len(defaults)
+    -> <builtin>.len
+148:45 call  isinstance(defaults, tuple)
+    -> <builtin>.isinstance
+150:25 call  getattr(func, '__kwdefaults__', None)
+    -> <builtin>.getattr
+151:22 call  isinstance(kwdefaults, dict)
+    -> <builtin>.isinstance
+155:24 call  getattr(code, 'co_posonlyargcount', 0)
+    -> <builtin>.getattr
+160:16 call  set(varnames[posonly_n:n])
+    -> <builtin>.set
+161:33 call  len(kwdefaults)
+    -> <builtin>.len
+162:20 call  set(varnames[posonly_n:pos_n - defaults_n] + varnames[pos...
+    -> <builtin>.set
+162:86 call  set(kwdefaults)
+    -> <builtin>.set
+163:17 call  bool(code.co_flags & CO_VARKEYWORDS)
+    -> <builtin>.bool
+166:16 call  Spec(max_n=max_n, names=names, req_n=req_n, req_names=req...
+    note: Spec is the collections.namedtuple class of line 97; calling a namedtuple class adds no edge
+
+[funcy._inspect._sig_to_spec]
+170:51 call  set()
+    -> <builtin>.set
+170:61 call  set()
+    -> <builtin>.set
+171:44 call  sig.parameters.items()
+    -> types.MappingProxyType.items
+    note: Signature.parameters is a mappingproxy
+182:22 call  names.add(name)
+    -> <builtin>.set.add
+185:30 call  req_names.add(name)
+    -> <builtin>.set.add
+186:16 call  Spec(max_n=max_n, names=names, req_n=req_n, req_names=req...
+    note: Spec is the collections.namedtuple class of line 97; calling a namedtuple class adds no edge
+
+== funcy.calc
+
+[funcy.calc]
+146:31 call  _make_lookuper(False)
+    -> funcy.calc._make_lookuper
+147:33 call  _make_lookuper(True)
+    -> funcy.calc._make_lookuper
+
+[funcy.calc.memoize]
+28:23 call  memoize(key_func=key_func)
+    -> funcy.calc.memoize
+28:42 call  memoize(key_func=key_func)(_func)
+    -> funcy.calc._memory_decorator.decorator
+    note: memoize(key_func=...) returns _memory_decorator({}, key_func), the closure decorator
+29:29 call  _memory_decorator({}, key_func)
+    -> funcy.calc._memory_decorator
+
+[funcy.calc.cache]
+36:18 call  isinstance(timeout, timedelta)
+    -> <builtin>.isinstance
+37:40 call  timeout.total_seconds()
+    -> datetime.timedelta.total_seconds
+39:29 call  _memory_decorator(CacheMemory(timeout), key_func)
+    -> funcy.calc._memory_decorator
+39:41 call  CacheMemory(timeout)
+    -> funcy.calc.CacheMemory.__init__
+
+[funcy.calc._memory_decorator.decorator]
+46:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: wraps is funcy.decorators.wraps, which returns functools.partial(update_wrapper, ...); calling the partial calls funcy's update_wrapper back
+46:15 call  wraps(func)
+    -> funcy.decorators.wraps
+
+[funcy.calc._memory_decorator.decorator.wrapper]
+52:30 getitem  memory[key]
+    -> funcy.calc.CacheMemory.__getitem__
+    note: memory is the {} of memoize (calc.py:29) or the CacheMemory of cache (calc.py:39); subscripting a CacheMemory runs its __getitem__ (accepted here against the default)
+55:35 setitem  memory[key]
+    -> funcy.calc.CacheMemory.__setitem__
+    note: memory is the {} of memoize or the CacheMemory of cache; the store runs CacheMemory.__setitem__ (accepted here against the default)
+49:27 call  key_func(*args, **kwargs)
+    note: key_func is the client's key function (tests: len, tuple; docs: lambdas); no package value is documented for it
+50:31 call  tuple(sorted(kwargs.items()))
+    -> <builtin>.tuple
+50:38 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+50:51 call  kwargs.items()
+    -> <builtin>.dict.items
+55:47 call  func(*args, **kwargs)
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper
+    note: func is the decorated function: client functions, and the package's own make_lookuper.wrapper, which make_lookuper decorates with @memoize (calc.py:123)
+
+[funcy.calc._memory_decorator.decorator.invalidate]
+61:27 call  key_func(*args, **kwargs)
+    note: key_func is the client's key function; no package value
+62:31 call  tuple(sorted(kwargs.items()))
+    -> <builtin>.tuple
+62:38 call  sorted(kwargs.items())
+    -> <builtin>.sorted
+62:51 call  kwargs.items()
+    -> <builtin>.dict.items
+63:23 call  memory.pop(key, None)
+    -> <builtin>.dict.pop
+    note: memory is the {} of memoize or the CacheMemory of cache, which inherits dict.pop
+
+[funcy.calc._memory_decorator.decorator.invalidate_all]
+67:25 call  memory.clear()
+    -> <builtin>.dict.clear
+    -> funcy.calc.CacheMemory.clear
+    note: memory is the {} of memoize or the CacheMemory of cache
+
+[funcy.calc.CacheMemory.__init__]
+77:19 call  self.clear()
+    -> funcy.calc.CacheMemory.clear
+
+[funcy.calc.CacheMemory.__setitem__]
+80:31 call  time.time()
+    -> time.time
+81:25 call  dict.__setitem__(self, key, (value, expires_at))
+    -> <builtin>.dict.__setitem__
+82:26 call  self._keys.append(key)
+    -> collections.deque.append
+83:29 call  self._expires.append(expires_at)
+    -> collections.deque.append
+
+[funcy.calc.CacheMemory.__getitem__]
+86:45 call  dict.__getitem__(self, key)
+    -> <builtin>.dict.__getitem__
+87:35 call  time.time()
+    -> time.time
+88:24 call  self.expire()
+    -> funcy.calc.CacheMemory.expire
+89:27 call  KeyError(key)
+    -> <builtin>.KeyError
+
+[funcy.calc.CacheMemory.expire]
+93:19 call  bisect(self._expires, time.time())
+    -> bisect.bisect
+93:44 call  time.time()
+    -> time.time
+94:23 call  range(i)
+    -> <builtin>.range
+95:47 call  self._expires.popleft()
+    -> collections.deque.popleft
+96:37 call  self._keys.popleft()
+    -> collections.deque.popleft
+97:29 call  self.get(key)
+    -> <builtin>.dict.get
+99:25 call  self.pop(key, None)
+    -> <builtin>.dict.pop
+
+[funcy.calc.CacheMemory.clear]
+102:19 call  dict.clear(self)
+    -> <builtin>.dict.clear
+    reject funcy.calc.CacheMemory.clear: dict.clear(self) calls the method of dict
+103:27 call  deque()
+    -> collections.deque
+104:30 call  deque()
+    -> collections.deque
+
+[funcy.calc._make_lookuper.make_lookuper]
+118:43 call  has_arg_types(func)
+    -> funcy.calc.has_arg_types
+123:14 decorator  @memoize
+    -> funcy.calc.memoize
+    note: @memoize without parentheses calls memoize(wrapper)
+143:21 call  wraps(func)
+    -> funcy.decorators.wraps
+143:27 call  wraps(func)(wrapper)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    reject *: update_wrapper copies attributes onto wrapper and calls no wrapper
+    note: the partial of funcy.decorators.wraps calls update_wrapper back
+
+[funcy.calc._make_lookuper.make_lookuper.wrapper]
+126:66 call  ', '.join(map(str, args))
+    -> <builtin>.str.join
+    reject funcy.colls.join: the receiver is the str ', '
+126:70 call  map(str, args)
+    -> <builtin>.map
+    reject funcy.seqs.map: calc.py does not import funcy's map; str is called back by the builtin map (no edge)
+127:37 call  make_lookuper(f)
+    -> funcy.calc._make_lookuper.make_lookuper
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: make_lookuper only inspects f (has_arg_types) and wraps it; the lookuper it returns calls f (calc.py:134)
+133:34 call  object()
+    -> <builtin>.object
+134:34 call  memory.update(func())
+    -> <builtin>.dict.update
+134:39 call  func()
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>
+    note: func is the client's table-building function, or, for a table with arguments, the lambda f of calc.py:125 that the outer wrapper passes to make_lookuper (calc.py:127)
+137:38 call  memory.get(arg)
+    -> <builtin>.dict.get
+141:38 call  LookupError("Failed to look up %s(%s)" % (func.__name__, ...
+    -> <builtin>.LookupError
+
+[funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>]
+125:33 call  func(*args)
+    note: func is the client's table-building function (opaque)
+
+[funcy.calc.has_arg_types]
+152:31 call  inspect.signature(func)
+    -> inspect.signature
+152:55 call  inspect.signature(func).parameters.values()
+    -> types.MappingProxyType.values
+153:15 call  any(p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD...
+    -> <builtin>.any
+    reject funcy.colls.any: calc.py does not import funcy's any; this is the builtin
+155:15 call  any(p.kind in (p.KEYWORD_ONLY, p.VAR_KEYWORD) for p in pa...
+    -> <builtin>.any
+    reject funcy.colls.any: calc.py does not import funcy's any; this is the builtin
+
+== funcy.colls
+
+[funcy.colls]
+26:9 call  type(object.__dict__)
+    -> <builtin>.type
+27:9 call  type({}.keys())
+    -> <builtin>.type
+27:17 call  {}.keys()
+    -> <builtin>.dict.keys
+28:9 call  type({}.values())
+    -> <builtin>.type
+28:19 call  {}.values()
+    -> <builtin>.dict.values
+29:9 call  type({}.items())
+    -> <builtin>.type
+29:18 call  {}.items()
+    -> <builtin>.dict.items
+
+[funcy.colls._factory]
+33:21 call  type(coll)
+    -> <builtin>.type
+35:18 call  isinstance(coll, defaultdict)
+    -> <builtin>.isinstance
+36:31 call  compose(mapper, coll.default_factory)
+    -> funcy.funcs.compose
+38:23 call  partial(defaultdict, item_factory)
+    -> functools.partial
+    note: partial is functools.partial, re-exported by funcy.funcs
+39:20 call  isinstance(coll, Iterator)
+    -> <builtin>.isinstance
+41:20 call  isinstance(coll, (bytes, str))
+    -> <builtin>.isinstance
+42:25 call  coll_type()
+    -> <builtin>.str
+    -> <builtin>.bytes
+    note: coll_type is the type of a str or bytes coll (the isinstance test above); coll_type() makes the empty separator
+
+[funcy.colls.empty]
+50:18 call  isinstance(coll, Iterator)
+    -> <builtin>.isinstance
+51:20 call  iter([])
+    -> <builtin>.iter
+52:20 call  _factory(coll)
+    -> funcy.colls._factory
+52:26 call  _factory(coll)()
+    -> functools.partial.__call__
+    -> <builtin>.dict
+    -> <builtin>.list
+    note: _factory returns partial(defaultdict, ...) for a defaultdict (its isinstance test), the FACTORY_REPLACE value (dict for a mappingproxy, list for a dict view), or the coll's type; empty's own entry and docstring name no collection type ("an empty collection of the same type"), so another client type is opaque (ruling R2); an iterator returns before (line 50); for a str or bytes the factory is ''.join, and ''.join() cannot bind its arguments (no edge)
+
+[funcy.colls.iteritems]
+55:22 call  coll.items()
+    -> <builtin>.dict.items
+    -> collections.defaultdict.items
+    -> collections.OrderedDict.items
+    note: coll has an items attribute: dicts (iteritems docs: "any dictionaries"), the defaultdict of the walk_values entry (colls.rst), the OrderedDict of the walk_keys and flip entries (both reach iteritems through walk), and the package's own dicts (join_with's lists, the **kwargs of get_arg); another client mapping is opaque (R2)
+55:35 call  hasattr(coll, 'items')
+    -> <builtin>.hasattr
+
+[funcy.colls.itervalues]
+58:23 call  coll.values()
+    -> <builtin>.dict.values
+    note: coll has a values attribute: itervalues's entry names dictionaries ("values for any dictionaries"); no package code calls itervalues; another client mapping is opaque (R2)
+58:36 call  hasattr(coll, 'values')
+    -> <builtin>.hasattr
+
+[funcy.colls.join]
+66:28 call  tee(colls)
+    -> itertools.tee
+67:14 call  iter(colls_copy)
+    -> <builtin>.iter
+69:20 call  next(it)
+    -> <builtin>.next
+74:18 call  isinstance(dest, (bytes, str))
+    -> <builtin>.isinstance
+75:19 call  cls()
+    -> <builtin>.str
+    -> <builtin>.bytes
+    note: cls is the class of a str or bytes dest (the isinstance test above)
+75:26 call  cls().join(colls)
+    -> <builtin>.str.join
+    -> <builtin>.bytes.join
+    reject funcy.colls.join: the receiver is the empty str or bytes made by cls()
+76:20 call  isinstance(dest, Mapping)
+    -> <builtin>.isinstance
+77:27 call  dest.copy()
+    -> <builtin>.dict.copy
+    note: dest is a Mapping: join is "Same as merge", whose entry and docstring name dicts, sets, lists, tuples, iterators and strings; another client mapping (a defaultdict, an OrderedDict) is opaque (R2)
+79:26 call  result.update(d)
+    -> <builtin>.dict.update
+    note: result is the copy of a dict dest (merge's documented dicts, R2)
+81:20 call  isinstance(dest, Set)
+    -> <builtin>.isinstance
+82:26 call  dest.union(*it)
+    -> <builtin>.set.union
+    note: dest is a Set: the set of merge's entry (R2)
+83:20 call  isinstance(dest, (Iterator, range))
+    -> <builtin>.isinstance
+84:35 call  chain.from_iterable(colls)
+    -> itertools.chain.from_iterable
+85:20 call  isinstance(dest, Iterable)
+    -> <builtin>.isinstance
+88:19 call  cls(chain.from_iterable(colls))
+    -> <builtin>.list
+    -> <builtin>.tuple
+    note: cls is the class of an iterable dest that is no str, mapping, set, iterator or range: the list and tuple of merge's entry (R2)
+88:39 call  chain.from_iterable(colls)
+    -> itertools.chain.from_iterable
+90:24 call  TypeError("Don't know how to join %s" % cls.__name__)
+    -> <builtin>.TypeError
+
+[funcy.colls.merge]
+97:16 call  join(colls)
+    -> funcy.colls.join
+
+[funcy.colls.join_with]
+102:17 call  list(dicts)
+    -> <builtin>.list
+105:28 call  len(dicts)
+    -> <builtin>.len
+110:30 call  iteritems(c)
+    -> funcy.colls.iteritems
+112:32 call  lists[k].append(v)
+    -> <builtin>.list.append
+118:30 call  iteritems(lists)
+    -> funcy.colls.iteritems
+119:25 call  f(v)
+    -> funcy.seqs.first
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda is local to make_lookuper's wrapper and only reaches make_lookuper
+    note: f is the merge_with/join_with role: tests pass sum and list, the documentation list, sum, len and first (colls.rst: join_with(first, ...)); first is the package value; merge_with passes its f through
+
+[funcy.colls.merge_with]
+125:21 call  join_with(f, dicts)
+    -> funcy.colls.join_with
+
+[funcy.colls.walk]
+131:20 call  _factory(coll)
+    -> funcy.colls._factory
+131:26 call  _factory(coll)(xmap(f, iteritems(coll)))
+    -> functools.partial.__call__
+    -> <builtin>.iter
+    -> <builtin>.str.join
+    -> <builtin>.bytes.join
+    -> <builtin>.dict
+    -> <builtin>.list
+    -> <builtin>.tuple
+    -> <builtin>.set
+    -> collections.OrderedDict
+    -> funcy.colls.walk_keys.pair_f
+    -> funcy.colls.flip.flip_pair
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.primitives.inc
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    note: the factory (see empty, line 52; here also iter for an iterator and the str or bytes join; set and tuple from walk's entry, colls.rst:37-38, OrderedDict from flip(OrderedDict(...)) and the walk_keys entry, which reach walk; R2) consumes the lazy map that xmap built from f, so it calls f back (J4), except iter, which returns it lazily. f values: walk_keys.pair_f and flip.flip_pair (the package's calls), make_func's lambdas for None and a str (xmap applies make_func), and the walk role's documented values inc and compose(str, ord) (colls.rst walk); an itemgetter or set.__contains__ called back by map is no edge
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: README.rst:91 passes even to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: docs/funcs.rst:150-151 passes re_tester output to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: docs/flow.rst:14 passes silent output to compose; silent returns ignore wrapper at flow.py:50. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/colls.rst:48 passes compose output to walk; collection factory consumes its mapper. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+
+131:31 call  xmap(f, iteritems(coll))
+    -> funcy.seqs.map
+131:44 call  iteritems(coll)
+    -> funcy.colls.iteritems
+
+[funcy.colls.walk_keys]
+135:18 call  make_func(f)
+    -> funcy.funcmakers.make_func
+141:16 call  walk(pair_f, coll)
+    -> funcy.colls.walk
+    reject funcy.colls.walk_keys.pair_f: walk calls it back in its own body (walk.py factory call, colls.py:131)
+    reject funcy.colls.walk_values.pair_f: the argument is walk_keys's own pair_f
+
+[funcy.colls.walk_keys.pair_f]
+139:17 call  f(k)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is make_func(f) of walk_keys: the client's callable (tests str.upper; docs str.upper, int) or make_func's result for None, a str, an int or slice, a set; no package callable is documented for walk_keys
+
+[funcy.colls.walk_values]
+145:18 call  make_func(f)
+    -> funcy.funcmakers.make_func
+151:20 call  _factory(coll, mapper=f)
+    -> funcy.colls._factory
+151:36 call  _factory(coll, mapper=f)(xmap(pair_f, iteritems(coll)))
+    -> functools.partial.__call__
+    -> <builtin>.iter
+    -> <builtin>.str.join
+    -> <builtin>.bytes.join
+    -> <builtin>.dict
+    -> <builtin>.list
+    -> funcy.colls.walk_values.pair_f
+    note: the factory consumes the lazy map of pair_f and calls it back (J4). walk_values's entry names "mappings and collections of pairs" and defaultdicts (the partial): the factories are the ones that _factory's isinstance tests and FACTORY_REPLACE fix, and dict; another client type is opaque (R2)
+151:41 call  xmap(pair_f, iteritems(coll))
+    -> funcy.seqs.map
+    reject funcy.colls.walk_values.pair_f: map stores it; the factory call of this line calls it back (151:36)
+    reject funcy.colls.walk_keys.pair_f: the argument is walk_values's own pair_f
+151:59 call  iteritems(coll)
+    -> funcy.colls.iteritems
+
+[funcy.colls.walk_values.pair_f]
+149:20 call  f(v)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.primitives.inc
+    -> funcy.flow.ignore.decorator.wrapper
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is make_func(f) of walk_values: make_func's results, the client's callable, and the walk_values role's documented values inc (README.rst) and silent(int), an ignore wrapper (colls.rst compact, README.rst)
+
+[funcy.colls.select]
+157:20 call  _factory(coll)
+    -> funcy.colls._factory
+157:26 call  _factory(coll)(xfilter(pred, iteritems(coll)))
+    -> functools.partial.__call__
+    -> <builtin>.iter
+    -> <builtin>.str.join
+    -> <builtin>.bytes.join
+    -> <builtin>.dict
+    -> <builtin>.list
+    -> <builtin>.tuple
+    -> <builtin>.set
+    -> funcy.colls.select_keys.<lambda1>
+    -> funcy.colls.select_values.<lambda1>
+    -> funcy.strings.re_tester.<lambda1>
+    -> funcy.primitives.even
+    note: the factory (set, dict and tuple from select's entry, colls.rst:87, 90, and README.rst; the others fixed by _factory's isinstance tests and FACTORY_REPLACE; R2) consumes the lazy filter that xfilter built with make_pred(pred) and calls pred back (J4). pred values: the lambdas of select_keys and select_values, bool (compact; called back, no edge), make_pred's re_tester lambda for a str, and the select role's documented value even (colls.rst, README.rst)
+157:34 call  xfilter(pred, iteritems(coll))
+    -> funcy.seqs.filter
+157:50 call  iteritems(coll)
+    -> funcy.colls.iteritems
+
+[funcy.colls.select_keys]
+161:21 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+162:18 call  select(lambda pair: pred(pair[0]), coll)
+    -> funcy.colls.select
+    reject funcy.colls.select_keys.<lambda1>: select calls it back in its own body (colls.py:157)
+
+[funcy.colls.select_keys.<lambda1>]
+162:36 call  pred(pair[0])
+    -> <builtin>.bool
+    -> funcy.strings.re_tester.<lambda1>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    note: pred is make_pred(pred) of select_keys: make_pred's results, the client's callable (tests; README callable), and the documented complement(re_tester('^_')), a composed lambda (colls.rst select_keys)
+
+[funcy.colls.select_values]
+166:21 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+167:18 call  select(lambda pair: pred(pair[1]), coll)
+    -> funcy.colls.select
+    reject funcy.colls.select_values.<lambda1>: select calls it back in its own body (colls.py:157)
+
+[funcy.colls.select_values.<lambda1>]
+167:36 call  pred(pair[1])
+    -> <builtin>.bool
+    -> funcy.strings.re_tester.<lambda1>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.types.isa.<lambda1>
+    -> funcy.primitives.notnone
+    note: pred is make_pred(pred) of select_values: make_pred's results (bool also from compact), the client's callable (docs inspect.isfunction), and the documented isa(str) (colls.rst) and notnone (primitives.rst)
+
+[funcy.colls.split_keys]
+173:21 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+174:23 call  _factory(coll)
+    -> funcy.colls._factory
+174:29 call  _factory(coll)()
+    -> functools.partial.__call__
+    -> <builtin>.dict
+    note: coll is "a dictionary" (split_keys's entry); _factory's isinstance test gives the partial for a defaultdict, and a mappingproxy gives dict; another client mapping is opaque (R2)
+174:41 call  _factory(coll)
+    -> funcy.colls._factory
+174:47 call  _factory(coll)()
+    -> functools.partial.__call__
+    -> <builtin>.dict
+    note: as at 174:29
+175:33 call  coll.items()
+    -> <builtin>.dict.items
+    note: coll is "a dictionary" (split_keys's entry); another client mapping is opaque (R2)
+176:21 call  pred(key)
+    -> <builtin>.bool
+    -> funcy.strings.re_tester.<lambda1>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    note: pred is make_pred(pred) of split_keys: make_pred's results and the client's callable (tests: lambdas, r'^X-', a set; docs r'^X-')
+
+[funcy.colls.compact]
+182:18 call  isinstance(coll, Mapping)
+    -> <builtin>.isinstance
+183:29 call  select_values(bool, coll)
+    -> funcy.colls.select_values
+185:22 call  select(bool, coll)
+    -> funcy.colls.select
+
+[funcy.colls.is_distinct]
+193:19 call  len(coll)
+    -> <builtin>.len
+193:32 call  len(set(coll))
+    -> <builtin>.len
+193:36 call  set(coll)
+    -> <builtin>.set
+195:19 call  len(coll)
+    -> <builtin>.len
+195:32 call  len(set(xmap(key, coll)))
+    -> <builtin>.len
+195:36 call  set(xmap(key, coll))
+    -> <builtin>.set
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.funcs.identity
+    note: set() consumes the lazy map of key (J4): make_func's lambdas for None and a str, and identity, which the documentation names as the key (colls.rst: is_distinct(coll, key=identity)); tests pass len and 0
+195:41 call  xmap(key, coll)
+    -> funcy.seqs.map
+
+[funcy.colls.all]
+201:20 call  _all(pred)
+    -> <builtin>.all
+    reject funcy.colls.all: _all is the builtin all (colls.py:1)
+202:16 call  _all(xmap(pred, seq))
+    -> <builtin>.all
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.primitives.even
+    -> funcy.types.isa.<lambda1>
+    reject funcy.colls.all: _all is the builtin all (colls.py:1)
+    note: the builtin all consumes the lazy map of pred (J4): make_func's lambdas for None and a str (xmap applies make_func), and the all role's documented values even and isa(int) (colls.rst all); tests pass callable and _ < 3
+202:21 call  xmap(pred, seq)
+    -> funcy.seqs.map
+
+[funcy.colls.any]
+207:20 call  _any(pred)
+    -> <builtin>.any
+    reject funcy.colls.any: _any is the builtin any (colls.py:1)
+208:16 call  _any(xmap(pred, seq))
+    -> <builtin>.any
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    reject funcy.colls.any: _any is the builtin any (colls.py:1)
+    note: the builtin any consumes the lazy map of pred (J4): make_func's lambdas for None and a str; none passes its pred through; no package callable is documented for any or none
+208:21 call  xmap(pred, seq)
+    -> funcy.seqs.map
+
+[funcy.colls.none]
+212:19 call  any(pred, seq)
+    -> funcy.colls.any
+
+[funcy.colls.one]
+217:19 call  one(bool, pred)
+    -> funcy.colls.one
+218:15 call  len(take(2, xfilter(pred, seq)))
+    -> <builtin>.len
+218:20 call  take(2, xfilter(pred, seq))
+    -> funcy.seqs.take
+218:31 call  xfilter(pred, seq)
+    -> funcy.seqs.filter
+
+[funcy.colls.some]
+224:20 call  some(bool, pred)
+    -> funcy.colls.some
+225:16 call  next(xfilter(pred, seq), None)
+    -> <builtin>.next
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.funcs.autocurry.autocurried
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    -> funcy.funcs.iffy.<lambda1>
+    -> funcy.funcs.ljuxt.<lambda1>
+    -> funcy.seqs.first
+    -> funcy.seqs.lcat
+    -> funcy.seqs.second
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.strings.re_tester.<lambda1>
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst10 and map/lmap docs. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst11; strings.rst re_finder mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_juxt passes ljuxt result to lmap. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_iffy; docs/funcs.rst129-137. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst212 lmap(lcat,product(...)). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/calc.rst53 translate returned lookuper passed to lmap; client table builder returns {"x":[1]}. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst86 and first entry mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst144 map(second,...). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/primitives.rst12; map(silent(int),...) names ignore wrapper for map role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/flow.rst14-15 composed greeting mapper. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst316 explicitly recommends the same operation with some and map. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/funcs.rst88 autocurried rem used as map callback. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.primitives.inc
+    -> funcy.primitives.isnone
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: README.rst:91 passes even to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:316 recommends some and map together; next consumes the documented map factory output. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+
+225:24 call  xfilter(pred, seq)
+    -> funcy.seqs.filter
+
+[funcy.colls.zipdict]
+236:16 call  dict(zip(keys, vals))
+    -> <builtin>.dict
+236:20 call  zip(keys, vals)
+    -> <builtin>.zip
+
+[funcy.colls.flip]
+243:16 call  walk(flip_pair, mapping)
+    -> funcy.colls.walk
+    reject funcy.colls.flip.flip_pair: walk calls it back in its own body (colls.py:131)
+
+[funcy.colls.project]
+247:20 call  _factory(mapping)
+    -> funcy.colls._factory
+247:29 call  _factory(mapping)((k, mapping[k]) for k in keys if k in m...
+    -> functools.partial.__call__
+    -> <builtin>.dict
+    note: project's entry names a dict ("Returns a dict"; examples __builtins__ and globals()); _factory's isinstance test gives the partial for a defaultdict; another client mapping is opaque (R2); the factory consumes the generator expression, whose calls belong to project
+
+[funcy.colls.omit]
+251:20 call  _factory(mapping)
+    -> funcy.colls._factory
+251:29 call  _factory(mapping)((k, v) for k, v in iteritems(mapping) i...
+    -> functools.partial.__call__
+    -> <builtin>.dict
+    note: mapping is a dict (omit's examples, and the **kwargs dict that get_arg passes, decorators.py:153); _factory's isinstance test gives the partial for a defaultdict; another client mapping is opaque (R2)
+251:58 call  iteritems(mapping)
+    -> funcy.colls.iteritems
+
+[funcy.colls.zip_values]
+255:11 call  len(dicts)
+    -> <builtin>.len
+256:24 call  TypeError('zip_values expects at least one argument')
+    -> <builtin>.TypeError
+257:28 call  set.intersection(*map(set, dicts))
+    -> <builtin>.set.intersection
+257:33 call  map(set, dicts)
+    -> <builtin>.map
+    reject funcy.seqs.map: colls.py imports funcy's map as xmap; map here is the builtin, and set is called back (no edge)
+259:20 call  tuple(d[key] for d in dicts)
+    -> <builtin>.tuple
+
+[funcy.colls.zip_dicts]
+264:11 call  len(dicts)
+    -> <builtin>.len
+265:24 call  TypeError('zip_dicts expects at least one argument')
+    -> <builtin>.TypeError
+266:28 call  set.intersection(*map(set, dicts))
+    -> <builtin>.set.intersection
+266:33 call  map(set, dicts)
+    -> <builtin>.map
+    reject funcy.seqs.map: colls.py imports funcy's map as xmap; map here is the builtin
+268:25 call  tuple(d[key] for d in dicts)
+    -> <builtin>.tuple
+
+[funcy.colls.set_in]
+292:21 call  update_in(coll, path, lambda _: value)
+    -> funcy.colls.update_in
+    reject funcy.colls.set_in.<lambda1>: update_in calls it in its own body (colls.py:297)
+
+[funcy.colls.update_in]
+297:22 call  update(coll)
+    -> funcy.colls.set_in.<lambda1>
+    -> funcy.primitives.inc
+    note: update is set_in's lambda, the client's callable (tests len), or inc, which the documentation passes (colls.rst: update_in(..., inc, default=0)); the recursive calls pass it through
+298:20 call  isinstance(coll, list)
+    -> <builtin>.isinstance
+301:34 call  update_in(copy[path[0]], path[1:], update, default)
+    -> funcy.colls.update_in
+304:25 call  coll.copy()
+    -> <builtin>.dict.copy
+    note: coll is a nested mapping (a list goes to the branch above): the {} that update_in itself passes as current_default for a missing key (line 305), or the client's collection, which update_in's entry does not type (opaque, R2)
+305:36 call  len(path)
+    -> <builtin>.len
+306:34 call  update_in(copy.get(path[0], current_default), path[1:], u...
+    -> funcy.colls.update_in
+306:43 call  copy.get(path[0], current_default)
+    -> <builtin>.dict.get
+    note: copy is the copy of the dict of line 304
+
+[funcy.colls.del_in]
+319:21 call  copy(coll)
+    -> copy.copy
+320:11 call  len(path)
+    -> <builtin>.len
+323:36 call  del_in(next_coll, path[1:])
+    -> funcy.colls.del_in
+
+[funcy.colls.lwhere]
+338:16 call  list(where(mappings, **cond))
+    -> <builtin>.list
+    -> funcy.colls.where.<lambda1>
+    note: list() consumes the lazy filter of match, where's lambda (J4)
+338:22 call  where(mappings, **cond)
+    -> funcy.colls.where
+
+[funcy.colls.lpluck]
+342:16 call  list(pluck(key, mappings))
+    -> <builtin>.list
+    note: list() consumes the map of an operator.itemgetter (library code called back: no edge)
+342:22 call  pluck(key, mappings)
+    -> funcy.colls.pluck
+
+[funcy.colls.lpluck_attr]
+346:16 call  list(pluck_attr(attr, objects))
+    -> <builtin>.list
+    note: the map of an operator.attrgetter (no edge)
+346:27 call  pluck_attr(attr, objects)
+    -> funcy.colls.pluck_attr
+
+[funcy.colls.linvoke]
+351:16 call  list(invoke(objects, name, *args, **kwargs))
+    -> <builtin>.list
+    note: the map of an operator.methodcaller (no edge)
+351:23 call  invoke(objects, name, *args, **kwargs)
+    -> funcy.colls.invoke
+
+[funcy.colls.where]
+358:23 call  cond.items()
+    -> <builtin>.dict.items
+    note: cond is the **cond dict
+360:18 call  filter(match, mappings)
+    -> <builtin>.filter
+    reject funcy.seqs.filter: colls.py imports funcy's filter as xfilter; filter here is the builtin
+    reject funcy.colls.where.<lambda1>: the lazy filter stores match; lwhere's list() (colls.py:338) or the client calls it
+
+[funcy.colls.where.<lambda1>]
+359:26 call  all(k in m and m[k] == v for k, v in items)
+    -> funcy.colls.all
+    note: in colls.py, all is funcy.colls.all (defined at line 198); its one-argument form iterates the generator expression, whose calls belong to this lambda
+
+[funcy.colls.pluck]
+364:15 call  map(itemgetter(key), mappings)
+    -> <builtin>.map
+    reject funcy.seqs.map: map here is the builtin
+364:26 call  itemgetter(key)
+    -> operator.itemgetter
+
+[funcy.colls.pluck_attr]
+368:15 call  map(attrgetter(attr), objects)
+    -> <builtin>.map
+    reject funcy.seqs.map: map here is the builtin
+368:26 call  attrgetter(attr)
+    -> operator.attrgetter
+
+[funcy.colls.invoke]
+373:15 call  map(methodcaller(name, *args, **kwargs), objects)
+    -> <builtin>.map
+    reject funcy.seqs.map: map here is the builtin
+373:28 call  methodcaller(name, *args, **kwargs)
+    -> operator.methodcaller
+
+== funcy.debug
+
+[funcy.debug]
+32:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at debug.py:7
+56:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at debug.py:7
+71:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at debug.py:7
+137:26 call  log_errors(print)
+    -> funcy.debug.log_errors.__init__
+    reject funcy.debug.LabeledContextDecorator.__init__: log_errors defines __init__; it calls the base __init__ in its own body
+180:32 call  log_durations(print)
+    -> funcy.debug.log_durations.__init__
+    reject funcy.debug.LabeledContextDecorator.__init__: log_durations defines __init__; it calls the base __init__ in its own body
+
+[funcy.debug.tap]
+26:14 call  print('%s: %s' % (label, x))
+    -> <builtin>.print
+28:14 call  print(x)
+    -> <builtin>.print
+
+[funcy.debug.log_calls]
+36:31 call  signature_repr(call, repr_len)
+    -> funcy.debug.signature_repr
+38:19 call  print_func('Call %s' % signature)
+    -> <builtin>.print
+    note: print_func is the builtin print (print_calls passes it) or the client's function (log.append, log.info: opaque)
+39:22 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call that make_decorator's wrapper builds (decorators.py:46) and passes to the @decorator function
+41:19 call  print_func('-> %s from %s' % (smart_repr(result, max_len=...
+    -> <builtin>.print
+    note: print_func is print (print_calls) or the client's function
+41:49 call  smart_repr(result, max_len=None)
+    -> funcy.debug.smart_repr
+45:23 call  print_func('-> ' + _format_error(signature, e, stack))
+    -> <builtin>.print
+    note: print_func is print (print_calls) or the client's function
+45:45 call  _format_error(signature, e, stack)
+    -> funcy.debug._format_error
+
+[funcy.debug.print_calls]
+49:16 call  callable(errors)
+    -> <builtin>.callable
+50:25 call  log_calls(print)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.debug.log_calls: @decorator (debug.py:32) rebinds log_calls to the decorator_fab that decorator() returns (its parameters after call are positional, so the second decorator_fab, decorators.py:36)
+50:32 call  log_calls(print)(errors)
+    -> funcy.decorators.make_decorator._decorator
+    note: decorator_fab returns make_decorator(...), the closure _decorator
+52:25 call  log_calls(print, errors, stack, repr_len)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.debug.log_calls: log_calls is the decorator_fab of @decorator
+
+[funcy.debug.log_enters]
+59:15 call  print_func('Call %s' % signature_repr(call, repr_len))
+    -> <builtin>.print
+    note: print_func is print (print_enters) or the client's function
+59:42 call  signature_repr(call, repr_len)
+    -> funcy.debug.signature_repr
+60:16 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call of make_decorator's wrapper
+
+[funcy.debug.print_enters]
+65:16 call  callable(repr_len)
+    -> <builtin>.callable
+66:26 call  log_enters(print)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.debug.log_enters: @decorator (debug.py:56) rebinds log_enters to decorator_fab
+66:33 call  log_enters(print)(repr_len)
+    -> funcy.decorators.make_decorator._decorator
+    note: decorator_fab returns the closure _decorator
+68:26 call  log_enters(print, repr_len)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.debug.log_enters: log_enters is the decorator_fab of @decorator
+
+[funcy.debug.log_exits]
+74:31 call  signature_repr(call, repr_len)
+    -> funcy.debug.signature_repr
+76:22 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call of make_decorator's wrapper
+78:19 call  print_func('-> %s from %s' % (smart_repr(result, max_len=...
+    -> <builtin>.print
+    note: print_func is print (print_exits) or the client's function
+78:49 call  smart_repr(result, max_len=None)
+    -> funcy.debug.smart_repr
+82:23 call  print_func('-> ' + _format_error(signature, e, stack))
+    -> <builtin>.print
+    note: print_func is print (print_exits) or the client's function
+82:45 call  _format_error(signature, e, stack)
+    -> funcy.debug._format_error
+
+[funcy.debug.print_exits]
+87:16 call  callable(errors)
+    -> <builtin>.callable
+88:25 call  log_exits(print)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.debug.log_exits: @decorator (debug.py:71) rebinds log_exits to decorator_fab
+88:32 call  log_exits(print)(errors)
+    -> funcy.decorators.make_decorator._decorator
+    note: decorator_fab returns the closure _decorator
+90:25 call  log_exits(print, errors, stack, repr_len)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.debug.log_exits: log_exits is the decorator_fab of @decorator
+
+[funcy.debug.LabeledContextDecorator.__call__]
+103:20 call  callable(label)
+    -> <builtin>.callable
+104:34 call  self.decorator(label)
+    -> funcy.debug.LabeledContextDecorator.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.decorators.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: self is a LabeledContextDecorator (or a log_errors or log_durations), which inherits LabeledContextDecorator.decorator
+106:34 call  self.__class__(self.print_func, label, **kwargs)
+    -> funcy.debug.LabeledContextDecorator.__init__
+    -> funcy.debug.log_errors.__init__
+    -> funcy.debug.log_durations.__init__
+    note: self.__class__ is the class of the instance: log_errors (print_errors, docs: print_errors('initialization', stack=False)), log_durations (print_durations('Creating models'), debug.rst and README.rst), or LabeledContextDecorator itself, a public class (funcy.debug.LabeledContextDecorator) that a client can instantiate (B1, C)
+
+[funcy.debug.LabeledContextDecorator.decorator]
+109:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: wraps is funcy.decorators.wraps; its partial calls update_wrapper back
+109:15 call  wraps(func)
+    -> funcy.decorators.wraps
+
+[funcy.debug.LabeledContextDecorator.decorator.inner]
+112:40 call  self.__class__.__new__(self.__class__)
+    -> <builtin>.object.__new__
+    note: log_errors, log_durations and LabeledContextDecorator do not define __new__
+113:31 call  cm.__dict__.update(self.__dict__)
+    -> <builtin>.dict.update
+114:38 call  signature_repr(Call(func, args, kwargs), self.repr_len)
+    -> funcy.debug.signature_repr
+114:43 call  Call(func, args, kwargs)
+    -> funcy.decorators.Call.__init__
+115:18 with  cm
+    -> funcy.debug.log_errors.__enter__
+    -> funcy.debug.log_errors.__exit__
+    -> funcy.debug.log_durations.__enter__
+    -> funcy.debug.log_durations.__exit__
+    reject funcy.flow.nullcontext.__enter__, funcy.flow.nullcontext.__exit__: cm is a new instance of self.__class__, a LabeledContextDecorator class
+    note: cm has the class of self: log_errors or log_durations; a plain LabeledContextDecorator has no __enter__, so the with statement fails before any call
+116:28 call  func(*args, **kwargs)
+    note: func is the function that log_errors or log_durations decorates: client functions in the tests and documentation (opaque)
+
+[funcy.debug.log_errors.__init__]
+123:41 call  LabeledContextDecorator.__init__(self, print_func, label=...
+    -> funcy.debug.LabeledContextDecorator.__init__
+    reject funcy.calc.CacheMemory.__init__, funcy.debug.log_durations.__init__, funcy.debug.log_errors.__init__, funcy.decorators.Call.__init__, funcy.flow.nullcontext.__init__, funcy.objects.LazyObject.__init__, funcy.objects.cached_property.__init__: the call names LabeledContextDecorator.__init__ explicitly
+
+[funcy.debug.log_errors.__exit__]
+132:38 call  ''.join(traceback.format_exception(exc_type, exc_value, tb))
+    -> <builtin>.str.join
+    reject funcy.colls.join: the receiver is the str ''
+132:65 call  traceback.format_exception(exc_type, exc_value, tb)
+    -> traceback.format_exception
+135:28 call  self.print_func(_format_error(self.label, exc_message, se...
+    -> <builtin>.print
+    note: print_func is print (print_errors = log_errors(print), debug.py:137) or the client's function
+135:42 call  _format_error(self.label, exc_message, self.stack)
+    -> funcy.debug._format_error
+
+[funcy.debug.log_durations.__init__]
+164:41 call  LabeledContextDecorator.__init__(self, print_func, label=...
+    -> funcy.debug.LabeledContextDecorator.__init__
+    reject funcy.calc.CacheMemory.__init__, funcy.debug.log_durations.__init__, funcy.debug.log_errors.__init__, funcy.decorators.Call.__init__, funcy.flow.nullcontext.__init__, funcy.objects.LazyObject.__init__, funcy.objects.cached_property.__init__: the call names LabeledContextDecorator.__init__ explicitly
+166:29 call  ValueError('Unknown time unit: %s. It should be ns, mks, ...
+    -> <builtin>.ValueError
+
+[funcy.debug.log_durations.__enter__]
+171:27 call  timer()
+    -> timeit.default_timer
+    note: timer is timeit.default_timer (debug.py:5)
+
+[funcy.debug.log_durations.__exit__]
+175:25 call  timer()
+    -> timeit.default_timer
+177:44 call  self.format_time(duration)
+    -> funcy.debug.format_time
+    -> funcy.debug.<lambda1>
+    -> funcy.debug.<lambda2>
+    -> funcy.debug.<lambda3>
+    -> funcy.debug.<lambda4>
+    note: self.format_time is time_formatters[unit] (debug.py:167): format_time for 'auto', the lambdas of debug.py:154-157 for 'ns', 'mks', 'ms', 's'
+178:28 call  self.print_func("%s in %s" % (duration_str, self.label) i...
+    -> <builtin>.print
+    note: print_func is print (print_durations = log_durations(print), debug.py:180) or the client's function
+
+[funcy.debug.log_iter_durations]
+186:25 call  ValueError('Unknown time unit: %s. It should be ns, mks, ...
+    -> <builtin>.ValueError
+189:14 call  iter(seq)
+    -> <builtin>.iter
+190:29 call  enumerate(it)
+    -> <builtin>.enumerate
+191:22 call  timer()
+    -> timeit.default_timer
+193:32 call  _format_time(timer() - start)
+    -> funcy.debug.format_time
+    -> funcy.debug.<lambda1>
+    -> funcy.debug.<lambda2>
+    -> funcy.debug.<lambda3>
+    -> funcy.debug.<lambda4>
+    note: _format_time is time_formatters[unit] (debug.py:187)
+193:38 call  timer()
+    -> timeit.default_timer
+194:19 call  print_func("%s in iteration %d%s" % (duration, i, suffix))
+    -> <builtin>.print
+    note: print_func is print (print_iter_durations) or the client's function
+
+[funcy.debug.print_iter_durations]
+198:30 call  log_iter_durations(seq, print, label, unit=unit)
+    -> funcy.debug.log_iter_durations
+
+[funcy.debug._format_error]
+204:18 call  isinstance(e, Exception)
+    -> <builtin>.isinstance
+206:45 call  traceback.format_exc()
+    -> traceback.format_exc
+
+[funcy.debug.signature_repr]
+222:18 call  isinstance(call._func, partial)
+    -> <builtin>.isinstance
+223:19 call  hasattr(call._func.func, '__name__')
+    -> <builtin>.hasattr
+228:23 call  getattr(call._func, '__name__', '<unknown>')
+    -> <builtin>.getattr
+229:28 call  smart_repr(arg, repr_len)
+    -> funcy.debug.smart_repr
+230:46 call  smart_repr(value, repr_len)
+    -> funcy.debug.smart_repr
+231:56 call  call._kwargs.items()
+    -> <builtin>.dict.items
+    note: call._kwargs is the **kwargs dict of the decorated call
+232:39 call  ', '.join(chain(args_repr, kwargs_repr))
+    -> <builtin>.str.join
+    reject funcy.colls.join: the receiver is the str ', '
+232:45 call  chain(args_repr, kwargs_repr)
+    -> itertools.chain
+
+[funcy.debug.smart_repr]
+235:18 call  isinstance(value, (bytes, str))
+    -> <builtin>.isinstance
+236:19 call  repr(value)
+    -> <builtin>.repr
+238:18 call  str(value)
+    -> <builtin>.str
+240:17 call  re.sub(r'\s+', ' ', res)
+    -> re.sub
+241:23 call  len(res)
+    -> <builtin>.len
+
+== funcy.decorators
+
+[funcy.decorators.decorator]
+25:22 call  has_single_arg(deco)
+    -> funcy.decorators.has_single_arg
+26:30 call  make_decorator(deco)
+    -> funcy.decorators.make_decorator
+27:29 call  has_1pos_and_kwonly(deco)
+    -> funcy.decorators.has_1pos_and_kwonly
+39:17 call  wraps(deco)
+    -> funcy.decorators.wraps
+39:23 call  wraps(deco)(decorator_fab)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    reject funcy.decorators.decorator.decorator_fab: update_wrapper copies attributes onto decorator_fab and does not call it
+    note: the partial of wraps calls update_wrapper back
+
+[funcy.decorators.decorator.decorator_fab]
+33:38 call  make_decorator(deco, (), dkwargs)
+    -> funcy.decorators.make_decorator
+33:57 call  make_decorator(deco, (), dkwargs)(_func)
+    -> funcy.decorators.make_decorator._decorator
+34:34 call  make_decorator(deco, (), dkwargs)
+    -> funcy.decorators.make_decorator
+37:34 call  make_decorator(deco, dargs, dkwargs)
+    -> funcy.decorators.make_decorator
+
+[funcy.decorators.make_decorator]
+43:6 decorator  @wraps(deco)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: the partial of wraps calls update_wrapper back
+43:11 call  wraps(deco)
+    -> funcy.decorators.wraps
+
+[funcy.decorators.make_decorator._decorator]
+48:21 call  wraps(func)
+    -> funcy.decorators.wraps
+48:27 call  wraps(func)(wrapper)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    reject *: update_wrapper copies attributes onto wrapper and calls no wrapper
+    note: the partial of wraps calls update_wrapper back
+
+[funcy.decorators.make_decorator._decorator.wrapper]
+46:24 call  Call(func, args, kwargs)
+    -> funcy.decorators.Call.__init__
+47:24 call  deco(call, *dargs, **dkwargs)
+    -> funcy.debug.log_calls
+    -> funcy.debug.log_enters
+    -> funcy.debug.log_exits
+    -> funcy.flow.retry
+    -> funcy.flow.post_processing
+    -> funcy.flow.joining
+    -> funcy.flow.wrap_with
+    note: deco is the function that @decorator wrapped: the client's, or the package's seven (debug.py:32, 56, 71; flow.py:90, 192, 201, 243)
+
+[funcy.decorators.Call.__call__]
+68:30 call  self._func(*self._args, **self._kwargs)
+    -> funcy.decorators.make_decorator._decorator.wrapper
+    -> funcy.debug.LabeledContextDecorator.decorator.inner
+    note: self._func is the decorated function: a client function, or a package wrapper where decorators are stacked: the wrapper of another @decorator decorator (tests: @deco @noop, decor(decorated); decorators.rst: @with_phone @with_user) and log_errors's inner under @log_calls (debug.rst, README.rst)
+70:30 call  self._func(*(self._args + a), **dict(self._kwargs, **kw))
+    -> funcy.decorators.make_decorator._decorator.wrapper
+    -> funcy.debug.LabeledContextDecorator.decorator.inner
+    note: as at 68:30
+70:56 call  dict(self._kwargs, **kw)
+    -> <builtin>.dict
+
+[funcy.decorators.Call.__getattr__]
+74:50 call  arggetter(self._func)
+    -> funcy.decorators.arggetter
+74:62 call  arggetter(self._func)(name, self._args, self._kwargs)
+    -> funcy.decorators.arggetter.get_arg
+    note: arggetter returns its closure get_arg
+77:33 call  AttributeError(*e.args)
+    -> <builtin>.AttributeError
+
+[funcy.decorators.Call.__str__]
+80:23 call  getattr(self._func, '__qualname__', str(self._func))
+    -> <builtin>.getattr
+80:55 call  str(self._func)
+    -> <builtin>.str
+81:25 call  ", ".join(list(map(str, self._args)) + ["%s=%s" % t for t...
+    -> <builtin>.str.join
+    reject funcy.colls.join: the receiver is the str ", "
+81:30 call  list(map(str, self._args))
+    -> <builtin>.list
+81:34 call  map(str, self._args)
+    -> <builtin>.map
+    reject funcy.seqs.map: decorators.py does not import funcy's map; str is called back (no edge)
+81:95 call  self._kwargs.items()
+    -> <builtin>.dict.items
+    note: self._kwargs is the **kwargs dict of the decorated call
+
+[funcy.decorators.has_single_arg]
+89:28 call  inspect.signature(func)
+    -> inspect.signature
+90:11 call  len(sig.parameters)
+    -> <builtin>.len
+92:15 call  next(iter(sig.parameters.values()))
+    -> <builtin>.next
+92:20 call  iter(sig.parameters.values())
+    -> <builtin>.iter
+92:42 call  sig.parameters.values()
+    -> types.MappingProxyType.values
+
+[funcy.decorators.has_1pos_and_kwonly]
+99:28 call  inspect.signature(func)
+    -> inspect.signature
+100:20 call  Counter(p.kind for p in sig.parameters.values())
+    -> collections.Counter
+100:58 call  sig.parameters.values()
+    -> types.MappingProxyType.values
+
+[funcy.decorators.get_argnames]
+105:19 call  getattr(func, '__original__', None)
+    -> <builtin>.getattr
+105:57 call  unwrap(func)
+    -> inspect.unwrap
+
+[funcy.decorators.arggetter]
+112:23 call  getattr(func, '__original__', None)
+    -> <builtin>.getattr
+112:61 call  unwrap(func)
+    -> inspect.unwrap
+121:15 call  hasattr(code, 'co_posonlyargcount')
+    -> <builtin>.hasattr
+133:19 call  set(code.co_varnames)
+    -> <builtin>.set
+134:48 call  enumerate(posnames)
+    -> <builtin>.enumerate
+137:24 call  defaults.update(zip(posnames[-len(original.__defaults__):...
+    -> <builtin>.dict.update
+137:28 call  zip(posnames[-len(original.__defaults__):], original.__de...
+    -> <builtin>.zip
+137:42 call  len(original.__defaults__)
+    -> <builtin>.len
+139:24 call  defaults.update(original.__kwdefaults__)
+    -> <builtin>.dict.update
+
+[funcy.decorators.arggetter.get_arg]
+143:28 call  TypeError("%s() doesn't have argument named %s" % (func._...
+    -> <builtin>.TypeError
+145:28 call  indexes.get(name)
+    -> <builtin>.dict.get
+146:45 call  len(args)
+    -> <builtin>.len
+151:28 call  len(posnames)
+    -> <builtin>.len
+153:24 call  omit(kwargs, kwnames)
+    -> funcy.colls.omit
+157:28 call  TypeError("%s() missing required argument: '%s'" % (func....
+    -> <builtin>.TypeError
+
+[funcy.decorators.update_wrapper]
+169:29 call  functools.update_wrapper(wrapper, wrapped, assigned, upda...
+    -> functools.update_wrapper
+    reject funcy.decorators.update_wrapper: the call names functools.update_wrapper
+172:35 call  getattr(wrapped, '__original__', None)
+    -> <builtin>.getattr
+172:76 call  unwrap(wrapped)
+    -> inspect.unwrap
+
+[funcy.decorators.wraps]
+182:29 call  functools.partial(update_wrapper, wrapped=wrapped, assign...
+    -> functools.partial
+    reject funcy.decorators.update_wrapper: the partial stores update_wrapper; calling the partial calls it (at the @wraps and wraps(...)(...) sites)
+
+[funcy.decorators.Call.__repr__]
+85:28 op  "<Call %s>" % self
+    -> funcy.decorators.Call.__str__
+    reject funcy.decorators.Call.__repr__: %s converts with str(), and Call defines __str__
+
+== funcy.flow
+
+[funcy.flow]
+78:2 decorator  @contextmanager
+    -> contextlib.contextmanager
+    note: contextmanager is contextlib.contextmanager, re-exported by funcy.decorators
+90:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at flow.py:6
+192:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at flow.py:6
+197:29 call  post_processing(list)
+    -> funcy.decorators.decorator.decorator_fab
+    reject funcy.flow.post_processing: @decorator (flow.py:192) rebinds post_processing to decorator_fab (its parameter func is positional, so the second decorator_fab, decorators.py:36)
+201:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at flow.py:6
+235:16 call  once_per()
+    -> funcy.flow.once_per
+243:2 decorator  @decorator
+    -> funcy.decorators.decorator
+    reject funcy.calc._memory_decorator.decorator, funcy.debug.LabeledContextDecorator.decorator, funcy.flow.ignore.decorator, funcy.flow.limit_error_rate.decorator, funcy.flow.throttle.decorator, funcy.objects.monkey.decorator, funcy.objects.wrap_prop.decorator: the decorator is funcy.decorators.decorator, imported at flow.py:6
+
+[funcy.flow.raiser]
+21:18 call  isinstance(exception_or_class, str)
+    -> <builtin>.isinstance
+22:39 call  Exception(exception_or_class)
+    -> <builtin>.Exception
+
+[funcy.flow.raiser._raiser]
+26:37 call  exception_or_class(*args, **kwargs)
+    -> <builtin>.Exception
+    note: raiser(extra=1) retains the package default Exception while kwargs selects the explicit constructor call. On supported CPython3.10, BaseException_new allocates and initializes the instance without rejecting kwargs; BaseException_init then rejects them. This enters the outside constructor before TypeError. CPython3.14 instead checks keywords in BaseException_vectorcall before allocation, but supported-version union includes3.10. Pinned official exceptions.c snapshots record both implementations.
+
+[funcy.flow.ignore]
+36:32 call  _ensure_exceptable(errors)
+    -> funcy.flow._ensure_exceptable
+
+[funcy.flow.ignore.decorator]
+39:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: wraps is funcy.decorators.wraps; its partial calls update_wrapper back
+39:15 call  wraps(func)
+    -> funcy.decorators.wraps
+
+[funcy.flow.ignore.decorator.wrapper]
+42:28 call  func(*args, **kwargs)
+    -> funcy.flow.raiser._raiser
+    -> funcy.decorators.make_decorator._decorator.wrapper
+    -> funcy.debug.LabeledContextDecorator.decorator.inner
+    -> funcy.flow.limit_error_rate.decorator.wrapper
+    note: func is the function that ignore or silent decorates: client functions, and the package values that the tests and documentation pass: raiser(...) (tests ignore), a log_calls wrapper and log_errors's inner (tests silent(f), @silent @print_errors(...); debug.rst @ignore(...) @log_errors(...)), and limit_error_rate's wrapper (flow.rst and README.rst: @ignore(...) @limit_error_rate(...))
+
+[funcy.flow.silent]
+50:18 call  ignore(Exception)
+    -> funcy.flow.ignore
+50:29 call  ignore(Exception)(func)
+    -> funcy.flow.ignore.decorator
+    note: ignore(...) returns its closure decorator
+
+[funcy.flow.reraise]
+81:32 call  _ensure_exceptable(errors)
+    -> funcy.flow._ensure_exceptable
+85:20 call  callable(into)
+    -> <builtin>.callable
+85:53 call  _is_exception_type(into)
+    -> funcy.flow._is_exception_type
+86:24 call  into(e)
+    note: into is the client's exception class, instance or factory (docs: a lambda; tests: a lambda); no package value
+
+[funcy.flow.retry]
+95:32 call  _ensure_exceptable(errors)
+    -> funcy.flow._ensure_exceptable
+96:25 call  range(tries)
+    -> <builtin>.range
+98:24 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call of make_decorator's wrapper
+100:59 call  filter_errors(e)
+    note: filter_errors is the client's predicate (tests and docs: lambdas)
+107:40 call  timeout(attempt)
+    note: timeout is the client's callable (tests and docs: lambdas)
+107:61 call  callable(timeout)
+    -> <builtin>.callable
+109:31 call  time.sleep(timeout_value)
+    -> time.sleep
+
+[funcy.flow.fallback]
+116:56 call  callable(approach)
+    -> <builtin>.callable
+117:35 call  _ensure_exceptable(catch)
+    -> funcy.flow._ensure_exceptable
+119:24 call  func()
+    -> funcy.flow.raiser._raiser
+    note: func is the callable of an approach: client callables and partials, and raiser(...), which the tests and the documentation pass (flow.rst fallback)
+
+[funcy.flow._ensure_exceptable]
+126:40 call  _is_exception_type(errors)
+    -> funcy.flow._is_exception_type
+126:59 call  tuple(errors)
+    -> <builtin>.tuple
+
+[funcy.flow._is_exception_type]
+130:22 call  isinstance(value, type)
+    -> <builtin>.isinstance
+130:50 call  issubclass(value, BaseException)
+    -> <builtin>.issubclass
+
+[funcy.flow.limit_error_rate]
+139:18 call  isinstance(timeout, int)
+    -> <builtin>.isinstance
+140:28 call  timedelta(seconds=timeout)
+    -> datetime.timedelta
+
+[funcy.flow.limit_error_rate.decorator]
+143:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: wraps is funcy.decorators.wraps; its partial calls update_wrapper back
+143:15 call  wraps(func)
+    -> funcy.decorators.wraps
+
+[funcy.flow.limit_error_rate.decorator.wrapper]
+146:32 call  datetime.now()
+    -> datetime.datetime.now
+152:30 call  func(*args, **kwargs)
+    -> funcy.decorators.make_decorator._decorator.wrapper
+    note: func is the decorated function: client functions, and retry's wrapper under it (README.rst: @limit_error_rate(...) @retry(...))
+156:51 call  datetime.now()
+    -> datetime.datetime.now
+
+[funcy.flow.throttle]
+170:18 call  isinstance(period, timedelta)
+    -> <builtin>.isinstance
+171:38 call  period.total_seconds()
+    -> datetime.timedelta.total_seconds
+
+[funcy.flow.throttle.decorator]
+175:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: wraps is funcy.decorators.wraps; its partial calls update_wrapper back
+175:15 call  wraps(func)
+    -> funcy.decorators.wraps
+
+[funcy.flow.throttle.decorator.wrapper]
+177:28 call  time.time()
+    -> time.time
+182:24 call  func(*args, **kwargs)
+    note: func is the function that throttle decorates: client functions and bound methods in the tests and documentation
+
+[funcy.flow.post_processing]
+195:16 call  func(call())
+    -> <builtin>.list
+    note: func is list (collecting = post_processing(list), flow.py:197) or the client's function (tests max, docs dict: opaque)
+195:21 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call of make_decorator's wrapper
+
+[funcy.flow.joining]
+204:20 call  sep.join(map(sep.__class__, call()))
+    -> <builtin>.str.join
+    -> <builtin>.bytes.join
+    reject funcy.colls.join: sep is the documented str or bytes separator (flow.rst joining: ', ' and b' ')
+204:24 call  map(sep.__class__, call())
+    -> <builtin>.map
+    reject funcy.seqs.map: flow.py does not import funcy's map; sep.__class__ is called back (no edge)
+204:44 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call of make_decorator's wrapper
+
+[funcy.flow.once_per.once]
+212:30 call  threading.Lock()
+    -> threading.Lock
+213:23 call  set()
+    -> <builtin>.set
+214:25 call  list()
+    -> <builtin>.list
+216:28 call  arggetter(func)
+    -> funcy.decorators.arggetter
+218:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    -> funcy.decorators.update_wrapper
+    note: wraps is funcy.decorators.wraps; its partial calls update_wrapper back
+218:15 call  wraps(func)
+    -> funcy.decorators.wraps
+
+[funcy.flow.once_per.once.wrapper]
+220:18 with  lock
+    reject *: lock is the threading.Lock of flow.py:212
+221:31 call  tuple(get_arg(name, args, kwargs) for name in argnames)
+    -> <builtin>.tuple
+221:39 call  get_arg(name, args, kwargs)
+    -> funcy.decorators.arggetter.get_arg
+    note: get_arg is arggetter(func) of flow.py:216, the closure get_arg
+223:25 call  hash(values)
+    -> <builtin>.hash
+230:24 call  add(values)
+    -> <builtin>.list.append
+    -> <builtin>.set.add
+    note: add is done_list.append or done_set.add (flow.py:225, 227)
+231:32 call  func(*args, **kwargs)
+    note: func is the function that once, once_per or once_per_args decorates: client functions in the tests and documentation
+
+[funcy.flow.once_per_args]
+240:20 call  once_per(*get_argnames(func))
+    -> funcy.flow.once_per
+240:34 call  get_argnames(func)
+    -> funcy.decorators.get_argnames
+240:41 call  once_per(*get_argnames(func))(func)
+    -> funcy.flow.once_per.once
+    note: once_per(...) returns its closure once
+
+[funcy.flow.wrap_with]
+246:10 with  ctx
+    reject *: ctx is the client's context manager (tests: a Manager class; flow.rst: threading.Lock()); no package context manager is documented for wrap_with
+247:20 call  call()
+    -> funcy.decorators.Call.__call__
+    note: call is the Call of make_decorator's wrapper
+
+== funcy.funcmakers
+
+[funcy.funcmakers.make_func]
+11:16 call  callable(f)
+    -> <builtin>.callable
+16:20 call  isinstance(f, (bytes, str, _re_type))
+    -> <builtin>.isinstance
+17:25 call  re_tester(f)
+    -> funcy.strings.re_tester
+17:51 call  re_finder(f)
+    -> funcy.strings.re_finder
+18:20 call  isinstance(f, (int, slice))
+    -> <builtin>.isinstance
+19:26 call  itemgetter(f)
+    -> operator.itemgetter
+20:20 call  isinstance(f, Mapping)
+    -> <builtin>.isinstance
+22:20 call  isinstance(f, Set)
+    -> <builtin>.isinstance
+25:24 call  TypeError("Can't make a func from %s" % f.__class__.__nam...
+    -> <builtin>.TypeError
+
+[funcy.funcmakers.make_pred]
+28:21 call  make_func(pred, test=True)
+    -> funcy.funcmakers.make_func
+
+== funcy.funcolls
+
+[funcy.funcolls.all_fn]
+10:19 call  compose(all, juxt(*fs))
+    -> funcy.funcs.compose
+    reject funcy.colls.all: funcolls.py imports only some, none and one from colls; all is the builtin, and compose stores it in the composed lambda
+10:29 call  juxt(*fs)
+    -> funcy.funcs.juxt
+
+[funcy.funcolls.any_fn]
+14:19 call  compose(any, juxt(*fs))
+    -> funcy.funcs.compose
+    reject funcy.colls.any: funcolls.py imports only some, none and one from colls; any is the builtin, and compose stores it
+14:29 call  juxt(*fs)
+    -> funcy.funcs.juxt
+
+[funcy.funcolls.none_fn]
+18:19 call  compose(none, juxt(*fs))
+    -> funcy.funcs.compose
+    reject funcy.colls.none: compose stores none in the composed lambda, which calls it (funcs.py:110)
+18:30 call  juxt(*fs)
+    -> funcy.funcs.juxt
+
+[funcy.funcolls.one_fn]
+22:19 call  compose(one, juxt(*fs))
+    -> funcy.funcs.compose
+    reject funcy.colls.one: compose stores one in the composed lambda, which calls it (funcs.py:110)
+22:29 call  juxt(*fs)
+    -> funcy.funcs.juxt
+
+[funcy.funcolls.some_fn]
+27:19 call  compose(some, juxt(*fs))
+    -> funcy.funcs.compose
+    reject funcy.colls.some: compose stores some in the composed lambda, which calls it (funcs.py:110)
+27:30 call  juxt(*fs)
+    -> funcy.funcs.juxt
+
+== funcy.funcs
+
+[funcy.funcs.caller.<lambda1>]
+29:23 call  f(*a, **kw)
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is the argument of the lambda that caller returns: client callables (tests sum; funcs.rst: iffy(callable, caller()) applies it to the client's values); no package value
+
+[funcy.funcs.func_partial.<lambda1>]
+34:33 call  func(*(args + a), **dict(kwargs, **kw))
+    note: func is the client's function (tests: a lambda; funcs.rst: the client's _get_FIELD_display); no package value
+34:53 call  dict(kwargs, **kw)
+    -> <builtin>.dict
+
+[funcy.funcs.rpartial.<lambda1>]
+39:33 call  func(*(a + args), **dict(kwargs, **kw))
+    -> funcy.funcs.rpartial.<lambda1>
+    note: func is the client's function (tests __sub__, pow, a lambda; docs div, str.split), or a lambda of rpartial itself, which rcurry passes when it curries four or more arguments (rcurry(rpartial(func, x), n - 1), funcs.py:66, with n >= 4)
+39:53 call  dict(kwargs, **kw)
+    -> <builtin>.dict
+
+[funcy.funcs.curry]
+45:21 call  get_spec(func)
+    -> funcy._inspect.get_spec
+
+[funcy.funcs.curry.<lambda1>.<lambda1>]
+50:40 call  func(x, y)
+    -> funcy.seqs.lmap
+    -> funcy.colls.merge_with
+    -> functools.partial.__call__
+    -> funcy.strings.re_test
+    note: func is the curried function (n == 2) or the functools.partial that curry.<lambda2> makes of it (n >= 3, funcs.py:52); the curry role's package values are lmap and merge_with (tests: curry(lmap), curry(merge_with)) and re_test (funcs.rst: curry(re_test)); re_test has three arguments, so it is reached through the partial, which calls it back
+
+[funcy.funcs.curry.<lambda2>]
+52:31 call  curry(partial(func, x), n - 1)
+    -> funcy.funcs.curry
+52:39 call  partial(func, x)
+    -> functools.partial
+
+[funcy.funcs.rcurry]
+59:21 call  get_spec(func)
+    -> funcy._inspect.get_spec
+
+[funcy.funcs.rcurry.<lambda1>.<lambda1>]
+64:40 call  func(y, x)
+    -> funcy.funcs.rpartial.<lambda1>
+    note: func is the client's function (tests __sub__, str.endswith, a lambda; docs str.endswith, pow) or, for n >= 3, the rpartial lambda that rcurry.<lambda2> passes (funcs.py:66)
+
+[funcy.funcs.rcurry.<lambda2>]
+66:32 call  rcurry(rpartial(func, x), n - 1)
+    -> funcy.funcs.rcurry
+66:41 call  rpartial(func, x)
+    -> funcy.funcs.rpartial
+
+[funcy.funcs.autocurry]
+72:30 call  get_spec(func)
+    -> funcy._inspect.get_spec
+72:60 call  Spec(n, set(), n, set(), False)
+    note: Spec is the collections.namedtuple class of _inspect.py:97; calling it adds no edge
+72:67 call  set()
+    -> <builtin>.set
+72:77 call  set()
+    -> <builtin>.set
+74:6 decorator  @wraps(func)
+    -> functools.partial.__call__
+    note: wraps is functools.wraps (funcs.py:2), whose partial calls functools.update_wrapper (library code, no package call)
+74:11 call  wraps(func)
+    -> functools.wraps
+    reject funcy.decorators.wraps: funcs.py imports wraps from functools
+
+[funcy.funcs.autocurry.autocurried]
+77:30 call  _kwargs.copy()
+    -> <builtin>.dict.copy
+78:22 call  kwargs.update(kw)
+    -> <builtin>.dict.update
+80:34 call  len(args)
+    -> <builtin>.len
+80:46 call  len(kwargs)
+    -> <builtin>.len
+81:24 call  func(*args, **kwargs)
+    -> funcy.seqs.lmap
+    -> funcy.seqs.keep
+    note: func is the autocurried function: client functions and classes (tests: lambdas, complex, int, str.split, iter, classes; funcs.rst: remainder) and the autocurry role's package values lmap and keep (tests: autocurry(lmap), autocurry(keep))
+82:17 call  len(args)
+    -> <builtin>.len
+82:29 call  len(set(kwargs) & spec.names)
+    -> <builtin>.len
+82:33 call  set(kwargs)
+    -> <builtin>.set
+83:24 call  func(*args, **kwargs)
+    note: line 83 runs only when line 80 fails; without **kwargs (spec.varkw false) line 80 fails only if len(args) + len(kwargs) < max_n, and then line 82 fails too; lmap ('f*' in ARGS, _inspect.py:89) and keep (_code_to_spec) have no **kwargs, and an explicit n gives Spec(n, set(), n, set(), False), so no package value reaches this call; client functions with **kwargs are opaque (audit F2)
+84:17 call  len(args)
+    -> <builtin>.len
+84:29 call  len(set(kwargs) & spec.req_names)
+    -> <builtin>.len
+84:33 call  set(kwargs)
+    -> <builtin>.set
+86:28 call  func(*args, **kwargs)
+    -> funcy.seqs.keep
+    note: line 86 needs req_n < max_n: keep has req_n 1 and max_n 2 (tests: _keep('01')); lmap has req_n == max_n == 2, and an explicit n gives req_n == max_n, so lmap never reaches it (audit F2)
+88:33 call  autocurry(func, _spec=spec, _args=args, _kwargs=kwargs)
+    -> funcy.funcs.autocurry
+90:29 call  autocurry(func, _spec=spec, _args=args, _kwargs=kwargs)
+    -> funcy.funcs.autocurry
+
+[funcy.funcs.iffy]
+98:20 call  iffy(bool, pred, default)
+    -> funcy.funcs.iffy
+100:25 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+101:27 call  make_func(action)
+    -> funcy.funcmakers.make_func
+
+[funcy.funcs.iffy.<lambda1>]
+102:32 call  action(v)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.funcs.caller.<lambda1>
+    note: action is make_func(action): make_func's results (iffy(None) and the one-argument iffy(pred) make action from pred), the client's callable (tests; docs len), and caller(), which the documentation passes (funcs.rst: iffy(callable, caller()))
+102:44 call  pred(v)
+    -> <builtin>.bool
+    -> funcy.strings.re_tester.<lambda1>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.types.isa.<lambda1>
+    note: pred is make_pred(pred): make_pred's results (bool also for the one-argument iffy, funcs.py:98), the client's callable, and isa(str), which the documentation passes (funcs.rst: iffy(isa(str), len, 0))
+103:33 call  default(v)
+    -> funcy.funcs.identity
+    note: default is identity (the package's default), or the client's value (tests: _ / 2, None, 1; docs 0)
+103:48 call  callable(default)
+    -> <builtin>.callable
+
+[funcy.funcs.compose]
+111:22 call  reduce(pair, map(make_func, fs))
+    -> functools.reduce
+    -> funcy.funcs.compose.<lambda1>
+    note: reduce is functools.reduce (funcs.py:2); it calls pair back and consumes the map of make_func (consumed at 111:22)
+    -> funcy.funcmakers.make_func
+    note: Builtin map is lazy on every supported Python version. The enclosing reduce call consumes it and calls make_func back. This ledger chooses the consumer placement as an allowed normalization; README ruling12 also permits the map construction site within this function.
+
+111:32 call  map(make_func, fs)
+    -> <builtin>.map
+    reject funcy.seqs.map: funcs.py does not import funcy's map; this is the builtin
+    note: reduce, called in compose, consumes this map, which calls make_func back (J4)
+    reject funcy.funcmakers.make_func: this ledger chooses the enclosing consumer placement. README ruling12 also permits this map construction site within the same function; the rejection avoids duplicate attribution and does not invalidate the prior placement.
+    note: Builtin map is lazy on every supported Python version. The enclosing reduce call consumes it and calls make_func back. This ledger chooses the consumer placement as an allowed normalization; README ruling12 also permits the map construction site within this function.
+
+[funcy.funcs.compose.<lambda1>.<lambda1>]
+110:47 call  f(g(*a, **kw))
+    -> <builtin>.all
+    -> <builtin>.any
+    -> <builtin>.dict.__getitem__
+    -> <builtin>.set.__contains__
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    -> funcy.primitives.inc
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> operator.not_
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: docs/funcs.rst179 explicitly composes a concrete dict with a regex. make_func returns that dict.__getitem__; the composed package lambda directly invokes it as f. Unlike a dict method invoked only by builtin map/filter, this is a direct package call.
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: README.rst:91 passes even to complement; funcs.py:121 forwards it to compose. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: docs/funcs.rst:150-151 passes re_tester output to complement; funcs.py:121 forwards it to compose. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+
+110:49 call  g(*a, **kw)
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.funcs.identity
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    note: g is a later function: the juxt lambda (all_fn ... some_fn), the pred of complement (tests identity; funcs.rst re_tester('^_') and the str r'^_', which make_func turns into re_finder's lambda; README.rst even; primitives.rst:19 isnone, "a shortcut for complement(isnone)", audit F1), the default factory of a client defaultdict (_factory, opaque), and the compose role's later values: make_func's results and re_finder(r'(\w+)!') (flow.rst), client callables
+    -> <builtin>.dict.__getitem__
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.primitives.inc
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: docs/flow.rst:14 passes silent output to compose; silent returns ignore wrapper at flow.py:50. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: The public compose *fs parameter is one role, not position-specific. This own value can occupy either f or g in a two-function composition: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Each unary invocation binds. Builtin client callbacks are still opaque; operator.not_/all/any supplied only by own fixed-position calls are not widened.
+    note: docs/funcs.rst:179 fixes a concrete dict for compose *fs. The public variadic role allows that dict in the later slot too; make_func returns dict.__getitem__, invoked directly as g with one existing key.
+
+[funcy.funcs.rcompose]
+117:19 call  compose(*reversed(fs))
+    -> funcy.funcs.compose
+117:29 call  reversed(fs)
+    -> <builtin>.reversed
+
+[funcy.funcs.complement]
+121:19 call  compose(__not__, pred)
+    -> funcy.funcs.compose
+
+[funcy.funcs.ljuxt]
+130:23 call  list(map(make_func, fs))
+    -> <builtin>.list
+    note: list() consumes the map of make_func (consumed at 130:23)
+    -> funcy.funcmakers.make_func
+    note: Builtin map is lazy on every supported Python version. The enclosing list call consumes it and calls make_func back. This ledger chooses the consumer placement as an allowed normalization; README ruling12 also permits the map construction site within this function.
+
+130:27 call  map(make_func, fs)
+    -> <builtin>.map
+    reject funcy.seqs.map: funcs.py does not import funcy's map; this is the builtin
+    note: list(), called in ljuxt, consumes this map, which calls make_func back (J4)
+    reject funcy.funcmakers.make_func: this ledger chooses the enclosing consumer placement. README ruling12 also permits this map construction site within the same function; the rejection avoids duplicate attribution and does not invalidate the prior placement.
+    note: Builtin map is lazy on every supported Python version. The enclosing list call consumes it and calls make_func back. This ledger chooses the consumer placement as an allowed normalization; README ruling12 also permits the map construction site within this function.
+
+[funcy.funcs.ljuxt.<lambda1>]
+131:31 call  f(*a, **kw)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    exclude funcy.types.isa.<lambda1>, funcy.primitives.even, funcy.funcs.compose.<lambda1>.<lambda1>: documented for all_fn and some_fn, which build on juxt, not on ljuxt (J1)
+    note: f is a make_func result of ljuxt's fs: client callables (tests __add__, __sub__, whatever expressions) or make_func's results; no package callable is documented for juxt or ljuxt
+
+[funcy.funcs.juxt]
+136:23 call  list(map(make_func, fs))
+    -> <builtin>.list
+    -> funcy.funcmakers.make_func
+    note: Builtin map is lazy on every supported Python version. The enclosing list call consumes it and calls make_func back. This ledger chooses the consumer placement as an allowed normalization; README ruling12 also permits the map construction site within this function.
+
+136:27 call  map(make_func, fs)
+    -> <builtin>.map
+    reject funcy.seqs.map: funcs.py does not import funcy's map; this is the builtin
+    note: list(), called in juxt, consumes this map, which calls make_func back (J4)
+    reject funcy.funcmakers.make_func: this ledger chooses the enclosing consumer placement. README ruling12 also permits this map construction site within the same function; the rejection avoids duplicate attribution and does not invalidate the prior placement.
+    note: Builtin map is lazy on every supported Python version. The enclosing list call consumes it and calls make_func back. This ledger chooses the consumer placement as an allowed normalization; README ruling12 also permits the map construction site within this function.
+
+[funcy.funcs.juxt.<lambda1>]
+137:31 call  f(*a, **kw)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.types.isa.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is a make_func result of juxt's fs, which all_fn ... some_fn pass through: make_func's results (tests: any_fn(None, set(...))), client callables, and the documented isa(int) and even (funcs.rst and README.rst: all_fn(isa(int), even)) and compose(...) (funcs.rst: some_fn(..., compose({...}, r'...'))); the generator expression belongs to this lambda
+    -> <builtin>.dict.__getitem__
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.inc
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: docs/funcs.rst:150-151 passes re_tester output to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: docs/flow.rst:14 passes silent output to compose; silent returns ignore wrapper at flow.py:50. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/funcs.rst:179 passes compose output to some_fn; some_fn passes fs to juxt, whose generator expression directly invokes it. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: docs/funcs.rst:179 admits compose output for some_fn.fs and a concrete dict as compose input. compose({1: 2}) returns its adapted dict.__getitem__; some_fn forwards it to juxt and f(1) directly invokes the documented concrete method. This is a direct package call, not an outside callback made by library code.
+
+== funcy.objects
+
+[funcy.objects.cached_property.__init__]
+20:31 call  getattr(fget, '__doc__')
+    -> <builtin>.getattr
+
+[funcy.objects.cached_property.__get__]
+25:64 call  self.fget(instance)
+    note: self.fget is the method that the client decorates with @cached_property (opaque); the package decorates none of its own
+
+[funcy.objects.cached_readonly.__set__]
+32:29 call  AttributeError("property is read-only")
+    -> <builtin>.AttributeError
+
+[funcy.objects.wrap_prop.decorator]
+49:23 call  hasattr(prop, '__set__')
+    -> <builtin>.hasattr
+54:23 call  hasattr(prop, '__del__')
+    -> <builtin>.hasattr
+59:27 call  WrapperProp()
+    note: WrapperProp defines no __init__; object.__init__ runs (no edge)
+
+[funcy.objects.wrap_prop.decorator.WrapperProp.__repr__]
+40:28 call  repr(prop)
+    -> <builtin>.repr
+    -> funcy.objects.wrap_prop.decorator.WrapperProp.__repr__
+    note: docs/objects.rst31-44 defines wrap_prop for properties, says it preserves descriptor type, and explicitly calls its output a wrapped cached property. The public returned property therefore fits the same documented property role. Nested wrapping reaches the inner package WrapperProp method. 
+
+[funcy.objects.wrap_prop.decorator.WrapperProp.__get__]
+46:22 with  ctx
+    reject *: ctx is the client's context manager (tests: a Manager class; objects.rst: threading.Lock()); no package context manager is documented for wrap_prop
+47:40 call  prop.__get__(instance, type)
+    -> <builtin>.property.__get__
+    -> funcy.objects.cached_property.__get__
+    -> funcy.objects.wrap_prop.decorator.WrapperProp.__get__
+    note: docs/objects.rst31-44 defines wrap_prop for properties, says it preserves descriptor type, and explicitly calls its output a wrapped cached property. The public returned property therefore fits the same documented property role. Nested wrapping reaches the inner package WrapperProp method. 
+
+[funcy.objects.wrap_prop.decorator.WrapperProp.__set__]
+51:26 with  ctx
+    reject *: ctx is the client's context manager; no package context manager is documented for wrap_prop
+52:44 call  prop.__set__(name, value)
+    -> <builtin>.property.__set__
+    -> funcy.objects.cached_readonly.__set__
+    -> funcy.objects.wrap_prop.decorator.WrapperProp.__set__
+    note: docs/objects.rst31-44 defines wrap_prop for properties, says it preserves descriptor type, and explicitly calls its output a wrapped cached property. The public returned property therefore fits the same documented property role. Nested wrapping reaches the inner package WrapperProp method. 
+
+[funcy.objects.wrap_prop.decorator.WrapperProp.__del__]
+56:26 with  ctx
+    reject *: ctx is the client's context manager
+57:44 call  prop.__del__(name)
+    -> funcy.objects.wrap_prop.decorator.WrapperProp.__del__
+    note: docs/objects.rst31-44 defines wrap_prop for properties, says it preserves descriptor type, and explicitly calls its output a wrapped cached property. The public returned property therefore fits the same documented property role. Nested wrapping reaches the inner package WrapperProp method. A client descriptor supplies the initial __del__; the first wrapper is a package-created descriptor which is then eligible as prop. Builtin property.__delete__ is not confused with __del__.
+
+[funcy.objects.monkey]
+69:19 call  isclass(cls)
+    -> inspect.isclass
+69:36 call  ismodule(cls)
+    -> inspect.ismodule
+
+[funcy.objects.monkey.decorator]
+72:23 call  getattr(value, 'fget', value)
+    -> <builtin>.getattr
+73:39 call  cut_prefix(func.__name__, '%s__' % cls.__name__)
+    -> funcy.strings.cut_prefix
+76:32 call  getattr(cls, func_name, None)
+    -> <builtin>.getattr
+78:16 call  setattr(cls, func_name, value)
+    -> <builtin>.setattr
+
+[funcy.objects.LazyObject._setup]
+97:25 call  self._init()
+    note: self._init is the client's init function, stored by LazyObject.__init__ (opaque)
+98:27 call  object.__setattr__(self, '__class__', obj.__class__)
+    -> <builtin>.object.__setattr__
+99:27 call  object.__setattr__(self, '__dict__', obj.__dict__)
+    -> <builtin>.object.__setattr__
+
+[funcy.objects.LazyObject.__getattr__]
+102:20 call  self._setup()
+    -> funcy.objects.LazyObject._setup
+103:23 call  getattr(self, name)
+    -> <builtin>.getattr
+
+[funcy.objects.LazyObject.__setattr__]
+106:20 call  self._setup()
+    -> funcy.objects.LazyObject._setup
+107:23 call  setattr(self, name, value)
+    -> <builtin>.setattr
+
+== funcy.primitives
+
+[funcy.primitives]
+8:18 call  EmptyType()
+    note: EmptyType defines no __init__; object.__init__ runs (no edge)
+
+== funcy.seqs
+
+[funcy.seqs._lmap]
+29:16 call  list(map(f, *seqs))
+    -> <builtin>.list
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.funcs.ljuxt.<lambda1>
+    -> funcy.funcs.iffy.<lambda1>
+    -> funcy.seqs.lcat
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper
+    -> funcy.seqs.first
+    -> funcy.seqs.second
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    -> funcy.funcs.autocurry.autocurried
+    note: list() consumes the lazy map that funcy.seqs.map builds from f (J4). f is lmap's make_func(f) or list (lpartition_by; called back, no edge). Package values of the map/lmap role: make_func's lambdas for None and a str; ljuxt(...) and iffy(...) (tests); lcat, iffy(len), translate('ru'), a make_lookuper wrapper (seqs.rst, funcs.rst, calc.rst); first and second (seqs.rst: map(first, ...), map(second, ...)); silent(int), an ignore wrapper, and compose(silent(...), re_finder(...)) (primitives.rst, flow.rst); rem(by=3), an autocurried function (funcs.rst)
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.primitives.inc
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: README.rst:91 passes even to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: docs/funcs.rst:150-151 passes re_tester output to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/flow.rst:14-15 documents map(compose(...), values), sharing map/lmap role; _lmap list consumes it. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+
+29:20 call  map(f, *seqs)
+    -> funcy.seqs.map
+    note: in seqs.py, map is funcy.seqs.map (seqs.py:129)
+
+[funcy.seqs._lfilter]
+32:16 call  list(filter(f, seq))
+    -> <builtin>.list
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.funcs.autocurry.autocurried
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    -> funcy.funcs.iffy.<lambda1>
+    -> funcy.funcs.ljuxt.<lambda1>
+    -> funcy.funcs.rcurry.<lambda1>.<lambda1>
+    -> funcy.seqs.first
+    -> funcy.seqs.lcat
+    -> funcy.seqs.second
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.strings.re_tester.<lambda1>
+    exclude funcy.types.isa.<lambda1>: documented for all, select_values, lsplit, iffy and all_fn, not the direct filter/lfilter predicate role (J1)
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst10 and map/lmap docs. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst11; strings.rst re_finder mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_juxt passes ljuxt result to lmap. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_iffy; docs/funcs.rst129-137. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst212 lmap(lcat,product(...)). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/calc.rst53 translate returned lookuper passed to lmap; client table builder returns {"x":[1]}. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst86 and first entry mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst144 map(second,...). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/primitives.rst12; map(silent(int),...) names ignore wrapper for map role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst298-301 explicitly gives filter/lfilter over map output. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/funcs.rst88 autocurried rem used as map callback. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.funcs.rcurry.<lambda1>
+    -> funcy.funcs.rcurry.<lambda2>
+    -> funcy.primitives.even
+    -> funcy.primitives.inc
+    -> funcy.primitives.isnone
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: README.rst:91 passes even to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/seqs.rst:301 explicitly gives lfilter(bool, map(f, seq)); the documented map factory output admits all its public mapper states. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: docs/funcs.rst:68-69 passes has_suffix("ce"), with has_suffix = rcurry(...), to lfilter. B2 admits public n variation. n=3 makes that first application return rcurry.<lambda1>; n>=4 returns rcurry.<lambda2>. The list/filter invokes either unary result on an item. Returning another truthy function is permitted; the original client callback stays opaque.
+    note: docs/funcs.rst:68-69 passes has_suffix("ce"), with has_suffix = rcurry(...), to lfilter. B2 admits public n variation. n=3 makes that first application return rcurry.<lambda1>; n>=4 returns rcurry.<lambda2>. The list/filter invokes either unary result on an item. Returning another truthy function is permitted; the original client callback stays opaque.
+
+32:23 call  filter(f, seq)
+    -> funcy.seqs.filter
+    note: in seqs.py, filter is funcy.seqs.filter (seqs.py:134)
+
+[funcy.seqs.repeatedly]
+41:21 call  repeat(None)
+    -> itertools.repeat
+41:53 call  repeat(None, n)
+    -> itertools.repeat
+42:14 call  f()
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is the client's function (tests: a lambda; seqs.rst: random.random, list, a readline method); no package value
+
+[funcy.seqs.iterate]
+48:14 call  f(x)
+    -> funcy.primitives.inc
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is the client's function (tests: _ * 2; seqs.rst: lambdas, attrgetter) or inc, which the documentation passes (seqs.rst: iterate(inc, 5))
+
+[funcy.seqs.take]
+54:16 call  list(islice(seq, n))
+    -> <builtin>.list
+    -> funcy.strings.re_tester.<lambda1>
+    note: list() consumes the islice of seq; one (colls.py:218) passes the lazy filter that funcy.seqs.filter built with make_pred(pred), so a str pred of one is called here (J4); other seqs are client iterables or iter() of them (_cut_iter)
+54:23 call  islice(seq, n)
+    -> itertools.islice
+
+[funcy.seqs.drop]
+58:18 call  islice(seq, n, None)
+    -> itertools.islice
+
+[funcy.seqs.first]
+63:16 call  next(iter(seq), None)
+    -> <builtin>.next
+    -> funcy.colls.where.<lambda1>
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    note: docs/seqs.rst312-314 explicitly recommends the first/keep combination. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst10 and map/lmap docs. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst312-314 explicitly recommends the first/keep combination. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst11; strings.rst re_finder mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst312-314 explicitly recommends the first/keep combination. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/primitives.rst12; map(silent(int),...) names ignore wrapper for map role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+63:21 call  iter(seq)
+    -> <builtin>.iter
+
+[funcy.seqs.second]
+68:17 call  first(rest(seq))
+    -> funcy.seqs.first
+68:22 call  rest(seq)
+    -> funcy.seqs.rest
+
+[funcy.seqs.nth]
+77:20 call  next(islice(seq, n, None), None)
+    -> <builtin>.next
+77:27 call  islice(seq, n, None)
+    -> itertools.islice
+
+[funcy.seqs.rest]
+94:16 call  drop(1, seq)
+    -> funcy.seqs.drop
+
+[funcy.seqs.butlast]
+98:14 call  iter(seq)
+    -> <builtin>.iter
+100:20 call  next(it)
+    -> <builtin>.next
+
+[funcy.seqs.ilen]
+112:20 call  count()
+    -> itertools.count
+113:10 call  deque(zip(seq, counter), maxlen=0)
+    -> collections.deque
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: docs/seqs.rst179 explicitly passes takewhile output to ilen. Public factory state may vary over admitted constructible inputs; deque consumes the lazy takewhile through zip. make_pred converts an admitted string predicate to the package re_tester closure.
+    note: docs/seqs.rst179 explicitly passes takewhile output to ilen. Public factory state may vary over admitted constructible inputs; deque consumes the lazy takewhile through zip. The package split_by calls takewhile with its pred; documented lsplit_by(isnone,...) therefore establishes public isnone in takewhile.pred. The function is available to clients for this direct construction.
+113:14 call  zip(seq, counter)
+    -> <builtin>.zip
+114:16 call  next(counter)
+    -> <builtin>.next
+
+[funcy.seqs.lmap]
+122:17 call  _lmap(make_func(f), *seqs)
+    -> funcy.seqs._lmap
+122:27 call  make_func(f)
+    -> funcy.funcmakers.make_func
+
+[funcy.seqs.lfilter]
+127:20 call  _lfilter(make_pred(pred), seq)
+    -> funcy.seqs._lfilter
+127:30 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+
+[funcy.seqs.map]
+132:16 call  _map(make_func(f), *seqs)
+    -> <builtin>.map
+    note: _map is the builtin map (seqs.py:26); the lazy map is returned
+132:26 call  make_func(f)
+    -> funcy.funcmakers.make_func
+
+[funcy.seqs.filter]
+137:19 call  _filter(make_pred(pred), seq)
+    -> <builtin>.filter
+    note: _filter is the builtin filter (seqs.py:26); the lazy filter is returned
+137:29 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+
+[funcy.seqs.lremove]
+141:16 call  list(remove(pred, seq))
+    -> <builtin>.list
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.funcs.autocurry.autocurried
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    -> funcy.funcs.iffy.<lambda1>
+    -> funcy.funcs.ljuxt.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.primitives.isnone
+    -> funcy.seqs.first
+    -> funcy.seqs.lcat
+    -> funcy.seqs.second
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.strings.re_tester.<lambda1>
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst10 and map/lmap docs. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst11; strings.rst re_finder mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_juxt passes ljuxt result to lmap. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_iffy; docs/funcs.rst129-137. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst212 lmap(lcat,product(...)). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/calc.rst53 translate returned lookuper passed to lmap; client table builder returns {"x":[1]}. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst86 and first entry mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst144 map(second,...). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/primitives.rst12; map(silent(int),...) names ignore wrapper for map role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/flow.rst14-15 composed greeting mapper. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/primitives.rst12 explicitly passes map output to remove; remove/lremove share an API entry. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/funcs.rst88 autocurried rem used as map callback. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.inc
+    note: B2 factory result: docs/primitives.rst:12 passes map output to remove; shared remove/lremove role lets list consume it. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/primitives.rst:12 passes map output to remove; shared remove/lremove role lets list consume it. Public compose arguments may be empty or singleton: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/primitives.rst:12 passes map output to remove; shared remove/lremove role lets list consume it. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/primitives.rst:12 passes map output to remove; shared remove/lremove role lets list consume it. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/primitives.rst:12 passes map output to remove; shared remove/lremove role lets list consume it. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: docs/primitives.rst:12 passes map output to remove; shared remove/lremove role lets list consume it. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+
+141:23 call  remove(pred, seq)
+    -> funcy.seqs.remove
+
+[funcy.seqs.remove]
+145:23 call  filterfalse(make_pred(pred), seq)
+    -> itertools.filterfalse
+145:33 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+
+[funcy.seqs.lkeep]
+150:16 call  list(keep(f, seq))
+    -> <builtin>.list
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> funcy.flow.ignore.decorator.wrapper
+    note: list() consumes the filter of the lazy map that keep builds from make_func(f) (J4): make_func's lambdas for None and a str, and the keep/lkeep role's documented values re_finder(r'\d+') (seqs.rst) and silent(int), an ignore wrapper (flow.rst); the one-argument form filters the client's iterable
+150:21 call  keep(f, seq)
+    -> funcy.seqs.keep
+
+[funcy.seqs.keep]
+156:23 call  _filter(bool, f)
+    -> <builtin>.filter
+    note: _filter is the builtin filter; the lazy filter is returned
+158:23 call  _filter(bool, map(f, seq))
+    -> <builtin>.filter
+    note: _filter is the builtin filter; the lazy filter is returned
+158:33 call  map(f, seq)
+    -> funcy.seqs.map
+
+[funcy.seqs.lwithout]
+168:16 call  list(without(seq, *items))
+    -> <builtin>.list
+168:24 call  without(seq, *items)
+    -> funcy.seqs.without
+
+[funcy.seqs.lconcat]
+173:16 call  list(chain(*seqs))
+    -> <builtin>.list
+173:22 call  chain(*seqs)
+    -> itertools.chain
+
+[funcy.seqs.lcat]
+178:16 call  list(cat(seqs))
+    -> <builtin>.list
+    -> funcy.calc._make_lookuper.make_lookuper.wrapper
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.funcs.autocurry.autocurried
+    -> funcy.funcs.compose.<lambda1>.<lambda1>
+    -> funcy.funcs.iffy.<lambda1>
+    -> funcy.funcs.ljuxt.<lambda1>
+    -> funcy.seqs.first
+    -> funcy.seqs.lcat
+    -> funcy.seqs.second
+    -> funcy.strings.re_finder.<lambda2>
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_juxt passes ljuxt result to lmap. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. tests/test_funcs.py test_iffy; docs/funcs.rst129-137. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst212 lmap(lcat,product(...)). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/calc.rst53 translate returned lookuper passed to lmap; client table builder returns {"x":[1]}. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst86 and first entry mapper role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/seqs.rst144 map(second,...). The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/primitives.rst12; map(silent(int),...) names ignore wrapper for map role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/flow.rst14-15 composed greeting mapper. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: README.rst70 explicitly passes map output to lcat; docs/seqs.rst331 also gives cat(map(f,*seqs)). This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/funcs.rst88 autocurried rem used as map callback. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    -> funcy.colls.none
+    -> funcy.colls.one
+    -> funcy.colls.some
+    -> funcy.funcs.identity
+    -> funcy.funcs.juxt.<lambda1>
+    -> funcy.primitives.even
+    -> funcy.primitives.inc
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: tests/test_funcs.py:184-185 passes identity to complement, which calls compose(__not__, pred); compose() independently returns identity at funcs.py:113. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: README.rst:90 composes inc; compose(inc) returns it without invoking pair. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: README.rst:91 passes even to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: docs/primitives.rst:19 documents complement(isnone); funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: docs/funcs.rst:150-151 passes re_tester output to complement; funcs.py:121 forwards it to compose. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: funcolls.py:18 passes none to compose; singleton compose(none) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: funcolls.py:22 passes one to compose; singleton compose(one) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: funcolls.py:27 passes some to compose; singleton compose(some) preserves this unary public callable. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+    note: B2 factory result: README.rst:70 passes map output to lcat; list consumes the map before chaining each result. Public compose arguments may be empty or singleton: funcolls.py:10/14/18/22/27 passes juxt output to compose; singleton compose(juxt()) preserves it. Choose one callback item; unary binding succeeds. A later failure while consuming the returned value does not erase this callback entry. No arbitrary internal callable is admitted.
+
+178:20 call  cat(seqs)
+    -> itertools.chain.from_iterable
+    note: cat is itertools.chain.from_iterable (seqs.py:179)
+
+[funcy.seqs.flatten]
+185:18 call  follow(item)
+    -> funcy.types.isa.<lambda1>
+    note: follow is is_seqcont (the default, isa(...) of types.py:23), is_list (tests), or the client's predicate
+186:31 call  flatten(item, follow)
+    -> funcy.seqs.flatten
+
+[funcy.seqs.lflatten]
+193:16 call  list(flatten(seq, follow))
+    -> <builtin>.list
+193:24 call  flatten(seq, follow)
+    -> funcy.seqs.flatten
+
+[funcy.seqs.lmapcat]
+197:16 call  lcat(map(f, *seqs))
+    -> funcy.seqs.lcat
+197:20 call  map(f, *seqs)
+    -> funcy.seqs.map
+
+[funcy.seqs.mapcat]
+201:15 call  cat(map(f, *seqs))
+    -> itertools.chain.from_iterable
+    note: cat is itertools.chain.from_iterable; the lazy chain is returned
+201:19 call  map(f, *seqs)
+    -> funcy.seqs.map
+
+[funcy.seqs.interleave]
+205:15 call  cat(zip(*seqs))
+    -> itertools.chain.from_iterable
+    note: cat is itertools.chain.from_iterable
+205:19 call  zip(*seqs)
+    -> <builtin>.zip
+
+[funcy.seqs.interpose]
+209:16 call  drop(1, interleave(repeat(sep), seq))
+    -> funcy.seqs.drop
+209:30 call  interleave(repeat(sep), seq)
+    -> funcy.seqs.interleave
+209:37 call  repeat(sep)
+    -> itertools.repeat
+
+[funcy.seqs.takewhile]
+217:25 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+218:22 call  _takewhile(pred, seq)
+    -> itertools.takewhile
+    reject funcy.seqs.takewhile: _takewhile is itertools.takewhile (seqs.py:3)
+
+[funcy.seqs.dropwhile]
+226:25 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+227:22 call  _dropwhile(pred, seq)
+    -> itertools.dropwhile
+    reject funcy.seqs.dropwhile: _dropwhile is itertools.dropwhile (seqs.py:3)
+
+[funcy.seqs.ldistinct]
+232:16 call  list(distinct(seq, key))
+    -> <builtin>.list
+232:25 call  distinct(seq, key)
+    -> funcy.seqs.distinct
+
+[funcy.seqs.distinct]
+236:15 call  set()
+    -> <builtin>.set
+241:25 call  seen.add(item)
+    -> <builtin>.set.add
+244:24 call  make_func(key)
+    -> funcy.funcmakers.make_func
+246:20 call  key(item)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.funcs.identity
+    note: key is make_func(key): make_func's results, the client's callable (tests len, 0), and identity, which the documentation names as the key (seqs.rst: distinct(seq, key=identity))
+248:25 call  seen.add(k)
+    -> <builtin>.set.add
+
+[funcy.seqs.split]
+255:21 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+256:20 call  deque()
+    -> collections.deque
+256:29 call  deque()
+    -> collections.deque
+257:27 call  yes.append(item)
+    -> collections.deque.append
+257:41 call  pred(item)
+    -> <builtin>.bool
+    -> funcy.strings.re_tester.<lambda1>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.types.isa.<lambda1>
+    -> funcy.primitives.odd
+    note: pred is make_pred(pred): make_pred's results, the client's callable (tests _ % 2), and the split/lsplit role's documented values re_tester('^_'), isa(str) (seqs.rst, types.rst) and odd (README.rst: lsplit(odd, ...)); the generator expression belongs to split
+257:62 call  no.append(item)
+    -> collections.deque.append
+268:18 call  _split(yes)
+    -> funcy.seqs.split._split
+268:31 call  _split(no)
+    -> funcy.seqs.split._split
+
+[funcy.seqs.split._split]
+262:32 call  q.popleft()
+    -> collections.deque.popleft
+264:21 call  next(splitter)
+    -> <builtin>.next
+    note: next() resumes split's generator expression, whose calls belong to split
+
+[funcy.seqs.lsplit]
+273:21 call  make_pred(pred)
+    -> funcy.funcmakers.make_pred
+276:16 call  pred(item)
+    -> <builtin>.bool
+    -> funcy.strings.re_tester.<lambda1>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.types.isa.<lambda1>
+    -> funcy.primitives.odd
+    note: as at 257:41 (the split/lsplit role); tests call lsplit(2, ...), whose itemgetter raises TypeError inside the call
+277:23 call  yes.append(item)
+    -> <builtin>.list.append
+279:22 call  no.append(item)
+    -> <builtin>.list.append
+
+[funcy.seqs.split_at]
+286:15 call  tee(seq)
+    -> itertools.tee
+287:18 call  islice(a, n)
+    -> itertools.islice
+287:32 call  islice(b, n, None)
+    -> itertools.islice
+
+[funcy.seqs.lsplit_at]
+292:20 call  split_at(n, seq)
+    -> funcy.seqs.split_at
+293:16 call  list(a)
+    -> <builtin>.list
+293:25 call  list(b)
+    -> <builtin>.list
+
+[funcy.seqs.split_by]
+298:15 call  tee(seq)
+    -> itertools.tee
+299:21 call  takewhile(pred, a)
+    -> funcy.seqs.takewhile
+299:41 call  dropwhile(pred, b)
+    -> funcy.seqs.dropwhile
+
+[funcy.seqs.lsplit_by]
+304:20 call  split_by(pred, seq)
+    -> funcy.seqs.split_by
+305:16 call  list(a)
+    -> <builtin>.list
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: list() consumes the takewhile that split_by built with make_pred(pred) (J4): make_pred's re_tester lambda for a str, and isnone, which the documentation passes (primitives.rst: lsplit_by(isnone, dirty_data)); bool (seqs.rst) is called back, no edge
+305:25 call  list(b)
+    -> <builtin>.list
+    -> funcy.primitives.isnone
+    -> funcy.strings.re_tester.<lambda1>
+    note: list() consumes the dropwhile of split_by, which calls pred until it fails (as at 305:16)
+
+[funcy.seqs.group_by]
+310:18 call  make_func(f)
+    -> funcy.funcmakers.make_func
+311:25 call  defaultdict(list)
+    -> collections.defaultdict
+313:17 call  f(item)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is make_func(f): make_func's results and the client's callable (tests _ % 2; docs len); no package callable is documented for group_by
+313:31 call  result[f(item)].append(item)
+    -> <builtin>.list.append
+
+[funcy.seqs.group_by_keys]
+320:25 call  make_func(get_keys)
+    -> funcy.funcmakers.make_func
+321:25 call  defaultdict(list)
+    -> collections.defaultdict
+323:26 call  get_keys(item)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    note: get_keys is make_func(get_keys): make_func's results and the client's callable (docs attrgetter, str.split)
+324:29 call  result[k].append(item)
+    -> <builtin>.list.append
+
+[funcy.seqs.group_values]
+331:23 iter  seq
+    -> funcy.flow.ignore.decorator.wrapper
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    note: docs/seqs.rst434 explicitly passes keep output to group_values. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. extended_fns.rst10 and map/lmap docs. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+    note: docs/seqs.rst434 explicitly passes keep output to group_values. This names a package-created lazy object for the consumer role. Public factory state varies over that factory's admitted public arguments; it is not frozen to the single example. docs/primitives.rst12; map(silent(int),...) names ignore wrapper for map role. The consuming builtin or loop calls the package mapper; outside callbacks and client returns remain opaque.
+330:25 call  defaultdict(list)
+    -> collections.defaultdict
+332:27 call  result[key].append(value)
+    -> <builtin>.list.append
+
+[funcy.seqs.count_by]
+339:18 call  make_func(f)
+    -> funcy.funcmakers.make_func
+340:25 call  defaultdict(int)
+    -> collections.defaultdict
+342:17 call  f(item)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    -> operator.itemgetter.__call__
+    -> <builtin>.set.__contains__
+    -> funcy.funcs.identity
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is make_func(f): make_func's results, the client's callable (tests _ % 2, len; docs len), and identity, which the documentation passes (seqs.rst count_reps: "alternative to count_by(identity, ...)")
+
+[funcy.seqs.count_reps]
+348:25 call  defaultdict(int)
+    -> collections.defaultdict
+
+[funcy.seqs._cut_seq]
+356:16 call  len(seq)
+    -> <builtin>.len
+356:47 call  len(seq)
+    -> <builtin>.len
+357:38 call  range(0, limit, step)
+    -> <builtin>.range
+
+[funcy.seqs._cut_iter]
+360:14 call  iter(seq)
+    -> <builtin>.iter
+361:16 call  take(n, it)
+    -> funcy.seqs.take
+363:18 call  len(pool)
+    -> <builtin>.len
+366:24 call  pool.extend(islice(it, step))
+    -> <builtin>.list.extend
+366:31 call  islice(it, step)
+    -> itertools.islice
+368:18 call  len(pool)
+    -> <builtin>.len
+370:24 call  take(n, it)
+    -> funcy.seqs.take
+373:18 call  len(pool)
+    -> <builtin>.len
+375:17 call  take(gap, it)
+    -> funcy.seqs.take
+376:24 call  take(n, it)
+    -> funcy.seqs.take
+378:28 call  _cut_seq(drop_tail, n, step, pool)
+    -> funcy.seqs._cut_seq
+
+[funcy.seqs._cut]
+383:18 call  isinstance(seq, Sequence)
+    -> <builtin>.isinstance
+384:24 call  _cut_seq(drop_tail, n, step, seq)
+    -> funcy.seqs._cut_seq
+386:25 call  _cut_iter(drop_tail, n, step, seq)
+    -> funcy.seqs._cut_iter
+
+[funcy.seqs.partition]
+391:16 call  _cut(True, n, step, seq)
+    -> funcy.seqs._cut
+
+[funcy.seqs.lpartition]
+396:16 call  list(partition(n, step, seq))
+    -> <builtin>.list
+396:26 call  partition(n, step, seq)
+    -> funcy.seqs.partition
+
+[funcy.seqs.chunks]
+401:16 call  _cut(False, n, step, seq)
+    -> funcy.seqs._cut
+
+[funcy.seqs.lchunks]
+406:16 call  list(chunks(n, step, seq))
+    -> <builtin>.list
+406:23 call  chunks(n, step, seq)
+    -> funcy.seqs.chunks
+
+[funcy.seqs.partition_by]
+411:21 iter  groupby(seq, f)
+    -> funcy.funcmakers.make_func.<lambda1>
+    -> funcy.strings.re_finder.<lambda2>
+    note: The for loop consumes the groupby created at 411:28 and invokes its mapper: make_func identity closure for None or re_finder closure for a string. Builtin/library/client callbacks remain excluded.
+410:18 call  make_func(f)
+    -> funcy.funcmakers.make_func
+411:28 call  groupby(seq, f)
+    -> itertools.groupby
+    note: the for loop of this generator consumes the groupby, which calls f back (J4): make_func's lambdas for None and a str (tests r'\d', 'x'); the client's callables and an itemgetter are no package edges
+    note: groupby construction stores f; only the surrounding for iteration invokes it. Callback relations are at seqs.py:411:21 iter.
+
+[funcy.seqs.lpartition_by]
+416:17 call  _lmap(list, partition_by(f, seq))
+    -> funcy.seqs._lmap
+416:36 call  partition_by(f, seq)
+    -> funcy.seqs.partition_by
+
+[funcy.seqs.with_prev]
+421:15 call  tee(seq)
+    -> itertools.tee
+422:15 call  zip(a, chain([fill], b))
+    -> <builtin>.zip
+422:24 call  chain([fill], b)
+    -> itertools.chain
+
+[funcy.seqs.with_next]
+426:15 call  tee(seq)
+    -> itertools.tee
+427:9 call  next(b, None)
+    -> <builtin>.next
+428:15 call  zip(a, chain(b, [fill]))
+    -> <builtin>.zip
+428:24 call  chain(b, [fill])
+    -> itertools.chain
+
+[funcy.seqs.pairwise]
+434:15 call  tee(seq)
+    -> itertools.tee
+435:9 call  next(b, None)
+    -> <builtin>.next
+436:15 call  zip(a, b)
+    -> <builtin>.zip
+
+[funcy.seqs.lzip]
+441:20 call  list(zip(*seqs, strict=strict))
+    -> <builtin>.list
+441:24 call  zip(*seqs, strict=strict)
+    -> <builtin>.zip
+445:26 call  len(seqs)
+    -> <builtin>.len
+446:24 call  list(_zip_strict(*seqs))
+    -> <builtin>.list
+446:36 call  _zip_strict(*seqs)
+    -> funcy.seqs._zip_strict
+447:20 call  list(zip(*seqs))
+    -> <builtin>.list
+447:24 call  zip(*seqs)
+    -> <builtin>.zip
+
+[funcy.seqs._zip_strict]
+452:24 call  len(seqs[0])
+    -> <builtin>.len
+453:34 call  enumerate(seqs, start=1)
+    -> <builtin>.enumerate
+454:28 call  len(s)
+    -> <builtin>.len
+457:44 call  _zip_strict_error(short_i, long_i)
+    -> funcy.seqs._zip_strict_error
+459:37 call  _zip_strict_iters(*seqs)
+    -> funcy.seqs._zip_strict_iters
+461:23 call  zip(*seqs)
+    -> <builtin>.zip
+
+[funcy.seqs._zip_strict_iters]
+464:22 call  iter(s)
+    -> <builtin>.iter
+467:35 call  enumerate(iters, start=1)
+    -> <builtin>.enumerate
+469:34 call  values.append(next(it))
+    -> <builtin>.list.append
+469:39 call  next(it)
+    -> <builtin>.next
+478:44 call  _zip_strict_error(stop_i, val_i)
+    -> funcy.seqs._zip_strict_error
+480:24 call  tuple(values)
+    -> <builtin>.tuple
+
+[funcy.seqs._zip_strict_error]
+484:30 call  ValueError("zip() argument %d is longer than argument 1" ...
+    -> <builtin>.ValueError
+487:30 call  ValueError("zip() argument %d is shorter than %s" % (shor...
+    -> <builtin>.ValueError
+
+[funcy.seqs._reductions]
+493:17 call  f(last, x)
+    -> operator.add
+    reject funcy.calc._make_lookuper.make_lookuper.wrapper.<lambda1>: that lambda only reaches make_lookuper
+    note: f is the client's function (tests add, a lambda) or operator.add, which sums and lsums pass with an acc (seqs.py:508, 512)
+
+[funcy.seqs.reductions]
+499:26 call  accumulate(seq)
+    -> itertools.accumulate
+499:68 call  accumulate(seq, f)
+    -> itertools.accumulate
+500:23 call  _reductions(f, seq, acc)
+    -> funcy.seqs._reductions
+
+[funcy.seqs.lreductions]
+504:16 call  list(reductions(f, seq, acc))
+    -> <builtin>.list
+    note: list() consumes accumulate(seq, f) or _reductions; f is the client's function or operator.add (library code called back: no edge)
+504:27 call  reductions(f, seq, acc)
+    -> funcy.seqs.reductions
+
+[funcy.seqs.sums]
+508:22 call  reductions(operator.add, seq, acc)
+    -> funcy.seqs.reductions
+
+[funcy.seqs.lsums]
+512:23 call  lreductions(operator.add, seq, acc)
+    -> funcy.seqs.lreductions
+
+== funcy.strings
+
+[funcy.strings]
+24:16 call  type(re.compile(r''))
+    -> <builtin>.type
+24:27 call  re.compile(r'')
+    -> re.compile
+
+[funcy.strings._make_getter]
+14:28 call  methodcaller('group')
+    -> operator.methodcaller
+16:28 call  methodcaller('group', 1)
+    -> operator.methodcaller
+18:28 call  methodcaller('groups')
+    -> operator.methodcaller
+19:29 call  len(regex.groupindex)
+    -> <builtin>.len
+20:28 call  methodcaller('groupdict')
+    -> operator.methodcaller
+
+[funcy.strings._prepare]
+27:22 call  isinstance(regex, _re_type)
+    -> <builtin>.isinstance
+28:27 call  re.compile(regex, flags)
+    -> re.compile
+29:31 call  _make_getter(regex)
+    -> funcy.strings._make_getter
+
+[funcy.strings.re_iter]
+34:29 call  _prepare(regex, flags)
+    -> funcy.strings._prepare
+35:15 call  map(getter, regex.finditer(s))
+    -> <builtin>.map
+    reject funcy.seqs.map: strings.py does not import funcy's map; the lazy map is returned
+35:38 call  regex.finditer(s)
+    -> _sre.SRE_Pattern.finditer
+    -> re.Pattern.finditer
+    note: Public re_iter/re_find/re_test accept a regex string. strings._prepare and re_tester compile it, retaining the concrete compiled pattern. re_iter directly calls finditer; the returned finder/tester lambdas directly call search. operator.methodcaller subsequently calling Match.group inside library code remains excluded; this review adds only the three direct Pattern calls.
+
+[funcy.strings.re_all]
+39:16 call  list(re_iter(regex, s, flags))
+    -> <builtin>.list
+    -> funcy.strings._make_getter.<lambda1>
+    note: list() consumes the lazy map of getter that re_iter returns (J4): a methodcaller (no edge) or _make_getter's lambda for mixed named and positional groups
+39:24 call  re_iter(regex, s, flags)
+    -> funcy.strings.re_iter
+
+[funcy.strings.re_find]
+44:21 call  re_finder(regex, flags)
+    -> funcy.strings.re_finder
+44:35 call  re_finder(regex, flags)(s)
+    -> funcy.strings.re_finder.<lambda2>
+    reject funcy.strings.re_finder.<lambda1>: re_finder returns its second lambda, which calls the first in its own body
+
+[funcy.strings.re_test]
+48:21 call  re_tester(regex, flags)
+    -> funcy.strings.re_tester
+48:35 call  re_tester(regex, flags)(s)
+    -> funcy.strings.re_tester.<lambda1>
+
+[funcy.strings.re_finder]
+53:30 call  _prepare(regex, flags)
+    -> funcy.strings._prepare
+
+[funcy.strings.re_finder.<lambda1>]
+54:31 call  _getter(m)
+    -> operator.methodcaller.__call__
+    -> funcy.strings._make_getter.<lambda1>
+    note: _getter is the getter of _make_getter (strings.py:12): an operator.methodcaller, or its lambda for mixed named and positional groups
+
+[funcy.strings.re_finder.<lambda2>]
+55:28 call  getter(regex.search(s))
+    -> funcy.strings.re_finder.<lambda1>
+55:41 call  regex.search(s)
+    -> _sre.SRE_Pattern.search
+    -> re.Pattern.search
+    note: Public re_iter/re_find/re_test accept a regex string. strings._prepare and re_tester compile it, retaining the concrete compiled pattern. re_iter directly calls finditer; the returned finder/tester lambdas directly call search. operator.methodcaller subsequently calling Match.group inside library code remains excluded; this review adds only the three direct Pattern calls.
+
+[funcy.strings.re_tester]
+59:22 call  isinstance(regex, _re_type)
+    -> <builtin>.isinstance
+60:27 call  re.compile(regex, flags)
+    -> re.compile
+
+[funcy.strings.re_tester.<lambda1>]
+61:26 call  bool(regex.search(s))
+    -> <builtin>.bool
+61:39 call  regex.search(s)
+    -> _sre.SRE_Pattern.search
+    -> re.Pattern.search
+    note: Public re_iter/re_find/re_test accept a regex string. strings._prepare and re_tester compile it, retaining the concrete compiled pattern. re_iter directly calls finditer; the returned finder/tester lambdas directly call search. operator.methodcaller subsequently calling Match.group inside library code remains excluded; this review adds only the three direct Pattern calls.
+
+[funcy.strings.str_join]
+68:24 call  str_join('', sep)
+    -> funcy.strings.str_join
+70:24 call  sep.join(map(sep.__class__, seq))
+    -> <builtin>.str.join
+    reject funcy.colls.join: sep is the documented str separator (strings.rst: "str by default")
+70:28 call  map(sep.__class__, seq)
+    -> <builtin>.map
+    reject funcy.seqs.map: strings.py does not import funcy's map; sep.__class__ is called back (no edge)
+
+[funcy.strings.cut_prefix]
+74:17 call  len(prefix)
+    -> <builtin>.len
+74:43 call  s.startswith(prefix)
+    -> <builtin>.str.startswith
+
+[funcy.strings.cut_suffix]
+78:19 call  len(suffix)
+    -> <builtin>.len
+78:53 call  s.endswith(suffix)
+    -> <builtin>.str.endswith
+
+== funcy.tree
+
+[funcy.tree.tree_leaves]
+10:14 call  deque([[root]])
+    -> collections.deque
+12:25 call  iter(q.pop())
+    -> <builtin>.iter
+12:31 call  q.pop()
+    -> collections.deque.pop
+14:22 call  follow(sub)
+    -> funcy.types.isa.<lambda1>
+    note: follow is is_seqcont (the default, isa(...) of types.py:23) or the client's predicate (tests _ > 1; seqs.rst type.__subclasses__)
+15:25 call  q.append(node_iter)
+    -> collections.deque.append
+16:25 call  q.append(children(sub))
+    -> collections.deque.append
+16:34 call  children(sub)
+    -> <builtin>.iter
+    -> funcy.seqs.rest
+    note: children is iter (the default), rest (tests: ltree_leaves(..., children=rest)), or the client's callable (tests range; seqs.rst type.__subclasses__)
+
+[funcy.tree.ltree_leaves]
+23:16 call  list(tree_leaves(root, follow, children))
+    -> <builtin>.list
+23:28 call  tree_leaves(root, follow, children)
+    -> funcy.tree.tree_leaves
+
+[funcy.tree.tree_nodes]
+28:14 call  deque([[root]])
+    -> collections.deque
+30:25 call  iter(q.pop())
+    -> <builtin>.iter
+30:31 call  q.pop()
+    -> collections.deque.pop
+33:22 call  follow(sub)
+    -> funcy.types.isa.<lambda1>
+    note: follow is is_seqcont (the default) or the client's predicate (tests _ > 1)
+34:25 call  q.append(node_iter)
+    -> collections.deque.append
+35:25 call  q.append(children(sub))
+    -> collections.deque.append
+35:34 call  children(sub)
+    -> <builtin>.iter
+    exclude funcy.seqs.rest: the tests pass rest only to ltree_leaves, a separate docs entry (J1)
+    note: children is iter (the default) or the client's callable (tests range; seqs.rst type.__subclasses__)
+
+[funcy.tree.ltree_nodes]
+40:16 call  list(tree_nodes(root, follow, children))
+    -> <builtin>.list
+40:27 call  tree_nodes(root, follow, children)
+    -> funcy.tree.tree_nodes
+
+== funcy.types
+
+[funcy.types]
+16:17 call  isa(Mapping)
+    -> funcy.types.isa
+17:13 call  isa(Set)
+    -> funcy.types.isa
+18:13 call  isa(Sequence)
+    -> funcy.types.isa
+19:14 call  isa(list)
+    -> funcy.types.isa
+20:15 call  isa(tuple)
+    -> funcy.types.isa
+22:17 call  isa(list, tuple)
+    -> funcy.types.isa
+23:17 call  isa(list, tuple, Iterator, range)
+    -> funcy.types.isa
+25:15 call  isa(Iterable)
+    -> funcy.types.isa
+26:14 call  isa(Iterator)
+    -> funcy.types.isa
+
+[funcy.types.isa.<lambda1>]
+14:32 call  isinstance(x, types)
+    -> <builtin>.isinstance

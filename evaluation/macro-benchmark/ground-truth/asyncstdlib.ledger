@@ -1,0 +1,2057 @@
+# Call-site ledger of asyncstdlib at 0c5e206189e20466bae9468f13be7f3d49fa70a5 (v3.14.0).
+# Hand-written from the source; judgements in asyncstdlib.md.
+#
+# Roles: the package values that can reach a parameter (asyncstdlib.md, "Roles").
+#   Iterable role: every parameter documented as an (async) iterable (AnyIterable,
+#     AsyncIterable, AsyncIterator). Package values: the async generators of the
+#     package's async generator functions and expressions, and the async iterator
+#     objects TeePeer, chain, GroupBy, _Grouper, _BorrowedAsyncIterator and
+#     _ScopedAsyncIterator (docs/source/notes/iter_scope.rst; the package and the
+#     tests pass them). A Tee is not a value of this role. aiter() of such a value
+#     returns the value itself.
+#   An async for over such a value runs TeePeer.__aiter__ or
+#     _BorrowedAsyncIterator.__aiter__ (also for _ScopedAsyncIterator), and the
+#     __anext__ of TeePeer, chain, GroupBy or _Grouper. chain, GroupBy and _Grouper
+#     inherit collections.abc.AsyncIterator.__aiter__, and the borrowed and scoped
+#     iterators forward __anext__ to an async generator: code outside the package,
+#     no edge at an implicit site.
+#   Async context manager role: NullContext, _AsyncGeneratorContextManager and
+#     _ScopedAsyncIteratorContext (the package classes that subclass
+#     AsyncContextManager), and what the package passes itself (NoLock).
+#   Callable roles (function, key, predicate, callback): no package value, except
+#     the defaults (itertools.add, itertools.identity, heapq._identity, bool) and
+#     ExitStack.enter_context, which a test passes to map.
+#   Awaitable role: no package value.
+default reject asyncstdlib.itertools.Tee.__getitem__: no package code subscripts a Tee, and none iterates, unpacks or searches one (Tee defines __iter__, so iteration never falls back to __getitem__); the subscripted objects are typing constructs in annotations, tuples, lists, dicts, OrderedDicts, instance __dict__s, the sys.exc_info() tuple and the list nodes of the tee buffer
+default reject asyncstdlib.itertools.Tee.__iter__, asyncstdlib.itertools.Tee.__len__: no package code iterates, unpacks, converts, measures or truth-tests a Tee; a Tee is not a value of the iterable role (header; asyncstdlib.md, "Roles"), and the package keeps no Tee of its own
+default reject asyncstdlib._lrucache.CallKey.__eq__, asyncstdlib._lrucache.CallKey.__hash__: a CallKey exists only as a key of the dict or OrderedDict of MemoizedLRUAsyncCallable and CachedLRUAsyncCallable; only the dict operations of their __call__ and cache_discard hash and compare it (accepted there); every other hashed or compared value is a str, int, tuple, type, sentinel, typing construct or client value
+default reject asyncstdlib.heapq._KeyIter.__eq__: two _KeyIter objects are compared only inside the heapq calls of merge on iter_heap, where tuple comparison runs __eq__ (accepted there); no other comparison, dict key or membership test has a _KeyIter operand
+default reject asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__: initialized slots and normal methods do not fail on lookup; missing forwarded names and AttributeError from admitted metadata descriptors reach fallback at the explicitly accepted sites142,171,175,179,183. Generic callable roles admit no package value (header)
+default reject asyncstdlib.functools.AwaitableValue.__await__, asyncstdlib.functools._FutureCachedPropertyValue.__await__: only an await on the value of a cached_property attribute runs these, and the package awaits one only in _FutureCachedPropertyValue._await_impl (accepted there); every other await is of a coroutine, of what __anext__, aclose or athrow return, or of a client awaitable (the awaitable role admits no package value, header)
+default reject asyncstdlib._typing.SupportsBool.__bool__, asyncstdlib._typing.SupportsLT.__lt__, asyncstdlib._typing.SupportsAdd.__add__, asyncstdlib._typing.ACloseable.aclose: methods of typing.Protocol classes that no package class subclasses; a Protocol is not instantiated (scope rule B1), so these bodies never run
+default reject asyncstdlib.functools.CachedProperty.__get__, asyncstdlib.functools.CachedProperty.__set_name__, asyncstdlib._lrucache.LRUAsyncCallable.__get__, asyncstdlib._lrucache.LRUAsyncBoundCallable.__get__: no package class body binds a CachedProperty, an LRU cache or a bound LRU cache, so no class statement or attribute access of the package reaches these descriptor methods; they run on client classes (CachedProperty.__get__ is accepted at the getattr() of _instance_value)
+
+== asyncstdlib._core
+
+[asyncstdlib._core.aiter]
+54:18 call  isinstance(subject, AsyncIterable)
+    -> <builtin>.isinstance
+55:33 call  subject.__aiter__()
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> collections.abc.AsyncIterator.__aiter__
+    -> types.AsyncGeneratorType.__aiter__
+    note: subject is a value of the iterable role (header): TeePeer, the borrowed and scoped iterators (_ScopedAsyncIterator inherits __aiter__), chain, GroupBy and _Grouper (they inherit collections.abc.AsyncIterator.__aiter__), the package's async generators, or a client object (opaque)
+57:27 call  _aiter_sync(subject)
+    -> asyncstdlib._core._aiter_sync
+57:46 call  _aiter_sync(subject).__aiter__()
+    -> types.AsyncGeneratorType.__aiter__
+    reject *: the receiver is the async generator that _aiter_sync returns
+
+[asyncstdlib._core.ScopedIter.__init__]
+77:49 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+
+[asyncstdlib._core.ScopedIter.__aexit__]
+89:43 call  self._iterator.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: self._iterator is aiter(iterable) (77): the async iterator of a value of the iterable role, the async generator of _aiter_sync, or a client iterator (opaque)
+
+[asyncstdlib._core.borrow]
+98:36 async-iter  iterator
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: iterator is the async iterator that islice (itertools.py:279) or _largest (heapq.py:183) took from a ScopedIter: aiter() of a value of the iterable role
+
+[asyncstdlib._core.awaitify]
+105:27 call  iscoroutinefunction(function)
+    -> inspect.iscoroutinefunction
+108:24 call  Awaitify(function)
+    -> asyncstdlib._core.Awaitify.__init__
+
+[asyncstdlib._core.Awaitify.__call__]
+122:26 getattr  self.__wrapped__
+    reject *: self is an Awaitify, whose __wrapped__ is a slot (line 114); the properties named __wrapped__ belong to the LRU classes
+122:37 call  self.__wrapped__(*args, **kwargs)
+    -> <builtin>.bool
+    reject *: self is an Awaitify, whose __wrapped__ is a slot (line 114)
+    note: __wrapped__ is the function that awaitify() wrapped because it is not a coroutine function: bool, which filterfalse awaitifies for predicate None (itertools.py:256-257), or a client callable (opaque); no other package value reaches awaitify as a plain function (header, callable roles)
+123:26 call  isinstance(value, Awaitable)
+    -> <builtin>.isinstance
+124:41 getattr  self.__wrapped__
+    reject *: self is an Awaitify, whose __wrapped__ is a slot (line 114)
+127:47 call  force_async(self.__wrapped__)
+    -> asyncstdlib._core.force_async
+    reject *: self.__wrapped__ is the Awaitify slot (line 114), passed and not called here
+127:53 getattr  self.__wrapped__
+    reject *: self is an Awaitify, whose __wrapped__ is a slot (line 114)
+128:35 call  await_value(value)
+    -> asyncstdlib._core.await_value
+130:30 call  async_call(*args, **kwargs)
+    -> asyncstdlib._core.force_async.async_wrapped
+    note: self._async_call is set only at lines 124 and 127: the client's callable whose first result was awaitable (opaque; bool never returns an awaitable), or force_async(self.__wrapped__), the closure async_wrapped
+
+[asyncstdlib._core.force_async.async_wrapped]
+139:20 call  call(*args, **kwargs)
+    -> <builtin>.bool
+    note: call is self.__wrapped__ of an Awaitify (line 127, the only caller of force_async): bool for filterfalse(None, ...) (itertools.py:256), or a client callable (opaque)
+
+== asyncstdlib._lrucache
+
+[asyncstdlib._lrucache]
+31:2 decorator  @public_module( "asyncstdlib.functools" )
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+31:15 call  public_module( "asyncstdlib.functools" )
+    -> asyncstdlib._utility.public_module
+52:2 decorator  @public_module("asyncstdlib.functools")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+52:15 call  public_module("asyncstdlib.functools")
+    -> asyncstdlib._utility.public_module
+67:2 decorator  @public_module("asyncstdlib.functools")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+67:15 call  public_module("asyncstdlib.functools")
+    -> asyncstdlib._utility.public_module
+75:6 decorator  @property
+    -> <builtin>.property
+125:12 call  TypeVar("S")
+    -> typing.TypeVar
+126:13 call  TypeVar("S2")
+    -> typing.TypeVar
+127:12 call  TypeVar("P")
+    -> typing.TypeVar
+128:12 call  TypeVar("R")
+    -> typing.TypeVar
+140:6 decorator  @property
+    -> <builtin>.property
+144:6 decorator  @property
+    -> <builtin>.property
+177:6 decorator  @property
+    -> <builtin>.property
+181:6 decorator  @property
+    -> <builtin>.property
+186:2 decorator  @overload
+    -> typing.overload
+190:2 decorator  @overload
+    -> typing.overload
+196:2 decorator  @public_module("asyncstdlib.functools")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+196:15 call  public_module("asyncstdlib.functools")
+    -> asyncstdlib._utility.public_module
+287:6 decorator  @classmethod
+    -> <builtin>.classmethod
+294:42 call  object()
+    -> <builtin>.object
+    note: the default value of the parameter kwarg_sentinel of CallKey.from_call, evaluated when the class body runs
+
+[asyncstdlib._lrucache.LRUAsyncCallable.__get__]
+86:37 call  LRUAsyncBoundCallable( self, instance )
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__init__
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__wrapped__]
+142:26 getattr  self._lru.__wrapped__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__
+    note: Nested public bound wrappers can wrap an opaque client LRUAsyncCallable whose metadata property raises AttributeError; normal lookup enters the inner package fallback before any failure escapes.
+    reject asyncstdlib._lrucache.LRUAsyncCallable.__wrapped__: the three concrete caches shadow this Protocol property with a slot; a nested bound callable uses its own property
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__wrapped__
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__get__]
+153:37 call  LRUAsyncBoundCallable(self._lru, instance)
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__init__
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__call__]
+156:25 call  self._lru(self.__self__, *args, **kwargs)
+    -> asyncstdlib._lrucache.UncachedLRUAsyncCallable.__call__
+    -> asyncstdlib._lrucache.MemoizedLRUAsyncCallable.__call__
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.__call__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__call__
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_parameters]
+159:42 call  self._lru.cache_parameters()
+    -> asyncstdlib._lrucache.UncachedLRUAsyncCallable.cache_parameters
+    -> asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_parameters
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_parameters
+    reject asyncstdlib._lrucache.LRUAsyncCallable.cache_parameters: the three cache classes override it, and the Protocol is not instantiated
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_parameters
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_info]
+162:36 call  self._lru.cache_info()
+    -> asyncstdlib._lrucache.UncachedLRUAsyncCallable.cache_info
+    -> asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_info
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_info
+    reject asyncstdlib._lrucache.LRUAsyncCallable.cache_info: the three cache classes override it, and the Protocol is not instantiated
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_info
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_clear]
+165:37 call  self._lru.cache_clear()
+    -> asyncstdlib._lrucache.UncachedLRUAsyncCallable.cache_clear
+    -> asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_clear
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_clear
+    reject asyncstdlib._lrucache.LRUAsyncCallable.cache_clear: the three cache classes override it, and the Protocol is not instantiated
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_clear
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_discard]
+168:39 call  self._lru.cache_discard(self.__self__, *args, **kwargs)
+    -> asyncstdlib._lrucache.UncachedLRUAsyncCallable.cache_discard
+    -> asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_discard
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_discard
+    reject asyncstdlib._lrucache.LRUAsyncCallable.cache_discard: the three cache classes override it, and the Protocol is not instantiated
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.cache_discard
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__repr__]
+171:23 call  getattr(self.__wrapped__, "__qualname__", "?")
+    -> <builtin>.getattr
+    reject *: the property self.__wrapped__ runs at the attribute load 171:29; its value, the client's cached function, is not called
+171:29 getattr  self.__wrapped__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__
+    note: The public bound wrapper can hold an opaque client LRUAsyncCallable whose __wrapped__ property raises AttributeError; this first repr enters the package fallback.
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__wrapped__
+    reject asyncstdlib._lrucache.LRUAsyncCallable.__wrapped__: self is an LRUAsyncBoundCallable
+172:37 format  {name}
+    reject *: the formatted value is a str or an int
+172:47 format  {self.__self__}
+    reject *: self.__self__ is the instance that the cache was bound to (LRUAsyncCallable.__get__ and LRUAsyncBoundCallable.__get__): an object of a client class, opaque (scope rule B5)
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__]
+175:23 call  getattr(self._lru, name)
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__annotations__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__doc__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__wrapped__
+    note: Automatic fallback within the same first nested metadata lookup forwards the source-fixed name __wrapped__, __doc__ or __annotations__ and re-enters the inner package getter. No package state changes or client retry after failure.
+    -> <builtin>.getattr
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__doc__]
+179:26 getattr  self._lru.__doc__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__
+    note: A nested public bound wrapper with an opaque client __doc__ property raising AttributeError enters the inner package fallback during this first metadata lookup.
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__doc__
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.LRUAsyncBoundCallable.__annotations__]
+183:26 getattr  self._lru.__annotations__
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__getattr__
+    note: A nested public bound wrapper with an opaque client __annotations__ property raising AttributeError enters the inner package fallback during this first metadata lookup.
+    -> asyncstdlib._lrucache.LRUAsyncBoundCallable.__annotations__
+    note: The public LRUAsyncBoundCallable constructor accepts another bound callable in its documented LRUAsyncCallable role (_lrucache.py:132; _lrucache.pyi:61-93). The inner bound callable can still accept the leading argument consumed by the outer wrapper: its generic parameters need not equal the outer parameters. Thus self._lru can be a bound callable, or one of the three cache classes. See judgement6.
+
+[asyncstdlib._lrucache.lru_cache]
+243:18 call  isinstance(maxsize, int)
+    -> <builtin>.isinstance
+244:32 op  maxsize < 0
+    reject *: maxsize is an int here (line 243)
+245:18 call  callable(maxsize)
+    -> <builtin>.callable
+247:46 call  CachedLRUAsyncCallable(cast(AC, maxsize), typed, 128)
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.__init__
+247:51 call  cast(AC, maxsize)
+    -> typing.cast
+248:23 call  update_wrapper(fast_wrapper, maxsize)
+    -> functools.update_wrapper
+    note: update_wrapper copies attributes of the client's function to the cache object; the cache object has a __dict__ and a __wrapped__ slot, so no package code runs
+251:24 call  TypeError( "first argument to 'lru_cache' must be an int,...
+    -> <builtin>.TypeError
+
+[asyncstdlib._lrucache.lru_cache.lru_decorator]
+256:28 call  callable(maxsize)
+    -> <builtin>.callable
+259:47 call  MemoizedLRUAsyncCallable(function, typed)
+    -> asyncstdlib._lrucache.MemoizedLRUAsyncCallable.__init__
+261:47 call  UncachedLRUAsyncCallable(function, typed)
+    -> asyncstdlib._lrucache.UncachedLRUAsyncCallable.__init__
+263:45 call  CachedLRUAsyncCallable(function, typed, maxsize)
+    -> asyncstdlib._lrucache.CachedLRUAsyncCallable.__init__
+264:23 call  update_wrapper(wrapper, function)
+    -> functools.update_wrapper
+
+[asyncstdlib._lrucache.CallKey.__init__]
+277:26 call  hash(values)
+    -> <builtin>.hash
+    note: values is the key tuple of from_call: the client's call arguments, the object() sentinel, keyword items and types; no package object (scope rule B3)
+
+[asyncstdlib._lrucache.CallKey.__eq__]
+284:20 call  type(self)
+    -> <builtin>.type
+284:34 call  type(other)
+    -> <builtin>.type
+
+[asyncstdlib._lrucache.CallKey.from_call]
+309:72 call  kwds.items()
+    -> <builtin>.dict.items
+312:22 call  tuple(map(type, args))
+    -> <builtin>.tuple
+    reject asyncstdlib.builtins.tuple: _lrucache.py does not import asyncstdlib.builtins; tuple is the builtin
+312:26 call  map(type, args)
+    -> <builtin>.map
+    reject asyncstdlib.builtins.map: _lrucache.py does not import asyncstdlib.builtins; map is the builtin (it calls type, a builtin: no edge, as in cachetools.md judgement 7)
+314:27 call  map(type, args)
+    -> <builtin>.map
+    reject asyncstdlib.builtins.map: _lrucache.py does not import asyncstdlib.builtins; map is the builtin
+314:45 call  map(type, kwds.values())
+    -> <builtin>.map
+    reject asyncstdlib.builtins.map: _lrucache.py does not import asyncstdlib.builtins; map is the builtin
+314:63 call  kwds.values()
+    -> <builtin>.dict.values
+    note: kwds is the **kwargs dict of a cache's __call__ or cache_discard (lines 373, 400, 428, 465), not a CallKey; the name values only matches the attribute CallKey.values
+316:17 call  len(key)
+    -> <builtin>.len
+316:36 call  type(key[0])
+    -> <builtin>.type
+318:19 call  cls(key)
+    -> asyncstdlib._lrucache.CallKey.__init__
+    note: cls is CallKey: from_call is called only as CallKey.from_call (lines 373, 400, 428, 465), and CallKey is private with no subclass
+
+[asyncstdlib._lrucache.UncachedLRUAsyncCallable.__call__]
+335:27 getattr  self.__wrapped__
+    reject *: self is an UncachedLRUAsyncCallable, whose __wrapped__ is a slot (line 324)
+335:38 call  self.__wrapped__(*args, **kwargs)
+    reject *: self is an UncachedLRUAsyncCallable, whose __wrapped__ is a slot (line 324)
+    note: __wrapped__ is the client's function that lru_cache wraps (update_wrapper, line 264): a client callback; the cached callable is typed AC, a bare callable, and no package code, test or example caches a package function
+
+[asyncstdlib._lrucache.UncachedLRUAsyncCallable.cache_parameters]
+338:31 call  CacheParameters(maxsize=0, typed=self.__typed)
+    -> <builtin>.dict.__init__
+    note: CacheParameters is a TypedDict (line 53), a subclass of dict at run time without an __init__ of its own
+
+[asyncstdlib._lrucache.UncachedLRUAsyncCallable.cache_info]
+341:25 call  CacheInfo(0, self.__misses, 0, 0)
+    note: CacheInfo is a NamedTuple class (line 34): instantiation runs the __new__ that collections.namedtuple generates (no node) and object.__init__: no edge, as in cachetools.md judgement 6
+
+[asyncstdlib._lrucache.MemoizedLRUAsyncCallable.__call__]
+373:32 call  CallKey.from_call(args, kwargs, typed=self.__typed)
+    -> asyncstdlib._lrucache.CallKey.from_call
+378:33 getattr  self.__wrapped__
+    reject *: self is a MemoizedLRUAsyncCallable, whose __wrapped__ is a slot (line 356)
+378:44 call  self.__wrapped__(*args, **kwargs)
+    reject *: self is a MemoizedLRUAsyncCallable, whose __wrapped__ is a slot (line 356)
+    note: __wrapped__ is the client's function that lru_cache wraps (update_wrapper, line 264): a client callback (see 335:38)
+375:34 getitem  self.__cache[key]
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: key is a CallKey unless the call has one int or str argument (line 316); the lookup hashes it and compares it with a stored key of the same hash (a hit compares two equal CallKey objects)
+381:20 op  key not in self.__cache
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: a dict membership test: hash, then a comparison with a stored key of the same hash (another task may have stored an equal key during the await)
+382:29 setitem  self.__cache[key]
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: the store hashes the key and compares it with a stored key of the same hash (two different argument tuples can collide)
+
+[asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_parameters]
+389:31 call  CacheParameters(maxsize=None, typed=self.__typed)
+    -> <builtin>.dict.__init__
+    note: CacheParameters is a TypedDict (line 53), a subclass of dict at run time without an __init__ of its own
+
+[asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_info]
+392:25 call  CacheInfo(self.__hits, self.__misses, None, len(self.__ca...
+    note: CacheInfo is a NamedTuple class (line 34): instantiation runs the generated __new__ (no node) and object.__init__: no edge
+392:63 call  len(self.__cache)
+    -> <builtin>.len
+
+[asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_clear]
+397:27 call  self.__cache.clear()
+    -> <builtin>.dict.clear
+
+[asyncstdlib._lrucache.MemoizedLRUAsyncCallable.cache_discard]
+400:25 call  self.__cache.pop(CallKey.from_call(args, kwargs, typed=se...
+    -> <builtin>.dict.pop
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: self.__cache is a dict (line 370); dict.pop hashes the key and compares it with a stored key of the same hash; the key from from_call is a CallKey unless it is a single int or str (line 316)
+400:43 call  CallKey.from_call(args, kwargs, typed=self.__typed)
+    -> asyncstdlib._lrucache.CallKey.from_call
+
+[asyncstdlib._lrucache.CachedLRUAsyncCallable.__init__]
+425:79 call  OrderedDict()
+    -> collections.OrderedDict
+
+[asyncstdlib._lrucache.CachedLRUAsyncCallable.__call__]
+428:32 call  CallKey.from_call(args, kwargs, typed=self.__typed)
+    -> asyncstdlib._lrucache.CallKey.from_call
+433:33 getattr  self.__wrapped__
+    reject *: self is a CachedLRUAsyncCallable, whose __wrapped__ is a slot (line 409)
+433:44 call  self.__wrapped__(*args, **kwargs)
+    reject *: self is a CachedLRUAsyncCallable, whose __wrapped__ is a slot (line 409)
+    note: __wrapped__ is the client's function that lru_cache wraps (update_wrapper, lines 248 and 264): a client callback (see 335:38)
+440:21 call  len(self.__cache)
+    -> <builtin>.len
+441:37 call  self.__cache.popitem(last=False)
+    -> collections.OrderedDict.popitem
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    note: CPython popitem uses the stored hash; a colliding stored key can still call CallKey.__eq__. Admitted PyPy 3.11 v7.3.20 OrderedDict.popitem(last=False) calls self.pop(k), whose object-key dictionary strategy computes the key hash and can compare colliding keys. Thus this site also calls CallKey.__hash__ in the interpreter union; see asyncstdlib.md judgement 8 and pinned primary source evidence.
+449:37 call  self.__cache.move_to_end(key, last=True)
+    -> collections.OrderedDict.move_to_end
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: key is a fresh CallKey (line 428) equal to the stored one: move_to_end hashes it and compares it with the stored key
+430:34 getitem  self.__cache[key]
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: key is a CallKey unless the call has one int or str argument (line 316); the lookup hashes it and compares it with a stored key of the same hash
+436:20 op  key in self.__cache
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+442:29 setitem  self.__cache[key]
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+446:29 setitem  self.__cache[key]
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+
+[asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_parameters]
+454:31 call  CacheParameters(maxsize=self.__maxsize, typed=self.__typed)
+    -> <builtin>.dict.__init__
+    note: CacheParameters is a TypedDict (line 53), a subclass of dict at run time without an __init__ of its own
+
+[asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_info]
+457:25 call  CacheInfo(self.__hits, self.__misses, self.__maxsize, len...
+    note: CacheInfo is a NamedTuple class (line 34): instantiation runs the generated __new__ (no node) and object.__init__: no edge
+457:73 call  len(self.__cache)
+    -> <builtin>.len
+
+[asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_clear]
+462:27 call  self.__cache.clear()
+    -> collections.OrderedDict.clear
+
+[asyncstdlib._lrucache.CachedLRUAsyncCallable.cache_discard]
+465:25 call  self.__cache.pop(CallKey.from_call(args, kwargs, typed=se...
+    -> collections.OrderedDict.pop
+    -> asyncstdlib._lrucache.CallKey.__hash__
+    -> asyncstdlib._lrucache.CallKey.__eq__
+    note: self.__cache is an OrderedDict (line 425); pop hashes the key and compares it with a stored key of the same hash
+465:43 call  CallKey.from_call(args, kwargs, typed=self.__typed)
+    -> asyncstdlib._lrucache.CallKey.from_call
+
+== asyncstdlib._typing
+
+[asyncstdlib._typing]
+45:12 call  TypeVar("T")
+    -> typing.TypeVar
+46:13 call  TypeVar("T1")
+    -> typing.TypeVar
+47:13 call  TypeVar("T2")
+    -> typing.TypeVar
+48:13 call  TypeVar("T3")
+    -> typing.TypeVar
+49:13 call  TypeVar("T4")
+    -> typing.TypeVar
+50:13 call  TypeVar("T5")
+    -> typing.TypeVar
+51:12 call  TypeVar("R", covariant=True)
+    -> typing.TypeVar
+52:12 call  TypeVar("C", bound=Callable[..., Any])
+    -> typing.TypeVar
+53:13 call  TypeVar("AC", bound=Callable[..., Awaitable[Any]])
+    -> typing.TypeVar
+56:13 call  TypeVar("HK", bound=Hashable)
+    -> typing.TypeVar
+66:13 call  TypeVar("LT", bound="SupportsLT")
+    -> typing.TypeVar
+75:14 call  TypeVar("ADD", bound="SupportsAdd")
+    -> typing.TypeVar
+84:17 call  TypeVar("AClose", bound="ACloseable")
+    -> typing.TypeVar
+87:2 decorator  @runtime_checkable
+    -> typing.runtime_checkable
+
+== asyncstdlib._utility
+
+[asyncstdlib._utility]
+16:12 call  TypeVar("D", bound=Definition)
+    -> typing.TypeVar
+
+[asyncstdlib._utility.public_module.decorator]
+28:50 call  qual_name.rpartition(".")
+    -> <builtin>.str.rpartition
+    note: qual_name is Optional[str], not None here (line 26)
+
+== asyncstdlib.asynctools
+
+[asyncstdlib.asynctools]
+23:12 call  TypeVar("S")
+    -> typing.TypeVar
+121:2 decorator  @overload
+    -> typing.overload
+125:2 decorator  @overload
+    -> typing.overload
+230:2 decorator  @overload
+    -> typing.overload
+238:2 decorator  @overload
+    -> typing.overload
+247:2 decorator  @overload
+    -> typing.overload
+257:2 decorator  @overload
+    -> typing.overload
+268:2 decorator  @overload
+    -> typing.overload
+280:2 decorator  @overload
+    -> typing.overload
+319:2 decorator  @overload
+    -> typing.overload
+323:2 decorator  @overload
+    -> typing.overload
+
+[asyncstdlib.asynctools._BorrowedAsyncIterator.__init__]
+46:74 async-iter  iterator
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: the async generator expression belongs to __init__; iterator is what borrow() passes (an async iterator of the iterable role, line 154) or the iterator of a scoped_iter context (aiter() of an (async) iterable, line 110)
+52:19 call  hasattr(iterator, "asend")
+    -> <builtin>.hasattr
+56:19 call  hasattr(iterator, "athrow")
+    -> <builtin>.hasattr
+
+[asyncstdlib.asynctools._BorrowedAsyncIterator.__repr__]
+65:41 format  {self.__wrapped__!r}
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__repr__
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.__repr__
+    reject *: self.__wrapped__ is the iterator that borrow() wrapped, an async iterator of the iterable role; of these, only borrowed and scoped iterators define __repr__ (the tests borrow both: test_asynctools.py:54, 78)
+65:47 getattr  self.__wrapped__
+    reject *: self is a borrowed iterator, whose __wrapped__ is a slot (line 34)
+65:67 format  {(id(self)):x}
+    reject *: the formatted value is a str or an int
+65:71 call  id(self)
+    -> <builtin>.id
+
+[asyncstdlib.asynctools._BorrowedAsyncIterator._aclose_wrapper]
+72:38 call  wrapper_iterator.aclose()
+    -> types.AsyncGeneratorType.aclose
+    reject *: wrapper_iterator is self._wrapper, the async generator expression of __init__ (line 46)
+74:19 call  hasattr(self, "asend")
+    -> <builtin>.hasattr
+76:19 call  hasattr(self, "athrow")
+    -> <builtin>.hasattr
+
+[asyncstdlib.asynctools._BorrowedAsyncIterator.aclose]
+80:36 call  self._aclose_wrapper()
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator._aclose_wrapper
+
+[asyncstdlib.asynctools._ScopedAsyncIterator.__repr__]
+87:46 format  {self.__wrapped__!r}
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__repr__
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.__repr__
+    reject *: self.__wrapped__ is the iterator of a scoped_iter context (line 110): aiter() of a value of the iterable role that has aclose; of these, only borrowed and scoped iterators define __repr__ (the tests scope both: test_asynctools.py:32, 55)
+87:52 getattr  self.__wrapped__
+    reject *: self is a scoped iterator, whose __wrapped__ is a slot (line 34)
+87:72 format  {(id(self)):x}
+    reject *: the formatted value is a str or an int
+87:76 call  id(self)
+    -> <builtin>.id
+
+[asyncstdlib.asynctools._ScopedAsyncIteratorContext.__aenter__]
+109:31 call  RuntimeError("scoped_iter is not re-entrant")
+    -> <builtin>.RuntimeError
+110:51 call  _ScopedAsyncIterator(self._iterator)
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__init__
+    note: _ScopedAsyncIterator defines no __init__; it inherits _BorrowedAsyncIterator.__init__
+
+[asyncstdlib.asynctools._ScopedAsyncIteratorContext.__aexit__]
+114:50 call  self._borrowed_iter._aclose_wrapper()
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator._aclose_wrapper
+    note: self._borrowed_iter is the _ScopedAsyncIterator of __aenter__ (line 110), which inherits _aclose_wrapper
+115:36 call  self._iterator.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: self._iterator is set only in __init__ from scoped_iter (line 196): aiter(iterable) when it has aclose
+
+[asyncstdlib.asynctools._ScopedAsyncIteratorContext.__repr__]
+118:19 format  {self.__class__.__name__}
+    reject *: the formatted value is a str or an int
+118:48 format  {self._iterator!r}
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__repr__
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.__repr__
+    reject *: self._iterator is aiter() of a value of the iterable role that has aclose (line 196); of these, only borrowed and scoped iterators define __repr__
+118:72 format  {(id(self)):x}
+    reject *: the formatted value is a str or an int
+118:76 call  id(self)
+    -> <builtin>.id
+
+[asyncstdlib.asynctools.borrow]
+149:19 call  hasattr(iterator, "__anext__")
+    -> <builtin>.hasattr
+149:57 call  hasattr(iterator, "__aiter__")
+    -> <builtin>.hasattr
+150:24 call  TypeError( "borrowing requires an async iterator " + f"wi...
+    -> <builtin>.TypeError
+152:58 format  {type(iterator).__name__}
+    reject *: the formatted value is a str or an int
+152:63 call  type(iterator)
+    -> <builtin>.type
+154:42 call  _BorrowedAsyncIterator[T, Any](iterator)
+    -> types.GenericAlias.__call__
+    -> typing._GenericAlias.__call__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__init__
+    note: _BorrowedAsyncIterator[T, Any] subscripts the class; the first __class_getitem__ in its MRO is that of collections.abc.AsyncGenerator, which makes a types.GenericAlias on Python 3.9 and later; on Python 3.8 it is Generic's, which makes a typing._GenericAlias (asyncstdlib.md, judgement 3); calling the alias calls the class, which runs _BorrowedAsyncIterator.__init__ (a callback); setting __orig_class__ on the slotted instance fails silently
+
+[asyncstdlib.asynctools.scoped_iter]
+191:19 call  hasattr(iterator := aiter(iterable), "aclose")
+    -> <builtin>.hasattr
+191:37 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+192:27 call  nullcontext(iterator)
+    -> asyncstdlib.contextlib.NullContext.__init__
+    note: nullcontext is NullContext (contextlib.py:245)
+196:39 call  _ScopedAsyncIteratorContext(iterator)
+    -> asyncstdlib.asynctools._ScopedAsyncIteratorContext.__init__
+
+[asyncstdlib.asynctools.apply]
+314:18 call  __func( *[await arg for arg in args], **{k: await arg for...
+    note: __func is the client's callable (a bare Callable; the tests and the docstring pass client functions and lambdas): a client callback, no callee
+315:81 call  kwargs.items()
+    -> <builtin>.dict.items
+
+[asyncstdlib.asynctools.sync]
+361:20 call  callable(function)
+    -> <builtin>.callable
+362:24 call  TypeError("function argument should be Callable")
+    -> <builtin>.TypeError
+364:27 call  iscoroutinefunction(function)
+    -> inspect.iscoroutinefunction
+367:6 decorator  @wraps(function)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+367:11 call  wraps(function)
+    -> functools.wraps
+
+[asyncstdlib.asynctools.sync.async_wrapped]
+369:26 call  function(*args, **kwargs)
+    note: function is the client's callable given to sync() (a bare Callable; the tests pass client functions and lambdas): a client callback, no callee
+370:22 call  isinstance(result, Awaitable)
+    -> <builtin>.isinstance
+
+[asyncstdlib.asynctools.any_iter]
+417:40 call  isinstance(__iter, Awaitable)
+    -> <builtin>.isinstance
+418:18 call  isinstance(iterable, AsyncIterable)
+    -> <builtin>.isinstance
+419:27 async-iter  iterable
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: iterable is __iter or what awaiting it gives: a value of the iterable role (an awaitable admits no package value)
+421:39 call  isinstance(item, Awaitable)
+    -> <builtin>.isinstance
+426:39 call  isinstance(item, Awaitable)
+    -> <builtin>.isinstance
+
+== asyncstdlib.builtins
+
+[asyncstdlib.builtins]
+25:27 call  Sentinel("<no default>")
+    -> asyncstdlib._core.Sentinel.__init__
+53:26 call  Sentinel("<no default>")
+    -> asyncstdlib._core.Sentinel.__init__
+241:29 call  Sentinel("<no default>")
+    -> asyncstdlib._core.Sentinel.__init__
+
+[asyncstdlib.builtins.anext]
+46:40 call  iterator.__anext__()
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    -> types.AsyncGeneratorType.__anext__
+    note: iterator is an async iterator of the iterable role: anext is public, and the package passes aiter() results (zip, _min_max, reduce, accumulate, batched, pairwise, zip_longest, _GroupByState.step); the __anext__ slot of a borrowed or scoped iterator holds the __anext__ of its async generator expression (asynctools.py:51)
+
+[asyncstdlib.builtins.iter]
+81:21 call  aiter(subject)
+    -> asyncstdlib._core.aiter
+82:22 call  callable(subject)
+    -> <builtin>.callable
+83:24 call  TypeError("iter(v, w): v must be callable")
+    -> <builtin>.TypeError
+85:30 call  isinstance(sentinel, Sentinel)
+    -> <builtin>.isinstance
+86:34 call  acallable_iterator(_awaitify(subject), sentinel)
+    -> asyncstdlib.builtins.acallable_iterator
+86:44 call  _awaitify(subject)
+    -> asyncstdlib._core.awaitify
+
+[asyncstdlib.builtins.acallable_iterator]
+92:26 call  subject()
+    -> asyncstdlib._core.Awaitify.__call__
+    note: subject is _awaitify(subject) from iter (line 86): the client's coroutine function (opaque) or an Awaitify around the client's callable
+95:30 call  subject()
+    -> asyncstdlib._core.Awaitify.__call__
+    note: subject is _awaitify(subject) from iter (line 86): see 92:26
+
+[asyncstdlib.builtins.all]
+102:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+102:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+103:30 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+
+[asyncstdlib.builtins.any]
+113:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+113:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+114:30 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+
+[asyncstdlib.builtins.zip]
+148:22 call  aiter(it)
+    -> asyncstdlib._core.aiter
+151:27 call  _zip_inner(aiters)
+    -> asyncstdlib.builtins._zip_inner
+151:72 call  _zip_inner_strict(aiters)
+    -> asyncstdlib.builtins._zip_inner_strict
+152:28 async-iter  inner
+    reject *: inner is the async generator of _zip_inner or _zip_inner_strict (line 151)
+161:29 call  aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: aclose is iterator.aclose (line 157) for an iterator of aiters: aiter() of a value of the iterable role (line 148)
+
+[asyncstdlib.builtins._zip_inner]
+170:33 call  anext(it)
+    -> asyncstdlib.builtins.anext
+
+[asyncstdlib.builtins._zip_inner_strict]
+184:58 call  _sync_builtins.enumerate(aiters)
+    -> <builtin>.enumerate
+    reject asyncstdlib.builtins.enumerate: _sync_builtins is the module builtins (line 15)
+185:29 call  items.append(await anext(_aiter))
+    -> <builtin>.list.append
+185:41 call  anext(_aiter)
+    -> asyncstdlib.builtins.anext
+189:18 op  tried > 0
+    reject *: tried is an int
+191:29 call  ValueError( f"zip() argument {tried + 1} is shorter than ...
+    -> <builtin>.ValueError
+192:34 format  {tried + 1}
+    reject *: the formatted value is a str or an int
+192:70 format  {plural}
+    reject *: the formatted value is a str or an int
+192:78 format  {tried}
+    reject *: the formatted value is a str or an int
+195:26 call  object()
+    -> <builtin>.object
+196:54 call  _sync_builtins.enumerate(aiters)
+    -> <builtin>.enumerate
+    reject asyncstdlib.builtins.enumerate: _sync_builtins is the module builtins (line 15)
+197:27 call  anext(_aiter, sentinel)
+    -> asyncstdlib.builtins.anext
+199:33 call  ValueError( f"zip() argument {tried + 1} is longer than a...
+    -> <builtin>.ValueError
+200:38 format  {tried + 1}
+    reject *: the formatted value is a str or an int
+200:73 format  {plural}
+    reject *: the formatted value is a str or an int
+200:81 format  {tried}
+    reject *: the formatted value is a str or an int
+
+[asyncstdlib.builtins.map]
+234:25 call  _awaitify(function)
+    -> asyncstdlib._core.awaitify
+235:16 async-with  ScopedIter(zip(iterable, *iterables, strict=strict))
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+235:26 call  ScopedIter(zip(iterable, *iterables, strict=strict))
+    -> asyncstdlib._core.ScopedIter.__init__
+235:30 call  zip(iterable, *iterables, strict=strict)
+    -> asyncstdlib.builtins.zip
+236:27 async-iter  args_iter
+    reject *: args_iter is aiter() of the async generator of zip (line 235), that generator itself
+237:30 call  function(*args)
+    -> asyncstdlib._core.Awaitify.__call__
+    -> asyncstdlib.contextlib.ExitStack.enter_context
+    note: function is _awaitify(function) (line 234): the client's coroutine function (opaque), an Awaitify around the client's callable, or a coroutine function that a test passes, the bound ExitStack.enter_context (test_contextlib.py:273); args is a tuple from zip
+
+[asyncstdlib.builtins.max]
+267:26 call  _min_max(iterable, key, True, default)
+    -> asyncstdlib.builtins._min_max
+
+[asyncstdlib.builtins.min]
+293:26 call  _min_max(iterable, key, False, default)
+    -> asyncstdlib.builtins._min_max
+
+[asyncstdlib.builtins._min_max]
+307:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+307:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+308:27 call  anext(item_iter, default=default)
+    -> asyncstdlib.builtins.anext
+312:29 call  ValueError(f"{name}() arg is an empty sequence")
+    -> <builtin>.ValueError
+312:32 format  {name}
+    reject *: the formatted value is a str or an int
+314:31 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+315:33 call  bool(item < best)
+    -> <builtin>.bool
+    note: the result of < between two items of the client's iterable (opaque)
+315:39 op  item < best
+    reject *: item and best are items of the iterable, client values; no package class with __lt__ (ReverseLT, _KeyIter) is ever an item of an iterable of the iterable role (scope rule B3)
+318:28 call  _awaitify(key)
+    -> asyncstdlib._core.awaitify
+319:33 call  key(best)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: key is _awaitify(key) (line 318): the client's coroutine function (opaque) or an Awaitify around the client's key function
+320:31 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+321:37 call  key(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: key is _awaitify(key) (line 318): see 319:33
+322:39 op  item_key < best_key
+    reject *: item_key and best_key are results of the client's key function, client values (scope rule B3)
+
+[asyncstdlib.builtins.filter]
+341:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+341:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+343:31 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+347:33 call  _awaitify(function)
+    -> asyncstdlib._core.awaitify
+348:31 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+349:34 call  function(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: function is _awaitify(function) (line 347): the client's coroutine function (opaque) or an Awaitify around the client's callable
+
+[asyncstdlib.builtins.enumerate]
+364:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+364:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+365:27 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+
+[asyncstdlib.builtins.sum]
+375:23 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+375:28 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+
+[asyncstdlib.builtins.list]
+386:42 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+386:47 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+
+[asyncstdlib.builtins.tuple]
+393:44 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+393:49 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+
+[asyncstdlib.builtins.dict]
+408:67 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+408:72 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+410:25 call  base_dict.update(kwargs)
+    -> <builtin>.dict.update
+
+[asyncstdlib.builtins.set]
+420:42 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+420:47 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+
+[asyncstdlib.builtins.sorted]
+451:41 call  _sync_builtins.sorted(iterable, reverse=reverse)
+    -> <builtin>.sorted
+    reject asyncstdlib.builtins.sorted: _sync_builtins is the module builtins (line 15)
+    note: sorted iterates and compares a client iterable; a package async iterator has no __iter__, so sorted raises TypeError before it calls package code (and a Tee is not a value of the iterable role)
+453:71 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+453:76 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+454:23 call  items.sort(reverse=reverse)
+    -> <builtin>.list.sort
+    note: items are items of the client's iterable: their comparisons are client code
+457:30 call  _awaitify(key)
+    -> asyncstdlib._core.awaitify
+458:40 call  async_key(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: async_key is _awaitify(key) (line 457): the client's coroutine function (opaque) or an Awaitify around the client's key function
+458:72 async-iter  aiter(iterable)
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: an async for over aiter() of a value of the iterable role
+458:77 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+459:25 call  keyed_items.sort(key=lambda ki: ki[0], reverse=reverse)
+    -> <builtin>.list.sort
+    -> asyncstdlib.builtins.sorted.<lambda1>
+    note: list.sort calls the key lambda back; the keys are results of the client's key function
+
+== asyncstdlib.contextlib
+
+[asyncstdlib.contextlib]
+171:2 decorator  @public_module(__name__, "closing")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+171:15 call  public_module(__name__, "closing")
+    -> asyncstdlib._utility.public_module
+209:2 decorator  @public_module(__name__, "nullcontext")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+209:15 call  public_module(__name__, "nullcontext")
+    -> asyncstdlib._utility.public_module
+248:13 call  TypeVar("SE")
+    -> typing.TypeVar
+275:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+413:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[asyncstdlib.contextlib.contextmanager]
+57:6 decorator  @wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+57:11 call  wraps(func)
+    -> functools.wraps
+
+[asyncstdlib.contextlib.contextmanager.helper]
+59:45 call  _AsyncGeneratorContextManager(func, args, kwds)
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__init__
+
+[asyncstdlib.contextlib.ContextDecorator.__call__]
+101:10 decorator  @wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code
+101:15 call  wraps(func)
+    -> functools.wraps
+
+[asyncstdlib.contextlib.ContextDecorator.__call__.inner]
+103:24 async-with  self._recreate_cm()
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__aenter__
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__aexit__
+    reject *: the context manager is what self._recreate_cm() returns (103:41); self is an _AsyncGeneratorContextManager, the only package subclass of the abstract ContextDecorator, and its _recreate_cm makes another one (line 118); client subclasses are client code (scope rule B1, lead ruling in asyncstdlib.md judgement 4)
+103:41 call  self._recreate_cm()
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager._recreate_cm
+    reject asyncstdlib.contextlib.ContextDecorator._recreate_cm: ContextDecorator is abstract by abc (it inherits the abstract __aexit__ of contextlib.AbstractAsyncContextManager and does not define one), so it is not a receiver; its only package subclass _AsyncGeneratorContextManager overrides _recreate_cm, and client subclasses are client code (scope rule B1, lead ruling in asyncstdlib.md judgement 4)
+104:34 call  func(*args, **kwds)
+    note: func is the function that the context manager decorates (__call__ is applied as a decorator): the client's coroutine function, a client callback, no callee
+
+[asyncstdlib.contextlib._AsyncGeneratorContextManager.__init__]
+113:24 call  func(*args, **kwds)
+    note: func is the client's async generator function, given to contextmanager (line 59; a bare Callable, and the tests pass client functions) or passed again by _recreate_cm (line 118): a client callback, no callee
+115:31 call  getattr(func, "__doc__", type(self).__doc__)
+    -> <builtin>.getattr
+    reject *: func is the client's async generator function, not an LRUAsyncBoundCallable
+115:53 call  type(self)
+    -> <builtin>.type
+115:60 getattr  type(self).__doc__
+    reject *: the receiver is the class _AsyncGeneratorContextManager, whose __doc__ is a plain class attribute
+
+[asyncstdlib.contextlib._AsyncGeneratorContextManager._recreate_cm]
+118:20 call  type(self)
+    -> <builtin>.type
+118:26 call  type(self)(*self.__recreate_args)
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__init__
+    note: type(self) is _AsyncGeneratorContextManager: the class is private, has no subclass, and only contextmanager.helper (line 59) and this line instantiate it
+
+[asyncstdlib.contextlib._AsyncGeneratorContextManager.__aenter__]
+122:44 call  self.gen.__anext__()
+    reject *: self.gen is the async generator of the client's function (line 113), not a package iterator
+    note: a method call on a client object: no callee (scope rule B5)
+124:31 call  RuntimeError("generator did not yield to __aenter__")
+    -> <builtin>.RuntimeError
+
+[asyncstdlib.contextlib._AsyncGeneratorContextManager.__aexit__]
+129:41 call  self.gen.__anext__()
+    reject *: self.gen is the async generator of the client's function (line 113), not a package iterator
+    note: a method call on a client object: no callee (scope rule B5)
+133:35 call  RuntimeError("generator did not stop after __aexit__")
+    -> <builtin>.RuntimeError
+140:51 call  self.gen.aclose()
+    reject *: self.gen is the async generator of the client's function (line 113), not a package iterator
+    note: a method call on a client object: no callee (scope rule B5)
+142:51 call  self.gen.athrow(exc_val)
+    note: self.gen is the async generator of the client's function (line 113): a method call on a client object, no callee (scope rule B5)
+149:30 call  isinstance(exc_val, (StopIteration, StopAsyncIteration))
+    -> <builtin>.isinstance
+168:35 call  RuntimeError("generator did not stop after throw() in __a...
+    -> <builtin>.RuntimeError
+
+[asyncstdlib.contextlib.Closing.__aexit__]
+203:32 call  self.thing.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose: ACloseable is a Protocol that no package class subclasses, and no package code, test or example passes an ExitStack or a Tee to closing (asyncstdlib.md, Roles 4)
+    reject asyncstdlib.itertools._GroupByState.aclose: _GroupByState is private and lives only inside GroupBy and _Grouper; the package never gives one to a client
+    note: thing is annotated AClose, a TypeVar bound to the package Protocol ACloseable, which no package class subclasses; the docstring passes a.iter(something), an async iterator of the iterable role (header); client objects are opaque
+
+[asyncstdlib.contextlib.ExitStack.__init__]
+273:86 call  deque()
+    -> collections.deque
+
+[asyncstdlib.contextlib.ExitStack._aexit_callback]
+280:23 call  callback()
+    -> functools.partial.__call__
+    -> asyncstdlib._core.Awaitify.__call__
+    reject asyncstdlib.contextlib.ExitStack.callback: the parameter callback is not the method
+    note: _aexit_callback is used only in ExitStack.callback (line 357), where callback is partial(awaitify(callback), *args, **kwargs): calling the partial calls the Awaitify around the client's callable, or the client's coroutine function (opaque)
+
+[asyncstdlib.contextlib.ExitStack.pop_all]
+295:25 call  type(self)
+    -> <builtin>.type
+295:31 call  type(self)()
+    -> asyncstdlib.contextlib.ExitStack.__init__
+    note: type(self) is ExitStack; client subclasses are client code
+296:86 call  deque()
+    -> collections.deque
+
+[asyncstdlib.contextlib.ExitStack.push]
+332:19 call  hasattr(exit, "__aexit__")
+    -> <builtin>.hasattr
+334:21 call  hasattr(exit, "__exit__")
+    -> <builtin>.hasattr
+335:29 call  awaitify(exit.__exit__)
+    -> asyncstdlib._core.awaitify
+336:22 call  callable(exit)
+    -> <builtin>.callable
+337:29 call  awaitify(exit)
+    -> asyncstdlib._core.awaitify
+339:28 call  TypeError(f"Expected (async) context manager or callable,...
+    -> <builtin>.TypeError
+339:81 format  {exit}
+    reject *: exit has no __aexit__ and no __exit__ and is not callable: this deliberate invalid-client-input branch admits no package value. The shipped stub binds SE to context-manager/callable alternatives; no admitted package alternative reaches this formatting branch.
+340:36 call  self._exit_callbacks.append(aexit)
+    -> collections.deque.append
+
+[asyncstdlib.contextlib.ExitStack.callback]
+356:36 call  self._exit_callbacks.append( partial(self._aexit_callback...
+    -> collections.deque.append
+357:20 call  partial(self._aexit_callback, partial(awaitify(callback),...
+    -> functools.partial
+    reject asyncstdlib.contextlib.ExitStack._aexit_callback: partial stores it; ExitStack.__aexit__ calls it later (452:34)
+357:50 call  partial(awaitify(callback), *args, **kwargs)
+    -> functools.partial
+357:59 call  awaitify(callback)
+    -> asyncstdlib._core.awaitify
+
+[asyncstdlib.contextlib.ExitStack.enter_context]
+393:29 call  awaitify( cm.__exit__, # type: ignore )
+    -> asyncstdlib._core.awaitify
+396:41 call  cm.__enter__()
+    note: cm has no __aexit__ here, so it is a synchronous context manager; no package class defines __enter__, and a client object is opaque (scope rule B5): no callee
+398:48 call  cm.__aenter__()
+    -> asyncstdlib.contextlib.NullContext.__aenter__
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__aenter__
+    -> asyncstdlib.asynctools._ScopedAsyncIteratorContext.__aenter__
+    reject *: Closing, ExitStack, Tee, NoLock and ScopedIter do not subclass AsyncContextManager, and no package code, test or example passes one to enter_context (header, async context manager role)
+    note: cm is annotated AnyContextManager (Union of AsyncContextManager and ContextManager): the package classes that subclass AsyncContextManager are NullContext, _AsyncGeneratorContextManager and _ScopedAsyncIteratorContext; the tests pass a.nullcontext (test_contextlib.py:264); client objects are opaque
+399:36 call  self._exit_callbacks.append(aexit)
+    -> collections.deque.append
+
+[asyncstdlib.contextlib.ExitStack.aclose]
+411:29 call  self.__aexit__(None, None, None)
+    -> asyncstdlib.contextlib.ExitStack.__aexit__
+    reject *: self is an ExitStack
+
+[asyncstdlib.contextlib.ExitStack.__aexit__]
+446:38 call  sys.exc_info()
+    -> sys.exc_info
+450:33 call  reversed(self._exit_callbacks)
+    -> <builtin>.reversed
+452:34 call  callback(exc_type, exc_val, tb)
+    -> asyncstdlib.contextlib.NullContext.__aexit__
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__aexit__
+    -> asyncstdlib.asynctools._ScopedAsyncIteratorContext.__aexit__
+    -> asyncstdlib._core.Awaitify.__call__
+    -> functools.partial.__call__
+    -> asyncstdlib.contextlib.ExitStack._aexit_callback
+    reject asyncstdlib.contextlib.ExitStack.callback: the local callback is an entry of _exit_callbacks, not the method
+    note: the entries of _exit_callbacks are added at lines 340, 356 and 399: the bound __aexit__ of a pushed or entered async context manager (entered: see 398:48; pushed: contextlib.pyi binds SE to async/sync context managers or callables, so the same three nominal package async context managers are admitted; tests also push an _AsyncGeneratorContextManager, test_contextlib.py:327-329), awaitify() of a client __exit__ or callable (an Awaitify, or the client's coroutine function), or partial(self._aexit_callback, ...), whose call runs _aexit_callback
+458:37 call  self._stitch_context(exc, exc_val, unwind_context)
+    -> asyncstdlib.contextlib.ExitStack._stitch_context
+460:45 call  type(exc)
+    -> <builtin>.type
+
+== asyncstdlib.functools
+
+[asyncstdlib.functools]
+94:6 decorator  @property
+    -> <builtin>.property
+278:29 call  Sentinel("<no default>")
+    -> asyncstdlib._core.Sentinel.__init__
+
+[asyncstdlib.functools.cache]
+48:21 call  lru_cache(maxsize=None)
+    -> asyncstdlib._lrucache.lru_cache
+48:35 call  lru_cache(maxsize=None)(user_function)
+    -> asyncstdlib._lrucache.lru_cache.lru_decorator
+    note: lru_cache(maxsize=None) returns its closure lru_decorator (_lrucache.py:267)
+
+[asyncstdlib.functools.AwaitableValue.__repr__]
+65:18 format  {self.__class__.__name__}
+    reject *: the formatted value is a str or an int
+65:44 format  {self.value!r}
+    reject *: self.value is either the direct client value passed to the public AwaitableValue(value: R) constructor (lines 56-57), or the awaited result of the client's getter (line 125); neither broad R nor a client getter result admits arbitrary package objects (scope rules B2/B3/B5)
+
+[asyncstdlib.functools._FutureCachedPropertyValue.__await__]
+92:32 call  self._await_impl()
+    -> asyncstdlib.functools._FutureCachedPropertyValue._await_impl
+92:44 call  self._await_impl().__await__()
+    -> types.CoroutineType.__await__
+    note: the receiver is the coroutine of _await_impl (92:32)
+
+[asyncstdlib.functools._FutureCachedPropertyValue._instance_value]
+106:27 call  getattr(self._instance, self._name)
+    -> <builtin>.getattr
+    -> asyncstdlib.functools.CachedProperty.__get__
+    note: the instance's __dict__ no longer holds the attribute, so getattr finds the CachedProperty on the client's class and calls its __get__ back (it stores and returns a new placeholder); a client descriptor of another kind is client code
+
+[asyncstdlib.functools._FutureCachedPropertyValue._await_impl]
+109:28 getattr  self._instance_value
+    -> asyncstdlib.functools._FutureCachedPropertyValue._instance_value
+111:24 async-with  self._lock
+    -> asyncstdlib.contextlib.NullContext.__aenter__
+    -> asyncstdlib.contextlib.NullContext.__aexit__
+    reject *: the lock is an instance of the asynccontextmanager_type of the CachedProperty, made without arguments (CachedProperty.__get__, line 183): of the package classes that subclass AsyncContextManager only NullContext (the default, line 139) can be made so
+    note: self._lock is set only in __init__, from CachedProperty.__get__ (lines 182-183): the type defaults to nullcontext; cached_property(type) takes a Type[AsyncContextManager] (line 190); client lock types are opaque
+113:36 getattr  self._instance_value
+    -> asyncstdlib.functools._FutureCachedPropertyValue._instance_value
+117:53 call  self._get_attribute()
+    -> asyncstdlib.functools._FutureCachedPropertyValue._get_attribute
+121:16 await  await stored
+    -> asyncstdlib.functools.AwaitableValue.__await__
+    -> asyncstdlib.functools._FutureCachedPropertyValue.__await__
+    note: stored is what the instance's __dict__ holds under the name (_instance_value): the AwaitableValue that _get_attribute stored (line 125), or another placeholder that CachedProperty.__get__ stored after the entry was deleted (line 185, also through getattr at line 106); a value the client stored itself is opaque
+
+[asyncstdlib.functools._FutureCachedPropertyValue._get_attribute]
+124:33 call  self._func(self._instance)
+    note: self._func is the getter of the CachedProperty (line 141, passed at line 183): the client's coroutine function that cached_property decorates, a client callback, no callee
+125:61 call  AwaitableValue(value)
+    -> asyncstdlib.functools.AwaitableValue.__init__
+
+[asyncstdlib.functools._FutureCachedPropertyValue.__repr__]
+130:16 format  {type(self).__name__}
+    reject *: the formatted value is a str or an int
+130:21 call  type(self)
+    -> <builtin>.type
+130:43 format  {type(self._instance).__name__}
+    reject *: the formatted value is a str or an int
+130:48 call  type(self._instance)
+    -> <builtin>.type
+131:15 format  {self._name}
+    reject *: the formatted value is a str or an int
+131:32 format  {id(self):#x}
+    reject *: the formatted value is a str or an int
+131:35 call  id(self)
+    -> <builtin>.id
+
+[asyncstdlib.functools.CachedProperty.__init__]
+143:31 getattr  getter.__doc__
+    reject *: getter is the client's coroutine function, not an LRUAsyncBoundCallable
+
+[asyncstdlib.functools.CachedProperty.__set_name__]
+151:28 call  TypeError( "Cannot assign the same cached_property to two...
+    -> <builtin>.TypeError
+153:20 format  {self.attrname!r}
+    reject *: the formatted value is a str or an int
+153:42 format  {name!r}
+    reject *: the formatted value is a str or an int
+
+[asyncstdlib.functools.CachedProperty.__get__]
+164:28 call  TypeError( "Cannot use cached_property instance without c...
+    -> <builtin>.TypeError
+173:46 format  {type(instance).__name__!r}
+    reject *: the formatted value is a str or an int
+173:51 call  type(instance)
+    -> <builtin>.type
+174:37 format  {name!r}
+    reject *: the formatted value is a str or an int
+176:28 call  TypeError(msg)
+    -> <builtin>.TypeError
+182:45 call  _FutureCachedPropertyValue( self.func, instance, name, se...
+    -> asyncstdlib.functools._FutureCachedPropertyValue.__init__
+183:70 call  self._asynccontextmanager_type()
+    -> asyncstdlib.contextlib.NullContext.__init__
+    note: self._asynccontextmanager_type is the type given to cached_property (line 268) or the default nullcontext, NullContext (line 139); the annotation Type[AsyncContextManager[Any]] admits the package classes that subclass AsyncContextManager, and of these only NullContext can be made without arguments (for the others a call without arguments fails before their __init__ runs); client types are opaque
+
+[asyncstdlib.functools.cached_property]
+257:27 call  iscoroutinefunction(type_or_getter)
+    -> inspect.iscoroutinefunction
+258:30 call  CachedProperty(type_or_getter)
+    -> asyncstdlib.functools.CachedProperty.__init__
+259:20 call  isinstance(type_or_getter, type)
+    -> <builtin>.isinstance
+259:57 call  issubclass( type_or_getter, AsyncContextManager # pyright...
+    -> <builtin>.issubclass
+275:25 call  ValueError("cached_property can only be used with a corou...
+    -> <builtin>.ValueError
+
+[asyncstdlib.functools.cached_property.decorator]
+266:34 call  CachedProperty( coroutine, asynccontextmanager_type=cast(...
+    -> asyncstdlib.functools.CachedProperty.__init__
+268:46 call  cast( Type[AsyncContextManager[Any]], type_or_getter )
+    -> typing.cast
+
+[asyncstdlib.functools.reduce]
+301:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+301:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+304:77 call  anext(item_iter)
+    -> asyncstdlib.builtins.anext
+307:28 call  TypeError( "reduce() of empty sequence with no initial va...
+    -> <builtin>.TypeError
+310:29 call  _awaitify(function)
+    -> asyncstdlib._core.awaitify
+311:27 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+312:35 call  function(value, head)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: function is _awaitify(function) (line 310): the client's coroutine function (opaque) or an Awaitify around the client's callable
+
+== asyncstdlib.heapq
+
+[asyncstdlib.heapq]
+21:6 decorator  @overload
+    -> typing.overload
+31:6 decorator  @overload
+    -> typing.overload
+50:6 decorator  @overload
+    -> typing.overload
+51:6 decorator  @classmethod
+    -> <builtin>.classmethod
+59:6 decorator  @overload
+    -> typing.overload
+60:6 decorator  @classmethod
+    -> <builtin>.classmethod
+65:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[asyncstdlib.heapq._KeyIter.from_iters]
+73:29 call  aiter(iterable)
+    -> asyncstdlib._core.aiter
+75:48 call  iterator.__anext__()
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    -> types.AsyncGeneratorType.__anext__
+    note: iterator is aiter() of an iterable of merge (line 73): an async iterator of the iterable role
+79:37 call  key(head)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: key is a_key of merge (line 123): awaitify(key), the client's coroutine function (opaque) or an Awaitify around the client's key function; None is not called
+80:26 call  cls(head, iterator, reverse, head_key, key)
+    -> asyncstdlib.heapq._KeyIter.__init__
+    note: cls is _KeyIter: from_iters is called only as _KeyIter[Any].from_iters (line 128), and the generic alias forwards the attribute to the class
+
+[asyncstdlib.heapq._KeyIter.pull_head]
+87:57 call  self.tail.__anext__()
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    -> types.AsyncGeneratorType.__anext__
+    note: self.tail is the iterator that from_iters stored (line 80): aiter() of an iterable of merge
+91:43 call  self.key(head)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: self.key is the key that from_iters stored (line 80): see 79:37
+
+[asyncstdlib.heapq._KeyIter.__lt__]
+95:35 call  bool(self.head_key < other.head_key)
+    -> <builtin>.bool
+    note: the result of < between two head keys: items or key results of the client (opaque)
+95:50 op  self.head_key < other.head_key
+    reject *: the head keys are items of the client's iterables or results of the client's key function (scope rule B3)
+
+[asyncstdlib.heapq._KeyIter.__eq__]
+98:35 op  self.head_key < other.head_key
+    reject *: the head keys are items of the client's iterables or results of the client's key function (scope rule B3)
+98:70 op  other.head_key < self.head_key
+    reject *: the head keys are items of the client's iterables or results of the client's key function (scope rule B3)
+
+[asyncstdlib.heapq.merge]
+123:21 call  awaitify(key)
+    -> asyncstdlib._core.awaitify
+127:31 async-iter  a_enumerate( _KeyIter[Any].from_iters(iterables, reverse,...
+    reject *: the async for is over the async generator of asyncstdlib.builtins.enumerate (127:42)
+127:42 call  a_enumerate( _KeyIter[Any].from_iters(iterables, reverse,...
+    -> asyncstdlib.builtins.enumerate
+128:37 call  _KeyIter[Any].from_iters(iterables, reverse, a_key)
+    -> asyncstdlib.heapq._KeyIter.from_iters
+132:23 call  _heapq.heapify(iter_heap)
+    -> heapq.heapify
+    -> asyncstdlib.heapq._KeyIter.__eq__
+    -> asyncstdlib.heapq._KeyIter.__lt__
+    note: iter_heap holds tuples (_KeyIter, int); heapify compares them, and tuple comparison calls __eq__ on the two _KeyIter objects and then __lt__ if they differ
+134:18 call  len(iter_heap)
+    -> <builtin>.len
+134:30 op  len(iter_heap) > 1
+    reject *: the operands are ints
+138:39 call  itr.pull_head()
+    -> asyncstdlib.heapq._KeyIter.pull_head
+139:39 call  _heapq.heapreplace(iter_heap, (itr, idx))
+    -> heapq.heapreplace
+    -> asyncstdlib.heapq._KeyIter.__eq__
+    -> asyncstdlib.heapq._KeyIter.__lt__
+    note: see 132:23
+141:35 call  _heapq.heappop(iter_heap)
+    -> heapq.heappop
+    -> asyncstdlib.heapq._KeyIter.__eq__
+    -> asyncstdlib.heapq._KeyIter.__lt__
+    note: see 132:23; heappop sifts the last item down when two or more remain
+147:31 async-iter  itr.tail
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: itr.tail is aiter() of an iterable of merge (from_iters, line 73)
+151:26 call  isinstance(itr.tail, ACloseable)
+    -> <builtin>.isinstance
+152:38 call  itr.tail.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: itr.tail is aiter() of an iterable of merge (from_iters, line 73)
+
+[asyncstdlib.heapq.ReverseLT.__lt__]
+164:20 call  bool(other.key < self.key)
+    -> <builtin>.bool
+    note: the result of < between two keys of the client (opaque)
+164:31 op  other.key < self.key
+    reject *: the keys are results of the client's key function or client items (_largest, line 182); ReverseLT is never nested (scope rule B3)
+
+[asyncstdlib.heapq._largest]
+178:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+178:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+182:21 call  ordered(await key(item))
+    -> asyncstdlib.heapq.ReverseLT.__init__
+    -> asyncstdlib.heapq._largest.<lambda1>
+    note: ordered is ReverseLT (a class) for nsmallest or the identity lambda for nlargest (line 177)
+182:31 call  key(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    -> asyncstdlib.heapq._identity
+    note: key is a_key of nlargest or nsmallest (lines 220, 236): awaitify(key), the client's coroutine function (opaque) or an Awaitify around the client's key function, or _identity
+183:38 async-iter  a_zip(range(n), borrow(iterator))
+    reject *: the async for is over the async generator of asyncstdlib.builtins.zip (183:43)
+183:43 call  a_zip(range(n), borrow(iterator))
+    -> asyncstdlib.builtins.zip
+183:49 call  range(n)
+    -> <builtin>.range
+183:60 call  borrow(iterator)
+    -> asyncstdlib._core.borrow
+    reject asyncstdlib.asynctools.borrow: heapq.py imports borrow from _core (line 14)
+187:23 call  _heapq.heapify(n_heap)
+    -> heapq.heapify
+    -> asyncstdlib.heapq.ReverseLT.__lt__
+    note: n_heap holds tuples (key, int, item); for nsmallest the keys are ReverseLT objects, and tuple comparison calls ReverseLT.__lt__ when the keys are not identical (ReverseLT has no __eq__: identity)
+190:27 async-iter  iterator
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: iterator is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+191:31 call  ordered(await key(item))
+    -> asyncstdlib.heapq.ReverseLT.__init__
+    -> asyncstdlib.heapq._largest.<lambda1>
+    note: see 182:21
+191:41 call  key(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    -> asyncstdlib.heapq._identity
+    note: see 182:31
+192:26 op  worst_key < item_key
+    -> asyncstdlib.heapq.ReverseLT.__lt__
+    reject asyncstdlib.heapq._KeyIter.__lt__: the operands are the keys made by ordered (lines 182, 191): ReverseLT objects for nsmallest, client keys for nlargest
+193:35 call  _heapq.heapreplace(n_heap, (item_key, next_index, item))
+    -> heapq.heapreplace
+    -> asyncstdlib.heapq.ReverseLT.__lt__
+    note: see 187:23
+196:20 call  n_heap.sort(reverse=True)
+    -> <builtin>.list.sort
+    -> asyncstdlib.heapq.ReverseLT.__lt__
+    note: see 187:23
+
+[asyncstdlib.heapq.nlargest]
+221:17 call  awaitify(key)
+    -> asyncstdlib._core.awaitify
+223:26 call  _largest(iterable=iterable, n=n, key=a_key, reverse=False)
+    -> asyncstdlib.heapq._largest
+
+[asyncstdlib.heapq.nsmallest]
+237:17 call  awaitify(key)
+    -> asyncstdlib._core.awaitify
+239:26 call  _largest(iterable=iterable, n=n, key=a_key, reverse=True)
+    -> asyncstdlib.heapq._largest
+
+== asyncstdlib.itertools
+
+[asyncstdlib.itertools]
+39:12 call  TypeVar("S")
+    -> typing.TypeVar
+40:15 call  TypeVar("T_co", covariant=True)
+    -> typing.TypeVar
+161:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+181:6 decorator  @classmethod
+    -> <builtin>.classmethod
+352:26 call  _counter()
+    -> itertools.count
+415:2 decorator  @public_module(__name__, "tee")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+415:15 call  public_module(__name__, "tee")
+    -> asyncstdlib._utility.public_module
+485:6 decorator  @overload
+    -> typing.overload
+488:6 decorator  @overload
+    -> typing.overload
+596:21 call  cast(T_co, object())
+    -> typing.cast
+596:34 call  object()
+    -> <builtin>.object
+662:2 decorator  @public_module(__name__, "groupby")
+    -> asyncstdlib._utility.public_module.decorator
+    note: the decorator is the closure that public_module returns (the call in the same line)
+662:15 call  public_module(__name__, "groupby")
+    -> asyncstdlib._utility.public_module
+
+[asyncstdlib.itertools.cycle]
+58:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+58:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+59:27 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+60:26 call  buffer.append(item)
+    -> <builtin>.list.append
+
+[asyncstdlib.itertools.accumulate]
+105:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+105:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+107:68 call  anext(item_iter)
+    -> asyncstdlib.builtins.anext
+109:28 call  TypeError( "accumulate() of empty sequence with no initia...
+    -> <builtin>.TypeError
+112:29 call  _awaitify(function)
+    -> asyncstdlib._core.awaitify
+114:27 async-iter  item_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: item_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+115:35 call  function(value, head)
+    -> asyncstdlib.itertools.add
+    -> asyncstdlib._core.Awaitify.__call__
+    note: function is _awaitify(function) (line 112): the default add (line 78), a coroutine function that awaitify returns unchanged, the client's coroutine function (opaque), or an Awaitify around the client's callable
+
+[asyncstdlib.itertools.batched]
+129:10 op  n < 1
+    reject *: n is an int
+130:25 call  ValueError("n must be at least one")
+    -> <builtin>.ValueError
+131:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+131:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+135:28 call  batch.clear()
+    -> <builtin>.list.clear
+136:31 call  range(n)
+    -> <builtin>.range
+137:33 call  batch.append(await anext(item_iter))
+    -> <builtin>.list.append
+137:45 call  anext(item_iter)
+    -> asyncstdlib.builtins.anext
+138:28 call  tuple(batch)
+    -> <builtin>.tuple
+    reject asyncstdlib.builtins.tuple: itertools.py does not import tuple from asyncstdlib.builtins; tuple is the builtin
+141:34 call  len(batch)
+    -> <builtin>.len
+141:42 op  len(batch) < n
+    reject *: the operands are ints
+142:37 call  ValueError("batched(): incomplete batch")
+    -> <builtin>.ValueError
+143:28 call  tuple(batch)
+    -> <builtin>.tuple
+    reject asyncstdlib.builtins.tuple: itertools.py does not import tuple from asyncstdlib.builtins; tuple is the builtin
+
+[asyncstdlib.itertools.chain._chain_iterator]
+165:20 async-with  ScopedIter(any_iterables)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+165:30 call  ScopedIter(any_iterables)
+    -> asyncstdlib._core.ScopedIter.__init__
+166:35 async-iter  iterables
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: iterables is the _iterator of the ScopedIter: aiter() of the *iterables tuple (the async generator of _aiter_sync) or of the iterable given to from_iterable, a value of the iterable role
+167:28 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+167:38 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+168:39 async-iter  iterator
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: iterator is the _iterator of the ScopedIter: aiter() of one of the chained iterables, a value of the iterable role
+
+[asyncstdlib.itertools.chain.__init__]
+174:46 call  self._chain_iterator(iterables or _iterables)
+    -> asyncstdlib.itertools.chain._chain_iterator
+175:38 call  tuple( iterable # type: ignore[misc] for iterable in iter...
+    -> <builtin>.tuple
+    reject asyncstdlib.builtins.tuple: itertools.py does not import tuple from asyncstdlib.builtins; tuple is the builtin
+178:26 call  isinstance(iterable, AsyncIterator)
+    -> <builtin>.isinstance
+178:66 call  isinstance(iterable, ACloseable)
+    -> <builtin>.isinstance
+
+[asyncstdlib.itertools.chain.from_iterable]
+191:19 call  cls(_iterables=iterable)
+    -> asyncstdlib.itertools.chain.__init__
+    note: cls is chain: from_iterable is a classmethod of chain, and client subclasses are client code
+
+[asyncstdlib.itertools.chain.__anext__]
+194:40 call  self._iterator.__anext__()
+    -> types.AsyncGeneratorType.__anext__
+    reject *: self._iterator is the async generator of _chain_iterator (line 174)
+    note: the receiver is the package's async generator, so the callee is its __anext__
+
+[asyncstdlib.itertools.chain.aclose]
+198:34 call  iterable.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: iterable is one of _owned_iterators (line 175): the iterables given to chain that are async iterators with aclose, values of the iterable role
+199:36 call  self._iterator.aclose()
+    -> types.AsyncGeneratorType.aclose
+    reject *: self._iterator is the async generator of _chain_iterator (line 174)
+
+[asyncstdlib.itertools.compress]
+217:16 async-with  ScopedIter(data)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+217:26 call  ScopedIter(data)
+    -> asyncstdlib._core.ScopedIter.__init__
+217:47 async-with  ScopedIter(selectors)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+217:57 call  ScopedIter(selectors)
+    -> asyncstdlib._core.ScopedIter.__init__
+218:33 async-iter  zip(data_iter, selectors_iter)
+    reject *: the async for is over the async generator of asyncstdlib.builtins.zip (218:36)
+218:36 call  zip(data_iter, selectors_iter)
+    -> asyncstdlib.builtins.zip
+
+[asyncstdlib.itertools.dropwhile]
+235:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+235:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+236:30 call  _awaitify(predicate)
+    -> asyncstdlib._core.awaitify
+237:27 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+238:35 call  predicate(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: predicate is _awaitify(predicate) (line 236): the client's coroutine function (opaque) or an Awaitify around the client's predicate
+241:27 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+
+[asyncstdlib.itertools.filterfalse]
+254:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+254:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+257:30 call  _awaitify(predicate)
+    -> asyncstdlib._core.awaitify
+258:27 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+259:35 call  predicate(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: predicate is _awaitify(predicate) (line 257): an Awaitify around bool (predicate None, line 256) or around the client's predicate, or the client's coroutine function (opaque)
+
+[asyncstdlib.itertools.islice]
+274:14 call  slice(*args)
+    -> <builtin>.slice
+276:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+276:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+278:18 op  start > 0
+    reject *: start is an int
+279:42 async-iter  aenumerate(_borrow(async_iter), start=1)
+    reject *: the async for is over the async generator of asyncstdlib.builtins.enumerate (279:52)
+279:52 call  aenumerate(_borrow(async_iter), start=1)
+    -> asyncstdlib.builtins.enumerate
+279:60 call  _borrow(async_iter)
+    -> asyncstdlib._core.borrow
+    reject asyncstdlib.asynctools.borrow: itertools.py imports borrow from _core as _borrow (line 29)
+283:39 async-iter  aenumerate(async_iter, start=0)
+    reject *: the async for is over the async generator of asyncstdlib.builtins.enumerate (283:49)
+283:49 call  aenumerate(async_iter, start=0)
+    -> asyncstdlib.builtins.enumerate
+284:28 op  idx % step
+    reject *: idx and step are ints: % is the modulo of int
+292:39 async-iter  aenumerate(async_iter, start=0)
+    reject *: the async for is over the async generator of asyncstdlib.builtins.enumerate (292:49)
+292:49 call  aenumerate(async_iter, start=0)
+    -> asyncstdlib.builtins.enumerate
+293:28 op  idx % step
+    reject *: idx and step are ints: % is the modulo of int
+
+[asyncstdlib.itertools.starmap]
+313:25 call  _awaitify(function)
+    -> asyncstdlib._core.awaitify
+314:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+314:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+315:27 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+316:33 call  function(*args)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: function is _awaitify(function) (line 313): the client's coroutine function (opaque) or an Awaitify around the client's callable; args is an item of the client's iterable
+
+[asyncstdlib.itertools.takewhile]
+331:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+331:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+332:30 call  _awaitify(predicate)
+    -> asyncstdlib._core.awaitify
+333:27 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+334:31 call  predicate(item)
+    -> asyncstdlib._core.Awaitify.__call__
+    note: predicate is _awaitify(predicate) (line 332): the client's coroutine function (opaque) or an Awaitify around the client's predicate
+
+[asyncstdlib.itertools.TeePeer.__init__]
+370:39 call  _get_tee_index()
+    -> itertools.count.__next__
+    note: _get_tee_index is the bound __next__ of an itertools.count (line 352)
+371:28 call  self._tee_peers.add(self._tee_idx)
+    -> <builtin>.set.add
+    reject asyncstdlib.itertools.add: self._tee_peers is a set (annotation set[int]; Tee.__init__ line 467 or the set of the parent peer)
+
+[asyncstdlib.itertools.TeePeer.__anext__]
+383:24 async-with  self._lock
+    -> asyncstdlib.itertools.NoLock.__aenter__
+    -> asyncstdlib.itertools.NoLock.__aexit__
+    -> asyncstdlib.contextlib.NullContext.__aenter__
+    -> asyncstdlib.contextlib.NullContext.__aexit__
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__aenter__
+    -> asyncstdlib.contextlib._AsyncGeneratorContextManager.__aexit__
+    -> asyncstdlib.asynctools._ScopedAsyncIteratorContext.__aenter__
+    -> asyncstdlib.asynctools._ScopedAsyncIteratorContext.__aexit__
+    reject *: Closing, ExitStack, Tee and ScopedIter do not subclass AsyncContextManager, and no package code, test or example passes one as a lock (header, async context manager role)
+    note: self._lock is the lock of Tee.__init__ (itertools.py:476): NoLock() by default, or the client's lock, annotated Optional[AsyncContextManager[Any]]; the package classes that subclass AsyncContextManager are NullContext, _AsyncGeneratorContextManager (through ContextDecorator) and _ScopedAsyncIteratorContext (header, async context manager role); client locks are opaque
+386:46 call  self._extend_buffer(next_node)
+    -> asyncstdlib.itertools.TeePeer._extend_buffer
+
+[asyncstdlib.itertools.TeePeer._extend_buffer]
+395:56 call  self._iterator.__anext__()
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    -> types.AsyncGeneratorType.__anext__
+    reject asyncstdlib.itertools.TeePeer.__anext__: lead ruling A1 (B2/B3): the iterator of TeePeer.__init__ is annotated AsyncIterator, which TeePeer does not subclass (ruling c1); no documentation, test, example or stub passes a peer there; Tee.__init__ unwraps a peer to its _iterator (lines 464-471); a peer that a client passes by hand is an arbitrary object where any iterator is accepted (B3)
+    note: self._iterator is aiter(iterable) of Tee.__init__ (line 465) for an iterable that is not a peer, or the _iterator of a parent peer (lines 469-471): an async iterator of the iterable role other than a TeePeer, the async generator of _aiter_sync, or a client iterator (opaque)
+
+[asyncstdlib.itertools.TeePeer.aclose]
+407:32 call  self._tee_peers.discard(self._tee_idx)
+    -> <builtin>.set.discard
+408:46 call  isinstance(self._iterator, ACloseable)
+    -> <builtin>.isinstance
+409:40 call  self._iterator.aclose()
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.itertools.TeePeer.aclose: lead ruling A1 (B2/B3): self._iterator is never a TeePeer (see 395:56)
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: self._iterator is an async iterator of the iterable role other than a TeePeer (see 395:56)
+
+[asyncstdlib.itertools.TeePeer.__del__]
+412:32 call  self._tee_peers.discard(self._tee_idx)
+    -> <builtin>.set.discard
+
+[asyncstdlib.itertools.Tee.__init__]
+464:26 call  isinstance(iterable, TeePeer)
+    -> <builtin>.isinstance
+465:29 call  aiter(iterable)
+    -> asyncstdlib.builtins.iter
+    reject asyncstdlib._core.aiter: in itertools.py, aiter is asyncstdlib.builtins.iter (import at line 35)
+467:24 call  set()
+    -> <builtin>.set
+    reject asyncstdlib.builtins.set: itertools.py does not import set from asyncstdlib.builtins; set is the builtin
+472:31 call  tuple( TeePeer( iterator, buffer, lock if lock is not Non...
+    -> <builtin>.tuple
+    reject asyncstdlib.builtins.tuple: itertools.py does not import tuple from asyncstdlib.builtins; tuple is the builtin
+473:20 call  TeePeer( iterator, buffer, lock if lock is not None else ...
+    -> asyncstdlib.itertools.TeePeer.__init__
+476:53 call  NoLock()
+    note: NoLock defines no __init__ and has no base but object: object.__init__, no edge
+479:27 call  range(n)
+    -> <builtin>.range
+
+[asyncstdlib.itertools.Tee.__len__]
+483:19 call  len(self._children)
+    -> <builtin>.len
+
+[asyncstdlib.itertools.Tee.__aexit__]
+503:26 call  self.aclose()
+    -> asyncstdlib.itertools.Tee.aclose
+    reject *: self is a Tee
+
+[asyncstdlib.itertools.Tee.aclose]
+507:31 call  child.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    reject *: child is one of self._children, the TeePeer objects of __init__ (line 473)
+
+[asyncstdlib.itertools.pairwise]
+521:16 async-with  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__aenter__
+    -> asyncstdlib._core.ScopedIter.__aexit__
+    reject *: the context manager is the ScopedIter made in this with item
+521:26 call  ScopedIter(iterable)
+    -> asyncstdlib._core.ScopedIter.__init__
+523:27 call  anext(async_iter, None)
+    -> asyncstdlib.builtins.anext
+524:30 async-iter  async_iter
+    -> asyncstdlib.itertools.TeePeer.__aiter__
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.__aiter__
+    -> asyncstdlib.itertools.TeePeer.__anext__
+    -> asyncstdlib.itertools.chain.__anext__
+    -> asyncstdlib.itertools.GroupBy.__anext__
+    -> asyncstdlib.itertools._Grouper.__anext__
+    note: async_iter is the _iterator of the ScopedIter: aiter() of a value of the iterable role
+
+[asyncstdlib.itertools.zip_longest]
+552:22 call  aiter(_repeat(fillvalue))
+    -> asyncstdlib.builtins.iter
+    reject asyncstdlib._core.aiter: in itertools.py, aiter is asyncstdlib.builtins.iter (import at line 35)
+552:30 call  _repeat(fillvalue)
+    -> asyncstdlib.itertools._repeat
+553:25 call  aiter(it)
+    -> asyncstdlib.builtins.iter
+    reject asyncstdlib._core.aiter: in itertools.py, aiter is asyncstdlib.builtins.iter (import at line 35)
+556:24 call  len(async_iters)
+    -> <builtin>.len
+559:46 call  enumerate(async_iters)
+    -> <builtin>.enumerate
+    reject asyncstdlib.builtins.enumerate: itertools.py imports the asyncstdlib enumerate only as aenumerate (line 34)
+561:40 call  anext(aiterator)
+    -> asyncstdlib.builtins.anext
+567:34 call  values.append(fillvalue)
+    -> <builtin>.list.append
+569:34 call  values.append(value)
+    -> <builtin>.list.append
+571:24 call  tuple(values)
+    -> <builtin>.tuple
+    reject asyncstdlib.builtins.tuple: itertools.py does not import tuple from asyncstdlib.builtins; tuple is the builtin
+573:31 call  fill_iter.aclose()
+    -> types.AsyncGeneratorType.aclose
+    reject *: fill_iter is aiter() of the async generator of _repeat (line 552), that generator itself
+575:26 call  isinstance(iterator, ACloseable)
+    -> <builtin>.isinstance
+576:38 call  iterator.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: iterator is one of async_iters: aiter() of a value of the iterable role (line 553), or fill_iter
+
+[asyncstdlib.itertools._GroupByState.step]
+607:28 call  anext(self._iterator)
+    -> asyncstdlib.builtins.anext
+608:35 call  self._key_func(value)
+    -> asyncstdlib.itertools.identity
+    -> asyncstdlib._core.Awaitify.__call__
+    note: self._key_func is set only in __init__ from GroupBy.__init__ (line 698): identity (key None) or _awaitify(key), the client's coroutine function (opaque) or an Awaitify around the client's key function
+
+[asyncstdlib.itertools._GroupByState.maybe_step]
+614:28 call  self.step()
+    -> asyncstdlib.itertools._GroupByState.step
+
+[asyncstdlib.itertools._GroupByState.aclose]
+624:31 call  group.aclose()
+    -> asyncstdlib.itertools._Grouper.aclose
+    reject *: group is self.current_group, set only by GroupBy.__anext__ (line 716, a _Grouper) or to None (lines 659, 703)
+625:22 call  isinstance(self._iterator, ACloseable)
+    -> <builtin>.isinstance
+626:40 call  self._iterator.aclose()
+    -> asyncstdlib.itertools.TeePeer.aclose
+    -> asyncstdlib.itertools.chain.aclose
+    -> asyncstdlib.itertools.GroupBy.aclose
+    -> asyncstdlib.itertools._Grouper.aclose
+    -> asyncstdlib.asynctools._BorrowedAsyncIterator.aclose
+    -> asyncstdlib.asynctools._ScopedAsyncIterator.aclose
+    -> types.AsyncGeneratorType.aclose
+    reject asyncstdlib.contextlib.ExitStack.aclose, asyncstdlib.itertools.Tee.aclose, asyncstdlib.itertools._GroupByState.aclose: the receiver is an async iterator of the iterable role (header); an ExitStack and a Tee are not async iterators, and the internal _GroupByState is never one
+    note: self._iterator is aiter(iterable) of GroupBy.__init__ (line 698): an async iterator of the iterable role
+
+[asyncstdlib.itertools._Grouper.__anext__]
+643:31 call  state.maybe_step()
+    -> asyncstdlib.itertools._GroupByState.maybe_step
+647:35 call  state.consume_value()
+    -> asyncstdlib.itertools._GroupByState.consume_value
+
+[asyncstdlib.itertools.GroupBy.__init__]
+694:17 call  cast(Callable[[T_co], Awaitable[R]], identity)
+    -> typing.cast
+    reject asyncstdlib.itertools.identity: cast returns identity unchanged; it does not call it
+696:27 call  _awaitify(key)
+    -> asyncstdlib._core.awaitify
+698:36 call  _GroupByState(aiter(iterable), key_func)
+    -> asyncstdlib.itertools._GroupByState.__init__
+698:42 call  aiter(iterable)
+    -> asyncstdlib.builtins.iter
+    reject asyncstdlib._core.aiter: in itertools.py, aiter is asyncstdlib.builtins.iter (import at line 35)
+
+[asyncstdlib.itertools.GroupBy.__anext__]
+704:31 call  state.maybe_step()
+    -> asyncstdlib.itertools._GroupByState.maybe_step
+713:33 call  state.step()
+    -> asyncstdlib.itertools._GroupByState.step
+716:47 call  _Grouper(current_key, state)
+    -> asyncstdlib.itertools._Grouper.__init__
+
+[asyncstdlib.itertools.GroupBy.aclose]
+720:33 call  self._state.aclose()
+    -> asyncstdlib.itertools._GroupByState.aclose
+    reject *: self._state is the _GroupByState of __init__ (line 698)

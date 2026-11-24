@@ -1,0 +1,325 @@
+{
+  "edges": {
+    "pyflakes.__main__": {
+      "pyflakes.api.main": [
+        "pyflakes.__main__ 5:9 call  main(prog='pyflakes')"
+      ]
+    },
+    "pyflakes.api._exitOnSignal.handler": {
+      "sys.exit": [
+        "pyflakes.api 148:17 call  sys.exit(message)"
+      ]
+    },
+    "pyflakes.api.isPythonFile": {
+      "<builtin>.bytes.endswith": [
+        "pyflakes.api 76:25 call  filename.endswith('.py')"
+      ]
+    },
+    "pyflakes.api.main": {
+      "io.TextIOWrapper.read": [
+        "pyflakes.api 184:40 call  sys.stdin.read()"
+      ]
+    },
+    "pyflakes.checker.Binding.__repr__": {
+      "<builtin>.id": [
+        "pyflakes.checker 232:15 call  id(self)"
+      ],
+      "<builtin>.str.format": [
+        "pyflakes.checker 228:66 call  '<{} object {!r} from line {!r} at 0x{:x}>'.format( self...."
+      ]
+    },
+    "pyflakes.checker.Builtin.__repr__": {
+      "<builtin>.id": [
+        "pyflakes.checker 260:15 call  id(self)"
+      ],
+      "<builtin>.str.format": [
+        "pyflakes.checker 257:51 call  '<{} object {!r} at 0x{:x}>'.format( self.__class__.__nam..."
+      ]
+    },
+    "pyflakes.checker.Checker.ANNASSIGN": {
+      "pyflakes.checker.Checker._enter_annotation": [
+        "pyflakes.checker 2074:44 call  self._enter_annotation(AnnotationState.BARE)"
+      ]
+    },
+    "pyflakes.checker.Checker.CALL._annotation": {
+      "pyflakes.checker.Checker._enter_annotation": [
+        "pyflakes.checker 1498:40 call  self._enter_annotation(AnnotationState.BARE)"
+      ]
+    },
+    "pyflakes.checker.Checker.CALL._non_annotation": {
+      "pyflakes.checker.Checker._enter_annotation": [
+        "pyflakes.checker 1506:40 call  self._enter_annotation(AnnotationState.NONE)"
+      ]
+    },
+    "pyflakes.checker.Checker.CLASSDEF": {
+      "pyflakes.checker.Checker._type_param_scope": [
+        "pyflakes.checker 2040:36 call  self._type_param_scope(node)"
+      ],
+      "pyflakes.checker.Checker.in_scope": [
+        "pyflakes.checker 2045:31 call  self.in_scope(ClassScope)"
+      ]
+    },
+    "pyflakes.checker.Checker.FUNCTIONDEF": {
+      "pyflakes.checker.Checker._type_param_scope": [
+        "pyflakes.checker 1969:36 call  self._type_param_scope(node)"
+      ]
+    },
+    "pyflakes.checker.Checker.GENERATOREXP": {
+      "pyflakes.checker.Checker.in_scope": [
+        "pyflakes.checker 1902:27 call  self.in_scope(scope_tp)"
+      ]
+    },
+    "pyflakes.checker.Checker.IMPORT": {
+      "<builtin>.isinstance": [
+        "pyflakes.checker 2120:35 call  isinstance(self.scope, ModuleScope)"
+      ],
+      "pyflakes.checker.Checker._in_try": [
+        "pyflakes.checker 2123:35 call  self._in_try(node)"
+      ],
+      "pyflakes.checker.Checker.report": [
+        "pyflakes.checker 2121:24 call  self.report(messages.LazyImportNotAtModuleScope, node)",
+        "pyflakes.checker 2124:24 call  self.report(messages.LazyImportNotAtModuleScope, node)"
+      ],
+      "pyflakes.checker.Checker.scope": [
+        "pyflakes.checker 2120:41 getattr  self.scope"
+      ]
+    },
+    "pyflakes.checker.Checker.IMPORTFROM": {
+      "pyflakes.checker.Checker._in_try": [
+        "pyflakes.checker 2149:35 call  self._in_try(node)"
+      ]
+    },
+    "pyflakes.checker.Checker.LAMBDA.runFunction": {
+      "pyflakes.checker.Checker.in_scope": [
+        "pyflakes.checker 2017:31 call  self.in_scope(FunctionScope)"
+      ]
+    },
+    "pyflakes.checker.Checker.SUBSCRIPT": {
+      "pyflakes.checker.Checker._enter_annotation": [
+        "pyflakes.checker 1344:40 call  self._enter_annotation(AnnotationState.NONE)",
+        "pyflakes.checker 1361:44 call  self._enter_annotation(AnnotationState.NONE)",
+        "pyflakes.checker 1368:44 call  self._enter_annotation()"
+      ]
+    },
+    "pyflakes.checker.Checker.TYPEALIAS": {
+      "pyflakes.checker.Checker._type_param_scope": [
+        "pyflakes.checker 2081:36 call  self._type_param_scope(node)"
+      ]
+    },
+    "pyflakes.checker.Checker.__init__": {
+      "functools._lru_cache_wrapper.wrapper": [
+        "pyflakes.checker 739:56 call  _custom_builtins()"
+      ],
+      "pyflakes.checker.Checker.in_scope": [
+        "pyflakes.checker 751:27 call  self.in_scope(scope_tp)"
+      ]
+    },
+    "pyflakes.checker.Checker._in_try": {
+      "<builtin>.isinstance": [
+        "pyflakes.checker 2113:26 call  isinstance(node, (ast.Try, ast.TryStar, ast.ExceptHandler))",
+        "pyflakes.checker 2115:28 call  isinstance(node, ast.Module)"
+      ],
+      "pyflakes.checker.Checker.getParent": [
+        "pyflakes.checker 2112:34 call  self.getParent(node)"
+      ]
+    },
+    "pyflakes.checker.Checker._type_param_scope": {
+      "pyflakes.checker.Checker.in_scope": [
+        "pyflakes.checker 2276:48 call  self.in_scope(TypeScope)"
+      ]
+    },
+    "pyflakes.checker.Checker._unknown_handler": {
+      "<builtin>.NotImplementedError": [
+        "pyflakes.checker 1007:38 call  NotImplementedError(f'Unexpected type: {type(node)}')"
+      ],
+      "<builtin>.type": [
+        "pyflakes.checker 1007:63 call  type(node)"
+      ],
+      "collections.abc.Mapping.get": [
+        "pyflakes.checker 1006:26 call  os.environ.get('PYFLAKES_ERROR_UNKNOWN')"
+      ],
+      "pyflakes.checker.Checker.handleChildren": [
+        "pyflakes.checker 1009:32 call  self.handleChildren(node)"
+      ]
+    },
+    "pyflakes.checker.Checker.handleAnnotation": {
+      "pyflakes.checker.Checker.handleNode": [
+        "pyflakes.checker 1321:28 call  self.handleNode(annotation, node)"
+      ]
+    },
+    "pyflakes.checker.Checker.handleDoctests": {
+      "functools._lru_cache_wrapper.wrapper": [
+        "pyflakes.checker 1259:53 call  _doctest_parser()"
+      ],
+      "pyflakes.checker.Checker.in_scope": [
+        "pyflakes.checker 1271:27 call  self.in_scope(DoctestScope)"
+      ]
+    },
+    "pyflakes.checker.Checker.handleNode": {
+      "pyflakes.checker.Checker._unknown_handler": [
+        "pyflakes.checker 1252:20 call  handler(node)"
+      ]
+    },
+    "pyflakes.checker.Checker.report": {
+      "pyflakes.messages.EagerUseOfLazyImport.__init__": [
+        "pyflakes.checker 891:42 call  messageClass(self.filename, *args, **kwargs)"
+      ],
+      "pyflakes.messages.FutureFeatureNotDefined.__init__": [
+        "pyflakes.checker 891:42 call  messageClass(self.filename, *args, **kwargs)"
+      ],
+      "pyflakes.messages.LazyImportStarNotPermitted.__init__": [
+        "pyflakes.checker 891:42 call  messageClass(self.filename, *args, **kwargs)"
+      ]
+    },
+    "pyflakes.checker.Scope.__repr__": {
+      "<builtin>.dict.__repr__": [
+        "pyflakes.checker 527:63 call  dict.__repr__(self)"
+      ],
+      "<builtin>.id": [
+        "pyflakes.checker 527:39 call  id(self)"
+      ],
+      "pyflakes.checker.Binding.__repr__": [
+        "pyflakes.checker 527:63 call  dict.__repr__(self)"
+      ],
+      "pyflakes.checker.Builtin.__repr__": [
+        "pyflakes.checker 527:63 call  dict.__repr__(self)"
+      ]
+    },
+    "pyflakes.checker._is_typing_helper": {
+      "pyflakes.checker._is_any_typing_member.<lambda1>": [
+        "pyflakes.checker 653:29 call  is_name_match_fn(node.attr)"
+      ]
+    },
+    "pyflakes.checker.in_annotation.in_annotation_func": {
+      "pyflakes.checker.Checker._enter_annotation": [
+        "pyflakes.checker 698:36 call  self._enter_annotation()"
+      ]
+    },
+    "pyflakes.checker.in_string_annotation.in_annotation_func": {
+      "pyflakes.checker.Checker._enter_annotation": [
+        "pyflakes.checker 706:36 call  self._enter_annotation(AnnotationState.STRING)"
+      ]
+    },
+    "pyflakes.messages.EagerUseOfLazyImport.__init__": {
+      "pyflakes.messages.Message.__init__": [
+        "pyflakes.messages 368:25 call  Message.__init__(self, filename, loc)"
+      ]
+    },
+    "pyflakes.messages.FutureFeatureNotDefined.__init__": {
+      "pyflakes.messages.Message.__init__": [
+        "pyflakes.messages 142:25 call  Message.__init__(self, filename, loc)"
+      ]
+    },
+    "pyflakes.messages.LazyImportStarNotPermitted.__init__": {
+      "pyflakes.messages.Message.__init__": [
+        "pyflakes.messages 376:25 call  Message.__init__(self, filename, loc)"
+      ]
+    },
+    "pyflakes.reporter.Reporter.flake": {
+      "io.TextIOWrapper.write": [
+        "pyflakes.reporter 84:27 call  self._stdout.write(str(message))",
+        "pyflakes.reporter 85:27 call  self._stdout.write('\\n')"
+      ]
+    },
+    "pyflakes.reporter.Reporter.syntaxError": {
+      "io.TextIOWrapper.write": [
+        "pyflakes.reporter 66:31 call  self._stderr.write('%s:%d:%d: %s\\n' % (filename, lineno, ...",
+        "pyflakes.reporter 69:31 call  self._stderr.write('%s:%d: %s\\n' % (filename, lineno, msg))",
+        "pyflakes.reporter 72:31 call  self._stderr.write(line)",
+        "pyflakes.reporter 73:31 call  self._stderr.write('\\n')",
+        "pyflakes.reporter 75:35 call  self._stderr.write(re.sub(r'\\S', ' ', line[:offset - 1]) ..."
+      ]
+    },
+    "pyflakes.reporter.Reporter.unexpectedError": {
+      "io.TextIOWrapper.write": [
+        "pyflakes.reporter 37:27 call  self._stderr.write(f\"{filename}: {msg}\\n\")"
+      ]
+    }
+  },
+  "notes": {
+    "pyflakes.api 184:40 call  sys.stdin.read()": [
+      "the default sys.stdin, named by its class (README \"Callees outside the package\")"
+    ],
+    "pyflakes.api 76:25 call  filename.endswith('.py')": [
+      "iterSourceCode(paths) documents an unannotated list of paths (96-103), with no str-only restriction. On a bytes directory path it calls os.walk(path) at106, obtains bytes names, and os.path.join(dirpath,filename) at108 creates a concrete bytes full_path. Its own isPythonFile(full_path) call at109 therefore reaches bytes.endswith at76. The str suffix binds to the builtin call and then raises TypeError within it; no edge requires successful return. This is a library-created result passed by the package, not a direct method call on an opaque client object. The second endswith at80 is not reached for bytes, but the edge is already present at76."
+    ],
+    "pyflakes.checker 1006:26 call  os.environ.get('PYFLAKES_ERROR_UNKNOWN')": [
+      "os.environ.get, named through the public class (see 32:25)"
+    ],
+    "pyflakes.checker 1252:20 call  handler(node)": [
+      "handler is what getNodeHandler returns for the class of node: the Checker attribute named by the class name in upper case, or _unknown_handler (line 1016). The ast classes that the parser makes on Python 3.11 to 3.15 select every handler function of the class body through the aliases of lines 1327-2285 (pyflakes.md, \"Node dispatch\"); _unknown_handler gets the TypeIgnore nodes that ast.parse(..., type_comments=True) puts in Module.type_ignores (judgement); a handler of a client subclass is client code"
+    ],
+    "pyflakes.checker 1259:53 call  _doctest_parser()": [
+      "_doctest_parser is the functools._lru_cache_wrapper of the decorator at line 42; it calls the function back on the first call",
+      "Pyflakes supports PyPy (setup.py classifier; tox pypy3). PyPy 7.3.20 implements Python 3.11.13 and ships no _functools accelerator; its functools.cache returns the nested functools._lru_cache_wrapper.wrapper function (functools.py:537,563-576,651-666). hidden_applevel marks the same function and returns it unchanged (interp_magic.py:73-78). The closure is an additional outside callee on this supported runtime; the CPython wrapper object and the package function callback remain."
+    ],
+    "pyflakes.checker 1271:27 call  self.in_scope(DoctestScope)": [
+      "in_scope is decorated with @contextlib.contextmanager (line 814)"
+    ],
+    "pyflakes.checker 1321:28 call  self.handleNode(annotation, node)": [
+      "version branch: Python 3.11 to 3.13 take it when the module has no `from __future__ import annotations`"
+    ],
+    "pyflakes.checker 1344:40 call  self._enter_annotation(AnnotationState.NONE)": [
+      "_enter_annotation is decorated with @contextlib.contextmanager (line 1184)"
+    ],
+    "pyflakes.checker 1498:40 call  self._enter_annotation(AnnotationState.BARE)": [
+      "_enter_annotation is decorated with @contextlib.contextmanager (line 1184)"
+    ],
+    "pyflakes.checker 1902:27 call  self.in_scope(scope_tp)": [
+      "in_scope is decorated with @contextlib.contextmanager (line 814)"
+    ],
+    "pyflakes.checker 1969:36 call  self._type_param_scope(node)": [
+      "_type_param_scope is decorated with @contextlib.contextmanager (line 2272)"
+    ],
+    "pyflakes.checker 2017:31 call  self.in_scope(FunctionScope)": [
+      "in_scope is decorated with @contextlib.contextmanager (line 814)"
+    ],
+    "pyflakes.checker 2040:36 call  self._type_param_scope(node)": [
+      "_type_param_scope is decorated with @contextlib.contextmanager (line 2272)"
+    ],
+    "pyflakes.checker 2045:31 call  self.in_scope(ClassScope)": [
+      "in_scope is decorated with @contextlib.contextmanager (line 814)"
+    ],
+    "pyflakes.checker 2074:44 call  self._enter_annotation(AnnotationState.BARE)": [
+      "_enter_annotation is decorated with @contextlib.contextmanager (line 1184)"
+    ],
+    "pyflakes.checker 2081:36 call  self._type_param_scope(node)": [
+      "_type_param_scope is decorated with @contextlib.contextmanager (line 2272)"
+    ],
+    "pyflakes.checker 2121:24 call  self.report(messages.LazyImportNotAtModuleScope, node)": [
+      "version branch: lazy is true only on Python 3.15 and later (line 2119)"
+    ],
+    "pyflakes.checker 2276:48 call  self.in_scope(TypeScope)": [
+      "in_scope is decorated with @contextlib.contextmanager (line 814); version branch: Python 3.12 and later"
+    ],
+    "pyflakes.checker 527:63 call  dict.__repr__(self)": [
+      "dict.__repr__ calls repr() of each value of the scope back: the bindings that addBinding and GLOBAL store; a Builtin has its own __repr__, every other binding class inherits Binding.__repr__"
+    ],
+    "pyflakes.checker 653:29 call  is_name_match_fn(node.attr)": [
+      "_is_typing_helper is private; its only callers pass the lambdas of _is_typing (line 666) and _is_any_typing_member (line 676)"
+    ],
+    "pyflakes.checker 698:36 call  self._enter_annotation()": [
+      "_enter_annotation is decorated with @contextlib.contextmanager (line 1184): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "pyflakes.checker 706:36 call  self._enter_annotation(AnnotationState.STRING)": [
+      "_enter_annotation is decorated with @contextlib.contextmanager (line 1184)"
+    ],
+    "pyflakes.checker 739:56 call  _custom_builtins()": [
+      "_custom_builtins is the functools._lru_cache_wrapper of the decorator at line 30; the wrapper calls the function back on the first call (micro-benchmark decorators/functools_cache)",
+      "Pyflakes supports PyPy (setup.py classifier; tox pypy3). PyPy 7.3.20 implements Python 3.11.13 and ships no _functools accelerator; its functools.cache returns the nested functools._lru_cache_wrapper.wrapper function (functools.py:537,563-576,651-666). hidden_applevel marks the same function and returns it unchanged (interp_magic.py:73-78). The closure is an additional outside callee on this supported runtime; the CPython wrapper object and the package function callback remain."
+    ],
+    "pyflakes.checker 751:27 call  self.in_scope(scope_tp)": [
+      "in_scope is decorated with @contextlib.contextmanager (line 814)"
+    ],
+    "pyflakes.checker 891:42 call  messageClass(self.filename, *args, **kwargs)": [
+      "messageClass is the message class that each self.report call of the checker passes: each of the 50 subclasses of Message is passed at least once (pyflakes.md, \"Message dispatch\"); the 29 classes with an __init__ run it, and the 21 without one run Message.__init__; report is public, and a class of the client is client code"
+    ],
+    "pyflakes.reporter 37:27 call  self._stderr.write(f\"{filename}: {msg}\\n\")": [
+      "_stderr is the errorStream of Reporter: a client file-like object (opaque, B5), or sys.stderr from _makeDefaultReporter (line 92), named by its class"
+    ],
+    "pyflakes.reporter 84:27 call  self._stdout.write(str(message))": [
+      "_stdout is the warningStream of Reporter: a client file-like object (opaque, B5), or sys.stdout from _makeDefaultReporter (line 92), named by its class"
+    ]
+  },
+  "trace": "dynamic/pyflakes.json"
+}

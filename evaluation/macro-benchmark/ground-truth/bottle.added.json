@@ -1,0 +1,2617 @@
+{
+  "edges": {
+    "bottle": {
+      "<builtin>.compile": [
+        "bottle 145:17 call  compile('def _raise(*a): raise a[0], a[1], a[2]', '<py3fi..."
+      ],
+      "<builtin>.exec": [
+        "bottle 145:9 call  exec(compile('def _raise(*a): raise a[0], a[1], a[2]', '<..."
+      ],
+      "bottle._cli_patch": [
+        "bottle 66:15 call  _cli_patch(sys.argv)"
+      ],
+      "bottle.main": [
+        "bottle 4681:9 call  main()"
+      ],
+      "warnings.warn": [
+        "bottle 121:18 call  warnings.warn(\"Python 2 support will be dropped in Bottle..."
+      ]
+    },
+    "bottle.<lambda1>": {
+      "ujson.loads": [
+        "bottle 114:36 call  json_lds(touni(s))"
+      ]
+    },
+    "bottle.AiohttpServer.get_event_loop": {
+      "asyncio.new_event_loop": [
+        "bottle 3783:38 call  asyncio.new_event_loop()"
+      ]
+    },
+    "bottle.AiohttpServer.run": {
+      "aiohttp_wsgi.wsgi.serve": [
+        "bottle 3795:14 call  serve(handler, host=self.host, port=self.port)"
+      ],
+      "asyncio.set_event_loop": [
+        "bottle 3789:31 call  asyncio.set_event_loop(self.loop)"
+      ],
+      "bottle.AiohttpServer.get_event_loop": [
+        "bottle 3788:40 call  self.get_event_loop()"
+      ],
+      "bottle.AiohttpServer.run.<lambda1>": [
+        "bottle 3795:14 call  serve(handler, host=self.host, port=self.port)"
+      ],
+      "bottle.AiohttpUVLoopServer.get_event_loop": [
+        "bottle 3788:40 call  self.get_event_loop()"
+      ],
+      "signal.signal": [
+        "bottle 3793:26 call  signal.signal(signal.SIGINT, lambda s, f: self.loop.stop())"
+      ]
+    },
+    "bottle.AiohttpServer.run.<lambda1>": {
+      "asyncio.ProactorEventLoop.stop": [
+        "bottle 3793:69 call  self.loop.stop()"
+      ],
+      "asyncio.SelectorEventLoop.stop": [
+        "bottle 3793:69 call  self.loop.stop()"
+      ],
+      "uvloop.new_event_loop.stop": [
+        "bottle 3793:69 call  self.loop.stop()"
+      ]
+    },
+    "bottle.AiohttpUVLoopServer.get_event_loop": {
+      "uvloop.new_event_loop": [
+        "bottle 3804:37 call  uvloop.new_event_loop()"
+      ]
+    },
+    "bottle.AppEngineServer.run": {
+      "<builtin>.dict.get": [
+        "bottle 3656:33 call  sys.modules.get('__main__')"
+      ],
+      "<builtin>.hasattr": [
+        "bottle 3657:34 call  hasattr(module, 'main')"
+      ],
+      "bottle.depr": [
+        "bottle 3651:13 call  depr(0, 13, \"AppEngineServer no longer required\", \"Config..."
+      ],
+      "google.appengine.ext.webapp.util.run_wsgi_app": [
+        "bottle 3659:26 call  util.run_wsgi_app(handler)"
+      ]
+    },
+    "bottle.AppEngineServer.run.<lambda1>": {
+      "google.appengine.ext.webapp.util.run_wsgi_app": [
+        "bottle 3658:52 call  util.run_wsgi_app(handler)"
+      ]
+    },
+    "bottle.AppStack.default": {
+      "bottle.AppStack.push": [
+        "bottle 2621:29 call  self.push()"
+      ]
+    },
+    "bottle.AutoServer.run": {
+      "bottle.CherootServer.run": [
+        "bottle 3814:68 call  sa(self.host, self.port, **self.options).run(handler)"
+      ],
+      "bottle.CherryPyServer.run": [
+        "bottle 3814:68 call  sa(self.host, self.port, **self.options).run(handler)"
+      ],
+      "bottle.PasteServer.run": [
+        "bottle 3814:68 call  sa(self.host, self.port, **self.options).run(handler)"
+      ],
+      "bottle.ServerAdapter.__init__": [
+        "bottle 3814:26 call  sa(self.host, self.port, **self.options)"
+      ],
+      "bottle.TwistedServer.run": [
+        "bottle 3814:68 call  sa(self.host, self.port, **self.options).run(handler)"
+      ],
+      "bottle.WSGIRefServer.run": [
+        "bottle 3814:68 call  sa(self.host, self.port, **self.options).run(handler)"
+      ],
+      "bottle.WaitressServer.run": [
+        "bottle 3814:68 call  sa(self.host, self.port, **self.options).run(handler)"
+      ]
+    },
+    "bottle.BaseRequest.POST": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1411:40 getattr  self.body",
+        "bottle 1411:61 getattr  self.content_length"
+      ],
+      "bottle.MultipartError.__init__": [
+        "bottle 1410:33 call  MultipartError(\"Invalid content type header, missing boun..."
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1396:29 getattr  self.environ"
+      ],
+      "bottle.tob": [
+        "bottle 1401:25 call  tonat(self._get_body_string(self.MEMFILE_MAX), 'latin1')",
+        "bottle 1417:40 call  tonat(part.value, 'utf8')"
+      ]
+    },
+    "bottle.BaseRequest.__delattr__": {
+      "<builtin>.AttributeError": [
+        "bottle 1603:33 call  AttributeError(\"Attribute not defined: %s\" % name)"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1601:22 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.__delitem__": {
+      "bottle._local_property.fget": [
+        "bottle 1550:19 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.__getitem__": {
+      "bottle._local_property.fget": [
+        "bottle 1546:21 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.__iter__": {
+      "bottle._local_property.fget": [
+        "bottle 1553:26 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.__len__": {
+      "bottle._local_property.fget": [
+        "bottle 1556:25 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.__repr__": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1581:63 getattr  self.method",
+        "bottle 1581:76 getattr  self.url"
+      ]
+    },
+    "bottle.BaseRequest._body": {
+      "StringIO.StringIO": [
+        "bottle 1344:49 call  BytesIO()",
+        "bottle 1347:48 call  BytesIO()"
+      ],
+      "StringIO.StringIO.getvalue": [
+        "bottle 1353:40 call  tmp.getvalue()"
+      ],
+      "StringIO.StringIO.seek": [
+        "bottle 1357:18 call  body.seek(0)"
+      ],
+      "StringIO.StringIO.write": [
+        "bottle 1349:23 call  body.write(part)"
+      ],
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1346:48 getattr  self.chunked"
+      ]
+    },
+    "bottle.BaseRequest._get_body_string": {
+      "StringIO.StringIO.read": [
+        "bottle 1365:30 call  self.body.read(maxread + 1)"
+      ],
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1363:17 getattr  self.content_length",
+        "bottle 1365:21 getattr  self.body"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "bottle 1365:30 call  self.body.read(maxread + 1)"
+      ]
+    },
+    "bottle.BaseRequest._iter_body": {
+      "StringIO.StringIO.read": [
+        "bottle 1306:24 call  read(min(maxread, bufsize))"
+      ],
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1304:31 getattr  self.content_length"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "bottle 1306:24 call  read(min(maxread, bufsize))"
+      ]
+    },
+    "bottle.BaseRequest._iter_chunked": {
+      "StringIO.StringIO.read": [
+        "bottle 1316:26 call  read(1)",
+        "bottle 1318:25 call  read(1)",
+        "bottle 1331:32 call  read(min(maxread, bufsize))",
+        "bottle 1336:20 call  read(2)"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "bottle 1316:26 call  read(1)",
+        "bottle 1318:25 call  read(1)",
+        "bottle 1331:32 call  read(min(maxread, bufsize))",
+        "bottle 1336:20 call  read(2)"
+      ]
+    },
+    "bottle.BaseRequest.body": {
+      "StringIO.StringIO.seek": [
+        "bottle 1377:24 call  self._body.seek(0)"
+      ],
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1377:14 getattr  self._body",
+        "bottle 1378:21 getattr  self._body"
+      ]
+    },
+    "bottle.BaseRequest.content_type": {
+      "<builtin>.dict.get": [
+        "bottle 1491:32 call  self.environ.get('CONTENT_TYPE', '')"
+      ],
+      "<builtin>.str.lower": [
+        "bottle 1491:58 call  self.environ.get('CONTENT_TYPE', '').lower()"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1491:21 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.copy": {
+      "<builtin>.dict.copy": [
+        "bottle 1540:41 call  self.environ.copy()"
+      ],
+      "bottle.BaseRequest.__init__": [
+        "bottle 1540:23 call  Request(self.environ.copy())"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1540:29 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.files": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1278:37 getattr  self.POST",
+        "bottle 1279:32 getattr  self.POST"
+      ]
+    },
+    "bottle.BaseRequest.forms": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1254:37 getattr  self.POST",
+        "bottle 1255:32 getattr  self.POST"
+      ]
+    },
+    "bottle.BaseRequest.fullpath": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1454:29 getattr  self.script_name",
+        "bottle 1454:47 getattr  self.path"
+      ]
+    },
+    "bottle.BaseRequest.get_cookie": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1222:22 getattr  self.cookies"
+      ]
+    },
+    "bottle.BaseRequest.get_header": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1208:21 getattr  self.headers"
+      ]
+    },
+    "bottle.BaseRequest.is_ajax": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1504:21 getattr  self.is_xhr"
+      ]
+    },
+    "bottle.BaseRequest.is_xhr": {
+      "bottle._local_property.fget": [
+        "bottle 1498:31 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.json": {
+      "bottle.HTTPError.__init__": [
+        "bottle 1300:32 call  HTTPError(400, 'Invalid JSON')"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1292:22 getattr  self.environ"
+      ],
+      "json.loads": [
+        "bottle 1298:34 call  json_loads(b)"
+      ],
+      "ujson.loads": [
+        "bottle 1298:34 call  json_loads(b)"
+      ]
+    },
+    "bottle.BaseRequest.keys": {
+      "<builtin>.dict.keys": [
+        "bottle 1559:33 call  self.environ.keys()"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1559:21 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.params": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1265:32 getattr  self.query",
+        "bottle 1267:32 getattr  self.forms"
+      ]
+    },
+    "bottle.BaseRequest.path_shift": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1478:78 getattr  self.path"
+      ]
+    },
+    "bottle.BaseRequest.query": {
+      "bottle._local_property.fget": [
+        "bottle 1241:20 getattr  self.environ",
+        "bottle 1242:33 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.query_string": {
+      "<builtin>.dict.get": [
+        "bottle 1460:32 call  self.environ.get('QUERY_STRING', '')"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1460:21 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.remote_addr": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1535:22 getattr  self.remote_route"
+      ]
+    },
+    "bottle.BaseRequest.remote_route": {
+      "bottle._local_property.fget": [
+        "bottle 1526:22 getattr  self.environ",
+        "bottle 1528:23 getattr  self.environ"
+      ]
+    },
+    "bottle.BaseRequest.route": {
+      "<builtin>.RuntimeError": [
+        "bottle 1182:27 call  RuntimeError('This request is not connected to a route.')"
+      ]
+    },
+    "bottle.BaseRequest.url": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1430:21 getattr  self.urlparts"
+      ]
+    },
+    "bottle.BaseRequest.urlparts": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 1448:30 getattr  self.fullpath"
+      ]
+    },
+    "bottle.BaseResponse.<lambda1>": {
+      "bottle._UTC.dst": [
+        "bottle 1806:48 call  datetime.fromtimestamp(parse_date(x), UTC)"
+      ],
+      "bottle._UTC.utcoffset": [
+        "bottle 1806:48 call  datetime.fromtimestamp(parse_date(x), UTC)"
+      ]
+    },
+    "bottle.BaseResponse.__delitem__": {
+      "bottle._local_property.fget": [
+        "bottle 1751:18 getattr  self._headers"
+      ]
+    },
+    "bottle.BaseResponse.__getitem__": {
+      "bottle._local_property.fget": [
+        "bottle 1754:21 getattr  self._headers"
+      ]
+    },
+    "bottle.BaseResponse.__init__": {
+      "<builtin>.isinstance": [
+        "bottle 1673:26 call  isinstance(headers, dict)"
+      ]
+    },
+    "bottle.BaseResponse.__iter__": {
+      "<builtin>.iter": [
+        "bottle 1696:20 call  iter(self.body)"
+      ],
+      "bottle.WSGIFileWrapper.__iter__": [
+        "bottle 1696:20 call  iter(self.body)"
+      ],
+      "bottle._closeiter.__iter__": [
+        "bottle 1696:20 call  iter(self.body)"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1696:26 getattr  self.body"
+      ]
+    },
+    "bottle.BaseResponse.__repr__": {
+      "<builtin>.bytes.strip": [
+        "bottle 1907:59 call  value.strip()"
+      ],
+      "<builtin>.str.strip": [
+        "bottle 1907:59 call  value.strip()"
+      ],
+      "<builtin>.str.title": [
+        "bottle 1907:44 call  name.title()"
+      ],
+      "bottle.BaseResponse.headerlist": [
+        "bottle 1906:33 getattr  self.headerlist"
+      ]
+    },
+    "bottle.BaseResponse.add_header": {
+      "bottle._local_property.fget": [
+        "bottle 1771:14 getattr  self._headers"
+      ]
+    },
+    "bottle.BaseResponse.charset": {
+      "<builtin>.bytes.split": [
+        "bottle 1813:43 call  self.content_type.split('charset=')",
+        "bottle 1813:65 call  self.content_type.split('charset=')[-1].split(';')"
+      ],
+      "<builtin>.bytes.strip": [
+        "bottle 1813:79 call  self.content_type.split('charset=')[-1].split(';')[0].str..."
+      ]
+    },
+    "bottle.BaseResponse.close": {
+      "<builtin>.hasattr": [
+        "bottle 1699:19 call  hasattr(self.body, 'close')"
+      ],
+      "bottle._closeiter.close": [
+        "bottle 1700:28 call  self.body.close()"
+      ],
+      "bottle._local_property.fget": [
+        "bottle 1699:25 getattr  self.body",
+        "bottle 1700:18 getattr  self.body"
+      ],
+      "io.BufferedReader.close": [
+        "bottle 1700:28 call  self.body.close()"
+      ]
+    },
+    "bottle.BaseResponse.copy": {
+      "bottle.HTTPError.__init__": [
+        "bottle 1685:19 call  cls()"
+      ],
+      "bottle._local_property.fset": [
+        "bottle 1687:14 setattr  copy._headers",
+        "bottle 1689:28 setattr  copy._cookies"
+      ]
+    },
+    "bottle.BaseResponse.iter_headers": {
+      "bottle.BaseResponse.headerlist": [
+        "bottle 1776:21 getattr  self.headerlist"
+      ]
+    },
+    "bottle.BaseResponse.set_cookie": {
+      "<builtin>.TypeError": [
+        "bottle 1874:28 call  TypeError('Secret key required for non-string cookies.')"
+      ],
+      "<builtin>.dict.setdefault": [
+        "bottle 1862:40 call  Morsel._reserved.setdefault('samesite', 'SameSite')"
+      ]
+    },
+    "bottle.BaseResponse.status_line": {
+      "bottle._local_property.fget": [
+        "bottle 1705:21 getattr  self._status_line"
+      ]
+    },
+    "bottle.BaseTemplate.__init__": {
+      "bottle.BaseTemplate.prepare": [
+        "bottle 4082:21 call  self.prepare(**self.settings)"
+      ],
+      "bottle.CheetahTemplate.prepare": [
+        "bottle 4082:21 call  self.prepare(**self.settings)"
+      ]
+    },
+    "bottle.BaseTemplate.search": {
+      "bottle.depr": [
+        "bottle 4089:23 call  depr(0, 12, \"Empty template lookup path.\", \"Configure a t...",
+        "bottle 4092:23 call  depr(0, 12, \"Use of absolute path for template name.\", \"R..."
+      ]
+    },
+    "bottle.BjoernServer.run": {
+      "bjoern.run": [
+        "bottle 3768:12 call  run(handler, self.host, self.port, reuse_port=True)"
+      ]
+    },
+    "bottle.Bottle.__init__": {
+      "bottle.ConfigDict.__setitem__": [
+        "bottle 643:24 setitem  self.config['catchall']",
+        "bottle 648:24 setitem  self.config['json.disable']"
+      ],
+      "bottle.depr": [
+        "bottle 640:17 call  depr(0, 13, \"Bottle(catchall) keyword argument.\", \"The 'c...",
+        "bottle 645:17 call  depr(0, 13, \"Bottle(autojson) keyword argument.\", \"The 'a..."
+      ]
+    },
+    "bottle.Bottle._cast": {
+      "bottle.Bottle._cast.<lambda1>": [
+        "bottle 1073:25 call  next(iout)",
+        "bottle 1075:29 call  next(iout)"
+      ],
+      "bottle.WSGIFileWrapper.__iter__": [
+        "bottle 1072:24 call  iter(out)"
+      ],
+      "bottle._closeiter.__iter__": [
+        "bottle 1072:24 call  iter(out)"
+      ],
+      "itertools.imap": [
+        "bottle 1093:28 call  imap(encoder, itertools.chain([first], iout))"
+      ]
+    },
+    "bottle.Bottle._handle": {
+      "bottle.Route.reset": [
+        "bottle 1005:32 call  route.reset()"
+      ],
+      "bottle.auth_basic.decorator.wrapper": [
+        "bottle 996:37 call  route.call(**args)"
+      ],
+      "bottle.cached_property.__get__": [
+        "bottle 996:33 getattr  route.call"
+      ],
+      "bottle.depr": [
+        "bottle 1002:25 call  depr(0, 13, \"RouteReset exception deprecated\", \"Call rout..."
+      ],
+      "bottle.view.decorator.wrapper": [
+        "bottle 996:37 call  route.call(**args)"
+      ]
+    },
+    "bottle.Bottle._mount_wsgi": {
+      "<builtin>.ValueError": [
+        "bottle 713:29 call  ValueError('WSGI applications cannot be mounted to \"/\".')"
+      ]
+    },
+    "bottle.Bottle._mount_wsgi.mountpoint_wrapper": {
+      "itertools.chain": [
+        "bottle 737:42 call  itertools.chain(rs.body, body)"
+      ]
+    },
+    "bottle.Bottle._mount_wsgi.mountpoint_wrapper.start_response": {
+      "bottle._raise": [
+        "bottle 723:31 call  _raise(*exc_info)"
+      ]
+    },
+    "bottle.Bottle.add_hook": {
+      "bottle.cached_property.__get__": [
+        "bottle 686:18 getattr  self._hooks",
+        "bottle 688:18 getattr  self._hooks"
+      ]
+    },
+    "bottle.Bottle.error.decorator": {
+      "bottle.load": [
+        "bottle 969:65 call  load(callback)"
+      ]
+    },
+    "bottle.Bottle.install": {
+      "<builtin>.callable": [
+        "bottle 820:24 call  callable(plugin)"
+      ]
+    },
+    "bottle.Bottle.match": {
+      "bottle.Router.match": [
+        "bottle 868:33 call  self.router.match(environ)"
+      ]
+    },
+    "bottle.Bottle.mount": {
+      "<builtin>.ValueError": [
+        "bottle 797:29 call  ValueError(\"Prefix must start with '/'\")"
+      ]
+    },
+    "bottle.Bottle.patch": {
+      "bottle.Bottle.route": [
+        "bottle 951:26 call  self.route(path, method, **options)"
+      ]
+    },
+    "bottle.Bottle.remove_hook": {
+      "<builtin>.list.remove": [
+        "bottle 693:37 call  self._hooks[name].remove(func)"
+      ],
+      "bottle.cached_property.__get__": [
+        "bottle 692:25 getattr  self._hooks",
+        "bottle 692:49 getattr  self._hooks",
+        "bottle 693:18 getattr  self._hooks"
+      ]
+    },
+    "bottle.Bottle.reset": {
+      "<builtin>.isinstance": [
+        "bottle 846:24 call  isinstance(route, Route)"
+      ]
+    },
+    "bottle.Bottle.route": {
+      "<builtin>.callable": [
+        "bottle 915:20 call  callable(path)"
+      ]
+    },
+    "bottle.Bottle.route.decorator": {
+      "bottle.load": [
+        "bottle 920:65 call  load(callback)"
+      ]
+    },
+    "bottle.Bottle.run": {
+      "bottle.run": [
+        "bottle 862:12 call  run(self, **kwargs)"
+      ]
+    },
+    "bottle.Bottle.wsgi": {
+      "<builtin>.repr": [
+        "bottle 1124:43 call  repr(E)"
+      ],
+      "bottle._closeiter.close": [
+        "bottle 1108:52 call  out.close()"
+      ],
+      "bottle.html_escape": [
+        "bottle 1120:32 call  html_escape(environ.get('PATH_INFO', '/'))",
+        "bottle 1124:38 call  html_escape(repr(E))",
+        "bottle 1124:60 call  html_escape(format_exc())"
+      ],
+      "bottle.tob": [
+        "bottle 1129:24 call  tob(err)"
+      ],
+      "sys.exc_info": [
+        "bottle 1128:78 call  sys.exc_info()"
+      ],
+      "traceback.format_exc": [
+        "bottle 1124:71 call  format_exc()"
+      ]
+    },
+    "bottle.CGIServer.run": {
+      "bottle.Bottle._cast.<lambda1>": [
+        "bottle 3495:25 call  CGIHandler().run(fixed_environ)"
+      ],
+      "bottle.CGIServer.run.fixed_environ": [
+        "bottle 3495:25 call  CGIHandler().run(fixed_environ)"
+      ],
+      "bottle.WSGIFileWrapper.__iter__": [
+        "bottle 3495:25 call  CGIHandler().run(fixed_environ)"
+      ],
+      "bottle._closeiter.__iter__": [
+        "bottle 3495:25 call  CGIHandler().run(fixed_environ)"
+      ],
+      "bottle._closeiter.close": [
+        "bottle 3495:25 call  CGIHandler().run(fixed_environ)"
+      ],
+      "wsgiref.handlers.CGIHandler": [
+        "bottle 3495:19 call  CGIHandler()"
+      ],
+      "wsgiref.handlers.CGIHandler.run": [
+        "bottle 3495:25 call  CGIHandler().run(fixed_environ)"
+      ]
+    },
+    "bottle.CGIServer.run.fixed_environ": {
+      "<builtin>.dict.setdefault": [
+        "bottle 3492:31 call  environ.setdefault('PATH_INFO', '')"
+      ],
+      "bottle.Bottle.__call__": [
+        "bottle 3493:27 call  handler(environ, start_response)"
+      ]
+    },
+    "bottle.CheetahTemplate.prepare": {
+      "Cheetah.Template.Template": [
+        "bottle 4159:32 call  Template(source=self.source, **options)",
+        "bottle 4161:32 call  Template(file=self.filename, **options)"
+      ],
+      "threading.local": [
+        "bottle 4155:39 call  threading.local()"
+      ]
+    },
+    "bottle.CheetahTemplate.render": {
+      "<builtin>.dict.clear": [
+        "bottle 4169:32 call  self.context.vars.clear()"
+      ],
+      "<builtin>.dict.update": [
+        "bottle 4165:26 call  kwargs.update(dictarg)",
+        "bottle 4166:33 call  self.context.vars.update(self.defaults)",
+        "bottle 4167:33 call  self.context.vars.update(kwargs)"
+      ],
+      "<builtin>.str": [
+        "bottle 4168:18 call  str(self.tpl)"
+      ]
+    },
+    "bottle.CherootServer.run": {
+      "<builtin>.dict.pop": [
+        "bottle 3573:36 call  self.options.pop('certfile', None)",
+        "bottle 3574:35 call  self.options.pop('keyfile', None)",
+        "bottle 3575:37 call  self.options.pop('chainfile', None)"
+      ],
+      "cheroot.ssl.builtin.BuiltinSSLAdapter": [
+        "bottle 3578:59 call  builtin.BuiltinSSLAdapter( certfile, keyfile, chainfile)"
+      ],
+      "cheroot.wsgi.Server": [
+        "bottle 3576:29 call  wsgi.Server(**self.options)"
+      ],
+      "cheroot.wsgi.Server.start": [
+        "bottle 3581:25 call  server.start()"
+      ],
+      "cheroot.wsgi.Server.stop": [
+        "bottle 3583:24 call  server.stop()"
+      ]
+    },
+    "bottle.CherryPyServer.run": {
+      "<builtin>.dict.get": [
+        "bottle 3548:36 call  self.options.get('certfile')",
+        "bottle 3551:35 call  self.options.get('keyfile')"
+      ],
+      "bottle.depr": [
+        "bottle 3540:13 call  depr(0, 13, \"The wsgi server part of cherrypy was split i..."
+      ],
+      "cherrypy.wsgiserver.CherryPyWSGIServer": [
+        "bottle 3555:47 call  wsgiserver.CherryPyWSGIServer(**self.options)"
+      ],
+      "cherrypy.wsgiserver.CherryPyWSGIServer.start": [
+        "bottle 3562:25 call  server.start()"
+      ],
+      "cherrypy.wsgiserver.CherryPyWSGIServer.stop": [
+        "bottle 3564:24 call  server.stop()"
+      ]
+    },
+    "bottle.ConfigDict.meta_list": {
+      "<builtin>.dict.get": [
+        "bottle 2546:30 call  self._meta.get(key, {})"
+      ],
+      "<builtin>.dict.keys": [
+        "bottle 2546:44 call  self._meta.get(key, {}).keys()"
+      ]
+    },
+    "bottle.DictProperty.__delete__": {
+      "<builtin>.AttributeError": [
+        "bottle 222:48 call  AttributeError(\"Read-Only property.\")"
+      ],
+      "<builtin>.getattr": [
+        "bottle 223:20 call  getattr(obj, self.attr)"
+      ],
+      "bottle.ConfigDict.__delitem__": [
+        "bottle 223:36 delitem  getattr(obj, self.attr)[self.key]"
+      ]
+    },
+    "bottle.DictProperty.__get__": {
+      "bottle.BaseRequest.route": [
+        "bottle 214:58 call  self.getter(obj)"
+      ]
+    },
+    "bottle.DictProperty.__set__": {
+      "<builtin>.AttributeError": [
+        "bottle 218:48 call  AttributeError(\"Read-Only property.\")"
+      ]
+    },
+    "bottle.EventletServer.run": {
+      "<builtin>.RuntimeError": [
+        "bottle 3747:31 call  RuntimeError(msg)"
+      ],
+      "<builtin>.dict.pop": [
+        "bottle 3751:52 call  self.options.pop(arg)"
+      ],
+      "eventlet.listen": [
+        "bottle 3756:31 call  listen(address, **socket_args)",
+        "bottle 3760:31 call  listen(address)"
+      ],
+      "eventlet.patcher.is_monkey_patched": [
+        "bottle 3745:41 call  patcher.is_monkey_patched(os)"
+      ],
+      "eventlet.wsgi.server": [
+        "bottle 3756:24 call  wsgi.server(listen(address, **socket_args), handler, log_...",
+        "bottle 3760:24 call  wsgi.server(listen(address), handler)"
+      ]
+    },
+    "bottle.FileCheckerThread.__enter__": {
+      "bottle.FileCheckerThread.run": [
+        "bottle 4032:19 call  self.start()"
+      ],
+      "threading.Thread.start": [
+        "bottle 4032:19 call  self.start()"
+      ]
+    },
+    "bottle.FileCheckerThread.__exit__": {
+      "<builtin>.issubclass": [
+        "bottle 4037:51 call  issubclass(exc_type, KeyboardInterrupt)"
+      ],
+      "threading.Thread.join": [
+        "bottle 4036:18 call  self.join()"
+      ]
+    },
+    "bottle.FileCheckerThread.__init__": {
+      "threading.Thread.__init__": [
+        "bottle 4003:34 call  threading.Thread.__init__(self)"
+      ]
+    },
+    "bottle.FileCheckerThread.run": {
+      "<builtin>.dict": [
+        "bottle 4012:21 call  dict()"
+      ],
+      "<builtin>.dict.items": [
+        "bottle 4024:49 call  files.items()"
+      ],
+      "<builtin>.dict.values": [
+        "bottle 4014:46 call  sys.modules.values()"
+      ],
+      "<builtin>.getattr": [
+        "bottle 4015:27 call  getattr(module, '__file__', '')"
+      ],
+      "<builtin>.list": [
+        "bottle 4014:27 call  list(sys.modules.values())",
+        "bottle 4024:37 call  list(files.items())"
+      ],
+      "_thread.interrupt_main": [
+        "bottle 4023:38 call  thread.interrupt_main()",
+        "bottle 4027:42 call  thread.interrupt_main()"
+      ],
+      "bottle.FileCheckerThread.run.<lambda1>": [
+        "bottle 4017:58 call  mtime(path)",
+        "bottle 4021:21 call  mtime(self.lockfile)",
+        "bottle 4025:45 call  mtime(path)"
+      ],
+      "os.path.exists": [
+        "bottle 4017:31 call  exists(path)",
+        "bottle 4020:26 call  exists(self.lockfile)",
+        "bottle 4025:30 call  exists(path)"
+      ],
+      "time.sleep": [
+        "bottle 4029:23 call  time.sleep(self.interval)"
+      ],
+      "time.time": [
+        "bottle 4021:48 call  time.time()"
+      ]
+    },
+    "bottle.FileCheckerThread.run.<lambda1>": {
+      "os.stat": [
+        "bottle 4011:34 call  os.stat(p)"
+      ]
+    },
+    "bottle.FileUpload._copy_file": {
+      "StringIO.StringIO.read": [
+        "bottle 2782:23 call  read(chunk_size)"
+      ],
+      "StringIO.StringIO.seek": [
+        "bottle 2785:23 call  self.file.seek(offset)"
+      ],
+      "StringIO.StringIO.tell": [
+        "bottle 2780:71 call  self.file.tell()"
+      ],
+      "io.BytesIO.read": [
+        "bottle 2782:23 call  read(chunk_size)"
+      ],
+      "io.BytesIO.seek": [
+        "bottle 2785:23 call  self.file.seek(offset)"
+      ],
+      "io.BytesIO.tell": [
+        "bottle 2780:71 call  self.file.tell()"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "bottle 2780:71 call  self.file.tell()",
+        "bottle 2782:23 call  read(chunk_size)",
+        "bottle 2785:23 call  self.file.seek(offset)"
+      ]
+    },
+    "bottle.FileUpload.save": {
+      "bottle.cached_property.__get__": [
+        "bottle 2798:62 getattr  self.filename"
+      ]
+    },
+    "bottle.FlupFCGIServer.run": {
+      "<builtin>.dict.setdefault": [
+        "bottle 3501:32 call  self.options.setdefault('bindAddress', (self.host, self.p..."
+      ],
+      "flup.server.fcgi.WSGIServer": [
+        "bottle 3502:36 call  flup.server.fcgi.WSGIServer(handler, **self.options)"
+      ],
+      "flup.server.fcgi.WSGIServer.run": [
+        "bottle 3502:65 call  flup.server.fcgi.WSGIServer(handler, **self.options).run()"
+      ]
+    },
+    "bottle.FormsDict.__getattr__": {
+      "<builtin>.str.endswith": [
+        "bottle 2257:51 call  name.endswith('__')"
+      ],
+      "<builtin>.super": [
+        "bottle 2258:25 call  super(FormsDict, self)"
+      ]
+    },
+    "bottle.GeventServer.run": {
+      "<builtin>.RuntimeError": [
+        "bottle 3698:31 call  RuntimeError(msg)"
+      ],
+      "<builtin>.isinstance": [
+        "bottle 3696:26 call  isinstance(threading.local(), local.local)"
+      ],
+      "bottle.GeventServer.run.<lambda1>": [
+        "bottle 3706:29 call  server.serve_forever()"
+      ],
+      "gevent.pywsgi.WSGIServer": [
+        "bottle 3702:35 call  pywsgi.WSGIServer(address, handler, **self.options)"
+      ],
+      "gevent.pywsgi.WSGIServer.serve_forever": [
+        "bottle 3706:29 call  server.serve_forever()"
+      ],
+      "signal.signal": [
+        "bottle 3705:26 call  signal.signal(signal.SIGINT, lambda s, f: server.stop())"
+      ],
+      "threading.local": [
+        "bottle 3696:42 call  threading.local()"
+      ]
+    },
+    "bottle.GeventServer.run.<lambda1>": {
+      "gevent.pywsgi.WSGIServer.stop": [
+        "bottle 3705:66 call  server.stop()"
+      ]
+    },
+    "bottle.GunicornServer.run": {
+      "<builtin>.dict.update": [
+        "bottle 3720:22 call  config.update(self.options)"
+      ],
+      "<builtin>.str.startswith": [
+        "bottle 3715:32 call  self.host.startswith(\"unix:\")"
+      ],
+      "bottle.Bottle.__call__": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ],
+      "bottle.Bottle._cast.<lambda1>": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ],
+      "bottle.GunicornServer.run.GunicornApplication.load": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ],
+      "bottle.GunicornServer.run.GunicornApplication.load_config": [
+        "bottle 3730:28 call  GunicornApplication()"
+      ],
+      "bottle.WSGIFileWrapper.__iter__": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ],
+      "bottle._closeiter.__iter__": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ],
+      "bottle._closeiter.close": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ],
+      "gunicorn.app.base.BaseApplication.__init__": [
+        "bottle 3730:28 call  GunicornApplication()"
+      ],
+      "gunicorn.app.base.BaseApplication.run": [
+        "bottle 3730:34 call  GunicornApplication().run()"
+      ]
+    },
+    "bottle.GunicornServer.run.GunicornApplication.load_config": {
+      "<builtin>.dict.items": [
+        "bottle 3724:47 call  config.items()"
+      ],
+      "gunicorn.config.Config.set": [
+        "bottle 3725:33 call  self.cfg.set(key, value)"
+      ]
+    },
+    "bottle.HeaderDict.__delitem__": {
+      "bottle._hkey": [
+        "bottle 2273:28 call  _hkey(key)"
+      ]
+    },
+    "bottle.HeaderDict.filter": {
+      "bottle._hkey": [
+        "bottle 2294:27 call  _hkey(n)"
+      ]
+    },
+    "bottle.HeaderProperty.__delete__": {
+      "bottle.BaseResponse.__delitem__": [
+        "bottle 1634:16 delitem  obj[self.name]"
+      ]
+    },
+    "bottle.HeaderProperty.__get__": {
+      "<builtin>.int": [
+        "bottle 1628:27 call  self.reader(value)"
+      ]
+    },
+    "bottle.JSONPlugin.apply.wrapper": {
+      "bottle.Bottle._mount_wsgi.mountpoint_wrapper": [
+        "bottle 2026:30 call  callback(*a, **ka)"
+      ],
+      "bottle.JSONPlugin.apply.wrapper": [
+        "bottle 2026:30 call  callback(*a, **ka)"
+      ],
+      "ujson.dumps": [
+        "bottle 2032:38 call  dumps(rv)",
+        "bottle 2037:32 call  dumps(rv.body)"
+      ]
+    },
+    "bottle.Jinja2Template.render": {
+      "bottle.Jinja2Template.loader": [
+        "bottle 4190:31 call  self.tpl.render(**_defaults)"
+      ],
+      "bottle.Jinja2Template.loader.<lambda1>": [
+        "bottle 4190:31 call  self.tpl.render(**_defaults)"
+      ]
+    },
+    "bottle.MeinheldServer.run": {
+      "meinheld.server.listen": [
+        "bottle 3605:22 call  server.listen((self.host, self.port))"
+      ],
+      "meinheld.server.run": [
+        "bottle 3606:19 call  server.run(handler)"
+      ]
+    },
+    "bottle.MultiDict.allitems": {
+      "<builtin>.dict.iteritems": [
+        "bottle 2179:60 call  self.dict.iteritems()"
+      ]
+    },
+    "bottle.MultiDict.items": {
+      "<builtin>.dict.items": [
+        "bottle 2148:59 call  self.dict.items()",
+        "bottle 2164:59 call  self.dict.items()"
+      ]
+    },
+    "bottle.MultiDict.iterallitems": {
+      "<builtin>.dict.iteritems": [
+        "bottle 2176:60 call  self.dict.iteritems()"
+      ]
+    },
+    "bottle.MultiDict.iteritems": {
+      "<builtin>.dict.iteritems": [
+        "bottle 2173:63 call  self.dict.iteritems()"
+      ]
+    },
+    "bottle.MultiDict.iterkeys": {
+      "<builtin>.dict.iterkeys": [
+        "bottle 2167:38 call  self.dict.iterkeys()"
+      ]
+    },
+    "bottle.MultiDict.itervalues": {
+      "<builtin>.dict.itervalues": [
+        "bottle 2170:56 call  self.dict.itervalues()"
+      ]
+    },
+    "bottle.PasteServer.run": {
+      "<builtin>.str": [
+        "bottle 3599:34 call  str(self.port)"
+      ],
+      "paste.httpserver.serve": [
+        "bottle 3597:25 call  httpserver.serve(handler, host=self.host, port=str(self.p..."
+      ],
+      "paste.translogger.TransLogger": [
+        "bottle 3596:30 call  TransLogger(handler, setup_console_handler=(not self.quiet))"
+      ]
+    },
+    "bottle.ResourceManager.__iter__": {
+      "<builtin>.list.append": [
+        "bottle 2713:54 call  search.append(full)"
+      ],
+      "<builtin>.list.pop": [
+        "bottle 2709:30 call  search.pop()"
+      ],
+      "os.listdir": [
+        "bottle 2711:35 call  os.listdir(path)"
+      ],
+      "os.path.isdir": [
+        "bottle 2710:33 call  os.path.isdir(path)",
+        "bottle 2713:33 call  os.path.isdir(full)"
+      ],
+      "os.path.join": [
+        "bottle 2712:36 call  os.path.join(path, name)"
+      ]
+    },
+    "bottle.ResourceManager.open": {
+      "<builtin>.IOError": [
+        "bottle 2736:36 call  IOError(\"Resource %r not found.\" % name)"
+      ]
+    },
+    "bottle.Route._make_callback": {
+      "bottle.Route._make_callback": [
+        "bottle 567:43 call  self._make_callback()"
+      ]
+    },
+    "bottle.Route.get_callback_args": {
+      "inspect.getargspec": [
+        "bottle 593:26 call  getargspec(self.get_undecorated_callback())"
+      ]
+    },
+    "bottle.Route.get_config": {
+      "<builtin>.dict.get": [
+        "bottle 601:31 call  self.config.get(key, default)"
+      ],
+      "bottle.depr": [
+        "bottle 598:13 call  depr(0, 13, \"Route.get_config() is deprecated.\", \"The Rou..."
+      ]
+    },
+    "bottle.Router.__init__.<lambda3>.<lambda1>": {
+      "<builtin>.float": [
+        "bottle 331:75 call  float(x)"
+      ],
+      "<builtin>.str": [
+        "bottle 331:69 call  str(float(x))"
+      ]
+    },
+    "bottle.Router.build": {
+      "bottle.Router.__init__.<lambda3>.<lambda1>": [
+        "bottle 460:29 call  f(query.pop(n))"
+      ]
+    },
+    "bottle.ServerAdapter.__init__": {
+      "<builtin>.int": [
+        "bottle 3474:24 call  int(port)"
+      ]
+    },
+    "bottle.ServerAdapter.__repr__": {
+      "<builtin>.dict.items": [
+        "bottle 3481:57 call  self.options.items()"
+      ],
+      "<builtin>.repr": [
+        "bottle 3480:44 call  repr(v)"
+      ],
+      "<builtin>.str.join": [
+        "bottle 3480:25 call  ', '.join('%s=%s' % (k, repr(v)) for k, v in self.options..."
+      ]
+    },
+    "bottle.SimpleTemplate.code": {
+      "bottle.depr": [
+        "bottle 4228:23 call  depr(0, 11, 'Unsupported template encodings.', 'Use utf-8..."
+      ]
+    },
+    "bottle.SimpleTemplate.execute": {
+      "<builtin>.dict.__contains__": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "<builtin>.dict.setdefault": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "<builtin>.list.extend": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "<builtin>.repr": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "<builtin>.type": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "bottle.SimpleTemplate._rebase": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ],
+      "functools.partial.__call__": [
+        "bottle 4259:13 call  exec(self.co, env)"
+      ]
+    },
+    "bottle.StplParser.translate": {
+      "<builtin>.RuntimeError": [
+        "bottle 4366:43 call  RuntimeError('Parser is a one time instance.')"
+      ]
+    },
+    "bottle.TornadoServer.run": {
+      "tornado.httpserver.HTTPServer": [
+        "bottle 3641:47 call  tornado.httpserver.HTTPServer(container)"
+      ],
+      "tornado.httpserver.HTTPServer.listen": [
+        "bottle 3642:22 call  server.listen(port=self.port, address=self.host)"
+      ],
+      "tornado.ioloop.IOLoop.instance": [
+        "bottle 3643:39 call  tornado.ioloop.IOLoop.instance()"
+      ],
+      "tornado.ioloop.IOLoop.instance.start": [
+        "bottle 3643:47 call  tornado.ioloop.IOLoop.instance().start()"
+      ],
+      "tornado.wsgi.WSGIContainer": [
+        "bottle 3640:47 call  tornado.wsgi.WSGIContainer(handler)"
+      ]
+    },
+    "bottle.TwistedServer.run": {
+      "twisted.internet.reactor.addSystemEventTrigger": [
+        "bottle 3671:38 call  reactor.addSystemEventTrigger('after', 'shutdown', thread..."
+      ],
+      "twisted.internet.reactor.listenTCP": [
+        "bottle 3673:26 call  reactor.listenTCP(self.port, factory, interface=self.host)"
+      ],
+      "twisted.internet.reactor.run": [
+        "bottle 3675:24 call  reactor.run()"
+      ],
+      "twisted.python.threadpool.ThreadPool": [
+        "bottle 3669:33 call  ThreadPool()"
+      ],
+      "twisted.python.threadpool.ThreadPool.start": [
+        "bottle 3670:26 call  thread_pool.start()"
+      ],
+      "twisted.web.server.Site": [
+        "bottle 3672:30 call  server.Site(wsgi.WSGIResource(reactor, thread_pool, handl..."
+      ],
+      "twisted.web.wsgi.WSGIResource": [
+        "bottle 3672:48 call  wsgi.WSGIResource(reactor, thread_pool, handler)"
+      ]
+    },
+    "bottle.WSGIHeaderDict.__delitem__": {
+      "<builtin>.TypeError": [
+        "bottle 2340:24 call  TypeError(\"%s is read-only.\" % self.__class__)"
+      ]
+    },
+    "bottle.WSGIHeaderDict.__iter__": {
+      "bottle._hkey": [
+        "bottle 2345:28 call  _hkey(key[5:])",
+        "bottle 2347:28 call  _hkey(key)"
+      ]
+    },
+    "bottle.WSGIHeaderDict.__setitem__": {
+      "<builtin>.TypeError": [
+        "bottle 2337:24 call  TypeError(\"%s is read-only.\" % self.__class__)"
+      ]
+    },
+    "bottle.WSGIHeaderDict.keys": {
+      "bottle.WSGIHeaderDict.__iter__": [
+        "bottle 2350:28 iter  self"
+      ]
+    },
+    "bottle.WSGIHeaderDict.raw": {
+      "<builtin>.dict.get": [
+        "bottle 2325:32 call  self.environ.get(self._ekey(key), default)"
+      ],
+      "bottle.WSGIHeaderDict._ekey": [
+        "bottle 2325:43 call  self._ekey(key)"
+      ]
+    },
+    "bottle.WSGIRefServer.run": {
+      "<builtin>.dict.get": [
+        "bottle 3519:39 call  self.options.get('handler_class', FixedHandler)",
+        "bottle 3520:38 call  self.options.get('server_class', WSGIServer)"
+      ],
+      "<builtin>.getattr": [
+        "bottle 3523:23 call  getattr(server_cls, 'address_family')"
+      ],
+      "bottle.Bottle.__call__": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "bottle.Bottle._cast.<lambda1>": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "bottle.WSGIFileWrapper.__iter__": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "bottle.WSGIRefServer.run.FixedHandler.address_string": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "bottle.WSGIRefServer.run.FixedHandler.log_request": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "bottle._closeiter.__iter__": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "bottle._closeiter.close": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "wsgiref.simple_server.WSGIServer.serve_forever": [
+        "bottle 3532:35 call  self.srv.serve_forever()"
+      ],
+      "wsgiref.simple_server.WSGIServer.server_close": [
+        "bottle 3534:34 call  self.srv.server_close()"
+      ],
+      "wsgiref.simple_server.make_server": [
+        "bottle 3528:31 call  make_server(self.host, self.port, app, server_cls, handle..."
+      ]
+    },
+    "bottle.WSGIRefServer.run.FixedHandler.log_request": {
+      "bottle.WSGIRefServer.run.FixedHandler.address_string": [
+        "bottle 3517:58 call  WSGIRequestHandler.log_request(*args, **kw)"
+      ],
+      "wsgiref.simple_server.WSGIRequestHandler.log_request": [
+        "bottle 3517:58 call  WSGIRequestHandler.log_request(*args, **kw)"
+      ]
+    },
+    "bottle.WaitressServer.run": {
+      "waitress.serve": [
+        "bottle 3589:14 call  serve(handler, host=self.host, port=self.port, _quiet=sel..."
+      ]
+    },
+    "bottle._ImportRedirect.__init__": {
+      "imp.new_module": [
+        "bottle 2071:62 call  new_module(name)"
+      ]
+    },
+    "bottle._ImportRedirect.find_module": {
+      "<builtin>.str.rsplit": [
+        "bottle 2088:27 call  fullname.rsplit('.', 1)"
+      ]
+    },
+    "bottle._ImportRedirect.load_module": {
+      "bottle._ImportRedirect.find_module": [
+        "bottle 2101:19 call  __import__(realname)"
+      ]
+    },
+    "bottle._MultipartParser._lineiter": {
+      "StringIO.StringIO.read": [
+        "bottle 3264:25 call  read(maxbuf if maxread < 0 else min(maxbuf, maxread))"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "bottle 3264:25 call  read(maxbuf if maxread < 0 else min(maxbuf, maxread))"
+      ]
+    },
+    "bottle._MultipartPart.close": {
+      "StringIO.StringIO.close": [
+        "bottle 3457:28 call  self.file.close()"
+      ]
+    },
+    "bottle._MultipartPart.finish": {
+      "StringIO.StringIO.seek": [
+        "bottle 3432:23 call  self.file.seek(0)"
+      ],
+      "bottle.MultipartError.__init__": [
+        "bottle 3431:33 call  MultipartError(\"Incomplete part: Header section not close..."
+      ]
+    },
+    "bottle._MultipartPart.finish_header": {
+      "<builtin>.bytes.split": [
+        "bottle 3422:52 call  self.filename.split(\"\\\\\")"
+      ],
+      "StringIO.StringIO": [
+        "bottle 3409:28 call  BytesIO()"
+      ]
+    },
+    "bottle._MultipartPart.raw": {
+      "StringIO.StringIO.read": [
+        "bottle 3451:34 call  self.file.read()"
+      ],
+      "StringIO.StringIO.seek": [
+        "bottle 3448:23 call  self.file.seek(0)",
+        "bottle 3453:27 call  self.file.seek(pos)"
+      ],
+      "StringIO.StringIO.tell": [
+        "bottle 3447:29 call  self.file.tell()"
+      ]
+    },
+    "bottle._MultipartPart.write_body": {
+      "StringIO.StringIO.read": [
+        "bottle 3404:29 call  read(min(chunksize, maxcopy - copied))"
+      ],
+      "StringIO.StringIO.seek": [
+        "bottle 3399:21 call  old.seek(0)"
+      ],
+      "StringIO.StringIO.write": [
+        "bottle 3391:24 call  self.file.write(self._buf + line)"
+      ]
+    },
+    "bottle._UTC.dst": {
+      "datetime.timedelta": [
+        "bottle 139:44 call  timedelta(0)"
+      ]
+    },
+    "bottle._UTC.utcoffset": {
+      "datetime.timedelta": [
+        "bottle 137:50 call  timedelta(0)"
+      ]
+    },
+    "bottle._cli_parse": {
+      "argparse.ArgumentParser": [
+        "bottle 34:28 call  ArgumentParser(prog=args[0], usage=\"%(prog)s [options] pa..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "bottle 36:8 call  opt(\"--version\", action=\"store_true\", help=\"show version ...",
+        "bottle 37:8 call  opt(\"-b\", \"--bind\", metavar=\"ADDRESS\", help=\"bind socket ...",
+        "bottle 38:8 call  opt(\"-s\", \"--server\", default='wsgiref', help=\"use SERVER...",
+        "bottle 39:8 call  opt(\"-p\", \"--plugin\", action=\"append\", help=\"install addi...",
+        "bottle 40:8 call  opt(\"-c\", \"--conf\", action=\"append\", metavar=\"FILE\", help...",
+        "bottle 42:8 call  opt(\"-C\", \"--param\", action=\"append\", metavar=\"NAME=VALUE...",
+        "bottle 44:8 call  opt(\"--debug\", action=\"store_true\", help=\"start server in...",
+        "bottle 45:8 call  opt(\"--reload\", action=\"store_true\", help=\"auto-reload on...",
+        "bottle 46:8 call  opt('app', help='WSGI app entry point.', nargs='?')"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "bottle 48:33 call  parser.parse_args(args[1:])"
+      ]
+    },
+    "bottle._cli_patch": {
+      "<builtin>.str.startswith": [
+        "bottle 57:34 call  opts.server.startswith('gevent')",
+        "bottle 60:36 call  opts.server.startswith('eventlet')"
+      ],
+      "bottle._cli_parse": [
+        "bottle 54:32 call  _cli_parse(cli_args)"
+      ],
+      "eventlet.monkey_patch": [
+        "bottle 62:34 call  eventlet.monkey_patch()"
+      ],
+      "gevent.monkey.patch_all": [
+        "bottle 59:36 call  gevent.monkey.patch_all()"
+      ]
+    },
+    "bottle._closeiter.close": {
+      "bottle._closeiter.close": [
+        "bottle 2651:17 call  func()"
+      ],
+      "io.BufferedReader.close": [
+        "bottle 2651:17 call  func()"
+      ]
+    },
+    "bottle._hval": {
+      "bottle.tob": [
+        "bottle 1613:18 call  tonat(value)"
+      ]
+    },
+    "bottle._local_property.fget": {
+      "<builtin>.RuntimeError": [
+        "bottle 1918:31 call  RuntimeError(\"Request context not initialized.\")"
+      ]
+    },
+    "bottle._main": {
+      "<builtin>.dict.setdefault": [
+        "bottle 4637:27 call  sys.modules.setdefault('bottle', sys.modules['__main__'])"
+      ],
+      "<builtin>.int": [
+        "bottle 4668:17 call  int(port)"
+      ],
+      "<builtin>.list.insert": [
+        "bottle 4636:20 call  sys.path.insert(0, '.')"
+      ],
+      "<builtin>.open": [
+        "bottle 4649:26 call  open(cfile, 'rb')"
+      ],
+      "<builtin>.print": [
+        "bottle 4631:14 call  print('Bottle %s' % __version__)"
+      ],
+      "<builtin>.str.endswith": [
+        "bottle 4648:30 call  cfile.endswith('.json')"
+      ],
+      "<builtin>.str.rfind": [
+        "bottle 4640:34 call  host.rfind(']')",
+        "bottle 4640:52 call  host.rfind(':')"
+      ],
+      "<builtin>.str.rsplit": [
+        "bottle 4641:33 call  host.rsplit(':', 1)"
+      ],
+      "<builtin>.str.split": [
+        "bottle 4662:38 call  cval.split('=', 1)"
+      ],
+      "<builtin>.str.strip": [
+        "bottle 4642:22 call  host.strip('[]')"
+      ],
+      "bottle.<lambda1>": [
+        "bottle 4650:48 call  json_loads(fp.read())"
+      ],
+      "bottle.ConfigDict.__init__": [
+        "bottle 4644:24 call  ConfigDict()"
+      ],
+      "bottle.ConfigDict.__setitem__": [
+        "bottle 4664:19 setitem  config[cval]"
+      ],
+      "bottle.ConfigDict.load_config": [
+        "bottle 4652:35 call  config.load_config(cfile)"
+      ],
+      "bottle.ConfigDict.load_dict": [
+        "bottle 4650:37 call  config.load_dict(json_loads(fp.read()))"
+      ],
+      "bottle.ConfigDict.update": [
+        "bottle 4662:26 call  config.update((cval.split('=', 1),))"
+      ],
+      "bottle._cli_parse": [
+        "bottle 4623:30 call  _cli_parse(argv)"
+      ],
+      "bottle._main._cli_error": [
+        "bottle 4634:19 call  _cli_error(\"No application entry point specified.\")",
+        "bottle 4654:23 call  _cli_error(parse_error)",
+        "bottle 4656:23 call  _cli_error(\"Unable to read config file %r\" % cfile)",
+        "bottle 4658:23 call  _cli_error(\"Unable to parse config file %r: %s\" % (cfile,..."
+      ],
+      "bottle.run": [
+        "bottle 4666:8 call  run(args.app, host=host, port=int(port), server=args.serv..."
+      ],
+      "io.BufferedReader.read": [
+        "bottle 4650:56 call  fp.read()"
+      ],
+      "json.loads": [
+        "bottle 4650:48 call  json_loads(fp.read())"
+      ],
+      "sys.exit": [
+        "bottle 4632:17 call  sys.exit(0)"
+      ],
+      "ujson.loads": [
+        "bottle 4650:48 call  json_loads(fp.read())"
+      ]
+    },
+    "bottle._main._cli_error": {
+      "argparse.ArgumentParser.print_help": [
+        "bottle 4626:26 call  parser.print_help()"
+      ],
+      "bottle._stderr": [
+        "bottle 4627:16 call  _stderr('\\nError: %s\\n' % cli_msg)"
+      ],
+      "sys.exit": [
+        "bottle 4628:17 call  sys.exit(1)"
+      ]
+    },
+    "bottle._parse_http_header": {
+      "<builtin>.bytes.lower": [
+        "bottle 3032:49 call  name.strip().lower()",
+        "bottle 3044:46 call  value.strip().lower()",
+        "bottle 3046:40 call  key.strip().lower()"
+      ],
+      "<builtin>.bytes.replace": [
+        "bottle 3036:63 call  quoted.replace('\\\\\"', '\"')"
+      ],
+      "<builtin>.bytes.split": [
+        "bottle 3027:29 call  h.split(',')",
+        "bottle 3028:32 call  value.split(';')",
+        "bottle 3031:41 call  attr.split('=', 1)"
+      ],
+      "<builtin>.bytes.strip": [
+        "bottle 3029:42 call  parts[0].strip()",
+        "bottle 3032:41 call  name.strip()",
+        "bottle 3032:66 call  value.strip()",
+        "bottle 3036:32 call  plain.strip()",
+        "bottle 3044:38 call  value.strip()",
+        "bottle 3046:32 call  key.strip()"
+      ]
+    },
+    "bottle._parse_qsl": {
+      "<builtin>.bytes.replace": [
+        "bottle 3058:39 call  nv[0].replace('+', ' ')",
+        "bottle 3059:41 call  nv[1].replace('+', ' ')"
+      ],
+      "<builtin>.bytes.split": [
+        "bottle 3054:25 call  qs.split('&')",
+        "bottle 3056:24 call  pair.split('=', 1)"
+      ],
+      "urllib.parse.unquote": [
+        "bottle 3058:25 call  urlunquote(nv[0].replace('+', ' '))",
+        "bottle 3059:27 call  urlunquote(nv[1].replace('+', ' '))"
+      ]
+    },
+    "bottle._stderr": {
+      "<builtin>.print": [
+        "bottle 165:14 call  print(*args, file=sys.stderr)"
+      ]
+    },
+    "bottle.auth_basic.decorator.wrapper": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 3173:38 getattr  request.auth"
+      ],
+      "bottle.Bottle._mount_wsgi.mountpoint_wrapper": [
+        "bottle 3178:24 call  func(*a, **ka)"
+      ],
+      "bottle.JSONPlugin.apply.wrapper": [
+        "bottle 3178:24 call  func(*a, **ka)"
+      ],
+      "bottle.auth_basic.decorator.wrapper": [
+        "bottle 3178:24 call  func(*a, **ka)"
+      ],
+      "bottle.view.decorator.wrapper": [
+        "bottle 3178:24 call  func(*a, **ka)"
+      ]
+    },
+    "bottle.cookie_decode": {
+      "<builtin>.bytes.split": [
+        "bottle 3087:30 call  data.split(tob('?'), 1)"
+      ],
+      "base64.b64decode": [
+        "bottle 3091:49 call  base64.b64decode(msg)"
+      ],
+      "base64.b64encode": [
+        "bottle 3090:44 call  base64.b64encode(hashed)"
+      ],
+      "bottle._lscmp": [
+        "bottle 3090:18 call  _lscmp(sig[1:], base64.b64encode(hashed))"
+      ],
+      "bottle.cookie_is_encoded": [
+        "bottle 3086:25 call  cookie_is_encoded(data)"
+      ],
+      "bottle.depr": [
+        "bottle 3083:9 call  depr(0, 13, \"cookie_decode() will be removed soon.\", \"Do ..."
+      ],
+      "bottle.tob": [
+        "bottle 3085:15 call  tob(data)",
+        "bottle 3087:34 call  tob('?')",
+        "bottle 3089:30 call  tob(key)"
+      ],
+      "hmac.HMAC.digest": [
+        "bottle 3089:69 call  hmac.new(tob(key), msg, digestmod=digestmod).digest()"
+      ],
+      "hmac.new": [
+        "bottle 3089:26 call  hmac.new(tob(key), msg, digestmod=digestmod)"
+      ],
+      "pickle.loads": [
+        "bottle 3091:32 call  pickle.loads(base64.b64decode(msg))"
+      ]
+    },
+    "bottle.cookie_encode": {
+      "base64.b64encode": [
+        "bottle 3076:27 call  base64.b64encode(pickle.dumps(data, -1))",
+        "bottle 3077:27 call  base64.b64encode(hmac.new(tob(key), msg, digestmod=digest..."
+      ],
+      "bottle.depr": [
+        "bottle 3073:9 call  depr(0, 13, \"cookie_encode() will be removed soon.\", \"Do ..."
+      ],
+      "bottle.tob": [
+        "bottle 3077:40 call  tob(key)",
+        "bottle 3078:15 call  tob('!')",
+        "bottle 3078:32 call  tob('?')"
+      ],
+      "hmac.HMAC.digest": [
+        "bottle 3077:79 call  hmac.new(tob(key), msg, digestmod=digestmod).digest()"
+      ],
+      "hmac.new": [
+        "bottle 3077:36 call  hmac.new(tob(key), msg, digestmod=digestmod)"
+      ],
+      "pickle.dumps": [
+        "bottle 3076:40 call  pickle.dumps(data, -1)"
+      ]
+    },
+    "bottle.cookie_is_encoded": {
+      "<builtin>.bool": [
+        "bottle 3099:16 call  bool(data.startswith(tob('!')) and tob('?') in data)"
+      ],
+      "<builtin>.bytes.startswith": [
+        "bottle 3099:32 call  data.startswith(tob('!'))"
+      ],
+      "bottle.depr": [
+        "bottle 3097:9 call  depr(0, 13, \"cookie_is_encoded() will be removed soon.\", ..."
+      ],
+      "bottle.tob": [
+        "bottle 3099:36 call  tob('!')",
+        "bottle 3099:50 call  tob('?')"
+      ]
+    },
+    "bottle.http_date": {
+      "bottle._UTC.utcoffset": [
+        "bottle 2967:35 call  value.utctimetuple()"
+      ],
+      "datetime.date.timetuple": [
+        "bottle 2970:32 call  value.timetuple()"
+      ]
+    },
+    "bottle.load": {
+      "<builtin>.eval": [
+        "bottle 3864:16 call  eval('%s.%s' % (module, target), namespace)"
+      ],
+      "<builtin>.getattr": [
+        "bottle 3861:40 call  getattr(sys.modules[module], target)"
+      ],
+      "<builtin>.str.isalnum": [
+        "bottle 3861:22 call  target.isalnum()"
+      ],
+      "<builtin>.str.split": [
+        "bottle 3858:34 call  target.split(\":\", 1)",
+        "bottle 3862:32 call  module.split('.')"
+      ],
+      "bottle._ImportRedirect.create_module": [
+        "bottle 3859:45 call  __import__(module)"
+      ],
+      "bottle._ImportRedirect.exec_module": [
+        "bottle 3859:45 call  __import__(module)"
+      ],
+      "bottle._ImportRedirect.find_module": [
+        "bottle 3859:45 call  __import__(module)"
+      ],
+      "bottle._ImportRedirect.find_spec": [
+        "bottle 3859:45 call  __import__(module)"
+      ],
+      "bottle._ImportRedirect.load_module": [
+        "bottle 3859:45 call  __import__(module)"
+      ]
+    },
+    "bottle.load_app": {
+      "<builtin>.callable": [
+        "bottle 3876:30 call  callable(rv)"
+      ],
+      "<builtin>.list.remove": [
+        "bottle 3878:27 call  default_app.remove(tmp)"
+      ],
+      "bottle.<lambda2>": [
+        "bottle 3876:30 call  callable(rv)"
+      ],
+      "bottle.AppStack.push": [
+        "bottle 3873:27 call  default_app.push()"
+      ],
+      "bottle.load": [
+        "bottle 3875:18 call  load(target)"
+      ]
+    },
+    "bottle.main": {
+      "bottle._main": [
+        "bottle 4677:10 call  _main(sys.argv)"
+      ]
+    },
+    "bottle.make_default_app_wrapper.wrapper": {
+      "bottle.Bottle.install": [
+        "bottle 3193:36 call  getattr(app(), name)(*a, **ka)"
+      ],
+      "bottle.Bottle.mount": [
+        "bottle 3193:36 call  getattr(app(), name)(*a, **ka)"
+      ],
+      "bottle.Bottle.patch": [
+        "bottle 3193:36 call  getattr(app(), name)(*a, **ka)"
+      ],
+      "bottle.Bottle.uninstall": [
+        "bottle 3193:36 call  getattr(app(), name)(*a, **ka)"
+      ]
+    },
+    "bottle.redirect": {
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 2824:48 getattr  request.url"
+      ]
+    },
+    "bottle.run": {
+      "<builtin>.ValueError": [
+        "bottle 3947:29 call  ValueError(\"Application is not callable: %r\" % app)",
+        "bottle 3964:29 call  ValueError(\"Unknown or unsupported server: %r\" % server)"
+      ],
+      "<builtin>.callable": [
+        "bottle 3946:24 call  callable(app)"
+      ],
+      "<builtin>.dict.get": [
+        "bottle 3921:35 call  sys.modules.get('__main__')",
+        "bottle 3958:38 call  server_names.get(server)"
+      ],
+      "<builtin>.getattr": [
+        "bottle 3921:19 call  getattr(sys.modules.get('__main__'), '__package__', None)",
+        "bottle 3992:23 call  getattr(server, 'quiet', quiet)"
+      ],
+      "<builtin>.isinstance": [
+        "bottle 3944:22 call  isinstance(app, basestring)",
+        "bottle 3950:26 call  isinstance(plugin, basestring)",
+        "bottle 3959:22 call  isinstance(server, basestring)",
+        "bottle 3961:22 call  isinstance(server, type)",
+        "bottle 3963:26 call  isinstance(server, ServerAdapter)"
+      ],
+      "<builtin>.repr": [
+        "bottle 3969:39 call  repr(server)"
+      ],
+      "<builtin>.str.startswith": [
+        "bottle 3970:38 call  server.host.startswith(\"unix:\")"
+      ],
+      "bottle.<lambda2>": [
+        "bottle 3946:24 call  callable(app)"
+      ],
+      "bottle.AiohttpServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.AppEngineServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.AppStack.__call__": [
+        "bottle 3943:33 call  default_app()"
+      ],
+      "bottle.AutoServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.BjoernServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.Bottle.install": [
+        "bottle 3952:24 call  app.install(plugin)"
+      ],
+      "bottle.CGIServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.CherootServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.CherryPyServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.ConfigDict.update": [
+        "bottle 3955:30 call  app.config.update(config)"
+      ],
+      "bottle.DieselServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.EventletServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.FapwsServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.FileCheckerThread.__enter__": [
+        "bottle 3980:18 with  bgcheck"
+      ],
+      "bottle.FileCheckerThread.__exit__": [
+        "bottle 3980:18 with  bgcheck"
+      ],
+      "bottle.FileCheckerThread.__init__": [
+        "bottle 3979:40 call  FileCheckerThread(lockfile, interval)"
+      ],
+      "bottle.FlupFCGIServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.GeventServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.GunicornServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.MeinheldServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.PasteServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.ServerAdapter.__init__": [
+        "bottle 3962:28 call  server(host=host, port=port, **kargs)"
+      ],
+      "bottle.ServerAdapter.__repr__": [
+        "bottle 3969:39 call  repr(server)"
+      ],
+      "bottle.ServerAdapter.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.TornadoServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.TwistedServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.WSGIRefServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle.WaitressServer.run": [
+        "bottle 3981:27 call  server.run(app)",
+        "bottle 3985:23 call  server.run(app)"
+      ],
+      "bottle._stderr": [
+        "bottle 3968:20 call  _stderr(\"Bottle v%s server starting up (using %s)...\" % (...",
+        "bottle 3971:24 call  _stderr(\"Listening on %s\" % server.host)",
+        "bottle 3973:24 call  _stderr(\"Listening on http://%s:%d/\" % (server.host, serv...",
+        "bottle 3975:20 call  _stderr(\"Hit Ctrl-C to quit.\\n\")"
+      ],
+      "bottle.debug": [
+        "bottle 3942:37 call  _debug(debug)"
+      ],
+      "bottle.load": [
+        "bottle 3951:30 call  load(plugin)",
+        "bottle 3960:26 call  load(server)"
+      ],
+      "bottle.load_app": [
+        "bottle 3945:27 call  load_app(app)"
+      ],
+      "collections.abc.Mapping.get": [
+        "bottle 3912:39 call  os.environ.get('BOTTLE_CHILD')",
+        "bottle 3978:38 call  os.environ.get('BOTTLE_LOCKFILE')"
+      ],
+      "os._Environ.copy": [
+        "bottle 3915:34 call  os.environ.copy()"
+      ],
+      "os.close": [
+        "bottle 3925:21 call  os.close(fd)"
+      ],
+      "os.path.exists": [
+        "bottle 3926:33 call  os.path.exists(lockfile)",
+        "bottle 3937:30 call  os.path.exists(lockfile)"
+      ],
+      "os.unlink": [
+        "bottle 3938:26 call  os.unlink(lockfile)"
+      ],
+      "os.utime": [
+        "bottle 3929:29 call  os.utime(lockfile, None)"
+      ],
+      "subprocess.Popen": [
+        "bottle 3927:37 call  subprocess.Popen(args, env=environ)"
+      ],
+      "subprocess.Popen.poll": [
+        "bottle 3928:29 call  p.poll()"
+      ],
+      "sys.exit": [
+        "bottle 3933:25 call  sys.exit(p.returncode)",
+        "bottle 3983:25 call  sys.exit(3)",
+        "bottle 3995:17 call  sys.exit(3)"
+      ],
+      "tempfile.mkstemp": [
+        "bottle 3914:40 call  tempfile.mkstemp(prefix='bottle.', suffix='.lock')"
+      ],
+      "time.sleep": [
+        "bottle 3930:31 call  time.sleep(interval)",
+        "bottle 3994:19 call  time.sleep(interval)"
+      ],
+      "traceback.print_exc": [
+        "bottle 3993:22 call  print_exc()"
+      ]
+    },
+    "bottle.static_file": {
+      "_sha1.sha1.hexdigest": [
+        "bottle 2918:49 call  hashlib.sha1(tob(etag)).hexdigest()"
+      ],
+      "bottle.BaseRequest.__getattr__": [
+        "bottle 2932:26 getattr  request.method"
+      ]
+    },
+    "bottle.template": {
+      "<builtin>.dict.update": [
+        "bottle 4482:22 call  kwargs.update(dictarg)"
+      ],
+      "bottle.CheetahTemplate.prepare": [
+        "bottle 4490:50 call  TEMPLATES[tplid].prepare(**settings)"
+      ],
+      "bottle.CheetahTemplate.render": [
+        "bottle 4497:35 call  TEMPLATES[tplid].render(kwargs)"
+      ],
+      "bottle.Jinja2Template.prepare": [
+        "bottle 4490:50 call  TEMPLATES[tplid].prepare(**settings)"
+      ],
+      "bottle.MakoTemplate.prepare": [
+        "bottle 4490:50 call  TEMPLATES[tplid].prepare(**settings)"
+      ],
+      "bottle.SimpleTemplate.prepare": [
+        "bottle 4490:50 call  TEMPLATES[tplid].prepare(**settings)"
+      ],
+      "bottle.abort": [
+        "bottle 4496:14 call  abort(500, 'Template (%s) not found' % tpl)"
+      ]
+    },
+    "bottle.view.decorator.wrapper": {
+      "bottle.Bottle._mount_wsgi.mountpoint_wrapper": [
+        "bottle 4521:26 call  func(*args, **kwargs)"
+      ],
+      "bottle.JSONPlugin.apply.wrapper": [
+        "bottle 4521:26 call  func(*args, **kwargs)"
+      ],
+      "bottle.auth_basic.decorator.wrapper": [
+        "bottle 4521:26 call  func(*args, **kwargs)"
+      ],
+      "bottle.view.decorator.wrapper": [
+        "bottle 4521:26 call  func(*args, **kwargs)"
+      ]
+    },
+    "bottle.yieldroutes": {
+      "inspect.getargspec": [
+        "bottle 3125:22 call  getargspec(func)"
+      ]
+    }
+  },
+  "notes": {
+    "bottle 1072:24 call  iter(out)": [
+      "out can be the _closeiter body of a static_file range response (line 2944), which reaches _cast through out.body (line 1061); for a Bottle mounted as a WSGI application, out.body is the child's output itself (line 737: rs.body is empty, so no chain): a _closeiter, or a WSGIFileWrapper whose file has read but neither close nor __iter__ (line 1067 does not wrap it again)"
+    ],
+    "bottle 1073:25 call  next(iout)": [
+      "The lazy encoder map from a mounted Bottle child is its named package-created output, stored by mountpoint_wrapper736-737 in HTTPResponse.body and recursively passed to _cast1061. next(iout) consumes it here and invokes encoder(x). For the second next1075, an admitted str subclass can encode its first truthy text item to empty bytes; the loop then consumes another map item. No client method is named. This ledger records the callback at the consumer. README ruling12 also permits its placement at1093:28 within Bottle._cast; the move is an allowed normalization, not an edge correction."
+    ],
+    "bottle 1075:29 call  next(iout)": [
+      "The lazy encoder map from a mounted Bottle child is its named package-created output, stored by mountpoint_wrapper736-737 in HTTPResponse.body and recursively passed to _cast1061. next(iout) consumes it here and invokes encoder(x). For the second next1075, an admitted str subclass can encode its first truthy text item to empty bytes; the loop then consumes another map item. No client method is named. This ledger records the callback at the consumer. README ruling12 also permits its placement at1093:28 within Bottle._cast; the move is an allowed normalization, not an edge correction."
+    ],
+    "bottle 1093:28 call  imap(encoder, itertools.chain([first], iout))": [
+      "imap is map on Python3 and itertools.imap on Python2. This ledger records the same-function callback at consumption sites as an allowed normalization; README ruling12 also permits the construction site."
+    ],
+    "bottle 1108:52 call  out.close()": [
+      "Client route callback results remain opaque under B5, including a documented callback returning static_file output. The package-created _closeiter alternative remains named; no concrete close method of a client-returned file is inferred."
+    ],
+    "bottle 1124:43 call  repr(E)": [
+      "The sole ledger/J12 witness is an HTTPResponse or HTTPError escaping a client error handler through abort/redirect. Global B5 expressly makes exceptions escaping client callbacks opaque. Independent package failures in _handle/_cast/default_error_handler do not supply this receiver: router HTTPError is caught inside _handle, and TemplateError derives from BottleException, not HTTPResponse. No independent admitted noncallback response exception reaches repr(E)."
+    ],
+    "bottle 114:36 call  json_lds(touni(s))": [
+      "json_lds is ujson.loads when ujson imports (an optional import, not installed: named as a missing module) and json.loads otherwise; both sides run"
+    ],
+    "bottle 1208:21 getattr  self.headers": [
+      "round 4 F4-1208-21: descriptor AttributeError invokes request fallback; No earlier operation checks this cache key."
+    ],
+    "bottle 1222:22 getattr  self.cookies": [
+      "round 4 F4-1222-22: descriptor AttributeError invokes request fallback; No earlier operation checks this cache key.",
+      "cookies of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1241:20 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1242:33 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1254:37 getattr  self.POST": [
+      "round 4 F4-1254-37: descriptor AttributeError invokes request fallback; FormsDict construction succeeds before the first POST load.",
+      "POST of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1255:32 getattr  self.POST": [
+      "round 4 F4-1255-32: descriptor AttributeError invokes request fallback; First POST load parses the empty urlencoded body successfully and caches FormsDict; recode_unicode assignment succeeds. The second POST load trips.",
+      "POST of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1265:32 getattr  self.query": [
+      "round 4 F4-1265-32: descriptor AttributeError invokes request fallback; FormsDict construction succeeds; first query load trips.",
+      "query of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1267:32 getattr  self.forms": [
+      "round 4 F4-1267-32: descriptor AttributeError invokes request fallback; Earlier query load parses empty QUERY_STRING, caches its FormsDict, and allitems iteration completes.",
+      "forms of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1278:37 getattr  self.POST": [
+      "round 4 F4-1278-37: descriptor AttributeError invokes request fallback; FormsDict construction succeeds before the first POST load.",
+      "POST of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1279:32 getattr  self.POST": [
+      "round 4 F4-1279-32: descriptor AttributeError invokes request fallback; First POST load parses and caches the empty urlencoded body; recode_unicode assignment succeeds before second POST load trips.",
+      "POST of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1292:22 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1298:34 call  json_loads(b)": [
+      "json_loads is the lambda of line 114 on Python 3; on Python 2 it is json_lds (line 143): ujson.loads when ujson imports (not installed: a missing module) or json.loads"
+    ],
+    "bottle 1304:31 getattr  self.content_length": [
+      "round 4 F4-1304-31: descriptor AttributeError invokes request fallback; Supply wsgi.input with an ordinary readable stream. Its read attribute is obtained; chunked reads HTTP_TRANSFER_ENCODING normally. _iter_body begins when _body iterates the generator, then its first content_length lookup trips."
+    ],
+    "bottle 1306:24 call  read(min(maxread, bufsize))": [
+      "BaseRequest._body creates BytesIO at1347 or NamedTemporaryFile at1352 and stores it in environ[\"wsgi.input\"] at1356. body publicly returns that exact object (1371-1378; docs/tutorial.rst675). Public __setitem__ supports changing wsgi.input and clears its body cache (1570-1578). Reassigning r[\"wsgi.input\"]=r.body therefore preserves package provenance while causing the next body read to use the package-created stream. Python2 uses StringIO.StringIO; NamedTemporaryFile methods have the Python3 func_wrapper name per the global version convention."
+    ],
+    "bottle 1316:26 call  read(1)": [
+      "BaseRequest._body creates BytesIO at1347 or NamedTemporaryFile at1352 and stores it in environ[\"wsgi.input\"] at1356. body publicly returns that exact object (1371-1378; docs/tutorial.rst675). Public __setitem__ supports changing wsgi.input and clears its body cache (1570-1578). Reassigning r[\"wsgi.input\"]=r.body therefore preserves package provenance while causing the next body read to use the package-created stream. Python2 uses StringIO.StringIO; NamedTemporaryFile methods have the Python3 func_wrapper name per the global version convention."
+    ],
+    "bottle 1318:25 call  read(1)": [
+      "BaseRequest._body creates BytesIO at1347 or NamedTemporaryFile at1352 and stores it in environ[\"wsgi.input\"] at1356. body publicly returns that exact object (1371-1378; docs/tutorial.rst675). Public __setitem__ supports changing wsgi.input and clears its body cache (1570-1578). Reassigning r[\"wsgi.input\"]=r.body therefore preserves package provenance while causing the next body read to use the package-created stream. Python2 uses StringIO.StringIO; NamedTemporaryFile methods have the Python3 func_wrapper name per the global version convention."
+    ],
+    "bottle 1331:32 call  read(min(maxread, bufsize))": [
+      "BaseRequest._body creates BytesIO at1347 or NamedTemporaryFile at1352 and stores it in environ[\"wsgi.input\"] at1356. body publicly returns that exact object (1371-1378; docs/tutorial.rst675). Public __setitem__ supports changing wsgi.input and clears its body cache (1570-1578). Reassigning r[\"wsgi.input\"]=r.body therefore preserves package provenance while causing the next body read to use the package-created stream. Python2 uses StringIO.StringIO; NamedTemporaryFile methods have the Python3 func_wrapper name per the global version convention."
+    ],
+    "bottle 1336:20 call  read(2)": [
+      "BaseRequest._body creates BytesIO at1347 or NamedTemporaryFile at1352 and stores it in environ[\"wsgi.input\"] at1356. body publicly returns that exact object (1371-1378; docs/tutorial.rst675). Public __setitem__ supports changing wsgi.input and clears its body cache (1570-1578). Reassigning r[\"wsgi.input\"]=r.body therefore preserves package provenance while causing the next body read to use the package-created stream. Python2 uses StringIO.StringIO; NamedTemporaryFile methods have the Python3 func_wrapper name per the global version convention."
+    ],
+    "bottle 1344:49 call  BytesIO()": [
+      "BytesIO is io.BytesIO on Python 3 and StringIO.StringIO on Python 2 (line 130), a class that only Python 2 has"
+    ],
+    "bottle 1346:48 getattr  self.chunked": [
+      "round 4 F4-1346-48: descriptor AttributeError invokes request fallback; Supply wsgi.input with an ordinary readable stream. _body obtains read_func successfully before chunked calls the selected get."
+    ],
+    "bottle 1347:48 call  BytesIO()": [
+      "BytesIO is io.BytesIO on Python 3 and StringIO.StringIO on Python 2 (line 130)"
+    ],
+    "bottle 1349:23 call  body.write(part)": [
+      "body is the BytesIO of line 1347 or, after the switch, the NamedTemporaryFile of line 1352, whose __getattr__ returns its func_wrapper around the file's write"
+    ],
+    "bottle 1363:17 getattr  self.content_length": [
+      "round 4 F4-1363-17: descriptor AttributeError invokes request fallback; CONTENT_TYPE is application/json. json recognizes this before entering _get_body_string; its first content_length lookup trips."
+    ],
+    "bottle 1365:21 getattr  self.body": [
+      "round 4 F4-1365-21: descriptor AttributeError invokes request fallback; CONTENT_TYPE is application/json and CONTENT_LENGTH is \"0\". Earlier length check succeeds. body enters, its _body descriptor trips; inner fallback raises AttributeError, causing fallback again at the outer self.body lookup."
+    ],
+    "bottle 1365:30 call  self.body.read(maxread + 1)": [
+      "self.body is the body that BaseRequest._body made: a BytesIO (StringIO on Python 2) or a NamedTemporaryFile"
+    ],
+    "bottle 1377:14 getattr  self._body": [
+      "round 4 F4-1377-14: descriptor AttributeError invokes request fallback; The first _body descriptor checks its cache and trips.",
+      "_body of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1377:24 call  self._body.seek(0)": [
+      "self._body is the body that BaseRequest._body made: a BytesIO (StringIO on Python 2) or a NamedTemporaryFile"
+    ],
+    "bottle 1378:21 getattr  self._body": [
+      "round 4 F4-1378-21: descriptor AttributeError invokes request fallback; Omit wsgi.input. First _body lookup creates BytesIO by its KeyError branch, stores and caches it successfully; seek(0) succeeds. Second cache membership check trips. No failed object is reused.",
+      "_body of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1396:29 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1401:25 call  tonat(self._get_body_string(self.MEMFILE_MAX), 'latin1')": [
+      "tonat is touni on Python 3 and tob on Python 2 (line 160)"
+    ],
+    "bottle 1411:40 getattr  self.body": [
+      "round 4 F4-1411-40: descriptor AttributeError invokes request fallback; CONTENT_TYPE is multipart/form-data; boundary=x. FormsDict creation, header parsing and boundary guard succeed before body lookup trips through its nested _body descriptor."
+    ],
+    "bottle 1411:61 getattr  self.content_length": [
+      "round 4 F4-1411-61: descriptor AttributeError invokes request fallback; CONTENT_TYPE is multipart/form-data; boundary=x. Omit wsgi.input, so earlier self.body creates and seeks an empty BytesIO without reading CONTENT_LENGTH; evaluating the later constructor argument self.content_length trips."
+    ],
+    "bottle 1417:40 call  tonat(part.value, 'utf8')": [
+      "tonat is touni on Python 3 and tob on Python 2 (line 160)"
+    ],
+    "bottle 1430:21 getattr  self.urlparts": [
+      "round 4 F4-1430-21: descriptor AttributeError invokes request fallback; The first urlparts descriptor cache check trips.",
+      "urlparts of a request is a DictProperty (lines 1174-1432), whose __get__ calls the getter"
+    ],
+    "bottle 1448:30 getattr  self.fullpath": [
+      "round 4 F4-1448-30: descriptor AttributeError invokes request fallback; HTTP_HOST is localhost; scheme and host reads succeed. fullpath enters script_name, selected get raises AttributeError, inner fallback propagates; the outer fullpath lookup enters fallback."
+    ],
+    "bottle 1454:29 getattr  self.script_name": [
+      "round 4 F4-1454-29: descriptor AttributeError invokes request fallback; script_name is the first operand and its first get trips."
+    ],
+    "bottle 1454:47 getattr  self.path": [
+      "round 4 F4-1454-47: descriptor AttributeError invokes request fallback; Earlier script_name reads ordinary SCRIPT_NAME and returns \"/\"; path then trips before lstrip."
+    ],
+    "bottle 145:9 call  exec(compile('def _raise(*a): raise a[0], a[1], a[2]', '<...": [
+      "Python 2 branch; the generated code only defines _raise (it has no node: generated code) and calls nothing when it runs"
+    ],
+    "bottle 1460:21 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1460:32 call  self.environ.get('QUERY_STRING', '')": [
+      "the receiver is the WSGI environ, a dict (PEP 3333)"
+    ],
+    "bottle 1478:78 getattr  self.path": [
+      "round 4 F4-1478-78: descriptor AttributeError invokes request fallback; Earlier self.environ.get(SCRIPT_NAME, \"/\") succeeds; self.path trips before calling module path_shift."
+    ],
+    "bottle 1491:21 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1491:32 call  self.environ.get('CONTENT_TYPE', '')": [
+      "the receiver is the WSGI environ, a dict (PEP 3333)"
+    ],
+    "bottle 1498:31 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1504:21 getattr  self.is_xhr": [
+      "round 4 F4-1504-21: descriptor AttributeError invokes request fallback; is_xhr first obtains requested_with with selected get and trips."
+    ],
+    "bottle 1526:22 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1528:23 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1535:22 getattr  self.remote_route": [
+      "round 4 F4-1535-22: descriptor AttributeError invokes request fallback; remote_route first selected get trips."
+    ],
+    "bottle 1540:23 call  Request(self.environ.copy())": [
+      "Request is BaseRequest (line 1953)"
+    ],
+    "bottle 1540:29 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1546:21 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1550:19 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1553:26 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1556:25 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1559:21 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1581:63 getattr  self.method": [
+      "round 4 F4-1581-63: descriptor AttributeError invokes request fallback; Class/name accesses succeed; method getter trips at selected get."
+    ],
+    "bottle 1581:76 getattr  self.url": [
+      "round 4 F4-1581-76: descriptor AttributeError invokes request fallback; Class/name and earlier method getter succeed using ordinary REQUEST_METHOD; url/urlparts reach selected get, whose AttributeError cascades to outer self.url fallback."
+    ],
+    "bottle 1601:22 getattr  self.environ": [
+      "for the LocalRequest request, environ is the property of _local_property (line 1936)"
+    ],
+    "bottle 1613:18 call  tonat(value)": [
+      "tonat is touni on Python 3 and tob on Python 2 (line 160)"
+    ],
+    "bottle 1628:27 call  self.reader(value)": [
+      "reader is int (content_length of BaseResponse and FileUpload) or the lambda of expires (line 1806); content_type has none"
+    ],
+    "bottle 1685:19 call  cls()": [
+      "cls is BaseResponse (default), HTTPResponse (redirect, line 2821) or another subclass that the issubclass check admits: LocalResponse runs BaseResponse.__init__, HTTPError its own; MultipartError() cannot bind its argument msg (TypeError, no edge)"
+    ],
+    "bottle 1687:14 setattr  copy._headers": [
+      "for the LocalResponse response, _headers is the property of _local_property (lines 1946-1950)"
+    ],
+    "bottle 1689:28 setattr  copy._cookies": [
+      "for the LocalResponse response, _cookies is the property of _local_property (lines 1946-1950)"
+    ],
+    "bottle 1696:20 call  iter(self.body)": [
+      "the body is a client value or what the package puts there: '', the file of static_file, the _closeiter of a static_file range response (line 2944), or the output of a Bottle mounted as a WSGI application (line 737), which is a WSGIFileWrapper when its route returns a file and the environ has no wsgi.file_wrapper (ruling R-b); a client can iterate the response"
+    ],
+    "bottle 1705:21 getattr  self._status_line": [
+      "for the LocalResponse response, _status_line is the property of _local_property (lines 1946-1950)"
+    ],
+    "bottle 1751:18 getattr  self._headers": [
+      "for the LocalResponse response, _headers is the property of _local_property (lines 1946-1950)"
+    ],
+    "bottle 1754:21 getattr  self._headers": [
+      "for the LocalResponse response, _headers is the property of _local_property (lines 1946-1950)"
+    ],
+    "bottle 1771:14 getattr  self._headers": [
+      "for the LocalResponse response, _headers is the property of _local_property (lines 1946-1950)"
+    ],
+    "bottle 1806:48 call  datetime.fromtimestamp(parse_date(x), UTC)": [
+      "on Python 2, UTC is the _UTC of line 140; fromtimestamp converts with the inherited tzinfo.fromutc, which calls back its utcoffset and dst (audit F2); on Python 3 UTC is timezone.utc"
+    ],
+    "bottle 1813:43 call  self.content_type.split('charset=')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): content_type is a header value stored through _hval (line 1613); the default '' never reaches this line (ruling R-c)"
+    ],
+    "bottle 1813:65 call  self.content_type.split('charset=')[-1].split(';')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): content_type is a header value stored through _hval (line 1613); the default '' never reaches this line (ruling R-c)"
+    ],
+    "bottle 1813:79 call  self.content_type.split('charset=')[-1].split(';')[0].str...": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): content_type is a header value stored through _hval (line 1613); the default '' never reaches this line (ruling R-c)"
+    ],
+    "bottle 1862:40 call  Morsel._reserved.setdefault('samesite', 'SameSite')": [
+      "the branch runs on declared Python2.7. The explicit changelog drop makes Python3.8 the supported Python3 minimum; stale setup/tox mentions of3.6/3.7 do not admit them."
+    ],
+    "bottle 1907:59 call  value.strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): the header values pass through _hval (line 1613) (ruling R-c)"
+    ],
+    "bottle 2026:30 call  callback(*a, **ka)": [
+      "Route.call is documented as the callback with all plugins applied (532-536). Bottle.route(callback=...) accepts exactly the route callback role (899-901). The public view and auth_basic APIs decorate that same role. A client can pass the existing package callback directly, preserving identity; no forwarding client callback is needed. Plugin uniqueness and a mount route's skip setting constrain its original route, not reuse on another route or direct decoration."
+    ],
+    "bottle 2032:38 call  dumps(rv)": [
+      "dumps is self.json_dumps: json_dumps by default (ujson.dumps when ujson imports, not installed: a missing module; else json.dumps), or a function that the client passes (a client callback)"
+    ],
+    "bottle 2037:32 call  dumps(rv.body)": [
+      "dumps is self.json_dumps: json_dumps by default (ujson.dumps or json.dumps) or a client callback"
+    ],
+    "bottle 2071:62 call  new_module(name)": [
+      "new_module is types.ModuleType on Python 3 (line 98) and imp.new_module on Python 2 (line 129)"
+    ],
+    "bottle 2101:19 call  __import__(realname)": [
+      "the import system asks every finder of sys.meta_path, which holds the _ImportRedirect of line 4618 (line 2078): find_spec on Python 3, find_module on Python 2; realname is bottle_<name>, outside the virtual package, so the finder returns None"
+    ],
+    "bottle 214:58 call  self.getter(obj)": [
+      "getter is the function that DictProperty.__call__ stores (line 208): the 13 functions of BaseRequest decorated with @DictProperty(...); Bottle.catchall is made without __call__ and has no getter; its key is normally in the config, but public deletion may remove it, after which missing-getter lookup raises before a call; a function that a client decorates is a client callback"
+    ],
+    "bottle 2164:59 call  self.dict.items()": [
+      "Python 2 branch (line 2158), which runs"
+    ],
+    "bottle 2167:38 call  self.dict.iterkeys()": [
+      "Python 2 branch (line 2158), which runs; dict.iterkeys exists only on Python 2 and keeps its Python 2 name"
+    ],
+    "bottle 2170:56 call  self.dict.itervalues()": [
+      "Python 2 branch (line 2158), which runs; dict.itervalues exists only on Python 2 and keeps its Python 2 name"
+    ],
+    "bottle 2173:63 call  self.dict.iteritems()": [
+      "Python 2 branch (line 2158), which runs; dict.iteritems exists only on Python 2 and keeps its Python 2 name"
+    ],
+    "bottle 2176:60 call  self.dict.iteritems()": [
+      "Python 2 branch (line 2158), which runs; dict.iteritems exists only on Python 2 and keeps its Python 2 name"
+    ],
+    "bottle 2179:60 call  self.dict.iteritems()": [
+      "Python 2 branch (line 2158), which runs; dict.iteritems exists only on Python 2 and keeps its Python 2 name"
+    ],
+    "bottle 223:20 call  getattr(obj, self.attr)": [
+      "obj is a Bottle (Bottle.catchall, attr 'config', an instance attribute); the request properties are read-only and raise before this line"
+    ],
+    "bottle 2325:32 call  self.environ.get(self._ekey(key), default)": [
+      "self.environ is the WSGI environ dict that BaseRequest.headers passes (line 1204)"
+    ],
+    "bottle 2546:30 call  self._meta.get(key, {})": [
+      "self._meta is a dict (line 2371)"
+    ],
+    "bottle 2651:17 call  func()": [
+      "the callbacks are the close of the file that static_file opens (line 2944) and the close that _cast passes (line 1098): a client iterable's, or _closeiter.close when the output was a _closeiter"
+    ],
+    "bottle 2780:71 call  self.file.tell()": [
+      "self.file is the file of a multipart part (BytesIO, StringIO on Python 2, or NamedTemporaryFile: lines 3398, 3409), which BaseRequest.POST passes, or a client file"
+    ],
+    "bottle 2782:23 call  read(chunk_size)": [
+      "read is self.file.read (line 2780): the file of a multipart part or a client file"
+    ],
+    "bottle 2785:23 call  self.file.seek(offset)": [
+      "self.file is the file of a multipart part or a client file"
+    ],
+    "bottle 2824:48 getattr  request.url": [
+      "round 4 F4-2824-48: descriptor AttributeError invokes request fallback; Both binds complete. request.get(SERVER_PROTOCOL), response.copy(cls=HTTPResponse), status and body assignments succeed. Evaluating request.url then trips before urljoin."
+    ],
+    "bottle 2918:49 call  hashlib.sha1(tob(etag)).hexdigest()": [
+      "The documented CPython hashlib fallback selects _sha1.sha1 when OpenSSL does not provide SHA-1; pinned CPython 3.8/3.11/3.12 sources establish _sha1.sha1.hexdigest alongside _hashlib.HASH.hexdigest. static_file builds the digest from its own stat-derived etag bytes. Bottle has no current explicit PyPy support declaration, so the PyPy-only _sha1.sha.hexdigest is outside the user-selected interpreter scope."
+    ],
+    "bottle 2932:26 getattr  request.method": [
+      "round 4 F4-2932-26: descriptor AttributeError invokes request fallback; Use an existing readable fixture file. Path checks, stat, header construction and SHA1 etag succeed. Missing conditional request headers return None through successful get_header calls; then request.method trips before file opening."
+    ],
+    "bottle 2967:35 call  value.utctimetuple()": [
+      "On supported Python2, UTC is the package _UTC instance (134-140). BaseResponse.expires reads a datetime produced by datetime.fromtimestamp(...,UTC) at1806. Assigning that public expires value back invokes its writer1807 -> http_date. The aware datetime.utctimetuple at2967 calls its tzinfo.utcoffset; local stdlib _pydatetime.py2072-2079 and2234-2241 show that dispatch. This preserves a package-created datetime through the same documented expiry role, without any client callback return."
+    ],
+    "bottle 3027:29 call  h.split(',')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3028:32 call  value.split(';')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3029:42 call  parts[0].strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3031:41 call  attr.split('=', 1)": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3032:41 call  name.strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3032:49 call  name.strip().lower()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3032:66 call  value.strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3036:32 call  plain.strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3036:63 call  quoted.replace('\\\\\"', '\"')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3044:38 call  value.strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3044:46 call  value.strip().lower()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3046:32 call  key.strip()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3046:40 call  key.strip().lower()": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): finish_header passes the part's header values, which HeaderDict stores through _hval (lines 3410, 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3054:25 call  qs.split('&')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): BaseRequest.POST passes tonat(body, 'latin1') (line 1401) (ruling R-c)"
+    ],
+    "bottle 3056:24 call  pair.split('=', 1)": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): BaseRequest.POST passes tonat(body, 'latin1') (line 1401) (ruling R-c)"
+    ],
+    "bottle 3058:25 call  urlunquote(nv[0].replace('+', ' '))": [
+      "urlunquote is a functools.partial of urllib.parse.unquote on Python 3 (line 95) and urllib.unquote on Python 2 (line 125), the same function under its Python 3 name"
+    ],
+    "bottle 3058:39 call  nv[0].replace('+', ' ')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): BaseRequest.POST passes tonat(body, 'latin1') (line 1401) (ruling R-c)"
+    ],
+    "bottle 3059:27 call  urlunquote(nv[1].replace('+', ' '))": [
+      "urlunquote is a functools.partial of urllib.parse.unquote on Python 3 (line 95) and urllib.unquote on Python 2 (line 125), the same function under its Python 3 name"
+    ],
+    "bottle 3059:41 call  nv[1].replace('+', ' ')": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): BaseRequest.POST passes tonat(body, 'latin1') (line 1401) (ruling R-c)"
+    ],
+    "bottle 3099:32 call  data.startswith(tob('!'))": [
+      "data is bytes: cookie_decode passes tob(data), and the test against tob('!') needs bytes"
+    ],
+    "bottle 3125:22 call  getargspec(func)": [
+      "getargspec is the function of line 107 on Python 3 and inspect.getargspec on Python 2 (line 133); both branches run"
+    ],
+    "bottle 3173:38 getattr  request.auth": [
+      "round 4 F4-3173-38: descriptor AttributeError invokes request fallback; Successful bind and decorator construction precede first wrapper invocation. The first request.auth lookup trips before check or client_func is called."
+    ],
+    "bottle 3178:24 call  func(*a, **ka)": [
+      "Route.call is documented as the callback with all plugins applied (532-536). Bottle.route(callback=...) accepts exactly the route callback role (899-901). The public view and auth_basic APIs decorate that same role. A client can pass the existing package callback directly, preserving identity; no forwarding client callback is needed. Plugin uniqueness and a mount route's skip setting constrain its original route, not reuse on another route or direct decoration."
+    ],
+    "bottle 3193:36 call  getattr(app(), name)(*a, **ka)": [
+      "the bound method of the default Bottle named by name: the twelve names of lines 3198-3209"
+    ],
+    "bottle 3264:25 call  read(maxbuf if maxread < 0 else min(maxbuf, maxread))": [
+      "read is self.stream.read; the only caller of the private parser, BaseRequest.POST, passes self.body: a BytesIO (StringIO on Python 2) or a NamedTemporaryFile"
+    ],
+    "bottle 3391:24 call  self.file.write(self._buf + line)": [
+      "self.file is the BytesIO of line 3409 (StringIO on Python 2) or the NamedTemporaryFile of line 3398"
+    ],
+    "bottle 3399:21 call  old.seek(0)": [
+      "old is the BytesIO of line 3409 (isinstance test; StringIO on Python 2)"
+    ],
+    "bottle 3404:29 call  read(min(chunksize, maxcopy - copied))": [
+      "read is old.read (line 3402), of the BytesIO of line 3409 (StringIO on Python 2)"
+    ],
+    "bottle 3409:28 call  BytesIO()": [
+      "BytesIO is io.BytesIO on Python 3 and StringIO.StringIO on Python 2 (line 130)"
+    ],
+    "bottle 3422:52 call  self.filename.split(\"\\\\\")": [
+      "on Python 2 the value can be the str (bytes by its Python 3 name) that tonat = tob makes (line 160): the Content-Disposition header of the part goes through HeaderDict.__setitem__ and _hval (lines 2279, 1613) (ruling R-c)"
+    ],
+    "bottle 3432:23 call  self.file.seek(0)": [
+      "self.file is the BytesIO of line 3409 (StringIO on Python 2) or the NamedTemporaryFile of line 3398"
+    ],
+    "bottle 3447:29 call  self.file.tell()": [
+      "The private raw getter is read only by _MultipartPart.value at3442. Its only package caller is BaseRequest.POST1417, guarded by not part.filename and part.is_buffered() at1416. is_buffered3436 requires isinstance(self.file,BytesIO). No private part is exported by POST: it exports strings or FileUpload objects. Thus tell/seek/read here reach BytesIO/StringIO, never NamedTemporaryFile. The per-function rule does not invent other receiver states."
+    ],
+    "bottle 3448:23 call  self.file.seek(0)": [
+      "The private raw getter is read only by _MultipartPart.value at3442. Its only package caller is BaseRequest.POST1417, guarded by not part.filename and part.is_buffered() at1416. is_buffered3436 requires isinstance(self.file,BytesIO). No private part is exported by POST: it exports strings or FileUpload objects. Thus tell/seek/read here reach BytesIO/StringIO, never NamedTemporaryFile. The per-function rule does not invent other receiver states."
+    ],
+    "bottle 3451:34 call  self.file.read()": [
+      "The private raw getter is read only by _MultipartPart.value at3442. Its only package caller is BaseRequest.POST1417, guarded by not part.filename and part.is_buffered() at1416. is_buffered3436 requires isinstance(self.file,BytesIO). No private part is exported by POST: it exports strings or FileUpload objects. Thus tell/seek/read here reach BytesIO/StringIO, never NamedTemporaryFile. The per-function rule does not invent other receiver states."
+    ],
+    "bottle 3453:27 call  self.file.seek(pos)": [
+      "The private raw getter is read only by _MultipartPart.value at3442. Its only package caller is BaseRequest.POST1417, guarded by not part.filename and part.is_buffered() at1416. is_buffered3436 requires isinstance(self.file,BytesIO). No private part is exported by POST: it exports strings or FileUpload objects. Thus tell/seek/read here reach BytesIO/StringIO, never NamedTemporaryFile. The per-function rule does not invent other receiver states."
+    ],
+    "bottle 3493:27 call  handler(environ, start_response)": [
+      "handler is the application that run() passes to the adapter (line 3981 or 3985): the default Bottle, a loaded Bottle, or a client WSGI callable"
+    ],
+    "bottle 3495:25 call  CGIHandler().run(fixed_environ)": [
+      "The library default wsgi.file_wrapper does not establish a permanent invariant: a before_request hook can use public del request[\"wsgi.file_wrapper\"]. BaseRequest.__delitem__1548-1550 and documented __setitem__1561 preserve this supported public operation. _cast then constructs its own WSGIFileWrapper1068 around a client file. The wrapper is a package-created value. wsgiref BaseHandler.finish_response iterates it (handlers.py183-185), so the server call has its __iter__ callback. The underlying file remains opaque."
+    ],
+    "bottle 3502:36 call  flup.server.fcgi.WSGIServer(handler, **self.options)": [
+      "flup is an optional server library that is not installed: named as a missing module (lead's ruling 2); a stub calls none of its arguments"
+    ],
+    "bottle 3517:58 call  WSGIRequestHandler.log_request(*args, **kw)": [
+      "BaseHTTPRequestHandler.log_request calls log_message, which calls self.address_string() of the FixedHandler"
+    ],
+    "bottle 3519:39 call  self.options.get('handler_class', FixedHandler)": [
+      "self.options is the ** dict of __init__"
+    ],
+    "bottle 3520:38 call  self.options.get('server_class', WSGIServer)": [
+      "self.options is the ** dict of __init__"
+    ],
+    "bottle 3532:35 call  self.srv.serve_forever()": [
+      "The library default wsgi.file_wrapper does not establish a permanent invariant: a before_request hook can use public del request[\"wsgi.file_wrapper\"]. BaseRequest.__delitem__1548-1550 and documented __setitem__1561 preserve this supported public operation. _cast then constructs its own WSGIFileWrapper1068 around a client file. The wrapper is a package-created value. wsgiref BaseHandler.finish_response iterates it (handlers.py183-185), so the server call has its __iter__ callback. The underlying file remains opaque."
+    ],
+    "bottle 3548:36 call  self.options.get('certfile')": [
+      "self.options is the ** dict of __init__"
+    ],
+    "bottle 3551:35 call  self.options.get('keyfile')": [
+      "self.options is the ** dict of __init__"
+    ],
+    "bottle 3555:47 call  wsgiserver.CherryPyWSGIServer(**self.options)": [
+      "cherrypy is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3576:29 call  wsgi.Server(**self.options)": [
+      "cheroot is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3589:14 call  serve(handler, host=self.host, port=self.port, _quiet=sel...": [
+      "waitress is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3596:30 call  TransLogger(handler, setup_console_handler=(not self.quiet))": [
+      "paste is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3605:22 call  server.listen((self.host, self.port))": [
+      "meinheld is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3640:47 call  tornado.wsgi.WSGIContainer(handler)": [
+      "tornado is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3656:33 call  sys.modules.get('__main__')": [
+      "sys.modules is a dict"
+    ],
+    "bottle 3659:26 call  util.run_wsgi_app(handler)": [
+      "google.appengine is an optional library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3669:33 call  ThreadPool()": [
+      "twisted is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3696:42 call  threading.local()": [
+      "threading.local is the class of the standard library (the module-level name local, line 4610, is not involved)"
+    ],
+    "bottle 36:8 call  opt(\"--version\", action=\"store_true\", help=\"show version ...": [
+      "opt is parser.add_argument (line 35), a bound method of the ArgumentParser of line 34"
+    ],
+    "bottle 3702:35 call  pywsgi.WSGIServer(address, handler, **self.options)": [
+      "gevent is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3706:29 call  server.serve_forever()": [
+      "the SIGINT handler of line 3705 (installed in a reloader child) runs while serve_forever blocks: the call where the package waits for the signal (signal handler ruling)"
+    ],
+    "bottle 3725:33 call  self.cfg.set(key, value)": [
+      "GunicornApplication is defined through missing-library BaseApplication, so the global definition-through-library exception requires reading the admitted library. BaseApplication.load_default_config constructs gunicorn.config.Config before invoking this override. The receiver is Config, not a stub access path.",
+      "Pinned Gunicorn27.0.1 app/base.py44 constructs Config in load_default_config, before do_load_config calls the package override at35. Its self.cfg.set is therefore the concrete receiver method Config.set (config.py81)."
+    ],
+    "bottle 3730:28 call  GunicornApplication()": [
+      "The global missing-library exception applies because the package defines GunicornApplication(BaseApplication). Pinned Gunicorn27.0.1 BaseApplication.__init__21-35 invokes package load_config. BaseApplication.run starts Arbiter, whose default sync worker calls app.wsgi -> package load (base.py65-68; workers/base.py138,148-150). SyncWorker.handle_request185 calls the Bottle application,189-191 iterates its output,197 closes it. The package-created _closeiter and encoding-map callbacks are preserved even when the underlying route output is opaque."
+    ],
+    "bottle 3730:34 call  GunicornApplication().run()": [
+      "The global missing-library exception applies because the package defines GunicornApplication(BaseApplication). Pinned Gunicorn27.0.1 BaseApplication.__init__21-35 invokes package load_config. BaseApplication.run starts Arbiter, whose default sync worker calls app.wsgi -> package load (base.py65-68; workers/base.py138,148-150). SyncWorker.handle_request185 calls the Bottle application,189-191 iterates its output,197 closes it. The package-created _closeiter and encoding-map callbacks are preserved even when the underlying route output is opaque.",
+      "The package-defined GunicornApplication invokes real admitted library code. Gunicorn's worker checks environ[\"wsgi.file_wrapper\"] after app return, so deletion alone is insufficient. An opaque client file can have a close property which restores the saved default wrapper class through public request[\"wsgi.file_wrapper\"] assignment when _cast1067 performs hasattr(out,\"close\"), after its absent-key branch1065 has already been selected. _cast constructs the package WSGIFileWrapper1068. The worker185-191 sees the restored default class, the returned wrapper is not an instance of it, and iterates the package wrapper. Client side effects affect control flow; no client method becomes a named callee."
+    ],
+    "bottle 3745:41 call  patcher.is_monkey_patched(os)": [
+      "eventlet is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3768:12 call  run(handler, self.host, self.port, reuse_port=True)": [
+      "bjoern is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3793:69 call  self.loop.stop()": [
+      "self.loop is the loop of get_event_loop: asyncio.new_event_loop() gives a SelectorEventLoop (ProactorEventLoop on Windows); uvloop.new_event_loop() an instance of the uvloop stub (not installed)"
+    ],
+    "bottle 3795:14 call  serve(handler, host=self.host, port=self.port)": [
+      "aiohttp_wsgi is not installed: named as a missing module (lead's ruling 2); the SIGINT handler of line 3793 (installed in a reloader child) runs while serve blocks (signal handler ruling)"
+    ],
+    "bottle 37:8 call  opt(\"-b\", \"--bind\", metavar=\"ADDRESS\", help=\"bind socket ...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 3804:37 call  uvloop.new_event_loop()": [
+      "uvloop is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 3814:26 call  sa(self.host, self.port, **self.options)": [
+      "sa is one of the classes of AutoServer.adapters (line 3808); all inherit ServerAdapter.__init__"
+    ],
+    "bottle 3859:45 call  __import__(module)": [
+      "the import system asks the _ImportRedirect of sys.meta_path (line 2078); for a target in the documented virtual package bottle.ext it loads the module through the redirect: find_spec, create_module and exec_module on Python 3, find_module and load_module on Python 2"
+    ],
+    "bottle 3876:30 call  callable(rv)": [
+      "callable is the lambda of line 115 on Python 3 and the builtin callable on Python 2"
+    ],
+    "bottle 38:8 call  opt(\"-s\", \"--server\", default='wsgiref', help=\"use SERVER...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 3912:39 call  os.environ.get('BOTTLE_CHILD')": [
+      "os.environ is an os._Environ, which inherits get from collections.abc.Mapping"
+    ],
+    "bottle 3921:35 call  sys.modules.get('__main__')": [
+      "sys.modules is a dict"
+    ],
+    "bottle 3942:37 call  _debug(debug)": [
+      "_debug is debug (line 3882), kept because the parameter debug shadows the function"
+    ],
+    "bottle 3943:33 call  default_app()": [
+      "default_app is the AppStack of line 4614"
+    ],
+    "bottle 3946:24 call  callable(app)": [
+      "callable is the lambda of line 115 on Python 3 and the builtin callable on Python 2"
+    ],
+    "bottle 3952:24 call  app.install(plugin)": [
+      "app is the default Bottle, a loaded Bottle, or a client WSGI callable (whose install is client behaviour)"
+    ],
+    "bottle 3958:38 call  server_names.get(server)": [
+      "server_names is the dict of line 3819"
+    ],
+    "bottle 3962:28 call  server(host=host, port=port, **kargs)": [
+      "server is an adapter class: a value of server_names (line 3819), all of which inherit ServerAdapter.__init__, or a client class"
+    ],
+    "bottle 3969:39 call  repr(server)": [
+      "server is a ServerAdapter (isinstance test, line 3963); all adapters inherit ServerAdapter.__repr__"
+    ],
+    "bottle 3978:38 call  os.environ.get('BOTTLE_LOCKFILE')": [
+      "os.environ is an os._Environ, which inherits get from collections.abc.Mapping"
+    ],
+    "bottle 3981:27 call  server.run(app)": [
+      "server is an instance of an adapter class: the values of server_names, the public base ServerAdapter, or a client subclass"
+    ],
+    "bottle 3985:23 call  server.run(app)": [
+      "server is an instance of an adapter class: the values of server_names, the public base ServerAdapter, or a client subclass"
+    ],
+    "bottle 39:8 call  opt(\"-p\", \"--plugin\", action=\"append\", help=\"install addi...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 4017:31 call  exists(path)": [
+      "exists is os.path.exists (line 4010)"
+    ],
+    "bottle 4017:58 call  mtime(path)": [
+      "mtime is the lambda of line 4011"
+    ],
+    "bottle 4020:26 call  exists(self.lockfile)": [
+      "exists is os.path.exists (line 4010)"
+    ],
+    "bottle 4021:21 call  mtime(self.lockfile)": [
+      "mtime is the lambda of line 4011"
+    ],
+    "bottle 4023:38 call  thread.interrupt_main()": [
+      "thread is _thread on Python 3 and thread on Python 2, the same module under its Python 3 name"
+    ],
+    "bottle 4025:30 call  exists(path)": [
+      "exists is os.path.exists (line 4010)"
+    ],
+    "bottle 4025:45 call  mtime(path)": [
+      "mtime is the lambda of line 4011"
+    ],
+    "bottle 4032:19 call  self.start()": [
+      "Thread.start runs self.run in the new thread"
+    ],
+    "bottle 4082:21 call  self.prepare(**self.settings)": [
+      "self is a BaseTemplate (a plain public class: its prepare raises NotImplementedError) or one of the four adapters"
+    ],
+    "bottle 40:8 call  opt(\"-c\", \"--conf\", action=\"append\", metavar=\"FILE\", help...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 4155:39 call  threading.local()": [
+      "threading.local is the class of the standard library (the module-level name local, line 4610, is not involved)"
+    ],
+    "bottle 4159:32 call  Template(source=self.source, **options)": [
+      "Cheetah is an optional template library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 4161:32 call  Template(file=self.filename, **options)": [
+      "Cheetah is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 4190:31 call  self.tpl.render(**_defaults)": [
+      "a template that extends or includes another loads it through the environment: the FunctionLoader calls self.loader, and a template found in the environment's cache is checked with its uptodate function, the lambda of line 4199"
+    ],
+    "bottle 4259:13 call  exec(self.co, env)": [
+      "round 4 F4-4259-13: descriptor AttributeError invokes request fallback; Bind, HTTPError and SimpleTemplate construction succeed; built-in template compilation succeeds. The generated error page formats e.status first, then evaluates repr(request.url), whose getter chain trips. Only ImportError is caught by that template, so fallback is entered before AttributeError propagates.",
+      "calls of the executed code belong to execute (generated code; bottle.md J3): the code that StplParser generates calls _printlist (list.extend), _str and _escape (the lambdas of prepare); templates call the documented functions include and rebase (partials of _include and _rebase), get, setdefault and defined (dict methods of env); the package's own ERROR_PAGE_TEMPLATE (line 4560) loads e.status (BaseResponse._get_status) and request.url and calls repr and type"
+    ],
+    "bottle 42:8 call  opt(\"-C\", \"--param\", action=\"append\", metavar=\"NAME=VALUE...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 4490:50 call  TEMPLATES[tplid].prepare(**settings)": [
+      "TEMPLATES[tplid] is the template object tpl that the client passes, an instance of the adapter class"
+    ],
+    "bottle 44:8 call  opt(\"--debug\", action=\"store_true\", help=\"start server in...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 4521:26 call  func(*args, **kwargs)": [
+      "Route.call is documented as the callback with all plugins applied (532-536). Bottle.route(callback=...) accepts exactly the route callback role (899-901). The public view and auth_basic APIs decorate that same role. A client can pass the existing package callback directly, preserving identity; no forwarding client callback is needed. Plugin uniqueness and a mount route's skip setting constrain its original route, not reuse on another route or direct decoration."
+    ],
+    "bottle 45:8 call  opt(\"--reload\", action=\"store_true\", help=\"auto-reload on...": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 460:29 call  f(query.pop(n))": [
+      "f is the out filter of a wildcard (line 389): the third item that the filter returns or str; the int and float filters return their inner lambdas, re and path return None; the filters of add_filter are client callbacks"
+    ],
+    "bottle 4650:48 call  json_loads(fp.read())": [
+      "json_loads is the lambda of line 114 on Python 3; on Python 2 it is json_lds (line 143): ujson.loads when ujson imports (not installed: a missing module) or json.loads"
+    ],
+    "bottle 4664:19 setitem  config[cval]": [
+      "config is the ConfigDict of line 4644"
+    ],
+    "bottle 4681:9 call  main()": [
+      "the __main__ block runs when bottle.py runs as a script (code of the module)"
+    ],
+    "bottle 46:8 call  opt('app', help='WSGI app entry point.', nargs='?')": [
+      "opt is parser.add_argument (line 35)"
+    ],
+    "bottle 593:26 call  getargspec(self.get_undecorated_callback())": [
+      "getargspec is the function of line 107 on Python 3 and inspect.getargspec on Python 2 (line 133); both branches run"
+    ],
+    "bottle 59:36 call  gevent.monkey.patch_all()": [
+      "gevent is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 601:31 call  self.config.get(key, default)": [
+      "self.config is a ConfigDict (line 529), a dict subclass that does not override get"
+    ],
+    "bottle 62:34 call  eventlet.monkey_patch()": [
+      "eventlet is an optional server library that is not installed: named as a missing module (lead's ruling 2)"
+    ],
+    "bottle 66:15 call  _cli_patch(sys.argv)": [
+      "the __main__ block runs when bottle.py runs as a script (code of the module)"
+    ],
+    "bottle 723:31 call  _raise(*exc_info)": [
+      "_raise is the function of line 118 on Python 3; on Python 2 it is the function that exec defines at line 145 (generated code, no node)"
+    ],
+    "bottle 820:24 call  callable(plugin)": [
+      "callable is the lambda of line 115 on Python 3 and the builtin callable on Python 2"
+    ],
+    "bottle 915:20 call  callable(path)": [
+      "callable is the lambda of line 115 on Python 3 and the builtin callable on Python 2"
+    ],
+    "bottle 951:26 call  self.route(path, method, **options)": [
+      "self is the Bottle; route is its method (the module-level name route, line 3198, is not involved)"
+    ],
+    "bottle 996:37 call  route.call(**args)": [
+      "route.call is the route callback after _make_callback applied the plugins: the wrapper of JSONPlugin (installed on every app), the wrapper of view (TemplatePlugin, or a callback decorated with @view), the wrapper of auth_basic (a callback decorated with @auth_basic, documented), mountpoint_wrapper (mount routes skip all plugins, line 742), or a client callback"
+    ]
+  },
+  "trace": "dynamic/bottle.json"
+}

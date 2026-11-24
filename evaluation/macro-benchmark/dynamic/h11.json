@@ -1,0 +1,744 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__"
+    ],
+    "<builtin>.RuntimeError": [
+      "threading.ThreadError"
+    ],
+    "<builtin>.bytes": [
+      "uuid.bytes_"
+    ],
+    "<builtin>.bytes.join": [
+      "uuid.bytes_.join"
+    ],
+    "<builtin>.bytes.lower": [
+      "uuid.bytes_.lower"
+    ],
+    "<builtin>.bytes.split": [
+      "uuid.bytes_.split"
+    ],
+    "<builtin>.bytes.strip": [
+      "uuid.bytes_.strip"
+    ],
+    "<builtin>.bytes.title": [
+      "uuid.bytes_.title"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.object.__init__": [
+      "<builtin>.bytes.__init__",
+      "<builtin>.str.__init__",
+      "abc.ABC.__init__",
+      "collections.abc.Collection.__init__",
+      "collections.abc.Container.__init__",
+      "collections.abc.Iterable.__init__",
+      "collections.abc.Reversible.__init__",
+      "collections.abc.Sequence.__init__",
+      "collections.abc.Sized.__init__",
+      "re.Match.__init__",
+      "re.Pattern.__init__",
+      "typing.Generic.__init__",
+      "typing.Text.__init__",
+      "uuid.bytes_.__init__"
+    ],
+    "<builtin>.object.__setattr__": [
+      "<builtin>.BaseException.__setattr__",
+      "<builtin>.Exception.__setattr__",
+      "<builtin>.bytearray.__setattr__",
+      "<builtin>.bytes.__setattr__",
+      "<builtin>.dict.__setattr__",
+      "<builtin>.list.__setattr__",
+      "<builtin>.set.__setattr__",
+      "<builtin>.str.__setattr__",
+      "abc.ABC.__setattr__",
+      "collections.abc.Collection.__setattr__",
+      "collections.abc.Container.__setattr__",
+      "collections.abc.Iterable.__setattr__",
+      "collections.abc.Reversible.__setattr__",
+      "collections.abc.Sequence.__setattr__",
+      "collections.abc.Sized.__setattr__",
+      "re.Match.__setattr__",
+      "re.Pattern.__setattr__",
+      "typing.Generic.__setattr__",
+      "typing.Text.__setattr__",
+      "uuid.bytes_.__setattr__"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ]
+  },
+  "commit": "1c5b07581f058886c8bdd87adababd7d959dc7ca",
+  "deselect": [
+    {
+      "reason": "binds a TCP server on 127.0.0.1, which the sandbox of the traces does not allow",
+      "test": "h11/tests/test_against_stdlib_http.py"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 0,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "h11._abnf": [
+      "<builtin>.globals",
+      "<builtin>.str.format"
+    ],
+    "h11._connection": [
+      "<builtin>.property",
+      "h11._util.Sentinel.__new__",
+      "typing.overload"
+    ],
+    "h11._connection.Connection.__init__": [
+      "<builtin>.ValueError",
+      "h11._connection.Connection._get_io_object",
+      "h11._receivebuffer.ReceiveBuffer.__init__",
+      "h11._state.ConnectionState.__init__"
+    ],
+    "h11._connection.Connection._clean_up_response_headers_for_sending": [
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "<builtin>.set.discard",
+      "<builtin>.sorted",
+      "<builtin>.type",
+      "h11._connection._body_framing",
+      "h11._events._ResponseBase.__init__",
+      "h11._headers.get_comma_header",
+      "h11._headers.set_comma_header",
+      "typing.cast"
+    ],
+    "h11._connection.Connection._extract_next_receive_event": [
+      "<builtin>.hasattr",
+      "h11._connection.Connection.their_state",
+      "h11._readers.ChunkedReader.__call__",
+      "h11._readers.ChunkedReader.read_eof",
+      "h11._readers.ContentLengthReader.__call__",
+      "h11._readers.ContentLengthReader.read_eof",
+      "h11._readers.Http10Reader.__call__",
+      "h11._readers.Http10Reader.read_eof",
+      "h11._readers.expect_nothing",
+      "h11._readers.maybe_read_from_IDLE_client",
+      "h11._readers.maybe_read_from_SEND_RESPONSE_server",
+      "h11._receivebuffer.ReceiveBuffer.__bool__"
+    ],
+    "h11._connection.Connection._get_io_object": [
+      "<builtin>.dict.get",
+      "h11._connection._body_framing",
+      "h11._readers.ChunkedReader.__init__",
+      "h11._readers.ContentLengthReader.__init__",
+      "h11._writers.ContentLengthWriter.__init__",
+      "typing.cast"
+    ],
+    "h11._connection.Connection._process_error": [
+      "<builtin>.dict",
+      "h11._connection.Connection._respond_to_state_changes",
+      "h11._state.ConnectionState.process_error"
+    ],
+    "h11._connection.Connection._process_event": [
+      "<builtin>.dict",
+      "<builtin>.type",
+      "h11._connection.Connection._respond_to_state_changes",
+      "h11._connection.Connection._server_switch_event",
+      "h11._connection._keep_alive",
+      "h11._headers.get_comma_header",
+      "h11._headers.has_expect_100_continue",
+      "h11._state.ConnectionState.process_client_switch_proposal",
+      "h11._state.ConnectionState.process_event",
+      "h11._state.ConnectionState.process_keep_alive_disabled",
+      "typing.cast"
+    ],
+    "h11._connection.Connection._respond_to_state_changes": [
+      "h11._connection.Connection._get_io_object",
+      "h11._connection.Connection.our_state",
+      "h11._connection.Connection.their_state"
+    ],
+    "h11._connection.Connection._server_switch_event": [
+      "<builtin>.type"
+    ],
+    "h11._connection.Connection.next_event": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "h11._connection.Connection._extract_next_receive_event",
+      "h11._connection.Connection._process_error",
+      "h11._connection.Connection._process_event",
+      "h11._connection.Connection.their_state",
+      "h11._receivebuffer.ReceiveBuffer.__len__",
+      "h11._util.LocalProtocolError._reraise_as_remote_protocol_error",
+      "h11._util.ProtocolError.__init__",
+      "typing.cast"
+    ],
+    "h11._connection.Connection.receive_data": [
+      "<builtin>.RuntimeError",
+      "h11._receivebuffer.ReceiveBuffer.__iadd__"
+    ],
+    "h11._connection.Connection.send": [
+      "<builtin>.bytes.join",
+      "h11._connection.Connection.send_with_data_passthrough"
+    ],
+    "h11._connection.Connection.send_failed": [
+      "h11._connection.Connection._process_error"
+    ],
+    "h11._connection.Connection.send_with_data_passthrough": [
+      "<builtin>.type",
+      "h11._connection.Connection._clean_up_response_headers_for_sending",
+      "h11._connection.Connection._process_error",
+      "h11._connection.Connection._process_event",
+      "h11._connection.Connection.our_state",
+      "h11._util.ProtocolError.__init__",
+      "h11._writers.BodyWriter.__call__",
+      "h11._writers.write_any_response",
+      "h11._writers.write_request"
+    ],
+    "h11._connection.Connection.start_next_cycle": [
+      "<builtin>.dict",
+      "h11._connection.Connection._respond_to_state_changes",
+      "h11._state.ConnectionState.start_next_cycle"
+    ],
+    "h11._connection.Connection.states": [
+      "<builtin>.dict"
+    ],
+    "h11._connection.Connection.trailing_data": [
+      "<builtin>.bytes",
+      "h11._receivebuffer.ReceiveBuffer.__bytes__"
+    ],
+    "h11._connection._body_framing": [
+      "<builtin>.int",
+      "<builtin>.type",
+      "h11._headers.get_comma_header"
+    ],
+    "h11._connection._keep_alive": [
+      "<builtin>.getattr",
+      "h11._headers.get_comma_header"
+    ],
+    "h11._events": [
+      "<builtin>.str.encode",
+      "dataclasses.dataclass",
+      "dataclasses.dataclass.wrap",
+      "re.compile"
+    ],
+    "h11._events.Data.__init__": [
+      "<builtin>.object.__setattr__"
+    ],
+    "h11._events.EndOfMessage.__init__": [
+      "<builtin>.isinstance",
+      "<builtin>.object.__init__",
+      "<builtin>.object.__setattr__",
+      "<builtin>.super",
+      "h11._headers.Headers.__init__",
+      "h11._headers.normalize_and_validate"
+    ],
+    "h11._events.InformationalResponse.__post_init__": [
+      "<builtin>.str.format",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._events.Request.__init__": [
+      "<builtin>.isinstance",
+      "<builtin>.object.__init__",
+      "<builtin>.object.__setattr__",
+      "<builtin>.super",
+      "h11._headers.Headers.__getitem__",
+      "h11._headers.normalize_and_validate",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.bytesify",
+      "h11._util.validate"
+    ],
+    "h11._events.Response.__post_init__": [
+      "<builtin>.str.format",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._events._ResponseBase.__init__": [
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.object.__init__",
+      "<builtin>.object.__setattr__",
+      "<builtin>.super",
+      "h11._events.InformationalResponse.__post_init__",
+      "h11._events.Response.__post_init__",
+      "h11._headers.normalize_and_validate",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.bytesify"
+    ],
+    "h11._headers": [
+      "<builtin>.str.encode",
+      "re.compile",
+      "typing.overload"
+    ],
+    "h11._headers.Headers.__bool__": [
+      "<builtin>.bool"
+    ],
+    "h11._headers.Headers.__eq__": [
+      "<builtin>.list",
+      "h11._headers.Headers.__getitem__",
+      "h11._headers.Headers.__len__"
+    ],
+    "h11._headers.Headers.__len__": [
+      "<builtin>.len"
+    ],
+    "h11._headers.get_comma_header": [
+      "<builtin>.bytes.lower",
+      "<builtin>.bytes.split",
+      "<builtin>.bytes.strip",
+      "<builtin>.list.append"
+    ],
+    "h11._headers.has_expect_100_continue": [
+      "h11._headers.get_comma_header"
+    ],
+    "h11._headers.normalize_and_validate": [
+      "<builtin>.bytes.lower",
+      "<builtin>.bytes.split",
+      "<builtin>.bytes.strip",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.set.pop",
+      "h11._headers.Headers.__init__",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.bytesify",
+      "h11._util.validate"
+    ],
+    "h11._headers.set_comma_header": [
+      "<builtin>.bytes.title",
+      "<builtin>.list.append",
+      "h11._headers.normalize_and_validate"
+    ],
+    "h11._readers": [
+      "<builtin>.str.encode",
+      "re.compile"
+    ],
+    "h11._readers.ChunkedReader.__call__": [
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.list",
+      "h11._events.Data.__init__",
+      "h11._events.EndOfMessage.__init__",
+      "h11._readers.ChunkedReader.__call__",
+      "h11._readers._decode_header_lines",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_lines",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_next_line",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.validate"
+    ],
+    "h11._readers.ChunkedReader.read_eof": [
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._readers.ContentLengthReader.__call__": [
+      "<builtin>.len",
+      "h11._events.Data.__init__",
+      "h11._events.EndOfMessage.__init__",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most"
+    ],
+    "h11._readers.ContentLengthReader.read_eof": [
+      "<builtin>.str.format",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._readers.Http10Reader.__call__": [
+      "h11._events.Data.__init__",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most"
+    ],
+    "h11._readers.Http10Reader.read_eof": [
+      "h11._events.EndOfMessage.__init__"
+    ],
+    "h11._readers._decode_header_lines": [
+      "h11._readers._obsolete_line_fold",
+      "h11._util.validate"
+    ],
+    "h11._readers._obsolete_line_fold": [
+      "<builtin>.bytearray",
+      "<builtin>.isinstance",
+      "<builtin>.iter",
+      "h11._util.ProtocolError.__init__",
+      "re.Match.end",
+      "re.Pattern.match"
+    ],
+    "h11._readers.expect_nothing": [
+      "h11._receivebuffer.ReceiveBuffer.__bool__",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._readers.maybe_read_from_IDLE_client": [
+      "<builtin>.list",
+      "h11._events.Request.__init__",
+      "h11._readers._decode_header_lines",
+      "h11._receivebuffer.ReceiveBuffer.is_next_line_obviously_invalid_request_line",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_lines",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.validate"
+    ],
+    "h11._readers.maybe_read_from_SEND_RESPONSE_server": [
+      "<builtin>.int",
+      "<builtin>.list",
+      "h11._events._ResponseBase.__init__",
+      "h11._readers._decode_header_lines",
+      "h11._receivebuffer.ReceiveBuffer.is_next_line_obviously_invalid_request_line",
+      "h11._receivebuffer.ReceiveBuffer.maybe_extract_lines",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.validate"
+    ],
+    "h11._receivebuffer": [
+      "re.compile"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.__bool__": [
+      "<builtin>.bool",
+      "<builtin>.len",
+      "h11._receivebuffer.ReceiveBuffer.__len__"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.__bytes__": [
+      "<builtin>.bytes"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.__init__": [
+      "<builtin>.bytearray"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.__len__": [
+      "<builtin>.len"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most": [
+      "h11._receivebuffer.ReceiveBuffer._extract"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_lines": [
+      "<builtin>.bytearray.endswith",
+      "<builtin>.bytearray.split",
+      "<builtin>.len",
+      "<builtin>.max",
+      "h11._receivebuffer.ReceiveBuffer._extract",
+      "re.Match.span",
+      "re.Pattern.search"
+    ],
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_next_line": [
+      "<builtin>.bytearray.find",
+      "<builtin>.len",
+      "<builtin>.max",
+      "h11._receivebuffer.ReceiveBuffer._extract"
+    ],
+    "h11._state": [
+      "h11._util.Sentinel.__new__"
+    ],
+    "h11._state.ConnectionState.__init__": [
+      "<builtin>.set"
+    ],
+    "h11._state.ConnectionState._fire_event_triggered_transitions": [
+      "<builtin>.str.format",
+      "h11._util.ProtocolError.__init__",
+      "h11._util.Sentinel.__repr__",
+      "typing.cast"
+    ],
+    "h11._state.ConnectionState._fire_state_triggered_transitions": [
+      "<builtin>.dict",
+      "<builtin>.dict.get",
+      "<builtin>.dict.update"
+    ],
+    "h11._state.ConnectionState.process_client_switch_proposal": [
+      "<builtin>.set.add",
+      "h11._state.ConnectionState._fire_state_triggered_transitions"
+    ],
+    "h11._state.ConnectionState.process_error": [
+      "h11._state.ConnectionState._fire_state_triggered_transitions"
+    ],
+    "h11._state.ConnectionState.process_event": [
+      "<builtin>.set",
+      "h11._state.ConnectionState._fire_event_triggered_transitions",
+      "h11._state.ConnectionState._fire_state_triggered_transitions",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._state.ConnectionState.process_keep_alive_disabled": [
+      "h11._state.ConnectionState._fire_state_triggered_transitions"
+    ],
+    "h11._state.ConnectionState.start_next_cycle": [
+      "h11._util.ProtocolError.__init__",
+      "h11._util.Sentinel.__repr__"
+    ],
+    "h11._util": [
+      "typing.TypeVar"
+    ],
+    "h11._util.ProtocolError.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.TypeError",
+      "<builtin>.type"
+    ],
+    "h11._util.Sentinel.__new__": [
+      "<builtin>.super",
+      "<builtin>.type.__new__"
+    ],
+    "h11._util.bytesify": [
+      "<builtin>.TypeError",
+      "<builtin>.bytes",
+      "<builtin>.isinstance",
+      "<builtin>.str.encode",
+      "<builtin>.type"
+    ],
+    "h11._util.validate": [
+      "<builtin>.str.format",
+      "h11._util.ProtocolError.__init__",
+      "re.Match.groupdict",
+      "re.Pattern.fullmatch"
+    ],
+    "h11._writers.BodyWriter.__call__": [
+      "<builtin>.type",
+      "h11._writers.ChunkedWriter.send_data",
+      "h11._writers.ChunkedWriter.send_eom",
+      "h11._writers.ContentLengthWriter.send_data",
+      "h11._writers.ContentLengthWriter.send_eom",
+      "h11._writers.Http10Writer.send_data",
+      "h11._writers.Http10Writer.send_eom"
+    ],
+    "h11._writers.ChunkedWriter.send_data": [
+      "<builtin>.len",
+      "<builtin>.list.append"
+    ],
+    "h11._writers.ChunkedWriter.send_eom": [
+      "<builtin>.list.append",
+      "h11._writers.write_headers"
+    ],
+    "h11._writers.ContentLengthWriter.send_data": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._writers.ContentLengthWriter.send_eom": [
+      "h11._headers.Headers.__bool__",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._writers.Http10Writer.send_data": [
+      "<builtin>.list.append"
+    ],
+    "h11._writers.Http10Writer.send_eom": [
+      "h11._headers.Headers.__bool__",
+      "h11._util.ProtocolError.__init__"
+    ],
+    "h11._writers.write_any_response": [
+      "<builtin>.list.append",
+      "<builtin>.str",
+      "<builtin>.str.encode",
+      "h11._util.ProtocolError.__init__",
+      "h11._writers.write_headers"
+    ],
+    "h11._writers.write_headers": [
+      "<builtin>.list.append"
+    ],
+    "h11._writers.write_request": [
+      "<builtin>.list.append",
+      "h11._util.ProtocolError.__init__",
+      "h11._writers.write_headers"
+    ]
+  },
+  "executed": [
+    "h11._connection.Connection.__init__",
+    "h11._connection.Connection._clean_up_response_headers_for_sending",
+    "h11._connection.Connection._extract_next_receive_event",
+    "h11._connection.Connection._get_io_object",
+    "h11._connection.Connection._process_error",
+    "h11._connection.Connection._process_event",
+    "h11._connection.Connection._respond_to_state_changes",
+    "h11._connection.Connection._server_switch_event",
+    "h11._connection.Connection.next_event",
+    "h11._connection.Connection.our_state",
+    "h11._connection.Connection.receive_data",
+    "h11._connection.Connection.send",
+    "h11._connection.Connection.send_failed",
+    "h11._connection.Connection.send_with_data_passthrough",
+    "h11._connection.Connection.start_next_cycle",
+    "h11._connection.Connection.states",
+    "h11._connection.Connection.their_state",
+    "h11._connection.Connection.they_are_waiting_for_100_continue",
+    "h11._connection.Connection.trailing_data",
+    "h11._connection._body_framing",
+    "h11._connection._keep_alive",
+    "h11._events.Data.__init__",
+    "h11._events.EndOfMessage.__init__",
+    "h11._events.InformationalResponse.__post_init__",
+    "h11._events.Request.__init__",
+    "h11._events.Response.__post_init__",
+    "h11._events._ResponseBase.__init__",
+    "h11._headers.Headers.__bool__",
+    "h11._headers.Headers.__eq__",
+    "h11._headers.Headers.__getitem__",
+    "h11._headers.Headers.__init__",
+    "h11._headers.Headers.__len__",
+    "h11._headers.Headers.raw_items",
+    "h11._headers.get_comma_header",
+    "h11._headers.has_expect_100_continue",
+    "h11._headers.normalize_and_validate",
+    "h11._headers.set_comma_header",
+    "h11._readers.ChunkedReader.__call__",
+    "h11._readers.ChunkedReader.__init__",
+    "h11._readers.ChunkedReader.read_eof",
+    "h11._readers.ContentLengthReader.__call__",
+    "h11._readers.ContentLengthReader.__init__",
+    "h11._readers.ContentLengthReader.read_eof",
+    "h11._readers.Http10Reader.__call__",
+    "h11._readers.Http10Reader.read_eof",
+    "h11._readers._decode_header_lines",
+    "h11._readers._obsolete_line_fold",
+    "h11._readers.expect_nothing",
+    "h11._readers.maybe_read_from_IDLE_client",
+    "h11._readers.maybe_read_from_SEND_RESPONSE_server",
+    "h11._receivebuffer.ReceiveBuffer.__bool__",
+    "h11._receivebuffer.ReceiveBuffer.__bytes__",
+    "h11._receivebuffer.ReceiveBuffer.__iadd__",
+    "h11._receivebuffer.ReceiveBuffer.__init__",
+    "h11._receivebuffer.ReceiveBuffer.__len__",
+    "h11._receivebuffer.ReceiveBuffer._extract",
+    "h11._receivebuffer.ReceiveBuffer.is_next_line_obviously_invalid_request_line",
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most",
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_lines",
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_next_line",
+    "h11._state.ConnectionState.__init__",
+    "h11._state.ConnectionState._fire_event_triggered_transitions",
+    "h11._state.ConnectionState._fire_state_triggered_transitions",
+    "h11._state.ConnectionState.process_client_switch_proposal",
+    "h11._state.ConnectionState.process_error",
+    "h11._state.ConnectionState.process_event",
+    "h11._state.ConnectionState.process_keep_alive_disabled",
+    "h11._state.ConnectionState.start_next_cycle",
+    "h11._util.LocalProtocolError._reraise_as_remote_protocol_error",
+    "h11._util.ProtocolError.__init__",
+    "h11._util.Sentinel.__new__",
+    "h11._util.Sentinel.__repr__",
+    "h11._util.bytesify",
+    "h11._util.validate",
+    "h11._writers.BodyWriter.__call__",
+    "h11._writers.ChunkedWriter.send_data",
+    "h11._writers.ChunkedWriter.send_eom",
+    "h11._writers.ContentLengthWriter.__init__",
+    "h11._writers.ContentLengthWriter.send_data",
+    "h11._writers.ContentLengthWriter.send_eom",
+    "h11._writers.Http10Writer.send_data",
+    "h11._writers.Http10Writer.send_eom",
+    "h11._writers.write_any_response",
+    "h11._writers.write_headers",
+    "h11._writers.write_request"
+  ],
+  "functions": [
+    "h11._connection.Connection.__init__",
+    "h11._connection.Connection._clean_up_response_headers_for_sending",
+    "h11._connection.Connection._extract_next_receive_event",
+    "h11._connection.Connection._get_io_object",
+    "h11._connection.Connection._process_error",
+    "h11._connection.Connection._process_event",
+    "h11._connection.Connection._respond_to_state_changes",
+    "h11._connection.Connection._server_switch_event",
+    "h11._connection.Connection.next_event",
+    "h11._connection.Connection.our_state",
+    "h11._connection.Connection.receive_data",
+    "h11._connection.Connection.send",
+    "h11._connection.Connection.send_failed",
+    "h11._connection.Connection.send_with_data_passthrough",
+    "h11._connection.Connection.start_next_cycle",
+    "h11._connection.Connection.states",
+    "h11._connection.Connection.their_state",
+    "h11._connection.Connection.they_are_waiting_for_100_continue",
+    "h11._connection.Connection.trailing_data",
+    "h11._connection._body_framing",
+    "h11._connection._keep_alive",
+    "h11._events.Data.__init__",
+    "h11._events.EndOfMessage.__init__",
+    "h11._events.InformationalResponse.__post_init__",
+    "h11._events.Request.__init__",
+    "h11._events.Response.__post_init__",
+    "h11._events._ResponseBase.__init__",
+    "h11._events._ResponseBase.__post_init__",
+    "h11._headers.Headers.__bool__",
+    "h11._headers.Headers.__eq__",
+    "h11._headers.Headers.__getitem__",
+    "h11._headers.Headers.__init__",
+    "h11._headers.Headers.__len__",
+    "h11._headers.Headers.__repr__",
+    "h11._headers.Headers.raw_items",
+    "h11._headers.get_comma_header",
+    "h11._headers.has_expect_100_continue",
+    "h11._headers.normalize_and_validate",
+    "h11._headers.set_comma_header",
+    "h11._readers.ChunkedReader.__call__",
+    "h11._readers.ChunkedReader.__init__",
+    "h11._readers.ChunkedReader.read_eof",
+    "h11._readers.ContentLengthReader.__call__",
+    "h11._readers.ContentLengthReader.__init__",
+    "h11._readers.ContentLengthReader.read_eof",
+    "h11._readers.Http10Reader.__call__",
+    "h11._readers.Http10Reader.read_eof",
+    "h11._readers._decode_header_lines",
+    "h11._readers._obsolete_line_fold",
+    "h11._readers.expect_nothing",
+    "h11._readers.maybe_read_from_IDLE_client",
+    "h11._readers.maybe_read_from_SEND_RESPONSE_server",
+    "h11._receivebuffer.ReceiveBuffer.__bool__",
+    "h11._receivebuffer.ReceiveBuffer.__bytes__",
+    "h11._receivebuffer.ReceiveBuffer.__iadd__",
+    "h11._receivebuffer.ReceiveBuffer.__init__",
+    "h11._receivebuffer.ReceiveBuffer.__len__",
+    "h11._receivebuffer.ReceiveBuffer._extract",
+    "h11._receivebuffer.ReceiveBuffer.is_next_line_obviously_invalid_request_line",
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_at_most",
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_lines",
+    "h11._receivebuffer.ReceiveBuffer.maybe_extract_next_line",
+    "h11._state.ConnectionState.__init__",
+    "h11._state.ConnectionState._fire_event_triggered_transitions",
+    "h11._state.ConnectionState._fire_state_triggered_transitions",
+    "h11._state.ConnectionState.process_client_switch_proposal",
+    "h11._state.ConnectionState.process_error",
+    "h11._state.ConnectionState.process_event",
+    "h11._state.ConnectionState.process_keep_alive_disabled",
+    "h11._state.ConnectionState.start_next_cycle",
+    "h11._util.LocalProtocolError._reraise_as_remote_protocol_error",
+    "h11._util.ProtocolError.__init__",
+    "h11._util.Sentinel.__new__",
+    "h11._util.Sentinel.__repr__",
+    "h11._util.bytesify",
+    "h11._util.validate",
+    "h11._writers.BodyWriter.__call__",
+    "h11._writers.BodyWriter.send_data",
+    "h11._writers.BodyWriter.send_eom",
+    "h11._writers.ChunkedWriter.send_data",
+    "h11._writers.ChunkedWriter.send_eom",
+    "h11._writers.ContentLengthWriter.__init__",
+    "h11._writers.ContentLengthWriter.send_data",
+    "h11._writers.ContentLengthWriter.send_eom",
+    "h11._writers.Http10Writer.send_data",
+    "h11._writers.Http10Writer.send_eom",
+    "h11._writers.write_any_response",
+    "h11._writers.write_headers",
+    "h11._writers.write_request"
+  ],
+  "modules": [
+    "h11",
+    "h11._abnf",
+    "h11._connection",
+    "h11._events",
+    "h11._headers",
+    "h11._readers",
+    "h11._receivebuffer",
+    "h11._state",
+    "h11._util",
+    "h11._version",
+    "h11._writers"
+  ],
+  "project": "h11",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.9",
+  "tests": {
+    "deselected": 2,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 76,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

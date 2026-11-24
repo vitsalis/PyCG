@@ -1,0 +1,454 @@
+# Call-site ledger of autojump at 06e082c91805cb022900819b2e0881eeae780d58.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# autojump.md shows how this ledger applies them. The analysed source is
+# bin/autojump_data.py, bin/autojump_match.py and bin/autojump_utils.py
+# (root bin). The main script bin/autojump and the vendored
+# autojump_argparse.py are outside: they are client code, and what the main
+# script passes is a client value, as what the tests pass. Module-level
+# functions are public (rule C); the 11 lexical lambdas retain their actual
+# captured values and callback argument flow. The package defines no class.
+# Public arguments are client objects (opaque, B5) unless a docstring fixes
+# a concrete type (B4; a
+# parameter's name is not documentation), or the package itself passes the
+# value. Python 2.6+ and 3.3+
+# are supported, so the Python 2 branches run; their builtin callees have
+# the Python 3 name of the type (README, "Judgements").
+
+== autojump_data
+
+[autojump_data]
+29:19 call  namedtuple('Entry', ['path', 'weight'])
+    -> collections.namedtuple
+
+[autojump_data.entriefy]
+47:18 call  is_python3()
+    -> autojump_utils.is_python3
+48:19 call  map(convert, data.items())
+    -> <builtin>.map
+    reject autojump_data.entriefy.<lambda1>: entriefy returns the map object unconsumed; convert runs when the caller iterates it, in the caller's code (callback rule: the scope whose call makes the library code run)
+48:39 call  data.items()
+    -> <builtin>.dict.items
+    note: data is a dict: the docstring says "Converts a dictionary into an iterator of entries" (B4)
+49:16 call  imap(convert, data.iteritems())
+    -> itertools.imap
+    reject autojump_data.entriefy.<lambda1>: entriefy returns the imap object unconsumed; convert runs when the caller iterates it, in the caller's code
+    note: line 49 runs only on Python 2 (is_python3() returns at line 48), where imap is itertools.imap (line 25)
+49:40 call  data.iteritems()
+    -> <builtin>.dict.iteritems
+    note: Python 2 only; data is a dict (docstring, B4); the Python 3 name of the type is dict (autojump.md, judgement 2)
+
+[autojump_data.entriefy.<lambda1>]
+46:32 call  Entry(*tup)
+    note: Entry is the collections.namedtuple class of line 29; a call of a namedtuple class adds no edge (README, "Callees outside the package")
+
+[autojump_data.load]
+54:31 call  os.path.join( os.path.expanduser('~'), '.local', 'share',...
+    -> os.path.join
+55:27 call  os.path.expanduser('~')
+    -> os.path.expanduser
+61:14 call  is_osx()
+    -> autojump_utils.is_osx
+61:35 call  os.path.exists(xdg_aj_home)
+    -> os.path.exists
+62:29 call  migrate_osx_xdg_data(config)
+    -> autojump_data.migrate_osx_xdg_data
+64:26 call  os.path.exists(config['data_path'])
+    -> os.path.exists
+76:18 call  open( config['data_path'], 'r', encoding='utf-8', errors=...
+    -> codecs.open
+    note: open is codecs.open, imported at line 8; it returns a codecs.StreamReaderWriter
+81:24 call  dict( imap( tupleize, ifilter(correct_length, imap(parse,...
+    -> <builtin>.dict
+    note: dict() iterates the chain of map and filter objects, which calls parse, correct_length and tupleize back; those callees are put at the imap and ifilter sites (82:21, 84:28, 84:49)
+82:21 call  imap( tupleize, ifilter(correct_length, imap(parse, f)), )
+    -> <builtin>.map
+    -> itertools.imap
+    -> autojump_data.load.<lambda3>
+    note: imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 20-25); both versions are supported. tupleize is the lambda of line 73; dict() at 81:24 iterates the result in load
+84:28 call  ifilter(correct_length, imap(parse, f))
+    -> <builtin>.filter
+    -> itertools.ifilter
+    -> autojump_data.load.<lambda2>
+    note: ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 20-25). correct_length is the lambda of line 70; dict() at 81:24 iterates the chain in load
+84:49 call  imap(parse, f)
+    -> <builtin>.map
+    -> itertools.imap
+    -> autojump_data.load.<lambda1>
+    note: imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 20-25). parse is the lambda of line 68; dict() at 81:24 iterates the chain in load
+88:27 call  load_backup(config)
+    -> autojump_data.load_backup
+
+[autojump_data.load.<lambda1>]
+68:36 call  line.strip()
+    -> <builtin>.str.strip
+    note: line is a line of the codecs.StreamReaderWriter of line 76 (utf-8): a str (unicode on Python 2, whose Python 3 name is str)
+68:44 call  line.strip().split('\t')
+    -> <builtin>.str.split
+
+[autojump_data.load.<lambda2>]
+70:35 call  len(x)
+    -> <builtin>.len
+
+[autojump_data.load.<lambda3>]
+73:38 call  float(x[0])
+    -> <builtin>.float
+
+[autojump_data.load_backup]
+92:22 call  os.path.exists(config['backup_path'])
+    -> os.path.exists
+93:18 call  move_file(config['backup_path'], config['data_path'])
+    -> autojump_utils.move_file
+94:20 call  load(config)
+    -> autojump_data.load
+
+[autojump_data.migrate_osx_xdg_data]
+103:18 call  is_osx()
+    -> autojump_utils.is_osx
+105:33 call  os.path.join(os.path.expanduser('~'), '.local', 'share')
+    -> os.path.join
+105:52 call  os.path.expanduser('~')
+    -> os.path.expanduser
+106:31 call  os.path.join(xdg_data_home, 'autojump')
+    -> os.path.join
+107:29 call  os.path.join(xdg_aj_home, 'autojump.txt')
+    -> os.path.join
+108:31 call  os.path.join(xdg_aj_home, 'autojump.txt.bak')
+    -> os.path.join
+110:22 call  os.path.exists(data_path)
+    -> os.path.exists
+111:18 call  move_file(data_path, config['data_path'])
+    -> autojump_utils.move_file
+112:22 call  os.path.exists(backup_path)
+    -> os.path.exists
+113:18 call  move_file(backup_path, config['backup_path'])
+    -> autojump_utils.move_file
+116:18 call  shutil.rmtree(xdg_aj_home)
+    -> shutil.rmtree
+117:11 call  len(os.listdir(xdg_data_home))
+    -> <builtin>.len
+117:22 call  os.listdir(xdg_data_home)
+    -> os.listdir
+118:22 call  shutil.rmtree(xdg_data_home)
+    -> shutil.rmtree
+
+[autojump_data.save]
+123:31 call  os.path.dirname(config['data_path'])
+    -> os.path.dirname
+124:15 call  create_dir(data_dir)
+    -> autojump_utils.create_dir
+128:34 call  NamedTemporaryFile(delete=False, dir=data_dir)
+    -> tempfile.NamedTemporaryFile
+130:19 call  temp.close()
+    -> io.BufferedRandom.close
+    -> tempfile._TemporaryFileWrapper.close
+    note: Supported Python 3.3 on Windows constructs tempfile._TemporaryFileWrapper without its close method: the method definition is inside if _os.name != 'nt' (Lib/tempfile.py:373-386). __getattr__ at 349-357 forwards close to its file. NamedTemporaryFile defaults to mode w+b and buffering=-1 (398), invokes _io.open at 434 and wraps that file at 437. The updating binary mode selects BufferedRandom and returns that buffer (Modules/_io/_iomodule.c:416-439). Thus the explicit temp.close() enters io.BufferedRandom.close. The existing wrapper.close edge remains valid on other supported runtimes. This is an actual supported Python 3 variant, independent of Python-2-to-Python-3 name normalization.
+132:18 call  open(temp.name, 'w', encoding='utf-8', errors='replace')
+    -> codecs.open
+    note: open is codecs.open, imported at line 8; it returns a codecs.StreamReaderWriter around the file that it opens in mode 'wb'
+133:43 call  data.items()
+    note: no callee: data is a client value. The docstring of save does not type it, no package code calls save, and the dicts that the main script bin/autojump passes are client values (B5; ruling on audit F1, autojump.md judgement 4)
+134:24 call  f.write(unico('%s\t%s\n' % (weight, path)))
+    -> codecs.StreamReaderWriter.write
+134:30 call  unico('%s\t%s\n' % (weight, path))
+    -> autojump_utils.unico
+136:20 call  f.flush()
+    -> io.BufferedWriter.flush
+    note: codecs.StreamReaderWriter defines no flush; its __getattr__ returns the flush of its stream, the file that codecs.open opens in mode 'wb' (an io.BufferedWriter)
+137:21 call  os.fsync(f)
+    -> os.fsync
+139:14 call  print('Error saving autojump data (disk full?)' % ex, fil...
+    -> <builtin>.print
+    note: The untyped data.items() client callback at line 133 may raise an IOError subclass defining __getitem__. The except IOError handler catches it. CPython PyMapping_Check regards an object with mp_subscript as a mapping (Objects/abstract.c:2287-2292). PyUnicode_Format sets ctx.dict for this non-tuple non-str mapping (Objects/unicodeobject.c:14391-14394); its unused-argument error applies only when ctx.dict is null (14423-14427). Therefore the constant format string succeeds and print is entered. The callback and exception remain unnamed; their control-flow effects are admitted. A writable directory and ordinary config suffice; no package mutation or failed-object reuse is involved.
+140:17 call  sys.exit(1)
+    -> sys.exit
+    note: The same MappingError witness as save -> print makes the formatting expression succeed. With normal writable stderr, print returns, then sys.exit(1) is entered. SystemExit being raised after entry does not remove this edge.
+143:14 call  move_file(temp.name, config['data_path'])
+    -> autojump_utils.move_file
+146:26 call  os.path.exists(config['backup_path'])
+    -> os.path.exists
+147:18 call  time()
+    -> time.time
+147:39 call  os.path.getmtime(config['backup_path'])
+    -> os.path.getmtime
+148:20 call  shutil.copy(config['data_path'], config['backup_path'])
+    -> shutil.copy
+
+== autojump_match
+
+[autojump_match]
+11:14 call  is_python3()
+    -> autojump_utils.is_python3
+
+[autojump_match.match_anywhere]
+39:36 call  '.*'.join(imap(re.escape, needles))
+    -> <builtin>.str.join
+    note: join iterates the map object, which calls re.escape back: a library callable, no edge
+39:41 call  imap(re.escape, needles)
+    -> <builtin>.map
+    -> itertools.imap
+    note: imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 11-17); both versions are supported
+46:19 call  ifilter(found, haystack)
+    -> <builtin>.filter
+    -> itertools.ifilter
+    reject autojump_match.match_anywhere.<lambda1>: match_anywhere returns the filter object unconsumed; found runs when the caller iterates it, in the caller's code (callback rule); the trace has no edge from match_anywhere to it
+    reject autojump_match.match_consecutive.<lambda1>: found is the lambda of line 41, not that of match_consecutive
+    note: ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 11-17)
+
+[autojump_match.match_anywhere.<lambda1>]
+41:39 call  re.search( regex_needle, haystack.path, flags=regex_flags, )
+    -> re.search
+
+[autojump_match.match_consecutive]
+81:38 call  regex_one_sep.join(imap(re.escape, needles))
+    -> <builtin>.str.join
+    note: regex_one_sep is a str (line 80); join iterates the map object, which calls re.escape back: a library callable, no edge
+81:43 call  imap(re.escape, needles)
+    -> <builtin>.map
+    -> itertools.imap
+    note: imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 11-17)
+88:19 call  ifilter(found, haystack)
+    -> <builtin>.filter
+    -> itertools.ifilter
+    reject autojump_match.match_consecutive.<lambda1>: match_consecutive returns the filter object unconsumed; found runs when the caller iterates it, in the caller's code (callback rule); the trace has no edge from match_consecutive to it
+    reject autojump_match.match_anywhere.<lambda1>: found is the lambda of line 83, not that of match_anywhere
+    note: ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 11-17)
+
+[autojump_match.match_consecutive.<lambda1>]
+83:36 call  re.search( regex_needle, entry.path, flags=regex_flags, )
+    -> re.search
+
+[autojump_match.match_fuzzy]
+117:22 call  last(needles)
+    -> autojump_utils.last
+117:37 call  last(needles).lower()
+    -> <builtin>.str.lower
+    note: needles is a list of str: the docstring example gives needles = ['foo', 'bar'] (B4; autojump.md, judgement 3); last returns its last item
+123:22 call  last(needles)
+    -> autojump_utils.last
+129:19 call  ifilter(meets_threshold, haystack)
+    -> <builtin>.filter
+    -> itertools.ifilter
+    reject autojump_match.match_fuzzy.<lambda4>: match_fuzzy returns the filter object unconsumed; meets_threshold runs when the caller iterates it, in the caller's code (callback rule)
+    note: ifilter is the builtin filter on Python 3 and itertools.ifilter on Python 2 (lines 11-17)
+
+[autojump_match.match_fuzzy.<lambda1>]
+115:32 call  last(os.path.split(path))
+    -> autojump_utils.last
+115:46 call  os.path.split(path)
+    -> os.path.split
+
+[autojump_match.match_fuzzy.<lambda2>]
+118:54 call  SequenceMatcher( a=needle, b=end_dir(entry.path.lower()), )
+    -> difflib.SequenceMatcher
+120:22 call  end_dir(entry.path.lower())
+    -> autojump_match.match_fuzzy.<lambda1>
+    note: end_dir is the lambda of line 115, a local name bound once
+120:39 call  entry.path.lower()
+    -> <builtin>.str.lower
+    note: entry is an item of haystack; the docstring example gives entries (path='/foo/bar/baz', weight=11), whose path is a str (B4; autojump.md, judgement 3)
+121:16 call  SequenceMatcher( a=needle, b=end_dir(entry.path.lower()),...
+    -> difflib.SequenceMatcher.ratio
+
+[autojump_match.match_fuzzy.<lambda3>]
+124:54 call  SequenceMatcher( a=needle, b=end_dir(entry.path), )
+    -> difflib.SequenceMatcher
+126:22 call  end_dir(entry.path)
+    -> autojump_match.match_fuzzy.<lambda1>
+    note: end_dir is the lambda of line 115, a local name bound once
+127:16 call  SequenceMatcher( a=needle, b=end_dir(entry.path), ).ratio()
+    -> difflib.SequenceMatcher.ratio
+
+[autojump_match.match_fuzzy.<lambda4>]
+128:50 call  match_percent(entry)
+    -> autojump_match.match_fuzzy.<lambda2>
+    -> autojump_match.match_fuzzy.<lambda3>
+    note: match_percent is the lambda of line 118 when ignore_case is true, else that of line 124; meets_threshold closes over it, so either one is called
+
+== autojump_utils
+
+[autojump_utils.create_dir]
+24:20 call  os.makedirs(path)
+    -> os.makedirs
+
+[autojump_utils.encode_local]
+32:18 call  is_python3()
+    -> autojump_utils.is_python3
+34:25 call  string.encode(sys.getfilesystemencoding() or 'utf-8')
+    -> <builtin>.str.encode
+    -> <builtin>.bytes.encode
+    note: Python 2 only (line 33 returns on Python 3). The docstring "Converts string" (line 31) names a Python 2 string: a unicode, whose Python 3 name is str, or a str, whose Python 3 name is bytes. The package's own % strings that reach it through print_local (print_entry, line 144; print_tab_menu, lines 162-168) are a Python 2 str when the entry's path is not a unicode (autojump.md, judgement 2)
+34:51 call  sys.getfilesystemencoding()
+    -> sys.getfilesystemencoding
+
+[autojump_utils.first]
+38:14 call  iter(xs)
+    -> <builtin>.iter
+40:22 call  is_python3()
+    -> autojump_utils.is_python3
+41:31 call  it.__next__()
+    note: it is the iterator of xs, a client iterable (no package code calls first, and nothing documents xs): opaque (B5), no callee
+42:23 call  it.next()
+    note: Python 2 only; it is the iterator of a client iterable (see 41:31): opaque (B5), no callee
+
+[autojump_utils.get_tab_entry_info]
+55:29 call  re.search(r'(.*?)' + separator, entry)
+    -> re.search
+56:28 call  re.search(separator + r'([0-9]{1})', entry)
+    -> re.search
+57:27 call  re.search( separator + r'[0-9]{1}' + separator + r'(.*)',...
+    -> re.search
+63:36 call  match_needle.group(1)
+    -> _sre.SRE_Match.group
+    -> re.Match.group
+    note: On supported Python 3.3, re.search returns _sre.SRE_Match. Modules/_sre.c defines SRE_MODULE as sre at 52-53 and Match_Type.tp_name as _sre.SRE_Match at 3614. Lib/re.py has no public Match class alias. CPython 3.6 retains the same fallback spelling, while 3.7 introduces re.Match (Lib/re.py:263) and the C type name re.Match (Modules/_sre.c:2685). The global version rule retains the older fallback where the later public path does not exist. Each matching input branch directly calls group; re.Match.group remains valid for newer versions.
+66:20 call  int(match_index.group(1))
+    -> <builtin>.int
+66:38 call  match_index.group(1)
+    -> _sre.SRE_Match.group
+    -> re.Match.group
+    note: the same admitted historical and modern regex receiver names as 63:36
+69:32 call  match_path.group(1)
+    -> _sre.SRE_Match.group
+    -> re.Match.group
+    note: the same admitted historical and modern regex receiver names as 63:36
+
+[autojump_utils.get_pwd]
+76:26 call  os.getcwdu()
+    -> os.getcwd
+    -> os.getcwdu
+    note: on Python 3, line 16 binds os.getcwdu to os.getcwd when the module is imported; on Python 2, os.getcwdu is the function of os (autojump.md, judgement 2)
+78:14 call  print('Current directory no longer exists.', file=sys.std...
+    -> <builtin>.print
+
+[autojump_utils.has_uppercase]
+83:18 call  is_python3()
+    -> autojump_utils.is_python3
+84:19 call  any(ch.isupper() for ch in string)
+    -> <builtin>.any
+84:30 call  ch.isupper()
+    note: no callee: ch is an item of string, a client value. has_uppercase has no docstring, a parameter's name is not documentation, and no package code calls it; the strs of the tests and of the main script bin/autojump are client values (B5; ruling on audit F1, autojump.md judgement 3)
+85:15 call  any(unicodedata.category(c) == 'Lu' for c in unicode(stri...
+    -> <builtin>.any
+    note: Python 2 only (line 84 returns on Python 3)
+85:36 call  unicodedata.category(c)
+    -> unicodedata.category
+85:64 call  unicode(string)
+    -> <builtin>.str
+    note: Python 2 only; the builtin unicode, whose Python 3 name is str
+
+[autojump_utils.in_bash]
+89:31 call  os.getenv('SHELL')
+    -> os.getenv
+
+[autojump_utils.is_autojump_sourced]
+93:28 call  os.getenv('AUTOJUMP_SOURCED')
+    -> os.getenv
+
+[autojump_utils.is_linux]
+105:27 call  platform.system()
+    -> platform.system
+
+[autojump_utils.is_osx]
+109:27 call  platform.system()
+    -> platform.system
+
+[autojump_utils.is_windows]
+113:27 call  platform.system()
+    -> platform.system
+
+[autojump_utils.last]
+117:14 call  iter(xs)
+    -> <builtin>.iter
+120:22 call  is_python3()
+    -> autojump_utils.is_python3
+122:34 call  it.__next__()
+    -> builtins.list_iterator.__next__
+    -> builtins.tuple_iterator.__next__
+    note: the package passes xs: a tuple from os.path.split (autojump_match.py:115) and needles, a list by the docstring example of match_fuzzy (autojump_match.py:97); other values are client iterables (opaque, B5). The iterator types are named as the trace names them (autojump.md, judgements 1 and 3)
+125:30 call  it.next()
+    -> builtins.list_iterator.next
+    -> builtins.tuple_iterator.next
+    note: Python 2 only; the same iterables as at 122:34; the Python 2 types listiterator and tupleiterator get their Python 3 names, the method keeps its name (autojump.md, judgement 2)
+
+[autojump_utils.move_file]
+137:18 call  is_windows()
+    -> autojump_utils.is_windows
+137:39 call  os.path.exists(dst)
+    -> os.path.exists
+139:18 call  os.remove(dst)
+    -> os.remove
+140:16 call  shutil.move(src, dst)
+    -> shutil.move
+
+[autojump_utils.print_entry]
+144:16 call  print_local('%.1f:\t%s' % (entry.weight, entry.path))
+    -> autojump_utils.print_local
+
+[autojump_utils.print_local]
+148:10 call  print(encode_local(string))
+    -> <builtin>.print
+148:23 call  encode_local(string)
+    -> autojump_utils.encode_local
+
+[autojump_utils.print_tab_menu]
+160:30 call  enumerate(tab_entries)
+    -> <builtin>.enumerate
+161:20 call  print_local( '%s%s%d%s%s' % ( needle, separator, i + 1, s...
+    -> autojump_utils.print_local
+
+[autojump_utils.sanitize]
+175:16 call  list(imap(clean, directories))
+    -> <builtin>.list
+175:21 call  imap(clean, directories)
+    -> <builtin>.map
+    -> itertools.imap
+    -> autojump_utils.sanitize.<lambda1>
+    note: imap is the builtin map on Python 3 and itertools.imap on Python 2 (lines 14-18). clean is the lambda of line 174; list() at 175:16 iterates the result in sanitize
+
+[autojump_utils.sanitize.<lambda1>]
+174:28 call  unico(x)
+    -> autojump_utils.unico
+174:57 call  unico(x)
+    -> autojump_utils.unico
+174:67 call  unico(x).rstrip(os.sep)
+    -> <builtin>.str.rstrip
+    note: on Python 2, unico returns a unicode (it converts a str with unicode(), lines 209-210), whose Python 3 name is str
+
+[autojump_utils.second]
+179:14 call  iter(xs)
+    -> <builtin>.iter
+181:22 call  is_python2()
+    -> autojump_utils.is_python2
+182:20 call  it.next()
+    note: Python 2 only; it is the iterator of xs, a client iterable (no package code calls second, and nothing documents xs): opaque (B5), no callee
+183:27 call  it.next()
+    note: Python 2 only; it is the iterator of a client iterable (see 182:20): opaque (B5), no callee
+184:24 call  is_python3()
+    -> autojump_utils.is_python3
+185:17 call  next(it)
+    -> <builtin>.next
+186:24 call  next(it)
+    -> <builtin>.next
+
+[autojump_utils.surround_quotes]
+196:15 call  in_bash()
+    -> autojump_utils.in_bash
+198:30 call  '"{0}"'.format(string)
+    -> <builtin>.str.format
+    note: the receiver is a str literal; code that runs on both versions gets only the Python 3 name
+
+[autojump_utils.take]
+204:18 call  islice(iterable, n)
+    -> itertools.islice
+
+[autojump_utils.unico]
+209:18 call  is_python2()
+    -> autojump_utils.is_python2
+209:39 call  isinstance(string, unicode)
+    -> <builtin>.isinstance
+    note: Python 2 only (the and short-circuits on Python 3)
+210:23 call  unicode(string, encoding='utf-8', errors='replace')
+    -> <builtin>.str
+    note: Python 2 only; the builtin unicode, whose Python 3 name is str

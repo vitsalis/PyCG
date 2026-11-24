@@ -1,0 +1,542 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.RuntimeError.__init__",
+      "threading.ThreadError.__init__"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.partition": [
+      "typing.Text.partition"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.splitlines": [
+      "typing.Text.splitlines"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "_io.StringIO": [
+      "io.StringIO"
+    ],
+    "_io.StringIO.read": [
+      "io.StringIO.read"
+    ],
+    "_io.StringIO.tell": [
+      "io.StringIO.tell"
+    ],
+    "_io.TextIOWrapper.close": [
+      "io.TextIOWrapper.close"
+    ],
+    "_io.TextIOWrapper.flush": [
+      "io.TextIOWrapper.flush"
+    ],
+    "_io.TextIOWrapper.write": [
+      "io.TextIOWrapper.write"
+    ],
+    "collections.abc.Mapping.get": [
+      "collections.abc.MutableMapping.get",
+      "selectors.Mapping.get"
+    ],
+    "genericpath.isdir": [
+      "ntpath.isdir",
+      "os.path.isdir",
+      "posixpath.isdir"
+    ],
+    "posix.listdir": [
+      "os.listdir"
+    ],
+    "posixpath.basename": [
+      "os.path.basename"
+    ],
+    "posixpath.dirname": [
+      "os.path.dirname"
+    ],
+    "posixpath.expanduser": [
+      "os.path.expanduser"
+    ],
+    "posixpath.join": [
+      "os.path.join"
+    ]
+  },
+  "commit": "0571dc489d9543b40f1bcbc6cbac4377906b76fd",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pexpect": "4.9.0",
+    "pluggy": "1.7.0",
+    "ptyprocess": "0.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 5,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "argcomplete": [
+      "argcomplete.finders.CompletionFinder.__init__"
+    ],
+    "argcomplete._check_module.find": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.len",
+      "<builtin>.range",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.str.split",
+      "genericpath.isdir",
+      "importlib.util.find_spec",
+      "posixpath.join"
+    ],
+    "argcomplete.completers": [
+      "argcomplete.completers.ChoicesCompleter.__init__"
+    ],
+    "argcomplete.completers.ChoicesCompleter.__call__": [
+      "argcomplete.completers.ChoicesCompleter._convert"
+    ],
+    "argcomplete.completers.ChoicesCompleter._convert": [
+      "<builtin>.isinstance",
+      "<builtin>.str"
+    ],
+    "argcomplete.completers.DirectoriesCompleter.__init__": [
+      "argcomplete.completers._FilteredFilesCompleter.__init__"
+    ],
+    "argcomplete.completers.FilesCompleter.__call__": [
+      "<builtin>.list",
+      "<builtin>.set",
+      "<builtin>.str.format",
+      "argcomplete.completers._call",
+      "shlex.quote"
+    ],
+    "argcomplete.completers.FilesCompleter.__init__": [
+      "<builtin>.isinstance"
+    ],
+    "argcomplete.completers._FilteredFilesCompleter.__call__": [
+      "<builtin>.str.startswith",
+      "genericpath.isdir",
+      "posix.listdir",
+      "posixpath.basename",
+      "posixpath.dirname",
+      "posixpath.expanduser",
+      "posixpath.join"
+    ],
+    "argcomplete.completers._call": [
+      "<builtin>.str.splitlines",
+      "subprocess.check_output"
+    ],
+    "argcomplete.finders": [
+      "<builtin>.staticmethod",
+      "argcomplete.completers.FilesCompleter.__init__"
+    ],
+    "argcomplete.finders.CompletionFinder.__call__": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.str.replace",
+      "<builtin>.str.split",
+      "_io.TextIOWrapper.flush",
+      "_io.TextIOWrapper.write",
+      "argcomplete.finders.CompletionFinder.__init__",
+      "argcomplete.finders.CompletionFinder._get_completions",
+      "argcomplete.finders.CompletionFinder._init_debug_stream",
+      "argcomplete.io.debug",
+      "argcomplete.lexers.split_line",
+      "sys.exit"
+    ],
+    "argcomplete.finders.CompletionFinder.__init__": [
+      "<builtin>.dict.get",
+      "collections.abc.Mapping.get"
+    ],
+    "argcomplete.finders.CompletionFinder._action_allowed": [
+      "<builtin>.dict.get"
+    ],
+    "argcomplete.finders.CompletionFinder._complete_active_option": [
+      "<builtin>.callable",
+      "<builtin>.dict.items",
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.format",
+      "<builtin>.str.partition",
+      "argcomplete.completers.ChoicesCompleter.__call__",
+      "argcomplete.completers.ChoicesCompleter.__init__",
+      "argcomplete.completers.FilesCompleter.__call__",
+      "argcomplete.finders.CompletionFinder._get_action_help",
+      "argcomplete.finders.default_validator",
+      "argcomplete.io.debug",
+      "argcomplete.packages._argparse.action_is_greedy",
+      "argcomplete.packages._argparse.action_is_open",
+      "argcomplete.packages._argparse.action_is_satisfied"
+    ],
+    "argcomplete.finders.CompletionFinder._get_completions": [
+      "<builtin>.str",
+      "<builtin>.type",
+      "argcomplete.finders.CompletionFinder._patch_argument_parser",
+      "argcomplete.finders.CompletionFinder.collect_completions",
+      "argcomplete.finders.CompletionFinder.filter_completions",
+      "argcomplete.finders.CompletionFinder.quote_completions",
+      "argcomplete.io.debug",
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args",
+      "argparse.ArgumentParser.parse_known_args",
+      "argparse.Namespace",
+      "contextlib.contextmanager.helper"
+    ],
+    "argcomplete.finders.CompletionFinder._get_next_positional": [
+      "<builtin>.len",
+      "<builtin>.range",
+      "argparse.ArgumentParser._get_positional_actions"
+    ],
+    "argcomplete.finders.CompletionFinder._get_option_completions": [
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.str.startswith",
+      "argcomplete.completers.SuppressCompleter.suppress",
+      "argcomplete.finders.CompletionFinder._action_allowed",
+      "argcomplete.finders.CompletionFinder._get_action_help",
+      "argcomplete.finders.CompletionFinder._include_options",
+      "argcomplete.finders.ExclusiveCompletionFinder._action_allowed"
+    ],
+    "argcomplete.finders.CompletionFinder._get_subparser_completions": [
+      "<builtin>.dict.keys",
+      "<builtin>.dict.setdefault",
+      "<builtin>.list.append",
+      "<builtin>.str.startswith",
+      "argcomplete.finders.CompletionFinder._get_action_help",
+      "argparse._SubParsersAction._get_subactions"
+    ],
+    "argcomplete.finders.CompletionFinder._include_options": [
+      "<builtin>.len",
+      "<builtin>.str.startswith"
+    ],
+    "argcomplete.finders.CompletionFinder._init_debug_stream": [
+      "argcomplete.io.debug",
+      "os.fdopen"
+    ],
+    "argcomplete.finders.CompletionFinder._patch_argument_parser": [
+      "argcomplete.finders.CompletionFinder._patch_argument_parser.patch",
+      "argcomplete.io.debug"
+    ],
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch": [
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.type"
+    ],
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__": [
+      "<builtin>.issubclass",
+      "<builtin>.list.append",
+      "argcomplete.finders.CompletionFinder._patch_argument_parser.patch",
+      "argcomplete.io.debug",
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args",
+      "argparse._AppendAction.__call__",
+      "argparse._AppendConstAction.__call__",
+      "argparse._StoreAction.__call__",
+      "argparse._StoreConstAction.__call__",
+      "argparse._SubParsersAction.__call__"
+    ],
+    "argcomplete.finders.CompletionFinder.collect_completions": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "argcomplete.finders.CompletionFinder._complete_active_option",
+      "argcomplete.finders.CompletionFinder._get_next_positional",
+      "argcomplete.finders.CompletionFinder._get_option_completions",
+      "argcomplete.finders.CompletionFinder._get_subparser_completions",
+      "argcomplete.io.debug"
+    ],
+    "argcomplete.finders.CompletionFinder.filter_completions": [
+      "<builtin>.list.append"
+    ],
+    "argcomplete.finders.CompletionFinder.quote_completions": [
+      "<builtin>.dict.get",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.replace",
+      "collections.abc.Mapping.get"
+    ],
+    "argcomplete.finders.CompletionFinder.rl_complete": [
+      "<builtin>.len",
+      "<builtin>.list.insert",
+      "argcomplete.finders.CompletionFinder._get_completions",
+      "argcomplete.lexers.split_line"
+    ],
+    "argcomplete.finders.ExclusiveCompletionFinder._action_allowed": [
+      "argcomplete.finders.CompletionFinder._action_allowed"
+    ],
+    "argcomplete.finders.default_validator": [
+      "<builtin>.str.startswith"
+    ],
+    "argcomplete.io": [
+      "contextlib.contextmanager"
+    ],
+    "argcomplete.io.mute_stderr": [
+      "<builtin>.open",
+      "_io.TextIOWrapper.close"
+    ],
+    "argcomplete.io.warn": [
+      "<builtin>.print"
+    ],
+    "argcomplete.lexers.split_line": [
+      "<builtin>.dict.get",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.format",
+      "_io.StringIO.tell",
+      "argcomplete.io.debug",
+      "argcomplete.lexers.split_line.split_word",
+      "argcomplete.packages._shlex.shlex.__init__",
+      "argcomplete.packages._shlex.shlex.get_token",
+      "collections.abc.Mapping.get"
+    ],
+    "argcomplete.lexers.split_line.split_word": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "_io.StringIO.tell",
+      "argcomplete.io.debug"
+    ],
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args": [
+      "<builtin>.dict.clear",
+      "<builtin>.dict.setdefault",
+      "<builtin>.enumerate",
+      "<builtin>.iter",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.max",
+      "<builtin>.min",
+      "<builtin>.set",
+      "<builtin>.str.join",
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional",
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals",
+      "argparse.ArgumentParser._get_positional_actions",
+      "argparse.ArgumentParser._parse_optional",
+      "argparse.ArgumentParser.error",
+      "argparse._get_action_name",
+      "gettext.gettext",
+      "typing.cast"
+    ],
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.list.remove",
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action",
+      "argcomplete.packages._argparse.action_is_open",
+      "argparse.ArgumentParser._match_argument"
+    ],
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.zip",
+      "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action",
+      "argparse.ArgumentParser._match_arguments_partial"
+    ],
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.set.add",
+      "<builtin>.setattr",
+      "<builtin>.vars",
+      "argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__",
+      "argparse.ArgumentParser._get_values"
+    ],
+    "argcomplete.packages._argparse.action_is_greedy": [
+      "<builtin>.dict.get",
+      "argcomplete.packages._argparse.action_is_satisfied"
+    ],
+    "argcomplete.packages._argparse.action_is_open": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance"
+    ],
+    "argcomplete.packages._argparse.action_is_satisfied": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance"
+    ],
+    "argcomplete.packages._shlex.shlex.__init__": [
+      "<builtin>.isinstance",
+      "_io.StringIO",
+      "collections.deque"
+    ],
+    "argcomplete.packages._shlex.shlex.get_token": [
+      "argcomplete.packages._shlex.shlex.read_token"
+    ],
+    "argcomplete.packages._shlex.shlex.read_token": [
+      "<builtin>.ValueError",
+      "<builtin>.len",
+      "_io.StringIO.read"
+    ],
+    "argcomplete.shell_integration.shellcode": [
+      "<builtin>.dict",
+      "<builtin>.dict.get",
+      "<builtin>.str.join",
+      "<builtin>.str.replace",
+      "shlex.quote"
+    ]
+  },
+  "executed": [
+    "argcomplete._check_module.find",
+    "argcomplete.completers.ChoicesCompleter.__call__",
+    "argcomplete.completers.ChoicesCompleter.__init__",
+    "argcomplete.completers.ChoicesCompleter._convert",
+    "argcomplete.completers.DirectoriesCompleter.__init__",
+    "argcomplete.completers.FilesCompleter.__call__",
+    "argcomplete.completers.FilesCompleter.__init__",
+    "argcomplete.completers.SuppressCompleter.__init__",
+    "argcomplete.completers.SuppressCompleter.suppress",
+    "argcomplete.completers._FilteredFilesCompleter.__call__",
+    "argcomplete.completers._FilteredFilesCompleter.__init__",
+    "argcomplete.completers._call",
+    "argcomplete.finders.CompletionFinder.__call__",
+    "argcomplete.finders.CompletionFinder.__init__",
+    "argcomplete.finders.CompletionFinder._action_allowed",
+    "argcomplete.finders.CompletionFinder._complete_active_option",
+    "argcomplete.finders.CompletionFinder._get_action_help",
+    "argcomplete.finders.CompletionFinder._get_completions",
+    "argcomplete.finders.CompletionFinder._get_next_positional",
+    "argcomplete.finders.CompletionFinder._get_option_completions",
+    "argcomplete.finders.CompletionFinder._get_subparser_completions",
+    "argcomplete.finders.CompletionFinder._include_options",
+    "argcomplete.finders.CompletionFinder._init_debug_stream",
+    "argcomplete.finders.CompletionFinder._patch_argument_parser",
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch",
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__",
+    "argcomplete.finders.CompletionFinder.collect_completions",
+    "argcomplete.finders.CompletionFinder.filter_completions",
+    "argcomplete.finders.CompletionFinder.get_display_completions",
+    "argcomplete.finders.CompletionFinder.quote_completions",
+    "argcomplete.finders.CompletionFinder.rl_complete",
+    "argcomplete.finders.ExclusiveCompletionFinder._action_allowed",
+    "argcomplete.finders.default_validator",
+    "argcomplete.io.debug",
+    "argcomplete.io.mute_stderr",
+    "argcomplete.io.warn",
+    "argcomplete.lexers.split_line",
+    "argcomplete.lexers.split_line.split_word",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action",
+    "argcomplete.packages._argparse.action_is_greedy",
+    "argcomplete.packages._argparse.action_is_open",
+    "argcomplete.packages._argparse.action_is_satisfied",
+    "argcomplete.packages._shlex.shlex.__init__",
+    "argcomplete.packages._shlex.shlex.get_token",
+    "argcomplete.packages._shlex.shlex.read_token",
+    "argcomplete.shell_integration.shellcode"
+  ],
+  "functions": [
+    "argcomplete._check_module.find",
+    "argcomplete._check_module.main",
+    "argcomplete.completers.BaseCompleter.__call__",
+    "argcomplete.completers.ChoicesCompleter.__call__",
+    "argcomplete.completers.ChoicesCompleter.__init__",
+    "argcomplete.completers.ChoicesCompleter._convert",
+    "argcomplete.completers.DirectoriesCompleter.__init__",
+    "argcomplete.completers.FilesCompleter.__call__",
+    "argcomplete.completers.FilesCompleter.__init__",
+    "argcomplete.completers.SuppressCompleter.__init__",
+    "argcomplete.completers.SuppressCompleter.suppress",
+    "argcomplete.completers._FilteredFilesCompleter.__call__",
+    "argcomplete.completers._FilteredFilesCompleter.__init__",
+    "argcomplete.completers._call",
+    "argcomplete.finders.CompletionFinder.__call__",
+    "argcomplete.finders.CompletionFinder.__init__",
+    "argcomplete.finders.CompletionFinder._action_allowed",
+    "argcomplete.finders.CompletionFinder._complete_active_option",
+    "argcomplete.finders.CompletionFinder._get_action_help",
+    "argcomplete.finders.CompletionFinder._get_completions",
+    "argcomplete.finders.CompletionFinder._get_next_positional",
+    "argcomplete.finders.CompletionFinder._get_option_completions",
+    "argcomplete.finders.CompletionFinder._get_subparser_completions",
+    "argcomplete.finders.CompletionFinder._include_options",
+    "argcomplete.finders.CompletionFinder._init_debug_stream",
+    "argcomplete.finders.CompletionFinder._patch_argument_parser",
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch",
+    "argcomplete.finders.CompletionFinder._patch_argument_parser.patch.IntrospectAction.__call__",
+    "argcomplete.finders.CompletionFinder.collect_completions",
+    "argcomplete.finders.CompletionFinder.filter_completions",
+    "argcomplete.finders.CompletionFinder.get_display_completions",
+    "argcomplete.finders.CompletionFinder.quote_completions",
+    "argcomplete.finders.CompletionFinder.rl_complete",
+    "argcomplete.finders.ExclusiveCompletionFinder._action_allowed",
+    "argcomplete.finders.default_validator",
+    "argcomplete.io.debug",
+    "argcomplete.io.mute_stderr",
+    "argcomplete.io.mute_stdout",
+    "argcomplete.io.warn",
+    "argcomplete.lexers.split_line",
+    "argcomplete.lexers.split_line.split_word",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_optional",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.consume_positionals",
+    "argcomplete.packages._argparse.IntrospectiveArgumentParser._parse_known_args.take_action",
+    "argcomplete.packages._argparse.action_is_greedy",
+    "argcomplete.packages._argparse.action_is_open",
+    "argcomplete.packages._argparse.action_is_satisfied",
+    "argcomplete.packages._shlex.shlex.__init__",
+    "argcomplete.packages._shlex.shlex.__iter__",
+    "argcomplete.packages._shlex.shlex.__next__",
+    "argcomplete.packages._shlex.shlex.error_leader",
+    "argcomplete.packages._shlex.shlex.get_token",
+    "argcomplete.packages._shlex.shlex.pop_source",
+    "argcomplete.packages._shlex.shlex.push_source",
+    "argcomplete.packages._shlex.shlex.push_token",
+    "argcomplete.packages._shlex.shlex.read_token",
+    "argcomplete.packages._shlex.shlex.sourcehook",
+    "argcomplete.shell_integration.shellcode"
+  ],
+  "modules": [
+    "argcomplete",
+    "argcomplete._check_module",
+    "argcomplete.completers",
+    "argcomplete.exceptions",
+    "argcomplete.finders",
+    "argcomplete.io",
+    "argcomplete.lexers",
+    "argcomplete.packages",
+    "argcomplete.packages._argparse",
+    "argcomplete.packages._shlex",
+    "argcomplete.shell_integration"
+  ],
+  "project": "argcomplete",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 52,
+    "skipped": 0,
+    "xfailed": 1,
+    "xpassed": 0
+  }
+}

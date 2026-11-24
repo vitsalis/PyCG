@@ -1,0 +1,648 @@
+{
+  "subbrute": [],
+  "subbrute.subbrute": [
+    "<builtin>.getattr",
+    "<builtin>.len",
+    "<builtin>.open",
+    "<builtin>.print",
+    "<builtin>.str",
+    "<builtin>.str.startswith",
+    "<builtin>.str.strip",
+    "<builtin>.str.upper",
+    "multiprocessing.freeze_support",
+    "optparse.OptionParser",
+    "optparse.OptionParser.add_option",
+    "optparse.OptionParser.error",
+    "optparse.OptionParser.parse_args",
+    "os.path.dirname",
+    "os.path.join",
+    "os.path.realpath",
+    "re.compile",
+    "subbrute.subbrute.check_open",
+    "subbrute.subbrute.error",
+    "subbrute.subbrute.extract_subdomains",
+    "subbrute.subbrute.print_target",
+    "sys.exit"
+  ],
+  "subbrute.subbrute.check_open": [
+    "<builtin>.len",
+    "<builtin>.open",
+    "io.TextIOWrapper.readlines",
+    "subbrute.subbrute.error"
+  ],
+  "subbrute.subbrute.error": [
+    "<builtin>.str",
+    "io.TextIOWrapper.write",
+    "sys.exit"
+  ],
+  "subbrute.subbrute.extract_hosts": [
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.rstrip",
+    "re.findall"
+  ],
+  "subbrute.subbrute.extract_subdomains": [
+    "<builtin>.dict.keys",
+    "<builtin>.len",
+    "<builtin>.open",
+    "<builtin>.sorted",
+    "<builtin>.str",
+    "<builtin>.str.find",
+    "<builtin>.str.lower",
+    "<builtin>.str.split",
+    "io.TextIOWrapper.read",
+    "re.findall",
+    "subbrute.subbrute.extract_subdomains.<lambda1>",
+    "subbrute.subbrute.trace"
+  ],
+  "subbrute.subbrute.extract_subdomains.<lambda1>": [],
+  "subbrute.subbrute.killproc": [
+    "<builtin>.str.startswith",
+    "ctypes.CDLL.__init__._FuncPtr.__call__",
+    "os.getpid",
+    "os.kill"
+  ],
+  "subbrute.subbrute.lookup.__init__": [
+    "dns.resolver.Resolver",
+    "multiprocessing.Process.__init__",
+    "subbrute.subbrute.signal_init",
+    "threading.Thread.__init__"
+  ],
+  "subbrute.subbrute.lookup.check": [
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.range",
+    "<builtin>.str",
+    "<builtin>.str.rstrip",
+    "<builtin>.type",
+    "dns.resolver.Resolver.query",
+    "multiprocessing.queues.Queue.put",
+    "subbrute.subbrute.error",
+    "subbrute.subbrute.extract_hosts",
+    "subbrute.subbrute.lookup.get_ns",
+    "subbrute.subbrute.lookup.get_ns_blocking",
+    "subbrute.subbrute.trace"
+  ],
+  "subbrute.subbrute.lookup.get_ns": [
+    "multiprocessing.queues.Queue.get_nowait"
+  ],
+  "subbrute.subbrute.lookup.get_ns_blocking": [
+    "multiprocessing.queues.Queue.get"
+  ],
+  "subbrute.subbrute.lookup.run": [
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.str",
+    "io.TextIOWrapper.flush",
+    "multiprocessing.queues.Queue.get",
+    "multiprocessing.queues.Queue.put",
+    "subbrute.subbrute.lookup.check",
+    "subbrute.subbrute.lookup.get_ns_blocking",
+    "subbrute.subbrute.trace"
+  ],
+  "subbrute.subbrute.print_target": [
+    "<builtin>.list.append",
+    "<builtin>.print",
+    "<builtin>.set",
+    "<builtin>.str.join",
+    "<builtin>.str.strip",
+    "subbrute.subbrute.run"
+  ],
+  "subbrute.subbrute.run": [
+    "<builtin>.len",
+    "<builtin>.range",
+    "<builtin>.str",
+    "<builtin>.str.endswith",
+    "<builtin>.str.find",
+    "<builtin>.str.split",
+    "<builtin>.str.strip",
+    "<builtin>.type",
+    "io.TextIOWrapper.write",
+    "multiprocessing.Manager",
+    "multiprocessing.Process.start",
+    "multiprocessing.Queue",
+    "multiprocessing.managers.SyncManager.dict",
+    "multiprocessing.queues.Queue.get",
+    "multiprocessing.queues.Queue.put",
+    "subbrute.subbrute.check_open",
+    "subbrute.subbrute.killproc",
+    "subbrute.subbrute.lookup.__init__",
+    "subbrute.subbrute.lookup.run",
+    "subbrute.subbrute.trace",
+    "subbrute.subbrute.verify_nameservers.__init__",
+    "subbrute.subbrute.verify_nameservers.end",
+    "subbrute.subbrute.verify_nameservers.run",
+    "threading.Thread.start"
+  ],
+  "subbrute.subbrute.signal_init": [
+    "signal.signal"
+  ],
+  "subbrute.subbrute.trace": [
+    "<builtin>.str",
+    "io.TextIOWrapper.write"
+  ],
+  "subbrute.subbrute.verify_nameservers.__init__": [
+    "dns.resolver.Resolver",
+    "dns.resolver.Resolver.query",
+    "multiprocessing.Process.__init__",
+    "subbrute.subbrute.signal_init",
+    "threading.Thread.__init__"
+  ],
+  "subbrute.subbrute.verify_nameservers.add_nameserver": [
+    "<builtin>.str",
+    "<builtin>.type",
+    "multiprocessing.queues.Queue.put",
+    "subbrute.subbrute.trace"
+  ],
+  "subbrute.subbrute.verify_nameservers.end": [],
+  "subbrute.subbrute.verify_nameservers.find_wildcards": [
+    "<builtin>.len",
+    "<builtin>.str",
+    "<builtin>.type",
+    "dns.resolver.Resolver.query",
+    "subbrute.subbrute.trace",
+    "uuid.uuid4"
+  ],
+  "subbrute.subbrute.verify_nameservers.run": [
+    "io.TextIOWrapper.write",
+    "multiprocessing.queues.Queue.put",
+    "random.shuffle",
+    "subbrute.subbrute.verify_nameservers.verify"
+  ],
+  "subbrute.subbrute.verify_nameservers.verify": [
+    "<builtin>.str.strip",
+    "<builtin>.type",
+    "subbrute.subbrute.trace",
+    "subbrute.subbrute.verify_nameservers.add_nameserver",
+    "subbrute.subbrute.verify_nameservers.find_wildcards"
+  ],
+  "sublist3r": [
+    "<builtin>.print",
+    "<builtin>.str.startswith",
+    "colorama.init",
+    "requests.packages.urllib3.disable_warnings",
+    "sublist3r.interactive",
+    "threading.Lock",
+    "win_unicode_console.enable"
+  ],
+  "sublist3r.AskEnum.__init__": [
+    "sublist3r.enumratorBaseThreaded.__init__"
+  ],
+  "sublist3r.AskEnum.extract_domains": [
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.str.startswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "sublist3r.enumratorBase.print_",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.AskEnum.generate_query": [
+    "<builtin>.str.format",
+    "<builtin>.str.join"
+  ],
+  "sublist3r.AskEnum.get_page": [],
+  "sublist3r.BaiduEnum.__init__": [
+    "sublist3r.enumratorBaseThreaded.__init__"
+  ],
+  "sublist3r.BaiduEnum.check_response_errors": [],
+  "sublist3r.BaiduEnum.extract_domains": [
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.startswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "re.sub",
+    "sublist3r.BaiduEnum.findsubs",
+    "sublist3r.enumratorBase.print_",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.BaiduEnum.findsubs": [
+    "<builtin>.max",
+    "collections.Counter",
+    "collections.Counter.pop"
+  ],
+  "sublist3r.BaiduEnum.generate_query": [
+    "<builtin>.str.format",
+    "<builtin>.str.join"
+  ],
+  "sublist3r.BaiduEnum.should_sleep": [
+    "random.randint",
+    "time.sleep"
+  ],
+  "sublist3r.BingEnum.__init__": [
+    "sublist3r.enumratorBaseThreaded.__init__"
+  ],
+  "sublist3r.BingEnum.extract_domains": [
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.str.startswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "re.sub",
+    "sublist3r.enumratorBase.print_",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.BingEnum.generate_query": [
+    "<builtin>.str.format",
+    "<builtin>.str.join"
+  ],
+  "sublist3r.CrtSearch.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__",
+    "threading.Lock"
+  ],
+  "sublist3r.CrtSearch.enumerate": [
+    "<builtin>.str.format",
+    "sublist3r.CrtSearch.extract_domains",
+    "sublist3r.CrtSearch.req"
+  ],
+  "sublist3r.CrtSearch.extract_domains": [
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.find",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.CrtSearch.req": [
+    "requests.Session.get",
+    "sublist3r.enumratorBase.get_response"
+  ],
+  "sublist3r.DNSdumpster.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__",
+    "threading.BoundedSemaphore"
+  ],
+  "sublist3r.DNSdumpster.check_host": [
+    "<builtin>.list.append",
+    "_thread.LockType.acquire",
+    "_thread.LockType.release",
+    "dns.resolver.Resolver",
+    "dns.resolver.Resolver.query",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.DNSdumpster.enumerate": [
+    "sublist3r.DNSdumpster.check_host",
+    "sublist3r.DNSdumpster.extract_domains",
+    "sublist3r.DNSdumpster.get_csrftoken",
+    "sublist3r.DNSdumpster.req",
+    "threading.Thread",
+    "threading.Thread.join",
+    "threading.Thread.start"
+  ],
+  "sublist3r.DNSdumpster.extract_domains": [
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.set",
+    "<builtin>.str.endswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile"
+  ],
+  "sublist3r.DNSdumpster.get_csrftoken": [
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile"
+  ],
+  "sublist3r.DNSdumpster.req": [
+    "<builtin>.dict",
+    "requests.Session.get",
+    "requests.Session.post",
+    "sublist3r.enumratorBase.get_response",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.GoogleEnum.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__"
+  ],
+  "sublist3r.GoogleEnum.check_response_errors": [
+    "<builtin>.type",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.GoogleEnum.extract_domains": [
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.str.startswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "re.sub",
+    "sublist3r.enumratorBase.print_",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.GoogleEnum.generate_query": [
+    "<builtin>.str.format",
+    "<builtin>.str.join"
+  ],
+  "sublist3r.GoogleEnum.should_sleep": [
+    "time.sleep"
+  ],
+  "sublist3r.NetcraftEnum.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__",
+    "threading.Lock"
+  ],
+  "sublist3r.NetcraftEnum.create_cookies": [
+    "<builtin>.dict",
+    "<builtin>.str.encode",
+    "_hashlib.HASH.hexdigest",
+    "_sha1.sha1.hexdigest",
+    "hashlib.sha1",
+    "urllib.parse.unquote"
+  ],
+  "sublist3r.NetcraftEnum.enumerate": [
+    "<builtin>.str.format",
+    "sublist3r.NetcraftEnum.extract_domains",
+    "sublist3r.NetcraftEnum.get_cookies",
+    "sublist3r.NetcraftEnum.get_next",
+    "sublist3r.NetcraftEnum.req",
+    "sublist3r.enumratorBase.get_response"
+  ],
+  "sublist3r.NetcraftEnum.extract_domains": [
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "sublist3r.enumratorBase.print_",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.NetcraftEnum.get_cookies": [
+    "sublist3r.NetcraftEnum.create_cookies"
+  ],
+  "sublist3r.NetcraftEnum.get_next": [
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "re.sub"
+  ],
+  "sublist3r.NetcraftEnum.req": [
+    "requests.Session.get",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.PassiveDNS.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__",
+    "threading.Lock"
+  ],
+  "sublist3r.PassiveDNS.enumerate": [
+    "<builtin>.str.format",
+    "sublist3r.PassiveDNS.extract_domains",
+    "sublist3r.PassiveDNS.req"
+  ],
+  "sublist3r.PassiveDNS.extract_domains": [
+    "<builtin>.list.append",
+    "<builtin>.str.strip",
+    "json.loads",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.PassiveDNS.req": [
+    "requests.Session.get",
+    "sublist3r.enumratorBase.get_response"
+  ],
+  "sublist3r.ThreatCrowd.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__",
+    "threading.Lock"
+  ],
+  "sublist3r.ThreatCrowd.enumerate": [
+    "<builtin>.str.format",
+    "sublist3r.ThreatCrowd.extract_domains",
+    "sublist3r.ThreatCrowd.req"
+  ],
+  "sublist3r.ThreatCrowd.extract_domains": [
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.strip",
+    "json.loads",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.ThreatCrowd.req": [
+    "requests.Session.get",
+    "sublist3r.enumratorBase.get_response"
+  ],
+  "sublist3r.Virustotal.__init__": [
+    "<builtin>.str.format",
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__",
+    "threading.Lock"
+  ],
+  "sublist3r.Virustotal.enumerate": [
+    "json.loads",
+    "sublist3r.Virustotal.extract_domains",
+    "sublist3r.Virustotal.send_req",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.Virustotal.extract_domains": [
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.strip",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.Virustotal.send_req": [
+    "requests.Session.get",
+    "sublist3r.enumratorBase.get_response",
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.YahooEnum.__init__": [
+    "<builtin>.super",
+    "sublist3r.enumratorBaseThreaded.__init__"
+  ],
+  "sublist3r.YahooEnum.extract_domains": [
+    "<builtin>.list.append",
+    "<builtin>.str.endswith",
+    "<builtin>.str.startswith",
+    "<builtin>.str.strip",
+    "_sre.SRE_Pattern.findall",
+    "re.Pattern.findall",
+    "re.compile",
+    "re.sub",
+    "sublist3r.enumratorBase.print_",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.YahooEnum.generate_query": [
+    "<builtin>.str.format",
+    "<builtin>.str.join"
+  ],
+  "sublist3r.YahooEnum.get_page": [],
+  "sublist3r.YahooEnum.should_sleep": [],
+  "sublist3r.banner": [
+    "<builtin>.print"
+  ],
+  "sublist3r.enumratorBase.__init__": [
+    "requests.Session",
+    "sublist3r.enumratorBase.print_banner",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.enumratorBase.check_max_pages": [],
+  "sublist3r.enumratorBase.check_max_subdomains": [],
+  "sublist3r.enumratorBase.check_response_errors": [],
+  "sublist3r.enumratorBase.enumerate": [
+    "<builtin>.str.count",
+    "sublist3r.AskEnum.extract_domains",
+    "sublist3r.AskEnum.generate_query",
+    "sublist3r.AskEnum.get_page",
+    "sublist3r.BaiduEnum.check_response_errors",
+    "sublist3r.BaiduEnum.extract_domains",
+    "sublist3r.BaiduEnum.generate_query",
+    "sublist3r.BaiduEnum.should_sleep",
+    "sublist3r.BingEnum.extract_domains",
+    "sublist3r.BingEnum.generate_query",
+    "sublist3r.GoogleEnum.check_response_errors",
+    "sublist3r.GoogleEnum.extract_domains",
+    "sublist3r.GoogleEnum.generate_query",
+    "sublist3r.GoogleEnum.should_sleep",
+    "sublist3r.YahooEnum.extract_domains",
+    "sublist3r.YahooEnum.generate_query",
+    "sublist3r.YahooEnum.get_page",
+    "sublist3r.YahooEnum.should_sleep",
+    "sublist3r.enumratorBase.check_max_pages",
+    "sublist3r.enumratorBase.check_max_subdomains",
+    "sublist3r.enumratorBase.check_response_errors",
+    "sublist3r.enumratorBase.generate_query",
+    "sublist3r.enumratorBase.get_page",
+    "sublist3r.enumratorBase.send_req",
+    "sublist3r.enumratorBase.should_sleep"
+  ],
+  "sublist3r.enumratorBase.extract_domains": [],
+  "sublist3r.enumratorBase.generate_query": [],
+  "sublist3r.enumratorBase.get_page": [],
+  "sublist3r.enumratorBase.get_response": [
+    "<builtin>.hasattr"
+  ],
+  "sublist3r.enumratorBase.print_": [
+    "<builtin>.print"
+  ],
+  "sublist3r.enumratorBase.print_banner": [
+    "sublist3r.enumratorBase.print_"
+  ],
+  "sublist3r.enumratorBase.send_req": [
+    "<builtin>.str.format",
+    "requests.Session.get",
+    "sublist3r.enumratorBase.get_response"
+  ],
+  "sublist3r.enumratorBase.should_sleep": [],
+  "sublist3r.enumratorBaseThreaded.__init__": [
+    "multiprocessing.Process.__init__",
+    "sublist3r.enumratorBase.__init__",
+    "threading.Thread.__init__"
+  ],
+  "sublist3r.enumratorBaseThreaded.run": [
+    "<builtin>.list.append",
+    "sublist3r.CrtSearch.enumerate",
+    "sublist3r.DNSdumpster.enumerate",
+    "sublist3r.NetcraftEnum.enumerate",
+    "sublist3r.PassiveDNS.enumerate",
+    "sublist3r.ThreatCrowd.enumerate",
+    "sublist3r.Virustotal.enumerate",
+    "sublist3r.enumratorBase.enumerate"
+  ],
+  "sublist3r.interactive": [
+    "sublist3r.banner",
+    "sublist3r.main",
+    "sublist3r.no_color",
+    "sublist3r.parse_args"
+  ],
+  "sublist3r.main": [
+    "<builtin>.len",
+    "<builtin>.list",
+    "<builtin>.list.append",
+    "<builtin>.print",
+    "<builtin>.set",
+    "<builtin>.set.add",
+    "<builtin>.set.union",
+    "<builtin>.sorted",
+    "<builtin>.str.lower",
+    "<builtin>.str.split",
+    "<builtin>.str.startswith",
+    "_sre.SRE_Pattern.match",
+    "multiprocessing.Manager",
+    "multiprocessing.Process.join",
+    "multiprocessing.Process.start",
+    "multiprocessing.managers.SyncManager.list",
+    "os.path.dirname",
+    "os.path.join",
+    "os.path.realpath",
+    "re.Pattern.match",
+    "re.compile",
+    "subbrute.subbrute.print_target",
+    "sublist3r.AskEnum.__init__",
+    "sublist3r.BaiduEnum.__init__",
+    "sublist3r.BingEnum.__init__",
+    "sublist3r.CrtSearch.__init__",
+    "sublist3r.DNSdumpster.__init__",
+    "sublist3r.GoogleEnum.__init__",
+    "sublist3r.NetcraftEnum.__init__",
+    "sublist3r.PassiveDNS.__init__",
+    "sublist3r.ThreatCrowd.__init__",
+    "sublist3r.Virustotal.__init__",
+    "sublist3r.YahooEnum.__init__",
+    "sublist3r.enumratorBaseThreaded.run",
+    "sublist3r.portscan.__init__",
+    "sublist3r.portscan.run",
+    "sublist3r.subdomain_sorting_key",
+    "sublist3r.write_file",
+    "threading.Thread.join",
+    "threading.Thread.start",
+    "urllib.parse.urlparse"
+  ],
+  "sublist3r.no_color": [],
+  "sublist3r.parse_args": [
+    "argparse.ArgumentParser",
+    "argparse.ArgumentParser.add_argument",
+    "argparse.ArgumentParser.parse_args",
+    "sublist3r.parser_error"
+  ],
+  "sublist3r.parser_error": [
+    "<builtin>.print",
+    "sublist3r.banner",
+    "sys.exit"
+  ],
+  "sublist3r.portscan.__init__": [
+    "threading.BoundedSemaphore"
+  ],
+  "sublist3r.portscan.port_scan": [
+    "<builtin>.int",
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.print",
+    "<builtin>.str.join",
+    "socket.socket",
+    "socket.socket.close",
+    "socket.socket.connect_ex",
+    "socket.socket.settimeout",
+    "threading.BoundedSemaphore.acquire",
+    "threading.BoundedSemaphore.release",
+    "threading._BoundedSemaphore.acquire",
+    "threading._BoundedSemaphore.release"
+  ],
+  "sublist3r.portscan.run": [
+    "sublist3r.portscan.port_scan",
+    "threading.Thread",
+    "threading.Thread.start"
+  ],
+  "sublist3r.subdomain_sorting_key": [
+    "<builtin>.str.split"
+  ],
+  "sublist3r.write_file": [
+    "<builtin>.open",
+    "<builtin>.print",
+    "<builtin>.str",
+    "io.TextIOWrapper.write"
+  ]
+}
