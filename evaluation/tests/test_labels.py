@@ -35,7 +35,7 @@ def result(micro=(10, 1, 2), inside=(20, 3, 4), outside=(30, 5, 6)):
         "evaluation/macro-benchmark/ground-truth/jmespath.json",
         "evaluation/macro-benchmark/dynamic/h11.json",
         "evaluation/macro-benchmark/projects.toml",
-        "evaluation/macro-benchmark/requirements/bottle.txt",
+        "evaluation/macro-benchmark/test-environments/bottle.txt",
         "evaluation/common/same_function.json",
         "micro-benchmark/snippets/classes/call/callgraph.json",
         "micro-benchmark/snippets/a/b/c/callgraph.json",

@@ -58,7 +58,7 @@ These paths define what PyCG is measured against:
 - `evaluation/macro-benchmark/ground-truth/`
 - `evaluation/macro-benchmark/dynamic/`
 - `evaluation/macro-benchmark/projects.toml`
-- `evaluation/macro-benchmark/requirements/`
+- `evaluation/macro-benchmark/test-environments/`
 - `evaluation/common/same_function.json`
 - `micro-benchmark/snippets/**/callgraph.json`
 - `tests/known_failures.txt`
