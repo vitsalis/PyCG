@@ -94,9 +94,16 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          pattern: eval-measure-*
+          name: eval-measure-pr
           path: ${{ env.EVAL_OUT }}
-          merge-multiple: true
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: eval-measure-seed1
+          path: ${{ env.EVAL_OUT }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: eval-measure-base
+          path: ${{ env.EVAL_OUT }}
       - run: make eval-compare BASE=HEAD^1 SUMMARY="$GITHUB_STEP_SUMMARY"
       - id: labels
         if: ${{ !cancelled() }}
