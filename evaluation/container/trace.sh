@@ -1,27 +1,4 @@
 #!/bin/sh
-# Record the trace of one macro-benchmark project in a container.
-#
-#   PYTHON_IMAGE=python:3.14-slim@sha256:<digest> \
-#       evaluation/container/trace.sh [--dry-run] BENCHMARK_DIR NAME
-#
-# The project's source comes from the inputs image (pycg-evaluation-inputs,
-# built by `docker compose -f evaluation/compose.yaml build inputs`; its
-# build checked the source against its pin). The script:
-# 1. checks that the pin of NAME in projects.toml is that of its round log
-#    (for an sdist, that the sdist names the release of its round log);
-# 2. builds the image of NAME from Dockerfile.trace,
-#    BENCHMARK_DIR/test-environments/NAME.txt (the only file of the context) and
-#    the source of NAME in the inputs image;
-# 3. copies the tracer, projects.toml and the project's pytest plugins to
-#    a temporary directory;
-# 4. runs the tests under the tracer in a container without network, with
-#    two mounts: the tracer (read-only) and the output;
-# 5. checks the trace and copies it to BENCHMARK_DIR/dynamic/NAME.json; the
-#    distributions of the container go to test-environments/NAME.installed.txt;
-# 6. removes the temporary directory and any container left.
-#
-# --dry-run prints the commands and runs nothing. Docker gets only PATH,
-# HOME, DOCKER_HOST and DOCKER_CONFIG of the caller's environment.
 set -eu
 
 usage() {
@@ -56,8 +33,7 @@ quote() {
     esac
 }
 
-# Print a command in dry-run mode, else run it.
-run() {
+print_or_run() {
     if [ "$dry_run" = 1 ]; then
         line=""
         for arg in "$@"; do
@@ -71,7 +47,7 @@ run() {
 
 docker_cli() {
     if [ "$dry_run" = 1 ]; then
-        # shellcheck disable=SC2016 # printed as it is, not expanded
+        # shellcheck disable=SC2016
         prefix='env -i PATH="$PATH" HOME="$HOME"'
         if [ -n "${DOCKER_HOST:-}" ]; then
             prefix="$prefix DOCKER_HOST=$(quote "$DOCKER_HOST")"
@@ -79,7 +55,7 @@ docker_cli() {
         if [ -n "${DOCKER_CONFIG:-}" ]; then
             prefix="$prefix DOCKER_CONFIG=$(quote "$DOCKER_CONFIG")"
         fi
-        printf '%s %s\n' "$prefix" "$(run docker "$@")"
+        printf '%s %s\n' "$prefix" "$(print_or_run docker "$@")"
     else
         env -i PATH="$PATH" HOME="$HOME" \
             ${DOCKER_HOST:+"DOCKER_HOST=$DOCKER_HOST"} \
@@ -99,8 +75,6 @@ cleanup() {
             docker_cli rm --force "$container" >/dev/null 2>&1 || true
         fi
         if [ -n "$work" ] && [ -d "$work" ]; then
-            # The temporary directory goes to the trash where there is one
-            # (recoverable); else it stays, and its path is printed.
             if command -v trash >/dev/null 2>&1; then
                 trash "$work"
             else
@@ -120,8 +94,8 @@ if [ -z "${PYTHON_IMAGE:-}" ]; then
         echo "trace.sh: set PYTHON_IMAGE to python:3.14-slim@sha256:<digest>" >&2
         exit 2
     fi
-    zeros=0000000000000000000000000000000000000000000000000000000000000000
-    PYTHON_IMAGE="python:3.14-slim@sha256:$zeros"  # a placeholder digest
+    placeholder_digest=0000000000000000000000000000000000000000000000000000000000000000
+    PYTHON_IMAGE="python:3.14-slim@sha256:$placeholder_digest"
 fi
 [ -f "$requirements" ] || { echo "trace.sh: no $requirements" >&2; exit 2; }
 

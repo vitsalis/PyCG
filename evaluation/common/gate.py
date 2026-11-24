@@ -1,32 +1,4 @@
 #!/usr/bin/env python3
-"""The gate of the evaluation: the values of a result against their floors.
-
-    python -I evaluation/common/gate.py check RESULT METRICS [--base BASE_METRICS]
-    python -I evaluation/common/gate.py record RESULT METRICS [--base BASE_METRICS]
-    python -I evaluation/common/gate.py summary RESULT METRICS --base-result RESULT \\
-        --changes FILE
-
-RESULT is the result.json of `loop.py run`; METRICS is evaluation/metrics.json:
-the best value that main has reached of each value of VALUES on the benchmark
-whose digest is `benchmark_sha256` (benchmark_digest), and the margin below
-it that a measurement may fall. A value's floor is its best minus the margin.
-
-`check` fails if a value is below its floor, a run failed, or METRICS was
-recorded on another benchmark than this checkout's; with --base (the
-metrics.json of the base commit), also if METRICS is not what `record` writes
-from the base and the result. An empty BASE_METRICS is a base without the
-file, whose floors are not checked. `record` prints that file: on the base's
-benchmark (default base: METRICS), each best is the larger of the base's and
-the measured value, so floors only rise; on another benchmark, the measured
-values are the new bests, as the base's were measured on other inputs. A
-base without `benchmark_sha256` was recorded before the digest existed, by
-the change that added it, which changes no file of the benchmark: it counts
-as this checkout's benchmark. `summary` prints the Markdown of a pull
-request: each value of the base and of the result with its floor, whether
-the benchmark changed, the changes that `loop.py compare` wrote to FILE, and
-the time and peak memory of each macro package (not gated).
-"""
-
 import argparse
 import hashlib
 import json
@@ -39,6 +11,14 @@ MACRO = Path("evaluation/macro-benchmark")
 SAME_FUNCTION = Path("evaluation/common/same_function.json")
 SNIPPETS = Path("micro-benchmark/snippets")
 SNIPPET_FILES = ("callgraph.json", "requires-python")
+DESCRIPTION = """The gate of the evaluation: the values of a result against their floors
+(evaluation/README.md, "The gate"). RESULT is the result.json of `loop.py
+run`; METRICS is evaluation/metrics.json.
+
+    python -I evaluation/common/gate.py check RESULT METRICS [--base BASE_METRICS]
+    python -I evaluation/common/gate.py record RESULT METRICS [--base BASE_METRICS]
+    python -I evaluation/common/gate.py summary RESULT METRICS --base-result RESULT \\
+        --changes FILE"""
 
 VALUES = {
     "micro P": ("micro", "all", "precision"),
@@ -72,13 +52,6 @@ def measured(result):
 
 
 def benchmark_files(root):
-    """The files of `root` that a measurement reads besides the code of PyCG
-    and of the evaluation: projects.toml (the projects, their pins, their
-    packages), each project's ground truth and trace (ground-truth/<name>.json,
-    dynamic/<name>.json), the table of names of one function, and each
-    micro-benchmark case's programs, ground truth and requires-python. The
-    other files beside them (ledgers, notes, test environments, READMEs) do
-    not move a value; a change of them keeps the floors."""
     macro = root / MACRO
     config = macro / "projects.toml"
     files = [config, root / SAME_FUNCTION]
@@ -99,8 +72,6 @@ def benchmark_files(root):
 
 
 def benchmark_digest(root=ROOT):
-    """The SHA-256 of the listing of `sha256sum` of benchmark_files, sorted
-    by path: `sha256sum FILES | sha256sum` in `root`."""
     listing = "".join(
         f"{hashlib.sha256((root / path).read_bytes()).hexdigest()}  {path}\n"
         for path in benchmark_files(root)
@@ -109,8 +80,6 @@ def benchmark_digest(root=ROOT):
 
 
 def rebased(base, digest):
-    """Whether the floors of `base` were recorded on another benchmark than
-    the one of `digest` (a base without a digest: no, see the module)."""
     return base.get("benchmark_sha256", digest) != digest
 
 
@@ -230,7 +199,7 @@ def summary(result, metrics, base_result, changes, digest, base=None):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("command", choices=["check", "record", "summary"])
     parser.add_argument("result", type=Path)

@@ -1,20 +1,3 @@
-"""Run one PyCG analysis in this interpreter (the child process of run.py).
-
-    python -S -s -P -B evaluation/common/analyse.py REQUEST.json
-
-REQUEST.json has `checkout` (a PyCG checkout, put first on sys.path),
-`flavour` (a key of FLAVOURS), `entry_points`, `package` (the package root),
-`graph` (where to write the call graph) and `result` (where to write the
-status). The analysed sources are data: they are passed to PyCG
-as paths, and nothing imports or runs them.
-
-The call graph is `{caller: [callees]}`, sorted. The result is `{"status":
-"ok"}` or `{"status": "crash", "error": ..., "where": ...}`, with `seconds`
-(construction, analysis and output) and `peak_rss_mib` (peak resident set
-size of this process: on Linux VmHWM, which starts again at exec, not
-ru_maxrss, which keeps the parent's).
-"""
-
 import json
 import os
 import resource
@@ -24,24 +7,24 @@ import traceback
 from pathlib import Path
 
 
-# One adapter per API flavour: build the generator of a checkout. The
-# checkout is on sys.path when an adapter runs.
-def _original(entry_points, package):
-    """The original analysis (the 2021 analysis, PyCG commit 046479e)."""
+def _generator_original_2021_engine(entry_points, package):
     from pycg import utils
     from pycg.pycg import CallGraphGenerator
 
     return CallGraphGenerator(entry_points, package, -1, utils.constants.CALL_GRAPH_OP)
 
 
-def _new(entry_points, package):
-    """The new engine."""
+def _generator_new_engine(entry_points, package):
     from pycg.pycg import CallGraphGenerator
 
     return CallGraphGenerator(entry_points, package)
 
 
-FLAVOURS = {"original": _original, "new": _new}
+GENERATOR_BY_FLAVOUR = {
+    "original": _generator_original_2021_engine,
+    "new": _generator_new_engine,
+}
+RU_MAXRSS_UNITS_PER_MIB = 1 << 20 if sys.platform == "darwin" else 1 << 10
 
 
 def _peak_rss_mib():
@@ -53,13 +36,10 @@ def _peak_rss_mib():
         assert len(peaks) == 1 and peaks[0][2] == "kB", peaks
         return round(int(peaks[0][1]) / (1 << 10), 1)
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    # macOS reports bytes, Linux kibibytes.
-    return round(peak / (1 << 20 if sys.platform == "darwin" else 1 << 10), 1)
+    return round(peak / RU_MAXRSS_UNITS_PER_MIB, 1)
 
 
-def _where(error, checkout):
-    """Where a crash happened: the innermost frame in the checkout (relative
-    to it), else the innermost frame."""
+def _crash_location_innermost_in_checkout(error, checkout):
     frames = traceback.extract_tb(error.__traceback__)
     inside = [f for f in frames if f.filename.startswith(checkout + os.sep)]
     if not frames:
@@ -72,12 +52,11 @@ def _where(error, checkout):
 
 
 def analyse(request):
-    """Run the analysis of `request`; return the result and the graph (or None)."""
     checkout = os.path.abspath(request["checkout"])
     sys.path.insert(0, checkout)
     start = time.perf_counter()
     try:
-        generator = FLAVOURS[request["flavour"]](
+        generator = GENERATOR_BY_FLAVOUR[request["flavour"]](
             request["entry_points"], request["package"]
         )
         generator.analyze()
@@ -86,13 +65,13 @@ def analyse(request):
             for caller, callees in sorted(generator.output().items())
         }
         result = {"status": "ok"}
-    except (Exception, SystemExit) as error:  # a crash of the tool is a result
+    except (Exception, SystemExit) as error:
         graph = None
         message = str(error).splitlines()[0] if str(error) else ""
         result = {
             "status": "crash",
             "error": f"{type(error).__name__}: {message}"[:300],
-            "where": _where(error, checkout),
+            "where": _crash_location_innermost_in_checkout(error, checkout),
         }
     result["seconds"] = round(time.perf_counter() - start, 3)
     result["peak_rss_mib"] = _peak_rss_mib()

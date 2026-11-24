@@ -1,38 +1,3 @@
-"""Choose the packages of a new batch of the macro-benchmark, by a procedure that
-another person can run again: a fixed public list at a recorded date, a
-quality-filtered frame that is computed once and frozen, and a seeded draw
-stratified by size.
-
-    python -I evaluation/macro-benchmark/draw.py frame --work DIR [--offline]
-    python -I evaluation/macro-benchmark/draw.py draw --round N
-        [--used DIR]... [--drop NAME=REASON]...
-    python -I evaluation/macro-benchmark/draw.py check NAME[==VERSION]... --work DIR
-
-`frame` evaluates every package of the list up to RANK_CUTOFF through the
-filters (FILTERS, cheap ones first; the first failure ends a package), in
-rank order, and writes selection/frame.json: the funnel, and per package
-the failed filter and why, or the facts of a pass. The frame does not depend
-on the batches already built: packages that are used or excluded are evaluated
-like the others and skipped only by the draw.
-
-`draw` reads the frozen frame, never the network. It sorts the passing
-packages by code lines (ties by name), cuts them into STRATA equal-count
-strata, shuffles their names with a seed derived from the list and the
-round, and takes for each stratum the first package of that order that is
-in the stratum and is not used, excluded or dropped. It writes
-selection/round-<N>.json.
-
-`check` evaluates every filter on named packages, all of them even after a
-failure. It writes no frame and no round log, but fills the cache.
-
-The network is the boundary: Internet makes every request, Cache keeps every
-response under --work, so that a run resumes where it stopped and a rerun
-reads the cache (--offline never fetches); Cache waits when the GitHub API
-answers that its limit is reached. A wheel is read as a zip and a clone as
-files: nothing of a package is installed, imported or run. Standard library
-only (Python 3.12 or later).
-"""
-
 import argparse
 import datetime
 import fnmatch
@@ -57,6 +22,11 @@ import zipfile
 import zlib
 from pathlib import Path
 
+_DESCRIPTION = """Choose the packages of a new batch of the macro-benchmark, by a
+procedure that another person can run again: a fixed public list at a recorded
+date, a quality-filtered frame that is computed once and frozen, and a seeded
+draw stratified by size."""
+
 HERE = Path(__file__).resolve().parent
 REPOSITORY_ROOT = HERE.parents[1]
 SELECTION_DIR = HERE / "selection"
@@ -65,17 +35,14 @@ EXCLUDED_PATH = SELECTION_DIR / "excluded.txt"
 FRAME_PATH = SELECTION_DIR / "frame.json"
 USED_DIRS = (HERE,)
 
-# The thresholds of the procedure. The frame and the round logs record them.
-# frame and check run only on this Python: the code-line count uses the
-# tokenizer, whose tokens differ between versions (t-strings since 3.14).
 FRAME_PYTHON = (3, 15)
-RANK_CUTOFF = 5000  # rank: the frame is the packages of rank 1 to this
-STUB_PREFIXES = ("types-",)  # stub-name, on the normalised name
+RANK_CUTOFF = 5000
+STUB_PREFIXES = ("types-",)
 STUB_SUFFIXES = ("-stubs",)
-MAINTAINED_YEARS = 3  # release: at most this old at the list date
-PURE_WHEEL_TAGS = ("py3-none-any", "py2.py3-none-any")  # pure-python
-TARGET_PYTHON = "3.14.0"  # requires-python and no-dependency
-MARKER_ENVIRONMENT = {  # no-dependency: CPython 3.14 on Linux, no extra
+MAINTAINED_YEARS = 3
+PURE_WHEEL_TAGS = ("py3-none-any", "py2.py3-none-any")
+TARGET_PYTHON = "3.14.0"
+MARKER_ENVIRONMENT = {
     "python_version": "3.14",
     "python_full_version": TARGET_PYTHON,
     "sys_platform": "linux",
@@ -85,7 +52,7 @@ MARKER_ENVIRONMENT = {  # no-dependency: CPython 3.14 on Linux, no extra
     "platform_python_implementation": "CPython",
     "extra": "",
 }
-PERMISSIVE_LICENCES = (  # licence and github: SPDX identifiers
+PERMISSIVE_LICENCES = (
     "0BSD",
     "Apache-2.0",
     "BSD-2-Clause",
@@ -104,25 +71,25 @@ PERMISSIVE_CLASSIFIERS = (
     "License :: OSI Approved :: The Unlicense (Unlicense)",
     "License :: OSI Approved :: Zero-Clause BSD (0BSD)",
 )
-MIN_CODE_LINES = 800  # size
+MIN_CODE_LINES = 800
 MAX_CODE_LINES = 4000
-TEST_DIRS = ("tests", "test", "testing", "unittests")  # size: not counted
+TEST_DIRS = ("tests", "test", "testing", "unittests")
 TAG_FORMS = ("{version}", "v{version}", "{name}-{version}", "release-{version}")
-MIN_COMMITS = 100  # history, at the tag
-MIN_AUTHORS = 2  # history: distinct author e-mails
-CI_FILES = (  # ci: a path ending in / means any file below it
+MIN_COMMITS = 100
+MIN_AUTHORS = 2
+CI_FILES = (
     ".github/workflows/",
     ".travis.yml",
     ".gitlab-ci.yml",
     ".circleci/",
     "azure-pipelines.yml",
 )
-TEST_FILES = ("test_*.py", "*_test.py")  # tests
-MAX_DIFFERING_PERCENT = 5  # released-code
-MIN_STARS = 500  # github
-MAX_BLOB_BYTES = 4 * 1024 * 1024  # tests and released-code: larger files are not read
-STRATA = 5  # draw: one package per stratum
-GITHUB_FACTS = (  # recorded as fetched
+TEST_FILES = ("test_*.py", "*_test.py")
+MAX_DIFFERING_PERCENT = 5
+MIN_STARS = 500
+MAX_BLOB_BYTES = 4 * 1024 * 1024
+STRATA = 5
+GITHUB_FACTS = (
     "archived",
     "created_at",
     "fork",
@@ -137,34 +104,27 @@ GITHUB_FACTS = (  # recorded as fetched
 PYPI_PROJECT = "https://pypi.org/pypi/{name}/json"
 PYPI_RELEASE = "https://pypi.org/pypi/{name}/{version}/json"
 GITHUB_API = "https://api.github.com/repos/{owner}/{repo}"
-HTTP_TIMEOUT = 60
-HTTP_ATTEMPTS = 8  # requests for one body, also to continue a cut one
-HTTP_PAUSE = 2  # seconds between two of them
+HTTP_TIMEOUT_SECONDS = 60
+HTTP_REQUESTS_PER_BODY_MAX = 8
+HTTP_PAUSE_SECONDS = 2
 USER_AGENT = "pycg-macro-benchmark-draw"
 
 
-class Offline(Exception):
-    """A response that --offline needs is not in the cache."""
+class OfflineCacheMiss(Exception):
+    pass
 
 
-class NotEvaluated(Exception):
-    """A filter needs a fact that an earlier filter did not find (check)."""
+class FilterInputMissing(Exception):
+    pass
 
 
 class RateLimited(Exception):
-    """The GitHub API refuses until `reset` (seconds since the epoch)."""
-
-    def __init__(self, reset):
-        super().__init__(reset)
-        self.reset = reset
+    def __init__(self, reset_epoch_seconds):
+        super().__init__(reset_epoch_seconds)
+        self.reset_epoch_seconds = reset_epoch_seconds
 
 
-# The network
-
-
-def rate_limit_reset(status, headers, now):
-    """The time at which a rate-limited answer allows the next request, or
-    None if the answer is not a rate limit."""
+def rate_limit_reset_epoch_seconds(status, headers, now):
     headers = {key.lower(): value for key, value in headers.items()}
     if status not in (403, 429):
         return None
@@ -179,31 +139,16 @@ def rate_limit_reset(status, headers, now):
 
 
 class Internet:
-    """Every request of the script: HTTP GET, git ls-remote, git clone.
-    `opener` is the HTTP transport (urlopen); `clock` paces the attempts."""
-
     def __init__(self, opener=urllib.request.urlopen, clock=time):
         self.opener = opener
         self.clock = clock
 
     def get(self, url):
-        """The body of `url`, or None if the server answers 404.
-
-        A body that arrives cut short is continued from the bytes already
-        received, with a Range request that names the first answer's
-        validator (If-Range: its strong ETag, else its Last-Modified). An
-        answer that is not the asked continuation starts the body again
-        from zero; without a validator, so does every attempt. The body is
-        complete when a read ends without being cut and its length is the
-        total that the server announced (Content-Length of the first answer,
-        or the total of a Content-Range), if it announced one. At most
-        HTTP_ATTEMPTS requests, HTTP_PAUSE seconds apart; the last failure is
-        raised."""
         assert url.startswith("https://"), url
-        body, validator, length, failure = b"", None, None, None
-        for attempt in range(1, HTTP_ATTEMPTS + 1):
+        body, validator, length_announced, failure = b"", None, None, None
+        for attempt in range(1, HTTP_REQUESTS_PER_BODY_MAX + 1):
             if attempt > 1:
-                self.clock.sleep(HTTP_PAUSE)
+                self.clock.sleep(HTTP_PAUSE_SECONDS)
             headers = {"User-Agent": USER_AGENT}
             if body and validator:
                 headers["Range"] = f"bytes={len(body)}-"
@@ -212,49 +157,53 @@ class Internet:
                 body = b""
             request = urllib.request.Request(url, headers=headers)
             try:
-                with self.opener(request, timeout=HTTP_TIMEOUT) as response:
-                    if body and not _continues(response, len(body)):
+                with self.opener(request, timeout=HTTP_TIMEOUT_SECONDS) as response:
+                    if body and not _is_continuation(response, len(body)):
                         body = b""
-                        if response.status == 206:  # a part from elsewhere
+                        answer_is_part_not_asked = response.status == 206
+                        if answer_is_part_not_asked:
                             failure = http.client.IncompleteRead(b"")
                             continue
                     if not body:
-                        validator = _validator(response.headers)
-                        length = _length(response.headers)
-                    elif length is None:  # a continuation may tell the total
-                        length = _range_total(response.headers)
-                    cut = False
+                        validator = _if_range_validator(response.headers)
+                        length_announced = _content_length_total(response.headers)
+                    elif length_announced is None:
+                        length_announced = _content_range_total(response.headers)
+                    read_was_cut = False
                     try:
                         body += response.read()
                     except http.client.IncompleteRead as error:
                         body += error.partial
-                        failure, cut = error, True
+                        failure, read_was_cut = error, True
             except urllib.error.HTTPError as error:
-                reset = rate_limit_reset(error.code, error.headers, time.time())
-                if error.code not in (404, 416) and reset is None:
+                reset_epoch_seconds = rate_limit_reset_epoch_seconds(
+                    error.code, error.headers, time.time()
+                )
+                if error.code not in (404, 416) and reset_epoch_seconds is None:
                     raise
                 error.close()
                 if error.code == 404:
                     return None
-                if reset is not None:
-                    raise RateLimited(reset) from None
-                body, failure = b"", error  # 416: the range is not served
+                if reset_epoch_seconds is not None:
+                    raise RateLimited(reset_epoch_seconds) from None
+                assert error.code == 416, error.code
+                body, failure = b"", error
                 continue
-            except (http.client.HTTPException, OSError) as error:
-                failure = error  # a failed connection: try again
+            except (http.client.HTTPException, OSError) as connection_failure:
+                failure = connection_failure
                 continue
-            if cut:  # never complete, whatever the length
+            if read_was_cut:
                 continue
-            if length is None or len(body) == length:
+            if length_announced is None or len(body) == length_announced:
                 return body
-            if len(body) > length:
+            if len(body) > length_announced:
                 body = b""
-            failure = http.client.IncompleteRead(body, max(0, length - len(body)))
+            failure = http.client.IncompleteRead(
+                body, max(0, length_announced - len(body))
+            )
         raise failure
 
     def ls_remote(self, repository):
-        """The output of git ls-remote of the tags, or None if there is no
-        such repository."""
         result = _git("ls-remote", "--tags", "--refs", "--", repository)
         if result.returncode == 0:
             return result.stdout.decode()
@@ -263,26 +212,12 @@ class Internet:
             return None
         raise RuntimeError(f"git ls-remote {repository}: {error.strip()}")
 
-    def clone(self, repository, tag, destination, needed):
-        """The objects of the tag, read from git's object store; nothing is
-        checked out, so no hook, filter or line-ending conversion applies.
-
-        Two bare repositories fetch the explicit ref refs/tags/<tag>: one
-        with its whole history and without blobs, one with the tree of the
-        tag (depth 1). Returns {tag_object, commit, commits, authors,
-        files}: the object that the tag ref names, the commit that it peels
-        to, the commits reachable from it and their distinct author e-mails
-        (without case), {path: blob id} of the regular files of its tree
-        (no symbolic link, no submodule), and too_large: the paths for which
-        `needed(path)` holds whose blob is over MAX_BLOB_BYTES. The other
-        needed blobs are written to destination/blobs/<blob id>, as
-        committed, one record at a time from git cat-file --batch, after
-        git cat-file --batch-check gave their sizes."""
+    def clone(self, repository, tag, destination, blob_is_needed):
         destination = Path(destination)
         ref = f"refs/tags/{tag}"
         history, tree = destination / "history.git", destination / "tree.git"
         for bare in (history, tree):
-            _git_output("init", "--quiet", "--bare", "--template=", str(bare))
+            _git_stdout_text("init", "--quiet", "--bare", "--template=", str(bare))
         settings = (
             ("core.repositoryformatversion", "1"),
             ("extensions.partialclone", "origin"),
@@ -291,25 +226,27 @@ class Internet:
             ("remote.origin.partialclonefilter", "blob:none"),
         )
         for name, value in settings:
-            _git_output("-C", str(history), "config", name, value)
-        _git_output(
+            _git_stdout_text("-C", str(history), "config", name, value)
+        _git_stdout_text(
             *("-C", str(history), "fetch", "--quiet", "--no-tags"),
             *("--filter=blob:none", "origin", f"+{ref}:{ref}"),
         )
-        _git_output(
+        _git_stdout_text(
             *("-C", str(tree), "fetch", "--quiet", "--no-tags", "--depth=1"),
             *("--", repository, f"+{ref}:{ref}"),
         )
-        tag_object = _git_output("-C", str(tree), "rev-parse", ref).strip()
-        if _git_output("-C", str(history), "rev-parse", ref).strip() != tag_object:
+        tag_object = _git_stdout_text("-C", str(tree), "rev-parse", ref).strip()
+        if _git_stdout_text("-C", str(history), "rev-parse", ref).strip() != tag_object:
             raise RuntimeError(f"{repository}: the tag {tag} moved during the fetch")
-        commit = _git_output("-C", str(tree), "rev-parse", f"{ref}^{{commit}}")
+        commit = _git_stdout_text("-C", str(tree), "rev-parse", f"{ref}^{{commit}}")
         commit = commit.strip()
-        log = _git_output("-C", str(history), "log", "--format=%ae", commit)
+        log = _git_stdout_text("-C", str(history), "log", "--format=%ae", commit)
         emails = {line.strip().lower() for line in log.splitlines() if line.strip()}
-        commits = int(_git_output("-C", str(history), "rev-list", "--count", commit))
-        files = {}
-        listing = _git_bytes(
+        commits = int(
+            _git_stdout_text("-C", str(history), "rev-list", "--count", commit)
+        )
+        blob_id_by_path = {}
+        listing = _git_stdout_bytes(
             "-C", str(tree), "ls-tree", "-r", "-z", "--full-tree", commit
         )
         for entry in listing.split(b"\0"):
@@ -317,14 +254,16 @@ class Internet:
                 continue
             meta, _, path = entry.partition(b"\t")
             mode, kind, oid = meta.decode().split()
-            if kind == "blob" and mode in ("100644", "100755"):
-                files[path.decode("utf-8", "replace")] = oid
-        wanted = {files[path] for path in files if needed(path)}
-        sizes = _blob_sizes(tree, sorted(wanted))
+            if kind == "blob" and mode in _GIT_REGULAR_FILE_MODES:
+                blob_id_by_path[path.decode("utf-8", "replace")] = oid
+        wanted = {
+            blob_id_by_path[path] for path in blob_id_by_path if blob_is_needed(path)
+        }
+        sizes = _blob_size_bytes_by_id(tree, sorted(wanted))
         too_large = sorted(
             path
-            for path in files
-            if needed(path) and sizes[files[path]] > MAX_BLOB_BYTES
+            for path in blob_id_by_path
+            if blob_is_needed(path) and sizes[blob_id_by_path[path]] > MAX_BLOB_BYTES
         )
         expected = [
             (oid, size) for oid, size in sorted(sizes.items()) if size <= MAX_BLOB_BYTES
@@ -342,7 +281,7 @@ class Internet:
                 env=git_environment(os.environ),
             )
             try:
-                copy_blobs(process.stdout, expected, blobs)
+                copy_cat_file_blobs(process.stdout, expected, blobs)
             finally:
                 process.stdout.close()
                 status = process.wait()
@@ -353,16 +292,19 @@ class Internet:
             "commit": commit,
             "commits": commits,
             "authors": len(emails),
-            "files": dict(sorted(files.items())),
+            "files": dict(sorted(blob_id_by_path.items())),
             "too_large": too_large,
         }
 
 
-def _blob_sizes(repository, oids):
-    """{blob id: size} from git cat-file --batch-check; every record must
-    be the blob that was asked."""
+_GIT_REGULAR_FILE_MODES = ("100644", "100755")
+
+
+def _blob_size_bytes_by_id(repository, oids):
     data = "".join(f"{oid}\n" for oid in oids).encode()
-    output = _git_bytes("-C", str(repository), "cat-file", "--batch-check", data=data)
+    output = _git_stdout_bytes(
+        "-C", str(repository), "cat-file", "--batch-check", data=data
+    )
     lines = output.decode().splitlines()
     if len(lines) != len(oids):
         raise RuntimeError("git cat-file --batch-check: not one record per object")
@@ -375,11 +317,7 @@ def _blob_sizes(repository, oids):
     return sizes
 
 
-def copy_blobs(stream, expected, directory):
-    """Copy the records of git cat-file --batch from `stream` to
-    directory/<blob id>, one at a time, for the expected [(blob id, size)]
-    in order. Each record must be `<id> blob <size>\\n`, the payload of that
-    size, and `\\n`; nothing may follow the last one."""
+def copy_cat_file_blobs(stream, expected, directory):
     for oid, size in expected:
         header = stream.readline(200)
         if not header:
@@ -400,58 +338,46 @@ def copy_blobs(stream, expected, directory):
         raise RuntimeError("git cat-file: output after the last record")
 
 
-def _validator(headers):
-    """The validator for If-Range: a strong ETag, else Last-Modified."""
+def _if_range_validator(headers):
     etag = headers.get("ETag")
     if etag and not etag.startswith("W/"):
         return etag
     return headers.get("Last-Modified")
 
 
-def _length(headers):
-    """The length of the whole body that a first answer announces
-    (Content-Length), or None."""
+def _content_length_total(headers):
     length = headers.get("Content-Length")
     return int(length) if length and length.isdigit() else None
 
 
-def _range_total(headers):
-    """The length of the whole body that a part announces (the total of
-    Content-Range: bytes a-b/total), or None when it is `*`. The part's own
-    Content-Length is the length of the part only."""
+def _content_range_total(headers):
     total = (headers.get("Content-Range") or "").rpartition("/")[2]
     return int(total) if total.isdigit() else None
 
 
-def _continues(response, offset):
-    """Whether an answer is the continuation from `offset` that was asked."""
+def _is_continuation(response, offset):
     content_range = response.headers.get("Content-Range") or ""
     return response.status == 206 and content_range.startswith(f"bytes {offset}-")
 
 
-TRANSPORT_SETTINGS = ("http.",)  # the caller's git settings that a child keeps
+TRANSPORT_SETTINGS = ("http.",)
 
 
 def git_environment(environ):
-    """The environment of a git child: no GIT_* variable of the caller and
-    neither the user's nor the system's configuration; no prompt, no LFS
-    download. Of the git settings that the caller passes in its
-    environment (GIT_CONFIG_PARAMETERS, GIT_CONFIG_KEY_n and _VALUE_n),
-    only those of TRANSPORT_SETTINGS stay: a sandbox's proxy may need
-    http.proxyAuthMethod. They pass on in GIT_CONFIG_PARAMETERS, where a
-    setting without a value (true) differs from an empty one, in the order
-    in which git applies them (the indexed ones first): the last one of a
-    key wins, as for the caller."""
-    settings = []  # (key, value or None), in the order in which git applies them
+    settings_in_git_order = []
     for number in range(int(environ.get("GIT_CONFIG_COUNT", "0") or 0)):
         key = environ.get(f"GIT_CONFIG_KEY_{number}", "")
-        settings.append((key, environ.get(f"GIT_CONFIG_VALUE_{number}", "")))
+        value = environ.get(f"GIT_CONFIG_VALUE_{number}", "")
+        settings_in_git_order.append((key, value))
     for item in shlex.split(environ.get("GIT_CONFIG_PARAMETERS", "")):
         key, separator, value = item.partition("=")
-        settings.append((key, value if separator else None))
+        value_or_none_if_valueless = value if separator else None
+        settings_in_git_order.append((key, value_or_none_if_valueless))
     kept = [
-        _quoted(key) if value is None else f"{_quoted(key)}={_quoted(value)}"
-        for key, value in settings
+        _git_config_quoted(key)
+        if value is None
+        else f"{_git_config_quoted(key)}={_git_config_quoted(value)}"
+        for key, value in settings_in_git_order
         if key.lower().startswith(TRANSPORT_SETTINGS)
     ]
     environment = {
@@ -469,21 +395,18 @@ def git_environment(environ):
     return environment
 
 
-def _quoted(text):
-    """`text` quoted as git quotes the items of GIT_CONFIG_PARAMETERS."""
+def _git_config_quoted(text):
     return "'" + text.replace("'", "'\\''") + "'"
 
 
 def _git(*args, data=None):
-    """Run git in git_environment."""
     environment = git_environment(os.environ)
     return subprocess.run(
         ["git", *args], input=data, capture_output=True, env=environment
     )
 
 
-def _git_bytes(*args, data=None):
-    """The output of a git command that must succeed."""
+def _git_stdout_bytes(*args, data=None):
     result = _git(*args, data=data)
     if result.returncode != 0:
         error = result.stderr.decode(errors="replace").strip()
@@ -491,27 +414,27 @@ def _git_bytes(*args, data=None):
     return result.stdout
 
 
-def _git_output(*args):
-    return _git_bytes(*args).decode()
+def _git_stdout_text(*args):
+    return _git_stdout_bytes(*args).decode()
 
 
 class Cache:
-    """The responses of the network, kept under `work`. Without `internet`
-    (--offline), a response that is not in the cache is an error. On a
-    rate-limit answer it waits, with `clock`, until the limit resets."""
-
     def __init__(self, work, internet, clock):
         self.work = Path(work)
         self.internet = internet
         self.clock = clock
 
-    def _fetch(self, fetch):
+    def _fetch_waiting_out_rate_limit(self, fetch):
         while True:
             try:
                 return fetch()
             except RateLimited as limit:
-                wait = max(0, math.ceil(limit.reset - self.clock.time())) + 1
-                until = datetime.datetime.fromtimestamp(limit.reset, datetime.UTC)
+                wait = (
+                    max(0, math.ceil(limit.reset_epoch_seconds - self.clock.time())) + 1
+                )
+                until = datetime.datetime.fromtimestamp(
+                    limit.reset_epoch_seconds, datetime.UTC
+                )
                 print(
                     f"The GitHub API rate limit is reached: waiting {wait} s, "
                     f"until {until:%Y-%m-%d %H:%M:%S} UTC.",
@@ -520,7 +443,7 @@ class Cache:
                 )
                 self.clock.sleep(wait)
 
-    def _keep(self, kind, key, fetch):
+    def _cached_or_fetched(self, kind, key, fetch):
         path = self.work / "cache" / kind / hashlib.sha256(key.encode()).hexdigest()
         missing = path.with_suffix(".missing")
         if path.exists():
@@ -528,21 +451,21 @@ class Cache:
         if missing.exists():
             return None
         if self.internet is None:
-            raise Offline(f"not in the cache under {self.work}: {key}")
-        data = self._fetch(fetch)
+            raise OfflineCacheMiss(f"not in the cache under {self.work}: {key}")
+        data = self._fetch_waiting_out_rate_limit(fetch)
         path.parent.mkdir(parents=True, exist_ok=True)
         _write_atomic(missing if data is None else path, data or b"")
         return data
 
     def get(self, url):
-        return self._keep("http", url, lambda: self.internet.get(url))
+        return self._cached_or_fetched("http", url, lambda: self.internet.get(url))
 
     def json(self, url):
         data = self.get(url)
         return None if data is None else json.loads(data)
 
     def ls_remote(self, repository):
-        data = self._keep(
+        data = self._cached_or_fetched(
             "git",
             repository,
             lambda: _encode(self.internet.ls_remote(repository)),
@@ -550,20 +473,25 @@ class Cache:
         return None if data is None else data.decode()
 
     def clone(self, repository, tag, modules):
-        """(directory, facts) of the objects of a tag: Internet.clone wrote
-        the directory (its blobs/) and gave the facts (clone.json). The
-        blobs read are those that needed_blobs(modules) names."""
         identity = json.dumps([repository, tag, sorted(modules)])
         key = hashlib.sha256(identity.encode()).hexdigest()[:24]
         entry = self.work / "tags" / key
         if not entry.exists():
             if self.internet is None:
-                raise Offline(f"not in the cache under {self.work}: {repository} {tag}")
+                raise OfflineCacheMiss(
+                    f"not in the cache under {self.work}: {repository} {tag}"
+                )
             entry.parent.mkdir(parents=True, exist_ok=True)
-            partial = Path(tempfile.mkdtemp(dir=entry.parent, prefix="partial-"))
-            facts = self.internet.clone(repository, tag, partial, needed_blobs(modules))
-            (partial / "clone.json").write_text(json.dumps(facts, sort_keys=True))
-            partial.rename(entry)  # the entry appears complete or not at all
+            entry_being_written = Path(
+                tempfile.mkdtemp(dir=entry.parent, prefix="partial-")
+            )
+            facts = self.internet.clone(
+                repository, tag, entry_being_written, blob_is_needed_for(modules)
+            )
+            (entry_being_written / "clone.json").write_text(
+                json.dumps(facts, sort_keys=True)
+            )
+            entry_being_written.rename(entry)
         return entry, json.loads((entry / "clone.json").read_text())
 
 
@@ -577,35 +505,38 @@ def _write_atomic(path, data):
     os.replace(temporary, path)
 
 
-# Names and versions
-
-
-def normalise(name):
-    """The name as PyPI compares names (PEP 503)."""
+def normalise_pep503(name):
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
-_VERSION = re.compile(
+_PEP440_VERSION = re.compile(
     r"""v?(?:(?P<epoch>[0-9]+)!)?(?P<release>[0-9]+(?:\.[0-9]+)*)
     (?:[-_.]?(?P<pre_l>alpha|a|beta|b|preview|pre|c|rc)[-_.]?(?P<pre_n>[0-9]+)?)?
     (?:-(?P<post_n1>[0-9]+)|[-_.]?(?P<post_l>post|rev|r)[-_.]?(?P<post_n2>[0-9]+)?)?
     (?:[-_.]?(?P<dev_l>dev)[-_.]?(?P<dev_n>[0-9]+)?)?""",
     re.VERBOSE | re.IGNORECASE,
 )
-_PRE_ORDER = {"a": 0, "alpha": 0, "b": 1, "beta": 1}  # c, pre, preview, rc: 2
+_PRE_RELEASE_RANK = {
+    "a": 0,
+    "alpha": 0,
+    "b": 1,
+    "beta": 1,
+    "c": 2,
+    "pre": 2,
+    "preview": 2,
+    "rc": 2,
+}
 
 
-def parse_version(text):
-    """A PEP 440 version as {release, pre, post, dev, key}, or None. `key`
-    orders versions as PEP 440 does; a local version is not accepted."""
-    match = _VERSION.fullmatch(text.strip())
+def parse_pep440_version(text):
+    match = _PEP440_VERSION.fullmatch(text.strip())
     if match is None:
         return None
     release = tuple(int(part) for part in match["release"].split("."))
     pre = (
         None
         if match["pre_l"] is None
-        else (_PRE_ORDER.get(match["pre_l"].lower(), 2), int(match["pre_n"] or 0))
+        else (_PRE_RELEASE_RANK[match["pre_l"].lower()], int(match["pre_n"] or 0))
     )
     post_text = match["post_n1"] or match["post_n2"]
     post = None
@@ -637,17 +568,15 @@ def parse_version(text):
     }
 
 
-_CLAUSE = re.compile(r"\s*(~=|===|==|!=|<=|>=|<|>)\s*([^\s,]+)\s*")
+_SPECIFIER_CLAUSE = re.compile(r"\s*(~=|===|==|!=|<=|>=|<|>)\s*([^\s,]+)\s*")
 
 
-def admits(specifier, text):
-    """Whether the version `text` satisfies the PEP 440 specifier set.
-    Raises ValueError for a specifier that cannot be read."""
-    version = parse_version(text)
+def specifier_admits(specifier, text):
+    version = parse_pep440_version(text)
     for clause in specifier.split(","):
         if not clause.strip():
             continue
-        match = _CLAUSE.fullmatch(clause)
+        match = _SPECIFIER_CLAUSE.fullmatch(clause)
         if match is None:
             raise ValueError(clause.strip())
         if not _clause_admits(match[1], match[2], version, text):
@@ -655,10 +584,7 @@ def admits(specifier, text):
     return True
 
 
-def _starts_with(version, prefix):
-    """Whether `version` is in the series of `prefix` (PEP 440 prefix
-    matching): the same epoch, and the release, padded with zeros, starts
-    with the prefix's release."""
+def _in_release_series(version, prefix):
     size = len(prefix["release"])
     padded = (version["release"] + (0,) * size)[:size]
     return version["epoch"] == prefix["epoch"] and padded == prefix["release"]
@@ -670,18 +596,18 @@ def _clause_admits(operator, target, version, text):
     if version is None:
         raise ValueError(f"{text} is not a version")
     if target.endswith(".*") and operator in ("==", "!="):
-        prefix = parse_version(target[:-2])
+        prefix = parse_pep440_version(target[:-2])
         if prefix is None:
             raise ValueError(target)
-        return _starts_with(version, prefix) == (operator == "==")
-    wanted = parse_version(target)
+        return _in_release_series(version, prefix) == (operator == "==")
+    wanted = parse_pep440_version(target)
     if wanted is None:
         raise ValueError(target)
     if operator == "~=":
         if len(wanted["release"]) < 2:
             raise ValueError(f"~={target}")
         prefix = {"epoch": wanted["epoch"], "release": wanted["release"][:-1]}
-        return version["key"] >= wanted["key"] and _starts_with(version, prefix)
+        return version["key"] >= wanted["key"] and _in_release_series(version, prefix)
     compare = {
         "==": lambda a, b: a == b,
         "!=": lambda a, b: a != b,
@@ -693,9 +619,7 @@ def _clause_admits(operator, target, version, text):
     return compare(version["key"], wanted["key"])
 
 
-# Environment markers (PEP 508), for CPython 3.14 on Linux
-
-_MARKER_TOKEN = re.compile(
+_PEP508_MARKER_TOKEN = re.compile(
     r"""\s*(?:(?P<string>'[^']*'|"[^"]*")|(?P<op>~=|===|==|!=|<=|>=|<|>|\(|\))
     |(?P<word>[A-Za-z_][A-Za-z0-9_.]*))""",
     re.VERBOSE,
@@ -707,12 +631,10 @@ class MarkerError(Exception):
 
 
 def evaluate_marker(text, environment):
-    """The value of a marker; every comparison is evaluated, so that a
-    variable outside `environment` is an error wherever it is."""
     tokens, position = [], 0
     text = text.strip()
     while position < len(text):
-        match = _MARKER_TOKEN.match(text, position)
+        match = _PEP508_MARKER_TOKEN.match(text, position)
         if match is None or match.end() == position:
             raise MarkerError(f"cannot read {text[position:]!r}")
         kind = match.lastgroup
@@ -788,19 +710,16 @@ class _MarkerParser:
 
 
 def compare_marker_values(left, operator, right):
-    """`left operator right` as PEP 508 compares: as versions when both
-    sides are versions, else as Python strings (~= and === have no string
-    form)."""
     if operator == "in":
         return left in right
     if operator == "not in":
         return left not in right
-    if parse_version(left) is not None:
+    if parse_pep440_version(left) is not None:
         try:
-            return admits(f"{operator}{right}", left)
+            return specifier_admits(f"{operator}{right}", left)
         except ValueError:
             pass
-    strings = {
+    string_comparisons = {
         "==": lambda a, b: a == b,
         "!=": lambda a, b: a != b,
         "<": lambda a, b: a < b,
@@ -808,22 +727,12 @@ def compare_marker_values(left, operator, right):
         ">": lambda a, b: a > b,
         ">=": lambda a, b: a >= b,
     }
-    if operator not in strings:  # ~= and === compare only versions
+    if operator not in string_comparisons:
         raise MarkerError(f"cannot compare {left!r} {operator} {right!r}")
-    return strings[operator](left, right)
-
-
-# Code lines (the definition of the hand selection's count.py)
+    return string_comparisons[operator](left, right)
 
 
 def code_lines(data):
-    """Lines with code: the lines of the tokens of every statement that is
-    not a string statement. A string statement (a docstring, say) starts its
-    logical line and has only string literals, not formatted ones, and
-    parentheses: "doc", ("a" "b"). The string after `def f():` on the same
-    line, or after a `;`, does not start its logical line: it is code.
-    Comments and blank lines are not code. A file that `tokenize` cannot
-    read counts its non-blank lines."""
     try:
         tokens = list(tokenize.tokenize(io.BytesIO(data).readline))
     except (tokenize.TokenError, SyntaxError, UnicodeDecodeError):
@@ -838,10 +747,10 @@ def code_lines(data):
         tokenize.ENCODING,
     )
     lines, statement, depth = set(), [], 0
-    first = True  # the statement starts its logical line
+    statement_starts_logical_line = True
 
-    def close():
-        if not first or not all(
+    def close_statement():
+        if not statement_starts_logical_line or not all(
             token.type == tokenize.STRING or token.string in ("(", ")")
             for token in statement
         ):
@@ -853,8 +762,8 @@ def code_lines(data):
         if token.type in skipped:
             continue
         if token.type == tokenize.NEWLINE:
-            close()
-            first = True
+            close_statement()
+            statement_starts_logical_line = True
             continue
         if token.type == tokenize.OP:
             if token.string in ("(", "[", "{"):
@@ -862,96 +771,78 @@ def code_lines(data):
             elif token.string in (")", "]", "}"):
                 depth -= 1
             elif token.string == ";" and depth == 0:
-                close()
-                first = False
+                close_statement()
+                statement_starts_logical_line = False
                 continue
         statement.append(token)
-    close()
+    close_statement()
     return len(lines)
 
 
-# The packages under evaluation
-
-
 class Candidate:
-    """A package under evaluation. `facts` go to the frame; `data` holds
-    what later filters need."""
-
-    def __init__(self, name, rank, pinned=None):
+    def __init__(self, name, rank, pinned_version=None):
         self.name = name
-        self.rank = rank  # None: not in the list
-        self.pinned = pinned  # check NAME==VERSION
+        self.rank = rank
+        self.pinned_version = pinned_version
         self.facts = {}
-        self.data = {}
-        self.github = None  # the GitHub facts, once fetched
+        self.filter_inputs = {}
+        self.github_facts = None
 
-    def need(self, key):
-        if key not in self.data:
-            raise NotEvaluated(key)
-        return self.data[key]
+    def filter_input(self, key):
+        if key not in self.filter_inputs:
+            raise FilterInputMissing(key)
+        return self.filter_inputs[key]
 
 
 class Context:
-    def __init__(self, network, date):
+    def __init__(self, network, list_date):
         self.network = network
-        self.date = date  # the list date D
+        self.list_date = list_date
 
 
-def metadata(candidate, context):
-    """The PyPI metadata of the release (its `info`)."""
-    if "info" not in candidate.data:
-        version = candidate.need("version")
+def release_metadata(candidate, context):
+    if "info" not in candidate.filter_inputs:
+        version = candidate.filter_input("version")
         url = PYPI_RELEASE.format(name=candidate.name, version=version)
         data = context.network.json(url)
-        candidate.data["info"] = None if data is None else data["info"]
-    if candidate.data["info"] is None:
-        raise NotEvaluated("the metadata of the release")
-    return candidate.data["info"]
+        candidate.filter_inputs["info"] = None if data is None else data["info"]
+    if candidate.filter_inputs["info"] is None:
+        raise FilterInputMissing("the metadata of the release")
+    return candidate.filter_inputs["info"]
 
 
-def needed_blobs(modules):
-    """Whether the filters need the blob of a path of the tree: a test-file
-    candidate (tests), or a path that ends in a module path of the wheel
-    (released-code)."""
+def blob_is_needed_for(modules):
     modules = set(modules)
 
-    def needed(path):
+    def blob_is_needed(path):
         parts = path.split("/")
         if any(fnmatch.fnmatch(parts[-1], form) for form in TEST_FILES):
             return True
         return any("/".join(parts[start:]) in modules for start in range(len(parts)))
 
-    return needed
+    return blob_is_needed
 
 
 def checkout(candidate, context):
-    """The tree of the tag, from the object store: (directory, {path: blob
-    id} of its regular files, the needed paths whose blob is too large).
-    The other needed blobs are in directory/blobs."""
-    if "checkout" not in candidate.data:
+    if "checkout" not in candidate.filter_inputs:
         directory, found = context.network.clone(
-            candidate.need("repository"),
-            candidate.need("tag"),
-            sorted(candidate.data.get("modules", {})),
+            candidate.filter_input("repository"),
+            candidate.filter_input("tag"),
+            sorted(candidate.filter_inputs.get("modules", {})),
         )
-        candidate.data["checkout"] = (directory, found["files"])
-        candidate.data["too_large"] = set(found["too_large"])
-        candidate.data["history"] = found
+        candidate.filter_inputs["checkout"] = (directory, found["files"])
+        candidate.filter_inputs["too_large"] = set(found["too_large"])
+        candidate.filter_inputs["history"] = found
         candidate.facts["tag_object"] = found["tag_object"]
         candidate.facts["commit"] = found["commit"]
-    return candidate.data["checkout"]
+    return candidate.filter_inputs["checkout"]
 
 
-def _blob(directory, files, path):
-    """The content of a .py file of the tree, as committed."""
-    return Path(directory, "blobs", files[path]).read_bytes()
-
-
-# The filters: each returns None (pass) or the reason of the failure.
+def _committed_blob(directory, blob_id_by_path, path):
+    return Path(directory, "blobs", blob_id_by_path[path]).read_bytes()
 
 
 def rank(candidate, context):
-    """1. The download rank is at most RANK_CUTOFF."""
     if candidate.rank is None:
         return "not in the list"
     if RANK_CUTOFF is not None and candidate.rank > RANK_CUTOFF:
@@ -960,8 +851,7 @@ def rank(candidate, context):
 
 
 def not_a_stub(candidate, context):
-    """2. Not a stub package by its name."""
-    name = normalise(candidate.name)
+    name = normalise_pep503(candidate.name)
     if name.startswith(STUB_PREFIXES) or name.endswith(STUB_SUFFIXES):
         return "a stub package by its name"
     return None
@@ -973,33 +863,31 @@ def _upload_date(file):
 
 
 def release(candidate, context):
-    """3. The latest final release on or before the list date, not yanked,
-    uploaded in the MAINTAINED_YEARS before that date."""
     project = context.network.json(PYPI_PROJECT.format(name=candidate.name))
     if project is None:
         return "not on PyPI"
     found = []
     for text, files in project.get("releases", {}).items():
-        version = parse_version(text)
+        version = parse_pep440_version(text)
         if version is not None:
             found.append((version, text, files))
-    if candidate.pinned is not None:
-        pinned = parse_version(candidate.pinned)
+    if candidate.pinned_version is not None:
+        pinned = parse_pep440_version(candidate.pinned_version)
         if pinned is None:
-            return f"{candidate.pinned!r} is not a version"
+            return f"{candidate.pinned_version!r} is not a version"
         matches = [entry for entry in found if entry[0]["key"] == pinned["key"]]
         if not matches:
-            return f"release {candidate.pinned} not on PyPI"
+            return f"release {candidate.pinned_version} not on PyPI"
         version, text, files = matches[0]
         files = [file for file in files if not file.get("yanked")]
         if version["pre"] is not None or version["dev"] is not None:
             return f"{text} is a pre-release"
         if not files:
             return f"{text} is yanked"
-        before = [file for file in files if _upload_date(file) <= context.date]
-        if not before:  # check goes on with the release that it names
-            _keep_release(candidate, text, files)
-            return f"{text} was uploaded after {context.date}"
+        before = [file for file in files if _upload_date(file) <= context.list_date]
+        if not before:
+            _record_release(candidate, text, files)
+            return f"{text} was uploaded after {context.list_date}"
         files = before
     else:
         eligible = []
@@ -1007,34 +895,36 @@ def release(candidate, context):
             files = [
                 file
                 for file in files
-                if not file.get("yanked") and _upload_date(file) <= context.date
+                if not file.get("yanked") and _upload_date(file) <= context.list_date
             ]
             if files and version["pre"] is None and version["dev"] is None:
                 eligible.append((version["key"], text, files))
         if not eligible:
-            return f"no final release on or before {context.date} that is not yanked"
+            return (
+                f"no final release on or before {context.list_date} that is not yanked"
+            )
         _, text, files = max(eligible, key=lambda entry: entry[0])
-    uploaded = _keep_release(candidate, text, files)
-    limit = _years_before(context.date, MAINTAINED_YEARS)
+    uploaded = _record_release(candidate, text, files)
+    limit = _years_before(context.list_date, MAINTAINED_YEARS)
     if uploaded < limit:
         return f"{text} was uploaded on {uploaded}, before {limit}"
     return None
 
 
-def _keep_release(candidate, text, files):
-    """Record the release for the later filters; returns its upload date."""
+def _record_release(candidate, text, files):
     uploaded = min(_upload_date(file) for file in files)
     candidate.facts["release"] = text
     candidate.facts["uploaded"] = uploaded.isoformat()
-    candidate.data["version"] = text
-    candidate.data["files"] = files
+    candidate.filter_inputs["version"] = text
+    candidate.filter_inputs["files"] = files
     return uploaded
 
 
 def _years_before(date, years):
     try:
         return date.replace(year=date.year - years)
-    except ValueError:  # 29 February
+    except ValueError:
+        assert (date.month, date.day) == (2, 29), date
         return date.replace(year=date.year - years, day=28)
 
 
@@ -1044,8 +934,7 @@ def _wheel_tag(filename):
 
 
 def pure_python(candidate, context):
-    """4. An sdist and at least one wheel, every wheel pure Python."""
-    files = candidate.need("files")
+    files = candidate.filter_input("files")
     wheels = sorted(
         (file for file in files if file["packagetype"] == "bdist_wheel"),
         key=lambda file: file["filename"],
@@ -1057,7 +946,7 @@ def pure_python(candidate, context):
     for wheel in wheels:
         if _wheel_tag(wheel["filename"]) not in PURE_WHEEL_TAGS:
             return f"wheel {wheel['filename']} is not pure Python"
-    candidate.data["wheel"] = wheels[0]
+    candidate.filter_inputs["wheel"] = wheels[0]
     candidate.facts["wheel"] = {
         "filename": wheels[0]["filename"],
         "url": wheels[0]["url"],
@@ -1066,26 +955,22 @@ def pure_python(candidate, context):
     return None
 
 
-def python_version(candidate, context):
-    """5. requires_python admits TARGET_PYTHON (no requirement admits it)."""
-    requires = metadata(candidate, context).get("requires_python") or ""
+def requires_python(candidate, context):
+    requires = release_metadata(candidate, context).get("requires_python") or ""
     try:
-        if admits(requires, TARGET_PYTHON):
+        if specifier_admits(requires, TARGET_PYTHON):
             return None
     except ValueError as error:
         return f"cannot read requires_python {requires!r}: {error}"
     return f"requires_python {requires!r} excludes Python {TARGET_PYTHON}"
 
 
-def _permissive(identifier):
+def _is_permissive_licence(identifier):
     return identifier.lower() in {name.lower() for name in PERMISSIVE_LICENCES}
 
 
 def licence(candidate, context):
-    """6. The licence that PyPI states is permissive: license_expression,
-    else the licence classifiers, else a license field that is one
-    identifier. A licence that PyPI does not state is left to `github`."""
-    info = metadata(candidate, context)
+    info = release_metadata(candidate, context)
     expression = (info.get("license_expression") or "").strip()
     classifiers = [
         classifier
@@ -1095,14 +980,14 @@ def licence(candidate, context):
     ]
     field = (info.get("license") or "").strip()
     if expression:
-        # Every licence that the expression names must be permissive; an
-        # exception (WITH) is not accepted.
-        names = [
+        licence_identifiers = [
             word
             for word in re.split(r"[\s()]+", expression)
             if word and word.upper() not in ("AND", "OR")
         ]
-        if not all(_permissive(name) for name in names):
+        if not all(
+            _is_permissive_licence(identifier) for identifier in licence_identifiers
+        ):
             return f"licence {expression!r} is not permissive"
         stated, source = expression, "license_expression"
     elif classifiers:
@@ -1110,11 +995,11 @@ def licence(candidate, context):
             return f"licence classifiers {classifiers} are not all permissive"
         stated, source = "; ".join(classifiers), "classifiers"
     elif field and not any(character.isspace() for character in field):
-        if not _permissive(field):
+        if not _is_permissive_licence(field):
             return f"licence field {field[:40]!r} is not permissive"
         stated, source = field, "license"
-    else:  # no licence, or a text that is not an identifier
-        candidate.data["licence_undecided"] = True
+    else:
+        candidate.filter_inputs["licence_undecided"] = True
         return None
     candidate.facts["licence"] = stated
     candidate.facts["licence_source"] = source
@@ -1122,9 +1007,7 @@ def licence(candidate, context):
 
 
 def no_dependency(candidate, context):
-    """7. No requirement that applies on CPython 3.14 on Linux without an
-    extra."""
-    for requirement in metadata(candidate, context).get("requires_dist") or []:
+    for requirement in release_metadata(candidate, context).get("requires_dist") or []:
         name, _, marker = requirement.partition(";")
         if marker.strip():
             try:
@@ -1138,7 +1021,7 @@ def no_dependency(candidate, context):
     return None
 
 
-def _unsafe(member):
+def _is_unsafe_member_path(member):
     return (
         member.startswith("/")
         or "\\" in member
@@ -1147,8 +1030,7 @@ def _unsafe(member):
     )
 
 
-# What reading a member of a zip archive can raise on malformed data.
-_MEMBER_ERRORS = (
+_ZIP_MEMBER_READ_ERRORS = (
     RuntimeError,
     NotImplementedError,
     zipfile.BadZipFile,
@@ -1160,9 +1042,7 @@ _MEMBER_ERRORS = (
 
 
 def size(candidate, context):
-    """8. The code lines of the wheel's modules, without test directories
-    and metadata, are within MIN_CODE_LINES and MAX_CODE_LINES."""
-    wheel = candidate.need("wheel")
+    wheel = candidate.filter_input("wheel")
     data = context.network.get(wheel["url"])
     if data is None:
         return f"wheel {wheel['url']} not found"
@@ -1172,7 +1052,7 @@ def size(candidate, context):
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             members = [info for info in archive.infolist() if not info.is_dir()]
             for info in members:
-                if _unsafe(info.filename):
+                if _is_unsafe_member_path(info.filename):
                     return f"unsafe member path {info.filename!r} in the wheel"
             modules = {}
             for info in members:
@@ -1185,18 +1065,18 @@ def size(candidate, context):
                     return f"member {name} of the wheel is encrypted"
                 try:
                     modules[name] = archive.read(info)
-                except _MEMBER_ERRORS as error:
+                except _ZIP_MEMBER_READ_ERRORS as error:
                     return f"cannot read member {name} of the wheel: {error}"
-    except _MEMBER_ERRORS as error:  # also names that cannot be decoded
+    except _ZIP_MEMBER_READ_ERRORS as error:
         return f"the wheel cannot be read as a zip file: {error}"
     lines = {name: code_lines(content) for name, content in modules.items()}
     counted = [
         name for name in modules if not set(name.split("/")[:-1]) & set(TEST_DIRS)
     ]
     total = sum(lines[name] for name in counted)
-    candidate.data["modules"] = modules
-    candidate.data["module_lines"] = lines
-    candidate.data["code_lines"] = total
+    candidate.filter_inputs["modules"] = modules
+    candidate.filter_inputs["module_lines"] = lines
+    candidate.filter_inputs["code_lines"] = total
     candidate.facts["code_lines"] = total
     candidate.facts["top_level"] = sorted(
         {name.split("/")[0].removesuffix(".py") for name in counted}
@@ -1206,21 +1086,26 @@ def size(candidate, context):
     return None
 
 
-_GITHUB = re.compile(
+_GITHUB_REPOSITORY_URL = re.compile(
     r"https?://(?:www\.)?github\.com/([A-Za-z0-9][A-Za-z0-9-]*)/([A-Za-z0-9_.-]+)",
     re.IGNORECASE,
 )
-_NOT_OWNERS = {"sponsors", "orgs", "users", "apps", "marketplace", "topics"}
+_GITHUB_PATHS_NOT_OWNERS = {
+    "sponsors",
+    "orgs",
+    "users",
+    "apps",
+    "marketplace",
+    "topics",
+}
 
 
 def github_repositories(info):
-    """[(owner, repo)] of the GitHub repositories that the project's URLs
-    name, in order, without duplicates (GitHub names ignore case)."""
     urls = list((info.get("project_urls") or {}).values()) + [info.get("home_page")]
     found = {}
     for url in urls:
-        match = _GITHUB.match((url or "").strip())
-        if match is None or match[1].lower() in _NOT_OWNERS:
+        match = _GITHUB_REPOSITORY_URL.match((url or "").strip())
+        if match is None or match[1].lower() in _GITHUB_PATHS_NOT_OWNERS:
             continue
         repo = match[2].removesuffix(".git")
         found.setdefault((match[1].lower(), repo.lower()), (match[1], repo))
@@ -1228,46 +1113,43 @@ def github_repositories(info):
 
 
 def source(candidate, context):
-    """9. One GitHub repository, with a tag of the release."""
-    version = candidate.need("version")
-    repositories = github_repositories(metadata(candidate, context))
+    version = candidate.filter_input("version")
+    repositories = github_repositories(release_metadata(candidate, context))
     if not repositories:
         return "no GitHub repository in project_urls or home_page"
     if len(repositories) > 1:
         named = ", ".join(f"{owner}/{repo}" for owner, repo in repositories)
         return f"several GitHub repositories: {named}"
     owner, repo = repositories[0]
-    candidate.data["github_repository"] = (owner, repo)
+    candidate.filter_inputs["github_repository"] = (owner, repo)
     url = f"https://github.com/{owner}/{repo}"
     candidate.facts["repository"] = url
     listing = context.network.ls_remote(url)
     if listing is None:
         return f"repository {url} not found"
-    tags = {}  # {tag: the object that refs/tags/<tag> names}
+    tag_object_by_tag = {}
     for line in listing.splitlines():
         oid, _, ref = line.partition("\t")
-        if ref.startswith("refs/tags/"):
-            tags[ref.removeprefix("refs/tags/")] = oid.strip()
+        if ref.startswith("refs/tag_object_by_tag/"):
+            tag_object_by_tag[ref.removeprefix("refs/tag_object_by_tag/")] = oid.strip()
     forms = [form.format(version=version, name=candidate.name) for form in TAG_FORMS]
     for tag in forms:
-        if tag in tags:
-            candidate.data["repository"] = url
-            candidate.data["tag"] = tag
-            candidate.data["tag_object"] = tags[tag]
+        if tag in tag_object_by_tag:
+            candidate.filter_inputs["repository"] = url
+            candidate.filter_inputs["tag"] = tag
+            candidate.filter_inputs["tag_object"] = tag_object_by_tag[tag]
             candidate.facts["tag"] = tag
             return None
     return f"no tag for {version} (tried {', '.join(forms)})"
 
 
 def history(candidate, context):
-    """10. At the tag: at least MIN_COMMITS commits and MIN_AUTHORS commit
-    authors (by e-mail)."""
     checkout(candidate, context)
-    found = candidate.data["history"]
-    listed = candidate.need("tag_object")
+    found = candidate.filter_inputs["history"]
+    listed = candidate.filter_input("tag_object")
     if found["tag_object"] != listed:
         return (
-            f"the tag {candidate.need('tag')} names {found['tag_object']}, "
+            f"the tag {candidate.filter_input('tag')} names {found['tag_object']}, "
             f"not {listed} as git ls-remote listed"
         )
     candidate.facts["commits"] = found["commits"]
@@ -1280,11 +1162,10 @@ def history(candidate, context):
 
 
 def ci(candidate, context):
-    """11. A CI configuration at the tag (one of CI_FILES)."""
-    _, files = checkout(candidate, context)
+    _, blob_id_by_path = checkout(candidate, context)
     found = [
         path
-        for path in files
+        for path in blob_id_by_path
         if any(
             path.startswith(entry) if entry.endswith("/") else path == entry
             for entry in CI_FILES
@@ -1294,12 +1175,6 @@ def ci(candidate, context):
     return None if found else "no CI configuration"
 
 
-# A test, by a rule on the text that is the same on every Python version: a
-# `def test...(` on one line (with type parameters on that line or not), or
-# a class line without type parameters whose bases name something that ends
-# in TestCase. The rule reads text: such a line inside a string, or TestCase
-# in a comment, counts too; type parameters over several lines, and a class
-# with type parameters, do not count.
 _TEST_FUNCTION = re.compile(
     r"^[ \t]*(?:async[ \t]+)?def[ \t]+test\w*[ \t]*(?:\[.*?\])?[ \t]*\(", re.M
 )
@@ -1307,7 +1182,6 @@ _TEST_CASE = re.compile(r"^[ \t]*class[ \t]+\w+[ \t]*\([^)]*TestCase\b", re.M)
 
 
 def _holds_a_test(content):
-    """Whether a file, decoded as UTF-8, has a test by the rule above."""
     try:
         text = content.decode("utf-8")
     except UnicodeDecodeError:
@@ -1316,25 +1190,22 @@ def _holds_a_test(content):
 
 
 def tests(candidate, context):
-    """12. A file test_*.py or *_test.py anywhere in the checkout that holds
-    a test (_TEST_FUNCTION or _TEST_CASE). Records the test-to-code line
-    ratio. A file over MAX_BLOB_BYTES is not read and does not count."""
-    directory, files = checkout(candidate, context)
-    too_large = candidate.data["too_large"]
+    directory, blob_id_by_path = checkout(candidate, context)
+    too_large = candidate.filter_inputs["too_large"]
     found, lines, skipped = [], 0, []
-    for path in files:
+    for path in blob_id_by_path:
         if not any(fnmatch.fnmatch(path.rsplit("/", 1)[-1], f) for f in TEST_FILES):
             continue
         if path in too_large:
             skipped.append(path)
             continue
-        content = _blob(directory, files, path)
+        content = _committed_blob(directory, blob_id_by_path, path)
         if _holds_a_test(content):
             found.append(path)
             lines += code_lines(content)
     candidate.facts["test_files"] = found
     candidate.facts["test_code_lines"] = lines
-    package = candidate.need("code_lines")
+    package = candidate.filter_input("code_lines")
     candidate.facts["test_ratio"] = round(lines / package, 3) if package else None
     if found:
         return None
@@ -1345,32 +1216,31 @@ def tests(candidate, context):
 
 
 def released_code(candidate, context):
-    """13. The wheel's modules that are missing from the checkout or differ
-    from it hold at most MAX_DIFFERING_PERCENT of the wheel's code lines.
-    A file of the checkout over MAX_BLOB_BYTES is not read and differs."""
-    modules = candidate.need("modules")
-    lines = candidate.need("module_lines")
-    directory, files = checkout(candidate, context)
-    too_large = candidate.data["too_large"]
+    modules = candidate.filter_input("modules")
+    lines = candidate.filter_input("module_lines")
+    directory, blob_id_by_path = checkout(candidate, context)
+    too_large = candidate.filter_inputs["too_large"]
     total = sum(lines.values())
 
     def differing(prefix):
         return [
             name
             for name in sorted(modules)
-            if prefix + name not in files
+            if prefix + name not in blob_id_by_path
             or prefix + name in too_large
-            or _blob(directory, files, prefix + name) != modules[name]
+            or _committed_blob(directory, blob_id_by_path, prefix + name)
+            != modules[name]
         ]
 
-    # Where the checkout has the wheel's modules: "" or "src/", say.
-    prefixes = {""}
+    source_root_candidates = {""}
     for name in modules:
-        prefixes.update(
-            path.removesuffix(name) for path in files if path.endswith("/" + name)
+        source_root_candidates.update(
+            path.removesuffix(name)
+            for path in blob_id_by_path
+            if path.endswith("/" + name)
         )
     root, missing = min(
-        ((prefix, differing(prefix)) for prefix in prefixes),
+        ((prefix, differing(prefix)) for prefix in source_root_candidates),
         key=lambda found: (sum(lines[n] for n in found[1]), len(found[0]), found[0]),
     )
     differ = sum(lines[name] for name in missing)
@@ -1391,17 +1261,14 @@ def released_code(candidate, context):
 
 
 def github(candidate, context):
-    """14. The GitHub repository has at least MIN_STARS stars, is not
-    archived and not a fork; when PyPI stated no licence, GitHub's detected
-    licence is permissive."""
-    owner, repo = candidate.need("github_repository")
+    owner, repo = candidate.filter_input("github_repository")
     data = context.network.json(GITHUB_API.format(owner=owner, repo=repo))
     if data is None:
-        candidate.github = {"found": False}
+        candidate.github_facts = {"found": False}
         return "repository not found by the GitHub API"
     detected = (data.get("license") or {}).get("spdx_id")
-    candidate.github = {key: data[key] for key in GITHUB_FACTS if key in data}
-    candidate.github["license"] = detected
+    candidate.github_facts = {key: data[key] for key in GITHUB_FACTS if key in data}
+    candidate.github_facts["license"] = detected
     stars = data.get("stargazers_count", 0)
     if stars < MIN_STARS:
         return f"{stars} stars, fewer than {MIN_STARS}"
@@ -1409,8 +1276,8 @@ def github(candidate, context):
         return "the repository is archived"
     if data.get("fork"):
         return "the repository is a fork"
-    if candidate.data.get("licence_undecided"):
-        if detected is None or not _permissive(detected):
+    if candidate.filter_inputs.get("licence_undecided"):
+        if detected is None or not _is_permissive_licence(detected):
             return (
                 f"PyPI states no licence, and GitHub's licence {detected} "
                 "is not permissive"
@@ -1420,12 +1287,12 @@ def github(candidate, context):
     return None
 
 
-FILTERS = (  # in this order: cheap ones first, the GitHub API last
+FILTERS = (
     ("rank", rank),
     ("stub-name", not_a_stub),
     ("release", release),
     ("pure-python", pure_python),
-    ("requires-python", python_version),
+    ("requires-python", requires_python),
     ("licence", licence),
     ("no-dependency", no_dependency),
     ("size", size),
@@ -1439,33 +1306,27 @@ FILTERS = (  # in this order: cheap ones first, the GitHub API last
 
 
 def evaluate(candidate, context, keep_going=False):
-    """[(filter name, None or reason)]: up to the first failure, or all of
-    them with `keep_going` (a filter without its inputs: "not evaluated")."""
     results = []
     for name, check in FILTERS:
         try:
             reason = check(candidate, context)
-        except NotEvaluated as missing:
+        except FilterInputMissing as missing:
             reason = f"not evaluated: needs {missing}"
+        assert reason is None or isinstance(reason, str), (name, reason)
         results.append((name, reason))
         if reason is not None and not keep_going:
             break
     return results
 
 
-# The list, the projects already used and the log
-
-
 def read_list(path):
-    """(bytes, date, [(rank, name)]) of the list; rank 1 is the most
-    downloaded."""
     data = Path(path).read_bytes()
     document = json.loads(data)
     date = datetime.date.fromisoformat(document["last_update"][:10])
     ranked, seen = [], set()
     for position, row in enumerate(document["rows"], start=1):
-        if normalise(row["project"]) not in seen:
-            seen.add(normalise(row["project"]))
+        if normalise_pep503(row["project"]) not in seen:
+            seen.add(normalise_pep503(row["project"]))
             ranked.append((position, row["project"]))
     return data, date, ranked
 
@@ -1485,16 +1346,15 @@ def seed_of(data, round_number):
 
 
 def used_names(directories, excluded):
-    """{normalised name: why it is skipped}: the projects of each benchmark
-    directory and the exclusions. Raises ValueError for an exclusion
-    without a reason."""
-    used = {}
+    skip_reason_by_name = {}
     for directory in directories:
         path = Path(directory) / "projects.toml"
         with open(path, "rb") as stream:
             names = tomllib.load(stream)
         for name in names:
-            used.setdefault(normalise(name), f"used: {_shown(path)}")
+            skip_reason_by_name.setdefault(
+                normalise_pep503(name), f"used: {_path_as_logged(path)}"
+            )
     lines = Path(excluded).read_text(encoding="utf-8").splitlines()
     for number, line in enumerate(lines, start=1):
         if not line.strip() or line.lstrip().startswith("#"):
@@ -1502,23 +1362,22 @@ def used_names(directories, excluded):
         parts = line.split(maxsplit=1)
         if len(parts) < 2:
             raise ValueError(
-                f"{_shown(excluded)}:{number}: an exclusion needs a reason"
+                f"{_path_as_logged(excluded)}:{number}: an exclusion needs a reason"
             )
-        used.setdefault(normalise(parts[0]), f"excluded: {parts[1].strip()}")
-    return used
+        skip_reason_by_name.setdefault(
+            normalise_pep503(parts[0]), f"excluded: {parts[1].strip()}"
+        )
+    return skip_reason_by_name
 
 
-def _shown(path):
-    """A path as the log shows it: relative to the repository if inside it."""
+def _path_as_logged(path):
     path = Path(path).resolve()
     if path.is_relative_to(REPOSITORY_ROOT):
         return path.relative_to(REPOSITORY_ROOT).as_posix()
     return path.name
 
 
-def constants():
-    """The constants of the procedure, for the logs: the thresholds, the
-    URLs and the filters in their order."""
+def logged_constants():
     paths = ("HERE", "REPOSITORY_ROOT", "SELECTION_DIR", "LIST_PATH")
     paths += ("EXCLUDED_PATH", "FRAME_PATH", "USED_DIRS")
     logged = {
@@ -1538,13 +1397,7 @@ def _write_log(path, document):
     path.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
 
 
-# The commands
-
-
-def other_python(command):
-    """Whether this Python is not FRAME_PYTHON; then says so. frame and
-    check run only on FRAME_PYTHON: the code-line count depends on the
-    tokenizer of the Python version."""
+def wrong_python_reported(command):
     if sys.version_info[:2] == tuple(FRAME_PYTHON):
         return False
     wanted = ".".join(map(str, FRAME_PYTHON))
@@ -1559,8 +1412,7 @@ def other_python(command):
 
 
 def run_frame(args, network):
-    """Evaluate the list up to RANK_CUTOFF and write the frame."""
-    if other_python("frame"):
+    if wrong_python_reported("frame"):
         return 2
     data, date, ranked = read_list(args.list)
     context = Context(network, date)
@@ -1575,19 +1427,23 @@ def run_frame(args, network):
         for filter_name, reason in results:
             funnel[filter_name][0] += 1
             funnel[filter_name][1] += reason is not None
-        if results[0][1] is not None:  # beyond the cut-off: counted only
+        rank_filter_name, rank_failure = results[0]
+        assert rank_filter_name == "rank", rank_filter_name
+        beyond_rank_cutoff = rank_failure is not None
+        if beyond_rank_cutoff:
             continue
         entry = {"name": name, "rank": position}
         entry["release"] = candidate.facts.get("release")
         failed, reason = results[-1]
         if reason is None:
             entry.update(
-                result="pass", facts={**candidate.facts, "github": candidate.github}
+                result="pass",
+                facts={**candidate.facts, "github": candidate.github_facts},
             )
         else:
             entry.update(result="fail", filter=failed, reason=reason)
-            if candidate.github is not None:
-                entry["github"] = candidate.github
+            if candidate.github_facts is not None:
+                entry["github"] = candidate.github_facts
         packages.append(entry)
         shown = "pass" if reason is None else f"{failed}: {reason}"
         print(
@@ -1599,7 +1455,7 @@ def run_frame(args, network):
     ]
     document = {
         "list": list_record(args.list, data, date, ranked),
-        "constants": constants(),
+        "constants": logged_constants(),
         "python": "{}.{}".format(*sys.version_info[:2]),
         "funnel": rows,
         "passed": sum(1 for entry in packages if entry["result"] == "pass"),
@@ -1617,10 +1473,7 @@ def run_frame(args, network):
     return 0
 
 
-def strata_of(passing):
-    """The passing packages sorted by code lines, then name, cut into
-    STRATA strata of equal count; the first (count mod STRATA) strata have
-    one package more."""
+def strata_by_code_lines(passing):
     ordered = sorted(
         passing, key=lambda entry: (entry["facts"]["code_lines"], entry["name"])
     )
@@ -1634,7 +1487,6 @@ def strata_of(passing):
 
 
 def run_draw(args):
-    """Draw one package per stratum from the frozen frame."""
     frame_bytes = Path(args.frame).read_bytes()
     frame = json.loads(frame_bytes)
     data, date, ranked = read_list(args.list)
@@ -1654,7 +1506,7 @@ def run_draw(args):
         if not separator or not name.strip() or not reason.strip():
             print(f"--drop needs NAME=REASON: {entry!r}", file=sys.stderr)
             return 2
-        drops[normalise(name)] = reason.strip()
+        drops[normalise_pep503(name)] = reason.strip()
     passing = [entry for entry in frame["packages"] if entry["result"] == "pass"]
     if len(passing) < STRATA:
         print(
@@ -1663,7 +1515,7 @@ def run_draw(args):
             file=sys.stderr,
         )
         return 2
-    strata = strata_of(passing)
+    strata = strata_by_code_lines(passing)
     seed = seed_of(data, args.round)
     order = sorted(entry["name"] for entry in passing)
     random.Random(seed).shuffle(order)
@@ -1679,7 +1531,7 @@ def run_draw(args):
         for name in order:
             if stratum_of[name] != number:
                 continue
-            key = normalise(name)
+            key = normalise_pep503(name)
             if key in used:
                 examined.append(
                     {"name": name, "result": "skipped", "reason": used[key]}
@@ -1727,7 +1579,7 @@ def run_draw(args):
         },
         "round": args.round,
         "seed": seed,
-        "constants": constants(),
+        "constants": logged_constants(),
         "used": dict(sorted(used.items())),
         "order": order,
         "strata": logged,
@@ -1757,16 +1609,15 @@ def run_draw(args):
 
 
 def run_check(args, network):
-    """Every filter on named packages, all of them even after a failure."""
-    if other_python("check"):
+    if wrong_python_reported("check"):
         return 2
     _, date, ranked = read_list(args.list)
-    ranks = {normalise(name): position for position, name in ranked}
+    ranks = {normalise_pep503(name): position for position, name in ranked}
     context = Context(network, date)
     rows, facts = [], []
     for wanted in args.names:
         name, _, pinned = wanted.partition("==")
-        candidate = Candidate(name, ranks.get(normalise(name)), pinned or None)
+        candidate = Candidate(name, ranks.get(normalise_pep503(name)), pinned or None)
         for filter_name, reason in evaluate(candidate, context, keep_going=True):
             result = "pass" if reason is None else reason
             if reason is not None and not reason.startswith("not evaluated"):
@@ -1775,7 +1626,7 @@ def run_check(args, network):
                 f"| {name} | {candidate.facts.get('release', '-')} | {filter_name} "
                 f"| {result} |"
             )
-        found = candidate.github or {}
+        found = candidate.github_facts or {}
         shown = [
             _shown_value(found.get(key, "-"))
             for key in ("stargazers_count", "forks_count", "archived", "fork")
@@ -1813,7 +1664,7 @@ def _shown_value(value):
 
 
 def main(argv=None, internet=None, clock=time):
-    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser = argparse.ArgumentParser(description=_DESCRIPTION)
     commands = parser.add_subparsers(dest="command", required=True)
     frame = commands.add_parser("frame", help="evaluate the list, write the frame")
     frame.add_argument("--work", type=Path, required=True, help="cache and clones")
@@ -1843,7 +1694,7 @@ def main(argv=None, internet=None, clock=time):
         if args.command == "frame":
             return run_frame(args, network)
         return run_check(args, network)
-    except Offline as error:
+    except OfflineCacheMiss as error:
         print(error, file=sys.stderr)
         return 2
 

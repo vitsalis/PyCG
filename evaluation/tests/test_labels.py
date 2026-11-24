@@ -1,6 +1,3 @@
-"""Behaviour tests for evaluation/common/labels.py: which pull requests get
-`metrics-changed` and `benchmark-changed`. Hand-made results and paths."""
-
 import importlib.util
 import json
 from pathlib import Path

@@ -1,23 +1,3 @@
-"""The call-site ledger: the hand-written ground truth of a macro-benchmark project.
-
-The ledger has one entry per call site (see sites.py) and states its
-callees. The adjacency list ground-truth/<name>.json is generated from it.
-The format (see evaluation/macro-benchmark/README.md):
-
-    # A comment.
-    default reject a.f: reason              rejects a.f wherever no entry decides it
-    == jmespath.parser                      the module (file) of the sites below
-    [jmespath.parser.Parser.parse]          the node that the calls belong to
-    102:31 call  self._parse(expression)    line:column kind text
-        -> jmespath.parser.Parser._parse    a callee
-        reject a.f, b.f: reason             rejected candidates
-        reject *: reason                    every other candidate
-        exclude a.g: reason                 a node considered, not a candidate
-        undecided a.f                       a candidate to decide (skeleton)
-        undecided                           callees to write (skeleton)
-        note: where the callee comes from
-"""
-
 import re
 from typing import NamedTuple
 
@@ -30,13 +10,11 @@ _EXCLUDE = re.compile(r"exclude\s+(.+?):\s+(.+)$")
 
 class Ledger(NamedTuple):
     entries: list
-    defaults: dict  # candidate -> (reason, line of the ledger)
+    default_rejections: dict
 
 
 class Entry(NamedTuple):
-    """The ledger entry of one call site."""
-
-    at: int  # line of the ledger
+    ledger_line: int
     module: str
     scope: str
     line: int
@@ -44,9 +22,9 @@ class Entry(NamedTuple):
     kind: str
     text: str
     callees: list
-    rejected: dict  # candidate -> reason; "*" for every other candidate
-    excluded: dict  # node that is not a candidate -> reason
-    undecided: list  # candidates; "" for the callees of the site
+    rejected: dict
+    excluded: dict
+    undecided: list
     notes: list
 
     @property
@@ -55,32 +33,33 @@ class Entry(NamedTuple):
 
 
 def parse(text):
-    """Return (ledger, errors) for the text of a ledger."""
     entries, defaults, errors = [], {}, []
     module = scope = entry = None
     seen_scopes = set()
-    for at, raw in enumerate(text.splitlines(), 1):
+    for ledger_line, raw in enumerate(text.splitlines(), 1):
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
         if line == "default" or line.startswith("default "):
-            problems = _default(defaults, line, at, module)
-            errors += [f"line {at}: {problem}" for problem in problems]
+            problems = _add_default_rejection(defaults, line, ledger_line, module)
+            errors += [f"line {ledger_line}: {problem}" for problem in problems]
         elif match := _MODULE.match(line):
             module, scope, entry = match[1], None, None
         elif match := _SCOPE.match(line):
             scope, entry = match[1], None
             if module is None:
-                errors.append(f"line {at}: a node before the first module")
+                errors.append(f"line {ledger_line}: a node before the first module")
             elif (module, scope) in seen_scopes:
-                errors.append(f"line {at}: [{scope}] appears twice in {module}")
+                errors.append(
+                    f"line {ledger_line}: [{scope}] appears twice in {module}"
+                )
             seen_scopes.add((module, scope))
         elif match := _SITE.match(line):
             if scope is None:
-                errors.append(f"line {at}: a site before the first node")
+                errors.append(f"line {ledger_line}: a site before the first node")
                 continue
             entry = Entry(
-                at=at,
+                ledger_line=ledger_line,
                 module=module,
                 scope=scope,
                 line=int(match[1]),
@@ -95,16 +74,15 @@ def parse(text):
             )
             entries.append(entry)
         elif entry is None:
-            errors.append(f"line {at}: not a module, node or site: {line}")
+            errors.append(f"line {ledger_line}: not a module, node or site: {line}")
         else:
-            error = _item(entry, line)
+            error = _add_item(entry, line)
             if error:
-                errors.append(f"line {at}: {error}")
+                errors.append(f"line {ledger_line}: {error}")
     return Ledger(entries, defaults), errors
 
 
-def _default(defaults, line, at, module):
-    """Add a default rejection to `defaults`; return the problems."""
+def _add_default_rejection(defaults, line, ledger_line, module):
     if module is not None:
         return ["a default rejection must come before the first module"]
     match = _REJECT.match(line.removeprefix("default").strip())
@@ -117,12 +95,11 @@ def _default(defaults, line, at, module):
         elif name in defaults:
             problems.append(f"{name} is rejected by default twice")
         else:
-            defaults[name] = (match[2], at)
+            defaults[name] = (match[2], ledger_line)
     return problems
 
 
-def _item(entry, line):
-    """Add an item line to `entry`; return an error message or None."""
+def _add_item(entry, line):
     if line.startswith("->"):
         entry.callees.append(line[2:].strip())
     elif line.startswith("note:"):
@@ -152,12 +129,11 @@ def _item(entry, line):
 
 
 def check(ledger, source, packages):
-    """List the problems of a ledger against the sites of the source."""
     sites = {site.key: site for site in source.sites}
-    defaults = ledger.defaults
+    defaults = ledger.default_rejections
     errors, seen = [], set()
     for entry in ledger.entries:
-        where = f"line {entry.at}: {entry.line}:{entry.column} {entry.kind}"
+        where = f"line {entry.ledger_line}: {entry.line}:{entry.column} {entry.kind}"
         site = sites.get(entry.key)
         if entry.key in seen:
             errors.append(f"{where}: a second entry for the site")
@@ -175,24 +151,23 @@ def check(ledger, source, packages):
         errors += [f"{where}: {problem}" for problem in problems]
     for key, site in sites.items():
         if _needs_entry(site, defaults) and key not in seen:
-            errors.append(f"no entry for {_where(site)} in [{site.scope}]: {site.text}")
+            errors.append(
+                f"no entry for {_site_location(site)} in [{site.scope}]: {site.text}"
+            )
     for name, decided in coverage(ledger, source).items():
         if not decided:
-            at = defaults[name][1]
-            errors.append(f"line {at}: default reject {name} decides no site")
+            ledger_line = defaults[name][1]
+            errors.append(f"line {ledger_line}: default reject {name} decides no site")
     return errors
 
 
 def _needs_entry(site, defaults):
-    """Whether a site needs an entry: what defaults leave of it to decide."""
     return site.explicit or bool(site.candidates - defaults.keys())
 
 
 def coverage(ledger, source):
-    """{default rejection: the sites where it decides}: where no entry
-    accepts or rejects that candidate itself."""
     entries = {entry.key: entry for entry in ledger.entries}
-    decided = {name: [] for name in ledger.defaults}
+    decided = {name: [] for name in ledger.default_rejections}
     for site in source.sites:
         entry = entries.get(site.key)
         for name in sorted(site.candidates & decided.keys()):
@@ -204,7 +179,6 @@ def coverage(ledger, source):
 
 
 def _decisions(entry, site, packages, defaults, nodes):
-    """The problems of the decisions in one entry."""
     problems = []
     callees = set(entry.callees)
     if entry.undecided:
@@ -239,12 +213,11 @@ def _decisions(entry, site, packages, defaults, nodes):
     return problems
 
 
-def _where(site):
+def _site_location(site):
     return f"{site.module} {site.line}:{site.column} {site.kind}"
 
 
 def _site_line(site):
-    """The line of a site in a ledger."""
     return f"{site.line}:{site.column} {site.kind}  {site.text}".rstrip()
 
 
@@ -253,7 +226,6 @@ def in_package(name, packages):
 
 
 def graph(ledger, source):
-    """The adjacency list: every node, with the callees of its sites."""
     result = {node: set() for node in source.modules | source.functions}
     for entry in ledger.entries:
         result.setdefault(entry.scope, set()).update(entry.callees)
@@ -261,12 +233,6 @@ def graph(ledger, source):
 
 
 def skeleton(source, title, defaults=None, header=None):
-    """A ledger with every site that needs an entry and its candidates undecided.
-
-    It leaves out what `defaults` (default rejections) decide. `header` is
-    the part of an existing ledger before its first module (comments and
-    default rejections); it replaces the title.
-    """
     defaults = defaults or {}
     if header is None:
         header = [
@@ -290,7 +256,7 @@ def skeleton(source, title, defaults=None, header=None):
             lines.append(_site_line(site))
             if site.value:
                 lines.append("    # a value site: note where the callee comes from")
-            if site.explicit:  # callees outside the package, if any
+            if site.explicit:
                 lines.append("    undecided")
             open_ = site.candidates - defaults.keys()
             lines += [f"    undecided {name}" for name in sorted(open_)]
@@ -298,20 +264,13 @@ def skeleton(source, title, defaults=None, header=None):
 
 
 def report(ledger, source, missing_edges, listed=None, without_candidates=False):
-    """The report for auditors: the sites where a missing edge is most likely.
-
-    It also counts the sites that each default rejection decides, with the
-    explicit ones (calls and decorators), and lists every site of the default
-    rejection of `listed`. With `without_candidates`, it also lists the
-    implicit sites without candidates, which the skeleton leaves out.
-    """
     sites = {site.key: site for site in source.sites}
     undecided, values, beyond = [], [], []
     for entry in ledger.entries:
         site = sites.get(entry.key)
         if site is None:
             continue
-        label = f"{_where(site)} [{site.scope}] {site.text}"
+        label = f"{_site_location(site)} [{site.scope}] {site.text}"
         if entry.undecided:
             undecided.append(
                 f"{label}: {', '.join(n or 'callees' for n in entry.undecided)}"
@@ -329,7 +288,7 @@ def report(ledger, source, missing_edges, listed=None, without_candidates=False)
                 beyond.append(f"{label}: -> {', '.join(extra)}")
     defaults = []
     for name, decided in coverage(ledger, source).items():
-        reason = ledger.defaults[name][0]
+        reason = ledger.default_rejections[name][0]
         defaults.append(f"{name}: {len(decided)} sites: {reason}")
         for site in decided:
             line = f"{site.module} [{site.scope}] {_site_line(site)}"

@@ -1,6 +1,3 @@
-"""macro-benchmark/projects.py: the projects of projects.toml, their batches,
-their pins and the analysed source."""
-
 import importlib.util
 from pathlib import Path
 from textwrap import dedent
@@ -32,8 +29,7 @@ SDIST_SHA256 = "ab" * 32
 SDIST_URL = "https://files.pythonhosted.org/packages/ab/cd/demo-1.0.tar.gz"
 
 
-def benchmark(root, config=CONFIG):
-    """Write projects.toml and the source projects/demo; return the config."""
+def write_benchmark_with_project_demo(root, config=CONFIG):
     for relative, text in FILES.items():
         path = root / "projects" / "demo" / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -44,13 +40,15 @@ def benchmark(root, config=CONFIG):
 
 
 def test_the_analysed_source_is_the_packages_without_the_exclusions(tmp_path):
-    project = projects.load_projects(benchmark(tmp_path))["demo"]
+    project = projects.load_projects(write_benchmark_with_project_demo(tmp_path))[
+        "demo"
+    ]
     modules = [project.module_name(path) for path in project.source_files()]
     assert modules == ["demo", "demo.core"]
 
 
 def test_a_link_that_leaves_the_project_is_refused(tmp_path):
-    config_path = benchmark(tmp_path)
+    config_path = write_benchmark_with_project_demo(tmp_path)
     (tmp_path / "outside.py").write_text("")
     link = tmp_path / "projects" / "demo" / "demo" / "out.py"
     link.symlink_to(tmp_path / "outside.py")
@@ -63,7 +61,9 @@ def test_a_link_that_leaves_the_project_is_refused(tmp_path):
 
 
 def test_the_pin_is_the_commit_or_the_sha256_of_the_sdist(tmp_path):
-    config_path = benchmark(tmp_path, CONFIG + f'commit = "{"0" * 40}"\n')
+    config_path = write_benchmark_with_project_demo(
+        tmp_path, CONFIG + f'commit = "{"0" * 40}"\n'
+    )
     project = projects.load_projects(config_path)["demo"]
     assert (project.sdist, project.pin) == (None, "0" * 40)
     sdist = 'sdist = "demo-1.0.tar.gz"\n'
@@ -78,8 +78,6 @@ def test_the_pin_is_the_commit_or_the_sha256_of_the_sdist(tmp_path):
 
 
 def test_every_project_of_the_benchmark_has_a_batch():
-    """The 40 projects: five per batch but the ten of batch 7, in the order of
-    projects.BATCHES."""
     batches = {}
     for name, project in projects.load_projects().items():
         batches.setdefault(project.batch, []).append(name)
@@ -101,7 +99,9 @@ def test_every_project_of_the_benchmark_has_a_batch():
 
 @pytest.mark.parametrize("batch", ["0", "6", '"2"', "true"])
 def test_a_batch_is_one_of_the_batches(tmp_path, batch):
-    config_path = benchmark(tmp_path, CONFIG + f"batch = {batch}\n")
+    config_path = write_benchmark_with_project_demo(
+        tmp_path, CONFIG + f"batch = {batch}\n"
+    )
     expected = "batch is one of 1, 2, 3, 4, 5, 7, 'icse-2021'"
     with pytest.raises(ValueError, match=expected):
         projects.load_projects(config_path)

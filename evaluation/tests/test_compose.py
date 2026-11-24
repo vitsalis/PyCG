@@ -1,11 +1,3 @@
-"""evaluation/compose.yaml: every service is sealed, and the trace is a
-service whose image takes its project's source from the inputs image.
-
-The standard library has no YAML parser: compose.yaml keeps to plain YAML
-(mappings, lists of scalars, JSON lists, anchors, aliases and merge keys),
-and `read` below reads that much. Nothing here runs Docker.
-"""
-
 import json
 import re
 from pathlib import Path
@@ -29,8 +21,7 @@ def _scalar(text, anchors):
     return {"true": True, "false": False}.get(text, text)
 
 
-def read(text):
-    """The document of plain YAML `text` (see the module docstring)."""
+def read_plain_yaml(text):
     lines = []
     for raw in text.splitlines():
         stripped = raw.strip()
@@ -71,7 +62,7 @@ def read(text):
 
 @pytest.fixture(scope="module")
 def compose():
-    return read(COMPOSE.read_text(encoding="utf-8"))
+    return read_plain_yaml(COMPOSE.read_text(encoding="utf-8"))
 
 
 def test_the_python_image_is_pinned_by_digest_in_the_file_once(compose):
@@ -81,8 +72,6 @@ def test_the_python_image_is_pinned_by_digest_in_the_file_once(compose):
 
 
 def test_the_default_base_of_the_inputs_image_is_the_python_image(compose):
-    """Its default lets every target build without arguments; it is the one
-    pin of compose.yaml."""
     text = (EVALUATION / "container" / "Dockerfile.inputs").read_text()
     assert f"ARG PYTHON_IMAGE={compose['x-python-image']}\n" in text
     inputs = compose["services"]["inputs"]["build"]["args"]
@@ -125,17 +114,13 @@ def test_every_image_is_built_from_a_pinned_base(compose):
         assert DIGEST.fullmatch(service["build"]["args"]["PYTHON_IMAGE"]), name
 
 
-def test_the_services_are_the_inputs_and_the_trace(compose):
-    """The trace service takes only NAME."""
+def test_the_services_are_the_inputs_and_the_trace_which_takes_only_name(compose):
     assert list(compose["services"]) == ["inputs", "trace"]
     assert compose["services"]["trace"]["entrypoint"][4:] == ["${NAME:-unset}"]
     assert "SET" not in re.findall(r"\$\{(\w+)", COMPOSE.read_text())
 
 
 def test_the_trace_service_writes_only_its_own_directory(compose):
-    """The trace service runs a project's test suite: third-party code. It
-    gets only its own directory of results (found by the security scan of
-    2026-11-14)."""
     writable = [
         volume
         for volume in compose["services"]["trace"]["volumes"]

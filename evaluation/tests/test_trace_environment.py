@@ -1,10 +1,3 @@
-"""Two settings of a trace's test run: the environment variables of an entry
-(projects.toml `environment`), which macro-benchmark/trace.py passes into
-its minimal environment and records in the trace; and the pytest plugin
-plugins/hypothesis_profile.py, which keeps Hypothesis from writing into the
-source copy and from timing out under the tracer. The runs are of small
-projects written to tmp_path, with this interpreter's pytest."""
-
 import importlib.util
 import json
 import subprocess
@@ -49,11 +42,12 @@ ENTRY = """
 """
 
 
-def benchmark(root, entry=ENTRY, files=None, plugins=()):
-    """A benchmark directory with the project demo: its package, its tests
-    (`files`: {path: text}) and the plugins it names (copied in)."""
-    files = {"demo/__init__.py": "def f():\n    return 1\n", **(files or {})}
-    for relative, text in files.items():
+def write_benchmark_with_project_demo(root, entry=ENTRY, text_by_path=None, plugins=()):
+    text_by_path = {
+        "demo/__init__.py": "def f():\n    return 1\n",
+        **(text_by_path or {}),
+    }
+    for relative, text in text_by_path.items():
         path = root / "projects" / "demo" / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(dedent(text))
@@ -64,10 +58,9 @@ def benchmark(root, entry=ENTRY, files=None, plugins=()):
     return root
 
 
-def run(root):
-    """The trace of demo, as trace.py records it."""
+def trace_of_project_demo(root):
     project = projects.load_projects(root / "projects.toml")["demo"]
-    return trace.trace(project, sys.executable, root, timeout=120)
+    return trace.trace(project, sys.executable, root, timeout_seconds=120)
 
 
 def test_the_trace_records_the_ids_of_failed_and_errored_tests(tmp_path):
@@ -88,7 +81,11 @@ def test_the_trace_records_the_ids_of_failed_and_errored_tests(tmp_path):
         def test_errors(broken):
             pass
     """
-    data = run(benchmark(tmp_path, files={"tests/test_demo.py": test}))
+    data = trace_of_project_demo(
+        write_benchmark_with_project_demo(
+            tmp_path, text_by_path={"tests/test_demo.py": test}
+        )
+    )
     assert (data["tests"]["passed"], data["tests"]["failed"]) == (1, 1)
     assert data["tests"]["errors"] == 1
     assert data["failures"] == {
@@ -99,7 +96,11 @@ def test_the_trace_records_the_ids_of_failed_and_errored_tests(tmp_path):
 
 def test_a_run_without_failures_records_empty_lists(tmp_path):
     test = "import demo\n\ndef test_passes():\n    assert demo.f() == 1\n"
-    data = run(benchmark(tmp_path, files={"tests/test_demo.py": test}))
+    data = trace_of_project_demo(
+        write_benchmark_with_project_demo(
+            tmp_path, text_by_path={"tests/test_demo.py": test}
+        )
+    )
     assert data["failures"] == {"errors": [], "failed": []}
 
 
@@ -116,7 +117,9 @@ def test_an_entry_names_variables_that_the_test_run_gets_and_the_trace_records(
             assert os.environ["DEMO_EMPTY"] == ""
             assert demo.f() == 1
     """
-    data = run(benchmark(tmp_path, entry, {"tests/test_demo.py": test}))
+    data = trace_of_project_demo(
+        write_benchmark_with_project_demo(tmp_path, entry, {"tests/test_demo.py": test})
+    )
     assert (data["tests"]["passed"], data["tests"]["failed"]) == (1, 0)
     assert data["environment"] == {"DEMO_BACKENDS": "numpy", "DEMO_EMPTY": ""}
 
@@ -129,7 +132,11 @@ def test_without_variables_the_trace_has_no_environment(tmp_path):
         def test_none():
             assert "DEMO_BACKENDS" not in os.environ and demo.f() == 1
     """
-    data = run(benchmark(tmp_path, files={"tests/test_demo.py": test}))
+    data = trace_of_project_demo(
+        write_benchmark_with_project_demo(
+            tmp_path, text_by_path={"tests/test_demo.py": test}
+        )
+    )
     assert data["tests"]["passed"] == 1
     assert "environment" not in data
 
@@ -157,7 +164,9 @@ def test_without_variables_the_trace_has_no_environment(tmp_path):
 def test_a_variable_of_the_tracer_or_of_the_interpreter_is_refused(tmp_path, name):
     entry = ENTRY + f'environment = {{ {name} = "x" }}\n'
     with pytest.raises(ValueError, match=f"environment: {name} is not an entry's"):
-        projects.load_projects(benchmark(tmp_path, entry) / "projects.toml")
+        projects.load_projects(
+            write_benchmark_with_project_demo(tmp_path, entry) / "projects.toml"
+        )
 
 
 @pytest.mark.parametrize(
@@ -173,16 +182,18 @@ def test_a_variable_of_the_tracer_or_of_the_interpreter_is_refused(tmp_path, nam
 def test_the_environment_is_a_table_of_names_and_strings(tmp_path, value):
     entry = ENTRY + f"environment = {value}\n"
     with pytest.raises(ValueError, match="environment: a table of variable names"):
-        projects.load_projects(benchmark(tmp_path, entry) / "projects.toml")
+        projects.load_projects(
+            write_benchmark_with_project_demo(tmp_path, entry) / "projects.toml"
+        )
 
 
 def test_every_variable_of_the_tracer_s_environment_is_refused_in_an_entry(tmp_path):
-    for name in trace._environment(sys.executable, tmp_path):
+    for name in trace._child_environment(sys.executable, tmp_path):
         assert projects.reserved_variable(name), name
 
 
 def test_the_check_of_a_trace_wants_the_environment_of_its_entry():
-    data = {key: kind() for key, kind in helper.TRACE_KEYS.items()}
+    data = {key: kind() for key, kind in helper.TRACE_TYPE_BY_KEY.items()}
     data |= {"project": "demo", "commit": "c", "tests": {"exit_status": 0}}
     data["tests"] |= dict.fromkeys((*helper.OUTCOMES, "deselected"), 0)
     expected = {"DEMO_BACKENDS": "numpy"}
@@ -225,10 +236,10 @@ WITH_PLUGIN = WITH_PLUGIN.replace('["pytest"]', '["pytest", "hypothesis"]')
 
 
 def test_the_hypothesis_profile_writes_nothing_into_the_source_copy(tmp_path):
-    root = benchmark(
+    root = write_benchmark_with_project_demo(
         tmp_path, WITH_PLUGIN, {"tests/test_demo.py": HYPOTHESIS_TEST}, [PLUGIN]
     )
-    data = run(root)
+    data = trace_of_project_demo(root)
     assert (data["tests"]["passed"], data["tests"]["failed"]) == (3, 0)
     assert data["plugins"] == ["plugins/hypothesis_profile.py"]
     assert not (root / "projects" / "demo" / ".hypothesis").exists()
@@ -237,9 +248,11 @@ def test_the_hypothesis_profile_writes_nothing_into_the_source_copy(tmp_path):
 def test_without_the_profile_hypothesis_writes_into_the_source_copy(tmp_path):
     entry = ENTRY.replace('["pytest"]', '["pytest", "hypothesis"]')
     test = HYPOTHESIS_TEST.split("    def test_the_profile")[0]
-    root = benchmark(tmp_path, entry, {"tests/test_demo.py": test})
+    root = write_benchmark_with_project_demo(
+        tmp_path, entry, {"tests/test_demo.py": test}
+    )
     with pytest.raises(trace.TraceError, match=r"changes in the checkout"):
-        run(root)
+        trace_of_project_demo(root)
 
 
 def test_two_runs_with_the_profile_draw_the_same_examples(tmp_path):

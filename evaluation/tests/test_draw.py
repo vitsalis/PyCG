@@ -1,8 +1,3 @@
-"""The recorded draws of batches 3 to 5 and 7
-(macro-benchmark/selection/round-N.json) are what macro-benchmark/draw.py
-draws again from the committed frame and list, with the seed and the drops
-of each round. The draw reads files only: no network."""
-
 import importlib.util
 import json
 from pathlib import Path
@@ -21,9 +16,10 @@ def test_each_recorded_round_is_drawn_again_from_its_seed(
     tmp_path, monkeypatch, number
 ):
     log = json.loads((SELECTION / f"round-{number}.json").read_text(encoding="utf-8"))
-    # The benchmark directories that were used then are gone (one benchmark
-    # now holds every batch): the round log's own record of them stands in.
-    monkeypatch.setattr(draw, "used_names", lambda *args: dict(log["used"]))
+    used_names_recorded_in_round_log = dict(log["used"])
+    monkeypatch.setattr(
+        draw, "used_names", lambda *args: used_names_recorded_in_round_log
+    )
     drops = [f"--drop={entry['name']}={entry['reason']}" for entry in log["dropped"]]
     out = tmp_path / "round.json"
     argv = ["draw", "--round", str(number), "--out", str(out), *drops]

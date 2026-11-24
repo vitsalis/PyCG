@@ -1,38 +1,4 @@
 #!/usr/bin/env python3
-"""Re-trace one macro-benchmark project inside the `trace` service.
-
-    NAME=jmespath docker compose -f evaluation/compose.yaml run --rm trace [--compare]
-
-The service (evaluation/compose.yaml) builds the image of the project from
-container/Dockerfile.trace: macro-benchmark/test-environments/NAME.txt
-(hash-pinned wheels) and the project's source from the inputs image
-(container/Dockerfile.inputs, whose build checked it against its pin). It
-runs, without network, with a read-only root, no capability and a
-non-root user:
-
-    python3 -I -B /repo/evaluation/container/trace_entry.py NAME
-
-/repo is this repository, read-only; /results/trace
-(evaluation/results/trace/) the only writable host mount, so the test suite
-of a project writes nowhere else on the host; /tmp a tmpfs. This entry:
-
-1. copies the project's source from the image (projects.SOURCES/NAME) to
-   /tmp/work/projects/NAME;
-2. copies projects.toml and the project's pytest plugins beside it;
-3. runs macro-benchmark/trace.py: --locate, then the tests under the tracer;
-4. checks the trace (trace_helper.check_trace: the format of trace.py, this
-   project and pin, exactly the distributions of the requirements file) and
-   writes it, with the distributions, to /results/trace/NAME.json and
-   NAME.installed.txt: the committed macro-benchmark/dynamic/NAME.json is
-   not changed;
-5. with --compare, prints the differences from the committed trace
-   (trace_helper.compare) and exits with 0 only if the edges are equal.
-
-Like trace.sh, it runs only our own code and the project's tests; the trace
-image holds CPython, the pinned test requirements and the project's source,
-neither PyCG nor git.
-"""
-
 import argparse
 import importlib.util
 import os
@@ -42,14 +8,21 @@ import subprocess
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
-REPOSITORY = HERE.parents[1]
+CONTAINER_DIRECTORY = Path(__file__).resolve().parent
+REPOSITORY = CONTAINER_DIRECTORY.parents[1]
 BENCHMARK = REPOSITORY / "evaluation" / "macro-benchmark"
-NAME = re.compile(r"[A-Za-z0-9_.-]+")
-WORK = Path("/tmp/work")
-OUT = Path("/tmp/out")
-RESULTS = Path("/results")
+PROJECT_NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]+")
+WORK_DIRECTORY = Path("/tmp/work")
+OUTPUT_DIRECTORY = Path("/tmp/out")
+RESULTS_DIRECTORY = Path("/results")
 PROJECTS_READER = BENCHMARK / "projects.py"
+DESCRIPTION = """Records the trace of one macro-benchmark project inside the `trace`
+service of evaluation/compose.yaml, writes it to /results/trace/NAME.json
+and, with --compare, compares it with the committed trace
+(evaluation/macro-benchmark/README.md, "Re-recording a trace").
+
+    NAME=jmespath docker compose -f evaluation/compose.yaml \\
+        run --rm trace [--compare]"""
 
 
 def _load(name, path):
@@ -59,12 +32,10 @@ def _load(name, path):
     return module
 
 
-helper = _load("trace_helper", HERE / "trace_helper.py")
+helper = _load("trace_helper", CONTAINER_DIRECTORY / "trace_helper.py")
 
 
-def prepare(benchmark, project, work):
-    """Lay out the project's source, projects.toml and plugins under `work`
-    as trace.py reads a benchmark directory."""
+def lay_out_benchmark_directory(benchmark, project, work):
     name = project.name
     shutil.copytree(
         project.directory,
@@ -80,12 +51,12 @@ def prepare(benchmark, project, work):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("name", help="a project of macro-benchmark/projects.toml")
     parser.add_argument("--compare", action="store_true")
     args = parser.parse_args(argv)
-    if not NAME.fullmatch(args.name) or args.name in (".", ".."):
+    if not PROJECT_NAME_PATTERN.fullmatch(args.name) or args.name in (".", ".."):
         parser.error(f"not one path component: {args.name!r}")
     benchmark = BENCHMARK
     projects = _load("macro_projects", PROJECTS_READER)
@@ -99,24 +70,36 @@ def main(argv=None):
     python = sys.executable
     trace = REPOSITORY / "evaluation" / "macro-benchmark" / "trace.py"
     try:
-        prepare(benchmark, found[args.name], WORK)
+        lay_out_benchmark_directory(benchmark, found[args.name], WORK_DIRECTORY)
         subprocess.run(
-            [python, "-I", "-B", str(trace), args.name, "--benchmark-dir", str(WORK)]
+            [
+                python,
+                "-I",
+                "-B",
+                str(trace),
+                args.name,
+                "--benchmark-dir",
+                str(WORK_DIRECTORY),
+            ]
             + ["--locate"],
             check=True,
         )
-        OUT.mkdir(parents=True, exist_ok=True)
+        OUTPUT_DIRECTORY.mkdir(parents=True, exist_ok=True)
         subprocess.run(
             [python, "-I", "-B", str(trace), args.name, "--python", python]
-            + ["--benchmark-dir", str(WORK)]
-            + ["--output", str(OUT / "trace.json")],
+            + ["--benchmark-dir", str(WORK_DIRECTORY)]
+            + ["--output", str(OUTPUT_DIRECTORY / "trace.json")],
             check=True,
         )
-        destination = RESULTS / "trace"
+        destination = RESULTS_DIRECTORY / "trace"
         image = os.environ.get("PYTHON_IMAGE", "")
         print(
             helper.check_trace(
-                OUT / "trace.json", benchmark, args.name, image, destination
+                OUTPUT_DIRECTORY / "trace.json",
+                benchmark,
+                args.name,
+                image,
+                destination,
             )
         )
     except (helper.HelperError, OSError, subprocess.CalledProcessError) as error:

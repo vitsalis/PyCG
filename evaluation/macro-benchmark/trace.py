@@ -1,15 +1,4 @@
 #!/usr/bin/env python3
-"""Record the calls that a macro-benchmark package makes while its tests run.
-
-    python evaluation/macro-benchmark/trace.py --python ENV/bin/python PROJECT
-
-The test suite of projects/PROJECT runs with pytest in a child process of
-the interpreter ENV/bin/python, with the pinned source first on sys.path.
-The child records the calls with the tracer of micro-benchmark/validate.py
-and the parent writes them to dynamic/PROJECT.json. See
-evaluation/macro-benchmark/README.md for the format and for how to prepare ENV.
-"""
-
 import argparse
 import builtins
 import contextlib
@@ -33,9 +22,16 @@ import traceback
 import types
 from pathlib import Path
 
+DESCRIPTION = """Records the calls that a macro-benchmark package makes while its tests
+run, into dynamic/PROJECT.json (evaluation/macro-benchmark/README.md,
+"Traces").
+
+    python evaluation/macro-benchmark/trace.py --python ENV/bin/python PROJECT"""
+CHILD_ENTRY_ARGUMENT = "--child"
+CHILD_INTERPRETER_FLAGS = ("-s", "-P", "-B")
+
 
 def _load_sibling(name):
-    """Load a script of this directory by path (it is not a package)."""
     path = Path(__file__).resolve().parent / f"{name}.py"
     spec = importlib.util.spec_from_file_location(f"macro_{name}", path)
     module = importlib.util.module_from_spec(spec)
@@ -50,17 +46,23 @@ Project = projects.Project
 load_projects = projects.load_projects
 _is_under = projects.is_under
 VALIDATOR_PATH = projects.MICRO_BENCHMARK / "validate.py"
-# The sys.monitoring tool that records which package functions start (see
-# MacroTracer.start); the validator's tracer is sys.monitoring.PROFILER_ID.
-_STARTS_TOOL_ID = 3
-# Default wall-clock limit of a test suite under the tracer.
-TIMEOUT_SECONDS = 600
-# Test outcomes that the trace records, in the order of the summary line.
-OUTCOMES = ("passed", "failed", "errors", "skipped", "xfailed", "xpassed")
-# Bound methods: calling one calls a method of its __self__.
-_BOUND_TYPES = (types.MethodType, types.BuiltinMethodType, types.MethodWrapperType)
-# What a method call passes, with the object as arg0.
-_UNBOUND_TYPES = (
+_MONITORING_TOOL_ID_STARTS = 3
+assert _MONITORING_TOOL_ID_STARTS != sys.monitoring.PROFILER_ID
+TIMEOUT_SECONDS_DEFAULT = 600
+OUTCOMES_IN_SUMMARY_ORDER = (
+    "passed",
+    "failed",
+    "errors",
+    "skipped",
+    "xfailed",
+    "xpassed",
+)
+_BOUND_METHOD_TYPES = (
+    types.MethodType,
+    types.BuiltinMethodType,
+    types.MethodWrapperType,
+)
+_UNBOUND_METHOD_TYPES = (
     types.FunctionType,
     types.MethodDescriptorType,
     types.WrapperDescriptorType,
@@ -68,7 +70,6 @@ _UNBOUND_TYPES = (
 
 
 def _load_validator():
-    """Load micro-benchmark/validate.py by path (its directory is not a package)."""
     spec = importlib.util.spec_from_file_location("validate", VALIDATOR_PATH)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -76,9 +77,8 @@ def _load_validator():
 
 
 validate = _load_validator()
-_is_a = validate._is_a  # isinstance() that runs no code of the object
-# Callees whose __name__ is the attribute name under which a class holds them.
-_NAMED_TYPES = (
+_isinstance_static = validate._is_a
+_TYPES_NAMED_AS_CLASS_ATTRIBUTE = (
     type,
     types.FunctionType,
     types.BuiltinFunctionType,
@@ -87,36 +87,18 @@ _NAMED_TYPES = (
 
 
 class TraceError(Exception):
-    """The trace could not be made."""
-
-
-# --------------------------------------------------------------------------
-# Child process: run the test suite and record the calls.
-# --------------------------------------------------------------------------
+    pass
 
 
 class MacroTracer(validate.Tracer):
-    """The validator's tracer, with the analysed package in place of a snippet.
-
-    Code is in one of three zones. The package is the analysed source. Library
-    code is the standard library, builtins and the installed dependencies
-    of the package. Client code is all other code: tests, conftest files,
-    pytest and its plugins, and this tracer. A call has a caller only if a
-    package frame made it, directly or through library frames (a callback
-    from a builtin belongs to the package scope that called the builtin).
-    Client code in between ends the search: what a test callback calls is
-    not an edge of the package. A callee defined in client code is not an
-    edge either; it is counted as a client callback.
-    """
-
     def __init__(self, project):
-        super().__init__(str(project.root))  # module names are relative to it
+        super().__init__(str(project.root))
         self.project = project
-        self.client_callbacks = set()  # {(caller, name)} of dropped callees
-        self.receivers = {}  # id(cls) -> cls whose methods the package called
-        self.started = set()  # functions and lambdas whose code started
-        self._recorded = {}  # id(target) -> names the validator gave it
-        self._client = {}  # filename -> whether it is client code
+        self.client_callback_edges_dropped = set()
+        self.receiver_class_by_id = {}
+        self.functions_started = set()
+        self._recorded_names_by_target_id = {}
+        self._is_client_by_filename = {}
         self._stdlib = {
             os.path.realpath(sysconfig.get_path(key))
             for key in ("stdlib", "platstdlib")
@@ -128,20 +110,20 @@ class MacroTracer(validate.Tracer):
         return self._snippet_files[filename]
 
     def is_client(self, filename):
-        """Whether code in `filename` is client code (see the class docstring)."""
-        if filename not in self._client:
-            self._client[filename] = self._classify(filename)
-        return self._client[filename]
+        if filename not in self._is_client_by_filename:
+            self._is_client_by_filename[filename] = self._is_client_uncached(filename)
+        return self._is_client_by_filename[filename]
 
-    def _classify(self, filename):
-        if filename.startswith("<"):  # frozen modules, exec and eval strings
+    def _is_client_uncached(self, filename):
+        is_frozen_module_or_exec_string = filename.startswith("<")
+        if is_frozen_module_or_exec_string:
             return False
         path = os.path.realpath(filename)
         parts = Path(path).parts
         for n in range(len(parts) - 2, -1, -1):
             if parts[n] in ("site-packages", "dist-packages"):
-                top = parts[n + 1].partition(".")[0]  # package or module file
-                return top not in self.project.dependencies
+                top_level_name = parts[n + 1].partition(".")[0]
+                return top_level_name not in self.project.dependencies
         if any(_is_under(path, directory) for directory in self._stdlib):
             return False
         return not self.in_snippet(filename)
@@ -152,39 +134,28 @@ class MacroTracer(validate.Tracer):
             if entry is not None:
                 return entry[0]
             if self.is_client(frame.f_code.co_filename):
-                return None  # client code made the call
+                return None
             frame = frame.f_back
-        return super().caller(None)  # the scope that started this thread
+        return super().caller(None)
 
     def start(self):
-        """Also watch, as a tool of its own, for package functions that start.
-
-        That is the only event of a generator or coroutine function that the
-        interpreter drives (`__iter__` written as a generator, `__anext__`):
-        no call expression calls it. The validator's tool keeps its events.
-        """
         super().start()
         monitoring = sys.monitoring
-        monitoring.use_tool_id(_STARTS_TOOL_ID, "pycg-macro-starts")
+        monitoring.use_tool_id(_MONITORING_TOOL_ID_STARTS, "pycg-macro-starts")
         monitoring.register_callback(
-            _STARTS_TOOL_ID, monitoring.events.PY_START, self._on_started
+            _MONITORING_TOOL_ID_STARTS, monitoring.events.PY_START, self._on_started
         )
-        monitoring.set_events(_STARTS_TOOL_ID, monitoring.events.PY_START)
+        monitoring.set_events(_MONITORING_TOOL_ID_STARTS, monitoring.events.PY_START)
 
     def stop(self):
-        sys.monitoring.set_events(_STARTS_TOOL_ID, 0)
-        sys.monitoring.free_tool_id(_STARTS_TOOL_ID)
+        sys.monitoring.set_events(_MONITORING_TOOL_ID_STARTS, 0)
+        sys.monitoring.free_tool_id(_MONITORING_TOOL_ID_STARTS)
         super().stop()
 
     def _on_started(self, code, offset):
-        """Remember the first start of a package function, then stop watching it.
-
-        A function's code object is registered when its module starts, so
-        before the function can run.
-        """
         entry = self._codes.get(id(code))
         if entry is not None and entry[1] is not None:
-            self.started.add(entry[1])
+            self.functions_started.add(entry[1])
         return sys.monitoring.DISABLE
 
     def on_call(self, code, offset, callee, arg0):
@@ -196,61 +167,61 @@ class MacroTracer(validate.Tracer):
         return super().on_call(code, offset, callee, arg0)
 
     def _note_receiver(self, callee, arg0):
-        """Remember the class of the object whose method package code calls.
-
-        A method call passes a bound method, or the function or descriptor
-        of the method with the object as arg0.
-        """
-        if _is_a(callee, _BOUND_TYPES):
+        if _isinstance_static(callee, _BOUND_METHOD_TYPES):
             receiver = callee.__self__
-            if receiver is None or _is_a(receiver, types.ModuleType):
+            if receiver is None or _isinstance_static(receiver, types.ModuleType):
                 return
-        elif _is_a(callee, _UNBOUND_TYPES) and arg0 is not sys.monitoring.MISSING:
+        elif (
+            _isinstance_static(callee, _UNBOUND_METHOD_TYPES)
+            and arg0 is not sys.monitoring.MISSING
+        ):
             receiver = arg0
             found = inspect.getattr_static(type(receiver), callee.__name__, None)
-            if found is None or validate._canonical(found) is not callee:
-                return  # a function that takes the object as first argument
+            is_method_of_receiver_type = (
+                found is not None and validate._canonical(found) is callee
+            )
+            if not is_method_of_receiver_type:
+                return
         else:
             return
-        cls = receiver if _is_a(receiver, type) else type(receiver)
-        self.receivers[id(cls)] = cls
+        cls = receiver if _isinstance_static(receiver, type) else type(receiver)
+        self.receiver_class_by_id[id(cls)] = cls
 
     def _record(self, caller, name, target):
         if target is not None:
             if self._defined_by_client(target):
-                self.client_callbacks.add((caller, name))
+                self.client_callback_edges_dropped.add((caller, name))
                 return
             key = id(validate._canonical(target))
-            self._recorded.setdefault(key, set()).add(name)
+            self._recorded_names_by_target_id.setdefault(key, set()).add(name)
         super()._record(caller, name, target)
 
     def _defined_by_client(self, target):
         target = validate._canonical(target)
-        if _is_a(target, types.FunctionType):
+        if _isinstance_static(target, types.FunctionType):
             return self.is_client(target.__code__.co_filename)
-        if _is_a(target, type):
+        if _isinstance_static(target, type):
             filename = _module_file(sys.modules.get(target.__module__))
             return filename is not None and self.is_client(filename)
         return False
 
-    # -- result ---------------------------------------------------------------
-
     def result(self):
-        """The call graph of the package, with aliases of the outside callees."""
         edges = {}
-        executed, unknown = set(self.started), set()
-        for caller, callee in self.edges:  # also generators created, not run
+        executed, unknown = set(self.functions_started), set()
+        for caller, callee in self.edges:
             executed.update({caller, callee} & self.functions)
-            if caller is None:  # client code called the package
+            called_by_client = caller is None
+            if called_by_client:
                 continue
             if caller == validate.UNKNOWN_CALLER:
                 unknown.add(callee)
                 continue
             edges.setdefault(caller, set()).add(callee)
-        names = {}  # id(target) -> (target, canonical name)
+        names = {}
         for (caller, key), (target, _) in self.outside.items():
             if key not in names:
-                names[key] = (target, _defining_name(target, self._recorded[key]))
+                recorded = self._recorded_names_by_target_id[key]
+                names[key] = (target, _defining_name(target, recorded))
             edges.setdefault(caller, set()).add(names[key][1])
         aliases = {}
         for key, found in self._aliases(names).items():
@@ -261,7 +232,7 @@ class MacroTracer(validate.Tracer):
             "functions": sorted(self.functions),
             "executed": sorted(executed),
             "dropped": {
-                "client_callbacks": len(self.client_callbacks),
+                "client_callbacks": len(self.client_callback_edges_dropped),
                 "unknown_caller": len(unknown),
             },
             "edges": {caller: sorted(edges[caller]) for caller in sorted(edges)},
@@ -271,20 +242,12 @@ class MacroTracer(validate.Tracer):
         }
 
     def _aliases(self, names):
-        """{id(target): dotted names that resolve to the target}.
-
-        The names are those the validator recorded, and the paths through
-        the library modules that are loaded at the end of the run:
-        `module.name`, and `module.Class.name` where the class defines
-        `name` or is in the MRO of a package class or of an object whose
-        method the package called (inherited methods are named through the
-        class that the package names). Only public names count: the names
-        in `__all__` if the module defines it, else the names that do not
-        start with an underscore, in modules whose path has no part that
-        starts with one. `builtins` is written `<builtin>`.
-        """
-        found = {key: set(self._recorded[key]) for key in names}
-        members = {t.__name__ for t, _ in names.values() if _is_a(t, _NAMED_TYPES)}
+        found = {key: set(self._recorded_names_by_target_id[key]) for key in names}
+        members = {
+            t.__name__
+            for t, _ in names.values()
+            if _isinstance_static(t, _TYPES_NAMED_AS_CLASS_ATTRIBUTE)
+        }
         inherited = self._named_classes()
         classes = []
         for module_name, module in list(sys.modules.items()):
@@ -293,14 +256,20 @@ class MacroTracer(validate.Tracer):
             prefix = "<builtin>" if module_name == "builtins" else module_name
             namespace = _namespace(module)
             public = dict.get(namespace, "__all__")
-            if _is_a(public, (list, tuple)):
-                attrs = [a for a in public if _is_a(a, str) and a in namespace]
+            if _isinstance_static(public, (list, tuple)):
+                attrs = [
+                    a for a in public if _isinstance_static(a, str) and a in namespace
+                ]
             else:
-                attrs = [a for a in namespace if _is_a(a, str) and not _is_private(a)]
+                attrs = [
+                    a
+                    for a in namespace
+                    if _isinstance_static(a, str) and not _is_private(a)
+                ]
             for attr in attrs:
                 value = namespace[attr]
-                _match(found, f"{prefix}.{attr}", value)
-                if _is_a(value, type):
+                _add_name_if_target(found, f"{prefix}.{attr}", value)
+                if _isinstance_static(value, type):
                     classes.append((f"{prefix}.{attr}", value))
         for path, cls in classes:
             own = vars(cls)
@@ -311,46 +280,40 @@ class MacroTracer(validate.Tracer):
                     value = inspect.getattr_static(cls, attr)
                 except AttributeError:
                     continue
-                _match(found, f"{path}.{attr}", value)
+                _add_name_if_target(found, f"{path}.{attr}", value)
         return found
 
     def _named_classes(self):
-        """{id: class} for the MROs of the package classes and of the receivers."""
-        roots = list(self.receivers.values())
+        roots = list(self.receiver_class_by_id.values())
         for name in self.modules:
             namespace = _namespace(sys.modules.get(name))
             if namespace is not None:
                 roots += [
                     value
                     for value in list(namespace.values())
-                    if _is_a(value, type) and self._is_snippet_class(value)
+                    if _isinstance_static(value, type) and self._is_snippet_class(value)
                 ]
         return {id(cls): cls for root in roots for cls in root.__mro__}
 
     def _is_library_module(self, name, module):
-        if not _is_a(module, types.ModuleType) or name == "__main__":
+        if not _isinstance_static(module, types.ModuleType) or name == "__main__":
             return False
         if any(part.startswith("_") for part in name.split(".")):
             return False
         filename = _module_file(module)
-        if filename is None:  # a builtin module or a namespace package
+        builtin_module_or_namespace_package = filename is None
+        if builtin_module_or_namespace_package:
             return True
         return not self.in_snippet(filename) and not self.is_client(filename)
 
 
 def _namespace(module):
-    """The namespace of a module object, read without running code, or None.
-
-    sys.modules can hold an object that runs code when an attribute is read
-    (a lazy module), so neither isinstance() nor vars() is used.
-    """
-    if not _is_a(module, types.ModuleType):
+    if not _isinstance_static(module, types.ModuleType):
         return None
     return object.__getattribute__(module, "__dict__")
 
 
 def _module_file(module):
-    """The __file__ of a module object, or None."""
     namespace = _namespace(module)
     return None if namespace is None else dict.get(namespace, "__file__")
 
@@ -359,8 +322,7 @@ def _is_private(name):
     return name.startswith("_") and not (name.startswith("__") and name.endswith("__"))
 
 
-def _match(found, name, value):
-    """Add `name` to the names of the target that `value` is, if it is one."""
+def _add_name_if_target(found, name, value):
     try:
         key = id(validate._canonical(value))
     except Exception:  # noqa: BLE001 - an attribute that is not a callable
@@ -370,34 +332,25 @@ def _match(found, name, value):
 
 
 def _defining_name(target, recorded):
-    """The canonical name of a callee outside the package: where it is defined.
-
-    A function is named by its module and qualified name without
-    `<locals>`, a class by its module and qualified name, a builtin by
-    `<builtin>` and its name, and a method of a builtin type by the type
-    that defines it. Other callables keep the first name the validator gave.
-    """
-    if _is_a(target, types.FunctionType):
+    if _isinstance_static(target, types.FunctionType):
         return validate._function_name(target)
-    if _is_a(target, type):
+    if _isinstance_static(target, type):
         return validate._class_name(target)
-    if _is_a(target, types.BuiltinFunctionType):
+    if _isinstance_static(target, types.BuiltinFunctionType):
         owner = target.__self__
-        if owner is None or _is_a(owner, types.ModuleType):
+        if owner is None or _isinstance_static(owner, types.ModuleType):
             if getattr(builtins, target.__name__, None) is target:
                 return f"<builtin>.{target.__name__}"
             module = owner.__name__ if owner is not None else target.__module__
             return f"{module}.{target.__name__}"
-        if _is_a(owner, type):  # e.g. object.__new__
+        if _isinstance_static(owner, type):
             return f"{validate._class_name(owner)}.{target.__name__}"
-    if _is_a(target, validate._DESCRIPTOR_TYPES):  # a method of a builtin type
+    if _isinstance_static(target, validate._DESCRIPTOR_TYPES):
         return f"{validate._class_name(target.__objclass__)}.{target.__name__}"
     return min(recorded)
 
 
-class _Session:
-    """A pytest plugin that records the outcomes and the configuration of the run."""
-
+class _SessionRecorderPlugin:
     def __init__(self):
         self.counts = None
         self.failures = {"errors": [], "failed": []}
@@ -407,12 +360,6 @@ class _Session:
         self.rootdir, self.config = config.rootpath, config.inipath
 
     def pytest_sessionfinish(self, session):
-        """Count the tests as the summary line of pytest does.
-
-        The categories are those of pytest's terminal reporter, and only the
-        reports that count towards the summary count: a passing subtest of a
-        unittest test is not a test (pytest 9).
-        """
         reporter = session.config.pluginmanager.get_plugin("terminalreporter")
         if reporter is None:
             return
@@ -428,7 +375,6 @@ class _Session:
                     self.failures[key] = sorted({r.nodeid for r in counted})
 
     def problems(self, project):
-        """Whether pytest used the checkout as rootdir, and the expected config."""
         found = []
         if self.counts is None:
             found.append("pytest ran without its terminal reporter: no test counts")
@@ -442,13 +388,12 @@ class _Session:
 
     def describe(self, project):
         return {
-            "rootdir": _relative(self.rootdir, project.directory),
-            "config": _relative(self.config, project.directory),
+            "rootdir": _relative_if_inside(self.rootdir, project.directory),
+            "config": _relative_if_inside(self.config, project.directory),
         }
 
 
-def _relative(path, directory):
-    """`path` relative to `directory` if it is in it (e.g. "."), else as it is."""
+def _relative_if_inside(path, directory):
     if path is None:
         return None
     path = Path(path).resolve()
@@ -457,13 +402,7 @@ def _relative(path, directory):
     return str(path)
 
 
-def _distributions(project):
-    """{name: version} of the installed distributions (pytest, test dependencies).
-
-    Metadata inside the project's own directory is not an installation: an
-    sdist carries the metadata of its build (`<name>.egg-info`), and its
-    source directory is on the path.
-    """
+def _installed_version_by_distribution(project):
     found = {}
     for distribution in importlib.metadata.distributions():
         location = Path(distribution.locate_file("")).resolve()
@@ -476,7 +415,6 @@ def _distributions(project):
 
 
 def _requirement_problems(requirements, distributions):
-    """How the installed distributions differ from the test requirements."""
     installed = {_normalize(name): (name, v) for name, v in distributions.items()}
     problems = []
     for requirement in requirements:
@@ -506,11 +444,6 @@ def _write(path, data):
 
 
 def _load_plugin(path):
-    """Import a pytest plugin of projects.toml by its path; return the module.
-
-    It is not put on sys.path, so that it cannot hide a module of the
-    project. Its code is client code for the tracer.
-    """
     spec = importlib.util.spec_from_file_location(f"macro_plugin_{path.stem}", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -518,11 +451,7 @@ def _load_plugin(path):
 
 
 def _not_importable_edges(project, edges):
-    """The edges from or to a package that the entry names in
-    not_importable: its code ran, so the entry is wrong."""
-
     def inside(name):
-        """The package of not_importable that `name` is in, or None."""
         for package in project.not_importable:
             if name == package or name.startswith(package + "."):
                 return package
@@ -541,21 +470,21 @@ def _run_child(config_path, name, out_path):
     project = load_projects(config_path)[name]
     benchmark = Path(config_path).resolve().parent
     sys.path.insert(0, str(project.root))
-    distributions = _distributions(project)
+    distributions = _installed_version_by_distribution(project)
     errors = _requirement_problems(project.requirements, distributions)
     errors += [
         f"the variable {name} of the entry's environment is not {value!r}"
         for name, value in project.environment
         if os.environ.get(name) != value
     ]
-    if errors:  # run nothing in an environment that is not the pinned one
+    if errors:
         _write(out_path, {"errors": errors})
         return
     tracer = MacroTracer(project)
-    session = _Session()
+    session = _SessionRecorderPlugin()
     tracer.start()
     try:
-        import pytest  # after start: pytest imports pluggy
+        import pytest
 
         plugins = [_load_plugin(path) for path in project.plugins]
         status = pytest.main(project.pytest_command(), plugins=[session, *plugins])
@@ -589,7 +518,11 @@ def _run_child(config_path, name, out_path):
             "deselect": [dict(entry) for entry in project.deselect],
             "failures": session.failures,
             **(
-                {"plugins": [_relative(p, benchmark) for p in project.plugins]}
+                {
+                    "plugins": [
+                        _relative_if_inside(p, benchmark) for p in project.plugins
+                    ]
+                }
                 if project.plugins
                 else {}
             ),
@@ -600,7 +533,7 @@ def _run_child(config_path, name, out_path):
             ),
             "tests": {
                 "exit_status": None if status is None else int(status),
-                **dict.fromkeys((*OUTCOMES, "deselected"), 0),
+                **dict.fromkeys((*OUTCOMES_IN_SUMMARY_ORDER, "deselected"), 0),
                 **(session.counts or {}),
             },
             **result,
@@ -609,20 +542,7 @@ def _run_child(config_path, name, out_path):
     )
 
 
-# --------------------------------------------------------------------------
-# Parent process
-# --------------------------------------------------------------------------
-
-
-def _environment(python, scratch, extra=()):
-    """The whole environment of the child: nothing comes from the caller's,
-    and `extra` (the entry's `environment`) is added.
-
-    HOME and TMPDIR are new directories in `scratch`, which is deleted after
-    the run. A fixed hash seed makes sets of strings iterate in the same
-    order in every run. projects.py refuses an entry's variable that this
-    environment sets; the check here is a second one.
-    """
+def _child_environment(python, scratch, extra=()):
     home, tmp = scratch / "home", scratch / "tmp"
     home.mkdir()
     tmp.mkdir()
@@ -646,16 +566,7 @@ def _environment(python, scratch, extra=()):
     return environment
 
 
-def _run(command, cwd, env, timeout):
-    """Run `command` in a new process group; return its exit status.
-
-    After `timeout` seconds it is stopped. Either way, every process that
-    is left in its group (a server that a test started) is killed. The
-    child is waited for without being reaped first, so that its process
-    group id cannot be reused by an unrelated process in between. Its stdin
-    is /dev/null, whatever the caller's is, so that code that reads stdin
-    when it is not a terminal reads nothing, on every run.
-    """
+def _run_in_process_group(command, cwd, env, timeout_seconds):
     proc = subprocess.Popen(
         command,
         cwd=cwd,
@@ -663,11 +574,13 @@ def _run(command, cwd, env, timeout):
         stdin=subprocess.DEVNULL,
         start_new_session=True,
     )
-    deadline = time.monotonic() + timeout
+    deadline = time.monotonic() + timeout_seconds
     try:
         while not os.waitid(os.P_PID, proc.pid, os.WEXITED | os.WNOHANG | os.WNOWAIT):
             if time.monotonic() > deadline:
-                raise TraceError(f"the test suite ran longer than {timeout:g} s")
+                raise TraceError(
+                    f"the test suite ran longer than {timeout_seconds:g} s"
+                )
             time.sleep(0.1)
     finally:
         with contextlib.suppress(ProcessLookupError, PermissionError):
@@ -677,8 +590,6 @@ def _run(command, cwd, env, timeout):
 
 
 def _snapshot(directory):
-    """{relative path: content} of everything below `directory`: the SHA-256
-    of a file, the target of a symbolic link, or "dir"."""
     found = {}
     for path in sorted(Path(directory).rglob("*")):
         key = path.relative_to(directory).as_posix()
@@ -691,9 +602,7 @@ def _snapshot(directory):
     return found
 
 
-def _differences(before, after):
-    """The changes from one snapshot to the other, in the form of git
-    status --porcelain."""
+def _differences_as_git_status(before, after):
     lines = []
     for key in sorted(before.keys() | after.keys()):
         if key not in before:
@@ -709,19 +618,10 @@ def trace(
     project,
     python,
     benchmark_dir=BENCHMARK_DIR,
-    timeout=TIMEOUT_SECONDS,
+    timeout_seconds=TIMEOUT_SECONDS_DEFAULT,
 ):
-    """Run the test suite of `project` (of the projects.toml in
-    `benchmark_dir`) with `python` and return the trace.
-
-    projects/<name> is a copy of the pinned source, which the caller laid
-    out in a container (evaluation/container/trace_entry.py, entry.sh):
-    the sources come from the inputs image, where the build checked each
-    one against its pin. The files after the run are compared with those
-    before it.
-    """
     config_path = Path(benchmark_dir) / "projects.toml"
-    if not project.pytest_args:  # pytest would collect the whole checkout
+    if not project.pytest_args:
         raise TraceError("no test run in projects.toml (no pytest_args)")
     if not project.directory.is_dir():
         raise TraceError(f"{project.directory} does not exist")
@@ -729,28 +629,31 @@ def trace(
         if not plugin.is_file():
             raise TraceError(f"the pytest plugin {plugin} does not exist")
     before = _snapshot(project.directory)
-    python = os.path.abspath(shutil.which(python) or python)  # keep venv symlinks
+    python_absolute_keeping_symbolic_links = os.path.abspath(
+        shutil.which(python) or python
+    )
+    python = python_absolute_keeping_symbolic_links
     with tempfile.TemporaryDirectory(prefix="macro-trace-") as tmp:
         scratch = Path(tmp)
         out_path = scratch / "trace.json"
         command = [
             python,
-            "-s",  # no user site-packages
-            "-P",  # neither the script directory nor the working directory
-            "-B",  # no bytecode files in the checkout
+            *CHILD_INTERPRETER_FLAGS,
             str(Path(__file__).resolve()),
-            "--child",
+            CHILD_ENTRY_ARGUMENT,
             str(Path(config_path).resolve()),
             project.name,
             str(out_path),
         ]
         problems, status = [], None
         try:
-            env = _environment(python, scratch, project.environment)
-            status = _run(command, project.directory, env, timeout)
+            env = _child_environment(python, scratch, project.environment)
+            status = _run_in_process_group(
+                command, project.directory, env, timeout_seconds
+            )
         except TraceError as exc:
             problems.append(str(exc))
-        changes = _differences(before, _snapshot(project.directory))
+        changes = _differences_as_git_status(before, _snapshot(project.directory))
         if changes:
             problems.append(f"the run left changes in the checkout:\n{changes}")
         if problems:
@@ -765,16 +668,6 @@ def trace(
 
 
 def locate(project):
-    """Where each package of `project` is found, without running its code.
-
-    A package must be found in the root, and no finder of this interpreter
-    may find it elsewhere (a builtin or frozen module, sys.path without the
-    root, an editable install), so that the environment cannot supply it.
-    A package of `also_installed` (pytest requires pluggy) may be found
-    elsewhere too; the run then checks that it is imported from the root.
-    The finders are asked directly, not through sys.modules, and read the
-    file system only. Return (lines, problems).
-    """
     lines, problems = [], []
     for package in project.package_names:
         top = package.partition(".")[0]
@@ -806,7 +699,7 @@ def write_trace(data, path):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("project", help="a project of projects.toml")
     parser.add_argument(
@@ -827,8 +720,9 @@ def main(argv=None):
     parser.add_argument(
         "--timeout",
         type=float,
-        default=TIMEOUT_SECONDS,
-        help=f"wall-clock limit of the run in seconds (default {TIMEOUT_SECONDS})",
+        default=TIMEOUT_SECONDS_DEFAULT,
+        help="wall-clock limit of the run in seconds "
+        f"(default {TIMEOUT_SECONDS_DEFAULT})",
     )
     parser.add_argument(
         "--locate",
@@ -864,7 +758,7 @@ def main(argv=None):
         print(f"{args.project}: {exc}", file=sys.stderr)
         return 1
     write_trace(data, output)
-    tests = ", ".join(f"{data['tests'][o]} {o}" for o in OUTCOMES)
+    tests = ", ".join(f"{data['tests'][o]} {o}" for o in OUTCOMES_IN_SUMMARY_ORDER)
     edges = sum(len(callees) for callees in data["edges"].values())
     print(
         f"{args.project}: {edges} edges, {len(data['executed'])} functions run; "
@@ -876,7 +770,7 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    if sys.argv[1:2] == ["--child"]:  # internal: the child process entry point
+    if sys.argv[1:2] == [CHILD_ENTRY_ARGUMENT]:
         _run_child(*sys.argv[2:5])
     else:
         sys.exit(main())
