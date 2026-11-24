@@ -533,7 +533,8 @@ positions are not known). A call with too few arguments gets nothing.
 
 ### Names in the call graph
 
-The conventions of `micro-benchmark/README.md` apply. A node of the call
+The conventions of `evaluation/micro-benchmark/README.md` apply. A node of
+the call
 graph is named after its definition site: `mod.Class.method`,
 `mod.outer.inner`, `mod.<lambdaN>` (numbered by the position of the
 `lambda` keyword in the enclosing function, class or module),
@@ -1701,7 +1702,8 @@ some overload that the call fits binds to a parameter typed as a callable
 (or a union with one): `open(path, opener=f)`. Arguments bind by
 position, keyword, `*` and `**` as for a function, after the receivers of
 a method. The call back calls a function, bound method or callable
-instance from the caller, with no arguments (`micro-benchmark/README.md`,
+instance from the caller, with no arguments
+(`evaluation/micro-benchmark/README.md`,
 "Callbacks"); these calls are implicit. Classes are not instantiated. All
 calls with one origin share one call back, and each passes its arguments
 to it. `isinstance(f, C)` and `list.append(f)` call nothing. The builtins
@@ -3390,7 +3392,8 @@ that the stubs or an annotation type as one of them (`builtin_models.py`,
 `deque` keeps no positions, since `appendleft` and `popleft` move them:
 `q[0] = f` stores an element and `q[1]` reads every element. Its methods are named by its own class, also where `dict` or `list`
 defines them (`collections.OrderedDict.items`, the convention of
-`micro-benchmark/README.md`), and the modelled methods of its builtin type
+`evaluation/micro-benchmark/README.md`), and the modelled methods of its
+builtin type
 carry its elements, with a few of its own: `deque.appendleft`,
 `extendleft` and `popleft`, and `Counter.update`. An operator on it gives
 what the method of its class in the stubs returns, as for a typed value
@@ -3402,7 +3405,8 @@ keeps it too), and a read `d[k]` calls it, as `__missing__` does for a key
 that is missing, which it may always be: an implicit call without
 arguments, from the scope of the read, whose result is a value of the dict
 under any key (a call back of `collections`, as
-`micro-benchmark/README.md`, "Callbacks", counts it). A store, `get`, `in`
+`evaluation/micro-benchmark/README.md`, "Callbacks", counts it). A store,
+`get`, `in`
 and `del` call nothing. One call per read joins the factories of every
 `defaultdict` that the read reaches and gives its result to each of them,
 so the calls, and what the factories make (a copy of the dict, another

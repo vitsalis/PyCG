@@ -1,7 +1,7 @@
 """Values of outside classes that the stubs describe (typed outside values).
 
 A value whose type the stubs give is an instance of that class: its methods
-are named through the public name of the class (micro-benchmark/README.md,
+are named through the public name of the class (evaluation/micro-benchmark/README.md,
 "Methods"), a name the stubs do not have gives nothing, and calling a method
 gives a value of its return type.
 """

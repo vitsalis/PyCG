@@ -79,12 +79,12 @@ BENCHMARK = {
     "evaluation/macro-benchmark/test-environments/demo.txt": "pytest==9\n",
     "evaluation/macro-benchmark/README.md": "rules",
     "evaluation/common/same_function.json": "{}",
-    "micro-benchmark/snippets/args/call/main.py": "f()",
-    "micro-benchmark/snippets/args/call/pkg/mod.py": "",
-    "micro-benchmark/snippets/args/call/callgraph.json": "{}",
-    "micro-benchmark/snippets/args/call/requires-python": "3.13",
-    "micro-benchmark/snippets/args/call/README.md": "a call",
-    "micro-benchmark/README.md": "cases",
+    "evaluation/micro-benchmark/snippets/args/call/main.py": "f()",
+    "evaluation/micro-benchmark/snippets/args/call/pkg/mod.py": "",
+    "evaluation/micro-benchmark/snippets/args/call/callgraph.json": "{}",
+    "evaluation/micro-benchmark/snippets/args/call/requires-python": "3.13",
+    "evaluation/micro-benchmark/snippets/args/call/README.md": "a call",
+    "evaluation/micro-benchmark/README.md": "cases",
 }
 
 
@@ -94,10 +94,10 @@ def test_the_benchmark_is_the_files_that_a_measurement_reads(tmp_path):
         "evaluation/macro-benchmark/dynamic/demo.json",
         "evaluation/macro-benchmark/ground-truth/demo.json",
         "evaluation/macro-benchmark/projects.toml",
-        "micro-benchmark/snippets/args/call/callgraph.json",
-        "micro-benchmark/snippets/args/call/main.py",
-        "micro-benchmark/snippets/args/call/pkg/mod.py",
-        "micro-benchmark/snippets/args/call/requires-python",
+        "evaluation/micro-benchmark/snippets/args/call/callgraph.json",
+        "evaluation/micro-benchmark/snippets/args/call/main.py",
+        "evaluation/micro-benchmark/snippets/args/call/pkg/mod.py",
+        "evaluation/micro-benchmark/snippets/args/call/requires-python",
     ]
 
 
@@ -117,8 +117,8 @@ def test_the_digest_is_that_of_the_sha256sum_listing(tmp_path):
         "evaluation/macro-benchmark/ground-truth/demo.json",
         "evaluation/macro-benchmark/dynamic/demo.json",
         "evaluation/common/same_function.json",
-        "micro-benchmark/snippets/args/call/main.py",
-        "micro-benchmark/snippets/args/call/callgraph.json",
+        "evaluation/micro-benchmark/snippets/args/call/main.py",
+        "evaluation/micro-benchmark/snippets/args/call/callgraph.json",
     ],
 )
 def test_a_change_of_a_file_of_the_benchmark_changes_the_digest(tmp_path, name):
@@ -135,7 +135,7 @@ def test_a_change_of_a_file_of_the_benchmark_changes_the_digest(tmp_path, name):
         "evaluation/macro-benchmark/ground-truth/demo.added.json",
         "evaluation/macro-benchmark/ground-truth/gone.json",
         "evaluation/macro-benchmark/test-environments/demo.txt",
-        "micro-benchmark/snippets/args/call/README.md",
+        "evaluation/micro-benchmark/snippets/args/call/README.md",
     ],
 )
 def test_a_change_of_another_file_keeps_the_digest(tmp_path, name):
@@ -150,7 +150,7 @@ def test_a_new_micro_case_or_project_truth_changes_the_digest(tmp_path):
     before = gate.benchmark_digest(root)
     tree(root, {"evaluation/macro-benchmark/ground-truth/bare.json": "{}"})
     after_truth = gate.benchmark_digest(root)
-    tree(root, {"micro-benchmark/snippets/args/new/main.py": ""})
+    tree(root, {"evaluation/micro-benchmark/snippets/args/new/main.py": ""})
     assert len({before, after_truth, gate.benchmark_digest(root)}) == 3
 
 

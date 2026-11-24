@@ -4,7 +4,7 @@ special methods: operators, conversions to `str`, `with`, `raise`, `except`.
 `Protocols` is part of `Analysis` (see semantics.py), whose objects, nodes
 and constraints it uses. The special methods are found and called like any
 method; calls of methods outside the analysed modules give no edges, because
-they are not call expressions (micro-benchmark/README.md).
+they are not call expressions (evaluation/micro-benchmark/README.md).
 """
 
 from .builtin_models import CONTAINER_CLASSES

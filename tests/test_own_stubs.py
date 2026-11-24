@@ -1408,7 +1408,12 @@ class Wide(Iterator[int], Sized, Hashable, Container[int]): ...
     assert callees(whole, "main.iterable") == ["mod.Own.ping", "mod.Wide.ping"]
 
 
-SNIPPETS = Path(__file__).resolve().parent.parent / "micro-benchmark" / "snippets"
+SNIPPETS = (
+    Path(__file__).resolve().parent.parent
+    / "evaluation"
+    / "micro-benchmark"
+    / "snippets"
+)
 
 
 def case_graph(tmp_path, case, edits):

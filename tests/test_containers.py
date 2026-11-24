@@ -1436,7 +1436,7 @@ def test_a_dict_of_collections_hashes_its_keys(tmp_path):
 def test_a_defaultdict_read_calls_its_factory(tmp_path):
     # `d[k]` calls `__missing__` for a missing key, which calls the factory
     # without arguments: an implicit call from the scope that reads, whose
-    # result is the value (micro-benchmark/README.md, "Callbacks").
+    # result is the value (evaluation/micro-benchmark/README.md, "Callbacks").
     graph = main_graph(
         tmp_path,
         """

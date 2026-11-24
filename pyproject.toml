@@ -33,7 +33,7 @@ build-backend = "hatchling.build"
 path = "pycg/__init__.py"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/evaluation/**"]
+exclude = ["/evaluation/**", "!/evaluation/micro-benchmark/**"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "evaluation/tests"]
@@ -44,7 +44,7 @@ empty_parameter_set_mark = "fail_at_collect"
 [tool.ruff]
 line-length = 88
 extend-exclude = [
-    "micro-benchmark/snippets",
+    "evaluation/micro-benchmark/snippets",
     "tests/fixtures",
     "evaluation/macro-benchmark/projects",
 ]

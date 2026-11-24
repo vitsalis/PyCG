@@ -35,7 +35,7 @@ sys.path.insert(0, str(ROOT))
 
 from pycg.pycg import CallGraphGenerator  # noqa: E402
 
-SNIPPETS = ROOT / "micro-benchmark" / "snippets"
+SNIPPETS = ROOT / "evaluation" / "micro-benchmark" / "snippets"
 KNOWN_FAILURES = ROOT / "tests" / "known_failures.txt"
 
 HEADER = """\

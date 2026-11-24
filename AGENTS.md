@@ -11,7 +11,7 @@ It never imports or executes the code it analyses. Keep it that way.
 | `pycg/analysis/` | The analysis: the builder that turns the AST into constraints, the rules, and the solver |
 | `tests/unit/` | Unit tests |
 | `tests/test_micro_benchmark.py` | Runs every micro-benchmark case against its expected call graph |
-| `micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json` |
+| `evaluation/micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json` |
 | `docs/design.md` | The design of the analysis: what it models, its rules, termination, open problems |
 | `evaluation/` | Measures PyCG: the runner, the scorer and their tests (`evaluation/README.md`, `evaluation/AGENTS.md`) |
 | `evaluation/macro-benchmark/` | 40 real packages with hand-written ground truths and traces |
@@ -63,7 +63,7 @@ These paths define what PyCG is measured against:
 - `evaluation/macro-benchmark/projects.toml`
 - `evaluation/macro-benchmark/test-environments/`
 - `evaluation/common/same_function.json`
-- `micro-benchmark/snippets/**/callgraph.json`
+- `evaluation/micro-benchmark/snippets/**/callgraph.json`
 - `tests/known_failures.txt`
 - `evaluation/metrics.json`
 - `.github/`

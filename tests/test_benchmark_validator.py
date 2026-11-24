@@ -1,4 +1,4 @@
-"""Behaviour tests for micro-benchmark/validate.py."""
+"""Behaviour tests for evaluation/micro-benchmark/validate.py."""
 
 import importlib.util
 import json
@@ -13,7 +13,12 @@ pytestmark = pytest.mark.slow
 if sys.version_info < (3, 14):
     pytest.skip("the validator needs Python 3.14 or later", allow_module_level=True)
 
-VALIDATOR_PATH = Path(__file__).resolve().parents[1] / "micro-benchmark" / "validate.py"
+VALIDATOR_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "evaluation"
+    / "micro-benchmark"
+    / "validate.py"
+)
 _spec = importlib.util.spec_from_file_location("benchmark_validate", VALIDATOR_PATH)
 validate = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(validate)

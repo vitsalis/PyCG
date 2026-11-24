@@ -2140,7 +2140,12 @@ def use(value: "X"):
     },
 }
 
-SNIPPETS = Path(__file__).resolve().parent.parent / "micro-benchmark" / "snippets"
+SNIPPETS = (
+    Path(__file__).resolve().parent.parent
+    / "evaluation"
+    / "micro-benchmark"
+    / "snippets"
+)
 
 
 def results(monkeypatch, order, entry, root):
