@@ -10,14 +10,14 @@
 # 1. checks that the pin of NAME in projects.toml is that of its round log
 #    (for an sdist, that the sdist names the release of its round log);
 # 2. builds the image of NAME from Dockerfile.trace,
-#    BENCHMARK_DIR/requirements/NAME.txt (the only file of the context) and
+#    BENCHMARK_DIR/test-environments/NAME.txt (the only file of the context) and
 #    the source of NAME in the inputs image;
 # 3. copies the tracer, projects.toml and the project's pytest plugins to
 #    a temporary directory;
 # 4. runs the tests under the tracer in a container without network, with
 #    two mounts: the tracer (read-only) and the output;
 # 5. checks the trace and copies it to BENCHMARK_DIR/dynamic/NAME.json; the
-#    distributions of the container go to requirements/NAME.installed.txt;
+#    distributions of the container go to test-environments/NAME.installed.txt;
 # 6. removes the temporary directory and any container left.
 #
 # --dry-run prints the commands and runs nothing. Docker gets only PATH,
@@ -43,7 +43,7 @@ esac
 
 here=$(cd "$(dirname "$0")" && pwd)
 repository=$(cd "$here/../.." && pwd)
-requirements=$benchmark/requirements/$name.txt
+requirements=$benchmark/test-environments/$name.txt
 uid=10001
 container=pycg-trace-$name-$$
 step="check the arguments"

@@ -20,7 +20,7 @@
 name: pycg-evaluation
 
 # The one pin of the Python image, by digest: the image of the traces of
-# the macro-benchmark (its requirements/*.installed.txt name it).
+# the macro-benchmark (its test-environments/*.installed.txt name it).
 x-python-image: &python-image python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
 
 # What every service of this file has: no network, a read-only root, no
@@ -66,7 +66,7 @@ services:
     <<: *sealed
     image: pycg-trace-${NAME:-unset}
     build:
-      context: macro-benchmark/requirements
+      context: macro-benchmark/test-environments
       dockerfile: ../../container/Dockerfile.trace
       additional_contexts:
         inputs: service:inputs

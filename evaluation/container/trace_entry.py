@@ -4,7 +4,7 @@
     NAME=jmespath docker compose -f evaluation/compose.yaml run --rm trace [--compare]
 
 The service (evaluation/compose.yaml) builds the image of the project from
-container/Dockerfile.trace: macro-benchmark/requirements/NAME.txt
+container/Dockerfile.trace: macro-benchmark/test-environments/NAME.txt
 (hash-pinned wheels) and the project's source from the inputs image
 (container/Dockerfile.inputs, whose build checked it against its pin). It
 runs, without network, with a read-only root, no capability and a

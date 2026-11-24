@@ -16,7 +16,7 @@ build checks it against its pin), and the trace image takes it from there.
 check-pin checks that the pin of projects.toml is that of the round log
 that drew the project. check-trace checks the trace that the container
 wrote and copies it to BENCHMARK_DIR/dynamic/NAME.json, and writes the
-distributions of the container to BENCHMARK_DIR/requirements/NAME.installed.txt.
+distributions of the container to BENCHMARK_DIR/test-environments/NAME.installed.txt.
 
 compare prints the test counts and edges of two traces of one project, and
 the edges that only one has, by caller module and callee kind (package,
@@ -233,7 +233,7 @@ def check_trace(trace_path, benchmark_dir, name, python_image, destination=None)
     problems = _check_shape(data, name, pinned)
     if not problems and json.dumps(data, indent=2, sort_keys=True) + "\n" != text:
         problems.append("the trace is not in the format that trace.py writes")
-    wanted = requirements(benchmark / "requirements" / f"{name}.txt")
+    wanted = requirements(benchmark / "test-environments" / f"{name}.txt")
     if not problems:
         installed = {_normalize(n): (n, v) for n, v in data["distributions"].items()}
         for key in sorted(wanted.keys() | installed.keys()):
@@ -263,7 +263,7 @@ def check_trace(trace_path, benchmark_dir, name, python_image, destination=None)
             )
         ),
     ]
-    installed_path = (directory or benchmark / "requirements") / (
+    installed_path = (directory or benchmark / "test-environments") / (
         f"{name}.installed.txt"
     )
     installed_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

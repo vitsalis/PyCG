@@ -50,7 +50,7 @@
 # A project without pytest_args and test_requirements has no test run: its
 # ground truth comes from reading only, and trace.py refuses it.
 #
-# requirements/<name>.txt is the test environment of each project with a
+# test-environments/<name>.txt is the test environment of each project with a
 # test run, for the trace service: the full closure, each file by version
 # and SHA-256; test_requirements repeats the versions.
 #
@@ -83,7 +83,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # upstream requirements.txt pins pytest==8.4.1; see requirements/jmespath.txt
+]  # upstream requirements.txt pins pytest==8.4.1; see test-environments/jmespath.txt
 notes = """
 Outside the analysed source: tests/, extra/ (a hypothesis test that needs
 hypothesis, not run), bin/jp.py (a console script), scripts/, perf/,
@@ -118,7 +118,7 @@ test_requirements = [
     "outcome==1.3.0.post0",
     "sniffio==1.3.1",
     "sortedcontainers==2.4.0",
-]  # upstream: tornado>=6.0; see requirements/tenacity.txt
+]  # upstream: tornado>=6.0; see test-environments/tenacity.txt
 notes = """
 Test extra: pytest, tornado>=6.0; the dev group adds trio, without which
 tests/test_asyncio.py skips its trio test. tests/test_tornado.py imports
@@ -150,7 +150,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # tox.ini also installs pytest-cov, for coverage only; see requirements/cachetools.txt
+]  # tox.ini also installs pytest-cov, for coverage only; see test-environments/cachetools.txt
 notes = """
 src layout. The type stubs (*.pyi) are not analysed. tests/test_threading.py
 starts threads from test code.
@@ -175,7 +175,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # upstream group "testing": pytest>=8; see requirements/pluggy.txt
+]  # upstream group "testing": pytest>=8; see test-environments/pluggy.txt
 also_installed = ["pluggy"]  # pytest requires pluggy: its wheel is in the environment too
 notes = """
 src layout. pytest itself imports pluggy: with src first on sys.path, pytest
@@ -207,7 +207,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # test-requirements.txt also lists pytest-cov; see requirements/h11.txt
+]  # test-requirements.txt also lists pytest-cov; see test-environments/h11.txt
 deselect = [
     { test = "h11/tests/test_against_stdlib_http.py", reason = "binds a TCP server on 127.0.0.1, which the sandbox of the traces does not allow" },
 ]
@@ -242,7 +242,7 @@ test_requirements = [
     "pluggy==1.7.0",
     "Pygments==2.21.0",
     "simplejson==4.2.0",
-]  # group "tests": pytest, simplejson; see requirements/marshmallow.txt
+]  # group "tests": pytest, simplejson; see test-environments/marshmallow.txt
 notes = """
 src layout. tests/base.py sets Meta.render_module = simplejson, so the
 package calls simplejson (dumps/loads): a dependency in this execution.
@@ -269,7 +269,7 @@ test_requirements = [
     "pluggy==1.7.0",
     "Pygments==2.21.0",
     "typing_extensions==4.16.0",
-]  # extra "test" adds linters, mypy, coverage, pytest-cov; typing-extensions is in extra "typetest"; see requirements/asyncstdlib.txt
+]  # extra "test" adds linters, mypy, coverage, pytest-cov; typing-extensions is in extra "typetest"; see test-environments/asyncstdlib.txt
 notes = """
 The *.pyi stubs are not analysed. typetests/ is mypy/pyright input and is
 not collected. The tests drive coroutines with their own loop
@@ -314,7 +314,7 @@ test_requirements = [
     "Pygments==2.21.0",
     "PyYAML==6.0.3",
     "toml==0.10.2",
-]  # setup.py tests_require also: black, mock, pytest-cov, pytest-subtests; see requirements/configargparse.txt
+]  # setup.py tests_require also: black, mock, pytest-cov, pytest-subtests; see test-environments/configargparse.txt
 notes = """
 A single module (setup.py py_modules). tests/test_configargparse.py execs
 CPython's Lib/test/test_argparse.py (rewritten to use
@@ -346,7 +346,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # dependency group dev also: coverage, ruff, build, sphinx, furo, hatch; see requirements/sqlparse.txt
+]  # dependency group dev also: coverage, ruff, build, sphinx, furo, hatch; see test-environments/sqlparse.txt
 deselect = [
     { test = "tests/test_cli.py::test_script", reason = "runs python -m sqlparse.cli in a subprocess: the child is not traced and, without -B, writes __pycache__ into the checkout" },
     { test = "tests/test_regressions.py::test_max_recursion", reason = "sets the recursion limit to 100; the tracer's callbacks add frames and can raise RecursionError inside the tracer" },
@@ -380,7 +380,7 @@ test_requirements = [
     "Pygments==2.21.0",
     "test2ref==0.8.1",
     "binaryornot==0.6.0",
-]  # dev group: test2ref>=0.4.2 (uv.lock: 0.8.1); see requirements/anytree.txt
+]  # dev group: test2ref>=0.4.2 (uv.lock: 0.8.1); see test-environments/anytree.txt
 deselect = [
     { test = "tests/test_dotexport.py::test_tree_png", reason = "runs graphviz's dot in a subprocess (skipped anyway when dot is not on PATH)" },
 ]
@@ -432,7 +432,7 @@ test_requirements = [
     "aiomcache==0.8.2",
     "msgpack==1.1.2",
     "marshmallow==3.19.0",
-]  # requirements.txt pins pytest 7.2.0, pytest-asyncio 0.20.3, pytest-mock 3.10.0, aiomcache 0.8.0, msgpack 1.0.4; see requirements/aiocache.txt
+]  # requirements.txt pins pytest 7.2.0, pytest-asyncio 0.20.3, pytest-mock 3.10.0, aiomcache 0.8.0, msgpack 1.0.4; see test-environments/aiocache.txt
 deselect = [
     { test = "tests/ut/test_decorators.py::TestCached::test_cache_write_doesnt_wait_for_future", reason = "fails on Python 3.13 and later, with or without the tracer: there, an autospecced async method (pytest-mock's spy) is a coroutine function that records the call only when it runs; the package schedules set_in_cache with asyncio.create_task, and the test asserts the call before the task runs (the test patches ensure_future, which the package no longer calls). aiocache 0.12.3's CI ran Python 3.7 to 3.11" },
     { test = "tests/ut/test_decorators.py::TestMultiCached::test_cache_write_doesnt_wait_for_future", reason = "fails on Python 3.13 and later, with or without the tracer: there, an autospecced async method (pytest-mock's spy) is a coroutine function that records the call only when it runs; the package schedules set_in_cache with asyncio.create_task, and the test asserts the call before the task runs (the test patches ensure_future, which the package no longer calls). aiocache 0.12.3's CI ran Python 3.7 to 3.11" },
@@ -486,7 +486,7 @@ test_requirements = [
     "Pygments==2.21.0",
     "pexpect==4.9.0",
     "ptyprocess==0.7.0",
-]  # extra "test": coverage, pexpect, wheel, ruff, mypy (unpinned); see requirements/argcomplete.txt
+]  # extra "test": coverage, pexpect, wheel, ruff, mypy (unpinned); see test-environments/argcomplete.txt
 notes = """
 The suite is a unittest file, test/test.py. pytest_args select the five
 in-process classes (53 tests). --capture=sys and -p no:faulthandler: the
@@ -539,7 +539,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # requirements_dev.txt and tox add pytest-cov and pytest-random-order (unpinned); see requirements/pypinyin.txt
+]  # requirements_dev.txt and tox add pytest-cov and pytest-random-order (unpinned); see test-environments/pypinyin.txt
 notes = """
 No pytest_config: the addopts of pytest.ini need pytest-cov. Its
 python_files, python_classes and python_functions are pytest's defaults for
@@ -577,7 +577,7 @@ test_requirements = [
     "pluggy==1.7.0",
     "Pygments==2.19.2",
     "latex2mathml==3.78.1",
-]  # CI: pip install .[all] (pygments, wavedrom, latex2mathml; unpinned); see requirements/markdown2.txt
+]  # CI: pip install .[all] (pygments, wavedrom, latex2mathml; unpinned); see test-environments/markdown2.txt
 deselect = [
     { test = "test/test_markdown2.py::DirectTestCase::test_slow_hr", reason = "asserts that one conversion takes less than 1 s: a timing test" },
     { test = "test/test_markdown2.py::TMTestCase::test_issue52_hang", reason = "tagged knownfailure: the harness runs with -knownfailure" },
@@ -644,7 +644,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # requirements-dev.txt pins pytest 7.4.4 and pytest-cov 4.1.0 (pip-compile, for Python 3.7); see requirements/netaddr.txt
+]  # requirements-dev.txt pins pytest 7.4.4 and pytest-cov 4.1.0 (pip-compile, for Python 3.7); see test-environments/netaddr.txt
 notes = """
 The tests are in the package directory (netaddr/tests); they are excluded.
 pytest.ini: --doctest-modules --doctest-glob="*.rst" (no plugin needed). The
@@ -679,7 +679,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # dependency group test: dagster[test], dagster-shared (editable, from the monorepo; uv.lock pins pytest 9.1.1); see requirements/dagster-pipes.txt
+]  # dependency group test: dagster[test], dagster-shared (editable, from the monorepo; uv.lock pins pytest 9.1.1); see test-environments/dagster-pipes.txt
 notes = """
 dagster-pipes is python_modules/dagster-pipes of the dagster monorepo
 (https://github.com/dagster-io/dagster); the draw pinned its release tag
@@ -730,7 +730,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # tox.ini: pytest (unpinned); extra devel adds colorama, jsonschema, json-spec, pylint, pytest-benchmark, pytest-cache, validictory; see requirements/fastjsonschema.txt
+]  # tox.ini: pytest (unpinned); extra devel adds colorama, jsonschema, json-spec, pylint, pytest-benchmark, pytest-cache, validictory; see test-environments/fastjsonschema.txt
 notes = """
 No pytest configuration in the project; tests/conftest.py registers the
 marks none and benchmark and puts the checkout on sys.path. -m "not
@@ -770,7 +770,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # requirements-dev.txt: covdefaults, coverage, flake8==6.1.0; see requirements/pyflakes.txt
+]  # requirements-dev.txt: covdefaults, coverage, flake8==6.1.0; see test-environments/pyflakes.txt
 deselect = [
     { test = "pyflakes/test/test_api.py::IntegrationTests::test_goodFile", reason = "runs `python -m pyflakes` in a subprocess: the child imports the checkout and writes bytecode into it (the tracer's -B does not pass to children), and the tracer does not record a child process" },
     { test = "pyflakes/test/test_api.py::IntegrationTests::test_fileWithFlakes", reason = "runs `python -m pyflakes` in a subprocess: the child imports the checkout and writes bytecode into it (the tracer's -B does not pass to children), and the tracer does not record a child process" },
@@ -813,7 +813,7 @@ test_requirements = [
     "Mako==1.3.10",
     "Jinja2==3.1.6",
     "MarkupSafe==3.0.3",
-]  # CI: pytest, pytest-cov, mako, jinja2 (unpinned); tox.ini: Mako, jinja2; see requirements/bottle.txt
+]  # CI: pytest, pytest-cov, mako, jinja2 (unpinned); tox.ini: Mako, jinja2; see test-environments/bottle.txt
 notes = """
 A single module (bottle.py). The tests drive the WSGI application in
 process (wsgiref's validator, no server, no socket). test/__init__.py
@@ -934,7 +934,7 @@ test_requirements = [
     "MarkupSafe==3.0.3",
     "pyarrow==25.0.0",
     "tzdata==2026.3",
-]  # extra test-all (unpinned): the extras all and test-notebook, with pytest-xdist and pytest-cov; see requirements/itables.txt
+]  # extra test-all (unpinned): the extras all and test-notebook, with pytest-xdist and pytest-cov; see test-environments/itables.txt
 not_importable = ["itables_for_dash"]  # it imports dash, which the environment does not install (see notes)
 deselect = [
     { test = "tests/test_javascript.py::test_unpkg_links", reason = "fetches the DataTables bundle from www.unpkg.com with requests (network; requests is not installed, so it would skip)" },
@@ -952,7 +952,7 @@ installed: no test can import it (not_importable); trace.py fails if an
 edge from or to it is traced. The
 environment is the CI's extra test-all without the frameworks, notebook
 tools, network clients and heavy backends whose tests are left out (see
-requirements/itables.txt), but with pyarrow and tzdata (the maintainer's
+test-environments/itables.txt), but with pyarrow and tzdata (the maintainer's
 decision of 2026-11-14, after a scan); dependencies lists the import names
 of all of it but pytest's own closure. pyarrow is there for
 test_downsample.py: a module-level parametrize converts pandas frames to
@@ -1026,7 +1026,7 @@ test_requirements = [
     "urllib3==2.6.3",
     "certifi==2026.2.25",
     "brotli==1.2.0",
-]  # dependency group test (coverage, pytest, pytest-randomly, requests) and the extra brotli, from uv.lock; tzdata added; see requirements/whitenoise.txt
+]  # dependency group test (coverage, pytest, pytest-randomly, requests) and the extra brotli, from uv.lock; tzdata added; see test-environments/whitenoise.txt
 notes = """
 The tests are tests/ (89 test functions by reading); scripts/ is not
 collected (scripts/generate_default_media_types.py fetches a file over
@@ -1077,7 +1077,7 @@ test_requirements = [
     "pluggy==1.7.0",
     "Pygments==2.21.0",
     "whatever==0.7",
-]  # test_requirements.txt: pytest==7.4.3, whatever==0.7; see requirements/funcy.txt
+]  # test_requirements.txt: pytest==7.4.3, whatever==0.7; see test-environments/funcy.txt
 notes = """
 The source is the git checkout. The sdist on PyPI ships 190 .pyc files in
 tests/__pycache__ (CPython 3.11 to 3.14, PyPy, and pytest's rewritten
@@ -1114,7 +1114,7 @@ test_requirements = [
     "pluggy==1.7.0",
     "Pygments==2.21.0",
     "pillow==11.3.0",
-]  # tox.ini: pytest, pytest-cov, and Pillow in py-images (unpinned); see requirements/python-barcode.txt
+]  # tox.ini: pytest, pytest-cov, and Pillow in py-images (unpinned); see test-environments/python-barcode.txt
 notes = """
 The draw pinned the tag v0.16.1 at commit cf58852b (round-3.json). The
 checkout at the tag cannot be imported: barcode/__init__.py, writer.py and
@@ -1184,7 +1184,7 @@ test_requirements = [
     "Pygments==2.21.0",
     "pytest-asyncio==1.4.0",
     "filelock==4.2.4",
-]  # uv.lock (dependency groups): pytest 8.4.1, pytest-asyncio 1.1.0, pytest-xdist, pytest-cov, pytest-retry, filelock 3.18.0, redis, psycopg, aiohttp and more; see requirements/pyrate-limiter.txt
+]  # uv.lock (dependency groups): pytest 8.4.1, pytest-asyncio 1.1.0, pytest-xdist, pytest-cov, pytest-retry, filelock 3.18.0, redis, psycopg, aiohttp and more; see test-environments/pyrate-limiter.txt
 deselect = [
     { test = "tests/test_postgres_concurrent.py::test_advisory_lock_id_is_the_same_in_every_process", reason = "runs `sys.executable -c` twice in a subprocess: the tracer does not record a child process, and the child writes bytecode into the checkout copy (its environment has no PYTHONDONTWRITEBYTECODE)" },
 ]
@@ -1276,7 +1276,7 @@ test_requirements = [
     "Incremental==24.11.0",
     "typing-extensions==4.15.0",
     "zope.interface==8.5",
-]  # dependency group tests (pytest, pytest-asyncio, pytest-randomly, simplejson, time-machine; unpinned), and Twisted with its closure; see requirements/structlog.txt
+]  # dependency group tests (pytest, pytest-asyncio, pytest-randomly, simplejson, time-machine; unpinned), and Twisted with its closure; see test-environments/structlog.txt
 deselect = [
     { test = "tests/test_packaging.py::TestLegacyMetadataHack::test_version", reason = "asks importlib.metadata for the distribution structlog, which is not installed: the trace uses the checkout" },
     { test = "tests/test_packaging.py::TestLegacyMetadataHack::test_description", reason = "asks importlib.metadata for the distribution structlog, which is not installed: the trace uses the checkout" },
@@ -1345,7 +1345,7 @@ test_requirements = [
     "pluggy==1.7.0",
     "Pygments==2.21.0",
     "mock==5.2.0",
-]  # tox.ini deps: mock, coverage, ipdb, ipython, pytest>=2.9 (unpinned); see requirements/autojump.txt
+]  # tox.ini deps: mock, coverage, ipdb, ipython, pytest>=2.9 (unpinned); see test-environments/autojump.txt
 notes = """
 An application, not a package: bin/ holds the program, and its modules
 import each other as top-level modules (root = "bin"). Analysed: the three
@@ -1417,7 +1417,7 @@ test_requirements = [
     "packaging==26.3",
     "pluggy==1.7.0",
     "Pygments==2.21.0",
-]  # setup.py tests_require: nose (unpinned); see requirements/asciinema.txt
+]  # setup.py tests_require: nose (unpinned); see test-environments/asciinema.txt
 notes = """
 Analysed: the package asciinema/. Not analysed: tests/, setup.py, doc/,
 man/. The 2021 selection was the same. The commit is on the develop branch,

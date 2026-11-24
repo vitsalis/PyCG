@@ -58,8 +58,8 @@ do not trigger another round.
 evaluation/macro-benchmark/
 ├── projects.toml                  # The 30 projects: pin, licence, analysed source, tests, batch
 ├── projects/                      # Empty: a copy of the sources, for reading only, goes here (not in git)
-├── requirements/<name>.txt        # The test environment, pinned by hash (to record the trace again)
-├── requirements/<name>.installed.txt  # What the container of the trace had installed
+├── test-environments/<name>.txt        # The test environment, pinned by hash (to record the trace again)
+├── test-environments/<name>.installed.txt  # What the container of the trace had installed
 ├── dynamic/<name>.json            # The trace: the calls made while the test suite runs (trace.py)
 ├── ground-truth/<name>.json       # The call graph: what scoring reads
 ├── ground-truth/<name>.ledger     # Its source: the call-site ledger
@@ -81,7 +81,7 @@ To score a tool you need `projects.toml`, `ground-truth/<name>.json`,
 `dynamic/<name>.json` (its aliases match names) and the tool's graph. To
 run a tool you also need the sources, which the inputs image holds (see
 "Getting the sources"). To record a trace again you need
-`requirements/` and the `trace` service (see "Re-recording a trace").
+`test-environments/` and the `trace` service (see "Re-recording a trace").
 
 The ledger is the source of truth. `ground-truth/<name>.json` is generated
 from it (`check.py --write`) and committed, so that a scorer needs neither
@@ -295,7 +295,7 @@ virtual environment per project that had exactly the pins of `test_requirements`
 0.34.0 and trio's five dependencies), before the container runner existed.
 The whole evaluation now runs in containers, so each package is traced
 again in a container and its trace compared with the
-committed one (`trace_helper.py compare`; see "Re-recording a trace"). `requirements/<name>.txt` pins the versions of the first
+committed one (`trace_helper.py compare`; see "Re-recording a trace"). `test-environments/<name>.txt` pins the versions of the first
 traces. The re-trace is a check: it does not replace the committed traces.
 Result (2026-11-14, CPython 3.14.10 in the container against 3.14.9 in
 the first traces): for each of the five packages the same tests pass and
@@ -361,7 +361,7 @@ CPython 3.14.9, which has no `test` package (configargparse needs that),
 and a virtual environment per project with exactly the pins of
 `test_requirements`, before the container runner existed. Each package is
 traced again in a container and its trace compared with the committed one,
-as for batch 1; `requirements/<name>.txt` pins the versions of
+as for batch 1; `test-environments/<name>.txt` pins the versions of
 the first traces. The re-trace is a check: it does not replace the
 committed traces, and it shows trace edges, not results of the analysis.
 Result (2026-11-14, CPython 3.14.10 in the container): for each of the
@@ -403,7 +403,7 @@ container"); `projects.toml` holds each restriction with its reason:
 | netaddr | `netaddr` and the three tutorials, with the project's `pytest.ini` | nothing |
 
 **Provenance.** Each project's test dependencies are installed from
-`requirements/<name>.txt`, which lists the full closure by version and
+`test-environments/<name>.txt`, which lists the full closure by version and
 SHA-256, with pip's `--require-hashes --only-binary :all: --no-deps`; the
 hash of each dependency that the security scan read is that of the file it
 read, and the others come from PyPI's JSON for that version. Before each
@@ -412,13 +412,13 @@ round log (the build of the inputs image checked the source against that
 commit), and the container checks, without importing it, that the package
 is found in the copy of that source and nowhere in the environment. After each run, `trace.sh` checks that the
 distributions of the container are exactly those of the requirements file
-and writes them to `requirements/<name>.installed.txt`.
+and writes them to `test-environments/<name>.installed.txt`.
 
 The traces were recorded in containers from
 `python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f`
 (CPython 3.14.10, linux/aarch64). Each package was traced twice, and both
 runs gave the same bytes for `dynamic/<name>.json` and
-`requirements/<name>.installed.txt`.
+`test-environments/<name>.installed.txt`.
 
 | Project | Passed | Skipped | Expected failures | Deselected | Failed | Trace edges | Functions run |
 |---|---|---|---|---|---|---|---|
@@ -481,7 +481,7 @@ tests. Three of the projects
 are GPL: the repository holds none of their code, and the build of the
 inputs image fetches them as every other project. Only autojump's
 commit is a release tag; the other entries have no `tag`.
-`requirements/` holds the test environments of autojump and asciinema, and
+`test-environments/` holds the test environments of autojump and asciinema, and
 `plugins/nose_tools.py` is a pytest plugin of asciinema.
 
 | Project | Commit | Licence | Analysed source | Modules | Code lines | Functions (lambdas) | Classes | Python (declared) |
@@ -621,7 +621,7 @@ restriction with its reason:
 | bottle | `test` (377 tests), with Mako and Jinja2 for the template adapters | nothing |
 | itables | 16 test files (143 test functions by reading, many parametrized), with pandas, polars, narwhals, pyarrow, tzdata, IPython, typeguard, platformdirs and Jinja2 | `tests/playwright` (a browser); the notebook tests (Jupyter kernels, subprocesses); the shiny, marimo, streamlit, widget and dash tests (frameworks, and JavaScript that npm builds at packaging time and that the repository lacks); `test_init_notebook_mode.py` (reads the DataTables bundle, also built by npm); `test_update_samples.py` and `test_unpkg_links` (network); `test_changelog.py` (no package code) |
 
-**Provenance** as for batch 3: `requirements/<name>.txt`
+**Provenance** as for batch 3: `test-environments/<name>.txt`
 lists the full closure by version and SHA-256, for pip's
 `--require-hashes --only-binary :all: --no-deps`. Most environments are
 pytest alone; bottle adds Mako, Jinja2 and MarkupSafe; itables has 36
@@ -661,7 +661,7 @@ same image digest, CPython 3.14.10), with the memory limit of 6 GiB (see
 "Recording traces in a container": under the tracer, fastjsonschema's
 `test_examples` needs more than 4 GiB). Each package was traced twice, and
 both runs gave the same bytes for `dynamic/<name>.json` and
-`requirements/<name>.installed.txt`.
+`test-environments/<name>.installed.txt`.
 
 | Project | Passed | Skipped | Expected failures | Deselected | Failed | Trace edges | Functions run |
 |---|---|---|---|---|---|---|---|
@@ -882,7 +882,7 @@ recommends and as the lead decided (below), in the container of batch 3; `projec
 | pyrate-limiter | `tests` with pytest-asyncio by `-p` and its two keys by `-o`, and filelock | `tests/test_multiprocessing.py` (worker processes, which the tracer does not see); `tests/test_aiohttp_limiter.py` (aiohttp is not installed); `test_advisory_lock_id_is_the_same_in_every_process` (two child interpreters, which write bytecode into the checkout copy); `examples/` and `benchmarks/` (HTTPS to httpbin.org, Redis, PostgreSQL). Without redis and psycopg the Redis and PostgreSQL tests skip; `pyproject.toml` is not the configuration (keys of pytest-retry) |
 | structlog | `tests` with pytest-asyncio by `-p` and its two keys by `-o`, time-machine, simplejson, and Twisted with its closure | the 4 tests of `tests/test_packaging.py` that ask `importlib.metadata` for the installed distribution (the trace uses the checkout); the tests that need Rich, greenlet or better-exceptions skip (not installed) |
 
-**Provenance** as for batch 3: `requirements/<name>.txt`
+**Provenance** as for batch 3: `test-environments/<name>.txt`
 lists the full closure for CPython 3.14 on Linux aarch64 by version and
 SHA-256, for pip's `--require-hashes --only-binary :all: --no-deps`. Every
 hash was checked against PyPI's JSON for its version (2026-11-14); each
@@ -977,7 +977,7 @@ What the runs settled:
   the test fails. It failed in the first run only because of the tracer.
   The trace has the same 695 edges with and without it.
 - **Two runs of one package gave the same bytes** for
-  `dynamic/<name>.json` and `requirements/<name>.installed.txt`, with one
+  `dynamic/<name>.json` and `test-environments/<name>.installed.txt`, with one
   exception: the first run of pyrate-limiter counted 76 dropped call-backs
   of the tests and the three later runs 74. The edges, the functions run
   and the test counts were equal in all four runs. The count is not part
@@ -2128,7 +2128,7 @@ The environment of a trace is the image that `trace.sh` builds (see
 is installed or run on the host. The image holds Python 3.14 (the tracer
 uses `sys.monitoring` events of 3.14) and exactly the `test_requirements`
 of `projects.toml`: the full closure of the test dependencies, which
-`requirements/<name>.txt` pins by hash, installed from wheels only
+`test-environments/<name>.txt` pins by hash, installed from wheels only
 (`--require-hashes --only-binary :all: --no-deps`), so that no build
 script of a package runs. The tracer refuses to run if the environment
 does not have the pinned versions. The project itself is not installed:
@@ -2233,7 +2233,7 @@ implementations are client callbacks.
 ### Re-recording a trace
 
 A trace is the reproducible half of a ground truth. To record the trace of
-a project again you need Docker with Compose, `requirements/<name>.txt`
+a project again you need Docker with Compose, `test-environments/<name>.txt`
 (the pinned test environment) and the inputs image, which holds the
 source. 27 projects have a trace; fabric, face_classification and
 Sublist3r have no test run.
@@ -2271,7 +2271,7 @@ host:
 ```sh
 B=evaluation/macro-benchmark
 cp evaluation/results/trace/jmespath.json $B/dynamic/jmespath.json
-cp evaluation/results/trace/jmespath.installed.txt $B/requirements/
+cp evaluation/results/trace/jmespath.installed.txt $B/test-environments/
 $C run --rm inputs python3 -I -B /repo/$B/check.py jmespath   # in the image
 python3 -I $B/check.py jmespath                                # on the host, on the copy
 ```
@@ -2301,7 +2301,7 @@ maintainers' own script for the same run: it runs Docker from the host,
 needs Python on the host for its checks, and writes the trace into
 `dynamic/`. It takes the source from the inputs image
 (`pycg-evaluation-inputs`: build it first with `$C build inputs`), a
-benchmark directory and one project that has `requirements/<name>.txt`:
+benchmark directory and one project that has `test-environments/<name>.txt`:
 
 ```sh
 PYTHON_IMAGE=python:3.14-slim@sha256:<digest> \
@@ -2340,7 +2340,7 @@ checks the pin. The script:
    `trace.py` writes, in its format, of this project and commit, and with
    exactly the distributions of the requirements file), copies it to
    `dynamic/<name>.json`, writes the distributions to
-   `requirements/<name>.installed.txt`, and prints the test counts;
+   `test-environments/<name>.installed.txt`, and prints the test counts;
 6. removes the temporary directories, and the container if a step failed.
    A failure names the step.
 
@@ -2358,15 +2358,15 @@ the Docker socket are not mounted; there is no `--privileged`, `--pid`,
 `--ipc` or host network. The image is built with network access (pip
 downloads the wheels); the tests run without any. Docker gets only `PATH`,
 `HOME`, `DOCKER_HOST` and `DOCKER_CONFIG` of the caller's environment. The
-digest of the base image is recorded in each `requirements/<name>.installed.txt`.
+digest of the base image is recorded in each `test-environments/<name>.installed.txt`.
 Inside the container the tracer works as described above; the trace names
 code relative to the package root, as on the host, so a trace from a
 container has the same format.
 
 **Re-tracing with `trace.sh` to check committed traces.** `trace.sh` writes
-`dynamic/<name>.json` and `requirements/<name>.installed.txt` in the
+`dynamic/<name>.json` and `test-environments/<name>.installed.txt` in the
 benchmark directory that it is given. To keep the committed traces, give it
-a scratch directory with a copy of `projects.toml` and `requirements/`
+a scratch directory with a copy of `projects.toml` and `test-environments/`
 (the source comes from the inputs image). Then compare each new trace
 with the committed one:
 
