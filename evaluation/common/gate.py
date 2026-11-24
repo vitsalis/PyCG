@@ -7,24 +7,38 @@
         --changes FILE
 
 RESULT is the result.json of `loop.py run`; METRICS is evaluation/metrics.json:
-the best value that main has reached of each value of VALUES, and the margin
-below it that a measurement may fall. A value's floor is its best minus the
-margin.
+the best value that main has reached of each value of VALUES on the benchmark
+whose digest is `benchmark_sha256` (benchmark_digest), and the margin below
+it that a measurement may fall. A value's floor is its best minus the margin.
 
-`check` fails if a value is below its floor or a run failed; with --base (the
+`check` fails if a value is below its floor, a run failed, or METRICS was
+recorded on another benchmark than this checkout's; with --base (the
 metrics.json of the base commit), also if METRICS is not what `record` writes
-from the base and the result: floors only rise. An empty BASE_METRICS is a
-base without the file, whose floors are not checked. `record` prints that file:
-each best is the larger of the base's (default: METRICS) and the measured
-value. `summary` prints the Markdown of a pull request: each value of the base
-and of the result with its floor, the changes that `loop.py compare` wrote to
-FILE, and the time and peak memory of each macro package (not gated).
+from the base and the result. An empty BASE_METRICS is a base without the
+file, whose floors are not checked. `record` prints that file: on the base's
+benchmark (default base: METRICS), each best is the larger of the base's and
+the measured value, so floors only rise; on another benchmark, the measured
+values are the new bests, as the base's were measured on other inputs. A
+base without `benchmark_sha256` was recorded before the digest existed, by
+the change that added it, which changes no file of the benchmark: it counts
+as this checkout's benchmark. `summary` prints the Markdown of a pull
+request: each value of the base and of the result with its floor, whether
+the benchmark changed, the changes that `loop.py compare` wrote to FILE, and
+the time and peak memory of each macro package (not gated).
 """
 
 import argparse
+import hashlib
 import json
 import sys
+import tomllib
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+MACRO = Path("evaluation/macro-benchmark")
+SAME_FUNCTION = Path("evaluation/common/same_function.json")
+SNIPPETS = Path("micro-benchmark/snippets")
+SNIPPET_FILES = ("callgraph.json", "requires-python")
 
 VALUES = {
     "micro P": ("micro", "all", "precision"),
@@ -57,25 +71,77 @@ def measured(result):
     return values
 
 
+def benchmark_files(root):
+    """The files of `root` that a measurement reads besides the code of PyCG
+    and of the evaluation: projects.toml (the projects, their pins, their
+    packages), each project's ground truth and trace (ground-truth/<name>.json,
+    dynamic/<name>.json), the table of names of one function, and each
+    micro-benchmark case's programs, ground truth and requires-python. The
+    other files beside them (ledgers, notes, test environments, READMEs) do
+    not move a value; a change of them keeps the floors."""
+    macro = root / MACRO
+    config = macro / "projects.toml"
+    files = [config, root / SAME_FUNCTION]
+    for name in tomllib.loads(config.read_text(encoding="utf-8")):
+        for directory in ("ground-truth", "dynamic"):
+            path = macro / directory / f"{name}.json"
+            if path.is_file():
+                files.append(path)
+    for case in (root / SNIPPETS).glob("*/*"):
+        if case.is_dir():
+            files += [
+                path
+                for path in case.rglob("*")
+                if path.is_file()
+                and (path.suffix == ".py" or path.name in SNIPPET_FILES)
+            ]
+    return sorted(path.relative_to(root).as_posix() for path in files)
+
+
+def benchmark_digest(root=ROOT):
+    """The SHA-256 of the listing of `sha256sum` of benchmark_files, sorted
+    by path: `sha256sum FILES | sha256sum` in `root`."""
+    listing = "".join(
+        f"{hashlib.sha256((root / path).read_bytes()).hexdigest()}  {path}\n"
+        for path in benchmark_files(root)
+    )
+    return hashlib.sha256(listing.encode("utf-8")).hexdigest()
+
+
+def rebased(base, digest):
+    """Whether the floors of `base` were recorded on another benchmark than
+    the one of `digest` (a base without a digest: no, see the module)."""
+    return base.get("benchmark_sha256", digest) != digest
+
+
 def floor(metrics, name):
     return round(metrics["best"][name] - metrics["margin"], 4)
 
 
-def recorded(base, values):
+def recorded(base, values, digest):
     if set(base["best"]) != set(VALUES):
         raise GateError(f"the values of the metrics are not {sorted(VALUES)}")
-    best = {name: max(base["best"][name], values[name]) for name in VALUES}
-    return {"margin": base["margin"], "best": best}
+    if rebased(base, digest):
+        best = {name: values[name] for name in VALUES}
+    else:
+        best = {name: max(base["best"][name], values[name]) for name in VALUES}
+    return {"margin": base["margin"], "benchmark_sha256": digest, "best": best}
 
 
 def dumps(metrics):
     return json.dumps(metrics, indent=1) + "\n"
 
 
-def check(result, metrics, base=None):
+def check(result, metrics, digest, base=None):
     values = measured(result)
     lines = [f"{'value':16} {'measured':>8} {'best':>8} {'floor':>8}"]
     failures = []
+    if metrics.get("benchmark_sha256") != digest:
+        failures.append(
+            "evaluation/metrics.json was recorded on another benchmark "
+            f"(benchmark_sha256 {metrics.get('benchmark_sha256')}, this "
+            f"checkout's {digest}): run make eval-record"
+        )
     for name, value in values.items():
         low = floor(metrics, name)
         ok = value >= low
@@ -88,17 +154,24 @@ def check(result, metrics, base=None):
     for run in result["failed"]:
         failures.append(f"the run {run['run']} failed: {run['status']}")
     if base is not None:
-        expected = recorded(base, values)
+        lines.append(benchmark_line(base, digest))
+        expected = recorded(base, values, digest)
         if metrics != expected:
             failures.append(
-                "evaluation/metrics.json is not the larger of the base's and the "
-                f"measured values: it should be {json.dumps(expected)}; run "
-                "make eval-record"
+                "evaluation/metrics.json is not what make eval-record writes from "
+                f"the base's and the measured values: it should be "
+                f"{json.dumps(expected)}; run make eval-record"
             )
     return lines, failures
 
 
-def summary(result, metrics, base_result, changes):
+def benchmark_line(base, digest):
+    if rebased(base, digest):
+        return "benchmark changed: floors re-based"
+    return "benchmark unchanged: floors only rise"
+
+
+def summary(result, metrics, base_result, changes, digest, base=None):
     values, base_values = measured(result), measured(base_result)
     lines = [
         "### PyCG evaluation",
@@ -113,6 +186,8 @@ def summary(result, metrics, base_result, changes):
             f"| {name} | {base_values[name]:.4f} | {value:.4f} | {low:.4f} "
             f"| {verdict} |"
         )
+    if base is not None:
+        lines += ["", benchmark_line(base, digest)]
     lines += ["", f"Failed runs: {len(result['failed'])}"]
     lines += [f"- {run['run']}: {run['status']}" for run in result["failed"]]
     lines += [
@@ -171,16 +246,19 @@ def main(argv=None):
             base = load(args.base)
         elif args.base:
             print(f"the base has no metrics: {args.base} is empty", file=sys.stderr)
+        digest = benchmark_digest()
         if args.command == "record":
-            print(dumps(recorded(base or metrics, measured(result))), end="")
+            print(dumps(recorded(base or metrics, measured(result), digest)), end="")
             return 0
         if args.command == "summary":
             if not (args.base_result and args.changes):
                 parser.error("summary needs --base-result and --changes")
-            lines = summary(result, metrics, load(args.base_result), args.changes)
+            lines = summary(
+                result, metrics, load(args.base_result), args.changes, digest, base
+            )
             print("\n".join(lines))
             return 0
-        lines, failures = check(result, metrics, base)
+        lines, failures = check(result, metrics, digest, base)
     except GateError as error:
         print(f"gate: {error}", file=sys.stderr)
         return 1
