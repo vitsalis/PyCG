@@ -1,0 +1,3414 @@
+{
+  "edges": {
+    "mss.__main__": {
+      "<builtin>.print": [
+        "mss.__main__ 124:14 call  print(\"[ERROR]\", exc)"
+      ],
+      "mss.__main__.main": [
+        "mss.__main__ 122:22 call  main()"
+      ],
+      "mss.linux.xcbhelpers.XProtoError.__str__": [
+        "mss.__main__ 124:14 call  print(\"[ERROR]\", exc)"
+      ],
+      "mss.linux.xlib.XError.__str__": [
+        "mss.__main__ 124:14 call  print(\"[ERROR]\", exc)"
+      ],
+      "sys.exit": [
+        "mss.__main__ 122:17 call  sys.exit(main())",
+        "mss.__main__ 125:17 call  sys.exit(1)"
+      ]
+    },
+    "mss.__main__._backend_cli_choices": {
+      "<builtin>.str.lower": [
+        "mss.__main__ 16:38 call  platform.system().lower()"
+      ],
+      "platform.system": [
+        "mss.__main__ 16:30 call  platform.system()"
+      ]
+    },
+    "mss.__main__.main": {
+      "<builtin>.int": [
+        "mss.__main__ 84:23 call  int(top)",
+        "mss.__main__ 85:24 call  int(left)",
+        "mss.__main__ 86:25 call  int(width)",
+        "mss.__main__ 87:26 call  int(height)"
+      ],
+      "<builtin>.list": [
+        "mss.__main__ 49:21 call  list(range(10))"
+      ],
+      "<builtin>.print": [
+        "mss.__main__ 73:14 call  print(f\"{cli_args.prog}: error: {e}\", file=sys.stderr)",
+        "mss.__main__ 80:18 call  print(\"Coordinates syntax: top, left, width, height\")",
+        "mss.__main__ 94:18 call  print(\"[WARNING] --with-cursor is only supported on Linux...",
+        "mss.__main__ 108:26 call  print(os.path.realpath(output))",
+        "mss.__main__ 112:30 call  print(os.path.realpath(file_name))"
+      ],
+      "<builtin>.range": [
+        "mss.__main__ 49:27 call  range(10)"
+      ],
+      "<builtin>.str.format": [
+        "mss.__main__ 104:54 call  grab_kwargs[\"output\"].format(**grab_kwargs[\"mon\"])"
+      ],
+      "<builtin>.str.lower": [
+        "mss.__main__ 92:67 call  platform.system().lower()"
+      ],
+      "<builtin>.str.split": [
+        "mss.__main__ 78:65 call  options.coordinates.split(\",\")"
+      ],
+      "argparse.ArgumentParser": [
+        "mss.__main__ 36:30 call  ArgumentParser(prog=\"mss\", exit_on_error=False)"
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "mss.__main__ 37:26 call  cli_args.add_argument( \"-c\", \"--coordinates\", default=\"\",...",
+        "mss.__main__ 44:26 call  cli_args.add_argument( \"-l\", \"--level\", default=6, type=i...",
+        "mss.__main__ 52:26 call  cli_args.add_argument(\"-m\", \"--monitor\", default=0, type=...",
+        "mss.__main__ 53:26 call  cli_args.add_argument(\"-o\", \"--output\", default=\"monitor-...",
+        "mss.__main__ 54:26 call  cli_args.add_argument(\"--with-cursor\", default=None, acti...",
+        "mss.__main__ 55:26 call  cli_args.add_argument( \"-q\", \"--quiet\", default=False, ac...",
+        "mss.__main__ 62:26 call  cli_args.add_argument( \"-b\", \"--backend\", default=\"defaul...",
+        "mss.__main__ 65:26 call  cli_args.add_argument(\"-v\", \"--version\", action=\"version\"..."
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "mss.__main__ 68:38 call  cli_args.parse_args(args or None)"
+      ],
+      "argparse.ArgumentParser.print_usage": [
+        "mss.__main__ 72:29 call  cli_args.print_usage(sys.stderr)"
+      ],
+      "mss.__main__._backend_cli_choices": [
+        "mss.__main__ 34:43 call  _backend_cli_choices()"
+      ],
+      "mss.base.MSS.__enter__": [
+        "mss.__main__ 102:14 with  MSS(**mss_kwargs)"
+      ],
+      "mss.base.MSS.__exit__": [
+        "mss.__main__ 102:14 with  MSS(**mss_kwargs)"
+      ],
+      "mss.base.MSS.__init__": [
+        "mss.__main__ 102:17 call  MSS(**mss_kwargs)"
+      ],
+      "mss.base.MSS.grab": [
+        "mss.__main__ 105:35 call  sct.grab(grab_kwargs[\"mon\"])"
+      ],
+      "mss.base.MSS.save": [
+        "mss.__main__ 110:42 call  sct.save(**grab_kwargs)"
+      ],
+      "mss.screenshot.ScreenShot.rgb": [
+        "mss.__main__ 106:32 getattr  sct_img.rgb"
+      ],
+      "mss.tools.to_png": [
+        "mss.__main__ 106:23 call  to_png(sct_img.rgb, sct_img.size, level=options.level, ou..."
+      ],
+      "os.path.realpath": [
+        "mss.__main__ 108:43 call  os.path.realpath(output)",
+        "mss.__main__ 112:47 call  os.path.realpath(file_name)"
+      ],
+      "platform.system": [
+        "mss.__main__ 92:59 call  platform.system()"
+      ]
+    },
+    "mss.base": {
+      "<builtin>.property": [
+        "mss.base 323:6 decorator  @property",
+        "mss.base 352:6 decorator  @property",
+        "mss.base 509:6 decorator  @property",
+        "mss.base 526:6 decorator  @property",
+        "mss.base 536:6 decorator  @property"
+      ],
+      "<builtin>.staticmethod": [
+        "mss.base 118:6 decorator  @staticmethod",
+        "mss.base 434:6 decorator  @staticmethod",
+        "mss.base 482:6 decorator  @staticmethod"
+      ],
+      "abc.abstractmethod": [
+        "mss.base 93:6 decorator  @abstractmethod",
+        "mss.base 97:6 decorator  @abstractmethod",
+        "mss.base 105:6 decorator  @abstractmethod"
+      ],
+      "mss.base._PlatformSpecific.__init__": [
+        "mss.base 201:40 call  _PlatformSpecific(False)",
+        "mss.base 202:36 call  _PlatformSpecific(None)",
+        "mss.base 203:41 call  _PlatformSpecific(32)"
+      ],
+      "threading.Lock": [
+        "mss.base 46:12 call  Lock()"
+      ]
+    },
+    "mss.base.MSS.__exit__": {
+      "mss.base.MSS.close": [
+        "mss.base 265:19 call  self.close()"
+      ]
+    },
+    "mss.base.MSS.__init__": {
+      "<builtin>.isinstance": [
+        "mss.base 223:26 call  isinstance(value, _PlatformSpecific)"
+      ],
+      "<builtin>.str.join": [
+        "mss.base 229:61 call  ', '.join(supported_platforms)"
+      ],
+      "mss.base._choose_impl": [
+        "mss.base 237:53 call  _choose_impl( backend=backend, **impl_kwargs, )"
+      ],
+      "platform.system": [
+        "mss.base 217:33 call  platform.system()"
+      ],
+      "threading.Lock": [
+        "mss.base 255:26 call  Lock()"
+      ],
+      "warnings.warn": [
+        "mss.base 228:30 call  warnings.warn( f\"{name} is only available on {', '.join(s..."
+      ]
+    },
+    "mss.base.MSS._cfactory": {
+      "<builtin>.getattr": [
+        "mss.base 492:23 call  getattr(attr, func)"
+      ]
+    },
+    "mss.base.MSS._merge": {
+      "<builtin>.int": [
+        "mss.base 478:51 call  int(cursor_raw[cpos + i] * alpha2 + screen_raw[spos + i] ..."
+      ],
+      "<builtin>.max": [
+        "mss.base 457:36 call  max(cy2, 0)",
+        "mss.base 458:36 call  max(cx2, 0)"
+      ],
+      "<builtin>.range": [
+        "mss.base 459:20 call  range(3)",
+        "mss.base 461:29 call  range(start_count_y, stop_count_y, 4)",
+        "mss.base 465:33 call  range(start_count_x, stop_count_x, 4)"
+      ]
+    },
+    "mss.base.MSS.close": {
+      "mss.base.MSSImplementation.close": [
+        "mss.base 285:29 call  self._impl.close()"
+      ],
+      "mss.linux.base.MSSImplXCBBase.close": [
+        "mss.base 285:29 call  self._impl.close()"
+      ],
+      "mss.linux.xlib.MSSImplXlib.close": [
+        "mss.base 285:29 call  self._impl.close()"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage.close": [
+        "mss.base 285:29 call  self._impl.close()"
+      ],
+      "mss.windows.gdi.MSSImplGdi.close": [
+        "mss.base 285:29 call  self._impl.close()"
+      ]
+    },
+    "mss.base.MSS.grab": {
+      "<builtin>.isinstance": [
+        "mss.base 299:22 call  isinstance(monitor, tuple)",
+        "mss.base 313:26 call  isinstance(img_data_and_maybe_size, tuple)"
+      ],
+      "mss.base.MSS._merge": [
+        "mss.base 320:35 call  self._merge(screenshot, cursor)"
+      ],
+      "mss.darwin.MSSImplDarwin.grab": [
+        "mss.base 312:54 call  self._impl.grab(monitor)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.base 309:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.base.MSSImplXCBBase.cursor": [
+        "mss.base 319:71 call  self._impl.cursor()"
+      ],
+      "mss.linux.xgetimage.MSSImplXGetImage.grab": [
+        "mss.base 312:54 call  self._impl.grab(monitor)"
+      ],
+      "mss.linux.xlib.MSSImplXlib.cursor": [
+        "mss.base 319:71 call  self._impl.cursor()"
+      ],
+      "mss.linux.xlib.MSSImplXlib.grab": [
+        "mss.base 312:54 call  self._impl.grab(monitor)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage.grab": [
+        "mss.base 312:54 call  self._impl.grab(monitor)"
+      ],
+      "mss.screenshot.ScreenShot.__init__": [
+        "mss.base 315:44 call  self.cls_image(img_data, monitor, size=size)",
+        "mss.base 318:44 call  self.cls_image(img_data, monitor)"
+      ],
+      "mss.windows.gdi.MSSImplGdi.grab": [
+        "mss.base 312:54 call  self._impl.grab(monitor)"
+      ]
+    },
+    "mss.base.MSS.monitors": {
+      "mss.darwin.MSSImplDarwin.monitors": [
+        "mss.base 348:53 call  self._impl.monitors()"
+      ],
+      "mss.linux.base.MSSImplXCBBase.monitors": [
+        "mss.base 348:53 call  self._impl.monitors()"
+      ],
+      "mss.linux.xlib.MSSImplXlib.monitors": [
+        "mss.base 348:53 call  self._impl.monitors()"
+      ],
+      "mss.windows.gdi.MSSImplGdi.monitors": [
+        "mss.base 348:53 call  self._impl.monitors()"
+      ]
+    },
+    "mss.base.MSS.primary_monitor": {
+      "<builtin>.dict.get": [
+        "mss.base 373:31 call  monitor.get(\"is_primary\", False)"
+      ],
+      "<builtin>.len": [
+        "mss.base 365:15 call  len(monitors)"
+      ],
+      "<builtin>.next": [
+        "mss.base 369:20 call  next( ( monitor for monitor in monitors[1:] # Skip the \"a..."
+      ],
+      "mss.base.MSS.monitors": [
+        "mss.base 364:25 getattr  self.monitors"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.base 367:34 call  ScreenShotError(msg)"
+      ]
+    },
+    "mss.base.MSS.save": {
+      "<builtin>.callable": [
+        "mss.base 405:28 call  callable(callback)",
+        "mss.base 421:24 call  callable(callback)"
+      ],
+      "<builtin>.enumerate": [
+        "mss.base 403:42 call  enumerate(monitors[1:], 1)"
+      ],
+      "<builtin>.str.format": [
+        "mss.base 404:38 call  output.format(mon=idx, date=datetime.now(UTC) if \"{date\" ...",
+        "mss.base 420:35 call  output.format(mon=mon, date=datetime.now(UTC) if \"{date\" ..."
+      ],
+      "datetime.datetime.now": [
+        "mss.base 404:65 call  datetime.now(UTC)",
+        "mss.base 420:62 call  datetime.now(UTC)"
+      ],
+      "mss.base.MSS.grab": [
+        "mss.base 407:32 call  self.grab(monitor)",
+        "mss.base 423:28 call  self.grab(monitor)"
+      ],
+      "mss.base.MSS.monitors": [
+        "mss.base 396:25 getattr  self.monitors"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.base 399:34 call  ScreenShotError(msg)",
+        "mss.base 418:38 call  ScreenShotError(msg)"
+      ],
+      "mss.screenshot.ScreenShot.rgb": [
+        "mss.base 408:28 getattr  sct.rgb",
+        "mss.base 424:24 getattr  sct.rgb"
+      ],
+      "mss.tools.to_png": [
+        "mss.base 408:23 call  to_png(sct.rgb, sct.size, level=self.compression_level, o...",
+        "mss.base 424:19 call  to_png(sct.rgb, sct.size, level=self.compression_level, o..."
+      ]
+    },
+    "mss.base.MSS.shot": {
+      "<builtin>.dict.get": [
+        "mss.base 431:35 call  kwargs.get(\"mon\", 1)"
+      ],
+      "<builtin>.next": [
+        "mss.base 432:20 call  next(self.save(**kwargs))"
+      ],
+      "mss.base.MSS.save": [
+        "mss.base 432:30 call  self.save(**kwargs)"
+      ]
+    },
+    "mss.base.MSSImplementation._cfactory": {
+      "<builtin>.getattr": [
+        "mss.base 128:23 call  getattr(attr, func)"
+      ]
+    },
+    "mss.base._PlatformSpecific.__init__": {
+      "<builtin>.str": [
+        "mss.base 58:31 call  str(sphinx_repr)"
+      ]
+    },
+    "mss.base._choose_impl": {
+      "<builtin>.str.lower": [
+        "mss.base 147:34 call  platform.system().lower()"
+      ],
+      "mss.darwin.MSSImplDarwin.__init__": [
+        "mss.base 152:29 call  MSSImplDarwin(**kwargs)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.base 167:26 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.choose_impl": [
+        "mss.base 158:33 call  choose_impl_linux(**kwargs)"
+      ],
+      "mss.windows.choose_impl": [
+        "mss.base 164:35 call  choose_impl_windows(**kwargs)"
+      ],
+      "platform.system": [
+        "mss.base 147:26 call  platform.system()"
+      ]
+    },
+    "mss.darwin": {
+      "ctypes.POINTER": [
+        "mss.darwin 110:53 call  POINTER(c_ubyte)",
+        "mss.darwin 113:58 call  POINTER(c_uint32)",
+        "mss.darwin 113:77 call  POINTER(c_uint32)"
+      ],
+      "mss.darwin.cgfloat": [
+        "mss.darwin 76:30 call  cgfloat()",
+        "mss.darwin 76:48 call  cgfloat()",
+        "mss.darwin 85:34 call  cgfloat()",
+        "mss.darwin 85:57 call  cgfloat()"
+      ]
+    },
+    "mss.darwin.CGPoint.__repr__": {
+      "<builtin>.type": [
+        "mss.darwin 79:23 call  type(self)"
+      ]
+    },
+    "mss.darwin.CGRect.__repr__": {
+      "<builtin>.type": [
+        "mss.darwin 97:23 call  type(self)"
+      ],
+      "mss.darwin.CGPoint.__repr__": [
+        "mss.darwin 97:40 format  {self.origin}"
+      ],
+      "mss.darwin.CGSize.__repr__": [
+        "mss.darwin 97:54 format  {self.size}"
+      ]
+    },
+    "mss.darwin.CGSize.__repr__": {
+      "<builtin>.type": [
+        "mss.darwin 88:23 call  type(self)"
+      ]
+    },
+    "mss.darwin.MSS.__init__": {
+      "<builtin>.super": [
+        "mss.darwin 65:14 call  super()"
+      ],
+      "mss.base.MSS.__init__": [
+        "mss.darwin 65:25 call  super().__init__(**kwargs)"
+      ],
+      "warnings.warn": [
+        "mss.darwin 60:22 call  warnings.warn( \"mss.darwin.MSS is deprecated and will be ..."
+      ]
+    },
+    "mss.darwin.MSSImplDarwin.__init__": {
+      "<builtin>.super": [
+        "mss.darwin 141:14 call  super()"
+      ],
+      "mss.base.MSSImplementation.__init__": [
+        "mss.darwin 141:25 call  super().__init__()"
+      ],
+      "mss.darwin.MSSImplDarwin._init_library": [
+        "mss.darwin 151:27 call  self._init_library()"
+      ],
+      "mss.darwin.MSSImplDarwin._set_cfunctions": [
+        "mss.darwin 152:29 call  self._set_cfunctions()"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.darwin 145:34 call  ScreenShotError(msg)"
+      ]
+    },
+    "mss.darwin.MSSImplDarwin._init_library": {
+      "<builtin>.float": [
+        "mss.darwin 156:24 call  float(\".\".join(mac_ver()[0].split(\".\")[:2]))"
+      ],
+      "<builtin>.str.join": [
+        "mss.darwin 156:33 call  \".\".join(mac_ver()[0].split(\".\")[:2])"
+      ],
+      "<builtin>.str.split": [
+        "mss.darwin 156:52 call  mac_ver()[0].split(\".\")"
+      ],
+      "ctypes.LibraryLoader.LoadLibrary": [
+        "mss.darwin 167:44 call  ctypes.cdll.LoadLibrary(coregraphics)"
+      ],
+      "ctypes.util.find_library": [
+        "mss.darwin 158:52 call  ctypes.util.find_library(\"CoreGraphics\")"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.darwin 165:34 call  ScreenShotError(msg)"
+      ],
+      "platform.mac_ver": [
+        "mss.darwin 156:41 call  mac_ver()"
+      ]
+    },
+    "mss.darwin.MSSImplDarwin._set_cfunctions": {
+      "<builtin>.dict.items": [
+        "mss.darwin 173:64 call  CFUNCTIONS.items()"
+      ],
+      "mss.base.MSSImplementation._cfactory": [
+        "mss.darwin 174:21 call  cfactory(attrs[attr], func, argtypes, restype)"
+      ]
+    },
+    "mss.darwin.MSSImplDarwin.grab": {
+      "<builtin>.bytearray": [
+        "mss.darwin 246:29 call  bytearray(raw.contents)",
+        "mss.darwin 254:36 call  bytearray()"
+      ],
+      "<builtin>.bytearray.extend": [
+        "mss.darwin 258:35 call  cropped.extend(data[start:end])"
+      ],
+      "<builtin>.range": [
+        "mss.darwin 255:33 call  range(height)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.darwin 232:49 call  core.CGWindowListCreateImage(rect, 1, 0, IMAGE_OPTIONS)",
+        "mss.darwin 237:37 call  core.CGImageGetWidth(image_ref)",
+        "mss.darwin 238:39 call  core.CGImageGetHeight(image_ref)",
+        "mss.darwin 241:47 call  core.CGImageGetDataProvider(image_ref)",
+        "mss.darwin 242:52 call  core.CGDataProviderCopyData(prov)",
+        "mss.darwin 243:45 call  core.CFDataGetBytePtr(copy_data)",
+        "mss.darwin 244:43 call  core.CFDataGetLength(copy_data)",
+        "mss.darwin 249:55 call  core.CGImageGetBytesPerRow(image_ref)",
+        "mss.darwin 250:58 call  core.CGImageGetBitsPerPixel(image_ref)",
+        "mss.darwin 262:31 call  core.CFRelease(copy_data)",
+        "mss.darwin 263:27 call  core.CFRelease(image_ref)"
+      ],
+      "ctypes.POINTER": [
+        "mss.darwin 245:48 call  POINTER(c_ubyte * buf_len)"
+      ],
+      "ctypes.Structure.__init__": [
+        "mss.darwin 230:22 call  CGRect((monitor[\"left\"], monitor[\"top\"]), (monitor[\"width..."
+      ],
+      "ctypes.cast": [
+        "mss.darwin 245:30 call  ctypes.cast(data_ref, POINTER(c_ubyte * buf_len))"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.darwin 235:34 call  ScreenShotError(msg)"
+      ]
+    },
+    "mss.darwin.MSSImplDarwin.monitors": {
+      "<builtin>.int": [
+        "mss.darwin 207:33 call  int_(rect.origin.x)",
+        "mss.darwin 208:32 call  int_(rect.origin.y)",
+        "mss.darwin 209:34 call  int_(width)",
+        "mss.darwin 210:35 call  int_(height)",
+        "mss.darwin 219:25 call  int_(all_monitors.origin.x)",
+        "mss.darwin 220:24 call  int_(all_monitors.origin.y)",
+        "mss.darwin 221:26 call  int_(all_monitors.size.width)",
+        "mss.darwin 222:27 call  int_(all_monitors.size.height)"
+      ],
+      "<builtin>.list.append": [
+        "mss.darwin 187:24 call  monitors.append({})",
+        "mss.darwin 205:28 call  monitors.append( { \"left\": int_(rect.origin.x), \"top\": in..."
+      ],
+      "<builtin>.range": [
+        "mss.darwin 193:25 call  range(display_count.value)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.darwin 192:36 call  core.CGGetActiveDisplayList(self.max_displays, active_dis...",
+        "mss.darwin 195:40 call  core.CGDisplayBounds(display)",
+        "mss.darwin 196:42 call  core.CGRectStandardize(rect)",
+        "mss.darwin 202:38 call  core.CGDisplayRotation(display)",
+        "mss.darwin 215:44 call  core.CGRectUnion(all_monitors, rect)"
+      ],
+      "ctypes.Structure.__init__": [
+        "mss.darwin 186:30 call  CGRect()"
+      ],
+      "ctypes.byref": [
+        "mss.darwin 192:85 call  ctypes.byref(display_count)"
+      ],
+      "ctypes.c_uint32": [
+        "mss.darwin 190:33 call  c_uint32(0)"
+      ]
+    },
+    "mss.exception.ScreenShotError.__init__": {
+      "<builtin>.Exception.__init__": [
+        "mss.exception 13:25 call  super().__init__(message)"
+      ],
+      "<builtin>.super": [
+        "mss.exception 13:14 call  super()"
+      ]
+    },
+    "mss.factory.mss": {
+      "mss.base.MSS.__init__": [
+        "mss.factory 22:15 call  MSS(**kwargs)"
+      ],
+      "warnings.warn": [
+        "mss.factory 17:18 call  warnings.warn( \"mss.mss is deprecated and will be removed..."
+      ]
+    },
+    "mss.linux.MSS.__init__": {
+      "<builtin>.super": [
+        "mss.linux 43:14 call  super()"
+      ],
+      "mss.base.MSS.__init__": [
+        "mss.linux 43:25 call  super().__init__(**kwargs)"
+      ],
+      "warnings.warn": [
+        "mss.linux 38:22 call  warnings.warn( \"mss.linux.MSS is deprecated and will be r..."
+      ]
+    },
+    "mss.linux.base": {
+      "<builtin>.staticmethod": [
+        "mss.linux.base 284:6 decorator  @staticmethod"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase.__init__": {
+      "<builtin>.isinstance": [
+        "mss.linux.base 50:24 call  isinstance(display, str)"
+      ],
+      "<builtin>.str.encode": [
+        "mss.linux.base 51:37 call  display.encode(\"utf-8\")"
+      ],
+      "<builtin>.super": [
+        "mss.linux.base 46:14 call  super()"
+      ],
+      "mss.base.MSSImplementation.__init__": [
+        "mss.linux.base 46:25 call  super().__init__(with_cursor=with_cursor)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 79:34 call  ScreenShotError(msg)",
+        "mss.linux.base 83:34 call  ScreenShotError(msg)",
+        "mss.linux.base 90:34 call  ScreenShotError(msg)",
+        "mss.linux.base 97:34 call  ScreenShotError(msg)",
+        "mss.linux.base 102:34 call  ScreenShotError(msg)",
+        "mss.linux.base 110:34 call  ScreenShotError(msg)",
+        "mss.linux.base 116:34 call  ScreenShotError(msg)",
+        "mss.linux.base 119:34 call  ScreenShotError(msg)",
+        "mss.linux.base 130:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcb.connect": [
+        "mss.linux.base 54:49 call  xcb.connect(display)"
+      ],
+      "mss.linux.xcb.get_setup": [
+        "mss.linux.base 57:34 call  xcb.get_setup(self.conn)"
+      ],
+      "mss.linux.xcbgen.Visualid.__eq__": [
+        "mss.linux.base 112:38 op  visual_info.visual_id == self.drawable_visual_id"
+      ],
+      "mss.linux.xcbgen.depth_visuals": [
+        "mss.linux.base 111:45 call  xcb.depth_visuals(xcb_depth)"
+      ],
+      "mss.linux.xcbgen.screen_allowed_depths": [
+        "mss.linux.base 105:51 call  xcb.screen_allowed_depths(self.pref_screen)"
+      ],
+      "mss.linux.xcbgen.setup_pixmap_formats": [
+        "mss.linux.base 85:48 call  xcb.setup_pixmap_formats(xcb_setup)"
+      ],
+      "mss.linux.xcbgen.setup_roots": [
+        "mss.linux.base 58:34 call  xcb.setup_roots(xcb_setup)"
+      ],
+      "mss.linux.xcbhelpers.XID.__eq__": [
+        "mss.linux.base 73:26 op  self.root == self.drawable"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._choose_randr_output": {
+      "<builtin>.len": [
+        "mss.linux.base 288:15 call  len(outputs)"
+      ],
+      "mss.linux.xcbhelpers.XID.__eq__": [
+        "mss.linux.base 294:49 op  primary_output in outputs"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._cursor_check_xfixes": {
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 383:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcb.get_extension_data": [
+        "mss.linux.base 385:49 call  xcb.get_extension_data(self.conn, LIB.xfixes_id)"
+      ],
+      "mss.linux.xcbgen.xfixes_query_version": [
+        "mss.linux.base 389:41 call  xcb.xfixes_query_version(self.conn, xcb.XFIXES_MAJOR_VERS..."
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._grab_xgetimage": {
+      "<builtin>.bytearray": [
+        "mss.linux.base 456:29 call  bytearray(img_data_arr)"
+      ],
+      "<builtin>.hex": [
+        "mss.linux.base 462:54 call  hex(self.drawable_visual_id.value)",
+        "mss.linux.base 463:45 call  hex(img_reply.visual.value)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 440:34 call  ScreenShotError(msg)",
+        "mss.linux.base 465:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbgen.Visualid.__eq__": [
+        "mss.linux.base 458:71 op  img_reply.visual != self.drawable_visual_id"
+      ],
+      "mss.linux.xcbgen.get_image": [
+        "mss.linux.base 442:34 call  xcb.get_image( self.conn, xcb.ImageFormat.ZPixmap, self.d..."
+      ],
+      "mss.linux.xcbgen.get_image_data": [
+        "mss.linux.base 454:42 call  xcb.get_image_data(img_reply)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._monitors_from_randr_crtcs": {
+      "<builtin>.hasattr": [
+        "mss.linux.base 343:19 call  hasattr(LIB.randr, \"xcb_randr_get_screen_resources_current\")"
+      ],
+      "<builtin>.list.append": [
+        "mss.linux.base 371:28 call  monitors.append(monitor)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 338:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._choose_randr_output": [
+        "mss.linux.base 363:54 call  self._choose_randr_output(outputs, primary_output)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._randr_output_ids": [
+        "mss.linux.base 364:46 call  self._randr_output_ids(chosen_output, timestamp, edid_atom)"
+      ],
+      "mss.linux.xcbgen.randr_get_crtc_info": [
+        "mss.linux.base 352:48 call  xcb.randr_get_crtc_info(self.conn, crtc, timestamp)"
+      ],
+      "mss.linux.xcbgen.randr_get_crtc_info_outputs": [
+        "mss.linux.base 362:54 call  xcb.randr_get_crtc_info_outputs(crtc_info)"
+      ],
+      "mss.linux.xcbgen.randr_get_screen_resources": [
+        "mss.linux.base 347:62 call  xcb.randr_get_screen_resources(self.conn, self.drawable)"
+      ],
+      "mss.linux.xcbgen.randr_get_screen_resources_crtcs": [
+        "mss.linux.base 348:57 call  xcb.randr_get_screen_resources_crtcs(screen_resources)"
+      ],
+      "mss.linux.xcbgen.randr_get_screen_resources_current": [
+        "mss.linux.base 344:70 call  xcb.randr_get_screen_resources_current(self.conn, self.dr..."
+      ],
+      "mss.linux.xcbgen.randr_get_screen_resources_current_crtcs": [
+        "mss.linux.base 345:65 call  xcb.randr_get_screen_resources_current_crtcs(screen_resou..."
+      ],
+      "mss.linux.xcbhelpers.XID.__eq__": [
+        "mss.linux.base 369:55 op  chosen_output == primary_output"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._monitors_from_randr_monitors": {
+      "<builtin>.bool": [
+        "mss.linux.base 317:35 call  bool(randr_monitor.primary)"
+      ],
+      "<builtin>.list.append": [
+        "mss.linux.base 325:28 call  monitors.append(monitor)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 301:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._choose_randr_output": [
+        "mss.linux.base 322:58 call  self._choose_randr_output(outputs, primary_output)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._randr_output_ids": [
+        "mss.linux.base 323:50 call  self._randr_output_ids(chosen_output, timestamp, edid_atom)"
+      ],
+      "mss.linux.xcbgen.randr_get_monitors": [
+        "mss.linux.base 305:48 call  xcb.randr_get_monitors(self.conn, self.drawable, 1)"
+      ],
+      "mss.linux.xcbgen.randr_get_monitors_monitors": [
+        "mss.linux.base 307:61 call  xcb.randr_get_monitors_monitors(monitors_reply)"
+      ],
+      "mss.linux.xcbgen.randr_monitor_info_outputs": [
+        "mss.linux.base 321:57 call  xcb.randr_monitor_info_outputs(randr_monitor)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._randr_get_edid_atom": {
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 220:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcb.intern_atom": [
+        "mss.linux.base 222:36 call  xcb.intern_atom(self.conn, \"EDID\", only_if_exists=True)",
+        "mss.linux.base 227:31 call  xcb.intern_atom(self.conn, \"EdidData\", only_if_exists=True)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._randr_get_primary_output": {
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 208:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbgen.randr_get_output_primary": [
+        "mss.linux.base 211:63 call  xcb.randr_get_output_primary(self.conn, self.drawable)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._randr_get_version": {
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 196:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcb.get_extension_data": [
+        "mss.linux.base 198:48 call  xcb.get_extension_data(self.conn, LIB.randr_id)"
+      ],
+      "mss.linux.xcbgen.randr_query_version": [
+        "mss.linux.base 202:53 call  xcb.randr_query_version(self.conn, xcb.RANDR_MAJOR_VERSIO..."
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._randr_output_ids": {
+      "<builtin>.bytes": [
+        "mss.linux.base 248:29 call  bytes(output_name_arr)",
+        "mss.linux.base 262:35 call  bytes(xcb.randr_get_output_property_data(edid_prop))"
+      ],
+      "<builtin>.bytes.decode": [
+        "mss.linux.base 248:53 call  bytes(output_name_arr).decode(\"utf_8\", errors=\"replace\")"
+      ],
+      "<builtin>.dict.get": [
+        "mss.linux.base 264:50 call  edid_data.get(\"display_name\")",
+        "mss.linux.base 268:47 call  edid_data.get(\"id_legacy\")",
+        "mss.linux.base 270:51 call  edid_data.get(\"serial_number\")",
+        "mss.linux.base 272:54 call  edid_data.get(\"manufacture_year\")",
+        "mss.linux.base 273:58 call  edid_data.get(\"manufacture_week\")",
+        "mss.linux.base 277:48 call  edid_data.get(\"model_year\")"
+      ],
+      "<builtin>.str": [
+        "mss.linux.base 271:48 call  str(serial_number)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 238:34 call  ScreenShotError(msg)",
+        "mss.linux.base 243:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbgen.randr_get_output_info": [
+        "mss.linux.base 240:48 call  xcb.randr_get_output_info(self.conn, output, timestamp)"
+      ],
+      "mss.linux.xcbgen.randr_get_output_info_name": [
+        "mss.linux.base 247:57 call  xcb.randr_get_output_info_name(output_info)"
+      ],
+      "mss.linux.xcbgen.randr_get_output_property": [
+        "mss.linux.base 251:54 call  xcb.randr_get_output_property( self.conn, # connection ou..."
+      ],
+      "mss.linux.xcbgen.randr_get_output_property_data": [
+        "mss.linux.base 262:70 call  xcb.randr_get_output_property_data(edid_prop)"
+      ],
+      "mss.tools.parse_edid": [
+        "mss.linux.base 263:39 call  parse_edid(edid_block)"
+      ],
+      "urllib.parse.urlencode": [
+        "mss.linux.base 280:48 call  urlencode(edid_params)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase._root_monitor": {
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 183:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbgen.get_geometry": [
+        "mss.linux.base 185:37 call  xcb.get_geometry(self.conn, self.root)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase.close": {
+      "mss.linux.xcb.disconnect": [
+        "mss.linux.base 135:27 call  xcb.disconnect(self.conn)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase.cursor": {
+      "<builtin>.bytearray": [
+        "mss.linux.base 421:25 call  bytearray(data_arr)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 404:34 call  ScreenShotError(msg)",
+        "mss.linux.base 410:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._cursor_check_xfixes": [
+        "mss.linux.base 407:59 call  self._cursor_check_xfixes()"
+      ],
+      "mss.linux.xcbgen.xfixes_get_cursor_image": [
+        "mss.linux.base 412:49 call  xcb.xfixes_get_cursor_image(self.conn)"
+      ],
+      "mss.linux.xcbgen.xfixes_get_cursor_image_cursor_image": [
+        "mss.linux.base 420:60 call  xcb.xfixes_get_cursor_image_cursor_image(cursor_img)"
+      ],
+      "mss.screenshot.ScreenShot.__init__": [
+        "mss.linux.base 425:26 call  ScreenShot(data, region)"
+      ]
+    },
+    "mss.linux.base.MSSImplXCBBase.monitors": {
+      "<builtin>.list.append": [
+        "mss.linux.base 152:24 call  monitors.append(self._root_monitor())"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.base 148:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._monitors_from_randr_crtcs": [
+        "mss.linux.base 176:56 call  self._monitors_from_randr_crtcs(randr_version, primary_ou..."
+      ],
+      "mss.linux.base.MSSImplXCBBase._monitors_from_randr_monitors": [
+        "mss.linux.base 174:59 call  self._monitors_from_randr_monitors(primary_output, edid_a..."
+      ],
+      "mss.linux.base.MSSImplXCBBase._randr_get_edid_atom": [
+        "mss.linux.base 171:46 call  self._randr_get_edid_atom()"
+      ],
+      "mss.linux.base.MSSImplXCBBase._randr_get_primary_output": [
+        "mss.linux.base 170:56 call  self._randr_get_primary_output(randr_version)"
+      ],
+      "mss.linux.base.MSSImplXCBBase._randr_get_version": [
+        "mss.linux.base 154:48 call  self._randr_get_version()"
+      ],
+      "mss.linux.base.MSSImplXCBBase._root_monitor": [
+        "mss.linux.base 152:43 call  self._root_monitor()"
+      ]
+    },
+    "mss.linux.choose_impl": {
+      "<builtin>.str.lower": [
+        "mss.linux 76:28 call  backend.lower()"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux 94:26 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.base.MSSImplXCBBase.__init__": [
+        "mss.linux 87:32 call  MSSImplXGetImage(**kwargs)"
+      ],
+      "mss.linux.xlib.MSSImplXlib.__init__": [
+        "mss.linux 80:27 call  MSSImplXlib(**kwargs)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage.__init__": [
+        "mss.linux 91:35 call  MSSImplXShmGetImage(**kwargs)"
+      ]
+    },
+    "mss.linux.xcb": {
+      "ctypes.c_uint32.__init__": [
+        "mss.linux.xcb 158:16 call  Atom(0)",
+        "mss.linux.xcb 162:20 call  Atom(1)",
+        "mss.linux.xcb 163:22 call  Atom(2)",
+        "mss.linux.xcb 164:16 call  Atom(3)",
+        "mss.linux.xcb 165:17 call  Atom(4)",
+        "mss.linux.xcb 166:19 call  Atom(5)",
+        "mss.linux.xcb 167:21 call  Atom(6)",
+        "mss.linux.xcb 168:21 call  Atom(7)",
+        "mss.linux.xcb 169:19 call  Atom(8)",
+        "mss.linux.xcb 170:24 call  Atom(9)",
+        "mss.linux.xcb 171:24 call  Atom(10)",
+        "mss.linux.xcb 172:24 call  Atom(11)",
+        "mss.linux.xcb 173:24 call  Atom(12)",
+        "mss.linux.xcb 174:24 call  Atom(13)",
+        "mss.linux.xcb 175:24 call  Atom(14)",
+        "mss.linux.xcb 176:24 call  Atom(15)",
+        "mss.linux.xcb 177:24 call  Atom(16)",
+        "mss.linux.xcb 178:21 call  Atom(17)",
+        "mss.linux.xcb 179:17 call  Atom(18)",
+        "mss.linux.xcb 180:20 call  Atom(19)",
+        "mss.linux.xcb 181:19 call  Atom(20)",
+        "mss.linux.xcb 182:18 call  Atom(21)",
+        "mss.linux.xcb 183:22 call  Atom(22)",
+        "mss.linux.xcb 184:29 call  Atom(23)",
+        "mss.linux.xcb 185:26 call  Atom(24)",
+        "mss.linux.xcb 186:25 call  Atom(25)",
+        "mss.linux.xcb 187:25 call  Atom(26)",
+        "mss.linux.xcb 188:28 call  Atom(27)",
+        "mss.linux.xcb 189:25 call  Atom(28)",
+        "mss.linux.xcb 190:26 call  Atom(29)",
+        "mss.linux.xcb 191:24 call  Atom(30)",
+        "mss.linux.xcb 192:19 call  Atom(31)",
+        "mss.linux.xcb 193:21 call  Atom(32)",
+        "mss.linux.xcb 194:19 call  Atom(33)",
+        "mss.linux.xcb 195:23 call  Atom(34)",
+        "mss.linux.xcb 196:21 call  Atom(35)",
+        "mss.linux.xcb 197:30 call  Atom(36)",
+        "mss.linux.xcb 198:25 call  Atom(37)",
+        "mss.linux.xcb 199:25 call  Atom(38)",
+        "mss.linux.xcb 200:20 call  Atom(39)",
+        "mss.linux.xcb 201:28 call  Atom(40)",
+        "mss.linux.xcb 202:26 call  Atom(41)",
+        "mss.linux.xcb 203:26 call  Atom(42)",
+        "mss.linux.xcb 204:22 call  Atom(43)",
+        "mss.linux.xcb 205:23 call  Atom(44)",
+        "mss.linux.xcb 206:22 call  Atom(45)",
+        "mss.linux.xcb 207:22 call  Atom(46)",
+        "mss.linux.xcb 208:26 call  Atom(47)",
+        "mss.linux.xcb 209:26 call  Atom(48)",
+        "mss.linux.xcb 210:24 call  Atom(49)",
+        "mss.linux.xcb 211:24 call  Atom(50)",
+        "mss.linux.xcb 212:31 call  Atom(51)",
+        "mss.linux.xcb 213:32 call  Atom(52)",
+        "mss.linux.xcb 214:29 call  Atom(53)",
+        "mss.linux.xcb 215:30 call  Atom(54)",
+        "mss.linux.xcb 216:25 call  Atom(55)",
+        "mss.linux.xcb 217:21 call  Atom(56)",
+        "mss.linux.xcb 218:23 call  Atom(57)",
+        "mss.linux.xcb 219:19 call  Atom(58)",
+        "mss.linux.xcb 220:23 call  Atom(59)",
+        "mss.linux.xcb 221:23 call  Atom(60)",
+        "mss.linux.xcb 222:22 call  Atom(61)",
+        "mss.linux.xcb 223:19 call  Atom(62)",
+        "mss.linux.xcb 224:22 call  Atom(63)",
+        "mss.linux.xcb 225:24 call  Atom(64)",
+        "mss.linux.xcb 226:22 call  Atom(65)",
+        "mss.linux.xcb 227:23 call  Atom(66)",
+        "mss.linux.xcb 228:21 call  Atom(67)",
+        "mss.linux.xcb 229:29 call  Atom(68)"
+      ],
+      "typing.overload": [
+        "mss.linux.xcb 237:2 decorator  @overload",
+        "mss.linux.xcb 244:2 decorator  @overload",
+        "mss.linux.xcb 251:2 decorator  @overload"
+      ]
+    },
+    "mss.linux.xcb.connect": {
+      "<builtin>.dict.get": [
+        "mss.linux.xcb 361:42 call  XCB_CONN_ERRMSG.get(conn_err)"
+      ],
+      "<builtin>.isinstance": [
+        "mss.linux.xcb 348:18 call  isinstance(display, str)"
+      ],
+      "<builtin>.str.encode": [
+        "mss.linux.xcb 349:33 call  display.encode(\"utf-8\")"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 353:33 call  LIB.xcb.xcb_connect(display, pref_screen_num)",
+        "mss.linux.xcb 356:48 call  LIB.xcb.xcb_connection_has_error(conn_p)",
+        "mss.linux.xcb 359:31 call  LIB.xcb.xcb_disconnect(conn_p)"
+      ],
+      "ctypes.addressof": [
+        "mss.linux.xcb 371:26 call  addressof(conn_p.contents)"
+      ],
+      "ctypes.c_int": [
+        "mss.linux.xcb 352:28 call  c_int()"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xcb 363:21 call  XError(msg)"
+      ],
+      "mss.linux.xcb.initialize": [
+        "mss.linux.xcb 351:15 call  initialize()"
+      ],
+      "mss.linux.xcb.prefetch_extension_data": [
+        "mss.linux.xcb 366:28 call  prefetch_extension_data(conn_p, LIB.randr_id)",
+        "mss.linux.xcb 367:28 call  prefetch_extension_data(conn_p, LIB.render_id)",
+        "mss.linux.xcb 368:28 call  prefetch_extension_data(conn_p, LIB.shm_id)",
+        "mss.linux.xcb 369:28 call  prefetch_extension_data(conn_p, LIB.xfixes_id)"
+      ]
+    },
+    "mss.linux.xcb.disconnect": {
+      "<builtin>.dict.get": [
+        "mss.linux.xcb 390:42 call  XCB_CONN_ERRMSG.get(conn_err)"
+      ],
+      "<builtin>.isinstance": [
+        "mss.linux.xcb 377:18 call  isinstance(xcb_conn, _Pointer)"
+      ],
+      "contextlib.suppress": [
+        "mss.linux.xcb 382:29 call  contextlib.suppress(KeyError)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 385:48 call  LIB.xcb.xcb_connection_has_error(xcb_conn)",
+        "mss.linux.xcb 387:27 call  LIB.xcb.xcb_disconnect(xcb_conn)"
+      ],
+      "ctypes.addressof": [
+        "mss.linux.xcb 383:34 call  addressof(xcb_conn)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xcb 392:21 call  XError(msg)"
+      ]
+    },
+    "mss.linux.xcb.generate_id": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 327:35 call  LIB.xcb.xcb_generate_id(xcb_conn)"
+      ]
+    },
+    "mss.linux.xcb.get_extension_data": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 307:45 call  LIB.xcb.xcb_get_extension_data(xcb_conn, ext)"
+      ]
+    },
+    "mss.linux.xcb.get_setup": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 336:36 call  LIB.xcb.xcb_get_setup(xcb_conn)"
+      ]
+    },
+    "mss.linux.xcb.initialize": {
+      "mss.linux.xcbhelpers.LibContainer.initialize": [
+        "mss.linux.xcb 344:19 call  LIB.initialize(callbacks=[xcbgen.initialize])"
+      ]
+    },
+    "mss.linux.xcb.intern_atom": {
+      "<builtin>.isinstance": [
+        "mss.linux.xcb 269:18 call  isinstance(xcb_conn, _Pointer)"
+      ],
+      "<builtin>.len": [
+        "mss.linux.xcb 285:79 call  len(name_encoded)"
+      ],
+      "<builtin>.str.encode": [
+        "mss.linux.xcb 284:31 call  name.encode(\"latin_1\", errors=\"strict\")"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 285:37 call  LIB.xcb.xcb_intern_atom(xcb_conn, 1 if only_if_exists els..."
+      ],
+      "ctypes.addressof": [
+        "mss.linux.xcb 272:26 call  addressof(xcb_conn)"
+      ],
+      "ctypes.c_uint32.__init__": [
+        "mss.linux.xcb 294:16 call  Atom(atom_as_xid.value)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xcb 278:21 call  XError(msg)",
+        "mss.linux.xcb 291:25 call  XError(msg)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcb 286:31 call  cookie.reply(xcb_conn)"
+      ]
+    },
+    "mss.linux.xcb.prefetch_extension_data": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcb 319:40 call  LIB.xcb.xcb_prefetch_extension_data(xcb_conn, ext)"
+      ]
+    },
+    "mss.linux.xcbgen": {
+      "ctypes.POINTER": [
+        "mss.linux.xcbgen 164:33 call  POINTER(Depth)",
+        "mss.linux.xcbgen 189:33 call  POINTER(Screen)",
+        "mss.linux.xcbgen 218:33 call  POINTER(Setup)",
+        "mss.linux.xcbgen 431:33 call  POINTER(RandrMonitorInfo)",
+        "mss.linux.xcbgen 504:33 call  POINTER(RenderPictdepth)",
+        "mss.linux.xcbgen 515:33 call  POINTER(RenderPictscreen)"
+      ]
+    },
+    "mss.linux.xcbgen.Keycode.__eq__": {
+      "<builtin>.isinstance": [
+        "mss.linux.xcbgen 106:22 call  isinstance(other, Keycode)"
+      ]
+    },
+    "mss.linux.xcbgen.Keycode.__hash__": {
+      "<builtin>.hash": [
+        "mss.linux.xcbgen 111:20 call  hash(self.value)"
+      ]
+    },
+    "mss.linux.xcbgen.Timestamp.__eq__": {
+      "<builtin>.isinstance": [
+        "mss.linux.xcbgen 283:22 call  isinstance(other, Timestamp)"
+      ]
+    },
+    "mss.linux.xcbgen.Timestamp.__hash__": {
+      "<builtin>.hash": [
+        "mss.linux.xcbgen 288:20 call  hash(self.value)"
+      ]
+    },
+    "mss.linux.xcbgen.Visualid.__eq__": {
+      "<builtin>.isinstance": [
+        "mss.linux.xcbgen 133:22 call  isinstance(other, Visualid)"
+      ]
+    },
+    "mss.linux.xcbgen.Visualid.__hash__": {
+      "<builtin>.hash": [
+        "mss.linux.xcbgen 138:20 call  hash(self.value)"
+      ]
+    },
+    "mss.linux.xcbgen.depth_visuals": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 604:26 call  array_from_xcb(LIB.xcb.xcb_depth_visuals, LIB.xcb.xcb_dep..."
+      ]
+    },
+    "mss.linux.xcbgen.get_geometry": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 774:36 call  LIB.xcb.xcb_get_geometry(c, drawable)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 774:55 call  LIB.xcb.xcb_get_geometry(c, drawable).reply(c)"
+      ]
+    },
+    "mss.linux.xcbgen.get_image": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 787:33 call  LIB.xcb.xcb_get_image(c, format_, drawable, x, y, width, ..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 787:94 call  LIB.xcb.xcb_get_image(c, format_, drawable, x, y, width, ..."
+      ]
+    },
+    "mss.linux.xcbgen.get_image_data": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 624:26 call  array_from_xcb(LIB.xcb.xcb_get_image_data, LIB.xcb.xcb_ge..."
+      ]
+    },
+    "mss.linux.xcbgen.get_property": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 799:36 call  LIB.xcb.xcb_get_property(c, delete, window, property_, ty..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 799:105 call  LIB.xcb.xcb_get_property(c, delete, window, property_, ty..."
+      ]
+    },
+    "mss.linux.xcbgen.get_property_value": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 628:26 call  array_from_xcb(LIB.xcb.xcb_get_property_value, LIB.xcb.xc..."
+      ]
+    },
+    "mss.linux.xcbgen.initialize": {
+      "ctypes.POINTER": [
+        "mss.linux.xcbgen 905:47 call  POINTER(DepthIterator)",
+        "mss.linux.xcbgen 907:48 call  POINTER(ScreenIterator)",
+        "mss.linux.xcbgen 909:47 call  POINTER(SetupIterator)",
+        "mss.linux.xcbgen 911:62 call  POINTER(RandrMonitorInfoIterator)",
+        "mss.linux.xcbgen 913:61 call  POINTER(RenderPictdepthIterator)",
+        "mss.linux.xcbgen 915:62 call  POINTER(RenderPictscreenIterator)",
+        "mss.linux.xcbgen 917:50 call  POINTER(Depth)",
+        "mss.linux.xcbgen 918:48 call  POINTER(Visualtype)",
+        "mss.linux.xcbgen 919:57 call  POINTER(Depth)",
+        "mss.linux.xcbgen 921:67 call  POINTER(Screen)",
+        "mss.linux.xcbgen 923:49 call  POINTER(Setup)",
+        "mss.linux.xcbgen 924:47 call  POINTER(c_char)",
+        "mss.linux.xcbgen 925:56 call  POINTER(Setup)",
+        "mss.linux.xcbgen 927:57 call  POINTER(Setup)",
+        "mss.linux.xcbgen 928:55 call  POINTER(Format)",
+        "mss.linux.xcbgen 929:64 call  POINTER(Setup)",
+        "mss.linux.xcbgen 931:57 call  POINTER(Setup)",
+        "mss.linux.xcbgen 933:51 call  POINTER(GetImageReply)",
+        "mss.linux.xcbgen 934:49 call  POINTER(c_uint8)",
+        "mss.linux.xcbgen 935:58 call  POINTER(GetImageReply)",
+        "mss.linux.xcbgen 937:55 call  POINTER(GetPropertyReply)",
+        "mss.linux.xcbgen 938:53 call  POINTER(c_char)",
+        "mss.linux.xcbgen 939:62 call  POINTER(GetPropertyReply)",
+        "mss.linux.xcbgen 941:71 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 942:69 call  POINTER(RandrCrtc)",
+        "mss.linux.xcbgen 943:78 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 945:73 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 946:71 call  POINTER(RandrOutput)",
+        "mss.linux.xcbgen 947:80 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 949:71 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 950:69 call  POINTER(RandrModeInfo)",
+        "mss.linux.xcbgen 951:78 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 953:71 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 954:69 call  POINTER(c_uint8)",
+        "mss.linux.xcbgen 955:78 call  POINTER(RandrGetScreenResourcesReply)",
+        "mss.linux.xcbgen 957:79 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 958:77 call  POINTER(RandrCrtc)",
+        "mss.linux.xcbgen 960:16 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 963:81 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 964:79 call  POINTER(RandrOutput)",
+        "mss.linux.xcbgen 966:16 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 969:79 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 970:77 call  POINTER(RandrModeInfo)",
+        "mss.linux.xcbgen 972:16 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 975:79 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 976:77 call  POINTER(c_uint8)",
+        "mss.linux.xcbgen 978:16 call  POINTER(RandrGetScreenResourcesCurrentReply)",
+        "mss.linux.xcbgen 981:66 call  POINTER(RandrGetCrtcInfoReply)",
+        "mss.linux.xcbgen 982:64 call  POINTER(RandrOutput)",
+        "mss.linux.xcbgen 983:73 call  POINTER(RandrGetCrtcInfoReply)",
+        "mss.linux.xcbgen 985:67 call  POINTER(RandrGetCrtcInfoReply)",
+        "mss.linux.xcbgen 986:65 call  POINTER(RandrOutput)",
+        "mss.linux.xcbgen 987:74 call  POINTER(RandrGetCrtcInfoReply)",
+        "mss.linux.xcbgen 989:66 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 990:64 call  POINTER(RandrCrtc)",
+        "mss.linux.xcbgen 991:73 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 993:66 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 994:64 call  POINTER(RandrMode)",
+        "mss.linux.xcbgen 995:73 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 997:67 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 998:65 call  POINTER(RandrOutput)",
+        "mss.linux.xcbgen 999:74 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 1001:65 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 1002:63 call  POINTER(c_uint8)",
+        "mss.linux.xcbgen 1003:72 call  POINTER(RandrGetOutputInfoReply)",
+        "mss.linux.xcbgen 1005:69 call  POINTER(RandrGetOutputPropertyReply)",
+        "mss.linux.xcbgen 1006:67 call  POINTER(c_uint8)",
+        "mss.linux.xcbgen 1007:76 call  POINTER(RandrGetOutputPropertyReply)",
+        "mss.linux.xcbgen 1009:65 call  POINTER(RandrMonitorInfo)",
+        "mss.linux.xcbgen 1010:63 call  POINTER(RandrOutput)",
+        "mss.linux.xcbgen 1011:72 call  POINTER(RandrMonitorInfo)",
+        "mss.linux.xcbgen 1013:75 call  POINTER(RandrGetMonitorsReply)",
+        "mss.linux.xcbgen 1015:64 call  POINTER(RenderPictdepth)",
+        "mss.linux.xcbgen 1016:62 call  POINTER(RenderPictvisual)",
+        "mss.linux.xcbgen 1017:71 call  POINTER(RenderPictdepth)",
+        "mss.linux.xcbgen 1019:73 call  POINTER(RenderPictscreen)",
+        "mss.linux.xcbgen 1021:73 call  POINTER(RenderQueryPictFormatsReply)",
+        "mss.linux.xcbgen 1022:71 call  POINTER(RenderPictforminfo)",
+        "mss.linux.xcbgen 1023:80 call  POINTER(RenderQueryPictFormatsReply)",
+        "mss.linux.xcbgen 1025:82 call  POINTER(RenderQueryPictFormatsReply)",
+        "mss.linux.xcbgen 1027:75 call  POINTER(RenderQueryPictFormatsReply)",
+        "mss.linux.xcbgen 1028:73 call  POINTER(c_uint32)",
+        "mss.linux.xcbgen 1029:82 call  POINTER(RenderQueryPictFormatsReply)",
+        "mss.linux.xcbgen 1031:76 call  POINTER(XfixesGetCursorImageReply)",
+        "mss.linux.xcbgen 1032:74 call  POINTER(c_uint32)",
+        "mss.linux.xcbgen 1033:83 call  POINTER(XfixesGetCursorImageReply)",
+        "mss.linux.xcbgen 1035:65 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1035:86 call  POINTER(ShmCreateSegmentReply)",
+        "mss.linux.xcbgen 1036:63 call  POINTER(c_int)",
+        "mss.linux.xcbgen 1037:68 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1041:17 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1047:17 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1050:57 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1053:55 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1056:62 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1061:17 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1065:55 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1068:57 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1071:60 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1076:17 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1080:54 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1083:57 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1086:62 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1088:73 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1092:17 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1095:58 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1098:52 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1100:55 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1103:57 call  POINTER(Connection)",
+        "mss.linux.xcbgen 1106:60 call  POINTER(Connection)"
+      ],
+      "mss.linux.xcbhelpers.initialize_xcb_typed_func": [
+        "mss.linux.xcbgen 1037:30 call  initialize_xcb_typed_func(LIB.xcb, \"xcb_get_geometry\", [P...",
+        "mss.linux.xcbgen 1038:30 call  initialize_xcb_typed_func( LIB.xcb, \"xcb_get_image\", [POI...",
+        "mss.linux.xcbgen 1044:30 call  initialize_xcb_typed_func( LIB.xcb, \"xcb_get_property\", [...",
+        "mss.linux.xcbgen 1052:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_query_ve...",
+        "mss.linux.xcbgen 1055:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_scre...",
+        "mss.linux.xcbgen 1058:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_scre...",
+        "mss.linux.xcbgen 1064:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_crtc...",
+        "mss.linux.xcbgen 1067:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_outp...",
+        "mss.linux.xcbgen 1070:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_outp...",
+        "mss.linux.xcbgen 1073:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_outp...",
+        "mss.linux.xcbgen 1079:30 call  initialize_xcb_typed_func( LIB.randr, \"xcb_randr_get_moni...",
+        "mss.linux.xcbgen 1082:30 call  initialize_xcb_typed_func( LIB.render, \"xcb_render_query_...",
+        "mss.linux.xcbgen 1085:30 call  initialize_xcb_typed_func( LIB.render, \"xcb_render_query_...",
+        "mss.linux.xcbgen 1088:30 call  initialize_xcb_typed_func(LIB.shm, \"xcb_shm_query_version...",
+        "mss.linux.xcbgen 1089:30 call  initialize_xcb_typed_func( LIB.shm, \"xcb_shm_get_image\", ...",
+        "mss.linux.xcbgen 1097:30 call  initialize_xcb_typed_func( LIB.shm, \"xcb_shm_create_segme...",
+        "mss.linux.xcbgen 1102:30 call  initialize_xcb_typed_func( LIB.xfixes, \"xcb_xfixes_query_...",
+        "mss.linux.xcbgen 1105:30 call  initialize_xcb_typed_func( LIB.xfixes, \"xcb_xfixes_get_cu..."
+      ]
+    },
+    "mss.linux.xcbgen.no_operation": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 803:44 call  LIB.xcb.xcb_no_operation_checked(c)"
+      ],
+      "mss.linux.xcbhelpers.VoidCookie.check": [
+        "mss.linux.xcbgen 803:53 call  LIB.xcb.xcb_no_operation_checked(c).check(c)"
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_crtc_info": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 821:45 call  LIB.randr.xcb_randr_get_crtc_info(c, crtc, config_timestamp)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 821:78 call  LIB.randr.xcb_randr_get_crtc_info(c, crtc, config_timesta..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_crtc_info_outputs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 688:26 call  array_from_xcb( LIB.randr.xcb_randr_get_crtc_info_outputs..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_crtc_info_possible": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 694:26 call  array_from_xcb( LIB.randr.xcb_randr_get_crtc_info_possibl..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_monitors": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 848:44 call  LIB.randr.xcb_randr_get_monitors(c, window, get_active)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 848:73 call  LIB.randr.xcb_randr_get_monitors(c, window, get_active).r..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_monitors_monitors": {
+      "mss.linux.xcbhelpers.list_from_xcb": [
+        "mss.linux.xcbgen 732:25 call  list_from_xcb(LIB.randr.xcb_randr_get_monitors_monitors_i..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_info": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 825:47 call  LIB.randr.xcb_randr_get_output_info(c, output, config_tim..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 825:82 call  LIB.randr.xcb_randr_get_output_info(c, output, config_tim..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_info_clones": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 712:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_info_clone..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_info_crtcs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 700:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_info_crtcs..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_info_modes": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 706:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_info_modes..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_info_name": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 718:26 call  array_from_xcb(LIB.randr.xcb_randr_get_output_info_name, ..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_primary": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 829:50 call  LIB.randr.xcb_randr_get_output_primary(c, window)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 829:67 call  LIB.randr.xcb_randr_get_output_primary(c, window).reply(c)"
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_property": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 842:51 call  LIB.randr.xcb_randr_get_output_property( c, output, prope..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 844:12 call  LIB.randr.xcb_randr_get_output_property( c, output, prope..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_output_property_data": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 722:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_property_d..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 813:52 call  LIB.randr.xcb_randr_get_screen_resources(c, window)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 813:69 call  LIB.randr.xcb_randr_get_screen_resources(c, window).reply(c)"
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_crtcs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 632:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_current": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 817:60 call  LIB.randr.xcb_randr_get_screen_resources_current(c, window)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 817:77 call  LIB.randr.xcb_randr_get_screen_resources_current(c, windo..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_current_crtcs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 656:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_current_modes": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 672:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_current_names": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 680:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_current_outputs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 664:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_modes": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 644:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_names": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 650:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_get_screen_resources_outputs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 638:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_monitor_info_outputs": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 728:26 call  array_from_xcb(LIB.randr.xcb_randr_monitor_info_outputs, ..."
+      ]
+    },
+    "mss.linux.xcbgen.randr_query_version": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 809:45 call  LIB.randr.xcb_randr_query_version(c, major_version, minor..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 809:84 call  LIB.randr.xcb_randr_query_version(c, major_version, minor..."
+      ]
+    },
+    "mss.linux.xcbgen.render_pictdepth_visuals": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 736:26 call  array_from_xcb(LIB.render.xcb_render_pictdepth_visuals, L..."
+      ]
+    },
+    "mss.linux.xcbgen.render_pictscreen_depths": {
+      "mss.linux.xcbhelpers.list_from_xcb": [
+        "mss.linux.xcbgen 740:25 call  list_from_xcb(LIB.render.xcb_render_pictscreen_depths_ite..."
+      ]
+    },
+    "mss.linux.xcbgen.render_query_pict_formats": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 858:52 call  LIB.render.xcb_render_query_pict_formats(c)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 858:61 call  LIB.render.xcb_render_query_pict_formats(c).reply(c)"
+      ]
+    },
+    "mss.linux.xcbgen.render_query_pict_formats_formats": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 744:26 call  array_from_xcb( LIB.render.xcb_render_query_pict_formats_..."
+      ]
+    },
+    "mss.linux.xcbgen.render_query_pict_formats_screens": {
+      "mss.linux.xcbhelpers.list_from_xcb": [
+        "mss.linux.xcbgen 750:25 call  list_from_xcb( LIB.render.xcb_render_query_pict_formats_s..."
+      ]
+    },
+    "mss.linux.xcbgen.render_query_pict_formats_subpixels": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 756:26 call  array_from_xcb( LIB.render.xcb_render_query_pict_formats_..."
+      ]
+    },
+    "mss.linux.xcbgen.render_query_version": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 854:47 call  LIB.render.xcb_render_query_version(c, client_major_versi..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 854:100 call  LIB.render.xcb_render_query_version(c, client_major_versi..."
+      ]
+    },
+    "mss.linux.xcbgen.screen_allowed_depths": {
+      "mss.linux.xcbhelpers.list_from_xcb": [
+        "mss.linux.xcbgen 608:25 call  list_from_xcb(LIB.xcb.xcb_screen_allowed_depths_iterator,..."
+      ]
+    },
+    "mss.linux.xcbgen.setup_pixmap_formats": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 616:26 call  array_from_xcb(LIB.xcb.xcb_setup_pixmap_formats, LIB.xcb...."
+      ]
+    },
+    "mss.linux.xcbgen.setup_roots": {
+      "mss.linux.xcbhelpers.list_from_xcb": [
+        "mss.linux.xcbgen 620:25 call  list_from_xcb(LIB.xcb.xcb_setup_roots_iterator, LIB.xcb.x..."
+      ]
+    },
+    "mss.linux.xcbgen.setup_vendor": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 612:26 call  array_from_xcb(LIB.xcb.xcb_setup_vendor, LIB.xcb.xcb_setu..."
+      ]
+    },
+    "mss.linux.xcbgen.shm_attach_fd": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 881:45 call  LIB.shm.xcb_shm_attach_fd_checked(c, shmseg, shm_fd, read..."
+      ],
+      "mss.linux.xcbhelpers.VoidCookie.check": [
+        "mss.linux.xcbgen 881:81 call  LIB.shm.xcb_shm_attach_fd_checked(c, shmseg, shm_fd, read..."
+      ]
+    },
+    "mss.linux.xcbgen.shm_create_segment": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 887:42 call  LIB.shm.xcb_shm_create_segment(c, shmseg, size, read_only)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 887:76 call  LIB.shm.xcb_shm_create_segment(c, shmseg, size, read_only..."
+      ]
+    },
+    "mss.linux.xcbgen.shm_create_segment_reply_fds": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 770:52 call  LIB.shm.xcb_shm_create_segment_reply_fds(c, r)"
+      ]
+    },
+    "mss.linux.xcbgen.shm_detach": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 891:42 call  LIB.shm.xcb_shm_detach_checked(c, shmseg)"
+      ],
+      "mss.linux.xcbhelpers.VoidCookie.check": [
+        "mss.linux.xcbgen 891:59 call  LIB.shm.xcb_shm_detach_checked(c, shmseg).check(c)"
+      ]
+    },
+    "mss.linux.xcbgen.shm_get_image": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 877:37 call  LIB.shm.xcb_shm_get_image(c, drawable, x, y, width, heigh..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 877:114 call  LIB.shm.xcb_shm_get_image(c, drawable, x, y, width, heigh..."
+      ]
+    },
+    "mss.linux.xcbgen.shm_query_version": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 862:41 call  LIB.shm.xcb_shm_query_version(c)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 862:50 call  LIB.shm.xcb_shm_query_version(c).reply(c)"
+      ]
+    },
+    "mss.linux.xcbgen.xfixes_get_cursor_image": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 901:50 call  LIB.xfixes.xcb_xfixes_get_cursor_image(c)"
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 901:59 call  LIB.xfixes.xcb_xfixes_get_cursor_image(c).reply(c)"
+      ]
+    },
+    "mss.linux.xcbgen.xfixes_get_cursor_image_cursor_image": {
+      "mss.linux.xcbhelpers.array_from_xcb": [
+        "mss.linux.xcbgen 762:26 call  array_from_xcb( LIB.xfixes.xcb_xfixes_get_cursor_image_cu..."
+      ]
+    },
+    "mss.linux.xcbgen.xfixes_query_version": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbgen 897:47 call  LIB.xfixes.xcb_xfixes_query_version(c, client_major_versi..."
+      ],
+      "mss.linux.xcbhelpers.ReplyCookieBase.reply": [
+        "mss.linux.xcbgen 897:100 call  LIB.xfixes.xcb_xfixes_query_version(c, client_major_versi..."
+      ]
+    },
+    "mss.linux.xcbhelpers": {
+      "<builtin>.frozenset": [
+        "mss.linux.xcbhelpers 411:31 call  frozenset( {\"c\", \"xcb\", \"randr\", \"randr_id\", \"render\", \"r...",
+        "mss.linux.xcbhelpers 430:77 call  frozenset()"
+      ],
+      "mss.linux.xcbhelpers.LibContainer.__init__": [
+        "mss.linux.xcbhelpers 556:19 call  LibContainer()"
+      ]
+    },
+    "mss.linux.xcbhelpers.CookieBase.discard": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbhelpers 275:34 call  LIB.xcb.xcb_discard_reply(xcb_conn, self.sequence)"
+      ]
+    },
+    "mss.linux.xcbhelpers.LibContainer.__init__": {
+      "threading.RLock": [
+        "mss.linux.xcbhelpers 416:27 call  RLock()"
+      ]
+    },
+    "mss.linux.xcbhelpers.LibContainer.initialize": {
+      "<builtin>.RuntimeError": [
+        "mss.linux.xcbhelpers 441:35 call  RuntimeError(msg)"
+      ],
+      "_ctypes.PyCStructType.in_dll": [
+        "mss.linux.xcbhelpers 495:52 call  XcbExtension.in_dll(self.randr, \"xcb_randr_id\")",
+        "mss.linux.xcbhelpers 502:53 call  XcbExtension.in_dll(self.render, \"xcb_render_id\")",
+        "mss.linux.xcbhelpers 509:50 call  XcbExtension.in_dll(self.shm, \"xcb_shm_id\")",
+        "mss.linux.xcbhelpers 516:53 call  XcbExtension.in_dll(self.xfixes, \"xcb_xfixes_id\")"
+      ],
+      "_ctypes.structure.StructureMeta.in_dll": [
+        "mss.linux.xcbhelpers 495:52 call  XcbExtension.in_dll(self.randr, \"xcb_randr_id\")",
+        "mss.linux.xcbhelpers 502:53 call  XcbExtension.in_dll(self.render, \"xcb_render_id\")",
+        "mss.linux.xcbhelpers 509:50 call  XcbExtension.in_dll(self.shm, \"xcb_shm_id\")",
+        "mss.linux.xcbhelpers 516:53 call  XcbExtension.in_dll(self.xfixes, \"xcb_xfixes_id\")"
+      ],
+      "ctypes.LibraryLoader.LoadLibrary": [
+        "mss.linux.xcbhelpers 453:42 call  cdll.LoadLibrary(None)",
+        "mss.linux.xcbhelpers 461:44 call  cdll.LoadLibrary(libxcb_so)",
+        "mss.linux.xcbhelpers 494:46 call  cdll.LoadLibrary(libxcb_randr_so)",
+        "mss.linux.xcbhelpers 501:47 call  cdll.LoadLibrary(libxcb_render_so)",
+        "mss.linux.xcbhelpers 508:44 call  cdll.LoadLibrary(libxcb_shm_so)",
+        "mss.linux.xcbhelpers 515:47 call  cdll.LoadLibrary(libxcb_xfixes_so)",
+        "mss.linux.xcbhelpers 521:64 call  cdll.LoadLibrary(\"libxcb-errors.so.0\")"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xcbhelpers 463:63 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 464:61 call  POINTER(GenericErrorStructure)",
+        "mss.linux.xcbhelpers 465:63 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 467:68 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 467:89 call  POINTER(XcbExtension)",
+        "mss.linux.xcbhelpers 468:66 call  POINTER(QueryExtensionReply)",
+        "mss.linux.xcbhelpers 469:73 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 469:94 call  POINTER(XcbExtension)",
+        "mss.linux.xcbhelpers 471:61 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 473:59 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 474:57 call  POINTER(Setup)",
+        "mss.linux.xcbhelpers 475:70 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 477:67 call  POINTER(c_int)",
+        "mss.linux.xcbhelpers 478:55 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 479:60 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 486:29 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 486:69 call  POINTER(c_char)",
+        "mss.linux.xcbhelpers 526:32 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 527:32 call  POINTER(POINTER(XcbErrorsContext))",
+        "mss.linux.xcbhelpers 527:40 call  POINTER(XcbErrorsContext)",
+        "mss.linux.xcbhelpers 530:76 call  POINTER(XcbErrorsContext)",
+        "mss.linux.xcbhelpers 532:87 call  POINTER(XcbErrorsContext)",
+        "mss.linux.xcbhelpers 535:32 call  POINTER(XcbErrorsContext)",
+        "mss.linux.xcbhelpers 541:32 call  POINTER(XcbErrorsContext)",
+        "mss.linux.xcbhelpers 543:32 call  POINTER(c_char_p)"
+      ],
+      "ctypes.util.find_library": [
+        "mss.linux.xcbhelpers 457:53 call  ctypes.util.find_library(\"xcb\")",
+        "mss.linux.xcbhelpers 490:59 call  ctypes.util.find_library(\"xcb-randr\")",
+        "mss.linux.xcbhelpers 497:60 call  ctypes.util.find_library(\"xcb-render\")",
+        "mss.linux.xcbhelpers 504:57 call  ctypes.util.find_library(\"xcb-shm\")",
+        "mss.linux.xcbhelpers 511:60 call  ctypes.util.find_library(\"xcb-xfixes\")"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xcbhelpers 460:42 call  ScreenShotError(msg)",
+        "mss.linux.xcbhelpers 493:42 call  ScreenShotError(msg)",
+        "mss.linux.xcbhelpers 500:42 call  ScreenShotError(msg)",
+        "mss.linux.xcbhelpers 507:42 call  ScreenShotError(msg)",
+        "mss.linux.xcbhelpers 514:42 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbgen.initialize": [
+        "mss.linux.xcbhelpers 548:22 call  x()"
+      ],
+      "mss.linux.xcbhelpers.initialize_xcb_typed_func": [
+        "mss.linux.xcbhelpers 483:42 call  initialize_xcb_typed_func( LIB.xcb, \"xcb_intern_atom\", [P..."
+      ]
+    },
+    "mss.linux.xcbhelpers.LibContainer.reset": {
+      "<builtin>.RuntimeError": [
+        "mss.linux.xcbhelpers 424:35 call  RuntimeError(msg)"
+      ],
+      "<builtin>.delattr": [
+        "mss.linux.xcbhelpers 428:28 call  delattr(self, name)"
+      ],
+      "contextlib.suppress": [
+        "mss.linux.xcbhelpers 427:30 call  suppress(AttributeError)"
+      ]
+    },
+    "mss.linux.xcbhelpers.ReplyCookieBase.reply": {
+      "copy.copy": [
+        "mss.linux.xcbhelpers 317:28 call  copy(err_p.contents)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbhelpers 311:39 call  self._xcb_reply_func(xcb_conn, self, err_p)",
+        "mss.linux.xcbhelpers 315:27 call  LIB.c.free(reply_p)",
+        "mss.linux.xcbhelpers 318:23 call  LIB.c.free(err_p)"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xcbhelpers 309:24 call  POINTER(GenericErrorStructure)"
+      ],
+      "ctypes.addressof": [
+        "mss.linux.xcbhelpers 327:42 call  addressof(reply_p.contents)"
+      ],
+      "ctypes.c_void_p": [
+        "mss.linux.xcbhelpers 327:32 call  c_void_p(addressof(reply_p.contents))"
+      ],
+      "mss.linux.xcbhelpers.XProtoError.__init__": [
+        "mss.linux.xcbhelpers 319:30 call  XProtoError(xcb_conn, err_copy)"
+      ],
+      "weakref.finalize": [
+        "mss.linux.xcbhelpers 328:29 call  finalize(reply_p, LIB.c.free, reply_void_p)"
+      ]
+    },
+    "mss.linux.xcbhelpers.VoidCookie.check": {
+      "copy.copy": [
+        "mss.linux.xcbhelpers 292:19 call  copy(err_p.contents)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbhelpers 289:42 call  LIB.xcb.xcb_request_check(xcb_conn, self)",
+        "mss.linux.xcbhelpers 293:19 call  LIB.c.free(err_p)"
+      ],
+      "mss.linux.xcbhelpers.XProtoError.__init__": [
+        "mss.linux.xcbhelpers 294:26 call  XProtoError(xcb_conn, err)"
+      ]
+    },
+    "mss.linux.xcbhelpers.XID.__eq__": {
+      "<builtin>.isinstance": [
+        "mss.linux.xcbhelpers 105:55 call  isinstance(other, XID)"
+      ]
+    },
+    "mss.linux.xcbhelpers.XID.__hash__": {
+      "<builtin>.hash": [
+        "mss.linux.xcbhelpers 108:20 call  hash(self.value)"
+      ]
+    },
+    "mss.linux.xcbhelpers.XProtoError.__init__": {
+      "<builtin>.bytes.decode": [
+        "mss.linux.xcbhelpers 219:57 call  error_name.decode(\"ascii\", errors=\"replace\")",
+        "mss.linux.xcbhelpers 224:71 call  ext_name_str.decode(\"ascii\", errors=\"replace\")",
+        "mss.linux.xcbhelpers 226:62 call  major_name.decode(\"ascii\", errors=\"replace\")",
+        "mss.linux.xcbhelpers 231:66 call  minor_name.decode(\"ascii\", errors=\"replace\")"
+      ],
+      "<builtin>.isinstance": [
+        "mss.linux.xcbhelpers 193:22 call  isinstance(xcb_err, _Pointer)",
+        "mss.linux.xcbhelpers 195:26 call  isinstance(xcb_err, GenericErrorStructure)"
+      ],
+      "<builtin>.super": [
+        "mss.linux.xcbhelpers 235:14 call  super()"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbhelpers 213:62 call  LIB.errors.xcb_errors_context_new(xcb_conn, ctx)",
+        "mss.linux.xcbhelpers 218:74 call  LIB.errors.xcb_errors_get_name_for_error(ctx, xcb_err.err...",
+        "mss.linux.xcbhelpers 225:79 call  LIB.errors.xcb_errors_get_name_for_major_code(ctx, xcb_er...",
+        "mss.linux.xcbhelpers 227:79 call  LIB.errors.xcb_errors_get_name_for_minor_code( ctx, xcb_e...",
+        "mss.linux.xcbhelpers 233:55 call  LIB.errors.xcb_errors_context_free(ctx)"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xcbhelpers 212:26 call  POINTER(XcbErrorsContext)",
+        "mss.linux.xcbhelpers 217:39 call  POINTER(c_char_p)"
+      ],
+      "ctypes.c_char_p.__pointer_type__": [
+        "mss.linux.xcbhelpers 217:49 call  POINTER(c_char_p)()"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xcbhelpers 235:25 call  super().__init__(\"X11 Protocol Error\", details=details)"
+      ]
+    },
+    "mss.linux.xcbhelpers.XProtoError.__str__": {
+      "<builtin>.Exception.__str__": [
+        "mss.linux.xcbhelpers 238:30 call  super().__str__()"
+      ],
+      "<builtin>.super": [
+        "mss.linux.xcbhelpers 238:20 call  super()"
+      ]
+    },
+    "mss.linux.xcbhelpers.array_from_xcb": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbhelpers 605:27 call  pointer_func(parent)",
+        "mss.linux.xcbhelpers 606:25 call  length_func(parent)"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xcbhelpers 610:38 call  POINTER(pointer._type_ * length)"
+      ],
+      "ctypes.cast": [
+        "mss.linux.xcbhelpers 610:21 call  cast(pointer, POINTER(pointer._type_ * length))"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xcbhelpers 609:30 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbhelpers.depends_on": [
+        "mss.linux.xcbhelpers 612:15 call  depends_on(array, parent)"
+      ]
+    },
+    "mss.linux.xcbhelpers.depends_on": {
+      "weakref.finalize": [
+        "mss.linux.xcbhelpers 93:13 call  finalize(subobject, id, superobject)"
+      ]
+    },
+    "mss.linux.xcbhelpers.initialize_xcb_typed_func": {
+      "<builtin>.getattr": [
+        "mss.linux.xcbhelpers 348:27 call  getattr(lib, name)",
+        "mss.linux.xcbhelpers 349:25 call  getattr(lib, f\"{name}_reply\")"
+      ],
+      "<builtin>.str.replace": [
+        "mss.linux.xcbhelpers 347:43 call  base_name.title().replace(\"_\", \"\")"
+      ],
+      "<builtin>.str.title": [
+        "mss.linux.xcbhelpers 347:33 call  base_name.title()"
+      ],
+      "<builtin>.type": [
+        "mss.linux.xcbhelpers 351:23 call  type(f\"{title_name}Cookie\", (ReplyCookieBase,), {\"_xcb_re..."
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xcbhelpers 354:35 call  POINTER(Connection)",
+        "mss.linux.xcbhelpers 354:69 call  POINTER(POINTER(GenericErrorStructure))",
+        "mss.linux.xcbhelpers 354:77 call  POINTER(GenericErrorStructure)",
+        "mss.linux.xcbhelpers 355:33 call  POINTER(reply_struct)"
+      ]
+    },
+    "mss.linux.xcbhelpers.list_from_xcb": {
+      "<builtin>.list.append": [
+        "mss.linux.xcbhelpers 599:21 call  items.append(current)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xcbhelpers 593:32 call  iterator_factory(parent)",
+        "mss.linux.xcbhelpers 600:18 call  next_func(iterator)"
+      ],
+      "mss.linux.xcbhelpers.depends_on": [
+        "mss.linux.xcbhelpers 598:19 call  depends_on(current, parent)"
+      ]
+    },
+    "mss.linux.xgetimage.MSSImplXGetImage.grab": {
+      "<builtin>.super": [
+        "mss.linux.xgetimage 28:21 call  super()"
+      ],
+      "mss.linux.base.MSSImplXCBBase._grab_xgetimage": [
+        "mss.linux.xgetimage 28:39 call  super()._grab_xgetimage(monitor)"
+      ]
+    },
+    "mss.linux.xlib": {
+      "ctypes.CFUNCTYPE": [
+        "mss.linux.xlib 291:11 call  CFUNCTYPE(c_int, POINTER(Display), POINTER(XErrorEvent))"
+      ],
+      "ctypes.CFUNCTYPE.CFunctionType": [
+        "mss.linux.xlib 291:2 decorator  @CFUNCTYPE(c_int, POINTER(Display), POINTER(XErrorEvent))"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xlib 129:28 call  POINTER(Display)",
+        "mss.linux.xlib 152:27 call  POINTER(c_ulong)",
+        "mss.linux.xlib 198:28 call  POINTER(XID)",
+        "mss.linux.xlib 201:29 call  POINTER(XID)",
+        "mss.linux.xlib 221:26 call  POINTER(XID)",
+        "mss.linux.xlib 223:28 call  POINTER(XID)",
+        "mss.linux.xlib 225:26 call  POINTER(XRRModeInfo)",
+        "mss.linux.xlib 242:27 call  POINTER(Visual)",
+        "mss.linux.xlib 258:27 call  POINTER(Screen)",
+        "mss.linux.xlib 291:26 call  POINTER(Display)",
+        "mss.linux.xlib 291:44 call  POINTER(XErrorEvent)",
+        "mss.linux.xlib 368:39 call  POINTER(Display)",
+        "mss.linux.xlib 369:44 call  POINTER(Display)",
+        "mss.linux.xlib 370:39 call  POINTER(XImage)",
+        "mss.linux.xlib 371:48 call  POINTER(Display)",
+        "mss.linux.xlib 371:67 call  POINTER(XFixesCursorImage)",
+        "mss.linux.xlib 374:17 call  POINTER(Display)",
+        "mss.linux.xlib 375:16 call  POINTER(XImage)",
+        "mss.linux.xlib 377:46 call  POINTER(Display)",
+        "mss.linux.xlib 377:69 call  POINTER(XWindowAttributes)",
+        "mss.linux.xlib 378:49 call  POINTER(Display)",
+        "mss.linux.xlib 379:41 call  POINTER(Display)",
+        "mss.linux.xlib 379:69 call  POINTER(c_int)",
+        "mss.linux.xlib 379:85 call  POINTER(c_int)",
+        "mss.linux.xlib 379:101 call  POINTER(c_int)",
+        "mss.linux.xlib 380:43 call  POINTER(Display)",
+        "mss.linux.xlib 380:61 call  POINTER(c_int)",
+        "mss.linux.xlib 380:77 call  POINTER(c_int)",
+        "mss.linux.xlib 381:43 call  POINTER(XRRCrtcInfo)",
+        "mss.linux.xlib 382:50 call  POINTER(XRRScreenResources)",
+        "mss.linux.xlib 383:42 call  POINTER(Display)",
+        "mss.linux.xlib 383:60 call  POINTER(XRRScreenResources)",
+        "mss.linux.xlib 383:95 call  POINTER(XRRCrtcInfo)",
+        "mss.linux.xlib 384:49 call  POINTER(Display)",
+        "mss.linux.xlib 384:73 call  POINTER(XRRScreenResources)",
+        "mss.linux.xlib 385:56 call  POINTER(Display)",
+        "mss.linux.xlib 385:80 call  POINTER(XRRScreenResources)"
+      ],
+      "ctypes.util.find_library": [
+        "mss.linux.xlib 263:20 call  find_library(\"X11\")",
+        "mss.linux.xlib 264:23 call  find_library(\"Xfixes\")",
+        "mss.linux.xlib 265:23 call  find_library(\"Xrandr\")"
+      ],
+      "threading.Lock": [
+        "mss.linux.xlib 51:13 call  Lock()"
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib.__init__": {
+      "<builtin>.bool": [
+        "mss.linux.xlib 414:37 call  bool(kwargs.pop(\"with_cursor\", False))",
+        "mss.linux.xlib 415:63 call  bool(_XFIXES)"
+      ],
+      "<builtin>.dict.pop": [
+        "mss.linux.xlib 414:48 call  kwargs.pop(\"with_cursor\", False)"
+      ],
+      "<builtin>.isinstance": [
+        "mss.linux.xlib 432:26 call  isinstance(display, bytes)"
+      ],
+      "<builtin>.str.encode": [
+        "mss.linux.xlib 427:55 call  os.environ[\"DISPLAY\"].encode(\"utf-8\")",
+        "mss.linux.xlib 433:37 call  display.encode(\"utf-8\")"
+      ],
+      "<builtin>.super": [
+        "mss.linux.xlib 416:14 call  super()"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 461:78 call  self.xlib.XSetErrorHandler(_error_handler)",
+        "mss.linux.xlib 463:59 call  self.xlib.XOpenDisplay(display)",
+        "mss.linux.xlib 468:87 call  self.xlib.XDefaultRootWindow(self._handles.display)"
+      ],
+      "ctypes.LibraryLoader.LoadLibrary": [
+        "mss.linux.xlib 443:37 call  cdll.LoadLibrary(_X11)",
+        "mss.linux.xlib 449:39 call  cdll.LoadLibrary(_XRANDR)",
+        "mss.linux.xlib 454:43 call  cdll.LoadLibrary(_XFIXES)"
+      ],
+      "mss.base.MSSImplementation.__init__": [
+        "mss.linux.xlib 416:25 call  super().__init__(with_cursor=effective_with_cursor, **kwa..."
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xlib 430:38 call  ScreenShotError(msg)",
+        "mss.linux.xlib 437:34 call  ScreenShotError(msg)",
+        "mss.linux.xlib 441:34 call  ScreenShotError(msg)",
+        "mss.linux.xlib 447:34 call  ScreenShotError(msg)",
+        "mss.linux.xlib 472:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xlib.MSSImplXlib._is_extension_enabled": [
+        "mss.linux.xlib 470:42 call  self._is_extension_enabled(\"RANDR\")"
+      ],
+      "mss.linux.xlib.MSSImplXlib._set_cfunctions": [
+        "mss.linux.xlib 456:29 call  self._set_cfunctions()"
+      ],
+      "mss.linux.xlib._error_handler": [
+        "mss.linux.xlib 463:59 call  self.xlib.XOpenDisplay(display)"
+      ],
+      "mss.linux.xlib._validate_x11": [
+        "mss.linux.xlib 463:59 call  self.xlib.XOpenDisplay(display)",
+        "mss.linux.xlib 468:87 call  self.xlib.XDefaultRootWindow(self._handles.display)"
+      ],
+      "threading.local": [
+        "mss.linux.xlib 419:30 call  local()"
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib._is_extension_enabled": {
+      "<builtin>.str.encode": [
+        "mss.linux.xlib 507:32 call  name.encode(\"latin1\")"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 505:42 call  self.xlib.XQueryExtension( self._handles.display, name.en..."
+      ],
+      "ctypes.byref": [
+        "mss.linux.xlib 508:26 call  byref(major_opcode_return)",
+        "mss.linux.xlib 509:26 call  byref(first_event_return)",
+        "mss.linux.xlib 510:26 call  byref(first_error_return)"
+      ],
+      "ctypes.c_int": [
+        "mss.linux.xlib 499:36 call  c_int()",
+        "mss.linux.xlib 500:35 call  c_int()",
+        "mss.linux.xlib 501:35 call  c_int()"
+      ],
+      "mss.linux.xlib._error_handler": [
+        "mss.linux.xlib 505:42 call  self.xlib.XQueryExtension( self._handles.display, name.en..."
+      ],
+      "mss.linux.xlib._validate_x11": [
+        "mss.linux.xlib 505:42 call  self.xlib.XQueryExtension( self._handles.display, name.en..."
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib._set_cfunctions": {
+      "<builtin>.dict.items": [
+        "mss.linux.xlib 524:64 call  CFUNCTIONS.items()"
+      ],
+      "<builtin>.getattr": [
+        "mss.linux.xlib 520:30 call  getattr(self, \"xfixes\", None)"
+      ],
+      "contextlib.suppress": [
+        "mss.linux.xlib 525:26 call  suppress(AttributeError)"
+      ],
+      "mss.base.MSSImplementation._cfactory": [
+        "mss.linux.xlib 527:25 call  cfactory(attrs[attr], func, argtypes, restype, errcheck=e..."
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib.close": {
+      "<builtin>.dict.clear": [
+        "mss.linux.xlib 495:21 call  _ERROR.clear()"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 478:40 call  self.xlib.XCloseDisplay(self._handles.display)",
+        "mss.linux.xlib 491:43 call  self.xlib.XSetErrorHandler(self._handles.original_error_h..."
+      ],
+      "mss.linux.xlib._error_handler": [
+        "mss.linux.xlib 478:40 call  self.xlib.XCloseDisplay(self._handles.display)"
+      ],
+      "mss.linux.xlib._validate_x11": [
+        "mss.linux.xlib 478:40 call  self.xlib.XCloseDisplay(self._handles.display)"
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib.cursor": {
+      "<builtin>.bytearray": [
+        "mss.linux.xlib 634:24 call  bytearray(raw_data.contents)",
+        "mss.linux.xlib 636:25 call  bytearray(region[\"height\"] * region[\"width\"] * 4)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 620:54 call  self.xfixes.XFixesGetCursorImage(self._handles.display)"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xlib 633:51 call  POINTER(c_ulong * region[\"height\"] * region[\"width\"])"
+      ],
+      "ctypes.cast": [
+        "mss.linux.xlib 633:24 call  cast(cursor_img.pixels, POINTER(c_ulong * region[\"height\"..."
+      ],
+      "mss.linux.xlib._error_handler": [
+        "mss.linux.xlib 620:54 call  self.xfixes.XFixesGetCursorImage(self._handles.display)"
+      ],
+      "mss.linux.xlib._validate_x11": [
+        "mss.linux.xlib 620:54 call  self.xfixes.XFixesGetCursorImage(self._handles.display)"
+      ],
+      "mss.screenshot.ScreenShot.__init__": [
+        "mss.linux.xlib 642:26 call  ScreenShot(data, region)"
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib.grab": {
+      "<builtin>.bytearray": [
+        "mss.linux.xlib 605:29 call  bytearray(raw_data.contents)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 584:41 call  self.xlib.XGetImage( self._handles.display, self._handles...",
+        "mss.linux.xlib 609:40 call  self.xlib.XDestroyImage(ximage)"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xlib 603:24 call  POINTER(c_ubyte * monitor[\"height\"] * monitor[\"width\"] * 4)"
+      ],
+      "ctypes.cast": [
+        "mss.linux.xlib 601:28 call  cast( ximage.contents.data, POINTER(c_ubyte * monitor[\"he..."
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xlib 599:38 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xlib._error_handler": [
+        "mss.linux.xlib 584:41 call  self.xlib.XGetImage( self._handles.display, self._handles..."
+      ],
+      "mss.linux.xlib._validate_x11": [
+        "mss.linux.xlib 584:41 call  self.xlib.XGetImage( self._handles.display, self._handles...",
+        "mss.linux.xlib 609:40 call  self.xlib.XDestroyImage(ximage)"
+      ]
+    },
+    "mss.linux.xlib.MSSImplXlib.monitors": {
+      "<builtin>.hasattr": [
+        "mss.linux.xlib 555:23 call  hasattr(xrandr, \"XRRGetScreenResourcesCurrent\")"
+      ],
+      "<builtin>.int": [
+        "mss.linux.xlib 545:30 call  int_(gwa.x)",
+        "mss.linux.xlib 545:50 call  int_(gwa.y)",
+        "mss.linux.xlib 545:72 call  int_(gwa.width)",
+        "mss.linux.xlib 545:99 call  int_(gwa.height)",
+        "mss.linux.xlib 569:37 call  int_(crtc.x)",
+        "mss.linux.xlib 570:36 call  int_(crtc.y)",
+        "mss.linux.xlib 571:38 call  int_(crtc.width)",
+        "mss.linux.xlib 572:39 call  int_(crtc.height)"
+      ],
+      "<builtin>.list.append": [
+        "mss.linux.xlib 544:28 call  monitors.append( {\"left\": int_(gwa.x), \"top\": int_(gwa.y)...",
+        "mss.linux.xlib 567:32 call  monitors.append( { \"left\": int_(crtc.x), \"top\": int_(crtc..."
+      ],
+      "<builtin>.range": [
+        "mss.linux.xlib 561:29 call  range(mon.ncrtc)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 539:35 call  xrandr.XRRQueryVersion(display, xrandr_major, xrandr_minor)",
+        "mss.linux.xlib 543:43 call  self.xlib.XGetWindowAttributes(display, self._handles.roo...",
+        "mss.linux.xlib 556:58 call  xrandr.XRRGetScreenResourcesCurrent(display, self._handle...",
+        "mss.linux.xlib 558:51 call  xrandr.XRRGetScreenResources(display, self._handles.drawa...",
+        "mss.linux.xlib 562:45 call  xrandr.XRRGetCrtcInfo(display, mon, crtcs[idx])",
+        "mss.linux.xlib 564:43 call  xrandr.XRRFreeCrtcInfo(crtc)",
+        "mss.linux.xlib 575:39 call  xrandr.XRRFreeCrtcInfo(crtc)",
+        "mss.linux.xlib 576:42 call  xrandr.XRRFreeScreenResources(mon)"
+      ],
+      "ctypes.Structure.__init__": [
+        "mss.linux.xlib 542:36 call  XWindowAttributes()"
+      ],
+      "ctypes.byref": [
+        "mss.linux.xlib 543:78 call  byref(gwa)"
+      ],
+      "ctypes.c_int": [
+        "mss.linux.xlib 537:33 call  c_int(0)",
+        "mss.linux.xlib 538:33 call  c_int(0)"
+      ],
+      "mss.linux.xlib._error_handler": [
+        "mss.linux.xlib 539:35 call  xrandr.XRRQueryVersion(display, xrandr_major, xrandr_minor)",
+        "mss.linux.xlib 543:43 call  self.xlib.XGetWindowAttributes(display, self._handles.roo...",
+        "mss.linux.xlib 556:58 call  xrandr.XRRGetScreenResourcesCurrent(display, self._handle...",
+        "mss.linux.xlib 558:51 call  xrandr.XRRGetScreenResources(display, self._handles.drawa...",
+        "mss.linux.xlib 562:45 call  xrandr.XRRGetCrtcInfo(display, mon, crtcs[idx])"
+      ],
+      "mss.linux.xlib._validate_x11": [
+        "mss.linux.xlib 539:35 call  xrandr.XRRQueryVersion(display, xrandr_major, xrandr_minor)",
+        "mss.linux.xlib 543:43 call  self.xlib.XGetWindowAttributes(display, self._handles.roo...",
+        "mss.linux.xlib 556:58 call  xrandr.XRRGetScreenResourcesCurrent(display, self._handle...",
+        "mss.linux.xlib 558:51 call  xrandr.XRRGetScreenResources(display, self._handles.drawa...",
+        "mss.linux.xlib 562:45 call  xrandr.XRRGetCrtcInfo(display, mon, crtcs[idx])",
+        "mss.linux.xlib 564:43 call  xrandr.XRRFreeCrtcInfo(crtc)",
+        "mss.linux.xlib 575:39 call  xrandr.XRRFreeCrtcInfo(crtc)",
+        "mss.linux.xlib 576:42 call  xrandr.XRRFreeScreenResources(mon)"
+      ]
+    },
+    "mss.linux.xlib.XError.__str__": {
+      "<builtin>.Exception.__str__": [
+        "mss.linux.xlib 270:30 call  super().__str__()"
+      ],
+      "<builtin>.super": [
+        "mss.linux.xlib 270:20 call  super()"
+      ]
+    },
+    "mss.linux.xlib._error_handler": {
+      "<builtin>.bytes.decode": [
+        "mss.linux.xlib 317:36 call  error.value.decode(encoding, errors=\"replace\")",
+        "mss.linux.xlib 320:40 call  request.value.decode(encoding, errors=\"replace\")"
+      ],
+      "<builtin>.hasattr": [
+        "mss.linux.xlib 314:40 call  hasattr(locale, \"getencoding\")"
+      ],
+      "<builtin>.len": [
+        "mss.linux.xlib 305:50 call  len(error)",
+        "mss.linux.xlib 307:107 call  len(request)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.linux.xlib 305:14 call  get_error(display, evt.error_code, error, len(error))",
+        "mss.linux.xlib 307:23 call  get_error_database(display, b\"XRequest\", b\"%i\" % evt.requ..."
+      ],
+      "ctypes.LibraryLoader.LoadLibrary": [
+        "mss.linux.xlib 295:28 call  cdll.LoadLibrary(_X11)"
+      ],
+      "ctypes.POINTER": [
+        "mss.linux.xlib 297:34 call  POINTER(Display)",
+        "mss.linux.xlib 300:43 call  POINTER(Display)"
+      ],
+      "ctypes.create_string_buffer": [
+        "mss.linux.xlib 304:33 call  create_string_buffer(1024)",
+        "mss.linux.xlib 306:35 call  create_string_buffer(1024)"
+      ],
+      "locale.getencoding": [
+        "mss.linux.xlib 314:27 call  locale.getencoding()"
+      ],
+      "locale.getpreferredencoding": [
+        "mss.linux.xlib 314:96 call  locale.getpreferredencoding(do_setlocale=False)"
+      ],
+      "threading.current_thread": [
+        "mss.linux.xlib 316:26 call  current_thread()"
+      ]
+    },
+    "mss.linux.xlib._validate_x11": {
+      "<builtin>.bool": [
+        "mss.linux.xlib 341:21 call  bool(retval)"
+      ],
+      "<builtin>.dict.pop": [
+        "mss.linux.xlib 355:25 call  _ERROR.pop(thread, {})"
+      ],
+      "<builtin>.isinstance": [
+        "mss.linux.xlib 338:20 call  isinstance(retval, (_Pointer, XBool, XStatus, XID))",
+        "mss.linux.xlib 342:20 call  isinstance(retval, int)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xlib 357:17 call  XError(msg, details=details)"
+      ],
+      "threading.current_thread": [
+        "mss.linux.xlib 333:28 call  current_thread()"
+      ]
+    },
+    "mss.linux.xshmgetimage": {
+      "enum.auto": [
+        "mss.linux.xshmgetimage 35:24 call  enum.auto()",
+        "mss.linux.xshmgetimage 36:26 call  enum.auto()",
+        "mss.linux.xshmgetimage 37:28 call  enum.auto()"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage.__init__": {
+      "<builtin>.super": [
+        "mss.linux.xshmgetimage 49:14 call  super()"
+      ],
+      "mss.linux.base.MSSImplXCBBase.__init__": [
+        "mss.linux.xshmgetimage 49:25 call  super().__init__(display=display, with_cursor=with_cursor)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._setup_shm": [
+        "mss.linux.xshmgetimage 63:53 call  self._setup_shm()"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage._grab_xshmgetimage": {
+      "<builtin>.bytearray": [
+        "mss.linux.xshmgetimage 191:29 call  bytearray(img_mv[:new_size])"
+      ],
+      "<builtin>.hex": [
+        "mss.linux.xshmgetimage 179:54 call  hex(self.drawable_visual_id.value)",
+        "mss.linux.xshmgetimage 180:45 call  hex(img_reply.visual.value)"
+      ],
+      "<builtin>.memoryview": [
+        "mss.linux.xshmgetimage 190:24 call  memoryview(self._buf)"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.linux.xshmgetimage 148:34 call  ScreenShotError(msg)",
+        "mss.linux.xshmgetimage 160:34 call  ScreenShotError(msg)",
+        "mss.linux.xshmgetimage 182:34 call  ScreenShotError(msg)"
+      ],
+      "mss.linux.xcbgen.Visualid.__eq__": [
+        "mss.linux.xshmgetimage 175:71 op  img_reply.visual != self.drawable_visual_id"
+      ],
+      "mss.linux.xcbgen.shm_get_image": [
+        "mss.linux.xshmgetimage 162:38 call  xcb.shm_get_image( self.conn, self.drawable, monitor[\"lef..."
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage._setup_shm": {
+      "<builtin>.hasattr": [
+        "mss.linux.xshmgetimage 96:27 call  hasattr(os, \"memfd_create\")"
+      ],
+      "ctypes.c_uint32.__init__": [
+        "mss.linux.xshmgetimage 109:38 call  xcb.ShmSeg(xcb.generate_id(self.conn).value)"
+      ],
+      "mmap.mmap": [
+        "mss.linux.xshmgetimage 106:33 call  mmap(self._memfd, self._bufsize, prot=PROT_READ)"
+      ],
+      "mss.linux.xcb.generate_id": [
+        "mss.linux.xshmgetimage 109:54 call  xcb.generate_id(self.conn)"
+      ],
+      "mss.linux.xcb.get_extension_data": [
+        "mss.linux.xshmgetimage 80:50 call  xcb.get_extension_data(self.conn, LIB.shm_id)"
+      ],
+      "mss.linux.xcbgen.shm_attach_fd": [
+        "mss.linux.xshmgetimage 114:38 call  xcb.shm_attach_fd(self.conn, self._shmseg, self._memfd, r..."
+      ],
+      "mss.linux.xcbgen.shm_query_version": [
+        "mss.linux.xshmgetimage 86:53 call  xcb.shm_query_version(self.conn)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue": [
+        "mss.linux.xshmgetimage 82:39 call  self._shm_report_issue(\"MIT-SHM extension not present\")",
+        "mss.linux.xshmgetimage 89:39 call  self._shm_report_issue(\"MIT-SHM version too old\", shm_ver...",
+        "mss.linux.xshmgetimage 97:39 call  self._shm_report_issue(\"os.memfd_create not available\")"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_unavailable": [
+        "mss.linux.xshmgetimage 102:45 call  self._shm_unavailable(\"memfd_create failed\", e)",
+        "mss.linux.xshmgetimage 108:45 call  self._shm_unavailable(\"mmap failed\", e)",
+        "mss.linux.xshmgetimage 118:45 call  self._shm_unavailable(\"Cannot attach MIT-SHM segment\", e)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm": [
+        "mss.linux.xshmgetimage 120:31 call  self._shutdown_shm()"
+      ],
+      "os.ftruncate": [
+        "mss.linux.xshmgetimage 103:25 call  os.ftruncate(self._memfd, self._bufsize)"
+      ],
+      "os.memfd_create": [
+        "mss.linux.xshmgetimage 100:46 call  os.memfd_create(\"mss-shm-buf\", flags=os.MFD_CLOEXEC)"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue": {
+      "<builtin>.list.append": [
+        "mss.linux.xshmgetimage 74:39 call  self.performance_status.append(full_msg)"
+      ],
+      "<builtin>.str": [
+        "mss.linux.xshmgetimage 73:46 call  str(arg)"
+      ],
+      "<builtin>.str.join": [
+        "mss.linux.xshmgetimage 73:42 call  \", \".join(str(arg) for arg in args)"
+      ],
+      "mss.linux.xcbhelpers.XProtoError.__str__": [
+        "mss.linux.xshmgetimage 73:46 call  str(arg)"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_unavailable": {
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue": [
+        "mss.linux.xshmgetimage 126:31 call  self._shm_report_issue(msg, exc)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm": [
+        "mss.linux.xshmgetimage 127:27 call  self._shutdown_shm()"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm": {
+      "mmap.mmap.close": [
+        "mss.linux.xshmgetimage 139:28 call  self._buf.close()"
+      ],
+      "os.close": [
+        "mss.linux.xshmgetimage 142:21 call  os.close(self._memfd)"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage.close": {
+      "<builtin>.super": [
+        "mss.linux.xshmgetimage 132:14 call  super()"
+      ],
+      "mss.linux.base.MSSImplXCBBase.close": [
+        "mss.linux.xshmgetimage 132:22 call  super().close()"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm": [
+        "mss.linux.xshmgetimage 131:27 call  self._shutdown_shm()"
+      ]
+    },
+    "mss.linux.xshmgetimage.MSSImplXShmGetImage.grab": {
+      "<builtin>.list.append": [
+        "mss.linux.xshmgetimage 203:47 call  self.performance_status.append(\"MIT-SHM is working correc..."
+      ],
+      "<builtin>.super": [
+        "mss.linux.xshmgetimage 196:25 call  super()",
+        "mss.linux.xshmgetimage 215:27 call  super()"
+      ],
+      "mss.linux.base.MSSImplXCBBase._grab_xgetimage": [
+        "mss.linux.xshmgetimage 196:43 call  super()._grab_xgetimage(monitor)",
+        "mss.linux.xshmgetimage 215:45 call  super()._grab_xgetimage(monitor)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._grab_xshmgetimage": [
+        "mss.linux.xshmgetimage 200:41 call  self._grab_xshmgetimage(monitor)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue": [
+        "mss.linux.xshmgetimage 225:35 call  self._shm_report_issue(\"MIT-SHM GetImage failed\", e)"
+      ],
+      "mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm": [
+        "mss.linux.xshmgetimage 227:31 call  self._shutdown_shm()"
+      ]
+    },
+    "mss.screenshot": {
+      "<builtin>.classmethod": [
+        "mss.screenshot 69:6 decorator  @classmethod"
+      ],
+      "<builtin>.property": [
+        "mss.screenshot 44:6 decorator  @property",
+        "mss.screenshot 75:6 decorator  @property",
+        "mss.screenshot 89:6 decorator  @property",
+        "mss.screenshot 113:6 decorator  @property",
+        "mss.screenshot 131:6 decorator  @property",
+        "mss.screenshot 136:6 decorator  @property",
+        "mss.screenshot 141:6 decorator  @property",
+        "mss.screenshot 146:6 decorator  @property"
+      ]
+    },
+    "mss.screenshot.ScreenShot.__array_interface__": {
+      "mss.screenshot.ScreenShot.height": [
+        "mss.screenshot 64:28 getattr  self.height"
+      ],
+      "mss.screenshot.ScreenShot.width": [
+        "mss.screenshot 64:41 getattr  self.width"
+      ]
+    },
+    "mss.screenshot.ScreenShot.__repr__": {
+      "<builtin>.type": [
+        "mss.screenshot 42:24 call  type(self)"
+      ],
+      "mss.screenshot.ScreenShot.height": [
+        "mss.screenshot 42:92 getattr  self.height"
+      ],
+      "mss.screenshot.ScreenShot.left": [
+        "mss.screenshot 42:51 getattr  self.left"
+      ],
+      "mss.screenshot.ScreenShot.top": [
+        "mss.screenshot 42:63 getattr  self.top"
+      ],
+      "mss.screenshot.ScreenShot.width": [
+        "mss.screenshot 42:79 getattr  self.width"
+      ]
+    },
+    "mss.screenshot.ScreenShot.bgra": {
+      "<builtin>.bytes": [
+        "mss.screenshot 87:21 call  bytes(self.raw)"
+      ]
+    },
+    "mss.screenshot.ScreenShot.from_size": {
+      "mss.screenshot.ScreenShot.__init__": [
+        "mss.screenshot 73:19 call  cls(data, monitor)"
+      ]
+    },
+    "mss.screenshot.ScreenShot.pixel": {
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.screenshot 111:34 call  ScreenShotError(msg)"
+      ],
+      "mss.screenshot.ScreenShot.pixels": [
+        "mss.screenshot 108:25 getattr  self.pixels"
+      ]
+    },
+    "mss.screenshot.ScreenShot.pixels": {
+      "<builtin>.iter": [
+        "mss.screenshot 98:44 call  iter(rgb_tuples)"
+      ],
+      "<builtin>.list": [
+        "mss.screenshot 98:33 call  list(zip(*[iter(rgb_tuples)] * self.width))"
+      ],
+      "<builtin>.zip": [
+        "mss.screenshot 97:46 call  zip(self.raw[2::4], self.raw[1::4], self.raw[::4])",
+        "mss.screenshot 98:37 call  zip(*[iter(rgb_tuples)] * self.width)"
+      ],
+      "mss.screenshot.ScreenShot.width": [
+        "mss.screenshot 98:65 getattr  self.width"
+      ]
+    },
+    "mss.screenshot.ScreenShot.rgb": {
+      "<builtin>.bytearray": [
+        "mss.screenshot 122:28 call  bytearray(self.height * self.width * 3)"
+      ],
+      "<builtin>.bytes": [
+        "mss.screenshot 127:31 call  bytes(rgb)"
+      ],
+      "mss.screenshot.ScreenShot.height": [
+        "mss.screenshot 122:34 getattr  self.height"
+      ],
+      "mss.screenshot.ScreenShot.width": [
+        "mss.screenshot 122:48 getattr  self.width"
+      ]
+    },
+    "mss.tools": {
+      "<builtin>.slice": [
+        "mss.tools 26:28 call  slice(5, 18)"
+      ]
+    },
+    "mss.tools.parse_edid": {
+      "<builtin>.any": [
+        "mss.tools 124:15 call  any(descr[field_offset] != 0 for field_offset in _EDID_DE..."
+      ],
+      "<builtin>.bytes.decode": [
+        "mss.tools 135:44 call  sn.decode(\"ascii\", errors=\"replace\")",
+        "mss.tools 140:45 call  name.decode(\"ascii\", errors=\"replace\")"
+      ],
+      "<builtin>.bytes.partition": [
+        "mss.tools 133:36 call  sn.partition(b\"\\x0a\")",
+        "mss.tools 138:40 call  name.partition(b\"\\x0a\")"
+      ],
+      "<builtin>.bytes.rstrip": [
+        "mss.tools 134:27 call  sn.rstrip(b\" \")",
+        "mss.tools 139:31 call  name.rstrip(b\" \")"
+      ],
+      "<builtin>.chr": [
+        "mss.tools 105:12 call  chr(((id_manufacturer_packed >> 10) % 32) + 64)",
+        "mss.tools 106:14 call  chr(((id_manufacturer_packed >> 5) % 32) + 64)",
+        "mss.tools 107:14 call  chr((id_manufacturer_packed % 32) + 64)"
+      ],
+      "<builtin>.len": [
+        "mss.tools 76:11 call  len(edid_data)"
+      ],
+      "<builtin>.sum": [
+        "mss.tools 83:11 call  sum(block0)"
+      ],
+      "struct.unpack": [
+        "mss.tools 98:22 call  struct.unpack(\"<8s2BHIBBBB106xBx\", block0)"
+      ]
+    },
+    "mss.tools.to_png": {
+      "<builtin>.bytes.join": [
+        "mss.tools 165:25 call  b\"\".join([png_filter + data[y * line : y * line + line] f...",
+        "mss.tools 172:40 call  b\"\".join(ihdr[1:3])",
+        "mss.tools 177:40 call  b\"\".join(idat[1:3])",
+        "mss.tools 187:32 call  b\"\".join(ihdr + idat + iend)",
+        "mss.tools 191:29 call  b\"\".join(ihdr)",
+        "mss.tools 192:29 call  b\"\".join(idat)",
+        "mss.tools 193:29 call  b\"\".join(iend)"
+      ],
+      "<builtin>.len": [
+        "mss.tools 173:29 call  len(ihdr[2])",
+        "mss.tools 178:29 call  len(idat[2])",
+        "mss.tools 183:29 call  len(iend[2])"
+      ],
+      "<builtin>.open": [
+        "mss.tools 189:14 call  open(output, \"wb\")"
+      ],
+      "<builtin>.range": [
+        "mss.tools 165:87 call  range(height)"
+      ],
+      "io.BufferedWriter.fileno": [
+        "mss.tools 197:30 call  fileh.fileno()"
+      ],
+      "io.BufferedWriter.flush": [
+        "mss.tools 196:20 call  fileh.flush()"
+      ],
+      "io.BufferedWriter.write": [
+        "mss.tools 190:20 call  fileh.write(magic)",
+        "mss.tools 191:20 call  fileh.write(b\"\".join(ihdr))",
+        "mss.tools 192:20 call  fileh.write(b\"\".join(idat))",
+        "mss.tools 193:20 call  fileh.write(b\"\".join(iend))"
+      ],
+      "os.fsync": [
+        "mss.tools 197:17 call  os.fsync(fileh.fileno())"
+      ],
+      "struct.pack": [
+        "mss.tools 164:22 call  pack(\">B\", 0)",
+        "mss.tools 167:17 call  pack(\">8B\", 137, 80, 78, 71, 13, 10, 26, 10)",
+        "mss.tools 171:19 call  pack(\">2I5B\", width, height, 8, 2, 0, 0, 0)",
+        "mss.tools 172:19 call  pack(\">I\", crc32(b\"\".join(ihdr[1:3])) & 0xFFFFFFFF)",
+        "mss.tools 173:19 call  pack(\">I\", len(ihdr[2]))",
+        "mss.tools 177:19 call  pack(\">I\", crc32(b\"\".join(idat[1:3])) & 0xFFFFFFFF)",
+        "mss.tools 178:19 call  pack(\">I\", len(idat[2]))",
+        "mss.tools 182:19 call  pack(\">I\", crc32(iend[1]) & 0xFFFFFFFF)",
+        "mss.tools 183:19 call  pack(\">I\", len(iend[2]))"
+      ],
+      "zlib.compress": [
+        "mss.tools 176:40 call  zlib.compress(scanlines, level)"
+      ],
+      "zlib.crc32": [
+        "mss.tools 172:31 call  crc32(b\"\".join(ihdr[1:3]))",
+        "mss.tools 177:31 call  crc32(b\"\".join(idat[1:3]))",
+        "mss.tools 182:31 call  crc32(iend[1])"
+      ]
+    },
+    "mss.windows.MSS.__init__": {
+      "<builtin>.super": [
+        "mss.windows 30:14 call  super()"
+      ],
+      "mss.base.MSS.__init__": [
+        "mss.windows 30:25 call  super().__init__(**kwargs)"
+      ],
+      "warnings.warn": [
+        "mss.windows 25:22 call  warnings.warn( \"mss.windows.MSS is deprecated and will be..."
+      ]
+    },
+    "mss.windows.choose_impl": {
+      "<builtin>.str.lower": [
+        "mss.windows 52:28 call  backend.lower()"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.windows 59:26 call  ScreenShotError(msg)"
+      ],
+      "mss.windows.gdi.MSSImplGdi.__init__": [
+        "mss.windows 56:26 call  MSSImplGdi(**kwargs)"
+      ]
+    },
+    "mss.windows.gdi": {
+      "ctypes.POINTER": [
+        "mss.windows.gdi 44:18 call  POINTER(RECT)",
+        "mss.windows.gdi 108:58 call  POINTER(RECT)",
+        "mss.windows.gdi 144:48 call  POINTER(BITMAPINFO)",
+        "mss.windows.gdi 144:75 call  POINTER(LPVOID)",
+        "mss.windows.gdi 147:47 call  POINTER(WORD)",
+        "mss.windows.gdi 147:69 call  POINTER(DISPLAY_DEVICEW)",
+        "mss.windows.gdi 156:53 call  POINTER(MONITORINFOEXW)"
+      ],
+      "ctypes.WINFUNCTYPE": [
+        "mss.windows.gdi 108:29 call  WINFUNCTYPE(BOOL, HMONITOR, HDC, POINTER(RECT), LPARAM)"
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi.__init__": {
+      "<builtin>.super": [
+        "mss.windows.gdi 194:14 call  super()"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.windows.gdi 207:46 call  self.user32.GetWindowDC(0)",
+        "mss.windows.gdi 208:52 call  self.gdi32.CreateCompatibleDC(self._srcdc)"
+      ],
+      "ctypes.Structure.__init__": [
+        "mss.windows.gdi 210:25 call  BITMAPINFO()"
+      ],
+      "ctypes.WinDLL": [
+        "mss.windows.gdi 197:36 call  ctypes.WinDLL(\"user32\", use_last_error=True)",
+        "mss.windows.gdi 198:35 call  ctypes.WinDLL(\"gdi32\", use_last_error=True)"
+      ],
+      "ctypes.sizeof": [
+        "mss.windows.gdi 211:45 call  ctypes.sizeof(BITMAPINFOHEADER)"
+      ],
+      "ctypes.wintypes.LPVOID": [
+        "mss.windows.gdi 205:40 call  LPVOID()"
+      ],
+      "mss.base.MSSImplementation.__init__": [
+        "mss.windows.gdi 194:25 call  super().__init__()"
+      ],
+      "mss.windows.gdi.MSSImplGdi._set_cfunctions": [
+        "mss.windows.gdi 199:29 call  self._set_cfunctions()"
+      ],
+      "mss.windows.gdi.MSSImplGdi._set_dpi_awareness": [
+        "mss.windows.gdi 200:32 call  self._set_dpi_awareness()"
+      ],
+      "mss.windows.gdi._errcheck": [
+        "mss.windows.gdi 207:46 call  self.user32.GetWindowDC(0)",
+        "mss.windows.gdi 208:52 call  self.gdi32.CreateCompatibleDC(self._srcdc)"
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi._set_cfunctions": {
+      "<builtin>.dict.items": [
+        "mss.windows.gdi 244:74 call  CFUNCTIONS.items()"
+      ],
+      "mss.base.MSSImplementation._cfactory": [
+        "mss.windows.gdi 245:21 call  cfactory(attrs[attr], func, argtypes, restype, errcheck)"
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi._set_dpi_awareness": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.windows.gdi 256:56 call  ctypes.windll.shcore.SetProcessDpiAwareness(2)",
+        "mss.windows.gdi 259:43 call  self.user32.SetProcessDPIAware()"
+      ],
+      "sys.getwindowsversion": [
+        "mss.windows.gdi 249:40 call  sys.getwindowsversion()"
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi.close": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.windows.gdi 226:36 call  self.gdi32.DeleteObject(self._dib)",
+        "mss.windows.gdi 230:32 call  self.gdi32.DeleteDC(self._memdc)",
+        "mss.windows.gdi 234:34 call  self.user32.ReleaseDC(0, self._srcdc)"
+      ],
+      "mss.windows.gdi._errcheck": [
+        "mss.windows.gdi 226:36 call  self.gdi32.DeleteObject(self._dib)",
+        "mss.windows.gdi 230:32 call  self.gdi32.DeleteDC(self._memdc)",
+        "mss.windows.gdi 234:34 call  self.user32.ReleaseDC(0, self._srcdc)"
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi.grab": {
+      "<builtin>.bytearray": [
+        "mss.windows.gdi 388:25 call  bytearray(self._dib_array)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.windows.gdi 358:33 call  gdi.DeleteObject(self._dib)",
+        "mss.windows.gdi 363:45 call  gdi.CreateDIBSection( memdc, self._bmi, DIB_RGB_COLORS, c...",
+        "mss.windows.gdi 371:29 call  gdi.SelectObject(memdc, self._dib)",
+        "mss.windows.gdi 380:19 call  gdi.BitBlt(memdc, 0, 0, width, height, srcdc, monitor[\"le...",
+        "mss.windows.gdi 384:21 call  gdi.GdiFlush()"
+      ],
+      "ctypes.POINTER": [
+        "mss.windows.gdi 377:66 call  POINTER(array_type)"
+      ],
+      "ctypes.byref": [
+        "mss.windows.gdi 367:29 call  ctypes.byref(self._dib_bits)"
+      ],
+      "ctypes.cast": [
+        "mss.windows.gdi 377:42 call  ctypes.cast(self._dib_bits, POINTER(array_type))"
+      ],
+      "ctypes.wintypes.LPVOID": [
+        "mss.windows.gdi 362:36 call  LPVOID()"
+      ],
+      "mss.windows.gdi._errcheck": [
+        "mss.windows.gdi 358:33 call  gdi.DeleteObject(self._dib)",
+        "mss.windows.gdi 363:45 call  gdi.CreateDIBSection( memdc, self._bmi, DIB_RGB_COLORS, c...",
+        "mss.windows.gdi 371:29 call  gdi.SelectObject(memdc, self._dib)",
+        "mss.windows.gdi 380:19 call  gdi.BitBlt(memdc, 0, 0, width, height, srcdc, monitor[\"le..."
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi.monitors": {
+      "<builtin>.int": [
+        "mss.windows.gdi 271:29 call  int_(get_system_metrics(76))",
+        "mss.windows.gdi 272:28 call  int_(get_system_metrics(77))",
+        "mss.windows.gdi 273:30 call  int_(get_system_metrics(78))",
+        "mss.windows.gdi 274:31 call  int_(get_system_metrics(79))"
+      ],
+      "<builtin>.list.append": [
+        "mss.windows.gdi 269:24 call  monitors.append( { \"left\": int_(get_system_metrics(76)), ..."
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.windows.gdi 271:48 call  get_system_metrics(76)",
+        "mss.windows.gdi 272:47 call  get_system_metrics(77)",
+        "mss.windows.gdi 273:49 call  get_system_metrics(78)",
+        "mss.windows.gdi 274:50 call  get_system_metrics(79)",
+        "mss.windows.gdi 331:35 call  user32.EnumDisplayMonitors(0, None, callback, 0)"
+      ],
+      "ctypes.WINFUNCTYPE.WinFunctionType": [
+        "mss.windows.gdi 279:10 decorator  @MONITORNUMPROC"
+      ],
+      "mss.windows.gdi.MSSImplGdi.monitors.callback": [
+        "mss.windows.gdi 331:35 call  user32.EnumDisplayMonitors(0, None, callback, 0)"
+      ],
+      "mss.windows.gdi._errcheck": [
+        "mss.windows.gdi 331:35 call  user32.EnumDisplayMonitors(0, None, callback, 0)"
+      ]
+    },
+    "mss.windows.gdi.MSSImplGdi.monitors.callback": {
+      "<builtin>.bool": [
+        "mss.windows.gdi 293:30 call  bool(info.dwFlags & MONITORINFOF_PRIMARY)"
+      ],
+      "<builtin>.int": [
+        "mss.windows.gdi 290:24 call  int_(rct.left)",
+        "mss.windows.gdi 291:23 call  int_(rct.top)",
+        "mss.windows.gdi 320:30 call  int_(rct.right)",
+        "mss.windows.gdi 321:31 call  int_(rct.bottom)"
+      ],
+      "<builtin>.list.append": [
+        "mss.windows.gdi 328:28 call  monitors.append(mon_dict)"
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "mss.windows.gdi 287:35 call  user32.GetMonitorInfoW(hmonitor, ctypes.byref(info))",
+        "mss.windows.gdi 299:42 call  user32.EnumDisplayDevicesW( ctypes.cast(ctypes.addressof(...",
+        "mss.windows.gdi 309:42 call  user32.EnumDisplayDevicesW( ctypes.cast(ctypes.addressof(..."
+      ],
+      "ctypes.POINTER": [
+        "mss.windows.gdi 300:69 call  POINTER(WORD)",
+        "mss.windows.gdi 310:69 call  POINTER(WORD)"
+      ],
+      "ctypes.Structure.__init__": [
+        "mss.windows.gdi 285:34 call  MONITORINFOEXW()",
+        "mss.windows.gdi 294:45 call  DISPLAY_DEVICEW()"
+      ],
+      "ctypes.addressof": [
+        "mss.windows.gdi 300:45 call  ctypes.addressof(info.szDevice)",
+        "mss.windows.gdi 305:67 call  ctypes.addressof(display_device.DeviceString)",
+        "mss.windows.gdi 310:45 call  ctypes.addressof(info.szDevice)",
+        "mss.windows.gdi 315:63 call  ctypes.addressof(display_device.DeviceID)"
+      ],
+      "ctypes.byref": [
+        "mss.windows.gdi 287:58 call  ctypes.byref(info)",
+        "mss.windows.gdi 302:29 call  ctypes.byref(display_device)",
+        "mss.windows.gdi 312:29 call  ctypes.byref(display_device)"
+      ],
+      "ctypes.cast": [
+        "mss.windows.gdi 300:28 call  ctypes.cast(ctypes.addressof(info.szDevice), POINTER(WORD))",
+        "mss.windows.gdi 310:28 call  ctypes.cast(ctypes.addressof(info.szDevice), POINTER(WORD))"
+      ],
+      "ctypes.sizeof": [
+        "mss.windows.gdi 286:40 call  ctypes.sizeof(MONITORINFOEXW)",
+        "mss.windows.gdi 295:46 call  ctypes.sizeof(DISPLAY_DEVICEW)"
+      ],
+      "ctypes.wstring_at": [
+        "mss.windows.gdi 305:50 call  ctypes.wstring_at(ctypes.addressof(display_device.DeviceS...",
+        "mss.windows.gdi 315:46 call  ctypes.wstring_at(ctypes.addressof(display_device.DeviceID))"
+      ],
+      "mss.windows.gdi._errcheck": [
+        "mss.windows.gdi 287:35 call  user32.GetMonitorInfoW(hmonitor, ctypes.byref(info))"
+      ]
+    },
+    "mss.windows.gdi._errcheck": {
+      "ctypes.WinError": [
+        "mss.windows.gdi 116:28 call  WinError()"
+      ],
+      "mss.exception.ScreenShotError.__init__": [
+        "mss.windows.gdi 127:34 call  ScreenShotError(msg, details=details)",
+        "mss.windows.gdi 129:30 call  ScreenShotError(msg, details=details)"
+      ]
+    }
+  },
+  "notes": {
+    "mss.__main__ 102:14 with  MSS(**mss_kwargs)": [
+      "the context manager is the mss.base.MSS that this with statement builds (mss re-exports mss.base.MSS)"
+    ],
+    "mss.__main__ 104:54 call  grab_kwargs[\"output\"].format(**grab_kwargs[\"mon\"])": [
+      "the output template is a str (the option or the literal of line 90); the fields name the ints of the coordinates dict"
+    ],
+    "mss.__main__ 106:32 getattr  sct_img.rgb": [
+      "sct_img is what MSS.grab returns: an instance of cls_image, which the command line leaves as ScreenShot (the cursor merge returns the same screenshot)"
+    ],
+    "mss.__main__ 124:14 call  print(\"[ERROR]\", exc)": [
+      "print calls str() on the ScreenShotError that main() re-raises; on GNU/Linux it can be an Xlib XError (_validate_x11) or an XProtoError (the XCB backends), which define __str__; the other ScreenShotError classes inherit Exception.__str__"
+    ],
+    "mss.__main__ 68:38 call  cli_args.parse_args(args or None)": [
+      "the type converters str and int are builtins that argparse calls back: no edge"
+    ],
+    "mss.__main__ 78:65 call  options.coordinates.split(\",\")": [
+      "options.coordinates is the str of --coordinates (type=str)"
+    ],
+    "mss.base 285:29 call  self._impl.close()": [
+      "self._impl is one of MSSImplDarwin (inherits MSSImplementation.close), MSSImplXlib, MSSImplXGetImage (inherits MSSImplXCBBase.close), MSSImplXShmGetImage and MSSImplGdi; every platform runs"
+    ],
+    "mss.base 315:44 call  self.cls_image(img_data, monitor, size=size)": [
+      "cls_image is ScreenShot (base.py:243); the documented custom_cls_image example assigns a client subclass, which is client code (B5)"
+    ],
+    "mss.base 318:44 call  self.cls_image(img_data, monitor)": [
+      "cls_image is ScreenShot (base.py:243); the documented custom_cls_image example assigns a client subclass, which is client code (B5)"
+    ],
+    "mss.base 373:31 call  monitor.get(\"is_primary\", False)": [
+      "the monitors are the dicts that the implementations build"
+    ],
+    "mss.base 404:38 call  output.format(mon=idx, date=datetime.now(UTC) if \"{date\" ...": [
+      "output is the str template of the client (default \"monitor-{mon}.png\"); the values are ints, strs, bools and a datetime"
+    ],
+    "mss.base 408:28 getattr  sct.rgb": [
+      "sct is what MSS.grab returns: a ScreenShot (cls_image) or the client's cls_image instance (opaque)"
+    ],
+    "mss.base 420:35 call  output.format(mon=mon, date=datetime.now(UTC) if \"{date\" ...": [
+      "output is the str template of the client; the values are ints, strs, bools and a datetime"
+    ],
+    "mss.base 424:24 getattr  sct.rgb": [
+      "sct is what MSS.grab returns: a ScreenShot (cls_image) or the client's cls_image instance (opaque)"
+    ],
+    "mss.base 58:31 call  str(sphinx_repr)": [
+      "the package makes the three _PlatformSpecific objects (base.py:201-203) with False, None and 32 (private class)"
+    ],
+    "mss.darwin 174:21 call  cfactory(attrs[attr], func, argtypes, restype)": [
+      "cfactory = self._cfactory (darwin.py:171)"
+    ],
+    "mss.darwin 186:30 call  CGRect()": [
+      "CGRect is a ctypes Structure without its own __init__; the first __init__ of its MRO is that of ctypes.Structure"
+    ],
+    "mss.darwin 192:36 call  core.CGGetActiveDisplayList(self.max_displays, active_dis...": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 195:40 call  core.CGDisplayBounds(display)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 196:42 call  core.CGRectStandardize(rect)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 202:38 call  core.CGDisplayRotation(display)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 207:33 call  int_(rect.origin.x)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 208:32 call  int_(rect.origin.y)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 209:34 call  int_(width)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 210:35 call  int_(height)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 215:44 call  core.CGRectUnion(all_monitors, rect)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 219:25 call  int_(all_monitors.origin.x)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 220:24 call  int_(all_monitors.origin.y)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 221:26 call  int_(all_monitors.size.width)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 222:27 call  int_(all_monitors.size.height)": [
+      "int_ = int (darwin.py:178)"
+    ],
+    "mss.darwin 230:22 call  CGRect((monitor[\"left\"], monitor[\"top\"]), (monitor[\"width...": [
+      "ctypes.Structure.__init__ builds the nested CGPoint and CGSize from the tuples; their __init__ is that of ctypes.Structure too, an implicit call of library code (no edge)"
+    ],
+    "mss.darwin 232:49 call  core.CGWindowListCreateImage(rect, 1, 0, IMAGE_OPTIONS)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 237:37 call  core.CGImageGetWidth(image_ref)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 238:39 call  core.CGImageGetHeight(image_ref)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 241:47 call  core.CGImageGetDataProvider(image_ref)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 242:52 call  core.CGDataProviderCopyData(prov)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 243:45 call  core.CFDataGetBytePtr(copy_data)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 244:43 call  core.CFDataGetLength(copy_data)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 249:55 call  core.CGImageGetBytesPerRow(image_ref)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 250:58 call  core.CGImageGetBitsPerPixel(image_ref)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 262:31 call  core.CFRelease(copy_data)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 263:27 call  core.CFRelease(image_ref)": [
+      "macOS only; no errcheck is set on the CoreGraphics functions"
+    ],
+    "mss.darwin 97:40 format  {self.origin}": [
+      "origin is a CGPoint field; ctypes returns a CGPoint instance, and its format runs object.__format__, str() and CGPoint.__repr__"
+    ],
+    "mss.darwin 97:54 format  {self.size}": [
+      "size is a CGSize field; its format runs CGSize.__repr__"
+    ],
+    "mss.linux 76:28 call  backend.lower()": [
+      "backend is a str (annotation; MSS passes its str backend)"
+    ],
+    "mss.linux.base 112:38 op  visual_info.visual_id == self.drawable_visual_id": [
+      "both operands are Visualid fields (Visualtype.visual_id, Screen.root_visual)"
+    ],
+    "mss.linux.base 271:48 call  str(serial_number)": [
+      "serial_number is the int or str that parse_edid stores"
+    ],
+    "mss.linux.base 294:49 op  primary_output in outputs": [
+      "outputs is a ctypes array of RandrOutput (XID subclass) and primary_output a RandrOutput; the array has no __contains__, so `in` iterates it and compares each item with ==, which runs XID.__eq__"
+    ],
+    "mss.linux.base 369:55 op  chosen_output == primary_output": [
+      "chosen_output is an item of the RandrOutput array or primary_output itself, and primary_output a RandrOutput (not None in this branch): == runs XID.__eq__"
+    ],
+    "mss.linux.base 458:71 op  img_reply.visual != self.drawable_visual_id": [
+      "both operands are Visualid instances (GetImageReply.visual, Screen.root_visual); Visualid defines __eq__ only, so != runs object.__ne__, which calls Visualid.__eq__"
+    ],
+    "mss.linux.base 58:34 call  xcb.setup_roots(xcb_setup)": [
+      "mss.linux.xcb re-exports setup_roots from xcbgen"
+    ],
+    "mss.linux.base 73:26 op  self.root == self.drawable": [
+      "both operands are the root field of the XCB Screen, a Window (XID subclass); ctypes returns the subclass instance, so == runs XID.__eq__"
+    ],
+    "mss.linux.xcb 158:16 call  Atom(0)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 162:20 call  Atom(1)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 163:22 call  Atom(2)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 164:16 call  Atom(3)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 165:17 call  Atom(4)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 166:19 call  Atom(5)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 167:21 call  Atom(6)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 168:21 call  Atom(7)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 169:19 call  Atom(8)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 170:24 call  Atom(9)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 171:24 call  Atom(10)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 172:24 call  Atom(11)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 173:24 call  Atom(12)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 174:24 call  Atom(13)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 175:24 call  Atom(14)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 176:24 call  Atom(15)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 177:24 call  Atom(16)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 178:21 call  Atom(17)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 179:17 call  Atom(18)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 180:20 call  Atom(19)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 181:19 call  Atom(20)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 182:18 call  Atom(21)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 183:22 call  Atom(22)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 184:29 call  Atom(23)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 185:26 call  Atom(24)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 186:25 call  Atom(25)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 187:25 call  Atom(26)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 188:28 call  Atom(27)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 189:25 call  Atom(28)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 190:26 call  Atom(29)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 191:24 call  Atom(30)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 192:19 call  Atom(31)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 193:21 call  Atom(32)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 194:19 call  Atom(33)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 195:23 call  Atom(34)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 196:21 call  Atom(35)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 197:30 call  Atom(36)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 198:25 call  Atom(37)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 199:25 call  Atom(38)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 200:20 call  Atom(39)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 201:28 call  Atom(40)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 202:26 call  Atom(41)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 203:26 call  Atom(42)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 204:22 call  Atom(43)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 205:23 call  Atom(44)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 206:22 call  Atom(45)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 207:22 call  Atom(46)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 208:26 call  Atom(47)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 209:26 call  Atom(48)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 210:24 call  Atom(49)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 211:24 call  Atom(50)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 212:31 call  Atom(51)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 213:32 call  Atom(52)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 214:29 call  Atom(53)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 215:30 call  Atom(54)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 216:25 call  Atom(55)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 217:21 call  Atom(56)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 218:23 call  Atom(57)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 219:19 call  Atom(58)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 220:23 call  Atom(59)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 221:23 call  Atom(60)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 222:22 call  Atom(61)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 223:19 call  Atom(62)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 224:22 call  Atom(63)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 225:24 call  Atom(64)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 226:22 call  Atom(65)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 227:23 call  Atom(66)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 228:21 call  Atom(67)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 229:29 call  Atom(68)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 278:21 call  XError(msg)": [
+      "XError (xcbhelpers) inherits ScreenShotError.__init__"
+    ],
+    "mss.linux.xcb 286:31 call  cookie.reply(xcb_conn)": [
+      "the restype of xcb_intern_atom is the cookie class that initialize_xcb_typed_func makes (xcbhelpers.py:483)"
+    ],
+    "mss.linux.xcb 291:25 call  XError(msg)": [
+      "XError (xcbhelpers) inherits ScreenShotError.__init__"
+    ],
+    "mss.linux.xcb 294:16 call  Atom(atom_as_xid.value)": [
+      "Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xcb 363:21 call  XError(msg)": [
+      "XError (xcbhelpers) inherits ScreenShotError.__init__"
+    ],
+    "mss.linux.xcb 392:21 call  XError(msg)": [
+      "XError (xcbhelpers) inherits ScreenShotError.__init__"
+    ],
+    "mss.linux.xcbgen 111:20 call  hash(self.value)": [
+      "self.value is an int"
+    ],
+    "mss.linux.xcbgen 138:20 call  hash(self.value)": [
+      "self.value is an int"
+    ],
+    "mss.linux.xcbgen 288:20 call  hash(self.value)": [
+      "self.value is an int"
+    ],
+    "mss.linux.xcbgen 774:55 call  LIB.xcb.xcb_get_geometry(c, drawable).reply(c)": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 787:94 call  LIB.xcb.xcb_get_image(c, format_, drawable, x, y, width, ...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 799:105 call  LIB.xcb.xcb_get_property(c, delete, window, property_, ty...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 803:53 call  LIB.xcb.xcb_no_operation_checked(c).check(c)": [
+      "the restype of this checked void request is VoidCookie (xcbgen.initialize)"
+    ],
+    "mss.linux.xcbgen 809:84 call  LIB.randr.xcb_randr_query_version(c, major_version, minor...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 813:69 call  LIB.randr.xcb_randr_get_screen_resources(c, window).reply(c)": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 817:77 call  LIB.randr.xcb_randr_get_screen_resources_current(c, windo...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 821:78 call  LIB.randr.xcb_randr_get_crtc_info(c, crtc, config_timesta...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 825:82 call  LIB.randr.xcb_randr_get_output_info(c, output, config_tim...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 829:67 call  LIB.randr.xcb_randr_get_output_primary(c, window).reply(c)": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 844:12 call  LIB.randr.xcb_randr_get_output_property( c, output, prope...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 848:73 call  LIB.randr.xcb_randr_get_monitors(c, window, get_active).r...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 854:100 call  LIB.render.xcb_render_query_version(c, client_major_versi...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 858:61 call  LIB.render.xcb_render_query_pict_formats(c).reply(c)": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 862:50 call  LIB.shm.xcb_shm_query_version(c).reply(c)": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 877:114 call  LIB.shm.xcb_shm_get_image(c, drawable, x, y, width, heigh...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 881:81 call  LIB.shm.xcb_shm_attach_fd_checked(c, shmseg, shm_fd, read...": [
+      "the restype of this checked void request is VoidCookie (xcbgen.initialize)"
+    ],
+    "mss.linux.xcbgen 887:76 call  LIB.shm.xcb_shm_create_segment(c, shmseg, size, read_only...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 891:59 call  LIB.shm.xcb_shm_detach_checked(c, shmseg).check(c)": [
+      "the restype of this checked void request is VoidCookie (xcbgen.initialize)"
+    ],
+    "mss.linux.xcbgen 897:100 call  LIB.xfixes.xcb_xfixes_query_version(c, client_major_versi...": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbgen 901:59 call  LIB.xfixes.xcb_xfixes_get_cursor_image(c).reply(c)": [
+      "the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase"
+    ],
+    "mss.linux.xcbhelpers 108:20 call  hash(self.value)": [
+      "self.value is an int"
+    ],
+    "mss.linux.xcbhelpers 217:49 call  POINTER(c_char_p)()": [
+      "the callee is the pointer class that POINTER(c_char_p) makes; CPython 3.14 documents c_char_p.__pointer_type__ as that class, a public class path rooted outside the package; a ctypes-generated pointer or array class is named through a public class path rooted outside the analysed package when an admitted runtime provides one; otherwise the site keeps a note and no callee (mss.md, J2)"
+    ],
+    "mss.linux.xcbhelpers 238:30 call  super().__str__()": [
+      "super() in XProtoError resolves to XError and ScreenShotError, which inherit __str__ from Exception (outside the package)"
+    ],
+    "mss.linux.xcbhelpers 311:39 call  self._xcb_reply_func(xcb_conn, self, err_p)": [
+      "_xcb_reply_func is the class attribute that initialize_xcb_typed_func puts on each cookie class: the foreign function xcb_..._reply of the same CDLL (xcbhelpers.py:349-351); a ctypes function pointer is no descriptor, so the attribute load does not bind self; ReplyCookieBase itself (None) is never instantiated"
+    ],
+    "mss.linux.xcbhelpers 351:23 call  type(f\"{title_name}Cookie\", (ReplyCookieBase,), {\"_xcb_re...": [
+      "type() builds a subclass of the ctypes Structure ReplyCookieBase; its metaclass is ctypes' (outside), and no package __init_subclass__, __set_name__ or metaclass method runs"
+    ],
+    "mss.linux.xcbhelpers 428:28 call  delattr(self, name)": [
+      "LibContainer defines no __delattr__"
+    ],
+    "mss.linux.xcbhelpers 495:52 call  XcbExtension.in_dll(self.randr, \"xcb_randr_id\")": [
+      "in_dll is a method of the metaclass of ctypes structures, which has no public path; named by the class of the receiver (a method of an outside object is named by the class of the receiver, also when it inherits it; a private class keeps its path): _ctypes.PyCStructType on CPython, _ctypes.structure.StructureMeta on PyPy (lib_pypy/_ctypes/structure.py:340, which inherits in_dll from _CDataMeta, basics.py:101), which mss declares (mss.md, judgement on ctypes names)"
+    ],
+    "mss.linux.xcbhelpers 502:53 call  XcbExtension.in_dll(self.render, \"xcb_render_id\")": [
+      "in_dll is a method of the metaclass of ctypes structures (no public path; CPython and PyPy names, see 495:52)"
+    ],
+    "mss.linux.xcbhelpers 509:50 call  XcbExtension.in_dll(self.shm, \"xcb_shm_id\")": [
+      "in_dll is a method of the metaclass of ctypes structures (no public path; CPython and PyPy names, see 495:52)"
+    ],
+    "mss.linux.xcbhelpers 516:53 call  XcbExtension.in_dll(self.xfixes, \"xcb_xfixes_id\")": [
+      "in_dll is a method of the metaclass of ctypes structures (no public path; CPython and PyPy names, see 495:52)"
+    ],
+    "mss.linux.xcbhelpers 548:22 call  x()": [
+      "callbacks is the [xcbgen.initialize] that xcb.initialize passes (xcb.py:344), or a client iterable of client callables (opaque, B5); the default is an empty frozenset"
+    ],
+    "mss.linux.xcbhelpers 593:32 call  iterator_factory(parent)": [
+      "every caller (xcbgen.py) passes an XCB iterator function of LIB (a ctypes function pointer)"
+    ],
+    "mss.linux.xcbhelpers 600:18 call  next_func(iterator)": [
+      "every caller (xcbgen.py) passes an XCB *_next function of LIB (a ctypes function pointer)"
+    ],
+    "mss.linux.xcbhelpers 605:27 call  pointer_func(parent)": [
+      "every caller (xcbgen.py) passes an XCB accessor function of LIB (a ctypes function pointer)"
+    ],
+    "mss.linux.xcbhelpers 606:25 call  length_func(parent)": [
+      "every caller (xcbgen.py) passes an XCB *_length function of LIB (a ctypes function pointer)"
+    ],
+    "mss.linux.xlib 270:30 call  super().__str__()": [
+      "super() in the Xlib XError resolves to ScreenShotError, which inherits __str__ from Exception (outside the package)"
+    ],
+    "mss.linux.xlib 291:2 decorator  @CFUNCTYPE(c_int, POINTER(Display), POINTER(XErrorEvent))": [
+      "the decorator is the C function type class that CFUNCTYPE(...) returns, defined in ctypes.CFUNCTYPE (named without <locals>); calling it with _error_handler makes the C callback object; the external class is the callee"
+    ],
+    "mss.linux.xlib 305:14 call  get_error(display, evt.error_code, error, len(error))": [
+      "get_error is the foreign function XGetErrorText of the CDLL that the handler loads itself (xlib.py:295-296); no errcheck is set on it"
+    ],
+    "mss.linux.xlib 307:23 call  get_error_database(display, b\"XRequest\", b\"%i\" % evt.requ...": [
+      "get_error_database is the foreign function XGetErrorDatabaseText of that CDLL (xlib.py:299); no errcheck is set on it"
+    ],
+    "mss.linux.xlib 314:27 call  locale.getencoding()": [
+      "Python 3.11 and later have locale.getencoding (the hasattr branch); 3.9 and 3.10 take getpreferredencoding"
+    ],
+    "mss.linux.xlib 357:17 call  XError(msg, details=details)": [
+      "the Xlib XError inherits ScreenShotError.__init__"
+    ],
+    "mss.linux.xlib 461:78 call  self.xlib.XSetErrorHandler(_error_handler)": [
+      "XSetErrorHandler has no errcheck (_set_cfunctions passes None for it)"
+    ],
+    "mss.linux.xlib 463:59 call  self.xlib.XOpenDisplay(display)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XOpenDisplay waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 468:87 call  self.xlib.XDefaultRootWindow(self._handles.display)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)"
+    ],
+    "mss.linux.xlib 478:40 call  self.xlib.XCloseDisplay(self._handles.display)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XCloseDisplay waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 505:42 call  self.xlib.XQueryExtension( self._handles.display, name.en...": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XQueryExtension waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 527:25 call  cfactory(attrs[attr], func, argtypes, restype, errcheck=e...": [
+      "cfactory = self._cfactory (xlib.py:518); _validate_x11 is passed as data here and called later by ctypes (at the foreign calls)"
+    ],
+    "mss.linux.xlib 539:35 call  xrandr.XRRQueryVersion(display, xrandr_major, xrandr_minor)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRQueryVersion waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 542:36 call  XWindowAttributes()": [
+      "XWindowAttributes is a ctypes Structure without its own __init__"
+    ],
+    "mss.linux.xlib 543:43 call  self.xlib.XGetWindowAttributes(display, self._handles.roo...": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XGetWindowAttributes waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 545:30 call  int_(gwa.x)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 545:50 call  int_(gwa.y)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 545:72 call  int_(gwa.width)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 545:99 call  int_(gwa.height)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 556:58 call  xrandr.XRRGetScreenResourcesCurrent(display, self._handle...": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRGetScreenResourcesCurrent waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 558:51 call  xrandr.XRRGetScreenResources(display, self._handles.drawa...": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRGetScreenResources waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 562:45 call  xrandr.XRRGetCrtcInfo(display, mon, crtcs[idx])": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRGetCrtcInfo waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 564:43 call  xrandr.XRRFreeCrtcInfo(crtc)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)"
+    ],
+    "mss.linux.xlib 569:37 call  int_(crtc.x)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 570:36 call  int_(crtc.y)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 571:38 call  int_(crtc.width)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 572:39 call  int_(crtc.height)": [
+      "int_ = int (xlib.py:532)"
+    ],
+    "mss.linux.xlib 575:39 call  xrandr.XRRFreeCrtcInfo(crtc)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)"
+    ],
+    "mss.linux.xlib 576:42 call  xrandr.XRRFreeScreenResources(mon)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)"
+    ],
+    "mss.linux.xlib 584:41 call  self.xlib.XGetImage( self._handles.display, self._handles...": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XGetImage waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xlib 609:40 call  self.xlib.XDestroyImage(ximage)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)"
+    ],
+    "mss.linux.xlib 620:54 call  self.xfixes.XFixesGetCursorImage(self._handles.display)": [
+      "ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XFixesGetCursorImage waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)"
+    ],
+    "mss.linux.xshmgetimage 109:38 call  xcb.ShmSeg(xcb.generate_id(self.conn).value)": [
+      "ShmSeg -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32"
+    ],
+    "mss.linux.xshmgetimage 175:71 op  img_reply.visual != self.drawable_visual_id": [
+      "both operands are Visualid instances (ShmGetImageReply.visual, Screen.root_visual); != runs object.__ne__, which calls Visualid.__eq__"
+    ],
+    "mss.linux.xshmgetimage 73:46 call  str(arg)": [
+      "the package passes a version tuple, OSErrors (memfd_create, mmap) and XProtoErrors (shm_attach_fd through VoidCookie.check, 118:45; the shm_get_image reply, 225:35); str() of an XProtoError runs its __str__ (private hook: no other caller)"
+    ],
+    "mss.screenshot 73:19 call  cls(data, monitor)": [
+      "cls is ScreenShot, or a client subclass (client code) when the client calls the classmethod on it"
+    ],
+    "mss.tools 133:36 call  sn.partition(b\"\\x0a\")": [
+      "edid_data is bytes (annotation; the package passes bytes(...)), so its slices are bytes"
+    ],
+    "mss.tools 164:22 call  pack(\">B\", 0)": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 167:17 call  pack(\">8B\", 137, 80, 78, 71, 13, 10, 26, 10)": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 171:19 call  pack(\">2I5B\", width, height, 8, 2, 0, 0, 0)": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 172:19 call  pack(\">I\", crc32(b\"\".join(ihdr[1:3])) & 0xFFFFFFFF)": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 172:31 call  crc32(b\"\".join(ihdr[1:3]))": [
+      "crc32 = zlib.crc32 (tools.py:160)"
+    ],
+    "mss.tools 173:19 call  pack(\">I\", len(ihdr[2]))": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 177:19 call  pack(\">I\", crc32(b\"\".join(idat[1:3])) & 0xFFFFFFFF)": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 177:31 call  crc32(b\"\".join(idat[1:3]))": [
+      "crc32 = zlib.crc32 (tools.py:160)"
+    ],
+    "mss.tools 178:19 call  pack(\">I\", len(idat[2]))": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 182:19 call  pack(\">I\", crc32(iend[1]) & 0xFFFFFFFF)": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 182:31 call  crc32(iend[1])": [
+      "crc32 = zlib.crc32 (tools.py:160)"
+    ],
+    "mss.tools 183:19 call  pack(\">I\", len(iend[2]))": [
+      "pack = struct.pack (tools.py:159)"
+    ],
+    "mss.tools 190:20 call  fileh.write(magic)": [
+      "open(output, \"wb\") returns an io.BufferedWriter"
+    ],
+    "mss.windows 52:28 call  backend.lower()": [
+      "backend is a str (annotation; MSS passes its str backend)"
+    ],
+    "mss.windows.gdi 108:29 call  WINFUNCTYPE(BOOL, HMONITOR, HDC, POINTER(RECT), LPARAM)": [
+      "Windows only (ctypes has WINFUNCTYPE and WinError only there; the module is imported only on Windows)"
+    ],
+    "mss.windows.gdi 205:40 call  LPVOID()": [
+      "ctypes.wintypes.LPVOID is ctypes.c_void_p (one class; the name the package imports)"
+    ],
+    "mss.windows.gdi 207:46 call  self.user32.GetWindowDC(0)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 208:52 call  self.gdi32.CreateCompatibleDC(self._srcdc)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 210:25 call  BITMAPINFO()": [
+      "BITMAPINFO is a ctypes Structure without its own __init__"
+    ],
+    "mss.windows.gdi 226:36 call  self.gdi32.DeleteObject(self._dib)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 230:32 call  self.gdi32.DeleteDC(self._memdc)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 234:34 call  self.user32.ReleaseDC(0, self._srcdc)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 245:21 call  cfactory(attrs[attr], func, argtypes, restype, errcheck)": [
+      "cfactory = self._cfactory (gdi.py:239); _errcheck is passed as data here and called later by ctypes (at the foreign calls)"
+    ],
+    "mss.windows.gdi 259:43 call  self.user32.SetProcessDPIAware()": [
+      "Windows only; no errcheck is set for this function"
+    ],
+    "mss.windows.gdi 271:29 call  int_(get_system_metrics(76))": [
+      "int_ = int (gdi.py:262)"
+    ],
+    "mss.windows.gdi 271:48 call  get_system_metrics(76)": [
+      "get_system_metrics is the foreign function user32.GetSystemMetrics (gdi.py:264), without errcheck"
+    ],
+    "mss.windows.gdi 272:28 call  int_(get_system_metrics(77))": [
+      "int_ = int (gdi.py:262)"
+    ],
+    "mss.windows.gdi 272:47 call  get_system_metrics(77)": [
+      "get_system_metrics is the foreign function user32.GetSystemMetrics, without errcheck"
+    ],
+    "mss.windows.gdi 273:30 call  int_(get_system_metrics(78))": [
+      "int_ = int (gdi.py:262)"
+    ],
+    "mss.windows.gdi 273:49 call  get_system_metrics(78)": [
+      "get_system_metrics is the foreign function user32.GetSystemMetrics, without errcheck"
+    ],
+    "mss.windows.gdi 274:31 call  int_(get_system_metrics(79))": [
+      "int_ = int (gdi.py:262)"
+    ],
+    "mss.windows.gdi 274:50 call  get_system_metrics(79)": [
+      "get_system_metrics is the foreign function user32.GetSystemMetrics, without errcheck"
+    ],
+    "mss.windows.gdi 279:10 decorator  @MONITORNUMPROC": [
+      "MONITORNUMPROC is the C function type class that WINFUNCTYPE(...) returns (gdi.py:108), defined in ctypes.WINFUNCTYPE (named without <locals>); the external class is the callee"
+    ],
+    "mss.windows.gdi 285:34 call  MONITORINFOEXW()": [
+      "MONITORINFOEXW is a ctypes Structure without its own __init__"
+    ],
+    "mss.windows.gdi 287:35 call  user32.GetMonitorInfoW(hmonitor, ctypes.byref(info))": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 290:24 call  int_(rct.left)": [
+      "int_ = int (closure, gdi.py:262)"
+    ],
+    "mss.windows.gdi 291:23 call  int_(rct.top)": [
+      "int_ = int (closure, gdi.py:262)"
+    ],
+    "mss.windows.gdi 294:45 call  DISPLAY_DEVICEW()": [
+      "DISPLAY_DEVICEW is a ctypes Structure without its own __init__"
+    ],
+    "mss.windows.gdi 299:42 call  user32.EnumDisplayDevicesW( ctypes.cast(ctypes.addressof(...": [
+      "Windows only; no errcheck is set for this function"
+    ],
+    "mss.windows.gdi 309:42 call  user32.EnumDisplayDevicesW( ctypes.cast(ctypes.addressof(...": [
+      "Windows only; no errcheck is set for this function"
+    ],
+    "mss.windows.gdi 320:30 call  int_(rct.right)": [
+      "int_ = int (closure, gdi.py:262)"
+    ],
+    "mss.windows.gdi 321:31 call  int_(rct.bottom)": [
+      "int_ = int (closure, gdi.py:262)"
+    ],
+    "mss.windows.gdi 331:35 call  user32.EnumDisplayMonitors(0, None, callback, 0)": [
+      "Windows calls the C callback (the decorated callback) for each monitor during EnumDisplayMonitors (callback rule); ctypes then calls the errcheck _errcheck"
+    ],
+    "mss.windows.gdi 358:33 call  gdi.DeleteObject(self._dib)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 362:36 call  LPVOID()": [
+      "ctypes.wintypes.LPVOID is ctypes.c_void_p (one class; the name the package imports)"
+    ],
+    "mss.windows.gdi 363:45 call  gdi.CreateDIBSection( memdc, self._bmi, DIB_RGB_COLORS, c...": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 371:29 call  gdi.SelectObject(memdc, self._dib)": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 380:19 call  gdi.BitBlt(memdc, 0, 0, width, height, srcdc, monitor[\"le...": [
+      "Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)"
+    ],
+    "mss.windows.gdi 384:21 call  gdi.GdiFlush()": [
+      "Windows only; no errcheck is set for this function"
+    ]
+  },
+  "trace": null
+}

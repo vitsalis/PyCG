@@ -1,0 +1,56 @@
+# The test environment (batch 7) of
+# textdistance 4.6.3: the full closure on CPython 3.14 for Linux aarch64,
+# each file by version and SHA-256. The package itself is not installed.
+#   pip install --require-hashes --only-binary :all: --no-deps -r textdistance.txt
+#
+# Computed on 2026-11-22 from PyPI's JSON (no wheel downloaded or read):
+# the requires_dist of each pinned release, the markers evaluated for
+# CPython 3.14.10 on Linux aarch64 and no extra; each hash is PyPI's for
+# that file. Each version but pytest's stack is the newest release that is
+# not yanked, not a pre-release and was uploaded on or before 2024-07-16
+# (the release of textdistance), with a usable wheel. Pure-Python wheel only
+# where there is one; else the cp314 (or abi3) aarch64 wheels for
+# manylinux and musllinux. A wheel's own METADATA could ask for more:
+# UNVERIFIED until pip installs the list with --no-deps.
+#
+# Two exceptions to the release-date rule (the lead's decisions). numpy
+# 2.3.2: the oldest release with a cp314 aarch64 wheel (uploaded
+# 2025-07-24, after the cutoff; the release current at the cutoff, 2.0.0,
+# has no wheel for CPython 3.14). hypothesis 6.140.4 (uploaded
+# 2025-10-14): the first release that declares Python 3.14 (its
+# classifiers); 6.108.2, current at the cutoff, and its attrs 23.2.0
+# declare 3.12 at most (security scan, round 7). Its closure is taken at
+# its own date: attrs 25.4.0 (2025-10-06, the first attrs that declares
+# 3.14) and sortedcontainers 2.4.0. None of the libraries that
+# textdistance imports by name when they are installed (rapidfuzz,
+# jellyfish, Levenshtein, pyxDamerauLevenshtein, distance, pylev,
+# tabulate) is in this file.
+
+# hypothesis==6.140.4; uploaded 2025-10-06.
+attrs==25.4.0 \
+    --hash=sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373
+# a test requirement; uploaded 2025-10-14.
+hypothesis==6.140.4 \
+    --hash=sha256:b05eee9ba0d69f479657a0952679d2ff8967ea5e05ca7bddc86ddb60c49291b2
+# pytest; uploaded 2026-10-06.
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# a test requirement; uploaded 2025-07-24.
+numpy==2.3.2 \
+    --hash=sha256:af58de8745f7fa9ca1c0c7c943616c6fe28e75d0c81f5c295810e3c83b5be92f \
+    --hash=sha256:095737ed986e00393ec18ec0b21b47c22889ae4b0cd2d5e88342e08b01141f58
+# pytest; uploaded 2026-08-04.
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# pytest; uploaded 2026-10-15.
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# pytest; uploaded 2026-08-17.
+Pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+# 9.2.0, as for batches 3 to 6 (one pytest stack); uploaded 2026-10-27.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# hypothesis==6.140.4; uploaded 2021-05-16.
+sortedcontainers==2.4.0 \
+    --hash=sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0

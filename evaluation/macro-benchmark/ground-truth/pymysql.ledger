@@ -1,0 +1,2848 @@
+# Call-site ledger of pymysql at c990e86083c26493f3285b1e047902994c4b1811.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md; pymysql.md
+# shows how this ledger applies them. pymysql 1.2.3 declares Python >= 3.9 and
+# the implementations CPython and PyPy (pyproject.toml classifiers,
+# docs/source/user/installation.rst). cryptography and PyNaCl are optional
+# extras that the test environment does not install: their calls are named as
+# missing modules. The module flags DEBUG (connections, protocol, _auth) are
+# False and nothing in the package, its tests or its documentation sets them
+# (tests/test_auth.py:7-8 only has them commented out), so the `if DEBUG:`
+# branches do not run (pymysql.md, judgement J1).
+default reject pymysql.protocol.OKPacketWrapper.__getattr__: the receiver of this attribute load is not an OKPacketWrapper, or the attribute is one that OKPacketWrapper.__init__ sets on the instance (affected_rows, insert_id, server_status, warning_count, message, has_next, packet); the only load that reaches __getattr__ is self.read_struct in OKPacketWrapper.__init__ (protocol.py:299), which accepts it
+default reject pymysql.protocol.EOFPacketWrapper.__getattr__: the receiver of this attribute load is not an EOFPacketWrapper, or the attribute is one that EOFPacketWrapper.__init__ sets on the instance (packet, warning_count, server_status, has_next); the package reads only those from its EOFPacketWrapper objects (connections.py:1366-1367), and no wrapper reaches a client
+default reject pymysql.protocol.LoadLocalPacketWrapper.__getattr__: the receiver of this attribute load is not a LoadLocalPacketWrapper, or the attribute is one that LoadLocalPacketWrapper.__init__ sets on the instance (packet, filename); the package reads only filename (connections.py:1343), and no wrapper reaches a client
+default reject pymysql.DBAPISet.__eq__: no DBAPISet takes part in this comparison, `in` test or key lookup; the package never compares, hashes or stores its DBAPISet constants (STRING, BINARY, ...), only clients do; in DBAPISet's own `in` tests, only the lookup of __ne__ (__init__.py:87:26), whose other can be a DBAPISet, can meet a DBAPISet.__eq__, and it accepts it (judgement J12); in __eq__'s lookup (93:26) other is not a frozenset
+default reject pymysql.DBAPISet.__hash__: no DBAPISet is hashed at this site (see the default for DBAPISet.__eq__); DBAPISet.__ne__ accepts it at its `in` test (__init__.py:87), where a client compares two DBAPISets
+default reject pymysql.DBAPISet.__ne__: no DBAPISet is the left operand of this comparison (see the default for DBAPISet.__eq__)
+default reject pymysql.charset.Charset.__repr__: no Charset is formatted, converted to str or repr at this site; the package only reads id, name, collation, is_default, encoding and is_binary of its Charset objects
+default reject pymysql.protocol.FieldDescriptorPacket.__str__: no FieldDescriptorPacket is formatted or converted to str at this site; the one format of a field (connections.py:1484) is under `if DEBUG:`, which does not run (judgement J1)
+default reject pymysql.cursors.Cursor.__iter__: no cursor is iterated or unpacked at this site; the package never iterates one of its cursors (the iteration of SSCursor.fetchall goes over iter(self.fetchone, None), a callable iterator)
+default reject pymysql.cursors.Cursor.__next__: no cursor is iterated or unpacked at this site (see the default for Cursor.__iter__)
+== pymysql
+
+[pymysql]
+99:18 call  DBAPISet([FIELD_TYPE.ENUM, FIELD_TYPE.STRING, FIELD_TYPE....
+    note: DBAPISet subclasses frozenset and defines neither __init__ nor __new__; frozenset defines no __init__ (CPython and PyPy), so the first __init__ of the MRO is object.__init__ and the class call has no edge (the tabulate ruling on an inherited __init__)
+100:18 call  DBAPISet( [ FIELD_TYPE.BLOB, FIELD_TYPE.LONG_BLOB, FIELD_...
+    note: no edge: DBAPISet's first __init__ is object.__init__ (see 99:18)
+108:18 call  DBAPISet( [ FIELD_TYPE.DECIMAL, FIELD_TYPE.DOUBLE, FIELD_...
+    note: no edge: DBAPISet's first __init__ is object.__init__ (see 99:18)
+120:16 call  DBAPISet([FIELD_TYPE.DATE, FIELD_TYPE.NEWDATE])
+    note: no edge: DBAPISet's first __init__ is object.__init__ (see 99:18)
+121:16 call  DBAPISet([FIELD_TYPE.TIME])
+    note: no edge: DBAPISet's first __init__ is object.__init__ (see 99:18)
+122:21 call  DBAPISet([FIELD_TYPE.TIMESTAMP, FIELD_TYPE.DATETIME])
+    note: no edge: DBAPISet's first __init__ is object.__init__ (see 99:18)
+124:17 call  DBAPISet()
+    note: no edge: DBAPISet's first __init__ is object.__init__ (see 99:18)
+
+[pymysql.DBAPISet.__ne__]
+87:26 op  other not in self
+    -> pymysql.DBAPISet.__hash__
+    -> pymysql.DBAPISet.__eq__
+    note: other is not a set; when it is another DBAPISet (the tests: pymysql.STRING != pymysql.NUMBER, test_MySQLdb_nonstandard.py:15), the frozenset lookup hashes it with DBAPISet.__hash__; DBAPISet is public, so self can be a DBAPISet that a client builds from its own type codes; when an element's hash equals other's (an int equal to hash(pymysql.NUMBER) in DBAPISet([...]) != pymysql.NUMBER; Codex round 1, whose witness is a client element that returns NotImplemented), the lookup compares the element with other, int.__eq__ returns NotImplemented, and the interpreter calls other's reflected DBAPISet.__eq__ (judgement J12)
+84:22 call  isinstance(other, set)
+    -> <builtin>.isinstance
+85:36 call  frozenset.__ne__(self, other)
+    -> <builtin>.frozenset.__ne__
+    reject pymysql.DBAPISet.__ne__: an explicit call of the builtin frozenset.__ne__, not of the override
+
+[pymysql.DBAPISet.__eq__]
+90:22 call  isinstance(other, frozenset)
+    -> <builtin>.isinstance
+91:36 call  frozenset.__eq__(self, other)
+    -> <builtin>.frozenset.__eq__
+    reject pymysql.DBAPISet.__eq__: an explicit call of the builtin frozenset.__eq__, not of the override
+
+[pymysql.DBAPISet.__hash__]
+96:34 call  frozenset.__hash__(self)
+    -> <builtin>.frozenset.__hash__
+    reject pymysql.DBAPISet.__hash__: an explicit call of the builtin frozenset.__hash__, not of the override
+
+[pymysql.Binary]
+129:17 call  bytes(x)
+    -> <builtin>.bytes
+
+== pymysql._auth
+
+[pymysql._auth]
+21:19 call  partial(hashlib.new, "sha1")
+    -> functools.partial
+
+[pymysql._auth.scramble_native_password]
+33:22 call  sha1_new(password)
+    -> functools.partial.__call__
+    note: sha1_new is the module's partial(hashlib.new, "sha1") (line 21); calling it runs functools.partial.__call__, which calls hashlib.new back (library code: no edge)
+33:39 call  sha1_new(password).digest()
+    -> _hashlib.HASH.digest
+    -> _sha1.sha1.digest
+    -> _sha1.sha.digest
+    note: hashlib.new("sha1") returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 object; on PyPy the fallback _sha1.sha1 is a function that returns a _sha1.sha (the precedent of path, judgement J6); pymysql supports CPython 3.9+ and PyPy (judgement J2)
+34:22 call  sha1_new(stage1)
+    -> functools.partial.__call__
+    note: sha1_new is the module's partial(hashlib.new, "sha1") (line 21)
+34:37 call  sha1_new(stage1).digest()
+    -> _hashlib.HASH.digest
+    -> _sha1.sha1.digest
+    -> _sha1.sha.digest
+    note: the SHA-1 object of hashlib.new (see 33:39)
+35:17 call  sha1_new()
+    -> functools.partial.__call__
+    note: sha1_new is the module's partial(hashlib.new, "sha1") (line 21)
+36:13 call  s.update(message[:SCRAMBLE_LENGTH])
+    -> _hashlib.HASH.update
+    -> _sha1.sha1.update
+    -> _sha1.sha.update
+    note: s is the SHA-1 object of sha1_new() (see 33:39)
+37:13 call  s.update(stage2)
+    -> _hashlib.HASH.update
+    -> _sha1.sha1.update
+    -> _sha1.sha.update
+    note: s is the SHA-1 object of sha1_new() (see 33:39)
+38:22 call  s.digest()
+    -> _hashlib.HASH.digest
+    -> _sha1.sha1.digest
+    -> _sha1.sha.digest
+    note: s is the SHA-1 object of sha1_new() (see 33:39)
+39:21 call  _my_crypt(result, stage1)
+    -> pymysql._auth._my_crypt
+
+[pymysql._auth._my_crypt]
+43:23 call  bytearray(message1)
+    -> <builtin>.bytearray
+45:19 call  range(len(result))
+    -> <builtin>.range
+45:23 call  len(result)
+    -> <builtin>.len
+48:17 call  bytes(result)
+    -> <builtin>.bytes
+
+[pymysql._auth._init_nacl]
+64:27 call  RuntimeError( "'pynacl' package is required for ed25519_p...
+    -> <builtin>.RuntimeError
+
+[pymysql._auth._scalar_clamp]
+70:19 call  bytearray(s32)
+    -> <builtin>.bytearray
+71:16 call  bytes(bytearray([ba[0] & 248]))
+    -> <builtin>.bytes
+71:26 call  bytearray([ba[0] & 248])
+    -> <builtin>.bytearray
+72:17 call  bytes(bytearray([(ba[31] & 127) | 64]))
+    -> <builtin>.bytes
+72:27 call  bytearray([(ba[31] & 127) | 64])
+    -> <builtin>.bytearray
+73:23 call  bytes(s32[1:31])
+    -> <builtin>.bytes
+
+[pymysql._auth.ed25519_password]
+84:19 call  _init_nacl()
+    -> pymysql._auth._init_nacl
+87:23 call  hashlib.sha512(password)
+    -> hashlib.sha512
+87:40 call  hashlib.sha512(password).digest()
+    -> _hashlib.HASH.digest
+    -> _sha512.sha512.digest
+    -> _sha2.SHA512Type.digest
+    note: hashlib.sha512 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha512.sha512 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha512.py), _sha2.SHA512Type from CPython 3.12 (the precedent of validators for SHA-256)
+90:22 call  _scalar_clamp(h[:32])
+    -> pymysql._auth._scalar_clamp
+93:23 call  hashlib.sha512(h[32:] + scramble)
+    -> hashlib.sha512
+93:49 call  hashlib.sha512(h[32:] + scramble).digest()
+    -> _hashlib.HASH.digest
+    -> _sha512.sha512.digest
+    -> _sha2.SHA512Type.digest
+    note: the SHA-512 object of hashlib.sha512 (see 87:40)
+96:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(r)
+    -> nacl.bindings.crypto_core_ed25519_scalar_reduce
+    note: _nacl_bindings is nacl.bindings, which _init_nacl imports (line 60) before this line runs; PyNaCl is an optional extra that the environment does not install: a missing module, named by its imported path
+97:62 call  _nacl_bindings.crypto_scalarmult_ed25519_base_noclamp(r)
+    -> nacl.bindings.crypto_scalarmult_ed25519_base_noclamp
+    note: missing module (see 96:57)
+100:62 call  _nacl_bindings.crypto_scalarmult_ed25519_base_noclamp(s)
+    -> nacl.bindings.crypto_scalarmult_ed25519_base_noclamp
+    note: missing module (see 96:57)
+103:23 call  hashlib.sha512(R + A + scramble)
+    -> hashlib.sha512
+103:48 call  hashlib.sha512(R + A + scramble).digest()
+    -> _hashlib.HASH.digest
+    -> _sha512.sha512.digest
+    -> _sha2.SHA512Type.digest
+    note: the SHA-512 object of hashlib.sha512 (see 87:40)
+106:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(k)
+    -> nacl.bindings.crypto_core_ed25519_scalar_reduce
+    note: missing module (see 96:57)
+107:55 call  _nacl_bindings.crypto_core_ed25519_scalar_mul(k, s)
+    -> nacl.bindings.crypto_core_ed25519_scalar_mul
+    note: missing module (see 96:57)
+108:54 call  _nacl_bindings.crypto_core_ed25519_scalar_add(ks, r)
+    -> nacl.bindings.crypto_core_ed25519_scalar_add
+    note: missing module (see 96:57)
+
+[pymysql._auth._roundtrip]
+118:22 call  conn.write_packet(send_data)
+    -> pymysql.connections.Connection.write_packet
+    note: _auth is private; the package passes conn=self, a Connection, from Connection._request_authentication and _process_auth (the tests' mock of write_packet is a client object, rejected)
+119:28 call  conn._read_packet()
+    -> pymysql.connections.Connection._read_packet
+    note: conn is a Connection (see 118:22)
+120:20 call  pkt.check_error()
+    -> pymysql.protocol.MysqlPacket.check_error
+    note: pkt is the MysqlPacket of conn._read_packet() (default packet_type)
+
+[pymysql._auth._xor_password]
+128:31 call  bytearray(password)
+    -> <builtin>.bytearray
+130:19 call  len(salt)
+    -> <builtin>.len
+131:19 call  range(len(password_bytes))
+    -> <builtin>.range
+131:23 call  len(password_bytes)
+    -> <builtin>.len
+133:17 call  bytes(password_bytes)
+    -> <builtin>.bytes
+
+[pymysql._auth.sha2_rsa_encrypt]
+142:27 call  RuntimeError( "'cryptography' package is required for sha...
+    -> <builtin>.RuntimeError
+146:28 call  _xor_password(password + b"\0", salt)
+    -> pymysql._auth._xor_password
+147:48 call  serialization.load_pem_public_key(public_key, default_bac...
+    -> cryptography.hazmat.primitives.serialization.load_pem_public_key
+    note: cryptography is an optional extra (rsa) that the environment does not install: a missing module, named by its imported path; both sides of the optional import (lines 7-14) run
+147:76 call  default_backend()
+    -> cryptography.hazmat.backends.default_backend
+    note: missing module (see 147:48)
+148:27 call  rsa_key.encrypt( message, padding.OAEP( mgf=padding.MGF1(...
+    -> cryptography.hazmat.primitives.serialization.load_pem_public_key.encrypt
+    note: rsa_key is the result of the missing-module call load_pem_public_key (147:48): a stub value whose method keeps the factory's access path (the precedent of django-constance, django_redis.get_redis_connection.get)
+150:21 call  padding.OAEP( mgf=padding.MGF1(algorithm=hashes.SHA1()), ...
+    -> cryptography.hazmat.primitives.asymmetric.padding.OAEP
+    note: missing module (see 147:48)
+151:29 call  padding.MGF1(algorithm=hashes.SHA1())
+    -> cryptography.hazmat.primitives.asymmetric.padding.MGF1
+    note: missing module (see 147:48)
+151:51 call  hashes.SHA1()
+    -> cryptography.hazmat.primitives.hashes.SHA1
+    note: missing module (see 147:48)
+152:34 call  hashes.SHA1()
+    -> cryptography.hazmat.primitives.hashes.SHA1
+    note: missing module (see 147:48)
+
+[pymysql._auth.sha256_password_auth]
+161:18 call  print("sha256: Sending plain password")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+163:26 call  _roundtrip(conn, data)
+    -> pymysql._auth._roundtrip
+165:34 call  pkt.is_auth_switch_request()
+    -> pymysql.protocol.MysqlPacket.is_auth_switch_request
+    note: pkt is a MysqlPacket: the package passes the packet of Connection._read_packet or of _process_auth without a handler (connections.py:1066, 1093); a packet that a client handler returned can also reach this function (an auth switch to a plugin without a handler, connections.py:1045-1046 and 1093), but it is the result of a client callback, opaque (B5): no edge
+166:33 call  pkt.read_all()
+    -> pymysql.protocol.MysqlPacket.read_all
+    note: pkt is a MysqlPacket (see 165:34)
+167:30 call  conn.salt.endswith(b"\0")
+    -> <builtin>.bytes.endswith
+    note: conn.salt is the bytes slice that read_all returns
+172:22 call  print("sha256: Requesting server public key")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+173:29 call  _roundtrip(conn, b"\1")
+    -> pymysql._auth._roundtrip
+175:30 call  pkt.is_extra_auth_data()
+    -> pymysql.protocol.MysqlPacket.is_extra_auth_data
+    note: pkt is a MysqlPacket: the argument (see 165:34) or the packet of _roundtrip
+178:18 call  print("Received public key:\n", conn.server_public_key.de...
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+178:74 call  conn.server_public_key.decode("ascii")
+    note: no edge: an argument of the print under `if DEBUG:`, which does not run (judgement J1)
+182:35 call  OperationalError("Couldn't receive server's public key")
+    -> pymysql.err.Error.__init__
+184:32 call  sha2_rsa_encrypt(conn.password, conn.salt, conn.server_pu...
+    -> pymysql._auth.sha2_rsa_encrypt
+188:22 call  _roundtrip(conn, data)
+    -> pymysql._auth._roundtrip
+
+[pymysql._auth.scramble_caching_sha2]
+200:24 call  hashlib.sha256(password)
+    -> hashlib.sha256
+200:41 call  hashlib.sha256(password).digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha256.sha256 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha256.py), _sha2.SHA256Type from CPython 3.12 (the precedent of validators, trx_address.py:33)
+201:24 call  hashlib.sha256(p1)
+    -> hashlib.sha256
+201:35 call  hashlib.sha256(p1).digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: the SHA-256 object of hashlib.sha256 (see 200:41)
+202:24 call  hashlib.sha256(p2 + nonce)
+    -> hashlib.sha256
+202:43 call  hashlib.sha256(p2 + nonce).digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: the SHA-256 object of hashlib.sha256 (see 200:41)
+204:20 call  bytearray(p1)
+    -> <builtin>.bytearray
+205:19 call  range(len(p3))
+    -> <builtin>.range
+205:23 call  len(p3)
+    -> <builtin>.len
+208:17 call  bytes(res)
+    -> <builtin>.bytes
+
+[pymysql._auth.caching_sha2_password_auth]
+214:26 call  _roundtrip(conn, b"")
+    -> pymysql._auth._roundtrip
+216:34 call  pkt.is_auth_switch_request()
+    -> pymysql.protocol.MysqlPacket.is_auth_switch_request
+    note: pkt is a MysqlPacket: the package passes the packet of Connection._read_packet or of _process_auth without a handler (connections.py:1063, 1091); a packet that a client handler returned can also reach this function (an auth switch to a plugin without a handler, connections.py:1045-1046 and 1091), but it is the result of a client callback, opaque (B5): no edge
+218:33 call  pkt.read_all()
+    -> pymysql.protocol.MysqlPacket.read_all
+    note: pkt is a MysqlPacket (see 216:34)
+219:30 call  conn.salt.endswith(b"\0")
+    -> <builtin>.bytes.endswith
+    note: conn.salt is the bytes slice that read_all returns
+222:18 call  print(f"caching sha2: Trying fast path. salt={conn.salt.h...
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+222:72 call  conn.salt.hex()
+    note: no edge: in the f-string argument of the print under `if DEBUG:`, which does not run (judgement J1)
+223:42 call  scramble_caching_sha2(conn.password, conn.salt)
+    -> pymysql._auth.scramble_caching_sha2
+224:25 call  _roundtrip(conn, scrambled)
+    -> pymysql._auth._roundtrip
+227:34 call  pkt.is_extra_auth_data()
+    -> pymysql.protocol.MysqlPacket.is_extra_auth_data
+    note: pkt is a MysqlPacket: the argument (see 216:34) or the packet of _roundtrip
+228:31 call  OperationalError( "caching sha2: Unknown packet for fast ...
+    -> pymysql.err.Error.__init__
+237:16 call  pkt.advance(1)
+    -> pymysql.protocol.MysqlPacket.advance
+238:23 call  pkt.read_uint8()
+    -> pymysql.protocol.MysqlPacket.read_uint8
+242:18 call  print("caching sha2: succeeded by fast path.")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+243:32 call  conn._read_packet()
+    -> pymysql.connections.Connection._read_packet
+    note: conn is a Connection (see 118:22)
+244:24 call  pkt.check_error()
+    -> pymysql.protocol.MysqlPacket.check_error
+248:31 call  OperationalError("caching sha2: Unknown result for fast a...
+    -> pymysql.err.Error.__init__
+251:14 call  print("caching sha2: Trying full auth...")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+255:18 call  print("caching sha2: Sending plain password via secure co...
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+256:26 call  _roundtrip(conn, conn.password + b"\0")
+    -> pymysql._auth._roundtrip
+259:25 call  _roundtrip(conn, b"\x02")
+    -> pymysql._auth._roundtrip
+260:38 call  pkt.is_extra_auth_data()
+    -> pymysql.protocol.MysqlPacket.is_extra_auth_data
+    note: pkt is the MysqlPacket of _roundtrip
+261:35 call  OperationalError( "caching sha2: Unknown packet for publi...
+    -> pymysql.err.Error.__init__
+267:18 call  print(conn.server_public_key.decode("ascii"))
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+267:48 call  conn.server_public_key.decode("ascii")
+    note: no edge: an argument of the print under `if DEBUG:`, which does not run (judgement J1)
+269:28 call  sha2_rsa_encrypt(conn.password, conn.salt, conn.server_pu...
+    -> pymysql._auth.sha2_rsa_encrypt
+270:21 call  _roundtrip(conn, data)
+    -> pymysql._auth._roundtrip
+
+== pymysql.charset
+
+[pymysql.charset]
+16:6 decorator  @property
+    -> <builtin>.property
+29:6 decorator  @property
+    -> <builtin>.property
+54:21 call  Charsets()
+    -> pymysql.charset.Charsets.__init__
+75:14 call  _charsets.add(Charset(1, "big5", "big5_chinese_ci", True))
+    -> pymysql.charset.Charsets.add
+75:22 call  Charset(1, "big5", "big5_chinese_ci", True)
+    -> pymysql.charset.Charset.__init__
+76:14 call  _charsets.add(Charset(2, "latin2", "latin2_czech_cs"))
+    -> pymysql.charset.Charsets.add
+76:22 call  Charset(2, "latin2", "latin2_czech_cs")
+    -> pymysql.charset.Charset.__init__
+77:14 call  _charsets.add(Charset(3, "dec8", "dec8_swedish_ci", True))
+    -> pymysql.charset.Charsets.add
+77:22 call  Charset(3, "dec8", "dec8_swedish_ci", True)
+    -> pymysql.charset.Charset.__init__
+78:14 call  _charsets.add(Charset(4, "cp850", "cp850_general_ci", True))
+    -> pymysql.charset.Charsets.add
+78:22 call  Charset(4, "cp850", "cp850_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+79:14 call  _charsets.add(Charset(5, "latin1", "latin1_german1_ci"))
+    -> pymysql.charset.Charsets.add
+79:22 call  Charset(5, "latin1", "latin1_german1_ci")
+    -> pymysql.charset.Charset.__init__
+80:14 call  _charsets.add(Charset(6, "hp8", "hp8_english_ci", True))
+    -> pymysql.charset.Charsets.add
+80:22 call  Charset(6, "hp8", "hp8_english_ci", True)
+    -> pymysql.charset.Charset.__init__
+81:14 call  _charsets.add(Charset(7, "koi8r", "koi8r_general_ci", True))
+    -> pymysql.charset.Charsets.add
+81:22 call  Charset(7, "koi8r", "koi8r_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+82:14 call  _charsets.add(Charset(8, "latin1", "latin1_swedish_ci", T...
+    -> pymysql.charset.Charsets.add
+82:22 call  Charset(8, "latin1", "latin1_swedish_ci", True)
+    -> pymysql.charset.Charset.__init__
+83:14 call  _charsets.add(Charset(9, "latin2", "latin2_general_ci", T...
+    -> pymysql.charset.Charsets.add
+83:22 call  Charset(9, "latin2", "latin2_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+84:14 call  _charsets.add(Charset(10, "swe7", "swe7_swedish_ci", True))
+    -> pymysql.charset.Charsets.add
+84:22 call  Charset(10, "swe7", "swe7_swedish_ci", True)
+    -> pymysql.charset.Charset.__init__
+85:14 call  _charsets.add(Charset(11, "ascii", "ascii_general_ci", Tr...
+    -> pymysql.charset.Charsets.add
+85:22 call  Charset(11, "ascii", "ascii_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+86:14 call  _charsets.add(Charset(12, "ujis", "ujis_japanese_ci", True))
+    -> pymysql.charset.Charsets.add
+86:22 call  Charset(12, "ujis", "ujis_japanese_ci", True)
+    -> pymysql.charset.Charset.__init__
+87:14 call  _charsets.add(Charset(13, "sjis", "sjis_japanese_ci", True))
+    -> pymysql.charset.Charsets.add
+87:22 call  Charset(13, "sjis", "sjis_japanese_ci", True)
+    -> pymysql.charset.Charset.__init__
+88:14 call  _charsets.add(Charset(14, "cp1251", "cp1251_bulgarian_ci"))
+    -> pymysql.charset.Charsets.add
+88:22 call  Charset(14, "cp1251", "cp1251_bulgarian_ci")
+    -> pymysql.charset.Charset.__init__
+89:14 call  _charsets.add(Charset(15, "latin1", "latin1_danish_ci"))
+    -> pymysql.charset.Charsets.add
+89:22 call  Charset(15, "latin1", "latin1_danish_ci")
+    -> pymysql.charset.Charset.__init__
+90:14 call  _charsets.add(Charset(16, "hebrew", "hebrew_general_ci", ...
+    -> pymysql.charset.Charsets.add
+90:22 call  Charset(16, "hebrew", "hebrew_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+91:14 call  _charsets.add(Charset(18, "tis620", "tis620_thai_ci", True))
+    -> pymysql.charset.Charsets.add
+91:22 call  Charset(18, "tis620", "tis620_thai_ci", True)
+    -> pymysql.charset.Charset.__init__
+92:14 call  _charsets.add(Charset(19, "euckr", "euckr_korean_ci", True))
+    -> pymysql.charset.Charsets.add
+92:22 call  Charset(19, "euckr", "euckr_korean_ci", True)
+    -> pymysql.charset.Charset.__init__
+93:14 call  _charsets.add(Charset(20, "latin7", "latin7_estonian_cs"))
+    -> pymysql.charset.Charsets.add
+93:22 call  Charset(20, "latin7", "latin7_estonian_cs")
+    -> pymysql.charset.Charset.__init__
+94:14 call  _charsets.add(Charset(21, "latin2", "latin2_hungarian_ci"))
+    -> pymysql.charset.Charsets.add
+94:22 call  Charset(21, "latin2", "latin2_hungarian_ci")
+    -> pymysql.charset.Charset.__init__
+95:14 call  _charsets.add(Charset(22, "koi8u", "koi8u_general_ci", Tr...
+    -> pymysql.charset.Charsets.add
+95:22 call  Charset(22, "koi8u", "koi8u_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+96:14 call  _charsets.add(Charset(23, "cp1251", "cp1251_ukrainian_ci"))
+    -> pymysql.charset.Charsets.add
+96:22 call  Charset(23, "cp1251", "cp1251_ukrainian_ci")
+    -> pymysql.charset.Charset.__init__
+97:14 call  _charsets.add(Charset(24, "gb2312", "gb2312_chinese_ci", ...
+    -> pymysql.charset.Charsets.add
+97:22 call  Charset(24, "gb2312", "gb2312_chinese_ci", True)
+    -> pymysql.charset.Charset.__init__
+98:14 call  _charsets.add(Charset(25, "greek", "greek_general_ci", Tr...
+    -> pymysql.charset.Charsets.add
+98:22 call  Charset(25, "greek", "greek_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+99:14 call  _charsets.add(Charset(26, "cp1250", "cp1250_general_ci", ...
+    -> pymysql.charset.Charsets.add
+99:22 call  Charset(26, "cp1250", "cp1250_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+100:14 call  _charsets.add(Charset(27, "latin2", "latin2_croatian_ci"))
+    -> pymysql.charset.Charsets.add
+100:22 call  Charset(27, "latin2", "latin2_croatian_ci")
+    -> pymysql.charset.Charset.__init__
+101:14 call  _charsets.add(Charset(28, "gbk", "gbk_chinese_ci", True))
+    -> pymysql.charset.Charsets.add
+101:22 call  Charset(28, "gbk", "gbk_chinese_ci", True)
+    -> pymysql.charset.Charset.__init__
+102:14 call  _charsets.add(Charset(29, "cp1257", "cp1257_lithuanian_ci"))
+    -> pymysql.charset.Charsets.add
+102:22 call  Charset(29, "cp1257", "cp1257_lithuanian_ci")
+    -> pymysql.charset.Charset.__init__
+103:14 call  _charsets.add(Charset(30, "latin5", "latin5_turkish_ci", ...
+    -> pymysql.charset.Charsets.add
+103:22 call  Charset(30, "latin5", "latin5_turkish_ci", True)
+    -> pymysql.charset.Charset.__init__
+104:14 call  _charsets.add(Charset(31, "latin1", "latin1_german2_ci"))
+    -> pymysql.charset.Charsets.add
+104:22 call  Charset(31, "latin1", "latin1_german2_ci")
+    -> pymysql.charset.Charset.__init__
+105:14 call  _charsets.add(Charset(32, "armscii8", "armscii8_general_c...
+    -> pymysql.charset.Charsets.add
+105:22 call  Charset(32, "armscii8", "armscii8_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+106:14 call  _charsets.add(Charset(33, "utf8mb3", "utf8mb3_general_ci"...
+    -> pymysql.charset.Charsets.add
+106:22 call  Charset(33, "utf8mb3", "utf8mb3_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+107:14 call  _charsets.add(Charset(34, "cp1250", "cp1250_czech_cs"))
+    -> pymysql.charset.Charsets.add
+107:22 call  Charset(34, "cp1250", "cp1250_czech_cs")
+    -> pymysql.charset.Charset.__init__
+108:14 call  _charsets.add(Charset(36, "cp866", "cp866_general_ci", Tr...
+    -> pymysql.charset.Charsets.add
+108:22 call  Charset(36, "cp866", "cp866_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+109:14 call  _charsets.add(Charset(37, "keybcs2", "keybcs2_general_ci"...
+    -> pymysql.charset.Charsets.add
+109:22 call  Charset(37, "keybcs2", "keybcs2_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+110:14 call  _charsets.add(Charset(38, "macce", "macce_general_ci", Tr...
+    -> pymysql.charset.Charsets.add
+110:22 call  Charset(38, "macce", "macce_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+111:14 call  _charsets.add(Charset(39, "macroman", "macroman_general_c...
+    -> pymysql.charset.Charsets.add
+111:22 call  Charset(39, "macroman", "macroman_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+112:14 call  _charsets.add(Charset(40, "cp852", "cp852_general_ci", Tr...
+    -> pymysql.charset.Charsets.add
+112:22 call  Charset(40, "cp852", "cp852_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+113:14 call  _charsets.add(Charset(41, "latin7", "latin7_general_ci", ...
+    -> pymysql.charset.Charsets.add
+113:22 call  Charset(41, "latin7", "latin7_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+114:14 call  _charsets.add(Charset(42, "latin7", "latin7_general_cs"))
+    -> pymysql.charset.Charsets.add
+114:22 call  Charset(42, "latin7", "latin7_general_cs")
+    -> pymysql.charset.Charset.__init__
+115:14 call  _charsets.add(Charset(43, "macce", "macce_bin"))
+    -> pymysql.charset.Charsets.add
+115:22 call  Charset(43, "macce", "macce_bin")
+    -> pymysql.charset.Charset.__init__
+116:14 call  _charsets.add(Charset(44, "cp1250", "cp1250_croatian_ci"))
+    -> pymysql.charset.Charsets.add
+116:22 call  Charset(44, "cp1250", "cp1250_croatian_ci")
+    -> pymysql.charset.Charset.__init__
+117:14 call  _charsets.add(Charset(45, "utf8mb4", "utf8mb4_general_ci"...
+    -> pymysql.charset.Charsets.add
+117:22 call  Charset(45, "utf8mb4", "utf8mb4_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+118:14 call  _charsets.add(Charset(46, "utf8mb4", "utf8mb4_bin"))
+    -> pymysql.charset.Charsets.add
+118:22 call  Charset(46, "utf8mb4", "utf8mb4_bin")
+    -> pymysql.charset.Charset.__init__
+119:14 call  _charsets.add(Charset(47, "latin1", "latin1_bin"))
+    -> pymysql.charset.Charsets.add
+119:22 call  Charset(47, "latin1", "latin1_bin")
+    -> pymysql.charset.Charset.__init__
+120:14 call  _charsets.add(Charset(48, "latin1", "latin1_general_ci"))
+    -> pymysql.charset.Charsets.add
+120:22 call  Charset(48, "latin1", "latin1_general_ci")
+    -> pymysql.charset.Charset.__init__
+121:14 call  _charsets.add(Charset(49, "latin1", "latin1_general_cs"))
+    -> pymysql.charset.Charsets.add
+121:22 call  Charset(49, "latin1", "latin1_general_cs")
+    -> pymysql.charset.Charset.__init__
+122:14 call  _charsets.add(Charset(50, "cp1251", "cp1251_bin"))
+    -> pymysql.charset.Charsets.add
+122:22 call  Charset(50, "cp1251", "cp1251_bin")
+    -> pymysql.charset.Charset.__init__
+123:14 call  _charsets.add(Charset(51, "cp1251", "cp1251_general_ci", ...
+    -> pymysql.charset.Charsets.add
+123:22 call  Charset(51, "cp1251", "cp1251_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+124:14 call  _charsets.add(Charset(52, "cp1251", "cp1251_general_cs"))
+    -> pymysql.charset.Charsets.add
+124:22 call  Charset(52, "cp1251", "cp1251_general_cs")
+    -> pymysql.charset.Charset.__init__
+125:14 call  _charsets.add(Charset(53, "macroman", "macroman_bin"))
+    -> pymysql.charset.Charsets.add
+125:22 call  Charset(53, "macroman", "macroman_bin")
+    -> pymysql.charset.Charset.__init__
+126:14 call  _charsets.add(Charset(57, "cp1256", "cp1256_general_ci", ...
+    -> pymysql.charset.Charsets.add
+126:22 call  Charset(57, "cp1256", "cp1256_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+127:14 call  _charsets.add(Charset(58, "cp1257", "cp1257_bin"))
+    -> pymysql.charset.Charsets.add
+127:22 call  Charset(58, "cp1257", "cp1257_bin")
+    -> pymysql.charset.Charset.__init__
+128:14 call  _charsets.add(Charset(59, "cp1257", "cp1257_general_ci", ...
+    -> pymysql.charset.Charsets.add
+128:22 call  Charset(59, "cp1257", "cp1257_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+129:14 call  _charsets.add(Charset(63, "binary", "binary", True))
+    -> pymysql.charset.Charsets.add
+129:22 call  Charset(63, "binary", "binary", True)
+    -> pymysql.charset.Charset.__init__
+130:14 call  _charsets.add(Charset(64, "armscii8", "armscii8_bin"))
+    -> pymysql.charset.Charsets.add
+130:22 call  Charset(64, "armscii8", "armscii8_bin")
+    -> pymysql.charset.Charset.__init__
+131:14 call  _charsets.add(Charset(65, "ascii", "ascii_bin"))
+    -> pymysql.charset.Charsets.add
+131:22 call  Charset(65, "ascii", "ascii_bin")
+    -> pymysql.charset.Charset.__init__
+132:14 call  _charsets.add(Charset(66, "cp1250", "cp1250_bin"))
+    -> pymysql.charset.Charsets.add
+132:22 call  Charset(66, "cp1250", "cp1250_bin")
+    -> pymysql.charset.Charset.__init__
+133:14 call  _charsets.add(Charset(67, "cp1256", "cp1256_bin"))
+    -> pymysql.charset.Charsets.add
+133:22 call  Charset(67, "cp1256", "cp1256_bin")
+    -> pymysql.charset.Charset.__init__
+134:14 call  _charsets.add(Charset(68, "cp866", "cp866_bin"))
+    -> pymysql.charset.Charsets.add
+134:22 call  Charset(68, "cp866", "cp866_bin")
+    -> pymysql.charset.Charset.__init__
+135:14 call  _charsets.add(Charset(69, "dec8", "dec8_bin"))
+    -> pymysql.charset.Charsets.add
+135:22 call  Charset(69, "dec8", "dec8_bin")
+    -> pymysql.charset.Charset.__init__
+136:14 call  _charsets.add(Charset(70, "greek", "greek_bin"))
+    -> pymysql.charset.Charsets.add
+136:22 call  Charset(70, "greek", "greek_bin")
+    -> pymysql.charset.Charset.__init__
+137:14 call  _charsets.add(Charset(71, "hebrew", "hebrew_bin"))
+    -> pymysql.charset.Charsets.add
+137:22 call  Charset(71, "hebrew", "hebrew_bin")
+    -> pymysql.charset.Charset.__init__
+138:14 call  _charsets.add(Charset(72, "hp8", "hp8_bin"))
+    -> pymysql.charset.Charsets.add
+138:22 call  Charset(72, "hp8", "hp8_bin")
+    -> pymysql.charset.Charset.__init__
+139:14 call  _charsets.add(Charset(73, "keybcs2", "keybcs2_bin"))
+    -> pymysql.charset.Charsets.add
+139:22 call  Charset(73, "keybcs2", "keybcs2_bin")
+    -> pymysql.charset.Charset.__init__
+140:14 call  _charsets.add(Charset(74, "koi8r", "koi8r_bin"))
+    -> pymysql.charset.Charsets.add
+140:22 call  Charset(74, "koi8r", "koi8r_bin")
+    -> pymysql.charset.Charset.__init__
+141:14 call  _charsets.add(Charset(75, "koi8u", "koi8u_bin"))
+    -> pymysql.charset.Charsets.add
+141:22 call  Charset(75, "koi8u", "koi8u_bin")
+    -> pymysql.charset.Charset.__init__
+142:14 call  _charsets.add(Charset(76, "utf8mb3", "utf8mb3_tolower_ci"))
+    -> pymysql.charset.Charsets.add
+142:22 call  Charset(76, "utf8mb3", "utf8mb3_tolower_ci")
+    -> pymysql.charset.Charset.__init__
+143:14 call  _charsets.add(Charset(77, "latin2", "latin2_bin"))
+    -> pymysql.charset.Charsets.add
+143:22 call  Charset(77, "latin2", "latin2_bin")
+    -> pymysql.charset.Charset.__init__
+144:14 call  _charsets.add(Charset(78, "latin5", "latin5_bin"))
+    -> pymysql.charset.Charsets.add
+144:22 call  Charset(78, "latin5", "latin5_bin")
+    -> pymysql.charset.Charset.__init__
+145:14 call  _charsets.add(Charset(79, "latin7", "latin7_bin"))
+    -> pymysql.charset.Charsets.add
+145:22 call  Charset(79, "latin7", "latin7_bin")
+    -> pymysql.charset.Charset.__init__
+146:14 call  _charsets.add(Charset(80, "cp850", "cp850_bin"))
+    -> pymysql.charset.Charsets.add
+146:22 call  Charset(80, "cp850", "cp850_bin")
+    -> pymysql.charset.Charset.__init__
+147:14 call  _charsets.add(Charset(81, "cp852", "cp852_bin"))
+    -> pymysql.charset.Charsets.add
+147:22 call  Charset(81, "cp852", "cp852_bin")
+    -> pymysql.charset.Charset.__init__
+148:14 call  _charsets.add(Charset(82, "swe7", "swe7_bin"))
+    -> pymysql.charset.Charsets.add
+148:22 call  Charset(82, "swe7", "swe7_bin")
+    -> pymysql.charset.Charset.__init__
+149:14 call  _charsets.add(Charset(83, "utf8mb3", "utf8mb3_bin"))
+    -> pymysql.charset.Charsets.add
+149:22 call  Charset(83, "utf8mb3", "utf8mb3_bin")
+    -> pymysql.charset.Charset.__init__
+150:14 call  _charsets.add(Charset(84, "big5", "big5_bin"))
+    -> pymysql.charset.Charsets.add
+150:22 call  Charset(84, "big5", "big5_bin")
+    -> pymysql.charset.Charset.__init__
+151:14 call  _charsets.add(Charset(85, "euckr", "euckr_bin"))
+    -> pymysql.charset.Charsets.add
+151:22 call  Charset(85, "euckr", "euckr_bin")
+    -> pymysql.charset.Charset.__init__
+152:14 call  _charsets.add(Charset(86, "gb2312", "gb2312_bin"))
+    -> pymysql.charset.Charsets.add
+152:22 call  Charset(86, "gb2312", "gb2312_bin")
+    -> pymysql.charset.Charset.__init__
+153:14 call  _charsets.add(Charset(87, "gbk", "gbk_bin"))
+    -> pymysql.charset.Charsets.add
+153:22 call  Charset(87, "gbk", "gbk_bin")
+    -> pymysql.charset.Charset.__init__
+154:14 call  _charsets.add(Charset(88, "sjis", "sjis_bin"))
+    -> pymysql.charset.Charsets.add
+154:22 call  Charset(88, "sjis", "sjis_bin")
+    -> pymysql.charset.Charset.__init__
+155:14 call  _charsets.add(Charset(89, "tis620", "tis620_bin"))
+    -> pymysql.charset.Charsets.add
+155:22 call  Charset(89, "tis620", "tis620_bin")
+    -> pymysql.charset.Charset.__init__
+156:14 call  _charsets.add(Charset(91, "ujis", "ujis_bin"))
+    -> pymysql.charset.Charsets.add
+156:22 call  Charset(91, "ujis", "ujis_bin")
+    -> pymysql.charset.Charset.__init__
+157:14 call  _charsets.add(Charset(92, "geostd8", "geostd8_general_ci"...
+    -> pymysql.charset.Charsets.add
+157:22 call  Charset(92, "geostd8", "geostd8_general_ci", True)
+    -> pymysql.charset.Charset.__init__
+158:14 call  _charsets.add(Charset(93, "geostd8", "geostd8_bin"))
+    -> pymysql.charset.Charsets.add
+158:22 call  Charset(93, "geostd8", "geostd8_bin")
+    -> pymysql.charset.Charset.__init__
+159:14 call  _charsets.add(Charset(94, "latin1", "latin1_spanish_ci"))
+    -> pymysql.charset.Charsets.add
+159:22 call  Charset(94, "latin1", "latin1_spanish_ci")
+    -> pymysql.charset.Charset.__init__
+160:14 call  _charsets.add(Charset(95, "cp932", "cp932_japanese_ci", T...
+    -> pymysql.charset.Charsets.add
+160:22 call  Charset(95, "cp932", "cp932_japanese_ci", True)
+    -> pymysql.charset.Charset.__init__
+161:14 call  _charsets.add(Charset(96, "cp932", "cp932_bin"))
+    -> pymysql.charset.Charsets.add
+161:22 call  Charset(96, "cp932", "cp932_bin")
+    -> pymysql.charset.Charset.__init__
+162:14 call  _charsets.add(Charset(97, "eucjpms", "eucjpms_japanese_ci...
+    -> pymysql.charset.Charsets.add
+162:22 call  Charset(97, "eucjpms", "eucjpms_japanese_ci", True)
+    -> pymysql.charset.Charset.__init__
+163:14 call  _charsets.add(Charset(98, "eucjpms", "eucjpms_bin"))
+    -> pymysql.charset.Charsets.add
+163:22 call  Charset(98, "eucjpms", "eucjpms_bin")
+    -> pymysql.charset.Charset.__init__
+164:14 call  _charsets.add(Charset(99, "cp1250", "cp1250_polish_ci"))
+    -> pymysql.charset.Charsets.add
+164:22 call  Charset(99, "cp1250", "cp1250_polish_ci")
+    -> pymysql.charset.Charset.__init__
+165:14 call  _charsets.add(Charset(192, "utf8mb3", "utf8mb3_unicode_ci"))
+    -> pymysql.charset.Charsets.add
+165:22 call  Charset(192, "utf8mb3", "utf8mb3_unicode_ci")
+    -> pymysql.charset.Charset.__init__
+166:14 call  _charsets.add(Charset(193, "utf8mb3", "utf8mb3_icelandic_...
+    -> pymysql.charset.Charsets.add
+166:22 call  Charset(193, "utf8mb3", "utf8mb3_icelandic_ci")
+    -> pymysql.charset.Charset.__init__
+167:14 call  _charsets.add(Charset(194, "utf8mb3", "utf8mb3_latvian_ci"))
+    -> pymysql.charset.Charsets.add
+167:22 call  Charset(194, "utf8mb3", "utf8mb3_latvian_ci")
+    -> pymysql.charset.Charset.__init__
+168:14 call  _charsets.add(Charset(195, "utf8mb3", "utf8mb3_romanian_c...
+    -> pymysql.charset.Charsets.add
+168:22 call  Charset(195, "utf8mb3", "utf8mb3_romanian_ci")
+    -> pymysql.charset.Charset.__init__
+169:14 call  _charsets.add(Charset(196, "utf8mb3", "utf8mb3_slovenian_...
+    -> pymysql.charset.Charsets.add
+169:22 call  Charset(196, "utf8mb3", "utf8mb3_slovenian_ci")
+    -> pymysql.charset.Charset.__init__
+170:14 call  _charsets.add(Charset(197, "utf8mb3", "utf8mb3_polish_ci"))
+    -> pymysql.charset.Charsets.add
+170:22 call  Charset(197, "utf8mb3", "utf8mb3_polish_ci")
+    -> pymysql.charset.Charset.__init__
+171:14 call  _charsets.add(Charset(198, "utf8mb3", "utf8mb3_estonian_c...
+    -> pymysql.charset.Charsets.add
+171:22 call  Charset(198, "utf8mb3", "utf8mb3_estonian_ci")
+    -> pymysql.charset.Charset.__init__
+172:14 call  _charsets.add(Charset(199, "utf8mb3", "utf8mb3_spanish_ci"))
+    -> pymysql.charset.Charsets.add
+172:22 call  Charset(199, "utf8mb3", "utf8mb3_spanish_ci")
+    -> pymysql.charset.Charset.__init__
+173:14 call  _charsets.add(Charset(200, "utf8mb3", "utf8mb3_swedish_ci"))
+    -> pymysql.charset.Charsets.add
+173:22 call  Charset(200, "utf8mb3", "utf8mb3_swedish_ci")
+    -> pymysql.charset.Charset.__init__
+174:14 call  _charsets.add(Charset(201, "utf8mb3", "utf8mb3_turkish_ci"))
+    -> pymysql.charset.Charsets.add
+174:22 call  Charset(201, "utf8mb3", "utf8mb3_turkish_ci")
+    -> pymysql.charset.Charset.__init__
+175:14 call  _charsets.add(Charset(202, "utf8mb3", "utf8mb3_czech_ci"))
+    -> pymysql.charset.Charsets.add
+175:22 call  Charset(202, "utf8mb3", "utf8mb3_czech_ci")
+    -> pymysql.charset.Charset.__init__
+176:14 call  _charsets.add(Charset(203, "utf8mb3", "utf8mb3_danish_ci"))
+    -> pymysql.charset.Charsets.add
+176:22 call  Charset(203, "utf8mb3", "utf8mb3_danish_ci")
+    -> pymysql.charset.Charset.__init__
+177:14 call  _charsets.add(Charset(204, "utf8mb3", "utf8mb3_lithuanian...
+    -> pymysql.charset.Charsets.add
+177:22 call  Charset(204, "utf8mb3", "utf8mb3_lithuanian_ci")
+    -> pymysql.charset.Charset.__init__
+178:14 call  _charsets.add(Charset(205, "utf8mb3", "utf8mb3_slovak_ci"))
+    -> pymysql.charset.Charsets.add
+178:22 call  Charset(205, "utf8mb3", "utf8mb3_slovak_ci")
+    -> pymysql.charset.Charset.__init__
+179:14 call  _charsets.add(Charset(206, "utf8mb3", "utf8mb3_spanish2_c...
+    -> pymysql.charset.Charsets.add
+179:22 call  Charset(206, "utf8mb3", "utf8mb3_spanish2_ci")
+    -> pymysql.charset.Charset.__init__
+180:14 call  _charsets.add(Charset(207, "utf8mb3", "utf8mb3_roman_ci"))
+    -> pymysql.charset.Charsets.add
+180:22 call  Charset(207, "utf8mb3", "utf8mb3_roman_ci")
+    -> pymysql.charset.Charset.__init__
+181:14 call  _charsets.add(Charset(208, "utf8mb3", "utf8mb3_persian_ci"))
+    -> pymysql.charset.Charsets.add
+181:22 call  Charset(208, "utf8mb3", "utf8mb3_persian_ci")
+    -> pymysql.charset.Charset.__init__
+182:14 call  _charsets.add(Charset(209, "utf8mb3", "utf8mb3_esperanto_...
+    -> pymysql.charset.Charsets.add
+182:22 call  Charset(209, "utf8mb3", "utf8mb3_esperanto_ci")
+    -> pymysql.charset.Charset.__init__
+183:14 call  _charsets.add(Charset(210, "utf8mb3", "utf8mb3_hungarian_...
+    -> pymysql.charset.Charsets.add
+183:22 call  Charset(210, "utf8mb3", "utf8mb3_hungarian_ci")
+    -> pymysql.charset.Charset.__init__
+184:14 call  _charsets.add(Charset(211, "utf8mb3", "utf8mb3_sinhala_ci"))
+    -> pymysql.charset.Charsets.add
+184:22 call  Charset(211, "utf8mb3", "utf8mb3_sinhala_ci")
+    -> pymysql.charset.Charset.__init__
+185:14 call  _charsets.add(Charset(212, "utf8mb3", "utf8mb3_german2_ci"))
+    -> pymysql.charset.Charsets.add
+185:22 call  Charset(212, "utf8mb3", "utf8mb3_german2_ci")
+    -> pymysql.charset.Charset.__init__
+186:14 call  _charsets.add(Charset(213, "utf8mb3", "utf8mb3_croatian_c...
+    -> pymysql.charset.Charsets.add
+186:22 call  Charset(213, "utf8mb3", "utf8mb3_croatian_ci")
+    -> pymysql.charset.Charset.__init__
+187:14 call  _charsets.add(Charset(214, "utf8mb3", "utf8mb3_unicode_52...
+    -> pymysql.charset.Charsets.add
+187:22 call  Charset(214, "utf8mb3", "utf8mb3_unicode_520_ci")
+    -> pymysql.charset.Charset.__init__
+188:14 call  _charsets.add(Charset(215, "utf8mb3", "utf8mb3_vietnamese...
+    -> pymysql.charset.Charsets.add
+188:22 call  Charset(215, "utf8mb3", "utf8mb3_vietnamese_ci")
+    -> pymysql.charset.Charset.__init__
+189:14 call  _charsets.add(Charset(223, "utf8mb3", "utf8mb3_general_my...
+    -> pymysql.charset.Charsets.add
+189:22 call  Charset(223, "utf8mb3", "utf8mb3_general_mysql500_ci")
+    -> pymysql.charset.Charset.__init__
+190:14 call  _charsets.add(Charset(224, "utf8mb4", "utf8mb4_unicode_ci"))
+    -> pymysql.charset.Charsets.add
+190:22 call  Charset(224, "utf8mb4", "utf8mb4_unicode_ci")
+    -> pymysql.charset.Charset.__init__
+191:14 call  _charsets.add(Charset(225, "utf8mb4", "utf8mb4_icelandic_...
+    -> pymysql.charset.Charsets.add
+191:22 call  Charset(225, "utf8mb4", "utf8mb4_icelandic_ci")
+    -> pymysql.charset.Charset.__init__
+192:14 call  _charsets.add(Charset(226, "utf8mb4", "utf8mb4_latvian_ci"))
+    -> pymysql.charset.Charsets.add
+192:22 call  Charset(226, "utf8mb4", "utf8mb4_latvian_ci")
+    -> pymysql.charset.Charset.__init__
+193:14 call  _charsets.add(Charset(227, "utf8mb4", "utf8mb4_romanian_c...
+    -> pymysql.charset.Charsets.add
+193:22 call  Charset(227, "utf8mb4", "utf8mb4_romanian_ci")
+    -> pymysql.charset.Charset.__init__
+194:14 call  _charsets.add(Charset(228, "utf8mb4", "utf8mb4_slovenian_...
+    -> pymysql.charset.Charsets.add
+194:22 call  Charset(228, "utf8mb4", "utf8mb4_slovenian_ci")
+    -> pymysql.charset.Charset.__init__
+195:14 call  _charsets.add(Charset(229, "utf8mb4", "utf8mb4_polish_ci"))
+    -> pymysql.charset.Charsets.add
+195:22 call  Charset(229, "utf8mb4", "utf8mb4_polish_ci")
+    -> pymysql.charset.Charset.__init__
+196:14 call  _charsets.add(Charset(230, "utf8mb4", "utf8mb4_estonian_c...
+    -> pymysql.charset.Charsets.add
+196:22 call  Charset(230, "utf8mb4", "utf8mb4_estonian_ci")
+    -> pymysql.charset.Charset.__init__
+197:14 call  _charsets.add(Charset(231, "utf8mb4", "utf8mb4_spanish_ci"))
+    -> pymysql.charset.Charsets.add
+197:22 call  Charset(231, "utf8mb4", "utf8mb4_spanish_ci")
+    -> pymysql.charset.Charset.__init__
+198:14 call  _charsets.add(Charset(232, "utf8mb4", "utf8mb4_swedish_ci"))
+    -> pymysql.charset.Charsets.add
+198:22 call  Charset(232, "utf8mb4", "utf8mb4_swedish_ci")
+    -> pymysql.charset.Charset.__init__
+199:14 call  _charsets.add(Charset(233, "utf8mb4", "utf8mb4_turkish_ci"))
+    -> pymysql.charset.Charsets.add
+199:22 call  Charset(233, "utf8mb4", "utf8mb4_turkish_ci")
+    -> pymysql.charset.Charset.__init__
+200:14 call  _charsets.add(Charset(234, "utf8mb4", "utf8mb4_czech_ci"))
+    -> pymysql.charset.Charsets.add
+200:22 call  Charset(234, "utf8mb4", "utf8mb4_czech_ci")
+    -> pymysql.charset.Charset.__init__
+201:14 call  _charsets.add(Charset(235, "utf8mb4", "utf8mb4_danish_ci"))
+    -> pymysql.charset.Charsets.add
+201:22 call  Charset(235, "utf8mb4", "utf8mb4_danish_ci")
+    -> pymysql.charset.Charset.__init__
+202:14 call  _charsets.add(Charset(236, "utf8mb4", "utf8mb4_lithuanian...
+    -> pymysql.charset.Charsets.add
+202:22 call  Charset(236, "utf8mb4", "utf8mb4_lithuanian_ci")
+    -> pymysql.charset.Charset.__init__
+203:14 call  _charsets.add(Charset(237, "utf8mb4", "utf8mb4_slovak_ci"))
+    -> pymysql.charset.Charsets.add
+203:22 call  Charset(237, "utf8mb4", "utf8mb4_slovak_ci")
+    -> pymysql.charset.Charset.__init__
+204:14 call  _charsets.add(Charset(238, "utf8mb4", "utf8mb4_spanish2_c...
+    -> pymysql.charset.Charsets.add
+204:22 call  Charset(238, "utf8mb4", "utf8mb4_spanish2_ci")
+    -> pymysql.charset.Charset.__init__
+205:14 call  _charsets.add(Charset(239, "utf8mb4", "utf8mb4_roman_ci"))
+    -> pymysql.charset.Charsets.add
+205:22 call  Charset(239, "utf8mb4", "utf8mb4_roman_ci")
+    -> pymysql.charset.Charset.__init__
+206:14 call  _charsets.add(Charset(240, "utf8mb4", "utf8mb4_persian_ci"))
+    -> pymysql.charset.Charsets.add
+206:22 call  Charset(240, "utf8mb4", "utf8mb4_persian_ci")
+    -> pymysql.charset.Charset.__init__
+207:14 call  _charsets.add(Charset(241, "utf8mb4", "utf8mb4_esperanto_...
+    -> pymysql.charset.Charsets.add
+207:22 call  Charset(241, "utf8mb4", "utf8mb4_esperanto_ci")
+    -> pymysql.charset.Charset.__init__
+208:14 call  _charsets.add(Charset(242, "utf8mb4", "utf8mb4_hungarian_...
+    -> pymysql.charset.Charsets.add
+208:22 call  Charset(242, "utf8mb4", "utf8mb4_hungarian_ci")
+    -> pymysql.charset.Charset.__init__
+209:14 call  _charsets.add(Charset(243, "utf8mb4", "utf8mb4_sinhala_ci"))
+    -> pymysql.charset.Charsets.add
+209:22 call  Charset(243, "utf8mb4", "utf8mb4_sinhala_ci")
+    -> pymysql.charset.Charset.__init__
+210:14 call  _charsets.add(Charset(244, "utf8mb4", "utf8mb4_german2_ci"))
+    -> pymysql.charset.Charsets.add
+210:22 call  Charset(244, "utf8mb4", "utf8mb4_german2_ci")
+    -> pymysql.charset.Charset.__init__
+211:14 call  _charsets.add(Charset(245, "utf8mb4", "utf8mb4_croatian_c...
+    -> pymysql.charset.Charsets.add
+211:22 call  Charset(245, "utf8mb4", "utf8mb4_croatian_ci")
+    -> pymysql.charset.Charset.__init__
+212:14 call  _charsets.add(Charset(246, "utf8mb4", "utf8mb4_unicode_52...
+    -> pymysql.charset.Charsets.add
+212:22 call  Charset(246, "utf8mb4", "utf8mb4_unicode_520_ci")
+    -> pymysql.charset.Charset.__init__
+213:14 call  _charsets.add(Charset(247, "utf8mb4", "utf8mb4_vietnamese...
+    -> pymysql.charset.Charsets.add
+213:22 call  Charset(247, "utf8mb4", "utf8mb4_vietnamese_ci")
+    -> pymysql.charset.Charset.__init__
+214:14 call  _charsets.add(Charset(248, "gb18030", "gb18030_chinese_ci...
+    -> pymysql.charset.Charsets.add
+214:22 call  Charset(248, "gb18030", "gb18030_chinese_ci", True)
+    -> pymysql.charset.Charset.__init__
+215:14 call  _charsets.add(Charset(249, "gb18030", "gb18030_bin"))
+    -> pymysql.charset.Charsets.add
+215:22 call  Charset(249, "gb18030", "gb18030_bin")
+    -> pymysql.charset.Charset.__init__
+216:14 call  _charsets.add(Charset(250, "gb18030", "gb18030_unicode_52...
+    -> pymysql.charset.Charsets.add
+216:22 call  Charset(250, "gb18030", "gb18030_unicode_520_ci")
+    -> pymysql.charset.Charset.__init__
+217:14 call  _charsets.add(Charset(255, "utf8mb4", "utf8mb4_0900_ai_ci"))
+    -> pymysql.charset.Charsets.add
+217:22 call  Charset(255, "utf8mb4", "utf8mb4_0900_ai_ci")
+    -> pymysql.charset.Charset.__init__
+
+[pymysql.charset.Charsets.by_name]
+48:26 call  name.lower()
+    -> <builtin>.str.lower
+    note: name is a charset name, a str: Connection's documented `str charset` (connections.py:117), a value of the option file through configparser, or the argument of set_character_set
+51:33 call  self._by_name.get(name)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: self._by_name is the dict of Charsets.__init__
+
+== pymysql.connections
+
+[pymysql.connections]
+41:35 call  getpass.getuser()
+    -> getpass.getuser
+443:6 decorator  @property
+    -> <builtin>.property
+
+[pymysql.connections._pack_int24]
+71:23 call  struct.pack("<I", n)
+    -> struct.pack
+
+[pymysql.connections._lenenc_int]
+77:25 call  ValueError( "Encoding %d is less than 0 - no representati...
+    note: no edge: _lenenc_int is private and every package call passes a len() result (lines 986, 1004, 1006, 1007), which is never negative (Codex round 1)
+81:21 call  bytes([i])
+    -> <builtin>.bytes
+83:37 call  struct.pack("<H", i)
+    -> struct.pack
+85:37 call  struct.pack("<I", i)
+    -> struct.pack
+87:37 call  struct.pack("<Q", i)
+    -> struct.pack
+89:25 call  ValueError( f"Encoding {i:x} is larger than {1 << 64:x} -...
+    note: no edge: every package call passes a len() result (see 77:25), at most sys.maxsize, below 1 << 64 (Codex round 1)
+
+[pymysql.connections.Connection.__init__]
+222:26 call  warnings.warn("'db' is deprecated, use 'database'", Depre...
+    -> warnings.warn
+225:26 call  warnings.warn( "'passwd' is deprecated, use 'password'", ...
+    -> warnings.warn
+231:38 call  NotImplementedError( "compress and named_pipe arguments a...
+    -> <builtin>.NotImplementedError
+235:34 call  bool(local_infile)
+    -> <builtin>.bool
+240:39 call  sys.platform.startswith("win")
+    -> <builtin>.str.startswith
+249:25 call  Parser()
+    -> pymysql.optionfile.Parser.__init__
+250:21 call  cfg.read(os.path.expanduser(read_default_file))
+    -> configparser.RawConfigParser.read
+    -> pymysql.optionfile.Parser.optionxform
+    reject pymysql.connections.MySQLResult.read, pymysql.protocol.MysqlPacket.read: cfg is the optionfile.Parser of line 249, which inherits read from configparser.RawConfigParser
+    note: Parser inherits read from configparser.RawConfigParser (named through the nearest base outside the package); RawConfigParser.read parses the option file and calls self.optionxform on every option name, Parser's override (judgement J4)
+250:40 call  os.path.expanduser(read_default_file)
+    -> os.path.expanduser
+260:27 call  _config("user", user)
+    -> pymysql.connections.Connection.__init__._config
+261:31 call  _config("password", password)
+    -> pymysql.connections.Connection.__init__._config
+262:27 call  _config("host", host)
+    -> pymysql.connections.Connection.__init__._config
+263:31 call  _config("database", database)
+    -> pymysql.connections.Connection.__init__._config
+264:34 call  _config("socket", unix_socket)
+    -> pymysql.connections.Connection.__init__._config
+265:23 call  int(_config("port", port))
+    -> <builtin>.int
+265:31 call  _config("port", port)
+    -> pymysql.connections.Connection.__init__._config
+266:35 call  _config("bind-address", bind_address)
+    -> pymysql.connections.Connection.__init__._config
+267:30 call  _config("default-character-set", charset)
+    -> pymysql.connections.Connection.__init__._config
+270:26 call  isinstance(ssl, dict)
+    -> <builtin>.isinstance
+272:36 call  _config("ssl-" + key, ssl.get(key))
+    -> pymysql.connections.Connection.__init__._config
+272:58 call  ssl.get(key)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: ssl is a dict here (the isinstance check of line 270, or the {} of line 269)
+282:43 call  bool(ssl_verify_identity)
+    -> <builtin>.bool
+295:46 call  NotImplementedError("ssl module not found")
+    -> <builtin>.NotImplementedError
+    note: SSL_ENABLED is False when `import ssl` fails (lines 30-36): both sides of an optional import run
+299:48 call  self._create_ssl_ctx(ssl)
+    -> pymysql.connections.Connection._create_ssl_ctx
+305:48 call  self._create_ssl_ctx({})
+    -> pymysql.connections.Connection._create_ssl_ctx
+309:16 call  type(self.port)
+    -> <builtin>.type
+310:29 call  ValueError("port should be of type int")
+    -> <builtin>.ValueError
+313:22 call  isinstance(self.password, str)
+    -> <builtin>.isinstance
+314:49 call  self.password.encode("latin1")
+    -> <builtin>.str.encode
+319:29 call  ValueError("connect_timeout should be >0 and <=31536000")
+    -> <builtin>.ValueError
+322:29 call  ValueError("read_timeout should be > 0")
+    -> <builtin>.ValueError
+325:29 call  ValueError("write_timeout should be > 0")
+    -> <builtin>.ValueError
+332:40 call  charset_by_name(self.charset)
+    -> pymysql.charset.Charsets.by_name
+    note: charset_by_name is the bound method _charsets.by_name of the module charset (charset.py:55)
+332:55 getattr  charset_by_name(self.charset).encoding
+    -> pymysql.charset.Charset.encoding
+    note: the Charset that by_name returns (a property of the package)
+353:55 call  conv.items()
+    -> <builtin>.dict.items
+    note: conv is converters.conversions, a dict, or the client's documented "Conversion dictionary" (line 125): a dict (B4)
+353:65 call  type(k)
+    -> <builtin>.type
+354:55 call  conv.items()
+    -> <builtin>.dict.items
+    note: conv is a dict (see 353:55)
+354:65 call  type(k)
+    -> <builtin>.type
+364:24 call  str(os.getpid())
+    -> <builtin>.str
+364:34 call  os.getpid()
+    -> os.getpid
+373:25 call  self.connect()
+    -> pymysql.connections.Connection.connect
+    note: self is a Connection (no package subclass); a value site only because pymysql/__init__.py:136 binds the module name connect
+
+[pymysql.connections.Connection.__init__._config]
+256:35 call  cfg.get(read_default_group, key)
+    -> pymysql.optionfile.Parser.get
+    note: cfg is the optionfile.Parser of the enclosing __init__ (line 249)
+
+[pymysql.connections.Connection.__exit__]
+380:19 call  self.close()
+    -> pymysql.connections.Connection.close
+    reject pymysql.cursors.Cursor.close, pymysql.cursors.SSCursor.close: self is a Connection
+
+[pymysql.connections.Connection._create_ssl_ctx]
+383:22 call  isinstance(sslp, ssl.SSLContext)
+    -> <builtin>.isinstance
+385:22 call  sslp.get("ca")
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: sslp is a dict: the package passes {}, the dict that __init__ builds (lines 269-292), or the client's documented "dict of arguments" (line 136); an ssl.SSLContext returned at line 384
+386:26 call  sslp.get("capath")
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: sslp is a dict (see 385:22)
+388:41 call  ssl.create_default_context(cafile=ca, capath=capath)
+    -> ssl.create_default_context
+395:54 call  sslp.get("check_hostname", True)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: sslp is a dict (see 385:22)
+396:37 call  sslp.get("verify_mode")
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: sslp is a dict (see 385:22)
+399:24 call  isinstance(verify_mode_value, bool)
+    -> <builtin>.isinstance
+402:26 call  isinstance(verify_mode_value, str)
+    -> <builtin>.isinstance
+403:60 call  verify_mode_value.lower()
+    -> <builtin>.str.lower
+    note: verify_mode_value is a str (the isinstance check of line 402)
+413:32 call  ctx.load_cert_chain( sslp["cert"], keyfile=sslp.get("key"...
+    -> ssl.SSLContext.load_cert_chain
+    note: ctx is the ssl.SSLContext of ssl.create_default_context (line 388)
+414:47 call  sslp.get("key")
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: sslp is a dict (see 385:22)
+414:73 call  sslp.get("password")
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: sslp is a dict (see 385:22)
+417:28 call  ctx.set_ciphers(sslp["cipher"])
+    -> ssl.SSLContext.set_ciphers
+    note: ctx is the ssl.SSLContext of line 388
+
+[pymysql.connections.Connection.close]
+432:28 call  err.Error("Already closed")
+    -> pymysql.err.Error.__init__
+    note: err.Error is the class of pymysql.err; a value site only because the class body of Connection binds the name Error (line 1256), the same class
+436:32 call  struct.pack("<iB", 1, COMMAND.COM_QUIT)
+    -> struct.pack
+438:18 with  contextlib.suppress(Exception)
+    reject *: the context manager is contextlib.suppress, a library class
+438:37 call  contextlib.suppress(Exception)
+    -> contextlib.suppress
+439:34 call  self._write_bytes(send_data)
+    -> pymysql.connections.Connection._write_bytes
+441:30 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+
+[pymysql.connections.Connection._force_close]
+451:30 call  self._rfile.close()
+    -> io.BufferedReader.close
+    reject *: self._rfile is the file of sock.makefile("rb") (lines 698, 953), an io.BufferedReader, not a package object
+    note: socket.makefile("rb") returns an io.BufferedReader over a SocketIO, for a socket.socket and for an ssl.SSLSocket; the makefile of a socket that a client passes to connect(sock) is a client object
+454:33 call  self._sock.close()
+    -> socket.socket.close
+    -> ssl.SSLSocket.close
+    reject *: self._sock is a socket.socket (lines 668, 681) or the ssl.SSLSocket of ctx.wrap_socket (line 952), not a package object
+    note: a socket that a client passes to connect(sock) is a client object (B5)
+
+[pymysql.connections.Connection.autocommit]
+463:36 call  bool(value)
+    -> <builtin>.bool
+464:38 call  self.get_autocommit()
+    -> pymysql.connections.Connection.get_autocommit
+466:39 call  self._send_autocommit_mode()
+    -> pymysql.connections.Connection._send_autocommit_mode
+
+[pymysql.connections.Connection.get_autocommit]
+469:20 call  bool(self.server_status & SERVER_STATUS.SERVER_STATUS_AUT...
+    -> <builtin>.bool
+
+[pymysql.connections.Connection._read_ok_packet]
+472:32 call  self._read_packet()
+    -> pymysql.connections.Connection._read_packet
+473:32 call  pkt.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+    note: pkt is the MysqlPacket of _read_packet (default packet_type)
+474:39 call  err.OperationalError( CR.CR_COMMANDS_OUT_OF_SYNC, "Comman...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, line 1260); its first __init__ is Error.__init__
+478:29 call  OKPacketWrapper(pkt)
+    -> pymysql.protocol.OKPacketWrapper.__init__
+
+[pymysql.connections.Connection._send_autocommit_mode]
+484:30 call  self._execute_command( COMMAND.COM_QUERY, "SET AUTOCOMMIT...
+    -> pymysql.connections.Connection._execute_command
+485:67 call  self.escape(self.autocommit_mode)
+    -> pymysql.connections.Connection.escape
+487:29 call  self._read_ok_packet()
+    -> pymysql.connections.Connection._read_ok_packet
+    reject pymysql.connections.MySQLResult._read_ok_packet: self is a Connection
+
+[pymysql.connections.Connection.begin]
+491:30 call  self._execute_command(COMMAND.COM_QUERY, "BEGIN")
+    -> pymysql.connections.Connection._execute_command
+492:29 call  self._read_ok_packet()
+    -> pymysql.connections.Connection._read_ok_packet
+    reject pymysql.connections.MySQLResult._read_ok_packet: self is a Connection
+
+[pymysql.connections.Connection.commit]
+501:30 call  self._execute_command(COMMAND.COM_QUERY, "COMMIT")
+    -> pymysql.connections.Connection._execute_command
+502:29 call  self._read_ok_packet()
+    -> pymysql.connections.Connection._read_ok_packet
+    reject pymysql.connections.MySQLResult._read_ok_packet: self is a Connection
+
+[pymysql.connections.Connection.rollback]
+511:30 call  self._execute_command(COMMAND.COM_QUERY, "ROLLBACK")
+    -> pymysql.connections.Connection._execute_command
+512:29 call  self._read_ok_packet()
+    -> pymysql.connections.Connection._read_ok_packet
+    reject pymysql.connections.MySQLResult._read_ok_packet: self is a Connection
+
+[pymysql.connections.Connection.show_warnings]
+516:30 call  self._execute_command(COMMAND.COM_QUERY, "SHOW WARNINGS")
+    -> pymysql.connections.Connection._execute_command
+517:29 call  MySQLResult(self)
+    -> pymysql.connections.MySQLResult.__init__
+518:20 call  result.read()
+    -> pymysql.connections.MySQLResult.read
+    reject pymysql.protocol.MysqlPacket.read: result is the MySQLResult of line 517
+
+[pymysql.connections.Connection.select_db]
+527:30 call  self._execute_command(COMMAND.COM_INIT_DB, db)
+    -> pymysql.connections.Connection._execute_command
+528:29 call  self._read_ok_packet()
+    -> pymysql.connections.Connection._read_ok_packet
+    reject pymysql.connections.MySQLResult._read_ok_packet: self is a Connection
+
+[pymysql.connections.Connection.escape]
+535:22 call  isinstance(obj, str)
+    -> <builtin>.isinstance
+536:43 call  self._escape_string(obj)
+    -> pymysql.connections.Connection._escape_string
+538:22 call  isinstance(obj, (bytes, bytearray))
+    -> <builtin>.isinstance
+539:32 call  obj.hex()
+    -> <builtin>.bytes.hex
+    -> <builtin>.bytearray.hex
+    note: obj is bytes or bytearray (the isinstance check of line 538)
+543:38 call  converters.escape_item(obj, self.encoding, mapping=mapping)
+    -> pymysql.converters.escape_item
+    reject pymysql.charset.Charset.encoding: self.encoding is the str attribute of the Connection (line 332), not the property of a Charset
+543:49 getattr  self.encoding
+    reject pymysql.charset.Charset.encoding: self is a Connection, whose encoding is a str instance attribute (lines 332, 660)
+
+[pymysql.connections.Connection.literal]
+550:22 call  warnings.warn( "literal() is deprecated and will be remov...
+    -> warnings.warn
+555:27 call  self.escape(obj)
+    -> pymysql.connections.Connection.escape
+
+[pymysql.connections.Connection._escape_string]
+559:29 call  s.replace("'", "''")
+    -> <builtin>.str.replace
+    note: s is a str: the only caller, escape, passes it after isinstance(obj, str) (line 535)
+560:40 call  converters.escape_string(s)
+    -> pymysql.converters.escape_string
+
+[pymysql.connections.Connection.cursor]
+571:26 call  cursor(self)
+    -> pymysql.cursors.Cursor.__init__
+    reject pymysql.connections.Connection.cursor: cursor is the parameter, a cursor class, not the method
+    note: the documented cursor classes (:type cursor:, line 567): Cursor, SSCursor, DictCursor and SSDictCursor, which all inherit Cursor.__init__; a client's own cursor class is client code
+572:32 call  self.cursorclass(self)
+    -> pymysql.cursors.Cursor.__init__
+    note: self.cursorclass is the cursorclass argument of __init__: Cursor by default, or a documented cursor class (DictCursor in README.md:67 and docs/source/user/examples.rst:35); all inherit Cursor.__init__
+
+[pymysql.connections.Connection.query]
+578:22 call  isinstance(sql, str)
+    -> <builtin>.isinstance
+579:29 call  sql.encode(self.encoding)
+    -> <builtin>.str.encode
+    reject pymysql.charset.Charset.encoding: self.encoding is a str attribute of the Connection
+    note: sql is a str (the isinstance check of line 578)
+579:35 getattr  self.encoding
+    reject pymysql.charset.Charset.encoding: self is a Connection, whose encoding is a str instance attribute
+580:30 call  self._execute_command(COMMAND.COM_QUERY, sql)
+    -> pymysql.connections.Connection._execute_command
+581:54 call  self._read_query_result(unbuffered=unbuffered)
+    -> pymysql.connections.Connection._read_query_result
+
+[pymysql.connections.Connection.next_result]
+585:54 call  self._read_query_result(unbuffered=unbuffered)
+    -> pymysql.connections.Connection._read_query_result
+
+[pymysql.connections.Connection.kill]
+592:26 call  isinstance(thread_id, int)
+    -> <builtin>.isinstance
+593:28 call  TypeError("thread_id must be an integer")
+    -> <builtin>.TypeError
+594:19 call  self.query(f"KILL {thread_id:d}")
+    -> pymysql.connections.Connection.query
+
+[pymysql.connections.Connection.ping]
+609:26 call  warnings.warn( "The 'reconnect' argument is deprecated. C...
+    -> warnings.warn
+616:29 call  self.connect()
+    -> pymysql.connections.Connection.connect
+    note: self is a Connection; a value site only because pymysql/__init__.py:136 binds the module name connect
+619:32 call  err.Error("Already closed")
+    -> pymysql.err.Error.__init__
+    note: err.Error is the class of pymysql.err (see 432:28)
+621:34 call  self._execute_command(COMMAND.COM_PING, "")
+    -> pymysql.connections.Connection._execute_command
+622:33 call  self._read_ok_packet()
+    -> pymysql.connections.Connection._read_ok_packet
+    reject pymysql.connections.MySQLResult._read_ok_packet: self is a Connection
+625:29 call  self.connect()
+    -> pymysql.connections.Connection.connect
+    note: self is a Connection (see 616:29)
+626:26 call  self.ping(False)
+    -> pymysql.connections.Connection.ping
+
+[pymysql.connections.Connection.set_charset]
+632:22 call  warnings.warn( "'set_charset' is deprecated, use 'set_cha...
+    -> warnings.warn
+641:31 call  self.set_character_set(charset)
+    -> pymysql.connections.Connection.set_character_set
+
+[pymysql.connections.Connection.set_character_set]
+651:35 call  charset_by_name(charset)
+    -> pymysql.charset.Charsets.by_name
+    note: charset_by_name is the bound method _charsets.by_name (charset.py:55)
+651:45 getattr  charset_by_name(charset).encoding
+    -> pymysql.charset.Charset.encoding
+    note: the Charset that by_name returns
+657:30 call  self._execute_command(COMMAND.COM_QUERY, query)
+    -> pymysql.connections.Connection._execute_command
+658:26 call  self._read_packet()
+    -> pymysql.connections.Connection._read_packet
+
+[pymysql.connections.Connection.connect]
+668:41 call  socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    -> socket.socket
+669:36 call  sock.settimeout(self.connect_timeout)
+    -> socket.socket.settimeout
+670:33 call  sock.connect(self.unix_socket)
+    -> socket.socket.connect
+    reject pymysql.connections.Connection.connect: sock is the socket.socket of line 668
+    note: a value site only because pymysql/__init__.py:136 binds the module name connect
+674:30 call  print("connected using unix_socket")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+681:60 call  socket.create_connection( (self.host, self.port), self.co...
+    -> socket.create_connection
+691:30 call  print("connected using socket")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+692:36 call  sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+    -> socket.socket.setsockopt
+    note: sock is the socket.socket of socket.create_connection
+693:36 call  sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    -> socket.socket.setsockopt
+696:28 call  sock.settimeout(self._read_timeout)
+    -> socket.socket.settimeout
+    note: sock is the socket.socket of line 668 or 681; a socket that the client passes as sock is a client object (B5)
+698:40 call  sock.makefile("rb")
+    -> socket.socket.makefile
+    note: sock is a socket.socket (see 696:28)
+701:41 call  self._get_server_information()
+    -> pymysql.connections.Connection._get_server_information
+702:41 call  self._request_authentication()
+    -> pymysql.connections.Connection._request_authentication
+717:35 call  self.set_character_set(self.charset, self.collation)
+    -> pymysql.connections.Connection.set_character_set
+720:32 call  self.cursor()
+    -> pymysql.connections.Connection.cursor
+721:26 call  c.execute("SET sql_mode=%s", (self.sql_mode,))
+    -> pymysql.cursors.Cursor.execute
+    note: c is an instance of self.cursorclass (Connection.cursor without an argument): Cursor by default or DictCursor (README.md:67, docs/source/user/examples.rst:35), the classes admitted at the constructor's cursorclass (judgement J9); both inherit Cursor.execute
+722:24 call  c.close()
+    -> pymysql.cursors.Cursor.close
+    reject pymysql.connections.Connection.close: c is a cursor (see 721:26)
+    reject pymysql.cursors.SSCursor.close: c is a Cursor or a DictCursor, the classes admitted at the constructor's cursorclass (judgement J9); SSCursor and SSDictCursor are admitted only at Connection.cursor(cursor), and that call does not change cursorclass
+    note: Cursor and DictCursor use Cursor.close
+725:32 call  self.cursor()
+    -> pymysql.connections.Connection.cursor
+726:26 call  c.execute(self.init_command)
+    -> pymysql.cursors.Cursor.execute
+    note: c is a cursor of self.cursorclass (see 721:26)
+727:24 call  c.close()
+    -> pymysql.cursors.Cursor.close
+    reject pymysql.connections.Connection.close: c is a cursor (see 722:24)
+    reject pymysql.cursors.SSCursor.close: c is a Cursor or a DictCursor (see 722:24)
+730:32 call  self.autocommit(self.autocommit_mode)
+    -> pymysql.connections.Connection.autocommit
+732:30 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+734:26 call  isinstance(e, OSError)
+    -> <builtin>.isinstance
+735:43 call  err.OperationalError( CR.CR_CONN_HOST_ERROR, f"Can't conn...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+741:53 call  traceback.format_exc()
+    -> traceback.format_exc
+743:26 call  print(exc.traceback)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+
+[pymysql.connections.Connection.write_packet]
+757:27 call  _pack_int24(len(payload))
+    -> pymysql.connections._pack_int24
+757:31 call  len(payload)
+    -> <builtin>.len
+757:49 call  bytes([self._next_seq_id])
+    -> <builtin>.bytes
+759:24 call  dump_packet(data)
+    reject pymysql.protocol.dump_packet: under `if DEBUG:`, which does not run (judgement J1)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+760:26 call  self._write_bytes(data)
+    -> pymysql.connections.Connection._write_bytes
+
+[pymysql.connections.Connection._read_packet]
+774:34 call  self._sock.settimeout(self._read_timeout)
+    -> socket.socket.settimeout
+    -> ssl.SSLSocket.settimeout
+    note: self._sock is the package's socket.socket (connect, lines 668 and 681) or the ssl.SSLSocket of ctx.wrap_socket (line 952), which inherits settimeout; a socket that a client passes to connect(sock) is a client object
+779:45 call  self._read_bytes(4)
+    -> pymysql.connections.Connection._read_bytes
+782:54 call  struct.unpack("<HBB", packet_header)
+    -> struct.unpack
+785:34 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+788:47 call  err.OperationalError( CR.CR_SERVER_LOST, "Lost connection...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+792:40 call  err.InternalError( "Packet sequence number wrong - got %d...
+    -> pymysql.err.Error.__init__
+    note: err.InternalError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, line 1262); its first __init__ is Error.__init__
+798:41 call  self._read_bytes(bytes_to_read)
+    -> pymysql.connections.Connection._read_bytes
+800:28 call  dump_packet(recv_data)
+    reject pymysql.protocol.dump_packet: under `if DEBUG:`, which does not run (judgement J1)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+801:24 call  buff.append(recv_data)
+    -> <builtin>.list.append
+806:29 call  packet_type(b"".join(buff), self.encoding)
+    -> pymysql.protocol.MysqlPacket.__init__
+    -> pymysql.protocol.FieldDescriptorPacket.__init__
+    reject pymysql.charset.Charset.encoding: self.encoding is the str attribute of the Connection
+    note: packet_type is MysqlPacket by default, or FieldDescriptorPacket, which MySQLResult._get_descriptions passes (line 1457); _read_packet is private and no other value reaches it
+806:38 call  b"".join(buff)
+    -> <builtin>.bytes.join
+806:51 getattr  self.encoding
+    reject pymysql.charset.Charset.encoding: self is a Connection, whose encoding is a str instance attribute
+807:34 call  packet.is_error_packet()
+    -> pymysql.protocol.MysqlPacket.is_error_packet
+    note: packet is a MysqlPacket or a FieldDescriptorPacket, which inherits the method
+810:35 call  packet.raise_for_error()
+    -> pymysql.protocol.MysqlPacket.raise_for_error
+
+[pymysql.connections.Connection._read_bytes]
+818:40 call  self._rfile.read(num_bytes)
+    -> io.BufferedReader.read
+    reject pymysql.connections.MySQLResult.read, pymysql.protocol.MysqlPacket.read: self._rfile is the io.BufferedReader of sock.makefile("rb") (see 451:30)
+823:34 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+824:43 call  err.OperationalError( CR.CR_SERVER_LOST, f"Lost connectio...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+830:34 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+832:15 call  len(data)
+    -> <builtin>.len
+833:30 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+834:39 call  err.OperationalError( CR.CR_SERVER_LOST, "Lost connection...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+
+[pymysql.connections.Connection._write_bytes]
+841:34 call  self._sock.settimeout(self._write_timeout)
+    -> socket.socket.settimeout
+    -> ssl.SSLSocket.settimeout
+    note: self._sock is a socket.socket or an ssl.SSLSocket (see 774:34)
+844:31 call  self._sock.sendall(data)
+    -> socket.socket.sendall
+    -> ssl.SSLSocket.sendall
+    note: self._sock is a socket.socket or an ssl.SSLSocket (see 774:34)
+846:30 call  self._force_close()
+    -> pymysql.connections.Connection._force_close
+847:39 call  err.OperationalError( CR.CR_SERVER_GONE_ERROR, f"MySQL se...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+
+[pymysql.connections.Connection._read_query_result]
+853:29 call  MySQLResult(self)
+    -> pymysql.connections.MySQLResult.__init__
+855:41 call  result.init_unbuffered_query()
+    -> pymysql.connections.MySQLResult.init_unbuffered_query
+857:24 call  result.read()
+    -> pymysql.connections.MySQLResult.read
+    reject pymysql.protocol.MysqlPacket.read: result is the MySQLResult of line 853
+
+[pymysql.connections.Connection._execute_command]
+875:37 call  err.InterfaceError(0, "")
+    -> pymysql.err.Error.__init__
+    note: err.InterfaceError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, line 1257); its first __init__ is Error.__init__
+881:30 call  warnings.warn("Previous unbuffered result was left incomp...
+    -> warnings.warn
+882:54 call  self._result._finish_unbuffered_query()
+    -> pymysql.connections.MySQLResult._finish_unbuffered_query
+    note: self._result is the MySQLResult of _read_query_result
+884:33 call  self.next_result()
+    -> pymysql.connections.Connection.next_result
+887:22 call  isinstance(sql, str)
+    -> <builtin>.isinstance
+888:29 call  sql.encode(self.encoding)
+    -> <builtin>.str.encode
+    reject pymysql.charset.Charset.encoding: self.encoding is a str attribute of the Connection
+    note: sql is a str (the isinstance check of line 887)
+888:35 getattr  self.encoding
+    reject pymysql.charset.Charset.encoding: self is a Connection, whose encoding is a str instance attribute
+890:26 call  min(MAX_PACKET_LEN, len(sql) + 1)
+    -> <builtin>.min
+890:46 call  len(sql)
+    -> <builtin>.len
+894:30 call  struct.pack("<iB", packet_size, command)
+    -> struct.pack
+896:26 call  self._write_bytes(packet)
+    -> pymysql.connections.Connection._write_bytes
+898:24 call  dump_packet(packet)
+    reject pymysql.protocol.dump_packet: under `if DEBUG:`, which does not run (judgement J1)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+906:30 call  min(MAX_PACKET_LEN, len(sql))
+    -> <builtin>.min
+906:50 call  len(sql)
+    -> <builtin>.len
+907:30 call  self.write_packet(sql[:packet_size])
+    -> pymysql.connections.Connection.write_packet
+
+[pymysql.connections.Connection._request_authentication]
+914:15 call  int(self.server_version.split(".", 1)[0])
+    -> <builtin>.int
+914:41 call  self.server_version.split(".", 1)
+    -> <builtin>.str.split
+    note: self.server_version is the str that _get_server_information decodes (line 1193)
+918:29 call  ValueError("Did not specify a username")
+    -> <builtin>.ValueError
+920:37 call  charset_by_name(self.charset)
+    -> pymysql.charset.Charsets.by_name
+    note: charset_by_name is the bound method _charsets.by_name (charset.py:55)
+921:22 call  isinstance(self.user, str)
+    -> <builtin>.isinstance
+922:41 call  self.user.encode(self.encoding)
+    -> <builtin>.str.encode
+    reject pymysql.charset.Charset.encoding: self.encoding is a str attribute of the Connection
+    note: self.user is a str (the isinstance check of line 921)
+922:47 getattr  self.encoding
+    reject pymysql.charset.Charset.encoding: self is a Connection, whose encoding is a str instance attribute
+936:43 call  err.OperationalError( CR.CR_SSL_CONNECTION_ERROR, "SSL is...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+946:32 call  struct.pack( "<iIB23s", client_flags, MAX_PACKET_LEN, cha...
+    -> struct.pack
+951:30 call  self.write_packet(data_init)
+    -> pymysql.connections.Connection.write_packet
+952:46 call  self.ctx.wrap_socket(self._sock, server_hostname=self.host)
+    -> ssl.SSLContext.wrap_socket
+    note: self.ctx is the ssl.SSLContext of _create_ssl_ctx: one that ssl.create_default_context makes, or the client's documented ssl.SSLContext (line 136, B4)
+953:46 call  self._sock.makefile("rb")
+    -> ssl.SSLSocket.makefile
+    note: self._sock is the ssl.SSLSocket that wrap_socket returns (line 952)
+963:54 call  _auth.scramble_native_password(self.password, self.salt)
+    -> pymysql._auth.scramble_native_password
+966:54 call  _auth.scramble_native_password(self.password, self.salt)
+    -> pymysql._auth.scramble_native_password
+971:26 call  print("caching_sha2: trying fast path")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+972:55 call  _auth.scramble_caching_sha2(self.password, self.salt)
+    -> pymysql._auth.scramble_caching_sha2
+975:26 call  print("caching_sha2: empty password")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+986:32 call  _lenenc_int(len(authresp))
+    -> pymysql.connections._lenenc_int
+986:36 call  len(authresp)
+    -> <builtin>.len
+988:32 call  struct.pack("B", len(authresp))
+    -> struct.pack
+988:41 call  len(authresp)
+    -> <builtin>.len
+993:26 call  isinstance(self.db, str)
+    -> <builtin>.isinstance
+994:41 call  self.db.encode(self.encoding)
+    -> <builtin>.str.encode
+    reject pymysql.charset.Charset.encoding: self.encoding is a str attribute of the Connection
+    note: self.db is a str (the isinstance check of line 993)
+994:47 getattr  self.encoding
+    reject pymysql.charset.Charset.encoding: self is a Connection, whose encoding is a str instance attribute
+1002:50 call  self._connect_attrs.items()
+    -> <builtin>.dict.items
+1003:29 call  k.encode("utf-8")
+    -> <builtin>.str.encode
+    note: the keys of self._connect_attrs are str literals (lines 362-368)
+1004:45 call  _lenenc_int(len(k))
+    -> pymysql.connections._lenenc_int
+1004:49 call  len(k)
+    -> <builtin>.len
+1005:29 call  v.encode("utf-8")
+    -> <builtin>.str.encode
+    note: the values of self._connect_attrs are str: "pymysql", VERSION_STRING, str(os.getpid()) and the client's program_name
+1006:45 call  _lenenc_int(len(v))
+    -> pymysql.connections._lenenc_int
+1006:49 call  len(v)
+    -> <builtin>.len
+1007:32 call  _lenenc_int(len(connect_attrs))
+    -> pymysql.connections._lenenc_int
+1007:36 call  len(connect_attrs)
+    -> <builtin>.len
+1009:26 call  self.write_packet(data)
+    -> pymysql.connections.Connection.write_packet
+1010:40 call  self._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1018:22 call  isinstance(auth_plugin_name, str)
+    -> <builtin>.isinstance
+1019:55 call  auth_plugin_name.encode("ascii")
+    -> <builtin>.str.encode
+    note: auth_plugin_name is a str (the isinstance check of line 1018)
+1020:60 call  self._get_auth_plugin_handler(auth_plugin_name)
+    -> pymysql.connections.Connection._get_auth_plugin_handler
+1031:50 call  auth_packet.is_auth_switch_request()
+    -> pymysql.protocol.MysqlPacket.is_auth_switch_request
+    note: auth_packet is the MysqlPacket of _read_packet, of _process_auth or of the _auth functions; a packet that a client handler's authenticate returns is a client object (B5)
+1033:47 call  err.OperationalError("received multiple auth switch reque...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1036:26 call  print("received auth switch")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+1038:39 call  auth_packet.read_uint8()
+    -> pymysql.protocol.MysqlPacket.read_uint8
+    note: auth_packet is a MysqlPacket (see 1031:50)
+1039:54 call  auth_packet.read_string()
+    -> pymysql.protocol.MysqlPacket.read_string
+1045:72 call  self._get_auth_plugin_handler(plugin_name)
+    -> pymysql.connections.Connection._get_auth_plugin_handler
+1046:53 call  self._process_auth( plugin_name, auth_packet, auth_plugin...
+    -> pymysql.connections.Connection._process_auth
+1050:43 call  err.OperationalError("received unknown auth switch request")
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1052:46 call  auth_packet.is_extra_auth_data()
+    -> pymysql.protocol.MysqlPacket.is_extra_auth_data
+    note: auth_packet is a MysqlPacket (see 1031:50)
+1054:26 call  print("received extra data")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+1057:67 call  auth_plugin_handler.authenticate(auth_packet)
+    note: auth_plugin_handler is an instance of a class of the client's auth_plugin_map (line 155: "a class that processes that plugin"); the package defines no such class: a client object, no callee (B5)
+1063:67 call  _auth.caching_sha2_password_auth(self, auth_packet)
+    -> pymysql._auth.caching_sha2_password_auth
+1066:61 call  _auth.sha256_password_auth(self, auth_packet)
+    -> pymysql._auth.sha256_password_auth
+1068:43 call  err.OperationalError( "Received extra packet for auth met...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1072:40 call  auth_packet.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+    note: auth_packet is a MysqlPacket (see 1031:50)
+1074:39 call  err.OperationalError("unexpected packet during authentica...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1077:18 call  print("Succeed to auth")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+
+[pymysql.connections.Connection._process_auth]
+1082:44 call  handler.authenticate(auth_packet)
+    note: handler is an instance of a client's auth_plugin_map class (see 1057:67): a client object, no callee (B5)
+1085:47 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f"Au...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1088:47 call  type(handler)
+    -> <builtin>.type
+1091:52 call  _auth.caching_sha2_password_auth(self, auth_packet)
+    -> pymysql._auth.caching_sha2_password_auth
+1093:46 call  _auth.sha256_password_auth(self, auth_packet)
+    -> pymysql._auth.sha256_password_auth
+1095:50 call  _auth.scramble_native_password(self.password, auth_packet...
+    -> pymysql._auth.scramble_native_password
+1095:86 call  auth_packet.read_all()
+    -> pymysql.protocol.MysqlPacket.read_all
+    note: auth_packet is a MysqlPacket: the auth switch packet of _request_authentication (line 1046)
+1097:42 call  _auth.ed25519_password(self.password, auth_packet.read_al...
+    -> pymysql._auth.ed25519_password
+1097:78 call  auth_packet.read_all()
+    -> pymysql.protocol.MysqlPacket.read_all
+1100:44 call  _auth.scramble_old_password(self.password, auth_packet.re...
+    note: no edge: the module _auth defines no scramble_old_password, so the load of the callee raises AttributeError before the call (judgement J3)
+1100:80 call  auth_packet.read_all()
+    reject pymysql.protocol.MysqlPacket.read_all: never evaluated (judgement J3)
+    note: no edge: the argument is never evaluated, because the load of _auth.scramble_old_password raises first (judgement J3)
+1109:38 call  pkt.read_uint8()
+    -> pymysql.protocol.MysqlPacket.read_uint8
+    note: pkt is auth_packet, then the MysqlPacket of _read_packet (line 1138)
+1112:38 call  pkt.read_all()
+    -> pymysql.protocol.MysqlPacket.read_all
+1115:38 call  self.write_packet(self.password + b"\0")
+    -> pymysql.connections.Connection.write_packet
+1119:46 call  handler.prompt(echo, prompt)
+    note: handler is an instance of a client's auth_plugin_map class (see 1057:67): a client object, no callee (B5)
+1120:42 call  self.write_packet(resp + b"\0")
+    -> pymysql.connections.Connection.write_packet
+1122:51 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f"Au...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1128:51 call  err.OperationalError( CR.CR_AUTH_PLUGIN_ERR, f"Authentica...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1134:47 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f"Au...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1138:40 call  self._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1139:32 call  pkt.check_error()
+    -> pymysql.protocol.MysqlPacket.check_error
+1140:36 call  pkt.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+1144:39 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, "Aut...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1149:26 call  self.write_packet(data)
+    -> pymysql.connections.Connection.write_packet
+1150:32 call  self._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1151:24 call  pkt.check_error()
+    -> pymysql.protocol.MysqlPacket.check_error
+
+[pymysql.connections.Connection._get_auth_plugin_handler]
+1155:49 call  self._auth_plugin_map.get(plugin_name)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: self._auth_plugin_map is the client's documented dict (line 155) or {} (line 358)
+1156:43 call  isinstance(plugin_name, bytes)
+    -> <builtin>.isinstance
+1157:53 call  self._auth_plugin_map.get(plugin_name.decode("ascii"))
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: self._auth_plugin_map is a dict (see 1155:49)
+1157:72 call  plugin_name.decode("ascii")
+    -> <builtin>.bytes.decode
+1160:39 call  plugin_class(self)
+    note: plugin_class is a value of the client's auth_plugin_map, a class that the client defines (the tests pass their own classes and object, tests/test_connection.py:227-303); the package defines none: no callee (B2, B5)
+1162:43 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f"Au...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+
+[pymysql.connections.Connection._get_server_information]
+1186:35 call  self._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1187:35 call  packet.get_all_data()
+    -> pymysql.protocol.MysqlPacket.get_all_data
+1192:31 call  data.find(b"\0", i)
+    -> <builtin>.bytes.find
+    note: data is the bytes payload of the packet (b"".join of the reads, line 806)
+1193:56 call  data[i:server_end].decode("latin1")
+    -> <builtin>.bytes.decode
+1196:46 call  struct.unpack("<I", data[i : i + 4])
+    -> struct.unpack
+1202:49 call  struct.unpack("<H", data[i : i + 2])
+    -> struct.unpack
+1205:15 call  len(data)
+    -> <builtin>.len
+1206:56 call  struct.unpack("<BHHB", data[i : i + 6])
+    -> struct.unpack
+1212:52 call  charset_by_id(lang)
+    -> pymysql.charset.Charsets.by_id
+    note: charset_by_id is the bound method _charsets.by_id (charset.py:56)
+1219:22 call  print("server_status: %x" % stat)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+1223:22 call  print("salt_len:", salt_len)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+1224:27 call  max(12, salt_len - 9)
+    -> <builtin>.max
+1229:15 call  len(data)
+    -> <builtin>.len
+1236:65 call  len(data)
+    -> <builtin>.len
+1242:35 call  data.find(b"\0", i)
+    -> <builtin>.bytes.find
+1245:57 call  data[i:].decode("utf-8")
+    -> <builtin>.bytes.decode
+1247:67 call  data[i:server_end].decode("utf-8")
+    -> <builtin>.bytes.decode
+
+[pymysql.connections.MySQLResult.__del__]
+1286:42 call  self._finish_unbuffered_query()
+    -> pymysql.connections.MySQLResult._finish_unbuffered_query
+
+[pymysql.connections.MySQLResult.read]
+1290:56 call  self.connection._read_packet()
+    -> pymysql.connections.Connection._read_packet
+    note: self.connection is the Connection that makes the MySQLResult (lines 517, 853; documented :type connection: Connection, line 1270)
+1292:41 call  first_packet.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+1293:37 call  self._read_ok_packet(first_packet)
+    -> pymysql.connections.MySQLResult._read_ok_packet
+    reject pymysql.connections.Connection._read_ok_packet: self is a MySQLResult
+1294:51 call  first_packet.is_load_local_packet()
+    -> pymysql.protocol.MysqlPacket.is_load_local_packet
+1295:45 call  self._read_load_local_packet(first_packet)
+    -> pymysql.connections.MySQLResult._read_load_local_packet
+1297:41 call  self._read_result_packet(first_packet)
+    -> pymysql.connections.MySQLResult._read_result_packet
+
+[pymysql.connections.MySQLResult.init_unbuffered_query]
+1306:52 call  self.connection._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1308:37 call  first_packet.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+1310:33 call  self._read_ok_packet(first_packet)
+    -> pymysql.connections.MySQLResult._read_ok_packet
+    reject pymysql.connections.Connection._read_ok_packet: self is a MySQLResult
+1311:47 call  first_packet.is_load_local_packet()
+    -> pymysql.protocol.MysqlPacket.is_load_local_packet
+1313:45 call  self._read_load_local_packet(first_packet)
+    -> pymysql.connections.MySQLResult._read_load_local_packet
+1317:72 call  first_packet.read_length_encoded_integer()
+    -> pymysql.protocol.MysqlPacket.read_length_encoded_integer
+1318:35 call  self._get_descriptions()
+    -> pymysql.connections.MySQLResult._get_descriptions
+
+[pymysql.connections.MySQLResult._read_ok_packet]
+1327:36 call  OKPacketWrapper(packet)
+    -> pymysql.protocol.OKPacketWrapper.__init__
+
+[pymysql.connections.MySQLResult._read_load_local_packet]
+1338:31 call  RuntimeError( "**WARN**: Received LOAD_LOCAL packet but l...
+    -> <builtin>.RuntimeError
+1341:45 call  LoadLocalPacketWrapper(first_packet)
+    -> pymysql.protocol.LoadLocalPacketWrapper.__init__
+1343:29 call  _send_local_file(load_packet.filename, conn)
+    -> pymysql.connections._send_local_file
+1346:30 call  conn.write_packet(b"")
+    -> pymysql.connections.Connection.write_packet
+1347:42 call  conn._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1351:38 call  ok_packet.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+1352:39 call  err.OperationalError( CR.CR_COMMANDS_OUT_OF_SYNC, "Comman...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+1355:29 call  self._read_ok_packet(ok_packet)
+    -> pymysql.connections.MySQLResult._read_ok_packet
+    reject pymysql.connections.Connection._read_ok_packet: self is a MySQLResult
+
+[pymysql.connections.MySQLResult._check_packet_is_eof]
+1358:36 call  packet.is_eof_packet()
+    -> pymysql.protocol.MysqlPacket.is_eof_packet
+1365:30 call  EOFPacketWrapper(packet)
+    -> pymysql.protocol.EOFPacketWrapper.__init__
+
+[pymysql.connections.MySQLResult._read_result_packet]
+1371:68 call  first_packet.read_length_encoded_integer()
+    -> pymysql.protocol.MysqlPacket.read_length_encoded_integer
+1372:31 call  self._get_descriptions()
+    -> pymysql.connections.MySQLResult._get_descriptions
+1373:34 call  self._read_rowdata_packet()
+    -> pymysql.connections.MySQLResult._read_rowdata_packet
+
+[pymysql.connections.MySQLResult._read_rowdata_packet_unbuffered]
+1381:46 call  self.connection._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1382:37 call  self._check_packet_is_eof(packet)
+    -> pymysql.connections.MySQLResult._check_packet_is_eof
+1388:41 call  self._read_row_from_packet(packet)
+    -> pymysql.connections.MySQLResult._read_row_from_packet
+
+[pymysql.connections.MySQLResult._finish_unbuffered_query]
+1399:54 call  self.connection._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1412:41 call  self._check_packet_is_eof(packet)
+    -> pymysql.connections.MySQLResult._check_packet_is_eof
+
+[pymysql.connections.MySQLResult._read_rowdata_packet]
+1420:50 call  self.connection._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1421:41 call  self._check_packet_is_eof(packet)
+    -> pymysql.connections.MySQLResult._check_packet_is_eof
+1424:24 call  rows.append(self._read_row_from_packet(packet))
+    -> <builtin>.list.append
+1424:51 call  self._read_row_from_packet(packet)
+    -> pymysql.connections.MySQLResult._read_row_from_packet
+1426:33 call  len(rows)
+    -> <builtin>.len
+1427:26 call  tuple(rows)
+    -> <builtin>.tuple
+
+[pymysql.connections.MySQLResult._read_row_from_packet]
+1433:55 call  packet.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+    note: packet is the MysqlPacket of _read_packet
+1440:39 call  data.decode(encoding)
+    -> <builtin>.bytes.decode
+    note: data is the bytes slice of read_length_coded_string
+1442:26 call  print("DEBUG: DATA = ", data)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+1444:37 call  converter(data)
+    -> <builtin>.int
+    -> <builtin>.float
+    -> decimal.Decimal
+    -> pymysql.converters.convert_datetime
+    -> pymysql.converters.convert_timedelta
+    -> pymysql.converters.convert_date
+    -> pymysql.converters.convert_time
+    note: converter is a value of self.connection.decoders (_get_descriptions, line 1480): the int-keyed values of conv, by default converters.conversions, whose decoders (converters.py:344-367) are int, float, Decimal, convert_datetime, convert_timedelta, convert_date and through (also convert_bit), and through becomes None (line 1481); convert_time is documented as a decoder for FIELD_TYPE.TIME (converters.py:263-266); a client's own decoder is a client callback (judgement J5)
+1445:23 call  row.append(data)
+    -> <builtin>.list.append
+1446:21 call  tuple(row)
+    -> <builtin>.tuple
+
+[pymysql.connections.MySQLResult._get_descriptions]
+1453:41 getattr  self.connection.encoding
+    reject pymysql.charset.Charset.encoding: self.connection is a Connection, whose encoding is a str instance attribute
+1456:23 call  range(self.field_count)
+    -> <builtin>.range
+1457:49 call  self.connection._read_packet(FieldDescriptorPacket)
+    -> pymysql.connections.Connection._read_packet
+1458:31 call  self.fields.append(field)
+    -> <builtin>.list.append
+1459:31 call  description.append(field.description())
+    -> <builtin>.list.append
+1459:49 call  field.description()
+    -> pymysql.protocol.FieldDescriptorPacket.description
+    note: field is the FieldDescriptorPacket of _read_packet(FieldDescriptorPacket); a value site only because the package assigns attributes named description (cursors.py:44, connections.py:1279)
+1480:53 call  self.connection.decoders.get(field_type)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: self.connection.decoders is the dict of Connection.__init__ (line 354)
+1484:22 call  print(f"DEBUG: field={field}, converter={converter}")
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+1485:35 call  self.converters.append((encoding, converter))
+    -> <builtin>.list.append
+1487:50 call  self.connection._read_packet()
+    -> pymysql.connections.Connection._read_packet
+1488:40 call  eof_packet.is_eof_packet()
+    -> pymysql.protocol.MysqlPacket.is_eof_packet
+1489:33 call  tuple(description)
+    -> <builtin>.tuple
+
+[pymysql.connections._send_local_file]
+1494:22 call  min(conn.max_allowed_packet, 16 * 1024)
+    -> <builtin>.min
+1497:14 with  open(filename, "rb")
+    reject *: the context manager is the file of open(), an io.BufferedReader
+1497:18 call  open(filename, "rb")
+    -> <builtin>.open
+    reject pymysql.connections.Connection.open: the builtin open, not the property
+1500:34 call  file.read(packet_size)
+    -> io.BufferedReader.read
+    reject pymysql.connections.MySQLResult.read, pymysql.protocol.MysqlPacket.read: file is the io.BufferedReader of open(filename, "rb")
+1503:34 call  conn.write_packet(chunk)
+    -> pymysql.connections.Connection.write_packet
+    note: conn is the Connection of the MySQLResult (line 1343)
+1505:35 call  err.OperationalError( ER.FILE_NOT_FOUND, f"Can't open fil...
+    -> pymysql.err.Error.__init__
+    note: err.OperationalError is the class of pymysql.err (see 474:39)
+
+== pymysql.converters
+
+[pymysql.converters]
+69:21 call  chr(x)
+    -> <builtin>.chr
+69:39 call  range(128)
+    -> <builtin>.range
+71:18 call  ord("\\")
+    -> <builtin>.ord
+72:18 call  ord("\n")
+    -> <builtin>.ord
+73:18 call  ord("\r")
+    -> <builtin>.ord
+74:18 call  ord("\032")
+    -> <builtin>.ord
+75:18 call  ord('"')
+    -> <builtin>.ord
+76:18 call  ord("'")
+    -> <builtin>.ord
+161:25 call  re.compile( r"(\d{1,4})-(\d{1,2})-(\d{1,2})[T ](\d{1,2}):...
+    -> re.compile
+196:26 call  re.compile(r"(-)?(\d{1,3}):(\d{1,2}):(\d{1,2})(?:.(\d{1,6...
+    -> re.compile
+243:21 call  re.compile(r"(\d{1,2}):(\d{1,2}):(\d{1,2})(?:.(\d{1,6}))?")
+    -> re.compile
+334:9 call  type(None)
+    -> <builtin>.type
+371:28 call  encoders.copy()
+    -> <builtin>.dict.copy
+372:19 call  conversions.update(decoders)
+    -> <builtin>.dict.update
+
+[pymysql.converters.escape_item]
+19:26 call  mapping.get(type(val))
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: mapping is one of the package's encoder dicts: encoders (line 18) or the Connection's encoders dict (connections.py:353, 542), which escape_sequence forwards (line 42); Connection.escape is internal (judgement J6), and every package call of it omits mapping; escape_set, which no package code calls, gets B's fallback and can forward a client mapping (line 49), opaque, which adds no callee
+19:31 call  type(val)
+    -> <builtin>.type
+26:28 call  TypeError("no default type converter defined")
+    -> <builtin>.TypeError
+29:22 call  encoder(val, charset, mapping)
+    -> pymysql.converters.escape_sequence
+    note: encoder is the value of mapping for type(val), or of mapping[str]; this call is reached only when it is escape_sequence (line 28)
+31:22 call  encoder(val, mapping)
+    -> pymysql.converters.escape_bool
+    -> pymysql.converters.escape_int
+    -> pymysql.converters.escape_float
+    -> pymysql.converters.escape_str
+    -> pymysql.converters.escape_bytes
+    -> pymysql.converters.escape_not_supported
+    -> pymysql.converters.escape_None
+    -> pymysql.converters.escape_date
+    -> pymysql.converters.escape_datetime
+    -> pymysql.converters.escape_timedelta
+    -> pymysql.converters.escape_time
+    -> pymysql.converters.escape_struct_time
+    -> pymysql.converters.Decimal2Literal
+    exclude pymysql.converters.escape_string: Connection.escape is internal (its docstring, connections.py:530-533) and so are the functions of converters (CHANGELOG.md:7), so they are private under C; the tests' mapping {str: escape_string} (tests/test_connection.py:936) does not widen the mappings that the package passes, and no package mapping holds escape_string (judgement J6)
+    note: encoder is a value of mapping other than escape_sequence: the package's encoders (lines 323-341, also through Connection.encoders, which keeps the non-int keys of conv, by default conversions); a client's own encoder in conv is a client callback (judgement J6)
+    exclude pymysql.converters.escape_set: no mapping of the package, its tests or its documentation holds escape_set (deprecated, line 48)
+    exclude pymysql.converters.through: through is a decoder (conversions' int keys), never a value of an encoder mapping
+
+[pymysql.converters.escape_not_supported]
+36:20 call  TypeError(f"{type(val).__name__} can not be used as param...
+    -> <builtin>.TypeError
+36:28 call  type(val)
+    -> <builtin>.type
+
+[pymysql.converters.escape_sequence]
+42:29 call  escape_item(item, charset, mapping)
+    -> pymysql.converters.escape_item
+43:17 call  n.append(quoted)
+    -> <builtin>.list.append
+44:26 call  ",".join(n)
+    -> <builtin>.str.join
+
+[pymysql.converters.escape_set]
+48:18 call  warnings.warn("escape_set is deprecated", DeprecationWarn...
+    -> warnings.warn
+49:20 call  ",".join([escape_item(x, charset, mapping) for x in val])
+    -> <builtin>.str.join
+49:33 call  escape_item(x, charset, mapping)
+    -> pymysql.converters.escape_item
+
+[pymysql.converters.escape_bool]
+53:15 call  str(int(value))
+    -> <builtin>.str
+53:19 call  int(value)
+    -> <builtin>.int
+
+[pymysql.converters.escape_int]
+57:15 call  str(value)
+    -> <builtin>.str
+
+[pymysql.converters.escape_float]
+61:13 call  repr(value)
+    -> <builtin>.repr
+63:31 call  ProgrammingError(f"{s} can not be used with MySQL")
+    -> pymysql.err.Error.__init__
+
+[pymysql.converters.escape_string]
+84:27 call  value.translate(_escape_table)
+    -> <builtin>.str.translate
+    note: value is a str (the docstring: "Value should be unicode"; escape_str passes str(value), Connection._escape_string a str)
+
+[pymysql.converters.escape_bytes]
+88:39 call  value.hex()
+    -> <builtin>.bytes.hex
+    note: value is bytes: escape_bytes is the encoder of the key bytes (line 328)
+
+[pymysql.converters.escape_str]
+92:31 call  escape_string(str(value))
+    -> pymysql.converters.escape_string
+92:35 call  str(value)
+    -> <builtin>.str
+
+[pymysql.converters.escape_timedelta]
+107:18 call  abs(obj)
+    -> <builtin>.abs
+110:30 call  divmod(obj.seconds, 60)
+    -> <builtin>.divmod
+111:28 call  divmod(minutes, 60)
+    -> <builtin>.divmod
+
+[pymysql.converters.escape_time]
+124:22 call  fmt.format(obj)
+    -> <builtin>.str.format
+
+[pymysql.converters.escape_datetime]
+135:22 call  fmt.format(obj)
+    -> <builtin>.str.format
+
+[pymysql.converters.escape_date]
+140:22 call  fmt.format(obj)
+    -> <builtin>.str.format
+
+[pymysql.converters.escape_struct_time]
+144:27 call  escape_datetime(datetime.datetime(*obj[:6]))
+    -> pymysql.converters.escape_datetime
+144:45 call  datetime.datetime(*obj[:6])
+    -> datetime.datetime
+
+[pymysql.converters.Decimal2Literal]
+148:23 call  o.is_finite()
+    -> decimal.Decimal.is_finite
+    note: o is a decimal.Decimal: Decimal2Literal is the encoder of the key Decimal (line 340)
+149:31 call  ProgrammingError("%s can not be used with MySQL" % str(o)...
+    -> pymysql.err.Error.__init__
+149:69 call  str(o)
+    -> <builtin>.str
+149:78 call  str(o).lower()
+    -> <builtin>.str.lower
+150:18 call  format(o, "f")
+    -> <builtin>.format
+
+[pymysql.converters._convert_second_fraction]
+157:16 call  s.ljust(6, "0")
+    -> <builtin>.str.ljust
+    note: s is the last group of a str regex match (convert_datetime, convert_timedelta, convert_time), a str
+158:15 call  int(s[:6])
+    -> <builtin>.int
+
+[pymysql.converters.convert_datetime]
+181:18 call  isinstance(obj, (bytes, bytearray))
+    -> <builtin>.isinstance
+182:25 call  obj.decode("ascii")
+    -> <builtin>.bytes.decode
+    note: obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)
+184:26 call  DATETIME_RE.match(obj)
+    -> re.Pattern.match
+186:28 call  convert_date(obj)
+    -> pymysql.converters.convert_date
+189:22 call  list(m.groups())
+    -> <builtin>.list
+189:31 call  m.groups()
+    -> re.Match.groups
+190:46 call  _convert_second_fraction(groups[-1])
+    -> pymysql.converters._convert_second_fraction
+191:33 call  datetime.datetime(*[int(x) for x in groups])
+    -> datetime.datetime
+191:39 call  int(x)
+    -> <builtin>.int
+193:28 call  convert_date(obj)
+    -> pymysql.converters.convert_date
+
+[pymysql.converters.convert_timedelta]
+216:18 call  isinstance(obj, (bytes, bytearray))
+    -> <builtin>.isinstance
+217:25 call  obj.decode("ascii")
+    -> <builtin>.bytes.decode
+    note: obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)
+219:27 call  TIMEDELTA_RE.match(obj)
+    -> re.Pattern.match
+224:22 call  list(m.groups())
+    -> <builtin>.list
+224:31 call  m.groups()
+    -> re.Match.groups
+225:46 call  _convert_second_fraction(groups[-1])
+    -> pymysql.converters._convert_second_fraction
+230:31 call  datetime.timedelta( hours=int(hours), minutes=int(minutes...
+    -> datetime.timedelta
+231:26 call  int(hours)
+    -> <builtin>.int
+232:28 call  int(minutes)
+    -> <builtin>.int
+233:28 call  int(seconds)
+    -> <builtin>.int
+234:33 call  int(microseconds)
+    -> <builtin>.int
+
+[pymysql.converters.convert_time]
+268:18 call  isinstance(obj, (bytes, bytearray))
+    -> <builtin>.isinstance
+269:25 call  obj.decode("ascii")
+    -> <builtin>.bytes.decode
+    note: obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)
+271:22 call  TIME_RE.match(obj)
+    -> re.Pattern.match
+276:22 call  list(m.groups())
+    -> <builtin>.list
+276:31 call  m.groups()
+    -> re.Match.groups
+277:46 call  _convert_second_fraction(groups[-1])
+    -> pymysql.converters._convert_second_fraction
+279:29 call  datetime.time( hour=int(hours), minute=int(minutes), seco...
+    -> datetime.time
+280:21 call  int(hours)
+    -> <builtin>.int
+281:23 call  int(minutes)
+    -> <builtin>.int
+282:23 call  int(seconds)
+    -> <builtin>.int
+283:28 call  int(microseconds)
+    -> <builtin>.int
+
+[pymysql.converters.convert_date]
+302:18 call  isinstance(obj, (bytes, bytearray))
+    -> <builtin>.isinstance
+303:25 call  obj.decode("ascii")
+    -> <builtin>.bytes.decode
+    note: obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)
+305:29 call  datetime.date(*[int(x) for x in obj.split("-", 2)])
+    -> datetime.date
+305:35 call  int(x)
+    -> <builtin>.int
+305:57 call  obj.split("-", 2)
+    -> <builtin>.str.split
+    note: obj is a str: the decoded bytes, or the str that the package passes (connections.py:1440, converters.py:186 and 193)
+
+== pymysql.cursors
+
+[pymysql.cursors]
+9:30 call  re.compile( r"\s*((?:INSERT|REPLACE)\b.+\bVALUES?\s*)" + ...
+    -> re.compile
+
+[pymysql.cursors._backquote_escape]
+21:21 call  s.replace("`", "``")
+    -> <builtin>.str.replace
+    note: s is procname, documented `:type procname: str` (line 239)
+
+[pymysql.cursors.Cursor.close]
+60:31 call  self.nextset()
+    -> pymysql.cursors.Cursor.nextset
+    reject pymysql.cursors.SSCursor.nextset: self is a Cursor or a DictCursor; SSCursor and SSDictCursor override close
+
+[pymysql.cursors.Cursor.__exit__]
+70:19 call  self.close()
+    -> pymysql.cursors.Cursor.close
+    -> pymysql.cursors.SSCursor.close
+    reject pymysql.connections.Connection.close: self is a cursor
+    note: self is a Cursor or a DictCursor (Cursor.close), or an SSCursor or SSDictCursor (SSCursor.close)
+
+[pymysql.cursors.Cursor._get_db]
+74:39 call  err.ProgrammingError("Cursor closed")
+    -> pymysql.err.Error.__init__
+    note: err.ProgrammingError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, connections.py:1263); its first __init__ is Error.__init__
+
+[pymysql.cursors.Cursor._check_executed]
+79:39 call  err.ProgrammingError("execute() first")
+    -> pymysql.err.Error.__init__
+    note: err.ProgrammingError is the class of pymysql.err (see 74:39)
+
+[pymysql.cursors.Cursor._nextset]
+92:28 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+99:27 call  self._clear_result()
+    -> pymysql.cursors.Cursor._clear_result
+100:25 call  conn.next_result(unbuffered=unbuffered)
+    -> pymysql.connections.Connection.next_result
+    note: conn is self.connection, the Connection that made the cursor (Connection.cursor, connections.py:571-572)
+101:28 call  self._do_get_result()
+    -> pymysql.cursors.Cursor._do_get_result
+    -> pymysql.cursors.DictCursorMixin._do_get_result
+    note: Cursor and SSCursor use Cursor._do_get_result, DictCursor and SSDictCursor DictCursorMixin._do_get_result
+
+[pymysql.cursors.Cursor.nextset]
+105:29 call  self._nextset(False)
+    -> pymysql.cursors.Cursor._nextset
+
+[pymysql.cursors.Cursor._mogrify]
+109:30 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+111:22 call  isinstance(args, dict)
+    -> <builtin>.isinstance
+112:32 call  escape(item)
+    -> pymysql.connections.Connection.escape
+    note: escape is the bound method self._get_db().escape (line 109) of the cursor's Connection
+112:66 call  args.items()
+    -> <builtin>.dict.items
+    note: args is a dict (the isinstance check of line 111)
+113:24 call  isinstance(args, (list, tuple))
+    -> <builtin>.isinstance
+114:25 call  tuple(map(escape, args))
+    -> <builtin>.tuple
+114:29 call  map(escape, args)
+    -> <builtin>.map
+    -> pymysql.connections.Connection.escape
+    note: tuple() iterates the map in this function, so map calls escape, the Connection's bound method (line 109), back here
+118:26 call  warnings.warn( "single argument is deprecated and will be...
+    -> warnings.warn
+123:26 call  escape(args)
+    -> pymysql.connections.Connection.escape
+    note: escape is the bound method of the cursor's Connection (line 109)
+127:39 call  err.ProgrammingError(str(m))
+    -> pymysql.err.Error.__init__
+    note: err.ProgrammingError is the class of pymysql.err (see 74:39)
+127:43 call  str(m)
+    -> <builtin>.str
+
+[pymysql.cursors.Cursor.mogrify]
+148:29 call  self._mogrify(query, args)
+    -> pymysql.cursors.Cursor._mogrify
+
+[pymysql.cursors.Cursor.execute]
+165:27 call  self.nextset()
+    -> pymysql.cursors.Cursor.nextset
+    -> pymysql.cursors.SSCursor.nextset
+    note: self is any of the four cursor classes, which inherit execute
+169:34 call  self._mogrify(query, args)
+    -> pymysql.cursors.Cursor._mogrify
+170:29 call  self._query(query)
+    -> pymysql.cursors.Cursor._query
+    -> pymysql.cursors.SSCursor._query
+
+[pymysql.cursors.Cursor.executemany]
+193:35 call  RE_INSERT_VALUES.match(query)
+    -> re.Pattern.match
+195:31 call  m.group(1)
+    -> re.Match.group
+196:31 call  m.group(2)
+    -> re.Match.group
+196:41 call  m.group(2).rstrip()
+    -> <builtin>.str.rstrip
+197:32 call  m.group(3)
+    -> re.Match.group
+199:41 call  self._do_execute_many( q_prefix, q_values, q_postfix, arg...
+    -> pymysql.cursors.Cursor._do_execute_many
+    reject pymysql.charset.Charset.encoding: the argument self._get_db().encoding is the str attribute of the Connection
+205:29 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+205:32 getattr  self._get_db().encoding
+    reject pymysql.charset.Charset.encoding: _get_db returns the Connection, whose encoding is a str instance attribute
+208:28 call  sum(self.execute(query, arg) for arg in args)
+    -> <builtin>.sum
+208:41 call  self.execute(query, arg)
+    -> pymysql.cursors.Cursor.execute
+
+[pymysql.cursors.Cursor._do_execute_many]
+214:32 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+214:35 getattr  self._get_db().encoding
+    reject pymysql.charset.Charset.encoding: _get_db returns the Connection, whose encoding is a str instance attribute
+215:22 call  isinstance(prefix, str)
+    -> <builtin>.isinstance
+216:35 call  prefix.encode(encoding)
+    -> <builtin>.str.encode
+217:22 call  isinstance(postfix, str)
+    -> <builtin>.isinstance
+218:37 call  postfix.encode(encoding)
+    -> <builtin>.str.encode
+219:24 call  bytearray(prefix)
+    -> <builtin>.bytearray
+220:20 call  iter(args)
+    -> <builtin>.iter
+221:29 call  self._mogrify(values, next(args))
+    -> pymysql.cursors.Cursor._mogrify
+221:42 call  next(args)
+    -> <builtin>.next
+221:56 call  self._mogrify(values, next(args)).encode(encoding)
+    -> <builtin>.str.encode
+    note: _mogrify returns the str query % args
+224:30 call  self._mogrify(values, arg)
+    -> pymysql.cursors.Cursor._mogrify
+224:50 call  self._mogrify(values, arg).encode(encoding)
+    -> <builtin>.str.encode
+    note: _mogrify returns a str
+225:19 call  len(sql)
+    -> <builtin>.len
+225:30 call  len(v)
+    -> <builtin>.len
+225:39 call  len(postfix)
+    -> <builtin>.len
+226:37 call  self.execute(sql + postfix)
+    -> pymysql.cursors.Cursor.execute
+227:32 call  bytearray(prefix)
+    -> <builtin>.bytearray
+231:29 call  self.execute(sql + postfix)
+    -> pymysql.cursors.Cursor.execute
+
+[pymysql.cursors.Cursor.callproc]
+265:45 call  _backquote_escape(procname)
+    -> pymysql.cursors._backquote_escape
+266:28 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+270:24 call  self._query( "SET %s" % ",".join( fmt % (index, conn.esca...
+    -> pymysql.cursors.Cursor._query
+    -> pymysql.cursors.SSCursor._query
+272:27 call  ",".join( fmt % (index, conn.escape(arg)) for index, arg ...
+    -> <builtin>.str.join
+273:46 call  conn.escape(arg)
+    -> pymysql.connections.Connection.escape
+    note: conn is the cursor's Connection (line 266)
+273:80 call  enumerate(args)
+    -> <builtin>.enumerate
+276:25 call  self.nextset()
+    -> pymysql.cursors.Cursor.nextset
+    -> pymysql.cursors.SSCursor.nextset
+278:35 call  "CALL `{}`({})".format( procname_escaped, ",".join([f"@`_...
+    -> <builtin>.str.format
+280:21 call  ",".join([f"@`_{procname_escaped}_{i}`" for i in range(le...
+    -> <builtin>.str.join
+280:67 call  range(len(args))
+    -> <builtin>.range
+280:71 call  len(args)
+    -> <builtin>.len
+282:20 call  self._query(q)
+    -> pymysql.cursors.Cursor._query
+    -> pymysql.cursors.SSCursor._query
+
+[pymysql.cursors.Cursor.fetchone]
+288:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+289:55 call  len(self._rows)
+    -> <builtin>.len
+
+[pymysql.cursors.Cursor.fetchmany]
+297:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+304:29 call  min(end, len(self._rows))
+    -> <builtin>.min
+304:38 call  len(self._rows)
+    -> <builtin>.len
+
+[pymysql.cursors.Cursor.fetchall]
+309:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+316:29 call  len(self._rows)
+    -> <builtin>.len
+
+[pymysql.cursors.Cursor.scroll]
+320:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+326:39 call  err.ProgrammingError("unknown scroll mode %s" % mode)
+    -> pymysql.err.Error.__init__
+    note: err.ProgrammingError is the class of pymysql.err (see 74:39)
+328:29 call  len(self._rows)
+    -> <builtin>.len
+329:29 call  IndexError("out of range")
+    -> <builtin>.IndexError
+
+[pymysql.cursors.Cursor._query]
+333:28 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+334:27 call  self._clear_result()
+    -> pymysql.cursors.Cursor._clear_result
+335:19 call  conn.query(q)
+    -> pymysql.connections.Connection.query
+336:28 call  self._do_get_result()
+    -> pymysql.cursors.Cursor._do_get_result
+    -> pymysql.cursors.DictCursorMixin._do_get_result
+    note: self is a Cursor (Cursor._do_get_result) or a DictCursor (DictCursorMixin._do_get_result); SSCursor overrides _query
+
+[pymysql.cursors.Cursor._do_get_result]
+350:28 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+
+[pymysql.cursors.Cursor.__next__]
+364:28 call  self.fetchone()
+    -> pymysql.cursors.Cursor.fetchone
+    -> pymysql.cursors.SSCursor.fetchone
+    note: self is any of the four cursor classes (a client iterates a cursor); SSCursor and SSDictCursor override fetchone
+
+[pymysql.cursors.DictCursorMixin._do_get_result]
+375:14 call  super()
+    -> <builtin>.super
+375:31 call  super()._do_get_result()
+    -> pymysql.cursors.Cursor._do_get_result
+    reject pymysql.cursors.DictCursorMixin._do_get_result: super() skips DictCursorMixin; for DictCursor the next class of the MRO is Cursor, for SSDictCursor SSCursor, which inherits Cursor._do_get_result (a bare DictCursorMixin has no next _do_get_result: AttributeError)
+382:30 call  fields.append(name)
+    -> <builtin>.list.append
+386:41 call  self._conv_row(r)
+    -> pymysql.cursors.DictCursorMixin._conv_row
+    reject pymysql.cursors.Cursor._conv_row, pymysql.cursors.SSCursor._conv_row: self is a DictCursor or an SSDictCursor, whose MRO puts DictCursorMixin first
+
+[pymysql.cursors.DictCursorMixin._conv_row]
+391:30 call  self.dict_type(zip(self._fields, row))
+    -> <builtin>.dict
+    note: self.dict_type is the class attribute dict (line 372); a client's subclass that overrides it (the comment of line 371; the tests' MyDict, tests/test_DictCursor.py:90) is client code
+391:34 call  zip(self._fields, row)
+    -> <builtin>.zip
+
+[pymysql.cursors.SSCursor.close]
+423:50 call  self._result._finish_unbuffered_query()
+    -> pymysql.connections.MySQLResult._finish_unbuffered_query
+    note: self._result is the MySQLResult of the connection (_do_get_result, line 352)
+426:31 call  self.nextset()
+    -> pymysql.cursors.SSCursor.nextset
+    reject pymysql.cursors.Cursor.nextset: self is an SSCursor or an SSDictCursor
+
+[pymysql.cursors.SSCursor._query]
+434:28 call  self._get_db()
+    -> pymysql.cursors.Cursor._get_db
+435:27 call  self._clear_result()
+    -> pymysql.cursors.Cursor._clear_result
+436:19 call  conn.query(q, unbuffered=True)
+    -> pymysql.connections.Connection.query
+437:28 call  self._do_get_result()
+    -> pymysql.cursors.Cursor._do_get_result
+    -> pymysql.cursors.DictCursorMixin._do_get_result
+    note: self is an SSCursor (Cursor._do_get_result) or an SSDictCursor (DictCursorMixin._do_get_result)
+
+[pymysql.cursors.SSCursor.nextset]
+441:29 call  self._nextset(unbuffered=True)
+    -> pymysql.cursors.Cursor._nextset
+
+[pymysql.cursors.SSCursor.read_next]
+445:30 call  self._conv_row(self._result._read_rowdata_packet_unbuffer...
+    -> pymysql.cursors.SSCursor._conv_row
+    -> pymysql.cursors.DictCursorMixin._conv_row
+    reject pymysql.cursors.Cursor._conv_row: self is an SSCursor (SSCursor._conv_row) or an SSDictCursor (DictCursorMixin._conv_row)
+445:75 call  self._result._read_rowdata_packet_unbuffered()
+    -> pymysql.connections.MySQLResult._read_rowdata_packet_unbuffered
+
+[pymysql.cursors.SSCursor.fetchone]
+449:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+450:29 call  self.read_next()
+    -> pymysql.cursors.SSCursor.read_next
+
+[pymysql.cursors.SSCursor.fetchall]
+463:20 call  list(self.fetchall_unbuffered())
+    -> <builtin>.list
+    -> pymysql.cursors.SSCursor.fetchone
+    note: list() iterates the callable iterator iter(self.fetchone, None) of fetchall_unbuffered, which calls self.fetchone, SSCursor.fetchone for an SSCursor and an SSDictCursor
+463:45 call  self.fetchall_unbuffered()
+    -> pymysql.cursors.SSCursor.fetchall_unbuffered
+
+[pymysql.cursors.SSCursor.fetchall_unbuffered]
+471:20 call  iter(self.fetchone, None)
+    -> <builtin>.iter
+    reject pymysql.cursors.Cursor.fetchone, pymysql.cursors.SSCursor.fetchone: iter() only stores the bound method; the callable iterator calls it when it is iterated (fetchall, line 463, or the client)
+
+[pymysql.cursors.SSCursor.fetchmany]
+475:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+480:23 call  range(size)
+    -> <builtin>.range
+481:33 call  self.read_next()
+    -> pymysql.cursors.SSCursor.read_next
+485:24 call  rows.append(row)
+    -> <builtin>.list.append
+
+[pymysql.cursors.SSCursor.scroll]
+494:29 call  self._check_executed()
+    -> pymysql.cursors.Cursor._check_executed
+498:44 call  err.NotSupportedError( "Backwards scrolling not supported...
+    -> pymysql.err.Error.__init__
+    note: err.NotSupportedError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, connections.py:1264); its first __init__ is Error.__init__
+502:27 call  range(value)
+    -> <builtin>.range
+503:31 call  self.read_next()
+    -> pymysql.cursors.SSCursor.read_next
+507:44 call  err.NotSupportedError( "Backwards scrolling not supported...
+    -> pymysql.err.Error.__init__
+    note: err.NotSupportedError is the class of pymysql.err (see 498:44)
+512:27 call  range(end)
+    -> <builtin>.range
+513:31 call  self.read_next()
+    -> pymysql.cursors.SSCursor.read_next
+516:39 call  err.ProgrammingError("unknown scroll mode %s" % mode)
+    -> pymysql.err.Error.__init__
+    note: err.ProgrammingError is the class of pymysql.err (see 74:39)
+
+== pymysql.err
+
+[pymysql.err]
+81:11 call  _map_error( ProgrammingError, ER.DB_CREATE_EXISTS, ER.SYN...
+    -> pymysql.err._map_error
+97:11 call  _map_error( DataError, ER.WARN_DATA_TRUNCATED, ER.WARN_NU...
+    -> pymysql.err._map_error
+109:11 call  _map_error( IntegrityError, ER.DUP_ENTRY, ER.NO_REFERENCE...
+    -> pymysql.err._map_error
+119:11 call  _map_error( NotSupportedError, ER.WARNING_NOT_COMPLETE_RO...
+    -> pymysql.err._map_error
+126:11 call  _map_error( OperationalError, ER.DBACCESS_DENIED_ERROR, E...
+    -> pymysql.err._map_error
+
+[pymysql.err.Error.__init__]
+20:14 call  super()
+    -> <builtin>.super
+20:25 call  super().__init__(*args)
+    -> <builtin>.Exception.__init__
+    reject *: self is an Error or a subclass; super() starts after Error (which defines this __init__), skips MySQLError, which defines none, and reaches Exception, outside the package
+
+[pymysql.err.raise_mysql_exception]
+142:26 call  struct.unpack("<h", data[1:3])
+    -> struct.unpack
+147:36 call  data[4:9].decode()
+    -> <builtin>.bytes.decode
+    note: data is the bytes payload of a packet (MysqlPacket.raise_for_error, protocol.py:219)
+148:33 call  data[9:].decode("utf-8", "replace")
+    -> <builtin>.bytes.decode
+150:33 call  data[3:].decode("utf-8", "replace")
+    -> <builtin>.bytes.decode
+151:31 call  error_map.get(errno)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: error_map is the module's dict (line 73)
+154:21 call  errorclass(errno, errval, sqlstate=sqlstate)
+    -> pymysql.err.Error.__init__
+    note: errorclass is a value of error_map (ProgrammingError, DataError, IntegrityError, NotSupportedError, OperationalError) or InternalError or OperationalError (line 153); all inherit Error.__init__
+
+== pymysql.optionfile
+
+[pymysql.optionfile.Parser.__init__]
+7:46 call  configparser.RawConfigParser.__init__(self, **kwargs)
+    -> configparser.RawConfigParser.__init__
+    -> pymysql.optionfile.Parser.optionxform
+    reject *: an explicit call of the library base's __init__
+    note: RawConfigParser.__init__ calls self._read_defaults(defaults), which calls self.optionxform on every key of a defaults dict, Parser's override; Parser is public, and a client can pass defaults through **kwargs (judgement J4)
+
+[pymysql.optionfile.Parser.__remove_quotes]
+12:19 call  len(value)
+    -> <builtin>.len
+
+[pymysql.optionfile.Parser.optionxform]
+17:25 call  key.lower()
+    -> <builtin>.str.lower
+    note: key is an option name, a str (configparser calls optionxform with str keys)
+17:35 call  key.lower().replace("_", "-")
+    -> <builtin>.str.replace
+
+[pymysql.optionfile.Parser.get]
+20:49 call  configparser.RawConfigParser.get(self, section, option)
+    -> configparser.RawConfigParser.get
+    -> pymysql.optionfile.Parser.optionxform
+    reject pymysql.optionfile.Parser.get: an explicit call of the library base's get
+    note: RawConfigParser.get calls self.optionxform(option), Parser's override (the trace has it)
+21:36 call  self.__remove_quotes(value)
+    -> pymysql.optionfile.Parser.__remove_quotes
+
+== pymysql.protocol
+
+[pymysql.protocol.dump_packet]
+27:14 call  print("packet length:", len(data))
+    -> <builtin>.print
+27:36 call  len(data)
+    -> <builtin>.len
+28:23 call  range(1, 7)
+    -> <builtin>.range
+29:30 call  sys._getframe(i)
+    -> sys._getframe
+30:18 call  print("call[%d]: %s (line %d)" % (i, f.f_code.co_name, f....
+    -> <builtin>.print
+31:14 call  print("-" * 66)
+    -> <builtin>.print
+34:49 call  range(0, min(len(data), 256), 16)
+    -> <builtin>.range
+34:56 call  min(len(data), 256)
+    -> <builtin>.min
+34:60 call  len(data)
+    -> <builtin>.len
+36:14 call  print( " ".join(f"{x:02X}" for x in d) + " " * (16 - len(...
+    -> <builtin>.print
+37:21 call  " ".join(f"{x:02X}" for x in d)
+    -> <builtin>.str.join
+38:32 call  len(d)
+    -> <builtin>.len
+40:22 call  "".join(printable(x) for x in d)
+    -> <builtin>.str.join
+40:32 call  printable(x)
+    -> pymysql.protocol.dump_packet.printable
+42:10 call  print("-" * 66)
+    -> <builtin>.print
+43:10 call  print()
+    -> <builtin>.print
+
+[pymysql.protocol.dump_packet.printable]
+23:23 call  chr(data)
+    -> <builtin>.chr
+
+[pymysql.protocol.MysqlPacket.read]
+64:15 call  len(result)
+    -> <builtin>.len
+67:48 call  len(result)
+    -> <builtin>.len
+67:106 call  len(self._data)
+    -> <builtin>.len
+70:22 call  print(error)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+71:26 call  self.dump()
+    reject pymysql.protocol.MysqlPacket.dump: under `if DEBUG:`, which does not run (judgement J1)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+72:33 call  AssertionError(error)
+    -> <builtin>.AssertionError
+
+[pymysql.protocol.MysqlPacket.advance]
+88:50 call  len(self._data)
+    -> <builtin>.len
+89:28 call  Exception( f"Invalid advance amount ({length}) for cursor...
+    -> <builtin>.Exception
+
+[pymysql.protocol.MysqlPacket.rewind]
+96:42 call  len(self._data)
+    -> <builtin>.len
+97:28 call  Exception("Invalid position to rewind cursor to: %s." % p...
+    -> <builtin>.Exception
+
+[pymysql.protocol.MysqlPacket.read_uint16]
+117:36 call  struct.unpack_from("<H", self._data, self._position)
+    -> struct.unpack_from
+
+[pymysql.protocol.MysqlPacket.read_uint24]
+122:39 call  struct.unpack_from("<HB", self._data, self._position)
+    -> struct.unpack_from
+
+[pymysql.protocol.MysqlPacket.read_uint32]
+127:36 call  struct.unpack_from("<I", self._data, self._position)
+    -> struct.unpack_from
+
+[pymysql.protocol.MysqlPacket.read_uint64]
+132:36 call  struct.unpack_from("<Q", self._data, self._position)
+    -> struct.unpack_from
+
+[pymysql.protocol.MysqlPacket.read_string]
+137:34 call  self._data.find(b"\0", self._position)
+    -> <builtin>.bytes.find
+    note: self._data is the bytes payload that Connection._read_packet joins (connections.py:806); the package makes every packet from bytes
+
+[pymysql.protocol.MysqlPacket.read_length_encoded_integer]
+157:36 call  self.read_uint16()
+    -> pymysql.protocol.MysqlPacket.read_uint16
+159:36 call  self.read_uint24()
+    -> pymysql.protocol.MysqlPacket.read_uint24
+161:36 call  self.read_uint64()
+    -> pymysql.protocol.MysqlPacket.read_uint64
+
+[pymysql.protocol.MysqlPacket.read_length_coded_string]
+170:50 call  self.read_length_encoded_integer()
+    -> pymysql.protocol.MysqlPacket.read_length_encoded_integer
+173:25 call  self.read(length)
+    -> pymysql.protocol.MysqlPacket.read
+    reject pymysql.connections.MySQLResult.read: self is a MysqlPacket or a FieldDescriptorPacket
+
+[pymysql.protocol.MysqlPacket.read_struct]
+176:26 call  struct.Struct(fmt)
+    -> struct.Struct
+177:31 call  s.unpack_from(self._data, self._position)
+    -> struct.Struct.unpack_from
+
+[pymysql.protocol.MysqlPacket.is_ok_packet]
+183:42 call  len(self._data)
+    -> <builtin>.len
+
+[pymysql.protocol.MysqlPacket.is_eof_packet]
+189:45 call  len(self._data)
+    -> <builtin>.len
+
+[pymysql.protocol.MysqlPacket.check_error]
+210:32 call  self.is_error_packet()
+    -> pymysql.protocol.MysqlPacket.is_error_packet
+211:33 call  self.raise_for_error()
+    -> pymysql.protocol.MysqlPacket.raise_for_error
+
+[pymysql.protocol.MysqlPacket.raise_for_error]
+214:20 call  self.rewind()
+    -> pymysql.protocol.MysqlPacket.rewind
+215:21 call  self.advance(1)
+    -> pymysql.protocol.MysqlPacket.advance
+216:33 call  self.read_uint16()
+    -> pymysql.protocol.MysqlPacket.read_uint16
+218:18 call  print("errno =", errno)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+219:34 call  err.raise_mysql_exception(self._data)
+    -> pymysql.err.raise_mysql_exception
+
+[pymysql.protocol.MysqlPacket.dump]
+222:20 call  dump_packet(self._data)
+    -> pymysql.protocol.dump_packet
+
+[pymysql.protocol.FieldDescriptorPacket.__init__]
+233:29 call  MysqlPacket.__init__(self, data, encoding)
+    -> pymysql.protocol.MysqlPacket.__init__
+    reject *: an explicit call of the base's __init__ (MysqlPacket)
+234:37 call  self._parse_field_descriptor(encoding)
+    -> pymysql.protocol.FieldDescriptorPacket._parse_field_descriptor
+
+[pymysql.protocol.FieldDescriptorPacket._parse_field_descriptor]
+241:53 call  self.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+242:48 call  self.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+243:56 call  self.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+243:65 call  self.read_length_coded_string().decode(encoding)
+    -> <builtin>.bytes.decode
+    note: read_length_coded_string returns a bytes slice of the payload (or None, which has no decode)
+244:55 call  self.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+244:64 call  self.read_length_coded_string().decode(encoding)
+    -> <builtin>.bytes.decode
+245:50 call  self.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+245:59 call  self.read_length_coded_string().decode(encoding)
+    -> <builtin>.bytes.decode
+246:54 call  self.read_length_coded_string()
+    -> pymysql.protocol.MysqlPacket.read_length_coded_string
+246:63 call  self.read_length_coded_string().decode(encoding)
+    -> <builtin>.bytes.decode
+253:29 call  self.read_struct("<xHIBHBxx")
+    -> pymysql.protocol.MysqlPacket.read_struct
+
+[pymysql.protocol.FieldDescriptorPacket.description]
+263:35 call  self.get_column_length()
+    -> pymysql.protocol.FieldDescriptorPacket.get_column_length
+264:35 call  self.get_column_length()
+    -> pymysql.protocol.FieldDescriptorPacket.get_column_length
+
+[pymysql.protocol.FieldDescriptorPacket.get_column_length]
+271:33 call  MBLENGTH.get(self.charsetnr, 1)
+    -> <builtin>.dict.get
+    reject pymysql.optionfile.Parser.get: MBLENGTH is the module dict of charset (charset.py:3)
+
+[pymysql.protocol.OKPacketWrapper.__init__]
+299:55 getattr  self.read_struct
+    -> pymysql.protocol.OKPacketWrapper.__getattr__
+    note: OKPacketWrapper defines no read_struct, so the load falls back to __getattr__, which returns self.packet.read_struct
+287:40 call  from_packet.is_ok_packet()
+    -> pymysql.protocol.MysqlPacket.is_ok_packet
+    note: from_packet is the MysqlPacket of Connection._read_packet (connections.py:478, 1327), or a packet a client passes (a MysqlPacket or FieldDescriptorPacket, which inherit the method)
+288:29 call  ValueError( "Cannot create " + str(self.__class__.__name_...
+    -> <builtin>.ValueError
+290:22 call  str(self.__class__.__name__)
+    -> <builtin>.str
+295:28 call  self.packet.advance(1)
+    -> pymysql.protocol.MysqlPacket.advance
+297:69 call  self.packet.read_length_encoded_integer()
+    -> pymysql.protocol.MysqlPacket.read_length_encoded_integer
+298:65 call  self.packet.read_length_encoded_integer()
+    -> pymysql.protocol.MysqlPacket.read_length_encoded_integer
+299:66 call  self.read_struct("<HH")
+    -> pymysql.protocol.MysqlPacket.read_struct
+    note: self.read_struct is the bound method of self.packet, a MysqlPacket, that OKPacketWrapper.__getattr__ returns (299:55)
+300:44 call  self.packet.read_all()
+    -> pymysql.protocol.MysqlPacket.read_all
+
+[pymysql.protocol.OKPacketWrapper.__getattr__]
+304:23 call  getattr(self.packet, key)
+    -> <builtin>.getattr
+    note: self.packet is a MysqlPacket, which defines no __getattr__ and no property: getattr runs no package code
+
+[pymysql.protocol.EOFPacketWrapper.__init__]
+315:41 call  from_packet.is_eof_packet()
+    -> pymysql.protocol.MysqlPacket.is_eof_packet
+316:29 call  ValueError( f"Cannot create '{self.__class__}' object fro...
+    -> <builtin>.ValueError
+321:73 call  self.packet.read_struct("<xhh")
+    -> pymysql.protocol.MysqlPacket.read_struct
+323:18 call  print("server_status=", self.server_status)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+
+[pymysql.protocol.EOFPacketWrapper.__getattr__]
+327:23 call  getattr(self.packet, key)
+    -> <builtin>.getattr
+    note: self.packet is a MysqlPacket (see 304:23)
+
+[pymysql.protocol.LoadLocalPacketWrapper.__init__]
+338:48 call  from_packet.is_load_local_packet()
+    -> pymysql.protocol.MysqlPacket.is_load_local_packet
+339:29 call  ValueError( f"Cannot create '{self.__class__}' object fro...
+    -> <builtin>.ValueError
+344:49 call  self.packet.get_all_data()
+    -> pymysql.protocol.MysqlPacket.get_all_data
+346:18 call  print("filename=", self.filename)
+    note: no edge: under `if DEBUG:`, which does not run (judgement J1)
+
+[pymysql.protocol.LoadLocalPacketWrapper.__getattr__]
+349:23 call  getattr(self.packet, key)
+    -> <builtin>.getattr
+    note: self.packet is a MysqlPacket (see 304:23)
+
+== pymysql.times
+
+[pymysql.times.DateFromTicks]
+11:16 call  date(*localtime(ticks)[:3])
+    -> datetime.date
+11:27 call  localtime(ticks)
+    -> time.localtime
+
+[pymysql.times.TimeFromTicks]
+15:16 call  time(*localtime(ticks)[3:6])
+    -> datetime.time
+15:27 call  localtime(ticks)
+    -> time.localtime
+
+[pymysql.times.TimestampFromTicks]
+19:20 call  datetime(*localtime(ticks)[:6])
+    -> datetime.datetime
+19:31 call  localtime(ticks)
+    -> time.localtime

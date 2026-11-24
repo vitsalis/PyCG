@@ -1,0 +1,771 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.RuntimeError.__init__",
+      "threading.ThreadError.__init__"
+    ],
+    "<builtin>.RuntimeError": [
+      "threading.ThreadError"
+    ],
+    "<builtin>.dict.get": [
+      "collections.OrderedDict.get"
+    ],
+    "<builtin>.frozenset.__contains__": [
+      "keyword.iskeyword",
+      "keyword.issoftkeyword"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.object.__init__": [
+      "<builtin>.frozenset.__init__",
+      "<builtin>.str.__init__",
+      "numpy.ndarray.__init__",
+      "typing.Text.__init__"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.count": [
+      "typing.Text.count"
+    ],
+    "<builtin>.str.isalnum": [
+      "typing.Text.isalnum"
+    ],
+    "<builtin>.str.isdecimal": [
+      "typing.Text.isdecimal"
+    ],
+    "<builtin>.str.isidentifier": [
+      "typing.Text.isidentifier"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.type.__subclasses__": [
+      "<builtin>.BaseException.__subclasses__",
+      "<builtin>.Exception.__subclasses__",
+      "<builtin>.RuntimeError.__subclasses__",
+      "<builtin>.dict.__subclasses__",
+      "<builtin>.frozenset.__subclasses__",
+      "<builtin>.list.__subclasses__",
+      "<builtin>.object.__subclasses__",
+      "<builtin>.set.__subclasses__",
+      "<builtin>.str.__subclasses__",
+      "collections.OrderedDict.__subclasses__",
+      "numpy.ndarray.__subclasses__",
+      "threading.ThreadError.__subclasses__",
+      "typing.Text.__subclasses__"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "numpy._core._multiarray_umath.arange": [
+      "numpy.arange"
+    ],
+    "numpy._core._multiarray_umath.from_dlpack": [
+      "numpy.from_dlpack"
+    ]
+  },
+  "commit": "8e911db71f2e693a0c434b041180388c685ed06f",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "numpy": "2.4.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 1,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "einops._backends.AbstractBackend.add_axes": [
+      "<builtin>.dict.items",
+      "<builtin>.tuple",
+      "einops._backends.NumpyBackend.add_axis",
+      "einops._backends.NumpyBackend.tile"
+    ],
+    "einops._backends.AbstractBackend.reduce": [
+      "<builtin>.getattr",
+      "numpy.ndarray.all",
+      "numpy.ndarray.any",
+      "numpy.ndarray.max",
+      "numpy.ndarray.mean",
+      "numpy.ndarray.min",
+      "numpy.ndarray.prod",
+      "numpy.ndarray.sum"
+    ],
+    "einops._backends.AbstractBackend.reshape": [
+      "numpy.ndarray.reshape"
+    ],
+    "einops._backends.AbstractBackend.transpose": [
+      "numpy.ndarray.transpose"
+    ],
+    "einops._backends.NumpyBackend.add_axis": [
+      "numpy._ArrayFunctionDispatcher.__call__"
+    ],
+    "einops._backends.NumpyBackend.arange": [
+      "numpy._core._multiarray_umath.arange"
+    ],
+    "einops._backends.NumpyBackend.concat": [
+      "numpy._ArrayFunctionDispatcher.__call__"
+    ],
+    "einops._backends.NumpyBackend.einsum": [
+      "numpy._ArrayFunctionDispatcher.__call__"
+    ],
+    "einops._backends.NumpyBackend.is_appropriate_type": [
+      "<builtin>.isinstance"
+    ],
+    "einops._backends.NumpyBackend.stack_on_zeroth_dimension": [
+      "numpy._ArrayFunctionDispatcher.__call__"
+    ],
+    "einops._backends.NumpyBackend.tile": [
+      "numpy._ArrayFunctionDispatcher.__call__"
+    ],
+    "einops._backends.get_backend": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.list.pop",
+      "<builtin>.type",
+      "<builtin>.type.__subclasses__",
+      "einops._backends.NumpyBackend.__init__",
+      "einops._backends.NumpyBackend.is_appropriate_type"
+    ],
+    "einops.array_api.asnumpy": [
+      "numpy._core._multiarray_umath.from_dlpack"
+    ],
+    "einops.array_api.pack": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "functools._lru_cache_wrapper.__call__",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.ndarray.__array_namespace__"
+    ],
+    "einops.array_api.rearrange": [
+      "einops.array_api.reduce"
+    ],
+    "einops.array_api.reduce": [
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.tuple",
+      "einops.einops._apply_recipe_array_api",
+      "functools._lru_cache_wrapper.__call__",
+      "numpy.ndarray.__array_namespace__"
+    ],
+    "einops.array_api.repeat": [
+      "einops.array_api.reduce"
+    ],
+    "einops.array_api.unpack": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.list.index",
+      "<builtin>.range",
+      "<builtin>.slice",
+      "<builtin>.sum",
+      "einops.packing.prod",
+      "functools._lru_cache_wrapper.__call__",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.ndarray.__array_namespace__"
+    ],
+    "einops.einops": [
+      "functools.lru_cache",
+      "functools.lru_cache.decorating_function",
+      "typing.TypeVar",
+      "typing.overload"
+    ],
+    "einops.einops._apply_recipe": [
+      "<builtin>.len",
+      "einops._backends.AbstractBackend.add_axes",
+      "einops._backends.AbstractBackend.reshape",
+      "einops._backends.AbstractBackend.shape",
+      "einops._backends.AbstractBackend.transpose",
+      "einops.einops._reconstruct_from_shape_uncached",
+      "einops.einops._reduce_axes",
+      "functools._lru_cache_wrapper.__call__"
+    ],
+    "einops.einops._apply_recipe_array_api": [
+      "<builtin>.callable",
+      "<builtin>.dict.items",
+      "<builtin>.getattr",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.tuple",
+      "functools._lru_cache_wrapper.__call__",
+      "numpy._ArrayFunctionDispatcher.__call__"
+    ],
+    "einops.einops._compactify_pattern_for_einsum": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.RuntimeError",
+      "<builtin>.ValueError",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.join",
+      "<builtin>.str.split",
+      "einops.einops._validate_einsum_axis_name",
+      "einops.parsing.ParsedExpression.__init__"
+    ],
+    "einops.einops._enumerate_directions": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "einops._backends.AbstractBackend.reshape",
+      "einops._backends.AbstractBackend.shape",
+      "einops._backends.NumpyBackend.arange",
+      "einops._backends.get_backend"
+    ],
+    "einops.einops._optimize_transformation": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.range",
+      "<builtin>.sorted",
+      "<builtin>.sum",
+      "<builtin>.tuple",
+      "einops.einops._optimize_transformation.build_mapping"
+    ],
+    "einops.einops._optimize_transformation.build_mapping": [
+      "<builtin>.dict.values",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.index",
+      "<builtin>.range",
+      "<builtin>.sum"
+    ],
+    "einops.einops._prepare_transformation_recipe": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.callable",
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.list.index",
+      "<builtin>.range",
+      "<builtin>.set.difference",
+      "<builtin>.set.remove",
+      "<builtin>.set.symmetric_difference",
+      "<builtin>.set.update",
+      "<builtin>.str",
+      "<builtin>.str.split",
+      "collections.OrderedDict",
+      "collections.OrderedDict.values",
+      "einops.einops.TransformRecipe.__init__",
+      "einops.parsing.ParsedExpression.__init__",
+      "einops.parsing.ParsedExpression.check_axis_name",
+      "itertools.chain"
+    ],
+    "einops.einops._reconstruct_from_shape_uncached": [
+      "<builtin>.dict.items",
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.range",
+      "einops.einops._product"
+    ],
+    "einops.einops._reduce_axes": [
+      "<builtin>.callable",
+      "<builtin>.tuple",
+      "einops._backends.AbstractBackend.reduce",
+      "einops._backends.NumpyBackend.is_float_type"
+    ],
+    "einops.einops._validate_einsum_axis_name": [
+      "<builtin>.NotImplementedError",
+      "<builtin>.isinstance",
+      "<builtin>.len"
+    ],
+    "einops.einops.asnumpy": [
+      "einops._backends.NumpyBackend.to_numpy",
+      "einops._backends.get_backend"
+    ],
+    "einops.einops.einsum": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "einops._backends.NumpyBackend.einsum",
+      "einops._backends.get_backend",
+      "einops.einops._compactify_pattern_for_einsum",
+      "functools._lru_cache_wrapper.__call__"
+    ],
+    "einops.einops.parse_shape": [
+      "<builtin>.RuntimeError",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.index",
+      "<builtin>.zip",
+      "einops._backends.AbstractBackend.shape",
+      "einops._backends.get_backend",
+      "einops.parsing.ParsedExpression.__init__",
+      "einops.parsing.ParsedExpression.has_composed_axes"
+    ],
+    "einops.einops.rearrange": [
+      "einops.einops.reduce"
+    ],
+    "einops.einops.reduce": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.tuple",
+      "einops._backends.AbstractBackend.shape",
+      "einops._backends.NumpyBackend.stack_on_zeroth_dimension",
+      "einops._backends.get_backend",
+      "einops.einops._apply_recipe",
+      "einops.einops._prepare_transformation_recipe",
+      "functools._lru_cache_wrapper.__call__",
+      "typing.cast"
+    ],
+    "einops.einops.repeat": [
+      "einops.einops.reduce"
+    ],
+    "einops.layers._einmix._EinmixMixin.__init__": [
+      "<builtin>.object.__init__",
+      "<builtin>.super",
+      "einops.layers._einmix._EinmixMixin.initialize_einmix"
+    ],
+    "einops.layers._einmix._EinmixMixin.initialize_einmix": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.any",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.set",
+      "<builtin>.set.difference",
+      "<builtin>.set.remove",
+      "<builtin>.sorted",
+      "<builtin>.str.join",
+      "<builtin>.str.split",
+      "<builtin>.zip",
+      "_warnings.warn",
+      "einops.einops._product",
+      "einops.layers._einmix._EinmixDebugger._create_parameters",
+      "einops.layers._einmix._EinmixDebugger._create_rearrange_layers",
+      "einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped",
+      "einops.layers._einmix._report_axes",
+      "einops.parsing.ParsedExpression.__init__"
+    ],
+    "einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped": [
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.str.join"
+    ],
+    "einops.layers._einmix._report_axes": [
+      "<builtin>.len"
+    ],
+    "einops.packing": [
+      "functools.lru_cache",
+      "functools.lru_cache.decorating_function",
+      "typing.TypeVar"
+    ],
+    "einops.packing.analyze_pattern": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.len",
+      "<builtin>.list.index",
+      "<builtin>.set",
+      "<builtin>.str.split",
+      "einops.parsing.ParsedExpression.check_axis_name_return_reason"
+    ],
+    "einops.packing.pack": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "einops._backends.AbstractBackend.reshape",
+      "einops._backends.AbstractBackend.shape",
+      "einops._backends.NumpyBackend.concat",
+      "einops._backends.get_backend",
+      "einops.packing.analyze_pattern",
+      "functools._lru_cache_wrapper.__call__"
+    ],
+    "einops.packing.unpack": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.enumerate",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.list.index",
+      "<builtin>.range",
+      "<builtin>.slice",
+      "<builtin>.sum",
+      "einops._backends.AbstractBackend.reshape",
+      "einops._backends.AbstractBackend.shape",
+      "einops._backends.get_backend",
+      "einops.packing.analyze_pattern",
+      "einops.packing.prod",
+      "functools._lru_cache_wrapper.__call__"
+    ],
+    "einops.parsing": [
+      "<builtin>.staticmethod"
+    ],
+    "einops.parsing.AnonymousAxis.__init__": [
+      "<builtin>.int"
+    ],
+    "einops.parsing.ParsedExpression.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.list.append",
+      "<builtin>.set",
+      "<builtin>.str.count",
+      "<builtin>.str.isalnum",
+      "<builtin>.str.replace",
+      "einops.parsing.ParsedExpression.__init__.add_axis_name"
+    ],
+    "einops.parsing.ParsedExpression.__init__.add_axis_name": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.int",
+      "<builtin>.list.append",
+      "<builtin>.set.add",
+      "<builtin>.str.isdecimal",
+      "einops.parsing.AnonymousAxis.__init__",
+      "einops.parsing.ParsedExpression.check_axis_name_return_reason"
+    ],
+    "einops.parsing.ParsedExpression.check_axis_name": [
+      "einops.parsing.ParsedExpression.check_axis_name_return_reason"
+    ],
+    "einops.parsing.ParsedExpression.check_axis_name_return_reason": [
+      "<builtin>.frozenset.__contains__",
+      "<builtin>.str.isidentifier"
+    ],
+    "einops.parsing.ParsedExpression.has_composed_axes": [
+      "<builtin>.isinstance",
+      "<builtin>.len"
+    ]
+  },
+  "environment": {
+    "EINOPS_TEST_BACKENDS": "numpy"
+  },
+  "executed": [
+    "einops._backends.AbstractBackend.add_axes",
+    "einops._backends.AbstractBackend.reduce",
+    "einops._backends.AbstractBackend.reshape",
+    "einops._backends.AbstractBackend.shape",
+    "einops._backends.AbstractBackend.transpose",
+    "einops._backends.NumpyBackend.__init__",
+    "einops._backends.NumpyBackend.add_axis",
+    "einops._backends.NumpyBackend.arange",
+    "einops._backends.NumpyBackend.concat",
+    "einops._backends.NumpyBackend.einsum",
+    "einops._backends.NumpyBackend.from_numpy",
+    "einops._backends.NumpyBackend.is_appropriate_type",
+    "einops._backends.NumpyBackend.is_float_type",
+    "einops._backends.NumpyBackend.stack_on_zeroth_dimension",
+    "einops._backends.NumpyBackend.tile",
+    "einops._backends.NumpyBackend.to_numpy",
+    "einops._backends.get_backend",
+    "einops.array_api.asnumpy",
+    "einops.array_api.pack",
+    "einops.array_api.rearrange",
+    "einops.array_api.reduce",
+    "einops.array_api.repeat",
+    "einops.array_api.unpack",
+    "einops.einops.TransformRecipe.__init__",
+    "einops.einops._apply_recipe",
+    "einops.einops._apply_recipe_array_api",
+    "einops.einops._compactify_pattern_for_einsum",
+    "einops.einops._enumerate_directions",
+    "einops.einops._optimize_transformation",
+    "einops.einops._optimize_transformation.build_mapping",
+    "einops.einops._prepare_transformation_recipe",
+    "einops.einops._product",
+    "einops.einops._reconstruct_from_shape_uncached",
+    "einops.einops._reduce_axes",
+    "einops.einops._validate_einsum_axis_name",
+    "einops.einops.asnumpy",
+    "einops.einops.einsum",
+    "einops.einops.parse_shape",
+    "einops.einops.rearrange",
+    "einops.einops.reduce",
+    "einops.einops.repeat",
+    "einops.layers._einmix._EinmixDebugger._create_parameters",
+    "einops.layers._einmix._EinmixDebugger._create_rearrange_layers",
+    "einops.layers._einmix._EinmixMixin.__init__",
+    "einops.layers._einmix._EinmixMixin.initialize_einmix",
+    "einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped",
+    "einops.layers._einmix._report_axes",
+    "einops.packing.analyze_pattern",
+    "einops.packing.pack",
+    "einops.packing.prod",
+    "einops.packing.unpack",
+    "einops.parsing.AnonymousAxis.__init__",
+    "einops.parsing.ParsedExpression.__init__",
+    "einops.parsing.ParsedExpression.__init__.add_axis_name",
+    "einops.parsing.ParsedExpression.check_axis_name",
+    "einops.parsing.ParsedExpression.check_axis_name_return_reason",
+    "einops.parsing.ParsedExpression.has_composed_axes"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "einops._backends.AbstractBackend.__repr__",
+    "einops._backends.AbstractBackend.add_axes",
+    "einops._backends.AbstractBackend.add_axis",
+    "einops._backends.AbstractBackend.arange",
+    "einops._backends.AbstractBackend.concat",
+    "einops._backends.AbstractBackend.create_symbol",
+    "einops._backends.AbstractBackend.einsum",
+    "einops._backends.AbstractBackend.eval_symbol",
+    "einops._backends.AbstractBackend.from_numpy",
+    "einops._backends.AbstractBackend.is_appropriate_type",
+    "einops._backends.AbstractBackend.is_float_type",
+    "einops._backends.AbstractBackend.layers",
+    "einops._backends.AbstractBackend.reduce",
+    "einops._backends.AbstractBackend.reshape",
+    "einops._backends.AbstractBackend.shape",
+    "einops._backends.AbstractBackend.stack_on_zeroth_dimension",
+    "einops._backends.AbstractBackend.tile",
+    "einops._backends.AbstractBackend.to_numpy",
+    "einops._backends.AbstractBackend.transpose",
+    "einops._backends.CupyBackend.__init__",
+    "einops._backends.CupyBackend.add_axis",
+    "einops._backends.CupyBackend.arange",
+    "einops._backends.CupyBackend.concat",
+    "einops._backends.CupyBackend.einsum",
+    "einops._backends.CupyBackend.from_numpy",
+    "einops._backends.CupyBackend.is_appropriate_type",
+    "einops._backends.CupyBackend.is_float_type",
+    "einops._backends.CupyBackend.stack_on_zeroth_dimension",
+    "einops._backends.CupyBackend.tile",
+    "einops._backends.CupyBackend.to_numpy",
+    "einops._backends.HashableTuple.__getitem__",
+    "einops._backends.HashableTuple.__init__",
+    "einops._backends.HashableTuple.__iter__",
+    "einops._backends.HashableTuple.__len__",
+    "einops._backends.JaxBackend.__init__",
+    "einops._backends.JaxBackend.from_numpy",
+    "einops._backends.JaxBackend.to_numpy",
+    "einops._backends.MLXBackend.__init__",
+    "einops._backends.MLXBackend.add_axes",
+    "einops._backends.MLXBackend.arange",
+    "einops._backends.MLXBackend.concat",
+    "einops._backends.MLXBackend.einsum",
+    "einops._backends.MLXBackend.from_numpy",
+    "einops._backends.MLXBackend.is_appropriate_type",
+    "einops._backends.MLXBackend.is_float_type",
+    "einops._backends.MLXBackend.stack_on_zeroth_dimension",
+    "einops._backends.MLXBackend.tile",
+    "einops._backends.MLXBackend.to_numpy",
+    "einops._backends.NumpyBackend.__init__",
+    "einops._backends.NumpyBackend.add_axis",
+    "einops._backends.NumpyBackend.arange",
+    "einops._backends.NumpyBackend.concat",
+    "einops._backends.NumpyBackend.einsum",
+    "einops._backends.NumpyBackend.from_numpy",
+    "einops._backends.NumpyBackend.is_appropriate_type",
+    "einops._backends.NumpyBackend.is_float_type",
+    "einops._backends.NumpyBackend.stack_on_zeroth_dimension",
+    "einops._backends.NumpyBackend.tile",
+    "einops._backends.NumpyBackend.to_numpy",
+    "einops._backends.OneFlowBackend.__init__",
+    "einops._backends.OneFlowBackend.add_axes",
+    "einops._backends.OneFlowBackend.add_axis",
+    "einops._backends.OneFlowBackend.arange",
+    "einops._backends.OneFlowBackend.concat",
+    "einops._backends.OneFlowBackend.einsum",
+    "einops._backends.OneFlowBackend.from_numpy",
+    "einops._backends.OneFlowBackend.is_appropriate_type",
+    "einops._backends.OneFlowBackend.is_float_type",
+    "einops._backends.OneFlowBackend.layers",
+    "einops._backends.OneFlowBackend.reduce",
+    "einops._backends.OneFlowBackend.stack_on_zeroth_dimension",
+    "einops._backends.OneFlowBackend.tile",
+    "einops._backends.OneFlowBackend.to_numpy",
+    "einops._backends.OneFlowBackend.transpose",
+    "einops._backends.PaddleBackend.__init__",
+    "einops._backends.PaddleBackend.add_axes",
+    "einops._backends.PaddleBackend.add_axis",
+    "einops._backends.PaddleBackend.arange",
+    "einops._backends.PaddleBackend.concat",
+    "einops._backends.PaddleBackend.einsum",
+    "einops._backends.PaddleBackend.from_numpy",
+    "einops._backends.PaddleBackend.is_appropriate_type",
+    "einops._backends.PaddleBackend.is_float_type",
+    "einops._backends.PaddleBackend.layers",
+    "einops._backends.PaddleBackend.reduce",
+    "einops._backends.PaddleBackend.reshape",
+    "einops._backends.PaddleBackend.shape",
+    "einops._backends.PaddleBackend.stack_on_zeroth_dimension",
+    "einops._backends.PaddleBackend.tile",
+    "einops._backends.PaddleBackend.to_numpy",
+    "einops._backends.PaddleBackend.transpose",
+    "einops._backends.PyTensorBackend.__init__",
+    "einops._backends.PyTensorBackend.add_axis",
+    "einops._backends.PyTensorBackend.arange",
+    "einops._backends.PyTensorBackend.concat",
+    "einops._backends.PyTensorBackend.create_symbol",
+    "einops._backends.PyTensorBackend.einsum",
+    "einops._backends.PyTensorBackend.eval_symbol",
+    "einops._backends.PyTensorBackend.from_numpy",
+    "einops._backends.PyTensorBackend.is_appropriate_type",
+    "einops._backends.PyTensorBackend.is_float_type",
+    "einops._backends.PyTensorBackend.shape",
+    "einops._backends.PyTensorBackend.stack_on_zeroth_dimension",
+    "einops._backends.PyTensorBackend.tile",
+    "einops._backends.PyTensorBackend.to_numpy",
+    "einops._backends.TFKerasBackend.__init__",
+    "einops._backends.TFKerasBackend.add_axis",
+    "einops._backends.TFKerasBackend.arange",
+    "einops._backends.TFKerasBackend.concat",
+    "einops._backends.TFKerasBackend.create_symbol",
+    "einops._backends.TFKerasBackend.eval_symbol",
+    "einops._backends.TFKerasBackend.is_appropriate_type",
+    "einops._backends.TFKerasBackend.is_float_type",
+    "einops._backends.TFKerasBackend.layers",
+    "einops._backends.TFKerasBackend.reduce",
+    "einops._backends.TFKerasBackend.reshape",
+    "einops._backends.TFKerasBackend.shape",
+    "einops._backends.TFKerasBackend.stack_on_zeroth_dimension",
+    "einops._backends.TFKerasBackend.tile",
+    "einops._backends.TFKerasBackend.transpose",
+    "einops._backends.TensorflowBackend.__init__",
+    "einops._backends.TensorflowBackend.add_axis",
+    "einops._backends.TensorflowBackend.arange",
+    "einops._backends.TensorflowBackend.concat",
+    "einops._backends.TensorflowBackend.einsum",
+    "einops._backends.TensorflowBackend.from_numpy",
+    "einops._backends.TensorflowBackend.is_appropriate_type",
+    "einops._backends.TensorflowBackend.is_float_type",
+    "einops._backends.TensorflowBackend.layers",
+    "einops._backends.TensorflowBackend.reduce",
+    "einops._backends.TensorflowBackend.reshape",
+    "einops._backends.TensorflowBackend.shape",
+    "einops._backends.TensorflowBackend.stack_on_zeroth_dimension",
+    "einops._backends.TensorflowBackend.tile",
+    "einops._backends.TensorflowBackend.to_numpy",
+    "einops._backends.TensorflowBackend.transpose",
+    "einops._backends.TinygradBackend.__init__",
+    "einops._backends.TinygradBackend.add_axis",
+    "einops._backends.TinygradBackend.arange",
+    "einops._backends.TinygradBackend.concat",
+    "einops._backends.TinygradBackend.einsum",
+    "einops._backends.TinygradBackend.from_numpy",
+    "einops._backends.TinygradBackend.is_appropriate_type",
+    "einops._backends.TinygradBackend.is_float_type",
+    "einops._backends.TinygradBackend.reduce",
+    "einops._backends.TinygradBackend.reshape",
+    "einops._backends.TinygradBackend.shape",
+    "einops._backends.TinygradBackend.stack_on_zeroth_dimension",
+    "einops._backends.TinygradBackend.tile",
+    "einops._backends.TinygradBackend.to_numpy",
+    "einops._backends.TinygradBackend.transpose",
+    "einops._backends.TorchBackend.__init__",
+    "einops._backends.TorchBackend.add_axes",
+    "einops._backends.TorchBackend.add_axis",
+    "einops._backends.TorchBackend.arange",
+    "einops._backends.TorchBackend.concat",
+    "einops._backends.TorchBackend.einsum",
+    "einops._backends.TorchBackend.from_numpy",
+    "einops._backends.TorchBackend.is_appropriate_type",
+    "einops._backends.TorchBackend.is_float_type",
+    "einops._backends.TorchBackend.layers",
+    "einops._backends.TorchBackend.reduce",
+    "einops._backends.TorchBackend.stack_on_zeroth_dimension",
+    "einops._backends.TorchBackend.tile",
+    "einops._backends.TorchBackend.to_numpy",
+    "einops._backends.TorchBackend.transpose",
+    "einops._backends.UnknownSize.__eq__",
+    "einops._backends.UnknownSize.__floordiv__",
+    "einops._backends.UnknownSize.__hash__",
+    "einops._backends.UnknownSize.__mul__",
+    "einops._backends.UnknownSize.__rmul__",
+    "einops._backends.get_backend",
+    "einops.array_api.asnumpy",
+    "einops.array_api.pack",
+    "einops.array_api.rearrange",
+    "einops.array_api.reduce",
+    "einops.array_api.repeat",
+    "einops.array_api.unpack",
+    "einops.einops.TransformRecipe.__init__",
+    "einops.einops._apply_recipe",
+    "einops.einops._apply_recipe_array_api",
+    "einops.einops._compactify_pattern_for_einsum",
+    "einops.einops._enumerate_directions",
+    "einops.einops._optimize_transformation",
+    "einops.einops._optimize_transformation.build_mapping",
+    "einops.einops._prepare_recipes_for_all_dims",
+    "einops.einops._prepare_transformation_recipe",
+    "einops.einops._product",
+    "einops.einops._reconstruct_from_shape_uncached",
+    "einops.einops._reduce_axes",
+    "einops.einops._validate_einsum_axis_name",
+    "einops.einops.asnumpy",
+    "einops.einops.einsum",
+    "einops.einops.parse_shape",
+    "einops.einops.rearrange",
+    "einops.einops.reduce",
+    "einops.einops.repeat",
+    "einops.layers.RearrangeMixin.__getstate__",
+    "einops.layers.RearrangeMixin.__init__",
+    "einops.layers.RearrangeMixin.__repr__",
+    "einops.layers.RearrangeMixin.__setstate__",
+    "einops.layers.RearrangeMixin._apply_recipe",
+    "einops.layers.RearrangeMixin.multirecipe",
+    "einops.layers.ReduceMixin.__getstate__",
+    "einops.layers.ReduceMixin.__init__",
+    "einops.layers.ReduceMixin.__repr__",
+    "einops.layers.ReduceMixin.__setstate__",
+    "einops.layers.ReduceMixin._apply_recipe",
+    "einops.layers.ReduceMixin.multirecipe",
+    "einops.layers._einmix._EinmixDebugger._create_parameters",
+    "einops.layers._einmix._EinmixDebugger._create_rearrange_layers",
+    "einops.layers._einmix._EinmixMixin.__init__",
+    "einops.layers._einmix._EinmixMixin.__repr__",
+    "einops.layers._einmix._EinmixMixin._create_parameters",
+    "einops.layers._einmix._EinmixMixin._create_rearrange_layers",
+    "einops.layers._einmix._EinmixMixin.initialize_einmix",
+    "einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped",
+    "einops.layers._einmix._report_axes",
+    "einops.packing.analyze_pattern",
+    "einops.packing.pack",
+    "einops.packing.prod",
+    "einops.packing.unpack",
+    "einops.parsing.AnonymousAxis.__init__",
+    "einops.parsing.AnonymousAxis.__repr__",
+    "einops.parsing.ParsedExpression.__init__",
+    "einops.parsing.ParsedExpression.__init__.add_axis_name",
+    "einops.parsing.ParsedExpression.check_axis_name",
+    "einops.parsing.ParsedExpression.check_axis_name_return_reason",
+    "einops.parsing.ParsedExpression.flat_axes_order",
+    "einops.parsing.ParsedExpression.has_composed_axes"
+  ],
+  "modules": [
+    "einops",
+    "einops._backends",
+    "einops.array_api",
+    "einops.einops",
+    "einops.layers",
+    "einops.layers._einmix",
+    "einops.packing",
+    "einops.parsing"
+  ],
+  "project": "einops",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 55,
+    "skipped": 11,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "einops.layers._einmix._EinmixMixin.__init__": {
+    "<builtin>.object.__init__": "the tests instantiate the private _EinmixDebugger (einops/tests/test_layers.py), whose next __init__ after _EinmixMixin is object's; no package code makes an _EinmixDebugger or an _EinmixMixin, so the receivers of _EinmixMixin.__init__ are the EinMix layers, whose next __init__ is their framework's (README, A and B1: a direct test invocation of a private API)"
+  },
+  "einops.layers._einmix._EinmixMixin.initialize_einmix": {
+    "einops.layers._einmix._EinmixDebugger._create_parameters": "the receiver is the tests' _EinmixDebugger, a private class that no package code instantiates (README, A and B1)",
+    "einops.layers._einmix._EinmixDebugger._create_rearrange_layers": "the receiver is the tests' _EinmixDebugger, a private class that no package code instantiates (README, A and B1)"
+  }
+}

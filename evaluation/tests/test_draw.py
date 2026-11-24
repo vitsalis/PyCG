@@ -1,6 +1,7 @@
-"""The recorded draw of batches 3 to 5 (macro-benchmark/selection/round-N.json)
-is what macro-benchmark/draw.py draws again from the committed frame and
-list, with the seed of each round. The draw reads files only: no network."""
+"""The recorded draws of batches 3 to 5 and 7
+(macro-benchmark/selection/round-N.json) are what macro-benchmark/draw.py
+draws again from the committed frame and list, with the seed and the drops
+of each round. The draw reads files only: no network."""
 
 import importlib.util
 import json
@@ -15,7 +16,7 @@ draw = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(draw)
 
 
-@pytest.mark.parametrize("number", [1, 2, 3])
+@pytest.mark.parametrize("number", [1, 2, 3, 6, 7])
 def test_each_recorded_round_is_drawn_again_from_its_seed(
     tmp_path, monkeypatch, number
 ):
@@ -23,9 +24,12 @@ def test_each_recorded_round_is_drawn_again_from_its_seed(
     # The benchmark directories that were used then are gone (one benchmark
     # now holds every batch): the round log's own record of them stands in.
     monkeypatch.setattr(draw, "used_names", lambda *args: dict(log["used"]))
+    drops = [f"--drop={entry['name']}={entry['reason']}" for entry in log["dropped"]]
     out = tmp_path / "round.json"
-    assert draw.main(["draw", "--round", str(number), "--out", str(out)]) == 0
+    argv = ["draw", "--round", str(number), "--out", str(out), *drops]
+    assert draw.main(argv) == 0
     drawn = json.loads(out.read_text(encoding="utf-8"))
     assert drawn["seed"] == log["seed"]
     assert drawn["strata"] == log["strata"]
     assert drawn["selected"] == log["selected"]
+    assert drawn["dropped"] == log["dropped"]

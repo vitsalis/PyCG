@@ -1,0 +1,1672 @@
+{
+  "edges": {
+    "pgvector.asyncpg.register.register_vector": {
+      "<builtin>.str": [
+        "pgvector.asyncpg.register 31:19 call  str(e)"
+      ],
+      "<builtin>.str.startswith": [
+        "pgvector.asyncpg.register 31:33 call  str(e).startswith('unknown type:')"
+      ],
+      "asyncpg.Connection.set_type_codec": [
+        "pgvector.asyncpg.register 6:30 call  conn.set_type_codec( 'vector', schema=schema, encoder=lam...",
+        "pgvector.asyncpg.register 15:34 call  conn.set_type_codec( 'halfvec', schema=schema, encoder=la...",
+        "pgvector.asyncpg.register 23:34 call  conn.set_type_codec( 'sparsevec', schema=schema, encoder=..."
+      ]
+    },
+    "pgvector.asyncpg.register.register_vector.<lambda1>": {
+      "<builtin>.isinstance": [
+        "pgvector.asyncpg.register 9:43 call  isinstance(v, Vector)"
+      ],
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.asyncpg.register 9:66 call  Vector(v)"
+      ],
+      "pgvector.vector.Vector.to_binary": [
+        "pgvector.asyncpg.register 9:80 call  (v if isinstance(v, Vector) else Vector(v)).to_binary()"
+      ]
+    },
+    "pgvector.asyncpg.register.register_vector.<lambda2>": {
+      "<builtin>.isinstance": [
+        "pgvector.asyncpg.register 18:47 call  isinstance(v, HalfVector)"
+      ],
+      "pgvector.halfvec.HalfVector.__init__": [
+        "pgvector.asyncpg.register 18:78 call  HalfVector(v)"
+      ],
+      "pgvector.halfvec.HalfVector.to_binary": [
+        "pgvector.asyncpg.register 18:92 call  (v if isinstance(v, HalfVector) else HalfVector(v)).to_bi..."
+      ]
+    },
+    "pgvector.asyncpg.register.register_vector.<lambda3>": {
+      "<builtin>.isinstance": [
+        "pgvector.asyncpg.register 26:47 call  isinstance(v, SparseVector)"
+      ],
+      "pgvector.sparsevec.SparseVector.__init__": [
+        "pgvector.asyncpg.register 26:82 call  SparseVector(v)"
+      ],
+      "pgvector.sparsevec.SparseVector.to_binary": [
+        "pgvector.asyncpg.register 26:96 call  (v if isinstance(v, SparseVector) else SparseVector(v)).t..."
+      ]
+    },
+    "pgvector.bit.Bit.__init__": {
+      "numpy.any": [
+        "pgvector.bit 43:53 call  np.any(value > 1)"
+      ],
+      "numpy.packbits": [
+        "pgvector.bit 51:37 call  np.packbits(value)"
+      ]
+    },
+    "pgvector.bit.Bit.from_binary": {
+      "<builtin>.ValueError": [
+        "pgvector.bit 89:29 call  ValueError('invalid length')"
+      ]
+    },
+    "pgvector.bit.Bit.to_numpy": {
+      "numpy.unpackbits": [
+        "pgvector.bit 70:29 call  np.unpackbits(np.frombuffer(self._data, dtype=np.uint8), ..."
+      ]
+    },
+    "pgvector.django.bit.BitField.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.bit 12:14 call  super()"
+      ],
+      "django.db.models.Field.__init__": [
+        "pgvector.django.bit 12:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.django.bit.BitField.deconstruct": {
+      "<builtin>.super": [
+        "pgvector.django.bit 15:41 call  super()"
+      ],
+      "django.db.models.Field.deconstruct": [
+        "pgvector.django.bit 15:55 call  super().deconstruct()"
+      ]
+    },
+    "pgvector.django.bit.BitField.formfield": {
+      "<builtin>.super": [
+        "pgvector.django.bit 26:21 call  super()"
+      ],
+      "django.db.models.Field.formfield": [
+        "pgvector.django.bit 26:33 call  super().formfield( form_class=BitFormField if form_class ..."
+      ]
+    },
+    "pgvector.django.bit.BitFormField.to_python": {
+      "<builtin>.isinstance": [
+        "pgvector.django.bit 35:22 call  isinstance(value, str)"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.bit 37:21 call  super()"
+      ],
+      "django.forms.CharField.to_python": [
+        "pgvector.django.bit 37:33 call  super().to_python(value)"
+      ]
+    },
+    "pgvector.django.extensions.VectorExtension.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.extensions 9:18 call  super()"
+      ],
+      "django.contrib.postgres.operations.CreateExtension.__init__": [
+        "pgvector.django.extensions 9:29 call  super().__init__('vector', hints=hints)"
+      ]
+    },
+    "pgvector.django.functions": {
+      "django.db.models.FloatField": [
+        "pgvector.django.functions 7:30 call  FloatField()",
+        "pgvector.django.functions 23:30 call  FloatField()"
+      ]
+    },
+    "pgvector.django.functions.BitDistanceBase.__init__": {
+      "<builtin>.hasattr": [
+        "pgvector.django.functions 26:23 call  hasattr(vector, 'resolve_expression')"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.functions 28:14 call  super()"
+      ],
+      "django.db.models.Func.__init__": [
+        "pgvector.django.functions 28:25 call  super().__init__(expression, vector, **extra)"
+      ],
+      "django.db.models.Value": [
+        "pgvector.django.functions 27:27 call  Value(vector)"
+      ]
+    },
+    "pgvector.django.functions.DistanceBase.__init__": {
+      "<builtin>.hasattr": [
+        "pgvector.django.functions 10:23 call  hasattr(vector, 'resolve_expression')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.django.functions 11:26 call  isinstance(vector, (Vector, HalfVector, SparseVector))"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.functions 19:14 call  super()"
+      ],
+      "django.db.models.Func.__init__": [
+        "pgvector.django.functions 19:25 call  super().__init__(expression, vector, **extra)"
+      ],
+      "django.db.models.Value": [
+        "pgvector.django.functions 12:31 call  Value(vector.to_text())",
+        "pgvector.django.functions 14:31 call  Value(Vector(vector).to_text())"
+      ],
+      "pgvector.halfvec.HalfVector.to_text": [
+        "pgvector.django.functions 12:46 call  vector.to_text()"
+      ],
+      "pgvector.sparsevec.SparseVector.to_text": [
+        "pgvector.django.functions 12:46 call  vector.to_text()"
+      ],
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.django.functions 14:38 call  Vector(vector)"
+      ],
+      "pgvector.vector.Vector.to_text": [
+        "pgvector.django.functions 12:46 call  vector.to_text()",
+        "pgvector.django.functions 14:54 call  Vector(vector).to_text()"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.halfvec 14:14 call  super()"
+      ],
+      "django.db.models.Field.__init__": [
+        "pgvector.django.halfvec 14:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.deconstruct": {
+      "<builtin>.super": [
+        "pgvector.django.halfvec 17:41 call  super()"
+      ],
+      "django.db.models.Field.deconstruct": [
+        "pgvector.django.halfvec 17:55 call  super().deconstruct()"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.formfield": {
+      "<builtin>.super": [
+        "pgvector.django.halfvec 43:21 call  super()"
+      ],
+      "django.db.models.Field.formfield": [
+        "pgvector.django.halfvec 43:33 call  super().formfield( form_class=HalfVectorFormField if form..."
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.from_db_value": {
+      "pgvector.halfvec.HalfVector._from_db": [
+        "pgvector.django.halfvec 28:35 call  HalfVector._from_db(value)"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.get_prep_value": {
+      "pgvector.halfvec.HalfVector._to_db": [
+        "pgvector.django.halfvec 36:33 call  HalfVector._to_db(value)"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.to_python": {
+      "<builtin>.isinstance": [
+        "pgvector.django.halfvec 31:22 call  isinstance(value, list)"
+      ],
+      "pgvector.halfvec.HalfVector._from_db": [
+        "pgvector.django.halfvec 33:35 call  HalfVector._from_db(value)"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorField.value_to_string": {
+      "django.db.models.Field.value_from_object": [
+        "pgvector.django.halfvec 39:59 call  self.value_from_object(obj)"
+      ],
+      "pgvector.django.halfvec.HalfVectorField.get_prep_value": [
+        "pgvector.django.halfvec 39:36 call  self.get_prep_value(self.value_from_object(obj))"
+      ]
+    },
+    "pgvector.django.halfvec.HalfVectorFormField.to_python": {
+      "<builtin>.isinstance": [
+        "pgvector.django.halfvec 52:22 call  isinstance(value, str)"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.halfvec 54:21 call  super()"
+      ],
+      "django.forms.CharField.to_python": [
+        "pgvector.django.halfvec 54:33 call  super().to_python(value)"
+      ]
+    },
+    "pgvector.django.indexes.HnswIndex.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.indexes 31:14 call  super()"
+      ],
+      "django.contrib.postgres.indexes.PostgresIndex.__init__": [
+        "pgvector.django.indexes 31:25 call  super().__init__(*expressions, **kwargs)"
+      ]
+    },
+    "pgvector.django.indexes.HnswIndex.deconstruct": {
+      "<builtin>.super": [
+        "pgvector.django.indexes 34:35 call  super()"
+      ],
+      "django.contrib.postgres.indexes.PostgresIndex.deconstruct": [
+        "pgvector.django.indexes 34:49 call  super().deconstruct()"
+      ]
+    },
+    "pgvector.django.indexes.HnswIndex.get_with_params": {
+      "<builtin>.list.append": [
+        "pgvector.django.indexes 44:31 call  with_params.append('m = %d' % self.m)",
+        "pgvector.django.indexes 46:31 call  with_params.append('ef_construction = %d' % self.ef_const..."
+      ]
+    },
+    "pgvector.django.indexes.IvfflatIndex.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.indexes 10:14 call  super()"
+      ],
+      "django.contrib.postgres.indexes.PostgresIndex.__init__": [
+        "pgvector.django.indexes 10:25 call  super().__init__(*expressions, **kwargs)"
+      ]
+    },
+    "pgvector.django.indexes.IvfflatIndex.deconstruct": {
+      "<builtin>.super": [
+        "pgvector.django.indexes 13:35 call  super()"
+      ],
+      "django.contrib.postgres.indexes.PostgresIndex.deconstruct": [
+        "pgvector.django.indexes 13:49 call  super().deconstruct()"
+      ]
+    },
+    "pgvector.django.indexes.IvfflatIndex.get_with_params": {
+      "<builtin>.list.append": [
+        "pgvector.django.indexes 21:31 call  with_params.append('lists = %d' % self.lists)"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.sparsevec 14:14 call  super()"
+      ],
+      "django.db.models.Field.__init__": [
+        "pgvector.django.sparsevec 14:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.deconstruct": {
+      "<builtin>.super": [
+        "pgvector.django.sparsevec 17:41 call  super()"
+      ],
+      "django.db.models.Field.deconstruct": [
+        "pgvector.django.sparsevec 17:55 call  super().deconstruct()"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.formfield": {
+      "<builtin>.super": [
+        "pgvector.django.sparsevec 41:21 call  super()"
+      ],
+      "django.db.models.Field.formfield": [
+        "pgvector.django.sparsevec 41:33 call  super().formfield( form_class=SparseVectorFormField if fo..."
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.from_db_value": {
+      "pgvector.sparsevec.SparseVector._from_db": [
+        "pgvector.django.sparsevec 28:37 call  SparseVector._from_db(value)"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.get_prep_value": {
+      "pgvector.sparsevec.SparseVector._to_db": [
+        "pgvector.django.sparsevec 34:35 call  SparseVector._to_db(value)"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.to_python": {
+      "pgvector.sparsevec.SparseVector._from_db": [
+        "pgvector.django.sparsevec 31:37 call  SparseVector._from_db(value)"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorField.value_to_string": {
+      "django.db.models.Field.value_from_object": [
+        "pgvector.django.sparsevec 37:59 call  self.value_from_object(obj)"
+      ],
+      "pgvector.django.sparsevec.SparseVectorField.get_prep_value": [
+        "pgvector.django.sparsevec 37:36 call  self.get_prep_value(self.value_from_object(obj))"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorFormField.to_python": {
+      "<builtin>.isinstance": [
+        "pgvector.django.sparsevec 59:22 call  isinstance(value, str)"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.sparsevec 61:21 call  super()"
+      ],
+      "django.forms.CharField.to_python": [
+        "pgvector.django.sparsevec 61:33 call  super().to_python(value)"
+      ]
+    },
+    "pgvector.django.sparsevec.SparseVectorWidget.format_value": {
+      "<builtin>.isinstance": [
+        "pgvector.django.sparsevec 50:22 call  isinstance(value, SparseVector)"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.sparsevec 52:21 call  super()"
+      ],
+      "django.forms.TextInput.format_value": [
+        "pgvector.django.sparsevec 52:36 call  super().format_value(value)"
+      ],
+      "pgvector.sparsevec.SparseVector.to_text": [
+        "pgvector.django.sparsevec 51:34 call  value.to_text()"
+      ]
+    },
+    "pgvector.django.vector.VectorField.__init__": {
+      "<builtin>.super": [
+        "pgvector.django.vector 14:14 call  super()"
+      ],
+      "django.db.models.Field.__init__": [
+        "pgvector.django.vector 14:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.django.vector.VectorField.deconstruct": {
+      "<builtin>.super": [
+        "pgvector.django.vector 17:41 call  super()"
+      ],
+      "django.db.models.Field.deconstruct": [
+        "pgvector.django.vector 17:55 call  super().deconstruct()"
+      ]
+    },
+    "pgvector.django.vector.VectorField.formfield": {
+      "<builtin>.super": [
+        "pgvector.django.vector 43:21 call  super()"
+      ],
+      "django.db.models.Field.formfield": [
+        "pgvector.django.vector 43:33 call  super().formfield( form_class=VectorFormField if form_cla..."
+      ]
+    },
+    "pgvector.django.vector.VectorField.from_db_value": {
+      "pgvector.vector.Vector._from_db": [
+        "pgvector.django.vector 28:31 call  Vector._from_db(value)"
+      ]
+    },
+    "pgvector.django.vector.VectorField.get_prep_value": {
+      "pgvector.vector.Vector._to_db": [
+        "pgvector.django.vector 36:29 call  Vector._to_db(value)"
+      ]
+    },
+    "pgvector.django.vector.VectorField.to_python": {
+      "<builtin>.isinstance": [
+        "pgvector.django.vector 31:22 call  isinstance(value, list)"
+      ],
+      "pgvector.vector.Vector._from_db": [
+        "pgvector.django.vector 33:31 call  Vector._from_db(value)"
+      ]
+    },
+    "pgvector.django.vector.VectorField.value_to_string": {
+      "django.db.models.Field.value_from_object": [
+        "pgvector.django.vector 39:59 call  self.value_from_object(obj)"
+      ],
+      "pgvector.django.vector.VectorField.get_prep_value": [
+        "pgvector.django.vector 39:36 call  self.get_prep_value(self.value_from_object(obj))"
+      ]
+    },
+    "pgvector.django.vector.VectorFormField.to_python": {
+      "<builtin>.isinstance": [
+        "pgvector.django.vector 52:22 call  isinstance(value, str)"
+      ],
+      "<builtin>.super": [
+        "pgvector.django.vector 54:21 call  super()"
+      ],
+      "django.forms.CharField.to_python": [
+        "pgvector.django.vector 54:33 call  super().to_python(value)"
+      ]
+    },
+    "pgvector.halfvec.HalfVector._from_db": {
+      "<builtin>.isinstance": [
+        "pgvector.halfvec 111:22 call  isinstance(value, HalfVector)"
+      ],
+      "pgvector.halfvec.HalfVector._from_text": [
+        "pgvector.halfvec 114:30 call  cls._from_text(value)"
+      ],
+      "pgvector.halfvec.HalfVector.to_list": [
+        "pgvector.halfvec 112:33 call  value.to_list()"
+      ]
+    },
+    "pgvector.halfvec.HalfVector._to_db": {
+      "<builtin>.float": [
+        "pgvector.halfvec 99:43 call  float(v)"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.halfvec 98:22 call  isinstance(value, list)",
+        "pgvector.halfvec 101:26 call  isinstance(value, HalfVector)"
+      ],
+      "<builtin>.str": [
+        "pgvector.halfvec 99:37 call  str(float(v))"
+      ],
+      "<builtin>.str.join": [
+        "pgvector.halfvec 99:32 call  \",\".join([str(float(v)) for v in value])"
+      ],
+      "pgvector.halfvec.HalfVector.__init__": [
+        "pgvector.halfvec 102:24 call  cls(value)"
+      ],
+      "pgvector.halfvec.HalfVector.to_text": [
+        "pgvector.halfvec 104:29 call  value.to_text()"
+      ]
+    },
+    "pgvector.halfvec.HalfVector.from_binary": {
+      "<builtin>.ValueError": [
+        "pgvector.halfvec 74:29 call  ValueError('invalid length')",
+        "pgvector.halfvec 77:29 call  ValueError('expected unused to be 0')"
+      ]
+    },
+    "pgvector.peewee.bit.FixedBitField.__init__": {
+      "<builtin>.super": [
+        "pgvector.peewee.bit 10:14 call  super()"
+      ],
+      "peewee.Field.__init__": [
+        "pgvector.peewee.bit 10:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.peewee.bit.FixedBitField._distance": {
+      "peewee.Expression": [
+        "pgvector.peewee.bit 16:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))"
+      ],
+      "peewee.Field.to_value": [
+        "pgvector.peewee.bit 16:61 call  self.to_value(vector)"
+      ]
+    },
+    "pgvector.peewee.bit.FixedBitField.hamming_distance": {
+      "pgvector.peewee.bit.FixedBitField._distance": [
+        "pgvector.peewee.bit 19:30 call  self._distance('<~>', vector)"
+      ]
+    },
+    "pgvector.peewee.bit.FixedBitField.jaccard_distance": {
+      "pgvector.peewee.bit.FixedBitField._distance": [
+        "pgvector.peewee.bit 22:30 call  self._distance('<%%>', vector)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.__init__": {
+      "<builtin>.super": [
+        "pgvector.peewee.halfvec 11:14 call  super()"
+      ],
+      "peewee.Field.__init__": [
+        "pgvector.peewee.halfvec 11:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField._distance": {
+      "peewee.Expression": [
+        "pgvector.peewee.halfvec 23:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))"
+      ],
+      "peewee.Field.to_value": [
+        "pgvector.peewee.halfvec 23:61 call  self.to_value(vector)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.cosine_distance": {
+      "pgvector.peewee.halfvec.HalfVectorField._distance": [
+        "pgvector.peewee.halfvec 32:30 call  self._distance('<=>', vector)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.db_value": {
+      "pgvector.halfvec.HalfVector._to_db": [
+        "pgvector.peewee.halfvec 17:33 call  HalfVector._to_db(value)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.l1_distance": {
+      "pgvector.peewee.halfvec.HalfVectorField._distance": [
+        "pgvector.peewee.halfvec 35:30 call  self._distance('<+>', vector)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.l2_distance": {
+      "pgvector.peewee.halfvec.HalfVectorField._distance": [
+        "pgvector.peewee.halfvec 26:30 call  self._distance('<->', vector)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.max_inner_product": {
+      "pgvector.peewee.halfvec.HalfVectorField._distance": [
+        "pgvector.peewee.halfvec 29:30 call  self._distance('<#>', vector)"
+      ]
+    },
+    "pgvector.peewee.halfvec.HalfVectorField.python_value": {
+      "pgvector.halfvec.HalfVector._from_db": [
+        "pgvector.peewee.halfvec 20:35 call  HalfVector._from_db(value)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.__init__": {
+      "<builtin>.super": [
+        "pgvector.peewee.sparsevec 11:14 call  super()"
+      ],
+      "peewee.Field.__init__": [
+        "pgvector.peewee.sparsevec 11:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField._distance": {
+      "peewee.Expression": [
+        "pgvector.peewee.sparsevec 23:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))"
+      ],
+      "peewee.Field.to_value": [
+        "pgvector.peewee.sparsevec 23:61 call  self.to_value(vector)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.cosine_distance": {
+      "pgvector.peewee.sparsevec.SparseVectorField._distance": [
+        "pgvector.peewee.sparsevec 32:30 call  self._distance('<=>', vector)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.db_value": {
+      "pgvector.sparsevec.SparseVector._to_db": [
+        "pgvector.peewee.sparsevec 17:35 call  SparseVector._to_db(value)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.l1_distance": {
+      "pgvector.peewee.sparsevec.SparseVectorField._distance": [
+        "pgvector.peewee.sparsevec 35:30 call  self._distance('<+>', vector)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.l2_distance": {
+      "pgvector.peewee.sparsevec.SparseVectorField._distance": [
+        "pgvector.peewee.sparsevec 26:30 call  self._distance('<->', vector)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.max_inner_product": {
+      "pgvector.peewee.sparsevec.SparseVectorField._distance": [
+        "pgvector.peewee.sparsevec 29:30 call  self._distance('<#>', vector)"
+      ]
+    },
+    "pgvector.peewee.sparsevec.SparseVectorField.python_value": {
+      "pgvector.sparsevec.SparseVector._from_db": [
+        "pgvector.peewee.sparsevec 20:37 call  SparseVector._from_db(value)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.__init__": {
+      "<builtin>.super": [
+        "pgvector.peewee.vector 11:14 call  super()"
+      ],
+      "peewee.Field.__init__": [
+        "pgvector.peewee.vector 11:25 call  super().__init__(*args, **kwargs)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField._distance": {
+      "peewee.Expression": [
+        "pgvector.peewee.vector 23:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))"
+      ],
+      "peewee.Field.to_value": [
+        "pgvector.peewee.vector 23:61 call  self.to_value(vector)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.cosine_distance": {
+      "pgvector.peewee.vector.VectorField._distance": [
+        "pgvector.peewee.vector 32:30 call  self._distance('<=>', vector)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.db_value": {
+      "pgvector.vector.Vector._to_db": [
+        "pgvector.peewee.vector 17:29 call  Vector._to_db(value)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.l1_distance": {
+      "pgvector.peewee.vector.VectorField._distance": [
+        "pgvector.peewee.vector 35:30 call  self._distance('<+>', vector)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.l2_distance": {
+      "pgvector.peewee.vector.VectorField._distance": [
+        "pgvector.peewee.vector 26:30 call  self._distance('<->', vector)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.max_inner_product": {
+      "pgvector.peewee.vector.VectorField._distance": [
+        "pgvector.peewee.vector 29:30 call  self._distance('<#>', vector)"
+      ]
+    },
+    "pgvector.peewee.vector.VectorField.python_value": {
+      "pgvector.vector.Vector._from_db": [
+        "pgvector.peewee.vector 20:31 call  Vector._from_db(value)"
+      ]
+    },
+    "pgvector.pg8000.register.register_vector": {
+      "<builtin>.RuntimeError": [
+        "pgvector.pg8000.register 12:27 call  RuntimeError('vector type not found in the database')"
+      ],
+      "<builtin>.dict": [
+        "pgvector.pg8000.register 9:21 call  dict(res)"
+      ],
+      "pg8000.native.Connection.register_in_adapter": [
+        "pgvector.pg8000.register 15:29 call  conn.register_in_adapter(type_info['vector'], Vector.from...",
+        "pgvector.pg8000.register 25:33 call  conn.register_in_adapter(type_info['halfvec'], HalfVector...",
+        "pgvector.pg8000.register 29:33 call  conn.register_in_adapter(type_info['sparsevec'], SparseVe..."
+      ],
+      "pg8000.native.Connection.register_out_adapter": [
+        "pgvector.pg8000.register 14:30 call  conn.register_out_adapter(Vector, lambda v: v.to_text())",
+        "pgvector.pg8000.register 19:34 call  conn.register_out_adapter(np.ndarray, lambda v: Vector(v)...",
+        "pgvector.pg8000.register 24:34 call  conn.register_out_adapter(HalfVector, lambda v: v.to_text())",
+        "pgvector.pg8000.register 28:34 call  conn.register_out_adapter(SparseVector, lambda v: v.to_te..."
+      ],
+      "pg8000.native.Connection.run": [
+        "pgvector.pg8000.register 8:47 call  conn.run(\"SELECT typname, oid FROM pg_type WHERE oid IN (..."
+      ],
+      "typing.cast": [
+        "pgvector.pg8000.register 8:15 call  cast(list[tuple[str, int]], conn.run(\"SELECT typname, oid..."
+      ]
+    },
+    "pgvector.pg8000.register.register_vector.<lambda1>": {
+      "pgvector.vector.Vector.to_text": [
+        "pgvector.pg8000.register 14:58 call  v.to_text()"
+      ]
+    },
+    "pgvector.pg8000.register.register_vector.<lambda2>": {
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.pg8000.register 19:63 call  Vector(v)"
+      ],
+      "pgvector.vector.Vector.to_text": [
+        "pgvector.pg8000.register 19:74 call  Vector(v).to_text()"
+      ]
+    },
+    "pgvector.pg8000.register.register_vector.<lambda3>": {
+      "pgvector.halfvec.HalfVector.to_text": [
+        "pgvector.pg8000.register 24:66 call  v.to_text()"
+      ]
+    },
+    "pgvector.pg8000.register.register_vector.<lambda4>": {
+      "pgvector.sparsevec.SparseVector.to_text": [
+        "pgvector.pg8000.register 28:68 call  v.to_text()"
+      ]
+    },
+    "pgvector.psycopg.bit.BitBinaryDumper.dump": {
+      "pgvector.bit.Bit.to_binary": [
+        "pgvector.psycopg.bit 21:29 call  obj.to_binary()"
+      ]
+    },
+    "pgvector.psycopg.bit.BitDumper.dump": {
+      "<builtin>.str.encode": [
+        "pgvector.psycopg.bit 14:36 call  obj.to_text().encode('utf8')"
+      ],
+      "pgvector.bit.Bit.to_text": [
+        "pgvector.psycopg.bit 14:27 call  obj.to_text()"
+      ]
+    },
+    "pgvector.psycopg.bit.register_bit_info": {
+      "<builtin>.type": [
+        "pgvector.psycopg.bit 29:23 call  type('', (BitDumper,), {'oid': info.oid})",
+        "pgvector.psycopg.bit 30:25 call  type('', (BitBinaryDumper,), {'oid': info.oid})"
+      ],
+      "psycopg.AsyncConnection.adapters.register_dumper": [
+        "pgvector.psycopg.bit 33:29 call  adapters.register_dumper(Bit, text_dumper)",
+        "pgvector.psycopg.bit 34:29 call  adapters.register_dumper(Bit, binary_dumper)"
+      ],
+      "psycopg.BaseConnection.adapters.register_dumper": [
+        "pgvector.psycopg.bit 33:29 call  adapters.register_dumper(Bit, text_dumper)",
+        "pgvector.psycopg.bit 34:29 call  adapters.register_dumper(Bit, binary_dumper)"
+      ],
+      "psycopg.Connection.adapters.register_dumper": [
+        "pgvector.psycopg.bit 33:29 call  adapters.register_dumper(Bit, text_dumper)",
+        "pgvector.psycopg.bit 34:29 call  adapters.register_dumper(Bit, binary_dumper)"
+      ],
+      "psycopg.types.TypeInfo.fetch.register": [
+        "pgvector.psycopg.bit 26:18 call  info.register(context)"
+      ],
+      "psycopg.types.TypeInfo.register": [
+        "pgvector.psycopg.bit 26:18 call  info.register(context)"
+      ]
+    },
+    "pgvector.psycopg.halfvec.HalfVectorBinaryDumper.dump": {
+      "pgvector.halfvec.HalfVector.to_binary": [
+        "pgvector.psycopg.halfvec 21:29 call  obj.to_binary()"
+      ]
+    },
+    "pgvector.psycopg.halfvec.HalfVectorBinaryLoader.load": {
+      "pgvector.halfvec.HalfVector.from_binary": [
+        "pgvector.psycopg.halfvec 37:38 call  HalfVector.from_binary(data)"
+      ]
+    },
+    "pgvector.psycopg.halfvec.HalfVectorDumper.dump": {
+      "<builtin>.str.encode": [
+        "pgvector.psycopg.halfvec 14:36 call  obj.to_text().encode('utf8')"
+      ],
+      "pgvector.halfvec.HalfVector.to_text": [
+        "pgvector.psycopg.halfvec 14:27 call  obj.to_text()"
+      ]
+    },
+    "pgvector.psycopg.halfvec.HalfVectorLoader.load": {
+      "<builtin>.bytearray.decode": [
+        "pgvector.psycopg.halfvec 30:48 call  data.decode('utf8')"
+      ],
+      "<builtin>.bytes.decode": [
+        "pgvector.psycopg.halfvec 30:48 call  data.decode('utf8')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg.halfvec 28:22 call  isinstance(data, memoryview)"
+      ],
+      "<builtin>.memoryview.tobytes": [
+        "pgvector.psycopg.halfvec 29:32 call  data.tobytes()"
+      ],
+      "pgvector.halfvec.HalfVector.from_text": [
+        "pgvector.psycopg.halfvec 30:36 call  HalfVector.from_text(data.decode('utf8'))"
+      ]
+    },
+    "pgvector.psycopg.halfvec.register_halfvec_info": {
+      "<builtin>.type": [
+        "pgvector.psycopg.halfvec 44:23 call  type('', (HalfVectorDumper,), {'oid': info.oid})",
+        "pgvector.psycopg.halfvec 45:25 call  type('', (HalfVectorBinaryDumper,), {'oid': info.oid})"
+      ],
+      "psycopg.AsyncConnection.adapters.register_dumper": [
+        "pgvector.psycopg.halfvec 48:29 call  adapters.register_dumper(HalfVector, text_dumper)",
+        "pgvector.psycopg.halfvec 49:29 call  adapters.register_dumper(HalfVector, binary_dumper)"
+      ],
+      "psycopg.AsyncConnection.adapters.register_loader": [
+        "pgvector.psycopg.halfvec 50:29 call  adapters.register_loader(info.oid, HalfVectorLoader)",
+        "pgvector.psycopg.halfvec 51:29 call  adapters.register_loader(info.oid, HalfVectorBinaryLoader)"
+      ],
+      "psycopg.BaseConnection.adapters.register_dumper": [
+        "pgvector.psycopg.halfvec 48:29 call  adapters.register_dumper(HalfVector, text_dumper)",
+        "pgvector.psycopg.halfvec 49:29 call  adapters.register_dumper(HalfVector, binary_dumper)"
+      ],
+      "psycopg.BaseConnection.adapters.register_loader": [
+        "pgvector.psycopg.halfvec 50:29 call  adapters.register_loader(info.oid, HalfVectorLoader)",
+        "pgvector.psycopg.halfvec 51:29 call  adapters.register_loader(info.oid, HalfVectorBinaryLoader)"
+      ],
+      "psycopg.Connection.adapters.register_dumper": [
+        "pgvector.psycopg.halfvec 48:29 call  adapters.register_dumper(HalfVector, text_dumper)",
+        "pgvector.psycopg.halfvec 49:29 call  adapters.register_dumper(HalfVector, binary_dumper)"
+      ],
+      "psycopg.Connection.adapters.register_loader": [
+        "pgvector.psycopg.halfvec 50:29 call  adapters.register_loader(info.oid, HalfVectorLoader)",
+        "pgvector.psycopg.halfvec 51:29 call  adapters.register_loader(info.oid, HalfVectorBinaryLoader)"
+      ],
+      "psycopg.types.TypeInfo.fetch.register": [
+        "pgvector.psycopg.halfvec 41:18 call  info.register(context)"
+      ],
+      "psycopg.types.TypeInfo.register": [
+        "pgvector.psycopg.halfvec 41:18 call  info.register(context)"
+      ]
+    },
+    "pgvector.psycopg.register.register_vector": {
+      "pgvector.psycopg.bit.register_bit_info": [
+        "pgvector.psycopg.register 15:22 call  register_bit_info(context, info)"
+      ],
+      "pgvector.psycopg.halfvec.register_halfvec_info": [
+        "pgvector.psycopg.register 19:30 call  register_halfvec_info(context, info)"
+      ],
+      "pgvector.psycopg.sparsevec.register_sparsevec_info": [
+        "pgvector.psycopg.register 23:32 call  register_sparsevec_info(context, info)"
+      ],
+      "pgvector.psycopg.vector.register_vector_info": [
+        "pgvector.psycopg.register 12:25 call  register_vector_info(context, info)"
+      ],
+      "psycopg.types.TypeInfo.fetch": [
+        "pgvector.psycopg.register 11:26 call  TypeInfo.fetch(context, 'vector')",
+        "pgvector.psycopg.register 14:26 call  TypeInfo.fetch(context, 'bit')",
+        "pgvector.psycopg.register 17:26 call  TypeInfo.fetch(context, 'halfvec')",
+        "pgvector.psycopg.register 21:26 call  TypeInfo.fetch(context, 'sparsevec')"
+      ]
+    },
+    "pgvector.psycopg.register.register_vector_async": {
+      "pgvector.psycopg.bit.register_bit_info": [
+        "pgvector.psycopg.register 31:22 call  register_bit_info(context, info)"
+      ],
+      "pgvector.psycopg.halfvec.register_halfvec_info": [
+        "pgvector.psycopg.register 35:30 call  register_halfvec_info(context, info)"
+      ],
+      "pgvector.psycopg.sparsevec.register_sparsevec_info": [
+        "pgvector.psycopg.register 39:32 call  register_sparsevec_info(context, info)"
+      ],
+      "pgvector.psycopg.vector.register_vector_info": [
+        "pgvector.psycopg.register 28:25 call  register_vector_info(context, info)"
+      ],
+      "psycopg.types.TypeInfo.fetch": [
+        "pgvector.psycopg.register 27:32 call  TypeInfo.fetch(context, 'vector')",
+        "pgvector.psycopg.register 30:32 call  TypeInfo.fetch(context, 'bit')",
+        "pgvector.psycopg.register 33:32 call  TypeInfo.fetch(context, 'halfvec')",
+        "pgvector.psycopg.register 37:32 call  TypeInfo.fetch(context, 'sparsevec')"
+      ]
+    },
+    "pgvector.psycopg.sparsevec.SparseVectorBinaryDumper.dump": {
+      "pgvector.sparsevec.SparseVector.to_binary": [
+        "pgvector.psycopg.sparsevec 21:29 call  obj.to_binary()"
+      ]
+    },
+    "pgvector.psycopg.sparsevec.SparseVectorBinaryLoader.load": {
+      "pgvector.sparsevec.SparseVector.from_binary": [
+        "pgvector.psycopg.sparsevec 37:40 call  SparseVector.from_binary(data)"
+      ]
+    },
+    "pgvector.psycopg.sparsevec.SparseVectorDumper.dump": {
+      "<builtin>.str.encode": [
+        "pgvector.psycopg.sparsevec 14:36 call  obj.to_text().encode('utf8')"
+      ],
+      "pgvector.sparsevec.SparseVector.to_text": [
+        "pgvector.psycopg.sparsevec 14:27 call  obj.to_text()"
+      ]
+    },
+    "pgvector.psycopg.sparsevec.SparseVectorLoader.load": {
+      "<builtin>.bytearray.decode": [
+        "pgvector.psycopg.sparsevec 30:50 call  data.decode('utf8')"
+      ],
+      "<builtin>.bytes.decode": [
+        "pgvector.psycopg.sparsevec 30:50 call  data.decode('utf8')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg.sparsevec 28:22 call  isinstance(data, memoryview)"
+      ],
+      "<builtin>.memoryview.tobytes": [
+        "pgvector.psycopg.sparsevec 29:32 call  data.tobytes()"
+      ],
+      "pgvector.sparsevec.SparseVector.from_text": [
+        "pgvector.psycopg.sparsevec 30:38 call  SparseVector.from_text(data.decode('utf8'))"
+      ]
+    },
+    "pgvector.psycopg.sparsevec.register_sparsevec_info": {
+      "<builtin>.type": [
+        "pgvector.psycopg.sparsevec 44:23 call  type('', (SparseVectorDumper,), {'oid': info.oid})",
+        "pgvector.psycopg.sparsevec 45:25 call  type('', (SparseVectorBinaryDumper,), {'oid': info.oid})"
+      ],
+      "psycopg.AsyncConnection.adapters.register_dumper": [
+        "pgvector.psycopg.sparsevec 48:29 call  adapters.register_dumper(SparseVector, text_dumper)",
+        "pgvector.psycopg.sparsevec 49:29 call  adapters.register_dumper(SparseVector, binary_dumper)"
+      ],
+      "psycopg.AsyncConnection.adapters.register_loader": [
+        "pgvector.psycopg.sparsevec 50:29 call  adapters.register_loader(info.oid, SparseVectorLoader)",
+        "pgvector.psycopg.sparsevec 51:29 call  adapters.register_loader(info.oid, SparseVectorBinaryLoader)"
+      ],
+      "psycopg.BaseConnection.adapters.register_dumper": [
+        "pgvector.psycopg.sparsevec 48:29 call  adapters.register_dumper(SparseVector, text_dumper)",
+        "pgvector.psycopg.sparsevec 49:29 call  adapters.register_dumper(SparseVector, binary_dumper)"
+      ],
+      "psycopg.BaseConnection.adapters.register_loader": [
+        "pgvector.psycopg.sparsevec 50:29 call  adapters.register_loader(info.oid, SparseVectorLoader)",
+        "pgvector.psycopg.sparsevec 51:29 call  adapters.register_loader(info.oid, SparseVectorBinaryLoader)"
+      ],
+      "psycopg.Connection.adapters.register_dumper": [
+        "pgvector.psycopg.sparsevec 48:29 call  adapters.register_dumper(SparseVector, text_dumper)",
+        "pgvector.psycopg.sparsevec 49:29 call  adapters.register_dumper(SparseVector, binary_dumper)"
+      ],
+      "psycopg.Connection.adapters.register_loader": [
+        "pgvector.psycopg.sparsevec 50:29 call  adapters.register_loader(info.oid, SparseVectorLoader)",
+        "pgvector.psycopg.sparsevec 51:29 call  adapters.register_loader(info.oid, SparseVectorBinaryLoader)"
+      ],
+      "psycopg.types.TypeInfo.fetch.register": [
+        "pgvector.psycopg.sparsevec 41:18 call  info.register(context)"
+      ],
+      "psycopg.types.TypeInfo.register": [
+        "pgvector.psycopg.sparsevec 41:18 call  info.register(context)"
+      ]
+    },
+    "pgvector.psycopg.vector.VectorBinaryDumper.dump": {
+      "<builtin>.isinstance": [
+        "pgvector.psycopg.vector 26:26 call  isinstance(obj, Vector)"
+      ],
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.psycopg.vector 27:25 call  Vector(obj)"
+      ],
+      "pgvector.vector.Vector.to_binary": [
+        "pgvector.psycopg.vector 28:29 call  obj.to_binary()"
+      ]
+    },
+    "pgvector.psycopg.vector.VectorBinaryLoader.load": {
+      "pgvector.vector.Vector.from_binary": [
+        "pgvector.psycopg.vector 44:34 call  Vector.from_binary(data)"
+      ]
+    },
+    "pgvector.psycopg.vector.VectorDumper.dump": {
+      "<builtin>.isinstance": [
+        "pgvector.psycopg.vector 17:26 call  isinstance(obj, Vector)"
+      ],
+      "<builtin>.str.encode": [
+        "pgvector.psycopg.vector 19:36 call  obj.to_text().encode('utf8')"
+      ],
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.psycopg.vector 18:25 call  Vector(obj)"
+      ],
+      "pgvector.vector.Vector.to_text": [
+        "pgvector.psycopg.vector 19:27 call  obj.to_text()"
+      ]
+    },
+    "pgvector.psycopg.vector.VectorLoader.load": {
+      "<builtin>.bytearray.decode": [
+        "pgvector.psycopg.vector 37:44 call  data.decode('utf8')"
+      ],
+      "<builtin>.bytes.decode": [
+        "pgvector.psycopg.vector 37:44 call  data.decode('utf8')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg.vector 35:22 call  isinstance(data, memoryview)"
+      ],
+      "<builtin>.memoryview.tobytes": [
+        "pgvector.psycopg.vector 36:32 call  data.tobytes()"
+      ],
+      "pgvector.vector.Vector.from_text": [
+        "pgvector.psycopg.vector 37:32 call  Vector.from_text(data.decode('utf8'))"
+      ]
+    },
+    "pgvector.psycopg.vector.register_vector_info": {
+      "<builtin>.type": [
+        "pgvector.psycopg.vector 53:23 call  type('', (VectorDumper,), {'oid': info.oid})",
+        "pgvector.psycopg.vector 54:25 call  type('', (VectorBinaryDumper,), {'oid': info.oid})"
+      ],
+      "psycopg.AsyncConnection.adapters.register_dumper": [
+        "pgvector.psycopg.vector 57:29 call  adapters.register_dumper(Vector, text_dumper)",
+        "pgvector.psycopg.vector 58:29 call  adapters.register_dumper(Vector, binary_dumper)",
+        "pgvector.psycopg.vector 59:29 call  adapters.register_dumper('numpy.ndarray', text_dumper)",
+        "pgvector.psycopg.vector 60:29 call  adapters.register_dumper('numpy.ndarray', binary_dumper)"
+      ],
+      "psycopg.AsyncConnection.adapters.register_loader": [
+        "pgvector.psycopg.vector 61:29 call  adapters.register_loader(info.oid, VectorLoader)",
+        "pgvector.psycopg.vector 62:29 call  adapters.register_loader(info.oid, VectorBinaryLoader)"
+      ],
+      "psycopg.BaseConnection.adapters.register_dumper": [
+        "pgvector.psycopg.vector 57:29 call  adapters.register_dumper(Vector, text_dumper)",
+        "pgvector.psycopg.vector 58:29 call  adapters.register_dumper(Vector, binary_dumper)",
+        "pgvector.psycopg.vector 59:29 call  adapters.register_dumper('numpy.ndarray', text_dumper)",
+        "pgvector.psycopg.vector 60:29 call  adapters.register_dumper('numpy.ndarray', binary_dumper)"
+      ],
+      "psycopg.BaseConnection.adapters.register_loader": [
+        "pgvector.psycopg.vector 61:29 call  adapters.register_loader(info.oid, VectorLoader)",
+        "pgvector.psycopg.vector 62:29 call  adapters.register_loader(info.oid, VectorBinaryLoader)"
+      ],
+      "psycopg.Connection.adapters.register_dumper": [
+        "pgvector.psycopg.vector 57:29 call  adapters.register_dumper(Vector, text_dumper)",
+        "pgvector.psycopg.vector 58:29 call  adapters.register_dumper(Vector, binary_dumper)",
+        "pgvector.psycopg.vector 59:29 call  adapters.register_dumper('numpy.ndarray', text_dumper)",
+        "pgvector.psycopg.vector 60:29 call  adapters.register_dumper('numpy.ndarray', binary_dumper)"
+      ],
+      "psycopg.Connection.adapters.register_loader": [
+        "pgvector.psycopg.vector 61:29 call  adapters.register_loader(info.oid, VectorLoader)",
+        "pgvector.psycopg.vector 62:29 call  adapters.register_loader(info.oid, VectorBinaryLoader)"
+      ],
+      "psycopg.ProgrammingError": [
+        "pgvector.psycopg.vector 49:39 call  psycopg.ProgrammingError('vector type not found in the da..."
+      ],
+      "psycopg.types.TypeInfo.fetch.register": [
+        "pgvector.psycopg.vector 50:18 call  info.register(context)"
+      ],
+      "psycopg.types.TypeInfo.register": [
+        "pgvector.psycopg.vector 50:18 call  info.register(context)"
+      ]
+    },
+    "pgvector.psycopg2.halfvec.HalfvecAdapter.getquoted": {
+      "pgvector.halfvec.HalfVector.to_text": [
+        "pgvector.psycopg2.halfvec 11:41 call  self._value.to_text()"
+      ],
+      "psycopg2.extensions.adapt": [
+        "pgvector.psycopg2.halfvec 11:21 call  adapt(self._value.to_text())"
+      ],
+      "psycopg2.extensions.adapt.getquoted": [
+        "pgvector.psycopg2.halfvec 11:54 call  adapt(self._value.to_text()).getquoted()"
+      ]
+    },
+    "pgvector.psycopg2.halfvec.cast_halfvec": {
+      "<builtin>.ValueError": [
+        "pgvector.psycopg2.halfvec 18:25 call  ValueError('expected str')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg2.halfvec 17:18 call  isinstance(value, bytes)"
+      ],
+      "pgvector.halfvec.HalfVector.from_text": [
+        "pgvector.psycopg2.halfvec 19:32 call  HalfVector.from_text(value)"
+      ]
+    },
+    "pgvector.psycopg2.halfvec.register_halfvec_info": {
+      "psycopg2.extensions.new_array_type": [
+        "pgvector.psycopg2.halfvec 27:38 call  new_array_type((array_oid,), 'HALFVECARRAY', halfvec)"
+      ],
+      "psycopg2.extensions.new_type": [
+        "pgvector.psycopg2.halfvec 23:23 call  new_type((oid,), 'HALFVEC', cast_halfvec)"
+      ],
+      "psycopg2.extensions.register_adapter": [
+        "pgvector.psycopg2.halfvec 30:21 call  register_adapter(HalfVector, HalfvecAdapter)"
+      ],
+      "psycopg2.extensions.register_type": [
+        "pgvector.psycopg2.halfvec 24:18 call  register_type(halfvec, scope)",
+        "pgvector.psycopg2.halfvec 28:22 call  register_type(halfvecarray, scope)"
+      ]
+    },
+    "pgvector.psycopg2.register.register_vector": {
+      "<builtin>.dict": [
+        "pgvector.psycopg2.register 16:21 call  dict(cur.fetchall())"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg2.register 10:38 call  isinstance(conn_or_curs, connection)"
+      ],
+      "pgvector.psycopg2.halfvec.register_halfvec_info": [
+        "pgvector.psycopg2.register 24:30 call  register_halfvec_info(type_info['halfvec'], type_info['_h..."
+      ],
+      "pgvector.psycopg2.sparsevec.register_sparsevec_info": [
+        "pgvector.psycopg2.register 27:32 call  register_sparsevec_info(type_info['sparsevec'], type_info..."
+      ],
+      "pgvector.psycopg2.vector.register_vector_info": [
+        "pgvector.psycopg2.register 21:25 call  register_vector_info(type_info['vector'], type_info['_vec..."
+      ],
+      "psycopg2.ProgrammingError": [
+        "pgvector.psycopg2.register 19:40 call  psycopg2.ProgrammingError('vector type not found in the d..."
+      ],
+      "psycopg2.extensions.connection.cursor": [
+        "pgvector.psycopg2.register 11:22 call  conn.cursor(cursor_factory=cursor)"
+      ],
+      "psycopg2.extensions.connection.cursor.execute": [
+        "pgvector.psycopg2.register 15:16 call  cur.execute(\"SELECT typname, oid FROM pg_type WHERE oid I..."
+      ],
+      "psycopg2.extensions.connection.cursor.fetchall": [
+        "pgvector.psycopg2.register 16:34 call  cur.fetchall()"
+      ],
+      "psycopg2.extensions.cursor.connection.cursor": [
+        "pgvector.psycopg2.register 11:22 call  conn.cursor(cursor_factory=cursor)"
+      ],
+      "psycopg2.extensions.cursor.connection.cursor.execute": [
+        "pgvector.psycopg2.register 15:16 call  cur.execute(\"SELECT typname, oid FROM pg_type WHERE oid I..."
+      ],
+      "psycopg2.extensions.cursor.connection.cursor.fetchall": [
+        "pgvector.psycopg2.register 16:34 call  cur.fetchall()"
+      ]
+    },
+    "pgvector.psycopg2.sparsevec.SparsevecAdapter.getquoted": {
+      "pgvector.sparsevec.SparseVector.to_text": [
+        "pgvector.psycopg2.sparsevec 11:41 call  self._value.to_text()"
+      ],
+      "psycopg2.extensions.adapt": [
+        "pgvector.psycopg2.sparsevec 11:21 call  adapt(self._value.to_text())"
+      ],
+      "psycopg2.extensions.adapt.getquoted": [
+        "pgvector.psycopg2.sparsevec 11:54 call  adapt(self._value.to_text()).getquoted()"
+      ]
+    },
+    "pgvector.psycopg2.sparsevec.cast_sparsevec": {
+      "<builtin>.ValueError": [
+        "pgvector.psycopg2.sparsevec 18:25 call  ValueError('expected str')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg2.sparsevec 17:18 call  isinstance(value, bytes)"
+      ],
+      "pgvector.sparsevec.SparseVector.from_text": [
+        "pgvector.psycopg2.sparsevec 19:34 call  SparseVector.from_text(value)"
+      ]
+    },
+    "pgvector.psycopg2.sparsevec.register_sparsevec_info": {
+      "psycopg2.extensions.new_array_type": [
+        "pgvector.psycopg2.sparsevec 27:40 call  new_array_type((array_oid,), 'SPARSEVECARRAY', sparsevec)"
+      ],
+      "psycopg2.extensions.new_type": [
+        "pgvector.psycopg2.sparsevec 23:25 call  new_type((oid,), 'SPARSEVEC', cast_sparsevec)"
+      ],
+      "psycopg2.extensions.register_adapter": [
+        "pgvector.psycopg2.sparsevec 30:21 call  register_adapter(SparseVector, SparsevecAdapter)"
+      ],
+      "psycopg2.extensions.register_type": [
+        "pgvector.psycopg2.sparsevec 24:18 call  register_type(sparsevec, scope)",
+        "pgvector.psycopg2.sparsevec 28:22 call  register_type(sparsevecarray, scope)"
+      ]
+    },
+    "pgvector.psycopg2.vector.VectorAdapter.__init__": {
+      "<builtin>.isinstance": [
+        "pgvector.psycopg2.vector 10:26 call  isinstance(value, Vector)"
+      ],
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.psycopg2.vector 11:27 call  Vector(value)"
+      ]
+    },
+    "pgvector.psycopg2.vector.VectorAdapter.getquoted": {
+      "pgvector.vector.Vector.to_text": [
+        "pgvector.psycopg2.vector 15:41 call  self._value.to_text()"
+      ],
+      "psycopg2.extensions.adapt": [
+        "pgvector.psycopg2.vector 15:21 call  adapt(self._value.to_text())"
+      ],
+      "psycopg2.extensions.adapt.getquoted": [
+        "pgvector.psycopg2.vector 15:54 call  adapt(self._value.to_text()).getquoted()"
+      ]
+    },
+    "pgvector.psycopg2.vector.cast_vector": {
+      "<builtin>.ValueError": [
+        "pgvector.psycopg2.vector 22:25 call  ValueError('expected str')"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.psycopg2.vector 21:18 call  isinstance(value, bytes)"
+      ],
+      "pgvector.vector.Vector.from_text": [
+        "pgvector.psycopg2.vector 23:28 call  Vector.from_text(value)"
+      ]
+    },
+    "pgvector.psycopg2.vector.register_vector_info": {
+      "psycopg2.extensions.new_array_type": [
+        "pgvector.psycopg2.vector 31:37 call  new_array_type((array_oid,), 'VECTORARRAY', vector)"
+      ],
+      "psycopg2.extensions.new_type": [
+        "pgvector.psycopg2.vector 27:22 call  new_type((oid,), 'VECTOR', cast_vector)"
+      ],
+      "psycopg2.extensions.register_adapter": [
+        "pgvector.psycopg2.vector 34:21 call  register_adapter(Vector, VectorAdapter)",
+        "pgvector.psycopg2.vector 38:25 call  register_adapter(np.ndarray, VectorAdapter)"
+      ],
+      "psycopg2.extensions.register_type": [
+        "pgvector.psycopg2.vector 28:18 call  register_type(vector, scope)",
+        "pgvector.psycopg2.vector 32:22 call  register_type(vectorarray, scope)"
+      ]
+    },
+    "pgvector.sparsevec.SparseVector._from_db": {
+      "<builtin>.isinstance": [
+        "pgvector.sparsevec 188:39 call  isinstance(value, SparseVector)"
+      ],
+      "pgvector.sparsevec.SparseVector.from_text": [
+        "pgvector.sparsevec 191:29 call  cls.from_text(value)"
+      ]
+    },
+    "pgvector.sparsevec.SparseVector._from_sparse": {
+      "<builtin>.ValueError": [
+        "pgvector.sparsevec 119:29 call  ValueError('expected ndim to be 1')"
+      ],
+      "<builtin>.list.sort": [
+        "pgvector.sparsevec 131:26 call  elements.sort()"
+      ],
+      "scipy.sparse.bsr_array.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.bsr_matrix.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.csc_array.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.csc_matrix.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.dia_array.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.dia_matrix.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.dok_matrix.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.lil_array.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ],
+      "scipy.sparse.lil_matrix.tocoo": [
+        "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)"
+      ]
+    },
+    "pgvector.sparsevec.SparseVector._to_db": {
+      "<builtin>.isinstance": [
+        "pgvector.sparsevec 181:26 call  isinstance(value, SparseVector)"
+      ],
+      "pgvector.sparsevec.SparseVector.__init__": [
+        "pgvector.sparsevec 182:24 call  cls(value)"
+      ],
+      "pgvector.sparsevec.SparseVector.to_text": [
+        "pgvector.sparsevec 184:29 call  value.to_text()"
+      ]
+    },
+    "pgvector.sparsevec.SparseVector.from_binary": {
+      "<builtin>.ValueError": [
+        "pgvector.sparsevec 159:29 call  ValueError('invalid length')",
+        "pgvector.sparsevec 162:29 call  ValueError('expected unused to be 0')"
+      ]
+    },
+    "pgvector.sqlalchemy.bit.BIT.Comparator.hamming_distance": {
+      "sqlalchemy.types.TypeDecorator.Comparator.op": [
+        "pgvector.sqlalchemy.bit 19:27 call  self.op('<~>', return_type=Float)",
+        "pgvector.sqlalchemy.bit 19:53 call  self.op('<~>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.bit.BIT.Comparator.jaccard_distance": {
+      "sqlalchemy.types.TypeDecorator.Comparator.op": [
+        "pgvector.sqlalchemy.bit 22:27 call  self.op('<%>', return_type=Float)",
+        "pgvector.sqlalchemy.bit 22:53 call  self.op('<%>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.bit.BIT.process_bind_param": {
+      "<builtin>.isinstance": [
+        "pgvector.sqlalchemy.bit 12:76 call  isinstance(value, str)"
+      ],
+      "asyncpg.BitString": [
+        "pgvector.sqlalchemy.bit 14:37 call  asyncpg.BitString(value)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec": {
+      "sqlalchemy.types.String": [
+        "pgvector.sqlalchemy.halfvec 10:21 call  String()"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.cosine_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.halfvec 46:27 call  self.op('<=>', return_type=Float)",
+        "pgvector.sqlalchemy.halfvec 46:53 call  self.op('<=>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.l1_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.halfvec 49:27 call  self.op('<+>', return_type=Float)",
+        "pgvector.sqlalchemy.halfvec 49:53 call  self.op('<+>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.l2_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.halfvec 40:27 call  self.op('<->', return_type=Float)",
+        "pgvector.sqlalchemy.halfvec 40:53 call  self.op('<->', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.max_inner_product": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.halfvec 43:27 call  self.op('<#>', return_type=Float)",
+        "pgvector.sqlalchemy.halfvec 43:53 call  self.op('<#>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.__init__": {
+      "<builtin>.super": [
+        "pgvector.sqlalchemy.halfvec 13:14 call  super()"
+      ],
+      "sqlalchemy.types.UserDefinedType.__init__": [
+        "pgvector.sqlalchemy.halfvec 13:25 call  super().__init__()"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.bind_processor.process": {
+      "pgvector.halfvec.HalfVector._to_db": [
+        "pgvector.sqlalchemy.halfvec 23:37 call  HalfVector._to_db(value)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.literal_processor": {
+      "sqlalchemy.types.String._cached_literal_processor": [
+        "pgvector.sqlalchemy.halfvec 27:74 call  self._string._cached_literal_processor(dialect)"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.literal_processor.process": {
+      "pgvector.halfvec.HalfVector._to_db": [
+        "pgvector.sqlalchemy.halfvec 30:62 call  HalfVector._to_db(value)"
+      ],
+      "sqlalchemy.types.String._cached_literal_processor": [
+        "pgvector.sqlalchemy.halfvec 30:44 call  string_literal_processor(HalfVector._to_db(value))"
+      ]
+    },
+    "pgvector.sqlalchemy.halfvec.HALFVEC.result_processor.process": {
+      "pgvector.halfvec.HalfVector._from_db": [
+        "pgvector.sqlalchemy.halfvec 35:39 call  HalfVector._from_db(value)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec": {
+      "sqlalchemy.types.String": [
+        "pgvector.sqlalchemy.sparsevec 10:21 call  String()"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.cosine_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.sparsevec 46:27 call  self.op('<=>', return_type=Float)",
+        "pgvector.sqlalchemy.sparsevec 46:53 call  self.op('<=>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.l1_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.sparsevec 49:27 call  self.op('<+>', return_type=Float)",
+        "pgvector.sqlalchemy.sparsevec 49:53 call  self.op('<+>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.l2_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.sparsevec 40:27 call  self.op('<->', return_type=Float)",
+        "pgvector.sqlalchemy.sparsevec 40:53 call  self.op('<->', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.max_inner_product": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.sparsevec 43:27 call  self.op('<#>', return_type=Float)",
+        "pgvector.sqlalchemy.sparsevec 43:53 call  self.op('<#>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.__init__": {
+      "<builtin>.super": [
+        "pgvector.sqlalchemy.sparsevec 13:14 call  super()"
+      ],
+      "sqlalchemy.types.UserDefinedType.__init__": [
+        "pgvector.sqlalchemy.sparsevec 13:25 call  super().__init__()"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.bind_processor.process": {
+      "pgvector.sparsevec.SparseVector._to_db": [
+        "pgvector.sqlalchemy.sparsevec 23:39 call  SparseVector._to_db(value)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.literal_processor": {
+      "sqlalchemy.types.String._cached_literal_processor": [
+        "pgvector.sqlalchemy.sparsevec 27:74 call  self._string._cached_literal_processor(dialect)"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.literal_processor.process": {
+      "pgvector.sparsevec.SparseVector._to_db": [
+        "pgvector.sqlalchemy.sparsevec 30:64 call  SparseVector._to_db(value)"
+      ],
+      "sqlalchemy.types.String._cached_literal_processor": [
+        "pgvector.sqlalchemy.sparsevec 30:44 call  string_literal_processor(SparseVector._to_db(value))"
+      ]
+    },
+    "pgvector.sqlalchemy.sparsevec.SPARSEVEC.result_processor.process": {
+      "pgvector.sparsevec.SparseVector._from_db": [
+        "pgvector.sqlalchemy.sparsevec 35:41 call  SparseVector._from_db(value)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector": {
+      "sqlalchemy.types.String": [
+        "pgvector.sqlalchemy.vector 10:21 call  String()"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.Comparator.cosine_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.vector 46:27 call  self.op('<=>', return_type=Float)",
+        "pgvector.sqlalchemy.vector 46:53 call  self.op('<=>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.Comparator.l1_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.vector 49:27 call  self.op('<+>', return_type=Float)",
+        "pgvector.sqlalchemy.vector 49:53 call  self.op('<+>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.Comparator.l2_distance": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.vector 40:27 call  self.op('<->', return_type=Float)",
+        "pgvector.sqlalchemy.vector 40:53 call  self.op('<->', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.Comparator.max_inner_product": {
+      "sqlalchemy.types.TypeEngine.Comparator.op": [
+        "pgvector.sqlalchemy.vector 43:27 call  self.op('<#>', return_type=Float)",
+        "pgvector.sqlalchemy.vector 43:53 call  self.op('<#>', return_type=Float)(other)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.__init__": {
+      "<builtin>.super": [
+        "pgvector.sqlalchemy.vector 13:14 call  super()"
+      ],
+      "sqlalchemy.types.UserDefinedType.__init__": [
+        "pgvector.sqlalchemy.vector 13:25 call  super().__init__()"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.bind_processor.process": {
+      "pgvector.vector.Vector._to_db": [
+        "pgvector.sqlalchemy.vector 23:33 call  Vector._to_db(value)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.literal_processor": {
+      "sqlalchemy.types.String._cached_literal_processor": [
+        "pgvector.sqlalchemy.vector 27:74 call  self._string._cached_literal_processor(dialect)"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.literal_processor.process": {
+      "pgvector.vector.Vector._to_db": [
+        "pgvector.sqlalchemy.vector 30:58 call  Vector._to_db(value)"
+      ],
+      "sqlalchemy.types.String._cached_literal_processor": [
+        "pgvector.sqlalchemy.vector 30:44 call  string_literal_processor(Vector._to_db(value))"
+      ]
+    },
+    "pgvector.sqlalchemy.vector.VECTOR.result_processor.process": {
+      "pgvector.vector.Vector._from_db": [
+        "pgvector.sqlalchemy.vector 35:35 call  Vector._from_db(value)"
+      ]
+    },
+    "pgvector.vector.Vector._from_db": {
+      "<builtin>.isinstance": [
+        "pgvector.vector 109:22 call  isinstance(value, Vector)"
+      ],
+      "pgvector.vector.Vector._from_text": [
+        "pgvector.vector 112:30 call  cls._from_text(value)"
+      ],
+      "pgvector.vector.Vector.to_list": [
+        "pgvector.vector 110:33 call  value.to_list()"
+      ]
+    },
+    "pgvector.vector.Vector._to_db": {
+      "<builtin>.float": [
+        "pgvector.vector 97:43 call  float(v)"
+      ],
+      "<builtin>.isinstance": [
+        "pgvector.vector 96:22 call  isinstance(value, list)",
+        "pgvector.vector 99:26 call  isinstance(value, Vector)"
+      ],
+      "<builtin>.str": [
+        "pgvector.vector 97:37 call  str(float(v))"
+      ],
+      "<builtin>.str.join": [
+        "pgvector.vector 97:32 call  \",\".join([str(float(v)) for v in value])"
+      ],
+      "pgvector.vector.Vector.__init__": [
+        "pgvector.vector 100:24 call  cls(value)"
+      ],
+      "pgvector.vector.Vector.to_text": [
+        "pgvector.vector 102:29 call  value.to_text()"
+      ]
+    },
+    "pgvector.vector.Vector.from_binary": {
+      "<builtin>.ValueError": [
+        "pgvector.vector 72:29 call  ValueError('invalid length')",
+        "pgvector.vector 75:29 call  ValueError('expected unused to be 0')"
+      ]
+    }
+  },
+  "notes": {
+    "pgvector.asyncpg.register 6:30 call  conn.set_type_codec( 'vector', schema=schema, encoder=lam...": [
+      "conn is annotated asyncpg.Connection"
+    ],
+    "pgvector.bit 43:53 call  np.any(value > 1)": [
+      "numpy 1.25 and later make this function an _ArrayFunctionDispatcher object; the numpy 1.x releases before 1.25, which the package admits (pgvector.md, J2), make it a Python function at this public numpy attribute (the itables precedent)"
+    ],
+    "pgvector.bit 51:37 call  np.packbits(value)": [
+      "numpy 1.25 and later make this function an _ArrayFunctionDispatcher object; the numpy 1.x releases before 1.25, which the package admits (pgvector.md, J2), make it a Python function at this public numpy attribute (the itables precedent)"
+    ],
+    "pgvector.bit 70:29 call  np.unpackbits(np.frombuffer(self._data, dtype=np.uint8), ...": [
+      "numpy 1.25 and later make this function an _ArrayFunctionDispatcher object; the numpy 1.x releases before 1.25, which the package admits (pgvector.md, J2), make it a Python function at this public numpy attribute (the itables precedent)"
+    ],
+    "pgvector.django.bit 12:25 call  super().__init__(*args, **kwargs)": [
+      "super() in a class whose base is a class of a missing module: the stub base's method (micro-benchmark external/base_class_super)"
+    ],
+    "pgvector.django.bit 26:33 call  super().formfield( form_class=BitFormField if form_class ...": [
+      "Django's Field.formfield calls form_class(...); BitFormField's __init__ is Django's CharField.__init__ (outside), so no package callee (pgvector.md J6)"
+    ],
+    "pgvector.django.extensions 9:29 call  super().__init__('vector', hints=hints)": [
+      "the branch VERSION[0] >= 6 runs for Django 6 and the else branch for earlier releases (both admitted, pgvector.md J8)"
+    ],
+    "pgvector.django.halfvec 39:59 call  self.value_from_object(obj)": [
+      "inherited from the stub base django.db.models.Field"
+    ],
+    "pgvector.django.sparsevec 37:59 call  self.value_from_object(obj)": [
+      "inherited from the stub base django.db.models.Field"
+    ],
+    "pgvector.django.sparsevec 61:33 call  super().to_python(value)": [
+      "no edge to SparseVector.__eq__ or __repr__ (referee's ruling on audit Q1): a disabled form field would pass its SparseVector initial value here, and CharField.to_python would compare and str() it, but a SparseVector is not an admitted input of this cleaning parameter (the tests give it only for rendering; cleaning gets strs); pgvector.md J13"
+    ],
+    "pgvector.django.vector 39:59 call  self.value_from_object(obj)": [
+      "inherited from the stub base django.db.models.Field"
+    ],
+    "pgvector.halfvec 102:24 call  cls(value)": [
+      "cls is HalfVector: the package calls the private _to_db only as HalfVector._to_db"
+    ],
+    "pgvector.peewee.bit 16:61 call  self.to_value(vector)": [
+      "inherited from the stub base peewee.Field; a missing module calls nothing back (Field.to_value does not reach the package's db_value here)"
+    ],
+    "pgvector.peewee.halfvec 23:61 call  self.to_value(vector)": [
+      "inherited from the stub base peewee.Field; a missing module calls nothing back"
+    ],
+    "pgvector.peewee.sparsevec 23:61 call  self.to_value(vector)": [
+      "inherited from the stub base peewee.Field; a missing module calls nothing back"
+    ],
+    "pgvector.peewee.vector 23:61 call  self.to_value(vector)": [
+      "inherited from the stub base peewee.Field; a missing module calls nothing back"
+    ],
+    "pgvector.pg8000.register 8:47 call  conn.run(\"SELECT typname, oid FROM pg_type WHERE oid IN (...": [
+      "conn is annotated pg8000.native.Connection"
+    ],
+    "pgvector.pg8000.register 9:21 call  dict(res)": [
+      "the branches that the database's answer decides all run (README, missing modules)"
+    ],
+    "pgvector.psycopg.bit 26:18 call  info.register(context)": [
+      "the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)",
+      "info is annotated psycopg.types.TypeInfo; context is annotated psycopg.BaseConnection (pgvector.md J10)"
+    ],
+    "pgvector.psycopg.bit 29:23 call  type('', (BitDumper,), {'oid': info.oid})": [
+      "creates a subclass of a package dumper; no package __init_subclass__ or metaclass"
+    ],
+    "pgvector.psycopg.bit 33:29 call  adapters.register_dumper(Bit, text_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.bit 34:29 call  adapters.register_dumper(Bit, binary_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.halfvec 30:48 call  data.decode('utf8')": [
+      "data is psycopg's Buffer (bytes, bytearray or memoryview, psycopg's documented loader API; pgvector.md J7); a memoryview was converted to bytes just before"
+    ],
+    "pgvector.psycopg.halfvec 41:18 call  info.register(context)": [
+      "the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)",
+      "info is annotated psycopg.types.TypeInfo (pgvector.md J10)"
+    ],
+    "pgvector.psycopg.halfvec 48:29 call  adapters.register_dumper(HalfVector, text_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.halfvec 49:29 call  adapters.register_dumper(HalfVector, binary_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.halfvec 50:29 call  adapters.register_loader(info.oid, HalfVectorLoader)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.halfvec 51:29 call  adapters.register_loader(info.oid, HalfVectorBinaryLoader)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.sparsevec 30:50 call  data.decode('utf8')": [
+      "data is psycopg's Buffer (bytes, bytearray or memoryview, psycopg's documented loader API; pgvector.md J7); a memoryview was converted to bytes just before"
+    ],
+    "pgvector.psycopg.sparsevec 41:18 call  info.register(context)": [
+      "the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)",
+      "info is annotated psycopg.types.TypeInfo (pgvector.md J10)"
+    ],
+    "pgvector.psycopg.sparsevec 48:29 call  adapters.register_dumper(SparseVector, text_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.sparsevec 49:29 call  adapters.register_dumper(SparseVector, binary_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.sparsevec 50:29 call  adapters.register_loader(info.oid, SparseVectorLoader)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.sparsevec 51:29 call  adapters.register_loader(info.oid, SparseVectorBinaryLoader)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 37:44 call  data.decode('utf8')": [
+      "data is psycopg's Buffer (bytes, bytearray or memoryview, psycopg's documented loader API; pgvector.md J7); a memoryview was converted to bytes just before"
+    ],
+    "pgvector.psycopg.vector 50:18 call  info.register(context)": [
+      "the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)",
+      "info is annotated psycopg.types.TypeInfo (pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 57:29 call  adapters.register_dumper(Vector, text_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 58:29 call  adapters.register_dumper(Vector, binary_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 59:29 call  adapters.register_dumper('numpy.ndarray', text_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 60:29 call  adapters.register_dumper('numpy.ndarray', binary_dumper)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 61:29 call  adapters.register_loader(info.oid, VectorLoader)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg.vector 62:29 call  adapters.register_loader(info.oid, VectorBinaryLoader)": [
+      "the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)"
+    ],
+    "pgvector.psycopg2.register 11:22 call  conn.cursor(cursor_factory=cursor)": [
+      "conn is the connection argument or the attribute connection of the cursor argument (annotation connection or cursor); a missing module keeps the access path of each (pgvector.md J10)"
+    ],
+    "pgvector.psycopg2.register 15:16 call  cur.execute(\"SELECT typname, oid FROM pg_type WHERE oid I...": [
+      "cur is an instance of the stub that conn.cursor returns"
+    ],
+    "pgvector.sparsevec 106:50 call  arr.tocoo(copy=False)": [
+      "arr is a SciPy sparse array or matrix: the annotation sparray or spmatrix and the isinstance test of is_sparse_array admit the fourteen concrete formats, named one by one (pgvector.md J4)"
+    ],
+    "pgvector.sparsevec 182:24 call  cls(value)": [
+      "cls is SparseVector: the package calls the private _to_db only as SparseVector._to_db"
+    ],
+    "pgvector.sqlalchemy.bit 19:27 call  self.op('<~>', return_type=Float)": [
+      "the base TypeDecorator.Comparator[Any] is the stub class TypeDecorator.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.bit 19:53 call  self.op('<~>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.bit 22:53 call  self.op('<%>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.halfvec 13:25 call  super().__init__()": [
+      "the base UserDefinedType[Any] is the stub class UserDefinedType (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.halfvec 27:74 call  self._string._cached_literal_processor(dialect)": [
+      "_string is the class attribute String(), an instance of the stub sqlalchemy.types.String"
+    ],
+    "pgvector.sqlalchemy.halfvec 30:44 call  string_literal_processor(HalfVector._to_db(value))": [
+      "string_literal_processor is the free variable of the enclosing literal_processor: the value that the stub method _cached_literal_processor returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.halfvec 40:27 call  self.op('<->', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.halfvec 40:53 call  self.op('<->', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.halfvec 43:27 call  self.op('<#>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.halfvec 43:53 call  self.op('<#>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.halfvec 46:27 call  self.op('<=>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.halfvec 46:53 call  self.op('<=>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.halfvec 49:27 call  self.op('<+>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.halfvec 49:53 call  self.op('<+>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 13:25 call  super().__init__()": [
+      "the base UserDefinedType[Any] is the stub class UserDefinedType (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 27:74 call  self._string._cached_literal_processor(dialect)": [
+      "_string is the class attribute String(), an instance of the stub sqlalchemy.types.String"
+    ],
+    "pgvector.sqlalchemy.sparsevec 30:44 call  string_literal_processor(SparseVector._to_db(value))": [
+      "string_literal_processor is the free variable of the enclosing literal_processor: the value that the stub method _cached_literal_processor returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 40:27 call  self.op('<->', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 40:53 call  self.op('<->', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 43:27 call  self.op('<#>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 43:53 call  self.op('<#>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 46:27 call  self.op('<=>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 46:53 call  self.op('<=>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 49:27 call  self.op('<+>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.sparsevec 49:53 call  self.op('<+>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.vector 13:25 call  super().__init__()": [
+      "the base UserDefinedType[Any] is the stub class UserDefinedType (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.vector 27:74 call  self._string._cached_literal_processor(dialect)": [
+      "_string is the class attribute String(), an instance of the stub sqlalchemy.types.String"
+    ],
+    "pgvector.sqlalchemy.vector 30:44 call  string_literal_processor(Vector._to_db(value))": [
+      "string_literal_processor is the free variable of the enclosing literal_processor: the value that the stub method _cached_literal_processor returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.vector 40:27 call  self.op('<->', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.vector 40:53 call  self.op('<->', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.vector 43:27 call  self.op('<#>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.vector 43:53 call  self.op('<#>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.vector 46:27 call  self.op('<=>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.vector 46:53 call  self.op('<=>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.sqlalchemy.vector 49:27 call  self.op('<+>', return_type=Float)": [
+      "the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)"
+    ],
+    "pgvector.sqlalchemy.vector 49:53 call  self.op('<+>', return_type=Float)(other)": [
+      "calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)"
+    ],
+    "pgvector.vector 100:24 call  cls(value)": [
+      "cls is Vector: the package calls the private _to_db only as Vector._to_db"
+    ]
+  },
+  "trace": "dynamic/pgvector.json"
+}

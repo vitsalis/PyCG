@@ -1,0 +1,3026 @@
+# Call-site ledger of mss at b7f4d62c6c5dc68fd60d43600f0e91012c8bc2e0.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# mss has no trace: every edge comes from reading (mss.md). Analysed source:
+# src/mss (root src), 19 modules. Python >= 3.9, CPython and PyPy, on the
+# declared Unix family (GNU/Linux among it), macOS and Windows; every platform
+# branch runs (README, "Judgements").
+# Native calls go through ctypes: a call of a foreign function is
+# ctypes.CDLL.__init__._FuncPtr.__call__ (Sublist3r precedent); an errcheck
+# function or a C callback of the package that the foreign call runs is a
+# callee of the package site that makes the foreign call (callback rule, B5).
+default reject mss.linux.xcbgen.Keycode.__eq__, mss.linux.xcbgen.Timestamp.__eq__: no operand of this comparison or `in` test, and no key of this dict or set operation, is a Keycode or a Timestamp: the package never reads Setup.min_keycode/max_keycode, and it only passes timestamps on to XCB requests; the operands are str, bytes, int, float, tuple, list, dict, set, thread, IntEnum and Enum values, XID instances or Visualid instances
+default reject mss.linux.xcbhelpers.XID.__eq__: no operand of this comparison or `in` test, and no key of this dict or set operation, is an XID instance (str, bytes, int, float, tuple, dict, set, thread, IntEnum and Enum values, or Visualid instances); the XID sites (linux/base.py 73:26, 294:49, 369:55) accept the candidate explicitly
+default reject mss.linux.xcbgen.Visualid.__eq__: no operand of this comparison or `in` test, and no key of this dict or set operation, is a Visualid instance; the Visualid sites (linux/base.py 112:38, 458:71, linux/xshmgetimage.py 175:71) accept the candidate explicitly
+default reject mss.linux.xcbhelpers.XID.__hash__, mss.linux.xcbgen.Keycode.__hash__, mss.linux.xcbgen.Timestamp.__hash__, mss.linux.xcbgen.Visualid.__hash__: no XID, Keycode, Timestamp or Visualid instance is ever hashed: none is a key of a dict or a member of a set (the keys and members are str, int, float, thread objects, IntEnum members and tuples), and the hash() calls hash ints
+default reject mss.base._PlatformSpecific.__repr__, mss.darwin.CGPoint.__repr__, mss.darwin.CGRect.__repr__, mss.darwin.CGSize.__repr__, mss.screenshot.ScreenShot.__repr__: no value formatted, printed or converted to str at this site is one of these objects (the values are str, bytes, int, float, bool, None, dicts of such values, tuples of ints, exceptions or client values); the package never formats a _PlatformSpecific or a ScreenShot; CGRect.__repr__ formats its CGPoint and CGSize fields and accepts those candidates explicitly
+default reject mss.linux.xcbhelpers.XProtoError.__str__, mss.linux.xlib.XError.__str__: no value formatted, printed or converted to str at this site is an XProtoError or an Xlib XError, and super().__str__() in an exception class reaches Exception.__str__; the str(arg) of _shm_report_issue (linux/xshmgetimage.py) and the print of the caught exception in mss.__main__ accept the candidates explicitly
+default reject mss.base.MSS.__enter__, mss.base.MSS.__exit__: the context manager of this with statement is a threading lock, a contextlib.suppress object, a memoryview or a file object, not an MSS; the one with statement on an MSS (mss.__main__ 102:14) accepts the candidates explicitly
+
+== mss.__main__
+
+[mss.__main__]
+122:17 call  sys.exit(main())
+    -> sys.exit
+122:22 call  main()
+    -> mss.__main__.main
+124:14 call  print("[ERROR]", exc)
+    -> <builtin>.print
+    -> mss.linux.xcbhelpers.XProtoError.__str__
+    -> mss.linux.xlib.XError.__str__
+    note: print calls str() on the ScreenShotError that main() re-raises; on GNU/Linux it can be an Xlib XError (_validate_x11) or an XProtoError (the XCB backends), which define __str__; the other ScreenShotError classes inherit Exception.__str__
+125:17 call  sys.exit(1)
+    -> sys.exit
+
+[mss.__main__._backend_cli_choices]
+16:30 call  platform.system()
+    -> platform.system
+16:38 call  platform.system().lower()
+    -> <builtin>.str.lower
+
+[mss.__main__.main]
+34:43 call  _backend_cli_choices()
+    -> mss.__main__._backend_cli_choices
+36:30 call  ArgumentParser(prog="mss", exit_on_error=False)
+    -> argparse.ArgumentParser
+37:26 call  cli_args.add_argument( "-c", "--coordinates", default="",...
+    -> argparse.ArgumentParser.add_argument
+44:26 call  cli_args.add_argument( "-l", "--level", default=6, type=i...
+    -> argparse.ArgumentParser.add_argument
+49:21 call  list(range(10))
+    -> <builtin>.list
+49:27 call  range(10)
+    -> <builtin>.range
+52:26 call  cli_args.add_argument("-m", "--monitor", default=0, type=...
+    -> argparse.ArgumentParser.add_argument
+53:26 call  cli_args.add_argument("-o", "--output", default="monitor-...
+    -> argparse.ArgumentParser.add_argument
+54:26 call  cli_args.add_argument("--with-cursor", default=None, acti...
+    -> argparse.ArgumentParser.add_argument
+55:26 call  cli_args.add_argument( "-q", "--quiet", default=False, ac...
+    -> argparse.ArgumentParser.add_argument
+62:26 call  cli_args.add_argument( "-b", "--backend", default="defaul...
+    -> argparse.ArgumentParser.add_argument
+65:26 call  cli_args.add_argument("-v", "--version", action="version"...
+    -> argparse.ArgumentParser.add_argument
+68:38 call  cli_args.parse_args(args or None)
+    -> argparse.ArgumentParser.parse_args
+    note: the type converters str and int are builtins that argparse calls back: no edge
+72:29 call  cli_args.print_usage(sys.stderr)
+    -> argparse.ArgumentParser.print_usage
+73:14 call  print(f"{cli_args.prog}: error: {e}", file=sys.stderr)
+    -> <builtin>.print
+78:65 call  options.coordinates.split(",")
+    -> <builtin>.str.split
+    note: options.coordinates is the str of --coordinates (type=str)
+80:18 call  print("Coordinates syntax: top, left, width, height")
+    -> <builtin>.print
+84:23 call  int(top)
+    -> <builtin>.int
+85:24 call  int(left)
+    -> <builtin>.int
+86:25 call  int(width)
+    -> <builtin>.int
+87:26 call  int(height)
+    -> <builtin>.int
+92:16 getattr  options.with_cursor
+    reject mss.base.MSS.with_cursor: options is the argparse Namespace that parse_args returns, not an MSS
+92:59 call  platform.system()
+    -> platform.system
+92:67 call  platform.system().lower()
+    -> <builtin>.str.lower
+94:18 call  print("[WARNING] --with-cursor is only supported on Linux...
+    -> <builtin>.print
+98:16 getattr  options.with_cursor
+    reject mss.base.MSS.with_cursor: options is the argparse Namespace that parse_args returns, not an MSS
+99:45 getattr  options.with_cursor
+    reject mss.base.MSS.with_cursor: options is the argparse Namespace that parse_args returns, not an MSS
+102:14 with  MSS(**mss_kwargs)
+    -> mss.base.MSS.__enter__
+    -> mss.base.MSS.__exit__
+    note: the context manager is the mss.base.MSS that this with statement builds (mss re-exports mss.base.MSS)
+102:17 call  MSS(**mss_kwargs)
+    -> mss.base.MSS.__init__
+    reject mss.darwin.MSS.__init__, mss.linux.MSS.__init__, mss.windows.MSS.__init__: MSS is mss.base.MSS (from mss import MSS; mss/__init__.py imports it from mss.base), not one of the deprecated platform subclasses
+104:54 call  grab_kwargs["output"].format(**grab_kwargs["mon"])
+    -> <builtin>.str.format
+    note: the output template is a str (the option or the literal of line 90); the fields name the ints of the coordinates dict
+105:35 call  sct.grab(grab_kwargs["mon"])
+    -> mss.base.MSS.grab
+    reject mss.base.MSSImplementation.grab, mss.darwin.MSSImplDarwin.grab, mss.linux.xgetimage.MSSImplXGetImage.grab, mss.linux.xlib.MSSImplXlib.grab, mss.linux.xshmgetimage.MSSImplXShmGetImage.grab, mss.windows.gdi.MSSImplGdi.grab: sct is the mss.base.MSS that MSS.__enter__ returns (self), not an implementation object
+106:23 call  to_png(sct_img.rgb, sct_img.size, level=options.level, ou...
+    -> mss.tools.to_png
+    reject mss.screenshot.ScreenShot.rgb: the property runs at its load (106:32); its bytes are the argument
+106:32 getattr  sct_img.rgb
+    -> mss.screenshot.ScreenShot.rgb
+    note: sct_img is what MSS.grab returns: an instance of cls_image, which the command line leaves as ScreenShot (the cursor merge returns the same screenshot)
+108:26 call  print(os.path.realpath(output))
+    -> <builtin>.print
+108:43 call  os.path.realpath(output)
+    -> os.path.realpath
+110:42 call  sct.save(**grab_kwargs)
+    -> mss.base.MSS.save
+112:30 call  print(os.path.realpath(file_name))
+    -> <builtin>.print
+112:47 call  os.path.realpath(file_name)
+    -> os.path.realpath
+
+== mss.base
+
+[mss.base]
+46:12 call  Lock()
+    -> threading.Lock
+93:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+97:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+105:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+118:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+201:40 call  _PlatformSpecific(False)
+    -> mss.base._PlatformSpecific.__init__
+202:36 call  _PlatformSpecific(None)
+    -> mss.base._PlatformSpecific.__init__
+203:41 call  _PlatformSpecific(32)
+    -> mss.base._PlatformSpecific.__init__
+323:6 decorator  @property
+    -> <builtin>.property
+352:6 decorator  @property
+    -> <builtin>.property
+434:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+482:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+509:6 decorator  @property
+    -> <builtin>.property
+526:6 decorator  @property
+    -> <builtin>.property
+536:6 decorator  @property
+    -> <builtin>.property
+
+[mss.base._PlatformSpecific.__init__]
+58:31 call  str(sphinx_repr)
+    -> <builtin>.str
+    note: the package makes the three _PlatformSpecific objects (base.py:201-203) with False, None and 32 (private class)
+
+[mss.base.MSSImplementation._cfactory]
+128:23 call  getattr(attr, func)
+    -> <builtin>.getattr
+
+[mss.base._choose_impl]
+147:26 call  platform.system()
+    -> platform.system
+147:34 call  platform.system().lower()
+    -> <builtin>.str.lower
+152:29 call  MSSImplDarwin(**kwargs)
+    -> mss.darwin.MSSImplDarwin.__init__
+    reject mss.base.MSSImplementation.__init__: MSSImplDarwin defines its own __init__, which reaches MSSImplementation.__init__ through super() (darwin.py:141)
+158:33 call  choose_impl_linux(**kwargs)
+    -> mss.linux.choose_impl
+    reject mss.windows.choose_impl: choose_impl_linux is mss.linux.choose_impl (import at base.py:155)
+164:35 call  choose_impl_windows(**kwargs)
+    -> mss.windows.choose_impl
+    reject mss.linux.choose_impl: choose_impl_windows is mss.windows.choose_impl (import at base.py:161)
+167:26 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+[mss.base.MSS.__init__]
+217:33 call  platform.system()
+    -> platform.system
+223:26 call  isinstance(value, _PlatformSpecific)
+    -> <builtin>.isinstance
+228:30 call  warnings.warn( f"{name} is only available on {', '.join(s...
+    -> warnings.warn
+229:61 call  ', '.join(supported_platforms)
+    -> <builtin>.str.join
+237:53 call  _choose_impl( backend=backend, **impl_kwargs, )
+    -> mss.base._choose_impl
+255:26 call  Lock()
+    -> threading.Lock
+
+[mss.base.MSS.__exit__]
+265:19 call  self.close()
+    -> mss.base.MSS.close
+    reject mss.base.MSSImplementation.close, mss.linux.base.MSSImplXCBBase.close, mss.linux.xlib.MSSImplXlib.close, mss.linux.xshmgetimage.MSSImplXShmGetImage.close, mss.windows.gdi.MSSImplGdi.close: self is an MSS (or a deprecated platform subclass, which inherits close), not an implementation object
+
+[mss.base.MSS.close]
+285:29 call  self._impl.close()
+    -> mss.base.MSSImplementation.close
+    -> mss.linux.base.MSSImplXCBBase.close
+    -> mss.linux.xlib.MSSImplXlib.close
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage.close
+    -> mss.windows.gdi.MSSImplGdi.close
+    reject mss.base.MSS.close: self._impl is the implementation object that _choose_impl makes, not an MSS
+    note: self._impl is one of MSSImplDarwin (inherits MSSImplementation.close), MSSImplXlib, MSSImplXGetImage (inherits MSSImplXCBBase.close), MSSImplXShmGetImage and MSSImplGdi; every platform runs
+
+[mss.base.MSS.grab]
+299:22 call  isinstance(monitor, tuple)
+    -> <builtin>.isinstance
+309:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+312:54 call  self._impl.grab(monitor)
+    -> mss.darwin.MSSImplDarwin.grab
+    -> mss.linux.xgetimage.MSSImplXGetImage.grab
+    -> mss.linux.xlib.MSSImplXlib.grab
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage.grab
+    -> mss.windows.gdi.MSSImplGdi.grab
+    reject mss.base.MSS.grab: self._impl is an implementation object, not an MSS
+    reject mss.base.MSSImplementation.grab: abstract; every implementation class that _choose_impl makes overrides it
+313:26 call  isinstance(img_data_and_maybe_size, tuple)
+    -> <builtin>.isinstance
+315:44 call  self.cls_image(img_data, monitor, size=size)
+    -> mss.screenshot.ScreenShot.__init__
+    note: cls_image is ScreenShot (base.py:243); the documented custom_cls_image example assigns a client subclass, which is client code (B5)
+318:44 call  self.cls_image(img_data, monitor)
+    -> mss.screenshot.ScreenShot.__init__
+    note: cls_image is ScreenShot (base.py:243); the documented custom_cls_image example assigns a client subclass, which is client code (B5)
+319:27 getattr  self._impl.with_cursor
+    reject mss.base.MSS.with_cursor: self._impl is an implementation object; with_cursor is a slot of MSSImplementation there
+319:71 call  self._impl.cursor()
+    -> mss.linux.base.MSSImplXCBBase.cursor
+    -> mss.linux.xlib.MSSImplXlib.cursor
+    reject mss.base.MSSImplementation.cursor: abstract; every implementation class overrides it
+    reject mss.darwin.MSSImplDarwin.cursor, mss.windows.gdi.MSSImplGdi.cursor: the call runs only when self._impl.with_cursor is true, and the macOS and Windows implementations that _choose_impl makes always have with_cursor False (MSSImplementation.__init__ default; MSS passes with_cursor only on Linux, base.py:219), B1
+320:35 call  self._merge(screenshot, cursor)
+    -> mss.base.MSS._merge
+
+[mss.base.MSS.monitors]
+348:45 getattr  self._impl.monitors
+    reject mss.base.MSS.monitors: self._impl is an implementation object, whose monitors is a method
+348:53 call  self._impl.monitors()
+    -> mss.darwin.MSSImplDarwin.monitors
+    -> mss.linux.base.MSSImplXCBBase.monitors
+    -> mss.linux.xlib.MSSImplXlib.monitors
+    -> mss.windows.gdi.MSSImplGdi.monitors
+    reject mss.base.MSS.monitors: self._impl is an implementation object, not an MSS
+    reject mss.base.MSSImplementation.monitors: abstract; every implementation class overrides it (the two XCB classes inherit MSSImplXCBBase.monitors)
+
+[mss.base.MSS.primary_monitor]
+364:25 getattr  self.monitors
+    -> mss.base.MSS.monitors
+365:15 call  len(monitors)
+    -> <builtin>.len
+367:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+369:20 call  next( ( monitor for monitor in monitors[1:] # Skip the "a...
+    -> <builtin>.next
+373:31 call  monitor.get("is_primary", False)
+    -> <builtin>.dict.get
+    note: the monitors are the dicts that the implementations build
+
+[mss.base.MSS.save]
+396:25 getattr  self.monitors
+    -> mss.base.MSS.monitors
+399:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+403:42 call  enumerate(monitors[1:], 1)
+    -> <builtin>.enumerate
+404:38 call  output.format(mon=idx, date=datetime.now(UTC) if "{date" ...
+    -> <builtin>.str.format
+    note: output is the str template of the client (default "monitor-{mon}.png"); the values are ints, strs, bools and a datetime
+404:65 call  datetime.now(UTC)
+    -> datetime.datetime.now
+405:28 call  callable(callback)
+    -> <builtin>.callable
+406:29 call  callback(fname)
+    reject mss.windows.gdi.MSSImplGdi.monitors.callback: a local function of MSSImplGdi.monitors that only EnumDisplayMonitors receives; save's callback is the client's (the documented example passes its own on_exists)
+    note: callback is a client callable (docs/source/examples/callback.py); no package value is documented or passed for it: no callee (B5)
+407:32 call  self.grab(monitor)
+    -> mss.base.MSS.grab
+    reject mss.base.MSSImplementation.grab, mss.darwin.MSSImplDarwin.grab, mss.linux.xgetimage.MSSImplXGetImage.grab, mss.linux.xlib.MSSImplXlib.grab, mss.linux.xshmgetimage.MSSImplXShmGetImage.grab, mss.windows.gdi.MSSImplGdi.grab: self is an MSS, not an implementation object
+408:23 call  to_png(sct.rgb, sct.size, level=self.compression_level, o...
+    -> mss.tools.to_png
+    reject mss.screenshot.ScreenShot.rgb: the property runs at its load (408:28); its bytes are the argument
+408:28 getattr  sct.rgb
+    -> mss.screenshot.ScreenShot.rgb
+    note: sct is what MSS.grab returns: a ScreenShot (cls_image) or the client's cls_image instance (opaque)
+418:38 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+420:35 call  output.format(mon=mon, date=datetime.now(UTC) if "{date" ...
+    -> <builtin>.str.format
+    note: output is the str template of the client; the values are ints, strs, bools and a datetime
+420:62 call  datetime.now(UTC)
+    -> datetime.datetime.now
+421:24 call  callable(callback)
+    -> <builtin>.callable
+422:25 call  callback(output)
+    reject mss.windows.gdi.MSSImplGdi.monitors.callback: a local function of MSSImplGdi.monitors that only EnumDisplayMonitors receives; save's callback is the client's
+    note: callback is a client callable (docs/source/examples/callback.py); no package value is documented or passed for it: no callee (B5)
+423:28 call  self.grab(monitor)
+    -> mss.base.MSS.grab
+    reject mss.base.MSSImplementation.grab, mss.darwin.MSSImplDarwin.grab, mss.linux.xgetimage.MSSImplXGetImage.grab, mss.linux.xlib.MSSImplXlib.grab, mss.linux.xshmgetimage.MSSImplXShmGetImage.grab, mss.windows.gdi.MSSImplGdi.grab: self is an MSS, not an implementation object
+424:19 call  to_png(sct.rgb, sct.size, level=self.compression_level, o...
+    -> mss.tools.to_png
+    reject mss.screenshot.ScreenShot.rgb: the property runs at its load (424:24); its bytes are the argument
+424:24 getattr  sct.rgb
+    -> mss.screenshot.ScreenShot.rgb
+    note: sct is what MSS.grab returns: a ScreenShot (cls_image) or the client's cls_image instance (opaque)
+
+[mss.base.MSS.shot]
+431:35 call  kwargs.get("mon", 1)
+    -> <builtin>.dict.get
+432:20 call  next(self.save(**kwargs))
+    -> <builtin>.next
+432:30 call  self.save(**kwargs)
+    -> mss.base.MSS.save
+
+[mss.base.MSS._merge]
+457:36 call  max(cy2, 0)
+    -> <builtin>.max
+458:36 call  max(cx2, 0)
+    -> <builtin>.max
+459:20 call  range(3)
+    -> <builtin>.range
+461:29 call  range(start_count_y, stop_count_y, 4)
+    -> <builtin>.range
+465:33 call  range(start_count_x, stop_count_x, 4)
+    -> <builtin>.range
+478:51 call  int(cursor_raw[cpos + i] * alpha2 + screen_raw[spos + i] ...
+    -> <builtin>.int
+
+[mss.base.MSS._cfactory]
+492:23 call  getattr(attr, func)
+    -> <builtin>.getattr
+
+[mss.base.MSS.performance_status]
+524:27 getattr  self._impl.performance_status
+    reject mss.base.MSS.performance_status: self._impl is an implementation object; performance_status is a slot of MSSImplementation there
+
+[mss.base.MSS.max_displays]
+534:27 getattr  self._impl.max_displays
+    reject mss.base.MSS.max_displays: self._impl is an implementation object; max_displays is a slot of MSSImplDarwin (other implementations raise AttributeError)
+
+[mss.base.MSS.with_cursor]
+548:27 getattr  self._impl.with_cursor
+    reject mss.base.MSS.with_cursor: self._impl is an implementation object; with_cursor is a slot of MSSImplementation there
+
+== mss.darwin
+
+[mss.darwin]
+76:30 call  cgfloat()
+    -> mss.darwin.cgfloat
+76:48 call  cgfloat()
+    -> mss.darwin.cgfloat
+85:34 call  cgfloat()
+    -> mss.darwin.cgfloat
+85:57 call  cgfloat()
+    -> mss.darwin.cgfloat
+110:53 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+113:58 call  POINTER(c_uint32)
+    -> ctypes.POINTER
+113:77 call  POINTER(c_uint32)
+    -> ctypes.POINTER
+
+[mss.darwin.MSS.__init__]
+60:22 call  warnings.warn( "mss.darwin.MSS is deprecated and will be ...
+    -> warnings.warn
+65:14 call  super()
+    -> <builtin>.super
+65:25 call  super().__init__(**kwargs)
+    -> mss.base.MSS.__init__
+    reject *: super() in mss.darwin.MSS resolves to its base mss.base.MSS
+
+[mss.darwin.CGPoint.__repr__]
+79:23 call  type(self)
+    -> <builtin>.type
+
+[mss.darwin.CGSize.__repr__]
+88:23 call  type(self)
+    -> <builtin>.type
+88:52 getattr  self.width
+    reject mss.screenshot.ScreenShot.width: self is a CGSize; width is a ctypes field (a float)
+88:72 getattr  self.height
+    reject mss.screenshot.ScreenShot.height: self is a CGSize; height is a ctypes field (a float)
+
+[mss.darwin.CGRect.__repr__]
+97:23 call  type(self)
+    -> <builtin>.type
+97:40 format  {self.origin}
+    -> mss.darwin.CGPoint.__repr__
+    note: origin is a CGPoint field; ctypes returns a CGPoint instance, and its format runs object.__format__, str() and CGPoint.__repr__
+97:54 format  {self.size}
+    -> mss.darwin.CGSize.__repr__
+    note: size is a CGSize field; its format runs CGSize.__repr__
+
+[mss.darwin.MSSImplDarwin.__init__]
+141:14 call  super()
+    -> <builtin>.super
+141:25 call  super().__init__()
+    -> mss.base.MSSImplementation.__init__
+    reject *: super() in MSSImplDarwin resolves to its base MSSImplementation
+145:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+151:27 call  self._init_library()
+    -> mss.darwin.MSSImplDarwin._init_library
+152:29 call  self._set_cfunctions()
+    -> mss.darwin.MSSImplDarwin._set_cfunctions
+    reject mss.linux.xlib.MSSImplXlib._set_cfunctions, mss.windows.gdi.MSSImplGdi._set_cfunctions: self is an MSSImplDarwin
+
+[mss.darwin.MSSImplDarwin._init_library]
+156:24 call  float(".".join(mac_ver()[0].split(".")[:2]))
+    -> <builtin>.float
+156:33 call  ".".join(mac_ver()[0].split(".")[:2])
+    -> <builtin>.str.join
+156:41 call  mac_ver()
+    -> platform.mac_ver
+156:52 call  mac_ver()[0].split(".")
+    -> <builtin>.str.split
+158:52 call  ctypes.util.find_library("CoreGraphics")
+    -> ctypes.util.find_library
+165:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+167:44 call  ctypes.cdll.LoadLibrary(coregraphics)
+    -> ctypes.LibraryLoader.LoadLibrary
+
+[mss.darwin.MSSImplDarwin._set_cfunctions]
+173:64 call  CFUNCTIONS.items()
+    -> <builtin>.dict.items
+174:21 call  cfactory(attrs[attr], func, argtypes, restype)
+    -> mss.base.MSSImplementation._cfactory
+    exclude mss.base.MSS._cfactory: cfactory is self._cfactory of an MSSImplDarwin, the staticmethod of MSSImplementation (base.py:118), not the copy on MSS
+    note: cfactory = self._cfactory (darwin.py:171)
+
+[mss.darwin.MSSImplDarwin.monitors]
+186:30 call  CGRect()
+    -> ctypes.Structure.__init__
+    note: CGRect is a ctypes Structure without its own __init__; the first __init__ of its MRO is that of ctypes.Structure
+187:24 call  monitors.append({})
+    -> <builtin>.list.append
+190:33 call  c_uint32(0)
+    -> ctypes.c_uint32
+191:44 getattr  self.max_displays
+    reject mss.base.MSS.max_displays: self is an MSSImplDarwin; max_displays is its slot
+191:57 call  (c_uint32 * self.max_displays)()
+    note: the callee is the array class that c_uint32 * n makes at run time; no admitted runtime gives it a public class path (its generated name c_uint_Array_<n> is no module attribute), so no callee: a ctypes-generated pointer or array class is named through a public class path rooted outside the analysed package when an admitted runtime provides one; otherwise the site keeps a note and no callee (mss.md, J2)
+192:36 call  core.CGGetActiveDisplayList(self.max_displays, active_dis...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    reject mss.base.MSS.max_displays: the argument is the int slot of the MSSImplDarwin, loaded at 192:42
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+192:42 getattr  self.max_displays
+    reject mss.base.MSS.max_displays: self is an MSSImplDarwin; max_displays is its slot
+192:85 call  ctypes.byref(display_count)
+    -> ctypes.byref
+193:25 call  range(display_count.value)
+    -> <builtin>.range
+195:40 call  core.CGDisplayBounds(display)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+196:42 call  core.CGRectStandardize(rect)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+197:39 getattr  rect.size.width
+    reject mss.screenshot.ScreenShot.width: rect.size is the CGSize field of a CGRect; width is a ctypes field
+197:56 getattr  rect.size.height
+    reject mss.screenshot.ScreenShot.height: rect.size is the CGSize field of a CGRect; height is a ctypes field
+202:38 call  core.CGDisplayRotation(display)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+205:28 call  monitors.append( { "left": int_(rect.origin.x), "top": in...
+    -> <builtin>.list.append
+207:33 call  int_(rect.origin.x)
+    -> <builtin>.int
+    note: int_ = int (darwin.py:178)
+208:32 call  int_(rect.origin.y)
+    -> <builtin>.int
+    note: int_ = int (darwin.py:178)
+209:34 call  int_(width)
+    -> <builtin>.int
+    note: int_ = int (darwin.py:178)
+210:35 call  int_(height)
+    -> <builtin>.int
+    note: int_ = int (darwin.py:178)
+215:44 call  core.CGRectUnion(all_monitors, rect)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+219:25 call  int_(all_monitors.origin.x)
+    -> <builtin>.int
+    note: int_ = int (darwin.py:178)
+220:24 call  int_(all_monitors.origin.y)
+    -> <builtin>.int
+    note: int_ = int (darwin.py:178)
+221:26 call  int_(all_monitors.size.width)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.width: the argument is a float field of a CGSize, loaded at 221:45
+    note: int_ = int (darwin.py:178)
+221:45 getattr  all_monitors.size.width
+    reject mss.screenshot.ScreenShot.width: all_monitors.size is the CGSize field of a CGRect; width is a ctypes field
+222:27 call  int_(all_monitors.size.height)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.height: the argument is a float field of a CGSize, loaded at 222:46
+    note: int_ = int (darwin.py:178)
+222:46 getattr  all_monitors.size.height
+    reject mss.screenshot.ScreenShot.height: all_monitors.size is the CGSize field of a CGRect; height is a ctypes field
+
+[mss.darwin.MSSImplDarwin.grab]
+230:22 call  CGRect((monitor["left"], monitor["top"]), (monitor["width...
+    -> ctypes.Structure.__init__
+    note: ctypes.Structure.__init__ builds the nested CGPoint and CGSize from the tuples; their __init__ is that of ctypes.Structure too, an implicit call of library code (no edge)
+232:49 call  core.CGWindowListCreateImage(rect, 1, 0, IMAGE_OPTIONS)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+235:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+237:37 call  core.CGImageGetWidth(image_ref)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+238:39 call  core.CGImageGetHeight(image_ref)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+241:47 call  core.CGImageGetDataProvider(image_ref)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+242:52 call  core.CGDataProviderCopyData(prov)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+243:45 call  core.CFDataGetBytePtr(copy_data)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+244:43 call  core.CFDataGetLength(copy_data)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+245:30 call  ctypes.cast(data_ref, POINTER(c_ubyte * buf_len))
+    -> ctypes.cast
+245:48 call  POINTER(c_ubyte * buf_len)
+    -> ctypes.POINTER
+246:29 call  bytearray(raw.contents)
+    -> <builtin>.bytearray
+249:55 call  core.CGImageGetBytesPerRow(image_ref)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+250:58 call  core.CGImageGetBitsPerPixel(image_ref)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+254:36 call  bytearray()
+    -> <builtin>.bytearray
+255:33 call  range(height)
+    -> <builtin>.range
+258:35 call  cropped.extend(data[start:end])
+    -> <builtin>.bytearray.extend
+262:31 call  core.CFRelease(copy_data)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+263:27 call  core.CFRelease(image_ref)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: macOS only; no errcheck is set on the CoreGraphics functions
+265:26 call  Size(width, height)
+    note: Size is a NamedTuple class (models.py:29): its __new__ is generated code and its __init__ is object.__init__, so the call adds no edge (README, "Callees outside the package")
+
+== mss.exception
+
+[mss.exception.ScreenShotError.__init__]
+13:14 call  super()
+    -> <builtin>.super
+13:25 call  super().__init__(message)
+    -> <builtin>.Exception.__init__
+    reject *: super() in ScreenShotError resolves to its base Exception, outside the package
+
+== mss.factory
+
+[mss.factory.mss]
+17:18 call  warnings.warn( "mss.mss is deprecated and will be removed...
+    -> warnings.warn
+22:15 call  MSS(**kwargs)
+    -> mss.base.MSS.__init__
+    reject mss.darwin.MSS.__init__, mss.linux.MSS.__init__, mss.windows.MSS.__init__: MSS is mss.base.MSS (factory.py:7)
+
+== mss.linux
+
+[mss.linux.MSS.__init__]
+38:22 call  warnings.warn( "mss.linux.MSS is deprecated and will be r...
+    -> warnings.warn
+43:14 call  super()
+    -> <builtin>.super
+43:25 call  super().__init__(**kwargs)
+    -> mss.base.MSS.__init__
+    reject *: super() in mss.linux.MSS resolves to its base mss.base.MSS
+
+[mss.linux.choose_impl]
+76:28 call  backend.lower()
+    -> <builtin>.str.lower
+    note: backend is a str (annotation; MSS passes its str backend)
+80:27 call  MSSImplXlib(**kwargs)
+    -> mss.linux.xlib.MSSImplXlib.__init__
+    reject mss.base.MSSImplementation.__init__: MSSImplXlib defines its own __init__
+87:32 call  MSSImplXGetImage(**kwargs)
+    -> mss.linux.base.MSSImplXCBBase.__init__
+    reject mss.base.MSSImplementation.__init__: the first __init__ of MSSImplXGetImage's MRO is MSSImplXCBBase.__init__
+91:35 call  MSSImplXShmGetImage(**kwargs)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage.__init__
+    reject mss.base.MSSImplementation.__init__, mss.linux.base.MSSImplXCBBase.__init__: MSSImplXShmGetImage defines its own __init__
+94:26 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+== mss.linux.base
+
+[mss.linux.base]
+284:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[mss.linux.base.MSSImplXCBBase.__init__]
+46:14 call  super()
+    -> <builtin>.super
+46:25 call  super().__init__(with_cursor=with_cursor)
+    -> mss.base.MSSImplementation.__init__
+    reject *: super() in MSSImplXCBBase resolves to its base MSSImplementation
+50:24 call  isinstance(display, str)
+    -> <builtin>.isinstance
+51:37 call  display.encode("utf-8")
+    -> <builtin>.str.encode
+54:49 call  xcb.connect(display)
+    -> mss.linux.xcb.connect
+57:34 call  xcb.get_setup(self.conn)
+    -> mss.linux.xcb.get_setup
+58:34 call  xcb.setup_roots(xcb_setup)
+    -> mss.linux.xcbgen.setup_roots
+    note: mss.linux.xcb re-exports setup_roots from xcbgen
+73:26 op  self.root == self.drawable
+    -> mss.linux.xcbhelpers.XID.__eq__
+    note: both operands are the root field of the XCB Screen, a Window (XID subclass); ctypes returns the subclass instance, so == runs XID.__eq__
+79:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+83:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+85:48 call  xcb.setup_pixmap_formats(xcb_setup)
+    -> mss.linux.xcbgen.setup_pixmap_formats
+90:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+97:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+102:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+105:51 call  xcb.screen_allowed_depths(self.pref_screen)
+    -> mss.linux.xcbgen.screen_allowed_depths
+110:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+111:45 call  xcb.depth_visuals(xcb_depth)
+    -> mss.linux.xcbgen.depth_visuals
+112:38 op  visual_info.visual_id == self.drawable_visual_id
+    -> mss.linux.xcbgen.Visualid.__eq__
+    note: both operands are Visualid fields (Visualtype.visual_id, Screen.root_visual)
+116:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+119:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+130:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+[mss.linux.base.MSSImplXCBBase.close]
+135:27 call  xcb.disconnect(self.conn)
+    -> mss.linux.xcb.disconnect
+
+[mss.linux.base.MSSImplXCBBase.monitors]
+148:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+152:24 call  monitors.append(self._root_monitor())
+    -> <builtin>.list.append
+152:43 call  self._root_monitor()
+    -> mss.linux.base.MSSImplXCBBase._root_monitor
+154:48 call  self._randr_get_version()
+    -> mss.linux.base.MSSImplXCBBase._randr_get_version
+170:56 call  self._randr_get_primary_output(randr_version)
+    -> mss.linux.base.MSSImplXCBBase._randr_get_primary_output
+171:46 call  self._randr_get_edid_atom()
+    -> mss.linux.base.MSSImplXCBBase._randr_get_edid_atom
+174:59 call  self._monitors_from_randr_monitors(primary_output, edid_a...
+    -> mss.linux.base.MSSImplXCBBase._monitors_from_randr_monitors
+176:56 call  self._monitors_from_randr_crtcs(randr_version, primary_ou...
+    -> mss.linux.base.MSSImplXCBBase._monitors_from_randr_crtcs
+
+[mss.linux.base.MSSImplXCBBase._root_monitor]
+183:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+185:37 call  xcb.get_geometry(self.conn, self.root)
+    -> mss.linux.xcbgen.get_geometry
+189:32 getattr  root_geom.width
+    reject mss.screenshot.ScreenShot.width: root_geom is a GetGeometryReply structure; width is a ctypes field
+190:33 getattr  root_geom.height
+    reject mss.screenshot.ScreenShot.height: root_geom is a GetGeometryReply structure; height is a ctypes field
+
+[mss.linux.base.MSSImplXCBBase._randr_get_version]
+196:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+198:48 call  xcb.get_extension_data(self.conn, LIB.randr_id)
+    -> mss.linux.xcb.get_extension_data
+202:53 call  xcb.randr_query_version(self.conn, xcb.RANDR_MAJOR_VERSIO...
+    -> mss.linux.xcbgen.randr_query_version
+
+[mss.linux.base.MSSImplXCBBase._randr_get_primary_output]
+208:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+211:63 call  xcb.randr_get_output_primary(self.conn, self.drawable)
+    -> mss.linux.xcbgen.randr_get_output_primary
+
+[mss.linux.base.MSSImplXCBBase._randr_get_edid_atom]
+220:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+222:36 call  xcb.intern_atom(self.conn, "EDID", only_if_exists=True)
+    -> mss.linux.xcb.intern_atom
+227:31 call  xcb.intern_atom(self.conn, "EdidData", only_if_exists=True)
+    -> mss.linux.xcb.intern_atom
+
+[mss.linux.base.MSSImplXCBBase._randr_output_ids]
+238:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+240:48 call  xcb.randr_get_output_info(self.conn, output, timestamp)
+    -> mss.linux.xcbgen.randr_get_output_info
+243:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+247:57 call  xcb.randr_get_output_info_name(output_info)
+    -> mss.linux.xcbgen.randr_get_output_info_name
+248:29 call  bytes(output_name_arr)
+    -> <builtin>.bytes
+248:53 call  bytes(output_name_arr).decode("utf_8", errors="replace")
+    -> <builtin>.bytes.decode
+251:54 call  xcb.randr_get_output_property( self.conn, # connection ou...
+    -> mss.linux.xcbgen.randr_get_output_property
+262:35 call  bytes(xcb.randr_get_output_property_data(edid_prop))
+    -> <builtin>.bytes
+262:70 call  xcb.randr_get_output_property_data(edid_prop)
+    -> mss.linux.xcbgen.randr_get_output_property_data
+263:39 call  parse_edid(edid_block)
+    -> mss.tools.parse_edid
+264:50 call  edid_data.get("display_name")
+    -> <builtin>.dict.get
+268:47 call  edid_data.get("id_legacy")
+    -> <builtin>.dict.get
+270:51 call  edid_data.get("serial_number")
+    -> <builtin>.dict.get
+271:48 call  str(serial_number)
+    -> <builtin>.str
+    note: serial_number is the int or str that parse_edid stores
+272:54 call  edid_data.get("manufacture_year")
+    -> <builtin>.dict.get
+273:58 call  edid_data.get("manufacture_week")
+    -> <builtin>.dict.get
+277:48 call  edid_data.get("model_year")
+    -> <builtin>.dict.get
+280:48 call  urlencode(edid_params)
+    -> urllib.parse.urlencode
+
+[mss.linux.base.MSSImplXCBBase._choose_randr_output]
+288:15 call  len(outputs)
+    -> <builtin>.len
+290:34 call  ScreenShotError(msg)
+    reject mss.exception.ScreenShotError.__init__: the branch cannot run: the private helper gets only the arrays of randr_monitor_info_outputs and randr_get_crtc_info_outputs, whose callers first require nOutput > 0 (base.py:320) and num_outputs != 0 (353); the array length comes from the *_length accessor, which libxcb generates from the protocol XML as that same field (src/xcbproto/randr.xml:419, 878: <fieldref>num_outputs</fieldref>, <fieldref>nOutput</fieldref>), so len(outputs) is never 0 (B1; Codex round 1, mss.md)
+    note: no callee: the test at 288 cannot be true
+294:49 op  primary_output in outputs
+    -> mss.linux.xcbhelpers.XID.__eq__
+    note: outputs is a ctypes array of RandrOutput (XID subclass) and primary_output a RandrOutput; the array has no __contains__, so `in` iterates it and compares each item with ==, which runs XID.__eq__
+
+[mss.linux.base.MSSImplXCBBase._monitors_from_randr_monitors]
+301:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+305:48 call  xcb.randr_get_monitors(self.conn, self.drawable, 1)
+    -> mss.linux.xcbgen.randr_get_monitors
+307:61 call  xcb.randr_get_monitors_monitors(monitors_reply)
+    -> mss.linux.xcbgen.randr_get_monitors_monitors
+311:40 getattr  randr_monitor.width
+    reject mss.screenshot.ScreenShot.width: randr_monitor is a RandrMonitorInfo structure; width is a ctypes field
+312:41 getattr  randr_monitor.height
+    reject mss.screenshot.ScreenShot.height: randr_monitor is a RandrMonitorInfo structure; height is a ctypes field
+317:35 call  bool(randr_monitor.primary)
+    -> <builtin>.bool
+321:57 call  xcb.randr_monitor_info_outputs(randr_monitor)
+    -> mss.linux.xcbgen.randr_monitor_info_outputs
+322:58 call  self._choose_randr_output(outputs, primary_output)
+    -> mss.linux.base.MSSImplXCBBase._choose_randr_output
+323:50 call  self._randr_output_ids(chosen_output, timestamp, edid_atom)
+    -> mss.linux.base.MSSImplXCBBase._randr_output_ids
+325:28 call  monitors.append(monitor)
+    -> <builtin>.list.append
+
+[mss.linux.base.MSSImplXCBBase._monitors_from_randr_crtcs]
+338:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+343:19 call  hasattr(LIB.randr, "xcb_randr_get_screen_resources_current")
+    -> <builtin>.hasattr
+344:70 call  xcb.randr_get_screen_resources_current(self.conn, self.dr...
+    -> mss.linux.xcbgen.randr_get_screen_resources_current
+345:65 call  xcb.randr_get_screen_resources_current_crtcs(screen_resou...
+    -> mss.linux.xcbgen.randr_get_screen_resources_current_crtcs
+347:62 call  xcb.randr_get_screen_resources(self.conn, self.drawable)
+    -> mss.linux.xcbgen.randr_get_screen_resources
+348:57 call  xcb.randr_get_screen_resources_crtcs(screen_resources)
+    -> mss.linux.xcbgen.randr_get_screen_resources_crtcs
+352:48 call  xcb.randr_get_crtc_info(self.conn, crtc, timestamp)
+    -> mss.linux.xcbgen.randr_get_crtc_info
+358:36 getattr  crtc_info.width
+    reject mss.screenshot.ScreenShot.width: crtc_info is a RandrGetCrtcInfoReply structure; width is a ctypes field
+359:37 getattr  crtc_info.height
+    reject mss.screenshot.ScreenShot.height: crtc_info is a RandrGetCrtcInfoReply structure; height is a ctypes field
+362:54 call  xcb.randr_get_crtc_info_outputs(crtc_info)
+    -> mss.linux.xcbgen.randr_get_crtc_info_outputs
+363:54 call  self._choose_randr_output(outputs, primary_output)
+    -> mss.linux.base.MSSImplXCBBase._choose_randr_output
+364:46 call  self._randr_output_ids(chosen_output, timestamp, edid_atom)
+    -> mss.linux.base.MSSImplXCBBase._randr_output_ids
+369:55 op  chosen_output == primary_output
+    -> mss.linux.xcbhelpers.XID.__eq__
+    note: chosen_output is an item of the RandrOutput array or primary_output itself, and primary_output a RandrOutput (not None in this branch): == runs XID.__eq__
+371:28 call  monitors.append(monitor)
+    -> <builtin>.list.append
+
+[mss.linux.base.MSSImplXCBBase._cursor_check_xfixes]
+383:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+385:49 call  xcb.get_extension_data(self.conn, LIB.xfixes_id)
+    -> mss.linux.xcb.get_extension_data
+389:41 call  xcb.xfixes_query_version(self.conn, xcb.XFIXES_MAJOR_VERS...
+    -> mss.linux.xcbgen.xfixes_query_version
+
+[mss.linux.base.MSSImplXCBBase.cursor]
+404:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+407:59 call  self._cursor_check_xfixes()
+    -> mss.linux.base.MSSImplXCBBase._cursor_check_xfixes
+410:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+412:49 call  xcb.xfixes_get_cursor_image(self.conn)
+    -> mss.linux.xcbgen.xfixes_get_cursor_image
+416:33 getattr  cursor_img.width
+    reject mss.screenshot.ScreenShot.width: cursor_img is an XfixesGetCursorImageReply structure; width is a ctypes field
+417:34 getattr  cursor_img.height
+    reject mss.screenshot.ScreenShot.height: cursor_img is an XfixesGetCursorImageReply structure; height is a ctypes field
+420:60 call  xcb.xfixes_get_cursor_image_cursor_image(cursor_img)
+    -> mss.linux.xcbgen.xfixes_get_cursor_image_cursor_image
+421:25 call  bytearray(data_arr)
+    -> <builtin>.bytearray
+425:26 call  ScreenShot(data, region)
+    -> mss.screenshot.ScreenShot.__init__
+
+[mss.linux.base.MSSImplXCBBase._grab_xgetimage]
+440:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+442:34 call  xcb.get_image( self.conn, xcb.ImageFormat.ZPixmap, self.d...
+    -> mss.linux.xcbgen.get_image
+454:42 call  xcb.get_image_data(img_reply)
+    -> mss.linux.xcbgen.get_image_data
+456:29 call  bytearray(img_data_arr)
+    -> <builtin>.bytearray
+458:71 op  img_reply.visual != self.drawable_visual_id
+    -> mss.linux.xcbgen.Visualid.__eq__
+    note: both operands are Visualid instances (GetImageReply.visual, Screen.root_visual); Visualid defines __eq__ only, so != runs object.__ne__, which calls Visualid.__eq__
+462:54 call  hex(self.drawable_visual_id.value)
+    -> <builtin>.hex
+463:45 call  hex(img_reply.visual.value)
+    -> <builtin>.hex
+465:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+== mss.linux.xcb
+
+[mss.linux.xcb]
+158:16 call  Atom(0)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+162:20 call  Atom(1)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+163:22 call  Atom(2)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+164:16 call  Atom(3)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+165:17 call  Atom(4)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+166:19 call  Atom(5)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+167:21 call  Atom(6)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+168:21 call  Atom(7)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+169:19 call  Atom(8)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+170:24 call  Atom(9)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+171:24 call  Atom(10)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+172:24 call  Atom(11)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+173:24 call  Atom(12)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+174:24 call  Atom(13)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+175:24 call  Atom(14)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+176:24 call  Atom(15)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+177:24 call  Atom(16)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+178:21 call  Atom(17)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+179:17 call  Atom(18)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+180:20 call  Atom(19)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+181:19 call  Atom(20)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+182:18 call  Atom(21)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+183:22 call  Atom(22)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+184:29 call  Atom(23)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+185:26 call  Atom(24)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+186:25 call  Atom(25)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+187:25 call  Atom(26)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+188:28 call  Atom(27)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+189:25 call  Atom(28)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+190:26 call  Atom(29)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+191:24 call  Atom(30)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+192:19 call  Atom(31)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+193:21 call  Atom(32)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+194:19 call  Atom(33)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+195:23 call  Atom(34)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+196:21 call  Atom(35)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+197:30 call  Atom(36)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+198:25 call  Atom(37)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+199:25 call  Atom(38)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+200:20 call  Atom(39)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+201:28 call  Atom(40)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+202:26 call  Atom(41)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+203:26 call  Atom(42)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+204:22 call  Atom(43)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+205:23 call  Atom(44)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+206:22 call  Atom(45)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+207:22 call  Atom(46)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+208:26 call  Atom(47)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+209:26 call  Atom(48)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+210:24 call  Atom(49)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+211:24 call  Atom(50)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+212:31 call  Atom(51)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+213:32 call  Atom(52)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+214:29 call  Atom(53)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+215:30 call  Atom(54)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+216:25 call  Atom(55)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+217:21 call  Atom(56)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+218:23 call  Atom(57)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+219:19 call  Atom(58)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+220:23 call  Atom(59)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+221:23 call  Atom(60)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+222:22 call  Atom(61)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+223:19 call  Atom(62)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+224:22 call  Atom(63)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+225:24 call  Atom(64)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+226:22 call  Atom(65)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+227:23 call  Atom(66)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+228:21 call  Atom(67)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+229:29 call  Atom(68)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+237:2 decorator  @overload
+    -> typing.overload
+244:2 decorator  @overload
+    -> typing.overload
+251:2 decorator  @overload
+    -> typing.overload
+
+[mss.linux.xcb.intern_atom]
+269:18 call  isinstance(xcb_conn, _Pointer)
+    -> <builtin>.isinstance
+272:26 call  addressof(xcb_conn)
+    -> ctypes.addressof
+278:21 call  XError(msg)
+    -> mss.exception.ScreenShotError.__init__
+    note: XError (xcbhelpers) inherits ScreenShotError.__init__
+284:31 call  name.encode("latin_1", errors="strict")
+    -> <builtin>.str.encode
+285:37 call  LIB.xcb.xcb_intern_atom(xcb_conn, 1 if only_if_exists els...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+285:79 call  len(name_encoded)
+    -> <builtin>.len
+286:31 call  cookie.reply(xcb_conn)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the restype of xcb_intern_atom is the cookie class that initialize_xcb_typed_func makes (xcbhelpers.py:483)
+291:25 call  XError(msg)
+    -> mss.exception.ScreenShotError.__init__
+    note: XError (xcbhelpers) inherits ScreenShotError.__init__
+294:16 call  Atom(atom_as_xid.value)
+    -> ctypes.c_uint32.__init__
+    note: Atom -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+
+[mss.linux.xcb.get_extension_data]
+307:45 call  LIB.xcb.xcb_get_extension_data(xcb_conn, ext)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[mss.linux.xcb.prefetch_extension_data]
+319:40 call  LIB.xcb.xcb_prefetch_extension_data(xcb_conn, ext)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[mss.linux.xcb.generate_id]
+327:35 call  LIB.xcb.xcb_generate_id(xcb_conn)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[mss.linux.xcb.get_setup]
+336:36 call  LIB.xcb.xcb_get_setup(xcb_conn)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[mss.linux.xcb.initialize]
+344:19 call  LIB.initialize(callbacks=[xcbgen.initialize])
+    -> mss.linux.xcbhelpers.LibContainer.initialize
+    reject mss.linux.xcb.initialize: LIB is the LibContainer of xcbhelpers.py:556
+    reject mss.linux.xcbgen.initialize: passed in the callbacks list; LibContainer.initialize calls it (its site 548:22)
+
+[mss.linux.xcb.connect]
+348:18 call  isinstance(display, str)
+    -> <builtin>.isinstance
+349:33 call  display.encode("utf-8")
+    -> <builtin>.str.encode
+351:15 call  initialize()
+    -> mss.linux.xcb.initialize
+    reject mss.linux.xcbgen.initialize, mss.linux.xcbhelpers.LibContainer.initialize: the name is the module function initialize of xcb.py:343
+352:28 call  c_int()
+    -> ctypes.c_int
+353:33 call  LIB.xcb.xcb_connect(display, pref_screen_num)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+356:48 call  LIB.xcb.xcb_connection_has_error(conn_p)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+359:31 call  LIB.xcb.xcb_disconnect(conn_p)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+361:42 call  XCB_CONN_ERRMSG.get(conn_err)
+    -> <builtin>.dict.get
+363:21 call  XError(msg)
+    -> mss.exception.ScreenShotError.__init__
+    note: XError (xcbhelpers) inherits ScreenShotError.__init__
+366:28 call  prefetch_extension_data(conn_p, LIB.randr_id)
+    -> mss.linux.xcb.prefetch_extension_data
+367:28 call  prefetch_extension_data(conn_p, LIB.render_id)
+    -> mss.linux.xcb.prefetch_extension_data
+368:28 call  prefetch_extension_data(conn_p, LIB.shm_id)
+    -> mss.linux.xcb.prefetch_extension_data
+369:28 call  prefetch_extension_data(conn_p, LIB.xfixes_id)
+    -> mss.linux.xcb.prefetch_extension_data
+371:26 call  addressof(conn_p.contents)
+    -> ctypes.addressof
+
+[mss.linux.xcb.disconnect]
+377:18 call  isinstance(xcb_conn, _Pointer)
+    -> <builtin>.isinstance
+382:29 call  contextlib.suppress(KeyError)
+    -> contextlib.suppress
+383:34 call  addressof(xcb_conn)
+    -> ctypes.addressof
+385:48 call  LIB.xcb.xcb_connection_has_error(xcb_conn)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+387:27 call  LIB.xcb.xcb_disconnect(xcb_conn)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+390:42 call  XCB_CONN_ERRMSG.get(conn_err)
+    -> <builtin>.dict.get
+392:21 call  XError(msg)
+    -> mss.exception.ScreenShotError.__init__
+    note: XError (xcbhelpers) inherits ScreenShotError.__init__
+
+== mss.linux.xcbgen
+
+[mss.linux.xcbgen]
+164:33 call  POINTER(Depth)
+    -> ctypes.POINTER
+189:33 call  POINTER(Screen)
+    -> ctypes.POINTER
+218:33 call  POINTER(Setup)
+    -> ctypes.POINTER
+431:33 call  POINTER(RandrMonitorInfo)
+    -> ctypes.POINTER
+504:33 call  POINTER(RenderPictdepth)
+    -> ctypes.POINTER
+515:33 call  POINTER(RenderPictscreen)
+    -> ctypes.POINTER
+
+[mss.linux.xcbgen.Keycode.__eq__]
+106:22 call  isinstance(other, Keycode)
+    -> <builtin>.isinstance
+
+[mss.linux.xcbgen.Keycode.__hash__]
+111:20 call  hash(self.value)
+    -> <builtin>.hash
+    note: self.value is an int
+
+[mss.linux.xcbgen.Visualid.__eq__]
+133:22 call  isinstance(other, Visualid)
+    -> <builtin>.isinstance
+
+[mss.linux.xcbgen.Visualid.__hash__]
+138:20 call  hash(self.value)
+    -> <builtin>.hash
+    note: self.value is an int
+
+[mss.linux.xcbgen.Timestamp.__eq__]
+283:22 call  isinstance(other, Timestamp)
+    -> <builtin>.isinstance
+
+[mss.linux.xcbgen.Timestamp.__hash__]
+288:20 call  hash(self.value)
+    -> <builtin>.hash
+    note: self.value is an int
+
+[mss.linux.xcbgen.depth_visuals]
+604:26 call  array_from_xcb(LIB.xcb.xcb_depth_visuals, LIB.xcb.xcb_dep...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.screen_allowed_depths]
+608:25 call  list_from_xcb(LIB.xcb.xcb_screen_allowed_depths_iterator,...
+    -> mss.linux.xcbhelpers.list_from_xcb
+
+[mss.linux.xcbgen.setup_vendor]
+612:26 call  array_from_xcb(LIB.xcb.xcb_setup_vendor, LIB.xcb.xcb_setu...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.setup_pixmap_formats]
+616:26 call  array_from_xcb(LIB.xcb.xcb_setup_pixmap_formats, LIB.xcb....
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.setup_roots]
+620:25 call  list_from_xcb(LIB.xcb.xcb_setup_roots_iterator, LIB.xcb.x...
+    -> mss.linux.xcbhelpers.list_from_xcb
+
+[mss.linux.xcbgen.get_image_data]
+624:26 call  array_from_xcb(LIB.xcb.xcb_get_image_data, LIB.xcb.xcb_ge...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.get_property_value]
+628:26 call  array_from_xcb(LIB.xcb.xcb_get_property_value, LIB.xcb.xc...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_crtcs]
+632:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_outputs]
+638:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_modes]
+644:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_names]
+650:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_current_crtcs]
+656:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_current_outputs]
+664:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_current_modes]
+672:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_screen_resources_current_names]
+680:26 call  array_from_xcb( LIB.randr.xcb_randr_get_screen_resources_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_crtc_info_outputs]
+688:26 call  array_from_xcb( LIB.randr.xcb_randr_get_crtc_info_outputs...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_crtc_info_possible]
+694:26 call  array_from_xcb( LIB.randr.xcb_randr_get_crtc_info_possibl...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_output_info_crtcs]
+700:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_info_crtcs...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_output_info_modes]
+706:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_info_modes...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_output_info_clones]
+712:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_info_clone...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_output_info_name]
+718:26 call  array_from_xcb(LIB.randr.xcb_randr_get_output_info_name, ...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_output_property_data]
+722:26 call  array_from_xcb( LIB.randr.xcb_randr_get_output_property_d...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_monitor_info_outputs]
+728:26 call  array_from_xcb(LIB.randr.xcb_randr_monitor_info_outputs, ...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.randr_get_monitors_monitors]
+732:25 call  list_from_xcb(LIB.randr.xcb_randr_get_monitors_monitors_i...
+    -> mss.linux.xcbhelpers.list_from_xcb
+
+[mss.linux.xcbgen.render_pictdepth_visuals]
+736:26 call  array_from_xcb(LIB.render.xcb_render_pictdepth_visuals, L...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.render_pictscreen_depths]
+740:25 call  list_from_xcb(LIB.render.xcb_render_pictscreen_depths_ite...
+    -> mss.linux.xcbhelpers.list_from_xcb
+
+[mss.linux.xcbgen.render_query_pict_formats_formats]
+744:26 call  array_from_xcb( LIB.render.xcb_render_query_pict_formats_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.render_query_pict_formats_screens]
+750:25 call  list_from_xcb( LIB.render.xcb_render_query_pict_formats_s...
+    -> mss.linux.xcbhelpers.list_from_xcb
+
+[mss.linux.xcbgen.render_query_pict_formats_subpixels]
+756:26 call  array_from_xcb( LIB.render.xcb_render_query_pict_formats_...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.xfixes_get_cursor_image_cursor_image]
+762:26 call  array_from_xcb( LIB.xfixes.xcb_xfixes_get_cursor_image_cu...
+    -> mss.linux.xcbhelpers.array_from_xcb
+
+[mss.linux.xcbgen.shm_create_segment_reply_fds]
+770:52 call  LIB.shm.xcb_shm_create_segment_reply_fds(c, r)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[mss.linux.xcbgen.get_geometry]
+774:36 call  LIB.xcb.xcb_get_geometry(c, drawable)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+774:55 call  LIB.xcb.xcb_get_geometry(c, drawable).reply(c)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.get_image]
+787:33 call  LIB.xcb.xcb_get_image(c, format_, drawable, x, y, width, ...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+787:94 call  LIB.xcb.xcb_get_image(c, format_, drawable, x, y, width, ...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.get_property]
+799:36 call  LIB.xcb.xcb_get_property(c, delete, window, property_, ty...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+799:105 call  LIB.xcb.xcb_get_property(c, delete, window, property_, ty...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.no_operation]
+803:44 call  LIB.xcb.xcb_no_operation_checked(c)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+803:53 call  LIB.xcb.xcb_no_operation_checked(c).check(c)
+    -> mss.linux.xcbhelpers.VoidCookie.check
+    note: the restype of this checked void request is VoidCookie (xcbgen.initialize)
+
+[mss.linux.xcbgen.randr_query_version]
+809:45 call  LIB.randr.xcb_randr_query_version(c, major_version, minor...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+809:84 call  LIB.randr.xcb_randr_query_version(c, major_version, minor...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_screen_resources]
+813:52 call  LIB.randr.xcb_randr_get_screen_resources(c, window)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+813:69 call  LIB.randr.xcb_randr_get_screen_resources(c, window).reply(c)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_screen_resources_current]
+817:60 call  LIB.randr.xcb_randr_get_screen_resources_current(c, window)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+817:77 call  LIB.randr.xcb_randr_get_screen_resources_current(c, windo...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_crtc_info]
+821:45 call  LIB.randr.xcb_randr_get_crtc_info(c, crtc, config_timestamp)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+821:78 call  LIB.randr.xcb_randr_get_crtc_info(c, crtc, config_timesta...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_output_info]
+825:47 call  LIB.randr.xcb_randr_get_output_info(c, output, config_tim...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+825:82 call  LIB.randr.xcb_randr_get_output_info(c, output, config_tim...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_output_primary]
+829:50 call  LIB.randr.xcb_randr_get_output_primary(c, window)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+829:67 call  LIB.randr.xcb_randr_get_output_primary(c, window).reply(c)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_output_property]
+842:51 call  LIB.randr.xcb_randr_get_output_property( c, output, prope...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+844:12 call  LIB.randr.xcb_randr_get_output_property( c, output, prope...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.randr_get_monitors]
+848:44 call  LIB.randr.xcb_randr_get_monitors(c, window, get_active)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+848:73 call  LIB.randr.xcb_randr_get_monitors(c, window, get_active).r...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.render_query_version]
+854:47 call  LIB.render.xcb_render_query_version(c, client_major_versi...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+854:100 call  LIB.render.xcb_render_query_version(c, client_major_versi...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.render_query_pict_formats]
+858:52 call  LIB.render.xcb_render_query_pict_formats(c)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+858:61 call  LIB.render.xcb_render_query_pict_formats(c).reply(c)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.shm_query_version]
+862:41 call  LIB.shm.xcb_shm_query_version(c)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+862:50 call  LIB.shm.xcb_shm_query_version(c).reply(c)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.shm_get_image]
+877:37 call  LIB.shm.xcb_shm_get_image(c, drawable, x, y, width, heigh...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+877:114 call  LIB.shm.xcb_shm_get_image(c, drawable, x, y, width, heigh...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.shm_attach_fd]
+881:45 call  LIB.shm.xcb_shm_attach_fd_checked(c, shmseg, shm_fd, read...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+881:81 call  LIB.shm.xcb_shm_attach_fd_checked(c, shmseg, shm_fd, read...
+    -> mss.linux.xcbhelpers.VoidCookie.check
+    note: the restype of this checked void request is VoidCookie (xcbgen.initialize)
+
+[mss.linux.xcbgen.shm_create_segment]
+887:42 call  LIB.shm.xcb_shm_create_segment(c, shmseg, size, read_only)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+887:76 call  LIB.shm.xcb_shm_create_segment(c, shmseg, size, read_only...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.shm_detach]
+891:42 call  LIB.shm.xcb_shm_detach_checked(c, shmseg)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+891:59 call  LIB.shm.xcb_shm_detach_checked(c, shmseg).check(c)
+    -> mss.linux.xcbhelpers.VoidCookie.check
+    note: the restype of this checked void request is VoidCookie (xcbgen.initialize)
+
+[mss.linux.xcbgen.xfixes_query_version]
+897:47 call  LIB.xfixes.xcb_xfixes_query_version(c, client_major_versi...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+897:100 call  LIB.xfixes.xcb_xfixes_query_version(c, client_major_versi...
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.xfixes_get_cursor_image]
+901:50 call  LIB.xfixes.xcb_xfixes_get_cursor_image(c)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+901:59 call  LIB.xfixes.xcb_xfixes_get_cursor_image(c).reply(c)
+    -> mss.linux.xcbhelpers.ReplyCookieBase.reply
+    note: the request function's restype is a cookie class that initialize_xcb_typed_func makes as a subclass of ReplyCookieBase
+
+[mss.linux.xcbgen.initialize]
+905:47 call  POINTER(DepthIterator)
+    -> ctypes.POINTER
+907:48 call  POINTER(ScreenIterator)
+    -> ctypes.POINTER
+909:47 call  POINTER(SetupIterator)
+    -> ctypes.POINTER
+911:62 call  POINTER(RandrMonitorInfoIterator)
+    -> ctypes.POINTER
+913:61 call  POINTER(RenderPictdepthIterator)
+    -> ctypes.POINTER
+915:62 call  POINTER(RenderPictscreenIterator)
+    -> ctypes.POINTER
+917:50 call  POINTER(Depth)
+    -> ctypes.POINTER
+918:48 call  POINTER(Visualtype)
+    -> ctypes.POINTER
+919:57 call  POINTER(Depth)
+    -> ctypes.POINTER
+921:67 call  POINTER(Screen)
+    -> ctypes.POINTER
+923:49 call  POINTER(Setup)
+    -> ctypes.POINTER
+924:47 call  POINTER(c_char)
+    -> ctypes.POINTER
+925:56 call  POINTER(Setup)
+    -> ctypes.POINTER
+927:57 call  POINTER(Setup)
+    -> ctypes.POINTER
+928:55 call  POINTER(Format)
+    -> ctypes.POINTER
+929:64 call  POINTER(Setup)
+    -> ctypes.POINTER
+931:57 call  POINTER(Setup)
+    -> ctypes.POINTER
+933:51 call  POINTER(GetImageReply)
+    -> ctypes.POINTER
+934:49 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+935:58 call  POINTER(GetImageReply)
+    -> ctypes.POINTER
+937:55 call  POINTER(GetPropertyReply)
+    -> ctypes.POINTER
+938:53 call  POINTER(c_char)
+    -> ctypes.POINTER
+939:62 call  POINTER(GetPropertyReply)
+    -> ctypes.POINTER
+941:71 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+942:69 call  POINTER(RandrCrtc)
+    -> ctypes.POINTER
+943:78 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+945:73 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+946:71 call  POINTER(RandrOutput)
+    -> ctypes.POINTER
+947:80 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+949:71 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+950:69 call  POINTER(RandrModeInfo)
+    -> ctypes.POINTER
+951:78 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+953:71 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+954:69 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+955:78 call  POINTER(RandrGetScreenResourcesReply)
+    -> ctypes.POINTER
+957:79 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+958:77 call  POINTER(RandrCrtc)
+    -> ctypes.POINTER
+960:16 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+963:81 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+964:79 call  POINTER(RandrOutput)
+    -> ctypes.POINTER
+966:16 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+969:79 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+970:77 call  POINTER(RandrModeInfo)
+    -> ctypes.POINTER
+972:16 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+975:79 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+976:77 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+978:16 call  POINTER(RandrGetScreenResourcesCurrentReply)
+    -> ctypes.POINTER
+981:66 call  POINTER(RandrGetCrtcInfoReply)
+    -> ctypes.POINTER
+982:64 call  POINTER(RandrOutput)
+    -> ctypes.POINTER
+983:73 call  POINTER(RandrGetCrtcInfoReply)
+    -> ctypes.POINTER
+985:67 call  POINTER(RandrGetCrtcInfoReply)
+    -> ctypes.POINTER
+986:65 call  POINTER(RandrOutput)
+    -> ctypes.POINTER
+987:74 call  POINTER(RandrGetCrtcInfoReply)
+    -> ctypes.POINTER
+989:66 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+990:64 call  POINTER(RandrCrtc)
+    -> ctypes.POINTER
+991:73 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+993:66 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+994:64 call  POINTER(RandrMode)
+    -> ctypes.POINTER
+995:73 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+997:67 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+998:65 call  POINTER(RandrOutput)
+    -> ctypes.POINTER
+999:74 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+1001:65 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+1002:63 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+1003:72 call  POINTER(RandrGetOutputInfoReply)
+    -> ctypes.POINTER
+1005:69 call  POINTER(RandrGetOutputPropertyReply)
+    -> ctypes.POINTER
+1006:67 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+1007:76 call  POINTER(RandrGetOutputPropertyReply)
+    -> ctypes.POINTER
+1009:65 call  POINTER(RandrMonitorInfo)
+    -> ctypes.POINTER
+1010:63 call  POINTER(RandrOutput)
+    -> ctypes.POINTER
+1011:72 call  POINTER(RandrMonitorInfo)
+    -> ctypes.POINTER
+1013:75 call  POINTER(RandrGetMonitorsReply)
+    -> ctypes.POINTER
+1015:64 call  POINTER(RenderPictdepth)
+    -> ctypes.POINTER
+1016:62 call  POINTER(RenderPictvisual)
+    -> ctypes.POINTER
+1017:71 call  POINTER(RenderPictdepth)
+    -> ctypes.POINTER
+1019:73 call  POINTER(RenderPictscreen)
+    -> ctypes.POINTER
+1021:73 call  POINTER(RenderQueryPictFormatsReply)
+    -> ctypes.POINTER
+1022:71 call  POINTER(RenderPictforminfo)
+    -> ctypes.POINTER
+1023:80 call  POINTER(RenderQueryPictFormatsReply)
+    -> ctypes.POINTER
+1025:82 call  POINTER(RenderQueryPictFormatsReply)
+    -> ctypes.POINTER
+1027:75 call  POINTER(RenderQueryPictFormatsReply)
+    -> ctypes.POINTER
+1028:73 call  POINTER(c_uint32)
+    -> ctypes.POINTER
+1029:82 call  POINTER(RenderQueryPictFormatsReply)
+    -> ctypes.POINTER
+1031:76 call  POINTER(XfixesGetCursorImageReply)
+    -> ctypes.POINTER
+1032:74 call  POINTER(c_uint32)
+    -> ctypes.POINTER
+1033:83 call  POINTER(XfixesGetCursorImageReply)
+    -> ctypes.POINTER
+1035:65 call  POINTER(Connection)
+    -> ctypes.POINTER
+1035:86 call  POINTER(ShmCreateSegmentReply)
+    -> ctypes.POINTER
+1036:63 call  POINTER(c_int)
+    -> ctypes.POINTER
+1037:30 call  initialize_xcb_typed_func(LIB.xcb, "xcb_get_geometry", [P...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1037:68 call  POINTER(Connection)
+    -> ctypes.POINTER
+1038:30 call  initialize_xcb_typed_func( LIB.xcb, "xcb_get_image", [POI...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1041:17 call  POINTER(Connection)
+    -> ctypes.POINTER
+1044:30 call  initialize_xcb_typed_func( LIB.xcb, "xcb_get_property", [...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1047:17 call  POINTER(Connection)
+    -> ctypes.POINTER
+1050:57 call  POINTER(Connection)
+    -> ctypes.POINTER
+1052:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_query_ve...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1053:55 call  POINTER(Connection)
+    -> ctypes.POINTER
+1055:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_scre...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1056:62 call  POINTER(Connection)
+    -> ctypes.POINTER
+1058:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_scre...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1061:17 call  POINTER(Connection)
+    -> ctypes.POINTER
+1064:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_crtc...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1065:55 call  POINTER(Connection)
+    -> ctypes.POINTER
+1067:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_outp...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1068:57 call  POINTER(Connection)
+    -> ctypes.POINTER
+1070:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_outp...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1071:60 call  POINTER(Connection)
+    -> ctypes.POINTER
+1073:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_outp...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1076:17 call  POINTER(Connection)
+    -> ctypes.POINTER
+1079:30 call  initialize_xcb_typed_func( LIB.randr, "xcb_randr_get_moni...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1080:54 call  POINTER(Connection)
+    -> ctypes.POINTER
+1082:30 call  initialize_xcb_typed_func( LIB.render, "xcb_render_query_...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1083:57 call  POINTER(Connection)
+    -> ctypes.POINTER
+1085:30 call  initialize_xcb_typed_func( LIB.render, "xcb_render_query_...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1086:62 call  POINTER(Connection)
+    -> ctypes.POINTER
+1088:30 call  initialize_xcb_typed_func(LIB.shm, "xcb_shm_query_version...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1088:73 call  POINTER(Connection)
+    -> ctypes.POINTER
+1089:30 call  initialize_xcb_typed_func( LIB.shm, "xcb_shm_get_image", ...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1092:17 call  POINTER(Connection)
+    -> ctypes.POINTER
+1095:58 call  POINTER(Connection)
+    -> ctypes.POINTER
+1097:30 call  initialize_xcb_typed_func( LIB.shm, "xcb_shm_create_segme...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1098:52 call  POINTER(Connection)
+    -> ctypes.POINTER
+1100:55 call  POINTER(Connection)
+    -> ctypes.POINTER
+1102:30 call  initialize_xcb_typed_func( LIB.xfixes, "xcb_xfixes_query_...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1103:57 call  POINTER(Connection)
+    -> ctypes.POINTER
+1105:30 call  initialize_xcb_typed_func( LIB.xfixes, "xcb_xfixes_get_cu...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+1106:60 call  POINTER(Connection)
+    -> ctypes.POINTER
+
+== mss.linux.xcbhelpers
+
+[mss.linux.xcbhelpers]
+411:31 call  frozenset( {"c", "xcb", "randr", "randr_id", "render", "r...
+    -> <builtin>.frozenset
+430:77 call  frozenset()
+    -> <builtin>.frozenset
+556:19 call  LibContainer()
+    -> mss.linux.xcbhelpers.LibContainer.__init__
+
+[mss.linux.xcbhelpers.depends_on]
+93:13 call  finalize(subobject, id, superobject)
+    -> weakref.finalize
+
+[mss.linux.xcbhelpers.XID.__eq__]
+105:55 call  isinstance(other, XID)
+    -> <builtin>.isinstance
+
+[mss.linux.xcbhelpers.XID.__hash__]
+108:20 call  hash(self.value)
+    -> <builtin>.hash
+    note: self.value is an int
+
+[mss.linux.xcbhelpers.XProtoError.__init__]
+193:22 call  isinstance(xcb_err, _Pointer)
+    -> <builtin>.isinstance
+195:26 call  isinstance(xcb_err, GenericErrorStructure)
+    -> <builtin>.isinstance
+212:26 call  POINTER(XcbErrorsContext)
+    -> ctypes.POINTER
+212:44 call  POINTER(XcbErrorsContext)()
+    note: the callee is the pointer class that POINTER(XcbErrorsContext) makes at run time; no public class path rooted outside the package names it (XcbErrorsContext.__pointer_type__ goes through a package class, and the generated name LP_XcbErrorsContext is no module attribute), so no callee: a ctypes-generated pointer or array class is named through a public class path rooted outside the analysed package when an admitted runtime provides one; otherwise the site keeps a note and no callee (mss.md, J2)
+213:62 call  LIB.errors.xcb_errors_context_new(xcb_conn, ctx)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+217:39 call  POINTER(c_char_p)
+    -> ctypes.POINTER
+217:49 call  POINTER(c_char_p)()
+    -> ctypes.c_char_p.__pointer_type__
+    note: the callee is the pointer class that POINTER(c_char_p) makes; CPython 3.14 documents c_char_p.__pointer_type__ as that class, a public class path rooted outside the package; a ctypes-generated pointer or array class is named through a public class path rooted outside the analysed package when an admitted runtime provides one; otherwise the site keeps a note and no callee (mss.md, J2)
+218:74 call  LIB.errors.xcb_errors_get_name_for_error(ctx, xcb_err.err...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+219:57 call  error_name.decode("ascii", errors="replace")
+    -> <builtin>.bytes.decode
+224:71 call  ext_name_str.decode("ascii", errors="replace")
+    -> <builtin>.bytes.decode
+225:79 call  LIB.errors.xcb_errors_get_name_for_major_code(ctx, xcb_er...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+226:62 call  major_name.decode("ascii", errors="replace")
+    -> <builtin>.bytes.decode
+227:79 call  LIB.errors.xcb_errors_get_name_for_minor_code( ctx, xcb_e...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+231:66 call  minor_name.decode("ascii", errors="replace")
+    -> <builtin>.bytes.decode
+233:55 call  LIB.errors.xcb_errors_context_free(ctx)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+235:14 call  super()
+    -> <builtin>.super
+235:25 call  super().__init__("X11 Protocol Error", details=details)
+    -> mss.exception.ScreenShotError.__init__
+    reject *: super() in XProtoError resolves to XError, which inherits ScreenShotError.__init__
+
+[mss.linux.xcbhelpers.XProtoError.__str__]
+238:20 call  super()
+    -> <builtin>.super
+238:30 call  super().__str__()
+    -> <builtin>.Exception.__str__
+    note: super() in XProtoError resolves to XError and ScreenShotError, which inherit __str__ from Exception (outside the package)
+
+[mss.linux.xcbhelpers.CookieBase.discard]
+275:34 call  LIB.xcb.xcb_discard_reply(xcb_conn, self.sequence)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[mss.linux.xcbhelpers.VoidCookie.check]
+289:42 call  LIB.xcb.xcb_request_check(xcb_conn, self)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+292:19 call  copy(err_p.contents)
+    -> copy.copy
+293:19 call  LIB.c.free(err_p)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+294:26 call  XProtoError(xcb_conn, err)
+    -> mss.linux.xcbhelpers.XProtoError.__init__
+    reject mss.exception.ScreenShotError.__init__: XProtoError defines its own __init__, which reaches ScreenShotError.__init__ through super() (235:25)
+
+[mss.linux.xcbhelpers.ReplyCookieBase.reply]
+309:24 call  POINTER(GenericErrorStructure)
+    -> ctypes.POINTER
+309:47 call  POINTER(GenericErrorStructure)()
+    note: the callee is the pointer class that POINTER(GenericErrorStructure) makes at run time; no public class path rooted outside the package names it (GenericErrorStructure.__pointer_type__ goes through a package class), so no callee: a ctypes-generated pointer or array class is named through a public class path rooted outside the analysed package when an admitted runtime provides one; otherwise the site keeps a note and no callee (mss.md, J2)
+311:39 call  self._xcb_reply_func(xcb_conn, self, err_p)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: _xcb_reply_func is the class attribute that initialize_xcb_typed_func puts on each cookie class: the foreign function xcb_..._reply of the same CDLL (xcbhelpers.py:349-351); a ctypes function pointer is no descriptor, so the attribute load does not bind self; ReplyCookieBase itself (None) is never instantiated
+315:27 call  LIB.c.free(reply_p)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+317:28 call  copy(err_p.contents)
+    -> copy.copy
+318:23 call  LIB.c.free(err_p)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+319:30 call  XProtoError(xcb_conn, err_copy)
+    -> mss.linux.xcbhelpers.XProtoError.__init__
+    reject mss.exception.ScreenShotError.__init__: XProtoError defines its own __init__, which reaches ScreenShotError.__init__ through super() (235:25)
+327:32 call  c_void_p(addressof(reply_p.contents))
+    -> ctypes.c_void_p
+327:42 call  addressof(reply_p.contents)
+    -> ctypes.addressof
+328:29 call  finalize(reply_p, LIB.c.free, reply_void_p)
+    -> weakref.finalize
+
+[mss.linux.xcbhelpers.initialize_xcb_typed_func]
+347:33 call  base_name.title()
+    -> <builtin>.str.title
+347:43 call  base_name.title().replace("_", "")
+    -> <builtin>.str.replace
+348:27 call  getattr(lib, name)
+    -> <builtin>.getattr
+349:25 call  getattr(lib, f"{name}_reply")
+    -> <builtin>.getattr
+351:23 call  type(f"{title_name}Cookie", (ReplyCookieBase,), {"_xcb_re...
+    -> <builtin>.type
+    note: type() builds a subclass of the ctypes Structure ReplyCookieBase; its metaclass is ctypes' (outside), and no package __init_subclass__, __set_name__ or metaclass method runs
+354:35 call  POINTER(Connection)
+    -> ctypes.POINTER
+354:69 call  POINTER(POINTER(GenericErrorStructure))
+    -> ctypes.POINTER
+354:77 call  POINTER(GenericErrorStructure)
+    -> ctypes.POINTER
+355:33 call  POINTER(reply_struct)
+    -> ctypes.POINTER
+
+[mss.linux.xcbhelpers.LibContainer.__init__]
+416:27 call  RLock()
+    -> threading.RLock
+
+[mss.linux.xcbhelpers.LibContainer.reset]
+424:35 call  RuntimeError(msg)
+    -> <builtin>.RuntimeError
+427:30 call  suppress(AttributeError)
+    -> contextlib.suppress
+428:28 call  delattr(self, name)
+    -> <builtin>.delattr
+    note: LibContainer defines no __delattr__
+
+[mss.linux.xcbhelpers.LibContainer.initialize]
+441:35 call  RuntimeError(msg)
+    -> <builtin>.RuntimeError
+453:42 call  cdll.LoadLibrary(None)
+    -> ctypes.LibraryLoader.LoadLibrary
+457:53 call  ctypes.util.find_library("xcb")
+    -> ctypes.util.find_library
+460:42 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+461:44 call  cdll.LoadLibrary(libxcb_so)
+    -> ctypes.LibraryLoader.LoadLibrary
+463:63 call  POINTER(Connection)
+    -> ctypes.POINTER
+464:61 call  POINTER(GenericErrorStructure)
+    -> ctypes.POINTER
+465:63 call  POINTER(Connection)
+    -> ctypes.POINTER
+467:68 call  POINTER(Connection)
+    -> ctypes.POINTER
+467:89 call  POINTER(XcbExtension)
+    -> ctypes.POINTER
+468:66 call  POINTER(QueryExtensionReply)
+    -> ctypes.POINTER
+469:73 call  POINTER(Connection)
+    -> ctypes.POINTER
+469:94 call  POINTER(XcbExtension)
+    -> ctypes.POINTER
+471:61 call  POINTER(Connection)
+    -> ctypes.POINTER
+473:59 call  POINTER(Connection)
+    -> ctypes.POINTER
+474:57 call  POINTER(Setup)
+    -> ctypes.POINTER
+475:70 call  POINTER(Connection)
+    -> ctypes.POINTER
+477:67 call  POINTER(c_int)
+    -> ctypes.POINTER
+478:55 call  POINTER(Connection)
+    -> ctypes.POINTER
+479:60 call  POINTER(Connection)
+    -> ctypes.POINTER
+483:42 call  initialize_xcb_typed_func( LIB.xcb, "xcb_intern_atom", [P...
+    -> mss.linux.xcbhelpers.initialize_xcb_typed_func
+486:29 call  POINTER(Connection)
+    -> ctypes.POINTER
+486:69 call  POINTER(c_char)
+    -> ctypes.POINTER
+490:59 call  ctypes.util.find_library("xcb-randr")
+    -> ctypes.util.find_library
+493:42 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+494:46 call  cdll.LoadLibrary(libxcb_randr_so)
+    -> ctypes.LibraryLoader.LoadLibrary
+495:52 call  XcbExtension.in_dll(self.randr, "xcb_randr_id")
+    -> _ctypes.PyCStructType.in_dll
+    -> _ctypes.structure.StructureMeta.in_dll
+    note: in_dll is a method of the metaclass of ctypes structures, which has no public path; named by the class of the receiver (a method of an outside object is named by the class of the receiver, also when it inherits it; a private class keeps its path): _ctypes.PyCStructType on CPython, _ctypes.structure.StructureMeta on PyPy (lib_pypy/_ctypes/structure.py:340, which inherits in_dll from _CDataMeta, basics.py:101), which mss declares (mss.md, judgement on ctypes names)
+497:60 call  ctypes.util.find_library("xcb-render")
+    -> ctypes.util.find_library
+500:42 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+501:47 call  cdll.LoadLibrary(libxcb_render_so)
+    -> ctypes.LibraryLoader.LoadLibrary
+502:53 call  XcbExtension.in_dll(self.render, "xcb_render_id")
+    -> _ctypes.PyCStructType.in_dll
+    -> _ctypes.structure.StructureMeta.in_dll
+    note: in_dll is a method of the metaclass of ctypes structures (no public path; CPython and PyPy names, see 495:52)
+504:57 call  ctypes.util.find_library("xcb-shm")
+    -> ctypes.util.find_library
+507:42 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+508:44 call  cdll.LoadLibrary(libxcb_shm_so)
+    -> ctypes.LibraryLoader.LoadLibrary
+509:50 call  XcbExtension.in_dll(self.shm, "xcb_shm_id")
+    -> _ctypes.PyCStructType.in_dll
+    -> _ctypes.structure.StructureMeta.in_dll
+    note: in_dll is a method of the metaclass of ctypes structures (no public path; CPython and PyPy names, see 495:52)
+511:60 call  ctypes.util.find_library("xcb-xfixes")
+    -> ctypes.util.find_library
+514:42 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+515:47 call  cdll.LoadLibrary(libxcb_xfixes_so)
+    -> ctypes.LibraryLoader.LoadLibrary
+516:53 call  XcbExtension.in_dll(self.xfixes, "xcb_xfixes_id")
+    -> _ctypes.PyCStructType.in_dll
+    -> _ctypes.structure.StructureMeta.in_dll
+    note: in_dll is a method of the metaclass of ctypes structures (no public path; CPython and PyPy names, see 495:52)
+521:64 call  cdll.LoadLibrary("libxcb-errors.so.0")
+    -> ctypes.LibraryLoader.LoadLibrary
+526:32 call  POINTER(Connection)
+    -> ctypes.POINTER
+527:32 call  POINTER(POINTER(XcbErrorsContext))
+    -> ctypes.POINTER
+527:40 call  POINTER(XcbErrorsContext)
+    -> ctypes.POINTER
+530:76 call  POINTER(XcbErrorsContext)
+    -> ctypes.POINTER
+532:87 call  POINTER(XcbErrorsContext)
+    -> ctypes.POINTER
+535:32 call  POINTER(XcbErrorsContext)
+    -> ctypes.POINTER
+541:32 call  POINTER(XcbErrorsContext)
+    -> ctypes.POINTER
+543:32 call  POINTER(c_char_p)
+    -> ctypes.POINTER
+548:22 call  x()
+    -> mss.linux.xcbgen.initialize
+    note: callbacks is the [xcbgen.initialize] that xcb.initialize passes (xcb.py:344), or a client iterable of client callables (opaque, B5); the default is an empty frozenset
+
+[mss.linux.xcbhelpers.list_from_xcb]
+593:32 call  iterator_factory(parent)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: every caller (xcbgen.py) passes an XCB iterator function of LIB (a ctypes function pointer)
+598:19 call  depends_on(current, parent)
+    -> mss.linux.xcbhelpers.depends_on
+599:21 call  items.append(current)
+    -> <builtin>.list.append
+600:18 call  next_func(iterator)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: every caller (xcbgen.py) passes an XCB *_next function of LIB (a ctypes function pointer)
+
+[mss.linux.xcbhelpers.array_from_xcb]
+605:27 call  pointer_func(parent)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: every caller (xcbgen.py) passes an XCB accessor function of LIB (a ctypes function pointer)
+606:25 call  length_func(parent)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: every caller (xcbgen.py) passes an XCB *_length function of LIB (a ctypes function pointer)
+609:30 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+610:21 call  cast(pointer, POINTER(pointer._type_ * length))
+    -> ctypes.cast
+610:38 call  POINTER(pointer._type_ * length)
+    -> ctypes.POINTER
+612:15 call  depends_on(array, parent)
+    -> mss.linux.xcbhelpers.depends_on
+
+== mss.linux.xgetimage
+
+[mss.linux.xgetimage.MSSImplXGetImage.grab]
+28:21 call  super()
+    -> <builtin>.super
+28:39 call  super()._grab_xgetimage(monitor)
+    -> mss.linux.base.MSSImplXCBBase._grab_xgetimage
+
+== mss.linux.xlib
+
+[mss.linux.xlib]
+51:13 call  Lock()
+    -> threading.Lock
+129:28 call  POINTER(Display)
+    -> ctypes.POINTER
+152:27 call  POINTER(c_ulong)
+    -> ctypes.POINTER
+198:28 call  POINTER(XID)
+    -> ctypes.POINTER
+201:29 call  POINTER(XID)
+    -> ctypes.POINTER
+221:26 call  POINTER(XID)
+    -> ctypes.POINTER
+223:28 call  POINTER(XID)
+    -> ctypes.POINTER
+225:26 call  POINTER(XRRModeInfo)
+    -> ctypes.POINTER
+242:27 call  POINTER(Visual)
+    -> ctypes.POINTER
+258:27 call  POINTER(Screen)
+    -> ctypes.POINTER
+263:20 call  find_library("X11")
+    -> ctypes.util.find_library
+264:23 call  find_library("Xfixes")
+    -> ctypes.util.find_library
+265:23 call  find_library("Xrandr")
+    -> ctypes.util.find_library
+291:2 decorator  @CFUNCTYPE(c_int, POINTER(Display), POINTER(XErrorEvent))
+    -> ctypes.CFUNCTYPE.CFunctionType
+    note: the decorator is the C function type class that CFUNCTYPE(...) returns, defined in ctypes.CFUNCTYPE (named without <locals>); calling it with _error_handler makes the C callback object; the external class is the callee
+291:11 call  CFUNCTYPE(c_int, POINTER(Display), POINTER(XErrorEvent))
+    -> ctypes.CFUNCTYPE
+291:26 call  POINTER(Display)
+    -> ctypes.POINTER
+291:44 call  POINTER(XErrorEvent)
+    -> ctypes.POINTER
+368:39 call  POINTER(Display)
+    -> ctypes.POINTER
+369:44 call  POINTER(Display)
+    -> ctypes.POINTER
+370:39 call  POINTER(XImage)
+    -> ctypes.POINTER
+371:48 call  POINTER(Display)
+    -> ctypes.POINTER
+371:67 call  POINTER(XFixesCursorImage)
+    -> ctypes.POINTER
+374:17 call  POINTER(Display)
+    -> ctypes.POINTER
+375:16 call  POINTER(XImage)
+    -> ctypes.POINTER
+377:46 call  POINTER(Display)
+    -> ctypes.POINTER
+377:69 call  POINTER(XWindowAttributes)
+    -> ctypes.POINTER
+378:49 call  POINTER(Display)
+    -> ctypes.POINTER
+379:41 call  POINTER(Display)
+    -> ctypes.POINTER
+379:69 call  POINTER(c_int)
+    -> ctypes.POINTER
+379:85 call  POINTER(c_int)
+    -> ctypes.POINTER
+379:101 call  POINTER(c_int)
+    -> ctypes.POINTER
+380:43 call  POINTER(Display)
+    -> ctypes.POINTER
+380:61 call  POINTER(c_int)
+    -> ctypes.POINTER
+380:77 call  POINTER(c_int)
+    -> ctypes.POINTER
+381:43 call  POINTER(XRRCrtcInfo)
+    -> ctypes.POINTER
+382:50 call  POINTER(XRRScreenResources)
+    -> ctypes.POINTER
+383:42 call  POINTER(Display)
+    -> ctypes.POINTER
+383:60 call  POINTER(XRRScreenResources)
+    -> ctypes.POINTER
+383:95 call  POINTER(XRRCrtcInfo)
+    -> ctypes.POINTER
+384:49 call  POINTER(Display)
+    -> ctypes.POINTER
+384:73 call  POINTER(XRRScreenResources)
+    -> ctypes.POINTER
+385:56 call  POINTER(Display)
+    -> ctypes.POINTER
+385:80 call  POINTER(XRRScreenResources)
+    -> ctypes.POINTER
+
+[mss.linux.xlib.XError.__str__]
+270:20 call  super()
+    -> <builtin>.super
+270:30 call  super().__str__()
+    -> <builtin>.Exception.__str__
+    note: super() in the Xlib XError resolves to ScreenShotError, which inherits __str__ from Exception (outside the package)
+
+[mss.linux.xlib._error_handler]
+295:28 call  cdll.LoadLibrary(_X11)
+    -> ctypes.LibraryLoader.LoadLibrary
+297:34 call  POINTER(Display)
+    -> ctypes.POINTER
+300:43 call  POINTER(Display)
+    -> ctypes.POINTER
+304:33 call  create_string_buffer(1024)
+    -> ctypes.create_string_buffer
+305:14 call  get_error(display, evt.error_code, error, len(error))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: get_error is the foreign function XGetErrorText of the CDLL that the handler loads itself (xlib.py:295-296); no errcheck is set on it
+305:50 call  len(error)
+    -> <builtin>.len
+306:35 call  create_string_buffer(1024)
+    -> ctypes.create_string_buffer
+307:23 call  get_error_database(display, b"XRequest", b"%i" % evt.requ...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: get_error_database is the foreign function XGetErrorDatabaseText of that CDLL (xlib.py:299); no errcheck is set on it
+307:107 call  len(request)
+    -> <builtin>.len
+314:27 call  locale.getencoding()
+    -> locale.getencoding
+    note: Python 3.11 and later have locale.getencoding (the hasattr branch); 3.9 and 3.10 take getpreferredencoding
+314:40 call  hasattr(locale, "getencoding")
+    -> <builtin>.hasattr
+314:96 call  locale.getpreferredencoding(do_setlocale=False)
+    -> locale.getpreferredencoding
+316:26 call  current_thread()
+    -> threading.current_thread
+317:36 call  error.value.decode(encoding, errors="replace")
+    -> <builtin>.bytes.decode
+320:40 call  request.value.decode(encoding, errors="replace")
+    -> <builtin>.bytes.decode
+
+[mss.linux.xlib._validate_x11]
+333:28 call  current_thread()
+    -> threading.current_thread
+338:20 call  isinstance(retval, (_Pointer, XBool, XStatus, XID))
+    -> <builtin>.isinstance
+341:21 call  bool(retval)
+    -> <builtin>.bool
+342:20 call  isinstance(retval, int)
+    -> <builtin>.isinstance
+348:63 call  type(retval)
+    note: no callee: the else branch cannot run under the package's own values; ctypes calls this errcheck only for the CFUNCTIONS of xlib.py:366, whose restypes give None, a pointer, an XBool, an XStatus, an XID or an int (c_int), and each takes an earlier branch (B1: a check that cannot fail under the package's own values has no callee)
+349:29 call  AssertionError(msg)
+    note: no callee: the else branch cannot run under the package's own values (see 348:63)
+355:25 call  _ERROR.pop(thread, {})
+    -> <builtin>.dict.pop
+357:17 call  XError(msg, details=details)
+    -> mss.exception.ScreenShotError.__init__
+    note: the Xlib XError inherits ScreenShotError.__init__
+
+[mss.linux.xlib.MSSImplXlib.__init__]
+414:37 call  bool(kwargs.pop("with_cursor", False))
+    -> <builtin>.bool
+414:48 call  kwargs.pop("with_cursor", False)
+    -> <builtin>.dict.pop
+415:63 call  bool(_XFIXES)
+    -> <builtin>.bool
+416:14 call  super()
+    -> <builtin>.super
+416:25 call  super().__init__(with_cursor=effective_with_cursor, **kwa...
+    -> mss.base.MSSImplementation.__init__
+    reject *: super() in MSSImplXlib resolves to its base MSSImplementation
+419:30 call  local()
+    -> threading.local
+427:55 call  os.environ["DISPLAY"].encode("utf-8")
+    -> <builtin>.str.encode
+430:38 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+432:26 call  isinstance(display, bytes)
+    -> <builtin>.isinstance
+433:37 call  display.encode("utf-8")
+    -> <builtin>.str.encode
+437:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+441:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+443:37 call  cdll.LoadLibrary(_X11)
+    -> ctypes.LibraryLoader.LoadLibrary
+447:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+449:39 call  cdll.LoadLibrary(_XRANDR)
+    -> ctypes.LibraryLoader.LoadLibrary
+454:43 call  cdll.LoadLibrary(_XFIXES)
+    -> ctypes.LibraryLoader.LoadLibrary
+456:29 call  self._set_cfunctions()
+    -> mss.linux.xlib.MSSImplXlib._set_cfunctions
+    reject mss.darwin.MSSImplDarwin._set_cfunctions, mss.windows.gdi.MSSImplGdi._set_cfunctions: self is an MSSImplXlib
+461:78 call  self.xlib.XSetErrorHandler(_error_handler)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    reject mss.linux.xlib._error_handler: XSetErrorHandler only installs the handler; Xlib calls it later, during the Xlib calls that wait for the server (their sites have the edge)
+    note: XSetErrorHandler has no errcheck (_set_cfunctions passes None for it)
+463:59 call  self.xlib.XOpenDisplay(display)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XOpenDisplay waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+466:38 call  ScreenShotError(msg)
+    reject mss.exception.ScreenShotError.__init__: the branch cannot run: XOpenDisplay has the restype POINTER(Display) and the errcheck _validate_x11, which raises XError for a NULL pointer before the call returns, and a non-NULL pointer is true (B1: a check that cannot fail under the package's own values; Codex round 1, mss.md)
+    note: no callee: the test at 464 cannot be true
+468:87 call  self.xlib.XDefaultRootWindow(self._handles.display)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)
+470:42 call  self._is_extension_enabled("RANDR")
+    -> mss.linux.xlib.MSSImplXlib._is_extension_enabled
+472:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+[mss.linux.xlib.MSSImplXlib.close]
+478:40 call  self.xlib.XCloseDisplay(self._handles.display)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XCloseDisplay waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+491:43 call  self.xlib.XSetErrorHandler(self._handles.original_error_h...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+495:21 call  _ERROR.clear()
+    -> <builtin>.dict.clear
+
+[mss.linux.xlib.MSSImplXlib._is_extension_enabled]
+499:36 call  c_int()
+    -> ctypes.c_int
+500:35 call  c_int()
+    -> ctypes.c_int
+501:35 call  c_int()
+    -> ctypes.c_int
+505:42 call  self.xlib.XQueryExtension( self._handles.display, name.en...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XQueryExtension waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+507:32 call  name.encode("latin1")
+    -> <builtin>.str.encode
+508:26 call  byref(major_opcode_return)
+    -> ctypes.byref
+509:26 call  byref(first_event_return)
+    -> ctypes.byref
+510:26 call  byref(first_error_return)
+    -> ctypes.byref
+
+[mss.linux.xlib.MSSImplXlib._set_cfunctions]
+520:30 call  getattr(self, "xfixes", None)
+    -> <builtin>.getattr
+524:64 call  CFUNCTIONS.items()
+    -> <builtin>.dict.items
+525:26 call  suppress(AttributeError)
+    -> contextlib.suppress
+527:25 call  cfactory(attrs[attr], func, argtypes, restype, errcheck=e...
+    -> mss.base.MSSImplementation._cfactory
+    exclude mss.base.MSS._cfactory: cfactory is self._cfactory of an MSSImplXlib, the staticmethod of MSSImplementation (base.py:118), not the copy on MSS
+    note: cfactory = self._cfactory (xlib.py:518); _validate_x11 is passed as data here and called later by ctypes (at the foreign calls)
+
+[mss.linux.xlib.MSSImplXlib.monitors]
+537:33 call  c_int(0)
+    -> ctypes.c_int
+538:33 call  c_int(0)
+    -> ctypes.c_int
+539:35 call  xrandr.XRRQueryVersion(display, xrandr_major, xrandr_minor)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRQueryVersion waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+542:36 call  XWindowAttributes()
+    -> ctypes.Structure.__init__
+    note: XWindowAttributes is a ctypes Structure without its own __init__
+543:43 call  self.xlib.XGetWindowAttributes(display, self._handles.roo...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XGetWindowAttributes waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+543:78 call  byref(gwa)
+    -> ctypes.byref
+544:28 call  monitors.append( {"left": int_(gwa.x), "top": int_(gwa.y)...
+    -> <builtin>.list.append
+545:30 call  int_(gwa.x)
+    -> <builtin>.int
+    note: int_ = int (xlib.py:532)
+545:50 call  int_(gwa.y)
+    -> <builtin>.int
+    note: int_ = int (xlib.py:532)
+545:72 call  int_(gwa.width)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.width: the argument is an int field of XWindowAttributes, loaded at 545:77
+    note: int_ = int (xlib.py:532)
+545:77 getattr  gwa.width
+    reject mss.screenshot.ScreenShot.width: gwa is an XWindowAttributes structure; width is a ctypes field
+545:99 call  int_(gwa.height)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.height: the argument is an int field of XWindowAttributes, loaded at 545:104
+    note: int_ = int (xlib.py:532)
+545:104 getattr  gwa.height
+    reject mss.screenshot.ScreenShot.height: gwa is an XWindowAttributes structure; height is a ctypes field
+555:23 call  hasattr(xrandr, "XRRGetScreenResourcesCurrent")
+    -> <builtin>.hasattr
+556:58 call  xrandr.XRRGetScreenResourcesCurrent(display, self._handle...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRGetScreenResourcesCurrent waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+558:51 call  xrandr.XRRGetScreenResources(display, self._handles.drawa...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRGetScreenResources waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+561:29 call  range(mon.ncrtc)
+    -> <builtin>.range
+562:45 call  xrandr.XRRGetCrtcInfo(display, mon, crtcs[idx])
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XRRGetCrtcInfo waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+564:43 call  xrandr.XRRFreeCrtcInfo(crtc)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)
+567:32 call  monitors.append( { "left": int_(crtc.x), "top": int_(crtc...
+    -> <builtin>.list.append
+569:37 call  int_(crtc.x)
+    -> <builtin>.int
+    note: int_ = int (xlib.py:532)
+570:36 call  int_(crtc.y)
+    -> <builtin>.int
+    note: int_ = int (xlib.py:532)
+571:38 call  int_(crtc.width)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.width: the argument is an int field of XRRCrtcInfo, loaded at 571:44
+    note: int_ = int (xlib.py:532)
+571:44 getattr  crtc.width
+    reject mss.screenshot.ScreenShot.width: crtc is an XRRCrtcInfo structure; width is a ctypes field
+572:39 call  int_(crtc.height)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.height: the argument is an int field of XRRCrtcInfo, loaded at 572:45
+    note: int_ = int (xlib.py:532)
+572:45 getattr  crtc.height
+    reject mss.screenshot.ScreenShot.height: crtc is an XRRCrtcInfo structure; height is a ctypes field
+575:39 call  xrandr.XRRFreeCrtcInfo(crtc)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)
+576:42 call  xrandr.XRRFreeScreenResources(mon)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)
+
+[mss.linux.xlib.MSSImplXlib.grab]
+584:41 call  self.xlib.XGetImage( self._handles.display, self._handles...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XGetImage waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+599:38 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+601:28 call  cast( ximage.contents.data, POINTER(c_ubyte * monitor["he...
+    -> ctypes.cast
+603:24 call  POINTER(c_ubyte * monitor["height"] * monitor["width"] * 4)
+    -> ctypes.POINTER
+605:29 call  bytearray(raw_data.contents)
+    -> <builtin>.bytearray
+609:40 call  self.xlib.XDestroyImage(ximage)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions)
+
+[mss.linux.xlib.MSSImplXlib.cursor]
+620:54 call  self.xfixes.XFixesGetCursorImage(self._handles.display)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.linux.xlib._validate_x11
+    -> mss.linux.xlib._error_handler
+    note: ctypes calls the errcheck _validate_x11 after the call (_set_cfunctions); XFixesGetCursorImage waits for a reply of the X server, and Xlib calls the installed error handler _error_handler for an X error that arrives (mss.md, judgement on the Xlib error handler)
+623:34 call  ScreenShotError(msg)
+    reject mss.exception.ScreenShotError.__init__: the branch cannot run: XFixesGetCursorImage has the restype POINTER(XFixesCursorImage) and the errcheck _validate_x11 (xlib.py:371, 526-527), which raises XError for a NULL pointer; a non-NULL pointer is true and its Structure contents define neither __bool__ nor __len__ (B1; Codex round 1, mss.md)
+    note: no callee: the test at 621 cannot be true; the test file reaches it only with a mock of the foreign function (tests/test_gnu_linux.py:282), a change of package internals
+629:33 getattr  cursor_img.width
+    reject mss.screenshot.ScreenShot.width: cursor_img is an XFixesCursorImage structure; width is a ctypes field
+630:34 getattr  cursor_img.height
+    reject mss.screenshot.ScreenShot.height: cursor_img is an XFixesCursorImage structure; height is a ctypes field
+633:24 call  cast(cursor_img.pixels, POINTER(c_ulong * region["height"...
+    -> ctypes.cast
+    reject mss.screenshot.ScreenShot.pixels: the argument is the pointer field pixels of XFixesCursorImage, loaded at 633:36
+633:36 getattr  cursor_img.pixels
+    reject mss.screenshot.ScreenShot.pixels: cursor_img is an XFixesCursorImage structure; pixels is a ctypes field
+633:51 call  POINTER(c_ulong * region["height"] * region["width"])
+    -> ctypes.POINTER
+634:24 call  bytearray(raw_data.contents)
+    -> <builtin>.bytearray
+636:25 call  bytearray(region["height"] * region["width"] * 4)
+    -> <builtin>.bytearray
+642:26 call  ScreenShot(data, region)
+    -> mss.screenshot.ScreenShot.__init__
+
+== mss.linux.xshmgetimage
+
+[mss.linux.xshmgetimage]
+35:24 call  enum.auto()
+    -> enum.auto
+36:26 call  enum.auto()
+    -> enum.auto
+37:28 call  enum.auto()
+    -> enum.auto
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage.__init__]
+49:14 call  super()
+    -> <builtin>.super
+49:25 call  super().__init__(display=display, with_cursor=with_cursor)
+    -> mss.linux.base.MSSImplXCBBase.__init__
+    reject *: super() in MSSImplXShmGetImage resolves to its base MSSImplXCBBase
+63:53 call  self._setup_shm()
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._setup_shm
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue]
+73:42 call  ", ".join(str(arg) for arg in args)
+    -> <builtin>.str.join
+73:46 call  str(arg)
+    -> <builtin>.str
+    -> mss.linux.xcbhelpers.XProtoError.__str__
+    note: the package passes a version tuple, OSErrors (memfd_create, mmap) and XProtoErrors (shm_attach_fd through VoidCookie.check, 118:45; the shm_get_image reply, 225:35); str() of an XProtoError runs its __str__ (private hook: no other caller)
+74:14 getattr  self.performance_status
+    reject mss.base.MSS.performance_status: self is an MSSImplXShmGetImage; performance_status is the list slot of MSSImplementation
+74:39 call  self.performance_status.append(full_msg)
+    -> <builtin>.list.append
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage._setup_shm]
+80:50 call  xcb.get_extension_data(self.conn, LIB.shm_id)
+    -> mss.linux.xcb.get_extension_data
+82:39 call  self._shm_report_issue("MIT-SHM extension not present")
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue
+86:53 call  xcb.shm_query_version(self.conn)
+    -> mss.linux.xcbgen.shm_query_version
+89:39 call  self._shm_report_issue("MIT-SHM version too old", shm_ver...
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue
+96:27 call  hasattr(os, "memfd_create")
+    -> <builtin>.hasattr
+97:39 call  self._shm_report_issue("os.memfd_create not available")
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue
+100:46 call  os.memfd_create("mss-shm-buf", flags=os.MFD_CLOEXEC)
+    -> os.memfd_create
+102:45 call  self._shm_unavailable("memfd_create failed", e)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_unavailable
+103:25 call  os.ftruncate(self._memfd, self._bufsize)
+    -> os.ftruncate
+106:33 call  mmap(self._memfd, self._bufsize, prot=PROT_READ)
+    -> mmap.mmap
+108:45 call  self._shm_unavailable("mmap failed", e)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_unavailable
+109:38 call  xcb.ShmSeg(xcb.generate_id(self.conn).value)
+    -> ctypes.c_uint32.__init__
+    note: ShmSeg -> XID(c_uint32): the first __init__ of the MRO is _SimpleCData.__init__, named through the nearest outside base c_uint32
+109:54 call  xcb.generate_id(self.conn)
+    -> mss.linux.xcb.generate_id
+114:38 call  xcb.shm_attach_fd(self.conn, self._shmseg, self._memfd, r...
+    -> mss.linux.xcbgen.shm_attach_fd
+118:45 call  self._shm_unavailable("Cannot attach MIT-SHM segment", e)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_unavailable
+120:31 call  self._shutdown_shm()
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_unavailable]
+126:31 call  self._shm_report_issue(msg, exc)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue
+127:27 call  self._shutdown_shm()
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage.close]
+131:27 call  self._shutdown_shm()
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm
+132:14 call  super()
+    -> <builtin>.super
+132:22 call  super().close()
+    -> mss.linux.base.MSSImplXCBBase.close
+    reject *: super() in MSSImplXShmGetImage resolves to its base MSSImplXCBBase
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm]
+139:28 call  self._buf.close()
+    -> mmap.mmap.close
+    reject *: self._buf is the mmap.mmap of _setup_shm (106:33), not a package object
+142:21 call  os.close(self._memfd)
+    -> os.close
+    reject *: os is the os module
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage._grab_xshmgetimage]
+148:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+160:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+162:38 call  xcb.shm_get_image( self.conn, self.drawable, monitor["lef...
+    -> mss.linux.xcbgen.shm_get_image
+175:71 op  img_reply.visual != self.drawable_visual_id
+    -> mss.linux.xcbgen.Visualid.__eq__
+    note: both operands are Visualid instances (ShmGetImageReply.visual, Screen.root_visual); != runs object.__ne__, which calls Visualid.__eq__
+179:54 call  hex(self.drawable_visual_id.value)
+    -> <builtin>.hex
+180:45 call  hex(img_reply.visual.value)
+    -> <builtin>.hex
+182:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+190:24 call  memoryview(self._buf)
+    -> <builtin>.memoryview
+191:29 call  bytearray(img_mv[:new_size])
+    -> <builtin>.bytearray
+
+[mss.linux.xshmgetimage.MSSImplXShmGetImage.grab]
+196:25 call  super()
+    -> <builtin>.super
+196:43 call  super()._grab_xgetimage(monitor)
+    -> mss.linux.base.MSSImplXCBBase._grab_xgetimage
+200:41 call  self._grab_xshmgetimage(monitor)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._grab_xshmgetimage
+203:22 getattr  self.performance_status
+    reject mss.base.MSS.performance_status: self is an MSSImplXShmGetImage; performance_status is the list slot of MSSImplementation
+203:47 call  self.performance_status.append("MIT-SHM is working correc...
+    -> <builtin>.list.append
+215:27 call  super()
+    -> <builtin>.super
+215:45 call  super()._grab_xgetimage(monitor)
+    -> mss.linux.base.MSSImplXCBBase._grab_xgetimage
+225:35 call  self._shm_report_issue("MIT-SHM GetImage failed", e)
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shm_report_issue
+227:31 call  self._shutdown_shm()
+    -> mss.linux.xshmgetimage.MSSImplXShmGetImage._shutdown_shm
+
+== mss.screenshot
+
+[mss.screenshot]
+44:6 decorator  @property
+    -> <builtin>.property
+69:6 decorator  @classmethod
+    -> <builtin>.classmethod
+75:6 decorator  @property
+    -> <builtin>.property
+89:6 decorator  @property
+    -> <builtin>.property
+113:6 decorator  @property
+    -> <builtin>.property
+131:6 decorator  @property
+    -> <builtin>.property
+136:6 decorator  @property
+    -> <builtin>.property
+141:6 decorator  @property
+    -> <builtin>.property
+146:6 decorator  @property
+    -> <builtin>.property
+
+[mss.screenshot.ScreenShot.__init__]
+36:28 call  Pos(monitor["left"], monitor["top"])
+    note: Pos is a NamedTuple class (models.py:22): its __new__ is generated code and its __init__ is object.__init__, so the call adds no edge (README, "Callees outside the package")
+39:31 call  Size(monitor["width"], monitor["height"])
+    note: Size is a NamedTuple class (models.py:29): the call adds no edge
+
+[mss.screenshot.ScreenShot.__repr__]
+42:24 call  type(self)
+    -> <builtin>.type
+42:51 getattr  self.left
+    -> mss.screenshot.ScreenShot.left
+42:63 getattr  self.top
+    -> mss.screenshot.ScreenShot.top
+42:79 getattr  self.width
+    -> mss.screenshot.ScreenShot.width
+42:92 getattr  self.height
+    -> mss.screenshot.ScreenShot.height
+
+[mss.screenshot.ScreenShot.__array_interface__]
+64:28 getattr  self.height
+    -> mss.screenshot.ScreenShot.height
+64:41 getattr  self.width
+    -> mss.screenshot.ScreenShot.width
+
+[mss.screenshot.ScreenShot.from_size]
+73:19 call  cls(data, monitor)
+    -> mss.screenshot.ScreenShot.__init__
+    note: cls is ScreenShot, or a client subclass (client code) when the client calls the classmethod on it
+
+[mss.screenshot.ScreenShot.bgra]
+87:21 call  bytes(self.raw)
+    -> <builtin>.bytes
+
+[mss.screenshot.ScreenShot.pixels]
+97:46 call  zip(self.raw[2::4], self.raw[1::4], self.raw[::4])
+    -> <builtin>.zip
+98:33 call  list(zip(*[iter(rgb_tuples)] * self.width))
+    -> <builtin>.list
+98:37 call  zip(*[iter(rgb_tuples)] * self.width)
+    -> <builtin>.zip
+98:44 call  iter(rgb_tuples)
+    -> <builtin>.iter
+98:65 getattr  self.width
+    -> mss.screenshot.ScreenShot.width
+
+[mss.screenshot.ScreenShot.pixel]
+108:25 getattr  self.pixels
+    -> mss.screenshot.ScreenShot.pixels
+111:34 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+[mss.screenshot.ScreenShot.rgb]
+122:28 call  bytearray(self.height * self.width * 3)
+    -> <builtin>.bytearray
+122:34 getattr  self.height
+    -> mss.screenshot.ScreenShot.height
+122:48 getattr  self.width
+    -> mss.screenshot.ScreenShot.width
+127:31 call  bytes(rgb)
+    -> <builtin>.bytes
+
+[mss.screenshot.ScreenShot.top]
+134:25 getattr  self.pos.top
+    reject mss.screenshot.ScreenShot.top: self.pos is a Pos named tuple; top is its field
+
+[mss.screenshot.ScreenShot.left]
+139:25 getattr  self.pos.left
+    reject mss.screenshot.ScreenShot.left: self.pos is a Pos named tuple; left is its field
+
+[mss.screenshot.ScreenShot.width]
+144:26 getattr  self.size.width
+    reject mss.screenshot.ScreenShot.width: self.size is a Size named tuple (annotation; the package passes Size); width is its field
+
+[mss.screenshot.ScreenShot.height]
+149:26 getattr  self.size.height
+    reject mss.screenshot.ScreenShot.height: self.size is a Size named tuple; height is its field
+
+== mss.tools
+
+[mss.tools]
+26:28 call  slice(5, 18)
+    -> <builtin>.slice
+
+[mss.tools.parse_edid]
+76:11 call  len(edid_data)
+    -> <builtin>.len
+83:11 call  sum(block0)
+    -> <builtin>.sum
+98:22 call  struct.unpack("<8s2BHIBBBB106xBx", block0)
+    -> struct.unpack
+105:12 call  chr(((id_manufacturer_packed >> 10) % 32) + 64)
+    -> <builtin>.chr
+106:14 call  chr(((id_manufacturer_packed >> 5) % 32) + 64)
+    -> <builtin>.chr
+107:14 call  chr((id_manufacturer_packed % 32) + 64)
+    -> <builtin>.chr
+124:15 call  any(descr[field_offset] != 0 for field_offset in _EDID_DE...
+    -> <builtin>.any
+133:36 call  sn.partition(b"\x0a")
+    -> <builtin>.bytes.partition
+    note: edid_data is bytes (annotation; the package passes bytes(...)), so its slices are bytes
+134:27 call  sn.rstrip(b" ")
+    -> <builtin>.bytes.rstrip
+135:44 call  sn.decode("ascii", errors="replace")
+    -> <builtin>.bytes.decode
+138:40 call  name.partition(b"\x0a")
+    -> <builtin>.bytes.partition
+139:31 call  name.rstrip(b" ")
+    -> <builtin>.bytes.rstrip
+140:45 call  name.decode("ascii", errors="replace")
+    -> <builtin>.bytes.decode
+
+[mss.tools.to_png]
+164:22 call  pack(">B", 0)
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+165:25 call  b"".join([png_filter + data[y * line : y * line + line] f...
+    -> <builtin>.bytes.join
+165:87 call  range(height)
+    -> <builtin>.range
+167:17 call  pack(">8B", 137, 80, 78, 71, 13, 10, 26, 10)
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+171:19 call  pack(">2I5B", width, height, 8, 2, 0, 0, 0)
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+172:19 call  pack(">I", crc32(b"".join(ihdr[1:3])) & 0xFFFFFFFF)
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+172:31 call  crc32(b"".join(ihdr[1:3]))
+    -> zlib.crc32
+    note: crc32 = zlib.crc32 (tools.py:160)
+172:40 call  b"".join(ihdr[1:3])
+    -> <builtin>.bytes.join
+173:19 call  pack(">I", len(ihdr[2]))
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+173:29 call  len(ihdr[2])
+    -> <builtin>.len
+176:40 call  zlib.compress(scanlines, level)
+    -> zlib.compress
+177:19 call  pack(">I", crc32(b"".join(idat[1:3])) & 0xFFFFFFFF)
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+177:31 call  crc32(b"".join(idat[1:3]))
+    -> zlib.crc32
+    note: crc32 = zlib.crc32 (tools.py:160)
+177:40 call  b"".join(idat[1:3])
+    -> <builtin>.bytes.join
+178:19 call  pack(">I", len(idat[2]))
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+178:29 call  len(idat[2])
+    -> <builtin>.len
+182:19 call  pack(">I", crc32(iend[1]) & 0xFFFFFFFF)
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+182:31 call  crc32(iend[1])
+    -> zlib.crc32
+    note: crc32 = zlib.crc32 (tools.py:160)
+183:19 call  pack(">I", len(iend[2]))
+    -> struct.pack
+    note: pack = struct.pack (tools.py:159)
+183:29 call  len(iend[2])
+    -> <builtin>.len
+187:32 call  b"".join(ihdr + idat + iend)
+    -> <builtin>.bytes.join
+189:14 call  open(output, "wb")
+    -> <builtin>.open
+190:20 call  fileh.write(magic)
+    -> io.BufferedWriter.write
+    note: open(output, "wb") returns an io.BufferedWriter
+191:20 call  fileh.write(b"".join(ihdr))
+    -> io.BufferedWriter.write
+191:29 call  b"".join(ihdr)
+    -> <builtin>.bytes.join
+192:20 call  fileh.write(b"".join(idat))
+    -> io.BufferedWriter.write
+192:29 call  b"".join(idat)
+    -> <builtin>.bytes.join
+193:20 call  fileh.write(b"".join(iend))
+    -> io.BufferedWriter.write
+193:29 call  b"".join(iend)
+    -> <builtin>.bytes.join
+196:20 call  fileh.flush()
+    -> io.BufferedWriter.flush
+197:17 call  os.fsync(fileh.fileno())
+    -> os.fsync
+197:30 call  fileh.fileno()
+    -> io.BufferedWriter.fileno
+
+== mss.windows
+
+[mss.windows.MSS.__init__]
+25:22 call  warnings.warn( "mss.windows.MSS is deprecated and will be...
+    -> warnings.warn
+30:14 call  super()
+    -> <builtin>.super
+30:25 call  super().__init__(**kwargs)
+    -> mss.base.MSS.__init__
+    reject *: super() in mss.windows.MSS resolves to its base mss.base.MSS
+
+[mss.windows.choose_impl]
+52:28 call  backend.lower()
+    -> <builtin>.str.lower
+    note: backend is a str (annotation; MSS passes its str backend)
+56:26 call  MSSImplGdi(**kwargs)
+    -> mss.windows.gdi.MSSImplGdi.__init__
+    reject mss.base.MSSImplementation.__init__: MSSImplGdi defines its own __init__
+59:26 call  ScreenShotError(msg)
+    -> mss.exception.ScreenShotError.__init__
+
+== mss.windows.gdi
+
+[mss.windows.gdi]
+44:18 call  POINTER(RECT)
+    -> ctypes.POINTER
+108:29 call  WINFUNCTYPE(BOOL, HMONITOR, HDC, POINTER(RECT), LPARAM)
+    -> ctypes.WINFUNCTYPE
+    note: Windows only (ctypes has WINFUNCTYPE and WinError only there; the module is imported only on Windows)
+108:58 call  POINTER(RECT)
+    -> ctypes.POINTER
+144:48 call  POINTER(BITMAPINFO)
+    -> ctypes.POINTER
+144:75 call  POINTER(LPVOID)
+    -> ctypes.POINTER
+147:47 call  POINTER(WORD)
+    -> ctypes.POINTER
+147:69 call  POINTER(DISPLAY_DEVICEW)
+    -> ctypes.POINTER
+156:53 call  POINTER(MONITORINFOEXW)
+    -> ctypes.POINTER
+
+[mss.windows.gdi._errcheck]
+116:28 call  WinError()
+    -> ctypes.WinError
+127:34 call  ScreenShotError(msg, details=details)
+    -> mss.exception.ScreenShotError.__init__
+129:30 call  ScreenShotError(msg, details=details)
+    -> mss.exception.ScreenShotError.__init__
+
+[mss.windows.gdi.MSSImplGdi.__init__]
+194:14 call  super()
+    -> <builtin>.super
+194:25 call  super().__init__()
+    -> mss.base.MSSImplementation.__init__
+    reject *: super() in MSSImplGdi resolves to its base MSSImplementation
+197:36 call  ctypes.WinDLL("user32", use_last_error=True)
+    -> ctypes.WinDLL
+198:35 call  ctypes.WinDLL("gdi32", use_last_error=True)
+    -> ctypes.WinDLL
+199:29 call  self._set_cfunctions()
+    -> mss.windows.gdi.MSSImplGdi._set_cfunctions
+    reject mss.darwin.MSSImplDarwin._set_cfunctions, mss.linux.xlib.MSSImplXlib._set_cfunctions: self is an MSSImplGdi
+200:32 call  self._set_dpi_awareness()
+    -> mss.windows.gdi.MSSImplGdi._set_dpi_awareness
+205:40 call  LPVOID()
+    -> ctypes.wintypes.LPVOID
+    note: ctypes.wintypes.LPVOID is ctypes.c_void_p (one class; the name the package imports)
+207:46 call  self.user32.GetWindowDC(0)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+208:52 call  self.gdi32.CreateCompatibleDC(self._srcdc)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+210:25 call  BITMAPINFO()
+    -> ctypes.Structure.__init__
+    note: BITMAPINFO is a ctypes Structure without its own __init__
+211:45 call  ctypes.sizeof(BITMAPINFOHEADER)
+    -> ctypes.sizeof
+
+[mss.windows.gdi.MSSImplGdi.close]
+226:36 call  self.gdi32.DeleteObject(self._dib)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+230:32 call  self.gdi32.DeleteDC(self._memdc)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+234:34 call  self.user32.ReleaseDC(0, self._srcdc)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+
+[mss.windows.gdi.MSSImplGdi._set_cfunctions]
+244:74 call  CFUNCTIONS.items()
+    -> <builtin>.dict.items
+245:21 call  cfactory(attrs[attr], func, argtypes, restype, errcheck)
+    -> mss.base.MSSImplementation._cfactory
+    exclude mss.base.MSS._cfactory: cfactory is self._cfactory of an MSSImplGdi, the staticmethod of MSSImplementation (base.py:118), not the copy on MSS
+    note: cfactory = self._cfactory (gdi.py:239); _errcheck is passed as data here and called later by ctypes (at the foreign calls)
+
+[mss.windows.gdi.MSSImplGdi._set_dpi_awareness]
+249:40 call  sys.getwindowsversion()
+    -> sys.getwindowsversion
+256:56 call  ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+259:43 call  self.user32.SetProcessDPIAware()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; no errcheck is set for this function
+
+[mss.windows.gdi.MSSImplGdi.monitors]
+269:24 call  monitors.append( { "left": int_(get_system_metrics(76)), ...
+    -> <builtin>.list.append
+271:29 call  int_(get_system_metrics(76))
+    -> <builtin>.int
+    note: int_ = int (gdi.py:262)
+271:48 call  get_system_metrics(76)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: get_system_metrics is the foreign function user32.GetSystemMetrics (gdi.py:264), without errcheck
+272:28 call  int_(get_system_metrics(77))
+    -> <builtin>.int
+    note: int_ = int (gdi.py:262)
+272:47 call  get_system_metrics(77)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: get_system_metrics is the foreign function user32.GetSystemMetrics, without errcheck
+273:30 call  int_(get_system_metrics(78))
+    -> <builtin>.int
+    note: int_ = int (gdi.py:262)
+273:49 call  get_system_metrics(78)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: get_system_metrics is the foreign function user32.GetSystemMetrics, without errcheck
+274:31 call  int_(get_system_metrics(79))
+    -> <builtin>.int
+    note: int_ = int (gdi.py:262)
+274:50 call  get_system_metrics(79)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: get_system_metrics is the foreign function user32.GetSystemMetrics, without errcheck
+279:10 decorator  @MONITORNUMPROC
+    -> ctypes.WINFUNCTYPE.WinFunctionType
+    note: MONITORNUMPROC is the C function type class that WINFUNCTYPE(...) returns (gdi.py:108), defined in ctypes.WINFUNCTYPE (named without <locals>); the external class is the callee
+331:35 call  user32.EnumDisplayMonitors(0, None, callback, 0)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi.MSSImplGdi.monitors.callback
+    -> mss.windows.gdi._errcheck
+    note: Windows calls the C callback (the decorated callback) for each monitor during EnumDisplayMonitors (callback rule); ctypes then calls the errcheck _errcheck
+
+[mss.windows.gdi.MSSImplGdi.monitors.callback]
+285:34 call  MONITORINFOEXW()
+    -> ctypes.Structure.__init__
+    note: MONITORINFOEXW is a ctypes Structure without its own __init__
+286:40 call  ctypes.sizeof(MONITORINFOEXW)
+    -> ctypes.sizeof
+287:35 call  user32.GetMonitorInfoW(hmonitor, ctypes.byref(info))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+287:58 call  ctypes.byref(info)
+    -> ctypes.byref
+290:24 call  int_(rct.left)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.left: the argument is a field of the RECT that Windows passes, loaded at 290:29
+    note: int_ = int (closure, gdi.py:262)
+290:29 getattr  rct.left
+    reject mss.screenshot.ScreenShot.left: rct is a ctypes.wintypes.RECT; left is a ctypes field
+291:23 call  int_(rct.top)
+    -> <builtin>.int
+    reject mss.screenshot.ScreenShot.top: the argument is a field of the RECT, loaded at 291:28
+    note: int_ = int (closure, gdi.py:262)
+291:28 getattr  rct.top
+    reject mss.screenshot.ScreenShot.top: rct is a ctypes.wintypes.RECT; top is a ctypes field
+293:30 call  bool(info.dwFlags & MONITORINFOF_PRIMARY)
+    -> <builtin>.bool
+294:45 call  DISPLAY_DEVICEW()
+    -> ctypes.Structure.__init__
+    note: DISPLAY_DEVICEW is a ctypes Structure without its own __init__
+295:46 call  ctypes.sizeof(DISPLAY_DEVICEW)
+    -> ctypes.sizeof
+299:42 call  user32.EnumDisplayDevicesW( ctypes.cast(ctypes.addressof(...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; no errcheck is set for this function
+300:28 call  ctypes.cast(ctypes.addressof(info.szDevice), POINTER(WORD))
+    -> ctypes.cast
+300:45 call  ctypes.addressof(info.szDevice)
+    -> ctypes.addressof
+300:69 call  POINTER(WORD)
+    -> ctypes.POINTER
+302:29 call  ctypes.byref(display_device)
+    -> ctypes.byref
+305:50 call  ctypes.wstring_at(ctypes.addressof(display_device.DeviceS...
+    -> ctypes.wstring_at
+305:67 call  ctypes.addressof(display_device.DeviceString)
+    -> ctypes.addressof
+309:42 call  user32.EnumDisplayDevicesW( ctypes.cast(ctypes.addressof(...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; no errcheck is set for this function
+310:28 call  ctypes.cast(ctypes.addressof(info.szDevice), POINTER(WORD))
+    -> ctypes.cast
+310:45 call  ctypes.addressof(info.szDevice)
+    -> ctypes.addressof
+310:69 call  POINTER(WORD)
+    -> ctypes.POINTER
+312:29 call  ctypes.byref(display_device)
+    -> ctypes.byref
+315:46 call  ctypes.wstring_at(ctypes.addressof(display_device.DeviceID))
+    -> ctypes.wstring_at
+315:63 call  ctypes.addressof(display_device.DeviceID)
+    -> ctypes.addressof
+320:30 call  int_(rct.right)
+    -> <builtin>.int
+    note: int_ = int (closure, gdi.py:262)
+321:31 call  int_(rct.bottom)
+    -> <builtin>.int
+    note: int_ = int (closure, gdi.py:262)
+328:28 call  monitors.append(mon_dict)
+    -> <builtin>.list.append
+
+[mss.windows.gdi.MSSImplGdi.grab]
+358:33 call  gdi.DeleteObject(self._dib)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+362:36 call  LPVOID()
+    -> ctypes.wintypes.LPVOID
+    note: ctypes.wintypes.LPVOID is ctypes.c_void_p (one class; the name the package imports)
+363:45 call  gdi.CreateDIBSection( memdc, self._bmi, DIB_RGB_COLORS, c...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+367:29 call  ctypes.byref(self._dib_bits)
+    -> ctypes.byref
+371:29 call  gdi.SelectObject(memdc, self._dib)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+377:42 call  ctypes.cast(self._dib_bits, POINTER(array_type))
+    -> ctypes.cast
+377:66 call  POINTER(array_type)
+    -> ctypes.POINTER
+380:19 call  gdi.BitBlt(memdc, 0, 0, width, height, srcdc, monitor["le...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> mss.windows.gdi._errcheck
+    note: Windows only; ctypes calls the errcheck _errcheck after the call (_set_cfunctions)
+384:21 call  gdi.GdiFlush()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; no errcheck is set for this function
+388:25 call  bytearray(self._dib_array)
+    -> <builtin>.bytearray

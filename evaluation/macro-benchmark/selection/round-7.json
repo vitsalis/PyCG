@@ -1,0 +1,818 @@
+{
+  "complete": true,
+  "constants": {
+    "CI_FILES": [
+      ".github/workflows/",
+      ".travis.yml",
+      ".gitlab-ci.yml",
+      ".circleci/",
+      "azure-pipelines.yml"
+    ],
+    "FILTERS": [
+      "rank",
+      "stub-name",
+      "release",
+      "pure-python",
+      "requires-python",
+      "licence",
+      "no-dependency",
+      "size",
+      "source",
+      "history",
+      "ci",
+      "tests",
+      "released-code",
+      "github"
+    ],
+    "FRAME_PYTHON": [
+      3,
+      15
+    ],
+    "GITHUB_API": "https://api.github.com/repos/{owner}/{repo}",
+    "GITHUB_FACTS": [
+      "archived",
+      "created_at",
+      "fork",
+      "forks_count",
+      "full_name",
+      "open_issues_count",
+      "pushed_at",
+      "stargazers_count",
+      "subscribers_count"
+    ],
+    "MAINTAINED_YEARS": 3,
+    "MARKER_ENVIRONMENT": {
+      "extra": "",
+      "implementation_name": "cpython",
+      "os_name": "posix",
+      "platform_python_implementation": "CPython",
+      "platform_system": "Linux",
+      "python_full_version": "3.14.0",
+      "python_version": "3.14",
+      "sys_platform": "linux"
+    },
+    "MAX_BLOB_BYTES": 4194304,
+    "MAX_CODE_LINES": 4000,
+    "MAX_DIFFERING_PERCENT": 5,
+    "MIN_AUTHORS": 2,
+    "MIN_CODE_LINES": 800,
+    "MIN_COMMITS": 100,
+    "MIN_STARS": 500,
+    "PERMISSIVE_CLASSIFIERS": [
+      "License :: OSI Approved :: Apache Software License",
+      "License :: OSI Approved :: BSD License",
+      "License :: OSI Approved :: ISC License (ISCL)",
+      "License :: OSI Approved :: MIT License",
+      "License :: OSI Approved :: Python Software Foundation License",
+      "License :: OSI Approved :: The Unlicense (Unlicense)",
+      "License :: OSI Approved :: Zero-Clause BSD (0BSD)"
+    ],
+    "PERMISSIVE_LICENCES": [
+      "0BSD",
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "ISC",
+      "MIT",
+      "PSF-2.0",
+      "Unlicense"
+    ],
+    "PURE_WHEEL_TAGS": [
+      "py3-none-any",
+      "py2.py3-none-any"
+    ],
+    "PYPI_PROJECT": "https://pypi.org/pypi/{name}/json",
+    "PYPI_RELEASE": "https://pypi.org/pypi/{name}/{version}/json",
+    "RANK_CUTOFF": 5000,
+    "STRATA": 5,
+    "STUB_PREFIXES": [
+      "types-"
+    ],
+    "STUB_SUFFIXES": [
+      "-stubs"
+    ],
+    "TAG_FORMS": [
+      "{version}",
+      "v{version}",
+      "{name}-{version}",
+      "release-{version}"
+    ],
+    "TARGET_PYTHON": "3.14.0",
+    "TEST_DIRS": [
+      "tests",
+      "test",
+      "testing",
+      "unittests"
+    ],
+    "TEST_FILES": [
+      "test_*.py",
+      "*_test.py"
+    ],
+    "TRANSPORT_SETTINGS": [
+      "http."
+    ]
+  },
+  "dropped": [
+    {
+      "name": "dill",
+      "reason": "a tool run touched it: dill 0.3.9 is in HeaderGen's image (evaluation/tools/headergen-requirements.txt)"
+    }
+  ],
+  "frame": {
+    "file": "frame.json",
+    "sha256": "901447044e59a51cc87d0af631fb5f31dfa0a64ac565cf30ed5c95ffb8eebf90"
+  },
+  "list": {
+    "date": "2026-11-01",
+    "file": "top-pypi-packages-2026-11-01.json",
+    "rows": 15000,
+    "sha256": "3e958a64ebe1de0b6a4ab4c6b465d481f350fd1dfa926c639add36eb34dabc1e"
+  },
+  "order": [
+    "django-constance",
+    "python-barcode",
+    "jsonpickle",
+    "itables",
+    "configargparse",
+    "websocket-client",
+    "aiocache",
+    "cachetools",
+    "h11",
+    "prometheus-client",
+    "pymysql",
+    "segno",
+    "textdistance",
+    "django-environ",
+    "dill",
+    "pgvector",
+    "whitenoise",
+    "dagster-pipes",
+    "toolz",
+    "jmespath",
+    "mss",
+    "path",
+    "platformdirs",
+    "anytree",
+    "pyfiglet",
+    "pyflakes",
+    "pyusb",
+    "pyjwt",
+    "tinydb",
+    "pypandoc",
+    "pyrate-limiter",
+    "attrs",
+    "funcy",
+    "avro",
+    "sqlparse",
+    "pyshp",
+    "secure",
+    "argcomplete",
+    "markdown2",
+    "asgiref",
+    "nodeenv",
+    "json-repair",
+    "automat",
+    "marshmallow",
+    "tinytag",
+    "vulture",
+    "validators",
+    "sh",
+    "cloudpickle",
+    "structlog",
+    "pypinyin",
+    "pubchempy",
+    "tablib",
+    "einops",
+    "honcho",
+    "more-itertools",
+    "pluggy",
+    "flit-core",
+    "uncertainties",
+    "m3u8",
+    "loguru",
+    "bottle",
+    "python-multipart",
+    "cloudpathlib",
+    "fastjsonschema",
+    "netaddr",
+    "tenacity",
+    "cerberus",
+    "tabulate"
+  ],
+  "round": 7,
+  "seed": 16299633012922554993,
+  "selected": [
+    "tinydb",
+    "pgvector",
+    "textdistance",
+    "websocket-client",
+    "mss"
+  ],
+  "strata": [
+    {
+      "examined": [
+        {
+          "name": "aiocache",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "h11",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "django-environ",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "whitenoise",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "dagster-pipes",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "path",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "pyfiglet",
+          "reason": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "tinydb",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 1236,
+      "members": [
+        "tinydb",
+        "cloudpickle",
+        "pyfiglet",
+        "honcho",
+        "django-environ",
+        "pypandoc",
+        "whitenoise",
+        "path",
+        "pubchempy",
+        "vulture",
+        "dagster-pipes",
+        "python-multipart",
+        "h11",
+        "aiocache"
+      ],
+      "min_code_lines": 809,
+      "selected": {
+        "facts": {
+          "authors": 102,
+          "ci": [
+            ".github/workflows/ci-workflow.yml",
+            ".github/workflows/publish-workflow.yml"
+          ],
+          "code_lines": 809,
+          "commit": "1e39ad3a2d9eca57efd9019fd089b5a04676da95",
+          "commits": 737,
+          "github": {
+            "archived": false,
+            "created_at": "2013-07-12T23:31:13Z",
+            "fork": false,
+            "forks_count": 647,
+            "full_name": "msiemens/tinydb",
+            "license": "MIT",
+            "open_issues_count": 9,
+            "pushed_at": "2026-10-26T04:03:45Z",
+            "stargazers_count": 7579,
+            "subscribers_count": 99
+          },
+          "licence": "MIT",
+          "licence_source": "license_expression",
+          "release": "4.9.0",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 809,
+            "source_root": "."
+          },
+          "repository": "https://github.com/msiemens/tinydb",
+          "tag": "v4.9.0",
+          "tag_object": "1e39ad3a2d9eca57efd9019fd089b5a04676da95",
+          "test_code_lines": 1291,
+          "test_files": [
+            "tests/test_middlewares.py",
+            "tests/test_operations.py",
+            "tests/test_queries.py",
+            "tests/test_storages.py",
+            "tests/test_tables.py",
+            "tests/test_tinydb.py",
+            "tests/test_utils.py"
+          ],
+          "test_ratio": 1.596,
+          "top_level": [
+            "tinydb"
+          ],
+          "uploaded": "2026-08-06",
+          "wheel": {
+            "filename": "tinydb-4.9.0-py3-none-any.whl",
+            "sha256": "111f1f680978a1b7c534d698dd1d76739ff31c74c27fd26a111140b51d8b35d6",
+            "url": "https://files.pythonhosted.org/packages/54/ef/321cb77b49bc26f36ed1c85d55cd8e80f8f81e5e183b769abf67386c257a/tinydb-4.9.0-py3-none-any.whl"
+          }
+        },
+        "name": "tinydb",
+        "rank": 1879
+      },
+      "stratum": 1
+    },
+    {
+      "examined": [
+        {
+          "name": "django-constance",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "configargparse",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "cachetools",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "pgvector",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 1559,
+      "members": [
+        "django-constance",
+        "asgiref",
+        "jmespath",
+        "pgvector",
+        "fastjsonschema",
+        "pluggy",
+        "anytree",
+        "cachetools",
+        "validators",
+        "configargparse",
+        "argcomplete",
+        "tenacity",
+        "uncertainties",
+        "funcy"
+      ],
+      "min_code_lines": 1239,
+      "selected": {
+        "facts": {
+          "authors": 9,
+          "ci": [
+            ".github/workflows/build.yml"
+          ],
+          "code_lines": 1244,
+          "commit": "5275164edb3a2847d4a5aec1af5ae90f7dc47b53",
+          "commits": 918,
+          "github": {
+            "archived": false,
+            "created_at": "2021-06-12T13:48:05Z",
+            "fork": false,
+            "forks_count": 105,
+            "full_name": "pgvector/pgvector-python",
+            "license": "MIT",
+            "open_issues_count": 10,
+            "pushed_at": "2026-11-05T02:53:13Z",
+            "stargazers_count": 1545,
+            "subscribers_count": 15
+          },
+          "licence": "MIT",
+          "licence_source": "license_expression",
+          "release": "0.5.1",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 1244,
+            "source_root": "."
+          },
+          "repository": "https://github.com/pgvector/pgvector-python",
+          "tag": "v0.5.1",
+          "tag_object": "5275164edb3a2847d4a5aec1af5ae90f7dc47b53",
+          "test_code_lines": 2113,
+          "test_files": [
+            "tests/test_asyncpg.py",
+            "tests/test_bit.py",
+            "tests/test_django.py",
+            "tests/test_half_vector.py",
+            "tests/test_peewee.py",
+            "tests/test_pg8000.py",
+            "tests/test_psycopg.py",
+            "tests/test_psycopg2.py",
+            "tests/test_sparse_vector.py",
+            "tests/test_sqlalchemy.py",
+            "tests/test_sqlmodel.py",
+            "tests/test_vector.py"
+          ],
+          "test_ratio": 1.699,
+          "top_level": [
+            "pgvector"
+          ],
+          "uploaded": "2026-10-09",
+          "wheel": {
+            "filename": "pgvector-0.5.1-py3-none-any.whl",
+            "sha256": "ec5bcd5ffaefe6ecb2dcc9564ca921d284564b969183bc837a144604773af8ea",
+            "url": "https://files.pythonhosted.org/packages/a2/8d/a9c2a531da0ebb54b4a7174450e8534a39db112a141ae3a437de28420111/pgvector-0.5.1-py3-none-any.whl"
+          }
+        },
+        "name": "pgvector",
+        "rank": 545
+      },
+      "stratum": 2
+    },
+    {
+      "examined": [
+        {
+          "name": "python-barcode",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "textdistance",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 2256,
+      "members": [
+        "python-barcode",
+        "textdistance",
+        "tabulate",
+        "nodeenv",
+        "einops",
+        "pyflakes",
+        "m3u8",
+        "secure",
+        "cerberus",
+        "toolz",
+        "sh",
+        "pyjwt",
+        "tinytag",
+        "pypinyin"
+      ],
+      "min_code_lines": 1596,
+      "selected": {
+        "facts": {
+          "authors": 18,
+          "ci": [
+            ".github/workflows/main.yml"
+          ],
+          "code_lines": 1735,
+          "commit": "faa25f6ff50d0f34dc9655d4d7b0d8daf6f9ff85",
+          "commits": 409,
+          "github": {
+            "archived": false,
+            "created_at": "2017-05-05T08:46:10Z",
+            "fork": false,
+            "forks_count": 267,
+            "full_name": "life4/textdistance",
+            "license": "MIT",
+            "open_issues_count": 21,
+            "pushed_at": "2025-04-18T12:13:17Z",
+            "stargazers_count": 3546,
+            "subscribers_count": 58
+          },
+          "licence": "License :: OSI Approved :: MIT License",
+          "licence_source": "classifiers",
+          "release": "4.6.3",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 1735,
+            "source_root": "."
+          },
+          "repository": "https://github.com/orsinium/textdistance",
+          "tag": "4.6.3",
+          "tag_object": "faa25f6ff50d0f34dc9655d4d7b0d8daf6f9ff85",
+          "test_code_lines": 873,
+          "test_files": [
+            "tests/test_common.py",
+            "tests/test_compression/test_arith_ncd.py",
+            "tests/test_compression/test_bwtrle_ncd.py",
+            "tests/test_compression/test_bz2_ncd.py",
+            "tests/test_compression/test_common.py",
+            "tests/test_compression/test_entropy_ncd.py",
+            "tests/test_compression/test_sqrt_ncd.py",
+            "tests/test_edit/test_damerau_levenshtein.py",
+            "tests/test_edit/test_editex.py",
+            "tests/test_edit/test_gotoh.py",
+            "tests/test_edit/test_hamming.py",
+            "tests/test_edit/test_jaro.py",
+            "tests/test_edit/test_jaro_winkler.py",
+            "tests/test_edit/test_levenshtein.py",
+            "tests/test_edit/test_matrix.py",
+            "tests/test_edit/test_mlipns.py",
+            "tests/test_edit/test_needleman_wunsch.py",
+            "tests/test_edit/test_smith_waterman.py",
+            "tests/test_edit/test_strcmp95.py",
+            "tests/test_external.py",
+            "tests/test_phonetic/test_editex.py",
+            "tests/test_sequence/test_lcsseq.py",
+            "tests/test_sequence/test_lcsstr.py",
+            "tests/test_token/test_bag.py",
+            "tests/test_token/test_cosine.py",
+            "tests/test_token/test_jaccard.py",
+            "tests/test_token/test_monge_elkan.py",
+            "tests/test_token/test_overlap.py",
+            "tests/test_token/test_sorensen.py"
+          ],
+          "test_ratio": 0.503,
+          "top_level": [
+            "textdistance"
+          ],
+          "uploaded": "2024-07-16",
+          "wheel": {
+            "filename": "textdistance-4.6.3-py3-none-any.whl",
+            "sha256": "0cb1b2cc8e3339ddc3e0f8c870e49fb49de6ecc42a718917308b3c971f34aa56",
+            "url": "https://files.pythonhosted.org/packages/c6/c2/c62601c858010b0513a6434b9be19bd740533a6e861eddfd30b7258d92a0/textdistance-4.6.3-py3-none-any.whl"
+          }
+        },
+        "name": "textdistance",
+        "rank": 2809
+      },
+      "stratum": 3
+    },
+    {
+      "examined": [
+        {
+          "name": "jsonpickle",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "websocket-client",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 3074,
+      "members": [
+        "platformdirs",
+        "pyrate-limiter",
+        "tablib",
+        "jsonpickle",
+        "more-itertools",
+        "websocket-client",
+        "automat",
+        "flit-core",
+        "marshmallow",
+        "loguru",
+        "sqlparse",
+        "markdown2",
+        "bottle",
+        "pymysql"
+      ],
+      "min_code_lines": 2267,
+      "selected": {
+        "facts": {
+          "authors": 231,
+          "ci": [
+            ".github/workflows/build.yml",
+            ".github/workflows/codecoverage.yml",
+            ".github/workflows/doctest.yml",
+            ".github/workflows/lint.yml"
+          ],
+          "code_lines": 2739,
+          "commit": "12225f5ce6e27536be3b0da85fd763ed75581bcc",
+          "commits": 1300,
+          "github": {
+            "archived": false,
+            "created_at": "2010-12-28T06:35:25Z",
+            "fork": false,
+            "forks_count": 796,
+            "full_name": "websocket-client/websocket-client",
+            "license": "Apache-2.0",
+            "open_issues_count": 42,
+            "pushed_at": "2026-10-29T00:13:06Z",
+            "stargazers_count": 3711,
+            "subscribers_count": 76
+          },
+          "licence": "Apache-2.0",
+          "licence_source": "license",
+          "release": "1.9.2",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 6533,
+            "source_root": "."
+          },
+          "repository": "https://github.com/websocket-client/websocket-client",
+          "tag": "v1.9.2",
+          "tag_object": "12225f5ce6e27536be3b0da85fd763ed75581bcc",
+          "test_code_lines": 3783,
+          "test_files": [
+            "websocket/tests/test_abnf.py",
+            "websocket/tests/test_app.py",
+            "websocket/tests/test_cookiejar.py",
+            "websocket/tests/test_dispatcher.py",
+            "websocket/tests/test_handshake_large_response.py",
+            "websocket/tests/test_http.py",
+            "websocket/tests/test_large_payloads.py",
+            "websocket/tests/test_logging_helpers.py",
+            "websocket/tests/test_reconnect_bad_fd.py",
+            "websocket/tests/test_socket.py",
+            "websocket/tests/test_socket_bugs.py",
+            "websocket/tests/test_ssl_compat.py",
+            "websocket/tests/test_ssl_edge_cases.py",
+            "websocket/tests/test_url.py",
+            "websocket/tests/test_utils.py",
+            "websocket/tests/test_websocket.py"
+          ],
+          "test_ratio": 1.381,
+          "top_level": [
+            "websocket"
+          ],
+          "uploaded": "2026-08-31",
+          "wheel": {
+            "filename": "websocket_client-1.9.2-py3-none-any.whl",
+            "sha256": "e1a673830a9c7bfa47b1cd3d5e4178f4c9651d80a4eab02c9c23a1c3ec6250ce",
+            "url": "https://files.pythonhosted.org/packages/d5/d2/cc4dc1271e464942db7ee278baae2daa99ee77cb2af744025c04da585a3e/websocket_client-1.9.2-py3-none-any.whl"
+          }
+        },
+        "name": "websocket-client",
+        "rank": 180
+      },
+      "stratum": 4
+    },
+    {
+      "examined": [
+        {
+          "name": "itables",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "prometheus-client",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "segno",
+          "reason": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "dill",
+          "reason": "a tool run touched it: dill 0.3.9 is in HeaderGen's image (evaluation/tools/headergen-requirements.txt)",
+          "result": "dropped"
+        },
+        {
+          "name": "mss",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 3880,
+      "members": [
+        "itables",
+        "segno",
+        "structlog",
+        "pyusb",
+        "attrs",
+        "mss",
+        "json-repair",
+        "netaddr",
+        "pyshp",
+        "prometheus-client",
+        "avro",
+        "cloudpathlib",
+        "dill"
+      ],
+      "min_code_lines": 3117,
+      "selected": {
+        "facts": {
+          "authors": 30,
+          "ci": [
+            ".github/workflows/release.yml",
+            ".github/workflows/tests.yml"
+          ],
+          "code_lines": 3365,
+          "commit": "b7f4d62c6c5dc68fd60d43600f0e91012c8bc2e0",
+          "commits": 995,
+          "github": {
+            "archived": false,
+            "created_at": "2013-07-01T16:14:08Z",
+            "fork": false,
+            "forks_count": 117,
+            "full_name": "BoboTiG/python-mss",
+            "license": "MIT",
+            "open_issues_count": 43,
+            "pushed_at": "2026-11-09T12:49:45Z",
+            "stargazers_count": 1290,
+            "subscribers_count": 12
+          },
+          "licence": "License :: OSI Approved :: MIT License",
+          "licence_source": "classifiers",
+          "release": "10.2.0",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 3365,
+            "source_root": "src"
+          },
+          "repository": "https://github.com/BoboTiG/python-mss",
+          "tag": "v10.2.0",
+          "tag_object": "d9bea7e544ee3041adc94daa102af44c1e4e859c",
+          "test_code_lines": 1554,
+          "test_files": [
+            "src/tests/test_bgra_to_rgb.py",
+            "src/tests/test_cls_image.py",
+            "src/tests/test_compat_10_1.py",
+            "src/tests/test_compat_exports.py",
+            "src/tests/test_compat_linux_api.py",
+            "src/tests/test_find_monitors.py",
+            "src/tests/test_get_pixels.py",
+            "src/tests/test_gnu_linux.py",
+            "src/tests/test_implementation.py",
+            "src/tests/test_issue_220.py",
+            "src/tests/test_leaks.py",
+            "src/tests/test_macos.py",
+            "src/tests/test_primary_monitor.py",
+            "src/tests/test_save.py",
+            "src/tests/test_setup.py",
+            "src/tests/test_tools.py",
+            "src/tests/test_windows.py",
+            "src/tests/test_xcb.py",
+            "src/tests/third_party/test_numpy.py",
+            "src/tests/third_party/test_pil.py"
+          ],
+          "test_ratio": 0.462,
+          "top_level": [
+            "mss"
+          ],
+          "uploaded": "2026-04-23",
+          "wheel": {
+            "filename": "mss-10.2.0-py3-none-any.whl",
+            "sha256": "e79f428899280e7e64e38365b5bfed683851ebea807eeaeadaf06eb8e0d67197",
+            "url": "https://files.pythonhosted.org/packages/f2/c3/313e14f245c79b4c05bd0f3a84a4813aa26fa10f8993aebd91d04c5fad3f/mss-10.2.0-py3-none-any.whl"
+          }
+        },
+        "name": "mss",
+        "rank": 2560
+      },
+      "stratum": 5
+    }
+  ],
+  "used": {
+    "aiocache": "used: macro-benchmark/projects.toml",
+    "anytree": "used: macro-benchmark/projects.toml",
+    "argcomplete": "used: macro-benchmark/projects.toml",
+    "asciinema": "used: macro-benchmark/projects.toml",
+    "asyncstdlib": "used: macro-benchmark/projects.toml",
+    "autojump": "used: macro-benchmark/projects.toml",
+    "bottle": "used: macro-benchmark/projects.toml",
+    "cachetools": "used: macro-benchmark/projects.toml",
+    "configargparse": "used: macro-benchmark/projects.toml",
+    "dagster-pipes": "used: macro-benchmark/projects.toml",
+    "django-constance": "used: macro-benchmark/projects.toml",
+    "django-environ": "used: macro-benchmark/projects.toml",
+    "einops": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+    "fabric": "used: macro-benchmark/projects.toml",
+    "face-classification": "used: macro-benchmark/projects.toml",
+    "fastjsonschema": "used: macro-benchmark/projects.toml",
+    "funcy": "used: macro-benchmark/projects.toml",
+    "h11": "used: macro-benchmark/projects.toml",
+    "hypothesis": "excluded: the scalability runs",
+    "itables": "used: macro-benchmark/projects.toml",
+    "jmespath": "used: macro-benchmark/projects.toml",
+    "json-repair": "used: macro-benchmark/projects.toml",
+    "jsonpickle": "used: macro-benchmark/projects.toml",
+    "loguru": "excluded: the pilot of the test-selection client",
+    "markdown2": "used: macro-benchmark/projects.toml",
+    "marshmallow": "used: macro-benchmark/projects.toml",
+    "more-itertools": "used: macro-benchmark/projects.toml",
+    "netaddr": "used: macro-benchmark/projects.toml",
+    "packaging": "excluded: the scalability runs",
+    "path": "used: macro-benchmark/projects.toml",
+    "pluggy": "used: macro-benchmark/projects.toml",
+    "prometheus-client": "used: macro-benchmark/projects.toml",
+    "pyfiglet": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+    "pyflakes": "used: macro-benchmark/projects.toml",
+    "pygments": "excluded: the scalability runs",
+    "pymysql": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+    "pypinyin": "used: macro-benchmark/projects.toml",
+    "pyrate-limiter": "used: macro-benchmark/projects.toml",
+    "pytest": "excluded: the scalability runs (its package _pytest)",
+    "python-barcode": "used: macro-benchmark/projects.toml",
+    "segno": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+    "sqlparse": "used: macro-benchmark/projects.toml",
+    "structlog": "used: macro-benchmark/projects.toml",
+    "sublist3r": "used: macro-benchmark/projects.toml",
+    "tabulate": "used: macro-benchmark/projects.toml",
+    "tenacity": "used: macro-benchmark/projects.toml",
+    "tinytag": "used: macro-benchmark/projects.toml",
+    "uncertainties": "used: macro-benchmark/selection/batch-7-proposal/projects.toml",
+    "validators": "used: macro-benchmark/projects.toml",
+    "whitenoise": "used: macro-benchmark/projects.toml"
+  }
+}

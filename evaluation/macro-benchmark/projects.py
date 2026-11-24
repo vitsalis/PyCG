@@ -34,9 +34,9 @@ _GIT_KEYS = ("repository", "tag", "commit")
 _SDIST_KEYS = ("sdist", "sdist_url", "sdist_sha256")
 _SDIST_FILE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*\.tar\.gz")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-# The batches: the five batches in the order in which they were built,
-# then the projects of PyCG's ICSE 2021 evaluation.
-BATCHES = (1, 2, 3, 4, 5, "icse-2021")
+# The batches in the order in which they were built, then the projects of
+# PyCG's ICSE 2021 evaluation.
+BATCHES = (1, 2, 3, 4, 5, 7, "icse-2021")
 
 
 class Sdist(NamedTuple):
@@ -69,6 +69,7 @@ class Project(NamedTuple):
     repository: str | None  # the git repository's URL
     commit: str | None
     sdist: Sdist | None  # in place of a commit; the source is its unpacked copy
+    environment: tuple = ()  # ((name, value), ...): variables of the test run
 
     @property
     def pin(self):
@@ -246,6 +247,7 @@ def load_projects(config_path=CONFIG_PATH):
             repository=entry.get("repository"),
             commit=entry.get("commit"),
             sdist=_sdist(config_path, name, entry),
+            environment=_environment(config_path, name, entry),
         )
         # A test requirement can need the package itself (pytest needs
         # pluggy): the environment then has it too. The run checks that the
@@ -264,6 +266,41 @@ def load_projects(config_path=CONFIG_PATH):
             )
         projects[name] = project
     return projects
+
+
+# The variables that an entry may not set: those of trace.py's environment of
+# the test run, and the families that configure the interpreter, pytest, the
+# dynamic loader and the locale (compared without case).
+_TRACER_VARIABLES = frozenset(
+    {"PATH", "HOME", "TMPDIR", "LANG", "NO_PROXY", "PYTHONHASHSEED"}
+)
+_RESERVED_PREFIXES = ("PYTHON", "PYTEST", "LD_", "LC_")
+_VARIABLE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+
+
+def reserved_variable(name):
+    """Whether an entry's `environment` may not set the variable `name`."""
+    upper = name.upper()
+    return upper in _TRACER_VARIABLES or upper.startswith(_RESERVED_PREFIXES)
+
+
+def _environment(config_path, name, entry):
+    """The environment variables of an entry's test run, sorted by name: a
+    table of variable names and string values; a reserved name is refused."""
+    table = entry.get("environment", {})
+    where = f"{config_path}: [{name}]: environment"
+    if not isinstance(table, dict) or not all(
+        isinstance(key, str) and _VARIABLE.fullmatch(key) and isinstance(value, str)
+        for key, value in table.items()
+    ):
+        raise ValueError(f"{where}: a table of variable names and strings")
+    for key in table:
+        if reserved_variable(key):
+            raise ValueError(
+                f"{where}: {key} is not an entry's to set (trace.py sets it, or "
+                "it configures the interpreter, pytest, the loader or the locale)"
+            )
+    return tuple(sorted(table.items()))
 
 
 def _sdist(config_path, name, entry):

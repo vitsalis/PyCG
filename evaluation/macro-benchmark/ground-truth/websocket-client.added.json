@@ -1,0 +1,1259 @@
+{
+  "edges": {
+    "websocket._abnf.ABNF.mask": {
+      "wsaccel.xormask.XorMaskerSimple.process.encode": [
+        "websocket._abnf 302:31 call  data.encode(\"latin-1\")"
+      ],
+      "wsaccel.xormask.XorMaskerSimple.process.encode.encode": [
+        "websocket._abnf 302:31 call  data.encode(\"latin-1\")"
+      ]
+    },
+    "websocket._abnf.ABNF.validate": {
+      "<builtin>.str.encode": [
+        "websocket._abnf 205:42 call  self.data[:2].encode(\"utf-8\")"
+      ]
+    },
+    "websocket._abnf._mask": {
+      "wsaccel.xormask.XorMaskerSimple": [
+        "websocket._abnf 38:45 call  XorMaskerSimple(mask_value)"
+      ],
+      "wsaccel.xormask.XorMaskerSimple.process": [
+        "websocket._abnf 38:65 call  XorMaskerSimple(mask_value).process(data_value)"
+      ]
+    },
+    "websocket._abnf.frame_buffer.recv_frame": {
+      "<builtin>.Exception.__init__": [
+        "websocket._abnf 379:49 call  WebSocketProtocolException(\"Header not received\")",
+        "websocket._abnf 394:49 call  WebSocketProtocolException(\"Length not received\")",
+        "websocket._abnf 398:53 call  WebSocketProtocolException(\"Mask not received\")"
+      ]
+    },
+    "websocket._abnf.frame_buffer.recv_length": {
+      "<builtin>.Exception.__init__": [
+        "websocket._abnf 355:45 call  WebSocketProtocolException(\"Header not received\")"
+      ],
+      "struct.unpack": [
+        "websocket._abnf 360:40 call  struct.unpack(\"!H\", v)",
+        "websocket._abnf 363:40 call  struct.unpack(\"!Q\", v)"
+      ],
+      "websocket._abnf.frame_buffer.recv_strict": [
+        "websocket._abnf 359:33 call  self.recv_strict(2)",
+        "websocket._abnf 362:33 call  self.recv_strict(8)"
+      ]
+    },
+    "websocket._abnf.frame_buffer.recv_strict": {
+      "<builtin>.ValueError": [
+        "websocket._abnf 411:29 call  ValueError(\"bufsize must be an integer\")"
+      ]
+    },
+    "websocket._app.WebSocketApp._parse_close_frame": {
+      "<builtin>.bytes": [
+        "websocket._app 663:31 call  bytes(data)"
+      ],
+      "wsaccel.xormask.XorMaskerSimple.process.encode": [
+        "websocket._app 661:37 call  data.encode(\"utf-8\")"
+      ]
+    },
+    "websocket._app.WebSocketApp._send_ping": {
+      "threading.Event.wait": [
+        "websocket._app 249:38 call  self.stop_ping.wait(self.ping_interval)"
+      ],
+      "time.time": [
+        "websocket._app 251:46 call  time.time()"
+      ],
+      "websocket._core.WebSocket.ping": [
+        "websocket._app 254:35 call  self.sock.ping(self.ping_payload)"
+      ],
+      "websocket._logging.debug": [
+        "websocket._app 253:26 call  debug(\"Sending ping\")",
+        "websocket._app 256:26 call  debug(f\"Failed to send ping: {e}\")"
+      ]
+    },
+    "websocket._app.WebSocketApp._start_ping_thread": {
+      "<builtin>.float": [
+        "websocket._app 217:54 call  float(0)"
+      ],
+      "threading.Event": [
+        "websocket._app 218:41 call  threading.Event()"
+      ],
+      "threading.Thread": [
+        "websocket._app 219:44 call  threading.Thread(target=self._send_ping)"
+      ],
+      "threading.Thread.start": [
+        "websocket._app 221:31 call  self.ping_thread.start()"
+      ],
+      "websocket._app.WebSocketApp._send_ping": [
+        "websocket._app 221:31 call  self.ping_thread.start()"
+      ]
+    },
+    "websocket._app.WebSocketApp._stop_ping_thread": {
+      "threading.Event.set": [
+        "websocket._app 225:31 call  self.stop_ping.set()"
+      ],
+      "threading.Thread.is_alive": [
+        "websocket._app 226:58 call  self.ping_thread.is_alive()",
+        "websocket._app 230:41 call  self.ping_thread.is_alive()"
+      ],
+      "threading.Thread.join": [
+        "websocket._app 227:34 call  self.ping_thread.join(3)"
+      ],
+      "websocket._logging.warning": [
+        "websocket._app 231:24 call  warning( \"Ping thread failed to terminate within 3 second..."
+      ]
+    },
+    "websocket._app.WebSocketApp.close": {
+      "websocket._core.WebSocket.close": [
+        "websocket._app 210:23 call  sock.close(**kwargs)"
+      ]
+    },
+    "websocket._app.WebSocketApp.run_forever": {
+      "<builtin>.len": [
+        "websocket._app 605:61 call  len(inspect.stack())"
+      ],
+      "inspect.stack": [
+        "websocket._app 605:75 call  inspect.stack()"
+      ],
+      "websocket._dispatcher.DispatcherBase.reconnect": [
+        "websocket._app 607:41 call  dispatcher.reconnect(reconnect, initialize_socket)"
+      ],
+      "websocket._logging.debug": [
+        "websocket._app 604:26 call  debug( f\"Calling dispatcher reconnect [{len(inspect.stack..."
+      ],
+      "websocket._logging.info": [
+        "websocket._app 609:17 call  info(f\"tearing down on exception {e}\")"
+      ]
+    },
+    "websocket._app.WebSocketApp.run_forever.check": {
+      "<builtin>.Exception.__init__": [
+        "websocket._app 522:52 call  WebSocketTimeoutException(\"ping/pong timed out\")"
+      ],
+      "time.time": [
+        "websocket._app 505:30 call  time.time()"
+      ]
+    },
+    "websocket._app.WebSocketApp.run_forever.handleDisconnect": {
+      "<builtin>.len": [
+        "websocket._app 586:68 call  len(inspect.stack())"
+      ],
+      "inspect.stack": [
+        "websocket._app 586:82 call  inspect.stack()"
+      ],
+      "websocket._abnf.ABNF.__str__": [
+        "websocket._app 583:24 format  {e}",
+        "websocket._app 591:25 format  {e}"
+      ],
+      "websocket._dispatcher.WrappedDispatcher.reconnect": [
+        "websocket._app 589:41 call  dispatcher.reconnect(reconnect, initialize_socket)"
+      ],
+      "websocket._logging.debug": [
+        "websocket._app 585:26 call  debug( f\"Calling custom dispatcher reconnect [{len(inspec..."
+      ],
+      "websocket._logging.info": [
+        "websocket._app 583:21 call  info(f\"{e} - reconnect\")"
+      ]
+    },
+    "websocket._app.WebSocketApp.run_forever.initialize_socket": {
+      "websocket._app.WebSocketApp._start_ping_thread": [
+        "websocket._app 443:44 call  self._start_ping_thread()"
+      ],
+      "websocket._core.WebSocket.shutdown": [
+        "websocket._app 403:35 call  self.sock.shutdown()"
+      ],
+      "websocket._dispatcher.Dispatcher.read": [
+        "websocket._app 451:32 call  dispatcher.read(self.sock.sock, read, check)"
+      ],
+      "websocket._dispatcher.SSLDispatcher.read": [
+        "websocket._app 451:32 call  dispatcher.read(self.sock.sock, read, check)"
+      ],
+      "websocket._dispatcher.WrappedDispatcher.read": [
+        "websocket._app 451:32 call  dispatcher.read(self.sock.sock, read, check)"
+      ]
+    },
+    "websocket._app.WebSocketApp.run_forever.read": {
+      "<builtin>.bytes.decode": [
+        "websocket._app 496:39 call  data.decode(\"utf-8\")"
+      ],
+      "time.time": [
+        "websocket._app 488:46 call  time.time()"
+      ],
+      "websocket._app.WebSocketApp._callback": [
+        "websocket._app 486:31 call  self._callback(self.on_ping, frame.data)",
+        "websocket._app 489:31 call  self._callback(self.on_pong, frame.data)",
+        "websocket._app 491:31 call  self._callback(self.on_data, frame.data, frame.opcode, fr...",
+        "websocket._app 492:31 call  self._callback(self.on_cont_message, frame.data, frame.fin)",
+        "websocket._app 497:31 call  self._callback(self.on_data, data, frame.opcode, True)",
+        "websocket._app 498:31 call  self._callback(self.on_message, data)"
+      ],
+      "websocket._core.WebSocket.recv_data_frame": [
+        "websocket._app 470:59 call  self.sock.recv_data_frame(True)"
+      ],
+      "wsaccel.xormask.XorMaskerSimple.process.decode": [
+        "websocket._app 496:39 call  data.decode(\"utf-8\")"
+      ]
+    },
+    "websocket._app.WebSocketApp.send": {
+      "websocket._core.WebSocket.send": [
+        "websocket._app 186:43 call  self.sock.send(data, opcode)"
+      ]
+    },
+    "websocket._app.WebSocketApp.send_bytes": {
+      "websocket._core.WebSocket.send": [
+        "websocket._app 200:43 call  self.sock.send(data, ABNF.OPCODE_BINARY)"
+      ]
+    },
+    "websocket._app.WebSocketApp.send_text": {
+      "websocket._core.WebSocket.send": [
+        "websocket._app 193:43 call  self.sock.send(text_data, ABNF.OPCODE_TEXT)"
+      ]
+    },
+    "websocket._cookiejar.SimpleCookieJar.add": {
+      "http.cookies.Morsel.get": [
+        "websocket._cookiejar 33:35 call  v.get(\"domain\")"
+      ]
+    },
+    "websocket._cookiejar.SimpleCookieJar.set": {
+      "http.cookies.Morsel.get": [
+        "websocket._cookiejar 47:35 call  v.get(\"domain\")"
+      ]
+    },
+    "websocket._core.WebSocket.__iter__": {
+      "websocket._core.WebSocket.recv": [
+        "websocket._core 135:28 call  self.recv()"
+      ]
+    },
+    "websocket._core.WebSocket.__next__": {
+      "websocket._core.WebSocket.recv": [
+        "websocket._core 138:25 call  self.recv()"
+      ]
+    },
+    "websocket._core.WebSocket._recv": {
+      "<builtin>.Exception.__init__": [
+        "websocket._core 643:53 call  WebSocketConnectionClosedException(\"Connection is closed\")"
+      ],
+      "python_socks.sync.Proxy.create.connect.close": [
+        "websocket._core 648:32 call  self.sock.close()"
+      ],
+      "socket.socket.close": [
+        "websocket._core 648:32 call  self.sock.close()"
+      ],
+      "ssl.SSLSocket.close": [
+        "websocket._core 648:32 call  self.sock.close()"
+      ]
+    },
+    "websocket._core.WebSocket._send": {
+      "websocket._dispatcher.DispatcherBase.send": [
+        "websocket._core 638:40 call  self.dispatcher.send(self.sock, data)"
+      ],
+      "websocket._dispatcher.WrappedDispatcher.send": [
+        "websocket._core 638:40 call  self.dispatcher.send(self.sock, data)"
+      ]
+    },
+    "websocket._core.WebSocket.abort": {
+      "python_socks.sync.Proxy.create.connect.shutdown": [
+        "websocket._core 610:35 call  self.sock.shutdown(socket.SHUT_RDWR)"
+      ],
+      "ssl.SSLSocket.shutdown": [
+        "websocket._core 610:35 call  self.sock.shutdown(socket.SHUT_RDWR)"
+      ]
+    },
+    "websocket._core.WebSocket.close": {
+      "<builtin>.ValueError": [
+        "websocket._core 560:29 call  ValueError(\"code is invalid range\")"
+      ],
+      "<builtin>.repr": [
+        "websocket._core 586:56 call  repr(recv_status)",
+        "websocket._core 588:56 call  repr(recv_status)"
+      ],
+      "python_socks.sync.Proxy.create.connect.gettimeout": [
+        "websocket._core 573:48 call  self.sock.gettimeout()"
+      ],
+      "python_socks.sync.Proxy.create.connect.settimeout": [
+        "websocket._core 574:33 call  self.sock.settimeout(timeout)",
+        "websocket._core 597:37 call  self.sock.settimeout(sock_timeout)"
+      ],
+      "python_socks.sync.Proxy.create.connect.shutdown": [
+        "websocket._core 598:35 call  self.sock.shutdown(socket.SHUT_RDWR)"
+      ],
+      "socket.socket.gettimeout": [
+        "websocket._core 573:48 call  self.sock.gettimeout()"
+      ],
+      "socket.socket.settimeout": [
+        "websocket._core 574:33 call  self.sock.settimeout(timeout)",
+        "websocket._core 597:37 call  self.sock.settimeout(sock_timeout)"
+      ],
+      "socket.socket.shutdown": [
+        "websocket._core 598:35 call  self.sock.shutdown(socket.SHUT_RDWR)"
+      ],
+      "ssl.SSLSocket.gettimeout": [
+        "websocket._core 573:48 call  self.sock.gettimeout()"
+      ],
+      "ssl.SSLSocket.settimeout": [
+        "websocket._core 574:33 call  self.sock.settimeout(timeout)",
+        "websocket._core 597:37 call  self.sock.settimeout(sock_timeout)"
+      ],
+      "ssl.SSLSocket.shutdown": [
+        "websocket._core 598:35 call  self.sock.shutdown(socket.SHUT_RDWR)"
+      ],
+      "struct.unpack": [
+        "websocket._core 584:52 call  struct.unpack(\"!H\", frame.data[0:2])"
+      ],
+      "time.time": [
+        "websocket._core 575:35 call  time.time()",
+        "websocket._core 576:47 call  time.time()"
+      ],
+      "websocket._core.WebSocket.recv_frame": [
+        "websocket._core 578:44 call  self.recv_frame()"
+      ],
+      "websocket._logging.debug": [
+        "websocket._core 586:34 call  debug(f\"close status: {repr(recv_status)}\")"
+      ],
+      "websocket._logging.error": [
+        "websocket._core 588:34 call  error(f\"close status: {repr(recv_status)}\")"
+      ],
+      "websocket._logging.isEnabledForError": [
+        "websocket._core 583:41 call  isEnabledForError()"
+      ]
+    },
+    "websocket._core.WebSocket.connect": {
+      "python_socks.sync.Proxy.create.connect.close": [
+        "websocket._core 296:36 call  self.sock.close()",
+        "websocket._core 319:32 call  self.sock.close()"
+      ],
+      "socket.socket.close": [
+        "websocket._core 296:36 call  self.sock.close()",
+        "websocket._core 319:32 call  self.sock.close()"
+      ],
+      "ssl.SSLSocket.close": [
+        "websocket._core 296:36 call  self.sock.close()",
+        "websocket._core 319:32 call  self.sock.close()"
+      ],
+      "websocket._handshake.handshake": [
+        "websocket._core 284:48 call  handshake(self.sock, url, *addrs, **options)",
+        "websocket._core 308:56 call  handshake( self.sock, url, *addrs, **options )"
+      ]
+    },
+    "websocket._core.WebSocket.fileno": {
+      "python_socks.sync.Proxy.create.connect.fileno": [
+        "websocket._core 146:32 call  self.sock.fileno()"
+      ],
+      "socket.socket.fileno": [
+        "websocket._core 146:32 call  self.sock.fileno()"
+      ],
+      "ssl.SSLSocket.fileno": [
+        "websocket._core 146:32 call  self.sock.fileno()"
+      ]
+    },
+    "websocket._core.WebSocket.ping": {
+      "<builtin>.isinstance": [
+        "websocket._core 403:22 call  isinstance(payload, str)"
+      ],
+      "<builtin>.str.encode": [
+        "websocket._core 404:37 call  payload.encode(\"utf-8\")"
+      ],
+      "websocket._core.WebSocket.send": [
+        "websocket._core 405:18 call  self.send(payload, ABNF.OPCODE_PING)"
+      ]
+    },
+    "websocket._core.WebSocket.pong": {
+      "<builtin>.str.encode": [
+        "websocket._core 417:37 call  payload.encode(\"utf-8\")"
+      ],
+      "wsaccel.xormask.XorMaskerSimple.process.encode": [
+        "websocket._core 417:37 call  payload.encode(\"utf-8\")"
+      ]
+    },
+    "websocket._core.WebSocket.recv": {
+      "websocket._utils.NoLock.__enter__": [
+        "websocket._core 428:14 with  self.readlock"
+      ],
+      "websocket._utils.NoLock.__exit__": [
+        "websocket._core 428:14 with  self.readlock"
+      ],
+      "wsaccel.xormask.XorMaskerSimple.process.decode": [
+        "websocket._core 433:44 call  data_received.decode(\"utf-8\")"
+      ]
+    },
+    "websocket._core.WebSocket.recv_data_frame": {
+      "<builtin>.Exception.__init__": [
+        "websocket._core 500:53 call  WebSocketProtocolException(\"Ping message is too long\")"
+      ]
+    },
+    "websocket._core.WebSocket.send_bytes": {
+      "websocket._core.WebSocket.send": [
+        "websocket._core 350:25 call  self.send(data, ABNF.OPCODE_BINARY)"
+      ]
+    },
+    "websocket._core.WebSocket.send_close": {
+      "<builtin>.ValueError": [
+        "websocket._core 531:29 call  ValueError(\"code is invalid range\")"
+      ]
+    },
+    "websocket._core.WebSocket.send_frame": {
+      "websocket._utils.NoLock.__enter__": [
+        "websocket._core 376:14 with  self.lock"
+      ],
+      "websocket._utils.NoLock.__exit__": [
+        "websocket._core 376:14 with  self.lock"
+      ]
+    },
+    "websocket._core.WebSocket.send_text": {
+      "websocket._core.WebSocket.send": [
+        "websocket._core 344:25 call  self.send(text_data, ABNF.OPCODE_TEXT)"
+      ]
+    },
+    "websocket._core.WebSocket.settimeout": {
+      "python_socks.sync.Proxy.create.connect.settimeout": [
+        "websocket._core 185:33 call  self.sock.settimeout(timeout)"
+      ],
+      "socket.socket.settimeout": [
+        "websocket._core 185:33 call  self.sock.settimeout(timeout)"
+      ],
+      "ssl.SSLSocket.settimeout": [
+        "websocket._core 185:33 call  self.sock.settimeout(timeout)"
+      ]
+    },
+    "websocket._core.WebSocket.shutdown": {
+      "python_socks.sync.Proxy.create.connect.close": [
+        "websocket._core 624:36 call  self.sock.close()"
+      ],
+      "ssl.SSLSocket.close": [
+        "websocket._core 624:36 call  self.sock.close()"
+      ]
+    },
+    "websocket._core._normalize_close_reason": {
+      "<builtin>.bytes": [
+        "websocket._core 53:17 call  bytes(reason)"
+      ]
+    },
+    "websocket._core.create_connection": {
+      "websocket._core.WebSocket.__init__": [
+        "websocket._core 725:21 call  class_( sockopt=sockopt, sslopt=sslopt, fire_cont_frame=f..."
+      ],
+      "websocket._core.WebSocket.connect": [
+        "websocket._core 734:20 call  websock.connect(url, **options)"
+      ],
+      "websocket._core.WebSocket.settimeout": [
+        "websocket._core 733:23 call  websock.settimeout(timeout if timeout is not None else ge..."
+      ],
+      "websocket._socket.getdefaulttimeout": [
+        "websocket._core 733:77 call  getdefaulttimeout()"
+      ]
+    },
+    "websocket._dispatcher.Dispatcher.read": {
+      "selectors.DefaultSelector": [
+        "websocket._dispatcher 76:40 call  selectors.DefaultSelector()"
+      ],
+      "selectors.DevpollSelector.close": [
+        "websocket._dispatcher 85:22 call  sel.close()"
+      ],
+      "selectors.DevpollSelector.register": [
+        "websocket._dispatcher 77:21 call  sel.register(self.app.sock.sock, selectors.EVENT_READ)"
+      ],
+      "selectors.DevpollSelector.select": [
+        "websocket._dispatcher 80:30 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.EpollSelector.close": [
+        "websocket._dispatcher 85:22 call  sel.close()"
+      ],
+      "selectors.EpollSelector.register": [
+        "websocket._dispatcher 77:21 call  sel.register(self.app.sock.sock, selectors.EVENT_READ)"
+      ],
+      "selectors.EpollSelector.select": [
+        "websocket._dispatcher 80:30 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.KqueueSelector.close": [
+        "websocket._dispatcher 85:22 call  sel.close()"
+      ],
+      "selectors.KqueueSelector.register": [
+        "websocket._dispatcher 77:21 call  sel.register(self.app.sock.sock, selectors.EVENT_READ)"
+      ],
+      "selectors.KqueueSelector.select": [
+        "websocket._dispatcher 80:30 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.PollSelector.close": [
+        "websocket._dispatcher 85:22 call  sel.close()"
+      ],
+      "selectors.PollSelector.register": [
+        "websocket._dispatcher 77:21 call  sel.register(self.app.sock.sock, selectors.EVENT_READ)"
+      ],
+      "selectors.PollSelector.select": [
+        "websocket._dispatcher 80:30 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.SelectSelector.close": [
+        "websocket._dispatcher 85:22 call  sel.close()"
+      ],
+      "selectors.SelectSelector.register": [
+        "websocket._dispatcher 77:21 call  sel.register(self.app.sock.sock, selectors.EVENT_READ)"
+      ],
+      "selectors.SelectSelector.select": [
+        "websocket._dispatcher 80:30 call  sel.select(self.ping_timeout)"
+      ],
+      "websocket._app.WebSocketApp.run_forever.check": [
+        "websocket._dispatcher 83:31 call  check_callback()"
+      ],
+      "websocket._app.WebSocketApp.run_forever.read": [
+        "websocket._dispatcher 81:41 call  read_callback()"
+      ]
+    },
+    "websocket._dispatcher.DispatcherBase.reconnect": {
+      "websocket._app.WebSocketApp.run_forever.initialize_socket": [
+        "websocket._dispatcher 54:24 call  reconnector(reconnecting=True)"
+      ]
+    },
+    "websocket._dispatcher.DispatcherBase.send": {
+      "websocket._socket.send": [
+        "websocket._dispatcher 60:20 call  send(sock, data)"
+      ]
+    },
+    "websocket._dispatcher.SSLDispatcher.read": {
+      "selectors.DefaultSelector": [
+        "websocket._dispatcher 102:40 call  selectors.DefaultSelector()"
+      ],
+      "selectors.DevpollSelector.close": [
+        "websocket._dispatcher 111:22 call  sel.close()"
+      ],
+      "selectors.DevpollSelector.register": [
+        "websocket._dispatcher 103:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.EpollSelector.close": [
+        "websocket._dispatcher 111:22 call  sel.close()"
+      ],
+      "selectors.EpollSelector.register": [
+        "websocket._dispatcher 103:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.KqueueSelector.close": [
+        "websocket._dispatcher 111:22 call  sel.close()"
+      ],
+      "selectors.KqueueSelector.register": [
+        "websocket._dispatcher 103:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.PollSelector.close": [
+        "websocket._dispatcher 111:22 call  sel.close()"
+      ],
+      "selectors.PollSelector.register": [
+        "websocket._dispatcher 103:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.SelectSelector.close": [
+        "websocket._dispatcher 111:22 call  sel.close()"
+      ],
+      "selectors.SelectSelector.register": [
+        "websocket._dispatcher 103:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "websocket._app.WebSocketApp.run_forever.check": [
+        "websocket._dispatcher 109:31 call  check_callback()"
+      ],
+      "websocket._app.WebSocketApp.run_forever.read": [
+        "websocket._dispatcher 107:41 call  read_callback()"
+      ]
+    },
+    "websocket._dispatcher.SSLDispatcher.select": {
+      "python_socks.sync.Proxy.create.connect.pending": [
+        "websocket._dispatcher 117:24 call  sock.pending()"
+      ],
+      "selectors.DevpollSelector.select": [
+        "websocket._dispatcher 122:23 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.EpollSelector.select": [
+        "websocket._dispatcher 122:23 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.KqueueSelector.select": [
+        "websocket._dispatcher 122:23 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.PollSelector.select": [
+        "websocket._dispatcher 122:23 call  sel.select(self.ping_timeout)"
+      ],
+      "selectors.SelectSelector.select": [
+        "websocket._dispatcher 122:23 call  sel.select(self.ping_timeout)"
+      ],
+      "ssl.SSLSocket.pending": [
+        "websocket._dispatcher 117:24 call  sock.pending()"
+      ]
+    },
+    "websocket._handshake._get_handshake_headers": {
+      "<builtin>.dict.items": [
+        "websocket._handshake 136:65 call  header.items()"
+      ],
+      "<builtin>.isinstance": [
+        "websocket._handshake 135:22 call  isinstance(header, dict)"
+      ]
+    },
+    "websocket._handshake._get_resp_headers": {
+      "websocket._socket.recv": [
+        "websocket._handshake 168:29 call  recv(sock, chunk_size)"
+      ]
+    },
+    "websocket._handshake._validate": {
+      "_sha1.sha1.digest": [
+        "websocket._handshake 215:53 call  hashlib.sha1(value).digest()"
+      ]
+    },
+    "websocket._handshake.handshake": {
+      "<builtin>.Exception.__init__": [
+        "websocket._handshake 78:33 call  WebSocketException(\"Invalid WebSocket Header\")"
+      ],
+      "<builtin>.dict.get": [
+        "websocket._handshake 76:57 call  options.get(\"subprotocols\")"
+      ],
+      "<builtin>.str.join": [
+        "websocket._handshake 69:29 call  \"\\r\\n\".join(headers)"
+      ],
+      "websocket._handshake._get_handshake_headers": [
+        "websocket._handshake 67:42 call  _get_handshake_headers(resource, url, hostname, port, opt..."
+      ],
+      "websocket._handshake._get_resp_headers": [
+        "websocket._handshake 73:37 call  _get_resp_headers(sock)"
+      ],
+      "websocket._handshake._validate": [
+        "websocket._handshake 76:34 call  _validate(resp, key, options.get(\"subprotocols\"))"
+      ],
+      "websocket._handshake.handshake_response.__init__": [
+        "websocket._handshake 75:34 call  handshake_response(status, resp, None)",
+        "websocket._handshake 80:30 call  handshake_response(status, resp, subproto)"
+      ],
+      "websocket._logging.dump": [
+        "websocket._handshake 71:9 call  dump(\"request header\", header_str)"
+      ],
+      "websocket._socket.send": [
+        "websocket._handshake 70:9 call  send(sock, header_str)"
+      ]
+    },
+    "websocket._http._ssl_socket": {
+      "os.path.isdir": [
+        "websocket._http 359:26 call  os.path.isdir(cert_path)"
+      ],
+      "os.path.isfile": [
+        "websocket._http 353:27 call  os.path.isfile(cert_path)"
+      ]
+    },
+    "websocket._http._start_proxied_socket": {
+      "python_socks.sync.Proxy.create": [
+        "websocket._http 116:28 call  Proxy.create( proxy_type=proxy_type, host=proxy.proxy_hos..."
+      ],
+      "python_socks.sync.Proxy.create.connect": [
+        "websocket._http 125:28 call  ws_proxy.connect(hostname, port, timeout=proxy.proxy_time..."
+      ],
+      "websocket._http._ssl_socket": [
+        "websocket._http 129:31 call  _ssl_socket(sock, options.sslopt, hostname)"
+      ]
+    },
+    "websocket._http._wrap_sni_socket": {
+      "<builtin>.ValueError": [
+        "websocket._http 321:37 call  ValueError( \"cert_chain must be a tuple/list of (certfile..."
+      ],
+      "<builtin>.isinstance": [
+        "websocket._http 320:34 call  isinstance(cert_chain, (tuple, list))"
+      ],
+      "<builtin>.len": [
+        "websocket._http 320:68 call  len(cert_chain)"
+      ],
+      "ssl.SSLContext.load_cert_chain": [
+        "websocket._http 283:40 call  context.load_cert_chain( sslopt[\"certfile\"], sslopt.get(\"...",
+        "websocket._http 325:40 call  context.load_cert_chain(certfile, keyfile, password)"
+      ],
+      "ssl.SSLContext.load_default_certs": [
+        "websocket._http 276:47 call  context.load_default_certs(ssl.Purpose.SERVER_AUTH)"
+      ],
+      "ssl.SSLContext.load_verify_locations": [
+        "websocket._http 271:50 call  context.load_verify_locations(cafile=cafile, capath=capath)"
+      ],
+      "ssl.SSLContext.set_ciphers": [
+        "websocket._http 314:36 call  context.set_ciphers(sslopt[\"ciphers\"])"
+      ],
+      "ssl.SSLContext.set_ecdh_curve": [
+        "websocket._http 334:39 call  context.set_ecdh_curve(sslopt[\"ecdh_curve\"])"
+      ],
+      "ssl.SSLContext.wrap_socket": [
+        "websocket._http 338:31 call  context.wrap_socket( sock, do_handshake_on_connect=sslopt..."
+      ]
+    },
+    "websocket._http.connect": {
+      "<builtin>.Exception.__init__": [
+        "websocket._http 154:33 call  WebSocketException(f\"Host not found.: {hostname}:{port_fr...",
+        "websocket._http 166:41 call  WebSocketException(\"SSL not available.\")"
+      ],
+      "socket.socket.close": [
+        "websocket._http 171:23 call  sock.close()"
+      ],
+      "websocket._http._ssl_socket": [
+        "websocket._http 164:35 call  _ssl_socket(sock, options.sslopt, hostname)"
+      ],
+      "websocket._http._start_proxied_socket": [
+        "websocket._http 143:37 call  _start_proxied_socket(url, options, proxy)"
+      ],
+      "websocket._http._tunnel": [
+        "websocket._http 160:27 call  _tunnel(sock, hostname, port_from_url, auth)"
+      ]
+    },
+    "websocket._http.proxy_info.__init__": {
+      "python_socks._errors.ProxyError": [
+        "websocket._http 78:33 call  ProxyError( \"Only http, socks4, socks5 proxy protocols ar..."
+      ]
+    },
+    "websocket._logging.isEnabledForDebug": {
+      "logging.Logger.isEnabledFor": [
+        "websocket._logging 117:32 call  _logger.isEnabledFor(logging.DEBUG)"
+      ]
+    },
+    "websocket._logging.isEnabledForError": {
+      "logging.Logger.isEnabledFor": [
+        "websocket._logging 113:32 call  _logger.isEnabledFor(logging.ERROR)"
+      ]
+    },
+    "websocket._logging.warning": {
+      "logging.Logger.warning": [
+        "websocket._logging 96:20 call  _logger.warning(msg)"
+      ]
+    },
+    "websocket._socket.recv": {
+      "python_socks.sync.Proxy.create.connect.gettimeout": [
+        "websocket._socket 124:27 call  sock.gettimeout()"
+      ],
+      "python_socks.sync.Proxy.create.connect.recv": [
+        "websocket._socket 125:31 call  sock.recv(bufsize)"
+      ],
+      "socket.socket.gettimeout": [
+        "websocket._socket 124:27 call  sock.gettimeout()"
+      ],
+      "socket.socket.recv": [
+        "websocket._socket 125:31 call  sock.recv(bufsize)"
+      ],
+      "ssl.SSLSocket.gettimeout": [
+        "websocket._socket 124:27 call  sock.gettimeout()"
+      ],
+      "ssl.SSLSocket.recv": [
+        "websocket._socket 125:31 call  sock.recv(bufsize)"
+      ]
+    },
+    "websocket._socket.recv._recv": {
+      "python_socks.sync.Proxy.create.connect.gettimeout": [
+        "websocket._socket 113:39 call  sock.gettimeout()"
+      ],
+      "python_socks.sync.Proxy.create.connect.recv": [
+        "websocket._socket 99:29 call  sock.recv(bufsize)",
+        "websocket._socket 117:29 call  sock.recv(bufsize)"
+      ],
+      "selectors.DefaultSelector": [
+        "websocket._socket 110:40 call  selectors.DefaultSelector()"
+      ],
+      "selectors.DevpollSelector.close": [
+        "websocket._socket 114:18 call  sel.close()"
+      ],
+      "selectors.DevpollSelector.register": [
+        "websocket._socket 111:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.DevpollSelector.select": [
+        "websocket._socket 113:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.EpollSelector.close": [
+        "websocket._socket 114:18 call  sel.close()"
+      ],
+      "selectors.EpollSelector.register": [
+        "websocket._socket 111:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.EpollSelector.select": [
+        "websocket._socket 113:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.KqueueSelector.close": [
+        "websocket._socket 114:18 call  sel.close()"
+      ],
+      "selectors.KqueueSelector.register": [
+        "websocket._socket 111:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.KqueueSelector.select": [
+        "websocket._socket 113:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.PollSelector.close": [
+        "websocket._socket 114:18 call  sel.close()"
+      ],
+      "selectors.PollSelector.register": [
+        "websocket._socket 111:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.PollSelector.select": [
+        "websocket._socket 113:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.SelectSelector.close": [
+        "websocket._socket 114:18 call  sel.close()"
+      ],
+      "selectors.SelectSelector.register": [
+        "websocket._socket 111:21 call  sel.register(sock, selectors.EVENT_READ)"
+      ],
+      "selectors.SelectSelector.select": [
+        "websocket._socket 113:23 call  sel.select(sock.gettimeout())"
+      ],
+      "socket.socket.gettimeout": [
+        "websocket._socket 113:39 call  sock.gettimeout()"
+      ],
+      "socket.socket.recv": [
+        "websocket._socket 99:29 call  sock.recv(bufsize)",
+        "websocket._socket 117:29 call  sock.recv(bufsize)"
+      ],
+      "ssl.SSLSocket.gettimeout": [
+        "websocket._socket 113:39 call  sock.gettimeout()"
+      ],
+      "ssl.SSLSocket.recv": [
+        "websocket._socket 99:29 call  sock.recv(bufsize)",
+        "websocket._socket 117:29 call  sock.recv(bufsize)"
+      ]
+    },
+    "websocket._socket.send": {
+      "python_socks.sync.Proxy.create.connect.gettimeout": [
+        "websocket._socket 190:27 call  sock.gettimeout()"
+      ],
+      "python_socks.sync.Proxy.create.connect.send": [
+        "websocket._socket 191:29 call  sock.send(data)"
+      ],
+      "socket.socket.gettimeout": [
+        "websocket._socket 190:27 call  sock.gettimeout()"
+      ],
+      "socket.socket.send": [
+        "websocket._socket 191:29 call  sock.send(data)"
+      ],
+      "ssl.SSLSocket.gettimeout": [
+        "websocket._socket 190:27 call  sock.gettimeout()"
+      ],
+      "ssl.SSLSocket.send": [
+        "websocket._socket 191:29 call  sock.send(data)"
+      ]
+    },
+    "websocket._socket.send._send": {
+      "python_socks.sync.Proxy.create.connect.gettimeout": [
+        "websocket._socket 182:39 call  sock.gettimeout()"
+      ],
+      "python_socks.sync.Proxy.create.connect.send": [
+        "websocket._socket 167:29 call  sock.send(data)",
+        "websocket._socket 186:29 call  sock.send(data)"
+      ],
+      "selectors.DefaultSelector": [
+        "websocket._socket 179:40 call  selectors.DefaultSelector()"
+      ],
+      "selectors.DevpollSelector.close": [
+        "websocket._socket 183:18 call  sel.close()"
+      ],
+      "selectors.DevpollSelector.register": [
+        "websocket._socket 180:21 call  sel.register(sock, selectors.EVENT_WRITE)"
+      ],
+      "selectors.DevpollSelector.select": [
+        "websocket._socket 182:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.EpollSelector.close": [
+        "websocket._socket 183:18 call  sel.close()"
+      ],
+      "selectors.EpollSelector.register": [
+        "websocket._socket 180:21 call  sel.register(sock, selectors.EVENT_WRITE)"
+      ],
+      "selectors.EpollSelector.select": [
+        "websocket._socket 182:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.KqueueSelector.close": [
+        "websocket._socket 183:18 call  sel.close()"
+      ],
+      "selectors.KqueueSelector.register": [
+        "websocket._socket 180:21 call  sel.register(sock, selectors.EVENT_WRITE)"
+      ],
+      "selectors.KqueueSelector.select": [
+        "websocket._socket 182:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.PollSelector.close": [
+        "websocket._socket 183:18 call  sel.close()"
+      ],
+      "selectors.PollSelector.register": [
+        "websocket._socket 180:21 call  sel.register(sock, selectors.EVENT_WRITE)"
+      ],
+      "selectors.PollSelector.select": [
+        "websocket._socket 182:23 call  sel.select(sock.gettimeout())"
+      ],
+      "selectors.SelectSelector.close": [
+        "websocket._socket 183:18 call  sel.close()"
+      ],
+      "selectors.SelectSelector.register": [
+        "websocket._socket 180:21 call  sel.register(sock, selectors.EVENT_WRITE)"
+      ],
+      "selectors.SelectSelector.select": [
+        "websocket._socket 182:23 call  sel.select(sock.gettimeout())"
+      ],
+      "socket.socket.gettimeout": [
+        "websocket._socket 182:39 call  sock.gettimeout()"
+      ],
+      "socket.socket.send": [
+        "websocket._socket 167:29 call  sock.send(data)",
+        "websocket._socket 186:29 call  sock.send(data)"
+      ],
+      "ssl.SSLSocket.gettimeout": [
+        "websocket._socket 182:39 call  sock.gettimeout()"
+      ],
+      "ssl.SSLSocket.send": [
+        "websocket._socket 167:29 call  sock.send(data)",
+        "websocket._socket 186:29 call  sock.send(data)"
+      ]
+    },
+    "websocket._utils._validate_utf8": {
+      "wsaccel.utf8validator.Utf8Validator": [
+        "websocket._utils 38:37 call  Utf8Validator()"
+      ],
+      "wsaccel.utf8validator.Utf8Validator.validate": [
+        "websocket._utils 38:48 call  Utf8Validator().validate(utfbytes)"
+      ]
+    },
+    "websocket._utils.validate_utf8": {
+      "wsaccel.xormask.XorMaskerSimple.process.encode": [
+        "websocket._utils 447:35 call  utfbytes.encode(\"utf-8\", \"surrogatepass\")"
+      ]
+    },
+    "websocket._wsdump": {
+      "<builtin>.print": [
+        "websocket._wsdump 228:14 call  print(e)"
+      ],
+      "websocket._wsdump.main": [
+        "websocket._wsdump 226:13 call  main()"
+      ]
+    },
+    "websocket._wsdump.InteractiveConsole.read": {
+      "websocket._wsdump.RawInput.raw_input": [
+        "websocket._wsdump 113:30 call  self.raw_input(\"> \")"
+      ]
+    },
+    "websocket._wsdump.InteractiveConsole.write": {
+      "io.TextIOWrapper.flush": [
+        "websocket._wsdump 110:25 call  sys.stdout.flush()"
+      ],
+      "io.TextIOWrapper.write": [
+        "websocket._wsdump 106:25 call  sys.stdout.write(\"\\033[2K\\033[E\")",
+        "websocket._wsdump 108:25 call  sys.stdout.write(\"\\033[34m< \" + data + \"\\033[39m\")",
+        "websocket._wsdump 109:25 call  sys.stdout.write(\"\\n> \")"
+      ]
+    },
+    "websocket._wsdump.NonInteractive.read": {
+      "websocket._wsdump.RawInput.raw_input": [
+        "websocket._wsdump 123:30 call  self.raw_input(\"\")"
+      ]
+    },
+    "websocket._wsdump.NonInteractive.write": {
+      "io.TextIOWrapper.flush": [
+        "websocket._wsdump 120:25 call  sys.stdout.flush()"
+      ],
+      "io.TextIOWrapper.write": [
+        "websocket._wsdump 118:25 call  sys.stdout.write(data)",
+        "websocket._wsdump 119:25 call  sys.stdout.write(\"\\n\")"
+      ]
+    },
+    "websocket._wsdump.RawInput.raw_input": {
+      "<builtin>.input": [
+        "websocket._wsdump 101:21 call  input(prompt)"
+      ],
+      "<builtin>.str.encode": [
+        "websocket._wsdump 101:36 call  input(prompt).encode(\"utf-8\")"
+      ]
+    },
+    "websocket._wsdump.VAction.__call__": {
+      "<builtin>.int": [
+        "websocket._wsdump 54:25 call  int(values)"
+      ],
+      "<builtin>.setattr": [
+        "websocket._wsdump 57:16 call  setattr(args, self.dest, values)"
+      ],
+      "<builtin>.str.count": [
+        "websocket._wsdump 56:34 call  values.count(\"v\")"
+      ]
+    },
+    "websocket._wsdump.main": {
+      "<builtin>.list": [
+        "websocket._wsdump 144:33 call  list(map(str.strip, args.headers.split(\",\")))"
+      ],
+      "<builtin>.map": [
+        "websocket._wsdump 144:37 call  map(str.strip, args.headers.split(\",\"))"
+      ],
+      "<builtin>.print": [
+        "websocket._wsdump 150:14 call  print(\"Press Ctrl+C to quit\")"
+      ],
+      "<builtin>.str.split": [
+        "websocket._wsdump 144:67 call  args.headers.split(\",\")"
+      ],
+      "code.InteractiveConsole.__init__": [
+        "websocket._wsdump 149:37 call  InteractiveConsole()"
+      ],
+      "threading.Thread": [
+        "websocket._wsdump 206:30 call  threading.Thread(target=recv_ws)"
+      ],
+      "threading.Thread.start": [
+        "websocket._wsdump 208:17 call  thread.start()"
+      ],
+      "time.sleep": [
+        "websocket._wsdump 220:23 call  time.sleep(args.eof_wait)"
+      ],
+      "time.time": [
+        "websocket._wsdump 127:27 call  time.time()"
+      ],
+      "urllib.parse.urlparse": [
+        "websocket._wsdump 133:21 call  urlparse(args.proxy)"
+      ],
+      "websocket._core.WebSocket.send": [
+        "websocket._wsdump 211:16 call  ws.send(args.text)",
+        "websocket._wsdump 216:20 call  ws.send(message)"
+      ],
+      "websocket._core.create_connection": [
+        "websocket._wsdump 145:37 call  websocket.create_connection(args.url, sslopt=opts, **opti..."
+      ],
+      "websocket._logging.enableTrace": [
+        "websocket._wsdump 130:30 call  websocket.enableTrace(True)"
+      ],
+      "websocket._wsdump.InteractiveConsole.read": [
+        "websocket._wsdump 215:35 call  console.read()"
+      ],
+      "websocket._wsdump.NonInteractive.read": [
+        "websocket._wsdump 215:35 call  console.read()"
+      ],
+      "websocket._wsdump.main.recv_ws": [
+        "websocket._wsdump 208:17 call  thread.start()"
+      ],
+      "websocket._wsdump.parse_args": [
+        "websocket._wsdump 128:22 call  parse_args()"
+      ]
+    },
+    "websocket._wsdump.main.recv": {
+      "websocket._core.WebSocket.pong": [
+        "websocket._wsdump 163:20 call  ws.pong(frame.data)"
+      ],
+      "websocket._core.WebSocket.recv_frame": [
+        "websocket._wsdump 154:34 call  ws.recv_frame()"
+      ],
+      "websocket._core.WebSocket.send_close": [
+        "websocket._wsdump 160:26 call  ws.send_close()"
+      ]
+    },
+    "websocket._wsdump.main.recv_ws": {
+      "<builtin>.dict.get": [
+        "websocket._wsdump 193:55 call  websocket.ABNF.OPCODE_MAP.get(opcode)"
+      ],
+      "<builtin>.isinstance": [
+        "websocket._wsdump 172:67 call  isinstance(data, bytes)",
+        "websocket._wsdump 175:27 call  isinstance(data, bytes)",
+        "websocket._wsdump 181:28 call  isinstance(data, bytes)",
+        "websocket._wsdump 189:26 call  isinstance(data, bytes)"
+      ],
+      "<builtin>.len": [
+        "websocket._wsdump 175:48 call  len(data)"
+      ],
+      "<builtin>.repr": [
+        "websocket._wsdump 190:28 call  repr(data)"
+      ],
+      "<builtin>.str": [
+        "websocket._wsdump 173:27 call  str(data, \"utf-8\")",
+        "websocket._wsdump 178:43 call  str(gzip.decompress(data), \"utf-8\")",
+        "websocket._wsdump 183:43 call  str( zlib.decompress(data, -zlib.MAX_WBITS), \"utf-8\" )"
+      ],
+      "gzip.decompress": [
+        "websocket._wsdump 178:59 call  gzip.decompress(data)"
+      ],
+      "time.time": [
+        "websocket._wsdump 199:47 call  time.time()"
+      ],
+      "websocket._wsdump.InteractiveConsole.write": [
+        "websocket._wsdump 199:34 call  console.write(f\"{time.time() - start_time}: {msg}\")",
+        "websocket._wsdump 201:34 call  console.write(msg)"
+      ],
+      "websocket._wsdump.NonInteractive.write": [
+        "websocket._wsdump 199:34 call  console.write(f\"{time.time() - start_time}: {msg}\")",
+        "websocket._wsdump 201:34 call  console.write(msg)"
+      ],
+      "websocket._wsdump.main.recv": [
+        "websocket._wsdump 170:32 call  recv()"
+      ],
+      "zlib.decompress": [
+        "websocket._wsdump 184:40 call  zlib.decompress(data, -zlib.MAX_WBITS)"
+      ]
+    },
+    "websocket._wsdump.parse_args": {
+      "argparse.ArgumentParser": [
+        "websocket._wsdump 61:37 call  argparse.ArgumentParser(description=\"WebSocket Simple Dum..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "websocket._wsdump 62:24 call  parser.add_argument( \"url\", metavar=\"ws_url\", help=\"webso...",
+        "websocket._wsdump 67:24 call  parser.add_argument(\"-p\", \"--proxy\", help=\"proxy url. ex....",
+        "websocket._wsdump 68:24 call  parser.add_argument( \"-v\", \"--verbose\", default=0, nargs=...",
+        "websocket._wsdump 78:24 call  parser.add_argument( \"-n\", \"--nocert\", action=\"store_true...",
+        "websocket._wsdump 81:24 call  parser.add_argument(\"-r\", \"--raw\", action=\"store_true\", h...",
+        "websocket._wsdump 82:24 call  parser.add_argument(\"-s\", \"--subprotocols\", nargs=\"*\", he...",
+        "websocket._wsdump 83:24 call  parser.add_argument(\"-o\", \"--origin\", help=\"Set origin\")",
+        "websocket._wsdump 84:24 call  parser.add_argument( \"--eof-wait\", default=0, type=int, h...",
+        "websocket._wsdump 90:24 call  parser.add_argument(\"-t\", \"--text\", help=\"Send initial te...",
+        "websocket._wsdump 91:24 call  parser.add_argument( \"--timings\", action=\"store_true\", he...",
+        "websocket._wsdump 94:24 call  parser.add_argument(\"--headers\", help=\"Set custom headers..."
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "websocket._wsdump 96:29 call  parser.parse_args()"
+      ],
+      "websocket._wsdump.VAction.__call__": [
+        "websocket._wsdump 96:29 call  parser.parse_args()"
+      ]
+    }
+  },
+  "notes": {
+    "websocket._abnf 205:42 call  self.data[:2].encode(\"utf-8\")": [
+      "data is a str or bytes (annotation of ABNF.__init__); the isinstance test leaves a str here"
+    ],
+    "websocket._abnf 302:31 call  data.encode(\"latin-1\")": [
+      "WebSocket.pong forwards a received ping payload through send, ABNF.create_frame, ABNF.format and _get_masked to this data: the stub result of _mask, or its stub .encode result where pong's isinstance test succeeded (_core.py:417) (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)"
+    ],
+    "websocket._abnf 38:45 call  XorMaskerSimple(mask_value)": [
+      "both sides of the optional import of wsaccel run (README \"Judgements\"); wsaccel is not installed, so the names are those of the missing module (websocket-client.md J1)"
+    ],
+    "websocket._abnf 38:65 call  XorMaskerSimple(mask_value).process(data_value)": [
+      "a direct call chain on a missing-module value keeps its access path"
+    ],
+    "websocket._app 221:31 call  self.ping_thread.start()": [
+      "start() runs the target self._send_ping of the Thread made at line 219 (callback rule: the target belongs to the scope that calls start())"
+    ],
+    "websocket._app 451:32 call  dispatcher.read(self.sock.sock, read, check)": [
+      "dispatcher is the enclosing run_forever's variable, rebound at line 596 to what create_dispatcher returns before initialize_socket first runs: a WrappedDispatcher (custom dispatcher), an SSLDispatcher (wss) or a Dispatcher"
+    ],
+    "websocket._app 496:39 call  data.decode(\"utf-8\")": [
+      "frame.data of a received text frame is the bytes payload that frame_buffer.recv_strict returns (unmasked by ABNF.mask, joined by continuous_frame.add); with wsaccel, a masked single frame keeps the stub result of _mask (_abnf.py:38), which ABNF.mask, recv_frame, continuous_frame.add (a package list) and extract forward unchanged (README, batch 7: forwarded stub values; Codex round 1)"
+    ],
+    "websocket._app 583:24 format  {e}": [
+      "closed is handed to the client's dispatcher (WrappedDispatcher.send), so its parameter e takes the values of its annotation as a public input (batch 7 ruling on J5/F1); an ABNF of another opcode than CLOSE passes closed unchanged (line 539) and is formatted here; this entry overrides the default rejection of ABNF.__str__ (websocket-client.md J5)"
+    ],
+    "websocket._app 589:41 call  dispatcher.reconnect(reconnect, initialize_socket)": [
+      "under custom_dispatcher, create_dispatcher returned a WrappedDispatcher (line 626)"
+    ],
+    "websocket._app 591:25 format  {e}": [
+      "as at 583:24: an ABNF of another opcode than CLOSE that the client's dispatcher passes to closed (J5)"
+    ],
+    "websocket._app 607:41 call  dispatcher.reconnect(reconnect, initialize_socket)": [
+      "without a custom dispatcher, dispatcher is the Dispatcher or SSLDispatcher of create_dispatcher (line 596); both inherit DispatcherBase.reconnect"
+    ],
+    "websocket._app 661:37 call  data.encode(\"utf-8\")": [
+      "an ABNF's data is str or bytes by its annotation; a close frame with str data reaches here through the frame that a custom dispatcher passes to closed, whose annotation names ABNF, and independently through the public last_close_frame (annotated Optional[ABNF]), which the tests assign (tests/test_app.py:833) and teardown forwards to _get_close_args (websocket-client.md J5); with wsaccel, a received masked close frame (read, line 484, through closed) carries the stub result of _mask (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)"
+    ],
+    "websocket._app 663:31 call  bytes(data)": [
+      "explicit handling of another data type (README, B4 clarification: explicit handling counts), e.g. a bytearray payload (WebSocket.send_bytes admits bytearray); the frame reaches here through closed or through the public last_close_frame that the tests assign (tests/test_app.py:833) (websocket-client.md J5)"
+    ],
+    "websocket._cookiejar 33:35 call  v.get(\"domain\")": [
+      "the values of a SimpleCookie are http.cookies.Morsel objects (a dict subclass); the method is named by the receiver's class"
+    ],
+    "websocket._core 135:28 call  self.recv()": [
+      "a value site by name only (frame_buffer assigns an attribute recv); self is a WebSocket, whose recv is the method WebSocket.recv"
+    ],
+    "websocket._core 138:25 call  self.recv()": [
+      "a value site by name only (frame_buffer assigns an attribute recv); self is a WebSocket, whose recv is the method WebSocket.recv"
+    ],
+    "websocket._core 146:32 call  self.sock.fileno()": [
+      "self.sock is the package's socket.socket or ssl.SSLSocket (_http.connect), or the client's pre-initialised socket, a socket.socket by B4, or the python-socks stub value of a SOCKS ws connection (python_socks.sync.Proxy.create.connect, forwarded in a package tuple by _http.connect); websocket-client.md J3"
+    ],
+    "websocket._core 376:14 with  self.lock": [
+      "self.lock is a threading.Lock, or a NoLock when enable_multithread is false (line 127)"
+    ],
+    "websocket._core 417:37 call  payload.encode(\"utf-8\")": [
+      "recv_data_frame (line 498) and _wsdump.main.recv pass the data of a received ping frame; with wsaccel, a masked frame's data is the stub result of _mask (_abnf.py:38, forwarded by ABNF.mask and frame_buffer.recv_frame) (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)"
+    ],
+    "websocket._core 428:14 with  self.readlock": [
+      "self.readlock is a threading.Lock, or a NoLock when enable_multithread is false (line 128)"
+    ],
+    "websocket._core 433:44 call  data_received.decode(\"utf-8\")": [
+      "with wsaccel, the data of a masked single text frame is the stub result of _mask (_abnf.py:38), forwarded unchanged (see _app.py:496:39) (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)"
+    ],
+    "websocket._core 53:17 call  bytes(reason)": [
+      "explicit handling of a reason that is neither str nor bytes (a bytearray, say); explicit handling of another type counts (README, B4 clarification)"
+    ],
+    "websocket._core 638:40 call  self.dispatcher.send(self.sock, data)": [
+      "self.dispatcher is the dispatcher argument of WebSocket.__init__ (annotated DispatcherBase or WrappedDispatcher); the package passes the Dispatcher, SSLDispatcher or WrappedDispatcher of WebSocketApp.create_dispatcher (_app.py:408-415); Dispatcher and SSLDispatcher inherit DispatcherBase.send; a client's own dispatcher object is opaque (B5)"
+    ],
+    "websocket._core 725:21 call  class_( sockopt=sockopt, sslopt=sslopt, fire_cont_frame=f...": [
+      "class_ is annotated Type[WebSocket] with the default WebSocket; the package defines no subclass; a client's subclass is client code"
+    ],
+    "websocket._dispatcher 102:40 call  selectors.DefaultSelector()": [
+      "J6"
+    ],
+    "websocket._dispatcher 107:41 call  read_callback()": [
+      "the package calls SSLDispatcher.read only from run_forever.initialize_socket (_app.py:451), with read as read_callback"
+    ],
+    "websocket._dispatcher 109:31 call  check_callback()": [
+      "the package calls SSLDispatcher.read only from run_forever.initialize_socket (_app.py:451), with check as check_callback"
+    ],
+    "websocket._dispatcher 117:24 call  sock.pending()": [
+      "Codex round 1: with SOCKS, a wss url gives an SSLDispatcher (_app.py:596-597, from the original url) and a redirect to a ws url (_core.py:290-309) reconnects through _start_proxied_socket without TLS, so self.app.sock.sock is the python-socks stub value; a call of an attribute of a stub instance is named by its access path (missing-module convention; websocket-client.md J3)",
+      "sock is the WebSocket's socket; create_dispatcher makes an SSLDispatcher only for a wss url, and _http.connect wraps every wss socket of the package in an ssl.SSLSocket; a pre-initialised socket.socket of the client (B4) has no pending method, so the call raises AttributeError before any callee (J3)"
+    ],
+    "websocket._dispatcher 54:24 call  reconnector(reconnecting=True)": [
+      "the package calls DispatcherBase.reconnect only from WebSocketApp.run_forever (_app.py:607, on a Dispatcher or SSLDispatcher), with initialize_socket as the reconnector"
+    ],
+    "websocket._dispatcher 76:40 call  selectors.DefaultSelector()": [
+      "selectors.DefaultSelector is a direct alias of the platform's selector class: the first usable of KqueueSelector, EpollSelector, DevpollSelector, PollSelector and SelectSelector on the declared platforms (macOS, POSIX, Windows; websocket-client.md J6)"
+    ],
+    "websocket._dispatcher 81:41 call  read_callback()": [
+      "the package calls Dispatcher.read only from run_forever.initialize_socket (_app.py:451), with read as read_callback"
+    ],
+    "websocket._dispatcher 83:31 call  check_callback()": [
+      "the package calls Dispatcher.read only from run_forever.initialize_socket (_app.py:451), with check as check_callback"
+    ],
+    "websocket._handshake 136:65 call  header.items()": [
+      "the isinstance test at line 135 fixes dict (B4)"
+    ],
+    "websocket._handshake 215:53 call  hashlib.sha1(value).digest()": [
+      "hashlib.sha1 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 (README \"Versions and configuration\"; bottle bottle.py:2918, path)"
+    ],
+    "websocket._http 116:28 call  Proxy.create( proxy_type=proxy_type, host=proxy.proxy_hos...": [
+      "runs only on the side of the optional import where python-socks is importable (HAVE_PYTHON_SOCKS, line 94); python-socks is not installed, so the name is the missing module's access path (J1)"
+    ],
+    "websocket._http 125:28 call  ws_proxy.connect(hostname, port, timeout=proxy.proxy_time...": [
+      "ws_proxy is the missing-module value of line 116; the call keeps its access path (dagster-pipes judgement 5, spark.conf.get)"
+    ],
+    "websocket._http 171:23 call  sock.close()": [
+      "an exception after line 158 leaves sock the socket.socket of _open_socket (_tunnel returns its argument; the assignment of _ssl_socket's result is the last statement that can fail)"
+    ],
+    "websocket._http 338:31 call  context.wrap_socket( sock, do_handshake_on_connect=sslopt...": [
+      "context is the SSLContext of line 257, or the client's \"context\" sslopt, which docs/source/faq.rst:207 documents as an ssl.SSLContext (B4)"
+    ],
+    "websocket._http 78:33 call  ProxyError( \"Only http, socks4, socks5 proxy protocols ar...": [
+      "both sides of the optional import of python_socks run (lines 39-58): with python-socks, ProxyError is python_socks._errors.ProxyError (a missing module here); without it, the fallback class at line 48, whose first __init__ is Exception's (websocket-client.md J1)"
+    ],
+    "websocket._socket 110:40 call  selectors.DefaultSelector()": [
+      "J6"
+    ],
+    "websocket._socket 117:29 call  sock.recv(bufsize)": [
+      "a value site by name only; sock is the socket.socket or ssl.SSLSocket or python-socks stub value of recv (J3)"
+    ],
+    "websocket._socket 124:27 call  sock.gettimeout()": [
+      "sock is annotated socket.socket (B4); the package passes its socket.socket and ssl.SSLSocket (a subclass) objects and the client's pre-initialised socket.socket, and the python-socks stub value of a SOCKS ws connection (websocket-client.md J3)"
+    ],
+    "websocket._socket 125:31 call  sock.recv(bufsize)": [
+      "a value site by name only (frame_buffer assigns an attribute recv); sock is a socket.socket, an ssl.SSLSocket or the python-socks stub value (J3)"
+    ],
+    "websocket._socket 179:40 call  selectors.DefaultSelector()": [
+      "J6"
+    ],
+    "websocket._socket 190:27 call  sock.gettimeout()": [
+      "sock is annotated socket.socket (B4); the package passes its socket.socket and ssl.SSLSocket objects and the python-socks stub value of a SOCKS ws connection (J3)"
+    ],
+    "websocket._socket 99:29 call  sock.recv(bufsize)": [
+      "a value site by name only; sock is the socket.socket or ssl.SSLSocket or python-socks stub value of recv (J3)"
+    ],
+    "websocket._utils 38:37 call  Utf8Validator()": [
+      "both sides of the optional import of wsaccel run (J1); wsaccel is not installed"
+    ],
+    "websocket._utils 447:35 call  utfbytes.encode(\"utf-8\", \"surrogatepass\")": [
+      "continuous_frame.extract (_abnf.py:479) passes frame.data, which with wsaccel is the stub result of _mask for a masked single text frame (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)"
+    ],
+    "websocket._wsdump 106:25 call  sys.stdout.write(\"\\033[2K\\033[E\")": [
+      "the default sys.stdout is named by its class (README, callees outside the package)"
+    ],
+    "websocket._wsdump 113:30 call  self.raw_input(\"> \")": [
+      "in the MRO of InteractiveConsole, RawInput comes before code.InteractiveConsole, so RawInput.raw_input is found first"
+    ],
+    "websocket._wsdump 149:37 call  InteractiveConsole()": [
+      "the first __init__ in the MRO of InteractiveConsole is code.InteractiveConsole's (README: an inherited __init__ is named through the nearest base outside the package)"
+    ],
+    "websocket._wsdump 208:17 call  thread.start()": [
+      "start() runs the target recv_ws of the Thread made at line 206 (callback rule)"
+    ],
+    "websocket._wsdump 56:34 call  values.count(\"v\")": [
+      "values is the option's argument string (annotated str); argparse passes a str for nargs=\"?\""
+    ],
+    "websocket._wsdump 68:24 call  parser.add_argument( \"-v\", \"--verbose\", default=0, nargs=...": [
+      "add_argument instantiates VAction, whose first __init__ is argparse.Action.__init__ (outside the package, no edge)"
+    ],
+    "websocket._wsdump 96:29 call  parser.parse_args()": [
+      "parse_args calls the VAction of -v/--verbose back when the option is given (library call-back, B5)"
+    ]
+  },
+  "trace": "dynamic/websocket-client.json"
+}

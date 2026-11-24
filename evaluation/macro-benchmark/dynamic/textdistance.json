@@ -1,0 +1,1148 @@
+{
+  "aliases": {
+    "<builtin>.bytes": [
+      "uuid.bytes_"
+    ],
+    "<builtin>.bytes.join": [
+      "uuid.bytes_.join"
+    ],
+    "<builtin>.dict.get": [
+      "collections.Counter.get",
+      "collections.defaultdict.get",
+      "unittest.util.Counter.get"
+    ],
+    "<builtin>.dict.items": [
+      "collections.Counter.items",
+      "collections.defaultdict.items",
+      "unittest.util.Counter.items"
+    ],
+    "<builtin>.dict.keys": [
+      "collections.Counter.keys",
+      "collections.defaultdict.keys",
+      "unittest.util.Counter.keys"
+    ],
+    "<builtin>.dict.values": [
+      "collections.Counter.values",
+      "collections.defaultdict.values",
+      "unittest.util.Counter.values"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.find": [
+      "typing.Text.find"
+    ],
+    "<builtin>.str.isdigit": [
+      "typing.Text.isdigit"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "<builtin>.str.upper": [
+      "typing.Text.upper"
+    ],
+    "_codecs.encode": [
+      "codecs.encode"
+    ],
+    "_functools.reduce": [
+      "functools.reduce"
+    ],
+    "collections.Counter": [
+      "unittest.util.Counter"
+    ],
+    "collections.Counter.copy": [
+      "unittest.util.Counter.copy"
+    ],
+    "collections.Counter.most_common": [
+      "unittest.util.Counter.most_common"
+    ],
+    "numpy._core._multiarray_umath.arange": [
+      "numpy.arange"
+    ],
+    "numpy._core._multiarray_umath.zeros": [
+      "numpy.zeros"
+    ],
+    "pathlib.Path.open": [
+      "pathlib.PosixPath.open"
+    ]
+  },
+  "commit": "faa25f6ff50d0f34dc9655d4d7b0d8daf6f9ff85",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "attrs": "25.4.0",
+    "hypothesis": "6.140.4",
+    "iniconfig": "2.3.1",
+    "numpy": "2.3.2",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0",
+    "sortedcontainers": "2.4.0"
+  },
+  "dropped": {
+    "client_callbacks": 3,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "textdistance.algorithms.base": [
+      "<builtin>.staticmethod",
+      "textdistance.libraries.LibrariesManager.clone",
+      "textdistance.libraries.LibrariesManager.optimize",
+      "typing.TypeVar"
+    ],
+    "textdistance.algorithms.base.Base._count_counters": [
+      "<builtin>.dict.values",
+      "<builtin>.getattr",
+      "<builtin>.len",
+      "<builtin>.set",
+      "<builtin>.sum"
+    ],
+    "textdistance.algorithms.base.Base._get_counters": [
+      "<builtin>.all",
+      "<builtin>.isinstance",
+      "collections.Counter",
+      "textdistance.algorithms.base.Base._get_sequences"
+    ],
+    "textdistance.algorithms.base.Base._get_sequences": [
+      "<builtin>.list"
+    ],
+    "textdistance.algorithms.base.Base._ident": [
+      "<builtin>.len",
+      "<builtin>.set",
+      "<builtin>.zip"
+    ],
+    "textdistance.algorithms.base.Base._intersect_counters": [
+      "collections.Counter.copy"
+    ],
+    "textdistance.algorithms.base.Base._sum_counters": [
+      "collections.Counter.copy"
+    ],
+    "textdistance.algorithms.base.Base._union_counters": [
+      "collections.Counter.copy"
+    ],
+    "textdistance.algorithms.base.Base.distance": [
+      "textdistance.algorithms.compression_based._BinaryNCDBase.__call__",
+      "textdistance.algorithms.compression_based._NCDBase.__call__",
+      "textdistance.algorithms.edit_based.DamerauLevenshtein.__call__",
+      "textdistance.algorithms.edit_based.Hamming.__call__",
+      "textdistance.algorithms.edit_based.Levenshtein.__call__",
+      "textdistance.algorithms.phonetic.Editex.__call__",
+      "textdistance.algorithms.token_based.Bag.__call__"
+    ],
+    "textdistance.algorithms.base.Base.external_answer": [
+      "<builtin>.getattr",
+      "textdistance.libraries.LibrariesManager.get_libs",
+      "textdistance.libraries.LibraryBase.check_conditions",
+      "textdistance.libraries.LibraryBase.get_function",
+      "textdistance.libraries.SameLengthLibrary.check_conditions",
+      "textdistance.libraries.TextLibrary.check_conditions"
+    ],
+    "textdistance.algorithms.base.Base.maximum": [
+      "<builtin>.map",
+      "<builtin>.max"
+    ],
+    "textdistance.algorithms.base.Base.normalized_distance": [
+      "textdistance.algorithms.base.Base.distance",
+      "textdistance.algorithms.base.Base.maximum",
+      "textdistance.algorithms.base.BaseSimilarity.distance",
+      "textdistance.algorithms.compression_based._NCDBase.maximum",
+      "textdistance.algorithms.edit_based.JaroWinkler.maximum",
+      "textdistance.algorithms.edit_based.MLIPNS.maximum",
+      "textdistance.algorithms.edit_based.SmithWaterman.maximum",
+      "textdistance.algorithms.edit_based.StrCmp95.maximum",
+      "textdistance.algorithms.phonetic.Editex.maximum",
+      "textdistance.algorithms.phonetic.MRA.maximum",
+      "textdistance.algorithms.sequence_based.RatcliffObershelp.maximum",
+      "textdistance.algorithms.simple.Identity.maximum",
+      "textdistance.algorithms.token_based.Cosine.maximum",
+      "textdistance.algorithms.token_based.Jaccard.maximum",
+      "textdistance.algorithms.token_based.MongeElkan.maximum",
+      "textdistance.algorithms.token_based.Overlap.maximum",
+      "textdistance.algorithms.token_based.Sorensen.maximum",
+      "textdistance.algorithms.token_based.Tversky.maximum"
+    ],
+    "textdistance.algorithms.base.Base.normalized_similarity": [
+      "textdistance.algorithms.base.Base.normalized_distance"
+    ],
+    "textdistance.algorithms.base.Base.quick_answer": [
+      "<builtin>.all",
+      "<builtin>.len",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.base.Base.external_answer",
+      "textdistance.algorithms.base.Base.maximum",
+      "textdistance.algorithms.phonetic.Editex.maximum"
+    ],
+    "textdistance.algorithms.base.Base.similarity": [
+      "textdistance.algorithms.base.Base.distance",
+      "textdistance.algorithms.base.Base.maximum",
+      "textdistance.algorithms.compression_based._NCDBase.maximum",
+      "textdistance.algorithms.phonetic.Editex.maximum"
+    ],
+    "textdistance.algorithms.base.BaseSimilarity.distance": [
+      "textdistance.algorithms.base.Base.maximum",
+      "textdistance.algorithms.base.BaseSimilarity.similarity",
+      "textdistance.algorithms.edit_based.JaroWinkler.maximum",
+      "textdistance.algorithms.edit_based.MLIPNS.maximum",
+      "textdistance.algorithms.edit_based.SmithWaterman.maximum",
+      "textdistance.algorithms.edit_based.StrCmp95.maximum",
+      "textdistance.algorithms.phonetic.MRA.maximum",
+      "textdistance.algorithms.sequence_based.LCSSeq.similarity",
+      "textdistance.algorithms.sequence_based.LCSStr.similarity",
+      "textdistance.algorithms.sequence_based.RatcliffObershelp.maximum",
+      "textdistance.algorithms.simple.Identity.maximum",
+      "textdistance.algorithms.simple.Prefix.similarity",
+      "textdistance.algorithms.token_based.Cosine.maximum",
+      "textdistance.algorithms.token_based.Jaccard.maximum",
+      "textdistance.algorithms.token_based.MongeElkan.maximum",
+      "textdistance.algorithms.token_based.Overlap.maximum",
+      "textdistance.algorithms.token_based.Sorensen.maximum",
+      "textdistance.algorithms.token_based.Tversky.maximum"
+    ],
+    "textdistance.algorithms.base.BaseSimilarity.quick_answer": [
+      "<builtin>.all",
+      "<builtin>.len",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.base.Base.external_answer",
+      "textdistance.algorithms.edit_based.JaroWinkler.maximum",
+      "textdistance.algorithms.edit_based.MLIPNS.maximum",
+      "textdistance.algorithms.edit_based.SmithWaterman.maximum",
+      "textdistance.algorithms.edit_based.StrCmp95.maximum",
+      "textdistance.algorithms.sequence_based.RatcliffObershelp.maximum",
+      "textdistance.algorithms.token_based.Cosine.maximum",
+      "textdistance.algorithms.token_based.Jaccard.maximum",
+      "textdistance.algorithms.token_based.MongeElkan.maximum",
+      "textdistance.algorithms.token_based.Overlap.maximum",
+      "textdistance.algorithms.token_based.Sorensen.maximum",
+      "textdistance.algorithms.token_based.Tversky.maximum"
+    ],
+    "textdistance.algorithms.base.BaseSimilarity.similarity": [
+      "textdistance.algorithms.edit_based.JaroWinkler.__call__",
+      "textdistance.algorithms.edit_based.MLIPNS.__call__",
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.__call__",
+      "textdistance.algorithms.edit_based.SmithWaterman.__call__",
+      "textdistance.algorithms.edit_based.StrCmp95.__call__",
+      "textdistance.algorithms.phonetic.MRA.__call__",
+      "textdistance.algorithms.sequence_based.RatcliffObershelp.__call__",
+      "textdistance.algorithms.simple.Identity.__call__",
+      "textdistance.algorithms.token_based.Cosine.__call__",
+      "textdistance.algorithms.token_based.Jaccard.__call__",
+      "textdistance.algorithms.token_based.MongeElkan.__call__",
+      "textdistance.algorithms.token_based.Overlap.__call__",
+      "textdistance.algorithms.token_based.Sorensen.__call__",
+      "textdistance.algorithms.token_based.Tversky.__call__"
+    ],
+    "textdistance.algorithms.compression_based": [
+      "textdistance.algorithms.compression_based.ArithNCD.__init__",
+      "textdistance.algorithms.compression_based.BWTRLENCD.__init__",
+      "textdistance.algorithms.compression_based.EntropyNCD.__init__",
+      "textdistance.algorithms.compression_based.SqrtNCD.__init__",
+      "textdistance.algorithms.compression_based._BinaryNCDBase.__init__",
+      "textdistance.algorithms.compression_based._NCDBase.__init__",
+      "typing.TypeVar"
+    ],
+    "textdistance.algorithms.compression_based.ArithNCD._compress": [
+      "fractions.Fraction",
+      "textdistance.algorithms.compression_based.ArithNCD._get_range",
+      "textdistance.algorithms.compression_based.ArithNCD._make_probs"
+    ],
+    "textdistance.algorithms.compression_based.ArithNCD._get_range": [
+      "fractions.Fraction"
+    ],
+    "textdistance.algorithms.compression_based.ArithNCD._get_size": [
+      "math.ceil",
+      "math.log",
+      "textdistance.algorithms.compression_based.ArithNCD._compress"
+    ],
+    "textdistance.algorithms.compression_based.ArithNCD._make_probs": [
+      "<builtin>.dict.values",
+      "<builtin>.sum",
+      "collections.Counter.most_common",
+      "fractions.Fraction",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._sum_counters"
+    ],
+    "textdistance.algorithms.compression_based.BWTRLENCD._compress": [
+      "<builtin>.len",
+      "<builtin>.range",
+      "<builtin>.sorted",
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "<builtin>.super",
+      "<builtin>.type",
+      "textdistance.algorithms.compression_based.RLENCD._compress"
+    ],
+    "textdistance.algorithms.compression_based.BZ2NCD._compress": [
+      "_codecs.encode"
+    ],
+    "textdistance.algorithms.compression_based.EntropyNCD._compress": [
+      "<builtin>.dict.values",
+      "<builtin>.len",
+      "collections.Counter",
+      "math.log"
+    ],
+    "textdistance.algorithms.compression_based.EntropyNCD._get_size": [
+      "textdistance.algorithms.compression_based.EntropyNCD._compress"
+    ],
+    "textdistance.algorithms.compression_based.RLENCD._compress": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "itertools.groupby"
+    ],
+    "textdistance.algorithms.compression_based.SqrtNCD._compress": [
+      "<builtin>.dict.items",
+      "collections.Counter",
+      "math.sqrt"
+    ],
+    "textdistance.algorithms.compression_based.SqrtNCD._get_size": [
+      "<builtin>.dict.values",
+      "<builtin>.sum",
+      "textdistance.algorithms.compression_based.SqrtNCD._compress"
+    ],
+    "textdistance.algorithms.compression_based.ZLIBNCD._compress": [
+      "_codecs.encode"
+    ],
+    "textdistance.algorithms.compression_based._BinaryNCDBase.__call__": [
+      "<builtin>.isinstance",
+      "<builtin>.str.encode",
+      "<builtin>.super",
+      "<builtin>.tuple",
+      "textdistance.algorithms.compression_based._NCDBase.__call__"
+    ],
+    "textdistance.algorithms.compression_based._NCDBase.__call__": [
+      "<builtin>.bytes",
+      "<builtin>.bytes.join",
+      "<builtin>.float",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.min",
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "<builtin>.type",
+      "itertools.permutations",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.compression_based.ArithNCD._get_size",
+      "textdistance.algorithms.compression_based.EntropyNCD._get_size",
+      "textdistance.algorithms.compression_based.SqrtNCD._get_size",
+      "textdistance.algorithms.compression_based._NCDBase._get_size"
+    ],
+    "textdistance.algorithms.compression_based._NCDBase._get_size": [
+      "<builtin>.len",
+      "textdistance.algorithms.compression_based.BWTRLENCD._compress",
+      "textdistance.algorithms.compression_based.BZ2NCD._compress",
+      "textdistance.algorithms.compression_based.RLENCD._compress",
+      "textdistance.algorithms.compression_based.ZLIBNCD._compress"
+    ],
+    "textdistance.algorithms.edit_based": [
+      "<builtin>.staticmethod",
+      "textdistance.algorithms.edit_based.DamerauLevenshtein.__init__",
+      "textdistance.algorithms.edit_based.Gotoh.__init__",
+      "textdistance.algorithms.edit_based.Hamming.__init__",
+      "textdistance.algorithms.edit_based.Jaro.__init__",
+      "textdistance.algorithms.edit_based.JaroWinkler.__init__",
+      "textdistance.algorithms.edit_based.Levenshtein.__init__",
+      "textdistance.algorithms.edit_based.MLIPNS.__init__",
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.__init__",
+      "textdistance.algorithms.edit_based.SmithWaterman.__init__",
+      "textdistance.algorithms.edit_based.StrCmp95.__init__",
+      "typing.TypeVar"
+    ],
+    "textdistance.algorithms.edit_based.DamerauLevenshtein.__call__": [
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.Base.quick_answer",
+      "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_restricted",
+      "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_unrestricted"
+    ],
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_restricted": [
+      "<builtin>.enumerate",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.range",
+      "textdistance.algorithms.base.Base._ident"
+    ],
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_unrestricted": [
+      "<builtin>.dict.get",
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.range",
+      "textdistance.algorithms.base.Base._ident"
+    ],
+    "textdistance.algorithms.edit_based.Gotoh.__call__": [
+      "<builtin>.enumerate",
+      "<builtin>.float",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.range",
+      "numpy._core._multiarray_umath.zeros",
+      "textdistance.algorithms.base.Base._get_sequences"
+    ],
+    "textdistance.algorithms.edit_based.Hamming.__call__": [
+      "<builtin>.isinstance",
+      "<builtin>.sum",
+      "itertools.zip_longest",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.base.Base.quick_answer"
+    ],
+    "textdistance.algorithms.edit_based.Jaro.__init__": [
+      "<builtin>.super",
+      "textdistance.algorithms.edit_based.JaroWinkler.__init__"
+    ],
+    "textdistance.algorithms.edit_based.JaroWinkler.__call__": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.min",
+      "<builtin>.range",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer"
+    ],
+    "textdistance.algorithms.edit_based.Levenshtein.__call__": [
+      "<builtin>.isinstance",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.Base.quick_answer",
+      "textdistance.algorithms.edit_based.Levenshtein._cycled"
+    ],
+    "textdistance.algorithms.edit_based.Levenshtein._cycled": [
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.range",
+      "numpy._core._multiarray_umath.arange",
+      "textdistance.algorithms.base.Base._ident"
+    ],
+    "textdistance.algorithms.edit_based.MLIPNS.__call__": [
+      "<builtin>.all",
+      "<builtin>.map",
+      "<builtin>.max",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+      "textdistance.algorithms.edit_based.Hamming.__call__",
+      "textdistance.algorithms.edit_based.Hamming.__init__"
+    ],
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.__call__": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.range",
+      "numpy._core._multiarray_umath.zeros",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.simple.Matrix.__call__"
+    ],
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.distance": [
+      "textdistance.algorithms.base.BaseSimilarity.similarity"
+    ],
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.maximum": [
+      "<builtin>.map",
+      "<builtin>.max"
+    ],
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.minimum": [
+      "<builtin>.map",
+      "<builtin>.max"
+    ],
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_distance": [
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.distance",
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.maximum",
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.minimum"
+    ],
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_similarity": [
+      "textdistance.algorithms.base.BaseSimilarity.similarity",
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.maximum",
+      "textdistance.algorithms.edit_based.NeedlemanWunsch.minimum"
+    ],
+    "textdistance.algorithms.edit_based.SmithWaterman.__call__": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.max",
+      "numpy._core._multiarray_umath.zeros",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+      "textdistance.algorithms.simple.Matrix.__call__"
+    ],
+    "textdistance.algorithms.edit_based.SmithWaterman.maximum": [
+      "<builtin>.map",
+      "<builtin>.min"
+    ],
+    "textdistance.algorithms.edit_based.StrCmp95.__call__": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.min",
+      "<builtin>.range",
+      "<builtin>.str.isdigit",
+      "<builtin>.str.strip",
+      "<builtin>.str.upper",
+      "<builtin>.zip",
+      "collections.defaultdict",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+      "textdistance.algorithms.edit_based.StrCmp95._in_range"
+    ],
+    "textdistance.algorithms.edit_based.StrCmp95._in_range": [
+      "<builtin>.ord"
+    ],
+    "textdistance.algorithms.phonetic": [
+      "<builtin>.frozenset",
+      "textdistance.algorithms.base.Base.__init__",
+      "textdistance.algorithms.phonetic.Editex.__init__",
+      "typing.TypeVar"
+    ],
+    "textdistance.algorithms.phonetic.Editex.__call__": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.range",
+      "<builtin>.str.upper",
+      "<builtin>.zip",
+      "numpy._core._multiarray_umath.zeros",
+      "textdistance.algorithms.base.Base.quick_answer",
+      "textdistance.algorithms.phonetic.Editex.d_cost",
+      "textdistance.algorithms.phonetic.Editex.maximum",
+      "textdistance.algorithms.phonetic.Editex.r_cost"
+    ],
+    "textdistance.algorithms.phonetic.Editex.__init__": [
+      "<builtin>.frozenset.union",
+      "<builtin>.max"
+    ],
+    "textdistance.algorithms.phonetic.Editex.d_cost": [
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.phonetic.Editex.r_cost"
+    ],
+    "textdistance.algorithms.phonetic.Editex.maximum": [
+      "<builtin>.map",
+      "<builtin>.max"
+    ],
+    "textdistance.algorithms.phonetic.Editex.r_cost": [
+      "<builtin>.all",
+      "<builtin>.any",
+      "<builtin>.map",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.phonetic.Editex.r_cost.<lambda1>",
+      "textdistance.algorithms.phonetic.Editex.r_cost.<lambda2>"
+    ],
+    "textdistance.algorithms.phonetic.MRA.__call__": [
+      "<builtin>.abs",
+      "<builtin>.all",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.map",
+      "<builtin>.max",
+      "<builtin>.min",
+      "<builtin>.range",
+      "<builtin>.zip",
+      "itertools.zip_longest",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.phonetic.MRA._calc_mra"
+    ],
+    "textdistance.algorithms.phonetic.MRA._calc_mra": [
+      "<builtin>.len",
+      "<builtin>.str.join",
+      "<builtin>.str.upper",
+      "itertools.groupby"
+    ],
+    "textdistance.algorithms.phonetic.MRA.maximum": [
+      "<builtin>.list",
+      "<builtin>.map",
+      "<builtin>.max",
+      "textdistance.algorithms.phonetic.MRA._calc_mra"
+    ],
+    "textdistance.algorithms.sequence_based": [
+      "textdistance.algorithms.base.Base.__init__",
+      "textdistance.algorithms.sequence_based.LCSSeq.__init__"
+    ],
+    "textdistance.algorithms.sequence_based.LCSSeq.__call__": [
+      "<builtin>.len",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.sequence_based.LCSSeq._dynamic",
+      "textdistance.algorithms.sequence_based.LCSSeq._recursive"
+    ],
+    "textdistance.algorithms.sequence_based.LCSSeq._dynamic": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.max",
+      "numpy._core._multiarray_umath.zeros"
+    ],
+    "textdistance.algorithms.sequence_based.LCSSeq._recursive": [
+      "<builtin>.all",
+      "<builtin>.enumerate",
+      "<builtin>.max",
+      "<builtin>.str",
+      "<builtin>.tuple",
+      "<builtin>.type",
+      "textdistance.algorithms.base.Base._ident",
+      "textdistance.algorithms.sequence_based.LCSSeq.__call__"
+    ],
+    "textdistance.algorithms.sequence_based.LCSSeq.similarity": [
+      "<builtin>.len",
+      "textdistance.algorithms.sequence_based.LCSSeq.__call__"
+    ],
+    "textdistance.algorithms.sequence_based.LCSStr.__call__": [
+      "<builtin>.all",
+      "<builtin>.len",
+      "<builtin>.map",
+      "<builtin>.max",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.sequence_based.LCSStr._custom",
+      "textdistance.algorithms.sequence_based.LCSStr._standart"
+    ],
+    "textdistance.algorithms.sequence_based.LCSStr._custom": [
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.range",
+      "<builtin>.str.join",
+      "textdistance.utils.find_ngrams"
+    ],
+    "textdistance.algorithms.sequence_based.LCSStr._standart": [
+      "<builtin>.len",
+      "difflib.SequenceMatcher",
+      "difflib.SequenceMatcher.find_longest_match"
+    ],
+    "textdistance.algorithms.sequence_based.LCSStr.similarity": [
+      "<builtin>.len",
+      "textdistance.algorithms.sequence_based.LCSStr.__call__"
+    ],
+    "textdistance.algorithms.sequence_based.RatcliffObershelp.__call__": [
+      "<builtin>.len",
+      "<builtin>.map",
+      "<builtin>.sum",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+      "textdistance.algorithms.sequence_based.RatcliffObershelp._find"
+    ],
+    "textdistance.algorithms.sequence_based.RatcliffObershelp._find": [
+      "<builtin>.len",
+      "<builtin>.str.find",
+      "textdistance.algorithms.base.Base.__init__",
+      "textdistance.algorithms.sequence_based.LCSStr.__call__",
+      "textdistance.algorithms.sequence_based.RatcliffObershelp._find"
+    ],
+    "textdistance.algorithms.simple": [
+      "textdistance.algorithms.base.Base.__init__",
+      "textdistance.algorithms.simple.Matrix.__init__",
+      "textdistance.algorithms.simple.Prefix.__init__"
+    ],
+    "textdistance.algorithms.simple.Identity.__call__": [
+      "<builtin>.int",
+      "textdistance.algorithms.base.Base._ident"
+    ],
+    "textdistance.algorithms.simple.Matrix.__call__": [
+      "<builtin>.reversed",
+      "<builtin>.tuple",
+      "textdistance.algorithms.base.Base._ident"
+    ],
+    "textdistance.algorithms.simple.Postfix.__call__": [
+      "<builtin>.isinstance",
+      "<builtin>.list",
+      "<builtin>.reversed",
+      "<builtin>.str.join",
+      "<builtin>.super",
+      "textdistance.algorithms.simple.Prefix.__call__"
+    ],
+    "textdistance.algorithms.simple.Prefix.__call__": [
+      "<builtin>.isinstance",
+      "<builtin>.str.join",
+      "<builtin>.zip",
+      "itertools.takewhile",
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.simple.Prefix.__call__.test"
+    ],
+    "textdistance.algorithms.simple.Prefix.__call__.test": [
+      "textdistance.algorithms.base.Base._ident"
+    ],
+    "textdistance.algorithms.simple.Prefix.similarity": [
+      "<builtin>.len",
+      "textdistance.algorithms.simple.Postfix.__call__",
+      "textdistance.algorithms.simple.Prefix.__call__"
+    ],
+    "textdistance.algorithms.token_based": [
+      "textdistance.algorithms.base.Base.__init__",
+      "textdistance.algorithms.edit_based.DamerauLevenshtein.__init__",
+      "textdistance.algorithms.token_based.Cosine.__init__",
+      "textdistance.algorithms.token_based.Jaccard.__init__",
+      "textdistance.algorithms.token_based.MongeElkan.__init__",
+      "textdistance.algorithms.token_based.Overlap.__init__",
+      "textdistance.algorithms.token_based.Sorensen.__init__",
+      "textdistance.algorithms.token_based.Tversky.__init__"
+    ],
+    "textdistance.algorithms.token_based.Bag.__call__": [
+      "<builtin>.max",
+      "textdistance.algorithms.base.Base._count_counters",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._intersect_counters"
+    ],
+    "textdistance.algorithms.token_based.Cosine.__call__": [
+      "<builtin>.len",
+      "<builtin>.pow",
+      "_functools.reduce",
+      "textdistance.algorithms.base.Base._count_counters",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._intersect_counters",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+      "textdistance.algorithms.token_based.Cosine.__call__.<lambda1>"
+    ],
+    "textdistance.algorithms.token_based.Jaccard.__call__": [
+      "textdistance.algorithms.base.Base._count_counters",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._intersect_counters",
+      "textdistance.algorithms.base.Base._union_counters",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer"
+    ],
+    "textdistance.algorithms.token_based.MongeElkan.__call__": [
+      "textdistance.algorithms.base.Base._get_sequences",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+      "textdistance.algorithms.token_based.MongeElkan._calc"
+    ],
+    "textdistance.algorithms.token_based.MongeElkan._calc": [
+      "<builtin>.float",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.max",
+      "<builtin>.sum",
+      "textdistance.algorithms.base.Base.similarity",
+      "textdistance.algorithms.base.BaseSimilarity.similarity"
+    ],
+    "textdistance.algorithms.token_based.MongeElkan.maximum": [
+      "<builtin>.max",
+      "textdistance.algorithms.base.Base.maximum"
+    ],
+    "textdistance.algorithms.token_based.Overlap.__call__": [
+      "<builtin>.min",
+      "textdistance.algorithms.base.Base._count_counters",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._intersect_counters",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer"
+    ],
+    "textdistance.algorithms.token_based.Sorensen.__call__": [
+      "<builtin>.sum",
+      "textdistance.algorithms.base.Base._count_counters",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._intersect_counters",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer"
+    ],
+    "textdistance.algorithms.token_based.Tversky.__call__": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.zip",
+      "itertools.islice",
+      "textdistance.algorithms.base.Base._count_counters",
+      "textdistance.algorithms.base.Base._get_counters",
+      "textdistance.algorithms.base.Base._intersect_counters",
+      "textdistance.algorithms.base.BaseSimilarity.quick_answer"
+    ],
+    "textdistance.algorithms.token_based.Tversky.__init__": [
+      "itertools.repeat"
+    ],
+    "textdistance.algorithms.types": [
+      "typing.TypeVar"
+    ],
+    "textdistance.libraries": [
+      "<builtin>.dict",
+      "<builtin>.property",
+      "pathlib.Path",
+      "textdistance.libraries.LibrariesManager.__init__",
+      "textdistance.libraries.LibrariesManager.register",
+      "textdistance.libraries.LibraryBase.__init__"
+    ],
+    "textdistance.libraries.LibrariesManager.__init__": [
+      "collections.defaultdict"
+    ],
+    "textdistance.libraries.LibrariesManager.clone": [
+      "copy.deepcopy",
+      "textdistance.libraries.LibrariesManager.__init__"
+    ],
+    "textdistance.libraries.LibrariesManager.get_algorithms": [
+      "<builtin>.dict.keys",
+      "<builtin>.list"
+    ],
+    "textdistance.libraries.LibrariesManager.optimize": [
+      "<builtin>.dict.items",
+      "<builtin>.list.sort",
+      "json.load",
+      "pathlib.Path.open",
+      "textdistance.libraries.LibrariesManager.get_libs",
+      "textdistance.libraries.LibrariesManager.optimize.<lambda1>"
+    ],
+    "textdistance.libraries.LibrariesManager.optimize.<lambda1>": [
+      "<builtin>.list.index"
+    ],
+    "textdistance.libraries.LibrariesManager.register": [
+      "<builtin>.list.append"
+    ],
+    "textdistance.libraries.LibraryBase.check_conditions": [
+      "<builtin>.dict.items",
+      "<builtin>.getattr",
+      "<builtin>.len"
+    ],
+    "textdistance.libraries.LibraryBase.get_function": [
+      "importlib.import_module"
+    ],
+    "textdistance.libraries.SameLengthLibrary.check_conditions": [
+      "<builtin>.map",
+      "<builtin>.max",
+      "<builtin>.min",
+      "<builtin>.super",
+      "textdistance.libraries.LibraryBase.check_conditions",
+      "textdistance.libraries.TextLibrary.check_conditions"
+    ],
+    "textdistance.libraries.TextLibrary.check_conditions": [
+      "<builtin>.getattr",
+      "<builtin>.super",
+      "<builtin>.type",
+      "textdistance.libraries.LibraryBase.check_conditions"
+    ],
+    "textdistance.utils.find_ngrams": [
+      "<builtin>.list",
+      "<builtin>.range",
+      "<builtin>.zip"
+    ]
+  },
+  "executed": [
+    "textdistance.algorithms.base.Base.__init__",
+    "textdistance.algorithms.base.Base._count_counters",
+    "textdistance.algorithms.base.Base._get_counters",
+    "textdistance.algorithms.base.Base._get_sequences",
+    "textdistance.algorithms.base.Base._ident",
+    "textdistance.algorithms.base.Base._intersect_counters",
+    "textdistance.algorithms.base.Base._sum_counters",
+    "textdistance.algorithms.base.Base._union_counters",
+    "textdistance.algorithms.base.Base.distance",
+    "textdistance.algorithms.base.Base.external_answer",
+    "textdistance.algorithms.base.Base.maximum",
+    "textdistance.algorithms.base.Base.normalized_distance",
+    "textdistance.algorithms.base.Base.normalized_similarity",
+    "textdistance.algorithms.base.Base.quick_answer",
+    "textdistance.algorithms.base.Base.similarity",
+    "textdistance.algorithms.base.BaseSimilarity.distance",
+    "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+    "textdistance.algorithms.base.BaseSimilarity.similarity",
+    "textdistance.algorithms.compression_based.ArithNCD.__init__",
+    "textdistance.algorithms.compression_based.ArithNCD._compress",
+    "textdistance.algorithms.compression_based.ArithNCD._get_range",
+    "textdistance.algorithms.compression_based.ArithNCD._get_size",
+    "textdistance.algorithms.compression_based.ArithNCD._make_probs",
+    "textdistance.algorithms.compression_based.BWTRLENCD.__init__",
+    "textdistance.algorithms.compression_based.BWTRLENCD._compress",
+    "textdistance.algorithms.compression_based.BZ2NCD._compress",
+    "textdistance.algorithms.compression_based.EntropyNCD.__init__",
+    "textdistance.algorithms.compression_based.EntropyNCD._compress",
+    "textdistance.algorithms.compression_based.EntropyNCD._get_size",
+    "textdistance.algorithms.compression_based.RLENCD._compress",
+    "textdistance.algorithms.compression_based.SqrtNCD.__init__",
+    "textdistance.algorithms.compression_based.SqrtNCD._compress",
+    "textdistance.algorithms.compression_based.SqrtNCD._get_size",
+    "textdistance.algorithms.compression_based.ZLIBNCD._compress",
+    "textdistance.algorithms.compression_based._BinaryNCDBase.__call__",
+    "textdistance.algorithms.compression_based._BinaryNCDBase.__init__",
+    "textdistance.algorithms.compression_based._NCDBase.__call__",
+    "textdistance.algorithms.compression_based._NCDBase.__init__",
+    "textdistance.algorithms.compression_based._NCDBase._get_size",
+    "textdistance.algorithms.compression_based._NCDBase.maximum",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein.__call__",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein.__init__",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_restricted",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_unrestricted",
+    "textdistance.algorithms.edit_based.Gotoh.__call__",
+    "textdistance.algorithms.edit_based.Gotoh.__init__",
+    "textdistance.algorithms.edit_based.Hamming.__call__",
+    "textdistance.algorithms.edit_based.Hamming.__init__",
+    "textdistance.algorithms.edit_based.Jaro.__init__",
+    "textdistance.algorithms.edit_based.JaroWinkler.__call__",
+    "textdistance.algorithms.edit_based.JaroWinkler.__init__",
+    "textdistance.algorithms.edit_based.JaroWinkler.maximum",
+    "textdistance.algorithms.edit_based.Levenshtein.__call__",
+    "textdistance.algorithms.edit_based.Levenshtein.__init__",
+    "textdistance.algorithms.edit_based.Levenshtein._cycled",
+    "textdistance.algorithms.edit_based.MLIPNS.__call__",
+    "textdistance.algorithms.edit_based.MLIPNS.__init__",
+    "textdistance.algorithms.edit_based.MLIPNS.maximum",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.__call__",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.__init__",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.distance",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.maximum",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.minimum",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_distance",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_similarity",
+    "textdistance.algorithms.edit_based.SmithWaterman.__call__",
+    "textdistance.algorithms.edit_based.SmithWaterman.__init__",
+    "textdistance.algorithms.edit_based.SmithWaterman.maximum",
+    "textdistance.algorithms.edit_based.StrCmp95.__call__",
+    "textdistance.algorithms.edit_based.StrCmp95.__init__",
+    "textdistance.algorithms.edit_based.StrCmp95._in_range",
+    "textdistance.algorithms.edit_based.StrCmp95.maximum",
+    "textdistance.algorithms.phonetic.Editex.__call__",
+    "textdistance.algorithms.phonetic.Editex.__init__",
+    "textdistance.algorithms.phonetic.Editex.d_cost",
+    "textdistance.algorithms.phonetic.Editex.maximum",
+    "textdistance.algorithms.phonetic.Editex.r_cost",
+    "textdistance.algorithms.phonetic.Editex.r_cost.<lambda1>",
+    "textdistance.algorithms.phonetic.Editex.r_cost.<lambda2>",
+    "textdistance.algorithms.phonetic.MRA.__call__",
+    "textdistance.algorithms.phonetic.MRA._calc_mra",
+    "textdistance.algorithms.phonetic.MRA.maximum",
+    "textdistance.algorithms.sequence_based.LCSSeq.__call__",
+    "textdistance.algorithms.sequence_based.LCSSeq.__init__",
+    "textdistance.algorithms.sequence_based.LCSSeq._dynamic",
+    "textdistance.algorithms.sequence_based.LCSSeq._recursive",
+    "textdistance.algorithms.sequence_based.LCSSeq.similarity",
+    "textdistance.algorithms.sequence_based.LCSStr.__call__",
+    "textdistance.algorithms.sequence_based.LCSStr._custom",
+    "textdistance.algorithms.sequence_based.LCSStr._standart",
+    "textdistance.algorithms.sequence_based.LCSStr.similarity",
+    "textdistance.algorithms.sequence_based.RatcliffObershelp.__call__",
+    "textdistance.algorithms.sequence_based.RatcliffObershelp._find",
+    "textdistance.algorithms.sequence_based.RatcliffObershelp.maximum",
+    "textdistance.algorithms.simple.Identity.__call__",
+    "textdistance.algorithms.simple.Identity.maximum",
+    "textdistance.algorithms.simple.Matrix.__call__",
+    "textdistance.algorithms.simple.Matrix.__init__",
+    "textdistance.algorithms.simple.Postfix.__call__",
+    "textdistance.algorithms.simple.Prefix.__call__",
+    "textdistance.algorithms.simple.Prefix.__call__.test",
+    "textdistance.algorithms.simple.Prefix.__init__",
+    "textdistance.algorithms.simple.Prefix.similarity",
+    "textdistance.algorithms.token_based.Bag.__call__",
+    "textdistance.algorithms.token_based.Cosine.__call__",
+    "textdistance.algorithms.token_based.Cosine.__call__.<lambda1>",
+    "textdistance.algorithms.token_based.Cosine.__init__",
+    "textdistance.algorithms.token_based.Cosine.maximum",
+    "textdistance.algorithms.token_based.Jaccard.__call__",
+    "textdistance.algorithms.token_based.Jaccard.__init__",
+    "textdistance.algorithms.token_based.Jaccard.maximum",
+    "textdistance.algorithms.token_based.MongeElkan.__call__",
+    "textdistance.algorithms.token_based.MongeElkan.__init__",
+    "textdistance.algorithms.token_based.MongeElkan._calc",
+    "textdistance.algorithms.token_based.MongeElkan.maximum",
+    "textdistance.algorithms.token_based.Overlap.__call__",
+    "textdistance.algorithms.token_based.Overlap.__init__",
+    "textdistance.algorithms.token_based.Overlap.maximum",
+    "textdistance.algorithms.token_based.Sorensen.__call__",
+    "textdistance.algorithms.token_based.Sorensen.__init__",
+    "textdistance.algorithms.token_based.Sorensen.maximum",
+    "textdistance.algorithms.token_based.Tversky.__call__",
+    "textdistance.algorithms.token_based.Tversky.__init__",
+    "textdistance.algorithms.token_based.Tversky.maximum",
+    "textdistance.libraries.LibrariesManager.__init__",
+    "textdistance.libraries.LibrariesManager.clone",
+    "textdistance.libraries.LibrariesManager.get_algorithms",
+    "textdistance.libraries.LibrariesManager.get_libs",
+    "textdistance.libraries.LibrariesManager.optimize",
+    "textdistance.libraries.LibrariesManager.optimize.<lambda1>",
+    "textdistance.libraries.LibrariesManager.register",
+    "textdistance.libraries.LibraryBase.__init__",
+    "textdistance.libraries.LibraryBase.check_conditions",
+    "textdistance.libraries.LibraryBase.get_function",
+    "textdistance.libraries.SameLengthLibrary.check_conditions",
+    "textdistance.libraries.TextLibrary.check_conditions",
+    "textdistance.utils.find_ngrams"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "textdistance.algorithms.base.Base.__call__",
+    "textdistance.algorithms.base.Base.__init__",
+    "textdistance.algorithms.base.Base.__repr__",
+    "textdistance.algorithms.base.Base._count_counters",
+    "textdistance.algorithms.base.Base._get_counters",
+    "textdistance.algorithms.base.Base._get_sequences",
+    "textdistance.algorithms.base.Base._ident",
+    "textdistance.algorithms.base.Base._intersect_counters",
+    "textdistance.algorithms.base.Base._sum_counters",
+    "textdistance.algorithms.base.Base._union_counters",
+    "textdistance.algorithms.base.Base.distance",
+    "textdistance.algorithms.base.Base.external_answer",
+    "textdistance.algorithms.base.Base.maximum",
+    "textdistance.algorithms.base.Base.normalized_distance",
+    "textdistance.algorithms.base.Base.normalized_similarity",
+    "textdistance.algorithms.base.Base.quick_answer",
+    "textdistance.algorithms.base.Base.similarity",
+    "textdistance.algorithms.base.BaseSimilarity.distance",
+    "textdistance.algorithms.base.BaseSimilarity.quick_answer",
+    "textdistance.algorithms.base.BaseSimilarity.similarity",
+    "textdistance.algorithms.compression_based.ArithNCD.__init__",
+    "textdistance.algorithms.compression_based.ArithNCD._compress",
+    "textdistance.algorithms.compression_based.ArithNCD._get_range",
+    "textdistance.algorithms.compression_based.ArithNCD._get_size",
+    "textdistance.algorithms.compression_based.ArithNCD._make_probs",
+    "textdistance.algorithms.compression_based.BWTRLENCD.__init__",
+    "textdistance.algorithms.compression_based.BWTRLENCD._compress",
+    "textdistance.algorithms.compression_based.BZ2NCD._compress",
+    "textdistance.algorithms.compression_based.EntropyNCD.__init__",
+    "textdistance.algorithms.compression_based.EntropyNCD._compress",
+    "textdistance.algorithms.compression_based.EntropyNCD._get_size",
+    "textdistance.algorithms.compression_based.LZMANCD._compress",
+    "textdistance.algorithms.compression_based.RLENCD._compress",
+    "textdistance.algorithms.compression_based.SqrtNCD.__init__",
+    "textdistance.algorithms.compression_based.SqrtNCD._compress",
+    "textdistance.algorithms.compression_based.SqrtNCD._get_size",
+    "textdistance.algorithms.compression_based.ZLIBNCD._compress",
+    "textdistance.algorithms.compression_based._BinaryNCDBase.__call__",
+    "textdistance.algorithms.compression_based._BinaryNCDBase.__init__",
+    "textdistance.algorithms.compression_based._NCDBase.__call__",
+    "textdistance.algorithms.compression_based._NCDBase.__init__",
+    "textdistance.algorithms.compression_based._NCDBase._compress",
+    "textdistance.algorithms.compression_based._NCDBase._get_size",
+    "textdistance.algorithms.compression_based._NCDBase.maximum",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein.__call__",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein.__init__",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._numpy",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_restricted",
+    "textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_unrestricted",
+    "textdistance.algorithms.edit_based.Gotoh.__call__",
+    "textdistance.algorithms.edit_based.Gotoh.__init__",
+    "textdistance.algorithms.edit_based.Gotoh.maximum",
+    "textdistance.algorithms.edit_based.Gotoh.minimum",
+    "textdistance.algorithms.edit_based.Hamming.__call__",
+    "textdistance.algorithms.edit_based.Hamming.__init__",
+    "textdistance.algorithms.edit_based.Jaro.__init__",
+    "textdistance.algorithms.edit_based.JaroWinkler.__call__",
+    "textdistance.algorithms.edit_based.JaroWinkler.__init__",
+    "textdistance.algorithms.edit_based.JaroWinkler.maximum",
+    "textdistance.algorithms.edit_based.Levenshtein.__call__",
+    "textdistance.algorithms.edit_based.Levenshtein.__init__",
+    "textdistance.algorithms.edit_based.Levenshtein._cycled",
+    "textdistance.algorithms.edit_based.Levenshtein._recursive",
+    "textdistance.algorithms.edit_based.MLIPNS.__call__",
+    "textdistance.algorithms.edit_based.MLIPNS.__init__",
+    "textdistance.algorithms.edit_based.MLIPNS.maximum",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.__call__",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.__init__",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.distance",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.maximum",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.minimum",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_distance",
+    "textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_similarity",
+    "textdistance.algorithms.edit_based.SmithWaterman.__call__",
+    "textdistance.algorithms.edit_based.SmithWaterman.__init__",
+    "textdistance.algorithms.edit_based.SmithWaterman.maximum",
+    "textdistance.algorithms.edit_based.StrCmp95.__call__",
+    "textdistance.algorithms.edit_based.StrCmp95.__init__",
+    "textdistance.algorithms.edit_based.StrCmp95._in_range",
+    "textdistance.algorithms.edit_based.StrCmp95.maximum",
+    "textdistance.algorithms.phonetic.Editex.__call__",
+    "textdistance.algorithms.phonetic.Editex.__call__.<lambda1>",
+    "textdistance.algorithms.phonetic.Editex.__init__",
+    "textdistance.algorithms.phonetic.Editex.d_cost",
+    "textdistance.algorithms.phonetic.Editex.maximum",
+    "textdistance.algorithms.phonetic.Editex.r_cost",
+    "textdistance.algorithms.phonetic.Editex.r_cost.<lambda1>",
+    "textdistance.algorithms.phonetic.Editex.r_cost.<lambda2>",
+    "textdistance.algorithms.phonetic.MRA.__call__",
+    "textdistance.algorithms.phonetic.MRA._calc_mra",
+    "textdistance.algorithms.phonetic.MRA.maximum",
+    "textdistance.algorithms.sequence_based.LCSSeq.__call__",
+    "textdistance.algorithms.sequence_based.LCSSeq.__init__",
+    "textdistance.algorithms.sequence_based.LCSSeq._dynamic",
+    "textdistance.algorithms.sequence_based.LCSSeq._recursive",
+    "textdistance.algorithms.sequence_based.LCSSeq.similarity",
+    "textdistance.algorithms.sequence_based.LCSStr.__call__",
+    "textdistance.algorithms.sequence_based.LCSStr._custom",
+    "textdistance.algorithms.sequence_based.LCSStr._standart",
+    "textdistance.algorithms.sequence_based.LCSStr.similarity",
+    "textdistance.algorithms.sequence_based.RatcliffObershelp.__call__",
+    "textdistance.algorithms.sequence_based.RatcliffObershelp._find",
+    "textdistance.algorithms.sequence_based.RatcliffObershelp.maximum",
+    "textdistance.algorithms.simple.Identity.__call__",
+    "textdistance.algorithms.simple.Identity.maximum",
+    "textdistance.algorithms.simple.Length.__call__",
+    "textdistance.algorithms.simple.Matrix.__call__",
+    "textdistance.algorithms.simple.Matrix.__init__",
+    "textdistance.algorithms.simple.Matrix.maximum",
+    "textdistance.algorithms.simple.Postfix.__call__",
+    "textdistance.algorithms.simple.Prefix.__call__",
+    "textdistance.algorithms.simple.Prefix.__call__.test",
+    "textdistance.algorithms.simple.Prefix.__init__",
+    "textdistance.algorithms.simple.Prefix.similarity",
+    "textdistance.algorithms.token_based.Bag.__call__",
+    "textdistance.algorithms.token_based.Cosine.__call__",
+    "textdistance.algorithms.token_based.Cosine.__call__.<lambda1>",
+    "textdistance.algorithms.token_based.Cosine.__init__",
+    "textdistance.algorithms.token_based.Cosine.maximum",
+    "textdistance.algorithms.token_based.Jaccard.__call__",
+    "textdistance.algorithms.token_based.Jaccard.__init__",
+    "textdistance.algorithms.token_based.Jaccard.maximum",
+    "textdistance.algorithms.token_based.MongeElkan.__call__",
+    "textdistance.algorithms.token_based.MongeElkan.__init__",
+    "textdistance.algorithms.token_based.MongeElkan._calc",
+    "textdistance.algorithms.token_based.MongeElkan.maximum",
+    "textdistance.algorithms.token_based.Overlap.__call__",
+    "textdistance.algorithms.token_based.Overlap.__init__",
+    "textdistance.algorithms.token_based.Overlap.maximum",
+    "textdistance.algorithms.token_based.Sorensen.__call__",
+    "textdistance.algorithms.token_based.Sorensen.__init__",
+    "textdistance.algorithms.token_based.Sorensen.maximum",
+    "textdistance.algorithms.token_based.Tanimoto.__call__",
+    "textdistance.algorithms.token_based.Tversky.__call__",
+    "textdistance.algorithms.token_based.Tversky.__init__",
+    "textdistance.algorithms.token_based.Tversky.maximum",
+    "textdistance.libraries.LibrariesManager.__init__",
+    "textdistance.libraries.LibrariesManager.clone",
+    "textdistance.libraries.LibrariesManager.get_algorithms",
+    "textdistance.libraries.LibrariesManager.get_libs",
+    "textdistance.libraries.LibrariesManager.optimize",
+    "textdistance.libraries.LibrariesManager.optimize.<lambda1>",
+    "textdistance.libraries.LibrariesManager.register",
+    "textdistance.libraries.LibraryBase.__init__",
+    "textdistance.libraries.LibraryBase.__str__",
+    "textdistance.libraries.LibraryBase.check_conditions",
+    "textdistance.libraries.LibraryBase.get_function",
+    "textdistance.libraries.LibraryBase.prepare",
+    "textdistance.libraries.LibraryBase.setup",
+    "textdistance.libraries.SameLengthLibrary.check_conditions",
+    "textdistance.libraries.TextLibrary.check_conditions",
+    "textdistance.libraries.TextLibrary.prepare",
+    "textdistance.libraries.TextLibrary.prepare.<lambda1>",
+    "textdistance.utils.find_ngrams",
+    "textdistance.utils.words_combinations"
+  ],
+  "modules": [
+    "textdistance",
+    "textdistance.algorithms",
+    "textdistance.algorithms.base",
+    "textdistance.algorithms.compression_based",
+    "textdistance.algorithms.edit_based",
+    "textdistance.algorithms.phonetic",
+    "textdistance.algorithms.sequence_based",
+    "textdistance.algorithms.simple",
+    "textdistance.algorithms.token_based",
+    "textdistance.algorithms.types",
+    "textdistance.libraries",
+    "textdistance.utils"
+  ],
+  "plugins": [
+    "plugins/hypothesis_profile.py"
+  ],
+  "project": "textdistance",
+  "pytest": {
+    "config": "setup.cfg",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 30,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 400,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

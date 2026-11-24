@@ -1,0 +1,476 @@
+{
+  "edges": {
+    "tinydb.database.TinyDB.__getattr__": {
+      "tinydb.table.Table.name": [
+        "tinydb.database 255:23 call  getattr(self.table(self.default_table_name), name)"
+      ]
+    },
+    "tinydb.database.TinyDB.__iter__": {
+      "tinydb.table.Table.__iter__": [
+        "tinydb.database 274:20 call  iter(self.table(self.default_table_name))"
+      ]
+    },
+    "tinydb.database.TinyDB.drop_table": {
+      "tinydb.middlewares.CachingMiddleware.read": [
+        "tinydb.database 188:33 call  self.storage.read()"
+      ],
+      "tinydb.middlewares.CachingMiddleware.write": [
+        "tinydb.database 202:27 call  self.storage.write(data)"
+      ],
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.database 188:29 getattr  self.storage.read",
+        "tinydb.database 202:22 getattr  self.storage.write"
+      ],
+      "tinydb.storages.JSONStorage.read": [
+        "tinydb.database 188:33 call  self.storage.read()"
+      ],
+      "tinydb.storages.JSONStorage.write": [
+        "tinydb.database 202:27 call  self.storage.write(data)"
+      ]
+    },
+    "tinydb.database.TinyDB.drop_tables": {
+      "tinydb.middlewares.CachingMiddleware.write": [
+        "tinydb.database 170:27 call  self.storage.write({})"
+      ],
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.database 170:22 getattr  self.storage.write"
+      ]
+    },
+    "tinydb.database.TinyDB.tables": {
+      "tinydb.middlewares.CachingMiddleware.read": [
+        "tinydb.database 161:37 call  self.storage.read()"
+      ],
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.database 161:33 getattr  self.storage.read"
+      ]
+    },
+    "tinydb.middlewares.CachingMiddleware.close": {
+      "tinydb.middlewares.CachingMiddleware.close": [
+        "tinydb.middlewares 127:27 call  self.storage.close()"
+      ],
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.middlewares 127:22 getattr  self.storage.close"
+      ]
+    },
+    "tinydb.middlewares.CachingMiddleware.flush": {
+      "tinydb.middlewares.CachingMiddleware.write": [
+        "tinydb.middlewares 119:31 call  self.storage.write(self.cache)"
+      ],
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.middlewares 119:26 getattr  self.storage.write"
+      ]
+    },
+    "tinydb.middlewares.CachingMiddleware.read": {
+      "tinydb.middlewares.CachingMiddleware.read": [
+        "tinydb.middlewares 99:43 call  self.storage.read()"
+      ],
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.middlewares 99:39 getattr  self.storage.read"
+      ]
+    },
+    "tinydb.middlewares.Middleware.__call__": {
+      "tinydb.middlewares.Middleware.__call__": [
+        "tinydb.middlewares 63:41 call  self._storage_cls(*args, **kwargs)"
+      ]
+    },
+    "tinydb.middlewares.Middleware.__getattr__": {
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.middlewares 73:23 call  getattr(self.__dict__['storage'], name)"
+      ]
+    },
+    "tinydb.mypy_plugin": {
+      "typing.TypeVar": [
+        "tinydb.mypy_plugin 8:12 call  TypeVar('T')"
+      ]
+    },
+    "tinydb.mypy_plugin.TinyDBPlugin.__init__": {
+      "<builtin>.super": [
+        "tinydb.mypy_plugin 15:14 call  super()"
+      ],
+      "mypy.plugin.Plugin.__init__": [
+        "tinydb.mypy_plugin 15:25 call  super().__init__(options)"
+      ]
+    },
+    "tinydb.mypy_plugin.TinyDBPlugin.get_dynamic_class_hook.hook": {
+      "<builtin>.isinstance": [
+        "tinydb.mypy_plugin 23:34 call  isinstance(klass, NameExpr)"
+      ],
+      "mypy.plugin.DynamicClassDefContext.api.add_symbol_table_node": [
+        "tinydb.mypy_plugin 31:46 call  ctx.api.add_symbol_table_node(ctx.name, qualified)"
+      ],
+      "mypy.plugin.Plugin.lookup_fully_qualified": [
+        "tinydb.mypy_plugin 28:56 call  self.lookup_fully_qualified(type_name)"
+      ]
+    },
+    "tinydb.queries.Query.__eq__.<lambda1>": {
+      "tinydb.queries.Query.__eq__": [
+        "tinydb.queries 260:33 op  value == rhs"
+      ],
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.queries 260:33 op  value == rhs"
+      ]
+    },
+    "tinydb.queries.Query.all.test": {
+      "tinydb.database.TinyDB.__iter__": [
+        "tinydb.queries 458:68 iter  value",
+        "tinydb.queries 462:53 op  e in value"
+      ]
+    },
+    "tinydb.queries.Query.any.test": {
+      "tinydb.database.TinyDB.__iter__": [
+        "tinydb.queries 425:68 iter  value",
+        "tinydb.queries 429:70 iter  value"
+      ]
+    },
+    "tinydb.queries.Query.fragment.test": {
+      "tinydb.database.TinyDB.__iter__": [
+        "tinydb.queries 485:24 op  key not in value"
+      ]
+    },
+    "tinydb.queries.QueryInstance.__and__": {
+      "tinydb.queries.Query.__eq__": [
+        "tinydb.queries 118:40 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.queries.Query.__hash__": [
+        "tinydb.queries 118:40 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.queries 118:40 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.queries.QueryInstance.__hash__": [
+        "tinydb.queries 118:40 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.utils.FrozenDict.__hash__": [
+        "tinydb.queries 118:40 call  frozenset([self._hash, other._hash])"
+      ]
+    },
+    "tinydb.queries.QueryInstance.__eq__": {
+      "tinydb.queries.Query.__eq__": [
+        "tinydb.queries 107:31 op  self._hash == other._hash"
+      ],
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.queries 107:31 op  self._hash == other._hash"
+      ]
+    },
+    "tinydb.queries.QueryInstance.__hash__": {
+      "tinydb.queries.Query.__hash__": [
+        "tinydb.queries 100:20 call  hash(self._hash)"
+      ],
+      "tinydb.queries.QueryInstance.__hash__": [
+        "tinydb.queries 100:20 call  hash(self._hash)"
+      ],
+      "tinydb.utils.FrozenDict.__hash__": [
+        "tinydb.queries 100:20 call  hash(self._hash)"
+      ]
+    },
+    "tinydb.queries.QueryInstance.__init__": {
+      "tinydb.queries.Query.__hash__": [
+        "tinydb.queries 77:21 call  hash(hashval)"
+      ]
+    },
+    "tinydb.queries.QueryInstance.__or__": {
+      "tinydb.queries.Query.__eq__": [
+        "tinydb.queries 128:39 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.queries.Query.__hash__": [
+        "tinydb.queries 128:39 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.queries 128:39 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.queries.QueryInstance.__hash__": [
+        "tinydb.queries 128:39 call  frozenset([self._hash, other._hash])"
+      ],
+      "tinydb.utils.FrozenDict.__hash__": [
+        "tinydb.queries 128:39 call  frozenset([self._hash, other._hash])"
+      ]
+    },
+    "tinydb.queries.QueryInstance.__repr__": {
+      "tinydb.queries.Query.__repr__": [
+        "tinydb.queries 103:36 call  'QueryImpl{}'.format(self._hash)"
+      ],
+      "tinydb.queries.QueryInstance.__repr__": [
+        "tinydb.queries 103:36 call  'QueryImpl{}'.format(self._hash)"
+      ]
+    },
+    "tinydb.storages.JSONStorage.close": {
+      "io.BufferedRandom.close": [
+        "tinydb.storages 123:27 call  self._handle.close()"
+      ],
+      "io.BufferedReader.close": [
+        "tinydb.storages 123:27 call  self._handle.close()"
+      ],
+      "io.BufferedWriter.close": [
+        "tinydb.storages 123:27 call  self._handle.close()"
+      ]
+    },
+    "tinydb.storages.JSONStorage.read": {
+      "io.BufferedRandom.seek": [
+        "tinydb.storages 128:26 call  self._handle.seek(0, os.SEEK_END)",
+        "tinydb.storages 137:30 call  self._handle.seek(0)"
+      ],
+      "io.BufferedRandom.tell": [
+        "tinydb.storages 129:33 call  self._handle.tell()"
+      ],
+      "io.BufferedReader.seek": [
+        "tinydb.storages 128:26 call  self._handle.seek(0, os.SEEK_END)",
+        "tinydb.storages 137:30 call  self._handle.seek(0)"
+      ],
+      "io.BufferedReader.tell": [
+        "tinydb.storages 129:33 call  self._handle.tell()"
+      ],
+      "io.BufferedWriter.seek": [
+        "tinydb.storages 128:26 call  self._handle.seek(0, os.SEEK_END)",
+        "tinydb.storages 137:30 call  self._handle.seek(0)"
+      ],
+      "io.BufferedWriter.tell": [
+        "tinydb.storages 129:33 call  self._handle.tell()"
+      ]
+    },
+    "tinydb.storages.JSONStorage.write": {
+      "io.BufferedRandom.fileno": [
+        "tinydb.storages 157:37 call  self._handle.fileno()"
+      ],
+      "io.BufferedRandom.flush": [
+        "tinydb.storages 156:27 call  self._handle.flush()"
+      ],
+      "io.BufferedRandom.seek": [
+        "tinydb.storages 144:26 call  self._handle.seek(0)"
+      ],
+      "io.BufferedRandom.truncate": [
+        "tinydb.storages 161:30 call  self._handle.truncate()"
+      ],
+      "io.BufferedRandom.write": [
+        "tinydb.storages 151:31 call  self._handle.write(serialized)"
+      ],
+      "io.BufferedReader.seek": [
+        "tinydb.storages 144:26 call  self._handle.seek(0)"
+      ],
+      "io.BufferedReader.write": [
+        "tinydb.storages 151:31 call  self._handle.write(serialized)"
+      ],
+      "io.BufferedWriter.fileno": [
+        "tinydb.storages 157:37 call  self._handle.fileno()"
+      ],
+      "io.BufferedWriter.flush": [
+        "tinydb.storages 156:27 call  self._handle.flush()"
+      ],
+      "io.BufferedWriter.seek": [
+        "tinydb.storages 144:26 call  self._handle.seek(0)"
+      ],
+      "io.BufferedWriter.truncate": [
+        "tinydb.storages 161:30 call  self._handle.truncate()"
+      ],
+      "io.BufferedWriter.write": [
+        "tinydb.storages 151:31 call  self._handle.write(serialized)"
+      ]
+    },
+    "tinydb.storages.Storage.read": {
+      "<builtin>.NotImplementedError": [
+        "tinydb.storages 57:34 call  NotImplementedError('To be overridden!')"
+      ]
+    },
+    "tinydb.storages.Storage.write": {
+      "<builtin>.NotImplementedError": [
+        "tinydb.storages 69:34 call  NotImplementedError('To be overridden!')"
+      ]
+    },
+    "tinydb.table.Table._read_table": {
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.table 766:32 getattr  self._storage.read"
+      ]
+    },
+    "tinydb.table.Table._update_table": {
+      "tinydb.middlewares.Middleware.__getattr__": [
+        "tinydb.table 795:32 getattr  self._storage.read",
+        "tinydb.table 828:23 getattr  self._storage.write"
+      ]
+    },
+    "tinydb.table.Table.all": {
+      "tinydb.table.Table.__iter__": [
+        "tinydb.table 233:25 call  iter(self)"
+      ]
+    },
+    "tinydb.table.Table.search": {
+      "tinydb.table.Table.search.<lambda1>": [
+        "tinydb.table 273:24 call  is_cacheable()"
+      ]
+    },
+    "tinydb.table.Table.update_multiple.perform_update": {
+      "tinydb.operations.add.transform": [
+        "tinydb.table 525:23 call  fields(table[doc_id])"
+      ],
+      "tinydb.operations.decrement.transform": [
+        "tinydb.table 525:23 call  fields(table[doc_id])"
+      ],
+      "tinydb.operations.delete.transform": [
+        "tinydb.table 525:23 call  fields(table[doc_id])"
+      ],
+      "tinydb.operations.increment.transform": [
+        "tinydb.table 525:23 call  fields(table[doc_id])"
+      ],
+      "tinydb.operations.set.transform": [
+        "tinydb.table 525:23 call  fields(table[doc_id])"
+      ],
+      "tinydb.operations.subtract.transform": [
+        "tinydb.table 525:23 call  fields(table[doc_id])"
+      ]
+    },
+    "tinydb.utils.FrozenDict.__hash__": {
+      "tinydb.utils.FrozenDict.__hash__": [
+        "tinydb.utils 125:20 call  hash(tuple(sorted(self.items())))"
+      ]
+    },
+    "tinydb.utils.LRUCache.__contains__": {
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.utils 72:20 op  key in self.cache"
+      ]
+    },
+    "tinydb.utils.LRUCache.__delitem__": {
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.utils 78:23 delitem  self.cache[key]"
+      ]
+    },
+    "tinydb.utils.LRUCache.set": {
+      "tinydb.queries.QueryInstance.__eq__": [
+        "tinydb.utils 101:16 op  key in self.cache",
+        "tinydb.utils 102:23 setitem  self.cache[key]",
+        "tinydb.utils 103:35 call  self.cache.move_to_end(key, last=True)",
+        "tinydb.utils 105:23 setitem  self.cache[key]",
+        "tinydb.utils 111:35 call  self.cache.popitem(last=False)"
+      ]
+    }
+  },
+  "notes": {
+    "tinydb.database 161:33 getattr  self.storage.read": [
+      "a plain Middleware defines no read; its __getattr__ forwards the name to its storage (docs/api.rst:101-102)"
+    ],
+    "tinydb.database 161:37 call  self.storage.read()": [
+      "for a plain Middleware the call runs the read that its __getattr__ returns: one of the same three"
+    ],
+    "tinydb.database 170:22 getattr  self.storage.write": [
+      "a plain Middleware defines no write; its __getattr__ forwards the name to its storage"
+    ],
+    "tinydb.database 188:29 getattr  self.storage.read": [
+      "a plain Middleware defines no read; its __getattr__ forwards the name to its storage"
+    ],
+    "tinydb.database 202:22 getattr  self.storage.write": [
+      "a plain Middleware defines no write; its __getattr__ forwards the name to its storage"
+    ],
+    "tinydb.database 255:23 call  getattr(self.table(self.default_table_name), name)": [
+      "getattr runs the property Table.name when the forwarded name is name: a tested name on the Table (tests/test_tables.py:153, tests/test_tinydb.py:644) that this proxy forwards (README, \"Forwarded attribute names\"); TinyDB.storage shadows Table.storage, so that property is never forwarded"
+    ],
+    "tinydb.middlewares 119:26 getattr  self.storage.write": [
+      "the storage of a nested CachingMiddleware can be a plain Middleware, which defines no write"
+    ],
+    "tinydb.middlewares 127:22 getattr  self.storage.close": [
+      "the storage of a nested CachingMiddleware can be a plain Middleware, which defines no close"
+    ],
+    "tinydb.middlewares 63:41 call  self._storage_cls(*args, **kwargs)": [
+      "value site: _storage_cls is the storage_cls argument of __init__ (line 22): a storage class (JSONStorage, MemoryStorage; client classes) or, for nested middlewares, a middleware instance (docs/usage.rst:637-641; the docstring, lines 57-60), whose class inherits Middleware.__call__"
+    ],
+    "tinydb.middlewares 73:23 call  getattr(self.__dict__['storage'], name)": [
+      "the storage of a nested middleware is a Middleware or CachingMiddleware (docs/usage.rst:637-641), which forwards a name that it lacks once more: read, write and close for a plain Middleware, a tested name such as _handle (tests/test_middlewares.py:99) for both; the storages define no properties"
+    ],
+    "tinydb.middlewares 99:39 getattr  self.storage.read": [
+      "the storage of a nested CachingMiddleware can be a plain Middleware, which defines no read"
+    ],
+    "tinydb.middlewares 99:43 call  self.storage.read()": [
+      "the storage is a storage instance or a nested middleware (CachingMiddleware, or a plain Middleware that returns the read of its own storage)"
+    ],
+    "tinydb.mypy_plugin 28:56 call  self.lookup_fully_qualified(type_name)": [
+      "TinyDBPlugin inherits lookup_fully_qualified from the missing-module base mypy.plugin.Plugin"
+    ],
+    "tinydb.mypy_plugin 31:46 call  ctx.api.add_symbol_table_node(ctx.name, qualified)": [
+      "ctx is annotated with the missing-module class DynamicClassDefContext (line 21); the direct attribute chain keeps its access path"
+    ],
+    "tinydb.queries 100:20 call  hash(self._hash)": [
+      "the tuple _hash holds the same items as at 77:21; CPython before 3.14 and PyPy do not cache the hash of a tuple, so every hash of the query hashes them again (tinydb.md, J3)"
+    ],
+    "tinydb.queries 103:36 call  'QueryImpl{}'.format(self._hash)": [
+      "formatting the tuple _hash takes the repr of its items: the QueryInstance or Query that any and all keep (also inside the frozenset of & and |)"
+    ],
+    "tinydb.queries 107:31 op  self._hash == other._hash": [
+      "the tuples compare their items: two distinct QueryInstances or Querys that any or all keep as cond (also inside the frozensets of & and |) are compared with their own __eq__; Query.__eq__ makes a query (tinydb.md, J4)"
+    ],
+    "tinydb.queries 118:40 call  frozenset([self._hash, other._hash])": [
+      "the frozenset hashes the two hash tuples (their items as at 77:21, where no cached tuple hash exists: before CPython 3.14, PyPy, and the ('path', ...) hash of a Query) and compares them when their hashes are equal (two equal queries: q1 & q2); the tuples then compare their items (tinydb.md, J3, J4)"
+    ],
+    "tinydb.queries 128:39 call  frozenset([self._hash, other._hash])": [
+      "as at 118:40 (tinydb.md, J3, J4)"
+    ],
+    "tinydb.queries 260:33 op  value == rhs": [
+      "QueryInstance.__eq__ (107:31) compares hash tuples that hold the Query or QueryInstance kept by any/all, so the package itself calls Query.__eq__ with a nested query as rhs, and the lambda made there captures it (Codex round 1; tinydb.md, J4); by rule A and the round-1 ruling (a) on package-made objects, its body keeps its edges: a document field (a scalar or dict) returns NotImplemented, so Python calls the reflected __eq__ of rhs"
+    ],
+    "tinydb.queries 425:68 iter  value": [
+      "the document field can be a TinyDB: a test inserts {'int': db} (tests/test_tinydb.py:623); with MemoryStorage or a CachingMiddleware the document is stored, and a search with this query iterates the field (ruling, b7-ruling-tinydb.md; tinydb.md, J10)"
+    ],
+    "tinydb.queries 429:70 iter  value": [
+      "the document field can be a TinyDB: a test inserts {'int': db} (tests/test_tinydb.py:623); with MemoryStorage or a CachingMiddleware the document is stored, and a search with this query iterates the field (ruling, b7-ruling-tinydb.md; tinydb.md, J10)"
+    ],
+    "tinydb.queries 458:68 iter  value": [
+      "the document field can be a TinyDB: a test inserts {'int': db} (tests/test_tinydb.py:623); with MemoryStorage or a CachingMiddleware the document is stored, and a search with this query iterates the field (ruling, b7-ruling-tinydb.md; tinydb.md, J10)"
+    ],
+    "tinydb.queries 462:53 op  e in value": [
+      "TinyDB defines no __contains__, so `in` iterates a TinyDB field (a nonempty cond list); see 425:68"
+    ],
+    "tinydb.queries 485:24 op  key not in value": [
+      "TinyDB defines no __contains__, so `in` iterates a TinyDB field (a nonempty fragment); see 425:68"
+    ],
+    "tinydb.queries 77:21 call  hash(hashval)": [
+      "hashing the tuple hashval hashes its items: FrozenDicts that freeze makes from dict operands (tests/test_queries.py:293, fragment, test arguments), the QueryInstance or Query that any and all keep as cond (freeze returns it unchanged; cond: Union[QueryInstance, list[Any]], line 401, admits a Query), and the hashes of ~, which nest the hash of the negated query (tinydb.md, J3)"
+    ],
+    "tinydb.storages 123:27 call  self._handle.close()": [
+      "the class of _handle follows the access mode (tinydb.md, J6): text modes give a TextIOWrapper, 'rb' a BufferedReader, 'wb', 'ab', 'xb' a BufferedWriter, 'rb+', 'wb+', 'ab+' a BufferedRandom"
+    ],
+    "tinydb.storages 128:26 call  self._handle.seek(0, os.SEEK_END)": [
+      "the class of _handle follows the access mode (tinydb.md, J6)"
+    ],
+    "tinydb.storages 144:26 call  self._handle.seek(0)": [
+      "the class of _handle follows the access mode (tinydb.md, J6)"
+    ],
+    "tinydb.storages 151:31 call  self._handle.write(serialized)": [
+      "serialized is a str from the default encoder: a TextIOWrapper writes it (or, in mode 'r', raises io.UnsupportedOperation); BufferedReader.write raises io.UnsupportedOperation; BufferedWriter.write and BufferedRandom.write raise TypeError for a str but write the bytes that a client cls encoder can return (docs/usage.rst:599; tinydb.md, J6)"
+    ],
+    "tinydb.storages 156:27 call  self._handle.flush()": [
+      "a text stream gets past the write at 151:31, and so does a writable binary stream when a client cls encoder returns bytes (the referee's ruling on Codex R1, b7-ruling-round1-disputes.md, case 2); a BufferedReader never writes"
+    ],
+    "tinydb.storages 157:37 call  self._handle.fileno()": [
+      "a text stream, or a writable binary stream after a bytes result of a client cls encoder (see 156:27)"
+    ],
+    "tinydb.storages 161:30 call  self._handle.truncate()": [
+      "a text stream, or a writable binary stream after a bytes result of a client cls encoder (see 156:27)"
+    ],
+    "tinydb.table 273:24 call  is_cacheable()": [
+      "value site: the bound is_cacheable of a QueryInstance, or the default lambda for a client callable without that attribute (docs/usage.rst:208); a client's own is_cacheable is opaque (tests/test_tinydb.py:781)"
+    ],
+    "tinydb.table 525:23 call  fields(table[doc_id])": [
+      "value site: in this branch fields is callable: a transform that tinydb.operations returns (docs/usage.rst:337-342) or a client function (opaque)"
+    ],
+    "tinydb.table 766:32 getattr  self._storage.read": [
+      "TinyDB passes its storage (130:33), which can be a plain Middleware: it defines no read, and its __getattr__ forwards the name"
+    ],
+    "tinydb.table 795:32 getattr  self._storage.read": [
+      "the storage can be a plain Middleware, which defines no read"
+    ],
+    "tinydb.table 828:23 getattr  self._storage.write": [
+      "the storage can be a plain Middleware, which defines no write"
+    ],
+    "tinydb.utils 101:16 op  key in self.cache": [
+      "Table.search stores its cond (275:30) through __setitem__: a QueryInstance; a stored query of equal hash is compared (tinydb.md, J2)"
+    ],
+    "tinydb.utils 111:35 call  self.cache.popitem(last=False)": [
+      "value site by name only (FrozenDict binds popitem = _immutable, line 135); self.cache is the OrderedDict of __init__; the oldest key, a QueryInstance, is looked up in the dict: on CPython with its stored hash, and a stored key of equal hash met earlier on the probe path is compared (move_to_end reorders the list, not the slots); PyPy's OrderedDict.popitem(last=False) calls self.pop(k), which hashes it (tinydb.md, J2)"
+    ],
+    "tinydb.utils 125:20 call  hash(tuple(sorted(self.items())))": [
+      "freeze turns nested dicts into FrozenDicts (line 150), so hashing the items hashes the nested FrozenDicts; the values are what freeze makes from client data, never a query (tinydb.md, J3)"
+    ],
+    "tinydb.utils 72:20 op  key in self.cache": [
+      "the tests test a QueryInstance against the query cache (tests/test_tables.py:63, 66, 71, 74, 130); the lookup hashes it and compares it with a stored query of equal hash (tinydb.md, J2)"
+    ],
+    "tinydb.utils 78:23 delitem  self.cache[key]": [
+      "the package never deletes from the query cache, but LRUCache is public (tinydb.utils.__all__, docs/api.rst:125) and a QueryInstance is an admitted key (Table.search stores its cond, table.py:275); deleting a plain int key whose hash equals a stored query's hash (possible whenever that hash is in the int hash range) compares the stored query first: QueryInstance.__eq__ runs, returns False, and KeyError follows (Codex round 1; tinydb.md, J2)"
+    ]
+  },
+  "trace": "dynamic/tinydb.json"
+}

@@ -78,13 +78,18 @@ def test_the_pin_is_the_commit_or_the_sha256_of_the_sdist(tmp_path):
 
 
 def test_every_project_of_the_benchmark_has_a_batch():
-    """The 30 projects: five per batch, in the order of projects.BATCHES."""
+    """The 40 projects: five per batch but the ten of batch 7, in the order of
+    projects.BATCHES."""
     batches = {}
     for name, project in projects.load_projects().items():
         batches.setdefault(project.batch, []).append(name)
     assert list(batches) == list(projects.BATCHES)
-    assert {len(names) for names in batches.values()} == {5}
+    assert {len(names) for batch, names in batches.items() if batch != 7} == {5}
     assert batches[1] == ["jmespath", "tenacity", "cachetools", "pluggy", "h11"]
+    assert batches[7] == [
+        *("pyfiglet", "uncertainties", "einops", "pymysql", "segno"),
+        *("tinydb", "pgvector", "textdistance", "websocket-client", "mss"),
+    ]
     assert batches["icse-2021"] == [
         "autojump",
         "fabric",
@@ -97,7 +102,8 @@ def test_every_project_of_the_benchmark_has_a_batch():
 @pytest.mark.parametrize("batch", ["0", "6", '"2"', "true"])
 def test_a_batch_is_one_of_the_batches(tmp_path, batch):
     config_path = benchmark(tmp_path, CONFIG + f"batch = {batch}\n")
-    with pytest.raises(ValueError, match="batch is one of 1, 2, 3, 4, 5, 'icse-2021'"):
+    expected = "batch is one of 1, 2, 3, 4, 5, 7, 'icse-2021'"
+    with pytest.raises(ValueError, match=expected):
         projects.load_projects(config_path)
     config_path.write_text(dedent(CONFIG + "batch = 3\n"))
     assert projects.load_projects(config_path)["demo"].batch == 3
