@@ -20,6 +20,8 @@ It never imports or executes the code it analyses. Keep it that way.
 
 ```
 make setup              # create the environment (uv sync --locked)
+make check              # before pushing: lint, and the tests of what the change touches
+make check FULL=1       # every check, as make lint and make test
 make test               # all tests: the engine's and the evaluation's
 make lint               # ruff check and format check
 make format             # apply formatting
@@ -45,9 +47,10 @@ not add one without discussion.
 - **Results are deterministic.** The same input gives the same output on every
   run and every supported Python version.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
-- Record every measurable result (benchmark numbers, bugs found in ground
-  truth, design decisions and their reasons) in the commit message of the
-  change.
+- Record every measurable result (bugs found in ground truth, measurements
+  other than those of `make eval`, design decisions and their reasons) in
+  the commit message of the change. The numbers of `make eval` go in the
+  pull request description (see Workflow).
 - **The evaluation measures PyCG only.** Work under `evaluation/` follows
   `evaluation/AGENTS.md`: third-party code runs only in Docker.
 
@@ -90,7 +93,19 @@ both.
 ## Workflow
 
 Do each feature on its own branch from `main`, in a worktree under
-`.worktrees/`. One pull request makes one change. Open it when tests and
-lint pass; it merges only with CI green: lint, tests, the gate of `make
-eval` (no value below its floor, no failed run) and the determinism check.
-Its commit message carries the numbers of `make eval` on its commit.
+`.worktrees/`. One pull request makes one change.
+
+While developing, run the narrowest tests that cover the change (`uv run
+pytest tests/test_x.py -k name`). Before pushing, run `make check` and
+nothing more. Then push the branch and open a draft pull request at once.
+CI runs the full tests on every supported Python and, when the diff touches
+a path that can move the metrics (`EVAL_PATHS` of `tools/check.py`), the
+gate of `make eval` and the determinism check; do not run them locally as
+well. Run `make eval` locally only to investigate a metrics change, or
+before `make eval-record` when the gate of CI reports that a value rose and
+must be recorded.
+
+Mark a pull request ready only when CI is green for its exact current
+commit: lint, tests, the gate (no value below its floor, no failed run) and
+the determinism check. Its description carries the metrics table of the job
+summary of CI.

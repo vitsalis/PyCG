@@ -22,6 +22,8 @@ from pycg.analysis.semantics import Analysis
 from pycg.formats import dumps
 from pycg.pycg import CallGraphGenerator
 
+pytestmark = pytest.mark.slow
+
 ORDERS = {
     "first in, first out": solver.Order,
     "last in, first out": solver.LastInFirstOut,

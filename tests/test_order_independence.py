@@ -23,6 +23,8 @@ from pycg.analysis.solver import Constraint, Each
 from pycg.formats import dumps
 from pycg.pycg import CallGraphGenerator
 
+pytestmark = pytest.mark.slow
+
 
 def orders():
     return {

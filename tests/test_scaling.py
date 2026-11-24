@@ -15,6 +15,8 @@ from test_termination import long_hierarchies
 from pycg.analysis import narrowing, solver
 from pycg.analysis.model import Class
 
+pytestmark = pytest.mark.slow
+
 
 def hub(size):
     """`size` callables and `size` arguments that meet in one generic apply

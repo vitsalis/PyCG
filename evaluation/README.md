@@ -27,7 +27,10 @@ reported. CI measures the pull request, its second hash seed and its base
 (`BASE=HEAD^1`, the first parent of the merge commit) in three parallel
 jobs, then gates, compares, checks the two seeds and decides the labels
 in one job; a last job, the only one that may write to the pull request,
-sets or removes the labels.
+sets or removes the labels. On a pull request these jobs run only when its
+diff touches a path that can move the metrics (`tools/check.py
+--detect-eval`, `make eval-changes`); the first job of CI decides it, and
+writes the decision to the job summary. On a push they always run.
 
 ## The gate
 

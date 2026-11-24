@@ -8,6 +8,8 @@ from textwrap import dedent
 
 import pytest
 
+pytestmark = pytest.mark.slow
+
 if sys.version_info < (3, 14):
     pytest.skip("the validator needs Python 3.14 or later", allow_module_level=True)
 
