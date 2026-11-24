@@ -1,0 +1,85 @@
+{
+  "nodeenv.Config._load": {
+    "unittest.mock.CallableMixin.__call__": "the tests replace builtins.open with a function that returns mock.mock_open() for .node-version (tests/nodeenv_test.py:1890-1898): readline() calls the mock"
+  },
+  "nodeenv._download_node_file": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.urlopen and nodeenv.logger.error with mocks (tests/nodeenv_test.py:813-814, 830-832)"
+  },
+  "nodeenv._get_last_node_version": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch is_x86_64_musl and is_riscv64 with mocks (tests/nodeenv_test.py:409-424)"
+  },
+  "nodeenv._get_versions_json": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.urlopen with a mock (tests/nodeenv_test.py:374, 583, 1398)",
+    "_io.BufferedReader.read": "the tests patch nodeenv.urlopen to return a file that they opened (tests/nodeenv_test.py:374): a client object, not a response of urllib",
+    "_io.BytesIO.read": "the tests patch nodeenv.urlopen to return a BytesIO that they made (tests/nodeenv_test.py:396-397): a client object"
+  },
+  "nodeenv._has_platform_build": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch is_x86_64_musl and is_riscv64 with mocks (tests/nodeenv_test.py:409-424)"
+  },
+  "nodeenv._urlopen": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch urllib.request.urlopen (nodeenv.urllib2.urlopen) with a mock (tests/nodeenv_test.py:764, 873, 950)"
+  },
+  "nodeenv.build_node_from_src": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.callit and shutil.which with mocks (tests/nodeenv_test.py:1712, 1492)"
+  },
+  "nodeenv.create_environment": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch install_node, install_activate, install_npm, install_npm_win, set_predeactivate_hook and get_installed_node_version with mocks (tests/nodeenv_test.py:528-533, 1668-1670)"
+  },
+  "nodeenv.create_logger.emit": {
+    "_io.StringIO.write": "pytest's logging capture adds its handlers (StreamHandler subclasses whose stream is a StringIO) to the root logger; the patched StreamHandler.emit runs on them when a nodeenv record propagates: a client's handler and stream (B5, J2)"
+  },
+  "nodeenv.download_node_src": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch _download_node_file, tarfile_open and _extract_zip with mocks (tests/nodeenv_test.py:971, 1061, 1161-1162)"
+  },
+  "nodeenv.find_system_node": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch shutil.which with a mock (tests/nodeenv_test.py:1492-1523)"
+  },
+  "nodeenv.get_env_dir": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.logger.warning and logger.error with mocks (tests/nodeenv_test.py:1781, 1816-1821)"
+  },
+  "nodeenv.get_installed_node_version": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch subprocess.Popen (nodeenv.subprocess.Popen) with a mock (tests/nodeenv_test.py:518)"
+  },
+  "nodeenv.get_node_bin_url": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch platform.system and platform.machine with mocks (tests/nodeenv_test.py:1931-1966)"
+  },
+  "nodeenv.install_activate": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch find_system_node, os.symlink or os.link with mocks (tests/nodeenv_test.py, mock.patch.object(os, 'symlink') and (os, 'link'))"
+  },
+  "nodeenv.install_node": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch install_node_wrapped and logger.info with mocks (tests/nodeenv_test.py:2491-2496)"
+  },
+  "nodeenv.install_node_wrapped": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch get_node_bin_url, download_node_src, copy_node_from_prebuilt, build_node_from_src and logger.info with mocks (tests/nodeenv_test.py:2581-2718)"
+  },
+  "nodeenv.install_npm": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch subprocess.Popen and logger.info with mocks (tests/nodeenv_test.py:3023-3205)"
+  },
+  "nodeenv.install_npm_win": {
+    "_io.BytesIO.read": "the tests patch nodeenv.urlopen to return a BytesIO that they made (tests/nodeenv_test.py:3265-3271, 3288): a client object, not a response of urllib"
+  },
+  "nodeenv.install_packages": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.callit with a mock (tests/nodeenv_test.py:1712-1713)"
+  },
+  "nodeenv.is_x86_64_musl": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch sysconfig.get_config_var with a mock (tests/nodeenv_test.py:1443)"
+  },
+  "nodeenv.main": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch urlopen, print_node_versions, logger.info, logger.warning and logger.error with mocks (tests/nodeenv_test.py:583, 1816-1835)"
+  },
+  "nodeenv.make_certifi_context": {
+    "unittest.mock.CallableMixin.__call__": "the tests put a mock certifi into sys.modules and patch ssl.create_default_context (tests/nodeenv_test.py:3405-3413)"
+  },
+  "nodeenv.node_version_from_args": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch find_system_node and subprocess.Popen with mocks (tests/nodeenv_test.py:1532-1545)"
+  },
+  "nodeenv.print_node_versions": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.logger.info with a mock (tests/nodeenv_test.py:403)"
+  },
+  "nodeenv.report_node_download_error": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.logger.info and logger.error with mocks (tests/nodeenv_test.py:2433-2434, 2585-2586)"
+  },
+  "nodeenv.urlopen": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch nodeenv.logger.error and urllib.request.urlopen with mocks (tests/nodeenv_test.py:873-890)"
+  }
+}

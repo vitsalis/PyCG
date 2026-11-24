@@ -1,0 +1,1256 @@
+default reject vulture.whitelists.whitelist_utils.Whitelist.__getattr__: only reached for an attribute that a Whitelist instance lacks; the one Whitelist instance is whitelist_node_visitor of ast_whitelist, and no other receiver is a Whitelist
+default reject vulture.core.Item.__eq__: the operands are not Item objects; Items are compared only where the set of _get_unused_items hashes them
+default reject vulture.core.Item.__hash__: the value is not an Item; Items are hashed only where _get_unused_items builds a set of them
+default reject vulture.core.Item.__repr__: the formatted value is not an Item; the package never formats an Item
+
+== vulture.__main__
+
+[vulture.__main__]
+3:5 call  main()
+    -> vulture.core.main
+
+== vulture.config
+
+[vulture.config._check_input_config]
+40:33 call  data.items()
+    -> <builtin>.dict.items
+    note: data is a dict: the [tool.vulture] table that tomllib or tomli returns (_parse_toml) or the dict that _parse_args builds
+42:29 call  InputError(f"Unknown configuration key: {key}")
+    -> vulture.config.InputError.__init__
+45:16 call  type(value)
+    -> <builtin>.type
+45:35 call  type(DEFAULTS[key])
+    -> <builtin>.type
+46:33 call  type(DEFAULTS[key])
+    -> <builtin>.type
+47:29 call  InputError(f"Data type for {key} must be {expected_type!r}")
+    -> vulture.config.InputError.__init__
+
+[vulture.config._check_output_config]
+58:25 call  InputError("Please pass at least one file or directory")
+    -> vulture.config.InputError.__init__
+
+[vulture.config._parse_toml]
+84:24 call  tomllib.load(infile)
+    -> tomllib.load
+    -> tomli.load
+    note: optional import (config.py:9-12): tomllib on Python 3.11 and later, tomli before (the declared dependency for Python < 3.11, installed there; tomli.load is its public path, listed in tomli's __all__); both sides run
+85:24 call  data.get("tool", {})
+    -> <builtin>.dict.get
+85:40 call  data.get("tool", {}).get("vulture", {})
+    -> <builtin>.dict.get
+    note: the value of the key "tool" is a TOML table (a dict); any other TOML value has no get, so the call fails before a callee
+86:24 call  _check_input_config(settings)
+    -> vulture.config._check_input_config
+
+[vulture.config._parse_args]
+99:21 call  object()
+    -> <builtin>.object
+107:37 call  argparse.ArgumentParser(prog="vulture", usage=usage)
+    -> argparse.ArgumentParser
+108:24 call  parser.add_argument( "paths", nargs="*", metavar="PATH", ...
+    -> argparse.ArgumentParser.add_argument
+116:24 call  parser.add_argument( "--exclude", metavar="PATTERNS", typ...
+    -> argparse.ArgumentParser.add_argument
+    reject vulture.config._parse_args.csv: add_argument stores the type function; parse_args calls it (173:34)
+126:24 call  parser.add_argument( "--ignore-decorators", metavar="PATT...
+    -> argparse.ArgumentParser.add_argument
+    reject vulture.config._parse_args.csv: add_argument stores the type function; parse_args calls it (173:34)
+135:24 call  parser.add_argument( "--ignore-names", metavar="PATTERNS"...
+    -> argparse.ArgumentParser.add_argument
+    reject vulture.config._parse_args.csv: add_argument stores the type function; parse_args calls it (173:34)
+143:24 call  parser.add_argument( "--make-whitelist", action="store_tr...
+    -> argparse.ArgumentParser.add_argument
+150:24 call  parser.add_argument( "--min-confidence", type=int, defaul...
+    -> argparse.ArgumentParser.add_argument
+157:24 call  parser.add_argument( "--sort-by-size", action="store_true...
+    -> argparse.ArgumentParser.add_argument
+163:24 call  parser.add_argument( "--config", type=str, default="pypro...
+    -> argparse.ArgumentParser.add_argument
+169:24 call  parser.add_argument( "-v", "--verbose", action="store_tru...
+    -> argparse.ArgumentParser.add_argument
+172:24 call  parser.add_argument("--version", action="version", versio...
+    -> argparse.ArgumentParser.add_argument
+173:34 call  parser.parse_args(args)
+    -> argparse.ArgumentParser.parse_args
+    -> vulture.config._parse_args.csv
+    note: parse_args converts the strings of --exclude, --ignore-decorators and --ignore-names with the type csv (callback); the defaults are the sentinel object, not strings, so they are not converted
+176:31 call  vars(namespace)
+    -> <builtin>.vars
+176:48 call  vars(namespace).items()
+    -> <builtin>.dict.items
+179:24 call  _check_input_config(cli_args)
+    -> vulture.config._check_input_config
+
+[vulture.config._parse_args.csv]
+102:29 call  exclude.split(",")
+    -> <builtin>.str.split
+
+[vulture.config.make_config]
+196:29 call  _parse_args(argv)
+    -> vulture.config._parse_args
+203:29 call  _parse_toml(tomlfile)
+    -> vulture.config._parse_toml
+204:33 call  str(tomlfile)
+    -> <builtin>.str
+206:33 call  pathlib.Path(cli_config["config"])
+    -> pathlib.Path
+206:63 call  pathlib.Path(cli_config["config"]).resolve()
+    -> pathlib.PosixPath.resolve
+    -> pathlib.WindowsPath.resolve
+    note: pathlib.Path(...) makes a PosixPath, or a WindowsPath on Windows (a platform of the release's CI matrix)
+207:29 call  toml_path.is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+208:22 call  open(toml_path, "rb")
+    -> <builtin>.open
+209:37 call  _parse_toml(fconfig)
+    -> vulture.config._parse_toml
+210:37 call  str(toml_path)
+    -> <builtin>.str
+215:18 call  config.update(cli_config)
+    -> <builtin>.dict.update
+218:37 call  DEFAULTS.items()
+    -> <builtin>.dict.items
+219:26 call  config.setdefault(key, value)
+    -> <builtin>.dict.setdefault
+222:14 call  print(f"Reading configuration from {detected_toml_path}")
+    -> <builtin>.print
+224:25 call  _check_output_config(config)
+    -> vulture.config._check_output_config
+
+== vulture.core
+
+[vulture.core]
+149:6 decorator  @property
+    -> <builtin>.property
+367:6 decorator  @property
+    -> <builtin>.property
+371:6 decorator  @property
+    -> <builtin>.property
+375:6 decorator  @property
+    -> <builtin>.property
+379:6 decorator  @property
+    -> <builtin>.property
+383:6 decorator  @property
+    -> <builtin>.property
+387:6 decorator  @property
+    -> <builtin>.property
+391:6 decorator  @property
+    -> <builtin>.property
+539:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[vulture.core._get_unused_items]
+45:29 call  set(defined_items)
+    -> <builtin>.set
+    -> vulture.core.Item.__hash__
+    -> vulture.core.Item.__eq__
+    note: set() hashes each Item of the LoggingList; two equal Items (one file, line and name: `x = x = 1` or `import os, os` defines the same variable or import twice) or two Items whose hashes collide make the set call Item.__eq__ (judgement J3)
+47:22 call  unused_items.sort(key=lambda item: item.name.lower())
+    -> <builtin>.list.sort
+    -> vulture.core._get_unused_items.<lambda1>
+
+[vulture.core._get_unused_items.<lambda1>]
+47:55 call  item.name.lower()
+    -> <builtin>.str.lower
+
+[vulture.core._is_special_name]
+52:27 call  name.startswith("__")
+    -> <builtin>.str.startswith
+52:51 call  name.endswith("__")
+    -> <builtin>.str.endswith
+
+[vulture.core._match]
+57:15 call  any(func(name, pattern) for pattern in patterns)
+    -> <builtin>.any
+57:20 call  func(name, pattern)
+    -> fnmatch.fnmatchcase
+    -> fnmatch.fnmatch
+    note: func is fnmatch.fnmatchcase or fnmatch.fnmatch, chosen by case at 56
+
+[vulture.core._is_test_file]
+61:18 call  _match( filename.resolve(), ["*/test/*", "*/tests/*", "*/...
+    -> vulture.core._match
+62:25 call  filename.resolve()
+    -> pathlib.PosixPath.resolve
+    -> pathlib.WindowsPath.resolve
+    note: filename is the Path that Vulture.scan makes (228:24) and stores as self.filename, passed by Vulture._define.ignored (438:35)
+
+[vulture.core._assigns_special_variable__all__]
+69:22 call  isinstance(node, ast.Assign)
+    -> <builtin>.isinstance
+70:22 call  isinstance(node.value, (ast.List, ast.Tuple))
+    -> <builtin>.isinstance
+70:65 call  any( target.id == "__all__" for target in node.targets if...
+    -> <builtin>.any
+73:22 call  isinstance(target, ast.Name)
+    -> <builtin>.isinstance
+
+[vulture.core._ignore_class]
+78:25 call  _is_test_file(filename)
+    -> vulture.core._is_test_file
+
+[vulture.core._ignore_function]
+93:36 call  function_name.startswith("test_")
+    -> <builtin>.str.startswith
+94:24 call  _is_test_file(filename)
+    -> vulture.core._is_test_file
+
+[vulture.core._ignore_method]
+98:28 call  _is_special_name(method_name)
+    -> vulture.core._is_special_name
+99:70 call  method_name.startswith("test_")
+    -> <builtin>.str.startswith
+100:26 call  _is_test_file(filename)
+    -> vulture.core._is_test_file
+
+[vulture.core._ignore_variable]
+111:31 call  varname.startswith("_")
+    -> <builtin>.str.startswith
+111:63 call  varname.startswith("__")
+    -> <builtin>.str.startswith
+112:28 call  _is_special_name(varname)
+    -> vulture.core._is_special_name
+
+[vulture.core.Item.get_report]
+156:42 getattr  self.size
+    -> vulture.core.Item.size
+157:37 getattr  self.size
+    -> vulture.core.Item.size
+161:33 call  utils.format_path(self.filename)
+    -> vulture.utils.format_path
+
+[vulture.core.Item.get_whitelist_string]
+166:37 call  utils.format_path(self.filename)
+    -> vulture.utils.format_path
+
+[vulture.core.Item.__repr__]
+181:20 call  repr(self.name)
+    -> <builtin>.repr
+
+[vulture.core.Item.__eq__]
+184:27 call  self._tuple()
+    -> vulture.core.Item._tuple
+184:45 call  other._tuple()
+    -> vulture.core.Item._tuple
+
+[vulture.core.Item.__hash__]
+187:20 call  hash(self._tuple())
+    -> <builtin>.hash
+187:32 call  self._tuple()
+    -> vulture.core.Item._tuple
+
+[vulture.core.Vulture.__init__]
+201:38 call  get_list("attribute")
+    -> vulture.core.Vulture.__init__.get_list
+202:40 call  get_list("class")
+    -> vulture.core.Vulture.__init__.get_list
+203:38 call  get_list("function")
+    -> vulture.core.Vulture.__init__.get_list
+204:40 call  get_list("import")
+    -> vulture.core.Vulture.__init__.get_list
+205:40 call  get_list("method")
+    -> vulture.core.Vulture.__init__.get_list
+206:38 call  get_list("property")
+    -> vulture.core.Vulture.__init__.get_list
+207:37 call  get_list("variable")
+    -> vulture.core.Vulture.__init__.get_list
+208:41 call  get_list("unreachable_code")
+    -> vulture.core.Vulture.__init__.get_list
+210:43 call  utils.LoggingSet("name", self.verbose)
+    -> vulture.utils.LoggingSet.__init__
+215:29 call  Path()
+    -> pathlib.Path
+220:25 call  partial( self._define, collection=self.unreachable_code, ...
+    -> functools.partial
+    reject vulture.core.Vulture._define: partial stores the bound method; Reachability calls the partial later (reachability.py:59 and the other self._report sites)
+225:41 call  Reachability(report=report)
+    -> vulture.reachability.Reachability.__init__
+
+[vulture.core.Vulture.__init__.get_list]
+199:37 call  utils.LoggingList(typ, self.verbose)
+    -> vulture.utils.LoggingList.__init__
+
+[vulture.core.Vulture.scan]
+228:24 call  Path(filename)
+    -> pathlib.Path
+229:36 call  code.splitlines()
+    -> <builtin>.str.splitlines
+    note: code is the source text: a str (the tests, utils.read_file and the decoded whitelist at 312:51)
+230:42 call  noqa.parse_noqa(self.code)
+    -> vulture.noqa.parse_noqa
+243:29 call  ast.parse( code, filename=str(self.filename), type_commen...
+    -> ast.parse
+244:35 call  str(self.filename)
+    -> <builtin>.str
+247:32 call  handle_syntax_error(err)
+    -> vulture.core.Vulture.scan.handle_syntax_error
+250:22 call  self._log( f'{utils.format_path(filename)}: invalid sourc...
+    -> vulture.core.Vulture._log
+251:37 call  utils.format_path(filename)
+    -> vulture.utils.format_path
+259:27 call  self.visit(node)
+    -> vulture.core.Vulture.visit
+    reject vulture.reachability.Reachability.visit: the receiver is the Vulture
+261:36 call  handle_syntax_error(err)
+    -> vulture.core.Vulture.scan.handle_syntax_error
+265:32 call  self.reachability.reset()
+    -> vulture.reachability.Reachability.reset
+
+[vulture.core.Vulture.scan.handle_syntax_error]
+234:40 call  e.text.strip()
+    -> <builtin>.str.strip
+235:22 call  self._log( f"{utils.format_path(filename)}:{e.lineno}: {e...
+    -> vulture.core.Vulture._log
+236:37 call  utils.format_path(filename)
+    -> vulture.utils.format_path
+
+[vulture.core.Vulture.scavenge]
+273:35 call  prepare_pattern(pattern)
+    -> vulture.core.Vulture.scavenge.prepare_pattern
+278:22 call  Path(path)
+    -> pathlib.Path
+280:40 call  utils.get_modules(paths)
+    -> vulture.utils.get_modules
+281:28 call  exclude_path(module)
+    -> vulture.core.Vulture.scavenge.exclude_path
+282:26 call  self._log("Excluded:", module)
+    -> vulture.core.Vulture._log
+285:22 call  self._log("Scanning:", module)
+    -> vulture.core.Vulture._log
+287:48 call  utils.read_file(module)
+    -> vulture.utils.read_file
+289:26 call  self._log( f"Error: Could not read file {module} - {err}\...
+    -> vulture.core.Vulture._log
+297:26 call  self.scan(module_string, filename=module)
+    -> vulture.core.Vulture.scan
+301:24 call  Path("whitelists")
+    -> pathlib.Path
+302:28 call  exclude_path(path)
+    -> vulture.core.Vulture.scavenge.exclude_path
+303:26 call  self._log("Excluded whitelist:", path)
+    -> vulture.core.Vulture._log
+306:51 call  pkgutil.get_data("vulture", str(path))
+    -> pkgutil.get_data
+306:66 call  str(path)
+    -> <builtin>.str
+307:30 call  self._log("Included whitelist:", path)
+    -> vulture.core.Vulture._log
+312:51 call  module_data.decode("utf-8")
+    -> <builtin>.bytes.decode
+313:26 call  self.scan(module_string, filename=path)
+    -> vulture.core.Vulture.scan
+
+[vulture.core.Vulture.scavenge.prepare_pattern]
+269:23 call  any(char in pattern for char in "*?[")
+    -> <builtin>.any
+
+[vulture.core.Vulture.scavenge.exclude_path]
+276:26 call  _match(path, exclude, case=False)
+    -> vulture.core._match
+
+[vulture.core.Vulture.get_unused_code]
+322:29 call  ValueError("min_confidence must be between 0 and 100.")
+    -> <builtin>.ValueError
+331:18 getattr  self.unused_attrs
+    -> vulture.core.Vulture.unused_attrs
+332:20 getattr  self.unused_classes
+    -> vulture.core.Vulture.unused_classes
+333:20 getattr  self.unused_funcs
+    -> vulture.core.Vulture.unused_funcs
+334:20 getattr  self.unused_imports
+    -> vulture.core.Vulture.unused_imports
+335:20 getattr  self.unused_methods
+    -> vulture.core.Vulture.unused_methods
+336:20 getattr  self.unused_props
+    -> vulture.core.Vulture.unused_props
+337:20 getattr  self.unused_vars
+    -> vulture.core.Vulture.unused_vars
+345:22 call  sorted( confidently_unused, key=by_size if sort_by_size e...
+    -> <builtin>.sorted
+    -> vulture.core.Vulture.get_unused_code.by_size
+    -> vulture.core.Vulture.get_unused_code.by_name
+
+[vulture.core.Vulture.get_unused_code.by_name]
+325:23 call  str(item.filename)
+    -> <builtin>.str
+325:44 call  str(item.filename).lower()
+    -> <builtin>.str.lower
+
+[vulture.core.Vulture.get_unused_code.by_size]
+328:25 getattr  item.size
+    -> vulture.core.Item.size
+328:39 call  by_name(item)
+    -> vulture.core.Vulture.get_unused_code.by_name
+
+[vulture.core.Vulture.report]
+355:41 call  self.get_unused_code( min_confidence=min_confidence, sort...
+    -> vulture.core.Vulture.get_unused_code
+358:22 call  self._log( item.get_whitelist_string() if make_whitelist ...
+    -> vulture.core.Vulture._log
+359:42 call  item.get_whitelist_string()
+    -> vulture.core.Item.get_whitelist_string
+361:37 call  item.get_report(add_size=sort_by_size)
+    -> vulture.core.Item.get_report
+
+[vulture.core.Vulture.unused_classes]
+369:33 call  _get_unused_items(self.defined_classes, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture.unused_funcs]
+373:33 call  _get_unused_items(self.defined_funcs, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture.unused_imports]
+377:33 call  _get_unused_items(self.defined_imports, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture.unused_methods]
+381:33 call  _get_unused_items(self.defined_methods, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture.unused_props]
+385:33 call  _get_unused_items(self.defined_props, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture.unused_vars]
+389:33 call  _get_unused_items(self.defined_vars, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture.unused_attrs]
+393:33 call  _get_unused_items(self.defined_attrs, self.used_names)
+    -> vulture.core._get_unused_items
+
+[vulture.core.Vulture._log]
+399:22 call  print(*args, file=file)
+    -> <builtin>.print
+402:29 call  " ".join(map(str, args))
+    -> <builtin>.str.join
+402:33 call  map(str, args)
+    -> <builtin>.map
+403:22 call  print(x.encode(), file=file)
+    -> <builtin>.print
+403:31 call  x.encode()
+    -> <builtin>.str.encode
+
+[vulture.core.Vulture._add_aliases]
+410:26 call  isinstance(node, (ast.Import, ast.ImportFrom))
+    -> <builtin>.isinstance
+414:49 call  name_and_alias.name.partition(".")
+    -> <builtin>.str.partition
+416:25 call  self._define( self.defined_imports, alias or name, node, ...
+    -> vulture.core.Vulture._define
+    reject vulture.core._ignore_import: passed as ignore; Vulture._define.ignored calls it (438:35)
+424:36 call  self.used_names.add(name_and_alias.name)
+    -> vulture.utils.LoggingSet.add
+
+[vulture.core.Vulture._define]
+445:51 call  lines.get_first_line_number(first_node)
+    -> vulture.lines.get_first_line_number
+447:19 call  ignored(first_lineno)
+    -> vulture.core.Vulture._define.ignored
+448:22 call  self._log(f'Ignoring {typ} "{name}"')
+    -> vulture.core.Vulture._log
+450:30 call  collection.append( Item( name, typ, self.filename, first_...
+    -> vulture.utils.LoggingList.append
+    note: collection is one of the LoggingLists of Vulture.__init__ (201-208); the partial of 220:25 passes self.unreachable_code
+451:21 call  Item( name, typ, self.filename, first_lineno, lines.get_l...
+    -> vulture.core.Item.__init__
+456:47 call  lines.get_last_line_number(last_node)
+    -> vulture.lines.get_last_line_number
+
+[vulture.core.Vulture._define.ignored]
+438:35 call  ignore(self.filename, name)
+    -> vulture.core._ignore_import
+    -> vulture.core._ignore_variable
+    -> vulture.core._ignore_class
+    -> vulture.core._ignore_method
+    -> vulture.core._ignore_function
+    note: ignore is the argument of the private _define: _ignore_import (422), _ignore_variable (468), _ignore_class (561), _ignore_method (591), _ignore_function (595), or None (480, 588 and the partial of 220:25), which the `ignore and` test skips
+439:26 call  _match(name, self.ignore_names)
+    -> vulture.core._match
+440:36 call  noqa.ignore_line(self.noqa_lines, lineno, ERROR_CODES[typ])
+    -> vulture.noqa.ignore_line
+
+[vulture.core.Vulture._define_variable]
+463:21 call  self._define( self.defined_vars, name, node, confidence=c...
+    -> vulture.core.Vulture._define
+    reject vulture.core._ignore_variable: passed as ignore; Vulture._define.ignored calls it (438:35)
+
+[vulture.core.Vulture.visit_arg]
+473:30 call  self._define_variable(node.arg, node, confidence=100)
+    -> vulture.core.Vulture._define_variable
+
+[vulture.core.Vulture.visit_AsyncFunctionDef]
+476:38 call  self.visit_FunctionDef(node)
+    -> vulture.core.Vulture.visit_FunctionDef
+
+[vulture.core.Vulture.visit_Attribute]
+479:22 call  isinstance(node.ctx, ast.Store)
+    -> <builtin>.isinstance
+480:25 call  self._define(self.defined_attrs, node.attr, node)
+    -> vulture.core.Vulture._define
+481:24 call  isinstance(node.ctx, ast.Load)
+    -> <builtin>.isinstance
+482:32 call  self.used_names.add(node.attr)
+    -> vulture.utils.LoggingSet.add
+
+[vulture.core.Vulture.visit_BinOp]
+491:32 call  utils.is_ast_string(node.left)
+    -> vulture.utils.is_ast_string
+492:27 call  isinstance(node.op, ast.Mod)
+    -> <builtin>.isinstance
+493:37 call  self._is_locals_call(node.right)
+    -> vulture.core.Vulture._is_locals_call
+495:35 call  set(re.findall(r"%\((\w+)\)", node.left.value))
+    -> <builtin>.set
+495:46 call  re.findall(r"%\((\w+)\)", node.left.value)
+    -> re.findall
+
+[vulture.core.Vulture.visit_Call]
+499:22 call  isinstance(node.func, ast.Name)
+    -> <builtin>.isinstance
+500:52 call  len(node.args)
+    -> <builtin>.len
+501:50 call  len(node.args)
+    -> <builtin>.len
+504:35 call  utils.is_ast_string(attr_name_arg)
+    -> vulture.utils.is_ast_string
+505:36 call  self.used_names.add(attr_name_arg.value)
+    -> vulture.utils.LoggingSet.add
+510:23 call  isinstance(node.func, ast.Attribute)
+    -> <builtin>.isinstance
+511:36 call  utils.is_ast_string(node.func.value)
+    -> vulture.utils.is_ast_string
+513:20 call  any( kw.arg is None and self._is_locals_call(kw.value) fo...
+    -> <builtin>.any
+514:56 call  self._is_locals_call(kw.value)
+    -> vulture.core.Vulture._is_locals_call
+518:43 call  self._handle_new_format_string(node.func.value.value)
+    -> vulture.core.Vulture._handle_new_format_string
+
+[vulture.core.Vulture._handle_new_format_string]
+524:34 call  string.Formatter()
+    -> string.Formatter
+526:60 call  parser.parse(s)
+    -> string.Formatter.parse
+534:26 call  re.sub(r"\[\w*\]", "", field_name)
+    -> re.sub
+534:60 call  re.sub(r"\[\w*\]", "", field_name).split(".")
+    -> <builtin>.str.split
+536:33 call  is_identifier(var)
+    -> vulture.core.Vulture._handle_new_format_string.is_identifier
+537:40 call  self.used_names.add(var)
+    -> vulture.utils.LoggingSet.add
+
+[vulture.core.Vulture._handle_new_format_string.is_identifier]
+522:24 call  bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
+    -> <builtin>.bool
+522:33 call  re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name)
+    -> re.match
+
+[vulture.core.Vulture._is_locals_call]
+543:23 call  isinstance(node, ast.Call)
+    -> <builtin>.isinstance
+544:27 call  isinstance(node.func, ast.Name)
+    -> <builtin>.isinstance
+
+[vulture.core.Vulture.visit_ClassDef]
+552:22 call  _match( utils.get_decorator_name(decorator), self.ignore_...
+    -> vulture.core._match
+553:41 call  utils.get_decorator_name(decorator)
+    -> vulture.utils.get_decorator_name
+555:26 call  self._log( f'Ignoring class "{node.name}" (decorator whit...
+    -> vulture.core.Vulture._log
+560:25 call  self._define( self.defined_classes, node.name, node, igno...
+    -> vulture.core.Vulture._define
+    reject vulture.core._ignore_class: passed as ignore; Vulture._define.ignored calls it (438:35)
+
+[vulture.core.Vulture.visit_FunctionDef]
+566:37 call  utils.get_decorator_name(decorator)
+    -> vulture.utils.get_decorator_name
+583:15 call  any( _match(name, self.ignore_decorators) for name in dec...
+    -> <builtin>.any
+584:19 call  _match(name, self.ignore_decorators)
+    -> vulture.core._match
+586:22 call  self._log(f'Ignoring {typ} "{node.name}" (decorator white...
+    -> vulture.core.Vulture._log
+588:25 call  self._define(self.defined_props, node.name, node)
+    -> vulture.core.Vulture._define
+590:25 call  self._define( self.defined_methods, node.name, node, igno...
+    -> vulture.core.Vulture._define
+    reject vulture.core._ignore_method: passed as ignore; Vulture._define.ignored calls it (438:35)
+594:25 call  self._define( self.defined_funcs, node.name, node, ignore...
+    -> vulture.core.Vulture._define
+    reject vulture.core._ignore_function: passed as ignore; Vulture._define.ignored calls it (438:35)
+
+[vulture.core.Vulture.visit_Import]
+599:26 call  self._add_aliases(node)
+    -> vulture.core.Vulture._add_aliases
+
+[vulture.core.Vulture.visit_ImportFrom]
+603:30 call  self._add_aliases(node)
+    -> vulture.core.Vulture._add_aliases
+
+[vulture.core.Vulture.visit_Name]
+607:23 call  isinstance(node.ctx, (ast.Load, ast.Del))
+    -> <builtin>.isinstance
+610:32 call  self.used_names.add(node.id)
+    -> vulture.utils.LoggingSet.add
+611:24 call  isinstance(node.ctx, (ast.Param, ast.Store))
+    -> <builtin>.isinstance
+612:34 call  self._define_variable(node.id, node)
+    -> vulture.core.Vulture._define_variable
+
+[vulture.core.Vulture.visit_Assign]
+615:44 call  _assigns_special_variable__all__(node)
+    -> vulture.core._assigns_special_variable__all__
+616:30 call  isinstance(node.value, (ast.List, ast.Tuple))
+    -> <builtin>.isinstance
+618:39 call  utils.is_ast_string(elt)
+    -> vulture.utils.is_ast_string
+619:40 call  self.used_names.add(elt.value)
+    -> vulture.utils.LoggingSet.add
+
+[vulture.core.Vulture.visit_MatchClass]
+623:32 call  self.used_names.add(kwd_attr)
+    -> vulture.utils.LoggingSet.add
+
+[vulture.core.Vulture.visit]
+627:27 call  self.generic_visit(node)
+    -> vulture.core.Vulture.generic_visit
+629:32 call  self.reachability.visit(node)
+    -> vulture.reachability.Reachability.visit
+    reject vulture.core.Vulture.visit: the receiver is the Reachability that Vulture.__init__ makes (225:41)
+632:26 call  getattr(self, method, None)
+    -> <builtin>.getattr
+634:29 call  getattr(node, "lineno", 1)
+    -> <builtin>.getattr
+636:22 call  self._log(lineno, ast.dump(node), line)
+    -> vulture.core.Vulture._log
+636:39 call  ast.dump(node)
+    -> ast.dump
+638:20 call  visitor(node)
+    -> vulture.core.Vulture.visit_arg
+    -> vulture.core.Vulture.visit_AsyncFunctionDef
+    -> vulture.core.Vulture.visit_Attribute
+    -> vulture.core.Vulture.visit_BinOp
+    -> vulture.core.Vulture.visit_Call
+    -> vulture.core.Vulture.visit_ClassDef
+    -> vulture.core.Vulture.visit_FunctionDef
+    -> vulture.core.Vulture.visit_Import
+    -> vulture.core.Vulture.visit_ImportFrom
+    -> vulture.core.Vulture.visit_Name
+    -> vulture.core.Vulture.visit_Assign
+    -> vulture.core.Vulture.visit_MatchClass
+    -> ast.NodeVisitor.visit_Constant
+    -> vulture.core.Vulture.generic_visit
+    note: visitor is getattr(self, "visit_" + the class name of the node) (631-632): the twelve visit_* methods of Vulture for the node classes that ast.parse makes (arg, AsyncFunctionDef, Attribute, BinOp, Call, ClassDef, FunctionDef, Import, ImportFrom, Name, Assign, MatchClass); for a Constant node on Python 3.9 to 3.13 (CPython and PyPy), the inherited ast.NodeVisitor.visit_Constant, which finds no visit_Num, visit_Str, visit_Bytes, visit_NameConstant or visit_Ellipsis on a Vulture and calls back self.generic_visit (Lib/ast.py, 3.9.25:421-440, 3.13.18:434-453; Python 3.14 has no visit_Constant) (judgement J2)
+642:31 call  getattr(node, "type_comment", None)
+    -> <builtin>.getattr
+646:30 call  isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    -> <builtin>.isinstance
+649:23 call  self.visit( ast.parse(type_comment, filename="<type_comme...
+    -> vulture.core.Vulture.visit
+    reject vulture.reachability.Reachability.visit: the receiver is the Vulture
+650:26 call  ast.parse(type_comment, filename="<type_comment>", mode=m...
+    -> ast.parse
+
+[vulture.core.Vulture.generic_visit]
+655:40 call  ast.iter_fields(node)
+    -> ast.iter_fields
+656:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+658:34 call  isinstance(item, ast.AST)
+    -> <builtin>.isinstance
+659:35 call  self.visit(item)
+    -> vulture.core.Vulture.visit
+    reject vulture.reachability.Reachability.visit: the receiver is the Vulture
+660:28 call  isinstance(value, ast.AST)
+    -> <builtin>.isinstance
+661:27 call  self.visit(value)
+    -> vulture.core.Vulture.visit
+    reject vulture.reachability.Reachability.visit: the receiver is the Vulture
+
+[vulture.core.main]
+666:29 call  make_config()
+    -> vulture.config.make_config
+668:14 call  print(e, file=sys.stderr)
+    -> <builtin>.print
+669:17 call  sys.exit(ExitCode.InvalidCmdlineArguments)
+    -> sys.exit
+671:22 call  Vulture( verbose=config["verbose"], ignore_names=config["...
+    -> vulture.core.Vulture.__init__
+676:21 call  vulture.scavenge(config["paths"], exclude=config["exclude"])
+    -> vulture.core.Vulture.scavenge
+677:13 call  sys.exit( vulture.report( min_confidence=config["min_conf...
+    -> sys.exit
+678:23 call  vulture.report( min_confidence=config["min_confidence"], ...
+    -> vulture.core.Vulture.report
+
+== vulture.lines
+
+[vulture.lines.get_first_line_number]
+15:25 call  getattr(node, "decorator_list", [])
+    -> <builtin>.getattr
+
+== vulture.noqa
+
+[vulture.noqa]
+4:25 call  re.compile( # Use the same regex as flake8 does. # https:...
+    -> re.compile
+
+[vulture.noqa._parse_error_codes]
+27:16 call  c.strip()
+    -> <builtin>.str.strip
+27:44 call  match.groupdict()
+    -> re.Match.groupdict
+27:71 call  (match.groupdict()["codes"] or "all").split(",")
+    -> <builtin>.str.split
+
+[vulture.noqa.parse_noqa]
+32:29 call  defaultdict(set)
+    -> collections.defaultdict
+33:34 call  enumerate(code, start=1)
+    -> <builtin>.enumerate
+34:35 call  NOQA_REGEXP.search(line)
+    -> re.Pattern.search
+36:49 call  _parse_error_codes(match)
+    -> vulture.noqa._parse_error_codes
+37:47 call  NOQA_CODE_MAP.get(error_code, error_code)
+    -> <builtin>.dict.get
+38:43 call  noqa_lines[error_code].add(lineno)
+    -> <builtin>.set.add
+    reject vulture.utils.LoggingSet.add: noqa_lines is a defaultdict(set), whose values are builtin sets
+
+== vulture.reachability
+
+[vulture.reachability]
+171:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[vulture.reachability.Reachability.__init__]
+9:42 call  set()
+    -> <builtin>.set
+
+[vulture.reachability.Reachability.visit]
+13:22 call  isinstance(node, (ast.Break, ast.Continue, ast.Return, as...
+    -> <builtin>.isinstance
+14:42 call  self._mark_as_no_fall_through(node)
+    -> vulture.reachability.Reachability._mark_as_no_fall_through
+16:24 call  isinstance( node, ( ast.Module, ast.FunctionDef, ast.Asyn...
+    -> <builtin>.isinstance
+26:55 call  self._can_fall_through_statements_analysis(node.body)
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+27:24 call  isinstance(node, ast.While)
+    -> <builtin>.isinstance
+28:44 call  self._handle_reachability_while(node)
+    -> vulture.reachability.Reachability._handle_reachability_while
+29:24 call  isinstance(node, (ast.For, ast.AsyncFor))
+    -> <builtin>.isinstance
+30:55 call  self._can_fall_through_statements_analysis(node.body)
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+31:24 call  isinstance(node, ast.If)
+    -> <builtin>.isinstance
+32:41 call  self._handle_reachability_if(node)
+    -> vulture.reachability.Reachability._handle_reachability_if
+33:24 call  isinstance(node, ast.IfExp)
+    -> <builtin>.isinstance
+34:46 call  self._handle_reachability_if_expr(node)
+    -> vulture.reachability.Reachability._handle_reachability_if_expr
+35:24 call  isinstance(node, ast.Try)
+    -> <builtin>.isinstance
+36:42 call  self._handle_reachability_try(node)
+    -> vulture.reachability.Reachability._handle_reachability_try
+
+[vulture.reachability.Reachability.reset]
+39:42 call  set()
+    -> <builtin>.set
+
+[vulture.reachability.Reachability._mark_as_no_fall_through]
+45:40 call  self._no_fall_through_nodes.add(node)
+    -> <builtin>.set.add
+    reject vulture.utils.LoggingSet.add: _no_fall_through_nodes is the builtin set of 9:42 and 39:42
+
+[vulture.reachability.Reachability._can_fall_through_statements_analysis]
+51:40 call  enumerate(statements)
+    -> <builtin>.enumerate
+52:42 call  self._can_fall_through(statement)
+    -> vulture.reachability.Reachability._can_fall_through
+58:68 call  statement.__class__.__name__.lower()
+    -> <builtin>.str.lower
+59:33 call  self._report( name=class_name, first_node=next_sibling, l...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+
+[vulture.reachability.Reachability._handle_reachability_if]
+69:24 call  bool(node.orelse)
+    -> <builtin>.bool
+71:43 call  utils.condition_is_always_false(node.test)
+    -> vulture.utils.condition_is_always_false
+72:25 call  self._report( name="if", first_node=node, last_node=node....
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+76:30 call  isinstance(node, ast.IfExp)
+    -> <builtin>.isinstance
+81:64 call  self._can_else_fall_through( node.orelse, condition_alway...
+    -> vulture.reachability.Reachability._can_else_fall_through
+85:44 call  utils.condition_is_always_true(node.test)
+    -> vulture.utils.condition_is_always_true
+86:77 call  self._can_fall_through_statements_analysis( node.body )
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+89:64 call  self._can_else_fall_through( node.orelse, condition_alway...
+    -> vulture.reachability.Reachability._can_else_fall_through
+94:29 call  self._report( name="else", first_node=node.orelse[0], las...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+102:29 call  self._report( name="if", first_node=node, message="redund...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+108:77 call  self._can_fall_through_statements_analysis( node.body )
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+111:64 call  self._can_else_fall_through( node.orelse, condition_alway...
+    -> vulture.reachability.Reachability._can_else_fall_through
+120:42 call  self._mark_as_no_fall_through(node)
+    -> vulture.reachability.Reachability._mark_as_no_fall_through
+
+[vulture.reachability.Reachability._can_else_fall_through]
+125:58 call  self._can_fall_through_statements_analysis(or_else)
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+
+[vulture.reachability.Reachability._handle_reachability_if_expr]
+128:43 call  utils.condition_is_always_false(node.test)
+    -> vulture.utils.condition_is_always_false
+129:25 call  self._report( name="ternary", first_node=node, last_node=...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+133:30 call  isinstance(node, ast.IfExp)
+    -> <builtin>.isinstance
+137:44 call  utils.condition_is_always_true(node.test)
+    -> vulture.utils.condition_is_always_true
+139:25 call  self._report( name="ternary", first_node=else_body, messa...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+
+[vulture.reachability.Reachability._handle_reachability_while]
+146:43 call  utils.condition_is_always_false(node.test)
+    -> vulture.utils.condition_is_always_false
+147:25 call  self._report( name="while", first_node=node, last_node=no...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+151:30 call  isinstance(node, ast.IfExp)
+    -> <builtin>.isinstance
+156:44 call  utils.condition_is_always_true(node.test)
+    -> vulture.utils.condition_is_always_true
+159:29 call  self._report( name="else", first_node=else_body[0], last_...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+166:40 call  self._body_has_break(node.body)
+    -> vulture.reachability.Reachability._body_has_break
+167:46 call  self._mark_as_no_fall_through(node)
+    -> vulture.reachability.Reachability._mark_as_no_fall_through
+169:51 call  self._can_fall_through_statements_analysis(node.body)
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+
+[vulture.reachability.Reachability._body_has_break]
+179:26 call  isinstance(stmt, ast.Break)
+    -> <builtin>.isinstance
+181:26 call  isinstance( stmt, ( ast.While, ast.For, ast.AsyncFor, ast...
+    -> <builtin>.isinstance
+193:44 call  ast.iter_fields(stmt)
+    -> ast.iter_fields
+194:30 call  isinstance(value, list)
+    -> <builtin>.isinstance
+195:64 call  isinstance(s, ast.AST)
+    -> <builtin>.isinstance
+196:52 call  Reachability._body_has_break(ast_stmts)
+    -> vulture.reachability.Reachability._body_has_break
+
+[vulture.reachability.Reachability._handle_reachability_try]
+201:74 call  self._can_fall_through_statements_analysis( node.body )
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+205:24 call  bool(node.orelse)
+    -> <builtin>.bool
+209:25 call  self._report( name="else", first_node=else_body[0], last_...
+    -> functools.partial.__call__
+    -> vulture.core.Vulture._define
+    note: _report is the report argument of Reachability: the package passes the partial of Vulture._define (core.py:220-225), whose __call__ calls the bound Vulture._define; a report that a client passes is a client callback (B5)
+216:42 call  any( self._can_fall_through_statements_analysis(handler.b...
+    -> <builtin>.any
+217:55 call  self._can_fall_through_statements_analysis(handler.body)
+    -> vulture.reachability.Reachability._can_fall_through_statements_analysis
+226:42 call  self._mark_as_no_fall_through(node)
+    -> vulture.reachability.Reachability._mark_as_no_fall_through
+
+== vulture.utils
+
+[vulture.utils._safe_eval]
+33:18 call  isinstance(node, ast.BoolOp)
+    -> <builtin>.isinstance
+34:30 call  _safe_eval(value, default)
+    -> vulture.utils._safe_eval
+35:22 call  isinstance(node.op, ast.And)
+    -> <builtin>.isinstance
+36:23 call  all(results)
+    -> <builtin>.all
+38:23 call  any(results)
+    -> <builtin>.any
+39:20 call  isinstance(node, ast.UnaryOp)
+    -> <builtin>.isinstance
+39:54 call  isinstance(node.op, ast.Not)
+    -> <builtin>.isinstance
+40:30 call  _safe_eval(node.operand, not default)
+    -> vulture.utils._safe_eval
+43:36 call  ast.literal_eval(node)
+    -> ast.literal_eval
+
+[vulture.utils.condition_is_always_false]
+49:26 call  _safe_eval(condition, True)
+    -> vulture.utils._safe_eval
+
+[vulture.utils.condition_is_always_true]
+53:22 call  _safe_eval(condition, False)
+    -> vulture.utils._safe_eval
+
+[vulture.utils.is_ast_string]
+57:22 call  isinstance(node, ast.Constant)
+    -> <builtin>.isinstance
+57:57 call  isinstance(node.value, str)
+    -> <builtin>.isinstance
+
+[vulture.utils.format_path]
+62:32 call  path.relative_to(pathlib.Path.cwd())
+    -> pathlib.PosixPath.relative_to
+    -> pathlib.WindowsPath.relative_to
+    note: path is the Path of an Item (Item.filename, set by Vulture._define from Vulture.scan's Path) or the Path of Vulture.scan (228:24): a PosixPath, or a WindowsPath on Windows
+62:49 call  pathlib.Path.cwd()
+    -> pathlib.Path.cwd
+
+[vulture.utils.get_decorator_name]
+69:18 call  isinstance(decorator, ast.Call)
+    -> <builtin>.isinstance
+73:25 call  isinstance(decorator, ast.Attribute)
+    -> <builtin>.isinstance
+74:25 call  parts.append(decorator.attr)
+    -> <builtin>.list.append
+    reject vulture.utils.LoggingList.append: parts is the builtin list of 72
+76:21 call  parts.append(decorator.id)
+    -> <builtin>.list.append
+    reject vulture.utils.LoggingList.append: parts is the builtin list of 72
+79:26 call  ".".join(reversed(parts))
+    -> <builtin>.str.join
+79:35 call  reversed(parts)
+    -> <builtin>.reversed
+
+[vulture.utils.get_modules]
+92:28 call  path.resolve()
+    -> pathlib.PosixPath.resolve
+    -> pathlib.WindowsPath.resolve
+    note: paths holds the Paths that Vulture.scavenge makes (core.py:278); no test or document passes get_modules anything else
+93:24 call  path.is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+95:25 call  sys.exit(f"Error: *.pyc files are not supported: {path}")
+    -> sys.exit
+97:31 call  modules.append(path)
+    -> <builtin>.list.append
+    reject vulture.utils.LoggingList.append: modules is the builtin list of 90
+98:25 call  path.is_dir()
+    -> pathlib.PosixPath.is_dir
+    -> pathlib.WindowsPath.is_dir
+99:27 call  modules.extend(path.rglob("*.py"))
+    -> <builtin>.list.extend
+99:38 call  path.rglob("*.py")
+    -> pathlib.PosixPath.rglob
+    -> pathlib.WindowsPath.rglob
+101:21 call  sys.exit(f"Error: {path} could not be found.")
+    -> sys.exit
+
+[vulture.utils.read_file]
+108:27 call  tokenize.open(filename)
+    -> tokenize.open
+109:26 call  f.read()
+    -> io.TextIOWrapper.read
+
+[vulture.utils.LoggingList.__init__]
+116:14 call  super()
+    -> <builtin>.super
+116:25 call  super().__init__()
+    -> <builtin>.list.__init__
+    reject *: super() in LoggingList resolves to list.__init__
+
+[vulture.utils.LoggingList.append]
+122:18 call  print(f'define {self.typ} "{item.name}"')
+    -> <builtin>.print
+123:14 call  super()
+    -> <builtin>.super
+123:23 call  super().append(item)
+    -> <builtin>.list.append
+    reject vulture.utils.LoggingList.append: super() skips LoggingList and resolves to list.append
+
+[vulture.utils.LoggingSet.__init__]
+128:14 call  super()
+    -> <builtin>.super
+128:25 call  super().__init__()
+    -> <builtin>.set.__init__
+    reject *: super() in LoggingSet resolves to set.__init__
+
+[vulture.utils.LoggingSet.add]
+134:18 call  print(f'use {self.typ} "{name}"')
+    -> <builtin>.print
+135:14 call  super()
+    -> <builtin>.super
+135:20 call  super().add(name)
+    -> <builtin>.set.add
+    reject vulture.utils.LoggingSet.add: super() skips LoggingSet and resolves to set.add
+
+== vulture.whitelists.argparse_whitelist
+
+[vulture.whitelists.argparse_whitelist]
+3:24 call  argparse.ArgumentParser()
+    -> argparse.ArgumentParser
+5:39 call  argparse.ArgumentDefaultsHelpFormatter("prog")
+    -> argparse.ArgumentDefaultsHelpFormatter
+6:39 call  argparse.ArgumentDefaultsHelpFormatter("prog")
+    -> argparse.ArgumentDefaultsHelpFormatter
+
+== vulture.whitelists.ast_whitelist
+
+[vulture.whitelists.ast_whitelist]
+4:35 call  Whitelist()
+    note: Whitelist (whitelist_utils.py:20) defines no __init__; its first __init__ is object.__init__, so the call has no callee
+6:24 getattr  whitelist_node_visitor.visit_Assert
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+7:24 getattr  whitelist_node_visitor.visit_Assign
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+8:24 getattr  whitelist_node_visitor.visit_AsyncFor
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+9:24 getattr  whitelist_node_visitor.visit_AsyncFunctionDef
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+10:24 getattr  whitelist_node_visitor.visit_AsyncWith
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+11:24 getattr  whitelist_node_visitor.visit_Attribute
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+12:24 getattr  whitelist_node_visitor.visit_AugAssign
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+13:24 getattr  whitelist_node_visitor.visit_Await
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+14:24 getattr  whitelist_node_visitor.visit_BinOp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+15:24 getattr  whitelist_node_visitor.visit_BoolOp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+16:24 getattr  whitelist_node_visitor.visit_Bytes
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+17:24 getattr  whitelist_node_visitor.visit_Call
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+18:24 getattr  whitelist_node_visitor.visit_ClassDef
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+19:24 getattr  whitelist_node_visitor.visit_Compare
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+20:24 getattr  whitelist_node_visitor.visit_Constant
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+21:24 getattr  whitelist_node_visitor.visit_Delete
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+22:24 getattr  whitelist_node_visitor.visit_Dict
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+23:24 getattr  whitelist_node_visitor.visit_DictComp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+24:24 getattr  whitelist_node_visitor.visit_ExceptHandler
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+25:24 getattr  whitelist_node_visitor.visit_Exec
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+26:24 getattr  whitelist_node_visitor.visit_Expr
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+27:24 getattr  whitelist_node_visitor.visit_Expression
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+28:24 getattr  whitelist_node_visitor.visit_ExtSlice
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+29:24 getattr  whitelist_node_visitor.visit_For
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+30:24 getattr  whitelist_node_visitor.visit_FunctionDef
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+31:24 getattr  whitelist_node_visitor.visit_GeneratorExp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+32:24 getattr  whitelist_node_visitor.visit_Global
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+33:24 getattr  whitelist_node_visitor.visit_If
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+34:24 getattr  whitelist_node_visitor.visit_IfExp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+35:24 getattr  whitelist_node_visitor.visit_Import
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+36:24 getattr  whitelist_node_visitor.visit_ImportFrom
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+37:24 getattr  whitelist_node_visitor.visit_Index
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+38:24 getattr  whitelist_node_visitor.visit_Interactive
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+39:24 getattr  whitelist_node_visitor.visit_Lambda
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+40:24 getattr  whitelist_node_visitor.visit_List
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+41:24 getattr  whitelist_node_visitor.visit_ListComp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+42:24 getattr  whitelist_node_visitor.visit_MatchClass
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+43:24 getattr  whitelist_node_visitor.visit_Module
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+44:24 getattr  whitelist_node_visitor.visit_Name
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+45:24 getattr  whitelist_node_visitor.visit_NameConstant
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+46:24 getattr  whitelist_node_visitor.visit_Nonlocal
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+47:24 getattr  whitelist_node_visitor.visit_Num
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+48:24 getattr  whitelist_node_visitor.visit_Print
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+49:24 getattr  whitelist_node_visitor.visit_Raise
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+50:24 getattr  whitelist_node_visitor.visit_Repr
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+51:24 getattr  whitelist_node_visitor.visit_Return
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+52:24 getattr  whitelist_node_visitor.visit_Set
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+53:24 getattr  whitelist_node_visitor.visit_SetComp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+54:24 getattr  whitelist_node_visitor.visit_Slice
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+55:24 getattr  whitelist_node_visitor.visit_Starred
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+56:24 getattr  whitelist_node_visitor.visit_Str
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+57:24 getattr  whitelist_node_visitor.visit_Subscript
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+58:24 getattr  whitelist_node_visitor.visit_Suite
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+59:24 getattr  whitelist_node_visitor.visit_Try
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+60:24 getattr  whitelist_node_visitor.visit_TryExcept
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+61:24 getattr  whitelist_node_visitor.visit_TryFinally
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+62:24 getattr  whitelist_node_visitor.visit_Tuple
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+63:24 getattr  whitelist_node_visitor.visit_UnaryOp
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+64:24 getattr  whitelist_node_visitor.visit_While
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+65:24 getattr  whitelist_node_visitor.visit_With
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+66:24 getattr  whitelist_node_visitor.visit_Yield
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+67:24 getattr  whitelist_node_visitor.visit_YieldFrom
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+68:24 getattr  whitelist_node_visitor.visit_alias
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+69:24 getattr  whitelist_node_visitor.visit_arg
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+70:24 getattr  whitelist_node_visitor.visit_arguments
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+71:24 getattr  whitelist_node_visitor.visit_comprehension
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+72:24 getattr  whitelist_node_visitor.visit_keyword
+    -> vulture.whitelists.whitelist_utils.Whitelist.__getattr__
+    note: whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)
+
+== vulture.whitelists.collections_whitelist
+
+[vulture.whitelists.collections_whitelist]
+4:24 call  collections.defaultdict()
+    -> collections.defaultdict
+
+== vulture.whitelists.logging_whitelist
+
+[vulture.whitelists.logging_whitelist]
+4:18 call  logging.getLogger()
+    -> logging.getLogger
+
+== vulture.whitelists.pint_whitelist
+
+[vulture.whitelists.pint_whitelist]
+3:25 call  pint.UnitRegistry()
+    -> pint.UnitRegistry
+    note: pint is neither a dependency of vulture nor installed in the trace's environment: a missing module, named by its access path
+
+== vulture.whitelists.ssl_whitelist
+
+[vulture.whitelists.ssl_whitelist]
+3:21 call  ssl.SSLContext()
+    -> ssl.SSLContext

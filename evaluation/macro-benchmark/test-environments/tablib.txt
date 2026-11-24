@@ -1,0 +1,66 @@
+# The test environment (batch 8) of
+# tablib 3.10.0: the full closure on CPython 3.14 for Linux aarch64,
+# each file by version and SHA-256. The package itself is not installed.
+#   pip install --require-hashes --only-binary :all: --no-deps -r tablib.txt
+#
+# Computed on 2026-11-23 from PyPI's JSON (no wheel downloaded or read):
+# the requires_dist of each pinned release, the markers evaluated for
+# CPython 3.14.10 on Linux aarch64 and no extra; each hash is PyPI's for
+# that file. Each version but pytest's stack is the newest release that is
+# not yanked, not a pre-release and was uploaded on or before 2026-07-31
+# (the release of tablib), with a usable wheel. Pure-Python wheel only
+# where there is one; else the cp314 (or abi3) aarch64 wheels for
+# manylinux and musllinux. A wheel's own METADATA could ask for more:
+# UNVERIFIED until pip installs the list with --no-deps.
+#
+# tests/requirements.txt without pytest-cov; defusedxml 0.7.1 for odfpy
+# (its setup.py install_requires). odfpy 1.4.1 has no wheel on PyPI in any
+# release: its wheel was built from its pinned sdist (odfpy-1.4.1.tar.gz,
+# SHA-256
+# db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec) in a
+# container on 2026-11-24, after the security scans of that sdist (the
+# maintainer's decision), and is pinned here by its own SHA-256; it is
+# ../wheels/odfpy-1.4.1-py2.py3-none-any.whl, and pip finds it there
+# (../wheels/README.md: the recipe and the check). pandas is optional (tox
+# installs it best effort); not installed.
+
+# (top); uploaded 2021-03-08.
+defusedxml==0.7.1 \
+    --hash=sha256:a352e7e428770286cc899e2542b6cdaedb2b4953ff269a210103ec58f6198a61
+# openpyxl==3.1.5; uploaded 2024-10-25.
+et-xmlfile==2.0.0 \
+    --hash=sha256:7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa
+# pytest; uploaded 2026-10-06.
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# (top); built here on 2026-11-24 from the sdist of 2020-01-18 (../wheels/).
+odfpy==1.4.1 \
+    --hash=sha256:19548df9de7970e8cb6b120eb0de3232561de6c876b2642a91e1b9c88c2af2f8
+# (top); uploaded 2024-06-28.
+openpyxl==3.1.5 \
+    --hash=sha256:5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2
+# pytest; uploaded 2026-08-04.
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# pytest; uploaded 2026-10-15.
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# pytest; uploaded 2026-08-17.
+Pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+# 9.2.0, as for batches 3 to 7 (one pytest stack); uploaded 2026-10-27.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# (top); uploaded 2025-09-25.
+PyYAML==6.0.3 \
+    --hash=sha256:501a031947e3a9025ed4405a168e6ef5ae3126c59f90ce0cd6f2bfc477be31b7 \
+    --hash=sha256:7c6610def4f163542a622a73fb39f534f8c101d690126992300bf3207eab9764
+# (top); uploaded 2026-03-04.
+tabulate==0.10.0 \
+    --hash=sha256:f0b0622e567335c8fabaaa659f1b33bcb6ddfe2e496071b743aa113f8774f2d3
+# (top); uploaded 2025-06-14.
+xlrd==2.0.2 \
+    --hash=sha256:ea762c3d29f4cca48d82df517b6d89fbce4db3107f9d78713e48cd321d5c9aa9
+# (top); uploaded 2017-08-22.
+xlwt==1.3.0 \
+    --hash=sha256:a082260524678ba48a297d922cc385f58278b8aa68741596a87de01a9c628b2e

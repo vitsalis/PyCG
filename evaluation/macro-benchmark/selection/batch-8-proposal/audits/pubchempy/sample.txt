@@ -1,0 +1,148 @@
+# skeleton sites 901: explicit 329, implicit 572
+# drawn 90 explicit + 50 implicit; value sites added: 6
+explicit	pubchempy	24:21	call	os.getenv("PUBCHEMPY_CA_BUNDLE")
+explicit	pubchempy	24:57	call	os.getenv("REQUESTS_CA_BUNDLE")
+explicit	pubchempy	351:25	call	str(identifier)
+explicit	pubchempy	359:40	call	identifier.replace("/", ".")
+explicit	pubchempy	366:40	call	identifier.encode("utf8")
+explicit	pubchempy	368:29	call	urlencode([(namespace, identifier)])
+explicit	pubchempy	378:18	call	log.debug(f"Request data: {postdata}")
+explicit	pubchempy	380:27	call	urlopen(apiurl, postdata, context=context)
+explicit	pubchempy	400:44	call	response.decode()
+explicit	pubchempy	419:23	call	request( identifier, namespace, domain, operation, output...
+explicit	pubchempy	421:27	call	request( identifier, namespace, domain, operation, output...
+explicit	pubchempy	423:15	call	request( identifier, namespace, domain, operation, output...
+explicit	pubchempy	440:26	call	json.loads( get( identifier, namespace, domain, operation...
+explicit	pubchempy	446:17	call	log.info(e)
+explicit	pubchempy	616:38	call	properties.split(",")
+explicit	pubchempy	757:23	call	get_json( identifier, namespace, domain, "aids", searchty...
+explicit	pubchempy	791:14	call	open(path, "wb")
+explicit	pubchempy	792:16	call	f.write(response)
+explicit	pubchempy	803:6	decorator	@functools.wraps(fget)
+explicit	pubchempy	807:23	call	getattr(self, attr_name)
+explicit	pubchempy	870:23	call	isinstance(other, type(self))
+explicit	pubchempy	879:6	decorator	@deprecated("Dictionary style access to Atom attributes i...
+explicit	pubchempy	884:23	call	KeyError(prop)
+explicit	pubchempy	891:6	decorator	@deprecated("Dictionary style access to Atom attributes i...
+explicit	pubchempy	891:16	call	deprecated("Dictionary style access to Atom attributes is...
+explicit	pubchempy	907:23	call	getattr(self, coord)
+explicit	pubchempy	957:35	call	type(self)
+explicit	pubchempy	971:6	decorator	@deprecated("Dictionary style access to Bond attributes i...
+explicit	pubchempy	987:27	call	KeyError(prop)
+explicit	pubchempy	1050:41	call	len(xs)
+explicit	pubchempy	1050:52	call	len(ys)
+explicit	pubchempy	1051:31	call	len(zs)
+explicit	pubchempy	1053:41	call	ResponseParseError("Error parsing atom coordinates")
+explicit	pubchempy	1055:49	call	self._atoms[aid].set_coordinates(x, y, z)
+explicit	pubchempy	1070:47	call	len(orders)
+explicit	pubchempy	1072:37	call	zip(aid1s, aid2s, orders)
+explicit	pubchempy	1087:6	decorator	@classmethod
+explicit	pubchempy	1098:56	call	request(cid, **kwargs).read()
+explicit	pubchempy	1098:65	call	request(cid, **kwargs).read().decode()
+explicit	pubchempy	1106:6	decorator	@record.setter
+explicit	pubchempy	1117:38	call	type(self)
+explicit	pubchempy	1183:6	decorator	@property
+explicit	pubchempy	1207:22	call	sorted(self._atoms.values(), key=lambda x: x.aid)
+explicit	pubchempy	1221:31	call	get_json(self.cid, operation="synonyms")
+explicit	pubchempy	1274:6	decorator	@property
+explicit	pubchempy	1297:6	decorator	@property
+explicit	pubchempy	1298:16	call	deprecated("Use smiles instead")
+explicit	pubchempy	1334:6	decorator	@property
+explicit	pubchempy	1373:6	decorator	@property
+explicit	pubchempy	1394:21	call	float(sval)
+explicit	pubchempy	1404:27	call	_parse_prop( {"label": "Weight", "name": "MonoIsotopic"},...
+explicit	pubchempy	1407:21	call	float(sval)
+explicit	pubchempy	1431:6	decorator	@property
+explicit	pubchempy	1441:6	decorator	@property
+explicit	pubchempy	1460:6	decorator	@property
+explicit	pubchempy	1480:27	call	_parse_prop({"implementation": "E_SCREEN"}, self.record["...
+explicit	pubchempy	1505:22	call	int(self.fingerprint[8:], 16)
+explicit	pubchempy	1507:6	decorator	@property
+explicit	pubchempy	1529:6	decorator	@property
+explicit	pubchempy	1579:6	decorator	@property
+explicit	pubchempy	1585:6	decorator	@property
+explicit	pubchempy	1613:31	call	_parse_prop({"label": "Conformer", "name": "RMSD"}, coord...
+explicit	pubchempy	1624:27	call	_parse_prop( {"label": "Count", "name": "Effective Rotor"...
+explicit	pubchempy	1628:6	decorator	@property
+explicit	pubchempy	1654:6	decorator	@property
+explicit	pubchempy	1660:6	decorator	@property
+explicit	pubchempy	1666:6	decorator	@property
+explicit	pubchempy	1670:31	call	_parse_prop( {"label": "Feature", "name": "Self Overlap"}...
+explicit	pubchempy	1674:6	decorator	@property
+explicit	pubchempy	1678:31	call	_parse_prop({"label": "Fingerprint", "name": "Shape"}, co...
+explicit	pubchempy	1687:61	call	props[0]["value"].keys()
+explicit	pubchempy	1729:6	decorator	@classmethod
+explicit	pubchempy	1741:28	call	json.loads(response)
+explicit	pubchempy	1742:19	call	cls(record)
+explicit	pubchempy	1781:53	call	Substance.__dict__.items()
+explicit	pubchempy	1784:27	call	getattr(self, p)
+explicit	pubchempy	1801:38	call	self.to_dict(properties)
+explicit	pubchempy	1824:6	decorator	@property
+explicit	pubchempy	1843:37	call	Compound.from_cid(cid)
+explicit	pubchempy	1872:27	call	get_json(self.sid, "sid", "substance", "aids")
+explicit	pubchempy	1910:6	decorator	@classmethod
+explicit	pubchempy	1921:87	call	request(aid, "aid", "assay", "description", **kwargs).rea...
+explicit	pubchempy	1953:30	call	isinstance(v, property)
+explicit	pubchempy	1962:6	decorator	@property
+explicit	pubchempy	2000:6	decorator	@property
+explicit	pubchempy	2021:18	call	isinstance(compounds, Compound)
+explicit	pubchempy	2042:37	call	pd.DataFrame.from_records( [s.to_dict(properties) for s i...
+explicit	pubchempy	2043:19	call	s.to_dict(properties)
+explicit	pubchempy	2094:27	call	json.loads(e.read().decode())
+explicit	pubchempy	2111:32	call	error_map.get(code, PubChemHTTPError)
+implicit	pubchempy	362:23	op	searchtype == "xref"
+implicit	pubchempy	363:38	op	namespace == "cid"
+implicit	pubchempy	364:19	op	domain == "sources"
+implicit	pubchempy	402:43	getitem	status["Waiting"]["ListKey"]
+implicit	pubchempy	404:53	op	"ListKey" in status["Waiting"]
+implicit	pubchempy	542:73	mapping	**kwargs
+implicit	pubchempy	763:41	getitem	results["IdentifierList"]["AID"]
+implicit	pubchempy	866:29	getattr	self.aid
+implicit	pubchempy	876:38	getattr	other.charge
+implicit	pubchempy	1049:42	getitem	self.record["coords"][0]["conformers"]
+implicit	pubchempy	1049:56	getitem	self.record["coords"][0]["conformers"][0]
+implicit	pubchempy	1051:36	op	len(zs) == len(coord_ids)
+implicit	pubchempy	1083:33	getitem	self.record["coords"]
+implicit	pubchempy	1083:60	getitem	self.record["coords"][0]["conformers"][0]
+implicit	pubchempy	1098:68	getitem	json.loads(request(cid, **kwargs).read().decode())["PC_Co...
+implicit	pubchempy	1114:27	format	{self.cid if self.cid else ''}
+implicit	pubchempy	1155:38	iter	getattr(self, p)
+implicit	pubchempy	1158:22	iter	properties
+implicit	pubchempy	1195:31	getitem	self.record["id"]
+implicit	pubchempy	1237:58	getitem	results["InformationList"]["Information"][0]
+implicit	pubchempy	1249:24	getitem	results["InformationList"]
+implicit	pubchempy	1305:21	getattr	self.smiles
+implicit	pubchempy	1382:53	getattr	self.record
+implicit	pubchempy	1393:69	getattr	self.record
+implicit	pubchempy	1429:69	getattr	self.record
+implicit	pubchempy	1449:70	getattr	self.record
+implicit	pubchempy	1548:31	getitem	self.record["count"]
+implicit	pubchempy	1558:20	op	"count" in self.record
+implicit	pubchempy	1564:67	getitem	self.record["count"]
+implicit	pubchempy	1577:25	getattr	self.record
+implicit	pubchempy	1582:28	getattr	self.record
+implicit	pubchempy	1582:69	getitem	self.record["count"]
+implicit	pubchempy	1593:27	getitem	self.record["coords"]
+implicit	pubchempy	1637:66	getattr	self.record
+implicit	pubchempy	1643:71	getitem	self.record["props"]
+implicit	pubchempy	1648:27	getitem	self.record["coords"]
+implicit	pubchempy	1662:21	getattr	self.record
+implicit	pubchempy	1662:40	getitem	self.record["coords"][0]["conformers"]
+implicit	pubchempy	1741:55	getitem	json.loads(response)["PC_Substances"][0]
+implicit	pubchempy	1753:62	op	self.record == other.record
+implicit	pubchempy	1817:27	getitem	self.record["source"]
+implicit	pubchempy	1832:25	getitem	c["id"]
+implicit	pubchempy	1832:37	getitem	c["id"]["id"]["cid"]
+implicit	pubchempy	1854:23	getitem	c["id"]["type"]
+implicit	pubchempy	1955:46	iter	properties
+implicit	pubchempy	1960:45	getitem	self.record["assay"]["descr"]["aid"]
+implicit	pubchempy	1979:54	getitem	self.record["assay"]["descr"]
+implicit	pubchempy	2079:24	format	{output}
+implicit	pubchempy	2094:46	getitem	json.loads(e.read().decode())["Fault"]
+implicit	pubchempy	2096:22	op	"Message" in fault
+value	pubchempy	806:42	call	fget(self)
+value	pubchempy	816:10	decorator	@functools.wraps(func)
+value	pubchempy	823:24	call	func(*args, **kwargs)
+value	pubchempy	1099:19	call	cls(record)
+value	pubchempy	1923:19	call	cls(record)
+value	pubchempy	2112:23	call	error_class(code, msg, details)

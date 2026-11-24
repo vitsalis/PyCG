@@ -1,0 +1,91 @@
+# sites 3231: explicit 1772, implicit 1459
+# drawn 38 explicit and 32 implicit with random.Random(20261124)
+# value sites 18, of them 0 drawn; 18 added
+drawn	3	avro	34:93	call	[avro]	(pkgutil.get_data(__name__, "VERSION.txt") or b"0.0.1+unk...
+drawn	8	avro.__main__	62:10	call	[avro.__main__.print_json_pretty]	print(result)
+drawn	105	avro.__main__	173:22	getitem	[avro.__main__]	IO[AnyStr]
+drawn	115	avro.__main__	177:71	iter	[avro.__main__.iter_csv]	info
+drawn	123	avro.__main__	180:19	call	[avro.__main__.iter_csv]	dict(zip(header, values))
+drawn	179	avro.__main__	258:33	call	[avro.__main__._parse_args]	subparser_write.add_argument( "--input-type", "-f", choic...
+drawn	191	avro.__main__	275:27	getattr	[avro.__main__.main]	args.schema
+drawn	221	avro.codecs	176:34	call	[avro.codecs.NullCodec.decompress]	readers_decoder.skip_long()
+drawn	263	avro.codecs	261:41	call	[avro.codecs.BZip2Codec.decompress]	avro.io.BinaryDecoder(io.BytesIO(uncompressed))
+drawn	366	avro.compatibility	185:28	op	[avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility]	reader.type in PRIMITIVE_TYPES
+drawn	380	avro.compatibility	197:66	getattr	[avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility]	writer.values
+drawn	472	avro.compatibility	303:41	call	[avro.compatibility.ReaderWriterCompatibilityChecker.check_reader_writer_record_fields]	incompatible( SchemaIncompatibilityType.reader_field_miss...
+drawn	493	avro.compatibility	341:30	call	[avro.compatibility.check_fixed_size]	incompatible( SchemaIncompatibilityType.fixed_size_mismat...
+drawn	569	avro.datafile	144:22	call	[avro.datafile._DataFileMetadata.codec]	self.del_meta(CODEC_KEY)
+drawn	612	avro.datafile	233:31	call	[avro.datafile.DataFileWriter._write_block]	self._write_header()
+drawn	671	avro.datafile	341:27	getitem	[avro.datafile]	IO[bytes]
+drawn	721	avro.datafile	408:24	getattr	[avro.datafile.DataFileReader.__next__]	avro.errors
+drawn	773	avro.io	109:28	getitem	[avro.io]	Union[None, bool, str, int, float]
+drawn	897	avro.io	381:62	call	[avro.io.BinaryDecoder.read_date_from_int]	datetime.timedelta(days_since_epoch)
+drawn	1022	avro.io	740:46	call	[avro.io._collection_limits]	avro.errors.AvroWarning(f"Ignoring negative {MAX_COLLECTI...
+drawn	1092	avro.io	868:24	getattr	[avro.io.DatumReader.read_data]	avro.errors
+drawn	1201	avro.io	948:44	getattr	[avro.io.DatumReader.skip_data]	avro.schema
+drawn	1218	avro.io	960:47	getattr	[avro.io]	avro.schema
+drawn	1235	avro.io	982:50	getattr	[avro.io.DatumReader.read_enum]	writers_schema.symbols
+drawn	1247	avro.io	995:24	getattr	[avro.io.DatumReader.read_enum]	avro.errors
+drawn	1262	avro.io	1049:64	format	[avro.io.DatumReader._ensure_collection_available]	{MAX_COLLECTION_ITEMS_ENV}
+drawn	1286	avro.io	1090:6	decorator	[avro.io]	@staticmethod
+drawn	1312	avro.io	1125:45	iter	[avro.io.DatumReader.skip_array]	_collection_limits()
+drawn	1386	avro.io	1228:78	getattr	[avro.io]	avro.schema
+drawn	1463	avro.io	1312:58	getattr	[avro.io.DatumReader._read_default_value]	field_schema.schemas
+drawn	1501	avro.io	1355:24	getattr	[avro.io.DatumWriter.write_data]	avro.errors
+drawn	1596	avro.io	1418:36	call	[avro.io.DatumWriter.write_data]	isinstance(datum, decimal.Decimal)
+drawn	1641	avro.io	1458:33	call	[avro.io.DatumWriter.write_enum]	encoder.write_int(index_of_datum)
+drawn	1647	avro.io	1477:25	iter	[avro.io.DatumWriter.write_array]	datum
+drawn	1695	avro.ipc	47:49	call	[avro.ipc]	avro.io.DatumWriter(HANDSHAKE_RESPONSE_SCHEMA)
+drawn	1740	avro.ipc	156:51	call	[avro.ipc.BaseRequestor.write_call_request]	self.local_protocol.messages.get(message_name)
+drawn	1810	avro.ipc	248:33	getattr	[avro.ipc.Responder.__init__]	self.local_protocol
+drawn	1814	avro.ipc	250:55	getattr	[avro.ipc.Responder.__init__]	self.local_protocol
+drawn	1837	avro.ipc	300:61	call	[avro.ipc.Responder.respond]	self.local_protocol.messages.get(remote_message_name)
+drawn	2019	avro.name	173:75	format	[avro.name.Names.add_name]	{space_attr}
+drawn	2062	avro.protocol	108:36	call	[avro.protocol.Protocol.__init__]	str(self)
+drawn	2076	avro.protocol	123:32	getitem	[avro.protocol]	Optional[Sequence[avro.schema.NamedSchema]]
+drawn	2107	avro.protocol	144:74	iter	[avro.protocol.Protocol.to_json]	self.messages.items()
+drawn	2158	avro.protocol	226:51	call	[avro.protocol.Message.__eq__]	getattr(self, prop)
+drawn	2195	avro.protocol	252:30	call	[avro.protocol.make_avpr_object]	json_data.get("namespace")
+drawn	2204	avro.protocol	267:33	getitem	[avro.protocol]	Sequence[str]
+drawn	2246	avro.schema	171:36	getitem	[avro.schema]	MutableMapping[str, object]
+drawn	2266	avro.schema	207:38	call	[avro.schema.EqualByJsonMixin.__eq__]	str(that)
+drawn	2289	avro.schema	251:26	call	[avro.schema.Schema.__init__]	isinstance(type_, str)
+drawn	2292	avro.schema	253:18	op	[avro.schema.Schema.__init__]	type_ not in avro.constants.VALID_TYPES
+drawn	2351	avro.schema	380:6	decorator	[avro.schema]	@property
+drawn	2379	avro.schema	430:24	getattr	[avro.schema.Field.__init__]	avro.errors
+drawn	2458	avro.schema	598:22	call	[avro.schema.FixedSchema.__init__]	self.set_prop("size", size)
+drawn	2517	avro.schema	709:111	format	[avro.schema.EnumSchema.__init__]	{symbols}
+drawn	2577	avro.schema	811:24	getattr	[avro.schema.ArraySchema.to_canonical_json]	self.canonical_properties
+drawn	2586	avro.schema	832:49	call	[avro.schema.MapSchema.__init__]	make_avsc_object(values, names, validate_names=self.valid...
+drawn	2599	avro.schema	856:34	call	[avro.schema.MapSchema.to_json]	self.props.copy()
+drawn	2660	avro.schema	956:42	call	[avro.schema.ErrorUnionSchema.to_json]	schema.to_json(names)
+drawn	2708	avro.schema	1036:6	decorator	[avro.schema]	@property
+drawn	2792	avro.schema	1232:40	call	[avro.schema.make_logical_schema]	logical_types.get((logical_type, type_), None)
+drawn	2813	avro.schema	1249:45	getattr	[avro.schema]	avro.name
+drawn	2906	avro.tether.tether_task	44:23	call	[avro.tether.tether_task]	hf.read()
+drawn	2921	avro.tether.tether_task	59:23	call	[avro.tether.tether_task]	hf.read()
+drawn	2948	avro.tether.tether_task	196:30	getattr	[avro.tether.tether_task.TetherTask.__init__]	avro.schema
+drawn	2984	avro.tether.tether_task	306:6	decorator	[avro.tether.tether_task]	@property
+drawn	3021	avro.tether.tether_task	439:22	call	[avro.tether.tether_task.TetherTask.close]	self.log.info("TetherTask.close: closing")
+drawn	3041	avro.tether.tether_task_runner	70:35	call	[avro.tether.tether_task_runner.TaskRunnerResponder.invoke]	self.log.error("Exception occurred while processing the p...
+drawn	3052	avro.tether.tether_task_runner	77:34	call	[avro.tether.tether_task_runner.TaskRunnerResponder.invoke]	self.runner.close()
+drawn	3120	avro.tether.util	27:15	call	[avro.tether.util.find_port]	s.bind(("127.0.0.1", 0))
+drawn	3164	avro.tool	88:33	call	[avro.tool.run_server]	GenericResponder(proto, msg, datum)
+value	12	avro.__main__	71:15	call	[avro.__main__.print_csv]	_write_row(row[key] for key in sorted(row))
+value	47	avro.__main__	112:22	call	[avro.__main__.print_avro]	fs(cast(Mapping[str, object], r))
+value	56	avro.__main__	117:23	call	[avro.__main__.print_avro]	_write_row(sorted(record))
+value	58	avro.__main__	118:16	call	[avro.__main__.print_avro]	printer(record)
+value	114	avro.__main__	177:58	call	[avro.__main__.iter_csv]	getattr(i, "decode", lambda: i)()
+value	149	avro.__main__	197:39	call	[avro.__main__.write]	iter_records(file_, schema)
+value	776	avro.io	127:46	call	[avro.io.validate]	ValidationNode(expected_schema, datum, getattr(expected_s...
+value	781	avro.io	134:36	call	[avro.io.validate]	ValidationNode(validated_schema, current_node.datum, curr...
+value	793	avro.io	148:68	call	[avro.io._iterate_node]	_ITERATORS.get(node.schema.type, _default_iterator)(node)
+value	794	avro.io	149:29	call	[avro.io._iterate_node]	ValidationNode(*item)
+value	797	avro.io	168:27	call	[avro.io._record_iterator]	ValidationNode(field.type, datum.get(field.name), field.n...
+value	804	avro.io	174:27	call	[avro.io._array_iterator]	ValidationNode(schema.items, item, name)
+value	809	avro.io	181:27	call	[avro.io._map_iterator]	ValidationNode(child_schema, child_datum, child_name)
+value	2443	avro.schema	552:33	call	[avro.schema.PrimitiveSchema.validate]	validator(datum)
+value	2780	avro.schema	1193:22	call	[avro.schema.UUIDSchema.validate]	uuid.UUID(datum)
+value	2793	avro.schema	1234:31	call	[avro.schema.make_logical_schema]	schema_type(other_props)
+value	2914	avro.tether.tether_task	54:18	call	[avro.tether.tether_task]	_ttype(*taskschema.symbols)
+value	3112	avro.tether.tether_task_runner	229:19	call	[avro.tether.tether_task_runner]	taskcls()

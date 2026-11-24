@@ -1,0 +1,1532 @@
+# Call-site ledger of nodeenv at cb7fc97ebff9792d1fa603fe66baa6fcd5912659.
+# Hand-written from the source; judgements in nodeenv.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md. nodeenv
+# 1.12.0 supports CPython 3.10 and later (setup.py python_requires, no
+# upper bound) on Linux, macOS and Windows (its CI) and on Cygwin, MSYS2,
+# Solaris/illumos and FreeBSD (README.rst, CHANGES): both sides of every
+# is_WIN and is_CYGWIN test run (J4).
+# Values used below (nodeenv.md, "Values"):
+#   logger: the logging.Logger "nodeenv" of create_logger (line 424), level
+#     INFO, with one StreamHandler on sys.stderr. create_logger replaces
+#     logging.StreamHandler.emit with its local emit (line 407), so every
+#     info, warning, error and critical call of the package has emit as a
+#     callee (callback of logging); so has a debug call, since a client
+#     can lower the level through logging's documented configuration (J1;
+#     ruling of the lead, 2026-11-24).
+#   urlopen: nodeenv.urlopen returns what urllib.request.urlopen returns:
+#     an http.client.HTTPResponse, or a urllib.response.addinfourl for a
+#     file:// mirror (documented) and for ftp (J3).
+#   args: the argparse.Namespace of parse_args (make_parser's options).
+#   join and abspath: os.path.join and os.path.abspath (lines 44-45).
+
+== nodeenv
+
+[nodeenv]
+48:25 call  platform.system()
+    -> platform.system
+49:28 call  platform.system()
+    -> platform.system
+49:41 call  platform.system().startswith(('CYGWIN', 'MSYS'))
+    -> <builtin>.str.startswith
+92:6 decorator  @classmethod
+    -> <builtin>.classmethod
+138:6 decorator  @classmethod
+    -> <builtin>.classmethod
+149:23 call  dict( (attr, val) for attr, val in vars(Config).items() i...
+    -> <builtin>.dict
+150:38 call  vars(Config)
+    -> <builtin>.vars
+150:52 call  vars(Config).items()
+    -> types.MappingProxyType.items
+151:27 call  attr.startswith('_')
+    -> <builtin>.str.startswith
+198:31 call  re.compile(r'^v?\d+\.\d+\.\d+(\+\S*)?$')
+    -> re.compile
+200:28 call  re.compile( r'^(?P<op>\^|~|>=|<=|>|<|=)?\s*' r'v?(?P<majo...
+    -> re.compile
+424:23 call  create_logger()
+    -> nodeenv.create_logger
+896:2 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+1398:36 call  frozenset(( 'activate', 'activate.fish', 'activate.bat', ...
+    -> <builtin>.frozenset
+2403:9 call  main()
+    -> nodeenv.main
+    note: the if __name__ == '__main__' block is code of the module
+
+[nodeenv.Config._load]
+99:35 call  reversed(configfiles)
+    -> <builtin>.reversed
+100:44 call  os.path.expanduser(configfile)
+    -> os.path.expanduser
+101:34 call  os.path.exists(configfile)
+    -> os.path.exists
+104:36 call  ConfigParser()
+    -> configparser.ConfigParser
+105:26 call  ini_file.read(configfile)
+    -> configparser.ConfigParser.read
+107:40 call  ini_file.has_section(section)
+    -> configparser.ConfigParser.has_section
+110:34 call  vars(cls)
+    -> <builtin>.vars
+110:45 call  vars(cls).items()
+    -> types.MappingProxyType.items
+111:35 call  attr.startswith('_')
+    -> <builtin>.str.startswith
+112:39 call  ini_file.has_option(section, attr)
+    -> configparser.ConfigParser.has_option
+115:30 call  isinstance(val, bool)
+    -> <builtin>.isinstance
+116:46 call  ini_file.getboolean(section, attr)
+    -> configparser.ConfigParser.getboolean
+119:43 call  ini_file.get(section, attr)
+    -> configparser.ConfigParser.get
+122:43 call  ini_file.get(section, attr, raw=True)
+    -> configparser.ConfigParser.get
+126:27 call  len(val)
+    -> <builtin>.len
+130:26 call  print('CONFIG {0}: {1} = {2}'.format( os.path.basename(co...
+    -> <builtin>.print
+130:57 call  'CONFIG {0}: {1} = {2}'.format( os.path.basename(configfi...
+    -> <builtin>.str.format
+131:41 call  os.path.basename(configfile)
+    -> os.path.basename
+132:24 call  setattr(cls, attr, val)
+    -> <builtin>.setattr
+134:26 call  os.path.exists(".node-version")
+    -> os.path.exists
+135:22 call  open(".node-version", "r")
+    -> <builtin>.open
+136:24 call  setattr(cls, "node", v_file.readline().strip().lstrip("v"))
+    -> <builtin>.setattr
+136:53 call  v_file.readline()
+    -> io.TextIOWrapper.readline
+136:61 call  v_file.readline().strip()
+    -> <builtin>.str.strip
+136:70 call  v_file.readline().strip().lstrip("v")
+    -> <builtin>.str.lstrip
+
+[nodeenv.Config._dump]
+143:14 call  print(" [nodeenv]")
+    -> <builtin>.print
+144:14 call  print(" " + "\n ".join( "%s = %s" % (k, v) for k, v in so...
+    -> <builtin>.print
+144:37 call  "\n ".join( "%s = %s" % (k, v) for k, v in sorted(vars(cl...
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+145:50 call  sorted(vars(cls).items())
+    -> <builtin>.sorted
+145:55 call  vars(cls)
+    -> <builtin>.vars
+145:66 call  vars(cls).items()
+    -> types.MappingProxyType.items
+146:32 call  k.startswith('_')
+    -> <builtin>.str.startswith
+
+[nodeenv.clear_output]
+159:22 call  out.decode('utf-8')
+    -> <builtin>.bytes.decode
+    note: out is the bytes output of a subprocess.Popen without text mode (lines 365, 387); clear_output is documented for it and decodes it
+159:39 call  out.decode('utf-8').replace('\n', '')
+    -> <builtin>.str.replace
+
+[nodeenv.remove_env_bin_from_path]
+166:35 call  os.path.realpath(env_bin_dir)
+    -> os.path.realpath
+167:20 call  ':'.join( p for p in env.split(':') if os.path.realpath(p...
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+168:29 call  env.split(':')
+    -> <builtin>.str.split
+    note: env is the PATH string (os.environ['PATH'], line 176)
+168:54 call  os.path.realpath(p)
+    -> os.path.realpath
+
+[nodeenv.find_system_node]
+178:44 call  remove_env_bin_from_path(path_var, env_bin_dir)
+    -> nodeenv.remove_env_bin_from_path
+180:29 call  shutil.which(candidate, path=path_var)
+    -> shutil.which
+
+[nodeenv.parse_version]
+190:28 call  version_str.replace('v', '')
+    -> <builtin>.str.replace
+190:43 call  version_str.replace('v', '').split('.')
+    -> <builtin>.str.split
+193:11 call  len(v)
+    -> <builtin>.len
+194:24 call  re.split('[+-]', v[2])
+    -> re.split
+195:17 call  tuple(map(int, v))
+    -> <builtin>.tuple
+195:21 call  map(int, v)
+    -> <builtin>.map
+    note: map calls the builtin int, a library call back of a builtin: no edge
+
+[nodeenv._pad_version]
+220:18 call  tuple(version)
+    -> <builtin>.tuple
+221:35 call  len(parts)
+    -> <builtin>.len
+
+[nodeenv._is_exact_version]
+228:35 call  _EXACT_VERSION_RE.match(version_str)
+    -> re.Pattern.match
+
+[nodeenv._comparator_constraints]
+245:21 call  match.group('op')
+    -> re.Match.group
+247:20 call  match.group('major')
+    -> re.Match.group
+247:42 call  match.group('minor')
+    -> re.Match.group
+247:64 call  match.group('patch')
+    -> re.Match.group
+249:20 call  _is_wildcard(major)
+    -> nodeenv._is_wildcard
+252:16 call  int(major)
+    -> <builtin>.int
+253:33 call  _is_wildcard(minor)
+    -> nodeenv._is_wildcard
+254:47 call  _is_wildcard(patch)
+    -> nodeenv._is_wildcard
+255:16 call  int(minor)
+    -> <builtin>.int
+256:16 call  int(patch)
+    -> <builtin>.int
+
+[nodeenv._parse_comparator]
+304:33 call  _COMPARATOR_RE.match(token)
+    -> re.Pattern.match
+307:35 call  _comparator_constraints(match)
+    -> nodeenv._comparator_constraints
+
+[nodeenv.parse_node_range]
+321:34 call  spec.split('||')
+    -> <builtin>.str.split
+322:35 call  alternative.split()
+    -> <builtin>.str.split
+328:19 call  len(tokens)
+    -> <builtin>.len
+331:34 call  _parse_comparator('>=' + tokens[0])
+    -> nodeenv._parse_comparator
+332:34 call  _parse_comparator('<=' + tokens[2])
+    -> nodeenv._parse_comparator
+335:40 call  _parse_comparator(token)
+    -> nodeenv._parse_comparator
+341:31 call  constraints.extend(group)
+    -> <builtin>.list.extend
+342:22 call  ranges.append(constraints)
+    -> <builtin>.list.append
+
+[nodeenv.match_node_range]
+351:27 call  _pad_version(version)
+    -> nodeenv._pad_version
+352:15 call  any( all(_OPERATORS[op](version, other) for op, other in ...
+    -> <builtin>.any
+353:12 call  all(_OPERATORS[op](version, other) for op, other in const...
+    -> <builtin>.all
+353:27 call  _OPERATORS[op](version, other)
+    -> operator.ge
+    -> operator.gt
+    -> operator.le
+    -> operator.lt
+    note: _OPERATORS (line 207) maps an operator string of a parsed range to a function of operator; parse_node_range only makes the operators >=, >, <= and < (_comparator_constraints, lines 238-297), so operator.eq is no callee (J7)
+
+[nodeenv.node_version_from_args]
+363:36 call  find_system_node()
+    -> nodeenv.find_system_node
+364:36 call  subprocess.Popen( [node_bin, "--version"], stdout=subproc...
+    -> subprocess.Popen
+365:73 call  subprocess.Popen( [node_bin, "--version"], stdout=subproc...
+    -> subprocess.Popen.communicate
+366:29 call  parse_version(clear_output(out))
+    -> nodeenv.parse_version
+366:42 call  clear_output(out)
+    -> nodeenv.clear_output
+368:25 call  parse_version(args.node)
+    -> nodeenv.parse_version
+
+[nodeenv.get_installed_node_version]
+375:19 call  join(env_dir, 'Scripts' if is_WIN else 'bin')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+376:20 call  join(bin_dir, 'node.exe' if is_WIN else 'node')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+377:26 call  os.path.exists(node_bin)
+    -> os.path.exists
+380:14 call  open(node_bin, 'rb')
+    -> <builtin>.open
+382:18 call  f.read(2)
+    -> io.BufferedReader.read
+386:34 call  subprocess.Popen( [node_bin, "--version"], stdout=subproc...
+    -> subprocess.Popen
+387:73 call  subprocess.Popen( [node_bin, "--version"], stdout=subproc...
+    -> subprocess.Popen.communicate
+388:29 call  parse_version(clear_output(out))
+    -> nodeenv.parse_version
+388:42 call  clear_output(out)
+    -> nodeenv.clear_output
+
+[nodeenv.create_logger]
+398:30 call  logging.getLogger("nodeenv")
+    -> logging.getLogger
+399:19 call  loggr.setLevel(logging.INFO)
+    -> logging.Logger.setLevel
+410:31 call  logging.StreamHandler()
+    -> logging.StreamHandler
+411:16 call  ch.setLevel(logging.DEBUG)
+    -> logging.StreamHandler.setLevel
+414:34 call  logging.Formatter(fmt="%(message)s")
+    -> logging.Formatter
+417:20 call  ch.setFormatter(formatter)
+    -> logging.StreamHandler.setFormatter
+420:21 call  loggr.addHandler(ch)
+    -> logging.Logger.addHandler
+
+[nodeenv.create_logger.emit]
+403:26 call  self.format(record)
+    -> logging.StreamHandler.format
+    note: self is a logging.StreamHandler whose emit is this function (line 407): the package's handler ch (line 410), or logging's lastResort, a _StderrHandler that inherits format, flush and emit from StreamHandler; a client's handler is opaque (J2)
+404:29 call  getattr(record, "continued", False)
+    -> <builtin>.getattr
+405:26 call  self.stream.write(fs % msg)
+    -> io.TextIOWrapper.write
+    note: the stream of ch is sys.stderr at import, and lastResort's stream is sys.stderr: a text stream (J2)
+406:19 call  self.flush()
+    -> logging.StreamHandler.flush
+
+[nodeenv.PrintCompletionAction.__call__]
+442:25 call  parser.error('shtab is not installed, run: ' 'pip install...
+    -> argparse.ArgumentParser.error
+    note: argparse passes the parser that holds the action: the argparse.ArgumentParser of make_parser (argparse documents parser as the ArgumentParser object)
+444:63 call  hasattr(shtab, 'cmd')
+    -> <builtin>.hasattr
+445:25 call  parser.error('the installed shtab cannot complete %s, run...
+    -> argparse.ArgumentParser.error
+458:44 call  shtab.cmd(node_versions)
+    -> shtab.cmd
+460:44 call  shtab.cmd('echo latest')
+    -> shtab.cmd
+464:14 call  print(shtab.complete(parser, values))
+    -> <builtin>.print
+464:29 call  shtab.complete(parser, values)
+    -> shtab.complete
+    note: the function complete of the module shtab; the package assigns complete only on argparse actions (lines 454-460)
+465:20 call  parser.exit()
+    -> argparse.ArgumentParser.exit
+
+[nodeenv.make_parser]
+472:37 call  argparse.ArgumentParser( usage="%(prog)s [OPTIONS] DEST_D...
+    -> argparse.ArgumentParser
+475:24 call  parser.add_argument( '--version', action='version', versi...
+    -> argparse.ArgumentParser.add_argument
+478:24 call  parser.add_argument( '--print-completion', action=PrintCo...
+    -> argparse.ArgumentParser.add_argument
+484:24 call  parser.add_argument( '-n', '--node', dest='node', metavar...
+    -> argparse.ArgumentParser.add_argument
+496:24 call  parser.add_argument( '--prefer-system', dest='prefer_syst...
+    -> argparse.ArgumentParser.add_argument
+502:24 call  parser.add_argument( '--mirror', action="store", dest='mi...
+    -> argparse.ArgumentParser.add_argument
+508:28 call  parser.add_argument( '-j', '--jobs', dest='jobs', default...
+    -> argparse.ArgumentParser.add_argument
+513:28 call  parser.add_argument( '--load-average', dest='load_average...
+    -> argparse.ArgumentParser.add_argument
+518:28 call  parser.add_argument( '--without-ssl', dest='without_ssl',...
+    -> argparse.ArgumentParser.add_argument
+523:28 call  parser.add_argument( '--debug', dest='debug', action='sto...
+    -> argparse.ArgumentParser.add_argument
+528:28 call  parser.add_argument( '--profile', dest='profile', action=...
+    -> argparse.ArgumentParser.add_argument
+533:28 call  parser.add_argument( '--make', '-m', dest='make_path', me...
+    -> argparse.ArgumentParser.add_argument
+539:28 call  parser.add_argument( '--source', dest='prebuilt', action=...
+    -> argparse.ArgumentParser.add_argument
+544:24 call  parser.add_argument( '-v', '--verbose', action='store_tru...
+    -> argparse.ArgumentParser.add_argument
+549:24 call  parser.add_argument( '-q', '--quiet', action='store_true'...
+    -> argparse.ArgumentParser.add_argument
+554:24 call  parser.add_argument( '-C', '--config-file', dest='config_...
+    -> argparse.ArgumentParser.add_argument
+559:24 call  parser.add_argument( '-r', '--requirements', dest='requir...
+    -> argparse.ArgumentParser.add_argument
+565:24 call  parser.add_argument( '--local-requirements', dest='local_...
+    -> argparse.ArgumentParser.add_argument
+573:24 call  parser.add_argument( '--prompt', dest='prompt', help='Pro...
+    -> argparse.ArgumentParser.add_argument
+577:24 call  parser.add_argument( '-l', '--list', dest='list', action=...
+    -> argparse.ArgumentParser.add_argument
+582:24 call  parser.add_argument( '--update', dest='update', action='s...
+    -> argparse.ArgumentParser.add_argument
+587:24 call  parser.add_argument( '--with-npm', dest='with_npm', actio...
+    -> argparse.ArgumentParser.add_argument
+594:24 call  parser.add_argument( '--npm', dest='npm', metavar='NPM_VE...
+    -> argparse.ArgumentParser.add_argument
+602:24 call  parser.add_argument( '--no-npm-clean', dest='no_npm_clean...
+    -> argparse.ArgumentParser.add_argument
+607:24 call  parser.add_argument( '--isolate-npm', dest='isolate_npm',...
+    -> argparse.ArgumentParser.add_argument
+613:24 call  parser.add_argument( '--python-virtualenv', '-p', dest='p...
+    -> argparse.ArgumentParser.add_argument
+619:24 call  parser.add_argument( '--clean-src', '-c', dest='clean_src...
+    -> argparse.ArgumentParser.add_argument
+624:24 call  parser.add_argument( '--no-clean-src', dest='clean_src', ...
+    -> argparse.ArgumentParser.add_argument
+629:24 call  parser.add_argument( '--parallel-extract', dest='parallel...
+    -> argparse.ArgumentParser.add_argument
+635:24 call  parser.add_argument( '--no-parallel-extract', dest='paral...
+    -> argparse.ArgumentParser.add_argument
+640:24 call  parser.add_argument( '--force', dest='force', action='sto...
+    -> argparse.ArgumentParser.add_argument
+645:24 call  parser.add_argument( '--prebuilt', dest='prebuilt', actio...
+    -> argparse.ArgumentParser.add_argument
+650:24 call  parser.add_argument( '--ignore_ssl_certs', dest='ignore_s...
+    -> argparse.ArgumentParser.add_argument
+655:24 call  parser.add_argument( '--with-certifi', dest='with_certifi...
+    -> argparse.ArgumentParser.add_argument
+661:24 call  parser.add_argument( metavar='DEST_DIR', dest='env_dir', ...
+    -> argparse.ArgumentParser.add_argument
+
+[nodeenv.parse_args]
+674:25 call  make_parser()
+    -> nodeenv.make_parser
+675:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    -> nodeenv.PrintCompletionAction.__call__
+    reject nodeenv.parse_args: parser is the argparse.ArgumentParser of make_parser
+    note: with --print-completion, parse_args calls the PrintCompletionAction that make_parser registers (line 478) back
+683:30 call  os.path.exists(args.config_file)
+    -> os.path.exists
+684:25 call  parser.error("Config file '{0}' doesn't exist!".format( a...
+    -> argparse.ArgumentParser.error
+684:67 call  "Config file '{0}' doesn't exist!".format( args.config_file)
+    -> <builtin>.str.format
+693:25 call  parser.error('You must provide a DEST_DIR or ' 'use curre...
+    -> argparse.ArgumentParser.error
+
+[nodeenv.mkdir]
+703:26 call  os.path.exists(path)
+    -> os.path.exists
+704:21 call  logger.debug(' * Creating: %s ... ', path, extra=dict(con...
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+704:62 call  dict(continued=True)
+    -> <builtin>.dict
+705:20 call  os.makedirs(path)
+    -> os.makedirs
+706:21 call  logger.debug('done.')
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+708:21 call  logger.debug(' * Directory %s already exists', path)
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+
+[nodeenv.make_executable]
+714:13 call  os.chmod(filename, mode_0755)
+    -> os.chmod
+
+[nodeenv.writefile]
+725:22 call  isinstance(content, bytes)
+    -> <builtin>.isinstance
+726:24 call  bytes(content, 'utf-8')
+    -> <builtin>.bytes
+727:26 call  os.path.exists(dest)
+    -> os.path.exists
+728:21 call  logger.debug(' * Writing %s ... ', dest, extra=dict(conti...
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+728:60 call  dict(continued=True)
+    -> <builtin>.dict
+729:18 call  open(dest, 'wb')
+    -> <builtin>.open
+730:20 call  f.write(content)
+    -> io.BufferedWriter.write
+731:24 call  make_executable(dest)
+    -> nodeenv.make_executable
+732:21 call  logger.debug('done.')
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+735:18 call  open(dest, 'rb')
+    -> <builtin>.open
+736:23 call  f.read()
+    -> io.BufferedReader.read
+738:25 call  logger.debug(' * Content %s already in place', dest)
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+742:24 call  logger.info(' * File %s exists with different content; ' ...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+747:24 call  logger.info(' * Appending data to %s', dest)
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+753:48 call  c.partition(PS1_SIGNATURE)
+    -> <builtin>.bytes.partition
+757:42 call  head.endswith(b'\n')
+    -> <builtin>.bytes.endswith
+759:50 call  content.endswith(b'\n')
+    -> <builtin>.bytes.endswith
+761:22 call  open(dest, 'wb')
+    -> <builtin>.open
+762:24 call  f.write(head + content + signature + rest)
+    -> io.BufferedWriter.write
+765:20 call  logger.info(' * Overwriting %s with new content', dest)
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+766:18 call  open(dest, 'wb')
+    -> <builtin>.open
+767:20 call  f.write(content)
+    -> io.BufferedWriter.write
+
+[nodeenv.callit]
+779:15 call  len(part)
+    -> <builtin>.len
+782:41 call  part.replace('"', '\\"')
+    -> <builtin>.str.replace
+783:25 call  cmd_parts.append(part)
+    -> <builtin>.list.append
+784:24 call  ' '.join(cmd_parts)
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+785:17 call  logger.debug(" ** Running command %s" % cmd_desc)
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+788:23 call  ' '.join(cmd)
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+795:30 call  os.environ.copy()
+    -> os._Environ.copy
+797:23 call  env.update(extra_env)
+    -> <builtin>.dict.update
+    note: env is the dict of os.environ.copy() (line 795)
+803:32 call  subprocess.Popen( cmd, stderr=subprocess.STDOUT, stdin=No...
+    -> subprocess.Popen
+807:25 call  sys.exc_info()
+    -> sys.exc_info
+808:21 call  logger.error("Error %s while executing command %s" % (e, ...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+813:31 call  stdout.readline()
+    -> io.BufferedReader.readline
+    note: proc.stdout of a Popen with stdout=PIPE and neither text mode nor bufsize is an io.BufferedReader
+818:35 call  line.decode('mbcs')
+    -> <builtin>.bytes.decode
+818:50 call  line.decode('mbcs').rstrip()
+    -> <builtin>.str.rstrip
+820:35 call  line.decode('utf8')
+    -> <builtin>.bytes.decode
+820:50 call  line.decode('utf8').rstrip()
+    -> <builtin>.str.rstrip
+822:31 call  line.decode('cp866')
+    -> <builtin>.bytes.decode
+822:47 call  line.decode('cp866').rstrip()
+    -> <builtin>.str.rstrip
+823:26 call  all_output.append(line)
+    -> <builtin>.list.append
+825:24 call  logger.info(line)
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+826:14 call  proc.wait()
+    -> subprocess.Popen.wait
+832:32 call  logger.critical(s)
+    -> logging.Logger.critical
+    -> nodeenv.create_logger.emit
+833:22 call  OSError("Command %s failed with error code %s" % (cmd_des...
+    -> <builtin>.OSError
+
+[nodeenv.get_root_url]
+840:21 call  parse_version(version_str)
+    -> nodeenv.parse_version
+
+[nodeenv.is_x86_64_musl]
+848:45 call  sysconfig.get_config_var('HOST_GNU_TYPE')
+    -> sysconfig.get_config_var
+849:37 call  host_gnu_type.startswith('x86_64-')
+    -> <builtin>.str.startswith
+850:39 call  host_gnu_type.endswith('-linux-musl')
+    -> <builtin>.str.endswith
+
+[nodeenv.is_riscv64]
+854:28 call  platform.machine()
+    -> platform.machine
+
+[nodeenv.get_node_bin_url]
+878:34 call  platform.system()
+    -> platform.system
+878:42 call  platform.system().lower()
+    -> <builtin>.str.lower
+879:41 call  platform.machine()
+    -> platform.machine
+879:49 call  platform.machine().lower()
+    -> <builtin>.str.lower
+883:24 call  is_x86_64_musl()
+    -> nodeenv.is_x86_64_musl
+888:24 call  get_root_url(version)
+    -> nodeenv.get_root_url
+
+[nodeenv.get_node_src_url]
+893:24 call  get_root_url(version)
+    -> nodeenv.get_root_url
+
+[nodeenv.tarfile_open]
+899:22 call  tarfile.open(*args, **kwargs)
+    -> tarfile.open
+903:17 call  tf.close()
+    -> tarfile.TarFile.close
+    note: tarfile.open is TarFile.open bound to TarFile: it returns a TarFile
+
+[nodeenv._download_node_file]
+911:30 call  io.BytesIO(urlopen(node_url).read())
+    -> io.BytesIO
+911:38 call  urlopen(node_url)
+    -> nodeenv.urlopen
+911:53 call  urlopen(node_url).read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)
+919:27 call  logger.warning( 'Incomplete read while reading ' 'from {}...
+    -> logging.Logger.warning
+    -> nodeenv.create_logger.emit
+921:38 call  'Incomplete read while reading ' 'from {} - {}'.format(no...
+    -> <builtin>.str.format
+925:29 call  logger.error('Error: cannot download %s: %s' % (node_url,...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+926:25 call  sys.exit(1)
+    -> sys.exit
+927:23 call  time.sleep(delay)
+    -> time.sleep
+
+[nodeenv._extract_zip]
+939:57 call  name.endswith('/')
+    -> <builtin>.str.endswith
+    note: names is the list of member names that download_node_src takes from ZipFile.namelist (lines 974, 987)
+940:15 call  set(name for name in names if name.endswith('/'))
+    -> <builtin>.set
+940:55 call  name.endswith('/')
+    -> <builtin>.str.endswith
+941:16 call  dirs.update(name.rpartition('/')[0] + '/' for name in fil...
+    -> <builtin>.set.update
+941:32 call  name.rpartition('/')
+    -> <builtin>.str.rpartition
+943:23 call  sorted(dirs)
+    -> <builtin>.sorted
+944:24 call  archive.extract(zipfile.ZipInfo(name), path)
+    -> zipfile.ZipFile.extract
+    note: archive is the zipfile.ZipFile of download_node_src (line 973), its only caller
+944:40 call  zipfile.ZipInfo(name)
+    -> zipfile.ZipInfo
+946:47 call  concurrent.futures.ThreadPoolExecutor(extract_workers)
+    -> concurrent.futures.ThreadPoolExecutor
+948:35 call  pool.submit(archive.extract, name, path)
+    -> concurrent.futures.ThreadPoolExecutor.submit
+    note: the worker threads call ZipFile.extract, library code: no package callee
+953:56 call  concurrent.futures.wait( pending, timeout=0.1, return_whe...
+    -> concurrent.futures.wait
+957:34 call  future.result()
+    -> concurrent.futures.Future.result
+960:26 call  pool.shutdown(cancel_futures=True)
+    -> concurrent.futures.ThreadPoolExecutor.shutdown
+
+[nodeenv.download_node_src]
+968:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+968:32 call  dict(continued=True)
+    -> <builtin>.dict
+969:38 call  _download_node_file(node_url)
+    -> nodeenv._download_node_file
+970:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+970:32 call  dict(continued=True)
+    -> <builtin>.dict
+973:30 call  zipfile.ZipFile(dl_contents)
+    -> zipfile.ZipFile
+974:40 call  operator.methodcaller('namelist')
+    -> operator.methodcaller
+977:27 call  tarfile_open(fileobj=dl_contents)
+    -> contextlib.contextmanager.helper
+    -> nodeenv.tarfile_open
+    note: tarfile_open is a @contextlib.contextmanager generator function: the call runs contextmanager's local helper, which calls the generator function back (J6)
+978:40 call  operator.methodcaller('getmembers')
+    -> operator.methodcaller
+979:42 call  operator.attrgetter('name')
+    -> operator.attrgetter
+982:29 call  re.escape(args.node)
+    -> re.escape
+987:34 call  members(archive)
+    -> operator.methodcaller.__call__
+    note: members is operator.methodcaller('namelist') (Windows, Cygwin; line 974) or operator.methodcaller('getmembers') (line 978); the methodcaller calls ZipFile.namelist or TarFile.getmembers, library code
+988:24 call  re.match(rexp_string, member_name(member))
+    -> re.match
+988:49 call  member_name(member)
+    -> nodeenv.download_node_src.<lambda1>
+    -> operator.attrgetter.__call__
+    note: member_name is the lambda of line 975 (Windows, Cygwin) or operator.attrgetter('name') (line 979)
+991:25 call  _extract_zip(archive, src_dir, extract_list)
+    -> nodeenv._extract_zip
+994:31 call  archive.extractall(src_dir, extract_list, filter="data")
+    -> tarfile.TarFile.extractall
+    note: only off Windows and Cygwin: archive is the TarFile that tarfile_open yields
+996:31 call  archive.extractall(src_dir, extract_list)
+    -> tarfile.TarFile.extractall
+    -> zipfile.ZipFile.extractall
+    note: the ZipFile on Windows and Cygwin with --no-parallel-extract, the TarFile elsewhere on Python 3.10 and 3.11
+
+[nodeenv.make_certifi_context]
+1009:23 call  logger.warning( 'certifi is not installed, --with-certifi...
+    -> logging.Logger.warning
+    -> nodeenv.create_logger.emit
+1014:38 call  ssl.create_default_context(cafile=certifi.where())
+    -> ssl.create_default_context
+1014:59 call  certifi.where()
+    -> certifi.where
+    note: certifi is an optional extra (setup.py extras_require), not installed in the benchmark: a missing module, named by its access path; both sides of the optional import run (J9)
+
+[nodeenv.get_proxy_settings]
+1022:74 call  os.environ.get(n)
+    -> collections.abc.Mapping.get
+
+[nodeenv._urlopen]
+1029:33 call  ssl.SSLContext(ssl.PROTOCOL_TLS)
+    -> ssl.SSLContext
+1031:31 call  urllib2.urlopen(req, context=context, timeout=download_ti...
+    -> urllib.request.urlopen
+    reject nodeenv.urlopen: urllib2 is urllib.request (line 39)
+1036:31 call  urllib2.urlopen(req, context=certifi_context, timeout=dow...
+    -> urllib.request.urlopen
+    reject nodeenv.urlopen: urllib2 is urllib.request (line 39)
+1039:27 call  urllib2.urlopen(req, timeout=download_timeout)
+    -> urllib.request.urlopen
+    reject nodeenv.urlopen: urllib2 is urllib.request (line 39)
+
+[nodeenv.split_url_auth]
+1048:21 call  urlsplit(url)
+    -> urllib.parse.urlsplit
+    -> functools._lru_cache_wrapper.__call__
+    note: urlsplit is a plain function on Python 3.10 and an lru_cache wrapper from 3.11 (J5)
+1051:37 call  unquote(parts.username)
+    -> urllib.parse.unquote
+1052:37 call  unquote(parts.password or '')
+    -> urllib.parse.unquote
+1053:28 call  base64.b64encode(credentials.encode('utf-8'))
+    -> base64.b64encode
+1053:47 call  credentials.encode('utf-8')
+    -> <builtin>.str.encode
+1053:64 call  base64.b64encode(credentials.encode('utf-8')).decode('asc...
+    -> <builtin>.bytes.decode
+1054:37 call  parts.netloc.rpartition('@')
+    -> <builtin>.str.rpartition
+1055:22 call  urlunsplit(parts._replace(netloc=netloc))
+    -> urllib.parse.urlunsplit
+1055:37 call  parts._replace(netloc=netloc)
+    -> urllib.parse.SplitResult._replace
+
+[nodeenv.urlopen]
+1061:26 call  urllib2.Request(url, None, headers)
+    -> urllib.request.Request
+1064:35 call  url.startswith(src_base_url)
+    -> <builtin>.str.startswith
+1065:36 call  req.add_unredirected_header('Authorization', src_auth)
+    -> urllib.request.Request.add_unredirected_header
+1067:24 call  _urlopen(req)
+    -> nodeenv._urlopen
+1076:21 call  logger.error('Error: cannot download %s: %s' % (url, geta...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1077:37 call  getattr(e, 'reason', e)
+    -> <builtin>.getattr
+1078:37 call  get_proxy_settings()
+    -> nodeenv.get_proxy_settings
+1080:25 call  logger.error('Error: check the proxy settings: %s' % ', '...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1081:37 call  ', '.join(proxies)
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+1082:17 call  sys.exit(1)
+    -> sys.exit
+
+[nodeenv.copytree]
+1089:27 call  os.listdir(src)
+    -> os.listdir
+1090:25 call  os.path.join(src, item)
+    note: the function join of the module os.path (the name join of line 44 is the same function)
+    -> os.path.join
+1091:25 call  os.path.join(dst, item)
+    note: the function join of the module os.path (the name join of line 44 is the same function)
+    -> os.path.join
+1092:25 call  os.path.isdir(s)
+    -> os.path.isdir
+1094:32 call  shutil.copytree(s, d, symlinks, ignore)
+    -> shutil.copytree
+    reject nodeenv.copytree: shutil.copytree is the function of shutil; ignore is the caller's (None from the package)
+1096:25 call  copytree(s, d, symlinks, ignore)
+    -> nodeenv.copytree
+1098:30 call  os.path.islink(s)
+    -> os.path.islink
+1100:38 call  os.path.islink(d)
+    -> os.path.islink
+1101:31 call  os.symlink(os.readlink(s), d)
+    -> os.symlink
+1101:43 call  os.readlink(s)
+    -> os.readlink
+1103:29 call  shutil.copy2(s, d)
+    -> shutil.copy2
+
+[nodeenv.copy_node_from_prebuilt]
+1110:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1110:32 call  dict(continued=True)
+    -> <builtin>.dict
+1112:20 call  join(env_dir, 'Scripts')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1113:14 call  mkdir(dest)
+    -> nodeenv.mkdir
+1115:20 call  join(env_dir, 'bin')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1116:14 call  mkdir(dest)
+    -> nodeenv.mkdir
+1118:18 call  writefile(join(env_dir, 'bin', 'node'), CYGWIN_NODE)
+    -> nodeenv.writefile
+    note: Cygwin and MSYS only (is_CYGWIN), supported platforms (J4)
+1118:23 call  join(env_dir, 'bin', 'node')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1122:33 call  glob.escape('node-v%s-' % node_version)
+    -> glob.escape
+1123:28 call  glob.glob(src_folder_tpl, root_dir=src_dir)
+    -> glob.glob
+1124:13 call  copytree(join(src_dir, src_folder), dest, True)
+    -> nodeenv.copytree
+1124:18 call  join(src_dir, src_folder)
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1128:28 call  join(env_dir, 'bin', filename)
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1129:30 call  os.path.exists(filename)
+    -> os.path.exists
+1130:32 call  make_executable(filename)
+    -> nodeenv.make_executable
+1132:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1132:32 call  dict(continued=True)
+    -> <builtin>.dict
+
+[nodeenv.build_node_from_src]
+1138:28 call  map( lambda x: getattr(args, x.replace('-', '_')), make_p...
+    -> <builtin>.map
+    -> nodeenv.build_node_from_src.<lambda1>
+    note: the zip of line 1144 iterates the map in this function: the map calls the lambda back
+1142:27 call  '--{0}={1}'.format(name, value)
+    -> <builtin>.str.format
+1143:15 call  len(value)
+    -> <builtin>.len
+    note: value is args.load_average or args.jobs, a str of the command line or of Config (jobs '2'); None is filtered first
+1143:46 call  '--{0}'.format(name)
+    -> <builtin>.str.format
+1144:31 call  zip(make_param_names, make_param_values)
+    -> <builtin>.zip
+1148:33 call  parse_version(args.node)
+    -> nodeenv.parse_version
+1152:36 call  shutil.which('python2')
+    -> shutil.which
+1154:26 call  OSError( 'no python2 command (required for building ' 'no...
+    -> <builtin>.OSError
+1161:25 call  logger.debug(' * Temporarily pointing python to %s', pyth...
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+1163:35 call  join(src_dir, 'tmpbin')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1164:36 call  join(node_tmpbin_dir, 'python')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1165:18 call  mkdir(node_tmpbin_dir)
+    -> nodeenv.mkdir
+1166:34 call  os.path.exists(node_tmpbin_link)
+    -> os.path.exists
+1167:23 call  callit(['ln', '-s', python2_path, node_tmpbin_link])
+    -> nodeenv.callit
+1168:41 call  '{}:{}'.format(node_tmpbin_dir, os.environ.get('PATH', ''))
+    -> <builtin>.str.format
+1169:56 call  os.environ.get('PATH', '')
+    -> collections.abc.Mapping.get
+1173:31 call  _quote(env_dir)
+    -> shlex.quote
+1176:24 call  conf_cmd.append('--without-ssl')
+    -> <builtin>.list.append
+1178:24 call  conf_cmd.append('--debug')
+    -> <builtin>.list.append
+1180:24 call  conf_cmd.append('--profile')
+    -> <builtin>.list.append
+1184:11 call  callit(conf_cmd, args.verbose, True, node_src_dir, env)
+    -> nodeenv.callit
+1185:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1185:32 call  dict(continued=True)
+    -> <builtin>.dict
+1186:11 call  callit([make_cmd] + make_opts, args.verbose, True, node_s...
+    -> nodeenv.callit
+1187:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1187:32 call  dict(continued=True)
+    -> <builtin>.dict
+1188:11 call  callit([make_cmd + ' install'], args.verbose, True, node_...
+    -> nodeenv.callit
+
+[nodeenv.build_node_from_src.<lambda1>]
+1139:26 call  getattr(args, x.replace('-', '_'))
+    -> <builtin>.getattr
+1139:42 call  x.replace('-', '_')
+    -> <builtin>.str.replace
+
+[nodeenv.install_node]
+1197:29 call  install_node_wrapped(env_dir, src_dir, args)
+    -> nodeenv.install_node_wrapped
+1200:20 call  logger.info('')
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+
+[nodeenv.report_node_download_error]
+1212:16 call  logger.info('')
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1214:21 call  logger.error('Error: cannot download %s: HTTP %s %s' % (n...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1219:25 call  logger.error('Error: there is no prebuilt node.js %s for ...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1220:55 call  platform.system()
+    -> platform.system
+1220:63 call  platform.system().lower()
+    -> <builtin>.str.lower
+1221:45 call  platform.machine()
+    -> platform.machine
+1221:53 call  platform.machine().lower()
+    -> <builtin>.str.lower
+1222:25 call  logger.error('Error: check "nodeenv --list" for the avail...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1225:25 call  logger.error('Error: there is no node.js %s source archiv...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1227:25 call  logger.error('Error: check "nodeenv --list" for the avail...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1229:13 call  sys.exit(1)
+    -> sys.exit
+
+[nodeenv.install_node_wrapped]
+1233:22 call  abspath(env_dir)
+    note: abspath is os.path.abspath, bound at module level (line 45)
+    -> os.path.abspath
+1234:24 call  join(src_dir, 'node-v%s' % args.node)
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1237:16 call  logger.info(' * Install %s node (%s) ' % (src_type, args....
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1238:27 call  dict(continued=True)
+    -> <builtin>.dict
+1241:36 call  get_node_bin_url(args.node)
+    -> nodeenv.get_node_bin_url
+1243:36 call  get_node_src_url(args.node)
+    -> nodeenv.get_node_src_url
+1248:25 call  node_urls.append(node_url.replace('arm64', 'x64'))
+    -> <builtin>.list.append
+1248:42 call  node_url.replace('arm64', 'x64')
+    -> <builtin>.str.replace
+1251:43 call  os.path.exists(node_src_dir)
+    -> os.path.exists
+1257:34 call  download_node_src(url, src_dir, args)
+    -> nodeenv.download_node_src
+1260:30 call  errors.append((url, e))
+    -> <builtin>.list.append
+1262:39 call  report_node_download_error(errors, args)
+    -> nodeenv.report_node_download_error
+1264:16 call  logger.info('.', extra=dict(continued=True))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1264:32 call  dict(continued=True)
+    -> <builtin>.dict
+1267:32 call  copy_node_from_prebuilt(env_dir, src_dir, args.node)
+    -> nodeenv.copy_node_from_prebuilt
+1269:28 call  build_node_from_src(env_dir, src_dir, node_src_dir, args)
+    -> nodeenv.build_node_from_src
+1271:16 call  logger.info(' done.')
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+
+[nodeenv.install_npm]
+1279:16 call  logger.info(' * Install npm.js (%s) ... ' % args.npm, ext...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1280:27 call  dict(continued=True)
+    -> <builtin>.dict
+1281:15 call  dict( os.environ, clean='no' if args.no_npm_clean else 'y...
+    -> <builtin>.dict
+1286:28 call  subprocess.Popen( ( 'sh', '-c', '. {0} && npm install -g ...
+    -> subprocess.Popen
+1289:53 call  '. {0} && npm install -g npm@{1}'.format( _quote(join(env...
+    -> <builtin>.str.format
+1290:23 call  _quote(join(env_dir, 'bin', 'activate'))
+    -> shlex.quote
+1290:28 call  join(env_dir, 'bin', 'activate')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1299:30 call  proc.communicate()
+    -> subprocess.Popen.communicate
+1301:20 call  logger.info(out)
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1302:16 call  logger.info('done.')
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+
+[nodeenv.install_npm_win]
+1310:16 call  logger.info(' * Install npm.js (%s) ... ' % args.npm, ext...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1311:27 call  dict(continued=True)
+    -> <builtin>.dict
+1316:26 call  json.loads(urlopen(npm_meta_url).read().decode('UTF-8'))
+    -> json.loads
+1316:34 call  urlopen(npm_meta_url)
+    -> nodeenv.urlopen
+1316:53 call  urlopen(npm_meta_url).read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)
+1316:62 call  urlopen(npm_meta_url).read().decode('UTF-8')
+    -> <builtin>.bytes.decode
+1318:30 call  io.BytesIO(urlopen(npm_url).read())
+    -> io.BytesIO
+1318:38 call  urlopen(npm_url)
+    -> nodeenv.urlopen
+1318:52 call  urlopen(npm_url).read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)
+1320:20 call  join(env_dir, 'Scripts')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1321:29 call  join(bin_path, 'node_modules', 'npm')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1323:22 call  os.path.exists(node_modules_path)
+    -> os.path.exists
+1324:22 call  shutil.rmtree(node_modules_path)
+    -> shutil.rmtree
+1326:22 call  os.path.exists(join(bin_path, 'npm.cmd'))
+    -> os.path.exists
+1326:27 call  join(bin_path, 'npm.cmd')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1327:18 call  os.remove(join(bin_path, 'npm.cmd'))
+    -> os.remove
+1327:23 call  join(bin_path, 'npm.cmd')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1329:22 call  os.path.exists(join(bin_path, 'npm-cli.js'))
+    -> os.path.exists
+1329:27 call  join(bin_path, 'npm-cli.js')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1330:18 call  os.remove(join(bin_path, 'npm-cli.js'))
+    -> os.remove
+1330:23 call  join(bin_path, 'npm-cli.js')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1332:23 call  join(src_dir, 'npm-%s' % npm_meta['version'])
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1333:22 call  tarfile_open(fileobj=npm_contents)
+    -> contextlib.contextmanager.helper
+    -> nodeenv.tarfile_open
+    note: as at 977:27 (J6)
+1335:28 call  tarf.extractall(npm_src_dir, filter="data")
+    -> tarfile.TarFile.extractall
+    note: tarf is the TarFile that tarfile_open yields
+1337:28 call  tarf.extractall(npm_src_dir)
+    -> tarfile.TarFile.extractall
+1339:19 call  join('npm-%s' % npm_meta['version'], 'package')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1340:20 call  shutil.copytree(join(src_dir, npm_ver), node_modules_path)
+    -> shutil.copytree
+    reject nodeenv.copytree: shutil.copytree is the function of shutil
+1340:25 call  join(src_dir, npm_ver)
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1341:16 call  shutil.copy(join(src_dir, npm_ver, 'bin', 'npm.cmd'), joi...
+    -> shutil.copy
+1341:21 call  join(src_dir, npm_ver, 'bin', 'npm.cmd')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1342:21 call  join(bin_path, 'npm.cmd')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1343:16 call  shutil.copy(join(src_dir, npm_ver, 'bin', 'npm-cli.js'), ...
+    -> shutil.copy
+1343:21 call  join(src_dir, npm_ver, 'bin', 'npm-cli.js')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1344:21 call  join(bin_path, 'npm-cli.js')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1347:20 call  shutil.copy(join(bin_path, 'npm-cli.js'), join(env_dir, '...
+    -> shutil.copy
+1347:25 call  join(bin_path, 'npm-cli.js')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1348:25 call  join(env_dir, 'bin', 'npm-cli.js')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1349:24 call  shutil.copytree(join(bin_path, 'node_modules'), join(env_...
+    -> shutil.copytree
+    reject nodeenv.copytree: shutil.copytree is the function of shutil
+1349:29 call  join(bin_path, 'node_modules')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1350:29 call  join(env_dir, 'bin', 'node_modules')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1351:20 call  shutil.copy(join(src_dir, npm_ver, 'bin', 'npm'), join(en...
+    -> shutil.copy
+1351:25 call  join(src_dir, npm_ver, 'bin', 'npm')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1352:25 call  join(env_dir, 'bin', 'npm')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+
+[nodeenv._read_packages]
+1361:18 call  open(filename)
+    -> <builtin>.open
+1362:28 call  packages.extend(package.strip() for package in f.readline...
+    -> <builtin>.list.extend
+1362:42 call  package.strip()
+    -> <builtin>.str.strip
+1362:71 call  f.readlines()
+    -> io.TextIOWrapper.readlines
+
+[nodeenv.install_packages]
+1370:16 call  logger.info(' * Install node.js packages ... ', extra=dic...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1371:27 call  dict(continued=True)
+    -> <builtin>.dict
+1372:25 call  join(env_dir, 'bin', 'activate')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1373:46 call  args.npm.count(".")
+    -> <builtin>.str.count
+1375:28 call  _quote(activate_path)
+    -> shlex.quote
+1378:28 call  _quote(activate_path)
+    -> shlex.quote
+1385:38 call  _read_packages(filenames)
+    -> nodeenv._read_packages
+1388:19 call  callit(cmd=[cmd % {"pack": package, "opt": opt}], show_st...
+    -> nodeenv.callit
+1391:16 call  logger.info('done.')
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+
+[nodeenv.is_python_venv_script]
+1422:26 call  os.path.exists(file_path)
+    -> os.path.exists
+1424:14 call  open(file_path, 'rb')
+    -> <builtin>.open
+1425:25 call  f.read()
+    -> io.BufferedReader.read
+1426:34 call  content.startswith(DISABLE_PROMPT[name].encode('utf-8'))
+    -> <builtin>.bytes.startswith
+1426:62 call  DISABLE_PROMPT[name].encode('utf-8')
+    -> <builtin>.str.encode
+
+[nodeenv.install_activate]
+1443:23 call  join(env_dir, 'Scripts')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1444:25 call  join(bin_dir, "node.exe")
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1445:27 call  join(bin_dir, "nodejs.exe")
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1452:23 call  join(env_dir, 'bin')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1453:25 call  join(bin_dir, "node")
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1454:27 call  join(bin_dir, "nodejs")
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1456:14 call  mkdir(bin_dir)
+    -> nodeenv.mkdir
+    note: Cygwin and MSYS only (J4)
+1463:57 call  join('lib', 'node_modules')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1464:54 call  os.path.basename(os.path.abspath(env_dir))
+    -> os.path.basename
+1464:70 call  os.path.abspath(env_dir)
+    note: the function abspath of the module os.path (the name abspath of line 45 is the same function)
+    -> os.path.abspath
+1467:37 call  find_system_node(bin_dir)
+    -> nodeenv.find_system_node
+1470:37 call  files.items()
+    -> <builtin>.dict.items
+1471:25 call  join(bin_dir, name)
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1474:38 call  is_python_venv_script(file_path, name)
+    -> nodeenv.is_python_venv_script
+1475:38 call  content.replace(VENV_BIN_PATH[name], '')
+    -> <builtin>.str.replace
+1476:34 call  NPM_ISOLATE.get(name, '')
+    -> <builtin>.dict.get
+1477:38 call  NPM_UNISOLATE.get(name, '')
+    -> <builtin>.dict.get
+1478:34 call  content.replace('__NPM_ISOLATE__', isolate)
+    -> <builtin>.str.replace
+1479:34 call  content.replace('__NPM_UNISOLATE__', unisolate)
+    -> <builtin>.str.replace
+1480:34 call  content.replace('__NODE_VIRTUAL_PROMPT__', prompt)
+    -> <builtin>.str.replace
+1481:34 call  content.replace('__NODE_VIRTUAL_ENV__', os.path.abspath(e...
+    -> <builtin>.str.replace
+1482:50 call  os.path.abspath(env_dir)
+    note: the function abspath of the module os.path (the name abspath of line 45 is the same function)
+    -> os.path.abspath
+1483:34 call  content.replace('__SHIM_NODE__', shim_node)
+    -> <builtin>.str.replace
+1484:34 call  content.replace('__BIN_NAME__', os.path.basename(bin_dir))
+    -> <builtin>.str.replace
+1484:67 call  os.path.basename(bin_dir)
+    -> os.path.basename
+1485:34 call  content.replace('__MOD_NAME__', mod_dir)
+    -> <builtin>.str.replace
+1487:36 call  callit( ['cygpath', '-w', os.path.abspath(bin_dir)], show...
+    -> nodeenv.callit
+    note: Cygwin and MSYS only (J4)
+1488:50 call  os.path.abspath(bin_dir)
+    note: the function abspath of the module os.path (the name abspath of line 45 is the same function)
+    -> os.path.abspath
+1490:38 call  content.replace('__NPM_CONFIG_PREFIX__', cyg_bin_dir[0])
+    -> <builtin>.str.replace
+1493:38 call  content.replace('__NPM_CONFIG_PREFIX__', '$NODE_VIRTUAL_E...
+    -> <builtin>.str.replace
+1496:38 call  content.replace('__NPM_CONFIG_PREFIX__', '$NODE_VIRTUAL_E...
+    -> <builtin>.str.replace
+1506:48 call  DISABLE_PROMPT.get(name, '')
+    -> <builtin>.dict.get
+1507:46 call  ENABLE_PROMPT.get(name, '')
+    -> <builtin>.dict.get
+1510:18 call  writefile(file_path, content, append=need_append)
+    -> nodeenv.writefile
+1512:26 call  os.path.exists(shim_nodejs)
+    -> os.path.exists
+1518:27 call  os.symlink('node.exe', shim_nodejs)
+    -> os.symlink
+1521:28 call  os.link(join(bin_dir, 'node.exe'), shim_nodejs)
+    -> os.link
+1521:33 call  join(bin_dir, 'node.exe')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1523:35 call  logger.warning( 'Could not create the nodejs.exe link; th...
+    -> logging.Logger.warning
+    -> nodeenv.create_logger.emit
+1528:23 call  os.symlink("node", shim_nodejs)
+    -> os.symlink
+
+[nodeenv.set_predeactivate_hook]
+1535:18 call  writefile(join(env_dir, 'Scripts', 'predeactivate.bat'), ...
+    -> nodeenv.writefile
+1535:23 call  join(env_dir, 'Scripts', 'predeactivate.bat')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1537:18 call  writefile(join(env_dir, 'Scripts', 'predeactivate.ps1'), ...
+    -> nodeenv.writefile
+1537:23 call  join(env_dir, 'Scripts', 'predeactivate.ps1')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1541:18 call  writefile(join(env_dir, 'bin', 'predeactivate'), PREDEACT...
+    -> nodeenv.writefile
+1541:23 call  join(env_dir, 'bin', 'predeactivate')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+
+[nodeenv.create_environment]
+1549:22 call  os.path.exists(env_dir)
+    -> os.path.exists
+1550:20 call  logger.info(' * Environment already exists: %s', env_dir)
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1552:21 call  sys.exit(2)
+    -> sys.exit
+1553:22 call  abspath(join(env_dir, 'src'))
+    note: abspath is os.path.abspath, bound at module level (line 45)
+    -> os.path.abspath
+1553:27 call  join(env_dir, 'src')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1554:10 call  mkdir(src_dir)
+    -> nodeenv.mkdir
+1557:14 call  mkdir(join(env_dir, 'bin'))
+    -> nodeenv.mkdir
+1557:19 call  join(env_dir, 'bin')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1558:14 call  mkdir(join(env_dir, 'lib'))
+    -> nodeenv.mkdir
+1558:19 call  join(env_dir, 'lib')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1559:14 call  mkdir(join(env_dir, 'lib', 'node_modules'))
+    -> nodeenv.mkdir
+1559:19 call  join(env_dir, 'lib', 'node_modules')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1561:39 call  get_installed_node_version(env_dir)
+    -> nodeenv.get_installed_node_version
+1561:65 call  parse_version(args.node)
+    -> nodeenv.parse_version
+1562:20 call  logger.info(' * Node.js %s is already installed, skipping...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1565:21 call  install_node(env_dir, src_dir, args)
+    -> nodeenv.install_node
+1569:21 call  install_activate(env_dir, args)
+    -> nodeenv.install_activate
+1570:30 call  node_version_from_args(args)
+    -> nodeenv.node_version_from_args
+1572:17 call  instfunc(env_dir, src_dir, args)
+    -> nodeenv.install_npm
+    -> nodeenv.install_npm_win
+    note: instfunc is install_npm_win on Windows, Cygwin and MSYS, install_npm elsewhere (line 1571; J4)
+1574:25 call  install_packages(env_dir, args)
+    -> nodeenv.install_packages
+1576:31 call  set_predeactivate_hook(env_dir)
+    -> nodeenv.set_predeactivate_hook
+1579:22 call  shutil.rmtree(src_dir)
+    -> shutil.rmtree
+
+[nodeenv._get_versions_json]
+1583:23 call  urlopen('%s/index.json' % src_base_url)
+    -> nodeenv.urlopen
+1584:22 call  json.loads(response.read().decode('UTF-8'))
+    -> json.loads
+1584:36 call  response.read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)
+1584:45 call  response.read().decode('UTF-8')
+    -> <builtin>.bytes.decode
+
+[nodeenv.get_node_versions]
+1588:34 call  dct['version'].lstrip('v')
+    -> <builtin>.str.lstrip
+1588:69 call  _get_versions_json()
+    -> nodeenv._get_versions_json
+
+[nodeenv.print_node_versions]
+1595:33 call  get_node_versions()
+    -> nodeenv.get_node_versions
+1597:47 call  range(0, len(versions), 8)
+    -> <builtin>.range
+1597:54 call  len(versions)
+    -> <builtin>.len
+1600:20 call  logger.info('\t'.join(chunk))
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1600:30 call  '\t'.join(chunk)
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+
+[nodeenv._has_platform_build]
+1607:22 call  is_x86_64_musl()
+    -> nodeenv.is_x86_64_musl
+1609:20 call  is_riscv64()
+    -> nodeenv.is_riscv64
+
+[nodeenv._get_last_node_version]
+1626:17 call  logger.debug( ' * Host platform: x86_64-musl=%s, riscv64=...
+    note: logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)
+    -> logging.Logger.debug
+    -> nodeenv.create_logger.emit
+1628:23 call  is_x86_64_musl()
+    -> nodeenv.is_x86_64_musl
+1628:37 call  is_riscv64()
+    -> nodeenv.is_riscv64
+1638:16 call  next((v['version'].lstrip('v') for v in _get_versions_jso...
+    -> <builtin>.next
+1638:37 call  v['version'].lstrip('v')
+    -> <builtin>.str.lstrip
+1639:45 call  _get_versions_json()
+    -> nodeenv._get_versions_json
+1639:65 call  version_filter(v)
+    -> nodeenv._get_last_node_version.version_filter
+
+[nodeenv._get_last_node_version.version_filter]
+1633:26 call  _is_prerelease(v)
+    -> nodeenv._is_prerelease
+1636:35 call  _has_platform_build(v)
+    -> nodeenv._has_platform_build
+
+[nodeenv.get_last_stable_node_version]
+1646:34 call  _get_last_node_version()
+    -> nodeenv._get_last_node_version
+
+[nodeenv.get_last_lts_node_version]
+1653:34 call  _get_last_node_version(lts=True)
+    -> nodeenv._get_last_node_version
+
+[nodeenv.resolve_node_version]
+1663:30 call  parse_node_range(spec)
+    -> nodeenv.parse_node_range
+1668:44 call  _get_versions_json()
+    -> nodeenv._get_versions_json
+1669:26 call  _is_prerelease(version_entry)
+    -> nodeenv._is_prerelease
+1671:35 call  _has_platform_build(version_entry)
+    -> nodeenv._has_platform_build
+1673:31 call  _pad_version(parse_version(version_entry['version']))
+    -> nodeenv._pad_version
+1673:45 call  parse_version(version_entry['version'])
+    -> nodeenv.parse_version
+1674:28 call  match_node_range(version, ranges)
+    -> nodeenv.match_node_range
+1675:27 call  matched.append(version)
+    -> <builtin>.list.append
+1678:21 call  logger.error("No available node.js version matches '%s'" ...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1679:17 call  sys.exit(1)
+    -> sys.exit
+1681:20 call  '.'.join(str(part) for part in max(matched))
+    note: the receiver is a str; the module name join (line 44) is not this attribute
+    -> <builtin>.str.join
+1681:24 call  str(part)
+    -> <builtin>.str
+1681:46 call  max(matched)
+    -> <builtin>.max
+
+[nodeenv.get_env_dir]
+1688:20 call  hasattr(sys, 'real_prefix')
+    -> <builtin>.hasattr
+1689:21 call  hasattr(sys, 'base_prefix')
+    -> <builtin>.hasattr
+1693:33 call  os.path.isdir(res)
+    -> os.path.isdir
+1694:29 call  logger.error("Python virtualenv '%s' doesn't exist", res)
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1695:25 call  sys.exit(2)
+    -> sys.exit
+1698:28 call  os.environ.get('VIRTUAL_ENV')
+    -> collections.abc.Mapping.get
+1701:31 call  logger.warning( ' * Using activated virtualenv %s, not %s...
+    -> logging.Logger.warning
+    -> nodeenv.create_logger.emit
+1708:25 call  logger.error('No python virtualenv is available')
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1709:21 call  sys.exit(2)
+    -> sys.exit
+
+[nodeenv.main]
+1722:21 call  Config._dump()
+    -> nodeenv.Config._dump
+1725:22 call  parse_args(check=False)
+    -> nodeenv.parse_args
+1727:17 call  Config._load(args.config_file, args.verbose)
+    -> nodeenv.Config._load
+1729:22 call  parse_args()
+    -> nodeenv.parse_args
+1731:23 call  args.node.lower()
+    -> <builtin>.str.lower
+1732:21 call  logger.error('Installing system node.js on win32 is not s...
+    -> logging.Logger.error
+    -> nodeenv.create_logger.emit
+1733:13 call  exit(1)
+    -> _sitebuiltins.Quitter.__call__
+    note: exit is the _sitebuiltins.Quitter that site puts into builtins (pyfiglet J6); Windows only (J4)
+1742:47 call  make_certifi_context()
+    -> nodeenv.make_certifi_context
+1751:24 call  is_x86_64_musl()
+    -> nodeenv.is_x86_64_musl
+1751:40 call  is_riscv64()
+    -> nodeenv.is_riscv64
+1757:44 call  split_url_auth(src_base_url)
+    -> nodeenv.split_url_auth
+1762:28 call  args.node.lower()
+    -> <builtin>.str.lower
+1764:27 call  logger.warning(' * --prefer-system is not supported on wi...
+    -> logging.Logger.warning
+    -> nodeenv.create_logger.emit
+1767:43 call  find_system_node(join(get_env_dir(args), 'bin'))
+    -> nodeenv.find_system_node
+1767:48 call  join(get_env_dir(args), 'bin')
+    note: join is os.path.join, bound at module level (line 44)
+    -> os.path.join
+1767:60 call  get_env_dir(args)
+    -> nodeenv.get_env_dir
+1769:28 call  logger.info(' * Using system node: %s' % system_node)
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1772:28 call  logger.info(' * System node not found, installing %s' % (...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1776:23 call  logger.warning(' * --isolate-npm is not supported on win3...
+    -> logging.Logger.warning
+    -> nodeenv.create_logger.emit
+1779:40 call  args.node.lower()
+    -> <builtin>.str.lower
+1780:49 call  get_last_stable_node_version()
+    -> nodeenv.get_last_stable_node_version
+1781:25 call  args.node.lower()
+    -> <builtin>.str.lower
+1782:46 call  get_last_lts_node_version()
+    -> nodeenv.get_last_lts_node_version
+1783:25 call  args.node.lower()
+    -> <builtin>.str.lower
+1783:65 call  _is_exact_version(args.node)
+    -> nodeenv._is_exact_version
+1784:40 call  resolve_node_version(args.node)
+    -> nodeenv.resolve_node_version
+1786:24 call  logger.info(" * Resolved '%s' to %s" % (args.node, resolv...
+    -> logging.Logger.info
+    -> nodeenv.create_logger.emit
+1790:28 call  print_node_versions()
+    -> nodeenv.print_node_versions
+1792:30 call  get_env_dir(args)
+    -> nodeenv.get_env_dir
+1793:25 call  install_packages(env_dir, args)
+    -> nodeenv.install_packages
+1795:30 call  get_env_dir(args)
+    -> nodeenv.get_env_dir
+1796:27 call  create_environment(env_dir, args)
+    -> nodeenv.create_environment

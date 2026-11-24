@@ -1,0 +1,2440 @@
+# Call-site ledger of flit-core at eeaf9e783c87c331f1d73bb2f5553fc79016aae1.
+# Hand-written from the source; judgements in flit-core.md.
+#
+# Receivers and values used below (flit-core.md, "Values"):
+#   public: only the PEP 517 hooks of flit_core.buildapi and the command line
+#     python -m flit_core.wheel (flit_core/README.rst; doc/bootstrap.rst);
+#     every other function is private (J1) and gets what the package passes.
+#   the TOML document: dicts, lists, strs, ints, floats, bools and datetime
+#     values that tomllib.loads or the vendored tomli makes; a call on such a
+#     value is named by the type that has the method (only a dict has get).
+#   paths: Path('pyproject.toml'), Path.cwd(), Path(<directory>) and what is
+#     derived from them: a pathlib.PosixPath on Linux, a pathlib.WindowsPath
+#     on Windows (CI: ubuntu-latest and windows-latest).
+#   text streams: the io.TextIOWrapper of open(..., 'w'), the io.StringIO of
+#     WheelBuilder._write_to_zip and of SdistBuilder.build.
+default reject flit_core.common.VCSError.__str__: flit_core never makes a VCSError (no package code raises or builds one; flit, the command-line tool, does), so no formatted or str()-converted value is one
+default reject flit_core.config.EntryPointsConflict.__str__: no formatted or str()-converted value is an EntryPointsConflict: its only raise (LoadedConfig.add_scripts, 236:23) propagates to the caller, and the only exceptions that the package formats are the ValueError of email.headerregistry.Address (pep621_people) and the ConfigError or ValueError of _license_files_from_globs, whose args[0] (a str) it formats
+
+== flit_core.buildapi
+
+[flit_core.buildapi]
+15:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+18:19 call  Path('pyproject.toml')
+    -> pathlib.Path
+
+[flit_core.buildapi.get_requires_for_build_wheel]
+22:28 call  read_flit_config(pyproj_toml)
+    -> flit_core.config.read_flit_config
+32:20 call  Module(info.module, Path.cwd())
+    -> flit_core.common.Module.__init__
+32:42 call  Path.cwd()
+    -> pathlib.Path.cwd
+34:63 call  get_docstring_and_version_via_ast(module)
+    -> flit_core.common.get_docstring_and_version_via_ast
+37:33 call  info.metadata.get('requires_dist', [])
+    -> <builtin>.dict.get
+    note: info.metadata is the dict md_dict of read_pep621_metadata (config.py:387)
+
+[flit_core.buildapi.prepare_metadata_for_build_wheel]
+49:32 call  read_flit_config(pyproj_toml)
+    -> flit_core.config.read_flit_config
+50:20 call  Module(ini_info.module, Path.cwd())
+    -> flit_core.common.Module.__init__
+50:46 call  Path.cwd()
+    -> pathlib.Path.cwd
+51:29 call  make_metadata(module, ini_info)
+    -> flit_core.common.make_metadata
+53:25 call  osp.join(metadata_directory, dist_info_name(metadata.name...
+    -> os.path.join
+54:40 call  dist_info_name(metadata.name, metadata.version)
+    -> flit_core.common.dist_info_name
+55:13 call  os.mkdir(dist_info)
+    -> os.mkdir
+57:14 call  open(osp.join(dist_info, 'WHEEL'), 'w', encoding='utf-8')
+    -> <builtin>.open
+57:23 call  osp.join(dist_info, 'WHEEL')
+    -> os.path.join
+58:26 call  _write_wheel_file(f, supports_py2=metadata.supports_py2)
+    -> flit_core.wheel._write_wheel_file
+    reject flit_core.common.Metadata.supports_py2: the argument is the bool that the property returns at 58:52, not the function
+58:52 getattr  metadata.supports_py2
+    -> flit_core.common.Metadata.supports_py2
+60:14 call  open(osp.join(dist_info, 'METADATA'), 'w', encoding='utf-8')
+    -> <builtin>.open
+60:23 call  osp.join(dist_info, 'METADATA')
+    -> os.path.join
+61:37 call  metadata.write_metadata_file(f)
+    -> flit_core.common.Metadata.write_metadata_file
+64:18 call  open(osp.join(dist_info, 'entry_points.txt'), 'w', encodi...
+    -> <builtin>.open
+64:27 call  osp.join(dist_info, 'entry_points.txt')
+    -> os.path.join
+65:31 call  write_entry_points(ini_info.entrypoints, f)
+    -> flit_core.common.write_entry_points
+67:24 call  osp.basename(dist_info)
+    -> os.path.basename
+
+[flit_core.buildapi.build_wheel]
+74:25 call  make_wheel_in(pyproj_toml, Path(wheel_directory))
+    -> flit_core.wheel.make_wheel_in
+74:43 call  Path(wheel_directory)
+    -> pathlib.Path
+75:17 getattr  info.file
+    reject flit_core.common.Module.file: info is the types.SimpleNamespace of make_wheel_in (wheel.py:247); its file is the Path of the wheel
+
+[flit_core.buildapi.build_editable]
+79:25 call  make_wheel_in(pyproj_toml, Path(wheel_directory), editabl...
+    -> flit_core.wheel.make_wheel_in
+79:43 call  Path(wheel_directory)
+    -> pathlib.Path
+80:17 getattr  info.file
+    reject flit_core.common.Module.file: info is the types.SimpleNamespace of make_wheel_in (wheel.py:247); its file is the Path of the wheel
+
+[flit_core.buildapi.build_sdist]
+84:38 call  SdistBuilder.from_ini_path(pyproj_toml)
+    -> flit_core.sdist.SdistBuilder.from_ini_path
+    reject flit_core.wheel.WheelBuilder.from_ini_path: the receiver is the class SdistBuilder
+84:57 call  SdistBuilder.from_ini_path(pyproj_toml).build(Path(sdist_...
+    -> flit_core.sdist.SdistBuilder.build
+    reject flit_core.wheel.WheelBuilder.build: from_ini_path, called on SdistBuilder, returns cls(...), an SdistBuilder
+84:62 call  Path(sdist_directory)
+    -> pathlib.Path
+
+== flit_core.common
+
+[flit_core.common]
+11:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+21:49 call  Path()
+    -> pathlib.Path
+    note: the default value of Module.__init__'s directory, evaluated when the class body runs
+68:6 decorator  @property
+    -> <builtin>.property
+75:6 decorator  @property
+    -> <builtin>.property
+127:2 decorator  @contextmanager
+    -> contextlib.contextmanager
+478:6 decorator  @property
+    -> <builtin>.property
+
+[flit_core.common.Module.__init__]
+23:41 call  name.endswith('-stubs')
+    -> <builtin>.str.endswith
+    note: Module is private (flit-core.md J1); the package passes the module name of LoadedConfig, a str (config.py:395 or a [tool.flit.module] name that config.py:124 has split), and a Path directory (Path.cwd() or the parent of the pyproject.toml Path)
+26:36 call  name.replace('.', os.sep)
+    -> <builtin>.str.replace
+32:23 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+33:26 call  pkg_dir.is_dir()
+    -> pathlib.PosixPath.is_dir
+    -> pathlib.WindowsPath.is_dir
+    note: directory / name_as_path keeps the flavour of directory, a PosixPath on Linux or a WindowsPath on Windows (flit-core.md J4)
+37:25 call  existing.add(pkg_dir)
+    -> <builtin>.set.add
+38:27 call  py_file.is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+    note: a PosixPath or a WindowsPath, as at 33:26
+42:25 call  existing.add(py_file)
+    -> <builtin>.set.add
+43:30 call  src_pkg_dir.is_dir()
+    -> pathlib.PosixPath.is_dir
+    -> pathlib.WindowsPath.is_dir
+    note: a PosixPath or a WindowsPath, as at 33:26
+47:25 call  existing.add(src_pkg_dir)
+    -> <builtin>.set.add
+48:31 call  src_py_file.is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+    note: a PosixPath or a WindowsPath, as at 33:26
+52:25 call  existing.add(src_py_file)
+    -> <builtin>.set.add
+54:15 call  len(existing)
+    -> <builtin>.len
+55:37 call  ", ".join(map(str, sorted(existing)))
+    -> <builtin>.str.join
+55:41 call  map(str, sorted(existing))
+    -> <builtin>.map
+    note: join iterates the map, which calls str on Paths (library code calling a builtin: no edge)
+55:53 call  sorted(existing)
+    -> <builtin>.sorted
+56:29 call  ValueError( f"Multiple files or folders could be module {...
+    -> <builtin>.ValueError
+60:29 call  ValueError(f"No file/folder found for module {name}")
+    -> <builtin>.ValueError
+65:58 call  name.rpartition('.')
+    -> <builtin>.str.rpartition
+
+[flit_core.common.Module.version_files]
+84:50 call  (self.path / filename).is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+    note: self.path is one of the Paths of __init__ (33:26)
+85:33 call  paths.insert(0, self.path / filename)
+    -> <builtin>.list.insert
+
+[flit_core.common.Module.iter_files]
+102:48 call  os.walk(str(self.path))
+    -> os.walk
+102:52 call  str(self.path)
+    -> <builtin>.str
+103:35 call  sorted(files)
+    -> <builtin>.sorted
+104:45 call  os.path.join(dirpath, file)
+    -> os.path.join
+105:32 call  _include(full_path)
+    -> flit_core.common.Module.iter_files._include
+108:45 call  sorted(dirs)
+    -> <builtin>.sorted
+108:63 call  _include(d)
+    -> flit_core.common.Module.iter_files._include
+111:22 call  str(self.path)
+    -> <builtin>.str
+
+[flit_core.common.Module.iter_files._include]
+97:36 call  os.path.basename(path)
+    -> os.path.basename
+98:63 call  name.endswith('.pyc')
+    -> <builtin>.str.endswith
+
+[flit_core.common.get_docstring_and_version_via_ast]
+145:31 getattr  target.version_files
+    -> flit_core.common.Module.version_files
+147:30 call  target_path.open('rb')
+    -> pathlib.PosixPath.open
+    -> pathlib.WindowsPath.open
+    note: target is a Module (private function; its callers pass the Module of buildapi, make_metadata or get_info_from_module); version_files holds Paths built from Module.path (33:26)
+148:29 call  ast.parse(f.read())
+    -> ast.parse
+148:36 call  f.read()
+    -> io.BufferedReader.read
+    note: Path.open('rb') with the default buffering returns an io.BufferedReader
+150:41 call  is_version_str_assignment(child)
+    -> flit_core.common.is_version_str_assignment
+153:29 call  ast.get_docstring(node)
+    -> ast.get_docstring
+
+[flit_core.common.is_version_str_assignment]
+158:22 call  isinstance(node, (ast.Assign, ast.AnnAssign))
+    -> <builtin>.isinstance
+160:22 call  isinstance(node.value, ast.Constant)
+    -> <builtin>.isinstance
+162:43 call  isinstance(node, ast.AnnAssign)
+    -> <builtin>.isinstance
+164:22 call  isinstance(target, ast.Name)
+    -> <builtin>.isinstance
+
+[flit_core.common.get_docstring_and_version_via_import]
+184:14 call  log.debug("Loading module %s", target.file)
+    -> logging.Logger.debug
+    reject flit_core.common.Module.file: the argument is the Path that the property returns at 184:43
+184:43 getattr  target.file
+    -> flit_core.common.Module.file
+    note: target is the Module that get_info_from_module passes (223:66)
+187:35 call  spec_from_file_location(mod_name, target.file)
+    -> importlib.util.spec_from_file_location
+    reject flit_core.common.Module.file: the argument is the Path that the property returns at 187:53
+187:53 getattr  target.file
+    -> flit_core.common.Module.file
+188:26 call  _module_load_ctx()
+    -> contextlib.contextmanager.helper
+    -> flit_core.common._module_load_ctx
+    note: _module_load_ctx is decorated with @contextmanager (127:2): the call runs contextlib's helper, which calls the generator function back
+189:29 call  module_from_spec(spec)
+    -> importlib.util.module_from_spec
+196:36 call  spec.loader.exec_module(m)
+    -> importlib.machinery.SourceFileLoader.exec_module
+    note: spec_from_file_location gets no loader and picks one by the suffix of the location; Module.file always ends in .py (common.py:28, 71), so the loader is a SourceFileLoader (importlib/_bootstrap_external.py, _get_supported_file_loaders). The client's module code that exec_module runs is client code (flit-core.md J5)
+198:28 call  sys.modules.pop(mod_name, None)
+    -> <builtin>.dict.pop
+200:31 call  m.__dict__.get('__doc__', None)
+    -> <builtin>.dict.get
+201:29 call  m.__dict__.get('__version__', None)
+    -> <builtin>.dict.get
+
+[flit_core.common.get_info_from_module]
+215:14 call  log.debug("Loading module %s", target.file)
+    -> logging.Logger.debug
+    reject flit_core.common.Module.file: the argument is the Path that the property returns at 215:43
+215:43 getattr  target.file
+    -> flit_core.common.Module.file
+    note: target is the Module that make_metadata passes
+221:59 call  get_docstring_and_version_via_ast(target)
+    -> flit_core.common.get_docstring_and_version_via_ast
+223:66 call  get_docstring_and_version_via_import(target)
+    -> flit_core.common.get_docstring_and_version_via_import
+228:50 call  docstring.strip()
+    -> <builtin>.str.strip
+    note: docstring is the str or None of ast.get_docstring, or the __doc__ of the client's module (a str, or an object that the client's module code assigns: opaque, B5)
+229:35 call  NoDocstringError( 'Flit cannot package module without doc...
+    -> <builtin>.ValueError.__init__
+    note: NoDocstringError and ProblemInModule define no __init__; the first in the MRO is ValueError's
+231:66 getattr  target.file
+    -> flit_core.common.Module.file
+233:42 call  docstring.lstrip()
+    -> <builtin>.str.lstrip
+    note: as at 228:50
+233:55 call  docstring.lstrip().splitlines()
+    -> <builtin>.str.splitlines
+236:39 call  check_version(version)
+    -> flit_core.common.check_version
+
+[flit_core.common.check_version]
+252:29 call  NoVersionError('Cannot package module without a version s...
+    -> <builtin>.ValueError.__init__
+    note: NoVersionError and ProblemInModule define no __init__
+254:22 call  isinstance(version, str)
+    -> <builtin>.isinstance
+255:29 call  InvalidVersion(f'__version__ must be a string, not {type(...
+    -> <builtin>.ValueError.__init__
+    note: InvalidVersion and ProblemInModule define no __init__
+255:71 call  type(version)
+    -> <builtin>.type
+258:32 call  normalise_version(version)
+    -> flit_core.versionno.normalise_version
+
+[flit_core.common.parse_entry_point]
+280:25 call  ValueError(f"Invalid entry point (no ':'): {ep!r}")
+    -> <builtin>.ValueError
+    note: parse_entry_point is private and never called by the package: its parameter is judged as a public one; the docstring makes ep a 'package.module:func' str
+281:25 call  ep.split(':')
+    -> <builtin>.str.split
+283:28 call  func.split('.')
+    -> <builtin>.str.split
+284:34 call  piece.isidentifier()
+    -> <builtin>.str.isidentifier
+285:29 call  ValueError(f"Invalid entry point: {piece!r} is not an ide...
+    -> <builtin>.ValueError
+286:27 call  mod.split('.')
+    -> <builtin>.str.split
+287:34 call  piece.isidentifier()
+    -> <builtin>.str.isidentifier
+288:29 call  ValueError(f"Invalid entry point: {piece!r} is not a modu...
+    -> <builtin>.ValueError
+
+[flit_core.common.write_entry_points]
+297:29 call  sorted(d)
+    -> <builtin>.sorted
+    note: d is LoadedConfig.entrypoints, a dict of dicts of strs (config.py:574, 582, 590)
+298:17 call  fp.write(f'[{group_name}]\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: fp is the text file of prepare_metadata_for_build_wheel (buildapi.py:64) or the io.StringIO of WheelBuilder._write_to_zip (wheel.py:191)
+300:27 call  sorted(group)
+    -> <builtin>.sorted
+302:21 call  fp.write(f'{name}={val}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 298:17
+303:17 call  fp.write('\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 298:17
+
+[flit_core.common.hash_file]
+306:14 call  open(path, 'rb')
+    -> <builtin>.open
+    note: hash_file is private and never called by the package: its parameters are judged as public ones; nothing documents or tests another algorithm, so the hash is the default sha256 (flit-core.md J6)
+307:24 call  hashlib.new(algorithm, f.read())
+    -> hashlib.new
+307:42 call  f.read()
+    -> io.BufferedReader.read
+308:23 call  h.hexdigest()
+    -> _hashlib.HASH.hexdigest
+    -> _sha256.SHA256Type.hexdigest
+    -> _sha2.SHA256Type.hexdigest
+    note: hashlib.new('sha256') returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object of the class that the module exports as _sha256.SHA256Type on CPython 3.8 to 3.11 (PyModule_AddObject; its type name is _sha256.sha256) and _sha2.SHA256Type from 3.12 (Modules/sha256module.c, sha2module.c of the deps; the precedent of django-constance and markdown2)
+
+[flit_core.common.path_is_within_directory]
+334:33 call  os.path.realpath(directory)
+    -> os.path.realpath
+335:32 call  os.path.realpath(path)
+    -> os.path.realpath
+336:56 call  resolved.startswith(directory + os.sep)
+    -> <builtin>.str.startswith
+    note: realpath returns a str for the str and Path arguments of the package's callers
+
+[flit_core.common.Metadata.__init__]
+388:25 call  data.copy()
+    -> <builtin>.dict.copy
+    note: data is the dict md_dict of make_metadata
+389:29 call  data.pop('name')
+    -> <builtin>.dict.pop
+390:32 call  data.pop('version')
+    -> <builtin>.dict.pop
+392:31 call  data.items()
+    -> <builtin>.dict.items
+393:27 call  hasattr(self, k)
+    -> <builtin>.hasattr
+    note: the keys are the metadata field names of make_metadata, get_info_from_module and read_pep621_metadata; none names the property supports_py2
+394:20 call  setattr(self, k, v)
+    -> <builtin>.setattr
+
+[flit_core.common.Metadata._normalise_field_name]
+397:23 call  n.lower()
+    -> <builtin>.str.lower
+397:33 call  n.lower().replace('-', '_')
+    -> <builtin>.str.replace
+
+[flit_core.common.Metadata._normalise_requires_dist]
+402:25 call  re.match(r'[ \t]*[A-Za-z0-9][A-Za-z0-9._-]*[ \t]*\[([^]]*...
+    -> re.match
+    note: req is an item of requires_dist: a str of [project] dependencies or of _expand_requires_extra (config.py:630)
+406:29 call  item.strip()
+    -> <builtin>.str.strip
+406:55 call  match.group(1)
+    -> re.Match.group
+406:64 call  match.group(1).split(',')
+    -> <builtin>.str.split
+407:58 call  normalise_core_metadata_name(extra)
+    -> flit_core.common.normalise_core_metadata_name
+408:33 call  match.start(1)
+    -> re.Match.start
+408:49 call  ', '.join(normalised_extras)
+    -> <builtin>.str.join
+409:32 call  match.end(1)
+    -> re.Match.end
+
+[flit_core.common.Metadata.write_metadata_file]
+431:28 call  getattr(self, self._normalise_field_name(field))
+    -> <builtin>.getattr
+    note: the names are metadata_version, name and version; none is a property
+431:61 call  self._normalise_field_name(field)
+    -> flit_core.common.Metadata._normalise_field_name
+432:21 call  fp.write(f"{field}: {value}\n")
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: fp is the text file of prepare_metadata_for_build_wheel (buildapi.py:60), the io.StringIO of WheelBuilder._write_to_zip (wheel.py:200) or that of SdistBuilder.build (sdist.py:257)
+435:28 call  getattr(self, self._normalise_field_name(field))
+    -> <builtin>.getattr
+    note: the names of optional_fields; none is a property
+435:61 call  self._normalise_field_name(field)
+    -> flit_core.common.Metadata._normalise_field_name
+441:42 call  '\n '.join(value.splitlines())
+    -> <builtin>.str.join
+441:59 call  value.splitlines()
+    -> <builtin>.str.splitlines
+    note: the optional fields hold strs: summary, keywords, author, maintainer and their emails, requires_python, description_content_type (config.py), or the Metadata class defaults None, which the test skips
+442:25 call  fp.write(f"{field}: {value}\n")
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+445:31 call  getattr(self, self._normalise_field_name("License-Express...
+    -> <builtin>.getattr
+445:64 call  self._normalise_field_name("License-Expression")
+    -> flit_core.common.Metadata._normalise_field_name
+446:26 call  getattr(self, self._normalise_field_name("License"))
+    -> <builtin>.getattr
+446:59 call  self._normalise_field_name("License")
+    -> flit_core.common.Metadata._normalise_field_name
+448:21 call  fp.write(f'License-Expression: {license_expr}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+450:21 call  fp.write(f'License: {license}\n')
+    note: no callee: Metadata is private (flit-core.md J1), and no package code gives it a license: make_metadata's dict never has the key, so license is the class default None and the branch never runs (B1)
+453:21 call  fp.write(f'Classifier: {clsfr}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+456:21 call  fp.write(f'License-File: {file}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+459:59 call  self._normalise_requires_dist(req)
+    -> flit_core.common.Metadata._normalise_requires_dist
+460:21 call  fp.write(f'Requires-Dist: {normalised_req}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+463:21 call  fp.write(f'Project-URL: {url}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+466:60 call  normalise_core_metadata_name(extra)
+    -> flit_core.common.normalise_core_metadata_name
+467:21 call  fp.write(f'Provides-Extra: {normalised_extra}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+470:21 call  fp.write(f'Import-Name: {name}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+473:21 call  fp.write(f'Import-Namespace: {name}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+476:21 call  fp.write(f'\n{self.description}\n')
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 432:21
+
+[flit_core.common.Metadata.supports_py2]
+481:55 call  (self.requires_python or "").split(",")
+    -> <builtin>.str.split
+    note: requires_python is the str of [project] requires-python (config.py:457-458) or None
+482:25 call  re.search(r"^\s*(>=?|~=|===?)?\s*[3-9]", part)
+    -> re.search
+
+[flit_core.common.make_metadata]
+489:19 call  md_dict.update(get_info_from_module(module, ini_info.dyna...
+    -> <builtin>.dict.update
+489:40 call  get_info_from_module(module, ini_info.dynamic_metadata)
+    -> flit_core.common.get_info_from_module
+490:19 call  md_dict.update(ini_info.metadata)
+    -> <builtin>.dict.update
+491:20 call  Metadata(md_dict)
+    -> flit_core.common.Metadata.__init__
+
+[flit_core.common.normalise_core_metadata_name]
+496:18 call  re.sub(r"[-_.]+", "-", name)
+    -> re.sub
+496:46 call  re.sub(r"[-_.]+", "-", name).lower()
+    -> <builtin>.str.lower
+
+[flit_core.common.normalize_dist_name]
+507:29 call  re.sub(r'[-_.]+', '_', name, flags=re.UNICODE)
+    -> re.sub
+507:75 call  re.sub(r'[-_.]+', '_', name, flags=re.UNICODE).lower()
+    -> <builtin>.str.lower
+508:25 call  check_version(version)
+    -> flit_core.common.check_version
+    note: in an assert: absent under -O, kept in the union of normal and optimised execution
+
+[flit_core.common.dist_info_name]
+515:34 call  normalize_dist_name(distribution, version)
+    -> flit_core.common.normalize_dist_name
+
+[flit_core.common.walk_data_dir]
+527:40 call  os.walk(data_directory)
+    -> os.walk
+    note: data_directory is None (returned before) or the Path of [tool.flit.external-data] (config.py:182)
+528:27 call  sorted(files)
+    -> <builtin>.sorted
+529:37 call  os.path.join(dirpath, file)
+    -> os.path.join
+532:37 call  sorted(dirs)
+    -> <builtin>.sorted
+
+== flit_core.config
+
+[flit_core.config]
+24:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+68:41 call  re.compile(r'^[\w\-\.\/\*\?\[\] ]+$')
+    -> re.compile
+
+[flit_core.config.read_flit_config]
+74:22 call  tomllib.loads(path.read_text('utf-8'))
+    -> tomllib.loads
+    -> flit_core.vendor.tomli._parser.loads
+    note: optional import (lines 10-18): tomllib on CPython 3.11 and later; on 3.8 to 3.10 the vendored copy (flit_core.vendor.tomli re-exports _parser.loads). The third side (import tomli, line 18) runs only on 3.8 to 3.10 with the vendored package deleted, a state that the release does not document: no edge (flit-core.md J2, ruling of the lead, 2026-11-24)
+74:37 call  path.read_text('utf-8')
+    -> pathlib.PosixPath.read_text
+    -> pathlib.WindowsPath.read_text
+    note: path is the pyproject.toml Path of buildapi (Path('pyproject.toml')), of wheel.main (srcdir / 'pyproject.toml') or of the from_ini_path callers, which pass these; a PosixPath on Linux, a WindowsPath on Windows
+75:28 call  prep_toml_config(d, path)
+    -> flit_core.config.prep_toml_config
+
+[flit_core.config.prep_toml_config]
+88:18 call  d.get('tool', {})
+    -> <builtin>.dict.get
+    note: d is the dict that tomllib.loads or the vendored tomli returns (a TOML document); no tomli stub reaches it (flit-core.md J2)
+88:34 call  d.get('tool', {}).get('flit', {})
+    -> <builtin>.dict.get
+    note: only a TOML table (a dict) has get
+91:26 call  ConfigError( "The [tool.flit.metadata] table is no longer...
+    -> <builtin>.ValueError.__init__
+    note: ConfigError defines no __init__ (also at every ConfigError call below)
+97:26 call  ConfigError( "The [tool.flit.scripts] and [tool.flit.entr...
+    -> <builtin>.ValueError.__init__
+104:26 call  ConfigError("No [project] table found in pyproject.toml")
+    -> <builtin>.ValueError.__init__
+106:38 call  read_pep621_metadata(d['project'], path)
+    -> flit_core.config.read_pep621_metadata
+108:27 call  dtool.get('module', {})
+    -> <builtin>.dict.get
+    note: dtool is a TOML value of the document; only a table (dict) has get
+114:20 call  s.split(';')
+    -> <builtin>.str.split
+    note: the import_name items are the strs of normalize_import_name (line 640)
+117:30 call  ConfigError( f"Specified import-names {import_names_from_...
+    -> <builtin>.ValueError.__init__
+124:46 call  loaded_cfg.module.split('.')
+    -> <builtin>.str.split
+    note: module is the str of normalize_pkg_name or the TOML value of [tool.flit.module] name; of the TOML types only a str has split
+126:17 call  '.'.join(namespace_parts[:i])
+    -> <builtin>.str.join
+126:53 call  range(1, len(namespace_parts) + 1)
+    -> <builtin>.range
+126:60 call  len(namespace_parts)
+    -> <builtin>.len
+130:20 call  s.split(';')
+    -> <builtin>.str.split
+    note: the import_namespace items are the strs of normalize_import_name (line 646)
+132:15 call  set(nspkgs_from_config)
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+132:42 call  set(nspkgs_from_mod_name)
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+133:30 call  ConfigError( f"Specified import-namespaces {nspkgs_from_c...
+    -> <builtin>.ValueError.__init__
+140:27 call  set(dtool)
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+141:67 call  s.lower()
+    -> <builtin>.str.lower
+    note: s is a key of the TOML table dtool, a str
+141:80 call  s.lower().startswith('x-')
+    -> <builtin>.str.startswith
+143:26 call  ConfigError('Unexpected tables in pyproject.toml: ' + ', ...
+    -> <builtin>.ValueError.__init__
+143:78 call  ', '.join( f'[tool.flit.{s}]' for s in unknown_sections )
+    -> <builtin>.str.join
+148:27 call  set(dtool['sdist'])
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+150:30 call  ConfigError( "Unknown keys in [tool.flit.sdist]:" + ", "....
+    -> <builtin>.ValueError.__init__
+151:65 call  ", ".join(unknown_keys)
+    -> <builtin>.str.join
+154:65 call  _check_glob_patterns( dtool['sdist'].get('include', []), ...
+    -> flit_core.config._check_glob_patterns
+155:31 call  dtool['sdist'].get('include', [])
+    -> <builtin>.dict.get
+    note: only a TOML table has get; a list or str with no unknown key fails at the attribute lookup
+160:31 call  dtool['sdist'].get('exclude', [])
+    -> <builtin>.dict.get
+161:65 call  _check_glob_patterns( exclude, 'exclude' )
+    -> flit_core.config._check_glob_patterns
+165:25 call  dtool.get('external-data', {})
+    -> <builtin>.dict.get
+165:50 call  dtool.get('external-data', {}).get('directory', None)
+    -> <builtin>.dict.get
+    note: only a TOML table has get
+168:26 call  isinstance(data_dir, str)
+    -> <builtin>.isinstance
+169:30 call  ConfigError(f"{toml_key} must be a string")
+    -> <builtin>.ValueError.__init__
+171:29 call  osp.normpath(data_dir)
+    -> os.path.normpath
+172:21 call  isabs_ish(normp)
+    -> flit_core.config.isabs_ish
+173:30 call  ConfigError(f"{toml_key} cannot be an absolute path")
+    -> <builtin>.ValueError.__init__
+174:28 call  normp.startswith('..' + os.sep)
+    -> <builtin>.str.startswith
+175:30 call  ConfigError( f"{toml_key} cannot point outside the direct...
+    -> <builtin>.ValueError.__init__
+179:30 call  ConfigError( f"{toml_key} cannot refer to the directory c...
+    -> <builtin>.ValueError.__init__
+183:48 call  loaded_cfg.data_directory.is_dir()
+    -> pathlib.PosixPath.is_dir
+    -> pathlib.WindowsPath.is_dir
+    note: path.parent / data_dir keeps the flavour of path (74:37)
+184:30 call  ConfigError(f"{toml_key} must refer to a directory")
+    -> <builtin>.ValueError.__init__
+
+[flit_core.config._check_glob_patterns]
+191:22 call  isinstance(pats, list)
+    -> <builtin>.isinstance
+192:26 call  ConfigError(f"sdist {clude} patterns must be a list")
+    -> <builtin>.ValueError.__init__
+196:27 call  re.compile(r'[\000-\037<>:"\\]')
+    -> re.compile
+201:28 call  bad_chars.search(p)
+    -> re.Pattern.search
+    note: p is an item of a TOML list (include or exclude patterns); search enters its body for any argument and refuses a non-str there
+202:30 call  ConfigError( f'{clude} pattern {p!r} contains bad charact...
+    -> <builtin>.ValueError.__init__
+206:29 call  osp.normpath(p)
+    -> os.path.normpath
+208:21 call  isabs_ish(normp)
+    -> flit_core.config.isabs_ish
+209:30 call  ConfigError( f'{clude} pattern {p!r} is an absolute path' )
+    -> <builtin>.ValueError.__init__
+212:28 call  normp.startswith('..' + os.sep)
+    -> <builtin>.str.startswith
+213:30 call  ConfigError( f'{clude} pattern {p!r} points out of the di...
+    -> <builtin>.ValueError.__init__
+216:22 call  normed.append(normp)
+    -> <builtin>.list.append
+
+[flit_core.config.description_from_file]
+248:17 call  isabs_ish(rel_path)
+    -> flit_core.config.isabs_ish
+249:26 call  ConfigError("Readme path must be relative")
+    -> <builtin>.ValueError.__init__
+252:36 call  path_is_within_directory(desc_path, proj_dir)
+    -> flit_core.common.path_is_within_directory
+253:26 call  ConfigError( f"Readme path ({rel_path}) points outside th...
+    -> <builtin>.ValueError.__init__
+257:28 call  desc_path.open('r', encoding='utf-8')
+    -> pathlib.PosixPath.open
+    -> pathlib.WindowsPath.open
+    note: proj_dir is path.parent of read_pep621_metadata (lines 413, 439), a PosixPath or a WindowsPath; proj_dir / rel_path keeps it
+258:30 call  f.read()
+    -> io.TextIOWrapper.read
+261:30 call  ConfigError( f"Description file {desc_path} does not exis...
+    -> <builtin>.ValueError.__init__
+267:37 call  desc_path.suffix.lower()
+    -> <builtin>.str.lower
+271:24 call  log.warning("Unknown extension %r for description file.",...
+    -> logging.Logger.warning
+272:24 call  log.warning(" Recognised extensions: %s", " ".join(readme...
+    -> logging.Logger.warning
+273:33 call  " ".join(readme_ext_to_content_type)
+    -> <builtin>.str.join
+
+[flit_core.config._expand_requires_extra]
+282:30 call  sorted(re.items())
+    -> <builtin>.sorted
+    note: re is LoadedConfig.reqs_by_extra (line 631), a dict of lists of strs (lines 607, 617)
+282:39 call  re.items()
+    -> <builtin>.dict.items
+285:42 call  req.split(';', 1)
+    -> <builtin>.str.split
+
+[flit_core.config._license_files_from_globs]
+292:24 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+294:21 call  isabs_ish(pattern)
+    -> flit_core.config.isabs_ish
+    note: globs is the TOML list [project] license-files (line 510) or default_license_files_globs (line 519)
+295:30 call  ConfigError( f"Invalid glob pattern for [project.license-...
+    -> <builtin>.ValueError.__init__
+300:30 call  ConfigError( f"Invalid glob pattern for [project.license-...
+    -> <builtin>.ValueError.__init__
+304:45 call  license_files_allowed_chars.match(pattern)
+    -> re.Pattern.match
+305:30 call  ConfigError( f"Invalid glob pattern for [project.license-...
+    -> <builtin>.ValueError.__init__
+312:41 call  project_dir.glob(pattern)
+    -> pathlib.PosixPath.glob
+    -> pathlib.WindowsPath.glob
+    note: project_dir is path.parent of read_pep621_metadata, a PosixPath or a WindowsPath
+313:36 call  file.is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+    note: glob yields Paths of project_dir's class
+319:48 call  path_is_within_directory(file, project_dir)
+    -> flit_core.common.path_is_within_directory
+320:38 call  ConfigError( f"License file {file.relative_to(project_dir...
+    -> <builtin>.ValueError.__init__
+321:57 call  file.relative_to(project_dir)
+    -> pathlib.PosixPath.relative_to
+    -> pathlib.WindowsPath.relative_to
+321:79 call  file.relative_to(project_dir).as_posix()
+    -> pathlib.PosixPath.as_posix
+    -> pathlib.WindowsPath.as_posix
+325:29 call  files.append(file.relative_to(project_dir).as_posix())
+    -> <builtin>.list.append
+325:46 call  file.relative_to(project_dir)
+    -> pathlib.PosixPath.relative_to
+    -> pathlib.WindowsPath.relative_to
+325:68 call  file.relative_to(project_dir).as_posix()
+    -> pathlib.PosixPath.as_posix
+    -> pathlib.WindowsPath.as_posix
+327:30 call  ConfigError( f"Invalid glob pattern for [project.license-...
+    -> <builtin>.ValueError.__init__
+332:30 call  ConfigError( f"No files found for [project.license-files]...
+    -> <builtin>.ValueError.__init__
+335:29 call  license_files.update(files)
+    -> <builtin>.set.update
+
+[flit_core.config._check_type]
+339:22 call  isinstance(d[field_name], cls)
+    -> <builtin>.isinstance
+340:26 call  ConfigError( f"{field_name} field should be {cls}, not {t...
+    -> <builtin>.ValueError.__init__
+341:60 call  type(d[field_name])
+    -> <builtin>.type
+
+[flit_core.config._check_types]
+345:22 call  isinstance(d[field_name], cls_list)
+    -> <builtin>.isinstance
+346:30 call  ' or '.join(map(str, cls_list))
+    -> <builtin>.str.join
+346:34 call  map(str, cls_list)
+    -> <builtin>.map
+347:26 call  ConfigError( f"{field_name} field should be {cls_str}, no...
+    -> <builtin>.ValueError.__init__
+348:64 call  type(d[field_name])
+    -> <builtin>.type
+
+[flit_core.config._check_list_of_str]
+352:22 call  isinstance(d[field_name], list)
+    -> <builtin>.isinstance
+352:54 call  all( isinstance(e, str) for e in d[field_name] )
+    -> <builtin>.all
+353:19 call  isinstance(e, str)
+    -> <builtin>.isinstance
+355:26 call  ConfigError( f"{field_name} field should be a list of str...
+    -> <builtin>.ValueError.__init__
+
+[flit_core.config.normalize_pkg_name]
+360:21 call  name.endswith('-stubs')
+    -> <builtin>.str.endswith
+    note: name is [project] name, checked as a str (line 391)
+362:33 call  name[:-6].replace('-','_')
+    -> <builtin>.str.replace
+363:24 call  name.replace('-','_')
+    -> <builtin>.str.replace
+
+[flit_core.config.normalize_import_name]
+368:38 call  name.split(';', 1)
+    -> <builtin>.str.split
+    note: name is an item of [project] import-names or import-namespaces, checked as a list of strs (lines 638, 644)
+369:27 call  name.rstrip()
+    -> <builtin>.str.rstrip
+370:39 call  annotation.lstrip()
+    -> <builtin>.str.lstrip
+372:30 call  ConfigError( f"{annotation!r} for import name {name!r} is...
+    -> <builtin>.ValueError.__init__
+379:15 call  all(p.isidentifier() for p in name.split('.'))
+    -> <builtin>.all
+379:30 call  p.isidentifier()
+    -> <builtin>.str.isidentifier
+379:52 call  name.split('.')
+    -> <builtin>.str.split
+380:26 call  ConfigError(f"{name!r} is not a valid import name")
+    -> <builtin>.ValueError.__init__
+
+[flit_core.config.read_pep621_metadata]
+386:22 call  LoadedConfig()
+    -> flit_core.config.LoadedConfig.__init__
+390:26 call  ConfigError('name must be specified in [project] table')
+    -> <builtin>.ValueError.__init__
+    note: proj is the [project] value of the TOML document (prep_toml_config, line 106); past the subscript of line 391 it is a table (dict)
+391:16 call  _check_type(proj, 'name', str)
+    -> flit_core.config._check_type
+392:25 call  name_is_valid(proj['name'])
+    -> flit_core.config.name_is_valid
+393:26 call  ConfigError(f"name {proj['name']} is not valid")
+    -> <builtin>.ValueError.__init__
+395:35 call  normalize_pkg_name(md_dict['name'])
+    -> flit_core.config.normalize_pkg_name
+397:32 call  proj.keys()
+    -> <builtin>.dict.keys
+399:26 call  ConfigError( "Unrecognised key(s) in [project] table: " +...
+    -> <builtin>.ValueError.__init__
+400:67 call  ', '.join(unexpected_keys)
+    -> <builtin>.str.join
+404:20 call  _check_type(proj, 'version', str)
+    -> flit_core.config._check_type
+405:47 call  normalise_version(proj['version'])
+    -> flit_core.versionno.normalise_version
+407:20 call  _check_type(proj, 'description', str)
+    -> flit_core.config._check_type
+411:22 call  isinstance(readme, str)
+    -> <builtin>.isinstance
+412:39 call  lc.referenced_files.append(readme)
+    -> <builtin>.list.append
+413:59 call  description_from_file(readme, path.parent)
+    -> flit_core.config.description_from_file
+415:24 call  isinstance(readme, dict)
+    -> <builtin>.isinstance
+416:29 call  set(readme.keys())
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+416:41 call  readme.keys()
+    -> <builtin>.dict.keys
+418:34 call  ConfigError( f"Unrecognised keys in [project.readme]: {un...
+    -> <builtin>.ValueError.__init__
+423:44 call  mimetype.split(';')
+    -> <builtin>.str.split
+    note: mimetype is the TOML value of readme content-type; of the TOML types only a str has split
+423:58 call  mimetype.split(';')[0].strip()
+    -> <builtin>.str.strip
+424:71 call  readme_ext_to_content_type.values()
+    -> <builtin>.dict.values
+425:38 call  ConfigError( f"Unrecognised readme content-type: {mtype_b...
+    -> <builtin>.ValueError.__init__
+430:34 call  ConfigError( "content-type field required in [project.rea...
+    -> <builtin>.ValueError.__init__
+435:38 call  ConfigError( "[project.readme] should specify file or tex...
+    -> <builtin>.ValueError.__init__
+438:43 call  lc.referenced_files.append(readme['file'])
+    -> <builtin>.list.append
+439:56 call  description_from_file( readme['file'], path.parent, guess...
+    -> flit_core.config.description_from_file
+445:34 call  ConfigError( "file or text field required in [project.rea...
+    -> <builtin>.ValueError.__init__
+449:30 call  ConfigError( "project.readme should be a string or a tabl...
+    -> <builtin>.ValueError.__init__
+457:20 call  _check_type(proj, 'requires-python', str)
+    -> flit_core.config._check_type
+460:24 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+462:21 call  _check_types(proj, 'license', (str, dict))
+    -> flit_core.config._check_types
+463:22 call  isinstance(proj['license'], str)
+    -> <builtin>.isinstance
+465:76 call  normalise_compound_license_expr(licence_expr)
+    -> flit_core.config.normalise_compound_license_expr
+468:29 call  set(license_tbl.keys())
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+468:46 call  license_tbl.keys()
+    -> <builtin>.dict.keys
+470:34 call  ConfigError( f"Unrecognised keys in [project.license]: {u...
+    -> <builtin>.ValueError.__init__
+478:38 call  ConfigError( "[project.license] should specify file or te...
+    -> <builtin>.ValueError.__init__
+481:41 call  osp.normpath(license_tbl['file'])
+    -> os.path.normpath
+482:29 call  isabs_ish(license_f)
+    -> flit_core.config.isabs_ish
+483:38 call  ConfigError( f"License file path ({license_tbl['file']}) ...
+    -> <builtin>.ValueError.__init__
+486:40 call  license_f.startswith('..' + os.sep)
+    -> <builtin>.str.startswith
+487:38 call  ConfigError( f"License file path ({license_tbl['file']}) ...
+    -> <builtin>.ValueError.__init__
+491:41 call  license_p.is_file()
+    -> pathlib.PosixPath.is_file
+    -> pathlib.WindowsPath.is_file
+    note: path.parent / license_f keeps the class of path, a PosixPath or a WindowsPath (read_flit_config, 74:37)
+492:38 call  ConfigError(f"License file {license_tbl['file']} does not...
+    -> <builtin>.ValueError.__init__
+493:48 call  path_is_within_directory(license_p, path.parent)
+    -> flit_core.common.path_is_within_directory
+494:38 call  ConfigError( f"License file ({license_tbl['file']}) point...
+    -> <builtin>.ValueError.__init__
+498:50 call  license_p.relative_to(path.parent)
+    -> pathlib.PosixPath.relative_to
+    -> pathlib.WindowsPath.relative_to
+498:72 call  license_p.relative_to(path.parent).as_posix()
+    -> pathlib.PosixPath.as_posix
+    -> pathlib.WindowsPath.as_posix
+499:34 call  license_files.add(license_f)
+    -> <builtin>.set.add
+503:34 call  ConfigError( "file or text field required in [project.lic...
+    -> <builtin>.ValueError.__init__
+508:20 call  _check_type(proj, 'license-files', list)
+    -> flit_core.config._check_type
+510:50 call  _license_files_from_globs(path.parent, globs)
+    -> flit_core.config._license_files_from_globs
+511:22 call  isinstance(proj.get('license'), dict)
+    -> <builtin>.isinstance
+511:31 call  proj.get('license')
+    -> <builtin>.dict.get
+512:30 call  ConfigError( "license-files cannot be used with a license...
+    -> <builtin>.ValueError.__init__
+517:29 call  license_files.update( _license_files_from_globs( path.par...
+    -> <builtin>.set.update
+518:38 call  _license_files_from_globs( path.parent, default_license_f...
+    -> flit_core.config._license_files_from_globs
+522:34 call  sorted(license_files)
+    -> <builtin>.sorted
+523:31 call  lc.referenced_files.extend(license_files_sorted)
+    -> <builtin>.list.extend
+527:20 call  _check_type(proj, 'authors', list)
+    -> flit_core.config._check_type
+528:23 call  md_dict.update(pep621_people(proj['authors']))
+    -> <builtin>.dict.update
+528:37 call  pep621_people(proj['authors'])
+    -> flit_core.config.pep621_people
+531:20 call  _check_type(proj, 'maintainers', list)
+    -> flit_core.config._check_type
+532:23 call  md_dict.update(pep621_people(proj['maintainers'], group_n...
+    -> <builtin>.dict.update
+532:37 call  pep621_people(proj['maintainers'], group_name='maintainer')
+    -> flit_core.config.pep621_people
+535:27 call  _check_list_of_str(proj, 'keywords')
+    -> flit_core.config._check_list_of_str
+536:39 call  ",".join(proj['keywords'])
+    -> <builtin>.str.join
+539:27 call  _check_list_of_str(proj, 'classifiers')
+    -> flit_core.config._check_list_of_str
+541:35 call  md_dict.get('license_expression', None)
+    -> <builtin>.dict.get
+544:37 call  cl.startswith('License :: ')
+    -> <builtin>.str.startswith
+546:34 call  ConfigError( "License classifiers are deprecated in favor...
+    -> <builtin>.ValueError.__init__
+553:20 call  _check_type(proj, 'urls', dict)
+    -> flit_core.config._check_type
+555:33 call  sorted(proj['urls'].items())
+    -> <builtin>.sorted
+555:52 call  proj['urls'].items()
+    -> <builtin>.dict.items
+556:32 call  project_urls.append(f"{label}, {url}")
+    -> <builtin>.list.append
+559:20 call  _check_type(proj, 'entry-points', dict)
+    -> flit_core.config._check_type
+560:47 call  proj['entry-points'].values()
+    -> <builtin>.dict.values
+561:30 call  isinstance(grp, dict)
+    -> <builtin>.isinstance
+562:34 call  ConfigError( "projects.entry-points should only contain s...
+    -> <builtin>.ValueError.__init__
+565:23 call  all(isinstance(k, str) for k in grp.values())
+    -> <builtin>.all
+565:34 call  isinstance(k, str)
+    -> <builtin>.isinstance
+565:62 call  grp.values()
+    -> <builtin>.dict.values
+566:34 call  ConfigError( "[projects.entry-points.*] tables should hav...
+    -> <builtin>.ValueError.__init__
+569:15 call  set(proj['entry-points'].keys())
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+569:41 call  proj['entry-points'].keys()
+    -> <builtin>.dict.keys
+570:30 call  ConfigError( "Scripts should be specified in [project.scr...
+    -> <builtin>.ValueError.__init__
+577:20 call  _check_type(proj, 'scripts', dict)
+    -> flit_core.config._check_type
+578:19 call  all(isinstance(k, str) for k in proj['scripts'].values())
+    -> <builtin>.all
+578:30 call  isinstance(k, str)
+    -> <builtin>.isinstance
+578:70 call  proj['scripts'].values()
+    -> <builtin>.dict.values
+579:30 call  ConfigError( "[projects.scripts] table should have string...
+    -> <builtin>.ValueError.__init__
+585:20 call  _check_type(proj, 'gui-scripts', dict)
+    -> flit_core.config._check_type
+586:19 call  all(isinstance(k, str) for k in proj['gui-scripts'].value...
+    -> <builtin>.all
+586:30 call  isinstance(k, str)
+    -> <builtin>.isinstance
+586:74 call  proj['gui-scripts'].values()
+    -> <builtin>.dict.values
+587:30 call  ConfigError( "[projects.gui-scripts] table should have st...
+    -> <builtin>.ValueError.__init__
+593:27 call  _check_list_of_str(proj, 'dependencies')
+    -> flit_core.config._check_list_of_str
+599:20 call  _check_type(proj, 'optional-dependencies', dict)
+    -> flit_core.config._check_type
+601:19 call  all(isinstance(e, list) for e in optdeps.values())
+    -> <builtin>.all
+601:30 call  isinstance(e, list)
+    -> <builtin>.isinstance
+601:63 call  optdeps.values()
+    -> <builtin>.dict.values
+602:30 call  ConfigError( 'Expected a dict of lists in optional-depend...
+    -> <builtin>.ValueError.__init__
+606:37 call  optdeps.items()
+    -> <builtin>.dict.items
+607:23 call  all(isinstance(a, str) for a in reqs)
+    -> <builtin>.all
+607:34 call  isinstance(a, str)
+    -> <builtin>.isinstance
+608:34 call  ConfigError( f'Expected a string list for optional-depend...
+    -> <builtin>.ValueError.__init__
+611:33 call  name_is_valid(e)
+    -> flit_core.config.name_is_valid
+612:34 call  ConfigError( f'optional-dependencies group name {e!r} is ...
+    -> <builtin>.ValueError.__init__
+615:49 call  normalise_core_metadata_name(e)
+    -> flit_core.common.normalise_core_metadata_name
+616:45 call  extra_names_by_normed.setdefault(enorm, set())
+    -> <builtin>.dict.setdefault
+616:56 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+616:63 call  extra_names_by_normed.setdefault(enorm, set()).add(e)
+    -> <builtin>.set.add
+620:52 call  extra_names_by_normed.values()
+    -> <builtin>.dict.values
+620:61 call  len(g)
+    -> <builtin>.len
+623:30 call  '/'.join(sorted(g))
+    -> <builtin>.str.join
+623:37 call  sorted(g)
+    -> <builtin>.sorted
+624:30 call  ConfigError( f"optional-dependencies group names clash: {...
+    -> <builtin>.ValueError.__init__
+625:70 call  '; '.join(fmted)
+    -> <builtin>.str.join
+628:43 call  sorted(lc.reqs_by_extra.keys())
+    -> <builtin>.sorted
+628:65 call  lc.reqs_by_extra.keys()
+    -> <builtin>.dict.keys
+631:28 call  list(_expand_requires_extra(lc.reqs_by_extra))
+    -> <builtin>.list
+631:51 call  _expand_requires_extra(lc.reqs_by_extra)
+    -> flit_core.config._expand_requires_extra
+638:27 call  _check_list_of_str(proj, 'import-names')
+    -> flit_core.config._check_list_of_str
+640:34 call  normalize_import_name(s)
+    -> flit_core.config.normalize_import_name
+644:27 call  _check_list_of_str(proj, 'import-namespaces')
+    -> flit_core.config._check_list_of_str
+646:34 call  normalize_import_name(s)
+    -> flit_core.config.normalize_import_name
+650:27 call  _check_list_of_str(proj, 'dynamic')
+    -> flit_core.config._check_list_of_str
+651:22 call  set(proj['dynamic'])
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+654:30 call  ConfigError( "flit only supports dynamic metadata for:" +...
+    -> <builtin>.ValueError.__init__
+655:71 call  ', '.join( sorted(allowed_dynamic_fields) )
+    -> <builtin>.str.join
+656:27 call  sorted(allowed_dynamic_fields)
+    -> <builtin>.sorted
+659:32 call  dynamic.intersection(proj)
+    -> <builtin>.set.intersection
+660:30 call  ConfigError( "keys listed in project.dynamic must not be ...
+    -> <builtin>.ValueError.__init__
+666:26 call  ConfigError( "version must be specified under [project] o...
+    -> <builtin>.ValueError.__init__
+670:26 call  ConfigError( "description must be specified under [projec...
+    -> <builtin>.ValueError.__init__
+
+[flit_core.config.name_is_valid]
+678:16 call  bool(re.match( r"^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])...
+    -> <builtin>.bool
+678:25 call  re.match( r"^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$", n...
+    -> re.match
+
+[flit_core.config.pep621_people]
+687:26 call  isinstance(person, dict)
+    -> <builtin>.isinstance
+    note: people is the TOML list of [project] authors or maintainers (lines 527-532)
+688:30 call  ConfigError(f"{group_name} info must be list of dicts")
+    -> <builtin>.ValueError.__init__
+689:25 call  set(person.keys())
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+689:37 call  person.keys()
+    -> <builtin>.dict.keys
+691:30 call  ConfigError( f"Unrecognised keys in {group_name} info: {u...
+    -> <builtin>.ValueError.__init__
+695:48 call  isinstance(person[key], str)
+    -> <builtin>.isinstance
+696:34 call  ConfigError(f"{group_name} {key} must be a string")
+    -> <builtin>.ValueError.__init__
+701:32 call  str(Address(person['name'], addr_spec=email))
+    -> <builtin>.str
+701:40 call  Address(person['name'], addr_spec=email)
+    -> email.headerregistry.Address
+703:38 call  ConfigError( f"Invalid {group_name} email address {email!...
+    -> <builtin>.ValueError.__init__
+706:26 call  emails.append(email)
+    -> <builtin>.list.append
+708:25 call  names.append(person['name'])
+    -> <builtin>.list.append
+712:36 call  ", ".join(names)
+    -> <builtin>.str.join
+714:47 call  ", ".join(emails)
+    -> <builtin>.str.join
+
+[flit_core.config.isabs_ish]
+724:25 call  os.path.isabs(path)
+    -> os.path.isabs
+724:50 call  path.startswith(('/', '\\'))
+    -> <builtin>.str.startswith
+    note: the package passes strs (normpath results, readme and license paths, glob patterns, symlink targets); a TOML value that is not a str fails in os.path.isabs (os.fspath) first
+
+[flit_core.config.normalise_compound_license_expr]
+736:26 call  s.isspace()
+    -> <builtin>.str.isspace
+    note: s is [project] license, checked as a str (line 463)
+737:26 call  ConfigError("The SPDX license expression must not be empty")
+    -> <builtin>.ValueError.__init__
+742:27 call  filter(None, re.split(r' +|([()])', s))
+    -> <builtin>.filter
+742:42 call  re.split(r' +|([()])', s)
+    -> re.split
+747:39 call  parts[-1].lower()
+    -> <builtin>.str.lower
+750:38 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+750:57 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+751:29 call  parts.append(' WITH ')
+    -> <builtin>.list.append
+755:38 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+755:57 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+756:29 call  parts.append(f' {part} ')
+    -> <builtin>.list.append
+757:28 call  part.lower()
+    -> <builtin>.str.lower
+760:34 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+760:53 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+764:38 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+764:57 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+766:29 call  parts.append(part)
+    -> <builtin>.list.append
+770:38 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+770:57 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+774:38 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+774:57 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+775:29 call  parts.append(part)
+    -> <builtin>.list.append
+779:38 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+779:57 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+781:62 call  normalise_license_exception(part)
+    -> flit_core.config.normalise_license_exception
+783:64 call  normalise_simple_license_expr(part)
+    -> flit_core.config.normalise_simple_license_expr
+784:29 call  parts.append(simple_expr)
+    -> <builtin>.list.append
+788:30 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+788:49 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+790:40 call  parts[-1].strip()
+    -> <builtin>.str.strip
+792:30 call  ConfigError(invalid_msg.format(s=s, reason=reason))
+    -> <builtin>.ValueError.__init__
+792:49 call  invalid_msg.format(s=s, reason=reason)
+    -> <builtin>.str.format
+794:26 call  os.environ.get('FLIT_ALLOW_INVALID')
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, which inherits get from Mapping (the anytree precedent); FLIT_ALLOW_INVALID is documented (doc/cmdline.rst:217)
+795:24 call  log.warning("Invalid license ID %r allowed by FLIT_ALLOW_...
+    -> logging.Logger.warning
+799:19 call  ''.join(parts)
+    -> <builtin>.str.join
+
+[flit_core.config.normalise_simple_license_expr]
+807:17 call  s.lower()
+    -> <builtin>.str.lower
+    note: s is a part of the str that re.split returns (normalise_compound_license_expr, 783:64)
+808:21 call  ls.startswith('licenseref-')
+    -> <builtin>.str.startswith
+810:24 call  re.fullmatch(r'[a-zA-Z0-9\-.]+', ref)
+    -> re.fullmatch
+813:26 call  ConfigError( "LicenseRef- license expression can only con...
+    -> <builtin>.ValueError.__init__
+818:27 call  ls.endswith('+')
+    -> <builtin>.str.endswith
+825:26 call  ConfigError(f"{s!r} is not a recognised SPDX license ID")
+    -> <builtin>.ValueError.__init__
+
+[flit_core.config.normalise_license_exception]
+835:34 call  s.lower()
+    -> <builtin>.str.lower
+837:26 call  ConfigError(f"{s!r} is not a recognised SPDX license exce...
+    -> <builtin>.ValueError.__init__
+
+== flit_core.sdist
+
+[flit_core.sdist]
+17:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+144:6 decorator  @classmethod
+    -> <builtin>.classmethod
+219:6 decorator  @property
+    -> <builtin>.property
+
+[flit_core.sdist._normalize_for_match]
+34:33 call  unicodedata.normalize('NFC', path)
+    -> unicodedata.normalize
+
+[flit_core.sdist._symlink_target_escapes]
+61:17 call  isabs_ish(linkname)
+    -> flit_core.config.isabs_ish
+63:28 call  osp.normpath(osp.join(osp.dirname(arcname_relpath), linkn...
+    -> os.path.normpath
+63:37 call  osp.join(osp.dirname(arcname_relpath), linkname)
+    -> os.path.join
+63:49 call  osp.dirname(arcname_relpath)
+    -> os.path.dirname
+64:56 call  resolved.startswith(os.pardir + os.sep)
+    -> <builtin>.str.startswith
+
+[flit_core.sdist.clean_tarinfo]
+75:14 call  copy(ti)
+    -> copy.copy
+    note: ti is the tarfile.TarInfo of TarFile.gettarinfo (SdistBuilder.build, 240:35)
+80:48 call  common.normalize_file_permissions(ti.mode)
+    -> flit_core.common.normalize_file_permissions
+
+[flit_core.sdist.FilePatterns.__init__]
+91:24 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+92:25 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+95:31 call  sorted(glob(osp.join(basedir, pattern), recursive=True))
+    -> <builtin>.sorted
+95:36 call  glob(osp.join(basedir, pattern), recursive=True)
+    -> glob.glob
+95:45 call  osp.join(basedir, pattern)
+    -> os.path.join
+96:34 call  osp.relpath(path, basedir)
+    -> os.path.relpath
+97:29 call  osp.isdir(path)
+    -> os.path.isdir
+98:34 call  self.dirs.add(rel)
+    -> <builtin>.set.add
+100:35 call  self.files.add(rel)
+    -> <builtin>.set.add
+106:50 call  _normalize_for_match(f)
+    -> flit_core.sdist._normalize_for_match
+107:49 call  _normalize_for_match(d)
+    -> flit_core.sdist._normalize_for_match
+
+[flit_core.sdist.FilePatterns.match_file]
+110:40 call  _normalize_for_match(rel_path)
+    -> flit_core.sdist._normalize_for_match
+114:19 call  any(rel_path.startswith(d + os.sep) for d in self._match_...
+    -> <builtin>.any
+114:39 call  rel_path.startswith(d + os.sep)
+    -> <builtin>.str.startswith
+
+[flit_core.sdist.FilePatterns.match_dir]
+117:40 call  _normalize_for_match(rel_path)
+    -> flit_core.sdist._normalize_for_match
+122:19 call  any(rel_path.startswith(d + os.sep) for d in self._match_...
+    -> <builtin>.any
+122:39 call  rel_path.startswith(d + os.sep)
+    -> <builtin>.str.startswith
+
+[flit_core.sdist.SdistBuilder.__init__]
+141:37 call  FilePatterns(include_patterns, str(cfgdir))
+    -> flit_core.sdist.FilePatterns.__init__
+141:59 call  str(cfgdir)
+    -> <builtin>.str
+142:37 call  FilePatterns(exclude_patterns, str(cfgdir))
+    -> flit_core.sdist.FilePatterns.__init__
+142:59 call  str(cfgdir)
+    -> <builtin>.str
+
+[flit_core.sdist.SdistBuilder.from_ini_path]
+148:36 call  read_flit_config(ini_path)
+    -> flit_core.config.read_flit_config
+150:31 call  common.Module(ini_info.module, srcdir)
+    -> flit_core.common.Module.__init__
+151:40 call  common.make_metadata(module, ini_info)
+    -> flit_core.common.make_metadata
+152:43 call  map(osp.normpath, ini_info.referenced_files)
+    -> <builtin>.map
+    note: the list display iterates the map, which calls os.path.normpath (library code calling a library function: no edge)
+153:19 call  cls( module, metadata, srcdir, ini_info.reqs_by_extra, in...
+    -> flit_core.sdist.SdistBuilder.__init__
+    note: value site: cls is the class on which from_ini_path is called; the package calls it only as SdistBuilder.from_ini_path (buildapi.py:84); SdistBuilder is private (flit-core.md J1), and a subclass of flit's is client code
+
+[flit_core.sdist.SdistBuilder.prep_entry_points]
+161:26 call  defaultdict(list)
+    -> collections.defaultdict
+    note: the package never calls prep_entry_points; self is an SdistBuilder that from_ini_path makes, so entrypoints is LoadedConfig.entrypoints, a dict of dicts of strs
+162:55 call  self.entrypoints.items()
+    -> <builtin>.dict.items
+163:35 call  sorted(group.items())
+    -> <builtin>.sorted
+163:47 call  group.items()
+    -> <builtin>.dict.items
+164:38 call  res[groupname].append(f'{name} = {ep}')
+    -> <builtin>.list.append
+166:20 call  dict(res)
+    -> <builtin>.dict
+
+[flit_core.sdist.SdistBuilder.select_files]
+174:23 call  str(self.cfgdir)
+    -> <builtin>.str
+176:24 call  osp.relpath(p, cfgdir_s)
+    -> os.path.relpath
+176:69 call  self.module.iter_files()
+    -> flit_core.common.Module.iter_files
+178:24 call  osp.relpath(p, cfgdir_s)
+    -> os.path.relpath
+178:67 call  common.walk_data_dir(self.data_directory)
+    -> flit_core.common.walk_data_dir
+
+[flit_core.sdist.SdistBuilder.apply_includes_excludes]
+182:23 call  str(self.cfgdir)
+    -> <builtin>.str
+183:66 call  self.excludes.match_file(f)
+    -> flit_core.sdist.FilePatterns.match_file
+186:44 call  self.excludes.match_file(f_rel)
+    -> flit_core.sdist.FilePatterns.match_file
+187:26 call  files.add(f_rel)
+    -> <builtin>.set.add
+190:49 call  os.walk(osp.join(cfgdir_s, rel_d))
+    -> os.walk
+190:58 call  osp.join(cfgdir_s, rel_d)
+    -> os.path.join
+192:37 call  osp.join(dirpath, file)
+    -> os.path.join
+193:40 call  osp.relpath(f_abs, cfgdir_s)
+    -> os.path.relpath
+194:52 call  self.excludes.match_file(f_rel)
+    -> flit_core.sdist.FilePatterns.match_file
+195:34 call  files.add(f_rel)
+    -> <builtin>.set.add
+198:74 call  self.excludes.match_dir( osp.relpath(osp.join(dirpath, d)...
+    -> flit_core.sdist.FilePatterns.match_dir
+199:32 call  osp.relpath(osp.join(dirpath, d), cfgdir_s)
+    -> os.path.relpath
+199:41 call  osp.join(dirpath, d)
+    -> os.path.join
+202:28 call  set(self.extra_files)
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set
+204:30 call  crucial_files.add(str(self.module.file.relative_to(self.c...
+    -> <builtin>.set.add
+204:34 call  str(self.module.file.relative_to(self.cfgdir))
+    -> <builtin>.str
+204:47 getattr  self.module.file
+    -> flit_core.common.Module.file
+204:63 call  self.module.file.relative_to(self.cfgdir)
+    -> pathlib.PosixPath.relative_to
+    -> pathlib.WindowsPath.relative_to
+    note: Module.file is built from the Path directory that from_ini_path passes (ini_path.parent), a PosixPath or a WindowsPath
+209:41 call  _normalize_for_match(f)
+    -> flit_core.sdist._normalize_for_match
+211:61 call  _normalize_for_match(f)
+    -> flit_core.sdist._normalize_for_match
+214:28 call  Exception("Crucial files were excluded from the sdist: {}...
+    -> <builtin>.Exception
+215:36 call  "Crucial files were excluded from the sdist: {}" .format(...
+    -> <builtin>.str.format
+215:46 call  ", ".join(missing_crucial)
+    -> <builtin>.str.join
+217:22 call  sorted(files)
+    -> <builtin>.sorted
+
+[flit_core.sdist.SdistBuilder.dir_name]
+221:42 call  common.normalize_dist_name(self.metadata.name, self.metad...
+    -> flit_core.common.normalize_dist_name
+
+[flit_core.sdist.SdistBuilder.build]
+224:20 call  os.makedirs(str(target_dir), exist_ok=True)
+    -> os.makedirs
+    note: target_dir is the Path(sdist_directory) of buildapi.build_sdist (buildapi.py:84)
+224:24 call  str(target_dir)
+    -> <builtin>.str
+225:39 getattr  self.dir_name
+    -> flit_core.sdist.SdistBuilder.dir_name
+226:43 call  os.environ.get('SOURCE_DATE_EPOCH', '')
+    -> collections.abc.Mapping.get
+    note: SOURCE_DATE_EPOCH is documented (doc/cmdline.rst:242, doc/reproducible.rst)
+227:20 call  int(source_date_epoch)
+    -> <builtin>.int
+231:22 call  GzipFile(str(target), mode='wb', mtime=(mtime or 14516064...
+    -> gzip.GzipFile
+231:26 call  str(target)
+    -> <builtin>.str
+232:29 call  tarfile.TarFile(str(target), mode='w', fileobj=gz, format...
+    -> tarfile.TarFile
+232:33 call  str(target)
+    -> <builtin>.str
+236:56 call  self.apply_includes_excludes(self.select_files())
+    -> flit_core.sdist.SdistBuilder.apply_includes_excludes
+236:74 call  self.select_files()
+    -> flit_core.sdist.SdistBuilder.select_files
+    note: self is an SdistBuilder of from_ini_path; flit's override (the docstring, line 170) is client code
+239:27 call  str(self.cfgdir / relpath)
+    -> <builtin>.str
+240:35 call  tf.gettarinfo(path, arcname=pjoin(self.dir_name, relpath))
+    -> tarfile.TarFile.gettarinfo
+240:55 call  pjoin(self.dir_name, relpath)
+    -> posixpath.join
+    reject flit_core.sdist.SdistBuilder.dir_name: the argument is the str that the property returns at 240:61
+240:61 getattr  self.dir_name
+    -> flit_core.sdist.SdistBuilder.dir_name
+241:35 call  clean_tarinfo(ti, mtime)
+    -> flit_core.sdist.clean_tarinfo
+243:28 call  ti.issym()
+    -> tarfile.TarInfo.issym
+243:58 call  _symlink_target_escapes(relpath, ti.linkname)
+    -> flit_core.sdist._symlink_target_escapes
+244:36 call  Exception( f"Refusing to build sdist: the symlink {relpat...
+    -> <builtin>.Exception
+251:28 call  ti.isreg()
+    -> tarfile.TarInfo.isreg
+252:30 call  open(path, 'rb')
+    -> <builtin>.open
+253:35 call  tf.addfile(ti, f)
+    -> tarfile.TarFile.addfile
+255:31 call  tf.addfile(ti)
+    -> tarfile.TarFile.addfile
+257:33 call  io.StringIO()
+    -> io.StringIO
+258:46 call  self.metadata.write_metadata_file(stream)
+    -> flit_core.common.Metadata.write_metadata_file
+259:39 call  stream.getvalue()
+    -> io.StringIO.getvalue
+259:48 call  stream.getvalue().encode()
+    -> <builtin>.str.encode
+260:33 call  tarfile.TarInfo(pjoin(self.dir_name, 'PKG-INFO'))
+    -> tarfile.TarInfo
+260:39 call  pjoin(self.dir_name, 'PKG-INFO')
+    -> posixpath.join
+    reject flit_core.sdist.SdistBuilder.dir_name: the argument is the str that the property returns at 260:45
+260:45 getattr  self.dir_name
+    -> flit_core.sdist.SdistBuilder.dir_name
+261:26 call  len(pkg_info)
+    -> <builtin>.len
+262:23 call  tf.addfile(ti, io.BytesIO(pkg_info))
+    -> tarfile.TarFile.addfile
+262:38 call  io.BytesIO(pkg_info)
+    -> io.BytesIO
+265:21 call  tf.close()
+    -> tarfile.TarFile.close
+266:21 call  gz.close()
+    -> gzip.GzipFile.close
+268:17 call  log.info("Built sdist: %s", target)
+    -> logging.Logger.info
+
+== flit_core.vendor.tomli._parser
+
+[flit_core.vendor.tomli._parser]
+16:23 call  frozenset(chr(i) for i in range(32))
+    -> <builtin>.frozenset
+16:27 call  chr(i)
+    -> <builtin>.chr
+16:45 call  range(32)
+    -> <builtin>.range
+16:62 call  frozenset(chr(127))
+    -> <builtin>.frozenset
+16:66 call  chr(127)
+    -> <builtin>.chr
+20:49 call  frozenset("\t")
+    -> <builtin>.frozenset
+21:59 call  frozenset("\t\n")
+    -> <builtin>.frozenset
+28:20 call  frozenset(" \t")
+    -> <builtin>.frozenset
+29:42 call  frozenset("\n")
+    -> <builtin>.frozenset
+30:27 call  frozenset(string.ascii_letters + string.digits + "-_")
+    -> <builtin>.frozenset
+31:47 call  frozenset("\"'")
+    -> <builtin>.frozenset
+32:27 call  frozenset(string.hexdigits)
+    -> <builtin>.frozenset
+34:49 call  MappingProxyType( { "\\b": "\u0008", # backspace "\\t": "...
+    -> types.MappingProxyType
+
+[flit_core.vendor.tomli._parser.load]
+53:22 call  fp.read()
+    note: fp is annotated BinaryIO, an abstract type (B4); load is private and never called by the package, so fp is judged as a public parameter: a client object, whose read is client behaviour (B5): no callee
+55:27 call  s_bytes.decode()
+    note: s_bytes is what the client object fp.read() returned: opaque (B5): no callee
+57:22 call  warnings.warn( "Text file object support is deprecated in...
+    -> warnings.warn
+64:17 call  loads(s, parse_float=parse_float)
+    -> flit_core.vendor.tomli._parser.loads
+
+[flit_core.vendor.tomli._parser.loads]
+72:20 call  s.replace("\r\n", "\n")
+    -> <builtin>.str.replace
+    note: s is annotated str; the package caller (config.read_flit_config) passes the str of Path.read_text
+74:17 call  Output(NestedDict(), Flags())
+    note: Output is a typing.NamedTuple class: its call runs the generated __new__ and object.__init__, no edge (README, "Ground-truth conventions")
+74:28 call  NestedDict()
+    -> flit_core.vendor.tomli._parser.NestedDict.__init__
+74:37 call  Flags()
+    -> flit_core.vendor.tomli._parser.Flags.__init__
+81:25 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+99:33 call  key_value_rule(src, pos, out, header, parse_float)
+    -> flit_core.vendor.tomli._parser.key_value_rule
+100:29 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+107:47 call  create_list_rule(src, pos, out)
+    -> flit_core.vendor.tomli._parser.create_list_rule
+109:47 call  create_dict_rule(src, pos, out)
+    -> flit_core.vendor.tomli._parser.create_dict_rule
+110:29 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+112:31 call  suffixed_err(src, pos, "Invalid statement")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+115:27 call  skip_comment(src, pos)
+    -> flit_core.vendor.tomli._parser.skip_comment
+123:31 call  suffixed_err( src, pos, "Expected newline or end of docum...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.Flags.unset_all]
+149:17 call  cont.pop(key[-1], None)
+    -> <builtin>.dict.pop
+    note: cont is self._flags or a nested "nested" dict that Flags itself made
+
+[flit_core.vendor.tomli._parser.Flags.set_for_relative_key]
+155:40 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+155:66 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+159:37 call  cont[k]["flags"].add(flag)
+    -> <builtin>.set.add
+    note: the "flags" entry is a set that Flags made (lines 155, 161, 169, 172)
+161:67 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+
+[flit_core.vendor.tomli._parser.Flags.set]
+169:40 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+169:66 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+172:43 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+172:69 call  set()
+    -> <builtin>.set
+    reject flit_core.vendor.tomli._parser.Flags.set: the builtin set (the method Flags.set is reached only through a Flags instance)
+173:72 call  cont[key_stem]["recursive_flags" if recursive else "flags...
+    -> <builtin>.set.add
+    note: the "flags" and "recursive_flags" entries are sets that Flags made
+
+[flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest]
+209:43 call  isinstance(cont, list)
+    -> <builtin>.isinstance
+211:30 call  isinstance(cont, dict)
+    -> <builtin>.isinstance
+212:31 call  KeyError("There is no nest behind this key")
+    -> <builtin>.KeyError
+
+[flit_core.vendor.tomli._parser.NestedDict.append_nest_to_list]
+216:39 call  self.get_or_create_nest(key[:-1])
+    -> flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest
+221:29 call  list_.append({})
+    -> <builtin>.list.append
+    note: list_ is a value that tomli stored behind the key: a list (an array of tables or an inline array) has append; any other value (a dict, str, int, float, bool or datetime value) raises AttributeError at the attribute load, before a call
+223:31 call  KeyError("An object other than list found behind this key")
+    -> <builtin>.KeyError
+
+[flit_core.vendor.tomli._parser.skip_until]
+251:28 call  src.index(expect, pos)
+    -> <builtin>.str.index
+253:22 call  len(src)
+    -> <builtin>.len
+255:31 call  suffixed_err(src, new_pos, f"Expected {expect!r}")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+257:31 call  error_on.isdisjoint(src[pos:new_pos])
+    -> <builtin>.frozenset.isdisjoint
+    note: error_on is one of the module frozensets ILLEGAL_* (annotated FrozenSet[str]; every package caller passes one)
+260:27 call  suffixed_err(src, pos, f"Found invalid character {src[pos...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.skip_comment]
+270:26 call  skip_until( src, pos + 1, "\n", error_on=ILLEGAL_COMMENT_...
+    -> flit_core.vendor.tomli._parser.skip_until
+
+[flit_core.vendor.tomli._parser.skip_comments_and_array_ws]
+279:25 call  skip_chars(src, pos, TOML_WS_AND_NEWLINE)
+    -> flit_core.vendor.tomli._parser.skip_chars
+280:27 call  skip_comment(src, pos)
+    -> flit_core.vendor.tomli._parser.skip_comment
+
+[flit_core.vendor.tomli._parser.create_dict_rule]
+287:21 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+288:25 call  parse_key(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_key
+290:21 call  out.flags.is_(key, Flags.EXPLICIT_NEST)
+    -> flit_core.vendor.tomli._parser.Flags.is_
+290:64 call  out.flags.is_(key, Flags.FROZEN)
+    -> flit_core.vendor.tomli._parser.Flags.is_
+291:27 call  suffixed_err(src, pos, f"Can not declare {key} twice")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+292:18 call  out.flags.set(key, Flags.EXPLICIT_NEST, recursive=False)
+    -> flit_core.vendor.tomli._parser.Flags.set
+294:36 call  out.data.get_or_create_nest(key)
+    -> flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest
+296:27 call  suffixed_err(src, pos, "Can not overwrite a value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+298:26 call  src.startswith("]", pos)
+    -> <builtin>.str.startswith
+299:27 call  suffixed_err(src, pos, 'Expected "]" at the end of a tabl...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.create_list_rule]
+305:21 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+306:25 call  parse_key(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_key
+308:21 call  out.flags.is_(key, Flags.FROZEN)
+    -> flit_core.vendor.tomli._parser.Flags.is_
+309:27 call  suffixed_err(src, pos, f"Can not mutate immutable namespa...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+311:24 call  out.flags.unset_all(key)
+    -> flit_core.vendor.tomli._parser.Flags.unset_all
+313:18 call  out.flags.set(key, Flags.EXPLICIT_NEST, recursive=False)
+    -> flit_core.vendor.tomli._parser.Flags.set
+315:37 call  out.data.append_nest_to_list(key)
+    -> flit_core.vendor.tomli._parser.NestedDict.append_nest_to_list
+317:27 call  suffixed_err(src, pos, "Can not overwrite a value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+319:26 call  src.startswith("]]", pos)
+    -> <builtin>.str.startswith
+320:27 call  suffixed_err(src, pos, 'Expected "]]" at the end of an ar...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.key_value_rule]
+327:43 call  parse_key_value_pair(src, pos, parse_float)
+    -> flit_core.vendor.tomli._parser.parse_key_value_pair
+331:21 call  out.flags.is_(abs_key_parent, Flags.FROZEN)
+    -> flit_core.vendor.tomli._parser.Flags.is_
+332:27 call  suffixed_err( src, pos, f"Can not mutate immutable namesp...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+336:35 call  out.flags.set_for_relative_key(header, key, Flags.EXPLICI...
+    -> flit_core.vendor.tomli._parser.Flags.set_for_relative_key
+338:43 call  out.data.get_or_create_nest(abs_key_parent)
+    -> flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest
+340:27 call  suffixed_err(src, pos, "Can not overwrite a value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+342:27 call  suffixed_err(src, pos, "Can not overwrite a value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+344:18 call  isinstance(value, (dict, list))
+    -> <builtin>.isinstance
+345:22 call  out.flags.set(header + key, Flags.FROZEN, recursive=True)
+    -> flit_core.vendor.tomli._parser.Flags.set
+
+[flit_core.vendor.tomli._parser.parse_key_value_pair]
+353:25 call  parse_key(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_key
+359:27 call  suffixed_err(src, pos, 'Expected "=" after a key in a key...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+361:21 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+362:29 call  parse_value(src, pos, parse_float)
+    -> flit_core.vendor.tomli._parser.parse_value
+
+[flit_core.vendor.tomli._parser.parse_key]
+367:35 call  parse_key_part(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_key_part
+369:21 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+378:25 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+379:39 call  parse_key_part(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_key_part
+381:25 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+
+[flit_core.vendor.tomli._parser.parse_key_part]
+391:25 call  skip_chars(src, pos, BARE_KEY_CHARS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+394:33 call  parse_literal_str(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_literal_str
+396:40 call  parse_one_line_basic_str(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_one_line_basic_str
+397:23 call  suffixed_err(src, pos, "Invalid initial character for a k...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.parse_one_line_basic_str]
+402:27 call  parse_basic_str(src, pos, multiline=False)
+    -> flit_core.vendor.tomli._parser.parse_basic_str
+
+[flit_core.vendor.tomli._parser.parse_array]
+409:37 call  skip_comments_and_array_ws(src, pos)
+    -> flit_core.vendor.tomli._parser.skip_comments_and_array_ws
+410:22 call  src.startswith("]", pos)
+    -> <builtin>.str.startswith
+413:31 call  parse_value(src, pos, parse_float)
+    -> flit_core.vendor.tomli._parser.parse_value
+414:21 call  array.append(val)
+    -> <builtin>.list.append
+415:41 call  skip_comments_and_array_ws(src, pos)
+    -> flit_core.vendor.tomli._parser.skip_comments_and_array_ws
+421:31 call  suffixed_err(src, pos, "Unclosed array")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+424:41 call  skip_comments_and_array_ws(src, pos)
+    -> flit_core.vendor.tomli._parser.skip_comments_and_array_ws
+425:26 call  src.startswith("]", pos)
+    -> <builtin>.str.startswith
+
+[flit_core.vendor.tomli._parser.parse_inline_table]
+431:29 call  NestedDict()
+    -> flit_core.vendor.tomli._parser.NestedDict.__init__
+432:18 call  Flags()
+    -> flit_core.vendor.tomli._parser.Flags.__init__
+434:21 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+435:22 call  src.startswith("}", pos)
+    -> <builtin>.str.startswith
+438:47 call  parse_key_value_pair(src, pos, parse_float)
+    -> flit_core.vendor.tomli._parser.parse_key_value_pair
+440:21 call  flags.is_(key, Flags.FROZEN)
+    -> flit_core.vendor.tomli._parser.Flags.is_
+441:31 call  suffixed_err(src, pos, f"Can not mutate immutable namespa...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+443:50 call  nested_dict.get_or_create_nest(key_parent, access_lists=F...
+    -> flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest
+445:31 call  suffixed_err(src, pos, "Can not overwrite a value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+447:31 call  suffixed_err(src, pos, f"Duplicate inline table key {key_...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+449:25 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+454:31 call  suffixed_err(src, pos, "Unclosed inline table")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+455:22 call  isinstance(value, (dict, list))
+    -> <builtin>.isinstance
+456:22 call  flags.set(key, Flags.FROZEN, recursive=True)
+    -> flit_core.vendor.tomli._parser.Flags.set
+458:25 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+
+[flit_core.vendor.tomli._parser.parse_basic_str_escape]
+470:29 call  skip_chars(src, pos, TOML_WS)
+    -> flit_core.vendor.tomli._parser.skip_chars
+476:35 call  suffixed_err(src, pos, 'Unescaped "\\" in a string')
+    -> flit_core.vendor.tomli._parser.suffixed_err
+478:25 call  skip_chars(src, pos, TOML_WS_AND_NEWLINE)
+    -> flit_core.vendor.tomli._parser.skip_chars
+481:30 call  parse_hex_char(src, pos, 4)
+    -> flit_core.vendor.tomli._parser.parse_hex_char
+483:30 call  parse_hex_char(src, pos, 8)
+    -> flit_core.vendor.tomli._parser.parse_hex_char
+487:15 call  len(escape_id)
+    -> <builtin>.len
+488:31 call  suffixed_err(src, pos, "Unterminated string")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+489:27 call  suffixed_err(src, pos, 'Unescaped "\\" in a string')
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.parse_basic_str_escape_multiline]
+493:34 call  parse_basic_str_escape(src, pos, multiline=True)
+    -> flit_core.vendor.tomli._parser.parse_basic_str_escape
+
+[flit_core.vendor.tomli._parser.parse_hex_char]
+498:11 call  len(hex_str)
+    -> <builtin>.len
+498:64 call  HEXDIGIT_CHARS.issuperset(hex_str)
+    -> <builtin>.frozenset.issuperset
+499:27 call  suffixed_err(src, pos, "Invalid hex value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+501:18 call  int(hex_str, 16)
+    -> <builtin>.int
+502:35 call  is_unicode_scalar_value(hex_int)
+    -> flit_core.vendor.tomli._parser.is_unicode_scalar_value
+503:27 call  suffixed_err(src, pos, "Escaped character is not a Unicod...
+    -> flit_core.vendor.tomli._parser.suffixed_err
+504:20 call  chr(hex_int)
+    -> <builtin>.chr
+
+[flit_core.vendor.tomli._parser.parse_literal_str]
+510:21 call  skip_until( src, pos, "'", error_on=ILLEGAL_LITERAL_STR_C...
+    -> flit_core.vendor.tomli._parser.skip_until
+
+[flit_core.vendor.tomli._parser.parse_multiline_str]
+518:22 call  src.startswith("\n", pos)
+    -> <builtin>.str.startswith
+523:29 call  skip_until( src, pos, "'''", error_on=ILLEGAL_MULTILINE_L...
+    -> flit_core.vendor.tomli._parser.skip_until
+534:38 call  parse_basic_str(src, pos, multiline=True)
+    -> flit_core.vendor.tomli._parser.parse_basic_str
+538:26 call  src.startswith(delim, pos)
+    -> <builtin>.str.startswith
+541:26 call  src.startswith(delim, pos)
+    -> <builtin>.str.startswith
+
+[flit_core.vendor.tomli._parser.parse_basic_str]
+560:31 call  suffixed_err(src, pos, "Unterminated string")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+564:30 call  src.startswith('"""', pos)
+    -> <builtin>.str.startswith
+570:47 call  parse_escapes(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_basic_str_escape
+    -> flit_core.vendor.tomli._parser.parse_basic_str_escape_multiline
+    note: value site: parse_escapes is the local of lines 550 and 553: parse_basic_str_escape_multiline when multiline, else parse_basic_str_escape
+575:31 call  suffixed_err(src, pos, f"Illegal character {char!r}")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.parse_value]
+589:26 call  src.startswith('"""', pos)
+    -> <builtin>.str.startswith
+590:39 call  parse_multiline_str(src, pos, literal=False)
+    -> flit_core.vendor.tomli._parser.parse_multiline_str
+591:40 call  parse_one_line_basic_str(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_one_line_basic_str
+595:26 call  src.startswith("'''", pos)
+    -> <builtin>.str.startswith
+596:39 call  parse_multiline_str(src, pos, literal=True)
+    -> flit_core.vendor.tomli._parser.parse_multiline_str
+597:33 call  parse_literal_str(src, pos)
+    -> flit_core.vendor.tomli._parser.parse_literal_str
+601:26 call  src.startswith("true", pos)
+    -> <builtin>.str.startswith
+604:26 call  src.startswith("false", pos)
+    -> <builtin>.str.startswith
+608:39 call  RE_DATETIME.match(src, pos)
+    -> re.Pattern.match
+611:45 call  match_to_datetime(datetime_match)
+    -> flit_core.vendor.tomli._re.match_to_datetime
+613:31 call  suffixed_err(src, pos, "Invalid date or datetime")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+614:34 call  datetime_match.end()
+    -> re.Match.end
+615:41 call  RE_LOCALTIME.match(src, pos)
+    -> re.Pattern.match
+617:35 call  localtime_match.end()
+    -> re.Match.end
+617:57 call  match_to_localtime(localtime_match)
+    -> flit_core.vendor.tomli._re.match_to_localtime
+622:35 call  RE_NUMBER.match(src, pos)
+    -> re.Pattern.match
+624:32 call  number_match.end()
+    -> re.Match.end
+624:51 call  match_to_number(number_match, parse_float)
+    -> flit_core.vendor.tomli._re.match_to_number
+628:27 call  parse_array(src, pos, parse_float)
+    -> flit_core.vendor.tomli._parser.parse_array
+632:34 call  parse_inline_table(src, pos, parse_float)
+    -> flit_core.vendor.tomli._parser.parse_inline_table
+637:36 call  parse_float(first_three)
+    -> <builtin>.float
+    note: value site: parse_float is the parameter of loads (through parse_value, parse_array, parse_inline_table and parse_key_value_pair, which forward it unchanged); its only package value is the default float of loads and load (read_flit_config calls loads(text) with the default); a client callable passed to load or loads is opaque (B2: ParseFloat is a bare Callable)
+640:36 call  parse_float(first_four)
+    -> <builtin>.float
+    note: value site: parse_float is the parameter of loads (through parse_value, parse_array, parse_inline_table and parse_key_value_pair, which forward it unchanged); its only package value is the default float of loads and load (read_flit_config calls loads(text) with the default); a client callable passed to load or loads is opaque (B2: ParseFloat is a bare Callable)
+642:23 call  suffixed_err(src, pos, "Invalid value")
+    -> flit_core.vendor.tomli._parser.suffixed_err
+
+[flit_core.vendor.tomli._parser.suffixed_err]
+659:27 call  TOMLDecodeError(f"{msg} (at {coord_repr(src, pos)})")
+    -> <builtin>.ValueError.__init__
+    note: TOMLDecodeError subclasses ValueError and defines no __init__
+659:51 call  coord_repr(src, pos)
+    -> flit_core.vendor.tomli._parser.suffixed_err.coord_repr
+
+[flit_core.vendor.tomli._parser.suffixed_err.coord_repr]
+650:22 call  len(src)
+    -> <builtin>.len
+652:25 call  src.count("\n", 0, pos)
+    -> <builtin>.str.count
+656:38 call  src.rindex("\n", 0, pos)
+    -> <builtin>.str.rindex
+
+== flit_core.vendor.tomli._re
+
+[flit_core.vendor.tomli._re]
+13:23 call  re.compile( r""" 0 (?: x[0-9A-Fa-f](?:_?[0-9A-Fa-f])* # h...
+    -> re.compile
+32:26 call  re.compile(_TIME_RE_STR)
+    -> re.compile
+33:25 call  re.compile( fr""" ([0-9]{{4}})-(0[1-9]|1[0-2])-(0[1-9]|[1...
+    -> re.compile
+81:2 decorator  @lru_cache(maxsize=None)
+    -> functools.lru_cache.decorating_function
+    note: value site: the decorator is the value that lru_cache(maxsize=None) returns, its local function decorating_function (functools.py), which wraps cached_tz in a functools._lru_cache_wrapper without calling it
+81:11 call  lru_cache(maxsize=None)
+    -> functools.lru_cache
+
+[flit_core.vendor.tomli._re.match_to_datetime]
+64:21 call  match.groups()
+    -> re.Match.groups
+    note: match is the RE_DATETIME match of parse_value (608:39), annotated re.Match
+65:27 call  int(year_str)
+    -> <builtin>.int
+65:42 call  int(month_str)
+    -> <builtin>.int
+65:58 call  int(day_str)
+    -> <builtin>.int
+67:20 call  date(year, month, day)
+    -> datetime.date
+68:28 call  int(hour_str)
+    -> <builtin>.int
+68:43 call  int(minute_str)
+    -> <builtin>.int
+68:60 call  int(sec_str)
+    -> <builtin>.int
+69:17 call  int(micros_str.ljust(6, "0"))
+    -> <builtin>.int
+69:34 call  micros_str.ljust(6, "0")
+    -> <builtin>.str.ljust
+71:41 call  cached_tz( offset_hour_str, offset_minute_str, offset_sig...
+    -> functools._lru_cache_wrapper.__call__
+    -> flit_core.vendor.tomli._re.cached_tz
+    note: cached_tz is the lru_cache wrapper of the function (81:2); on a cache miss the wrapper calls the function (no PyPy is admitted, so no functools._lru_cache_wrapper.wrapper)
+78:20 call  datetime(year, month, day, hour, minute, sec, micros, tzi...
+    -> datetime.datetime
+
+[flit_core.vendor.tomli._re.cached_tz]
+84:20 call  timezone( timedelta( hours=sign * int(hour_str), minutes=...
+    -> datetime.timezone
+85:18 call  timedelta( hours=sign * int(hour_str), minutes=sign * int...
+    -> datetime.timedelta
+86:29 call  int(hour_str)
+    -> <builtin>.int
+87:31 call  int(minute_str)
+    -> <builtin>.int
+
+[flit_core.vendor.tomli._re.match_to_localtime]
+93:61 call  match.groups()
+    -> re.Match.groups
+    note: match is the RE_LOCALTIME match of parse_value (615:41)
+94:17 call  int(micros_str.ljust(6, "0"))
+    -> <builtin>.int
+94:34 call  micros_str.ljust(6, "0")
+    -> <builtin>.str.ljust
+95:16 call  time(int(hour_str), int(minute_str), int(sec_str), micros)
+    -> datetime.time
+95:20 call  int(hour_str)
+    -> <builtin>.int
+95:35 call  int(minute_str)
+    -> <builtin>.int
+95:52 call  int(sec_str)
+    -> <builtin>.int
+
+[flit_core.vendor.tomli._re.match_to_number]
+99:19 call  match.group("floatpart")
+    -> re.Match.group
+    note: match is the RE_NUMBER match of parse_value (622:35)
+100:27 call  parse_float(match.group())
+    -> <builtin>.float
+    note: value site: parse_float is the parameter of loads (through parse_value, parse_array, parse_inline_table and parse_key_value_pair, which forward it unchanged); its only package value is the default float of loads and load (read_flit_config calls loads(text) with the default); a client callable passed to load or loads is opaque (B2: ParseFloat is a bare Callable)
+100:39 call  match.group()
+    -> re.Match.group
+101:15 call  int(match.group(), 0)
+    -> <builtin>.int
+101:27 call  match.group()
+    -> re.Match.group
+
+== flit_core.versionno
+
+[flit_core.versionno]
+6:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+32:32 call  re.compile(r""" \s*v? (?: (?:(?P<epoch>[0-9]+)!)? # epoch...
+    -> re.compile
+
+[flit_core.versionno.normalise_version]
+77:33 call  orig_version.lower()
+    -> <builtin>.str.lower
+    note: the package passes strs: check_version passes a version that it has tested with isinstance(version, str) (common.py:254), and read_pep621_metadata [project] version, checked as a str (config.py:404)
+78:33 call  VERSION_PERMISSIVE.match(version)
+    -> re.Pattern.match
+80:26 call  os.environ.get('FLIT_ALLOW_INVALID')
+    -> collections.abc.Mapping.get
+    note: FLIT_ALLOW_INVALID is documented (doc/cmdline.rst:217)
+81:24 call  log.warning("Invalid version number %r allowed by FLIT_AL...
+    -> logging.Logger.warning
+86:33 call  InvalidVersion(f"Version number {orig_version!r} does not...
+    -> <builtin>.ValueError.__init__
+    note: common.InvalidVersion and ProblemInModule define no __init__
+91:29 call  m.group('epoch', 'release')
+    -> re.Match.group
+93:12 call  add(f'{int(epoch)}!')
+    -> <builtin>.list.append
+    note: value site: add is components.append, the bound method of the list of line 88 (line 89)
+93:19 call  int(epoch)
+    -> <builtin>.int
+94:8 call  add('.'.join(str(int(rp)) for rp in release.split('.')))
+    -> <builtin>.list.append
+    note: value site: add is components.append (line 89)
+94:17 call  '.'.join(str(int(rp)) for rp in release.split('.'))
+    -> <builtin>.str.join
+94:21 call  str(int(rp))
+    -> <builtin>.str
+94:25 call  int(rp)
+    -> <builtin>.int
+94:54 call  release.split('.')
+    -> <builtin>.str.split
+96:27 call  m.group('pre_l', 'pre_n')
+    -> re.Match.group
+99:46 call  str(int(pre_n))
+    -> <builtin>.str
+99:50 call  int(pre_n)
+    -> <builtin>.int
+100:12 call  add(pre_l + pre_n)
+    -> <builtin>.list.append
+    note: value site: add is components.append (line 89)
+102:39 call  m.group('post_n1', 'post_l', 'post_n2')
+    -> re.Match.group
+104:12 call  add('.post' + str(int(post_n1)))
+    -> <builtin>.list.append
+    note: value site: add is components.append (line 89)
+104:26 call  str(int(post_n1))
+    -> <builtin>.str
+104:30 call  int(post_n1)
+    -> <builtin>.int
+106:49 call  str(int(post_n2))
+    -> <builtin>.str
+106:53 call  int(post_n2)
+    -> <builtin>.int
+107:12 call  add('.post' + str(int(post_n)))
+    -> <builtin>.list.append
+    note: value site: add is components.append (line 89)
+107:26 call  str(int(post_n))
+    -> <builtin>.str
+107:30 call  int(post_n)
+    -> <builtin>.int
+109:27 call  m.group('dev_l', 'dev_n')
+    -> re.Match.group
+111:46 call  str(int(dev_n))
+    -> <builtin>.str
+111:50 call  int(dev_n)
+    -> <builtin>.int
+112:12 call  add('.dev' + dev_n)
+    -> <builtin>.list.append
+    note: value site: add is components.append (line 89)
+114:20 call  m.group('local')
+    -> re.Match.group
+116:30 call  local.replace('-', '.')
+    -> <builtin>.str.replace
+116:48 call  local.replace('-', '.').replace('_', '.')
+    -> <builtin>.str.replace
+117:17 call  str(int(c))
+    -> <builtin>.str
+117:21 call  int(c)
+    -> <builtin>.int
+117:38 call  c.isdigit()
+    -> <builtin>.str.isdigit
+118:34 call  local.split('.')
+    -> <builtin>.str.split
+119:12 call  add('+' + '.'.join(l))
+    -> <builtin>.list.append
+    note: value site: add is components.append (line 89)
+119:27 call  '.'.join(l)
+    -> <builtin>.str.join
+121:22 call  ''.join(components)
+    -> <builtin>.str.join
+123:20 call  log.warning("Version number normalised: %r -> %r (see PEP...
+    -> logging.Logger.warning
+
+== flit_core.wheel
+
+[flit_core.wheel]
+21:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+82:6 decorator  @classmethod
+    -> <builtin>.classmethod
+94:6 decorator  @property
+    -> <builtin>.property
+98:6 decorator  @property
+    -> <builtin>.property
+150:6 decorator  @contextlib.contextmanager
+    -> contextlib.contextmanager
+274:9 call  main()
+    -> flit_core.wheel.main
+    note: the module's __main__ block, which python -m flit_core.wheel runs (doc/bootstrap.rst:18)
+
+[flit_core.wheel._write_wheel_file]
+30:12 call  f.write(wheel_file_template)
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: f is the text file of prepare_metadata_for_build_wheel (buildapi.py:57) or the io.StringIO of WheelBuilder._write_to_zip (line 197)
+32:16 call  f.write("Tag: py2-none-any\n")
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 30:12; supports_py2 is Metadata.supports_py2, true for a requires-python that admits Python 2
+33:12 call  f.write("Tag: py3-none-any\n")
+    -> io.TextIOWrapper.write
+    -> io.StringIO.write
+    note: as at 30:12
+
+[flit_core.wheel.zip_timestamp_from_env]
+46:16 call  int(os.environ['SOURCE_DATE_EPOCH'])
+    -> <builtin>.int
+    note: SOURCE_DATE_EPOCH is documented (doc/cmdline.rst:242, doc/reproducible.rst)
+47:35 call  datetime.fromtimestamp(t, timezone.utc)
+    -> datetime.datetime.fromtimestamp
+54:17 call  log.info("Zip timestamps will be from SOURCE_DATE_EPOCH: ...
+    -> logging.Logger.info
+58:17 call  log.info("SOURCE_DATE_EPOCH is below the minimum for zip ...
+    -> logging.Logger.info
+59:17 call  log.info("Zip timestamps will be 1980-01-01 00:00:00")
+    -> logging.Logger.info
+
+[flit_core.wheel.WheelBuilder.__init__]
+76:56 call  zip_timestamp_from_env()
+    -> flit_core.wheel.zip_timestamp_from_env
+79:41 call  zipfile.ZipFile(target_fp, 'w', compression=zipfile.ZIP_D...
+    -> zipfile.ZipFile
+
+[flit_core.wheel.WheelBuilder.from_ini_path]
+86:36 call  read_flit_config(ini_path)
+    -> flit_core.config.read_flit_config
+88:31 call  common.Module(ini_info.module, directory)
+    -> flit_core.common.Module.__init__
+89:40 call  common.make_metadata(module, ini_info)
+    -> flit_core.common.make_metadata
+90:19 call  cls( directory, module, metadata, entrypoints, target_fp,...
+    -> flit_core.wheel.WheelBuilder.__init__
+    note: value site: cls is the class on which from_ini_path is called; the package calls it only as WheelBuilder.from_ini_path (make_wheel_in, line 231); WheelBuilder is private (flit-core.md J1) and has no package subclass
+
+[flit_core.wheel.WheelBuilder.dist_info]
+96:37 call  common.dist_info_name(self.metadata.name, self.metadata.v...
+    -> flit_core.common.dist_info_name
+
+[flit_core.wheel.WheelBuilder.wheel_filename]
+100:47 call  common.normalize_dist_name(self.metadata.name, self.metad...
+    -> flit_core.common.normalize_dist_name
+101:40 getattr  self.metadata.supports_py2
+    -> flit_core.common.Metadata.supports_py2
+    note: self.metadata is the Metadata of make_metadata (from_ini_path)
+
+[flit_core.wheel.WheelBuilder._add_file]
+105:18 call  log.debug("Adding %s to zip file", full_path)
+    -> logging.Logger.debug
+106:34 call  str(full_path)
+    -> <builtin>.str
+106:50 call  str(rel_path)
+    -> <builtin>.str
+111:47 call  common.path_is_within_directory(full_path, self.directory)
+    -> flit_core.common.path_is_within_directory
+112:31 call  RuntimeError( f"Refusing to add {rel_path!r} to the wheel...
+    -> <builtin>.RuntimeError
+119:40 call  rel_path.replace(os.sep, '/')
+    -> <builtin>.str.replace
+    note: the branch runs where os.sep is not '/': Windows, a supported platform (CI windows-latest)
+122:46 call  zipfile.ZipInfo.from_file(full_path, rel_path)
+    -> zipfile.ZipInfo.from_file
+125:36 call  zipfile.ZipInfo(rel_path, self.source_time_stamp)
+    -> zipfile.ZipInfo
+128:26 call  os.stat(full_path)
+    -> os.stat
+129:53 call  common.normalize_file_permissions(st_mode)
+    -> flit_core.common.normalize_file_permissions
+130:24 call  _set_zinfo_mode(zinfo, new_mode & 0xFFFF)
+    -> flit_core.wheel._set_zinfo_mode
+132:24 call  stat.S_ISDIR(st_mode)
+    -> stat.S_ISDIR
+137:33 call  hashlib.sha256()
+    -> hashlib.sha256
+138:18 call  open(full_path, 'rb')
+    -> <builtin>.open
+138:63 call  self.wheel_zip.open(zinfo, 'w')
+    -> zipfile.ZipFile.open
+140:31 call  src.read(1024 * 8)
+    -> io.BufferedReader.read
+    note: open(full_path, 'rb') returns an io.BufferedReader
+143:31 call  hashsum.update(buf)
+    -> _hashlib.HASH.update
+    -> _sha256.SHA256Type.update
+    -> _sha2.SHA256Type.update
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback when OpenSSL does not provide SHA-256 the builtin object of the class that the module exports as _sha256.SHA256Type on CPython 3.8 to 3.11 (PyModule_AddObject; its type name is _sha256.sha256) and _sha2.SHA256Type from 3.12 (Modules/sha256module.c and sha2module.c of the deps; the precedent of django-constance)
+144:26 call  dst.write(buf)
+    -> zipfile._ZipWriteFile.write
+    note: ZipFile.open(zinfo, 'w') returns a zipfile._ZipWriteFile, a class without a public path, named as the tracer names it
+146:23 call  os.stat(full_path)
+    -> os.stat
+147:40 call  urlsafe_b64encode(hashsum.digest())
+    -> base64.urlsafe_b64encode
+147:55 call  hashsum.digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.SHA256Type.digest
+    -> _sha2.SHA256Type.digest
+    note: the hash object of 137:33, as at 143:31
+147:65 call  urlsafe_b64encode(hashsum.digest()).decode('ascii')
+    -> <builtin>.bytes.decode
+147:81 call  urlsafe_b64encode(hashsum.digest()).decode('ascii').rstri...
+    -> <builtin>.str.rstrip
+148:28 call  self.records.append((rel_path, hash_digest, size))
+    -> <builtin>.list.append
+
+[flit_core.wheel.WheelBuilder._write_to_zip]
+152:23 call  StringIO()
+    -> io.StringIO
+155:18 call  log.debug("Writing data to %s in zip file", rel_path)
+    -> logging.Logger.debug
+160:29 call  zipfile.ZipInfo(rel_path, date_time)
+    -> zipfile.ZipInfo
+162:24 call  _set_zinfo_mode(zi, mode | stat.S_IFREG)
+    -> flit_core.wheel._set_zinfo_mode
+163:25 call  sio.getvalue()
+    -> io.StringIO.getvalue
+163:34 call  sio.getvalue().encode('utf-8')
+    -> <builtin>.str.encode
+164:33 call  hashlib.sha256(b)
+    -> hashlib.sha256
+165:40 call  urlsafe_b64encode(hashsum.digest())
+    -> base64.urlsafe_b64encode
+165:55 call  hashsum.digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.SHA256Type.digest
+    -> _sha2.SHA256Type.digest
+    note: the hash object of 164:33, as at 143:31
+165:65 call  urlsafe_b64encode(hashsum.digest()).decode('ascii')
+    -> <builtin>.bytes.decode
+165:81 call  urlsafe_b64encode(hashsum.digest()).decode('ascii').rstri...
+    -> <builtin>.str.rstrip
+166:32 call  self.wheel_zip.writestr(zi, b, compress_type=zipfile.ZIP_...
+    -> zipfile.ZipFile.writestr
+167:28 call  self.records.append((rel_path, hash_digest, len(b)))
+    -> <builtin>.list.append
+167:56 call  len(b)
+    -> <builtin>.len
+
+[flit_core.wheel.WheelBuilder.copy_module]
+170:17 call  log.info('Copying package file(s) from %s', self.module.p...
+    -> logging.Logger.info
+171:25 call  str(self.module.source_dir)
+    -> <builtin>.str
+173:48 call  self.module.iter_files()
+    -> flit_core.common.Module.iter_files
+174:35 call  osp.relpath(full_path, source_dir)
+    -> os.path.relpath
+175:27 call  self._add_file(full_path, rel_path)
+    -> flit_core.wheel.WheelBuilder._add_file
+
+[flit_core.wheel.WheelBuilder.add_pth]
+178:32 call  self._write_to_zip(self.module.name + ".pth")
+    -> contextlib.contextmanager.helper
+    -> flit_core.wheel.WheelBuilder._write_to_zip
+    note: _write_to_zip is decorated with @contextlib.contextmanager (150:6): the call runs contextlib's helper, which calls the generator function back
+179:20 call  f.write(str(self.module.source_dir.resolve()))
+    -> io.StringIO.write
+    note: f is the io.StringIO that _write_to_zip yields (line 153)
+179:24 call  str(self.module.source_dir.resolve())
+    -> <builtin>.str
+179:55 call  self.module.source_dir.resolve()
+    -> pathlib.PosixPath.resolve
+    -> pathlib.WindowsPath.resolve
+    note: source_dir is directory / prefix of Module.__init__ (common.py:62), a PosixPath or a WindowsPath
+
+[flit_core.wheel.WheelBuilder.add_data_directory]
+182:47 call  common.normalize_dist_name(self.metadata.name, self.metad...
+    -> flit_core.common.normalize_dist_name
+183:46 call  common.walk_data_dir(self.data_directory)
+    -> flit_core.common.walk_data_dir
+184:39 call  os.path.relpath(full_path, self.data_directory)
+    -> os.path.relpath
+185:27 call  self._add_file(full_path, f'{dist_name}.data/data/{rel_pa...
+    -> flit_core.wheel.WheelBuilder._add_file
+
+[flit_core.wheel.WheelBuilder.write_metadata]
+188:17 call  log.info('Writing metadata files')
+    -> logging.Logger.info
+191:36 call  self._write_to_zip(f'{self.dist_info}/entry_points.txt')
+    -> contextlib.contextmanager.helper
+    -> flit_core.wheel.WheelBuilder._write_to_zip
+    note: as at 178:32
+191:45 getattr  self.dist_info
+    -> flit_core.wheel.WheelBuilder.dist_info
+192:42 call  common.write_entry_points(self.entrypoints, f)
+    -> flit_core.common.write_entry_points
+195:27 call  self._add_file(self.directory / file, f'{self.dist_info}/...
+    -> flit_core.wheel.WheelBuilder._add_file
+195:59 getattr  self.dist_info
+    -> flit_core.wheel.WheelBuilder.dist_info
+197:32 call  self._write_to_zip(f'{self.dist_info}/WHEEL')
+    -> contextlib.contextmanager.helper
+    -> flit_core.wheel.WheelBuilder._write_to_zip
+    note: as at 178:32
+197:41 getattr  self.dist_info
+    -> flit_core.wheel.WheelBuilder.dist_info
+198:30 call  _write_wheel_file(f, supports_py2=self.metadata.supports_...
+    -> flit_core.wheel._write_wheel_file
+    reject flit_core.common.Metadata.supports_py2: the argument is the bool that the property returns at 198:61
+198:61 getattr  self.metadata.supports_py2
+    -> flit_core.common.Metadata.supports_py2
+200:32 call  self._write_to_zip(f'{self.dist_info}/METADATA')
+    -> contextlib.contextmanager.helper
+    -> flit_core.wheel.WheelBuilder._write_to_zip
+    note: as at 178:32
+200:41 getattr  self.dist_info
+    -> flit_core.wheel.WheelBuilder.dist_info
+201:46 call  self.metadata.write_metadata_file(f)
+    -> flit_core.common.Metadata.write_metadata_file
+
+[flit_core.wheel.WheelBuilder.write_record]
+204:17 call  log.info('Writing the record of files')
+    -> logging.Logger.info
+206:32 call  self._write_to_zip(f'{self.dist_info}/RECORD')
+    -> contextlib.contextmanager.helper
+    -> flit_core.wheel.WheelBuilder._write_to_zip
+    note: as at 178:32
+206:41 getattr  self.dist_info
+    -> flit_core.wheel.WheelBuilder.dist_info
+207:32 call  csv.writer(f)
+    -> csv.writer
+209:32 call  writer.writerow((path, f'sha256={hash}', size))
+    -> _csv.Writer.writerow
+    -> _csv.writer.writerow
+    note: writer is the object that csv.writer returns; CPython 3.10 and later export its class as _csv.Writer (Modules/_csv.c, PyModule_AddObjectRef); 3.8 and 3.9 have no public path for it, so their name is the type name _csv.writer, as the tracer names it (the netaddr precedent; Codex round 1, M1)
+211:28 call  writer.writerow((f'{self.dist_info}/RECORD', '', ''))
+    -> _csv.Writer.writerow
+    -> _csv.writer.writerow
+    note: as at 209:32
+211:38 getattr  self.dist_info
+    -> flit_core.wheel.WheelBuilder.dist_info
+
+[flit_core.wheel.WheelBuilder.build]
+216:29 call  self.add_pth()
+    -> flit_core.wheel.WheelBuilder.add_pth
+218:33 call  self.copy_module()
+    -> flit_core.wheel.WheelBuilder.copy_module
+219:36 call  self.add_data_directory()
+    -> flit_core.wheel.WheelBuilder.add_data_directory
+220:32 call  self.write_metadata()
+    -> flit_core.wheel.WheelBuilder.write_metadata
+221:30 call  self.write_record()
+    -> flit_core.wheel.WheelBuilder.write_record
+223:33 call  self.wheel_zip.close()
+    -> zipfile.ZipFile.close
+
+[flit_core.wheel.make_wheel_in]
+228:39 call  tempfile.mkstemp(suffix='.whl', dir=str(wheel_directory))
+    -> tempfile.mkstemp
+228:62 call  str(wheel_directory)
+    -> <builtin>.str
+230:18 call  open(fd, 'w+b')
+    -> <builtin>.open
+231:44 call  WheelBuilder.from_ini_path(ini_path, fp)
+    -> flit_core.wheel.WheelBuilder.from_ini_path
+    reject flit_core.sdist.SdistBuilder.from_ini_path: the receiver is the class WheelBuilder
+232:21 call  wb.build(editable)
+    -> flit_core.wheel.WheelBuilder.build
+    reject flit_core.sdist.SdistBuilder.build: wb is the WheelBuilder that WheelBuilder.from_ini_path returns
+237:26 call  os.stat(temp_path)
+    -> os.stat
+238:17 call  os.chmod(temp_path, common.normalize_file_permissions(st_...
+    -> os.chmod
+238:62 call  common.normalize_file_permissions(st_mode)
+    -> flit_core.common.normalize_file_permissions
+240:43 getattr  wb.wheel_filename
+    -> flit_core.wheel.WheelBuilder.wheel_filename
+241:19 call  os.replace(temp_path, str(wheel_path))
+    -> os.replace
+241:34 call  str(wheel_path)
+    -> <builtin>.str
+243:18 call  os.unlink(temp_path)
+    -> os.unlink
+246:13 call  log.info("Built wheel: %s", wheel_path)
+    -> logging.Logger.info
+247:27 call  SimpleNamespace(builder=wb, file=wheel_path)
+    -> types.SimpleNamespace
+
+[flit_core.wheel.main]
+251:37 call  argparse.ArgumentParser()
+    -> argparse.ArgumentParser
+252:24 call  parser.add_argument( 'srcdir', type=Path, nargs='?', defa...
+    -> argparse.ArgumentParser.add_argument
+256:25 call  Path.cwd()
+    -> pathlib.Path.cwd
+260:24 call  parser.add_argument( '--outdir', '-o', help='output direc...
+    -> argparse.ArgumentParser.add_argument
+265:29 call  parser.parse_args(argv)
+    -> argparse.ArgumentParser.parse_args
+    note: argparse calls the type Path on the srcdir string (library code calling a library class: no edge)
+266:67 call  Path(args.outdir)
+    -> pathlib.Path
+267:10 call  print("Building wheel from", args.srcdir)
+    -> <builtin>.print
+269:17 call  outdir.mkdir(parents=True, exist_ok=True)
+    -> pathlib.PosixPath.mkdir
+    -> pathlib.WindowsPath.mkdir
+    note: outdir is srcdir / 'dist' (srcdir a Path from argparse's type=Path or the default Path.cwd()) or Path(args.outdir): a PosixPath on Linux, a WindowsPath on Windows
+270:25 call  make_wheel_in(pyproj_toml, outdir)
+    -> flit_core.wheel.make_wheel_in
+271:10 call  print("Wheel built", outdir / info.file.name)
+    -> <builtin>.print
+271:40 getattr  info.file
+    reject flit_core.common.Module.file: info is the types.SimpleNamespace of make_wheel_in (line 247)
+

@@ -70,6 +70,7 @@ services:
       dockerfile: ../../container/Dockerfile.trace
       additional_contexts:
         inputs: service:inputs
+        wheels: macro-benchmark/wheels
       args:
         PYTHON_IMAGE: *python-image
         NAME: ${NAME:-unset}

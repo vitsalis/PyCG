@@ -1,0 +1,60 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.00kB done
+#1 WARN: InvalidDefaultArgInFrom: Default value for ARG ${PYTHON_IMAGE} results in empty or invalid base image name (line 8)
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+#2 DONE 1.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM docker.io/library/python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f
+#4 resolve docker.io/library/python:3.14-slim@sha256:9aaa474097d094040649f2162a627c0049b408f52138d980916788d80f04802f 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 579B done
+#5 DONE 0.0s
+
+#6 [3/4] RUN env -i PATH=/usr/local/bin:/usr/bin:/bin PIP_CONFIG_FILE=/dev/null         python3 -m pip install --require-hashes --only-binary :all: --no-deps         --no-cache-dir --disable-pip-version-check --no-input         -r /opt/pycg-wheel/build-requirements.txt     && groupadd --gid 10001 builder     && useradd --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent         --shell /usr/sbin/nologin builder
+#6 CACHED
+
+#7 [2/4] COPY build-requirements.txt /opt/pycg-wheel/build-requirements.txt
+#7 CACHED
+
+#8 [4/4] WORKDIR /tmp
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 exporting manifest sha256:3842b54b9e46ebdaf362bb721f65ff5ee0bf2a7ea273606bfad14b758cb78c7b done
+#9 exporting config sha256:17f53bcff5a1ea186b584e8143e17603aede0917fde07c1e1e0d535399043313 done
+#9 exporting attestation manifest sha256:19549ff6b35f952d9da09accffec64b464cc561bb274cdd0477bec9962dbe9e4 done
+#9 exporting manifest list sha256:d90fb1c07af53a55c318b463f91597818af271d1eabb11583878e1d51a888e18 done
+#9 naming to docker.io/library/pycg-wheel-builder:latest done
+#9 unpacking to docker.io/library/pycg-wheel-builder:latest done
+#9 DONE 0.0s
+
+ [33m1 warning found (use docker --debug to expand):
+[0m - InvalidDefaultArgInFrom: Default value for ARG ${PYTHON_IMAGE} results in empty or invalid base image name (line 8)
+site-packages: /usr/local/lib/python3.14/site-packages
+  README.txt
+  _distutils_hack
+  distutils-precedence.pth
+  pip
+  pip-26.2.2.dist-info
+  setuptools
+  setuptools-83.0.0.dist-info
+Processing ./odfpy-1.4.1
+  Preparing metadata (pyproject.toml): started
+  Preparing metadata (pyproject.toml): finished with status 'done'
+Building wheels for collected packages: odfpy
+  Building wheel for odfpy (pyproject.toml): started
+  Building wheel for odfpy (pyproject.toml): finished with status 'done'
+  Created wheel for odfpy: filename=odfpy-1.4.1-py2.py3-none-any.whl size=160717 sha256=19548df9de7970e8cb6b120eb0de3232561de6c876b2642a91e1b9c88c2af2f8
+  Stored in directory: /tmp/pip-ephem-wheel-cache-be83oslk/wheels/75/b1/ba/10d7cfe7103c98325a9f906608dc79b509414866a860b1b25d
+Successfully built odfpy

@@ -120,6 +120,12 @@ def test_the_services_are_the_inputs_and_the_trace_which_takes_only_name(compose
     assert "SET" not in re.findall(r"\$\{(\w+)", COMPOSE.read_text())
 
 
+def test_the_trace_service_gives_the_wheels_built_here_as_a_build_context(compose):
+    contexts = compose["services"]["trace"]["build"]["additional_contexts"]
+    assert contexts["wheels"] == "macro-benchmark/wheels"
+    assert (EVALUATION / contexts["wheels"]).is_dir()
+
+
 def test_the_trace_service_writes_only_its_own_directory(compose):
     writable = [
         volume

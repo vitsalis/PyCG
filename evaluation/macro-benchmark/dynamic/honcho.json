@@ -1,0 +1,508 @@
+{
+  "aliases": {
+    "<builtin>.RuntimeError": [
+      "threading.ThreadError"
+    ],
+    "<builtin>.bytes.decode": [
+      "uuid.bytes_.decode"
+    ],
+    "<builtin>.dict.get": [
+      "collections.OrderedDict.get",
+      "collections.defaultdict.get"
+    ],
+    "<builtin>.dict.items": [
+      "collections.defaultdict.items"
+    ],
+    "<builtin>.dict.keys": [
+      "collections.defaultdict.keys"
+    ],
+    "<builtin>.dict.update": [
+      "collections.defaultdict.update"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.join": [
+      "jinja2.compiler.concat",
+      "jinja2.environment.concat",
+      "jinja2.runtime.concat",
+      "jinja2.utils.concat",
+      "typing.Text.join"
+    ],
+    "<builtin>.str.ljust": [
+      "typing.Text.ljust"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.splitlines": [
+      "typing.Text.splitlines"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "argparse._ActionsContainer.add_argument": [
+      "argparse.ArgumentParser.add_argument"
+    ],
+    "collections.ChainMap": [
+      "jinja2.environment.ChainMap"
+    ],
+    "collections.abc.Mapping.get": [
+      "collections.abc.MutableMapping.get",
+      "selectors.Mapping.get"
+    ],
+    "collections.namedtuple": [
+      "selectors.namedtuple",
+      "ssl.namedtuple",
+      "unittest.util.namedtuple"
+    ],
+    "datetime.date.strftime": [
+      "datetime.datetime.strftime"
+    ],
+    "itertools.groupby": [
+      "jinja2.filters.groupby"
+    ],
+    "jinja2.environment.Environment": [
+      "jinja2.Environment"
+    ],
+    "jinja2.loaders.PackageLoader": [
+      "jinja2.PackageLoader"
+    ],
+    "multiprocessing.context.BaseContext.Queue": [
+      "multiprocessing.Queue"
+    ],
+    "posix.getcwd": [
+      "os.getcwd"
+    ],
+    "posixpath.basename": [
+      "os.path.basename"
+    ],
+    "posixpath.join": [
+      "os.path.join"
+    ]
+  },
+  "commit": "8af63177405a574612abf90ef55aaa68d76f7686",
+  "deselect": [
+    {
+      "reason": "runs `python -m honcho version` in a child interpreter: the tracer does not record a child process",
+      "test": "tests/test_invocation.py::test_runpy_invoke"
+    },
+    {
+      "reason": "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)",
+      "test": "tests/test_manager.py::TestManager::test_loop_calls_process_run"
+    },
+    {
+      "reason": "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)",
+      "test": "tests/test_manager.py::TestManager::test_printer_receives_messages_in_correct_order"
+    },
+    {
+      "reason": "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)",
+      "test": "tests/test_manager.py::TestManager::test_printer_receives_lines_multi_process"
+    },
+    {
+      "reason": "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)",
+      "test": "tests/test_manager.py::TestManager::test_returncode_set_by_first_exiting_process"
+    },
+    {
+      "reason": "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)",
+      "test": "tests/test_manager.py::TestManager::test_printer_receives_lines_after_stop"
+    }
+  ],
+  "distributions": {
+    "Jinja2": "3.1.4",
+    "MarkupSafe": "3.0.3",
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "mock": "5.1.0",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 20,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "honcho.colour": [
+      "<builtin>.enumerate",
+      "<builtin>.globals",
+      "<builtin>.str"
+    ],
+    "honcho.colour.get_colours": [
+      "<builtin>.globals",
+      "<builtin>.len"
+    ],
+    "honcho.command": [
+      "<builtin>.dict",
+      "<builtin>.dict.keys",
+      "<builtin>.sorted",
+      "argparse.ArgumentParser",
+      "argparse.ArgumentParser.add_subparsers",
+      "argparse._ActionsContainer.add_argument",
+      "argparse._SubParsersAction.add_parser",
+      "honcho.command._add_common_args",
+      "importlib.metadata.entry_points",
+      "logging.basicConfig",
+      "logging.getLogger",
+      "posix.getcwd",
+      "posixpath.basename"
+    ],
+    "honcho.command._add_common_args": [
+      "argparse._ActionsContainer.add_argument"
+    ],
+    "honcho.command._compact": [
+      "<builtin>.dict.items"
+    ],
+    "honcho.command._read_env": [
+      "<builtin>.open",
+      "<builtin>.str.join",
+      "<builtin>.str.split",
+      "<builtin>.str.strip",
+      "honcho.environ.parse",
+      "posixpath.join"
+    ],
+    "honcho.command.map_from": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.vars",
+      "collections.ChainMap",
+      "collections.abc.Mapping.get",
+      "honcho.command._compact",
+      "honcho.command._read_env"
+    ],
+    "honcho.compat": [
+      "<builtin>.str",
+      "<builtin>.str.lower"
+    ],
+    "honcho.environ": [
+      "<builtin>.property",
+      "collections.namedtuple",
+      "re.compile"
+    ],
+    "honcho.environ.Procfile.__init__": [
+      "collections.OrderedDict"
+    ],
+    "honcho.environ.expand_processes": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.update",
+      "<builtin>.int",
+      "<builtin>.list.append",
+      "<builtin>.range",
+      "<builtin>.str",
+      "<builtin>.str.format",
+      "collections.OrderedDict.items",
+      "collections.defaultdict",
+      "honcho.environ.expand_processes.<lambda1>"
+    ],
+    "honcho.environ.parse": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.str.join",
+      "<builtin>.str.replace",
+      "<builtin>.str.splitlines",
+      "re.match",
+      "shlex.shlex"
+    ],
+    "honcho.environ.parse_procfile": [
+      "<builtin>.str.splitlines",
+      "honcho.environ.Procfile.__init__",
+      "honcho.environ.Procfile.add_process",
+      "re.Match.group",
+      "re.Pattern.match"
+    ],
+    "honcho.export.base.BaseExport.__init__": [
+      "honcho.export.base._default_template_env",
+      "honcho.export.runit.Export.get_template_loader",
+      "honcho.export.supervisord.Export.get_template_loader",
+      "honcho.export.systemd.Export.get_template_loader",
+      "honcho.export.upstart.Export.get_template_loader"
+    ],
+    "honcho.export.base._default_template_env": [
+      "jinja2.environment.Environment"
+    ],
+    "honcho.export.base.dashrepl": [
+      "re.compile",
+      "re.sub"
+    ],
+    "honcho.export.base.percentescape": [
+      "<builtin>.str.replace"
+    ],
+    "honcho.export.runit.Export.get_template_loader": [
+      "jinja2.loaders.PackageLoader"
+    ],
+    "honcho.export.runit.Export.render": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.str.format",
+      "honcho.export.base.File.__init__",
+      "honcho.export.base.dashrepl",
+      "posixpath.join"
+    ],
+    "honcho.export.supervisord.Export.get_template_loader": [
+      "jinja2.loaders.PackageLoader"
+    ],
+    "honcho.export.supervisord.Export.render": [
+      "<builtin>.str.format",
+      "honcho.export.base.File.__init__"
+    ],
+    "honcho.export.systemd.Export.get_template_loader": [
+      "jinja2.loaders.PackageLoader"
+    ],
+    "honcho.export.systemd.Export.render": [
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "honcho.export.base.dashrepl",
+      "honcho.export.systemd.Export.render.<lambda1>",
+      "itertools.groupby"
+    ],
+    "honcho.export.systemd.Export.render.<lambda1>": [
+      "<builtin>.str.split"
+    ],
+    "honcho.export.upstart.Export.get_template_loader": [
+      "jinja2.loaders.PackageLoader"
+    ],
+    "honcho.export.upstart.Export.render": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.update",
+      "<builtin>.str.format",
+      "honcho.export.base.dashrepl",
+      "honcho.export.upstart.Export.render.<lambda1>",
+      "itertools.groupby"
+    ],
+    "honcho.export.upstart.Export.render.<lambda1>": [
+      "<builtin>.str.split"
+    ],
+    "honcho.manager.Manager.__init__": [
+      "<builtin>.len",
+      "honcho.colour.get_colours",
+      "multiprocessing.context.BaseContext.Queue"
+    ],
+    "honcho.manager.Manager._all_started": [
+      "<builtin>.all",
+      "<builtin>.dict.items"
+    ],
+    "honcho.manager.Manager._all_stopped": [
+      "<builtin>.all",
+      "<builtin>.dict.items"
+    ],
+    "honcho.manager.Manager._any_stopped": [
+      "<builtin>.any",
+      "<builtin>.dict.items"
+    ],
+    "honcho.manager.Manager._start": [
+      "<builtin>.dict.items"
+    ],
+    "honcho.manager.Manager.add_process": [
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.next",
+      "honcho.process.Process.__init__"
+    ],
+    "honcho.manager.Manager.loop": [
+      "honcho.manager.Manager._all_started",
+      "honcho.manager.Manager._all_stopped",
+      "honcho.manager.Manager._any_stopped",
+      "honcho.manager.Manager._start",
+      "multiprocessing.queues.Queue.get",
+      "signal.signal"
+    ],
+    "honcho.printer": [
+      "collections.namedtuple"
+    ],
+    "honcho.printer.Printer.write": [
+      "<builtin>.RuntimeError",
+      "<builtin>.bytes.decode",
+      "<builtin>.isinstance",
+      "<builtin>.print",
+      "<builtin>.str.format",
+      "<builtin>.str.ljust",
+      "<builtin>.str.splitlines",
+      "datetime.date.strftime",
+      "honcho.printer._colour_string"
+    ],
+    "honcho.printer._ansi": [
+      "<builtin>.str.format"
+    ],
+    "honcho.printer._colour_string": [
+      "<builtin>.str.format",
+      "honcho.printer._ansi"
+    ],
+    "honcho.process.Process.__init__": [
+      "os._Environ.copy"
+    ],
+    "honcho.process.Process._send_message": [
+      "datetime.datetime.now"
+    ],
+    "honcho.process.Process.run": [
+      "<builtin>.iter",
+      "honcho.process.Process._send_message"
+    ]
+  },
+  "executed": [
+    "honcho.colour.get_colours",
+    "honcho.command._add_common_args",
+    "honcho.command._compact",
+    "honcho.command._read_env",
+    "honcho.command.map_from",
+    "honcho.environ.Procfile.__init__",
+    "honcho.environ.Procfile.add_process",
+    "honcho.environ.expand_processes",
+    "honcho.environ.expand_processes.<lambda1>",
+    "honcho.environ.parse",
+    "honcho.environ.parse_procfile",
+    "honcho.export.base.BaseExport.__init__",
+    "honcho.export.base.BaseExport.get_template",
+    "honcho.export.base.File.__init__",
+    "honcho.export.base._default_template_env",
+    "honcho.export.base.dashrepl",
+    "honcho.export.base.percentescape",
+    "honcho.export.runit.Export.get_template_loader",
+    "honcho.export.runit.Export.render",
+    "honcho.export.supervisord.Export.get_template_loader",
+    "honcho.export.supervisord.Export.render",
+    "honcho.export.systemd.Export.get_template_loader",
+    "honcho.export.systemd.Export.render",
+    "honcho.export.systemd.Export.render.<lambda1>",
+    "honcho.export.upstart.Export.get_template_loader",
+    "honcho.export.upstart.Export.render",
+    "honcho.export.upstart.Export.render.<lambda1>",
+    "honcho.manager.Manager.__init__",
+    "honcho.manager.Manager._all_started",
+    "honcho.manager.Manager._all_stopped",
+    "honcho.manager.Manager._any_stopped",
+    "honcho.manager.Manager._start",
+    "honcho.manager.Manager.add_process",
+    "honcho.manager.Manager.loop",
+    "honcho.printer.Printer.__init__",
+    "honcho.printer.Printer.write",
+    "honcho.printer._ansi",
+    "honcho.printer._colour_string",
+    "honcho.process.Process.__init__",
+    "honcho.process.Process._send_message",
+    "honcho.process.Process.run"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "honcho.colour.get_colours",
+    "honcho.command._add_common_args",
+    "honcho.command._check_output_encoding",
+    "honcho.command._compact",
+    "honcho.command._mkdir",
+    "honcho.command._parse_concurrency",
+    "honcho.command._parse_concurrency.<lambda1>",
+    "honcho.command._parse_quiet",
+    "honcho.command._port",
+    "honcho.command._procfile",
+    "honcho.command._read_env",
+    "honcho.command._write_file",
+    "honcho.command.command_check",
+    "honcho.command.command_export",
+    "honcho.command.command_help",
+    "honcho.command.command_run",
+    "honcho.command.command_start",
+    "honcho.command.command_version",
+    "honcho.command.main",
+    "honcho.command.map_from",
+    "honcho.compat.ProcessManager.kill",
+    "honcho.compat.ProcessManager.terminate",
+    "honcho.environ.Env.__init__",
+    "honcho.environ.Env.load_procfile",
+    "honcho.environ.Env.port",
+    "honcho.environ.Env.procfile",
+    "honcho.environ.Procfile.__init__",
+    "honcho.environ.Procfile.add_process",
+    "honcho.environ.expand_processes",
+    "honcho.environ.expand_processes.<lambda1>",
+    "honcho.environ.parse",
+    "honcho.environ.parse_procfile",
+    "honcho.export.base.BaseExport.__init__",
+    "honcho.export.base.BaseExport.get_template",
+    "honcho.export.base.BaseExport.get_template_loader",
+    "honcho.export.base.BaseExport.render",
+    "honcho.export.base.File.__init__",
+    "honcho.export.base._default_template_env",
+    "honcho.export.base.dashrepl",
+    "honcho.export.base.percentescape",
+    "honcho.export.runit.Export.get_template_loader",
+    "honcho.export.runit.Export.render",
+    "honcho.export.supervisord.Export.get_template_loader",
+    "honcho.export.supervisord.Export.render",
+    "honcho.export.systemd.Export.get_template_loader",
+    "honcho.export.systemd.Export.render",
+    "honcho.export.systemd.Export.render.<lambda1>",
+    "honcho.export.upstart.Export.get_template_loader",
+    "honcho.export.upstart.Export.render",
+    "honcho.export.upstart.Export.render.<lambda1>",
+    "honcho.manager.Manager.__init__",
+    "honcho.manager.Manager._all_started",
+    "honcho.manager.Manager._all_stopped",
+    "honcho.manager.Manager._any_stopped",
+    "honcho.manager.Manager._killall",
+    "honcho.manager.Manager._start",
+    "honcho.manager.Manager._system_print",
+    "honcho.manager.Manager.add_process",
+    "honcho.manager.Manager.kill",
+    "honcho.manager.Manager.loop",
+    "honcho.manager.Manager.loop._terminate",
+    "honcho.manager.Manager.terminate",
+    "honcho.printer.Printer.__init__",
+    "honcho.printer.Printer.write",
+    "honcho.printer._ansi",
+    "honcho.printer._colour_string",
+    "honcho.process.Popen.__init__",
+    "honcho.process.Process.__init__",
+    "honcho.process.Process._send_message",
+    "honcho.process.Process.run"
+  ],
+  "modules": [
+    "honcho",
+    "honcho.colour",
+    "honcho.command",
+    "honcho.compat",
+    "honcho.environ",
+    "honcho.export",
+    "honcho.export.base",
+    "honcho.export.runit",
+    "honcho.export.supervisord",
+    "honcho.export.systemd",
+    "honcho.export.upstart",
+    "honcho.manager",
+    "honcho.printer",
+    "honcho.process"
+  ],
+  "project": "honcho",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 6,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 117,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

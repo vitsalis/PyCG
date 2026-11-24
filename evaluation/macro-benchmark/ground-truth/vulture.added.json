@@ -1,0 +1,468 @@
+{
+  "edges": {
+    "vulture.__main__": {
+      "vulture.core.main": [
+        "vulture.__main__ 3:5 call  main()"
+      ]
+    },
+    "vulture.config._parse_toml": {
+      "tomli.load": [
+        "vulture.config 84:24 call  tomllib.load(infile)"
+      ]
+    },
+    "vulture.config.make_config": {
+      "pathlib.WindowsPath.is_file": [
+        "vulture.config 207:29 call  toml_path.is_file()"
+      ],
+      "pathlib.WindowsPath.resolve": [
+        "vulture.config 206:63 call  pathlib.Path(cli_config[\"config\"]).resolve()"
+      ]
+    },
+    "vulture.core.Item.__eq__": {
+      "vulture.core.Item._tuple": [
+        "vulture.core 184:27 call  self._tuple()",
+        "vulture.core 184:45 call  other._tuple()"
+      ]
+    },
+    "vulture.core.Item.get_report": {
+      "vulture.core.Item.size": [
+        "vulture.core 156:42 getattr  self.size",
+        "vulture.core 157:37 getattr  self.size"
+      ]
+    },
+    "vulture.core.Vulture._log": {
+      "<builtin>.map": [
+        "vulture.core 402:33 call  map(str, args)"
+      ],
+      "<builtin>.str.encode": [
+        "vulture.core 403:31 call  x.encode()"
+      ],
+      "<builtin>.str.join": [
+        "vulture.core 402:29 call  \" \".join(map(str, args))"
+      ]
+    },
+    "vulture.core.Vulture.scan": {
+      "vulture.core.Vulture._log": [
+        "vulture.core 250:22 call  self._log( f'{utils.format_path(filename)}: invalid sourc..."
+      ],
+      "vulture.utils.format_path": [
+        "vulture.core 251:37 call  utils.format_path(filename)"
+      ]
+    },
+    "vulture.core.Vulture.scavenge": {
+      "<builtin>.bytes.decode": [
+        "vulture.core 312:51 call  module_data.decode(\"utf-8\")"
+      ],
+      "<builtin>.str": [
+        "vulture.core 306:66 call  str(path)"
+      ],
+      "pkgutil.get_data": [
+        "vulture.core 306:51 call  pkgutil.get_data(\"vulture\", str(path))"
+      ],
+      "vulture.core.Vulture.scavenge.prepare_pattern": [
+        "vulture.core 273:35 call  prepare_pattern(pattern)"
+      ]
+    },
+    "vulture.core.Vulture.scavenge.prepare_pattern": {
+      "<builtin>.any": [
+        "vulture.core 269:23 call  any(char in pattern for char in \"*?[\")"
+      ]
+    },
+    "vulture.core.Vulture.visit": {
+      "ast.NodeVisitor.visit_Constant": [
+        "vulture.core 638:20 call  visitor(node)"
+      ]
+    },
+    "vulture.core._get_unused_items": {
+      "vulture.core.Item.__eq__": [
+        "vulture.core 45:29 call  set(defined_items)"
+      ]
+    },
+    "vulture.core._is_test_file": {
+      "pathlib.WindowsPath.resolve": [
+        "vulture.core 62:25 call  filename.resolve()"
+      ]
+    },
+    "vulture.core.main": {
+      "<builtin>.print": [
+        "vulture.core 668:14 call  print(e, file=sys.stderr)"
+      ],
+      "sys.exit": [
+        "vulture.core 669:17 call  sys.exit(ExitCode.InvalidCmdlineArguments)",
+        "vulture.core 677:13 call  sys.exit( vulture.report( min_confidence=config[\"min_conf..."
+      ],
+      "vulture.config.make_config": [
+        "vulture.core 666:29 call  make_config()"
+      ],
+      "vulture.core.Vulture.__init__": [
+        "vulture.core 671:22 call  Vulture( verbose=config[\"verbose\"], ignore_names=config[\"..."
+      ],
+      "vulture.core.Vulture.report": [
+        "vulture.core 678:23 call  vulture.report( min_confidence=config[\"min_confidence\"], ..."
+      ],
+      "vulture.core.Vulture.scavenge": [
+        "vulture.core 676:21 call  vulture.scavenge(config[\"paths\"], exclude=config[\"exclude\"])"
+      ]
+    },
+    "vulture.utils.format_path": {
+      "pathlib.WindowsPath.relative_to": [
+        "vulture.utils 62:32 call  path.relative_to(pathlib.Path.cwd())"
+      ]
+    },
+    "vulture.utils.get_modules": {
+      "<builtin>.list.extend": [
+        "vulture.utils 99:27 call  modules.extend(path.rglob(\"*.py\"))"
+      ],
+      "pathlib.PosixPath.is_dir": [
+        "vulture.utils 98:25 call  path.is_dir()"
+      ],
+      "pathlib.PosixPath.rglob": [
+        "vulture.utils 99:38 call  path.rglob(\"*.py\")"
+      ],
+      "pathlib.WindowsPath.is_dir": [
+        "vulture.utils 98:25 call  path.is_dir()"
+      ],
+      "pathlib.WindowsPath.is_file": [
+        "vulture.utils 93:24 call  path.is_file()"
+      ],
+      "pathlib.WindowsPath.resolve": [
+        "vulture.utils 92:28 call  path.resolve()"
+      ],
+      "pathlib.WindowsPath.rglob": [
+        "vulture.utils 99:38 call  path.rglob(\"*.py\")"
+      ],
+      "sys.exit": [
+        "vulture.utils 95:25 call  sys.exit(f\"Error: *.pyc files are not supported: {path}\")",
+        "vulture.utils 101:21 call  sys.exit(f\"Error: {path} could not be found.\")"
+      ]
+    },
+    "vulture.whitelists.argparse_whitelist": {
+      "argparse.ArgumentDefaultsHelpFormatter": [
+        "vulture.whitelists.argparse_whitelist 5:39 call  argparse.ArgumentDefaultsHelpFormatter(\"prog\")",
+        "vulture.whitelists.argparse_whitelist 6:39 call  argparse.ArgumentDefaultsHelpFormatter(\"prog\")"
+      ],
+      "argparse.ArgumentParser": [
+        "vulture.whitelists.argparse_whitelist 3:24 call  argparse.ArgumentParser()"
+      ]
+    },
+    "vulture.whitelists.ast_whitelist": {
+      "vulture.whitelists.whitelist_utils.Whitelist.__getattr__": [
+        "vulture.whitelists.ast_whitelist 6:24 getattr  whitelist_node_visitor.visit_Assert",
+        "vulture.whitelists.ast_whitelist 7:24 getattr  whitelist_node_visitor.visit_Assign",
+        "vulture.whitelists.ast_whitelist 8:24 getattr  whitelist_node_visitor.visit_AsyncFor",
+        "vulture.whitelists.ast_whitelist 9:24 getattr  whitelist_node_visitor.visit_AsyncFunctionDef",
+        "vulture.whitelists.ast_whitelist 10:24 getattr  whitelist_node_visitor.visit_AsyncWith",
+        "vulture.whitelists.ast_whitelist 11:24 getattr  whitelist_node_visitor.visit_Attribute",
+        "vulture.whitelists.ast_whitelist 12:24 getattr  whitelist_node_visitor.visit_AugAssign",
+        "vulture.whitelists.ast_whitelist 13:24 getattr  whitelist_node_visitor.visit_Await",
+        "vulture.whitelists.ast_whitelist 14:24 getattr  whitelist_node_visitor.visit_BinOp",
+        "vulture.whitelists.ast_whitelist 15:24 getattr  whitelist_node_visitor.visit_BoolOp",
+        "vulture.whitelists.ast_whitelist 16:24 getattr  whitelist_node_visitor.visit_Bytes",
+        "vulture.whitelists.ast_whitelist 17:24 getattr  whitelist_node_visitor.visit_Call",
+        "vulture.whitelists.ast_whitelist 18:24 getattr  whitelist_node_visitor.visit_ClassDef",
+        "vulture.whitelists.ast_whitelist 19:24 getattr  whitelist_node_visitor.visit_Compare",
+        "vulture.whitelists.ast_whitelist 20:24 getattr  whitelist_node_visitor.visit_Constant",
+        "vulture.whitelists.ast_whitelist 21:24 getattr  whitelist_node_visitor.visit_Delete",
+        "vulture.whitelists.ast_whitelist 22:24 getattr  whitelist_node_visitor.visit_Dict",
+        "vulture.whitelists.ast_whitelist 23:24 getattr  whitelist_node_visitor.visit_DictComp",
+        "vulture.whitelists.ast_whitelist 24:24 getattr  whitelist_node_visitor.visit_ExceptHandler",
+        "vulture.whitelists.ast_whitelist 25:24 getattr  whitelist_node_visitor.visit_Exec",
+        "vulture.whitelists.ast_whitelist 26:24 getattr  whitelist_node_visitor.visit_Expr",
+        "vulture.whitelists.ast_whitelist 27:24 getattr  whitelist_node_visitor.visit_Expression",
+        "vulture.whitelists.ast_whitelist 28:24 getattr  whitelist_node_visitor.visit_ExtSlice",
+        "vulture.whitelists.ast_whitelist 29:24 getattr  whitelist_node_visitor.visit_For",
+        "vulture.whitelists.ast_whitelist 30:24 getattr  whitelist_node_visitor.visit_FunctionDef",
+        "vulture.whitelists.ast_whitelist 31:24 getattr  whitelist_node_visitor.visit_GeneratorExp",
+        "vulture.whitelists.ast_whitelist 32:24 getattr  whitelist_node_visitor.visit_Global",
+        "vulture.whitelists.ast_whitelist 33:24 getattr  whitelist_node_visitor.visit_If",
+        "vulture.whitelists.ast_whitelist 34:24 getattr  whitelist_node_visitor.visit_IfExp",
+        "vulture.whitelists.ast_whitelist 35:24 getattr  whitelist_node_visitor.visit_Import",
+        "vulture.whitelists.ast_whitelist 36:24 getattr  whitelist_node_visitor.visit_ImportFrom",
+        "vulture.whitelists.ast_whitelist 37:24 getattr  whitelist_node_visitor.visit_Index",
+        "vulture.whitelists.ast_whitelist 38:24 getattr  whitelist_node_visitor.visit_Interactive",
+        "vulture.whitelists.ast_whitelist 39:24 getattr  whitelist_node_visitor.visit_Lambda",
+        "vulture.whitelists.ast_whitelist 40:24 getattr  whitelist_node_visitor.visit_List",
+        "vulture.whitelists.ast_whitelist 41:24 getattr  whitelist_node_visitor.visit_ListComp",
+        "vulture.whitelists.ast_whitelist 42:24 getattr  whitelist_node_visitor.visit_MatchClass",
+        "vulture.whitelists.ast_whitelist 43:24 getattr  whitelist_node_visitor.visit_Module",
+        "vulture.whitelists.ast_whitelist 44:24 getattr  whitelist_node_visitor.visit_Name",
+        "vulture.whitelists.ast_whitelist 45:24 getattr  whitelist_node_visitor.visit_NameConstant",
+        "vulture.whitelists.ast_whitelist 46:24 getattr  whitelist_node_visitor.visit_Nonlocal",
+        "vulture.whitelists.ast_whitelist 47:24 getattr  whitelist_node_visitor.visit_Num",
+        "vulture.whitelists.ast_whitelist 48:24 getattr  whitelist_node_visitor.visit_Print",
+        "vulture.whitelists.ast_whitelist 49:24 getattr  whitelist_node_visitor.visit_Raise",
+        "vulture.whitelists.ast_whitelist 50:24 getattr  whitelist_node_visitor.visit_Repr",
+        "vulture.whitelists.ast_whitelist 51:24 getattr  whitelist_node_visitor.visit_Return",
+        "vulture.whitelists.ast_whitelist 52:24 getattr  whitelist_node_visitor.visit_Set",
+        "vulture.whitelists.ast_whitelist 53:24 getattr  whitelist_node_visitor.visit_SetComp",
+        "vulture.whitelists.ast_whitelist 54:24 getattr  whitelist_node_visitor.visit_Slice",
+        "vulture.whitelists.ast_whitelist 55:24 getattr  whitelist_node_visitor.visit_Starred",
+        "vulture.whitelists.ast_whitelist 56:24 getattr  whitelist_node_visitor.visit_Str",
+        "vulture.whitelists.ast_whitelist 57:24 getattr  whitelist_node_visitor.visit_Subscript",
+        "vulture.whitelists.ast_whitelist 58:24 getattr  whitelist_node_visitor.visit_Suite",
+        "vulture.whitelists.ast_whitelist 59:24 getattr  whitelist_node_visitor.visit_Try",
+        "vulture.whitelists.ast_whitelist 60:24 getattr  whitelist_node_visitor.visit_TryExcept",
+        "vulture.whitelists.ast_whitelist 61:24 getattr  whitelist_node_visitor.visit_TryFinally",
+        "vulture.whitelists.ast_whitelist 62:24 getattr  whitelist_node_visitor.visit_Tuple",
+        "vulture.whitelists.ast_whitelist 63:24 getattr  whitelist_node_visitor.visit_UnaryOp",
+        "vulture.whitelists.ast_whitelist 64:24 getattr  whitelist_node_visitor.visit_While",
+        "vulture.whitelists.ast_whitelist 65:24 getattr  whitelist_node_visitor.visit_With",
+        "vulture.whitelists.ast_whitelist 66:24 getattr  whitelist_node_visitor.visit_Yield",
+        "vulture.whitelists.ast_whitelist 67:24 getattr  whitelist_node_visitor.visit_YieldFrom",
+        "vulture.whitelists.ast_whitelist 68:24 getattr  whitelist_node_visitor.visit_alias",
+        "vulture.whitelists.ast_whitelist 69:24 getattr  whitelist_node_visitor.visit_arg",
+        "vulture.whitelists.ast_whitelist 70:24 getattr  whitelist_node_visitor.visit_arguments",
+        "vulture.whitelists.ast_whitelist 71:24 getattr  whitelist_node_visitor.visit_comprehension",
+        "vulture.whitelists.ast_whitelist 72:24 getattr  whitelist_node_visitor.visit_keyword"
+      ]
+    },
+    "vulture.whitelists.collections_whitelist": {
+      "collections.defaultdict": [
+        "vulture.whitelists.collections_whitelist 4:24 call  collections.defaultdict()"
+      ]
+    },
+    "vulture.whitelists.logging_whitelist": {
+      "logging.getLogger": [
+        "vulture.whitelists.logging_whitelist 4:18 call  logging.getLogger()"
+      ]
+    },
+    "vulture.whitelists.pint_whitelist": {
+      "pint.UnitRegistry": [
+        "vulture.whitelists.pint_whitelist 3:25 call  pint.UnitRegistry()"
+      ]
+    },
+    "vulture.whitelists.ssl_whitelist": {
+      "ssl.SSLContext": [
+        "vulture.whitelists.ssl_whitelist 3:21 call  ssl.SSLContext()"
+      ]
+    }
+  },
+  "notes": {
+    "vulture.config 206:63 call  pathlib.Path(cli_config[\"config\"]).resolve()": [
+      "pathlib.Path(...) makes a PosixPath, or a WindowsPath on Windows (a platform of the release's CI matrix)"
+    ],
+    "vulture.config 84:24 call  tomllib.load(infile)": [
+      "optional import (config.py:9-12): tomllib on Python 3.11 and later, tomli before (the declared dependency for Python < 3.11, installed there; tomli.load is its public path, listed in tomli's __all__); both sides run"
+    ],
+    "vulture.core 45:29 call  set(defined_items)": [
+      "set() hashes each Item of the LoggingList; two equal Items (one file, line and name: `x = x = 1` or `import os, os` defines the same variable or import twice) or two Items whose hashes collide make the set call Item.__eq__ (judgement J3)"
+    ],
+    "vulture.core 62:25 call  filename.resolve()": [
+      "filename is the Path that Vulture.scan makes (228:24) and stores as self.filename, passed by Vulture._define.ignored (438:35)"
+    ],
+    "vulture.core 638:20 call  visitor(node)": [
+      "visitor is getattr(self, \"visit_\" + the class name of the node) (631-632): the twelve visit_* methods of Vulture for the node classes that ast.parse makes (arg, AsyncFunctionDef, Attribute, BinOp, Call, ClassDef, FunctionDef, Import, ImportFrom, Name, Assign, MatchClass); for a Constant node on Python 3.9 to 3.13 (CPython and PyPy), the inherited ast.NodeVisitor.visit_Constant, which finds no visit_Num, visit_Str, visit_Bytes, visit_NameConstant or visit_Ellipsis on a Vulture and calls back self.generic_visit (Lib/ast.py, 3.9.25:421-440, 3.13.18:434-453; Python 3.14 has no visit_Constant) (judgement J2)"
+    ],
+    "vulture.utils 62:32 call  path.relative_to(pathlib.Path.cwd())": [
+      "path is the Path of an Item (Item.filename, set by Vulture._define from Vulture.scan's Path) or the Path of Vulture.scan (228:24): a PosixPath, or a WindowsPath on Windows"
+    ],
+    "vulture.utils 92:28 call  path.resolve()": [
+      "paths holds the Paths that Vulture.scavenge makes (core.py:278); no test or document passes get_modules anything else"
+    ],
+    "vulture.whitelists.ast_whitelist 10:24 getattr  whitelist_node_visitor.visit_AsyncWith": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 11:24 getattr  whitelist_node_visitor.visit_Attribute": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 12:24 getattr  whitelist_node_visitor.visit_AugAssign": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 13:24 getattr  whitelist_node_visitor.visit_Await": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 14:24 getattr  whitelist_node_visitor.visit_BinOp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 15:24 getattr  whitelist_node_visitor.visit_BoolOp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 16:24 getattr  whitelist_node_visitor.visit_Bytes": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 17:24 getattr  whitelist_node_visitor.visit_Call": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 18:24 getattr  whitelist_node_visitor.visit_ClassDef": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 19:24 getattr  whitelist_node_visitor.visit_Compare": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 20:24 getattr  whitelist_node_visitor.visit_Constant": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 21:24 getattr  whitelist_node_visitor.visit_Delete": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 22:24 getattr  whitelist_node_visitor.visit_Dict": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 23:24 getattr  whitelist_node_visitor.visit_DictComp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 24:24 getattr  whitelist_node_visitor.visit_ExceptHandler": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 25:24 getattr  whitelist_node_visitor.visit_Exec": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 26:24 getattr  whitelist_node_visitor.visit_Expr": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 27:24 getattr  whitelist_node_visitor.visit_Expression": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 28:24 getattr  whitelist_node_visitor.visit_ExtSlice": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 29:24 getattr  whitelist_node_visitor.visit_For": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 30:24 getattr  whitelist_node_visitor.visit_FunctionDef": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 31:24 getattr  whitelist_node_visitor.visit_GeneratorExp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 32:24 getattr  whitelist_node_visitor.visit_Global": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 33:24 getattr  whitelist_node_visitor.visit_If": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 34:24 getattr  whitelist_node_visitor.visit_IfExp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 35:24 getattr  whitelist_node_visitor.visit_Import": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 36:24 getattr  whitelist_node_visitor.visit_ImportFrom": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 37:24 getattr  whitelist_node_visitor.visit_Index": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 38:24 getattr  whitelist_node_visitor.visit_Interactive": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 39:24 getattr  whitelist_node_visitor.visit_Lambda": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 40:24 getattr  whitelist_node_visitor.visit_List": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 41:24 getattr  whitelist_node_visitor.visit_ListComp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 42:24 getattr  whitelist_node_visitor.visit_MatchClass": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 43:24 getattr  whitelist_node_visitor.visit_Module": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 44:24 getattr  whitelist_node_visitor.visit_Name": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 45:24 getattr  whitelist_node_visitor.visit_NameConstant": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 46:24 getattr  whitelist_node_visitor.visit_Nonlocal": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 47:24 getattr  whitelist_node_visitor.visit_Num": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 48:24 getattr  whitelist_node_visitor.visit_Print": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 49:24 getattr  whitelist_node_visitor.visit_Raise": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 50:24 getattr  whitelist_node_visitor.visit_Repr": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 51:24 getattr  whitelist_node_visitor.visit_Return": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 52:24 getattr  whitelist_node_visitor.visit_Set": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 53:24 getattr  whitelist_node_visitor.visit_SetComp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 54:24 getattr  whitelist_node_visitor.visit_Slice": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 55:24 getattr  whitelist_node_visitor.visit_Starred": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 56:24 getattr  whitelist_node_visitor.visit_Str": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 57:24 getattr  whitelist_node_visitor.visit_Subscript": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 58:24 getattr  whitelist_node_visitor.visit_Suite": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 59:24 getattr  whitelist_node_visitor.visit_Try": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 60:24 getattr  whitelist_node_visitor.visit_TryExcept": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 61:24 getattr  whitelist_node_visitor.visit_TryFinally": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 62:24 getattr  whitelist_node_visitor.visit_Tuple": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 63:24 getattr  whitelist_node_visitor.visit_UnaryOp": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 64:24 getattr  whitelist_node_visitor.visit_While": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 65:24 getattr  whitelist_node_visitor.visit_With": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 66:24 getattr  whitelist_node_visitor.visit_Yield": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 67:24 getattr  whitelist_node_visitor.visit_YieldFrom": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 68:24 getattr  whitelist_node_visitor.visit_alias": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 69:24 getattr  whitelist_node_visitor.visit_arg": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 6:24 getattr  whitelist_node_visitor.visit_Assert": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 70:24 getattr  whitelist_node_visitor.visit_arguments": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 71:24 getattr  whitelist_node_visitor.visit_comprehension": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 72:24 getattr  whitelist_node_visitor.visit_keyword": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 7:24 getattr  whitelist_node_visitor.visit_Assign": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 8:24 getattr  whitelist_node_visitor.visit_AsyncFor": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.ast_whitelist 9:24 getattr  whitelist_node_visitor.visit_AsyncFunctionDef": [
+      "whitelist_node_visitor is the Whitelist of 4:35, which has no attribute of this name, so the load calls Whitelist.__getattr__ (judgement J1)"
+    ],
+    "vulture.whitelists.pint_whitelist 3:25 call  pint.UnitRegistry()": [
+      "pint is neither a dependency of vulture nor installed in the trace's environment: a missing module, named by its access path"
+    ]
+  },
+  "trace": "dynamic/vulture.json"
+}

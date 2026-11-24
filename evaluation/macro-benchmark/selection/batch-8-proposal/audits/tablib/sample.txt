@@ -1,0 +1,95 @@
+3	drawn	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.__init__	116:22	call	isinstance(f, str)
+8	drawn	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.__init__	125:57	call	bool(readOnly)
+12	value	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.__init__	132:43	call	self.HeaderClass()
+15	value	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.__init__	135:54	call	self.HeaderClass.fromStream(self.stream)
+46	value	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.indexOfFieldName	207:27	call	names.index(name.upper())
+49	value	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.newRecord	211:32	call	self.RecordClass(self)
+56	drawn	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.addField	228:34	iter	*defs
+63	value	tablib._vendor.dbfpy.dbf	tablib._vendor.dbfpy.dbf.Dbf.__getitem__	244:43	call	self.RecordClass.fromStream(self, self._fixIndex(index))
+92	drawn	tablib._vendor.dbfpy.dbfnew	tablib._vendor.dbfpy.dbfnew	3:33	getitem	"$Revision: 1.4 $"[11:-2]
+98	value	tablib._vendor.dbfpy.dbfnew	tablib._vendor.dbfpy.dbfnew._FieldDefinition.getDbfField	84:24	call	self.cls(self.name, self.len, self.dec)
+103	value	tablib._vendor.dbfpy.dbfnew	tablib._vendor.dbfpy.dbfnew.dbf_new.add_field	142:53	call	self.FieldDefinitionClass(name, typ, len, dec)
+119	drawn	tablib._vendor.dbfpy.dbfnew	tablib._vendor.dbfpy.dbfnew	166:10	call	print(repr(dbft))
+149	drawn	tablib._vendor.dbfpy.fields	tablib._vendor.dbfpy.fields.DbfFieldDef.__init__	81:21	getattr	self.defaultValue
+155	drawn	tablib._vendor.dbfpy.fields	tablib._vendor.dbfpy.fields.DbfFieldDef.__init__	85:31	call	str(name).upper()
+156	drawn	tablib._vendor.dbfpy.fields	tablib._vendor.dbfpy.fields.DbfFieldDef.__init__	86:27	getattr	self.__class__.length
+178	value	tablib._vendor.dbfpy.fields	tablib._vendor.dbfpy.fields.DbfFieldDef.fromString	133:19	call	cls(utils.unzfill(string)[:11].decode('utf-8'), _length, ...
+283	drawn	tablib._vendor.dbfpy.fields	tablib._vendor.dbfpy.fields	472:23	call	__all__.append(_name)
+287	drawn	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.__init__	88:31	call	list(fields)
+291	drawn	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.__init__	96:14	setattr	self.changed
+294	value	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.fromString	101:30	call	cls.fromStream(io.StringIO(str(string)))
+308	value	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.fromStream	122:19	call	cls(None, _hdrLen, _recLen, _cnt, _data[0], (_year, _data...
+318	value	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.fromStream	130:58	call	fields.lookupFor(_data[11]).fromString(_data, _pos)
+334	drawn	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.__repr__	171:25	call	"\n".join( ["%10s %4s %3s %3s" % _fld.fieldInfo() for _fl...
+336	drawn	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.__repr__	172:49	call	_fld.fieldInfo()
+344	value	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader._addField	200:28	call	_cls(_name, _len, _dec, ignoreErrors=self._ignore_errors)
+355	drawn	tablib._vendor.dbfpy.header	tablib._vendor.dbfpy.header.DbfHeader.write	238:32	call	_fld.toString()
+385	value	tablib._vendor.dbfpy.record	tablib._vendor.dbfpy.record.DbfRecord.fromStream	123:30	call	cls.fromString(dbf, cls.rawFromStream(dbf, index), index)
+387	value	tablib._vendor.dbfpy.record	tablib._vendor.dbfpy.record.DbfRecord.fromStream	123:53	call	cls.rawFromStream(dbf, index)
+389	value	tablib._vendor.dbfpy.record	tablib._vendor.dbfpy.record.DbfRecord.fromString	142:19	call	cls(dbf, index, string[0] == "*", [_fd.decodeFromRecord(s...
+455	value	tablib._vendor.dbfpy.utils	tablib._vendor.dbfpy.utils.unzfill	29:30	call	str.index(b'\0')
+467	drawn	tablib._vendor.dbfpy.utils	tablib._vendor.dbfpy.utils.getDate	71:34	iter	*time.strptime(date, "%y%m%d")[:3]
+505	drawn	tablib.core	tablib.core.Row.__setitem__	60:18	setitem	self._row[i]
+514	drawn	tablib.core	tablib.core.Row.copy	84:34	call	self._row.copy()
+521	drawn	tablib.core	tablib.core.Row.has_tag	104:24	call	isinstance(tag, str)
+532	drawn	tablib.core	tablib.core.Dataset.__init__	172:32	call	kwargs.get('title')
+540	value	tablib.core	tablib.core.Dataset.__getitem__	182:41	call	self.headers.index(key)
+542	drawn	tablib.core	tablib.core.Dataset.__getitem__	183:45	iter	self._data
+552	drawn	tablib.core	tablib.core.Dataset.__delitem__	199:21	getattr	self.headers
+557	value	tablib.core	tablib.core.Dataset.__delitem__	204:41	call	self.headers.index(key)
+597	drawn	tablib.core	tablib.core.Dataset._get_in_format	250:45	getattr	registry.get_format(fmt_key).export_set
+635	value	tablib.core	tablib.core.Dataset._package.format_row	294:40	call	callback(cell)
+638	value	tablib.core	tablib.core.Dataset._package.format_row	296:44	call	callback(row[col])
+662	drawn	tablib.core	tablib.core.Dataset._set_dict	358:26	call	isinstance(pickle, list)
+722	drawn	tablib.core	tablib.core.Dataset.insert	463:57	call	self._dynamic_columns.items()
+725	value	tablib.core	tablib.core.Dataset.insert	465:37	call	func(row)
+746	drawn	tablib.core	tablib.core.Dataset.insert_col	554:27	call	map(col, self._data)
+790	value	tablib.core	tablib.core.Dataset.add_formatter	637:41	call	self.headers.index(col)
+870	drawn	tablib.core	tablib.core.Dataset.stack_cols	779:25	getattr	self.headers
+898	drawn	tablib.core	tablib.core.Dataset.remove_duplicates	812:19	call	set()
+922	drawn	tablib.core	tablib.core.Dataset.subset	847:13	iter	row_no, row
+928	drawn	tablib.core	tablib.core.Dataset.subset	851:32	getattr	self.headers
+929	value	tablib.core	tablib.core.Dataset.subset	851:45	call	self.headers.index(key)
+953	drawn	tablib.core	tablib.core.Databook.load	919:36	call	UnsupportedFormat(f'Format {format} cannot be loaded.')
+1003	drawn	tablib.formats	tablib.formats.ImportExportSetDescriptor.__set__	75:29	getattr	self._format.import_set
+1033	drawn	tablib.formats	tablib.formats.Registry.register_builtins	107:26	call	self.register('yaml', 'tablib.formats._yaml.YAMLFormat')
+1083	drawn	tablib.formats._cli	tablib.formats._cli	17:6	decorator	@classmethod
+1112	drawn	tablib.formats._csv	tablib.formats._csv.CSVFormat.import_set	45:40	mapping	**kwargs
+1124	drawn	tablib.formats._csv	tablib.formats._csv.CSVFormat.import_set	53:41	getattr	dset.width
+1151	drawn	tablib.formats._dbf	tablib.formats._dbf.DBFFormat.export_set	44:46	call	zip(dataset.headers, row)
+1165	drawn	tablib.formats._dbf	tablib.formats._dbf.DBFFormat.import_set	61:23	call	dbf.Dbf(in_stream)
+1179	drawn	tablib.formats._df	tablib.formats._df.DataFrameFormat.detect	22:22	call	DataFrame(stream.read())
+1183	value	tablib.formats._df	tablib.formats._df.DataFrameFormat.export_set	34:30	call	DataFrame(dset.dict, columns=dset.headers)
+1196	drawn	tablib.formats._html	tablib.formats._html.HTMLFormat.export_set	24:35	getattr	dataset.headers
+1208	drawn	tablib.formats._html	tablib.formats._html.HTMLFormat.export_set	37:26	call	tr.append(td)
+1242	drawn	tablib.formats._html	tablib.formats._html.TablibHTMLParser.handle_starttag	88:57	op	dict(attrs).get('id') == self.table_id
+1308	drawn	tablib.formats._json	tablib.formats._json.JSONFormat.import_book	56:28	call	dbook.add_sheet(data)
+1320	drawn	tablib.formats._latex	tablib.formats._latex.LATEXFormat.export_set	55:62	getattr	dataset.title
+1377	drawn	tablib.formats._ods	tablib.formats._ods.set_date_style	27:21	call	style.addElement(number.Day(style="long"))
+1379	drawn	tablib.formats._ods	tablib.formats._ods.set_time_style	31:21	call	style.addElement(number.Hours(style="long"))
+1384	drawn	tablib.formats._ods	tablib.formats._ods.set_time_style	33:36	call	number.Minutes(style="long")
+1417	drawn	tablib.formats._ods	tablib.formats._ods.ODSFormat.export_set	89:25	call	BytesIO()
+1443	drawn	tablib.formats._ods	tablib.formats._ods.ODSFormat.import_sheet	118:32	iter	sheet.childNodes
+1485	drawn	tablib.formats._ods	tablib.formats._ods.ODSFormat.read_cell	161:46	call	cell.getAttribute('value')
+1520	drawn	tablib.formats._ods	tablib.formats._ods.ODSFormat.dset_sheet	211:36	op	row_number == 1
+1550	drawn	tablib.formats._ods	tablib.formats._ods.ODSFormat.dset_sheet	242:43	call	table.TableCell(valuetype="void")
+1557	drawn	tablib.formats._ods	tablib.formats._ods.ODSFormat.detect	250:22	call	isinstance(stream, bytes)
+1591	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat._get_column_string_lengths	54:45	call	len(text)
+1611	value	tablib.formats._rst	tablib.formats._rst.ReSTFormat._row_to_lines	82:32	call	wrapper.wrap(text)
+1621	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat._row_to_lines	89:41	call	pad.join(line)
+1632	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat._get_column_widths	101:52	call	len(median_lens)
+1637	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat._get_column_widths	108:29	call	max(w, l)
+1649	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat.export_set_as_simple_table	124:25	call	lines.extend(cls._row_to_lines( dataset.headers, column_w...
+1688	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat.export_set_as_grid_table	187:25	call	lines.append(row_sep)
+1698	drawn	tablib.formats._rst	tablib.formats._rst	214:6	decorator	@classmethod
+1716	drawn	tablib.formats._rst	tablib.formats._rst.ReSTFormat.export_set	256:24	getattr	cls.export_set_as_simple_table
+1798	drawn	tablib.formats._xls	tablib.formats._xls.XLSFormat.export_book	84:30	call	wb.add_sheet(safe_xls_sheet_title( dset.title, invalid_ch...
+1801	drawn	tablib.formats._xls	tablib.formats._xls.XLSFormat.export_book	86:20	truth	dset.title
+1816	drawn	tablib.formats._xls	tablib.formats._xls.XLSFormat.import_sheet	110:23	call	range(sheet.nrows)
+1857	drawn	tablib.formats._xls	tablib.formats._xls.XLSFormat.dset_sheet	158:23	op	i == 0
+1930	drawn	tablib.formats._xlsx	tablib.formats._xlsx.XLSXFormat.import_sheet	124:46	getattr	dset.width
+1931	drawn	tablib.formats._xlsx	tablib.formats._xlsx.XLSXFormat.import_sheet	124:57	call	len(row_vals)
+1951	drawn	tablib.formats._xlsx	tablib.formats._xlsx.XLSXFormat.dset_sheet	157:33	getitem	sep[0]
+1999	drawn	tablib.formats._yaml	tablib.formats._yaml	15:6	decorator	@classmethod
+2013	drawn	tablib.formats._yaml	tablib.formats._yaml.YAMLFormat.import_book	49:34	call	tablib.Dataset()
+2018	drawn	tablib.formats._yaml	tablib.formats._yaml.YAMLFormat.import_book	52:28	call	dbook.add_sheet(data)

@@ -1507,6 +1507,24 @@ def run_draw(args):
             print(f"--drop needs NAME=REASON: {entry!r}", file=sys.stderr)
             return 2
         drops[normalise_pep503(name)] = reason.strip()
+    skipped_strata = {}
+    stratum_numbers = {str(n): n for n in range(1, STRATA + 1)}
+    for entry in args.skip_stratum:
+        text, separator, reason = entry.partition("=")
+        if not separator or not reason.strip() or text.strip() not in stratum_numbers:
+            print(
+                f"--skip-stratum needs N=REASON, N from 1 to {STRATA}: {entry!r}",
+                file=sys.stderr,
+            )
+            return 2
+        number = stratum_numbers[text.strip()]
+        if number in skipped_strata:
+            print(f"--skip-stratum {number} is given twice", file=sys.stderr)
+            return 2
+        skipped_strata[number] = reason.strip()
+    if len(skipped_strata) == STRATA:
+        print("--skip-stratum skips every stratum", file=sys.stderr)
+        return 2
     passing = [entry for entry in frame["packages"] if entry["result"] == "pass"]
     if len(passing) < STRATA:
         print(
@@ -1528,6 +1546,19 @@ def run_draw(args):
     logged, dropped, reached = [], [], set()
     for number, members in enumerate(strata):
         examined, selected = [], None
+        if number + 1 in skipped_strata:
+            logged.append(
+                {
+                    "stratum": number + 1,
+                    "members": [entry["name"] for entry in members],
+                    "min_code_lines": members[0]["facts"]["code_lines"],
+                    "max_code_lines": members[-1]["facts"]["code_lines"],
+                    "examined": [],
+                    "selected": None,
+                    "skipped": skipped_strata[number + 1],
+                }
+            )
+            continue
         for name in order:
             if stratum_of[name] != number:
                 continue
@@ -1583,9 +1614,14 @@ def run_draw(args):
         "used": dict(sorted(used.items())),
         "order": order,
         "strata": logged,
-        "complete": len(selected) == STRATA,
+        "complete": len(selected) == STRATA - len(skipped_strata),
         "selected": selected,
         "dropped": dropped,
+        **(
+            {"skipped_strata": {str(n): r for n, r in sorted(skipped_strata.items())}}
+            if skipped_strata
+            else {}
+        ),
     }
     _write_log(args.out or SELECTION_DIR / f"round-{args.round}.json", log)
     print(f"Round {args.round}, seed {seed}, frame of {len(passing)} packages")
@@ -1597,6 +1633,8 @@ def run_draw(args):
             f"{e['name']} ({e['reason']})" for e in stratum["examined"] if "reason" in e
         ]
         chosen = stratum["selected"]["name"] if stratum["selected"] else "-"
+        if "skipped" in stratum:
+            chosen = f"skipped: {stratum['skipped']}"
         print(
             f"| {stratum['stratum']} | {stratum['min_code_lines']} to "
             f"{stratum['max_code_lines']} | {len(stratum['members'])} | {chosen} "
@@ -1675,6 +1713,13 @@ def main(argv=None, internet=None, clock=time):
     chosen.add_argument("--round", type=int, required=True)
     chosen.add_argument("--used", action="append", default=[], metavar="DIR")
     chosen.add_argument("--drop", action="append", default=[], metavar="NAME=REASON")
+    chosen.add_argument(
+        "--skip-stratum",
+        action="append",
+        default=[],
+        metavar="N=REASON",
+        help="draw nothing from stratum N (1 to STRATA): exhausted, or a partial round",
+    )
     chosen.add_argument("--list", type=Path, default=LIST_PATH)
     chosen.add_argument("--frame", type=Path, default=FRAME_PATH)
     chosen.add_argument("--excluded", type=Path, default=EXCLUDED_PATH)

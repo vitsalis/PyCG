@@ -21,6 +21,7 @@ esac
 here=$(cd "$(dirname "$0")" && pwd)
 repository=$(cd "$here/../.." && pwd)
 requirements=$benchmark/test-environments/$name.txt
+wheels=$repository/evaluation/macro-benchmark/wheels
 uid=10001
 container=pycg-trace-$name-$$
 step="check the arguments"
@@ -103,7 +104,7 @@ step="1 check the pin"
 helper check-pin "$benchmark" "$name"
 
 step="2 build the image"
-tag=$(helper image-tag "$name" "$here/Dockerfile.trace" "$requirements" "$PYTHON_IMAGE")
+tag=$(helper image-tag "$name" "$here/Dockerfile.trace" "$requirements" "$PYTHON_IMAGE" "$wheels")
 if [ "$dry_run" = 1 ]; then
     work="<work>"
 else
@@ -114,6 +115,7 @@ else
 fi
 docker_cli build --pull=false --network=default \
     --build-context inputs=docker-image://pycg-inputs \
+    --build-context "wheels=$wheels" \
     --build-arg "PYTHON_IMAGE=$PYTHON_IMAGE" --build-arg "NAME=$name" \
     --tag "$tag" "$work/context"
 

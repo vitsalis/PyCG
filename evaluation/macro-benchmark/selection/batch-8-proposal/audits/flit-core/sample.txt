@@ -1,0 +1,87 @@
+# 1086 sites: 952 explicit, 134 implicit
+# drawn: 50 explicit, 20 implicit; value sites added: 14
+2 flit_core.buildapi 18:19 call [flit_core.buildapi] Path('pyproject.toml')
+4 flit_core.buildapi 32:20 call [flit_core.buildapi.get_requires_for_build_wheel] Module(info.module, Path.cwd())
+30 flit_core.buildapi 79:43 call [flit_core.buildapi.build_editable] Path(wheel_directory)
+49 flit_core.common 55:37 call [flit_core.common.Module.__init__] ", ".join(map(str, sorted(existing)))
+66 flit_core.common 103:35 call [flit_core.common.Module.iter_files] sorted(files)
+72 flit_core.common 124:18 format [flit_core.common.VCSError.__str__] {self.msg}
+73 flit_core.common 124:30 format [flit_core.common.VCSError.__str__] {self.directory}
+84 flit_core.common 164:22 call [flit_core.common.is_version_str_assignment] isinstance(target, ast.Name)
+89 flit_core.common 187:53 getattr [flit_core.common.get_docstring_and_version_via_import] target.file
+90 flit_core.common 188:26 call [flit_core.common.get_docstring_and_version_via_import] _module_load_ctx()
+166 flit_core.common 445:64 call [flit_core.common.Metadata.write_metadata_file] self._normalise_field_name("License-Expression")
+171 flit_core.common 450:21 call [flit_core.common.Metadata.write_metadata_file] fp.write(f'License: {license}\n')
+201 flit_core.common 507:75 call [flit_core.common.normalize_dist_name] re.sub(r'[-_.]+', '_', name, flags=re.UNICODE).lower()
+202 flit_core.common 508:25 call [flit_core.common.normalize_dist_name] check_version(version)
+204 flit_core.common 510:32 format [flit_core.common.normalize_dist_name] {version}
+215 flit_core.config 75:28 call [flit_core.config.read_flit_config] prep_toml_config(d, path)
+226 flit_core.config 119:39 format [flit_core.config.prep_toml_config] {loaded_cfg.module}
+311 flit_core.config 319:48 call [flit_core.config._license_files_from_globs] path_is_within_directory(file, project_dir)
+315 flit_core.config 325:29 call [flit_core.config._license_files_from_globs] files.append(file.relative_to(project_dir).as_posix())
+319 flit_core.config 328:82 format [flit_core.config._license_files_from_globs] {ex.args[0]}
+320 flit_core.config 332:30 call [flit_core.config._license_files_from_globs] ConfigError( f"No files found for [project.license-files]...
+352 flit_core.config 382:14 format [flit_core.config.normalize_import_name] {name}
+353 flit_core.config 382:22 format [flit_core.config.normalize_import_name] {annotation}
+359 flit_core.config 393:34 format [flit_core.config.read_pep621_metadata] {proj['name']}
+368 flit_core.config 412:39 call [flit_core.config.read_pep621_metadata] lc.referenced_files.append(readme)
+401 flit_core.config 488:46 format [flit_core.config.read_pep621_metadata] {license_tbl['file']}
+437 flit_core.config 556:32 call [flit_core.config.read_pep621_metadata] project_urls.append(f"{label}, {url}")
+439 flit_core.config 556:44 format [flit_core.config.read_pep621_metadata] {url}
+511 flit_core.config 692:59 format [flit_core.config.pep621_people] {unrec_keys}
+519 flit_core.config 704:35 format [flit_core.config.pep621_people] {group_name}
+522 flit_core.config 708:25 call [flit_core.config.pep621_people] names.append(person['name'])
+537 flit_core.config 755:57 call [flit_core.config.normalise_compound_license_expr] invalid_msg.format(s=s, reason=reason)
+552 flit_core.config 775:29 call [flit_core.config.normalise_compound_license_expr] parts.append(part)
+555 flit_core.config 781:62 call [flit_core.config.normalise_compound_license_expr] normalise_license_exception(part)
+569 flit_core.config 810:24 call [flit_core.config.normalise_simple_license_expr] re.fullmatch(r'[a-zA-Z0-9\-.]+', ref)
+574 flit_core.config 828:18 format [flit_core.config.normalise_simple_license_expr] {normalised_id}
+596 flit_core.sdist 107:49 call [flit_core.sdist.FilePatterns.__init__] _normalize_for_match(d)
+638 flit_core.sdist 199:41 call [flit_core.sdist.SdistBuilder.apply_includes_excludes] osp.join(dirpath, d)
+653 flit_core.sdist 224:24 call [flit_core.sdist.SdistBuilder.build] str(target_dir)
+676 flit_core.sdist 257:33 call [flit_core.sdist.SdistBuilder.build] io.StringIO()
+684 flit_core.sdist 262:23 call [flit_core.sdist.SdistBuilder.build] tf.addfile(ti, io.BytesIO(pkg_info))
+699 flit_core.vendor.tomli._parser 31:47 call [flit_core.vendor.tomli._parser] frozenset("\"'")
+705 flit_core.vendor.tomli._parser 64:17 call [flit_core.vendor.tomli._parser.load] loads(s, parse_float=parse_float)
+722 flit_core.vendor.tomli._parser 159:37 call [flit_core.vendor.tomli._parser.Flags.set_for_relative_key] cont[k]["flags"].add(flag)
+756 flit_core.vendor.tomli._parser 308:21 call [flit_core.vendor.tomli._parser.create_list_rule] out.flags.is_(key, Flags.FROZEN)
+758 flit_core.vendor.tomli._parser 309:75 format [flit_core.vendor.tomli._parser.create_list_rule] {key}
+763 flit_core.vendor.tomli._parser 319:26 call [flit_core.vendor.tomli._parser.create_list_rule] src.startswith("]]", pos)
+768 flit_core.vendor.tomli._parser 333:60 format [flit_core.vendor.tomli._parser.key_value_rule] {abs_key_parent}
+793 flit_core.vendor.tomli._parser 415:41 call [flit_core.vendor.tomli._parser.parse_array] skip_comments_and_array_ws(src, pos)
+796 flit_core.vendor.tomli._parser 425:26 call [flit_core.vendor.tomli._parser.parse_array] src.startswith("]", pos)
+814 flit_core.vendor.tomli._parser 476:35 call [flit_core.vendor.tomli._parser.parse_basic_str_escape] suffixed_err(src, pos, 'Unescaped "\\" in a string')
+827 flit_core.vendor.tomli._parser 503:27 call [flit_core.vendor.tomli._parser.parse_hex_char] suffixed_err(src, pos, "Escaped character is not a Unicod...
+848 flit_core.vendor.tomli._parser 611:45 call [flit_core.vendor.tomli._parser.parse_value] match_to_datetime(datetime_match)
+885 flit_core.vendor.tomli._re 71:41 call [flit_core.vendor.tomli._re.match_to_datetime] cached_tz( offset_hour_str, offset_minute_str, offset_sig...
+889 flit_core.vendor.tomli._re 84:20 call [flit_core.vendor.tomli._re.cached_tz] timezone( timedelta( hours=sign * int(hour_str), minutes=...
+906 flit_core.versionno 32:32 call [flit_core.versionno] re.compile(r""" \s*v? (?: (?:(?P<epoch>[0-9]+)!)? # epoch...
+922 flit_core.versionno 99:46 call [flit_core.versionno.normalise_version] str(int(pre_n))
+927 flit_core.versionno 104:26 call [flit_core.versionno.normalise_version] str(int(post_n1))
+930 flit_core.versionno 106:53 call [flit_core.versionno.normalise_version] int(post_n2)
+956 flit_core.wheel 54:17 call [flit_core.wheel.zip_timestamp_from_env] log.info("Zip timestamps will be from SOURCE_DATE_EPOCH: ...
+961 flit_core.wheel 82:6 decorator [flit_core.wheel] @classmethod
+973 flit_core.wheel 105:18 call [flit_core.wheel.WheelBuilder._add_file] log.debug("Adding %s to zip file", full_path)
+1014 flit_core.wheel 173:48 call [flit_core.wheel.WheelBuilder.copy_module] self.module.iter_files()
+1016 flit_core.wheel 175:27 call [flit_core.wheel.WheelBuilder.copy_module] self._add_file(full_path, rel_path)
+1023 flit_core.wheel 184:39 call [flit_core.wheel.WheelBuilder.add_data_directory] os.path.relpath(full_path, self.data_directory)
+1033 flit_core.wheel 195:53 format [flit_core.wheel.WheelBuilder.write_metadata] {self.dist_info}
+1037 flit_core.wheel 197:35 format [flit_core.wheel.WheelBuilder.write_metadata] {self.dist_info}
+1051 flit_core.wheel 209:49 format [flit_core.wheel.WheelBuilder.write_record] {hash}
+1061 flit_core.wheel 228:39 call [flit_core.wheel.make_wheel_in] tempfile.mkstemp(suffix='.whl', dir=str(wheel_directory))
+1069 flit_core.wheel 240:43 getattr [flit_core.wheel.make_wheel_in] wb.wheel_filename
+# value sites not drawn
+612 flit_core.sdist 153:19 call [flit_core.sdist.SdistBuilder.from_ini_path] cls( module, metadata, srcdir, ini_info.reqs_by_extra, in... value
+837 flit_core.vendor.tomli._parser 570:47 call [flit_core.vendor.tomli._parser.parse_basic_str] parse_escapes(src, pos) value
+859 flit_core.vendor.tomli._parser 637:36 call [flit_core.vendor.tomli._parser.parse_value] parse_float(first_three) value
+860 flit_core.vendor.tomli._parser 640:36 call [flit_core.vendor.tomli._parser.parse_value] parse_float(first_four) value
+887 flit_core.vendor.tomli._re 81:2 decorator [flit_core.vendor.tomli._re] @lru_cache(maxsize=None) value
+901 flit_core.vendor.tomli._re 100:27 call [flit_core.vendor.tomli._re.match_to_number] parse_float(match.group()) value
+913 flit_core.versionno 93:12 call [flit_core.versionno.normalise_version] add(f'{int(epoch)}!') value
+916 flit_core.versionno 94:8 call [flit_core.versionno.normalise_version] add('.'.join(str(int(rp)) for rp in release.split('.'))) value
+924 flit_core.versionno 100:12 call [flit_core.versionno.normalise_version] add(pre_l + pre_n) value
+926 flit_core.versionno 104:12 call [flit_core.versionno.normalise_version] add('.post' + str(int(post_n1))) value
+931 flit_core.versionno 107:12 call [flit_core.versionno.normalise_version] add('.post' + str(int(post_n))) value
+937 flit_core.versionno 112:12 call [flit_core.versionno.normalise_version] add('.dev' + dev_n) value
+945 flit_core.versionno 119:12 call [flit_core.versionno.normalise_version] add('+' + '.'.join(l)) value
+965 flit_core.wheel 90:19 call [flit_core.wheel.WheelBuilder.from_ini_path] cls( directory, module, metadata, entrypoints, target_fp,... value

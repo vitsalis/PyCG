@@ -82,11 +82,17 @@ def test_every_project_of_the_benchmark_has_a_batch():
     for name, project in projects.load_projects().items():
         batches.setdefault(project.batch, []).append(name)
     assert list(batches) == list(projects.BATCHES)
-    assert {len(names) for batch, names in batches.items() if batch != 7} == {5}
+    assert {len(names) for batch, names in batches.items() if batch not in (7, 8)} == {
+        5
+    }
     assert batches[1] == ["jmespath", "tenacity", "cachetools", "pluggy", "h11"]
     assert batches[7] == [
         *("pyfiglet", "uncertainties", "einops", "pymysql", "segno"),
         *("tinydb", "pgvector", "textdistance", "websocket-client", "mss"),
+    ]
+    assert batches[8] == [
+        *("honcho", "nodeenv", "flit-core", "pyusb", "vulture"),
+        *("toolz", "tablib", "avro", "pubchempy", "m3u8"),
     ]
     assert batches["icse-2021"] == [
         "autojump",
@@ -102,7 +108,7 @@ def test_a_batch_is_one_of_the_batches(tmp_path, batch):
     config_path = write_benchmark_with_project_demo(
         tmp_path, CONFIG + f"batch = {batch}\n"
     )
-    expected = "batch is one of 1, 2, 3, 4, 5, 7, 'icse-2021'"
+    expected = "batch is one of 1, 2, 3, 4, 5, 7, 8, 'icse-2021'"
     with pytest.raises(ValueError, match=expected):
         projects.load_projects(config_path)
     config_path.write_text(dedent(CONFIG + "batch = 3\n"))

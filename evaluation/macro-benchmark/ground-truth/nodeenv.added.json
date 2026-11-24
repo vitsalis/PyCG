@@ -1,0 +1,520 @@
+{
+  "edges": {
+    "nodeenv": {
+      "nodeenv.main": [
+        "nodeenv 2403:9 call  main()"
+      ]
+    },
+    "nodeenv.Config._dump": {
+      "<builtin>.print": [
+        "nodeenv 143:14 call  print(\" [nodeenv]\")",
+        "nodeenv 144:14 call  print(\" \" + \"\\n \".join( \"%s = %s\" % (k, v) for k, v in so..."
+      ],
+      "<builtin>.sorted": [
+        "nodeenv 145:50 call  sorted(vars(cls).items())"
+      ],
+      "<builtin>.str.join": [
+        "nodeenv 144:37 call  \"\\n \".join( \"%s = %s\" % (k, v) for k, v in sorted(vars(cl..."
+      ],
+      "<builtin>.str.startswith": [
+        "nodeenv 146:32 call  k.startswith('_')"
+      ],
+      "<builtin>.vars": [
+        "nodeenv 145:55 call  vars(cls)"
+      ],
+      "types.MappingProxyType.items": [
+        "nodeenv 145:66 call  vars(cls).items()"
+      ]
+    },
+    "nodeenv.Config._load": {
+      "<builtin>.open": [
+        "nodeenv 135:22 call  open(\".node-version\", \"r\")"
+      ],
+      "<builtin>.print": [
+        "nodeenv 130:26 call  print('CONFIG {0}: {1} = {2}'.format( os.path.basename(co..."
+      ],
+      "<builtin>.str.format": [
+        "nodeenv 130:57 call  'CONFIG {0}: {1} = {2}'.format( os.path.basename(configfi..."
+      ],
+      "io.TextIOWrapper.readline": [
+        "nodeenv 136:53 call  v_file.readline()"
+      ],
+      "os.path.basename": [
+        "nodeenv 131:41 call  os.path.basename(configfile)"
+      ]
+    },
+    "nodeenv._download_node_file": {
+      "http.client.HTTPResponse.read": [
+        "nodeenv 911:53 call  urlopen(node_url).read()"
+      ],
+      "logging.Logger.error": [
+        "nodeenv 925:29 call  logger.error('Error: cannot download %s: %s' % (node_url,..."
+      ],
+      "nodeenv.urlopen": [
+        "nodeenv 911:38 call  urlopen(node_url)"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "nodeenv 911:53 call  urlopen(node_url).read()"
+      ],
+      "time.sleep": [
+        "nodeenv 927:23 call  time.sleep(delay)"
+      ]
+    },
+    "nodeenv._get_last_node_version": {
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1626:17 call  logger.debug( ' * Host platform: x86_64-musl=%s, riscv64=..."
+      ]
+    },
+    "nodeenv.build_node_from_src": {
+      "<builtin>.list.append": [
+        "nodeenv 1176:24 call  conf_cmd.append('--without-ssl')",
+        "nodeenv 1178:24 call  conf_cmd.append('--debug')",
+        "nodeenv 1180:24 call  conf_cmd.append('--profile')"
+      ],
+      "nodeenv.callit": [
+        "nodeenv 1167:23 call  callit(['ln', '-s', python2_path, node_tmpbin_link])",
+        "nodeenv 1184:11 call  callit(conf_cmd, args.verbose, True, node_src_dir, env)",
+        "nodeenv 1186:11 call  callit([make_cmd] + make_opts, args.verbose, True, node_s...",
+        "nodeenv 1188:11 call  callit([make_cmd + ' install'], args.verbose, True, node_..."
+      ],
+      "shutil.which": [
+        "nodeenv 1152:36 call  shutil.which('python2')"
+      ]
+    },
+    "nodeenv.callit": {
+      "<builtin>.OSError": [
+        "nodeenv 833:22 call  OSError(\"Command %s failed with error code %s\" % (cmd_des..."
+      ],
+      "<builtin>.bytes.decode": [
+        "nodeenv 818:35 call  line.decode('mbcs')",
+        "nodeenv 820:35 call  line.decode('utf8')",
+        "nodeenv 822:31 call  line.decode('cp866')"
+      ],
+      "<builtin>.dict.update": [
+        "nodeenv 797:23 call  env.update(extra_env)"
+      ],
+      "<builtin>.len": [
+        "nodeenv 779:15 call  len(part)"
+      ],
+      "<builtin>.list.append": [
+        "nodeenv 783:25 call  cmd_parts.append(part)",
+        "nodeenv 823:26 call  all_output.append(line)"
+      ],
+      "<builtin>.str.join": [
+        "nodeenv 784:24 call  ' '.join(cmd_parts)",
+        "nodeenv 788:23 call  ' '.join(cmd)"
+      ],
+      "<builtin>.str.replace": [
+        "nodeenv 782:41 call  part.replace('\"', '\\\\\"')"
+      ],
+      "<builtin>.str.rstrip": [
+        "nodeenv 818:50 call  line.decode('mbcs').rstrip()",
+        "nodeenv 820:50 call  line.decode('utf8').rstrip()",
+        "nodeenv 822:47 call  line.decode('cp866').rstrip()"
+      ],
+      "io.BufferedReader.readline": [
+        "nodeenv 813:31 call  stdout.readline()"
+      ],
+      "logging.Logger.critical": [
+        "nodeenv 832:32 call  logger.critical(s)"
+      ],
+      "logging.Logger.debug": [
+        "nodeenv 785:17 call  logger.debug(\" ** Running command %s\" % cmd_desc)"
+      ],
+      "logging.Logger.error": [
+        "nodeenv 808:21 call  logger.error(\"Error %s while executing command %s\" % (e, ..."
+      ],
+      "logging.Logger.info": [
+        "nodeenv 825:24 call  logger.info(line)"
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 785:17 call  logger.debug(\" ** Running command %s\" % cmd_desc)",
+        "nodeenv 808:21 call  logger.error(\"Error %s while executing command %s\" % (e, ...",
+        "nodeenv 825:24 call  logger.info(line)",
+        "nodeenv 832:32 call  logger.critical(s)"
+      ],
+      "os._Environ.copy": [
+        "nodeenv 795:30 call  os.environ.copy()"
+      ],
+      "subprocess.Popen": [
+        "nodeenv 803:32 call  subprocess.Popen( cmd, stderr=subprocess.STDOUT, stdin=No..."
+      ],
+      "subprocess.Popen.wait": [
+        "nodeenv 826:14 call  proc.wait()"
+      ],
+      "sys.exc_info": [
+        "nodeenv 807:25 call  sys.exc_info()"
+      ]
+    },
+    "nodeenv.copytree": {
+      "os.readlink": [
+        "nodeenv 1101:43 call  os.readlink(s)"
+      ],
+      "os.symlink": [
+        "nodeenv 1101:31 call  os.symlink(os.readlink(s), d)"
+      ]
+    },
+    "nodeenv.create_environment": {
+      "nodeenv.install_activate": [
+        "nodeenv 1569:21 call  install_activate(env_dir, args)"
+      ],
+      "nodeenv.install_node": [
+        "nodeenv 1565:21 call  install_node(env_dir, src_dir, args)"
+      ],
+      "nodeenv.install_npm": [
+        "nodeenv 1572:17 call  instfunc(env_dir, src_dir, args)"
+      ],
+      "nodeenv.install_npm_win": [
+        "nodeenv 1572:17 call  instfunc(env_dir, src_dir, args)"
+      ],
+      "nodeenv.install_packages": [
+        "nodeenv 1574:25 call  install_packages(env_dir, args)"
+      ],
+      "nodeenv.set_predeactivate_hook": [
+        "nodeenv 1576:31 call  set_predeactivate_hook(env_dir)"
+      ],
+      "sys.exit": [
+        "nodeenv 1552:21 call  sys.exit(2)"
+      ]
+    },
+    "nodeenv.download_node_src": {
+      "contextlib.contextmanager.helper": [
+        "nodeenv 977:27 call  tarfile_open(fileobj=dl_contents)"
+      ],
+      "nodeenv._download_node_file": [
+        "nodeenv 969:38 call  _download_node_file(node_url)"
+      ],
+      "nodeenv.tarfile_open": [
+        "nodeenv 977:27 call  tarfile_open(fileobj=dl_contents)"
+      ],
+      "operator.attrgetter.__call__": [
+        "nodeenv 988:49 call  member_name(member)"
+      ],
+      "tarfile.TarFile.extractall": [
+        "nodeenv 994:31 call  archive.extractall(src_dir, extract_list, filter=\"data\")",
+        "nodeenv 996:31 call  archive.extractall(src_dir, extract_list)"
+      ]
+    },
+    "nodeenv.find_system_node": {
+      "shutil.which": [
+        "nodeenv 180:29 call  shutil.which(candidate, path=path_var)"
+      ]
+    },
+    "nodeenv.get_env_dir": {
+      "logging.Logger.warning": [
+        "nodeenv 1701:31 call  logger.warning( ' * Using activated virtualenv %s, not %s..."
+      ]
+    },
+    "nodeenv.get_installed_node_version": {
+      "subprocess.Popen": [
+        "nodeenv 386:34 call  subprocess.Popen( [node_bin, \"--version\"], stdout=subproc..."
+      ],
+      "subprocess.Popen.communicate": [
+        "nodeenv 387:73 call  subprocess.Popen( [node_bin, \"--version\"], stdout=subproc..."
+      ]
+    },
+    "nodeenv.get_node_bin_url": {
+      "nodeenv.get_root_url": [
+        "nodeenv 888:24 call  get_root_url(version)"
+      ],
+      "nodeenv.is_x86_64_musl": [
+        "nodeenv 883:24 call  is_x86_64_musl()"
+      ],
+      "platform.machine": [
+        "nodeenv 879:41 call  platform.machine()"
+      ],
+      "platform.system": [
+        "nodeenv 878:34 call  platform.system()"
+      ]
+    },
+    "nodeenv.get_node_src_url": {
+      "nodeenv.get_root_url": [
+        "nodeenv 893:24 call  get_root_url(version)"
+      ]
+    },
+    "nodeenv.get_root_url": {
+      "nodeenv.parse_version": [
+        "nodeenv 840:21 call  parse_version(version_str)"
+      ]
+    },
+    "nodeenv.install_activate": {
+      "logging.Logger.warning": [
+        "nodeenv 1523:35 call  logger.warning( 'Could not create the nodejs.exe link; th..."
+      ],
+      "nodeenv.callit": [
+        "nodeenv 1487:36 call  callit( ['cygpath', '-w', os.path.abspath(bin_dir)], show..."
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1523:35 call  logger.warning( 'Could not create the nodejs.exe link; th..."
+      ],
+      "nodeenv.mkdir": [
+        "nodeenv 1456:14 call  mkdir(bin_dir)"
+      ]
+    },
+    "nodeenv.install_node": {
+      "logging.Logger.info": [
+        "nodeenv 1200:20 call  logger.info('')"
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1200:20 call  logger.info('')"
+      ],
+      "nodeenv.install_node_wrapped": [
+        "nodeenv 1197:29 call  install_node_wrapped(env_dir, src_dir, args)"
+      ]
+    },
+    "nodeenv.install_node_wrapped": {
+      "nodeenv.build_node_from_src": [
+        "nodeenv 1269:28 call  build_node_from_src(env_dir, src_dir, node_src_dir, args)"
+      ],
+      "nodeenv.download_node_src": [
+        "nodeenv 1257:34 call  download_node_src(url, src_dir, args)"
+      ],
+      "nodeenv.get_node_bin_url": [
+        "nodeenv 1241:36 call  get_node_bin_url(args.node)"
+      ],
+      "nodeenv.get_node_src_url": [
+        "nodeenv 1243:36 call  get_node_src_url(args.node)"
+      ]
+    },
+    "nodeenv.install_npm": {
+      "logging.Logger.info": [
+        "nodeenv 1279:16 call  logger.info(' * Install npm.js (%s) ... ' % args.npm, ext...",
+        "nodeenv 1301:20 call  logger.info(out)",
+        "nodeenv 1302:16 call  logger.info('done.')"
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1279:16 call  logger.info(' * Install npm.js (%s) ... ' % args.npm, ext...",
+        "nodeenv 1301:20 call  logger.info(out)",
+        "nodeenv 1302:16 call  logger.info('done.')"
+      ],
+      "subprocess.Popen": [
+        "nodeenv 1286:28 call  subprocess.Popen( ( 'sh', '-c', '. {0} && npm install -g ..."
+      ],
+      "subprocess.Popen.communicate": [
+        "nodeenv 1299:30 call  proc.communicate()"
+      ]
+    },
+    "nodeenv.install_npm_win": {
+      "http.client.HTTPResponse.read": [
+        "nodeenv 1316:53 call  urlopen(npm_meta_url).read()",
+        "nodeenv 1318:52 call  urlopen(npm_url).read()"
+      ],
+      "nodeenv.tarfile_open": [
+        "nodeenv 1333:22 call  tarfile_open(fileobj=npm_contents)"
+      ],
+      "nodeenv.urlopen": [
+        "nodeenv 1316:34 call  urlopen(npm_meta_url)",
+        "nodeenv 1318:38 call  urlopen(npm_url)"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "nodeenv 1316:53 call  urlopen(npm_meta_url).read()",
+        "nodeenv 1318:52 call  urlopen(npm_url).read()"
+      ]
+    },
+    "nodeenv.install_packages": {
+      "nodeenv.callit": [
+        "nodeenv 1388:19 call  callit(cmd=[cmd % {\"pack\": package, \"opt\": opt}], show_st..."
+      ]
+    },
+    "nodeenv.main": {
+      "_sitebuiltins.Quitter.__call__": [
+        "nodeenv 1733:13 call  exit(1)"
+      ],
+      "logging.Logger.error": [
+        "nodeenv 1732:21 call  logger.error('Installing system node.js on win32 is not s..."
+      ],
+      "logging.Logger.warning": [
+        "nodeenv 1764:27 call  logger.warning(' * --prefer-system is not supported on wi...",
+        "nodeenv 1776:23 call  logger.warning(' * --isolate-npm is not supported on win3..."
+      ],
+      "nodeenv.Config._dump": [
+        "nodeenv 1722:21 call  Config._dump()"
+      ],
+      "nodeenv.create_environment": [
+        "nodeenv 1796:27 call  create_environment(env_dir, args)"
+      ],
+      "nodeenv.get_last_lts_node_version": [
+        "nodeenv 1782:46 call  get_last_lts_node_version()"
+      ],
+      "nodeenv.install_packages": [
+        "nodeenv 1793:25 call  install_packages(env_dir, args)"
+      ],
+      "nodeenv.make_certifi_context": [
+        "nodeenv 1742:47 call  make_certifi_context()"
+      ]
+    },
+    "nodeenv.make_certifi_context": {
+      "certifi.where": [
+        "nodeenv 1014:59 call  certifi.where()"
+      ],
+      "logging.Logger.warning": [
+        "nodeenv 1009:23 call  logger.warning( 'certifi is not installed, --with-certifi..."
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1009:23 call  logger.warning( 'certifi is not installed, --with-certifi..."
+      ],
+      "ssl.create_default_context": [
+        "nodeenv 1014:38 call  ssl.create_default_context(cafile=certifi.where())"
+      ]
+    },
+    "nodeenv.match_node_range": {
+      "operator.gt": [
+        "nodeenv 353:27 call  _OPERATORS[op](version, other)"
+      ]
+    },
+    "nodeenv.mkdir": {
+      "nodeenv.create_logger.emit": [
+        "nodeenv 704:21 call  logger.debug(' * Creating: %s ... ', path, extra=dict(con...",
+        "nodeenv 706:21 call  logger.debug('done.')",
+        "nodeenv 708:21 call  logger.debug(' * Directory %s already exists', path)"
+      ]
+    },
+    "nodeenv.node_version_from_args": {
+      "nodeenv.find_system_node": [
+        "nodeenv 363:36 call  find_system_node()"
+      ],
+      "subprocess.Popen": [
+        "nodeenv 364:36 call  subprocess.Popen( [node_bin, \"--version\"], stdout=subproc..."
+      ],
+      "subprocess.Popen.communicate": [
+        "nodeenv 365:73 call  subprocess.Popen( [node_bin, \"--version\"], stdout=subproc..."
+      ]
+    },
+    "nodeenv.parse_args": {
+      "<builtin>.str.format": [
+        "nodeenv 684:67 call  \"Config file '{0}' doesn't exist!\".format( args.config_file)"
+      ],
+      "argparse.ArgumentParser.error": [
+        "nodeenv 684:25 call  parser.error(\"Config file '{0}' doesn't exist!\".format( a...",
+        "nodeenv 693:25 call  parser.error('You must provide a DEST_DIR or ' 'use curre..."
+      ],
+      "os.path.exists": [
+        "nodeenv 683:30 call  os.path.exists(args.config_file)"
+      ]
+    },
+    "nodeenv.print_node_versions": {
+      "logging.Logger.info": [
+        "nodeenv 1600:20 call  logger.info('\\t'.join(chunk))"
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1600:20 call  logger.info('\\t'.join(chunk))"
+      ]
+    },
+    "nodeenv.report_node_download_error": {
+      "logging.Logger.error": [
+        "nodeenv 1214:21 call  logger.error('Error: cannot download %s: HTTP %s %s' % (n...",
+        "nodeenv 1219:25 call  logger.error('Error: there is no prebuilt node.js %s for ...",
+        "nodeenv 1222:25 call  logger.error('Error: check \"nodeenv --list\" for the avail...",
+        "nodeenv 1225:25 call  logger.error('Error: there is no node.js %s source archiv...",
+        "nodeenv 1227:25 call  logger.error('Error: check \"nodeenv --list\" for the avail..."
+      ],
+      "logging.Logger.info": [
+        "nodeenv 1212:16 call  logger.info('')"
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1212:16 call  logger.info('')",
+        "nodeenv 1214:21 call  logger.error('Error: cannot download %s: HTTP %s %s' % (n...",
+        "nodeenv 1219:25 call  logger.error('Error: there is no prebuilt node.js %s for ...",
+        "nodeenv 1222:25 call  logger.error('Error: check \"nodeenv --list\" for the avail...",
+        "nodeenv 1225:25 call  logger.error('Error: there is no node.js %s source archiv...",
+        "nodeenv 1227:25 call  logger.error('Error: check \"nodeenv --list\" for the avail..."
+      ]
+    },
+    "nodeenv.split_url_auth": {
+      "urllib.parse.urlsplit": [
+        "nodeenv 1048:21 call  urlsplit(url)"
+      ]
+    },
+    "nodeenv.urlopen": {
+      "logging.Logger.error": [
+        "nodeenv 1076:21 call  logger.error('Error: cannot download %s: %s' % (url, geta...",
+        "nodeenv 1080:25 call  logger.error('Error: check the proxy settings: %s' % ', '..."
+      ],
+      "nodeenv.create_logger.emit": [
+        "nodeenv 1076:21 call  logger.error('Error: cannot download %s: %s' % (url, geta...",
+        "nodeenv 1080:25 call  logger.error('Error: check the proxy settings: %s' % ', '..."
+      ]
+    }
+  },
+  "notes": {
+    "nodeenv 1014:59 call  certifi.where()": [
+      "certifi is an optional extra (setup.py extras_require), not installed in the benchmark: a missing module, named by its access path; both sides of the optional import run (J9)"
+    ],
+    "nodeenv 1048:21 call  urlsplit(url)": [
+      "urlsplit is a plain function on Python 3.10 and an lru_cache wrapper from 3.11 (J5)"
+    ],
+    "nodeenv 1316:53 call  urlopen(npm_meta_url).read()": [
+      "the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)"
+    ],
+    "nodeenv 1318:52 call  urlopen(npm_url).read()": [
+      "the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)"
+    ],
+    "nodeenv 1333:22 call  tarfile_open(fileobj=npm_contents)": [
+      "as at 977:27 (J6)"
+    ],
+    "nodeenv 144:37 call  \"\\n \".join( \"%s = %s\" % (k, v) for k, v in sorted(vars(cl...": [
+      "the receiver is a str; the module name join (line 44) is not this attribute"
+    ],
+    "nodeenv 1456:14 call  mkdir(bin_dir)": [
+      "Cygwin and MSYS only (J4)"
+    ],
+    "nodeenv 1487:36 call  callit( ['cygpath', '-w', os.path.abspath(bin_dir)], show...": [
+      "Cygwin and MSYS only (J4)"
+    ],
+    "nodeenv 1572:17 call  instfunc(env_dir, src_dir, args)": [
+      "instfunc is install_npm_win on Windows, Cygwin and MSYS, install_npm elsewhere (line 1571; J4)"
+    ],
+    "nodeenv 1626:17 call  logger.debug( ' * Host platform: x86_64-musl=%s, riscv64=...": [
+      "logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)"
+    ],
+    "nodeenv 1733:13 call  exit(1)": [
+      "exit is the _sitebuiltins.Quitter that site puts into builtins (pyfiglet J6); Windows only (J4)"
+    ],
+    "nodeenv 2403:9 call  main()": [
+      "the if __name__ == '__main__' block is code of the module"
+    ],
+    "nodeenv 353:27 call  _OPERATORS[op](version, other)": [
+      "_OPERATORS (line 207) maps an operator string of a parsed range to a function of operator; parse_node_range only makes the operators >=, >, <= and < (_comparator_constraints, lines 238-297), so operator.eq is no callee (J7)"
+    ],
+    "nodeenv 704:21 call  logger.debug(' * Creating: %s ... ', path, extra=dict(con...": [
+      "logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)"
+    ],
+    "nodeenv 706:21 call  logger.debug('done.')": [
+      "logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)"
+    ],
+    "nodeenv 708:21 call  logger.debug(' * Directory %s already exists', path)": [
+      "logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)"
+    ],
+    "nodeenv 784:24 call  ' '.join(cmd_parts)": [
+      "the receiver is a str; the module name join (line 44) is not this attribute"
+    ],
+    "nodeenv 785:17 call  logger.debug(\" ** Running command %s\" % cmd_desc)": [
+      "logger is the logging.Logger of create_logger (line 424); the name debug of line 80 is an attribute of Config. A client can lower the logger's level through logging's documented configuration (ruling of the lead, 2026-11-24), so logging calls back emit here too (J1)"
+    ],
+    "nodeenv 788:23 call  ' '.join(cmd)": [
+      "the receiver is a str; the module name join (line 44) is not this attribute"
+    ],
+    "nodeenv 797:23 call  env.update(extra_env)": [
+      "env is the dict of os.environ.copy() (line 795)"
+    ],
+    "nodeenv 813:31 call  stdout.readline()": [
+      "proc.stdout of a Popen with stdout=PIPE and neither text mode nor bufsize is an io.BufferedReader"
+    ],
+    "nodeenv 911:53 call  urlopen(node_url).read()": [
+      "the response of nodeenv.urlopen: an http.client.HTTPResponse for an http(s) URL, or a urllib.response.addinfourl for a file:// mirror (README.rst:224-228) or an ftp URL, which also a server's redirect can give; addinfourl's read is the local func_wrapper that tempfile._TemporaryFileWrapper.__getattr__ returns (J3)"
+    ],
+    "nodeenv 977:27 call  tarfile_open(fileobj=dl_contents)": [
+      "tarfile_open is a @contextlib.contextmanager generator function: the call runs contextmanager's local helper, which calls the generator function back (J6)"
+    ],
+    "nodeenv 988:49 call  member_name(member)": [
+      "member_name is the lambda of line 975 (Windows, Cygwin) or operator.attrgetter('name') (line 979)"
+    ],
+    "nodeenv 994:31 call  archive.extractall(src_dir, extract_list, filter=\"data\")": [
+      "only off Windows and Cygwin: archive is the TarFile that tarfile_open yields"
+    ],
+    "nodeenv 996:31 call  archive.extractall(src_dir, extract_list)": [
+      "the ZipFile on Windows and Cygwin with --no-parallel-extract, the TarFile elsewhere on Python 3.10 and 3.11"
+    ]
+  },
+  "trace": "dynamic/nodeenv.json"
+}

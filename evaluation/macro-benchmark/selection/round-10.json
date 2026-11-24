@@ -1,0 +1,568 @@
+{
+  "complete": true,
+  "constants": {
+    "CI_FILES": [
+      ".github/workflows/",
+      ".travis.yml",
+      ".gitlab-ci.yml",
+      ".circleci/",
+      "azure-pipelines.yml"
+    ],
+    "FILTERS": [
+      "rank",
+      "stub-name",
+      "release",
+      "pure-python",
+      "requires-python",
+      "licence",
+      "no-dependency",
+      "size",
+      "source",
+      "history",
+      "ci",
+      "tests",
+      "released-code",
+      "github"
+    ],
+    "FRAME_PYTHON": [
+      3,
+      15
+    ],
+    "GITHUB_API": "https://api.github.com/repos/{owner}/{repo}",
+    "GITHUB_FACTS": [
+      "archived",
+      "created_at",
+      "fork",
+      "forks_count",
+      "full_name",
+      "open_issues_count",
+      "pushed_at",
+      "stargazers_count",
+      "subscribers_count"
+    ],
+    "MAINTAINED_YEARS": 3,
+    "MARKER_ENVIRONMENT": {
+      "extra": "",
+      "implementation_name": "cpython",
+      "os_name": "posix",
+      "platform_python_implementation": "CPython",
+      "platform_system": "Linux",
+      "python_full_version": "3.14.0",
+      "python_version": "3.14",
+      "sys_platform": "linux"
+    },
+    "MAX_BLOB_BYTES": 4194304,
+    "MAX_CODE_LINES": 4000,
+    "MAX_DIFFERING_PERCENT": 5,
+    "MIN_AUTHORS": 2,
+    "MIN_CODE_LINES": 800,
+    "MIN_COMMITS": 100,
+    "MIN_STARS": 500,
+    "PERMISSIVE_CLASSIFIERS": [
+      "License :: OSI Approved :: Apache Software License",
+      "License :: OSI Approved :: BSD License",
+      "License :: OSI Approved :: ISC License (ISCL)",
+      "License :: OSI Approved :: MIT License",
+      "License :: OSI Approved :: Python Software Foundation License",
+      "License :: OSI Approved :: The Unlicense (Unlicense)",
+      "License :: OSI Approved :: Zero-Clause BSD (0BSD)"
+    ],
+    "PERMISSIVE_LICENCES": [
+      "0BSD",
+      "Apache-2.0",
+      "BSD-2-Clause",
+      "BSD-3-Clause",
+      "ISC",
+      "MIT",
+      "PSF-2.0",
+      "Unlicense"
+    ],
+    "PURE_WHEEL_TAGS": [
+      "py3-none-any",
+      "py2.py3-none-any"
+    ],
+    "PYPI_PROJECT": "https://pypi.org/pypi/{name}/json",
+    "PYPI_RELEASE": "https://pypi.org/pypi/{name}/{version}/json",
+    "RANK_CUTOFF": 5000,
+    "STRATA": 5,
+    "STUB_PREFIXES": [
+      "types-"
+    ],
+    "STUB_SUFFIXES": [
+      "-stubs"
+    ],
+    "TAG_FORMS": [
+      "{version}",
+      "v{version}",
+      "{name}-{version}",
+      "release-{version}"
+    ],
+    "TARGET_PYTHON": "3.14.0",
+    "TEST_DIRS": [
+      "tests",
+      "test",
+      "testing",
+      "unittests"
+    ],
+    "TEST_FILES": [
+      "test_*.py",
+      "*_test.py"
+    ],
+    "TRANSPORT_SETTINGS": [
+      "http."
+    ]
+  },
+  "dropped": [],
+  "frame": {
+    "file": "frame.json",
+    "sha256": "901447044e59a51cc87d0af631fb5f31dfa0a64ac565cf30ed5c95ffb8eebf90"
+  },
+  "list": {
+    "date": "2026-11-01",
+    "file": "top-pypi-packages-2026-11-01.json",
+    "rows": 15000,
+    "sha256": "3e958a64ebe1de0b6a4ab4c6b465d481f350fd1dfa926c639add36eb34dabc1e"
+  },
+  "order": [
+    "validators",
+    "fastjsonschema",
+    "einops",
+    "itables",
+    "h11",
+    "pyusb",
+    "structlog",
+    "websocket-client",
+    "tenacity",
+    "pyfiglet",
+    "platformdirs",
+    "json-repair",
+    "jsonpickle",
+    "asgiref",
+    "flit-core",
+    "anytree",
+    "cachetools",
+    "django-constance",
+    "pgvector",
+    "tinydb",
+    "loguru",
+    "toolz",
+    "mss",
+    "marshmallow",
+    "tablib",
+    "textdistance",
+    "prometheus-client",
+    "django-environ",
+    "pymysql",
+    "pyshp",
+    "pyflakes",
+    "pubchempy",
+    "tabulate",
+    "attrs",
+    "vulture",
+    "pyrate-limiter",
+    "more-itertools",
+    "pypandoc",
+    "jmespath",
+    "automat",
+    "cloudpathlib",
+    "argcomplete",
+    "whitenoise",
+    "pluggy",
+    "m3u8",
+    "avro",
+    "configargparse",
+    "dagster-pipes",
+    "cloudpickle",
+    "sh",
+    "path",
+    "python-multipart",
+    "bottle",
+    "segno",
+    "markdown2",
+    "funcy",
+    "aiocache",
+    "netaddr",
+    "tinytag",
+    "secure",
+    "nodeenv",
+    "dill",
+    "honcho",
+    "cerberus",
+    "sqlparse",
+    "uncertainties",
+    "pyjwt",
+    "pypinyin",
+    "python-barcode"
+  ],
+  "round": 10,
+  "seed": 6284874201124768312,
+  "selected": [
+    "pubchempy",
+    "m3u8"
+  ],
+  "skipped_strata": {
+    "2": "exhausted: its only project left, asgiref, is touched (django-constance's trace, ground truth and environment name it)",
+    "4": "the partial round 10 of batch 8 draws only from strata 1 and 3, the two largest pools left",
+    "5": "the partial round 10 of batch 8 draws only from strata 1 and 3, the two largest pools left"
+  },
+  "strata": [
+    {
+      "examined": [
+        {
+          "name": "h11",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "pyfiglet",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "tinydb",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "django-environ",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "pubchempy",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 1236,
+      "members": [
+        "tinydb",
+        "cloudpickle",
+        "pyfiglet",
+        "honcho",
+        "django-environ",
+        "pypandoc",
+        "whitenoise",
+        "path",
+        "pubchempy",
+        "vulture",
+        "dagster-pipes",
+        "python-multipart",
+        "h11",
+        "aiocache"
+      ],
+      "min_code_lines": 809,
+      "selected": {
+        "facts": {
+          "authors": 13,
+          "ci": [
+            ".github/workflows/code-check.yml",
+            ".github/workflows/release.yml",
+            ".github/workflows/test.yml"
+          ],
+          "code_lines": 1159,
+          "commit": "9935a14e7fdb4a88d27a99fedce69ca99f004698",
+          "commits": 159,
+          "github": {
+            "archived": false,
+            "created_at": "2013-01-06T02:35:45Z",
+            "fork": false,
+            "forks_count": 126,
+            "full_name": "mcs07/PubChemPy",
+            "license": "MIT",
+            "open_issues_count": 31,
+            "pushed_at": "2025-09-08T20:52:27Z",
+            "stargazers_count": 519,
+            "subscribers_count": 18
+          },
+          "licence": "MIT",
+          "licence_source": "license_expression",
+          "release": "1.0.5",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 1159,
+            "source_root": "."
+          },
+          "repository": "https://github.com/mcs07/PubChemPy",
+          "tag": "v1.0.5",
+          "tag_object": "1fcc2e5cb56f6c07faaf9009bc7bf26fc9f36df2",
+          "test_code_lines": 443,
+          "test_files": [
+            "tests/test_assay.py",
+            "tests/test_compound.py",
+            "tests/test_compound3d.py",
+            "tests/test_download.py",
+            "tests/test_errors.py",
+            "tests/test_identifiers.py",
+            "tests/test_pandas.py",
+            "tests/test_properties.py",
+            "tests/test_requests.py",
+            "tests/test_search.py",
+            "tests/test_sources.py",
+            "tests/test_substance.py"
+          ],
+          "test_ratio": 0.382,
+          "top_level": [
+            "pubchempy"
+          ],
+          "uploaded": "2025-09-08",
+          "wheel": {
+            "filename": "pubchempy-1.0.5-py3-none-any.whl",
+            "sha256": "e936cfed31fa194042ad463be3c803dde5b12ef2f795caf336e3114127c34fa0",
+            "url": "https://files.pythonhosted.org/packages/6b/e3/2c887645f21b94d992a16775bcf81cdf6dcc36cf1606782cb2a3c86e9a35/pubchempy-1.0.5-py3-none-any.whl"
+          }
+        },
+        "name": "pubchempy",
+        "rank": 2888
+      },
+      "stratum": 1
+    },
+    {
+      "examined": [],
+      "max_code_lines": 1559,
+      "members": [
+        "django-constance",
+        "asgiref",
+        "jmespath",
+        "pgvector",
+        "fastjsonschema",
+        "pluggy",
+        "anytree",
+        "cachetools",
+        "validators",
+        "configargparse",
+        "argcomplete",
+        "tenacity",
+        "uncertainties",
+        "funcy"
+      ],
+      "min_code_lines": 1239,
+      "selected": null,
+      "skipped": "exhausted: its only project left, asgiref, is touched (django-constance's trace, ground truth and environment name it)",
+      "stratum": 2
+    },
+    {
+      "examined": [
+        {
+          "name": "einops",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "toolz",
+          "reason": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "textdistance",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "pyflakes",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "tabulate",
+          "reason": "used: macro-benchmark/projects.toml",
+          "result": "skipped"
+        },
+        {
+          "name": "m3u8",
+          "result": "selected"
+        }
+      ],
+      "max_code_lines": 2256,
+      "members": [
+        "python-barcode",
+        "textdistance",
+        "tabulate",
+        "nodeenv",
+        "einops",
+        "pyflakes",
+        "m3u8",
+        "secure",
+        "cerberus",
+        "toolz",
+        "sh",
+        "pyjwt",
+        "tinytag",
+        "pypinyin"
+      ],
+      "min_code_lines": 1596,
+      "selected": {
+        "facts": {
+          "authors": 98,
+          "ci": [
+            ".github/workflows/main.yml",
+            ".github/workflows/ruff.yml"
+          ],
+          "code_lines": 1934,
+          "commit": "49417d05602fc472b518ec61aa9b327cd00e079d",
+          "commits": 560,
+          "github": {
+            "archived": false,
+            "created_at": "2012-04-27T20:56:32Z",
+            "fork": false,
+            "forks_count": 500,
+            "full_name": "globocom/m3u8",
+            "license": "NOASSERTION",
+            "open_issues_count": 45,
+            "pushed_at": "2025-01-31T21:13:34Z",
+            "stargazers_count": 2286,
+            "subscribers_count": 145
+          },
+          "licence": "MIT",
+          "licence_source": "license",
+          "release": "6.0.0",
+          "released_code": {
+            "differing_files": [],
+            "differing_lines": 0,
+            "lines": 1934,
+            "source_root": "."
+          },
+          "repository": "https://github.com/globocom/m3u8",
+          "tag": "6.0.0",
+          "tag_object": "49417d05602fc472b518ec61aa9b327cd00e079d",
+          "test_code_lines": 2596,
+          "test_files": [
+            "tests/test_http_client.py",
+            "tests/test_invalid_versioned_playlists.py",
+            "tests/test_loader.py",
+            "tests/test_model.py",
+            "tests/test_parser.py",
+            "tests/test_strict_validations.py",
+            "tests/test_variant_m3u8.py",
+            "tests/test_version_matching_rules.py"
+          ],
+          "test_ratio": 1.342,
+          "top_level": [
+            "m3u8"
+          ],
+          "uploaded": "2024-08-07",
+          "wheel": {
+            "filename": "m3u8-6.0.0-py3-none-any.whl",
+            "sha256": "566d0748739c552dad10f8c87150078de6a0ec25071fa48e6968e96fc6dcba5d",
+            "url": "https://files.pythonhosted.org/packages/f8/31/50f3c38b38ff28635ff9c4a4afefddccc5f1b57457b539bdbdf75ce18669/m3u8-6.0.0-py3-none-any.whl"
+          }
+        },
+        "name": "m3u8",
+        "rank": 3212
+      },
+      "stratum": 3
+    },
+    {
+      "examined": [],
+      "max_code_lines": 3074,
+      "members": [
+        "platformdirs",
+        "pyrate-limiter",
+        "tablib",
+        "jsonpickle",
+        "more-itertools",
+        "websocket-client",
+        "automat",
+        "flit-core",
+        "marshmallow",
+        "loguru",
+        "sqlparse",
+        "markdown2",
+        "bottle",
+        "pymysql"
+      ],
+      "min_code_lines": 2267,
+      "selected": null,
+      "skipped": "the partial round 10 of batch 8 draws only from strata 1 and 3, the two largest pools left",
+      "stratum": 4
+    },
+    {
+      "examined": [],
+      "max_code_lines": 3880,
+      "members": [
+        "itables",
+        "segno",
+        "structlog",
+        "pyusb",
+        "attrs",
+        "mss",
+        "json-repair",
+        "netaddr",
+        "pyshp",
+        "prometheus-client",
+        "avro",
+        "cloudpathlib",
+        "dill"
+      ],
+      "min_code_lines": 3117,
+      "selected": null,
+      "skipped": "the partial round 10 of batch 8 draws only from strata 1 and 3, the two largest pools left",
+      "stratum": 5
+    }
+  ],
+  "used": {
+    "aiocache": "used: macro-benchmark/projects.toml",
+    "anytree": "used: macro-benchmark/projects.toml",
+    "argcomplete": "used: macro-benchmark/projects.toml",
+    "asciinema": "used: macro-benchmark/projects.toml",
+    "asyncstdlib": "used: macro-benchmark/projects.toml",
+    "autojump": "used: macro-benchmark/projects.toml",
+    "avro": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "bottle": "used: macro-benchmark/projects.toml",
+    "cachetools": "used: macro-benchmark/projects.toml",
+    "configargparse": "used: macro-benchmark/projects.toml",
+    "dagster-pipes": "used: macro-benchmark/projects.toml",
+    "django-constance": "used: macro-benchmark/projects.toml",
+    "django-environ": "used: macro-benchmark/projects.toml",
+    "einops": "used: macro-benchmark/projects.toml",
+    "fabric": "used: macro-benchmark/projects.toml",
+    "face-classification": "used: macro-benchmark/projects.toml",
+    "fastjsonschema": "used: macro-benchmark/projects.toml",
+    "flit-core": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "funcy": "used: macro-benchmark/projects.toml",
+    "h11": "used: macro-benchmark/projects.toml",
+    "honcho": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "hypothesis": "excluded: the scalability runs",
+    "itables": "used: macro-benchmark/projects.toml",
+    "jmespath": "used: macro-benchmark/projects.toml",
+    "json-repair": "used: macro-benchmark/projects.toml",
+    "jsonpickle": "used: macro-benchmark/projects.toml",
+    "loguru": "excluded: the pilot of the test-selection client",
+    "markdown2": "used: macro-benchmark/projects.toml",
+    "marshmallow": "used: macro-benchmark/projects.toml",
+    "more-itertools": "used: macro-benchmark/projects.toml",
+    "mss": "used: macro-benchmark/projects.toml",
+    "netaddr": "used: macro-benchmark/projects.toml",
+    "nodeenv": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "packaging": "excluded: the scalability runs",
+    "path": "used: macro-benchmark/projects.toml",
+    "pgvector": "used: macro-benchmark/projects.toml",
+    "pluggy": "used: macro-benchmark/projects.toml",
+    "prometheus-client": "used: macro-benchmark/projects.toml",
+    "pyfiglet": "used: macro-benchmark/projects.toml",
+    "pyflakes": "used: macro-benchmark/projects.toml",
+    "pygments": "excluded: the scalability runs",
+    "pymysql": "used: macro-benchmark/projects.toml",
+    "pypinyin": "used: macro-benchmark/projects.toml",
+    "pyrate-limiter": "used: macro-benchmark/projects.toml",
+    "pytest": "excluded: the scalability runs (its package _pytest)",
+    "python-barcode": "used: macro-benchmark/projects.toml",
+    "pyusb": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "segno": "used: macro-benchmark/projects.toml",
+    "sqlparse": "used: macro-benchmark/projects.toml",
+    "structlog": "used: macro-benchmark/projects.toml",
+    "sublist3r": "used: macro-benchmark/projects.toml",
+    "tablib": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "tabulate": "used: macro-benchmark/projects.toml",
+    "tenacity": "used: macro-benchmark/projects.toml",
+    "textdistance": "used: macro-benchmark/projects.toml",
+    "tinydb": "used: macro-benchmark/projects.toml",
+    "tinytag": "used: macro-benchmark/projects.toml",
+    "toolz": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "uncertainties": "used: macro-benchmark/projects.toml",
+    "validators": "used: macro-benchmark/projects.toml",
+    "vulture": "used: macro-benchmark/selection/batch-8-proposal/projects.toml",
+    "websocket-client": "used: macro-benchmark/projects.toml",
+    "whitenoise": "used: macro-benchmark/projects.toml"
+  }
+}

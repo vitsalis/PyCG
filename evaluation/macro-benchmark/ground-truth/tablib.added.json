@@ -1,0 +1,1027 @@
+{
+  "edges": {
+    "tablib._vendor.dbfpy.dbf": {
+      "<builtin>.len": [
+        "tablib._vendor.dbfpy.dbf 293:16 call  len(sys.argv)"
+      ],
+      "tablib._vendor.dbfpy.dbf.demo_create": [
+        "tablib._vendor.dbfpy.dbf 294:16 call  demo_create(_name)"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.__init__": {
+      "tablib._vendor.dbfpy.header.DbfHeader.__init__": [
+        "tablib._vendor.dbfpy.dbf 132:43 call  self.HeaderClass()"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.__repr__": {
+      "<builtin>.repr": [
+        "tablib._vendor.dbfpy.dbf 236:54 call  repr(self.header)"
+      ],
+      "tablib._vendor.dbfpy.header.DbfHeader.__repr__": [
+        "tablib._vendor.dbfpy.dbf 236:54 call  repr(self.header)"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.__setitem__": {
+      "tablib._vendor.dbfpy.dbf.Dbf._fixIndex": [
+        "tablib._vendor.dbfpy.dbf 248:38 call  self._fixIndex(index)"
+      ],
+      "tablib._vendor.dbfpy.record.DbfRecord._write": [
+        "tablib._vendor.dbfpy.dbf 249:22 call  record._write()"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf._fixIndex": {
+      "<builtin>.IndexError": [
+        "tablib._vendor.dbfpy.dbf 186:29 call  IndexError(\"Record index out of range\")"
+      ],
+      "<builtin>.TypeError": [
+        "tablib._vendor.dbfpy.dbf 180:28 call  TypeError(\"Index must be a numeric object\")"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.addField": {
+      "tablib._vendor.dbfpy.header.DbfHeader.addField": [
+        "tablib._vendor.dbfpy.dbf 228:33 call  self.header.addField(*defs)"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.close": {
+      "io.BufferedReader.close": [
+        "tablib._vendor.dbfpy.dbf 193:26 call  self.stream.close()"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.indexOfFieldName": {
+      "<builtin>.bytes.upper": [
+        "tablib._vendor.dbfpy.dbf 207:38 call  name.upper()"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.Dbf.newRecord": {
+      "tablib._vendor.dbfpy.record.DbfRecord.__init__": [
+        "tablib._vendor.dbfpy.dbf 211:32 call  self.RecordClass(self)"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.demo_create": {
+      "tablib._vendor.dbfpy.dbf.Dbf.__init__": [
+        "tablib._vendor.dbfpy.dbf 267:15 call  Dbf(filename, new=True)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.addField": [
+        "tablib._vendor.dbfpy.dbf 268:18 call  _dbf.addField( (\"NAME\", \"C\", 15), (\"SURNAME\", \"C\", 25), (..."
+      ]
+    },
+    "tablib._vendor.dbfpy.dbf.demo_read": {
+      "<builtin>.print": [
+        "tablib._vendor.dbfpy.dbf 261:14 call  print()",
+        "tablib._vendor.dbfpy.dbf 262:14 call  print(repr(_rec))"
+      ],
+      "<builtin>.repr": [
+        "tablib._vendor.dbfpy.dbf 262:19 call  repr(_rec)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.__getitem__": [
+        "tablib._vendor.dbfpy.dbf 260:17 iter  _dbf"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.__init__": [
+        "tablib._vendor.dbfpy.dbf 259:15 call  Dbf(filename, True)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.close": [
+        "tablib._vendor.dbfpy.dbf 263:15 call  _dbf.close()"
+      ],
+      "tablib._vendor.dbfpy.record.DbfRecord.__repr__": [
+        "tablib._vendor.dbfpy.dbf 262:19 call  repr(_rec)"
+      ]
+    },
+    "tablib._vendor.dbfpy.dbfnew": {
+      "<builtin>.len": [
+        "tablib._vendor.dbfpy.dbfnew 183:24 call  len(dbft)"
+      ],
+      "<builtin>.print": [
+        "tablib._vendor.dbfpy.dbfnew 164:10 call  print(\"*** created tst.dbf: ***\")",
+        "tablib._vendor.dbfpy.dbfnew 166:10 call  print(repr(dbft))",
+        "tablib._vendor.dbfpy.dbfnew 181:10 call  print(\"*** inserted 2 records into tst.dbf: ***\")",
+        "tablib._vendor.dbfpy.dbfnew 182:10 call  print(repr(dbft))"
+      ],
+      "<builtin>.range": [
+        "tablib._vendor.dbfpy.dbfnew 183:20 call  range(len(dbft))"
+      ],
+      "<builtin>.repr": [
+        "tablib._vendor.dbfpy.dbfnew 166:15 call  repr(dbft)",
+        "tablib._vendor.dbfpy.dbfnew 182:15 call  repr(dbft)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.__getitem__": [
+        "tablib._vendor.dbfpy.dbfnew 184:19 getitem  dbft[i1]"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.__init__": [
+        "tablib._vendor.dbfpy.dbfnew 165:15 call  Dbf('tst.dbf', readOnly=0)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.__len__": [
+        "tablib._vendor.dbfpy.dbfnew 183:24 call  len(dbft)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.__repr__": [
+        "tablib._vendor.dbfpy.dbfnew 166:15 call  repr(dbft)",
+        "tablib._vendor.dbfpy.dbfnew 182:15 call  repr(dbft)"
+      ],
+      "tablib._vendor.dbfpy.dbfnew.dbf_new.__init__": [
+        "tablib._vendor.dbfpy.dbfnew 158:19 call  dbf_new()"
+      ],
+      "tablib._vendor.dbfpy.dbfnew.dbf_new.add_field": [
+        "tablib._vendor.dbfpy.dbfnew 159:19 call  dbfn.add_field(\"name\", 'C', 80)",
+        "tablib._vendor.dbfpy.dbfnew 160:19 call  dbfn.add_field(\"price\", 'N', 10, 2)",
+        "tablib._vendor.dbfpy.dbfnew 161:19 call  dbfn.add_field(\"date\", 'D', 8)"
+      ],
+      "tablib._vendor.dbfpy.dbfnew.dbf_new.write": [
+        "tablib._vendor.dbfpy.dbfnew 162:15 call  dbfn.write(\"tst.dbf\")"
+      ],
+      "tablib._vendor.dbfpy.record.DbfRecord.__init__": [
+        "tablib._vendor.dbfpy.dbfnew 168:20 call  DbfRecord(dbft)",
+        "tablib._vendor.dbfpy.dbfnew 174:20 call  DbfRecord(dbft)"
+      ],
+      "tablib._vendor.dbfpy.record.DbfRecord.__setitem__": [
+        "tablib._vendor.dbfpy.dbfnew 169:8 setitem  rec['name']",
+        "tablib._vendor.dbfpy.dbfnew 170:8 setitem  rec['price']",
+        "tablib._vendor.dbfpy.dbfnew 171:8 setitem  rec['date']",
+        "tablib._vendor.dbfpy.dbfnew 175:8 setitem  rec['name']",
+        "tablib._vendor.dbfpy.dbfnew 176:8 setitem  rec['price']",
+        "tablib._vendor.dbfpy.dbfnew 177:8 setitem  rec['date']"
+      ],
+      "tablib._vendor.dbfpy.record.DbfRecord.store": [
+        "tablib._vendor.dbfpy.dbfnew 172:14 call  rec.store()",
+        "tablib._vendor.dbfpy.dbfnew 178:14 call  rec.store()"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.decodeValue": {
+      "struct.unpack": [
+        "tablib._vendor.dbfpy.fields 296:29 call  struct.unpack(\"<q\", value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.encodeValue": {
+      "<builtin>.round": [
+        "tablib._vendor.dbfpy.fields 300:39 call  round(value * 10000)"
+      ],
+      "struct.pack": [
+        "tablib._vendor.dbfpy.fields 300:27 call  struct.pack(\"<q\", round(value * 10000))"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfDateFieldDef.<lambda1>": {
+      "datetime.date.today": [
+        "tablib._vendor.dbfpy.fields 366:71 call  datetime.date.today()"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfDateFieldDef.decodeValue": {
+      "<builtin>.bytes.strip": [
+        "tablib._vendor.dbfpy.fields 372:23 call  value.strip()"
+      ],
+      "tablib._vendor.dbfpy.utils.getDate": [
+        "tablib._vendor.dbfpy.fields 373:33 call  utils.getDate(value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfDateFieldDef.encodeValue": {
+      "datetime.date.strftime": [
+        "tablib._vendor.dbfpy.fields 388:49 call  utils.getDate(value).strftime(\"%Y%m%d\")"
+      ],
+      "tablib._vendor.dbfpy.utils.getDate": [
+        "tablib._vendor.dbfpy.fields 388:33 call  utils.getDate(value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.<lambda1>": {
+      "datetime.datetime.now": [
+        "tablib._vendor.dbfpy.fields 400:73 call  datetime.datetime.now()"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.decodeValue": {
+      "<builtin>.len": [
+        "tablib._vendor.dbfpy.fields 408:19 call  len(value)"
+      ],
+      "datetime.datetime.fromordinal": [
+        "tablib._vendor.dbfpy.fields 412:48 call  datetime.datetime.fromordinal(_jdn - self.JDN_GDN_DIFF)"
+      ],
+      "datetime.timedelta": [
+        "tablib._vendor.dbfpy.fields 413:38 call  datetime.timedelta(0, _msecs / 1000.0)"
+      ],
+      "struct.unpack": [
+        "tablib._vendor.dbfpy.fields 410:37 call  struct.unpack(\"<2I\", value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.encodeValue": {
+      "<builtin>.len": [
+        "tablib._vendor.dbfpy.fields 428:19 call  len(_rv)"
+      ],
+      "datetime.datetime.toordinal": [
+        "tablib._vendor.dbfpy.fields 424:53 call  value.toordinal()"
+      ],
+      "struct.pack": [
+        "tablib._vendor.dbfpy.fields 424:30 call  struct.pack(\"<2I\", value.toordinal() + self.JDN_GDN_DIFF,..."
+      ],
+      "tablib._vendor.dbfpy.utils.getDateTime": [
+        "tablib._vendor.dbfpy.fields 422:38 call  utils.getDateTime(value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfFieldDef.__hash__": {
+      "<builtin>.hash": [
+        "tablib._vendor.dbfpy.fields 116:20 call  hash(self.name)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfFieldDef.__init__": {
+      "<builtin>.ValueError": [
+        "tablib._vendor.dbfpy.fields 84:29 call  ValueError(f\"Field name \\\"{name}\\\" is too long\")",
+        "tablib._vendor.dbfpy.fields 91:33 call  ValueError(f\"[{name}] Length must be a positive integer\")"
+      ],
+      "tablib._vendor.dbfpy.utils.classproperty.__get__": [
+        "tablib._vendor.dbfpy.fields 81:21 getattr  self.defaultValue"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfFieldDef.decodeFromRecord": {
+      "tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.decodeValue": [
+        "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfDateFieldDef.decodeValue": [
+        "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.decodeValue": [
+        "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.decodeValue": [
+        "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfLogicalFieldDef.decodeValue": [
+        "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfMemoFieldDef.decodeValue": [
+        "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.decodeValue": {
+      "struct.unpack": [
+        "tablib._vendor.dbfpy.fields 280:29 call  struct.unpack(\"<i\", value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.encodeValue": {
+      "<builtin>.int": [
+        "tablib._vendor.dbfpy.fields 284:37 call  int(value)"
+      ],
+      "struct.pack": [
+        "tablib._vendor.dbfpy.fields 284:27 call  struct.pack(\"<i\", int(value))"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfNumericFieldDef.decodeValue": {
+      "<builtin>.int": [
+        "tablib._vendor.dbfpy.fields 247:23 call  int(value)"
+      ]
+    },
+    "tablib._vendor.dbfpy.fields.DbfNumericFieldDef.encodeValue": {
+      "<builtin>.ValueError": [
+        "tablib._vendor.dbfpy.fields 259:33 call  ValueError( f\"[{self.name}] Numeric overflow: {_rv} (fiel..."
+      ]
+    },
+    "tablib._vendor.dbfpy.header.DbfHeader.__getitem__": {
+      "<builtin>.KeyError": [
+        "tablib._vendor.dbfpy.header 267:31 call  KeyError(item)"
+      ],
+      "<builtin>.isinstance": [
+        "tablib._vendor.dbfpy.header 261:22 call  isinstance(item, str)"
+      ],
+      "<builtin>.str.upper": [
+        "tablib._vendor.dbfpy.header 262:31 call  item.upper()"
+      ]
+    },
+    "tablib._vendor.dbfpy.header.DbfHeader.__repr__": {
+      "<builtin>.str.join": [
+        "tablib._vendor.dbfpy.header 171:25 call  \"\\n\".join( [\"%10s %4s %3s %3s\" % _fld.fieldInfo() for _fl..."
+      ],
+      "tablib._vendor.dbfpy.fields.DbfFieldDef.fieldInfo": [
+        "tablib._vendor.dbfpy.header 172:49 call  _fld.fieldInfo()"
+      ]
+    },
+    "tablib._vendor.dbfpy.header.DbfHeader._addField": {
+      "<builtin>.tuple": [
+        "tablib._vendor.dbfpy.header 198:52 call  tuple(_def)"
+      ],
+      "tablib._vendor.dbfpy.fields.lookupFor": [
+        "tablib._vendor.dbfpy.header 199:40 call  fields.lookupFor(_type)"
+      ]
+    },
+    "tablib._vendor.dbfpy.header.DbfHeader.fromStream": {
+      "io.BufferedReader.read": [
+        "tablib._vendor.dbfpy.header 108:31 call  stream.read(32)",
+        "tablib._vendor.dbfpy.header 127:28 call  stream.read(1)",
+        "tablib._vendor.dbfpy.header 129:33 call  stream.read(31)",
+        "tablib._vendor.dbfpy.header 133:32 call  stream.read(1)"
+      ],
+      "io.BufferedReader.seek": [
+        "tablib._vendor.dbfpy.header 107:20 call  stream.seek(0)"
+      ],
+      "io.TextIOWrapper.read": [
+        "tablib._vendor.dbfpy.header 108:31 call  stream.read(32)"
+      ],
+      "io.TextIOWrapper.seek": [
+        "tablib._vendor.dbfpy.header 107:20 call  stream.seek(0)"
+      ],
+      "pandas.DataFrame.read": [
+        "tablib._vendor.dbfpy.header 108:31 call  stream.read(32)"
+      ],
+      "pandas.DataFrame.seek": [
+        "tablib._vendor.dbfpy.header 107:20 call  stream.seek(0)"
+      ]
+    },
+    "tablib._vendor.dbfpy.header.DbfHeader.fromString": {
+      "<builtin>.str": [
+        "tablib._vendor.dbfpy.header 101:46 call  str(string)"
+      ],
+      "io.StringIO": [
+        "tablib._vendor.dbfpy.header 101:42 call  io.StringIO(str(string))"
+      ],
+      "tablib._vendor.dbfpy.header.DbfHeader.fromStream": [
+        "tablib._vendor.dbfpy.header 101:30 call  cls.fromStream(io.StringIO(str(string)))"
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord.__init__": {
+      "tablib._vendor.dbfpy.utils.classproperty.__get__": [
+        "tablib._vendor.dbfpy.record 81:35 getattr  _fd.defaultValue"
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord.__repr__": {
+      "<builtin>.len": [
+        "tablib._vendor.dbfpy.record 150:49 call  len(_fld)"
+      ],
+      "<builtin>.list.append": [
+        "tablib._vendor.dbfpy.record 157:27 call  _rv.append(_template % (_fld, _val, type(_val)))"
+      ],
+      "<builtin>.max": [
+        "tablib._vendor.dbfpy.record 150:45 call  max(len(_fld) for _fld in self.dbf.fieldNames)"
+      ],
+      "<builtin>.str.join": [
+        "tablib._vendor.dbfpy.record 158:25 call  \"\\n\".join(_rv)"
+      ],
+      "<builtin>.type": [
+        "tablib._vendor.dbfpy.record 157:57 call  type(_val)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.<lambda3>": [
+        "tablib._vendor.dbfpy.record 150:77 getattr  self.dbf.fieldNames",
+        "tablib._vendor.dbfpy.record 152:30 getattr  self.dbf.fieldNames"
+      ],
+      "tablib._vendor.dbfpy.record.DbfRecord.__getitem__": [
+        "tablib._vendor.dbfpy.record 153:24 getitem  self[_fld]"
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord._validateIndex": {
+      "<builtin>.ValueError": [
+        "tablib._vendor.dbfpy.record 196:29 call  ValueError(f\"Index can't be negative ({self.index})\")"
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord._write": {
+      "io.BufferedReader.seek": [
+        "tablib._vendor.dbfpy.record 173:29 call  self.dbf.stream.seek(self.position)"
+      ],
+      "io.BufferedReader.write": [
+        "tablib._vendor.dbfpy.record 174:30 call  self.dbf.stream.write(bytes(self.toString(), sys.getfiles..."
+      ],
+      "io.BytesIO.seek": [
+        "tablib._vendor.dbfpy.record 173:29 call  self.dbf.stream.seek(self.position)"
+      ],
+      "io.BytesIO.write": [
+        "tablib._vendor.dbfpy.record 174:30 call  self.dbf.stream.write(bytes(self.toString(), sys.getfiles...",
+        "tablib._vendor.dbfpy.record 181:34 call  self.dbf.stream.write(b\"\\x1A\")"
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord.asDict": {
+      "<builtin>.dict": [
+        "tablib._vendor.dbfpy.record 246:20 call  dict(list(zip(self.dbf.fieldNames, self.fieldData)))"
+      ],
+      "<builtin>.list": [
+        "tablib._vendor.dbfpy.record 246:25 call  list(zip(self.dbf.fieldNames, self.fieldData))"
+      ],
+      "<builtin>.zip": [
+        "tablib._vendor.dbfpy.record 246:29 call  zip(self.dbf.fieldNames, self.fieldData)"
+      ],
+      "tablib._vendor.dbfpy.dbf.Dbf.<lambda3>": [
+        "tablib._vendor.dbfpy.record 246:39 getattr  self.dbf.fieldNames"
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord.rawFromStream": {
+      "io.BufferedRandom.read": [
+        "tablib._vendor.dbfpy.record 106:31 call  dbf.stream.read(dbf.header.recordLength)"
+      ],
+      "io.BufferedRandom.seek": [
+        "tablib._vendor.dbfpy.record 105:24 call  dbf.stream.seek(dbf.header.headerLength + index * dbf.hea..."
+      ],
+      "io.BufferedReader.read": [
+        "tablib._vendor.dbfpy.record 106:31 call  dbf.stream.read(dbf.header.recordLength)"
+      ],
+      "io.BufferedReader.seek": [
+        "tablib._vendor.dbfpy.record 105:24 call  dbf.stream.seek(dbf.header.headerLength + index * dbf.hea..."
+      ]
+    },
+    "tablib._vendor.dbfpy.record.DbfRecord.toString": {
+      "tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.encodeValue": [
+        "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfDateFieldDef.encodeValue": [
+        "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.encodeValue": [
+        "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.encodeValue": [
+        "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfLogicalFieldDef.encodeValue": [
+        "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfMemoFieldDef.encodeValue": [
+        "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)"
+      ]
+    },
+    "tablib._vendor.dbfpy.utils.classproperty.__get__": {
+      "tablib._vendor.dbfpy.fields.DbfDateFieldDef.<lambda1>": [
+        "tablib._vendor.dbfpy.utils 126:25 call  self.fget(cls)"
+      ],
+      "tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.<lambda1>": [
+        "tablib._vendor.dbfpy.utils 126:25 call  self.fget(cls)"
+      ]
+    },
+    "tablib.core.Databook.size": {
+      "<builtin>.len": [
+        "tablib.core 903:19 call  len(self._datasets)"
+      ]
+    },
+    "tablib.core.Dataset.__repr__": {
+      "<builtin>.bytes.lower": [
+        "tablib.core 220:40 call  self.title.lower()"
+      ],
+      "<builtin>.str.lower": [
+        "tablib.core 220:40 call  self.title.lower()"
+      ]
+    },
+    "tablib.core.Dataset.__setitem__": {
+      "tablib.core.Dataset._validate": [
+        "tablib.core 194:23 call  self._validate(value)"
+      ],
+      "tablib.core.Row.__init__": [
+        "tablib.core 195:30 call  Row(value)"
+      ],
+      "tablib.core.Row.__iter__": [
+        "tablib.core 195:19 setitem  self._data[key]"
+      ]
+    },
+    "tablib.core.Dataset._clean_col": {
+      "<builtin>.map": [
+        "tablib.core 388:27 call  map(col[0], self._data)"
+      ]
+    },
+    "tablib.core.Dataset._get_in_format": {
+      "tablib.formats._cli.CLIFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._dbf.DBFFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._df.DataFrameFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._html.HTMLFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._jira.JIRAFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._json.JSONFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._latex.LATEXFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._ods.ODSFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._rst.ReSTFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._sql.SQLFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._xls.XLSFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._xlsx.XLSXFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ],
+      "tablib.formats._yaml.YAMLFormat.export_set": [
+        "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)"
+      ]
+    },
+    "tablib.core.Dataset._package.format_row": {
+      "<builtin>.dict.copy": [
+        "tablib.core 290:31 call  row.copy()"
+      ],
+      "<builtin>.list.copy": [
+        "tablib.core 290:31 call  row.copy()"
+      ],
+      "<builtin>.set.copy": [
+        "tablib.core 290:31 call  row.copy()"
+      ]
+    },
+    "tablib.core.Dataset._set_in_format": {
+      "tablib.formats._dbf.DBFFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._df.DataFrameFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._html.HTMLFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._json.JSONFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._ods.ODSFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._sql.SQLFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._xls.XLSFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._xlsx.XLSXFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ],
+      "tablib.formats._yaml.YAMLFormat.import_set": [
+        "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ..."
+      ]
+    },
+    "tablib.core.Dataset.export": {
+      "<builtin>.NotImplementedError.__init__": [
+        "tablib.core 440:36 call  UnsupportedFormat(f'Format {format} cannot be exported.')"
+      ],
+      "tablib.formats._dbf.DBFFormat.export_set": [
+        "tablib.core 442:30 call  fmt.export_set(self, **kwargs)"
+      ],
+      "tablib.formats._df.DataFrameFormat.export_set": [
+        "tablib.core 442:30 call  fmt.export_set(self, **kwargs)"
+      ]
+    },
+    "tablib.core.Dataset.extend": {
+      "tablib.core.Dataset.append": [
+        "tablib.core 495:24 call  self.append(row, tags)"
+      ]
+    },
+    "tablib.core.Dataset.filter": {
+      "copy.copy": [
+        "tablib.core 652:21 call  copy(self)"
+      ],
+      "tablib.core.Row.has_tag": [
+        "tablib.core 653:65 call  row.has_tag(tag)"
+      ]
+    },
+    "tablib.core.Dataset.insert": {
+      "tablib.core.Row.__iter__": [
+        "tablib.core 464:27 call  list(row)"
+      ]
+    },
+    "tablib.core.Dataset.insert_col": {
+      "<builtin>.AttributeError.__init__": [
+        "tablib.core 562:36 call  HeadersNeeded()"
+      ]
+    },
+    "tablib.core.Dataset.load": {
+      "<builtin>.NotImplementedError.__init__": [
+        "tablib.core 427:36 call  UnsupportedFormat(f'Format {format} cannot be imported.')"
+      ],
+      "tablib.formats._dbf.DBFFormat.import_set": [
+        "tablib.core 429:23 call  fmt.import_set(self, stream, **kwargs)"
+      ],
+      "tablib.formats._df.DataFrameFormat.import_set": [
+        "tablib.core 429:23 call  fmt.import_set(self, stream, **kwargs)"
+      ],
+      "tablib.formats._sql.SQLFormat.import_set": [
+        "tablib.core 429:23 call  fmt.import_set(self, stream, **kwargs)"
+      ]
+    },
+    "tablib.core.Dataset.lpop": {
+      "tablib.core.Dataset.__delitem__": [
+        "tablib.core 501:17 delitem  self[0]"
+      ],
+      "tablib.core.Dataset.__getitem__": [
+        "tablib.core 500:21 getitem  self[0]"
+      ]
+    },
+    "tablib.core.Dataset.lpush": {
+      "tablib.core.Dataset.insert": [
+        "tablib.core 480:20 call  self.insert(0, row=row, tags=tags)"
+      ]
+    },
+    "tablib.core.Dataset.lpush_col": {
+      "tablib.core.Dataset.insert_col": [
+        "tablib.core 591:24 call  self.insert_col(0, col, header=header)"
+      ]
+    },
+    "tablib.core.Dataset.remove_duplicates": {
+      "tablib.core.Row.__len__": [
+        "tablib.core 814:52 call  tuple(row)",
+        "tablib.core 814:83 call  tuple(row)"
+      ]
+    },
+    "tablib.core.detect_format": {
+      "io.TextIOWrapper.seek": [
+        "tablib.core 950:28 call  stream.seek(0)"
+      ],
+      "pandas.DataFrame.seek": [
+        "tablib.core 950:28 call  stream.seek(0)"
+      ],
+      "tablib.formats._df.DataFrameFormat.detect": [
+        "tablib.core 943:26 call  fmt.detect(stream)"
+      ]
+    },
+    "tablib.core.import_book": {
+      "tablib.core.Databook.__init__": [
+        "tablib.core 963:20 call  Databook()"
+      ],
+      "tablib.core.Databook.load": [
+        "tablib.core 963:27 call  Databook().load(stream, format, **kwargs)"
+      ]
+    },
+    "tablib.formats.ImportExportBookDescriptor.__get__": {
+      "tablib.formats._ods.ODSFormat.export_book": [
+        "tablib.formats 61:40 call  self._format.export_book(obj, **kwargs)"
+      ],
+      "tablib.formats._rst.ReSTFormat.export_book": [
+        "tablib.formats 61:40 call  self._format.export_book(obj, **kwargs)"
+      ],
+      "tablib.formats._xls.XLSFormat.export_book": [
+        "tablib.formats 61:40 call  self._format.export_book(obj, **kwargs)"
+      ],
+      "tablib.formats._xlsx.XLSXFormat.export_book": [
+        "tablib.formats 61:40 call  self._format.export_book(obj, **kwargs)"
+      ]
+    },
+    "tablib.formats.ImportExportBookDescriptor.__set__": {
+      "tablib.formats._ods.ODSFormat.import_book": [
+        "tablib.formats 65:40 call  self._format.import_book(obj, normalize_input(val))"
+      ],
+      "tablib.formats._xls.XLSFormat.import_book": [
+        "tablib.formats 65:40 call  self._format.import_book(obj, normalize_input(val))"
+      ],
+      "tablib.formats._xlsx.XLSXFormat.import_book": [
+        "tablib.formats 65:40 call  self._format.import_book(obj, normalize_input(val))"
+      ]
+    },
+    "tablib.formats.ImportExportSetDescriptor.__get__": {
+      "tablib.formats._cli.CLIFormat.export_set": [
+        "tablib.formats 71:39 call  self._format.export_set(obj, **kwargs)"
+      ],
+      "tablib.formats._df.DataFrameFormat.export_set": [
+        "tablib.formats 71:39 call  self._format.export_set(obj, **kwargs)"
+      ],
+      "tablib.formats._sql.SQLFormat.export_set": [
+        "tablib.formats 71:39 call  self._format.export_set(obj, **kwargs)"
+      ]
+    },
+    "tablib.formats.ImportExportSetDescriptor.__set__": {
+      "tablib.formats._df.DataFrameFormat.import_set": [
+        "tablib.formats 75:39 call  self._format.import_set(obj, normalize_input(val))"
+      ],
+      "tablib.formats._sql.SQLFormat.import_set": [
+        "tablib.formats 75:39 call  self._format.import_set(obj, normalize_input(val))"
+      ],
+      "tablib.formats._xls.XLSFormat.import_set": [
+        "tablib.formats 75:39 call  self._format.import_set(obj, normalize_input(val))"
+      ]
+    },
+    "tablib.formats._csv.CSVFormat.detect": {
+      "io.BufferedReader.read": [
+        "tablib.formats._csv 60:44 call  stream.read(2048)"
+      ],
+      "io.TextIOWrapper.read": [
+        "tablib.formats._csv 60:44 call  stream.read(2048)"
+      ],
+      "pandas.DataFrame.read": [
+        "tablib.formats._csv 60:44 call  stream.read(2048)"
+      ]
+    },
+    "tablib.formats._csv.CSVFormat.export_stream_set": {
+      "_csv.Writer.writerow": [
+        "tablib.formats._csv 26:26 call  _csv.writerow(row)"
+      ]
+    },
+    "tablib.formats._df": {
+      "<builtin>.classmethod": [
+        "tablib.formats._df 14:6 decorator  @classmethod",
+        "tablib.formats._df 27:6 decorator  @classmethod",
+        "tablib.formats._df 37:6 decorator  @classmethod"
+      ]
+    },
+    "tablib.formats._df.DataFrameFormat.detect": {
+      "<builtin>.isinstance": [
+        "tablib.formats._df 19:24 call  isinstance(stream, DataFrame)"
+      ],
+      "io.BufferedReader.read": [
+        "tablib.formats._df 22:34 call  stream.read()"
+      ],
+      "io.BytesIO.read": [
+        "tablib.formats._df 22:34 call  stream.read()"
+      ],
+      "io.StringIO.read": [
+        "tablib.formats._df 22:34 call  stream.read()"
+      ],
+      "io.TextIOWrapper.read": [
+        "tablib.formats._df 22:34 call  stream.read()"
+      ],
+      "pandas.DataFrame": [
+        "tablib.formats._df 22:22 call  DataFrame(stream.read())"
+      ]
+    },
+    "tablib.formats._df.DataFrameFormat.export_set": {
+      "<builtin>.NotImplementedError": [
+        "tablib.formats._df 31:38 call  NotImplementedError( 'DataFrame Format requires `pandas` ..."
+      ],
+      "pandas.DataFrame": [
+        "tablib.formats._df 34:30 call  DataFrame(dset.dict, columns=dset.headers)"
+      ],
+      "tablib.core.Dataset._get_dict": [
+        "tablib.formats._df 34:36 getattr  dset.dict"
+      ],
+      "tablib.core.Dataset._get_headers": [
+        "tablib.formats._df 34:55 getattr  dset.headers"
+      ]
+    },
+    "tablib.formats._df.DataFrameFormat.import_set": {
+      "pandas.DataFrame.to_dict": [
+        "tablib.formats._df 41:38 call  in_stream.to_dict(orient='records')"
+      ],
+      "tablib.core.Dataset._set_dict": [
+        "tablib.formats._df 41:14 setattr  dset.dict"
+      ],
+      "tablib.core.Dataset.wipe": [
+        "tablib.formats._df 40:18 call  dset.wipe()"
+      ]
+    },
+    "tablib.formats._html.HTMLFormat.import_set": {
+      "io.BufferedReader.read": [
+        "tablib.formats._html 64:35 call  in_stream.read()"
+      ],
+      "io.BytesIO.read": [
+        "tablib.formats._html 64:35 call  in_stream.read()"
+      ],
+      "io.TextIOWrapper.read": [
+        "tablib.formats._html 64:35 call  in_stream.read()"
+      ],
+      "pandas.DataFrame.read": [
+        "tablib.formats._html 64:35 call  in_stream.read()"
+      ]
+    },
+    "tablib.formats._json.JSONFormat.export_book": {
+      "tablib.formats._json.serialize_objects_handler": [
+        "tablib.formats._json 36:26 call  json.dumps( databook._package(), default=serialize_object..."
+      ]
+    },
+    "tablib.formats._json.serialize_objects_handler": {
+      "datetime.date.isoformat": [
+        "tablib.formats._json 17:29 call  obj.isoformat()"
+      ],
+      "datetime.time.isoformat": [
+        "tablib.formats._json 17:29 call  obj.isoformat()"
+      ]
+    },
+    "tablib.formats._ods.ODSFormat.detect": {
+      "io.BytesIO": [
+        "tablib.formats._ods 252:29 call  BytesIO(stream)"
+      ]
+    },
+    "tablib.formats._ods.ODSFormat.import_sheet.is_real_cell": {
+      "odf.element.Text.hasChildNodes": [
+        "tablib.formats._ods 116:38 call  cell.hasChildNodes()"
+      ]
+    },
+    "tablib.formats._rst.ReSTFormat.export_set_as_grid_table": {
+      "tablib.formats._rst.ReSTFormat._get_column_widths": [
+        "tablib.formats._rst 170:51 call  cls._get_column_widths(dataset)"
+      ]
+    },
+    "tablib.formats._rst._max_word_len": {
+      "<builtin>.bytes.split": [
+        "tablib.formats._rst 29:49 call  text.split()"
+      ]
+    },
+    "tablib.formats._rst.to_str": {
+      "<builtin>.bytes.decode": [
+        "tablib.formats._rst 18:28 call  value.decode('utf-8')"
+      ]
+    },
+    "tablib.formats._sql.SQLFormat.import_set": {
+      "<builtin>.NotImplementedError.__init__": [
+        "tablib.formats._sql 72:32 call  UnsupportedFormat('SQL import is not supported.')"
+      ]
+    },
+    "tablib.formats._xls.XLSFormat.detect": {
+      "io.BufferedReader.read": [
+        "tablib.formats._xls 43:57 call  stream.read()"
+      ],
+      "io.TextIOWrapper.read": [
+        "tablib.formats._xls 43:57 call  stream.read()"
+      ],
+      "pandas.DataFrame.read": [
+        "tablib.formats._xls 43:57 call  stream.read()"
+      ]
+    },
+    "tablib.formats._xls.XLSFormat.import_book": {
+      "io.StringIO.read": [
+        "tablib.formats._xls 138:67 call  in_stream.read()"
+      ]
+    },
+    "tablib.formats._xls.XLSFormat.import_set": {
+      "io.StringIO.read": [
+        "tablib.formats._xls 127:67 call  in_stream.read()"
+      ],
+      "io.TextIOWrapper.read": [
+        "tablib.formats._xls 127:67 call  in_stream.read()"
+      ],
+      "pandas.DataFrame.read": [
+        "tablib.formats._xls 127:67 call  in_stream.read()"
+      ]
+    },
+    "tablib.formats._xlsx.XLSXFormat._adapt_column_width": {
+      "openpyxl.utils.cell.get_column_letter": [
+        "tablib.formats._xlsx 218:58 call  get_column_letter(i)"
+      ]
+    },
+    "tablib.formats._xlsx.XLSXFormat.dset_sheet": {
+      "openpyxl.utils.cell.get_column_letter": [
+        "tablib.formats._xlsx 165:44 call  get_column_letter(j + 1)"
+      ]
+    },
+    "tablib.formats.load_format_class": {
+      "<builtin>.ImportError": [
+        "tablib.formats 40:26 call  ImportError(f\"Unable to load format class '{dotted_path}'..."
+      ]
+    }
+  },
+  "notes": {
+    "tablib._vendor.dbfpy.dbf 132:43 call  self.HeaderClass()": [
+      "HeaderClass is the class attribute header.DbfHeader; Dbf has __slots__, no package subclass and no assignment of HeaderClass"
+    ],
+    "tablib._vendor.dbfpy.dbf 180:28 call  TypeError(\"Index must be a numeric object\")": [
+      "reachable through Dbf.__setitem__, which the package never calls; its index is judged as public (J4)"
+    ],
+    "tablib._vendor.dbfpy.dbf 193:26 call  self.stream.close()": [
+      "the stream of a closed Dbf: open(path, \"r+b\") in DBFFormat.export_set (BufferedRandom); open(filename, \"rb\") in demo_read, which the package never calls (BufferedReader, J4)"
+    ],
+    "tablib._vendor.dbfpy.dbf 207:38 call  name.upper()": [
+      "name is a field name: a header of the exported Dataset (documented as strings; bytes from a YAML !!binary key, Codex round 1 T03) or a field name that the package reads"
+    ],
+    "tablib._vendor.dbfpy.dbf 211:32 call  self.RecordClass(self)": [
+      "RecordClass is the class attribute record.DbfRecord (Dbf has __slots__ and no package subclass)"
+    ],
+    "tablib._vendor.dbfpy.fields 175:36 call  self.decodeValue(self.rawFromRecord(record))": [
+      "the fields of a header that fromStream reads from a client file can have every registered type code; DbfFloatFieldDef inherits DbfNumericFieldDef.decodeValue"
+    ],
+    "tablib._vendor.dbfpy.fields 388:49 call  utils.getDate(value).strftime(\"%Y%m%d\")": [
+      "getDate returns its date argument or a new datetime.date; the values are tuples (the __main__ block of dbfnew), the default date.today() and decoded dates (J4), never a datetime"
+    ],
+    "tablib._vendor.dbfpy.fields 424:53 call  value.toordinal()": [
+      "value is what getDateTime returns for a datetime (J4)"
+    ],
+    "tablib._vendor.dbfpy.fields 81:21 getattr  self.defaultValue": [
+      "defaultValue is a classproperty in DbfDateFieldDef and DbfDateTimeFieldDef (fields.py:366, 400); the assert is removed under -O, the graph is the union"
+    ],
+    "tablib._vendor.dbfpy.header 101:30 call  cls.fromStream(io.StringIO(str(string)))": [
+      "cls is DbfHeader (a classmethod of DbfHeader, which has no subclass)"
+    ],
+    "tablib._vendor.dbfpy.header 107:20 call  stream.seek(0)": [
+      "the stream of Dbf.__init__: open(path, \"r+b\") (DBFFormat.export_set and dbfnew), open(path, \"rb\") (DBFFormat.detect with a str, demo_read), and the stream of DBFFormat.import_set and detect: StringIO, BytesIO, the documented text and binary files, a pandas DataFrame (J1, J2); fromString passes a StringIO"
+    ],
+    "tablib._vendor.dbfpy.header 108:31 call  stream.read(32)": [
+      "as at 107:20"
+    ],
+    "tablib._vendor.dbfpy.header 127:28 call  stream.read(1)": [
+      "only a binary stream gets past struct.unpack (line 112): a str of a text stream makes it raise TypeError, and a DataFrame raises at bytes() on line 110"
+    ],
+    "tablib._vendor.dbfpy.header 129:33 call  stream.read(31)": [
+      "as at 127:28"
+    ],
+    "tablib._vendor.dbfpy.header 133:32 call  stream.read(1)": [
+      "as at 127:28"
+    ],
+    "tablib._vendor.dbfpy.record 105:24 call  dbf.stream.seek(dbf.header.headerLength + index * dbf.hea...": [
+      "the stream of a Dbf whose records the package reads: BytesIO or the documented binary file (DBFFormat.import_set, J1), open(path, \"r+b\") (dbfnew's __main__ block), open(path, \"rb\") (demo_read); a Dbf over a text stream or a DataFrame is never made (fromStream raises)"
+    ],
+    "tablib._vendor.dbfpy.record 106:31 call  dbf.stream.read(dbf.header.recordLength)": [
+      "as at 105:24"
+    ],
+    "tablib._vendor.dbfpy.record 173:29 call  self.dbf.stream.seek(self.position)": [
+      "the record's Dbf: open(path, \"r+b\") (DBFFormat.export_set, dbfnew); through Dbf.__setitem__, which the package never calls, any record that the package makes, also one read from BytesIO or a binary file (J4)"
+    ],
+    "tablib._vendor.dbfpy.record 174:30 call  self.dbf.stream.write(bytes(self.toString(), sys.getfiles...": [
+      "as at 173:29; a BufferedReader refuses the write in its body (io.UnsupportedOperation)"
+    ],
+    "tablib._vendor.dbfpy.record 181:34 call  self.dbf.stream.write(b\"\\x1A\")": [
+      "as at 173:29; a BufferedReader raised at line 174"
+    ],
+    "tablib._vendor.dbfpy.record 196:29 call  ValueError(f\"Index can't be negative ({self.index})\")": [
+      "through Dbf.__setitem__ (judged as public, J4): _fixIndex adds len(self) + 1 to a negative index and checks only the upper bound, so -10 on an empty table gives -9 (audit F2)"
+    ],
+    "tablib._vendor.dbfpy.record 225:28 call  _def.encodeValue(_dat)": [
+      "character and numeric fields (DBFFormat.export_set), a date field (dbfnew's __main__ block); every field type through Dbf.__setitem__ and newRecord, which the package never calls (J4); DbfFloatFieldDef inherits DbfNumericFieldDef.encodeValue"
+    ],
+    "tablib._vendor.dbfpy.record 81:35 getattr  _fd.defaultValue": [
+      "defaultValue is a classproperty for date and timestamp fields (the __main__ block of dbfnew; a client file read by newRecord's Dbf, J4)"
+    ],
+    "tablib._vendor.dbfpy.utils 126:25 call  self.fget(cls)": [
+      "self.fget is the lambda that the class body passes to classproperty (fields.py:366, 400); the only classproperty objects"
+    ],
+    "tablib.core 195:19 setitem  self._data[key]": [
+      "with a slice key the list's slice assignment iterates the new Row (PySequence_Fast calls iter first, Objects/abstract.c, CPython 3.10 to 3.15); the Row's items, not the Row, become elements of _data (Codex round 1 T04)"
+    ],
+    "tablib.core 220:40 call  self.title.lower()": [
+      "title is documented as a string (Dataset docstring); the package sets it from a sheet name (xlrd, openpyxl, odfpy) or a JSON or YAML title, and a YAML !!binary title is bytes (PyYAML SafeConstructor.construct_yaml_binary; _yaml.py:50; Codex round 1 T01)"
+    ],
+    "tablib.core 250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)": [
+      "get_format returns the format object of a registered key: the 15 built-in keys (J3; tsv is a TSVFormat, which inherits CSVFormat.export_set) or a client's format (opaque); Dataset.get_<key> partialmethods pass the key"
+    ],
+    "tablib.core 254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ...": [
+      "as at 250:55; the formats without import_set raise AttributeError"
+    ],
+    "tablib.core 290:31 call  row.copy()": [
+      "row is a Row, or, after a slice assignment through Dataset.__setitem__ (195:19), a cell of the assigned row: a list, dict or set that yaml.safe_load (or json.load) made (Codex round 1 T05-T07)"
+    ],
+    "tablib.core 429:23 call  fmt.import_set(self, stream, **kwargs)": [
+      "fmt is the format object of a registered key (J3)"
+    ],
+    "tablib.core 442:30 call  fmt.export_set(self, **kwargs)": [
+      "fmt is the format object of a registered key (J3)"
+    ],
+    "tablib.core 464:27 call  list(row)": [
+      "a Row reaches this list() when a dataset with a dynamic column gets a shorter row through _set_dict (wipe keeps _dynamic_columns)"
+    ],
+    "tablib.core 814:52 call  tuple(row)": [
+      "row is a Row of self._data; tuple() calls __len__ for its length hint on CPython 3.10 to 3.13 (Objects/abstract.c, PySequence_Tuple), not on 3.14 and later"
+    ],
+    "tablib.core 814:83 call  tuple(row)": [
+      "as at 814:52"
+    ],
+    "tablib.core 943:26 call  fmt.detect(stream)": [
+      "fmt runs over every registered format object (J3); the formats without detect raise AttributeError, which the loop catches"
+    ],
+    "tablib.core 950:28 call  stream.seek(0)": [
+      "stream after normalize_input: a StringIO (str), a BytesIO (bytes), the documented text and binary files (J1), a pandas DataFrame (J2); any other stream is a client object (B5)"
+    ],
+    "tablib.formats 40:26 call  ImportError(f\"Unable to load format class '{dotted_path}'...": [
+      "a client str registered as a format path (Registry.register is documented) that has no dot or names no class"
+    ],
+    "tablib.formats 61:40 call  self._format.export_book(obj, **kwargs)": [
+      "self._format is the format object of the descriptor's key: one of the built-in formats (J3) or a client's format (opaque)"
+    ],
+    "tablib.formats 65:40 call  self._format.import_book(obj, normalize_input(val))": [
+      "as at 61:40"
+    ],
+    "tablib.formats 71:39 call  self._format.export_set(obj, **kwargs)": [
+      "as at 61:40"
+    ],
+    "tablib.formats 75:39 call  self._format.import_set(obj, normalize_input(val))": [
+      "as at 61:40"
+    ],
+    "tablib.formats._csv 26:26 call  _csv.writerow(row)": [
+      "_csv is the writer object that csv.writer returns (line 23); CPython 3.10 to 3.15 export its type as _csv.Writer (Modules/_csv.c: 3.10.22:1719, 3.14.10 and 3.15.2:1799), which names it (referee ruling b8-ruling-c-type-names-1.md); tablib admits no runtime without that export"
+    ],
+    "tablib.formats._csv 60:44 call  stream.read(2048)": [
+      "the stream of detect_format (see core.py:950; J1, J2)"
+    ],
+    "tablib.formats._df 22:22 call  DataFrame(stream.read())": [
+      "DataFrame is pandas.DataFrame (pandas is not installed: a missing module, J2); with the fallback None, line 18 returns first"
+    ],
+    "tablib.formats._df 22:34 call  stream.read()": [
+      "the stream of detect_format (J1); a DataFrame returned on line 20"
+    ],
+    "tablib.formats._df 31:38 call  NotImplementedError( 'DataFrame Format requires `pandas` ...": [
+      "the side of the optional import where `from pandas import DataFrame` fails (both sides run, README \"Judgements\")"
+    ],
+    "tablib.formats._df 34:30 call  DataFrame(dset.dict, columns=dset.headers)": [
+      "DataFrame is pandas.DataFrame (J2)"
+    ],
+    "tablib.formats._df 41:38 call  in_stream.to_dict(orient='records')": [
+      "in_stream is a pandas DataFrame, the documented input of the df format (J2)"
+    ],
+    "tablib.formats._html 64:35 call  in_stream.read()": [
+      "in_stream after normalize_input: StringIO, BytesIO, the documented files (J1), a DataFrame (J2)"
+    ],
+    "tablib.formats._json 17:29 call  obj.isoformat()": [
+      "obj is a cell that json cannot serialize; the cells that the package's importers make are datetimes (xlrd, openpyxl, odfpy), dates and times (odfpy, openpyxl, dbf) (J6); client cells are opaque (B5)"
+    ],
+    "tablib.formats._ods 116:38 call  cell.hasChildNodes()": [
+      "the children of a table row: cell elements, and text nodes where the file has text between cells (odf.load adds it, load.py:69-72); Element inherits Node.hasChildNodes, Text gets Childless.hasChildNodes"
+    ],
+    "tablib.formats._rst 29:49 call  text.split()": [
+      "text is what to_str returns, or a header: documented as a string, but a YAML mapping keyed by !!binary gives bytes headers (_set_dict, core.py:372; Codex round 1 T02)"
+    ],
+    "tablib.formats._xls 127:67 call  in_stream.read()": [
+      "in_stream after normalize_input (J1, J2)"
+    ],
+    "tablib.formats._xls 138:67 call  in_stream.read()": [
+      "in_stream after normalize_input; Databook.load documents only an abstract \"file-like object\" (no example), so no file class (J1; audit F3, the lead's ruling); no DataFrame reaches a book (J2)"
+    ],
+    "tablib.formats._xls 43:57 call  stream.read()": [
+      "the stream of detect_format (see core.py:950; J1, J2)"
+    ],
+    "tablib.formats._xlsx 165:44 call  get_column_letter(j + 1)": [
+      "get_column_letter is a functools.lru_cache wrapper in openpyxl 3.1.5 (utils/cell.py:78) and a plain function of openpyxl.utils.cell in 2.6.0, 2.6.4 and 3.0.10 (utils/cell.py:107, 107, 105), re-exported by openpyxl.utils without __all__ (audit F4, the lead's ruling on admitted releases)"
+    ],
+    "tablib.formats._xlsx 218:58 call  get_column_letter(i)": [
+      "as at 165:44"
+    ]
+  },
+  "trace": "dynamic/tablib.json"
+}

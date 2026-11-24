@@ -1,7 +1,8 @@
 # Macro-benchmark
 
-Forty real Python packages at pinned releases (`projects.toml`, `batch`):
-thirty in six batches of five, and batch 7, ten packages. Each package gets a
+Fifty real Python packages at pinned releases (`projects.toml`, `batch`):
+thirty in six batches of five, and batches 7 and 8, ten packages each. Each
+package gets a
 hand-written call graph of its source, the ground truth. It is written as a
 call-site ledger: one entry per place in the source that can call a
 function, with the callees of that site. A naive list of candidate callees
@@ -56,7 +57,7 @@ do not trigger another round.
 
 ```
 evaluation/macro-benchmark/
-├── projects.toml                  # The 40 projects: pin, licence, analysed source, tests, batch
+├── projects.toml                  # The 50 projects: pin, licence, analysed source, tests, batch
 ├── projects/                      # Empty: a copy of the sources, for reading only, goes here (not in git)
 ├── test-environments/<name>.txt        # The test environment, pinned by hash (to record the trace again)
 ├── test-environments/<name>.installed.txt  # What the container of the trace had installed
@@ -67,8 +68,9 @@ evaluation/macro-benchmark/
 ├── ground-truth/<name>.added.json # Graph edges that the trace does not have, generated
 ├── ground-truth/<name>.md         # Judgements (optional)
 ├── ground-truth/<name>.audit.md   # The blind audit
-├── plugins/                       # pytest plugins that four traces need
-├── selection/                     # How batches 3 to 5 and 7 were drawn: list, exclusions, frame, round logs
+├── plugins/                       # pytest plugins that five traces need
+├── wheels/                        # Wheels built from pinned sdists that PyPI has no wheel of, with their build records
+├── selection/                     # How batches 3 to 5, 7 and 8 were drawn: list, exclusions, frame, round logs; batch 8's rulings and audit samples
 ├── projects.py                    # Reads projects.toml; where the sources of the projects are
 ├── sites.py                       # Finds the call sites and their candidates (ast only)
 ├── ledger.py                      # Reads and checks a ledger, makes its graph
@@ -109,7 +111,7 @@ name is one path component of letters, digits, `_`, `-` and `.`, and names
 
 | Key | Content |
 |---|---|
-| `batch` | 1 to 5 and 7, the batches in the order in which they were built, or `icse-2021`, the projects of PyCG's ICSE 2021 evaluation |
+| `batch` | 1 to 5, 7 and 8, the batches in the order in which they were built, or `icse-2021`, the projects of PyCG's ICSE 2021 evaluation |
 | `repository`, `tag`, `commit` | A git source: the repository's URL, the release tag if the commit is one, and the pinned commit |
 | `sdist`, `sdist_url`, `sdist_sha256` | In place of a git source, a source archive from PyPI: its file name, which names the release, an https URL that ends in that name, and its SHA-256 (see "A project held as an sdist") |
 | `root` | The directory on `sys.path`; module names are relative to it |
@@ -235,10 +237,10 @@ can match two names in the graph (bottle, batch 4:
 
 ## Projects
 
-The 40 projects are in one `projects.toml`. Each has a `batch`: 1 to 5
-and 7, in the order in which the batches were built, or `icse-2021` for the
+The 50 projects are in one `projects.toml`. Each has a `batch`: 1 to 5, 7
+and 8, in the order in which the batches were built, or `icse-2021` for the
 five projects of PyCG's ICSE 2021 evaluation. A command takes project
-names, so a batch is its names (five; ten in batch 7).
+names, so a batch is its names (five; ten in batches 7 and 8).
 
 ### How the benchmark grew
 
@@ -253,11 +255,12 @@ maintainer's rule: when every rule that no decision blocks, measured
 together on the newest batch, gains less than one point of precision and
 of recall. Batch 5 met it.
 
-Two batches of ten followed, each drawn in two rounds of five and measured
-once in the same way. Batch 6 (rounds 4 and 5) is not in this repository
-yet; its rulings are, because batch 7 follows them ("Rulings for batch 6").
-Batch 7 was measured once, on 2026-11-23, by the frozen engine `2372b60`,
-before its false positives and false negatives were read.
+Three batches of ten followed, each measured once in the same way. Batch 6
+(rounds 4 and 5) is not in this repository yet; its rulings are, because
+batches 7 and 8 follow them ("Rulings for batch 6"). Batch 7 was measured
+once, on 2026-11-23, by the frozen engine `2372b60`, before its false
+positives and false negatives were read; batch 8 was measured once, on
+2026-11-24, by the same engine, in the same way.
 
 Batches 1 and 2 were chosen before `draw.py` existed. Batches 3, 4 and 5
 were drawn by `draw.py` in rounds 1, 2 and 3, and batch 7 in rounds 6 and
@@ -265,7 +268,8 @@ were drawn by `draw.py` in rounds 1, 2 and 3, and batch 7 in rounds 6 and
 the five of round 6, which its log lists under `used`, and dropped `dill`,
 because a tool run touched it (dill 0.3.9 is installed in the image of the
 call-graph tool HeaderGen); the draw took `mss`, the next project of the
-order in stratum 5.
+order in stratum 5. Batch 8 was drawn in rounds 8 and 9 and the partial
+round 10, by the rule fixed before its draw (see "Choosing a new batch").
 
 ### Batch 1
 
@@ -1304,6 +1308,109 @@ the package a second time. einops, uncertainties and pgvector draw test
 data from unseeded random numbers (see "Repeatability"). pymysql ships an
 `AGENTS.md` addressed to agents (see the warning of "Traces").
 
+### Batch 8
+
+The frame had too few projects left for two complete rounds:
+stratum 2 holds only asgiref, which is touched. By the rule fixed before the
+draw ("Choosing a new batch"), rounds 8 and 9 drew from strata 1, 3, 4 and
+5, and the partial round 10 from strata 1 and 3 (`selection/round-8.json`,
+`round-9.json`, `round-10.json`). Round 8 drew honcho, nodeenv, flit-core
+and pyusb (seed 5460937401858195157), after three drops: cerberus and
+platformdirs (in the corpora of the scalability runs; platformdirs also in
+itables' trace environment) and `sh` (the maintainer's veto of round 4). Round 9 drew
+vulture, toolz, tablib and avro (seed 3989746975721607198), round 10
+pubchempy and m3u8 (seed 6284874201124768312). Nine are git sources at the
+draw's commits; avro is its PyPI sdist, because its checkout does not import
+(`avro/__init__.py` reads `VERSION.txt`, and `avro/ipc.py` two schemas,
+which `setup.py` copies from `share/` at build time).
+
+| Project | Release | Licence | Source | Analysed source | Code lines (draw) |
+|---|---|---|---|---|---|
+| honcho | v2.0.0 | MIT | git | `honcho/` | 835 |
+| nodeenv | 1.12.0 | BSD-3-Clause | git | `nodeenv.py` | 1793 |
+| flit-core | 4.2.0 | BSD-3-Clause | git | `flit_core/` (root `flit_core`; its vendored tomli included) | 2855 |
+| pyusb | v1.3.1 | BSD-3-Clause | git | `usb/` | 3245 |
+| vulture | v2.16 | MIT | git | `vulture/` (not `dev/`: no importable module) | 1161 |
+| toolz | 1.2.0 | BSD-3-Clause | git | `toolz/` without `toolz/tests/` and `toolz/sandbox/tests/`, and `tlz/` | 2144 |
+| tablib | v3.10.0 | MIT | git | `tablib/` (root `src`) | 2416 |
+| avro | 1.12.2 | Apache-2.0 | sdist | `avro/` without `avro/test/` | 3697 |
+| pubchempy | v1.0.5 | MIT | git | `pubchempy.py` | 1159 |
+| m3u8 | 6.0.0 | MIT | git | `m3u8/` | 1934 |
+
+**The selection stage.** The ten trees were fetched at their pins into a
+Docker volume and read there, in containers without network; nothing of a
+package was run, and no analysis tool had run on them. The record of that
+stage (the rule, the draw, the proposed entries and environments, the
+writers', auditors' and referee's briefs, the veto list, the checks of the
+trace images and the script of the trace run) is with the audit records;
+`selection/batch-8-proposal/` holds the referee's rulings (`rulings/`) and
+the samples, draw scripts and blind answers of the audits (`audits/`). The
+maintainer's answer to the veto list (2026-11-24, "just move forward"): no veto; pubchempy without a test
+run and pyusb with about 15 tests, each with a doubled blind audit; avro as
+its sdist with a pytest run; tablib with odfpy built from its pinned sdist
+in a container after a scan of that sdist; MarkupSafe 3.0.3 for honcho.
+**Two security scans** (2026-11-24, Claude Fable 5.2; part A honcho,
+nodeenv, flit-core, pyusb and the build of odfpy; part B vulture, toolz,
+tablib with odfpy, avro and m3u8) read the exported trees, odfpy's sdist
+and PyPI's JSON as data and ran nothing. They found no malicious code, no
+obfuscated payload, no install hook, no `.pth` or `.pyc` file and no
+typosquat: the nine test runs are safe as planned, with one more
+deselection (avro's `test_server_with_path`, which connects to
+apache.org:80), and odfpy's build is safe with restrictions (a container of
+its own, setuptools alone, no network; `wheels/README.md`). The lead's
+decisions on their points (2026-11-24): pyusb keeps
+`FindDescriptorTest::runTest` as a declared failure; nodeenv's untraced
+children are accepted; toolz's `test_has_version` is deselected and its
+`filterwarnings = error` kept; vulture's `dev/` is not analysed. flit-core's
+documentation holds a policy addressed to AI tools: data, not followed (the
+benchmark changes nothing in Flit). The checks of each trace image before
+its first trace are with the record of the selection stage.
+
+**typeshed's stub of m3u8.** The frozen engine (PyCG `2372b60`) holds
+typeshed's stub data of m3u8 6.0.* (`pycg/analysis/stub_data/third_party/
+m3u8.json`, and a row of `stub_data/README.md`), generated from one commit
+of typeshed for all stubs, before batch 8 was drawn; nothing in it was
+written for the benchmark. The analysed package wins over a stub of its
+name (PyCG `docs/design.md`), so the analysis of m3u8 does not read it.
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| honcho | `tests` (92 test functions; 86 run), with mock and Jinja2 | `tests/integration` (13: the console script and child processes); `test_invocation` (a child interpreter); 5 manager tests that start a `multiprocessing.Process` with a local function (Python 3.14's forkserver cannot pickle it; inferred) |
+| nodeenv | `tests -m "not integration"` (245 test functions; about 225 run), with shtab | the 9 integration tests (Node.js downloads); `test_module_run_completes_nodeenv` (a child interpreter); the Windows file skips, and each shell test skips without its shell |
+| flit-core | `flit_core/tests_core` (80 test functions), with testpath | `tests/` (flit's) |
+| pyusb | `test_find.py`, `test_interop.py`, `test_util.py` (16; `FindDescriptorTest::runTest` fails with `NoBackendError`, declared) | 54 tests that need the PIC test device over libusb |
+| vulture | `tests` (274 test functions; about 260 run) | `tests/test_script.py` and `test_invalid_cmdline_args` (child interpreters) |
+| toolz | `toolz --doctest-modules` with `pyproject.toml` (163 test functions and about 288 doctest examples) | `test_has_version` (toolz is not installed, so it has no metadata); `bench/` |
+| tablib | `tests` (183 test functions), with openpyxl, PyYAML, tabulate, xlrd, xlwt, defusedxml and odfpy (the wheel built here) | none |
+| avro | `avro/test` (144 test methods; about 119 run) | `test_script.py`, the tether tests (child processes, Java), `test_minimum_speed` (timing), `test_server_with_path` (connects to apache.org:80); the cases of `load_tests` run only under unittest (the plugin `plugins/avro_load_tests.py` keeps the eight classes that only `load_tests` can instantiate out of collection) |
+| pubchempy | none | every test calls the PubChem web service; the ground truth comes from reading only |
+| m3u8 | `tests` (267 test functions; 263 run) | 4 loader tests that need the local bottle server on port 8112 |
+
+**Environments.** `test-environments/<name>.txt` for the nine with a run, by the
+rule of batch 7 (pytest's stack of batches 3 to 7; every other version the
+newest release on or before the package's release, with a usable wheel),
+with one exception: MarkupSafe 3.0.3 for honcho (the oldest MarkupSafe with
+a cp314 aarch64 wheel). odfpy 1.4.1 has no wheel in any release: its wheel
+was built from its pinned sdist (`odfpy-1.4.1.tar.gz`, SHA-256
+`db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec`) in a
+container after the scans, with setuptools 83.0.0 alone, twice with the
+same bytes, and checked against the sdist; it is
+`wheels/odfpy-1.4.1-py2.py3-none-any.whl` (SHA-256 `19548df9…af2f8`),
+pinned in `test-environments/tablib.txt` by that hash (`wheels/README.md`).
+
+**For the tracer.** Code that runs in a child process is not traced.
+honcho's ten `TestManager` tests make `multiprocessing.Queue` objects, which
+start the resource tracker (a child) and need a writable `/dev/shm` (the
+container has one); toolz's `test_fold` maps through a `Pool`. nodeenv runs
+`sh`, `dash` and `bash` on scripts that it writes, each with a child Python,
+`python -m venv` five times and three child interpreters of
+`nodeenv.py --print-completion`, and starts an HTTP server on 127.0.0.1
+(the lead accepts these children). odfpy appends its own directory to
+`sys.path` at import, so its modules also answer to top-level names
+(`table`, `text`); with defusedxml installed, openpyxl parses through
+`defusedxml.ElementTree`. No test of batch 8 that runs draws unseeded
+random data (see "Repeatability").
+
 ### Ground truths
 
 | Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
@@ -1421,6 +1528,35 @@ project that was drawn but dropped at a later stage (the security scan, a
 test suite that cannot run in the tracer's environment, the maintainer's
 veto, a run of a tool on the project before the draw); the draw takes the
 next project of the order in its stratum.
+`--skip-stratum N=REASON` (repeated) draws nothing from stratum N and
+records it in the log (`skipped`, and `skipped_strata`) with its reason: a
+stratum that has no project left, or a stratum that a partial round leaves
+out; N is an ASCII number from 1 to 5, given once, and a round skips
+not every stratum. Without it, the draw is the same as before (the logs of
+rounds 1 to 3, 6 and 7 are drawn again byte for byte).
+
+**Batch 8, the rule fixed before its draw** (2026-11-23, the maintainer's
+choice "10: 8 + 2 extra"). The frozen frame has too few projects left for
+two complete rounds: stratum 2 is exhausted, because its only project left,
+asgiref, is touched (django-constance's trace, ground truth and test
+environment name it). So: rounds 8 and 9 run the unchanged procedure, with
+their own seeds, over strata 1, 3, 4 and 5 (`--skip-stratum 2=...`); then a
+third, partial round 10, with its own seed, draws one project each from
+strata 1 and 3, by the same rule (`--skip-stratum` 2, 4 and 5). Strata 1
+and 3 are the maintainer's choice, fixed before the draw; they were not
+strictly the two largest pools, as the rule and round 10's log call them
+(a loose reason: the log stays as it is). When the rule was fixed, strata
+1, 3, 4 and 5 held 6, 7, 4 and 6 projects not yet used, of them 4 (5 with
+vulture), 4, 2 and 4 untouched; before round 10, 4, 5, 2 and 4, of them 3,
+2, 0 and 2: stratum 5 ties with stratum 1 or 3 by each count (review
+batch8-r1, M4). The seeds depend on the list and the round only, so the
+draw of every choice could be computed in advance; the order of the
+commits shows that the rule came first, not that the choice was blind.
+Batch 8 has 3, 0, 3, 2 and 2 projects in strata 1 to 5. Drops follow the
+rule of every round (a project that a corpus, a result, a trace, a ground truth or an environment
+names; the maintainer's veto of `sh`), each with its reason in the log.
+Each round skips the projects of the earlier ones (`--used` with the
+proposal's entries; each log lists them under `used`).
 
 The draw writes `selection/round-<N>.json`: the list and the frame (their
 SHA-256), the round, the seed, the constants, the projects already used,
@@ -1430,9 +1566,9 @@ selected with its facts from the frame. The frame and the logs have sorted
 keys and no time of the run (the dates in them are facts of the list, of
 the releases and of the repositories): a rerun from the same cache writes
 the same bytes.
-`tests/test_draw.py` draws rounds 1, 2, 3, 6 and 7 (batches 3 to 5 and
-7) again from the committed frame and list, with the seed and the drops of
-each round, reading files only, and checks that each gives the recorded
+`tests/test_draw.py` draws rounds 1, 2, 3 and 6 to 10 (batches 3 to 5, 7
+and 8) again from the committed frame and list, with the seed, the drops
+and the skipped strata of each round, reading files only, and checks that each gives the recorded
 log. The benchmark directories that the draws used then are gone (one
 benchmark now holds every batch), so the test takes the projects already
 used from the round log itself.
@@ -2633,6 +2769,236 @@ rules above did not decide, and adopted by the lead:
   jax backend with NNX enabled: `flax.nnx.module.ModuleMeta.__call__` at
   `layers/tensorflow.py:62` and `:66`, beside `RearrangeMixin.__init__`).
 
+### Rulings for batch 8 (from 2026-11-24)
+
+Batch 8's ground truths follow every rule above, the rulings for batches 6
+and 7 included. Its blind audits draw their samples with
+`random.Random(20261124)`: 70 sites, or 140 for pubchempy (no trace) and
+pyusb (16 tests), and every value site. Each ruling below was given by the
+lead after the auditor's opinion, or, where it decides many edges, by a
+referee (Codex), whose file is in `selection/batch-8-proposal/rulings/`,
+and adopted by the lead. The package's `<name>.md` and `<name>.audit.md`
+record each application. Where an auditor asked to clarify an earlier
+rule, the clarification is a ruling here; the earlier text stands as it
+was.
+
+- **The import-time state of a declared platform dependency (honcho J6;
+  the lead).** A declared dependency of an admitted platform is not inert
+  because the trace environment lacks it: the missing-module convention
+  fixes how a missing library's callees are named, not what the library
+  does, and its actual behaviour on that platform decides (as for
+  websocket-client and einops). honcho declares `colorama;
+  sys_platform=="win32"` and admits Windows; colorama 0.4.6's `init()`,
+  which `honcho.printer` runs at import, replaces `sys.stdout` with a
+  `colorama.ansitowin32.StreamWrapper` when `should_wrap()` holds. So
+  `Printer.__init__` (`printer.py:31`) and `_check_output_encoding`
+  (`command.py:400`) also call `colorama.ansitowin32.StreamWrapper.isatty`,
+  beside `io.TextIOWrapper.isatty` (2 outside edges; `honcho.md` J6,
+  `honcho.audit.md` R1).
+- **A client's unbound call runs the body with an opaque `self`
+  (pubchempy F1; the lead; clarifies B1's last sentence, the auditor's
+  R2).** An object that a client passes explicitly as `self` to an
+  unbound method of a public class is a client object and opaque (B5),
+  and the method's body runs with it: its attributes are client values,
+  and an opaque object may carry any attribute, so a test on a private,
+  even name-mangled, attribute of `self` can pass. A witness that needs a
+  change of package internals (storing `_Bond__wrapped` through the
+  deprecated item assignment) is not used. `Bond.__delitem__(obj, key)`
+  reaches `<builtin>.hasattr`, `<builtin>.KeyError` and `<builtin>.delattr`
+  (`pubchempy.py:986-988`; 3 outside edges; `pubchempy.md` J6).
+- **A package decorator that replaces a function with a package wrapper
+  (pubchempy; the auditor's R1, as the writer and the auditor applied it
+  blind).** The rule for a library decorator that wraps a method (fabric's
+  `@opens`, "Implicit calls") holds for a package decorator too: where the
+  decorated name is reached, the callee is the package wrapper that the
+  decorator returns, and the wrapper's own call of the decorated function
+  is a value site of the wrapper. pubchempy's `deprecated(...)` returns
+  `deco`, whose `wrapped` replaces nine functions (`pubchempy.py:879-983`,
+  `1287`, `1298`), and `memoized_property` returns
+  `property(fget_memoized)` for six (`1214-1240`, `1834-1866`); the
+  wrapper value sites are `806:42` and `823:24` (no edge changed). In the
+  same package the lead confirmed J2 (the property names that the
+  docstrings and documented examples give for "properties" are values of
+  `to_dict`'s `getattr(self, p)`, B2; `record` and
+  `Substance.deposited_compound` are not, B3) and J5 (`Atom.__contains__
+  -> Atom.element`, the package's own name set admits it).
+- **A library setting lowered through the library's documented interface
+  (nodeenv F1; the lead).** Lowering a named logger's level through
+  logging's public interface (`getLogger(name).setLevel`, `dictConfig`)
+  is documented library configuration that changes a package-owned value
+  ("Versions and configuration"), not a change of package internals: a
+  client assigning a package module's own flag is (pymysql). nodeenv sets
+  its `nodeenv` logger to INFO and installs its own `emit`; with the level
+  lowered, the `logger.debug` sites also reach `create_logger.emit` (2
+  inside edges: from `mkdir` and `_get_last_node_version`; `nodeenv.md`
+  J1).
+- **A package function installed as a method of a library class
+  (nodeenv; the auditor's R1, as both applied it).** A package function
+  that the package assigns as a method of a library class
+  (`logging.StreamHandler.emit = emit`, `nodeenv.py:407`) is a call-back
+  of that library (B5): the library's calls reach it, and its receivers
+  are judged by B5 (a client's handlers are opaque; the package's own
+  handler and logging's `lastResort` are named).
+- **ctypes' module-level function-pointer objects (pyusb F1; by the
+  existing rules; the auditor's R1).** `ctypes.memset` and
+  `ctypes.memmove` are instances of the class that `CFUNCTYPE(...)`
+  returns, so a call of them names
+  `ctypes.CFUNCTYPE.CFunctionType.__call__` (the micro-benchmark's "Calls
+  of instances", and "Outside names" of the 2026-11-15 clarifications: a
+  callable wrapper object uses its concrete class's `__call__`); `cast`,
+  `string_at` and `wstring_at` are Python functions and are named as
+  such. Batch 7's
+  ctypes rule covers the foreign functions of a `CDLL`; this covers the
+  module's own function-pointer objects (`pyusb.md`).
+- **Names from the sources of every admitted runtime (pyusb; the
+  auditor's R2).** A callee outside the package is named from the sources
+  of each admitted implementation and version, never from memory or
+  another ledger. PyPy defines some types at interpreter level
+  (`pypy/module/`), which the dependency sources hold beside
+  `lib-python/` and `lib_pypy/`. pyusb's `self.lock.acquire()` and
+  `.release()` (`core.py:112:30`, `115:30`) are `_thread.RLock.acquire`
+  and `.release` on PyPy 3.9 to 3.11 too: `pypy/module/thread/
+  moduledef.py:24` registers `RLock` as `os_lock.W_RLock`, whose TypeDef
+  is `"_thread.RLock"`, and `lib-python/3/threading.py:46` takes it (no
+  `threading._RLock` name; `pyusb.audit.md` R2).
+- **A module that the release documents and tests as a script (vulture
+  J1; the lead confirmed; the auditor's R1).** A module of the analysed
+  source that the release documents and tests as a script runs as that
+  script, and an import that works only in that mode is taken as written.
+  vulture's whitelists run as scripts (`whitelist_utils.py:24-25`,
+  `tests/test_script.py:34-37`); `ast_whitelist`'s `from whitelist_utils
+  import Whitelist` gives `vulture.whitelists.ast_whitelist ->
+  vulture.whitelists.whitelist_utils.Whitelist.__getattr__` (1 inside
+  edge, 67 sites). face_classification's rule (code after an import of a
+  module that the checkout lacks has no edges) does not apply: the
+  checkout has the module.
+- **A fallback that runs only when a vendored part of the analysed source
+  is deleted (flit-core J2; the lead; the auditor's R1).** The checkout is
+  taken as it is (face_classification): a fallback reached only when a
+  distributor deletes a vendored part of the analysed source does not run
+  unless the release documents that state. flit-core's `config.py:10-18`
+  tries `tomllib`, the vendored `flit_core.vendor.tomli`, then `import
+  tomli`; the third runs only on CPython 3.8 to 3.10 with the vendored
+  copy deleted, which the release does not document (`doc/bootstrap.rst`
+  allows the removal only on 3.11 and later, and `vendor/README`'s
+  unbundling keeps the vendored import working). Its 3 outside edges to
+  `tomli.loads` go (`flit-core.md` J2). An optional import of an
+  installed declared dependency differs: both sides run on different
+  versions, and vulture's `tomli.load` beside `tomllib.load` stays
+  (`vulture.md` J5).
+- **Dispatch on a client subclass of an abstract documented base, and
+  package values stored on client objects (avro J8; the referee,
+  `b8-ruling-avro-1.md`; also the auditor's R1).** B1's clause on "a
+  subclass that calls the method explicitly on itself" concerns package
+  subclasses. A call dispatched on a client subclass of an abstract
+  documented base gets no package callees merely because that subclass
+  could inherit concrete methods (B1, asyncstdlib). A value that package
+  code constructs or selects keeps its provenance through explicit
+  storage and forwarding, also on an otherwise opaque client object, when
+  the package's assignments establish it at the call site (clarifies B5;
+  B2's value flows); this needs actual assignment evidence and admits no
+  client call-back result, arbitrary client attribute or client-defined
+  method. avro's `TetherTask` (an `abc.ABC` with no package subclass):
+  the 13 dispatch edges on the client task go (`tether_task.py`, five;
+  `tether_task_runner.py`, eight), and the 17 edges on the
+  package-created requestor, readers, schema, logger and event stay (9
+  inside, 8 outside; the ruling file lists each site).
+- **A release's own CI at its tag, for a project held as its sdist
+  (avro Q1; the lead; the auditor's R2).** When the analysed artefact (an
+  sdist) leaves out the release's test jobs, the jobs at the release's
+  tag decide as the path and textdistance rulings say, fetched by tag.
+  avro 1.12.2's `test-lang-py.yml` at `release-1.12.2` (in
+  `deps/upstream-ci/`) runs on `ubuntu-latest` and `ubuntu-24.04-arm`
+  with CPython 3.10 to 3.14, `pypy-3.10` and `pypy-3.11`: CPython 3.10
+  and later (the last classifier is no upper bound), PyPy 3.10 and 3.11,
+  Linux on x86-64 and aarch64 (einops), so `pathlib.PosixPath` alone and
+  the PyPy names (5 outside edges; `avro.md`, "Versions, implementations
+  and platforms").
+- **A dispatch table of the package selected by a client input (toolz J4;
+  the referee, `b8-ruling-toolz-1.md`).** An admitted public input may
+  select a handler that the package installs in its own dispatch table;
+  client opacity does not erase that handler's provenance, and each
+  target needs a witness on an admitted runtime that reaches the call and
+  binds, accounting for overwritten entries and short-circuiting.
+  Registry membership alone does not admit package objects that B2 or B3
+  exclude; admission extends between parameters only through forwarding
+  or documentation of a common role (pymysql). toolz's `check_valid`
+  (`_signatures.py:684:13`) keeps all 193 registry lambdas, the six
+  package keys included (`is_valid_args` and `is_partial_args` document
+  one role); no edge changed, and the exclusions are 51 unavailable names
+  and 46 overwritten entries.
+- **Which releases of a dependency are read (tablib O1/F4; the lead; the
+  auditor's R1).** Batch 7's ruling admits every release that satisfies
+  the declared requirement on an admitted runtime; a release in the range
+  that cannot run on any admitted Python of the package is not admitted.
+  The callee names come from the sources of the admitted releases, never
+  from memory or another ledger. Which releases are read: the floor of
+  the declared range (for a bare requirement, the oldest release that
+  runs on the package's oldest admitted Python, decided by reading its
+  source), and the last release of each minor series up to the version
+  that the environment pins or that the date rule picks (the
+  django-constance precedent, the last release of each family). The
+  lead fetches them in a container by PyPI's SHA-256 into the dependency
+  sources, each with its reason in `MANIFEST.json`. tablib: openpyxl
+  2.6.0, 2.6.4, 3.0.10, 3.1.5 (2.6.x and 3.0.x import on 3.10: their
+  `descriptors/slots.py` uses `collections.Callable` but no module imports
+  it); xlrd 1.2.0 (0.9 to 1.1 call `time.clock()` when opening a
+  workbook), 2.0.2; xlwt 1.0.0, 1.1.2, 1.2.0, 1.3.0; odfpy 1.3.0, 1.3.6,
+  1.4.1; PyYAML 5.1 (3.10 to 3.13 test `collections.Hashable`), 5.1.2,
+  5.2, 5.3.1, 5.4.1, 6.0.3; tabulate 0.4.2 to 0.10.0, the last of each
+  series. Only `get_column_letter` changes a name (2 outside edges;
+  `tablib.md`). The same rule gives the older releases of honcho's,
+  nodeenv's, vulture's and m3u8's declared dependencies. In tablib the
+  lead also confirmed J1 for `Dataset.load` (documented file streams) and
+  removed `Databook.load`'s two (F3: its documentation names only an
+  abstract "file-like object", and documentation is read one entry at a
+  time, B4 and funcy).
+- **A C type exported under a module attribute other than its type name
+  (flit-core's Codex round 1; the referee, `b8-ruling-c-type-names-1.md`).**
+  A method of an outside class is named by the class's public path on each
+  admitted implementation and version: a public alias where one exists,
+  otherwise the attribute under which the defining extension module
+  exports the type, even in a module whose name starts with `_`
+  (`_csv.Writer` on CPython 3.10 and later, `_sha256.SHA256Type` on 3.8 to
+  3.11, `_md5.MD5Type`, `_sha1.SHA1Type`). The type name (`_csv.writer`,
+  `_sha256.sha256`) is the fallback only on a runtime that exports no such
+  attribute (CPython 3.8 and 3.9 for the csv writer; PyPy, whose `_csv`
+  exports factories only and whose `_md5`, `_sha256`, `_sha512` and
+  `_sha1` export the classes under their own names, `_sha1.sha`). The
+  names are the union over admitted runtimes, never two aliases of one
+  class on one runtime. An attribute that a module overwrites names what
+  it holds last: CPython 3.10 and 3.11 export the SHA-512 type as
+  `_sha512.SHA384Type` (`sha512module.c` sets `SHA384Type` and then
+  overwrites it), and SHA-384 keeps `_sha512.sha384`. A factory function
+  names its own call, not the methods of its result. The
+  pyfiglet/path/structlog ruling still decides a private class without a
+  public path that a public module re-exports. Earlier usage does not bind
+  (the scope rules: a package judgement cannot override a global rule).
+  flit-core (0fa844a), tablib (1 site) and avro (4 sites) follow it: net
+  +8 outside edges over the three.
+- **The lead's rulings of Codex round 1 (avro, tablib, toolz, pyusb).**
+  A class whose metaclass sets `__call__` to a builtin class is called as
+  that class: `MessageObject()` on a `TypedDict` (`_TypedDictMeta.__call__
+  = dict`) is an edge to `<builtin>.dict` (micro README, "Instantiation
+  of a builtin or external class"), and the trace's `dict.__init__` is a
+  naming artefact (avro AVRO-R1-02, 1 outside edge renamed). A public
+  registry key names a new entry; a key that collides with an existing
+  attribute of a package class replaces package internals and admits
+  nothing (B3; tablib T08, no edge). Admission follows forwarding from an
+  admitted parameter onward, never backwards from a wrapped callable's
+  admitted inputs to its wrapper's (pymysql; toolz R02, no edge), and a
+  factory's other output is admitted only where documentation names it for
+  the role (toolz R01, no edge). A native library that the package declares
+  by name and series (pyusb: "libusb 1.x") is read like a dependency
+  release: its floor is the oldest release that the package can load (the
+  first that exports every symbol the package binds without a guard:
+  libusb 1.0.12, `libusb_get_parent`) and the last release of the series
+  (1.0.30); an operating system's own implementation on a declared
+  platform is read at the platform's supported releases (FreeBSD 14.5 and
+  15.1). pyusb: a synchronous libusb transfer handles the context's events
+  and runs a concurrent isochronous transfer's callback (6 inside edges;
+  `pyusb.md`, J9).
+
 ## Call sites and candidates
 
 `sites.py` reads the source with `ast` and `tokenize` and finds every call
@@ -2951,7 +3317,10 @@ installed or run on the host. The image holds Python 3.14 (the tracer uses
 `projects.toml`: the full closure of the test dependencies, which
 `test-environments/<name>.txt` pins by hash, installed from wheels only
 (`--require-hashes --only-binary :all: --no-deps`), so that no build script
-of a package runs. The tracer refuses to run if the environment does not
+of a package runs. A dependency that PyPI has no wheel of is built once
+from its pinned sdist, in a container, and the wheel is committed in
+`wheels/` and pinned by its hash like any other (odfpy for tablib;
+`wheels/README.md`). The tracer refuses to run if the environment does not
 have the pinned versions; metadata inside the project's own directory is not
 an installation (an sdist carries the metadata of its build,
 `<name>.egg-info`, and its source directory is on the path). The project
@@ -3054,7 +3423,7 @@ The trace records the version of every installed distribution
 
 ### The pytest plugins
 
-`plugins/` holds the four pytest plugins that `plugins` of `projects.toml`
+`plugins/` holds the five pytest plugins that `plugins` of `projects.toml`
 names. Each changes nothing in the checkout; for the tracer it is client
 code.
 
@@ -3096,6 +3465,15 @@ code.
   fails: `trace.py` reports the exception. Its end of session runs last
   (`trylast`), so that the other plugins (the tracer's test counts) finish
   first.
+- `avro_load_tests.py` (avro). Eight unittest `TestCase` classes of avro
+  1.12.2's tests take constructor arguments (a datum, a schema, a
+  fingerprint) that only the modules' unittest `load_tests()` supplies;
+  upstream runs them with `python -m unittest discover`. pytest ignores
+  `load_tests` and instantiates each class while it collects it, so each
+  one is a collection error, which `--deselect` cannot remove (it filters
+  items after collection). The plugin returns no collector for exactly
+  these class names in exactly these modules (`CLASSES`); every other
+  class and module is collected as before. It runs no project code.
 
 ### What the tracer does
 
@@ -3147,8 +3525,8 @@ implementations are client callbacks.
 A trace is the reproducible half of a ground truth. To record the trace of
 a project again you need Docker with Compose, `test-environments/<name>.txt`
 (the pinned test environment) and the inputs image, which holds the
-source. 35 projects have a trace; fabric, face_classification,
-Sublist3r, pyfiglet and mss have no test run.
+source. 44 projects have a trace; fabric, face_classification,
+Sublist3r, pyfiglet, mss and pubchempy have no test run.
 
 ```sh
 C="docker compose -f evaluation/compose.yaml"
@@ -3236,6 +3614,22 @@ recording, and no union was taken. The decision record of each package
 (the SHA-256, edge count, test counts and failure ids of each recording)
 is an audit record.
 
+Batch 8 was recorded by the same rule. Its declared random tests are
+none: toolz's random tests seed their generators, and the `uuid4()` values
+of tablib and avro do not change what their tests call. One failure was
+declared before its run: pyusb's
+`tests/test_util.py::FindDescriptorTest::runTest` calls `usb.core.find`
+with no backend, the image has no libusb, and the test fails with
+`NoBackendError`; it is kept as the only test of the backend search. The
+first run added 20 declared failures of nodeenv: each test writes an
+executable into its tmpdir and runs it, or asserts that it is executable,
+and the trace container mounts `/tmp` noexec (Docker's tmpfs default, as
+for every committed trace); the calls made before each failure stay in the
+trace. The same run voided avro's attempt 1, whose eight classes that only
+`load_tests()` can instantiate were collection errors; avro's entry then
+gained the plugin `plugins/avro_load_tests.py`, and attempt 2 is its trace.
+Every package's full recordings had the same edges.
+
 ### Recording traces in a container
 
 The traces of batch 3 and of every later batch were recorded in Docker
@@ -3265,9 +3659,13 @@ The script:
    1.13.28);
 2. builds the image `pycg-trace-<name>:<tag>` from
    `evaluation/container/Dockerfile.trace`, the requirements file (with
-   the Dockerfile the only files of the build context) and the project's
-   source from the inputs image (the named context `inputs`). The tag is
-   12 hex digits of the SHA-256 of the two files and the base image. The
+   the Dockerfile the only files of the build context), the wheels built
+   here (`wheels/`, the named context `wheels`: pip finds there, by
+   `--find-links`, the wheels that PyPI lacks, and installs them by hash
+   like every other) and the project's source from the inputs image (the
+   named context `inputs`). The tag is 12 hex digits of the SHA-256 of the
+   two files, the base image and every file of `wheels/`, so a new or
+   changed wheel gives every project a new tag. The
    base image is given by digest in `PYTHON_IMAGE` (the script refuses to
    run without it). The image has the official CPython 3.14 and the
    hash-pinned closure, installed by pip with no configuration (pip is

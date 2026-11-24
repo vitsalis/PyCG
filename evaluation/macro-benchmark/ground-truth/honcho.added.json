@@ -1,0 +1,750 @@
+{
+  "edges": {
+    "honcho.__main__": {
+      "honcho.command.main": [
+        "honcho.__main__ 4:9 call  main()"
+      ]
+    },
+    "honcho.command": {
+      "backports.entry_points_selectable.entry_points": [
+        "honcho.command 38:56 call  entry_points(group=\"honcho_exporters\")"
+      ],
+      "honcho.command.main": [
+        "honcho.command 410:9 call  main()"
+      ]
+    },
+    "honcho.command._check_output_encoding": {
+      "codecs.lookup": [
+        "honcho.command 398:25 call  codecs.lookup('utf8')",
+        "honcho.command 403:36 call  codecs.lookup(sys.stdout.encoding)"
+      ],
+      "colorama.ansitowin32.StreamWrapper.isatty": [
+        "honcho.command 400:29 call  sys.stdout.isatty()"
+      ],
+      "io.TextIOWrapper.isatty": [
+        "honcho.command 400:29 call  sys.stdout.isatty()"
+      ],
+      "logging.Logger.warn": [
+        "honcho.command 404:17 call  log.warn('Your terminal is not configured to receive UTF-..."
+      ]
+    },
+    "honcho.command._mkdir": {
+      "<builtin>.Exception.__init__": [
+        "honcho.command 383:27 call  CommandError(e)"
+      ],
+      "logging.Logger.error": [
+        "honcho.command 382:18 call  log.error(\"Could not create export directory\")"
+      ],
+      "os.makedirs": [
+        "honcho.command 380:20 call  os.makedirs(path)"
+      ],
+      "os.path.exists": [
+        "honcho.command 377:22 call  os.path.exists(path)"
+      ]
+    },
+    "honcho.command._parse_concurrency": {
+      "<builtin>.int": [
+        "honcho.command 364:26 call  int(concurrency)"
+      ],
+      "<builtin>.str.split": [
+        "honcho.command 362:27 call  desc.split(',')",
+        "honcho.command 363:38 call  item.split('=', 1)"
+      ],
+      "collections.defaultdict": [
+        "honcho.command 359:25 call  defaultdict(lambda: 1)"
+      ]
+    },
+    "honcho.command._parse_quiet": {
+      "<builtin>.str.split": [
+        "honcho.command 372:24 call  desc.split(',')"
+      ]
+    },
+    "honcho.command._port": {
+      "<builtin>.Exception.__init__": [
+        "honcho.command 342:27 call  CommandError(str(e))"
+      ],
+      "<builtin>.str": [
+        "honcho.command 342:31 call  str(e)"
+      ],
+      "honcho.environ.Env.port": [
+        "honcho.command 340:20 getattr  env.port"
+      ]
+    },
+    "honcho.command._procfile": {
+      "<builtin>.Exception.__init__": [
+        "honcho.command 332:27 call  CommandError('Procfile does not exist or is not a file')",
+        "honcho.command 334:27 call  CommandError(str(e))"
+      ],
+      "<builtin>.str": [
+        "honcho.command 334:31 call  str(e)"
+      ],
+      "honcho.environ.Env.load_procfile": [
+        "honcho.command 330:37 call  env.load_procfile()"
+      ]
+    },
+    "honcho.command._read_env": {
+      "<builtin>.list.append": [
+        "honcho.command 351:31 call  content.append(f.read())"
+      ],
+      "io.TextIOWrapper.read": [
+        "honcho.command 351:38 call  f.read()"
+      ]
+    },
+    "honcho.command._write_file": {
+      "<builtin>.Exception.__init__": [
+        "honcho.command 393:27 call  CommandError(e)"
+      ],
+      "<builtin>.open": [
+        "honcho.command 389:18 call  open(path, 'w')"
+      ],
+      "honcho.command._mkdir": [
+        "honcho.command 387:11 call  _mkdir(os.path.dirname(path))"
+      ],
+      "io.TextIOWrapper.write": [
+        "honcho.command 390:21 call  fp.write(content)"
+      ],
+      "logging.Logger.error": [
+        "honcho.command 392:18 call  log.error(\"Could not write to export file\")"
+      ],
+      "os.path.dirname": [
+        "honcho.command 387:27 call  os.path.dirname(path)"
+      ]
+    },
+    "honcho.command.command_check": {
+      "<builtin>.str.format": [
+        "honcho.command 86:52 call  'Valid procfile detected ({0})'.format(', '.join(procfile..."
+      ],
+      "<builtin>.str.join": [
+        "honcho.command 86:62 call  ', '.join(procfile.processes)"
+      ],
+      "honcho.command._procfile": [
+        "honcho.command 85:25 call  _procfile(env)"
+      ],
+      "honcho.command.map_from": [
+        "honcho.command 82:22 call  map_from(args)"
+      ],
+      "honcho.environ.Env.__init__": [
+        "honcho.command 83:14 call  Env(config)"
+      ],
+      "logging.Logger.info": [
+        "honcho.command 86:13 call  log.info('Valid procfile detected ({0})'.format(', '.join..."
+      ]
+    },
+    "honcho.command.command_export": {
+      "<builtin>.str.replace": [
+        "honcho.command 97:36 call  args.log.replace('APP', args.app)"
+      ],
+      "honcho.command._mkdir": [
+        "honcho.command 123:11 call  _mkdir(args.location)"
+      ],
+      "honcho.command._parse_concurrency": [
+        "honcho.command 104:37 call  _parse_concurrency(args.concurrency)"
+      ],
+      "honcho.command._port": [
+        "honcho.command 105:17 call  _port(env)"
+      ],
+      "honcho.command._procfile": [
+        "honcho.command 102:25 call  _procfile(env)"
+      ],
+      "honcho.command._read_env": [
+        "honcho.command 103:24 call  _read_env(args.app_root, args.env)"
+      ],
+      "honcho.command._write_file": [
+        "honcho.command 128:20 call  _write_file(path, f.content)"
+      ],
+      "honcho.command.map_from": [
+        "honcho.command 99:22 call  map_from(args)"
+      ],
+      "honcho.environ.Env.__init__": [
+        "honcho.command 100:14 call  Env(config)"
+      ],
+      "honcho.environ.expand_processes": [
+        "honcho.command 107:41 call  environ.expand_processes(procfile.processes, concurrency=..."
+      ],
+      "honcho.export.base.BaseExport.__init__": [
+        "honcho.command 113:25 call  export_ctor(template_dir=args.template_dir)"
+      ],
+      "honcho.export.runit.Export.render": [
+        "honcho.command 125:27 call  export.render(processes, context)"
+      ],
+      "honcho.export.supervisord.Export.render": [
+        "honcho.command 125:27 call  export.render(processes, context)"
+      ],
+      "honcho.export.systemd.Export.render": [
+        "honcho.command 125:27 call  export.render(processes, context)"
+      ],
+      "honcho.export.upstart.Export.render": [
+        "honcho.command 125:27 call  export.render(processes, context)"
+      ],
+      "importlib.metadata.EntryPoint.load": [
+        "honcho.command 112:51 call  export_choices[args.format].load()"
+      ],
+      "logging.Logger.info": [
+        "honcho.command 127:17 call  log.info(\"Writing '%s'\", path)"
+      ],
+      "os.chmod": [
+        "honcho.command 130:21 call  os.chmod(path, 0o755)"
+      ],
+      "os.path.abspath": [
+        "honcho.command 117:36 call  os.path.abspath(args.app_root)"
+      ],
+      "os.path.join": [
+        "honcho.command 126:28 call  os.path.join(args.location, f.name)"
+      ]
+    },
+    "honcho.command.command_help": {
+      "<builtin>.list.append": [
+        "honcho.command 178:20 call  argv.append(args.task)"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "honcho.command 179:29 call  parser.parse_args(argv[::-1])"
+      ]
+    },
+    "honcho.command.command_run": {
+      "<builtin>.str.join": [
+        "honcho.command 202:23 call  ' '.join(shlex.quote(arg) for arg in argv)"
+      ],
+      "collections.abc.MutableMapping.update": [
+        "honcho.command 189:22 call  os.environ.update(_read_env(args.app_root, args.env))"
+      ],
+      "honcho.command._read_env": [
+        "honcho.command 189:32 call  _read_env(args.app_root, args.env)"
+      ],
+      "honcho.process.Popen.__init__": [
+        "honcho.command 204:14 call  Popen(cmd, stdout=sys.stdout, stderr=sys.stderr, start_ne..."
+      ],
+      "shlex.quote": [
+        "honcho.command 202:35 call  shlex.quote(arg)"
+      ],
+      "signal.signal": [
+        "honcho.command 206:18 call  signal.signal(signal.SIGINT, signal.SIG_IGN)"
+      ],
+      "subprocess.Popen.wait": [
+        "honcho.command 207:11 call  p.wait()"
+      ],
+      "sys.exit": [
+        "honcho.command 208:13 call  sys.exit(p.returncode)"
+      ]
+    },
+    "honcho.command.command_start": {
+      "<builtin>.Exception.__init__": [
+        "honcho.command 237:35 call  CommandError(\"Process type '{0}' does not exist in Procfi..."
+      ],
+      "<builtin>.dict.update": [
+        "honcho.command 251:17 call  e.update(p.env)"
+      ],
+      "<builtin>.str.format": [
+        "honcho.command 237:90 call  \"Process type '{0}' does not exist in Procfile\".format(name)"
+      ],
+      "collections.OrderedDict": [
+        "honcho.command 232:32 call  OrderedDict()"
+      ],
+      "honcho.command._parse_concurrency": [
+        "honcho.command 226:37 call  _parse_concurrency(args.concurrency)"
+      ],
+      "honcho.command._parse_quiet": [
+        "honcho.command 228:25 call  _parse_quiet(args.quiet)"
+      ],
+      "honcho.command._port": [
+        "honcho.command 229:17 call  _port(env)"
+      ],
+      "honcho.command._procfile": [
+        "honcho.command 225:25 call  _procfile(env)"
+      ],
+      "honcho.command._read_env": [
+        "honcho.command 227:24 call  _read_env(args.app_root, args.env)"
+      ],
+      "honcho.command.map_from": [
+        "honcho.command 222:22 call  map_from(args)"
+      ],
+      "honcho.environ.Env.__init__": [
+        "honcho.command 223:14 call  Env(config)"
+      ],
+      "honcho.environ.expand_processes": [
+        "honcho.command 245:38 call  environ.expand_processes(processes, concurrency=concurren..."
+      ],
+      "honcho.manager.Manager.__init__": [
+        "honcho.command 241:22 call  Manager(Printer(sys.stdout, colour=(not args.no_colour), ..."
+      ],
+      "honcho.manager.Manager.add_process": [
+        "honcho.command 252:28 call  manager.add_process(p.name, p.cmd, quiet=p.quiet, env=e)"
+      ],
+      "honcho.manager.Manager.loop": [
+        "honcho.command 254:17 call  manager.loop()"
+      ],
+      "honcho.printer.Printer.__init__": [
+        "honcho.command 241:30 call  Printer(sys.stdout, colour=(not args.no_colour), prefix=(..."
+      ],
+      "os._Environ.copy": [
+        "honcho.command 250:28 call  os.environ.copy()"
+      ],
+      "sys.exit": [
+        "honcho.command 255:13 call  sys.exit(manager.returncode)"
+      ]
+    },
+    "honcho.command.command_version": {
+      "<builtin>.print": [
+        "honcho.command 280:10 call  print('{prog} {version}'.format( prog=parser.prog, versio..."
+      ],
+      "<builtin>.str.format": [
+        "honcho.command 280:36 call  '{prog} {version}'.format( prog=parser.prog, version=__ve..."
+      ]
+    },
+    "honcho.command.main": {
+      "<builtin>.str": [
+        "honcho.command 320:22 call  str(e)"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "honcho.command 312:33 call  parser.parse_args(argv)",
+        "honcho.command 314:33 call  parser.parse_args()"
+      ],
+      "honcho.command._check_output_encoding": [
+        "honcho.command 317:31 call  _check_output_encoding()"
+      ],
+      "honcho.command.command_check": [
+        "honcho.command 318:31 call  COMMANDS[args.command](args)"
+      ],
+      "honcho.command.command_export": [
+        "honcho.command 318:31 call  COMMANDS[args.command](args)"
+      ],
+      "honcho.command.command_help": [
+        "honcho.command 318:31 call  COMMANDS[args.command](args)"
+      ],
+      "honcho.command.command_run": [
+        "honcho.command 318:31 call  COMMANDS[args.command](args)"
+      ],
+      "honcho.command.command_start": [
+        "honcho.command 318:31 call  COMMANDS[args.command](args)"
+      ],
+      "honcho.command.command_version": [
+        "honcho.command 318:31 call  COMMANDS[args.command](args)"
+      ],
+      "logging.Logger.error": [
+        "honcho.command 320:18 call  log.error(str(e))"
+      ],
+      "sys.exit": [
+        "honcho.command 321:17 call  sys.exit(1)"
+      ]
+    },
+    "honcho.compat.ProcessManager.kill": {
+      "honcho.compat.ProcessManager.terminate": [
+        "honcho.compat 36:27 call  self.terminate(pid)"
+      ],
+      "os.killpg": [
+        "honcho.compat 40:26 call  os.killpg(pid, signal.SIGKILL)"
+      ]
+    },
+    "honcho.compat.ProcessManager.terminate": {
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "honcho.compat 22:56 call  ctypes.windll.kernel32.OpenProcess(1, False, pid)",
+        "honcho.compat 23:52 call  ctypes.windll.kernel32.TerminateProcess(handle, -1)",
+        "honcho.compat 24:47 call  ctypes.windll.kernel32.CloseHandle(handle)"
+      ],
+      "os.killpg": [
+        "honcho.compat 28:26 call  os.killpg(pid, signal.SIGTERM)"
+      ]
+    },
+    "honcho.environ.Env.load_procfile": {
+      "<builtin>.open": [
+        "honcho.environ 26:18 call  open(self.procfile)"
+      ],
+      "honcho.environ.Env.procfile": [
+        "honcho.environ 26:24 getattr  self.procfile"
+      ],
+      "honcho.environ.parse_procfile": [
+        "honcho.environ 29:30 call  parse_procfile(content)"
+      ],
+      "io.TextIOWrapper.read": [
+        "honcho.environ 27:29 call  f.read()"
+      ]
+    },
+    "honcho.environ.Env.port": {
+      "<builtin>.ValueError": [
+        "honcho.environ 19:29 call  ValueError(f\"invalid value for port: '{self._c['port']}'\")"
+      ],
+      "<builtin>.int": [
+        "honcho.environ 17:23 call  int(self._c['port'])"
+      ]
+    },
+    "honcho.environ.Env.procfile": {
+      "os.path.join": [
+        "honcho.environ 23:28 call  os.path.join(self._c['app_root'], self._c['procfile'])"
+      ]
+    },
+    "honcho.export.base": {
+      "<builtin>.print": [
+        "honcho.export.base 8:10 call  print(\"honcho's 'export' command requires the jinja2 pack..."
+      ],
+      "sys.exit": [
+        "honcho.export.base 15:13 call  sys.exit(1)"
+      ]
+    },
+    "honcho.export.base.BaseExport.__init__": {
+      "honcho.export.base.BaseExport.get_template_loader": [
+        "honcho.export.base 27:46 call  self.get_template_loader()"
+      ],
+      "jinja2.FileSystemLoader": [
+        "honcho.export.base 25:45 call  jinja2.FileSystemLoader([template_dir])"
+      ]
+    },
+    "honcho.export.base.BaseExport.get_template": {
+      "jinja2.Environment.get_template": [
+        "honcho.export.base 37:47 call  self._template_env.get_template(path)"
+      ]
+    },
+    "honcho.export.base.BaseExport.get_template_loader": {
+      "<builtin>.NotImplementedError": [
+        "honcho.export.base 40:34 call  NotImplementedError(\"You must implement a get_template_lo..."
+      ]
+    },
+    "honcho.export.base.BaseExport.render": {
+      "<builtin>.NotImplementedError": [
+        "honcho.export.base 44:34 call  NotImplementedError(\"You must implement a render method.\")"
+      ]
+    },
+    "honcho.export.runit.Export.render": {
+      "honcho.export.base.BaseExport.get_template": [
+        "honcho.export.runit 18:36 call  self.get_template('run')",
+        "honcho.export.runit 19:36 call  self.get_template('log/run')"
+      ],
+      "jinja2.Template.render": [
+        "honcho.export.runit 33:38 call  run_tpl.render(ctx)",
+        "honcho.export.runit 38:38 call  log_tpl.render(ctx)"
+      ]
+    },
+    "honcho.export.supervisord.Export.render": {
+      "honcho.export.base.BaseExport.get_template": [
+        "honcho.export.supervisord 13:37 call  self.get_template('supervisord.conf')"
+      ],
+      "honcho.export.base.dashrepl": [
+        "honcho.export.supervisord 14:47 call  template.render(context)"
+      ],
+      "honcho.export.base.percentescape": [
+        "honcho.export.supervisord 14:47 call  template.render(context)"
+      ],
+      "jinja2.Template.render": [
+        "honcho.export.supervisord 14:47 call  template.render(context)"
+      ]
+    },
+    "honcho.export.systemd.Export.render": {
+      "honcho.export.base.BaseExport.get_template": [
+        "honcho.export.systemd 18:39 call  self.get_template('master.target')",
+        "honcho.export.systemd 19:47 call  self.get_template('process_master.target')",
+        "honcho.export.systemd 20:40 call  self.get_template('process.service')"
+      ],
+      "honcho.export.base.File.__init__": [
+        "honcho.export.systemd 32:19 call  File(\"{0}.target\".format(app_name), master_tpl.render(con...",
+        "honcho.export.systemd 38:23 call  File(\"{0}.target\".format(process_master_name), process_ma...",
+        "honcho.export.systemd 42:27 call  File(\"{0}.service\".format(process_name), process_tpl.rend..."
+      ],
+      "jinja2.Template.render": [
+        "honcho.export.systemd 32:68 call  master_tpl.render(context)",
+        "honcho.export.systemd 38:91 call  process_master_tpl.render(context)",
+        "honcho.export.systemd 42:82 call  process_tpl.render(context)"
+      ]
+    },
+    "honcho.export.upstart.Export.render": {
+      "honcho.export.base.BaseExport.get_template": [
+        "honcho.export.upstart 13:39 call  self.get_template('master.conf')",
+        "honcho.export.upstart 14:47 call  self.get_template('process_master.conf')",
+        "honcho.export.upstart 15:40 call  self.get_template('process.conf')"
+      ],
+      "honcho.export.base.File.__init__": [
+        "honcho.export.upstart 20:19 call  File(master, master_tpl.render(context))",
+        "honcho.export.upstart 29:23 call  File(process_master, process_master_tpl.render(ctx))",
+        "honcho.export.upstart 37:27 call  File(process, process_tpl.render(ctx))"
+      ],
+      "jinja2.Template.render": [
+        "honcho.export.upstart 20:45 call  master_tpl.render(context)",
+        "honcho.export.upstart 29:65 call  process_master_tpl.render(ctx)",
+        "honcho.export.upstart 37:55 call  process_tpl.render(ctx)"
+      ]
+    },
+    "honcho.manager.Manager.__init__": {
+      "honcho.printer.Printer.__init__": [
+        "honcho.manager 57:68 call  Printer(sys.stdout)"
+      ]
+    },
+    "honcho.manager.Manager._all_started": {
+      "<builtin>.dict.get": [
+        "honcho.manager 183:25 call  p.get('pid')"
+      ]
+    },
+    "honcho.manager.Manager._all_stopped": {
+      "<builtin>.dict.get": [
+        "honcho.manager 186:25 call  p.get('returncode')"
+      ]
+    },
+    "honcho.manager.Manager._any_stopped": {
+      "<builtin>.dict.get": [
+        "honcho.manager 189:25 call  p.get('returncode')"
+      ]
+    },
+    "honcho.manager.Manager._killall": {
+      "<builtin>.dict.items": [
+        "honcho.manager 161:42 call  self._processes.items()"
+      ],
+      "<builtin>.list.append": [
+        "honcho.manager 163:39 call  for_termination.append(n)"
+      ],
+      "honcho.compat.ProcessManager.kill": [
+        "honcho.manager 171:35 call  self._procmgr.kill(p['pid'])"
+      ],
+      "honcho.compat.ProcessManager.terminate": [
+        "honcho.manager 173:40 call  self._procmgr.terminate(p['pid'])"
+      ],
+      "honcho.manager.Manager._system_print": [
+        "honcho.manager 168:31 call  self._system_print(\"sending %s to %s (pid %s)\\n\" % (signa..."
+      ]
+    },
+    "honcho.manager.Manager._start": {
+      "honcho.process.Process.run": [
+        "honcho.manager 180:31 call  p['process'].start()"
+      ],
+      "multiprocessing.Process": [
+        "honcho.manager 177:51 call  multiprocessing.Process(name=name, target=p['obj'].run, a..."
+      ],
+      "multiprocessing.Process.start": [
+        "honcho.manager 180:31 call  p['process'].start()"
+      ]
+    },
+    "honcho.manager.Manager._system_print": {
+      "datetime.datetime.now": [
+        "honcho.manager 194:57 call  self._clock.now()"
+      ],
+      "honcho.printer.Printer.write": [
+        "honcho.manager 192:28 call  self._printer.write(Message(type='line', data=data, time=..."
+      ]
+    },
+    "honcho.manager.Manager.kill": {
+      "honcho.manager.Manager._killall": [
+        "honcho.manager 155:22 call  self._killall(force=True)"
+      ]
+    },
+    "honcho.manager.Manager.loop": {
+      "datetime.datetime.now": [
+        "honcho.manager 132:45 call  self._clock.now()",
+        "honcho.manager 138:42 call  self._clock.now()"
+      ],
+      "datetime.timedelta": [
+        "honcho.manager 139:48 call  datetime.timedelta(seconds=KILL_WAIT)"
+      ],
+      "honcho.manager.Manager._system_print": [
+        "honcho.manager 119:39 call  self._system_print(\"%s started (pid=%s)\\n\" % (msg.name, m...",
+        "honcho.manager 123:39 call  self._system_print(\"%s stopped (rc=%s)\\n\" % (msg.name, ms..."
+      ],
+      "honcho.manager.Manager.kill": [
+        "honcho.manager 140:30 call  self.kill()"
+      ],
+      "honcho.manager.Manager.loop._terminate": [
+        "honcho.manager 110:38 call  self.events.get(timeout=0.1)"
+      ],
+      "honcho.manager.Manager.terminate": [
+        "honcho.manager 133:31 call  self.terminate()"
+      ],
+      "honcho.printer.Printer.write": [
+        "honcho.manager 116:40 call  self._printer.write(msg)"
+      ]
+    },
+    "honcho.manager.Manager.loop._terminate": {
+      "honcho.manager.Manager._system_print": [
+        "honcho.manager 96:31 call  self._system_print(\"%s received\\n\" % SIGNALS[signum]['nam..."
+      ],
+      "honcho.manager.Manager.terminate": [
+        "honcho.manager 98:27 call  self.terminate()"
+      ]
+    },
+    "honcho.manager.Manager.terminate": {
+      "honcho.manager.Manager._killall": [
+        "honcho.manager 149:22 call  self._killall()"
+      ]
+    },
+    "honcho.printer": {
+      "colorama.init": [
+        "honcho.printer 82:22 call  colorama.init()"
+      ]
+    },
+    "honcho.printer.Printer.__init__": {
+      "colorama.ansitowin32.StreamWrapper.isatty": [
+        "honcho.printer 31:57 call  self.output.isatty()"
+      ],
+      "io.TextIOWrapper.isatty": [
+        "honcho.printer 31:57 call  self.output.isatty()"
+      ]
+    },
+    "honcho.process.Popen.__init__": {
+      "<builtin>.dict.pop": [
+        "honcho.process 66:39 call  kwargs.pop('start_new_session', True)"
+      ],
+      "<builtin>.dict.update": [
+        "honcho.process 73:23 call  options.update(**kwargs)",
+        "honcho.process 79:27 call  options.update(creationflags=create_no_window)",
+        "honcho.process 81:27 call  options.update(start_new_session=True)"
+      ],
+      "<builtin>.super": [
+        "honcho.process 83:14 call  super(Popen, self)"
+      ],
+      "subprocess.Popen.__init__": [
+        "honcho.process 83:36 call  super(Popen, self).__init__(cmd, **options)"
+      ]
+    },
+    "honcho.process.Process._send_message": {
+      "multiprocessing.queues.Queue.put": [
+        "honcho.process 56:29 call  self._events.put(Message(type=type, data=data, time=self...."
+      ]
+    },
+    "honcho.process.Process.run": {
+      "honcho.process.Popen.__init__": [
+        "honcho.process 36:39 call  self._child_ctor(self.cmd, env=self.env, cwd=self.cwd)"
+      ],
+      "io.BufferedReader.close": [
+        "honcho.process 49:33 call  self._child.stdout.close()"
+      ],
+      "signal.signal": [
+        "honcho.process 43:26 call  signal.signal(signal.SIGINT, signal.SIG_IGN)",
+        "honcho.process 44:26 call  signal.signal(signal.SIGTERM, signal.SIG_IGN)"
+      ],
+      "subprocess.Popen.wait": [
+        "honcho.process 50:25 call  self._child.wait()"
+      ]
+    }
+  },
+  "notes": {
+    "honcho.__main__ 4:9 call  main()": [
+      "main is the function that line 1 imports from honcho.command; the block runs under python -m honcho"
+    ],
+    "honcho.command 112:51 call  export_choices[args.format].load()": [
+      "export_choices maps the names of the group honcho_exporters to importlib.metadata.EntryPoint objects (3.10 and later); on 3.8 and 3.9 the backports stub iterates no items, so the dict is empty and the lookup fails before the call"
+    ],
+    "honcho.command 113:25 call  export_ctor(template_dir=args.template_dir)": [
+      "value site: export_ctor is the class that EntryPoint.load imports: one of the four exporters that honcho's own distribution registers (pyproject.toml, [project.entry-points.honcho_exporters]: runit, supervisord, systemd, upstart), each an Export that inherits BaseExport.__init__, or a plugin's class (doc/export.rst; client code)"
+    ],
+    "honcho.command 125:27 call  export.render(processes, context)": [
+      "the runit, systemd and upstart render methods are generator functions, whose bodies run as this for loop iterates; supervisord's returns a list"
+    ],
+    "honcho.command 179:29 call  parser.parse_args(argv[::-1])": [
+      "parser is the module's ArgumentParser; with --help it prints the help and exits"
+    ],
+    "honcho.command 189:22 call  os.environ.update(_read_env(args.app_root, args.env))": [
+      "os.environ is an os._Environ, which inherits update from MutableMapping (bottle precedent)"
+    ],
+    "honcho.command 207:11 call  p.wait()": [
+      "p is a honcho.process.Popen, which inherits wait from subprocess.Popen"
+    ],
+    "honcho.command 237:35 call  CommandError(\"Process type '{0}' does not exist in Procfi...": [
+      "CommandError (line 42) defines no __init__; the first __init__ of its MRO is that of Exception"
+    ],
+    "honcho.command 251:17 call  e.update(p.env)": [
+      "e is the dict that os._Environ.copy returns"
+    ],
+    "honcho.command 318:31 call  COMMANDS[args.command](args)": [
+      "value site: COMMANDS (lines 290-297) maps the six subcommand names to the six command functions; args.command is the name of the subparser that parse_args selected (dest='command', required)"
+    ],
+    "honcho.command 340:20 getattr  env.port": [
+      "env is the Env that the command functions make"
+    ],
+    "honcho.command 351:38 call  f.read()": [
+      "f is the text-mode file that open() returns"
+    ],
+    "honcho.command 38:56 call  entry_points(group=\"honcho_exporters\")": [
+      "version branch, lines 16-19: on 3.10 and later entry_points is importlib.metadata.entry_points; on CPython 3.8, 3.9 and PyPy 3.9 it comes from backports.entry_points_selectable, a declared dependency for python_version<\"3.10\" that the trace environment lacks (missing module, named by its access path; its result iterates no items)"
+    ],
+    "honcho.command 400:29 call  sys.stdout.isatty()": [
+      "sys.stdout is the interpreter's text stream, or on Windows the colorama StreamWrapper that colorama.init() (printer.py:82, run at import) puts in its place when should_wrap() holds (honcho.md J6, ruling of the lead)"
+    ],
+    "honcho.command 404:17 call  log.warn('Your terminal is not configured to receive UTF-...": [
+      "Logger.warn is deprecated but present in every admitted CPython (3.8 to 3.15)"
+    ],
+    "honcho.command 86:13 call  log.info('Valid procfile detected ({0})'.format(', '.join...": [
+      "log is logging.getLogger(__name__) (line 25), a logging.Logger"
+    ],
+    "honcho.command 97:36 call  args.log.replace('APP', args.app)": [
+      "args.log is the str of --log (type=str; the test compares it with a str)"
+    ],
+    "honcho.compat 22:56 call  ctypes.windll.kernel32.OpenProcess(1, False, pid)": [
+      "Windows only. ctypes.windll.kernel32 is a ctypes.WinDLL; its functions are instances of the class _FuncPtr that CDLL.__init__ defines, and the call is its __call__ (Sublist3r, segno precedent)"
+    ],
+    "honcho.compat 23:52 call  ctypes.windll.kernel32.TerminateProcess(handle, -1)": [
+      "Windows only; as at line 22"
+    ],
+    "honcho.compat 24:47 call  ctypes.windll.kernel32.CloseHandle(handle)": [
+      "Windows only; as at line 22"
+    ],
+    "honcho.compat 36:27 call  self.terminate(pid)": [
+      "Windows only"
+    ],
+    "honcho.environ 17:23 call  int(self._c['port'])": [
+      "the port value is a str of the config (the default '5000', the --port option, PORT of the .env file or of os.environ)"
+    ],
+    "honcho.environ 26:24 getattr  self.procfile": [
+      "self is an Env"
+    ],
+    "honcho.environ 27:29 call  f.read()": [
+      "f is the text-mode file that open() returns"
+    ],
+    "honcho.export.base 27:46 call  self.get_template_loader()": [
+      "self is a BaseExport (a plain public class documented for subclassing, doc/export.rst: a receiver of its own methods, B1; its method raises NotImplementedError) or one of the four package exporters"
+    ],
+    "honcho.export.base 8:10 call  print(\"honcho's 'export' command requires the jinja2 pack...": [
+      "optional import, lines 5-15: jinja2 is the extra \"export\"; both sides run"
+    ],
+    "honcho.export.runit 33:38 call  run_tpl.render(ctx)": [
+      "templates/runit/run applies no package filter"
+    ],
+    "honcho.export.runit 38:38 call  log_tpl.render(ctx)": [
+      "templates/runit/log/run applies the filter dashrepl, which _default_template_env registers; the code that jinja2 generates from the template calls it during render (callback; honcho.md J4)"
+    ],
+    "honcho.export.supervisord 14:47 call  template.render(context)": [
+      "templates/supervisord/supervisord.conf applies the filters dashrepl and percentescape to each process (callback; honcho.md J4)"
+    ],
+    "honcho.export.systemd 32:68 call  master_tpl.render(context)": [
+      "the systemd templates apply no package filter (only shellquote, which is shlex.quote)"
+    ],
+    "honcho.export.upstart 20:45 call  master_tpl.render(context)": [
+      "the upstart templates apply no package filter (only shellquote, which is shlex.quote)"
+    ],
+    "honcho.manager 110:38 call  self.events.get(timeout=0.1)": [
+      "events is the multiprocessing.Queue of __init__. The handler that lines 100-101 install runs when SIGTERM or SIGINT interrupts this blocking get (PyErr_CheckSignals on EINTR in the wait); a signal at another point runs it in an unrelated frame (asciinema precedent; honcho.md J2)"
+    ],
+    "honcho.manager 116:40 call  self._printer.write(msg)": [
+      "_printer is the Printer of command_start or of __init__'s default; a client printer is opaque"
+    ],
+    "honcho.manager 132:45 call  self._clock.now()": [
+      "_clock is datetime.datetime (line 54), a private attribute that nothing in the package reassigns"
+    ],
+    "honcho.manager 180:31 call  p['process'].start()": [
+      "start() runs the target p['obj'].run, the run method of the honcho.process.Process of add_process, in the child process that it forks (the default start method on Linux up to 3.13); callback rule (asciinema, Sublist3r precedent; honcho.md J1)"
+    ],
+    "honcho.manager 183:25 call  p.get('pid')": [
+      "each value of _processes is a dict (add_process, line 77)"
+    ],
+    "honcho.manager 192:28 call  self._printer.write(Message(type='line', data=data, time=...": [
+      "_printer is the Printer of command_start or of __init__'s default; a client printer is opaque"
+    ],
+    "honcho.manager 96:31 call  self._system_print(\"%s received\\n\" % SIGNALS[signum]['nam...": [
+      "self is the Manager whose loop defines the handler"
+    ],
+    "honcho.printer 31:57 call  self.output.isatty()": [
+      "the package passes sys.stdout (the default of line 17, Manager.__init__ and command_start): a text stream, or on Windows, at the two calls made after import, the colorama StreamWrapper that colorama.init() (line 82) puts in its place when should_wrap() holds; a client output is opaque (honcho.md J6, ruling of the lead)"
+    ],
+    "honcho.printer 82:22 call  colorama.init()": [
+      "Windows only (lines 72-82); colorama, a dependency on win32, is missing from the trace environment: named by its access path; both sides of the optional import run (the except side defines a _colour_string without calls)"
+    ],
+    "honcho.process 36:39 call  self._child_ctor(self.cmd, env=self.env, cwd=self.cwd)": [
+      "value site: _child_ctor is honcho.process.Popen (line 32), a private attribute that nothing in the package reassigns (the tests' FakePopen is a change of package internals)"
+    ],
+    "honcho.process 49:33 call  self._child.stdout.close()": [
+      "_child is the Popen of line 36 with stdout=PIPE in binary mode (only env and cwd are passed), so stdout is an io.BufferedReader"
+    ],
+    "honcho.process 50:25 call  self._child.wait()": [
+      "_child is a honcho.process.Popen, which inherits wait from subprocess.Popen"
+    ],
+    "honcho.process 56:29 call  self._events.put(Message(type=type, data=data, time=self....": [
+      "_events is the events argument of run: the package passes the multiprocessing.Queue of Manager (manager.py:179); a client queue is opaque"
+    ],
+    "honcho.process 79:27 call  options.update(creationflags=create_no_window)": [
+      "Windows only"
+    ]
+  },
+  "trace": "dynamic/honcho.json"
+}

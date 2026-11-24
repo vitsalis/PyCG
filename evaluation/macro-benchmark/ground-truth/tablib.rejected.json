@@ -1,0 +1,30 @@
+{
+  "tablib._vendor.dbfpy.utils.getDate": {
+    "<builtin>.len": "private input (rule A): getDate is private (tablib._vendor) and the package passes it None, a tuple, bytes or a date; the str comes from a direct test call (tests/test_tablib_dbfpy_packages_utils.py:83, 95), J4",
+    "<builtin>.str.replace": "private input (rule A): the str comes from a direct test call of the private getDate (tests/test_tablib_dbfpy_packages_utils.py:83, 95), J4",
+    "datetime.date.fromtimestamp": "private input (rule A): the int timestamp comes from a direct test call of the private getDate (tests/test_tablib_dbfpy_packages_utils.py:71), J4",
+    "time.strptime": "private input (rule A): the str comes from a direct test call of the private getDate (tests/test_tablib_dbfpy_packages_utils.py:83, 95), J4"
+  },
+  "tablib._vendor.dbfpy.utils.getDateTime": {
+    "<builtin>.NotImplementedError": "private input (rule A): the package passes getDateTime only a datetime (DbfDateTimeFieldDef.encodeValue); the str comes from a direct test call (tests/test_tablib_dbfpy_packages_utils.py:153), J4",
+    "datetime.date.fromordinal": "private input (rule A): the date comes from a direct test call of the private getDateTime (tests/test_tablib_dbfpy_packages_utils.py:132), J4",
+    "datetime.date.toordinal": "private input (rule A): the date comes from a direct test call of the private getDateTime (tests/test_tablib_dbfpy_packages_utils.py:132), J4",
+    "datetime.date.today": "private input (rule A): None comes from a direct test call of the private getDateTime (tests/test_tablib_dbfpy_packages_utils.py:111); its package caller passes only a true value, J4",
+    "datetime.datetime.fromtimestamp": "private input (rule A): the int comes from a direct test call of the private getDateTime (tests/test_tablib_dbfpy_packages_utils.py:142), J4"
+  },
+  "tablib.core.Databook.add_sheet": {
+    "<builtin>.BaseException.__init__": "implicit call outside the package: `raise InvalidDatasetType` without a call, whose first __init__ is TypeError's (README, Implicit calls)"
+  },
+  "tablib.core.Dataset._validate": {
+    "<builtin>.BaseException.__init__": "implicit call outside the package: `raise InvalidDimensions` without a call, whose first __init__ is ValueError's (README, Implicit calls)"
+  },
+  "tablib.core.Dataset.insert_col": {
+    "<builtin>.BaseException.__init__": "implicit call outside the package: `raise InvalidDimensions` without a call (core.py:566), whose first __init__ is ValueError's (README, Implicit calls)"
+  },
+  "tablib.formats._xls.XLSFormat.import_book": {
+    "_io.BufferedReader.read": "client stream (B5): only Dataset.load's documentation has the tutorial's open() examples; Databook.load has only the abstract \"file-like object\" (documentation is read one entry at a time, B4/funcy); the tests pass Path.open('rb') (J1; audit F3, the lead's ruling 2026-11-24)"
+  },
+  "tablib.formats._csv.CSVFormat.export_stream_set": {
+    "_csv.writer.writerow": "naming artefact (rule A): the tracer names the writer's type by its tp_name, _csv.writer; CPython 3.10 to 3.15 export it as _csv.Writer (Modules/_csv.c), and the ground truth names that edge _csv.Writer.writerow at _csv.py:26:26 (the referee's ruling on C-type names, b8-ruling-c-type-names-1.md)"
+  }
+}

@@ -1,0 +1,2121 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.NotImplementedError.__init__",
+      "<builtin>.RuntimeError.__init__",
+      "<builtin>.UserWarning.__init__",
+      "<builtin>.Warning.__init__",
+      "threading.ThreadError.__init__"
+    ],
+    "<builtin>.bytes": [
+      "uuid.bytes_"
+    ],
+    "<builtin>.bytes.decode": [
+      "uuid.bytes_.decode"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.endswith": [
+      "typing.Text.endswith"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.rsplit": [
+      "typing.Text.rsplit"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "<builtin>.str.upper": [
+      "typing.Text.upper"
+    ],
+    "_bz2.BZ2Decompressor": [
+      "bz2.BZ2Decompressor"
+    ],
+    "_bz2.BZ2Decompressor.decompress": [
+      "bz2.BZ2Decompressor.decompress"
+    ],
+    "_functools.reduce": [
+      "functools.reduce"
+    ],
+    "_hashlib.openssl_md5": [
+      "hashlib.md5"
+    ],
+    "_io.BufferedRandom.close": [
+      "io.BufferedRandom.close"
+    ],
+    "_io.BufferedRandom.flush": [
+      "io.BufferedRandom.flush"
+    ],
+    "_io.BufferedRandom.read": [
+      "io.BufferedRandom.read"
+    ],
+    "_io.BufferedRandom.seek": [
+      "io.BufferedRandom.seek"
+    ],
+    "_io.BufferedRandom.tell": [
+      "io.BufferedRandom.tell"
+    ],
+    "_io.BufferedRandom.write": [
+      "io.BufferedRandom.write"
+    ],
+    "_io.BufferedReader.close": [
+      "io.BufferedReader.close"
+    ],
+    "_io.BufferedReader.read": [
+      "io.BufferedReader.read"
+    ],
+    "_io.BufferedReader.seek": [
+      "io.BufferedReader.seek"
+    ],
+    "_io.BufferedReader.tell": [
+      "io.BufferedReader.tell"
+    ],
+    "_io.BufferedWriter.close": [
+      "io.BufferedWriter.close"
+    ],
+    "_io.BufferedWriter.flush": [
+      "io.BufferedWriter.flush"
+    ],
+    "_io.BufferedWriter.write": [
+      "io.BufferedWriter.write"
+    ],
+    "_io.BytesIO": [
+      "io.BytesIO"
+    ],
+    "_io.BytesIO.getvalue": [
+      "io.BytesIO.getvalue"
+    ],
+    "_io.BytesIO.read": [
+      "io.BytesIO.read"
+    ],
+    "_io.BytesIO.seek": [
+      "io.BytesIO.seek"
+    ],
+    "_io.BytesIO.tell": [
+      "io.BytesIO.tell"
+    ],
+    "_io.BytesIO.truncate": [
+      "io.BytesIO.truncate"
+    ],
+    "_io.BytesIO.write": [
+      "io.BytesIO.write"
+    ],
+    "_io.TextIOWrapper.read": [
+      "io.TextIOWrapper.read"
+    ],
+    "_struct.Struct": [
+      "struct.Struct"
+    ],
+    "_struct.Struct.pack": [
+      "struct.Struct.pack"
+    ],
+    "_struct.Struct.unpack": [
+      "struct.Struct.unpack"
+    ],
+    "_struct.pack": [
+      "struct.pack"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "abc.abstractmethod": [
+      "selectors.abstractmethod"
+    ],
+    "collections.abc.Mapping.get": [
+      "collections.abc.MutableMapping.get",
+      "selectors.Mapping.get"
+    ],
+    "collections.namedtuple": [
+      "selectors.namedtuple",
+      "ssl.namedtuple",
+      "unittest.util.namedtuple"
+    ],
+    "hashlib.__hash_new": [
+      "hashlib.new"
+    ],
+    "posixpath.dirname": [
+      "os.path.dirname"
+    ],
+    "posixpath.join": [
+      "os.path.join"
+    ],
+    "random.Random.randbytes": [
+      "random.randbytes"
+    ]
+  },
+  "commit": "sha256:e900e7b59a4781f63d9e935e88f6ec50c4d60be3f4adf9c63b51ed39d578fe08",
+  "deselect": [
+    {
+      "reason": "asserts on timing (10,000 random records written and read within a limit sized for an untraced run)",
+      "test": "avro/test/test_bench.py::TestBench::test_minimum_speed"
+    },
+    {
+      "reason": "opens a TCP connection to apache.org:80 (HTTPTransceiver connects in its constructor; scan B)",
+      "test": "avro/test/test_ipc.py::TestIPC::test_server_with_path"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 7,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "avro": [
+      "<builtin>.bytes.decode",
+      "<builtin>.str.strip",
+      "pkgutil.get_data"
+    ],
+    "avro.codecs": [
+      "<builtin>.dict.items",
+      "<builtin>.globals",
+      "<builtin>.isinstance",
+      "<builtin>.issubclass",
+      "<builtin>.staticmethod",
+      "<builtin>.str.endswith",
+      "<builtin>.str.lower",
+      "_struct.Struct",
+      "abc.abstractmethod"
+    ],
+    "avro.codecs.BZip2Codec.compress": [
+      "<builtin>.len",
+      "bz2.compress"
+    ],
+    "avro.codecs.BZip2Codec.decompress": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytearray",
+      "<builtin>.len",
+      "_bz2.BZ2Decompressor",
+      "_bz2.BZ2Decompressor.decompress",
+      "_io.BytesIO",
+      "avro.codecs._decompress_read_ceiling",
+      "avro.codecs._max_decompress_length",
+      "avro.codecs._raise_decompression_too_large",
+      "avro.io.BinaryDecoder.__init__",
+      "avro.io.BinaryDecoder.read",
+      "avro.io.BinaryDecoder.read_long"
+    ],
+    "avro.codecs.DeflateCodec.compress": [
+      "<builtin>.len",
+      "zlib.compress"
+    ],
+    "avro.codecs.DeflateCodec.decompress": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytearray",
+      "<builtin>.len",
+      "_io.BytesIO",
+      "avro.codecs._decompress_read_ceiling",
+      "avro.codecs._max_decompress_length",
+      "avro.codecs._raise_decompression_too_large",
+      "avro.io.BinaryDecoder.__init__",
+      "avro.io.BinaryDecoder.read_bytes",
+      "zlib.Decompress.decompress",
+      "zlib.Decompress.flush",
+      "zlib.decompressobj"
+    ],
+    "avro.codecs.NullCodec.compress": [
+      "<builtin>.len"
+    ],
+    "avro.codecs.NullCodec.decompress": [
+      "avro.io.BinaryDecoder.skip_long"
+    ],
+    "avro.codecs._max_decompress_length": [
+      "<builtin>.int",
+      "<builtin>.min",
+      "collections.abc.Mapping.get"
+    ],
+    "avro.codecs._raise_decompression_too_large": [
+      "<builtin>.BaseException.__init__"
+    ],
+    "avro.compatibility": [
+      "avro.compatibility.SchemaCompatibilityResult.__init__"
+    ],
+    "avro.compatibility.ReaderWriter.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "avro.compatibility.ReaderWriter.__hash__": [
+      "<builtin>.id"
+    ],
+    "avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility": [
+      "<builtin>.enumerate",
+      "<builtin>.str",
+      "<builtin>.str.upper",
+      "avro.compatibility.ReaderWriterCompatibilityChecker.check_reader_writer_record_fields",
+      "avro.compatibility.ReaderWriterCompatibilityChecker.get_compatibility",
+      "avro.compatibility.SchemaType.__str__",
+      "avro.compatibility.check_fixed_size",
+      "avro.compatibility.check_reader_enum_contains_writer_enum",
+      "avro.compatibility.check_schema_names",
+      "avro.compatibility.incompatible",
+      "avro.compatibility.merge",
+      "avro.compatibility.type_mismatch",
+      "avro.schema.ArraySchema.items",
+      "avro.schema.MapSchema.values",
+      "avro.schema.UnionSchema.schemas",
+      "typing.cast"
+    ],
+    "avro.compatibility.ReaderWriterCompatibilityChecker.check_reader_writer_record_fields": [
+      "<builtin>.enumerate",
+      "<builtin>.str",
+      "avro.compatibility.ReaderWriterCompatibilityChecker.get_compatibility",
+      "avro.compatibility.incompatible",
+      "avro.compatibility.lookup_writer_field",
+      "avro.compatibility.merge",
+      "avro.schema.Field.has_default",
+      "avro.schema.RecordSchema.fields",
+      "typing.cast"
+    ],
+    "avro.compatibility.ReaderWriterCompatibilityChecker.get_compatibility": [
+      "avro.compatibility.ReaderWriter.__eq__",
+      "avro.compatibility.ReaderWriter.__hash__",
+      "avro.compatibility.ReaderWriter.__init__",
+      "avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility",
+      "avro.compatibility.SchemaCompatibilityResult.__init__"
+    ],
+    "avro.compatibility.SchemaCompatibilityResult.__init__": [
+      "<builtin>.set"
+    ],
+    "avro.compatibility.check_fixed_size": [
+      "avro.compatibility.incompatible",
+      "avro.schema.FixedSchema.size"
+    ],
+    "avro.compatibility.check_reader_enum_contains_writer_enum": [
+      "<builtin>.dict.get",
+      "<builtin>.set",
+      "<builtin>.set.difference",
+      "<builtin>.str",
+      "avro.compatibility.incompatible",
+      "avro.schema.EnumSchema.symbols",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.compatibility.check_schema_names": [
+      "avro.compatibility.incompatible",
+      "avro.compatibility.schema_name_equals",
+      "avro.schema.NamedSchema.fullname"
+    ],
+    "avro.compatibility.incompatible": [
+      "<builtin>.len",
+      "<builtin>.str.join",
+      "avro.compatibility.SchemaCompatibilityResult.__init__"
+    ],
+    "avro.compatibility.lookup_writer_field": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance",
+      "avro.schema.PropertiesMixin.props",
+      "avro.schema.RecordSchema.fields_dict",
+      "typing.cast"
+    ],
+    "avro.compatibility.merge": [
+      "<builtin>.set.union",
+      "avro.compatibility.SchemaCompatibilityResult.__init__",
+      "copy.copy",
+      "typing.cast"
+    ],
+    "avro.compatibility.schema_name_equals": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance",
+      "avro.schema.NamedSchema.fullname",
+      "avro.schema.NamedSchema.name",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.compatibility.type_mismatch": [
+      "avro.compatibility.SchemaType.__str__",
+      "avro.compatibility.incompatible"
+    ],
+    "avro.datafile": [
+      "<builtin>.bytearray",
+      "<builtin>.bytes",
+      "<builtin>.dict.keys",
+      "<builtin>.len",
+      "<builtin>.property",
+      "<builtin>.property.deleter",
+      "<builtin>.property.setter",
+      "avro.schema.parse",
+      "json.dumps",
+      "typing.cast"
+    ],
+    "avro.datafile.DataFileReader.__exit__": [
+      "avro.datafile.DataFileReader.close"
+    ],
+    "avro.datafile.DataFileReader.__init__": [
+      "<builtin>.getattr",
+      "<builtin>.hasattr",
+      "avro.datafile.DataFileReader._read_header",
+      "avro.datafile.DataFileReader.datum_reader",
+      "avro.datafile.DataFileReader.determine_file_length",
+      "avro.datafile._DataFileMetadata.schema",
+      "avro.io.BinaryDecoder.__init__",
+      "avro.io.DatumReader.writers_schema",
+      "avro.schema.parse",
+      "typing.cast"
+    ],
+    "avro.datafile.DataFileReader.__next__": [
+      "avro.datafile.DataFileReader._read_block_header",
+      "avro.datafile.DataFileReader._skip_sync",
+      "avro.datafile.DataFileReader.datum_decoder",
+      "avro.datafile.DataFileReader.datum_reader",
+      "avro.datafile.DataFileReader.is_EOF",
+      "avro.io.DatumReader.read"
+    ],
+    "avro.datafile.DataFileReader._read_block_header": [
+      "avro.codecs.BZip2Codec.decompress",
+      "avro.codecs.DeflateCodec.decompress",
+      "avro.codecs.NullCodec.decompress",
+      "avro.codecs.get_codec",
+      "avro.datafile.DataFileReader.raw_decoder",
+      "avro.datafile._DataFileMetadata.codec",
+      "avro.io.BinaryDecoder.read_long"
+    ],
+    "avro.datafile.DataFileReader._read_header": [
+      "<builtin>.dict.get",
+      "_io.BufferedRandom.seek",
+      "_io.BufferedReader.seek",
+      "avro.datafile.DataFileReader.datum_reader",
+      "avro.datafile.DataFileReader.raw_decoder",
+      "avro.datafile.DataFileReader.reader",
+      "avro.io.DatumReader.read_data",
+      "typing.cast"
+    ],
+    "avro.datafile.DataFileReader._skip_sync": [
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "avro.datafile.DataFileReader.reader"
+    ],
+    "avro.datafile.DataFileReader.close": [
+      "_io.BufferedReader.close",
+      "avro.datafile.DataFileReader.reader"
+    ],
+    "avro.datafile.DataFileReader.determine_file_length": [
+      "_io.BufferedRandom.seek",
+      "_io.BufferedRandom.tell",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "avro.datafile.DataFileReader.reader"
+    ],
+    "avro.datafile.DataFileReader.is_EOF": [
+      "_io.BufferedReader.tell",
+      "avro.datafile.DataFileReader.file_length",
+      "avro.datafile.DataFileReader.reader"
+    ],
+    "avro.datafile.DataFileWriter.__exit__": [
+      "avro.datafile.DataFileWriter.close"
+    ],
+    "avro.datafile.DataFileWriter.__init__": [
+      "<builtin>.getattr",
+      "<builtin>.hasattr",
+      "<builtin>.str",
+      "_io.BufferedRandom.seek",
+      "_io.BytesIO",
+      "avro.datafile.DataFileReader.__init__",
+      "avro.datafile.DataFileWriter.datum_writer",
+      "avro.datafile._DataFileMetadata.codec",
+      "avro.datafile._DataFileMetadata.schema",
+      "avro.io.BinaryEncoder.__init__",
+      "avro.io.DatumReader.__init__",
+      "avro.io.DatumWriter.writers_schema",
+      "avro.schema.Schema.__str__",
+      "avro.schema.parse",
+      "random.Random.randbytes",
+      "typing.cast"
+    ],
+    "avro.datafile.DataFileWriter._write_block": [
+      "_io.BufferedRandom.write",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.getvalue",
+      "_io.BytesIO.seek",
+      "_io.BytesIO.truncate",
+      "avro.codecs.BZip2Codec.compress",
+      "avro.codecs.DeflateCodec.compress",
+      "avro.codecs.NullCodec.compress",
+      "avro.codecs.get_codec",
+      "avro.datafile.DataFileWriter._write_header",
+      "avro.datafile.DataFileWriter.buffer_writer",
+      "avro.datafile.DataFileWriter.encoder",
+      "avro.datafile.DataFileWriter.writer",
+      "avro.datafile._DataFileMetadata.codec",
+      "avro.io.BinaryEncoder.write_long"
+    ],
+    "avro.datafile.DataFileWriter._write_header": [
+      "avro.datafile.DataFileWriter.datum_writer",
+      "avro.datafile.DataFileWriter.encoder",
+      "avro.datafile._DataFileMetadata.meta",
+      "avro.io.DatumWriter.write_data"
+    ],
+    "avro.datafile.DataFileWriter.append": [
+      "_io.BytesIO.tell",
+      "avro.datafile.DataFileWriter.buffer_encoder",
+      "avro.datafile.DataFileWriter.buffer_writer",
+      "avro.datafile.DataFileWriter.datum_writer",
+      "avro.io.DatumWriter.write"
+    ],
+    "avro.datafile.DataFileWriter.close": [
+      "_io.BufferedRandom.close",
+      "_io.BufferedWriter.close",
+      "avro.datafile.DataFileWriter.flush",
+      "avro.datafile.DataFileWriter.writer"
+    ],
+    "avro.datafile.DataFileWriter.flush": [
+      "_io.BufferedRandom.flush",
+      "_io.BufferedWriter.flush",
+      "avro.datafile.DataFileWriter._write_block",
+      "avro.datafile.DataFileWriter.writer"
+    ],
+    "avro.datafile._DataFileMetadata.codec": [
+      "<builtin>.bytes.decode",
+      "<builtin>.str.encode",
+      "avro.datafile._DataFileMetadata.get_meta",
+      "avro.datafile._DataFileMetadata.set_meta"
+    ],
+    "avro.datafile._DataFileMetadata.get_meta": [
+      "<builtin>.dict.get",
+      "avro.datafile._DataFileMetadata.meta"
+    ],
+    "avro.datafile._DataFileMetadata.meta": [
+      "<builtin>.hasattr"
+    ],
+    "avro.datafile._DataFileMetadata.schema": [
+      "<builtin>.bytes.decode",
+      "<builtin>.str.encode",
+      "avro.datafile._DataFileMetadata.get_meta",
+      "avro.datafile._DataFileMetadata.set_meta"
+    ],
+    "avro.datafile._DataFileMetadata.set_meta": [
+      "avro.datafile._DataFileMetadata.meta"
+    ],
+    "avro.errors.AvroOutOfScaleException.__init__": [
+      "<builtin>.super",
+      "avro.errors.AvroTypeException.__init__"
+    ],
+    "avro.errors.AvroTypeException.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.str",
+      "<builtin>.super",
+      "avro.schema.Schema.__str__",
+      "json.dumps",
+      "json.loads"
+    ],
+    "avro.errors.SchemaResolutionException.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.super",
+      "avro.errors._safe_pretty"
+    ],
+    "avro.errors._safe_pretty": [
+      "<builtin>.str",
+      "avro.schema.Schema.__str__",
+      "json.dumps",
+      "json.loads"
+    ],
+    "avro.io": [
+      "<builtin>.property",
+      "<builtin>.property.setter",
+      "<builtin>.staticmethod",
+      "_struct.Struct",
+      "collections.namedtuple"
+    ],
+    "avro.io.BinaryDecoder.bytes_remaining": [
+      "<builtin>.max",
+      "_io.BytesIO.seek",
+      "_io.BytesIO.tell",
+      "avro.io.BinaryDecoder.reader"
+    ],
+    "avro.io.BinaryDecoder.read": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.len",
+      "_io.BufferedRandom.read",
+      "_io.BufferedReader.read",
+      "_io.BytesIO.read",
+      "avro.io.BinaryDecoder.bytes_remaining",
+      "avro.io.BinaryDecoder.reader"
+    ],
+    "avro.io.BinaryDecoder.read_boolean": [
+      "<builtin>.ord",
+      "avro.io.BinaryDecoder.read"
+    ],
+    "avro.io.BinaryDecoder.read_bytes": [
+      "avro.io.BinaryDecoder.read",
+      "avro.io.BinaryDecoder.read_long"
+    ],
+    "avro.io.BinaryDecoder.read_double": [
+      "<builtin>.float",
+      "_struct.Struct.unpack",
+      "avro.io.BinaryDecoder.read"
+    ],
+    "avro.io.BinaryDecoder.read_float": [
+      "<builtin>.float",
+      "_struct.Struct.unpack",
+      "avro.io.BinaryDecoder.read"
+    ],
+    "avro.io.BinaryDecoder.read_int": [
+      "avro.io.BinaryDecoder.read_long"
+    ],
+    "avro.io.BinaryDecoder.read_long": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.ord",
+      "avro.io.BinaryDecoder.read"
+    ],
+    "avro.io.BinaryDecoder.read_utf8": [
+      "<builtin>.bytes.decode",
+      "avro.io.BinaryDecoder.read_bytes"
+    ],
+    "avro.io.BinaryDecoder.skip": [
+      "<builtin>.BaseException.__init__",
+      "_io.BytesIO.seek",
+      "_io.BytesIO.tell",
+      "avro.io.BinaryDecoder.reader"
+    ],
+    "avro.io.BinaryDecoder.skip_bytes": [
+      "<builtin>.BaseException.__init__",
+      "avro.io.BinaryDecoder.bytes_remaining",
+      "avro.io.BinaryDecoder.read_long",
+      "avro.io.BinaryDecoder.skip"
+    ],
+    "avro.io.BinaryDecoder.skip_int": [
+      "avro.io.BinaryDecoder.skip_long"
+    ],
+    "avro.io.BinaryDecoder.skip_long": [
+      "<builtin>.ord",
+      "avro.io.BinaryDecoder.read"
+    ],
+    "avro.io.BinaryEncoder.write": [
+      "_io.BufferedRandom.write",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.write",
+      "avro.io.BinaryEncoder.writer"
+    ],
+    "avro.io.BinaryEncoder.write_boolean": [
+      "<builtin>.bool",
+      "<builtin>.bytearray",
+      "avro.io.BinaryEncoder.write"
+    ],
+    "avro.io.BinaryEncoder.write_bytes": [
+      "<builtin>.len",
+      "_struct.pack",
+      "avro.io.BinaryEncoder.write",
+      "avro.io.BinaryEncoder.write_long"
+    ],
+    "avro.io.BinaryEncoder.write_decimal_bytes": [
+      "<builtin>.int",
+      "avro.errors.AvroOutOfScaleException.__init__",
+      "decimal.Decimal.as_tuple"
+    ],
+    "avro.io.BinaryEncoder.write_decimal_fixed": [
+      "<builtin>.int",
+      "avro.errors.AvroOutOfScaleException.__init__",
+      "decimal.Decimal.as_tuple"
+    ],
+    "avro.io.BinaryEncoder.write_double": [
+      "_struct.Struct.pack",
+      "avro.io.BinaryEncoder.write"
+    ],
+    "avro.io.BinaryEncoder.write_float": [
+      "_struct.Struct.pack",
+      "avro.io.BinaryEncoder.write"
+    ],
+    "avro.io.BinaryEncoder.write_int": [
+      "avro.io.BinaryEncoder.write_long"
+    ],
+    "avro.io.BinaryEncoder.write_long": [
+      "<builtin>.bytearray",
+      "avro.io.BinaryEncoder.write"
+    ],
+    "avro.io.BinaryEncoder.write_utf8": [
+      "<builtin>.str.encode",
+      "avro.io.BinaryEncoder.write_bytes"
+    ],
+    "avro.io.DatumReader._ensure_collection_available": [
+      "<builtin>.BaseException.__init__",
+      "avro.io.BinaryDecoder.bytes_remaining"
+    ],
+    "avro.io.DatumReader._skip_block_bytes": [
+      "<builtin>.BaseException.__init__"
+    ],
+    "avro.io.DatumReader.read": [
+      "avro.io.DatumReader.read_data",
+      "avro.io.DatumReader.readers_schema",
+      "avro.io.DatumReader.writers_schema"
+    ],
+    "avro.io.DatumReader.read_array": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.range",
+      "avro.io.BinaryDecoder.read_long",
+      "avro.io.BinaryDecoder.skip_long",
+      "avro.io.DatumReader._ensure_collection_available",
+      "avro.io.DatumReader.read_data",
+      "avro.io._collection_limits",
+      "avro.io._min_bytes_per_element",
+      "avro.schema.ArraySchema.items"
+    ],
+    "avro.io.DatumReader.read_data": [
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "avro.io.BinaryDecoder.read_boolean",
+      "avro.io.BinaryDecoder.read_bytes",
+      "avro.io.BinaryDecoder.read_double",
+      "avro.io.BinaryDecoder.read_float",
+      "avro.io.BinaryDecoder.read_int",
+      "avro.io.BinaryDecoder.read_long",
+      "avro.io.BinaryDecoder.read_utf8",
+      "avro.io.DatumReader.read_array",
+      "avro.io.DatumReader.read_data",
+      "avro.io.DatumReader.read_enum",
+      "avro.io.DatumReader.read_fixed",
+      "avro.io.DatumReader.read_map",
+      "avro.io.DatumReader.read_record",
+      "avro.io.DatumReader.read_union",
+      "avro.schema.ArraySchema.match",
+      "avro.schema.EnumSchema.match",
+      "avro.schema.FixedSchema.match",
+      "avro.schema.MapSchema.match",
+      "avro.schema.PrimitiveSchema.match",
+      "avro.schema.RecordSchema.match",
+      "avro.schema.UnionSchema.match",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.io.DatumReader.read_enum": [
+      "<builtin>.len",
+      "avro.errors.SchemaResolutionException.__init__",
+      "avro.io.BinaryDecoder.read_int",
+      "avro.schema.EnumSchema.default",
+      "avro.schema.EnumSchema.symbols"
+    ],
+    "avro.io.DatumReader.read_fixed": [
+      "avro.io.BinaryDecoder.read",
+      "avro.schema.FixedSchema.size"
+    ],
+    "avro.io.DatumReader.read_map": [
+      "<builtin>.range",
+      "avro.io.BinaryDecoder.read_long",
+      "avro.io.BinaryDecoder.read_utf8",
+      "avro.io.DatumReader._ensure_collection_available",
+      "avro.io.DatumReader.read_data",
+      "avro.io._collection_limits",
+      "avro.io._min_bytes_per_element",
+      "avro.schema.MapSchema.values"
+    ],
+    "avro.io.DatumReader.read_record": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.len",
+      "avro.errors.SchemaResolutionException.__init__",
+      "avro.io.DatumReader.read_data",
+      "avro.io.DatumReader.skip_data",
+      "avro.schema.Field.has_default",
+      "avro.schema.RecordSchema.fields",
+      "avro.schema.RecordSchema.fields_dict"
+    ],
+    "avro.io.DatumReader.read_union": [
+      "<builtin>.int",
+      "<builtin>.len",
+      "avro.errors.SchemaResolutionException.__init__",
+      "avro.io.BinaryDecoder.read_long",
+      "avro.io.DatumReader.read_data",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.io.DatumReader.skip_array": [
+      "avro.io.BinaryDecoder.read_long",
+      "avro.io.DatumReader._ensure_collection_available",
+      "avro.io._collection_limits",
+      "avro.io._min_bytes_per_element",
+      "avro.schema.ArraySchema.items"
+    ],
+    "avro.io.DatumReader.skip_data": [
+      "<builtin>.isinstance",
+      "avro.io.BinaryDecoder.skip_int",
+      "avro.io.DatumReader.skip_array"
+    ],
+    "avro.io.DatumWriter.write": [
+      "avro.io.DatumWriter.write_data",
+      "avro.io.DatumWriter.writers_schema",
+      "avro.io.validate"
+    ],
+    "avro.io.DatumWriter.write_array": [
+      "<builtin>.len",
+      "avro.io.BinaryEncoder.write_long",
+      "avro.io.DatumWriter.write_data",
+      "avro.schema.ArraySchema.items"
+    ],
+    "avro.io.DatumWriter.write_data": [
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "avro.io.BinaryEncoder.write_boolean",
+      "avro.io.BinaryEncoder.write_bytes",
+      "avro.io.BinaryEncoder.write_decimal_bytes",
+      "avro.io.BinaryEncoder.write_decimal_fixed",
+      "avro.io.BinaryEncoder.write_double",
+      "avro.io.BinaryEncoder.write_float",
+      "avro.io.BinaryEncoder.write_int",
+      "avro.io.BinaryEncoder.write_long",
+      "avro.io.BinaryEncoder.write_null",
+      "avro.io.BinaryEncoder.write_utf8",
+      "avro.io.DatumWriter.write_array",
+      "avro.io.DatumWriter.write_enum",
+      "avro.io.DatumWriter.write_fixed",
+      "avro.io.DatumWriter.write_map",
+      "avro.io.DatumWriter.write_record",
+      "avro.io.DatumWriter.write_union",
+      "avro.schema.FixedSchema.size",
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.io.DatumWriter.write_enum": [
+      "<builtin>.list.index",
+      "avro.io.BinaryEncoder.write_int",
+      "avro.schema.EnumSchema.symbols"
+    ],
+    "avro.io.DatumWriter.write_fixed": [
+      "avro.io.BinaryEncoder.write"
+    ],
+    "avro.io.DatumWriter.write_map": [
+      "<builtin>.dict.items",
+      "<builtin>.len",
+      "avro.io.BinaryEncoder.write_long",
+      "avro.io.BinaryEncoder.write_utf8",
+      "avro.io.DatumWriter.write_data",
+      "avro.schema.MapSchema.values"
+    ],
+    "avro.io.DatumWriter.write_record": [
+      "<builtin>.dict.get",
+      "avro.io.DatumWriter.write_data",
+      "avro.schema.RecordSchema.fields"
+    ],
+    "avro.io.DatumWriter.write_union": [
+      "<builtin>.enumerate",
+      "avro.io.BinaryEncoder.write_long",
+      "avro.io.DatumWriter.write_data",
+      "avro.io.validate",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.io._array_iterator": [
+      "avro.schema.ArraySchema.items"
+    ],
+    "avro.io._collection_limits": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.int",
+      "_warnings.warn",
+      "collections.abc.Mapping.get"
+    ],
+    "avro.io._iterate_node": [
+      "<builtin>.dict.get",
+      "avro.io._array_iterator",
+      "avro.io._default_iterator",
+      "avro.io._map_iterator",
+      "avro.io._record_iterator"
+    ],
+    "avro.io._map_iterator": [
+      "<builtin>.dict.items",
+      "avro.schema.MapSchema.values"
+    ],
+    "avro.io._max_collection_items": [
+      "avro.io._collection_limits"
+    ],
+    "avro.io._min_bytes_per_element": [
+      "<builtin>.getattr",
+      "<builtin>.id",
+      "<builtin>.min",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "<builtin>.set.discard",
+      "avro.io._min_bytes_per_element",
+      "avro.schema.FixedSchema.size",
+      "avro.schema.RecordSchema.fields",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.io._record_iterator": [
+      "<builtin>.dict.get",
+      "avro.schema.RecordSchema.fields"
+    ],
+    "avro.io.validate": [
+      "<builtin>.getattr",
+      "avro.errors.AvroTypeException.__init__",
+      "avro.io._iterate_node",
+      "avro.schema.ArraySchema.validate",
+      "avro.schema.BytesDecimalSchema.validate",
+      "avro.schema.EnumSchema.validate",
+      "avro.schema.FixedDecimalSchema.validate",
+      "avro.schema.FixedSchema.validate",
+      "avro.schema.MapSchema.validate",
+      "avro.schema.NamedSchema.name",
+      "avro.schema.PrimitiveSchema.validate",
+      "avro.schema.RecordSchema.validate",
+      "avro.schema.UnionSchema.validate",
+      "collections.deque",
+      "collections.deque.append",
+      "collections.deque.popleft"
+    ],
+    "avro.ipc": [
+      "<builtin>.property",
+      "<builtin>.property.setter",
+      "_struct.Struct",
+      "avro.io.DatumReader.__init__",
+      "avro.io.DatumWriter.__init__",
+      "avro.ipc._load",
+      "avro.schema.parse"
+    ],
+    "avro.ipc._load": [
+      "<builtin>.open",
+      "_io.TextIOWrapper.read",
+      "posixpath.dirname",
+      "posixpath.join"
+    ],
+    "avro.name": [
+      "<builtin>.property",
+      "re.compile"
+    ],
+    "avro.name.Name.__eq__": [
+      "<builtin>.getattr",
+      "<builtin>.hasattr",
+      "avro.name.Name.fullname"
+    ],
+    "avro.name.Name.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.str.split",
+      "avro.name._validate_fullname"
+    ],
+    "avro.name.Name.space": [
+      "<builtin>.str.rsplit"
+    ],
+    "avro.name.Names.add_name": [
+      "avro.name.Name.__init__",
+      "avro.name.Name.fullname"
+    ],
+    "avro.name.Names.get_name": [
+      "<builtin>.dict.get",
+      "avro.name.Name.__init__",
+      "avro.name.Name.fullname"
+    ],
+    "avro.name.Names.has_name": [
+      "avro.name.Name.__init__",
+      "avro.name.Name.fullname"
+    ],
+    "avro.name.Names.prune_namespace": [
+      "<builtin>.dict.copy"
+    ],
+    "avro.name._validate_fullname": [
+      "<builtin>.str.split",
+      "avro.name.validate_basename"
+    ],
+    "avro.name.validate_basename": [
+      "<builtin>.BaseException.__init__",
+      "re.Pattern.search"
+    ],
+    "avro.protocol": [
+      "<builtin>.property"
+    ],
+    "avro.protocol.Message.__init__": [
+      "avro.protocol._parse_errors",
+      "avro.protocol._parse_request",
+      "avro.protocol._parse_response"
+    ],
+    "avro.protocol.Message.to_json": [
+      "<builtin>.dict.__init__",
+      "avro.protocol.Message.errors",
+      "avro.protocol.Message.request",
+      "avro.protocol.Message.response",
+      "avro.schema.ErrorUnionSchema.to_json",
+      "avro.schema.RecordSchema.to_json"
+    ],
+    "avro.protocol.Protocol.__init__": [
+      "<builtin>.callable",
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.str",
+      "<builtin>.str.encode",
+      "_hashlib.HASH.digest",
+      "_hashlib.openssl_md5",
+      "avro.name.Names.__init__",
+      "avro.protocol.Protocol.__str__",
+      "avro.protocol._parse_messages",
+      "avro.protocol._parse_types"
+    ],
+    "avro.protocol.Protocol.__str__": [
+      "avro.protocol.Protocol.to_json",
+      "json.dumps"
+    ],
+    "avro.protocol.Protocol.fullname": [
+      "avro.name.Name.__init__",
+      "avro.name.Name.fullname",
+      "avro.protocol.Protocol.name",
+      "avro.protocol.Protocol.namespace"
+    ],
+    "avro.protocol.Protocol.to_json": [
+      "<builtin>.dict.items",
+      "avro.name.Names.__init__",
+      "avro.protocol.Message.to_json",
+      "avro.protocol.Protocol.messages",
+      "avro.protocol.Protocol.name",
+      "avro.protocol.Protocol.namespace",
+      "avro.protocol.Protocol.types",
+      "avro.schema.RecordSchema.to_json"
+    ],
+    "avro.protocol.Protocol.types_dict": [
+      "avro.protocol.Protocol.types",
+      "avro.schema.NamedSchema.name"
+    ],
+    "avro.protocol._parse_errors": [
+      "<builtin>.isinstance",
+      "avro.schema.make_avsc_object",
+      "typing.cast"
+    ],
+    "avro.protocol._parse_messages": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.hasattr",
+      "avro.protocol.Message.__init__"
+    ],
+    "avro.protocol._parse_request": [
+      "<builtin>.isinstance",
+      "avro.schema.RecordSchema.__init__"
+    ],
+    "avro.protocol._parse_response": [
+      "<builtin>.isinstance",
+      "avro.name.Names.get_name"
+    ],
+    "avro.protocol._parse_types": [
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "avro.schema.make_avsc_object"
+    ],
+    "avro.protocol.make_avpr_object": [
+      "<builtin>.dict.get",
+      "<builtin>.hasattr",
+      "avro.protocol.Protocol.__init__"
+    ],
+    "avro.protocol.parse": [
+      "avro.protocol.make_avpr_object",
+      "json.loads"
+    ],
+    "avro.schema": [
+      "<builtin>.frozenset",
+      "<builtin>.property",
+      "<builtin>.range",
+      "<builtin>.staticmethod",
+      "<builtin>.tuple",
+      "_functools.reduce",
+      "abc.abstractmethod",
+      "avro.schema.<lambda1>"
+    ],
+    "avro.schema.ArraySchema.__init__": [
+      "<builtin>.isinstance",
+      "avro.name.Names.get_name",
+      "avro.name.Names.has_name",
+      "avro.schema.PropertiesMixin.set_prop",
+      "avro.schema.Schema.__init__",
+      "avro.schema.make_avsc_object"
+    ],
+    "avro.schema.ArraySchema.items": [
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.ArraySchema.match": [
+      "avro.schema.ArraySchema.items",
+      "avro.schema.PropertiesMixin.check_props"
+    ],
+    "avro.schema.ArraySchema.to_canonical_json": [
+      "avro.name.Names.__init__",
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+      "avro.schema.PrimitiveSchema.to_canonical_json",
+      "avro.schema.PropertiesMixin.get_prop",
+      "avro.schema.RecordSchema.to_canonical_json"
+    ],
+    "avro.schema.ArraySchema.to_json": [
+      "<builtin>.dict.copy",
+      "avro.name.Names.__init__",
+      "avro.schema.PrimitiveSchema.to_json",
+      "avro.schema.PropertiesMixin.get_prop",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.ArraySchema.validate": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.BytesDecimalSchema.__init__": [
+      "avro.schema.DecimalLogicalSchema.__init__",
+      "avro.schema.PrimitiveSchema.__init__",
+      "avro.schema.PropertiesMixin.set_prop"
+    ],
+    "avro.schema.BytesDecimalSchema.validate": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.CanonicalPropertiesMixin.canonical_properties": [
+      "avro.schema.PropertiesMixin.props",
+      "collections.OrderedDict"
+    ],
+    "avro.schema.DecimalLogicalSchema.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.isinstance",
+      "<builtin>.super",
+      "avro.schema.LogicalSchema.__init__"
+    ],
+    "avro.schema.EnumSchema.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.len",
+      "<builtin>.set",
+      "avro.name.validate_basename",
+      "avro.schema.NamedSchema.__init__",
+      "avro.schema.PropertiesMixin.set_prop"
+    ],
+    "avro.schema.EnumSchema.default": [
+      "<builtin>.isinstance",
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.EnumSchema.match": [
+      "avro.schema.PropertiesMixin.check_props"
+    ],
+    "avro.schema.EnumSchema.symbols": [
+      "<builtin>.isinstance",
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.EnumSchema.to_canonical_json": [
+      "<builtin>.isinstance",
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+      "avro.schema.EnumSchema.to_json",
+      "avro.schema.NamedSchema.fullname"
+    ],
+    "avro.schema.EnumSchema.to_json": [
+      "avro.name.Names.__init__",
+      "avro.name.Names.prune_namespace",
+      "avro.schema.NamedSchema.fullname",
+      "avro.schema.NamedSchema.name_ref",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.EnumSchema.validate": [
+      "avro.schema.EnumSchema.symbols"
+    ],
+    "avro.schema.ErrorUnionSchema.__init__": [
+      "avro.schema.UnionSchema.__init__"
+    ],
+    "avro.schema.ErrorUnionSchema.to_json": [
+      "<builtin>.list.append",
+      "avro.schema.RecordSchema.to_json",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.schema.Field.__init__": [
+      "<builtin>.dict.update",
+      "<builtin>.isinstance",
+      "avro.name.Names.get_name",
+      "avro.name.Names.has_name",
+      "avro.schema.PropertiesMixin.props",
+      "avro.schema.PropertiesMixin.set_prop",
+      "avro.schema.make_avsc_object"
+    ],
+    "avro.schema.Field.to_canonical_json": [
+      "avro.schema.ArraySchema.to_canonical_json",
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+      "avro.schema.EnumSchema.to_canonical_json",
+      "avro.schema.FixedSchema.to_canonical_json",
+      "avro.schema.MapSchema.to_canonical_json",
+      "avro.schema.PrimitiveSchema.to_canonical_json",
+      "avro.schema.RecordSchema.to_canonical_json",
+      "avro.schema.UnionSchema.to_canonical_json"
+    ],
+    "avro.schema.Field.to_json": [
+      "<builtin>.dict.copy",
+      "avro.schema.PrimitiveSchema.to_json",
+      "avro.schema.PropertiesMixin.props",
+      "avro.schema.RecordSchema.to_json",
+      "avro.schema.UnionSchema.to_json"
+    ],
+    "avro.schema.FixedDecimalSchema.__init__": [
+      "<builtin>.int",
+      "avro.schema.DecimalLogicalSchema.__init__",
+      "avro.schema.FixedSchema.__init__",
+      "avro.schema.PropertiesMixin.set_prop",
+      "math.floor",
+      "math.log10"
+    ],
+    "avro.schema.FixedDecimalSchema.validate": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.FixedSchema.__init__": [
+      "<builtin>.isinstance",
+      "avro.schema.NamedSchema.__init__",
+      "avro.schema.PropertiesMixin.set_prop"
+    ],
+    "avro.schema.FixedSchema.match": [
+      "avro.schema.PropertiesMixin.check_props"
+    ],
+    "avro.schema.FixedSchema.size": [
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.FixedSchema.to_canonical_json": [
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+      "avro.schema.NamedSchema.fullname"
+    ],
+    "avro.schema.FixedSchema.to_json": [
+      "avro.name.Names.__init__",
+      "avro.name.Names.prune_namespace",
+      "avro.schema.NamedSchema.fullname",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.FixedSchema.validate": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "avro.schema.FixedSchema.size"
+    ],
+    "avro.schema.MapSchema.__init__": [
+      "<builtin>.isinstance",
+      "avro.name.Names.has_name",
+      "avro.schema.PropertiesMixin.set_prop",
+      "avro.schema.Schema.__init__",
+      "avro.schema.make_avsc_object"
+    ],
+    "avro.schema.MapSchema.match": [
+      "avro.schema.MapSchema.values",
+      "avro.schema.PropertiesMixin.check_props"
+    ],
+    "avro.schema.MapSchema.to_canonical_json": [
+      "avro.name.Names.__init__",
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+      "avro.schema.PrimitiveSchema.to_canonical_json",
+      "avro.schema.PropertiesMixin.get_prop",
+      "avro.schema.RecordSchema.to_canonical_json"
+    ],
+    "avro.schema.MapSchema.to_json": [
+      "<builtin>.dict.copy",
+      "avro.name.Names.__init__",
+      "avro.schema.PrimitiveSchema.to_json",
+      "avro.schema.PropertiesMixin.get_prop",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.MapSchema.validate": [
+      "<builtin>.all",
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.MapSchema.values": [
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.NamedSchema.__init__": [
+      "<builtin>.isinstance",
+      "<builtin>.super",
+      "avro.name.Name.fullname",
+      "avro.name.Name.name",
+      "avro.name.Name.space",
+      "avro.name.Names.__init__",
+      "avro.name.Names.add_name",
+      "avro.schema.PropertiesMixin.set_prop",
+      "avro.schema.Schema.__init__"
+    ],
+    "avro.schema.NamedSchema.name": [
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.NamedSchema.name_ref": [
+      "avro.schema.NamedSchema.fullname",
+      "avro.schema.NamedSchema.name",
+      "avro.schema.NamedSchema.namespace"
+    ],
+    "avro.schema.NamedSchema.namespace": [
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda2>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda3>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda4>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda5>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda6>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda7>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.<lambda8>": [
+      "<builtin>.isinstance"
+    ],
+    "avro.schema.PrimitiveSchema.__init__": [
+      "avro.schema.Schema.__init__"
+    ],
+    "avro.schema.PrimitiveSchema.match": [
+      "<builtin>.dict.get"
+    ],
+    "avro.schema.PrimitiveSchema.to_canonical_json": [
+      "<builtin>.len",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.PrimitiveSchema.to_json": [
+      "<builtin>.len",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.PrimitiveSchema.validate": [
+      "<builtin>.dict.get",
+      "avro.schema.PrimitiveSchema.<lambda1>",
+      "avro.schema.PrimitiveSchema.<lambda2>",
+      "avro.schema.PrimitiveSchema.<lambda3>",
+      "avro.schema.PrimitiveSchema.<lambda4>",
+      "avro.schema.PrimitiveSchema.<lambda5>",
+      "avro.schema.PrimitiveSchema.<lambda6>",
+      "avro.schema.PrimitiveSchema.<lambda7>",
+      "avro.schema.PrimitiveSchema.<lambda8>"
+    ],
+    "avro.schema.PropertiesMixin.check_props": [
+      "<builtin>.all",
+      "<builtin>.getattr",
+      "avro.schema.FixedSchema.size",
+      "avro.schema.NamedSchema.fullname"
+    ],
+    "avro.schema.PropertiesMixin.get_prop": [
+      "<builtin>.dict.get",
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.PropertiesMixin.set_prop": [
+      "avro.schema.PropertiesMixin.props"
+    ],
+    "avro.schema.RecordSchema.__init__": [
+      "<builtin>.isinstance",
+      "avro.name.Name.__init__",
+      "avro.name.Name.space",
+      "avro.name.Names.__init__",
+      "avro.schema.NamedSchema.__init__",
+      "avro.schema.PropertiesMixin.set_prop",
+      "avro.schema.RecordSchema.make_field_objects",
+      "avro.schema.Schema.__init__"
+    ],
+    "avro.schema.RecordSchema.fields": [
+      "avro.schema.PropertiesMixin.get_prop"
+    ],
+    "avro.schema.RecordSchema.fields_dict": [
+      "avro.schema.RecordSchema.fields"
+    ],
+    "avro.schema.RecordSchema.make_field_objects": [
+      "<builtin>.callable",
+      "<builtin>.dict.get",
+      "<builtin>.getattr",
+      "<builtin>.list.append",
+      "avro.schema.Field.__init__",
+      "avro.schema.get_other_props"
+    ],
+    "avro.schema.RecordSchema.match": [
+      "avro.schema.PropertiesMixin.check_props"
+    ],
+    "avro.schema.RecordSchema.to_canonical_json": [
+      "avro.name.Names.__init__",
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+      "avro.schema.Field.to_canonical_json",
+      "avro.schema.NamedSchema.fullname",
+      "avro.schema.NamedSchema.name_ref",
+      "avro.schema.RecordSchema.fields"
+    ],
+    "avro.schema.RecordSchema.to_json": [
+      "<builtin>.dict.copy",
+      "avro.name.Names.__init__",
+      "avro.name.Names.prune_namespace",
+      "avro.schema.Field.to_json",
+      "avro.schema.NamedSchema.fullname",
+      "avro.schema.NamedSchema.name_ref",
+      "avro.schema.PropertiesMixin.props",
+      "avro.schema.RecordSchema.fields"
+    ],
+    "avro.schema.RecordSchema.validate": [
+      "<builtin>.dict.keys",
+      "<builtin>.isinstance",
+      "<builtin>.set.issuperset",
+      "avro.schema.RecordSchema.fields"
+    ],
+    "avro.schema.Schema.__init__": [
+      "<builtin>.dict.update",
+      "<builtin>.isinstance",
+      "avro.schema.PropertiesMixin.props",
+      "avro.schema.PropertiesMixin.set_prop"
+    ],
+    "avro.schema.Schema.__str__": [
+      "avro.schema.ArraySchema.to_json",
+      "avro.schema.EnumSchema.to_json",
+      "avro.schema.FixedSchema.to_json",
+      "avro.schema.MapSchema.to_json",
+      "avro.schema.PrimitiveSchema.to_json",
+      "avro.schema.RecordSchema.to_json",
+      "avro.schema.UnionSchema.to_json",
+      "json.dumps"
+    ],
+    "avro.schema.Schema.canonical_form": [
+      "avro.schema.ArraySchema.to_canonical_json",
+      "avro.schema.EnumSchema.to_canonical_json",
+      "avro.schema.FixedSchema.to_canonical_json",
+      "avro.schema.MapSchema.to_canonical_json",
+      "avro.schema.PrimitiveSchema.to_canonical_json",
+      "avro.schema.RecordSchema.to_canonical_json",
+      "avro.schema.UnionSchema.to_canonical_json",
+      "json.dumps"
+    ],
+    "avro.schema.Schema.fingerprint": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.str.encode",
+      "<builtin>.str.lower",
+      "_hashlib.HASH.digest",
+      "avro.schema.Schema.canonical_form",
+      "hashlib.__hash_new"
+    ],
+    "avro.schema.UnionSchema.__init__": [
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "avro.name.Names.get_name",
+      "avro.name.Names.has_name",
+      "avro.schema.Schema.__init__",
+      "avro.schema.make_avsc_object"
+    ],
+    "avro.schema.UnionSchema.match": [
+      "<builtin>.any",
+      "avro.schema.PrimitiveSchema.match",
+      "avro.schema.RecordSchema.match",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.schema.UnionSchema.to_canonical_json": [
+      "avro.name.Names.__init__",
+      "avro.schema.ArraySchema.to_canonical_json",
+      "avro.schema.EnumSchema.to_canonical_json",
+      "avro.schema.FixedSchema.to_canonical_json",
+      "avro.schema.MapSchema.to_canonical_json",
+      "avro.schema.PrimitiveSchema.to_canonical_json",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.schema.UnionSchema.to_json": [
+      "<builtin>.list.append",
+      "avro.name.Names.__init__",
+      "avro.schema.PrimitiveSchema.to_json",
+      "avro.schema.RecordSchema.to_json",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.schema.UnionSchema.validate": [
+      "<builtin>.next",
+      "avro.schema.PrimitiveSchema.validate",
+      "avro.schema.RecordSchema.validate",
+      "avro.schema.UnionSchema.schemas"
+    ],
+    "avro.schema.get_other_props": [
+      "<builtin>.dict.items"
+    ],
+    "avro.schema.make_avsc_object": [
+      "<builtin>.callable",
+      "<builtin>.dict.get",
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "_warnings.warn",
+      "avro.name.Names.__init__",
+      "avro.schema.ArraySchema.__init__",
+      "avro.schema.EnumSchema.__init__",
+      "avro.schema.ErrorUnionSchema.__init__",
+      "avro.schema.FixedDecimalSchema.__init__",
+      "avro.schema.FixedSchema.__init__",
+      "avro.schema.MapSchema.__init__",
+      "avro.schema.PrimitiveSchema.__init__",
+      "avro.schema.RecordSchema.__init__",
+      "avro.schema.UnionSchema.__init__",
+      "avro.schema.get_other_props",
+      "avro.schema.make_logical_schema",
+      "typing.cast"
+    ],
+    "avro.schema.make_bytes_decimal_schema": [
+      "<builtin>.dict.get",
+      "avro.schema.BytesDecimalSchema.__init__"
+    ],
+    "avro.schema.make_logical_schema": [
+      "<builtin>.dict.get",
+      "avro.schema.make_bytes_decimal_schema",
+      "avro.schema.make_logical_schema.<lambda1>"
+    ],
+    "avro.schema.parse": [
+      "<builtin>.BaseException.__init__",
+      "avro.name.Names.__init__",
+      "avro.schema.make_avsc_object",
+      "json.loads"
+    ],
+    "avro.utils": [
+      "<builtin>.getattr"
+    ]
+  },
+  "executed": [
+    "avro.codecs.BZip2Codec.compress",
+    "avro.codecs.BZip2Codec.decompress",
+    "avro.codecs.DeflateCodec.compress",
+    "avro.codecs.DeflateCodec.decompress",
+    "avro.codecs.NullCodec.compress",
+    "avro.codecs.NullCodec.decompress",
+    "avro.codecs._decompress_read_ceiling",
+    "avro.codecs._max_decompress_length",
+    "avro.codecs._raise_decompression_too_large",
+    "avro.codecs.get_codec",
+    "avro.compatibility.ReaderWriter.__eq__",
+    "avro.compatibility.ReaderWriter.__hash__",
+    "avro.compatibility.ReaderWriter.__init__",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.__init__",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.check_reader_writer_record_fields",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.get_compatibility",
+    "avro.compatibility.SchemaCompatibilityResult.__init__",
+    "avro.compatibility.SchemaType.__str__",
+    "avro.compatibility.check_fixed_size",
+    "avro.compatibility.check_reader_enum_contains_writer_enum",
+    "avro.compatibility.check_schema_names",
+    "avro.compatibility.incompatible",
+    "avro.compatibility.lookup_writer_field",
+    "avro.compatibility.merge",
+    "avro.compatibility.schema_name_equals",
+    "avro.compatibility.type_mismatch",
+    "avro.datafile.DataFileReader.__enter__",
+    "avro.datafile.DataFileReader.__exit__",
+    "avro.datafile.DataFileReader.__init__",
+    "avro.datafile.DataFileReader.__iter__",
+    "avro.datafile.DataFileReader.__next__",
+    "avro.datafile.DataFileReader._read_block_header",
+    "avro.datafile.DataFileReader._read_header",
+    "avro.datafile.DataFileReader._skip_sync",
+    "avro.datafile.DataFileReader.close",
+    "avro.datafile.DataFileReader.datum_decoder",
+    "avro.datafile.DataFileReader.datum_reader",
+    "avro.datafile.DataFileReader.determine_file_length",
+    "avro.datafile.DataFileReader.file_length",
+    "avro.datafile.DataFileReader.is_EOF",
+    "avro.datafile.DataFileReader.raw_decoder",
+    "avro.datafile.DataFileReader.reader",
+    "avro.datafile.DataFileWriter.__enter__",
+    "avro.datafile.DataFileWriter.__exit__",
+    "avro.datafile.DataFileWriter.__init__",
+    "avro.datafile.DataFileWriter._write_block",
+    "avro.datafile.DataFileWriter._write_header",
+    "avro.datafile.DataFileWriter.append",
+    "avro.datafile.DataFileWriter.buffer_encoder",
+    "avro.datafile.DataFileWriter.buffer_writer",
+    "avro.datafile.DataFileWriter.close",
+    "avro.datafile.DataFileWriter.datum_writer",
+    "avro.datafile.DataFileWriter.encoder",
+    "avro.datafile.DataFileWriter.flush",
+    "avro.datafile.DataFileWriter.writer",
+    "avro.datafile._DataFileMetadata.codec",
+    "avro.datafile._DataFileMetadata.get_meta",
+    "avro.datafile._DataFileMetadata.meta",
+    "avro.datafile._DataFileMetadata.schema",
+    "avro.datafile._DataFileMetadata.set_meta",
+    "avro.errors.AvroOutOfScaleException.__init__",
+    "avro.errors.AvroTypeException.__init__",
+    "avro.errors.SchemaResolutionException.__init__",
+    "avro.errors._safe_pretty",
+    "avro.io.BinaryDecoder.__init__",
+    "avro.io.BinaryDecoder.bytes_remaining",
+    "avro.io.BinaryDecoder.read",
+    "avro.io.BinaryDecoder.read_boolean",
+    "avro.io.BinaryDecoder.read_bytes",
+    "avro.io.BinaryDecoder.read_double",
+    "avro.io.BinaryDecoder.read_float",
+    "avro.io.BinaryDecoder.read_int",
+    "avro.io.BinaryDecoder.read_long",
+    "avro.io.BinaryDecoder.read_utf8",
+    "avro.io.BinaryDecoder.reader",
+    "avro.io.BinaryDecoder.skip",
+    "avro.io.BinaryDecoder.skip_bytes",
+    "avro.io.BinaryDecoder.skip_int",
+    "avro.io.BinaryDecoder.skip_long",
+    "avro.io.BinaryEncoder.__init__",
+    "avro.io.BinaryEncoder.write",
+    "avro.io.BinaryEncoder.write_boolean",
+    "avro.io.BinaryEncoder.write_bytes",
+    "avro.io.BinaryEncoder.write_decimal_bytes",
+    "avro.io.BinaryEncoder.write_decimal_fixed",
+    "avro.io.BinaryEncoder.write_double",
+    "avro.io.BinaryEncoder.write_float",
+    "avro.io.BinaryEncoder.write_int",
+    "avro.io.BinaryEncoder.write_long",
+    "avro.io.BinaryEncoder.write_null",
+    "avro.io.BinaryEncoder.write_utf8",
+    "avro.io.BinaryEncoder.writer",
+    "avro.io.DatumReader.__init__",
+    "avro.io.DatumReader._ensure_collection_available",
+    "avro.io.DatumReader._skip_block_bytes",
+    "avro.io.DatumReader.read",
+    "avro.io.DatumReader.read_array",
+    "avro.io.DatumReader.read_data",
+    "avro.io.DatumReader.read_enum",
+    "avro.io.DatumReader.read_fixed",
+    "avro.io.DatumReader.read_map",
+    "avro.io.DatumReader.read_record",
+    "avro.io.DatumReader.read_union",
+    "avro.io.DatumReader.readers_schema",
+    "avro.io.DatumReader.skip_array",
+    "avro.io.DatumReader.skip_data",
+    "avro.io.DatumReader.writers_schema",
+    "avro.io.DatumWriter.__init__",
+    "avro.io.DatumWriter.write",
+    "avro.io.DatumWriter.write_array",
+    "avro.io.DatumWriter.write_data",
+    "avro.io.DatumWriter.write_enum",
+    "avro.io.DatumWriter.write_fixed",
+    "avro.io.DatumWriter.write_map",
+    "avro.io.DatumWriter.write_record",
+    "avro.io.DatumWriter.write_union",
+    "avro.io.DatumWriter.writers_schema",
+    "avro.io._array_iterator",
+    "avro.io._collection_limits",
+    "avro.io._default_iterator",
+    "avro.io._iterate_node",
+    "avro.io._map_iterator",
+    "avro.io._max_collection_items",
+    "avro.io._min_bytes_per_element",
+    "avro.io._record_iterator",
+    "avro.io.validate",
+    "avro.ipc._load",
+    "avro.name.Name.__eq__",
+    "avro.name.Name.__init__",
+    "avro.name.Name.fullname",
+    "avro.name.Name.name",
+    "avro.name.Name.space",
+    "avro.name.Names.__init__",
+    "avro.name.Names.add_name",
+    "avro.name.Names.get_name",
+    "avro.name.Names.has_name",
+    "avro.name.Names.prune_namespace",
+    "avro.name._validate_fullname",
+    "avro.name.validate_basename",
+    "avro.protocol.Message.__init__",
+    "avro.protocol.Message.errors",
+    "avro.protocol.Message.request",
+    "avro.protocol.Message.response",
+    "avro.protocol.Message.to_json",
+    "avro.protocol.Protocol.__init__",
+    "avro.protocol.Protocol.__str__",
+    "avro.protocol.Protocol.fullname",
+    "avro.protocol.Protocol.messages",
+    "avro.protocol.Protocol.name",
+    "avro.protocol.Protocol.namespace",
+    "avro.protocol.Protocol.to_json",
+    "avro.protocol.Protocol.types",
+    "avro.protocol.Protocol.types_dict",
+    "avro.protocol._parse_errors",
+    "avro.protocol._parse_messages",
+    "avro.protocol._parse_request",
+    "avro.protocol._parse_response",
+    "avro.protocol._parse_types",
+    "avro.protocol.make_avpr_object",
+    "avro.protocol.parse",
+    "avro.schema.<lambda1>",
+    "avro.schema.ArraySchema.__init__",
+    "avro.schema.ArraySchema.items",
+    "avro.schema.ArraySchema.match",
+    "avro.schema.ArraySchema.to_canonical_json",
+    "avro.schema.ArraySchema.to_json",
+    "avro.schema.ArraySchema.validate",
+    "avro.schema.BytesDecimalSchema.__init__",
+    "avro.schema.BytesDecimalSchema.validate",
+    "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+    "avro.schema.DecimalLogicalSchema.__init__",
+    "avro.schema.EnumSchema.__init__",
+    "avro.schema.EnumSchema.default",
+    "avro.schema.EnumSchema.match",
+    "avro.schema.EnumSchema.symbols",
+    "avro.schema.EnumSchema.to_canonical_json",
+    "avro.schema.EnumSchema.to_json",
+    "avro.schema.EnumSchema.validate",
+    "avro.schema.ErrorUnionSchema.__init__",
+    "avro.schema.ErrorUnionSchema.to_json",
+    "avro.schema.Field.__init__",
+    "avro.schema.Field.has_default",
+    "avro.schema.Field.to_canonical_json",
+    "avro.schema.Field.to_json",
+    "avro.schema.FixedDecimalSchema.__init__",
+    "avro.schema.FixedDecimalSchema.validate",
+    "avro.schema.FixedSchema.__init__",
+    "avro.schema.FixedSchema.match",
+    "avro.schema.FixedSchema.size",
+    "avro.schema.FixedSchema.to_canonical_json",
+    "avro.schema.FixedSchema.to_json",
+    "avro.schema.FixedSchema.validate",
+    "avro.schema.LogicalSchema.__init__",
+    "avro.schema.MapSchema.__init__",
+    "avro.schema.MapSchema.match",
+    "avro.schema.MapSchema.to_canonical_json",
+    "avro.schema.MapSchema.to_json",
+    "avro.schema.MapSchema.validate",
+    "avro.schema.MapSchema.values",
+    "avro.schema.NamedSchema.__init__",
+    "avro.schema.NamedSchema.fullname",
+    "avro.schema.NamedSchema.name",
+    "avro.schema.NamedSchema.name_ref",
+    "avro.schema.NamedSchema.namespace",
+    "avro.schema.PrimitiveSchema.<lambda1>",
+    "avro.schema.PrimitiveSchema.<lambda2>",
+    "avro.schema.PrimitiveSchema.<lambda3>",
+    "avro.schema.PrimitiveSchema.<lambda4>",
+    "avro.schema.PrimitiveSchema.<lambda5>",
+    "avro.schema.PrimitiveSchema.<lambda6>",
+    "avro.schema.PrimitiveSchema.<lambda7>",
+    "avro.schema.PrimitiveSchema.<lambda8>",
+    "avro.schema.PrimitiveSchema.__init__",
+    "avro.schema.PrimitiveSchema.match",
+    "avro.schema.PrimitiveSchema.to_canonical_json",
+    "avro.schema.PrimitiveSchema.to_json",
+    "avro.schema.PrimitiveSchema.validate",
+    "avro.schema.PropertiesMixin.check_props",
+    "avro.schema.PropertiesMixin.get_prop",
+    "avro.schema.PropertiesMixin.props",
+    "avro.schema.PropertiesMixin.set_prop",
+    "avro.schema.RecordSchema.__init__",
+    "avro.schema.RecordSchema.fields",
+    "avro.schema.RecordSchema.fields_dict",
+    "avro.schema.RecordSchema.make_field_objects",
+    "avro.schema.RecordSchema.match",
+    "avro.schema.RecordSchema.to_canonical_json",
+    "avro.schema.RecordSchema.to_json",
+    "avro.schema.RecordSchema.validate",
+    "avro.schema.Schema.__init__",
+    "avro.schema.Schema.__str__",
+    "avro.schema.Schema.canonical_form",
+    "avro.schema.Schema.fingerprint",
+    "avro.schema.UnionSchema.__init__",
+    "avro.schema.UnionSchema.match",
+    "avro.schema.UnionSchema.schemas",
+    "avro.schema.UnionSchema.to_canonical_json",
+    "avro.schema.UnionSchema.to_json",
+    "avro.schema.UnionSchema.validate",
+    "avro.schema.get_other_props",
+    "avro.schema.make_avsc_object",
+    "avro.schema.make_bytes_decimal_schema",
+    "avro.schema.make_logical_schema",
+    "avro.schema.make_logical_schema.<lambda1>",
+    "avro.schema.parse"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "avro.codecs.BZip2Codec.compress",
+    "avro.codecs.BZip2Codec.decompress",
+    "avro.codecs.Codec.compress",
+    "avro.codecs.Codec.decompress",
+    "avro.codecs.DeflateCodec.compress",
+    "avro.codecs.DeflateCodec.decompress",
+    "avro.codecs.NullCodec.compress",
+    "avro.codecs.NullCodec.decompress",
+    "avro.codecs.SnappyCodec.compress",
+    "avro.codecs.SnappyCodec.decompress",
+    "avro.codecs.ZstandardCodec.compress",
+    "avro.codecs.ZstandardCodec.decompress",
+    "avro.codecs._check_crc32",
+    "avro.codecs._decompress_read_ceiling",
+    "avro.codecs._max_decompress_length",
+    "avro.codecs._raise_decompression_too_large",
+    "avro.codecs._snappy_uncompressed_length",
+    "avro.codecs.get_codec",
+    "avro.compatibility.ReaderWriter.__eq__",
+    "avro.compatibility.ReaderWriter.__hash__",
+    "avro.compatibility.ReaderWriter.__init__",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.__init__",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.check_reader_writer_record_fields",
+    "avro.compatibility.ReaderWriterCompatibilityChecker.get_compatibility",
+    "avro.compatibility.SchemaCompatibilityResult.__init__",
+    "avro.compatibility.SchemaType.__str__",
+    "avro.compatibility.check_fixed_size",
+    "avro.compatibility.check_reader_enum_contains_writer_enum",
+    "avro.compatibility.check_schema_names",
+    "avro.compatibility.incompatible",
+    "avro.compatibility.lookup_writer_field",
+    "avro.compatibility.merge",
+    "avro.compatibility.schema_name_equals",
+    "avro.compatibility.type_mismatch",
+    "avro.datafile.DataFileReader.__enter__",
+    "avro.datafile.DataFileReader.__exit__",
+    "avro.datafile.DataFileReader.__init__",
+    "avro.datafile.DataFileReader.__iter__",
+    "avro.datafile.DataFileReader.__next__",
+    "avro.datafile.DataFileReader._read_block_header",
+    "avro.datafile.DataFileReader._read_header",
+    "avro.datafile.DataFileReader._skip_sync",
+    "avro.datafile.DataFileReader.close",
+    "avro.datafile.DataFileReader.datum_decoder",
+    "avro.datafile.DataFileReader.datum_reader",
+    "avro.datafile.DataFileReader.determine_file_length",
+    "avro.datafile.DataFileReader.file_length",
+    "avro.datafile.DataFileReader.is_EOF",
+    "avro.datafile.DataFileReader.raw_decoder",
+    "avro.datafile.DataFileReader.reader",
+    "avro.datafile.DataFileWriter.__enter__",
+    "avro.datafile.DataFileWriter.__exit__",
+    "avro.datafile.DataFileWriter.__init__",
+    "avro.datafile.DataFileWriter._write_block",
+    "avro.datafile.DataFileWriter._write_header",
+    "avro.datafile.DataFileWriter.append",
+    "avro.datafile.DataFileWriter.buffer_encoder",
+    "avro.datafile.DataFileWriter.buffer_writer",
+    "avro.datafile.DataFileWriter.close",
+    "avro.datafile.DataFileWriter.datum_writer",
+    "avro.datafile.DataFileWriter.encoder",
+    "avro.datafile.DataFileWriter.flush",
+    "avro.datafile.DataFileWriter.sync",
+    "avro.datafile.DataFileWriter.writer",
+    "avro.datafile._DataFileMetadata.codec",
+    "avro.datafile._DataFileMetadata.del_meta",
+    "avro.datafile._DataFileMetadata.get_meta",
+    "avro.datafile._DataFileMetadata.meta",
+    "avro.datafile._DataFileMetadata.schema",
+    "avro.datafile._DataFileMetadata.set_meta",
+    "avro.errors.AvroOutOfScaleException.__init__",
+    "avro.errors.AvroTypeException.__init__",
+    "avro.errors.SchemaResolutionException.__init__",
+    "avro.errors._safe_pretty",
+    "avro.io.BinaryDecoder.__init__",
+    "avro.io.BinaryDecoder._build_time_object",
+    "avro.io.BinaryDecoder.bytes_remaining",
+    "avro.io.BinaryDecoder.read",
+    "avro.io.BinaryDecoder.read_boolean",
+    "avro.io.BinaryDecoder.read_bytes",
+    "avro.io.BinaryDecoder.read_date_from_int",
+    "avro.io.BinaryDecoder.read_decimal_from_bytes",
+    "avro.io.BinaryDecoder.read_decimal_from_fixed",
+    "avro.io.BinaryDecoder.read_double",
+    "avro.io.BinaryDecoder.read_float",
+    "avro.io.BinaryDecoder.read_int",
+    "avro.io.BinaryDecoder.read_long",
+    "avro.io.BinaryDecoder.read_null",
+    "avro.io.BinaryDecoder.read_time_micros_from_long",
+    "avro.io.BinaryDecoder.read_time_millis_from_int",
+    "avro.io.BinaryDecoder.read_timestamp_micros_from_long",
+    "avro.io.BinaryDecoder.read_timestamp_millis_from_long",
+    "avro.io.BinaryDecoder.read_utf8",
+    "avro.io.BinaryDecoder.reader",
+    "avro.io.BinaryDecoder.skip",
+    "avro.io.BinaryDecoder.skip_boolean",
+    "avro.io.BinaryDecoder.skip_bytes",
+    "avro.io.BinaryDecoder.skip_double",
+    "avro.io.BinaryDecoder.skip_float",
+    "avro.io.BinaryDecoder.skip_int",
+    "avro.io.BinaryDecoder.skip_long",
+    "avro.io.BinaryDecoder.skip_null",
+    "avro.io.BinaryDecoder.skip_utf8",
+    "avro.io.BinaryEncoder.__init__",
+    "avro.io.BinaryEncoder._timedelta_total_microseconds",
+    "avro.io.BinaryEncoder.write",
+    "avro.io.BinaryEncoder.write_boolean",
+    "avro.io.BinaryEncoder.write_bytes",
+    "avro.io.BinaryEncoder.write_date_int",
+    "avro.io.BinaryEncoder.write_decimal_bytes",
+    "avro.io.BinaryEncoder.write_decimal_fixed",
+    "avro.io.BinaryEncoder.write_double",
+    "avro.io.BinaryEncoder.write_float",
+    "avro.io.BinaryEncoder.write_int",
+    "avro.io.BinaryEncoder.write_long",
+    "avro.io.BinaryEncoder.write_null",
+    "avro.io.BinaryEncoder.write_time_micros_long",
+    "avro.io.BinaryEncoder.write_time_millis_int",
+    "avro.io.BinaryEncoder.write_timestamp_micros_long",
+    "avro.io.BinaryEncoder.write_timestamp_millis_long",
+    "avro.io.BinaryEncoder.write_utf8",
+    "avro.io.BinaryEncoder.writer",
+    "avro.io.DatumReader.__init__",
+    "avro.io.DatumReader._ensure_collection_available",
+    "avro.io.DatumReader._read_default_value",
+    "avro.io.DatumReader._skip_block_bytes",
+    "avro.io.DatumReader.read",
+    "avro.io.DatumReader.read_array",
+    "avro.io.DatumReader.read_data",
+    "avro.io.DatumReader.read_enum",
+    "avro.io.DatumReader.read_fixed",
+    "avro.io.DatumReader.read_map",
+    "avro.io.DatumReader.read_record",
+    "avro.io.DatumReader.read_union",
+    "avro.io.DatumReader.readers_schema",
+    "avro.io.DatumReader.skip_array",
+    "avro.io.DatumReader.skip_data",
+    "avro.io.DatumReader.skip_enum",
+    "avro.io.DatumReader.skip_fixed",
+    "avro.io.DatumReader.skip_map",
+    "avro.io.DatumReader.skip_record",
+    "avro.io.DatumReader.skip_union",
+    "avro.io.DatumReader.writers_schema",
+    "avro.io.DatumWriter.__init__",
+    "avro.io.DatumWriter.write",
+    "avro.io.DatumWriter.write_array",
+    "avro.io.DatumWriter.write_data",
+    "avro.io.DatumWriter.write_enum",
+    "avro.io.DatumWriter.write_fixed",
+    "avro.io.DatumWriter.write_map",
+    "avro.io.DatumWriter.write_record",
+    "avro.io.DatumWriter.write_union",
+    "avro.io.DatumWriter.writers_schema",
+    "avro.io._array_iterator",
+    "avro.io._collection_limits",
+    "avro.io._default_iterator",
+    "avro.io._iterate_node",
+    "avro.io._map_iterator",
+    "avro.io._max_collection_items",
+    "avro.io._min_bytes_per_element",
+    "avro.io._record_iterator",
+    "avro.io.validate",
+    "avro.ipc.BaseRequestor.__init__",
+    "avro.ipc.BaseRequestor.local_protocol",
+    "avro.ipc.BaseRequestor.read_call_response",
+    "avro.ipc.BaseRequestor.read_handshake_response",
+    "avro.ipc.BaseRequestor.read_response",
+    "avro.ipc.BaseRequestor.remote_hash",
+    "avro.ipc.BaseRequestor.remote_protocol",
+    "avro.ipc.BaseRequestor.request",
+    "avro.ipc.BaseRequestor.send_protocol",
+    "avro.ipc.BaseRequestor.transceiver",
+    "avro.ipc.BaseRequestor.write_call_request",
+    "avro.ipc.BaseRequestor.write_handshake_request",
+    "avro.ipc.BaseRequestor.write_request",
+    "avro.ipc.FramedReader.__init__",
+    "avro.ipc.FramedReader._read_buffer_length",
+    "avro.ipc.FramedReader.read_framed_message",
+    "avro.ipc.FramedReader.reader",
+    "avro.ipc.FramedWriter.__init__",
+    "avro.ipc.FramedWriter.write_buffer",
+    "avro.ipc.FramedWriter.write_buffer_length",
+    "avro.ipc.FramedWriter.write_framed_message",
+    "avro.ipc.FramedWriter.writer",
+    "avro.ipc.HTTPTransceiver.__init__",
+    "avro.ipc.HTTPTransceiver.close",
+    "avro.ipc.HTTPTransceiver.read_framed_message",
+    "avro.ipc.HTTPTransceiver.transceive",
+    "avro.ipc.HTTPTransceiver.write_framed_message",
+    "avro.ipc.Requestor.issue_request",
+    "avro.ipc.Responder.__init__",
+    "avro.ipc.Responder.get_protocol_cache",
+    "avro.ipc.Responder.invoke",
+    "avro.ipc.Responder.local_hash",
+    "avro.ipc.Responder.local_protocol",
+    "avro.ipc.Responder.process_handshake",
+    "avro.ipc.Responder.protocol_cache",
+    "avro.ipc.Responder.read_request",
+    "avro.ipc.Responder.respond",
+    "avro.ipc.Responder.set_protocol_cache",
+    "avro.ipc.Responder.write_error",
+    "avro.ipc.Responder.write_response",
+    "avro.ipc._load",
+    "avro.name.Name.__eq__",
+    "avro.name.Name.__init__",
+    "avro.name.Name.fullname",
+    "avro.name.Name.get_space",
+    "avro.name.Name.name",
+    "avro.name.Name.space",
+    "avro.name.Names.__init__",
+    "avro.name.Names.add_name",
+    "avro.name.Names.get_name",
+    "avro.name.Names.has_name",
+    "avro.name.Names.prune_namespace",
+    "avro.name._validate_fullname",
+    "avro.name.validate_basename",
+    "avro.protocol.Message.__eq__",
+    "avro.protocol.Message.__init__",
+    "avro.protocol.Message.__str__",
+    "avro.protocol.Message.errors",
+    "avro.protocol.Message.name",
+    "avro.protocol.Message.request",
+    "avro.protocol.Message.response",
+    "avro.protocol.Message.to_json",
+    "avro.protocol.Protocol.__eq__",
+    "avro.protocol.Protocol.__init__",
+    "avro.protocol.Protocol.__str__",
+    "avro.protocol.Protocol.fullname",
+    "avro.protocol.Protocol.md5",
+    "avro.protocol.Protocol.messages",
+    "avro.protocol.Protocol.name",
+    "avro.protocol.Protocol.namespace",
+    "avro.protocol.Protocol.to_json",
+    "avro.protocol.Protocol.types",
+    "avro.protocol.Protocol.types_dict",
+    "avro.protocol._parse_errors",
+    "avro.protocol._parse_messages",
+    "avro.protocol._parse_request",
+    "avro.protocol._parse_response",
+    "avro.protocol._parse_types",
+    "avro.protocol.make_avpr_object",
+    "avro.protocol.parse",
+    "avro.schema.<lambda1>",
+    "avro.schema.ArraySchema.__init__",
+    "avro.schema.ArraySchema.items",
+    "avro.schema.ArraySchema.match",
+    "avro.schema.ArraySchema.to_canonical_json",
+    "avro.schema.ArraySchema.to_json",
+    "avro.schema.ArraySchema.validate",
+    "avro.schema.BytesDecimalSchema.__init__",
+    "avro.schema.BytesDecimalSchema.precision",
+    "avro.schema.BytesDecimalSchema.scale",
+    "avro.schema.BytesDecimalSchema.to_json",
+    "avro.schema.BytesDecimalSchema.validate",
+    "avro.schema.CanonicalPropertiesMixin.canonical_properties",
+    "avro.schema.DateSchema.__init__",
+    "avro.schema.DateSchema.to_json",
+    "avro.schema.DateSchema.validate",
+    "avro.schema.DecimalLogicalSchema.__init__",
+    "avro.schema.EnumSchema.__init__",
+    "avro.schema.EnumSchema.default",
+    "avro.schema.EnumSchema.doc",
+    "avro.schema.EnumSchema.match",
+    "avro.schema.EnumSchema.symbols",
+    "avro.schema.EnumSchema.to_canonical_json",
+    "avro.schema.EnumSchema.to_json",
+    "avro.schema.EnumSchema.validate",
+    "avro.schema.EqualByJsonMixin.__eq__",
+    "avro.schema.EqualByJsonMixin.__hash__",
+    "avro.schema.EqualByPropsMixin.__eq__",
+    "avro.schema.EqualByPropsMixin.__hash__",
+    "avro.schema.ErrorUnionSchema.__init__",
+    "avro.schema.ErrorUnionSchema.to_json",
+    "avro.schema.Field.__init__",
+    "avro.schema.Field.__str__",
+    "avro.schema.Field.default",
+    "avro.schema.Field.doc",
+    "avro.schema.Field.has_default",
+    "avro.schema.Field.order",
+    "avro.schema.Field.to_canonical_json",
+    "avro.schema.Field.to_json",
+    "avro.schema.FixedDecimalSchema.__init__",
+    "avro.schema.FixedDecimalSchema.precision",
+    "avro.schema.FixedDecimalSchema.scale",
+    "avro.schema.FixedDecimalSchema.to_json",
+    "avro.schema.FixedDecimalSchema.validate",
+    "avro.schema.FixedSchema.__init__",
+    "avro.schema.FixedSchema.match",
+    "avro.schema.FixedSchema.size",
+    "avro.schema.FixedSchema.to_canonical_json",
+    "avro.schema.FixedSchema.to_json",
+    "avro.schema.FixedSchema.validate",
+    "avro.schema.LogicalSchema.__init__",
+    "avro.schema.MapSchema.__init__",
+    "avro.schema.MapSchema.match",
+    "avro.schema.MapSchema.to_canonical_json",
+    "avro.schema.MapSchema.to_json",
+    "avro.schema.MapSchema.validate",
+    "avro.schema.MapSchema.values",
+    "avro.schema.NamedSchema.__init__",
+    "avro.schema.NamedSchema.fullname",
+    "avro.schema.NamedSchema.name",
+    "avro.schema.NamedSchema.name_ref",
+    "avro.schema.NamedSchema.namespace",
+    "avro.schema.PrimitiveSchema.<lambda1>",
+    "avro.schema.PrimitiveSchema.<lambda2>",
+    "avro.schema.PrimitiveSchema.<lambda3>",
+    "avro.schema.PrimitiveSchema.<lambda4>",
+    "avro.schema.PrimitiveSchema.<lambda5>",
+    "avro.schema.PrimitiveSchema.<lambda6>",
+    "avro.schema.PrimitiveSchema.<lambda7>",
+    "avro.schema.PrimitiveSchema.<lambda8>",
+    "avro.schema.PrimitiveSchema.__init__",
+    "avro.schema.PrimitiveSchema.match",
+    "avro.schema.PrimitiveSchema.to_canonical_json",
+    "avro.schema.PrimitiveSchema.to_json",
+    "avro.schema.PrimitiveSchema.validate",
+    "avro.schema.PrimitiveSchema.validate.<lambda1>",
+    "avro.schema.PropertiesMixin.check_props",
+    "avro.schema.PropertiesMixin.get_prop",
+    "avro.schema.PropertiesMixin.other_props",
+    "avro.schema.PropertiesMixin.props",
+    "avro.schema.PropertiesMixin.set_prop",
+    "avro.schema.RecordSchema.__init__",
+    "avro.schema.RecordSchema.doc",
+    "avro.schema.RecordSchema.fields",
+    "avro.schema.RecordSchema.fields_dict",
+    "avro.schema.RecordSchema.make_field_objects",
+    "avro.schema.RecordSchema.match",
+    "avro.schema.RecordSchema.to_canonical_json",
+    "avro.schema.RecordSchema.to_json",
+    "avro.schema.RecordSchema.validate",
+    "avro.schema.Schema.__eq__",
+    "avro.schema.Schema.__init__",
+    "avro.schema.Schema.__str__",
+    "avro.schema.Schema.canonical_form",
+    "avro.schema.Schema.fingerprint",
+    "avro.schema.Schema.match",
+    "avro.schema.Schema.to_canonical_json",
+    "avro.schema.Schema.to_json",
+    "avro.schema.Schema.validate",
+    "avro.schema.TimeMicrosSchema.__init__",
+    "avro.schema.TimeMicrosSchema.to_json",
+    "avro.schema.TimeMicrosSchema.validate",
+    "avro.schema.TimeMillisSchema.__init__",
+    "avro.schema.TimeMillisSchema.to_json",
+    "avro.schema.TimeMillisSchema.validate",
+    "avro.schema.TimestampMicrosSchema.__init__",
+    "avro.schema.TimestampMicrosSchema.to_json",
+    "avro.schema.TimestampMicrosSchema.validate",
+    "avro.schema.TimestampMillisSchema.__init__",
+    "avro.schema.TimestampMillisSchema.to_json",
+    "avro.schema.TimestampMillisSchema.validate",
+    "avro.schema.UUIDSchema.__init__",
+    "avro.schema.UUIDSchema.to_json",
+    "avro.schema.UUIDSchema.validate",
+    "avro.schema.UnionSchema.__init__",
+    "avro.schema.UnionSchema.match",
+    "avro.schema.UnionSchema.schemas",
+    "avro.schema.UnionSchema.to_canonical_json",
+    "avro.schema.UnionSchema.to_json",
+    "avro.schema.UnionSchema.validate",
+    "avro.schema._crc_64_fingerprint",
+    "avro.schema._is_timezone_aware_datetime",
+    "avro.schema.from_path",
+    "avro.schema.get_other_props",
+    "avro.schema.make_avsc_object",
+    "avro.schema.make_bytes_decimal_schema",
+    "avro.schema.make_logical_schema",
+    "avro.schema.make_logical_schema.<lambda1>",
+    "avro.schema.parse",
+    "avro.timezones.TSTTzinfo.dst",
+    "avro.timezones.TSTTzinfo.tzname",
+    "avro.timezones.TSTTzinfo.utcoffset",
+    "avro.timezones.UTCTzinfo.dst",
+    "avro.timezones.UTCTzinfo.tzname",
+    "avro.timezones.UTCTzinfo.utcoffset",
+    "avro.utils._randbytes"
+  ],
+  "modules": [
+    "avro",
+    "avro.codecs",
+    "avro.compatibility",
+    "avro.constants",
+    "avro.datafile",
+    "avro.errors",
+    "avro.io",
+    "avro.ipc",
+    "avro.name",
+    "avro.protocol",
+    "avro.schema",
+    "avro.timezones",
+    "avro.utils"
+  ],
+  "plugins": [
+    "plugins/avro_load_tests.py"
+  ],
+  "project": "avro",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 2,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 116,
+    "skipped": 5,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

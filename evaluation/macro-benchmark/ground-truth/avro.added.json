@@ -1,0 +1,4095 @@
+{
+  "edges": {
+    "avro.__main__": {
+      "<builtin>.SystemExit": [
+        "avro.__main__ 280:21 call  SystemExit(main())"
+      ],
+      "avro.__main__.main": [
+        "avro.__main__ 280:26 call  main()"
+      ],
+      "csv.writer": [
+        "avro.__main__ 65:24 call  csv.writer(sys.stdout)"
+      ]
+    },
+    "avro.__main__._parse_args": {
+      "argparse.ArgumentParser": [
+        "avro.__main__ 207:37 call  argparse.ArgumentParser(description=\"Display/write for Av..."
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "avro.__main__ 208:24 call  parser.add_argument(\"--version\", action=\"version\", versio...",
+        "avro.__main__ 211:31 call  subparser_cat.add_argument(\"--version\", action=\"version\",...",
+        "avro.__main__ 212:31 call  subparser_cat.add_argument( \"--count\", \"-n\", default=None...",
+        "avro.__main__ 219:31 call  subparser_cat.add_argument( \"--skip\", \"-s\", type=int, def...",
+        "avro.__main__ 226:31 call  subparser_cat.add_argument( \"--format\", \"-f\", default=\"js...",
+        "avro.__main__ 233:31 call  subparser_cat.add_argument( \"--header\", \"-H\", default=Fal...",
+        "avro.__main__ 240:31 call  subparser_cat.add_argument( \"--filter\", \"-F\", default=Non...",
+        "avro.__main__ 246:31 call  subparser_cat.add_argument( \"--print-schema\", \"-p\", actio...",
+        "avro.__main__ 253:31 call  subparser_cat.add_argument(\"--fields\", type=csv_arg, defa...",
+        "avro.__main__ 254:31 call  subparser_cat.add_argument(\"files\", nargs=\"*\", type=argpa...",
+        "avro.__main__ 256:33 call  subparser_write.add_argument(\"--version\", action=\"version...",
+        "avro.__main__ 257:33 call  subparser_write.add_argument(\"--schema\", \"-s\", type=avro....",
+        "avro.__main__ 258:33 call  subparser_write.add_argument( \"--input-type\", \"-f\", choic...",
+        "avro.__main__ 265:33 call  subparser_write.add_argument(\"--output\", \"-o\", help=\"outp...",
+        "avro.__main__ 266:33 call  subparser_write.add_argument(\"input_files\", nargs=\"*\", ty..."
+      ],
+      "argparse.ArgumentParser.add_subparsers": [
+        "avro.__main__ 209:39 call  parser.add_subparsers(required=True, dest=\"command\")"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "avro.__main__ 267:29 call  parser.parse_args()"
+      ],
+      "argparse.FileType": [
+        "avro.__main__ 254:74 call  argparse.FileType(\"rb\")",
+        "avro.__main__ 265:94 call  argparse.FileType(\"wb\")",
+        "avro.__main__ 266:82 call  argparse.FileType(\"r\")"
+      ],
+      "argparse._SubParsersAction.add_parser": [
+        "avro.__main__ 210:42 call  subparsers.add_parser(\"cat\")",
+        "avro.__main__ 255:44 call  subparsers.add_parser(\"write\")"
+      ],
+      "avro.__main__.csv_arg": [
+        "avro.__main__ 267:29 call  parser.parse_args()"
+      ],
+      "avro.schema.from_path": [
+        "avro.__main__ 267:29 call  parser.parse_args()"
+      ]
+    },
+    "avro.__main__.cat": {
+      "avro.__main__.print_avro": [
+        "avro.__main__ 134:23 call  print_avro(data_file_reader, header, format_, filter_, sk..."
+      ],
+      "avro.__main__.print_schema": [
+        "avro.__main__ 132:29 call  print_schema(data_file_reader)"
+      ],
+      "avro.datafile.DataFileReader.__enter__": [
+        "avro.__main__ 130:14 with  avro.datafile.DataFileReader(file_, datum_reader)"
+      ],
+      "avro.datafile.DataFileReader.__exit__": [
+        "avro.__main__ 130:14 with  avro.datafile.DataFileReader(file_, datum_reader)"
+      ],
+      "avro.datafile.DataFileReader.__init__": [
+        "avro.__main__ 130:42 call  avro.datafile.DataFileReader(file_, datum_reader)"
+      ],
+      "avro.io.DatumReader.__init__": [
+        "avro.__main__ 128:39 call  avro.io.DatumReader()"
+      ]
+    },
+    "avro.__main__.convert": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.__main__ 161:33 call  avro.errors.UsageError(\"No valid conversion type\")"
+      ],
+      "<builtin>.float": [
+        "avro.__main__ 150:21 call  float(value)"
+      ],
+      "<builtin>.int": [
+        "avro.__main__ 148:19 call  int(value)"
+      ],
+      "<builtin>.str.encode": [
+        "avro.__main__ 154:28 call  value.encode()"
+      ],
+      "<builtin>.str.lower": [
+        "avro.__main__ 156:27 call  value.lower()"
+      ],
+      "avro.__main__.convert_union": [
+        "avro.__main__ 160:29 call  convert_union(value, field)"
+      ]
+    },
+    "avro.__main__.convert_union": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.__main__ 170:33 call  avro.errors.UsageError(\"Exhausted Union Schema without fi..."
+      ],
+      "avro.__main__.convert": [
+        "avro.__main__ 167:27 call  convert(value, name)"
+      ],
+      "avro.schema.NamedSchema.name": [
+        "avro.__main__ 165:20 getattr  s.name"
+      ],
+      "avro.schema.UnionSchema.schemas": [
+        "avro.__main__ 165:45 getattr  field.type.schemas"
+      ]
+    },
+    "avro.__main__.csv_arg": {
+      "<builtin>.str.split": [
+        "avro.__main__ 203:46 call  arg.split(\",\")"
+      ],
+      "<builtin>.str.strip": [
+        "avro.__main__ 203:25 call  f.strip()",
+        "avro.__main__ 203:62 call  f.strip()",
+        "avro.__main__ 203:87 call  arg.strip()"
+      ],
+      "<builtin>.tuple": [
+        "avro.__main__ 203:17 call  tuple(f.strip() for f in arg.split(\",\") if f.strip())"
+      ]
+    },
+    "avro.__main__.field_selector.keys_filter": {
+      "<builtin>.dict.keys": [
+        "avro.__main__ 91:48 call  obj.keys()"
+      ],
+      "<builtin>.set": [
+        "avro.__main__ 91:56 call  set(fields)"
+      ]
+    },
+    "avro.__main__.guess_input_type": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.__main__ 189:37 call  avro.errors.UsageError(\"Can't guess input file type (not ..."
+      ],
+      "<builtin>.str.lower": [
+        "avro.__main__ 184:43 call  Path(io_.name).suffixes[0].lower()"
+      ],
+      "pathlib.Path": [
+        "avro.__main__ 184:15 call  Path(io_.name)"
+      ]
+    },
+    "avro.__main__.iter_csv": {
+      "<builtin>.bytes.decode": [
+        "avro.__main__ 177:58 call  getattr(i, \"decode\", lambda: i)()"
+      ],
+      "<builtin>.dict": [
+        "avro.__main__ 180:19 call  dict(zip(header, values))"
+      ],
+      "<builtin>.getattr": [
+        "avro.__main__ 177:34 call  getattr(i, \"decode\", lambda: i)"
+      ],
+      "<builtin>.zip": [
+        "avro.__main__ 179:48 call  zip(row, schema.fields)",
+        "avro.__main__ 180:23 call  zip(header, values)"
+      ],
+      "avro.__main__.convert": [
+        "avro.__main__ 179:26 call  convert(v, f)"
+      ],
+      "avro.__main__.iter_csv.<lambda1>": [
+        "avro.__main__ 177:58 call  getattr(i, \"decode\", lambda: i)()"
+      ],
+      "avro.schema.RecordSchema.fields": [
+        "avro.__main__ 174:46 getattr  schema.fields",
+        "avro.__main__ 179:61 getattr  schema.fields"
+      ],
+      "csv.reader": [
+        "avro.__main__ 178:26 call  csv.reader(csv_data)"
+      ],
+      "typing.cast": [
+        "avro.__main__ 177:21 call  cast(str, getattr(i, \"decode\", lambda: i)())"
+      ]
+    },
+    "avro.__main__.iter_json": {
+      "<builtin>.bytes.decode": [
+        "avro.__main__ 140:66 call  cast(bytes, i).decode()"
+      ],
+      "<builtin>.isinstance": [
+        "avro.__main__ 140:31 call  isinstance(i, str)"
+      ],
+      "<builtin>.str.strip": [
+        "avro.__main__ 140:75 call  (i if isinstance(i, str) else cast(bytes, i).decode()).st..."
+      ],
+      "json.loads": [
+        "avro.__main__ 142:29 call  json.loads(row)"
+      ],
+      "typing.cast": [
+        "avro.__main__ 140:49 call  cast(bytes, i)"
+      ]
+    },
+    "avro.__main__.main": {
+      "avro.__main__._parse_args": [
+        "avro.__main__ 271:23 call  _parse_args()"
+      ],
+      "avro.__main__.cat": [
+        "avro.__main__ 273:19 call  cat(args.files, args.print_schema, args.header, args.form..."
+      ],
+      "avro.__main__.write": [
+        "avro.__main__ 275:21 call  write(args.schema, args.output, args.input_files, args.in..."
+      ]
+    },
+    "avro.__main__.print_avro": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.__main__ 107:37 call  avro.errors.UsageError(\"--header applies only to CSV form..."
+      ],
+      "<builtin>.enumerate": [
+        "avro.__main__ 113:26 call  enumerate(avro_fields)"
+      ],
+      "<builtin>.filter": [
+        "avro.__main__ 109:27 call  filter(predicate, data_file_reader)"
+      ],
+      "<builtin>.sorted": [
+        "avro.__main__ 117:30 call  sorted(record)"
+      ],
+      "_csv.Writer.writerow": [
+        "avro.__main__ 117:23 call  _write_row(sorted(record))"
+      ],
+      "_csv.writer.writerow": [
+        "avro.__main__ 117:23 call  _write_row(sorted(record))"
+      ],
+      "avro.__main__._passthrough_keys_filter": [
+        "avro.__main__ 112:22 call  fs(cast(Mapping[str, object], r))"
+      ],
+      "avro.__main__.field_selector": [
+        "avro.__main__ 111:24 call  field_selector(fields)"
+      ],
+      "avro.__main__.field_selector.keys_filter": [
+        "avro.__main__ 112:22 call  fs(cast(Mapping[str, object], r))"
+      ],
+      "avro.__main__.print_csv": [
+        "avro.__main__ 118:16 call  printer(record)"
+      ],
+      "avro.__main__.print_json": [
+        "avro.__main__ 118:16 call  printer(record)"
+      ],
+      "avro.__main__.print_json_pretty": [
+        "avro.__main__ 118:16 call  printer(record)"
+      ],
+      "avro.__main__.record_match": [
+        "avro.__main__ 112:63 iter  avro_slice"
+      ],
+      "avro.__main__.select_printer": [
+        "avro.__main__ 114:29 call  select_printer(format_)"
+      ],
+      "avro.datafile.DataFileReader.__iter__": [
+        "avro.__main__ 109:27 call  filter(predicate, data_file_reader)"
+      ],
+      "avro.datafile.DataFileReader.__next__": [
+        "avro.__main__ 112:63 iter  avro_slice"
+      ],
+      "functools.partial": [
+        "avro.__main__ 108:34 call  functools.partial(record_match, filter_)"
+      ],
+      "itertools.islice": [
+        "avro.__main__ 110:34 call  itertools.islice(avro_filtered, skip, (skip + count) if c..."
+      ],
+      "typing.cast": [
+        "avro.__main__ 112:27 call  cast(Mapping[str, object], r)"
+      ]
+    },
+    "avro.__main__.print_csv": {
+      "<builtin>.sorted": [
+        "avro.__main__ 71:42 call  sorted(row)"
+      ],
+      "_csv.Writer.writerow": [
+        "avro.__main__ 71:15 call  _write_row(row[key] for key in sorted(row))"
+      ],
+      "_csv.writer.writerow": [
+        "avro.__main__ 71:15 call  _write_row(row[key] for key in sorted(row))"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.__main__ 71:15 call  _write_row(row[key] for key in sorted(row))"
+      ]
+    },
+    "avro.__main__.print_json": {
+      "<builtin>.print": [
+        "avro.__main__ 54:10 call  print(json.dumps(row))"
+      ],
+      "json.dumps": [
+        "avro.__main__ 54:21 call  json.dumps(row)"
+      ]
+    },
+    "avro.__main__.print_json_pretty": {
+      "<builtin>.print": [
+        "avro.__main__ 62:10 call  print(result)"
+      ],
+      "<builtin>.str.replace": [
+        "avro.__main__ 61:63 call  json.dumps(row, sort_keys=True, indent=4).replace(\" \\n\", ..."
+      ],
+      "json.dumps": [
+        "avro.__main__ 61:24 call  json.dumps(row, sort_keys=True, indent=4)"
+      ]
+    },
+    "avro.__main__.print_schema": {
+      "<builtin>.print": [
+        "avro.__main__ 122:10 call  print(json.dumps(json.loads(data_file_reader.schema), ind..."
+      ],
+      "avro.datafile._DataFileMetadata.schema": [
+        "avro.__main__ 122:50 getattr  data_file_reader.schema"
+      ],
+      "json.dumps": [
+        "avro.__main__ 122:21 call  json.dumps(json.loads(data_file_reader.schema), indent=4)"
+      ],
+      "json.loads": [
+        "avro.__main__ 122:32 call  json.loads(data_file_reader.schema)"
+      ]
+    },
+    "avro.__main__.record_match": {
+      "<builtin>.UserWarning.__init__": [
+        "avro.__main__ 79:42 call  avro.errors.AvroWarning(\"There is no way to safely type c..."
+      ],
+      "<builtin>.eval": [
+        "avro.__main__ 80:61 call  eval(expr, None, {\"r\": record})"
+      ],
+      "typing.cast": [
+        "avro.__main__ 80:16 call  cast(Callable[[Mapping[str, object]], bool], eval(expr, N..."
+      ],
+      "warnings.warn": [
+        "avro.__main__ 79:18 call  warnings.warn(avro.errors.AvroWarning(\"There is no way to..."
+      ]
+    },
+    "avro.__main__.write": {
+      "<builtin>.iter": [
+        "avro.__main__ 193:75 call  iter(input_files)"
+      ],
+      "<builtin>.next": [
+        "avro.__main__ 193:70 call  next(iter(input_files), sys.stdin)"
+      ],
+      "avro.__main__.guess_input_type": [
+        "avro.__main__ 193:48 call  guess_input_type(cast(IO[AnyStr], next(iter(input_files),..."
+      ],
+      "avro.__main__.iter_csv": [
+        "avro.__main__ 197:39 call  iter_records(file_, schema)"
+      ],
+      "avro.__main__.iter_json": [
+        "avro.__main__ 197:39 call  iter_records(file_, schema)"
+      ],
+      "avro.datafile.DataFileWriter.__enter__": [
+        "avro.__main__ 195:10 with  avro.datafile.DataFileWriter(output, avro.io.DatumWriter(..."
+      ],
+      "avro.datafile.DataFileWriter.__exit__": [
+        "avro.__main__ 195:10 with  avro.datafile.DataFileWriter(output, avro.io.DatumWriter(..."
+      ],
+      "avro.datafile.DataFileWriter.__init__": [
+        "avro.__main__ 195:38 call  avro.datafile.DataFileWriter(output, avro.io.DatumWriter(..."
+      ],
+      "avro.datafile.DataFileWriter.append": [
+        "avro.__main__ 198:30 call  writer.append(record)"
+      ],
+      "avro.io.DatumWriter.__init__": [
+        "avro.__main__ 195:66 call  avro.io.DatumWriter()"
+      ],
+      "typing.cast": [
+        "avro.__main__ 193:53 call  cast(IO[AnyStr], next(iter(input_files), sys.stdin))"
+      ]
+    },
+    "avro.codecs.DeflateCodec.decompress": {
+      "zlib.decompressobj.decompress": [
+        "avro.codecs 208:52 call  decompressor.decompress(pending, want)"
+      ],
+      "zlib.decompressobj.flush": [
+        "avro.codecs 214:43 call  decompressor.flush(ceiling - len(uncompressed))"
+      ]
+    },
+    "avro.codecs.SnappyCodec.compress": {
+      "<builtin>.len": [
+        "avro.codecs 272:40 call  len(compressed_data)"
+      ],
+      "binascii.crc32": [
+        "avro.codecs 271:64 call  binascii.crc32(data)"
+      ],
+      "snappy.compress": [
+        "avro.codecs 269:46 call  snappy.compress(data)"
+      ],
+      "struct.Struct.pack": [
+        "avro.codecs 271:49 call  STRUCT_CRC32.pack(binascii.crc32(data) & 0xFFFFFFFF)"
+      ]
+    },
+    "avro.codecs.SnappyCodec.decompress": {
+      "<builtin>.Exception.__init__": [
+        "avro.codecs 279:60 call  avro.errors.InvalidAvroBinaryEncoding( f\"Invalid snappy b..."
+      ],
+      "<builtin>.len": [
+        "avro.codecs 290:19 call  len(uncompressed)"
+      ],
+      "avro.codecs._check_crc32": [
+        "avro.codecs 293:25 call  _check_crc32(uncompressed, checksum)"
+      ],
+      "avro.codecs._max_decompress_length": [
+        "avro.codecs 283:43 call  _max_decompress_length()"
+      ],
+      "avro.codecs._raise_decompression_too_large": [
+        "avro.codecs 288:47 call  _raise_decompression_too_large(limit)",
+        "avro.codecs 291:47 call  _raise_decompression_too_large(limit)"
+      ],
+      "avro.codecs._snappy_uncompressed_length": [
+        "avro.codecs 286:51 call  _snappy_uncompressed_length(data)"
+      ],
+      "avro.io.BinaryDecoder.__init__": [
+        "avro.codecs 294:41 call  avro.io.BinaryDecoder(io.BytesIO(uncompressed))"
+      ],
+      "avro.io.BinaryDecoder.read": [
+        "avro.codecs 282:40 call  readers_decoder.read(length - 4)",
+        "avro.codecs 292:44 call  readers_decoder.read(4)"
+      ],
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.codecs 277:47 call  readers_decoder.read_long()"
+      ],
+      "io.BytesIO": [
+        "avro.codecs 294:52 call  io.BytesIO(uncompressed)"
+      ],
+      "snappy.decompress": [
+        "avro.codecs 289:45 call  snappy.decompress(data)"
+      ]
+    },
+    "avro.codecs.ZstandardCodec.compress": {
+      "<builtin>.len": [
+        "avro.codecs 303:40 call  len(compressed_data)"
+      ],
+      "zstandard.ZstdCompressor": [
+        "avro.codecs 302:50 call  zstd.ZstdCompressor()"
+      ],
+      "zstandard.ZstdCompressor.compress": [
+        "avro.codecs 302:61 call  zstd.ZstdCompressor().compress(data)"
+      ]
+    },
+    "avro.codecs.ZstandardCodec.decompress": {
+      "<builtin>.bytearray": [
+        "avro.codecs 310:37 call  bytearray()"
+      ],
+      "<builtin>.bytearray.extend": [
+        "avro.codecs 320:40 call  uncompressed.extend(chunk)"
+      ],
+      "<builtin>.len": [
+        "avro.codecs 318:27 call  len(uncompressed)",
+        "avro.codecs 318:47 call  len(chunk)"
+      ],
+      "avro.codecs._max_decompress_length": [
+        "avro.codecs 309:43 call  _max_decompress_length()"
+      ],
+      "avro.codecs._raise_decompression_too_large": [
+        "avro.codecs 319:55 call  _raise_decompression_too_large(limit)"
+      ],
+      "avro.io.BinaryDecoder.__init__": [
+        "avro.codecs 321:41 call  avro.io.BinaryDecoder(io.BytesIO(uncompressed))"
+      ],
+      "avro.io.BinaryDecoder.read": [
+        "avro.codecs 308:40 call  readers_decoder.read(length)"
+      ],
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.codecs 307:47 call  readers_decoder.read_long()"
+      ],
+      "io.BytesIO": [
+        "avro.codecs 312:47 call  io.BytesIO(data)",
+        "avro.codecs 321:52 call  io.BytesIO(uncompressed)"
+      ],
+      "zstandard.ZstdDecompressor": [
+        "avro.codecs 311:41 call  zstd.ZstdDecompressor()"
+      ],
+      "zstandard.ZstdDecompressor.stream_reader": [
+        "avro.codecs 312:36 call  dctx.stream_reader(io.BytesIO(data))"
+      ],
+      "zstandard.ZstdDecompressor.stream_reader.read": [
+        "avro.codecs 314:40 call  reader.read(16384)"
+      ]
+    },
+    "avro.codecs._check_crc32": {
+      "<builtin>.Exception.__init__": [
+        "avro.codecs 116:40 call  avro.errors.AvroException(\"Checksum failure\")"
+      ],
+      "binascii.crc32": [
+        "avro.codecs 115:22 call  binascii.crc32(bytes_)"
+      ],
+      "struct.Struct.unpack": [
+        "avro.codecs 115:66 call  STRUCT_CRC32.unpack(checksum)"
+      ]
+    },
+    "avro.codecs.get_codec": {
+      "<builtin>.NotImplementedError.__init__": [
+        "avro.codecs 335:43 call  avro.errors.UnsupportedCodec(f\"Unsupported codec: {codec_..."
+      ]
+    },
+    "avro.compatibility.ReaderWriterCompatibilityChecker.calculate_compatibility": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.compatibility 231:39 call  AvroRuntimeException(f\"Unknown schema type: {reader.type}\")",
+        "avro.compatibility 279:35 call  AvroRuntimeException(f\"Unknown schema type: {reader.type}\")"
+      ]
+    },
+    "avro.compatibility.ReaderWriterCompatibilityChecker.check_reader_writer_record_fields": {
+      "<builtin>.dict.get": [
+        "avro.compatibility 290:97 call  reader_field.type.props.get(\"default\")"
+      ],
+      "avro.schema.PropertiesMixin.props": [
+        "avro.compatibility 290:88 getattr  reader_field.type.props"
+      ]
+    },
+    "avro.compatibility.ReaderWriterCompatibilityChecker.get_compatibility": {
+      "typing.cast": [
+        "avro.compatibility 157:26 call  cast(SchemaCompatibilityResult, self.memoize_map[pair])"
+      ]
+    },
+    "avro.datafile.DataFileReader.__init__": {
+      "<builtin>.UserWarning.__init__": [
+        "avro.datafile 320:50 call  avro.errors.AvroWarning(f\"Reader binary data from a reade..."
+      ],
+      "warnings.warn": [
+        "avro.datafile 320:26 call  warnings.warn(avro.errors.AvroWarning(f\"Reader binary dat..."
+      ]
+    },
+    "avro.datafile.DataFileReader.__next__": {
+      "<builtin>.Exception.__init__": [
+        "avro.datafile 408:48 call  avro.errors.DataFileException(\"DataFile is not ready to r..."
+      ]
+    },
+    "avro.datafile.DataFileReader._read_block_header": {
+      "avro.codecs.SnappyCodec.decompress": [
+        "avro.datafile 387:47 call  codec.decompress(self.raw_decoder)"
+      ],
+      "avro.codecs.ZstandardCodec.decompress": [
+        "avro.datafile 387:47 call  codec.decompress(self.raw_decoder)"
+      ]
+    },
+    "avro.datafile.DataFileReader._read_header": {
+      "<builtin>.Exception.__init__": [
+        "avro.datafile 380:44 call  avro.errors.AvroException(f\"Not an Avro data file: {heade..."
+      ]
+    },
+    "avro.datafile.DataFileWriter.__init__": {
+      "<builtin>.UserWarning.__init__": [
+        "avro.datafile 173:50 call  avro.errors.AvroWarning(f\"Writing binary data to a writer..."
+      ],
+      "warnings.warn": [
+        "avro.datafile 173:26 call  warnings.warn(avro.errors.AvroWarning(f\"Writing binary da..."
+      ]
+    },
+    "avro.datafile.DataFileWriter._write_block": {
+      "avro.codecs.SnappyCodec.compress": [
+        "avro.datafile 242:69 call  codec.compress(uncompressed_data)"
+      ],
+      "avro.codecs.ZstandardCodec.compress": [
+        "avro.datafile 242:69 call  codec.compress(uncompressed_data)"
+      ],
+      "io.FileIO.write": [
+        "avro.datafile 248:30 call  self.writer.write(compressed_data)",
+        "avro.datafile 251:30 call  self.writer.write(self.sync_marker)"
+      ]
+    },
+    "avro.datafile.DataFileWriter.append": {
+      "avro.datafile.DataFileWriter._write_block": [
+        "avro.datafile 265:30 call  self._write_block()"
+      ]
+    },
+    "avro.datafile.DataFileWriter.close": {
+      "io.FileIO.close": [
+        "avro.datafile 284:26 call  self.writer.close()"
+      ]
+    },
+    "avro.datafile.DataFileWriter.flush": {
+      "io.FileIO.flush": [
+        "avro.datafile 279:26 call  self.writer.flush()"
+      ]
+    },
+    "avro.datafile.DataFileWriter.sync": {
+      "avro.datafile.DataFileWriter._write_block": [
+        "avro.datafile 273:26 call  self._write_block()"
+      ],
+      "avro.datafile.DataFileWriter.writer": [
+        "avro.datafile 274:21 getattr  self.writer"
+      ],
+      "io.BufferedWriter.tell": [
+        "avro.datafile 274:32 call  self.writer.tell()"
+      ],
+      "io.FileIO.tell": [
+        "avro.datafile 274:32 call  self.writer.tell()"
+      ]
+    },
+    "avro.datafile._DataFileMetadata.codec": {
+      "<builtin>.Exception.__init__": [
+        "avro.datafile 138:48 call  avro.errors.DataFileException(f\"Unknown codec: {value!r}\")"
+      ],
+      "avro.datafile._DataFileMetadata.del_meta": [
+        "avro.datafile 144:22 call  self.del_meta(CODEC_KEY)"
+      ]
+    },
+    "avro.datafile._DataFileMetadata.del_meta": {
+      "avro.datafile._DataFileMetadata.meta": [
+        "avro.datafile 106:18 getattr  self.meta"
+      ]
+    },
+    "avro.datafile._DataFileMetadata.schema": {
+      "<builtin>.Exception.__init__": [
+        "avro.datafile 121:44 call  avro.errors.DataFileException(\"Missing required schema me..."
+      ]
+    },
+    "avro.errors.AvroTypeException.__init__": {
+      "avro.timezones.TSTTzinfo.utcoffset": [
+        "avro.errors 77:46 format  {datum}"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.errors 77:46 format  {datum}"
+      ]
+    },
+    "avro.errors.SchemaResolutionException.__init__": {
+      "avro.schema.Schema.__str__": [
+        "avro.errors 105:48 format  {_safe_pretty(writers_schema)}",
+        "avro.errors 106:48 format  {_safe_pretty(readers_schema)}"
+      ]
+    },
+    "avro.io.BinaryDecoder._build_time_object": {
+      "<builtin>.divmod": [
+        "avro.io 385:37 call  divmod(value, 1000000)",
+        "avro.io 386:32 call  divmod(value, 60)",
+        "avro.io 387:32 call  divmod(value, 60)"
+      ],
+      "datetime.time": [
+        "avro.io 390:29 call  datetime.time(hour=hours, minute=minutes, second=seconds,..."
+      ]
+    },
+    "avro.io.BinaryDecoder.bytes_remaining": {
+      "io.BufferedReader.seek": [
+        "avro.io 249:24 call  reader.seek(0, os.SEEK_END)",
+        "avro.io 261:28 call  reader.seek(pos)"
+      ],
+      "io.BufferedReader.tell": [
+        "avro.io 244:30 call  reader.tell()",
+        "avro.io 250:30 call  reader.tell()"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_date_from_int": {
+      "avro.io.BinaryDecoder.read_int": [
+        "avro.io 380:41 call  self.read_int()"
+      ],
+      "datetime.date": [
+        "avro.io 381:29 call  datetime.date(1970, 1, 1)"
+      ],
+      "datetime.timedelta": [
+        "avro.io 381:62 call  datetime.timedelta(days_since_epoch)"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_decimal_from_bytes": {
+      "avro.io.BinaryDecoder.read_decimal_from_fixed": [
+        "avro.io 330:44 call  self.read_decimal_from_fixed(precision, scale, size)"
+      ],
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.io 329:30 call  self.read_long()"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_decimal_from_fixed": {
+      "<builtin>.bytearray": [
+        "avro.io 343:30 call  bytearray([modified_first_byte])"
+      ],
+      "<builtin>.ord": [
+        "avro.io 342:38 call  ord(datum[0:1])",
+        "avro.io 346:38 call  ord(datum[offset : 1 + offset])",
+        "avro.io 351:38 call  ord(datum[offset : 1 + offset])"
+      ],
+      "<builtin>.pow": [
+        "avro.io 347:34 call  pow(-2, (size * 8) - 1)"
+      ],
+      "<builtin>.range": [
+        "avro.io 344:32 call  range(size)",
+        "avro.io 349:32 call  range(size)"
+      ],
+      "avro.io.BinaryDecoder.read": [
+        "avro.io 337:26 call  self.read(size)"
+      ],
+      "decimal.Decimal": [
+        "avro.io 356:43 call  decimal.Decimal(unscaled_datum)"
+      ],
+      "decimal.Decimal.scaleb": [
+        "avro.io 356:66 call  decimal.Decimal(unscaled_datum).scaleb(-scale)"
+      ],
+      "decimal.getcontext": [
+        "avro.io 353:43 call  decimal.getcontext()",
+        "avro.io 355:31 call  decimal.getcontext()",
+        "avro.io 358:31 call  decimal.getcontext()"
+      ],
+      "struct.unpack": [
+        "avro.io 339:28 call  struct.unpack(\"!b\", datum[0:1])"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_time_micros_from_long": {
+      "avro.io.BinaryDecoder._build_time_object": [
+        "avro.io 406:39 call  self._build_time_object(microseconds, 1)"
+      ],
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.io 405:38 call  self.read_long()"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_time_millis_from_int": {
+      "avro.io.BinaryDecoder._build_time_object": [
+        "avro.io 398:39 call  self._build_time_object(milliseconds, 1000)"
+      ],
+      "avro.io.BinaryDecoder.read_int": [
+        "avro.io 397:37 call  self.read_int()"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_timestamp_micros_from_long": {
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.io 423:42 call  self.read_long()"
+      ],
+      "datetime.datetime": [
+        "avro.io 425:48 call  datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=avro.tim..."
+      ],
+      "datetime.timedelta": [
+        "avro.io 424:39 call  datetime.timedelta(microseconds=timestamp_micros)"
+      ]
+    },
+    "avro.io.BinaryDecoder.read_timestamp_millis_from_long": {
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.io 413:42 call  self.read_long()"
+      ],
+      "datetime.datetime": [
+        "avro.io 415:48 call  datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=avro.tim..."
+      ],
+      "datetime.timedelta": [
+        "avro.io 414:39 call  datetime.timedelta(microseconds=timestamp_millis * 1000)"
+      ]
+    },
+    "avro.io.BinaryDecoder.skip": {
+      "io.BufferedReader.seek": [
+        "avro.io 482:25 call  self.reader.seek(self.reader.tell() + n)"
+      ],
+      "io.BufferedReader.tell": [
+        "avro.io 482:42 call  self.reader.tell()"
+      ]
+    },
+    "avro.io.BinaryDecoder.skip_boolean": {
+      "avro.io.BinaryDecoder.skip": [
+        "avro.io 432:18 call  self.skip(1)"
+      ]
+    },
+    "avro.io.BinaryDecoder.skip_double": {
+      "avro.io.BinaryDecoder.skip": [
+        "avro.io 459:18 call  self.skip(8)"
+      ]
+    },
+    "avro.io.BinaryDecoder.skip_float": {
+      "avro.io.BinaryDecoder.skip": [
+        "avro.io 456:18 call  self.skip(4)"
+      ]
+    },
+    "avro.io.BinaryDecoder.skip_long": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 445:60 call  avro.errors.InvalidAvroBinaryEncoding(\"Varint is too long\")",
+        "avro.io 452:60 call  avro.errors.InvalidAvroBinaryEncoding(\"Varint is too long\")"
+      ]
+    },
+    "avro.io.BinaryDecoder.skip_utf8": {
+      "avro.io.BinaryDecoder.skip_bytes": [
+        "avro.io 474:24 call  self.skip_bytes()"
+      ]
+    },
+    "avro.io.BinaryEncoder.write": {
+      "io.FileIO.write": [
+        "avro.io 502:26 call  self.writer.write(datum)"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_date_int": {
+      "avro.io.BinaryEncoder.write_int": [
+        "avro.io 637:23 call  self.write_int(delta_date.days)"
+      ],
+      "datetime.date": [
+        "avro.io 636:43 call  datetime.date(1970, 1, 1)"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_decimal_bytes": {
+      "<builtin>.bytearray": [
+        "avro.io 573:33 call  bytearray([bits_to_write & 0xFF])"
+      ],
+      "<builtin>.int.bit_length": [
+        "avro.io 561:45 call  unscaled_datum.bit_length()"
+      ],
+      "<builtin>.range": [
+        "avro.io 571:27 call  range(bytes_req - 1, -1, -1)"
+      ],
+      "avro.io.BinaryEncoder.write": [
+        "avro.io 573:23 call  self.write(bytearray([bits_to_write & 0xFF]))"
+      ],
+      "avro.io.BinaryEncoder.write_long": [
+        "avro.io 570:24 call  self.write_long(bytes_req)"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_decimal_fixed": {
+      "<builtin>.bytearray": [
+        "avro.io 608:37 call  bytearray([bits_to_write & 0xFF])",
+        "avro.io 614:37 call  bytearray([bits_to_write & 0xFF])"
+      ],
+      "<builtin>.int.bit_length": [
+        "avro.io 587:45 call  unscaled_datum.bit_length()"
+      ],
+      "<builtin>.range": [
+        "avro.io 593:23 call  range(bits_req)",
+        "avro.io 606:31 call  range(size - 1, -1, -1)",
+        "avro.io 610:27 call  range(offset_bits // 8)",
+        "avro.io 612:31 call  range(bytes_req - 1, -1, -1)"
+      ],
+      "avro.io.BinaryEncoder.write": [
+        "avro.io 608:27 call  self.write(bytearray([bits_to_write & 0xFF]))",
+        "avro.io 611:27 call  self.write(b\"\\x00\")",
+        "avro.io 614:27 call  self.write(bytearray([bits_to_write & 0xFF]))"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_time_micros_long": {
+      "avro.io.BinaryEncoder.write_long": [
+        "avro.io 653:24 call  self.write_long(microseconds)"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_time_millis_int": {
+      "avro.io.BinaryEncoder.write_int": [
+        "avro.io 645:23 call  self.write_int(milliseconds)"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_timestamp_micros_long": {
+      "avro.io.BinaryEncoder._timedelta_total_microseconds": [
+        "avro.io 675:58 call  self._timedelta_total_microseconds(timedelta)"
+      ],
+      "avro.io.BinaryEncoder.write_long": [
+        "avro.io 676:24 call  self.write_long(microseconds)"
+      ],
+      "avro.timezones.TSTTzinfo.utcoffset": [
+        "avro.io 673:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ],
+      "avro.timezones.UTCTzinfo.dst": [
+        "avro.io 673:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.io 673:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ],
+      "datetime.datetime": [
+        "avro.io 674:46 call  datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=avro.tim..."
+      ],
+      "datetime.datetime.astimezone": [
+        "avro.io 673:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ]
+    },
+    "avro.io.BinaryEncoder.write_timestamp_millis_long": {
+      "avro.io.BinaryEncoder._timedelta_total_microseconds": [
+        "avro.io 665:58 call  self._timedelta_total_microseconds(timedelta)"
+      ],
+      "avro.io.BinaryEncoder.write_long": [
+        "avro.io 666:24 call  self.write_long(milliseconds)"
+      ],
+      "avro.timezones.TSTTzinfo.utcoffset": [
+        "avro.io 663:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ],
+      "avro.timezones.UTCTzinfo.dst": [
+        "avro.io 663:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.io 663:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ],
+      "datetime.datetime": [
+        "avro.io 664:46 call  datetime.datetime(1970, 1, 1, 0, 0, 0, 0, tzinfo=avro.tim..."
+      ],
+      "datetime.datetime.astimezone": [
+        "avro.io 663:33 call  datum.astimezone(tz=avro.timezones.utc)"
+      ]
+    },
+    "avro.io.DatumReader._read_default_value": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 1324:40 call  avro.errors.AvroException(f\"Unknown type: {field_schema.t..."
+      ],
+      "<builtin>.bool": [
+        "avro.io 1284:24 call  bool(default_value)"
+      ],
+      "<builtin>.dict.get": [
+        "avro.io 1318:45 call  default_value.get(field.name)"
+      ],
+      "<builtin>.dict.items": [
+        "avro.io 1309:126 call  default_value.items()"
+      ],
+      "<builtin>.isinstance": [
+        "avro.io 1286:26 call  isinstance(default_value, int)",
+        "avro.io 1290:26 call  isinstance(default_value, float)",
+        "avro.io 1294:26 call  isinstance(default_value, bytes)",
+        "avro.io 1296:26 call  isinstance(default_value, str)",
+        "avro.io 1300:26 call  isinstance(default_value, str)",
+        "avro.io 1303:22 call  isinstance(field_schema, avro.schema.ArraySchema)",
+        "avro.io 1304:26 call  isinstance(default_value, Iterable)",
+        "avro.io 1307:22 call  isinstance(field_schema, avro.schema.MapSchema)",
+        "avro.io 1308:26 call  isinstance(default_value, Mapping)",
+        "avro.io 1311:22 call  isinstance(field_schema, avro.schema.UnionSchema)",
+        "avro.io 1313:22 call  isinstance(field_schema, avro.schema.RecordSchema)",
+        "avro.io 1314:30 call  isinstance(default_value, Mapping)"
+      ],
+      "<builtin>.str.encode": [
+        "avro.io 1297:44 call  default_value.encode()"
+      ],
+      "avro.errors.AvroTypeException.__init__": [
+        "avro.io 1282:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1288:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1292:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1298:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1302:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1306:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1310:54 call  avro.errors.InvalidDefaultException(field_schema, default...",
+        "avro.io 1315:58 call  avro.errors.InvalidDefaultException(field_schema, default..."
+      ],
+      "avro.io.DatumReader._read_default_value": [
+        "avro.io 1305:49 call  self._read_default_value(field_schema.items, json_val)",
+        "avro.io 1309:54 call  self._read_default_value(field_schema.values, json_val)",
+        "avro.io 1312:44 call  self._read_default_value(field_schema.schemas[0], default...",
+        "avro.io 1321:53 call  self._read_default_value(field.type, json_val)"
+      ],
+      "avro.schema.ArraySchema.items": [
+        "avro.io 1305:63 getattr  field_schema.items"
+      ],
+      "avro.schema.Field.default": [
+        "avro.io 1320:38 getattr  field.default"
+      ],
+      "avro.schema.MapSchema.values": [
+        "avro.io 1309:68 getattr  field_schema.values"
+      ],
+      "avro.schema.RecordSchema.fields": [
+        "avro.io 1317:39 getattr  field_schema.fields"
+      ],
+      "avro.schema.UnionSchema.schemas": [
+        "avro.io 1312:58 getattr  field_schema.schemas"
+      ]
+    },
+    "avro.io.DatumReader._skip_block_bytes": {
+      "avro.io.BinaryDecoder.bytes_remaining": [
+        "avro.io 1105:44 call  decoder.bytes_remaining()"
+      ],
+      "avro.io.BinaryDecoder.skip": [
+        "avro.io 1116:25 call  decoder.skip(block_size)"
+      ]
+    },
+    "avro.io.DatumReader.read": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 838:50 call  avro.errors.IONotReadyException(\"Cannot read without a wr..."
+      ]
+    },
+    "avro.io.DatumReader.read_data": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 927:40 call  avro.errors.AvroException(f\"Cannot read unknown schema ty..."
+      ],
+      "<builtin>.UserWarning.__init__": [
+        "avro.io 898:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal precisio...",
+        "avro.io 902:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...",
+        "avro.io 910:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal precisio...",
+        "avro.io 914:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s..."
+      ],
+      "avro.errors.SchemaResolutionException.__init__": [
+        "avro.io 853:56 call  avro.errors.SchemaResolutionException(\"Schemas do not mat...",
+        "avro.io 868:56 call  avro.errors.SchemaResolutionException(\"Schemas do not mat..."
+      ],
+      "avro.io.BinaryDecoder.read_date_from_int": [
+        "avro.io 878:50 call  decoder.read_date_from_int()"
+      ],
+      "avro.io.BinaryDecoder.read_decimal_from_bytes": [
+        "avro.io 904:55 call  decoder.read_decimal_from_bytes(precision, scale)"
+      ],
+      "avro.io.BinaryDecoder.read_decimal_from_fixed": [
+        "avro.io 916:55 call  decoder.read_decimal_from_fixed(precision, scale, writers..."
+      ],
+      "avro.io.BinaryDecoder.read_time_micros_from_long": [
+        "avro.io 884:58 call  decoder.read_time_micros_from_long()"
+      ],
+      "avro.io.BinaryDecoder.read_time_millis_from_int": [
+        "avro.io 880:57 call  decoder.read_time_millis_from_int()"
+      ],
+      "avro.io.BinaryDecoder.read_timestamp_micros_from_long": [
+        "avro.io 888:63 call  decoder.read_timestamp_micros_from_long()"
+      ],
+      "avro.io.BinaryDecoder.read_timestamp_millis_from_long": [
+        "avro.io 886:63 call  decoder.read_timestamp_millis_from_long()"
+      ],
+      "avro.schema.FixedSchema.size": [
+        "avro.io 916:89 getattr  writers_schema.size"
+      ],
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.io 896:52 call  writers_schema.get_prop(\"precision\")",
+        "avro.io 900:48 call  writers_schema.get_prop(\"scale\")",
+        "avro.io 908:52 call  writers_schema.get_prop(\"precision\")",
+        "avro.io 912:48 call  writers_schema.get_prop(\"scale\")"
+      ],
+      "warnings.warn": [
+        "avro.io 898:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Invalid de...",
+        "avro.io 902:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Invalid de...",
+        "avro.io 910:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Invalid de...",
+        "avro.io 914:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Invalid de..."
+      ]
+    },
+    "avro.io.DatumReader.read_map": {
+      "avro.io.BinaryDecoder.skip_long": [
+        "avro.io 1171:34 call  decoder.skip_long()"
+      ]
+    },
+    "avro.io.DatumReader.read_record": {
+      "avro.io.DatumReader._read_default_value": [
+        "avro.io 1267:57 call  self._read_default_value(field.type, field.default)"
+      ],
+      "avro.schema.Field.default": [
+        "avro.io 1267:76 getattr  field.default"
+      ]
+    },
+    "avro.io.DatumReader.skip_array": {
+      "<builtin>.range": [
+        "avro.io 1140:31 call  range(block_count)"
+      ],
+      "avro.io.DatumReader._skip_block_bytes": [
+        "avro.io 1138:39 call  self._skip_block_bytes(decoder, block_size, block_count, ..."
+      ],
+      "avro.io.DatumReader.skip_data": [
+        "avro.io 1141:35 call  self.skip_data(writers_schema.items, decoder)"
+      ]
+    },
+    "avro.io.DatumReader.skip_data": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 958:40 call  avro.errors.AvroException(f\"Unknown schema type: {writers..."
+      ],
+      "avro.io.BinaryDecoder.skip_boolean": [
+        "avro.io 933:40 call  decoder.skip_boolean()"
+      ],
+      "avro.io.BinaryDecoder.skip_bytes": [
+        "avro.io 945:38 call  decoder.skip_bytes()"
+      ],
+      "avro.io.BinaryDecoder.skip_double": [
+        "avro.io 943:39 call  decoder.skip_double()"
+      ],
+      "avro.io.BinaryDecoder.skip_float": [
+        "avro.io 941:38 call  decoder.skip_float()"
+      ],
+      "avro.io.BinaryDecoder.skip_long": [
+        "avro.io 939:37 call  decoder.skip_long()"
+      ],
+      "avro.io.BinaryDecoder.skip_null": [
+        "avro.io 931:37 call  decoder.skip_null()"
+      ],
+      "avro.io.BinaryDecoder.skip_utf8": [
+        "avro.io 935:37 call  decoder.skip_utf8()"
+      ],
+      "avro.io.DatumReader.skip_enum": [
+        "avro.io 949:34 call  self.skip_enum(writers_schema, decoder)"
+      ],
+      "avro.io.DatumReader.skip_fixed": [
+        "avro.io 947:35 call  self.skip_fixed(writers_schema, decoder)"
+      ],
+      "avro.io.DatumReader.skip_map": [
+        "avro.io 953:33 call  self.skip_map(writers_schema, decoder)"
+      ],
+      "avro.io.DatumReader.skip_record": [
+        "avro.io 957:36 call  self.skip_record(writers_schema, decoder)"
+      ],
+      "avro.io.DatumReader.skip_union": [
+        "avro.io 955:35 call  self.skip_union(writers_schema, decoder)"
+      ]
+    },
+    "avro.io.DatumReader.skip_enum": {
+      "avro.io.BinaryDecoder.skip_int": [
+        "avro.io 1000:32 call  decoder.skip_int()"
+      ]
+    },
+    "avro.io.DatumReader.skip_fixed": {
+      "avro.io.BinaryDecoder.skip": [
+        "avro.io 968:28 call  decoder.skip(writers_schema.size)"
+      ],
+      "avro.schema.FixedSchema.size": [
+        "avro.io 968:44 getattr  writers_schema.size"
+      ]
+    },
+    "avro.io.DatumReader.skip_map": {
+      "<builtin>.range": [
+        "avro.io 1197:31 call  range(block_count)"
+      ],
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.io 1184:40 call  decoder.read_long()",
+        "avro.io 1189:47 call  decoder.read_long()",
+        "avro.io 1200:44 call  decoder.read_long()"
+      ],
+      "avro.io.BinaryDecoder.skip_utf8": [
+        "avro.io 1198:38 call  decoder.skip_utf8()"
+      ],
+      "avro.io.DatumReader._ensure_collection_available": [
+        "avro.io 1192:46 call  self._ensure_collection_available(decoder, items_skipped,..."
+      ],
+      "avro.io.DatumReader._skip_block_bytes": [
+        "avro.io 1195:39 call  self._skip_block_bytes(decoder, block_size, block_count, ..."
+      ],
+      "avro.io.DatumReader.skip_data": [
+        "avro.io 1199:35 call  self.skip_data(writers_schema.values, decoder)"
+      ],
+      "avro.io._collection_limits": [
+        "avro.io 1182:63 call  _collection_limits()"
+      ],
+      "avro.io._min_bytes_per_element": [
+        "avro.io 1181:47 call  _min_bytes_per_element(writers_schema.values)"
+      ],
+      "avro.schema.MapSchema.values": [
+        "avro.io 1181:63 getattr  writers_schema.values",
+        "avro.io 1199:51 getattr  writers_schema.values"
+      ]
+    },
+    "avro.io.DatumReader.skip_record": {
+      "avro.io.DatumReader.skip_data": [
+        "avro.io 1273:27 call  self.skip_data(field.type, decoder)"
+      ],
+      "avro.schema.RecordSchema.fields": [
+        "avro.io 1272:37 getattr  writers_schema.fields"
+      ]
+    },
+    "avro.io.DatumReader.skip_union": {
+      "<builtin>.int": [
+        "avro.io 1220:30 call  int(decoder.read_long())"
+      ],
+      "<builtin>.len": [
+        "avro.io 1221:57 call  len(writers_schema.schemas)",
+        "avro.io 1223:82 call  len(writers_schema.schemas)"
+      ],
+      "avro.errors.SchemaResolutionException.__init__": [
+        "avro.io 1222:56 call  avro.errors.SchemaResolutionException( f\"Can't access bra..."
+      ],
+      "avro.io.BinaryDecoder.read_long": [
+        "avro.io 1220:48 call  decoder.read_long()"
+      ],
+      "avro.io.DatumReader.skip_data": [
+        "avro.io 1225:30 call  self.skip_data(writers_schema.schemas[index_of_schema], d..."
+      ],
+      "avro.schema.UnionSchema.schemas": [
+        "avro.io 1221:73 getattr  writers_schema.schemas",
+        "avro.io 1223:98 getattr  writers_schema.schemas",
+        "avro.io 1225:46 getattr  writers_schema.schemas"
+      ]
+    },
+    "avro.io.DatumWriter.write": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 1345:50 call  avro.errors.IONotReadyException(\"Cannot write without a w..."
+      ]
+    },
+    "avro.io.DatumWriter.write_data": {
+      "<builtin>.Exception.__init__": [
+        "avro.io 1443:40 call  avro.errors.AvroException(f\"Unknown type: {writers_schema..."
+      ],
+      "<builtin>.UserWarning.__init__": [
+        "avro.io 1368:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a date ty...",
+        "avro.io 1372:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a time ty...",
+        "avro.io 1380:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a time ty...",
+        "avro.io 1384:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a datetim...",
+        "avro.io 1388:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a datetim...",
+        "avro.io 1404:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...",
+        "avro.io 1406:65 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a decimal...",
+        "avro.io 1417:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...",
+        "avro.io 1419:65 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a decimal..."
+      ],
+      "avro.errors.AvroTypeException.__init__": [
+        "avro.io 1355:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1359:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1363:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1375:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1391:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1395:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1399:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1411:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1424:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1428:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1432:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1436:48 call  avro.errors.AvroTypeException(writers_schema, datum)",
+        "avro.io 1442:48 call  avro.errors.AvroTypeException(writers_schema, datum)"
+      ],
+      "avro.io.BinaryEncoder.write_date_int": [
+        "avro.io 1367:50 call  encoder.write_date_int(datum)"
+      ],
+      "avro.io.BinaryEncoder.write_time_micros_long": [
+        "avro.io 1379:58 call  encoder.write_time_micros_long(datum)"
+      ],
+      "avro.io.BinaryEncoder.write_time_millis_int": [
+        "avro.io 1371:57 call  encoder.write_time_millis_int(datum)"
+      ],
+      "avro.io.BinaryEncoder.write_timestamp_micros_long": [
+        "avro.io 1387:63 call  encoder.write_timestamp_micros_long(datum)"
+      ],
+      "avro.io.BinaryEncoder.write_timestamp_millis_long": [
+        "avro.io 1383:63 call  encoder.write_timestamp_millis_long(datum)"
+      ],
+      "avro.timezones.TSTTzinfo.utcoffset": [
+        "avro.io 1372:64 format  {datum}",
+        "avro.io 1380:64 format  {datum}",
+        "avro.io 1406:68 format  {datum}",
+        "avro.io 1419:68 format  {datum}"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.io 1372:64 format  {datum}",
+        "avro.io 1380:64 format  {datum}",
+        "avro.io 1406:68 format  {datum}",
+        "avro.io 1419:68 format  {datum}"
+      ],
+      "warnings.warn": [
+        "avro.io 1368:30 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is...",
+        "avro.io 1372:30 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is...",
+        "avro.io 1380:30 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is...",
+        "avro.io 1384:30 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is...",
+        "avro.io 1388:30 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is...",
+        "avro.io 1404:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Invalid de...",
+        "avro.io 1406:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is...",
+        "avro.io 1417:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Invalid de...",
+        "avro.io 1419:34 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"{datum} is..."
+      ]
+    },
+    "avro.io.DatumWriter.write_union": {
+      "avro.errors.AvroTypeException.__init__": [
+        "avro.io 1515:48 call  avro.errors.AvroTypeException(writers_schema, datum)"
+      ]
+    },
+    "avro.io.validate": {
+      "avro.schema.DateSchema.validate": [
+        "avro.io 133:56 call  current_node.schema.validate(current_node.datum)"
+      ],
+      "avro.schema.TimeMicrosSchema.validate": [
+        "avro.io 133:56 call  current_node.schema.validate(current_node.datum)"
+      ],
+      "avro.schema.TimeMillisSchema.validate": [
+        "avro.io 133:56 call  current_node.schema.validate(current_node.datum)"
+      ],
+      "avro.schema.TimestampMicrosSchema.validate": [
+        "avro.io 133:56 call  current_node.schema.validate(current_node.datum)"
+      ],
+      "avro.schema.TimestampMillisSchema.validate": [
+        "avro.io 133:56 call  current_node.schema.validate(current_node.datum)"
+      ],
+      "avro.schema.UUIDSchema.validate": [
+        "avro.io 133:56 call  current_node.schema.validate(current_node.datum)"
+      ]
+    },
+    "avro.ipc.BaseRequestor.read_call_response": {
+      "<builtin>.Exception.__init__": [
+        "avro.ipc 207:44 call  avro.errors.AvroException(f\"Unknown remote message: {mess...",
+        "avro.ipc 212:44 call  avro.errors.AvroException(f\"Unknown local message: {messa...",
+        "avro.ipc 223:50 call  avro.errors.AvroRemoteException(datum_reader.read(decoder))"
+      ],
+      "<builtin>.dict.get": [
+        "avro.ipc 205:66 call  self.remote_protocol.messages.get(message_name)",
+        "avro.ipc 210:64 call  self.local_protocol.messages.get(message_name)"
+      ],
+      "avro.io.BinaryDecoder.read_boolean": [
+        "avro.ipc 215:36 call  decoder.read_boolean()"
+      ],
+      "avro.io.DatumReader.__init__": [
+        "avro.ipc 222:47 call  avro.io.DatumReader(writers_schema, readers_schema)"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.ipc 202:25 call  META_READER.read(decoder)",
+        "avro.ipc 223:68 call  datum_reader.read(decoder)"
+      ],
+      "avro.ipc.BaseRequestor.local_protocol": [
+        "avro.ipc 210:37 getattr  self.local_protocol"
+      ],
+      "avro.ipc.BaseRequestor.read_response": [
+        "avro.ipc 218:38 call  self.read_response(writers_schema, readers_schema, decoder)"
+      ],
+      "avro.ipc.BaseRequestor.remote_protocol": [
+        "avro.ipc 205:38 getattr  self.remote_protocol"
+      ],
+      "avro.protocol.Message.errors": [
+        "avro.ipc 220:52 getattr  remote_message_schema.errors",
+        "avro.ipc 221:51 getattr  local_message_schema.errors"
+      ],
+      "avro.protocol.Message.response": [
+        "avro.ipc 216:52 getattr  remote_message_schema.response",
+        "avro.ipc 217:51 getattr  local_message_schema.response"
+      ],
+      "avro.protocol.Protocol.messages": [
+        "avro.ipc 205:54 getattr  self.remote_protocol.messages",
+        "avro.ipc 210:52 getattr  self.local_protocol.messages"
+      ]
+    },
+    "avro.ipc.BaseRequestor.read_handshake_response": {
+      "<builtin>.Exception.__init__": [
+        "avro.ipc 176:48 call  avro.errors.AvroException(\"Handshake failure.\")",
+        "avro.ipc 183:48 call  avro.errors.AvroException(\"Handshake failure.\")",
+        "avro.ipc 189:44 call  avro.errors.AvroException(f\"Unexpected match: {match}\")"
+      ],
+      "<builtin>.dict.get": [
+        "avro.ipc 170:39 call  handshake_response.get(\"match\")",
+        "avro.ipc 177:78 call  handshake_response.get(\"serverProtocol\")",
+        "avro.ipc 178:54 call  handshake_response.get(\"serverHash\")",
+        "avro.ipc 184:78 call  handshake_response.get(\"serverProtocol\")",
+        "avro.ipc 185:54 call  handshake_response.get(\"serverHash\")"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.ipc 169:61 call  HANDSHAKE_REQUESTOR_READER.read(decoder)"
+      ],
+      "avro.ipc.BaseRequestor.remote_hash": [
+        "avro.ipc 178:18 setattr  self.remote_hash",
+        "avro.ipc 185:18 setattr  self.remote_hash"
+      ],
+      "avro.ipc.BaseRequestor.remote_protocol": [
+        "avro.ipc 177:18 setattr  self.remote_protocol",
+        "avro.ipc 184:18 setattr  self.remote_protocol"
+      ],
+      "avro.ipc.BaseRequestor.send_protocol": [
+        "avro.ipc 172:18 setattr  self.send_protocol",
+        "avro.ipc 175:21 getattr  self.send_protocol",
+        "avro.ipc 179:18 setattr  self.send_protocol",
+        "avro.ipc 182:21 getattr  self.send_protocol",
+        "avro.ipc 186:18 setattr  self.send_protocol"
+      ],
+      "avro.protocol.parse": [
+        "avro.ipc 177:55 call  avro.protocol.parse(handshake_response.get(\"serverProtoco...",
+        "avro.ipc 184:55 call  avro.protocol.parse(handshake_response.get(\"serverProtoco..."
+      ]
+    },
+    "avro.ipc.BaseRequestor.read_response": {
+      "avro.io.DatumReader.__init__": [
+        "avro.ipc 226:43 call  avro.io.DatumReader(writers_schema, readers_schema)"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.ipc 227:35 call  datum_reader.read(decoder)"
+      ]
+    },
+    "avro.ipc.BaseRequestor.remote_hash": {
+      "avro.ipc.BaseRequestor.remote_hash": [
+        "avro.ipc 105:60 getattr  self.remote_hash"
+      ],
+      "avro.ipc.BaseRequestor.transceiver": [
+        "avro.ipc 105:28 getattr  self.transceiver"
+      ]
+    },
+    "avro.ipc.BaseRequestor.remote_protocol": {
+      "avro.ipc.BaseRequestor.remote_protocol": [
+        "avro.ipc 96:63 getattr  self.remote_protocol"
+      ],
+      "avro.ipc.BaseRequestor.transceiver": [
+        "avro.ipc 96:31 getattr  self.transceiver"
+      ]
+    },
+    "avro.ipc.BaseRequestor.request": {
+      "avro.io.BinaryEncoder.__init__": [
+        "avro.ipc 121:47 call  avro.io.BinaryEncoder(buffer_writer)"
+      ],
+      "avro.ipc.BaseRequestor.write_call_request": [
+        "avro.ipc 123:32 call  self.write_call_request(message_name, request_datum, buff..."
+      ],
+      "avro.ipc.BaseRequestor.write_handshake_request": [
+        "avro.ipc 122:37 call  self.write_handshake_request(buffer_encoder)"
+      ],
+      "avro.ipc.Requestor.issue_request": [
+        "avro.ipc 127:34 call  self.issue_request(call_request, message_name, request_da..."
+      ],
+      "io.BytesIO": [
+        "avro.ipc 120:35 call  io.BytesIO()"
+      ],
+      "io.BytesIO.getvalue": [
+        "avro.ipc 126:46 call  buffer_writer.getvalue()"
+      ]
+    },
+    "avro.ipc.BaseRequestor.write_call_request": {
+      "<builtin>.Exception.__init__": [
+        "avro.ipc 158:44 call  avro.errors.AvroException(f\"Unknown message: {message_nam..."
+      ],
+      "<builtin>.dict.get": [
+        "avro.ipc 156:51 call  self.local_protocol.messages.get(message_name)"
+      ],
+      "avro.io.BinaryEncoder.write_utf8": [
+        "avro.ipc 159:27 call  encoder.write_utf8(message.name)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 153:26 call  META_WRITER.write(request_metadata, encoder)"
+      ],
+      "avro.ipc.BaseRequestor.local_protocol": [
+        "avro.ipc 156:24 getattr  self.local_protocol"
+      ],
+      "avro.ipc.BaseRequestor.write_request": [
+        "avro.ipc 162:27 call  self.write_request(message.request, request_datum, encoder)"
+      ],
+      "avro.protocol.Message.name": [
+        "avro.ipc 159:36 getattr  message.name"
+      ],
+      "avro.protocol.Message.request": [
+        "avro.ipc 162:36 getattr  message.request"
+      ],
+      "avro.protocol.Protocol.messages": [
+        "avro.ipc 156:39 getattr  self.local_protocol.messages"
+      ]
+    },
+    "avro.ipc.BaseRequestor.write_handshake_request": {
+      "<builtin>.dict.get": [
+        "avro.ipc 132:40 call  REMOTE_HASHES.get(remote_name)"
+      ],
+      "<builtin>.str": [
+        "avro.ipc 140:50 call  str(self.local_protocol)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 141:41 call  HANDSHAKE_REQUESTOR_WRITER.write(request_datum, encoder)"
+      ],
+      "avro.ipc.BaseRequestor.local_protocol": [
+        "avro.ipc 130:27 getattr  self.local_protocol",
+        "avro.ipc 135:41 getattr  self.local_protocol",
+        "avro.ipc 140:56 getattr  self.local_protocol"
+      ],
+      "avro.ipc.BaseRequestor.remote_protocol": [
+        "avro.ipc 135:18 setattr  self.remote_protocol"
+      ],
+      "avro.ipc.BaseRequestor.send_protocol": [
+        "avro.ipc 139:17 getattr  self.send_protocol"
+      ],
+      "avro.ipc.BaseRequestor.transceiver": [
+        "avro.ipc 131:28 getattr  self.transceiver"
+      ],
+      "avro.protocol.Protocol.__str__": [
+        "avro.ipc 140:50 call  str(self.local_protocol)"
+      ],
+      "avro.protocol.Protocol.md5": [
+        "avro.ipc 130:42 getattr  self.local_protocol.md5"
+      ]
+    },
+    "avro.ipc.BaseRequestor.write_request": {
+      "avro.io.DatumWriter.__init__": [
+        "avro.ipc 165:43 call  avro.io.DatumWriter(request_schema)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 166:27 call  datum_writer.write(request_datum, encoder)"
+      ]
+    },
+    "avro.ipc.FramedReader._read_buffer_length": {
+      "<builtin>.Exception.__init__": [
+        "avro.ipc 416:56 call  avro.errors.ConnectionClosedException(\"Reader read 0 byte..."
+      ],
+      "avro.ipc.FramedReader.reader": [
+        "avro.ipc 414:21 getattr  self.reader"
+      ],
+      "http.client.HTTPResponse.read": [
+        "avro.ipc 414:32 call  self.reader.read(BUFFER_HEADER_LENGTH)"
+      ],
+      "io.BufferedReader.read": [
+        "avro.ipc 414:32 call  self.reader.read(BUFFER_HEADER_LENGTH)"
+      ],
+      "struct.Struct.unpack": [
+        "avro.ipc 417:44 call  BIG_ENDIAN_INT_STRUCT.unpack(read)"
+      ]
+    },
+    "avro.ipc.FramedReader.read_framed_message": {
+      "<builtin>.Exception.__init__": [
+        "avro.ipc 409:64 call  avro.errors.ConnectionClosedException(\"Reader read 0 byte..."
+      ],
+      "<builtin>.bytes.join": [
+        "avro.ipc 405:32 call  b\"\".join(message)"
+      ],
+      "<builtin>.list.append": [
+        "avro.ipc 411:27 call  message.append(buffer.getvalue())"
+      ],
+      "avro.ipc.FramedReader._read_buffer_length": [
+        "avro.ipc 403:53 call  self._read_buffer_length()"
+      ],
+      "avro.ipc.FramedReader.reader": [
+        "avro.ipc 407:30 getattr  self.reader"
+      ],
+      "http.client.HTTPResponse.read": [
+        "avro.ipc 407:41 call  self.reader.read(buffer_length - buffer.tell())"
+      ],
+      "io.BufferedReader.read": [
+        "avro.ipc 407:41 call  self.reader.read(buffer_length - buffer.tell())"
+      ],
+      "io.BytesIO": [
+        "avro.ipc 402:32 call  io.BytesIO()"
+      ],
+      "io.BytesIO.getvalue": [
+        "avro.ipc 411:43 call  buffer.getvalue()"
+      ],
+      "io.BytesIO.tell": [
+        "avro.ipc 406:30 call  buffer.tell()",
+        "avro.ipc 407:69 call  buffer.tell()"
+      ],
+      "io.BytesIO.write": [
+        "avro.ipc 410:29 call  buffer.write(chunk)"
+      ]
+    },
+    "avro.ipc.FramedWriter.write_buffer": {
+      "<builtin>.len": [
+        "avro.ipc 445:28 call  len(chunk)"
+      ],
+      "avro.ipc.FramedWriter.write_buffer_length": [
+        "avro.ipc 446:33 call  self.write_buffer_length(buffer_length)"
+      ],
+      "avro.ipc.FramedWriter.writer": [
+        "avro.ipc 447:14 getattr  self.writer"
+      ],
+      "io.BytesIO.write": [
+        "avro.ipc 447:26 call  self.writer.write(chunk)"
+      ],
+      "socketserver._SocketWriter.write": [
+        "avro.ipc 447:26 call  self.writer.write(chunk)"
+      ]
+    },
+    "avro.ipc.FramedWriter.write_buffer_length": {
+      "avro.ipc.FramedWriter.writer": [
+        "avro.ipc 450:14 getattr  self.writer"
+      ],
+      "io.BytesIO.write": [
+        "avro.ipc 450:26 call  self.writer.write(BIG_ENDIAN_INT_STRUCT.pack(n))"
+      ],
+      "socketserver._SocketWriter.write": [
+        "avro.ipc 450:26 call  self.writer.write(BIG_ENDIAN_INT_STRUCT.pack(n))"
+      ],
+      "struct.Struct.pack": [
+        "avro.ipc 450:53 call  BIG_ENDIAN_INT_STRUCT.pack(n)"
+      ]
+    },
+    "avro.ipc.FramedWriter.write_framed_message": {
+      "<builtin>.len": [
+        "avro.ipc 432:29 call  len(message)"
+      ],
+      "avro.ipc.FramedWriter.write_buffer": [
+        "avro.ipc 439:30 call  self.write_buffer(message[total_bytes_sent : (total_bytes..."
+      ],
+      "avro.ipc.FramedWriter.write_buffer_length": [
+        "avro.ipc 442:33 call  self.write_buffer_length(0)"
+      ]
+    },
+    "avro.ipc.HTTPTransceiver.__init__": {
+      "http.client.HTTPConnection": [
+        "avro.ipc 466:47 call  http.client.HTTPConnection(host, port)"
+      ],
+      "http.client.HTTPConnection.connect": [
+        "avro.ipc 467:26 call  self.conn.connect()"
+      ],
+      "socket.socket.getsockname": [
+        "avro.ipc 468:54 call  self.conn.sock.getsockname()"
+      ]
+    },
+    "avro.ipc.HTTPTransceiver.close": {
+      "http.client.HTTPConnection.close": [
+        "avro.ipc 493:24 call  self.conn.close()"
+      ]
+    },
+    "avro.ipc.HTTPTransceiver.read_framed_message": {
+      "avro.ipc.FramedReader.__init__": [
+        "avro.ipc 477:39 call  FramedReader(response)"
+      ],
+      "avro.ipc.FramedReader.read_framed_message": [
+        "avro.ipc 478:61 call  response_reader.read_framed_message()"
+      ],
+      "http.client.HTTPConnection.getresponse": [
+        "avro.ipc 476:41 call  self.conn.getresponse()"
+      ],
+      "http.client.HTTPResponse.read": [
+        "avro.ipc 479:22 call  response.read()"
+      ]
+    },
+    "avro.ipc.HTTPTransceiver.transceive": {
+      "avro.ipc.HTTPTransceiver.read_framed_message": [
+        "avro.ipc 472:42 call  self.read_framed_message()"
+      ],
+      "avro.ipc.HTTPTransceiver.write_framed_message": [
+        "avro.ipc 471:34 call  self.write_framed_message(request)"
+      ]
+    },
+    "avro.ipc.HTTPTransceiver.write_framed_message": {
+      "avro.ipc.FramedWriter.__init__": [
+        "avro.ipc 486:39 call  FramedWriter(io.BytesIO())"
+      ],
+      "avro.ipc.FramedWriter.write_framed_message": [
+        "avro.ipc 487:45 call  req_body_buffer.write_framed_message(message)"
+      ],
+      "avro.ipc.FramedWriter.writer": [
+        "avro.ipc 488:36 getattr  req_body_buffer.writer"
+      ],
+      "http.client.HTTPConnection.request": [
+        "avro.ipc 490:26 call  self.conn.request(req_method, self.req_resource, req_body..."
+      ],
+      "io.BytesIO": [
+        "avro.ipc 486:50 call  io.BytesIO()"
+      ],
+      "io.BytesIO.getvalue": [
+        "avro.ipc 488:51 call  req_body_buffer.writer.getvalue()"
+      ]
+    },
+    "avro.ipc.Requestor.issue_request": {
+      "avro.io.BinaryDecoder.__init__": [
+        "avro.ipc 236:47 call  avro.io.BinaryDecoder(io.BytesIO(call_response))"
+      ],
+      "avro.ipc.BaseRequestor.read_call_response": [
+        "avro.ipc 239:43 call  self.read_call_response(message_name, buffer_decoder)"
+      ],
+      "avro.ipc.BaseRequestor.read_handshake_response": [
+        "avro.ipc 237:60 call  self.read_handshake_response(buffer_decoder)"
+      ],
+      "avro.ipc.BaseRequestor.request": [
+        "avro.ipc 240:28 call  self.request(message_name, request_datum)"
+      ],
+      "avro.ipc.BaseRequestor.transceiver": [
+        "avro.ipc 233:30 getattr  self.transceiver"
+      ],
+      "avro.ipc.HTTPTransceiver.transceive": [
+        "avro.ipc 233:52 call  self.transceiver.transceive(call_request)"
+      ],
+      "io.BytesIO": [
+        "avro.ipc 236:58 call  io.BytesIO(call_response)"
+      ]
+    },
+    "avro.ipc.Responder.__init__": {
+      "avro.ipc.Responder.local_hash": [
+        "avro.ipc 250:38 getattr  self.local_hash"
+      ],
+      "avro.ipc.Responder.local_protocol": [
+        "avro.ipc 248:33 getattr  self.local_protocol",
+        "avro.ipc 250:55 getattr  self.local_protocol"
+      ],
+      "avro.ipc.Responder.set_protocol_cache": [
+        "avro.ipc 250:32 call  self.set_protocol_cache(self.local_hash, self.local_proto..."
+      ],
+      "avro.protocol.Protocol.md5": [
+        "avro.ipc 248:48 getattr  self.local_protocol.md5"
+      ]
+    },
+    "avro.ipc.Responder.get_protocol_cache": {
+      "<builtin>.dict.get": [
+        "avro.ipc 267:39 call  self.protocol_cache.get(hash)"
+      ],
+      "avro.ipc.Responder.protocol_cache": [
+        "avro.ipc 267:21 getattr  self.protocol_cache"
+      ]
+    },
+    "avro.ipc.Responder.process_handshake": {
+      "<builtin>.dict.get": [
+        "avro.ipc 338:44 call  handshake_request.get(\"clientHash\")",
+        "avro.ipc 339:48 call  handshake_request.get(\"clientProtocol\")",
+        "avro.ipc 346:44 call  handshake_request.get(\"serverHash\")"
+      ],
+      "<builtin>.str": [
+        "avro.ipc 359:55 call  str(self.local_protocol)"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.ipc 334:60 call  HANDSHAKE_RESPONDER_READER.read(decoder)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 362:41 call  HANDSHAKE_RESPONDER_WRITER.write(handshake_response, enco..."
+      ],
+      "avro.ipc.Responder.get_protocol_cache": [
+        "avro.ipc 340:50 call  self.get_protocol_cache(client_hash)"
+      ],
+      "avro.ipc.Responder.local_hash": [
+        "avro.ipc 347:17 getattr  self.local_hash",
+        "avro.ipc 360:53 getattr  self.local_hash"
+      ],
+      "avro.ipc.Responder.local_protocol": [
+        "avro.ipc 359:61 getattr  self.local_protocol"
+      ],
+      "avro.ipc.Responder.set_protocol_cache": [
+        "avro.ipc 343:36 call  self.set_protocol_cache(client_hash, remote_protocol)"
+      ],
+      "avro.protocol.Protocol.__str__": [
+        "avro.ipc 359:55 call  str(self.local_protocol)"
+      ],
+      "avro.protocol.parse": [
+        "avro.ipc 342:50 call  avro.protocol.parse(client_protocol)"
+      ]
+    },
+    "avro.ipc.Responder.read_request": {
+      "avro.io.DatumReader.__init__": [
+        "avro.ipc 371:43 call  avro.io.DatumReader(writers_schema, readers_schema)"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.ipc 372:33 call  datum_reader.read(decoder)"
+      ]
+    },
+    "avro.ipc.Responder.respond": {
+      "<builtin>.Exception.__init__": [
+        "avro.ipc 299:48 call  avro.errors.AvroException(fail_msg)",
+        "avro.ipc 303:48 call  avro.errors.AvroException(fail_msg)",
+        "avro.ipc 314:56 call  avro.errors.AvroRemoteException(str(e))",
+        "avro.ipc 326:52 call  avro.errors.AvroRemoteException(str(e))"
+      ],
+      "<builtin>.dict.get": [
+        "avro.ipc 296:58 call  remote_protocol.messages.get(remote_message_name)",
+        "avro.ipc 300:61 call  self.local_protocol.messages.get(remote_message_name)"
+      ],
+      "<builtin>.str": [
+        "avro.ipc 314:60 call  str(e)",
+        "avro.ipc 326:56 call  str(e)"
+      ],
+      "avro.io.BinaryDecoder.__init__": [
+        "avro.ipc 278:47 call  avro.io.BinaryDecoder(buffer_reader)"
+      ],
+      "avro.io.BinaryDecoder.read_utf8": [
+        "avro.ipc 292:59 call  buffer_decoder.read_utf8()"
+      ],
+      "avro.io.BinaryEncoder.__init__": [
+        "avro.ipc 280:47 call  avro.io.BinaryEncoder(buffer_writer)",
+        "avro.ipc 327:51 call  avro.io.BinaryEncoder(io.BytesIO())"
+      ],
+      "avro.io.BinaryEncoder.write_boolean": [
+        "avro.ipc 318:41 call  buffer_encoder.write_boolean(error is not None)",
+        "avro.ipc 329:41 call  buffer_encoder.write_boolean(True)"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.ipc 291:29 call  META_READER.read(buffer_decoder)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 317:30 call  META_WRITER.write(response_metadata, buffer_encoder)",
+        "avro.ipc 328:30 call  META_WRITER.write(response_metadata, buffer_encoder)"
+      ],
+      "avro.ipc.Responder.invoke": [
+        "avro.ipc 310:39 call  self.invoke(local_message, request)"
+      ],
+      "avro.ipc.Responder.local_protocol": [
+        "avro.ipc 300:34 getattr  self.local_protocol"
+      ],
+      "avro.ipc.Responder.process_handshake": [
+        "avro.ipc 285:53 call  self.process_handshake(buffer_decoder, buffer_encoder)"
+      ],
+      "avro.ipc.Responder.read_request": [
+        "avro.ipc 306:40 call  self.read_request(writers_schema, readers_schema, buffer_..."
+      ],
+      "avro.ipc.Responder.write_error": [
+        "avro.ipc 324:33 call  self.write_error(writers_schema, error, buffer_encoder)",
+        "avro.ipc 330:29 call  self.write_error(SYSTEM_ERROR_SCHEMA, error, buffer_encoder)"
+      ],
+      "avro.ipc.Responder.write_response": [
+        "avro.ipc 321:36 call  self.write_response(writers_schema, response, buffer_enco..."
+      ],
+      "avro.protocol.Message.errors": [
+        "avro.ipc 323:48 getattr  local_message.errors"
+      ],
+      "avro.protocol.Message.request": [
+        "avro.ipc 304:45 getattr  remote_message.request",
+        "avro.ipc 305:44 getattr  local_message.request"
+      ],
+      "avro.protocol.Message.response": [
+        "avro.ipc 320:48 getattr  local_message.response"
+      ],
+      "avro.protocol.Protocol.messages": [
+        "avro.ipc 296:46 getattr  remote_protocol.messages",
+        "avro.ipc 300:49 getattr  self.local_protocol.messages"
+      ],
+      "avro.tether.tether_task_runner.TaskRunnerResponder.invoke": [
+        "avro.ipc 310:39 call  self.invoke(local_message, request)"
+      ],
+      "avro.tool.GenericResponder.invoke": [
+        "avro.ipc 310:39 call  self.invoke(local_message, request)"
+      ],
+      "io.BytesIO": [
+        "avro.ipc 277:35 call  io.BytesIO(call_request)",
+        "avro.ipc 279:35 call  io.BytesIO()",
+        "avro.ipc 327:62 call  io.BytesIO()"
+      ],
+      "io.BytesIO.getvalue": [
+        "avro.ipc 288:46 call  buffer_writer.getvalue()",
+        "avro.ipc 331:38 call  buffer_writer.getvalue()"
+      ]
+    },
+    "avro.ipc.Responder.set_protocol_cache": {
+      "avro.ipc.Responder.protocol_cache": [
+        "avro.ipc 270:14 getattr  self.protocol_cache"
+      ]
+    },
+    "avro.ipc.Responder.write_error": {
+      "<builtin>.str": [
+        "avro.ipc 380:31 call  str(error_exception)"
+      ],
+      "avro.io.DatumWriter.__init__": [
+        "avro.ipc 379:43 call  avro.io.DatumWriter(writers_schema)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 380:27 call  datum_writer.write(str(error_exception), encoder)"
+      ]
+    },
+    "avro.ipc.Responder.write_response": {
+      "avro.io.DatumWriter.__init__": [
+        "avro.ipc 375:43 call  avro.io.DatumWriter(writers_schema)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.ipc 376:27 call  datum_writer.write(response_datum, encoder)"
+      ]
+    },
+    "avro.name.Name.__init__": {
+      "avro.compatibility.SchemaType.__str__": [
+        "avro.name 91:52 format  {name_attr!s}"
+      ]
+    },
+    "avro.name.Name.get_space": {
+      "avro.name.Name.space": [
+        "avro.name 116:21 getattr  self.space"
+      ],
+      "warnings.warn": [
+        "avro.name 115:22 call  warnings.warn(\"Name.get_space() is deprecated in favor of..."
+      ]
+    },
+    "avro.name.Names.add_name": {
+      "<builtin>.Exception.__init__": [
+        "avro.name 169:51 call  avro.errors.SchemaParseException(f\"{to_add.fullname} is a...",
+        "avro.name 171:51 call  avro.errors.SchemaParseException(f'The name \"{to_add.full...",
+        "avro.name 173:51 call  avro.errors.SchemaParseException(f'The name built from \"{..."
+      ]
+    },
+    "avro.protocol.Message.__eq__": {
+      "<builtin>.all": [
+        "avro.protocol 226:19 call  all(hasattr(that, prop) and getattr(self, prop) == getatt..."
+      ],
+      "<builtin>.getattr": [
+        "avro.protocol 226:51 call  getattr(self, prop)",
+        "avro.protocol 226:74 call  getattr(that, prop)"
+      ],
+      "<builtin>.hasattr": [
+        "avro.protocol 226:27 call  hasattr(that, prop)"
+      ],
+      "avro.schema.EqualByJsonMixin.__eq__": [
+        "avro.protocol 226:64 op  getattr(self, prop) == getattr(that, prop)"
+      ],
+      "avro.schema.EqualByPropsMixin.__eq__": [
+        "avro.protocol 226:64 op  getattr(self, prop) == getattr(that, prop)"
+      ]
+    },
+    "avro.protocol.Message.__init__": {
+      "avro.name.Names.__init__": [
+        "avro.protocol 186:41 call  avro.name.Names(validate_names=validate_names)"
+      ]
+    },
+    "avro.protocol.Message.__str__": {
+      "avro.protocol.Message.to_json": [
+        "avro.protocol 209:39 call  self.to_json()"
+      ],
+      "json.dumps": [
+        "avro.protocol 209:26 call  json.dumps(self.to_json())"
+      ]
+    },
+    "avro.protocol.Message.to_json": {
+      "<builtin>.dict": [
+        "avro.protocol 215:36 call  MessageObject()"
+      ],
+      "avro.name.Names.__init__": [
+        "avro.protocol 212:41 call  avro.name.Names(validate_names=self._validate_names)"
+      ],
+      "avro.schema.ArraySchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.MapSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.PrimitiveSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.UUIDSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ],
+      "avro.schema.UnionSchema.to_json": [
+        "avro.protocol 219:52 call  self.response.to_json(names)"
+      ]
+    },
+    "avro.protocol.Protocol.__eq__": {
+      "<builtin>.str": [
+        "avro.protocol 151:31 call  str(self)",
+        "avro.protocol 153:35 call  str(that)"
+      ],
+      "avro.protocol.Protocol.__str__": [
+        "avro.protocol 151:31 call  str(self)",
+        "avro.protocol 153:35 call  str(that)"
+      ],
+      "json.loads": [
+        "avro.protocol 151:27 call  json.loads(str(self))",
+        "avro.protocol 153:31 call  json.loads(str(that))"
+      ],
+      "typing.cast": [
+        "avro.protocol 156:20 call  cast(bool, this_ == that_)"
+      ]
+    },
+    "avro.protocol.Protocol.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 92:53 call  avro.errors.ProtocolParseException(\"Protocols must have a...",
+        "avro.protocol 94:53 call  avro.errors.ProtocolParseException(\"The name property mus...",
+        "avro.protocol 96:53 call  avro.errors.ProtocolParseException(\"The namespace propert...",
+        "avro.protocol 98:53 call  avro.errors.ProtocolParseException(\"The types property mu...",
+        "avro.protocol 100:53 call  avro.errors.ProtocolParseException(\"The messages property..."
+      ],
+      "_hashlib._OneShotHash.digest": [
+        "avro.protocol 108:59 call  hashlib.md5(str(self).encode()).digest()"
+      ],
+      "_md5.MD5Type.digest": [
+        "avro.protocol 108:59 call  hashlib.md5(str(self).encode()).digest()"
+      ],
+      "_md5.md5.digest": [
+        "avro.protocol 108:59 call  hashlib.md5(str(self).encode()).digest()"
+      ]
+    },
+    "avro.protocol.Protocol.to_json": {
+      "avro.schema.EnumSchema.to_json": [
+        "avro.protocol 143:36 call  t.to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.protocol 143:36 call  t.to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.protocol 143:36 call  t.to_json(names)"
+      ]
+    },
+    "avro.protocol._parse_errors": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 242:49 call  avro.errors.ProtocolParseException(f\"Errors property not ..."
+      ]
+    },
+    "avro.protocol._parse_messages": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 282:53 call  avro.errors.ProtocolParseException(f'Message name \"{name}..."
+      ]
+    },
+    "avro.protocol._parse_request": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 231:49 call  avro.errors.ProtocolParseException(f\"Request property not..."
+      ]
+    },
+    "avro.protocol._parse_response": {
+      "avro.schema.make_avsc_object": [
+        "avro.protocol 236:100 call  avro.schema.make_avsc_object(response, names, validate_na..."
+      ]
+    },
+    "avro.protocol._parse_types": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 274:49 call  avro.errors.ProtocolParseException(f\"Type {type_} not an ..."
+      ]
+    },
+    "avro.protocol.make_avpr_object": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 250:49 call  avro.errors.ProtocolParseException(f\"Not a JSON object: {..."
+      ]
+    },
+    "avro.protocol.parse": {
+      "<builtin>.Exception.__init__": [
+        "avro.protocol 263:49 call  avro.errors.ProtocolParseException(f\"Error parsing JSON: ..."
+      ]
+    },
+    "avro.schema.ArraySchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 782:55 call  avro.errors.SchemaParseException(fail_msg)"
+      ],
+      "<builtin>.dict.keys": [
+        "avro.schema 781:113 call  names.names.keys()"
+      ]
+    },
+    "avro.schema.ArraySchema.to_canonical_json": {
+      "avro.schema.ArraySchema.to_canonical_json": [
+        "avro.schema 813:57 call  item_schema.to_canonical_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_canonical_json": [
+        "avro.schema 813:57 call  item_schema.to_canonical_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_canonical_json": [
+        "avro.schema 813:57 call  item_schema.to_canonical_json(names)"
+      ],
+      "avro.schema.MapSchema.to_canonical_json": [
+        "avro.schema 813:57 call  item_schema.to_canonical_json(names)"
+      ],
+      "avro.schema.UnionSchema.to_canonical_json": [
+        "avro.schema 813:57 call  item_schema.to_canonical_json(names)"
+      ]
+    },
+    "avro.schema.ArraySchema.to_json": {
+      "avro.schema.ArraySchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.ErrorUnionSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.MapSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.RecordSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.UUIDSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ],
+      "avro.schema.UnionSchema.to_json": [
+        "avro.schema 804:47 call  item_schema.to_json(names)"
+      ]
+    },
+    "avro.schema.BytesDecimalSchema.precision": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 570:29 call  self.get_prop(\"precision\")"
+      ]
+    },
+    "avro.schema.BytesDecimalSchema.scale": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 574:29 call  self.get_prop(\"scale\")"
+      ]
+    },
+    "avro.schema.BytesDecimalSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 577:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.DateSchema.__init__": {
+      "avro.schema.LogicalSchema.__init__": [
+        "avro.schema 1097:31 call  LogicalSchema.__init__(self, avro.constants.DATE)"
+      ],
+      "avro.schema.PrimitiveSchema.__init__": [
+        "avro.schema 1098:33 call  PrimitiveSchema.__init__(self, \"int\", other_props)"
+      ]
+    },
+    "avro.schema.DateSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 1101:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.DateSchema.validate": {
+      "<builtin>.isinstance": [
+        "avro.schema 1105:34 call  isinstance(datum, datetime.date)"
+      ]
+    },
+    "avro.schema.EnumSchema.default": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 725:41 call  avro.errors.InvalidDefault(f\"Enum default '{symbol}' is n..."
+      ],
+      "avro.schema.EnumSchema.symbols": [
+        "avro.schema 725:108 getattr  self.symbols"
+      ]
+    },
+    "avro.schema.EnumSchema.doc": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 729:29 call  self.get_prop(\"doc\")"
+      ]
+    },
+    "avro.schema.EqualByJsonMixin.__eq__": {
+      "<builtin>.str": [
+        "avro.schema 207:38 call  str(that)",
+        "avro.schema 210:41 call  str(self)"
+      ],
+      "avro.schema.Field.__str__": [
+        "avro.schema 210:41 call  str(self)"
+      ],
+      "avro.schema.Schema.__str__": [
+        "avro.schema 207:38 call  str(that)",
+        "avro.schema 210:41 call  str(self)"
+      ],
+      "json.loads": [
+        "avro.schema 207:34 call  json.loads(str(that))",
+        "avro.schema 210:37 call  json.loads(str(self))"
+      ],
+      "typing.cast": [
+        "avro.schema 210:20 call  cast(bool, json.loads(str(self)) == that_obj)"
+      ]
+    },
+    "avro.schema.EqualByJsonMixin.__hash__": {
+      "<builtin>.hash": [
+        "avro.schema 217:20 call  hash(self.fingerprint())"
+      ],
+      "avro.schema.Schema.fingerprint": [
+        "avro.schema 217:37 call  self.fingerprint()"
+      ]
+    },
+    "avro.schema.EqualByPropsMixin.__eq__": {
+      "<builtin>.getattr": [
+        "avro.schema 226:64 call  getattr(that, \"props\")"
+      ],
+      "<builtin>.hasattr": [
+        "avro.schema 226:23 call  hasattr(that, \"props\")"
+      ],
+      "avro.schema.EqualByJsonMixin.__eq__": [
+        "avro.schema 226:54 op  self.props == getattr(that, \"props\")"
+      ],
+      "avro.schema.EqualByPropsMixin.__eq__": [
+        "avro.schema 226:54 op  self.props == getattr(that, \"props\")"
+      ],
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 226:23 call  hasattr(that, \"props\")",
+        "avro.schema 226:48 getattr  self.props",
+        "avro.schema 226:64 call  getattr(that, \"props\")"
+      ]
+    },
+    "avro.schema.EqualByPropsMixin.__hash__": {
+      "<builtin>.hash": [
+        "avro.schema 233:20 call  hash(self.fingerprint())"
+      ],
+      "avro.schema.Schema.fingerprint": [
+        "avro.schema 233:37 call  self.fingerprint()"
+      ]
+    },
+    "avro.schema.ErrorUnionSchema.to_json": {
+      "avro.name.Names.__init__": [
+        "avro.schema 949:31 call  Names(validate_names=self.validate_names)"
+      ],
+      "avro.schema.ArraySchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.MapSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.PrimitiveSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.schema 956:42 call  schema.to_json(names)"
+      ]
+    },
+    "avro.schema.Field.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 426:51 call  avro.errors.SchemaParseException(\"Fields must have a non-...",
+        "avro.schema 428:51 call  avro.errors.SchemaParseException(\"The name property must ...",
+        "avro.schema 430:51 call  avro.errors.SchemaParseException(f\"The order property {or...",
+        "avro.schema 440:55 call  avro.errors.SchemaParseException(f'Type property \"{type_}..."
+      ]
+    },
+    "avro.schema.Field.__str__": {
+      "avro.schema.Field.to_json": [
+        "avro.schema 472:39 call  self.to_json()"
+      ],
+      "json.dumps": [
+        "avro.schema 472:26 call  json.dumps(self.to_json())"
+      ]
+    },
+    "avro.schema.Field.default": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 457:29 call  self.get_prop(\"default\")"
+      ]
+    },
+    "avro.schema.Field.doc": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 469:29 call  self.get_prop(\"doc\")"
+      ]
+    },
+    "avro.schema.Field.order": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 465:29 call  self.get_prop(\"order\")"
+      ]
+    },
+    "avro.schema.Field.to_canonical_json": {
+      "avro.name.Names.__init__": [
+        "avro.schema 483:31 call  Names(validate_names=self.validate_names)"
+      ]
+    },
+    "avro.schema.Field.to_json": {
+      "avro.name.Names.__init__": [
+        "avro.schema 475:31 call  Names(validate_names=self.validate_names)"
+      ],
+      "avro.schema.ArraySchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.ErrorUnionSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.MapSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ],
+      "avro.schema.UUIDSchema.to_json": [
+        "avro.schema 478:44 call  self.type.to_json(names)"
+      ]
+    },
+    "avro.schema.FixedDecimalSchema.precision": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 659:29 call  self.get_prop(\"precision\")"
+      ]
+    },
+    "avro.schema.FixedDecimalSchema.scale": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 663:29 call  self.get_prop(\"scale\")"
+      ]
+    },
+    "avro.schema.FixedDecimalSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 666:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.FixedSchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 592:44 call  avro.errors.AvroException(fail_msg)"
+      ]
+    },
+    "avro.schema.FixedSchema.to_json": {
+      "avro.schema.NamedSchema.name_ref": [
+        "avro.schema 617:33 call  self.name_ref(names)"
+      ]
+    },
+    "avro.schema.MapSchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 836:55 call  avro.errors.SchemaParseException(\"Values schema is not a ..."
+      ],
+      "avro.name.Names.get_name": [
+        "avro.schema 829:43 call  names.get_name(values, None)"
+      ]
+    },
+    "avro.schema.MapSchema.to_canonical_json": {
+      "avro.schema.ArraySchema.to_canonical_json": [
+        "avro.schema 865:70 call  self.get_prop(\"values\").to_canonical_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_canonical_json": [
+        "avro.schema 865:70 call  self.get_prop(\"values\").to_canonical_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_canonical_json": [
+        "avro.schema 865:70 call  self.get_prop(\"values\").to_canonical_json(names)"
+      ],
+      "avro.schema.MapSchema.to_canonical_json": [
+        "avro.schema 865:70 call  self.get_prop(\"values\").to_canonical_json(names)"
+      ],
+      "avro.schema.UnionSchema.to_canonical_json": [
+        "avro.schema 865:70 call  self.get_prop(\"values\").to_canonical_json(names)"
+      ]
+    },
+    "avro.schema.MapSchema.to_json": {
+      "avro.schema.ArraySchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.ErrorUnionSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.MapSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.RecordSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.UUIDSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ],
+      "avro.schema.UnionSchema.to_json": [
+        "avro.schema 857:60 call  self.get_prop(\"values\").to_json(names)"
+      ]
+    },
+    "avro.schema.NamedSchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 355:51 call  avro.errors.SchemaParseException(\"Named Schemas must have...",
+        "avro.schema 357:51 call  avro.errors.SchemaParseException(\"The name property must ...",
+        "avro.schema 359:51 call  avro.errors.SchemaParseException(\"The namespace property ..."
+      ]
+    },
+    "avro.schema.PrimitiveSchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 513:44 call  avro.errors.AvroException(f\"{type} is not a valid primiti..."
+      ]
+    },
+    "avro.schema.PrimitiveSchema.to_canonical_json": {
+      "avro.schema.CanonicalPropertiesMixin.canonical_properties": [
+        "avro.schema 543:64 getattr  self.canonical_properties"
+      ]
+    },
+    "avro.schema.PrimitiveSchema.validate": {
+      "avro.schema.PrimitiveSchema.validate.<lambda1>": [
+        "avro.schema 552:33 call  validator(datum)"
+      ]
+    },
+    "avro.schema.PropertiesMixin.other_props": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 197:37 getattr  self.props"
+      ],
+      "avro.schema.get_other_props": [
+        "avro.schema 197:31 call  get_other_props(self.props, self._reserved_properties)"
+      ]
+    },
+    "avro.schema.RecordSchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 1010:51 call  avro.errors.SchemaParseException(fail_msg)",
+        "avro.schema 1013:51 call  avro.errors.SchemaParseException(fail_msg)"
+      ]
+    },
+    "avro.schema.RecordSchema.doc": {
+      "avro.schema.PropertiesMixin.get_prop": [
+        "avro.schema 1042:29 call  self.get_prop(\"doc\")"
+      ]
+    },
+    "avro.schema.RecordSchema.make_field_objects": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 969:55 call  avro.errors.SchemaParseException(f\"Not a valid field: {fi...",
+        "avro.schema 983:55 call  avro.errors.SchemaParseException(fail_msg)"
+      ]
+    },
+    "avro.schema.RecordSchema.to_canonical_json": {
+      "<builtin>.NotImplementedError": [
+        "avro.schema 1072:38 call  NotImplementedError(\"Canonical form (probably) does not m..."
+      ]
+    },
+    "avro.schema.Schema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 252:51 call  avro.errors.SchemaParseException(\"Schema type must be a s...",
+        "avro.schema 254:51 call  avro.errors.SchemaParseException(f\"{type_} is not a valid..."
+      ]
+    },
+    "avro.schema.Schema.__str__": {
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.ErrorUnionSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ],
+      "avro.schema.UUIDSchema.to_json": [
+        "avro.schema 269:39 call  self.to_json()"
+      ]
+    },
+    "avro.schema.Schema.fingerprint": {
+      "_blake2.blake2b.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_blake2.blake2s.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_hashlib._OneShotHash.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_md5.MD5Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_md5.md5.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha1.SHA1Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha1.sha.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha2.SHA224Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha2.SHA256Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha2.SHA384Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha2.SHA512Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha256.SHA224Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha256.SHA256Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha256.sha224.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha256.sha256.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha3.sha3_224.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha3.sha3_256.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha3.sha3_384.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha3.sha3_512.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha512.SHA384Type.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha512.sha384.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "_sha512.sha512.digest": [
+        "avro.schema 338:24 call  h.digest()"
+      ],
+      "avro.schema._crc_64_fingerprint": [
+        "avro.schema 330:39 call  _crc_64_fingerprint(schema)"
+      ]
+    },
+    "avro.schema.TimeMicrosSchema.__init__": {
+      "avro.schema.LogicalSchema.__init__": [
+        "avro.schema 1133:31 call  LogicalSchema.__init__(self, avro.constants.TIME_MICROS)"
+      ],
+      "avro.schema.PrimitiveSchema.__init__": [
+        "avro.schema 1134:33 call  PrimitiveSchema.__init__(self, \"long\", other_props)"
+      ]
+    },
+    "avro.schema.TimeMicrosSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 1137:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.TimeMicrosSchema.validate": {
+      "<builtin>.isinstance": [
+        "avro.schema 1141:34 call  isinstance(datum, datetime.time)"
+      ]
+    },
+    "avro.schema.TimeMillisSchema.__init__": {
+      "avro.schema.LogicalSchema.__init__": [
+        "avro.schema 1115:31 call  LogicalSchema.__init__(self, avro.constants.TIME_MILLIS)"
+      ],
+      "avro.schema.PrimitiveSchema.__init__": [
+        "avro.schema 1116:33 call  PrimitiveSchema.__init__(self, \"int\", other_props)"
+      ]
+    },
+    "avro.schema.TimeMillisSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 1119:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.TimeMillisSchema.validate": {
+      "<builtin>.isinstance": [
+        "avro.schema 1123:34 call  isinstance(datum, datetime.time)"
+      ]
+    },
+    "avro.schema.TimestampMicrosSchema.__init__": {
+      "avro.schema.LogicalSchema.__init__": [
+        "avro.schema 1168:31 call  LogicalSchema.__init__(self, avro.constants.TIMESTAMP_MIC..."
+      ],
+      "avro.schema.PrimitiveSchema.__init__": [
+        "avro.schema 1169:33 call  PrimitiveSchema.__init__(self, \"long\", other_props)"
+      ]
+    },
+    "avro.schema.TimestampMicrosSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 1172:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.TimestampMicrosSchema.validate": {
+      "<builtin>.isinstance": [
+        "avro.schema 1175:34 call  isinstance(datum, datetime.datetime)"
+      ],
+      "avro.schema._is_timezone_aware_datetime": [
+        "avro.schema 1175:92 call  _is_timezone_aware_datetime(datum)"
+      ]
+    },
+    "avro.schema.TimestampMillisSchema.__init__": {
+      "avro.schema.LogicalSchema.__init__": [
+        "avro.schema 1151:31 call  LogicalSchema.__init__(self, avro.constants.TIMESTAMP_MIL..."
+      ],
+      "avro.schema.PrimitiveSchema.__init__": [
+        "avro.schema 1152:33 call  PrimitiveSchema.__init__(self, \"long\", other_props)"
+      ]
+    },
+    "avro.schema.TimestampMillisSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 1155:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.TimestampMillisSchema.validate": {
+      "<builtin>.isinstance": [
+        "avro.schema 1158:34 call  isinstance(datum, datetime.datetime)"
+      ],
+      "avro.schema._is_timezone_aware_datetime": [
+        "avro.schema 1158:92 call  _is_timezone_aware_datetime(datum)"
+      ]
+    },
+    "avro.schema.UUIDSchema.__init__": {
+      "avro.schema.LogicalSchema.__init__": [
+        "avro.schema 1185:31 call  LogicalSchema.__init__(self, avro.constants.UUID)"
+      ],
+      "avro.schema.PrimitiveSchema.__init__": [
+        "avro.schema 1186:33 call  PrimitiveSchema.__init__(self, \"string\", other_props)"
+      ]
+    },
+    "avro.schema.UUIDSchema.to_json": {
+      "avro.schema.PropertiesMixin.props": [
+        "avro.schema 1189:21 getattr  self.props"
+      ]
+    },
+    "avro.schema.UUIDSchema.validate": {
+      "uuid.UUID": [
+        "avro.schema 1193:22 call  uuid.UUID(datum)"
+      ]
+    },
+    "avro.schema.UnionSchema.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 883:51 call  avro.errors.SchemaParseException(fail_msg)",
+        "avro.schema 897:59 call  avro.errors.SchemaParseException(f\"Union item must be a v...",
+        "avro.schema 904:55 call  avro.errors.SchemaParseException(f\"{new_schema.type} type...",
+        "avro.schema 906:55 call  avro.errors.SchemaParseException(\"Unions cannot contain o..."
+      ],
+      "avro.compatibility.SchemaType.__str__": [
+        "avro.schema 904:58 format  {new_schema.type}"
+      ]
+    },
+    "avro.schema.UnionSchema.match": {
+      "avro.schema.ArraySchema.match": [
+        "avro.schema 922:70 call  s.match(writer)"
+      ],
+      "avro.schema.EnumSchema.match": [
+        "avro.schema 922:70 call  s.match(writer)"
+      ],
+      "avro.schema.FixedSchema.match": [
+        "avro.schema 922:70 call  s.match(writer)"
+      ],
+      "avro.schema.MapSchema.match": [
+        "avro.schema 922:70 call  s.match(writer)"
+      ]
+    },
+    "avro.schema.UnionSchema.to_canonical_json": {
+      "avro.schema.RecordSchema.to_canonical_json": [
+        "avro.schema 936:41 call  schema.to_canonical_json(names)"
+      ]
+    },
+    "avro.schema.UnionSchema.to_json": {
+      "avro.schema.ArraySchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.BytesDecimalSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.DateSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.EnumSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.FixedDecimalSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.FixedSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.MapSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimeMicrosSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimeMillisSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimestampMicrosSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.TimestampMillisSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ],
+      "avro.schema.UUIDSchema.to_json": [
+        "avro.schema 929:42 call  schema.to_json(names)"
+      ]
+    },
+    "avro.schema.UnionSchema.validate": {
+      "avro.schema.ArraySchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.BytesDecimalSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.DateSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.EnumSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.FixedDecimalSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.FixedSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.MapSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.TimeMicrosSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.TimeMillisSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.TimestampMicrosSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.TimestampMillisSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ],
+      "avro.schema.UUIDSchema.validate": [
+        "avro.schema 940:74 call  branch.validate(datum)"
+      ]
+    },
+    "avro.schema._crc_64_fingerprint": {
+      "<builtin>.int.to_bytes": [
+        "avro.schema 159:27 call  result.to_bytes(length=8, byteorder=\"little\", signed=False)"
+      ]
+    },
+    "avro.schema._is_timezone_aware_datetime": {
+      "avro.timezones.TSTTzinfo.utcoffset": [
+        "avro.schema 115:57 call  dt.tzinfo.utcoffset(dt)"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.schema 115:57 call  dt.tzinfo.utcoffset(dt)"
+      ]
+    },
+    "avro.schema.from_path": {
+      "avro.schema.parse": [
+        "avro.schema 1351:17 call  parse(Path(path).read_text(), validate_enum_symbols, vali..."
+      ],
+      "pathlib.Path": [
+        "avro.schema 1351:22 call  Path(path)"
+      ],
+      "pathlib.PosixPath.read_text": [
+        "avro.schema 1351:38 call  Path(path).read_text()"
+      ]
+    },
+    "avro.schema.make_avsc_object": {
+      "<builtin>.Exception.__init__": [
+        "avro.schema 1274:55 call  avro.errors.SchemaParseException(f\"Name {name} must be a ...",
+        "avro.schema 1289:59 call  avro.errors.SchemaParseException(f\"Enum symbols must be a...",
+        "avro.schema 1292:63 call  avro.errors.SchemaParseException(f\"Enum symbols must be a...",
+        "avro.schema 1299:51 call  avro.errors.SchemaParseException(f\"Unknown Named Type: {t...",
+        "avro.schema 1315:55 call  avro.errors.SchemaParseException(f\"Unknown Valid Type: {t...",
+        "avro.schema 1317:51 call  avro.errors.SchemaParseException(f'No \"type\" property: {j...",
+        "avro.schema 1319:51 call  avro.errors.SchemaParseException(f\"Undefined type: {type_}\")",
+        "avro.schema 1328:43 call  avro.errors.SchemaParseException(fail_msg)"
+      ],
+      "<builtin>.type": [
+        "avro.schema 1274:103 call  type(name)",
+        "avro.schema 1289:121 call  type(symbols)",
+        "avro.schema 1292:135 call  type(symbol)"
+      ]
+    },
+    "avro.schema.make_logical_schema": {
+      "<builtin>.UserWarning.__init__": [
+        "avro.schema 1239:47 call  avro.errors.IgnoredLogicalType(f\"Logical type {logical_ty...",
+        "avro.schema 1242:57 call  avro.errors.IgnoredLogicalType(f\"Unknown {logical_type}, ..."
+      ],
+      "<builtin>.sorted": [
+        "avro.schema 1236:32 call  sorted(literal_type for lt, literal_type in logical_types..."
+      ],
+      "<builtin>.str.join": [
+        "avro.schema 1239:109 call  '/'.join(expected_types)"
+      ],
+      "avro.compatibility.SchemaType.__str__": [
+        "avro.schema 1239:132 format  {type_}",
+        "avro.schema 1242:90 format  {type_}"
+      ],
+      "avro.schema.DateSchema.__init__": [
+        "avro.schema 1234:31 call  schema_type(other_props)"
+      ],
+      "avro.schema.TimeMicrosSchema.__init__": [
+        "avro.schema 1234:31 call  schema_type(other_props)"
+      ],
+      "avro.schema.TimeMillisSchema.__init__": [
+        "avro.schema 1234:31 call  schema_type(other_props)"
+      ],
+      "avro.schema.TimestampMicrosSchema.__init__": [
+        "avro.schema 1234:31 call  schema_type(other_props)"
+      ],
+      "avro.schema.TimestampMillisSchema.__init__": [
+        "avro.schema 1234:31 call  schema_type(other_props)"
+      ],
+      "avro.schema.UUIDSchema.__init__": [
+        "avro.schema 1234:31 call  schema_type(other_props)"
+      ],
+      "warnings.warn": [
+        "avro.schema 1238:26 call  warnings.warn( avro.errors.IgnoredLogicalType(f\"Logical t...",
+        "avro.schema 1242:26 call  warnings.warn(avro.errors.IgnoredLogicalType(f\"Unknown {l...",
+        "avro.schema 1244:22 call  warnings.warn(warning)"
+      ]
+    },
+    "avro.tether.tether_task": {
+      "<builtin>.open": [
+        "avro.tether.tether_task 43:10 call  open(pfile)",
+        "avro.tether.tether_task 58:10 call  open(pfile)"
+      ],
+      "<builtin>.property": [
+        "avro.tether.tether_task 306:6 decorator  @property"
+      ],
+      "<builtin>.property.setter": [
+        "avro.tether.tether_task 311:6 decorator  @partitions.setter"
+      ],
+      "abc.abstractmethod": [
+        "avro.tether.tether_task 367:6 decorator  @abc.abstractmethod",
+        "avro.tether.tether_task 380:6 decorator  @abc.abstractmethod",
+        "avro.tether.tether_task 397:6 decorator  @abc.abstractmethod"
+      ],
+      "avro.protocol.Protocol.types_dict": [
+        "avro.tether.tether_task 49:22 getattr  inputProtocol.types_dict",
+        "avro.tether.tether_task 50:57 getattr  inputProtocol.types_dict"
+      ],
+      "avro.protocol.parse": [
+        "avro.tether.tether_task 46:36 call  avro.protocol.parse(prototxt)",
+        "avro.tether.tether_task 61:37 call  avro.protocol.parse(prototxt)"
+      ],
+      "avro.schema.EnumSchema.symbols": [
+        "avro.tether.tether_task 54:31 getattr  taskschema.symbols"
+      ],
+      "collections.namedtuple": [
+        "avro.tether.tether_task 53:32 call  collections.namedtuple(\"_ttype\", (\"MAP\", \"REDUCE\"))"
+      ],
+      "io.TextIOWrapper.read": [
+        "avro.tether.tether_task 44:23 call  hf.read()",
+        "avro.tether.tether_task 59:23 call  hf.read()"
+      ],
+      "os.path.split": [
+        "avro.tether.tether_task 42:22 call  os.path.split(__file__)",
+        "avro.tether.tether_task 56:22 call  os.path.split(__file__)"
+      ],
+      "typing.cast": [
+        "avro.tether.tether_task 50:18 call  cast(avro.schema.EnumSchema, inputProtocol.types_dict[\"Ta..."
+      ]
+    },
+    "avro.tether.tether_task.Collector.__init__": {
+      "<builtin>.isinstance": [
+        "avro.tether.tether_task 78:26 call  isinstance(scheme, avro.schema.Schema)"
+      ],
+      "avro.io.DatumWriter.__init__": [
+        "avro.tether.tether_task 83:48 call  avro.io.DatumWriter(writers_schema=self.scheme)"
+      ],
+      "avro.schema.parse": [
+        "avro.tether.tether_task 79:39 call  avro.schema.parse(scheme)"
+      ]
+    },
+    "avro.tether.tether_task.Collector.collect": {
+      "avro.io.BinaryEncoder.__init__": [
+        "avro.tether.tether_task 97:49 call  avro.io.BinaryEncoder(buff)"
+      ],
+      "avro.io.DatumWriter.write": [
+        "avro.tether.tether_task 98:36 call  self.datum_writer.write(record, self.encoder)"
+      ],
+      "avro.tether.tether_task.HTTPRequestor.request": [
+        "avro.tether.tether_task 104:34 call  self.outputClient.request(\"output\", datum)"
+      ],
+      "io.BytesIO": [
+        "avro.tether.tether_task 96:24 call  io.BytesIO()"
+      ],
+      "io.BytesIO.getvalue": [
+        "avro.tether.tether_task 99:34 call  buff.getvalue()"
+      ]
+    },
+    "avro.tether.tether_task.HTTPRequestor.request": {
+      "avro.ipc.BaseRequestor.__init__": [
+        "avro.tether.tether_task 151:39 call  avro.ipc.Requestor(self.protocol, transciever)"
+      ],
+      "avro.ipc.BaseRequestor.request": [
+        "avro.tether.tether_task 152:33 call  requestor.request(*args, **param)"
+      ],
+      "avro.ipc.HTTPTransceiver.__init__": [
+        "avro.tether.tether_task 150:47 call  avro.ipc.HTTPTransceiver(self.server, self.port)"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.__init__": {
+      "avro.schema.parse": [
+        "avro.tether.tether_task 196:42 call  avro.schema.parse(inschema)",
+        "avro.tether.tether_task 197:43 call  avro.schema.parse(midschema)",
+        "avro.tether.tether_task 198:43 call  avro.schema.parse(outschema)"
+      ],
+      "logging.getLogger": [
+        "avro.tether.tether_task 226:37 call  logging.getLogger(\"TetherTask\")"
+      ],
+      "threading.Event": [
+        "avro.tether.tether_task 225:50 call  threading.Event()"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.close": {
+      "logging.Logger.info": [
+        "avro.tether.tether_task 439:22 call  self.log.info(\"TetherTask.close: closing\")"
+      ],
+      "threading.Event.set": [
+        "avro.tether.tether_task 449:36 call  self.ready_for_shutdown.set()"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.complete": {
+      "<builtin>.dict": [
+        "avro.tether.tether_task 365:51 call  dict()"
+      ],
+      "avro.tether.tether_task.HTTPRequestor.request": [
+        "avro.tether.tether_task 365:34 call  self.outputClient.request(\"complete\", dict())"
+      ],
+      "logging.Logger.warning": [
+        "avro.tether.tether_task 362:33 call  self.log.warning(\"failing: %s\", estr)"
+      ],
+      "traceback.format_exc": [
+        "avro.tether.tether_task 361:44 call  traceback.format_exc()"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.configure": {
+      "avro.io.DatumReader.__init__": [
+        "avro.tether.tether_task 291:52 call  avro.io.DatumReader(writers_schema=inSchema, readers_sche...",
+        "avro.tether.tether_task 295:53 call  avro.io.DatumReader(writers_schema=inSchema, readers_sche..."
+      ],
+      "avro.schema.Field.order": [
+        "avro.tether.tether_task 300:84 getattr  f.order"
+      ],
+      "avro.schema.RecordSchema.fields": [
+        "avro.tether.tether_task 300:67 getattr  self.midschema.fields"
+      ],
+      "avro.schema.parse": [
+        "avro.tether.tether_task 287:41 call  avro.schema.parse(inSchemaText)",
+        "avro.tether.tether_task 288:30 call  avro.schema.parse(outSchemaText)"
+      ],
+      "avro.tether.tether_task.Collector.__init__": [
+        "avro.tether.tether_task 292:46 call  Collector(outSchemaText, self.outputClient)",
+        "avro.tether.tether_task 297:46 call  Collector(outSchemaText, self.outputClient)"
+      ],
+      "traceback.format_exc": [
+        "avro.tether.tether_task 303:40 call  traceback.format_exc()"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.count": {
+      "avro.tether.tether_task.HTTPRequestor.request": [
+        "avro.tether.tether_task 419:34 call  self.outputClient.request(\"count\", {\"group\": group, \"name..."
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.fail": {
+      "<builtin>.bytes.decode": [
+        "avro.tether.tether_task 427:37 call  message.decode()"
+      ],
+      "avro.tether.tether_task.HTTPRequestor.request": [
+        "avro.tether.tether_task 432:38 call  self.outputClient.request(\"fail\", {\"message\": message})"
+      ],
+      "logging.Logger.error": [
+        "avro.tether.tether_task 425:23 call  self.log.error(\"TetherTask.fail: failure occurred message..."
+      ],
+      "logging.Logger.exception": [
+        "avro.tether.tether_task 434:31 call  self.log.exception(\"TetherTask.fail: an exception occurre..."
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.input": {
+      "<builtin>.range": [
+        "avro.tether.tether_task 329:27 call  range(count)"
+      ],
+      "avro.io.BinaryDecoder.__init__": [
+        "avro.tether.tether_task 327:44 call  avro.io.BinaryDecoder(bdata)"
+      ],
+      "avro.io.DatumReader.read": [
+        "avro.tether.tether_task 331:50 call  self.inReader.read(decoder)",
+        "avro.tether.tether_task 341:57 call  self.midReader.read(decoder)"
+      ],
+      "avro.tether.tether_task.keys_are_equal": [
+        "avro.tether.tether_task 342:64 call  keys_are_equal(self.midRecord, prev, self._red_fkeys)"
+      ],
+      "io.BytesIO": [
+        "avro.tether.tether_task 326:31 call  io.BytesIO(data)"
+      ],
+      "logging.Logger.warning": [
+        "avro.tether.tether_task 350:29 call  self.log.warning(\"failing: %s\", estr)"
+      ],
+      "traceback.format_exc": [
+        "avro.tether.tether_task 349:40 call  traceback.format_exc()"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.open": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.tether.tether_task 249:41 call  avro.errors.UsageError(\"AVRO_TETHER_OUTPUT_PORT env var i..."
+      ],
+      "<builtin>.int": [
+        "avro.tether.tether_task 247:25 call  int(clientPort or os.getenv(\"AVRO_TETHER_OUTPUT_PORT\", 0))"
+      ],
+      "avro.tether.tether_task.HTTPRequestor.__init__": [
+        "avro.tether.tether_task 260:42 call  HTTPRequestor(\"127.0.0.1\", clientPort, outputProtocol)"
+      ],
+      "avro.tether.tether_task.HTTPRequestor.request": [
+        "avro.tether.tether_task 263:38 call  self.outputClient.request(\"configure\", {\"port\": inputport})"
+      ],
+      "logging.Logger.info": [
+        "avro.tether.tether_task 251:22 call  self.log.info(\"TetherTask.open: Opening connection to par..."
+      ],
+      "os.getenv": [
+        "avro.tether.tether_task 247:49 call  os.getenv(\"AVRO_TETHER_OUTPUT_PORT\", 0)"
+      ],
+      "traceback.format_exc": [
+        "avro.tether.tether_task 265:40 call  traceback.format_exc()"
+      ]
+    },
+    "avro.tether.tether_task.TetherTask.status": {
+      "avro.tether.tether_task.HTTPRequestor.request": [
+        "avro.tether.tether_task 413:34 call  self.outputClient.request(\"status\", {\"message\": message})"
+      ]
+    },
+    "avro.tether.tether_task_runner": {
+      "<builtin>.RuntimeError.__init__": [
+        "avro.tether.tether_task_runner 220:37 call  avro.errors.UsageError(\"Usage: tether_task_runner task_pa...",
+        "avro.tether.tether_task_runner 234:37 call  avro.errors.UsageError(e)"
+      ],
+      "<builtin>.__import__": [
+        "avro.tether.tether_task_runner 226:24 call  __import__(mod, fromlist=cname)"
+      ],
+      "<builtin>.getattr": [
+        "avro.tether.tether_task_runner 228:22 call  getattr(modobj, cname)"
+      ],
+      "<builtin>.property": [
+        "avro.tether.tether_task_runner 155:6 decorator  @property"
+      ],
+      "<builtin>.str.rsplit": [
+        "avro.tether.tether_task_runner 222:32 call  fullcls.rsplit(\".\", 1)"
+      ],
+      "avro.tether.tether_task_runner.TaskRunner.__init__": [
+        "avro.tether.tether_task_runner 232:28 call  TaskRunner(task=task)"
+      ],
+      "avro.tether.tether_task_runner.TaskRunner.start": [
+        "avro.tether.tether_task_runner 236:17 call  runner.start()"
+      ],
+      "logging.basicConfig": [
+        "avro.tether.tether_task_runner 215:24 call  logging.basicConfig(level=logging.INFO)"
+      ],
+      "logging.info": [
+        "avro.tether.tether_task_runner 224:17 call  logging.info(f\"tether_task_runner.__main__: Task: {fullcl..."
+      ]
+    },
+    "avro.tether.tether_task_runner.HTTPHandlerGen": {
+      "<builtin>.isinstance": [
+        "avro.tether.tether_task_runner 104:23 call  isinstance(runner, weakref.ProxyType)"
+      ],
+      "weakref.proxy": [
+        "avro.tether.tether_task_runner 105:34 call  weakref.proxy(runner)"
+      ]
+    },
+    "avro.tether.tether_task_runner.HTTPHandlerGen.TaskRunnerHTTPHandler.__init__": {
+      "avro.tether.tether_task_runner.HTTPHandlerGen.TaskRunnerHTTPHandler.do_POST": [
+        "avro.tether.tether_task_runner 116:56 call  http.server.BaseHTTPRequestHandler.__init__(self, *args, ..."
+      ],
+      "http.server.BaseHTTPRequestHandler.__init__": [
+        "avro.tether.tether_task_runner 116:56 call  http.server.BaseHTTPRequestHandler.__init__(self, *args, ..."
+      ]
+    },
+    "avro.tether.tether_task_runner.HTTPHandlerGen.TaskRunnerHTTPHandler.do_POST": {
+      "avro.ipc.FramedReader.__init__": [
+        "avro.tether.tether_task_runner 120:56 call  avro.ipc.FramedReader(self.rfile)"
+      ],
+      "avro.ipc.FramedReader.read_framed_message": [
+        "avro.tether.tether_task_runner 121:67 call  call_request_reader.read_framed_message()"
+      ],
+      "avro.ipc.FramedWriter.__init__": [
+        "avro.tether.tether_task_runner 126:48 call  avro.ipc.FramedWriter(self.wfile)"
+      ],
+      "avro.ipc.FramedWriter.write_framed_message": [
+        "avro.tether.tether_task_runner 127:45 call  resp_writer.write_framed_message(resp_body)"
+      ],
+      "avro.ipc.Responder.respond": [
+        "avro.tether.tether_task_runner 122:47 call  self.responder.respond(call_request)"
+      ],
+      "avro.tether.tether_task_runner.TaskRunnerResponder.__init__": [
+        "avro.tether.tether_task_runner 119:49 call  TaskRunnerResponder(self.runner)"
+      ],
+      "http.server.BaseHTTPRequestHandler.end_headers": [
+        "avro.tether.tether_task_runner 125:29 call  self.end_headers()"
+      ],
+      "http.server.BaseHTTPRequestHandler.send_header": [
+        "avro.tether.tether_task_runner 124:29 call  self.send_header(\"Content-Type\", \"avro/binary\")"
+      ],
+      "http.server.BaseHTTPRequestHandler.send_response": [
+        "avro.tether.tether_task_runner 123:31 call  self.send_response(200)"
+      ]
+    },
+    "avro.tether.tether_task_runner.TaskRunner.__init__": {
+      "<builtin>.Exception.__init__": [
+        "avro.tether.tether_task_runner 152:44 call  avro.errors.AvroException(\"task must be an instance of te..."
+      ],
+      "<builtin>.isinstance": [
+        "avro.tether.tether_task_runner 151:26 call  isinstance(task, avro.tether.tether_task.TetherTask)"
+      ],
+      "logging.getLogger": [
+        "avro.tether.tether_task_runner 150:37 call  logging.getLogger(\"TaskRunner:\")"
+      ]
+    },
+    "avro.tether.tether_task_runner.TaskRunner.server": {
+      "<builtin>.RuntimeError": [
+        "avro.tether.tether_task_runner 161:27 call  RuntimeError(\"Server never started\")"
+      ],
+      "<builtin>.range": [
+        "avro.tether.tether_task_runner 157:23 call  range(self.timeout)"
+      ],
+      "time.sleep": [
+        "avro.tether.tether_task_runner 160:23 call  time.sleep(1)"
+      ]
+    },
+    "avro.tether.tether_task_runner.TaskRunner.start": {
+      "avro.tether.tether_task_runner.TaskRunner.start.thread_run": [
+        "avro.tether.tether_task_runner 189:22 call  sthread.start()"
+      ],
+      "avro.tether.util.find_port": [
+        "avro.tether.tether_task_runner 179:42 call  avro.tether.util.find_port()"
+      ],
+      "http.server.HTTPServer.shutdown": [
+        "avro.tether.tether_task_runner 198:34 call  self._server.shutdown()"
+      ],
+      "logging.Logger.info": [
+        "avro.tether.tether_task_runner 201:26 call  self.log.info(\"Shutdown the logger\")"
+      ],
+      "logging.shutdown": [
+        "avro.tether.tether_task_runner 203:29 call  logging.shutdown()"
+      ],
+      "threading.Event.wait": [
+        "avro.tether.tether_task_runner 197:46 call  self.task.ready_for_shutdown.wait()"
+      ],
+      "threading.Thread": [
+        "avro.tether.tether_task_runner 188:35 call  threading.Thread(target=thread_run, kwargs={\"task_runner\"..."
+      ],
+      "threading.Thread.start": [
+        "avro.tether.tether_task_runner 189:22 call  sthread.start()"
+      ]
+    },
+    "avro.tether.tether_task_runner.TaskRunner.start.thread_run": {
+      "avro.tether.tether_task_runner.HTTPHandlerGen": [
+        "avro.tether.tether_task_runner 183:81 call  HTTPHandlerGen(task_runner)"
+      ],
+      "avro.tether.tether_task_runner.HTTPHandlerGen.TaskRunnerHTTPHandler.__init__": [
+        "avro.tether.tether_task_runner 185:46 call  task_runner._server.serve_forever()"
+      ],
+      "http.server.HTTPServer": [
+        "avro.tether.tether_task_runner 183:57 call  http.server.HTTPServer(address, HTTPHandlerGen(task_runner))"
+      ],
+      "http.server.HTTPServer.serve_forever": [
+        "avro.tether.tether_task_runner 185:46 call  task_runner._server.serve_forever()"
+      ]
+    },
+    "avro.tether.tether_task_runner.TaskRunnerResponder.__init__": {
+      "<builtin>.isinstance": [
+        "avro.tether.tether_task_runner 53:22 call  isinstance(runner, weakref.ProxyType)"
+      ],
+      "avro.ipc.Responder.__init__": [
+        "avro.tether.tether_task_runner 47:36 call  avro.ipc.Responder.__init__(self, avro.tether.tether_task..."
+      ],
+      "logging.getLogger": [
+        "avro.tether.tether_task_runner 49:37 call  logging.getLogger(\"TaskRunnerResponder\")"
+      ],
+      "weakref.proxy": [
+        "avro.tether.tether_task_runner 56:40 call  weakref.proxy(runner)",
+        "avro.tether.tether_task_runner 58:34 call  weakref.proxy(runner.task)"
+      ]
+    },
+    "avro.tether.tether_task_runner.TaskRunnerResponder.invoke": {
+      "avro.protocol.Message.name": [
+        "avro.tether.tether_task_runner 62:24 getattr  message.name",
+        "avro.tether.tether_task_runner 65:26 getattr  message.name",
+        "avro.tether.tether_task_runner 72:26 getattr  message.name",
+        "avro.tether.tether_task_runner 75:26 getattr  message.name",
+        "avro.tether.tether_task_runner 78:26 getattr  message.name",
+        "avro.tether.tether_task_runner 84:91 getattr  message.name",
+        "avro.tether.tether_task_runner 87:83 getattr  message.name"
+      ],
+      "avro.tether.tether_task_runner.TaskRunner.close": [
+        "avro.tether.tether_task_runner 77:34 call  self.runner.close()",
+        "avro.tether.tether_task_runner 82:34 call  self.runner.close()"
+      ],
+      "logging.Logger.error": [
+        "avro.tether.tether_task_runner 70:35 call  self.log.error(\"Exception occurred while processing the p...",
+        "avro.tether.tether_task_runner 87:27 call  self.log.error(\"Error occurred while processing message: ..."
+      ],
+      "logging.Logger.info": [
+        "avro.tether.tether_task_runner 63:30 call  self.log.info(\"TetherTaskRunner: Received configure\")",
+        "avro.tether.tether_task_runner 66:30 call  self.log.info(\"TetherTaskRunner: Received partitions\")",
+        "avro.tether.tether_task_runner 73:30 call  self.log.info(\"TetherTaskRunner: Received input\")",
+        "avro.tether.tether_task_runner 76:30 call  self.log.info(\"TetherTaskRunner: Received abort\")",
+        "avro.tether.tether_task_runner 79:30 call  self.log.info(\"TetherTaskRunner: Received complete\")"
+      ],
+      "logging.Logger.warning": [
+        "avro.tether.tether_task_runner 84:33 call  self.log.warning(\"TetherTaskRunner: Received unknown mess..."
+      ],
+      "traceback.format_exc": [
+        "avro.tether.tether_task_runner 70:132 call  traceback.format_exc()",
+        "avro.tether.tether_task_runner 88:37 call  traceback.format_exc()"
+      ]
+    },
+    "avro.tether.util.find_port": {
+      "socket.socket": [
+        "avro.tether.util 26:23 call  socket.socket()"
+      ],
+      "socket.socket.bind": [
+        "avro.tether.util 27:15 call  s.bind((\"127.0.0.1\", 0))"
+      ],
+      "socket.socket.getsockname": [
+        "avro.tether.util 28:29 call  s.getsockname()"
+      ],
+      "typing.cast": [
+        "avro.tether.util 29:16 call  cast(int, port)"
+      ]
+    },
+    "avro.timezones.TSTTzinfo.dst": {
+      "datetime.timedelta": [
+        "avro.timezones 47:34 call  datetime.timedelta(0)"
+      ]
+    },
+    "avro.timezones.TSTTzinfo.utcoffset": {
+      "datetime.timedelta": [
+        "avro.timezones 41:34 call  datetime.timedelta(hours=10)"
+      ]
+    },
+    "avro.timezones.UTCTzinfo.dst": {
+      "datetime.timedelta": [
+        "avro.timezones 32:34 call  datetime.timedelta(0)"
+      ]
+    },
+    "avro.timezones.UTCTzinfo.utcoffset": {
+      "datetime.timedelta": [
+        "avro.timezones 26:34 call  datetime.timedelta(0)"
+      ]
+    },
+    "avro.tool": {
+      "avro.tool.main": [
+        "avro.tool 163:18 call  main()"
+      ],
+      "os.path.dirname": [
+        "avro.tool 158:23 call  os.path.dirname(avro.io.__file__)"
+      ],
+      "sys.exit": [
+        "avro.tool 163:13 call  sys.exit(main())"
+      ],
+      "warnings.warn": [
+        "avro.tool 159:22 call  warnings.warn( \"Invoking avro/tool.py directly is likely ..."
+      ]
+    },
+    "avro.tool.GenericHandler.do_POST": {
+      "<builtin>.print": [
+        "avro.tool 72:18 call  print(\"Shutting down server.\", file=sys.stderr)"
+      ],
+      "avro.ipc.FramedReader.__init__": [
+        "avro.tool 63:52 call  avro.ipc.FramedReader(self.rfile)"
+      ],
+      "avro.ipc.FramedReader.read_framed_message": [
+        "avro.tool 64:63 call  call_request_reader.read_framed_message()"
+      ],
+      "avro.ipc.FramedWriter.__init__": [
+        "avro.tool 69:44 call  avro.ipc.FramedWriter(self.wfile)"
+      ],
+      "avro.ipc.FramedWriter.write_framed_message": [
+        "avro.tool 70:41 call  resp_writer.write_framed_message(resp_body)"
+      ],
+      "avro.ipc.Responder.respond": [
+        "avro.tool 65:43 call  self.responder.respond(call_request)"
+      ],
+      "http.server.BaseHTTPRequestHandler.end_headers": [
+        "avro.tool 68:25 call  self.end_headers()"
+      ],
+      "http.server.BaseHTTPRequestHandler.send_header": [
+        "avro.tool 67:25 call  self.send_header(\"Content-Type\", \"avro/binary\")"
+      ],
+      "http.server.BaseHTTPRequestHandler.send_response": [
+        "avro.tool 66:27 call  self.send_response(200)"
+      ],
+      "threading.Thread": [
+        "avro.tool 73:39 call  threading.Thread(target=self.server.shutdown)"
+      ],
+      "threading.Thread.start": [
+        "avro.tool 75:26 call  quitter.start()"
+      ]
+    },
+    "avro.tool.GenericResponder.__init__": {
+      "avro.ipc.Responder.__init__": [
+        "avro.tool 46:36 call  avro.ipc.Responder.__init__(self, avro.protocol.parse(Pat..."
+      ],
+      "avro.protocol.parse": [
+        "avro.tool 46:62 call  avro.protocol.parse(Path(proto).read_text())"
+      ],
+      "pathlib.Path": [
+        "avro.tool 46:67 call  Path(proto)"
+      ],
+      "pathlib.PosixPath.read_text": [
+        "avro.tool 46:84 call  Path(proto).read_text()"
+      ]
+    },
+    "avro.tool.GenericResponder.invoke": {
+      "<builtin>.print": [
+        "avro.tool 54:14 call  print(f\"Message: {message.name} Datum: {self.datum}\", fil..."
+      ],
+      "avro.protocol.Message.name": [
+        "avro.tool 52:20 getattr  message.name",
+        "avro.tool 54:35 getattr  message.name"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.tool 54:48 format  {self.datum}"
+      ]
+    },
+    "avro.tool._parse_args": {
+      "argparse.ArgumentParser": [
+        "avro.tool 106:37 call  argparse.ArgumentParser()"
+      ],
+      "argparse.ArgumentParser.add_argument": [
+        "avro.tool 109:32 call  subparser_dump.add_argument(\"input_file\", type=argparse.F...",
+        "avro.tool 111:38 call  subparser_rpcreceive.add_argument(\"uri\")",
+        "avro.tool 112:38 call  subparser_rpcreceive.add_argument(\"proto\")",
+        "avro.tool 113:38 call  subparser_rpcreceive.add_argument(\"msg\")",
+        "avro.tool 114:38 call  subparser_rpcreceive.add_argument(\"-file\", type=argparse....",
+        "avro.tool 116:35 call  subparser_rpcsend.add_argument(\"uri\")",
+        "avro.tool 117:35 call  subparser_rpcsend.add_argument(\"proto\")",
+        "avro.tool 118:35 call  subparser_rpcsend.add_argument(\"msg\")",
+        "avro.tool 119:35 call  subparser_rpcsend.add_argument(\"-file\", type=argparse.Fil..."
+      ],
+      "argparse.ArgumentParser.add_subparsers": [
+        "avro.tool 107:39 call  parser.add_subparsers(required=True, dest=\"command\")"
+      ],
+      "argparse.ArgumentParser.parse_args": [
+        "avro.tool 120:29 call  parser.parse_args()"
+      ],
+      "argparse.FileType": [
+        "avro.tool 109:69 call  argparse.FileType(\"rb\")",
+        "avro.tool 114:70 call  argparse.FileType(\"rb\")",
+        "avro.tool 119:67 call  argparse.FileType(\"rb\")"
+      ],
+      "argparse._SubParsersAction.add_parser": [
+        "avro.tool 108:43 call  subparsers.add_parser(\"dump\", help=\"Dump an avro file\")",
+        "avro.tool 110:49 call  subparsers.add_parser(\"rpcreceive\", help=\"receive a messa...",
+        "avro.tool 115:46 call  subparsers.add_parser(\"rpcsend\", help=\"send a message\")"
+      ]
+    },
+    "avro.tool.main": {
+      "avro.tool._parse_args": [
+        "avro.tool 147:23 call  _parse_args()"
+      ],
+      "avro.tool.main_dump": [
+        "avro.tool 149:25 call  main_dump(args)"
+      ],
+      "avro.tool.main_rpcreceive": [
+        "avro.tool 151:31 call  main_rpcreceive(args)"
+      ],
+      "avro.tool.main_rpcsend": [
+        "avro.tool 153:28 call  main_rpcsend(args)"
+      ]
+    },
+    "avro.tool.main_dump": {
+      "<builtin>.print": [
+        "avro.tool 124:10 call  print(\"\\n\".join(f\"{d!r}\" for d in avro.datafile.DataFileR..."
+      ],
+      "<builtin>.str.join": [
+        "avro.tool 124:20 call  \"\\n\".join(f\"{d!r}\" for d in avro.datafile.DataFileReader(..."
+      ],
+      "avro.datafile.DataFileReader.__init__": [
+        "avro.tool 124:67 call  avro.datafile.DataFileReader(args.input_file, avro.io.Dat..."
+      ],
+      "avro.datafile.DataFileReader.__iter__": [
+        "avro.tool 124:39 iter  avro.datafile.DataFileReader(args.input_file, avro.io.Dat..."
+      ],
+      "avro.datafile.DataFileReader.__next__": [
+        "avro.tool 124:39 iter  avro.datafile.DataFileReader(args.input_file, avro.io.Dat..."
+      ],
+      "avro.io.DatumReader.__init__": [
+        "avro.tool 124:104 call  avro.io.DatumReader()"
+      ]
+    },
+    "avro.tool.main_rpcreceive": {
+      "<builtin>.next": [
+        "avro.tool 132:25 call  next(dfr)"
+      ],
+      "avro.datafile.DataFileReader.__enter__": [
+        "avro.tool 131:14 with  avro.datafile.DataFileReader(args.file, avro.io.DatumRead..."
+      ],
+      "avro.datafile.DataFileReader.__exit__": [
+        "avro.tool 131:14 with  avro.datafile.DataFileReader(args.file, avro.io.DatumRead..."
+      ],
+      "avro.datafile.DataFileReader.__init__": [
+        "avro.tool 131:42 call  avro.datafile.DataFileReader(args.file, avro.io.DatumRead..."
+      ],
+      "avro.datafile.DataFileReader.__next__": [
+        "avro.tool 132:25 call  next(dfr)"
+      ],
+      "avro.io.DatumReader.__init__": [
+        "avro.tool 131:73 call  avro.io.DatumReader()"
+      ],
+      "avro.tool.run_server": [
+        "avro.tool 133:15 call  run_server(args.uri, args.proto, args.msg, datum)"
+      ]
+    },
+    "avro.tool.main_rpcsend": {
+      "<builtin>.next": [
+        "avro.tool 141:25 call  next(dfr)"
+      ],
+      "avro.datafile.DataFileReader.__enter__": [
+        "avro.tool 140:14 with  avro.datafile.DataFileReader(args.file, avro.io.DatumRead..."
+      ],
+      "avro.datafile.DataFileReader.__exit__": [
+        "avro.tool 140:14 with  avro.datafile.DataFileReader(args.file, avro.io.DatumRead..."
+      ],
+      "avro.datafile.DataFileReader.__init__": [
+        "avro.tool 140:42 call  avro.datafile.DataFileReader(args.file, avro.io.DatumRead..."
+      ],
+      "avro.datafile.DataFileReader.__next__": [
+        "avro.tool 141:25 call  next(dfr)"
+      ],
+      "avro.io.DatumReader.__init__": [
+        "avro.tool 140:73 call  avro.io.DatumReader()"
+      ],
+      "avro.tool.send_message": [
+        "avro.tool 142:17 call  send_message(args.uri, args.proto, args.msg, datum)"
+      ]
+    },
+    "avro.tool.run_server": {
+      "<builtin>.RuntimeError": [
+        "avro.tool 83:27 call  RuntimeError(f\"uri {uri} must have a hostname.\")",
+        "avro.tool 85:27 call  RuntimeError(f\"uri {uri} must have a port.\")"
+      ],
+      "<builtin>.print": [
+        "avro.tool 90:10 call  print(f\"Port: {server.server_port}\")",
+        "avro.tool 93:10 call  print(\"Starting server.\", file=sys.stderr)"
+      ],
+      "avro.tool.GenericHandler.do_POST": [
+        "avro.tool 94:25 call  server.serve_forever()"
+      ],
+      "avro.tool.GenericResponder.__init__": [
+        "avro.tool 88:33 call  GenericResponder(proto, msg, datum)"
+      ],
+      "http.server.HTTPServer": [
+        "avro.tool 89:36 call  http.server.HTTPServer(server_addr, GenericHandler)"
+      ],
+      "http.server.HTTPServer.serve_forever": [
+        "avro.tool 94:25 call  server.serve_forever()"
+      ],
+      "io.TextIOWrapper.flush": [
+        "avro.tool 91:21 call  sys.stdout.flush()"
+      ],
+      "urllib.parse.urlparse": [
+        "avro.tool 81:36 call  urllib.parse.urlparse(uri)"
+      ]
+    },
+    "avro.tool.send_message": {
+      "<builtin>.print": [
+        "avro.tool 101:10 call  print(requestor.request(msg, datum))"
+      ],
+      "avro.ipc.BaseRequestor.__init__": [
+        "avro.tool 100:35 call  avro.ipc.Requestor(avro.protocol.parse(Path(proto).read_t..."
+      ],
+      "avro.ipc.BaseRequestor.request": [
+        "avro.tool 101:28 call  requestor.request(msg, datum)"
+      ],
+      "avro.ipc.HTTPTransceiver.__init__": [
+        "avro.tool 99:38 call  avro.ipc.HTTPTransceiver(url_obj.hostname, url_obj.port)"
+      ],
+      "avro.protocol.parse": [
+        "avro.tool 100:55 call  avro.protocol.parse(Path(proto).read_text())"
+      ],
+      "avro.timezones.UTCTzinfo.utcoffset": [
+        "avro.tool 101:10 call  print(requestor.request(msg, datum))"
+      ],
+      "pathlib.Path": [
+        "avro.tool 100:60 call  Path(proto)"
+      ],
+      "pathlib.PosixPath.read_text": [
+        "avro.tool 100:77 call  Path(proto).read_text()"
+      ],
+      "urllib.parse.urlparse": [
+        "avro.tool 98:36 call  urllib.parse.urlparse(uri)"
+      ]
+    },
+    "avro.utils._randbytes": {
+      "<builtin>.bytes": [
+        "avro.utils 35:17 call  bytes(random.choices(range(256), k=n))"
+      ],
+      "<builtin>.range": [
+        "avro.utils 35:38 call  range(256)"
+      ],
+      "random.choices": [
+        "avro.utils 35:32 call  random.choices(range(256), k=n)"
+      ]
+    }
+  },
+  "notes": {
+    "avro.__main__ 107:37 call  avro.errors.UsageError(\"--header applies only to CSV form...": [
+      "UsageError(RuntimeError, AvroException) defines no __init__: RuntimeError.__init__"
+    ],
+    "avro.__main__ 109:27 call  filter(predicate, data_file_reader)": [
+      "filter() calls iter() on the DataFileReader when it is made"
+    ],
+    "avro.__main__ 112:22 call  fs(cast(Mapping[str, object], r))": [
+      "fs is what field_selector returns: its local keys_filter or _passthrough_keys_filter"
+    ],
+    "avro.__main__ 112:63 iter  avro_slice": [
+      "the generator expression (code of print_avro) pulls from the islice over the filter over the DataFileReader: the filter calls the reader's __next__ and, with a --filter, the functools.partial predicate, which calls record_match back (the uncertainties ruling on lazy filters consumed through library iterators)"
+    ],
+    "avro.__main__ 117:23 call  _write_row(sorted(record))": [
+      "_write_row is the writerow method of the csv writer object of line 65"
+    ],
+    "avro.__main__ 118:16 call  printer(record)": [
+      "printer is a value of the dict of select_printer (line 75)"
+    ],
+    "avro.__main__ 122:50 getattr  data_file_reader.schema": [
+      "data_file_reader is a DataFileReader"
+    ],
+    "avro.__main__ 140:66 call  cast(bytes, i).decode()": [
+      "info is Iterable[AnyStr]: a line is a str (the package's files of argparse.FileType(\"r\")) or bytes"
+    ],
+    "avro.__main__ 161:33 call  avro.errors.UsageError(\"No valid conversion type\")": [
+      "UsageError inherits RuntimeError.__init__"
+    ],
+    "avro.__main__ 165:20 getattr  s.name": [
+      "s is a branch of the field's union; the named branches have the property name (the others no attribute name: AttributeError)"
+    ],
+    "avro.__main__ 170:33 call  avro.errors.UsageError(\"Exhausted Union Schema without fi...": [
+      "UsageError inherits RuntimeError.__init__"
+    ],
+    "avro.__main__ 177:58 call  getattr(i, \"decode\", lambda: i)()": [
+      "a line of info (IO[AnyStr]) is a str, which has no decode, so getattr returns the lambda of line 177, or bytes, whose decode is returned"
+    ],
+    "avro.__main__ 189:37 call  avro.errors.UsageError(\"Can't guess input file type (not ...": [
+      "UsageError inherits RuntimeError.__init__"
+    ],
+    "avro.__main__ 197:39 call  iter_records(file_, schema)": [
+      "iter_records is a value of the dict of line 194"
+    ],
+    "avro.__main__ 267:29 call  parser.parse_args()": [
+      "parse_args calls the type of each given argument: csv_arg for --fields, avro.schema.from_path for --schema (library call-backs)"
+    ],
+    "avro.__main__ 71:15 call  _write_row(row[key] for key in sorted(row))": [
+      "_write_row is the writerow method of the csv writer object of line 65 (named by the exported type attribute _csv.Writer on CPython, Modules/_csv.c of 3.10.22 to 3.15.2, and by the type name _csv.writer on PyPy, whose _csv exports only the factories, pypy/module/_csv/moduledef.py:73-87: b8-ruling-c-type-names-1); the csv writer converts a field that is a decoded timestamp (tzinfo avro.timezones.utc) with str(), whose isoformat calls UTCTzinfo.utcoffset (avro.md J7)"
+    ],
+    "avro.__main__ 79:42 call  avro.errors.AvroWarning(\"There is no way to safely type c...": [
+      "AvroWarning inherits UserWarning.__init__"
+    ],
+    "avro.__main__ 80:61 call  eval(expr, None, {\"r\": record})": [
+      "expr is the client's --filter expression: what it calls is client code"
+    ],
+    "avro.__main__ 91:48 call  obj.keys()": [
+      "obj is a record that DataFileReader reads, a dict (read_record)"
+    ],
+    "avro.codecs 116:40 call  avro.errors.AvroException(\"Checksum failure\")": [
+      "AvroException defines no __init__"
+    ],
+    "avro.codecs 208:52 call  decompressor.decompress(pending, want)": [
+      "on CPython the object's class is zlib.Decompress (named as the tracer names it); on PyPy the class itself is exported as zlib.decompressobj (pypy/module/zlib/moduledef.py:30, the TypeDef 'Decompress' of interp_zlib.py:399 in 3.10 v7.3.19, :422 in 3.11 v7.3.23), its public path"
+    ],
+    "avro.codecs 214:43 call  decompressor.flush(ceiling - len(uncompressed))": [
+      "see 208:52"
+    ],
+    "avro.codecs 269:46 call  snappy.compress(data)": [
+      "the optional import (lines 125-130) runs on both sides (README, \"Judgements\")"
+    ],
+    "avro.codecs 279:60 call  avro.errors.InvalidAvroBinaryEncoding( f\"Invalid snappy b...": [
+      "InvalidAvroBinaryEncoding inherits Exception.__init__"
+    ],
+    "avro.codecs 302:50 call  zstd.ZstdCompressor()": [
+      "zstd is the optional module zstandard (line 132, imported as zstd), missing in the test environment: stubs named by the module's path; the optional import runs on both sides"
+    ],
+    "avro.codecs 335:43 call  avro.errors.UnsupportedCodec(f\"Unsupported codec: {codec_...": [
+      "UnsupportedCodec(NotImplementedError, AvroException) defines no __init__: the first __init__ of its MRO is NotImplementedError's"
+    ],
+    "avro.compatibility 231:39 call  AvroRuntimeException(f\"Unknown schema type: {reader.type}\")": [
+      "AvroRuntimeException(RuntimeError, AvroException) defines no __init__: RuntimeError.__init__ comes first in its MRO"
+    ],
+    "avro.compatibility 279:35 call  AvroRuntimeException(f\"Unknown schema type: {reader.type}\")": [
+      "AvroRuntimeException inherits RuntimeError.__init__"
+    ],
+    "avro.datafile 121:44 call  avro.errors.DataFileException(\"Missing required schema me...": [
+      "DataFileException inherits Exception.__init__"
+    ],
+    "avro.datafile 138:48 call  avro.errors.DataFileException(f\"Unknown codec: {value!r}\")": [
+      "DataFileException inherits Exception.__init__"
+    ],
+    "avro.datafile 173:50 call  avro.errors.AvroWarning(f\"Writing binary data to a writer...": [
+      "AvroWarning inherits UserWarning.__init__"
+    ],
+    "avro.datafile 242:69 call  codec.compress(uncompressed_data)": [
+      "codec is the class of KNOWN_CODECS that get_codec returns for the file's codec name; the snappy and zstandard codecs exist where their optional modules are installed (both sides of the optional import)"
+    ],
+    "avro.datafile 248:30 call  self.writer.write(compressed_data)": [
+      "self.writer is the binary stream of DataFileWriter.__init__ (writer: IO[AnyStr], abstract: a client's stream is opaque, segno ruling); the package's own caller, avro.__main__.write, passes a file of argparse.FileType(\"wb\") (io.BufferedWriter) or sys.stdout, whose buffer is an io.BufferedWriter (io.FileIO under python -u) (avro.md, \"Streams\")"
+    ],
+    "avro.datafile 251:30 call  self.writer.write(self.sync_marker)": [
+      "self.writer is the binary stream of DataFileWriter.__init__ (writer: IO[AnyStr], abstract: a client's stream is opaque, segno ruling); the package's own caller, avro.__main__.write, passes a file of argparse.FileType(\"wb\") (io.BufferedWriter) or sys.stdout, whose buffer is an io.BufferedWriter (io.FileIO under python -u) (avro.md, \"Streams\")"
+    ],
+    "avro.datafile 274:32 call  self.writer.tell()": [
+      "self.writer is the binary stream of DataFileWriter.__init__ (writer: IO[AnyStr], abstract: a client's stream is opaque, segno ruling); the package's own caller, avro.__main__.write, passes a file of argparse.FileType(\"wb\") (io.BufferedWriter) or sys.stdout, whose buffer is an io.BufferedWriter (io.FileIO under python -u) (avro.md, \"Streams\")"
+    ],
+    "avro.datafile 279:26 call  self.writer.flush()": [
+      "self.writer is the binary stream of DataFileWriter.__init__ (writer: IO[AnyStr], abstract: a client's stream is opaque, segno ruling); the package's own caller, avro.__main__.write, passes a file of argparse.FileType(\"wb\") (io.BufferedWriter) or sys.stdout, whose buffer is an io.BufferedWriter (io.FileIO under python -u) (avro.md, \"Streams\")"
+    ],
+    "avro.datafile 284:26 call  self.writer.close()": [
+      "self.writer is the binary stream of DataFileWriter.__init__ (writer: IO[AnyStr], abstract: a client's stream is opaque, segno ruling); the package's own caller, avro.__main__.write, passes a file of argparse.FileType(\"wb\") (io.BufferedWriter) or sys.stdout, whose buffer is an io.BufferedWriter (io.FileIO under python -u) (avro.md, \"Streams\")"
+    ],
+    "avro.datafile 320:50 call  avro.errors.AvroWarning(f\"Reader binary data from a reade...": [
+      "AvroWarning inherits UserWarning.__init__"
+    ],
+    "avro.datafile 380:44 call  avro.errors.AvroException(f\"Not an Avro data file: {heade...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.datafile 408:48 call  avro.errors.DataFileException(\"DataFile is not ready to r...": [
+      "DataFileException inherits Exception.__init__"
+    ],
+    "avro.errors 105:48 format  {_safe_pretty(writers_schema)}": [
+      "_safe_pretty returns the schema itself when json.dumps or json.loads raises; then the f-string formats the schema through object.__format__, which calls Schema.__str__ (avro.md J3: a schema whose other_props hold a value that json cannot serialize, admitted by Mapping[str, object])"
+    ],
+    "avro.errors 106:48 format  {_safe_pretty(readers_schema)}": [
+      "as at 105:48"
+    ],
+    "avro.errors 77:46 format  {datum}": [
+      "datum is the client's datum, which can be a datetime whose tzinfo is avro.timezones.utc or tst (the tests put them into data, test_io.py:119-139); formatting an aware datetime calls str(), whose isoformat calls the tzinfo's utcoffset (avro.md J7)"
+    ],
+    "avro.io 1282:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1288:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1292:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1298:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1302:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1306:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1310:54 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1315:58 call  avro.errors.InvalidDefaultException(field_schema, default...": [
+      "InvalidDefaultException inherits AvroTypeException.__init__"
+    ],
+    "avro.io 1318:45 call  default_value.get(field.name)": [
+      "default_value is a dict of the parsed JSON (a client mapping is opaque)"
+    ],
+    "avro.io 1324:40 call  avro.errors.AvroException(f\"Unknown type: {field_schema.t...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.io 1345:50 call  avro.errors.IONotReadyException(\"Cannot write without a w...": [
+      "the exception class defines no __init__ and no package base does (AvroException): Exception.__init__"
+    ],
+    "avro.io 1368:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a date ty...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1372:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a time ty...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1372:64 format  {datum}": [
+      "datum is the client's datum, which can be a datetime whose tzinfo is avro.timezones.utc or tst (the tests put them into data, test_io.py:119-139); formatting an aware datetime calls str(), whose isoformat calls the tzinfo's utcoffset (avro.md J7)"
+    ],
+    "avro.io 1380:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a time ty...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1380:64 format  {datum}": [
+      "datum is the client's datum, which can be a datetime whose tzinfo is avro.timezones.utc or tst (the tests put them into data, test_io.py:119-139); formatting an aware datetime calls str(), whose isoformat calls the tzinfo's utcoffset (avro.md J7)"
+    ],
+    "avro.io 1384:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a datetim...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1388:61 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a datetim...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1404:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1406:65 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a decimal...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1406:68 format  {datum}": [
+      "datum is the client's datum, which can be a datetime whose tzinfo is avro.timezones.utc or tst (the tests put them into data, test_io.py:119-139); formatting an aware datetime calls str(), whose isoformat calls the tzinfo's utcoffset (avro.md J7)"
+    ],
+    "avro.io 1417:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1419:65 call  avro.errors.IgnoredLogicalType(f\"{datum} is not a decimal...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 1419:68 format  {datum}": [
+      "datum is the client's datum, which can be a datetime whose tzinfo is avro.timezones.utc or tst (the tests put them into data, test_io.py:119-139); formatting an aware datetime calls str(), whose isoformat calls the tzinfo's utcoffset (avro.md J7)"
+    ],
+    "avro.io 1443:40 call  avro.errors.AvroException(f\"Unknown type: {writers_schema...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.io 244:30 call  reader.tell()": [
+      "self.reader is the stream of BinaryDecoder.__init__ (IO[bytes], an abstract annotation: a client's stream is opaque, segno ruling); the package passes an io.BytesIO (codecs, ipc, tether) or, through DataFileReader, the io.BufferedReader of a file that avro.tool and avro.__main__ open with argparse.FileType(\"rb\") or of sys.stdin.buffer (avro.md, \"Streams\")"
+    ],
+    "avro.io 249:24 call  reader.seek(0, os.SEEK_END)": [
+      "self.reader is the stream of BinaryDecoder.__init__ (IO[bytes], an abstract annotation: a client's stream is opaque, segno ruling); the package passes an io.BytesIO (codecs, ipc, tether) or, through DataFileReader, the io.BufferedReader of a file that avro.tool and avro.__main__ open with argparse.FileType(\"rb\") or of sys.stdin.buffer (avro.md, \"Streams\")"
+    ],
+    "avro.io 250:30 call  reader.tell()": [
+      "self.reader is the stream of BinaryDecoder.__init__ (IO[bytes], an abstract annotation: a client's stream is opaque, segno ruling); the package passes an io.BytesIO (codecs, ipc, tether) or, through DataFileReader, the io.BufferedReader of a file that avro.tool and avro.__main__ open with argparse.FileType(\"rb\") or of sys.stdin.buffer (avro.md, \"Streams\")"
+    ],
+    "avro.io 261:28 call  reader.seek(pos)": [
+      "self.reader is the stream of BinaryDecoder.__init__ (IO[bytes], an abstract annotation: a client's stream is opaque, segno ruling); the package passes an io.BytesIO (codecs, ipc, tether) or, through DataFileReader, the io.BufferedReader of a file that avro.tool and avro.__main__ open with argparse.FileType(\"rb\") or of sys.stdin.buffer (avro.md, \"Streams\")"
+    ],
+    "avro.io 445:60 call  avro.errors.InvalidAvroBinaryEncoding(\"Varint is too long\")": [
+      "the exception class defines no __init__ and no package base does (AvroException): Exception.__init__"
+    ],
+    "avro.io 452:60 call  avro.errors.InvalidAvroBinaryEncoding(\"Varint is too long\")": [
+      "the exception class defines no __init__ and no package base does (AvroException): Exception.__init__"
+    ],
+    "avro.io 482:25 call  self.reader.seek(self.reader.tell() + n)": [
+      "self.reader is the stream of BinaryDecoder.__init__ (IO[bytes], an abstract annotation: a client's stream is opaque, segno ruling); the package passes an io.BytesIO (codecs, ipc, tether) or, through DataFileReader, the io.BufferedReader of a file that avro.tool and avro.__main__ open with argparse.FileType(\"rb\") or of sys.stdin.buffer (avro.md, \"Streams\")"
+    ],
+    "avro.io 482:42 call  self.reader.tell()": [
+      "self.reader is the stream of BinaryDecoder.__init__ (IO[bytes], an abstract annotation: a client's stream is opaque, segno ruling); the package passes an io.BytesIO (codecs, ipc, tether) or, through DataFileReader, the io.BufferedReader of a file that avro.tool and avro.__main__ open with argparse.FileType(\"rb\") or of sys.stdin.buffer (avro.md, \"Streams\")"
+    ],
+    "avro.io 502:26 call  self.writer.write(datum)": [
+      "self.writer is the stream of BinaryEncoder.__init__ (IO[bytes], abstract: a client's stream is opaque); the package passes an io.BytesIO (DataFileWriter's buffer, ipc, tether) or, through DataFileWriter, the output of avro.__main__.write: a file of argparse.FileType(\"wb\") (io.BufferedWriter) or sys.stdout.buffer (io.BufferedWriter; io.FileIO under python -u) (avro.md, \"Streams\")"
+    ],
+    "avro.io 663:33 call  datum.astimezone(tz=avro.timezones.utc)": [
+      "datum is a datetime.datetime (write_data tests isinstance); astimezone returns datum itself when its tzinfo is utc, else it calls the utcoffset of datum's tzinfo (TSTTzinfo for avro.timezones.tst, which the tests put into data, test_io.py:127, 139; a client tzinfo is opaque) and then utc.fromutc, tzinfo.fromutc of the C library, which calls UTCTzinfo.utcoffset and .dst (_datetimemodule.c, datetime_astimezone and tzinfo_fromutc) (avro.md J7)"
+    ],
+    "avro.io 673:33 call  datum.astimezone(tz=avro.timezones.utc)": [
+      "see 663:33"
+    ],
+    "avro.io 838:50 call  avro.errors.IONotReadyException(\"Cannot read without a wr...": [
+      "the exception class defines no __init__ and no package base does (AvroException): Exception.__init__"
+    ],
+    "avro.io 898:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal precisio...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 902:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 910:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal precisio...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 914:65 call  avro.errors.IgnoredLogicalType(f\"Invalid decimal scale {s...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.io 927:40 call  avro.errors.AvroException(f\"Cannot read unknown schema ty...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.io 958:40 call  avro.errors.AvroException(f\"Unknown schema type: {writers...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 127:34 call  self.issue_request(call_request, message_name, request_da...": [
+      "only the subclass Requestor defines issue_request (a plain BaseRequestor raises AttributeError here)"
+    ],
+    "avro.ipc 130:42 getattr  self.local_protocol.md5": [
+      "local_protocol is a Protocol (the package passes parsed protocols: avro.tool.send_message, tether.HTTPRequestor)"
+    ],
+    "avro.ipc 156:51 call  self.local_protocol.messages.get(message_name)": [
+      "messages is the dict of protocol._parse_messages"
+    ],
+    "avro.ipc 158:44 call  avro.errors.AvroException(f\"Unknown message: {message_nam...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 159:36 getattr  message.name": [
+      "message is a Message of the protocol's messages"
+    ],
+    "avro.ipc 170:39 call  handshake_response.get(\"match\")": [
+      "the handshake response is the dict that read_record returns"
+    ],
+    "avro.ipc 176:48 call  avro.errors.AvroException(\"Handshake failure.\")": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 183:48 call  avro.errors.AvroException(\"Handshake failure.\")": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 189:44 call  avro.errors.AvroException(f\"Unexpected match: {match}\")": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 207:44 call  avro.errors.AvroException(f\"Unknown remote message: {mess...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 212:44 call  avro.errors.AvroException(f\"Unknown local message: {messa...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 223:50 call  avro.errors.AvroRemoteException(datum_reader.read(decoder))": [
+      "AvroRemoteException inherits Exception.__init__"
+    ],
+    "avro.ipc 233:52 call  self.transceiver.transceive(call_request)": [
+      "the transceiver is a client's (opaque) or the HTTPTransceiver that the package passes (avro.tool.send_message, tether.HTTPRequestor.request)"
+    ],
+    "avro.ipc 248:48 getattr  self.local_protocol.md5": [
+      "local_protocol is a Protocol (the package passes parsed protocols: avro.tool.GenericResponder, tether.TaskRunnerResponder)"
+    ],
+    "avro.ipc 299:48 call  avro.errors.AvroException(fail_msg)": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 303:48 call  avro.errors.AvroException(fail_msg)": [
+      "AvroException defines no __init__"
+    ],
+    "avro.ipc 310:39 call  self.invoke(local_message, request)": [
+      "self is a Responder (a plain public class), or one of the package's subclasses GenericResponder (avro.tool) and TaskRunnerResponder (tether); a client's subclass is client code"
+    ],
+    "avro.ipc 314:56 call  avro.errors.AvroRemoteException(str(e))": [
+      "AvroRemoteException inherits Exception.__init__"
+    ],
+    "avro.ipc 314:60 call  str(e)": [
+      "e is an exception; no package exception class defines __str__"
+    ],
+    "avro.ipc 326:52 call  avro.errors.AvroRemoteException(str(e))": [
+      "AvroRemoteException inherits Exception.__init__"
+    ],
+    "avro.ipc 338:44 call  handshake_request.get(\"clientHash\")": [
+      "the handshake request is the dict that read_record returns"
+    ],
+    "avro.ipc 380:31 call  str(error_exception)": [
+      "error_exception is an AvroRemoteException (respond); no package exception class defines __str__"
+    ],
+    "avro.ipc 407:41 call  self.reader.read(buffer_length - buffer.tell())": [
+      "the reader is a client's file object (opaque) or what the package passes: the rfile of the request handlers that avro.tool and tether start (socketserver.StreamRequestHandler: socket.makefile(\"rb\", -1), an io.BufferedReader) or the http.client.HTTPResponse of HTTPTransceiver.read_framed_message (avro.md, \"Streams\")"
+    ],
+    "avro.ipc 409:64 call  avro.errors.ConnectionClosedException(\"Reader read 0 byte...": [
+      "ConnectionClosedException inherits Exception.__init__"
+    ],
+    "avro.ipc 414:32 call  self.reader.read(BUFFER_HEADER_LENGTH)": [
+      "see 407:41"
+    ],
+    "avro.ipc 416:56 call  avro.errors.ConnectionClosedException(\"Reader read 0 byte...": [
+      "ConnectionClosedException inherits Exception.__init__"
+    ],
+    "avro.ipc 447:26 call  self.writer.write(chunk)": [
+      "the writer is a client's file object (opaque) or what the package passes: the wfile of the request handlers that avro.tool and tether start (socketserver.StreamRequestHandler with wbufsize 0: a socketserver._SocketWriter) or the io.BytesIO of HTTPTransceiver.write_framed_message (avro.md, \"Streams\")"
+    ],
+    "avro.ipc 450:26 call  self.writer.write(BIG_ENDIAN_INT_STRUCT.pack(n))": [
+      "see 447:26"
+    ],
+    "avro.ipc 468:54 call  self.conn.sock.getsockname()": [
+      "the sock of a connected HTTPConnection is the socket.socket of socket.create_connection"
+    ],
+    "avro.name 169:51 call  avro.errors.SchemaParseException(f\"{to_add.fullname} is a...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.name 171:51 call  avro.errors.SchemaParseException(f'The name \"{to_add.full...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.name 173:51 call  avro.errors.SchemaParseException(f'The name built from \"{...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.name 91:52 format  {name_attr!s}": [
+      "name_attr can be a SchemaType member: the tests pass SchemaType members as the items of ArraySchema and the values of MapSchema (test_compatibility.py:46-51), which Names.has_name and get_name forward here (avro.md J2); with a Names that has a default namespace (a public argument, combined freely), the `!s` conversion calls SchemaType.__str__"
+    ],
+    "avro.protocol 100:53 call  avro.errors.ProtocolParseException(\"The messages property...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 108:59 call  hashlib.md5(str(self).encode()).digest()": [
+      "hashlib.md5 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.md5 is _hashlib.openssl_md5, lib-python/3/hashlib.py:172 and :307, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin MD5 object: _md5.MD5Type on CPython (the module's exported type attribute, md5module.c, b8-ruling-c-type-names-1), _md5.md5 on PyPy (pypy/module/_md5/moduledef.py:22) (avro.md J5)"
+    ],
+    "avro.protocol 153:35 call  str(that)": [
+      "that is a Protocol (the tests compare protocols, test_protocol.py:462) or a client object (opaque)"
+    ],
+    "avro.protocol 215:36 call  MessageObject()": [
+      "MessageObject is a TypedDict class; its metaclass sets __call__ = dict (CPython 3.10.22 Lib/typing.py:2381; PyPy 3.11 lib-python/3/typing.py:3057), so the call is an explicit call of the builtin class dict (lead ruling, Codex round 1, AVRO-R1-02); the trace's <builtin>.dict.__init__ is rejected as a naming artefact"
+    ],
+    "avro.protocol 226:64 op  getattr(self, prop) == getattr(that, prop)": [
+      "prop runs over __slots__; self's _request (a RecordSchema) and _errors (an ErrorUnionSchema) compare with EqualByJsonMixin.__eq__, _response (any schema) with either mixin's; _name and _validate_names are a str and a bool"
+    ],
+    "avro.protocol 231:49 call  avro.errors.ProtocolParseException(f\"Request property not...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 242:49 call  avro.errors.ProtocolParseException(f\"Errors property not ...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 250:49 call  avro.errors.ProtocolParseException(f\"Not a JSON object: {...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 263:49 call  avro.errors.ProtocolParseException(f\"Error parsing JSON: ...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 274:49 call  avro.errors.ProtocolParseException(f\"Type {type_} not an ...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 282:53 call  avro.errors.ProtocolParseException(f'Message name \"{name}...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 92:53 call  avro.errors.ProtocolParseException(\"Protocols must have a...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 94:53 call  avro.errors.ProtocolParseException(\"The name property mus...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 96:53 call  avro.errors.ProtocolParseException(\"The namespace propert...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.protocol 98:53 call  avro.errors.ProtocolParseException(\"The types property mu...": [
+      "ProtocolParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1010:51 call  avro.errors.SchemaParseException(fail_msg)": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1013:51 call  avro.errors.SchemaParseException(fail_msg)": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 115:57 call  dt.tzinfo.utcoffset(dt)": [
+      "dt is the client's datetime; its tzinfo is a client object (opaque, no outside callee) or one of the package's avro.timezones.utc and tst, which the tests put into datetimes passed as data (test_io.py:119-139; a package value inside a client container, the json-repair ruling)"
+    ],
+    "avro.schema 1193:22 call  uuid.UUID(datum)": [
+      "a value site by name only (avro.constants binds the name UUID to a str); this is the class uuid.UUID of the standard library"
+    ],
+    "avro.schema 1234:31 call  schema_type(other_props)": [
+      "schema_type is a value of the dict logical_types (lines 1220-1230): five logical schema classes, UUIDSchema, make_bytes_decimal_schema and the lambda for decimal on fixed"
+    ],
+    "avro.schema 1239:132 format  {type_}": [
+      "type_ can be a SchemaType member (the \"type\" of a dict passed to the constructors, test_compatibility.py:422-427; avro.md J2) with a client logicalType that does not fit it"
+    ],
+    "avro.schema 1239:47 call  avro.errors.IgnoredLogicalType(f\"Logical type {logical_ty...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.schema 1242:57 call  avro.errors.IgnoredLogicalType(f\"Unknown {logical_type}, ...": [
+      "IgnoredLogicalType inherits UserWarning.__init__"
+    ],
+    "avro.schema 1242:90 format  {type_}": [
+      "see 1239:132"
+    ],
+    "avro.schema 1274:55 call  avro.errors.SchemaParseException(f\"Name {name} must be a ...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1289:59 call  avro.errors.SchemaParseException(f\"Enum symbols must be a...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1292:63 call  avro.errors.SchemaParseException(f\"Enum symbols must be a...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1299:51 call  avro.errors.SchemaParseException(f\"Unknown Named Type: {t...": [
+      "SchemaParseException inherits Exception.__init__; reachable with an admitted client str subclass as the type whose comparisons disagree (README, \"Client control flow\")"
+    ],
+    "avro.schema 1315:55 call  avro.errors.SchemaParseException(f\"Unknown Valid Type: {t...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1317:51 call  avro.errors.SchemaParseException(f'No \"type\" property: {j...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1319:51 call  avro.errors.SchemaParseException(f\"Undefined type: {type_}\")": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1328:43 call  avro.errors.SchemaParseException(fail_msg)": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 1351:38 call  Path(path).read_text()": [
+      "Path(path) makes a PosixPath on the release's platform, Linux (avro.md, \"Versions and platforms\")"
+    ],
+    "avro.schema 207:38 call  str(that)": [
+      "that is a schema (the tests compare schemas, test_schema.py:996-1004, test_compatibility) or a client object (object() in the tests; opaque)"
+    ],
+    "avro.schema 210:41 call  str(self)": [
+      "self is an ArraySchema, MapSchema, UnionSchema, ErrorUnionSchema, RecordSchema (Schema.__str__) or a Field (Field.__str__), all of which take __eq__ from EqualByJsonMixin"
+    ],
+    "avro.schema 217:37 call  self.fingerprint()": [
+      "self is a schema with EqualByJsonMixin; a Field has no fingerprint method (AttributeError, no edge)"
+    ],
+    "avro.schema 226:23 call  hasattr(that, \"props\")": [
+      "that is a schema (the tests compare schemas) or a client object (opaque); every schema class inherits PropertiesMixin.props"
+    ],
+    "avro.schema 226:54 op  self.props == getattr(that, \"props\")": [
+      "the dicts compare their values; a value of that.props can be a schema (the \"items\" of an ArraySchema, the \"values\" of a MapSchema; Fields in the \"fields\" of a RecordSchema), and when self.props holds a plain value under that key (other_props is Mapping[str, object], so PrimitiveSchema(\"int\", {\"type\": \"array\", \"items\": 1}) compared with an ArraySchema), the plain value's __eq__ returns NotImplemented and Python calls the schema's (or Field's) __eq__ reflected (avro.md J4)"
+    ],
+    "avro.schema 226:64 call  getattr(that, \"props\")": [
+      "see 226:23"
+    ],
+    "avro.schema 252:51 call  avro.errors.SchemaParseException(\"Schema type must be a s...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 254:51 call  avro.errors.SchemaParseException(f\"{type_} is not a valid...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 338:24 call  h.digest()": [
+      "h is hashlib.new(name, schema) for a name of hashlib.algorithms_guaranteed: an OpenSSL _hashlib.HASH, the builtin _blake2 objects (hashlib never takes blake2 from OpenSSL), or by hashlib's documented fallback the builtin classes, named by their module's exported type attribute (b8-ruling-c-type-names-1): _md5.MD5Type, _sha1.SHA1Type, on CPython 3.10 and 3.11 _sha256.SHA224Type and SHA256Type, _sha512.SHA384Type for SHA-512 (sha512module.c overwrites that attribute with the SHA-512 type) and _sha512.sha384 for SHA-384 (no export left), _sha2.SHA*Type from 3.12; on PyPy the classes _md5.md5, _sha1.sha, _sha256.sha224/sha256, _sha512.sha384/sha512; on PyPy (3.10 and 3.11, admitted by upstream's CI) hashlib.new is __hash_new (lib-python/3/hashlib.py:170-171), which calls _hashlib.new(name, data) (:160), and with non-empty data PyPy 3.11's _hashlib.new returns a _hashlib._OneShotHash (lib_pypy/_hashlib/__init__.py:40-57) and the fallback _sha1.sha1 is a function that returns a _sha1.sha (lib_pypy/_sha1.py:129, 359); shake_128 and shake_256 objects need a length, so their digest() cannot bind, except PyPy 3.11's one-shot object, already named (avro.md J5)"
+    ],
+    "avro.schema 355:51 call  avro.errors.SchemaParseException(\"Named Schemas must have...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 357:51 call  avro.errors.SchemaParseException(\"The name property must ...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 359:51 call  avro.errors.SchemaParseException(\"The namespace property ...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 426:51 call  avro.errors.SchemaParseException(\"Fields must have a non-...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 428:51 call  avro.errors.SchemaParseException(\"The name property must ...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 430:51 call  avro.errors.SchemaParseException(f\"The order property {or...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 440:55 call  avro.errors.SchemaParseException(f'Type property \"{type_}...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 513:44 call  avro.errors.AvroException(f\"{type} is not a valid primiti...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.schema 552:33 call  validator(datum)": [
+      "validator is a lambda of the class attribute _validators (lines 500-507: null, boolean, string, bytes, int, long, float, double), or the default lambda of line 551 when self.type misses the dict: an admitted client str subclass of a primitive name (Schema.__init__'s type_: str) with its own __hash__ passes the `in PRIMITIVE_TYPES` test but not the lookup (avro.md J6)"
+    ],
+    "avro.schema 592:44 call  avro.errors.AvroException(fail_msg)": [
+      "AvroException defines no __init__"
+    ],
+    "avro.schema 725:41 call  avro.errors.InvalidDefault(f\"Enum default '{symbol}' is n...": [
+      "InvalidDefault inherits Exception.__init__"
+    ],
+    "avro.schema 782:55 call  avro.errors.SchemaParseException(fail_msg)": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 836:55 call  avro.errors.SchemaParseException(\"Values schema is not a ...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 883:51 call  avro.errors.SchemaParseException(fail_msg)": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 897:59 call  avro.errors.SchemaParseException(f\"Union item must be a v...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 904:55 call  avro.errors.SchemaParseException(f\"{new_schema.type} type...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 904:58 format  {new_schema.type}": [
+      "new_schema.type is a SchemaType member when the union's items are SchemaType members (test_compatibility.py:137-158; avro.md J2): two equal members, UnionSchema([SchemaType.INT, SchemaType.INT]), reach this raise"
+    ],
+    "avro.schema 906:55 call  avro.errors.SchemaParseException(\"Unions cannot contain o...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 969:55 call  avro.errors.SchemaParseException(f\"Not a valid field: {fi...": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.schema 983:55 call  avro.errors.SchemaParseException(fail_msg)": [
+      "SchemaParseException inherits Exception.__init__"
+    ],
+    "avro.tether.tether_task 151:39 call  avro.ipc.Requestor(self.protocol, transciever)": [
+      "Requestor inherits BaseRequestor.__init__"
+    ],
+    "avro.tether.tether_task 247:49 call  os.getenv(\"AVRO_TETHER_OUTPUT_PORT\", 0)": [
+      "AVRO_TETHER_OUTPUT_PORT is documented configuration (the docstring of open)"
+    ],
+    "avro.tether.tether_task 249:41 call  avro.errors.UsageError(\"AVRO_TETHER_OUTPUT_PORT env var i...": [
+      "UsageError(RuntimeError, AvroException) defines no __init__"
+    ],
+    "avro.tether.tether_task 251:22 call  self.log.info(\"TetherTask.open: Opening connection to par...": [
+      "self.log is the logging.Logger of TetherTask.__init__ (logging.getLogger)"
+    ],
+    "avro.tether.tether_task 300:67 getattr  self.midschema.fields": [
+      "midschema is the parsed schema of the mapper's output, a record (the docstring of __init__)"
+    ],
+    "avro.tether.tether_task 427:37 call  message.decode()": [
+      "message is a str (the package passes traceback.format_exc()), whose missing decode raises AttributeError, or bytes, which the code handles explicitly"
+    ],
+    "avro.tether.tether_task 49:22 getattr  inputProtocol.types_dict": [
+      "an assert statement: it runs without -O (the graph is the union of normal and optimized execution)"
+    ],
+    "avro.tether.tether_task_runner 116:56 call  http.server.BaseHTTPRequestHandler.__init__(self, *args, ...": [
+      "BaseRequestHandler.__init__ calls handle, whose handle_one_request calls do_POST for a POST request: a library call-back of this package call"
+    ],
+    "avro.tether.tether_task_runner 122:47 call  self.responder.respond(call_request)": [
+      "self.responder is the TaskRunnerResponder of line 119"
+    ],
+    "avro.tether.tether_task_runner 123:31 call  self.send_response(200)": [
+      "self is a TaskRunnerHTTPHandler, a package subclass of http.server.BaseHTTPRequestHandler"
+    ],
+    "avro.tether.tether_task_runner 152:44 call  avro.errors.AvroException(\"task must be an instance of te...": [
+      "AvroException defines no __init__"
+    ],
+    "avro.tether.tether_task_runner 185:46 call  task_runner._server.serve_forever()": [
+      "the server that thread_run makes and starts instantiates the package's handler class for each request (its __init__ is package code; the do_POST it reaches is a call-back of TaskRunnerHTTPHandler.__init__, 116:56)"
+    ],
+    "avro.tether.tether_task_runner 189:22 call  sthread.start()": [
+      "Thread.start runs the target thread_run (the micro-benchmark rule on threads)"
+    ],
+    "avro.tether.tether_task_runner 197:46 call  self.task.ready_for_shutdown.wait()": [
+      "ready_for_shutdown is the threading.Event of TetherTask.__init__"
+    ],
+    "avro.tether.tether_task_runner 198:34 call  self._server.shutdown()": [
+      "self._server is the http.server.HTTPServer that thread_run makes (line 183)"
+    ],
+    "avro.tether.tether_task_runner 220:37 call  avro.errors.UsageError(\"Usage: tether_task_runner task_pa...": [
+      "UsageError inherits RuntimeError.__init__"
+    ],
+    "avro.tether.tether_task_runner 234:37 call  avro.errors.UsageError(e)": [
+      "UsageError inherits RuntimeError.__init__"
+    ],
+    "avro.tether.tether_task_runner 62:24 getattr  message.name": [
+      "message is the local Message that Responder.respond passes to invoke"
+    ],
+    "avro.tool 100:35 call  avro.ipc.Requestor(avro.protocol.parse(Path(proto).read_t...": [
+      "Requestor inherits BaseRequestor.__init__"
+    ],
+    "avro.tool 100:77 call  Path(proto).read_text()": [
+      "see 46:84"
+    ],
+    "avro.tool 101:10 call  print(requestor.request(msg, datum))": [
+      "the response datum is decoded by io (a timestamp with tzinfo avro.timezones.utc); print converts it with str(), whose isoformat calls UTCTzinfo.utcoffset (avro.md J7)"
+    ],
+    "avro.tool 124:39 iter  avro.datafile.DataFileReader(args.input_file, avro.io.Dat...": [
+      "the generator expression iterates the DataFileReader; its code belongs to main_dump, and str.join consumes it there"
+    ],
+    "avro.tool 46:84 call  Path(proto).read_text()": [
+      "Path(proto) makes a PosixPath on the release's platform, Linux (avro.md, \"Versions and platforms\")"
+    ],
+    "avro.tool 52:20 getattr  message.name": [
+      "message is the local Message that Responder.respond passes to invoke"
+    ],
+    "avro.tool 54:48 format  {self.datum}": [
+      "self.datum is the first datum of the client's data file (main_rpcreceive): a datetime of a timestamp schema is decoded with tzinfo avro.timezones.utc (io.read_timestamp_*), and formatting it calls UTCTzinfo.utcoffset (avro.md J7)"
+    ],
+    "avro.tool 65:43 call  self.responder.respond(call_request)": [
+      "self.responder is the module's GenericResponder (run_server, line 88), which inherits Responder.respond"
+    ],
+    "avro.tool 66:27 call  self.send_response(200)": [
+      "self is a GenericHandler, a package subclass of http.server.BaseHTTPRequestHandler that inherits the method"
+    ],
+    "avro.tool 94:25 call  server.serve_forever()": [
+      "the server that run_server makes and starts dispatches each POST to the package's GenericHandler (http.server's handle_one_request calls do_POST): a library call-back of the package call that starts the library code (B5; the package-started servers ruling)"
+    ]
+  },
+  "trace": "dynamic/avro.json"
+}

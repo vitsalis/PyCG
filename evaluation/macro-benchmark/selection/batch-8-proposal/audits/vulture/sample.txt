@@ -1,0 +1,79 @@
+# 1100 sites: 360 explicit, 627 getattr, 113 other implicit; 12 value sites
+    1 explicit        vulture.__main__ [vulture.__main__] 3:5 call  main()
+    3 explicit        vulture.config [vulture.config._check_input_config] 40:33 call  data.items()
+   27 explicit        vulture.config [vulture.config._parse_args.csv] 102:29 call  exclude.split(",")
+   32 explicit        vulture.config [vulture.config._parse_args] 108:24 call  parser.add_argument( "paths", nargs="*", metavar="PATH", ...
+   49 explicit        vulture.config [vulture.config._parse_args] 163:24 call  parser.add_argument( "--config", type=str, default="pypro...
+   60 explicit        vulture.config [vulture.config.make_config] 196:29 call  _parse_args(argv)
+   72 explicit        vulture.config [vulture.config.make_config] 210:37 call  str(toml_path)
+   74 explicit        vulture.config [vulture.config.make_config] 215:18 call  config.update(cli_config)
+  184 explicit        vulture.core [vulture.core.Item.__eq__] 184:45 call  other._tuple()
+  185 explicit        vulture.core [vulture.core.Item.__hash__] 187:20 call  hash(self._tuple())
+  187 explicit        vulture.core [vulture.core.Item.__hash__] 187:32 call  self._tuple()
+  195 explicit        vulture.core [vulture.core.Vulture.__init__] 204:40 call  get_list("import")
+  203 explicit        vulture.core [vulture.core.Vulture.__init__] 215:29 call  Path()
+  213 explicit        vulture.core [vulture.core.Vulture.scan] 230:42 call  noqa.parse_noqa(self.code)
+  285 explicit        vulture.core [vulture.core.Vulture.scavenge] 307:30 call  self._log("Included whitelist:", path)
+  314 explicit        vulture.core [vulture.core.Vulture.report] 359:42 call  item.get_whitelist_string()
+  319 explicit        vulture.core [vulture.core] 367:6 decorator  @property
+  323 explicit        vulture.core [vulture.core] 371:6 decorator  @property
+  327 explicit        vulture.core [vulture.core] 375:6 decorator  @property
+  332 explicit        vulture.core [vulture.core.Vulture.unused_methods] 381:33 call  _get_unused_items(self.defined_methods, self.used_names)
+  336 explicit        vulture.core [vulture.core.Vulture.unused_props] 385:33 call  _get_unused_items(self.defined_props, self.used_names)
+  353 explicit        vulture.core [vulture.core.Vulture._log] 403:22 call  print(x.encode(), file=file)
+  366 explicit        vulture.core [vulture.core.Vulture._add_aliases] 416:25 call  self._define( self.defined_imports, alias or name, node, ...
+  382 explicit        vulture.core [vulture.core.Vulture._define] 445:51 call  lines.get_first_line_number(first_node)
+  409 explicit        vulture.core [vulture.core.Vulture.visit_Attribute] 481:24 call  isinstance(node.ctx, ast.Load)
+  428 explicit        vulture.core [vulture.core.Vulture.visit_BinOp] 495:46 call  re.findall(r"%\((\w+)\)", node.left.value)
+  466 explicit        vulture.core [vulture.core.Vulture.visit_Call] 514:56 call  self._is_locals_call(kw.value)
+  482 explicit        vulture.core [vulture.core.Vulture._handle_new_format_string] 534:26 call  re.sub(r"\[\w*\]", "", field_name)
+  595 explicit        vulture.core [vulture.core.Vulture.visit] 632:26 call  getattr(self, method, None)
+  611 explicit        vulture.core [vulture.core.Vulture.visit] 649:23 call  self.visit( ast.parse(type_comment, filename="<type_comme...
+  621 explicit        vulture.core [vulture.core.Vulture.generic_visit] 660:28 call  isinstance(value, ast.AST)
+  624 explicit        vulture.core [vulture.core.Vulture.generic_visit] 661:27 call  self.visit(value)
+  642 explicit        vulture.core [vulture.core.main] 678:23 call  vulture.report( min_confidence=config["min_confidence"], ...
+  675 explicit        vulture.reachability [vulture.reachability.Reachability.__init__] 9:42 call  set()
+  700 explicit        vulture.reachability [vulture.reachability.Reachability.visit] 30:55 call  self._can_fall_through_statements_analysis(node.body)
+  713 explicit        vulture.reachability [vulture.reachability.Reachability.visit] 36:42 call  self._handle_reachability_try(node)
+  729 explicit  value vulture.reachability [vulture.reachability.Reachability._can_fall_through_statements_analysis] 59:33 call  self._report( name=class_name, first_node=next_sibling, l...
+  751 explicit        vulture.reachability [vulture.reachability.Reachability._handle_reachability_if] 86:77 call  self._can_fall_through_statements_analysis( node.body )
+  763 explicit  value vulture.reachability [vulture.reachability.Reachability._handle_reachability_if] 102:29 call  self._report( name="if", first_node=node, message="redund...
+  780 explicit        vulture.reachability [vulture.reachability.Reachability._handle_reachability_if_expr] 133:30 call  isinstance(node, ast.IfExp)
+  794 explicit  value vulture.reachability [vulture.reachability.Reachability._handle_reachability_while] 147:25 call  self._report( name="while", first_node=node, last_node=no...
+  805 explicit  value vulture.reachability [vulture.reachability.Reachability._handle_reachability_while] 159:29 call  self._report( name="else", first_node=else_body[0], last_...
+  816 explicit        vulture.reachability [vulture.reachability] 171:6 decorator  @staticmethod
+  827 explicit        vulture.reachability [vulture.reachability.Reachability._body_has_break] 193:44 call  ast.iter_fields(stmt)
+  849 explicit        vulture.reachability [vulture.reachability.Reachability._handle_reachability_try] 226:42 call  self._mark_as_no_fall_through(node)
+  879 explicit        vulture.utils [vulture.utils.get_decorator_name] 69:18 call  isinstance(decorator, ast.Call)
+  889 explicit        vulture.utils [vulture.utils.get_decorator_name] 76:21 call  parts.append(decorator.id)
+  922 explicit        vulture.utils [vulture.utils.LoggingList.append] 122:18 call  print(f'define {self.typ} "{item.name}"')
+  927 explicit        vulture.utils [vulture.utils.LoggingList.append] 123:14 call  super()
+  948 explicit        vulture.whitelists.argparse_whitelist [vulture.whitelists.argparse_whitelist] 6:39 call  argparse.ArgumentDefaultsHelpFormatter("prog")
+  427 getattr         vulture.core [vulture.core.Vulture.visit_BinOp] 495:39 getattr  re.findall
+  456 getattr         vulture.core [vulture.core.Vulture.visit_Call] 511:23 getattr  utils.is_ast_string
+  653 getattr         vulture.noqa [vulture.noqa] 13:8 getattr  re.IGNORECASE
+  813 getattr         vulture.reachability [vulture.reachability.Reachability._handle_reachability_while] 169:14 getattr  self._can_fall_through_statements_analysis
+  815 getattr         vulture.reachability [vulture.reachability.Reachability._handle_reachability_while] 169:57 getattr  node.body
+  862 getattr         vulture.utils [vulture.utils._safe_eval] 39:60 getattr  node.op
+  946 getattr         vulture.whitelists.argparse_whitelist [vulture.whitelists.argparse_whitelist] 5:48 getattr  argparse.ArgumentDefaultsHelpFormatter("prog")._fill_text
+  960 getattr         vulture.whitelists.ast_whitelist [vulture.whitelists.ast_whitelist] 15:24 getattr  whitelist_node_visitor.visit_BoolOp
+  997 getattr         vulture.whitelists.ast_whitelist [vulture.whitelists.ast_whitelist] 52:24 getattr  whitelist_node_visitor.visit_Set
+ 1096 getattr         vulture.whitelists.unittest_whitelist [vulture.whitelists.unittest_whitelist] 16:11 getattr  mock.Mock.side_effect
+  108 implicit        vulture.core [vulture.core._assigns_special_variable__all__] 71:19 op  target.id == "__all__"
+  133 implicit        vulture.core [vulture.core.Item.__init__] 146:56 format  {name}
+  140 implicit        vulture.core [vulture.core.Item.get_report] 156:47 op  self.size == 1
+  141 implicit        vulture.core [vulture.core.Item.get_report] 157:31 format  {self.size:d}
+  252 implicit        vulture.core [vulture.core.Vulture.scavenge.prepare_pattern] 269:29 op  char in pattern
+  446 implicit        vulture.core [vulture.core.Vulture.visit_Call] 503:38 getitem  node.args[1]
+  638 implicit        vulture.core [vulture.core.main] 676:53 getitem  config["exclude"]
+  799 implicit        vulture.reachability [vulture.reachability.Reachability._handle_reachability_while] 152:31 getitem  node.body[-1]
+  899 implicit        vulture.utils [vulture.utils.get_modules] 94:28 op  path.suffix == ".pyc"
+  913 implicit        vulture.utils [vulture.utils.get_modules] 101:31 format  {path}
+   96 value     value vulture.core [vulture.core._match] 57:20 call  func(name, pattern)
+  372 value     value vulture.core [vulture.core.Vulture._define.ignored] 438:35 call  ignore(self.filename, name)
+  605 value     value vulture.core [vulture.core.Vulture.visit] 638:20 call  visitor(node)
+  738 value     value vulture.reachability [vulture.reachability.Reachability._handle_reachability_if] 72:25 call  self._report( name="if", first_node=node, last_node=node....
+  757 value     value vulture.reachability [vulture.reachability.Reachability._handle_reachability_if] 94:29 call  self._report( name="else", first_node=node.orelse[0], las...
+  778 value     value vulture.reachability [vulture.reachability.Reachability._handle_reachability_if_expr] 129:25 call  self._report( name="ternary", first_node=node, last_node=...
+  789 value     value vulture.reachability [vulture.reachability.Reachability._handle_reachability_if_expr] 139:25 call  self._report( name="ternary", first_node=else_body, messa...
+  840 value     value vulture.reachability [vulture.reachability.Reachability._handle_reachability_try] 209:25 call  self._report( name="else", first_node=else_body[0], last_...

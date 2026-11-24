@@ -1,0 +1,2348 @@
+# Call-site ledger of m3u8 at 49417d05602fc472b518ec61aa9b327cd00e079d.
+# Hand-written from the source; judgements in m3u8.md.
+#
+# Values used below (m3u8.md, "Values"):
+#   the receivers of the BasePathMixin properties: Segment, PartialSegment,
+#     Key, SessionKey, InitializationSection, Playlist, IFramePlaylist,
+#     ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering
+#     (and Tiles, which the package never makes); only Segment defines its
+#     own base_uri and base_path properties; M3U8 defines both.
+#   the grouped lists of an M3U8 (SegmentList, MediaList, PlaylistList,
+#     RenditionReportList, PartialSegmentList of a Segment) are the ones that
+#     _initialize_attributes and Segment.__init__ make; their elements are the
+#     package objects named in m3u8.md.
+#   resource in DefaultHTTPClient.download: http.client.HTTPResponse or
+#     urllib.response.addinfourl (file, data, ftp URLs).
+#   attribute values (uri, codecs, durations, ...): strs, ints, floats,
+#     None and datetimes from the parser, or the client's values for these
+#     documented string and number attributes.
+default reject m3u8.model.InitializationSection.__eq__, m3u8.model.Key.__eq__: no Key, SessionKey or InitializationSection is an operand of this comparison or an element or key of this container test: the compared values are strs, ints, floats, None, bools, dicts of the parser, lists, tuples, Decimals or typing objects; the sites that compare keys or initialization sections (SegmentList.by_key and the explicit self.__eq__ calls of the two __ne__ methods) accept them explicitly, and the != sites of Segment.dumps reach __ne__, which both classes define
+default reject m3u8.model.PreloadHint.__getitem__, m3u8.model.ServerControl.__getitem__: the subscripted or unpacked object is not a PreloadHint or ServerControl: it is a dict of the parser, a list, a tuple, a str, an iterator, or a typing object in an annotation; only self[attr] in PreloadHint.dumps and ServerControl.dumps subscripts these classes, and those sites accept them explicitly
+default reject m3u8.model.ContentSteering.__str__, m3u8.model.DateRange.__str__, m3u8.model.IFramePlaylist.__str__, m3u8.model.ImagePlaylist.__str__, m3u8.model.InitializationSection.__str__, m3u8.model.Key.__str__, m3u8.model.Media.__str__, m3u8.model.PartInformation.__str__, m3u8.model.PartialSegment.__str__, m3u8.model.PartialSegmentList.__str__, m3u8.model.Playlist.__str__, m3u8.model.PreloadHint.__str__, m3u8.model.RenditionReport.__str__, m3u8.model.RenditionReportList.__str__, m3u8.model.Segment.__str__, m3u8.model.SegmentList.__str__, m3u8.model.ServerControl.__str__, m3u8.model.SessionData.__str__, m3u8.model.Skip.__str__, m3u8.model.Start.__str__, m3u8.model.StreamInfo.__str__, m3u8.model.TagList.__str__, m3u8.model.Tiles.__str__, m3u8.parser.ParseError.__str__, m3u8.version_matching_rules.VersionMatchingError.__str__: no package object is converted or formatted here: the formatted values are strs, ints, floats, bools, None, Decimals or datetimes (parsed attribute values, or the client's values for these documented string and number attributes); the str() and join sites that convert package objects accept their classes explicitly
+
+== m3u8
+
+[m3u8]
+86:34 call  DefaultHTTPClient()
+    -> m3u8.httpclient.DefaultHTTPClient.__init__
+
+[m3u8.loads]
+75:20 call  M3U8(content, custom_tags_parser=custom_tags_parser)
+    -> m3u8.model.M3U8.__init__
+77:27 call  urljoin(uri, ".")
+    -> urllib.parse.urljoin
+78:20 call  M3U8(content, base_uri=base_uri, custom_tags_parser=custo...
+    -> m3u8.model.M3U8.__init__
+
+[m3u8.load]
+93:16 call  urlsplit(uri)
+    -> urllib.parse.urlsplit
+    -> functools._lru_cache_wrapper.__call__
+94:49 call  http_client.download(uri, timeout, headers, verify_ssl)
+    -> m3u8.httpclient.DefaultHTTPClient.download
+    note: http_client is the default DefaultHTTPClient() made at import (line 86), a DefaultHTTPClient that the client makes, or a client object (opaque, B5); no other package class has download
+95:20 call  M3U8(content, base_uri=base_uri, custom_tags_parser=custo...
+    -> m3u8.model.M3U8.__init__
+97:31 call  _load_from_file(uri, custom_tags_parser)
+    -> m3u8._load_from_file
+
+[m3u8._load_from_file]
+101:14 call  open(uri, encoding="utf8")
+    -> <builtin>.open
+102:35 call  fileobj.read()
+    -> io.TextIOWrapper.read
+    note: fileobj is the text stream of open(uri, encoding="utf8")
+102:43 call  fileobj.read().strip()
+    -> <builtin>.str.strip
+103:31 call  os.path.dirname(uri)
+    -> os.path.dirname
+104:16 call  M3U8(raw_content, base_uri=base_uri, custom_tags_parser=c...
+    -> m3u8.model.M3U8.__init__
+
+== m3u8.httpclient
+
+[m3u8.httpclient.DefaultHTTPClient.download]
+12:52 call  urllib.request.ProxyHandler(self.proxies)
+    -> urllib.request.ProxyHandler
+13:37 call  HTTPSHandler(verify_ssl=verify_ssl)
+    -> m3u8.httpclient.HTTPSHandler.__new__
+14:45 call  urllib.request.build_opener(proxy_handler, https_handler)
+    -> urllib.request.build_opener
+15:42 call  headers.items()
+    -> <builtin>.dict.items
+    note: headers is the dict default {} of load and download, or a client dict (B4: the default fixes dict; a client mapping is opaque)
+16:31 call  opener.open(uri, timeout=timeout)
+    -> urllib.request.OpenerDirector.open
+    note: opener is the OpenerDirector of urllib.request.build_opener
+17:27 call  urljoin(resource.geturl(), ".")
+    -> urllib.parse.urljoin
+17:43 call  resource.geturl()
+    -> http.client.HTTPResponse.geturl
+    -> urllib.response.addinfourl.geturl
+    note: resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4)
+19:25 call  resource.info()
+    -> http.client.HTTPResponse.info
+    -> urllib.response.addinfourl.info
+    note: resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4)
+19:31 call  resource.info().get("Content-Encoding")
+    -> http.client.HTTPMessage.get
+    -> email.message.Message.get
+    note: info() returns the headers: an http.client.HTTPMessage for an HTTPResponse, an email.message.Message (email.message_from_string) for an addinfourl; Message.get is named by the receiver's class
+20:38 call  gzip.decompress(resource.read())
+    -> gzip.decompress
+20:52 call  resource.read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4); addinfourl is a tempfile._TemporaryFileWrapper (urllib.response.addbase), whose __getattr__ returns its local func_wrapper around the read of the wrapped file
+20:62 call  gzip.decompress(resource.read()).decode( resource.headers...
+    -> <builtin>.bytes.decode
+21:53 call  resource.headers.get_content_charset(failobj="utf-8")
+    -> http.client.HTTPMessage.get_content_charset
+    -> email.message.Message.get_content_charset
+    note: resource.headers is the http.client.HTTPMessage of an HTTPResponse or the email.message.Message of an addinfourl
+24:36 call  resource.read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4); addinfourl is a tempfile._TemporaryFileWrapper (urllib.response.addbase), whose __getattr__ returns its local func_wrapper around the read of the wrapped file
+24:45 call  resource.read().decode( resource.headers.get_content_char...
+    -> <builtin>.bytes.decode
+25:53 call  resource.headers.get_content_charset(failobj="utf-8")
+    -> http.client.HTTPMessage.get_content_charset
+    -> email.message.Message.get_content_charset
+    note: resource.headers is the http.client.HTTPMessage of an HTTPResponse or the email.message.Message of an addinfourl
+
+[m3u8.httpclient.HTTPSHandler.__new__]
+32:45 call  ssl.create_default_context()
+    -> ssl.create_default_context
+36:43 call  urllib.request.HTTPSHandler(context=context)
+    -> urllib.request.HTTPSHandler
+    reject m3u8.httpclient.HTTPSHandler.__new__: the call names urllib.request.HTTPSHandler, the library class, not the package class
+
+== m3u8.mixins
+
+[m3u8.mixins]
+6:6 decorator  @property
+    -> <builtin>.property
+20:6 decorator  @property
+    -> <builtin>.property
+30:6 decorator  @base_path.setter
+    -> <builtin>.property.setter
+44:24 call  property(None, _set_base_uri)
+    -> <builtin>.property
+    reject m3u8.mixins.GroupedBasePathMixin._set_base_uri: property() stores the setter without calling it
+50:25 call  property(None, _set_base_path)
+    -> <builtin>.property
+    reject m3u8.mixins.GroupedBasePathMixin._set_base_path: property() stores the setter without calling it
+
+[m3u8.mixins.BasePathMixin.absolute_uri]
+8:17 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+11:22 call  urljoin(self.base_uri, self.uri)
+    -> urllib.parse.urljoin
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+11:28 getattr  self.base_uri
+    -> m3u8.model.Segment.base_uri
+    reject m3u8.model.M3U8.base_uri: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), never an M3U8; Segment defines the base_uri property, the others have a plain instance attribute
+11:43 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+12:17 getattr  self.base_uri
+    -> m3u8.model.Segment.base_uri
+    reject m3u8.model.M3U8.base_uri: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), never an M3U8; Segment defines the base_uri property, the others have a plain instance attribute
+12:43 call  urlsplit(self.base_uri)
+    -> urllib.parse.urlsplit
+    -> functools._lru_cache_wrapper.__call__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+12:49 getattr  self.base_uri
+    -> m3u8.model.Segment.base_uri
+    reject m3u8.model.M3U8.base_uri: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), never an M3U8; Segment defines the base_uri property, the others have a plain instance attribute
+15:24 call  urlsplit(ret)
+    -> urllib.parse.urlsplit
+    -> functools._lru_cache_wrapper.__call__
+16:29 call  ValueError("There can not be `absolute_uri` with no `base...
+    -> <builtin>.ValueError
+
+[m3u8.mixins.BasePathMixin.base_path]
+22:17 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+24:23 call  dirname(self.get_path_from_uri())
+    -> os.path.dirname
+24:46 call  self.get_path_from_uri()
+    -> m3u8.mixins.BasePathMixin.get_path_from_uri
+32:17 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+33:25 getattr  self.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    -> m3u8.model.Segment.base_path
+    reject m3u8.model.M3U8.base_path: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles); a Segment reaches this setter through the explicit fset call of Segment.base_path (model.py:692) and loads its own property, the others load BasePathMixin.base_path
+34:51 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+36:33 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+36:44 call  self.uri.replace(self.base_path, newbase_path)
+    -> <builtin>.str.replace
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+36:50 getattr  self.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    -> m3u8.model.Segment.base_path
+    reject m3u8.model.M3U8.base_path: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles); a Segment reaches this setter through the explicit fset call of Segment.base_path (model.py:692) and loads its own property, the others load BasePathMixin.base_path
+
+[m3u8.mixins.BasePathMixin.get_path_from_uri]
+28:21 getattr  self.uri
+    reject *: the receiver is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+28:30 call  self.uri.split("?")
+    -> <builtin>.str.split
+
+[m3u8.mixins.GroupedBasePathMixin._set_base_uri]
+42:18 setattr  item.base_uri
+    -> m3u8.model.Segment.base_uri
+    reject *: item is an element of a SegmentList (a Segment, whose base_uri setter runs) or of a PartialSegmentList, MediaList, PlaylistList or RenditionReportList (PartialSegment, Media, Playlist, IFramePlaylist, ImagePlaylist, RenditionReport: plain instance attributes); no element is an M3U8 or a grouped list
+
+[m3u8.mixins.GroupedBasePathMixin._set_base_path]
+48:18 setattr  item.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    -> m3u8.model.Segment.base_path
+    reject *: item is a Segment (SegmentList) or a PartialSegment, Media, Playlist, IFramePlaylist, ImagePlaylist or RenditionReport, all BasePathMixin instances; no element is an M3U8 or a grouped list
+
+== m3u8.model
+
+[m3u8.model]
+289:6 decorator  @property
+    -> <builtin>.property
+293:6 decorator  @base_uri.setter
+    -> <builtin>.property.setter
+313:6 decorator  @property
+    -> <builtin>.property
+317:6 decorator  @base_path.setter
+    -> <builtin>.property.setter
+686:6 decorator  @property
+    -> <builtin>.property
+690:6 decorator  @base_path.setter
+    -> <builtin>.property.setter
+697:6 decorator  @property
+    -> <builtin>.property
+701:6 decorator  @base_uri.setter
+    -> <builtin>.property.setter
+721:6 decorator  @property
+    -> <builtin>.property
+1270:6 decorator  @property
+    -> <builtin>.property
+
+[m3u8.model.M3U8.__init__]
+166:30 call  parse(content, strict, custom_tags_parser)
+    -> m3u8.parser.parse
+171:43 call  self._base_uri.endswith("/")
+    -> <builtin>.str.endswith
+174:36 call  self._initialize_attributes()
+    -> m3u8.model.M3U8._initialize_attributes
+175:14 setattr  self.base_path
+    -> m3u8.model.M3U8.base_path
+    reject *: self is an M3U8
+
+[m3u8.model.M3U8._initialize_attributes]
+179:16 call  Key(base_uri=self.base_uri, **params)
+    -> m3u8.model.Key.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+179:31 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+180:40 call  self.data.get("keys", [])
+    -> <builtin>.dict.get
+183:34 call  InitializationSection(base_uri=self.base_uri, **params)
+    -> m3u8.model.InitializationSection.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+183:49 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+184:40 call  self.data.get("segment_map", [])
+    -> <builtin>.dict.get
+186:36 call  SegmentList( [ Segment( base_uri=self.base_uri, keyobject...
+    -> <builtin>.list.__init__
+188:24 call  Segment( base_uri=self.base_uri, keyobject=find_key(segme...
+    -> m3u8.model.Segment.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+189:35 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+190:39 call  find_key(segment.get("key", {}), self.keys)
+    -> m3u8.model.find_key
+190:51 call  segment.get("key", {})
+    -> <builtin>.dict.get
+193:45 call  self.data.get("segments", [])
+    -> <builtin>.dict.get
+198:20 call  setattr(self, attr, self.data.get(param))
+    -> <builtin>.setattr
+198:46 call  self.data.get(param)
+    -> <builtin>.dict.get
+200:36 call  enumerate(self.segments, self.media_sequence or 0)
+    -> <builtin>.enumerate
+206:28 getattr  key.uri
+    reject *: key is a Key that this method made (self.keys), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the list classes
+207:34 call  self.files.append(key.uri)
+    -> <builtin>.list.append
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+207:39 getattr  key.uri
+    reject *: key is a Key that this method made (self.keys), whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the list classes
+208:26 call  self.files.extend(self.segments.uri)
+    -> <builtin>.list.extend
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+208:41 getattr  self.segments.uri
+    -> m3u8.model.SegmentList.uri
+    reject m3u8.model.MediaList.uri: self.segments is the SegmentList made at line 186
+210:31 call  MediaList( [ Media(base_uri=self.base_uri, **media) for m...
+    -> <builtin>.list.__init__
+212:22 call  Media(base_uri=self.base_uri, **media)
+    -> m3u8.model.Media.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+212:37 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+213:43 call  self.data.get("media", [])
+    -> <builtin>.dict.get
+217:38 call  PlaylistList( [ Playlist(base_uri=self.base_uri, media=se...
+    -> <builtin>.list.__init__
+219:25 call  Playlist(base_uri=self.base_uri, media=self.media, **play...
+    -> m3u8.model.Playlist.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+219:40 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+220:46 call  self.data.get("playlists", [])
+    -> <builtin>.dict.get
+224:45 call  PlaylistList()
+    -> <builtin>.list.__init__
+225:36 call  self.data.get("iframe_playlists", [])
+    -> <builtin>.dict.get
+226:41 call  self.iframe_playlists.append( IFramePlaylist( base_uri=se...
+    -> <builtin>.list.append
+227:31 call  IFramePlaylist( base_uri=self.base_uri, uri=ifr_pl["uri"]...
+    -> m3u8.model.IFramePlaylist.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+228:35 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+234:44 call  PlaylistList()
+    -> <builtin>.list.__init__
+235:36 call  self.data.get("image_playlists", [])
+    -> <builtin>.dict.get
+236:40 call  self.image_playlists.append( ImagePlaylist( base_uri=self...
+    -> <builtin>.list.append
+237:30 call  ImagePlaylist( base_uri=self.base_uri, uri=img_pl["uri"],...
+    -> m3u8.model.ImagePlaylist.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+238:35 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+244:30 call  self.data.get("start", None)
+    -> <builtin>.dict.get
+245:37 call  Start(**start)
+    -> m3u8.model.Start.__init__
+247:39 call  self.data.get("server_control", None)
+    -> <builtin>.dict.get
+248:63 call  ServerControl(**server_control)
+    -> m3u8.model.ServerControl.__init__
+250:33 call  self.data.get("part_inf", None)
+    -> <builtin>.dict.get
+251:53 call  PartInformation(**part_inf)
+    -> m3u8.model.PartInformation.__init__
+253:29 call  self.data.get("skip", None)
+    -> <builtin>.dict.get
+254:34 call  Skip(**skip)
+    -> m3u8.model.Skip.__init__
+256:53 call  RenditionReportList( [ RenditionReport(base_uri=self.base...
+    -> <builtin>.list.__init__
+258:32 call  RenditionReport(base_uri=self.base_uri, **rendition_report)
+    -> m3u8.model.RenditionReport.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+258:47 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+259:54 call  self.data.get("rendition_reports", [])
+    -> <builtin>.dict.get
+263:44 call  SessionDataList( [ SessionData(**session_data) for sessio...
+    -> <builtin>.list.__init__
+265:28 call  SessionData(**session_data)
+    -> m3u8.model.SessionData.__init__
+266:50 call  self.data.get("session_data", [])
+    -> <builtin>.dict.get
+272:23 call  SessionKey(base_uri=self.base_uri, **params)
+    -> m3u8.model.Key.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+272:38 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+273:40 call  self.data.get("session_keys", [])
+    -> <builtin>.dict.get
+276:37 call  self.data.get("preload_hint", None)
+    -> <builtin>.dict.get
+277:57 call  PreloadHint( base_uri=self.base_uri, **preload_hint )
+    -> m3u8.model.PreloadHint.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+278:27 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+281:41 call  self.data.get("content_steering", None)
+    -> <builtin>.dict.get
+282:69 call  ContentSteering( base_uri=self.base_uri, **content_steeri...
+    -> m3u8.model.ContentSteering.__init__
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+283:27 getattr  self.base_uri
+    -> m3u8.model.M3U8.base_uri
+    reject *: self is an M3U8
+
+[m3u8.model.M3U8.__unicode__]
+287:26 call  self.dumps()
+    -> m3u8.model.M3U8.dumps
+    reject *: self is a M3U8, which has no package subclass
+
+[m3u8.model.M3U8.base_uri]
+296:20 setattr  self.media.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: the receiver is the MediaList that _initialize_attributes made (no test or document assigns these attributes); its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+297:24 setattr  self.playlists.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: the receiver is the PlaylistList that _initialize_attributes made (no test or document assigns these attributes); its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+298:31 setattr  self.iframe_playlists.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: the receiver is the PlaylistList that _initialize_attributes made (no test or document assigns these attributes); its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+299:23 setattr  self.segments.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: the receiver is the SegmentList that _initialize_attributes made (no test or document assigns these attributes); its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+300:32 setattr  self.rendition_reports.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: the receiver is the RenditionReportList that _initialize_attributes made (no test or document assigns these attributes); its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+301:30 setattr  self.image_playlists.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: the receiver is the PlaylistList that _initialize_attributes made (no test or document assigns these attributes); its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+304:21 setattr  key.base_uri
+    reject *: key is a Key (self.keys) or SessionKey (self.session_keys), whose base_uri is a plain instance attribute; no property runs
+307:21 setattr  key.base_uri
+    reject *: key is a Key (self.keys) or SessionKey (self.session_keys), whose base_uri is a plain instance attribute; no property runs
+309:31 setattr  self.preload_hint.base_uri
+    reject *: self.preload_hint is a PreloadHint, whose base_uri is a plain instance attribute
+311:35 setattr  self.content_steering.base_uri
+    reject *: self.content_steering is a ContentSteering, whose base_uri is a plain instance attribute
+
+[m3u8.model.M3U8.base_path]
+320:31 call  self._update_base_path()
+    -> m3u8.model.M3U8._update_base_path
+
+[m3u8.model.M3U8._update_base_path]
+327:21 setattr  key.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    reject *: key is a Key or SessionKey, which inherit the base_path property of BasePathMixin
+330:21 setattr  key.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    reject *: key is a Key or SessionKey, which inherit the base_path property of BasePathMixin
+331:20 setattr  self.media.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: the receiver is the MediaList that _initialize_attributes made; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+332:23 setattr  self.segments.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: the receiver is the SegmentList that _initialize_attributes made; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+333:24 setattr  self.playlists.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: the receiver is the PlaylistList that _initialize_attributes made; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+334:31 setattr  self.iframe_playlists.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: the receiver is the PlaylistList that _initialize_attributes made; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+335:30 setattr  self.image_playlists.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: the receiver is the PlaylistList that _initialize_attributes made; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+336:32 setattr  self.rendition_reports.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: the receiver is the RenditionReportList that _initialize_attributes made; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+338:31 setattr  self.preload_hint.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    reject *: self.preload_hint is a PreloadHint, which inherits the base_path property of BasePathMixin
+340:35 setattr  self.content_steering.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    reject *: self.content_steering is a ContentSteering, which inherits the base_path property of BasePathMixin
+
+[m3u8.model.M3U8.add_playlist]
+344:30 call  self.playlists.append(playlist)
+    -> <builtin>.list.append
+
+[m3u8.model.M3U8.add_iframe_playlist]
+349:41 call  self.iframe_playlists.append(iframe_playlist)
+    -> <builtin>.list.append
+
+[m3u8.model.M3U8.add_image_playlist]
+354:40 call  self.image_playlists.append(image_playlist)
+    -> <builtin>.list.append
+
+[m3u8.model.M3U8.add_media]
+357:26 call  self.media.append(media)
+    -> <builtin>.list.append
+
+[m3u8.model.M3U8.add_segment]
+360:29 call  self.segments.append(segment)
+    -> <builtin>.list.append
+
+[m3u8.model.M3U8.add_rendition_report]
+363:38 call  self.rendition_reports.append(report)
+    -> <builtin>.list.append
+
+[m3u8.model.M3U8.dumps]
+372:26 call  output.append(str(self.content_steering))
+    -> <builtin>.list.append
+372:30 call  str(self.content_steering)
+    -> <builtin>.str
+    -> m3u8.model.ContentSteering.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.content_steering is a ContentSteering (truth-tested before)
+374:26 call  output.append("#EXT-X-MEDIA-SEQUENCE:" + str(self.media_s...
+    -> <builtin>.list.append
+374:57 call  str(self.media_sequence)
+    -> <builtin>.str
+376:26 call  output.append( f"#EXT-X-DISCONTINUITY-SEQUENCE:{self.disc...
+    -> <builtin>.list.append
+380:26 call  output.append("#EXT-X-ALLOW-CACHE:" + self.allow_cache.up...
+    -> <builtin>.list.append
+380:73 call  self.allow_cache.upper()
+    -> <builtin>.str.upper
+382:26 call  output.append("#EXT-X-VERSION:" + str(self.version))
+    -> <builtin>.list.append
+382:50 call  str(self.version)
+    -> <builtin>.str
+384:26 call  output.append("#EXT-X-INDEPENDENT-SEGMENTS")
+    -> <builtin>.list.append
+386:26 call  output.append( "#EXT-X-TARGETDURATION:" + number_to_strin...
+    -> <builtin>.list.append
+387:60 call  number_to_string(self.target_duration)
+    -> m3u8.model.number_to_string
+390:26 call  output.append("#EXT-X-PLAYLIST-TYPE:%s" % str(self.playli...
+    -> <builtin>.list.append
+390:58 call  str(self.playlist_type)
+    -> <builtin>.str
+390:84 call  str(self.playlist_type).upper()
+    -> <builtin>.str.upper
+392:26 call  output.append(str(self.start))
+    -> <builtin>.list.append
+392:30 call  str(self.start)
+    -> <builtin>.str
+    -> m3u8.model.Start.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.start is a Start (truth-tested before)
+394:26 call  output.append("#EXT-X-I-FRAMES-ONLY")
+    -> <builtin>.list.append
+396:26 call  output.append("#EXT-X-IMAGES-ONLY")
+    -> <builtin>.list.append
+398:26 call  output.append(str(self.server_control))
+    -> <builtin>.list.append
+398:30 call  str(self.server_control)
+    -> <builtin>.str
+    -> m3u8.model.ServerControl.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.server_control is a ServerControl
+401:30 call  output.append(str(self.media))
+    -> <builtin>.list.append
+401:34 call  str(self.media)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.media is a MediaList, which inherits TagList.__str__
+402:26 call  output.append(str(self.playlists))
+    -> <builtin>.list.append
+402:30 call  str(self.playlists)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.playlists is a PlaylistList, which inherits TagList.__str__
+404:30 call  output.append(str(self.iframe_playlists))
+    -> <builtin>.list.append
+404:34 call  str(self.iframe_playlists)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.iframe_playlists is a PlaylistList
+406:30 call  output.append(str(self.image_playlists))
+    -> <builtin>.list.append
+406:34 call  str(self.image_playlists)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.image_playlists is a PlaylistList
+408:26 call  output.append(str(self.part_inf))
+    -> <builtin>.list.append
+408:30 call  str(self.part_inf)
+    -> <builtin>.str
+    -> m3u8.model.PartInformation.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.part_inf is a PartInformation
+410:26 call  output.append(str(self.skip))
+    -> <builtin>.list.append
+410:30 call  str(self.skip)
+    -> <builtin>.str
+    -> m3u8.model.Skip.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.skip is a Skip
+412:26 call  output.append(str(self.session_data))
+    -> <builtin>.list.append
+412:30 call  str(self.session_data)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.session_data is a SessionDataList
+415:26 call  output.append(str(key))
+    -> <builtin>.list.append
+415:30 call  str(key)
+    -> <builtin>.str
+    -> m3u8.model.Key.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: key is a SessionKey, which inherits Key.__str__, or None
+417:22 call  output.append(self.segments.dumps(timespec, infspec))
+    -> <builtin>.list.append
+417:42 call  self.segments.dumps(timespec, infspec)
+    -> m3u8.model.SegmentList.dumps
+    reject *: self.segments is the SegmentList of _initialize_attributes
+420:26 call  output.append(str(self.preload_hint))
+    -> <builtin>.list.append
+420:30 call  str(self.preload_hint)
+    -> <builtin>.str
+    -> m3u8.model.PreloadHint.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.preload_hint is a PreloadHint
+423:26 call  output.append(str(self.rendition_reports))
+    -> <builtin>.list.append
+423:30 call  str(self.rendition_reports)
+    -> <builtin>.str
+    -> m3u8.model.RenditionReportList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.rendition_reports is a RenditionReportList
+426:26 call  output.append("#EXT-X-ENDLIST")
+    -> <builtin>.list.append
+429:50 call  output[-1].endswith("\n")
+    -> <builtin>.str.endswith
+430:26 call  output.append("")
+    -> <builtin>.list.append
+432:25 call  "\n".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.M3U8.dump]
+438:37 call  self._create_sub_directories(filename)
+    -> m3u8.model.M3U8._create_sub_directories
+440:18 call  open(filename, "w")
+    -> <builtin>.open
+441:26 call  fileobj.write(self.dumps())
+    -> io.TextIOWrapper.write
+    note: fileobj is the text stream of open(filename, "w")
+441:37 call  self.dumps()
+    -> m3u8.model.M3U8.dumps
+    reject *: self is a M3U8, which has no package subclass
+
+[m3u8.model.M3U8._create_sub_directories]
+444:29 call  os.path.isabs(filename)
+    -> os.path.isabs
+445:36 call  os.path.join(os.getcwd(), filename)
+    -> os.path.join
+445:46 call  os.getcwd()
+    -> os.getcwd
+447:35 call  os.path.dirname(filename)
+    -> os.path.dirname
+449:24 call  os.makedirs(basename, exist_ok=True)
+    -> os.makedirs
+
+[m3u8.model.Segment.__init__]
+574:40 call  PartialSegmentList( [PartialSegment(base_uri=self._base_u...
+    -> <builtin>.list.__init__
+575:28 call  PartialSegment(base_uri=self._base_uri, **partial)
+    -> m3u8.model.PartialSegment.__init__
+580:54 call  InitializationSection(self._base_uri, **init_section)
+    -> m3u8.model.InitializationSection.__init__
+583:40 call  DateRangeList( [DateRange(**daterange) for daterange in d...
+    -> <builtin>.list.__init__
+584:23 call  DateRange(**daterange)
+    -> m3u8.model.DateRange.__init__
+
+[m3u8.model.Segment.add_part]
+590:26 call  self.parts.append(part)
+    -> <builtin>.list.append
+
+[m3u8.model.Segment.dumps]
+595:38 op  self.key != last_segment.key
+    -> m3u8.model.Key.__ne__
+    reject m3u8.model.InitializationSection.__ne__: the operands are segment keys, Key objects or None; when only the right one is a Key, Python calls its reflected __ne__
+596:26 call  output.append(str(self.key))
+    -> <builtin>.list.append
+596:30 call  str(self.key)
+    -> <builtin>.str
+    -> m3u8.model.Key.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.key is a Key (find_key over self.keys, or a client Key as the tests assign) or None
+597:26 call  output.append("\n")
+    -> <builtin>.list.append
+601:30 call  output.append(str(self.key))
+    -> <builtin>.list.append
+601:34 call  str(self.key)
+    -> <builtin>.str
+    -> m3u8.model.Key.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.key is a Key (truth-tested before)
+602:30 call  output.append("\n")
+    -> <builtin>.list.append
+605:57 op  self.init_section != last_segment.init_section
+    -> m3u8.model.InitializationSection.__ne__
+    reject m3u8.model.Key.__ne__: the left operand is an InitializationSection (truth-tested before)
+606:30 call  output.append(str(self.init_section))
+    -> <builtin>.list.append
+606:34 call  str(self.init_section)
+    -> <builtin>.str
+    -> m3u8.model.InitializationSection.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.init_section is an InitializationSection (Segment.__init__)
+607:30 call  output.append("\n")
+    -> <builtin>.list.append
+610:26 call  output.append("#EXT-X-DISCONTINUITY\n")
+    -> <builtin>.list.append
+612:26 call  output.append( "#EXT-X-PROGRAM-DATE-TIME:%s\n" % format_d...
+    -> <builtin>.list.append
+614:35 call  format_date_time(self.program_date_time, timespec=timespec)
+    -> m3u8.parser.format_date_time
+617:15 call  len(self.dateranges)
+    -> <builtin>.len
+618:26 call  output.append(str(self.dateranges))
+    -> <builtin>.list.append
+618:30 call  str(self.dateranges)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.dateranges is a DateRangeList, which inherits TagList.__str__
+619:26 call  output.append("\n")
+    -> <builtin>.list.append
+623:30 call  output.append(f"{ext_oatcls_scte35}:{self.oatcls_scte35}\n")
+    -> <builtin>.list.append
+627:78 call  self.asset_metadata.items()
+    -> <builtin>.dict.items
+    note: asset_metadata is the dict of _parse_attribute_list (parser.py:739)
+628:40 call  asset_suffix.append(f"{metadata_key.upper()}={metadata_va...
+    -> <builtin>.list.append
+628:62 call  metadata_key.upper()
+    -> <builtin>.str.upper
+629:30 call  output.append(f"{ext_x_asset}:{','.join(asset_suffix)}\n")
+    -> <builtin>.list.append
+629:56 call  ','.join(asset_suffix)
+    -> <builtin>.str.join
+633:26 call  output.append(f"#EXT-X-CUE-OUT{cue_info}\n")
+    -> <builtin>.list.append
+637:43 call  cue_out_cont_suffix.append(f"ElapsedTime={self.scte35_ela...
+    -> <builtin>.list.append
+639:43 call  cue_out_cont_suffix.append(f"Duration={self.scte35_durati...
+    -> <builtin>.list.append
+641:43 call  cue_out_cont_suffix.append(f"SCTE35={self.scte35}")
+    -> <builtin>.list.append
+644:53 call  ",".join(cue_out_cont_suffix)
+    -> <builtin>.str.join
+647:26 call  output.append(f"#EXT-X-CUE-OUT-CONT{cue_out_cont_suffix}\n")
+    -> <builtin>.list.append
+649:26 call  output.append("#EXT-X-CUE-IN\n")
+    -> <builtin>.list.append
+651:26 call  output.append(f"{ext_oatcls_scte35}:{self.oatcls_scte35}\n")
+    -> <builtin>.list.append
+654:26 call  output.append(str(self.parts))
+    -> <builtin>.list.append
+654:30 call  str(self.parts)
+    -> <builtin>.str
+    -> m3u8.model.PartialSegmentList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.parts is a PartialSegmentList
+655:26 call  output.append("\n")
+    -> <builtin>.list.append
+657:17 getattr  self.uri
+    reject *: the receiver is a Segment, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+660:47 call  "{:.3f}".format(self.duration)
+    -> <builtin>.str.format
+662:47 call  "{:.6f}".format(self.duration)
+    -> <builtin>.str.format
+664:48 call  number_to_string(self.duration)
+    -> m3u8.model.number_to_string
+665:30 call  output.append("#EXTINF:%s," % duration)
+    -> <builtin>.list.append
+667:34 call  output.append(self.title)
+    -> <builtin>.list.append
+668:30 call  output.append("\n")
+    -> <builtin>.list.append
+671:30 call  output.append("#EXT-X-BYTERANGE:%s\n" % self.byterange)
+    -> <builtin>.list.append
+674:30 call  output.append("#EXT-X-BITRATE:%d\n" % self.bitrate)
+    -> <builtin>.list.append
+677:30 call  output.append("#EXT-X-GAP\n")
+    -> <builtin>.list.append
+679:26 call  output.append(self.uri)
+    -> <builtin>.list.append
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+679:32 getattr  self.uri
+    reject *: the receiver is a Segment, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+681:23 call  "".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.Segment.__str__]
+684:26 call  self.dumps(None)
+    -> m3u8.model.Segment.dumps
+    reject *: self is a Segment, which has no package subclass
+
+[m3u8.model.Segment.base_path]
+688:21 call  super()
+    -> <builtin>.super
+688:24 getattr  super().base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    reject *: super() in Segment resolves base_path in BasePathMixin, the next class of the MRO
+692:14 call  super(Segment, self.__class__)
+    -> <builtin>.super
+692:40 getattr  super(Segment, self.__class__).base_path
+    reject *: super(Segment, self.__class__) is bound to a class, so the lookup returns the property object itself (property.__get__ with no instance) and runs no getter
+692:54 call  super(Segment, self.__class__).base_path.fset(self, newba...
+    -> m3u8.mixins.BasePathMixin.base_path
+    note: .fset is the setter of BasePathMixin's base_path property, called explicitly with the Segment as self
+693:20 setattr  self.parts.base_path
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_path
+    reject *: self.parts is a PartialSegmentList; its base_path is the property(None, _set_base_path) of GroupedBasePathMixin
+695:31 setattr  self.init_section.base_path
+    -> m3u8.mixins.BasePathMixin.base_path
+    reject *: self.init_section is an InitializationSection, which inherits the base_path property of BasePathMixin
+
+[m3u8.model.Segment.base_uri]
+704:20 setattr  self.parts.base_uri
+    -> m3u8.mixins.GroupedBasePathMixin._set_base_uri
+    reject *: self.parts is a PartialSegmentList; its base_uri is the property(None, _set_base_uri) of GroupedBasePathMixin
+706:31 setattr  self.init_section.base_uri
+    reject *: self.init_section is an InitializationSection, whose base_uri is a plain instance attribute
+
+[m3u8.model.SegmentList.dumps]
+714:26 call  output.append(segment.dumps(last_segment, timespec, infsp...
+    -> <builtin>.list.append
+714:40 call  segment.dumps(last_segment, timespec, infspec)
+    -> m3u8.model.Segment.dumps
+    reject *: segment is an element of the SegmentList: a Segment
+716:25 call  "\n".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.SegmentList.__str__]
+719:26 call  self.dumps()
+    -> m3u8.model.SegmentList.dumps
+    reject *: self is a SegmentList, which has no package subclass
+
+[m3u8.model.SegmentList.uri]
+723:21 getattr  seg.uri
+    reject *: seg is a Segment of the list, whose uri is an instance attribute
+
+[m3u8.model.SegmentList.by_key]
+726:60 op  segment.key == key
+    -> m3u8.model.Key.__eq__
+    reject m3u8.model.InitializationSection.__eq__: the operands are a segment's key (a Key or None) and the client's key (a Key or None, as the tests pass); when only the right one is a Key, Python calls its reflected __eq__
+
+[m3u8.model.PartialSegment.__init__]
+781:14 setattr  self.base_uri
+    reject *: self is a PartialSegment, which has no base_uri property: the store makes a plain instance attribute
+789:40 call  DateRangeList( [DateRange(**daterange) for daterange in d...
+    -> <builtin>.list.__init__
+790:23 call  DateRange(**daterange)
+    -> m3u8.model.DateRange.__init__
+
+[m3u8.model.PartialSegment.dumps]
+797:15 call  len(self.dateranges)
+    -> <builtin>.len
+798:26 call  output.append(str(self.dateranges))
+    -> <builtin>.list.append
+798:30 call  str(self.dateranges)
+    -> <builtin>.str
+    -> m3u8.model.TagList.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.dateranges is a DateRangeList
+799:26 call  output.append("\n")
+    -> <builtin>.list.append
+802:26 call  output.append("#EXT-X-GAP\n")
+    -> <builtin>.list.append
+804:22 call  output.append( '#EXT-X-PART:DURATION=%s,URI="%s"' % (numb...
+    -> <builtin>.list.append
+806:32 call  number_to_string(self.duration)
+    -> m3u8.model.number_to_string
+806:54 getattr  self.uri
+    reject *: the receiver is a PartialSegment, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+810:26 call  output.append(",INDEPENDENT=%s" % self.independent)
+    -> <builtin>.list.append
+813:26 call  output.append(",BYTERANGE=%s" % self.byterange)
+    -> <builtin>.list.append
+816:26 call  output.append(",GAP=%s" % self.gap)
+    -> <builtin>.list.append
+818:23 call  "".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.PartialSegment.__str__]
+821:26 call  self.dumps(None)
+    -> m3u8.model.PartialSegment.dumps
+    reject *: self is a PartialSegment, which has no package subclass
+
+[m3u8.model.PartialSegmentList.__str__]
+826:22 call  str(part)
+    -> <builtin>.str
+    -> m3u8.model.PartialSegment.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: part is a PartialSegment (Segment.__init__, add_part)
+827:25 call  "\n".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.Key.__init__]
+865:14 setattr  self.base_uri
+    reject *: self is a Key or SessionKey, which has no base_uri property: the store makes a plain instance attribute
+
+[m3u8.model.Key.__str__]
+872:17 getattr  self.uri
+    reject *: the receiver is a Key, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+873:26 call  output.append('URI="%s"' % self.uri)
+    -> <builtin>.list.append
+873:45 getattr  self.uri
+    reject *: the receiver is a Key, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+875:26 call  output.append("IV=%s" % self.iv)
+    -> <builtin>.list.append
+877:26 call  output.append('KEYFORMAT="%s"' % self.keyformat)
+    -> <builtin>.list.append
+879:26 call  output.append('KEYFORMATVERSIONS="%s"' % self.keyformatve...
+    -> <builtin>.list.append
+881:41 call  ",".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.Key.__eq__]
+888:22 getattr  self.uri
+    reject *: the receiver is a Key, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+888:35 getattr  other.uri
+    reject *: other is a Key or a client object (opaque); a Key's uri is an instance attribute
+890:22 getattr  self.base_uri
+    reject *: self is a Key or SessionKey, whose base_uri is a plain instance attribute
+890:40 getattr  other.base_uri
+    reject *: other is a Key or a client object (opaque); a Key's base_uri is a plain instance attribute
+
+[m3u8.model.Key.__ne__]
+896:31 call  self.__eq__(other)
+    -> m3u8.model.Key.__eq__
+    reject m3u8.model.InitializationSection.__eq__: self is a Key or SessionKey
+
+[m3u8.model.InitializationSection.__init__]
+917:14 setattr  self.base_uri
+    reject *: self is an InitializationSection, which has no base_uri property: the store makes a plain instance attribute
+
+[m3u8.model.InitializationSection.__str__]
+923:17 getattr  self.uri
+    reject *: the receiver is an InitializationSection, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+924:26 call  output.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+924:42 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+924:48 getattr  self.uri
+    reject *: the receiver is an InitializationSection, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+926:26 call  output.append("BYTERANGE=" + quoted(self.byterange))
+    -> <builtin>.list.append
+926:48 call  quoted(self.byterange)
+    -> m3u8.model.quoted
+927:43 call  "{tag}:{attributes}".format(tag=self.tag, attributes=","....
+    -> <builtin>.str.format
+927:77 call  ",".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.InitializationSection.__eq__]
+933:18 getattr  self.uri
+    reject *: the receiver is an InitializationSection, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+933:31 getattr  other.uri
+    reject *: other is an InitializationSection; its uri is an instance attribute
+935:22 getattr  self.base_uri
+    reject *: self is an InitializationSection, whose base_uri is a plain instance attribute
+935:40 getattr  other.base_uri
+    reject *: other is an InitializationSection, whose base_uri is a plain instance attribute
+
+[m3u8.model.InitializationSection.__ne__]
+939:31 call  self.__eq__(other)
+    -> m3u8.model.InitializationSection.__eq__
+    reject m3u8.model.Key.__eq__: self is an InitializationSection
+
+[m3u8.model.Playlist.__init__]
+963:14 setattr  self.base_uri
+    reject *: self is a Playlist, which has no base_uri property: the store makes a plain instance attribute
+965:37 call  stream_info.get("resolution")
+    -> <builtin>.dict.get
+967:42 call  resolution.strip('"')
+    -> <builtin>.str.strip
+968:38 call  resolution.split("x")
+    -> <builtin>.str.split
+969:35 call  int(values[0])
+    -> <builtin>.int
+969:51 call  int(values[1])
+    -> <builtin>.int
+973:38 call  StreamInfo( bandwidth=stream_info["bandwidth"], video=str...
+    -> m3u8.model.StreamInfo.__init__
+975:34 call  stream_info.get("video")
+    -> <builtin>.dict.get
+976:34 call  stream_info.get("audio")
+    -> <builtin>.dict.get
+977:38 call  stream_info.get("subtitles")
+    -> <builtin>.dict.get
+978:44 call  stream_info.get("closed_captions")
+    -> <builtin>.dict.get
+979:46 call  stream_info.get("average_bandwidth")
+    -> <builtin>.dict.get
+980:39 call  stream_info.get("program_id")
+    -> <builtin>.dict.get
+982:35 call  stream_info.get("codecs")
+    -> <builtin>.dict.get
+983:39 call  stream_info.get("frame_rate")
+    -> <builtin>.dict.get
+984:40 call  stream_info.get("video_range")
+    -> <builtin>.dict.get
+985:39 call  stream_info.get("hdcp_level")
+    -> <builtin>.dict.get
+986:39 call  stream_info.get("pathway_id")
+    -> <builtin>.dict.get
+987:46 call  stream_info.get("stable_variant_id")
+    -> <builtin>.dict.get
+988:45 call  stream_info.get("req_video_layout")
+    -> <builtin>.dict.get
+992:39 call  stream_info.get(media_type)
+    -> <builtin>.dict.get
+996:33 call  filter(lambda m: m.group_id == group_id, media)
+    -> <builtin>.filter
+    -> m3u8.model.Playlist.__init__.<lambda1>
+    note: the augmented assignment on the same line (self.media += ...) iterates the filter object in this function, which calls the lambda for each media
+
+[m3u8.model.Playlist.__str__]
+1000:26 call  str(self.stream_info)
+    -> <builtin>.str
+    -> m3u8.model.StreamInfo.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: self.stream_info is the StreamInfo of __init__
+1006:46 call  media.type.upper()
+    -> <builtin>.str.upper
+1007:34 call  stream_inf.append(f'{media_type}="{media.group_id}"')
+    -> <builtin>.list.append
+1009:47 call  ",".join(stream_inf)
+    -> <builtin>.str.join
+1009:74 getattr  self.uri
+    reject *: the receiver is a Playlist, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+
+[m3u8.model.IFramePlaylist.__init__]
+1028:14 setattr  self.base_uri
+    reject *: self is an IFramePlaylist, which has no base_uri property: the store makes a plain instance attribute
+1030:44 call  iframe_stream_info.get("resolution")
+    -> <builtin>.dict.get
+1032:38 call  resolution.split("x")
+    -> <builtin>.str.split
+1033:35 call  int(values[0])
+    -> <builtin>.int
+1033:51 call  int(values[1])
+    -> <builtin>.int
+1037:45 call  StreamInfo( bandwidth=iframe_stream_info.get("bandwidth")...
+    -> m3u8.model.StreamInfo.__init__
+1038:45 call  iframe_stream_info.get("bandwidth")
+    -> <builtin>.dict.get
+1039:53 call  iframe_stream_info.get("average_bandwidth")
+    -> <builtin>.dict.get
+1040:41 call  iframe_stream_info.get("video")
+    -> <builtin>.dict.get
+1046:46 call  iframe_stream_info.get("program_id")
+    -> <builtin>.dict.get
+1048:42 call  iframe_stream_info.get("codecs")
+    -> <builtin>.dict.get
+1049:47 call  iframe_stream_info.get("video_range")
+    -> <builtin>.dict.get
+1050:46 call  iframe_stream_info.get("hdcp_level")
+    -> <builtin>.dict.get
+1052:46 call  iframe_stream_info.get("pathway_id")
+    -> <builtin>.dict.get
+1053:53 call  iframe_stream_info.get("stable_variant_id")
+    -> <builtin>.dict.get
+
+[m3u8.model.IFramePlaylist.__str__]
+1060:37 call  iframe_stream_inf.append( "PROGRAM-ID=%d" % self.iframe_s...
+    -> <builtin>.list.append
+1064:37 call  iframe_stream_inf.append("BANDWIDTH=%d" % self.iframe_str...
+    -> <builtin>.list.append
+1066:37 call  iframe_stream_inf.append( "AVERAGE-BANDWIDTH=%d" % self.i...
+    -> <builtin>.list.append
+1071:20 call  str(self.iframe_stream_info.resolution[0])
+    -> <builtin>.str
+1073:22 call  str(self.iframe_stream_info.resolution[1])
+    -> <builtin>.str
+1075:37 call  iframe_stream_inf.append("RESOLUTION=" + res)
+    -> <builtin>.list.append
+1077:37 call  iframe_stream_inf.append("CODECS=" + quoted(self.iframe_s...
+    -> <builtin>.list.append
+1077:56 call  quoted(self.iframe_stream_info.codecs)
+    -> m3u8.model.quoted
+1079:37 call  iframe_stream_inf.append( "VIDEO-RANGE=%s" % self.iframe_...
+    -> <builtin>.list.append
+1083:37 call  iframe_stream_inf.append( "HDCP-LEVEL=%s" % self.iframe_s...
+    -> <builtin>.list.append
+1086:17 getattr  self.uri
+    reject *: the receiver is an IFramePlaylist, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1087:37 call  iframe_stream_inf.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1087:53 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1087:59 getattr  self.uri
+    reject *: the receiver is an IFramePlaylist, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1089:37 call  iframe_stream_inf.append( "PATHWAY-ID=" + quoted(self.ifr...
+    -> <builtin>.list.append
+1090:39 call  quoted(self.iframe_stream_info.pathway_id)
+    -> m3u8.model.quoted
+1093:37 call  iframe_stream_inf.append( "STABLE-VARIANT-ID=" + quoted(s...
+    -> <builtin>.list.append
+1094:46 call  quoted(self.iframe_stream_info.stable_variant_id)
+    -> m3u8.model.quoted
+1097:55 call  ",".join(iframe_stream_inf)
+    -> <builtin>.str.join
+
+[m3u8.model.StreamInfo.__init__]
+1118:36 call  kwargs.get("bandwidth")
+    -> <builtin>.dict.get
+1119:42 call  kwargs.get("closed_captions")
+    -> <builtin>.dict.get
+1120:44 call  kwargs.get("average_bandwidth")
+    -> <builtin>.dict.get
+1121:37 call  kwargs.get("program_id")
+    -> <builtin>.dict.get
+1122:37 call  kwargs.get("resolution")
+    -> <builtin>.dict.get
+1123:33 call  kwargs.get("codecs")
+    -> <builtin>.dict.get
+1124:32 call  kwargs.get("audio")
+    -> <builtin>.dict.get
+1125:32 call  kwargs.get("video")
+    -> <builtin>.dict.get
+1126:36 call  kwargs.get("subtitles")
+    -> <builtin>.dict.get
+1127:37 call  kwargs.get("frame_rate")
+    -> <builtin>.dict.get
+1128:38 call  kwargs.get("video_range")
+    -> <builtin>.dict.get
+1129:37 call  kwargs.get("hdcp_level")
+    -> <builtin>.dict.get
+1130:37 call  kwargs.get("pathway_id")
+    -> <builtin>.dict.get
+1131:44 call  kwargs.get("stable_variant_id")
+    -> <builtin>.dict.get
+1132:43 call  kwargs.get("req_video_layout")
+    -> <builtin>.dict.get
+
+[m3u8.model.StreamInfo.__str__]
+1137:30 call  stream_inf.append("PROGRAM-ID=%d" % self.program_id)
+    -> <builtin>.list.append
+1139:30 call  stream_inf.append("CLOSED-CAPTIONS=%s" % self.closed_capt...
+    -> <builtin>.list.append
+1141:30 call  stream_inf.append("BANDWIDTH=%d" % self.bandwidth)
+    -> <builtin>.list.append
+1143:30 call  stream_inf.append("AVERAGE-BANDWIDTH=%d" % self.average_b...
+    -> <builtin>.list.append
+1145:22 call  str(self.resolution[0])
+    -> <builtin>.str
+1145:54 call  str(self.resolution[1])
+    -> <builtin>.str
+1146:30 call  stream_inf.append("RESOLUTION=" + res)
+    -> <builtin>.list.append
+1148:30 call  stream_inf.append( "FRAME-RATE=%g" % decimal.Decimal(self...
+    -> <builtin>.list.append
+1150:34 call  decimal.Decimal(self.frame_rate)
+    -> decimal.Decimal
+1150:60 call  decimal.Decimal(self.frame_rate).quantize(decimal.Decimal...
+    -> decimal.Decimal.quantize
+1150:76 call  decimal.Decimal("1.000")
+    -> decimal.Decimal
+1153:30 call  stream_inf.append("CODECS=" + quoted(self.codecs))
+    -> <builtin>.list.append
+1153:49 call  quoted(self.codecs)
+    -> m3u8.model.quoted
+1155:30 call  stream_inf.append("VIDEO-RANGE=%s" % self.video_range)
+    -> <builtin>.list.append
+1157:30 call  stream_inf.append("HDCP-LEVEL=%s" % self.hdcp_level)
+    -> <builtin>.list.append
+1159:30 call  stream_inf.append("PATHWAY-ID=" + quoted(self.pathway_id))
+    -> <builtin>.list.append
+1159:53 call  quoted(self.pathway_id)
+    -> m3u8.model.quoted
+1161:30 call  stream_inf.append("STABLE-VARIANT-ID=" + quoted(self.stab...
+    -> <builtin>.list.append
+1161:60 call  quoted(self.stable_variant_id)
+    -> m3u8.model.quoted
+1163:30 call  stream_inf.append("REQ-VIDEO_LAYOUT=" + quoted(self.req_v...
+    -> <builtin>.list.append
+1163:59 call  quoted(self.req_video_layout)
+    -> m3u8.model.quoted
+1164:24 call  ",".join(stream_inf)
+    -> <builtin>.str.join
+
+[m3u8.model.Media.__init__]
+1211:14 setattr  self.base_uri
+    reject *: self is a Media, which has no base_uri property: the store makes a plain instance attribute
+
+[m3u8.model.Media.dumps]
+1230:17 getattr  self.uri
+    reject *: the receiver is a Media, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1231:29 call  media_out.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1231:45 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1231:51 getattr  self.uri
+    reject *: the receiver is a Media, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1233:29 call  media_out.append("TYPE=" + self.type)
+    -> <builtin>.list.append
+1235:29 call  media_out.append("GROUP-ID=" + quoted(self.group_id))
+    -> <builtin>.list.append
+1235:50 call  quoted(self.group_id)
+    -> m3u8.model.quoted
+1237:29 call  media_out.append("LANGUAGE=" + quoted(self.language))
+    -> <builtin>.list.append
+1237:50 call  quoted(self.language)
+    -> m3u8.model.quoted
+1239:29 call  media_out.append("ASSOC-LANGUAGE=" + quoted(self.assoc_la...
+    -> <builtin>.list.append
+1239:56 call  quoted(self.assoc_language)
+    -> m3u8.model.quoted
+1241:29 call  media_out.append("NAME=" + quoted(self.name))
+    -> <builtin>.list.append
+1241:46 call  quoted(self.name)
+    -> m3u8.model.quoted
+1243:29 call  media_out.append("DEFAULT=" + self.default)
+    -> <builtin>.list.append
+1245:29 call  media_out.append("AUTOSELECT=" + self.autoselect)
+    -> <builtin>.list.append
+1247:29 call  media_out.append("FORCED=" + self.forced)
+    -> <builtin>.list.append
+1249:29 call  media_out.append("INSTREAM-ID=" + quoted(self.instream_id))
+    -> <builtin>.list.append
+1249:53 call  quoted(self.instream_id)
+    -> m3u8.model.quoted
+1251:29 call  media_out.append("CHARACTERISTICS=" + quoted(self.charact...
+    -> <builtin>.list.append
+1251:57 call  quoted(self.characteristics)
+    -> m3u8.model.quoted
+1253:29 call  media_out.append("CHANNELS=" + quoted(self.channels))
+    -> <builtin>.list.append
+1253:50 call  quoted(self.channels)
+    -> m3u8.model.quoted
+1255:29 call  media_out.append("STABLE-RENDITION-ID=" + quoted(self.sta...
+    -> <builtin>.list.append
+1255:61 call  quoted(self.stable_rendition_id)
+    -> m3u8.model.quoted
+1257:42 call  ",".join(media_out)
+    -> <builtin>.str.join
+
+[m3u8.model.Media.__str__]
+1260:26 call  self.dumps()
+    -> m3u8.model.Media.dumps
+    reject *: self is a Media, which has no package subclass
+
+[m3u8.model.TagList.__str__]
+1265:22 call  str(tag)
+    -> <builtin>.str
+    -> m3u8.model.Media.__str__
+    -> m3u8.model.Playlist.__str__
+    -> m3u8.model.IFramePlaylist.__str__
+    -> m3u8.model.ImagePlaylist.__str__
+    -> m3u8.model.SessionData.__str__
+    -> m3u8.model.DateRange.__str__
+    reject *: tag is a Media, Playlist, IFramePlaylist, ImagePlaylist, SessionData or DateRange (see the note)
+    note: self is a MediaList (Media), PlaylistList (Playlist, IFramePlaylist, ImagePlaylist), SessionDataList (SessionData) or DateRangeList (DateRange); a plain TagList is never made
+1266:25 call  "\n".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.MediaList.uri]
+1272:23 getattr  media.uri
+    reject *: media is a Media of the list, whose uri is an instance attribute
+
+[m3u8.model.Start.__init__]
+1285:33 call  float(time_offset)
+    -> <builtin>.float
+
+[m3u8.model.Start.__str__]
+1289:39 call  str(self.time_offset)
+    -> <builtin>.str
+1291:26 call  output.append("PRECISE=" + str(self.precise))
+    -> <builtin>.list.append
+1291:43 call  str(self.precise)
+    -> <builtin>.str
+1293:44 call  ",".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.RenditionReport.__init__]
+1298:14 setattr  self.base_uri
+    reject *: self is a RenditionReport, which has no base_uri property: the store makes a plain instance attribute
+
+[m3u8.model.RenditionReport.dumps]
+1305:22 call  report.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1305:38 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1305:44 getattr  self.uri
+    reject *: the receiver is a RenditionReport, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1306:22 call  report.append("LAST-MSN=" + str(self.last_msn))
+    -> <builtin>.list.append
+1306:40 call  str(self.last_msn)
+    -> <builtin>.str
+1308:26 call  report.append("LAST-PART=" + str(self.last_part))
+    -> <builtin>.list.append
+1308:45 call  str(self.last_part)
+    -> <builtin>.str
+1310:53 call  ",".join(report)
+    -> <builtin>.str.join
+
+[m3u8.model.RenditionReport.__str__]
+1313:26 call  self.dumps()
+    -> m3u8.model.RenditionReport.dumps
+    reject *: self is a RenditionReport, which has no package subclass
+
+[m3u8.model.RenditionReportList.__str__]
+1318:22 call  str(report)
+    -> <builtin>.str
+    -> m3u8.model.RenditionReport.__str__
+    reject *: the converted value is the object named in the note (or None), whose class defines or inherits only this __str__
+    note: report is a RenditionReport (_initialize_attributes, add_rendition_report)
+1319:25 call  "\n".join(output)
+    -> <builtin>.str.join
+
+[m3u8.model.ServerControl.__getitem__]
+1338:23 call  getattr(self, item)
+    -> <builtin>.getattr
+    note: the package passes only hold_back and part_hold_back (dumps), plain attributes; a name that the client supplies is not taken to name a property (B3)
+
+[m3u8.model.ServerControl.dumps]
+1343:24 call  ctrl.append("CAN-BLOCK-RELOAD=%s" % self.can_block_reload)
+    -> <builtin>.list.append
+1346:20 getitem  self[attr]
+    -> m3u8.model.ServerControl.__getitem__
+    reject m3u8.model.PreloadHint.__getitem__: self is a ServerControl
+1347:28 call  ctrl.append( "%s=%s" % (denormalize_attribute(attr), numb...
+    -> <builtin>.list.append
+1349:45 call  denormalize_attribute(attr)
+    -> m3u8.model.denormalize_attribute
+1349:69 call  number_to_string(self[attr])
+    -> m3u8.model.number_to_string
+1349:74 getitem  self[attr]
+    -> m3u8.model.ServerControl.__getitem__
+    reject m3u8.model.PreloadHint.__getitem__: self is a ServerControl
+1353:24 call  ctrl.append("CAN-SKIP-UNTIL=%s" % number_to_string(self.c...
+    -> <builtin>.list.append
+1353:63 call  number_to_string(self.can_skip_until)
+    -> m3u8.model.number_to_string
+1355:28 call  ctrl.append("CAN-SKIP-DATERANGES=%s" % self.can_skip_date...
+    -> <builtin>.list.append
+1357:51 call  ",".join(ctrl)
+    -> <builtin>.str.join
+
+[m3u8.model.ServerControl.__str__]
+1360:26 call  self.dumps()
+    -> m3u8.model.ServerControl.dumps
+    reject *: self is a ServerControl, which has no package subclass
+
+[m3u8.model.Skip.dumps]
+1370:20 call  skip.append("SKIPPED-SEGMENTS=%s" % self.skipped_segments)
+    -> <builtin>.list.append
+1372:24 call  skip.append( "RECENTLY-REMOVED-DATERANGES=%s" % quoted(se...
+    -> <builtin>.list.append
+1374:25 call  quoted(self.recently_removed_dateranges)
+    -> m3u8.model.quoted
+1377:41 call  ",".join(skip)
+    -> <builtin>.str.join
+
+[m3u8.model.Skip.__str__]
+1380:26 call  self.dumps()
+    -> m3u8.model.Skip.dumps
+    reject *: self is a Skip, which has no package subclass
+
+[m3u8.model.PartInformation.dumps]
+1388:67 call  number_to_string(self.part_target)
+    -> m3u8.model.number_to_string
+
+[m3u8.model.PartInformation.__str__]
+1391:26 call  self.dumps()
+    -> m3u8.model.PartInformation.dumps
+    reject *: self is a PartInformation, which has no package subclass
+
+[m3u8.model.PreloadHint.__init__]
+1399:14 setattr  self.base_uri
+    reject *: self is a PreloadHint, which has no base_uri property: the store makes a plain instance attribute
+
+[m3u8.model.PreloadHint.__getitem__]
+1405:23 call  getattr(self, item)
+    -> <builtin>.getattr
+    note: the package passes only byterange_start and byterange_length (dumps), plain attributes; a name that the client supplies is not taken to name the inherited base_path or absolute_uri property (B3)
+
+[m3u8.model.PreloadHint.dumps]
+1409:20 call  hint.append("TYPE=" + self.hint_type)
+    -> <builtin>.list.append
+1410:20 call  hint.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1410:36 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1410:42 getattr  self.uri
+    reject *: the receiver is a PreloadHint, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1413:20 getitem  self[attr]
+    -> m3u8.model.PreloadHint.__getitem__
+    reject m3u8.model.ServerControl.__getitem__: self is a PreloadHint
+1414:28 call  hint.append(f"{denormalize_attribute(attr)}={self[attr]}")
+    -> <builtin>.list.append
+1414:53 call  denormalize_attribute(attr)
+    -> m3u8.model.denormalize_attribute
+1414:66 getitem  self[attr]
+    -> m3u8.model.PreloadHint.__getitem__
+    reject m3u8.model.ServerControl.__getitem__: self is a PreloadHint
+1416:49 call  ",".join(hint)
+    -> <builtin>.str.join
+
+[m3u8.model.PreloadHint.__str__]
+1419:26 call  self.dumps()
+    -> m3u8.model.PreloadHint.dumps
+    reject *: self is a PreloadHint, which has no package subclass
+
+[m3u8.model.SessionData.dumps]
+1430:48 call  quoted(self.data_id)
+    -> m3u8.model.quoted
+1433:36 call  session_data_out.append("VALUE=" + quoted(self.value))
+    -> <builtin>.list.append
+1433:54 call  quoted(self.value)
+    -> m3u8.model.quoted
+1434:19 getattr  self.uri
+    reject *: the receiver is a SessionData, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1435:36 call  session_data_out.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1435:52 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1435:58 getattr  self.uri
+    reject *: the receiver is a SessionData, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1437:36 call  session_data_out.append("LANGUAGE=" + quoted(self.language))
+    -> <builtin>.list.append
+1437:57 call  quoted(self.language)
+    -> m3u8.model.quoted
+1439:49 call  ",".join(session_data_out)
+    -> <builtin>.str.join
+
+[m3u8.model.SessionData.__str__]
+1442:26 call  self.dumps()
+    -> m3u8.model.SessionData.dumps
+    reject *: self is a SessionData, which has no package subclass
+
+[m3u8.model.DateRange.__init__]
+1452:37 call  kwargs.get("start_date")
+    -> <builtin>.dict.get
+1453:33 call  kwargs.get("class")
+    -> <builtin>.dict.get
+1454:35 call  kwargs.get("end_date")
+    -> <builtin>.dict.get
+1455:35 call  kwargs.get("duration")
+    -> <builtin>.dict.get
+1456:43 call  kwargs.get("planned_duration")
+    -> <builtin>.dict.get
+1457:37 call  kwargs.get("scte35_cmd")
+    -> <builtin>.dict.get
+1458:37 call  kwargs.get("scte35_out")
+    -> <builtin>.dict.get
+1459:36 call  kwargs.get("scte35_in")
+    -> <builtin>.dict.get
+1460:38 call  kwargs.get("end_on_next")
+    -> <builtin>.dict.get
+1462:30 call  kwargs.get(attr)
+    -> <builtin>.dict.get
+1462:75 call  attr.startswith("x_")
+    -> <builtin>.str.startswith
+
+[m3u8.model.DateRange.dumps]
+1467:25 call  daterange.append("ID=" + quoted(self.id))
+    -> <builtin>.list.append
+1467:40 call  quoted(self.id)
+    -> m3u8.model.quoted
+1474:29 call  daterange.append("START-DATE=" + quoted(self.start_date))
+    -> <builtin>.list.append
+1474:52 call  quoted(self.start_date)
+    -> m3u8.model.quoted
+1476:29 call  daterange.append("CLASS=" + quoted(self.class_))
+    -> <builtin>.list.append
+1476:47 call  quoted(self.class_)
+    -> m3u8.model.quoted
+1478:29 call  daterange.append("END-DATE=" + quoted(self.end_date))
+    -> <builtin>.list.append
+1478:50 call  quoted(self.end_date)
+    -> m3u8.model.quoted
+1480:29 call  daterange.append("DURATION=" + number_to_string(self.dura...
+    -> <builtin>.list.append
+1480:60 call  number_to_string(self.duration)
+    -> m3u8.model.number_to_string
+1482:29 call  daterange.append( "PLANNED-DURATION=" + number_to_string(...
+    -> <builtin>.list.append
+1483:55 call  number_to_string(self.planned_duration)
+    -> m3u8.model.number_to_string
+1486:29 call  daterange.append("SCTE35-CMD=" + self.scte35_cmd)
+    -> <builtin>.list.append
+1488:29 call  daterange.append("SCTE35-OUT=" + self.scte35_out)
+    -> <builtin>.list.append
+1490:29 call  daterange.append("SCTE35-IN=" + self.scte35_in)
+    -> <builtin>.list.append
+1492:29 call  daterange.append("END-ON-NEXT=" + self.end_on_next)
+    -> <builtin>.list.append
+1495:34 call  sorted(self.x_client_attrs)
+    -> <builtin>.sorted
+1496:29 call  daterange.append(f"{denormalize_attribute(attr)}={value}")
+    -> <builtin>.list.append
+1496:54 call  denormalize_attribute(attr)
+    -> m3u8.model.denormalize_attribute
+1498:46 call  ",".join(daterange)
+    -> <builtin>.str.join
+
+[m3u8.model.DateRange.__str__]
+1501:26 call  self.dumps()
+    -> m3u8.model.DateRange.dumps
+    reject *: self is a DateRange, which has no package subclass
+
+[m3u8.model.ContentSteering.__init__]
+1506:14 setattr  self.base_uri
+    reject *: self is a ContentSteering, which has no base_uri property: the store makes a plain instance attribute
+
+[m3u8.model.ContentSteering.dumps]
+1512:24 call  steering.append("SERVER-URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1512:47 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1512:53 getattr  self.uri
+    reject *: the receiver is a ContentSteering, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1515:28 call  steering.append("PATHWAY-ID=" + quoted(self.pathway_id))
+    -> <builtin>.list.append
+1515:51 call  quoted(self.pathway_id)
+    -> m3u8.model.quoted
+1517:53 call  ",".join(steering)
+    -> <builtin>.str.join
+
+[m3u8.model.ContentSteering.__str__]
+1520:26 call  self.dumps()
+    -> m3u8.model.ContentSteering.dumps
+    reject *: self is a ContentSteering, which has no package subclass
+
+[m3u8.model.ImagePlaylist.__init__]
+1538:14 setattr  self.base_uri
+    reject *: self is an ImagePlaylist, which has no base_uri property: the store makes a plain instance attribute
+1540:43 call  image_stream_info.get("resolution")
+    -> <builtin>.dict.get
+1542:38 call  resolution.split("x")
+    -> <builtin>.str.split
+1543:35 call  int(values[0])
+    -> <builtin>.int
+1543:51 call  int(values[1])
+    -> <builtin>.int
+1547:44 call  StreamInfo( bandwidth=image_stream_info.get("bandwidth"),...
+    -> m3u8.model.StreamInfo.__init__
+1548:44 call  image_stream_info.get("bandwidth")
+    -> <builtin>.dict.get
+1549:52 call  image_stream_info.get("average_bandwidth")
+    -> <builtin>.dict.get
+1550:40 call  image_stream_info.get("video")
+    -> <builtin>.dict.get
+1556:45 call  image_stream_info.get("program_id")
+    -> <builtin>.dict.get
+1558:41 call  image_stream_info.get("codecs")
+    -> <builtin>.dict.get
+1562:45 call  image_stream_info.get("pathway_id")
+    -> <builtin>.dict.get
+1563:52 call  image_stream_info.get("stable_variant_id")
+    -> <builtin>.dict.get
+
+[m3u8.model.ImagePlaylist.__str__]
+1569:36 call  image_stream_inf.append("PROGRAM-ID=%d" % self.image_stre...
+    -> <builtin>.list.append
+1571:36 call  image_stream_inf.append("BANDWIDTH=%d" % self.image_strea...
+    -> <builtin>.list.append
+1573:36 call  image_stream_inf.append( "AVERAGE-BANDWIDTH=%d" % self.im...
+    -> <builtin>.list.append
+1578:20 call  str(self.image_stream_info.resolution[0])
+    -> <builtin>.str
+1580:22 call  str(self.image_stream_info.resolution[1])
+    -> <builtin>.str
+1582:36 call  image_stream_inf.append("RESOLUTION=" + res)
+    -> <builtin>.list.append
+1584:36 call  image_stream_inf.append("CODECS=" + quoted(self.image_str...
+    -> <builtin>.list.append
+1584:55 call  quoted(self.image_stream_info.codecs)
+    -> m3u8.model.quoted
+1585:17 getattr  self.uri
+    reject *: the receiver is an ImagePlaylist, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1586:36 call  image_stream_inf.append("URI=" + quoted(self.uri))
+    -> <builtin>.list.append
+1586:52 call  quoted(self.uri)
+    -> m3u8.model.quoted
+    reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
+1586:58 getattr  self.uri
+    reject *: the receiver is an ImagePlaylist, whose uri is an instance attribute; MediaList.uri and SegmentList.uri are properties of the two list classes
+1588:36 call  image_stream_inf.append( "PATHWAY-ID=" + quoted(self.imag...
+    -> <builtin>.list.append
+1589:39 call  quoted(self.image_stream_info.pathway_id)
+    -> m3u8.model.quoted
+1592:36 call  image_stream_inf.append( "STABLE-VARIANT-ID=" + quoted(se...
+    -> <builtin>.list.append
+1593:46 call  quoted(self.image_stream_info.stable_variant_id)
+    -> m3u8.model.quoted
+1596:53 call  ",".join(image_stream_inf)
+    -> <builtin>.str.join
+
+[m3u8.model.Tiles.dumps]
+1620:21 call  tiles.append("RESOLUTION=" + self.resolution)
+    -> <builtin>.list.append
+1621:21 call  tiles.append("LAYOUT=" + self.layout)
+    -> <builtin>.list.append
+1622:21 call  tiles.append("DURATION=" + self.duration)
+    -> <builtin>.list.append
+1624:42 call  ",".join(tiles)
+    -> <builtin>.str.join
+
+[m3u8.model.Tiles.__str__]
+1627:26 call  self.dumps()
+    -> m3u8.model.Tiles.dumps
+    reject *: self is a Tiles, which has no package subclass
+
+[m3u8.model.find_key]
+1637:28 call  keydata.get("uri", None)
+    -> <builtin>.dict.get
+1637:49 getattr  key.uri
+    reject *: key is a Key of the keylist (M3U8.keys), whose uri is an instance attribute
+1638:32 call  keydata.get("method", "NONE")
+    -> <builtin>.dict.get
+1639:32 call  keydata.get("iv", None)
+    -> <builtin>.dict.get
+1642:19 call  KeyError("No key found for key data")
+    -> <builtin>.KeyError
+
+[m3u8.model.denormalize_attribute]
+1646:29 call  attribute.replace("_", "-")
+    -> <builtin>.str.replace
+1646:45 call  attribute.replace("_", "-").upper()
+    -> <builtin>.str.upper
+
+[m3u8.model.number_to_string]
+1654:30 call  decimal.localcontext()
+    -> decimal.localcontext
+1656:28 call  decimal.Decimal(str(number))
+    -> decimal.Decimal
+1656:32 call  str(number)
+    -> <builtin>.str
+1657:19 call  str( d.quantize(decimal.Decimal(1)) if d == d.to_integral...
+    -> <builtin>.str
+1658:23 call  d.quantize(decimal.Decimal(1))
+    -> decimal.Decimal.quantize
+1658:39 call  decimal.Decimal(1)
+    -> decimal.Decimal
+1659:40 call  d.to_integral_value()
+    -> decimal.Decimal.to_integral_value
+1660:29 call  d.normalize()
+    -> decimal.Decimal.normalize
+
+== m3u8.parser
+
+[m3u8.parser]
+12:36 call  MonkeyPatch.patch_fromisoformat()
+    -> backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat
+    note: the import of the declared dependency backports-datetime-fromisoformat (python_version < '3.11') succeeds on CPython 3.7 to 3.10 where it is installed; both sides of the optional import run (m3u8.md, J2)
+23:34 call  re.compile(r"""((?:[^,"']|"[^"]*"|'[^']*')+)""")
+    -> re.compile
+
+[m3u8.parser.cast_date_time]
+27:34 call  datetime.fromisoformat(value)
+    -> datetime.datetime.fromisoformat
+    note: on 3.7 to 3.10 the backport replaces the fromisoformat of datetime's type dict; a function installed at a public outside attribute keeps that path (m3u8.md, J2)
+
+[m3u8.parser.format_date_time]
+31:27 call  value.isoformat(**kwargs)
+    -> datetime.datetime.isoformat
+    note: value is the datetime that cast_date_time makes, or a client datetime for Segment's program_date_time (documented: "as a datetime")
+
+[m3u8.parser.parse]
+77:28 call  string_to_lines(content)
+    -> m3u8.parser.string_to_lines
+79:49 call  version_matching.validate(lines)
+    -> m3u8.version_matching.validate
+    reject *: the call names the module function m3u8.version_matching.validate, not a rule's validate method
+81:15 call  len(found_errors)
+    -> <builtin>.len
+82:28 call  Exception(found_errors)
+    -> <builtin>.Exception
+84:34 call  enumerate(lines, 1)
+    -> <builtin>.enumerate
+85:26 call  line.strip()
+    -> <builtin>.str.strip
+95:27 call  line.startswith("#")
+    -> <builtin>.str.startswith
+95:45 call  callable(custom_tags_parser)
+    -> <builtin>.callable
+96:49 call  custom_tags_parser(line, lineno, data, state)
+    note: value site: custom_tags_parser is the client's callable (B5, opaque); get_segment_custom_value and save_segment_custom_value are documented as helpers for such a parser, not as parsers
+103:27 call  line.startswith(protocol.ext_x_byterange)
+    -> <builtin>.str.startswith
+104:29 call  _parse_byterange(**parse_kwargs)
+    -> m3u8.parser._parse_byterange
+107:29 call  line.startswith(protocol.ext_x_bitrate)
+    -> <builtin>.str.startswith
+108:27 call  _parse_bitrate(**parse_kwargs)
+    -> m3u8.parser._parse_bitrate
+110:29 call  line.startswith(protocol.ext_x_targetduration)
+    -> <builtin>.str.startswith
+111:34 call  _parse_targetduration(**parse_kwargs)
+    -> m3u8.parser._parse_targetduration
+113:29 call  line.startswith(protocol.ext_x_media_sequence)
+    -> <builtin>.str.startswith
+114:34 call  _parse_media_sequence(**parse_kwargs)
+    -> m3u8.parser._parse_media_sequence
+116:29 call  line.startswith(protocol.ext_x_discontinuity_sequence)
+    -> <builtin>.str.startswith
+117:42 call  _parse_discontinuity_sequence(**parse_kwargs)
+    -> m3u8.parser._parse_discontinuity_sequence
+119:29 call  line.startswith(protocol.ext_x_program_date_time)
+    -> <builtin>.str.startswith
+120:37 call  _parse_program_date_time(**parse_kwargs)
+    -> m3u8.parser._parse_program_date_time
+122:29 call  line.startswith(protocol.ext_x_discontinuity)
+    -> <builtin>.str.startswith
+123:33 call  _parse_discontinuity(**parse_kwargs)
+    -> m3u8.parser._parse_discontinuity
+125:29 call  line.startswith(protocol.ext_x_cue_out_cont)
+    -> <builtin>.str.startswith
+126:31 call  _parse_cueout_cont(**parse_kwargs)
+    -> m3u8.parser._parse_cueout_cont
+128:29 call  line.startswith(protocol.ext_x_cue_out)
+    -> <builtin>.str.startswith
+129:26 call  _parse_cueout(**parse_kwargs)
+    -> m3u8.parser._parse_cueout
+131:29 call  line.startswith(f"{protocol.ext_oatcls_scte35}:")
+    -> <builtin>.str.startswith
+132:33 call  _parse_oatcls_scte35(**parse_kwargs)
+    -> m3u8.parser._parse_oatcls_scte35
+134:29 call  line.startswith(f"{protocol.ext_x_asset}:")
+    -> <builtin>.str.startswith
+135:25 call  _parse_asset(**parse_kwargs)
+    -> m3u8.parser._parse_asset
+137:29 call  line.startswith(protocol.ext_x_cue_in)
+    -> <builtin>.str.startswith
+138:26 call  _parse_cue_in(**parse_kwargs)
+    -> m3u8.parser._parse_cue_in
+140:29 call  line.startswith(protocol.ext_x_cue_span)
+    -> <builtin>.str.startswith
+141:28 call  _parse_cue_span(**parse_kwargs)
+    -> m3u8.parser._parse_cue_span
+143:29 call  line.startswith(protocol.ext_x_version)
+    -> <builtin>.str.startswith
+144:27 call  _parse_version(**parse_kwargs)
+    -> m3u8.parser._parse_version
+146:29 call  line.startswith(protocol.ext_x_allow_cache)
+    -> <builtin>.str.startswith
+147:31 call  _parse_allow_cache(**parse_kwargs)
+    -> m3u8.parser._parse_allow_cache
+149:29 call  line.startswith(protocol.ext_x_key)
+    -> <builtin>.str.startswith
+150:23 call  _parse_key(**parse_kwargs)
+    -> m3u8.parser._parse_key
+152:29 call  line.startswith(protocol.extinf)
+    -> <builtin>.str.startswith
+153:26 call  _parse_extinf(**parse_kwargs)
+    -> m3u8.parser._parse_extinf
+155:29 call  line.startswith(protocol.ext_x_stream_inf)
+    -> <builtin>.str.startswith
+156:30 call  _parse_stream_inf(**parse_kwargs)
+    -> m3u8.parser._parse_stream_inf
+158:29 call  line.startswith(protocol.ext_x_i_frame_stream_inf)
+    -> <builtin>.str.startswith
+159:38 call  _parse_i_frame_stream_inf(**parse_kwargs)
+    -> m3u8.parser._parse_i_frame_stream_inf
+161:29 call  line.startswith(protocol.ext_x_media)
+    -> <builtin>.str.startswith
+162:25 call  _parse_media(**parse_kwargs)
+    -> m3u8.parser._parse_media
+164:29 call  line.startswith(protocol.ext_x_playlist_type)
+    -> <builtin>.str.startswith
+165:33 call  _parse_playlist_type(**parse_kwargs)
+    -> m3u8.parser._parse_playlist_type
+167:29 call  line.startswith(protocol.ext_i_frames_only)
+    -> <builtin>.str.startswith
+168:33 call  _parse_i_frames_only(**parse_kwargs)
+    -> m3u8.parser._parse_i_frames_only
+170:29 call  line.startswith(protocol.ext_is_independent_segments)
+    -> <builtin>.str.startswith
+171:43 call  _parse_is_independent_segments(**parse_kwargs)
+    -> m3u8.parser._parse_is_independent_segments
+173:29 call  line.startswith(protocol.ext_x_endlist)
+    -> <builtin>.str.startswith
+174:27 call  _parse_endlist(**parse_kwargs)
+    -> m3u8.parser._parse_endlist
+176:29 call  line.startswith(protocol.ext_x_map)
+    -> <builtin>.str.startswith
+177:25 call  _parse_x_map(**parse_kwargs)
+    -> m3u8.parser._parse_x_map
+179:29 call  line.startswith(protocol.ext_x_start)
+    -> <builtin>.str.startswith
+180:25 call  _parse_start(**parse_kwargs)
+    -> m3u8.parser._parse_start
+182:29 call  line.startswith(protocol.ext_x_server_control)
+    -> <builtin>.str.startswith
+183:34 call  _parse_server_control(**parse_kwargs)
+    -> m3u8.parser._parse_server_control
+185:29 call  line.startswith(protocol.ext_x_part_inf)
+    -> <builtin>.str.startswith
+186:28 call  _parse_part_inf(**parse_kwargs)
+    -> m3u8.parser._parse_part_inf
+188:29 call  line.startswith(protocol.ext_x_rendition_report)
+    -> <builtin>.str.startswith
+189:36 call  _parse_rendition_report(**parse_kwargs)
+    -> m3u8.parser._parse_rendition_report
+191:29 call  line.startswith(protocol.ext_x_part)
+    -> <builtin>.str.startswith
+192:24 call  _parse_part(**parse_kwargs)
+    -> m3u8.parser._parse_part
+194:29 call  line.startswith(protocol.ext_x_skip)
+    -> <builtin>.str.startswith
+195:24 call  _parse_skip(**parse_kwargs)
+    -> m3u8.parser._parse_skip
+197:29 call  line.startswith(protocol.ext_x_session_data)
+    -> <builtin>.str.startswith
+198:32 call  _parse_session_data(**parse_kwargs)
+    -> m3u8.parser._parse_session_data
+200:29 call  line.startswith(protocol.ext_x_session_key)
+    -> <builtin>.str.startswith
+201:31 call  _parse_session_key(**parse_kwargs)
+    -> m3u8.parser._parse_session_key
+203:29 call  line.startswith(protocol.ext_x_preload_hint)
+    -> <builtin>.str.startswith
+204:32 call  _parse_preload_hint(**parse_kwargs)
+    -> m3u8.parser._parse_preload_hint
+206:29 call  line.startswith(protocol.ext_x_daterange)
+    -> <builtin>.str.startswith
+207:29 call  _parse_daterange(**parse_kwargs)
+    -> m3u8.parser._parse_daterange
+209:29 call  line.startswith(protocol.ext_x_gap)
+    -> <builtin>.str.startswith
+210:23 call  _parse_gap(**parse_kwargs)
+    -> m3u8.parser._parse_gap
+212:29 call  line.startswith(protocol.ext_x_content_steering)
+    -> <builtin>.str.startswith
+213:36 call  _parse_content_steering(**parse_kwargs)
+    -> m3u8.parser._parse_content_steering
+215:29 call  line.startswith(protocol.ext_x_image_stream_inf)
+    -> <builtin>.str.startswith
+216:36 call  _parse_image_stream_inf(**parse_kwargs)
+    -> m3u8.parser._parse_image_stream_inf
+218:29 call  line.startswith(protocol.ext_x_images_only)
+    -> <builtin>.str.startswith
+219:34 call  _parse_is_images_only(**parse_kwargs)
+    -> m3u8.parser._parse_is_images_only
+220:29 call  line.startswith(protocol.ext_x_tiles)
+    -> <builtin>.str.startswith
+221:25 call  _parse_tiles(**parse_kwargs)
+    -> m3u8.parser._parse_tiles
+224:29 call  line.startswith(protocol.ext_m3u)
+    -> <builtin>.str.startswith
+228:24 call  line.strip()
+    -> <builtin>.str.strip
+232:34 call  line.startswith("#")
+    -> <builtin>.str.startswith
+233:28 call  _parse_ts_chunk(**parse_kwargs)
+    -> m3u8.parser._parse_ts_chunk
+235:34 call  line.startswith("#")
+    -> <builtin>.str.startswith
+236:36 call  _parse_variant_playlist(**parse_kwargs)
+    -> m3u8.parser._parse_variant_playlist
+241:29 call  ParseError(lineno, line)
+    -> m3u8.parser.ParseError.__init__
+245:32 call  data["segments"].append(state.pop("segment"))
+    -> <builtin>.list.append
+245:42 call  state.pop("segment")
+    -> <builtin>.dict.pop
+
+[m3u8.parser._parse_key]
+251:40 call  ATTRIBUTELISTPATTERN.split(line.replace(protocol.ext_x_ke...
+    -> re.Pattern.split
+251:53 call  line.replace(protocol.ext_x_key + ":", "")
+    -> <builtin>.str.replace
+256:34 call  param.split("=", 1)
+    -> <builtin>.str.split
+257:32 call  normalize_attribute(name)
+    -> m3u8.parser.normalize_attribute
+257:55 call  remove_quotes(value)
+    -> m3u8.parser.remove_quotes
+261:28 call  data["keys"].append(key)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_extinf]
+265:26 call  line.replace(protocol.extinf + ":", "")
+    -> <builtin>.str.replace
+265:59 call  line.replace(protocol.extinf + ":", "").split(",", 1)
+    -> <builtin>.str.split
+266:11 call  len(chunks)
+    -> <builtin>.len
+268:13 call  len(chunks)
+    -> <builtin>.len
+270:29 call  ParseError(lineno, line)
+    -> m3u8.parser.ParseError.__init__
+276:41 call  float(duration)
+    -> <builtin>.float
+
+[m3u8.parser._parse_ts_chunk]
+282:24 call  state.pop("segment")
+    -> <builtin>.dict.pop
+283:17 call  state.get("program_date_time")
+    -> <builtin>.dict.get
+284:49 call  state.pop("program_date_time")
+    -> <builtin>.dict.pop
+285:17 call  state.get("current_program_date_time")
+    -> <builtin>.dict.get
+287:56 call  timedelta(seconds=segment["duration"])
+    -> datetime.timedelta
+289:34 call  state.pop("cue_in", False)
+    -> <builtin>.dict.pop
+290:35 call  state.pop("cue_out", False)
+    -> <builtin>.dict.pop
+291:41 call  state.pop("cue_out_start", False)
+    -> <builtin>.dict.pop
+292:55 call  state.pop( "cue_out_explicitly_duration", False )
+    -> <builtin>.dict.pop
+297:32 call  scte_op("current_cue_out_scte35", None)
+    -> <builtin>.dict.get
+    -> <builtin>.dict.pop
+    note: value site: scte_op is the bound get or pop of the state dict (line 296)
+298:39 call  scte_op("current_cue_out_oatcls_scte35", None)
+    -> <builtin>.dict.get
+    -> <builtin>.dict.pop
+    note: value site: scte_op is the bound get or pop of the state dict (line 296)
+299:41 call  scte_op("current_cue_out_duration", None)
+    -> <builtin>.dict.get
+    -> <builtin>.dict.pop
+    note: value site: scte_op is the bound get or pop of the state dict (line 296)
+300:44 call  scte_op("current_cue_out_elapsedtime", None)
+    -> <builtin>.dict.get
+    -> <builtin>.dict.pop
+    note: value site: scte_op is the bound get or pop of the state dict (line 296)
+301:40 call  scte_op("asset_metadata", None)
+    -> <builtin>.dict.get
+    -> <builtin>.dict.pop
+    note: value site: scte_op is the bound get or pop of the state dict (line 296)
+303:41 call  state.pop("discontinuity", False)
+    -> <builtin>.dict.pop
+304:17 call  state.get("current_key")
+    -> <builtin>.dict.get
+309:32 call  data["keys"].append(None)
+    -> <builtin>.list.append
+310:17 call  state.get("current_segment_map")
+    -> <builtin>.dict.get
+312:38 call  state.pop("dateranges", None)
+    -> <builtin>.dict.pop
+313:35 call  state.pop("gap", None)
+    -> <builtin>.dict.pop
+314:28 call  data["segments"].append(segment)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_attribute_list]
+319:40 call  ATTRIBUTELISTPATTERN.split(line.replace(prefix + ":", ""))
+    -> re.Pattern.split
+319:53 call  line.replace(prefix + ":", "")
+    -> <builtin>.str.replace
+322:27 call  line.startswith(prefix + ":")
+    -> <builtin>.str.startswith
+326:34 call  param.split("=", 1)
+    -> <builtin>.str.split
+327:15 call  len(param_parts)
+    -> <builtin>.len
+333:35 call  normalize_attribute(name)
+    -> m3u8.parser.normalize_attribute
+335:43 call  attribute_parser[name](value)
+    -> m3u8.parser.remove_quotes
+    -> <builtin>.int
+    -> <builtin>.float
+    -> <builtin>.str
+    -> m3u8.parser._parse_stream_inf.<lambda1>
+    -> m3u8.parser._parse_start.<lambda1>
+    -> m3u8.parser._parse_server_control.<lambda1>
+    -> m3u8.parser._parse_server_control.<lambda2>
+    -> m3u8.parser._parse_server_control.<lambda3>
+    -> m3u8.parser._parse_part_inf.<lambda1>
+    -> m3u8.parser._parse_part.<lambda1>
+    note: value site: attribute_parser is the dict that each _parse_* caller builds (the function is private): values remove_quotes (remove_quotes_parser), int, float, str and the seven lambdas of _parse_stream_inf, _parse_start, _parse_server_control (3), _parse_part_inf and _parse_part; _parse_asset passes an empty dict
+337:35 call  default_parser(value)
+    -> <builtin>.str
+    note: value site: default_parser is None or str, the only value that a caller passes (_parse_asset, line 740)
+
+[m3u8.parser._parse_stream_inf]
+348:44 call  remove_quotes_parser( "codecs", "audio", "video", "video_...
+    -> m3u8.parser.remove_quotes_parser
+362:49 call  _parse_attribute_list( protocol.ext_x_stream_inf, line, a...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_stream_inf.<lambda1>]
+358:50 call  int(float(x))
+    -> <builtin>.int
+358:56 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_i_frame_stream_inf]
+368:44 call  remove_quotes_parser( "codecs", "uri", "pathway_id", "sta...
+    -> m3u8.parser.remove_quotes_parser
+375:47 call  _parse_attribute_list( protocol.ext_x_i_frame_stream_inf,...
+    -> m3u8.parser._parse_attribute_list
+379:38 call  iframe_stream_info.pop("uri")
+    -> <builtin>.dict.pop
+383:36 call  data["iframe_playlists"].append(iframe_playlist)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_image_stream_inf]
+387:44 call  remove_quotes_parser( "codecs", "uri", "pathway_id", "sta...
+    -> m3u8.parser.remove_quotes_parser
+394:46 call  _parse_attribute_list( protocol.ext_x_image_stream_inf, l...
+    -> m3u8.parser._parse_attribute_list
+398:37 call  image_stream_info.pop("uri")
+    -> <builtin>.dict.pop
+402:35 call  data["image_playlists"].append(image_playlist)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_tiles]
+410:44 call  remove_quotes_parser("uri")
+    -> m3u8.parser.remove_quotes_parser
+414:39 call  _parse_attribute_list(protocol.ext_x_tiles, line, attribu...
+    -> m3u8.parser._parse_attribute_list
+415:25 call  data["tiles"].append(tiles_info)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_media]
+419:34 call  remove_quotes_parser( "uri", "group_id", "language", "ass...
+    -> m3u8.parser.remove_quotes_parser
+432:34 call  _parse_attribute_list(protocol.ext_x_media, line, quoted)
+    -> m3u8.parser._parse_attribute_list
+433:25 call  data["media"].append(media)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_variant_playlist]
+437:54 call  state.pop("stream_info")
+    -> <builtin>.dict.pop
+438:29 call  data["playlists"].append(playlist)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_bitrate]
+445:58 call  _parse_simple_parameter(cast_to=int, **kwargs)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_byterange]
+451:49 call  line.replace(protocol.ext_x_byterange + ":", "")
+    -> <builtin>.str.replace
+
+[m3u8.parser._parse_targetduration]
+456:35 call  _parse_simple_parameter(cast_to=int, **parse_kwargs)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_media_sequence]
+460:35 call  _parse_simple_parameter(cast_to=int, **parse_kwargs)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_discontinuity_sequence]
+464:35 call  _parse_simple_parameter(cast_to=int, **parse_kwargs)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_program_date_time]
+468:61 call  _parse_simple_parameter_raw_value( line, cast_to=cast_dat...
+    -> m3u8.parser._parse_simple_parameter_raw_value
+    reject m3u8.parser.cast_date_time: passed as cast_to; _parse_simple_parameter_raw_value calls it at its own site (523:26)
+471:20 call  data.get("program_date_time")
+    -> <builtin>.dict.get
+
+[m3u8.parser._parse_version]
+490:35 call  _parse_simple_parameter(cast_to=int, **parse_kwargs)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_allow_cache]
+494:35 call  _parse_simple_parameter(cast_to=str, **parse_kwargs)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_playlist_type]
+498:35 call  _parse_simple_parameter(line, data)
+    -> m3u8.parser._parse_simple_parameter
+
+[m3u8.parser._parse_x_map]
+502:41 call  remove_quotes_parser("uri", "byterange")
+    -> m3u8.parser.remove_quotes_parser
+503:45 call  _parse_attribute_list(protocol.ext_x_map, line, quoted_pa...
+    -> m3u8.parser._parse_attribute_list
+505:31 call  data["segment_map"].append(segment_map_info)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_start]
+510:39 call  _parse_attribute_list(protocol.ext_x_start, line, attribu...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_start.<lambda1>]
+509:55 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_simple_parameter_raw_value]
+519:30 call  line.split(":", 1)
+    -> <builtin>.str.split
+520:32 call  normalize_attribute(param.replace("#EXT-X-", ""))
+    -> m3u8.parser.normalize_attribute
+520:46 call  param.replace("#EXT-X-", "")
+    -> <builtin>.str.replace
+522:28 call  value.strip()
+    -> <builtin>.str.strip
+522:36 call  value.strip().lower()
+    -> <builtin>.str.lower
+523:26 call  cast_to(value)
+    -> <builtin>.str
+    -> <builtin>.int
+    -> m3u8.parser.cast_date_time
+    note: value site: cast_to is the default str, int (_parse_bitrate, _parse_targetduration, _parse_media_sequence, _parse_discontinuity_sequence, _parse_version through _parse_simple_parameter), str (_parse_allow_cache, _parse_playlist_type) or cast_date_time (_parse_program_date_time); the function is private
+
+[m3u8.parser._parse_and_set_simple_parameter_raw_value]
+529:53 call  _parse_simple_parameter_raw_value(line, cast_to, normalize)
+    -> m3u8.parser._parse_simple_parameter_raw_value
+
+[m3u8.parser._parse_simple_parameter]
+535:53 call  _parse_and_set_simple_parameter_raw_value(line, data, cas...
+    -> m3u8.parser._parse_and_set_simple_parameter_raw_value
+
+[m3u8.parser._parse_cueout_cont]
+553:26 call  line.split(":", 1)
+    -> <builtin>.str.split
+554:11 call  len(elements)
+    -> <builtin>.len
+554:22 op  len(elements) != 2
+    reject *: the operands are ints
+558:37 call  _parse_attribute_list( protocol.ext_x_cue_out_cont, line,...
+    -> m3u8.parser._parse_attribute_list
+561:29 call  remove_quotes_parser("duration", "elapsedtime", "scte35")
+    -> m3u8.parser.remove_quotes_parser
+565:28 call  cue_info.get("")
+    -> <builtin>.dict.get
+567:40 call  progress.split("/", 1)
+    -> <builtin>.str.split
+568:15 call  len(progress_parts)
+    -> <builtin>.len
+574:28 call  cue_info.get("duration")
+    -> <builtin>.dict.get
+578:26 call  cue_info.get("scte35")
+    -> <builtin>.dict.get
+582:31 call  cue_info.get("elapsedtime")
+    -> <builtin>.dict.get
+
+[m3u8.parser._parse_cueout]
+590:32 call  line.upper()
+    -> <builtin>.str.upper
+593:26 call  line.split(":", 1)
+    -> <builtin>.str.split
+594:11 call  len(elements)
+    -> <builtin>.len
+594:22 op  len(elements) != 2
+    reject *: the operands are ints
+597:37 call  _parse_attribute_list( protocol.ext_x_cue_out, line, remo...
+    -> m3u8.parser._parse_attribute_list
+600:29 call  remove_quotes_parser("cue")
+    -> m3u8.parser.remove_quotes_parser
+602:34 call  cue_info.get("cue")
+    -> <builtin>.dict.get
+603:36 call  cue_info.get("duration")
+    -> <builtin>.dict.get
+603:64 call  cue_info.get("")
+    -> <builtin>.dict.get
+605:39 call  state.get("current_cue_out_scte35")
+    -> <builtin>.dict.get
+
+[m3u8.parser._parse_server_control]
+619:51 call  _parse_attribute_list( protocol.ext_x_server_control, lin...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_server_control.<lambda1>]
+613:37 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_server_control.<lambda2>]
+614:42 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_server_control.<lambda3>]
+615:42 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_part_inf]
+627:45 call  _parse_attribute_list( protocol.ext_x_part_inf, line, att...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_part_inf.<lambda1>]
+625:55 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_rendition_report]
+633:44 call  remove_quotes_parser("uri")
+    -> m3u8.parser.remove_quotes_parser
+637:45 call  _parse_attribute_list( protocol.ext_x_rendition_report, l...
+    -> m3u8.parser._parse_attribute_list
+641:37 call  data["rendition_reports"].append(rendition_report)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_part]
+645:44 call  remove_quotes_parser("uri")
+    -> m3u8.parser.remove_quotes_parser
+651:33 call  _parse_attribute_list(protocol.ext_x_part, line, attribut...
+    -> m3u8.parser._parse_attribute_list
+654:17 call  state.get("current_program_date_time")
+    -> <builtin>.dict.get
+656:56 call  timedelta(seconds=part["duration"])
+    -> datetime.timedelta
+658:35 call  state.pop("dateranges", None)
+    -> <builtin>.dict.pop
+659:32 call  state.pop("gap", None)
+    -> <builtin>.dict.pop
+667:28 call  segment["parts"].append(part)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_part.<lambda1>]
+646:51 call  float(x)
+    -> <builtin>.float
+
+[m3u8.parser._parse_skip]
+671:44 call  remove_quotes_parser("recently_removed_dateranges")
+    -> m3u8.parser.remove_quotes_parser
+674:41 call  _parse_attribute_list(protocol.ext_x_skip, line, attribut...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_session_data]
+678:34 call  remove_quotes_parser("data_id", "value", "uri", "language")
+    -> m3u8.parser.remove_quotes_parser
+679:41 call  _parse_attribute_list(protocol.ext_x_session_data, line, ...
+    -> m3u8.parser._parse_attribute_list
+680:32 call  data["session_data"].append(session_data)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_session_key]
+684:40 call  ATTRIBUTELISTPATTERN.split( line.replace(protocol.ext_x_s...
+    -> re.Pattern.split
+685:21 call  line.replace(protocol.ext_x_session_key + ":", "")
+    -> <builtin>.str.replace
+689:34 call  param.split("=", 1)
+    -> <builtin>.str.split
+690:32 call  normalize_attribute(name)
+    -> m3u8.parser.normalize_attribute
+690:55 call  remove_quotes(value)
+    -> m3u8.parser.remove_quotes
+691:32 call  data["session_keys"].append(key)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_preload_hint]
+695:44 call  remove_quotes_parser("uri")
+    -> m3u8.parser.remove_quotes_parser
+700:49 call  _parse_attribute_list( protocol.ext_x_preload_hint, line,...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_daterange]
+706:44 call  remove_quotes_parser("id", "class", "start_date", "end_da...
+    -> m3u8.parser.remove_quotes_parser
+714:35 call  _parse_attribute_list(protocol.ext_x_daterange, line, att...
+    -> m3u8.parser._parse_attribute_list
+719:31 call  state["dateranges"].append(parsed)
+    -> <builtin>.list.append
+
+[m3u8.parser._parse_content_steering]
+723:44 call  remove_quotes_parser("server_uri", "pathway_id")
+    -> m3u8.parser.remove_quotes_parser
+725:53 call  _parse_attribute_list( protocol.ext_x_content_steering, l...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser._parse_oatcls_scte35]
+731:28 call  line.split(":", 1)
+    -> <builtin>.str.split
+
+[m3u8.parser._parse_asset]
+739:52 call  _parse_attribute_list( protocol.ext_x_asset, line, {}, de...
+    -> m3u8.parser._parse_attribute_list
+
+[m3u8.parser.string_to_lines]
+745:24 call  string.strip()
+    -> <builtin>.str.strip
+745:37 call  string.strip().splitlines()
+    -> <builtin>.str.splitlines
+
+[m3u8.parser.remove_quotes_parser]
+749:16 call  dict(zip(attrs, itertools.repeat(remove_quotes)))
+    -> <builtin>.dict
+749:20 call  zip(attrs, itertools.repeat(remove_quotes))
+    -> <builtin>.zip
+749:44 call  itertools.repeat(remove_quotes)
+    -> itertools.repeat
+    reject m3u8.parser.remove_quotes: repeat stores it without calling it, and dict(zip(...)) only pairs it with the names
+
+[m3u8.parser.remove_quotes]
+763:25 call  string.startswith(quotes)
+    -> <builtin>.str.startswith
+763:53 call  string.endswith(quotes)
+    -> <builtin>.str.endswith
+
+[m3u8.parser.normalize_attribute]
+769:29 call  attribute.replace("-", "_")
+    -> <builtin>.str.replace
+769:45 call  attribute.replace("-", "_").lower()
+    -> <builtin>.str.lower
+769:53 call  attribute.replace("-", "_").lower().strip()
+    -> <builtin>.str.strip
+
+[m3u8.parser.get_segment_custom_value]
+781:56 call  state["segment"]["custom_parser_values"].get(key, default)
+    -> <builtin>.dict.get
+
+== m3u8.version_matching
+
+[m3u8.version_matching.get_version]
+9:27 call  line.startswith(protocol.ext_x_version)
+    -> <builtin>.str.startswith
+10:33 call  line.split(":")
+    -> <builtin>.str.split
+11:25 call  float(version)
+    -> <builtin>.float
+
+[m3u8.version_matching.valid_in_all_rules]
+21:25 call  rule(version, line_number, line)
+    -> m3u8.version_matching_rules.VersionMatchRuleBase.__init__
+    note: value site: rule is a class of available_rules: ValidIVInEXTXKEY, ValidFloatingPointEXTINF and ValidEXTXBYTERANGEOrEXTXIFRAMESONLY, which inherit VersionMatchRuleBase.__init__
+23:34 call  validator.validate()
+    -> m3u8.version_matching_rules.ValidIVInEXTXKEY.validate
+    -> m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate
+    -> m3u8.version_matching_rules.ValidEXTXBYTERANGEOrEXTXIFRAMESONLY.validate
+    reject m3u8.version_matching.validate: a module function, not a method of the rule
+    reject m3u8.version_matching_rules.VersionMatchRuleBase.validate: validator is an instance of one of the three rule classes, which override validate
+24:26 call  errors.append(validator.get_error())
+    -> <builtin>.list.append
+24:46 call  validator.get_error()
+    -> m3u8.version_matching_rules.VersionMatchRuleBase.get_error
+
+[m3u8.version_matching.validate]
+30:32 call  get_version(file_lines)
+    -> m3u8.version_matching.get_version
+35:34 call  enumerate(file_lines)
+    -> <builtin>.enumerate
+36:44 call  valid_in_all_rules(number, line, found_version)
+    -> m3u8.version_matching.valid_in_all_rules
+37:22 call  errors.extend(errors_in_line)
+    -> <builtin>.list.extend
+
+== m3u8.version_matching_rules
+
+[m3u8.version_matching_rules]
+7:2 decorator  @dataclass
+    -> dataclasses.dataclass
+
+[m3u8.version_matching_rules.VersionMatchRuleBase.get_error]
+40:36 call  VersionMatchingError( line_number=self.line_number, line=...
+    note: VersionMatchingError is a dataclass: its __init__ is generated by dataclasses (no node), so the call has no edge (README, Nodes; micro-benchmark generated __init__)
+
+[m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate]
+72:35 call  self.line.replace(protocol.extinf + ":", "")
+    -> <builtin>.str.replace
+72:68 call  self.line.replace(protocol.extinf + ":", "").split(",", 1)
+    -> <builtin>.str.split
+85:30 call  is_floating_number(duration)
+    -> m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate.is_floating_number
+88:25 call  is_number(duration)
+    -> m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate.is_number
+
+[m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate.is_number]
+77:22 call  float(value)
+    -> <builtin>.float
+
+[m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate.is_floating_number]
+83:29 call  is_number(value)
+    -> m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate.is_number

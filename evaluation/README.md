@@ -2,7 +2,7 @@
 
 Measures PyCG on two benchmarks and scores its call graphs: the
 micro-benchmark (`micro-benchmark/` here) and the
-macro-benchmark (`macro-benchmark/` here: 40 real packages with
+macro-benchmark (`macro-benchmark/` here: 50 real packages with
 hand-written ground truths). Standard library only. The analysed sources
 are data: PyCG reads them, and no script imports or runs them.
 
@@ -10,7 +10,7 @@ are data: PyCG reads them, and no script imports or runs them.
 
 | Command | What it does |
 |---|---|
-| `make eval [BASE=<ref>]` | Builds the inputs image (the 40 sources, fetched by their pins), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary and runs the gate (below); the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
+| `make eval [BASE=<ref>]` | Builds the inputs image (the 50 sources, fetched by their pins), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary and runs the gate (below); the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
 | `make eval-record [BASE=<ref>]` | Writes `metrics.json`: each best is the larger of the base's and the measured value (measures first if this commit has no result) |
 | `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures the engine of BASE on this checkout's benchmarks, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
 | `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
@@ -56,7 +56,7 @@ writes the decision to the job summary. On a push they always run.
 reached, the margin, and `benchmark_sha256`, the digest of the benchmark
 on which the bests were measured: micro edge precision and recall (all
 edges), and the macro-benchmark's precision and recall inside and outside
-the package, summed over the 40 projects. `make eval` (`common/gate.py
+the package, summed over the 50 projects. `make eval` (`common/gate.py
 check`) fails when a value is below its best minus the margin, when a run
 failed, or when the digest is not that of this checkout. With `BASE`, it
 also fails unless `metrics.json` is what `make eval-record` writes from the
@@ -121,7 +121,7 @@ Edges to callees outside it (builtins, the standard library, third-party
 code) are reported apart: their names depend on how a tool models code
 that it does not analyse.
 
-- **Macro-benchmark.** Per project and summed over the 40: tool edges,
+- **Macro-benchmark.** Per project and summed over the 50: tool edges,
   ground-truth edges, true and false positives, false negatives,
   precision, recall and F1, for the edges inside the package, outside it,
   and all. The sums add the counts, then compute precision and recall.
