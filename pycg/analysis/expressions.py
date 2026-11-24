@@ -1,27 +1,15 @@
-"""The expressions of a module: the constraints of each expression and the
-node of its value.
-
-`Expressions` is part of `ModuleBuilder` (see builder.py), whose names,
-scopes and context it uses. An expression handler returns the node of the
-expression's value, or None if the analysis does not track the value. A
-construct without a handler is walked, so calls inside it are found.
-"""
-
 import ast
 import operator as operators
 import string
 
 from .flow import FALSE, LITERAL_TYPES, TRUE, UNKNOWN, literals_of, truth_of, values_of
 
-# The modules whose `TYPE_CHECKING` is false at run time (and true only for
-# a type checker).
 TYPING_MODULES = ("typing", "typing_extensions")
 TYPE_CHECKING_IMPORTS = frozenset(
     f"{module}.TYPE_CHECKING" for module in TYPING_MODULES
 )
 
-# The operator of each comparison of literal values.
-_LITERAL_COMPARISONS = {
+_OPERATOR_BY_LITERAL_COMPARISON = {
     ast.Eq: operators.eq,
     ast.NotEq: operators.ne,
     ast.Lt: operators.lt,
@@ -32,12 +20,9 @@ _LITERAL_COMPARISONS = {
     ast.IsNot: operators.is_not,
 }
 
-# The values whose identity is the same on every Python: `is` decides on
-# them.
-_SINGLETONS = (None, True, False)
+_VALUES_WITH_FIXED_IDENTITY = (None, True, False)
 
-# The special method of each binary operator, without the underscores.
-_OPERATORS = {
+_SPECIAL_METHOD_BY_OPERATOR = {
     ast.Add: "add",
     ast.Sub: "sub",
     ast.Mult: "mul",
@@ -55,8 +40,7 @@ _OPERATORS = {
 
 _UNARY_OPERATORS = {ast.USub: "__neg__", ast.UAdd: "__pos__", ast.Invert: "__invert__"}
 
-# The special method of each comparison, and that of its right operand.
-_COMPARISONS = {
+_SPECIAL_METHODS_BY_COMPARISON = {
     ast.Eq: ("__eq__", "__eq__"),
     ast.NotEq: ("__ne__", "__ne__"),
     ast.Lt: ("__lt__", "__gt__"),
@@ -65,14 +49,12 @@ _COMPARISONS = {
     ast.GtE: ("__ge__", "__le__"),
 }
 
-# The conversion of a value in an f-string, by its `!` flag.
-_CONVERSIONS = {ord("s"): "str", ord("r"): "repr", ord("a"): "repr"}
+_CONVERSION_BY_FSTRING_FLAG = {ord("s"): "str", ord("r"): "repr", ord("a"): "repr"}
 
 _DISPLAYS = {ast.Tuple: "tuple", ast.List: "list", ast.Set: "set"}
 
 
-# The conversion that `!r`, `!a` and `!s` in a format field make.
-FORMAT_CONVERSIONS = {"r": "repr", "a": "repr", "s": "str"}
+CONVERSION_BY_FORMAT_FLAG = {"r": "repr", "a": "repr", "s": "str"}
 
 
 def _is_str(node):
@@ -80,10 +62,6 @@ def _is_str(node):
 
 
 def _format_fields(text):
-    """The fields of the format string `text`: (argument, attribute names
-    or None if the field indexes, conversion, spec); the argument is "" for
-    an automatic number, an int, a keyword, or None for an index that no
-    call supplies. Nothing if `text` is not a valid format."""
     try:
         parsed = list(string.Formatter().parse(text))
     except ValueError:
@@ -102,24 +80,18 @@ def _format_fields(text):
 
 
 def _format_index(digits):
-    """The position that the digits of a format field name, whatever their
-    leading zeros; None past 19 digits: Python rejects an index past
-    `sys.maxsize`, and no call has that many arguments."""
     digits = digits.lstrip("0") or "0"
     return int(digits) if len(digits) <= 19 else None
 
 
 class Expressions:
     def expression(self, node):
-        """Emit the constraints of the expression `node` and return the node
-        of its value, or None."""
         handler = getattr(self, f"_expr_{type(node).__name__}", None)
         if handler is None:
             self._walk(node)
             return None
         value = handler(node)
         if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.Call)):
-            # A str built from a constant and another value (patterns.py).
             pattern = self.string_pattern(node)
             if pattern is not None:
                 value = self._join([value, pattern])
@@ -128,27 +100,21 @@ class Expressions:
         return value
 
     def _pattern_operands(self, node):
-        """The nodes of the operands of the `+` chain or the right operand
-        of the `%` of `node` whose values may decide its result (see
-        `Patterns.add_pattern_operand`), with None for one whose value is
-        not a node: a constant and an f-string that CPython joins into a
-        new str (one of more than one part) are left out; a single-field
-        f-string gives what `format` returns, which may be a str subclass,
-        so it counts as None."""
         if not isinstance(node, ast.BinOp):
             return []
         if isinstance(node.op, ast.Mod):
-            return _dynamic_operands([(node.right, self._binop_operands[node][1])])
+            return _dynamic_operands(
+                [(node.right, self._operand_nodes_by_binop[node][1])]
+            )
         operands = []
         while isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-            left, right = self._binop_operands[node]
+            left, right = self._operand_nodes_by_binop[node]
             operands.append((node.right, right))
             node = node.left
         operands.append((node, left))
         return _dynamic_operands(operands)
 
     def _walk(self, node):
-        """Visit the parts of a node that the builder does not model."""
         for child in ast.iter_child_nodes(node):
             if isinstance(child, ast.stmt):
                 self.statement(child)
@@ -158,22 +124,13 @@ class Expressions:
                 self._walk(child)
 
     def _truth(self, node):
-        """What `bool()` of the value of the expression `node`, which has
-        been evaluated, may give (see `TRUE` in flow.py). Known for values
-        whose truth cannot change: literals, tuple displays, lambdas, names
-        whose reaching definitions agree, and `not`, `and`, `or`,
-        comparisons and conditional expressions of those. A list, set or
-        dict display is not: the container may change."""
         return self._facts(node)[0]
 
     def _literals(self, node):
-        """The literal values that the evaluated expression `node` may have
-        (see `LITERAL_TYPES` in flow.py), or None if it may have another."""
         return self._facts(node)[1]
 
     def _facts(self, node):
-        """`(truth, literal values)` of the evaluated expression `node`."""
-        facts = self._known_facts.get(node)
+        facts = self._facts_by_expression.get(node)
         if facts is not None:
             return facts
         if type(node) is ast.Constant:
@@ -184,16 +141,12 @@ class Expressions:
         return (UNKNOWN, None)
 
     def _known(self, node, truth=UNKNOWN, values=None):
-        """Record the truth of `node`, or its literal values (which decide
-        its truth)."""
         if values is not None:
             truth = truth_of(values_of(values))
         if truth != UNKNOWN or values is not None:
-            self._known_facts[node] = (truth, values)
+            self._facts_by_expression[node] = (truth, values)
 
     def _names_type_checking(self, name, value):
-        """Whether the name `name`, whose value is the node `value`, is the
-        `TYPE_CHECKING` of a typing module (see `TYPING_MODULES`)."""
         if any(
             value is self.analysis.constant(self.analysis.external(target))
             for target in TYPE_CHECKING_IMPORTS
@@ -204,10 +157,6 @@ class Expressions:
         return self.scopes.imported(scope, name) in TYPE_CHECKING_IMPORTS
 
     def _is_typing_module(self, expression, node):
-        """Whether the expression `expression`, whose value is `node`, is an
-        outside typing module (see `TYPING_MODULES`), whose `TYPE_CHECKING`
-        is false: the value of its import, or a name that only imports of
-        it bind."""
         if any(
             node is self.analysis.constant(self.analysis.external(module))
             for module in TYPING_MODULES
@@ -220,7 +169,6 @@ class Expressions:
         return self.scopes.imported(scope, name) in TYPING_MODULES
 
     def _join(self, values):
-        """A node that holds what any of `values` holds."""
         values = [value for value in values if value is not None]
         if len(values) <= 1:
             return values[0] if values else None
@@ -233,7 +181,7 @@ class Expressions:
         value, facts = self._read_name(node.id)
         self._known(node, *facts)
         if facts[0] == FALSE and self._names_type_checking(node.id, value):
-            self._type_checking[node] = True
+            self._type_checking_truth_by_test[node] = True
         return value
 
     def _expr_Attribute(self, node):
@@ -242,7 +190,7 @@ class Expressions:
             return None
         if node.attr == "TYPE_CHECKING" and self._is_typing_module(node.value, base):
             self._known(node, values=literals_of(False))
-            self._type_checking[node] = True
+            self._type_checking_truth_by_test[node] = True
         value = self.analysis.node()
         attr = self._scope.mangle(node.attr)
         self.analysis.add_load(base, attr, value, self._caller, self._site(node))
@@ -263,9 +211,6 @@ class Expressions:
                 value = self.expression(arg.value)
                 star.append((value, True))
                 if value is not None:
-                    # The interpreter builds a tuple or a list of the
-                    # unpacked argument, whatever the callee: it asks its
-                    # length (see `LENGTH_HINT`).
                     site = self._site(node)
                     self.analysis.add_length_hint(value, self._caller, site)
             elif star:
@@ -284,11 +229,8 @@ class Expressions:
             if _is_str(node.func.value):
                 self._format_fields(node, args, dict(keywords))
         if callee is None:
-            # A call whose callee has no value: listed as unresolved.
             self.analysis.add_call(None, self._caller, [], [], None, self._site(node))
             return None
-        # An import by a str literal gives the module (see builder.py),
-        # recorded before the call, which acts at once on a constant callee.
         module = self.literal_import(node)
         if module is not None:
             self.analysis.literal_imports[self._site(node)] = module
@@ -317,11 +259,6 @@ class Expressions:
         return result
 
     def _format_fields(self, node, args, keywords):
-        """`"{0.name!r:>8}".format(...)` with a literal format: each field
-        loads the attributes it names from its argument and converts the
-        result (`!r` and `!a` with repr, `!s` with str, else with format and
-        the field's spec). A field that indexes (`{0[key]}`) or that the
-        call does not supply is skipped."""
         auto = 0
         for index, (first, attributes, conversion, spec) in enumerate(
             _format_fields(node.func.value.value)
@@ -339,14 +276,11 @@ class Expressions:
                 loaded = self.analysis.node()
                 self.analysis.add_load(value, attr, loaded, self._caller, site)
                 value = loaded
-            kind = FORMAT_CONVERSIONS.get(conversion, "format")
+            kind = CONVERSION_BY_FORMAT_FLAG.get(conversion, "format")
             spec = self.analysis.constant(self.analysis.const(spec))
             self.analysis.add_conversion(value, kind, self._caller, site, spec)
 
     def _implicit_super_arguments(self, node):
-        """The arguments that `super()` without arguments takes from its
-        function: the class around it (the `__class__` cell) and the first
-        parameter. Empty for any other call."""
         if node.args or node.keywords:
             return []
         if not self._is_builtin_reference(node.func, "super"):
@@ -379,28 +313,17 @@ class Expressions:
         return self.choice(node, self.expression)
 
     def condition(self, node):
-        """Evaluate the condition `node` (of `if`, `while`, `assert`, a
-        conditional expression, a comprehension, a case guard), whose truth
-        Python tests: `__bool__`, else `__len__`. Which branch the builder
-        walks depends on the syntax only (see `_truth`)."""
         value = self.expression(node)
         if value is not None:
             self.analysis.add_truth(value, self._caller, self._site(node))
         return value
 
     def choice(self, node, evaluate):
-        """The value of a conditional expression or an `and`/`or` (`node`):
-        the join of what `evaluate` gives for each part that may give the
-        result, called within that part's branch of the flow (a `return`
-        passes parameters through this way, see `ModuleBuilder._returned`).
-        """
         if isinstance(node, ast.IfExp):
             return self._choose_arm(node, evaluate)
         return self._choose_operand(node, evaluate)
 
     def _choose_arm(self, node, evaluate):
-        """An arm runs only if the test may have its truth; the other one is
-        not walked (see *Code that cannot run* in the design)."""
         self.condition(node.test)
         test = self._truth(node.test)
         flow = self._flow
@@ -418,10 +341,6 @@ class Expressions:
         return self._join(values)
 
     def _choose_operand(self, node, evaluate):
-        """`a or b` is `a` if it is true, else `b`; `a and b` is `a` if it is
-        false, else `b`. An operand gives the result only if it may decide
-        it (or is the last), and runs only if those before it may not
-        decide it; the operands that cannot run are not walked."""
         decides = TRUE if isinstance(node.op, ast.Or) else FALSE
         goes_on = UNKNOWN ^ decides
         flow = self._flow
@@ -435,9 +354,6 @@ class Expressions:
                 self.narrow(node.values[index - 1], goes_on == TRUE)
             value = evaluate(operand)
             if index < last:
-                # Python tests the truth of each operand but the last. A
-                # returned parameter is passed through without a value (see
-                # `ModuleBuilder._returned`): read it for the test.
                 tested = value
                 if tested is None and isinstance(operand, ast.Name):
                     tested = self.expression(operand)
@@ -450,7 +366,6 @@ class Expressions:
                 break
             if operand_truth & decides:
                 values.append(value)
-                # Only its values of that truth are the result.
                 if literals is not None:
                     literals = frozenset(
                         entry for entry in literals if truth_of(entry[1:]) == decides
@@ -479,8 +394,6 @@ class Expressions:
         return result
 
     def _expr_Yield(self, node):
-        """`yield value`: the function yields `value`, and the expression is
-        what is sent to the generator."""
         value = self.expression(node.value) if node.value is not None else None
         function = self._function
         if function is None or function.yield_node is None:
@@ -501,8 +414,6 @@ class Expressions:
         return result
 
     def _expr_BinOp(self, node):
-        # Long chains such as `a + b + c + ...` nest on the left; walk them in
-        # a loop, so that they do not exhaust the Python stack.
         chain = []
         while isinstance(node, ast.BinOp):
             chain.append(node)
@@ -510,12 +421,11 @@ class Expressions:
         value = self.expression(node)
         for operation in reversed(chain):
             right = self.expression(operation.right)
-            self._binop_operands[operation] = (value, right)
+            self._operand_nodes_by_binop[operation] = (value, right)
             value = self._operator(value, right, operation, inplace=False)
         return value
 
     def _expr_Constant(self, node):
-        # Its facts are those of its value (see `_facts`).
         value = node.value
         if isinstance(value, (str, bytes, int)) and not isinstance(value, bool):
             return self.analysis.constant(self.analysis.const(value))
@@ -530,9 +440,10 @@ class Expressions:
         if isinstance(node.op, ast.Not):
             if operand is not None:
                 self.analysis.add_truth(operand, self._caller, self._site(node))
-            if node.operand in self._type_checking:
-                self._type_checking[node] = not self._type_checking[node.operand]
-            # A bool, whatever the operand.
+            if node.operand in self._type_checking_truth_by_test:
+                self._type_checking_truth_by_test[
+                    node
+                ] = not self._type_checking_truth_by_test[node.operand]
             truth = self._truth(node.operand)
             results = {False} if truth & TRUE else set()
             if truth & FALSE:
@@ -556,17 +467,8 @@ class Expressions:
         return result
 
     def _expr_Compare(self, node):
-        """Each comparison calls the special method of its left operand and
-        the reflected one of its right operand, and gives what they return
-        (`a < b < c` gives the result of either comparison); Python tests
-        the truth of each result but the last to decide whether to go on.
-        `in` calls `__contains__` of the right operand and tests the truth
-        of its result; `in`, `not in`, `is` and `is not` give bools, which
-        are not tracked."""
         left = self.expression(node.left)
         results = []
-        # A comparison after the first runs only where those before it
-        # held, and not at all after one that cannot hold.
         flow = self._flow
         base, ends, outcomes = flow.state, [], set()
         previous = node.left
@@ -577,20 +479,17 @@ class Expressions:
                 flow.branch(flow.state)
             right = self.expression(comparator)
             outcome = self._comparison(operator, previous, comparator)
-            # Each comparison of a chain is its own construct, from its left
-            # operand to its right one: the whole expression for one link.
             site = self._span(previous, comparator)
             previous = comparator
             if outcomes is not None:
                 outcomes = None if outcome is None else outcomes | outcome
-            if type(operator) in _COMPARISONS:
+            if type(operator) in _SPECIAL_METHODS_BY_COMPARISON:
                 result = self.rich_comparison(left, right, operator, site)
                 if result is not None:
                     results.append(result)
                     if index < last:
                         self.analysis.add_truth(result, self._caller, site)
             elif isinstance(operator, (ast.In, ast.NotIn)):
-                # A container that is not tracked is searched too.
                 container = right if right is not None else self.analysis.node()
                 contained = self.analysis.node()
                 self.analysis.add_operator(
@@ -606,7 +505,6 @@ class Expressions:
                 self.analysis.add_truth(contained, self._caller, site)
             left = right
             if outcome == {False}:
-                # The chain is false here, whatever came before.
                 outcomes = {False} if outcomes is not None else None
                 break
         ends.append(flow.state)
@@ -616,14 +514,9 @@ class Expressions:
         return self._join(results)
 
     def rich_comparison(self, left, right, operator, site):
-        """The node of what `left <operator> right` gives, for a rich
-        comparison (`operator` an `ast.Lt`...): it calls the special method
-        of the left operand and the reflected one of the right operand.
-        Either operand may be None, if it is not tracked; None if neither
-        is."""
         if left is None and right is None:
             return None
-        method, reflected = _COMPARISONS[type(operator)]
+        method, reflected = _SPECIAL_METHODS_BY_COMPARISON[type(operator)]
         result = self.analysis.node()
         self.analysis.add_operator(
             left, right, method, reflected, False, result, self._caller, site
@@ -631,8 +524,6 @@ class Expressions:
         return result
 
     def _comparison(self, operator_node, left, right):
-        """The bools that `left <operator> right` may give, if decided by
-        the literal values of the operands; else None."""
         lefts = values_of(self._literals(left) or ())
         if not lefts:
             return None
@@ -647,10 +538,9 @@ class Expressions:
         rights = values_of(self._literals(right) or ())
         if not rights:
             return None
-        compare = _LITERAL_COMPARISONS[type(operator_node)]
+        compare = _OPERATOR_BY_LITERAL_COMPARISON[type(operator_node)]
         if compare in (operators.is_, operators.is_not):
-            # The identity of other literals depends on the interpreter.
-            if not all(_is_singleton(value) for value in lefts + rights):
+            if not all(_has_fixed_identity(value) for value in lefts + rights):
                 return None
         try:
             return {bool(compare(a, b)) for a in lefts for b in rights}
@@ -658,8 +548,6 @@ class Expressions:
             return None
 
     def _members(self, node):
-        """The literal values of the elements of a tuple, list or set
-        display whose elements each have one literal value; else None."""
         if not isinstance(node, (ast.Tuple, ast.List, ast.Set)):
             return None
         members = []
@@ -671,8 +559,6 @@ class Expressions:
         return members
 
     def _expr_JoinedStr(self, node):
-        """An f-string converts each value to str, passing the format spec
-        to `__format__`. Without values, it is a str constant."""
         if all(isinstance(value, ast.Constant) for value in node.values):
             text = "".join(value.value for value in node.values)
             self._known(node, values=literals_of(text))
@@ -686,7 +572,7 @@ class Expressions:
             else:
                 spec = self.analysis.constant(self.analysis.const(""))
             if operand is not None:
-                kind = _CONVERSIONS.get(value.conversion, "format")
+                kind = _CONVERSION_BY_FSTRING_FLAG.get(value.conversion, "format")
                 site = self._site(value)
                 self.analysis.add_conversion(operand, kind, self._caller, site, spec)
         return None
@@ -700,8 +586,6 @@ class Expressions:
         return result
 
     def _expr_Tuple(self, node):
-        """A tuple, list or set display. Elements after an unpacked one have
-        no known position."""
         kind = _DISPLAYS[type(node)]
         positional = kind != "set"
         unpacked = any(isinstance(elt, ast.Starred) for elt in node.elts)
@@ -709,8 +593,6 @@ class Expressions:
             self._known(node, TRUE if node.elts else FALSE)
         length = len(node.elts) if positional and not unpacked else None
         container = self.analysis.container(kind, self._site(node), length)
-        # The nodes of what the display stores without a position, and of
-        # what a set hashes among them and compares with all of them.
         unordered, hashed = [], []
         for index, elt in enumerate(node.elts):
             if isinstance(elt, ast.Starred) and kind == "set":
@@ -721,8 +603,6 @@ class Expressions:
                 continue
             if isinstance(elt, ast.Starred):
                 positional = False
-                # A list or tuple display extends a list with the
-                # unpacked iterable, which asks its length.
                 elements = self._elements_of(elt.value, length_hint=True)
                 if elements is not None:
                     unordered.append(elements)
@@ -747,9 +627,6 @@ class Expressions:
         return self.analysis.constant(container)
 
     def _entering_keys(self, iterable):
-        """Evaluate the expression `iterable`, unpacked into a set, and
-        return the nodes of its elements that the set hashes and of those
-        whose hashes it reuses (see `Containers.entering_keys`), or None."""
         value = self.expression(iterable)
         if value is None:
             return None
@@ -764,11 +641,9 @@ class Expressions:
     def _expr_Dict(self, node):
         container = self.analysis.container("dict", self._site(node))
         for key, value in zip(node.keys, node.values):
-            # Each key is evaluated before its value.
             key_node = None if key is None else self.expression(key)
             value_node = self.expression(value)
             if key is None:
-                # {**mapping}
                 if value_node is not None:
                     site = self._site(value)
                     self.analysis.add_dict_items(
@@ -783,16 +658,12 @@ class Expressions:
         return self.analysis.constant(container)
 
     def _comprehension(self, node):
-        """The container that a comprehension builds; a generator
-        expression is a container of kind `generator`, or `async_generator`
-        if it awaits (see `Scope.asynchronous`)."""
         scope = self.scopes.scope_of(node)
         kind = _COMPREHENSIONS[type(node)]
         if kind == "generator" and scope.asynchronous:
             kind = "async_generator"
         container = self.analysis.container(kind, self._site(node))
         generators = node.generators
-        # The first iterable is evaluated in the enclosing scope.
         first = generators[0]
         elements = self._elements_of(first.iter, bool(first.is_async))
         with self._inside(scope, self._function):
@@ -804,7 +675,6 @@ class Expressions:
                 for condition in generator.ifs:
                     self.condition(condition)
             if isinstance(node, ast.DictComp) and node.value is None:
-                # `{**mapping for ...}` (PEP 798): the items of each mapping.
                 mapping = self.expression(node.key)
                 if mapping is not None:
                     site = self._site(node.key)
@@ -819,8 +689,6 @@ class Expressions:
                     site = self._site(node.key)
                     self.analysis.add_hash(key, self._caller, site, stored)
             elif isinstance(node.elt, ast.Starred) and kind == "set":
-                # `{*iterable for ...}`: the elements of each one, hashed
-                # where they come from no set or dict.
                 entering = self._entering_keys(node.elt.value)
                 if entering is not None:
                     for value in entering:
@@ -829,7 +697,6 @@ class Expressions:
                     site = self._site(node.elt.value)
                     self.analysis.add_hash(entering[0], self._caller, site, stored)
             elif isinstance(node.elt, ast.Starred):
-                # `[*iterable for ...]` (PEP 798): the elements of each one.
                 iterable = self.expression(node.elt.value)
                 if iterable is not None:
                     target = self.analysis.unknown(container)
@@ -851,9 +718,6 @@ class Expressions:
     _expr_GeneratorExp = _comprehension
 
     def _elements_of(self, iterable, is_async=False, length_hint=False):
-        """Evaluate the expression `iterable` and return a node with what
-        iterating over it (with `async for` if `is_async`) gives, or None;
-        with `length_hint`, the iteration first asks its length."""
         value = self.expression(iterable)
         if value is None:
             return None
@@ -866,16 +730,12 @@ class Expressions:
         return elements
 
     def _subscript_parts(self, node):
-        """Evaluate the value and the index of a subscript. Return the node of
-        the value and either the key node or a `Bounds` for a slice."""
         base = self.expression(node.value)
         if isinstance(node.slice, ast.Slice):
             return base, Bounds(self._slice_bounds(node.slice))
         return base, self.expression(node.slice)
 
     def _slice_bounds(self, node):
-        """Evaluate the parts of a slice and return `(start, stop)` if both
-        are int literals or absent and there is no step; else None."""
         parts = [node.lower, node.upper, node.step]
         for part in parts:
             if part is not None:
@@ -891,8 +751,6 @@ class Expressions:
         return tuple(bounds)
 
     def _subscript(self, base, index, dst, src, node, delete=False):
-        """dst ⊇ base[index] (if `dst`), base[index] ⊇ src (if `src`),
-        `del base[index]` (if `delete`)."""
         if dst is None and src is None and not delete:
             return
         site, caller = self._site(node), self._caller
@@ -903,13 +761,10 @@ class Expressions:
             self.analysis.add_subscript(base, index, dst, src, caller, site, delete)
 
     def _operator(self, left, right, node, inplace=True):
-        """The node of the result of the binary operator of `node` (a BinOp
-        or an AugAssign) applied to `left` and `right`."""
         if left is None and right is None:
             return None
-        name = _OPERATORS[type(node.op)]
+        name = _SPECIAL_METHOD_BY_OPERATOR[type(node.op)]
         if isinstance(node.op, ast.Mod) and left is not None and right is not None:
-            # `fmt % items` formats where `fmt` holds a str (see `add_percent`).
             self.analysis.add_percent(left, right, self._caller, self._site(node))
         result = self.analysis.node()
         self.analysis.add_operator(
@@ -934,9 +789,6 @@ _COMPREHENSIONS = {
 
 
 class Bounds:
-    """The index of a slice: `bounds` is `(start, stop)`, or None if they
-    are not known (see `ModuleBuilder._slice_bounds`)."""
-
     __slots__ = ("bounds",)
 
     def __init__(self, bounds):
@@ -944,17 +796,12 @@ class Bounds:
 
 
 def _dynamic_operands(operands):
-    """The value nodes of the `(expression, node)` pairs `operands` that may
-    not be an exact str: not a constant and not an f-string that builds a
-    new str. A single-field f-string gives None."""
     found = []
     for expression, node in operands:
         if isinstance(expression, ast.Constant):
             continue
         if isinstance(expression, ast.JoinedStr):
             values = expression.values
-            # More than one part (a literal part or two fields) builds a
-            # new str; a literal alone is a constant.
             if len(values) != 1 or isinstance(values[0], ast.Constant):
                 continue
             node = None
@@ -963,7 +810,6 @@ def _dynamic_operands(operands):
 
 
 def _join_facts(facts):
-    """The facts of a value that may be any of those with `facts`."""
     truth, values = 0, frozenset()
     for bits, literals in facts:
         truth |= bits
@@ -971,12 +817,11 @@ def _join_facts(facts):
     return (truth or UNKNOWN, values)
 
 
-def _is_singleton(value):
-    return any(value is singleton for singleton in _SINGLETONS)
+def _has_fixed_identity(value):
+    return any(value is singleton for singleton in _VALUES_WITH_FIXED_IDENTITY)
 
 
 def _int_literal(node):
-    """The value of an int literal, possibly negated, or None."""
     sign = 1
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
         sign, node = -1, node.operand

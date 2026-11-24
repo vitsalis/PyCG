@@ -465,12 +465,12 @@ def lookups(spec):
 
 @contextmanager
 def at_most_hierarchies(limit):
-    saved = hierarchy_module.MAX_HIERARCHIES
-    hierarchy_module.MAX_HIERARCHIES = limit
+    saved = hierarchy_module.HIERARCHIES_PER_CLASS_MAX
+    hierarchy_module.HIERARCHIES_PER_CLASS_MAX = limit
     try:
         yield
     finally:
-        hierarchy_module.MAX_HIERARCHIES = saved
+        hierarchy_module.HIERARCHIES_PER_CLASS_MAX = saved
 
 
 @settings(max_examples=500, deadline=None)

@@ -12,7 +12,7 @@ from collections import deque
 
 from .annotations import Annotations
 from .arguments import Arguments
-from .attributes import MAX_EXTERNAL_STEPS, Attributes, Delete, Load, Store
+from .attributes import EXTERNAL_STEPS_PAST_ROOT_MAX, Attributes, Delete, Load, Store
 from .builtin_models import DECORATOR, method_model
 from .builtin_rules import BuiltinRules
 from .containers import Containers
@@ -133,7 +133,9 @@ class Analysis(
         self._fallbacks = {}
         self._fallback_nodes = {}
         self._returning = {}
-        self.unknown_external = UnknownExternal("<unknown>", MAX_EXTERNAL_STEPS)
+        self.unknown_external = UnknownExternal(
+            "<unknown>", EXTERNAL_STEPS_PAST_ROOT_MAX
+        )
         self._generators = {}
         self._coroutines = {}
         # Call backs by origin, the calls they have called back, and the

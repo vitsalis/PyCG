@@ -1,12 +1,3 @@
-"""Turn the AST of one module into constraints.
-
-The builder walks each module once. Every expression that can hold an object
-gets a node (see expressions.py); statements become subset edges between
-nodes and load, store and call constraints on them. The builder never reads
-points-to sets: the solver resolves everything later. Statements without a
-handler are walked, so calls inside them are found.
-"""
-
 import ast
 from contextlib import contextmanager
 from importlib.util import resolve_name
@@ -21,20 +12,14 @@ from .patterns import PatternBuilder
 from .scopes import CLASS, COMPREHENSION, MODULE, analyse_scopes
 from .stubs import Stubs
 
-# Names that the interpreter gives every module, which the stubs of
-# `builtins` do not list.
-MODULE_NAMES = frozenset(
+IMPLICIT_MODULE_NAMES = frozenset(
     {"__debug__", "__doc__", "__loader__", "__name__", "__package__", "__spec__"}
 )
 
 
 def _builtin_names():
-    """The names of the builtins in every version and on every platform,
-    from the stubs, so that the results do not depend on the interpreter
-    that runs the analysis (not the stubs' private helpers, nor the classes
-    that exist only in stubs), and the names that every module has."""
     names = Stubs().module("builtins")["names"]
-    return MODULE_NAMES | frozenset(
+    return IMPLICIT_MODULE_NAMES | frozenset(
         name
         for name, entry in names.items()
         if not (name.startswith("_") and not name.startswith("__"))
@@ -44,9 +29,6 @@ def _builtin_names():
 
 BUILTIN_NAMES = _builtin_names()
 
-# The class attributes that a class statement turns from a plain function
-# into a static or class method (`type.__new__` does). Each takes the class
-# first, so a receiver that no analysed call gives gets the classes.
 IMPLICIT_METHODS = {
     "__new__": "staticmethod",
     "__init_subclass__": "classmethod",
@@ -57,16 +39,6 @@ IMPLICIT_METHODS = {
 class ModuleBuilder(
     Matching, Expressions, AnnotationBuilder, PatternBuilder, ClassTestBuilder
 ):
-    """Emits the constraints of one module.
-
-    `module` is the analysis object of the module and `is_package` tells
-    whether its file is an `__init__.py`, which matters for relative imports.
-    `is_entry` tells whether it is an entry point, which may run as
-    `__main__` or be imported. `stub` is the tree of the module's own stub
-    (`x.pyi` beside `x.py`), which gives the annotations that the source
-    leaves out (see annotations.py), or None.
-    """
-
     def __init__(
         self, analysis, imports, module, tree, is_package, is_entry=False, stub=None
     ):
@@ -77,74 +49,44 @@ class ModuleBuilder(
         self.is_package = is_package
         self.is_entry = is_entry
         self.scopes = analyse_scopes(tree, module.name)
-        # The names that imports under `if TYPE_CHECKING:` would bind, which
-        # bind nothing at run time: the qualified name that the import would
-        # bind (`mod.Name`, `mod.Class.Name` in a class body) to the dotted
-        # name it would import. For resolving annotations only.
         self.type_only_names = {}
-        # Modules imported with `from ... import *`, in order.
-        self.star_imports = []
+        self.star_imported_modules = []
         self._scope = self.scopes.module
         self._function = None
         self._classes = {}
         self._variables = {}
-        # For each scope, the names that walked code binds but the builder
-        # does not track, with their nodes (see `_untracked`).
-        self._untracked_names = {}
+        self._untracked_nodes_by_scope = {}
         self._builtin_globals = {}
-        # The names that imports bind to `importlib` and to
-        # `importlib.import_module` (see `literal_import`).
-        self._importlib_names = set()
+        self._names_bound_to_importlib = set()
         self._import_module_names = set()
-        # The definitions of the scopes whose statements are being walked
-        # (see flow.py), and those of the current one.
         self._flow = Flow(self.analysis)
         self._flows = {self.scopes.module: self._flow}
-        # What `bool()` of an evaluated expression gives and the literal
-        # values it has, where known (see `Expressions._facts`).
-        self._known_facts = {}
-        # The nodes of the operands of each binary operator, for the
-        # patterns that `+` and `%` make (see `Expressions.expression`).
-        self._binop_operands = {}
-        # The tests that `TYPE_CHECKING` decides, with the truth they have
-        # for a type checker.
-        self._type_checking = {}
-        # The class tests that the builder evaluated, by call, and the node
-        # that each gives its name where it holds (see narrowing.py).
-        self._class_tests = {}
+        self._facts_by_expression = {}
+        self._operand_nodes_by_binop = {}
+        self._type_checking_truth_by_test = {}
+        self._class_tests_by_call = {}
         self._narrowed_nodes = {}
         self.own_stub = None
         if stub is not None:
             self.own_stub = OwnStub(stub, self._absolute_module_name)
-        # The path of the stub's scope whose annotation is being read, or
-        # None for the source's (see annotations.py).
-        self._reading_stub = None
-        # By module or class scope, the names that the source annotates.
-        self._source_annotated = {}
-        # By path, the class definitions that a stub class names.
-        self._stub_classes = {}
+        self._stub_scope_path_being_read = None
+        self._source_annotated_names_by_scope = {}
+        self._source_classes_by_stub_path = {}
 
     def build(self):
         try:
             self._statements(self.tree.body)
         finally:
-            # The names that the module binds at run time, in order: a load
-            # of another calls its `__getattr__`, and a star import of it
-            # takes the public ones (unless it declares `__all__`).
-            self.defined = list(self._bound_at_end(self.scopes.module))
-            self.module.defines.update(self.defined)
-
-    # Context
+            self.names_bound_at_run_time = list(self._bound_at_end(self.scopes.module))
+            self.module.defines.update(self.names_bound_at_run_time)
 
     @contextmanager
     def _inside(self, scope, function):
         saved = (self._scope, self._function, self._flow)
         self._scope, self._function = scope, function
         if scope.kind != COMPREHENSION:
-            # A comprehension binds only names that are not tracked.
             self._flow = self._flows[scope] = Flow(self.analysis)
             if function is not None:
-                # The parameters are the first definitions of a function.
                 for name, parameter in function.parameters.items():
                     if self.scopes.tracked(scope, name):
                         definition = (parameter, False, UNKNOWN, None)
@@ -163,16 +105,10 @@ class ModuleBuilder(
         return self._span(node, node)
 
     def _span(self, first, last):
-        """The site from the start of the node `first` to the end of the
-        node `last`."""
         start = f"{self.module.name}:{first.lineno}:{first.col_offset}"
         return f"{start}#{last.end_lineno}:{last.end_col_offset}"
 
-    # Names
-
     def _variable(self, scope, name):
-        """The node of the variable `name` bound in `scope`. Module and class
-        variables are fields of their module or class."""
         if scope.kind == MODULE:
             return self.analysis.field(self.module, name)
         if scope.kind == CLASS:
@@ -186,34 +122,20 @@ class ModuleBuilder(
         return self._read_name(name)[0]
 
     def _read_name(self, name):
-        """Read the name `name` in the current scope: the node of its value,
-        and what `bool()` of it may give and its literal values (see
-        flow.py). A reader that runs in statement order with the scope that binds it
-        reads the definitions that reach it; any other reads the variable,
-        which every definition flows into."""
         unknown = (UNKNOWN, None)
         name = self._scope.mangle(name)
         scope = self.scopes.resolve(self._scope, name)
         if scope.kind == CLASS and scope is not self._scope:
-            # The implicit `__class__` variable of a function in a class.
             return self.analysis.constant(self._classes[scope]), unknown
         if self._is_builtin(scope, name):
             facts = unknown
             if name == "__name__" and not self.is_entry and not scope.dynamic:
-                # Not bound by the module, which is not an entry point (an
-                # entry point may run as `__main__` or be imported): the
-                # module's own name.
                 facts = (TRUE, literals_of(self.module.name))
             return self._builtin_global(name), facts
         definition = self._reaching(scope, name)
         if definition is None and scope.kind == CLASS:
-            # The class body does not track its names (it uses its
-            # namespace): any value that it binds, or, where the name may be
-            # unbound, the module's and the builtin's (LOAD_NAME, below).
             definition = (self._variable(scope, name), True, UNKNOWN, None)
         if definition is None:
-            # Read at other times: known only for a name that is always the
-            # same import.
             facts = unknown
             if self.scopes.imported(scope, name) in TYPE_CHECKING_IMPORTS:
                 facts = (FALSE, literals_of(False))
@@ -222,9 +144,6 @@ class ModuleBuilder(
         if not unbound:
             return value, (truth or UNKNOWN, values)
         if scope.kind == CLASS:
-            # Where a class body has not bound the name, it reads it from
-            # the module globals and the builtins (LOAD_NAME), never from an
-            # enclosing function.
             module_value = self._value_of(self.scopes.module, name)
             return self._join([value, module_value]), unknown
         if scope.kind == MODULE and name in BUILTIN_NAMES:
@@ -234,8 +153,6 @@ class ModuleBuilder(
         return value, (truth or UNKNOWN, values)
 
     def _value_of(self, scope, name):
-        """The node of the module name `name` read from the current scope
-        (a class body's fallback), or of the builtin."""
         if self._is_builtin(scope, name):
             return self._builtin_global(name)
         definition = self._reaching(scope, name)
@@ -248,10 +165,6 @@ class ModuleBuilder(
         return value
 
     def _reaching(self, scope, name):
-        """The definition of `name`, bound in `scope`, that reaches the
-        current point (see flow.py), or None if the current scope does not
-        read it in statement order: the name is not tracked, or the reader
-        runs at other times."""
         flow = self._flows.get(scope)
         if (
             flow is None
@@ -262,12 +175,6 @@ class ModuleBuilder(
         return flow.read(name)
 
     def _bind(self, name, value, truth=UNKNOWN, values=None):
-        """Bind `name` in the current scope to `value` (None if untracked),
-        whose truth is `truth` and whose literal values are `values`. A
-        tracked name gets a new definition; the variable gets the value
-        too, for readers that do not run in statement order (and the
-        assignment graph), except in a class body, whose namespace is what
-        reaches its end."""
         name = self._scope.mangle(name)
         scope = self.scopes.resolve(self._scope, name)
         if scope is self._scope and self.scopes.tracked(scope, name):
@@ -281,11 +188,7 @@ class ModuleBuilder(
             self.analysis.add_edge(value, variable)
 
     def _untracked(self, scope, name):
-        """The node of every value that walked code binds to `name`, which
-        `scope` binds but does not track: its variable, or in a class body
-        a node that becomes the member at the end of the body (see
-        `_bound_at_end`)."""
-        bound = self._untracked_names.setdefault(scope, {})
+        bound = self._untracked_nodes_by_scope.setdefault(scope, {})
         if name not in bound:
             if scope.kind == CLASS:
                 bound[name] = self.analysis.node()
@@ -294,36 +197,27 @@ class ModuleBuilder(
         return bound[name]
 
     def _bound_at_end(self, scope):
-        """The names that the module or class body `scope`, whose statements
-        were just walked, may bind at their end, each with the node of its
-        value (None if untracked): for a tracked name, the definitions that
-        reach the end; for another, every value that walked code binds."""
         state = self._flows[scope].state
         members = {}
         for name in state.changed(None):
             definition = state.get(name)
             if definition != UNBOUND:
                 members[name] = definition[0]
-        members.update(self._untracked_names.get(scope, {}))
+        members.update(self._untracked_nodes_by_scope.get(scope, {}))
         return members
 
     def _unbind(self, name):
-        """`del name`, or the end of an `except ... as name` handler."""
         name = self._scope.mangle(name)
         scope = self.scopes.resolve(self._scope, name)
         if scope is self._scope and self.scopes.tracked(scope, name):
             self._flow.unbind(name)
 
     def _is_builtin(self, scope, name):
-        """True if `name`, resolved to `scope`, may be a builtin: the module
-        does not bind it, so it is a builtin unless a star import or another
-        module sets it."""
         return (
             scope.kind == MODULE and name not in scope.bound and name in BUILTIN_NAMES
         )
 
     def builtin_name(self, name):
-        """The node of the builtin `name`, or None if no builtin has it."""
         if name not in BUILTIN_NAMES:
             return None
         return self.analysis.constant(
@@ -331,8 +225,6 @@ class ModuleBuilder(
         )
 
     def _builtin_global(self, name):
-        """A node for a builtin name: the module global of that name, if
-        anything sets it, and the builtin."""
         if name not in self._builtin_globals:
             node = self.analysis.node()
             self.analysis.add_edge(self.analysis.field(self.module, name), node)
@@ -346,11 +238,7 @@ class ModuleBuilder(
             return False
         return self._is_builtin(self.scopes.resolve(self._scope, name), name)
 
-    # Statements
-
     def _statements(self, statements):
-        """Walk `statements` in order, up to the first that cannot run (see
-        *Code that cannot run* in the design)."""
         for statement in statements:
             if not self._flow.state.reachable:
                 return
@@ -388,7 +276,6 @@ class ModuleBuilder(
                 function,
                 kind,
             )
-        # A function is true; a decorator may return any value.
         truth = UNKNOWN if node.decorator_list else TRUE
         self._bind(node.name, self._decorate(node, decorators, function), truth)
         with self._inside(scope, function):
@@ -397,9 +284,6 @@ class ModuleBuilder(
     _stmt_AsyncFunctionDef = _stmt_FunctionDef
 
     def _decorate(self, node, decorators, obj):
-        """The value of a decorated definition of `obj`: the decorators,
-        whose values are `decorators`, applied bottom-up. Each application
-        is a call from the enclosing function or module."""
         value = self.analysis.constant(obj)
         for decorator, expression in reversed(
             list(zip(decorators, node.decorator_list))
@@ -421,8 +305,6 @@ class ModuleBuilder(
         return value
 
     def _function_object(self, node, scope):
-        """Create the function object of a def or lambda. Its default values
-        are evaluated in the enclosing scope."""
         arguments = node.args
         positional = [
             scope.mangle(arg.arg) for arg in arguments.posonlyargs + arguments.args
@@ -448,12 +330,9 @@ class ModuleBuilder(
         function = self.analysis.function(
             scope.name, self.module.name, signature, defaults, scope.generator
         )
-        # Its `__name__`: the name of the def, `<lambda>` for a lambda.
         name = "<lambda>" if isinstance(node, ast.Lambda) else node.name
         name_field = self.analysis.field(function, "__name__")
         self.analysis.add_object(name_field, self.analysis.const(name))
-        # An `async def` is a coroutine function, or with `yield` an async
-        # generator function.
         function.is_async = isinstance(node, ast.AsyncFunctionDef)
         function.lineno, function.end_lineno = node.lineno, node.end_lineno
         function.col_offset, function.end_col_offset = (
@@ -464,8 +343,6 @@ class ModuleBuilder(
         for name, parameter in function.parameters.items():
             variable = parameter
             if name in scope.rebound and self.scopes.tracked(scope, name):
-                # The parameter is the first definition of the variable: it
-                # holds what calls pass, and the variable every definition.
                 variable = self.analysis.node(parameter.label)
                 self.analysis.add_edge(parameter, variable)
             self._variables[(scope, name)] = variable
@@ -475,7 +352,6 @@ class ModuleBuilder(
         scope = self.scopes.scope_of(node)
         decorators = [self.expression(decorator) for decorator in node.decorator_list]
         bases = [self.expression(base) for base in node.bases]
-        # The keyword arguments go to `__init_subclass__`, but `metaclass`.
         keywords, double_star, metaclass = [], [], None
         for keyword in node.keywords:
             value = self.expression(keyword.value)
@@ -485,7 +361,6 @@ class ModuleBuilder(
                 metaclass = value
             else:
                 keywords.append((keyword.arg, value))
-        # A body that uses its namespace may bind any name: none is final.
         finals = {
             scope.mangle(name): statement
             for name, statement in _final_bindings(node.body).items()
@@ -507,8 +382,6 @@ class ModuleBuilder(
         site = self._site(node)
         with self._inside(scope, None):
             self._statements(node.body)
-            # The namespace of the class is what reaches the end of its body:
-            # the names that it may bind there, with their values.
             members = self._bound_at_end(scope)
             namespace = []
             for name, value in members.items():
@@ -521,9 +394,7 @@ class ModuleBuilder(
                     self.analysis.add_implicit_method(value, field, kind, site)
                 else:
                     self.analysis.add_class_member(value, field)
-                # The caller of a class body is that of the class statement.
                 self.analysis.add_set_name(value, cls, name, self._caller, site)
-            # A slot is a descriptor that Python makes on the class.
             slots = _slots(finals) if "__slots__" in members else ()
             cls.defines = frozenset(members).union(map(self._scope.mangle, slots))
         self.analysis.add_init_subclass(cls, keywords, double_star, self._caller, site)
@@ -535,8 +406,6 @@ class ModuleBuilder(
                 [decorator for decorator in decorators if decorator is not None],
                 [base for base in bases if base is not None],
             )
-        # A class is true unless its metaclass says otherwise (an empty
-        # `Enum` is false).
         plain = not (node.decorator_list or node.bases or node.keywords)
         truth = TRUE if plain else UNKNOWN
         self._bind(node.name, self._decorate(node, decorators, cls), truth)
@@ -549,11 +418,6 @@ class ModuleBuilder(
         self._flow.end_path()
 
     def _returned(self, node):
-        """The values that the returned expression `node` gives to the
-        result of the function, but not the parameters or elements of
-        `*args` that it returns unchanged (see `_returns_parameter`), also
-        as a part of a conditional expression or of `and`/`or` that may give
-        the result: each call gets its own arguments back for them."""
         if isinstance(node, (ast.IfExp, ast.BoolOp)):
             return self.choice(node, self._returned)
         if self._returns_parameter(node):
@@ -561,13 +425,6 @@ class ModuleBuilder(
         return self.expression(node)
 
     def _returns_parameter(self, value):
-        """If `value` is a parameter of the current function that the
-        function never rebinds, or `args[i]` for its `*args` parameter and
-        an int literal `i` >= 0, record that the function returns it
-        unchanged and return True: each call then gets its own argument
-        back, instead of every argument that any call passes. A call of a
-        generator or coroutine function returns no argument: it gives a
-        generator or coroutine, which returns it later."""
         function = self._function
         if function is None or function.yield_node is not None or function.is_async:
             return False
@@ -587,7 +444,6 @@ class ModuleBuilder(
         if self.scopes.resolve(self._scope, name) is not self._scope:
             return False
         if self.scopes.tracked(self._scope, name):
-            # The parameter's own definition reaches the return.
             if self._flow.definition(name)[:2] != (function.parameters[name], False):
                 return False
         elif name in self._scope.rebound:
@@ -601,14 +457,10 @@ class ModuleBuilder(
         if self._may_alias(node.targets):
             value = self._join([value, self.alias_form(node.value)])
         for target in node.targets:
-            # A name that the stub annotates is assigned as if the
-            # annotation were written here (see annotations.py).
             declared = self.declared(self.stub_variable(target), target)
             self._assign(target, self._join([value, declared]), *facts)
 
     def _may_alias(self, targets):
-        """Whether an assignment to `targets` may bind a type alias that
-        annotations read: one name at module or class level."""
         return (
             self._scope.kind in (MODULE, CLASS)
             and len(targets) == 1
@@ -616,11 +468,6 @@ class ModuleBuilder(
         )
 
     def _stmt_AnnAssign(self, node):
-        # The annotation of a class-level name is a value that a
-        # dataclass-like class makes a field (see annotations.py). With a
-        # value, the target also gets what the annotation names. Without a
-        # value nothing is stored, but the parts of an attribute or
-        # subscript target are evaluated.
         target = node.target
         class_level = self._may_alias([target]) and self._scope.kind == CLASS
         annotation = None
@@ -644,8 +491,6 @@ class ModuleBuilder(
             self._subscript_parts(target)
 
     def _stmt_AugAssign(self, node):
-        """`x op= v` evaluates the parts of `x` once, reads `x`, evaluates
-        `v`, applies the in-place operator and stores the result in `x`."""
         target = node.target
         site = self._site(target)
         match target:
@@ -681,8 +526,6 @@ class ModuleBuilder(
                 self.expression(node.value)
 
     def _stmt_Assert(self, node):
-        """The message is evaluated only where the test is false, and then
-        the statement raises."""
         self.condition(node.test)
         truth = self._truth(node.test)
         flow = self._flow
@@ -696,7 +539,6 @@ class ModuleBuilder(
         self.narrow(node.test, True)
 
     def _stmt_Expr(self, node):
-        # A constant statement, such as a docstring, has no effect.
         if not isinstance(node.value, ast.Constant):
             self.expression(node.value)
 
@@ -723,16 +565,12 @@ class ModuleBuilder(
                     self._delete(element)
 
     def _stmt_If(self, node):
-        # An elif chain nests in `orelse`; follow it in a loop, so that long
-        # chains do not exhaust the Python stack. Each test runs where the
-        # tests before it were false.
-        # A branch runs only if the test may have its truth.
         flow = self._flow
         base, ends = flow.state, []
         while flow.state.reachable:
             self.condition(node.test)
             truth = self._truth(node.test)
-            checked = self._type_checking.get(node.test)
+            checked = self._type_checking_truth_by_test.get(node.test)
             if checked is not None:
                 self._record_type_only(node.body if checked else node.orelse)
             tested = flow.state
@@ -753,8 +591,6 @@ class ModuleBuilder(
         flow.merge(base, ends)
 
     def _record_type_only(self, statements):
-        """Record the imports in `statements`, a block that only a type
-        checker runs, in `type_only_names`."""
         private = self._scope.private_class
         imports = imported_names(statements, self._absolute_module_name, private)
         for name, target in imports:
@@ -762,8 +598,6 @@ class ModuleBuilder(
             self.type_only_names[qualified] = target
 
     def _stmt_For(self, node):
-        """Each iteration binds the target and runs the body; the loop ends,
-        and the else block runs, at the start of an iteration."""
         is_async = isinstance(node, ast.AsyncFor)
         elements = self._elements_of(node.iter, is_async)
         flow = self._flow
@@ -778,8 +612,6 @@ class ModuleBuilder(
     _stmt_AsyncFor = _stmt_For
 
     def _stmt_While(self, node):
-        """The test runs at the start of each iteration; the loop ends, and
-        the else block runs, where it is false."""
         flow = self._flow
         flow.start_loop(self._loop_names(node))
         self.condition(node.test)
@@ -791,14 +623,12 @@ class ModuleBuilder(
         self._statements(node.body)
         flow.next_iteration()
         breaks = flow.stop_loop()
-        # Where the test is never false (`while True`), only `break` leaves.
         exit = State(tested)
         exit.reachable = tested.reachable and bool(truth & FALSE)
         self.narrow(node.test, False, exit)
         self._loop_exit(node, tested, exit, breaks)
 
     def _loop_names(self, node):
-        """The tracked names that the loop `node` binds on its iterations."""
         return {
             name: unbinds
             for name, unbinds in self.scopes.loop_bindings(node).items()
@@ -806,9 +636,6 @@ class ModuleBuilder(
         }
 
     def _loop_exit(self, node, start, exit, breaks):
-        """After a loop whose iterations start at the state `start` and
-        which ends normally at `exit` (`start` itself, or a state forked
-        from it): its else block, then where that and each `break` meet."""
         flow = self._flow
         flow.branch(exit)
         self._statements(node.orelse)
@@ -821,9 +648,6 @@ class ModuleBuilder(
         self._flow.jump(leaves=False)
 
     def _stmt_With(self, node):
-        """The body runs after the managers are entered. `__exit__` may
-        suppress an exception raised anywhere in it, so what follows also
-        starts from every definition that the statement makes."""
         flow = self._flow
         base = flow.state
         record = flow.record()
@@ -847,8 +671,6 @@ class ModuleBuilder(
         self._statements(node.body)
 
     def _stmt_Raise(self, node):
-        """`raise exc from cause`: a class is instantiated (see
-        `Protocols.add_raise`)."""
         for expression in (node.exc, node.cause):
             if expression is not None:
                 value = self.expression(expression)
@@ -858,12 +680,6 @@ class ModuleBuilder(
         self._flow.end_path()
 
     def _stmt_Try(self, node):
-        """A handler starts from any point of the body that may raise; the
-        else block from its end. The finally block starts from any point of
-        the statement, and after the statement the names that it binds have
-        its definitions, the others those of the paths that end normally.
-        A `break` or `continue` waits for the finally block, which may
-        replace it."""
         flow = self._flow
         base = flow.state
         everything = None
@@ -880,9 +696,6 @@ class ModuleBuilder(
             raising = flow.anywhere(base, in_body)
         grouped = isinstance(node, ast.TryStar)
         for handler in node.handlers:
-            # An `except` clause runs alone; every `except*` clause that
-            # matches part of the group runs, in order, so it starts where
-            # the ones before it ran or did not.
             flow.branch(raising)
             types = self.expression(handler.type) if handler.type else None
             if handler.name:
@@ -892,11 +705,8 @@ class ModuleBuilder(
                 self._bind(handler.name, caught)
             self._statements(handler.body)
             if handler.name:
-                # Python deletes the name at the end of the handler.
                 self._unbind(handler.name)
             if grouped:
-                # A clause that raises does not stop the next ones: its
-                # exception joins the group that the statement raises.
                 end = flow.state
                 end.reachable = raising.reachable
                 after = State(raising)
@@ -932,21 +742,16 @@ class ModuleBuilder(
     def _stmt_Import(self, node):
         for alias in node.names:
             if alias.name == "importlib":
-                self._importlib_names.add(alias.asname or alias.name)
-            # Inside a class, `import __m` imports `_Class__m` (a dotted
-            # name is not mangled).
+                self._names_bound_to_importlib.add(alias.asname or alias.name)
             name = self._scope.mangle(alias.name)
             record = alias not in self.scopes.unread_lazy
             imported = self.imports.handle_import(name, 0, record)
             if imported is None:
-                # Importing a.b.c attaches b to a and c to a.b, whatever the
-                # import binds.
                 self.analysis.add_external_module(name)
             if alias.asname:
                 value = self._imported_module(name, imported)
                 self._bind(alias.asname, value)
                 continue
-            # `import a.b.c` binds `a`.
             top = name.partition(".")[0]
             if imported is None:
                 top_object = self.analysis.external(top)
@@ -955,15 +760,6 @@ class ModuleBuilder(
             self._bind(alias.name.partition(".")[0], self.analysis.constant(top_object))
 
     def literal_import(self, node):
-        """If the call `node` may be `importlib.import_module` or
-        `__import__` with a str literal, an import resolved as an import
-        statement: discovery builds the module, and the node of the module
-        that the call gives if its callee is that function (see
-        `Analysis.literal_imports`) is returned; else None. The called name
-        must be, in the scope that reads it, the module's import of the
-        function, or the builtin: a parameter or a local of that name is
-        not it. `__import__` gives the top-level package unless `fromlist`
-        is a non-empty literal, as Python does."""
         func, top = node.func, False
         if isinstance(func, ast.Name) and self._module_import(
             func.id, self._import_module_names
@@ -973,7 +769,7 @@ class ModuleBuilder(
             isinstance(func, ast.Attribute)
             and func.attr == "import_module"
             and isinstance(func.value, ast.Name)
-            and self._module_import(func.value.id, self._importlib_names)
+            and self._module_import(func.value.id, self._names_bound_to_importlib)
         ):
             pass
         elif self._is_builtin_reference(func, "__import__"):
@@ -1004,24 +800,18 @@ class ModuleBuilder(
         return self.analysis.constant(self.analysis.module(package))
 
     def _module_import(self, name, imported_names):
-        """Whether `name`, read in the current scope, is a module-level name
-        that an import binds to what `imported_names` records."""
         scope = self.scopes.resolve(self._scope, self._scope.mangle(name))
         return scope.kind == MODULE and name in imported_names
 
     def _imported_module(self, name, imported):
-        """The value of `import name as alias`, given the module that the
-        import manager found."""
         if imported == name:
             return self.analysis.constant(self.analysis.module(name))
         if imported is not None:
-            # Only the parent is a module: the last part is its attribute.
             module = self.analysis.module(imported)
             return self.analysis.field(module, name.rpartition(".")[2])
         return self.analysis.constant(self.analysis.external(name))
 
     def _stmt_ImportFrom(self, node):
-        # Inside a class, `from __m import x` imports from `_Class__m`.
         source = self._scope.mangle(node.module) if node.module else None
         holder = self._absolute_module_name(source, node.level)
         for alias in node.names:
@@ -1031,18 +821,13 @@ class ModuleBuilder(
                 name = f"{source}.*" if source else "*"
                 imported = self.imports.handle_import(name, node.level)
                 if imported is not None:
-                    self.star_imports.append(imported)
+                    self.star_imported_modules.append(imported)
                 continue
-            # Inside a class, `from m import __x` reads and binds `_Class__x`,
-            # but the from-list keeps `__x`: a submodule `m.__x` is imported.
             member = self._scope.mangle(alias.name)
             name = f"{source}.{alias.name}" if source else alias.name
             record = alias not in self.scopes.unread_lazy
             imported = self.imports.handle_import(name, node.level, record)
             if imported is not None and holder is not None:
-                # An attribute of the module, which includes its submodules,
-                # loaded as `module.member` is (a module's `__getattr__`
-                # gives a name that the module does not bind).
                 module = self.analysis.constant(self.analysis.module(holder))
                 value = self.analysis.node()
                 site = self._site(alias)
@@ -1053,7 +838,6 @@ class ModuleBuilder(
                 )
                 value = self.analysis.imported_value(external)
                 if holder:
-                    # `from a.b import c` imports a.b and attaches it to a.
                     self.analysis.add_external_module(holder)
             truth = UNKNOWN
             if imported is None and holder in TYPING_MODULES:
@@ -1061,8 +845,6 @@ class ModuleBuilder(
             self._bind(alias.asname or alias.name, value, truth)
 
     def _absolute_module_name(self, module, level):
-        """The absolute name of the module in `from module import ...`, or
-        None if a relative import goes beyond the top-level package."""
         if level == 0:
             return module
         if self.is_package:
@@ -1075,17 +857,9 @@ class ModuleBuilder(
             return None
 
     def _stmt_TypeAlias(self, node):
-        # The value is evaluated lazily; annotations may name the alias (see
-        # annotations.py), so the name holds its type form.
         self._bind(node.name.id, self.annotation(node.value))
 
-    # Assignment targets
-
     def _assign(self, target, value, truth=UNKNOWN, values=None):
-        """Assign the node `value` (None if untracked), whose truth is
-        `truth` and whose literal values are `values`, to `target`. A store
-        to an attribute or subscript happens even if the value is untracked:
-        it may call a setter or `__setitem__`."""
         if value is None and isinstance(target, (ast.Attribute, ast.Subscript)):
             value = self.analysis.node()
         match target:
@@ -1108,8 +882,6 @@ class ModuleBuilder(
                 self.expression(target)
 
     def _unpack(self, target, value):
-        """Assign the elements of `value` to the elements of a tuple or list
-        target, which may have one starred element."""
         elements = target.elts
         star = next(
             (i for i, elt in enumerate(elements) if isinstance(elt, ast.Starred)),
@@ -1147,8 +919,6 @@ class ModuleBuilder(
 
 
 def _names(expression, name):
-    """Whether `expression` is the name `name`, or an attribute access that
-    ends with it (`abc.abstractmethod`), or a call or subscript of one."""
     if isinstance(expression, (ast.Call, ast.Subscript)):
         expression = (
             expression.func if isinstance(expression, ast.Call) else expression.value
@@ -1159,8 +929,6 @@ def _names(expression, name):
 
 
 def _element_index(expression):
-    """The index `i` if `expression` is `name[i]` with an int literal
-    `i` >= 0 (not a bool), else None."""
     if not (
         isinstance(expression, ast.Subscript)
         and isinstance(expression.value, ast.Name)
@@ -1174,10 +942,6 @@ def _element_index(expression):
 
 
 def _slots(finals):
-    """The names that `__slots__` lists, where its final binding in the
-    class body (`finals`, see `_final_bindings`) assigns a str, or a tuple,
-    a list or a dict (its keys) of str constants. `__dict__` is no slot of
-    its own: it gives the instances the `__dict__` that `object` gives."""
     statement = finals.get("__slots__")
     match statement:
         case (
@@ -1199,9 +963,6 @@ def _slots(finals):
 
 
 def _abstract_methods(finals):
-    """The names whose final binding in a class body (`finals`, see
-    `_final_bindings`) is a method decorated with `abstractmethod`, under
-    any other decorators (`property`, `classmethod`, `staticmethod`)."""
     return [
         name
         for name, statement in finals.items()
@@ -1210,8 +971,7 @@ def _abstract_methods(finals):
     ]
 
 
-# Statements that bind names only on some paths, or more than once.
-_COMPOUND = (
+_COMPOUND_STATEMENTS = (
     ast.If,
     ast.For,
     ast.AsyncFor,
@@ -1225,16 +985,9 @@ _COMPOUND = (
 
 
 def _final_bindings(body):
-    """The statement that binds each name last in `body` (a class body), for
-    the names that only plain statements at its top level bind: a `def`, a
-    `class`, an assignment with a value or an import. A name that a
-    compound statement (`if`, a loop, `try`, `with`, `match`), a `del` or
-    an assignment expression binds has no certain binding until a later
-    plain statement binds it again. An annotation without a value binds
-    nothing."""
     finals = {}
     for statement in body:
-        if isinstance(statement, (*_COMPOUND, ast.Delete)):
+        if isinstance(statement, (*_COMPOUND_STATEMENTS, ast.Delete)):
             for name in {*_bound_names(statement), *_walrus_names(statement)}:
                 finals[name] = None
             continue
@@ -1246,8 +999,6 @@ def _final_bindings(body):
 
 
 def _bound_names(node):
-    """The names that `node` binds in its own scope: targets of stores and
-    deletions, definitions and imports, not inside nested scopes."""
     pending = [node]
     while pending:
         current = pending.pop()
@@ -1282,8 +1033,6 @@ def _bound_names(node):
 
 
 def _walrus_names(statement):
-    """The names that assignment expressions in `statement` bind in the
-    class body: not those in nested functions, lambdas or classes."""
     names, pending = set(), [statement]
     while pending:
         node = pending.pop()
@@ -1291,7 +1040,6 @@ def _walrus_names(statement):
             case ast.NamedExpr(target=ast.Name(id=name)):
                 names.add(name)
             case ast.FunctionDef() | ast.AsyncFunctionDef():
-                # Its decorators and defaults run in the class body.
                 pending.extend([*node.decorator_list, node.args])
                 continue
             case ast.ClassDef():

@@ -201,7 +201,10 @@ test.
    *Imports*.
 2. **Scopes** (`scopes.py`). A light pass over each AST decides which scope
    binds each name, by Python's rules computed from the AST (not from
-   `symtable`, whose tables differ between versions). It names every scope
+   `symtable`, whose tables differ between versions), iteratively, so
+   deeply nested code does not exhaust the Python stack. An annotation
+   without a value (`x: int`) makes a name local but gives it no value, so
+   a class body with only `x: int` has no attribute `x`. It names every scope
    and marks generator functions. It also records what the builder needs
    to follow names by definition: the names that other code rebinds, the
    names that each loop binds on its iterations, and the lazy imports
@@ -211,7 +214,9 @@ test.
    statement order. Emit nodes and constraints, and carry the definitions
    of the names that it follows (idea 2). The builder never reads a
    points-to set. It walks constructs that it does not model, so the calls
-   inside them are found; it does not walk code that cannot run.
+   inside them are found; it does not walk code that cannot run. Long
+   chains (`a + b + c + ...`, which nest on the left) are walked in a loop,
+   so they do not exhaust the Python stack.
 4. **Linking**. When all modules are built, make each module a field of its
    package (also the packages of an entry module that no import names,
    without analysing their source, as far as an import resolves them as
@@ -287,15 +292,21 @@ and computes its name when asked.
 - `Var(scope, name)`: a local name or a parameter. Scopes follow Python's
   rules: `global` and `nonlocal`, class bodies that nested scopes cannot
   see, comprehension scopes, `:=` targets, and private names (`__x` inside
-  a class is `_Class__x`, also in attribute accesses and parameters, but
+  a class is `_Class__x`, without the leading underscores of the class
+  name, also in attribute accesses and parameters, but
   not in keyword arguments). In a function inside a class, an unbound
   `__class__` is the class (Python's implicit cell, which `super()`
   without arguments uses). A module-level name is `Field(module, name)`
   and a class-body name is `Field(class, name)`. The variable holds every
   value of the name; a read in statement order may get fewer (idea 2).
 - A name that the module does not bind and that is a builtin (a name of
-  the builtins stub, in any version) reads the module field (a star import
-  may set it) and `External(<builtin>.name)`. The module `builtins` is that
+  the builtins stub, in any version and on any platform, but its private
+  helpers and the classes that exist only in stubs, so that the result does
+  not depend on the interpreter that runs the analysis; or a name that the
+  interpreter gives every module and the stubs do not list, `__name__`,
+  `__doc__`, `__spec__`, `__loader__`, `__package__`, `__debug__`) reads
+  the module field (a star import may set it) and
+  `External(<builtin>.name)`. The module `builtins` is that
   namespace: `builtins.getattr` and `from builtins import getattr` give
   `External(<builtin>.getattr)`, which is a root, so the rules of modelled
   builtins apply to it.
@@ -1161,7 +1172,11 @@ that a decision asks of a hierarchy is one node per (class, tested class)
 that every test shares. Each node of a class expression or of a position of
 a tuple of classes is subscribed at most once per test, so a tuple that
 contains itself, or tuples that share their elements, end
-(`tests/test_scaling.py`, `tests/test_termination.py`).
+(`tests/test_scaling.py`, `tests/test_termination.py`). Once every value
+passes a position, a value that is not a class can add nothing there, so
+it stops at once; a class goes on, since its metaclass and its hierarchy
+may saturate the result. A hub of values at a position of many tests ends
+there (hypothesis: 5.8 of 7.2 million values).
 
 - Limit: only the builtin `isinstance` and `issubclass`, with a name as the
   first argument and, as the second, a name, an attribute path or a tuple
@@ -2023,8 +2038,11 @@ through constraints; each (annotation node, destination, shape) is read
 once, so a recursive alias ends. A class or an alias that a subscript
 reads is read as the node that holds only it, under the same rule, so an
 alias whose form subscripts itself or another alias that subscripts it
-(`type Loop[T] = Loop[T]`, `A = List[T]` then `A = A[T]`) ends too. Inside a container, a container or a
-`type[...]` names nothing.
+(`type Loop[T] = Loop[T]`, `A = List[T]` then `A = A[T]`) ends too.
+Inside a container, a container or a `type[...]` names nothing.
+`tuple[()]` has no arguments: a container or another generic class names
+what it names without them, and a form that names what its argument names
+(`Optional`, `type`) names nothing.
 
 A dataclass-like class (decorated with `dataclasses.dataclass`, also
 `dataclass(frozen=True)`, or a subclass of `typing.NamedTuple`; decided at
@@ -2761,7 +2779,9 @@ pattern alone are these, and no others:
   alias of a class member), or a container of exactly its builtin class
   (none derives from str);
 - a typed value of `str` or `bytes`: a typed value is of its declared
-  class (a stated limit of typed values).
+  class (a stated limit of typed values), and `str`'s own operation keeps
+  the prefix and suffix with either (`str` has an `__rmod__`, which
+  formats and so keeps them; `bytes` has none that takes a str).
 
 The other operand of the `+` chain, or the right operand of `%`, that
 holds any other value (an instance of an analysed class, an external, an
@@ -3129,7 +3149,12 @@ methods return.
 Python falls back to it; `repr()` calls `__repr__`; `format()` and f-strings
 call `__format__` with the format spec (the empty string by default), and
 `__str__` and `__repr__` where Python falls back to them; an f-string field
-with `!s`, `!r` or `!a` converts as `str()` or `repr()` does. A literal
+with `!s`, `!r` or `!a` converts as `str()` or `repr()` does. The
+`__iter__` and `__contains__` of a builtin class never call what Python
+falls back to without them: a subclass of `list` that defines
+`__getitem__` iterates with `list.__iter__` and tests `in` with
+`list.__contains__` (`FINAL_BUILTIN_METHODS`). Conversions are not so:
+`int.__format__` calls `__str__` for an empty spec. A literal
 format does the same for its fields: `"{0.name!r:>8}".format(x)` loads
 `name` from its argument and converts it, and a field that indexes is
 skipped. A field's digits name a position whatever their leading zeros;
@@ -3315,7 +3340,9 @@ Limits:
 
 Displays, comprehensions, the builtins `list`, `tuple`,
 `set`, `frozenset` and `dict`, slices, concatenations and starred targets
-create containers. A read with a constant key gets that field and
+create containers. An unpacking comprehension (PEP 798: `[*it for ...]`,
+`{*it for ...}`, `{**mapping for ...}`) holds the elements, or the items,
+of each one. A read with a constant key gets that field and
 `unknown`; a read with any other key gets every element; a write with a
 constant key goes to its field, any other to `unknown`. A read of a dict
 with a pattern key (see *Computed attribute names*) gets the fields whose
@@ -4051,8 +4078,8 @@ closure of the standard library. The document records it (`tool.cap`).
 | Bound | Value | Why | Past it |
 |---|---|---|---|
 | Names that a computed attribute name may hold (`getattr`, `hasattr`, `setattr`, `delattr`; `MAX_DYNAMIC_NAMES`) | 4 str constants | Precision and cost: a name that may be any of many strings would load every name in the program | The access is dynamic and gets no more names (see *Computed attribute names*) |
-| Alternative MROs of a class (`MAX_HIERARCHIES`) | 8 | Cost: the hierarchies are the product of the candidates of each base expression | One exhaustive order stands for all of them and finds every definition (see *Alternative hierarchies*) |
-| Steps of an outside name past its root (`MAX_EXTERNAL_STEPS`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
+| Alternative MROs of a class (`HIERARCHIES_PER_CLASS_MAX`) | 8 | Cost: the hierarchies are the product of the candidates of each base expression | One exhaustive order stands for all of them and finds every definition (see *Alternative hierarchies*) |
+| Steps of an outside name past its root (`EXTERNAL_STEPS_PAST_ROOT_MAX`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
 | Receivers that a call passes before its arguments (`MAX_RECEIVERS`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |
 | Layers of generic arguments in the stub data (`GENERIC_ARGUMENT_DEPTH_MAX` of `tools/generate_stubs.py`) | 2 | Termination and size: the types of recursive aliases nest without end, and the containers of stubbed results are keyed by the position in the type | A deeper argument keeps its class without its type arguments (see *Stub data*) |
 | Nested attachments of constraints in the solver (`_ATTACH_NESTING_MAX`) | 50 | The Python stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
