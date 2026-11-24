@@ -400,6 +400,7 @@ class _Session:
 
     def __init__(self):
         self.counts = None
+        self.failures = {"errors": [], "failed": []}
         self.rootdir = self.config = None
 
     def pytest_configure(self, config):
@@ -419,9 +420,12 @@ class _Session:
         for category, reports in reporter.stats.items():
             if category and category != "warnings":
                 key = "errors" if category == "error" else category
-                self.counts[key] = sum(
-                    getattr(r, "count_towards_summary", True) for r in reports
-                )
+                counted = [
+                    r for r in reports if getattr(r, "count_towards_summary", True)
+                ]
+                self.counts[key] = len(counted)
+                if key in self.failures:
+                    self.failures[key] = sorted({r.nodeid for r in counted})
 
     def problems(self, project):
         """Whether pytest used the checkout as rootdir, and the expected config."""
@@ -539,6 +543,11 @@ def _run_child(config_path, name, out_path):
     sys.path.insert(0, str(project.root))
     distributions = _distributions(project)
     errors = _requirement_problems(project.requirements, distributions)
+    errors += [
+        f"the variable {name} of the entry's environment is not {value!r}"
+        for name, value in project.environment
+        if os.environ.get(name) != value
+    ]
     if errors:  # run nothing in an environment that is not the pinned one
         _write(out_path, {"errors": errors})
         return
@@ -578,9 +587,15 @@ def _run_child(config_path, name, out_path):
             "distributions": distributions,
             "pytest": session.describe(project),
             "deselect": [dict(entry) for entry in project.deselect],
+            "failures": session.failures,
             **(
                 {"plugins": [_relative(p, benchmark) for p in project.plugins]}
                 if project.plugins
+                else {}
+            ),
+            **(
+                {"environment": dict(project.environment)}
+                if project.environment
                 else {}
             ),
             "tests": {
@@ -599,18 +614,20 @@ def _run_child(config_path, name, out_path):
 # --------------------------------------------------------------------------
 
 
-def _environment(python, scratch):
-    """The whole environment of the child: nothing comes from the caller's.
+def _environment(python, scratch, extra=()):
+    """The whole environment of the child: nothing comes from the caller's,
+    and `extra` (the entry's `environment`) is added.
 
     HOME and TMPDIR are new directories in `scratch`, which is deleted after
     the run. A fixed hash seed makes sets of strings iterate in the same
-    order in every run.
+    order in every run. projects.py refuses an entry's variable that this
+    environment sets; the check here is a second one.
     """
     home, tmp = scratch / "home", scratch / "tmp"
     home.mkdir()
     tmp.mkdir()
     local = "127.0.0.1,localhost"
-    return {
+    environment = {
         "PATH": os.pathsep.join([str(Path(python).parent), "/usr/bin", "/bin"]),
         "HOME": str(home),
         "TMPDIR": str(tmp),
@@ -620,6 +637,13 @@ def _environment(python, scratch):
         "NO_PROXY": local,
         "no_proxy": local,
     }
+    for name, value in extra:
+        if name in environment:
+            raise TraceError(
+                f"the entry's environment sets {name}, which trace.py sets"
+            )
+        environment[name] = value
+    return environment
 
 
 def _run(command, cwd, env, timeout):
@@ -722,7 +746,7 @@ def trace(
         ]
         problems, status = [], None
         try:
-            env = _environment(python, scratch)
+            env = _environment(python, scratch, project.environment)
             status = _run(command, project.directory, env, timeout)
         except TraceError as exc:
             problems.append(str(exc))

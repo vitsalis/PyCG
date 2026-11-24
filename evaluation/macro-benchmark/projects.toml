@@ -1,4 +1,4 @@
-# The projects of the macro-benchmark: 30 projects, each pinned at `commit`
+# The projects of the macro-benchmark: 40 projects, each pinned at `commit`
 # (the commit of the release `tag` of its `repository`) or at the SHA-256 of
 # its sdist: the only lock. The build of the inputs image
 # (evaluation/container/Dockerfile.inputs, fetch.py macro) writes the files
@@ -6,10 +6,10 @@
 # below: the project's directory).
 #
 # Read by trace.py, check.py and the evaluation:
-#   batch         the batch that the project came with: 1 to 5, in the order
-#                 in which the batches were built, or "icse-2021" for the
-#                 five projects of PyCG's ICSE 2021 evaluation (README.md,
-#                 "How the benchmark grew")
+#   batch         the batch that the project came with: 1 to 5 and 7, in the
+#                 order in which the batches were built (7: ten projects), or
+#                 "icse-2021" for the five projects of PyCG's ICSE 2021
+#                 evaluation (README.md, "How the benchmark grew")
 #   root          directory that is put on sys.path; module names are
 #                 relative to it (relative to projects/<name>)
 #   packages      package directories or module files (`name.py`), the
@@ -39,6 +39,10 @@
 #                 import (they need a library that it lacks): the run does not
 #                 require them to be imported, and fails on an edge from or to
 #                 them; the reason goes in the notes
+#   environment   variables of the test run: {NAME = "value"}; trace.py adds
+#                 them to its environment and the trace records them; a name
+#                 that trace.py sets, or PYTHON*, PYTEST*, LD_*, LC_*, is
+#                 refused
 #   commit        the lock: the build of the inputs image fetches the files
 #                 of this commit, and fails if it cannot
 #   sdist, sdist_url, sdist_sha256
@@ -55,7 +59,7 @@
 # and SHA-256; test_requirements repeats the versions.
 #
 # A security scan of the sources came before any run of batches 3 to 5 and
-# of the ICSE 2021 set; the entries hold its restrictions. The scan of
+# 7 and of the ICSE 2021 set; the entries hold its restrictions. The scan of
 # batches 1 and 2 came after their traces (README.md, "Projects").
 #
 # Documentation only (read from the project's tox.ini, pyproject.toml and
@@ -1315,6 +1319,517 @@ importlib.metadata. Imports from outside the standard library: twisted
 and zope.interface (twisted.py), rich, colorama and better_exceptions
 (dev.py and tracebacks.py, in a try), greenlet (_greenlets.py),
 typing_extensions (Python 3.10 only).
+"""
+
+# --------------------------------------------------------------------------
+# Batch 7: ten packages from two draws of five, round 6 and round 7
+# (selection/round-6.json, round-7.json; round 7 skipped the five of round
+# 6, which its log lists under `used`), one batch. It was measured once, by
+# the frozen engine 2372b60, before its false positives and false negatives
+# were read (README.md, "How the benchmark grew").
+#
+# Dropped (`--drop`, recorded in the round log under `dropped`); the draw
+# took the next project of the order in the same stratum:
+#   dill    round 7, stratum 5: a tool run touched it (dill 0.3.9 is
+#           installed in the image of the call-graph tool HeaderGen); mss
+#
+# The maintainer's answer to the veto list (2026-11-22): no veto; the eight
+# test runs as the two security scans (2026-11-22, Claude Fable 5.2) allow
+# them; pymysql and pgvector with their offline files only; no test run for
+# pyfiglet and mss (their ground truths come from reading only, as for the
+# ICSE 2021 projects without one); a doubled blind audit for the four. The
+# entries hold the scans' restrictions (README.md, "Batch 7"); the notes
+# keep the facts of the frame and of the reading.
+# --------------------------------------------------------------------------
+[pyfiglet]
+batch = 7
+sdist = "pyfiglet-1.0.4.tar.gz"
+sdist_url = "https://files.pythonhosted.org/packages/c8/e3/0a86276ad2c383ce08d76110a8eec2fe22e7051c4b8ba3fa163a0b08c428/pyfiglet-1.0.4.tar.gz"
+sdist_sha256 = "db9c9940ed1bf3048deff534ed52ff2dafbbc2cd7610b17bb5eca1df6d4278ef"
+licence = "MIT"
+root = "."
+packages = ["pyfiglet"]
+exclude = ["pyfiglet/tests", "pyfiglet/test.py"]
+dependencies = []
+upstream_test_command = "pytest -vv"  # .github/workflows/test.yml, after apt install figlet toilet, make full and python setup.py install
+notes = """
+Drawn in round 6, stratum 1 (809 to 1236 code lines). Release 1.0.4,
+uploaded 2025-08-15; wheel pyfiglet-1.0.4-py3-none-any.whl, SHA-256
+65b57b7a8e1dff8a67dc8e940a117238661d5e14c3e49121032bd404d9b2b39f; 831 code
+lines; import names pyfiglet; the checkout root is ".". Licence: PyPI's
+classifier "MIT License"; GitHub NOASSERTION. Test files (frame): 1, 51 code
+lines: pyfiglet/tests/test_cli.py; CI: .github/workflows/test.yml,
+.travis.yml. Of the compared Python files (the wheel's .py files outside
+*.dist-info and *.data), one differs from the tag (missing from it or not
+equal): pyfiglet/fonts/__init__.py, 0 code lines. The frame's test files are
+one, pyfiglet/tests/test_cli.py (51 code lines, test ratio 0.061): the trace
+may cover little of the package. Held as its sdist
+pyfiglet-1.0.4.tar.gz (SHA-256 db9c9940...; 600 members, regular files and
+directories only): the checkout has no pyfiglet/fonts, the package of the
+fonts that the build copies from pyfiglet/fonts-standard and fonts-contrib
+(setup.py, `make full`); the sdist has pyfiglet/fonts with __init__.py and
+the font files. Whether the sdist holds the tag's files otherwise is NOT
+VERIFIED (the check of a trace image compares its tree with the tree that the scan read). Without the fonts, Figlet() cannot load a
+font. No test run (the maintainer's decision, 2026-11-22): the
+ground truth comes from reading only. The tests are
+pyfiglet/tests/test_cli.py, 3 test functions by reading (and a fixture), and
+each runs the console script `pyfiglet` through a shell (subprocess.run(...,
+shell=True)); test_strip_strange_font also installs a font into the package
+directory. The script is not installed, and the tracer does not see a child
+process: no test can run (the kind of suite for which sh was vetoed).
+pyfiglet/test.py is a driver that compares with figlet and toilet through
+Popen: excluded, as a test. One module of 1035 lines holds most of the code.
+"""
+
+[uncertainties]
+batch = 7
+sdist = "uncertainties-3.2.3.tar.gz"
+sdist_url = "https://files.pythonhosted.org/packages/fe/0c/cb09f33b26955399c675ab378e4063ed7e48422d3d49f96219ab0be5eba9/uncertainties-3.2.3.tar.gz"
+sdist_sha256 = "76a5653e686f617a42922d546a239e9efce72e6b35411b7750a1d12dcba03031"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["uncertainties"]
+exclude = []
+dependencies = ["numpy"]
+pytest_args = [
+    "tests",
+]
+pytest_config = "pyproject.toml"
+upstream_test_command = "pytest tests/ doc/ uncertainties/ --cov=uncertainties --doctest-modules --doctest-glob=\"*.rst\""  # .github/workflows/python-package.yml; extra test: pytest, pytest_codspeed, pytest_cov, scipy
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "numpy==2.3.2",
+]  # see test-environments/uncertainties.txt
+deselect = [
+    { test = "tests/test_performance.py::test_repeated_summation_complexity", reason = "asserts on timing (timeit sized for an untraced run)" },
+    { test = "tests/test_umath.py::test_monte_carlo_comparison", reason = "draws 10**6 unseeded numpy samples through umath functions: slow under the tracer, and random" },
+]
+notes = """
+Drawn in round 6, stratum 2 (1239 to 1559 code lines). Release 3.2.3,
+uploaded 2025-04-21; wheel uncertainties-3.2.3-py3-none-any.whl, SHA-256
+313353900d8f88b283c9bad81e7d2b2d3d4bcc330cbace35403faaed7e78890a; 1521 code
+lines; import names uncertainties; the checkout root is ".". Licence: PyPI's
+classifier "BSD License"; GitHub NOASSERTION; LICENSE.txt is the BSD
+3-clause text (security scan, round 6). Test files (frame): 7, 1562 code
+lines: tests/test_formatting.py, tests/test_performance.py,
+tests/test_power.py, tests/test_ulinalg.py, tests/test_umath.py,
+tests/test_uncertainties.py and 1 more; CI: .github/workflows/lint.yml,
+.github/workflows/python-package.yml. Of the compared Python files, one
+differs from the tag (missing from it or not equal):
+uncertainties/version.py, 14 code lines; why, and whether the checkout
+imports without it, is NOT VERIFIED (python-barcode and django-constance had
+the same pattern). Held as its sdist uncertainties-3.2.3.tar.gz
+(SHA-256 76a5653e...; 70 members, regular files and directories only), as
+python-barcode: the checkout has no uncertainties/version.py, which
+setuptools-scm writes at build time (.gitignore names it), and
+uncertainties/__init__.py imports it with no fallback, so the checkout does
+not import; the sdist has it. Whether the sdist holds the tag's files
+otherwise is NOT VERIFIED. Tests: tests/, 58 test functions by reading
+(about 700 items with the parametrized JSON cases), with pyproject.toml as
+the configuration (testpaths only, no addopts); with numpy, so that
+test_unumpy.py and test_ulinalg.py run (they call sys.exit at import without
+it). numpy 2.3.2 is an exception to the release-date rule (see
+test-environments/uncertainties.txt). The doctests of doc/ and of the package are
+not run (upstream runs them). Dynamic code: ops.py builds operator methods
+with eval of lambda text and setattr; umath and unumpy set wrapped functions
+as module attributes. Two tests that run use unseeded random numbers
+(test_uncertainties.py:427 in test_all_comparison_ops, test_unumpy.py:64):
+two traces can differ in their edges (README, "Repeatability").
+"""
+
+[einops]
+batch = 7
+repository = "https://github.com/arogozhnikov/einops"
+tag = "v0.8.2"
+commit = "8e911db71f2e693a0c434b041180388c685ed06f"
+licence = "MIT"
+root = "."
+packages = ["einops"]
+exclude = ["einops/tests"]
+dependencies = ["numpy"]
+pytest_args = [
+    "einops/tests",
+]
+environment = { EINOPS_TEST_BACKENDS = "numpy" }
+upstream_test_command = "python -m einops.tests.run_tests numpy pytorch tensorflow jax mlx --pip-install"  # .github/workflows/run_tests.yml: pip installs the frameworks, then pytest in einops/tests with EINOPS_TEST_BACKENDS
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "numpy==2.4.1",
+]  # see test-environments/einops.txt
+notes = """
+Drawn in round 6, stratum 3 (1596 to 2256 code lines). Release 0.8.2,
+uploaded 2026-01-26; wheel einops-0.8.2-py3-none-any.whl, SHA-256
+54058201ac7087911181bfec4af6091bb59380360f069276601256a76af08193; 1883 code
+lines; import names einops; the checkout root is ".". Licence: PyPI's
+classifier "MIT License"; GitHub detects MIT. Test files (frame): 8, 2001
+code lines: einops/tests/test_einsum.py, einops/tests/test_examples.py,
+einops/tests/test_layers.py, einops/tests/test_ops.py,
+einops/tests/test_other.py, einops/tests/test_packing.py and 2 more; CI:
+.github/workflows/deploy_docs.yml, .github/workflows/deploy_to_pypi.yml,
+.github/workflows/run_tests.yml, .github/workflows/test_notebooks.yml. The
+draw counted 1883 of the 3993 compared code lines: the rest is einops/tests,
+inside the package (excluded, as tinytag's). scripts/test_notebooks.py is
+also a test file by the frame's rule. Tests: einops/tests (excluded from the
+analysed source), 65 test functions by reading; with numpy only, about 54
+run, 9 skip (torch, keras, flax) and 2 have no parameters. The tests need
+EINOPS_TEST_BACKENDS=numpy at collection (`environment`): test_ops.py and
+test_other.py call collect_test_backends at module level and raise
+RuntimeError without it. test_doctests_examples runs doctest.testmod on
+einops.layers and einops.einops. The layers of torch, flax, keras,
+tensorflow, paddle and oneflow import their framework: not installed, so
+their edges come from reading only. Run-time backend choice: get_backend
+walks AbstractBackend.__subclasses__() and checks sys.modules. Five test
+modules draw shapes, permutations and patterns from an unseeded numpy
+generator (test_ops.py, test_other.py, test_packing.py, test_einsum.py,
+test_layers.py): two traces can differ in their edges (README,
+"Repeatability"). EINOPS_TEST_BACKENDS must be exactly numpy: with torch in
+it, test_einops_threading starts a child python.
+"""
+
+[pymysql]
+batch = 7
+repository = "https://github.com/PyMySQL/PyMySQL"
+tag = "v1.2.3"
+commit = "c990e86083c26493f3285b1e047902994c4b1811"
+licence = "MIT"
+root = "."
+packages = ["pymysql"]
+exclude = ["pymysql/tests"]
+dependencies = []
+pytest_args = [
+    "pymysql/tests/test_auth_state_machine.py",
+    "pymysql/tests/test_charset.py",
+    "pymysql/tests/test_converters.py",
+    "pymysql/tests/test_err.py",
+    "pymysql/tests/test_optionfile.py",
+    "pymysql/tests/test_cursor.py::test_re_insert_values_with_on_duplicate_key_alias",
+    "pymysql/tests/test_issues.py::TestNewIssues::test_issue_34",
+    "pymysql/tests/thirdparty/test_MySQLdb/test_MySQLdb_nonstandard.py::TestDBAPISet",
+    "pymysql/tests/thirdparty/test_MySQLdb/test_MySQLdb_nonstandard.py::CoreModule",
+]
+upstream_test_command = "pytest -v --cov --cov-config .coveragerc pymysql; pytest --doctest-modules pymysql/converters.py"  # .github/workflows/test.yaml, with a MySQL or MariaDB service on 3306 and ci/ SQL files; tests/test_auth.py for MySQL 8 and later
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/pymysql.txt
+notes = """
+Drawn in round 6, stratum 4 (2267 to 3074 code lines). Release 1.2.3,
+uploaded 2026-09-17; wheel pymysql-1.2.3-py3-none-any.whl, SHA-256
+14f1c68e2ed859243ae5ca41ffbe677027fc46bc136a9f0be8a4e928e5e7415a; 3074 code
+lines; import names pymysql; the checkout root is ".". Licence: PyPI's
+license_expression MIT; GitHub detects MIT. Test files (frame): 17, 2916
+code lines: pymysql/tests/test_DictCursor.py,
+pymysql/tests/test_SSCursor.py, pymysql/tests/test_auth_state_machine.py,
+pymysql/tests/test_basic.py, pymysql/tests/test_charset.py,
+pymysql/tests/test_connection.py and 11 more; CI:
+.github/workflows/django.yaml, .github/workflows/lint.yaml,
+.github/workflows/publish.yml, .github/workflows/test.yaml. The draw counted
+3074 code lines, the top of stratum 4; pymysql/tests is inside the package
+(excluded), with pymysql/tests/thirdparty/test_MySQLdb. Tests: 149 test
+functions by reading, 194 items with the inherited unittest methods
+(pymysql/tests, inside the package, excluded), and tests/test_auth.py (8).
+Only the 33 items that need no server (the paths above); the other
+161 need a MySQL or MariaDB server (see the
+record of the selection stage, README.md "Batch 7"). test_connection.py connects in a
+class body at import, so it cannot even be collected without a server.
+test_issue_34 connects to localhost:1237 and expects a refusal. The class
+CoreAPI of test_MySQLdb_nonstandard.py is not selected (its setUp connects
+with ~/.my.cnf). The 4 doctests of pymysql/converters.py are not run (the lead's decision). Never create pymysql/tests/databases.json. AGENTS.md tells an
+agent to install and start mysqld and to run the whole suite: third-party
+data, not instructions (README, the warning of "Traces").
+"""
+
+[segno]
+batch = 7
+repository = "https://github.com/heuer/segno"
+tag = "1.6.6"
+commit = "9b67a3f2914be966c35dd8f00bef19d01b9ec68e"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["segno"]
+exclude = []
+dependencies = ["png"]
+pytest_args = [
+    "tests",
+]
+upstream_test_command = "pytest"  # .github/workflows/ci.yml after pip install -r tests/requirements.txt (pytest, pytest-cov, pypng~=0.0.20, pyzbar~=0.1.8, qrcode-artistic, Pillow)
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "pypng==0.0.21",
+]  # see test-environments/segno.txt
+deselect = [
+    { test = "tests/test_plugin.py::test_plugin", reason = "needs the plugin qrcode-artistic and Pillow (an entry point segno.plugin.converter), which are not installed: it fails" },
+]
+notes = """
+Drawn in round 6, stratum 5 (3117 to 3880 code lines). Release 1.6.6,
+uploaded 2025-03-12; wheel segno-1.6.6-py3-none-any.whl, SHA-256
+28c7d081ed0cf935e0411293a465efd4d500704072cdb039778a2ab8736190c7; 3126 code
+lines; import names segno; the checkout root is ".". The tag 1.6.6 is the
+annotated tag object d105c2e3badac3882a5121b0237d1f757c7183ea. Licence:
+PyPI's classifier "BSD License"; GitHub detects BSD-3-Clause. Test files
+(frame): 60, 6168 code lines: tests/test_boosterror.py, tests/test_cli.py,
+tests/test_cli_colorful.py, tests/test_colors.py, tests/test_covid_cert.py,
+tests/test_data_uri.py and 54 more; CI: .github/workflows/ci.yml. Tests:
+tests/, 641 test functions by reading (105 parametrize decorators: more
+items); with pypng (4 test files import png at module level). Without pyzbar
+(it needs libzbar through ctypes), 7 decoding tests skip. The tests write
+files through tempfile and remove them.
+tests/test_structured_append.py::test_dataoverflow_error encodes 16 symbols
+of version 40: it stays in the run, and is deselected only if the run
+reaches the time limit, with that reason. Writers are chosen by name from a
+table and plugins through entry points (QRCode.__getattr__); QRCodeSequence
+subclasses tuple.
+"""
+
+[tinydb]
+batch = 7
+repository = "https://github.com/msiemens/tinydb"
+tag = "v4.9.0"
+commit = "1e39ad3a2d9eca57efd9019fd089b5a04676da95"
+licence = "MIT"
+root = "."
+packages = ["tinydb"]
+exclude = []
+dependencies = ["yaml"]
+pytest_args = [
+    "tests",
+]
+upstream_test_command = "py.test -v --cov=tinydb"  # .github/workflows/ci-workflow.yml after uv sync --group dev; pytest.ini addopts need pytest-cov
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "PyYAML==6.0.3",
+]  # see test-environments/tinydb.txt
+notes = """
+Drawn in round 7, stratum 1 (809 to 1236 code lines). Release 4.9.0,
+uploaded 2026-08-06; wheel tinydb-4.9.0-py3-none-any.whl, SHA-256
+111f1f680978a1b7c534d698dd1d76739ff31c74c27fd26a111140b51d8b35d6; 809 code
+lines; import names tinydb; the checkout root is ".". Licence: PyPI's
+license_expression MIT; GitHub detects MIT. Test files (frame): 7, 1291 code
+lines: tests/test_middlewares.py, tests/test_operations.py,
+tests/test_queries.py, tests/test_storages.py, tests/test_tables.py,
+tests/test_tinydb.py and 1 more; CI: .github/workflows/ci-workflow.yml,
+.github/workflows/publish-workflow.yml. Tests: tests/, 152 test functions by
+reading (67 take the fixture db with two parameters: about 219 items);
+pytest.ini is not the configuration (its addopts need pytest-cov). PyYAML
+6.0.3 (upstream's uv.lock) so that test_yaml runs. tinydb/mypy_plugin.py
+imports mypy, which is not installed: analysed, and no test imports it. The
+tests write into tmp_path and a temporary directory. The query language is
+built from __getattr__, __getitem__ and operator overloading into closures;
+TinyDB.__getattr__ forwards to the default table.
+"""
+
+[pgvector]
+batch = 7
+repository = "https://github.com/pgvector/pgvector-python"
+tag = "v0.5.1"
+commit = "5275164edb3a2847d4a5aec1af5ae90f7dc47b53"
+licence = "MIT"
+root = "."
+packages = ["pgvector"]
+exclude = []
+dependencies = ["numpy", "scipy"]
+pytest_args = [
+    "tests/test_bit.py",
+    "tests/test_half_vector.py",
+    "tests/test_sparse_vector.py",
+    "tests/test_vector.py",
+]
+upstream_test_command = "pytest; then pip install --group numpy --group scipy and pytest"  # .github/workflows/build.yml, with PostgreSQL (ankane/setup-postgres) and pgvector 0.8.4 built from source
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "numpy==2.5.3",
+    "scipy==1.18.1",
+]  # see test-environments/pgvector.txt
+notes = """
+Drawn in round 7, stratum 2 (1239 to 1559 code lines). Release 0.5.1,
+uploaded 2026-10-09; wheel pgvector-0.5.1-py3-none-any.whl, SHA-256
+ec5bcd5ffaefe6ecb2dcc9564ca921d284564b969183bc837a144604773af8ea; 1244 code
+lines; import names pgvector; the checkout root is ".". Licence: PyPI's
+license_expression MIT; GitHub detects MIT. Test files (frame): 12, 2113
+code lines: tests/test_asyncpg.py, tests/test_bit.py, tests/test_django.py,
+tests/test_half_vector.py, tests/test_peewee.py, tests/test_pg8000.py and 6
+more; CI: .github/workflows/build.yml. Tests: tests/, 277 test functions by
+reading, 522 items (test_sqlalchemy.py alone 311). Only the four
+files of the types, 63 items with numpy and scipy; the other 459 need
+PostgreSQL with the pgvector extension and the client libraries (see the
+record of the selection stage, README.md "Batch 7"); seven of their files connect at
+import. The pyproject's asyncio keys need pytest-asyncio: -c /dev/null. The
+integrations (asyncpg, django, peewee, pg8000, psycopg, psycopg2,
+sqlalchemy) import their library: not installed, so their edges come from
+reading only. Install no database client: without one the other test modules
+cannot reach their connect call. test_bit::test_random uses unseeded random
+(README, "Repeatability").
+"""
+
+[textdistance]
+batch = 7
+repository = "https://github.com/orsinium/textdistance"
+tag = "4.6.3"
+commit = "faa25f6ff50d0f34dc9655d4d7b0d8daf6f9ff85"
+licence = "MIT"
+root = "."
+packages = ["textdistance"]
+exclude = []
+dependencies = ["numpy"]
+pytest_args = [
+    "tests",
+    "-m",
+    "not external",
+]
+pytest_config = "setup.cfg"
+plugins = ["plugins/hypothesis_profile.py"]
+upstream_test_command = "pytest -m 'not external'"  # Taskfile.yml pytest-pure (extra test: hypothesis, isort, numpy, pytest); setup.cfg [tool:pytest] addopts --strict-markers, marker external
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "attrs==25.4.0",
+    "hypothesis==6.140.4",
+    "numpy==2.3.2",
+    "sortedcontainers==2.4.0",
+]  # see test-environments/textdistance.txt
+notes = """
+Drawn in round 7, stratum 3 (1596 to 2256 code lines). Release 4.6.3,
+uploaded 2024-07-16; wheel textdistance-4.6.3-py3-none-any.whl, SHA-256
+0cb1b2cc8e3339ddc3e0f8c870e49fb49de6ecc42a718917308b3c971f34aa56; 1735 code
+lines; import names textdistance; the checkout root is ".". Licence: PyPI's
+classifier "MIT License"; GitHub detects MIT. Test files (frame): 29, 873
+code lines: tests/test_common.py, tests/test_compression/test_arith_ncd.py,
+tests/test_compression/test_bwtrle_ncd.py,
+tests/test_compression/test_bz2_ncd.py,
+tests/test_compression/test_common.py,
+tests/test_compression/test_entropy_ncd.py and 23 more; CI:
+.github/workflows/main.yml. Tests: tests/, 66 test functions by reading,
+about 24 of them Hypothesis @given tests; the 3 of test_external.py are
+marked external and left out. With numpy (9 tests import it) and Hypothesis
+6.140.4: numpy 2.3.2 and Hypothesis 6.140.4 (with attrs 25.4.0) are
+exceptions to the release-date rule (see test-environments/textdistance.txt):
+Hypothesis 6.108.2 and attrs 23.2.0, current at the release, declare Python
+3.12 at most. The plugin plugins/hypothesis_profile.py keeps Hypothesis from
+writing into the source copy, turns its deadline off and fixes its seed. The
+external libraries that libraries.json names (rapidfuzz, jellyfish,
+Levenshtein, pyxDamerauLevenshtein, distance, pylev; and tabulate for
+benchmark.py) must stay out of the environment: every call of an instance
+with external=True, the default, imports them by name when they are there,
+in every test, so the package's own algorithms run only without them.
+textdistance/benchmark.py imports tabulate (a project of batch 6) at module
+level: not installed, no test imports it. Algorithms are module-level
+instances called through __call__.
+"""
+
+[websocket-client]
+batch = 7
+repository = "https://github.com/websocket-client/websocket-client"
+tag = "v1.9.2"
+commit = "12225f5ce6e27536be3b0da85fd763ed75581bcc"
+licence = "Apache-2.0"
+root = "."
+packages = ["websocket"]
+exclude = ["websocket/tests"]
+dependencies = []
+pytest_args = [
+    "websocket/tests",
+]
+upstream_test_command = "pytest websocket/tests -v -r f"  # .github/workflows/build.yml, with websocket/tests/echo-server.py on localhost:8765 and TEST_WITH_INTERNET=1
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/websocket-client.txt
+notes = """
+Drawn in round 7, stratum 4 (2267 to 3074 code lines). Release 1.9.2,
+uploaded 2026-08-31; wheel websocket_client-1.9.2-py3-none-any.whl, SHA-256
+e1a673830a9c7bfa47b1cd3d5e4178f4c9651d80a4eab02c9c23a1c3ec6250ce; 2739 code
+lines; import names websocket; the checkout root is ".". Licence: PyPI's
+license field Apache-2.0; GitHub detects Apache-2.0. Test files (frame): 16,
+3783 code lines: websocket/tests/test_abnf.py, websocket/tests/test_app.py,
+websocket/tests/test_cookiejar.py, websocket/tests/test_dispatcher.py,
+websocket/tests/test_handshake_large_response.py,
+websocket/tests/test_http.py and 10 more; CI: .github/workflows/build.yml,
+.github/workflows/codecoverage.yml, .github/workflows/doctest.yml,
+.github/workflows/lint.yml. The draw counted 2739 of the 6533 compared code
+lines: the rest is websocket/tests, inside the package (excluded). The
+import name is websocket. Tests: websocket/tests (excluded from the analysed
+source), 221 test methods by reading (unittest classes). All of
+them, without network and without the echo server: 195 run and 26 skip by
+themselves (10 need the local echo server, 15 the internet, 1 is always
+skipped). compliance/ is not collected (it connects at import).
+test_utils.py and test_ssl_compat.py delete modules of the package from
+sys.modules and import them again under a patched __import__: a second set
+of code objects of the same names. The optional wsaccel (a C extension) and
+python-socks are not installed. No `environment`: TEST_WITH_INTERNET=1 or a
+LOCAL_WS_SERVER_PORT would turn on the internet and echo-server tests. The
+tests that run make one TCP connection attempt on loopback, refused
+(test_http.py::HttpTest::test_connect), and five name lookups that must fail
+(ws://example once, nonexistent.example.com twice in test_websocket.py and
+twice in test_app.py). trace.py's own no_proxy (127.0.0.1,localhost) exempts
+127.0.0.1 from the proxy of test_connect: the attempt goes directly to
+127.0.0.1:443, not through the proxy port 9999, so the trace has the direct
+branch where upstream's CI takes the proxy branch.
+"""
+
+[mss]
+batch = 7
+repository = "https://github.com/BoboTiG/python-mss"
+tag = "v10.2.0"
+commit = "b7f4d62c6c5dc68fd60d43600f0e91012c8bc2e0"
+licence = "MIT"
+root = "src"
+packages = ["mss"]
+exclude = []
+dependencies = []
+upstream_test_command = "xvfb-run python -m pytest"  # .github/workflows/tests.yml on Linux (pip install -e '.[dev,tests]'); plain pytest on macOS and Windows
+notes = """
+Drawn in round 7, stratum 5 (3117 to 3880 code lines). Release 10.2.0,
+uploaded 2026-04-23; wheel mss-10.2.0-py3-none-any.whl, SHA-256
+e79f428899280e7e64e38365b5bfed683851ebea807eeaeadaf06eb8e0d67197; 3365 code
+lines; import names mss; the checkout root is "src". The tag v10.2.0 is the
+annotated tag object d9bea7e544ee3041adc94daa102af44c1e4e859c. Licence:
+PyPI's classifier "MIT License"; GitHub detects MIT. Test files (frame): 20,
+1554 code lines: src/tests/test_bgra_to_rgb.py, src/tests/test_cls_image.py,
+src/tests/test_compat_10_1.py, src/tests/test_compat_exports.py,
+src/tests/test_compat_linux_api.py, src/tests/test_find_monitors.py and 14
+more; CI: .github/workflows/release.yml, .github/workflows/tests.yml. The
+tests are in src/tests, beside the package (not inside it). No test run (the
+maintainer's decision, 2026-11-22): the ground truth comes from
+reading only. Tests: src/tests, 114 test functions by reading, 230 items on
+Linux (three backends). The session fixture inhibit_x11_resets of
+src/tests/conftest.py connects to an X server through xcb on Linux, so
+without a display every test errors at setup but the 10 that skip off macOS
+and Windows; with the fixture changed, 65 items could pass, 9 of them error
+paths only (see the record of the selection stage, README.md "Batch 7").
+src/mss/linux/xcbgen.py (1107 lines) is generated from the XCB protocol
+files in src/xcbproto (not analysed). Every native call goes through ctypes
+(libX11, libXrandr, libXfixes and the xcb libraries, found with
+find_library, which runs ldconfig); the implementation is chosen inside
+MSS() by platform.system().
 """
 
 # --------------------------------------------------------------------------

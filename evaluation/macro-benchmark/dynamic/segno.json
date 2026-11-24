@@ -1,0 +1,1661 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.ValueError.__init__"
+    ],
+    "<builtin>.bytes.decode": [
+      "uuid.bytes_.decode"
+    ],
+    "<builtin>.bytes.find": [
+      "uuid.bytes_.find"
+    ],
+    "<builtin>.bytes.isdigit": [
+      "uuid.bytes_.isdigit"
+    ],
+    "<builtin>.bytes.join": [
+      "uuid.bytes_.join"
+    ],
+    "<builtin>.dict.get": [
+      "collections.defaultdict.get"
+    ],
+    "<builtin>.dict.items": [
+      "collections.defaultdict.items"
+    ],
+    "<builtin>.dict.keys": [
+      "collections.defaultdict.keys"
+    ],
+    "<builtin>.dict.pop": [
+      "collections.defaultdict.pop"
+    ],
+    "<builtin>.dict.update": [
+      "collections.defaultdict.update"
+    ],
+    "<builtin>.dict.values": [
+      "collections.defaultdict.values"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.rfind": [
+      "typing.Text.rfind"
+    ],
+    "<builtin>.str.rstrip": [
+      "typing.Text.rstrip"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "<builtin>.str.translate": [
+      "typing.Text.translate"
+    ],
+    "<builtin>.str.upper": [
+      "typing.Text.upper"
+    ],
+    "_codecs.lookup": [
+      "codecs.lookup"
+    ],
+    "_functools.reduce": [
+      "functools.reduce"
+    ],
+    "_io.BufferedWriter.close": [
+      "io.BufferedWriter.close"
+    ],
+    "_io.BufferedWriter.tell": [
+      "io.BufferedWriter.tell"
+    ],
+    "_io.BufferedWriter.write": [
+      "io.BufferedWriter.write"
+    ],
+    "_io.BytesIO": [
+      "io.BytesIO"
+    ],
+    "_io.BytesIO.getvalue": [
+      "io.BytesIO.getvalue"
+    ],
+    "_io.BytesIO.tell": [
+      "io.BytesIO.tell"
+    ],
+    "_io.BytesIO.write": [
+      "io.BytesIO.write"
+    ],
+    "_io.StringIO.write": [
+      "io.StringIO.write"
+    ],
+    "_io.TextIOWrapper.close": [
+      "io.TextIOWrapper.close"
+    ],
+    "_io.TextIOWrapper.write": [
+      "io.TextIOWrapper.write"
+    ],
+    "_io._IOBase.writelines": [
+      "gzip.GzipFile.writelines",
+      "io.BufferedIOBase.writelines",
+      "io.BufferedWriter.writelines",
+      "io.IOBase.writelines",
+      "io.StringIO.writelines",
+      "io.TextIOWrapper.writelines"
+    ],
+    "_operator.gt": [
+      "operator.gt"
+    ],
+    "_operator.lt": [
+      "operator.lt"
+    ],
+    "_struct.pack": [
+      "struct.pack"
+    ],
+    "argparse._ActionsContainer.add_argument": [
+      "argparse.ArgumentParser.add_argument"
+    ],
+    "argparse._ActionsContainer.add_argument_group": [
+      "argparse.ArgumentParser.add_argument_group"
+    ],
+    "argparse._ActionsContainer.add_mutually_exclusive_group": [
+      "argparse.ArgumentParser.add_mutually_exclusive_group"
+    ],
+    "codecs.StreamWriter.write": [
+      "encodings.latin_1.StreamWriter.write",
+      "encodings.utf_8.StreamWriter.write"
+    ],
+    "collections.namedtuple": [
+      "selectors.namedtuple",
+      "ssl.namedtuple",
+      "unittest.util.namedtuple"
+    ],
+    "functools.wraps": [
+      "unittest.result.wraps",
+      "unittest.signals.wraps"
+    ]
+  },
+  "commit": "9b67a3f2914be966c35dd8f00bef19d01b9ec68e",
+  "deselect": [
+    {
+      "reason": "needs the plugin qrcode-artistic and Pillow (an entry point segno.plugin.converter), which are not installed: it fails",
+      "test": "tests/test_plugin.py::test_plugin"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pypng": "0.0.21",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 0,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "segno": [
+      "<builtin>.property"
+    ],
+    "segno.QRCode.__getattr__": [
+      "<builtin>.AttributeError",
+      "<builtin>.str.startswith",
+      "importlib.metadata.entry_points"
+    ],
+    "segno.QRCode.__init__": [
+      "<builtin>.len",
+      "segno.encoder.Segments.__getitem__",
+      "segno.encoder.Segments.__len__"
+    ],
+    "segno.QRCode.default_border_size": [
+      "segno.utils.get_default_border_size"
+    ],
+    "segno.QRCode.designator": [
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "segno.QRCode.error",
+      "segno.QRCode.version"
+    ],
+    "segno.QRCode.error": [
+      "segno.encoder.get_error_name"
+    ],
+    "segno.QRCode.matrix_iter": [
+      "segno.utils.matrix_iter",
+      "segno.utils.matrix_iter_verbose"
+    ],
+    "segno.QRCode.mode": [
+      "segno.encoder.get_mode_name"
+    ],
+    "segno.QRCode.png_data_uri": [
+      "segno.writers.as_png_data_uri"
+    ],
+    "segno.QRCode.save": [
+      "segno.writers.save"
+    ],
+    "segno.QRCode.svg_data_uri": [
+      "segno.writers.as_svg_data_uri"
+    ],
+    "segno.QRCode.svg_inline": [
+      "<builtin>.bytes.decode",
+      "<builtin>.dict.get",
+      "_io.BytesIO",
+      "_io.BytesIO.getvalue",
+      "segno.QRCode.save"
+    ],
+    "segno.QRCode.symbol_size": [
+      "segno.utils.get_symbol_size"
+    ],
+    "segno.QRCode.terminal": [
+      "segno.writers.write_terminal",
+      "segno.writers.write_terminal_compact"
+    ],
+    "segno.QRCode.version": [
+      "segno.encoder.get_version_name"
+    ],
+    "segno.QRCodeSequence.__getattr__": [
+      "<builtin>.AttributeError",
+      "<builtin>.getattr",
+      "<builtin>.len",
+      "segno.QRCode.default_border_size",
+      "segno.QRCode.designator",
+      "segno.QRCode.error",
+      "segno.QRCode.is_micro",
+      "segno.QRCode.version"
+    ],
+    "segno.QRCodeSequence.__new__": [
+      "<builtin>.super",
+      "<builtin>.tuple.__new__",
+      "segno.QRCode.__init__"
+    ],
+    "segno.QRCodeSequence.save": [
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str.rfind",
+      "segno.QRCode.save",
+      "segno.QRCodeSequence.save.<lambda1>",
+      "segno.QRCodeSequence.save.<lambda2>"
+    ],
+    "segno.QRCodeSequence.save.<lambda2>": [
+      "<builtin>.str.format"
+    ],
+    "segno.QRCodeSequence.terminal": [
+      "segno.QRCode.terminal"
+    ],
+    "segno.cli": [
+      "<builtin>.dict.items",
+      "<builtin>.frozenset",
+      "<builtin>.set",
+      "<builtin>.set.update",
+      "segno.cli._get_args"
+    ],
+    "segno.cli._AttrDict.__init__": [
+      "<builtin>.dict.__init__",
+      "<builtin>.super"
+    ],
+    "segno.cli._get_args": [
+      "<builtin>.len"
+    ],
+    "segno.cli.build_config": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.pop",
+      "<builtin>.str.lower",
+      "<builtin>.str.rfind"
+    ],
+    "segno.cli.main": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.pop",
+      "<builtin>.str",
+      "_io._IOBase.writelines",
+      "segno.QRCode.save",
+      "segno.QRCode.terminal",
+      "segno.QRCodeSequence.save",
+      "segno.QRCodeSequence.terminal",
+      "segno.cli.build_config",
+      "segno.cli.make_code",
+      "segno.cli.parse",
+      "sys.exit"
+    ],
+    "segno.cli.make_code": [
+      "<builtin>.dict",
+      "<builtin>.dict.pop",
+      "<builtin>.str.join",
+      "segno.make",
+      "segno.make_sequence"
+    ],
+    "segno.cli.make_parser": [
+      "argparse.ArgumentParser",
+      "argparse._ActionsContainer.add_argument",
+      "argparse._ActionsContainer.add_argument_group",
+      "argparse._ActionsContainer.add_mutually_exclusive_group"
+    ],
+    "segno.cli.make_parser.<lambda1>": [
+      "<builtin>.str.upper"
+    ],
+    "segno.cli.make_parser.<lambda2>": [
+      "<builtin>.str.lower"
+    ],
+    "segno.cli.make_parser._convert_scale": [
+      "<builtin>.float",
+      "<builtin>.int"
+    ],
+    "segno.cli.parse": [
+      "<builtin>.len",
+      "<builtin>.str",
+      "<builtin>.str.upper",
+      "<builtin>.vars",
+      "argparse.ArgumentParser.parse_args",
+      "argparse.ArgumentParser.print_help",
+      "segno.cli._AttrDict.__init__",
+      "segno.cli.make_parser",
+      "segno.cli.make_parser.<lambda1>",
+      "segno.cli.make_parser.<lambda2>",
+      "segno.cli.make_parser._convert_scale",
+      "sys.exit"
+    ],
+    "segno.consts": [
+      "<builtin>.dict.values",
+      "<builtin>.sorted",
+      "<builtin>.tuple",
+      "collections.namedtuple"
+    ],
+    "segno.encoder": [
+      "<builtin>.property",
+      "collections.namedtuple",
+      "operator.itemgetter",
+      "re.compile",
+      "re.escape"
+    ],
+    "segno.encoder.Buffer.__init__": [
+      "<builtin>.bytearray"
+    ],
+    "segno.encoder.Buffer.__len__": [
+      "<builtin>.len"
+    ],
+    "segno.encoder.Buffer.append_bits": [
+      "<builtin>.bytearray.extend",
+      "<builtin>.range",
+      "<builtin>.reversed"
+    ],
+    "segno.encoder.Buffer.extend": [
+      "<builtin>.bytearray.extend"
+    ],
+    "segno.encoder.Buffer.toints": [
+      "<builtin>.int",
+      "<builtin>.iter",
+      "<builtin>.map",
+      "<builtin>.str.join",
+      "itertools.zip_longest"
+    ],
+    "segno.encoder.Segments.__iter__": [
+      "<builtin>.iter"
+    ],
+    "segno.encoder.Segments.__len__": [
+      "<builtin>.len"
+    ],
+    "segno.encoder.Segments.add_segment": [
+      "<builtin>.len",
+      "<builtin>.list.append"
+    ],
+    "segno.encoder.Segments.bit_length_with_overhead": [
+      "<builtin>.len",
+      "<builtin>.sum",
+      "segno.encoder.version_range"
+    ],
+    "segno.encoder._Segment.__new__": [
+      "<builtin>.tuple.__new__"
+    ],
+    "segno.encoder._StructuredAppendInfo.__new__": [
+      "<builtin>.super",
+      "<builtin>.tuple.__new__"
+    ],
+    "segno.encoder._encode": [
+      "<builtin>.len",
+      "segno.encoder.Buffer.__init__",
+      "segno.encoder.Buffer.__len__",
+      "segno.encoder.Buffer.append_bits",
+      "segno.encoder.Segments.__iter__",
+      "segno.encoder.add_alignment_patterns",
+      "segno.encoder.add_codewords",
+      "segno.encoder.add_finder_patterns",
+      "segno.encoder.add_format_info",
+      "segno.encoder.add_version_info",
+      "segno.encoder.boost_error_level",
+      "segno.encoder.calc_matrix_size",
+      "segno.encoder.find_and_apply_best_mask",
+      "segno.encoder.make_final_message",
+      "segno.encoder.make_matrix",
+      "segno.encoder.version_range",
+      "segno.encoder.write_pad_codewords",
+      "segno.encoder.write_padding_bits",
+      "segno.encoder.write_segment",
+      "segno.encoder.write_terminator"
+    ],
+    "segno.encoder.add_alignment_patterns": [
+      "<builtin>.range",
+      "itertools.product"
+    ],
+    "segno.encoder.add_codewords": [
+      "<builtin>.len",
+      "<builtin>.range",
+      "segno.encoder.Buffer.__getitem__",
+      "segno.encoder.Buffer.__len__"
+    ],
+    "segno.encoder.add_finder_patterns": [
+      "<builtin>.len",
+      "<builtin>.range"
+    ],
+    "segno.encoder.add_format_info": [
+      "<builtin>.int",
+      "<builtin>.range",
+      "segno.encoder.calc_format_info"
+    ],
+    "segno.encoder.add_timing_pattern": [
+      "<builtin>.len",
+      "<builtin>.range"
+    ],
+    "segno.encoder.add_version_info": [
+      "<builtin>.range"
+    ],
+    "segno.encoder.apply_mask": [
+      "<builtin>.range",
+      "segno.encoder.find_and_apply_best_mask.is_encoding_region",
+      "segno.encoder.get_data_mask_functions.fn0",
+      "segno.encoder.get_data_mask_functions.fn1",
+      "segno.encoder.get_data_mask_functions.fn2",
+      "segno.encoder.get_data_mask_functions.fn3",
+      "segno.encoder.get_data_mask_functions.fn4",
+      "segno.encoder.get_data_mask_functions.fn5",
+      "segno.encoder.get_data_mask_functions.fn6",
+      "segno.encoder.get_data_mask_functions.fn7"
+    ],
+    "segno.encoder.boost_error_level": [
+      "<builtin>.len",
+      "<builtin>.list.index",
+      "<builtin>.list.pop",
+      "segno.encoder.Segments.__len__",
+      "segno.encoder.Segments.bit_length_with_overhead"
+    ],
+    "segno.encoder.calc_structured_append_parity": [
+      "<builtin>.isinstance",
+      "<builtin>.str",
+      "<builtin>.str.encode",
+      "_functools.reduce"
+    ],
+    "segno.encoder.data_to_bytes": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str",
+      "<builtin>.str.encode"
+    ],
+    "segno.encoder.encode": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.ValueError",
+      "segno.encoder._encode",
+      "segno.encoder.find_version",
+      "segno.encoder.get_mode_name",
+      "segno.encoder.get_version_name",
+      "segno.encoder.is_mode_supported",
+      "segno.encoder.normalize_errorlevel",
+      "segno.encoder.normalize_mask",
+      "segno.encoder.normalize_mode",
+      "segno.encoder.normalize_version",
+      "segno.encoder.prepare_data"
+    ],
+    "segno.encoder.encode_sequence": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.ValueError",
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.str",
+      "functools.partial",
+      "functools.partial.__call__",
+      "segno.encoder._StructuredAppendInfo.__new__",
+      "segno.encoder._encode",
+      "segno.encoder.calc_structured_append_parity",
+      "segno.encoder.encode_sequence.divide_into_chunks",
+      "segno.encoder.encode_sequence.number_of_symbols_by_version",
+      "segno.encoder.encode_sequence.one_item_segments",
+      "segno.encoder.find_version",
+      "segno.encoder.get_version_name",
+      "segno.encoder.normalize_errorlevel",
+      "segno.encoder.normalize_mask",
+      "segno.encoder.normalize_mode",
+      "segno.encoder.normalize_version",
+      "segno.encoder.prepare_data"
+    ],
+    "segno.encoder.encode_sequence.calc_qrcode_bit_length": [
+      "<builtin>.divmod"
+    ],
+    "segno.encoder.encode_sequence.divide_into_chunks": [
+      "<builtin>.divmod",
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.range"
+    ],
+    "segno.encoder.encode_sequence.number_of_symbols_by_version": [
+      "<builtin>.int",
+      "<builtin>.len",
+      "math.ceil",
+      "segno.encoder.encode_sequence.calc_qrcode_bit_length",
+      "segno.encoder.version_range"
+    ],
+    "segno.encoder.encode_sequence.one_item_segments": [
+      "segno.encoder.Segments.__init__",
+      "segno.encoder.Segments.add_segment",
+      "segno.encoder.make_segment"
+    ],
+    "segno.encoder.evaluate_mask": [
+      "<builtin>.sum",
+      "segno.encoder.mask_scores"
+    ],
+    "segno.encoder.evaluate_micro_mask": [
+      "<builtin>.range",
+      "<builtin>.sum"
+    ],
+    "segno.encoder.find_and_apply_best_mask": [
+      "<builtin>.enumerate",
+      "<builtin>.tuple",
+      "_operator.gt",
+      "_operator.lt",
+      "segno.encoder.add_alignment_patterns",
+      "segno.encoder.add_finder_patterns",
+      "segno.encoder.apply_mask",
+      "segno.encoder.evaluate_mask",
+      "segno.encoder.evaluate_micro_mask",
+      "segno.encoder.get_data_mask_functions",
+      "segno.encoder.make_matrix"
+    ],
+    "segno.encoder.find_minimum_version_for_mode": [
+      "segno.encoder.is_mode_supported"
+    ],
+    "segno.encoder.find_mode": [
+      "<builtin>.bytes.isdigit",
+      "segno.encoder.is_alphanumeric",
+      "segno.encoder.is_kanji"
+    ],
+    "segno.encoder.find_version": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.max",
+      "<builtin>.range",
+      "segno.encoder.Segments.bit_length_with_overhead",
+      "segno.encoder.find_minimum_version_for_mode"
+    ],
+    "segno.encoder.get_eci_assignment_number": [
+      "_codecs.lookup"
+    ],
+    "segno.encoder.get_error_name": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.items"
+    ],
+    "segno.encoder.get_mode_name": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.items"
+    ],
+    "segno.encoder.get_version_name": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.items"
+    ],
+    "segno.encoder.is_alphanumeric": [
+      "re.Pattern.match"
+    ],
+    "segno.encoder.is_kanji": [
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.next",
+      "<builtin>.range"
+    ],
+    "segno.encoder.is_mode_supported": [
+      "<builtin>.ValueError"
+    ],
+    "segno.encoder.make_blocks": [
+      "<builtin>.bytearray",
+      "<builtin>.bytearray.extend",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.range",
+      "itertools.islice",
+      "segno.encoder.Buffer.toints"
+    ],
+    "segno.encoder.make_final_message": [
+      "<builtin>.bytearray.pop",
+      "<builtin>.map",
+      "itertools.chain",
+      "itertools.chain.from_iterable",
+      "itertools.zip_longest",
+      "segno.encoder.Buffer.__init__",
+      "segno.encoder.Buffer.extend",
+      "segno.encoder.make_blocks",
+      "segno.encoder.make_final_message.to_binary"
+    ],
+    "segno.encoder.make_final_message.to_binary": [
+      "<builtin>.range",
+      "<builtin>.reversed"
+    ],
+    "segno.encoder.make_matrix": [
+      "<builtin>.bytearray",
+      "<builtin>.range",
+      "<builtin>.tuple",
+      "segno.encoder.add_timing_pattern"
+    ],
+    "segno.encoder.make_segment": [
+      "<builtin>.bytes.find",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.range",
+      "segno.encoder.Buffer.__init__",
+      "segno.encoder.Buffer.append_bits",
+      "segno.encoder.Buffer.getbits",
+      "segno.encoder._Segment.__new__",
+      "segno.encoder.data_to_bytes",
+      "segno.encoder.find_mode"
+    ],
+    "segno.encoder.mask_scores": [
+      "<builtin>.abs",
+      "<builtin>.bytearray",
+      "<builtin>.float",
+      "<builtin>.int",
+      "<builtin>.range",
+      "segno.encoder.mask_scores.n3_pattern_occurrences"
+    ],
+    "segno.encoder.mask_scores.n3_pattern_occurrences": [
+      "<builtin>.any",
+      "<builtin>.bytearray.find",
+      "<builtin>.max",
+      "<builtin>.min"
+    ],
+    "segno.encoder.normalize_errorlevel": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.values",
+      "<builtin>.str.upper"
+    ],
+    "segno.encoder.normalize_mask": [
+      "<builtin>.ValueError",
+      "<builtin>.int"
+    ],
+    "segno.encoder.normalize_mode": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.keys",
+      "<builtin>.dict.values",
+      "<builtin>.sorted",
+      "<builtin>.str.join",
+      "<builtin>.str.lower"
+    ],
+    "segno.encoder.normalize_version": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.keys",
+      "<builtin>.int",
+      "<builtin>.sorted",
+      "<builtin>.str.join",
+      "<builtin>.str.upper"
+    ],
+    "segno.encoder.prepare_data": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "segno.encoder.Segments.__init__",
+      "segno.encoder.Segments.add_segment",
+      "segno.encoder.make_segment"
+    ],
+    "segno.encoder.version_range": [
+      "<builtin>.ValueError"
+    ],
+    "segno.encoder.write_pad_codewords": [
+      "<builtin>.range",
+      "segno.encoder.Buffer.extend"
+    ],
+    "segno.encoder.write_padding_bits": [
+      "segno.encoder.Buffer.extend"
+    ],
+    "segno.encoder.write_segment": [
+      "segno.encoder.Buffer.append_bits",
+      "segno.encoder.Buffer.extend",
+      "segno.encoder.get_eci_assignment_number"
+    ],
+    "segno.encoder.write_terminator": [
+      "<builtin>.min",
+      "segno.encoder.Buffer.extend"
+    ],
+    "segno.helpers": [
+      "<builtin>.ord",
+      "re.compile"
+    ],
+    "segno.helpers._escape_mecard": [
+      "<builtin>.str",
+      "<builtin>.str.translate"
+    ],
+    "segno.helpers._escape_vcard": [
+      "<builtin>.str",
+      "<builtin>.str.translate"
+    ],
+    "segno.helpers._make_epc_qr_data": [
+      "<builtin>.ValueError",
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str",
+      "<builtin>.str.encode",
+      "<builtin>.str.join",
+      "<builtin>.str.lower",
+      "<builtin>.str.rstrip",
+      "<builtin>.str.strip",
+      "<builtin>.tuple.index",
+      "decimal.Decimal"
+    ],
+    "segno.helpers.make_email": [
+      "segno.helpers.make_make_email_data",
+      "segno.make_qr"
+    ],
+    "segno.helpers.make_epc_qr": [
+      "segno.QRCode.version",
+      "segno.helpers._make_epc_qr_data",
+      "segno.make_qr"
+    ],
+    "segno.helpers.make_geo": [
+      "segno.helpers.make_geo_data",
+      "segno.make_qr"
+    ],
+    "segno.helpers.make_geo_data": [
+      "segno.helpers.make_geo_data.float_to_str"
+    ],
+    "segno.helpers.make_geo_data.float_to_str": [
+      "<builtin>.str.rstrip"
+    ],
+    "segno.helpers.make_make_email_data": [
+      "<builtin>.ValueError",
+      "<builtin>.list.append",
+      "<builtin>.str.encode",
+      "<builtin>.str.join",
+      "segno.helpers.make_make_email_data.multi",
+      "urllib.parse.quote"
+    ],
+    "segno.helpers.make_make_email_data.multi": [
+      "<builtin>.isinstance",
+      "<builtin>.tuple"
+    ],
+    "segno.helpers.make_mecard": [
+      "segno.helpers.make_mecard_data",
+      "segno.make_qr"
+    ],
+    "segno.helpers.make_mecard_data": [
+      "<builtin>.any",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "datetime.date.strftime",
+      "segno.helpers._escape_mecard",
+      "segno.helpers.make_mecard_data.make_multifield"
+    ],
+    "segno.helpers.make_mecard_data.make_multifield": [
+      "<builtin>.isinstance",
+      "segno.helpers._escape_mecard"
+    ],
+    "segno.helpers.make_vcard": [
+      "segno.helpers.make_vcard_data",
+      "segno.make_qr"
+    ],
+    "segno.helpers.make_vcard_data": [
+      "<builtin>.ValueError",
+      "<builtin>.any",
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "datetime.date.strftime",
+      "re.Pattern.match",
+      "segno.helpers._escape_vcard",
+      "segno.helpers.make_vcard_data.make_multifield"
+    ],
+    "segno.helpers.make_vcard_data.make_multifield": [
+      "<builtin>.isinstance",
+      "segno.helpers._escape_vcard"
+    ],
+    "segno.helpers.make_wifi": [
+      "segno.helpers.make_wifi_data",
+      "segno.make_qr"
+    ],
+    "segno.helpers.make_wifi_data": [
+      "<builtin>.str.upper",
+      "segno.helpers._escape_mecard"
+    ],
+    "segno.make": [
+      "segno.QRCode.__init__",
+      "segno.encoder.encode"
+    ],
+    "segno.make_micro": [
+      "segno.make"
+    ],
+    "segno.make_qr": [
+      "segno.make"
+    ],
+    "segno.make_sequence": [
+      "<builtin>.map",
+      "segno.QRCodeSequence.__new__",
+      "segno.encoder.encode_sequence"
+    ],
+    "segno.utils.check_valid_border": [
+      "<builtin>.ValueError",
+      "<builtin>.int"
+    ],
+    "segno.utils.check_valid_scale": [
+      "<builtin>.ValueError"
+    ],
+    "segno.utils.get_border": [
+      "segno.utils.get_default_border_size"
+    ],
+    "segno.utils.get_symbol_size": [
+      "segno.utils.get_default_border_size"
+    ],
+    "segno.utils.matrix_iter": [
+      "<builtin>.int",
+      "<builtin>.range",
+      "<builtin>.tuple",
+      "itertools.chain.from_iterable",
+      "itertools.repeat",
+      "segno.utils.check_valid_border",
+      "segno.utils.check_valid_scale",
+      "segno.utils.get_border"
+    ],
+    "segno.utils.matrix_iter_verbose": [
+      "<builtin>.int",
+      "<builtin>.range",
+      "<builtin>.tuple",
+      "itertools.chain.from_iterable",
+      "itertools.repeat",
+      "segno.encoder.add_alignment_patterns",
+      "segno.encoder.make_matrix",
+      "segno.utils.check_valid_border",
+      "segno.utils.check_valid_scale",
+      "segno.utils.get_border",
+      "segno.utils.matrix_iter_verbose.get_bit"
+    ],
+    "segno.writers": [
+      "contextlib.contextmanager",
+      "functools.partial",
+      "re.compile",
+      "segno.writers.colorful",
+      "segno.writers.colorful.decorate"
+    ],
+    "segno.writers._alpha_value": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.get",
+      "<builtin>.float",
+      "<builtin>.isinstance"
+    ],
+    "segno.writers._color_is_black": [
+      "<builtin>.str.lower"
+    ],
+    "segno.writers._color_is_white": [
+      "<builtin>.str.lower"
+    ],
+    "segno.writers._color_to_rgb": [
+      "<builtin>.ValueError",
+      "<builtin>.len",
+      "segno.writers._color_to_rgb_or_rgba"
+    ],
+    "segno.writers._color_to_rgb_or_rgba": [
+      "segno.writers._color_to_rgba"
+    ],
+    "segno.writers._color_to_rgba": [
+      "<builtin>.ValueError",
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.lower",
+      "<builtin>.tuple",
+      "segno.writers._alpha_value",
+      "segno.writers._hex_to_rgb_or_rgba"
+    ],
+    "segno.writers._color_to_webcolor": [
+      "<builtin>.len",
+      "<builtin>.str.format",
+      "segno.writers._color_is_black",
+      "segno.writers._color_is_white",
+      "segno.writers._color_to_rgb_or_rgba"
+    ],
+    "segno.writers._hex_to_rgb_or_rgba": [
+      "<builtin>.ValueError",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.range",
+      "<builtin>.str.join",
+      "<builtin>.tuple",
+      "segno.writers._alpha_value"
+    ],
+    "segno.writers._invert_color": [
+      "<builtin>.tuple"
+    ],
+    "segno.writers._make_colormap": [
+      "<builtin>.dict.items",
+      "<builtin>.list.extend"
+    ],
+    "segno.writers._valid_width_height_and_border": [
+      "segno.utils.check_valid_border",
+      "segno.utils.check_valid_scale",
+      "segno.utils.get_border",
+      "segno.utils.get_symbol_size"
+    ],
+    "segno.writers.as_png_data_uri": [
+      "<builtin>.bytes.decode",
+      "_io.BytesIO",
+      "_io.BytesIO.getvalue",
+      "base64.b64encode",
+      "segno.writers.colorful.decorate.wrapper"
+    ],
+    "segno.writers.as_svg_data_uri": [
+      "_io.BytesIO",
+      "_io.BytesIO.getvalue",
+      "functools.partial",
+      "functools.partial.__call__",
+      "segno.writers.colorful.decorate.wrapper"
+    ],
+    "segno.writers.color_to_rgb_hex": [
+      "<builtin>.str.format",
+      "segno.writers._color_to_rgb"
+    ],
+    "segno.writers.colorful.decorate": [
+      "functools.partial.__call__",
+      "functools.wraps"
+    ],
+    "segno.writers.colorful.decorate.wrapper": [
+      "segno.writers._make_colormap",
+      "segno.writers.write_png",
+      "segno.writers.write_ppm",
+      "segno.writers.write_svg"
+    ],
+    "segno.writers.save": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.pop",
+      "<builtin>.str.lower",
+      "<builtin>.str.rfind",
+      "gzip.open",
+      "segno.writers.colorful.decorate.wrapper",
+      "segno.writers.write_eps",
+      "segno.writers.write_pam",
+      "segno.writers.write_pbm",
+      "segno.writers.write_pdf",
+      "segno.writers.write_terminal",
+      "segno.writers.write_tex",
+      "segno.writers.write_txt",
+      "segno.writers.write_xbm",
+      "segno.writers.write_xpm"
+    ],
+    "segno.writers.writable": [
+      "<builtin>.open",
+      "_io.BufferedWriter.close",
+      "_io.TextIOWrapper.close",
+      "codecs.getwriter",
+      "encodings.latin_1.StreamWriter",
+      "encodings.utf_8.StreamWriter"
+    ],
+    "segno.writers.write_eps": [
+      "<builtin>.int",
+      "<builtin>.list.append",
+      "<builtin>.next",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "contextlib.contextmanager.helper",
+      "functools.partial",
+      "functools.partial.__call__",
+      "segno.utils.get_symbol_size",
+      "segno.utils.matrix_to_lines",
+      "segno.writers._color_is_black",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_eps.rgb_to_floats",
+      "segno.writers.write_eps.write_line",
+      "time.strftime"
+    ],
+    "segno.writers.write_eps.rgb_to_floats": [
+      "<builtin>.tuple",
+      "segno.writers._color_to_rgb",
+      "segno.writers.write_eps.rgb_to_floats.to_float"
+    ],
+    "segno.writers.write_eps.rgb_to_floats.to_float": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance"
+    ],
+    "segno.writers.write_eps.write_line": [
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper",
+      "textwrap.wrap"
+    ],
+    "segno.writers.write_pam": [
+      "<builtin>.ValueError",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.str.encode",
+      "<builtin>.str.startswith",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.write",
+      "_struct.pack",
+      "contextlib.contextmanager.helper",
+      "functools.partial",
+      "functools.partial.__call__",
+      "itertools.chain",
+      "segno.utils.matrix_iter",
+      "segno.writers._color_is_black",
+      "segno.writers._color_is_white",
+      "segno.writers._color_to_rgb_or_rgba",
+      "segno.writers._invert_color",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_pam.invert_row_bits",
+      "segno.writers.write_pam.row_to_color_values"
+    ],
+    "segno.writers.write_pam.invert_row_bits": [
+      "<builtin>.bytearray"
+    ],
+    "segno.writers.write_pam.row_to_color_values": [
+      "<builtin>.bytes.join"
+    ],
+    "segno.writers.write_pbm": [
+      "<builtin>.bytearray",
+      "<builtin>.bytes.join",
+      "<builtin>.str",
+      "<builtin>.str.encode",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.write",
+      "contextlib.contextmanager.helper",
+      "segno.utils.matrix_iter",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_pbm.pack_row"
+    ],
+    "segno.writers.write_pbm.pack_row": [
+      "<builtin>.iter",
+      "_functools.reduce",
+      "itertools.zip_longest",
+      "segno.writers.write_pbm.pack_row.<lambda1>"
+    ],
+    "segno.writers.write_pdf": [
+      "<builtin>.abs",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.str.encode",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "_io.BufferedWriter.tell",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.tell",
+      "_io.BytesIO.write",
+      "contextlib.contextmanager.helper",
+      "functools.partial",
+      "functools.partial.__call__",
+      "segno.utils.get_symbol_size",
+      "segno.utils.matrix_to_lines",
+      "segno.writers._color_is_black",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_pdf.to_pdf_color",
+      "segno.writers.write_pdf.write_string",
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper",
+      "time.strftime",
+      "zlib.compress"
+    ],
+    "segno.writers.write_pdf.to_pdf_color": [
+      "<builtin>.tuple",
+      "segno.writers._color_to_rgb",
+      "segno.writers.write_pdf.to_pdf_color.to_float"
+    ],
+    "segno.writers.write_pdf.to_pdf_color.to_float": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance"
+    ],
+    "segno.writers.write_pdf.write_string": [
+      "<builtin>.str.encode",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.write",
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper"
+    ],
+    "segno.writers.write_png": [
+      "<builtin>.ValueError",
+      "<builtin>.all",
+      "<builtin>.bytearray",
+      "<builtin>.bytes.join",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.dict.values",
+      "<builtin>.int",
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.list.index",
+      "<builtin>.list.sort",
+      "<builtin>.next",
+      "<builtin>.set",
+      "<builtin>.sorted",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.write",
+      "_struct.pack",
+      "contextlib.contextmanager.helper",
+      "itertools.chain",
+      "itertools.repeat",
+      "operator.itemgetter",
+      "segno.utils.matrix_iter_verbose",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_png.chunk",
+      "segno.writers.write_png.png_color",
+      "segno.writers.write_png.scanline",
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper",
+      "zlib.compress"
+    ],
+    "segno.writers.write_png.chunk": [
+      "<builtin>.len",
+      "_struct.pack",
+      "zlib.crc32"
+    ],
+    "segno.writers.write_png.png_color": [
+      "segno.writers._color_to_rgb_or_rgba"
+    ],
+    "segno.writers.write_png.scanline": [
+      "<builtin>.bytearray",
+      "<builtin>.iter",
+      "_functools.reduce",
+      "itertools.chain",
+      "itertools.zip_longest",
+      "segno.writers.write_png.scanline.<lambda1>"
+    ],
+    "segno.writers.write_ppm": [
+      "<builtin>.ValueError",
+      "<builtin>.bytes.join",
+      "<builtin>.dict.items",
+      "<builtin>.dict.values",
+      "<builtin>.int",
+      "<builtin>.str.encode",
+      "_io.BufferedWriter.write",
+      "_io.BytesIO.write",
+      "_struct.pack",
+      "contextlib.contextmanager.helper",
+      "segno.utils.matrix_iter_verbose",
+      "segno.writers._color_to_rgb",
+      "segno.writers._valid_width_height_and_border"
+    ],
+    "segno.writers.write_svg": [
+      "<builtin>.ValueError",
+      "<builtin>.dict.items",
+      "<builtin>.dict.values",
+      "<builtin>.enumerate",
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.set",
+      "<builtin>.sorted",
+      "<builtin>.str",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.str.replace",
+      "_io.TextIOWrapper.write",
+      "codecs.StreamWriter.write",
+      "collections.defaultdict",
+      "contextlib.contextmanager.helper",
+      "re.sub",
+      "segno.utils.matrix_to_lines",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_svg.<lambda1>",
+      "segno.writers.write_svg.matrix_to_lines_verbose",
+      "segno.writers.write_svg.svg_color",
+      "xml.sax.saxutils.escape",
+      "xml.sax.saxutils.quoteattr"
+    ],
+    "segno.writers.write_svg.matrix_to_lines_verbose": [
+      "segno.utils.matrix_iter_verbose"
+    ],
+    "segno.writers.write_svg.svg_color": [
+      "segno.writers._color_to_webcolor"
+    ],
+    "segno.writers.write_terminal": [
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "contextlib.contextmanager.helper",
+      "segno.utils.matrix_iter"
+    ],
+    "segno.writers.write_terminal_compact": [
+      "<builtin>.str.join",
+      "<builtin>.zip",
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "contextlib.contextmanager.helper",
+      "itertools.repeat",
+      "itertools.zip_longest",
+      "segno.utils.matrix_iter"
+    ],
+    "segno.writers.write_tex": [
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "contextlib.contextmanager.helper",
+      "segno.utils.check_valid_border",
+      "segno.utils.check_valid_scale",
+      "segno.utils.get_border",
+      "segno.utils.matrix_to_lines",
+      "segno.writers.write_tex.point",
+      "time.strftime"
+    ],
+    "segno.writers.write_txt": [
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "contextlib.contextmanager.helper",
+      "segno.utils.matrix_iter",
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper"
+    ],
+    "segno.writers.write_xbm": [
+      "<builtin>.enumerate",
+      "<builtin>.iter",
+      "<builtin>.str.join",
+      "_functools.reduce",
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "contextlib.contextmanager.helper",
+      "itertools.zip_longest",
+      "segno.utils.matrix_iter",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.write_xbm.<lambda1>"
+    ],
+    "segno.writers.write_xpm": [
+      "<builtin>.enumerate",
+      "<builtin>.str.join",
+      "_io.StringIO.write",
+      "_io.TextIOWrapper.write",
+      "contextlib.contextmanager.helper",
+      "itertools.chain",
+      "segno.utils.matrix_iter",
+      "segno.writers._valid_width_height_and_border",
+      "segno.writers.color_to_rgb_hex"
+    ]
+  },
+  "executed": [
+    "segno.QRCode.__eq__",
+    "segno.QRCode.__getattr__",
+    "segno.QRCode.__init__",
+    "segno.QRCode.default_border_size",
+    "segno.QRCode.designator",
+    "segno.QRCode.error",
+    "segno.QRCode.is_micro",
+    "segno.QRCode.matrix_iter",
+    "segno.QRCode.mode",
+    "segno.QRCode.png_data_uri",
+    "segno.QRCode.save",
+    "segno.QRCode.svg_data_uri",
+    "segno.QRCode.svg_inline",
+    "segno.QRCode.symbol_size",
+    "segno.QRCode.terminal",
+    "segno.QRCode.version",
+    "segno.QRCodeSequence.__getattr__",
+    "segno.QRCodeSequence.__new__",
+    "segno.QRCodeSequence.save",
+    "segno.QRCodeSequence.save.<lambda1>",
+    "segno.QRCodeSequence.save.<lambda2>",
+    "segno.QRCodeSequence.terminal",
+    "segno.cli._AttrDict.__init__",
+    "segno.cli._get_args",
+    "segno.cli.build_config",
+    "segno.cli.main",
+    "segno.cli.make_code",
+    "segno.cli.make_parser",
+    "segno.cli.make_parser.<lambda1>",
+    "segno.cli.make_parser.<lambda2>",
+    "segno.cli.make_parser._convert_scale",
+    "segno.cli.parse",
+    "segno.encoder.Buffer.__getitem__",
+    "segno.encoder.Buffer.__init__",
+    "segno.encoder.Buffer.__len__",
+    "segno.encoder.Buffer.append_bits",
+    "segno.encoder.Buffer.extend",
+    "segno.encoder.Buffer.getbits",
+    "segno.encoder.Buffer.toints",
+    "segno.encoder.Segments.__getitem__",
+    "segno.encoder.Segments.__init__",
+    "segno.encoder.Segments.__iter__",
+    "segno.encoder.Segments.__len__",
+    "segno.encoder.Segments.add_segment",
+    "segno.encoder.Segments.bit_length_with_overhead",
+    "segno.encoder._Segment.__new__",
+    "segno.encoder._StructuredAppendInfo.__new__",
+    "segno.encoder._encode",
+    "segno.encoder.add_alignment_patterns",
+    "segno.encoder.add_codewords",
+    "segno.encoder.add_finder_patterns",
+    "segno.encoder.add_format_info",
+    "segno.encoder.add_timing_pattern",
+    "segno.encoder.add_version_info",
+    "segno.encoder.apply_mask",
+    "segno.encoder.boost_error_level",
+    "segno.encoder.calc_format_info",
+    "segno.encoder.calc_matrix_size",
+    "segno.encoder.calc_structured_append_parity",
+    "segno.encoder.data_to_bytes",
+    "segno.encoder.encode",
+    "segno.encoder.encode_sequence",
+    "segno.encoder.encode_sequence.calc_qrcode_bit_length",
+    "segno.encoder.encode_sequence.divide_into_chunks",
+    "segno.encoder.encode_sequence.number_of_symbols_by_version",
+    "segno.encoder.encode_sequence.one_item_segments",
+    "segno.encoder.evaluate_mask",
+    "segno.encoder.evaluate_micro_mask",
+    "segno.encoder.find_and_apply_best_mask",
+    "segno.encoder.find_and_apply_best_mask.is_encoding_region",
+    "segno.encoder.find_minimum_version_for_mode",
+    "segno.encoder.find_mode",
+    "segno.encoder.find_version",
+    "segno.encoder.get_data_mask_functions",
+    "segno.encoder.get_data_mask_functions.fn0",
+    "segno.encoder.get_data_mask_functions.fn1",
+    "segno.encoder.get_data_mask_functions.fn2",
+    "segno.encoder.get_data_mask_functions.fn3",
+    "segno.encoder.get_data_mask_functions.fn4",
+    "segno.encoder.get_data_mask_functions.fn5",
+    "segno.encoder.get_data_mask_functions.fn6",
+    "segno.encoder.get_data_mask_functions.fn7",
+    "segno.encoder.get_eci_assignment_number",
+    "segno.encoder.get_error_name",
+    "segno.encoder.get_mode_name",
+    "segno.encoder.get_version_name",
+    "segno.encoder.is_alphanumeric",
+    "segno.encoder.is_kanji",
+    "segno.encoder.is_mode_supported",
+    "segno.encoder.make_blocks",
+    "segno.encoder.make_final_message",
+    "segno.encoder.make_final_message.to_binary",
+    "segno.encoder.make_matrix",
+    "segno.encoder.make_segment",
+    "segno.encoder.mask_scores",
+    "segno.encoder.mask_scores.n3_pattern_occurrences",
+    "segno.encoder.normalize_errorlevel",
+    "segno.encoder.normalize_mask",
+    "segno.encoder.normalize_mode",
+    "segno.encoder.normalize_version",
+    "segno.encoder.prepare_data",
+    "segno.encoder.version_range",
+    "segno.encoder.write_pad_codewords",
+    "segno.encoder.write_padding_bits",
+    "segno.encoder.write_segment",
+    "segno.encoder.write_terminator",
+    "segno.helpers._escape_mecard",
+    "segno.helpers._escape_vcard",
+    "segno.helpers._make_epc_qr_data",
+    "segno.helpers.make_email",
+    "segno.helpers.make_epc_qr",
+    "segno.helpers.make_geo",
+    "segno.helpers.make_geo_data",
+    "segno.helpers.make_geo_data.float_to_str",
+    "segno.helpers.make_make_email_data",
+    "segno.helpers.make_make_email_data.multi",
+    "segno.helpers.make_mecard",
+    "segno.helpers.make_mecard_data",
+    "segno.helpers.make_mecard_data.make_multifield",
+    "segno.helpers.make_vcard",
+    "segno.helpers.make_vcard_data",
+    "segno.helpers.make_vcard_data.make_multifield",
+    "segno.helpers.make_wifi",
+    "segno.helpers.make_wifi_data",
+    "segno.make",
+    "segno.make_micro",
+    "segno.make_qr",
+    "segno.make_sequence",
+    "segno.utils.check_valid_border",
+    "segno.utils.check_valid_scale",
+    "segno.utils.get_border",
+    "segno.utils.get_default_border_size",
+    "segno.utils.get_symbol_size",
+    "segno.utils.matrix_iter",
+    "segno.utils.matrix_iter_verbose",
+    "segno.utils.matrix_iter_verbose.get_bit",
+    "segno.utils.matrix_to_lines",
+    "segno.writers._alpha_value",
+    "segno.writers._color_is_black",
+    "segno.writers._color_is_white",
+    "segno.writers._color_to_rgb",
+    "segno.writers._color_to_rgb_or_rgba",
+    "segno.writers._color_to_rgba",
+    "segno.writers._color_to_webcolor",
+    "segno.writers._hex_to_rgb_or_rgba",
+    "segno.writers._invert_color",
+    "segno.writers._make_colormap",
+    "segno.writers._valid_width_height_and_border",
+    "segno.writers.as_png_data_uri",
+    "segno.writers.as_svg_data_uri",
+    "segno.writers.color_to_rgb_hex",
+    "segno.writers.colorful",
+    "segno.writers.colorful.decorate",
+    "segno.writers.colorful.decorate.wrapper",
+    "segno.writers.save",
+    "segno.writers.writable",
+    "segno.writers.write_eps",
+    "segno.writers.write_eps.rgb_to_floats",
+    "segno.writers.write_eps.rgb_to_floats.to_float",
+    "segno.writers.write_eps.write_line",
+    "segno.writers.write_pam",
+    "segno.writers.write_pam.invert_row_bits",
+    "segno.writers.write_pam.row_to_color_values",
+    "segno.writers.write_pbm",
+    "segno.writers.write_pbm.pack_row",
+    "segno.writers.write_pbm.pack_row.<lambda1>",
+    "segno.writers.write_pdf",
+    "segno.writers.write_pdf.to_pdf_color",
+    "segno.writers.write_pdf.to_pdf_color.to_float",
+    "segno.writers.write_pdf.write_string",
+    "segno.writers.write_png",
+    "segno.writers.write_png.chunk",
+    "segno.writers.write_png.png_color",
+    "segno.writers.write_png.scanline",
+    "segno.writers.write_png.scanline.<lambda1>",
+    "segno.writers.write_ppm",
+    "segno.writers.write_svg",
+    "segno.writers.write_svg.<lambda1>",
+    "segno.writers.write_svg.matrix_to_lines_verbose",
+    "segno.writers.write_svg.svg_color",
+    "segno.writers.write_terminal",
+    "segno.writers.write_terminal_compact",
+    "segno.writers.write_tex",
+    "segno.writers.write_tex.point",
+    "segno.writers.write_txt",
+    "segno.writers.write_xbm",
+    "segno.writers.write_xbm.<lambda1>",
+    "segno.writers.write_xpm"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "segno.QRCode.__eq__",
+    "segno.QRCode.__getattr__",
+    "segno.QRCode.__init__",
+    "segno.QRCode.default_border_size",
+    "segno.QRCode.designator",
+    "segno.QRCode.error",
+    "segno.QRCode.is_micro",
+    "segno.QRCode.matrix_iter",
+    "segno.QRCode.mode",
+    "segno.QRCode.png_data_uri",
+    "segno.QRCode.save",
+    "segno.QRCode.show",
+    "segno.QRCode.show.delete_file",
+    "segno.QRCode.svg_data_uri",
+    "segno.QRCode.svg_inline",
+    "segno.QRCode.symbol_size",
+    "segno.QRCode.terminal",
+    "segno.QRCode.version",
+    "segno.QRCodeSequence.__getattr__",
+    "segno.QRCodeSequence.__new__",
+    "segno.QRCodeSequence.save",
+    "segno.QRCodeSequence.save.<lambda1>",
+    "segno.QRCodeSequence.save.<lambda2>",
+    "segno.QRCodeSequence.terminal",
+    "segno.cli._AttrDict.__init__",
+    "segno.cli._get_args",
+    "segno.cli.build_config",
+    "segno.cli.main",
+    "segno.cli.make_code",
+    "segno.cli.make_parser",
+    "segno.cli.make_parser.<lambda1>",
+    "segno.cli.make_parser.<lambda2>",
+    "segno.cli.make_parser._convert_scale",
+    "segno.cli.parse",
+    "segno.encoder.Buffer.__getitem__",
+    "segno.encoder.Buffer.__init__",
+    "segno.encoder.Buffer.__len__",
+    "segno.encoder.Buffer.append_bits",
+    "segno.encoder.Buffer.extend",
+    "segno.encoder.Buffer.getbits",
+    "segno.encoder.Buffer.toints",
+    "segno.encoder.Segments.__getitem__",
+    "segno.encoder.Segments.__init__",
+    "segno.encoder.Segments.__iter__",
+    "segno.encoder.Segments.__len__",
+    "segno.encoder.Segments.add_segment",
+    "segno.encoder.Segments.bit_length_with_overhead",
+    "segno.encoder._Segment.__new__",
+    "segno.encoder._StructuredAppendInfo.__new__",
+    "segno.encoder._encode",
+    "segno.encoder.add_alignment_patterns",
+    "segno.encoder.add_codewords",
+    "segno.encoder.add_finder_patterns",
+    "segno.encoder.add_format_info",
+    "segno.encoder.add_timing_pattern",
+    "segno.encoder.add_version_info",
+    "segno.encoder.apply_mask",
+    "segno.encoder.boost_error_level",
+    "segno.encoder.calc_format_info",
+    "segno.encoder.calc_matrix_size",
+    "segno.encoder.calc_structured_append_parity",
+    "segno.encoder.data_to_bytes",
+    "segno.encoder.encode",
+    "segno.encoder.encode_sequence",
+    "segno.encoder.encode_sequence.calc_qrcode_bit_length",
+    "segno.encoder.encode_sequence.divide_into_chunks",
+    "segno.encoder.encode_sequence.number_of_symbols_by_version",
+    "segno.encoder.encode_sequence.one_item_segments",
+    "segno.encoder.evaluate_mask",
+    "segno.encoder.evaluate_micro_mask",
+    "segno.encoder.find_and_apply_best_mask",
+    "segno.encoder.find_and_apply_best_mask.is_encoding_region",
+    "segno.encoder.find_minimum_version_for_mode",
+    "segno.encoder.find_mode",
+    "segno.encoder.find_version",
+    "segno.encoder.get_data_mask_functions",
+    "segno.encoder.get_data_mask_functions.fn0",
+    "segno.encoder.get_data_mask_functions.fn1",
+    "segno.encoder.get_data_mask_functions.fn2",
+    "segno.encoder.get_data_mask_functions.fn3",
+    "segno.encoder.get_data_mask_functions.fn4",
+    "segno.encoder.get_data_mask_functions.fn5",
+    "segno.encoder.get_data_mask_functions.fn6",
+    "segno.encoder.get_data_mask_functions.fn7",
+    "segno.encoder.get_eci_assignment_number",
+    "segno.encoder.get_error_name",
+    "segno.encoder.get_mode_name",
+    "segno.encoder.get_version_name",
+    "segno.encoder.is_alphanumeric",
+    "segno.encoder.is_kanji",
+    "segno.encoder.is_mode_supported",
+    "segno.encoder.make_blocks",
+    "segno.encoder.make_final_message",
+    "segno.encoder.make_final_message.to_binary",
+    "segno.encoder.make_matrix",
+    "segno.encoder.make_segment",
+    "segno.encoder.mask_scores",
+    "segno.encoder.mask_scores.n3_pattern_occurrences",
+    "segno.encoder.normalize_errorlevel",
+    "segno.encoder.normalize_mask",
+    "segno.encoder.normalize_mode",
+    "segno.encoder.normalize_version",
+    "segno.encoder.prepare_data",
+    "segno.encoder.version_range",
+    "segno.encoder.write_pad_codewords",
+    "segno.encoder.write_padding_bits",
+    "segno.encoder.write_segment",
+    "segno.encoder.write_terminator",
+    "segno.helpers._escape_mecard",
+    "segno.helpers._escape_vcard",
+    "segno.helpers._make_epc_qr_data",
+    "segno.helpers.make_email",
+    "segno.helpers.make_epc_qr",
+    "segno.helpers.make_geo",
+    "segno.helpers.make_geo_data",
+    "segno.helpers.make_geo_data.float_to_str",
+    "segno.helpers.make_make_email_data",
+    "segno.helpers.make_make_email_data.multi",
+    "segno.helpers.make_mecard",
+    "segno.helpers.make_mecard_data",
+    "segno.helpers.make_mecard_data.make_multifield",
+    "segno.helpers.make_vcard",
+    "segno.helpers.make_vcard_data",
+    "segno.helpers.make_vcard_data.make_multifield",
+    "segno.helpers.make_wifi",
+    "segno.helpers.make_wifi_data",
+    "segno.make",
+    "segno.make_micro",
+    "segno.make_qr",
+    "segno.make_sequence",
+    "segno.utils.check_valid_border",
+    "segno.utils.check_valid_scale",
+    "segno.utils.get_border",
+    "segno.utils.get_default_border_size",
+    "segno.utils.get_symbol_size",
+    "segno.utils.matrix_iter",
+    "segno.utils.matrix_iter_verbose",
+    "segno.utils.matrix_iter_verbose.get_bit",
+    "segno.utils.matrix_to_lines",
+    "segno.writers._alpha_value",
+    "segno.writers._color_is_black",
+    "segno.writers._color_is_white",
+    "segno.writers._color_to_rgb",
+    "segno.writers._color_to_rgb_or_rgba",
+    "segno.writers._color_to_rgba",
+    "segno.writers._color_to_webcolor",
+    "segno.writers._hex_to_rgb_or_rgba",
+    "segno.writers._invert_color",
+    "segno.writers._make_colormap",
+    "segno.writers._valid_width_height_and_border",
+    "segno.writers.as_png_data_uri",
+    "segno.writers.as_svg_data_uri",
+    "segno.writers.color_to_rgb_hex",
+    "segno.writers.colorful",
+    "segno.writers.colorful.decorate",
+    "segno.writers.colorful.decorate.wrapper",
+    "segno.writers.save",
+    "segno.writers.writable",
+    "segno.writers.write_eps",
+    "segno.writers.write_eps.rgb_to_floats",
+    "segno.writers.write_eps.rgb_to_floats.to_float",
+    "segno.writers.write_eps.write_line",
+    "segno.writers.write_pam",
+    "segno.writers.write_pam.invert_row_bits",
+    "segno.writers.write_pam.row_to_color_values",
+    "segno.writers.write_pbm",
+    "segno.writers.write_pbm.pack_row",
+    "segno.writers.write_pbm.pack_row.<lambda1>",
+    "segno.writers.write_pdf",
+    "segno.writers.write_pdf.to_pdf_color",
+    "segno.writers.write_pdf.to_pdf_color.to_float",
+    "segno.writers.write_pdf.write_string",
+    "segno.writers.write_png",
+    "segno.writers.write_png.chunk",
+    "segno.writers.write_png.png_color",
+    "segno.writers.write_png.scanline",
+    "segno.writers.write_png.scanline.<lambda1>",
+    "segno.writers.write_ppm",
+    "segno.writers.write_svg",
+    "segno.writers.write_svg.<lambda1>",
+    "segno.writers.write_svg.matrix_to_lines_verbose",
+    "segno.writers.write_svg.svg_color",
+    "segno.writers.write_svg_debug",
+    "segno.writers.write_terminal",
+    "segno.writers.write_terminal_compact",
+    "segno.writers.write_terminal_win",
+    "segno.writers.write_tex",
+    "segno.writers.write_tex.point",
+    "segno.writers.write_txt",
+    "segno.writers.write_xbm",
+    "segno.writers.write_xbm.<lambda1>",
+    "segno.writers.write_xpm"
+  ],
+  "modules": [
+    "segno",
+    "segno.cli",
+    "segno.consts",
+    "segno.encoder",
+    "segno.helpers",
+    "segno.utils",
+    "segno.writers"
+  ],
+  "project": "segno",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 1,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 1575,
+    "skipped": 10,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

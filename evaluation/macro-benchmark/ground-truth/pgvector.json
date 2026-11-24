@@ -1,0 +1,950 @@
+{
+  "pgvector": [],
+  "pgvector._utils": [],
+  "pgvector._utils.is_ndarray": [
+    "<builtin>.dict.get",
+    "<builtin>.isinstance"
+  ],
+  "pgvector._utils.is_sparse_array": [
+    "<builtin>.dict.get",
+    "<builtin>.isinstance"
+  ],
+  "pgvector.asyncpg": [],
+  "pgvector.asyncpg.register": [],
+  "pgvector.asyncpg.register.register_vector": [
+    "<builtin>.str",
+    "<builtin>.str.startswith",
+    "asyncpg.Connection.set_type_codec"
+  ],
+  "pgvector.asyncpg.register.register_vector.<lambda1>": [
+    "<builtin>.isinstance",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.to_binary"
+  ],
+  "pgvector.asyncpg.register.register_vector.<lambda2>": [
+    "<builtin>.isinstance",
+    "pgvector.halfvec.HalfVector.__init__",
+    "pgvector.halfvec.HalfVector.to_binary"
+  ],
+  "pgvector.asyncpg.register.register_vector.<lambda3>": [
+    "<builtin>.isinstance",
+    "pgvector.sparsevec.SparseVector.__init__",
+    "pgvector.sparsevec.SparseVector.to_binary"
+  ],
+  "pgvector.bit": [
+    "<builtin>.classmethod"
+  ],
+  "pgvector.bit.Bit.__eq__": [
+    "<builtin>.isinstance"
+  ],
+  "pgvector.bit.Bit.__init__": [
+    "<builtin>.ValueError",
+    "<builtin>.int",
+    "<builtin>.int.to_bytes",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.set",
+    "<builtin>.set.issubset",
+    "<builtin>.str.join",
+    "numpy._ArrayFunctionDispatcher.__call__",
+    "numpy.any",
+    "numpy.ndarray.astype",
+    "numpy.ndarray.tobytes",
+    "numpy.packbits",
+    "pgvector._utils.is_ndarray"
+  ],
+  "pgvector.bit.Bit.__repr__": [
+    "pgvector.bit.Bit.to_text"
+  ],
+  "pgvector.bit.Bit.from_binary": [
+    "<builtin>.ValueError",
+    "<builtin>.len",
+    "<builtin>.memoryview",
+    "<builtin>.memoryview.tobytes",
+    "<builtin>.object.__new__",
+    "struct.unpack_from"
+  ],
+  "pgvector.bit.Bit.from_text": [
+    "<builtin>.str",
+    "pgvector.bit.Bit.__init__"
+  ],
+  "pgvector.bit.Bit.to_binary": [
+    "struct.pack"
+  ],
+  "pgvector.bit.Bit.to_list": [
+    "pgvector.bit.Bit.to_text"
+  ],
+  "pgvector.bit.Bit.to_numpy": [
+    "numpy._ArrayFunctionDispatcher.__call__",
+    "numpy.frombuffer",
+    "numpy.ndarray.astype",
+    "numpy.unpackbits"
+  ],
+  "pgvector.bit.Bit.to_text": [
+    "<builtin>.format",
+    "<builtin>.str.join"
+  ],
+  "pgvector.django": [],
+  "pgvector.django.bit": [],
+  "pgvector.django.bit.BitField.__init__": [
+    "<builtin>.super",
+    "django.db.models.Field.__init__"
+  ],
+  "pgvector.django.bit.BitField.db_type": [],
+  "pgvector.django.bit.BitField.deconstruct": [
+    "<builtin>.super",
+    "django.db.models.Field.deconstruct"
+  ],
+  "pgvector.django.bit.BitField.formfield": [
+    "<builtin>.super",
+    "django.db.models.Field.formfield"
+  ],
+  "pgvector.django.bit.BitFormField.to_python": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "django.forms.CharField.to_python"
+  ],
+  "pgvector.django.extensions": [],
+  "pgvector.django.extensions.VectorExtension.__init__": [
+    "<builtin>.super",
+    "django.contrib.postgres.operations.CreateExtension.__init__"
+  ],
+  "pgvector.django.functions": [
+    "django.db.models.FloatField"
+  ],
+  "pgvector.django.functions.BitDistanceBase.__init__": [
+    "<builtin>.hasattr",
+    "<builtin>.super",
+    "django.db.models.Func.__init__",
+    "django.db.models.Value"
+  ],
+  "pgvector.django.functions.DistanceBase.__init__": [
+    "<builtin>.hasattr",
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "django.db.models.Func.__init__",
+    "django.db.models.Value",
+    "pgvector.halfvec.HalfVector.to_text",
+    "pgvector.sparsevec.SparseVector.to_text",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.to_text"
+  ],
+  "pgvector.django.halfvec": [],
+  "pgvector.django.halfvec.HalfVectorField.__init__": [
+    "<builtin>.super",
+    "django.db.models.Field.__init__"
+  ],
+  "pgvector.django.halfvec.HalfVectorField.db_type": [],
+  "pgvector.django.halfvec.HalfVectorField.deconstruct": [
+    "<builtin>.super",
+    "django.db.models.Field.deconstruct"
+  ],
+  "pgvector.django.halfvec.HalfVectorField.formfield": [
+    "<builtin>.super",
+    "django.db.models.Field.formfield"
+  ],
+  "pgvector.django.halfvec.HalfVectorField.from_db_value": [
+    "pgvector.halfvec.HalfVector._from_db"
+  ],
+  "pgvector.django.halfvec.HalfVectorField.get_prep_value": [
+    "pgvector.halfvec.HalfVector._to_db"
+  ],
+  "pgvector.django.halfvec.HalfVectorField.to_python": [
+    "<builtin>.isinstance",
+    "pgvector.halfvec.HalfVector._from_db"
+  ],
+  "pgvector.django.halfvec.HalfVectorField.value_to_string": [
+    "django.db.models.Field.value_from_object",
+    "pgvector.django.halfvec.HalfVectorField.get_prep_value"
+  ],
+  "pgvector.django.halfvec.HalfVectorFormField.to_python": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "django.forms.CharField.to_python"
+  ],
+  "pgvector.django.indexes": [],
+  "pgvector.django.indexes.HnswIndex.__init__": [
+    "<builtin>.super",
+    "django.contrib.postgres.indexes.PostgresIndex.__init__"
+  ],
+  "pgvector.django.indexes.HnswIndex.deconstruct": [
+    "<builtin>.super",
+    "django.contrib.postgres.indexes.PostgresIndex.deconstruct"
+  ],
+  "pgvector.django.indexes.HnswIndex.get_with_params": [
+    "<builtin>.list.append"
+  ],
+  "pgvector.django.indexes.IvfflatIndex.__init__": [
+    "<builtin>.super",
+    "django.contrib.postgres.indexes.PostgresIndex.__init__"
+  ],
+  "pgvector.django.indexes.IvfflatIndex.deconstruct": [
+    "<builtin>.super",
+    "django.contrib.postgres.indexes.PostgresIndex.deconstruct"
+  ],
+  "pgvector.django.indexes.IvfflatIndex.get_with_params": [
+    "<builtin>.list.append"
+  ],
+  "pgvector.django.sparsevec": [],
+  "pgvector.django.sparsevec.SparseVectorField.__init__": [
+    "<builtin>.super",
+    "django.db.models.Field.__init__"
+  ],
+  "pgvector.django.sparsevec.SparseVectorField.db_type": [],
+  "pgvector.django.sparsevec.SparseVectorField.deconstruct": [
+    "<builtin>.super",
+    "django.db.models.Field.deconstruct"
+  ],
+  "pgvector.django.sparsevec.SparseVectorField.formfield": [
+    "<builtin>.super",
+    "django.db.models.Field.formfield"
+  ],
+  "pgvector.django.sparsevec.SparseVectorField.from_db_value": [
+    "pgvector.sparsevec.SparseVector._from_db"
+  ],
+  "pgvector.django.sparsevec.SparseVectorField.get_prep_value": [
+    "pgvector.sparsevec.SparseVector._to_db"
+  ],
+  "pgvector.django.sparsevec.SparseVectorField.to_python": [
+    "pgvector.sparsevec.SparseVector._from_db"
+  ],
+  "pgvector.django.sparsevec.SparseVectorField.value_to_string": [
+    "django.db.models.Field.value_from_object",
+    "pgvector.django.sparsevec.SparseVectorField.get_prep_value"
+  ],
+  "pgvector.django.sparsevec.SparseVectorFormField.to_python": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "django.forms.CharField.to_python"
+  ],
+  "pgvector.django.sparsevec.SparseVectorWidget.format_value": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "django.forms.TextInput.format_value",
+    "pgvector.sparsevec.SparseVector.to_text"
+  ],
+  "pgvector.django.vector": [],
+  "pgvector.django.vector.VectorField.__init__": [
+    "<builtin>.super",
+    "django.db.models.Field.__init__"
+  ],
+  "pgvector.django.vector.VectorField.db_type": [],
+  "pgvector.django.vector.VectorField.deconstruct": [
+    "<builtin>.super",
+    "django.db.models.Field.deconstruct"
+  ],
+  "pgvector.django.vector.VectorField.formfield": [
+    "<builtin>.super",
+    "django.db.models.Field.formfield"
+  ],
+  "pgvector.django.vector.VectorField.from_db_value": [
+    "pgvector.vector.Vector._from_db"
+  ],
+  "pgvector.django.vector.VectorField.get_prep_value": [
+    "pgvector.vector.Vector._to_db"
+  ],
+  "pgvector.django.vector.VectorField.to_python": [
+    "<builtin>.isinstance",
+    "pgvector.vector.Vector._from_db"
+  ],
+  "pgvector.django.vector.VectorField.value_to_string": [
+    "django.db.models.Field.value_from_object",
+    "pgvector.django.vector.VectorField.get_prep_value"
+  ],
+  "pgvector.django.vector.VectorFormField.to_python": [
+    "<builtin>.isinstance",
+    "<builtin>.super",
+    "django.forms.CharField.to_python"
+  ],
+  "pgvector.halfvec": [
+    "<builtin>.classmethod"
+  ],
+  "pgvector.halfvec.HalfVector.__eq__": [
+    "<builtin>.isinstance"
+  ],
+  "pgvector.halfvec.HalfVector.__init__": [
+    "<builtin>.ValueError",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.memoryview.cast",
+    "array.array",
+    "array.array.frombytes",
+    "numpy.ndarray.astype",
+    "pgvector._utils.is_ndarray",
+    "struct.pack"
+  ],
+  "pgvector.halfvec.HalfVector.__repr__": [
+    "pgvector.halfvec.HalfVector.to_list"
+  ],
+  "pgvector.halfvec.HalfVector._from_db": [
+    "<builtin>.isinstance",
+    "pgvector.halfvec.HalfVector._from_text",
+    "pgvector.halfvec.HalfVector.to_list"
+  ],
+  "pgvector.halfvec.HalfVector._from_text": [
+    "<builtin>.float",
+    "<builtin>.str.split"
+  ],
+  "pgvector.halfvec.HalfVector._to_db": [
+    "<builtin>.float",
+    "<builtin>.isinstance",
+    "<builtin>.str",
+    "<builtin>.str.join",
+    "pgvector.halfvec.HalfVector.__init__",
+    "pgvector.halfvec.HalfVector.to_text"
+  ],
+  "pgvector.halfvec.HalfVector.dimensions": [
+    "<builtin>.len"
+  ],
+  "pgvector.halfvec.HalfVector.from_binary": [
+    "<builtin>.ValueError",
+    "<builtin>.len",
+    "<builtin>.memoryview",
+    "<builtin>.object.__new__",
+    "array.array",
+    "array.array.byteswap",
+    "array.array.frombytes",
+    "struct.unpack_from"
+  ],
+  "pgvector.halfvec.HalfVector.from_text": [
+    "pgvector.halfvec.HalfVector.__init__",
+    "pgvector.halfvec.HalfVector._from_text"
+  ],
+  "pgvector.halfvec.HalfVector.to_binary": [
+    "<builtin>.len",
+    "<builtin>.memoryview",
+    "array.array",
+    "array.array.byteswap",
+    "struct.pack"
+  ],
+  "pgvector.halfvec.HalfVector.to_list": [
+    "<builtin>.len",
+    "<builtin>.list",
+    "struct.unpack"
+  ],
+  "pgvector.halfvec.HalfVector.to_numpy": [
+    "numpy.frombuffer"
+  ],
+  "pgvector.halfvec.HalfVector.to_text": [
+    "<builtin>.str",
+    "<builtin>.str.join",
+    "pgvector.halfvec.HalfVector.to_list"
+  ],
+  "pgvector.peewee": [],
+  "pgvector.peewee.bit": [],
+  "pgvector.peewee.bit.FixedBitField.__init__": [
+    "<builtin>.super",
+    "peewee.Field.__init__"
+  ],
+  "pgvector.peewee.bit.FixedBitField._distance": [
+    "peewee.Expression",
+    "peewee.Field.to_value"
+  ],
+  "pgvector.peewee.bit.FixedBitField.get_modifiers": [],
+  "pgvector.peewee.bit.FixedBitField.hamming_distance": [
+    "pgvector.peewee.bit.FixedBitField._distance"
+  ],
+  "pgvector.peewee.bit.FixedBitField.jaccard_distance": [
+    "pgvector.peewee.bit.FixedBitField._distance"
+  ],
+  "pgvector.peewee.halfvec": [],
+  "pgvector.peewee.halfvec.HalfVectorField.__init__": [
+    "<builtin>.super",
+    "peewee.Field.__init__"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField._distance": [
+    "peewee.Expression",
+    "peewee.Field.to_value"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField.cosine_distance": [
+    "pgvector.peewee.halfvec.HalfVectorField._distance"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField.db_value": [
+    "pgvector.halfvec.HalfVector._to_db"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField.get_modifiers": [],
+  "pgvector.peewee.halfvec.HalfVectorField.l1_distance": [
+    "pgvector.peewee.halfvec.HalfVectorField._distance"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField.l2_distance": [
+    "pgvector.peewee.halfvec.HalfVectorField._distance"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField.max_inner_product": [
+    "pgvector.peewee.halfvec.HalfVectorField._distance"
+  ],
+  "pgvector.peewee.halfvec.HalfVectorField.python_value": [
+    "pgvector.halfvec.HalfVector._from_db"
+  ],
+  "pgvector.peewee.sparsevec": [],
+  "pgvector.peewee.sparsevec.SparseVectorField.__init__": [
+    "<builtin>.super",
+    "peewee.Field.__init__"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField._distance": [
+    "peewee.Expression",
+    "peewee.Field.to_value"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField.cosine_distance": [
+    "pgvector.peewee.sparsevec.SparseVectorField._distance"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField.db_value": [
+    "pgvector.sparsevec.SparseVector._to_db"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField.get_modifiers": [],
+  "pgvector.peewee.sparsevec.SparseVectorField.l1_distance": [
+    "pgvector.peewee.sparsevec.SparseVectorField._distance"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField.l2_distance": [
+    "pgvector.peewee.sparsevec.SparseVectorField._distance"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField.max_inner_product": [
+    "pgvector.peewee.sparsevec.SparseVectorField._distance"
+  ],
+  "pgvector.peewee.sparsevec.SparseVectorField.python_value": [
+    "pgvector.sparsevec.SparseVector._from_db"
+  ],
+  "pgvector.peewee.vector": [],
+  "pgvector.peewee.vector.VectorField.__init__": [
+    "<builtin>.super",
+    "peewee.Field.__init__"
+  ],
+  "pgvector.peewee.vector.VectorField._distance": [
+    "peewee.Expression",
+    "peewee.Field.to_value"
+  ],
+  "pgvector.peewee.vector.VectorField.cosine_distance": [
+    "pgvector.peewee.vector.VectorField._distance"
+  ],
+  "pgvector.peewee.vector.VectorField.db_value": [
+    "pgvector.vector.Vector._to_db"
+  ],
+  "pgvector.peewee.vector.VectorField.get_modifiers": [],
+  "pgvector.peewee.vector.VectorField.l1_distance": [
+    "pgvector.peewee.vector.VectorField._distance"
+  ],
+  "pgvector.peewee.vector.VectorField.l2_distance": [
+    "pgvector.peewee.vector.VectorField._distance"
+  ],
+  "pgvector.peewee.vector.VectorField.max_inner_product": [
+    "pgvector.peewee.vector.VectorField._distance"
+  ],
+  "pgvector.peewee.vector.VectorField.python_value": [
+    "pgvector.vector.Vector._from_db"
+  ],
+  "pgvector.pg8000": [],
+  "pgvector.pg8000.register": [],
+  "pgvector.pg8000.register.register_vector": [
+    "<builtin>.RuntimeError",
+    "<builtin>.dict",
+    "pg8000.native.Connection.register_in_adapter",
+    "pg8000.native.Connection.register_out_adapter",
+    "pg8000.native.Connection.run",
+    "typing.cast"
+  ],
+  "pgvector.pg8000.register.register_vector.<lambda1>": [
+    "pgvector.vector.Vector.to_text"
+  ],
+  "pgvector.pg8000.register.register_vector.<lambda2>": [
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.to_text"
+  ],
+  "pgvector.pg8000.register.register_vector.<lambda3>": [
+    "pgvector.halfvec.HalfVector.to_text"
+  ],
+  "pgvector.pg8000.register.register_vector.<lambda4>": [
+    "pgvector.sparsevec.SparseVector.to_text"
+  ],
+  "pgvector.psycopg": [],
+  "pgvector.psycopg.bit": [],
+  "pgvector.psycopg.bit.BitBinaryDumper.dump": [
+    "pgvector.bit.Bit.to_binary"
+  ],
+  "pgvector.psycopg.bit.BitDumper.dump": [
+    "<builtin>.str.encode",
+    "pgvector.bit.Bit.to_text"
+  ],
+  "pgvector.psycopg.bit.register_bit_info": [
+    "<builtin>.type",
+    "psycopg.AsyncConnection.adapters.register_dumper",
+    "psycopg.BaseConnection.adapters.register_dumper",
+    "psycopg.Connection.adapters.register_dumper",
+    "psycopg.types.TypeInfo.fetch.register",
+    "psycopg.types.TypeInfo.register"
+  ],
+  "pgvector.psycopg.halfvec": [],
+  "pgvector.psycopg.halfvec.HalfVectorBinaryDumper.dump": [
+    "pgvector.halfvec.HalfVector.to_binary"
+  ],
+  "pgvector.psycopg.halfvec.HalfVectorBinaryLoader.load": [
+    "pgvector.halfvec.HalfVector.from_binary"
+  ],
+  "pgvector.psycopg.halfvec.HalfVectorDumper.dump": [
+    "<builtin>.str.encode",
+    "pgvector.halfvec.HalfVector.to_text"
+  ],
+  "pgvector.psycopg.halfvec.HalfVectorLoader.load": [
+    "<builtin>.bytearray.decode",
+    "<builtin>.bytes.decode",
+    "<builtin>.isinstance",
+    "<builtin>.memoryview.tobytes",
+    "pgvector.halfvec.HalfVector.from_text"
+  ],
+  "pgvector.psycopg.halfvec.register_halfvec_info": [
+    "<builtin>.type",
+    "psycopg.AsyncConnection.adapters.register_dumper",
+    "psycopg.AsyncConnection.adapters.register_loader",
+    "psycopg.BaseConnection.adapters.register_dumper",
+    "psycopg.BaseConnection.adapters.register_loader",
+    "psycopg.Connection.adapters.register_dumper",
+    "psycopg.Connection.adapters.register_loader",
+    "psycopg.types.TypeInfo.fetch.register",
+    "psycopg.types.TypeInfo.register"
+  ],
+  "pgvector.psycopg.register": [],
+  "pgvector.psycopg.register.register_vector": [
+    "pgvector.psycopg.bit.register_bit_info",
+    "pgvector.psycopg.halfvec.register_halfvec_info",
+    "pgvector.psycopg.sparsevec.register_sparsevec_info",
+    "pgvector.psycopg.vector.register_vector_info",
+    "psycopg.types.TypeInfo.fetch"
+  ],
+  "pgvector.psycopg.register.register_vector_async": [
+    "pgvector.psycopg.bit.register_bit_info",
+    "pgvector.psycopg.halfvec.register_halfvec_info",
+    "pgvector.psycopg.sparsevec.register_sparsevec_info",
+    "pgvector.psycopg.vector.register_vector_info",
+    "psycopg.types.TypeInfo.fetch"
+  ],
+  "pgvector.psycopg.sparsevec": [],
+  "pgvector.psycopg.sparsevec.SparseVectorBinaryDumper.dump": [
+    "pgvector.sparsevec.SparseVector.to_binary"
+  ],
+  "pgvector.psycopg.sparsevec.SparseVectorBinaryLoader.load": [
+    "pgvector.sparsevec.SparseVector.from_binary"
+  ],
+  "pgvector.psycopg.sparsevec.SparseVectorDumper.dump": [
+    "<builtin>.str.encode",
+    "pgvector.sparsevec.SparseVector.to_text"
+  ],
+  "pgvector.psycopg.sparsevec.SparseVectorLoader.load": [
+    "<builtin>.bytearray.decode",
+    "<builtin>.bytes.decode",
+    "<builtin>.isinstance",
+    "<builtin>.memoryview.tobytes",
+    "pgvector.sparsevec.SparseVector.from_text"
+  ],
+  "pgvector.psycopg.sparsevec.register_sparsevec_info": [
+    "<builtin>.type",
+    "psycopg.AsyncConnection.adapters.register_dumper",
+    "psycopg.AsyncConnection.adapters.register_loader",
+    "psycopg.BaseConnection.adapters.register_dumper",
+    "psycopg.BaseConnection.adapters.register_loader",
+    "psycopg.Connection.adapters.register_dumper",
+    "psycopg.Connection.adapters.register_loader",
+    "psycopg.types.TypeInfo.fetch.register",
+    "psycopg.types.TypeInfo.register"
+  ],
+  "pgvector.psycopg.vector": [],
+  "pgvector.psycopg.vector.VectorBinaryDumper.dump": [
+    "<builtin>.isinstance",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.to_binary"
+  ],
+  "pgvector.psycopg.vector.VectorBinaryLoader.load": [
+    "pgvector.vector.Vector.from_binary"
+  ],
+  "pgvector.psycopg.vector.VectorDumper.dump": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.to_text"
+  ],
+  "pgvector.psycopg.vector.VectorLoader.load": [
+    "<builtin>.bytearray.decode",
+    "<builtin>.bytes.decode",
+    "<builtin>.isinstance",
+    "<builtin>.memoryview.tobytes",
+    "pgvector.vector.Vector.from_text"
+  ],
+  "pgvector.psycopg.vector.register_vector_info": [
+    "<builtin>.type",
+    "psycopg.AsyncConnection.adapters.register_dumper",
+    "psycopg.AsyncConnection.adapters.register_loader",
+    "psycopg.BaseConnection.adapters.register_dumper",
+    "psycopg.BaseConnection.adapters.register_loader",
+    "psycopg.Connection.adapters.register_dumper",
+    "psycopg.Connection.adapters.register_loader",
+    "psycopg.ProgrammingError",
+    "psycopg.types.TypeInfo.fetch.register",
+    "psycopg.types.TypeInfo.register"
+  ],
+  "pgvector.psycopg2": [],
+  "pgvector.psycopg2.halfvec": [],
+  "pgvector.psycopg2.halfvec.HalfvecAdapter.__init__": [],
+  "pgvector.psycopg2.halfvec.HalfvecAdapter.getquoted": [
+    "pgvector.halfvec.HalfVector.to_text",
+    "psycopg2.extensions.adapt",
+    "psycopg2.extensions.adapt.getquoted"
+  ],
+  "pgvector.psycopg2.halfvec.cast_halfvec": [
+    "<builtin>.ValueError",
+    "<builtin>.isinstance",
+    "pgvector.halfvec.HalfVector.from_text"
+  ],
+  "pgvector.psycopg2.halfvec.register_halfvec_info": [
+    "psycopg2.extensions.new_array_type",
+    "psycopg2.extensions.new_type",
+    "psycopg2.extensions.register_adapter",
+    "psycopg2.extensions.register_type"
+  ],
+  "pgvector.psycopg2.register": [],
+  "pgvector.psycopg2.register.register_vector": [
+    "<builtin>.dict",
+    "<builtin>.isinstance",
+    "pgvector.psycopg2.halfvec.register_halfvec_info",
+    "pgvector.psycopg2.sparsevec.register_sparsevec_info",
+    "pgvector.psycopg2.vector.register_vector_info",
+    "psycopg2.ProgrammingError",
+    "psycopg2.extensions.connection.cursor",
+    "psycopg2.extensions.connection.cursor.execute",
+    "psycopg2.extensions.connection.cursor.fetchall",
+    "psycopg2.extensions.cursor.connection.cursor",
+    "psycopg2.extensions.cursor.connection.cursor.execute",
+    "psycopg2.extensions.cursor.connection.cursor.fetchall"
+  ],
+  "pgvector.psycopg2.sparsevec": [],
+  "pgvector.psycopg2.sparsevec.SparsevecAdapter.__init__": [],
+  "pgvector.psycopg2.sparsevec.SparsevecAdapter.getquoted": [
+    "pgvector.sparsevec.SparseVector.to_text",
+    "psycopg2.extensions.adapt",
+    "psycopg2.extensions.adapt.getquoted"
+  ],
+  "pgvector.psycopg2.sparsevec.cast_sparsevec": [
+    "<builtin>.ValueError",
+    "<builtin>.isinstance",
+    "pgvector.sparsevec.SparseVector.from_text"
+  ],
+  "pgvector.psycopg2.sparsevec.register_sparsevec_info": [
+    "psycopg2.extensions.new_array_type",
+    "psycopg2.extensions.new_type",
+    "psycopg2.extensions.register_adapter",
+    "psycopg2.extensions.register_type"
+  ],
+  "pgvector.psycopg2.vector": [],
+  "pgvector.psycopg2.vector.VectorAdapter.__init__": [
+    "<builtin>.isinstance",
+    "pgvector.vector.Vector.__init__"
+  ],
+  "pgvector.psycopg2.vector.VectorAdapter.getquoted": [
+    "pgvector.vector.Vector.to_text",
+    "psycopg2.extensions.adapt",
+    "psycopg2.extensions.adapt.getquoted"
+  ],
+  "pgvector.psycopg2.vector.cast_vector": [
+    "<builtin>.ValueError",
+    "<builtin>.isinstance",
+    "pgvector.vector.Vector.from_text"
+  ],
+  "pgvector.psycopg2.vector.register_vector_info": [
+    "psycopg2.extensions.new_array_type",
+    "psycopg2.extensions.new_type",
+    "psycopg2.extensions.register_adapter",
+    "psycopg2.extensions.register_type"
+  ],
+  "pgvector.sparsevec": [
+    "<builtin>.classmethod",
+    "typing.overload"
+  ],
+  "pgvector.sparsevec.SparseVector.__eq__": [
+    "<builtin>.isinstance"
+  ],
+  "pgvector.sparsevec.SparseVector.__init__": [
+    "<builtin>.ValueError",
+    "<builtin>.isinstance",
+    "pgvector._utils.is_sparse_array",
+    "pgvector.sparsevec.SparseVector._from_dense",
+    "pgvector.sparsevec.SparseVector._from_dict",
+    "pgvector.sparsevec.SparseVector._from_sparse"
+  ],
+  "pgvector.sparsevec.SparseVector.__repr__": [
+    "<builtin>.dict",
+    "<builtin>.zip"
+  ],
+  "pgvector.sparsevec.SparseVector._from_db": [
+    "<builtin>.isinstance",
+    "pgvector.sparsevec.SparseVector.from_text"
+  ],
+  "pgvector.sparsevec.SparseVector._from_dense": [
+    "<builtin>.enumerate",
+    "<builtin>.float",
+    "<builtin>.len"
+  ],
+  "pgvector.sparsevec.SparseVector._from_dict": [
+    "<builtin>.dict.items",
+    "<builtin>.float",
+    "<builtin>.int",
+    "<builtin>.list.sort"
+  ],
+  "pgvector.sparsevec.SparseVector._from_parts": [
+    "<builtin>.object.__new__"
+  ],
+  "pgvector.sparsevec.SparseVector._from_sparse": [
+    "<builtin>.ValueError",
+    "<builtin>.float",
+    "<builtin>.hasattr",
+    "<builtin>.len",
+    "<builtin>.list.sort",
+    "<builtin>.zip",
+    "numpy.ndarray.tolist",
+    "scipy.sparse.bsr_array.tocoo",
+    "scipy.sparse.bsr_matrix.tocoo",
+    "scipy.sparse.coo_array.copy",
+    "scipy.sparse.coo_array.sum_duplicates",
+    "scipy.sparse.coo_array.tocoo",
+    "scipy.sparse.coo_matrix.copy",
+    "scipy.sparse.coo_matrix.sum_duplicates",
+    "scipy.sparse.coo_matrix.tocoo",
+    "scipy.sparse.csc_array.tocoo",
+    "scipy.sparse.csc_matrix.tocoo",
+    "scipy.sparse.csr_array.tocoo",
+    "scipy.sparse.csr_matrix.tocoo",
+    "scipy.sparse.dia_array.tocoo",
+    "scipy.sparse.dia_matrix.tocoo",
+    "scipy.sparse.dok_array.tocoo",
+    "scipy.sparse.dok_matrix.tocoo",
+    "scipy.sparse.lil_array.tocoo",
+    "scipy.sparse.lil_matrix.tocoo",
+    "typing.cast"
+  ],
+  "pgvector.sparsevec.SparseVector._to_db": [
+    "<builtin>.isinstance",
+    "pgvector.sparsevec.SparseVector.__init__",
+    "pgvector.sparsevec.SparseVector.to_text"
+  ],
+  "pgvector.sparsevec.SparseVector.dimensions": [],
+  "pgvector.sparsevec.SparseVector.from_binary": [
+    "<builtin>.ValueError",
+    "<builtin>.len",
+    "<builtin>.list",
+    "pgvector.sparsevec.SparseVector._from_parts",
+    "struct.unpack_from"
+  ],
+  "pgvector.sparsevec.SparseVector.from_text": [
+    "<builtin>.float",
+    "<builtin>.int",
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.str.split",
+    "pgvector.sparsevec.SparseVector._from_parts"
+  ],
+  "pgvector.sparsevec.SparseVector.indices": [],
+  "pgvector.sparsevec.SparseVector.to_binary": [
+    "<builtin>.len",
+    "struct.pack"
+  ],
+  "pgvector.sparsevec.SparseVector.to_coo": [
+    "<builtin>.len",
+    "scipy.sparse.coo_array"
+  ],
+  "pgvector.sparsevec.SparseVector.to_list": [
+    "<builtin>.zip"
+  ],
+  "pgvector.sparsevec.SparseVector.to_numpy": [
+    "<builtin>.zip",
+    "numpy.zeros"
+  ],
+  "pgvector.sparsevec.SparseVector.to_text": [
+    "<builtin>.float",
+    "<builtin>.int",
+    "<builtin>.str.join",
+    "<builtin>.zip"
+  ],
+  "pgvector.sparsevec.SparseVector.values": [],
+  "pgvector.sqlalchemy": [],
+  "pgvector.sqlalchemy.bit": [],
+  "pgvector.sqlalchemy.bit.BIT.Comparator.hamming_distance": [
+    "sqlalchemy.types.TypeDecorator.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.bit.BIT.Comparator.jaccard_distance": [
+    "sqlalchemy.types.TypeDecorator.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.bit.BIT.process_bind_param": [
+    "<builtin>.isinstance",
+    "asyncpg.BitString"
+  ],
+  "pgvector.sqlalchemy.functions": [],
+  "pgvector.sqlalchemy.halfvec": [
+    "sqlalchemy.types.String"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.cosine_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.l1_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.l2_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.max_inner_product": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.__init__": [
+    "<builtin>.super",
+    "sqlalchemy.types.UserDefinedType.__init__"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.bind_processor": [],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.bind_processor.process": [
+    "pgvector.halfvec.HalfVector._to_db"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.get_col_spec": [],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.literal_processor": [
+    "sqlalchemy.types.String._cached_literal_processor"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.literal_processor.process": [
+    "pgvector.halfvec.HalfVector._to_db",
+    "sqlalchemy.types.String._cached_literal_processor"
+  ],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.result_processor": [],
+  "pgvector.sqlalchemy.halfvec.HALFVEC.result_processor.process": [
+    "pgvector.halfvec.HalfVector._from_db"
+  ],
+  "pgvector.sqlalchemy.sparsevec": [
+    "sqlalchemy.types.String"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.cosine_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.l1_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.l2_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.max_inner_product": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.__init__": [
+    "<builtin>.super",
+    "sqlalchemy.types.UserDefinedType.__init__"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.bind_processor": [],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.bind_processor.process": [
+    "pgvector.sparsevec.SparseVector._to_db"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.get_col_spec": [],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.literal_processor": [
+    "sqlalchemy.types.String._cached_literal_processor"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.literal_processor.process": [
+    "pgvector.sparsevec.SparseVector._to_db",
+    "sqlalchemy.types.String._cached_literal_processor"
+  ],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.result_processor": [],
+  "pgvector.sqlalchemy.sparsevec.SPARSEVEC.result_processor.process": [
+    "pgvector.sparsevec.SparseVector._from_db"
+  ],
+  "pgvector.sqlalchemy.vector": [
+    "sqlalchemy.types.String"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.Comparator.cosine_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.Comparator.l1_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.Comparator.l2_distance": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.Comparator.max_inner_product": [
+    "sqlalchemy.types.TypeEngine.Comparator.op"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.__init__": [
+    "<builtin>.super",
+    "sqlalchemy.types.UserDefinedType.__init__"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.bind_processor": [],
+  "pgvector.sqlalchemy.vector.VECTOR.bind_processor.process": [
+    "pgvector.vector.Vector._to_db"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.get_col_spec": [],
+  "pgvector.sqlalchemy.vector.VECTOR.literal_processor": [
+    "sqlalchemy.types.String._cached_literal_processor"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.literal_processor.process": [
+    "pgvector.vector.Vector._to_db",
+    "sqlalchemy.types.String._cached_literal_processor"
+  ],
+  "pgvector.sqlalchemy.vector.VECTOR.result_processor": [],
+  "pgvector.sqlalchemy.vector.VECTOR.result_processor.process": [
+    "pgvector.vector.Vector._from_db"
+  ],
+  "pgvector.vector": [
+    "<builtin>.classmethod"
+  ],
+  "pgvector.vector.Vector.__eq__": [
+    "<builtin>.isinstance"
+  ],
+  "pgvector.vector.Vector.__init__": [
+    "<builtin>.ValueError",
+    "<builtin>.isinstance",
+    "<builtin>.memoryview.cast",
+    "array.array",
+    "array.array.frombytes",
+    "numpy.ndarray.astype",
+    "pgvector._utils.is_ndarray"
+  ],
+  "pgvector.vector.Vector.__repr__": [
+    "pgvector.vector.Vector.to_list"
+  ],
+  "pgvector.vector.Vector._from_db": [
+    "<builtin>.isinstance",
+    "pgvector.vector.Vector._from_text",
+    "pgvector.vector.Vector.to_list"
+  ],
+  "pgvector.vector.Vector._from_text": [
+    "<builtin>.float",
+    "<builtin>.str.split"
+  ],
+  "pgvector.vector.Vector._to_db": [
+    "<builtin>.float",
+    "<builtin>.isinstance",
+    "<builtin>.str",
+    "<builtin>.str.join",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.to_text"
+  ],
+  "pgvector.vector.Vector.dimensions": [
+    "<builtin>.len"
+  ],
+  "pgvector.vector.Vector.from_binary": [
+    "<builtin>.ValueError",
+    "<builtin>.len",
+    "<builtin>.memoryview",
+    "<builtin>.object.__new__",
+    "array.array",
+    "array.array.byteswap",
+    "array.array.frombytes",
+    "struct.unpack_from"
+  ],
+  "pgvector.vector.Vector.from_text": [
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector._from_text"
+  ],
+  "pgvector.vector.Vector.to_binary": [
+    "<builtin>.len",
+    "<builtin>.memoryview",
+    "array.array",
+    "array.array.byteswap",
+    "struct.pack"
+  ],
+  "pgvector.vector.Vector.to_list": [
+    "array.array.tolist"
+  ],
+  "pgvector.vector.Vector.to_numpy": [
+    "numpy.frombuffer"
+  ],
+  "pgvector.vector.Vector.to_text": [
+    "<builtin>.str",
+    "<builtin>.str.join"
+  ]
+}

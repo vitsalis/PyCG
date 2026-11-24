@@ -1,0 +1,2276 @@
+{
+  "edges": {
+    "pymysql.Binary": {
+      "<builtin>.bytes": [
+        "pymysql 129:17 call  bytes(x)"
+      ]
+    },
+    "pymysql.DBAPISet.__ne__": {
+      "<builtin>.frozenset.__ne__": [
+        "pymysql 85:36 call  frozenset.__ne__(self, other)"
+      ],
+      "pymysql.DBAPISet.__eq__": [
+        "pymysql 87:26 op  other not in self"
+      ]
+    },
+    "pymysql._auth._init_nacl": {
+      "<builtin>.RuntimeError": [
+        "pymysql._auth 64:27 call  RuntimeError( \"'pynacl' package is required for ed25519_p..."
+      ]
+    },
+    "pymysql._auth._roundtrip": {
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql._auth 119:28 call  conn._read_packet()"
+      ],
+      "pymysql.connections.Connection.write_packet": [
+        "pymysql._auth 118:22 call  conn.write_packet(send_data)"
+      ]
+    },
+    "pymysql._auth._scalar_clamp": {
+      "<builtin>.bytearray": [
+        "pymysql._auth 70:19 call  bytearray(s32)",
+        "pymysql._auth 71:26 call  bytearray([ba[0] & 248])",
+        "pymysql._auth 72:27 call  bytearray([(ba[31] & 127) | 64])"
+      ],
+      "<builtin>.bytes": [
+        "pymysql._auth 71:16 call  bytes(bytearray([ba[0] & 248]))",
+        "pymysql._auth 72:17 call  bytes(bytearray([(ba[31] & 127) | 64]))",
+        "pymysql._auth 73:23 call  bytes(s32[1:31])"
+      ]
+    },
+    "pymysql._auth._xor_password": {
+      "<builtin>.bytearray": [
+        "pymysql._auth 128:31 call  bytearray(password)"
+      ],
+      "<builtin>.bytes": [
+        "pymysql._auth 133:17 call  bytes(password_bytes)"
+      ],
+      "<builtin>.len": [
+        "pymysql._auth 130:19 call  len(salt)",
+        "pymysql._auth 131:23 call  len(password_bytes)"
+      ],
+      "<builtin>.range": [
+        "pymysql._auth 131:19 call  range(len(password_bytes))"
+      ]
+    },
+    "pymysql._auth.caching_sha2_password_auth": {
+      "<builtin>.bytes.endswith": [
+        "pymysql._auth 219:30 call  conn.salt.endswith(b\"\\0\")"
+      ],
+      "pymysql._auth.scramble_caching_sha2": [
+        "pymysql._auth 223:42 call  scramble_caching_sha2(conn.password, conn.salt)"
+      ],
+      "pymysql._auth.sha2_rsa_encrypt": [
+        "pymysql._auth 269:28 call  sha2_rsa_encrypt(conn.password, conn.salt, conn.server_pu..."
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql._auth 243:32 call  conn._read_packet()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql._auth 228:31 call  OperationalError( \"caching sha2: Unknown packet for fast ...",
+        "pymysql._auth 248:31 call  OperationalError(\"caching sha2: Unknown result for fast a...",
+        "pymysql._auth 261:35 call  OperationalError( \"caching sha2: Unknown packet for publi..."
+      ],
+      "pymysql.protocol.MysqlPacket.check_error": [
+        "pymysql._auth 244:24 call  pkt.check_error()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_all": [
+        "pymysql._auth 218:33 call  pkt.read_all()"
+      ]
+    },
+    "pymysql._auth.ed25519_password": {
+      "_hashlib.HASH.digest": [
+        "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
+        "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
+        "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
+      ],
+      "_sha2.SHA512Type.digest": [
+        "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
+        "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
+        "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
+      ],
+      "_sha512.sha512.digest": [
+        "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
+        "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
+        "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
+      ],
+      "hashlib.sha512": [
+        "pymysql._auth 87:23 call  hashlib.sha512(password)",
+        "pymysql._auth 93:23 call  hashlib.sha512(h[32:] + scramble)",
+        "pymysql._auth 103:23 call  hashlib.sha512(R + A + scramble)"
+      ],
+      "nacl.bindings.crypto_core_ed25519_scalar_add": [
+        "pymysql._auth 108:54 call  _nacl_bindings.crypto_core_ed25519_scalar_add(ks, r)"
+      ],
+      "nacl.bindings.crypto_core_ed25519_scalar_mul": [
+        "pymysql._auth 107:55 call  _nacl_bindings.crypto_core_ed25519_scalar_mul(k, s)"
+      ],
+      "nacl.bindings.crypto_core_ed25519_scalar_reduce": [
+        "pymysql._auth 96:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(r)",
+        "pymysql._auth 106:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(k)"
+      ],
+      "nacl.bindings.crypto_scalarmult_ed25519_base_noclamp": [
+        "pymysql._auth 97:62 call  _nacl_bindings.crypto_scalarmult_ed25519_base_noclamp(r)",
+        "pymysql._auth 100:62 call  _nacl_bindings.crypto_scalarmult_ed25519_base_noclamp(s)"
+      ],
+      "pymysql._auth._init_nacl": [
+        "pymysql._auth 84:19 call  _init_nacl()"
+      ],
+      "pymysql._auth._scalar_clamp": [
+        "pymysql._auth 90:22 call  _scalar_clamp(h[:32])"
+      ]
+    },
+    "pymysql._auth.scramble_caching_sha2": {
+      "_sha2.SHA256Type.digest": [
+        "pymysql._auth 200:41 call  hashlib.sha256(password).digest()",
+        "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()",
+        "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()"
+      ],
+      "_sha256.sha256.digest": [
+        "pymysql._auth 200:41 call  hashlib.sha256(password).digest()",
+        "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()",
+        "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()"
+      ]
+    },
+    "pymysql._auth.scramble_native_password": {
+      "_sha1.sha.digest": [
+        "pymysql._auth 33:39 call  sha1_new(password).digest()",
+        "pymysql._auth 34:37 call  sha1_new(stage1).digest()",
+        "pymysql._auth 38:22 call  s.digest()"
+      ],
+      "_sha1.sha.update": [
+        "pymysql._auth 36:13 call  s.update(message[:SCRAMBLE_LENGTH])",
+        "pymysql._auth 37:13 call  s.update(stage2)"
+      ],
+      "_sha1.sha1.digest": [
+        "pymysql._auth 33:39 call  sha1_new(password).digest()",
+        "pymysql._auth 34:37 call  sha1_new(stage1).digest()",
+        "pymysql._auth 38:22 call  s.digest()"
+      ],
+      "_sha1.sha1.update": [
+        "pymysql._auth 36:13 call  s.update(message[:SCRAMBLE_LENGTH])",
+        "pymysql._auth 37:13 call  s.update(stage2)"
+      ]
+    },
+    "pymysql._auth.sha256_password_auth": {
+      "<builtin>.bytes.endswith": [
+        "pymysql._auth 167:30 call  conn.salt.endswith(b\"\\0\")"
+      ],
+      "pymysql._auth._roundtrip": [
+        "pymysql._auth 163:26 call  _roundtrip(conn, data)",
+        "pymysql._auth 173:29 call  _roundtrip(conn, b\"\\1\")",
+        "pymysql._auth 188:22 call  _roundtrip(conn, data)"
+      ],
+      "pymysql._auth.sha2_rsa_encrypt": [
+        "pymysql._auth 184:32 call  sha2_rsa_encrypt(conn.password, conn.salt, conn.server_pu..."
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql._auth 182:35 call  OperationalError(\"Couldn't receive server's public key\")"
+      ],
+      "pymysql.protocol.MysqlPacket.is_auth_switch_request": [
+        "pymysql._auth 165:34 call  pkt.is_auth_switch_request()"
+      ],
+      "pymysql.protocol.MysqlPacket.is_extra_auth_data": [
+        "pymysql._auth 175:30 call  pkt.is_extra_auth_data()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_all": [
+        "pymysql._auth 166:33 call  pkt.read_all()"
+      ]
+    },
+    "pymysql._auth.sha2_rsa_encrypt": {
+      "<builtin>.RuntimeError": [
+        "pymysql._auth 142:27 call  RuntimeError( \"'cryptography' package is required for sha..."
+      ],
+      "cryptography.hazmat.backends.default_backend": [
+        "pymysql._auth 147:76 call  default_backend()"
+      ],
+      "cryptography.hazmat.primitives.asymmetric.padding.MGF1": [
+        "pymysql._auth 151:29 call  padding.MGF1(algorithm=hashes.SHA1())"
+      ],
+      "cryptography.hazmat.primitives.asymmetric.padding.OAEP": [
+        "pymysql._auth 150:21 call  padding.OAEP( mgf=padding.MGF1(algorithm=hashes.SHA1()), ..."
+      ],
+      "cryptography.hazmat.primitives.hashes.SHA1": [
+        "pymysql._auth 151:51 call  hashes.SHA1()",
+        "pymysql._auth 152:34 call  hashes.SHA1()"
+      ],
+      "cryptography.hazmat.primitives.serialization.load_pem_public_key": [
+        "pymysql._auth 147:48 call  serialization.load_pem_public_key(public_key, default_bac..."
+      ],
+      "cryptography.hazmat.primitives.serialization.load_pem_public_key.encrypt": [
+        "pymysql._auth 148:27 call  rsa_key.encrypt( message, padding.OAEP( mgf=padding.MGF1(..."
+      ],
+      "pymysql._auth._xor_password": [
+        "pymysql._auth 146:28 call  _xor_password(password + b\"\\0\", salt)"
+      ]
+    },
+    "pymysql.connections.Connection.__exit__": {
+      "pymysql.connections.Connection.close": [
+        "pymysql.connections 380:19 call  self.close()"
+      ]
+    },
+    "pymysql.connections.Connection.__init__": {
+      "<builtin>.NotImplementedError": [
+        "pymysql.connections 231:38 call  NotImplementedError( \"compress and named_pipe arguments a...",
+        "pymysql.connections 295:46 call  NotImplementedError(\"ssl module not found\")"
+      ],
+      "<builtin>.ValueError": [
+        "pymysql.connections 310:29 call  ValueError(\"port should be of type int\")",
+        "pymysql.connections 319:29 call  ValueError(\"connect_timeout should be >0 and <=31536000\")",
+        "pymysql.connections 322:29 call  ValueError(\"read_timeout should be > 0\")",
+        "pymysql.connections 325:29 call  ValueError(\"write_timeout should be > 0\")"
+      ],
+      "<builtin>.dict.get": [
+        "pymysql.connections 272:58 call  ssl.get(key)"
+      ],
+      "<builtin>.int": [
+        "pymysql.connections 265:23 call  int(_config(\"port\", port))"
+      ],
+      "<builtin>.str.encode": [
+        "pymysql.connections 314:49 call  self.password.encode(\"latin1\")"
+      ],
+      "<builtin>.str.startswith": [
+        "pymysql.connections 240:39 call  sys.platform.startswith(\"win\")"
+      ],
+      "configparser.RawConfigParser.read": [
+        "pymysql.connections 250:21 call  cfg.read(os.path.expanduser(read_default_file))"
+      ],
+      "os.path.expanduser": [
+        "pymysql.connections 250:40 call  os.path.expanduser(read_default_file)"
+      ],
+      "pymysql.connections.Connection.__init__._config": [
+        "pymysql.connections 260:27 call  _config(\"user\", user)",
+        "pymysql.connections 261:31 call  _config(\"password\", password)",
+        "pymysql.connections 262:27 call  _config(\"host\", host)",
+        "pymysql.connections 263:31 call  _config(\"database\", database)",
+        "pymysql.connections 264:34 call  _config(\"socket\", unix_socket)",
+        "pymysql.connections 265:31 call  _config(\"port\", port)",
+        "pymysql.connections 266:35 call  _config(\"bind-address\", bind_address)",
+        "pymysql.connections 267:30 call  _config(\"default-character-set\", charset)",
+        "pymysql.connections 272:36 call  _config(\"ssl-\" + key, ssl.get(key))"
+      ],
+      "pymysql.optionfile.Parser.__init__": [
+        "pymysql.connections 249:25 call  Parser()"
+      ],
+      "pymysql.optionfile.Parser.optionxform": [
+        "pymysql.connections 250:21 call  cfg.read(os.path.expanduser(read_default_file))"
+      ],
+      "warnings.warn": [
+        "pymysql.connections 222:26 call  warnings.warn(\"'db' is deprecated, use 'database'\", Depre...",
+        "pymysql.connections 225:26 call  warnings.warn( \"'passwd' is deprecated, use 'password'\", ..."
+      ]
+    },
+    "pymysql.connections.Connection.__init__._config": {
+      "pymysql.optionfile.Parser.get": [
+        "pymysql.connections 256:35 call  cfg.get(read_default_group, key)"
+      ]
+    },
+    "pymysql.connections.Connection._create_ssl_ctx": {
+      "<builtin>.str.lower": [
+        "pymysql.connections 403:60 call  verify_mode_value.lower()"
+      ],
+      "ssl.SSLContext.load_cert_chain": [
+        "pymysql.connections 413:32 call  ctx.load_cert_chain( sslp[\"cert\"], keyfile=sslp.get(\"key\"..."
+      ],
+      "ssl.SSLContext.set_ciphers": [
+        "pymysql.connections 417:28 call  ctx.set_ciphers(sslp[\"cipher\"])"
+      ]
+    },
+    "pymysql.connections.Connection._escape_string": {
+      "<builtin>.str.replace": [
+        "pymysql.connections 559:29 call  s.replace(\"'\", \"''\")"
+      ],
+      "pymysql.converters.escape_string": [
+        "pymysql.connections 560:40 call  converters.escape_string(s)"
+      ]
+    },
+    "pymysql.connections.Connection._execute_command": {
+      "<builtin>.isinstance": [
+        "pymysql.connections 887:22 call  isinstance(sql, str)"
+      ],
+      "<builtin>.len": [
+        "pymysql.connections 890:46 call  len(sql)",
+        "pymysql.connections 906:50 call  len(sql)"
+      ],
+      "<builtin>.min": [
+        "pymysql.connections 890:26 call  min(MAX_PACKET_LEN, len(sql) + 1)",
+        "pymysql.connections 906:30 call  min(MAX_PACKET_LEN, len(sql))"
+      ],
+      "<builtin>.str.encode": [
+        "pymysql.connections 888:29 call  sql.encode(self.encoding)"
+      ],
+      "pymysql.connections.Connection._write_bytes": [
+        "pymysql.connections 896:26 call  self._write_bytes(packet)"
+      ],
+      "pymysql.connections.Connection.next_result": [
+        "pymysql.connections 884:33 call  self.next_result()"
+      ],
+      "pymysql.connections.Connection.write_packet": [
+        "pymysql.connections 907:30 call  self.write_packet(sql[:packet_size])"
+      ],
+      "pymysql.connections.MySQLResult._finish_unbuffered_query": [
+        "pymysql.connections 882:54 call  self._result._finish_unbuffered_query()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 875:37 call  err.InterfaceError(0, \"\")"
+      ],
+      "struct.pack": [
+        "pymysql.connections 894:30 call  struct.pack(\"<iB\", packet_size, command)"
+      ],
+      "warnings.warn": [
+        "pymysql.connections 881:30 call  warnings.warn(\"Previous unbuffered result was left incomp..."
+      ]
+    },
+    "pymysql.connections.Connection._force_close": {
+      "io.BufferedReader.close": [
+        "pymysql.connections 451:30 call  self._rfile.close()"
+      ],
+      "socket.socket.close": [
+        "pymysql.connections 454:33 call  self._sock.close()"
+      ],
+      "ssl.SSLSocket.close": [
+        "pymysql.connections 454:33 call  self._sock.close()"
+      ]
+    },
+    "pymysql.connections.Connection._get_auth_plugin_handler": {
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 1162:43 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au..."
+      ]
+    },
+    "pymysql.connections.Connection._get_server_information": {
+      "<builtin>.bytes.decode": [
+        "pymysql.connections 1193:56 call  data[i:server_end].decode(\"latin1\")",
+        "pymysql.connections 1245:57 call  data[i:].decode(\"utf-8\")",
+        "pymysql.connections 1247:67 call  data[i:server_end].decode(\"utf-8\")"
+      ],
+      "<builtin>.bytes.find": [
+        "pymysql.connections 1192:31 call  data.find(b\"\\0\", i)",
+        "pymysql.connections 1242:35 call  data.find(b\"\\0\", i)"
+      ],
+      "<builtin>.len": [
+        "pymysql.connections 1205:15 call  len(data)",
+        "pymysql.connections 1229:15 call  len(data)",
+        "pymysql.connections 1236:65 call  len(data)"
+      ],
+      "<builtin>.max": [
+        "pymysql.connections 1224:27 call  max(12, salt_len - 9)"
+      ],
+      "pymysql.charset.Charsets.by_id": [
+        "pymysql.connections 1212:52 call  charset_by_id(lang)"
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1186:35 call  self._read_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.get_all_data": [
+        "pymysql.connections 1187:35 call  packet.get_all_data()"
+      ],
+      "struct.unpack": [
+        "pymysql.connections 1196:46 call  struct.unpack(\"<I\", data[i : i + 4])",
+        "pymysql.connections 1202:49 call  struct.unpack(\"<H\", data[i : i + 2])",
+        "pymysql.connections 1206:56 call  struct.unpack(\"<BHHB\", data[i : i + 6])"
+      ]
+    },
+    "pymysql.connections.Connection._process_auth": {
+      "<builtin>.type": [
+        "pymysql.connections 1088:47 call  type(handler)"
+      ],
+      "pymysql._auth.caching_sha2_password_auth": [
+        "pymysql.connections 1091:52 call  _auth.caching_sha2_password_auth(self, auth_packet)"
+      ],
+      "pymysql._auth.ed25519_password": [
+        "pymysql.connections 1097:42 call  _auth.ed25519_password(self.password, auth_packet.read_al..."
+      ],
+      "pymysql._auth.sha256_password_auth": [
+        "pymysql.connections 1093:46 call  _auth.sha256_password_auth(self, auth_packet)"
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1138:40 call  self._read_packet()",
+        "pymysql.connections 1150:32 call  self._read_packet()"
+      ],
+      "pymysql.connections.Connection.write_packet": [
+        "pymysql.connections 1115:38 call  self.write_packet(self.password + b\"\\0\")",
+        "pymysql.connections 1120:42 call  self.write_packet(resp + b\"\\0\")",
+        "pymysql.connections 1149:26 call  self.write_packet(data)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 1085:47 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...",
+        "pymysql.connections 1122:51 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...",
+        "pymysql.connections 1128:51 call  err.OperationalError( CR.CR_AUTH_PLUGIN_ERR, f\"Authentica...",
+        "pymysql.connections 1134:47 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...",
+        "pymysql.connections 1144:39 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, \"Aut..."
+      ],
+      "pymysql.protocol.MysqlPacket.is_ok_packet": [
+        "pymysql.connections 1140:36 call  pkt.is_ok_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_uint8": [
+        "pymysql.connections 1109:38 call  pkt.read_uint8()"
+      ]
+    },
+    "pymysql.connections.Connection._read_bytes": {
+      "<builtin>.len": [
+        "pymysql.connections 832:15 call  len(data)"
+      ],
+      "io.BufferedReader.read": [
+        "pymysql.connections 818:40 call  self._rfile.read(num_bytes)"
+      ],
+      "pymysql.connections.Connection._force_close": [
+        "pymysql.connections 823:34 call  self._force_close()",
+        "pymysql.connections 830:34 call  self._force_close()",
+        "pymysql.connections 833:30 call  self._force_close()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 824:43 call  err.OperationalError( CR.CR_SERVER_LOST, f\"Lost connectio...",
+        "pymysql.connections 834:39 call  err.OperationalError( CR.CR_SERVER_LOST, \"Lost connection..."
+      ]
+    },
+    "pymysql.connections.Connection._read_ok_packet": {
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 472:32 call  self._read_packet()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 474:39 call  err.OperationalError( CR.CR_COMMANDS_OUT_OF_SYNC, \"Comman..."
+      ],
+      "pymysql.protocol.MysqlPacket.is_ok_packet": [
+        "pymysql.connections 473:32 call  pkt.is_ok_packet()"
+      ],
+      "pymysql.protocol.OKPacketWrapper.__init__": [
+        "pymysql.connections 478:29 call  OKPacketWrapper(pkt)"
+      ]
+    },
+    "pymysql.connections.Connection._read_packet": {
+      "<builtin>.bytes.join": [
+        "pymysql.connections 806:38 call  b\"\".join(buff)"
+      ],
+      "<builtin>.list.append": [
+        "pymysql.connections 801:24 call  buff.append(recv_data)"
+      ],
+      "pymysql.connections.Connection._force_close": [
+        "pymysql.connections 785:34 call  self._force_close()"
+      ],
+      "pymysql.connections.Connection._read_bytes": [
+        "pymysql.connections 779:45 call  self._read_bytes(4)",
+        "pymysql.connections 798:41 call  self._read_bytes(bytes_to_read)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 788:47 call  err.OperationalError( CR.CR_SERVER_LOST, \"Lost connection...",
+        "pymysql.connections 792:40 call  err.InternalError( \"Packet sequence number wrong - got %d..."
+      ],
+      "pymysql.protocol.FieldDescriptorPacket.__init__": [
+        "pymysql.connections 806:29 call  packet_type(b\"\".join(buff), self.encoding)"
+      ],
+      "pymysql.protocol.MysqlPacket.__init__": [
+        "pymysql.connections 806:29 call  packet_type(b\"\".join(buff), self.encoding)"
+      ],
+      "pymysql.protocol.MysqlPacket.is_error_packet": [
+        "pymysql.connections 807:34 call  packet.is_error_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.raise_for_error": [
+        "pymysql.connections 810:35 call  packet.raise_for_error()"
+      ],
+      "socket.socket.settimeout": [
+        "pymysql.connections 774:34 call  self._sock.settimeout(self._read_timeout)"
+      ],
+      "ssl.SSLSocket.settimeout": [
+        "pymysql.connections 774:34 call  self._sock.settimeout(self._read_timeout)"
+      ],
+      "struct.unpack": [
+        "pymysql.connections 782:54 call  struct.unpack(\"<HBB\", packet_header)"
+      ]
+    },
+    "pymysql.connections.Connection._read_query_result": {
+      "pymysql.connections.MySQLResult.__init__": [
+        "pymysql.connections 853:29 call  MySQLResult(self)"
+      ],
+      "pymysql.connections.MySQLResult.init_unbuffered_query": [
+        "pymysql.connections 855:41 call  result.init_unbuffered_query()"
+      ],
+      "pymysql.connections.MySQLResult.read": [
+        "pymysql.connections 857:24 call  result.read()"
+      ]
+    },
+    "pymysql.connections.Connection._request_authentication": {
+      "<builtin>.ValueError": [
+        "pymysql.connections 918:29 call  ValueError(\"Did not specify a username\")"
+      ],
+      "<builtin>.dict.items": [
+        "pymysql.connections 1002:50 call  self._connect_attrs.items()"
+      ],
+      "pymysql._auth.scramble_native_password": [
+        "pymysql.connections 963:54 call  _auth.scramble_native_password(self.password, self.salt)",
+        "pymysql.connections 966:54 call  _auth.scramble_native_password(self.password, self.salt)"
+      ],
+      "pymysql._auth.sha256_password_auth": [
+        "pymysql.connections 1066:61 call  _auth.sha256_password_auth(self, auth_packet)"
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1010:40 call  self._read_packet()"
+      ],
+      "pymysql.connections.Connection.write_packet": [
+        "pymysql.connections 951:30 call  self.write_packet(data_init)",
+        "pymysql.connections 1009:26 call  self.write_packet(data)"
+      ],
+      "pymysql.connections._lenenc_int": [
+        "pymysql.connections 986:32 call  _lenenc_int(len(authresp))",
+        "pymysql.connections 1004:45 call  _lenenc_int(len(k))",
+        "pymysql.connections 1006:45 call  _lenenc_int(len(v))",
+        "pymysql.connections 1007:32 call  _lenenc_int(len(connect_attrs))"
+      ],
+      "ssl.SSLContext.wrap_socket": [
+        "pymysql.connections 952:46 call  self.ctx.wrap_socket(self._sock, server_hostname=self.host)"
+      ],
+      "ssl.SSLSocket.makefile": [
+        "pymysql.connections 953:46 call  self._sock.makefile(\"rb\")"
+      ]
+    },
+    "pymysql.connections.Connection._send_autocommit_mode": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 484:30 call  self._execute_command( COMMAND.COM_QUERY, \"SET AUTOCOMMIT..."
+      ],
+      "pymysql.connections.Connection._read_ok_packet": [
+        "pymysql.connections 487:29 call  self._read_ok_packet()"
+      ],
+      "pymysql.connections.Connection.escape": [
+        "pymysql.connections 485:67 call  self.escape(self.autocommit_mode)"
+      ]
+    },
+    "pymysql.connections.Connection._write_bytes": {
+      "pymysql.connections.Connection._force_close": [
+        "pymysql.connections 846:30 call  self._force_close()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 847:39 call  err.OperationalError( CR.CR_SERVER_GONE_ERROR, f\"MySQL se..."
+      ],
+      "socket.socket.sendall": [
+        "pymysql.connections 844:31 call  self._sock.sendall(data)"
+      ],
+      "socket.socket.settimeout": [
+        "pymysql.connections 841:34 call  self._sock.settimeout(self._write_timeout)"
+      ],
+      "ssl.SSLSocket.sendall": [
+        "pymysql.connections 844:31 call  self._sock.sendall(data)"
+      ],
+      "ssl.SSLSocket.settimeout": [
+        "pymysql.connections 841:34 call  self._sock.settimeout(self._write_timeout)"
+      ]
+    },
+    "pymysql.connections.Connection.autocommit": {
+      "<builtin>.bool": [
+        "pymysql.connections 463:36 call  bool(value)"
+      ],
+      "pymysql.connections.Connection._send_autocommit_mode": [
+        "pymysql.connections 466:39 call  self._send_autocommit_mode()"
+      ],
+      "pymysql.connections.Connection.get_autocommit": [
+        "pymysql.connections 464:38 call  self.get_autocommit()"
+      ]
+    },
+    "pymysql.connections.Connection.begin": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 491:30 call  self._execute_command(COMMAND.COM_QUERY, \"BEGIN\")"
+      ],
+      "pymysql.connections.Connection._read_ok_packet": [
+        "pymysql.connections 492:29 call  self._read_ok_packet()"
+      ]
+    },
+    "pymysql.connections.Connection.close": {
+      "contextlib.suppress": [
+        "pymysql.connections 438:37 call  contextlib.suppress(Exception)"
+      ],
+      "pymysql.connections.Connection._force_close": [
+        "pymysql.connections 441:30 call  self._force_close()"
+      ],
+      "pymysql.connections.Connection._write_bytes": [
+        "pymysql.connections 439:34 call  self._write_bytes(send_data)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 432:28 call  err.Error(\"Already closed\")"
+      ],
+      "struct.pack": [
+        "pymysql.connections 436:32 call  struct.pack(\"<iB\", 1, COMMAND.COM_QUIT)"
+      ]
+    },
+    "pymysql.connections.Connection.commit": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 501:30 call  self._execute_command(COMMAND.COM_QUERY, \"COMMIT\")"
+      ],
+      "pymysql.connections.Connection._read_ok_packet": [
+        "pymysql.connections 502:29 call  self._read_ok_packet()"
+      ]
+    },
+    "pymysql.connections.Connection.connect": {
+      "pymysql.connections.Connection._get_server_information": [
+        "pymysql.connections 701:41 call  self._get_server_information()"
+      ],
+      "pymysql.connections.Connection._request_authentication": [
+        "pymysql.connections 702:41 call  self._request_authentication()"
+      ],
+      "pymysql.connections.Connection.autocommit": [
+        "pymysql.connections 730:32 call  self.autocommit(self.autocommit_mode)"
+      ],
+      "pymysql.connections.Connection.cursor": [
+        "pymysql.connections 720:32 call  self.cursor()",
+        "pymysql.connections 725:32 call  self.cursor()"
+      ],
+      "pymysql.connections.Connection.set_character_set": [
+        "pymysql.connections 717:35 call  self.set_character_set(self.charset, self.collation)"
+      ],
+      "pymysql.cursors.Cursor.close": [
+        "pymysql.connections 722:24 call  c.close()",
+        "pymysql.connections 727:24 call  c.close()"
+      ],
+      "pymysql.cursors.Cursor.execute": [
+        "pymysql.connections 721:26 call  c.execute(\"SET sql_mode=%s\", (self.sql_mode,))",
+        "pymysql.connections 726:26 call  c.execute(self.init_command)"
+      ],
+      "socket.socket": [
+        "pymysql.connections 668:41 call  socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)"
+      ],
+      "socket.socket.connect": [
+        "pymysql.connections 670:33 call  sock.connect(self.unix_socket)"
+      ],
+      "socket.socket.makefile": [
+        "pymysql.connections 698:40 call  sock.makefile(\"rb\")"
+      ],
+      "socket.socket.setsockopt": [
+        "pymysql.connections 692:36 call  sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)",
+        "pymysql.connections 693:36 call  sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)"
+      ],
+      "socket.socket.settimeout": [
+        "pymysql.connections 669:36 call  sock.settimeout(self.connect_timeout)",
+        "pymysql.connections 696:28 call  sock.settimeout(self._read_timeout)"
+      ]
+    },
+    "pymysql.connections.Connection.cursor": {
+      "pymysql.cursors.Cursor.__init__": [
+        "pymysql.connections 571:26 call  cursor(self)",
+        "pymysql.connections 572:32 call  self.cursorclass(self)"
+      ]
+    },
+    "pymysql.connections.Connection.escape": {
+      "<builtin>.bytearray.hex": [
+        "pymysql.connections 539:32 call  obj.hex()"
+      ],
+      "<builtin>.bytes.hex": [
+        "pymysql.connections 539:32 call  obj.hex()"
+      ],
+      "<builtin>.isinstance": [
+        "pymysql.connections 535:22 call  isinstance(obj, str)",
+        "pymysql.connections 538:22 call  isinstance(obj, (bytes, bytearray))"
+      ],
+      "pymysql.connections.Connection._escape_string": [
+        "pymysql.connections 536:43 call  self._escape_string(obj)"
+      ],
+      "pymysql.converters.escape_item": [
+        "pymysql.connections 543:38 call  converters.escape_item(obj, self.encoding, mapping=mapping)"
+      ]
+    },
+    "pymysql.connections.Connection.get_autocommit": {
+      "<builtin>.bool": [
+        "pymysql.connections 469:20 call  bool(self.server_status & SERVER_STATUS.SERVER_STATUS_AUT..."
+      ]
+    },
+    "pymysql.connections.Connection.kill": {
+      "<builtin>.TypeError": [
+        "pymysql.connections 593:28 call  TypeError(\"thread_id must be an integer\")"
+      ],
+      "<builtin>.isinstance": [
+        "pymysql.connections 592:26 call  isinstance(thread_id, int)"
+      ],
+      "pymysql.connections.Connection.query": [
+        "pymysql.connections 594:19 call  self.query(f\"KILL {thread_id:d}\")"
+      ]
+    },
+    "pymysql.connections.Connection.literal": {
+      "pymysql.connections.Connection.escape": [
+        "pymysql.connections 555:27 call  self.escape(obj)"
+      ],
+      "warnings.warn": [
+        "pymysql.connections 550:22 call  warnings.warn( \"literal() is deprecated and will be remov..."
+      ]
+    },
+    "pymysql.connections.Connection.next_result": {
+      "pymysql.connections.Connection._read_query_result": [
+        "pymysql.connections 585:54 call  self._read_query_result(unbuffered=unbuffered)"
+      ]
+    },
+    "pymysql.connections.Connection.ping": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 621:34 call  self._execute_command(COMMAND.COM_PING, \"\")"
+      ],
+      "pymysql.connections.Connection._read_ok_packet": [
+        "pymysql.connections 622:33 call  self._read_ok_packet()"
+      ],
+      "pymysql.connections.Connection.connect": [
+        "pymysql.connections 616:29 call  self.connect()",
+        "pymysql.connections 625:29 call  self.connect()"
+      ],
+      "pymysql.connections.Connection.ping": [
+        "pymysql.connections 626:26 call  self.ping(False)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 619:32 call  err.Error(\"Already closed\")"
+      ],
+      "warnings.warn": [
+        "pymysql.connections 609:26 call  warnings.warn( \"The 'reconnect' argument is deprecated. C..."
+      ]
+    },
+    "pymysql.connections.Connection.query": {
+      "<builtin>.isinstance": [
+        "pymysql.connections 578:22 call  isinstance(sql, str)"
+      ],
+      "<builtin>.str.encode": [
+        "pymysql.connections 579:29 call  sql.encode(self.encoding)"
+      ],
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 580:30 call  self._execute_command(COMMAND.COM_QUERY, sql)"
+      ],
+      "pymysql.connections.Connection._read_query_result": [
+        "pymysql.connections 581:54 call  self._read_query_result(unbuffered=unbuffered)"
+      ]
+    },
+    "pymysql.connections.Connection.rollback": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 511:30 call  self._execute_command(COMMAND.COM_QUERY, \"ROLLBACK\")"
+      ],
+      "pymysql.connections.Connection._read_ok_packet": [
+        "pymysql.connections 512:29 call  self._read_ok_packet()"
+      ]
+    },
+    "pymysql.connections.Connection.select_db": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 527:30 call  self._execute_command(COMMAND.COM_INIT_DB, db)"
+      ],
+      "pymysql.connections.Connection._read_ok_packet": [
+        "pymysql.connections 528:29 call  self._read_ok_packet()"
+      ]
+    },
+    "pymysql.connections.Connection.set_character_set": {
+      "pymysql.charset.Charset.encoding": [
+        "pymysql.connections 651:45 getattr  charset_by_name(charset).encoding"
+      ],
+      "pymysql.charset.Charsets.by_name": [
+        "pymysql.connections 651:35 call  charset_by_name(charset)"
+      ],
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 657:30 call  self._execute_command(COMMAND.COM_QUERY, query)"
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 658:26 call  self._read_packet()"
+      ]
+    },
+    "pymysql.connections.Connection.set_charset": {
+      "pymysql.connections.Connection.set_character_set": [
+        "pymysql.connections 641:31 call  self.set_character_set(charset)"
+      ]
+    },
+    "pymysql.connections.Connection.show_warnings": {
+      "pymysql.connections.Connection._execute_command": [
+        "pymysql.connections 516:30 call  self._execute_command(COMMAND.COM_QUERY, \"SHOW WARNINGS\")"
+      ],
+      "pymysql.connections.MySQLResult.__init__": [
+        "pymysql.connections 517:29 call  MySQLResult(self)"
+      ],
+      "pymysql.connections.MySQLResult.read": [
+        "pymysql.connections 518:20 call  result.read()"
+      ]
+    },
+    "pymysql.connections.Connection.write_packet": {
+      "<builtin>.bytes": [
+        "pymysql.connections 757:49 call  bytes([self._next_seq_id])"
+      ],
+      "<builtin>.len": [
+        "pymysql.connections 757:31 call  len(payload)"
+      ],
+      "pymysql.connections.Connection._write_bytes": [
+        "pymysql.connections 760:26 call  self._write_bytes(data)"
+      ],
+      "pymysql.connections._pack_int24": [
+        "pymysql.connections 757:27 call  _pack_int24(len(payload))"
+      ]
+    },
+    "pymysql.connections.MySQLResult.__del__": {
+      "pymysql.connections.MySQLResult._finish_unbuffered_query": [
+        "pymysql.connections 1286:42 call  self._finish_unbuffered_query()"
+      ]
+    },
+    "pymysql.connections.MySQLResult._check_packet_is_eof": {
+      "pymysql.protocol.EOFPacketWrapper.__init__": [
+        "pymysql.connections 1365:30 call  EOFPacketWrapper(packet)"
+      ],
+      "pymysql.protocol.MysqlPacket.is_eof_packet": [
+        "pymysql.connections 1358:36 call  packet.is_eof_packet()"
+      ]
+    },
+    "pymysql.connections.MySQLResult._finish_unbuffered_query": {
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1399:54 call  self.connection._read_packet()"
+      ],
+      "pymysql.connections.MySQLResult._check_packet_is_eof": [
+        "pymysql.connections 1412:41 call  self._check_packet_is_eof(packet)"
+      ]
+    },
+    "pymysql.connections.MySQLResult._get_descriptions": {
+      "<builtin>.dict.get": [
+        "pymysql.connections 1480:53 call  self.connection.decoders.get(field_type)"
+      ],
+      "<builtin>.list.append": [
+        "pymysql.connections 1458:31 call  self.fields.append(field)",
+        "pymysql.connections 1459:31 call  description.append(field.description())",
+        "pymysql.connections 1485:35 call  self.converters.append((encoding, converter))"
+      ],
+      "<builtin>.range": [
+        "pymysql.connections 1456:23 call  range(self.field_count)"
+      ],
+      "<builtin>.tuple": [
+        "pymysql.connections 1489:33 call  tuple(description)"
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1457:49 call  self.connection._read_packet(FieldDescriptorPacket)",
+        "pymysql.connections 1487:50 call  self.connection._read_packet()"
+      ],
+      "pymysql.protocol.FieldDescriptorPacket.description": [
+        "pymysql.connections 1459:49 call  field.description()"
+      ],
+      "pymysql.protocol.MysqlPacket.is_eof_packet": [
+        "pymysql.connections 1488:40 call  eof_packet.is_eof_packet()"
+      ]
+    },
+    "pymysql.connections.MySQLResult._read_load_local_packet": {
+      "<builtin>.RuntimeError": [
+        "pymysql.connections 1338:31 call  RuntimeError( \"**WARN**: Received LOAD_LOCAL packet but l..."
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1347:42 call  conn._read_packet()"
+      ],
+      "pymysql.connections.Connection.write_packet": [
+        "pymysql.connections 1346:30 call  conn.write_packet(b\"\")"
+      ],
+      "pymysql.connections.MySQLResult._read_ok_packet": [
+        "pymysql.connections 1355:29 call  self._read_ok_packet(ok_packet)"
+      ],
+      "pymysql.connections._send_local_file": [
+        "pymysql.connections 1343:29 call  _send_local_file(load_packet.filename, conn)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 1352:39 call  err.OperationalError( CR.CR_COMMANDS_OUT_OF_SYNC, \"Comman..."
+      ],
+      "pymysql.protocol.LoadLocalPacketWrapper.__init__": [
+        "pymysql.connections 1341:45 call  LoadLocalPacketWrapper(first_packet)"
+      ],
+      "pymysql.protocol.MysqlPacket.is_ok_packet": [
+        "pymysql.connections 1351:38 call  ok_packet.is_ok_packet()"
+      ]
+    },
+    "pymysql.connections.MySQLResult._read_ok_packet": {
+      "pymysql.protocol.OKPacketWrapper.__init__": [
+        "pymysql.connections 1327:36 call  OKPacketWrapper(packet)"
+      ]
+    },
+    "pymysql.connections.MySQLResult._read_result_packet": {
+      "pymysql.connections.MySQLResult._get_descriptions": [
+        "pymysql.connections 1372:31 call  self._get_descriptions()"
+      ],
+      "pymysql.connections.MySQLResult._read_rowdata_packet": [
+        "pymysql.connections 1373:34 call  self._read_rowdata_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_length_encoded_integer": [
+        "pymysql.connections 1371:68 call  first_packet.read_length_encoded_integer()"
+      ]
+    },
+    "pymysql.connections.MySQLResult._read_row_from_packet": {
+      "<builtin>.bytes.decode": [
+        "pymysql.connections 1440:39 call  data.decode(encoding)"
+      ],
+      "<builtin>.float": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "<builtin>.int": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "<builtin>.list.append": [
+        "pymysql.connections 1445:23 call  row.append(data)"
+      ],
+      "<builtin>.tuple": [
+        "pymysql.connections 1446:21 call  tuple(row)"
+      ],
+      "decimal.Decimal": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "pymysql.converters.convert_date": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "pymysql.converters.convert_datetime": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "pymysql.converters.convert_time": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "pymysql.converters.convert_timedelta": [
+        "pymysql.connections 1444:37 call  converter(data)"
+      ],
+      "pymysql.protocol.MysqlPacket.read_length_coded_string": [
+        "pymysql.connections 1433:55 call  packet.read_length_coded_string()"
+      ]
+    },
+    "pymysql.connections.MySQLResult._read_rowdata_packet": {
+      "<builtin>.len": [
+        "pymysql.connections 1426:33 call  len(rows)"
+      ],
+      "<builtin>.list.append": [
+        "pymysql.connections 1424:24 call  rows.append(self._read_row_from_packet(packet))"
+      ],
+      "<builtin>.tuple": [
+        "pymysql.connections 1427:26 call  tuple(rows)"
+      ],
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1420:50 call  self.connection._read_packet()"
+      ],
+      "pymysql.connections.MySQLResult._check_packet_is_eof": [
+        "pymysql.connections 1421:41 call  self._check_packet_is_eof(packet)"
+      ],
+      "pymysql.connections.MySQLResult._read_row_from_packet": [
+        "pymysql.connections 1424:51 call  self._read_row_from_packet(packet)"
+      ]
+    },
+    "pymysql.connections.MySQLResult._read_rowdata_packet_unbuffered": {
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1381:46 call  self.connection._read_packet()"
+      ],
+      "pymysql.connections.MySQLResult._check_packet_is_eof": [
+        "pymysql.connections 1382:37 call  self._check_packet_is_eof(packet)"
+      ],
+      "pymysql.connections.MySQLResult._read_row_from_packet": [
+        "pymysql.connections 1388:41 call  self._read_row_from_packet(packet)"
+      ]
+    },
+    "pymysql.connections.MySQLResult.init_unbuffered_query": {
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1306:52 call  self.connection._read_packet()"
+      ],
+      "pymysql.connections.MySQLResult._get_descriptions": [
+        "pymysql.connections 1318:35 call  self._get_descriptions()"
+      ],
+      "pymysql.connections.MySQLResult._read_load_local_packet": [
+        "pymysql.connections 1313:45 call  self._read_load_local_packet(first_packet)"
+      ],
+      "pymysql.connections.MySQLResult._read_ok_packet": [
+        "pymysql.connections 1310:33 call  self._read_ok_packet(first_packet)"
+      ],
+      "pymysql.protocol.MysqlPacket.is_load_local_packet": [
+        "pymysql.connections 1311:47 call  first_packet.is_load_local_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.is_ok_packet": [
+        "pymysql.connections 1308:37 call  first_packet.is_ok_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_length_encoded_integer": [
+        "pymysql.connections 1317:72 call  first_packet.read_length_encoded_integer()"
+      ]
+    },
+    "pymysql.connections.MySQLResult.read": {
+      "pymysql.connections.Connection._read_packet": [
+        "pymysql.connections 1290:56 call  self.connection._read_packet()"
+      ],
+      "pymysql.connections.MySQLResult._read_load_local_packet": [
+        "pymysql.connections 1295:45 call  self._read_load_local_packet(first_packet)"
+      ],
+      "pymysql.connections.MySQLResult._read_ok_packet": [
+        "pymysql.connections 1293:37 call  self._read_ok_packet(first_packet)"
+      ],
+      "pymysql.connections.MySQLResult._read_result_packet": [
+        "pymysql.connections 1297:41 call  self._read_result_packet(first_packet)"
+      ],
+      "pymysql.protocol.MysqlPacket.is_load_local_packet": [
+        "pymysql.connections 1294:51 call  first_packet.is_load_local_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.is_ok_packet": [
+        "pymysql.connections 1292:41 call  first_packet.is_ok_packet()"
+      ]
+    },
+    "pymysql.connections._lenenc_int": {
+      "<builtin>.bytes": [
+        "pymysql.connections 81:21 call  bytes([i])"
+      ],
+      "struct.pack": [
+        "pymysql.connections 83:37 call  struct.pack(\"<H\", i)",
+        "pymysql.connections 85:37 call  struct.pack(\"<I\", i)",
+        "pymysql.connections 87:37 call  struct.pack(\"<Q\", i)"
+      ]
+    },
+    "pymysql.connections._pack_int24": {
+      "struct.pack": [
+        "pymysql.connections 71:23 call  struct.pack(\"<I\", n)"
+      ]
+    },
+    "pymysql.connections._send_local_file": {
+      "<builtin>.min": [
+        "pymysql.connections 1494:22 call  min(conn.max_allowed_packet, 16 * 1024)"
+      ],
+      "<builtin>.open": [
+        "pymysql.connections 1497:18 call  open(filename, \"rb\")"
+      ],
+      "io.BufferedReader.read": [
+        "pymysql.connections 1500:34 call  file.read(packet_size)"
+      ],
+      "pymysql.connections.Connection.write_packet": [
+        "pymysql.connections 1503:34 call  conn.write_packet(chunk)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.connections 1505:35 call  err.OperationalError( ER.FILE_NOT_FOUND, f\"Can't open fil..."
+      ]
+    },
+    "pymysql.converters.Decimal2Literal": {
+      "<builtin>.format": [
+        "pymysql.converters 150:18 call  format(o, \"f\")"
+      ]
+    },
+    "pymysql.converters.convert_date": {
+      "<builtin>.bytes.decode": [
+        "pymysql.converters 303:25 call  obj.decode(\"ascii\")"
+      ],
+      "<builtin>.int": [
+        "pymysql.converters 305:35 call  int(x)"
+      ],
+      "<builtin>.isinstance": [
+        "pymysql.converters 302:18 call  isinstance(obj, (bytes, bytearray))"
+      ],
+      "<builtin>.str.split": [
+        "pymysql.converters 305:57 call  obj.split(\"-\", 2)"
+      ],
+      "datetime.date": [
+        "pymysql.converters 305:29 call  datetime.date(*[int(x) for x in obj.split(\"-\", 2)])"
+      ]
+    },
+    "pymysql.converters.convert_datetime": {
+      "<builtin>.bytes.decode": [
+        "pymysql.converters 182:25 call  obj.decode(\"ascii\")"
+      ],
+      "pymysql.converters.convert_date": [
+        "pymysql.converters 186:28 call  convert_date(obj)",
+        "pymysql.converters 193:28 call  convert_date(obj)"
+      ]
+    },
+    "pymysql.converters.convert_time": {
+      "<builtin>.bytes.decode": [
+        "pymysql.converters 269:25 call  obj.decode(\"ascii\")"
+      ]
+    },
+    "pymysql.converters.convert_timedelta": {
+      "<builtin>.bytes.decode": [
+        "pymysql.converters 217:25 call  obj.decode(\"ascii\")"
+      ]
+    },
+    "pymysql.converters.escape_bool": {
+      "<builtin>.int": [
+        "pymysql.converters 53:19 call  int(value)"
+      ],
+      "<builtin>.str": [
+        "pymysql.converters 53:15 call  str(int(value))"
+      ]
+    },
+    "pymysql.converters.escape_bytes": {
+      "<builtin>.bytes.hex": [
+        "pymysql.converters 88:39 call  value.hex()"
+      ]
+    },
+    "pymysql.converters.escape_date": {
+      "<builtin>.str.format": [
+        "pymysql.converters 140:22 call  fmt.format(obj)"
+      ]
+    },
+    "pymysql.converters.escape_datetime": {
+      "<builtin>.str.format": [
+        "pymysql.converters 135:22 call  fmt.format(obj)"
+      ]
+    },
+    "pymysql.converters.escape_float": {
+      "<builtin>.repr": [
+        "pymysql.converters 61:13 call  repr(value)"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.converters 63:31 call  ProgrammingError(f\"{s} can not be used with MySQL\")"
+      ]
+    },
+    "pymysql.converters.escape_int": {
+      "<builtin>.str": [
+        "pymysql.converters 57:15 call  str(value)"
+      ]
+    },
+    "pymysql.converters.escape_item": {
+      "<builtin>.TypeError": [
+        "pymysql.converters 26:28 call  TypeError(\"no default type converter defined\")"
+      ],
+      "<builtin>.dict.get": [
+        "pymysql.converters 19:26 call  mapping.get(type(val))"
+      ],
+      "<builtin>.type": [
+        "pymysql.converters 19:31 call  type(val)"
+      ],
+      "pymysql.converters.Decimal2Literal": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_None": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_bool": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_bytes": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_date": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_datetime": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_float": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_int": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_not_supported": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_sequence": [
+        "pymysql.converters 29:22 call  encoder(val, charset, mapping)"
+      ],
+      "pymysql.converters.escape_str": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_struct_time": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_time": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ],
+      "pymysql.converters.escape_timedelta": [
+        "pymysql.converters 31:22 call  encoder(val, mapping)"
+      ]
+    },
+    "pymysql.converters.escape_not_supported": {
+      "<builtin>.TypeError": [
+        "pymysql.converters 36:20 call  TypeError(f\"{type(val).__name__} can not be used as param..."
+      ],
+      "<builtin>.type": [
+        "pymysql.converters 36:28 call  type(val)"
+      ]
+    },
+    "pymysql.converters.escape_sequence": {
+      "<builtin>.list.append": [
+        "pymysql.converters 43:17 call  n.append(quoted)"
+      ],
+      "<builtin>.str.join": [
+        "pymysql.converters 44:26 call  \",\".join(n)"
+      ],
+      "pymysql.converters.escape_item": [
+        "pymysql.converters 42:29 call  escape_item(item, charset, mapping)"
+      ]
+    },
+    "pymysql.converters.escape_set": {
+      "<builtin>.str.join": [
+        "pymysql.converters 49:20 call  \",\".join([escape_item(x, charset, mapping) for x in val])"
+      ],
+      "pymysql.converters.escape_item": [
+        "pymysql.converters 49:33 call  escape_item(x, charset, mapping)"
+      ],
+      "warnings.warn": [
+        "pymysql.converters 48:18 call  warnings.warn(\"escape_set is deprecated\", DeprecationWarn..."
+      ]
+    },
+    "pymysql.converters.escape_str": {
+      "<builtin>.str": [
+        "pymysql.converters 92:35 call  str(value)"
+      ],
+      "pymysql.converters.escape_string": [
+        "pymysql.converters 92:31 call  escape_string(str(value))"
+      ]
+    },
+    "pymysql.converters.escape_struct_time": {
+      "datetime.datetime": [
+        "pymysql.converters 144:45 call  datetime.datetime(*obj[:6])"
+      ],
+      "pymysql.converters.escape_datetime": [
+        "pymysql.converters 144:27 call  escape_datetime(datetime.datetime(*obj[:6]))"
+      ]
+    },
+    "pymysql.converters.escape_time": {
+      "<builtin>.str.format": [
+        "pymysql.converters 124:22 call  fmt.format(obj)"
+      ]
+    },
+    "pymysql.cursors.Cursor.__exit__": {
+      "pymysql.cursors.Cursor.close": [
+        "pymysql.cursors 70:19 call  self.close()"
+      ],
+      "pymysql.cursors.SSCursor.close": [
+        "pymysql.cursors 70:19 call  self.close()"
+      ]
+    },
+    "pymysql.cursors.Cursor.__next__": {
+      "pymysql.cursors.Cursor.fetchone": [
+        "pymysql.cursors 364:28 call  self.fetchone()"
+      ],
+      "pymysql.cursors.SSCursor.fetchone": [
+        "pymysql.cursors 364:28 call  self.fetchone()"
+      ]
+    },
+    "pymysql.cursors.Cursor._check_executed": {
+      "pymysql.err.Error.__init__": [
+        "pymysql.cursors 79:39 call  err.ProgrammingError(\"execute() first\")"
+      ]
+    },
+    "pymysql.cursors.Cursor._do_execute_many": {
+      "<builtin>.bytearray": [
+        "pymysql.cursors 219:24 call  bytearray(prefix)",
+        "pymysql.cursors 227:32 call  bytearray(prefix)"
+      ],
+      "<builtin>.isinstance": [
+        "pymysql.cursors 215:22 call  isinstance(prefix, str)",
+        "pymysql.cursors 217:22 call  isinstance(postfix, str)"
+      ],
+      "<builtin>.iter": [
+        "pymysql.cursors 220:20 call  iter(args)"
+      ],
+      "<builtin>.len": [
+        "pymysql.cursors 225:19 call  len(sql)",
+        "pymysql.cursors 225:30 call  len(v)",
+        "pymysql.cursors 225:39 call  len(postfix)"
+      ],
+      "<builtin>.next": [
+        "pymysql.cursors 221:42 call  next(args)"
+      ],
+      "<builtin>.str.encode": [
+        "pymysql.cursors 216:35 call  prefix.encode(encoding)",
+        "pymysql.cursors 218:37 call  postfix.encode(encoding)",
+        "pymysql.cursors 221:56 call  self._mogrify(values, next(args)).encode(encoding)",
+        "pymysql.cursors 224:50 call  self._mogrify(values, arg).encode(encoding)"
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 214:32 call  self._get_db()"
+      ],
+      "pymysql.cursors.Cursor._mogrify": [
+        "pymysql.cursors 221:29 call  self._mogrify(values, next(args))",
+        "pymysql.cursors 224:30 call  self._mogrify(values, arg)"
+      ],
+      "pymysql.cursors.Cursor.execute": [
+        "pymysql.cursors 226:37 call  self.execute(sql + postfix)",
+        "pymysql.cursors 231:29 call  self.execute(sql + postfix)"
+      ]
+    },
+    "pymysql.cursors.Cursor._do_get_result": {
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 350:28 call  self._get_db()"
+      ]
+    },
+    "pymysql.cursors.Cursor._get_db": {
+      "pymysql.err.Error.__init__": [
+        "pymysql.cursors 74:39 call  err.ProgrammingError(\"Cursor closed\")"
+      ]
+    },
+    "pymysql.cursors.Cursor._mogrify": {
+      "<builtin>.dict.items": [
+        "pymysql.cursors 112:66 call  args.items()"
+      ],
+      "<builtin>.isinstance": [
+        "pymysql.cursors 111:22 call  isinstance(args, dict)",
+        "pymysql.cursors 113:24 call  isinstance(args, (list, tuple))"
+      ],
+      "<builtin>.map": [
+        "pymysql.cursors 114:29 call  map(escape, args)"
+      ],
+      "<builtin>.str": [
+        "pymysql.cursors 127:43 call  str(m)"
+      ],
+      "<builtin>.tuple": [
+        "pymysql.cursors 114:25 call  tuple(map(escape, args))"
+      ],
+      "pymysql.connections.Connection.escape": [
+        "pymysql.cursors 112:32 call  escape(item)",
+        "pymysql.cursors 114:29 call  map(escape, args)",
+        "pymysql.cursors 123:26 call  escape(args)"
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 109:30 call  self._get_db()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.cursors 127:39 call  err.ProgrammingError(str(m))"
+      ],
+      "warnings.warn": [
+        "pymysql.cursors 118:26 call  warnings.warn( \"single argument is deprecated and will be..."
+      ]
+    },
+    "pymysql.cursors.Cursor._nextset": {
+      "pymysql.connections.Connection.next_result": [
+        "pymysql.cursors 100:25 call  conn.next_result(unbuffered=unbuffered)"
+      ],
+      "pymysql.cursors.Cursor._clear_result": [
+        "pymysql.cursors 99:27 call  self._clear_result()"
+      ],
+      "pymysql.cursors.Cursor._do_get_result": [
+        "pymysql.cursors 101:28 call  self._do_get_result()"
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 92:28 call  self._get_db()"
+      ],
+      "pymysql.cursors.DictCursorMixin._do_get_result": [
+        "pymysql.cursors 101:28 call  self._do_get_result()"
+      ]
+    },
+    "pymysql.cursors.Cursor._query": {
+      "pymysql.connections.Connection.query": [
+        "pymysql.cursors 335:19 call  conn.query(q)"
+      ],
+      "pymysql.cursors.Cursor._clear_result": [
+        "pymysql.cursors 334:27 call  self._clear_result()"
+      ],
+      "pymysql.cursors.Cursor._do_get_result": [
+        "pymysql.cursors 336:28 call  self._do_get_result()"
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 333:28 call  self._get_db()"
+      ],
+      "pymysql.cursors.DictCursorMixin._do_get_result": [
+        "pymysql.cursors 336:28 call  self._do_get_result()"
+      ]
+    },
+    "pymysql.cursors.Cursor.callproc": {
+      "<builtin>.enumerate": [
+        "pymysql.cursors 273:80 call  enumerate(args)"
+      ],
+      "<builtin>.len": [
+        "pymysql.cursors 280:71 call  len(args)"
+      ],
+      "<builtin>.range": [
+        "pymysql.cursors 280:67 call  range(len(args))"
+      ],
+      "<builtin>.str.format": [
+        "pymysql.cursors 278:35 call  \"CALL `{}`({})\".format( procname_escaped, \",\".join([f\"@`_..."
+      ],
+      "<builtin>.str.join": [
+        "pymysql.cursors 272:27 call  \",\".join( fmt % (index, conn.escape(arg)) for index, arg ...",
+        "pymysql.cursors 280:21 call  \",\".join([f\"@`_{procname_escaped}_{i}`\" for i in range(le..."
+      ],
+      "pymysql.connections.Connection.escape": [
+        "pymysql.cursors 273:46 call  conn.escape(arg)"
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 266:28 call  self._get_db()"
+      ],
+      "pymysql.cursors.Cursor._query": [
+        "pymysql.cursors 270:24 call  self._query( \"SET %s\" % \",\".join( fmt % (index, conn.esca...",
+        "pymysql.cursors 282:20 call  self._query(q)"
+      ],
+      "pymysql.cursors.Cursor.nextset": [
+        "pymysql.cursors 276:25 call  self.nextset()"
+      ],
+      "pymysql.cursors.SSCursor._query": [
+        "pymysql.cursors 270:24 call  self._query( \"SET %s\" % \",\".join( fmt % (index, conn.esca...",
+        "pymysql.cursors 282:20 call  self._query(q)"
+      ],
+      "pymysql.cursors.SSCursor.nextset": [
+        "pymysql.cursors 276:25 call  self.nextset()"
+      ],
+      "pymysql.cursors._backquote_escape": [
+        "pymysql.cursors 265:45 call  _backquote_escape(procname)"
+      ]
+    },
+    "pymysql.cursors.Cursor.close": {
+      "pymysql.cursors.Cursor.nextset": [
+        "pymysql.cursors 60:31 call  self.nextset()"
+      ]
+    },
+    "pymysql.cursors.Cursor.execute": {
+      "pymysql.cursors.Cursor._mogrify": [
+        "pymysql.cursors 169:34 call  self._mogrify(query, args)"
+      ],
+      "pymysql.cursors.Cursor._query": [
+        "pymysql.cursors 170:29 call  self._query(query)"
+      ],
+      "pymysql.cursors.Cursor.nextset": [
+        "pymysql.cursors 165:27 call  self.nextset()"
+      ],
+      "pymysql.cursors.SSCursor._query": [
+        "pymysql.cursors 170:29 call  self._query(query)"
+      ],
+      "pymysql.cursors.SSCursor.nextset": [
+        "pymysql.cursors 165:27 call  self.nextset()"
+      ]
+    },
+    "pymysql.cursors.Cursor.executemany": {
+      "<builtin>.str.rstrip": [
+        "pymysql.cursors 196:41 call  m.group(2).rstrip()"
+      ],
+      "<builtin>.sum": [
+        "pymysql.cursors 208:28 call  sum(self.execute(query, arg) for arg in args)"
+      ],
+      "pymysql.cursors.Cursor._do_execute_many": [
+        "pymysql.cursors 199:41 call  self._do_execute_many( q_prefix, q_values, q_postfix, arg..."
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 205:29 call  self._get_db()"
+      ],
+      "pymysql.cursors.Cursor.execute": [
+        "pymysql.cursors 208:41 call  self.execute(query, arg)"
+      ],
+      "re.Match.group": [
+        "pymysql.cursors 195:31 call  m.group(1)",
+        "pymysql.cursors 196:31 call  m.group(2)",
+        "pymysql.cursors 197:32 call  m.group(3)"
+      ],
+      "re.Pattern.match": [
+        "pymysql.cursors 193:35 call  RE_INSERT_VALUES.match(query)"
+      ]
+    },
+    "pymysql.cursors.Cursor.fetchall": {
+      "<builtin>.len": [
+        "pymysql.cursors 316:29 call  len(self._rows)"
+      ],
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 309:29 call  self._check_executed()"
+      ]
+    },
+    "pymysql.cursors.Cursor.fetchmany": {
+      "<builtin>.len": [
+        "pymysql.cursors 304:38 call  len(self._rows)"
+      ],
+      "<builtin>.min": [
+        "pymysql.cursors 304:29 call  min(end, len(self._rows))"
+      ],
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 297:29 call  self._check_executed()"
+      ]
+    },
+    "pymysql.cursors.Cursor.fetchone": {
+      "<builtin>.len": [
+        "pymysql.cursors 289:55 call  len(self._rows)"
+      ],
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 288:29 call  self._check_executed()"
+      ]
+    },
+    "pymysql.cursors.Cursor.mogrify": {
+      "pymysql.cursors.Cursor._mogrify": [
+        "pymysql.cursors 148:29 call  self._mogrify(query, args)"
+      ]
+    },
+    "pymysql.cursors.Cursor.nextset": {
+      "pymysql.cursors.Cursor._nextset": [
+        "pymysql.cursors 105:29 call  self._nextset(False)"
+      ]
+    },
+    "pymysql.cursors.Cursor.scroll": {
+      "<builtin>.IndexError": [
+        "pymysql.cursors 329:29 call  IndexError(\"out of range\")"
+      ],
+      "<builtin>.len": [
+        "pymysql.cursors 328:29 call  len(self._rows)"
+      ],
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 320:29 call  self._check_executed()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.cursors 326:39 call  err.ProgrammingError(\"unknown scroll mode %s\" % mode)"
+      ]
+    },
+    "pymysql.cursors.DictCursorMixin._conv_row": {
+      "<builtin>.dict": [
+        "pymysql.cursors 391:30 call  self.dict_type(zip(self._fields, row))"
+      ],
+      "<builtin>.zip": [
+        "pymysql.cursors 391:34 call  zip(self._fields, row)"
+      ]
+    },
+    "pymysql.cursors.DictCursorMixin._do_get_result": {
+      "<builtin>.list.append": [
+        "pymysql.cursors 382:30 call  fields.append(name)"
+      ],
+      "<builtin>.super": [
+        "pymysql.cursors 375:14 call  super()"
+      ],
+      "pymysql.cursors.Cursor._do_get_result": [
+        "pymysql.cursors 375:31 call  super()._do_get_result()"
+      ],
+      "pymysql.cursors.DictCursorMixin._conv_row": [
+        "pymysql.cursors 386:41 call  self._conv_row(r)"
+      ]
+    },
+    "pymysql.cursors.SSCursor._query": {
+      "pymysql.connections.Connection.query": [
+        "pymysql.cursors 436:19 call  conn.query(q, unbuffered=True)"
+      ],
+      "pymysql.cursors.Cursor._clear_result": [
+        "pymysql.cursors 435:27 call  self._clear_result()"
+      ],
+      "pymysql.cursors.Cursor._do_get_result": [
+        "pymysql.cursors 437:28 call  self._do_get_result()"
+      ],
+      "pymysql.cursors.Cursor._get_db": [
+        "pymysql.cursors 434:28 call  self._get_db()"
+      ],
+      "pymysql.cursors.DictCursorMixin._do_get_result": [
+        "pymysql.cursors 437:28 call  self._do_get_result()"
+      ]
+    },
+    "pymysql.cursors.SSCursor.close": {
+      "pymysql.connections.MySQLResult._finish_unbuffered_query": [
+        "pymysql.cursors 423:50 call  self._result._finish_unbuffered_query()"
+      ],
+      "pymysql.cursors.SSCursor.nextset": [
+        "pymysql.cursors 426:31 call  self.nextset()"
+      ]
+    },
+    "pymysql.cursors.SSCursor.fetchall": {
+      "<builtin>.list": [
+        "pymysql.cursors 463:20 call  list(self.fetchall_unbuffered())"
+      ],
+      "pymysql.cursors.SSCursor.fetchall_unbuffered": [
+        "pymysql.cursors 463:45 call  self.fetchall_unbuffered()"
+      ],
+      "pymysql.cursors.SSCursor.fetchone": [
+        "pymysql.cursors 463:20 call  list(self.fetchall_unbuffered())"
+      ]
+    },
+    "pymysql.cursors.SSCursor.fetchall_unbuffered": {
+      "<builtin>.iter": [
+        "pymysql.cursors 471:20 call  iter(self.fetchone, None)"
+      ]
+    },
+    "pymysql.cursors.SSCursor.fetchmany": {
+      "<builtin>.list.append": [
+        "pymysql.cursors 485:24 call  rows.append(row)"
+      ],
+      "<builtin>.range": [
+        "pymysql.cursors 480:23 call  range(size)"
+      ],
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 475:29 call  self._check_executed()"
+      ],
+      "pymysql.cursors.SSCursor.read_next": [
+        "pymysql.cursors 481:33 call  self.read_next()"
+      ]
+    },
+    "pymysql.cursors.SSCursor.fetchone": {
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 449:29 call  self._check_executed()"
+      ],
+      "pymysql.cursors.SSCursor.read_next": [
+        "pymysql.cursors 450:29 call  self.read_next()"
+      ]
+    },
+    "pymysql.cursors.SSCursor.nextset": {
+      "pymysql.cursors.Cursor._nextset": [
+        "pymysql.cursors 441:29 call  self._nextset(unbuffered=True)"
+      ]
+    },
+    "pymysql.cursors.SSCursor.read_next": {
+      "pymysql.connections.MySQLResult._read_rowdata_packet_unbuffered": [
+        "pymysql.cursors 445:75 call  self._result._read_rowdata_packet_unbuffered()"
+      ],
+      "pymysql.cursors.DictCursorMixin._conv_row": [
+        "pymysql.cursors 445:30 call  self._conv_row(self._result._read_rowdata_packet_unbuffer..."
+      ],
+      "pymysql.cursors.SSCursor._conv_row": [
+        "pymysql.cursors 445:30 call  self._conv_row(self._result._read_rowdata_packet_unbuffer..."
+      ]
+    },
+    "pymysql.cursors.SSCursor.scroll": {
+      "<builtin>.range": [
+        "pymysql.cursors 502:27 call  range(value)",
+        "pymysql.cursors 512:27 call  range(end)"
+      ],
+      "pymysql.cursors.Cursor._check_executed": [
+        "pymysql.cursors 494:29 call  self._check_executed()"
+      ],
+      "pymysql.cursors.SSCursor.read_next": [
+        "pymysql.cursors 503:31 call  self.read_next()",
+        "pymysql.cursors 513:31 call  self.read_next()"
+      ],
+      "pymysql.err.Error.__init__": [
+        "pymysql.cursors 498:44 call  err.NotSupportedError( \"Backwards scrolling not supported...",
+        "pymysql.cursors 507:44 call  err.NotSupportedError( \"Backwards scrolling not supported...",
+        "pymysql.cursors 516:39 call  err.ProgrammingError(\"unknown scroll mode %s\" % mode)"
+      ]
+    },
+    "pymysql.cursors._backquote_escape": {
+      "<builtin>.str.replace": [
+        "pymysql.cursors 21:21 call  s.replace(\"`\", \"``\")"
+      ]
+    },
+    "pymysql.optionfile.Parser.__init__": {
+      "pymysql.optionfile.Parser.optionxform": [
+        "pymysql.optionfile 7:46 call  configparser.RawConfigParser.__init__(self, **kwargs)"
+      ]
+    },
+    "pymysql.protocol.EOFPacketWrapper.__getattr__": {
+      "<builtin>.getattr": [
+        "pymysql.protocol 327:23 call  getattr(self.packet, key)"
+      ]
+    },
+    "pymysql.protocol.EOFPacketWrapper.__init__": {
+      "<builtin>.ValueError": [
+        "pymysql.protocol 316:29 call  ValueError( f\"Cannot create '{self.__class__}' object fro..."
+      ],
+      "pymysql.protocol.MysqlPacket.is_eof_packet": [
+        "pymysql.protocol 315:41 call  from_packet.is_eof_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_struct": [
+        "pymysql.protocol 321:73 call  self.packet.read_struct(\"<xhh\")"
+      ]
+    },
+    "pymysql.protocol.FieldDescriptorPacket.__init__": {
+      "pymysql.protocol.FieldDescriptorPacket._parse_field_descriptor": [
+        "pymysql.protocol 234:37 call  self._parse_field_descriptor(encoding)"
+      ],
+      "pymysql.protocol.MysqlPacket.__init__": [
+        "pymysql.protocol 233:29 call  MysqlPacket.__init__(self, data, encoding)"
+      ]
+    },
+    "pymysql.protocol.FieldDescriptorPacket._parse_field_descriptor": {
+      "<builtin>.bytes.decode": [
+        "pymysql.protocol 243:65 call  self.read_length_coded_string().decode(encoding)",
+        "pymysql.protocol 244:64 call  self.read_length_coded_string().decode(encoding)",
+        "pymysql.protocol 245:59 call  self.read_length_coded_string().decode(encoding)",
+        "pymysql.protocol 246:63 call  self.read_length_coded_string().decode(encoding)"
+      ],
+      "pymysql.protocol.MysqlPacket.read_length_coded_string": [
+        "pymysql.protocol 241:53 call  self.read_length_coded_string()",
+        "pymysql.protocol 242:48 call  self.read_length_coded_string()",
+        "pymysql.protocol 243:56 call  self.read_length_coded_string()",
+        "pymysql.protocol 244:55 call  self.read_length_coded_string()",
+        "pymysql.protocol 245:50 call  self.read_length_coded_string()",
+        "pymysql.protocol 246:54 call  self.read_length_coded_string()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_struct": [
+        "pymysql.protocol 253:29 call  self.read_struct(\"<xHIBHBxx\")"
+      ]
+    },
+    "pymysql.protocol.FieldDescriptorPacket.description": {
+      "pymysql.protocol.FieldDescriptorPacket.get_column_length": [
+        "pymysql.protocol 263:35 call  self.get_column_length()",
+        "pymysql.protocol 264:35 call  self.get_column_length()"
+      ]
+    },
+    "pymysql.protocol.FieldDescriptorPacket.get_column_length": {
+      "<builtin>.dict.get": [
+        "pymysql.protocol 271:33 call  MBLENGTH.get(self.charsetnr, 1)"
+      ]
+    },
+    "pymysql.protocol.LoadLocalPacketWrapper.__getattr__": {
+      "<builtin>.getattr": [
+        "pymysql.protocol 349:23 call  getattr(self.packet, key)"
+      ]
+    },
+    "pymysql.protocol.LoadLocalPacketWrapper.__init__": {
+      "<builtin>.ValueError": [
+        "pymysql.protocol 339:29 call  ValueError( f\"Cannot create '{self.__class__}' object fro..."
+      ],
+      "pymysql.protocol.MysqlPacket.get_all_data": [
+        "pymysql.protocol 344:49 call  self.packet.get_all_data()"
+      ],
+      "pymysql.protocol.MysqlPacket.is_load_local_packet": [
+        "pymysql.protocol 338:48 call  from_packet.is_load_local_packet()"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.advance": {
+      "<builtin>.Exception": [
+        "pymysql.protocol 89:28 call  Exception( f\"Invalid advance amount ({length}) for cursor..."
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.check_error": {
+      "pymysql.protocol.MysqlPacket.raise_for_error": [
+        "pymysql.protocol 211:33 call  self.raise_for_error()"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.dump": {
+      "pymysql.protocol.dump_packet": [
+        "pymysql.protocol 222:20 call  dump_packet(self._data)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.is_eof_packet": {
+      "<builtin>.len": [
+        "pymysql.protocol 189:45 call  len(self._data)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.raise_for_error": {
+      "pymysql.err.raise_mysql_exception": [
+        "pymysql.protocol 219:34 call  err.raise_mysql_exception(self._data)"
+      ],
+      "pymysql.protocol.MysqlPacket.advance": [
+        "pymysql.protocol 215:21 call  self.advance(1)"
+      ],
+      "pymysql.protocol.MysqlPacket.read_uint16": [
+        "pymysql.protocol 216:33 call  self.read_uint16()"
+      ],
+      "pymysql.protocol.MysqlPacket.rewind": [
+        "pymysql.protocol 214:20 call  self.rewind()"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read": {
+      "<builtin>.AssertionError": [
+        "pymysql.protocol 72:33 call  AssertionError(error)"
+      ],
+      "<builtin>.len": [
+        "pymysql.protocol 64:15 call  len(result)",
+        "pymysql.protocol 67:48 call  len(result)",
+        "pymysql.protocol 67:106 call  len(self._data)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_length_coded_string": {
+      "pymysql.protocol.MysqlPacket.read": [
+        "pymysql.protocol 173:25 call  self.read(length)"
+      ],
+      "pymysql.protocol.MysqlPacket.read_length_encoded_integer": [
+        "pymysql.protocol 170:50 call  self.read_length_encoded_integer()"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_length_encoded_integer": {
+      "pymysql.protocol.MysqlPacket.read_uint16": [
+        "pymysql.protocol 157:36 call  self.read_uint16()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_uint24": [
+        "pymysql.protocol 159:36 call  self.read_uint24()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_uint64": [
+        "pymysql.protocol 161:36 call  self.read_uint64()"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_struct": {
+      "struct.Struct": [
+        "pymysql.protocol 176:26 call  struct.Struct(fmt)"
+      ],
+      "struct.Struct.unpack_from": [
+        "pymysql.protocol 177:31 call  s.unpack_from(self._data, self._position)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_uint16": {
+      "struct.unpack_from": [
+        "pymysql.protocol 117:36 call  struct.unpack_from(\"<H\", self._data, self._position)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_uint24": {
+      "struct.unpack_from": [
+        "pymysql.protocol 122:39 call  struct.unpack_from(\"<HB\", self._data, self._position)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_uint32": {
+      "struct.unpack_from": [
+        "pymysql.protocol 127:36 call  struct.unpack_from(\"<I\", self._data, self._position)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.read_uint64": {
+      "struct.unpack_from": [
+        "pymysql.protocol 132:36 call  struct.unpack_from(\"<Q\", self._data, self._position)"
+      ]
+    },
+    "pymysql.protocol.MysqlPacket.rewind": {
+      "<builtin>.Exception": [
+        "pymysql.protocol 97:28 call  Exception(\"Invalid position to rewind cursor to: %s.\" % p..."
+      ],
+      "<builtin>.len": [
+        "pymysql.protocol 96:42 call  len(self._data)"
+      ]
+    },
+    "pymysql.protocol.OKPacketWrapper.__getattr__": {
+      "<builtin>.getattr": [
+        "pymysql.protocol 304:23 call  getattr(self.packet, key)"
+      ]
+    },
+    "pymysql.protocol.OKPacketWrapper.__init__": {
+      "<builtin>.ValueError": [
+        "pymysql.protocol 288:29 call  ValueError( \"Cannot create \" + str(self.__class__.__name_..."
+      ],
+      "<builtin>.str": [
+        "pymysql.protocol 290:22 call  str(self.__class__.__name__)"
+      ],
+      "pymysql.protocol.MysqlPacket.advance": [
+        "pymysql.protocol 295:28 call  self.packet.advance(1)"
+      ],
+      "pymysql.protocol.MysqlPacket.is_ok_packet": [
+        "pymysql.protocol 287:40 call  from_packet.is_ok_packet()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_all": [
+        "pymysql.protocol 300:44 call  self.packet.read_all()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_length_encoded_integer": [
+        "pymysql.protocol 297:69 call  self.packet.read_length_encoded_integer()",
+        "pymysql.protocol 298:65 call  self.packet.read_length_encoded_integer()"
+      ],
+      "pymysql.protocol.MysqlPacket.read_struct": [
+        "pymysql.protocol 299:66 call  self.read_struct(\"<HH\")"
+      ],
+      "pymysql.protocol.OKPacketWrapper.__getattr__": [
+        "pymysql.protocol 299:55 getattr  self.read_struct"
+      ]
+    },
+    "pymysql.protocol.dump_packet": {
+      "<builtin>.len": [
+        "pymysql.protocol 27:36 call  len(data)",
+        "pymysql.protocol 34:60 call  len(data)",
+        "pymysql.protocol 38:32 call  len(d)"
+      ],
+      "<builtin>.min": [
+        "pymysql.protocol 34:56 call  min(len(data), 256)"
+      ],
+      "<builtin>.print": [
+        "pymysql.protocol 27:14 call  print(\"packet length:\", len(data))",
+        "pymysql.protocol 30:18 call  print(\"call[%d]: %s (line %d)\" % (i, f.f_code.co_name, f....",
+        "pymysql.protocol 31:14 call  print(\"-\" * 66)",
+        "pymysql.protocol 36:14 call  print( \" \".join(f\"{x:02X}\" for x in d) + \" \" * (16 - len(...",
+        "pymysql.protocol 42:10 call  print(\"-\" * 66)",
+        "pymysql.protocol 43:10 call  print()"
+      ],
+      "<builtin>.range": [
+        "pymysql.protocol 28:23 call  range(1, 7)",
+        "pymysql.protocol 34:49 call  range(0, min(len(data), 256), 16)"
+      ],
+      "<builtin>.str.join": [
+        "pymysql.protocol 37:21 call  \" \".join(f\"{x:02X}\" for x in d)",
+        "pymysql.protocol 40:22 call  \"\".join(printable(x) for x in d)"
+      ],
+      "pymysql.protocol.dump_packet.printable": [
+        "pymysql.protocol 40:32 call  printable(x)"
+      ],
+      "sys._getframe": [
+        "pymysql.protocol 29:30 call  sys._getframe(i)"
+      ]
+    },
+    "pymysql.protocol.dump_packet.printable": {
+      "<builtin>.chr": [
+        "pymysql.protocol 23:23 call  chr(data)"
+      ]
+    },
+    "pymysql.times.DateFromTicks": {
+      "datetime.date": [
+        "pymysql.times 11:16 call  date(*localtime(ticks)[:3])"
+      ],
+      "time.localtime": [
+        "pymysql.times 11:27 call  localtime(ticks)"
+      ]
+    },
+    "pymysql.times.TimeFromTicks": {
+      "datetime.time": [
+        "pymysql.times 15:16 call  time(*localtime(ticks)[3:6])"
+      ],
+      "time.localtime": [
+        "pymysql.times 15:27 call  localtime(ticks)"
+      ]
+    },
+    "pymysql.times.TimestampFromTicks": {
+      "datetime.datetime": [
+        "pymysql.times 19:20 call  datetime(*localtime(ticks)[:6])"
+      ],
+      "time.localtime": [
+        "pymysql.times 19:31 call  localtime(ticks)"
+      ]
+    }
+  },
+  "notes": {
+    "pymysql 87:26 op  other not in self": [
+      "other is not a set; when it is another DBAPISet (the tests: pymysql.STRING != pymysql.NUMBER, test_MySQLdb_nonstandard.py:15), the frozenset lookup hashes it with DBAPISet.__hash__; DBAPISet is public, so self can be a DBAPISet that a client builds from its own type codes; when an element's hash equals other's (an int equal to hash(pymysql.NUMBER) in DBAPISet([...]) != pymysql.NUMBER; Codex round 1, whose witness is a client element that returns NotImplemented), the lookup compares the element with other, int.__eq__ returns NotImplemented, and the interpreter calls other's reflected DBAPISet.__eq__ (judgement J12)"
+    ],
+    "pymysql._auth 100:62 call  _nacl_bindings.crypto_scalarmult_ed25519_base_noclamp(s)": [
+      "missing module (see 96:57)"
+    ],
+    "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()": [
+      "the SHA-512 object of hashlib.sha512 (see 87:40)"
+    ],
+    "pymysql._auth 106:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(k)": [
+      "missing module (see 96:57)"
+    ],
+    "pymysql._auth 107:55 call  _nacl_bindings.crypto_core_ed25519_scalar_mul(k, s)": [
+      "missing module (see 96:57)"
+    ],
+    "pymysql._auth 108:54 call  _nacl_bindings.crypto_core_ed25519_scalar_add(ks, r)": [
+      "missing module (see 96:57)"
+    ],
+    "pymysql._auth 118:22 call  conn.write_packet(send_data)": [
+      "_auth is private; the package passes conn=self, a Connection, from Connection._request_authentication and _process_auth (the tests' mock of write_packet is a client object, rejected)"
+    ],
+    "pymysql._auth 119:28 call  conn._read_packet()": [
+      "conn is a Connection (see 118:22)"
+    ],
+    "pymysql._auth 147:48 call  serialization.load_pem_public_key(public_key, default_bac...": [
+      "cryptography is an optional extra (rsa) that the environment does not install: a missing module, named by its imported path; both sides of the optional import (lines 7-14) run"
+    ],
+    "pymysql._auth 147:76 call  default_backend()": [
+      "missing module (see 147:48)"
+    ],
+    "pymysql._auth 148:27 call  rsa_key.encrypt( message, padding.OAEP( mgf=padding.MGF1(...": [
+      "rsa_key is the result of the missing-module call load_pem_public_key (147:48): a stub value whose method keeps the factory's access path (the precedent of django-constance, django_redis.get_redis_connection.get)"
+    ],
+    "pymysql._auth 150:21 call  padding.OAEP( mgf=padding.MGF1(algorithm=hashes.SHA1()), ...": [
+      "missing module (see 147:48)"
+    ],
+    "pymysql._auth 151:29 call  padding.MGF1(algorithm=hashes.SHA1())": [
+      "missing module (see 147:48)"
+    ],
+    "pymysql._auth 151:51 call  hashes.SHA1()": [
+      "missing module (see 147:48)"
+    ],
+    "pymysql._auth 152:34 call  hashes.SHA1()": [
+      "missing module (see 147:48)"
+    ],
+    "pymysql._auth 165:34 call  pkt.is_auth_switch_request()": [
+      "pkt is a MysqlPacket: the package passes the packet of Connection._read_packet or of _process_auth without a handler (connections.py:1066, 1093); a packet that a client handler returned can also reach this function (an auth switch to a plugin without a handler, connections.py:1045-1046 and 1093), but it is the result of a client callback, opaque (B5): no edge"
+    ],
+    "pymysql._auth 166:33 call  pkt.read_all()": [
+      "pkt is a MysqlPacket (see 165:34)"
+    ],
+    "pymysql._auth 167:30 call  conn.salt.endswith(b\"\\0\")": [
+      "conn.salt is the bytes slice that read_all returns"
+    ],
+    "pymysql._auth 175:30 call  pkt.is_extra_auth_data()": [
+      "pkt is a MysqlPacket: the argument (see 165:34) or the packet of _roundtrip"
+    ],
+    "pymysql._auth 200:41 call  hashlib.sha256(password).digest()": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha256.sha256 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha256.py), _sha2.SHA256Type from CPython 3.12 (the precedent of validators, trx_address.py:33)"
+    ],
+    "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()": [
+      "the SHA-256 object of hashlib.sha256 (see 200:41)"
+    ],
+    "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()": [
+      "the SHA-256 object of hashlib.sha256 (see 200:41)"
+    ],
+    "pymysql._auth 218:33 call  pkt.read_all()": [
+      "pkt is a MysqlPacket (see 216:34)"
+    ],
+    "pymysql._auth 219:30 call  conn.salt.endswith(b\"\\0\")": [
+      "conn.salt is the bytes slice that read_all returns"
+    ],
+    "pymysql._auth 243:32 call  conn._read_packet()": [
+      "conn is a Connection (see 118:22)"
+    ],
+    "pymysql._auth 33:39 call  sha1_new(password).digest()": [
+      "hashlib.new(\"sha1\") returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 object; on PyPy the fallback _sha1.sha1 is a function that returns a _sha1.sha (the precedent of path, judgement J6); pymysql supports CPython 3.9+ and PyPy (judgement J2)"
+    ],
+    "pymysql._auth 34:37 call  sha1_new(stage1).digest()": [
+      "the SHA-1 object of hashlib.new (see 33:39)"
+    ],
+    "pymysql._auth 36:13 call  s.update(message[:SCRAMBLE_LENGTH])": [
+      "s is the SHA-1 object of sha1_new() (see 33:39)"
+    ],
+    "pymysql._auth 37:13 call  s.update(stage2)": [
+      "s is the SHA-1 object of sha1_new() (see 33:39)"
+    ],
+    "pymysql._auth 38:22 call  s.digest()": [
+      "s is the SHA-1 object of sha1_new() (see 33:39)"
+    ],
+    "pymysql._auth 87:40 call  hashlib.sha512(password).digest()": [
+      "hashlib.sha512 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha512.sha512 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha512.py), _sha2.SHA512Type from CPython 3.12 (the precedent of validators for SHA-256)"
+    ],
+    "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()": [
+      "the SHA-512 object of hashlib.sha512 (see 87:40)"
+    ],
+    "pymysql._auth 96:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(r)": [
+      "_nacl_bindings is nacl.bindings, which _init_nacl imports (line 60) before this line runs; PyNaCl is an optional extra that the environment does not install: a missing module, named by its imported path"
+    ],
+    "pymysql._auth 97:62 call  _nacl_bindings.crypto_scalarmult_ed25519_base_noclamp(r)": [
+      "missing module (see 96:57)"
+    ],
+    "pymysql.connections 1085:47 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1109:38 call  pkt.read_uint8()": [
+      "pkt is auth_packet, then the MysqlPacket of _read_packet (line 1138)"
+    ],
+    "pymysql.connections 1122:51 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1128:51 call  err.OperationalError( CR.CR_AUTH_PLUGIN_ERR, f\"Authentica...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1134:47 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1144:39 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, \"Aut...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1162:43 call  err.OperationalError( CR.CR_AUTH_PLUGIN_CANNOT_LOAD, f\"Au...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1192:31 call  data.find(b\"\\0\", i)": [
+      "data is the bytes payload of the packet (b\"\".join of the reads, line 806)"
+    ],
+    "pymysql.connections 1212:52 call  charset_by_id(lang)": [
+      "charset_by_id is the bound method _charsets.by_id (charset.py:56)"
+    ],
+    "pymysql.connections 1290:56 call  self.connection._read_packet()": [
+      "self.connection is the Connection that makes the MySQLResult (lines 517, 853; documented :type connection: Connection, line 1270)"
+    ],
+    "pymysql.connections 1352:39 call  err.OperationalError( CR.CR_COMMANDS_OUT_OF_SYNC, \"Comman...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 1433:55 call  packet.read_length_coded_string()": [
+      "packet is the MysqlPacket of _read_packet"
+    ],
+    "pymysql.connections 1440:39 call  data.decode(encoding)": [
+      "data is the bytes slice of read_length_coded_string"
+    ],
+    "pymysql.connections 1444:37 call  converter(data)": [
+      "converter is a value of self.connection.decoders (_get_descriptions, line 1480): the int-keyed values of conv, by default converters.conversions, whose decoders (converters.py:344-367) are int, float, Decimal, convert_datetime, convert_timedelta, convert_date and through (also convert_bit), and through becomes None (line 1481); convert_time is documented as a decoder for FIELD_TYPE.TIME (converters.py:263-266); a client's own decoder is a client callback (judgement J5)"
+    ],
+    "pymysql.connections 1459:49 call  field.description()": [
+      "field is the FieldDescriptorPacket of _read_packet(FieldDescriptorPacket); a value site only because the package assigns attributes named description (cursors.py:44, connections.py:1279)"
+    ],
+    "pymysql.connections 1503:34 call  conn.write_packet(chunk)": [
+      "conn is the Connection of the MySQLResult (line 1343)"
+    ],
+    "pymysql.connections 1505:35 call  err.OperationalError( ER.FILE_NOT_FOUND, f\"Can't open fil...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 250:21 call  cfg.read(os.path.expanduser(read_default_file))": [
+      "Parser inherits read from configparser.RawConfigParser (named through the nearest base outside the package); RawConfigParser.read parses the option file and calls self.optionxform on every option name, Parser's override (judgement J4)"
+    ],
+    "pymysql.connections 256:35 call  cfg.get(read_default_group, key)": [
+      "cfg is the optionfile.Parser of the enclosing __init__ (line 249)"
+    ],
+    "pymysql.connections 295:46 call  NotImplementedError(\"ssl module not found\")": [
+      "SSL_ENABLED is False when `import ssl` fails (lines 30-36): both sides of an optional import run"
+    ],
+    "pymysql.connections 403:60 call  verify_mode_value.lower()": [
+      "verify_mode_value is a str (the isinstance check of line 402)"
+    ],
+    "pymysql.connections 413:32 call  ctx.load_cert_chain( sslp[\"cert\"], keyfile=sslp.get(\"key\"...": [
+      "ctx is the ssl.SSLContext of ssl.create_default_context (line 388)"
+    ],
+    "pymysql.connections 417:28 call  ctx.set_ciphers(sslp[\"cipher\"])": [
+      "ctx is the ssl.SSLContext of line 388"
+    ],
+    "pymysql.connections 432:28 call  err.Error(\"Already closed\")": [
+      "err.Error is the class of pymysql.err; a value site only because the class body of Connection binds the name Error (line 1256), the same class"
+    ],
+    "pymysql.connections 451:30 call  self._rfile.close()": [
+      "socket.makefile(\"rb\") returns an io.BufferedReader over a SocketIO, for a socket.socket and for an ssl.SSLSocket; the makefile of a socket that a client passes to connect(sock) is a client object"
+    ],
+    "pymysql.connections 454:33 call  self._sock.close()": [
+      "a socket that a client passes to connect(sock) is a client object (B5)"
+    ],
+    "pymysql.connections 473:32 call  pkt.is_ok_packet()": [
+      "pkt is the MysqlPacket of _read_packet (default packet_type)"
+    ],
+    "pymysql.connections 474:39 call  err.OperationalError( CR.CR_COMMANDS_OUT_OF_SYNC, \"Comman...": [
+      "err.OperationalError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, line 1260); its first __init__ is Error.__init__"
+    ],
+    "pymysql.connections 539:32 call  obj.hex()": [
+      "obj is bytes or bytearray (the isinstance check of line 538)"
+    ],
+    "pymysql.connections 559:29 call  s.replace(\"'\", \"''\")": [
+      "s is a str: the only caller, escape, passes it after isinstance(obj, str) (line 535)"
+    ],
+    "pymysql.connections 571:26 call  cursor(self)": [
+      "the documented cursor classes (:type cursor:, line 567): Cursor, SSCursor, DictCursor and SSDictCursor, which all inherit Cursor.__init__; a client's own cursor class is client code"
+    ],
+    "pymysql.connections 572:32 call  self.cursorclass(self)": [
+      "self.cursorclass is the cursorclass argument of __init__: Cursor by default, or a documented cursor class (DictCursor in README.md:67 and docs/source/user/examples.rst:35); all inherit Cursor.__init__"
+    ],
+    "pymysql.connections 579:29 call  sql.encode(self.encoding)": [
+      "sql is a str (the isinstance check of line 578)"
+    ],
+    "pymysql.connections 616:29 call  self.connect()": [
+      "self is a Connection; a value site only because pymysql/__init__.py:136 binds the module name connect"
+    ],
+    "pymysql.connections 619:32 call  err.Error(\"Already closed\")": [
+      "err.Error is the class of pymysql.err (see 432:28)"
+    ],
+    "pymysql.connections 625:29 call  self.connect()": [
+      "self is a Connection (see 616:29)"
+    ],
+    "pymysql.connections 651:35 call  charset_by_name(charset)": [
+      "charset_by_name is the bound method _charsets.by_name (charset.py:55)"
+    ],
+    "pymysql.connections 651:45 getattr  charset_by_name(charset).encoding": [
+      "the Charset that by_name returns"
+    ],
+    "pymysql.connections 670:33 call  sock.connect(self.unix_socket)": [
+      "a value site only because pymysql/__init__.py:136 binds the module name connect"
+    ],
+    "pymysql.connections 692:36 call  sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)": [
+      "sock is the socket.socket of socket.create_connection"
+    ],
+    "pymysql.connections 696:28 call  sock.settimeout(self._read_timeout)": [
+      "sock is the socket.socket of line 668 or 681; a socket that the client passes as sock is a client object (B5)"
+    ],
+    "pymysql.connections 698:40 call  sock.makefile(\"rb\")": [
+      "sock is a socket.socket (see 696:28)"
+    ],
+    "pymysql.connections 721:26 call  c.execute(\"SET sql_mode=%s\", (self.sql_mode,))": [
+      "c is an instance of self.cursorclass (Connection.cursor without an argument): Cursor by default or DictCursor (README.md:67, docs/source/user/examples.rst:35), the classes admitted at the constructor's cursorclass (judgement J9); both inherit Cursor.execute"
+    ],
+    "pymysql.connections 722:24 call  c.close()": [
+      "Cursor and DictCursor use Cursor.close"
+    ],
+    "pymysql.connections 726:26 call  c.execute(self.init_command)": [
+      "c is a cursor of self.cursorclass (see 721:26)"
+    ],
+    "pymysql.connections 774:34 call  self._sock.settimeout(self._read_timeout)": [
+      "self._sock is the package's socket.socket (connect, lines 668 and 681) or the ssl.SSLSocket of ctx.wrap_socket (line 952), which inherits settimeout; a socket that a client passes to connect(sock) is a client object"
+    ],
+    "pymysql.connections 788:47 call  err.OperationalError( CR.CR_SERVER_LOST, \"Lost connection...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 792:40 call  err.InternalError( \"Packet sequence number wrong - got %d...": [
+      "err.InternalError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, line 1262); its first __init__ is Error.__init__"
+    ],
+    "pymysql.connections 806:29 call  packet_type(b\"\".join(buff), self.encoding)": [
+      "packet_type is MysqlPacket by default, or FieldDescriptorPacket, which MySQLResult._get_descriptions passes (line 1457); _read_packet is private and no other value reaches it"
+    ],
+    "pymysql.connections 807:34 call  packet.is_error_packet()": [
+      "packet is a MysqlPacket or a FieldDescriptorPacket, which inherits the method"
+    ],
+    "pymysql.connections 824:43 call  err.OperationalError( CR.CR_SERVER_LOST, f\"Lost connectio...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 834:39 call  err.OperationalError( CR.CR_SERVER_LOST, \"Lost connection...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 841:34 call  self._sock.settimeout(self._write_timeout)": [
+      "self._sock is a socket.socket or an ssl.SSLSocket (see 774:34)"
+    ],
+    "pymysql.connections 844:31 call  self._sock.sendall(data)": [
+      "self._sock is a socket.socket or an ssl.SSLSocket (see 774:34)"
+    ],
+    "pymysql.connections 847:39 call  err.OperationalError( CR.CR_SERVER_GONE_ERROR, f\"MySQL se...": [
+      "err.OperationalError is the class of pymysql.err (see 474:39)"
+    ],
+    "pymysql.connections 875:37 call  err.InterfaceError(0, \"\")": [
+      "err.InterfaceError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, line 1257); its first __init__ is Error.__init__"
+    ],
+    "pymysql.connections 882:54 call  self._result._finish_unbuffered_query()": [
+      "self._result is the MySQLResult of _read_query_result"
+    ],
+    "pymysql.connections 888:29 call  sql.encode(self.encoding)": [
+      "sql is a str (the isinstance check of line 887)"
+    ],
+    "pymysql.connections 952:46 call  self.ctx.wrap_socket(self._sock, server_hostname=self.host)": [
+      "self.ctx is the ssl.SSLContext of _create_ssl_ctx: one that ssl.create_default_context makes, or the client's documented ssl.SSLContext (line 136, B4)"
+    ],
+    "pymysql.connections 953:46 call  self._sock.makefile(\"rb\")": [
+      "self._sock is the ssl.SSLSocket that wrap_socket returns (line 952)"
+    ],
+    "pymysql.converters 182:25 call  obj.decode(\"ascii\")": [
+      "obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)"
+    ],
+    "pymysql.converters 217:25 call  obj.decode(\"ascii\")": [
+      "obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)"
+    ],
+    "pymysql.converters 269:25 call  obj.decode(\"ascii\")": [
+      "obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)"
+    ],
+    "pymysql.converters 29:22 call  encoder(val, charset, mapping)": [
+      "encoder is the value of mapping for type(val), or of mapping[str]; this call is reached only when it is escape_sequence (line 28)"
+    ],
+    "pymysql.converters 303:25 call  obj.decode(\"ascii\")": [
+      "obj is the bytes of a field without an encoding (use_unicode=False, or a binary field; connections.py:1438-1444); the converters are private (CHANGELOG.md:7) and no package caller passes a bytearray, so the bytearray arm of the isinstance check adds no callee (the referee's second ruling, judgement J11)"
+    ],
+    "pymysql.converters 305:57 call  obj.split(\"-\", 2)": [
+      "obj is a str: the decoded bytes, or the str that the package passes (connections.py:1440, converters.py:186 and 193)"
+    ],
+    "pymysql.converters 31:22 call  encoder(val, mapping)": [
+      "encoder is a value of mapping other than escape_sequence: the package's encoders (lines 323-341, also through Connection.encoders, which keeps the non-int keys of conv, by default conversions); a client's own encoder in conv is a client callback (judgement J6)"
+    ],
+    "pymysql.converters 88:39 call  value.hex()": [
+      "value is bytes: escape_bytes is the encoder of the key bytes (line 328)"
+    ],
+    "pymysql.cursors 100:25 call  conn.next_result(unbuffered=unbuffered)": [
+      "conn is self.connection, the Connection that made the cursor (Connection.cursor, connections.py:571-572)"
+    ],
+    "pymysql.cursors 101:28 call  self._do_get_result()": [
+      "Cursor and SSCursor use Cursor._do_get_result, DictCursor and SSDictCursor DictCursorMixin._do_get_result"
+    ],
+    "pymysql.cursors 112:32 call  escape(item)": [
+      "escape is the bound method self._get_db().escape (line 109) of the cursor's Connection"
+    ],
+    "pymysql.cursors 112:66 call  args.items()": [
+      "args is a dict (the isinstance check of line 111)"
+    ],
+    "pymysql.cursors 114:29 call  map(escape, args)": [
+      "tuple() iterates the map in this function, so map calls escape, the Connection's bound method (line 109), back here"
+    ],
+    "pymysql.cursors 123:26 call  escape(args)": [
+      "escape is the bound method of the cursor's Connection (line 109)"
+    ],
+    "pymysql.cursors 127:39 call  err.ProgrammingError(str(m))": [
+      "err.ProgrammingError is the class of pymysql.err (see 74:39)"
+    ],
+    "pymysql.cursors 165:27 call  self.nextset()": [
+      "self is any of the four cursor classes, which inherit execute"
+    ],
+    "pymysql.cursors 21:21 call  s.replace(\"`\", \"``\")": [
+      "s is procname, documented `:type procname: str` (line 239)"
+    ],
+    "pymysql.cursors 221:56 call  self._mogrify(values, next(args)).encode(encoding)": [
+      "_mogrify returns the str query % args"
+    ],
+    "pymysql.cursors 224:50 call  self._mogrify(values, arg).encode(encoding)": [
+      "_mogrify returns a str"
+    ],
+    "pymysql.cursors 273:46 call  conn.escape(arg)": [
+      "conn is the cursor's Connection (line 266)"
+    ],
+    "pymysql.cursors 326:39 call  err.ProgrammingError(\"unknown scroll mode %s\" % mode)": [
+      "err.ProgrammingError is the class of pymysql.err (see 74:39)"
+    ],
+    "pymysql.cursors 336:28 call  self._do_get_result()": [
+      "self is a Cursor (Cursor._do_get_result) or a DictCursor (DictCursorMixin._do_get_result); SSCursor overrides _query"
+    ],
+    "pymysql.cursors 364:28 call  self.fetchone()": [
+      "self is any of the four cursor classes (a client iterates a cursor); SSCursor and SSDictCursor override fetchone"
+    ],
+    "pymysql.cursors 391:30 call  self.dict_type(zip(self._fields, row))": [
+      "self.dict_type is the class attribute dict (line 372); a client's subclass that overrides it (the comment of line 371; the tests' MyDict, tests/test_DictCursor.py:90) is client code"
+    ],
+    "pymysql.cursors 423:50 call  self._result._finish_unbuffered_query()": [
+      "self._result is the MySQLResult of the connection (_do_get_result, line 352)"
+    ],
+    "pymysql.cursors 437:28 call  self._do_get_result()": [
+      "self is an SSCursor (Cursor._do_get_result) or an SSDictCursor (DictCursorMixin._do_get_result)"
+    ],
+    "pymysql.cursors 463:20 call  list(self.fetchall_unbuffered())": [
+      "list() iterates the callable iterator iter(self.fetchone, None) of fetchall_unbuffered, which calls self.fetchone, SSCursor.fetchone for an SSCursor and an SSDictCursor"
+    ],
+    "pymysql.cursors 498:44 call  err.NotSupportedError( \"Backwards scrolling not supported...": [
+      "err.NotSupportedError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, connections.py:1264); its first __init__ is Error.__init__"
+    ],
+    "pymysql.cursors 507:44 call  err.NotSupportedError( \"Backwards scrolling not supported...": [
+      "err.NotSupportedError is the class of pymysql.err (see 498:44)"
+    ],
+    "pymysql.cursors 516:39 call  err.ProgrammingError(\"unknown scroll mode %s\" % mode)": [
+      "err.ProgrammingError is the class of pymysql.err (see 74:39)"
+    ],
+    "pymysql.cursors 70:19 call  self.close()": [
+      "self is a Cursor or a DictCursor (Cursor.close), or an SSCursor or SSDictCursor (SSCursor.close)"
+    ],
+    "pymysql.cursors 74:39 call  err.ProgrammingError(\"Cursor closed\")": [
+      "err.ProgrammingError is the class of pymysql.err (a value site only because the class body of Connection binds the same name, connections.py:1263); its first __init__ is Error.__init__"
+    ],
+    "pymysql.cursors 79:39 call  err.ProgrammingError(\"execute() first\")": [
+      "err.ProgrammingError is the class of pymysql.err (see 74:39)"
+    ],
+    "pymysql.optionfile 7:46 call  configparser.RawConfigParser.__init__(self, **kwargs)": [
+      "RawConfigParser.__init__ calls self._read_defaults(defaults), which calls self.optionxform on every key of a defaults dict, Parser's override; Parser is public, and a client can pass defaults through **kwargs (judgement J4)"
+    ],
+    "pymysql.protocol 243:65 call  self.read_length_coded_string().decode(encoding)": [
+      "read_length_coded_string returns a bytes slice of the payload (or None, which has no decode)"
+    ],
+    "pymysql.protocol 287:40 call  from_packet.is_ok_packet()": [
+      "from_packet is the MysqlPacket of Connection._read_packet (connections.py:478, 1327), or a packet a client passes (a MysqlPacket or FieldDescriptorPacket, which inherit the method)"
+    ],
+    "pymysql.protocol 299:55 getattr  self.read_struct": [
+      "OKPacketWrapper defines no read_struct, so the load falls back to __getattr__, which returns self.packet.read_struct"
+    ],
+    "pymysql.protocol 299:66 call  self.read_struct(\"<HH\")": [
+      "self.read_struct is the bound method of self.packet, a MysqlPacket, that OKPacketWrapper.__getattr__ returns (299:55)"
+    ],
+    "pymysql.protocol 304:23 call  getattr(self.packet, key)": [
+      "self.packet is a MysqlPacket, which defines no __getattr__ and no property: getattr runs no package code"
+    ],
+    "pymysql.protocol 327:23 call  getattr(self.packet, key)": [
+      "self.packet is a MysqlPacket (see 304:23)"
+    ],
+    "pymysql.protocol 349:23 call  getattr(self.packet, key)": [
+      "self.packet is a MysqlPacket (see 304:23)"
+    ]
+  },
+  "trace": "dynamic/pymysql.json"
+}

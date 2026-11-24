@@ -1,0 +1,947 @@
+{
+  "websocket": [],
+  "websocket._abnf": [
+    "<builtin>.staticmethod"
+  ],
+  "websocket._abnf.ABNF.__init__": [],
+  "websocket._abnf.ABNF.__str__": [
+    "<builtin>.isinstance",
+    "<builtin>.repr"
+  ],
+  "websocket._abnf.ABNF._get_masked": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "websocket._abnf.ABNF.mask"
+  ],
+  "websocket._abnf.ABNF._is_valid_close_status": [],
+  "websocket._abnf.ABNF.create_frame": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "websocket._abnf.ABNF.__init__"
+  ],
+  "websocket._abnf.ABNF.format": [
+    "<builtin>.ValueError",
+    "<builtin>.any",
+    "<builtin>.chr",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.str.encode",
+    "os.urandom",
+    "struct.pack",
+    "websocket._abnf.ABNF._get_masked"
+  ],
+  "websocket._abnf.ABNF.mask": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "array.array",
+    "websocket._abnf._mask",
+    "wsaccel.xormask.XorMaskerSimple.process.encode",
+    "wsaccel.xormask.XorMaskerSimple.process.encode.encode"
+  ],
+  "websocket._abnf.ABNF.validate": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.str.encode",
+    "struct.unpack",
+    "websocket._abnf.ABNF._is_valid_close_status",
+    "websocket._utils.validate_utf8"
+  ],
+  "websocket._abnf._mask": [
+    "<builtin>.int.from_bytes",
+    "<builtin>.int.to_bytes",
+    "<builtin>.len",
+    "wsaccel.xormask.XorMaskerSimple",
+    "wsaccel.xormask.XorMaskerSimple.process"
+  ],
+  "websocket._abnf.continuous_frame.__init__": [],
+  "websocket._abnf.continuous_frame.add": [],
+  "websocket._abnf.continuous_frame.extract": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.repr",
+    "websocket._utils.validate_utf8"
+  ],
+  "websocket._abnf.continuous_frame.is_fire": [],
+  "websocket._abnf.continuous_frame.validate": [
+    "<builtin>.Exception.__init__"
+  ],
+  "websocket._abnf.frame_buffer.__init__": [
+    "threading.Lock",
+    "websocket._abnf.frame_buffer.clear"
+  ],
+  "websocket._abnf.frame_buffer.clear": [],
+  "websocket._abnf.frame_buffer.has_mask": [],
+  "websocket._abnf.frame_buffer.needs_header": [],
+  "websocket._abnf.frame_buffer.needs_length": [],
+  "websocket._abnf.frame_buffer.needs_mask": [],
+  "websocket._abnf.frame_buffer.recv_frame": [
+    "<builtin>.Exception.__init__",
+    "websocket._abnf.ABNF.__init__",
+    "websocket._abnf.ABNF.mask",
+    "websocket._abnf.ABNF.validate",
+    "websocket._abnf.frame_buffer.clear",
+    "websocket._abnf.frame_buffer.needs_header",
+    "websocket._abnf.frame_buffer.needs_length",
+    "websocket._abnf.frame_buffer.needs_mask",
+    "websocket._abnf.frame_buffer.recv_header",
+    "websocket._abnf.frame_buffer.recv_length",
+    "websocket._abnf.frame_buffer.recv_mask",
+    "websocket._abnf.frame_buffer.recv_strict"
+  ],
+  "websocket._abnf.frame_buffer.recv_header": [
+    "websocket._abnf.frame_buffer.recv_strict"
+  ],
+  "websocket._abnf.frame_buffer.recv_length": [
+    "<builtin>.Exception.__init__",
+    "struct.unpack",
+    "websocket._abnf.frame_buffer.recv_strict"
+  ],
+  "websocket._abnf.frame_buffer.recv_mask": [
+    "websocket._abnf.frame_buffer.has_mask",
+    "websocket._abnf.frame_buffer.recv_strict"
+  ],
+  "websocket._abnf.frame_buffer.recv_strict": [
+    "<builtin>.ValueError",
+    "<builtin>.bytes.join",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.list.append",
+    "<builtin>.min",
+    "<builtin>.sum",
+    "websocket._core.WebSocket._recv"
+  ],
+  "websocket._app": [],
+  "websocket._app.WebSocketApp.__init__": [
+    "<builtin>.float",
+    "threading.Lock"
+  ],
+  "websocket._app.WebSocketApp._callback": [
+    "websocket._logging.error"
+  ],
+  "websocket._app.WebSocketApp._get_close_args": [
+    "websocket._app.WebSocketApp._parse_close_frame"
+  ],
+  "websocket._app.WebSocketApp._parse_close_frame": [
+    "<builtin>.bytes",
+    "<builtin>.bytes.decode",
+    "<builtin>.getattr",
+    "<builtin>.int",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.str.encode",
+    "wsaccel.xormask.XorMaskerSimple.process.encode"
+  ],
+  "websocket._app.WebSocketApp._send_ping": [
+    "threading.Event.wait",
+    "time.time",
+    "websocket._core.WebSocket.ping",
+    "websocket._logging.debug"
+  ],
+  "websocket._app.WebSocketApp._start_ping_thread": [
+    "<builtin>.float",
+    "threading.Event",
+    "threading.Thread",
+    "threading.Thread.start",
+    "websocket._app.WebSocketApp._send_ping"
+  ],
+  "websocket._app.WebSocketApp._stop_ping_thread": [
+    "<builtin>.float",
+    "threading.Event.set",
+    "threading.Thread.is_alive",
+    "threading.Thread.join",
+    "websocket._logging.warning"
+  ],
+  "websocket._app.WebSocketApp.close": [
+    "websocket._core.WebSocket.close"
+  ],
+  "websocket._app.WebSocketApp.create_dispatcher": [
+    "websocket._dispatcher.DispatcherBase.__init__",
+    "websocket._dispatcher.WrappedDispatcher.__init__"
+  ],
+  "websocket._app.WebSocketApp.ready": [],
+  "websocket._app.WebSocketApp.run_forever": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.bool",
+    "<builtin>.len",
+    "inspect.stack",
+    "websocket._app.WebSocketApp.create_dispatcher",
+    "websocket._app.WebSocketApp.run_forever.initialize_socket",
+    "websocket._app.WebSocketApp.run_forever.teardown",
+    "websocket._dispatcher.DispatcherBase.reconnect",
+    "websocket._logging.debug",
+    "websocket._logging.info",
+    "websocket._url.parse_url"
+  ],
+  "websocket._app.WebSocketApp.run_forever.check": [
+    "<builtin>.Exception.__init__",
+    "time.time"
+  ],
+  "websocket._app.WebSocketApp.run_forever.closed": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.bool",
+    "<builtin>.isinstance",
+    "<builtin>.list.append",
+    "<builtin>.setattr",
+    "<builtin>.str.join",
+    "<builtin>.type",
+    "websocket._app.WebSocketApp._parse_close_frame",
+    "websocket._app.WebSocketApp.run_forever.handleDisconnect"
+  ],
+  "websocket._app.WebSocketApp.run_forever.handleDisconnect": [
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "inspect.stack",
+    "websocket._abnf.ABNF.__str__",
+    "websocket._app.WebSocketApp._callback",
+    "websocket._app.WebSocketApp._stop_ping_thread",
+    "websocket._app.WebSocketApp.run_forever.teardown",
+    "websocket._dispatcher.WrappedDispatcher.reconnect",
+    "websocket._logging.debug",
+    "websocket._logging.error",
+    "websocket._logging.info"
+  ],
+  "websocket._app.WebSocketApp.run_forever.initialize_socket": [
+    "<builtin>.callable",
+    "websocket._app.WebSocketApp._callback",
+    "websocket._app.WebSocketApp._start_ping_thread",
+    "websocket._app.WebSocketApp.run_forever.handleDisconnect",
+    "websocket._core.WebSocket.__init__",
+    "websocket._core.WebSocket.connect",
+    "websocket._core.WebSocket.settimeout",
+    "websocket._core.WebSocket.shutdown",
+    "websocket._dispatcher.Dispatcher.read",
+    "websocket._dispatcher.SSLDispatcher.read",
+    "websocket._dispatcher.WrappedDispatcher.read",
+    "websocket._logging.info",
+    "websocket._socket.getdefaulttimeout"
+  ],
+  "websocket._app.WebSocketApp.run_forever.read": [
+    "<builtin>.bytes.decode",
+    "time.time",
+    "websocket._app.WebSocketApp._callback",
+    "websocket._app.WebSocketApp.run_forever.closed",
+    "websocket._app.WebSocketApp.run_forever.teardown",
+    "websocket._core.WebSocket.recv_data_frame",
+    "wsaccel.xormask.XorMaskerSimple.process.decode"
+  ],
+  "websocket._app.WebSocketApp.run_forever.teardown": [
+    "websocket._app.WebSocketApp._callback",
+    "websocket._app.WebSocketApp._get_close_args",
+    "websocket._app.WebSocketApp._stop_ping_thread",
+    "websocket._core.WebSocket.close"
+  ],
+  "websocket._app.WebSocketApp.send": [
+    "<builtin>.Exception.__init__",
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._app.WebSocketApp.send_bytes": [
+    "<builtin>.Exception.__init__",
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._app.WebSocketApp.send_text": [
+    "<builtin>.Exception.__init__",
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._app.set_reconnect": [],
+  "websocket._cookiejar": [],
+  "websocket._cookiejar.SimpleCookieJar.__init__": [],
+  "websocket._cookiejar.SimpleCookieJar.add": [
+    "<builtin>.dict.get",
+    "<builtin>.str.lower",
+    "<builtin>.str.startswith",
+    "http.cookies.Morsel.get",
+    "http.cookies.SimpleCookie",
+    "http.cookies.SimpleCookie.update",
+    "http.cookies.SimpleCookie.values"
+  ],
+  "websocket._cookiejar.SimpleCookieJar.get": [
+    "<builtin>.dict.get",
+    "<builtin>.dict.items",
+    "<builtin>.filter",
+    "<builtin>.list.append",
+    "<builtin>.sorted",
+    "<builtin>.str.endswith",
+    "<builtin>.str.join",
+    "<builtin>.str.lower",
+    "http.cookies.SimpleCookie.items"
+  ],
+  "websocket._cookiejar.SimpleCookieJar.set": [
+    "<builtin>.str.lower",
+    "<builtin>.str.startswith",
+    "http.cookies.Morsel.get",
+    "http.cookies.SimpleCookie",
+    "http.cookies.SimpleCookie.values"
+  ],
+  "websocket._core": [
+    "<builtin>.property"
+  ],
+  "websocket._core.WebSocket.__init__": [
+    "threading.Lock",
+    "websocket._abnf.continuous_frame.__init__",
+    "websocket._abnf.frame_buffer.__init__",
+    "websocket._socket.sock_opt.__init__"
+  ],
+  "websocket._core.WebSocket.__iter__": [
+    "websocket._core.WebSocket.recv"
+  ],
+  "websocket._core.WebSocket.__next__": [
+    "websocket._core.WebSocket.recv"
+  ],
+  "websocket._core.WebSocket._recv": [
+    "<builtin>.Exception.__init__",
+    "python_socks.sync.Proxy.create.connect.close",
+    "socket.socket.close",
+    "ssl.SSLSocket.close",
+    "websocket._socket.recv"
+  ],
+  "websocket._core.WebSocket._send": [
+    "<builtin>.Exception.__init__",
+    "websocket._dispatcher.DispatcherBase.send",
+    "websocket._dispatcher.WrappedDispatcher.send",
+    "websocket._socket.send"
+  ],
+  "websocket._core.WebSocket.abort": [
+    "python_socks.sync.Proxy.create.connect.shutdown",
+    "socket.socket.shutdown",
+    "ssl.SSLSocket.shutdown",
+    "websocket._logging.debug"
+  ],
+  "websocket._core.WebSocket.close": [
+    "<builtin>.ValueError",
+    "<builtin>.repr",
+    "python_socks.sync.Proxy.create.connect.gettimeout",
+    "python_socks.sync.Proxy.create.connect.settimeout",
+    "python_socks.sync.Proxy.create.connect.shutdown",
+    "socket.socket.gettimeout",
+    "socket.socket.settimeout",
+    "socket.socket.shutdown",
+    "ssl.SSLSocket.gettimeout",
+    "ssl.SSLSocket.settimeout",
+    "ssl.SSLSocket.shutdown",
+    "struct.pack",
+    "struct.unpack",
+    "time.time",
+    "websocket._core.WebSocket.recv_frame",
+    "websocket._core.WebSocket.send",
+    "websocket._core.WebSocket.shutdown",
+    "websocket._core._normalize_close_reason",
+    "websocket._logging.debug",
+    "websocket._logging.error",
+    "websocket._logging.isEnabledForError"
+  ],
+  "websocket._core.WebSocket.connect": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.get",
+    "<builtin>.dict.pop",
+    "<builtin>.range",
+    "python_socks.sync.Proxy.create.connect.close",
+    "socket.socket.close",
+    "ssl.SSLSocket.close",
+    "websocket._handshake.handshake",
+    "websocket._http.connect",
+    "websocket._http.proxy_info.__init__"
+  ],
+  "websocket._core.WebSocket.fileno": [
+    "<builtin>.Exception.__init__",
+    "python_socks.sync.Proxy.create.connect.fileno",
+    "socket.socket.fileno",
+    "ssl.SSLSocket.fileno"
+  ],
+  "websocket._core.WebSocket.getheaders": [],
+  "websocket._core.WebSocket.getstatus": [],
+  "websocket._core.WebSocket.getsubprotocol": [],
+  "websocket._core.WebSocket.gettimeout": [],
+  "websocket._core.WebSocket.is_ssl": [
+    "<builtin>.isinstance"
+  ],
+  "websocket._core.WebSocket.next": [
+    "websocket._core.WebSocket.__next__"
+  ],
+  "websocket._core.WebSocket.ping": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._core.WebSocket.pong": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "websocket._core.WebSocket.send",
+    "wsaccel.xormask.XorMaskerSimple.process.encode"
+  ],
+  "websocket._core.WebSocket.recv": [
+    "<builtin>.bytes.decode",
+    "<builtin>.isinstance",
+    "websocket._core.WebSocket.recv_data",
+    "websocket._utils.NoLock.__enter__",
+    "websocket._utils.NoLock.__exit__",
+    "wsaccel.xormask.XorMaskerSimple.process.decode"
+  ],
+  "websocket._core.WebSocket.recv_data": [
+    "websocket._core.WebSocket.recv_data_frame"
+  ],
+  "websocket._core.WebSocket.recv_data_frame": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.len",
+    "<builtin>.repr",
+    "websocket._abnf.ABNF.__str__",
+    "websocket._abnf.ABNF.format",
+    "websocket._abnf.continuous_frame.add",
+    "websocket._abnf.continuous_frame.extract",
+    "websocket._abnf.continuous_frame.is_fire",
+    "websocket._abnf.continuous_frame.validate",
+    "websocket._core.WebSocket.pong",
+    "websocket._core.WebSocket.recv_frame",
+    "websocket._core.WebSocket.send_close",
+    "websocket._logging.isEnabledForTrace",
+    "websocket._logging.trace"
+  ],
+  "websocket._core.WebSocket.recv_frame": [
+    "websocket._abnf.frame_buffer.recv_frame"
+  ],
+  "websocket._core.WebSocket.send": [
+    "websocket._abnf.ABNF.create_frame",
+    "websocket._core.WebSocket.send_frame"
+  ],
+  "websocket._core.WebSocket.send_binary": [
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._core.WebSocket.send_bytes": [
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._core.WebSocket.send_close": [
+    "<builtin>.ValueError",
+    "struct.pack",
+    "websocket._core.WebSocket.send",
+    "websocket._core._normalize_close_reason"
+  ],
+  "websocket._core.WebSocket.send_frame": [
+    "<builtin>.len",
+    "<builtin>.repr",
+    "websocket._abnf.ABNF.__str__",
+    "websocket._abnf.ABNF.format",
+    "websocket._core.WebSocket._send",
+    "websocket._logging.isEnabledForTrace",
+    "websocket._logging.trace",
+    "websocket._utils.NoLock.__enter__",
+    "websocket._utils.NoLock.__exit__"
+  ],
+  "websocket._core.WebSocket.send_text": [
+    "websocket._core.WebSocket.send"
+  ],
+  "websocket._core.WebSocket.set_mask_key": [],
+  "websocket._core.WebSocket.settimeout": [
+    "python_socks.sync.Proxy.create.connect.settimeout",
+    "socket.socket.settimeout",
+    "ssl.SSLSocket.settimeout"
+  ],
+  "websocket._core.WebSocket.shutdown": [
+    "python_socks.sync.Proxy.create.connect.close",
+    "socket.socket.close",
+    "ssl.SSLSocket.close",
+    "websocket._logging.debug"
+  ],
+  "websocket._core._normalize_close_reason": [
+    "<builtin>.bytes",
+    "<builtin>.isinstance",
+    "<builtin>.str.encode"
+  ],
+  "websocket._core.create_connection": [
+    "<builtin>.dict.pop",
+    "websocket._core.WebSocket.__init__",
+    "websocket._core.WebSocket.connect",
+    "websocket._core.WebSocket.settimeout",
+    "websocket._socket.getdefaulttimeout"
+  ],
+  "websocket._dispatcher": [],
+  "websocket._dispatcher.Dispatcher.read": [
+    "selectors.DefaultSelector",
+    "selectors.DevpollSelector.close",
+    "selectors.DevpollSelector.register",
+    "selectors.DevpollSelector.select",
+    "selectors.EpollSelector.close",
+    "selectors.EpollSelector.register",
+    "selectors.EpollSelector.select",
+    "selectors.KqueueSelector.close",
+    "selectors.KqueueSelector.register",
+    "selectors.KqueueSelector.select",
+    "selectors.PollSelector.close",
+    "selectors.PollSelector.register",
+    "selectors.PollSelector.select",
+    "selectors.SelectSelector.close",
+    "selectors.SelectSelector.register",
+    "selectors.SelectSelector.select",
+    "websocket._app.WebSocketApp.run_forever.check",
+    "websocket._app.WebSocketApp.run_forever.read"
+  ],
+  "websocket._dispatcher.DispatcherBase.__init__": [],
+  "websocket._dispatcher.DispatcherBase.reconnect": [
+    "<builtin>.len",
+    "inspect.stack",
+    "time.sleep",
+    "websocket._app.WebSocketApp.run_forever.initialize_socket",
+    "websocket._logging.info"
+  ],
+  "websocket._dispatcher.DispatcherBase.send": [
+    "websocket._socket.send"
+  ],
+  "websocket._dispatcher.DispatcherBase.timeout": [
+    "time.sleep"
+  ],
+  "websocket._dispatcher.SSLDispatcher.read": [
+    "selectors.DefaultSelector",
+    "selectors.DevpollSelector.close",
+    "selectors.DevpollSelector.register",
+    "selectors.EpollSelector.close",
+    "selectors.EpollSelector.register",
+    "selectors.KqueueSelector.close",
+    "selectors.KqueueSelector.register",
+    "selectors.PollSelector.close",
+    "selectors.PollSelector.register",
+    "selectors.SelectSelector.close",
+    "selectors.SelectSelector.register",
+    "websocket._app.WebSocketApp.run_forever.check",
+    "websocket._app.WebSocketApp.run_forever.read",
+    "websocket._dispatcher.SSLDispatcher.select"
+  ],
+  "websocket._dispatcher.SSLDispatcher.select": [
+    "<builtin>.len",
+    "python_socks.sync.Proxy.create.connect.pending",
+    "selectors.DevpollSelector.select",
+    "selectors.EpollSelector.select",
+    "selectors.KqueueSelector.select",
+    "selectors.PollSelector.select",
+    "selectors.SelectSelector.select",
+    "ssl.SSLSocket.pending"
+  ],
+  "websocket._dispatcher.WrappedDispatcher.__init__": [],
+  "websocket._dispatcher.WrappedDispatcher.read": [
+    "websocket._dispatcher.WrappedDispatcher.timeout"
+  ],
+  "websocket._dispatcher.WrappedDispatcher.reconnect": [
+    "websocket._dispatcher.WrappedDispatcher.timeout"
+  ],
+  "websocket._dispatcher.WrappedDispatcher.send": [
+    "<builtin>.len"
+  ],
+  "websocket._dispatcher.WrappedDispatcher.timeout": [],
+  "websocket._exceptions": [],
+  "websocket._exceptions.WebSocketBadStatusException.__init__": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.super"
+  ],
+  "websocket._handshake": [
+    "websocket._cookiejar.SimpleCookieJar.__init__"
+  ],
+  "websocket._handshake._create_sec_websocket_key": [
+    "<builtin>.bytes.decode",
+    "<builtin>.str.strip",
+    "base64.encodebytes",
+    "os.urandom"
+  ],
+  "websocket._handshake._get_handshake_headers": [
+    "<builtin>.dict.get",
+    "<builtin>.dict.items",
+    "<builtin>.filter",
+    "<builtin>.isinstance",
+    "<builtin>.list.append",
+    "<builtin>.list.extend",
+    "<builtin>.str.join",
+    "<builtin>.str.split",
+    "websocket._cookiejar.SimpleCookieJar.get",
+    "websocket._handshake._create_sec_websocket_key",
+    "websocket._handshake._pack_hostname"
+  ],
+  "websocket._handshake._get_resp_headers": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.bytes.decode",
+    "<builtin>.dict.get",
+    "<builtin>.int",
+    "<builtin>.len",
+    "<builtin>.min",
+    "websocket._exceptions.WebSocketBadStatusException.__init__",
+    "websocket._http.read_headers",
+    "websocket._socket.recv"
+  ],
+  "websocket._handshake._pack_hostname": [],
+  "websocket._handshake._validate": [
+    "<builtin>.bytes.lower",
+    "<builtin>.bytes.strip",
+    "<builtin>.dict.get",
+    "<builtin>.dict.items",
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "<builtin>.str.lower",
+    "<builtin>.str.split",
+    "<builtin>.str.strip",
+    "_hashlib.HASH.digest",
+    "_sha1.sha1.digest",
+    "base64.encodebytes",
+    "hashlib.sha1",
+    "hmac.compare_digest",
+    "websocket._logging.error"
+  ],
+  "websocket._handshake.handshake": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.get",
+    "<builtin>.str.join",
+    "websocket._handshake._get_handshake_headers",
+    "websocket._handshake._get_resp_headers",
+    "websocket._handshake._validate",
+    "websocket._handshake.handshake_response.__init__",
+    "websocket._logging.dump",
+    "websocket._socket.send"
+  ],
+  "websocket._handshake.handshake_response.__init__": [
+    "<builtin>.dict.get",
+    "websocket._cookiejar.SimpleCookieJar.add"
+  ],
+  "websocket._http": [],
+  "websocket._http._get_addrinfo_list": [
+    "<builtin>.Exception.__init__",
+    "socket.getaddrinfo",
+    "websocket._url.get_proxy_info"
+  ],
+  "websocket._http._open_socket": [
+    "<builtin>.getattr",
+    "<builtin>.str",
+    "socket.socket",
+    "socket.socket.close",
+    "socket.socket.connect",
+    "socket.socket.setsockopt",
+    "socket.socket.settimeout"
+  ],
+  "websocket._http._ssl_socket": [
+    "<builtin>.dict.get",
+    "<builtin>.dict.update",
+    "collections.abc.Mapping.get",
+    "os.path.isdir",
+    "os.path.isfile",
+    "websocket._http._wrap_sni_socket"
+  ],
+  "websocket._http._start_proxied_socket": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.int",
+    "python_socks.sync.Proxy.create",
+    "python_socks.sync.Proxy.create.connect",
+    "websocket._http._ssl_socket",
+    "websocket._url.parse_url"
+  ],
+  "websocket._http._tunnel": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.bytes.decode",
+    "<builtin>.bytes.strip",
+    "<builtin>.str",
+    "<builtin>.str.encode",
+    "<builtin>.str.replace",
+    "base64.encodebytes",
+    "websocket._http.read_headers",
+    "websocket._logging.debug",
+    "websocket._logging.dump",
+    "websocket._socket.send"
+  ],
+  "websocket._http._wrap_sni_socket": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.ValueError",
+    "<builtin>.dict.get",
+    "<builtin>.hasattr",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "collections.abc.Mapping.get",
+    "ssl.SSLContext",
+    "ssl.SSLContext.load_cert_chain",
+    "ssl.SSLContext.load_default_certs",
+    "ssl.SSLContext.load_verify_locations",
+    "ssl.SSLContext.set_ciphers",
+    "ssl.SSLContext.set_ecdh_curve",
+    "ssl.SSLContext.wrap_socket"
+  ],
+  "websocket._http.connect": [
+    "<builtin>.Exception.__init__",
+    "socket.socket.close",
+    "websocket._http._get_addrinfo_list",
+    "websocket._http._open_socket",
+    "websocket._http._ssl_socket",
+    "websocket._http._start_proxied_socket",
+    "websocket._http._tunnel",
+    "websocket._url.parse_url"
+  ],
+  "websocket._http.proxy_info.__init__": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.dict.get",
+    "python_socks._errors.ProxyError"
+  ],
+  "websocket._http.read_headers": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.bytes.decode",
+    "<builtin>.dict.get",
+    "<builtin>.int",
+    "<builtin>.len",
+    "<builtin>.str.lower",
+    "<builtin>.str.split",
+    "<builtin>.str.strip",
+    "websocket._logging.trace",
+    "websocket._socket.recv_line"
+  ],
+  "websocket._logging": [
+    "logging.Logger.addHandler",
+    "logging.Logger.getEffectiveLevel",
+    "logging.NullHandler",
+    "logging.getLogger"
+  ],
+  "websocket._logging.NullHandler.emit": [],
+  "websocket._logging.debug": [
+    "logging.Logger.debug"
+  ],
+  "websocket._logging.dump": [
+    "logging.Logger.debug"
+  ],
+  "websocket._logging.enableTrace": [
+    "<builtin>.getattr",
+    "logging.Logger.addHandler",
+    "logging.Logger.removeHandler",
+    "logging.Logger.setLevel",
+    "logging.StreamHandler"
+  ],
+  "websocket._logging.error": [
+    "logging.Logger.error"
+  ],
+  "websocket._logging.info": [
+    "logging.Logger.info"
+  ],
+  "websocket._logging.isEnabledForDebug": [
+    "logging.Logger.isEnabledFor"
+  ],
+  "websocket._logging.isEnabledForError": [
+    "logging.Logger.isEnabledFor"
+  ],
+  "websocket._logging.isEnabledForTrace": [],
+  "websocket._logging.trace": [
+    "logging.Logger.debug"
+  ],
+  "websocket._logging.warning": [
+    "logging.Logger.warning"
+  ],
+  "websocket._socket": [
+    "<builtin>.hasattr",
+    "<builtin>.list.append"
+  ],
+  "websocket._socket.getdefaulttimeout": [],
+  "websocket._socket.recv": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.isinstance",
+    "python_socks.sync.Proxy.create.connect.gettimeout",
+    "python_socks.sync.Proxy.create.connect.recv",
+    "socket.socket.gettimeout",
+    "socket.socket.recv",
+    "ssl.SSLSocket.gettimeout",
+    "ssl.SSLSocket.recv",
+    "websocket._socket.recv._recv",
+    "websocket._utils.extract_err_message"
+  ],
+  "websocket._socket.recv._recv": [
+    "<builtin>.Exception.__init__",
+    "python_socks.sync.Proxy.create.connect.gettimeout",
+    "python_socks.sync.Proxy.create.connect.recv",
+    "selectors.DefaultSelector",
+    "selectors.DevpollSelector.close",
+    "selectors.DevpollSelector.register",
+    "selectors.DevpollSelector.select",
+    "selectors.EpollSelector.close",
+    "selectors.EpollSelector.register",
+    "selectors.EpollSelector.select",
+    "selectors.KqueueSelector.close",
+    "selectors.KqueueSelector.register",
+    "selectors.KqueueSelector.select",
+    "selectors.PollSelector.close",
+    "selectors.PollSelector.register",
+    "selectors.PollSelector.select",
+    "selectors.SelectSelector.close",
+    "selectors.SelectSelector.register",
+    "selectors.SelectSelector.select",
+    "socket.socket.gettimeout",
+    "socket.socket.recv",
+    "ssl.SSLSocket.gettimeout",
+    "ssl.SSLSocket.recv",
+    "websocket._utils.extract_error_code"
+  ],
+  "websocket._socket.recv_line": [
+    "<builtin>.bytes.join",
+    "<builtin>.list.append",
+    "websocket._socket.recv"
+  ],
+  "websocket._socket.send": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "python_socks.sync.Proxy.create.connect.gettimeout",
+    "python_socks.sync.Proxy.create.connect.send",
+    "socket.socket.gettimeout",
+    "socket.socket.send",
+    "ssl.SSLSocket.gettimeout",
+    "ssl.SSLSocket.send",
+    "websocket._socket.send._send",
+    "websocket._utils.extract_err_message"
+  ],
+  "websocket._socket.send._send": [
+    "<builtin>.Exception.__init__",
+    "python_socks.sync.Proxy.create.connect.gettimeout",
+    "python_socks.sync.Proxy.create.connect.send",
+    "selectors.DefaultSelector",
+    "selectors.DevpollSelector.close",
+    "selectors.DevpollSelector.register",
+    "selectors.DevpollSelector.select",
+    "selectors.EpollSelector.close",
+    "selectors.EpollSelector.register",
+    "selectors.EpollSelector.select",
+    "selectors.KqueueSelector.close",
+    "selectors.KqueueSelector.register",
+    "selectors.KqueueSelector.select",
+    "selectors.PollSelector.close",
+    "selectors.PollSelector.register",
+    "selectors.PollSelector.select",
+    "selectors.SelectSelector.close",
+    "selectors.SelectSelector.register",
+    "selectors.SelectSelector.select",
+    "socket.socket.gettimeout",
+    "socket.socket.send",
+    "ssl.SSLSocket.gettimeout",
+    "ssl.SSLSocket.send",
+    "websocket._utils.extract_error_code"
+  ],
+  "websocket._socket.setdefaulttimeout": [],
+  "websocket._socket.sock_opt.__init__": [],
+  "websocket._ssl_compat": [],
+  "websocket._url": [],
+  "websocket._url._is_address_in_network": [
+    "ipaddress.IPv4Network.subnet_of",
+    "ipaddress.IPv6Network.subnet_of",
+    "ipaddress.ip_network"
+  ],
+  "websocket._url._is_ip_address": [
+    "<builtin>.TypeError",
+    "<builtin>.isinstance",
+    "ipaddress.ip_address"
+  ],
+  "websocket._url._is_no_proxy_host": [
+    "<builtin>.any",
+    "<builtin>.str.endswith",
+    "<builtin>.str.lstrip",
+    "<builtin>.str.replace",
+    "<builtin>.str.split",
+    "<builtin>.str.startswith",
+    "collections.abc.Mapping.get",
+    "websocket._url._is_address_in_network",
+    "websocket._url._is_ip_address",
+    "websocket._url._is_subnet_address"
+  ],
+  "websocket._url._is_subnet_address": [
+    "ipaddress.ip_network"
+  ],
+  "websocket._url.get_proxy_info": [
+    "<builtin>.Exception.__init__",
+    "<builtin>.str.replace",
+    "<builtin>.str.upper",
+    "collections.abc.Mapping.get",
+    "urllib.parse.unquote",
+    "urllib.parse.urlparse",
+    "websocket._url._is_no_proxy_host"
+  ],
+  "websocket._url.parse_url": [
+    "<builtin>.ValueError",
+    "<builtin>.str.split",
+    "urllib.parse.urlparse"
+  ],
+  "websocket._utils": [],
+  "websocket._utils.NoLock.__enter__": [],
+  "websocket._utils.NoLock.__exit__": [],
+  "websocket._utils._decode": [],
+  "websocket._utils._validate_utf8": [
+    "<builtin>.int",
+    "websocket._utils._decode",
+    "wsaccel.utf8validator.Utf8Validator",
+    "wsaccel.utf8validator.Utf8Validator.validate"
+  ],
+  "websocket._utils.extract_err_message": [
+    "<builtin>.str"
+  ],
+  "websocket._utils.extract_error_code": [
+    "<builtin>.isinstance",
+    "<builtin>.len"
+  ],
+  "websocket._utils.validate_utf8": [
+    "<builtin>.isinstance",
+    "<builtin>.str.encode",
+    "websocket._utils._validate_utf8",
+    "wsaccel.xormask.XorMaskerSimple.process.encode"
+  ],
+  "websocket._wsdump": [
+    "<builtin>.print",
+    "websocket._wsdump.main"
+  ],
+  "websocket._wsdump.InteractiveConsole.read": [
+    "websocket._wsdump.RawInput.raw_input"
+  ],
+  "websocket._wsdump.InteractiveConsole.write": [
+    "io.TextIOWrapper.flush",
+    "io.TextIOWrapper.write"
+  ],
+  "websocket._wsdump.NonInteractive.read": [
+    "websocket._wsdump.RawInput.raw_input"
+  ],
+  "websocket._wsdump.NonInteractive.write": [
+    "io.TextIOWrapper.flush",
+    "io.TextIOWrapper.write"
+  ],
+  "websocket._wsdump.RawInput.raw_input": [
+    "<builtin>.input",
+    "<builtin>.str.encode"
+  ],
+  "websocket._wsdump.VAction.__call__": [
+    "<builtin>.int",
+    "<builtin>.setattr",
+    "<builtin>.str.count"
+  ],
+  "websocket._wsdump.main": [
+    "<builtin>.list",
+    "<builtin>.map",
+    "<builtin>.print",
+    "<builtin>.str.split",
+    "code.InteractiveConsole.__init__",
+    "threading.Thread",
+    "threading.Thread.start",
+    "time.sleep",
+    "time.time",
+    "urllib.parse.urlparse",
+    "websocket._core.WebSocket.send",
+    "websocket._core.create_connection",
+    "websocket._logging.enableTrace",
+    "websocket._wsdump.InteractiveConsole.read",
+    "websocket._wsdump.NonInteractive.read",
+    "websocket._wsdump.main.recv_ws",
+    "websocket._wsdump.parse_args"
+  ],
+  "websocket._wsdump.main.recv": [
+    "websocket._core.WebSocket.pong",
+    "websocket._core.WebSocket.recv_frame",
+    "websocket._core.WebSocket.send_close"
+  ],
+  "websocket._wsdump.main.recv_ws": [
+    "<builtin>.dict.get",
+    "<builtin>.isinstance",
+    "<builtin>.len",
+    "<builtin>.repr",
+    "<builtin>.str",
+    "gzip.decompress",
+    "time.time",
+    "websocket._wsdump.InteractiveConsole.write",
+    "websocket._wsdump.NonInteractive.write",
+    "websocket._wsdump.main.recv",
+    "zlib.decompress"
+  ],
+  "websocket._wsdump.parse_args": [
+    "argparse.ArgumentParser",
+    "argparse.ArgumentParser.add_argument",
+    "argparse.ArgumentParser.parse_args",
+    "websocket._wsdump.VAction.__call__"
+  ]
+}

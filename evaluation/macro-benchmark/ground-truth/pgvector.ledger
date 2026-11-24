@@ -1,0 +1,1898 @@
+# Call-site ledger of pgvector at 5275164edb3a2847d4a5aec1af5ae90f7dc47b53.
+# Hand-written from the source; judgements in pgvector.md.
+#
+# Scope (pgvector.md): requires-python >= 3.10; no runtime dependency. numpy
+# and scipy are installed in the trace environment (real names); asyncpg,
+# Django, peewee, pg8000, psycopg, psycopg2 and SQLAlchemy are not: their calls
+# are named as missing modules by access path (micro-benchmark rules), and a
+# missing library calls nothing back. Arguments annotated with a missing
+# module's class are named through that annotation.
+default reject pgvector.bit.Bit.__eq__, pgvector.halfvec.HalfVector.__eq__, pgvector.sparsevec.SparseVector.__eq__, pgvector.vector.Vector.__eq__: no operand of these comparisons, `in` tests, subscripts or dict and set keys is a package vector; they compare or index ints, floats, strs, bytes, arrays, dicts, lists, typing forms in annotations, numpy dtypes and arrays, or client values that the package converts to floats (the package never puts a vector into a list, dict or set)
+default reject pgvector.bit.Bit.__repr__, pgvector.halfvec.HalfVector.__repr__, pgvector.sparsevec.SparseVector.__repr__, pgvector.vector.Vector.__repr__: no formatted, converted or %-formatted value at these sites is a package vector; they are ints, floats, strs, lists and dicts of floats and ints, bytes elements, and exceptions
+
+== pgvector._utils
+
+[pgvector._utils.is_ndarray]
+15:33 call  sys.modules.get('numpy')
+    -> <builtin>.dict.get
+    note: sys.modules is a dict
+16:26 call  isinstance(value, numpy.ndarray)
+    -> <builtin>.isinstance
+
+[pgvector._utils.is_sparse_array]
+21:34 call  sys.modules.get('scipy.sparse')
+    -> <builtin>.dict.get
+    note: sys.modules is a dict
+22:26 call  isinstance(value, (sparse.sparray, sparse.spmatrix))
+    -> <builtin>.isinstance
+
+== pgvector.asyncpg.register
+
+[pgvector.asyncpg.register.register_vector]
+6:30 call  conn.set_type_codec( 'vector', schema=schema, encoder=lam...
+    -> asyncpg.Connection.set_type_codec
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+    note: conn is annotated asyncpg.Connection
+15:34 call  conn.set_type_codec( 'halfvec', schema=schema, encoder=la...
+    -> asyncpg.Connection.set_type_codec
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+23:34 call  conn.set_type_codec( 'sparsevec', schema=schema, encoder=...
+    -> asyncpg.Connection.set_type_codec
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+31:19 call  str(e)
+    -> <builtin>.str
+31:33 call  str(e).startswith('unknown type:')
+    -> <builtin>.str.startswith
+
+[pgvector.asyncpg.register.register_vector.<lambda1>]
+9:43 call  isinstance(v, Vector)
+    -> <builtin>.isinstance
+9:66 call  Vector(v)
+    -> pgvector.vector.Vector.__init__
+9:80 call  (v if isinstance(v, Vector) else Vector(v)).to_binary()
+    -> pgvector.vector.Vector.to_binary
+    reject *: the receiver is a Vector (the isinstance test or the constructor); the package has no subclass of Vector
+
+[pgvector.asyncpg.register.register_vector.<lambda2>]
+18:47 call  isinstance(v, HalfVector)
+    -> <builtin>.isinstance
+18:78 call  HalfVector(v)
+    -> pgvector.halfvec.HalfVector.__init__
+18:92 call  (v if isinstance(v, HalfVector) else HalfVector(v)).to_bi...
+    -> pgvector.halfvec.HalfVector.to_binary
+    reject *: the receiver is a HalfVector (the isinstance test or the constructor); the package has no subclass of HalfVector
+
+[pgvector.asyncpg.register.register_vector.<lambda3>]
+26:47 call  isinstance(v, SparseVector)
+    -> <builtin>.isinstance
+26:82 call  SparseVector(v)
+    -> pgvector.sparsevec.SparseVector.__init__
+26:96 call  (v if isinstance(v, SparseVector) else SparseVector(v)).t...
+    -> pgvector.sparsevec.SparseVector.to_binary
+    reject *: the receiver is a SparseVector (the isinstance test or the constructor); the package has no subclass of SparseVector
+
+== pgvector.bit
+
+[pgvector.bit]
+78:6 decorator  @classmethod
+    -> <builtin>.classmethod
+83:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[pgvector.bit.Bit.__init__]
+19:22 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+20:35 call  len(value)
+    -> <builtin>.len
+22:24 call  isinstance(value, (list, str))
+    -> <builtin>.isinstance
+23:26 call  isinstance(value, list)
+    -> <builtin>.isinstance
+26:36 call  ''.join([bits[v] for v in value])
+    -> <builtin>.str.join
+28:37 call  ValueError('expected list[bool]')
+    -> <builtin>.ValueError
+29:25 call  set(value)
+    -> <builtin>.set
+29:41 call  set(value).issubset({'0', '1'})
+    -> <builtin>.set.issubset
+30:33 call  ValueError('expected bit string')
+    -> <builtin>.ValueError
+32:25 call  len(value)
+    -> <builtin>.len
+37:29 call  int(value, 2)
+    -> <builtin>.int
+37:48 call  int(value, 2).to_bytes(len(value) // 8, byteorder='big')
+    -> <builtin>.int.to_bytes
+37:52 call  len(value)
+    -> <builtin>.len
+38:24 call  is_ndarray(value)
+    -> pgvector._utils.is_ndarray
+43:53 call  np.any(value > 1)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.any
+    note: numpy 1.25 and later make this function an _ArrayFunctionDispatcher object; the numpy 1.x releases before 1.25, which the package admits (pgvector.md, J2), make it a Python function at this public numpy attribute (the itables precedent)
+44:37 call  ValueError('expected elements to be boolean')
+    -> <builtin>.ValueError
+45:37 call  value.astype(bool)
+    -> numpy.ndarray.astype
+    note: value is a numpy.ndarray here (is_ndarray checked it; the annotation names numpy.ndarray, pgvector.md J3)
+48:33 call  ValueError('expected ndim to be 1')
+    -> <builtin>.ValueError
+50:31 call  len(value)
+    -> <builtin>.len
+51:37 call  np.packbits(value)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.packbits
+    note: numpy 1.25 and later make this function an _ArrayFunctionDispatcher object; the numpy 1.x releases before 1.25, which the package admits (pgvector.md, J2), make it a Python function at this public numpy attribute (the itables precedent)
+51:52 call  np.packbits(value).tobytes()
+    -> numpy.ndarray.tobytes
+    note: np.packbits returns a numpy.ndarray
+53:29 call  ValueError('expected bytes, str, list, or ndarray')
+    -> <builtin>.ValueError
+
+[pgvector.bit.Bit.__repr__]
+56:35 call  self.to_text()
+    -> pgvector.bit.Bit.to_text
+    reject *: the receiver is a Bit (self); the package has no subclass of Bit
+
+[pgvector.bit.Bit.__eq__]
+59:26 call  isinstance(other, self.__class__)
+    -> <builtin>.isinstance
+
+[pgvector.bit.Bit.to_list]
+65:47 call  self.to_text()
+    -> pgvector.bit.Bit.to_text
+    reject *: the receiver is a Bit (self); the package has no subclass of Bit
+
+[pgvector.bit.Bit.to_numpy]
+70:29 call  np.unpackbits(np.frombuffer(self._data, dtype=np.uint8), ...
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.unpackbits
+    note: numpy 1.25 and later make this function an _ArrayFunctionDispatcher object; the numpy 1.x releases before 1.25, which the package admits (pgvector.md, J2), make it a Python function at this public numpy attribute (the itables precedent)
+70:43 call  np.frombuffer(self._data, dtype=np.uint8)
+    -> numpy.frombuffer
+70:99 call  np.unpackbits(np.frombuffer(self._data, dtype=np.uint8), ...
+    -> numpy.ndarray.astype
+    note: np.unpackbits returns a numpy.ndarray
+
+[pgvector.bit.Bit.to_text]
+73:23 call  ''.join(format(v, '08b') for v in self._data)
+    -> <builtin>.str.join
+73:30 call  format(v, '08b')
+    -> <builtin>.format
+    note: v is an int, an element of the bytes self._data
+
+[pgvector.bit.Bit.to_binary]
+76:20 call  pack('>i', self._length)
+    -> struct.pack
+
+[pgvector.bit.Bit.from_text]
+81:19 call  cls(str(value))
+    -> pgvector.bit.Bit.__init__
+    note: cls is the class of the classmethod: the public class itself, or a client subclass that inherits the method (client code where it overrides __init__)
+81:23 call  str(value)
+    -> <builtin>.str
+
+[pgvector.bit.Bit.from_binary]
+85:30 call  unpack_from('>i', value)
+    -> struct.unpack_from
+86:26 call  memoryview(value)
+    -> <builtin>.memoryview
+86:45 call  memoryview(value)[4:].tobytes()
+    -> <builtin>.memoryview.tobytes
+    note: a slice of a memoryview is a memoryview
+88:15 call  len(data)
+    -> <builtin>.len
+89:29 call  ValueError('invalid length')
+    -> <builtin>.ValueError
+91:26 call  cls.__new__(cls)
+    -> <builtin>.object.__new__
+    note: cls is Bit or a client subclass; Bit defines no __new__
+
+== pgvector.django.bit
+
+[pgvector.django.bit.BitField.__init__]
+12:14 call  super()
+    -> <builtin>.super
+12:25 call  super().__init__(*args, **kwargs)
+    -> django.db.models.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: super() in a class whose base is a class of a missing module: the stub base's method (micro-benchmark external/base_class_super)
+
+[pgvector.django.bit.BitField.deconstruct]
+15:41 call  super()
+    -> <builtin>.super
+15:55 call  super().deconstruct()
+    -> django.db.models.Field.deconstruct
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.bit.BitField.formfield]
+26:21 call  super()
+    -> <builtin>.super
+26:33 call  super().formfield( form_class=BitFormField if form_class ...
+    -> django.db.models.Field.formfield
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: Django's Field.formfield calls form_class(...); BitFormField's __init__ is Django's CharField.__init__ (outside), so no package callee (pgvector.md J6)
+
+[pgvector.django.bit.BitFormField.to_python]
+35:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+37:21 call  super()
+    -> <builtin>.super
+37:33 call  super().to_python(value)
+    -> django.forms.CharField.to_python
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+== pgvector.django.extensions
+
+[pgvector.django.extensions.VectorExtension.__init__]
+9:18 call  super()
+    -> <builtin>.super
+9:29 call  super().__init__('vector', hints=hints)
+    -> django.contrib.postgres.operations.CreateExtension.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: the branch VERSION[0] >= 6 runs for Django 6 and the else branch for earlier releases (both admitted, pgvector.md J8)
+
+== pgvector.django.functions
+
+[pgvector.django.functions]
+7:30 call  FloatField()
+    -> django.db.models.FloatField
+23:30 call  FloatField()
+    -> django.db.models.FloatField
+
+[pgvector.django.functions.DistanceBase.__init__]
+10:23 call  hasattr(vector, 'resolve_expression')
+    -> <builtin>.hasattr
+11:26 call  isinstance(vector, (Vector, HalfVector, SparseVector))
+    -> <builtin>.isinstance
+12:31 call  Value(vector.to_text())
+    -> django.db.models.Value
+12:46 call  vector.to_text()
+    -> pgvector.halfvec.HalfVector.to_text
+    -> pgvector.sparsevec.SparseVector.to_text
+    -> pgvector.vector.Vector.to_text
+    reject pgvector.bit.Bit.to_text: the isinstance test admits only Vector, HalfVector and SparseVector
+14:31 call  Value(Vector(vector).to_text())
+    -> django.db.models.Value
+14:38 call  Vector(vector)
+    -> pgvector.vector.Vector.__init__
+14:54 call  Vector(vector).to_text()
+    -> pgvector.vector.Vector.to_text
+    reject *: the receiver is a Vector (the isinstance test or the constructor); the package has no subclass of Vector
+19:14 call  super()
+    -> <builtin>.super
+19:25 call  super().__init__(expression, vector, **extra)
+    -> django.db.models.Func.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.functions.BitDistanceBase.__init__]
+26:23 call  hasattr(vector, 'resolve_expression')
+    -> <builtin>.hasattr
+27:27 call  Value(vector)
+    -> django.db.models.Value
+28:14 call  super()
+    -> <builtin>.super
+28:25 call  super().__init__(expression, vector, **extra)
+    -> django.db.models.Func.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+== pgvector.django.halfvec
+
+[pgvector.django.halfvec.HalfVectorField.__init__]
+14:14 call  super()
+    -> <builtin>.super
+14:25 call  super().__init__(*args, **kwargs)
+    -> django.db.models.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.halfvec.HalfVectorField.deconstruct]
+17:41 call  super()
+    -> <builtin>.super
+17:55 call  super().deconstruct()
+    -> django.db.models.Field.deconstruct
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.halfvec.HalfVectorField.from_db_value]
+28:35 call  HalfVector._from_db(value)
+    -> pgvector.halfvec.HalfVector._from_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.django.halfvec.HalfVectorField.to_python]
+31:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+33:35 call  HalfVector._from_db(value)
+    -> pgvector.halfvec.HalfVector._from_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.django.halfvec.HalfVectorField.get_prep_value]
+36:33 call  HalfVector._to_db(value)
+    -> pgvector.halfvec.HalfVector._to_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.django.halfvec.HalfVectorField.value_to_string]
+39:36 call  self.get_prep_value(self.value_from_object(obj))
+    -> pgvector.django.halfvec.HalfVectorField.get_prep_value
+    reject *: self is a HalfVectorField (no package subclass; a client subclass that overrides get_prep_value is client code)
+39:59 call  self.value_from_object(obj)
+    -> django.db.models.Field.value_from_object
+    note: inherited from the stub base django.db.models.Field
+
+[pgvector.django.halfvec.HalfVectorField.formfield]
+43:21 call  super()
+    -> <builtin>.super
+43:33 call  super().formfield( form_class=HalfVectorFormField if form...
+    -> django.db.models.Field.formfield
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.halfvec.HalfVectorFormField.to_python]
+52:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+54:21 call  super()
+    -> <builtin>.super
+54:33 call  super().to_python(value)
+    -> django.forms.CharField.to_python
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+== pgvector.django.indexes
+
+[pgvector.django.indexes.IvfflatIndex.__init__]
+10:14 call  super()
+    -> <builtin>.super
+10:25 call  super().__init__(*expressions, **kwargs)
+    -> django.contrib.postgres.indexes.PostgresIndex.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.indexes.IvfflatIndex.deconstruct]
+13:35 call  super()
+    -> <builtin>.super
+13:49 call  super().deconstruct()
+    -> django.contrib.postgres.indexes.PostgresIndex.deconstruct
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.indexes.IvfflatIndex.get_with_params]
+21:31 call  with_params.append('lists = %d' % self.lists)
+    -> <builtin>.list.append
+
+[pgvector.django.indexes.HnswIndex.__init__]
+31:14 call  super()
+    -> <builtin>.super
+31:25 call  super().__init__(*expressions, **kwargs)
+    -> django.contrib.postgres.indexes.PostgresIndex.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.indexes.HnswIndex.deconstruct]
+34:35 call  super()
+    -> <builtin>.super
+34:49 call  super().deconstruct()
+    -> django.contrib.postgres.indexes.PostgresIndex.deconstruct
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.indexes.HnswIndex.get_with_params]
+44:31 call  with_params.append('m = %d' % self.m)
+    -> <builtin>.list.append
+46:31 call  with_params.append('ef_construction = %d' % self.ef_const...
+    -> <builtin>.list.append
+
+== pgvector.django.sparsevec
+
+[pgvector.django.sparsevec.SparseVectorField.__init__]
+14:14 call  super()
+    -> <builtin>.super
+14:25 call  super().__init__(*args, **kwargs)
+    -> django.db.models.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.sparsevec.SparseVectorField.deconstruct]
+17:41 call  super()
+    -> <builtin>.super
+17:55 call  super().deconstruct()
+    -> django.db.models.Field.deconstruct
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.sparsevec.SparseVectorField.from_db_value]
+28:37 call  SparseVector._from_db(value)
+    -> pgvector.sparsevec.SparseVector._from_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.django.sparsevec.SparseVectorField.to_python]
+31:37 call  SparseVector._from_db(value)
+    -> pgvector.sparsevec.SparseVector._from_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.django.sparsevec.SparseVectorField.get_prep_value]
+34:35 call  SparseVector._to_db(value)
+    -> pgvector.sparsevec.SparseVector._to_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.django.sparsevec.SparseVectorField.value_to_string]
+37:36 call  self.get_prep_value(self.value_from_object(obj))
+    -> pgvector.django.sparsevec.SparseVectorField.get_prep_value
+    reject *: self is a SparseVectorField (no package subclass; a client subclass that overrides get_prep_value is client code)
+37:59 call  self.value_from_object(obj)
+    -> django.db.models.Field.value_from_object
+    note: inherited from the stub base django.db.models.Field
+
+[pgvector.django.sparsevec.SparseVectorField.formfield]
+41:21 call  super()
+    -> <builtin>.super
+41:33 call  super().formfield( form_class=SparseVectorFormField if fo...
+    -> django.db.models.Field.formfield
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.sparsevec.SparseVectorWidget.format_value]
+50:22 call  isinstance(value, SparseVector)
+    -> <builtin>.isinstance
+51:34 call  value.to_text()
+    -> pgvector.sparsevec.SparseVector.to_text
+    reject *: the isinstance test admits only SparseVector
+52:21 call  super()
+    -> <builtin>.super
+52:36 call  super().format_value(value)
+    -> django.forms.TextInput.format_value
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.sparsevec.SparseVectorFormField.to_python]
+59:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+61:21 call  super()
+    -> <builtin>.super
+61:33 call  super().to_python(value)
+    -> django.forms.CharField.to_python
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: no edge to SparseVector.__eq__ or __repr__ (referee's ruling on audit Q1): a disabled form field would pass its SparseVector initial value here, and CharField.to_python would compare and str() it, but a SparseVector is not an admitted input of this cleaning parameter (the tests give it only for rendering; cleaning gets strs); pgvector.md J13
+
+== pgvector.django.vector
+
+[pgvector.django.vector.VectorField.__init__]
+14:14 call  super()
+    -> <builtin>.super
+14:25 call  super().__init__(*args, **kwargs)
+    -> django.db.models.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.vector.VectorField.deconstruct]
+17:41 call  super()
+    -> <builtin>.super
+17:55 call  super().deconstruct()
+    -> django.db.models.Field.deconstruct
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.vector.VectorField.from_db_value]
+28:31 call  Vector._from_db(value)
+    -> pgvector.vector.Vector._from_db
+    reject *: the receiver is the class Vector
+
+[pgvector.django.vector.VectorField.to_python]
+31:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+33:31 call  Vector._from_db(value)
+    -> pgvector.vector.Vector._from_db
+    reject *: the receiver is the class Vector
+
+[pgvector.django.vector.VectorField.get_prep_value]
+36:29 call  Vector._to_db(value)
+    -> pgvector.vector.Vector._to_db
+    reject *: the receiver is the class Vector
+
+[pgvector.django.vector.VectorField.value_to_string]
+39:36 call  self.get_prep_value(self.value_from_object(obj))
+    -> pgvector.django.vector.VectorField.get_prep_value
+    reject *: self is a VectorField (no package subclass; a client subclass that overrides get_prep_value is client code)
+39:59 call  self.value_from_object(obj)
+    -> django.db.models.Field.value_from_object
+    note: inherited from the stub base django.db.models.Field
+
+[pgvector.django.vector.VectorField.formfield]
+43:21 call  super()
+    -> <builtin>.super
+43:33 call  super().formfield( form_class=VectorFormField if form_cla...
+    -> django.db.models.Field.formfield
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.django.vector.VectorFormField.to_python]
+52:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+54:21 call  super()
+    -> <builtin>.super
+54:33 call  super().to_python(value)
+    -> django.forms.CharField.to_python
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+== pgvector.halfvec
+
+[pgvector.halfvec]
+64:6 decorator  @classmethod
+    -> <builtin>.classmethod
+68:6 decorator  @classmethod
+    -> <builtin>.classmethod
+88:6 decorator  @classmethod
+    -> <builtin>.classmethod
+92:6 decorator  @classmethod
+    -> <builtin>.classmethod
+106:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[pgvector.halfvec.HalfVector.__init__]
+16:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+17:22 call  len(value)
+    -> <builtin>.len
+19:36 call  array('H', struct.pack(f'{dim}e', *value))
+    -> array.array
+19:53 call  struct.pack(f'{dim}e', *value)
+    -> struct.pack
+21:33 call  ValueError('expected list[float]')
+    -> <builtin>.ValueError
+22:24 call  is_ndarray(value)
+    -> pgvector._utils.is_ndarray
+26:33 call  ValueError('expected ndim to be 1')
+    -> <builtin>.ValueError
+28:24 call  array('H')
+    -> array.array
+29:26 call  arr.frombytes(value.astype(np.float16, order='C', copy=Fa...
+    -> array.array.frombytes
+29:39 call  value.astype(np.float16, order='C', copy=False)
+    -> numpy.ndarray.astype
+    note: value is a numpy.ndarray here (is_ndarray checked it; the annotation names numpy.ndarray, pgvector.md J3)
+29:84 call  value.astype(np.float16, order='C', copy=False).data.cast...
+    -> <builtin>.memoryview.cast
+    note: ndarray.data is a memoryview
+32:29 call  ValueError('expected list or ndarray')
+    -> <builtin>.ValueError
+
+[pgvector.halfvec.HalfVector.__repr__]
+35:42 call  self.to_list()
+    -> pgvector.halfvec.HalfVector.to_list
+    reject *: the receiver is a HalfVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of HalfVector
+
+[pgvector.halfvec.HalfVector.__eq__]
+38:26 call  isinstance(other, self.__class__)
+    -> <builtin>.isinstance
+
+[pgvector.halfvec.HalfVector.dimensions]
+43:19 call  len(self._value)
+    -> <builtin>.len
+
+[pgvector.halfvec.HalfVector.to_list]
+46:18 call  len(self._value)
+    -> <builtin>.len
+47:20 call  list(struct.unpack(f'{dim}e', self._value))
+    -> <builtin>.list
+47:34 call  struct.unpack(f'{dim}e', self._value)
+    -> struct.unpack
+
+[pgvector.halfvec.HalfVector.to_numpy]
+51:29 call  np.frombuffer(self._value, dtype=np.float16)
+    -> numpy.frombuffer
+
+[pgvector.halfvec.HalfVector.to_text]
+54:28 call  ",".join([str(v) for v in self.to_list()])
+    -> <builtin>.str.join
+54:33 call  str(v)
+    -> <builtin>.str
+54:58 call  self.to_list()
+    -> pgvector.halfvec.HalfVector.to_list
+    reject *: the receiver is a HalfVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of HalfVector
+
+[pgvector.halfvec.HalfVector.to_binary]
+60:26 call  array('H', self._value)
+    -> array.array
+61:27 call  value.byteswap()
+    -> array.array.byteswap
+    note: sys.byteorder: both branches run (pgvector.md J5)
+62:27 call  struct.pack('>HH', len(value), 0)
+    -> struct.pack
+62:38 call  len(value)
+    -> <builtin>.len
+62:62 call  memoryview(value)
+    -> <builtin>.memoryview
+
+[pgvector.halfvec.HalfVector.from_text]
+66:19 call  cls(cls._from_text(value))
+    -> pgvector.halfvec.HalfVector.__init__
+    note: cls is the class of the classmethod: the public class itself, or a client subclass that inherits the method (client code where it overrides __init__)
+66:34 call  cls._from_text(value)
+    -> pgvector.halfvec.HalfVector._from_text
+    reject *: the receiver is a HalfVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of HalfVector
+
+[pgvector.halfvec.HalfVector.from_binary]
+70:41 call  struct.unpack_from('>HH', value)
+    -> struct.unpack_from
+71:26 call  memoryview(value)
+    -> <builtin>.memoryview
+73:15 call  len(data)
+    -> <builtin>.len
+74:29 call  ValueError('invalid length')
+    -> <builtin>.ValueError
+77:29 call  ValueError('expected unused to be 0')
+    -> <builtin>.ValueError
+79:20 call  array('H')
+    -> array.array
+80:22 call  arr.frombytes(data)
+    -> array.array.frombytes
+82:25 call  arr.byteswap()
+    -> array.array.byteswap
+84:26 call  cls.__new__(cls)
+    -> <builtin>.object.__new__
+    note: cls is HalfVector or a client subclass; HalfVector defines no __new__
+
+[pgvector.halfvec.HalfVector._from_text]
+90:22 call  float(v)
+    -> <builtin>.float
+90:52 call  value[1:-1].split(',')
+    -> <builtin>.str.split
+    note: value is a str (annotation; the package passes str: from_text, _from_db, the psycopg loaders)
+
+[pgvector.halfvec.HalfVector._to_db]
+98:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+99:32 call  ",".join([str(float(v)) for v in value])
+    -> <builtin>.str.join
+99:37 call  str(float(v))
+    -> <builtin>.str
+99:43 call  float(v)
+    -> <builtin>.float
+101:26 call  isinstance(value, HalfVector)
+    -> <builtin>.isinstance
+102:24 call  cls(value)
+    -> pgvector.halfvec.HalfVector.__init__
+    note: cls is HalfVector: the package calls the private _to_db only as HalfVector._to_db
+104:29 call  value.to_text()
+    -> pgvector.halfvec.HalfVector.to_text
+    reject *: the receiver is a HalfVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of HalfVector
+
+[pgvector.halfvec.HalfVector._from_db]
+111:22 call  isinstance(value, HalfVector)
+    -> <builtin>.isinstance
+112:33 call  value.to_list()
+    -> pgvector.halfvec.HalfVector.to_list
+    reject *: the receiver is a HalfVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of HalfVector
+114:30 call  cls._from_text(value)
+    -> pgvector.halfvec.HalfVector._from_text
+    reject *: the receiver is a HalfVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of HalfVector
+
+== pgvector.peewee.bit
+
+[pgvector.peewee.bit.FixedBitField.__init__]
+10:14 call  super()
+    -> <builtin>.super
+10:25 call  super().__init__(*args, **kwargs)
+    -> peewee.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.peewee.bit.FixedBitField._distance]
+16:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))
+    -> peewee.Expression
+16:61 call  self.to_value(vector)
+    -> peewee.Field.to_value
+    note: inherited from the stub base peewee.Field; a missing module calls nothing back (Field.to_value does not reach the package's db_value here)
+
+[pgvector.peewee.bit.FixedBitField.hamming_distance]
+19:30 call  self._distance('<~>', vector)
+    -> pgvector.peewee.bit.FixedBitField._distance
+    reject *: self is a FixedBitField
+
+[pgvector.peewee.bit.FixedBitField.jaccard_distance]
+22:30 call  self._distance('<%%>', vector)
+    -> pgvector.peewee.bit.FixedBitField._distance
+    reject *: self is a FixedBitField
+
+== pgvector.peewee.halfvec
+
+[pgvector.peewee.halfvec.HalfVectorField.__init__]
+11:14 call  super()
+    -> <builtin>.super
+11:25 call  super().__init__(*args, **kwargs)
+    -> peewee.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.peewee.halfvec.HalfVectorField.db_value]
+17:33 call  HalfVector._to_db(value)
+    -> pgvector.halfvec.HalfVector._to_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.peewee.halfvec.HalfVectorField.python_value]
+20:35 call  HalfVector._from_db(value)
+    -> pgvector.halfvec.HalfVector._from_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.peewee.halfvec.HalfVectorField._distance]
+23:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))
+    -> peewee.Expression
+23:61 call  self.to_value(vector)
+    -> peewee.Field.to_value
+    note: inherited from the stub base peewee.Field; a missing module calls nothing back
+
+[pgvector.peewee.halfvec.HalfVectorField.l2_distance]
+26:30 call  self._distance('<->', vector)
+    -> pgvector.peewee.halfvec.HalfVectorField._distance
+    reject *: self is a HalfVectorField
+
+[pgvector.peewee.halfvec.HalfVectorField.max_inner_product]
+29:30 call  self._distance('<#>', vector)
+    -> pgvector.peewee.halfvec.HalfVectorField._distance
+    reject *: self is a HalfVectorField
+
+[pgvector.peewee.halfvec.HalfVectorField.cosine_distance]
+32:30 call  self._distance('<=>', vector)
+    -> pgvector.peewee.halfvec.HalfVectorField._distance
+    reject *: self is a HalfVectorField
+
+[pgvector.peewee.halfvec.HalfVectorField.l1_distance]
+35:30 call  self._distance('<+>', vector)
+    -> pgvector.peewee.halfvec.HalfVectorField._distance
+    reject *: self is a HalfVectorField
+
+== pgvector.peewee.sparsevec
+
+[pgvector.peewee.sparsevec.SparseVectorField.__init__]
+11:14 call  super()
+    -> <builtin>.super
+11:25 call  super().__init__(*args, **kwargs)
+    -> peewee.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.peewee.sparsevec.SparseVectorField.db_value]
+17:35 call  SparseVector._to_db(value)
+    -> pgvector.sparsevec.SparseVector._to_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.peewee.sparsevec.SparseVectorField.python_value]
+20:37 call  SparseVector._from_db(value)
+    -> pgvector.sparsevec.SparseVector._from_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.peewee.sparsevec.SparseVectorField._distance]
+23:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))
+    -> peewee.Expression
+23:61 call  self.to_value(vector)
+    -> peewee.Field.to_value
+    note: inherited from the stub base peewee.Field; a missing module calls nothing back
+
+[pgvector.peewee.sparsevec.SparseVectorField.l2_distance]
+26:30 call  self._distance('<->', vector)
+    -> pgvector.peewee.sparsevec.SparseVectorField._distance
+    reject *: self is a SparseVectorField
+
+[pgvector.peewee.sparsevec.SparseVectorField.max_inner_product]
+29:30 call  self._distance('<#>', vector)
+    -> pgvector.peewee.sparsevec.SparseVectorField._distance
+    reject *: self is a SparseVectorField
+
+[pgvector.peewee.sparsevec.SparseVectorField.cosine_distance]
+32:30 call  self._distance('<=>', vector)
+    -> pgvector.peewee.sparsevec.SparseVectorField._distance
+    reject *: self is a SparseVectorField
+
+[pgvector.peewee.sparsevec.SparseVectorField.l1_distance]
+35:30 call  self._distance('<+>', vector)
+    -> pgvector.peewee.sparsevec.SparseVectorField._distance
+    reject *: self is a SparseVectorField
+
+== pgvector.peewee.vector
+
+[pgvector.peewee.vector.VectorField.__init__]
+11:14 call  super()
+    -> <builtin>.super
+11:25 call  super().__init__(*args, **kwargs)
+    -> peewee.Field.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+
+[pgvector.peewee.vector.VectorField.db_value]
+17:29 call  Vector._to_db(value)
+    -> pgvector.vector.Vector._to_db
+    reject *: the receiver is the class Vector
+
+[pgvector.peewee.vector.VectorField.python_value]
+20:31 call  Vector._from_db(value)
+    -> pgvector.vector.Vector._from_db
+    reject *: the receiver is the class Vector
+
+[pgvector.peewee.vector.VectorField._distance]
+23:26 call  Expression(lhs=self, op=op, rhs=self.to_value(vector))
+    -> peewee.Expression
+23:61 call  self.to_value(vector)
+    -> peewee.Field.to_value
+    note: inherited from the stub base peewee.Field; a missing module calls nothing back
+
+[pgvector.peewee.vector.VectorField.l2_distance]
+26:30 call  self._distance('<->', vector)
+    -> pgvector.peewee.vector.VectorField._distance
+    reject *: self is a VectorField
+
+[pgvector.peewee.vector.VectorField.max_inner_product]
+29:30 call  self._distance('<#>', vector)
+    -> pgvector.peewee.vector.VectorField._distance
+    reject *: self is a VectorField
+
+[pgvector.peewee.vector.VectorField.cosine_distance]
+32:30 call  self._distance('<=>', vector)
+    -> pgvector.peewee.vector.VectorField._distance
+    reject *: self is a VectorField
+
+[pgvector.peewee.vector.VectorField.l1_distance]
+35:30 call  self._distance('<+>', vector)
+    -> pgvector.peewee.vector.VectorField._distance
+    reject *: self is a VectorField
+
+== pgvector.pg8000.register
+
+[pgvector.pg8000.register.register_vector]
+8:15 call  cast(list[tuple[str, int]], conn.run("SELECT typname, oid...
+    -> typing.cast
+8:47 call  conn.run("SELECT typname, oid FROM pg_type WHERE oid IN (...
+    -> pg8000.native.Connection.run
+    note: conn is annotated pg8000.native.Connection
+9:21 call  dict(res)
+    -> <builtin>.dict
+    note: the branches that the database's answer decides all run (README, missing modules)
+12:27 call  RuntimeError('vector type not found in the database')
+    -> <builtin>.RuntimeError
+14:30 call  conn.register_out_adapter(Vector, lambda v: v.to_text())
+    -> pg8000.native.Connection.register_out_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+15:29 call  conn.register_in_adapter(type_info['vector'], Vector.from...
+    -> pg8000.native.Connection.register_in_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+19:34 call  conn.register_out_adapter(np.ndarray, lambda v: Vector(v)...
+    -> pg8000.native.Connection.register_out_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+24:34 call  conn.register_out_adapter(HalfVector, lambda v: v.to_text())
+    -> pg8000.native.Connection.register_out_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+25:33 call  conn.register_in_adapter(type_info['halfvec'], HalfVector...
+    -> pg8000.native.Connection.register_in_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+28:34 call  conn.register_out_adapter(SparseVector, lambda v: v.to_te...
+    -> pg8000.native.Connection.register_out_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+29:33 call  conn.register_in_adapter(type_info['sparsevec'], SparseVe...
+    -> pg8000.native.Connection.register_in_adapter
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+
+[pgvector.pg8000.register.register_vector.<lambda1>]
+14:58 call  v.to_text()
+    -> pgvector.vector.Vector.to_text
+    reject *: pg8000 calls the out adapter registered for Vector with Vector values (pgvector.md J9)
+
+[pgvector.pg8000.register.register_vector.<lambda2>]
+19:63 call  Vector(v)
+    -> pgvector.vector.Vector.__init__
+19:74 call  Vector(v).to_text()
+    -> pgvector.vector.Vector.to_text
+    reject *: the receiver is a Vector (the isinstance test or the constructor); the package has no subclass of Vector
+
+[pgvector.pg8000.register.register_vector.<lambda3>]
+24:66 call  v.to_text()
+    -> pgvector.halfvec.HalfVector.to_text
+    reject *: pg8000 calls the out adapter registered for HalfVector with HalfVector values (pgvector.md J9)
+
+[pgvector.pg8000.register.register_vector.<lambda4>]
+28:68 call  v.to_text()
+    -> pgvector.sparsevec.SparseVector.to_text
+    reject *: pg8000 calls the out adapter registered for SparseVector with SparseVector values (pgvector.md J9)
+
+== pgvector.psycopg.bit
+
+[pgvector.psycopg.bit.BitDumper.dump]
+14:27 call  obj.to_text()
+    -> pgvector.bit.Bit.to_text
+    reject *: the receiver is a Bit (the annotation of obj: the dumper is registered for Bit); the package has no subclass of Bit
+14:36 call  obj.to_text().encode('utf8')
+    -> <builtin>.str.encode
+
+[pgvector.psycopg.bit.BitBinaryDumper.dump]
+21:29 call  obj.to_binary()
+    -> pgvector.bit.Bit.to_binary
+    reject *: the receiver is a Bit (the annotation of obj: the dumper is registered for Bit); the package has no subclass of Bit
+
+[pgvector.psycopg.bit.register_bit_info]
+26:18 call  info.register(context)
+    -> psycopg.types.TypeInfo.register
+    -> psycopg.types.TypeInfo.fetch.register
+    note: the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)
+    note: info is annotated psycopg.types.TypeInfo; context is annotated psycopg.BaseConnection (pgvector.md J10)
+29:23 call  type('', (BitDumper,), {'oid': info.oid})
+    -> <builtin>.type
+    note: creates a subclass of a package dumper; no package __init_subclass__ or metaclass
+30:25 call  type('', (BitBinaryDumper,), {'oid': info.oid})
+    -> <builtin>.type
+33:29 call  adapters.register_dumper(Bit, text_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+34:29 call  adapters.register_dumper(Bit, binary_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+
+== pgvector.psycopg.halfvec
+
+[pgvector.psycopg.halfvec.HalfVectorDumper.dump]
+14:27 call  obj.to_text()
+    -> pgvector.halfvec.HalfVector.to_text
+    reject *: the receiver is a HalfVector (the annotation of obj: the dumper is registered for HalfVector)
+14:36 call  obj.to_text().encode('utf8')
+    -> <builtin>.str.encode
+
+[pgvector.psycopg.halfvec.HalfVectorBinaryDumper.dump]
+21:29 call  obj.to_binary()
+    -> pgvector.halfvec.HalfVector.to_binary
+    reject *: the receiver is a HalfVector (the annotation of obj: the dumper is registered for HalfVector)
+
+[pgvector.psycopg.halfvec.HalfVectorLoader.load]
+28:22 call  isinstance(data, memoryview)
+    -> <builtin>.isinstance
+29:32 call  data.tobytes()
+    -> <builtin>.memoryview.tobytes
+30:36 call  HalfVector.from_text(data.decode('utf8'))
+    -> pgvector.halfvec.HalfVector.from_text
+    reject *: the receiver is the class HalfVector
+30:48 call  data.decode('utf8')
+    -> <builtin>.bytes.decode
+    -> <builtin>.bytearray.decode
+    note: data is psycopg's Buffer (bytes, bytearray or memoryview, psycopg's documented loader API; pgvector.md J7); a memoryview was converted to bytes just before
+
+[pgvector.psycopg.halfvec.HalfVectorBinaryLoader.load]
+37:38 call  HalfVector.from_binary(data)
+    -> pgvector.halfvec.HalfVector.from_binary
+    reject *: the receiver is the class HalfVector
+
+[pgvector.psycopg.halfvec.register_halfvec_info]
+41:18 call  info.register(context)
+    -> psycopg.types.TypeInfo.register
+    -> psycopg.types.TypeInfo.fetch.register
+    note: the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)
+    note: info is annotated psycopg.types.TypeInfo (pgvector.md J10)
+44:23 call  type('', (HalfVectorDumper,), {'oid': info.oid})
+    -> <builtin>.type
+45:25 call  type('', (HalfVectorBinaryDumper,), {'oid': info.oid})
+    -> <builtin>.type
+48:29 call  adapters.register_dumper(HalfVector, text_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+49:29 call  adapters.register_dumper(HalfVector, binary_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+50:29 call  adapters.register_loader(info.oid, HalfVectorLoader)
+    -> psycopg.BaseConnection.adapters.register_loader
+    -> psycopg.Connection.adapters.register_loader
+    -> psycopg.AsyncConnection.adapters.register_loader
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+51:29 call  adapters.register_loader(info.oid, HalfVectorBinaryLoader)
+    -> psycopg.BaseConnection.adapters.register_loader
+    -> psycopg.Connection.adapters.register_loader
+    -> psycopg.AsyncConnection.adapters.register_loader
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+
+== pgvector.psycopg.register
+
+[pgvector.psycopg.register.register_vector]
+11:26 call  TypeInfo.fetch(context, 'vector')
+    -> psycopg.types.TypeInfo.fetch
+12:25 call  register_vector_info(context, info)
+    -> pgvector.psycopg.vector.register_vector_info
+    reject *: the name is imported from .vector of pgvector.psycopg
+14:26 call  TypeInfo.fetch(context, 'bit')
+    -> psycopg.types.TypeInfo.fetch
+15:22 call  register_bit_info(context, info)
+    -> pgvector.psycopg.bit.register_bit_info
+17:26 call  TypeInfo.fetch(context, 'halfvec')
+    -> psycopg.types.TypeInfo.fetch
+19:30 call  register_halfvec_info(context, info)
+    -> pgvector.psycopg.halfvec.register_halfvec_info
+    reject *: the name is imported from .halfvec of pgvector.psycopg
+21:26 call  TypeInfo.fetch(context, 'sparsevec')
+    -> psycopg.types.TypeInfo.fetch
+23:32 call  register_sparsevec_info(context, info)
+    -> pgvector.psycopg.sparsevec.register_sparsevec_info
+    reject *: the name is imported from .sparsevec of pgvector.psycopg
+
+[pgvector.psycopg.register.register_vector_async]
+27:32 call  TypeInfo.fetch(context, 'vector')
+    -> psycopg.types.TypeInfo.fetch
+28:25 call  register_vector_info(context, info)
+    -> pgvector.psycopg.vector.register_vector_info
+    reject *: the name is imported from .vector of pgvector.psycopg
+30:32 call  TypeInfo.fetch(context, 'bit')
+    -> psycopg.types.TypeInfo.fetch
+31:22 call  register_bit_info(context, info)
+    -> pgvector.psycopg.bit.register_bit_info
+33:32 call  TypeInfo.fetch(context, 'halfvec')
+    -> psycopg.types.TypeInfo.fetch
+35:30 call  register_halfvec_info(context, info)
+    -> pgvector.psycopg.halfvec.register_halfvec_info
+    reject *: the name is imported from .halfvec of pgvector.psycopg
+37:32 call  TypeInfo.fetch(context, 'sparsevec')
+    -> psycopg.types.TypeInfo.fetch
+39:32 call  register_sparsevec_info(context, info)
+    -> pgvector.psycopg.sparsevec.register_sparsevec_info
+    reject *: the name is imported from .sparsevec of pgvector.psycopg
+
+== pgvector.psycopg.sparsevec
+
+[pgvector.psycopg.sparsevec.SparseVectorDumper.dump]
+14:27 call  obj.to_text()
+    -> pgvector.sparsevec.SparseVector.to_text
+    reject *: the receiver is a SparseVector (the annotation of obj: the dumper is registered for SparseVector)
+14:36 call  obj.to_text().encode('utf8')
+    -> <builtin>.str.encode
+
+[pgvector.psycopg.sparsevec.SparseVectorBinaryDumper.dump]
+21:29 call  obj.to_binary()
+    -> pgvector.sparsevec.SparseVector.to_binary
+    reject *: the receiver is a SparseVector (the annotation of obj: the dumper is registered for SparseVector)
+
+[pgvector.psycopg.sparsevec.SparseVectorLoader.load]
+28:22 call  isinstance(data, memoryview)
+    -> <builtin>.isinstance
+29:32 call  data.tobytes()
+    -> <builtin>.memoryview.tobytes
+30:38 call  SparseVector.from_text(data.decode('utf8'))
+    -> pgvector.sparsevec.SparseVector.from_text
+    reject *: the receiver is the class SparseVector
+30:50 call  data.decode('utf8')
+    -> <builtin>.bytes.decode
+    -> <builtin>.bytearray.decode
+    note: data is psycopg's Buffer (bytes, bytearray or memoryview, psycopg's documented loader API; pgvector.md J7); a memoryview was converted to bytes just before
+
+[pgvector.psycopg.sparsevec.SparseVectorBinaryLoader.load]
+37:40 call  SparseVector.from_binary(data)
+    -> pgvector.sparsevec.SparseVector.from_binary
+    reject *: the receiver is the class SparseVector
+
+[pgvector.psycopg.sparsevec.register_sparsevec_info]
+41:18 call  info.register(context)
+    -> psycopg.types.TypeInfo.register
+    -> psycopg.types.TypeInfo.fetch.register
+    note: the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)
+    note: info is annotated psycopg.types.TypeInfo (pgvector.md J10)
+44:23 call  type('', (SparseVectorDumper,), {'oid': info.oid})
+    -> <builtin>.type
+45:25 call  type('', (SparseVectorBinaryDumper,), {'oid': info.oid})
+    -> <builtin>.type
+48:29 call  adapters.register_dumper(SparseVector, text_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+49:29 call  adapters.register_dumper(SparseVector, binary_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+50:29 call  adapters.register_loader(info.oid, SparseVectorLoader)
+    -> psycopg.BaseConnection.adapters.register_loader
+    -> psycopg.Connection.adapters.register_loader
+    -> psycopg.AsyncConnection.adapters.register_loader
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+51:29 call  adapters.register_loader(info.oid, SparseVectorBinaryLoader)
+    -> psycopg.BaseConnection.adapters.register_loader
+    -> psycopg.Connection.adapters.register_loader
+    -> psycopg.AsyncConnection.adapters.register_loader
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+
+== pgvector.psycopg.vector
+
+[pgvector.psycopg.vector.VectorDumper.dump]
+17:26 call  isinstance(obj, Vector)
+    -> <builtin>.isinstance
+18:25 call  Vector(obj)
+    -> pgvector.vector.Vector.__init__
+19:27 call  obj.to_text()
+    -> pgvector.vector.Vector.to_text
+    reject *: the receiver is a Vector (the isinstance test or the constructor); the package has no subclass of Vector
+19:36 call  obj.to_text().encode('utf8')
+    -> <builtin>.str.encode
+
+[pgvector.psycopg.vector.VectorBinaryDumper.dump]
+26:26 call  isinstance(obj, Vector)
+    -> <builtin>.isinstance
+27:25 call  Vector(obj)
+    -> pgvector.vector.Vector.__init__
+28:29 call  obj.to_binary()
+    -> pgvector.vector.Vector.to_binary
+    reject *: the receiver is a Vector (the isinstance test or the constructor); the package has no subclass of Vector
+
+[pgvector.psycopg.vector.VectorLoader.load]
+35:22 call  isinstance(data, memoryview)
+    -> <builtin>.isinstance
+36:32 call  data.tobytes()
+    -> <builtin>.memoryview.tobytes
+37:32 call  Vector.from_text(data.decode('utf8'))
+    -> pgvector.vector.Vector.from_text
+    reject *: the receiver is the class Vector
+37:44 call  data.decode('utf8')
+    -> <builtin>.bytes.decode
+    -> <builtin>.bytearray.decode
+    note: data is psycopg's Buffer (bytes, bytearray or memoryview, psycopg's documented loader API; pgvector.md J7); a memoryview was converted to bytes just before
+
+[pgvector.psycopg.vector.VectorBinaryLoader.load]
+44:34 call  Vector.from_binary(data)
+    -> pgvector.vector.Vector.from_binary
+    reject *: the receiver is the class Vector
+
+[pgvector.psycopg.vector.register_vector_info]
+49:39 call  psycopg.ProgrammingError('vector type not found in the da...
+    -> psycopg.ProgrammingError
+50:18 call  info.register(context)
+    -> psycopg.types.TypeInfo.register
+    -> psycopg.types.TypeInfo.fetch.register
+    note: the package passes the result of TypeInfo.fetch (an instance of the stub psycopg.types.TypeInfo.fetch) as info; its access path stays beside the annotation's (ruling on F1, pgvector.md J10)
+    note: info is annotated psycopg.types.TypeInfo (pgvector.md J10)
+53:23 call  type('', (VectorDumper,), {'oid': info.oid})
+    -> <builtin>.type
+54:25 call  type('', (VectorBinaryDumper,), {'oid': info.oid})
+    -> <builtin>.type
+57:29 call  adapters.register_dumper(Vector, text_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+58:29 call  adapters.register_dumper(Vector, binary_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+59:29 call  adapters.register_dumper('numpy.ndarray', text_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+60:29 call  adapters.register_dumper('numpy.ndarray', binary_dumper)
+    -> psycopg.BaseConnection.adapters.register_dumper
+    -> psycopg.Connection.adapters.register_dumper
+    -> psycopg.AsyncConnection.adapters.register_dumper
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+61:29 call  adapters.register_loader(info.oid, VectorLoader)
+    -> psycopg.BaseConnection.adapters.register_loader
+    -> psycopg.Connection.adapters.register_loader
+    -> psycopg.AsyncConnection.adapters.register_loader
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+62:29 call  adapters.register_loader(info.oid, VectorBinaryLoader)
+    -> psycopg.BaseConnection.adapters.register_loader
+    -> psycopg.Connection.adapters.register_loader
+    -> psycopg.AsyncConnection.adapters.register_loader
+    note: the package passes the psycopg.Connection of register_vector and the psycopg.AsyncConnection of register_vector_async as context; their access paths stay beside the annotation's (ruling on F1, pgvector.md J10)
+
+== pgvector.psycopg2.halfvec
+
+[pgvector.psycopg2.halfvec.HalfvecAdapter.getquoted]
+11:21 call  adapt(self._value.to_text())
+    -> psycopg2.extensions.adapt
+11:41 call  self._value.to_text()
+    -> pgvector.halfvec.HalfVector.to_text
+    reject *: self._value is the HalfVector that psycopg2 passes to the adapter registered for HalfVector
+11:54 call  adapt(self._value.to_text()).getquoted()
+    -> psycopg2.extensions.adapt.getquoted
+    reject *: the receiver is what psycopg2's adapt returns for a str (an instance of the stub psycopg2.extensions.adapt), not a package adapter
+
+[pgvector.psycopg2.halfvec.cast_halfvec]
+17:18 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+18:25 call  ValueError('expected str')
+    -> <builtin>.ValueError
+19:32 call  HalfVector.from_text(value)
+    -> pgvector.halfvec.HalfVector.from_text
+    reject *: the receiver is the class HalfVector
+
+[pgvector.psycopg2.halfvec.register_halfvec_info]
+23:23 call  new_type((oid,), 'HALFVEC', cast_halfvec)
+    -> psycopg2.extensions.new_type
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+24:18 call  register_type(halfvec, scope)
+    -> psycopg2.extensions.register_type
+27:38 call  new_array_type((array_oid,), 'HALFVECARRAY', halfvec)
+    -> psycopg2.extensions.new_array_type
+28:22 call  register_type(halfvecarray, scope)
+    -> psycopg2.extensions.register_type
+30:21 call  register_adapter(HalfVector, HalfvecAdapter)
+    -> psycopg2.extensions.register_adapter
+
+== pgvector.psycopg2.register
+
+[pgvector.psycopg2.register.register_vector]
+10:38 call  isinstance(conn_or_curs, connection)
+    -> <builtin>.isinstance
+11:22 call  conn.cursor(cursor_factory=cursor)
+    -> psycopg2.extensions.connection.cursor
+    -> psycopg2.extensions.cursor.connection.cursor
+    note: conn is the connection argument or the attribute connection of the cursor argument (annotation connection or cursor); a missing module keeps the access path of each (pgvector.md J10)
+15:16 call  cur.execute("SELECT typname, oid FROM pg_type WHERE oid I...
+    -> psycopg2.extensions.connection.cursor.execute
+    -> psycopg2.extensions.cursor.connection.cursor.execute
+    note: cur is an instance of the stub that conn.cursor returns
+16:21 call  dict(cur.fetchall())
+    -> <builtin>.dict
+16:34 call  cur.fetchall()
+    -> psycopg2.extensions.connection.cursor.fetchall
+    -> psycopg2.extensions.cursor.connection.cursor.fetchall
+19:40 call  psycopg2.ProgrammingError('vector type not found in the d...
+    -> psycopg2.ProgrammingError
+21:25 call  register_vector_info(type_info['vector'], type_info['_vec...
+    -> pgvector.psycopg2.vector.register_vector_info
+    reject *: the name is imported from .vector of pgvector.psycopg2
+24:30 call  register_halfvec_info(type_info['halfvec'], type_info['_h...
+    -> pgvector.psycopg2.halfvec.register_halfvec_info
+    reject *: the name is imported from .halfvec of pgvector.psycopg2
+27:32 call  register_sparsevec_info(type_info['sparsevec'], type_info...
+    -> pgvector.psycopg2.sparsevec.register_sparsevec_info
+    reject *: the name is imported from .sparsevec of pgvector.psycopg2
+
+== pgvector.psycopg2.sparsevec
+
+[pgvector.psycopg2.sparsevec.SparsevecAdapter.getquoted]
+11:21 call  adapt(self._value.to_text())
+    -> psycopg2.extensions.adapt
+11:41 call  self._value.to_text()
+    -> pgvector.sparsevec.SparseVector.to_text
+    reject *: self._value is the SparseVector that psycopg2 passes to the adapter registered for SparseVector
+11:54 call  adapt(self._value.to_text()).getquoted()
+    -> psycopg2.extensions.adapt.getquoted
+    reject *: the receiver is what psycopg2's adapt returns for a str (an instance of the stub psycopg2.extensions.adapt), not a package adapter
+
+[pgvector.psycopg2.sparsevec.cast_sparsevec]
+17:18 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+18:25 call  ValueError('expected str')
+    -> <builtin>.ValueError
+19:34 call  SparseVector.from_text(value)
+    -> pgvector.sparsevec.SparseVector.from_text
+    reject *: the receiver is the class SparseVector
+
+[pgvector.psycopg2.sparsevec.register_sparsevec_info]
+23:25 call  new_type((oid,), 'SPARSEVEC', cast_sparsevec)
+    -> psycopg2.extensions.new_type
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+24:18 call  register_type(sparsevec, scope)
+    -> psycopg2.extensions.register_type
+27:40 call  new_array_type((array_oid,), 'SPARSEVECARRAY', sparsevec)
+    -> psycopg2.extensions.new_array_type
+28:22 call  register_type(sparsevecarray, scope)
+    -> psycopg2.extensions.register_type
+30:21 call  register_adapter(SparseVector, SparsevecAdapter)
+    -> psycopg2.extensions.register_adapter
+
+== pgvector.psycopg2.vector
+
+[pgvector.psycopg2.vector.VectorAdapter.__init__]
+10:26 call  isinstance(value, Vector)
+    -> <builtin>.isinstance
+11:27 call  Vector(value)
+    -> pgvector.vector.Vector.__init__
+
+[pgvector.psycopg2.vector.VectorAdapter.getquoted]
+15:21 call  adapt(self._value.to_text())
+    -> psycopg2.extensions.adapt
+15:41 call  self._value.to_text()
+    -> pgvector.vector.Vector.to_text
+    reject *: self._value is a Vector (__init__ converts every other value with Vector(value))
+15:54 call  adapt(self._value.to_text()).getquoted()
+    -> psycopg2.extensions.adapt.getquoted
+    reject *: the receiver is what psycopg2's adapt returns for a str (an instance of the stub psycopg2.extensions.adapt), not a package adapter
+
+[pgvector.psycopg2.vector.cast_vector]
+21:18 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+22:25 call  ValueError('expected str')
+    -> <builtin>.ValueError
+23:28 call  Vector.from_text(value)
+    -> pgvector.vector.Vector.from_text
+    reject *: the receiver is the class Vector
+
+[pgvector.psycopg2.vector.register_vector_info]
+27:22 call  new_type((oid,), 'VECTOR', cast_vector)
+    -> psycopg2.extensions.new_type
+    reject *: the library is not installed: a missing module calls nothing back; the library stores the callable and calls it later, from the client's queries
+28:18 call  register_type(vector, scope)
+    -> psycopg2.extensions.register_type
+31:37 call  new_array_type((array_oid,), 'VECTORARRAY', vector)
+    -> psycopg2.extensions.new_array_type
+32:22 call  register_type(vectorarray, scope)
+    -> psycopg2.extensions.register_type
+34:21 call  register_adapter(Vector, VectorAdapter)
+    -> psycopg2.extensions.register_adapter
+38:25 call  register_adapter(np.ndarray, VectorAdapter)
+    -> psycopg2.extensions.register_adapter
+
+== pgvector.sparsevec
+
+[pgvector.sparsevec]
+15:39 call  Sentinel()
+    note: Sentinel defines no __init__ and no __new__; its first __init__ is object.__init__, so the call has no edge
+23:6 decorator  @overload
+    -> typing.overload
+26:6 decorator  @overload
+    -> typing.overload
+141:6 decorator  @classmethod
+    -> <builtin>.classmethod
+154:6 decorator  @classmethod
+    -> <builtin>.classmethod
+168:6 decorator  @classmethod
+    -> <builtin>.classmethod
+176:6 decorator  @classmethod
+    -> <builtin>.classmethod
+186:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[pgvector.sparsevec.SparseVector.__init__]
+35:27 call  is_sparse_array(value)
+    -> pgvector._utils.is_sparse_array
+37:33 call  ValueError('extra argument')
+    -> <builtin>.ValueError
+39:30 call  self._from_sparse(value)
+    -> pgvector.sparsevec.SparseVector._from_sparse
+40:24 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+42:33 call  ValueError('missing dimensions')
+    -> <builtin>.ValueError
+44:28 call  self._from_dict(value, dimensions)
+    -> pgvector.sparsevec.SparseVector._from_dict
+47:33 call  ValueError('extra argument')
+    -> <builtin>.ValueError
+49:29 call  self._from_dense(value)
+    -> pgvector.sparsevec.SparseVector._from_dense
+
+[pgvector.sparsevec.SparseVector.__repr__]
+52:24 call  dict(zip(self._indices, self._values))
+    -> <builtin>.dict
+52:28 call  zip(self._indices, self._values)
+    -> <builtin>.zip
+
+[pgvector.sparsevec.SparseVector.__eq__]
+56:26 call  isinstance(other, self.__class__)
+    -> <builtin>.isinstance
+
+[pgvector.sparsevec.SparseVector.to_coo]
+72:28 call  len(self._indices)
+    -> <builtin>.len
+73:25 call  coo_array((self._values, coords), shape=(1, self._dim))
+    -> scipy.sparse.coo_array
+
+[pgvector.sparsevec.SparseVector.to_list]
+77:24 call  zip(self._indices, self._values)
+    -> <builtin>.zip
+
+[pgvector.sparsevec.SparseVector.to_numpy]
+84:23 call  np.zeros(self._dim, dtype=np.float32)
+    -> numpy.zeros
+85:24 call  zip(self._indices, self._values)
+    -> <builtin>.zip
+
+[pgvector.sparsevec.SparseVector.to_text]
+90:28 call  ','.join([f'{int(i) + 1}:{float(v)}' for i, v in zip(self...
+    -> <builtin>.str.join
+90:36 call  int(i)
+    -> <builtin>.int
+90:51 call  float(v)
+    -> <builtin>.float
+90:72 call  zip(self._indices, self._values)
+    -> <builtin>.zip
+91:37 call  int(self._dim)
+    -> <builtin>.int
+
+[pgvector.sparsevec.SparseVector.to_binary]
+94:18 call  len(self._indices)
+    -> <builtin>.len
+95:20 call  pack(f'>iii{nnz}i{nnz}f', self._dim, nnz, 0, *self._indic...
+    -> struct.pack
+
+[pgvector.sparsevec.SparseVector._from_dict]
+98:47 call  d.items()
+    -> <builtin>.dict.items
+    note: d is a dict (annotation dict[int, float], and the isinstance test of __init__; B4)
+99:22 call  elements.sort()
+    -> <builtin>.list.sort
+101:24 call  int(dim)
+    -> <builtin>.int
+102:29 call  int(v[0])
+    -> <builtin>.int
+103:30 call  float(v[1])
+    -> <builtin>.float
+
+[pgvector.sparsevec.SparseVector._from_sparse]
+106:50 call  arr.tocoo(copy=False)
+    -> scipy.sparse.bsr_array.tocoo
+    -> scipy.sparse.bsr_matrix.tocoo
+    -> scipy.sparse.coo_array.tocoo
+    -> scipy.sparse.coo_matrix.tocoo
+    -> scipy.sparse.csc_array.tocoo
+    -> scipy.sparse.csc_matrix.tocoo
+    -> scipy.sparse.csr_array.tocoo
+    -> scipy.sparse.csr_matrix.tocoo
+    -> scipy.sparse.dia_array.tocoo
+    -> scipy.sparse.dia_matrix.tocoo
+    -> scipy.sparse.dok_array.tocoo
+    -> scipy.sparse.dok_matrix.tocoo
+    -> scipy.sparse.lil_array.tocoo
+    -> scipy.sparse.lil_matrix.tocoo
+    note: arr is a SciPy sparse array or matrix: the annotation sparray or spmatrix and the isinstance test of is_sparse_array admit the fourteen concrete formats, named one by one (pgvector.md J4)
+109:23 call  hasattr(value, 'has_canonical_format')
+    -> <builtin>.hasattr
+110:31 call  value.copy()
+    -> scipy.sparse.coo_array.copy
+    -> scipy.sparse.coo_matrix.copy
+    note: tocoo returns a coo_array for a sparse array and a coo_matrix for a sparse matrix
+111:33 call  value.sum_duplicates()
+    -> scipy.sparse.coo_array.sum_duplicates
+    -> scipy.sparse.coo_matrix.sum_duplicates
+    note: copy returns an object of the same class
+113:21 call  cast(tuple[int, ...], value.shape)
+    -> typing.cast
+114:15 call  len(shape)
+    -> <builtin>.len
+116:17 call  len(shape)
+    -> <builtin>.len
+119:29 call  ValueError('expected ndim to be 1')
+    -> <builtin>.ValueError
+121:19 call  hasattr(value, 'coords')
+    -> <builtin>.hasattr
+123:46 call  value.coords[-1].tolist()
+    -> numpy.ndarray.tolist
+    note: coords is a tuple of numpy.ndarray (scipy 1.13 and later)
+125:39 call  value.col.tolist()
+    -> numpy.ndarray.tolist
+    note: col is a numpy.ndarray (scipy before 1.13, which the package admits: the version branch runs)
+127:43 call  zip(indices, value.data)
+    -> <builtin>.zip
+130:23 call  hasattr(value, 'has_canonical_format')
+    -> <builtin>.hasattr
+131:26 call  elements.sort()
+    -> <builtin>.list.sort
+134:30 call  float(v[1])
+    -> <builtin>.float
+
+[pgvector.sparsevec.SparseVector._from_dense]
+137:24 call  len(value)
+    -> <builtin>.len
+138:49 call  enumerate(value)
+    -> <builtin>.enumerate
+139:30 call  float(value[i])
+    -> <builtin>.float
+
+[pgvector.sparsevec.SparseVector.from_text]
+143:36 call  value.split('/', 2)
+    -> <builtin>.str.split
+    note: value is a str (annotation; the package passes str from _from_db and the loaders)
+147:15 call  len(elements)
+    -> <builtin>.len
+148:42 call  elements[1:-1].split(',')
+    -> <builtin>.str.split
+149:31 call  e.split(':', 2)
+    -> <builtin>.str.split
+150:31 call  indices.append(int(i) - 1)
+    -> <builtin>.list.append
+150:35 call  int(i)
+    -> <builtin>.int
+151:30 call  values.append(float(v))
+    -> <builtin>.list.append
+151:36 call  float(v)
+    -> <builtin>.float
+152:31 call  cls._from_parts(int(dim), indices, values)
+    -> pgvector.sparsevec.SparseVector._from_parts
+    reject *: the receiver is a SparseVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of SparseVector
+152:35 call  int(dim)
+    -> <builtin>.int
+
+[pgvector.sparsevec.SparseVector.from_binary]
+156:39 call  unpack_from('>iii', value)
+    -> struct.unpack_from
+158:15 call  len(value)
+    -> <builtin>.len
+159:29 call  ValueError('invalid length')
+    -> <builtin>.ValueError
+162:29 call  ValueError('expected unused to be 0')
+    -> <builtin>.ValueError
+164:23 call  list(unpack_from(f'>{nnz}i', value, 12))
+    -> <builtin>.list
+164:35 call  unpack_from(f'>{nnz}i', value, 12)
+    -> struct.unpack_from
+165:22 call  list(unpack_from(f'>{nnz}f', value, 12 + nnz * 4))
+    -> <builtin>.list
+165:34 call  unpack_from(f'>{nnz}f', value, 12 + nnz * 4)
+    -> struct.unpack_from
+166:31 call  cls._from_parts(dim, indices, values)
+    -> pgvector.sparsevec.SparseVector._from_parts
+    reject *: the receiver is a SparseVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of SparseVector
+
+[pgvector.sparsevec.SparseVector._from_parts]
+170:26 call  cls.__new__(cls)
+    -> <builtin>.object.__new__
+    note: cls is SparseVector or a client subclass; SparseVector defines no __new__
+
+[pgvector.sparsevec.SparseVector._to_db]
+181:26 call  isinstance(value, SparseVector)
+    -> <builtin>.isinstance
+182:24 call  cls(value)
+    -> pgvector.sparsevec.SparseVector.__init__
+    note: cls is SparseVector: the package calls the private _to_db only as SparseVector._to_db
+184:29 call  value.to_text()
+    -> pgvector.sparsevec.SparseVector.to_text
+    reject *: the receiver is a SparseVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of SparseVector
+
+[pgvector.sparsevec.SparseVector._from_db]
+188:39 call  isinstance(value, SparseVector)
+    -> <builtin>.isinstance
+191:29 call  cls.from_text(value)
+    -> pgvector.sparsevec.SparseVector.from_text
+    reject *: the receiver is a SparseVector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of SparseVector
+
+== pgvector.sqlalchemy.bit
+
+[pgvector.sqlalchemy.bit.BIT.process_bind_param]
+12:76 call  isinstance(value, str)
+    -> <builtin>.isinstance
+14:37 call  asyncpg.BitString(value)
+    -> asyncpg.BitString
+
+[pgvector.sqlalchemy.bit.BIT.Comparator.hamming_distance]
+19:27 call  self.op('<~>', return_type=Float)
+    -> sqlalchemy.types.TypeDecorator.Comparator.op
+    note: the base TypeDecorator.Comparator[Any] is the stub class TypeDecorator.Comparator (pgvector.md J11)
+19:53 call  self.op('<~>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeDecorator.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.bit.BIT.Comparator.jaccard_distance]
+22:27 call  self.op('<%>', return_type=Float)
+    -> sqlalchemy.types.TypeDecorator.Comparator.op
+22:53 call  self.op('<%>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeDecorator.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+== pgvector.sqlalchemy.halfvec
+
+[pgvector.sqlalchemy.halfvec]
+10:21 call  String()
+    -> sqlalchemy.types.String
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.__init__]
+13:14 call  super()
+    -> <builtin>.super
+13:25 call  super().__init__()
+    -> sqlalchemy.types.UserDefinedType.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: the base UserDefinedType[Any] is the stub class UserDefinedType (pgvector.md J11)
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.bind_processor.process]
+23:37 call  HalfVector._to_db(value)
+    -> pgvector.halfvec.HalfVector._to_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.literal_processor]
+27:74 call  self._string._cached_literal_processor(dialect)
+    -> sqlalchemy.types.String._cached_literal_processor
+    note: _string is the class attribute String(), an instance of the stub sqlalchemy.types.String
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.literal_processor.process]
+30:44 call  string_literal_processor(HalfVector._to_db(value))
+    -> sqlalchemy.types.String._cached_literal_processor
+    note: string_literal_processor is the free variable of the enclosing literal_processor: the value that the stub method _cached_literal_processor returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+30:62 call  HalfVector._to_db(value)
+    -> pgvector.halfvec.HalfVector._to_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.result_processor.process]
+35:39 call  HalfVector._from_db(value)
+    -> pgvector.halfvec.HalfVector._from_db
+    reject *: the receiver is the class HalfVector
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.l2_distance]
+40:27 call  self.op('<->', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+40:53 call  self.op('<->', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.max_inner_product]
+43:27 call  self.op('<#>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+43:53 call  self.op('<#>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.cosine_distance]
+46:27 call  self.op('<=>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+46:53 call  self.op('<=>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.halfvec.HALFVEC.Comparator.l1_distance]
+49:27 call  self.op('<+>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+49:53 call  self.op('<+>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+== pgvector.sqlalchemy.sparsevec
+
+[pgvector.sqlalchemy.sparsevec]
+10:21 call  String()
+    -> sqlalchemy.types.String
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.__init__]
+13:14 call  super()
+    -> <builtin>.super
+13:25 call  super().__init__()
+    -> sqlalchemy.types.UserDefinedType.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: the base UserDefinedType[Any] is the stub class UserDefinedType (pgvector.md J11)
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.bind_processor.process]
+23:39 call  SparseVector._to_db(value)
+    -> pgvector.sparsevec.SparseVector._to_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.literal_processor]
+27:74 call  self._string._cached_literal_processor(dialect)
+    -> sqlalchemy.types.String._cached_literal_processor
+    note: _string is the class attribute String(), an instance of the stub sqlalchemy.types.String
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.literal_processor.process]
+30:44 call  string_literal_processor(SparseVector._to_db(value))
+    -> sqlalchemy.types.String._cached_literal_processor
+    note: string_literal_processor is the free variable of the enclosing literal_processor: the value that the stub method _cached_literal_processor returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+30:64 call  SparseVector._to_db(value)
+    -> pgvector.sparsevec.SparseVector._to_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.result_processor.process]
+35:41 call  SparseVector._from_db(value)
+    -> pgvector.sparsevec.SparseVector._from_db
+    reject *: the receiver is the class SparseVector
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.l2_distance]
+40:27 call  self.op('<->', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+40:53 call  self.op('<->', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.max_inner_product]
+43:27 call  self.op('<#>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+43:53 call  self.op('<#>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.cosine_distance]
+46:27 call  self.op('<=>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+46:53 call  self.op('<=>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.sparsevec.SPARSEVEC.Comparator.l1_distance]
+49:27 call  self.op('<+>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+49:53 call  self.op('<+>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+== pgvector.sqlalchemy.vector
+
+[pgvector.sqlalchemy.vector]
+10:21 call  String()
+    -> sqlalchemy.types.String
+
+[pgvector.sqlalchemy.vector.VECTOR.__init__]
+13:14 call  super()
+    -> <builtin>.super
+13:25 call  super().__init__()
+    -> sqlalchemy.types.UserDefinedType.__init__
+    reject *: super() resolves to the base class from the missing library, not to a package class
+    note: the base UserDefinedType[Any] is the stub class UserDefinedType (pgvector.md J11)
+
+[pgvector.sqlalchemy.vector.VECTOR.bind_processor.process]
+23:33 call  Vector._to_db(value)
+    -> pgvector.vector.Vector._to_db
+    reject *: the receiver is the class Vector
+
+[pgvector.sqlalchemy.vector.VECTOR.literal_processor]
+27:74 call  self._string._cached_literal_processor(dialect)
+    -> sqlalchemy.types.String._cached_literal_processor
+    note: _string is the class attribute String(), an instance of the stub sqlalchemy.types.String
+
+[pgvector.sqlalchemy.vector.VECTOR.literal_processor.process]
+30:44 call  string_literal_processor(Vector._to_db(value))
+    -> sqlalchemy.types.String._cached_literal_processor
+    note: string_literal_processor is the free variable of the enclosing literal_processor: the value that the stub method _cached_literal_processor returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+30:58 call  Vector._to_db(value)
+    -> pgvector.vector.Vector._to_db
+    reject *: the receiver is the class Vector
+
+[pgvector.sqlalchemy.vector.VECTOR.result_processor.process]
+35:35 call  Vector._from_db(value)
+    -> pgvector.vector.Vector._from_db
+    reject *: the receiver is the class Vector
+
+[pgvector.sqlalchemy.vector.VECTOR.Comparator.l2_distance]
+40:27 call  self.op('<->', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+40:53 call  self.op('<->', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.vector.VECTOR.Comparator.max_inner_product]
+43:27 call  self.op('<#>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+43:53 call  self.op('<#>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.vector.VECTOR.Comparator.cosine_distance]
+46:27 call  self.op('<=>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+46:53 call  self.op('<=>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+[pgvector.sqlalchemy.vector.VECTOR.Comparator.l1_distance]
+49:27 call  self.op('<+>', return_type=Float)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: the base TypeEngine.Comparator[Any] is the stub class TypeEngine.Comparator (pgvector.md J11)
+49:53 call  self.op('<+>', return_type=Float)(other)
+    -> sqlalchemy.types.TypeEngine.Comparator.op
+    note: calls the value that the stub method op returns; a call of an instance of a stub is named by the stub's path (pyrate-limiter ruling 13)
+
+== pgvector.vector
+
+[pgvector.vector]
+62:6 decorator  @classmethod
+    -> <builtin>.classmethod
+66:6 decorator  @classmethod
+    -> <builtin>.classmethod
+86:6 decorator  @classmethod
+    -> <builtin>.classmethod
+90:6 decorator  @classmethod
+    -> <builtin>.classmethod
+104:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[pgvector.vector.Vector.__init__]
+16:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+18:36 call  array('f', value)
+    -> array.array
+20:33 call  ValueError('expected list[float]')
+    -> <builtin>.ValueError
+21:24 call  is_ndarray(value)
+    -> pgvector._utils.is_ndarray
+25:33 call  ValueError('expected ndim to be 1')
+    -> <builtin>.ValueError
+27:24 call  array('f')
+    -> array.array
+28:26 call  arr.frombytes(value.astype(np.float32, order='C', copy=Fa...
+    -> array.array.frombytes
+28:39 call  value.astype(np.float32, order='C', copy=False)
+    -> numpy.ndarray.astype
+    note: value is a numpy.ndarray here (is_ndarray checked it; the annotation names numpy.ndarray, pgvector.md J3)
+28:84 call  value.astype(np.float32, order='C', copy=False).data.cast...
+    -> <builtin>.memoryview.cast
+    note: ndarray.data is a memoryview
+31:29 call  ValueError('expected list or ndarray')
+    -> <builtin>.ValueError
+
+[pgvector.vector.Vector.__repr__]
+34:38 call  self.to_list()
+    -> pgvector.vector.Vector.to_list
+    reject *: the receiver is a Vector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of Vector
+
+[pgvector.vector.Vector.__eq__]
+37:26 call  isinstance(other, self.__class__)
+    -> <builtin>.isinstance
+
+[pgvector.vector.Vector.dimensions]
+42:19 call  len(self._value)
+    -> <builtin>.len
+
+[pgvector.vector.Vector.to_list]
+45:34 call  self._value.tolist()
+    -> array.array.tolist
+
+[pgvector.vector.Vector.to_numpy]
+49:29 call  np.frombuffer(self._value, dtype=np.float32)
+    -> numpy.frombuffer
+
+[pgvector.vector.Vector.to_text]
+52:28 call  ",".join([str(v) for v in self._value])
+    -> <builtin>.str.join
+52:33 call  str(v)
+    -> <builtin>.str
+
+[pgvector.vector.Vector.to_binary]
+58:26 call  array('f', self._value)
+    -> array.array
+59:27 call  value.byteswap()
+    -> array.array.byteswap
+    note: sys.byteorder: both branches run (pgvector.md J5)
+60:27 call  struct.pack('>HH', len(value), 0)
+    -> struct.pack
+60:38 call  len(value)
+    -> <builtin>.len
+60:62 call  memoryview(value)
+    -> <builtin>.memoryview
+
+[pgvector.vector.Vector.from_text]
+64:19 call  cls(cls._from_text(value))
+    -> pgvector.vector.Vector.__init__
+    note: cls is the class of the classmethod: the public class itself, or a client subclass that inherits the method (client code where it overrides __init__)
+64:34 call  cls._from_text(value)
+    -> pgvector.vector.Vector._from_text
+    reject *: the receiver is a Vector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of Vector
+
+[pgvector.vector.Vector.from_binary]
+68:41 call  struct.unpack_from('>HH', value)
+    -> struct.unpack_from
+69:26 call  memoryview(value)
+    -> <builtin>.memoryview
+71:15 call  len(data)
+    -> <builtin>.len
+72:29 call  ValueError('invalid length')
+    -> <builtin>.ValueError
+75:29 call  ValueError('expected unused to be 0')
+    -> <builtin>.ValueError
+77:20 call  array('f')
+    -> array.array
+78:22 call  arr.frombytes(data)
+    -> array.array.frombytes
+80:25 call  arr.byteswap()
+    -> array.array.byteswap
+82:26 call  cls.__new__(cls)
+    -> <builtin>.object.__new__
+    note: cls is Vector or a client subclass; Vector defines no __new__
+
+[pgvector.vector.Vector._from_text]
+88:22 call  float(v)
+    -> <builtin>.float
+88:52 call  value[1:-1].split(',')
+    -> <builtin>.str.split
+    note: value is a str (annotation; the package passes str: from_text, _from_db, the psycopg loaders)
+
+[pgvector.vector.Vector._to_db]
+96:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+97:32 call  ",".join([str(float(v)) for v in value])
+    -> <builtin>.str.join
+97:37 call  str(float(v))
+    -> <builtin>.str
+97:43 call  float(v)
+    -> <builtin>.float
+99:26 call  isinstance(value, Vector)
+    -> <builtin>.isinstance
+100:24 call  cls(value)
+    -> pgvector.vector.Vector.__init__
+    note: cls is Vector: the package calls the private _to_db only as Vector._to_db
+102:29 call  value.to_text()
+    -> pgvector.vector.Vector.to_text
+    reject *: the receiver is a Vector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of Vector
+
+[pgvector.vector.Vector._from_db]
+109:22 call  isinstance(value, Vector)
+    -> <builtin>.isinstance
+110:33 call  value.to_list()
+    -> pgvector.vector.Vector.to_list
+    reject *: the receiver is a Vector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of Vector
+112:30 call  cls._from_text(value)
+    -> pgvector.vector.Vector._from_text
+    reject *: the receiver is a Vector (self, cls or an instance that the isinstance test or the constructor gives); the package has no subclass of Vector

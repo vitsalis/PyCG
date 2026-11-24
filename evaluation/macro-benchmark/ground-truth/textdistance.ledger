@@ -1,0 +1,2295 @@
+# Call-site ledger of textdistance at faa25f6ff50d0f34dc9655d4d7b0d8daf6f9ff85.
+# Hand-written from the source; judgements in textdistance.md.
+#
+# Receivers (B1). Every algorithm class on a public path is a receiver of the
+# methods it inherits: a client can build any of them (Base and BaseSimilarity
+# too: their __init__ does not raise; the vector_based classes too: the module
+# is public, although algorithms/__init__.py does not import it). _NCDBase and
+# _BinaryNCDBase are private and never instantiated: only their public
+# subclasses are receivers. Method resolution (C = __call__, M = maximum,
+# D = distance, S = similarity, ND/NS = normalized_*, Q = quick_answer):
+#   Base: C M D S ND NS Q all of Base.
+#   BaseSimilarity: C=Base, M=Base, D S Q of BaseSimilarity, ND NS of Base.
+#   Base-derived, not BaseSimilarity (D S Q ND NS of Base):
+#     Hamming, Levenshtein, DamerauLevenshtein (M=Base); Editex (M=Editex);
+#     Length, Bag, Chebyshev, Minkowski, Manhattan, Euclidean, Mahalanobis
+#     (M=Base); ArithNCD, RLENCD, BWTRLENCD, SqrtNCD, EntropyNCD (C=_NCDBase,
+#     M=_NCDBase); BZ2NCD, LZMANCD, ZLIBNCD (C=_BinaryNCDBase, M=_NCDBase).
+#   BaseSimilarity-derived (D S Q of BaseSimilarity, ND NS of Base):
+#     JaroWinkler and Jaro (C M of JaroWinkler), SmithWaterman, StrCmp95,
+#     MLIPNS, MRA, RatcliffObershelp, Identity, Matrix, Jaccard, Sorensen,
+#     Tversky, Overlap, Cosine, MongeElkan (own C and M), Tanimoto (C own,
+#     M=Jaccard), Correlation, Kulsinski (own C, M=Base);
+#     LCSSeq, LCSStr, Prefix, Postfix (own C, M=Base, S own: Postfix S=Prefix);
+#     NeedlemanWunsch (own C M D ND NS minimum), Gotoh (own C M minimum,
+#     D ND NS of NeedlemanWunsch).
+# Sequences (B2, B4, B5): the compared sequences are client objects; an
+# annotation `str` (StrCmp95, Editex, MRA, LCSSeq, LCSStr, RatcliffObershelp)
+# fixes str (B4); `Sequence[...]` fixes nothing. The README asks that
+# "everything should work not only with strings".
+# Callables stored by __init__ (B2): test_func, sim_func, sim_test default to
+# Base._ident (a staticmethod); the tests pass a Matrix instance as sim_func of
+# NeedlemanWunsch and SmithWaterman (tests/test_edit/test_needleman_wunsch.py:29,
+# test_smith_waterman.py:29); SimFunc/TestFunc are aliases of a bare
+# Callable, so nothing else is admitted. MongeElkan.algorithm: the default
+# DamerauLevenshtein() and the tests' textdistance.jaro_winkler
+# (tests/test_token/test_monge_elkan.py:19).
+
+== textdistance.algorithms.base
+
+[textdistance.algorithms.base]
+13:28 call  prototype.clone()
+    -> textdistance.libraries.LibrariesManager.clone
+14:19 call  libraries.optimize()
+    -> textdistance.libraries.LibrariesManager.optimize
+15:12 call  TypeVar('T')
+    -> typing.TypeVar
+26:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+103:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[textdistance.algorithms.base.Base.maximum]
+30:19 call  max(map(len, sequences))
+    -> <builtin>.max
+30:23 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.base.Base.distance]
+35:20 call  self(*sequences)
+    -> textdistance.algorithms.base.Base.__call__
+    -> textdistance.algorithms.edit_based.Hamming.__call__
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__call__
+    -> textdistance.algorithms.phonetic.Editex.__call__
+    -> textdistance.algorithms.simple.Length.__call__
+    -> textdistance.algorithms.token_based.Bag.__call__
+    -> textdistance.algorithms.vector_based.Chebyshev.__call__
+    -> textdistance.algorithms.vector_based.Minkowski.__call__
+    -> textdistance.algorithms.vector_based.Manhattan.__call__
+    -> textdistance.algorithms.vector_based.Euclidean.__call__
+    -> textdistance.algorithms.vector_based.Mahalanobis.__call__
+    -> textdistance.algorithms.compression_based._NCDBase.__call__
+    -> textdistance.algorithms.compression_based._BinaryNCDBase.__call__
+    note: self is an instance of a class that inherits Base.distance: Base itself and the Base subclasses that are not BaseSimilarity subclasses (header); their __call__ is called (the NCD classes through _NCDBase.__call__ or _BinaryNCDBase.__call__)
+
+[textdistance.algorithms.base.Base.similarity]
+42:28 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.compression_based._NCDBase.maximum
+    -> textdistance.algorithms.phonetic.Editex.maximum
+    reject *: self inherits Base.similarity, so it is Base or a Base subclass outside BaseSimilarity (header); of those only Editex and the NCD classes override maximum
+42:56 call  self.distance(*sequences)
+    -> textdistance.algorithms.base.Base.distance
+    reject *: every class that inherits Base.similarity also inherits Base.distance
+
+[textdistance.algorithms.base.Base.normalized_distance]
+47:31 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.compression_based._NCDBase.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    -> textdistance.algorithms.edit_based.MLIPNS.maximum
+    -> textdistance.algorithms.edit_based.SmithWaterman.maximum
+    -> textdistance.algorithms.edit_based.StrCmp95.maximum
+    -> textdistance.algorithms.phonetic.Editex.maximum
+    -> textdistance.algorithms.phonetic.MRA.maximum
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp.maximum
+    -> textdistance.algorithms.simple.Identity.maximum
+    -> textdistance.algorithms.simple.Matrix.maximum
+    -> textdistance.algorithms.token_based.Cosine.maximum
+    -> textdistance.algorithms.token_based.Jaccard.maximum
+    -> textdistance.algorithms.token_based.MongeElkan.maximum
+    -> textdistance.algorithms.token_based.Overlap.maximum
+    -> textdistance.algorithms.token_based.Sorensen.maximum
+    -> textdistance.algorithms.token_based.Tversky.maximum
+    reject textdistance.algorithms.edit_based.NeedlemanWunsch.maximum, textdistance.algorithms.edit_based.Gotoh.maximum: NeedlemanWunsch and Gotoh override normalized_distance, so they never run Base.normalized_distance
+50:29 call  self.distance(*sequences)
+    -> textdistance.algorithms.base.Base.distance
+    -> textdistance.algorithms.base.BaseSimilarity.distance
+    reject textdistance.algorithms.edit_based.NeedlemanWunsch.distance: NeedlemanWunsch and Gotoh override normalized_distance, so they never run Base.normalized_distance
+
+[textdistance.algorithms.base.Base.normalized_similarity]
+57:44 call  self.normalized_distance(*sequences)
+    -> textdistance.algorithms.base.Base.normalized_distance
+    reject textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_distance: NeedlemanWunsch and Gotoh override normalized_similarity too, so they never run Base.normalized_similarity
+
+[textdistance.algorithms.base.Base.external_answer]
+63:23 call  getattr(self, 'external', False)
+    -> <builtin>.getattr
+    note: external is an instance attribute (or missing); no property or __getattr__ runs
+66:28 call  getattr(self, 'test_func', self._ident)
+    -> <builtin>.getattr
+    reject textdistance.algorithms.base.Base._ident: self._ident is only the default value that getattr returns; getattr does not call it
+70:34 call  libraries.get_libs(self.__class__.__name__)
+    -> textdistance.libraries.LibrariesManager.get_libs
+    note: libraries is the module-level clone of libraries.prototype (line 13)
+73:40 call  lib.check_conditions(self, *sequences)
+    -> textdistance.libraries.LibraryBase.check_conditions
+    -> textdistance.libraries.SameLengthLibrary.check_conditions
+    -> textdistance.libraries.TextLibrary.check_conditions
+    note: the registered libraries (libraries.py:170-199) are LibraryBase, TextLibrary, SameLengthLibrary and SameLengthTextLibrary instances; SameLengthTextLibrary resolves check_conditions to SameLengthLibrary's
+76:36 call  lib.get_function()
+    -> textdistance.libraries.LibraryBase.get_function
+79:45 call  lib.prepare(*sequences)
+    -> textdistance.libraries.LibraryBase.prepare
+    -> textdistance.libraries.TextLibrary.prepare
+    note: SameLengthTextLibrary resolves prepare to TextLibrary's; LibraryBase and SameLengthLibrary to LibraryBase's
+81:26 call  suppress(Exception)
+    -> contextlib.suppress
+82:28 call  func(*prepared_sequences)
+    -> pyxdameraulevenshtein.damerau_levenshtein_distance
+    -> jellyfish.damerau_levenshtein_distance
+    -> rapidfuzz.distance.DamerauLevenshtein.distance
+    -> rapidfuzz.distance.OSA.distance
+    -> distance.hamming
+    -> Levenshtein.hamming
+    -> jellyfish.hamming_distance
+    -> rapidfuzz.distance.Hamming.distance
+    -> jellyfish.jaro_similarity
+    -> rapidfuzz.distance.Jaro.similarity
+    -> jellyfish.jaro_winkler_similarity
+    -> rapidfuzz.distance.JaroWinkler.similarity
+    -> distance.levenshtein
+    -> pylev.levenshtein
+    -> jellyfish.levenshtein_distance
+    -> Levenshtein.distance
+    -> rapidfuzz.distance.Levenshtein.distance
+    note: func is what LibraryBase.get_function returns: getattr(import_module(module_name), func_name) for the 17 (module, function) pairs that libraries.py:170-199 registers (all 17 survive optimize(): libraries.json lists each), presets and attr being None for all of them. The libraries are the package's declared extras (setup.py extras_require), not installed in the test environment: named as missing modules by their access path (textdistance.md J1). A library that a client registers holds a client value.
+
+[textdistance.algorithms.base.Base.quick_answer]
+94:15 call  len(sequences)
+    -> <builtin>.len
+96:23 call  self._ident(*sequences)
+    -> textdistance.algorithms.base.Base._ident
+98:19 call  all(sequences)
+    -> <builtin>.all
+99:32 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.compression_based._NCDBase.maximum
+    -> textdistance.algorithms.phonetic.Editex.maximum
+    reject *: self inherits Base.quick_answer, so it is Base or a Base subclass outside BaseSimilarity (header); of those only Editex and the NCD classes override maximum (quick_answer is public: a client can call it on an NCD instance)
+101:36 call  self.external_answer(*sequences)
+    -> textdistance.algorithms.base.Base.external_answer
+
+[textdistance.algorithms.base.Base._ident]
+109:23 call  len(set(elements))
+    -> <builtin>.len
+109:27 call  set(elements)
+    -> <builtin>.set
+112:30 call  zip(elements, elements[1:])
+    -> <builtin>.zip
+
+[textdistance.algorithms.base.Base._get_sequences]
+126:28 call  s.split()
+    -> <builtin>.str.split
+    -> <builtin>.bytes.split
+    note: the package's callers pass the client's sequences (opaque, B5, where nothing fixes the type), the str sequences of LCSSeq, LCSStr and RatcliffObershelp (annotated str: B4), client bytes, which the package handles explicitly (simple.py:39-40, compression_based.py:60; e.g. Prefix(qval=None)(b'a b', b'a c'): audit F2), bytes from _BinaryNCDBase (whose qval stays 1: no split) and lists from Postfix (no split method); qval None (documented) reaches this line through the constructors
+129:24 call  list(sequences)
+    -> <builtin>.list
+131:28 call  find_ngrams(s, self.qval)
+    -> textdistance.utils.find_ngrams
+
+[textdistance.algorithms.base.Base._get_counters]
+137:15 call  all(isinstance(s, Counter) for s in sequences)
+    -> <builtin>.all
+137:26 call  isinstance(s, Counter)
+    -> <builtin>.isinstance
+138:24 call  list(sequences)
+    -> <builtin>.list
+139:24 call  Counter(s)
+    -> collections.Counter
+139:56 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+
+[textdistance.algorithms.base.Base._intersect_counters]
+142:41 call  sequences[0].copy()
+    -> collections.Counter.copy
+    note: the callers pass the Counters of _get_counters (Bag, Cosine, Jaccard, Overlap, Sorensen, Tversky)
+
+[textdistance.algorithms.base.Base._union_counters]
+148:34 call  sequences[0].copy()
+    -> collections.Counter.copy
+    note: the caller (Jaccard.__call__) passes the Counters of _get_counters
+
+[textdistance.algorithms.base.Base._sum_counters]
+154:35 call  sequences[0].copy()
+    -> collections.Counter.copy
+    note: the caller (ArithNCD._make_probs) passes the Counters of _get_counters
+
+[textdistance.algorithms.base.Base._count_counters]
+162:19 call  getattr(self, 'as_set', False)
+    -> <builtin>.getattr
+163:23 call  len(set(counter))
+    -> <builtin>.len
+163:27 call  set(counter)
+    -> <builtin>.set
+165:23 call  sum(counter.values())
+    -> <builtin>.sum
+165:38 call  counter.values()
+    -> collections.Counter.values
+    note: the callers pass Counters: those of _get_counters and _intersect_counters, and Counter differences (Bag.__call__)
+
+[textdistance.algorithms.base.Base.__repr__]
+168:39 call  '{name}({data})'.format( name=type(self).__name__, data=s...
+    -> <builtin>.str.format
+    -> textdistance.algorithms.base.Base.__repr__
+    reject textdistance.libraries.LibraryBase.__str__: no algorithm stores a library object
+    note: {data} formats self.__dict__, and the repr of a dict calls the repr of its values: MongeElkan.algorithm holds a DamerauLevenshtein or JaroWinkler instance, and sim_func of NeedlemanWunsch and SmithWaterman can hold a Matrix instance (the tests pass one); their repr is Base.__repr__
+169:22 call  type(self)
+    -> <builtin>.type
+
+[textdistance.algorithms.base.BaseSimilarity.distance]
+176:28 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    -> textdistance.algorithms.edit_based.MLIPNS.maximum
+    -> textdistance.algorithms.edit_based.SmithWaterman.maximum
+    -> textdistance.algorithms.edit_based.StrCmp95.maximum
+    -> textdistance.algorithms.phonetic.MRA.maximum
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp.maximum
+    -> textdistance.algorithms.simple.Identity.maximum
+    -> textdistance.algorithms.simple.Matrix.maximum
+    -> textdistance.algorithms.token_based.Cosine.maximum
+    -> textdistance.algorithms.token_based.Jaccard.maximum
+    -> textdistance.algorithms.token_based.MongeElkan.maximum
+    -> textdistance.algorithms.token_based.Overlap.maximum
+    -> textdistance.algorithms.token_based.Sorensen.maximum
+    -> textdistance.algorithms.token_based.Tversky.maximum
+    reject textdistance.algorithms.compression_based._NCDBase.maximum, textdistance.algorithms.phonetic.Editex.maximum: the NCD classes and Editex are not BaseSimilarity subclasses
+    reject textdistance.algorithms.edit_based.NeedlemanWunsch.maximum, textdistance.algorithms.edit_based.Gotoh.maximum: NeedlemanWunsch and Gotoh override distance, so they never run BaseSimilarity.distance
+176:58 call  self.similarity(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.similarity
+    -> textdistance.algorithms.sequence_based.LCSSeq.similarity
+    -> textdistance.algorithms.sequence_based.LCSStr.similarity
+    -> textdistance.algorithms.simple.Prefix.similarity
+    reject textdistance.algorithms.base.Base.similarity: self is a BaseSimilarity instance, which overrides similarity
+
+[textdistance.algorithms.base.BaseSimilarity.similarity]
+179:20 call  self(*sequences)
+    -> textdistance.algorithms.base.Base.__call__
+    -> textdistance.algorithms.edit_based.JaroWinkler.__call__
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.__call__
+    -> textdistance.algorithms.edit_based.Gotoh.__call__
+    -> textdistance.algorithms.edit_based.SmithWaterman.__call__
+    -> textdistance.algorithms.edit_based.StrCmp95.__call__
+    -> textdistance.algorithms.edit_based.MLIPNS.__call__
+    -> textdistance.algorithms.phonetic.MRA.__call__
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp.__call__
+    -> textdistance.algorithms.simple.Identity.__call__
+    -> textdistance.algorithms.simple.Matrix.__call__
+    -> textdistance.algorithms.token_based.Jaccard.__call__
+    -> textdistance.algorithms.token_based.Sorensen.__call__
+    -> textdistance.algorithms.token_based.Tversky.__call__
+    -> textdistance.algorithms.token_based.Overlap.__call__
+    -> textdistance.algorithms.token_based.Cosine.__call__
+    -> textdistance.algorithms.token_based.Tanimoto.__call__
+    -> textdistance.algorithms.token_based.MongeElkan.__call__
+    -> textdistance.algorithms.vector_based.Correlation.__call__
+    -> textdistance.algorithms.vector_based.Kulsinski.__call__
+    note: self is a BaseSimilarity instance whose class does not override similarity (all but LCSSeq, LCSStr, Prefix, Postfix); BaseSimilarity itself runs Base.__call__
+
+[textdistance.algorithms.base.BaseSimilarity.quick_answer]
+183:32 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.edit_based.Gotoh.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    -> textdistance.algorithms.edit_based.MLIPNS.maximum
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.maximum
+    -> textdistance.algorithms.edit_based.SmithWaterman.maximum
+    -> textdistance.algorithms.edit_based.StrCmp95.maximum
+    -> textdistance.algorithms.phonetic.MRA.maximum
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp.maximum
+    -> textdistance.algorithms.simple.Identity.maximum
+    -> textdistance.algorithms.simple.Matrix.maximum
+    -> textdistance.algorithms.token_based.Cosine.maximum
+    -> textdistance.algorithms.token_based.Jaccard.maximum
+    -> textdistance.algorithms.token_based.MongeElkan.maximum
+    -> textdistance.algorithms.token_based.Overlap.maximum
+    -> textdistance.algorithms.token_based.Sorensen.maximum
+    -> textdistance.algorithms.token_based.Tversky.maximum
+    reject *: the NCD classes and Editex are not BaseSimilarity subclasses
+    note: quick_answer is public: a client can call it on any BaseSimilarity instance, NeedlemanWunsch and Gotoh too
+184:15 call  len(sequences)
+    -> <builtin>.len
+185:32 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.edit_based.Gotoh.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    -> textdistance.algorithms.edit_based.MLIPNS.maximum
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.maximum
+    -> textdistance.algorithms.edit_based.SmithWaterman.maximum
+    -> textdistance.algorithms.edit_based.StrCmp95.maximum
+    -> textdistance.algorithms.phonetic.MRA.maximum
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp.maximum
+    -> textdistance.algorithms.simple.Identity.maximum
+    -> textdistance.algorithms.simple.Matrix.maximum
+    -> textdistance.algorithms.token_based.Cosine.maximum
+    -> textdistance.algorithms.token_based.Jaccard.maximum
+    -> textdistance.algorithms.token_based.MongeElkan.maximum
+    -> textdistance.algorithms.token_based.Overlap.maximum
+    -> textdistance.algorithms.token_based.Sorensen.maximum
+    -> textdistance.algorithms.token_based.Tversky.maximum
+    reject *: the NCD classes and Editex are not BaseSimilarity subclasses
+186:23 call  self._ident(*sequences)
+    -> textdistance.algorithms.base.Base._ident
+187:32 call  self.maximum(*sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.edit_based.Gotoh.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    -> textdistance.algorithms.edit_based.MLIPNS.maximum
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.maximum
+    -> textdistance.algorithms.edit_based.SmithWaterman.maximum
+    -> textdistance.algorithms.edit_based.StrCmp95.maximum
+    -> textdistance.algorithms.phonetic.MRA.maximum
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp.maximum
+    -> textdistance.algorithms.simple.Identity.maximum
+    -> textdistance.algorithms.simple.Matrix.maximum
+    -> textdistance.algorithms.token_based.Cosine.maximum
+    -> textdistance.algorithms.token_based.Jaccard.maximum
+    -> textdistance.algorithms.token_based.MongeElkan.maximum
+    -> textdistance.algorithms.token_based.Overlap.maximum
+    -> textdistance.algorithms.token_based.Sorensen.maximum
+    -> textdistance.algorithms.token_based.Tversky.maximum
+    reject *: the NCD classes and Editex are not BaseSimilarity subclasses
+188:19 call  all(sequences)
+    -> <builtin>.all
+191:36 call  self.external_answer(*sequences)
+    -> textdistance.algorithms.base.Base.external_answer
+
+== textdistance.algorithms.compression_based
+
+[textdistance.algorithms.compression_based]
+29:12 call  TypeVar('T')
+    -> typing.TypeVar
+279:21 call  ArithNCD()
+    -> textdistance.algorithms.compression_based.ArithNCD.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: ArithNCD defines __init__ and does not call super().__init__
+280:23 call  BWTRLENCD()
+    -> textdistance.algorithms.compression_based.BWTRLENCD.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: BWTRLENCD defines __init__ and does not call super().__init__
+281:17 call  BZ2NCD()
+    -> textdistance.algorithms.compression_based._BinaryNCDBase.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: _BinaryNCDBase.__init__ comes first in the MRO and does not call super().__init__
+282:19 call  LZMANCD()
+    -> textdistance.algorithms.compression_based._BinaryNCDBase.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: _BinaryNCDBase.__init__ comes first in the MRO and does not call super().__init__
+283:17 call  RLENCD()
+    -> textdistance.algorithms.compression_based._NCDBase.__init__
+284:19 call  ZLIBNCD()
+    -> textdistance.algorithms.compression_based._BinaryNCDBase.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: _BinaryNCDBase.__init__ comes first in the MRO and does not call super().__init__
+285:19 call  SqrtNCD()
+    -> textdistance.algorithms.compression_based.SqrtNCD.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: SqrtNCD defines __init__ and does not call super().__init__
+286:25 call  EntropyNCD()
+    -> textdistance.algorithms.compression_based.EntropyNCD.__init__
+    reject textdistance.algorithms.compression_based._NCDBase.__init__: EntropyNCD defines __init__ and does not call super().__init__
+
+[textdistance.algorithms.compression_based._NCDBase._get_size]
+47:19 call  len(self._compress(data))
+    -> <builtin>.len
+47:34 call  self._compress(data)
+    -> textdistance.algorithms.compression_based.RLENCD._compress
+    -> textdistance.algorithms.compression_based.BWTRLENCD._compress
+    -> textdistance.algorithms.compression_based.BZ2NCD._compress
+    -> textdistance.algorithms.compression_based.LZMANCD._compress
+    -> textdistance.algorithms.compression_based.ZLIBNCD._compress
+    reject textdistance.algorithms.compression_based.ArithNCD._compress, textdistance.algorithms.compression_based.SqrtNCD._compress, textdistance.algorithms.compression_based.EntropyNCD._compress: ArithNCD, SqrtNCD and EntropyNCD override _get_size, so self here is an RLENCD, BWTRLENCD, BZ2NCD, LZMANCD or ZLIBNCD
+    reject textdistance.algorithms.compression_based._NCDBase._compress: every class that inherits _NCDBase._get_size overrides _compress (_NCDBase is private and never instantiated)
+
+[textdistance.algorithms.compression_based._NCDBase.__call__]
+55:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+57:27 call  float('Inf')
+    -> <builtin>.float
+58:21 call  type(sequences[0])
+    -> <builtin>.type
+58:35 call  type(sequences[0])()
+    -> <builtin>.str
+    -> <builtin>.bytes
+    -> <builtin>.list
+    note: the class of the first prepared sequence: the lists that _get_sequences makes for qval None or > 1, the bytes that _BinaryNCDBase.__call__ encodes, and the str and bytes that this function handles explicitly (line 60; the README's examples pass str); another client class is a client value (B5; textdistance.md J3)
+59:37 call  permutations(sequences)
+    -> itertools.permutations
+60:26 call  isinstance(empty, (str, bytes))
+    -> <builtin>.isinstance
+61:34 call  empty.join(mutation)
+    -> <builtin>.str.join
+    -> <builtin>.bytes.join
+    note: empty is a str or a bytes (the isinstance check of line 60)
+63:27 call  sum(mutation, empty)
+    -> <builtin>.sum
+64:29 call  min(concat_len, self._get_size(data))
+    -> <builtin>.min
+64:56 call  self._get_size(data)
+    -> textdistance.algorithms.compression_based.ArithNCD._get_size
+    -> textdistance.algorithms.compression_based.EntropyNCD._get_size
+    -> textdistance.algorithms.compression_based.SqrtNCD._get_size
+    -> textdistance.algorithms.compression_based._NCDBase._get_size
+    note: self is an ArithNCD, SqrtNCD or EntropyNCD (own _get_size) or an RLENCD, BWTRLENCD, BZ2NCD, LZMANCD or ZLIBNCD (_NCDBase._get_size)
+66:42 call  self._get_size(s)
+    -> textdistance.algorithms.compression_based.ArithNCD._get_size
+    -> textdistance.algorithms.compression_based.EntropyNCD._get_size
+    -> textdistance.algorithms.compression_based.SqrtNCD._get_size
+    -> textdistance.algorithms.compression_based._NCDBase._get_size
+67:22 call  max(compressed_lens)
+    -> <builtin>.max
+70:33 call  min(compressed_lens)
+    -> <builtin>.min
+70:57 call  len(sequences)
+    -> <builtin>.len
+
+[textdistance.algorithms.compression_based._BinaryNCDBase.__call__]
+81:22 call  isinstance(sequences[0], str)
+    -> <builtin>.isinstance
+82:30 call  tuple(s.encode('utf-8') for s in sequences)
+    -> <builtin>.tuple
+82:39 call  s.encode('utf-8')
+    -> <builtin>.str.encode
+    note: reached when the first sequence is a str (line 81); the documented sequences are texts
+83:21 call  super()
+    -> <builtin>.super
+83:32 call  super().__call__(*sequences)
+    -> textdistance.algorithms.compression_based._NCDBase.__call__
+    reject *: self is a BZ2NCD, LZMANCD or ZLIBNCD; the next __call__ after _BinaryNCDBase in their MRO is _NCDBase.__call__
+
+[textdistance.algorithms.compression_based.ArithNCD._make_probs]
+103:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+104:36 call  self._sum_counters(*sequences)
+    -> textdistance.algorithms.base.Base._sum_counters
+107:28 call  sum(counts.values())
+    -> <builtin>.sum
+107:42 call  counts.values()
+    -> collections.Counter.values
+    note: counts is the Counter that _sum_counters copies from the Counters of _get_counters
+111:54 call  counts.most_common()
+    -> collections.Counter.most_common
+113:25 call  Fraction(cumulative_count, total_letters)
+    -> fractions.Fraction
+114:25 call  Fraction(current_count, total_letters)
+    -> fractions.Fraction
+
+[textdistance.algorithms.compression_based.ArithNCD._get_range]
+127:36 call  data.replace(self.terminator, '')
+    -> <builtin>.str.replace
+    note: data is annotated str; with a terminator (a str, annotated str | None), only a str gets past `self.terminator in data` (line 126) to this call
+130:25 call  Fraction(0, 1)
+    -> fractions.Fraction
+131:25 call  Fraction(1, 1)
+    -> fractions.Fraction
+
+[textdistance.algorithms.compression_based.ArithNCD._compress]
+139:33 call  self._make_probs(data)
+    -> textdistance.algorithms.compression_based.ArithNCD._make_probs
+140:37 call  self._get_range(data=data, probs=probs)
+    -> textdistance.algorithms.compression_based.ArithNCD._get_range
+141:35 call  Fraction(0, 1)
+    -> fractions.Fraction
+145:39 call  Fraction(output_numerator, output_denominator)
+    -> fractions.Fraction
+
+[textdistance.algorithms.compression_based.ArithNCD._get_size]
+150:35 call  self._compress(data)
+    -> textdistance.algorithms.compression_based.ArithNCD._compress
+    reject *: self is an ArithNCD (the package defines no subclass of it)
+153:25 call  math.ceil(math.log(numerator, self.base))
+    -> math.ceil
+153:34 call  math.log(numerator, self.base)
+    -> math.log
+
+[textdistance.algorithms.compression_based.RLENCD._compress]
+164:28 call  groupby(data)
+    -> itertools.groupby
+165:20 call  len(list(g))
+    -> <builtin>.len
+165:25 call  list(g)
+    -> <builtin>.list
+167:32 call  new_data.append(str(n) + k)
+    -> <builtin>.list.append
+167:36 call  str(n)
+    -> <builtin>.str
+    reject *: n is an int (a length)
+169:32 call  new_data.append(k)
+    -> <builtin>.list.append
+171:32 call  new_data.append(2 * k)
+    -> <builtin>.list.append
+172:23 call  ''.join(new_data)
+    -> <builtin>.str.join
+
+[textdistance.algorithms.compression_based.BWTRLENCD._compress]
+189:30 call  sorted(data[i:] + data[:i] for i in range(len(data)))
+    -> <builtin>.sorted
+189:65 call  range(len(data))
+    -> <builtin>.range
+189:69 call  len(data)
+    -> <builtin>.len
+190:25 call  type(data)
+    -> <builtin>.type
+190:31 call  type(data)()
+    -> <builtin>.str
+    note: data is annotated str, and the README's examples pass str; BWTRLENCD has no qval parameter (the class attribute 1 stays), so the package makes no list here; a client's other sequence class is a client value (B5)
+191:30 call  empty.join(subdata[-1] for subdata in modified)
+    -> <builtin>.str.join
+192:21 call  super()
+    -> <builtin>.super
+192:33 call  super()._compress(data)
+    -> textdistance.algorithms.compression_based.RLENCD._compress
+    reject *: the next _compress after BWTRLENCD in its MRO is RLENCD._compress
+
+[textdistance.algorithms.compression_based.SqrtNCD._compress]
+209:35 call  math.sqrt(count)
+    -> math.sqrt
+209:72 call  Counter(data)
+    -> collections.Counter
+209:84 call  Counter(data).items()
+    -> collections.Counter.items
+
+[textdistance.algorithms.compression_based.SqrtNCD._get_size]
+212:19 call  sum(self._compress(data).values())
+    -> <builtin>.sum
+212:34 call  self._compress(data)
+    -> textdistance.algorithms.compression_based.SqrtNCD._compress
+    reject *: self is a SqrtNCD (the package defines no subclass of it)
+212:47 call  self._compress(data).values()
+    -> <builtin>.dict.values
+    note: SqrtNCD._compress returns a dict comprehension
+
+[textdistance.algorithms.compression_based.EntropyNCD._compress]
+230:26 call  len(data)
+    -> <builtin>.len
+232:37 call  Counter(data)
+    -> collections.Counter
+232:50 call  Counter(data).values()
+    -> collections.Counter.values
+234:36 call  math.log(p, self.base)
+    -> math.log
+
+[textdistance.algorithms.compression_based.EntropyNCD._get_size]
+244:42 call  self._compress(data)
+    -> textdistance.algorithms.compression_based.EntropyNCD._compress
+    reject *: self is an EntropyNCD (the package defines no subclass of it)
+
+[textdistance.algorithms.compression_based.BZ2NCD._compress]
+256:29 call  codecs.encode(data, 'bz2_codec')
+    -> codecs.encode
+
+[textdistance.algorithms.compression_based.LZMANCD._compress]
+266:30 call  ImportError('Please, install the PylibLZMA module')
+    -> <builtin>.ImportError
+    note: lzma is None when its optional import fails (line 17-19): both sides of an optional import run
+267:29 call  lzma.compress(data)
+    -> lzma.compress
+
+[textdistance.algorithms.compression_based.ZLIBNCD._compress]
+276:29 call  codecs.encode(data, 'zlib_codec')
+    -> codecs.encode
+
+== textdistance.algorithms.edit_based
+
+[textdistance.algorithms.edit_based]
+31:12 call  TypeVar('T')
+    -> typing.TypeVar
+664:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+838:18 call  Hamming()
+    -> textdistance.algorithms.edit_based.Hamming.__init__
+839:26 call  Levenshtein()
+    -> textdistance.algorithms.edit_based.Levenshtein.__init__
+840:51 call  DamerauLevenshtein()
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__init__
+841:12 call  Jaro()
+    -> textdistance.algorithms.edit_based.Jaro.__init__
+    reject textdistance.algorithms.edit_based.JaroWinkler.__init__: Jaro defines __init__; its super().__init__ call is an edge of Jaro.__init__
+842:27 call  JaroWinkler()
+    -> textdistance.algorithms.edit_based.JaroWinkler.__init__
+843:35 call  NeedlemanWunsch()
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.__init__
+844:31 call  SmithWaterman()
+    -> textdistance.algorithms.edit_based.SmithWaterman.__init__
+845:14 call  Gotoh()
+    -> textdistance.algorithms.edit_based.Gotoh.__init__
+    reject textdistance.algorithms.edit_based.NeedlemanWunsch.__init__: Gotoh defines __init__ and does not call super().__init__
+846:20 call  StrCmp95()
+    -> textdistance.algorithms.edit_based.StrCmp95.__init__
+847:16 call  MLIPNS()
+    -> textdistance.algorithms.edit_based.MLIPNS.__init__
+
+[textdistance.algorithms.edit_based.Hamming.__call__]
+55:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+57:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.Base.quick_answer
+    reject textdistance.algorithms.base.BaseSimilarity.quick_answer: the class is a Base subclass, not a BaseSimilarity subclass
+59:30 call  isinstance(result, int)
+    -> <builtin>.isinstance
+63:19 call  sum(not self.test_func(*es) for es in _zip(*sequences))
+    -> <builtin>.sum
+63:38 call  self.test_func(*es)
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+63:58 call  _zip(*sequences)
+    -> <builtin>.zip
+    -> itertools.zip_longest
+    note: _zip is zip when truncate is true, else itertools.zip_longest (line 62)
+
+[textdistance.algorithms.edit_based.Levenshtein._recursive]
+93:23 call  len(s1)
+    -> <builtin>.len
+93:33 call  len(s2)
+    -> <builtin>.len
+95:26 call  self.test_func(s1[-1], s2[-1])
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+96:24 call  self(s1[:-1], s2[:-1])
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    note: self is a Levenshtein (the package defines no subclass of it)
+99:16 call  min( self(s1[:-1], s2), self(s1, s2[:-1]), )
+    -> <builtin>.min
+100:17 call  self(s1[:-1], s2)
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    note: self is a Levenshtein (the package defines no subclass of it)
+101:17 call  self(s1, s2[:-1])
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    note: self is a Levenshtein (the package defines no subclass of it)
+104:17 call  self(s1[:-1], s2[:-1])
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    note: self is a Levenshtein (the package defines no subclass of it)
+105:19 call  min(d, s)
+    -> <builtin>.min
+
+[textdistance.algorithms.edit_based.Levenshtein._cycled]
+112:19 call  len(s1)
+    -> <builtin>.len
+113:19 call  len(s2)
+    -> <builtin>.len
+117:31 call  numpy.arange(cols)
+    -> numpy.arange
+    note: numpy is the optional import of line 15 (both sides of an optional import run)
+119:24 call  range(cols)
+    -> <builtin>.range
+121:23 call  range(1, rows)
+    -> <builtin>.range
+123:27 call  range(1, cols)
+    -> <builtin>.range
+126:38 call  self.test_func(s1[r - 1], s2[c - 1])
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+128:29 call  min(edit, deletion, insertion)
+    -> <builtin>.min
+129:19 call  int(cur[-1])
+    -> <builtin>.int
+
+[textdistance.algorithms.edit_based.Levenshtein.__call__]
+132:37 call  self._get_sequences(s1, s2)
+    -> textdistance.algorithms.base.Base._get_sequences
+134:35 call  self.quick_answer(s1, s2)
+    -> textdistance.algorithms.base.Base.quick_answer
+    reject textdistance.algorithms.base.BaseSimilarity.quick_answer: the class is a Base subclass, not a BaseSimilarity subclass
+136:30 call  isinstance(result, int)
+    -> <builtin>.isinstance
+139:28 call  self._cycled(s1, s2)
+    -> textdistance.algorithms.edit_based.Levenshtein._cycled
+
+[textdistance.algorithms.edit_based.DamerauLevenshtein._numpy]
+174:24 call  numpy.zeros([len(s1) + 1, len(s2) + 1], dtype=int)
+    -> numpy.zeros
+    note: numpy is the optional import of line 15
+174:29 call  len(s1)
+    -> <builtin>.len
+174:42 call  len(s2)
+    -> <builtin>.len
+177:23 call  range(-1, len(s1) + 1)
+    -> <builtin>.range
+177:31 call  len(s1)
+    -> <builtin>.len
+179:23 call  range(-1, len(s2) + 1)
+    -> <builtin>.range
+179:31 call  len(s2)
+    -> <builtin>.len
+182:32 call  enumerate(s1)
+    -> <builtin>.enumerate
+183:36 call  enumerate(s2)
+    -> <builtin>.enumerate
+184:27 call  int(not self.test_func(cs1, cs2))
+    -> <builtin>.int
+184:46 call  self.test_func(cs1, cs2)
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+187:30 call  min( d[i - 1][j] + 1, # deletion d[i][j - 1] + 1, # inser...
+    -> <builtin>.min
+196:38 call  self.test_func(cs1, s2[j - 1])
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+198:30 call  min( d[i][j], d[i - 2][j - 2] + cost, )
+    -> <builtin>.min
+203:21 call  len(s1)
+    -> <builtin>.len
+203:34 call  len(s2)
+    -> <builtin>.len
+
+[textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_unrestricted]
+211:19 call  len(s1)
+    -> <builtin>.len
+212:19 call  len(s2)
+    -> <builtin>.len
+218:23 call  range(len(s1) + 1)
+    -> <builtin>.range
+218:27 call  len(s1)
+    -> <builtin>.len
+221:23 call  range(len(s2) + 1)
+    -> <builtin>.range
+221:27 call  len(s2)
+    -> <builtin>.len
+225:32 call  enumerate(s1, start=1)
+    -> <builtin>.enumerate
+227:36 call  enumerate(s2, start=1)
+    -> <builtin>.enumerate
+228:28 call  da.get(cs2, 0)
+    -> <builtin>.dict.get
+    note: da is a dict display (line 209)
+230:34 call  self.test_func(cs1, cs2)
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+236:30 call  min( d[i - 1, j - 1] + cost, # substitution d[i, j - 1] +...
+    -> <builtin>.min
+
+[textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_restricted]
+253:23 call  range(-1, len(s1) + 1)
+    -> <builtin>.range
+253:31 call  len(s1)
+    -> <builtin>.len
+255:23 call  range(-1, len(s2) + 1)
+    -> <builtin>.range
+255:31 call  len(s2)
+    -> <builtin>.len
+258:32 call  enumerate(s1)
+    -> <builtin>.enumerate
+259:36 call  enumerate(s2)
+    -> <builtin>.enumerate
+260:27 call  int(not self.test_func(cs1, cs2))
+    -> <builtin>.int
+260:46 call  self.test_func(cs1, cs2)
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+263:30 call  min( d[i - 1, j] + 1, # deletion d[i, j - 1] + 1, # inser...
+    -> <builtin>.min
+272:38 call  self.test_func(cs1, s2[j - 1])
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+274:38 call  self.test_func(s1[i - 1], cs2)
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable as test_func (TestFunc is an alias of a bare Callable), so another value is a client callback
+276:30 call  min( d[i, j], d[i - 2, j - 2] + cost, )
+    -> <builtin>.min
+281:21 call  len(s1)
+    -> <builtin>.len
+281:34 call  len(s2)
+    -> <builtin>.len
+
+[textdistance.algorithms.edit_based.DamerauLevenshtein.__call__]
+284:37 call  self._get_sequences(s1, s2)
+    -> textdistance.algorithms.base.Base._get_sequences
+286:35 call  self.quick_answer(s1, s2)
+    -> textdistance.algorithms.base.Base.quick_answer
+    reject textdistance.algorithms.base.BaseSimilarity.quick_answer: the class is a Base subclass, not a BaseSimilarity subclass
+294:48 call  self._pure_python_restricted(s1, s2)
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_restricted
+295:46 call  self._pure_python_unrestricted(s1, s2)
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein._pure_python_unrestricted
+
+[textdistance.algorithms.edit_based.JaroWinkler.__call__]
+326:37 call  self._get_sequences(s1, s2)
+    -> textdistance.algorithms.base.Base._get_sequences
+328:35 call  self.quick_answer(s1, s2)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+332:21 call  len(s1)
+    -> <builtin>.len
+333:21 call  len(s2)
+    -> <builtin>.len
+338:22 call  min(s1_len, s2_len)
+    -> <builtin>.min
+339:27 call  max(s1_len, s2_len)
+    -> <builtin>.max
+349:34 call  enumerate(s1)
+    -> <builtin>.enumerate
+350:22 call  max(0, i - search_range)
+    -> <builtin>.max
+351:21 call  min(i + search_range, s2_len - 1)
+    -> <builtin>.min
+352:27 call  range(low, hi + 1)
+    -> <builtin>.range
+364:33 call  enumerate(s1_flags)
+    -> <builtin>.enumerate
+366:31 call  range(k, s2_len)
+    -> <builtin>.range
+387:16 call  min(min_len, 4)
+    -> <builtin>.min
+
+[textdistance.algorithms.edit_based.Jaro.__init__]
+413:14 call  super()
+    -> <builtin>.super
+413:25 call  super().__init__( long_tolerance=long_tolerance, winkleri...
+    -> textdistance.algorithms.edit_based.JaroWinkler.__init__
+    reject *: the next class after Jaro in its MRO that defines __init__ is JaroWinkler
+
+[textdistance.algorithms.edit_based.NeedlemanWunsch.minimum]
+450:20 call  max(map(len, sequences))
+    -> <builtin>.max
+450:24 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.edit_based.NeedlemanWunsch.maximum]
+453:19 call  max(map(len, sequences))
+    -> <builtin>.max
+453:23 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.edit_based.NeedlemanWunsch.distance]
+458:36 call  self.similarity(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.similarity
+    reject *: self is a NeedlemanWunsch or a Gotoh, which inherit BaseSimilarity.similarity
+
+[textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_distance]
+463:31 call  self.minimum(*sequences)
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.minimum
+    -> textdistance.algorithms.edit_based.Gotoh.minimum
+464:31 call  self.maximum(*sequences)
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.maximum
+    -> textdistance.algorithms.edit_based.Gotoh.maximum
+    reject *: self is a NeedlemanWunsch or a Gotoh (the classes that inherit this method)
+467:30 call  self.distance(*sequences)
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.distance
+    reject *: self is a NeedlemanWunsch or a Gotoh, which inherit NeedlemanWunsch.distance
+
+[textdistance.algorithms.edit_based.NeedlemanWunsch.normalized_similarity]
+472:31 call  self.minimum(*sequences)
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.minimum
+    -> textdistance.algorithms.edit_based.Gotoh.minimum
+473:31 call  self.maximum(*sequences)
+    -> textdistance.algorithms.edit_based.NeedlemanWunsch.maximum
+    -> textdistance.algorithms.edit_based.Gotoh.maximum
+    reject *: self is a NeedlemanWunsch or a Gotoh (the classes that inherit this method)
+476:32 call  self.similarity(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.similarity
+    reject *: self is a NeedlemanWunsch or a Gotoh, which inherit BaseSimilarity.similarity
+
+[textdistance.algorithms.edit_based.NeedlemanWunsch.__call__]
+480:30 call  ImportError('Please, install numpy for Needleman-Wunsch m...
+    -> <builtin>.ImportError
+    note: numpy is None when its optional import fails (line 17): both sides run
+482:37 call  self._get_sequences(s1, s2)
+    -> textdistance.algorithms.base.Base._get_sequences
+488:31 call  numpy.zeros( (len(s1) + 1, len(s2) + 1), dtype=float, )
+    -> numpy.zeros
+    note: numpy is the optional import of line 15
+489:17 call  len(s1)
+    -> <builtin>.len
+489:30 call  len(s2)
+    -> <builtin>.len
+493:23 call  range(len(s1) + 1)
+    -> <builtin>.range
+493:27 call  len(s1)
+    -> <builtin>.len
+496:23 call  range(len(s2) + 1)
+    -> <builtin>.range
+496:27 call  len(s2)
+    -> <builtin>.len
+499:31 call  enumerate(s1, 1)
+    -> <builtin>.enumerate
+500:35 call  enumerate(s2, 1)
+    -> <builtin>.enumerate
+501:63 call  self.sim_func(c1, c2)
+    -> textdistance.algorithms.base.Base._ident
+    -> textdistance.algorithms.simple.Matrix.__call__
+    note: sim_func is the constructor argument or the default self._ident (Base._ident); the tests pass a Matrix instance (tests/test_edit/test_needleman_wunsch.py:29, test_smith_waterman.py:29); SimFunc is an alias of a bare Callable, so nothing else is admitted
+504:37 call  max(match, delete, insert)
+    -> <builtin>.max
+
+[textdistance.algorithms.edit_based.SmithWaterman.maximum]
+533:19 call  min(map(len, sequences))
+    -> <builtin>.min
+533:23 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.edit_based.SmithWaterman.__call__]
+537:30 call  ImportError('Please, install numpy for Smith-Waterman mea...
+    -> <builtin>.ImportError
+    note: numpy is None when its optional import fails (line 17): both sides run
+539:37 call  self._get_sequences(s1, s2)
+    -> textdistance.algorithms.base.Base._get_sequences
+541:35 call  self.quick_answer(s1, s2)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+545:31 call  numpy.zeros( (len(s1) + 1, len(s2) + 1), dtype=float, )
+    -> numpy.zeros
+    note: numpy is the optional import of line 15
+546:17 call  len(s1)
+    -> <builtin>.len
+546:30 call  len(s2)
+    -> <builtin>.len
+549:32 call  enumerate(s1, start=1)
+    -> <builtin>.enumerate
+550:36 call  enumerate(s2, start=1)
+    -> <builtin>.enumerate
+553:63 call  self.sim_func(sc1, sc2)
+    -> textdistance.algorithms.base.Base._ident
+    -> textdistance.algorithms.simple.Matrix.__call__
+    note: sim_func is the constructor argument or the default self._ident (Base._ident); the tests pass a Matrix instance (tests/test_edit/test_needleman_wunsch.py:29, test_smith_waterman.py:29); SimFunc is an alias of a bare Callable, so nothing else is admitted
+558:37 call  max(0, match, delete, insert)
+    -> <builtin>.max
+
+[textdistance.algorithms.edit_based.Gotoh.minimum]
+587:20 call  min(map(len, sequences))
+    -> <builtin>.min
+587:24 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.edit_based.Gotoh.maximum]
+590:19 call  min(map(len, sequences))
+    -> <builtin>.min
+590:23 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.edit_based.Gotoh.__call__]
+594:30 call  ImportError('Please, install numpy for Gotoh measure')
+    -> <builtin>.ImportError
+    note: numpy is None when its optional import fails (line 17): both sides run
+596:37 call  self._get_sequences(s1, s2)
+    -> textdistance.algorithms.base.Base._get_sequences
+602:21 call  len(s1)
+    -> <builtin>.len
+603:21 call  len(s2)
+    -> <builtin>.len
+604:28 call  numpy.zeros((len_s1 + 1, len_s2 + 1), dtype=float)
+    -> numpy.zeros
+    note: numpy is the optional import of line 15
+605:28 call  numpy.zeros((len_s1 + 1, len_s2 + 1), dtype=float)
+    -> numpy.zeros
+    note: numpy is the optional import of line 15
+606:28 call  numpy.zeros((len_s1 + 1, len_s2 + 1), dtype=float)
+    -> numpy.zeros
+    note: numpy is the optional import of line 15
+609:28 call  float('-inf')
+    -> <builtin>.float
+610:28 call  float('-inf')
+    -> <builtin>.float
+611:23 call  range(1, len_s1 + 1)
+    -> <builtin>.range
+612:32 call  float('-inf')
+    -> <builtin>.float
+614:32 call  float('-inf')
+    -> <builtin>.float
+616:23 call  range(1, len_s2 + 1)
+    -> <builtin>.range
+617:32 call  float('-inf')
+    -> <builtin>.float
+618:32 call  float('-inf')
+    -> <builtin>.float
+622:32 call  enumerate(s1, start=1)
+    -> <builtin>.enumerate
+623:36 call  enumerate(s2, start=1)
+    -> <builtin>.enumerate
+624:40 call  self.sim_func(sc1, sc2)
+    -> textdistance.algorithms.base.Base._ident
+    note: sim_func is the constructor argument or the default self._ident (Base._ident); the tests pass only their own function sim_ident to Gotoh, and SimFunc is an alias of a bare Callable: the Matrix that the tests pass to NeedlemanWunsch and SmithWaterman is not admitted here (the shared-alias ruling)
+625:34 call  max( d_mat[i - 1, j - 1] + sim_val, p_mat[i - 1, j - 1] +...
+    -> <builtin>.max
+630:34 call  max( d_mat[i - 1, j] - self.gap_open, p_mat[i - 1, j] - s...
+    -> <builtin>.max
+634:34 call  max( d_mat[i, j - 1] - self.gap_open, q_mat[i, j - 1] - s...
+    -> <builtin>.max
+640:19 call  max(d_mat[i, j], p_mat[i, j], q_mat[i, j])
+    -> <builtin>.max
+
+[textdistance.algorithms.edit_based.StrCmp95._in_range]
+666:23 call  ord(char)
+    -> <builtin>.ord
+
+[textdistance.algorithms.edit_based.StrCmp95.__call__]
+669:22 call  s1.strip()
+    -> <builtin>.str.strip
+    note: s1 and s2 are annotated str (B4)
+669:30 call  s1.strip().upper()
+    -> <builtin>.str.upper
+670:22 call  s2.strip()
+    -> <builtin>.str.strip
+670:30 call  s2.strip().upper()
+    -> <builtin>.str.upper
+672:35 call  self.quick_answer(s1, s2)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+676:21 call  len(s1)
+    -> <builtin>.len
+677:21 call  len(s2)
+    -> <builtin>.len
+679:28 call  defaultdict(int)
+    -> collections.defaultdict
+699:27 call  max(0, search_range // 2 - 1)
+    -> <builtin>.max
+704:32 call  enumerate(s1)
+    -> <builtin>.enumerate
+705:25 call  max(i - search_range, 0)
+    -> <builtin>.max
+706:24 call  min(i + search_range, yl1)
+    -> <builtin>.min
+707:27 call  range(lowlim, hilim + 1)
+    -> <builtin>.range
+720:32 call  enumerate(s1)
+    -> <builtin>.enumerate
+723:27 call  range(k, len_s2)
+    -> <builtin>.range
+734:27 call  range(len_s1)
+    -> <builtin>.range
+737:38 call  self._in_range(s1[i])
+    -> textdistance.algorithms.edit_based.StrCmp95._in_range
+739:31 call  range(len_s2)
+    -> <builtin>.range
+742:42 call  self._in_range(s2[j])
+    -> textdistance.algorithms.edit_based.StrCmp95._in_range
+761:16 call  min(minv, 4)
+    -> <builtin>.min
+763:28 call  zip(s1, s2)
+    -> <builtin>.zip
+768:27 call  sc1.isdigit()
+    -> <builtin>.str.isdigit
+    note: sc1 is a character of the str s1
+784:25 call  s1[0].isdigit()
+    -> <builtin>.str.isdigit
+
+[textdistance.algorithms.edit_based.MLIPNS.__call__]
+815:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+817:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+822:22 call  Hamming()
+    -> textdistance.algorithms.edit_based.Hamming.__init__
+822:24 call  Hamming()(*sequences)
+    -> textdistance.algorithms.edit_based.Hamming.__call__
+    reject *: the receiver is the Hamming instance made at 822:22
+823:21 call  max(map(len, sequences))
+    -> <builtin>.max
+823:25 call  map(len, sequences)
+    -> <builtin>.map
+824:18 call  all(sequences)
+    -> <builtin>.all
+
+== textdistance.algorithms.phonetic
+
+[textdistance.algorithms.phonetic]
+23:12 call  TypeVar('T')
+    -> typing.TypeVar
+85:18 call  frozenset('AEIOUY')
+    -> <builtin>.frozenset
+86:18 call  frozenset('BP')
+    -> <builtin>.frozenset
+87:18 call  frozenset('CKQ')
+    -> <builtin>.frozenset
+88:18 call  frozenset('DT')
+    -> <builtin>.frozenset
+89:18 call  frozenset('LR')
+    -> <builtin>.frozenset
+90:18 call  frozenset('MN')
+    -> <builtin>.frozenset
+91:18 call  frozenset('GJ')
+    -> <builtin>.frozenset
+92:18 call  frozenset('FPV')
+    -> <builtin>.frozenset
+93:18 call  frozenset('SXZ')
+    -> <builtin>.frozenset
+94:18 call  frozenset('CSZ')
+    -> <builtin>.frozenset
+96:26 call  frozenset('HW')
+    -> <builtin>.frozenset
+178:10 call  MRA()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: MRA defines no __init__; the first __init__ in its MRO is Base.__init__
+179:16 call  Editex()
+    -> textdistance.algorithms.phonetic.Editex.__init__
+    reject *: the class is Editex, which defines __init__
+
+[textdistance.algorithms.phonetic.MRA.maximum]
+33:26 call  list(self._calc_mra(s))
+    -> <builtin>.list
+33:41 call  self._calc_mra(s)
+    -> textdistance.algorithms.phonetic.MRA._calc_mra
+34:19 call  max(map(len, sequences))
+    -> <builtin>.max
+34:23 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.phonetic.MRA._calc_mra]
+39:26 call  word.upper()
+    -> <builtin>.str.upper
+    note: word is annotated str (B4)
+40:33 call  ''.join(c for c in word[1:] if c not in 'AEIOU')
+    -> <builtin>.str.join
+42:23 call  ''.join(char for char, _ in groupby(word))
+    -> <builtin>.str.join
+42:51 call  groupby(word)
+    -> itertools.groupby
+43:15 call  len(word)
+    -> <builtin>.len
+
+[textdistance.algorithms.phonetic.MRA.__call__]
+48:19 call  all(sequences)
+    -> <builtin>.all
+50:26 call  list(self._calc_mra(s))
+    -> <builtin>.list
+50:41 call  self._calc_mra(s)
+    -> textdistance.algorithms.phonetic.MRA._calc_mra
+51:23 call  list(map(len, sequences))
+    -> <builtin>.list
+51:27 call  map(len, sequences)
+    -> <builtin>.map
+52:20 call  len(lengths)
+    -> <builtin>.len
+53:25 call  max(lengths)
+    -> <builtin>.max
+54:15 call  abs(max_length - min(lengths))
+    -> <builtin>.abs
+54:32 call  min(lengths)
+    -> <builtin>.min
+57:23 call  range(count)
+    -> <builtin>.range
+59:25 call  min(lengths)
+    -> <builtin>.min
+60:29 call  zip(*sequences)
+    -> <builtin>.zip
+61:35 call  self._ident(*chars)
+    -> textdistance.algorithms.base.Base._ident
+62:41 call  new_sequences.append(chars)
+    -> <builtin>.list.append
+    note: new_sequences is the list display of line 58
+63:32 call  map(list, zip(*new_sequences))
+    -> <builtin>.map
+63:42 call  zip(*new_sequences)
+    -> <builtin>.zip
+66:29 call  zip_longest(new_sequences, sequences, fillvalue=list())
+    -> itertools.zip_longest
+66:70 call  list()
+    -> <builtin>.list
+69:27 call  list(map(len, sequences))
+    -> <builtin>.list
+69:31 call  map(len, sequences)
+    -> <builtin>.map
+73:32 call  max(lengths)
+    -> <builtin>.max
+
+[textdistance.algorithms.phonetic.Editex.__init__]
+110:30 call  max(group_cost, self.match_cost)
+    -> <builtin>.max
+111:33 call  max(mismatch_cost, self.group_cost)
+    -> <builtin>.max
+117:33 call  ValueError('`ungrouped` argument required with `groups`')
+    -> <builtin>.ValueError
+120:39 call  frozenset.union(*self.groups)
+    -> <builtin>.frozenset.union
+
+[textdistance.algorithms.phonetic.Editex.maximum]
+123:19 call  max(map(len, sequences))
+    -> <builtin>.max
+123:23 call  map(len, sequences)
+    -> <builtin>.map
+
+[textdistance.algorithms.phonetic.Editex.r_cost]
+126:23 call  self._ident(*elements)
+    -> textdistance.algorithms.base.Base._ident
+128:15 call  any(map(lambda x: x not in self.grouped, elements))
+    -> <builtin>.any
+128:19 call  map(lambda x: x not in self.grouped, elements)
+    -> <builtin>.map
+    -> textdistance.algorithms.phonetic.Editex.r_cost.<lambda1>
+    note: any() at 128:15 iterates the map in this function and calls the lambda
+131:19 call  all(map(lambda x: x in group, elements))
+    -> <builtin>.all
+131:23 call  map(lambda x: x in group, elements)
+    -> <builtin>.map
+    -> textdistance.algorithms.phonetic.Editex.r_cost.<lambda2>
+    note: all() at 131:19 iterates the map in this function and calls the lambda
+
+[textdistance.algorithms.phonetic.Editex.d_cost]
+136:27 call  self._ident(*elements)
+    -> textdistance.algorithms.base.Base._ident
+138:27 call  self.r_cost(*elements)
+    -> textdistance.algorithms.phonetic.Editex.r_cost
+
+[textdistance.algorithms.phonetic.Editex.__call__]
+141:35 call  self.quick_answer(s1, s2)
+    -> textdistance.algorithms.base.Base.quick_answer
+    reject textdistance.algorithms.base.BaseSimilarity.quick_answer: the class is a Base subclass, not a BaseSimilarity subclass
+149:34 call  self.maximum(s1, s2)
+    -> textdistance.algorithms.phonetic.Editex.maximum
+    reject *: self is an Editex (the package defines no subclass of it)
+150:28 call  s1.upper()
+    -> <builtin>.str.upper
+    note: s1 and s2 are annotated str (B4)
+151:28 call  s2.upper()
+    -> <builtin>.str.upper
+152:21 call  len(s1)
+    -> <builtin>.len
+153:21 call  len(s2)
+    -> <builtin>.len
+156:32 call  numpy.zeros((len_s1 + 1, len_s2 + 1), dtype=int)
+    -> numpy.zeros
+    note: numpy is the optional import of line 14 (both sides of an optional import run)
+158:32 call  defaultdict(lambda: defaultdict(int))
+    -> collections.defaultdict
+    -> textdistance.algorithms.phonetic.Editex.__call__.<lambda1>
+    note: the defaultdict calls its default factory, the lambda, when this function reads a missing row of d_mat (lines 162-174)
+161:27 call  range(1, len_s1 + 1)
+    -> <builtin>.range
+162:60 call  self.d_cost(s1[i - 1], s1[i])
+    -> textdistance.algorithms.phonetic.Editex.d_cost
+163:23 call  range(1, len_s2 + 1)
+    -> <builtin>.range
+164:56 call  self.d_cost(s2[j - 1], s2[j])
+    -> textdistance.algorithms.phonetic.Editex.d_cost
+166:49 call  enumerate(zip(s1, s1[1:]), start=1)
+    -> <builtin>.enumerate
+166:53 call  zip(s1, s1[1:])
+    -> <builtin>.zip
+167:53 call  enumerate(zip(s2, s2[1:]), start=1)
+    -> <builtin>.enumerate
+167:57 call  zip(s2, s2[1:])
+    -> <builtin>.zip
+168:34 call  min( d_mat[i - 1][j] + self.d_cost(cs1_prev, cs1_curr), d...
+    -> <builtin>.min
+169:50 call  self.d_cost(cs1_prev, cs1_curr)
+    -> textdistance.algorithms.phonetic.Editex.d_cost
+170:50 call  self.d_cost(cs2_prev, cs2_curr)
+    -> textdistance.algorithms.phonetic.Editex.d_cost
+171:54 call  self.r_cost(cs1_curr, cs2_curr)
+    -> textdistance.algorithms.phonetic.Editex.r_cost
+175:19 call  min(distance, max_length)
+    -> <builtin>.min
+
+[textdistance.algorithms.phonetic.Editex.__call__.<lambda1>]
+158:52 call  defaultdict(int)
+    -> collections.defaultdict
+
+== textdistance.algorithms.sequence_based
+
+[textdistance.algorithms.sequence_based]
+184:16 call  LCSSeq()
+    -> textdistance.algorithms.sequence_based.LCSSeq.__init__
+    reject *: the class is LCSSeq, which defines __init__
+185:16 call  LCSStr()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: LCSStr defines no __init__; the first __init__ in its MRO is Base.__init__
+186:39 call  RatcliffObershelp()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: RatcliffObershelp defines no __init__; the first __init__ in its MRO is Base.__init__
+
+[textdistance.algorithms.sequence_based.LCSSeq._dynamic]
+52:34 call  numpy.zeros((len(seq1) + 1, len(seq2) + 1), dtype=int)
+    -> numpy.zeros
+    note: numpy is the optional import of line 15 (both sides of an optional import run)
+52:39 call  len(seq1)
+    -> <builtin>.len
+52:54 call  len(seq2)
+    -> <builtin>.len
+54:29 call  array('L', [0] * (len(seq2) + 1))
+    -> array.array
+    note: array is imported when numpy is missing (line 18)
+54:45 call  len(seq2)
+    -> <builtin>.len
+54:72 call  range(len(seq1) + 1)
+    -> <builtin>.range
+54:76 call  len(seq1)
+    -> <builtin>.len
+57:34 call  enumerate(seq1)
+    -> <builtin>.enumerate
+58:38 call  enumerate(seq2)
+    -> <builtin>.enumerate
+62:48 call  max(lengths[i + 1][j], lengths[i][j + 1])
+    -> <builtin>.max
+66:19 call  len(seq1)
+    -> <builtin>.len
+66:30 call  len(seq2)
+    -> <builtin>.len
+
+[textdistance.algorithms.sequence_based.LCSSeq._recursive]
+80:19 call  all(sequences)
+    -> <builtin>.all
+81:24 call  type(sequences[0])
+    -> <builtin>.type
+81:38 call  type(sequences[0])()
+    -> <builtin>.str
+    -> <builtin>.list
+    note: the class of the first sequence: str (annotated str, B4) or the lists that _get_sequences makes for qval None or > 1 (LCSSeq.__call__ prepares the sequences before it calls _recursive)
+82:26 call  self.test_func(*[s[-1] for s in sequences])
+    -> textdistance.algorithms.base.Base._ident
+    note: test_func is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable (TestFunc is an alias of a bare Callable)
+84:30 call  tuple(s[:-1] for s in sequences)
+    -> <builtin>.tuple
+85:24 call  self(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSSeq.__call__
+    note: self is an LCSSeq (the package defines no subclass of it)
+86:17 call  type(sequences[0])
+    -> <builtin>.type
+86:31 call  type(sequences[0])()
+    -> <builtin>.str
+    -> <builtin>.list
+    note: as at 81:38
+87:30 call  enumerate(sequences)
+    -> <builtin>.enumerate
+89:20 call  max([self(*ss), m], key=len)
+    -> <builtin>.max
+89:26 call  self(*ss)
+    -> textdistance.algorithms.sequence_based.LCSSeq.__call__
+    note: self is an LCSSeq (the package defines no subclass of it)
+
+[textdistance.algorithms.sequence_based.LCSSeq.__call__]
+95:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+96:15 call  len(sequences)
+    -> <builtin>.len
+97:33 call  self._dynamic(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSSeq._dynamic
+99:35 call  self._recursive(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSSeq._recursive
+    reject textdistance.algorithms.edit_based.Levenshtein._recursive: self is an LCSSeq
+
+[textdistance.algorithms.sequence_based.LCSSeq.similarity]
+102:19 call  len(self(*sequences))
+    -> <builtin>.len
+102:24 call  self(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSSeq.__call__
+    note: self is an LCSSeq (the package defines no subclass of it)
+
+[textdistance.algorithms.sequence_based.LCSStr._standart]
+110:35 call  _SequenceMatcher(a=s1, b=s2)
+    -> difflib.SequenceMatcher
+111:43 call  matcher.find_longest_match(0, len(s1), 0, len(s2))
+    -> difflib.SequenceMatcher.find_longest_match
+111:50 call  len(s1)
+    -> <builtin>.len
+111:62 call  len(s2)
+    -> <builtin>.len
+
+[textdistance.algorithms.sequence_based.LCSStr._custom]
+115:20 call  min(sequences, key=len)
+    -> <builtin>.min
+116:21 call  len(short)
+    -> <builtin>.len
+117:23 call  range(length, 0, -1)
+    -> <builtin>.range
+118:38 call  find_ngrams(short, n)
+    -> textdistance.utils.find_ngrams
+119:33 call  ''.join(subseq)
+    -> <builtin>.str.join
+125:20 call  type(short)
+    -> <builtin>.type
+125:27 call  type(short)()
+    -> <builtin>.str
+    -> <builtin>.list
+    note: short is one of the prepared sequences: a str (annotated str, B4) or a list that _get_sequences makes for qval None or > 1 (an empty one, when no n-gram fits)
+
+[textdistance.algorithms.sequence_based.LCSStr.__call__]
+128:19 call  all(sequences)
+    -> <builtin>.all
+130:21 call  len(sequences)
+    -> <builtin>.len
+136:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+137:31 call  max(map(len, sequences))
+    -> <builtin>.max
+137:35 call  map(len, sequences)
+    -> <builtin>.map
+138:34 call  self._standart(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSStr._standart
+139:28 call  self._custom(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSStr._custom
+
+[textdistance.algorithms.sequence_based.LCSStr.similarity]
+142:19 call  len(self(*sequences))
+    -> <builtin>.len
+142:24 call  self(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSStr.__call__
+    note: self is an LCSStr (the package defines no subclass of it)
+
+[textdistance.algorithms.sequence_based.RatcliffObershelp._find]
+166:24 call  LCSStr()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: LCSStr defines no __init__; the first __init__ in its MRO is Base.__init__
+166:26 call  LCSStr()(*sequences)
+    -> textdistance.algorithms.sequence_based.LCSStr.__call__
+    reject *: the receiver is the LCSStr instance made at 166:24
+167:21 call  len(subseq)
+    -> <builtin>.len
+170:28 call  s.find(subseq)
+    -> <builtin>.str.find
+    note: the sequences are annotated str (B4); a list that _get_sequences makes has no find method
+171:26 call  s.find(subseq)
+    -> <builtin>.str.find
+172:26 call  self._find(*before)
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp._find
+172:57 call  self._find(*after)
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp._find
+
+[textdistance.algorithms.sequence_based.RatcliffObershelp.__call__]
+175:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+178:21 call  len(sequences)
+    -> <builtin>.len
+179:21 call  sum(map(len, sequences))
+    -> <builtin>.sum
+179:25 call  map(len, sequences)
+    -> <builtin>.map
+180:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+181:35 call  self._find(*sequences)
+    -> textdistance.algorithms.sequence_based.RatcliffObershelp._find
+
+== textdistance.algorithms.simple
+
+[textdistance.algorithms.simple]
+123:16 call  Prefix()
+    -> textdistance.algorithms.simple.Prefix.__init__
+    reject *: the class is Prefix, which defines __init__
+124:18 call  Postfix()
+    -> textdistance.algorithms.simple.Prefix.__init__
+    reject *: Postfix defines no __init__; the first __init__ in its MRO is Prefix.__init__
+125:16 call  Length()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: Length defines no __init__; the first __init__ in its MRO is Base.__init__
+126:20 call  Identity()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: Identity defines no __init__; the first __init__ in its MRO is Base.__init__
+127:16 call  Matrix()
+    -> textdistance.algorithms.simple.Matrix.__init__
+    reject *: the class is Matrix, which defines __init__
+
+[textdistance.algorithms.simple.Prefix.__call__]
+29:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+34:42 call  takewhile(test, zip(*sequences))
+    -> itertools.takewhile
+    -> textdistance.algorithms.simple.Prefix.__call__.test
+    note: the list comprehension of line 34 iterates the takewhile object in this function, which calls test
+34:52 call  zip(*sequences)
+    -> <builtin>.zip
+37:22 call  isinstance(s, str)
+    -> <builtin>.isinstance
+38:27 call  ''.join(result)
+    -> <builtin>.str.join
+39:22 call  isinstance(s, bytes)
+    -> <builtin>.isinstance
+40:28 call  b''.join(result)
+    -> <builtin>.bytes.join
+
+[textdistance.algorithms.simple.Prefix.__call__.test]
+32:33 call  self.sim_test(*seq)
+    -> textdistance.algorithms.base.Base._ident
+    note: sim_test is the constructor argument or the default self._ident (Base._ident); no test or document passes a package callable (SimFunc is an alias of a bare Callable)
+
+[textdistance.algorithms.simple.Prefix.similarity]
+44:19 call  len(self(*sequences))
+    -> <builtin>.len
+44:24 call  self(*sequences)
+    -> textdistance.algorithms.simple.Prefix.__call__
+    -> textdistance.algorithms.simple.Postfix.__call__
+    note: self is a Prefix or a Postfix (Postfix inherits similarity)
+
+[textdistance.algorithms.simple.Postfix.__call__]
+53:26 call  list(reversed(s))
+    -> <builtin>.list
+53:35 call  reversed(s)
+    -> <builtin>.reversed
+54:26 call  reversed(super().__call__(*sequences))
+    -> <builtin>.reversed
+54:32 call  super()
+    -> <builtin>.super
+54:43 call  super().__call__(*sequences)
+    -> textdistance.algorithms.simple.Prefix.__call__
+    reject *: the next __call__ after Postfix in its MRO is Prefix.__call__
+55:22 call  isinstance(s, str)
+    -> <builtin>.isinstance
+56:27 call  ''.join(result)
+    -> <builtin>.str.join
+57:22 call  isinstance(s, bytes)
+    -> <builtin>.isinstance
+58:28 call  b''.join(result)
+    -> <builtin>.bytes.join
+59:20 call  list(result)
+    -> <builtin>.list
+
+[textdistance.algorithms.simple.Length.__call__]
+67:23 call  list(map(len, sequences))
+    -> <builtin>.list
+67:27 call  map(len, sequences)
+    -> <builtin>.map
+68:19 call  max(lengths)
+    -> <builtin>.max
+68:34 call  min(lengths)
+    -> <builtin>.min
+
+[textdistance.algorithms.simple.Identity.__call__]
+79:19 call  int(self._ident(*sequences))
+    -> <builtin>.int
+79:31 call  self._ident(*sequences)
+    -> textdistance.algorithms.base.Base._ident
+
+[textdistance.algorithms.simple.Matrix.__call__]
+104:27 call  self._ident(*sequences)
+    -> textdistance.algorithms.base.Base._ident
+113:30 call  tuple(reversed(sequences))
+    -> <builtin>.tuple
+113:39 call  reversed(sequences)
+    -> <builtin>.reversed
+117:23 call  self._ident(*sequences)
+    -> textdistance.algorithms.base.Base._ident
+
+== textdistance.algorithms.token_based
+
+[textdistance.algorithms.token_based]
+228:46 call  DamerauLevenshtein()
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__init__
+    reject *: the class is DamerauLevenshtein, which defines __init__
+287:10 call  Bag()
+    -> textdistance.algorithms.base.Base.__init__
+    reject *: Bag defines no __init__; the first __init__ in its MRO is Base.__init__
+288:16 call  Cosine()
+    -> textdistance.algorithms.token_based.Cosine.__init__
+    reject *: the class is Cosine, which defines __init__
+289:16 call  Sorensen()
+    -> textdistance.algorithms.token_based.Sorensen.__init__
+    reject *: the class is Sorensen, which defines __init__
+290:18 call  Jaccard()
+    -> textdistance.algorithms.token_based.Jaccard.__init__
+    reject *: the class is Jaccard, which defines __init__
+291:25 call  MongeElkan()
+    -> textdistance.algorithms.token_based.MongeElkan.__init__
+    reject *: the class is MongeElkan, which defines __init__
+292:18 call  Overlap()
+    -> textdistance.algorithms.token_based.Overlap.__init__
+    reject *: the class is Overlap, which defines __init__
+293:20 call  Sorensen()
+    -> textdistance.algorithms.token_based.Sorensen.__init__
+    reject *: the class is Sorensen, which defines __init__
+294:25 call  Sorensen()
+    -> textdistance.algorithms.token_based.Sorensen.__init__
+    reject *: the class is Sorensen, which defines __init__
+296:20 call  Tanimoto()
+    -> textdistance.algorithms.token_based.Jaccard.__init__
+    reject *: Tanimoto defines no __init__; the first __init__ in its MRO is Jaccard.__init__
+297:18 call  Tversky()
+    -> textdistance.algorithms.token_based.Tversky.__init__
+    reject *: the class is Tversky, which defines __init__
+
+[textdistance.algorithms.token_based.Jaccard.__call__]
+48:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+52:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+53:48 call  self._intersect_counters(*sequences)
+    -> textdistance.algorithms.base.Base._intersect_counters
+54:44 call  self._count_counters(intersection)
+    -> textdistance.algorithms.base.Base._count_counters
+55:37 call  self._union_counters(*sequences)
+    -> textdistance.algorithms.base.Base._union_counters
+56:37 call  self._count_counters(union)
+    -> textdistance.algorithms.base.Base._count_counters
+
+[textdistance.algorithms.token_based.Sorensen.__call__]
+80:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+84:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+85:20 call  sum(self._count_counters(s) for s in sequences)
+    -> <builtin>.sum
+85:41 call  self._count_counters(s)
+    -> textdistance.algorithms.base.Base._count_counters
+86:48 call  self._intersect_counters(*sequences)
+    -> textdistance.algorithms.base.Base._intersect_counters
+87:44 call  self._count_counters(intersection)
+    -> textdistance.algorithms.base.Base._count_counters
+
+[textdistance.algorithms.token_based.Tversky.__init__]
+107:31 call  repeat(1)
+    -> itertools.repeat
+
+[textdistance.algorithms.token_based.Tversky.__call__]
+116:41 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+120:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+121:48 call  self._intersect_counters(*sequences)
+    -> textdistance.algorithms.base.Base._intersect_counters
+122:44 call  self._count_counters(intersection)
+    -> textdistance.algorithms.base.Base._count_counters
+123:42 call  self._count_counters(s)
+    -> textdistance.algorithms.base.Base._count_counters
+124:18 call  list(islice(self.ks, len(sequences)))
+    -> <builtin>.list
+124:25 call  islice(self.ks, len(sequences))
+    -> itertools.islice
+124:38 call  len(sequences)
+    -> <builtin>.len
+126:15 call  len(sequences)
+    -> <builtin>.len
+128:28 call  zip(ks, sequences)
+    -> <builtin>.zip
+134:20 call  min([s1, s2])
+    -> <builtin>.min
+135:20 call  max([s1, s2])
+    -> <builtin>.max
+
+[textdistance.algorithms.token_based.Overlap.__call__]
+162:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+166:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+167:48 call  self._intersect_counters(*sequences)
+    -> textdistance.algorithms.base.Base._intersect_counters
+168:44 call  self._count_counters(intersection)
+    -> textdistance.algorithms.base.Base._count_counters
+169:42 call  self._count_counters(s)
+    -> textdistance.algorithms.base.Base._count_counters
+171:34 call  min(sequences)
+    -> <builtin>.min
+
+[textdistance.algorithms.token_based.Cosine.__call__]
+195:35 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+199:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+200:48 call  self._intersect_counters(*sequences)
+    -> textdistance.algorithms.base.Base._intersect_counters
+201:44 call  self._count_counters(intersection)
+    -> textdistance.algorithms.base.Base._count_counters
+202:42 call  self._count_counters(s)
+    -> textdistance.algorithms.base.Base._count_counters
+203:22 call  reduce(lambda x, y: x * y, sequences)
+    -> functools.reduce
+    -> textdistance.algorithms.token_based.Cosine.__call__.<lambda1>
+205:34 call  pow(prod, 1.0 / len(sequences))
+    -> <builtin>.pow
+205:50 call  len(sequences)
+    -> <builtin>.len
+
+[textdistance.algorithms.token_based.Tanimoto.__call__]
+215:23 call  super()
+    -> <builtin>.super
+215:34 call  super().__call__(*sequences)
+    -> textdistance.algorithms.token_based.Jaccard.__call__
+    reject *: the next __call__ after Tanimoto in its MRO is Jaccard.__call__
+217:25 call  float('-inf')
+    -> <builtin>.float
+219:23 call  log(result, 2)
+    -> math.log
+
+[textdistance.algorithms.token_based.MongeElkan.maximum]
+243:40 call  self.algorithm.maximum(sequences)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    reject *: self.algorithm is the default DamerauLevenshtein() (line 228) or the JaroWinkler instance textdistance.jaro_winkler that the tests pass (tests/test_token/test_monge_elkan.py:19); the parameter has no annotation, and no other package algorithm is passed (B3)
+246:29 call  max(result, self.algorithm.maximum(*seq))
+    -> <builtin>.max
+246:60 call  self.algorithm.maximum(*seq)
+    -> textdistance.algorithms.base.Base.maximum
+    -> textdistance.algorithms.edit_based.JaroWinkler.maximum
+    reject *: self.algorithm is the default DamerauLevenshtein() (line 228) or the JaroWinkler instance textdistance.jaro_winkler that the tests pass (tests/test_token/test_monge_elkan.py:19); the parameter has no annotation, and no other package algorithm is passed (B3)
+
+[textdistance.algorithms.token_based.MongeElkan._calc]
+255:32 call  float('-inf')
+    -> <builtin>.float
+257:34 call  max(max_sim, self.algorithm.similarity(c1, c2))
+    -> <builtin>.max
+257:69 call  self.algorithm.similarity(c1, c2)
+    -> textdistance.algorithms.base.Base.similarity
+    -> textdistance.algorithms.base.BaseSimilarity.similarity
+    reject *: self.algorithm is the default DamerauLevenshtein() (line 228) or the JaroWinkler instance textdistance.jaro_winkler that the tests pass (tests/test_token/test_monge_elkan.py:19); the parameter has no annotation, and no other package algorithm is passed (B3); DamerauLevenshtein inherits Base.similarity, JaroWinkler BaseSimilarity.similarity
+258:29 call  maxes.append(max_sim)
+    -> <builtin>.list.append
+    note: maxes is the list display of line 252
+259:19 call  sum(maxes)
+    -> <builtin>.sum
+259:32 call  len(seq)
+    -> <builtin>.len
+259:43 call  len(maxes)
+    -> <builtin>.len
+
+[textdistance.algorithms.token_based.MongeElkan.__call__]
+262:41 call  self.quick_answer(*sequences)
+    -> textdistance.algorithms.base.BaseSimilarity.quick_answer
+    reject textdistance.algorithms.base.Base.quick_answer: the class is a BaseSimilarity subclass, which overrides quick_answer
+265:40 call  self._get_sequences(*sequences)
+    -> textdistance.algorithms.base.Base._get_sequences
+269:37 call  permutations(sequences)
+    -> itertools.permutations
+270:30 call  result.append(self._calc(*seqs))
+    -> <builtin>.list.append
+    note: result is the list display of line 268
+270:41 call  self._calc(*seqs)
+    -> textdistance.algorithms.token_based.MongeElkan._calc
+271:23 call  sum(result)
+    -> <builtin>.sum
+271:37 call  len(result)
+    -> <builtin>.len
+273:30 call  self._calc(*sequences)
+    -> textdistance.algorithms.token_based.MongeElkan._calc
+
+[textdistance.algorithms.token_based.Bag.__call__]
+282:39 call  self._get_counters(*sequences)
+    -> textdistance.algorithms.base.Base._get_counters
+283:48 call  self._intersect_counters(*sequences)
+    -> textdistance.algorithms.base.Base._intersect_counters
+284:19 call  max(self._count_counters(sequence - intersection) for seq...
+    -> <builtin>.max
+284:40 call  self._count_counters(sequence - intersection)
+    -> textdistance.algorithms.base.Base._count_counters
+
+== textdistance.algorithms.types
+
+[textdistance.algorithms.types]
+6:12 call  TypeVar('T')
+    -> typing.TypeVar
+
+== textdistance.algorithms.vector_based
+
+[textdistance.algorithms.vector_based.Chebyshev._numpy]
+21:31 call  numpy.asarray(s1)
+    -> numpy.asarray
+21:50 call  numpy.asarray(s2)
+    -> numpy.asarray
+22:19 call  max(abs(s1 - s2))
+    -> <builtin>.max
+22:23 call  abs(s1 - s2)
+    -> <builtin>.abs
+
+[textdistance.algorithms.vector_based.Chebyshev._pure]
+25:19 call  max(abs(e1 - e2) for e1, e2 in zip(s1, s2))
+    -> <builtin>.max
+25:23 call  abs(e1 - e2)
+    -> <builtin>.abs
+25:50 call  zip(s1, s2)
+    -> <builtin>.zip
+
+[textdistance.algorithms.vector_based.Chebyshev.__call__]
+29:31 call  self._numpy(s1, s2)
+    -> textdistance.algorithms.vector_based.Chebyshev._numpy
+    reject *: self is a Chebyshev (the package defines no subclass of it)
+    note: numpy is the optional import of line 14 (both sides of an optional import run)
+31:30 call  self._pure(s1, s2)
+    -> textdistance.algorithms.vector_based.Chebyshev._pure
+    reject *: self is a Chebyshev (the package defines no subclass of it)
+
+[textdistance.algorithms.vector_based.Minkowski.__init__]
+37:29 call  ValueError('p must be at least 1')
+    -> <builtin>.ValueError
+
+[textdistance.algorithms.vector_based.Minkowski._numpy]
+42:31 call  numpy.asarray(s1)
+    -> numpy.asarray
+42:50 call  numpy.asarray(s2)
+    -> numpy.asarray
+43:36 call  abs(s1 - s2)
+    -> <builtin>.abs
+44:26 call  result.sum()
+    -> numpy.ndarray.sum
+    note: s1 and s2 go through numpy.asarray, which returns an ndarray; the arithmetic of two vectors keeps an ndarray (the class compares two vectors; textdistance.md J4)
+
+[textdistance.algorithms.vector_based.Minkowski._pure]
+47:36 call  abs(e1 - e2)
+    -> <builtin>.abs
+47:63 call  zip(s1, s2)
+    -> <builtin>.zip
+48:21 call  sum(e ** self.p for e in result)
+    -> <builtin>.sum
+
+[textdistance.algorithms.vector_based.Minkowski.__call__]
+53:31 call  self._numpy(s1, s2)
+    -> textdistance.algorithms.vector_based.Minkowski._numpy
+    reject *: self is a Minkowski (the package defines no subclass of it)
+    note: numpy is the optional import of line 14 (both sides of an optional import run)
+55:30 call  self._pure(s1, s2)
+    -> textdistance.algorithms.vector_based.Minkowski._pure
+    reject *: self is a Minkowski (the package defines no subclass of it)
+
+[textdistance.algorithms.vector_based.Euclidean._numpy]
+68:27 call  numpy.asarray(s1)
+    -> numpy.asarray
+69:27 call  numpy.asarray(s2)
+    -> numpy.asarray
+70:25 call  numpy.matrix(s1 - s2)
+    -> numpy.matrix
+    note: numpy.matrix is the class of numpy (the optional import of line 14), not the package instance textdistance.matrix
+71:31 call  (q * q.T).sum()
+    -> numpy.matrix.sum
+    note: q is the numpy.matrix of line 70, and the product of two matrices is a matrix (numpy 2.3.2 matrixlib/defmatrix.py:295 defines matrix.sum)
+74:26 call  numpy.sqrt(result)
+    -> numpy.ufunc.__call__
+    note: numpy.sqrt is a ufunc in every numpy release
+
+[textdistance.algorithms.vector_based.Euclidean.__call__]
+81:31 call  self._numpy(s1, s2)
+    -> textdistance.algorithms.vector_based.Euclidean._numpy
+    reject *: self is a Euclidean (the package defines no subclass of it)
+    note: numpy is the optional import of line 14 (both sides of an optional import run)
+83:30 call  self._pure(s1, s2)
+    -> textdistance.algorithms.vector_based.Euclidean._pure
+    reject *: self is a Euclidean (the package defines no subclass of it)
+
+[textdistance.algorithms.vector_based.Correlation._numpy]
+93:35 call  numpy.asarray(s)
+    -> numpy.asarray
+94:26 call  s.mean()
+    -> numpy.ndarray.mean
+    note: s is the ndarray that numpy.asarray returns (line 93)
+95:24 call  reduce(numpy.dot, sequences)
+    -> functools.reduce
+    note: reduce calls numpy.dot back: library code calling a library callable is no edge
+97:33 call  numpy.sqrt(numpy.dot(sm, sm))
+    -> numpy.ufunc.__call__
+    note: numpy.sqrt is a ufunc in every numpy release
+97:43 call  numpy.dot(sm, sm)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.dot
+    note: numpy.dot is an array_function_dispatch function: an _ArrayFunctionDispatcher instance from NumPy 1.25 (numpy 2.3.2 _core/overrides.py:162), a Python function exported as numpy.dot in the older admitted releases (the itables precedent, NumPy 1.24.4 overrides.py:176-212); textdistance pins no numpy version
+
+[textdistance.algorithms.vector_based.Correlation.__call__]
+105:31 call  self._numpy(*sequences)
+    -> textdistance.algorithms.vector_based.Correlation._numpy
+    reject *: self is a Correlation (the package defines no subclass of it)
+    note: numpy is the optional import of line 14 (both sides of an optional import run)
+107:30 call  self._pure(*sequences)
+    -> textdistance.algorithms.vector_based.Correlation._pure
+    reject *: self is a Correlation (the package defines no subclass of it)
+
+== textdistance.benchmark
+
+[textdistance.benchmark]
+20:28 call  prototype.clone()
+    -> textdistance.libraries.LibrariesManager.clone
+30:6 decorator  @property
+    -> <builtin>.property
+51:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+68:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+78:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+94:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+102:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+112:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+120:6 decorator  @classmethod
+    -> <builtin>.classmethod
+139:18 call  Benchmark.run()
+    -> textdistance.benchmark.Benchmark.run
+    note: the `if __name__ == "__main__":` block is module code (python3 -m textdistance.benchmark)
+
+[textdistance.benchmark.Lib.row]
+32:32 call  math.isinf(self.time)
+    -> math.isinf
+32:51 format  {self.time:0.05f}
+    reject *: self.time is a float (the timeit result or float("Inf"))
+33:51 call  self.library.split('.')
+    -> <builtin>.str.split
+    note: library is a str field of Lib (a module name or "**textdistance**")
+
+[textdistance.benchmark.Benchmark.get_installed]
+53:44 call  libraries.get_algorithms()
+    -> textdistance.libraries.LibrariesManager.get_algorithms
+54:42 call  libraries.get_libs(alg)
+    -> textdistance.libraries.LibrariesManager.get_libs
+56:40 call  lib.get_function()
+    -> textdistance.libraries.LibraryBase.get_function
+    note: the libraries of the clone are the LibraryBase, TextLibrary, SameLengthLibrary and SameLengthTextLibrary instances of libraries.py:170-199, which all inherit get_function
+57:26 call  print(f'WARNING: cannot get func for {lib}')
+    -> <builtin>.print
+    reject *: the argument is the str that the f-string makes (its field is the site 57:58)
+57:58 format  {lib}
+    -> textdistance.libraries.LibraryBase.__str__
+    reject textdistance.algorithms.base.Base.__repr__: lib is a library object (LibraryBase or a subclass), whose format() falls back to str(), LibraryBase.__str__
+60:26 call  Lib( algorithm=alg, library=lib.module_name, function=lib...
+    note: Lib is a typing.NamedTuple class: its call adds no edge (generated __new__, object.__init__)
+    reject textdistance.libraries.LibraryBase.setup: the property is read at the attribute load 65:31, not called by Lib
+64:31 call  float('Inf')
+    -> <builtin>.float
+65:31 getattr  lib.setup
+    -> textdistance.libraries.LibraryBase.setup
+
+[textdistance.benchmark.Benchmark.get_external_benchmark]
+71:26 call  timeit( stmt=STMT, setup=lib.setup, number=RUNS, )
+    -> timeit.timeit
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__init__
+    -> textdistance.algorithms.edit_based.Hamming.__init__
+    -> textdistance.algorithms.edit_based.Jaro.__init__
+    -> textdistance.algorithms.edit_based.JaroWinkler.__init__
+    -> textdistance.algorithms.edit_based.Levenshtein.__init__
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__call__
+    -> textdistance.algorithms.edit_based.Hamming.__call__
+    -> textdistance.algorithms.edit_based.JaroWinkler.__call__
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    reject textdistance.libraries.LibraryBase.setup: lib is a Lib (a NamedTuple), whose setup is a str field (the attribute load 73:27)
+    note: installed is annotated Iterable[Lib], so every Lib that the package makes is admitted (B2): the Libs of get_installed, whose setup is LibraryBase.setup (it imports an external library: outside calls only), and the Libs of get_internal_benchmark, whose setup builds textdistance.{alg}(external=False) as at 86:28; timeit runs setup and STMT in a function it generates, and the package functions that it calls belong to this site (textdistance.md J5; audit F1)
+73:27 getattr  lib.setup
+    reject textdistance.libraries.LibraryBase.setup: lib is a Lib (a NamedTuple; installed is annotated Iterable[Lib]), whose setup is a str field
+76:31 call  lib._replace(time=time)
+    -> collections.namedtuple._replace
+    note: lib is a Lib namedtuple; _replace is the local function of collections.namedtuple
+
+[textdistance.benchmark.Benchmark.get_internal_benchmark]
+80:44 call  libraries.get_algorithms()
+    -> textdistance.libraries.LibrariesManager.get_algorithms
+81:57 format  {alg}
+    reject *: alg is a str (a key of the libraries mapping)
+82:22 call  Lib( algorithm=alg, library='**textdistance**', function=...
+    note: Lib is a typing.NamedTuple class: its call adds no edge (generated __new__, object.__init__)
+86:28 call  timeit( stmt=STMT, setup=setup, number=RUNS, )
+    -> timeit.timeit
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__init__
+    -> textdistance.algorithms.edit_based.Hamming.__init__
+    -> textdistance.algorithms.edit_based.Jaro.__init__
+    -> textdistance.algorithms.edit_based.JaroWinkler.__init__
+    -> textdistance.algorithms.edit_based.Levenshtein.__init__
+    -> textdistance.algorithms.edit_based.DamerauLevenshtein.__call__
+    -> textdistance.algorithms.edit_based.Hamming.__call__
+    -> textdistance.algorithms.edit_based.JaroWinkler.__call__
+    -> textdistance.algorithms.edit_based.Levenshtein.__call__
+    note: timeit compiles setup and STMT into a function and calls it: the setup `__import__("textdistance").{alg}(external=False)` builds the algorithm for each name of get_algorithms (DamerauLevenshtein, Hamming, Jaro, JaroWinkler, Levenshtein; Jaro.__init__ calls JaroWinkler.__init__ itself), and STMT calls it; the package functions that the generated function calls belong to this site (generated code; textdistance.md J5)
+
+[textdistance.benchmark.Benchmark.filter_benchmark]
+100:22 call  filter(lambda x: x.time < limits[x.algorithm], external)
+    -> <builtin>.filter
+    reject textdistance.benchmark.Benchmark.filter_benchmark.<lambda1>: filter is lazy and this function returns it without iterating it; run() iterates it at 134:25
+
+[textdistance.benchmark.Benchmark.get_table]
+104:25 call  tabulate( [lib.row for lib in libs], headers=['algorithm'...
+    -> tabulate.tabulate
+    note: tabulate is the benchmark extra (setup.py), not installed in the test environment: a missing module
+105:18 getattr  lib.row
+    -> textdistance.benchmark.Lib.row
+    note: the libs are Lib namedtuples (run passes the lists of get_installed and of the two benchmarks)
+109:29 format  {len(libs)}
+    reject *: len(libs) is an int
+109:33 call  len(libs)
+    -> <builtin>.len
+
+[textdistance.benchmark.Benchmark.save]
+114:27 call  defaultdict(list)
+    -> collections.defaultdict
+116:39 call  data[lib.algorithm].append([lib.library, lib.function])
+    -> <builtin>.list.append
+    note: data is a defaultdict(list) (line 114)
+117:33 call  LIBRARIES_PATH.open('w', encoding='utf8')
+    -> pathlib.PosixPath.open
+    note: as at libraries.py:30:33 (textdistance.md J2)
+118:22 call  json.dump(obj=data, fp=f, indent=2, sort_keys=True)
+    -> json.dump
+
+[textdistance.benchmark.Benchmark.run]
+122:14 call  print('# Installed libraries:\n')
+    -> <builtin>.print
+    reject *: the argument is a str literal
+123:25 call  list(cls.get_installed())
+    -> <builtin>.list
+123:43 call  cls.get_installed()
+    -> textdistance.benchmark.Benchmark.get_installed
+    note: cls is Benchmark (run is a classmethod; the package defines no subclass)
+124:23 call  installed.sort()
+    -> <builtin>.list.sort
+125:14 call  print(cls.get_table(installed))
+    -> <builtin>.print
+    reject *: the argument is the str that get_table returns
+125:28 call  cls.get_table(installed)
+    -> textdistance.benchmark.Benchmark.get_table
+127:14 call  print('# Benchmarks (with textdistance):\n')
+    -> <builtin>.print
+    reject *: the argument is a str literal
+128:25 call  list(cls.get_external_benchmark(installed))
+    -> <builtin>.list
+128:52 call  cls.get_external_benchmark(installed)
+    -> textdistance.benchmark.Benchmark.get_external_benchmark
+129:34 call  list(cls.get_internal_benchmark())
+    -> <builtin>.list
+129:61 call  cls.get_internal_benchmark()
+    -> textdistance.benchmark.Benchmark.get_internal_benchmark
+131:23 call  benchmark.sort(key=lambda x: (x.algorithm, x.time))
+    -> <builtin>.list.sort
+    -> textdistance.benchmark.Benchmark.run.<lambda1>
+132:14 call  print(cls.get_table(benchmark))
+    -> <builtin>.print
+    reject *: the argument is the str that get_table returns
+132:28 call  cls.get_table(benchmark)
+    -> textdistance.benchmark.Benchmark.get_table
+134:25 call  list(cls.filter_benchmark(benchmark, benchmark_internal))
+    -> <builtin>.list
+    -> textdistance.benchmark.Benchmark.filter_benchmark.<lambda1>
+    note: list() iterates the lazy filter that filter_benchmark returns, which calls its lambda
+134:46 call  cls.filter_benchmark(benchmark, benchmark_internal)
+    -> textdistance.benchmark.Benchmark.filter_benchmark
+135:17 call  cls.save(benchmark)
+    -> textdistance.benchmark.Benchmark.save
+
+== textdistance.libraries
+
+[textdistance.libraries]
+12:22 call  Path(__file__)
+    -> pathlib.Path
+95:6 decorator  @property
+    -> <builtin>.property
+166:29 call  LibrariesManager()
+    -> textdistance.libraries.LibrariesManager.__init__
+170:4 call  reg(alg, LibraryBase('pyxdameraulevenshtein', 'damerau_le...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+170:21 call  LibraryBase('pyxdameraulevenshtein', 'damerau_levenshtein...
+    -> textdistance.libraries.LibraryBase.__init__
+170:94 call  dict(restricted=True)
+    -> <builtin>.dict
+171:4 call  reg(alg, TextLibrary('jellyfish', 'damerau_levenshtein_di...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+171:21 call  TextLibrary('jellyfish', 'damerau_levenshtein_distance', ...
+    -> textdistance.libraries.LibraryBase.__init__
+171:82 call  dict(restricted=False)
+    -> <builtin>.dict
+172:4 call  reg(alg, LibraryBase('rapidfuzz.distance.DamerauLevenshte...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+172:21 call  LibraryBase('rapidfuzz.distance.DamerauLevenshtein', 'dis...
+    -> textdistance.libraries.LibraryBase.__init__
+172:90 call  dict(restricted=False)
+    -> <builtin>.dict
+173:4 call  reg(alg, LibraryBase('rapidfuzz.distance.OSA', 'distance'...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+173:21 call  LibraryBase('rapidfuzz.distance.OSA', 'distance', conditi...
+    -> textdistance.libraries.LibraryBase.__init__
+173:75 call  dict(restricted=True)
+    -> <builtin>.dict
+176:4 call  reg(alg, SameLengthLibrary('distance', 'hamming'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+176:27 call  SameLengthLibrary('distance', 'hamming')
+    -> textdistance.libraries.LibraryBase.__init__
+177:4 call  reg(alg, SameLengthTextLibrary('Levenshtein', 'hamming'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+177:31 call  SameLengthTextLibrary('Levenshtein', 'hamming')
+    -> textdistance.libraries.LibraryBase.__init__
+178:4 call  reg(alg, TextLibrary('jellyfish', 'hamming_distance'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+178:21 call  TextLibrary('jellyfish', 'hamming_distance')
+    -> textdistance.libraries.LibraryBase.__init__
+179:4 call  reg(alg, SameLengthLibrary('rapidfuzz.distance.Hamming', ...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+179:27 call  SameLengthLibrary('rapidfuzz.distance.Hamming', 'distance')
+    -> textdistance.libraries.LibraryBase.__init__
+182:4 call  reg(alg, TextLibrary('jellyfish', 'jaro_similarity'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+182:21 call  TextLibrary('jellyfish', 'jaro_similarity')
+    -> textdistance.libraries.LibraryBase.__init__
+183:4 call  reg(alg, LibraryBase('rapidfuzz.distance.Jaro', 'similari...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+183:21 call  LibraryBase('rapidfuzz.distance.Jaro', 'similarity')
+    -> textdistance.libraries.LibraryBase.__init__
+189:4 call  reg(alg, TextLibrary('jellyfish', 'jaro_winkler_similarit...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+189:21 call  TextLibrary('jellyfish', 'jaro_winkler_similarity', condi...
+    -> textdistance.libraries.LibraryBase.__init__
+189:77 call  dict(winklerize=True)
+    -> <builtin>.dict
+190:4 call  reg(alg, LibraryBase('rapidfuzz.distance.JaroWinkler', 's...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+190:21 call  LibraryBase('rapidfuzz.distance.JaroWinkler', 'similarity...
+    -> textdistance.libraries.LibraryBase.__init__
+190:85 call  dict(winklerize=True)
+    -> <builtin>.dict
+195:4 call  reg(alg, LibraryBase('distance', 'levenshtein'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+195:21 call  LibraryBase('distance', 'levenshtein')
+    -> textdistance.libraries.LibraryBase.__init__
+196:4 call  reg(alg, LibraryBase('pylev', 'levenshtein'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+196:21 call  LibraryBase('pylev', 'levenshtein')
+    -> textdistance.libraries.LibraryBase.__init__
+197:4 call  reg(alg, TextLibrary('jellyfish', 'levenshtein_distance'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+197:21 call  TextLibrary('jellyfish', 'levenshtein_distance')
+    -> textdistance.libraries.LibraryBase.__init__
+198:4 call  reg(alg, TextLibrary('Levenshtein', 'distance'))
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+198:21 call  TextLibrary('Levenshtein', 'distance')
+    -> textdistance.libraries.LibraryBase.__init__
+199:4 call  reg(alg, LibraryBase('rapidfuzz.distance.Levenshtein', 'd...
+    -> textdistance.libraries.LibrariesManager.register
+    note: reg is the bound method prototype.register (line 167)
+199:21 call  LibraryBase('rapidfuzz.distance.Levenshtein', 'distance')
+    -> textdistance.libraries.LibraryBase.__init__
+
+[textdistance.libraries.LibrariesManager.__init__]
+19:32 call  defaultdict(list)
+    -> collections.defaultdict
+
+[textdistance.libraries.LibrariesManager.register]
+24:30 call  self.libs[alg].append(lib)
+    -> <builtin>.list.append
+    note: self.libs is a defaultdict(list) (line 19, or the deepcopy of one in clone)
+
+[textdistance.libraries.LibrariesManager.optimize]
+30:33 call  LIBRARIES_PATH.open('r', encoding='utf8')
+    -> pathlib.PosixPath.open
+    note: Path(...) / 'libraries.json' is a PosixPath on Linux, the platform that the release supports: its classifiers and documentation are silent and its test jobs run on ubuntu only (the referee's ruling; textdistance.md J2)
+31:40 call  json.load(f)
+    -> json.load
+33:47 call  libs_data.items()
+    -> <builtin>.dict.items
+    note: libs_data is the dict that json.load reads from the package's own libraries.json (its top level is an object)
+34:33 call  self.get_libs(alg)
+    -> textdistance.libraries.LibrariesManager.get_libs
+40:32 call  self.libs[alg].sort(key=lambda lib: libs_names.index([lib...
+    -> <builtin>.list.sort
+    -> textdistance.libraries.LibrariesManager.optimize.<lambda1>
+
+[textdistance.libraries.LibrariesManager.optimize.<lambda1>]
+40:65 call  libs_names.index([lib.module_name, lib.func_name])
+    -> <builtin>.list.index
+    note: libs_names is a list of the JSON file (a value of libs_data)
+
+[textdistance.libraries.LibrariesManager.get_algorithms]
+45:20 call  list(self.libs.keys())
+    -> <builtin>.list
+45:35 call  self.libs.keys()
+    -> collections.defaultdict.keys
+
+[textdistance.libraries.LibrariesManager.clone]
+57:29 call  self.__class__()
+    -> textdistance.libraries.LibrariesManager.__init__
+    note: self is a LibrariesManager (the package defines no subclass)
+58:28 call  deepcopy(self.libs)
+    -> copy.deepcopy
+
+[textdistance.libraries.LibraryBase.check_conditions]
+82:15 call  len(sequences)
+    -> <builtin>.len
+86:49 call  self.conditions.items()
+    -> <builtin>.dict.items
+    note: conditions is annotated dict[str, bool]; the package passes dict(...) displays
+87:23 call  getattr(obj, name)
+    -> <builtin>.getattr
+    note: the package's conditions name the instance attributes restricted and winklerize; no property runs (B3 for a client's names)
+
+[textdistance.libraries.LibraryBase.setup]
+97:25 format  {self.module_name}
+    reject *: module_name is a str (annotated, and the package passes str literals)
+97:51 format  {self.func_name}
+    reject *: func_name is a str (annotated, and the package passes str literals)
+100:28 format  {repr(self.presets)}
+    reject *: the formatted value is the str that repr returns
+100:33 call  repr(self.presets)
+    -> <builtin>.repr
+    reject textdistance.algorithms.base.Base.__repr__: presets is a client dict (dict[str, Any]); the package registers no presets, and an algorithm object put there by a client is not considered (B3)
+102:26 format  {self.attr}
+    reject *: attr is a str here (annotated str | None, and the branch needs it not None)
+
+[textdistance.libraries.LibraryBase.get_function]
+109:39 call  import_module(self.module_name)
+    -> importlib.import_module
+115:26 call  getattr(module, self.func_name)
+    -> <builtin>.getattr
+118:26 call  obj(**self.presets)
+    note: presets is None for every library that the package registers, so only a library that a client builds with presets reaches this call; obj is then the object that the client's module and function names select, a client value (B2, B5; textdistance.md J1)
+121:30 call  getattr(obj, self.attr)
+    -> <builtin>.getattr
+
+[textdistance.libraries.LibraryBase.__str__]
+127:18 format  {self.module_name}
+    reject *: module_name is a str (annotated, and the package passes str literals)
+127:37 format  {self.func_name}
+    reject *: func_name is a str (annotated, and the package passes str literals)
+
+[textdistance.libraries.TextLibrary.check_conditions]
+132:21 call  super()
+    -> <builtin>.super
+132:40 call  super().check_conditions(obj, *sequences)
+    -> textdistance.libraries.LibraryBase.check_conditions
+    reject textdistance.libraries.SameLengthLibrary.check_conditions, textdistance.libraries.TextLibrary.check_conditions: the next class after TextLibrary in the MRO of TextLibrary and of SameLengthTextLibrary is LibraryBase
+136:19 call  getattr(obj, 'qval', 0)
+    -> <builtin>.getattr
+141:20 call  type(seq)
+    -> <builtin>.type
+
+[textdistance.libraries.TextLibrary.prepare]
+147:22 call  isinstance(sequences[0], (tuple, list))
+    -> <builtin>.isinstance
+148:30 call  tuple(map(lambda x: ''.join(x), sequences))
+    -> <builtin>.tuple
+148:34 call  map(lambda x: ''.join(x), sequences)
+    -> <builtin>.map
+    -> textdistance.libraries.TextLibrary.prepare.<lambda1>
+    note: tuple() at 148:30 iterates the map in this function and calls the lambda
+
+[textdistance.libraries.TextLibrary.prepare.<lambda1>]
+148:52 call  ''.join(x)
+    -> <builtin>.str.join
+
+[textdistance.libraries.SameLengthLibrary.check_conditions]
+154:21 call  super()
+    -> <builtin>.super
+154:40 call  super().check_conditions(obj, *sequences)
+    -> textdistance.libraries.LibraryBase.check_conditions
+    -> textdistance.libraries.TextLibrary.check_conditions
+    reject textdistance.libraries.SameLengthLibrary.check_conditions: super() starts after SameLengthLibrary: LibraryBase for a SameLengthLibrary, TextLibrary for a SameLengthTextLibrary
+157:15 call  min(map(len, sequences))
+    -> <builtin>.min
+157:19 call  map(len, sequences)
+    -> <builtin>.map
+157:43 call  max(map(len, sequences))
+    -> <builtin>.max
+157:47 call  map(len, sequences)
+    -> <builtin>.map
+
+== textdistance.utils
+
+[textdistance.utils.words_combinations]
+12:14 call  float('Inf')
+    -> <builtin>.float
+14:21 call  t.split()
+    note: the texts are client objects without an annotation or a documented type (B5): no outside callee
+16:26 call  permutations(words)
+    -> itertools.permutations
+18:28 call  product(*texts)
+    -> itertools.product
+20:32 call  len(min(subtexts, key=len))
+    -> <builtin>.len
+20:36 call  min(subtexts, key=len)
+    -> <builtin>.min
+22:29 call  ' '.join(t)
+    -> <builtin>.str.join
+23:16 call  min(m, f(*subtexts))
+    -> <builtin>.min
+23:21 call  f(*subtexts)
+    note: f is a client value: no test or document passes a package object, and no package algorithm has the attribute `equality` that line 19 reads first (AttributeError), so no package __call__ is reached here
+
+[textdistance.utils.find_ngrams]
+28:16 call  list(zip(*[input_list[i:] for i in range(n)]))
+    -> <builtin>.list
+28:20 call  zip(*[input_list[i:] for i in range(n)])
+    -> <builtin>.zip
+28:52 call  range(n)
+    -> <builtin>.range

@@ -1,0 +1,200 @@
+{
+  "edges": {
+    "uncertainties.core.AffineScalarFunc.__repr__": {
+      "uncertainties.core.AffineScalarFunc.std_dev": [
+        "uncertainties.core 522:24 getattr  self.std_dev"
+      ]
+    },
+    "uncertainties.core.AffineScalarFunc.std_score": {
+      "uncertainties.core.AffineScalarFunc.std_dev": [
+        "uncertainties.core 566:57 getattr  self.std_dev"
+      ]
+    },
+    "uncertainties.core.correlated_values": {
+      "<builtin>.NotImplementedError": [
+        "uncertainties.core 110:34 call  NotImplementedError(msg)"
+      ],
+      "numpy.diag": [
+        "uncertainties.core 116:37 call  numpy.diag(covariance_mat)"
+      ]
+    },
+    "uncertainties.core.correlated_values_norm": {
+      "<builtin>.NotImplementedError": [
+        "uncertainties.core 167:34 call  NotImplementedError(msg)"
+      ],
+      "numpy.linalg.eigh": [
+        "uncertainties.core 184:47 call  numpy.linalg.eigh(correlation_mat)"
+      ],
+      "numpy.transpose": [
+        "uncertainties.core 174:49 call  numpy.transpose(values_with_std_dev)"
+      ]
+    },
+    "uncertainties.core.correlation_matrix": {
+      "<builtin>.NotImplementedError": [
+        "uncertainties.core 227:34 call  NotImplementedError(msg)"
+      ]
+    },
+    "uncertainties.formatting.format_ufloat": {
+      "<builtin>.ValueError": [
+        "uncertainties.formatting 768:25 call  ValueError( \"Format specification %r cannot be used with ...",
+        "uncertainties.formatting 879:33 call  ValueError( \"The number of significant digits\" \" on the u..."
+      ]
+    },
+    "uncertainties.ops.IndexableIter.__str__": {
+      "<builtin>.map": [
+        "uncertainties.ops 344:26 call  map(str, self.returned_elements)"
+      ],
+      "<builtin>.str.join": [
+        "uncertainties.ops 344:22 call  \", \".join(map(str, self.returned_elements))"
+      ]
+    },
+    "uncertainties.ops._wrap.f_with_affine_output": {
+      "<builtin>.float.__rfloordiv__": [
+        "uncertainties.ops 470:21 call  f(*args, **kwargs)",
+        "uncertainties.ops 506:28 call  f(*args_values, **kwargs)"
+      ],
+      "<builtin>.float.__rmod__": [
+        "uncertainties.ops 470:21 call  f(*args, **kwargs)",
+        "uncertainties.ops 506:28 call  f(*args_values, **kwargs)"
+      ]
+    },
+    "uncertainties.ops.partial_derivative.partial_derivative_of_f": {
+      "math.hypot": [
+        "uncertainties.ops 641:31 call  f(*args_with_var, **kwargs)",
+        "uncertainties.ops 648:32 call  f(*args_with_var, **kwargs)"
+      ],
+      "uncertainties.ops.no_complex_result.no_complex_func": [
+        "uncertainties.ops 639:31 call  f(*args, **args_with_var)",
+        "uncertainties.ops 646:32 call  f(*args, **args_with_var)"
+      ]
+    },
+    "uncertainties.parsing.parse_error_in_parentheses": {
+      "<builtin>.ValueError.__init__": [
+        "uncertainties.parsing 86:29 call  NotParenUncert( \"Unparsable number representation: '%s'.\"..."
+      ]
+    },
+    "uncertainties.parsing.str_to_number_with_uncert": {
+      "<builtin>.ValueError": [
+        "uncertainties.parsing 207:29 call  ValueError(cannot_parse_ufloat_msg_pat % representation)",
+        "uncertainties.parsing 224:29 call  ValueError(cannot_parse_ufloat_msg_pat % representation)",
+        "uncertainties.parsing 231:29 call  ValueError(cannot_parse_ufloat_msg_pat % representation)"
+      ]
+    },
+    "uncertainties.parsing.to_float": {
+      "<builtin>.ValueError": [
+        "uncertainties.parsing 154:29 call  ValueError( \"Mantissa or exponent incorrect in pretty-pri...",
+        "uncertainties.parsing 158:25 call  ValueError( \"No valid Python float or pretty-print form\" ..."
+      ]
+    },
+    "uncertainties.umath_core.frexp": {
+      "uncertainties.ops.add_arithmetic_ops.raise_error": [
+        "uncertainties.umath_core 422:26 call  math.frexp(x)"
+      ]
+    },
+    "uncertainties.umath_core.ldexp": {
+      "uncertainties.ops.add_arithmetic_ops.raise_error": [
+        "uncertainties.umath_core 386:26 call  math.ldexp(x, i)"
+      ]
+    },
+    "uncertainties.unumpy.core.inv_with_derivatives": {
+      "numpy.linalg.inv": [
+        "uncertainties.unumpy.core 485:31 call  numpy.linalg.inv(arr)"
+      ]
+    },
+    "uncertainties.unumpy.core.matrix.__rmul__": {
+      "numpy.dot": [
+        "uncertainties.unumpy.core 616:29 call  numpy.dot(self, other)",
+        "uncertainties.unumpy.core 618:29 call  numpy.dot(other, self)"
+      ]
+    },
+    "uncertainties.unumpy.core.matrix.std_devs": {
+      "numpy.matrix": [
+        "uncertainties.unumpy.core 644:28 call  numpy.matrix(std_devs(self))"
+      ],
+      "uncertainties.unumpy.core.std_devs": [
+        "uncertainties.unumpy.core 644:37 call  std_devs(self)"
+      ]
+    },
+    "uncertainties.unumpy.core.pinv_with_derivatives": {
+      "numpy.linalg.pinv": [
+        "uncertainties.unumpy.core 526:32 call  numpy.linalg.pinv(arr, rcond)"
+      ]
+    },
+    "uncertainties.unumpy.core.uarray": {
+      "<builtin>.TypeError": [
+        "uncertainties.unumpy.core 304:24 call  TypeError(\"uarray() should be called with two arguments.\")"
+      ]
+    },
+    "uncertainties.unumpy.core.umatrix": {
+      "<builtin>.TypeError": [
+        "uncertainties.unumpy.core 659:24 call  TypeError(\"umatrix() should be called with two arguments.\")"
+      ]
+    }
+  },
+  "notes": {
+    "uncertainties.core 110:34 call  NotImplementedError(msg)": [
+      "both sides of the optional import of numpy run (core.py:70-73)"
+    ],
+    "uncertainties.core 116:37 call  numpy.diag(covariance_mat)": [
+      "the numpy releases before 1.25 export a Python function made by array_function_dispatch at this public attribute; later ones a C _ArrayFunctionDispatcher (the precedent of itables J7)"
+    ],
+    "uncertainties.core 167:34 call  NotImplementedError(msg)": [
+      "both sides of the optional import of numpy run (core.py:70-73)"
+    ],
+    "uncertainties.core 174:49 call  numpy.transpose(values_with_std_dev)": [
+      "as numpy.diag at 116:37"
+    ],
+    "uncertainties.core 184:47 call  numpy.linalg.eigh(correlation_mat)": [
+      "as numpy.diag at 116:37"
+    ],
+    "uncertainties.core 227:34 call  NotImplementedError(msg)": [
+      "both sides of the optional import of numpy run (core.py:70-73)"
+    ],
+    "uncertainties.core 522:24 getattr  self.std_dev": [
+      "self is an AffineScalarFunc or, through Variable.__repr__ (super), a Variable, which overrides the property"
+    ],
+    "uncertainties.core 566:57 getattr  self.std_dev": [
+      "self is an AffineScalarFunc or a Variable (inherited method)"
+    ],
+    "uncertainties.ops 470:21 call  f(*args, **kwargs)": [
+      "f is the function that _wrap wraps: the float methods of add_arithmetic_ops (abs, neg, pos, trunc; add, floordiv, mod, mul, sub, truediv and their reflections; div and rdiv do not exist on Python 3), no_complex_func for pow and rpow (custom_ops), the math functions that umath_core wraps through core.wrap (the keys of fixed_derivatives and num_deriv_funcs, umath_core.py:61 and 183-215), and the flat_fsum lambda of wrapped_fsum; a client's f (core.wrap is public) is a client callback. This branch runs when no argument has an uncertainty: a umath function on floats, or an operator called unbound on floats (the tests do it, test_uncertainties.py:193)"
+    ],
+    "uncertainties.ops 506:28 call  f(*args_values, **kwargs)": [
+      "the same f as at 470:21, on the nominal values"
+    ],
+    "uncertainties.ops 639:31 call  f(*args, **args_with_var)": [
+      "the keyword branch (change_kwargs): arg_ref is a str. The package makes such closures only in _wrap (partial_derivative(f, name), ops.py:372, 408, 544) and calls them only at ops.py:550. On CPython no f of the package reaches 550 (each refuses keyword arguments at ops.py:506 first). On PyPy (admitted, uncertainties.md J6, J23) builtins bind keywords by parameter name: umath.fmod(x=ufloat(...), y=2.0), umath.gamma(x=...) and umath.lgamma(x=...) reach the closures of math.fmod, math.gamma, math.lgamma, and UFloat.__pow__(self=ufloat(2.0, 0.1), rhs=3.0) (or __rpow__) the closure of no_complex_func, whose float.__pow__ binds self and rhs (pypy floatobject.py:583, gateway.py:227, argument.py:459; Codex round 1). The tests pass the AffineScalarFunc operators and the umath functions as f (test_uncertainties.py:193, test_umath.py:48), ops._wrap closures; with a client's str arg_ref, which the docstring documents (\"a string represents the name of an argument in kwargs\"), the admitted values combine (README, \"Admitted values of several parameters combine\"); a client's f is a client callback"
+    ],
+    "uncertainties.ops 641:31 call  f(*args_with_var, **kwargs)": [
+      "the positional branch: f is the function of partial_derivative. In the package, the f of _wrap when a positional derivative is missing (_wrap.<lambda1> through none_converter): math.fmod, math.gamma and math.lgamma of num_deriv_funcs, and math.hypot for a third or later argument (Python 3.8 and later: umath.hypot(1.0, 2.0, x)); and float.__mod__, which the \"mod\" and \"rmod\" derivatives of get_ops_with_reflection pass. The tests pass ops._wrap closures (test_uncertainties.py:193, test_umath.py:48). A client's f is a client callback"
+    ],
+    "uncertainties.ops 646:32 call  f(*args, **args_with_var)": [
+      "as 639:31"
+    ],
+    "uncertainties.ops 648:32 call  f(*args_with_var, **kwargs)": [
+      "as 641:31"
+    ],
+    "uncertainties.parsing 86:29 call  NotParenUncert( \"Unparsable number representation: '%s'.\"...": [
+      "NotParenUncert subclasses ValueError and defines no __init__"
+    ],
+    "uncertainties.umath_core 386:26 call  math.ldexp(x, i)": [
+      "when x is a number with uncertainty whose linear part is empty, to_affine_scalar returns x itself (ops.py:738-739), the test above is false, and math.ldexp converts x to a C double through type(x).__float__, the raise_error closure (ops.py:282-291; TypeError). The package makes such values: the elements with zero derivatives of unumpy.ulinalg.inv (unumpy/core.py:437-462), the constants of the public to_affine_scalar (cls(x, {}), ops.py:743) and AffineScalarFunc(value, {}) (audit F1)"
+    ],
+    "uncertainties.umath_core 422:26 call  math.frexp(x)": [
+      "when x is a number with uncertainty whose linear part is empty, to_affine_scalar returns x itself (ops.py:738-739), the test above is false, and math.frexp converts x to a C double through type(x).__float__, the raise_error closure (ops.py:282-291; TypeError). The package makes such values: the elements with zero derivatives of unumpy.ulinalg.inv (unumpy/core.py:437-462), the constants of the public to_affine_scalar (cls(x, {}), ops.py:743) and AffineScalarFunc(value, {}) (audit F1)"
+    ],
+    "uncertainties.unumpy.core 485:31 call  numpy.linalg.inv(arr)": [
+      "the name is numpy.linalg.inv, not the module's inv (line 502); as numpy.diag at core.py:116:37"
+    ],
+    "uncertainties.unumpy.core 526:32 call  numpy.linalg.pinv(arr, rcond)": [
+      "as numpy.diag at core.py:116:37"
+    ],
+    "uncertainties.unumpy.core 616:29 call  numpy.dot(self, other)": [
+      "numpy.dot multiplies (and adds) the elements of an object matrix with Python's operators: the operators of its numbers with uncertainty are ops._wrap closures; as numpy.diag at core.py:116:37 for the two names of numpy.dot"
+    ],
+    "uncertainties.unumpy.core 618:29 call  numpy.dot(other, self)": [
+      "as 616:29"
+    ]
+  },
+  "trace": "dynamic/uncertainties.json"
+}

@@ -1,0 +1,4049 @@
+# Call-site ledger of einops at 8e911db71f2e693a0c434b041180388c685ed06f.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# einops.md ("Scope", "Backends and tensors", "Shapes: HashableTuple and
+# UnknownSize") shows how this ledger applies the global rules.
+default reject einops._backends.HashableTuple.__getitem__: no HashableTuple is subscripted, iterated, unpacked, searched or converted at this site; only TensorflowBackend.shape (graph mode, unhashable symbols) and TFKerasBackend.shape make one, and their results reach only the shape sites of reduce, parse_shape, _enumerate_directions, pack, unpack and _reconstruct_from_shape_uncached, which accept the candidate explicitly
+default reject einops._backends.HashableTuple.__iter__: no HashableTuple is iterated or unpacked at this site; only TensorflowBackend.shape and TFKerasBackend.shape make one, and the sites that iterate a backend shape (parse_shape's zip, _enumerate_directions's enumerate) accept the candidate explicitly
+default reject einops._backends.HashableTuple.__len__: no HashableTuple is measured or tested for truth at this site; only TensorflowBackend.shape and TFKerasBackend.shape make one, and the len() sites on a backend shape (reduce, parse_shape, _enumerate_directions, pack, unpack) accept the candidate explicitly
+default reject einops._backends.UnknownSize.__eq__: no operand of this comparison, `in` test, list search, set construction or dict key lookup is an UnknownSize; UnknownSize objects exist only as elements of the eager TensorflowBackend.shape tuples (and of what parse_shape and pack copy out of them), and the sites that compare those elements accept the candidate explicitly
+default reject einops._backends.UnknownSize.__hash__: no UnknownSize is hashed at this site (no set, dict key or lru_cache key holds one); the lru_cache keys of _apply_recipe's _reconstruct_from_shape call, which can hold a shape or an axes_lengths tuple with UnknownSize elements, accept the candidate explicitly
+default reject einops._backends.AbstractBackend.__repr__: no package code formats or repr()s a backend object; the formatted values here are strs, ints, sets of axis names, shapes, exceptions, dicts of axis lengths, classes or layer objects
+default reject einops.layers._einmix._EinmixMixin.__repr__: no package code formats an EinMix object: only the client's repr() of a layer runs it
+default reject einops.layers.RearrangeMixin.__repr__: the formatted value is not a Rearrange layer; only `{self!r}` in RearrangeMixin.multirecipe formats one, and that site accepts the candidate explicitly
+default reject einops.layers.ReduceMixin.__repr__: the formatted value is not a Reduce layer; only `{self!r}` in ReduceMixin.multirecipe formats one, and that site accepts the candidate explicitly
+default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not an AnonymousAxis and holds none: it is a str, an int, a shape tuple, an exception, a dict of axis lengths or a set of str axis names; the sets of identifiers that can hold an AnonymousAxis (the repeat and reduce differences of _prepare_transformation_recipe, and the sets that _report_axes formats) accept the candidate explicitly
+
+== einops._backends
+
+[einops._backends.get_backend]
+27:17 call  type(tensor)
+    -> <builtin>.type
+28:32 call  _type2backend.get(_type, None)
+    -> <builtin>.dict.get
+32:38 call  list(_loaded_backends.items())
+    -> <builtin>.list
+    note: list() iterates a dict_items view of _loaded_backends, a dict of str to backend
+32:61 call  _loaded_backends.items()
+    -> <builtin>.dict.items
+34:39 call  backend.is_appropriate_type(tensor)
+    -> einops._backends.NumpyBackend.is_appropriate_type
+    -> einops._backends.CupyBackend.is_appropriate_type
+    -> einops._backends.MLXBackend.is_appropriate_type
+    -> einops._backends.OneFlowBackend.is_appropriate_type
+    -> einops._backends.PaddleBackend.is_appropriate_type
+    -> einops._backends.PyTensorBackend.is_appropriate_type
+    -> einops._backends.TFKerasBackend.is_appropriate_type
+    -> einops._backends.TensorflowBackend.is_appropriate_type
+    -> einops._backends.TinygradBackend.is_appropriate_type
+    -> einops._backends.TorchBackend.is_appropriate_type
+    reject einops._backends.AbstractBackend.is_appropriate_type: the backends of _loaded_backends are made at line 56 from AbstractBackend.__subclasses__() (recursively), which never holds AbstractBackend itself; every package subclass overrides the method (JaxBackend inherits NumpyBackend's)
+40:46 call  AbstractBackend.__subclasses__()
+    -> <builtin>.type.__subclasses__
+42:31 call  backends.pop()
+    -> <builtin>.list.pop
+43:43 call  backend.__subclasses__()
+    -> <builtin>.type.__subclasses__
+44:34 call  backend_subclasses.append(backend)
+    -> <builtin>.list.append
+50:18 call  print("Testing for subclass of ", BackendSubclass)
+    note: under `if _debug_importing:`; the private module flag is False and the package never sets it, so print never runs (a client's assignment to a private module attribute is a change of package internals)
+55:26 call  print("Imported backend for ", BackendSubclass.framework_...
+    note: under `if _debug_importing:`; the private module flag is False and the package never sets it, so print never runs
+56:42 call  BackendSubclass()
+    -> einops._backends.NumpyBackend.__init__
+    -> einops._backends.JaxBackend.__init__
+    -> einops._backends.TorchBackend.__init__
+    -> einops._backends.CupyBackend.__init__
+    -> einops._backends.TensorflowBackend.__init__
+    -> einops._backends.TFKerasBackend.__init__
+    -> einops._backends.OneFlowBackend.__init__
+    -> einops._backends.PaddleBackend.__init__
+    -> einops._backends.TinygradBackend.__init__
+    -> einops._backends.PyTensorBackend.__init__
+    -> einops._backends.MLXBackend.__init__
+    note: BackendSubclass is a class of backend_subclasses, the recursive __subclasses__() of AbstractBackend: the eleven package backends (a client's own subclass is client code); each is made when its framework_name is in sys.modules
+58:47 call  backend.is_appropriate_type(tensor)
+    -> einops._backends.NumpyBackend.is_appropriate_type
+    -> einops._backends.CupyBackend.is_appropriate_type
+    -> einops._backends.MLXBackend.is_appropriate_type
+    -> einops._backends.OneFlowBackend.is_appropriate_type
+    -> einops._backends.PaddleBackend.is_appropriate_type
+    -> einops._backends.PyTensorBackend.is_appropriate_type
+    -> einops._backends.TFKerasBackend.is_appropriate_type
+    -> einops._backends.TensorflowBackend.is_appropriate_type
+    -> einops._backends.TinygradBackend.is_appropriate_type
+    -> einops._backends.TorchBackend.is_appropriate_type
+    reject einops._backends.AbstractBackend.is_appropriate_type: backend is an instance of one of the eleven package subclasses made at line 56, never of AbstractBackend; every subclass overrides the method (JaxBackend inherits NumpyBackend's)
+62:23 call  RuntimeError(f"Tensor type unknown to einops {type(tensor...
+    -> <builtin>.RuntimeError
+62:61 call  type(tensor)
+    -> <builtin>.type
+
+[einops._backends.AbstractBackend.is_appropriate_type]
+72:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.from_numpy]
+75:34 call  NotImplementedError("framework doesn't support imperative...
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.to_numpy]
+78:34 call  NotImplementedError("framework doesn't support imperative...
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.create_symbol]
+81:34 call  NotImplementedError("framework doesn't support symbolic c...
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.eval_symbol]
+85:34 call  NotImplementedError("framework doesn't support symbolic c...
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.arange]
+89:34 call  NotImplementedError("framework doesn't implement arange")
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.reshape]
+96:25 call  x.reshape(shape)
+    -> numpy.ndarray.reshape
+    -> numpy.bool_.reshape
+    -> numpy.int8.reshape
+    -> numpy.int16.reshape
+    -> numpy.int32.reshape
+    -> numpy.int64.reshape
+    -> numpy.intc.reshape
+    -> numpy.longlong.reshape
+    -> numpy.uint8.reshape
+    -> numpy.uint16.reshape
+    -> numpy.uint32.reshape
+    -> numpy.uint64.reshape
+    -> numpy.uintc.reshape
+    -> numpy.ulonglong.reshape
+    -> numpy.float16.reshape
+    -> numpy.float32.reshape
+    -> numpy.float64.reshape
+    -> numpy.longdouble.reshape
+    -> numpy.complex64.reshape
+    -> numpy.complex128.reshape
+    -> numpy.clongdouble.reshape
+    -> numpy.datetime64.reshape
+    -> numpy.timedelta64.reshape
+    -> jax.numpy.ndarray.reshape
+    -> torch.Tensor.reshape
+    -> cupy.ndarray.reshape
+    -> oneflow.Tensor.reshape
+    -> pytensor.tensor.TensorVariable.reshape
+    -> mlx.core.array.reshape
+    -> jax.numpy.stack.reshape
+    -> jax.numpy.ndarray.reshape.reshape
+    -> jax.numpy.stack.reshape.reshape
+    -> jax.numpy.ndarray.transpose.reshape
+    -> jax.numpy.stack.transpose.reshape
+    -> jax.numpy.ndarray.reshape.transpose.reshape
+    -> jax.numpy.stack.reshape.transpose.reshape
+    -> jax.numpy.ndarray.min.reshape
+    -> jax.numpy.stack.min.reshape
+    -> jax.numpy.ndarray.reshape.min.reshape
+    -> jax.numpy.stack.reshape.min.reshape
+    -> jax.numpy.ndarray.transpose.min.reshape
+    -> jax.numpy.stack.transpose.min.reshape
+    -> jax.numpy.ndarray.reshape.transpose.min.reshape
+    -> jax.numpy.stack.reshape.transpose.min.reshape
+    -> jax.numpy.ndarray.max.reshape
+    -> jax.numpy.stack.max.reshape
+    -> jax.numpy.ndarray.reshape.max.reshape
+    -> jax.numpy.stack.reshape.max.reshape
+    -> jax.numpy.ndarray.transpose.max.reshape
+    -> jax.numpy.stack.transpose.max.reshape
+    -> jax.numpy.ndarray.reshape.transpose.max.reshape
+    -> jax.numpy.stack.reshape.transpose.max.reshape
+    -> jax.numpy.ndarray.sum.reshape
+    -> jax.numpy.stack.sum.reshape
+    -> jax.numpy.ndarray.reshape.sum.reshape
+    -> jax.numpy.stack.reshape.sum.reshape
+    -> jax.numpy.ndarray.transpose.sum.reshape
+    -> jax.numpy.stack.transpose.sum.reshape
+    -> jax.numpy.ndarray.reshape.transpose.sum.reshape
+    -> jax.numpy.stack.reshape.transpose.sum.reshape
+    -> jax.numpy.ndarray.mean.reshape
+    -> jax.numpy.stack.mean.reshape
+    -> jax.numpy.ndarray.reshape.mean.reshape
+    -> jax.numpy.stack.reshape.mean.reshape
+    -> jax.numpy.ndarray.transpose.mean.reshape
+    -> jax.numpy.stack.transpose.mean.reshape
+    -> jax.numpy.ndarray.reshape.transpose.mean.reshape
+    -> jax.numpy.stack.reshape.transpose.mean.reshape
+    -> jax.numpy.ndarray.prod.reshape
+    -> jax.numpy.stack.prod.reshape
+    -> jax.numpy.ndarray.reshape.prod.reshape
+    -> jax.numpy.stack.reshape.prod.reshape
+    -> jax.numpy.ndarray.transpose.prod.reshape
+    -> jax.numpy.stack.transpose.prod.reshape
+    -> jax.numpy.ndarray.reshape.transpose.prod.reshape
+    -> jax.numpy.stack.reshape.transpose.prod.reshape
+    -> jax.numpy.ndarray.any.reshape
+    -> jax.numpy.stack.any.reshape
+    -> jax.numpy.ndarray.reshape.any.reshape
+    -> jax.numpy.stack.reshape.any.reshape
+    -> jax.numpy.ndarray.transpose.any.reshape
+    -> jax.numpy.stack.transpose.any.reshape
+    -> jax.numpy.ndarray.reshape.transpose.any.reshape
+    -> jax.numpy.stack.reshape.transpose.any.reshape
+    -> jax.numpy.ndarray.all.reshape
+    -> jax.numpy.stack.all.reshape
+    -> jax.numpy.ndarray.reshape.all.reshape
+    -> jax.numpy.stack.reshape.all.reshape
+    -> jax.numpy.ndarray.transpose.all.reshape
+    -> jax.numpy.stack.transpose.all.reshape
+    -> jax.numpy.ndarray.reshape.transpose.all.reshape
+    -> jax.numpy.stack.reshape.transpose.all.reshape
+    -> jax.numpy.tile.reshape
+    -> jax.numpy.arange.reshape
+    -> jax.numpy.einsum.reshape
+    -> cupy.stack.reshape
+    -> cupy.ndarray.reshape.reshape
+    -> cupy.stack.reshape.reshape
+    -> cupy.ndarray.transpose.reshape
+    -> cupy.stack.transpose.reshape
+    -> cupy.ndarray.reshape.transpose.reshape
+    -> cupy.stack.reshape.transpose.reshape
+    -> cupy.ndarray.min.reshape
+    -> cupy.stack.min.reshape
+    -> cupy.ndarray.reshape.min.reshape
+    -> cupy.stack.reshape.min.reshape
+    -> cupy.ndarray.transpose.min.reshape
+    -> cupy.stack.transpose.min.reshape
+    -> cupy.ndarray.reshape.transpose.min.reshape
+    -> cupy.stack.reshape.transpose.min.reshape
+    -> cupy.ndarray.max.reshape
+    -> cupy.stack.max.reshape
+    -> cupy.ndarray.reshape.max.reshape
+    -> cupy.stack.reshape.max.reshape
+    -> cupy.ndarray.transpose.max.reshape
+    -> cupy.stack.transpose.max.reshape
+    -> cupy.ndarray.reshape.transpose.max.reshape
+    -> cupy.stack.reshape.transpose.max.reshape
+    -> cupy.ndarray.sum.reshape
+    -> cupy.stack.sum.reshape
+    -> cupy.ndarray.reshape.sum.reshape
+    -> cupy.stack.reshape.sum.reshape
+    -> cupy.ndarray.transpose.sum.reshape
+    -> cupy.stack.transpose.sum.reshape
+    -> cupy.ndarray.reshape.transpose.sum.reshape
+    -> cupy.stack.reshape.transpose.sum.reshape
+    -> cupy.ndarray.mean.reshape
+    -> cupy.stack.mean.reshape
+    -> cupy.ndarray.reshape.mean.reshape
+    -> cupy.stack.reshape.mean.reshape
+    -> cupy.ndarray.transpose.mean.reshape
+    -> cupy.stack.transpose.mean.reshape
+    -> cupy.ndarray.reshape.transpose.mean.reshape
+    -> cupy.stack.reshape.transpose.mean.reshape
+    -> cupy.ndarray.prod.reshape
+    -> cupy.stack.prod.reshape
+    -> cupy.ndarray.reshape.prod.reshape
+    -> cupy.stack.reshape.prod.reshape
+    -> cupy.ndarray.transpose.prod.reshape
+    -> cupy.stack.transpose.prod.reshape
+    -> cupy.ndarray.reshape.transpose.prod.reshape
+    -> cupy.stack.reshape.transpose.prod.reshape
+    -> cupy.ndarray.any.reshape
+    -> cupy.stack.any.reshape
+    -> cupy.ndarray.reshape.any.reshape
+    -> cupy.stack.reshape.any.reshape
+    -> cupy.ndarray.transpose.any.reshape
+    -> cupy.stack.transpose.any.reshape
+    -> cupy.ndarray.reshape.transpose.any.reshape
+    -> cupy.stack.reshape.transpose.any.reshape
+    -> cupy.ndarray.all.reshape
+    -> cupy.stack.all.reshape
+    -> cupy.ndarray.reshape.all.reshape
+    -> cupy.stack.reshape.all.reshape
+    -> cupy.ndarray.transpose.all.reshape
+    -> cupy.stack.transpose.all.reshape
+    -> cupy.ndarray.reshape.transpose.all.reshape
+    -> cupy.stack.reshape.transpose.all.reshape
+    -> cupy.tile.reshape
+    -> cupy.arange.reshape
+    -> pytensor.tensor.stack.reshape
+    -> pytensor.tensor.TensorVariable.reshape.reshape
+    -> pytensor.tensor.stack.reshape.reshape
+    -> pytensor.tensor.TensorVariable.transpose.reshape
+    -> pytensor.tensor.stack.transpose.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.reshape
+    -> pytensor.tensor.stack.reshape.transpose.reshape
+    -> pytensor.tensor.TensorVariable.min.reshape
+    -> pytensor.tensor.stack.min.reshape
+    -> pytensor.tensor.TensorVariable.reshape.min.reshape
+    -> pytensor.tensor.stack.reshape.min.reshape
+    -> pytensor.tensor.TensorVariable.transpose.min.reshape
+    -> pytensor.tensor.stack.transpose.min.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.min.reshape
+    -> pytensor.tensor.stack.reshape.transpose.min.reshape
+    -> pytensor.tensor.TensorVariable.max.reshape
+    -> pytensor.tensor.stack.max.reshape
+    -> pytensor.tensor.TensorVariable.reshape.max.reshape
+    -> pytensor.tensor.stack.reshape.max.reshape
+    -> pytensor.tensor.TensorVariable.transpose.max.reshape
+    -> pytensor.tensor.stack.transpose.max.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.max.reshape
+    -> pytensor.tensor.stack.reshape.transpose.max.reshape
+    -> pytensor.tensor.TensorVariable.sum.reshape
+    -> pytensor.tensor.stack.sum.reshape
+    -> pytensor.tensor.TensorVariable.reshape.sum.reshape
+    -> pytensor.tensor.stack.reshape.sum.reshape
+    -> pytensor.tensor.TensorVariable.transpose.sum.reshape
+    -> pytensor.tensor.stack.transpose.sum.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.sum.reshape
+    -> pytensor.tensor.stack.reshape.transpose.sum.reshape
+    -> pytensor.tensor.TensorVariable.mean.reshape
+    -> pytensor.tensor.stack.mean.reshape
+    -> pytensor.tensor.TensorVariable.reshape.mean.reshape
+    -> pytensor.tensor.stack.reshape.mean.reshape
+    -> pytensor.tensor.TensorVariable.transpose.mean.reshape
+    -> pytensor.tensor.stack.transpose.mean.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.mean.reshape
+    -> pytensor.tensor.stack.reshape.transpose.mean.reshape
+    -> pytensor.tensor.TensorVariable.prod.reshape
+    -> pytensor.tensor.stack.prod.reshape
+    -> pytensor.tensor.TensorVariable.reshape.prod.reshape
+    -> pytensor.tensor.stack.reshape.prod.reshape
+    -> pytensor.tensor.TensorVariable.transpose.prod.reshape
+    -> pytensor.tensor.stack.transpose.prod.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.prod.reshape
+    -> pytensor.tensor.stack.reshape.transpose.prod.reshape
+    -> pytensor.tensor.TensorVariable.any.reshape
+    -> pytensor.tensor.stack.any.reshape
+    -> pytensor.tensor.TensorVariable.reshape.any.reshape
+    -> pytensor.tensor.stack.reshape.any.reshape
+    -> pytensor.tensor.TensorVariable.transpose.any.reshape
+    -> pytensor.tensor.stack.transpose.any.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.any.reshape
+    -> pytensor.tensor.stack.reshape.transpose.any.reshape
+    -> pytensor.tensor.TensorVariable.all.reshape
+    -> pytensor.tensor.stack.all.reshape
+    -> pytensor.tensor.TensorVariable.reshape.all.reshape
+    -> pytensor.tensor.stack.reshape.all.reshape
+    -> pytensor.tensor.TensorVariable.transpose.all.reshape
+    -> pytensor.tensor.stack.transpose.all.reshape
+    -> pytensor.tensor.TensorVariable.reshape.transpose.all.reshape
+    -> pytensor.tensor.stack.reshape.transpose.all.reshape
+    -> pytensor.tensor.tile.reshape
+    -> pytensor.tensor.arange.reshape
+    -> mlx.core.stack.reshape
+    -> mlx.core.array.reshape.reshape
+    -> mlx.core.stack.reshape.reshape
+    -> mlx.core.array.transpose.reshape
+    -> mlx.core.stack.transpose.reshape
+    -> mlx.core.array.reshape.transpose.reshape
+    -> mlx.core.stack.reshape.transpose.reshape
+    -> mlx.core.array.min.reshape
+    -> mlx.core.stack.min.reshape
+    -> mlx.core.array.reshape.min.reshape
+    -> mlx.core.stack.reshape.min.reshape
+    -> mlx.core.array.transpose.min.reshape
+    -> mlx.core.stack.transpose.min.reshape
+    -> mlx.core.array.reshape.transpose.min.reshape
+    -> mlx.core.stack.reshape.transpose.min.reshape
+    -> mlx.core.array.max.reshape
+    -> mlx.core.stack.max.reshape
+    -> mlx.core.array.reshape.max.reshape
+    -> mlx.core.stack.reshape.max.reshape
+    -> mlx.core.array.transpose.max.reshape
+    -> mlx.core.stack.transpose.max.reshape
+    -> mlx.core.array.reshape.transpose.max.reshape
+    -> mlx.core.stack.reshape.transpose.max.reshape
+    -> mlx.core.array.sum.reshape
+    -> mlx.core.stack.sum.reshape
+    -> mlx.core.array.reshape.sum.reshape
+    -> mlx.core.stack.reshape.sum.reshape
+    -> mlx.core.array.transpose.sum.reshape
+    -> mlx.core.stack.transpose.sum.reshape
+    -> mlx.core.array.reshape.transpose.sum.reshape
+    -> mlx.core.stack.reshape.transpose.sum.reshape
+    -> mlx.core.array.mean.reshape
+    -> mlx.core.stack.mean.reshape
+    -> mlx.core.array.reshape.mean.reshape
+    -> mlx.core.stack.reshape.mean.reshape
+    -> mlx.core.array.transpose.mean.reshape
+    -> mlx.core.stack.transpose.mean.reshape
+    -> mlx.core.array.reshape.transpose.mean.reshape
+    -> mlx.core.stack.reshape.transpose.mean.reshape
+    -> mlx.core.array.prod.reshape
+    -> mlx.core.stack.prod.reshape
+    -> mlx.core.array.reshape.prod.reshape
+    -> mlx.core.stack.reshape.prod.reshape
+    -> mlx.core.array.transpose.prod.reshape
+    -> mlx.core.stack.transpose.prod.reshape
+    -> mlx.core.array.reshape.transpose.prod.reshape
+    -> mlx.core.stack.reshape.transpose.prod.reshape
+    -> mlx.core.array.any.reshape
+    -> mlx.core.stack.any.reshape
+    -> mlx.core.array.reshape.any.reshape
+    -> mlx.core.stack.reshape.any.reshape
+    -> mlx.core.array.transpose.any.reshape
+    -> mlx.core.stack.transpose.any.reshape
+    -> mlx.core.array.reshape.transpose.any.reshape
+    -> mlx.core.stack.reshape.transpose.any.reshape
+    -> mlx.core.array.all.reshape
+    -> mlx.core.stack.all.reshape
+    -> mlx.core.array.reshape.all.reshape
+    -> mlx.core.stack.reshape.all.reshape
+    -> mlx.core.array.transpose.all.reshape
+    -> mlx.core.stack.transpose.all.reshape
+    -> mlx.core.array.reshape.transpose.all.reshape
+    -> mlx.core.stack.reshape.transpose.all.reshape
+    -> mlx.core.arange.reshape
+    -> torch.stack.reshape
+    -> torch.Tensor.reshape.reshape
+    -> torch.stack.reshape.reshape
+    -> torch.Tensor.permute.reshape
+    -> torch.stack.permute.reshape
+    -> torch.Tensor.reshape.permute.reshape
+    -> torch.stack.reshape.permute.reshape
+    -> torch.Tensor.amin.reshape
+    -> torch.stack.amin.reshape
+    -> torch.Tensor.reshape.amin.reshape
+    -> torch.stack.reshape.amin.reshape
+    -> torch.Tensor.permute.amin.reshape
+    -> torch.stack.permute.amin.reshape
+    -> torch.Tensor.reshape.permute.amin.reshape
+    -> torch.stack.reshape.permute.amin.reshape
+    -> torch.Tensor.amax.reshape
+    -> torch.stack.amax.reshape
+    -> torch.Tensor.reshape.amax.reshape
+    -> torch.stack.reshape.amax.reshape
+    -> torch.Tensor.permute.amax.reshape
+    -> torch.stack.permute.amax.reshape
+    -> torch.Tensor.reshape.permute.amax.reshape
+    -> torch.stack.reshape.permute.amax.reshape
+    -> torch.Tensor.sum.reshape
+    -> torch.stack.sum.reshape
+    -> torch.Tensor.reshape.sum.reshape
+    -> torch.stack.reshape.sum.reshape
+    -> torch.Tensor.permute.sum.reshape
+    -> torch.stack.permute.sum.reshape
+    -> torch.Tensor.reshape.permute.sum.reshape
+    -> torch.stack.reshape.permute.sum.reshape
+    -> torch.Tensor.mean.reshape
+    -> torch.stack.mean.reshape
+    -> torch.Tensor.reshape.mean.reshape
+    -> torch.stack.reshape.mean.reshape
+    -> torch.Tensor.permute.mean.reshape
+    -> torch.stack.permute.mean.reshape
+    -> torch.Tensor.reshape.permute.mean.reshape
+    -> torch.stack.reshape.permute.mean.reshape
+    -> torch.Tensor.any.reshape
+    -> torch.Tensor.any.any.reshape
+    -> torch.stack.any.reshape
+    -> torch.stack.any.any.reshape
+    -> torch.Tensor.reshape.any.reshape
+    -> torch.Tensor.reshape.any.any.reshape
+    -> torch.stack.reshape.any.reshape
+    -> torch.stack.reshape.any.any.reshape
+    -> torch.Tensor.permute.any.reshape
+    -> torch.Tensor.permute.any.any.reshape
+    -> torch.stack.permute.any.reshape
+    -> torch.stack.permute.any.any.reshape
+    -> torch.Tensor.reshape.permute.any.reshape
+    -> torch.Tensor.reshape.permute.any.any.reshape
+    -> torch.stack.reshape.permute.any.reshape
+    -> torch.stack.reshape.permute.any.any.reshape
+    -> torch.Tensor.all.reshape
+    -> torch.Tensor.all.all.reshape
+    -> torch.stack.all.reshape
+    -> torch.stack.all.all.reshape
+    -> torch.Tensor.reshape.all.reshape
+    -> torch.Tensor.reshape.all.all.reshape
+    -> torch.stack.reshape.all.reshape
+    -> torch.stack.reshape.all.all.reshape
+    -> torch.Tensor.permute.all.reshape
+    -> torch.Tensor.permute.all.all.reshape
+    -> torch.stack.permute.all.reshape
+    -> torch.stack.permute.all.all.reshape
+    -> torch.Tensor.reshape.permute.all.reshape
+    -> torch.Tensor.reshape.permute.all.all.reshape
+    -> torch.stack.reshape.permute.all.reshape
+    -> torch.stack.reshape.permute.all.all.reshape
+    -> torch.Tensor.prod.reshape
+    -> torch.Tensor.prod.prod.reshape
+    -> torch.stack.prod.reshape
+    -> torch.stack.prod.prod.reshape
+    -> torch.Tensor.reshape.prod.reshape
+    -> torch.Tensor.reshape.prod.prod.reshape
+    -> torch.stack.reshape.prod.reshape
+    -> torch.stack.reshape.prod.prod.reshape
+    -> torch.Tensor.permute.prod.reshape
+    -> torch.Tensor.permute.prod.prod.reshape
+    -> torch.stack.permute.prod.reshape
+    -> torch.stack.permute.prod.prod.reshape
+    -> torch.Tensor.reshape.permute.prod.reshape
+    -> torch.Tensor.reshape.permute.prod.prod.reshape
+    -> torch.stack.reshape.permute.prod.reshape
+    -> torch.stack.reshape.permute.prod.prod.reshape
+    -> torch.unsqueeze.expand.reshape
+    -> torch.arange.reshape
+    -> oneflow.stack.reshape
+    -> oneflow.Tensor.reshape.reshape
+    -> oneflow.stack.reshape.reshape
+    -> oneflow.Tensor.permute.reshape
+    -> oneflow.stack.permute.reshape
+    -> oneflow.Tensor.reshape.permute.reshape
+    -> oneflow.stack.reshape.permute.reshape
+    -> oneflow.Tensor.sum.reshape
+    -> oneflow.Tensor.sum.sum.reshape
+    -> oneflow.stack.sum.reshape
+    -> oneflow.stack.sum.sum.reshape
+    -> oneflow.Tensor.reshape.sum.reshape
+    -> oneflow.Tensor.reshape.sum.sum.reshape
+    -> oneflow.stack.reshape.sum.reshape
+    -> oneflow.stack.reshape.sum.sum.reshape
+    -> oneflow.Tensor.permute.sum.reshape
+    -> oneflow.Tensor.permute.sum.sum.reshape
+    -> oneflow.stack.permute.sum.reshape
+    -> oneflow.stack.permute.sum.sum.reshape
+    -> oneflow.Tensor.reshape.permute.sum.reshape
+    -> oneflow.Tensor.reshape.permute.sum.sum.reshape
+    -> oneflow.stack.reshape.permute.sum.reshape
+    -> oneflow.stack.reshape.permute.sum.sum.reshape
+    -> oneflow.Tensor.mean.reshape
+    -> oneflow.Tensor.mean.mean.reshape
+    -> oneflow.stack.mean.reshape
+    -> oneflow.stack.mean.mean.reshape
+    -> oneflow.Tensor.reshape.mean.reshape
+    -> oneflow.Tensor.reshape.mean.mean.reshape
+    -> oneflow.stack.reshape.mean.reshape
+    -> oneflow.stack.reshape.mean.mean.reshape
+    -> oneflow.Tensor.permute.mean.reshape
+    -> oneflow.Tensor.permute.mean.mean.reshape
+    -> oneflow.stack.permute.mean.reshape
+    -> oneflow.stack.permute.mean.mean.reshape
+    -> oneflow.Tensor.reshape.permute.mean.reshape
+    -> oneflow.Tensor.reshape.permute.mean.mean.reshape
+    -> oneflow.stack.reshape.permute.mean.reshape
+    -> oneflow.stack.reshape.permute.mean.mean.reshape
+    -> oneflow.Tensor.prod.reshape
+    -> oneflow.Tensor.prod.prod.reshape
+    -> oneflow.stack.prod.reshape
+    -> oneflow.stack.prod.prod.reshape
+    -> oneflow.Tensor.reshape.prod.reshape
+    -> oneflow.Tensor.reshape.prod.prod.reshape
+    -> oneflow.stack.reshape.prod.reshape
+    -> oneflow.stack.reshape.prod.prod.reshape
+    -> oneflow.Tensor.permute.prod.reshape
+    -> oneflow.Tensor.permute.prod.prod.reshape
+    -> oneflow.stack.permute.prod.reshape
+    -> oneflow.stack.permute.prod.prod.reshape
+    -> oneflow.Tensor.reshape.permute.prod.reshape
+    -> oneflow.Tensor.reshape.permute.prod.prod.reshape
+    -> oneflow.stack.reshape.permute.prod.reshape
+    -> oneflow.stack.reshape.permute.prod.prod.reshape
+    -> oneflow.Tensor.any.reshape
+    -> oneflow.Tensor.any.any.reshape
+    -> oneflow.stack.any.reshape
+    -> oneflow.stack.any.any.reshape
+    -> oneflow.Tensor.reshape.any.reshape
+    -> oneflow.Tensor.reshape.any.any.reshape
+    -> oneflow.stack.reshape.any.reshape
+    -> oneflow.stack.reshape.any.any.reshape
+    -> oneflow.Tensor.permute.any.reshape
+    -> oneflow.Tensor.permute.any.any.reshape
+    -> oneflow.stack.permute.any.reshape
+    -> oneflow.stack.permute.any.any.reshape
+    -> oneflow.Tensor.reshape.permute.any.reshape
+    -> oneflow.Tensor.reshape.permute.any.any.reshape
+    -> oneflow.stack.reshape.permute.any.reshape
+    -> oneflow.stack.reshape.permute.any.any.reshape
+    -> oneflow.Tensor.all.reshape
+    -> oneflow.Tensor.all.all.reshape
+    -> oneflow.stack.all.reshape
+    -> oneflow.stack.all.all.reshape
+    -> oneflow.Tensor.reshape.all.reshape
+    -> oneflow.Tensor.reshape.all.all.reshape
+    -> oneflow.stack.reshape.all.reshape
+    -> oneflow.stack.reshape.all.all.reshape
+    -> oneflow.Tensor.permute.all.reshape
+    -> oneflow.Tensor.permute.all.all.reshape
+    -> oneflow.stack.permute.all.reshape
+    -> oneflow.stack.permute.all.all.reshape
+    -> oneflow.Tensor.reshape.permute.all.reshape
+    -> oneflow.Tensor.reshape.permute.all.all.reshape
+    -> oneflow.stack.reshape.permute.all.reshape
+    -> oneflow.stack.reshape.permute.all.all.reshape
+    -> oneflow.unsqueeze.expand.reshape
+    -> oneflow.arange.reshape
+    -> oneflow.einsum.reshape
+    reject *: x is a tensor of the backend's framework, never a package object
+    note: a numpy reduction over every axis returns a numpy scalar, which the final reshape receives (audit round 1: `reduce(x, "a -> ()", "min")` on a 1-d array, einops.py:247 then :251); the scalar keeps the array's dtype for min and max (and any/all give bool_, mean a float), so each concrete scalar class is a receiver, named one by one (batch 6, jsonpickle (e)): the C-integer names intc/uintc (Linux ILP32) and longlong/ulonglong (Linux LP64) are distinct classes on those platforms; numpy 2.4.1 _core/src/multiarray/scalartypes.c.src:2697 (scalar reshape), _core/src/multiarray/arraytypes.h.src:99
+    note: self is a NumpyBackend, JaxBackend, TorchBackend, CupyBackend, OneFlowBackend, PyTensorBackend or MLXBackend (the subclasses that inherit reshape); x is a tensor of its framework, named by the class that its is_appropriate_type checks with isinstance (einops.md, "Backends and tensors")
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.AbstractBackend.transpose]
+99:27 call  x.transpose(axes)
+    -> numpy.ndarray.transpose
+    -> jax.numpy.ndarray.transpose
+    -> cupy.ndarray.transpose
+    -> pytensor.tensor.TensorVariable.transpose
+    -> mlx.core.array.transpose
+    -> jax.numpy.stack.transpose
+    -> jax.numpy.ndarray.reshape.transpose
+    -> jax.numpy.stack.reshape.transpose
+    -> cupy.stack.transpose
+    -> cupy.ndarray.reshape.transpose
+    -> cupy.stack.reshape.transpose
+    -> pytensor.tensor.stack.transpose
+    -> pytensor.tensor.TensorVariable.reshape.transpose
+    -> pytensor.tensor.stack.reshape.transpose
+    -> mlx.core.stack.transpose
+    -> mlx.core.array.reshape.transpose
+    -> mlx.core.stack.reshape.transpose
+    reject *: x is a tensor of the backend's framework, never a package object
+    note: self is a NumpyBackend, JaxBackend, CupyBackend, PyTensorBackend or MLXBackend (the subclasses that inherit transpose)
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._backends.AbstractBackend.reduce]
+102:23 call  getattr(x, operation)
+    -> <builtin>.getattr
+102:37 call  getattr(x, operation)(axis=axes)
+    -> numpy.ndarray.min
+    -> numpy.ndarray.max
+    -> numpy.ndarray.sum
+    -> numpy.ndarray.mean
+    -> numpy.ndarray.prod
+    -> numpy.ndarray.any
+    -> numpy.ndarray.all
+    -> jax.numpy.ndarray.min
+    -> jax.numpy.ndarray.max
+    -> jax.numpy.ndarray.sum
+    -> jax.numpy.ndarray.mean
+    -> jax.numpy.ndarray.prod
+    -> jax.numpy.ndarray.any
+    -> jax.numpy.ndarray.all
+    -> cupy.ndarray.min
+    -> cupy.ndarray.max
+    -> cupy.ndarray.sum
+    -> cupy.ndarray.mean
+    -> cupy.ndarray.prod
+    -> cupy.ndarray.any
+    -> cupy.ndarray.all
+    -> pytensor.tensor.TensorVariable.min
+    -> pytensor.tensor.TensorVariable.max
+    -> pytensor.tensor.TensorVariable.sum
+    -> pytensor.tensor.TensorVariable.mean
+    -> pytensor.tensor.TensorVariable.prod
+    -> pytensor.tensor.TensorVariable.any
+    -> pytensor.tensor.TensorVariable.all
+    -> mlx.core.array.min
+    -> mlx.core.array.max
+    -> mlx.core.array.sum
+    -> mlx.core.array.mean
+    -> mlx.core.array.prod
+    -> mlx.core.array.any
+    -> mlx.core.array.all
+    -> jax.numpy.stack.min
+    -> jax.numpy.ndarray.reshape.min
+    -> jax.numpy.stack.reshape.min
+    -> jax.numpy.ndarray.transpose.min
+    -> jax.numpy.stack.transpose.min
+    -> jax.numpy.ndarray.reshape.transpose.min
+    -> jax.numpy.stack.reshape.transpose.min
+    -> jax.numpy.stack.max
+    -> jax.numpy.ndarray.reshape.max
+    -> jax.numpy.stack.reshape.max
+    -> jax.numpy.ndarray.transpose.max
+    -> jax.numpy.stack.transpose.max
+    -> jax.numpy.ndarray.reshape.transpose.max
+    -> jax.numpy.stack.reshape.transpose.max
+    -> jax.numpy.stack.sum
+    -> jax.numpy.ndarray.reshape.sum
+    -> jax.numpy.stack.reshape.sum
+    -> jax.numpy.ndarray.transpose.sum
+    -> jax.numpy.stack.transpose.sum
+    -> jax.numpy.ndarray.reshape.transpose.sum
+    -> jax.numpy.stack.reshape.transpose.sum
+    -> jax.numpy.stack.mean
+    -> jax.numpy.ndarray.reshape.mean
+    -> jax.numpy.stack.reshape.mean
+    -> jax.numpy.ndarray.transpose.mean
+    -> jax.numpy.stack.transpose.mean
+    -> jax.numpy.ndarray.reshape.transpose.mean
+    -> jax.numpy.stack.reshape.transpose.mean
+    -> jax.numpy.stack.prod
+    -> jax.numpy.ndarray.reshape.prod
+    -> jax.numpy.stack.reshape.prod
+    -> jax.numpy.ndarray.transpose.prod
+    -> jax.numpy.stack.transpose.prod
+    -> jax.numpy.ndarray.reshape.transpose.prod
+    -> jax.numpy.stack.reshape.transpose.prod
+    -> jax.numpy.stack.any
+    -> jax.numpy.ndarray.reshape.any
+    -> jax.numpy.stack.reshape.any
+    -> jax.numpy.ndarray.transpose.any
+    -> jax.numpy.stack.transpose.any
+    -> jax.numpy.ndarray.reshape.transpose.any
+    -> jax.numpy.stack.reshape.transpose.any
+    -> jax.numpy.stack.all
+    -> jax.numpy.ndarray.reshape.all
+    -> jax.numpy.stack.reshape.all
+    -> jax.numpy.ndarray.transpose.all
+    -> jax.numpy.stack.transpose.all
+    -> jax.numpy.ndarray.reshape.transpose.all
+    -> jax.numpy.stack.reshape.transpose.all
+    -> cupy.stack.min
+    -> cupy.ndarray.reshape.min
+    -> cupy.stack.reshape.min
+    -> cupy.ndarray.transpose.min
+    -> cupy.stack.transpose.min
+    -> cupy.ndarray.reshape.transpose.min
+    -> cupy.stack.reshape.transpose.min
+    -> cupy.stack.max
+    -> cupy.ndarray.reshape.max
+    -> cupy.stack.reshape.max
+    -> cupy.ndarray.transpose.max
+    -> cupy.stack.transpose.max
+    -> cupy.ndarray.reshape.transpose.max
+    -> cupy.stack.reshape.transpose.max
+    -> cupy.stack.sum
+    -> cupy.ndarray.reshape.sum
+    -> cupy.stack.reshape.sum
+    -> cupy.ndarray.transpose.sum
+    -> cupy.stack.transpose.sum
+    -> cupy.ndarray.reshape.transpose.sum
+    -> cupy.stack.reshape.transpose.sum
+    -> cupy.stack.mean
+    -> cupy.ndarray.reshape.mean
+    -> cupy.stack.reshape.mean
+    -> cupy.ndarray.transpose.mean
+    -> cupy.stack.transpose.mean
+    -> cupy.ndarray.reshape.transpose.mean
+    -> cupy.stack.reshape.transpose.mean
+    -> cupy.stack.prod
+    -> cupy.ndarray.reshape.prod
+    -> cupy.stack.reshape.prod
+    -> cupy.ndarray.transpose.prod
+    -> cupy.stack.transpose.prod
+    -> cupy.ndarray.reshape.transpose.prod
+    -> cupy.stack.reshape.transpose.prod
+    -> cupy.stack.any
+    -> cupy.ndarray.reshape.any
+    -> cupy.stack.reshape.any
+    -> cupy.ndarray.transpose.any
+    -> cupy.stack.transpose.any
+    -> cupy.ndarray.reshape.transpose.any
+    -> cupy.stack.reshape.transpose.any
+    -> cupy.stack.all
+    -> cupy.ndarray.reshape.all
+    -> cupy.stack.reshape.all
+    -> cupy.ndarray.transpose.all
+    -> cupy.stack.transpose.all
+    -> cupy.ndarray.reshape.transpose.all
+    -> cupy.stack.reshape.transpose.all
+    -> pytensor.tensor.stack.min
+    -> pytensor.tensor.TensorVariable.reshape.min
+    -> pytensor.tensor.stack.reshape.min
+    -> pytensor.tensor.TensorVariable.transpose.min
+    -> pytensor.tensor.stack.transpose.min
+    -> pytensor.tensor.TensorVariable.reshape.transpose.min
+    -> pytensor.tensor.stack.reshape.transpose.min
+    -> pytensor.tensor.stack.max
+    -> pytensor.tensor.TensorVariable.reshape.max
+    -> pytensor.tensor.stack.reshape.max
+    -> pytensor.tensor.TensorVariable.transpose.max
+    -> pytensor.tensor.stack.transpose.max
+    -> pytensor.tensor.TensorVariable.reshape.transpose.max
+    -> pytensor.tensor.stack.reshape.transpose.max
+    -> pytensor.tensor.stack.sum
+    -> pytensor.tensor.TensorVariable.reshape.sum
+    -> pytensor.tensor.stack.reshape.sum
+    -> pytensor.tensor.TensorVariable.transpose.sum
+    -> pytensor.tensor.stack.transpose.sum
+    -> pytensor.tensor.TensorVariable.reshape.transpose.sum
+    -> pytensor.tensor.stack.reshape.transpose.sum
+    -> pytensor.tensor.stack.mean
+    -> pytensor.tensor.TensorVariable.reshape.mean
+    -> pytensor.tensor.stack.reshape.mean
+    -> pytensor.tensor.TensorVariable.transpose.mean
+    -> pytensor.tensor.stack.transpose.mean
+    -> pytensor.tensor.TensorVariable.reshape.transpose.mean
+    -> pytensor.tensor.stack.reshape.transpose.mean
+    -> pytensor.tensor.stack.prod
+    -> pytensor.tensor.TensorVariable.reshape.prod
+    -> pytensor.tensor.stack.reshape.prod
+    -> pytensor.tensor.TensorVariable.transpose.prod
+    -> pytensor.tensor.stack.transpose.prod
+    -> pytensor.tensor.TensorVariable.reshape.transpose.prod
+    -> pytensor.tensor.stack.reshape.transpose.prod
+    -> pytensor.tensor.stack.any
+    -> pytensor.tensor.TensorVariable.reshape.any
+    -> pytensor.tensor.stack.reshape.any
+    -> pytensor.tensor.TensorVariable.transpose.any
+    -> pytensor.tensor.stack.transpose.any
+    -> pytensor.tensor.TensorVariable.reshape.transpose.any
+    -> pytensor.tensor.stack.reshape.transpose.any
+    -> pytensor.tensor.stack.all
+    -> pytensor.tensor.TensorVariable.reshape.all
+    -> pytensor.tensor.stack.reshape.all
+    -> pytensor.tensor.TensorVariable.transpose.all
+    -> pytensor.tensor.stack.transpose.all
+    -> pytensor.tensor.TensorVariable.reshape.transpose.all
+    -> pytensor.tensor.stack.reshape.transpose.all
+    -> mlx.core.stack.min
+    -> mlx.core.array.reshape.min
+    -> mlx.core.stack.reshape.min
+    -> mlx.core.array.transpose.min
+    -> mlx.core.stack.transpose.min
+    -> mlx.core.array.reshape.transpose.min
+    -> mlx.core.stack.reshape.transpose.min
+    -> mlx.core.stack.max
+    -> mlx.core.array.reshape.max
+    -> mlx.core.stack.reshape.max
+    -> mlx.core.array.transpose.max
+    -> mlx.core.stack.transpose.max
+    -> mlx.core.array.reshape.transpose.max
+    -> mlx.core.stack.reshape.transpose.max
+    -> mlx.core.stack.sum
+    -> mlx.core.array.reshape.sum
+    -> mlx.core.stack.reshape.sum
+    -> mlx.core.array.transpose.sum
+    -> mlx.core.stack.transpose.sum
+    -> mlx.core.array.reshape.transpose.sum
+    -> mlx.core.stack.reshape.transpose.sum
+    -> mlx.core.stack.mean
+    -> mlx.core.array.reshape.mean
+    -> mlx.core.stack.reshape.mean
+    -> mlx.core.array.transpose.mean
+    -> mlx.core.stack.transpose.mean
+    -> mlx.core.array.reshape.transpose.mean
+    -> mlx.core.stack.reshape.transpose.mean
+    -> mlx.core.stack.prod
+    -> mlx.core.array.reshape.prod
+    -> mlx.core.stack.reshape.prod
+    -> mlx.core.array.transpose.prod
+    -> mlx.core.stack.transpose.prod
+    -> mlx.core.array.reshape.transpose.prod
+    -> mlx.core.stack.reshape.transpose.prod
+    -> mlx.core.stack.any
+    -> mlx.core.array.reshape.any
+    -> mlx.core.stack.reshape.any
+    -> mlx.core.array.transpose.any
+    -> mlx.core.stack.transpose.any
+    -> mlx.core.array.reshape.transpose.any
+    -> mlx.core.stack.reshape.transpose.any
+    -> mlx.core.stack.all
+    -> mlx.core.array.reshape.all
+    -> mlx.core.stack.reshape.all
+    -> mlx.core.array.transpose.all
+    -> mlx.core.stack.transpose.all
+    -> mlx.core.array.reshape.transpose.all
+    -> mlx.core.stack.reshape.transpose.all
+    -> paddle.stack.min
+    -> paddle.stack.reshape.min
+    -> paddle.stack.transpose.min
+    -> paddle.stack.reshape.transpose.min
+    -> paddle.stack.max
+    -> paddle.stack.reshape.max
+    -> paddle.stack.transpose.max
+    -> paddle.stack.reshape.transpose.max
+    -> paddle.stack.sum
+    -> paddle.stack.reshape.sum
+    -> paddle.stack.transpose.sum
+    -> paddle.stack.reshape.transpose.sum
+    -> paddle.stack.mean
+    -> paddle.stack.reshape.mean
+    -> paddle.stack.transpose.mean
+    -> paddle.stack.reshape.transpose.mean
+    -> paddle.stack.prod
+    -> paddle.stack.reshape.prod
+    -> paddle.stack.transpose.prod
+    -> paddle.stack.reshape.transpose.prod
+    -> paddle.stack.any
+    -> paddle.stack.reshape.any
+    -> paddle.stack.transpose.any
+    -> paddle.stack.reshape.transpose.any
+    -> paddle.stack.all
+    -> paddle.stack.reshape.all
+    -> paddle.stack.transpose.all
+    -> paddle.stack.reshape.transpose.all
+    note: the callee is the method of the tensor x that the str operation names; operation is one of _reductions ("min", "max", "sum", "mean", "prod", "any", "all"): _reduce_axes calls backend.reduce only for a str reduction that _prepare_transformation_recipe accepted (another str raises "Unknown reduction"). self is a NumpyBackend, JaxBackend, CupyBackend, PyTensorBackend or MLXBackend, or a PaddleBackend through super().reduce; a client paddle tensor has no class that the package names, but paddle.stack results and their reshape/transpose results keep their paths
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._backends.AbstractBackend.stack_on_zeroth_dimension]
+105:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.add_axis]
+108:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.add_axes]
+111:23 op  [1] * n_axes
+    reject *: a list times an int (n_axes is the int n_axes_w_added that _apply_recipe computes with len())
+112:56 call  pos2len.items()
+    -> <builtin>.dict.items
+    note: pos2len is the dict added_axes of _reconstruct_from_shape_uncached
+113:30 call  self.add_axis(x, axis_position)
+    -> einops._backends.NumpyBackend.add_axis
+    -> einops._backends.CupyBackend.add_axis
+    -> einops._backends.TensorflowBackend.add_axis
+    -> einops._backends.TFKerasBackend.add_axis
+    -> einops._backends.TinygradBackend.add_axis
+    -> einops._backends.PyTensorBackend.add_axis
+    reject einops._backends.AbstractBackend.add_axis: every receiver of add_axes overrides add_axis (MLXBackend, which does not, overrides add_axes)
+    reject einops._backends.OneFlowBackend.add_axis, einops._backends.PaddleBackend.add_axis, einops._backends.TorchBackend.add_axis: these backends override add_axes, so they never run AbstractBackend.add_axes
+    note: self is a NumpyBackend, JaxBackend (NumpyBackend.add_axis), CupyBackend, TensorflowBackend, TFKerasBackend, TinygradBackend or PyTensorBackend
+115:25 call  self.tile(x, tuple(repeats))
+    -> einops._backends.NumpyBackend.tile
+    -> einops._backends.CupyBackend.tile
+    -> einops._backends.TensorflowBackend.tile
+    -> einops._backends.TFKerasBackend.tile
+    -> einops._backends.TinygradBackend.tile
+    -> einops._backends.PyTensorBackend.tile
+    reject einops._backends.AbstractBackend.tile: every receiver of add_axes overrides tile
+    reject einops._backends.MLXBackend.tile, einops._backends.OneFlowBackend.tile, einops._backends.PaddleBackend.tile, einops._backends.TorchBackend.tile: these backends override add_axes, so they never run AbstractBackend.add_axes
+    reject einops._torch_specific.TorchJitBackend.tile: self is a backend of _backends; TorchJitBackend is not an AbstractBackend
+115:34 call  tuple(repeats)
+    -> <builtin>.tuple
+
+[einops._backends.AbstractBackend.tile]
+119:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.concat]
+124:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.is_float_type]
+129:34 call  NotImplementedError()
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.layers]
+132:34 call  NotImplementedError("backend does not provide layers")
+    -> <builtin>.NotImplementedError
+
+[einops._backends.AbstractBackend.einsum]
+138:34 call  NotImplementedError("backend does not support einsum")
+    -> <builtin>.NotImplementedError
+
+[einops._backends.UnknownSize.__hash__]
+157:20 call  hash(None)
+    -> <builtin>.hash
+
+[einops._backends.NumpyBackend.is_appropriate_type]
+169:26 call  isinstance(tensor, self.np.ndarray)
+    -> <builtin>.isinstance
+
+[einops._backends.NumpyBackend.arange]
+178:30 call  self.np.arange(start, stop)
+    -> numpy.arange
+    -> jax.numpy.arange
+    reject *: self.np is the module numpy or jax.numpy, not a backend
+
+[einops._backends.NumpyBackend.stack_on_zeroth_dimension]
+181:29 call  self.np.stack(tensors)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> jax.numpy.stack
+    note: numpy.stack is an _ArrayFunctionDispatcher from numpy 1.25 on, and no support declaration of einops establishes an earlier release (einops.md, J3); a JaxBackend's self.np is jax.numpy
+
+[einops._backends.NumpyBackend.tile]
+184:28 call  self.np.tile(x, repeats)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> jax.numpy.tile
+    reject *: self.np is the module numpy or jax.numpy, not a backend
+
+[einops._backends.NumpyBackend.concat]
+187:35 call  self.np.concatenate(tensors, axis=axis)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> jax.numpy.concatenate
+
+[einops._backends.NumpyBackend.add_axis]
+193:35 call  self.np.expand_dims(x, new_position)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> jax.numpy.expand_dims
+
+[einops._backends.NumpyBackend.einsum]
+196:30 call  self.np.einsum(pattern, *x)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> jax.numpy.einsum
+    reject *: self.np is the module numpy or jax.numpy, not a backend or the package's einsum
+
+[einops._backends.JaxBackend.__init__]
+203:14 call  super()
+    -> <builtin>.super
+203:25 call  super().__init__()
+    -> einops._backends.NumpyBackend.__init__
+    reject *: super() in JaxBackend, whose only base is NumpyBackend; NumpyBackend.__init__ is the next __init__ of the MRO
+
+[einops._backends.JaxBackend.from_numpy]
+211:31 call  self.np.asarray(x)
+    -> jax.numpy.asarray
+
+[einops._backends.JaxBackend.to_numpy]
+214:32 call  self.onp.asarray(x)
+    -> numpy.asarray
+    note: self.onp is numpy (the self.np that NumpyBackend.__init__ set)
+
+[einops._backends.TorchBackend.is_appropriate_type]
+228:26 call  isinstance(tensor, self.torch.Tensor)
+    -> <builtin>.isinstance
+
+[einops._backends.TorchBackend.from_numpy]
+231:41 call  self.torch.from_numpy(x)
+    -> torch.from_numpy
+    reject *: self.torch is the module torch, not a backend
+232:30 call  self.is_float_type(variable)
+    -> einops._backends.TorchBackend.is_float_type
+    reject *: self is a TorchBackend (it has no subclass)
+
+[einops._backends.TorchBackend.to_numpy]
+238:24 call  x.detach()
+    -> torch.Tensor.detach
+238:30 call  x.detach().cpu()
+    -> torch.Tensor.detach.cpu
+    note: a call on the result of a missing-module call keeps the access path (README, "Missing libraries")
+238:38 call  x.detach().cpu().numpy()
+    -> torch.Tensor.detach.cpu.numpy
+
+[einops._backends.TorchBackend.arange]
+241:33 call  self.torch.arange(start, stop, dtype=self.torch.int64)
+    -> torch.arange
+    reject *: self.torch is the module torch, not a backend
+
+[einops._backends.TorchBackend.reduce]
+245:26 call  x.amin(dim=reduced_axes)
+    -> torch.Tensor.amin
+    -> torch.stack.amin
+    -> torch.Tensor.reshape.amin
+    -> torch.stack.reshape.amin
+    -> torch.Tensor.permute.amin
+    -> torch.stack.permute.amin
+    -> torch.Tensor.reshape.permute.amin
+    -> torch.stack.reshape.permute.amin
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+247:26 call  x.amax(dim=reduced_axes)
+    -> torch.Tensor.amax
+    -> torch.stack.amax
+    -> torch.Tensor.reshape.amax
+    -> torch.stack.reshape.amax
+    -> torch.Tensor.permute.amax
+    -> torch.stack.permute.amax
+    -> torch.Tensor.reshape.permute.amax
+    -> torch.stack.reshape.permute.amax
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+249:25 call  x.sum(dim=reduced_axes)
+    -> torch.Tensor.sum
+    -> torch.stack.sum
+    -> torch.Tensor.reshape.sum
+    -> torch.stack.reshape.sum
+    -> torch.Tensor.permute.sum
+    -> torch.stack.permute.sum
+    -> torch.Tensor.reshape.permute.sum
+    -> torch.stack.reshape.permute.sum
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+251:26 call  x.mean(dim=reduced_axes)
+    -> torch.Tensor.mean
+    -> torch.stack.mean
+    -> torch.Tensor.reshape.mean
+    -> torch.stack.reshape.mean
+    -> torch.Tensor.permute.mean
+    -> torch.stack.permute.mean
+    -> torch.Tensor.reshape.permute.mean
+    -> torch.stack.reshape.permute.mean
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+254:28 call  sorted(reduced_axes)
+    -> <builtin>.sorted
+255:28 call  getattr(x, operation)
+    -> <builtin>.getattr
+255:42 call  getattr(x, operation)(dim=i)
+    -> torch.Tensor.any
+    -> torch.Tensor.all
+    -> torch.Tensor.prod
+    -> torch.Tensor.any.any
+    -> torch.stack.any
+    -> torch.stack.any.any
+    -> torch.Tensor.reshape.any
+    -> torch.Tensor.reshape.any.any
+    -> torch.stack.reshape.any
+    -> torch.stack.reshape.any.any
+    -> torch.Tensor.permute.any
+    -> torch.Tensor.permute.any.any
+    -> torch.stack.permute.any
+    -> torch.stack.permute.any.any
+    -> torch.Tensor.reshape.permute.any
+    -> torch.Tensor.reshape.permute.any.any
+    -> torch.stack.reshape.permute.any
+    -> torch.stack.reshape.permute.any.any
+    -> torch.Tensor.all.all
+    -> torch.stack.all
+    -> torch.stack.all.all
+    -> torch.Tensor.reshape.all
+    -> torch.Tensor.reshape.all.all
+    -> torch.stack.reshape.all
+    -> torch.stack.reshape.all.all
+    -> torch.Tensor.permute.all
+    -> torch.Tensor.permute.all.all
+    -> torch.stack.permute.all
+    -> torch.stack.permute.all.all
+    -> torch.Tensor.reshape.permute.all
+    -> torch.Tensor.reshape.permute.all.all
+    -> torch.stack.reshape.permute.all
+    -> torch.stack.reshape.permute.all.all
+    -> torch.Tensor.prod.prod
+    -> torch.stack.prod
+    -> torch.stack.prod.prod
+    -> torch.Tensor.reshape.prod
+    -> torch.Tensor.reshape.prod.prod
+    -> torch.stack.reshape.prod
+    -> torch.stack.reshape.prod.prod
+    -> torch.Tensor.permute.prod
+    -> torch.Tensor.permute.prod.prod
+    -> torch.stack.permute.prod
+    -> torch.stack.permute.prod.prod
+    -> torch.Tensor.reshape.permute.prod
+    -> torch.Tensor.reshape.permute.prod.prod
+    -> torch.stack.reshape.permute.prod
+    -> torch.stack.reshape.permute.prod.prod
+    note: the method of the torch.Tensor x that operation names; this branch runs for operation in ("any", "all", "prod")
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+258:38 call  NotImplementedError("Unknown reduction ", operation)
+    note: a check that cannot fail under the package's own values: operation is always one of _reductions, and min, max, sum, mean, any, all and prod all have branches, so this raise never runs (README, B1)
+
+[einops._backends.TorchBackend.transpose]
+261:25 call  x.permute(axes)
+    -> torch.Tensor.permute
+    -> torch.stack.permute
+    -> torch.Tensor.reshape.permute
+    -> torch.stack.reshape.permute
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._backends.TorchBackend.stack_on_zeroth_dimension]
+264:32 call  self.torch.stack(tensors)
+    -> torch.stack
+
+[einops._backends.TorchBackend.add_axes]
+267:24 op  [-1] * n_axes
+    reject *: a list times an int
+268:56 call  pos2len.items()
+    -> <builtin>.dict.items
+269:30 call  self.add_axis(x, axis_position)
+    -> einops._backends.TorchBackend.add_axis
+    reject *: self is a TorchBackend (it has no subclass)
+271:24 call  x.expand(repeats)
+    -> torch.unsqueeze.expand
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; removed by the ruling: torch.Tensor.expand
+
+[einops._backends.TorchBackend.tile]
+274:24 call  x.repeat(repeats)
+    -> torch.Tensor.repeat
+    reject *: x is a torch.Tensor; the package functions named repeat are not its methods
+
+[einops._backends.TorchBackend.concat]
+277:30 call  self.torch.cat(tensors, dim=axis)
+    -> torch.cat
+
+[einops._backends.TorchBackend.add_axis]
+280:36 call  self.torch.unsqueeze(x, new_position)
+    -> torch.unsqueeze
+
+[einops._backends.TorchBackend.einsum]
+291:33 call  self.torch.einsum(pattern, *x)
+    -> torch.einsum
+    reject *: self.torch is the module torch, not a backend or the package's einsum
+
+[einops._backends.CupyBackend.is_appropriate_type]
+303:26 call  isinstance(tensor, self.cupy.ndarray)
+    -> <builtin>.isinstance
+
+[einops._backends.CupyBackend.from_numpy]
+306:33 call  self.cupy.asarray(x)
+    -> cupy.asarray
+
+[einops._backends.CupyBackend.to_numpy]
+309:33 call  self.cupy.asnumpy(x)
+    -> cupy.asnumpy
+    reject *: self.cupy is the module cupy, not the package
+
+[einops._backends.CupyBackend.arange]
+312:32 call  self.cupy.arange(start, stop)
+    -> cupy.arange
+    reject *: self.cupy is the module cupy, not a backend
+
+[einops._backends.CupyBackend.stack_on_zeroth_dimension]
+315:31 call  self.cupy.stack(tensors)
+    -> cupy.stack
+
+[einops._backends.CupyBackend.tile]
+318:30 call  self.cupy.tile(x, repeats)
+    -> cupy.tile
+    reject *: self.cupy is the module cupy, not a backend
+
+[einops._backends.CupyBackend.concat]
+321:37 call  self.cupy.concatenate(tensors, axis=axis)
+    -> cupy.concatenate
+
+[einops._backends.CupyBackend.add_axis]
+324:37 call  self.cupy.expand_dims(x, new_position)
+    -> cupy.expand_dims
+
+[einops._backends.CupyBackend.einsum]
+330:32 call  self.cupy.einsum(pattern, *x)
+    -> cupy.einsum
+    reject *: self.cupy is the module cupy, not a backend or the package's einsum
+
+[einops._backends.HashableTuple.__len__]
+343:19 call  len(self.elements)
+    -> <builtin>.len
+
+[einops._backends.TensorflowBackend.is_appropriate_type]
+360:26 call  isinstance(tensor, (self.tf.Tensor, self.tf.Variable))
+    -> <builtin>.isinstance
+
+[einops._backends.TensorflowBackend.from_numpy]
+363:41 call  self.tf.executing_eagerly()
+    -> tensorflow.executing_eagerly
+364:41 call  self.tf.convert_to_tensor(x)
+    -> tensorflow.convert_to_tensor
+
+[einops._backends.TensorflowBackend.to_numpy]
+367:41 call  self.tf.executing_eagerly()
+    -> tensorflow.executing_eagerly
+368:23 call  x.numpy()
+    -> tensorflow.Tensor.numpy
+    -> tensorflow.Variable.numpy
+
+[einops._backends.TensorflowBackend.arange]
+371:29 call  self.tf.range(start, stop)
+    -> tensorflow.range
+
+[einops._backends.TensorflowBackend.shape]
+374:37 call  self.tf.executing_eagerly()
+    -> tensorflow.executing_eagerly
+375:25 call  tuple(UnknownSize() if d is None else int(d) for d in x.s...
+    -> <builtin>.tuple
+375:37 call  UnknownSize()
+    note: UnknownSize defines no __init__ and its first __init__ in the MRO is object.__init__: no edge
+375:61 call  int(d)
+    -> <builtin>.int
+377:43 call  x.shape.as_list()
+    -> tensorflow.Tensor.shape.as_list
+    -> tensorflow.Variable.shape.as_list
+    -> tensorflow.stack.shape.as_list
+    -> tensorflow.einsum.shape.as_list
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+378:37 call  self.tf.shape(x)
+    -> tensorflow.shape
+    reject *: self.tf is the module tensorflow, not a backend
+380:26 call  tuple([s or tf_shape[dim] for dim, s in enumerate(static_...
+    -> <builtin>.tuple
+380:70 call  enumerate(static_shape)
+    -> <builtin>.enumerate
+382:21 call  hash(shape)
+    -> <builtin>.hash
+    note: the tuple holds ints and tensorflow symbols, never an UnknownSize (this is the graph-mode branch)
+386:37 call  HashableTuple(shape)
+    -> einops._backends.HashableTuple.__init__
+
+[einops._backends.TensorflowBackend.reduce]
+389:23 call  getattr(self.tf, "reduce_" + operation)
+    -> <builtin>.getattr
+389:55 call  getattr(self.tf, "reduce_" + operation)(x, axis=axes)
+    -> tensorflow.reduce_min
+    -> tensorflow.reduce_max
+    -> tensorflow.reduce_sum
+    -> tensorflow.reduce_mean
+    -> tensorflow.reduce_prod
+    -> tensorflow.reduce_any
+    -> tensorflow.reduce_all
+    note: the function of tensorflow that "reduce_" + operation names; operation is one of _reductions
+
+[einops._backends.TensorflowBackend.reshape]
+392:31 call  self.tf.reshape(x, shape)
+    -> tensorflow.reshape
+    reject *: self.tf is the module tensorflow, not a backend
+
+[einops._backends.TensorflowBackend.transpose]
+395:33 call  self.tf.transpose(x, axes)
+    -> tensorflow.transpose
+    reject *: self.tf is the module tensorflow, not a backend
+
+[einops._backends.TensorflowBackend.stack_on_zeroth_dimension]
+398:29 call  self.tf.stack(tensors)
+    -> tensorflow.stack
+
+[einops._backends.TensorflowBackend.tile]
+401:28 call  self.tf.tile(x, repeats)
+    -> tensorflow.tile
+    reject *: self.tf is the module tensorflow, not a backend
+
+[einops._backends.TensorflowBackend.concat]
+404:30 call  self.tf.concat(tensors, axis=axis)
+    -> tensorflow.concat
+    reject *: self.tf is the module tensorflow, not a backend
+
+[einops._backends.TensorflowBackend.add_axis]
+407:35 call  self.tf.expand_dims(x, new_position)
+    -> tensorflow.expand_dims
+
+[einops._backends.TensorflowBackend.einsum]
+418:30 call  self.tf.einsum(pattern, *x)
+    -> tensorflow.einsum
+    reject *: self.tf is the module tensorflow, not a backend or the package's einsum
+
+[einops._backends.TFKerasBackend.is_appropriate_type]
+432:33 call  self.tf.is_tensor(tensor)
+    -> tensorflow.is_tensor
+432:68 call  self.K.is_keras_tensor(tensor)
+    -> tensorflow.keras.backend.is_keras_tensor
+
+[einops._backends.TFKerasBackend.create_symbol]
+435:32 call  self.keras.Input(batch_shape=shape)
+    -> tensorflow.keras.Input
+
+[einops._backends.TFKerasBackend.eval_symbol]
+438:40 call  self.keras.models.Model([var for (var, _) in symbol_value...
+    -> tensorflow.keras.models.Model
+439:38 call  model.predict_on_batch([val for (_, val) in symbol_value_...
+    -> tensorflow.keras.models.Model.predict_on_batch
+    note: model is the instance of the missing-module class tensorflow.keras.models.Model made at line 438
+
+[einops._backends.TFKerasBackend.arange]
+442:29 call  self.K.arange(start, stop)
+    -> tensorflow.keras.backend.arange
+    reject *: self.K is the module tensorflow.keras.backend, not a backend
+
+[einops._backends.TFKerasBackend.shape]
+445:29 call  self.K.shape(x)
+    -> tensorflow.keras.backend.shape
+    reject *: self.K is the module tensorflow.keras.backend, not a backend
+446:29 call  HashableTuple(tuple(shape))
+    -> einops._backends.HashableTuple.__init__
+446:35 call  tuple(shape)
+    -> <builtin>.tuple
+
+[einops._backends.TFKerasBackend.reduce]
+449:23 call  getattr(self.K, operation)
+    -> <builtin>.getattr
+449:42 call  getattr(self.K, operation)(x, axis=axes)
+    -> tensorflow.keras.backend.min
+    -> tensorflow.keras.backend.max
+    -> tensorflow.keras.backend.sum
+    -> tensorflow.keras.backend.mean
+    -> tensorflow.keras.backend.prod
+    -> tensorflow.keras.backend.any
+    -> tensorflow.keras.backend.all
+    note: the function of tensorflow.keras.backend that operation names; operation is one of _reductions
+
+[einops._backends.TFKerasBackend.reshape]
+452:30 call  self.K.reshape(x, shape)
+    -> tensorflow.keras.backend.reshape
+    reject *: self.K is the module tensorflow.keras.backend, not a backend
+
+[einops._backends.TFKerasBackend.transpose]
+455:41 call  self.K.permute_dimensions(x, axes)
+    -> tensorflow.keras.backend.permute_dimensions
+
+[einops._backends.TFKerasBackend.stack_on_zeroth_dimension]
+458:28 call  self.K.stack(tensors)
+    -> tensorflow.keras.backend.stack
+
+[einops._backends.TFKerasBackend.tile]
+461:27 call  self.K.tile(x, repeats)
+    -> tensorflow.keras.backend.tile
+    reject *: self.K is the module tensorflow.keras.backend, not a backend
+
+[einops._backends.TFKerasBackend.concat]
+464:34 call  self.K.concatenate(tensors, axis=axis)
+    -> tensorflow.keras.backend.concatenate
+
+[einops._backends.TFKerasBackend.add_axis]
+467:34 call  self.K.expand_dims(x, new_position)
+    -> tensorflow.keras.backend.expand_dims
+
+[einops._backends.TFKerasBackend.is_float_type]
+470:39 call  self.K.dtype(x)
+    -> tensorflow.keras.backend.dtype
+
+[einops._backends.OneFlowBackend.is_appropriate_type]
+487:26 call  isinstance(tensor, self.flow.Tensor)
+    -> <builtin>.isinstance
+
+[einops._backends.OneFlowBackend.from_numpy]
+490:40 call  self.flow.from_numpy(x)
+    -> oneflow.from_numpy
+    reject *: self.flow is the module oneflow, not a backend
+491:30 call  self.is_float_type(variable)
+    -> einops._backends.OneFlowBackend.is_float_type
+    reject *: self is a OneFlowBackend (it has no subclass)
+
+[einops._backends.OneFlowBackend.to_numpy]
+497:24 call  x.detach()
+    -> oneflow.Tensor.detach
+497:30 call  x.detach().cpu()
+    -> oneflow.Tensor.detach.cpu
+497:38 call  x.detach().cpu().numpy()
+    -> oneflow.Tensor.detach.cpu.numpy
+
+[einops._backends.OneFlowBackend.arange]
+500:32 call  self.flow.arange(start, stop, dtype=self.flow.int64)
+    -> oneflow.arange
+    reject *: self.flow is the module oneflow, not a backend
+
+[einops._backends.OneFlowBackend.reduce]
+503:27 call  sorted(reduced_axes, reverse=True)
+    -> <builtin>.sorted
+505:29 call  x.min(dim=axis)
+    -> oneflow.Tensor.min
+    -> oneflow.stack.min
+    -> oneflow.Tensor.reshape.min
+    -> oneflow.stack.reshape.min
+    -> oneflow.Tensor.permute.min
+    -> oneflow.stack.permute.min
+    -> oneflow.Tensor.reshape.permute.min
+    -> oneflow.stack.reshape.permute.min
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+507:29 call  x.max(dim=axis)
+    -> oneflow.Tensor.max
+    -> oneflow.stack.max
+    -> oneflow.Tensor.reshape.max
+    -> oneflow.stack.reshape.max
+    -> oneflow.Tensor.permute.max
+    -> oneflow.stack.permute.max
+    -> oneflow.Tensor.reshape.permute.max
+    -> oneflow.stack.reshape.permute.max
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+509:28 call  getattr(x, operation)
+    -> <builtin>.getattr
+509:42 call  getattr(x, operation)(dim=axis)
+    -> oneflow.Tensor.sum
+    -> oneflow.Tensor.mean
+    -> oneflow.Tensor.prod
+    -> oneflow.Tensor.any
+    -> oneflow.Tensor.all
+    -> oneflow.Tensor.sum.sum
+    -> oneflow.stack.sum
+    -> oneflow.stack.sum.sum
+    -> oneflow.Tensor.reshape.sum
+    -> oneflow.Tensor.reshape.sum.sum
+    -> oneflow.stack.reshape.sum
+    -> oneflow.stack.reshape.sum.sum
+    -> oneflow.Tensor.permute.sum
+    -> oneflow.Tensor.permute.sum.sum
+    -> oneflow.stack.permute.sum
+    -> oneflow.stack.permute.sum.sum
+    -> oneflow.Tensor.reshape.permute.sum
+    -> oneflow.Tensor.reshape.permute.sum.sum
+    -> oneflow.stack.reshape.permute.sum
+    -> oneflow.stack.reshape.permute.sum.sum
+    -> oneflow.Tensor.mean.mean
+    -> oneflow.stack.mean
+    -> oneflow.stack.mean.mean
+    -> oneflow.Tensor.reshape.mean
+    -> oneflow.Tensor.reshape.mean.mean
+    -> oneflow.stack.reshape.mean
+    -> oneflow.stack.reshape.mean.mean
+    -> oneflow.Tensor.permute.mean
+    -> oneflow.Tensor.permute.mean.mean
+    -> oneflow.stack.permute.mean
+    -> oneflow.stack.permute.mean.mean
+    -> oneflow.Tensor.reshape.permute.mean
+    -> oneflow.Tensor.reshape.permute.mean.mean
+    -> oneflow.stack.reshape.permute.mean
+    -> oneflow.stack.reshape.permute.mean.mean
+    -> oneflow.Tensor.prod.prod
+    -> oneflow.stack.prod
+    -> oneflow.stack.prod.prod
+    -> oneflow.Tensor.reshape.prod
+    -> oneflow.Tensor.reshape.prod.prod
+    -> oneflow.stack.reshape.prod
+    -> oneflow.stack.reshape.prod.prod
+    -> oneflow.Tensor.permute.prod
+    -> oneflow.Tensor.permute.prod.prod
+    -> oneflow.stack.permute.prod
+    -> oneflow.stack.permute.prod.prod
+    -> oneflow.Tensor.reshape.permute.prod
+    -> oneflow.Tensor.reshape.permute.prod.prod
+    -> oneflow.stack.reshape.permute.prod
+    -> oneflow.stack.reshape.permute.prod.prod
+    -> oneflow.Tensor.any.any
+    -> oneflow.stack.any
+    -> oneflow.stack.any.any
+    -> oneflow.Tensor.reshape.any
+    -> oneflow.Tensor.reshape.any.any
+    -> oneflow.stack.reshape.any
+    -> oneflow.stack.reshape.any.any
+    -> oneflow.Tensor.permute.any
+    -> oneflow.Tensor.permute.any.any
+    -> oneflow.stack.permute.any
+    -> oneflow.stack.permute.any.any
+    -> oneflow.Tensor.reshape.permute.any
+    -> oneflow.Tensor.reshape.permute.any.any
+    -> oneflow.stack.reshape.permute.any
+    -> oneflow.stack.reshape.permute.any.any
+    -> oneflow.Tensor.all.all
+    -> oneflow.stack.all
+    -> oneflow.stack.all.all
+    -> oneflow.Tensor.reshape.all
+    -> oneflow.Tensor.reshape.all.all
+    -> oneflow.stack.reshape.all
+    -> oneflow.stack.reshape.all.all
+    -> oneflow.Tensor.permute.all
+    -> oneflow.Tensor.permute.all.all
+    -> oneflow.stack.permute.all
+    -> oneflow.stack.permute.all.all
+    -> oneflow.Tensor.reshape.permute.all
+    -> oneflow.Tensor.reshape.permute.all.all
+    -> oneflow.stack.reshape.permute.all
+    -> oneflow.stack.reshape.permute.all.all
+    note: the method of the oneflow.Tensor x that operation names; this branch runs for operation in ["sum", "mean", "prod", "any", "all"]
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+511:42 call  NotImplementedError("Unknown reduction ", operation)
+    note: a check that cannot fail under the package's own values: operation is always one of _reductions (_prepare_transformation_recipe refuses any other str, and a callable reduction never reaches backend.reduce), and every one has a branch, so this raise never runs (README, B1)
+
+[einops._backends.OneFlowBackend.transpose]
+515:25 call  x.permute(axes)
+    -> oneflow.Tensor.permute
+    -> oneflow.stack.permute
+    -> oneflow.Tensor.reshape.permute
+    -> oneflow.stack.reshape.permute
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._backends.OneFlowBackend.stack_on_zeroth_dimension]
+518:31 call  self.flow.stack(tensors)
+    -> oneflow.stack
+
+[einops._backends.OneFlowBackend.add_axes]
+521:24 op  [-1] * n_axes
+    reject *: a list times an int
+522:56 call  pos2len.items()
+    -> <builtin>.dict.items
+523:30 call  self.add_axis(x, axis_position)
+    -> einops._backends.OneFlowBackend.add_axis
+    reject *: self is a OneFlowBackend (it has no subclass)
+525:24 call  x.expand(*repeats)
+    -> oneflow.unsqueeze.expand
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; removed by the ruling: oneflow.Tensor.expand
+
+[einops._backends.OneFlowBackend.tile]
+528:24 call  x.repeat(repeats)
+    -> oneflow.Tensor.repeat
+    reject *: x is a oneflow.Tensor; the package functions named repeat are not its methods
+
+[einops._backends.OneFlowBackend.concat]
+531:32 call  self.flow.concat(tensors, dim=axis)
+    -> oneflow.concat
+    reject *: self.flow is the module oneflow, not a backend
+
+[einops._backends.OneFlowBackend.add_axis]
+534:35 call  self.flow.unsqueeze(x, new_position)
+    -> oneflow.unsqueeze
+
+[einops._backends.OneFlowBackend.einsum]
+545:32 call  self.flow.einsum(pattern, *x)
+    -> oneflow.einsum
+    reject *: self.flow is the module oneflow, not a backend or the package's einsum
+
+[einops._backends.PaddleBackend.is_appropriate_type]
+557:37 call  self.paddle.is_tensor(tensor)
+    -> paddle.is_tensor
+
+[einops._backends.PaddleBackend.from_numpy]
+560:39 call  self.paddle.to_tensor(x)
+    -> paddle.to_tensor
+
+[einops._backends.PaddleBackend.to_numpy]
+565:24 call  x.detach()
+    note: x is a paddle tensor, whose class the package never names (is_appropriate_type uses paddle.is_tensor, not isinstance): a client object with no callee (B5; einops.md, "Backends and tensors")
+565:32 call  x.detach().numpy()
+    note: a method of the result of x.detach() on a paddle tensor: no callee, as at 565:24
+
+[einops._backends.PaddleBackend.arange]
+568:34 call  self.paddle.arange(start, stop, dtype=self.paddle.int64)
+    -> paddle.arange
+    reject *: self.paddle is the module paddle, not a backend
+
+[einops._backends.PaddleBackend.reduce]
+571:15 call  len(axes)
+    -> <builtin>.len
+573:25 call  super()
+    -> <builtin>.super
+573:34 call  super().reduce(x, operation, axes)
+    -> einops._backends.AbstractBackend.reduce
+    reject *: super() in PaddleBackend, whose base is AbstractBackend
+573:62 call  super().reduce(x, operation, axes).squeeze(0)
+    -> paddle.stack.min.squeeze
+    -> paddle.stack.reshape.min.squeeze
+    -> paddle.stack.transpose.min.squeeze
+    -> paddle.stack.reshape.transpose.min.squeeze
+    -> paddle.stack.max.squeeze
+    -> paddle.stack.reshape.max.squeeze
+    -> paddle.stack.transpose.max.squeeze
+    -> paddle.stack.reshape.transpose.max.squeeze
+    -> paddle.stack.sum.squeeze
+    -> paddle.stack.reshape.sum.squeeze
+    -> paddle.stack.transpose.sum.squeeze
+    -> paddle.stack.reshape.transpose.sum.squeeze
+    -> paddle.stack.mean.squeeze
+    -> paddle.stack.reshape.mean.squeeze
+    -> paddle.stack.transpose.mean.squeeze
+    -> paddle.stack.reshape.transpose.mean.squeeze
+    -> paddle.stack.prod.squeeze
+    -> paddle.stack.reshape.prod.squeeze
+    -> paddle.stack.transpose.prod.squeeze
+    -> paddle.stack.reshape.transpose.prod.squeeze
+    -> paddle.stack.any.squeeze
+    -> paddle.stack.reshape.any.squeeze
+    -> paddle.stack.transpose.any.squeeze
+    -> paddle.stack.reshape.transpose.any.squeeze
+    -> paddle.stack.all.squeeze
+    -> paddle.stack.reshape.all.squeeze
+    -> paddle.stack.transpose.all.squeeze
+    -> paddle.stack.reshape.transpose.all.squeeze
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+575:25 call  super()
+    -> <builtin>.super
+575:34 call  super().reduce(x, operation, axes)
+    -> einops._backends.AbstractBackend.reduce
+    reject *: super() in PaddleBackend, whose base is AbstractBackend
+
+[einops._backends.PaddleBackend.transpose]
+578:27 call  x.transpose(axes)
+    -> paddle.stack.transpose
+    -> paddle.stack.reshape.transpose
+    reject *: x is a paddle tensor, never a package object
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._backends.PaddleBackend.add_axes]
+581:24 op  [-1] * n_axes
+    reject *: a list times an int
+582:56 call  pos2len.items()
+    -> <builtin>.dict.items
+583:30 call  self.add_axis(x, axis_position)
+    -> einops._backends.PaddleBackend.add_axis
+    reject *: self is a PaddleBackend (it has no subclass)
+585:24 call  x.expand(repeats)
+    -> paddle.stack.unsqueeze.expand
+    -> paddle.stack.unsqueeze.unsqueeze.expand
+    -> paddle.stack.reshape.unsqueeze.expand
+    -> paddle.stack.reshape.unsqueeze.unsqueeze.expand
+    -> paddle.stack.transpose.unsqueeze.expand
+    -> paddle.stack.transpose.unsqueeze.unsqueeze.expand
+    -> paddle.stack.reshape.transpose.unsqueeze.expand
+    -> paddle.stack.reshape.transpose.unsqueeze.unsqueeze.expand
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.PaddleBackend.stack_on_zeroth_dimension]
+588:33 call  self.paddle.stack(tensors)
+    -> paddle.stack
+
+[einops._backends.PaddleBackend.reshape]
+591:25 call  x.reshape(shape)
+    -> paddle.stack.reshape
+    -> paddle.stack.reshape.reshape
+    -> paddle.stack.transpose.reshape
+    -> paddle.stack.reshape.transpose.reshape
+    -> paddle.stack.min.reshape
+    -> paddle.stack.reshape.min.reshape
+    -> paddle.stack.transpose.min.reshape
+    -> paddle.stack.reshape.transpose.min.reshape
+    -> paddle.stack.max.reshape
+    -> paddle.stack.reshape.max.reshape
+    -> paddle.stack.transpose.max.reshape
+    -> paddle.stack.reshape.transpose.max.reshape
+    -> paddle.stack.sum.reshape
+    -> paddle.stack.reshape.sum.reshape
+    -> paddle.stack.transpose.sum.reshape
+    -> paddle.stack.reshape.transpose.sum.reshape
+    -> paddle.stack.mean.reshape
+    -> paddle.stack.reshape.mean.reshape
+    -> paddle.stack.transpose.mean.reshape
+    -> paddle.stack.reshape.transpose.mean.reshape
+    -> paddle.stack.prod.reshape
+    -> paddle.stack.reshape.prod.reshape
+    -> paddle.stack.transpose.prod.reshape
+    -> paddle.stack.reshape.transpose.prod.reshape
+    -> paddle.stack.any.reshape
+    -> paddle.stack.reshape.any.reshape
+    -> paddle.stack.transpose.any.reshape
+    -> paddle.stack.reshape.transpose.any.reshape
+    -> paddle.stack.all.reshape
+    -> paddle.stack.reshape.all.reshape
+    -> paddle.stack.transpose.all.reshape
+    -> paddle.stack.reshape.transpose.all.reshape
+    -> paddle.stack.min.squeeze.reshape
+    -> paddle.stack.reshape.min.squeeze.reshape
+    -> paddle.stack.transpose.min.squeeze.reshape
+    -> paddle.stack.reshape.transpose.min.squeeze.reshape
+    -> paddle.stack.max.squeeze.reshape
+    -> paddle.stack.reshape.max.squeeze.reshape
+    -> paddle.stack.transpose.max.squeeze.reshape
+    -> paddle.stack.reshape.transpose.max.squeeze.reshape
+    -> paddle.stack.sum.squeeze.reshape
+    -> paddle.stack.reshape.sum.squeeze.reshape
+    -> paddle.stack.transpose.sum.squeeze.reshape
+    -> paddle.stack.reshape.transpose.sum.squeeze.reshape
+    -> paddle.stack.mean.squeeze.reshape
+    -> paddle.stack.reshape.mean.squeeze.reshape
+    -> paddle.stack.transpose.mean.squeeze.reshape
+    -> paddle.stack.reshape.transpose.mean.squeeze.reshape
+    -> paddle.stack.prod.squeeze.reshape
+    -> paddle.stack.reshape.prod.squeeze.reshape
+    -> paddle.stack.transpose.prod.squeeze.reshape
+    -> paddle.stack.reshape.transpose.prod.squeeze.reshape
+    -> paddle.stack.any.squeeze.reshape
+    -> paddle.stack.reshape.any.squeeze.reshape
+    -> paddle.stack.transpose.any.squeeze.reshape
+    -> paddle.stack.reshape.transpose.any.squeeze.reshape
+    -> paddle.stack.all.squeeze.reshape
+    -> paddle.stack.reshape.all.squeeze.reshape
+    -> paddle.stack.transpose.all.squeeze.reshape
+    -> paddle.stack.reshape.transpose.all.squeeze.reshape
+    -> paddle.stack.unsqueeze.expand.reshape
+    -> paddle.stack.unsqueeze.unsqueeze.expand.reshape
+    -> paddle.stack.reshape.unsqueeze.expand.reshape
+    -> paddle.stack.reshape.unsqueeze.unsqueeze.expand.reshape
+    -> paddle.stack.transpose.unsqueeze.expand.reshape
+    -> paddle.stack.transpose.unsqueeze.unsqueeze.expand.reshape
+    -> paddle.stack.reshape.transpose.unsqueeze.expand.reshape
+    -> paddle.stack.reshape.transpose.unsqueeze.unsqueeze.expand.reshape
+    -> paddle.arange.reshape
+    -> paddle.einsum.reshape
+    reject *: x is a paddle tensor, never a package object
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.PaddleBackend.tile]
+594:22 call  x.tile(repeats)
+    note: x is a paddle tensor, whose class the package never names: no callee
+    reject *: x is a paddle tensor, never a package object
+
+[einops._backends.PaddleBackend.concat]
+597:34 call  self.paddle.concat(tensors, axis=axis)
+    -> paddle.concat
+    reject *: self.paddle is the module paddle, not a backend
+
+[einops._backends.PaddleBackend.add_axis]
+600:27 call  x.unsqueeze(new_position)
+    -> paddle.stack.unsqueeze
+    -> paddle.stack.unsqueeze.unsqueeze
+    -> paddle.stack.reshape.unsqueeze
+    -> paddle.stack.reshape.unsqueeze.unsqueeze
+    -> paddle.stack.transpose.unsqueeze
+    -> paddle.stack.transpose.unsqueeze.unsqueeze
+    -> paddle.stack.reshape.transpose.unsqueeze
+    -> paddle.stack.reshape.transpose.unsqueeze.unsqueeze
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.PaddleBackend.einsum]
+611:34 call  self.paddle.einsum(pattern, *x)
+    -> paddle.einsum
+    reject *: self.paddle is the module paddle, not a backend or the package's einsum
+
+[einops._backends.PaddleBackend.shape]
+614:21 call  tuple(x.shape)
+    -> <builtin>.tuple
+    reject *: tuple() iterates the shape attribute of a paddle tensor, not a package object
+    note: iterating a paddle shape (a list) runs no package code
+
+[einops._backends.TinygradBackend.is_appropriate_type]
+626:26 call  isinstance(tensor, self.tinygrad.Tensor)
+    -> <builtin>.isinstance
+
+[einops._backends.TinygradBackend.from_numpy]
+629:36 call  self.tinygrad.Tensor(x)
+    -> tinygrad.Tensor
+    note: self.tinygrad is the module tinygrad; the callee is its class Tensor (a missing module)
+
+[einops._backends.TinygradBackend.to_numpy]
+632:23 call  x.numpy()
+    -> tinygrad.Tensor.numpy
+
+[einops._backends.TinygradBackend.arange]
+635:43 call  self.tinygrad.Tensor.arange(start, stop)
+    -> tinygrad.Tensor.arange
+    reject *: the class tinygrad.Tensor, not a backend
+
+[einops._backends.TinygradBackend.reshape]
+641:25 call  x.reshape(shape)
+    -> tinygrad.Tensor.reshape
+    -> tinygrad.Tensor.stack.reshape
+    -> tinygrad.Tensor.reshape.reshape
+    -> tinygrad.Tensor.stack.reshape.reshape
+    -> tinygrad.Tensor.permute.reshape
+    -> tinygrad.Tensor.stack.permute.reshape
+    -> tinygrad.Tensor.reshape.permute.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.reshape
+    -> tinygrad.Tensor.min.reshape
+    -> tinygrad.Tensor.min.min.reshape
+    -> tinygrad.Tensor.stack.min.reshape
+    -> tinygrad.Tensor.stack.min.min.reshape
+    -> tinygrad.Tensor.reshape.min.reshape
+    -> tinygrad.Tensor.reshape.min.min.reshape
+    -> tinygrad.Tensor.stack.reshape.min.reshape
+    -> tinygrad.Tensor.stack.reshape.min.min.reshape
+    -> tinygrad.Tensor.permute.min.reshape
+    -> tinygrad.Tensor.permute.min.min.reshape
+    -> tinygrad.Tensor.stack.permute.min.reshape
+    -> tinygrad.Tensor.stack.permute.min.min.reshape
+    -> tinygrad.Tensor.reshape.permute.min.reshape
+    -> tinygrad.Tensor.reshape.permute.min.min.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.min.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.min.min.reshape
+    -> tinygrad.Tensor.max.reshape
+    -> tinygrad.Tensor.max.max.reshape
+    -> tinygrad.Tensor.stack.max.reshape
+    -> tinygrad.Tensor.stack.max.max.reshape
+    -> tinygrad.Tensor.reshape.max.reshape
+    -> tinygrad.Tensor.reshape.max.max.reshape
+    -> tinygrad.Tensor.stack.reshape.max.reshape
+    -> tinygrad.Tensor.stack.reshape.max.max.reshape
+    -> tinygrad.Tensor.permute.max.reshape
+    -> tinygrad.Tensor.permute.max.max.reshape
+    -> tinygrad.Tensor.stack.permute.max.reshape
+    -> tinygrad.Tensor.stack.permute.max.max.reshape
+    -> tinygrad.Tensor.reshape.permute.max.reshape
+    -> tinygrad.Tensor.reshape.permute.max.max.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.max.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.max.max.reshape
+    -> tinygrad.Tensor.sum.reshape
+    -> tinygrad.Tensor.sum.sum.reshape
+    -> tinygrad.Tensor.stack.sum.reshape
+    -> tinygrad.Tensor.stack.sum.sum.reshape
+    -> tinygrad.Tensor.reshape.sum.reshape
+    -> tinygrad.Tensor.reshape.sum.sum.reshape
+    -> tinygrad.Tensor.stack.reshape.sum.reshape
+    -> tinygrad.Tensor.stack.reshape.sum.sum.reshape
+    -> tinygrad.Tensor.permute.sum.reshape
+    -> tinygrad.Tensor.permute.sum.sum.reshape
+    -> tinygrad.Tensor.stack.permute.sum.reshape
+    -> tinygrad.Tensor.stack.permute.sum.sum.reshape
+    -> tinygrad.Tensor.reshape.permute.sum.reshape
+    -> tinygrad.Tensor.reshape.permute.sum.sum.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.sum.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.sum.sum.reshape
+    -> tinygrad.Tensor.mean.reshape
+    -> tinygrad.Tensor.mean.mean.reshape
+    -> tinygrad.Tensor.stack.mean.reshape
+    -> tinygrad.Tensor.stack.mean.mean.reshape
+    -> tinygrad.Tensor.reshape.mean.reshape
+    -> tinygrad.Tensor.reshape.mean.mean.reshape
+    -> tinygrad.Tensor.stack.reshape.mean.reshape
+    -> tinygrad.Tensor.stack.reshape.mean.mean.reshape
+    -> tinygrad.Tensor.permute.mean.reshape
+    -> tinygrad.Tensor.permute.mean.mean.reshape
+    -> tinygrad.Tensor.stack.permute.mean.reshape
+    -> tinygrad.Tensor.stack.permute.mean.mean.reshape
+    -> tinygrad.Tensor.reshape.permute.mean.reshape
+    -> tinygrad.Tensor.reshape.permute.mean.mean.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.mean.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.mean.mean.reshape
+    -> tinygrad.Tensor.prod.reshape
+    -> tinygrad.Tensor.prod.prod.reshape
+    -> tinygrad.Tensor.stack.prod.reshape
+    -> tinygrad.Tensor.stack.prod.prod.reshape
+    -> tinygrad.Tensor.reshape.prod.reshape
+    -> tinygrad.Tensor.reshape.prod.prod.reshape
+    -> tinygrad.Tensor.stack.reshape.prod.reshape
+    -> tinygrad.Tensor.stack.reshape.prod.prod.reshape
+    -> tinygrad.Tensor.permute.prod.reshape
+    -> tinygrad.Tensor.permute.prod.prod.reshape
+    -> tinygrad.Tensor.stack.permute.prod.reshape
+    -> tinygrad.Tensor.stack.permute.prod.prod.reshape
+    -> tinygrad.Tensor.reshape.permute.prod.reshape
+    -> tinygrad.Tensor.reshape.permute.prod.prod.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.prod.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.prod.prod.reshape
+    -> tinygrad.Tensor.any.reshape
+    -> tinygrad.Tensor.any.any.reshape
+    -> tinygrad.Tensor.stack.any.reshape
+    -> tinygrad.Tensor.stack.any.any.reshape
+    -> tinygrad.Tensor.reshape.any.reshape
+    -> tinygrad.Tensor.reshape.any.any.reshape
+    -> tinygrad.Tensor.stack.reshape.any.reshape
+    -> tinygrad.Tensor.stack.reshape.any.any.reshape
+    -> tinygrad.Tensor.permute.any.reshape
+    -> tinygrad.Tensor.permute.any.any.reshape
+    -> tinygrad.Tensor.stack.permute.any.reshape
+    -> tinygrad.Tensor.stack.permute.any.any.reshape
+    -> tinygrad.Tensor.reshape.permute.any.reshape
+    -> tinygrad.Tensor.reshape.permute.any.any.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.any.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.any.any.reshape
+    -> tinygrad.Tensor.all.reshape
+    -> tinygrad.Tensor.all.all.reshape
+    -> tinygrad.Tensor.stack.all.reshape
+    -> tinygrad.Tensor.stack.all.all.reshape
+    -> tinygrad.Tensor.reshape.all.reshape
+    -> tinygrad.Tensor.reshape.all.all.reshape
+    -> tinygrad.Tensor.stack.reshape.all.reshape
+    -> tinygrad.Tensor.stack.reshape.all.all.reshape
+    -> tinygrad.Tensor.permute.all.reshape
+    -> tinygrad.Tensor.permute.all.all.reshape
+    -> tinygrad.Tensor.stack.permute.all.reshape
+    -> tinygrad.Tensor.stack.permute.all.all.reshape
+    -> tinygrad.Tensor.reshape.permute.all.reshape
+    -> tinygrad.Tensor.reshape.permute.all.all.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.all.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.all.all.reshape
+    -> tinygrad.Tensor.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.reshape.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.reshape.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.reshape.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.reshape.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.permute.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.permute.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.permute.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.permute.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.reshape.permute.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.reshape.permute.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.stack.reshape.permute.unsqueeze.unsqueeze.repeat.reshape
+    -> tinygrad.Tensor.arange.reshape
+    reject *: x is a tinygrad.Tensor, never a package object
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.TinygradBackend.transpose]
+644:25 call  x.permute(axes)
+    -> tinygrad.Tensor.permute
+    -> tinygrad.Tensor.stack.permute
+    -> tinygrad.Tensor.reshape.permute
+    -> tinygrad.Tensor.stack.reshape.permute
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._backends.TinygradBackend.reduce]
+647:27 call  sorted(axes, reverse=True)
+    -> <builtin>.sorted
+648:24 call  getattr(x, operation)
+    -> <builtin>.getattr
+648:38 call  getattr(x, operation)(axis=axis)
+    -> tinygrad.Tensor.min
+    -> tinygrad.Tensor.max
+    -> tinygrad.Tensor.sum
+    -> tinygrad.Tensor.mean
+    -> tinygrad.Tensor.prod
+    -> tinygrad.Tensor.any
+    -> tinygrad.Tensor.all
+    -> tinygrad.Tensor.min.min
+    -> tinygrad.Tensor.stack.min
+    -> tinygrad.Tensor.stack.min.min
+    -> tinygrad.Tensor.reshape.min
+    -> tinygrad.Tensor.reshape.min.min
+    -> tinygrad.Tensor.stack.reshape.min
+    -> tinygrad.Tensor.stack.reshape.min.min
+    -> tinygrad.Tensor.permute.min
+    -> tinygrad.Tensor.permute.min.min
+    -> tinygrad.Tensor.stack.permute.min
+    -> tinygrad.Tensor.stack.permute.min.min
+    -> tinygrad.Tensor.reshape.permute.min
+    -> tinygrad.Tensor.reshape.permute.min.min
+    -> tinygrad.Tensor.stack.reshape.permute.min
+    -> tinygrad.Tensor.stack.reshape.permute.min.min
+    -> tinygrad.Tensor.max.max
+    -> tinygrad.Tensor.stack.max
+    -> tinygrad.Tensor.stack.max.max
+    -> tinygrad.Tensor.reshape.max
+    -> tinygrad.Tensor.reshape.max.max
+    -> tinygrad.Tensor.stack.reshape.max
+    -> tinygrad.Tensor.stack.reshape.max.max
+    -> tinygrad.Tensor.permute.max
+    -> tinygrad.Tensor.permute.max.max
+    -> tinygrad.Tensor.stack.permute.max
+    -> tinygrad.Tensor.stack.permute.max.max
+    -> tinygrad.Tensor.reshape.permute.max
+    -> tinygrad.Tensor.reshape.permute.max.max
+    -> tinygrad.Tensor.stack.reshape.permute.max
+    -> tinygrad.Tensor.stack.reshape.permute.max.max
+    -> tinygrad.Tensor.sum.sum
+    -> tinygrad.Tensor.stack.sum
+    -> tinygrad.Tensor.stack.sum.sum
+    -> tinygrad.Tensor.reshape.sum
+    -> tinygrad.Tensor.reshape.sum.sum
+    -> tinygrad.Tensor.stack.reshape.sum
+    -> tinygrad.Tensor.stack.reshape.sum.sum
+    -> tinygrad.Tensor.permute.sum
+    -> tinygrad.Tensor.permute.sum.sum
+    -> tinygrad.Tensor.stack.permute.sum
+    -> tinygrad.Tensor.stack.permute.sum.sum
+    -> tinygrad.Tensor.reshape.permute.sum
+    -> tinygrad.Tensor.reshape.permute.sum.sum
+    -> tinygrad.Tensor.stack.reshape.permute.sum
+    -> tinygrad.Tensor.stack.reshape.permute.sum.sum
+    -> tinygrad.Tensor.mean.mean
+    -> tinygrad.Tensor.stack.mean
+    -> tinygrad.Tensor.stack.mean.mean
+    -> tinygrad.Tensor.reshape.mean
+    -> tinygrad.Tensor.reshape.mean.mean
+    -> tinygrad.Tensor.stack.reshape.mean
+    -> tinygrad.Tensor.stack.reshape.mean.mean
+    -> tinygrad.Tensor.permute.mean
+    -> tinygrad.Tensor.permute.mean.mean
+    -> tinygrad.Tensor.stack.permute.mean
+    -> tinygrad.Tensor.stack.permute.mean.mean
+    -> tinygrad.Tensor.reshape.permute.mean
+    -> tinygrad.Tensor.reshape.permute.mean.mean
+    -> tinygrad.Tensor.stack.reshape.permute.mean
+    -> tinygrad.Tensor.stack.reshape.permute.mean.mean
+    -> tinygrad.Tensor.prod.prod
+    -> tinygrad.Tensor.stack.prod
+    -> tinygrad.Tensor.stack.prod.prod
+    -> tinygrad.Tensor.reshape.prod
+    -> tinygrad.Tensor.reshape.prod.prod
+    -> tinygrad.Tensor.stack.reshape.prod
+    -> tinygrad.Tensor.stack.reshape.prod.prod
+    -> tinygrad.Tensor.permute.prod
+    -> tinygrad.Tensor.permute.prod.prod
+    -> tinygrad.Tensor.stack.permute.prod
+    -> tinygrad.Tensor.stack.permute.prod.prod
+    -> tinygrad.Tensor.reshape.permute.prod
+    -> tinygrad.Tensor.reshape.permute.prod.prod
+    -> tinygrad.Tensor.stack.reshape.permute.prod
+    -> tinygrad.Tensor.stack.reshape.permute.prod.prod
+    -> tinygrad.Tensor.any.any
+    -> tinygrad.Tensor.stack.any
+    -> tinygrad.Tensor.stack.any.any
+    -> tinygrad.Tensor.reshape.any
+    -> tinygrad.Tensor.reshape.any.any
+    -> tinygrad.Tensor.stack.reshape.any
+    -> tinygrad.Tensor.stack.reshape.any.any
+    -> tinygrad.Tensor.permute.any
+    -> tinygrad.Tensor.permute.any.any
+    -> tinygrad.Tensor.stack.permute.any
+    -> tinygrad.Tensor.stack.permute.any.any
+    -> tinygrad.Tensor.reshape.permute.any
+    -> tinygrad.Tensor.reshape.permute.any.any
+    -> tinygrad.Tensor.stack.reshape.permute.any
+    -> tinygrad.Tensor.stack.reshape.permute.any.any
+    -> tinygrad.Tensor.all.all
+    -> tinygrad.Tensor.stack.all
+    -> tinygrad.Tensor.stack.all.all
+    -> tinygrad.Tensor.reshape.all
+    -> tinygrad.Tensor.reshape.all.all
+    -> tinygrad.Tensor.stack.reshape.all
+    -> tinygrad.Tensor.stack.reshape.all.all
+    -> tinygrad.Tensor.permute.all
+    -> tinygrad.Tensor.permute.all.all
+    -> tinygrad.Tensor.stack.permute.all
+    -> tinygrad.Tensor.stack.permute.all.all
+    -> tinygrad.Tensor.reshape.permute.all
+    -> tinygrad.Tensor.reshape.permute.all.all
+    -> tinygrad.Tensor.stack.reshape.permute.all
+    -> tinygrad.Tensor.stack.reshape.permute.all.all
+    note: the method of the tinygrad.Tensor x that operation names; operation is one of _reductions
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.TinygradBackend.stack_on_zeroth_dimension]
+652:42 call  self.tinygrad.Tensor.stack(tensors)
+    -> tinygrad.Tensor.stack
+
+[einops._backends.TinygradBackend.add_axis]
+655:27 call  x.unsqueeze(new_position)
+    -> tinygrad.Tensor.unsqueeze
+    -> tinygrad.Tensor.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.stack.unsqueeze
+    -> tinygrad.Tensor.stack.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.reshape.unsqueeze
+    -> tinygrad.Tensor.reshape.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.stack.reshape.unsqueeze
+    -> tinygrad.Tensor.stack.reshape.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.permute.unsqueeze
+    -> tinygrad.Tensor.permute.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.stack.permute.unsqueeze
+    -> tinygrad.Tensor.stack.permute.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.reshape.permute.unsqueeze
+    -> tinygrad.Tensor.reshape.permute.unsqueeze.unsqueeze
+    -> tinygrad.Tensor.stack.reshape.permute.unsqueeze
+    -> tinygrad.Tensor.stack.reshape.permute.unsqueeze.unsqueeze
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._backends.TinygradBackend.tile]
+658:24 call  x.repeat(repeats)
+    -> tinygrad.Tensor.unsqueeze.repeat
+    -> tinygrad.Tensor.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.reshape.unsqueeze.repeat
+    -> tinygrad.Tensor.reshape.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.reshape.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.reshape.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.permute.unsqueeze.repeat
+    -> tinygrad.Tensor.permute.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.permute.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.permute.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.reshape.permute.unsqueeze.repeat
+    -> tinygrad.Tensor.reshape.permute.unsqueeze.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.reshape.permute.unsqueeze.repeat
+    -> tinygrad.Tensor.stack.reshape.permute.unsqueeze.unsqueeze.repeat
+    reject *: x is a tinygrad.Tensor; the package functions named repeat are not its methods
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets"); removed by the ruling: tinygrad.Tensor.repeat
+
+[einops._backends.TinygradBackend.concat]
+661:30 call  tensors[0].cat(*tensors[1:], dim=axis)
+    -> tinygrad.Tensor.reshape.cat
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; removed by the ruling: tinygrad.Tensor.cat
+661:61 call  len(tensors)
+    -> <builtin>.len
+
+[einops._backends.TinygradBackend.is_float_type]
+664:45 call  self.tinygrad.dtypes.is_float(x.dtype)
+    -> tinygrad.dtypes.is_float
+
+[einops._backends.TinygradBackend.einsum]
+667:43 call  self.tinygrad.Tensor.einsum(pattern, *x)
+    -> tinygrad.Tensor.einsum
+    reject *: the class tinygrad.Tensor, not a backend or the package's einsum
+
+[einops._backends.PyTensorBackend.is_appropriate_type]
+679:26 call  isinstance(tensor, self.pt.TensorVariable)
+    -> <builtin>.isinstance
+
+[einops._backends.PyTensorBackend.from_numpy]
+685:33 call  self.pt.as_tensor(x)
+    -> pytensor.tensor.as_tensor
+
+[einops._backends.PyTensorBackend.to_numpy]
+688:22 call  x.eval()
+    -> pytensor.tensor.TensorVariable.eval
+
+[einops._backends.PyTensorBackend.create_symbol]
+691:26 call  isinstance(shape, tuple | list)
+    -> <builtin>.isinstance
+    note: on Python 3.9 `tuple | list` raises TypeError before isinstance runs; from 3.10 the call runs
+693:30 call  self.pt.tensor(shape=shape)
+    -> pytensor.tensor.tensor
+
+[einops._backends.PyTensorBackend.eval_symbol]
+696:27 call  symbol.eval(dict(symbol_value_pairs))
+    note: symbol is the client's symbol (eval_symbol is a public method of a private class that no package code calls; its parameters are judged as for a public method): an opaque client object
+696:32 call  dict(symbol_value_pairs)
+    -> <builtin>.dict
+
+[einops._backends.PyTensorBackend.arange]
+699:30 call  self.pt.arange(start, stop)
+    -> pytensor.tensor.arange
+    reject *: self.pt is the module pytensor.tensor, not a backend
+
+[einops._backends.PyTensorBackend.shape]
+703:21 call  tuple( static_dim if static_dim is not None else symbolic...
+    -> <builtin>.tuple
+    note: tuple() iterates a generator expression over zip(x.type.shape, x.shape): pytensor values, no package code
+705:48 call  zip(x.type.shape, x.shape)
+    -> <builtin>.zip
+    reject *: zip iterates x.type.shape and x.shape of a pytensor tensor, not package objects
+
+[einops._backends.PyTensorBackend.stack_on_zeroth_dimension]
+709:29 call  self.pt.stack(tensors)
+    -> pytensor.tensor.stack
+
+[einops._backends.PyTensorBackend.tile]
+712:28 call  self.pt.tile(x, repeats)
+    -> pytensor.tensor.tile
+    reject *: self.pt is the module pytensor.tensor, not a backend
+
+[einops._backends.PyTensorBackend.concat]
+715:35 call  self.pt.concatenate(tensors, axis=axis)
+    -> pytensor.tensor.concatenate
+
+[einops._backends.PyTensorBackend.add_axis]
+718:35 call  self.pt.expand_dims(x, new_position)
+    -> pytensor.tensor.expand_dims
+
+[einops._backends.PyTensorBackend.einsum]
+721:30 call  self.pt.einsum(pattern, *x)
+    -> pytensor.tensor.einsum
+    reject *: self.pt is the module pytensor.tensor, not a backend or the package's einsum
+
+[einops._backends.MLXBackend.is_appropriate_type]
+735:26 call  isinstance(tensor, self.mx.array)
+    -> <builtin>.isinstance
+
+[einops._backends.MLXBackend.from_numpy]
+738:29 call  self.mx.array(x)
+    -> mlx.core.array
+
+[einops._backends.MLXBackend.to_numpy]
+742:25 call  x.astype(self.mx.float32)
+    -> mlx.core.array.astype
+743:29 call  self.np.array(x)
+    -> numpy.array
+
+[einops._backends.MLXBackend.arange]
+746:30 call  self.mx.arange(start, stop)
+    -> mlx.core.arange
+    reject *: self.mx is the module mlx.core, not a backend
+
+[einops._backends.MLXBackend.stack_on_zeroth_dimension]
+749:29 call  self.mx.stack(tensors)
+    -> mlx.core.stack
+
+[einops._backends.MLXBackend.add_axes]
+752:35 call  self.mx.expand_dims(x, new_position)
+    -> mlx.core.expand_dims
+
+[einops._backends.MLXBackend.tile]
+755:28 call  self.mx.tile(x, repeats)
+    -> mlx.core.tile
+    reject *: self.mx is the module mlx.core, not a backend
+
+[einops._backends.MLXBackend.concat]
+758:35 call  self.mx.concatenate(tensors, axis=axis)
+    -> mlx.core.concatenate
+
+[einops._backends.MLXBackend.is_float_type]
+761:34 call  self.mx.issubdtype(x.dtype, self.mx.floating)
+    -> mlx.core.issubdtype
+
+[einops._backends.MLXBackend.einsum]
+764:30 call  self.mx.einsum(pattern, *x)
+    -> mlx.core.einsum
+    reject *: self.mx is the module mlx.core, not a backend or the package's einsum
+
+== einops._torch_specific
+
+[einops._torch_specific]
+27:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+44:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+48:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+52:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+56:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+64:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+68:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+72:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+136:28 call  allow_ops_in_compiled_graph()
+    -> einops._torch_specific.allow_ops_in_compiled_graph
+
+[einops._torch_specific.TorchJitBackend.reduce]
+30:26 call  x.amin(dim=reduced_axes)
+    -> torch.Tensor.amin
+    -> torch.Tensor.reshape.amin
+    -> torch.Tensor.permute.amin
+    -> torch.Tensor.reshape.permute.amin
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+32:26 call  x.amax(dim=reduced_axes)
+    -> torch.Tensor.amax
+    -> torch.Tensor.reshape.amax
+    -> torch.Tensor.permute.amax
+    -> torch.Tensor.reshape.permute.amax
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+34:25 call  x.sum(dim=reduced_axes)
+    -> torch.Tensor.sum
+    -> torch.Tensor.reshape.sum
+    -> torch.Tensor.permute.sum
+    -> torch.Tensor.reshape.permute.sum
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+36:26 call  x.mean(dim=reduced_axes)
+    -> torch.Tensor.mean
+    -> torch.Tensor.reshape.mean
+    -> torch.Tensor.permute.mean
+    -> torch.Tensor.reshape.permute.mean
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+38:28 call  sorted(reduced_axes)
+    -> <builtin>.sorted
+39:27 call  x.prod(dim=i)
+    -> torch.Tensor.prod
+    -> torch.Tensor.prod.prod
+    -> torch.Tensor.reshape.prod
+    -> torch.Tensor.reshape.prod.prod
+    -> torch.Tensor.permute.prod
+    -> torch.Tensor.permute.prod.prod
+    -> torch.Tensor.reshape.permute.prod
+    -> torch.Tensor.reshape.permute.prod.prod
+    reject einops.packing.prod: x is a torch.Tensor; prod is its method, not the package function
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+42:38 call  NotImplementedError("Unknown reduction ", operation)
+    -> <builtin>.NotImplementedError
+    note: reached for the reductions "any" and "all", which ReduceMixin accepts (they are in _reductions) and this static backend does not handle
+
+[einops._torch_specific.TorchJitBackend.transpose]
+46:25 call  x.permute(axes)
+    -> torch.Tensor.permute
+    -> torch.Tensor.reshape.permute
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py
+
+[einops._torch_specific.TorchJitBackend.stack_on_zeroth_dimension]
+50:27 call  torch.stack(tensors)
+    -> torch.stack
+
+[einops._torch_specific.TorchJitBackend.tile]
+54:24 call  x.repeat(repeats)
+    -> torch.Tensor.repeat
+    reject *: x is a torch.Tensor; the package functions named repeat are not its methods
+
+[einops._torch_specific.TorchJitBackend.add_axes]
+58:24 op  [-1] * n_axes
+    reject *: a list times an int
+59:56 call  pos2len.items()
+    -> <builtin>.dict.items
+60:32 call  torch.unsqueeze(x, axis_position)
+    -> torch.unsqueeze
+62:24 call  x.expand(repeats)
+    -> torch.unsqueeze.expand
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; removed by the ruling: torch.Tensor.expand
+
+[einops._torch_specific.TorchJitBackend.reshape]
+74:25 call  x.reshape(shape)
+    -> torch.Tensor.reshape
+    -> torch.Tensor.reshape.reshape
+    -> torch.Tensor.permute.reshape
+    -> torch.Tensor.reshape.permute.reshape
+    -> torch.Tensor.amin.reshape
+    -> torch.Tensor.reshape.amin.reshape
+    -> torch.Tensor.permute.amin.reshape
+    -> torch.Tensor.reshape.permute.amin.reshape
+    -> torch.Tensor.amax.reshape
+    -> torch.Tensor.reshape.amax.reshape
+    -> torch.Tensor.permute.amax.reshape
+    -> torch.Tensor.reshape.permute.amax.reshape
+    -> torch.Tensor.sum.reshape
+    -> torch.Tensor.reshape.sum.reshape
+    -> torch.Tensor.permute.sum.reshape
+    -> torch.Tensor.reshape.permute.sum.reshape
+    -> torch.Tensor.mean.reshape
+    -> torch.Tensor.reshape.mean.reshape
+    -> torch.Tensor.permute.mean.reshape
+    -> torch.Tensor.reshape.permute.mean.reshape
+    -> torch.Tensor.prod.reshape
+    -> torch.Tensor.prod.prod.reshape
+    -> torch.Tensor.reshape.prod.reshape
+    -> torch.Tensor.reshape.prod.prod.reshape
+    -> torch.Tensor.permute.prod.reshape
+    -> torch.Tensor.permute.prod.prod.reshape
+    -> torch.Tensor.reshape.permute.prod.reshape
+    -> torch.Tensor.reshape.permute.prod.prod.reshape
+    -> torch.unsqueeze.expand.reshape
+    -> torch.einsum.reshape
+    reject *: x is a torch.Tensor, never a package object
+    note: missing-library results keep their access path through assignment and forwarding (referee ruling on J1, reviews/b7-ruling-numpy-einops.md; einops.md, "Stub paths"); callees generated from the ruling's families by b7-audits/einops/writer-tools/families.py; an open path set: a repeated attribute (.x^n) is listed for n = 1 and 2 only, a lower bound (einops.md, "Open path sets")
+
+[einops._torch_specific.apply_for_scriptable_torch]
+89:41 call  _reconstruct_from_shape_uncached(recipe, backend.shape(te...
+    -> einops.einops._reconstruct_from_shape_uncached
+89:63 call  backend.shape(tensor)
+    -> einops._torch_specific.TorchJitBackend.shape
+    reject *: backend is the class TorchJitBackend, whose static methods are called
+91:33 call  backend.reshape(tensor, init_shapes)
+    -> einops._torch_specific.TorchJitBackend.reshape
+    reject *: backend is the class TorchJitBackend
+93:35 call  backend.transpose(tensor, axes_reordering)
+    -> einops._torch_specific.TorchJitBackend.transpose
+    reject *: backend is the class TorchJitBackend
+94:11 call  len(reduced_axes)
+    -> <builtin>.len
+95:32 call  backend.reduce(tensor, operation=reduction_type, reduced_...
+    -> einops._torch_specific.TorchJitBackend.reduce
+    reject *: backend is the class TorchJitBackend
+96:11 call  len(added_axes)
+    -> <builtin>.len
+97:34 call  backend.add_axes(tensor, n_axes=n_axes_w_added, pos2len=a...
+    -> einops._torch_specific.TorchJitBackend.add_axes
+    reject *: backend is the class TorchJitBackend
+99:33 call  backend.reshape(tensor, final_shapes)
+    -> einops._torch_specific.TorchJitBackend.reshape
+    reject *: backend is the class TorchJitBackend
+
+[einops._torch_specific.allow_ops_in_compiled_graph]
+104:15 call  hasattr(torch, "__version__")
+    -> <builtin>.hasattr
+108:15 call  hasattr(torch, "__version__")
+    -> <builtin>.hasattr
+115:22 call  warnings.warn( "allow_ops_in_compiled_graph failed to imp...
+    -> warnings.warn
+    note: reached when `from torch._dynamo import allow_in_graph` raises ImportError: a branch that the library's answer decides runs (README, "Missing libraries")
+123:19 call  allow_in_graph(rearrange)
+    -> torch._dynamo.allow_in_graph
+    reject *: allow_in_graph registers the function for torch.compile and does not call it; a missing module calls nothing back
+124:19 call  allow_in_graph(reduce)
+    -> torch._dynamo.allow_in_graph
+    reject *: allow_in_graph registers the function and does not call it
+125:19 call  allow_in_graph(repeat)
+    -> torch._dynamo.allow_in_graph
+    reject *: allow_in_graph registers the function and does not call it
+126:19 call  allow_in_graph(einsum)
+    -> torch._dynamo.allow_in_graph
+    reject *: allow_in_graph registers the function and does not call it
+127:19 call  allow_in_graph(pack)
+    -> torch._dynamo.allow_in_graph
+    reject *: allow_in_graph registers the function and does not call it
+128:19 call  allow_in_graph(unpack)
+    -> torch._dynamo.allow_in_graph
+    reject *: allow_in_graph registers the function and does not call it
+
+== einops.array_api
+
+[einops.array_api.reduce]
+8:18 call  isinstance(tensor, list)
+    -> <builtin>.isinstance
+9:15 call  len(tensor)
+    -> <builtin>.len
+10:28 call  TypeError("Einops can't be applied to an empty list")
+    -> <builtin>.TypeError
+11:43 call  tensor[0].__array_namespace__()
+    -> numpy.ndarray.__array_namespace__
+    note: tensor is the client's list of arrays; its elements are numpy arrays (einops.md, "array_api")
+12:26 call  xp.stack(tensor)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    note: xp is the module numpy; numpy.stack is an _ArrayFunctionDispatcher
+14:40 call  tensor.__array_namespace__()
+    -> numpy.ndarray.__array_namespace__
+16:38 call  tuple(axes_lengths.items())
+    -> <builtin>.tuple
+16:57 call  axes_lengths.items()
+    -> <builtin>.dict.items
+17:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n...
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.einops._prepare_transformation_recipe
+    note: _prepare_transformation_recipe is the lru_cache wrapper of the function (einops.py:289); on a cache miss the wrapper calls the function
+17:85 call  tuple(axes_lengths)
+    -> <builtin>.tuple
+18:39 call  _apply_recipe_array_api( xp, recipe=recipe, tensor=tensor...
+    -> einops.einops._apply_recipe_array_api
+27:26 call  isinstance(tensor, list)
+    -> <builtin>.isinstance
+32:26 call  EinopsError(message + f"\n {e}")
+    -> <builtin>.RuntimeError.__init__
+    note: EinopsError subclasses RuntimeError and defines no __init__
+
+[einops.array_api.repeat]
+36:18 call  reduce(tensor, pattern, reduction="repeat", **axes_lengths)
+    -> einops.array_api.reduce
+    reject *: reduce is the module's own function (array_api.py:7)
+
+[einops.array_api.rearrange]
+40:18 call  reduce(tensor, pattern, reduction="rearrange", **axes_len...
+    -> einops.array_api.reduce
+    reject *: reduce is the module's own function (array_api.py:7)
+
+[einops.array_api.asnumpy]
+46:26 call  np.from_dlpack(tensor)
+    -> numpy.from_dlpack
+
+[einops.array_api.pack]
+53:60 call  analyze_pattern(pattern, "pack")
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.packing.analyze_pattern
+    note: analyze_pattern is the lru_cache wrapper of the function (packing.py:13)
+54:40 call  tensors[0].__array_namespace__()
+    -> numpy.ndarray.__array_namespace__
+58:31 call  enumerate(tensors)
+    -> <builtin>.enumerate
+60:15 call  len(shape)
+    -> <builtin>.len
+61:30 call  EinopsError( f"packed tensor #{i} (enumeration starts wit...
+    -> <builtin>.RuntimeError.__init__
+65:37 call  len(shape)
+    -> <builtin>.len
+66:29 call  packed_shapes.append(shape[n_axes_before:axis_after_packe...
+    -> <builtin>.list.append
+67:32 call  reshaped_tensors.append(xp.reshape(tensor, (*shape[:n_axe...
+    -> <builtin>.list.append
+67:43 call  xp.reshape(tensor, (*shape[:n_axes_before], -1, *shape[ax...
+    -> numpy._ArrayFunctionDispatcher.__call__
+    reject *: xp is the module numpy, not a backend
+69:21 call  xp.concat(reshaped_tensors, axis=n_axes_before)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    note: numpy.concat is numpy.concatenate, an _ArrayFunctionDispatcher
+    reject *: xp is the module numpy, not a backend
+
+[einops.array_api.unpack]
+73:36 call  tensor.__array_namespace__()
+    -> numpy.ndarray.__array_namespace__
+74:60 call  analyze_pattern(pattern, opname="unpack")
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.packing.analyze_pattern
+78:11 call  len(input_shape)
+    -> <builtin>.len
+79:26 call  EinopsError(f"unpack(..., {pattern}) received input of wr...
+    -> <builtin>.RuntimeError.__init__
+83:73 call  prod(p_shape)
+    -> einops.packing.prod
+85:34 call  sum(x == -1 for x in lengths_of_composed_axes)
+    -> <builtin>.sum
+87:26 call  EinopsError( f"unpack(..., {pattern}) received more than ...
+    -> <builtin>.RuntimeError.__init__
+97:27 op  [0] * len(packed_shapes)
+    reject *: a list times an int
+97:32 call  len(packed_shapes)
+    -> <builtin>.len
+99:30 call  enumerate(lengths_of_composed_axes[:-1])
+    -> <builtin>.enumerate
+102:68 call  lengths_of_composed_axes.index(-1)
+    -> <builtin>.list.index
+103:23 call  range(unknown_composed_axis)
+    -> <builtin>.range
+105:23 call  range(unknown_composed_axis + 1, len(lengths_of_composed_...
+    -> <builtin>.range
+105:54 call  len(lengths_of_composed_axes)
+    -> <builtin>.len
+110:26 call  slice(None, None)
+    -> <builtin>.slice
+110:41 op  (slice(None, None),) * unpacked_axis
+    reject *: a tuple times an int
+113:23 call  xp.reshape( # shortest way slice arbitrary axis tensor[(*...
+    -> numpy._ArrayFunctionDispatcher.__call__
+    reject *: xp is the module numpy, not a backend
+115:45 call  slice(split_positions[i], split_positions[i + 1])
+    -> <builtin>.slice
+118:46 call  enumerate(packed_shapes)
+    -> <builtin>.enumerate
+122:27 call  RuntimeError( f'Error during unpack(..., "{pattern}"): co...
+    -> <builtin>.RuntimeError
+
+== einops.einops
+
+[einops.einops]
+16:17 call  TypeVar("Tensor")
+    -> typing.TypeVar
+227:46 call  functools.lru_cache(1024)
+    -> functools.lru_cache
+227:52 call  functools.lru_cache(1024)(_reconstruct_from_shape_uncached)
+    -> functools.lru_cache.decorating_function
+    reject einops.einops._reconstruct_from_shape_uncached: decorating_function wraps the function in an _lru_cache_wrapper and does not call it
+    note: functools.lru_cache(1024) returns its local function decorating_function
+289:2 decorator  @functools.lru_cache(256)
+    -> functools.lru_cache.decorating_function
+    note: the decorator is the decorating_function that functools.lru_cache(256) returns; it wraps _prepare_transformation_recipe without calling it
+289:21 call  functools.lru_cache(256)
+    -> functools.lru_cache
+460:2 decorator  @overload
+    -> typing.overload
+464:2 decorator  @overload
+    -> typing.overload
+553:2 decorator  @overload
+    -> typing.overload
+557:2 decorator  @overload
+    -> typing.overload
+619:2 decorator  @overload
+    -> typing.overload
+623:2 decorator  @overload
+    -> typing.overload
+795:2 decorator  @functools.lru_cache(256)
+    -> functools.lru_cache.decorating_function
+    note: the decorator is the decorating_function that functools.lru_cache(256) returns; it wraps _compactify_pattern_for_einsum without calling it
+795:21 call  functools.lru_cache(256)
+    -> functools.lru_cache
+849:2 decorator  @typing.overload
+    -> typing.overload
+853:2 decorator  @typing.overload
+    -> typing.overload
+857:2 decorator  @typing.overload
+    -> typing.overload
+861:2 decorator  @typing.overload
+    -> typing.overload
+
+[einops.einops._product]
+33:16 op  result *= element
+    -> einops._backends.UnknownSize.__mul__
+    -> einops._backends.UnknownSize.__rmul__
+    note: _reconstruct_from_shape_uncached passes the lengths of an output group, which can hold the UnknownSize of an eager tensorflow shape (einops.md, "Shapes"): 1 * UnknownSize runs __rmul__, UnknownSize * x runs __mul__ (neither class defines __imul__)
+
+[einops.einops._reduce_axes]
+38:16 call  callable(reduction_type)
+    -> <builtin>.callable
+40:30 call  reduction_type(tensor, tuple(reduced_axes))
+    note: reduction_type is the client's callable reduction (documented: "a callable f(tensor, reduced_axes)", e.g. np.max, torch.var): a client callback, no callee (README, B2); no package function is documented for this role
+40:44 call  tuple(reduced_axes)
+    -> <builtin>.tuple
+45:41 call  backend.is_float_type(tensor)
+    -> einops._backends.NumpyBackend.is_float_type
+    -> einops._backends.CupyBackend.is_float_type
+    -> einops._backends.MLXBackend.is_float_type
+    -> einops._backends.OneFlowBackend.is_float_type
+    -> einops._backends.PaddleBackend.is_float_type
+    -> einops._backends.PyTensorBackend.is_float_type
+    -> einops._backends.TFKerasBackend.is_float_type
+    -> einops._backends.TensorflowBackend.is_float_type
+    -> einops._backends.TinygradBackend.is_float_type
+    -> einops._backends.TorchBackend.is_float_type
+    reject einops._backends.AbstractBackend.is_float_type: backend is one of the eleven package backends that get_backend makes, and each overrides is_float_type (JaxBackend inherits NumpyBackend's)
+    reject einops._torch_specific.TorchJitBackend.is_float_type: _reduce_axes gets a backend of get_backend (from einops.reduce and the layers' _apply_recipe), never TorchJitBackend
+46:42 call  NotImplementedError("reduce_mean is not available for non...
+    -> <builtin>.NotImplementedError
+47:30 call  backend.reduce(tensor, reduction_type, tuple(reduced_axes))
+    -> einops._backends.AbstractBackend.reduce
+    -> einops._backends.TorchBackend.reduce
+    -> einops._backends.TensorflowBackend.reduce
+    -> einops._backends.TFKerasBackend.reduce
+    -> einops._backends.OneFlowBackend.reduce
+    -> einops._backends.PaddleBackend.reduce
+    -> einops._backends.TinygradBackend.reduce
+    reject *: backend is a backend of get_backend; AbstractBackend.reduce is run by NumpyBackend, JaxBackend, CupyBackend, PyTensorBackend and MLXBackend; TorchJitBackend and the package functions named reduce are not backends
+    note: backend is one of the eleven package backends that get_backend makes
+47:60 call  tuple(reduced_axes)
+    -> <builtin>.tuple
+
+[einops.einops._optimize_transformation]
+53:15 call  len(axes_reordering)
+    -> <builtin>.len
+53:38 call  len(reduced_axes)
+    -> <builtin>.len
+53:59 call  len(init_shapes)
+    -> <builtin>.len
+56:25 call  tuple(sorted(reduced_axes))
+    -> <builtin>.tuple
+56:32 call  sorted(reduced_axes)
+    -> <builtin>.sorted
+57:19 call  range(len(reduced_axes) - 1)
+    -> <builtin>.range
+57:23 call  len(reduced_axes)
+    -> <builtin>.len
+62:43 op  init_shapes[removed_axis - 1] *= removed_length
+    reject *: init_shapes holds ints: no package code calls _optimize_transformation, and its tests pass lists of ints (tests/test_other.py:73); B3
+63:57 call  tuple(axis - 1 for axis in reduced_axes[i + 2 :])
+    -> <builtin>.tuple
+76:44 call  build_mapping()
+    -> einops.einops._optimize_transformation.build_mapping
+78:27 call  range(len(init_shapes) - 1)
+    -> <builtin>.range
+78:31 call  len(init_shapes)
+    -> <builtin>.len
+86:47 call  sum(x not in reduced_axes for x in range(removed_axis))
+    -> <builtin>.sum
+86:84 call  range(removed_axis)
+    -> <builtin>.range
+88:33 call  tuple(axis if axis < removed_axis else axis - 1 for axis ...
+    -> <builtin>.tuple
+90:43 op  init_shapes[removed_axis - 1] *= removed_length
+    reject *: init_shapes holds ints (as at 62:43)
+97:43 call  axes_reordering.append(axis)
+    -> <builtin>.list.append
+    note: axes_reordering is the list made at line 92
+99:43 call  axes_reordering.append(axis - 1)
+    -> <builtin>.list.append
+100:52 call  build_mapping()
+    -> einops.einops._optimize_transformation.build_mapping
+
+[einops.einops._optimize_transformation.build_mapping]
+68:26 call  range(len(init_shapes))
+    -> <builtin>.range
+68:30 call  len(init_shapes)
+    -> <builtin>.len
+72:38 call  sum(x is not None for x in init_to_final.values())
+    -> <builtin>.sum
+72:82 call  init_to_final.values()
+    -> <builtin>.dict.values
+73:43 call  list(axes_reordering)
+    -> <builtin>.list
+73:66 call  list(axes_reordering).index(after_reduction)
+    -> <builtin>.list.index
+
+[einops.einops._reconstruct_from_shape_uncached]
+167:35 call  list(self.elementary_axes_lengths)
+    -> <builtin>.list
+171:60 call  enumerate(self.input_composition_known_unknown)
+    -> <builtin>.enumerate
+172:23 getitem  shape[input_axis]
+    -> einops._backends.HashableTuple.__getitem__
+    note: shape is the result of backend.shape, a HashableTuple for TensorflowBackend in graph mode and for TFKerasBackend (einops.md, "Shapes")
+173:15 call  len(known_axes)
+    -> <builtin>.len
+173:40 call  len(unknown_axes)
+    -> <builtin>.len
+180:27 op  known_product *= axes_lengths[axis]
+    -> einops._backends.UnknownSize.__mul__
+    -> einops._backends.UnknownSize.__rmul__
+    note: a known axis takes its length from axes_dims, the client's axes_lengths; parse_shape's documented output can be passed there (einops.py:689) and holds the UnknownSize of an eager tensorflow shape: an int times an UnknownSize runs __rmul__, and then known_product is the UnknownSize, so the next product runs __mul__
+182:15 call  len(unknown_axes)
+    -> <builtin>.len
+183:26 call  isinstance(length, int)
+    -> <builtin>.isinstance
+183:54 call  isinstance(known_product, int)
+    -> <builtin>.isinstance
+184:34 call  EinopsError(f"Shape mismatch, {length} != {known_product}")
+    -> <builtin>.RuntimeError.__init__
+    note: EinopsError subclasses RuntimeError and defines no __init__
+187:26 call  isinstance(length, int)
+    -> <builtin>.isinstance
+187:54 call  isinstance(known_product, int)
+    -> <builtin>.isinstance
+188:34 call  EinopsError(f"Shape mismatch, can't divide axis of length...
+    -> <builtin>.RuntimeError.__init__
+191:43 op  length // known_product
+    -> einops._backends.UnknownSize.__floordiv__
+    note: length is a shape element, an UnknownSize for an unknown dimension of an eager tensorflow tensor (einops.md, "Shapes")
+194:15 call  len(known_axes)
+    -> <builtin>.len
+194:33 call  len(unknown_axes)
+    -> <builtin>.len
+200:58 call  len(self.axes_permutation)
+    -> <builtin>.len
+206:28 call  final_shapes.append(_product(lengths))
+    -> <builtin>.list.append
+206:37 call  _product(lengths)
+    -> einops.einops._product
+207:15 call  len(lengths)
+    -> <builtin>.len
+211:97 call  self.added_axes.items()
+    -> <builtin>.dict.items
+215:24 call  list(range(self.first_reduced_axis, len(self.axes_permuta...
+    -> <builtin>.list
+215:30 call  range(self.first_reduced_axis, len(self.axes_permutation))
+    -> <builtin>.range
+215:59 call  len(self.axes_permutation)
+    -> <builtin>.len
+217:35 call  len(added_axes)
+    -> <builtin>.len
+217:53 call  len(self.axes_permutation)
+    -> <builtin>.len
+220:37 call  list(range(len(self.axes_permutation)))
+    -> <builtin>.list
+220:43 call  range(len(self.axes_permutation))
+    -> <builtin>.range
+220:47 call  len(self.axes_permutation)
+    -> <builtin>.len
+
+[einops.einops._apply_recipe]
+235:119 call  _reconstruct_from_shape( recipe, backend.shape(tensor), a...
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.einops._reconstruct_from_shape_uncached
+    -> einops._backends.UnknownSize.__hash__
+    -> einops._backends.UnknownSize.__eq__
+    note: _reconstruct_from_shape is functools.lru_cache(1024)(_reconstruct_from_shape_uncached) (einops.py:227); the wrapper calls the function on a cache miss. Its key hashes the shape and the axes_lengths tuple, which can hold UnknownSize objects (an eager tensorflow shape, and parse_shape's output as axes_lengths): hash() runs UnknownSize.__hash__, and since every UnknownSize hashes as None, a lookup that meets a stored key compares the tuples and runs UnknownSize.__eq__
+236:34 call  backend.shape(tensor)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: backend is a backend of get_backend, never TorchJitBackend
+    note: AbstractBackend.shape is run by NumpyBackend, JaxBackend, TorchBackend, CupyBackend, OneFlowBackend and MLXBackend
+240:51 call  _reconstruct_from_shape_uncached(recipe, backend.shape(te...
+    -> einops.einops._reconstruct_from_shape_uncached
+240:73 call  backend.shape(tensor)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: backend is a backend of get_backend, never TorchJitBackend
+243:33 call  backend.reshape(tensor, init_shapes)
+    -> einops._backends.AbstractBackend.reshape
+    -> einops._backends.TensorflowBackend.reshape
+    -> einops._backends.TFKerasBackend.reshape
+    -> einops._backends.PaddleBackend.reshape
+    -> einops._backends.TinygradBackend.reshape
+    reject einops._torch_specific.TorchJitBackend.reshape: backend is a backend of get_backend, never TorchJitBackend
+    note: AbstractBackend.reshape is run by NumpyBackend, JaxBackend, TorchBackend, CupyBackend, OneFlowBackend, PyTensorBackend and MLXBackend
+245:35 call  backend.transpose(tensor, axes_reordering)
+    -> einops._backends.AbstractBackend.transpose
+    -> einops._backends.TorchBackend.transpose
+    -> einops._backends.OneFlowBackend.transpose
+    -> einops._backends.PaddleBackend.transpose
+    -> einops._backends.TensorflowBackend.transpose
+    -> einops._backends.TFKerasBackend.transpose
+    -> einops._backends.TinygradBackend.transpose
+    reject einops._torch_specific.TorchJitBackend.transpose: backend is a backend of get_backend, never TorchJitBackend
+246:11 call  len(reduced_axes)
+    -> <builtin>.len
+247:30 call  _reduce_axes(tensor, reduction_type=reduction_type, reduc...
+    -> einops.einops._reduce_axes
+248:11 call  len(added_axes)
+    -> <builtin>.len
+249:34 call  backend.add_axes(tensor, n_axes=n_axes_w_added, pos2len=a...
+    -> einops._backends.AbstractBackend.add_axes
+    -> einops._backends.TorchBackend.add_axes
+    -> einops._backends.OneFlowBackend.add_axes
+    -> einops._backends.PaddleBackend.add_axes
+    reject einops._backends.MLXBackend.add_axes: MLXBackend.add_axes(self, x, new_position) cannot bind the keywords n_axes and pos2len: the call raises TypeError before the method starts
+    reject *: backend is a backend of get_backend; AbstractBackend.add_axes is run by NumpyBackend, JaxBackend, CupyBackend, TensorflowBackend, TFKerasBackend, TinygradBackend and PyTensorBackend; TorchJitBackend is not a backend of get_backend
+251:33 call  backend.reshape(tensor, final_shapes)
+    -> einops._backends.AbstractBackend.reshape
+    -> einops._backends.TensorflowBackend.reshape
+    -> einops._backends.TFKerasBackend.reshape
+    -> einops._backends.PaddleBackend.reshape
+    -> einops._backends.TinygradBackend.reshape
+    reject einops._torch_specific.TorchJitBackend.reshape: backend is a backend of get_backend, never TorchJitBackend
+
+[einops.einops._apply_recipe_array_api]
+259:115 call  _reconstruct_from_shape( recipe, tensor.shape, axes_lengt...
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.einops._reconstruct_from_shape_uncached
+    reject einops._torch_specific.TorchJitBackend.shape: tensor.shape is the shape attribute of a numpy array
+    note: the lru_cache wrapper of einops.py:227 calls the function on a cache miss; the key holds the ints of a numpy shape and the int axes_lengths of array_api (annotated int), so no package __hash__ runs
+    reject *: tensor.shape is the shape attribute of a numpy array, not a backend's shape method
+263:28 call  xp.reshape(tensor, init_shapes)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    reject *: xp is the module numpy, not a backend
+265:33 call  xp.permute_dims(tensor, axes_reordering)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    note: numpy.permute_dims is numpy.transpose, an _ArrayFunctionDispatcher
+266:11 call  len(reduced_axes)
+    -> <builtin>.len
+267:20 call  callable(reduction_type)
+    -> <builtin>.callable
+269:36 call  reduction_type(tensor, tuple(reduced_axes))
+    note: reduction_type is the client's callable reduction: a client callback, no callee (B2)
+269:50 call  tuple(reduced_axes)
+    -> <builtin>.tuple
+273:29 call  getattr(xp, reduction_type)
+    -> <builtin>.getattr
+273:49 call  getattr(xp, reduction_type)(tensor, axis=tuple(reduced_ax...
+    -> numpy._ArrayFunctionDispatcher.__call__
+    note: getattr(numpy, reduction_type) is one of numpy.min, max, sum, mean, prod, any, all (reduction_type is in _reductions), each an _ArrayFunctionDispatcher
+273:68 call  tuple(reduced_axes)
+    -> <builtin>.tuple
+274:11 call  len(added_axes)
+    -> <builtin>.len
+276:60 call  added_axes.items()
+    -> <builtin>.dict.items
+277:36 call  xp.expand_dims(tensor, axis=axis_position)
+    -> numpy._ArrayFunctionDispatcher.__call__
+279:27 call  list(tensor.shape)
+    -> <builtin>.list
+    reject *: tensor.shape is the shape tuple of a numpy array
+280:59 call  added_axes.items()
+    -> <builtin>.dict.items
+283:33 call  xp.broadcast_to(tensor, final_shape)
+    -> numpy._ArrayFunctionDispatcher.__call__
+285:28 call  xp.reshape(tensor, final_shapes)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    reject *: xp is the module numpy, not a backend
+
+[einops.einops._prepare_transformation_recipe]
+299:39 call  pattern.split("->")
+    -> <builtin>.str.split
+300:28 call  ParsedExpression(left_str)
+    -> einops.parsing.ParsedExpression.__init__
+301:28 call  ParsedExpression(rght_str)
+    -> einops.parsing.ParsedExpression.__init__
+305:26 call  EinopsError(f"Ellipsis found in right side, but not left ...
+    -> <builtin>.RuntimeError.__init__
+307:26 call  EinopsError(f"Ellipsis inside parenthesis in the left sid...
+    -> <builtin>.RuntimeError.__init__
+310:30 call  EinopsError("Non-unitary anonymous axes are not supported...
+    -> <builtin>.RuntimeError.__init__
+311:46 call  set.symmetric_difference(left.identifiers, rght.identifiers)
+    -> <builtin>.set.symmetric_difference
+312:15 call  len(difference)
+    -> <builtin>.len
+313:30 call  EinopsError(f"Identifiers only on one side of expression ...
+    -> <builtin>.RuntimeError.__init__
+315:36 call  set.difference(left.identifiers, rght.identifiers)
+    -> <builtin>.set.difference
+316:15 call  len(difference)
+    -> <builtin>.len
+317:30 call  EinopsError(f"Unexpected identifiers on the left side of ...
+    -> <builtin>.RuntimeError.__init__
+317:84 format  {difference}
+    -> einops.parsing.AnonymousAxis.__repr__
+    note: in repeat, an anonymous axis of the left side (e.g. "a 2 -> a") is never in rght.identifiers (AnonymousAxis objects are all distinct), so it is in the difference; formatting the set runs set.__repr__, which calls repr() of each element
+318:43 call  set.difference( {ax for ax in rght.identifiers if not isi...
+    -> <builtin>.set.difference
+319:61 call  isinstance(ax, AnonymousAxis)
+    -> <builtin>.isinstance
+322:15 call  len(axes_without_size)
+    -> <builtin>.len
+323:30 call  EinopsError(f"Specify sizes for new axes in repeat: {axes...
+    -> <builtin>.RuntimeError.__init__
+324:46 call  callable(operation)
+    -> <builtin>.callable
+325:36 call  set.difference(rght.identifiers, left.identifiers)
+    -> <builtin>.set.difference
+326:15 call  len(difference)
+    -> <builtin>.len
+327:30 call  EinopsError(f"Unexpected identifiers on the right side of...
+    -> <builtin>.RuntimeError.__init__
+327:97 format  {difference}
+    -> einops.parsing.AnonymousAxis.__repr__
+    note: in a reduction, an anonymous axis of the right side (e.g. "a -> a 2") is in the difference; set.__repr__ calls its repr()
+329:26 call  EinopsError(f"Unknown reduction {operation}. Expect one o...
+    -> <builtin>.RuntimeError.__init__
+332:27 call  len(left.composition)
+    -> <builtin>.len
+334:30 call  EinopsError(f"Wrong shape: expected >={n_other_dims} dims...
+    -> <builtin>.RuntimeError.__init__
+336:36 call  str(i)
+    -> <builtin>.str
+336:54 call  range(ellipsis_ndim)
+    -> <builtin>.range
+341:44 call  left_composition.append([axis])
+    -> <builtin>.list.append
+343:40 call  left_composition.append(composite_axis)
+    -> <builtin>.list.append
+349:44 call  rght_composition.append([axis])
+    -> <builtin>.list.append
+354:37 call  group.extend(ell_axes)
+    -> <builtin>.list.extend
+356:37 call  group.append(axis)
+    -> <builtin>.list.append
+357:40 call  rght_composition.append(group)
+    -> <builtin>.list.append
+359:32 call  left.identifiers.update(ell_axes)
+    -> <builtin>.set.update
+360:32 call  left.identifiers.remove(_ellipsis)
+    -> <builtin>.set.remove
+362:36 call  rght.identifiers.update(ell_axes)
+    -> <builtin>.set.update
+363:36 call  rght.identifiers.remove(_ellipsis)
+    -> <builtin>.set.remove
+365:23 call  len(left.composition)
+    -> <builtin>.len
+366:30 call  EinopsError(f"Wrong shape: expected {len(left.composition...
+    -> <builtin>.RuntimeError.__init__
+366:59 call  len(left.composition)
+    -> <builtin>.len
+371:79 call  OrderedDict()
+    -> collections.OrderedDict
+374:26 call  isinstance(axis_name, AnonymousAxis)
+    -> <builtin>.isinstance
+384:26 call  isinstance(axis_name, AnonymousAxis)
+    -> <builtin>.isinstance
+388:37 call  repeat_axes_names.append(axis_name)
+    -> <builtin>.list.append
+390:73 call  enumerate(axis_name2known_length)
+    -> <builtin>.enumerate
+394:48 call  ParsedExpression.check_axis_name(elementary_axis)
+    -> einops.parsing.ParsedExpression.check_axis_name
+395:30 call  EinopsError("Invalid name for an axis", elementary_axis)
+    -> <builtin>.RuntimeError.__init__
+397:30 call  EinopsError(f"Axis {elementary_axis} is not used in trans...
+    -> <builtin>.RuntimeError.__init__
+405:15 call  len(unknown)
+    -> <builtin>.len
+406:30 call  EinopsError(f"Could not infer sizes for {unknown}")
+    -> <builtin>.RuntimeError.__init__
+407:19 call  len(unknown)
+    -> <builtin>.len
+407:34 call  len(known)
+    -> <builtin>.len
+407:48 call  len(composite_axis)
+    -> <builtin>.len
+408:40 call  input_axes_known_unknown.append( ([axis_name2position[axi...
+    -> <builtin>.list.append
+413:37 call  itertools.chain(*left_composition)
+    -> itertools.chain
+415:59 call  len(axis_position_after_reduction)
+    -> <builtin>.len
+418:97 call  enumerate(rght_composition)
+    -> <builtin>.enumerate
+421:29 call  list(itertools.chain(*left_composition))
+    -> <builtin>.list
+421:45 call  itertools.chain(*left_composition)
+    -> itertools.chain
+422:29 call  list(itertools.chain(*rght_composition))
+    -> <builtin>.list
+422:45 call  itertools.chain(*rght_composition)
+    -> itertools.chain
+425:48 call  ordered_axis_left.index(axis)
+    -> <builtin>.list.index
+428:38 call  enumerate(ordered_axis_rght)
+    -> <builtin>.enumerate
+432:29 call  len(order_after_transposition)
+    -> <builtin>.len
+432:62 call  len(reduced_axes)
+    -> <builtin>.len
+434:27 call  TransformRecipe( elementary_axes_lengths=list(axis_name2k...
+    -> einops.einops.TransformRecipe.__init__
+435:37 call  list(axis_name2known_length.values())
+    -> <builtin>.list
+435:67 call  axis_name2known_length.values()
+    -> collections.OrderedDict.values
+
+[einops.einops._prepare_recipes_for_all_dims]
+452:39 call  pattern.split("->")
+    -> <builtin>.str.split
+453:28 call  ParsedExpression(left_str)
+    -> einops.parsing.ParsedExpression.__init__
+454:16 call  len(left.composition)
+    -> <builtin>.len
+456:20 call  len(left.composition)
+    -> <builtin>.len
+456:85 call  range(8)
+    -> <builtin>.range
+457:49 call  _prepare_transformation_recipe(pattern, operation, axes_n...
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.einops._prepare_transformation_recipe
+    note: the lru_cache wrapper (einops.py:289) calls the function on a cache miss
+
+[einops.einops.reduce]
+529:22 call  isinstance(tensor, list)
+    -> <builtin>.isinstance
+530:19 call  len(tensor)
+    -> <builtin>.len
+531:32 call  TypeError("Rearrange/Reduce/Repeat can't be applied to an...
+    -> <builtin>.TypeError
+532:34 call  get_backend(tensor[0])
+    -> einops._backends.get_backend
+533:55 call  backend.stack_on_zeroth_dimension(tensor)
+    -> einops._backends.NumpyBackend.stack_on_zeroth_dimension
+    -> einops._backends.TorchBackend.stack_on_zeroth_dimension
+    -> einops._backends.CupyBackend.stack_on_zeroth_dimension
+    -> einops._backends.TensorflowBackend.stack_on_zeroth_dimension
+    -> einops._backends.TFKerasBackend.stack_on_zeroth_dimension
+    -> einops._backends.OneFlowBackend.stack_on_zeroth_dimension
+    -> einops._backends.PaddleBackend.stack_on_zeroth_dimension
+    -> einops._backends.TinygradBackend.stack_on_zeroth_dimension
+    -> einops._backends.PyTensorBackend.stack_on_zeroth_dimension
+    -> einops._backends.MLXBackend.stack_on_zeroth_dimension
+    reject einops._backends.AbstractBackend.stack_on_zeroth_dimension: every package backend overrides it (JaxBackend inherits NumpyBackend's)
+    reject einops._torch_specific.TorchJitBackend.stack_on_zeroth_dimension: backend comes from get_backend, never TorchJitBackend
+535:34 call  get_backend(tensor)
+    -> einops._backends.get_backend
+537:38 call  tuple(axes_lengths.items())
+    -> <builtin>.tuple
+537:57 call  axes_lengths.items()
+    -> <builtin>.dict.items
+538:30 call  backend.shape(tensor)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: backend comes from get_backend, never TorchJitBackend
+539:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n...
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.einops._prepare_transformation_recipe
+    note: the lru_cache wrapper (einops.py:289) calls the function on a cache miss; its key holds strs, an int and the client's reduction (a str or a client callable)
+539:85 call  tuple(axes_lengths)
+    -> <builtin>.tuple
+539:109 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+    note: shape is the result of backend.shape, a HashableTuple for the tensorflow backends (einops.md, "Shapes")
+540:29 call  _apply_recipe( backend, recipe, cast(Tensor, tensor), red...
+    -> einops.einops._apply_recipe
+    reject *: _apply_recipe is the module function of einops.py:230, not a layer method
+541:34 call  cast(Tensor, tensor)
+    -> typing.cast
+545:26 call  isinstance(tensor, list)
+    -> <builtin>.isinstance
+550:26 call  EinopsError(message + f"\n {e}")
+    -> <builtin>.RuntimeError.__init__
+
+[einops.einops.rearrange]
+616:18 call  reduce(tensor, pattern, reduction="rearrange", **axes_len...
+    -> einops.einops.reduce
+    reject *: reduce is the module's own function (einops.py:468)
+
+[einops.einops.repeat]
+674:18 call  reduce(tensor, pattern, reduction="repeat", **axes_lengths)
+    -> einops.einops.reduce
+    reject *: reduce is the module's own function (einops.py:468)
+
+[einops.einops.parse_shape]
+703:27 call  ParsedExpression(pattern, allow_underscore=True)
+    -> einops.parsing.ParsedExpression.__init__
+704:24 call  get_backend(x)
+    -> einops._backends.get_backend
+704:33 call  get_backend(x).shape(x)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: the receiver comes from get_backend, never TorchJitBackend
+705:29 call  exp.has_composed_axes()
+    -> einops.parsing.ParsedExpression.has_composed_axes
+706:27 call  RuntimeError(f"Can't parse shape with composite axes: {pa...
+    -> <builtin>.RuntimeError
+707:11 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+    note: shape is the result of backend.shape, a HashableTuple for the tensorflow backends
+707:25 call  len(exp.composition)
+    -> <builtin>.len
+709:19 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+709:32 call  len(exp.composition)
+    -> <builtin>.len
+710:35 call  RuntimeError(f"Can't parse shape with this number of dime...
+    -> <builtin>.RuntimeError
+712:31 call  RuntimeError(f"Can't parse shape with different number of...
+    -> <builtin>.RuntimeError
+714:45 call  exp.composition.index(_ellipsis)
+    -> <builtin>.list.index
+717:21 op  ["_"] * (len(shape) - len(exp.composition) + 1)
+    reject *: a list times an int
+717:27 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+717:40 call  len(exp.composition)
+    -> <builtin>.len
+723:33 call  zip(composition, shape)
+    -> <builtin>.zip
+    -> einops._backends.HashableTuple.__iter__
+    note: zip calls iter() on shape, a HashableTuple for the tensorflow backends; __iter__ is a generator function that zip calls
+725:15 call  len(axes)
+    -> <builtin>.len
+726:28 op  axis_length != 1
+    -> einops._backends.UnknownSize.__eq__
+    note: axis_length is a shape element, an UnknownSize for an unknown dimension of an eager tensorflow tensor; UnknownSize defines no __ne__, so the inherited object.__ne__ calls its __eq__ and inverts the result
+727:35 call  RuntimeError(f"Length of axis is not 1: {pattern} {shape}")
+    -> <builtin>.RuntimeError
+730:26 call  isinstance(axis, str)
+    -> <builtin>.isinstance
+734:31 op  axis.value != axis_length
+    -> einops._backends.UnknownSize.__eq__
+    note: int != UnknownSize: int.__ne__ returns NotImplemented, so Python calls the reflected UnknownSize.__ne__ (object.__ne__), which calls UnknownSize.__eq__
+735:39 call  RuntimeError(f"Length of anonymous axis does not match: {...
+    -> <builtin>.RuntimeError
+
+[einops.einops._enumerate_directions]
+752:26 call  get_backend(x)
+    -> einops._backends.get_backend
+753:26 call  backend.shape(x)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: backend comes from get_backend, never TorchJitBackend
+755:42 call  enumerate(shape)
+    -> <builtin>.enumerate
+    -> einops._backends.HashableTuple.__iter__
+    note: enumerate calls iter() on shape, a HashableTuple for the tensorflow backends
+756:21 op  [1] * len(shape)
+    reject *: a list times an int
+756:26 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+    note: at the first iteration shape is still the backend's shape (a HashableTuple for the tensorflow backends); line 756 then rebinds it to a list
+758:22 call  result.append(backend.reshape(backend.arange(0, axis_leng...
+    -> <builtin>.list.append
+758:38 call  backend.reshape(backend.arange(0, axis_length), shape)
+    -> einops._backends.AbstractBackend.reshape
+    -> einops._backends.TensorflowBackend.reshape
+    -> einops._backends.TFKerasBackend.reshape
+    -> einops._backends.PaddleBackend.reshape
+    -> einops._backends.TinygradBackend.reshape
+    reject einops._torch_specific.TorchJitBackend.reshape: backend comes from get_backend, never TorchJitBackend
+758:53 call  backend.arange(0, axis_length)
+    -> einops._backends.NumpyBackend.arange
+    -> einops._backends.TorchBackend.arange
+    -> einops._backends.CupyBackend.arange
+    -> einops._backends.TensorflowBackend.arange
+    -> einops._backends.TFKerasBackend.arange
+    -> einops._backends.OneFlowBackend.arange
+    -> einops._backends.PaddleBackend.arange
+    -> einops._backends.TinygradBackend.arange
+    -> einops._backends.PyTensorBackend.arange
+    -> einops._backends.MLXBackend.arange
+    reject *: backend comes from get_backend, and every package backend overrides arange (JaxBackend inherits NumpyBackend's)
+
+[einops.einops.asnumpy]
+776:23 call  get_backend(tensor)
+    -> einops._backends.get_backend
+776:40 call  get_backend(tensor).to_numpy(tensor)
+    -> einops._backends.NumpyBackend.to_numpy
+    -> einops._backends.JaxBackend.to_numpy
+    -> einops._backends.TorchBackend.to_numpy
+    -> einops._backends.CupyBackend.to_numpy
+    -> einops._backends.TensorflowBackend.to_numpy
+    -> einops._backends.OneFlowBackend.to_numpy
+    -> einops._backends.PaddleBackend.to_numpy
+    -> einops._backends.TinygradBackend.to_numpy
+    -> einops._backends.PyTensorBackend.to_numpy
+    -> einops._backends.MLXBackend.to_numpy
+    -> einops._backends.AbstractBackend.to_numpy
+    note: the receiver comes from get_backend; TFKerasBackend inherits AbstractBackend.to_numpy, which raises
+
+[einops.einops._validate_einsum_axis_name]
+780:11 call  len(axis_name)
+    -> <builtin>.len
+781:34 call  NotImplementedError("Singleton () axes are not yet suppor...
+    -> <builtin>.NotImplementedError
+782:11 call  len(axis_name)
+    -> <builtin>.len
+783:34 call  NotImplementedError("Shape rearrangement is not yet suppo...
+    -> <builtin>.NotImplementedError
+787:18 call  isinstance(axis_name, AnonymousAxis)
+    -> <builtin>.isinstance
+788:34 call  NotImplementedError("Anonymous axes are not yet supported...
+    -> <builtin>.NotImplementedError
+789:11 call  len(axis_name)
+    -> <builtin>.len
+790:27 call  RuntimeError("Encountered empty axis name in einsum.")
+    -> <builtin>.RuntimeError
+791:22 call  isinstance(axis_name, str)
+    -> <builtin>.isinstance
+792:27 call  RuntimeError("Axis name in einsum must be a string.")
+    -> <builtin>.RuntimeError
+
+[einops.einops._compactify_pattern_for_einsum]
+800:25 call  ValueError("Einsum pattern must contain '->'.")
+    -> <builtin>.ValueError
+801:41 call  pattern.split("->")
+    -> <builtin>.str.split
+803:30 call  ParsedExpression(left, allow_underscore=True, allow_dupli...
+    -> einops.parsing.ParsedExpression.__init__
+803:110 call  lefts_str.split(",")
+    -> <builtin>.str.split
+805:29 call  ParsedExpression(right_str, allow_underscore=True)
+    -> einops.parsing.ParsedExpression.__init__
+820:39 call  _validate_einsum_axis_name(raw_axis_name)
+    -> einops.einops._validate_einsum_axis_name
+823:28 call  len(output_axis_names)
+    -> <builtin>.len
+824:39 call  RuntimeError("Too many axes in einsum.")
+    -> <builtin>.RuntimeError
+829:29 call  left_patterns.append(left_pattern)
+    -> <builtin>.list.append
+831:31 call  ",".join(left_patterns)
+    -> <builtin>.str.join
+838:35 call  _validate_einsum_axis_name(raw_axis_name)
+    -> einops.einops._validate_einsum_axis_name
+842:30 call  EinopsError(f"Unknown axis {axis_name} on right side of e...
+    -> <builtin>.RuntimeError.__init__
+
+[einops.einops.einsum]
+928:11 call  len(tensors_and_pattern)
+    -> <builtin>.len
+929:25 call  ValueError( "`einops.einsum` takes at minimum two argumen...
+    -> <builtin>.ValueError
+933:22 call  isinstance(pattern, str)
+    -> <builtin>.isinstance
+934:25 call  ValueError( "The last argument passed to `einops.einsum` ...
+    -> <builtin>.ValueError
+938:45 call  _compactify_pattern_for_einsum(pattern)
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.einops._compactify_pattern_for_einsum
+    note: the lru_cache wrapper (einops.py:795) calls the function on a cache miss
+939:23 call  get_backend(tensors[0])
+    -> einops._backends.get_backend
+939:42 call  get_backend(tensors[0]).einsum(pattern, *tensors)
+    -> einops._backends.NumpyBackend.einsum
+    -> einops._backends.TorchBackend.einsum
+    -> einops._backends.CupyBackend.einsum
+    -> einops._backends.TensorflowBackend.einsum
+    -> einops._backends.OneFlowBackend.einsum
+    -> einops._backends.PaddleBackend.einsum
+    -> einops._backends.TinygradBackend.einsum
+    -> einops._backends.PyTensorBackend.einsum
+    -> einops._backends.MLXBackend.einsum
+    -> einops._backends.AbstractBackend.einsum
+    reject einops.einops.einsum: the receiver is a backend of get_backend, not this module
+    note: the receiver comes from get_backend; TFKerasBackend inherits AbstractBackend.einsum, which raises
+
+== einops.layers
+
+[einops.layers.RearrangeMixin.__init__]
+20:14 call  super()
+    -> <builtin>.super
+20:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    -> torch.nn.Module.__init__
+    -> tensorflow.keras.layers.Layer.__init__
+    -> paddle.nn.Layer.__init__
+    -> oneflow.nn.Module.__init__
+    reject *: after RearrangeMixin the MRO of each receiver has only the framework's base class (a missing module) or object, no package class
+    note: the next __init__ in the MRO of self: object's for a RearrangeMixin, the framework base of each Rearrange layer (named through the base class that the package names, README "Missing modules")
+24:45 call  self.multirecipe()
+    -> einops.layers.RearrangeMixin.multirecipe
+    reject einops.layers.ReduceMixin.multirecipe: self is a RearrangeMixin or a subclass of it, and no subclass overrides multirecipe
+25:35 call  tuple(self.axes_lengths.items())
+    -> <builtin>.tuple
+25:59 call  self.axes_lengths.items()
+    -> <builtin>.dict.items
+    -> keras.src.utils.tracking.TrackedDict.items
+    note: self.axes_lengths is the **axes_lengths dict (einops.md, "Layers" for the framework attribute hooks)
+    note: for the Keras layers (layers/tensorflow.py) self.axes_lengths is a TrackedDict: Layer.__setattr__ (keras 3.13.1 keras/src/layers/layer.py:1559-1565) passes the stored value to self._tracker.track, which wraps a dict in TrackedDict (keras/src/utils/tracking.py:70-72, 96-98; tracking is on by default, :18-19); TrackedDict (tracking.py:219) subclasses dict and does not define items, so the callee is named by the receiver class (einops.md, J5)
+
+[einops.layers.RearrangeMixin.__repr__]
+28:22 call  repr(self.pattern)
+    -> <builtin>.repr
+29:52 call  self.axes_lengths.items()
+    -> <builtin>.dict.items
+    -> keras.src.utils.tracking.TrackedDict.items
+    note: for the Keras layers (layers/tensorflow.py) self.axes_lengths is a TrackedDict: Layer.__setattr__ (keras 3.13.1 keras/src/layers/layer.py:1559-1565) passes the stored value to self._tracker.track, which wraps a dict in TrackedDict (keras/src/utils/tracking.py:70-72, 96-98; tracking is on by default, :18-19); TrackedDict (tracking.py:219) subclasses dict and does not define items, so the callee is named by the receiver class (einops.md, J5)
+
+[einops.layers.RearrangeMixin.multirecipe]
+35:49 call  _prepare_recipes_for_all_dims( self.pattern, operation="r...
+    -> einops.einops._prepare_recipes_for_all_dims
+36:70 call  tuple(self.axes_lengths)
+    -> <builtin>.tuple
+39:30 call  EinopsError(f" Error while preparing {self!r}\n {e}")
+    -> <builtin>.RuntimeError.__init__
+39:56 format  {self!r}
+    -> einops.layers.RearrangeMixin.__repr__
+    note: self is a RearrangeMixin or a Rearrange layer; RearrangeMixin comes before the framework base in each MRO, so repr() runs RearrangeMixin.__repr__
+
+[einops.layers.RearrangeMixin._apply_recipe]
+42:30 call  get_backend(x)
+    -> einops._backends.get_backend
+43:29 call  _apply_recipe( backend=backend, recipe=self._multirecipe[...
+    -> einops.einops._apply_recipe
+    reject *: _apply_recipe is the function that einops.layers imports from einops.einops, not a layer method
+45:41 call  len(x.shape)
+    -> <builtin>.len
+    reject *: len() of the shape attribute of a framework tensor
+
+[einops.layers.RearrangeMixin.__setstate__]
+55:22 call  self.__init__(pattern=state["pattern"], **state["axes_len...
+    -> einops.layers.RearrangeMixin.__init__
+    reject *: self is a RearrangeMixin or a subclass of it, and no subclass overrides __init__
+    note: unpickling calls __setstate__ on an object made without __init__; the package then calls __init__ itself
+
+[einops.layers.ReduceMixin.__init__]
+70:14 call  super()
+    -> <builtin>.super
+70:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    -> torch.nn.Module.__init__
+    -> tensorflow.keras.layers.Layer.__init__
+    -> paddle.nn.Layer.__init__
+    -> oneflow.nn.Module.__init__
+    reject *: after ReduceMixin the MRO of each receiver has only the framework's base class or object, no package class
+    note: the receivers are ReduceMixin itself (flax.Reduce.setup makes one) and the Reduce layers of torch, tensorflow, paddle and oneflow
+74:45 call  self.multirecipe()
+    -> einops.layers.ReduceMixin.multirecipe
+    reject einops.layers.RearrangeMixin.multirecipe: self is a ReduceMixin or a subclass of it
+75:35 call  tuple(self.axes_lengths.items())
+    -> <builtin>.tuple
+75:59 call  self.axes_lengths.items()
+    -> <builtin>.dict.items
+    -> keras.src.utils.tracking.TrackedDict.items
+    note: for the Keras layers (layers/tensorflow.py) self.axes_lengths is a TrackedDict: Layer.__setattr__ (keras 3.13.1 keras/src/layers/layer.py:1559-1565) passes the stored value to self._tracker.track, which wraps a dict in TrackedDict (keras/src/utils/tracking.py:70-72, 96-98; tracking is on by default, :18-19); TrackedDict (tracking.py:219) subclasses dict and does not define items, so the callee is named by the receiver class (einops.md, J5)
+
+[einops.layers.ReduceMixin.__repr__]
+79:52 call  self.axes_lengths.items()
+    -> <builtin>.dict.items
+    -> keras.src.utils.tracking.TrackedDict.items
+    note: for the Keras layers (layers/tensorflow.py) self.axes_lengths is a TrackedDict: Layer.__setattr__ (keras 3.13.1 keras/src/layers/layer.py:1559-1565) passes the stored value to self._tracker.track, which wraps a dict in TrackedDict (keras/src/utils/tracking.py:70-72, 96-98; tracking is on by default, :18-19); TrackedDict (tracking.py:219) subclasses dict and does not define items, so the callee is named by the receiver class (einops.md, J5)
+
+[einops.layers.ReduceMixin.multirecipe]
+85:49 call  _prepare_recipes_for_all_dims( self.pattern, operation=se...
+    -> einops.einops._prepare_recipes_for_all_dims
+86:73 call  tuple(self.axes_lengths)
+    -> <builtin>.tuple
+89:30 call  EinopsError(f" Error while preparing {self!r}\n {e}")
+    -> <builtin>.RuntimeError.__init__
+89:56 format  {self!r}
+    -> einops.layers.ReduceMixin.__repr__
+    note: self is a ReduceMixin or a Reduce layer; ReduceMixin comes before the framework base in each MRO
+
+[einops.layers.ReduceMixin._apply_recipe]
+92:30 call  get_backend(x)
+    -> einops._backends.get_backend
+93:29 call  _apply_recipe( backend=backend, recipe=self._multirecipe[...
+    -> einops.einops._apply_recipe
+    reject *: _apply_recipe is the function that einops.layers imports from einops.einops, not a layer method
+95:41 call  len(x.shape)
+    -> <builtin>.len
+    reject *: len() of the shape attribute of a framework tensor
+
+[einops.layers.ReduceMixin.__setstate__]
+105:22 call  self.__init__(pattern=state["pattern"], reduction=state["...
+    -> einops.layers.ReduceMixin.__init__
+    reject *: self is a ReduceMixin or a subclass of it, and no subclass overrides __init__
+
+== einops.layers._einmix
+
+[einops.layers._einmix._report_axes]
+11:11 call  len(axes)
+    -> <builtin>.len
+12:26 call  EinopsError(report_message.format(axes))
+    -> <builtin>.RuntimeError.__init__
+12:48 call  report_message.format(axes)
+    -> <builtin>.str.format
+    -> einops.parsing.AnonymousAxis.__repr__
+    note: format() of the set axes runs set.__repr__, which calls repr() of each element; the sets of lines 73 and 132 and 136 can hold an AnonymousAxis (a number on the right side, before the check of line 83, or in the bias shape, which no check covers)
+
+[einops.layers._einmix._EinmixMixin.__init__]
+58:14 call  super()
+    -> <builtin>.super
+58:25 call  super().__init__()
+    -> torch.nn.Module.__init__
+    -> tensorflow.keras.layers.Layer.__init__
+    -> paddle.nn.Layer.__init__
+    -> oneflow.nn.Module.__init__
+    reject *: after _EinmixMixin the MRO of each receiver has only the framework's base class; flax's EinMix never runs _EinmixMixin.__init__ (flax makes its dataclass __init__)
+    note: _EinmixDebugger, whose next __init__ is object's, is a private class that no package code instantiates (B1)
+63:31 call  self.initialize_einmix( pattern=pattern, weight_shape=wei...
+    -> einops.layers._einmix._EinmixMixin.initialize_einmix
+
+[einops.layers._einmix._EinmixMixin.initialize_einmix]
+68:52 call  pattern.split("->")
+    -> <builtin>.str.split
+69:32 call  ParsedExpression(left_pattern)
+    -> einops.parsing.ParsedExpression.__init__
+70:33 call  ParsedExpression(right_pattern)
+    -> einops.parsing.ParsedExpression.__init__
+71:34 call  ParsedExpression(weight_shape)
+    -> einops.parsing.ParsedExpression.__init__
+72:21 call  _report_axes( set.difference(right.identifiers, {*left.id...
+    -> einops.layers._einmix._report_axes
+73:27 call  set.difference(right.identifiers, {*left.identifiers, *we...
+    -> <builtin>.set.difference
+77:30 call  EinopsError("Ellipsis is not supported in weight, as its ...
+    -> <builtin>.RuntimeError.__init__
+80:34 call  EinopsError(f"Ellipsis in EinMix should be on both sides,...
+    -> <builtin>.RuntimeError.__init__
+82:34 call  EinopsError(f"Ellipsis on left side can't be in parenthes...
+    -> <builtin>.RuntimeError.__init__
+83:15 call  any(x.has_non_unitary_anonymous_axes for x in [left, righ...
+    -> <builtin>.any
+84:30 call  EinopsError("Anonymous axes (numbers) are not allowed in ...
+    -> <builtin>.RuntimeError.__init__
+86:30 call  EinopsError(f"Parenthesis is not allowed in weight shape:...
+    -> <builtin>.RuntimeError.__init__
+91:15 call  any(len(group) != 1 for group in left.composition)
+    -> <builtin>.any
+91:19 call  len(group)
+    -> <builtin>.len
+96:35 call  " ".join(names)
+    -> <builtin>.str.join
+98:87 call  axes_lengths.items()
+    -> <builtin>.dict.items
+    -> flax.core.frozen_dict.FrozenDict.items
+    note: axes_lengths is the **axes_lengths dict of _EinmixMixin.__init__, or, for the flax EinMix (setup, layers/flax.py:44-49), its field self.sizes, which flax's _try_setup has registered and frozen into a FrozenDict (flax 0.12.2 linen/module.py:1490-1492, 1469, 458-461)
+100:15 call  any(len(group) != 1 for group in right.composition)
+    -> <builtin>.any
+100:19 call  len(group)
+    -> <builtin>.len
+105:35 call  " ".join(names)
+    -> <builtin>.str.join
+108:38 call  self._create_rearrange_layers(pre_reshape_pattern, pre_re...
+    -> flax.linen.module.wrap_method_once.wrapped_module_method
+    -> einops.layers.torch.EinMix._create_rearrange_layers
+    -> einops.layers.tensorflow.EinMix._create_rearrange_layers
+    -> einops.layers.paddle.EinMix._create_rearrange_layers
+    -> einops.layers.oneflow.EinMix._create_rearrange_layers
+    -> einops.layers.flax.EinMix._create_rearrange_layers
+    -> einops.layers.flax.EinMix.setup
+    reject einops.layers._einmix._EinmixMixin._create_rearrange_layers: every EinMix layer overrides it
+    reject einops.layers._einmix._EinmixDebugger._create_rearrange_layers: _EinmixDebugger is private and no package code makes one (B1)
+    note: for the flax EinMix the class attribute is flax's wrapper of the method (__init_subclass__ wraps every local method with wrap_method_once: flax 0.12.2 linen/module.py:1034-1046, 1135-1152, 677-703); the wrapper calls the method through _call_wrapped_method (:1167-1218), whose _try_setup (:1194) does nothing inside setup (:1478-1483). A client can also call the public einops.layers.flax.EinMix.initialize_einmix directly on a bound EinMix whose setup is pending (bind makes a scoped clone, :2037-2038; construction leaves setup pending, :1330-1390); then this first wrapped call runs _try_setup, which calls the wrapped setup (:1494): the callee einops.layers.flax.EinMix.setup (audit round 1). On that path the outer _create_rearrange_layers then raises at its first assignment, self.pre_rearrange = None, made outside setup on an initialized module (SetAttributeFrozenModuleError, flax linen/module.py:1252-1281), so 162:32 is not reached on it
+112:34 call  EinopsError(f"Dimension {axis} of weight should be specif...
+    -> <builtin>.RuntimeError.__init__
+113:21 call  _report_axes( set.difference(set(axes_lengths), {*left.id...
+    -> einops.layers._einmix._report_axes
+114:27 call  set.difference(set(axes_lengths), {*left.identifiers, *we...
+    -> <builtin>.set.difference
+114:31 call  set(axes_lengths)
+    -> <builtin>.set
+117:21 call  _report_axes( set.difference(weight.identifiers, {*left.i...
+    -> einops.layers._einmix._report_axes
+118:27 call  set.difference(weight.identifiers, {*left.identifiers, *r...
+    -> <builtin>.set.difference
+120:15 call  len(weight.identifiers)
+    -> <builtin>.len
+121:26 call  warnings.warn("EinMix: weight has no dimensions (means mu...
+    -> warnings.warn
+125:27 call  _product([axes_lengths[axis] for (axis,) in weight.compos...
+    -> einops.einops._product
+128:30 call  isinstance(bias_shape, str)
+    -> <builtin>.isinstance
+129:34 call  EinopsError("bias shape should be string specifying which...
+    -> <builtin>.RuntimeError.__init__
+130:36 call  ParsedExpression(bias_shape)
+    -> einops.parsing.ParsedExpression.__init__
+131:25 call  _report_axes( set.difference(bias.identifiers, right.iden...
+    -> einops.layers._einmix._report_axes
+132:31 call  set.difference(bias.identifiers, right.identifiers)
+    -> <builtin>.set.difference
+135:25 call  _report_axes( set.difference(bias.identifiers, set(axes_l...
+    -> einops.layers._einmix._report_axes
+136:31 call  set.difference(bias.identifiers, set(axes_lengths))
+    -> <builtin>.set.difference
+136:53 call  set(axes_lengths)
+    -> <builtin>.set
+145:42 call  EinopsError("all bias dimensions should go after ellipsis...
+    -> <builtin>.RuntimeError.__init__
+151:50 call  EinopsError("all bias dimensions should go after ellipsis...
+    -> <builtin>.RuntimeError.__init__
+153:47 call  _bias_shape.append(axes_lengths[axis])
+    -> <builtin>.list.append
+156:47 call  _bias_shape.append(1)
+    -> <builtin>.list.append
+162:32 call  self._create_parameters(_weight_shape, weight_bound, _bia...
+    -> flax.linen.module.wrap_method_once.wrapped_module_method
+    -> einops.layers.torch.EinMix._create_parameters
+    -> einops.layers.tensorflow.EinMix._create_parameters
+    -> einops.layers.paddle.EinMix._create_parameters
+    -> einops.layers.oneflow.EinMix._create_parameters
+    -> einops.layers.flax.EinMix._create_parameters
+    reject einops.layers._einmix._EinmixMixin._create_parameters: every EinMix layer overrides it
+    reject einops.layers._einmix._EinmixDebugger._create_parameters: _EinmixDebugger is private and no package code makes one (B1)
+    note: for the flax EinMix the callee is flax's wrapper, which calls the method (as at 108:38)
+168:38 call  mapped_identifiers.remove(_ellipsis)
+    -> <builtin>.set.remove
+169:36 call  sorted(mapped_identifiers)
+    -> <builtin>.sorted
+170:58 call  zip(string.ascii_lowercase, mapped_identifiers)
+    -> <builtin>.zip
+184:35 call  write_flat_remapped(left)
+    -> einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped
+184:63 call  write_flat_remapped(weight)
+    -> einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped
+184:94 call  write_flat_remapped(right)
+    -> einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped
+
+[einops.layers._einmix._EinmixMixin.initialize_einmix.write_flat_remapped]
+176:30 call  isinstance(composed_axis, list)
+    -> <builtin>.isinstance
+177:34 call  result.extend([mapping2letters[axis] for axis in composed...
+    -> <builtin>.list.extend
+180:34 call  result.append("...")
+    -> <builtin>.list.append
+181:27 call  "".join(result)
+    -> <builtin>.str.join
+
+[einops.layers._einmix._EinmixMixin._create_rearrange_layers]
+194:34 call  NotImplementedError("Should be defined in framework imple...
+    -> <builtin>.NotImplementedError
+
+[einops.layers._einmix._EinmixMixin._create_parameters]
+198:34 call  NotImplementedError("Should be defined in framework imple...
+    -> <builtin>.NotImplementedError
+
+[einops.layers._einmix._EinmixMixin.__repr__]
+201:22 call  repr(self.pattern)
+    -> <builtin>.repr
+205:52 call  self.axes_lengths.items()
+    -> <builtin>.dict.items
+    -> keras.src.utils.tracking.TrackedDict.items
+    note: for the Keras layers (layers/tensorflow.py) self.axes_lengths, stored at _einmix.py:62, is a TrackedDict: Layer.__setattr__ (keras 3.13.1 keras/src/layers/layer.py:1559-1565) passes the stored value to self._tracker.track, which wraps a dict in TrackedDict (keras/src/utils/tracking.py:70-72, 96-98; tracking is on by default, :18-19); TrackedDict (tracking.py:219) subclasses dict and does not define items, so the callee is named by the receiver class (einops.md, J5)
+
+== einops.layers.flax
+
+[einops.layers.flax]
+17:24 call  field(default_factory=dict)
+    -> dataclasses.field
+28:24 call  field(default_factory=dict)
+    -> dataclasses.field
+41:24 call  field(default_factory=dict)
+    -> dataclasses.field
+
+[einops.layers.flax.Reduce.setup]
+20:35 call  ReduceMixin(self.pattern, self.reduction, **self.sizes)
+    -> einops.layers.ReduceMixin.__init__
+
+[einops.layers.flax.Reduce.__call__]
+23:42 call  self.reducer._apply_recipe(input)
+    -> einops.layers.ReduceMixin._apply_recipe
+    reject *: self.reducer is the ReduceMixin that setup makes (line 20)
+
+[einops.layers.flax.Rearrange.setup]
+31:41 call  RearrangeMixin(self.pattern, **self.sizes)
+    -> einops.layers.RearrangeMixin.__init__
+
+[einops.layers.flax.Rearrange.__call__]
+34:45 call  self.rearranger._apply_recipe(input)
+    -> einops.layers.RearrangeMixin._apply_recipe
+    reject *: self.rearranger is the RearrangeMixin that setup makes (line 31)
+
+[einops.layers.flax.EinMix.setup]
+44:31 call  self.initialize_einmix( pattern=self.pattern, weight_shap...
+    -> einops.layers._einmix._EinmixMixin.initialize_einmix
+
+[einops.layers.flax.EinMix._create_parameters]
+52:33 call  self.param("weight", jax.nn.initializers.uniform(weight_b...
+    -> flax.linen.Module.param
+    note: self is the flax EinMix; param is the method it inherits from the missing module's flax.linen.Module
+52:71 call  jax.nn.initializers.uniform(weight_bound)
+    -> jax.nn.initializers.uniform
+55:35 call  self.param("bias", jax.nn.initializers.uniform(bias_bound...
+    -> flax.linen.Module.param
+55:71 call  jax.nn.initializers.uniform(bias_bound)
+    -> jax.nn.initializers.uniform
+
+[einops.layers.flax.EinMix._create_rearrange_layers]
+68:43 call  Rearrange(pre_reshape_pattern, sizes=cast(dict, pre_resha...
+    reject einops.layers.RearrangeMixin.__init__: Rearrange here is flax.Rearrange (layers/flax.py:26), a flax Module and no RearrangeMixin
+    note: flax makes each Module subclass a dataclass; the generated __init__ has no node and calls no package function (einops.md, "Layers")
+68:75 call  cast(dict, pre_reshape_lengths)
+    -> typing.cast
+72:44 call  Rearrange(post_reshape_pattern, sizes=cast(dict, post_res...
+    reject einops.layers.RearrangeMixin.__init__: Rearrange here is flax.Rearrange, a flax Module and no RearrangeMixin
+    note: the dataclass __init__ that flax generates has no node
+72:77 call  cast(dict, post_reshape_lengths)
+    -> typing.cast
+
+[einops.layers.flax.EinMix.__call__]
+76:39 call  self.pre_rearrange(input)
+    -> flax.linen.module.wrap_method_once.wrapped_module_method
+    -> einops.layers.flax.Rearrange.__call__
+    -> einops.layers.flax.Rearrange.setup
+    note: self.pre_rearrange is the flax.Rearrange of _create_rearrange_layers (guarded by `is not None`). flax replaced Rearrange.__call__ and Rearrange.setup by wrap_method_once wrappers at class creation (flax 0.12.2 linen/module.py:1034-1046, 1135-1152); the wrapper (:693-700) runs _call_wrapped_method (:1167), which first runs _try_setup (:1194, :1478-1495: the wrapped setup, once, :1494) and then __call__ (:1216, :1218); the wrapper is a local function of flax, named where it is defined (micro-benchmark README, "Functions without an attribute path")
+77:28 call  jnp.einsum(self.einsum_pattern, input, self.weight)
+    -> jax.numpy.einsum
+    reject einops.einops.einsum: jnp is jax.numpy
+    reject *: jnp is the module jax.numpy, not a backend or the package's einsum
+81:41 call  self.post_rearrange(result)
+    -> flax.linen.module.wrap_method_once.wrapped_module_method
+    -> einops.layers.flax.Rearrange.__call__
+    -> einops.layers.flax.Rearrange.setup
+    note: self.post_rearrange is the flax.Rearrange of _create_rearrange_layers (guarded by `is not None`). flax replaced Rearrange.__call__ and Rearrange.setup by wrap_method_once wrappers at class creation (flax 0.12.2 linen/module.py:1034-1046, 1135-1152); the wrapper (:693-700) runs _call_wrapped_method (:1167), which first runs _try_setup (:1194, :1478-1495: the wrapped setup, once, :1494) and then __call__ (:1216, :1218); the wrapper is a local function of flax, named where it is defined (micro-benchmark README, "Functions without an attribute path")
+
+== einops.layers.oneflow
+
+[einops.layers.oneflow.Rearrange.forward]
+13:34 call  self._apply_recipe(input)
+    -> einops.layers.RearrangeMixin._apply_recipe
+    reject *: self is a oneflow Rearrange, which inherits RearrangeMixin._apply_recipe
+
+[einops.layers.oneflow.Reduce.forward]
+18:34 call  self._apply_recipe(input)
+    -> einops.layers.ReduceMixin._apply_recipe
+    reject *: self is a oneflow Reduce, which inherits ReduceMixin._apply_recipe
+
+[einops.layers.oneflow.EinMix._create_parameters]
+23:40 call  flow.nn.Parameter( flow.zeros(weight_shape).uniform_(-wei...
+    -> oneflow.nn.Parameter
+24:23 call  flow.zeros(weight_shape)
+    -> oneflow.zeros
+24:46 call  flow.zeros(weight_shape).uniform_(-weight_bound, weight_b...
+    -> oneflow.zeros.uniform_
+    note: a call on the result of a missing-module call keeps the access path
+27:42 call  flow.nn.Parameter(flow.zeros(bias_shape).uniform_(-bias_b...
+    -> oneflow.nn.Parameter
+27:53 call  flow.zeros(bias_shape)
+    -> oneflow.zeros
+27:74 call  flow.zeros(bias_shape).uniform_(-bias_bound, bias_bound)
+    -> oneflow.zeros.uniform_
+
+[einops.layers.oneflow.EinMix._create_rearrange_layers]
+40:43 call  Rearrange(pre_reshape_pattern, **cast(dict, pre_reshape_l...
+    -> einops.layers.RearrangeMixin.__init__
+    note: Rearrange is the oneflow Rearrange; its first __init__ in the MRO is RearrangeMixin's
+40:71 call  cast(dict, pre_reshape_lengths)
+    -> typing.cast
+44:44 call  Rearrange(post_reshape_pattern, **cast(dict, post_reshape...
+    -> einops.layers.RearrangeMixin.__init__
+44:73 call  cast(dict, post_reshape_lengths)
+    -> typing.cast
+
+[einops.layers.oneflow.EinMix.forward]
+48:39 call  self.pre_rearrange(input)
+    -> oneflow.nn.Module.__call__
+    -> einops.layers.oneflow.Rearrange.forward
+    note: self.pre_rearrange is the oneflow Rearrange of _create_rearrange_layers (guarded by `is not None`). oneflow 0.9.0 (the version that einops/tests/run_tests.py pins) oneflow/nn/modules/module.py:150-169: Module.__call__ calls self.forward (:163) between the forward hooks
+49:29 call  flow.einsum(self.einsum_pattern, input, self.weight)
+    -> oneflow.einsum
+    reject einops.einops.einsum: flow is the module oneflow
+    reject *: flow is the module oneflow, not a backend or the package's einsum
+53:41 call  self.post_rearrange(result)
+    -> oneflow.nn.Module.__call__
+    -> einops.layers.oneflow.Rearrange.forward
+    note: self.post_rearrange is the oneflow Rearrange of _create_rearrange_layers (guarded by `is not None`). oneflow 0.9.0 (the version that einops/tests/run_tests.py pins) oneflow/nn/modules/module.py:150-169: Module.__call__ calls self.forward (:163) between the forward hooks
+
+== einops.layers.paddle
+
+[einops.layers.paddle.Rearrange.forward]
+13:34 call  self._apply_recipe(input)
+    -> einops.layers.RearrangeMixin._apply_recipe
+    reject *: self is a paddle Rearrange, which inherits RearrangeMixin._apply_recipe
+
+[einops.layers.paddle.Reduce.forward]
+18:34 call  self._apply_recipe(input)
+    -> einops.layers.ReduceMixin._apply_recipe
+    reject *: self is a paddle Reduce, which inherits ReduceMixin._apply_recipe
+
+[einops.layers.paddle.EinMix._create_parameters]
+23:44 call  self.create_parameter( weight_shape, default_initializer=...
+    -> paddle.nn.Layer.create_parameter
+    note: self is the paddle EinMix; create_parameter is the method it inherits from the missing module's paddle.nn.Layer
+24:76 call  paddle.nn.initializer.Uniform(-weight_bound, weight_bound)
+    -> paddle.nn.initializer.Uniform
+28:46 call  self.create_parameter( bias_shape, default_initializer=pa...
+    -> paddle.nn.Layer.create_parameter
+29:78 call  paddle.nn.initializer.Uniform(-bias_bound, bias_bound)
+    -> paddle.nn.initializer.Uniform
+
+[einops.layers.paddle.EinMix._create_rearrange_layers]
+43:43 call  Rearrange(pre_reshape_pattern, **cast(dict, pre_reshape_l...
+    -> einops.layers.RearrangeMixin.__init__
+43:71 call  cast(dict, pre_reshape_lengths)
+    -> typing.cast
+47:44 call  Rearrange(post_reshape_pattern, **cast(dict, post_reshape...
+    -> einops.layers.RearrangeMixin.__init__
+47:73 call  cast(dict, post_reshape_lengths)
+    -> typing.cast
+
+[einops.layers.paddle.EinMix.forward]
+51:39 call  self.pre_rearrange(input)
+    -> paddle.nn.Layer.__call__
+    -> einops.layers.paddle.Rearrange.forward
+    note: self.pre_rearrange is the paddle Rearrange of _create_rearrange_layers. paddle 3.3.0 paddle/nn/layer/layers.py:1824-1835: Layer.__call__ calls self.forward, directly or through _dygraph_call_func (:1737, :1772, :1775); _build_once (:1734) is not overridden by the package
+53:31 call  paddle.einsum(self.einsum_pattern, input, self.weight)
+    -> paddle.einsum
+    reject einops.einops.einsum: paddle is the module paddle
+    reject *: paddle is the module paddle, not a backend or the package's einsum
+57:41 call  self.post_rearrange(result)
+    -> paddle.nn.Layer.__call__
+    -> einops.layers.paddle.Rearrange.forward
+    note: self.post_rearrange is the paddle Rearrange of _create_rearrange_layers. paddle 3.3.0 paddle/nn/layer/layers.py:1824-1835: Layer.__call__ calls self.forward, directly or through _dygraph_call_func (:1737, :1772, :1775); _build_once (:1734) is not overridden by the package
+
+== einops.layers.tensorflow
+
+[einops.layers.tensorflow.Rearrange.call]
+30:34 call  self._apply_recipe(inputs)
+    -> einops.layers.RearrangeMixin._apply_recipe
+    reject *: self is a tensorflow Rearrange, which inherits RearrangeMixin._apply_recipe
+
+[einops.layers.tensorflow.Reduce.call]
+41:34 call  self._apply_recipe(inputs)
+    -> einops.layers.ReduceMixin._apply_recipe
+    reject *: self is a tensorflow Reduce, which inherits ReduceMixin._apply_recipe
+
+[einops.layers.tensorflow.EinMix._create_rearrange_layers]
+62:43 call  Rearrange(pre_reshape_pattern, **cast(dict, pre_reshape_l...
+    -> flax.nnx.module.ModuleMeta.__call__
+    -> einops.layers.RearrangeMixin.__init__
+    note: with Keras's jax backend and NNX enabled (documented configuration: keras.config.set_nnx_enabled, KERAS_NNX_ENABLED; keras/src/backend/config.py:236-259, :441) the metaclass of the tensorflow Rearrange is flax.nnx.module.ModuleMeta, whose inherited __call__ (flax/nnx/pytreelib.py:396-421) runs Layer.__new__ and then self.__init__; named through the concrete metaclass, not PytreeMeta (referee ruling, b7-ruling-einops-metaclass.md)
+62:71 call  cast(dict, pre_reshape_lengths)
+    -> typing.cast
+66:44 call  Rearrange(post_reshape_pattern, **cast(dict, post_reshape...
+    -> flax.nnx.module.ModuleMeta.__call__
+    -> einops.layers.RearrangeMixin.__init__
+    note: with Keras's jax backend and NNX enabled (documented configuration: keras.config.set_nnx_enabled, KERAS_NNX_ENABLED; keras/src/backend/config.py:236-259, :441) the metaclass of the tensorflow Rearrange is flax.nnx.module.ModuleMeta, whose inherited __call__ (flax/nnx/pytreelib.py:396-421) runs Layer.__new__ and then self.__init__; named through the concrete metaclass, not PytreeMeta (referee ruling, b7-ruling-einops-metaclass.md)
+66:73 call  cast(dict, post_reshape_lengths)
+    -> typing.cast
+
+[einops.layers.tensorflow.EinMix.build]
+70:38 call  self.add_weight( shape=weight_shape, initializer=tf.rando...
+    -> tensorflow.keras.layers.Layer.add_weight
+    note: self is the tensorflow EinMix; add_weight is the method it inherits from the missing module's tensorflow.keras.layers.Layer
+72:54 call  tf.random_uniform_initializer(-weight_bound, weight_bound)
+    -> tensorflow.random_uniform_initializer
+77:40 call  self.add_weight( shape=bias_shape, initializer=tf.random_...
+    -> tensorflow.keras.layers.Layer.add_weight
+79:58 call  tf.random_uniform_initializer(-bias_bound, bias_bound)
+    -> tensorflow.random_uniform_initializer
+
+[einops.layers.tensorflow.EinMix.call]
+87:40 call  self.pre_rearrange(inputs)
+    -> tensorflow.keras.layers.Layer.__call__
+    -> einops.layers.tensorflow.Rearrange.build
+    -> einops.layers.tensorflow.Rearrange.call
+    note: self.pre_rearrange is the tensorflow Rearrange of _create_rearrange_layers. keras 3.13.1 (tensorflow 2.20.0 requires keras>=3.10.0): Layer.__call__ (keras/src/layers/layer.py:828-829, decorated by traceback_utils.filter_traceback) runs _maybe_build (:878, :1474-1490), which calls self.build: the build_wrapper that Layer.__new__ installs (:222-241) and that calls Rearrange.build, at the first call; then super().__call__ (:951, :953), Operation.__call__ (keras/src/ops/operation.py:32-77), calls self.call directly or through symbolic_call and compute_output_spec (:79-82, :99-101; layer.py:1145-1147); the name is the public attribute path through the base class that the package names
+88:27 call  tf.einsum(self.einsum_pattern, inputs, self.weight)
+    -> tensorflow.einsum
+    reject einops.einops.einsum: tf is the module tensorflow
+    reject *: tf is the module tensorflow, not a backend or the package's einsum
+92:41 call  self.post_rearrange(result)
+    -> tensorflow.keras.layers.Layer.__call__
+    -> einops.layers.tensorflow.Rearrange.build
+    -> einops.layers.tensorflow.Rearrange.call
+    note: self.post_rearrange is the tensorflow Rearrange of _create_rearrange_layers. keras 3.13.1 (tensorflow 2.20.0 requires keras>=3.10.0): Layer.__call__ (keras/src/layers/layer.py:828-829, decorated by traceback_utils.filter_traceback) runs _maybe_build (:878, :1474-1490), which calls self.build: the build_wrapper that Layer.__new__ installs (:222-241) and that calls Rearrange.build, at the first call; then super().__call__ (:951, :953), Operation.__call__ (keras/src/ops/operation.py:32-77), calls self.call directly or through symbolic_call and compute_output_spec (:79-82, :99-101; layer.py:1145-1147); the name is the public attribute path through the base class that the package names
+
+== einops.layers.torch
+
+[einops.layers.torch.Rearrange.forward]
+16:42 call  apply_for_scriptable_torch(recipe, input, reduction_type=...
+    -> einops._torch_specific.apply_for_scriptable_torch
+
+[einops.layers.torch.Reduce.forward]
+26:42 call  apply_for_scriptable_torch(recipe, input, reduction_type=...
+    -> einops._torch_specific.apply_for_scriptable_torch
+
+[einops.layers.torch.EinMix._create_parameters]
+35:41 call  torch.nn.Parameter( torch.zeros(weight_shape).uniform_(-w...
+    -> torch.nn.Parameter
+36:24 call  torch.zeros(weight_shape)
+    -> torch.zeros
+36:47 call  torch.zeros(weight_shape).uniform_(-weight_bound, weight_...
+    -> torch.zeros.uniform_
+    note: a call on the result of a missing-module call keeps the access path
+39:43 call  torch.nn.Parameter( torch.zeros(bias_shape).uniform_(-bia...
+    -> torch.nn.Parameter
+40:28 call  torch.zeros(bias_shape)
+    -> torch.zeros
+40:49 call  torch.zeros(bias_shape).uniform_(-bias_bound, bias_bound)
+    -> torch.zeros.uniform_
+
+[einops.layers.torch.EinMix._create_rearrange_layers]
+54:43 call  Rearrange(pre_reshape_pattern, **cast(dict, pre_reshape_l...
+    -> einops.layers.RearrangeMixin.__init__
+    note: Rearrange is the torch Rearrange; its first __init__ in the MRO is RearrangeMixin's
+54:71 call  cast(dict, pre_reshape_lengths)
+    -> typing.cast
+58:44 call  Rearrange(post_reshape_pattern, **cast(dict, post_reshape...
+    -> einops.layers.RearrangeMixin.__init__
+58:73 call  cast(dict, post_reshape_lengths)
+    -> typing.cast
+
+[einops.layers.torch.EinMix.forward]
+62:39 call  self.pre_rearrange(input)
+    -> torch.nn.Module.__call__
+    -> einops.layers.torch.Rearrange.forward
+    note: self.pre_rearrange is the torch Rearrange of _create_rearrange_layers (guarded by `is not None`). torch 2.10.0 torch/nn/modules/module.py:1915 sets Module.__call__ = _wrapped_call_impl (:1772), which calls _call_impl (:1780), whose forward_call is self.forward (:1781, :1787, :1830; _slow_forward under tracing calls self.forward too, :1752-1755); the name is the attribute path through the base class that the package names (README, "Outside names": a function installed at a public outside attribute keeps that path)
+63:30 call  torch.einsum(self.einsum_pattern, input, self.weight)
+    -> torch.einsum
+    reject einops.einops.einsum: torch is the module torch
+    reject *: torch is the module torch, not a backend or the package's einsum
+67:41 call  self.post_rearrange(result)
+    -> torch.nn.Module.__call__
+    -> einops.layers.torch.Rearrange.forward
+    note: self.post_rearrange is the torch Rearrange of _create_rearrange_layers (guarded by `is not None`). torch 2.10.0 torch/nn/modules/module.py:1915 sets Module.__call__ = _wrapped_call_impl (:1772), which calls _call_impl (:1780), whose forward_call is self.forward (:1781, :1787, :1830; _slow_forward under tracing calls self.forward too, :1752-1755); the name is the attribute path through the base class that the package names (README, "Outside names": a function installed at a public outside attribute keeps that path)
+
+== einops.packing
+
+[einops.packing]
+8:17 call  TypeVar("Tensor")
+    -> typing.TypeVar
+13:2 decorator  @lru_cache(maxsize=128)
+    -> functools.lru_cache.decorating_function
+    note: the decorator is the decorating_function that lru_cache(maxsize=128) returns; it wraps analyze_pattern without calling it
+13:11 call  lru_cache(maxsize=128)
+    -> functools.lru_cache
+
+[einops.packing.analyze_pattern]
+16:25 call  pattern.split()
+    -> <builtin>.str.split
+17:19 call  set(axes)
+    -> <builtin>.set
+18:11 call  len(axes)
+    -> <builtin>.len
+18:24 call  len(axes_set)
+    -> <builtin>.len
+19:26 call  EinopsError(f'Duplicates in axes names in {opname}(..., "...
+    -> <builtin>.RuntimeError.__init__
+21:26 call  EinopsError(f'No *-axis in {opname}(..., "{pattern}")')
+    -> <builtin>.RuntimeError.__init__
+24:78 call  ParsedExpression.check_axis_name_return_reason(axis)
+    -> einops.parsing.ParsedExpression.check_axis_name_return_reason
+26:34 call  EinopsError(f'Invalid axis name {axis} in {opname}(..., "...
+    -> <builtin>.RuntimeError.__init__
+27:31 call  axes.index("*")
+    -> <builtin>.list.index
+28:23 call  len(axes)
+    -> <builtin>.len
+
+[einops.packing.pack]
+69:60 call  analyze_pattern(pattern, "pack")
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.packing.analyze_pattern
+    note: analyze_pattern is the lru_cache wrapper of the function (line 13); on a cache miss it calls the function
+72:26 call  get_backend(tensors[0])
+    -> einops._backends.get_backend
+76:31 call  enumerate(tensors)
+    -> <builtin>.enumerate
+77:30 call  backend.shape(tensor)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: backend comes from get_backend, never TorchJitBackend
+78:15 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+    note: shape is the result of backend.shape, a HashableTuple for the tensorflow backends
+79:30 call  EinopsError( f"packed tensor #{i} (enumeration starts wit...
+    -> <builtin>.RuntimeError.__init__
+83:37 call  len(shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+84:29 call  packed_shapes.append(shape[n_axes_before:axis_after_packe...
+    -> <builtin>.list.append
+84:35 getitem  shape[n_axes_before:axis_after_packed_axes]
+    -> einops._backends.HashableTuple.__getitem__
+    note: shape is a HashableTuple for the tensorflow backends; its __getitem__ returns a tuple slice
+85:32 call  reshaped_tensors.append(backend.reshape(tensor, (*shape[:...
+    -> <builtin>.list.append
+85:48 call  backend.reshape(tensor, (*shape[:n_axes_before], -1, *sha...
+    -> einops._backends.AbstractBackend.reshape
+    -> einops._backends.TensorflowBackend.reshape
+    -> einops._backends.TFKerasBackend.reshape
+    -> einops._backends.PaddleBackend.reshape
+    -> einops._backends.TinygradBackend.reshape
+    reject einops._torch_specific.TorchJitBackend.reshape: backend comes from get_backend, never TorchJitBackend
+85:64 getitem  shape[:n_axes_before]
+    -> einops._backends.HashableTuple.__getitem__
+85:92 getitem  shape[axis_after_packed_axes:]
+    -> einops._backends.HashableTuple.__getitem__
+87:26 call  backend.concat(reshaped_tensors, axis=n_axes_before)
+    -> einops._backends.NumpyBackend.concat
+    -> einops._backends.TorchBackend.concat
+    -> einops._backends.CupyBackend.concat
+    -> einops._backends.TensorflowBackend.concat
+    -> einops._backends.TFKerasBackend.concat
+    -> einops._backends.OneFlowBackend.concat
+    -> einops._backends.PaddleBackend.concat
+    -> einops._backends.TinygradBackend.concat
+    -> einops._backends.PyTensorBackend.concat
+    -> einops._backends.MLXBackend.concat
+    reject *: backend comes from get_backend, and every package backend overrides concat (JaxBackend inherits NumpyBackend's)
+
+[einops.packing.prod]
+93:16 op  result *= i
+    reject *: x is a Shape (annotated Union[Tuple[int, ...], List[int]]); unpack calls prod only for a shape that holds no -1, and a shape copied from an eager tensorflow shape with an UnknownSize always passes `-1 in p_shape` (UnknownSize.__eq__ returns True)
+
+[einops.packing.unpack]
+138:60 call  analyze_pattern(pattern, opname="unpack")
+    -> functools._lru_cache_wrapper.__call__
+    -> einops.packing.analyze_pattern
+140:26 call  get_backend(tensor)
+    -> einops._backends.get_backend
+141:32 call  backend.shape(tensor)
+    -> einops._backends.AbstractBackend.shape
+    -> einops._backends.TensorflowBackend.shape
+    -> einops._backends.TFKerasBackend.shape
+    -> einops._backends.PaddleBackend.shape
+    -> einops._backends.TinygradBackend.shape
+    -> einops._backends.PyTensorBackend.shape
+    reject einops._torch_specific.TorchJitBackend.shape: backend comes from get_backend, never TorchJitBackend
+142:11 call  len(input_shape)
+    -> <builtin>.len
+    -> einops._backends.HashableTuple.__len__
+    note: input_shape is the result of backend.shape, a HashableTuple for the tensorflow backends
+143:26 call  EinopsError(f"unpack(..., {pattern}) received input of wr...
+    -> <builtin>.RuntimeError.__init__
+147:53 op  -1 in p_shape
+    -> einops._backends.UnknownSize.__eq__
+    note: packed_shapes is documented as pack's output, whose shapes are slices of the backend's shape and so can hold the UnknownSize of an eager tensorflow shape; the `in` test of a tuple compares each element with -1 by the element's __eq__
+147:73 call  prod(p_shape)
+    -> einops.packing.prod
+149:34 call  sum(int(x == -1) for x in lengths_of_composed_axes)
+    -> <builtin>.sum
+149:38 call  int(x == -1)
+    -> <builtin>.int
+151:26 call  EinopsError( f"unpack(..., {pattern}) received more than ...
+    -> <builtin>.RuntimeError.__init__
+161:27 op  [0] * len(packed_shapes)
+    reject *: a list times an int
+161:32 call  len(packed_shapes)
+    -> <builtin>.len
+161:62 getitem  input_shape[unpacked_axis]
+    -> einops._backends.HashableTuple.__getitem__
+    note: input_shape is a HashableTuple for the tensorflow backends
+163:30 call  enumerate(lengths_of_composed_axes[:-1])
+    -> <builtin>.enumerate
+166:68 call  lengths_of_composed_axes.index(-1)
+    -> <builtin>.list.index
+167:23 call  range(unknown_composed_axis)
+    -> <builtin>.range
+169:23 call  range(unknown_composed_axis + 1, len(lengths_of_composed_...
+    -> <builtin>.range
+169:54 call  len(lengths_of_composed_axes)
+    -> <builtin>.len
+172:30 getitem  input_shape[:unpacked_axis]
+    -> einops._backends.HashableTuple.__getitem__
+173:28 getitem  input_shape[unpacked_axis + 1 :]
+    -> einops._backends.HashableTuple.__getitem__
+174:26 call  slice(None, None)
+    -> <builtin>.slice
+174:41 op  (slice(None, None),) * unpacked_axis
+    reject *: a tuple times an int
+177:28 call  backend.reshape( # shortest way slice arbitrary axis tens...
+    -> einops._backends.AbstractBackend.reshape
+    -> einops._backends.TensorflowBackend.reshape
+    -> einops._backends.TFKerasBackend.reshape
+    -> einops._backends.PaddleBackend.reshape
+    -> einops._backends.TinygradBackend.reshape
+    reject einops._torch_specific.TorchJitBackend.reshape: backend comes from get_backend, never TorchJitBackend
+179:45 call  slice(split_positions[i], split_positions[i + 1])
+    -> <builtin>.slice
+182:46 call  enumerate(packed_shapes)
+    -> <builtin>.enumerate
+186:26 call  EinopsError( f'Error during unpack(..., "{pattern}"): cou...
+    -> <builtin>.RuntimeError.__init__
+
+== einops.parsing
+
+[einops.parsing]
+128:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+151:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[einops.parsing.AnonymousAxis.__init__]
+14:25 call  int(value)
+    -> <builtin>.int
+17:34 call  EinopsError("No need to create anonymous axis of length 1...
+    -> <builtin>.RuntimeError.__init__
+19:34 call  EinopsError(f"Anonymous axis should have positive length,...
+    -> <builtin>.RuntimeError.__init__
+
+[einops.parsing.AnonymousAxis.__repr__]
+22:22 call  str(self.value)
+    -> <builtin>.str
+
+[einops.parsing.ParsedExpression.__init__]
+34:41 call  set()
+    -> <builtin>.set
+41:34 call  EinopsError("Expression may contain dots only inside elli...
+    -> <builtin>.RuntimeError.__init__
+42:25 call  str.count(expression, "...")
+    -> <builtin>.str.count
+42:62 call  str.count(expression, ".")
+    -> <builtin>.str.count
+43:34 call  EinopsError( "Expression may contain dots only inside ell...
+    -> <builtin>.RuntimeError.__init__
+46:44 call  expression.replace("...", _ellipsis)
+    -> <builtin>.str.replace
+89:34 call  add_axis_name(current_identifier)
+    -> einops.parsing.ParsedExpression.__init__.add_axis_name
+93:42 call  EinopsError("Axis composition is one-level (brackets insi...
+    -> <builtin>.RuntimeError.__init__
+97:42 call  EinopsError("Brackets are not balanced")
+    -> <builtin>.RuntimeError.__init__
+98:44 call  self.composition.append(bracket_group)
+    -> <builtin>.list.append
+100:29 call  str.isalnum(char)
+    -> <builtin>.str.isalnum
+106:34 call  EinopsError(f"Unknown character '{char}'")
+    -> <builtin>.RuntimeError.__init__
+109:30 call  EinopsError(f'Imbalanced parentheses in expression: "{exp...
+    -> <builtin>.RuntimeError.__init__
+111:26 call  add_axis_name(current_identifier)
+    -> einops.parsing.ParsedExpression.__init__.add_axis_name
+
+[einops.parsing.ParsedExpression.__init__.add_axis_name]
+54:38 call  EinopsError(f'Indexing expression contains duplicate dime...
+    -> <builtin>.RuntimeError.__init__
+56:37 call  self.identifiers.add(_ellipsis)
+    -> <builtin>.set.add
+58:44 call  self.composition.append(_ellipsis)
+    -> <builtin>.list.append
+61:41 call  bracket_group.append(_ellipsis)
+    -> <builtin>.list.append
+64:42 call  str.isdecimal(x)
+    -> <builtin>.str.isdecimal
+65:37 call  int(x)
+    -> <builtin>.int
+68:48 call  self.composition.append([])
+    -> <builtin>.list.append
+72:74 call  self.check_axis_name_return_reason(x, allow_underscore=al...
+    -> einops.parsing.ParsedExpression.check_axis_name_return_reason
+74:38 call  EinopsError(f"Invalid axis identifier: {x}\n{reason}")
+    -> <builtin>.RuntimeError.__init__
+76:38 call  AnonymousAxis(x)
+    -> einops.parsing.AnonymousAxis.__init__
+77:37 call  self.identifiers.add(x)
+    -> <builtin>.set.add
+81:44 call  self.composition.append([x])
+    -> <builtin>.list.append
+83:41 call  bracket_group.append(x)
+    -> <builtin>.list.append
+
+[einops.parsing.ParsedExpression.flat_axes_order]
+116:30 call  isinstance(composed_axis, list)
+    -> <builtin>.isinstance
+118:30 call  result.append(axis)
+    -> <builtin>.list.append
+
+[einops.parsing.ParsedExpression.has_composed_axes]
+124:26 call  isinstance(axes, list)
+    -> <builtin>.isinstance
+124:46 call  len(axes)
+    -> <builtin>.len
+
+[einops.parsing.ParsedExpression.check_axis_name_return_reason]
+130:32 call  str.isidentifier(name)
+    -> <builtin>.str.isidentifier
+137:33 call  keyword.iskeyword(name)
+    -> keyword.iskeyword
+138:30 call  warnings.warn( f"It is discouraged to use axes names that...
+    -> warnings.warn
+144:30 call  warnings.warn( "It is discouraged to use 'axis' as an axi...
+    -> warnings.warn
+
+[einops.parsing.ParsedExpression.check_axis_name]
+157:75 call  ParsedExpression.check_axis_name_return_reason(name)
+    -> einops.parsing.ParsedExpression.check_axis_name_return_reason

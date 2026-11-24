@@ -1,0 +1,487 @@
+{
+  "aliases": {
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.int.to_bytes": [
+      "uuid.int_.to_bytes"
+    ],
+    "<builtin>.object.__new__": [
+      "abc.ABC.__new__",
+      "scipy.sparse.coo_array.__new__",
+      "scipy.sparse.coo_matrix.__new__",
+      "scipy.sparse.csr_array.__new__",
+      "scipy.sparse.csr_matrix.__new__",
+      "scipy.sparse.sparray.__new__",
+      "scipy.sparse.spmatrix.__new__"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "_struct.pack": [
+      "struct.pack"
+    ],
+    "_struct.unpack": [
+      "struct.unpack"
+    ],
+    "_struct.unpack_from": [
+      "struct.unpack_from"
+    ],
+    "array.array": [
+      "array.ArrayType"
+    ],
+    "array.array.byteswap": [
+      "array.ArrayType.byteswap"
+    ],
+    "array.array.frombytes": [
+      "array.ArrayType.frombytes"
+    ],
+    "array.array.tolist": [
+      "array.ArrayType.tolist"
+    ],
+    "numpy._core._multiarray_umath.frombuffer": [
+      "numpy.frombuffer"
+    ],
+    "numpy._core._multiarray_umath.zeros": [
+      "numpy.zeros"
+    ],
+    "scipy.sparse._coo._coo_base.sum_duplicates": [
+      "scipy.sparse.coo_array.sum_duplicates",
+      "scipy.sparse.coo_matrix.sum_duplicates"
+    ],
+    "scipy.sparse._coo._coo_base.tocoo": [
+      "scipy.sparse.coo_array.tocoo",
+      "scipy.sparse.coo_matrix.tocoo"
+    ],
+    "scipy.sparse._coo.coo_array": [
+      "scipy.sparse.coo_array"
+    ],
+    "scipy.sparse._csr._csr_base.tocoo": [
+      "scipy.sparse.csr_array.tocoo",
+      "scipy.sparse.csr_matrix.tocoo"
+    ],
+    "scipy.sparse._data._data_matrix.copy": [
+      "scipy.sparse.coo_array.copy",
+      "scipy.sparse.coo_matrix.copy",
+      "scipy.sparse.csr_array.copy",
+      "scipy.sparse.csr_matrix.copy"
+    ],
+    "scipy.sparse._dok._dok_base.tocoo": [
+      "scipy.sparse.dok_array.tocoo"
+    ]
+  },
+  "commit": "5275164edb3a2847d4a5aec1af5ae90f7dc47b53",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "numpy": "2.5.3",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0",
+    "scipy": "1.18.1"
+  },
+  "dropped": {
+    "client_callbacks": 0,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "pgvector._utils.is_ndarray": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance"
+    ],
+    "pgvector._utils.is_sparse_array": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance"
+    ],
+    "pgvector.bit": [
+      "<builtin>.classmethod"
+    ],
+    "pgvector.bit.Bit.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "pgvector.bit.Bit.__init__": [
+      "<builtin>.ValueError",
+      "<builtin>.int",
+      "<builtin>.int.to_bytes",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.set",
+      "<builtin>.set.issubset",
+      "<builtin>.str.join",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.ndarray.astype",
+      "numpy.ndarray.tobytes",
+      "pgvector._utils.is_ndarray"
+    ],
+    "pgvector.bit.Bit.__repr__": [
+      "pgvector.bit.Bit.to_text"
+    ],
+    "pgvector.bit.Bit.from_binary": [
+      "<builtin>.len",
+      "<builtin>.memoryview",
+      "<builtin>.memoryview.tobytes",
+      "<builtin>.object.__new__",
+      "_struct.unpack_from"
+    ],
+    "pgvector.bit.Bit.from_text": [
+      "<builtin>.str",
+      "pgvector.bit.Bit.__init__"
+    ],
+    "pgvector.bit.Bit.to_binary": [
+      "_struct.pack"
+    ],
+    "pgvector.bit.Bit.to_list": [
+      "pgvector.bit.Bit.to_text"
+    ],
+    "pgvector.bit.Bit.to_numpy": [
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy._core._multiarray_umath.frombuffer",
+      "numpy.ndarray.astype"
+    ],
+    "pgvector.bit.Bit.to_text": [
+      "<builtin>.format",
+      "<builtin>.str.join"
+    ],
+    "pgvector.halfvec": [
+      "<builtin>.classmethod"
+    ],
+    "pgvector.halfvec.HalfVector.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "pgvector.halfvec.HalfVector.__init__": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.memoryview.cast",
+      "_struct.pack",
+      "array.array",
+      "array.array.frombytes",
+      "numpy.ndarray.astype",
+      "pgvector._utils.is_ndarray"
+    ],
+    "pgvector.halfvec.HalfVector.__repr__": [
+      "pgvector.halfvec.HalfVector.to_list"
+    ],
+    "pgvector.halfvec.HalfVector._from_text": [
+      "<builtin>.float",
+      "<builtin>.str.split"
+    ],
+    "pgvector.halfvec.HalfVector.dimensions": [
+      "<builtin>.len"
+    ],
+    "pgvector.halfvec.HalfVector.from_binary": [
+      "<builtin>.len",
+      "<builtin>.memoryview",
+      "<builtin>.object.__new__",
+      "_struct.unpack_from",
+      "array.array",
+      "array.array.byteswap",
+      "array.array.frombytes"
+    ],
+    "pgvector.halfvec.HalfVector.from_text": [
+      "pgvector.halfvec.HalfVector.__init__",
+      "pgvector.halfvec.HalfVector._from_text"
+    ],
+    "pgvector.halfvec.HalfVector.to_binary": [
+      "<builtin>.len",
+      "<builtin>.memoryview",
+      "_struct.pack",
+      "array.array",
+      "array.array.byteswap"
+    ],
+    "pgvector.halfvec.HalfVector.to_list": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "_struct.unpack"
+    ],
+    "pgvector.halfvec.HalfVector.to_numpy": [
+      "numpy._core._multiarray_umath.frombuffer"
+    ],
+    "pgvector.halfvec.HalfVector.to_text": [
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "pgvector.halfvec.HalfVector.to_list"
+    ],
+    "pgvector.sparsevec": [
+      "<builtin>.classmethod",
+      "typing.overload"
+    ],
+    "pgvector.sparsevec.SparseVector.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "pgvector.sparsevec.SparseVector.__init__": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance",
+      "pgvector._utils.is_sparse_array",
+      "pgvector.sparsevec.SparseVector._from_dense",
+      "pgvector.sparsevec.SparseVector._from_dict",
+      "pgvector.sparsevec.SparseVector._from_sparse"
+    ],
+    "pgvector.sparsevec.SparseVector.__repr__": [
+      "<builtin>.dict",
+      "<builtin>.zip"
+    ],
+    "pgvector.sparsevec.SparseVector._from_dense": [
+      "<builtin>.enumerate",
+      "<builtin>.float",
+      "<builtin>.len"
+    ],
+    "pgvector.sparsevec.SparseVector._from_dict": [
+      "<builtin>.dict.items",
+      "<builtin>.float",
+      "<builtin>.int",
+      "<builtin>.list.sort"
+    ],
+    "pgvector.sparsevec.SparseVector._from_parts": [
+      "<builtin>.object.__new__"
+    ],
+    "pgvector.sparsevec.SparseVector._from_sparse": [
+      "<builtin>.float",
+      "<builtin>.hasattr",
+      "<builtin>.len",
+      "<builtin>.zip",
+      "numpy.ndarray.tolist",
+      "scipy.sparse._coo._coo_base.sum_duplicates",
+      "scipy.sparse._coo._coo_base.tocoo",
+      "scipy.sparse._csr._csr_base.tocoo",
+      "scipy.sparse._data._data_matrix.copy",
+      "scipy.sparse._dok._dok_base.tocoo",
+      "typing.cast"
+    ],
+    "pgvector.sparsevec.SparseVector.from_binary": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "_struct.unpack_from",
+      "pgvector.sparsevec.SparseVector._from_parts"
+    ],
+    "pgvector.sparsevec.SparseVector.from_text": [
+      "<builtin>.float",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.split",
+      "pgvector.sparsevec.SparseVector._from_parts"
+    ],
+    "pgvector.sparsevec.SparseVector.to_binary": [
+      "<builtin>.len",
+      "_struct.pack"
+    ],
+    "pgvector.sparsevec.SparseVector.to_coo": [
+      "<builtin>.len",
+      "scipy.sparse._coo.coo_array"
+    ],
+    "pgvector.sparsevec.SparseVector.to_list": [
+      "<builtin>.zip"
+    ],
+    "pgvector.sparsevec.SparseVector.to_numpy": [
+      "<builtin>.zip",
+      "numpy._core._multiarray_umath.zeros"
+    ],
+    "pgvector.sparsevec.SparseVector.to_text": [
+      "<builtin>.float",
+      "<builtin>.int",
+      "<builtin>.str.join",
+      "<builtin>.zip"
+    ],
+    "pgvector.vector": [
+      "<builtin>.classmethod"
+    ],
+    "pgvector.vector.Vector.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "pgvector.vector.Vector.__init__": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance",
+      "<builtin>.memoryview.cast",
+      "array.array",
+      "array.array.frombytes",
+      "numpy.ndarray.astype",
+      "pgvector._utils.is_ndarray"
+    ],
+    "pgvector.vector.Vector.__repr__": [
+      "pgvector.vector.Vector.to_list"
+    ],
+    "pgvector.vector.Vector._from_text": [
+      "<builtin>.float",
+      "<builtin>.str.split"
+    ],
+    "pgvector.vector.Vector.dimensions": [
+      "<builtin>.len"
+    ],
+    "pgvector.vector.Vector.from_binary": [
+      "<builtin>.len",
+      "<builtin>.memoryview",
+      "<builtin>.object.__new__",
+      "_struct.unpack_from",
+      "array.array",
+      "array.array.byteswap",
+      "array.array.frombytes"
+    ],
+    "pgvector.vector.Vector.from_text": [
+      "pgvector.vector.Vector.__init__",
+      "pgvector.vector.Vector._from_text"
+    ],
+    "pgvector.vector.Vector.to_binary": [
+      "<builtin>.len",
+      "<builtin>.memoryview",
+      "_struct.pack",
+      "array.array",
+      "array.array.byteswap"
+    ],
+    "pgvector.vector.Vector.to_list": [
+      "array.array.tolist"
+    ],
+    "pgvector.vector.Vector.to_numpy": [
+      "numpy._core._multiarray_umath.frombuffer"
+    ],
+    "pgvector.vector.Vector.to_text": [
+      "<builtin>.str",
+      "<builtin>.str.join"
+    ]
+  },
+  "executed": [
+    "pgvector._utils.is_ndarray",
+    "pgvector._utils.is_sparse_array",
+    "pgvector.bit.Bit.__eq__",
+    "pgvector.bit.Bit.__init__",
+    "pgvector.bit.Bit.__repr__",
+    "pgvector.bit.Bit.from_binary",
+    "pgvector.bit.Bit.from_text",
+    "pgvector.bit.Bit.to_binary",
+    "pgvector.bit.Bit.to_list",
+    "pgvector.bit.Bit.to_numpy",
+    "pgvector.bit.Bit.to_text",
+    "pgvector.halfvec.HalfVector.__eq__",
+    "pgvector.halfvec.HalfVector.__init__",
+    "pgvector.halfvec.HalfVector.__repr__",
+    "pgvector.halfvec.HalfVector._from_text",
+    "pgvector.halfvec.HalfVector.dimensions",
+    "pgvector.halfvec.HalfVector.from_binary",
+    "pgvector.halfvec.HalfVector.from_text",
+    "pgvector.halfvec.HalfVector.to_binary",
+    "pgvector.halfvec.HalfVector.to_list",
+    "pgvector.halfvec.HalfVector.to_numpy",
+    "pgvector.halfvec.HalfVector.to_text",
+    "pgvector.sparsevec.SparseVector.__eq__",
+    "pgvector.sparsevec.SparseVector.__init__",
+    "pgvector.sparsevec.SparseVector.__repr__",
+    "pgvector.sparsevec.SparseVector._from_dense",
+    "pgvector.sparsevec.SparseVector._from_dict",
+    "pgvector.sparsevec.SparseVector._from_parts",
+    "pgvector.sparsevec.SparseVector._from_sparse",
+    "pgvector.sparsevec.SparseVector.dimensions",
+    "pgvector.sparsevec.SparseVector.from_binary",
+    "pgvector.sparsevec.SparseVector.from_text",
+    "pgvector.sparsevec.SparseVector.indices",
+    "pgvector.sparsevec.SparseVector.to_binary",
+    "pgvector.sparsevec.SparseVector.to_coo",
+    "pgvector.sparsevec.SparseVector.to_list",
+    "pgvector.sparsevec.SparseVector.to_numpy",
+    "pgvector.sparsevec.SparseVector.to_text",
+    "pgvector.sparsevec.SparseVector.values",
+    "pgvector.vector.Vector.__eq__",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.__repr__",
+    "pgvector.vector.Vector._from_text",
+    "pgvector.vector.Vector.dimensions",
+    "pgvector.vector.Vector.from_binary",
+    "pgvector.vector.Vector.from_text",
+    "pgvector.vector.Vector.to_binary",
+    "pgvector.vector.Vector.to_list",
+    "pgvector.vector.Vector.to_numpy",
+    "pgvector.vector.Vector.to_text"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "pgvector._utils.is_ndarray",
+    "pgvector._utils.is_sparse_array",
+    "pgvector.bit.Bit.__eq__",
+    "pgvector.bit.Bit.__init__",
+    "pgvector.bit.Bit.__repr__",
+    "pgvector.bit.Bit.from_binary",
+    "pgvector.bit.Bit.from_text",
+    "pgvector.bit.Bit.to_binary",
+    "pgvector.bit.Bit.to_list",
+    "pgvector.bit.Bit.to_numpy",
+    "pgvector.bit.Bit.to_text",
+    "pgvector.halfvec.HalfVector.__eq__",
+    "pgvector.halfvec.HalfVector.__init__",
+    "pgvector.halfvec.HalfVector.__repr__",
+    "pgvector.halfvec.HalfVector._from_db",
+    "pgvector.halfvec.HalfVector._from_text",
+    "pgvector.halfvec.HalfVector._to_db",
+    "pgvector.halfvec.HalfVector.dimensions",
+    "pgvector.halfvec.HalfVector.from_binary",
+    "pgvector.halfvec.HalfVector.from_text",
+    "pgvector.halfvec.HalfVector.to_binary",
+    "pgvector.halfvec.HalfVector.to_list",
+    "pgvector.halfvec.HalfVector.to_numpy",
+    "pgvector.halfvec.HalfVector.to_text",
+    "pgvector.sparsevec.SparseVector.__eq__",
+    "pgvector.sparsevec.SparseVector.__init__",
+    "pgvector.sparsevec.SparseVector.__repr__",
+    "pgvector.sparsevec.SparseVector._from_db",
+    "pgvector.sparsevec.SparseVector._from_dense",
+    "pgvector.sparsevec.SparseVector._from_dict",
+    "pgvector.sparsevec.SparseVector._from_parts",
+    "pgvector.sparsevec.SparseVector._from_sparse",
+    "pgvector.sparsevec.SparseVector._to_db",
+    "pgvector.sparsevec.SparseVector.dimensions",
+    "pgvector.sparsevec.SparseVector.from_binary",
+    "pgvector.sparsevec.SparseVector.from_text",
+    "pgvector.sparsevec.SparseVector.indices",
+    "pgvector.sparsevec.SparseVector.to_binary",
+    "pgvector.sparsevec.SparseVector.to_coo",
+    "pgvector.sparsevec.SparseVector.to_list",
+    "pgvector.sparsevec.SparseVector.to_numpy",
+    "pgvector.sparsevec.SparseVector.to_text",
+    "pgvector.sparsevec.SparseVector.values",
+    "pgvector.vector.Vector.__eq__",
+    "pgvector.vector.Vector.__init__",
+    "pgvector.vector.Vector.__repr__",
+    "pgvector.vector.Vector._from_db",
+    "pgvector.vector.Vector._from_text",
+    "pgvector.vector.Vector._to_db",
+    "pgvector.vector.Vector.dimensions",
+    "pgvector.vector.Vector.from_binary",
+    "pgvector.vector.Vector.from_text",
+    "pgvector.vector.Vector.to_binary",
+    "pgvector.vector.Vector.to_list",
+    "pgvector.vector.Vector.to_numpy",
+    "pgvector.vector.Vector.to_text"
+  ],
+  "modules": [
+    "pgvector",
+    "pgvector._utils",
+    "pgvector.bit",
+    "pgvector.halfvec",
+    "pgvector.sparsevec",
+    "pgvector.vector"
+  ],
+  "project": "pgvector",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 63,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

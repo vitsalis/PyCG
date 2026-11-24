@@ -1,7 +1,7 @@
 # Macro-benchmark
 
-Thirty real Python packages at pinned releases, in six batches of five
-(`projects.toml`, `batch`). Each package gets a
+Forty real Python packages at pinned releases (`projects.toml`, `batch`):
+thirty in six batches of five, and batch 7, ten packages. Each package gets a
 hand-written call graph of its source, the ground truth. It is written as a
 call-site ledger: one entry per place in the source that can call a
 function, with the callees of that site. A naive list of candidate callees
@@ -56,7 +56,7 @@ do not trigger another round.
 
 ```
 evaluation/macro-benchmark/
-├── projects.toml                  # The 30 projects: pin, licence, analysed source, tests, batch
+├── projects.toml                  # The 40 projects: pin, licence, analysed source, tests, batch
 ├── projects/                      # Empty: a copy of the sources, for reading only, goes here (not in git)
 ├── test-environments/<name>.txt        # The test environment, pinned by hash (to record the trace again)
 ├── test-environments/<name>.installed.txt  # What the container of the trace had installed
@@ -67,8 +67,8 @@ evaluation/macro-benchmark/
 ├── ground-truth/<name>.added.json # Graph edges that the trace does not have, generated
 ├── ground-truth/<name>.md         # Judgements (optional)
 ├── ground-truth/<name>.audit.md   # The blind audit
-├── plugins/                       # pytest plugins that three traces need
-├── selection/                     # How batches 3 to 5 were drawn: list, exclusions, frame, round logs
+├── plugins/                       # pytest plugins that four traces need
+├── selection/                     # How batches 3 to 5 and 7 were drawn: list, exclusions, frame, round logs
 ├── projects.py                    # Reads projects.toml; where the sources of the projects are
 ├── sites.py                       # Finds the call sites and their candidates (ast only)
 ├── ledger.py                      # Reads and checks a ledger, makes its graph
@@ -199,10 +199,10 @@ can match two names in the graph (bottle, batch 4:
 
 ## Projects
 
-The 30 projects are in one `projects.toml`. Each has a `batch`: 1 to 5, in
-the order in which the batches were built, or `icse-2021` for the five
-projects of PyCG's ICSE 2021 evaluation. A command takes project names, so
-a batch is its five names.
+The 40 projects are in one `projects.toml`. Each has a `batch`: 1 to 5
+and 7, in the order in which the batches were built, or `icse-2021` for the
+five projects of PyCG's ICSE 2021 evaluation. A command takes project
+names, so a batch is its names (five; ten in batch 7).
 
 ### How the benchmark grew
 
@@ -217,9 +217,19 @@ maintainer's rule: when every rule that no decision blocks, measured
 together on the newest batch, gains less than one point of precision and
 of recall. Batch 5 met it.
 
+Two batches of ten followed, each drawn in two rounds of five and measured
+once in the same way. Batch 6 (rounds 4 and 5) is not in this repository
+yet; its rulings are, because batch 7 follows them ("Rulings for batch 6").
+Batch 7 was measured once, on 2026-11-23, by the frozen engine `2372b60`,
+before its false positives and false negatives were read.
+
 Batches 1 and 2 were chosen before `draw.py` existed. Batches 3, 4 and 5
-were drawn by `draw.py` in rounds 1, 2 and 3 (`selection/round-N.json`;
-see "Choosing a new batch").
+were drawn by `draw.py` in rounds 1, 2 and 3, and batch 7 in rounds 6 and
+7 (`selection/round-N.json`; see "Choosing a new batch"). Round 7 skipped
+the five of round 6, which its log lists under `used`, and dropped `dill`,
+because a tool run touched it (dill 0.3.9 is installed in the image of the
+call-graph tool HeaderGen); the draw took `mss`, the next project of the
+order in stratum 5.
 
 ### Batch 1
 
@@ -1162,6 +1172,102 @@ pins, and nothing run. The whitenoise writer ran a few read-only commands
 with its working directory inside the checkout; nothing was run or written
 there, and the checkout is clean.
 
+### Batch 7
+
+The ten packages that `draw.py` drew in rounds 6 and 7
+(`selection/round-6.json`, `round-7.json`, one per size stratum and round;
+see "How the benchmark grew"), from the frozen frame, with the procedure
+unchanged. Round 6 drew pyfiglet, uncertainties, einops, pymysql and segno
+(seed 2612795115469913897); round 7 drew tinydb, pgvector, textdistance,
+websocket-client and mss (seed 16299633012922554993), with one drop:
+`dill`, because a tool run touched it, and the draw took `mss`, the next
+project of the order in stratum 5. Eight are git sources at the draw's
+commits; uncertainties and pyfiglet are their PyPI sdists, because their
+checkouts lack files that the build writes (`uncertainties/version.py`,
+which `__init__.py` imports, and the package `pyfiglet/fonts`).
+
+| Project | Release | Licence | Source | Analysed source | Code lines (draw) |
+|---|---|---|---|---|---|
+| pyfiglet | 1.0.4 | MIT | sdist | `pyfiglet/` without `pyfiglet/tests/` and `pyfiglet/test.py` | 831 |
+| uncertainties | 3.2.3 | BSD-3-Clause | sdist | `uncertainties/` | 1521 |
+| einops | v0.8.2 | MIT | git | `einops/` without `einops/tests/` | 1883 |
+| pymysql | v1.2.3 | MIT | git | `pymysql/` without `pymysql/tests/` | 3074 |
+| segno | 1.6.6 | BSD-3-Clause | git | `segno/` | 3126 |
+| tinydb | v4.9.0 | MIT | git | `tinydb/` | 809 |
+| pgvector | v0.5.1 | MIT | git | `pgvector/` | 1244 |
+| textdistance | 4.6.3 | MIT | git | `textdistance/` | 1735 |
+| websocket-client | v1.9.2 | Apache-2.0 | git | `websocket/` without `websocket/tests/` | 2739 |
+| mss | v10.2.0 | MIT | git | `mss/` (root `src`) | 3365 |
+
+**The selection stage.** The ten trees were fetched at their pins by
+`evaluation/container/fetch.py` into a Docker volume and read there, in
+containers without network; nothing of a package was run, and no analysis
+tool had run on them. The record of that stage is with the audit records:
+the proposed entries, the test environments, and the veto list with a
+paragraph per package and, for pymysql, pgvector, mss and
+websocket-client, how many tests run in the tracer's environment and what
+the rest would need. The maintainer's answer to the veto list
+(2026-11-22) was "ok on all": no veto, the ten as drawn.
+
+**Two security scans** (2026-11-22, Claude Fable 5.2; part A uncertainties,
+einops, segno and tinydb; part B textdistance, websocket-client, pymysql
+and pgvector) read the trees and PyPI's JSON as data and ran nothing. They
+found no malicious code, no obfuscated payload, no install hook, no `.pth`
+or `.pyc` file and no typosquat: the eight test runs are safe as planned,
+pymysql only with its nine named paths and pgvector only with its four files
+and no database client installed. pyfiglet and mss have no test run and
+needed no scan of a run. Before the first trace of each, the lead ran a
+check in its trace image, with `-S` and with limits of memory, processes,
+CPU and time (the checks that both scans ask for before a run: no start-up
+file in the site directories, the installed closure exactly the pins, every
+RECORD and numpy's and scipy's layout, the entry points, the modules kept
+out in any importable form, pytest's `tmpdir`, the source equal to the
+scanned tree, the loopback ports closed and the name lookups; the import of
+Hypothesis only after all of them passed); a problem stopped the package.
+Its output is with the record of the selection stage. The recordings of
+each package follow the rule of batch 7 in "Repeatability".
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| pyfiglet | none | every test runs the console script through a shell (the kind of suite for which `sh` was vetoed in batch 6); the ground truth comes from reading only |
+| uncertainties | `tests` with `pyproject.toml` (58 test functions, about 700 items), with numpy | `test_repeated_summation_complexity` (timing), `test_monte_carlo_comparison` (10**6 unseeded samples); the doctests |
+| einops | `einops/tests` (65 test functions) with numpy and `environment = { EINOPS_TEST_BACKENDS = "numpy" }` | the tests of torch, keras and flax skip (not installed) |
+| pymysql | nine named paths: 33 items that need no server | 161 items that need a MySQL or MariaDB server (`test_connection.py` connects at import); `tests/test_auth.py`; the doctests of `converters.py` |
+| segno | `tests` (641 test functions), with pypng | `test_plugin` (needs qrcode-artistic and Pillow); 7 decoding tests skip (no pyzbar); `test_dataoverflow_error` stays, deselected only if the run hits the time limit |
+| tinydb | `tests` (152 test functions, about 219 items), with PyYAML 6.0.3 | nothing (`pytest.ini` needs pytest-cov) |
+| pgvector | the four files of the types: 63 items, with numpy and scipy | 459 items that need PostgreSQL with pgvector and eight client libraries (seven files connect at import) |
+| textdistance | `tests -m "not external"` with `setup.cfg` (66 test functions), Hypothesis 6.140.4 and numpy, with `plugins/hypothesis_profile.py` | the 3 `external` tests; the libraries that it imports by name (rapidfuzz, jellyfish, Levenshtein, pyxDamerauLevenshtein, distance, pylev; tabulate) are never installed |
+| websocket-client | `websocket/tests` (221 test methods): 195 run | 26 skip by themselves (10 need the local echo server, 15 the internet, 1 always); no `environment` |
+| mss | none | as shipped, a session fixture connects to an X display: no test runs without one; the ground truth comes from reading only |
+
+**Environments.** `test-environments/<name>.txt` for the eight: the
+closure for CPython 3.14 on Linux aarch64 from PyPI's JSON, every hash
+PyPI's, pytest's stack of batches 3 to 6, every other version the newest
+release on or before the package's release, with two exceptions: numpy
+2.3.2 for uncertainties and textdistance (the oldest numpy with a cp314
+aarch64 wheel), and Hypothesis 6.140.4 for textdistance, the first release
+that declares Python 3.14 (6.108.2 and attrs 23.2.0, current at its
+release, declare 3.12 at most), with its closure at its own date (attrs
+25.4.0, sortedcontainers 2.4.0).
+
+**What the traces cannot cover, and why the four stay.** pymysql and
+pgvector run only their offline tests (33 and 63 items): most of each
+package talks to a database server. mss and pyfiglet have no test run. The
+maintainer kept all four (2026-11-22): a drawn package is not replaced
+because its suite cannot run in the tracer's environment (no package has
+been dropped for that; partial suites were kept since batch 1, and three
+ICSE 2021 projects have no test run). Their ground truths come mostly or
+wholly from reading, so each gets a doubled blind audit.
+
+**For the tracer.** websocket-client: the tracer's own `no_proxy` exempts
+127.0.0.1 from the proxy that `test_connect` sets, so the trace has the
+direct branch (a refused connection to 127.0.0.1:443) where upstream's CI
+takes the proxy branch; the tests that run make that one loopback attempt
+and five name lookups that must fail, and two test files import modules of
+the package a second time. einops, uncertainties and pgvector draw test
+data from unseeded random numbers (see "Repeatability"). pymysql ships an
+`AGENTS.md` addressed to agents (see the warning of "Traces").
+
 ### Ground truths
 
 | Project | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections (sites) | Exclusions |
@@ -1274,7 +1380,8 @@ the packages of the scalability runs), nor dropped. Names are compared as
 PyPI compares them (PEP 503). `--drop NAME=REASON` (repeated) marks a
 project that was drawn but dropped at a later stage (the security scan, a
 test suite that cannot run in the tracer's environment, the maintainer's
-veto); the draw takes the next project of the order in its stratum.
+veto, a run of a tool on the project before the draw); the draw takes the
+next project of the order in its stratum.
 
 The draw writes `selection/round-<N>.json`: the list and the frame (their
 SHA-256), the round, the seed, the constants, the projects already used,
@@ -1835,6 +1942,634 @@ superseded by the first-build subclass witnesses in this audit. The rules
 against arbitrary attribute assignment and failed-object reuse still
 apply. Earlier batch tables and audit narratives retain their dated counts.
 
+### Rulings for batch 6 (from 2026-11-22)
+
+These rulings were made on the ground truths of batch 6, whose projects
+are not in this repository yet; batch 7 follows them. A ruling that
+decides many edges is not made by the lead alone: an independent referee
+(a model of another provider, given this README and the package's files,
+and told not to consider what any analysis tool reports) gives the ruling,
+and the lead adopts it unless it contradicts an earlier ruling. Each
+ruling records who gave it. A file named for a ruling
+(`ruling-<name>.md`, `b7-ruling-<name>.md`) is an audit record.
+
+- **Declared iterable types (B2; more-itertools; the referee, adopted by
+  the lead).** For annotation matching, an explicit base declared in a
+  `.pyi` file shipped beside a package module counts as a declared base of
+  the corresponding package class; run-time method lookup still follows
+  the Python implementation. A method match or an ABC `__subclasshook__`
+  result alone does not satisfy this annotation rule. In more-itertools
+  11.2.1, the documentation and composition examples establish one
+  ordinary source-iterable role (`README.rst:8`; `docs/api.rst:270`;
+  `more.py:5499`), so its eight stub-declared iterators (`peekable`,
+  `seekable`, `islice_extended`, `sized_iterator`, `time_limited`,
+  `callback_iter`, `countable` and `serialize`) and its two sequences
+  (`numeric_range` and `SequenceView`) fit generic iterable inputs.
+  Narrower contracts keep a separate requirement of purpose (the
+  referee's second ruling, after the blind audit): specialising the item
+  type of an outside `Iterable` annotation does not by itself admit every
+  member of the ordinary source-iterable role. For the numeric and index
+  inputs (`sizes`, `key_list`, weights, counts, indices, an iterable
+  shape and the data of the `running_*` functions), compatible
+  `numeric_range` instances are admitted: the class is documented as a
+  producer of numeric ranges (`more.py:2266`). `SequenceView` and the
+  nine iterator members are not admitted there merely because they can
+  carry numbers. Sequence-only inputs keep compatible `numeric_range` and
+  `SequenceView` instances; matrices keep `SequenceView`. No member is
+  admitted in general as the outer iterable of iterables, tuples or
+  mappings without evidence for that input, but the package's own
+  forwarding counts: `matmul` passes its admitted `SequenceView` matrix
+  to `transpose` (`recipes.py:1051`), so `transpose` keeps it, and that
+  passage admits the class at no other outer input. Inner ordinary
+  iterables keep the eleven members. Run-time and stub-declared bases are
+  treated alike throughout. The private
+  `_concurrent_tee` instances that the public `concurrent_tee` returns
+  also fit this role: its documentation names those outputs as inputs to
+  `serialize` (`more.py:5535`), and the factory-output clarification
+  applies; a `_concurrent_tee` built in another way is not considered.
+  `bucket` itself is not admitted through `__iter__` alone: its declared
+  base is `Container`, and the tested passage to `take`
+  (`tests/test_more.py:1084`) supplies a child iterator. Admission
+  determines possible values; each site keeps only the calls that Python
+  makes on those values (a length check reaches `numeric_range.__len__`,
+  `SequenceView.__len__` or `sized_iterator.__len__`; a truth test reaches
+  `numeric_range.__bool__`, `peekable.__bool__`, `seekable.__bool__`, or
+  the length of `SequenceView` and `sized_iterator`).
+- **An environment variable that sets a package-owned value (tinytag; the
+  writer and the blind auditor agree, adopted by the lead).** An
+  environment variable that the package reads to set a value of its own
+  counts as configuration when the package's documentation or its own
+  test setup sets it. tinytag reads `TINYTAG_DEBUG` at import; its README
+  does not document it, and upstream's test job sets it and requires full
+  coverage under it (`.github/workflows/tests.yml:58`, `:131`). So the ten
+  edges of its debug branches stay (eight to `<builtin>.print`, and
+  `_ID3._parse_frame` to `io.BufferedReader.tell` and `io.BytesIO.tell`).
+  This is not the argcomplete case, where the package fixes its own state.
+- **The blind audits of batch 6** draw their sample with
+  `random.Random(20261122)`: 70 sites and every value site; where one kind
+  of site dominates, the draw is split by kind (tinytag: 735 of 780 sites
+  are explicit, so 50 explicit and 20 implicit sites).
+- **Two limits of the site finder that a writer settles by hand
+  (validators; the blind auditor, adopted by the lead).** The finder
+  offers every operand of `and` and `or` as a truth site, also the last
+  one, which Python does not test there, and it makes no site for a
+  parenthesised group: the edge of a truth test is written at the site of
+  the operand whose value is tested (`url.py:252:16`). A comparison whose
+  method `functools.total_ordering` generates gets no candidate: its
+  callees are added by hand (`between.py:74`).
+- **A package value inside a client container (B2; json-repair; the blind
+  auditor, adopted by the lead).** A package value that the package's own
+  tests pass inside a client container to a public parameter is an
+  admitted value there (the test clause of B2), and each site keeps the
+  calls that Python makes on it. json-repair's tests pass
+  `{"a": MISSING_VALUE}` to `SchemaRepairer.repair_value`
+  (`tests/test_schema_repairer.py:479`), so `copy.deepcopy` calls
+  `MissingValueType.__deepcopy__` back at `schema_repair.py:315` and
+  `:337` (2 edges). This is not the h11 case (B5), where no test or
+  document puts a package value into the client's iterable.
+- **Admitted values of several parameters combine (B2; django-environ;
+  the writer and the blind auditor agree, adopted by the lead).** B2
+  counts admitted values per parameter, and a path needs only a witness
+  through the public interface: the admitted values of the parameters of
+  one public call combine freely. In django-environ a `Path` or a
+  `NoValue` default with `cast=str` and `parse_default=True` reaches
+  `cast(value)` in `Env.parse_value` (`environ.py:613`): edges to
+  `Path.__str__` and `NoValue.__repr__`. A client's own value stays a
+  client value: a bytes default adds no `bytes` method there.
+- **Binding for a callable written in C (tabulate; the blind auditor,
+  adopted by the lead against the writer's reading; 1 edge).** "Argument
+  binding failure before entry gives no edge" means, for every callable,
+  the matching of the arguments to the parameters of its signature
+  (number and names, as `inspect.Signature.bind` checks). A type that a C
+  callable then refuses is a failure in its body: the edge exists
+  (`val.replace(raw_val, formatted_val)` with a bytes cell,
+  `tabulate/__init__.py:1376`: `<builtin>.bytes.replace`). A call with the
+  wrong number of arguments has no edge (`NoneType(cell)`). Where CPython's
+  argument parser checks a type differs between methods and versions, so
+  it does not decide an edge.
+- **An inherited `__init__` (tabulate; the blind auditor).** A class whose
+  first `__init__` in the MRO is `object.__init__` has no constructor
+  edge, also when a builtin base is not `object`: `str` defines no
+  `__init__`, so `JupyterHTMLStr(output)` has no callee (`dict` defines
+  one; the dagster-pipes precedent).
+- **jsonpickle (the blind auditor's opinions, adopted by the lead).**
+  (a) A role that the documentation gives a base class
+  (`jsonpickle.handlers.BaseHandler`) admits the package's subclasses of
+  it, as an annotated base class does (B2 with B4): 11 edges. (b) "The
+  package" in B3 includes earlier releases whose output this release
+  documents that it decodes (the `'c'` arrays of Python 2: 1 edge).
+  (c) Calls on the `__dict__` or the class of a client object are opaque
+  (B5, "or on one of its attributes"; cachetools C2): 2 edges go; a call
+  on the `__dict__` or the class of a library object that the package
+  itself reaches stays. (d) A module that the package's tests load as a
+  backend by name (`os.path`, `jsonpickle_test.py:986`) is an admitted
+  value of that role (the aiocache clause on strings that select
+  functions): 2 edges. (e) A module that only a docstring names and that
+  neither the package nor its tests pass (`bz2`) is a client value: 4
+  edges go.
+- **The blind draw where a kind has fewer than 20 sites** takes all of
+  them and fills the 70 from the other kind (jsonpickle: 19 implicit, 51
+  explicit).
+- **Package Protocols and parameter roles (B2; prometheus-client; the
+  referee, adopted by the lead).** A package Protocol admits its declared
+  package implementations and the classes that the package documents as
+  implementations; a class docstring counts as documentation. A default,
+  an example or a passage of another package class admits it at that
+  parameter and along the package's forwarding calls. That use alone does
+  not make the class an implementation at every parameter annotated with
+  the Protocol; broader admission needs documentation that joins the
+  roles. So `MultiProcessCollector` is a documented Collector
+  implementation; `CollectorRegistry` is admitted at the exporter inputs
+  that default to it, name it or receive it; and `RestrictedRegistry`
+  reaches both text encoders, but neither `GraphiteBridge` nor the role
+  of a registered collector. The ruling
+  (`ruling-prometheus-client.md`) lists the admitted classes for each
+  parameter.
+- **Package-started servers (A, B2, B5; prometheus-client; the referee,
+  adopted by the lead).** The server-as-client rule applies when the
+  client supplies the server or the framework that runs the package.
+  When package code selects and starts library server code and gives it
+  the package's application, the values that this library code makes and
+  passes to the application keep their library provenance, and an
+  explicit package call of such a value has its normal outside callee.
+  So `start_wsgi_server` makes wsgiref's `start_response` a callee of
+  `make_wsgi_app.prometheus_app`
+  (`wsgiref.handlers.BaseHandler.start_response`); a callback that an
+  external server supplies stays a client callback.
+- **An annotation that is wider than the documentation (B4;
+  prometheus-client; the referee).** B4 already decides: the annotation
+  has precedence where the two differ. `Enum`'s `states` is
+  `Sequence[str]`; the documentation's `List[str]` and the tests' lists
+  add no `list.index` edge.
+- **Environment data read through libraries (path; the referee, adopted
+  by the lead).** An environment variable that a library reads, where the
+  package calls that library, counts as configuration when the library
+  documents it, or the package's documentation or tests set it, and its
+  result supplies a package-owned value. The text values that the library
+  processes are considered, not only the literal values of the tests or
+  of the trace's environment. This covers `HOME` through
+  `os.path.expanduser`, and `XDG_CONFIG_HOME` and `XDG_CONFIG_DIRS`
+  through appdirs (`tests/test_path.py:1264`, `1270`, `1290`). It admits
+  no module, class or callable that a client injects, and no change of
+  package internals. So the 60 edges of `path` that rest on `TempDir`
+  as the value of `_next_class` stay.
+- **Library behaviour on supported platforms (path; the referee, adopted
+  by the lead).** The supported-platform rule applies to the package's
+  branches and also to library behaviour reached through the package's
+  admitted library values: a call back into the package that happens on
+  any supported platform and admitted Python version is an edge, by the
+  library call-back rule (B5). A trace recorded on one platform does not
+  limit this union. The usual imported names are kept (`os.path.*` also
+  on Windows), and a module that a client supplies stays a client object
+  (`Path.module` is `os.path`; the nine traced `ntpath.*` edges of the
+  tests' injected module stay rejected). `path` declares
+  `OS Independent` and tests on Windows, so the 38 call-backs that
+  `ntpath` and `pathlib` make into `Path.replace` and `Path.__radd__`
+  stay.
+- **A shared alias of a bare callable (B2; path; the referee).** An alias
+  of `Callable[...]` is not a package class or Protocol: a value that the
+  documentation passes at one parameter annotated with it
+  (`only_newer(...)` at `merge_tree`) is not admitted at the others
+  (`copytree`, `move`): 2 edges go.
+- **django-constance (the referee, adopted by the lead;
+  `ruling-django-constance.md` lists every site).**
+  (a) *Configured implementations (B2, B5).* When package or library code
+  resolves a class, callable or module that a supported setting names,
+  the configuration-selection rule applies whichever code resolves the
+  name: the defaults of the package and of the library, and the admitted
+  documented configurations, count. This differs from an outside callable
+  or object that a client passes directly (B2). A configured
+  implementation that the client defines stays client code.
+  (b) *Test configurations (B2, B5).* The package's own tests count as
+  evidence for a configuration that selects a concrete library
+  implementation by name, as for jsonpickle's tested backend and
+  tinytag's test environment. This includes a test's replacement setting
+  when the same configuration can be given through the supported
+  interface. It admits no implementation that a test defines, no mock, no
+  arbitrary client callback and no state that needs a change of package
+  internals. (The tests' `EmailField`, `TypedMultipleChoiceField`,
+  `CheckboxSelectMultiple` and `CharField` as an additional field: 10
+  edges; the tests' SQLite connection in migration 0002, with both cursor
+  wrappers: 6 edges.)
+  (c) *Configured missing factories.* An admitted configuration that
+  names a factory in a missing module uses the missing-module convention
+  for the factory and for the value it returns:
+  `django_redis.get_redis_connection.get`, `.mget`, `.set` (5 edges),
+  beside `redis.Redis.*` where another admitted branch makes that
+  receiver.
+  (d) *Attribute hooks and private names (B2, B3, C).* The public path of
+  a special method does not make a private attribute a name that a client
+  selects: a direct call of an attribute hook does not admit a
+  private-name branch that ordinary attribute operations never reach
+  (`Config.__getattr__` and `__setattr__` with `_backend`: 4 edges go).
+  This restricts attribute access only; it is no protocol-only rule for
+  every public special method.
+  (e) *Package-produced stored proxies.* A value that package code reads
+  and later restores through its public helper stays admitted when an
+  admitted backend stores it unchanged: under a running event loop,
+  `override_config` can restore an `AsyncValueProxy` into the memory
+  backend, and the calls that then recurse through the proxy count before
+  the `RecursionError` (3 and 36 edges stay). A later call whose
+  preceding step must raise is not reached.
+  (f) *Dependency support without a declared requirement.* When a release
+  has no declared dependency requirement for a library, its explicit support
+  declarations (classifiers, versioned test environments) give the
+  admitted versions: Django 4.2, 5.0, 5.1, 5.2, 6.0 and 6.1.
+- **After Codex audit round 1 (the referee, adopted by the lead;
+  `ruling-round1-disputes.md` lists every pair).**
+  (a) *Body edges of a method that the package never calls (A, B1;
+  json-repair).* Rule A separates a function's outgoing edges from
+  whether anything calls it, and B1 admits the instances that the package
+  creates: such an instance need not escape to the client before its
+  methods get their body edges. `StringFileWrapper.__setitem__` calls
+  `io.TextIOWrapper.tell`, `.seek` and `.write` on the stream that the
+  package opens (3 edges).
+  (b) *Unannotated inputs and concrete outside types (B4, B5;
+  django-environ, prometheus-client).* That an argument binds does not by
+  itself admit a concrete outside type. At an unannotated parameter the
+  entry's documented contract, explicit type handling in the code and
+  admitted package flows decide the concrete outside receivers; a
+  general-purpose library operation that keeps or derives the input's
+  path or string representation does not widen that contract. So a bytes
+  path at `environ.Path` or at `MultiProcessCollector.merge` adds no
+  `bytes` method (4 proposed edges rejected). tabulate differs: its
+  documentation shows bytes cells and its code handles bytes. Once a
+  concrete receiver is admitted, a method call whose arguments bind
+  counts also when the method refuses their types in its body.
+  (c) *Random outcomes and file-system histories (path).* "Some program in
+  a fresh process" sets no threshold of probability and no restriction to
+  an empty file system or to one thread: a call that happens for a
+  possible outcome of a library's random-name generator and a possible
+  state of the file system is an edge. The 18 callers that reach
+  `TempDir.__new__` with a value that usually makes `tempfile.mkdtemp`
+  fail also reach `TempDir.__init__` (18 edges).
+  (d) *State changed through a public method (B2; jsonpickle).* Calling a
+  public method that changes state is not a change of package internals:
+  a default handler removed with the public `unregister` (documented;
+  the package's tests do it) is an admitted state, and the values that
+  the remaining handlers forward then reach the generic pickling path
+  (12 edges).
+  (e) *One name per admitted concrete receiver class (jsonpickle).* The
+  rule "an outside method is named by the class of the receiver, also
+  when that class inherits it" has no exception for a large receiver
+  set, and B4 does not replace known concrete receivers by their defining
+  base. The numpy scalar classes and the `numpy.dtypes` classes that can
+  arrive at a site are named one by one (the ruling gives the sets);
+  `numpy.generic.tolist` and `numpy.generic.item` go, because `generic`
+  has no instances; `numpy.dtype.newbyteorder` stays as the name of the
+  older admitted numpy releases.
+- **Open receiver sets of a generic serialisation path (jsonpickle; the
+  lead, 2026-11-22, after Codex audit round 2; reported to the
+  maintainer).** jsonpickle calls protocol methods (`__reduce__`,
+  `__reduce_ex__`, `__getnewargs__`, `__setstate__`, `cls.__new__`, the
+  class call, a reducer's reconstructor) on whatever object it flattens
+  or restores, and its numpy and pandas handlers call `tolist`, `item`
+  and `newbyteorder` on whatever scalar, dtype or index arrives. Under
+  rulings (d) and (e) above, the callees at these sites are one name per
+  concrete library class that a handler can forward, also through
+  reducer states and instance dictionaries. That set is open-ended in
+  practice: it grows with every admitted release of numpy and pandas,
+  with reducers that Cython generates at build time, and with native
+  types. Round 1 added about 225 such names; round 2 reported 152 more
+  and named three further sources that it could not read. So: (1) the
+  ledger records every such pair that a writer or an auditor verified in
+  a source: the graph at these sites is a LOWER BOUND, and the package's
+  notes say so; (2) the stop rule of the audit rounds counts the
+  findings outside these sites; findings at these sites are applied when
+  verified and start no further round; (3) the edges outside the
+  packages of batch 6 are read for all ten packages and for the nine
+  without jsonpickle, both from the per-package table (the edges inside
+  the packages, the headline, do not depend on any of this: jsonpickle's
+  383 inside edges did not change in either round).
+  The sites are listed in `ground-truth/jsonpickle.md` under "Open
+  receiver sets".
+- **Implementation, version and platform combinations (path; the referee,
+  adopted by the lead).** Once a release explicitly supports an
+  interpreter implementation, the release's declared Python-version
+  bounds and its supported platforms apply to that implementation, unless
+  the release states a restriction or a support drop for it. A CI job is
+  evidence of support; the version and the platform that it selects do
+  not by themselves exclude other combinations. Only combinations on
+  which the implementation exists are considered, with that runtime's
+  real library behaviour. So `path` admits PyPy 3.11 on Windows: its
+  PyPy 3.10 job on Linux admits PyPy, its bound is `>=3.9`, and its
+  platforms include Windows. PyPy's `nt` module has no `_path_normpath`,
+  so `ntpath.normpath` runs in Python there: 5 call-backs into `Path`
+  (`absolute`, `normpath`, `realpath` to `Path.__add__`; `copymode`,
+  `copystat` to `Path.replace`). Runtime admission does not relax the
+  rules on inputs, configuration and client values.
+
+### Rulings for batch 7 (from 2026-11-23)
+
+Batch 7's ground truths follow every rule above, "Rulings for batch 6"
+included. Its blind audits draw their samples with
+`random.Random(20261123)`: 70 sites, or 140 for a package whose trace is
+partial or absent (pymysql, pgvector, mss, pyfiglet), and every value
+site. The rulings that batch 7 added, each by a referee (Codex) where the
+rules above did not decide, and adopted by the lead:
+
+- **What makes a platform supported (pyfiglet; the referee,
+  `b7-ruling-pyfiglet.md`).** Supported platforms are those the release
+  declares through classifiers or documentation, or establishes through
+  its own platform test jobs, subject to explicit restrictions and
+  support drops. A platform branch in the code, or a platform-neutral
+  wheel tag, does not by itself admit another platform. pyfiglet 1.0.4
+  declares only `Operating System :: Unix`, and its sdist has no test job
+  and no statement about Windows, so its `win32` branch
+  (`__init__.py:61-62`) does not run and no `WindowsPath` or Windows
+  console receiver is named (ten outside edges went; no edge inside the
+  package depends on it).
+- **A release that is silent about platforms (textdistance; the referee,
+  `b7-ruling-textdistance.md`).** When platform classifiers and
+  documentation are silent, the release's platform test jobs establish
+  support; neither silence nor a platform-neutral wheel admits additional
+  platforms. The CI-combination rule ("Implementation, version and
+  platform combinations") permits untested combinations of independently
+  admitted implementations, versions and platforms, but does not
+  establish support for an otherwise unadmitted platform. textdistance
+  4.6.3 has no OS classifier and no platform statement, and all its test
+  jobs run on `ubuntu-latest`: Linux is its platform, and the two
+  `pathlib.WindowsPath.open` edges went (`libraries.py:30`,
+  `benchmark.py:117`). The referee's caution: a platform ruling can
+  change edges inside a package (path's call-backs did); here it does
+  not.
+- **The access paths of forwarded stub values (pgvector; the referee,
+  `b7-ruling-pgvector.md`).** Preserve each missing-module access path
+  carried by an admitted package argument flow, alongside
+  annotation-derived paths where rule B independently admits them. An
+  annotation constrains admitted types; it does not rename an admitted
+  stub value when package code forwards it. Whether the passing caller is
+  public or private does not change this. pgvector's psycopg register
+  functions are annotated with `BaseConnection` and `TypeInfo`, and the
+  package's own callers pass `psycopg.Connection` and
+  `psycopg.AsyncConnection` contexts and results of `TypeInfo.fetch(...)`:
+  18 outside edges were added
+  (`psycopg.{Connection,AsyncConnection}.adapters.register_*`,
+  `psycopg.types.TypeInfo.fetch.register`).
+- **A library call-back needs an admitted input (pgvector; the same
+  ruling).** The base-class exception exposes call-backs made by the
+  reached library implementation, including implicit calls on admitted
+  arguments, but does not widen the definition's input roles. A package
+  value established for rendering is not thereby admitted for cleaning
+  through otherwise opaque client-framework dispatch: a disabled Django
+  form field would clean a `SparseVector` initial value
+  (`django/forms/fields.py`, `_clean_bound_field`), but no rule admits
+  that value at `SparseVectorFormField.to_python`'s parameter, so there
+  is no edge to `SparseVector.__eq__` or `__repr__` at
+  `django/sparsevec.py:61`.
+- **A release's own changelog as a support statement (pgvector).** An
+  explicit support statement in the release's changelog counts as a
+  declaration under django-constance (f): "Fixed error with Bit
+  constructor for NumPy 1.24-1.26" admits numpy 1.x names beside the
+  dispatcher name. A parameterized generic used as a class base keeps its
+  origin's stub path for inheritance (`UserDefinedType[Any]`).
+- **A declared platform family (websocket-client; the referee,
+  `b7-ruling-websocket-client.md`).** A declared platform family admits
+  its members on which an admitted interpreter and Python version exist,
+  subject to the release's explicit restrictions; neither a narrower CI
+  matrix nor the interpreter's support-tier list narrows that
+  declaration. Use each admitted combination's actual library behaviour,
+  including capability probes. websocket-client declares
+  `Operating System :: POSIX`, macOS and Windows, so
+  `selectors.DefaultSelector` is one of `KqueueSelector`,
+  `EpollSelector`, `DevpollSelector` (Solaris), `PollSelector` (a POSIX
+  system without the others, such as AIX) and `SelectSelector`
+  (`Lib/selectors.py` takes the first that works): 24 outside edges
+  were added for the two that the writer had left out.
+- **A package callable handed to client code (websocket-client; the same
+  ruling).** When the package hands a package callable to client code
+  through a supported callback interface, judge its parameters as public
+  inputs under B2 to B4; its captured values remain constrained by
+  package flows and admitted public state. The client's invocation
+  creates no callback edge at the handoff site under B5. The closure
+  `closed` of `run_forever`, which a custom dispatcher gets, takes any
+  `ABNF` that its annotation admits: a frame that is not a close frame
+  reaches `handleDisconnect` and an f-string formats it (one inside
+  edge, `handleDisconnect -> ABNF.__str__`, `_app.py:583`, `591`).
+- **An abstract stream annotation against documented stream classes
+  (segno; the referee, `b7-ruling-segno.md`).** A shipped stub's abstract
+  stream annotation takes precedence over concrete stream classes named
+  in narrower per-format documentation; those client streams remain
+  opaque under B5. Concrete streams supplied by the package retain their
+  method edges at the sites they can reach. segno's stub annotates
+  `out: IO[AnyStr] | str`, and the docstring of `QRCode.save` names
+  `io.BytesIO` or `io.StringIO` per format: twelve outside edges to
+  `io.StringIO.write`, `io.BytesIO.write` and `io.BytesIO.tell`, all in
+  the trace of the package's tests, became rejected trace edges. This is
+  the prometheus-client ruling (B4: the annotation decides).
+- **Compiled patterns on CPython 3.6 (segno; the same ruling).** When
+  CPython 3.6 is admitted, compiled-pattern methods retain
+  `_sre.SRE_Pattern.<method>` beside their `re.Pattern.<method>` names
+  on 3.7 and later, as configargparse, funcy and pypinyin have them.
+  Removing an old test environment without withdrawing support does not
+  exclude that version.
+- **A module that its docstring excludes from the public API (segno).** A
+  module docstring that excludes the module from the public API marks
+  its functions private under C; an uncalled private function still
+  receives B's public-parameter fallback.
+- **Deprecated behaviour of an admitted client subclass (segno; the
+  referee, `b7-ruling-segno-2.md`).** Deprecated behavior of an admitted
+  client subclass remains in scope where an admitted runtime accepts it,
+  but a control-flow witness must account for conversions that remove
+  the subclass's overridden operations. A client `int` or `str` subclass
+  fits segno's `version: int, str or None`, but on every admitted runtime
+  `int()` returns an exact `int` (CPython 3.6 and later copy a strict
+  subclass that `__int__` returns; PyPy 3.6 7.0 and later reconvert it),
+  so `normalize_version` and the callers' guards keep
+  `encoder.version_range` to versions 1 to 40: its `ValueError`
+  (`encoder.py:1476`) has no edge, and the trace edge of a direct test
+  of the private helper is rejected.
+- **A callable that the release calls internal (pymysql; the referee,
+  `b7-ruling-pymysql.md`).** An explicit statement that a callable is
+  internal makes it private under C, despite its public spelling or
+  direct calls in tests. Such tests do not widen inputs constrained by
+  package callers; the uncalled-private fallback still applies, subject
+  to B2/B3's restrictions on package values. `Connection.escape` ("for
+  internal use; do not use this in your applications") and the functions
+  of `pymysql.converters` (CHANGELOG: "It's internal functions") are
+  private, so a test that passes `{str: escape_string}` as a mapping
+  admits nothing: the inside edge `escape_item -> escape_string` went.
+- **One parameter's admitted classes do not pass to another (pymysql;
+  the same ruling).** Admission of a package class at one parameter
+  extends along actual forwarding calls, but not to another parameter
+  merely because both select similar objects. Broader admission requires
+  an applicable base-class contract or documentation joining the roles;
+  a default value alone establishes neither. The constructor's
+  `cursorclass` admits `Cursor` and `DictCursor`; `SSCursor` and
+  `SSDictCursor` are documented for `Connection.cursor(cursor)` only:
+  the inside edge `Connection.connect -> SSCursor.close` went.
+- **Explicit type handling in a private function (pymysql; the referee,
+  `b7-ruling-pymysql-2.md`).** Explicit type handling does not supply an
+  otherwise excluded input to a private function whose package callers
+  constrain its arguments. Admission as a configurable converter does
+  not make its parameters public-style: that requires a supported
+  interface through which the package hands the callable to client code
+  for invocation. pymysql's `convert_datetime`, `convert_timedelta`,
+  `convert_time` and `convert_date` test for `bytes` and `bytearray`,
+  but the package passes them a `str` or `bytes` only: four outside
+  edges to `<builtin>.bytearray.decode` went.
+- **A module flag that a client could assign (pymysql).** A client
+  assignment to a module flag counts only when package documentation or
+  tests establish that assignment; commented-out assignments do not
+  (pymysql's `DEBUG` flags stay `False`).
+- **A package value used in a refusal test (tinydb; the referee,
+  `b7-ruling-tinydb.md`).** A package value used in a refusal test
+  remains admitted unless the parameter's annotation excludes it;
+  `Mapping` does not exclude a package object among the mapping's
+  values. That admission follows package forwarding through successful
+  public calls with other admitted settings, while B3 still excludes
+  reuse of state left by a failed call. A test inserts a document that
+  holds a `TinyDB` to show that JSON storage refuses it; with
+  `MemoryStorage` the document is stored, and `Query().f.any(...)`,
+  `.all(...)` and `.fragment(...)` then iterate it: three inside edges
+  to `TinyDB.__iter__`.
+- **A Protocol, a builder and a concrete base (tinydb; the same
+  ruling).** A package Protocol admits implementations established for
+  that parameter's role; structural compatibility or inheritance from a
+  documented implementation does not alone override documentation
+  distinguishing a builder from an evaluable condition. A concrete
+  package-base annotation admits its package subclasses, and a later
+  evaluation failure does not remove calls reached before that failure.
+  A bare `Query` is not admitted at `cond: QueryLike` of the table
+  methods, and is admitted where `any`/`all` annotate `QueryInstance`.
+- **An unannotated mode parameter (tinydb).** An unannotated mode
+  parameter is judged from its documented contract and explicit
+  handling: `JSONStorage`'s `access_mode` admits the valid `open()`
+  modes, text and binary.
+- **ctypes (mss; the referee, `b7-ruling-mss.md` and
+  `b7-ruling-mss-2.md`).** A ctypes foreign-function call is named
+  through the concrete function-pointer class's `__call__`; for functions
+  obtained from `CDLL` or `WinDLL` this is
+  `ctypes.CDLL.__init__._FuncPtr.__call__`. Package `errcheck` functions
+  and package functions entered through C callback thunks are callbacks
+  of the package call whose library execution invokes them. A handler
+  registered with a C library is a callee only at package calls that can
+  dispatch it while installed, as established by source or authoritative
+  documentation; registration alone adds no callback edge (mss's Xlib
+  error handler is a callee of the ten Xlib calls that wait for a reply
+  from the server, by the Xlib, RandR and XFixes documentation; an
+  available native library loaded through ctypes is not a missing
+  module). A ctypes-generated pointer or array class is named through a
+  public class path rooted outside the analysed package when an admitted
+  runtime provides one (`ctypes.c_char_p.__pointer_type__`, CPython
+  3.14); otherwise the constructor site keeps a note and no callee,
+  since neither an alias through a package class nor generated
+  class-name metadata supplies an outside name. A method of a ctypes
+  class object is named by the class of the receiver per implementation
+  (`_ctypes.PyCStructType.in_dll` on CPython,
+  `_ctypes.structure.StructureMeta.in_dll` on PyPy).
+- **Why a name through a package class is no outside name (mss).** An
+  edge counts as inside the package when the callee's name lies in the
+  package's namespace, so a path through a package class cannot name a
+  class of a library. The referee withdrew two such names for this
+  reason.
+- **Special methods that a library call invokes (uncertainties; the
+  referee, `b7-ruling-uncertainties.md`).** A builtin or library call
+  that invokes a package special method on an admitted argument adds
+  that method as a callback at the triggering package site, including
+  when the method raises. Methods installed dynamically must be checked
+  by hand when the site finder supplies no candidate (uncertainties
+  installs its operators and `__float__` with `setattr`: `math.ldexp`
+  and `math.frexp` convert a number with an empty linear part through
+  `__float__`, two inside edges that the writer had missed and the blind
+  audit found).
+- **Parameter combinations of a public helper (uncertainties).** Public
+  helpers retain independently admitted parameter combinations even when
+  their package callers use a narrower pairing (an ndarray `arr` with
+  `numpy.matrix` as `input_type`: `inverse.view` has both receiver
+  names).
+- **A lazy map consumed through another library iterator
+  (uncertainties).** When library code consumes a lazy map or filter
+  through another library iterator, its callback belongs to the package
+  site that triggers consumption (`next()` on an `itertools.chain` over
+  a `map`).
+- **Hashing in a dict display (uncertainties).** The site finder omits
+  key hashing in dict displays; for a display used as a call argument,
+  record its package hashing edge at the enclosing call site and note
+  that it occurs during argument evaluation.
+- **An awaited result of a missing module (pgvector; Codex round 1).** A
+  stub's access path is kept across `await`, as across a call.
+- **Which releases of a dependency are admitted (pgvector,
+  uncertainties, textdistance, einops; the referee,
+  `b7-ruling-numpy-einops.md`).** A declared dependency requirement,
+  including an unversioned installable extra, admits releases satisfying
+  that requirement on an admitted Python runtime, subject to explicit
+  support restrictions; where no dependency requirement is declared, use
+  the release's explicit version-support declarations, including
+  changelogs and versioned test environments, rather than treating an
+  unpinned installation command as support for every historical release.
+  The benchmark pin establishes its own configuration without imposing a
+  support bound, and each call site keeps the names from the admitted
+  versions on which its interface exists: for numpy's dispatched
+  functions, the public function path before 1.25 and
+  `numpy._ArrayFunctionDispatcher.__call__` from 1.25 onward.
+  uncertainties and textdistance declare a bare `numpy` extra (both
+  names); pgvector's changelog names numpy 1.24 to 1.26 (both names);
+  einops declares no numpy requirement and no release statement
+  establishes a numpy before 1.25 (the dispatcher name only). The lead's
+  first ruling for einops ("the pin decides") was wrong as a rule; its
+  edges were right.
+- **A stub result keeps its path through assignment (einops; the same
+  ruling).** A missing-library result retains its access path through
+  assignment, storage in package-created containers, and forwarding
+  through package functions, just as within one expression. Concrete
+  input-type evidence supplies independently admitted class paths; it
+  does not replace a produced stub's path, while subscripting a
+  missing-library value, unpacking it, or performing arithmetic on it
+  supplies no inferred result path.
+- **Open path sets (the lead's decision; einops).** A reassignment in a
+  loop (`x = x.prod(axis)`) opens a path set only when the source gives no
+  finite bound on the number of iterations: then the access paths of a
+  stub result at the later sites have no finite bound (`...prod`,
+  `...prod.prod`, and so on). A loop whose iteration count the source
+  bounds (a fixed range, a fixed tuple) gives a finite family, and every
+  member is an edge. For any package with such sites, the ground truth
+  records the members with one and two repetitions, declares each site in
+  its `<name>.md` under "Open path sets" (the site, the family, why it is
+  open), and states the graph at those sites as a lower bound, as
+  jsonpickle's open receiver sets. Findings at those sites are applied when
+  verified and are not counted in the audit's stop rule, and the outside
+  edges of its batch are read with and without each such package. Example: einops, whose reductions loop over the
+  reduced axes of a client tensor (12 sites, `einops.md`). No edge inside
+  a package depends on it.
+- **A stub result at an `isinstance` test (websocket-client; the
+  referee after Codex round 1, `b7-ruling-round1-disputes.md`).** For
+  macro-benchmark edges, an otherwise unknown missing-library result may
+  take either outcome of a concrete-type `isinstance` test; on the
+  successful branch, B4 supplies the concrete type's method name without
+  erasing the result's retained missing-module access path.
+- **A client callback's result and later calls (tinydb; the same
+  ruling).** An admitted client callback's opaque result may determine
+  whether a call on an independently admitted receiver succeeds and
+  later calls run; that witness alone supplies no callee name for the
+  callback or its result. A client JSON encoder (the documented `cls`)
+  that returns bytes lets `JSONStorage.write` succeed on a binary
+  stream, so `flush`, `fileno` and `truncate` of `io.BufferedWriter` and
+  `io.BufferedRandom` follow (six outside edges; this revises part 3 of
+  `b7-ruling-tinydb.md`).
+- **A private class that a public module re-exports (pyfiglet's auditor;
+  path, structlog).** A class without a public path that a public module
+  imports without listing it in `__all__` is named by its defining
+  module: the Windows console stream is `_io._WindowsConsoleIO` (its
+  type name in `Modules/_io/winconsoleio.c`; `io.py` imports it only to
+  register it), not `io._WindowsConsoleIO`.
+- **Architectures of an admitted operating system (einops; the referee,
+  `b7-ruling-einops-platform.md`).** An operating system admitted through
+  a release's declarations or its own test jobs includes its
+  architectures and ABIs on which the admitted interpreter, Python
+  version and dependencies can run, unless the release explicitly
+  restricts them; a CI runner's architecture alone imposes no such
+  restriction (numpy's distinct `intc`/`uintc` scalar classes on 32-bit
+  Linux stay at `_backends.py:96:25`).
+- **An outside metaclass that overrides `type.__call__` (einops; the
+  referee, `b7-ruling-einops-metaclass.md`).** In an admitted
+  configuration, an explicit call of a package class whose outside
+  metaclass overrides `type.__call__` adds an outside edge to that
+  method, named through the concrete metaclass, and retains edges to
+  package constructor methods that the call actually invokes (Keras's
+  jax backend with NNX enabled: `flax.nnx.module.ModuleMeta.__call__` at
+  `layers/tensorflow.py:62` and `:66`, beside `RearrangeMixin.__init__`).
+
 ## Call sites and candidates
 
 `sites.py` reads the source with `ast` and `tokenize` and finds every call
@@ -2117,9 +2852,11 @@ environment that you trust for that code.
 
 > **Warning.** Never start an agent session (Claude Code, Codex, ...) with
 > its working directory in a project checkout. `projects/pluggy`,
-> `projects/cachetools` and `projects/sqlparse` ship
-> agent configuration files (`AGENTS.md`, `CLAUDE.md`, `.claude/`). These
-> are third-party data, not instructions.
+> `projects/cachetools`, `projects/sqlparse` and `projects/pymysql`
+> (batch 7) ship agent configuration files (`AGENTS.md`, `CLAUDE.md`,
+> `.claude/`). pymysql's `AGENTS.md` tells an agent to install and start a
+> MySQL server and to run the whole suite. These are third-party data, not
+> instructions; a writer's or an auditor's brief names them as such.
 
 ### Preparing an environment
 
@@ -2164,7 +2901,16 @@ The trace records the version of every installed distribution
   `PYTEST_ADDOPTS`): `PATH` (the bin directory of the interpreter,
   `/usr/bin`, `/bin`), `HOME` and `TMPDIR` (new directories that are deleted
   after the run), `LANG=C.UTF-8`, `PYTHONHASHSEED=0`,
-  `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and `NO_PROXY=127.0.0.1,localhost`. The
+  `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and `NO_PROXY=127.0.0.1,localhost`.
+  An entry may add variables of its own, by name and value (`environment =
+  { EINOPS_TEST_BACKENDS = "numpy" }`): a suite that reads its settings from
+  the environment gets them, and nothing else does. `projects.py` refuses a
+  name that this environment sets and the names that configure the
+  interpreter, pytest, the dynamic loader or the locale (`PYTHON*`,
+  `PYTEST*`, `LD_*`, `LC_*`; compared without case), so that an entry cannot
+  undo a precaution. The child checks that it has the variables, and the
+  trace records them (`environment`); `trace_helper.py` refuses a trace whose
+  variables are not its entry's. The
   interpreter runs with `-s -P`: no user site-packages, and neither the
   script directory nor the working directory on `sys.path`. Its stdin is
   `/dev/null`, so that code that reads stdin when it is not a terminal
@@ -2190,6 +2936,22 @@ The trace records the version of every installed distribution
   tracer starts, and passes it to pytest; its code is client code. The
   trace records them (`plugins`). markdown2's plugin calls the project's
   own case generator, which only its harness calls.
+  `plugins/hypothesis_profile.py` is the plugin of a project whose tests use
+  Hypothesis. It loads a profile with `deadline=None` (an example that takes
+  longer than the deadline, 200 ms by default, fails, and under the tracer
+  every call is slower), `database=None` (the example database is a
+  directory in the working directory, the source copy, and a run that
+  changes the source copy fails) and `derandomize=True` (the examples come
+  from a fixed seed, so that two traces of the project draw the same
+  examples and can have the same edges), and suppresses every health check
+  (a health check fails a test whose examples are slow to generate, large
+  or mostly filtered out; under the tracer generation is slower, and a suite
+  that passes without the tracer must not fail its health checks with it).
+  It also moves Hypothesis's storage
+  directory, where it caches the Unicode character map of its text
+  strategies outside the database, to a new directory below the run's
+  `TMPDIR`. Hypothesis's own pytest plugin is not loaded (no autoloading);
+  `@given` tests run without it.
 - **Time limit.** The parent stops the run after `--timeout` seconds
   (default 600). The child runs in its own process group; after the run,
   or when it is stopped, every process left in that group (a server that a
@@ -2235,8 +2997,8 @@ implementations are client callbacks.
 A trace is the reproducible half of a ground truth. To record the trace of
 a project again you need Docker with Compose, `test-environments/<name>.txt`
 (the pinned test environment) and the inputs image, which holds the
-source. 27 projects have a trace; fabric, face_classification and
-Sublist3r have no test run.
+source. 35 projects have a trace; fabric, face_classification,
+Sublist3r, pyfiglet and mss have no test run.
 
 ```sh
 C="docker compose -f evaluation/compose.yaml"
@@ -2290,6 +3052,30 @@ asciinema.pty.record.<lambda1>.<lambda1>`, a callback whose call depends on
 the timing of a pseudo-terminal. No run gives an edge that the committed
 trace lacks. A trace edge is an edge of any run, so each committed trace is
 the union of its six recordings, and the traces stay as they are.
+
+**The rule for the recordings of batch 7** (fixed on 2026-11-22, before
+any trace of the batch). Each package was recorded twice with its full
+test selection, and every recording had to be a valid trace of its pin
+and environment. The failed and the errored test ids had to be the same in
+both recordings and each declared beforehand with its reason; the declared
+failures started empty, and one was added after the first run:
+uncertainties' `tests/test_umath.py::test_math_module` fails in both
+recordings at the same assertion, because Python 3.14 words the message of
+`math.log(0.0)` differently (the calls made before the assertion stay in
+the trace), and uncertainties was recorded again. If the full recordings
+have the same edges, the first is the trace. Only a package whose tests
+were declared beforehand as drawing unseeded random data could have
+unequal recordings accepted, as the union of its full recordings, after
+two equal recordings with those tests deselected: einops (the five test
+modules that draw from `numpy.random.default_rng()` without a seed),
+uncertainties (`tests/test_uncertainties.py::test_comparison_ops`,
+`tests/test_unumpy.py::test_numpy`) and pgvector
+(`tests/test_bit.py::TestBit::test_random`); textdistance's Hypothesis
+tests are not on the list, as its profile fixes the seed. Every package's
+full recordings had the same edges, so each trace is its first full
+recording, and no union was taken. The decision record of each package
+(the SHA-256, edge count, test counts and failure ids of each recording)
+is an audit record.
 
 ### Recording traces in a container
 
@@ -2407,6 +3193,8 @@ that with the entry.
 | `tests` | Pytest exit status, and the tests by outcome as pytest's summary line counts them (passed, failed, errors, skipped, xfailed, xpassed, deselected): a passing subtest of a `unittest` test is not a test |
 | `pytest`, `deselect` | The rootdir and configuration file that pytest used (relative to the checkout); the deselected tests with their reasons |
 | `plugins` | Only for a project with `plugins`: their paths, relative to the benchmark directory |
+| `failures` | The ids of the failed and the errored tests (`failed`, `errors`), as pytest's summary counts them; written since batch 7 |
+| `environment` | Only for a project with `environment`: the variables that its entry adds to the test run, by name |
 | `dropped` | `client_callbacks` and `unknown_caller` (see above) |
 | `project`, `commit`, `python`, `distributions` | The source and the environment of the trace; for a project held as an sdist, `commit` is `sha256:` and the SHA-256 of the archive |
 

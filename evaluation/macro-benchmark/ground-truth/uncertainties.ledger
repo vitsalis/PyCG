@@ -1,0 +1,1735 @@
+# Call-site ledger of uncertainties at sha256:76a5653e686f617a42922d546a239e9efce72e6b35411b7750a1d12dcba03031.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# uncertainties.md shows how this ledger applies them. The operators of
+# AffineScalarFunc are not `def`s of their dunder names: ops.py installs
+# closures with setattr (ops.add_arithmetic_ops, ops.add_comparative_ops),
+# and core.py wraps eight of them again (core.deprecation_wrapper). So an
+# operator on a number with uncertainty calls one of these closures, which
+# no candidate names: they are written by hand at each site where such an
+# operand can arrive (see uncertainties.md, "Operators").
+default reject uncertainties.ops.IndexableIter.__getitem__: the subscripted object is not an IndexableIter; the only IndexableIter is the derivatives_args_index of ops._wrap, whose subscripts accept the candidate explicitly
+default reject uncertainties.core.Variable.__hash__: no Variable is hashed at this site (no Variable is a key of the dict or set, or an element looked up in it); the sites that hash a Variable accept the candidate explicitly
+default reject uncertainties.core.LinearCombination.__bool__: the tested value is not a LinearCombination (it is a float, int, bool, str, list, dict, set, tuple, re.Match, numpy value or a client value); the three tests of AffineScalarFunc._linear_part in umath_core accept the candidate explicitly
+default reject uncertainties.ops.add_comparative_ops.__bool__: the tested value is not a number with uncertainty (AffineScalarFunc): the package tests only floats, ints, bools, strs, containers, re.Match objects, numpy values or comparison results there
+default reject uncertainties.core.AffineScalarFunc.__repr__: no number with uncertainty is formatted or passed to repr() at this site; the formatted values are strs, floats, ints, classes, the client's tag or the client's format specification
+default reject uncertainties.core.Variable.__repr__: no number with uncertainty is formatted or passed to repr() at this site; the formatted values are strs, floats, ints, classes, the client's tag or the client's format specification
+default reject uncertainties.core.AffineScalarFunc.__str__: no number with uncertainty is converted to str or formatted with %s at this site; the values are strs, floats, ints, classes, functions, the client's tag or the client's format specification
+default reject uncertainties.ops.IndexableIter.__str__: no IndexableIter is converted to str or formatted at this site (the package never formats one; the only IndexableIter is the private derivatives_args_index of ops._wrap)
+default reject uncertainties.unumpy.core.matrix.__rmul__: the right operand of this * is not a unumpy.matrix (the operands are floats, ints, tuples, strs, numpy float arrays and matrices, or the client's derivative values, which are client objects); the products of unumpy/core.py that can meet one accept the candidate explicitly
+
+== uncertainties.core
+
+[uncertainties.core]
+377:28 call  staticmethod(lambda value: value)
+    -> <builtin>.staticmethod
+    reject uncertainties.core.AffineScalarFunc.dtype.<lambda1>: staticmethod() only stores the lambda; numpy's mean() calls it later, from client code
+423:6 decorator  @property
+    -> <builtin>.property
+435:6 decorator  @property
+    -> <builtin>.property
+494:6 decorator  @property
+    -> <builtin>.property
+541:6 decorator  @set_doc(format_ufloat.__doc__)
+    -> uncertainties.ops.set_doc.set_doc_string
+    note: set_doc(...) returns its closure set_doc_string, which the decorator applies to __format__
+541:13 call  set_doc(format_ufloat.__doc__)
+    -> uncertainties.ops.set_doc
+545:6 decorator  @set_doc(""" Return the same result as self.__format__(fo...
+    -> uncertainties.ops.set_doc.set_doc_string
+    note: set_doc(...) returns its closure set_doc_string, which the decorator applies to format
+545:13 call  set_doc(""" Return the same result as self.__format__(for...
+    -> uncertainties.ops.set_doc
+658:23 call  ops.add_arithmetic_ops(AffineScalarFunc)
+    -> uncertainties.ops.add_arithmetic_ops
+659:24 call  ops.add_comparative_ops(AffineScalarFunc)
+    -> uncertainties.ops.add_comparative_ops
+779:6 decorator  @property
+    -> <builtin>.property
+787:6 decorator  @std_dev.setter
+    -> <builtin>.property.setter
+1053:28 format  {method_name}
+    reject uncertainties.core.AffineScalarFunc.__format__: method_name is a str of the list deprecated_methods
+1056:12 call  setattr( AffineScalarFunc, method_name, deprecation_wrapp...
+    -> <builtin>.setattr
+1059:28 call  deprecation_wrapper(getattr(AffineScalarFunc, method_name...
+    -> uncertainties.core.deprecation_wrapper
+1059:36 call  getattr(AffineScalarFunc, method_name)
+    -> <builtin>.getattr
+    note: a class attribute lookup of an operator closure that ops.py installed (no property)
+
+[uncertainties.core.correlated_values]
+110:34 call  NotImplementedError(msg)
+    -> <builtin>.NotImplementedError
+    note: both sides of the optional import of numpy run (core.py:70-73)
+116:26 call  numpy.sqrt(numpy.diag(covariance_mat))
+    -> numpy.ufunc.__call__
+    note: numpy.sqrt is a ufunc in every numpy release
+116:37 call  numpy.diag(covariance_mat)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.diag
+    note: the numpy releases before 1.25 export a Python function made by array_function_dispatch at this public attribute; later ones a C _ArrayFunctionDispatcher (the precedent of itables J7)
+124:32 call  std_devs.copy()
+    -> numpy.ndarray.copy
+    note: std_devs is the ndarray that numpy.sqrt makes from numpy.diag's result (numpy.diagonal turns a matrix diagonal into an ndarray)
+127:34 call  correlated_values_norm( # !! The following zip() is a bit...
+    -> uncertainties.core.correlated_values_norm
+130:13 call  list(zip(nom_values, std_devs))
+    -> <builtin>.list
+130:17 call  zip(nom_values, std_devs)
+    -> <builtin>.zip
+
+[uncertainties.core.correlated_values_norm]
+167:34 call  NotImplementedError(msg)
+    -> <builtin>.NotImplementedError
+    note: both sides of the optional import of numpy run (core.py:70-73)
+172:29 call  len(values_with_std_dev)
+    -> <builtin>.len
+174:49 call  numpy.transpose(values_with_std_dev)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.transpose
+    note: as numpy.diag at 116:37
+184:47 call  numpy.linalg.eigh(correlation_mat)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.linalg.eigh
+    note: as numpy.diag at 116:37
+195:22 call  tuple( # The variables represent "pure" uncertainties: Va...
+    -> <builtin>.tuple
+197:17 call  Variable(0, sqrt(variance), tag)
+    -> uncertainties.core.Variable.__init__
+    reject uncertainties.core.AffineScalarFunc.__init__: Variable defines __init__; AffineScalarFunc.__init__ runs from Variable.__init__ (super)
+197:25 call  sqrt(variance)
+    -> math.sqrt
+198:35 call  zip(variances, tags)
+    -> <builtin>.zip
+206:25 call  tuple( AffineScalarFunc(value, LinearCombination(dict(zip...
+    -> <builtin>.tuple
+207:25 call  AffineScalarFunc(value, LinearCombination(dict(zip(variab...
+    -> uncertainties.core.AffineScalarFunc.__init__
+207:50 call  LinearCombination(dict(zip(variables, coords)))
+    -> uncertainties.core.LinearCombination.__init__
+207:55 call  dict(zip(variables, coords))
+    -> <builtin>.dict
+    -> uncertainties.core.Variable.__hash__
+    note: the keys are the new Variables; dict() hashes each key
+207:59 call  zip(variables, coords)
+    -> <builtin>.zip
+208:35 call  zip(transform, nominal_values)
+    -> <builtin>.zip
+
+[uncertainties.core.correlation_matrix]
+227:34 call  NotImplementedError(msg)
+    -> <builtin>.NotImplementedError
+    note: both sides of the optional import of numpy run (core.py:70-73)
+229:26 call  numpy.array(covariance_matrix(nums_with_uncert))
+    -> numpy.array
+229:44 call  covariance_matrix(nums_with_uncert)
+    -> uncertainties.core.covariance_matrix
+231:26 call  numpy.sqrt(cov_mat.diagonal())
+    -> numpy.ufunc.__call__
+231:43 call  cov_mat.diagonal()
+    -> numpy.ndarray.diagonal
+
+[uncertainties.core.LinearCombination.__bool__]
+275:20 call  bool(self.linear_combo)
+    -> <builtin>.bool
+    note: linear_combo is a dict, a collections.defaultdict or a list (LinearCombination.__init__'s contract); their truth runs no package code
+
+[uncertainties.core.LinearCombination.expanded]
+281:26 call  isinstance(self.linear_combo, dict)
+    -> <builtin>.isinstance
+
+[uncertainties.core.LinearCombination.expand]
+298:46 call  collections.defaultdict(float)
+    -> collections.defaultdict
+311:61 call  self.linear_combo.pop()
+    -> <builtin>.list.pop
+    note: expand() runs on a non-expanded combination, whose linear_combo is a list of (coefficient, LinearCombination) pairs; on a dict, pop() without an argument cannot bind (no edge)
+315:34 call  main_expr.expanded()
+    -> uncertainties.core.LinearCombination.expanded
+316:64 call  main_expr.linear_combo.items()
+    -> <builtin>.dict.items
+    -> collections.defaultdict.items
+    note: an expanded linear_combo is a plain dict ({self: 1.0} of a Variable, dict(zip(...)) of correlated_values_norm, {} of to_affine_scalar, the dicts of unumpy) or the collections.defaultdict of an earlier expand()
+322:45 call  self.linear_combo.append((main_factor * factor, expr))
+    -> <builtin>.list.append
+317:32 getitem  derivatives[var]
+    -> uncertainties.core.Variable.__hash__
+    note: the keys of every expanded combination are Variables
+317:32 setitem  derivatives[var]
+    -> uncertainties.core.Variable.__hash__
+
+[uncertainties.core.AffineScalarFunc.__init__]
+409:36 call  float(nominal_value)
+    -> <builtin>.float
+    note: the package passes floats, ints and numpy numbers here; a number with uncertainty as nominal value is no value of the package for this role (B3), so the __float__ closure (add_arithmetic_ops.raise_error) is no callee
+417:26 call  isinstance(linear_part, LinearCombination)
+    -> <builtin>.isinstance
+418:44 call  LinearCombination(linear_part)
+    -> uncertainties.core.LinearCombination.__init__
+
+[uncertainties.core.AffineScalarFunc.derivatives]
+449:42 call  self._linear_part.expanded()
+    -> uncertainties.core.LinearCombination.expanded
+450:37 call  self._linear_part.expand()
+    -> uncertainties.core.LinearCombination.expand
+
+[uncertainties.core.AffineScalarFunc.error_components]
+476:42 getattr  self.derivatives
+    -> uncertainties.core.AffineScalarFunc.derivatives
+476:59 call  self.derivatives.items()
+    -> <builtin>.dict.items
+    -> collections.defaultdict.items
+    note: derivatives returns the linear_combo of the expanded combination: a plain dict or a collections.defaultdict (see 316:64)
+490:49 call  abs(derivative * variable._std_dev)
+    -> <builtin>.abs
+    note: derivative is a float (or an int or numpy number) that a derivative function returned
+488:33 setitem  error_components[variable]
+    -> uncertainties.core.Variable.__hash__
+490:33 setitem  error_components[variable]
+    -> uncertainties.core.Variable.__hash__
+
+[uncertainties.core.AffineScalarFunc.std_dev]
+511:21 call  float(sqrt(sum(delta**2 for delta in self.error_component...
+    -> <builtin>.float
+511:26 call  sqrt(sum(delta**2 for delta in self.error_components().va...
+    -> math.sqrt
+511:30 call  sum(delta**2 for delta in self.error_components().values())
+    -> <builtin>.sum
+511:74 call  self.error_components()
+    -> uncertainties.core.AffineScalarFunc.error_components
+511:83 call  self.error_components().values()
+    -> <builtin>.dict.values
+    note: error_components returns the dict display {} of line 474
+
+[uncertainties.core.AffineScalarFunc.__repr__]
+522:24 getattr  self.std_dev
+    -> uncertainties.core.AffineScalarFunc.std_dev
+    -> uncertainties.core.Variable.std_dev
+    note: self is an AffineScalarFunc or, through Variable.__repr__ (super), a Variable, which overrides the property
+529:31 call  repr(std_dev)
+    -> <builtin>.repr
+533:34 getattr  self.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+
+[uncertainties.core.AffineScalarFunc.__str__]
+539:27 call  self.format("")
+    -> uncertainties.core.AffineScalarFunc.format
+    reject uncertainties.core.AffineScalarFunc.__format__: the call is the method format of self, not the builtin format()
+
+[uncertainties.core.AffineScalarFunc.__format__]
+543:29 call  format_ufloat(self, format_spec)
+    -> uncertainties.formatting.format_ufloat
+
+[uncertainties.core.AffineScalarFunc.format]
+554:29 call  format_ufloat(self, format_spec)
+    -> uncertainties.formatting.format_ufloat
+
+[uncertainties.core.AffineScalarFunc.std_score]
+566:57 getattr  self.std_dev
+    -> uncertainties.core.AffineScalarFunc.std_dev
+    -> uncertainties.core.Variable.std_dev
+    note: self is an AffineScalarFunc or a Variable (inherited method)
+568:29 call  ValueError("The standard deviation is zero:" " undefined ...
+    -> <builtin>.ValueError
+
+[uncertainties.core.AffineScalarFunc.__deepcopy__]
+579:32 call  AffineScalarFunc(self._nominal_value, copy.deepcopy(self....
+    -> uncertainties.core.AffineScalarFunc.__init__
+579:67 call  copy.deepcopy(self._linear_part)
+    -> copy.deepcopy
+    -> uncertainties.core.LinearCombination.__getstate__
+    -> uncertainties.core.LinearCombination.__setstate__
+    -> uncertainties.core.Variable.__deepcopy__
+    -> uncertainties.core.Variable.__hash__
+    note: copy.deepcopy reduces each LinearCombination with __reduce_ex__(4), which calls __getstate__, deep-copies the state and calls __setstate__ on the copy; the dicts of an expanded combination have Variable keys, which deepcopy copies with Variable.__deepcopy__ and hashes into the new dict; a non-expanded combination holds a list of (coefficient, LinearCombination) pairs, copied the same way
+
+[uncertainties.core.AffineScalarFunc.__getstate__]
+620:24 call  set()
+    -> <builtin>.set
+622:24 call  type(self)
+    -> <builtin>.type
+622:34 call  type(self).mro()
+    -> <builtin>.type.mro
+625:33 call  getattr(cls, "__slots__", ())
+    -> <builtin>.getattr
+629:26 call  isinstance(slot_names, str)
+    -> <builtin>.isinstance
+630:30 call  all_slots.add(slot_names)
+    -> <builtin>.set.add
+632:33 call  all_slots.update(slot_names)
+    -> <builtin>.set.update
+641:42 call  getattr(self, name)
+    -> <builtin>.getattr
+    note: the names are the slots of the package classes (_nominal_value, _linear_part, _std_dev, tag): member descriptors, no property; a client subclass's slots are client code
+
+[uncertainties.core.AffineScalarFunc.__setstate__]
+651:43 call  data_dict.items()
+    -> <builtin>.dict.items
+    note: data_dict is the dict that __getstate__ returns (pickle passes it back)
+655:20 call  setattr(self, name, value)
+    -> <builtin>.setattr
+    note: the names are slot names and __dict__ (see 641:42); no property
+
+[uncertainties.core.wrap]
+709:17 call  _wrap( AffineScalarFunc, f, derivatives_args=derivatives_...
+    -> uncertainties.ops._wrap
+
+[uncertainties.core.Variable.__init__]
+763:22 call  float(value)
+    -> <builtin>.float
+    note: as AffineScalarFunc.__init__ 409:36: the client passes a float-like nominal value
+773:14 call  super(Variable, self)
+    -> <builtin>.super
+773:39 call  super(Variable, self).__init__(value, LinearCombination({...
+    -> uncertainties.core.AffineScalarFunc.__init__
+    reject uncertainties.core.LinearCombination.__init__, uncertainties.core.Variable.__init__, uncertainties.ops.IndexableIter.__init__: super(Variable, self) resolves __init__ in AffineScalarFunc
+773:64 call  LinearCombination({self: 1.0})
+    -> uncertainties.core.LinearCombination.__init__
+    -> uncertainties.core.Variable.__hash__
+    note: the dict display {self: 1.0}, evaluated for this call, hashes self; a dict display has no site of its own (uncertainties.md, "Sites"). Rule (referee's ruling, J4): "The site finder omits key hashing in dict displays; for a display used as a call argument, record its package hashing edge at the enclosing call site and note that it occurs during argument evaluation."
+775:14 setattr  self.std_dev
+    -> uncertainties.core.Variable.std_dev
+
+[uncertainties.core.Variable.std_dev]
+794:36 call  isfinite(std_dev)
+    -> math.isfinite
+795:33 call  NegativeStdDev("The standard deviation cannot be negative")
+    -> <builtin>.Exception.__init__
+    note: NegativeStdDev defines no __init__; the first in its MRO is Exception's
+797:30 call  float(std_dev)
+    -> <builtin>.float
+
+[uncertainties.core.Variable.__repr__]
+801:25 call  super(Variable, self)
+    -> <builtin>.super
+801:50 call  super(Variable, self).__repr__()
+    -> uncertainties.core.AffineScalarFunc.__repr__
+
+[uncertainties.core.Variable.__hash__]
+813:18 call  id(self)
+    -> <builtin>.id
+
+[uncertainties.core.Variable.__copy__]
+832:24 call  Variable(self.nominal_value, self.std_dev, self.tag)
+    -> uncertainties.core.Variable.__init__
+    reject uncertainties.core.AffineScalarFunc.__init__: Variable defines __init__
+    reject uncertainties.core.AffineScalarFunc.nominal_value, uncertainties.core.AffineScalarFunc.std_dev, uncertainties.core.Variable.std_dev, uncertainties.core.nominal_value, uncertainties.core.std_dev: the arguments are the values of the properties (loaded at 832:30 and 832:50), no function is passed
+832:30 getattr  self.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+832:50 getattr  self.std_dev
+    -> uncertainties.core.Variable.std_dev
+    reject uncertainties.core.AffineScalarFunc.std_dev: self is a Variable, which overrides the property
+
+[uncertainties.core.Variable.__deepcopy__]
+847:29 call  self.__copy__()
+    -> uncertainties.core.Variable.__copy__
+
+[uncertainties.core.nominal_value]
+865:18 call  isinstance(x, AffineScalarFunc)
+    -> <builtin>.isinstance
+866:18 getattr  x.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+
+[uncertainties.core.std_dev]
+881:18 call  isinstance(x, AffineScalarFunc)
+    -> <builtin>.isinstance
+882:18 getattr  x.std_dev
+    -> uncertainties.core.AffineScalarFunc.std_dev
+    -> uncertainties.core.Variable.std_dev
+
+[uncertainties.core.covariance_matrix]
+907:31 call  enumerate(nums_with_uncert, 1)
+    -> <builtin>.enumerate
+908:30 getattr  expr1.derivatives
+    -> uncertainties.core.AffineScalarFunc.derivatives
+909:20 call  set(derivatives1)
+    -> <builtin>.set
+    -> uncertainties.core.Variable.__hash__
+    note: derivatives1 is a dict or a collections.defaultdict with Variable keys; set() reuses the stored hashes only of an exact dict, so it hashes the keys of a defaultdict
+913:34 getattr  expr2.derivatives
+    -> uncertainties.core.AffineScalarFunc.derivatives
+914:31 call  coefs_expr1.append( sum( ( (derivatives1[var] * derivativ...
+    -> <builtin>.list.append
+915:20 call  sum( ( (derivatives1[var] * derivatives2[var] * var._std_...
+    -> <builtin>.sum
+920:54 call  vars1.intersection(derivatives2)
+    -> <builtin>.set.intersection
+    -> uncertainties.core.Variable.__hash__
+    note: set.intersection with a dict argument iterates it and hashes each Variable key
+928:33 call  covariance_matrix.append(coefs_expr1)
+    -> <builtin>.list.append
+931:41 call  enumerate(covariance_matrix)
+    -> <builtin>.enumerate
+932:32 call  covariance_coefs.extend( [covariance_matrix[j][i] for j i...
+    -> <builtin>.list.extend
+933:52 call  range(i + 1, len(covariance_matrix))
+    -> <builtin>.range
+933:63 call  len(covariance_matrix)
+    -> <builtin>.len
+917:38 getitem  derivatives1[var]
+    -> uncertainties.core.Variable.__hash__
+917:58 getitem  derivatives2[var]
+    -> uncertainties.core.Variable.__hash__
+
+[uncertainties.core.ufloat_fromstr]
+987:43 call  str_to_number_with_uncert(representation.strip())
+    -> uncertainties.parsing.str_to_number_with_uncert
+987:64 call  representation.strip()
+    -> <builtin>.str.strip
+988:18 call  ufloat(nom, std, tag)
+    -> uncertainties.core.ufloat
+
+[uncertainties.core.ufloat]
+1024:13 call  warn("Using UFloat objects with std_dev==0 may give unexp...
+    -> warnings.warn
+1025:20 call  Variable(nominal_value, std_dev, tag=tag)
+    -> uncertainties.core.Variable.__init__
+    reject uncertainties.core.AffineScalarFunc.__init__: Variable defines __init__
+
+[uncertainties.core.deprecation_wrapper]
+1032:6 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: functools.wraps returns a functools.partial of functools.update_wrapper; calling it on wrapped copies attributes and calls no package code
+1032:21 call  functools.wraps(func)
+    -> functools.wraps
+    reject uncertainties.umath_core.wraps: this is functools.wraps, not umath_core.wraps
+
+[uncertainties.core.deprecation_wrapper.wrapped]
+1034:13 call  warn(msg, FutureWarning, stacklevel=2)
+    -> warnings.warn
+1035:20 call  func(*args, **kwargs)
+    -> math.factorial
+    -> uncertainties.ops._wrap.f_with_affine_output
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args
+    -> uncertainties.umath_core.frexp
+    -> uncertainties.umath_core.ldexp
+    -> uncertainties.umath_core.modf
+    -> uncertainties.umath_core.wrap_locally_cst_func.wrapped_func
+    note: func is the function that deprecation_wrapper wraps: the AffineScalarFunc operators of core.py:1040-1049 (__floordiv__, __mod__, __abs__, __trunc__ are ops._wrap closures; __lt__, __gt__, __le__, __ge__ are force_aff_func_args closures) and the umath functions of umath_core.py:429-440 (ceil, floor, trunc: wrap_locally_cst_func closures; copysign, fabs, fmod: ops._wrap closures through core.wrap; factorial: math.factorial itself; frexp, ldexp, modf)
+
+== uncertainties.formatting
+
+[uncertainties.formatting]
+112:24 call  ord(sup)
+    -> <builtin>.ord
+112:79 call  TO_SUPERSCRIPT.items()
+    -> <builtin>.dict.items
+
+[uncertainties.formatting.first_digit]
+16:19 call  int(math.floor(math.log10(abs(value))))
+    -> <builtin>.int
+16:30 call  math.floor(math.log10(abs(value)))
+    -> math.floor
+16:41 call  math.log10(abs(value))
+    -> math.log10
+16:45 call  abs(value)
+    -> <builtin>.abs
+    note: value is a float (a standard deviation, a rounded uncertainty or a reference value of format_ufloat and format_num)
+
+[uncertainties.formatting.PDG_precision]
+32:27 call  first_digit(std_dev)
+    -> uncertainties.formatting.first_digit
+49:17 call  int(std_dev / 10.0**exponent * factor)
+    -> <builtin>.int
+
+[uncertainties.formatting.robust_align]
+89:18 call  format(orig_str, fill_char + align_option + width)
+    -> <builtin>.format
+    reject uncertainties.core.AffineScalarFunc.__format__, uncertainties.core.AffineScalarFunc.format: orig_str is a str that format_num built (robust_align's contract: "string to be aligned")
+
+[uncertainties.formatting.to_superscript]
+124:36 call  ("%d" % value).translate(TO_SUPERSCRIPT)
+    -> <builtin>.str.translate
+
+[uncertainties.formatting.nrmlze_superscript]
+143:15 call  int(str(number_str).translate(FROM_SUPERSCRIPT))
+    -> <builtin>.int
+143:19 call  str(number_str)
+    -> <builtin>.str
+    note: number_str is a str (a group of the parsing regular expressions, or the client's string: "string to be converted")
+143:41 call  str(number_str).translate(FROM_SUPERSCRIPT)
+    -> <builtin>.str.translate
+
+[uncertainties.formatting.<lambda1>]
+156:52 call  to_superscript(common_exp)
+    -> uncertainties.formatting.to_superscript
+
+[uncertainties.formatting.format_num]
+276:40 call  EXP_PRINT[print_type](common_exp)
+    -> uncertainties.formatting.<lambda1>
+    -> uncertainties.formatting.<lambda2>
+    note: EXP_PRINT (formatting.py:154) maps "pretty-print" and "latex" to the two lambdas; print_type is one of them here (the "default" case is handled at line 271); a function that a client stores in EXP_PRINT is a client callback
+293:51 call  isfinite(error_main)
+    -> math.isfinite
+322:19 call  isnan(error_main)
+    -> math.isnan
+323:39 call  robust_format(error_main, main_pres_type)
+    -> <builtin>.format
+    note: robust_format is the builtin format (formatting.py:66); error_main is a float
+326:19 call  isinf(error_main)
+    -> math.isinf
+330:43 call  robust_format(error_main, main_pres_type)
+    -> <builtin>.format
+    note: robust_format is the builtin format (formatting.py:66); error_main is a float
+332:27 call  round(error_main, prec)
+    -> <builtin>.round
+342:27 call  first_digit(uncert)
+    -> uncertainties.formatting.first_digit
+352:46 call  round(uncert * 10.0**prec)
+    -> <builtin>.round
+375:32 call  max(int(fmt_parts["width"]) - len(value_end), 0)
+    -> <builtin>.max
+375:36 call  int(fmt_parts["width"])
+    -> <builtin>.int
+375:62 call  len(value_end)
+    -> <builtin>.len
+391:36 call  robust_format(nom_val_main, fmt_prefix_n + fmt_suffix_n)
+    -> <builtin>.format
+    note: robust_format is the builtin format (formatting.py:66); nom_val_main is a float
+397:21 call  isnan(nom_val_main)
+    -> math.isnan
+399:23 call  isinf(nom_val_main)
+    -> math.isinf
+414:37 call  robust_align( value_str, fmt_parts["fill"], fmt_parts["al...
+    -> uncertainties.formatting.robust_align
+439:56 call  isfinite(nom_val_main)
+    -> math.isfinite
+446:28 call  int(fmt_parts["width"])
+    -> <builtin>.int
+450:38 call  max(width - len(exp_str), 0)
+    -> <builtin>.max
+450:50 call  len(exp_str)
+    -> <builtin>.len
+489:36 call  robust_format(nom_val_main, fmt_prefix_n + fmt_suffix_n)
+    -> <builtin>.format
+    note: robust_format is the builtin format (formatting.py:66); nom_val_main is a float
+509:29 call  isfinite(nom_val_main)
+    -> math.isfinite
+520:34 call  robust_format(error_main, fmt_prefix_e + fmt_suffix_e)
+    -> <builtin>.format
+    note: robust_format is the builtin format (formatting.py:66); error_main is a float
+525:21 call  isnan(nom_val_main)
+    -> math.isnan
+527:23 call  isinf(nom_val_main)
+    -> math.isinf
+530:21 call  isnan(error_main)
+    -> math.isnan
+532:23 call  isinf(error_main)
+    -> math.isinf
+552:39 call  robust_align( nom_val_str, fmt_parts["fill"], effective_a...
+    -> uncertainties.formatting.robust_align
+556:37 call  robust_align( error_str, fmt_parts["fill"], effective_ali...
+    -> uncertainties.formatting.robust_align
+576:32 call  "".join( ( LEFT_GROUPING, nom_val_str, pm_symbol, error_s...
+    -> <builtin>.str.join
+588:32 call  "".join([nom_val_str, pm_symbol, error_str])
+    -> <builtin>.str.join
+590:36 call  "".join( (LEFT_GROUPING, value_str, RIGHT_GROUPING, perce...
+    -> <builtin>.str.join
+594:36 call  "".join((LEFT_GROUPING, value_str, RIGHT_GROUPING))
+    -> <builtin>.str.join
+
+[uncertainties.formatting.signif_dgt_to_limit]
+608:28 call  first_digit(value)
+    -> uncertainties.formatting.first_digit
+618:20 call  round(value, -limit_no_rounding)
+    -> <builtin>.round
+619:36 call  first_digit(rounded)
+    -> uncertainties.formatting.first_digit
+
+[uncertainties.formatting.format_ufloat]
+749:21 call  re.match( r""" (?P<fill>[^{}]??)(?P<align>[<>=^]?) # fill...
+    -> re.match
+768:25 call  ValueError( "Format specification %r cannot be used with ...
+    -> <builtin>.ValueError
+783:28 call  match.group("type")
+    -> re.Match.group
+786:27 call  match.group("prec")
+    -> re.Match.group
+795:32 getattr  ufloat_to_format.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+796:32 getattr  ufloat_to_format.std_dev
+    -> uncertainties.core.AffineScalarFunc.std_dev
+    -> uncertainties.core.Variable.std_dev
+    note: ufloat_to_format is a number with uncertainty: an AffineScalarFunc or a Variable (AffineScalarFunc.__format__ and .format pass self)
+799:18 call  set(match.group("options"))
+    -> <builtin>.set
+799:30 call  match.group("options")
+    -> re.Match.group
+816:20 call  options.add("%")
+    -> <builtin>.set.add
+824:43 call  abs(nom_val)
+    -> <builtin>.abs
+824:74 call  isfinite(value)
+    -> math.isfinite
+838:32 call  max(real_values)
+    -> <builtin>.max
+854:34 call  len(real_values)
+    -> <builtin>.len
+854:68 call  match.group("uncert_prec")
+    -> re.Match.group
+862:21 call  isfinite(std_dev)
+    -> math.isfinite
+877:31 call  int(fmt_prec)
+    -> <builtin>.int
+879:33 call  ValueError( "The number of significant digits" " on the u...
+    -> <builtin>.ValueError
+884:52 call  PDG_precision(std_dev)
+    -> uncertainties.formatting.PDG_precision
+886:43 call  signif_dgt_to_limit(std_dev, num_signif_d)
+    -> uncertainties.formatting.signif_dgt_to_limit
+906:23 call  int(fmt_prec)
+    -> <builtin>.int
+952:36 call  signif_dgt_to_limit(exp_ref_value, num_signif_digits)
+    -> uncertainties.formatting.signif_dgt_to_limit
+993:37 call  first_digit(round(exp_ref_value, -digits_limit))
+    -> uncertainties.formatting.first_digit
+993:43 call  round(exp_ref_value, -digits_limit)
+    -> <builtin>.round
+1033:53 call  (pres_type or "g").isupper()
+    -> <builtin>.str.isupper
+1055:19 call  max(-signif_limit, 1 if pres_type is None and not std_dev...
+    -> <builtin>.max
+1072:22 call  format_num( nom_val_mantissa, std_dev_mantissa, common_ex...
+    -> uncertainties.formatting.format_num
+1076:24 call  match.groupdict()
+    -> re.Match.groupdict
+
+== uncertainties.ops
+
+[uncertainties.ops]
+164:46 call  get_ops_with_reflection()
+    -> uncertainties.ops.get_ops_with_reflection
+200:29 call  no_complex_result(float.__pow__)
+    -> uncertainties.ops.no_complex_result
+201:30 call  no_complex_result(float.__rpow__)
+    -> uncertainties.ops.no_complex_result
+588:17 call  sqrt(sys.float_info.epsilon)
+    -> math.sqrt
+
+[uncertainties.ops.nan_if_exception.wrapped_f]
+60:21 call  f(*args, **kwargs)
+    -> math.cos
+    -> math.cosh
+    -> math.exp
+    -> math.sinh
+    -> uncertainties.ops.get_ops_with_reflection.<lambda1>
+    -> uncertainties.ops.get_ops_with_reflection.<lambda2>
+    -> uncertainties.ops.pow_deriv_0
+    -> uncertainties.ops.pow_deriv_1
+    -> uncertainties.umath_core.<lambda1>
+    -> uncertainties.umath_core.<lambda2>
+    -> uncertainties.umath_core.<lambda3>
+    -> uncertainties.umath_core.<lambda4>
+    -> uncertainties.umath_core.<lambda5>
+    -> uncertainties.umath_core.<lambda6>
+    -> uncertainties.umath_core.<lambda7>
+    -> uncertainties.umath_core.<lambda8>
+    -> uncertainties.umath_core.<lambda9>
+    -> uncertainties.umath_core.<lambda10>
+    -> uncertainties.umath_core.<lambda11>
+    -> uncertainties.umath_core.<lambda12>
+    -> uncertainties.umath_core.<lambda13>
+    -> uncertainties.umath_core.<lambda14>
+    -> uncertainties.umath_core.<lambda15>
+    -> uncertainties.umath_core.<lambda16>
+    -> uncertainties.umath_core.<lambda17>
+    -> uncertainties.umath_core.<lambda18>
+    -> uncertainties.umath_core.<lambda19>
+    -> uncertainties.umath_core.<lambda20>
+    -> uncertainties.umath_core.<lambda21>
+    -> uncertainties.umath_core.<lambda22>
+    -> uncertainties.umath_core._deriv_copysign
+    -> uncertainties.umath_core._deriv_fabs
+    -> uncertainties.umath_core._deriv_pow_0
+    -> uncertainties.umath_core._deriv_pow_1
+    -> uncertainties.umath_core.log_der0
+    note: f is a derivative that the package wraps: the pow derivatives of get_ops_with_reflection (ops.py:152-158: pow_deriv_0, pow_deriv_1 and the two rpow lambdas) and every entry of umath_core.fixed_derivatives (umath_core.py:183-215: its 22 lambdas, _deriv_copysign, _deriv_fabs, _deriv_pow_0, _deriv_pow_1, log_der0, and math.sinh, math.exp, math.cos, math.cosh), mapped at umath_core.py:267; a client's f (nan_if_exception is public) is a client callback
+62:25 call  float("nan")
+    -> <builtin>.float
+
+[uncertainties.ops.pow_deriv_0]
+77:21 call  float("nan")
+    -> <builtin>.float
+
+[uncertainties.ops.pow_deriv_1]
+82:19 call  log(x)
+    -> math.log
+86:21 call  float("nan")
+    -> <builtin>.float
+
+[uncertainties.ops.get_ops_with_reflection]
+135:50 call  derivatives_list.items()
+    -> <builtin>.dict.items
+137:17 call  eval("lambda x, y: %s" % expr)
+    -> <builtin>.eval
+    note: the evaluated text is a lambda expression; evaluating it calls nothing (the lambdas it makes have no node: see uncertainties.md, "Generated derivatives")
+141:17 call  eval("lambda y, x: %s" % expr)
+    -> <builtin>.eval
+    note: as 137:17
+141:64 call  reversed(derivatives)
+    -> <builtin>.reversed
+154:29 call  nan_if_exception(func)
+    -> uncertainties.ops.nan_if_exception
+157:29 call  nan_if_exception(func)
+    -> uncertainties.ops.nan_if_exception
+
+[uncertainties.ops.get_ops_with_reflection.<lambda1>]
+146:33 call  pow_deriv_1(x, y)
+    -> uncertainties.ops.pow_deriv_1
+
+[uncertainties.ops.get_ops_with_reflection.<lambda2>]
+147:33 call  pow_deriv_0(x, y)
+    -> uncertainties.ops.pow_deriv_0
+
+[uncertainties.ops.no_complex_result.no_complex_func]
+185:21 call  func(*args, **kwargs)
+    -> <builtin>.float.__pow__
+    -> <builtin>.float.__rpow__
+    note: func is float.__pow__ or float.__rpow__ (custom_ops, ops.py:199-202); a client's func (no_complex_result is public) is a client callback
+186:22 call  isinstance(value, complex)
+    -> <builtin>.isinstance
+187:29 call  ValueError( "The uncertainties module does not handle" " ...
+    -> <builtin>.ValueError
+
+[uncertainties.ops.add_arithmetic_ops]
+235:31 call  iter(simple_numerical_operators_derivatives.items())
+    -> <builtin>.iter
+235:76 call  simple_numerical_operators_derivatives.items()
+    -> <builtin>.dict.items
+242:20 call  setattr( cls, attribute_name, _wrap(cls, getattr(float, a...
+    -> <builtin>.setattr
+245:22 call  _wrap(cls, getattr(float, attribute_name), [derivative])
+    -> uncertainties.ops._wrap
+245:35 call  getattr(float, attribute_name)
+    -> <builtin>.getattr
+251:38 call  modified_operators.append(op)
+    -> <builtin>.list.append
+257:53 call  ops_with_reflection.items()
+    -> <builtin>.dict.items
+269:39 call  getattr(float, attribute_name)
+    -> <builtin>.getattr
+    note: float has no __div__ and __rdiv__ on Python 3: getattr raises AttributeError, and the except branch skips them
+276:20 call  setattr(cls, attribute_name, _wrap(cls, func_to_wrap, der...
+    -> <builtin>.setattr
+276:47 call  _wrap(cls, func_to_wrap, derivatives)
+    -> uncertainties.ops._wrap
+277:48 call  modified_ops_with_reflection.append(op)
+    -> <builtin>.list.append
+291:16 call  setattr(cls, "__%s__" % coercion_type, raise_error)
+    -> <builtin>.setattr
+    reject uncertainties.ops.add_arithmetic_ops.raise_error: setattr() stores the function as __complex__, __int__, __long__ and __float__
+
+[uncertainties.ops.add_arithmetic_ops.raise_error]
+285:28 call  TypeError( "can't convert an affine function (%s)" " to %...
+    -> <builtin>.TypeError
+
+[uncertainties.ops.IndexableIter.__getitem__]
+331:29 call  range(len(returned_elements), index + 1)
+    -> <builtin>.range
+331:33 call  len(returned_elements)
+    -> <builtin>.len
+332:29 call  next(self.iterable)
+    -> <builtin>.next
+    -> uncertainties.ops.nan_if_exception
+    note: self.iterable is the itertools.chain of _wrap (ops.py:357); for the umath functions its first part is the lazy map(nan_if_exception, derivatives) of umath_core.py:267, so next() calls nan_if_exception here; the other parts (lists, itertools.repeat, the client's iterable) call no package code. Rule (referee's ruling, J3): "When library code consumes a lazy map or filter through another library iterator, its callback belongs to the package site that triggers consumption."
+335:48 call  self.none_converter(pos)
+    -> uncertainties.ops.IndexableIter.<lambda1>
+    -> uncertainties.ops._wrap.<lambda1>
+    note: none_converter is the default lambda of IndexableIter.__init__ (ops.py:312) until _wrap sets its own lambda (ops.py:417, 424); a client's none_converter (IndexableIter is public) is a client callback
+337:41 call  returned_elements.append(value)
+    -> <builtin>.list.append
+
+[uncertainties.ops.IndexableIter.__str__]
+344:22 call  ", ".join(map(str, self.returned_elements))
+    -> <builtin>.str.join
+344:26 call  map(str, self.returned_elements)
+    -> <builtin>.map
+
+[uncertainties.ops._wrap]
+353:43 call  IndexableIter( # Automatic addition of numerical derivati...
+    -> uncertainties.ops.IndexableIter.__init__
+357:24 call  itertools.chain(derivatives_args, itertools.repeat(None))
+    -> itertools.chain
+357:59 call  itertools.repeat(None)
+    -> itertools.repeat
+366:53 call  derivatives_kwargs.items()
+    -> <builtin>.dict.items
+    note: derivatives_kwargs is a dict ({} by default; core.wrap documents "dictionary")
+372:62 call  partial_derivative(f, name)
+    -> uncertainties.ops.partial_derivative
+382:33 call  getfullargspec(f)
+    -> inspect.getfullargspec
+394:37 call  enumerate(argspec.args)
+    -> <builtin>.enumerate
+408:66 call  partial_derivative(f, name)
+    -> uncertainties.ops.partial_derivative
+419:39 call  enumerate(derivatives_args_index.returned_elements)
+    -> <builtin>.enumerate
+421:77 call  none_converter(index)
+    -> uncertainties.ops._wrap.<lambda1>
+430:6 decorator  @set_doc( """\ Version of %s(...) that returns an affine ...
+    -> uncertainties.ops.set_doc.set_doc_string
+430:13 call  set_doc( """\ Version of %s(...) that returns an affine a...
+    -> uncertainties.ops.set_doc
+560:35 call  set_doc( """\ Version of %s(...) that returns an affine a...
+    -> uncertainties.ops.set_doc
+575:6 call  set_doc( """\ Version of %s(...) that returns an affine a...
+    -> uncertainties.ops.set_doc.set_doc_string
+    note: set_doc(...) returns set_doc_string, called here on f_with_affine_output
+405:48 getitem  derivatives_args_index[index]
+    -> uncertainties.ops.IndexableIter.__getitem__
+
+[uncertainties.ops._wrap.<lambda1>]
+417:54 call  partial_derivative(f, index)
+    -> uncertainties.ops.partial_derivative
+
+[uncertainties.ops._wrap.f_with_affine_output]
+457:50 call  enumerate(args)
+    -> <builtin>.enumerate
+457:70 call  isinstance(value, cls)
+    -> <builtin>.isinstance
+460:49 call  kwargs.items()
+    -> <builtin>.dict.items
+460:65 call  isinstance(value, cls)
+    -> <builtin>.isinstance
+470:21 call  f(*args, **kwargs)
+    -> <builtin>.float.__abs__
+    -> <builtin>.float.__add__
+    -> <builtin>.float.__floordiv__
+    -> <builtin>.float.__mod__
+    -> <builtin>.float.__mul__
+    -> <builtin>.float.__neg__
+    -> <builtin>.float.__pos__
+    -> <builtin>.float.__radd__
+    -> <builtin>.float.__rfloordiv__
+    -> <builtin>.float.__rmod__
+    -> <builtin>.float.__rmul__
+    -> <builtin>.float.__rsub__
+    -> <builtin>.float.__rtruediv__
+    -> <builtin>.float.__sub__
+    -> <builtin>.float.__truediv__
+    -> <builtin>.float.__trunc__
+    -> math.acos
+    -> math.acosh
+    -> math.asin
+    -> math.asinh
+    -> math.atan
+    -> math.atan2
+    -> math.atanh
+    -> math.copysign
+    -> math.cos
+    -> math.cosh
+    -> math.degrees
+    -> math.erf
+    -> math.erfc
+    -> math.exp
+    -> math.expm1
+    -> math.fabs
+    -> math.fmod
+    -> math.gamma
+    -> math.hypot
+    -> math.lgamma
+    -> math.log
+    -> math.log10
+    -> math.log1p
+    -> math.pow
+    -> math.radians
+    -> math.sin
+    -> math.sinh
+    -> math.sqrt
+    -> math.tan
+    -> math.tanh
+    -> uncertainties.ops.no_complex_result.no_complex_func
+    -> uncertainties.umath_core.wrapped_fsum.<lambda1>
+    note: f is the function that _wrap wraps: the float methods of add_arithmetic_ops (abs, neg, pos, trunc; add, floordiv, mod, mul, sub, truediv and their reflections; div and rdiv do not exist on Python 3), no_complex_func for pow and rpow (custom_ops), the math functions that umath_core wraps through core.wrap (the keys of fixed_derivatives and num_deriv_funcs, umath_core.py:61 and 183-215), and the flat_fsum lambda of wrapped_fsum; a client's f (core.wrap is public) is a client callback. This branch runs when no argument has an uncertainty: a umath function on floats, or an operator called unbound on floats (the tests do it, test_uncertainties.py:193)
+482:27 call  list(args)
+    -> <builtin>.list
+486:46 getattr  args[index].nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+504:46 getattr  value_with_uncert.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+506:28 call  f(*args_values, **kwargs)
+    -> <builtin>.float.__abs__
+    -> <builtin>.float.__add__
+    -> <builtin>.float.__floordiv__
+    -> <builtin>.float.__mod__
+    -> <builtin>.float.__mul__
+    -> <builtin>.float.__neg__
+    -> <builtin>.float.__pos__
+    -> <builtin>.float.__radd__
+    -> <builtin>.float.__rfloordiv__
+    -> <builtin>.float.__rmod__
+    -> <builtin>.float.__rmul__
+    -> <builtin>.float.__rsub__
+    -> <builtin>.float.__rtruediv__
+    -> <builtin>.float.__sub__
+    -> <builtin>.float.__truediv__
+    -> <builtin>.float.__trunc__
+    -> math.acos
+    -> math.acosh
+    -> math.asin
+    -> math.asinh
+    -> math.atan
+    -> math.atan2
+    -> math.atanh
+    -> math.copysign
+    -> math.cos
+    -> math.cosh
+    -> math.degrees
+    -> math.erf
+    -> math.erfc
+    -> math.exp
+    -> math.expm1
+    -> math.fabs
+    -> math.fmod
+    -> math.gamma
+    -> math.hypot
+    -> math.lgamma
+    -> math.log
+    -> math.log10
+    -> math.log1p
+    -> math.pow
+    -> math.radians
+    -> math.sin
+    -> math.sinh
+    -> math.sqrt
+    -> math.tan
+    -> math.tanh
+    -> uncertainties.ops.no_complex_result.no_complex_func
+    -> uncertainties.umath_core.wrapped_fsum.<lambda1>
+    note: the same f as at 470:21, on the nominal values
+514:26 call  isinstance(f_nominal_value, FLOAT_LIKE_TYPES)
+    -> <builtin>.isinstance
+526:31 call  linear_part.append( ( # Coefficient: derivatives_args_ind...
+    -> <builtin>.list.append
+529:48 call  derivatives_args_index[pos](*args_values, **kwargs)
+    -> uncertainties.ops.add_arithmetic_ops._simple_add_deriv
+    -> uncertainties.ops.add_arithmetic_ops.<lambda1>
+    -> uncertainties.ops.add_arithmetic_ops.<lambda2>
+    -> uncertainties.ops.add_arithmetic_ops.<lambda3>
+    -> uncertainties.ops.nan_if_exception.wrapped_f
+    -> uncertainties.ops.partial_derivative
+    -> uncertainties.ops.partial_derivative.partial_derivative_of_f
+    -> uncertainties.umath_core.wrapped_fsum.<lambda2>
+    note: the derivative functions of _wrap: those of add_arithmetic_ops (_simple_add_deriv and its three lambdas), the lambdas that get_ops_with_reflection makes with eval (they have no node; the "mod" and "rmod" ones call partial_derivative(float.__mod__, 1) and then its closure, which belong to this site), the nan_if_exception closures (pow, rpow, and the umath derivatives), the partial_derivative_of_f closures that none_converter makes for missing derivatives (umath fmod, gamma, lgamma; extra arguments of hypot), and the `lambda *args: 1` of wrapped_fsum; a client's derivative is a client callback
+541:59 call  derivatives_all_kwargs.setdefault( name, # Derivative nev...
+    -> <builtin>.dict.setdefault
+544:35 call  partial_derivative(f, name)
+    -> uncertainties.ops.partial_derivative
+547:31 call  linear_part.append( ( # Coefficient: derivative(*args_val...
+    -> <builtin>.list.append
+550:31 call  derivative(*args_values, **kwargs)
+    -> uncertainties.ops.nan_if_exception.wrapped_f
+    -> uncertainties.ops.partial_derivative.partial_derivative_of_f
+    reject uncertainties.unumpy.core.derivative: derivative is the local value of derivatives_all_kwargs, not the function of unumpy.core
+    note: a keyword argument with an uncertainty reaches this line only when f accepts it by keyword. On CPython every f of the package (float methods, math functions, no_complex_func, the flat_fsum lambda) refuses keyword arguments at line 506 first, so the values are those of a client's f: the partial_derivative_of_f closures of lines 372, 408 and 544, or the client's own derivatives (client callbacks). On PyPy (admitted, uncertainties.md J6) builtins bind keywords by parameter name, so umath.sin(x=ufloat(...)) gets derivatives_all_kwargs["x"] from the argspec loop (PyPy's inspect reads builtin code): the nan_if_exception closure; umath.fmod(x=...) and UFloat.__pow__(self=..., rhs=...) get partial_derivative_of_f (Codex round 1)
+558:19 call  cls(f_nominal_value, linear_part)
+    -> uncertainties.core.AffineScalarFunc.__init__
+    note: cls is AffineScalarFunc: core.wrap and core.py:658 pass it (add_arithmetic_ops); a client class given to the public add_arithmetic_ops is client code
+529:43 getitem  derivatives_args_index[pos]
+    -> uncertainties.ops.IndexableIter.__getitem__
+
+[uncertainties.ops.partial_derivative]
+610:31 call  isinstance(arg_ref, str)
+    -> <builtin>.isinstance
+
+[uncertainties.ops.partial_derivative.partial_derivative_of_f]
+627:33 call  list(args)
+    -> <builtin>.list
+631:31 call  abs(args_with_var[arg_ref])
+    -> <builtin>.abs
+639:31 call  f(*args, **args_with_var)
+    -> uncertainties.ops._wrap.f_with_affine_output
+    -> math.fmod
+    -> math.gamma
+    -> math.lgamma
+    -> uncertainties.ops.no_complex_result.no_complex_func
+    note: the keyword branch (change_kwargs): arg_ref is a str. The package makes such closures only in _wrap (partial_derivative(f, name), ops.py:372, 408, 544) and calls them only at ops.py:550. On CPython no f of the package reaches 550 (each refuses keyword arguments at ops.py:506 first). On PyPy (admitted, uncertainties.md J6, J23) builtins bind keywords by parameter name: umath.fmod(x=ufloat(...), y=2.0), umath.gamma(x=...) and umath.lgamma(x=...) reach the closures of math.fmod, math.gamma, math.lgamma, and UFloat.__pow__(self=ufloat(2.0, 0.1), rhs=3.0) (or __rpow__) the closure of no_complex_func, whose float.__pow__ binds self and rhs (pypy floatobject.py:583, gateway.py:227, argument.py:459; Codex round 1). The tests pass the AffineScalarFunc operators and the umath functions as f (test_uncertainties.py:193, test_umath.py:48), ops._wrap closures; with a client's str arg_ref, which the docstring documents ("a string represents the name of an argument in kwargs"), the admitted values combine (README, "Admitted values of several parameters combine"); a client's f is a client callback
+641:31 call  f(*args_with_var, **kwargs)
+    -> math.fmod
+    -> math.gamma
+    -> math.hypot
+    -> math.lgamma
+    -> <builtin>.float.__mod__
+    -> uncertainties.ops._wrap.f_with_affine_output
+    note: the positional branch: f is the function of partial_derivative. In the package, the f of _wrap when a positional derivative is missing (_wrap.<lambda1> through none_converter): math.fmod, math.gamma and math.lgamma of num_deriv_funcs, and math.hypot for a third or later argument (Python 3.8 and later: umath.hypot(1.0, 2.0, x)); and float.__mod__, which the "mod" and "rmod" derivatives of get_ops_with_reflection pass. The tests pass ops._wrap closures (test_uncertainties.py:193, test_umath.py:48). A client's f is a client callback
+646:32 call  f(*args, **args_with_var)
+    -> math.fmod
+    -> math.gamma
+    -> math.lgamma
+    -> uncertainties.ops._wrap.f_with_affine_output
+    -> uncertainties.ops.no_complex_result.no_complex_func
+    note: as 639:31
+648:32 call  f(*args_with_var, **kwargs)
+    -> math.fmod
+    -> math.gamma
+    -> math.hypot
+    -> math.lgamma
+    -> <builtin>.float.__mod__
+    -> uncertainties.ops._wrap.f_with_affine_output
+    note: as 641:31
+
+[uncertainties.ops.eq_on_aff_funcs]
+680:57 getattr  difference.std_dev
+    -> uncertainties.core.AffineScalarFunc.std_dev
+    reject uncertainties.core.Variable.std_dev: difference is the new AffineScalarFunc that the __sub__ closure returns (ops.py:558), never a Variable
+677:23 op  self - y_with_uncert
+    -> uncertainties.ops._wrap.f_with_affine_output
+    note: both operands are numbers with uncertainty (op_on_upcast_args upcasts y); AffineScalarFunc.__sub__ is the ops._wrap closure of float.__sub__ (add_arithmetic_ops)
+
+[uncertainties.ops.ne_on_aff_funcs]
+689:31 call  eq_on_aff_funcs(self, y_with_uncert)
+    -> uncertainties.ops.eq_on_aff_funcs
+
+[uncertainties.ops.ge_on_aff_funcs]
+706:27 call  gt_on_aff_funcs(self, y_with_uncert)
+    -> uncertainties.ops.gt_on_aff_funcs
+706:67 call  eq_on_aff_funcs(self, y_with_uncert)
+    -> uncertainties.ops.eq_on_aff_funcs
+
+[uncertainties.ops.le_on_aff_funcs]
+723:27 call  lt_on_aff_funcs(self, y_with_uncert)
+    -> uncertainties.ops.lt_on_aff_funcs
+723:67 call  eq_on_aff_funcs(self, y_with_uncert)
+    -> uncertainties.ops.eq_on_aff_funcs
+
+[uncertainties.ops.add_comparative_ops]
+843:37 call  force_aff_func_args(eq_on_aff_funcs)
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args
+    reject uncertainties.ops.eq_on_aff_funcs: passed to force_aff_func_args, which stores it in its closure
+845:37 call  force_aff_func_args(ne_on_aff_funcs)
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args
+    reject uncertainties.ops.ne_on_aff_funcs: passed to force_aff_func_args, which stores it in its closure
+846:37 call  force_aff_func_args(gt_on_aff_funcs)
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args
+    reject uncertainties.ops.gt_on_aff_funcs: passed to force_aff_func_args, which stores it in its closure
+851:37 call  force_aff_func_args(ge_on_aff_funcs)
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args
+    reject uncertainties.ops.ge_on_aff_funcs: passed to force_aff_func_args, which stores it in its closure
+853:37 call  force_aff_func_args(lt_on_aff_funcs)
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args
+    reject uncertainties.ops.lt_on_aff_funcs: passed to force_aff_func_args, which stores it in its closure
+854:37 call  force_aff_func_args(le_on_aff_funcs)
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args
+    reject uncertainties.ops.le_on_aff_funcs: passed to force_aff_func_args, which stores it in its closure
+
+[uncertainties.ops.add_comparative_ops.to_affine_scalar]
+738:22 call  isinstance(x, cls)
+    -> <builtin>.isinstance
+741:22 call  isinstance(x, CONSTANT_TYPES)
+    -> <builtin>.isinstance
+743:23 call  cls(x, {})
+    -> uncertainties.core.AffineScalarFunc.__init__
+    note: cls is AffineScalarFunc, the class that core.py:659 passes to add_comparative_ops
+746:24 call  NotUpcast( "%s cannot be converted to a number with" " un...
+    -> <builtin>.Exception.__init__
+    note: NotUpcast defines no __init__; the first in its MRO is Exception's
+747:76 call  type(x)
+    -> <builtin>.type
+
+[uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args]
+771:49 call  to_affine_scalar(y)
+    -> uncertainties.ops.add_comparative_ops.to_affine_scalar
+779:28 call  func(x, y_with_uncert)
+    -> uncertainties.ops.eq_on_aff_funcs
+    -> uncertainties.ops.ge_on_aff_funcs
+    -> uncertainties.ops.gt_on_aff_funcs
+    -> uncertainties.ops.le_on_aff_funcs
+    -> uncertainties.ops.lt_on_aff_funcs
+    -> uncertainties.ops.ne_on_aff_funcs
+    note: func is the comparison function that add_comparative_ops passes to its local force_aff_func_args (ops.py:843-854)
+
+[uncertainties.ops.add_comparative_ops.__bool__]
+809:21 op  self != 0.0
+    -> uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args
+    note: self is a number with uncertainty; AffineScalarFunc.__ne__ is the force_aff_func_args closure of ne_on_aff_funcs (ops.py:845)
+
+== uncertainties.parsing
+
+[uncertainties.parsing]
+34:41 call  re.compile( "%s$" % NUMBER_WITH_UNCERT_RE_STR, re.VERBOSE )
+    -> re.compile
+41:52 call  re.compile( """ \\( (?P<simple_num_with_uncert>.*) \\) (?...
+    -> re.compile
+127:32 call  re.compile("(.*?)\\s*×\\s*10(.*)")
+    -> re.compile
+
+[uncertainties.parsing.parse_error_in_parentheses]
+76:40 call  NUMBER_WITH_UNCERT_RE_MATCH(representation)
+    -> re.Pattern.match
+    note: NUMBER_WITH_UNCERT_RE_MATCH is the bound match method of a compiled pattern (parsing.py:34-36)
+83:25 call  match.groups()
+    -> re.Match.groups
+86:29 call  NotParenUncert( "Unparsable number representation: '%s'."...
+    -> <builtin>.ValueError.__init__
+    note: NotParenUncert subclasses ValueError and defines no __init__
+93:44 call  nrmlze_superscript(exponent)
+    -> uncertainties.formatting.nrmlze_superscript
+98:18 call  float((sign or "") + main)
+    -> <builtin>.float
+107:29 call  float(uncert)
+    -> <builtin>.float
+116:42 call  len(main_dec)
+    -> <builtin>.len
+118:27 call  int(uncert_int)
+    -> <builtin>.int
+
+[uncertainties.parsing.to_float]
+144:21 call  float(value_str)
+    -> <builtin>.float
+149:31 call  PRETTY_PRINT_MATCH(value_str)
+    -> re.Pattern.match
+    note: PRETTY_PRINT_MATCH is the bound match method of a compiled pattern (parsing.py:127)
+152:25 call  float(match.group(1))
+    -> <builtin>.float
+152:37 call  match.group(1)
+    -> re.Match.group
+152:70 call  nrmlze_superscript(match.group(2))
+    -> uncertainties.formatting.nrmlze_superscript
+152:82 call  match.group(2)
+    -> re.Match.group
+154:29 call  ValueError( "Mantissa or exponent incorrect in pretty-pri...
+    -> <builtin>.ValueError
+158:25 call  ValueError( "No valid Python float or pretty-print form" ...
+    -> <builtin>.ValueError
+
+[uncertainties.parsing.str_to_number_with_uncert]
+190:33 call  representation.startswith("(")
+    -> <builtin>.str.startswith
+190:66 call  representation.endswith(")")
+    -> <builtin>.str.endswith
+193:51 call  NUMBER_WITH_UNCERT_GLOBAL_EXP_RE_MATCH(representation)
+    -> re.Pattern.match
+    note: NUMBER_WITH_UNCERT_GLOBAL_EXP_RE_MATCH is the bound match method of a compiled pattern (parsing.py:41-49)
+202:36 call  match.group("exp_value")
+    -> re.Match.group
+205:42 call  nrmlze_superscript(exp_value_str)
+    -> uncertainties.formatting.nrmlze_superscript
+207:29 call  ValueError(cannot_parse_ufloat_msg_pat % representation)
+    -> <builtin>.ValueError
+211:37 call  match.group("simple_num_with_uncert")
+    -> re.Match.group
+215:21 call  re.match("(.*)(?:\\+/-|±)(.*)", representation)
+    -> re.match
+217:43 call  match.groups()
+    -> re.Match.groups
+222:37 call  to_float(nom_value)
+    -> uncertainties.parsing.to_float
+222:67 call  to_float(uncert)
+    -> uncertainties.parsing.to_float
+224:29 call  ValueError(cannot_parse_ufloat_msg_pat % representation)
+    -> <builtin>.ValueError
+229:54 call  parse_error_in_parentheses(representation)
+    -> uncertainties.parsing.parse_error_in_parentheses
+231:29 call  ValueError(cannot_parse_ufloat_msg_pat % representation)
+    -> <builtin>.ValueError
+
+== uncertainties.umath_core
+
+[uncertainties.umath_core]
+61:22 call  set(["fmod", "gamma", "lgamma"])
+    -> <builtin>.set
+73:24 call  set(["ceil", "floor", "isinf", "isnan", "trunc"])
+    -> <builtin>.set
+181:25 call  math.sqrt(math.pi)
+    -> math.sqrt
+247:16 call  dir(math)
+    -> <builtin>.dir
+257:19 call  getattr(math, name)
+    -> <builtin>.getattr
+260:45 call  wrap_locally_cst_func(func)
+    -> uncertainties.umath_core.wrap_locally_cst_func
+266:40 call  uncert_core.wrap( func, map(uncert_core.nan_if_exception,...
+    -> uncertainties.core.wrap
+    note: the lazy map of 267:22 is consumed inside, by next() in IndexableIter.__getitem__ (ops.py:332), which calls nan_if_exception
+267:22 call  map(uncert_core.nan_if_exception, derivatives)
+    -> <builtin>.map
+    reject uncertainties.ops.nan_if_exception: map() is lazy; next() in IndexableIter.__getitem__ (ops.py:332) calls it later
+271:12 call  setattr(this_module, name, wraps(wrapped_func, func))
+    -> <builtin>.setattr
+271:37 call  wraps(wrapped_func, func)
+    -> uncertainties.umath_core.wraps
+273:40 call  many_scalars_to_scalar_funcs.append(name)
+    -> <builtin>.list.append
+296:29 call  non_std_wrapped_funcs.append("factorial")
+    -> <builtin>.list.append
+323:20 call  wrapped_fsum()
+    -> uncertainties.umath_core.wrapped_fsum
+324:29 call  non_std_wrapped_funcs.append("fsum")
+    -> <builtin>.list.append
+336:2 decorator  @uncert_core.set_doc(math.modf.__doc__)
+    -> uncertainties.ops.set_doc.set_doc_string
+336:21 call  uncert_core.set_doc(math.modf.__doc__)
+    -> uncertainties.ops.set_doc
+    note: uncertainties.core re-exports ops.set_doc (core.py:28-34)
+361:36 call  many_scalars_to_scalar_funcs.append("modf")
+    -> <builtin>.list.append
+364:2 decorator  @uncert_core.set_doc(math.ldexp.__doc__)
+    -> uncertainties.ops.set_doc.set_doc_string
+364:21 call  uncert_core.set_doc(math.ldexp.__doc__)
+    -> uncertainties.ops.set_doc
+389:36 call  many_scalars_to_scalar_funcs.append("ldexp")
+    -> <builtin>.list.append
+392:2 decorator  @uncert_core.set_doc(math.frexp.__doc__)
+    -> uncertainties.ops.set_doc.set_doc_string
+392:21 call  uncert_core.set_doc(math.frexp.__doc__)
+    -> uncertainties.ops.set_doc
+425:29 call  non_std_wrapped_funcs.append("frexp")
+    -> <builtin>.list.append
+444:17 format  {function_name}
+    reject uncertainties.core.AffineScalarFunc.__format__: function_name is a str of the list deprecated_functions
+447:12 call  setattr( this_module, function_name, uncert_core.deprecat...
+    -> <builtin>.setattr
+450:40 call  uncert_core.deprecation_wrapper( getattr(this_module, fun...
+    -> uncertainties.core.deprecation_wrapper
+451:20 call  getattr(this_module, function_name)
+    -> <builtin>.getattr
+
+[uncertainties.umath_core.wraps]
+97:16 call  setattr(wrapper, attr, getattr(wrapped, attr))
+    -> <builtin>.setattr
+97:39 call  getattr(wrapped, attr)
+    -> <builtin>.getattr
+99:16 call  getattr(wrapper, attr)
+    -> <builtin>.getattr
+99:38 call  getattr(wrapper, attr).update(getattr(wrapped, attr, {}))
+    -> <builtin>.dict.update
+    note: wrapper is a package function (an ops._wrap closure, a wrap_locally_cst_func closure or a wrapped_fsum lambda); its __dict__ is a dict
+99:46 call  getattr(wrapped, attr, {})
+    -> <builtin>.getattr
+
+[uncertainties.umath_core.log_der0]
+136:11 call  len(args)
+    -> <builtin>.len
+139:38 call  math.log(args[1])
+    -> math.log
+
+[uncertainties.umath_core._deriv_copysign]
+153:29 call  math.copysign(1, y)
+    -> math.copysign
+155:30 call  math.copysign(1, y)
+    -> math.copysign
+
+[uncertainties.umath_core._deriv_pow_0]
+169:28 call  math.pow(x, y - 1)
+    -> math.pow
+171:21 call  float("nan")
+    -> <builtin>.float
+
+[uncertainties.umath_core._deriv_pow_1]
+178:24 call  math.log(x)
+    -> math.log
+178:38 call  math.pow(x, y)
+    -> math.pow
+
+[uncertainties.umath_core.<lambda1>]
+185:38 call  math.sqrt(1 - x**2)
+    -> math.sqrt
+
+[uncertainties.umath_core.<lambda2>]
+186:38 call  math.sqrt(x**2 - 1)
+    -> math.sqrt
+
+[uncertainties.umath_core.<lambda3>]
+187:37 call  math.sqrt(1 - x**2)
+    -> math.sqrt
+
+[uncertainties.umath_core.<lambda4>]
+188:38 call  math.sqrt(1 + x**2)
+    -> math.sqrt
+
+[uncertainties.umath_core.<lambda10>]
+196:32 call  math.sin(x)
+    -> math.sin
+
+[uncertainties.umath_core.<lambda11>]
+198:39 call  math.degrees(1)
+    -> math.degrees
+
+[uncertainties.umath_core.<lambda12>]
+199:31 call  math.exp(-(x**2))
+    -> math.exp
+
+[uncertainties.umath_core.<lambda13>]
+200:33 call  math.exp(-(x**2))
+    -> math.exp
+
+[uncertainties.umath_core.<lambda14>]
+204:42 call  math.hypot(x, y)
+    -> math.hypot
+
+[uncertainties.umath_core.<lambda15>]
+204:77 call  math.hypot(x, y)
+    -> math.hypot
+
+[uncertainties.umath_core.<lambda16>]
+205:45 call  math.log(x, y)
+    -> math.log
+205:66 call  math.log(y)
+    -> math.log
+
+[uncertainties.umath_core.<lambda17>]
+206:41 call  math.log(10)
+    -> math.log
+
+[uncertainties.umath_core.<lambda19>]
+209:39 call  math.radians(1)
+    -> math.radians
+
+[uncertainties.umath_core.<lambda20>]
+212:39 call  math.sqrt(x)
+    -> math.sqrt
+
+[uncertainties.umath_core.<lambda21>]
+213:35 call  math.tan(x)
+    -> math.tan
+
+[uncertainties.umath_core.<lambda22>]
+214:37 call  math.tanh(x)
+    -> math.tanh
+
+[uncertainties.umath_core.wrap_locally_cst_func.wrapped_func]
+235:25 call  map(uncert_core.nominal_value, args)
+    -> <builtin>.map
+    -> uncertainties.core.nominal_value
+    reject uncertainties.core.AffineScalarFunc.nominal_value: the function passed is uncertainties.core.nominal_value, not the property
+    note: the lazy map is consumed in this function, by the unpacking *args_float at 241:20
+235:38 getattr  uncert_core.nominal_value
+    reject uncertainties.core.AffineScalarFunc.nominal_value: uncert_core is the module uncertainties.core; the load gives its function nominal_value
+237:28 call  dict( (arg_name, uncert_core.nominal_value(value)) for (a...
+    -> <builtin>.dict
+238:36 getattr  uncert_core.nominal_value
+    reject uncertainties.core.AffineScalarFunc.nominal_value: uncert_core is the module uncertainties.core; the load gives its function nominal_value
+238:49 call  uncert_core.nominal_value(value)
+    -> uncertainties.core.nominal_value
+    reject uncertainties.core.AffineScalarFunc.nominal_value: uncert_core is the module uncertainties.core
+239:50 call  kwargs.items()
+    -> <builtin>.dict.items
+241:20 call  func(*args_float, **kwargs_float)
+    -> math.ceil
+    -> math.floor
+    -> math.isinf
+    -> math.isnan
+    -> math.trunc
+    note: func is the math function of locally_cst_funcs (umath_core.py:73) that the loop of umath_core.py:247-273 wraps; the package calls wrap_locally_cst_func nowhere else
+
+[uncertainties.umath_core.wrapped_fsum]
+317:38 call  uncert_core.wrap(flat_fsum, itertools.repeat(lambda *args...
+    -> uncertainties.core.wrap
+    reject uncertainties.umath_core.wrapped_fsum.<lambda1>: core.wrap only stores flat_fsum (getfullargspec reads its signature); f_with_affine_output calls it later
+317:66 call  itertools.repeat(lambda *args: 1)
+    -> itertools.repeat
+    reject uncertainties.umath_core.wrapped_fsum.<lambda2>: itertools.repeat only stores the lambda
+319:17 call  wraps(lambda arg_list: flat_fsum_wrap(*arg_list), origina...
+    -> uncertainties.umath_core.wraps
+    reject uncertainties.umath_core.wrapped_fsum.<lambda3>: wraps only sets attributes of the lambda
+
+[uncertainties.umath_core.wrapped_fsum.<lambda1>]
+315:44 call  original_func(args)
+    -> math.fsum
+    note: original_func is the module global math.fsum (umath_core.py:301)
+
+[uncertainties.umath_core.wrapped_fsum.<lambda3>]
+319:49 call  flat_fsum_wrap(*arg_list)
+    -> uncertainties.ops._wrap.f_with_affine_output
+    note: flat_fsum_wrap is the ops._wrap closure that core.wrap returns at 317:38
+
+[uncertainties.umath_core.modf]
+347:32 call  to_affine_scalar(x)
+    -> uncertainties.ops.add_comparative_ops.to_affine_scalar
+    note: core.to_affine_scalar is AffineScalarFunc._to_affine_scalar (core.py:660), the closure that add_comparative_ops sets (ops.py:750)
+349:38 call  math.modf(aff_func.nominal_value)
+    -> math.modf
+    reject uncertainties.core.AffineScalarFunc.nominal_value, uncertainties.core.nominal_value: the argument is the value of the property (349:48)
+    reject uncertainties.umath_core.modf: this is the function of the math module
+349:48 getattr  aff_func.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+354:33 call  AffineScalarFunc(frac_part, aff_func._linear_part)
+    -> uncertainties.core.AffineScalarFunc.__init__
+351:8 truth  aff_func._linear_part
+    -> uncertainties.core.LinearCombination.__bool__
+
+[uncertainties.umath_core.ldexp]
+370:32 call  to_affine_scalar(x)
+    -> uncertainties.ops.add_comparative_ops.to_affine_scalar
+373:32 call  AffineScalarFunc( math.ldexp(aff_func.nominal_value, i), ...
+    -> uncertainties.core.AffineScalarFunc.__init__
+374:23 call  math.ldexp(aff_func.nominal_value, i)
+    -> math.ldexp
+    reject uncertainties.core.AffineScalarFunc.nominal_value, uncertainties.core.nominal_value: the argument is the value of the property (374:33)
+    reject uncertainties.umath_core.ldexp: this is the function of the math module
+374:33 getattr  aff_func.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+375:30 call  LinearCombination([(2**i, aff_func._linear_part)])
+    -> uncertainties.core.LinearCombination.__init__
+386:26 call  math.ldexp(x, i)
+    -> math.ldexp
+    -> uncertainties.ops.add_arithmetic_ops.raise_error
+    reject uncertainties.umath_core.ldexp: this is the function of the math module
+    note: when x is a number with uncertainty whose linear part is empty, to_affine_scalar returns x itself (ops.py:738-739), the test above is false, and math.ldexp converts x to a C double through type(x).__float__, the raise_error closure (ops.py:282-291; TypeError). The package makes such values: the elements with zero derivatives of unumpy.ulinalg.inv (unumpy/core.py:437-462), the constants of the public to_affine_scalar (cls(x, {}), ops.py:743) and AffineScalarFunc(value, {}) (audit F1)
+372:8 truth  aff_func._linear_part
+    -> uncertainties.core.LinearCombination.__bool__
+
+[uncertainties.umath_core.frexp]
+403:32 call  to_affine_scalar(x)
+    -> uncertainties.ops.add_comparative_ops.to_affine_scalar
+406:42 call  math.frexp(aff_func.nominal_value)
+    -> math.frexp
+    reject uncertainties.core.AffineScalarFunc.nominal_value, uncertainties.core.nominal_value: the argument is the value of the property (406:52)
+    reject uncertainties.umath_core.frexp: this is the function of the math module
+406:52 getattr  aff_func.nominal_value
+    -> uncertainties.core.AffineScalarFunc.nominal_value
+408:29 call  AffineScalarFunc( mantissa, # With frexp(x) = (m, e), x =...
+    -> uncertainties.core.AffineScalarFunc.__init__
+413:34 call  LinearCombination([2**-exponent, aff_func._linear_part])
+    -> uncertainties.core.LinearCombination.__init__
+422:26 call  math.frexp(x)
+    -> math.frexp
+    -> uncertainties.ops.add_arithmetic_ops.raise_error
+    reject uncertainties.umath_core.frexp: this is the function of the math module
+    note: when x is a number with uncertainty whose linear part is empty, to_affine_scalar returns x itself (ops.py:738-739), the test above is false, and math.frexp converts x to a C double through type(x).__float__, the raise_error closure (ops.py:282-291; TypeError). The package makes such values: the elements with zero derivatives of unumpy.ulinalg.inv (unumpy/core.py:437-462), the constants of the public to_affine_scalar (cls(x, {}), ops.py:743) and AffineScalarFunc(value, {}) (audit F1)
+405:8 truth  aff_func._linear_part
+    -> uncertainties.core.LinearCombination.__bool__
+
+== uncertainties.unumpy
+
+[uncertainties.unumpy]
+80:15 call  __all__.append("ulinalg")
+    -> <builtin>.list.append
+
+== uncertainties.unumpy.core
+
+[uncertainties.unumpy.core]
+55:36 call  numpy.vectorize( uncert_core.nominal_value, otypes=[float...
+    -> numpy.vectorize
+    reject uncertainties.core.AffineScalarFunc.nominal_value, uncertainties.core.nominal_value: numpy.vectorize only stores the function (core.nominal_value); calling the vectorized object calls it (100:52)
+56:17 getattr  uncert_core.nominal_value
+    reject uncertainties.core.AffineScalarFunc.nominal_value: uncert_core is the module uncertainties.core; the load gives its function nominal_value
+64:30 call  numpy.vectorize( uncert_core.std_dev, otypes=[float], # B...
+    -> numpy.vectorize
+    reject uncertainties.core.AffineScalarFunc.std_dev, uncertainties.core.Variable.std_dev, uncertainties.core.std_dev: numpy.vectorize only stores the function (core.std_dev); calling the vectorized object calls it (117:46)
+65:17 getattr  uncert_core.std_dev
+    reject uncertainties.core.AffineScalarFunc.std_dev, uncertainties.core.Variable.std_dev: uncert_core is the module uncertainties.core; the load gives its function std_dev
+502:37 call  func_with_deriv_to_uncert_func(inv_with_derivatives)
+    -> uncertainties.unumpy.core.func_with_deriv_to_uncert_func
+    reject uncertainties.unumpy.core.inv_with_derivatives: stored in the closure of func_with_deriv_to_uncert_func
+568:37 call  inspect.signature(numpy.linalg.pinv)
+    -> inspect.signature
+    reject uncertainties.unumpy.core.pinv: the argument is numpy.linalg.pinv; inspect.signature only reads it
+    note: the except branches (unumpy/core.py:569-577) run on no supported Python: inspect.signature exists from Python 3.3
+579:50 call  func_with_deriv_to_uncert_func(pinv_with_derivatives)
+    -> uncertainties.unumpy.core.func_with_deriv_to_uncert_func
+    reject uncertainties.unumpy.core.pinv_with_derivatives: stored in the closure of func_with_deriv_to_uncert_func
+586:27 call  uncert_core.set_doc( """ Version of numpy.linalg.pinv tha...
+    -> uncertainties.ops.set_doc
+596:2 call  uncert_core.set_doc( """ Version of numpy.linalg.pinv tha...
+    -> uncertainties.ops.set_doc.set_doc_string
+    note: set_doc(...) returns set_doc_string, called here on pinv
+625:30 call  numpy.matrix.I.getter(getI)
+    -> <builtin>.property.getter
+    reject uncertainties.unumpy.core.matrix.getI: property.getter only stores it in a new property
+    note: numpy.matrix.I is a property
+631:6 decorator  @property
+    -> <builtin>.property
+642:6 decorator  @property
+    -> <builtin>.property
+743:24 call  define_vectorized_funcs()
+    -> uncertainties.unumpy.core.define_vectorized_funcs
+
+[uncertainties.unumpy.core.unumpy_to_numpy_matrix]
+80:18 call  isinstance(arr, matrix)
+    -> <builtin>.isinstance
+81:24 call  arr.view(numpy.matrix)
+    -> numpy.matrix.view
+    note: arr is a unumpy.matrix, which inherits view from numpy.matrix
+
+[uncertainties.unumpy.core.nominal_values]
+100:34 call  unumpy_to_numpy_matrix(to_nominal_values(arr))
+    -> uncertainties.unumpy.core.unumpy_to_numpy_matrix
+100:52 call  to_nominal_values(arr)
+    -> numpy.vectorize.__call__
+    -> uncertainties.core.nominal_value
+    note: to_nominal_values is the numpy.vectorize object of line 55, which calls core.nominal_value on each element
+
+[uncertainties.unumpy.core.std_devs]
+117:34 call  unumpy_to_numpy_matrix(to_std_devs(arr))
+    -> uncertainties.unumpy.core.unumpy_to_numpy_matrix
+117:46 call  to_std_devs(arr)
+    -> numpy.vectorize.__call__
+    -> uncertainties.core.std_dev
+    note: to_std_devs is the numpy.vectorize object of line 64, which calls core.std_dev on each element
+
+[uncertainties.unumpy.core.derivative]
+129:18 call  isinstance(u, uncert_core.AffineScalarFunc)
+    -> <builtin>.isinstance
+131:22 getattr  u.derivatives
+    -> uncertainties.core.AffineScalarFunc.derivatives
+131:33 getitem  u.derivatives[var]
+    -> uncertainties.core.Variable.__hash__
+    note: var is a Variable (array_derivative's contract; the package passes the Variables it collected)
+
+[uncertainties.unumpy.core.wrap_array_func]
+161:6 decorator  @uncert_core.set_doc( """\ Version of %s(...) that works ...
+    -> uncertainties.ops.set_doc.set_doc_string
+161:25 call  uncert_core.set_doc( """\ Version of %s(...) that works e...
+    -> uncertainties.ops.set_doc
+261:39 call  uncert_core.set_doc( """\ Version of %s(...) that works e...
+    -> uncertainties.ops.set_doc
+274:6 call  uncert_core.set_doc( """\ Version of %s(...) that works e...
+    -> uncertainties.ops.set_doc.set_doc_string
+    note: set_doc(...) returns set_doc_string, called here on wrapped_func
+
+[uncertainties.unumpy.core.wrap_array_func.wrapped_func]
+177:43 call  nominal_values(arr)
+    -> uncertainties.unumpy.core.nominal_values
+    reject uncertainties.unumpy.core.matrix.nominal_values: the name is the module function nominal_values, not the property of matrix
+178:34 call  func(arr_nominal_value, *args, **kwargs)
+    note: func is the client's function that wrap_array_func wraps (the package never calls wrap_array_func; the tests pass numpy.linalg.pinv and a function of their own): a client callback, no edge
+184:24 call  set()
+    -> <builtin>.set
+187:26 call  isinstance(element, uncert_core.AffineScalarFunc)
+    -> <builtin>.isinstance
+193:33 call  set(element.derivatives.keys())
+    -> <builtin>.set
+    -> uncertainties.core.Variable.__hash__
+    note: set() of a dict_keys view iterates it and hashes each Variable
+193:42 getattr  element.derivatives
+    -> uncertainties.core.AffineScalarFunc.derivatives
+193:58 call  element.derivatives.keys()
+    -> <builtin>.dict.keys
+    -> collections.defaultdict.keys
+    note: derivatives is a plain dict or a collections.defaultdict (core.py:316, uncertainties.md)
+205:38 call  numpy.vectorize(lambda _: {})
+    -> numpy.vectorize
+    reject uncertainties.unumpy.core.wrap_array_func.wrapped_func.<lambda1>: numpy.vectorize only stores the lambda; 205:52 calls it
+205:52 call  numpy.vectorize(lambda _: {})(func_nominal_value)
+    -> numpy.vectorize.__call__
+    -> uncertainties.unumpy.core.wrap_array_func.wrapped_func.<lambda1>
+    note: the numpy.vectorize object of 205:38 calls the lambda on each element
+229:28 call  max(var._std_dev / 1e5, 1e-8 * abs(var._nominal_value))
+    -> <builtin>.max
+229:59 call  abs(var._nominal_value)
+    -> <builtin>.abs
+240:41 call  array_derivative(arr, var)
+    -> uncertainties.unumpy.core.array_derivative
+244:32 call  func(shifted_arr_values, *args, **kwargs)
+    note: the client's func, as at 178:34: a client callback, no edge
+249:57 call  zip( derivatives.flat, numerical_deriv.flat )
+    -> <builtin>.zip
+256:31 call  numpy.vectorize(uncert_core.AffineScalarFunc)
+    -> numpy.vectorize
+256:61 call  numpy.vectorize(uncert_core.AffineScalarFunc)( func_nomin...
+    -> numpy.vectorize.__call__
+    -> uncertainties.core.AffineScalarFunc.__init__
+    note: the numpy.vectorize object of 256:31 calls the class AffineScalarFunc on each pair of elements
+258:28 call  numpy.vectorize(uncert_core.LinearCombination)
+    -> numpy.vectorize
+258:59 call  numpy.vectorize(uncert_core.LinearCombination)(derivatives)
+    -> numpy.vectorize.__call__
+    -> uncertainties.core.LinearCombination.__init__
+    note: the numpy.vectorize object of 258:28 calls the class LinearCombination on each element
+253:36 setitem  derivative_dict[var]
+    -> uncertainties.core.Variable.__hash__
+
+[uncertainties.unumpy.core.uarray]
+304:24 call  TypeError("uarray() should be called with two arguments.")
+    -> <builtin>.TypeError
+306:27 call  numpy.vectorize( # ! Looking up uncert_core.Variable befo...
+    -> numpy.vectorize
+    reject uncertainties.unumpy.core.uarray.<lambda1>: numpy.vectorize only stores the lambda; 312:6 calls it
+312:6 call  numpy.vectorize( # ! Looking up uncert_core.Variable befo...
+    -> numpy.vectorize.__call__
+    -> uncertainties.unumpy.core.uarray.<lambda1>
+    note: the numpy.vectorize object of 306:27 calls the lambda on each pair of elements
+
+[uncertainties.unumpy.core.uarray.<lambda1>]
+310:42 call  uncert_core.Variable(v, s)
+    -> uncertainties.core.Variable.__init__
+    reject uncertainties.core.AffineScalarFunc.__init__: Variable defines __init__
+
+[uncertainties.unumpy.core.array_derivative]
+331:27 call  numpy.vectorize( lambda u: derivative(u, var), # The type...
+    -> numpy.vectorize
+    reject uncertainties.unumpy.core.array_derivative.<lambda1>: numpy.vectorize only stores the lambda; 338:6 calls it
+338:6 call  numpy.vectorize( lambda u: derivative(u, var), # The type...
+    -> numpy.vectorize.__call__
+    -> uncertainties.unumpy.core.array_derivative.<lambda1>
+    note: the numpy.vectorize object of 331:27 calls the lambda on each element
+
+[uncertainties.unumpy.core.array_derivative.<lambda1>]
+332:29 call  derivative(u, var)
+    -> uncertainties.unumpy.core.derivative
+
+[uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func]
+405:41 call  numpy.asanyarray(array_like)
+    -> numpy.asanyarray
+408:24 call  set()
+    -> <builtin>.set
+411:26 call  isinstance(element, uncert_core.AffineScalarFunc)
+    -> <builtin>.isinstance
+413:33 call  set(element.derivatives.keys())
+    -> <builtin>.set
+    -> uncertainties.core.Variable.__hash__
+    note: set() of a dict_keys view iterates it and hashes each Variable
+413:42 getattr  element.derivatives
+    -> uncertainties.core.AffineScalarFunc.derivatives
+413:58 call  element.derivatives.keys()
+    -> <builtin>.dict.keys
+    -> collections.defaultdict.keys
+    note: derivatives is a plain dict or a collections.defaultdict
+415:39 call  nominal_values(array_version)
+    -> uncertainties.unumpy.core.nominal_values
+    reject uncertainties.unumpy.core.matrix.nominal_values: the name is the module function nominal_values, not the property of matrix
+419:49 call  func_with_derivatives( array_nominal, type(array_like), (...
+    -> uncertainties.unumpy.core.inv_with_derivatives
+    -> uncertainties.unumpy.core.pinv_with_derivatives
+    note: func_with_derivatives is the generator function that the package gives func_with_deriv_to_uncert_func (unumpy/core.py:502, 579); a client's function is a client callback
+421:17 call  type(array_like)
+    -> <builtin>.type
+422:30 call  array_derivative(array_version, var)
+    -> uncertainties.unumpy.core.array_derivative
+427:34 call  next(func_then_derivs)
+    -> <builtin>.next
+437:34 call  numpy.array( [{} for _ in range(func_nominal_value.size)]...
+    -> numpy.array
+438:31 call  range(func_nominal_value.size)
+    -> <builtin>.range
+439:18 call  numpy.array( [{} for _ in range(func_nominal_value.size)]...
+    -> numpy.ndarray.reshape
+448:38 call  zip(variables, func_then_derivs)
+    -> <builtin>.zip
+451:57 call  zip( derivatives.flat, deriv_wrt_var.flat )
+    -> <builtin>.zip
+459:33 call  numpy.vectorize(uncert_core.AffineScalarFunc)
+    -> numpy.vectorize
+459:63 call  numpy.vectorize(uncert_core.AffineScalarFunc)( func_nomin...
+    -> numpy.vectorize.__call__
+    -> uncertainties.core.AffineScalarFunc.__init__
+    note: the numpy.vectorize object of 459:33 calls the class AffineScalarFunc on each pair of elements
+461:28 call  numpy.vectorize(uncert_core.LinearCombination)
+    -> numpy.vectorize
+461:59 call  numpy.vectorize(uncert_core.LinearCombination)(derivatives)
+    -> numpy.vectorize.__call__
+    -> uncertainties.core.LinearCombination.__init__
+    note: the numpy.vectorize object of 461:28 calls the class LinearCombination on each element
+466:22 call  isinstance(result, numpy.matrix)
+    -> <builtin>.isinstance
+467:33 call  result.view(matrix)
+    -> numpy.matrix.view
+    note: result is a numpy.matrix (the isinstance test of 466:22)
+455:36 setitem  derivative_dict[var]
+    -> uncertainties.core.Variable.__hash__
+
+[uncertainties.unumpy.core.inv_with_derivatives]
+485:31 call  numpy.linalg.inv(arr)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.linalg.inv
+    note: the name is numpy.linalg.inv, not the module's inv (line 502); as numpy.diag at core.py:116:37
+489:18 call  issubclass(input_type, numpy.matrix)
+    -> <builtin>.issubclass
+490:31 call  inverse.view(numpy.matrix)
+    -> numpy.matrix.view
+    -> numpy.ndarray.view
+    note: in the package's own calls input_type is a subclass of numpy.matrix only when arr is the numpy.matrix that nominal_values made (unumpy_to_numpy_matrix turns a unumpy.matrix into one), and numpy.linalg.inv returns a numpy.matrix for it. inv_with_derivatives is public, and its documented contract (unumpy/core.py:355-377: arr "NumPy ndarray of scalars", input_type the type of the input array-like) admits an ndarray arr with numpy.matrix as input_type; numpy.linalg.inv then returns an ndarray (audit F2; referee's ruling: "Public helpers retain independently admitted parameter combinations even when their package callers use a narrower pairing.")
+494:33 call  numpy.asmatrix(inverse)
+    -> numpy.asmatrix
+498:40 call  numpy.asmatrix(derivative)
+    -> numpy.asmatrix
+499:28 op  -inverse_mat * derivative_mat
+    -> uncertainties.unumpy.core.matrix.__rmul__
+    note: for a unumpy.matrix argument, array_derivative returns a unumpy.matrix (numpy.vectorize keeps the subclass), and numpy.asmatrix returns it unchanged; as a subclass of numpy.matrix that overrides __rmul__, its __rmul__ runs first
+
+[uncertainties.unumpy.core.pinv_with_derivatives]
+526:32 call  numpy.linalg.pinv(arr, rcond)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.linalg.pinv
+    reject uncertainties.unumpy.core.pinv: the name is numpy.linalg.pinv, not the module's pinv
+    note: as numpy.diag at core.py:116:37
+530:18 call  issubclass(input_type, numpy.matrix)
+    -> <builtin>.issubclass
+531:31 call  inverse.view(numpy.matrix)
+    -> numpy.matrix.view
+    -> numpy.ndarray.view
+    note: as 490:31 (pinv_with_derivatives is public with the same contract; numpy.linalg.pinv returns an ndarray for an ndarray arr)
+535:33 call  numpy.asmatrix(inverse)
+    -> numpy.asmatrix
+550:25 call  numpy.eye(arr.shape[0])
+    -> numpy.eye
+551:25 call  numpy.eye(arr.shape[1])
+    -> numpy.eye
+556:40 call  numpy.asmatrix(derivative)
+    -> numpy.asmatrix
+557:30 op  -inverse_mat * derivative_mat
+    -> uncertainties.unumpy.core.matrix.__rmul__
+    note: as inv_with_derivatives 499:28
+559:26 op  factor21 * derivative_mat_H
+    -> uncertainties.unumpy.core.matrix.__rmul__
+    note: derivative_mat_H is the transpose (.H of a real matrix) of a unumpy.matrix derivative, still a unumpy.matrix
+560:26 op  factor31 * derivative_mat_H
+    -> uncertainties.unumpy.core.matrix.__rmul__
+    note: as 559:26
+
+[uncertainties.unumpy.core.pinv]
+583:28 call  pinv_with_uncert(array_like, rcond)
+    -> uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func
+    note: pinv_with_uncert is the closure that func_with_deriv_to_uncert_func returns (line 579)
+
+[uncertainties.unumpy.core.matrix.__rmul__]
+615:26 call  numpy.isscalar(other)
+    -> numpy.isscalar
+616:29 call  numpy.dot(self, other)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.dot
+    -> uncertainties.ops._wrap.f_with_affine_output
+    note: numpy.dot multiplies (and adds) the elements of an object matrix with Python's operators: the operators of its numbers with uncertainty are ops._wrap closures; as numpy.diag at core.py:116:37 for the two names of numpy.dot
+618:29 call  numpy.dot(other, self)
+    -> numpy._ArrayFunctionDispatcher.__call__
+    -> numpy.dot
+    -> uncertainties.ops._wrap.f_with_affine_output
+    note: as 616:29
+
+[uncertainties.unumpy.core.matrix.getI]
+623:41 call  (inv if m == n else pinv)(self)
+    -> uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func
+    -> uncertainties.unumpy.core.pinv
+    note: inv is the closure of func_with_deriv_to_uncert_func (line 502); pinv is the function of line 582 (set_doc returns it unchanged)
+
+[uncertainties.unumpy.core.matrix.nominal_values]
+636:30 call  nominal_values(self)
+    -> uncertainties.unumpy.core.nominal_values
+    reject uncertainties.unumpy.core.matrix.nominal_values: the name is the module function nominal_values, not the property
+
+[uncertainties.unumpy.core.matrix.std_devs]
+644:28 call  numpy.matrix(std_devs(self))
+    -> numpy.matrix
+644:37 call  std_devs(self)
+    -> uncertainties.unumpy.core.std_devs
+    reject uncertainties.unumpy.core.matrix.std_devs: the name is the module function std_devs, not the property
+
+[uncertainties.unumpy.core.umatrix]
+659:24 call  TypeError("umatrix() should be called with two arguments.")
+    -> <builtin>.TypeError
+661:18 call  uarray(nominal_values, std_devs)
+    -> uncertainties.unumpy.core.uarray
+661:49 call  uarray(nominal_values, std_devs).view(matrix)
+    -> numpy.matrix.view
+    -> numpy.ndarray.view
+    note: uarray returns what numpy.vectorize returns (nominal_values and std_devs: lists, lists of lists, numpy arrays: uarray's contract): an ndarray, or, for numpy.matrix or unumpy.matrix inputs (ndarrays by class), a matrix of that subclass, because numpy.vectorize keeps it through asanyarray (numpy 2.3.2 lib/_function_base_impl.py:2615-2628); a unumpy.matrix inherits view from numpy.matrix (Codex round 1)
+
+[uncertainties.unumpy.core.define_vectorized_funcs]
+678:34 call  dict( [ (f_name, "arc" + f_name[1:]) for f_name in ["acos...
+    -> <builtin>.dict
+686:35 call  func_name_translations.get(function_name, function_name)
+    -> <builtin>.dict.get
+693:42 call  zip( umath_core.many_scalars_to_scalar_funcs, new_func_na...
+    -> <builtin>.zip
+700:23 call  getattr(umath_core, function_name)
+    -> <builtin>.getattr
+722:16 call  setattr( this_module, unumpy_name, #!!!! For umath_core.l...
+    -> <builtin>.setattr
+728:28 call  numpy.vectorize( func, doc="""\ Vectorized version of uma...
+    -> numpy.vectorize
+740:23 call  __all__.append(unumpy_name)
+    -> <builtin>.list.append

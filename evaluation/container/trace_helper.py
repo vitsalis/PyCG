@@ -54,7 +54,7 @@ TRACE_KEYS = {
     "python": str,
     "tests": dict,
 }
-OPTIONAL_KEYS = {"plugins": list}
+OPTIONAL_KEYS = {"plugins": list, "environment": dict, "failures": dict}
 
 
 class HelperError(Exception):
@@ -176,7 +176,7 @@ def _normalize(name):
     return re.sub(r"[-_.]+", "-", name).lower()
 
 
-def _check_shape(data, name, pinned):
+def _check_shape(data, name, pinned, environment=None):
     problems = []
     if not isinstance(data, dict):
         return ["the trace is not a JSON object"]
@@ -197,9 +197,22 @@ def _check_shape(data, name, pinned):
             for k, v in data[key].items()
         ):
             problems.append(f"{key!r} is not a mapping of names to lists of names")
-    for key in ("modules", "functions", "executed", *OPTIONAL_KEYS):
+    for key in ("modules", "functions", "executed", "plugins"):
         if not all(isinstance(x, str) for x in data.get(key, [])):
             problems.append(f"{key!r} is not a list of names")
+    failures = data.get("failures", {"errors": [], "failed": []})
+    if set(failures) != {"errors", "failed"} or not all(
+        isinstance(ids, list) and all(isinstance(i, str) for i in ids)
+        for ids in failures.values()
+    ):
+        problems.append("'failures' is not the lists of failed and errored test ids")
+    recorded = data.get("environment", {})
+    if not all(isinstance(v, str) for v in recorded.values()):
+        problems.append("'environment' is not a mapping of names to strings")
+    elif recorded != (environment or {}):
+        problems.append(
+            f"the trace has the environment {recorded}, its entry {environment or {}}"
+        )
     counts = [data["tests"].get(k) for k in (*OUTCOMES, "deselected")]
     if not all(isinstance(c, int) for c in counts):
         problems.append("'tests' has no count for each outcome")
@@ -222,7 +235,8 @@ def check_trace(trace_path, benchmark_dir, name, python_image, destination=None)
     and its distributions must be exactly the requirements file.
     """
     benchmark = Path(benchmark_dir)
-    pinned = project(benchmark, name).pin
+    entry = project(benchmark, name)
+    pinned = entry.pin
     info = os.lstat(trace_path)
     if not stat.S_ISREG(info.st_mode):
         raise HelperError(f"{trace_path} is not a regular file")
@@ -230,7 +244,7 @@ def check_trace(trace_path, benchmark_dir, name, python_image, destination=None)
         raise HelperError(f"{trace_path} has {info.st_size} bytes, over the limit")
     text = Path(trace_path).read_text(encoding="utf-8")
     data = json.loads(text)
-    problems = _check_shape(data, name, pinned)
+    problems = _check_shape(data, name, pinned, dict(entry.environment))
     if not problems and json.dumps(data, indent=2, sort_keys=True) + "\n" != text:
         problems.append("the trace is not in the format that trace.py writes")
     wanted = requirements(benchmark / "test-environments" / f"{name}.txt")

@@ -1,0 +1,14 @@
+{
+  "pymysql._auth._roundtrip": {
+    "unittest.mock.CallableMixin.__call__": "the tests' mock: test_auth_state_machine.py patches conn.write_packet and conn._read_packet with mock.patch.object, so conn.write_packet(...) and conn._read_packet() call a MagicMock, a client object (B5)"
+  },
+  "pymysql.connections.Connection._process_auth": {
+    "unittest.mock.CallableMixin.__call__": "the tests' mock: test_auth_state_machine.py patches the Connection's write_packet and _read_packet with mock.patch.object, a client object (B5)"
+  },
+  "pymysql.connections.Connection._request_authentication": {
+    "unittest.mock.CallableMixin.__call__": "the tests' mock: test_auth_state_machine.py patches the Connection's write_packet and _read_packet with mock.patch.object, a client object (B5)"
+  },
+  "pymysql.connections.Connection.set_charset": {
+    "unittest.mock.CallableMixin.__call__": "the tests' mock: test_err.py:36-41 calls Connection.set_charset(con, ...) unbound on a mock.Mock(spec=Connection), so self.set_character_set is the mock's attribute, a client object (B1, B5)"
+  }
+}

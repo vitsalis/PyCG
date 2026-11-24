@@ -1,0 +1,46 @@
+{
+  "segno.encoder.version_range": {
+    "<builtin>.ValueError": "tests/test_encoder.py:508 passes 41 directly to the private helper; its package callers pass only versions 1 to 40 (rule A, private input; b7-ruling-segno-2.md)"
+  },
+  "segno.writers.write_eps.write_line": {
+    "_io.StringIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)",
+    "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": "the tests pass a tempfile.NamedTemporaryFile as out (a client stream, opaque, B5); the package's own temporary file (QRCode.show) is a .png and reaches only write_png"
+  },
+  "segno.writers.write_pam": {
+    "_io.BytesIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  },
+  "segno.writers.write_pbm": {
+    "_io.BytesIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  },
+  "segno.writers.write_pdf": {
+    "_io.BytesIO.tell": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)",
+    "_io.BytesIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)",
+    "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": "the tests pass a tempfile.NamedTemporaryFile as out (a client stream, opaque, B5); the package's own temporary file (QRCode.show) is a .png and reaches only write_png"
+  },
+  "segno.writers.write_pdf.write_string": {
+    "_io.BytesIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)",
+    "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": "the tests pass a tempfile.NamedTemporaryFile as out (a client stream, opaque, B5); the package's own temporary file (QRCode.show) is a .png and reaches only write_png"
+  },
+  "segno.writers.write_ppm": {
+    "_io.BytesIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  },
+  "segno.writers.write_terminal": {
+    "_io.StringIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  },
+  "segno.writers.write_terminal_compact": {
+    "_io.StringIO.write": "the tests pass an io.StringIO to QRCode.terminal(compact=True); QRCode.terminal documents out only as a file name or a file-like object, so the stream is a client object (opaque, B5); io.StringIO is documented only for the ANSI kind of QRCode.save, which runs write_terminal"
+  },
+  "segno.writers.write_tex": {
+    "_io.StringIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  },
+  "segno.writers.write_txt": {
+    "_io.StringIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)",
+    "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": "the tests pass a tempfile.NamedTemporaryFile as out (a client stream, opaque, B5); the package's own temporary file (QRCode.show) is a .png and reaches only write_png"
+  },
+  "segno.writers.write_xbm": {
+    "_io.StringIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  },
+  "segno.writers.write_xpm": {
+    "_io.StringIO.write": "Client-supplied stream; out: IO[AnyStr] | str (segno/__init__.pyi:91) fixes no concrete stream class under B4, and no package flow establishes this receiver at these sites (the referee's ruling on audit F1)"
+  }
+}

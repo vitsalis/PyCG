@@ -1,0 +1,1236 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.ValueError.__init__"
+    ],
+    "<builtin>.dict.get": [
+      "collections.defaultdict.get"
+    ],
+    "<builtin>.dict.items": [
+      "collections.defaultdict.items"
+    ],
+    "<builtin>.dict.keys": [
+      "collections.defaultdict.keys"
+    ],
+    "<builtin>.dict.setdefault": [
+      "collections.defaultdict.setdefault"
+    ],
+    "<builtin>.dict.update": [
+      "collections.defaultdict.update"
+    ],
+    "<builtin>.dict.values": [
+      "collections.defaultdict.values"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.endswith": [
+      "typing.Text.endswith"
+    ],
+    "<builtin>.str.isupper": [
+      "typing.Text.isupper"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "<builtin>.str.translate": [
+      "typing.Text.translate"
+    ],
+    "<builtin>.type.mro": [
+      "<builtin>.BaseException.mro",
+      "<builtin>.Exception.mro",
+      "<builtin>.ValueError.mro",
+      "<builtin>.dict.mro",
+      "<builtin>.float.mro",
+      "<builtin>.list.mro",
+      "<builtin>.object.mro",
+      "<builtin>.property.mro",
+      "<builtin>.set.mro",
+      "<builtin>.str.mro",
+      "collections.defaultdict.mro",
+      "numpy.matrix.mro",
+      "numpy.matrixlib.defmatrix.matrix.mro",
+      "numpy.matrixlib.matrix.mro",
+      "numpy.ndarray.mro",
+      "re.Match.mro",
+      "re.Pattern.mro",
+      "typing.Text.mro"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "functools.wraps": [
+      "unittest.result.wraps",
+      "unittest.signals.wraps"
+    ],
+    "numpy._core._multiarray_umath.array": [
+      "numpy.array"
+    ],
+    "numpy._core._multiarray_umath.asanyarray": [
+      "numpy.asanyarray"
+    ],
+    "numpy._core.numeric.isscalar": [
+      "numpy.isscalar"
+    ],
+    "numpy.lib._function_base_impl.vectorize.__call__": [
+      "numpy.vectorize.__call__"
+    ],
+    "numpy.lib._twodim_base_impl.eye": [
+      "numpy.eye"
+    ],
+    "numpy.matrixlib.defmatrix.asmatrix": [
+      "numpy.asmatrix",
+      "numpy.matrixlib.asmatrix"
+    ],
+    "numpy.ndarray.copy": [
+      "numpy.matrix.copy",
+      "numpy.matrixlib.defmatrix.matrix.copy",
+      "numpy.matrixlib.matrix.copy"
+    ],
+    "numpy.ndarray.diagonal": [
+      "numpy.matrix.diagonal",
+      "numpy.matrixlib.defmatrix.matrix.diagonal",
+      "numpy.matrixlib.matrix.diagonal"
+    ],
+    "numpy.ndarray.reshape": [
+      "numpy.matrix.reshape",
+      "numpy.matrixlib.defmatrix.matrix.reshape",
+      "numpy.matrixlib.matrix.reshape"
+    ],
+    "numpy.ndarray.view": [
+      "numpy.matrix.view",
+      "numpy.matrixlib.defmatrix.matrix.view",
+      "numpy.matrixlib.matrix.view"
+    ]
+  },
+  "commit": "sha256:76a5653e686f617a42922d546a239e9efce72e6b35411b7750a1d12dcba03031",
+  "deselect": [
+    {
+      "reason": "asserts on timing (timeit sized for an untraced run)",
+      "test": "tests/test_performance.py::test_repeated_summation_complexity"
+    },
+    {
+      "reason": "draws 10**6 unseeded numpy samples through umath functions: slow under the tracer, and random",
+      "test": "tests/test_umath.py::test_monte_carlo_comparison"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "numpy": "2.3.2",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 20,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "uncertainties.core": [
+      "<builtin>.getattr",
+      "<builtin>.property",
+      "<builtin>.property.setter",
+      "<builtin>.setattr",
+      "<builtin>.staticmethod",
+      "uncertainties.core.deprecation_wrapper",
+      "uncertainties.ops.add_arithmetic_ops",
+      "uncertainties.ops.add_comparative_ops",
+      "uncertainties.ops.set_doc",
+      "uncertainties.ops.set_doc.set_doc_string"
+    ],
+    "uncertainties.core.AffineScalarFunc.__deepcopy__": [
+      "copy.deepcopy",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.LinearCombination.__getstate__",
+      "uncertainties.core.LinearCombination.__setstate__",
+      "uncertainties.core.Variable.__deepcopy__",
+      "uncertainties.core.Variable.__hash__"
+    ],
+    "uncertainties.core.AffineScalarFunc.__format__": [
+      "uncertainties.formatting.format_ufloat"
+    ],
+    "uncertainties.core.AffineScalarFunc.__getstate__": [
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "<builtin>.set.update",
+      "<builtin>.type",
+      "<builtin>.type.mro"
+    ],
+    "uncertainties.core.AffineScalarFunc.__init__": [
+      "<builtin>.float",
+      "<builtin>.isinstance",
+      "uncertainties.core.LinearCombination.__init__"
+    ],
+    "uncertainties.core.AffineScalarFunc.__repr__": [
+      "<builtin>.repr",
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.core.Variable.std_dev"
+    ],
+    "uncertainties.core.AffineScalarFunc.__setstate__": [
+      "<builtin>.dict.items",
+      "<builtin>.setattr"
+    ],
+    "uncertainties.core.AffineScalarFunc.__str__": [
+      "uncertainties.core.AffineScalarFunc.format"
+    ],
+    "uncertainties.core.AffineScalarFunc.derivatives": [
+      "uncertainties.core.LinearCombination.expand",
+      "uncertainties.core.LinearCombination.expanded"
+    ],
+    "uncertainties.core.AffineScalarFunc.error_components": [
+      "<builtin>.abs",
+      "<builtin>.dict.items",
+      "uncertainties.core.AffineScalarFunc.derivatives",
+      "uncertainties.core.Variable.__hash__"
+    ],
+    "uncertainties.core.AffineScalarFunc.format": [
+      "uncertainties.formatting.format_ufloat"
+    ],
+    "uncertainties.core.AffineScalarFunc.std_dev": [
+      "<builtin>.dict.values",
+      "<builtin>.float",
+      "<builtin>.sum",
+      "math.sqrt",
+      "uncertainties.core.AffineScalarFunc.error_components"
+    ],
+    "uncertainties.core.AffineScalarFunc.std_score": [
+      "<builtin>.ValueError",
+      "uncertainties.core.Variable.std_dev"
+    ],
+    "uncertainties.core.LinearCombination.__bool__": [
+      "<builtin>.bool"
+    ],
+    "uncertainties.core.LinearCombination.expand": [
+      "<builtin>.dict.items",
+      "<builtin>.list.append",
+      "<builtin>.list.pop",
+      "collections.defaultdict",
+      "uncertainties.core.LinearCombination.expanded",
+      "uncertainties.core.Variable.__hash__"
+    ],
+    "uncertainties.core.LinearCombination.expanded": [
+      "<builtin>.isinstance"
+    ],
+    "uncertainties.core.Variable.__copy__": [
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.core.Variable.__init__",
+      "uncertainties.core.Variable.std_dev"
+    ],
+    "uncertainties.core.Variable.__deepcopy__": [
+      "uncertainties.core.Variable.__copy__"
+    ],
+    "uncertainties.core.Variable.__hash__": [
+      "<builtin>.id"
+    ],
+    "uncertainties.core.Variable.__init__": [
+      "<builtin>.float",
+      "<builtin>.super",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.LinearCombination.__init__",
+      "uncertainties.core.Variable.__hash__",
+      "uncertainties.core.Variable.std_dev"
+    ],
+    "uncertainties.core.Variable.__repr__": [
+      "<builtin>.super",
+      "uncertainties.core.AffineScalarFunc.__repr__"
+    ],
+    "uncertainties.core.Variable.std_dev": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.float",
+      "math.isfinite"
+    ],
+    "uncertainties.core.correlated_values": [
+      "<builtin>.list",
+      "<builtin>.zip",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.ndarray.copy",
+      "numpy.ufunc.__call__",
+      "uncertainties.core.correlated_values_norm"
+    ],
+    "uncertainties.core.correlated_values_norm": [
+      "<builtin>.dict",
+      "<builtin>.len",
+      "<builtin>.tuple",
+      "<builtin>.zip",
+      "math.sqrt",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.LinearCombination.__init__",
+      "uncertainties.core.Variable.__hash__",
+      "uncertainties.core.Variable.__init__"
+    ],
+    "uncertainties.core.correlation_matrix": [
+      "numpy._core._multiarray_umath.array",
+      "numpy.ndarray.diagonal",
+      "numpy.ufunc.__call__",
+      "uncertainties.core.covariance_matrix"
+    ],
+    "uncertainties.core.covariance_matrix": [
+      "<builtin>.enumerate",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.range",
+      "<builtin>.set",
+      "<builtin>.set.intersection",
+      "<builtin>.sum",
+      "uncertainties.core.AffineScalarFunc.derivatives",
+      "uncertainties.core.Variable.__hash__"
+    ],
+    "uncertainties.core.deprecation_wrapper": [
+      "functools.partial.__call__",
+      "functools.wraps"
+    ],
+    "uncertainties.core.deprecation_wrapper.wrapped": [
+      "_warnings.warn",
+      "math.factorial",
+      "uncertainties.ops._wrap.f_with_affine_output",
+      "uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args",
+      "uncertainties.umath_core.frexp",
+      "uncertainties.umath_core.ldexp",
+      "uncertainties.umath_core.modf",
+      "uncertainties.umath_core.wrap_locally_cst_func.wrapped_func"
+    ],
+    "uncertainties.core.nominal_value": [
+      "<builtin>.isinstance",
+      "uncertainties.core.AffineScalarFunc.nominal_value"
+    ],
+    "uncertainties.core.std_dev": [
+      "<builtin>.isinstance",
+      "uncertainties.core.AffineScalarFunc.std_dev",
+      "uncertainties.core.Variable.std_dev"
+    ],
+    "uncertainties.core.ufloat": [
+      "_warnings.warn",
+      "uncertainties.core.Variable.__init__"
+    ],
+    "uncertainties.core.ufloat_fromstr": [
+      "<builtin>.str.strip",
+      "uncertainties.core.ufloat",
+      "uncertainties.parsing.str_to_number_with_uncert"
+    ],
+    "uncertainties.core.wrap": [
+      "uncertainties.ops._wrap"
+    ],
+    "uncertainties.formatting": [
+      "<builtin>.dict.items",
+      "<builtin>.ord"
+    ],
+    "uncertainties.formatting.<lambda1>": [
+      "uncertainties.formatting.to_superscript"
+    ],
+    "uncertainties.formatting.PDG_precision": [
+      "<builtin>.int",
+      "uncertainties.formatting.first_digit"
+    ],
+    "uncertainties.formatting.first_digit": [
+      "<builtin>.abs",
+      "<builtin>.int",
+      "math.floor",
+      "math.log10"
+    ],
+    "uncertainties.formatting.format_num": [
+      "<builtin>.format",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.round",
+      "<builtin>.str.join",
+      "math.isfinite",
+      "math.isinf",
+      "math.isnan",
+      "uncertainties.formatting.<lambda1>",
+      "uncertainties.formatting.<lambda2>",
+      "uncertainties.formatting.first_digit",
+      "uncertainties.formatting.robust_align"
+    ],
+    "uncertainties.formatting.format_ufloat": [
+      "<builtin>.abs",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.round",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "<builtin>.str.isupper",
+      "math.isfinite",
+      "re.Match.group",
+      "re.Match.groupdict",
+      "re.match",
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.core.AffineScalarFunc.std_dev",
+      "uncertainties.core.Variable.std_dev",
+      "uncertainties.formatting.PDG_precision",
+      "uncertainties.formatting.first_digit",
+      "uncertainties.formatting.format_num",
+      "uncertainties.formatting.signif_dgt_to_limit"
+    ],
+    "uncertainties.formatting.nrmlze_superscript": [
+      "<builtin>.int",
+      "<builtin>.str",
+      "<builtin>.str.translate"
+    ],
+    "uncertainties.formatting.robust_align": [
+      "<builtin>.format"
+    ],
+    "uncertainties.formatting.signif_dgt_to_limit": [
+      "<builtin>.round",
+      "uncertainties.formatting.first_digit"
+    ],
+    "uncertainties.formatting.to_superscript": [
+      "<builtin>.str.translate"
+    ],
+    "uncertainties.ops": [
+      "math.sqrt",
+      "uncertainties.ops.get_ops_with_reflection",
+      "uncertainties.ops.no_complex_result"
+    ],
+    "uncertainties.ops.IndexableIter.__getitem__": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.next",
+      "<builtin>.range",
+      "uncertainties.ops.IndexableIter.<lambda1>",
+      "uncertainties.ops._wrap.<lambda1>",
+      "uncertainties.ops.nan_if_exception"
+    ],
+    "uncertainties.ops._wrap": [
+      "<builtin>.dict.items",
+      "<builtin>.enumerate",
+      "inspect.getfullargspec",
+      "itertools.chain",
+      "itertools.repeat",
+      "uncertainties.ops.IndexableIter.__getitem__",
+      "uncertainties.ops.IndexableIter.__init__",
+      "uncertainties.ops._wrap.<lambda1>",
+      "uncertainties.ops.partial_derivative",
+      "uncertainties.ops.set_doc",
+      "uncertainties.ops.set_doc.set_doc_string"
+    ],
+    "uncertainties.ops._wrap.<lambda1>": [
+      "uncertainties.ops.partial_derivative"
+    ],
+    "uncertainties.ops._wrap.f_with_affine_output": [
+      "<builtin>.dict.items",
+      "<builtin>.dict.setdefault",
+      "<builtin>.enumerate",
+      "<builtin>.float.__abs__",
+      "<builtin>.float.__add__",
+      "<builtin>.float.__floordiv__",
+      "<builtin>.float.__mod__",
+      "<builtin>.float.__mul__",
+      "<builtin>.float.__neg__",
+      "<builtin>.float.__pos__",
+      "<builtin>.float.__radd__",
+      "<builtin>.float.__rmul__",
+      "<builtin>.float.__rsub__",
+      "<builtin>.float.__rtruediv__",
+      "<builtin>.float.__sub__",
+      "<builtin>.float.__truediv__",
+      "<builtin>.float.__trunc__",
+      "<builtin>.isinstance",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "math.acos",
+      "math.acosh",
+      "math.asin",
+      "math.asinh",
+      "math.atan",
+      "math.atan2",
+      "math.atanh",
+      "math.copysign",
+      "math.cos",
+      "math.cosh",
+      "math.degrees",
+      "math.erf",
+      "math.erfc",
+      "math.exp",
+      "math.expm1",
+      "math.fabs",
+      "math.fmod",
+      "math.gamma",
+      "math.hypot",
+      "math.lgamma",
+      "math.log",
+      "math.log10",
+      "math.log1p",
+      "math.pow",
+      "math.radians",
+      "math.sin",
+      "math.sinh",
+      "math.sqrt",
+      "math.tan",
+      "math.tanh",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.ops.IndexableIter.__getitem__",
+      "uncertainties.ops.add_arithmetic_ops.<lambda1>",
+      "uncertainties.ops.add_arithmetic_ops.<lambda2>",
+      "uncertainties.ops.add_arithmetic_ops.<lambda3>",
+      "uncertainties.ops.add_arithmetic_ops._simple_add_deriv",
+      "uncertainties.ops.nan_if_exception.wrapped_f",
+      "uncertainties.ops.no_complex_result.no_complex_func",
+      "uncertainties.ops.partial_derivative",
+      "uncertainties.ops.partial_derivative.partial_derivative_of_f",
+      "uncertainties.umath_core.wrapped_fsum.<lambda1>",
+      "uncertainties.umath_core.wrapped_fsum.<lambda2>"
+    ],
+    "uncertainties.ops.add_arithmetic_ops": [
+      "<builtin>.dict.items",
+      "<builtin>.getattr",
+      "<builtin>.iter",
+      "<builtin>.list.append",
+      "<builtin>.setattr",
+      "uncertainties.ops._wrap"
+    ],
+    "uncertainties.ops.add_arithmetic_ops.raise_error": [
+      "<builtin>.TypeError"
+    ],
+    "uncertainties.ops.add_comparative_ops": [
+      "uncertainties.ops.add_comparative_ops.force_aff_func_args"
+    ],
+    "uncertainties.ops.add_comparative_ops.__bool__": [
+      "uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args"
+    ],
+    "uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args": [
+      "uncertainties.ops.add_comparative_ops.to_affine_scalar",
+      "uncertainties.ops.eq_on_aff_funcs",
+      "uncertainties.ops.ge_on_aff_funcs",
+      "uncertainties.ops.gt_on_aff_funcs",
+      "uncertainties.ops.le_on_aff_funcs",
+      "uncertainties.ops.lt_on_aff_funcs",
+      "uncertainties.ops.ne_on_aff_funcs"
+    ],
+    "uncertainties.ops.add_comparative_ops.to_affine_scalar": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.isinstance",
+      "<builtin>.type",
+      "uncertainties.core.AffineScalarFunc.__init__"
+    ],
+    "uncertainties.ops.eq_on_aff_funcs": [
+      "uncertainties.core.AffineScalarFunc.std_dev",
+      "uncertainties.ops._wrap.f_with_affine_output"
+    ],
+    "uncertainties.ops.ge_on_aff_funcs": [
+      "uncertainties.ops.eq_on_aff_funcs",
+      "uncertainties.ops.gt_on_aff_funcs"
+    ],
+    "uncertainties.ops.get_ops_with_reflection": [
+      "<builtin>.dict.items",
+      "<builtin>.eval",
+      "<builtin>.reversed",
+      "uncertainties.ops.nan_if_exception"
+    ],
+    "uncertainties.ops.get_ops_with_reflection.<lambda1>": [
+      "uncertainties.ops.pow_deriv_1"
+    ],
+    "uncertainties.ops.get_ops_with_reflection.<lambda2>": [
+      "uncertainties.ops.pow_deriv_0"
+    ],
+    "uncertainties.ops.le_on_aff_funcs": [
+      "uncertainties.ops.eq_on_aff_funcs",
+      "uncertainties.ops.lt_on_aff_funcs"
+    ],
+    "uncertainties.ops.nan_if_exception.wrapped_f": [
+      "<builtin>.float",
+      "math.cos",
+      "math.cosh",
+      "math.exp",
+      "math.sinh",
+      "uncertainties.ops.get_ops_with_reflection.<lambda1>",
+      "uncertainties.ops.get_ops_with_reflection.<lambda2>",
+      "uncertainties.ops.pow_deriv_0",
+      "uncertainties.ops.pow_deriv_1",
+      "uncertainties.umath_core.<lambda10>",
+      "uncertainties.umath_core.<lambda11>",
+      "uncertainties.umath_core.<lambda12>",
+      "uncertainties.umath_core.<lambda13>",
+      "uncertainties.umath_core.<lambda14>",
+      "uncertainties.umath_core.<lambda15>",
+      "uncertainties.umath_core.<lambda16>",
+      "uncertainties.umath_core.<lambda17>",
+      "uncertainties.umath_core.<lambda18>",
+      "uncertainties.umath_core.<lambda19>",
+      "uncertainties.umath_core.<lambda1>",
+      "uncertainties.umath_core.<lambda20>",
+      "uncertainties.umath_core.<lambda21>",
+      "uncertainties.umath_core.<lambda22>",
+      "uncertainties.umath_core.<lambda2>",
+      "uncertainties.umath_core.<lambda3>",
+      "uncertainties.umath_core.<lambda4>",
+      "uncertainties.umath_core.<lambda5>",
+      "uncertainties.umath_core.<lambda6>",
+      "uncertainties.umath_core.<lambda7>",
+      "uncertainties.umath_core.<lambda8>",
+      "uncertainties.umath_core.<lambda9>",
+      "uncertainties.umath_core._deriv_copysign",
+      "uncertainties.umath_core._deriv_fabs",
+      "uncertainties.umath_core._deriv_pow_0",
+      "uncertainties.umath_core._deriv_pow_1",
+      "uncertainties.umath_core.log_der0"
+    ],
+    "uncertainties.ops.ne_on_aff_funcs": [
+      "uncertainties.ops.eq_on_aff_funcs"
+    ],
+    "uncertainties.ops.no_complex_result.no_complex_func": [
+      "<builtin>.ValueError",
+      "<builtin>.float.__pow__",
+      "<builtin>.float.__rpow__",
+      "<builtin>.isinstance"
+    ],
+    "uncertainties.ops.partial_derivative": [
+      "<builtin>.isinstance"
+    ],
+    "uncertainties.ops.partial_derivative.partial_derivative_of_f": [
+      "<builtin>.abs",
+      "<builtin>.float.__mod__",
+      "<builtin>.list",
+      "math.fmod",
+      "math.gamma",
+      "math.lgamma",
+      "uncertainties.ops._wrap.f_with_affine_output"
+    ],
+    "uncertainties.ops.pow_deriv_0": [
+      "<builtin>.float"
+    ],
+    "uncertainties.ops.pow_deriv_1": [
+      "<builtin>.float",
+      "math.log"
+    ],
+    "uncertainties.parsing": [
+      "re.compile"
+    ],
+    "uncertainties.parsing.parse_error_in_parentheses": [
+      "<builtin>.float",
+      "<builtin>.int",
+      "<builtin>.len",
+      "re.Match.groups",
+      "re.Pattern.match",
+      "uncertainties.formatting.nrmlze_superscript"
+    ],
+    "uncertainties.parsing.str_to_number_with_uncert": [
+      "<builtin>.str.endswith",
+      "<builtin>.str.startswith",
+      "re.Match.group",
+      "re.Match.groups",
+      "re.Pattern.match",
+      "re.match",
+      "uncertainties.formatting.nrmlze_superscript",
+      "uncertainties.parsing.parse_error_in_parentheses",
+      "uncertainties.parsing.to_float"
+    ],
+    "uncertainties.parsing.to_float": [
+      "<builtin>.float",
+      "re.Match.group",
+      "re.Pattern.match",
+      "uncertainties.formatting.nrmlze_superscript"
+    ],
+    "uncertainties.umath_core": [
+      "<builtin>.dir",
+      "<builtin>.getattr",
+      "<builtin>.list.append",
+      "<builtin>.map",
+      "<builtin>.set",
+      "<builtin>.setattr",
+      "math.sqrt",
+      "uncertainties.core.deprecation_wrapper",
+      "uncertainties.core.wrap",
+      "uncertainties.ops.set_doc",
+      "uncertainties.ops.set_doc.set_doc_string",
+      "uncertainties.umath_core.wrap_locally_cst_func",
+      "uncertainties.umath_core.wrapped_fsum",
+      "uncertainties.umath_core.wraps"
+    ],
+    "uncertainties.umath_core.<lambda10>": [
+      "math.sin"
+    ],
+    "uncertainties.umath_core.<lambda11>": [
+      "math.degrees"
+    ],
+    "uncertainties.umath_core.<lambda12>": [
+      "math.exp"
+    ],
+    "uncertainties.umath_core.<lambda13>": [
+      "math.exp"
+    ],
+    "uncertainties.umath_core.<lambda14>": [
+      "math.hypot"
+    ],
+    "uncertainties.umath_core.<lambda15>": [
+      "math.hypot"
+    ],
+    "uncertainties.umath_core.<lambda16>": [
+      "math.log"
+    ],
+    "uncertainties.umath_core.<lambda17>": [
+      "math.log"
+    ],
+    "uncertainties.umath_core.<lambda19>": [
+      "math.radians"
+    ],
+    "uncertainties.umath_core.<lambda1>": [
+      "math.sqrt"
+    ],
+    "uncertainties.umath_core.<lambda20>": [
+      "math.sqrt"
+    ],
+    "uncertainties.umath_core.<lambda21>": [
+      "math.tan"
+    ],
+    "uncertainties.umath_core.<lambda22>": [
+      "math.tanh"
+    ],
+    "uncertainties.umath_core.<lambda2>": [
+      "math.sqrt"
+    ],
+    "uncertainties.umath_core.<lambda3>": [
+      "math.sqrt"
+    ],
+    "uncertainties.umath_core.<lambda4>": [
+      "math.sqrt"
+    ],
+    "uncertainties.umath_core._deriv_copysign": [
+      "math.copysign"
+    ],
+    "uncertainties.umath_core._deriv_pow_0": [
+      "<builtin>.float",
+      "math.pow"
+    ],
+    "uncertainties.umath_core._deriv_pow_1": [
+      "math.log",
+      "math.pow"
+    ],
+    "uncertainties.umath_core.frexp": [
+      "math.frexp",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.core.LinearCombination.__bool__",
+      "uncertainties.core.LinearCombination.__init__",
+      "uncertainties.ops.add_comparative_ops.to_affine_scalar"
+    ],
+    "uncertainties.umath_core.ldexp": [
+      "math.ldexp",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.core.LinearCombination.__bool__",
+      "uncertainties.core.LinearCombination.__init__",
+      "uncertainties.ops.add_comparative_ops.to_affine_scalar"
+    ],
+    "uncertainties.umath_core.log_der0": [
+      "<builtin>.len",
+      "math.log"
+    ],
+    "uncertainties.umath_core.modf": [
+      "math.modf",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.AffineScalarFunc.nominal_value",
+      "uncertainties.core.LinearCombination.__bool__",
+      "uncertainties.ops.add_comparative_ops.to_affine_scalar"
+    ],
+    "uncertainties.umath_core.wrap_locally_cst_func.wrapped_func": [
+      "<builtin>.dict",
+      "<builtin>.dict.items",
+      "<builtin>.map",
+      "math.ceil",
+      "math.floor",
+      "math.isinf",
+      "math.isnan",
+      "math.trunc",
+      "uncertainties.core.nominal_value"
+    ],
+    "uncertainties.umath_core.wrapped_fsum": [
+      "itertools.repeat",
+      "uncertainties.core.wrap",
+      "uncertainties.umath_core.wraps"
+    ],
+    "uncertainties.umath_core.wrapped_fsum.<lambda1>": [
+      "math.fsum"
+    ],
+    "uncertainties.umath_core.wrapped_fsum.<lambda3>": [
+      "uncertainties.ops._wrap.f_with_affine_output"
+    ],
+    "uncertainties.umath_core.wraps": [
+      "<builtin>.dict.update",
+      "<builtin>.getattr",
+      "<builtin>.setattr"
+    ],
+    "uncertainties.unumpy": [
+      "<builtin>.list.append"
+    ],
+    "uncertainties.unumpy.core": [
+      "<builtin>.property",
+      "<builtin>.property.getter",
+      "inspect.signature",
+      "numpy.vectorize",
+      "uncertainties.ops.set_doc",
+      "uncertainties.ops.set_doc.set_doc_string",
+      "uncertainties.unumpy.core.define_vectorized_funcs",
+      "uncertainties.unumpy.core.func_with_deriv_to_uncert_func"
+    ],
+    "uncertainties.unumpy.core.array_derivative": [
+      "numpy.lib._function_base_impl.vectorize.__call__",
+      "numpy.vectorize",
+      "uncertainties.unumpy.core.array_derivative.<lambda1>"
+    ],
+    "uncertainties.unumpy.core.array_derivative.<lambda1>": [
+      "uncertainties.unumpy.core.derivative"
+    ],
+    "uncertainties.unumpy.core.define_vectorized_funcs": [
+      "<builtin>.dict",
+      "<builtin>.dict.get",
+      "<builtin>.getattr",
+      "<builtin>.list.append",
+      "<builtin>.setattr",
+      "<builtin>.zip",
+      "numpy.vectorize"
+    ],
+    "uncertainties.unumpy.core.derivative": [
+      "<builtin>.isinstance",
+      "uncertainties.core.AffineScalarFunc.derivatives",
+      "uncertainties.core.Variable.__hash__"
+    ],
+    "uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func": [
+      "<builtin>.dict.keys",
+      "<builtin>.isinstance",
+      "<builtin>.next",
+      "<builtin>.range",
+      "<builtin>.set",
+      "<builtin>.type",
+      "<builtin>.zip",
+      "numpy._core._multiarray_umath.array",
+      "numpy._core._multiarray_umath.asanyarray",
+      "numpy.lib._function_base_impl.vectorize.__call__",
+      "numpy.ndarray.reshape",
+      "numpy.ndarray.view",
+      "numpy.vectorize",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.AffineScalarFunc.derivatives",
+      "uncertainties.core.LinearCombination.__init__",
+      "uncertainties.core.Variable.__hash__",
+      "uncertainties.unumpy.core.array_derivative",
+      "uncertainties.unumpy.core.inv_with_derivatives",
+      "uncertainties.unumpy.core.nominal_values",
+      "uncertainties.unumpy.core.pinv_with_derivatives"
+    ],
+    "uncertainties.unumpy.core.inv_with_derivatives": [
+      "<builtin>.issubclass",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.matrixlib.defmatrix.asmatrix",
+      "numpy.ndarray.view",
+      "uncertainties.unumpy.core.matrix.__rmul__"
+    ],
+    "uncertainties.unumpy.core.matrix.__rmul__": [
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy._core.numeric.isscalar",
+      "uncertainties.ops._wrap.f_with_affine_output"
+    ],
+    "uncertainties.unumpy.core.matrix.getI": [
+      "uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func",
+      "uncertainties.unumpy.core.pinv"
+    ],
+    "uncertainties.unumpy.core.matrix.nominal_values": [
+      "uncertainties.unumpy.core.nominal_values"
+    ],
+    "uncertainties.unumpy.core.nominal_values": [
+      "numpy.lib._function_base_impl.vectorize.__call__",
+      "uncertainties.core.nominal_value",
+      "uncertainties.unumpy.core.unumpy_to_numpy_matrix"
+    ],
+    "uncertainties.unumpy.core.pinv": [
+      "uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func"
+    ],
+    "uncertainties.unumpy.core.pinv_with_derivatives": [
+      "<builtin>.issubclass",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.lib._twodim_base_impl.eye",
+      "numpy.matrixlib.defmatrix.asmatrix",
+      "numpy.ndarray.view",
+      "uncertainties.unumpy.core.matrix.__rmul__"
+    ],
+    "uncertainties.unumpy.core.std_devs": [
+      "numpy.lib._function_base_impl.vectorize.__call__",
+      "uncertainties.core.std_dev",
+      "uncertainties.unumpy.core.unumpy_to_numpy_matrix"
+    ],
+    "uncertainties.unumpy.core.uarray": [
+      "numpy.lib._function_base_impl.vectorize.__call__",
+      "numpy.vectorize",
+      "uncertainties.unumpy.core.uarray.<lambda1>"
+    ],
+    "uncertainties.unumpy.core.uarray.<lambda1>": [
+      "uncertainties.core.Variable.__init__"
+    ],
+    "uncertainties.unumpy.core.umatrix": [
+      "numpy.ndarray.view",
+      "uncertainties.unumpy.core.uarray"
+    ],
+    "uncertainties.unumpy.core.unumpy_to_numpy_matrix": [
+      "<builtin>.isinstance",
+      "numpy.ndarray.view"
+    ],
+    "uncertainties.unumpy.core.wrap_array_func": [
+      "uncertainties.ops.set_doc",
+      "uncertainties.ops.set_doc.set_doc_string"
+    ],
+    "uncertainties.unumpy.core.wrap_array_func.wrapped_func": [
+      "<builtin>.abs",
+      "<builtin>.dict.keys",
+      "<builtin>.isinstance",
+      "<builtin>.max",
+      "<builtin>.set",
+      "<builtin>.zip",
+      "numpy._ArrayFunctionDispatcher.__call__",
+      "numpy.lib._function_base_impl.vectorize.__call__",
+      "numpy.vectorize",
+      "uncertainties.core.AffineScalarFunc.__init__",
+      "uncertainties.core.AffineScalarFunc.derivatives",
+      "uncertainties.core.LinearCombination.__init__",
+      "uncertainties.core.Variable.__hash__",
+      "uncertainties.unumpy.core.array_derivative",
+      "uncertainties.unumpy.core.nominal_values",
+      "uncertainties.unumpy.core.wrap_array_func.wrapped_func.<lambda1>"
+    ]
+  },
+  "executed": [
+    "uncertainties.core.AffineScalarFunc.__deepcopy__",
+    "uncertainties.core.AffineScalarFunc.__format__",
+    "uncertainties.core.AffineScalarFunc.__getstate__",
+    "uncertainties.core.AffineScalarFunc.__init__",
+    "uncertainties.core.AffineScalarFunc.__repr__",
+    "uncertainties.core.AffineScalarFunc.__setstate__",
+    "uncertainties.core.AffineScalarFunc.__str__",
+    "uncertainties.core.AffineScalarFunc.derivatives",
+    "uncertainties.core.AffineScalarFunc.dtype.<lambda1>",
+    "uncertainties.core.AffineScalarFunc.error_components",
+    "uncertainties.core.AffineScalarFunc.format",
+    "uncertainties.core.AffineScalarFunc.nominal_value",
+    "uncertainties.core.AffineScalarFunc.std_dev",
+    "uncertainties.core.AffineScalarFunc.std_score",
+    "uncertainties.core.LinearCombination.__bool__",
+    "uncertainties.core.LinearCombination.__getstate__",
+    "uncertainties.core.LinearCombination.__init__",
+    "uncertainties.core.LinearCombination.__setstate__",
+    "uncertainties.core.LinearCombination.expand",
+    "uncertainties.core.LinearCombination.expanded",
+    "uncertainties.core.Variable.__copy__",
+    "uncertainties.core.Variable.__deepcopy__",
+    "uncertainties.core.Variable.__hash__",
+    "uncertainties.core.Variable.__init__",
+    "uncertainties.core.Variable.__repr__",
+    "uncertainties.core.Variable.std_dev",
+    "uncertainties.core.correlated_values",
+    "uncertainties.core.correlated_values_norm",
+    "uncertainties.core.correlation_matrix",
+    "uncertainties.core.covariance_matrix",
+    "uncertainties.core.deprecation_wrapper",
+    "uncertainties.core.deprecation_wrapper.wrapped",
+    "uncertainties.core.nominal_value",
+    "uncertainties.core.std_dev",
+    "uncertainties.core.ufloat",
+    "uncertainties.core.ufloat_fromstr",
+    "uncertainties.core.wrap",
+    "uncertainties.formatting.<lambda1>",
+    "uncertainties.formatting.<lambda2>",
+    "uncertainties.formatting.PDG_precision",
+    "uncertainties.formatting.first_digit",
+    "uncertainties.formatting.format_num",
+    "uncertainties.formatting.format_ufloat",
+    "uncertainties.formatting.nrmlze_superscript",
+    "uncertainties.formatting.robust_align",
+    "uncertainties.formatting.signif_dgt_to_limit",
+    "uncertainties.formatting.to_superscript",
+    "uncertainties.ops.IndexableIter.<lambda1>",
+    "uncertainties.ops.IndexableIter.__getitem__",
+    "uncertainties.ops.IndexableIter.__init__",
+    "uncertainties.ops._wrap",
+    "uncertainties.ops._wrap.<lambda1>",
+    "uncertainties.ops._wrap.f_with_affine_output",
+    "uncertainties.ops.add_arithmetic_ops",
+    "uncertainties.ops.add_arithmetic_ops.<lambda1>",
+    "uncertainties.ops.add_arithmetic_ops.<lambda2>",
+    "uncertainties.ops.add_arithmetic_ops.<lambda3>",
+    "uncertainties.ops.add_arithmetic_ops._simple_add_deriv",
+    "uncertainties.ops.add_arithmetic_ops.raise_error",
+    "uncertainties.ops.add_comparative_ops",
+    "uncertainties.ops.add_comparative_ops.__bool__",
+    "uncertainties.ops.add_comparative_ops.force_aff_func_args",
+    "uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args",
+    "uncertainties.ops.add_comparative_ops.to_affine_scalar",
+    "uncertainties.ops.eq_on_aff_funcs",
+    "uncertainties.ops.ge_on_aff_funcs",
+    "uncertainties.ops.get_ops_with_reflection",
+    "uncertainties.ops.get_ops_with_reflection.<lambda1>",
+    "uncertainties.ops.get_ops_with_reflection.<lambda2>",
+    "uncertainties.ops.gt_on_aff_funcs",
+    "uncertainties.ops.le_on_aff_funcs",
+    "uncertainties.ops.lt_on_aff_funcs",
+    "uncertainties.ops.nan_if_exception",
+    "uncertainties.ops.nan_if_exception.wrapped_f",
+    "uncertainties.ops.ne_on_aff_funcs",
+    "uncertainties.ops.no_complex_result",
+    "uncertainties.ops.no_complex_result.no_complex_func",
+    "uncertainties.ops.partial_derivative",
+    "uncertainties.ops.partial_derivative.partial_derivative_of_f",
+    "uncertainties.ops.pow_deriv_0",
+    "uncertainties.ops.pow_deriv_1",
+    "uncertainties.ops.set_doc",
+    "uncertainties.ops.set_doc.set_doc_string",
+    "uncertainties.parsing.parse_error_in_parentheses",
+    "uncertainties.parsing.str_to_number_with_uncert",
+    "uncertainties.parsing.to_float",
+    "uncertainties.umath_core.<lambda10>",
+    "uncertainties.umath_core.<lambda11>",
+    "uncertainties.umath_core.<lambda12>",
+    "uncertainties.umath_core.<lambda13>",
+    "uncertainties.umath_core.<lambda14>",
+    "uncertainties.umath_core.<lambda15>",
+    "uncertainties.umath_core.<lambda16>",
+    "uncertainties.umath_core.<lambda17>",
+    "uncertainties.umath_core.<lambda18>",
+    "uncertainties.umath_core.<lambda19>",
+    "uncertainties.umath_core.<lambda1>",
+    "uncertainties.umath_core.<lambda20>",
+    "uncertainties.umath_core.<lambda21>",
+    "uncertainties.umath_core.<lambda22>",
+    "uncertainties.umath_core.<lambda2>",
+    "uncertainties.umath_core.<lambda3>",
+    "uncertainties.umath_core.<lambda4>",
+    "uncertainties.umath_core.<lambda5>",
+    "uncertainties.umath_core.<lambda6>",
+    "uncertainties.umath_core.<lambda7>",
+    "uncertainties.umath_core.<lambda8>",
+    "uncertainties.umath_core.<lambda9>",
+    "uncertainties.umath_core._deriv_copysign",
+    "uncertainties.umath_core._deriv_fabs",
+    "uncertainties.umath_core._deriv_pow_0",
+    "uncertainties.umath_core._deriv_pow_1",
+    "uncertainties.umath_core.frexp",
+    "uncertainties.umath_core.ldexp",
+    "uncertainties.umath_core.log_der0",
+    "uncertainties.umath_core.modf",
+    "uncertainties.umath_core.wrap_locally_cst_func",
+    "uncertainties.umath_core.wrap_locally_cst_func.wrapped_func",
+    "uncertainties.umath_core.wrapped_fsum",
+    "uncertainties.umath_core.wrapped_fsum.<lambda1>",
+    "uncertainties.umath_core.wrapped_fsum.<lambda2>",
+    "uncertainties.umath_core.wrapped_fsum.<lambda3>",
+    "uncertainties.umath_core.wraps",
+    "uncertainties.unumpy.core.array_derivative",
+    "uncertainties.unumpy.core.array_derivative.<lambda1>",
+    "uncertainties.unumpy.core.define_vectorized_funcs",
+    "uncertainties.unumpy.core.derivative",
+    "uncertainties.unumpy.core.func_with_deriv_to_uncert_func",
+    "uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func",
+    "uncertainties.unumpy.core.inv_with_derivatives",
+    "uncertainties.unumpy.core.matrix.__rmul__",
+    "uncertainties.unumpy.core.matrix.getI",
+    "uncertainties.unumpy.core.matrix.nominal_values",
+    "uncertainties.unumpy.core.nominal_values",
+    "uncertainties.unumpy.core.pinv",
+    "uncertainties.unumpy.core.pinv_with_derivatives",
+    "uncertainties.unumpy.core.std_devs",
+    "uncertainties.unumpy.core.uarray",
+    "uncertainties.unumpy.core.uarray.<lambda1>",
+    "uncertainties.unumpy.core.umatrix",
+    "uncertainties.unumpy.core.unumpy_to_numpy_matrix",
+    "uncertainties.unumpy.core.wrap_array_func",
+    "uncertainties.unumpy.core.wrap_array_func.wrapped_func",
+    "uncertainties.unumpy.core.wrap_array_func.wrapped_func.<lambda1>"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": [
+      "tests/test_umath.py::test_math_module"
+    ]
+  },
+  "functions": [
+    "uncertainties.core.AffineScalarFunc.__deepcopy__",
+    "uncertainties.core.AffineScalarFunc.__format__",
+    "uncertainties.core.AffineScalarFunc.__getstate__",
+    "uncertainties.core.AffineScalarFunc.__init__",
+    "uncertainties.core.AffineScalarFunc.__repr__",
+    "uncertainties.core.AffineScalarFunc.__setstate__",
+    "uncertainties.core.AffineScalarFunc.__str__",
+    "uncertainties.core.AffineScalarFunc.derivatives",
+    "uncertainties.core.AffineScalarFunc.dtype.<lambda1>",
+    "uncertainties.core.AffineScalarFunc.error_components",
+    "uncertainties.core.AffineScalarFunc.format",
+    "uncertainties.core.AffineScalarFunc.nominal_value",
+    "uncertainties.core.AffineScalarFunc.std_dev",
+    "uncertainties.core.AffineScalarFunc.std_score",
+    "uncertainties.core.LinearCombination.__bool__",
+    "uncertainties.core.LinearCombination.__getstate__",
+    "uncertainties.core.LinearCombination.__init__",
+    "uncertainties.core.LinearCombination.__setstate__",
+    "uncertainties.core.LinearCombination.expand",
+    "uncertainties.core.LinearCombination.expanded",
+    "uncertainties.core.Variable.__copy__",
+    "uncertainties.core.Variable.__deepcopy__",
+    "uncertainties.core.Variable.__hash__",
+    "uncertainties.core.Variable.__init__",
+    "uncertainties.core.Variable.__repr__",
+    "uncertainties.core.Variable.std_dev",
+    "uncertainties.core.correlated_values",
+    "uncertainties.core.correlated_values_norm",
+    "uncertainties.core.correlation_matrix",
+    "uncertainties.core.covariance_matrix",
+    "uncertainties.core.deprecation_wrapper",
+    "uncertainties.core.deprecation_wrapper.wrapped",
+    "uncertainties.core.nominal_value",
+    "uncertainties.core.std_dev",
+    "uncertainties.core.ufloat",
+    "uncertainties.core.ufloat_fromstr",
+    "uncertainties.core.wrap",
+    "uncertainties.formatting.<lambda1>",
+    "uncertainties.formatting.<lambda2>",
+    "uncertainties.formatting.PDG_precision",
+    "uncertainties.formatting.first_digit",
+    "uncertainties.formatting.format_num",
+    "uncertainties.formatting.format_ufloat",
+    "uncertainties.formatting.nrmlze_superscript",
+    "uncertainties.formatting.robust_align",
+    "uncertainties.formatting.signif_dgt_to_limit",
+    "uncertainties.formatting.to_superscript",
+    "uncertainties.ops.IndexableIter.<lambda1>",
+    "uncertainties.ops.IndexableIter.__getitem__",
+    "uncertainties.ops.IndexableIter.__init__",
+    "uncertainties.ops.IndexableIter.__str__",
+    "uncertainties.ops._wrap",
+    "uncertainties.ops._wrap.<lambda1>",
+    "uncertainties.ops._wrap.f_with_affine_output",
+    "uncertainties.ops.add_arithmetic_ops",
+    "uncertainties.ops.add_arithmetic_ops.<lambda1>",
+    "uncertainties.ops.add_arithmetic_ops.<lambda2>",
+    "uncertainties.ops.add_arithmetic_ops.<lambda3>",
+    "uncertainties.ops.add_arithmetic_ops._simple_add_deriv",
+    "uncertainties.ops.add_arithmetic_ops.raise_error",
+    "uncertainties.ops.add_comparative_ops",
+    "uncertainties.ops.add_comparative_ops.__bool__",
+    "uncertainties.ops.add_comparative_ops.force_aff_func_args",
+    "uncertainties.ops.add_comparative_ops.force_aff_func_args.op_on_upcast_args",
+    "uncertainties.ops.add_comparative_ops.to_affine_scalar",
+    "uncertainties.ops.eq_on_aff_funcs",
+    "uncertainties.ops.ge_on_aff_funcs",
+    "uncertainties.ops.get_ops_with_reflection",
+    "uncertainties.ops.get_ops_with_reflection.<lambda1>",
+    "uncertainties.ops.get_ops_with_reflection.<lambda2>",
+    "uncertainties.ops.gt_on_aff_funcs",
+    "uncertainties.ops.le_on_aff_funcs",
+    "uncertainties.ops.lt_on_aff_funcs",
+    "uncertainties.ops.nan_if_exception",
+    "uncertainties.ops.nan_if_exception.wrapped_f",
+    "uncertainties.ops.ne_on_aff_funcs",
+    "uncertainties.ops.no_complex_result",
+    "uncertainties.ops.no_complex_result.no_complex_func",
+    "uncertainties.ops.partial_derivative",
+    "uncertainties.ops.partial_derivative.partial_derivative_of_f",
+    "uncertainties.ops.pow_deriv_0",
+    "uncertainties.ops.pow_deriv_1",
+    "uncertainties.ops.set_doc",
+    "uncertainties.ops.set_doc.set_doc_string",
+    "uncertainties.parsing.parse_error_in_parentheses",
+    "uncertainties.parsing.str_to_number_with_uncert",
+    "uncertainties.parsing.to_float",
+    "uncertainties.umath_core.<lambda10>",
+    "uncertainties.umath_core.<lambda11>",
+    "uncertainties.umath_core.<lambda12>",
+    "uncertainties.umath_core.<lambda13>",
+    "uncertainties.umath_core.<lambda14>",
+    "uncertainties.umath_core.<lambda15>",
+    "uncertainties.umath_core.<lambda16>",
+    "uncertainties.umath_core.<lambda17>",
+    "uncertainties.umath_core.<lambda18>",
+    "uncertainties.umath_core.<lambda19>",
+    "uncertainties.umath_core.<lambda1>",
+    "uncertainties.umath_core.<lambda20>",
+    "uncertainties.umath_core.<lambda21>",
+    "uncertainties.umath_core.<lambda22>",
+    "uncertainties.umath_core.<lambda2>",
+    "uncertainties.umath_core.<lambda3>",
+    "uncertainties.umath_core.<lambda4>",
+    "uncertainties.umath_core.<lambda5>",
+    "uncertainties.umath_core.<lambda6>",
+    "uncertainties.umath_core.<lambda7>",
+    "uncertainties.umath_core.<lambda8>",
+    "uncertainties.umath_core.<lambda9>",
+    "uncertainties.umath_core._deriv_copysign",
+    "uncertainties.umath_core._deriv_fabs",
+    "uncertainties.umath_core._deriv_pow_0",
+    "uncertainties.umath_core._deriv_pow_1",
+    "uncertainties.umath_core.frexp",
+    "uncertainties.umath_core.ldexp",
+    "uncertainties.umath_core.log_der0",
+    "uncertainties.umath_core.modf",
+    "uncertainties.umath_core.wrap_locally_cst_func",
+    "uncertainties.umath_core.wrap_locally_cst_func.wrapped_func",
+    "uncertainties.umath_core.wrapped_fsum",
+    "uncertainties.umath_core.wrapped_fsum.<lambda1>",
+    "uncertainties.umath_core.wrapped_fsum.<lambda2>",
+    "uncertainties.umath_core.wrapped_fsum.<lambda3>",
+    "uncertainties.umath_core.wraps",
+    "uncertainties.unumpy.core.array_derivative",
+    "uncertainties.unumpy.core.array_derivative.<lambda1>",
+    "uncertainties.unumpy.core.define_vectorized_funcs",
+    "uncertainties.unumpy.core.derivative",
+    "uncertainties.unumpy.core.func_with_deriv_to_uncert_func",
+    "uncertainties.unumpy.core.func_with_deriv_to_uncert_func.wrapped_func",
+    "uncertainties.unumpy.core.inv_with_derivatives",
+    "uncertainties.unumpy.core.matrix.__rmul__",
+    "uncertainties.unumpy.core.matrix.getI",
+    "uncertainties.unumpy.core.matrix.nominal_values",
+    "uncertainties.unumpy.core.matrix.std_devs",
+    "uncertainties.unumpy.core.nominal_values",
+    "uncertainties.unumpy.core.pinv",
+    "uncertainties.unumpy.core.pinv_with_derivatives",
+    "uncertainties.unumpy.core.std_devs",
+    "uncertainties.unumpy.core.uarray",
+    "uncertainties.unumpy.core.uarray.<lambda1>",
+    "uncertainties.unumpy.core.umatrix",
+    "uncertainties.unumpy.core.unumpy_to_numpy_matrix",
+    "uncertainties.unumpy.core.wrap_array_func",
+    "uncertainties.unumpy.core.wrap_array_func.wrapped_func",
+    "uncertainties.unumpy.core.wrap_array_func.wrapped_func.<lambda1>"
+  ],
+  "modules": [
+    "uncertainties",
+    "uncertainties.core",
+    "uncertainties.formatting",
+    "uncertainties.ops",
+    "uncertainties.parsing",
+    "uncertainties.umath",
+    "uncertainties.umath_core",
+    "uncertainties.unumpy",
+    "uncertainties.unumpy.core",
+    "uncertainties.unumpy.ulinalg",
+    "uncertainties.version"
+  ],
+  "project": "uncertainties",
+  "pytest": {
+    "config": "pyproject.toml",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 2,
+    "errors": 0,
+    "exit_status": 1,
+    "failed": 1,
+    "passed": 743,
+    "skipped": 1,
+    "xfailed": 1,
+    "xpassed": 0
+  }
+}

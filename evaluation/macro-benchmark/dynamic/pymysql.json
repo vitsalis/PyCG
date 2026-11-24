@@ -1,0 +1,578 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.Warning.__init__"
+    ],
+    "<builtin>.bytes": [
+      "uuid.bytes_"
+    ],
+    "<builtin>.bytes.decode": [
+      "uuid.bytes_.decode"
+    ],
+    "<builtin>.bytes.find": [
+      "uuid.bytes_.find"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.ljust": [
+      "typing.Text.ljust"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.translate": [
+      "typing.Text.translate"
+    ],
+    "_hashlib.openssl_sha256": [
+      "hashlib.sha256"
+    ],
+    "_struct.pack": [
+      "struct.pack"
+    ],
+    "_struct.unpack": [
+      "struct.unpack"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "posix.getpid": [
+      "os.getpid"
+    ],
+    "socket.create_connection": [
+      "ssl.create_connection"
+    ]
+  },
+  "commit": "c990e86083c26493f3285b1e047902994c4b1811",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 7,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "pymysql.DBAPISet.__eq__": [
+      "<builtin>.frozenset.__eq__",
+      "<builtin>.isinstance"
+    ],
+    "pymysql.DBAPISet.__hash__": [
+      "<builtin>.frozenset.__hash__"
+    ],
+    "pymysql.DBAPISet.__ne__": [
+      "<builtin>.isinstance",
+      "pymysql.DBAPISet.__hash__"
+    ],
+    "pymysql._auth": [
+      "functools.partial"
+    ],
+    "pymysql._auth._my_crypt": [
+      "<builtin>.bytearray",
+      "<builtin>.bytes",
+      "<builtin>.len",
+      "<builtin>.range"
+    ],
+    "pymysql._auth._roundtrip": [
+      "pymysql.protocol.MysqlPacket.check_error",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "pymysql._auth.caching_sha2_password_auth": [
+      "pymysql._auth._roundtrip",
+      "pymysql.protocol.MysqlPacket.advance",
+      "pymysql.protocol.MysqlPacket.is_auth_switch_request",
+      "pymysql.protocol.MysqlPacket.is_extra_auth_data",
+      "pymysql.protocol.MysqlPacket.read_uint8"
+    ],
+    "pymysql._auth.scramble_caching_sha2": [
+      "<builtin>.bytearray",
+      "<builtin>.bytes",
+      "<builtin>.len",
+      "<builtin>.range",
+      "_hashlib.HASH.digest",
+      "_hashlib.openssl_sha256"
+    ],
+    "pymysql._auth.scramble_native_password": [
+      "_hashlib.HASH.digest",
+      "_hashlib.HASH.update",
+      "functools.partial.__call__",
+      "pymysql._auth._my_crypt"
+    ],
+    "pymysql.charset": [
+      "<builtin>.property",
+      "pymysql.charset.Charset.__init__",
+      "pymysql.charset.Charsets.__init__",
+      "pymysql.charset.Charsets.add"
+    ],
+    "pymysql.charset.Charsets.by_name": [
+      "<builtin>.dict.get",
+      "<builtin>.str.lower"
+    ],
+    "pymysql.connections": [
+      "<builtin>.property",
+      "getpass.getuser"
+    ],
+    "pymysql.connections.Connection.__init__": [
+      "<builtin>.bool",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.str",
+      "<builtin>.type",
+      "posix.getpid",
+      "pymysql.charset.Charset.encoding",
+      "pymysql.charset.Charsets.by_name",
+      "pymysql.connections.Connection._create_ssl_ctx",
+      "pymysql.connections.Connection.connect"
+    ],
+    "pymysql.connections.Connection._create_ssl_ctx": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance",
+      "ssl.create_default_context"
+    ],
+    "pymysql.connections.Connection._get_auth_plugin_handler": [
+      "<builtin>.bytes.decode",
+      "<builtin>.dict.get",
+      "<builtin>.isinstance"
+    ],
+    "pymysql.connections.Connection._process_auth": [
+      "pymysql._auth.scramble_native_password",
+      "pymysql.protocol.MysqlPacket.check_error",
+      "pymysql.protocol.MysqlPacket.read_all",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "pymysql.connections.Connection._request_authentication": [
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str.encode",
+      "<builtin>.str.split",
+      "_struct.pack",
+      "pymysql._auth.caching_sha2_password_auth",
+      "pymysql._auth.scramble_caching_sha2",
+      "pymysql.charset.Charsets.by_name",
+      "pymysql.connections.Connection._get_auth_plugin_handler",
+      "pymysql.connections.Connection._process_auth",
+      "pymysql.err.Error.__init__",
+      "pymysql.protocol.MysqlPacket.is_auth_switch_request",
+      "pymysql.protocol.MysqlPacket.is_extra_auth_data",
+      "pymysql.protocol.MysqlPacket.is_ok_packet",
+      "pymysql.protocol.MysqlPacket.read_string",
+      "pymysql.protocol.MysqlPacket.read_uint8",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "pymysql.connections.Connection.connect": [
+      "<builtin>.isinstance",
+      "pymysql.connections.Connection._force_close",
+      "pymysql.err.Error.__init__",
+      "socket.create_connection",
+      "traceback.format_exc"
+    ],
+    "pymysql.connections.Connection.set_charset": [
+      "_warnings.warn",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "pymysql.converters": [
+      "<builtin>.chr",
+      "<builtin>.dict.copy",
+      "<builtin>.dict.update",
+      "<builtin>.ord",
+      "<builtin>.range",
+      "<builtin>.type",
+      "re.compile"
+    ],
+    "pymysql.converters.Decimal2Literal": [
+      "<builtin>.str",
+      "<builtin>.str.lower",
+      "decimal.Decimal.is_finite",
+      "pymysql.err.Error.__init__"
+    ],
+    "pymysql.converters._convert_second_fraction": [
+      "<builtin>.int",
+      "<builtin>.str.ljust"
+    ],
+    "pymysql.converters.convert_datetime": [
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.list",
+      "datetime.datetime",
+      "pymysql.converters._convert_second_fraction",
+      "re.Match.groups",
+      "re.Pattern.match"
+    ],
+    "pymysql.converters.convert_time": [
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.list",
+      "datetime.time",
+      "pymysql.converters._convert_second_fraction",
+      "re.Match.groups",
+      "re.Pattern.match"
+    ],
+    "pymysql.converters.convert_timedelta": [
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.list",
+      "datetime.timedelta",
+      "pymysql.converters._convert_second_fraction",
+      "re.Match.groups",
+      "re.Pattern.match"
+    ],
+    "pymysql.converters.escape_string": [
+      "<builtin>.str.translate"
+    ],
+    "pymysql.converters.escape_timedelta": [
+      "<builtin>.abs",
+      "<builtin>.divmod"
+    ],
+    "pymysql.cursors": [
+      "re.compile"
+    ],
+    "pymysql.err": [
+      "pymysql.err._map_error"
+    ],
+    "pymysql.err.Error.__init__": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.super"
+    ],
+    "pymysql.err.raise_mysql_exception": [
+      "<builtin>.bytes.decode",
+      "<builtin>.dict.get",
+      "_struct.unpack",
+      "pymysql.err.Error.__init__"
+    ],
+    "pymysql.optionfile.Parser.__init__": [
+      "configparser.RawConfigParser.__init__"
+    ],
+    "pymysql.optionfile.Parser.__remove_quotes": [
+      "<builtin>.len"
+    ],
+    "pymysql.optionfile.Parser.get": [
+      "configparser.RawConfigParser.get",
+      "pymysql.optionfile.Parser.__remove_quotes",
+      "pymysql.optionfile.Parser.optionxform"
+    ],
+    "pymysql.optionfile.Parser.optionxform": [
+      "<builtin>.str.lower",
+      "<builtin>.str.replace"
+    ],
+    "pymysql.protocol.MysqlPacket.advance": [
+      "<builtin>.len"
+    ],
+    "pymysql.protocol.MysqlPacket.check_error": [
+      "pymysql.protocol.MysqlPacket.is_error_packet"
+    ],
+    "pymysql.protocol.MysqlPacket.is_ok_packet": [
+      "<builtin>.len"
+    ],
+    "pymysql.protocol.MysqlPacket.read_string": [
+      "<builtin>.bytes.find"
+    ]
+  },
+  "executed": [
+    "pymysql.DBAPISet.__eq__",
+    "pymysql.DBAPISet.__hash__",
+    "pymysql.DBAPISet.__ne__",
+    "pymysql._auth._my_crypt",
+    "pymysql._auth._roundtrip",
+    "pymysql._auth.caching_sha2_password_auth",
+    "pymysql._auth.scramble_caching_sha2",
+    "pymysql._auth.scramble_native_password",
+    "pymysql.charset.Charset.__init__",
+    "pymysql.charset.Charset.__repr__",
+    "pymysql.charset.Charset.encoding",
+    "pymysql.charset.Charsets.__init__",
+    "pymysql.charset.Charsets.add",
+    "pymysql.charset.Charsets.by_name",
+    "pymysql.connections.Connection.__init__",
+    "pymysql.connections.Connection._create_ssl_ctx",
+    "pymysql.connections.Connection._force_close",
+    "pymysql.connections.Connection._get_auth_plugin_handler",
+    "pymysql.connections.Connection._process_auth",
+    "pymysql.connections.Connection._request_authentication",
+    "pymysql.connections.Connection.connect",
+    "pymysql.connections.Connection.set_charset",
+    "pymysql.converters.Decimal2Literal",
+    "pymysql.converters._convert_second_fraction",
+    "pymysql.converters.convert_datetime",
+    "pymysql.converters.convert_time",
+    "pymysql.converters.convert_timedelta",
+    "pymysql.converters.escape_string",
+    "pymysql.converters.escape_timedelta",
+    "pymysql.err.Error.__init__",
+    "pymysql.err._map_error",
+    "pymysql.err.raise_mysql_exception",
+    "pymysql.get_client_info",
+    "pymysql.optionfile.Parser.__init__",
+    "pymysql.optionfile.Parser.__remove_quotes",
+    "pymysql.optionfile.Parser.get",
+    "pymysql.optionfile.Parser.optionxform",
+    "pymysql.protocol.MysqlPacket.__init__",
+    "pymysql.protocol.MysqlPacket.advance",
+    "pymysql.protocol.MysqlPacket.check_error",
+    "pymysql.protocol.MysqlPacket.get_all_data",
+    "pymysql.protocol.MysqlPacket.is_auth_switch_request",
+    "pymysql.protocol.MysqlPacket.is_error_packet",
+    "pymysql.protocol.MysqlPacket.is_extra_auth_data",
+    "pymysql.protocol.MysqlPacket.is_ok_packet",
+    "pymysql.protocol.MysqlPacket.read_all",
+    "pymysql.protocol.MysqlPacket.read_string",
+    "pymysql.protocol.MysqlPacket.read_uint8",
+    "pymysql.thread_safe"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "pymysql.Binary",
+    "pymysql.DBAPISet.__eq__",
+    "pymysql.DBAPISet.__hash__",
+    "pymysql.DBAPISet.__ne__",
+    "pymysql._auth._init_nacl",
+    "pymysql._auth._my_crypt",
+    "pymysql._auth._roundtrip",
+    "pymysql._auth._scalar_clamp",
+    "pymysql._auth._xor_password",
+    "pymysql._auth.caching_sha2_password_auth",
+    "pymysql._auth.ed25519_password",
+    "pymysql._auth.scramble_caching_sha2",
+    "pymysql._auth.scramble_native_password",
+    "pymysql._auth.sha256_password_auth",
+    "pymysql._auth.sha2_rsa_encrypt",
+    "pymysql.charset.Charset.__init__",
+    "pymysql.charset.Charset.__repr__",
+    "pymysql.charset.Charset.encoding",
+    "pymysql.charset.Charset.is_binary",
+    "pymysql.charset.Charsets.__init__",
+    "pymysql.charset.Charsets.add",
+    "pymysql.charset.Charsets.by_id",
+    "pymysql.charset.Charsets.by_name",
+    "pymysql.connections.Connection.__enter__",
+    "pymysql.connections.Connection.__exit__",
+    "pymysql.connections.Connection.__init__",
+    "pymysql.connections.Connection.__init__._config",
+    "pymysql.connections.Connection._create_ssl_ctx",
+    "pymysql.connections.Connection._escape_string",
+    "pymysql.connections.Connection._execute_command",
+    "pymysql.connections.Connection._force_close",
+    "pymysql.connections.Connection._get_auth_plugin_handler",
+    "pymysql.connections.Connection._get_server_information",
+    "pymysql.connections.Connection._process_auth",
+    "pymysql.connections.Connection._read_bytes",
+    "pymysql.connections.Connection._read_ok_packet",
+    "pymysql.connections.Connection._read_packet",
+    "pymysql.connections.Connection._read_query_result",
+    "pymysql.connections.Connection._request_authentication",
+    "pymysql.connections.Connection._send_autocommit_mode",
+    "pymysql.connections.Connection._write_bytes",
+    "pymysql.connections.Connection.affected_rows",
+    "pymysql.connections.Connection.autocommit",
+    "pymysql.connections.Connection.begin",
+    "pymysql.connections.Connection.character_set_name",
+    "pymysql.connections.Connection.close",
+    "pymysql.connections.Connection.commit",
+    "pymysql.connections.Connection.connect",
+    "pymysql.connections.Connection.cursor",
+    "pymysql.connections.Connection.escape",
+    "pymysql.connections.Connection.get_autocommit",
+    "pymysql.connections.Connection.get_host_info",
+    "pymysql.connections.Connection.get_proto_info",
+    "pymysql.connections.Connection.get_server_info",
+    "pymysql.connections.Connection.insert_id",
+    "pymysql.connections.Connection.kill",
+    "pymysql.connections.Connection.literal",
+    "pymysql.connections.Connection.next_result",
+    "pymysql.connections.Connection.open",
+    "pymysql.connections.Connection.ping",
+    "pymysql.connections.Connection.query",
+    "pymysql.connections.Connection.rollback",
+    "pymysql.connections.Connection.select_db",
+    "pymysql.connections.Connection.set_character_set",
+    "pymysql.connections.Connection.set_charset",
+    "pymysql.connections.Connection.show_warnings",
+    "pymysql.connections.Connection.thread_id",
+    "pymysql.connections.Connection.write_packet",
+    "pymysql.connections.MySQLResult.__del__",
+    "pymysql.connections.MySQLResult.__init__",
+    "pymysql.connections.MySQLResult._check_packet_is_eof",
+    "pymysql.connections.MySQLResult._finish_unbuffered_query",
+    "pymysql.connections.MySQLResult._get_descriptions",
+    "pymysql.connections.MySQLResult._read_load_local_packet",
+    "pymysql.connections.MySQLResult._read_ok_packet",
+    "pymysql.connections.MySQLResult._read_result_packet",
+    "pymysql.connections.MySQLResult._read_row_from_packet",
+    "pymysql.connections.MySQLResult._read_rowdata_packet",
+    "pymysql.connections.MySQLResult._read_rowdata_packet_unbuffered",
+    "pymysql.connections.MySQLResult.init_unbuffered_query",
+    "pymysql.connections.MySQLResult.read",
+    "pymysql.connections._lenenc_int",
+    "pymysql.connections._pack_int24",
+    "pymysql.connections._send_local_file",
+    "pymysql.converters.Decimal2Literal",
+    "pymysql.converters._convert_second_fraction",
+    "pymysql.converters.convert_date",
+    "pymysql.converters.convert_datetime",
+    "pymysql.converters.convert_time",
+    "pymysql.converters.convert_timedelta",
+    "pymysql.converters.escape_None",
+    "pymysql.converters.escape_bool",
+    "pymysql.converters.escape_bytes",
+    "pymysql.converters.escape_date",
+    "pymysql.converters.escape_datetime",
+    "pymysql.converters.escape_float",
+    "pymysql.converters.escape_int",
+    "pymysql.converters.escape_item",
+    "pymysql.converters.escape_not_supported",
+    "pymysql.converters.escape_sequence",
+    "pymysql.converters.escape_set",
+    "pymysql.converters.escape_str",
+    "pymysql.converters.escape_string",
+    "pymysql.converters.escape_struct_time",
+    "pymysql.converters.escape_time",
+    "pymysql.converters.escape_timedelta",
+    "pymysql.converters.through",
+    "pymysql.cursors.Cursor.__enter__",
+    "pymysql.cursors.Cursor.__exit__",
+    "pymysql.cursors.Cursor.__init__",
+    "pymysql.cursors.Cursor.__iter__",
+    "pymysql.cursors.Cursor.__next__",
+    "pymysql.cursors.Cursor._check_executed",
+    "pymysql.cursors.Cursor._clear_result",
+    "pymysql.cursors.Cursor._conv_row",
+    "pymysql.cursors.Cursor._do_execute_many",
+    "pymysql.cursors.Cursor._do_get_result",
+    "pymysql.cursors.Cursor._get_db",
+    "pymysql.cursors.Cursor._mogrify",
+    "pymysql.cursors.Cursor._nextset",
+    "pymysql.cursors.Cursor._query",
+    "pymysql.cursors.Cursor.callproc",
+    "pymysql.cursors.Cursor.close",
+    "pymysql.cursors.Cursor.execute",
+    "pymysql.cursors.Cursor.executemany",
+    "pymysql.cursors.Cursor.fetchall",
+    "pymysql.cursors.Cursor.fetchmany",
+    "pymysql.cursors.Cursor.fetchone",
+    "pymysql.cursors.Cursor.mogrify",
+    "pymysql.cursors.Cursor.nextset",
+    "pymysql.cursors.Cursor.scroll",
+    "pymysql.cursors.Cursor.setinputsizes",
+    "pymysql.cursors.Cursor.setoutputsizes",
+    "pymysql.cursors.DictCursorMixin._conv_row",
+    "pymysql.cursors.DictCursorMixin._do_get_result",
+    "pymysql.cursors.SSCursor._conv_row",
+    "pymysql.cursors.SSCursor._query",
+    "pymysql.cursors.SSCursor.close",
+    "pymysql.cursors.SSCursor.fetchall",
+    "pymysql.cursors.SSCursor.fetchall_unbuffered",
+    "pymysql.cursors.SSCursor.fetchmany",
+    "pymysql.cursors.SSCursor.fetchone",
+    "pymysql.cursors.SSCursor.nextset",
+    "pymysql.cursors.SSCursor.read_next",
+    "pymysql.cursors.SSCursor.scroll",
+    "pymysql.cursors._backquote_escape",
+    "pymysql.err.Error.__init__",
+    "pymysql.err._map_error",
+    "pymysql.err.raise_mysql_exception",
+    "pymysql.get_client_info",
+    "pymysql.install_as_MySQLdb",
+    "pymysql.optionfile.Parser.__init__",
+    "pymysql.optionfile.Parser.__remove_quotes",
+    "pymysql.optionfile.Parser.get",
+    "pymysql.optionfile.Parser.optionxform",
+    "pymysql.protocol.EOFPacketWrapper.__getattr__",
+    "pymysql.protocol.EOFPacketWrapper.__init__",
+    "pymysql.protocol.FieldDescriptorPacket.__init__",
+    "pymysql.protocol.FieldDescriptorPacket.__str__",
+    "pymysql.protocol.FieldDescriptorPacket._parse_field_descriptor",
+    "pymysql.protocol.FieldDescriptorPacket.description",
+    "pymysql.protocol.FieldDescriptorPacket.get_column_length",
+    "pymysql.protocol.LoadLocalPacketWrapper.__getattr__",
+    "pymysql.protocol.LoadLocalPacketWrapper.__init__",
+    "pymysql.protocol.MysqlPacket.__init__",
+    "pymysql.protocol.MysqlPacket.advance",
+    "pymysql.protocol.MysqlPacket.check_error",
+    "pymysql.protocol.MysqlPacket.dump",
+    "pymysql.protocol.MysqlPacket.get_all_data",
+    "pymysql.protocol.MysqlPacket.get_bytes",
+    "pymysql.protocol.MysqlPacket.is_auth_switch_request",
+    "pymysql.protocol.MysqlPacket.is_eof_packet",
+    "pymysql.protocol.MysqlPacket.is_error_packet",
+    "pymysql.protocol.MysqlPacket.is_extra_auth_data",
+    "pymysql.protocol.MysqlPacket.is_load_local_packet",
+    "pymysql.protocol.MysqlPacket.is_ok_packet",
+    "pymysql.protocol.MysqlPacket.is_resultset_packet",
+    "pymysql.protocol.MysqlPacket.raise_for_error",
+    "pymysql.protocol.MysqlPacket.read",
+    "pymysql.protocol.MysqlPacket.read_all",
+    "pymysql.protocol.MysqlPacket.read_length_coded_string",
+    "pymysql.protocol.MysqlPacket.read_length_encoded_integer",
+    "pymysql.protocol.MysqlPacket.read_string",
+    "pymysql.protocol.MysqlPacket.read_struct",
+    "pymysql.protocol.MysqlPacket.read_uint16",
+    "pymysql.protocol.MysqlPacket.read_uint24",
+    "pymysql.protocol.MysqlPacket.read_uint32",
+    "pymysql.protocol.MysqlPacket.read_uint64",
+    "pymysql.protocol.MysqlPacket.read_uint8",
+    "pymysql.protocol.MysqlPacket.rewind",
+    "pymysql.protocol.OKPacketWrapper.__getattr__",
+    "pymysql.protocol.OKPacketWrapper.__init__",
+    "pymysql.protocol.dump_packet",
+    "pymysql.protocol.dump_packet.printable",
+    "pymysql.thread_safe",
+    "pymysql.times.DateFromTicks",
+    "pymysql.times.TimeFromTicks",
+    "pymysql.times.TimestampFromTicks"
+  ],
+  "modules": [
+    "pymysql",
+    "pymysql._auth",
+    "pymysql.charset",
+    "pymysql.connections",
+    "pymysql.constants",
+    "pymysql.constants.CLIENT",
+    "pymysql.constants.COMMAND",
+    "pymysql.constants.CR",
+    "pymysql.constants.ER",
+    "pymysql.constants.FIELD_TYPE",
+    "pymysql.constants.SERVER_STATUS",
+    "pymysql.converters",
+    "pymysql.cursors",
+    "pymysql.err",
+    "pymysql.optionfile",
+    "pymysql.protocol",
+    "pymysql.times"
+  ],
+  "project": "pymysql",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 33,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

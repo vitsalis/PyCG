@@ -1,0 +1,514 @@
+{
+  "edges": {
+    "segno.QRCode.__getattr__": {
+      "functools.partial": [
+        "segno 962:31 call  partial(plugin, self)"
+      ],
+      "importlib.metadata.EntryPoint.load": [
+        "segno 961:33 call  ep.load()"
+      ],
+      "importlib_metadata.entry_points": [
+        "segno 959:44 call  metadata.entry_points(group='segno.plugin.converter', nam..."
+      ]
+    },
+    "segno.QRCode.show": {
+      "os.unlink": [
+        "segno 428:22 call  os.unlink(f.name)"
+      ],
+      "segno.QRCode.save": [
+        "segno 425:22 call  self.save(f, scale=scale, dark=dark, light=light, border=..."
+      ],
+      "segno.QRCode.show.delete_file": [
+        "segno 434:20 call  t.start()"
+      ],
+      "tempfile.NamedTemporaryFile": [
+        "segno 423:40 call  tempfile.NamedTemporaryFile('wb', suffix='.png', delete=F..."
+      ],
+      "tempfile._TemporaryFileWrapper.close": [
+        "segno 427:20 call  f.close()",
+        "segno 430:16 call  f.close()"
+      ],
+      "threading.Thread": [
+        "segno 433:33 call  threading.Thread(target=delete_file, args=(f.name,))"
+      ],
+      "threading.Thread.start": [
+        "segno 434:20 call  t.start()"
+      ],
+      "urllib.parse.urljoin": [
+        "segno 431:40 call  urljoin('file:', pathname2url(f.name))"
+      ],
+      "urllib.request.pathname2url": [
+        "segno 431:62 call  pathname2url(f.name)"
+      ],
+      "webbrowser.open_new_tab": [
+        "segno 431:32 call  webbrowser.open_new_tab(urljoin('file:', pathname2url(f.n..."
+      ]
+    },
+    "segno.QRCode.show.delete_file": {
+      "os.unlink": [
+        "segno 419:26 call  os.unlink(name)"
+      ],
+      "time.sleep": [
+        "segno 417:23 call  time.sleep(delete_after)"
+      ]
+    },
+    "segno.QRCode.terminal": {
+      "segno.writers.write_terminal_win": [
+        "segno 537:43 call  writers.write_terminal_win(self.matrix, self._matrix_size..."
+      ]
+    },
+    "segno.QRCodeSequence.__getattr__": {
+      "segno.QRCode.__getattr__": [
+        "segno 1016:27 call  getattr(self[0], item)"
+      ],
+      "segno.QRCode.mode": [
+        "segno 1016:27 call  getattr(self[0], item)"
+      ]
+    },
+    "segno.cli": {
+      "segno.cli.main": [
+        "segno.cli 299:9 call  main()"
+      ]
+    },
+    "segno.cli.make_parser": {
+      "argparse._ArgumentGroup.add_argument": [
+        "segno.cli 108:29 call  color_group.add_argument('--dark', help='Color of the dar...",
+        "segno.cli 115:29 call  color_group.add_argument('--light', help='Color of the li...",
+        "segno.cli 118:29 call  color_group.add_argument('--finder-dark', help='Sets the ...",
+        "segno.cli 119:29 call  color_group.add_argument('--finder-light', help='Sets the...",
+        "segno.cli 120:29 call  color_group.add_argument('--separator', help='Sets the co...",
+        "segno.cli 121:29 call  color_group.add_argument('--data-dark', help='Sets the co...",
+        "segno.cli 122:29 call  color_group.add_argument('--data-light', help='Sets the c...",
+        "segno.cli 123:29 call  color_group.add_argument('--timing-dark', help='Sets the ...",
+        "segno.cli 124:29 call  color_group.add_argument('--timing-light', help='Sets the...",
+        "segno.cli 125:29 call  color_group.add_argument('--align-dark', help='Sets the c...",
+        "segno.cli 127:29 call  color_group.add_argument('--align-light', help='Sets the ...",
+        "segno.cli 129:29 call  color_group.add_argument('--quiet-zone', help='Sets the c...",
+        "segno.cli 130:29 call  color_group.add_argument('--dark-module', help='Sets the ...",
+        "segno.cli 131:29 call  color_group.add_argument('--format-dark', help='Sets the ...",
+        "segno.cli 132:29 call  color_group.add_argument('--format-light', help='Sets the...",
+        "segno.cli 133:29 call  color_group.add_argument('--version-dark', help='Sets the...",
+        "segno.cli 134:29 call  color_group.add_argument('--version-light', help='Sets th...",
+        "segno.cli 138:27 call  svg_group.add_argument('--no-classes', help='Omits the (d...",
+        "segno.cli 140:27 call  svg_group.add_argument('--no-xmldecl', help='Omits the XM...",
+        "segno.cli 143:27 call  svg_group.add_argument('--no-namespace', help='Indicates ...",
+        "segno.cli 147:27 call  svg_group.add_argument('--no-newline', help='Indicates th...",
+        "segno.cli 150:27 call  svg_group.add_argument('--title', help='Specifies the tit...",
+        "segno.cli 151:27 call  svg_group.add_argument('--desc', help='Specifies the desc...",
+        "segno.cli 152:27 call  svg_group.add_argument('--svgid', help='Indicates the ID ...",
+        "segno.cli 153:27 call  svg_group.add_argument('--svgclass', help='Indicates the ...",
+        "segno.cli 155:27 call  svg_group.add_argument('--lineclass', help='Indicates the...",
+        "segno.cli 157:27 call  svg_group.add_argument('--no-size', help='Indicates that ...",
+        "segno.cli 161:27 call  svg_group.add_argument('--unit', help='Indicates SVG coor...",
+        "segno.cli 162:27 call  svg_group.add_argument('--svgversion', help='Indicates th...",
+        "segno.cli 164:27 call  svg_group.add_argument('--svgencoding', help='Specifies t...",
+        "segno.cli 166:27 call  svg_group.add_argument('--draw-transparent', help='Indica...",
+        "segno.cli 170:27 call  png_group.add_argument('--dpi', help='Sets the DPI value ...",
+        "segno.cli 174:32 call  terminal_group.add_argument('--compact', help='Indicates ..."
+      ],
+      "argparse._MutuallyExclusiveGroup.add_argument": [
+        "segno.cli 177:55 call  parser.add_mutually_exclusive_group().add_argument('--ver..."
+      ]
+    },
+    "segno.encoder.Segments.add_segment": {
+      "segno.encoder._Segment.__new__": [
+        "segno.encoder 1571:35 call  _Segment(prev_seg.bits + segment.bits, prev_seg.char_coun..."
+      ]
+    },
+    "segno.encoder.get_eci_assignment_number": {
+      "<builtin>.ValueError": [
+        "segno.encoder 1489:25 call  ValueError(f'Unknown ECI assignment number for encoding \"..."
+      ]
+    },
+    "segno.encoder.is_alphanumeric": {
+      "_sre.SRE_Pattern.match": [
+        "segno.encoder 1319:39 call  _ALPHANUMERIC_PATTERN.match(data)"
+      ]
+    },
+    "segno.encoder.make_segment": {
+      "<builtin>.ValueError": [
+        "segno.encoder 1029:29 call  ValueError(f'The provided mode \"{get_mode_name(segment_mo...",
+        "segno.encoder 1083:33 call  ValueError(f'Invalid Hanzi bytes: {code}')",
+        "segno.encoder 1101:33 call  ValueError(f'Invalid Kanji bytes: {code}')"
+      ],
+      "segno.encoder.get_mode_name": [
+        "segno.encoder 1029:65 call  get_mode_name(segment_mode)",
+        "segno.encoder 1031:56 call  get_mode_name(guessed_mode)"
+      ]
+    },
+    "segno.helpers.make_vcard_data": {
+      "_sre.SRE_Pattern.match": [
+        "segno.helpers 329:69 call  _looks_like_datetime(birthday)",
+        "segno.helpers 345:64 call  _looks_like_datetime(rev)"
+      ]
+    },
+    "segno.writers.writable": {
+      "encodings.ascii.StreamWriter": [
+        "segno.writers 66:43 call  codecs.getwriter(encoding)(file_or_path)"
+      ]
+    },
+    "segno.writers.write_eps": {
+      "segno.writers.writable": [
+        "segno.writers 415:18 call  writable(out, 'wt')"
+      ]
+    },
+    "segno.writers.write_pam": {
+      "segno.writers.writable": [
+        "segno.writers 828:18 call  writable(out, 'wb')"
+      ]
+    },
+    "segno.writers.write_pbm": {
+      "segno.writers.writable": [
+        "segno.writers 756:18 call  writable(out, 'wb')"
+      ]
+    },
+    "segno.writers.write_pdf": {
+      "segno.writers.writable": [
+        "segno.writers 684:18 call  writable(out, 'wb')"
+      ]
+    },
+    "segno.writers.write_png": {
+      "segno.writers.writable": [
+        "segno.writers 596:18 call  writable(out, 'wb')"
+      ]
+    },
+    "segno.writers.write_ppm": {
+      "segno.writers.writable": [
+        "segno.writers 864:18 call  writable(out, 'wb')"
+      ]
+    },
+    "segno.writers.write_svg": {
+      "encodings.ascii.StreamWriter.write": [
+        "segno.writers 270:16 call  f.write(svg)"
+      ],
+      "segno.writers.writable": [
+        "segno.writers 269:18 call  writable(out, 'wt', encoding=encoding)"
+      ]
+    },
+    "segno.writers.write_svg_debug": {
+      "<builtin>.dict.get": [
+        "segno.writers 360:39 call  clr_mapping.get(bit, fallback_color)"
+      ],
+      "<builtin>.dict.update": [
+        "segno.writers 342:27 call  clr_mapping.update(colormap)"
+      ],
+      "<builtin>.list.append": [
+        "segno.writers 359:34 call  legend.append((x, y, bit))"
+      ],
+      "<builtin>.range": [
+        "segno.writers 353:23 call  range(matrix_height)",
+        "segno.writers 355:27 call  range(matrix_width)"
+      ],
+      "contextlib.contextmanager.helper": [
+        "segno.writers 345:18 call  writable(out, 'wt', encoding='utf-8')"
+      ],
+      "encodings.utf_8.StreamWriter.write": [
+        "segno.writers 348:14 call  write('<?xml version=\"1.0\" encoding=\"utf-8\"?>\\n')",
+        "segno.writers 349:14 call  write(f'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"...",
+        "segno.writers 350:14 call  write('<style type=\"text/css\"><![CDATA[ text { font-size:...",
+        "segno.writers 352:14 call  write(f'<g transform=\"scale({scale})\">')",
+        "segno.writers 361:22 call  write(f'<rect x=\"{x}\" y=\"{y}\" width=\"1\" height=\"1\" fill=\"...",
+        "segno.writers 364:18 call  write(f'<text x=\"{x + .2}\" y=\"{y + .9}\">{val}</text>')",
+        "segno.writers 365:14 call  write('</g></svg>\\n')"
+      ],
+      "io.TextIOWrapper.write": [
+        "segno.writers 348:14 call  write('<?xml version=\"1.0\" encoding=\"utf-8\"?>\\n')",
+        "segno.writers 349:14 call  write(f'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"...",
+        "segno.writers 350:14 call  write('<style type=\"text/css\"><![CDATA[ text { font-size:...",
+        "segno.writers 352:14 call  write(f'<g transform=\"scale({scale})\">')",
+        "segno.writers 361:22 call  write(f'<rect x=\"{x}\" y=\"{y}\" width=\"1\" height=\"1\" fill=\"...",
+        "segno.writers 364:18 call  write(f'<text x=\"{x + .2}\" y=\"{y + .9}\">{val}</text>')",
+        "segno.writers 365:14 call  write('</g></svg>\\n')"
+      ],
+      "segno.writers._valid_width_height_and_border": [
+        "segno.writers 343:59 call  _valid_width_height_and_border(matrix_size, scale, border)"
+      ],
+      "segno.writers.writable": [
+        "segno.writers 345:18 call  writable(out, 'wt', encoding='utf-8')"
+      ]
+    },
+    "segno.writers.write_terminal": {
+      "segno.writers.writable": [
+        "segno.writers 1002:18 call  writable(out, 'wt')"
+      ]
+    },
+    "segno.writers.write_terminal_compact": {
+      "segno.writers.writable": [
+        "segno.writers 1085:18 call  writable(out, 'wt')"
+      ]
+    },
+    "segno.writers.write_terminal_win": {
+      "<builtin>.OSError": [
+        "segno.writers 1043:22 call  OSError('Cannot find information about the console. ' 'No..."
+      ],
+      "ctypes.CDLL.__init__._FuncPtr.__call__": [
+        "segno.writers 1039:50 call  ctypes.windll.kernel32.GetStdHandle(-11)",
+        "segno.writers 1041:60 call  ctypes.windll.kernel32.GetConsoleScreenBufferInfo(std_out..."
+      ],
+      "ctypes.create_string_buffer": [
+        "segno.writers 1040:39 call  ctypes.create_string_buffer(22)"
+      ],
+      "functools.partial": [
+        "segno.writers 1046:24 call  partial(ctypes.windll.kernel32.SetConsoleTextAttribute, s..."
+      ],
+      "functools.partial.__call__": [
+        "segno.writers 1056:30 call  set_color(colours[prev_bit])",
+        "segno.writers 1061:22 call  set_color(colours[prev_bit])",
+        "segno.writers 1063:18 call  set_color(default_color)"
+      ],
+      "io.TextIOWrapper.write": [
+        "segno.writers 1057:26 call  write(' ' * cnt)",
+        "segno.writers 1062:18 call  write(' ' * cnt)",
+        "segno.writers 1064:14 call  write('\\n')"
+      ],
+      "segno.utils.matrix_iter": [
+        "segno.writers 1048:27 call  matrix_iter(matrix, matrix_size, scale=1, border=border)"
+      ],
+      "struct.unpack": [
+        "segno.writers 1045:34 call  struct.unpack(b'hhhhHhhhhhh', csbi.raw)"
+      ]
+    },
+    "segno.writers.write_tex": {
+      "segno.writers.writable": [
+        "segno.writers 972:18 call  writable(out, 'wt')"
+      ]
+    },
+    "segno.writers.write_txt": {
+      "segno.writers.writable": [
+        "segno.writers 724:18 call  writable(out, 'wt')"
+      ]
+    },
+    "segno.writers.write_xbm": {
+      "segno.writers.writable": [
+        "segno.writers 928:18 call  writable(out, 'wt')"
+      ]
+    },
+    "segno.writers.write_xpm": {
+      "segno.writers.writable": [
+        "segno.writers 897:18 call  writable(out, 'wt')"
+      ]
+    }
+  },
+  "notes": {
+    "segno 1016:27 call  getattr(self[0], item)": [
+      "the proxy forwards a name that tuple lacks to the one QRCode (judgement J3): the six documented properties of QRCode (the tests read version, error, designator, default_border_size and is_micro through a sequence), and the documented plugin names to_<name> (docs/plugins.rst, docs/artistic-qrcodes.rst), which run QRCode.__getattr__ (B3, forwarded attribute names)"
+    ],
+    "segno 427:20 call  f.close()": [
+      "f is the tempfile._TemporaryFileWrapper that NamedTemporaryFile returns on every platform"
+    ],
+    "segno 430:16 call  f.close()": [
+      "f is the tempfile._TemporaryFileWrapper that NamedTemporaryFile returns on every platform"
+    ],
+    "segno 434:20 call  t.start()": [
+      "start runs Thread.run in a new thread, which calls the target delete_file"
+    ],
+    "segno 537:43 call  writers.write_terminal_win(self.matrix, self._matrix_size...": [
+      "the branch runs on Windows (sys.platform == 'win32'); the package declares \"OS Independent\""
+    ],
+    "segno 959:44 call  metadata.entry_points(group='segno.plugin.converter', nam...": [
+      "both sides of the optional import run (judgement J2): importlib_metadata is a declared requirement for Python < 3.10 and is not installed for the trace, so it is named as a missing module; importlib.metadata is the standard library from 3.8"
+    ],
+    "segno 961:33 call  ep.load()": [
+      "ep is an item of the EntryPoints that importlib.metadata.entry_points returns; an item of the missing module's result has no stub path, so its load has no name (README, Missing libraries)"
+    ],
+    "segno.cli 108:29 call  color_group.add_argument('--dark', help='Color of the dar...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 115:29 call  color_group.add_argument('--light', help='Color of the li...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 118:29 call  color_group.add_argument('--finder-dark', help='Sets the ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 119:29 call  color_group.add_argument('--finder-light', help='Sets the...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 120:29 call  color_group.add_argument('--separator', help='Sets the co...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 121:29 call  color_group.add_argument('--data-dark', help='Sets the co...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 122:29 call  color_group.add_argument('--data-light', help='Sets the c...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 123:29 call  color_group.add_argument('--timing-dark', help='Sets the ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 124:29 call  color_group.add_argument('--timing-light', help='Sets the...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 125:29 call  color_group.add_argument('--align-dark', help='Sets the c...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 127:29 call  color_group.add_argument('--align-light', help='Sets the ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 129:29 call  color_group.add_argument('--quiet-zone', help='Sets the c...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 130:29 call  color_group.add_argument('--dark-module', help='Sets the ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 131:29 call  color_group.add_argument('--format-dark', help='Sets the ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 132:29 call  color_group.add_argument('--format-light', help='Sets the...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 133:29 call  color_group.add_argument('--version-dark', help='Sets the...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 134:29 call  color_group.add_argument('--version-light', help='Sets th...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 138:27 call  svg_group.add_argument('--no-classes', help='Omits the (d...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 140:27 call  svg_group.add_argument('--no-xmldecl', help='Omits the XM...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 143:27 call  svg_group.add_argument('--no-namespace', help='Indicates ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 147:27 call  svg_group.add_argument('--no-newline', help='Indicates th...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 150:27 call  svg_group.add_argument('--title', help='Specifies the tit...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 151:27 call  svg_group.add_argument('--desc', help='Specifies the desc...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 152:27 call  svg_group.add_argument('--svgid', help='Indicates the ID ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 153:27 call  svg_group.add_argument('--svgclass', help='Indicates the ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 155:27 call  svg_group.add_argument('--lineclass', help='Indicates the...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 157:27 call  svg_group.add_argument('--no-size', help='Indicates that ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 161:27 call  svg_group.add_argument('--unit', help='Indicates SVG coor...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 162:27 call  svg_group.add_argument('--svgversion', help='Indicates th...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 164:27 call  svg_group.add_argument('--svgencoding', help='Specifies t...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 166:27 call  svg_group.add_argument('--draw-transparent', help='Indica...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 170:27 call  png_group.add_argument('--dpi', help='Sets the DPI value ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.cli 174:32 call  terminal_group.add_argument('--compact', help='Indicates ...": [
+      "the receiver is the argparse._ArgumentGroup that add_argument_group returns (named by the class of the receiver, which inherits the method)"
+    ],
+    "segno.helpers 329:69 call  _looks_like_datetime(birthday)": [
+      "_looks_like_datetime is the bound match method of the compiled pattern of line 226"
+    ],
+    "segno.helpers 345:64 call  _looks_like_datetime(rev)": [
+      "_looks_like_datetime is the bound match method of the compiled pattern of line 226"
+    ],
+    "segno.writers 1002:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 1039:50 call  ctypes.windll.kernel32.GetStdHandle(-11)": [
+      "Windows only. ctypes.windll.kernel32 is a ctypes.WinDLL; its functions are instances of the class _FuncPtr that CDLL.__init__ defines, and the call is its __call__ (Sublist3r precedent)"
+    ],
+    "segno.writers 1041:60 call  ctypes.windll.kernel32.GetConsoleScreenBufferInfo(std_out...": [
+      "Windows only. ctypes.windll.kernel32 is a ctypes.WinDLL; its functions are instances of the class _FuncPtr that CDLL.__init__ defines, and the call is its __call__ (Sublist3r precedent)"
+    ],
+    "segno.writers 1056:30 call  set_color(colours[prev_bit])": [
+      "set_color is the functools.partial of the foreign function SetConsoleTextAttribute (line 1046); partial calls it (library code calling library code: no edge)"
+    ],
+    "segno.writers 1057:26 call  write(' ' * cnt)": [
+      "write is sys.stdout.write (line 1038); the default sys.stdout is an io.TextIOWrapper"
+    ],
+    "segno.writers 1061:22 call  set_color(colours[prev_bit])": [
+      "set_color is the functools.partial of the foreign function SetConsoleTextAttribute (line 1046); partial calls it (library code calling library code: no edge)"
+    ],
+    "segno.writers 1062:18 call  write(' ' * cnt)": [
+      "write is sys.stdout.write (line 1038); the default sys.stdout is an io.TextIOWrapper"
+    ],
+    "segno.writers 1063:18 call  set_color(default_color)": [
+      "set_color is the functools.partial of the foreign function SetConsoleTextAttribute (line 1046); partial calls it (library code calling library code: no edge)"
+    ],
+    "segno.writers 1064:14 call  write('\\n')": [
+      "write is sys.stdout.write (line 1038); the default sys.stdout is an io.TextIOWrapper"
+    ],
+    "segno.writers 1085:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 269:18 call  writable(out, 'wt', encoding=encoding)": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 270:16 call  f.write(svg)": [
+      "writable gets encoding (never None here, line 182): for a file name it opens an io.TextIOWrapper; for a stream (the package's io.BytesIO of svg_inline or as_svg_data_uri, the gzip.GzipFile of an .svgz name, a client stream) it wraps it in the StreamWriter of the codec (utf-8 by default, ISO-8859-1 in the tests, ascii in the tested cli configuration; 66:43)"
+    ],
+    "segno.writers 345:18 call  writable(out, 'wt', encoding='utf-8')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 348:14 call  write('<?xml version=\"1.0\" encoding=\"utf-8\"?>\\n')": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 349:14 call  write(f'<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"...": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 350:14 call  write('<style type=\"text/css\"><![CDATA[ text { font-size:...": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 352:14 call  write(f'<g transform=\"scale({scale})\">')": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 361:22 call  write(f'<rect x=\"{x}\" y=\"{y}\" width=\"1\" height=\"1\" fill=\"...": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 364:18 call  write(f'<text x=\"{x + .2}\" y=\"{y + .9}\">{val}</text>')": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 365:14 call  write('</g></svg>\\n')": [
+      "write is f.write (line 347); writable opens a file name as io.TextIOWrapper with utf-8, and wraps a stream in the utf-8 StreamWriter"
+    ],
+    "segno.writers 415:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 596:18 call  writable(out, 'wb')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 66:43 call  codecs.getwriter(encoding)(file_or_path)": [
+      "the class that codecs.getwriter returns for the encoding of write_svg: its default \"utf-8\" (also the cli default), the \"ISO-8859-1\" that the tests pass (tests/test_svg.py:373, tests/test_issue82_svg_inline.py:323), or the \"ascii\" of the tested cli configuration --svgencoding=ascii (tests/test_cli.py:394-396; with an .svgz output, writers.save passes a gzip stream; judgement J4, Codex round 1); another codec name is the client's choice; write_svg_debug passes \"utf-8\""
+    ],
+    "segno.writers 684:18 call  writable(out, 'wb')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 724:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 756:18 call  writable(out, 'wb')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 828:18 call  writable(out, 'wb')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 864:18 call  writable(out, 'wb')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 897:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 928:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "segno.writers 972:18 call  writable(out, 'wt')": [
+      "writable is decorated with @contextmanager (line 47): the call runs contextlib's helper, which calls the generator function back"
+    ]
+  },
+  "trace": "dynamic/segno.json"
+}

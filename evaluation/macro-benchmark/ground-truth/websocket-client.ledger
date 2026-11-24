@@ -1,0 +1,2182 @@
+# Call-site ledger of websocket-client at 12225f5ce6e27536be3b0da85fd763ed75581bcc.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# websocket-client.md shows how this ledger applies them. Sockets: the
+# package's own sockets are socket.socket (_http._open_socket) and
+# ssl.SSLSocket (ssl.SSLContext.wrap_socket in _http._wrap_sni_socket). The
+# client's pre-initialised socket (the `socket` option) is socket.socket by
+# its annotation and documentation (B4; websocket-client.md J3). The socket that python-socks returns
+# (_http._start_proxied_socket) is a value of a missing module: see
+# websocket-client.md, J3.
+default reject websocket._core.WebSocket.__iter__, websocket._core.WebSocket.__next__: no WebSocket object is iterated, unpacked, searched with `in` or passed to a builtin that iterates (sum, any, sorted, filter, map, list, join) at this site; the iterated values are lists, tuples, dicts and their views, strs, bytes, generator expressions, addrinfo lists, cookie values or client collections (sockopt, no_proxy, subprotocols, header), never the WebSocket that create_connection or WebSocketApp makes (WebSocket.next accepts __next__ explicitly)
+default reject websocket._abnf.ABNF.__str__: no formatted, %-converted or str()-converted value at this site is an ABNF frame; the values are ints, strs, bytes reprs, exceptions, lists, dicts, None or client values (the explicit frame.__str__() calls in WebSocket.send_frame and recv_data_frame, and the f-strings of run_forever.handleDisconnect at _app.py:583 and 591, J5, accept it)
+default reject websocket._cookiejar.SimpleCookieJar.get: the receiver of this .get call is a dict (options, sslopt, headers, kwargs), os.environ, a http.cookies.Morsel, a client object or ABNF.OPCODE_MAP, never a SimpleCookieJar; the one SimpleCookieJar receiver is the module-level CookieJar in _handshake._get_handshake_headers, which accepts it
+
+== websocket._abnf
+
+[websocket._abnf]
+211:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+219:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+283:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[websocket._abnf._mask]
+38:45 call  XorMaskerSimple(mask_value)
+    -> wsaccel.xormask.XorMaskerSimple
+    note: both sides of the optional import of wsaccel run (README "Judgements"); wsaccel is not installed, so the names are those of the missing module (websocket-client.md J1)
+38:65 call  XorMaskerSimple(mask_value).process(data_value)
+    -> wsaccel.xormask.XorMaskerSimple.process
+    note: a direct call chain on a missing-module value keeps its access path
+46:22 call  len(data_value)
+    -> <builtin>.len
+47:40 call  int.from_bytes(data_value, native_byteorder)
+    -> <builtin>.int.from_bytes
+48:40 call  int.from_bytes( mask_value * (datalen // 4) + mask_value[...
+    -> <builtin>.int.from_bytes
+51:58 call  (int_data_value ^ int_mask_value).to_bytes(datalen, nativ...
+    -> <builtin>.int.to_bytes
+
+[websocket._abnf.ABNF.validate]
+181:45 call  WebSocketProtocolException("rsv is not implemented, yet")
+    -> <builtin>.Exception.__init__
+184:45 call  WebSocketProtocolException(f"Invalid opcode {self.opcode!...
+    -> <builtin>.Exception.__init__
+187:45 call  WebSocketProtocolException("Invalid ping frame.")
+    -> <builtin>.Exception.__init__
+190:30 call  len(self.data)
+    -> <builtin>.len
+194:49 call  WebSocketProtocolException("Invalid close frame.")
+    -> <builtin>.Exception.__init__
+198:38 call  validate_utf8(self.data[2:])
+    -> websocket._utils.validate_utf8
+200:49 call  WebSocketProtocolException("Invalid close frame.")
+    -> <builtin>.Exception.__init__
+204:30 call  isinstance(self.data, bytes)
+    -> <builtin>.isinstance
+205:42 call  self.data[:2].encode("utf-8")
+    -> <builtin>.str.encode
+    note: data is a str or bytes (annotation of ABNF.__init__); the isinstance test leaves a str here
+207:33 call  struct.unpack("!H", data_bytes)
+    -> struct.unpack
+208:47 call  self._is_valid_close_status(code)
+    -> websocket._abnf.ABNF._is_valid_close_status
+209:49 call  WebSocketProtocolException(f"Invalid close opcode {code!r}")
+    -> <builtin>.Exception.__init__
+
+[websocket._abnf.ABNF.__str__]
+216:44 call  isinstance(self.data, str)
+    -> <builtin>.isinstance
+216:70 call  repr(self.data)
+    -> <builtin>.repr
+    note: self.data is bytes here (str or bytes by the annotation); bytes.__repr__ is outside the package
+
+[websocket._abnf.ABNF.create_frame]
+235:53 call  isinstance(data, str)
+    -> <builtin>.isinstance
+236:31 call  data.encode("utf-8")
+    -> <builtin>.str.encode
+238:20 call  ABNF(fin, 0, 0, 0, opcode, 1, data)
+    -> websocket._abnf.ABNF.__init__
+
+[websocket._abnf.ABNF.format]
+244:15 call  any(x not in (0, 1) for x in [self.fin, self.rsv1, self.r...
+    -> <builtin>.any
+245:29 call  ValueError("not 0 or 1")
+    -> <builtin>.ValueError
+247:29 call  ValueError("Invalid OPCODE")
+    -> <builtin>.ValueError
+248:21 call  len(self.data)
+    -> <builtin>.len
+250:29 call  ValueError("data is too long")
+    note: unreachable: length comes from len() (line 248), which returns at most sys.maxsize = 2**63 - 1 on every admitted CPython platform (a larger __len__ result raises OverflowError first), so length >= ABNF.LENGTH_63 = 2**63 never holds; no edge (Codex round 1)
+252:27 call  chr( self.fin << 7 | self.rsv1 << 6 | self.rsv2 << 5 | se...
+    -> <builtin>.chr
+258:17 call  chr( self.fin << 7 | self.rsv1 << 6 | self.rsv2 << 5 | se...
+    -> <builtin>.str.encode
+260:32 call  chr(self.mask_value << 7 | length)
+    -> <builtin>.chr
+260:70 call  chr(self.mask_value << 7 | length).encode("latin-1")
+    -> <builtin>.str.encode
+262:32 call  chr(self.mask_value << 7 | 0x7E)
+    -> <builtin>.chr
+262:68 call  chr(self.mask_value << 7 | 0x7E).encode("latin-1")
+    -> <builtin>.str.encode
+263:40 call  struct.pack("!H", length)
+    -> struct.pack
+265:32 call  chr(self.mask_value << 7 | 0x7F)
+    -> <builtin>.chr
+265:68 call  chr(self.mask_value << 7 | 0x7F).encode("latin-1")
+    -> <builtin>.str.encode
+266:40 call  struct.pack("!Q", length)
+    -> struct.pack
+269:26 call  isinstance(self.data, str)
+    -> <builtin>.isinstance
+270:45 call  self.data.encode("utf-8")
+    -> <builtin>.str.encode
+272:37 call  self.get_mask_key(4)
+    -> os.urandom
+    note: get_mask_key is os.urandom from ABNF.__init__ (line 170), or the client's mask function that WebSocket.send_frame copies from WebSocket.get_mask_key (a client callback, B5)
+273:47 call  self._get_masked(mask_key)
+    -> websocket._abnf.ABNF._get_masked
+
+[websocket._abnf.ABNF._get_masked]
+276:22 call  ABNF.mask(mask_key, self.data)
+    -> websocket._abnf.ABNF.mask
+278:22 call  isinstance(mask_key, str)
+    -> <builtin>.isinstance
+279:39 call  mask_key.encode("utf-8")
+    -> <builtin>.str.encode
+    note: a client mask function may return a str (set_mask_key's docstring); the isinstance test fixes str (B4)
+
+[websocket._abnf.ABNF.mask]
+298:22 call  isinstance(mask_key, str)
+    -> <builtin>.isinstance
+299:39 call  mask_key.encode("latin-1")
+    -> <builtin>.str.encode
+301:22 call  isinstance(data, str)
+    -> <builtin>.isinstance
+302:31 call  data.encode("latin-1")
+    -> <builtin>.str.encode
+    -> wsaccel.xormask.XorMaskerSimple.process.encode
+    -> wsaccel.xormask.XorMaskerSimple.process.encode.encode
+    note: WebSocket.pong forwards a received ping payload through send, ABNF.create_frame, ABNF.format and _get_masked to this data: the stub result of _mask, or its stub .encode result where pong's isinstance test succeeded (_core.py:417) (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)
+304:21 call  _mask(array.array("B", mask_key), array.array("B", data))
+    -> websocket._abnf._mask
+304:33 call  array.array("B", mask_key)
+    -> array.array
+304:61 call  array.array("B", data)
+    -> array.array
+
+[websocket._abnf.frame_buffer.__init__]
+319:19 call  self.clear()
+    -> websocket._abnf.frame_buffer.clear
+320:25 call  Lock()
+    -> threading.Lock
+
+[websocket._abnf.frame_buffer.recv_header]
+331:34 call  self.recv_strict(2)
+    -> websocket._abnf.frame_buffer.recv_strict
+
+[websocket._abnf.frame_buffer.recv_length]
+355:45 call  WebSocketProtocolException("Header not received")
+    -> <builtin>.Exception.__init__
+359:33 call  self.recv_strict(2)
+    -> websocket._abnf.frame_buffer.recv_strict
+360:40 call  struct.unpack("!H", v)
+    -> struct.unpack
+362:33 call  self.recv_strict(8)
+    -> websocket._abnf.frame_buffer.recv_strict
+363:40 call  struct.unpack("!Q", v)
+    -> struct.unpack
+
+[websocket._abnf.frame_buffer.recv_mask]
+371:43 call  self.recv_strict(4)
+    -> websocket._abnf.frame_buffer.recv_strict
+371:63 call  self.has_mask()
+    -> websocket._abnf.frame_buffer.has_mask
+
+[websocket._abnf.frame_buffer.recv_frame]
+374:14 with  self.lock
+    reject *: self.lock is the threading.Lock of frame_buffer.__init__ (line 320), never a NoLock
+376:33 call  self.needs_header()
+    -> websocket._abnf.frame_buffer.needs_header
+377:33 call  self.recv_header()
+    -> websocket._abnf.frame_buffer.recv_header
+379:49 call  WebSocketProtocolException("Header not received")
+    -> <builtin>.Exception.__init__
+383:33 call  self.needs_length()
+    -> websocket._abnf.frame_buffer.needs_length
+384:33 call  self.recv_length()
+    -> websocket._abnf.frame_buffer.recv_length
+388:31 call  self.needs_mask()
+    -> websocket._abnf.frame_buffer.needs_mask
+389:31 call  self.recv_mask()
+    -> websocket._abnf.frame_buffer.recv_mask
+394:49 call  WebSocketProtocolException("Length not received")
+    -> <builtin>.Exception.__init__
+395:39 call  self.recv_strict(length)
+    -> websocket._abnf.frame_buffer.recv_strict
+398:53 call  WebSocketProtocolException("Mask not received")
+    -> <builtin>.Exception.__init__
+399:36 call  ABNF.mask(mask_value, payload)
+    -> websocket._abnf.ABNF.mask
+402:23 call  self.clear()
+    -> websocket._abnf.frame_buffer.clear
+404:25 call  ABNF(fin, rsv1, rsv2, rsv3, opcode, has_mask, payload)
+    -> websocket._abnf.ABNF.__init__
+405:27 call  frame.validate(self.skip_utf8_validation)
+    -> websocket._abnf.ABNF.validate
+    reject websocket._abnf.continuous_frame.validate: frame is the ABNF made at line 404
+
+[websocket._abnf.frame_buffer.recv_strict]
+410:26 call  isinstance(bufsize, int)
+    -> <builtin>.isinstance
+411:29 call  ValueError("bufsize must be an integer")
+    -> <builtin>.ValueError
+412:33 call  sum(len(buf) for buf in self.recv_buffer)
+    -> <builtin>.sum
+412:37 call  len(buf)
+    -> <builtin>.len
+420:31 call  self.recv(min(16384, shortage))
+    -> websocket._core.WebSocket._recv
+    note: recv is the recv_fn of frame_buffer.__init__; the package passes only WebSocket._recv (_core.py:119); a client's recv_fn is a client callback (the annotation is a bare Callable)
+    reject websocket._core.WebSocket.recv, websocket._socket.recv, websocket._wsdump.main.recv: the package never passes them as recv_fn; only the bound WebSocket._recv
+420:35 call  min(16384, shortage)
+    -> <builtin>.min
+421:26 call  isinstance(bytes_, bytes)
+    -> <builtin>.isinstance
+422:40 call  self.recv_buffer.append(bytes_)
+    -> <builtin>.list.append
+423:32 call  len(bytes_)
+    -> <builtin>.len
+428:27 call  b"".join(self.recv_buffer)
+    -> <builtin>.bytes.join
+
+[websocket._abnf.continuous_frame.validate]
+447:45 call  WebSocketProtocolException("Illegal frame")
+    -> <builtin>.Exception.__init__
+452:45 call  WebSocketProtocolException("Illegal frame")
+    -> <builtin>.Exception.__init__
+
+[websocket._abnf.continuous_frame.extract]
+471:45 call  WebSocketProtocolException("No continuation data available")
+    -> <builtin>.Exception.__init__
+479:34 call  validate_utf8(frame.data)
+    -> websocket._utils.validate_utf8
+481:44 call  WebSocketPayloadException(f"cannot decode: {repr(frame.da...
+    -> <builtin>.Exception.__init__
+481:67 call  repr(frame.data)
+    -> <builtin>.repr
+
+483:45 call  WebSocketProtocolException("No continuation data available")
+    note: unreachable: data is the local of line 469, and line 470 already raised when it is None; no edge (B1, a check that cannot fail)
+
+== websocket._app
+
+[websocket._app.WebSocketApp.__init__]
+159:34 call  float(0)
+    -> <builtin>.float
+160:34 call  float(0)
+    -> <builtin>.float
+163:35 call  float(0)
+    -> <builtin>.float
+170:53 call  threading.Lock()
+    -> threading.Lock
+
+[websocket._app.WebSocketApp.send]
+186:43 call  self.sock.send(data, opcode)
+    -> websocket._core.WebSocket.send
+    reject *: self.sock is the WebSocket that initialize_socket makes (line 408), or None (websocket-client.md J4)
+187:53 call  WebSocketConnectionClosedException("Connection is already...
+    -> <builtin>.Exception.__init__
+
+[websocket._app.WebSocketApp.send_text]
+193:43 call  self.sock.send(text_data, ABNF.OPCODE_TEXT)
+    -> websocket._core.WebSocket.send
+    reject *: self.sock is the WebSocket that initialize_socket makes (line 408), or None (websocket-client.md J4)
+194:53 call  WebSocketConnectionClosedException("Connection is already...
+    -> <builtin>.Exception.__init__
+
+[websocket._app.WebSocketApp.send_bytes]
+200:43 call  self.sock.send(data, ABNF.OPCODE_BINARY)
+    -> websocket._core.WebSocket.send
+    reject *: self.sock is the WebSocket that initialize_socket makes (line 408), or None (websocket-client.md J4)
+201:53 call  WebSocketConnectionClosedException("Connection is already...
+    -> <builtin>.Exception.__init__
+
+[websocket._app.WebSocketApp.close]
+210:23 call  sock.close(**kwargs)
+    -> websocket._core.WebSocket.close
+    reject websocket._app.WebSocketApp.close: sock is self.sock, a WebSocket
+
+[websocket._app.WebSocketApp._start_ping_thread]
+217:54 call  float(0)
+    -> <builtin>.float
+218:41 call  threading.Event()
+    -> threading.Event
+219:44 call  threading.Thread(target=self._send_ping)
+    -> threading.Thread
+    reject websocket._app.WebSocketApp._send_ping: Thread stores the target; self.ping_thread.start() (221:31) runs it
+221:31 call  self.ping_thread.start()
+    -> threading.Thread.start
+    -> websocket._app.WebSocketApp._send_ping
+    note: start() runs the target self._send_ping of the Thread made at line 219 (callback rule: the target belongs to the scope that calls start())
+
+[websocket._app.WebSocketApp._stop_ping_thread]
+225:31 call  self.stop_ping.set()
+    -> threading.Event.set
+    reject websocket._cookiejar.SimpleCookieJar.set: stop_ping is the threading.Event of line 218
+226:58 call  self.ping_thread.is_alive()
+    -> threading.Thread.is_alive
+227:34 call  self.ping_thread.join(3)
+    -> threading.Thread.join
+230:41 call  self.ping_thread.is_alive()
+    -> threading.Thread.is_alive
+231:24 call  warning( "Ping thread failed to terminate within 3 second...
+    -> websocket._logging.warning
+242:54 call  float(0)
+    -> <builtin>.float
+
+[websocket._app.WebSocketApp._send_ping]
+249:38 call  self.stop_ping.wait(self.ping_interval)
+    -> threading.Event.wait
+251:46 call  time.time()
+    -> time.time
+253:26 call  debug("Sending ping")
+    -> websocket._logging.debug
+254:35 call  self.sock.ping(self.ping_payload)
+    -> websocket._core.WebSocket.ping
+256:26 call  debug(f"Failed to send ping: {e}")
+    -> websocket._logging.debug
+
+[websocket._app.WebSocketApp.run_forever]
+342:37 call  WebSocketException("Ensure ping_timeout > 0")
+    -> <builtin>.Exception.__init__
+344:37 call  WebSocketException("Ensure ping_interval >= 0")
+    -> <builtin>.Exception.__init__
+346:37 call  WebSocketException("Ensure ping_interval > ping_timeout")
+    -> <builtin>.Exception.__init__
+352:37 call  WebSocketException("socket is already opened")
+    -> <builtin>.Exception.__init__
+595:33 call  bool(dispatcher)
+    -> <builtin>.bool
+596:44 call  self.create_dispatcher( ping_timeout, dispatcher, parse_u...
+    -> websocket._app.WebSocketApp.create_dispatcher
+    reject websocket._app.WebSocketApp.run_forever.closed: create_dispatcher only stores closed in a WrappedDispatcher, whose send hands it to the client's dispatcher (buffwrite); the package never calls it there
+597:48 call  parse_url(self.url)
+    -> websocket._url.parse_url
+601:30 call  initialize_socket()
+    -> websocket._app.WebSocketApp.run_forever.initialize_socket
+604:26 call  debug( f"Calling dispatcher reconnect [{len(inspect.stack...
+    -> websocket._logging.debug
+605:61 call  len(inspect.stack())
+    -> <builtin>.len
+605:75 call  inspect.stack()
+    -> inspect.stack
+607:41 call  dispatcher.reconnect(reconnect, initialize_socket)
+    -> websocket._dispatcher.DispatcherBase.reconnect
+    note: without a custom dispatcher, dispatcher is the Dispatcher or SSLDispatcher of create_dispatcher (line 596); both inherit DispatcherBase.reconnect
+    reject websocket._dispatcher.WrappedDispatcher.reconnect: the loop runs only when custom_dispatcher is false, so create_dispatcher made no WrappedDispatcher
+    reject websocket._app.WebSocketApp.run_forever.initialize_socket: passed as the reconnector; DispatcherBase.reconnect calls it (_dispatcher.py:54)
+609:17 call  info(f"tearing down on exception {e}")
+    -> websocket._logging.info
+610:21 call  teardown()
+    -> websocket._app.WebSocketApp.run_forever.teardown
+614:25 call  teardown()
+    -> websocket._app.WebSocketApp.run_forever.teardown
+
+[websocket._app.WebSocketApp.run_forever.teardown]
+374:18 with  self.has_done_teardown_lock
+    reject *: has_done_teardown_lock is the threading.Lock of WebSocketApp.__init__ (line 170), never a NoLock
+379:35 call  self._stop_ping_thread()
+    -> websocket._app.WebSocketApp._stop_ping_thread
+389:35 call  current_sock.close()
+    -> websocket._core.WebSocket.close
+    reject websocket._app.WebSocketApp.close: current_sock is self.sock, a WebSocket
+395:67 call  self._get_close_args( effective_close_frame )
+    -> websocket._app.WebSocketApp._get_close_args
+399:27 call  self._callback(self.on_close, close_status_code, close_re...
+    -> websocket._app.WebSocketApp._callback
+
+[websocket._app.WebSocketApp.run_forever.initialize_socket]
+403:35 call  self.sock.shutdown()
+    -> websocket._core.WebSocket.shutdown
+408:34 call  WebSocket( self.get_mask_key, sockopt=sockopt, sslopt=ssl...
+    -> websocket._core.WebSocket.__init__
+418:33 call  self.sock.settimeout(getdefaulttimeout())
+    -> websocket._core.WebSocket.settimeout
+418:51 call  getdefaulttimeout()
+    -> websocket._socket.getdefaulttimeout
+420:37 call  self.header()
+    note: self.header is the client's header argument of WebSocketApp.__init__ (a list, a dict or a client callable); calling it is a client callback (B5), no callee
+420:51 call  callable(self.header)
+    -> <builtin>.callable
+422:34 call  self.sock.connect( self.url, header=header, cookie=self.c...
+    -> websocket._core.WebSocket.connect
+    reject websocket._http.connect: the receiver is the WebSocket of line 408
+440:21 call  info("Websocket connected")
+    -> websocket._logging.info
+443:44 call  self._start_ping_thread()
+    -> websocket._app.WebSocketApp._start_ping_thread
+446:35 call  self._callback(self.on_reconnect)
+    -> websocket._app.WebSocketApp._callback
+448:35 call  self._callback(self.on_open)
+    -> websocket._app.WebSocketApp._callback
+451:32 call  dispatcher.read(self.sock.sock, read, check)
+    -> websocket._dispatcher.Dispatcher.read
+    -> websocket._dispatcher.SSLDispatcher.read
+    -> websocket._dispatcher.WrappedDispatcher.read
+    note: dispatcher is the enclosing run_forever's variable, rebound at line 596 to what create_dispatcher returns before initialize_socket first runs: a WrappedDispatcher (custom dispatcher), an SSLDispatcher (wss) or a Dispatcher
+    reject websocket._app.WebSocketApp.run_forever.check, websocket._app.WebSocketApp.run_forever.read: passed as the callbacks; the dispatcher's read calls them at its own sites
+    reject websocket._wsdump.InteractiveConsole.read, websocket._wsdump.NonInteractive.read: the receiver is a dispatcher
+459:33 call  handleDisconnect(e, reconnecting)
+    -> websocket._app.WebSocketApp.run_forever.handleDisconnect
+
+[websocket._app.WebSocketApp.run_forever.read]
+463:25 call  teardown()
+    -> websocket._app.WebSocketApp.run_forever.teardown
+470:59 call  self.sock.recv_data_frame(True)
+    -> websocket._core.WebSocket.recv_data_frame
+479:34 call  closed(e)
+    -> websocket._app.WebSocketApp.run_forever.closed
+484:30 call  closed(frame)
+    -> websocket._app.WebSocketApp.run_forever.closed
+486:31 call  self._callback(self.on_ping, frame.data)
+    -> websocket._app.WebSocketApp._callback
+488:46 call  time.time()
+    -> time.time
+489:31 call  self._callback(self.on_pong, frame.data)
+    -> websocket._app.WebSocketApp._callback
+491:31 call  self._callback(self.on_data, frame.data, frame.opcode, fr...
+    -> websocket._app.WebSocketApp._callback
+492:31 call  self._callback(self.on_cont_message, frame.data, frame.fin)
+    -> websocket._app.WebSocketApp._callback
+496:39 call  data.decode("utf-8")
+    -> <builtin>.bytes.decode
+    -> wsaccel.xormask.XorMaskerSimple.process.decode
+    note: frame.data of a received text frame is the bytes payload that frame_buffer.recv_strict returns (unmasked by ABNF.mask, joined by continuous_frame.add); with wsaccel, a masked single frame keeps the stub result of _mask (_abnf.py:38), which ABNF.mask, recv_frame, continuous_frame.add (a package list) and extract forward unchanged (README, batch 7: forwarded stub values; Codex round 1)
+497:31 call  self._callback(self.on_data, data, frame.opcode, True)
+    -> websocket._app.WebSocketApp._callback
+498:31 call  self._callback(self.on_message, data)
+    -> websocket._app.WebSocketApp._callback
+
+[websocket._app.WebSocketApp.run_forever.check]
+505:30 call  time.time()
+    -> time.time
+522:52 call  WebSocketTimeoutException("ping/pong timed out")
+    -> <builtin>.Exception.__init__
+
+[websocket._app.WebSocketApp.run_forever.closed]
+537:20 call  type(e)
+    -> <builtin>.type
+538:55 call  WebSocketConnectionClosedException(e)
+    -> <builtin>.Exception.__init__
+539:28 call  isinstance(e, ABNF)
+    -> <builtin>.isinstance
+542:74 call  self._parse_close_frame(e)
+    -> websocket._app.WebSocketApp._parse_close_frame
+551:40 call  reason_parts.append(close_reason)
+    -> <builtin>.list.append
+553:54 call  '; '.join(reason_parts)
+    -> <builtin>.str.join
+554:63 call  WebSocketConnectionClosedException(message)
+    -> <builtin>.Exception.__init__
+555:24 call  setattr(converted, "status_code", close_status_code)
+    -> <builtin>.setattr
+556:24 call  setattr(converted, "reason", close_reason)
+    -> <builtin>.setattr
+558:36 call  handleDisconnect(e, bool(reconnect), close_frame=close_fr...
+    -> websocket._app.WebSocketApp.run_forever.handleDisconnect
+558:44 call  bool(reconnect)
+    -> <builtin>.bool
+
+[websocket._app.WebSocketApp.run_forever.handleDisconnect]
+573:35 call  self._stop_ping_thread()
+    -> websocket._app.WebSocketApp._stop_ping_thread
+575:31 call  self._callback(self.on_error, e)
+    -> websocket._app.WebSocketApp._callback
+577:26 call  isinstance(e, (KeyboardInterrupt, SystemExit))
+    -> <builtin>.isinstance
+578:25 call  teardown(close_frame)
+    -> websocket._app.WebSocketApp.run_forever.teardown
+583:21 call  info(f"{e} - reconnect")
+    -> websocket._logging.info
+583:24 format  {e}
+    -> websocket._abnf.ABNF.__str__
+    note: closed is handed to the client's dispatcher (WrappedDispatcher.send), so its parameter e takes the values of its annotation as a public input (batch 7 ruling on J5/F1); an ABNF of another opcode than CLOSE passes closed unchanged (line 539) and is formatted here; this entry overrides the default rejection of ABNF.__str__ (websocket-client.md J5)
+585:26 call  debug( f"Calling custom dispatcher reconnect [{len(inspec...
+    -> websocket._logging.debug
+586:68 call  len(inspect.stack())
+    -> <builtin>.len
+586:82 call  inspect.stack()
+    -> inspect.stack
+589:41 call  dispatcher.reconnect(reconnect, initialize_socket)
+    -> websocket._dispatcher.WrappedDispatcher.reconnect
+    note: under custom_dispatcher, create_dispatcher returned a WrappedDispatcher (line 626)
+    reject websocket._dispatcher.DispatcherBase.reconnect: with a custom dispatcher, dispatcher is a WrappedDispatcher, which does not derive from DispatcherBase
+    reject websocket._app.WebSocketApp.run_forever.initialize_socket: passed as the reconnector; WrappedDispatcher.reconnect hands it to its timeout
+591:22 call  error(f"{e} - goodbye")
+    -> websocket._logging.error
+591:25 format  {e}
+    -> websocket._abnf.ABNF.__str__
+    note: as at 583:24: an ABNF of another opcode than CLOSE that the client's dispatcher passes to closed (J5)
+592:25 call  teardown(close_frame)
+    -> websocket._app.WebSocketApp.run_forever.teardown
+
+[websocket._app.WebSocketApp.create_dispatcher]
+626:37 call  WrappedDispatcher(self, ping_timeout, dispatcher, handleD...
+    -> websocket._dispatcher.WrappedDispatcher.__init__
+629:33 call  SSLDispatcher(self, timeout)
+    -> websocket._dispatcher.DispatcherBase.__init__
+630:26 call  Dispatcher(self, timeout)
+    -> websocket._dispatcher.DispatcherBase.__init__
+
+[websocket._app.WebSocketApp._get_close_args]
+643:60 call  self._parse_close_frame(close_frame)
+    -> websocket._app.WebSocketApp._parse_close_frame
+
+[websocket._app.WebSocketApp._parse_close_frame]
+654:42 call  getattr(close_frame, "data", None)
+    -> <builtin>.getattr
+    note: data is a plain instance attribute of ABNF; no property or __getattr__ runs
+658:22 call  isinstance(data, bytes)
+    -> <builtin>.isinstance
+660:24 call  isinstance(data, str)
+    -> <builtin>.isinstance
+661:37 call  data.encode("utf-8")
+    -> <builtin>.str.encode
+    -> wsaccel.xormask.XorMaskerSimple.process.encode
+    note: an ABNF's data is str or bytes by its annotation; a close frame with str data reaches here through the frame that a custom dispatcher passes to closed, whose annotation names ABNF, and independently through the public last_close_frame (annotated Optional[ABNF]), which the tests assign (tests/test_app.py:833) and teardown forwards to _get_close_args (websocket-client.md J5); with wsaccel, a received masked close frame (read, line 484, through closed) carries the stub result of _mask (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)
+663:31 call  bytes(data)
+    -> <builtin>.bytes
+    note: explicit handling of another data type (README, B4 clarification: explicit handling counts), e.g. a bytearray payload (WebSocket.send_bytes admits bytearray); the frame reaches here through closed or through the public last_close_frame that the tests assign (tests/test_app.py:833) (websocket-client.md J5)
+665:15 call  len(data_bytes)
+    -> <builtin>.len
+668:38 call  int(data_bytes[0])
+    -> <builtin>.int
+668:59 call  int(data_bytes[1])
+    -> <builtin>.int
+676:45 call  reason_bytes.decode("utf-8")
+    -> <builtin>.bytes.decode
+678:45 call  reason_bytes.decode("utf-8", errors="replace")
+    -> <builtin>.bytes.decode
+
+[websocket._app.WebSocketApp._callback]
+685:25 call  callback(self, *args)
+    note: callback is one of the client's on_* callbacks of WebSocketApp.__init__ (on_open, on_reconnect, on_message, on_data, on_error, on_close, on_ping, on_pong, on_cont_message); the package passes no function of its own there, so the call is a client callback (B5)
+688:22 call  error(f"error from callback {callback}: {e}")
+    -> websocket._logging.error
+692:34 call  self.on_error(self, e)
+    note: on_error is the client's callback of WebSocketApp.__init__ (B5), no callee
+
+== websocket._cookiejar
+
+[websocket._cookiejar.SimpleCookieJar.add]
+30:54 call  http.cookies.SimpleCookie(set_cookie)
+    -> http.cookies.SimpleCookie
+32:42 call  simple_cookie.values()
+    -> http.cookies.SimpleCookie.values
+33:35 call  v.get("domain")
+    -> http.cookies.Morsel.get
+    note: the values of a SimpleCookie are http.cookies.Morsel objects (a dict subclass); the method is named by the receiver's class
+34:45 call  domain.startswith(".")
+    -> <builtin>.str.startswith
+36:42 call  self.jar.get(domain)
+    -> <builtin>.dict.get
+38:59 call  http.cookies.SimpleCookie()
+    -> http.cookies.SimpleCookie
+39:34 call  cookie.update(simple_cookie)
+    -> http.cookies.SimpleCookie.update
+    note: cookie is a SimpleCookie from the jar (only SimpleCookie values are stored) or the one made at line 38
+40:42 call  domain.lower()
+    -> <builtin>.str.lower
+
+[websocket._cookiejar.SimpleCookieJar.set]
+44:54 call  http.cookies.SimpleCookie(set_cookie)
+    -> http.cookies.SimpleCookie
+46:42 call  simple_cookie.values()
+    -> http.cookies.SimpleCookie.values
+47:35 call  v.get("domain")
+    -> http.cookies.Morsel.get
+48:45 call  domain.startswith(".")
+    -> <builtin>.str.startswith
+50:42 call  domain.lower()
+    -> <builtin>.str.lower
+
+[websocket._cookiejar.SimpleCookieJar.get]
+57:40 call  self.jar.items()
+    -> <builtin>.dict.items
+58:30 call  host.lower()
+    -> <builtin>.str.lower
+59:29 call  host.endswith(domain)
+    -> <builtin>.str.endswith
+60:31 call  cookies.append(self.jar.get(domain))
+    -> <builtin>.list.append
+60:44 call  self.jar.get(domain)
+    -> <builtin>.dict.get
+62:25 call  "; ".join( filter( None, sorted( [ f"{k}={v.value}" for c...
+    -> <builtin>.str.join
+63:19 call  filter( None, sorted( [ f"{k}={v.value}" for cookie in fi...
+    -> <builtin>.filter
+65:23 call  sorted( [ f"{k}={v.value}" for cookie in filter(None, coo...
+    -> <builtin>.sorted
+68:45 call  filter(None, cookies)
+    -> <builtin>.filter
+69:49 call  cookie.items()
+    -> http.cookies.SimpleCookie.items
+
+== websocket._core
+
+[websocket._core]
+187:23 call  property(gettimeout, settimeout)
+    -> <builtin>.property
+    reject *: property() only stores the accessors; an attribute load or store of WebSocket.timeout runs them
+198:27 call  property(getsubprotocol)
+    -> <builtin>.property
+    reject *: property() only stores the accessor; a load of WebSocket.subprotocol runs it
+209:22 call  property(getstatus)
+    -> <builtin>.property
+    reject *: property() only stores the accessor; a load of WebSocket.status runs it
+226:23 call  property(getheaders)
+    -> <builtin>.property
+    reject *: property() only stores the accessor; a load of WebSocket.headers runs it
+
+[websocket._core._normalize_close_reason]
+49:18 call  isinstance(reason, str)
+    -> <builtin>.isinstance
+50:29 call  reason.encode("utf-8")
+    -> <builtin>.str.encode
+51:18 call  isinstance(reason, bytes)
+    -> <builtin>.isinstance
+53:17 call  bytes(reason)
+    -> <builtin>.bytes
+    note: explicit handling of a reason that is neither str nor bytes (a bytearray, say); explicit handling of another type counts (README, B4 clarification)
+
+[websocket._core.WebSocket.__init__]
+111:33 call  sock_opt(sockopt, sslopt)
+    -> websocket._socket.sock_opt.__init__
+119:41 call  frame_buffer(self._recv, skip_utf8_validation)
+    -> websocket._abnf.frame_buffer.__init__
+    reject websocket._core.WebSocket._recv: frame_buffer.__init__ only stores it as recv; frame_buffer.recv_strict calls it
+    reject websocket._socket.recv._recv: a local function of _socket.recv, not passed here
+120:43 call  continuous_frame(fire_cont_frame, skip_utf8_validation)
+    -> websocket._abnf.continuous_frame.__init__
+124:39 call  threading.Lock()
+    -> threading.Lock
+125:43 call  threading.Lock()
+    -> threading.Lock
+127:31 call  NoLock()
+    note: NoLock defines no __init__ and no __new__; its first __init__ is object.__init__, so the call has no constructor edge (README, rulings for batch 6: an inherited __init__)
+128:35 call  NoLock()
+    note: NoLock defines no __init__ and no __new__; no constructor edge
+
+[websocket._core.WebSocket.__iter__]
+135:28 call  self.recv()
+    -> websocket._core.WebSocket.recv
+    note: a value site by name only (frame_buffer assigns an attribute recv); self is a WebSocket, whose recv is the method WebSocket.recv
+    reject websocket._socket.recv, websocket._wsdump.main.recv: self is a WebSocket
+
+[websocket._core.WebSocket.__next__]
+138:25 call  self.recv()
+    -> websocket._core.WebSocket.recv
+    note: a value site by name only (frame_buffer assigns an attribute recv); self is a WebSocket, whose recv is the method WebSocket.recv
+    reject websocket._socket.recv, websocket._wsdump.main.recv: self is a WebSocket
+
+[websocket._core.WebSocket.next]
+141:29 call  self.__next__()
+    -> websocket._core.WebSocket.__next__
+
+[websocket._core.WebSocket.fileno]
+145:37 call  WebSocketException("Connection not established")
+    -> <builtin>.Exception.__init__
+146:32 call  self.sock.fileno()
+    -> socket.socket.fileno
+    -> ssl.SSLSocket.fileno
+    -> python_socks.sync.Proxy.create.connect.fileno
+    note: self.sock is the package's socket.socket or ssl.SSLSocket (_http.connect), or the client's pre-initialised socket, a socket.socket by B4, or the python-socks stub value of a SOCKS ws connection (python_socks.sync.Proxy.create.connect, forwarded in a package tuple by _http.connect); websocket-client.md J3
+    reject websocket._core.WebSocket.fileno: self.sock is a socket, not a WebSocket
+
+[websocket._core.WebSocket.gettimeout]
+172:30 getattr  self.sock_opt.timeout
+    reject websocket._core.WebSocket.gettimeout: self.sock_opt is a sock_opt, whose timeout is a plain instance attribute
+
+[websocket._core.WebSocket.settimeout]
+183:23 setattr  self.sock_opt.timeout
+    reject websocket._core.WebSocket.settimeout: self.sock_opt is a sock_opt, whose timeout is a plain instance attribute
+185:33 call  self.sock.settimeout(timeout)
+    -> socket.socket.settimeout
+    -> ssl.SSLSocket.settimeout
+    -> python_socks.sync.Proxy.create.connect.settimeout
+    reject websocket._core.WebSocket.settimeout: self.sock is a socket (J3)
+
+[websocket._core.WebSocket.getsubprotocol]
+194:44 getattr  self.handshake_response.subprotocol
+    reject websocket._core.WebSocket.getsubprotocol: handshake_response is a _handshake.handshake_response, whose subprotocol is a plain instance attribute
+
+[websocket._core.WebSocket.getstatus]
+205:44 getattr  self.handshake_response.status
+    reject websocket._core.WebSocket.getstatus: handshake_response is a _handshake.handshake_response, whose status is a plain instance attribute
+
+[websocket._core.WebSocket.getheaders]
+216:44 getattr  self.handshake_response.headers
+    reject websocket._core.WebSocket.getheaders: handshake_response is a _handshake.handshake_response, whose headers is a plain instance attribute
+
+[websocket._core.WebSocket.is_ssl]
+222:30 call  isinstance(self.sock, ssl.SSLSocket)
+    -> <builtin>.isinstance
+
+[websocket._core.WebSocket.connect]
+278:23 setattr  self.sock_opt.timeout
+    reject websocket._core.WebSocket.settimeout: self.sock_opt is a sock_opt (plain attribute)
+278:44 call  options.get("timeout", self.sock_opt.timeout)
+    -> <builtin>.dict.get
+    reject websocket._dispatcher.DispatcherBase.timeout, websocket._dispatcher.WrappedDispatcher.timeout: the argument is the number in sock_opt.timeout, not a dispatcher method
+278:70 getattr  self.sock_opt.timeout
+    reject websocket._core.WebSocket.gettimeout: self.sock_opt is a sock_opt (plain attribute)
+279:35 call  connect( url, self.sock_opt, proxy_info(**options), optio...
+    -> websocket._http.connect
+    reject websocket._core.WebSocket.connect: connect is the module-level name imported from _http (line 16)
+280:43 call  proxy_info(**options)
+    -> websocket._http.proxy_info.__init__
+280:67 call  options.pop("socket", None)
+    -> <builtin>.dict.pop
+284:48 call  handshake(self.sock, url, *addrs, **options)
+    -> websocket._handshake.handshake
+285:27 call  range(options.pop("redirect_limit", 3))
+    -> <builtin>.range
+285:39 call  options.pop("redirect_limit", 3)
+    -> <builtin>.dict.pop
+288:49 getattr  self.handshake_response.status
+    reject websocket._core.WebSocket.getstatus: handshake_response is a _handshake.handshake_response (plain attribute)
+290:51 getattr  self.handshake_response.headers
+    reject websocket._core.WebSocket.getheaders: handshake_response is a _handshake.handshake_response (plain attribute)
+290:62 call  self.handshake_response.headers.get("location")
+    -> <builtin>.dict.get
+    note: headers is the dict that _http.read_headers builds
+292:49 call  WebSocketException( "Redirect response without Location h...
+    -> <builtin>.Exception.__init__
+294:63 getattr  self.handshake_response.status
+    reject websocket._core.WebSocket.getstatus: handshake_response is a _handshake.handshake_response (plain attribute)
+296:36 call  self.sock.close()
+    -> socket.socket.close
+    -> ssl.SSLSocket.close
+    -> python_socks.sync.Proxy.create.connect.close
+    reject *: self.sock is a socket (J3)
+298:51 call  connect( url, self.sock_opt, proxy_info(**options), optio...
+    -> websocket._http.connect
+    reject websocket._core.WebSocket.connect: connect is the module-level name imported from _http (line 16)
+301:39 call  proxy_info(**options)
+    -> websocket._http.proxy_info.__init__
+302:40 call  options.pop("socket", None)
+    -> <builtin>.dict.pop
+305:49 call  WebSocketException( f"Invalid redirect target {url!r}: {e...
+    -> <builtin>.Exception.__init__
+308:56 call  handshake( self.sock, url, *addrs, **options )
+    -> websocket._handshake.handshake
+313:45 getattr  self.handshake_response.status
+    reject websocket._core.WebSocket.getstatus: handshake_response is a _handshake.handshake_response (plain attribute)
+315:41 call  WebSocketException("Redirect limit exhausted")
+    -> <builtin>.Exception.__init__
+319:32 call  self.sock.close()
+    -> socket.socket.close
+    -> ssl.SSLSocket.close
+    -> python_socks.sync.Proxy.create.connect.close
+    reject *: self.sock is a socket (J3)
+
+[websocket._core.WebSocket.send]
+337:34 call  ABNF.create_frame(payload, opcode)
+    -> websocket._abnf.ABNF.create_frame
+338:31 call  self.send_frame(frame)
+    -> websocket._core.WebSocket.send_frame
+
+[websocket._core.WebSocket.send_text]
+344:25 call  self.send(text_data, ABNF.OPCODE_TEXT)
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+
+[websocket._core.WebSocket.send_bytes]
+350:25 call  self.send(data, ABNF.OPCODE_BINARY)
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+
+[websocket._core.WebSocket.send_frame]
+371:28 call  frame.format()
+    -> websocket._abnf.ABNF.format
+372:21 call  len(data)
+    -> <builtin>.len
+373:29 call  isEnabledForTrace()
+    -> websocket._logging.isEnabledForTrace
+374:18 call  trace(f"++Sent raw: {repr(data)}")
+    -> websocket._logging.trace
+374:38 call  repr(data)
+    -> <builtin>.repr
+375:18 call  trace(f"++Sent decoded: {frame.__str__()}")
+    -> websocket._logging.trace
+375:51 call  frame.__str__()
+    -> websocket._abnf.ABNF.__str__
+376:14 with  self.lock
+    -> websocket._utils.NoLock.__enter__
+    -> websocket._utils.NoLock.__exit__
+    note: self.lock is a threading.Lock, or a NoLock when enable_multithread is false (line 127)
+378:40 call  self._send(data)
+    -> websocket._core.WebSocket._send
+    reject websocket._socket.send._send: a local function of _socket.send; self is a WebSocket
+
+[websocket._core.WebSocket.send_binary]
+392:25 call  self.send(payload, ABNF.OPCODE_BINARY)
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+
+[websocket._core.WebSocket.ping]
+403:22 call  isinstance(payload, str)
+    -> <builtin>.isinstance
+404:37 call  payload.encode("utf-8")
+    -> <builtin>.str.encode
+405:18 call  self.send(payload, ABNF.OPCODE_PING)
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+
+[websocket._core.WebSocket.pong]
+416:22 call  isinstance(payload, str)
+    -> <builtin>.isinstance
+417:37 call  payload.encode("utf-8")
+    -> <builtin>.str.encode
+    -> wsaccel.xormask.XorMaskerSimple.process.encode
+    note: recv_data_frame (line 498) and _wsdump.main.recv pass the data of a received ping frame; with wsaccel, a masked frame's data is the stub result of _mask (_abnf.py:38, forwarded by ABNF.mask and frame_buffer.recv_frame) (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)
+418:18 call  self.send(payload, ABNF.OPCODE_PONG)
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+
+[websocket._core.WebSocket.recv]
+428:14 with  self.readlock
+    -> websocket._utils.NoLock.__enter__
+    -> websocket._utils.NoLock.__exit__
+    note: self.readlock is a threading.Lock, or a NoLock when enable_multithread is false (line 128)
+429:42 call  self.recv_data()
+    -> websocket._core.WebSocket.recv_data
+432:26 call  isinstance(data_received, bytes)
+    -> <builtin>.isinstance
+433:44 call  data_received.decode("utf-8")
+    -> <builtin>.bytes.decode
+    -> wsaccel.xormask.XorMaskerSimple.process.decode
+    note: with wsaccel, the data of a masked single text frame is the stub result of _mask (_abnf.py:38), forwarded unchanged (see _app.py:496:39) (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)
+434:28 call  isinstance(data_received, str)
+    -> <builtin>.isinstance
+
+[websocket._core.WebSocket.recv_data]
+457:45 call  self.recv_data_frame(control_frame)
+    -> websocket._core.WebSocket.recv_data_frame
+
+[websocket._core.WebSocket.recv_data_frame]
+478:36 call  self.recv_frame()
+    -> websocket._core.WebSocket.recv_frame
+    reject websocket._abnf.frame_buffer.recv_frame: self is a WebSocket
+479:33 call  isEnabledForTrace()
+    -> websocket._logging.isEnabledForTrace
+480:22 call  trace(f"++Rcv raw: {repr(frame.format())}")
+    -> websocket._logging.trace
+480:41 call  repr(frame.format())
+    -> <builtin>.repr
+480:54 call  frame.format()
+    -> websocket._abnf.ABNF.format
+481:22 call  trace(f"++Rcv decoded: {frame.__str__()}")
+    -> websocket._logging.trace
+481:54 call  frame.__str__()
+    -> websocket._abnf.ABNF.__str__
+487:41 call  self.cont_frame.validate(frame)
+    -> websocket._abnf.continuous_frame.validate
+    reject websocket._abnf.ABNF.validate: cont_frame is the continuous_frame of line 120
+488:36 call  self.cont_frame.add(frame)
+    -> websocket._abnf.continuous_frame.add
+    reject websocket._cookiejar.SimpleCookieJar.add: cont_frame is the continuous_frame of line 120
+490:43 call  self.cont_frame.is_fire(frame)
+    -> websocket._abnf.continuous_frame.is_fire
+491:51 call  self.cont_frame.extract(frame)
+    -> websocket._abnf.continuous_frame.extract
+494:32 call  self.send_close()
+    -> websocket._core.WebSocket.send_close
+497:23 call  len(frame.data)
+    -> <builtin>.len
+498:30 call  self.pong(frame.data)
+    -> websocket._core.WebSocket.pong
+500:53 call  WebSocketProtocolException("Ping message is too long")
+    -> <builtin>.Exception.__init__
+
+[websocket._core.WebSocket.recv_frame]
+515:44 call  self.frame_buffer.recv_frame()
+    -> websocket._abnf.frame_buffer.recv_frame
+    reject websocket._core.WebSocket.recv_frame: self.frame_buffer is the frame_buffer of line 119
+
+[websocket._core.WebSocket.send_close]
+531:29 call  ValueError("code is invalid range")
+    -> <builtin>.ValueError
+533:47 call  _normalize_close_reason(reason)
+    -> websocket._core._normalize_close_reason
+536:18 call  self.send(struct.pack("!H", status) + reason_bytes, ABNF....
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+536:30 call  struct.pack("!H", status)
+    -> struct.pack
+
+[websocket._core.WebSocket.close]
+560:29 call  ValueError("code is invalid range")
+    -> <builtin>.ValueError
+567:22 call  self.send( struct.pack("!H", status) + _normalize_close_r...
+    -> websocket._core.WebSocket.send
+    reject *: self is a WebSocket (the package defines no subclass)
+568:28 call  struct.pack("!H", status)
+    -> struct.pack
+568:68 call  _normalize_close_reason(reason)
+    -> websocket._core._normalize_close_reason
+573:48 call  self.sock.gettimeout()
+    -> socket.socket.gettimeout
+    -> ssl.SSLSocket.gettimeout
+    -> python_socks.sync.Proxy.create.connect.gettimeout
+    reject websocket._core.WebSocket.gettimeout: self.sock is a socket (J3)
+574:33 call  self.sock.settimeout(timeout)
+    -> socket.socket.settimeout
+    -> ssl.SSLSocket.settimeout
+    -> python_socks.sync.Proxy.create.connect.settimeout
+    reject websocket._core.WebSocket.settimeout: self.sock is a socket (J3)
+575:35 call  time.time()
+    -> time.time
+576:47 call  time.time()
+    -> time.time
+578:44 call  self.recv_frame()
+    -> websocket._core.WebSocket.recv_frame
+    reject websocket._abnf.frame_buffer.recv_frame: self is a WebSocket
+583:41 call  isEnabledForError()
+    -> websocket._logging.isEnabledForError
+584:52 call  struct.unpack("!H", frame.data[0:2])
+    -> struct.unpack
+586:34 call  debug(f"close status: {repr(recv_status)}")
+    -> websocket._logging.debug
+586:56 call  repr(recv_status)
+    -> <builtin>.repr
+588:34 call  error(f"close status: {repr(recv_status)}")
+    -> websocket._logging.error
+588:56 call  repr(recv_status)
+    -> <builtin>.repr
+597:37 call  self.sock.settimeout(sock_timeout)
+    -> socket.socket.settimeout
+    -> ssl.SSLSocket.settimeout
+    -> python_socks.sync.Proxy.create.connect.settimeout
+    reject websocket._core.WebSocket.settimeout: self.sock is a socket (J3)
+598:35 call  self.sock.shutdown(socket.SHUT_RDWR)
+    -> socket.socket.shutdown
+    -> ssl.SSLSocket.shutdown
+    -> python_socks.sync.Proxy.create.connect.shutdown
+    reject websocket._core.WebSocket.shutdown: self.sock is a socket (J3)
+602:22 call  self.shutdown()
+    -> websocket._core.WebSocket.shutdown
+
+[websocket._core.WebSocket.abort]
+610:35 call  self.sock.shutdown(socket.SHUT_RDWR)
+    -> socket.socket.shutdown
+    -> ssl.SSLSocket.shutdown
+    -> python_socks.sync.Proxy.create.connect.shutdown
+    reject websocket._core.WebSocket.shutdown: self.sock is a socket (J3)
+614:22 call  debug("Socket already closed during abort")
+    -> websocket._logging.debug
+
+[websocket._core.WebSocket.shutdown]
+624:36 call  self.sock.close()
+    -> socket.socket.close
+    -> ssl.SSLSocket.close
+    -> python_socks.sync.Proxy.create.connect.close
+    reject *: self.sock is a socket (J3)
+628:22 call  debug("Socket already closed during shutdown")
+    -> websocket._logging.debug
+
+[websocket._core.WebSocket._send]
+636:53 call  WebSocketConnectionClosedException("socket is already clo...
+    -> <builtin>.Exception.__init__
+638:40 call  self.dispatcher.send(self.sock, data)
+    -> websocket._dispatcher.DispatcherBase.send
+    -> websocket._dispatcher.WrappedDispatcher.send
+    note: self.dispatcher is the dispatcher argument of WebSocket.__init__ (annotated DispatcherBase or WrappedDispatcher); the package passes the Dispatcher, SSLDispatcher or WrappedDispatcher of WebSocketApp.create_dispatcher (_app.py:408-415); Dispatcher and SSLDispatcher inherit DispatcherBase.send; a client's own dispatcher object is opaque (B5)
+    reject websocket._app.WebSocketApp.send, websocket._core.WebSocket.send, websocket._socket.send: the receiver is a dispatcher
+639:20 call  send(self.sock, data)
+    -> websocket._socket.send
+    reject websocket._app.WebSocketApp.send, websocket._core.WebSocket.send, websocket._dispatcher.DispatcherBase.send, websocket._dispatcher.WrappedDispatcher.send: send is the module-level name imported from _socket (line 18)
+
+[websocket._core.WebSocket._recv]
+643:53 call  WebSocketConnectionClosedException("Connection is closed")
+    -> <builtin>.Exception.__init__
+645:24 call  recv(self.sock, bufsize)
+    -> websocket._socket.recv
+    reject websocket._core.WebSocket.recv, websocket._wsdump.main.recv: recv is the module-level name imported from _socket (line 18)
+648:32 call  self.sock.close()
+    -> socket.socket.close
+    -> ssl.SSLSocket.close
+    -> python_socks.sync.Proxy.create.connect.close
+    reject *: self.sock is a socket (J3)
+
+[websocket._core.create_connection]
+720:26 call  options.pop("sockopt", [])
+    -> <builtin>.dict.pop
+721:25 call  options.pop("sslopt", {})
+    -> <builtin>.dict.pop
+722:34 call  options.pop("fire_cont_frame", False)
+    -> <builtin>.dict.pop
+723:37 call  options.pop("enable_multithread", True)
+    -> <builtin>.dict.pop
+724:39 call  options.pop("skip_utf8_validation", False)
+    -> <builtin>.dict.pop
+725:21 call  class_( sockopt=sockopt, sslopt=sslopt, fire_cont_frame=f...
+    -> websocket._core.WebSocket.__init__
+    note: class_ is annotated Type[WebSocket] with the default WebSocket; the package defines no subclass; a client's subclass is client code
+733:23 call  websock.settimeout(timeout if timeout is not None else ge...
+    -> websocket._core.WebSocket.settimeout
+734:20 call  websock.connect(url, **options)
+    -> websocket._core.WebSocket.connect
+    reject websocket._http.connect: websock is the WebSocket of line 725
+733:77 call  getdefaulttimeout()
+    -> websocket._socket.getdefaulttimeout
+
+== websocket._dispatcher
+
+[websocket._dispatcher.DispatcherBase.timeout]
+45:23 call  time.sleep(seconds)
+    -> time.sleep
+46:17 call  callback()
+    note: the package never calls DispatcherBase.timeout (WrappedDispatcher.timeout calls the client's dispatcher), so callback is judged as for a public parameter: a bare Callable names no package value (B2); a client callback, no callee
+
+[websocket._dispatcher.DispatcherBase.reconnect]
+50:17 call  info( f"reconnect() - retrying in {seconds} seconds [{len...
+    -> websocket._logging.info
+51:68 call  len(inspect.stack())
+    -> <builtin>.len
+51:82 call  inspect.stack()
+    -> inspect.stack
+53:23 call  time.sleep(seconds)
+    -> time.sleep
+54:24 call  reconnector(reconnecting=True)
+    -> websocket._app.WebSocketApp.run_forever.initialize_socket
+    note: the package calls DispatcherBase.reconnect only from WebSocketApp.run_forever (_app.py:607, on a Dispatcher or SSLDispatcher), with initialize_socket as the reconnector
+56:17 call  info(f"User exited {e}")
+    -> websocket._logging.info
+
+[websocket._dispatcher.DispatcherBase.send]
+60:20 call  send(sock, data)
+    -> websocket._socket.send
+    reject websocket._app.WebSocketApp.send, websocket._core.WebSocket.send, websocket._dispatcher.DispatcherBase.send, websocket._dispatcher.WrappedDispatcher.send: send is the module-level name imported from _socket (line 10)
+
+[websocket._dispatcher.Dispatcher.read]
+76:40 call  selectors.DefaultSelector()
+    -> selectors.DefaultSelector
+    note: selectors.DefaultSelector is a direct alias of the platform's selector class: the first usable of KqueueSelector, EpollSelector, DevpollSelector, PollSelector and SelectSelector on the declared platforms (macOS, POSIX, Windows; websocket-client.md J6)
+77:21 call  sel.register(self.app.sock.sock, selectors.EVENT_READ)
+    -> selectors.EpollSelector.register
+    -> selectors.KqueueSelector.register
+    -> selectors.DevpollSelector.register
+    -> selectors.PollSelector.register
+    -> selectors.SelectSelector.register
+80:30 call  sel.select(self.ping_timeout)
+    -> selectors.EpollSelector.select
+    -> selectors.KqueueSelector.select
+    -> selectors.DevpollSelector.select
+    -> selectors.PollSelector.select
+    -> selectors.SelectSelector.select
+    reject websocket._dispatcher.SSLDispatcher.select: sel is the selector of line 76
+81:41 call  read_callback()
+    -> websocket._app.WebSocketApp.run_forever.read
+    note: the package calls Dispatcher.read only from run_forever.initialize_socket (_app.py:451), with read as read_callback
+83:31 call  check_callback()
+    -> websocket._app.WebSocketApp.run_forever.check
+    note: the package calls Dispatcher.read only from run_forever.initialize_socket (_app.py:451), with check as check_callback
+85:22 call  sel.close()
+    -> selectors.EpollSelector.close
+    -> selectors.KqueueSelector.close
+    -> selectors.DevpollSelector.close
+    -> selectors.PollSelector.close
+    -> selectors.SelectSelector.close
+    reject *: sel is the selector of line 76
+
+[websocket._dispatcher.SSLDispatcher.read]
+102:40 call  selectors.DefaultSelector()
+    -> selectors.DefaultSelector
+    note: J6
+103:21 call  sel.register(sock, selectors.EVENT_READ)
+    -> selectors.EpollSelector.register
+    -> selectors.KqueueSelector.register
+    -> selectors.DevpollSelector.register
+    -> selectors.PollSelector.register
+    -> selectors.SelectSelector.register
+106:31 call  self.select(sock, sel)
+    -> websocket._dispatcher.SSLDispatcher.select
+107:41 call  read_callback()
+    -> websocket._app.WebSocketApp.run_forever.read
+    note: the package calls SSLDispatcher.read only from run_forever.initialize_socket (_app.py:451), with read as read_callback
+109:31 call  check_callback()
+    -> websocket._app.WebSocketApp.run_forever.check
+    note: the package calls SSLDispatcher.read only from run_forever.initialize_socket (_app.py:451), with check as check_callback
+111:22 call  sel.close()
+    -> selectors.EpollSelector.close
+    -> selectors.KqueueSelector.close
+    -> selectors.DevpollSelector.close
+    -> selectors.PollSelector.close
+    -> selectors.SelectSelector.close
+    reject *: sel is the selector of line 102
+
+[websocket._dispatcher.SSLDispatcher.select]
+117:24 call  sock.pending()
+    -> ssl.SSLSocket.pending
+    -> python_socks.sync.Proxy.create.connect.pending
+    note: Codex round 1: with SOCKS, a wss url gives an SSLDispatcher (_app.py:596-597, from the original url) and a redirect to a ws url (_core.py:290-309) reconnects through _start_proxied_socket without TLS, so self.app.sock.sock is the python-socks stub value; a call of an attribute of a stub instance is named by its access path (missing-module convention; websocket-client.md J3)
+    note: sock is the WebSocket's socket; create_dispatcher makes an SSLDispatcher only for a wss url, and _http.connect wraps every wss socket of the package in an ssl.SSLSocket; a pre-initialised socket.socket of the client (B4) has no pending method, so the call raises AttributeError before any callee (J3)
+122:23 call  sel.select(self.ping_timeout)
+    -> selectors.EpollSelector.select
+    -> selectors.KqueueSelector.select
+    -> selectors.DevpollSelector.select
+    -> selectors.PollSelector.select
+    -> selectors.SelectSelector.select
+    reject websocket._dispatcher.SSLDispatcher.select: sel is the selector of SSLDispatcher.read
+124:15 call  len(r)
+    -> <builtin>.len
+
+[websocket._dispatcher.WrappedDispatcher.__init__]
+145:26 call  dispatcher.signal(2, dispatcher.abort)
+    note: dispatcher is the client's custom dispatcher (run_forever's dispatcher argument, e.g. rel); a method call on a client object has no callee (B5)
+    reject websocket._core.WebSocket.abort: dispatcher.abort is an attribute of the client's dispatcher, not a WebSocket
+
+[websocket._dispatcher.WrappedDispatcher.read]
+153:29 call  self.dispatcher.read(sock, read_callback)
+    note: self.dispatcher is the client's custom dispatcher (B5); what it calls back is client behaviour
+    reject *: the receiver is the client's dispatcher; read_callback is handed to client code
+155:18 getattr  self.timeout
+    reject websocket._core.WebSocket.gettimeout: self is a WrappedDispatcher, whose timeout is a method, not the property of WebSocket
+155:25 call  self.timeout(self.ping_timeout, check_callback)
+    -> websocket._dispatcher.WrappedDispatcher.timeout
+    note: a value site by name only (sock_opt assigns an attribute timeout); self is a WrappedDispatcher, whose timeout is the method WrappedDispatcher.timeout
+    reject websocket._dispatcher.DispatcherBase.timeout: WrappedDispatcher does not derive from DispatcherBase
+
+[websocket._dispatcher.WrappedDispatcher.send]
+158:34 call  self.dispatcher.buffwrite(sock, data, send, self.handleDi...
+    note: self.dispatcher is the client's custom dispatcher (B5); send and handleDisconnect are handed to client code, which calls them as client behaviour
+    reject *: the receiver is the client's dispatcher
+159:19 call  len(data)
+    -> <builtin>.len
+
+[websocket._dispatcher.WrappedDispatcher.timeout]
+162:25 getattr  self.dispatcher.timeout
+    reject websocket._core.WebSocket.gettimeout: self.dispatcher is the client's dispatcher
+162:32 call  self.dispatcher.timeout(seconds, callback, *args)
+    note: self.dispatcher is the client's custom dispatcher (B5), no callee
+    reject *: the receiver is the client's dispatcher, not a package dispatcher (WrappedDispatcher.__init__ would fail on a package dispatcher, which has no signal method)
+
+[websocket._dispatcher.WrappedDispatcher.reconnect]
+165:14 getattr  self.timeout
+    reject websocket._core.WebSocket.gettimeout: self is a WrappedDispatcher, whose timeout is a method
+165:21 call  self.timeout(seconds, reconnector, True)
+    -> websocket._dispatcher.WrappedDispatcher.timeout
+    note: a value site by name only; self is a WrappedDispatcher
+    reject websocket._dispatcher.DispatcherBase.timeout: WrappedDispatcher does not derive from DispatcherBase
+
+== websocket._exceptions
+
+[websocket._exceptions.WebSocketBadStatusException.__init__]
+85:14 call  super()
+    -> <builtin>.super
+85:25 call  super().__init__(message)
+    -> <builtin>.Exception.__init__
+    reject *: the next class in the MRO of WebSocketBadStatusException with an __init__ is Exception
+
+== websocket._handshake
+
+[websocket._handshake]
+48:28 call  SimpleCookieJar()
+    -> websocket._cookiejar.SimpleCookieJar.__init__
+
+[websocket._handshake.handshake_response.__init__]
+56:22 call  CookieJar.add(headers.get("set-cookie"))
+    -> websocket._cookiejar.SimpleCookieJar.add
+    reject websocket._abnf.continuous_frame.add: CookieJar is the SimpleCookieJar of line 48
+56:34 call  headers.get("set-cookie")
+    -> <builtin>.dict.get
+
+[websocket._handshake.handshake]
+67:42 call  _get_handshake_headers(resource, url, hostname, port, opt...
+    -> websocket._handshake._get_handshake_headers
+69:29 call  "\r\n".join(headers)
+    -> <builtin>.str.join
+70:9 call  send(sock, header_str)
+    -> websocket._socket.send
+    reject websocket._app.WebSocketApp.send, websocket._core.WebSocket.send, websocket._dispatcher.DispatcherBase.send, websocket._dispatcher.WrappedDispatcher.send: send is the module-level name imported from _socket (line 32)
+71:9 call  dump("request header", header_str)
+    -> websocket._logging.dump
+73:37 call  _get_resp_headers(sock)
+    -> websocket._handshake._get_resp_headers
+75:34 call  handshake_response(status, resp, None)
+    -> websocket._handshake.handshake_response.__init__
+76:34 call  _validate(resp, key, options.get("subprotocols"))
+    -> websocket._handshake._validate
+76:57 call  options.get("subprotocols")
+    -> <builtin>.dict.get
+78:33 call  WebSocketException("Invalid WebSocket Header")
+    -> <builtin>.Exception.__init__
+80:30 call  handshake_response(status, resp, subproto)
+    -> websocket._handshake.handshake_response.__init__
+
+[websocket._handshake._get_handshake_headers]
+95:34 call  _pack_hostname(host)
+    -> websocket._handshake._pack_hostname
+97:37 call  _pack_hostname(host)
+    -> websocket._handshake._pack_hostname
+98:23 call  options.get("suppress_host")
+    -> <builtin>.dict.get
+99:23 call  options.get("host")
+    -> <builtin>.dict.get
+100:27 call  headers.append(f'Host: {options["host"]}')
+    -> <builtin>.list.append
+102:27 call  headers.append(f"Host: {hostport}")
+    -> <builtin>.list.append
+106:28 call  url.split(":", 1)
+    -> <builtin>.str.split
+107:23 call  options.get("suppress_origin")
+    -> <builtin>.dict.get
+109:27 call  headers.append(f'Origin: {options["origin"]}')
+    -> <builtin>.list.append
+111:27 call  headers.append(f"Origin: https://{hostport}")
+    -> <builtin>.list.append
+113:27 call  headers.append(f"Origin: http://{hostport}")
+    -> <builtin>.list.append
+115:36 call  _create_sec_websocket_key()
+    -> websocket._handshake._create_sec_websocket_key
+118:23 call  options.get("header")
+    -> <builtin>.dict.get
+119:23 call  headers.append(f"Sec-WebSocket-Key: {key}")
+    -> <builtin>.list.append
+123:23 call  options.get("header")
+    -> <builtin>.dict.get
+124:23 call  headers.append(f"Sec-WebSocket-Version: {VERSION}")
+    -> <builtin>.list.append
+126:23 call  options.get("connection")
+    -> <builtin>.dict.get
+127:23 call  headers.append("Connection: Upgrade")
+    -> <builtin>.list.append
+129:23 call  headers.append(options["connection"])
+    -> <builtin>.list.append
+131:35 call  options.get("subprotocols")
+    -> <builtin>.dict.get
+132:23 call  headers.append(f'Sec-WebSocket-Protocol: {",".join(subpro...
+    -> <builtin>.list.append
+132:59 call  ",".join(subprotocols)
+    -> <builtin>.str.join
+134:29 call  options.get("header")
+    -> <builtin>.dict.get
+135:22 call  isinstance(header, dict)
+    -> <builtin>.isinstance
+136:32 call  ": ".join([k, v])
+    -> <builtin>.str.join
+136:65 call  header.items()
+    -> <builtin>.dict.items
+    note: the isinstance test at line 135 fixes dict (B4)
+137:23 call  headers.extend(header)
+    -> <builtin>.list.extend
+139:34 call  CookieJar.get(host)
+    -> websocket._cookiejar.SimpleCookieJar.get
+    note: CookieJar is the module's SimpleCookieJar (line 48); the default rejection of SimpleCookieJar.get does not apply here
+140:32 call  options.get("cookie", None)
+    -> <builtin>.dict.get
+142:27 call  "; ".join(filter(None, [server_cookie, client_cookie]))
+    -> <builtin>.str.join
+142:34 call  filter(None, [server_cookie, client_cookie])
+    -> <builtin>.filter
+143:23 call  headers.append(f"Cookie: {cookie}")
+    -> <builtin>.list.append
+145:19 call  headers.extend(("", ""))
+    -> <builtin>.list.extend
+
+[websocket._handshake._get_resp_headers]
+152:56 call  read_headers(sock)
+    -> websocket._http.read_headers
+154:39 call  resp_headers.get("content-length")
+    -> <builtin>.dict.get
+161:32 call  int(content_len)
+    -> <builtin>.int
+163:41 call  WebSocketException( f"Invalid content-length header: {con...
+    -> <builtin>.Exception.__init__
+167:33 call  min(remaining, 16384)
+    -> <builtin>.min
+168:29 call  recv(sock, chunk_size)
+    -> websocket._socket.recv
+    reject websocket._core.WebSocket.recv, websocket._wsdump.main.recv: recv is imported from _socket at line 157
+170:33 call  len(chunk)
+    -> <builtin>.len
+173:42 call  WebSocketBadStatusException( f"Handshake status {status} ...
+    -> websocket._exceptions.WebSocketBadStatusException.__init__
+174:106 call  response_body.decode('utf-8', errors='replace')
+    -> <builtin>.bytes.decode
+
+[websocket._handshake._validate]
+191:40 call  _HEADERS_TO_CHECK.items()
+    -> <builtin>.dict.items
+192:24 call  headers.get(k, None)
+    -> <builtin>.dict.get
+195:21 call  x.strip()
+    -> <builtin>.str.strip
+195:29 call  x.strip().lower()
+    -> <builtin>.str.lower
+195:48 call  r.split(",")
+    -> <builtin>.str.split
+200:31 call  headers.get("sec-websocket-protocol", None)
+    -> <builtin>.dict.get
+201:42 call  subproto.lower()
+    -> <builtin>.str.lower
+201:60 call  s.lower()
+    -> <builtin>.str.lower
+    note: subprotocols is annotated Optional[List[str]] (B4)
+202:18 call  error(f"Invalid subprotocol: {subprotocols}")
+    -> websocket._logging.error
+204:34 call  subproto.lower()
+    -> <builtin>.str.lower
+206:25 call  headers.get("sec-websocket-accept", None)
+    -> <builtin>.dict.get
+209:26 call  result.lower()
+    -> <builtin>.str.lower
+211:18 call  isinstance(result, str)
+    -> <builtin>.isinstance
+212:31 call  result.encode("utf-8")
+    -> <builtin>.str.encode
+214:64 call  f"{key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11".encode("utf-8")
+    -> <builtin>.str.encode
+215:26 call  base64encode(hashlib.sha1(value).digest())
+    -> base64.encodebytes
+215:39 call  hashlib.sha1(value)
+    -> hashlib.sha1
+215:53 call  hashlib.sha1(value).digest()
+    -> _hashlib.HASH.digest
+    -> _sha1.sha1.digest
+    note: hashlib.sha1 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 (README "Versions and configuration"; bottle bottle.py:2918, path)
+215:62 call  base64encode(hashlib.sha1(value).digest()).strip()
+    -> <builtin>.bytes.strip
+215:70 call  base64encode(hashlib.sha1(value).digest()).strip().lower()
+    -> <builtin>.bytes.lower
+217:27 call  hmac.compare_digest(hashed, result)
+    -> hmac.compare_digest
+
+[websocket._handshake._create_sec_websocket_key]
+224:28 call  os.urandom(16)
+    -> os.urandom
+225:24 call  base64encode(randomness)
+    -> base64.encodebytes
+225:43 call  base64encode(randomness).decode("utf-8")
+    -> <builtin>.bytes.decode
+225:58 call  base64encode(randomness).decode("utf-8").strip()
+    -> <builtin>.str.strip
+
+== websocket._http
+
+[websocket._http.proxy_info.__init__]
+63:38 call  options.get("http_proxy_host", None)
+    -> <builtin>.dict.get
+65:42 call  options.get("http_proxy_port", 0)
+    -> <builtin>.dict.get
+66:36 call  options.get("http_proxy_auth", None)
+    -> <builtin>.dict.get
+67:40 call  options.get("http_no_proxy", None)
+    -> <builtin>.dict.get
+68:46 call  options.get("proxy_type", "http")
+    -> <builtin>.dict.get
+70:45 call  options.get("http_proxy_timeout", None)
+    -> <builtin>.dict.get
+78:33 call  ProxyError( "Only http, socks4, socks5 proxy protocols ar...
+    -> python_socks._errors.ProxyError
+    -> <builtin>.Exception.__init__
+    note: both sides of the optional import of python_socks run (lines 39-58): with python-socks, ProxyError is python_socks._errors.ProxyError (a missing module here); without it, the fallback class at line 48, whose first __init__ is Exception's (websocket-client.md J1)
+
+[websocket._http._start_proxied_socket]
+93:38 call  WebSocketProxyException("Cannot use port 0 when proxy_hos...
+    -> <builtin>.Exception.__init__
+95:33 call  WebSocketException( "Python Socks is needed for SOCKS pro...
+    -> <builtin>.Exception.__init__
+99:52 call  parse_url(url)
+    -> websocket._url.parse_url
+116:28 call  Proxy.create( proxy_type=proxy_type, host=proxy.proxy_hos...
+    -> python_socks.sync.Proxy.create
+    note: runs only on the side of the optional import where python-socks is importable (HAVE_PYTHON_SOCKS, line 94); python-socks is not installed, so the name is the missing module's access path (J1)
+119:17 call  int(proxy.proxy_port)
+    -> <builtin>.int
+125:28 call  ws_proxy.connect(hostname, port, timeout=proxy.proxy_time...
+    -> python_socks.sync.Proxy.create.connect
+    note: ws_proxy is the missing-module value of line 116; the call keeps its access path (dagster-pipes judgement 5, spark.conf.get)
+    reject websocket._core.WebSocket.connect, websocket._http.connect: the receiver is a python-socks proxy
+129:31 call  _ssl_socket(sock, options.sslopt, hostname)
+    -> websocket._http._ssl_socket
+131:37 call  WebSocketException("SSL not available.")
+    -> <builtin>.Exception.__init__
+
+[websocket._http.connect]
+143:37 call  _start_proxied_socket(url, options, proxy)
+    -> websocket._http._start_proxied_socket
+145:61 call  parse_url(url)
+    -> websocket._url.parse_url
+150:58 call  _get_addrinfo_list( hostname, port_from_url, is_secure, p...
+    -> websocket._http._get_addrinfo_list
+154:33 call  WebSocketException(f"Host not found.: {hostname}:{port_fr...
+    -> <builtin>.Exception.__init__
+158:28 call  _open_socket(addrinfo_list, options.sockopt, options.time...
+    -> websocket._http._open_socket
+    reject websocket._dispatcher.DispatcherBase.timeout, websocket._dispatcher.WrappedDispatcher.timeout: options.timeout is the number in a sock_opt
+158:69 getattr  options.timeout
+    reject websocket._core.WebSocket.gettimeout: options is the WebSocket's sock_opt (plain attribute)
+160:27 call  _tunnel(sock, hostname, port_from_url, auth)
+    -> websocket._http._tunnel
+164:35 call  _ssl_socket(sock, options.sslopt, hostname)
+    -> websocket._http._ssl_socket
+166:41 call  WebSocketException("SSL not available.")
+    -> <builtin>.Exception.__init__
+171:23 call  sock.close()
+    -> socket.socket.close
+    note: an exception after line 158 leaves sock the socket.socket of _open_socket (_tunnel returns its argument; the assignment of _ssl_socket's result is the last statement that can fail)
+    reject *: sock is a socket.socket
+
+[websocket._http._get_addrinfo_list]
+179:45 call  get_proxy_info( hostname, is_secure, proxy.proxy_host, pr...
+    -> websocket._url.get_proxy_info
+188:40 call  WebSocketAddressException(e)
+    -> <builtin>.Exception.__init__
+194:47 call  socket.getaddrinfo( hostname, port, 0, socket.SOCK_STREAM...
+    -> socket.getaddrinfo
+204:47 call  socket.getaddrinfo( phost, pport, 0, socket.SOCK_STREAM, ...
+    -> socket.getaddrinfo
+209:40 call  WebSocketAddressException(e)
+    -> <builtin>.Exception.__init__
+
+[websocket._http._open_socket]
+216:29 call  socket.socket(family, socktype, proto)
+    -> socket.socket
+217:24 call  sock.settimeout(timeout)
+    -> socket.socket.settimeout
+    reject websocket._core.WebSocket.settimeout: sock is the socket.socket of line 216
+219:28 call  sock.setsockopt(*opts)
+    -> socket.socket.setsockopt
+221:28 call  sock.setsockopt(*opts)
+    -> socket.socket.setsockopt
+227:29 call  sock.connect(address)
+    -> socket.socket.connect
+    reject *: sock is the socket.socket of line 216
+229:27 call  sock.close()
+    -> socket.socket.close
+    reject *: sock is the socket.socket of line 216
+230:38 call  str(address[0])
+    -> <builtin>.str
+233:28 call  getattr(errno, "WSAECONNREFUSED", errno.ECONNREFUSED)
+    -> <builtin>.getattr
+
+[websocket._http._wrap_sni_socket]
+255:25 call  sslopt.get("context", None)
+    -> <builtin>.dict.get
+257:33 call  ssl.SSLContext(sslopt.get("ssl_version", ssl.PROTOCOL_TLS...
+    -> ssl.SSLContext
+257:44 call  sslopt.get("ssl_version", ssl.PROTOCOL_TLS_CLIENT)
+    -> <builtin>.dict.get
+262:37 call  os.environ.get("SSLKEYLOGFILE")
+    -> collections.abc.Mapping.get
+266:22 call  sslopt.get("cert_reqs", ssl.CERT_NONE)
+    -> <builtin>.dict.get
+267:32 call  sslopt.get("ca_certs", None)
+    -> <builtin>.dict.get
+268:32 call  sslopt.get("ca_cert_path", None)
+    -> <builtin>.dict.get
+271:50 call  context.load_verify_locations(cafile=cafile, capath=capath)
+    -> ssl.SSLContext.load_verify_locations
+273:45 call  WebSocketException(f"SSL CA certificate loading failed: {...
+    -> <builtin>.Exception.__init__
+274:25 call  hasattr(context, "load_default_certs")
+    -> <builtin>.hasattr
+276:47 call  context.load_default_certs(ssl.Purpose.SERVER_AUTH)
+    -> ssl.SSLContext.load_default_certs
+278:45 call  WebSocketException( f"SSL default certificate loading fai...
+    -> <builtin>.Exception.__init__
+281:22 call  sslopt.get("certfile", None)
+    -> <builtin>.dict.get
+283:40 call  context.load_cert_chain( sslopt["certfile"], sslopt.get("...
+    -> ssl.SSLContext.load_cert_chain
+285:31 call  sslopt.get("keyfile", None)
+    -> <builtin>.dict.get
+286:31 call  sslopt.get("password", None)
+    -> <builtin>.dict.get
+289:41 call  WebSocketException(f"SSL client certificate loading faile...
+    -> <builtin>.Exception.__init__
+291:41 call  WebSocketException(f"SSL client certificate loading faile...
+    -> <builtin>.Exception.__init__
+296:22 call  sslopt.get("cert_reqs", ssl.CERT_NONE)
+    -> <builtin>.dict.get
+296:86 call  sslopt.get( "check_hostname", False )
+    -> <builtin>.dict.get
+302:40 call  sslopt.get("check_hostname", True)
+    -> <builtin>.dict.get
+303:35 call  sslopt.get("cert_reqs", ssl.CERT_REQUIRED)
+    -> <builtin>.dict.get
+305:41 call  WebSocketException( "SSL certificate verification configu...
+    -> <builtin>.Exception.__init__
+314:36 call  context.set_ciphers(sslopt["ciphers"])
+    -> ssl.SSLContext.set_ciphers
+316:41 call  WebSocketException(f"SSL cipher configuration failed: {e}")
+    -> <builtin>.Exception.__init__
+320:34 call  isinstance(cert_chain, (tuple, list))
+    -> <builtin>.isinstance
+320:68 call  len(cert_chain)
+    -> <builtin>.len
+321:37 call  ValueError( "cert_chain must be a tuple/list of (certfile...
+    -> <builtin>.ValueError
+325:40 call  context.load_cert_chain(certfile, keyfile, password)
+    -> ssl.SSLContext.load_cert_chain
+329:41 call  WebSocketException( f"SSL client certificate configuratio...
+    -> <builtin>.Exception.__init__
+334:39 call  context.set_ecdh_curve(sslopt["ecdh_curve"])
+    -> ssl.SSLContext.set_ecdh_curve
+336:41 call  WebSocketException(f"SSL ECDH curve configuration failed:...
+    -> <builtin>.Exception.__init__
+338:31 call  context.wrap_socket( sock, do_handshake_on_connect=sslopt...
+    -> ssl.SSLContext.wrap_socket
+    note: context is the SSLContext of line 257, or the client's "context" sslopt, which docs/source/faq.rst:207 documents as an ssl.SSLContext (B4)
+340:43 call  sslopt.get("do_handshake_on_connect", True)
+    -> <builtin>.dict.get
+341:40 call  sslopt.get("suppress_ragged_eofs", True)
+    -> <builtin>.dict.get
+
+[websocket._http._ssl_socket]
+348:18 call  sslopt.update(user_sslopt)
+    -> <builtin>.dict.update
+350:31 call  os.environ.get("WEBSOCKET_CLIENT_CA_BUNDLE")
+    -> collections.abc.Mapping.get
+353:27 call  os.path.isfile(cert_path)
+    -> os.path.isfile
+354:28 call  user_sslopt.get("ca_certs", None)
+    -> <builtin>.dict.get
+359:26 call  os.path.isdir(cert_path)
+    -> os.path.isdir
+360:28 call  user_sslopt.get("ca_cert_path", None)
+    -> <builtin>.dict.get
+364:18 call  sslopt.get("server_hostname", None)
+    -> <builtin>.dict.get
+367:32 call  sslopt.get("check_hostname", True)
+    -> <builtin>.dict.get
+368:28 call  _wrap_sni_socket(sock, sslopt, hostname, check_hostname)
+    -> websocket._http._wrap_sni_socket
+
+[websocket._http._tunnel]
+374:10 call  debug("Connecting proxy...")
+    -> websocket._logging.debug
+383:35 call  base64encode(auth_str.encode())
+    -> base64.encodebytes
+383:51 call  auth_str.encode()
+    -> <builtin>.str.encode
+    note: auth is the (username, password) tuple of http_proxy_auth (documented in WebSocket.connect) or the unquoted strs of the proxy environment variable (_url.get_proxy_info)
+383:60 call  base64encode(auth_str.encode()).strip()
+    -> <builtin>.bytes.strip
+383:69 call  base64encode(auth_str.encode()).strip().decode()
+    -> <builtin>.bytes.decode
+383:79 call  base64encode(auth_str.encode()).strip().decode().replace(...
+    -> <builtin>.str.replace
+386:9 call  dump("request header", connect_header)
+    -> websocket._logging.dump
+388:9 call  send(sock, connect_header)
+    -> websocket._socket.send
+    reject websocket._app.WebSocketApp.send, websocket._core.WebSocket.send, websocket._dispatcher.DispatcherBase.send, websocket._dispatcher.WrappedDispatcher.send: send is the module-level name imported from _socket (line 32)
+391:36 call  read_headers(sock)
+    -> websocket._http.read_headers
+393:38 call  WebSocketProxyException(str(e))
+    -> <builtin>.Exception.__init__
+393:42 call  str(e)
+    -> <builtin>.str
+396:38 call  WebSocketProxyException(f"failed CONNECT via proxy status...
+    -> <builtin>.Exception.__init__
+
+[websocket._http.read_headers]
+405:10 call  trace("--- response header ---")
+    -> websocket._logging.trace
+408:25 call  recv_line(sock)
+    -> websocket._socket.recv_line
+410:31 call  line.decode("utf-8")
+    -> <builtin>.bytes.decode
+410:46 call  line.decode("utf-8").strip()
+    -> <builtin>.str.strip
+412:37 call  WebSocketException( f"Invalid header line, not valid UTF-...
+    -> <builtin>.Exception.__init__
+417:14 call  trace(line)
+    -> websocket._logging.trace
+419:37 call  line.split(" ", 2)
+    -> <builtin>.str.split
+421:29 call  int(status_info[1])
+    -> <builtin>.int
+423:41 call  WebSocketException(f"Invalid status line: {line!r}")
+    -> <builtin>.Exception.__init__
+424:19 call  len(status_info)
+    -> <builtin>.len
+427:28 call  line.split(":", 1)
+    -> <builtin>.str.split
+428:19 call  len(kv)
+    -> <builtin>.len
+429:41 call  WebSocketException("Invalid header")
+    -> <builtin>.Exception.__init__
+431:25 call  key.lower()
+    -> <builtin>.str.lower
+431:59 call  headers.get("set-cookie")
+    -> <builtin>.dict.get
+432:46 call  headers.get("set-cookie")
+    -> <builtin>.dict.get
+434:81 call  value.strip()
+    -> <builtin>.str.strip
+436:56 call  value.strip()
+    -> <builtin>.str.strip
+438:34 call  key.lower()
+    -> <builtin>.str.lower
+438:51 call  value.strip()
+    -> <builtin>.str.strip
+440:10 call  trace("-----------------------")
+    -> websocket._logging.trace
+
+== websocket._logging
+
+[websocket._logging]
+23:28 call  logging.getLogger("websocket")
+    -> logging.getLogger
+33:19 call  _logger.addHandler(NullHandler())
+    -> logging.Logger.addHandler
+33:31 call  NullHandler()
+    -> logging.NullHandler
+    note: logging.NullHandler exists on every supported version (Python >= 3.10), so the fallback class of lines 27-30 is never defined (a branch that only an unsupported version takes; websocket-client.md J2)
+37:43 call  _logger.getEffectiveLevel()
+    -> logging.Logger.getEffectiveLevel
+
+[websocket._logging.enableTrace]
+68:44 call  logging.StreamHandler()
+    -> logging.StreamHandler
+70:34 call  _logger.removeHandler(_trace_handler)
+    -> logging.Logger.removeHandler
+73:31 call  _logger.addHandler(handler)
+    -> logging.Logger.addHandler
+74:25 call  _logger.setLevel(getattr(logging, level))
+    -> logging.Logger.setLevel
+74:33 call  getattr(logging, level)
+    -> <builtin>.getattr
+79:34 call  _logger.removeHandler(_trace_handler)
+    -> logging.Logger.removeHandler
+81:25 call  _logger.setLevel(_default_level)
+    -> logging.Logger.setLevel
+
+[websocket._logging.dump]
+86:22 call  _logger.debug(f"--- {title} ---")
+    -> logging.Logger.debug
+    reject websocket._logging.debug: _logger is the logging.Logger of line 23
+87:22 call  _logger.debug(message)
+    -> logging.Logger.debug
+    reject websocket._logging.debug: _logger is the logging.Logger of line 23
+88:22 call  _logger.debug("-----------------------")
+    -> logging.Logger.debug
+    reject websocket._logging.debug: _logger is the logging.Logger of line 23
+
+[websocket._logging.error]
+92:18 call  _logger.error(msg)
+    -> logging.Logger.error
+    reject websocket._logging.error: _logger is the logging.Logger of line 23
+
+[websocket._logging.warning]
+96:20 call  _logger.warning(msg)
+    -> logging.Logger.warning
+    reject websocket._logging.warning: _logger is the logging.Logger of line 23
+
+[websocket._logging.debug]
+100:18 call  _logger.debug(msg)
+    -> logging.Logger.debug
+    reject websocket._logging.debug: _logger is the logging.Logger of line 23
+
+[websocket._logging.info]
+104:17 call  _logger.info(msg)
+    -> logging.Logger.info
+    reject websocket._logging.info: _logger is the logging.Logger of line 23
+
+[websocket._logging.trace]
+109:22 call  _logger.debug(msg)
+    -> logging.Logger.debug
+    reject websocket._logging.debug: _logger is the logging.Logger of line 23
+
+[websocket._logging.isEnabledForError]
+113:32 call  _logger.isEnabledFor(logging.ERROR)
+    -> logging.Logger.isEnabledFor
+
+[websocket._logging.isEnabledForDebug]
+117:32 call  _logger.isEnabledFor(logging.DEBUG)
+    -> logging.Logger.isEnabledFor
+
+== websocket._socket
+
+[websocket._socket]
+33:11 call  hasattr(socket, "SO_KEEPALIVE")
+    -> <builtin>.hasattr
+34:33 call  DEFAULT_SOCKET_OPTION.append((socket.SOL_SOCKET, socket.S...
+    -> <builtin>.list.append
+35:11 call  hasattr(socket, "TCP_KEEPIDLE")
+    -> <builtin>.hasattr
+36:33 call  DEFAULT_SOCKET_OPTION.append((socket.SOL_TCP, socket.TCP_...
+    -> <builtin>.list.append
+37:11 call  hasattr(socket, "TCP_KEEPINTVL")
+    -> <builtin>.hasattr
+38:33 call  DEFAULT_SOCKET_OPTION.append((socket.SOL_TCP, socket.TCP_...
+    -> <builtin>.list.append
+39:11 call  hasattr(socket, "TCP_KEEPCNT")
+    -> <builtin>.hasattr
+40:33 call  DEFAULT_SOCKET_OPTION.append((socket.SOL_TCP, socket.TCP_...
+    -> <builtin>.list.append
+
+[websocket._socket.sock_opt.__init__]
+65:14 setattr  self.timeout
+    reject websocket._core.WebSocket.settimeout: self is a sock_opt; timeout is a plain instance attribute
+
+[websocket._socket.recv]
+95:49 call  WebSocketConnectionClosedException("socket is already clo...
+    -> <builtin>.Exception.__init__
+124:27 call  sock.gettimeout()
+    -> socket.socket.gettimeout
+    -> ssl.SSLSocket.gettimeout
+    -> python_socks.sync.Proxy.create.connect.gettimeout
+    note: sock is annotated socket.socket (B4); the package passes its socket.socket and ssl.SSLSocket (a subclass) objects and the client's pre-initialised socket.socket, and the python-socks stub value of a SOCKS ws connection (websocket-client.md J3)
+    reject websocket._core.WebSocket.gettimeout: sock is a socket
+125:31 call  sock.recv(bufsize)
+    -> socket.socket.recv
+    -> ssl.SSLSocket.recv
+    -> python_socks.sync.Proxy.create.connect.recv
+    note: a value site by name only (frame_buffer assigns an attribute recv); sock is a socket.socket, an ssl.SSLSocket or the python-socks stub value (J3)
+    reject *: sock is a socket
+127:27 call  _recv()
+    -> websocket._socket.recv._recv
+    reject websocket._core.WebSocket._recv: _recv is the local function of line 97
+129:40 call  WebSocketTimeoutException("Connection timed out")
+    -> <builtin>.Exception.__init__
+130:19 getattr  socket.timeout
+    reject websocket._core.WebSocket.gettimeout: socket is the standard module; socket.timeout is its exception class
+131:38 call  extract_err_message(e)
+    -> websocket._utils.extract_err_message
+132:40 call  WebSocketTimeoutException(message)
+    -> <builtin>.Exception.__init__
+134:38 call  extract_err_message(e)
+    -> websocket._utils.extract_err_message
+135:22 call  isinstance(message, str)
+    -> <builtin>.isinstance
+136:44 call  WebSocketTimeoutException(message)
+    -> <builtin>.Exception.__init__
+141:49 call  WebSocketConnectionClosedException("Connection to remote ...
+    -> <builtin>.Exception.__init__
+    note: the package's sockets never return None from recv, but the client's pre-initialised socket.socket may be an admitted subclass whose recv returns None (README, B5 clarification: an admitted subclass can override operations; Codex round 1)
+143:49 call  WebSocketConnectionClosedException("Connection to remote ...
+    -> <builtin>.Exception.__init__
+
+[websocket._socket.recv._recv]
+99:29 call  sock.recv(bufsize)
+    -> socket.socket.recv
+    -> ssl.SSLSocket.recv
+    -> python_socks.sync.Proxy.create.connect.recv
+    note: a value site by name only; sock is the socket.socket or ssl.SSLSocket or python-socks stub value of recv (J3)
+    reject *: sock is a socket
+104:44 call  extract_error_code(exc)
+    -> websocket._utils.extract_error_code
+110:40 call  selectors.DefaultSelector()
+    -> selectors.DefaultSelector
+    note: J6
+111:21 call  sel.register(sock, selectors.EVENT_READ)
+    -> selectors.EpollSelector.register
+    -> selectors.KqueueSelector.register
+    -> selectors.DevpollSelector.register
+    -> selectors.PollSelector.register
+    -> selectors.SelectSelector.register
+113:23 call  sel.select(sock.gettimeout())
+    -> selectors.EpollSelector.select
+    -> selectors.KqueueSelector.select
+    -> selectors.DevpollSelector.select
+    -> selectors.PollSelector.select
+    -> selectors.SelectSelector.select
+    reject websocket._dispatcher.SSLDispatcher.select: sel is the selector of line 110
+113:39 call  sock.gettimeout()
+    -> socket.socket.gettimeout
+    -> ssl.SSLSocket.gettimeout
+    -> python_socks.sync.Proxy.create.connect.gettimeout
+    reject websocket._core.WebSocket.gettimeout: sock is a socket
+114:18 call  sel.close()
+    -> selectors.EpollSelector.close
+    -> selectors.KqueueSelector.close
+    -> selectors.DevpollSelector.close
+    -> selectors.PollSelector.close
+    -> selectors.SelectSelector.close
+    reject *: sel is the selector of line 110
+117:29 call  sock.recv(bufsize)
+    -> socket.socket.recv
+    -> ssl.SSLSocket.recv
+    -> python_socks.sync.Proxy.create.connect.recv
+    note: a value site by name only; sock is the socket.socket or ssl.SSLSocket or python-socks stub value of recv (J3)
+    reject *: sock is a socket
+121:44 call  WebSocketTimeoutException("Connection timed out waiting f...
+    -> <builtin>.Exception.__init__
+
+[websocket._socket.recv_line]
+151:17 call  recv(sock, 1)
+    -> websocket._socket.recv
+    reject websocket._core.WebSocket.recv, websocket._wsdump.main.recv: recv is the function of this module (line 93)
+152:20 call  line.append(c)
+    -> <builtin>.list.append
+155:20 call  b"".join(line)
+    -> <builtin>.bytes.join
+
+[websocket._socket.send]
+159:18 call  isinstance(data, str)
+    -> <builtin>.isinstance
+160:27 call  data.encode("utf-8")
+    -> <builtin>.str.encode
+163:49 call  WebSocketConnectionClosedException("socket is already clo...
+    -> <builtin>.Exception.__init__
+190:27 call  sock.gettimeout()
+    -> socket.socket.gettimeout
+    -> ssl.SSLSocket.gettimeout
+    -> python_socks.sync.Proxy.create.connect.gettimeout
+    note: sock is annotated socket.socket (B4); the package passes its socket.socket and ssl.SSLSocket objects and the python-socks stub value of a SOCKS ws connection (J3)
+    reject websocket._core.WebSocket.gettimeout: sock is a socket
+191:29 call  sock.send(data)
+    -> socket.socket.send
+    -> ssl.SSLSocket.send
+    -> python_socks.sync.Proxy.create.connect.send
+    reject *: sock is a socket
+193:25 call  _send()
+    -> websocket._socket.send._send
+    reject websocket._core.WebSocket._send: _send is the local function of line 165
+194:19 getattr  socket.timeout
+    reject websocket._core.WebSocket.gettimeout: socket is the standard module; socket.timeout is its exception class
+195:38 call  extract_err_message(e)
+    -> websocket._utils.extract_err_message
+196:40 call  WebSocketTimeoutException(message)
+    -> <builtin>.Exception.__init__
+198:38 call  extract_err_message(e)
+    -> websocket._utils.extract_err_message
+199:22 call  isinstance(message, str)
+    -> <builtin>.isinstance
+200:44 call  WebSocketTimeoutException(message)
+    -> <builtin>.Exception.__init__
+
+[websocket._socket.send._send]
+167:29 call  sock.send(data)
+    -> socket.socket.send
+    -> ssl.SSLSocket.send
+    -> python_socks.sync.Proxy.create.connect.send
+    reject *: sock is a socket (J3)
+169:53 call  WebSocketConnectionClosedException("socket is already clo...
+    -> <builtin>.Exception.__init__
+173:44 call  extract_error_code(exc)
+    -> websocket._utils.extract_error_code
+179:40 call  selectors.DefaultSelector()
+    -> selectors.DefaultSelector
+    note: J6
+180:21 call  sel.register(sock, selectors.EVENT_WRITE)
+    -> selectors.EpollSelector.register
+    -> selectors.KqueueSelector.register
+    -> selectors.DevpollSelector.register
+    -> selectors.PollSelector.register
+    -> selectors.SelectSelector.register
+182:23 call  sel.select(sock.gettimeout())
+    -> selectors.EpollSelector.select
+    -> selectors.KqueueSelector.select
+    -> selectors.DevpollSelector.select
+    -> selectors.PollSelector.select
+    -> selectors.SelectSelector.select
+    reject websocket._dispatcher.SSLDispatcher.select: sel is the selector of line 179
+182:39 call  sock.gettimeout()
+    -> socket.socket.gettimeout
+    -> ssl.SSLSocket.gettimeout
+    -> python_socks.sync.Proxy.create.connect.gettimeout
+    reject websocket._core.WebSocket.gettimeout: sock is a socket
+183:18 call  sel.close()
+    -> selectors.EpollSelector.close
+    -> selectors.KqueueSelector.close
+    -> selectors.DevpollSelector.close
+    -> selectors.PollSelector.close
+    -> selectors.SelectSelector.close
+    reject *: sel is the selector of line 179
+186:29 call  sock.send(data)
+    -> socket.socket.send
+    -> ssl.SSLSocket.send
+    -> python_socks.sync.Proxy.create.connect.send
+    reject *: sock is a socket (J3)
+
+== websocket._url
+
+[websocket._url.parse_url]
+40:25 call  ValueError("url is invalid")
+    -> <builtin>.ValueError
+42:28 call  url.split(":", 1)
+    -> <builtin>.str.split
+44:22 call  urlparse(url, scheme="http")
+    -> urllib.parse.urlparse
+48:25 call  ValueError("hostname is invalid")
+    -> <builtin>.ValueError
+62:25 call  ValueError("scheme %s is invalid" % scheme)
+    -> <builtin>.ValueError
+
+[websocket._url._is_ip_address]
+76:22 call  isinstance(addr, str)
+    -> <builtin>.isinstance
+77:24 call  TypeError("_is_ip_address() argument 1 must be str")
+    -> <builtin>.TypeError
+79:29 call  ipaddress.ip_address(addr)
+    -> ipaddress.ip_address
+
+[websocket._url._is_subnet_address]
+88:29 call  ipaddress.ip_network(hostname)
+    -> ipaddress.ip_network
+
+[websocket._url._is_address_in_network]
+98:33 call  ipaddress.ip_network(ip)
+    -> ipaddress.ip_network
+101:33 call  ipaddress.ip_network(net)
+    -> ipaddress.ip_network
+103:32 call  ip_net.subnet_of(target_net)
+    -> ipaddress.IPv4Network.subnet_of
+    -> ipaddress.IPv6Network.subnet_of
+    note: ipaddress.ip_network returns an IPv4Network or an IPv6Network; both inherit _BaseNetwork.subnet_of and are named by the receiver's class
+
+[websocket._url._is_no_proxy_host]
+110:31 call  os.environ.get("no_proxy", os.environ.get("NO_PROXY", ""))
+    -> collections.abc.Mapping.get
+110:58 call  os.environ.get("NO_PROXY", "")
+    -> collections.abc.Mapping.get
+110:83 call  os.environ.get("no_proxy", os.environ.get("NO_PROXY", "")...
+    -> <builtin>.str.replace
+113:31 call  v.split(",")
+    -> <builtin>.str.split
+122:22 call  _is_ip_address(hostname)
+    -> websocket._url._is_ip_address
+123:19 call  any( [ _is_address_in_network(hostname, subnet) for subne...
+    -> <builtin>.any
+125:39 call  _is_address_in_network(hostname, subnet)
+    -> websocket._url._is_address_in_network
+127:38 call  _is_subnet_address(subnet)
+    -> websocket._url._is_subnet_address
+133:29 call  domain.startswith(".")
+    -> <builtin>.str.startswith
+    note: no_proxy is annotated Optional[list[str]] (B4), or the strs split from the no_proxy environment variable
+135:44 call  domain.lstrip(".")
+    -> <builtin>.str.lstrip
+136:33 call  hostname.endswith(stripped_domain)
+    -> <builtin>.str.endswith
+141:55 call  hostname.endswith("." + domain)
+    -> <builtin>.str.endswith
+
+[websocket._url.get_proxy_info]
+181:25 call  _is_no_proxy_host(hostname, no_proxy)
+    -> websocket._url._is_no_proxy_host
+186:42 call  WebSocketProxyException("Cannot use port 0 when proxy_hos...
+    -> <builtin>.Exception.__init__
+192:27 call  os.environ.get(env_key, os.environ.get(env_key.upper(), ""))
+    -> collections.abc.Mapping.get
+192:51 call  os.environ.get(env_key.upper(), "")
+    -> collections.abc.Mapping.get
+192:65 call  env_key.upper()
+    -> <builtin>.str.upper
+192:81 call  os.environ.get(env_key, os.environ.get(env_key.upper(), "...
+    -> <builtin>.str.replace
+196:25 call  urlparse(value)
+    -> urllib.parse.urlparse
+198:21 call  unquote(proxy.username or "")
+    -> urllib.parse.unquote
+198:52 call  unquote(proxy.password or "")
+    -> urllib.parse.unquote
+
+== websocket._utils
+
+[websocket._utils._validate_utf8]
+38:37 call  Utf8Validator()
+    -> wsaccel.utf8validator.Utf8Validator
+    note: both sides of the optional import of wsaccel run (J1); wsaccel is not installed
+38:48 call  Utf8Validator().validate(utfbytes)
+    -> wsaccel.utf8validator.Utf8Validator.validate
+    reject websocket._abnf.ABNF.validate, websocket._abnf.continuous_frame.validate: the receiver is a wsaccel Utf8Validator
+433:35 call  _decode(state, codep, int(i))
+    -> websocket._utils._decode
+433:53 call  int(i)
+    -> <builtin>.int
+
+[websocket._utils.validate_utf8]
+446:18 call  isinstance(utfbytes, str)
+    -> <builtin>.isinstance
+447:35 call  utfbytes.encode("utf-8", "surrogatepass")
+    -> <builtin>.str.encode
+    -> wsaccel.xormask.XorMaskerSimple.process.encode
+    note: continuous_frame.extract (_abnf.py:479) passes frame.data, which with wsaccel is the stub result of _mask for a masked single text frame (referee, round-1 disputes case 1: a missing-library result may take either outcome of a concrete-type isinstance test; on the successful branch B4 adds the concrete method, and the stub path stays)
+448:26 call  _validate_utf8(utfbytes)
+    -> websocket._utils._validate_utf8
+
+[websocket._utils.extract_err_message]
+453:19 call  str(exception.args[0])
+    -> <builtin>.str
+
+[websocket._utils.extract_error_code]
+459:30 call  len(exception.args)
+    -> <builtin>.len
+460:47 call  isinstance(exception.args[0], int)
+    -> <builtin>.isinstance
+
+== websocket._wsdump
+
+[websocket._wsdump]
+226:13 call  main()
+    -> websocket._wsdump.main
+228:14 call  print(e)
+    -> <builtin>.print
+
+[websocket._wsdump.VAction.__call__]
+54:25 call  int(values)
+    -> <builtin>.int
+56:34 call  values.count("v")
+    -> <builtin>.str.count
+    note: values is the option's argument string (annotated str); argparse passes a str for nargs="?"
+57:16 call  setattr(args, self.dest, values)
+    -> <builtin>.setattr
+
+[websocket._wsdump.parse_args]
+61:37 call  argparse.ArgumentParser(description="WebSocket Simple Dum...
+    -> argparse.ArgumentParser
+62:24 call  parser.add_argument( "url", metavar="ws_url", help="webso...
+    -> argparse.ArgumentParser.add_argument
+67:24 call  parser.add_argument("-p", "--proxy", help="proxy url. ex....
+    -> argparse.ArgumentParser.add_argument
+68:24 call  parser.add_argument( "-v", "--verbose", default=0, nargs=...
+    -> argparse.ArgumentParser.add_argument
+    note: add_argument instantiates VAction, whose first __init__ is argparse.Action.__init__ (outside the package, no edge)
+78:24 call  parser.add_argument( "-n", "--nocert", action="store_true...
+    -> argparse.ArgumentParser.add_argument
+81:24 call  parser.add_argument("-r", "--raw", action="store_true", h...
+    -> argparse.ArgumentParser.add_argument
+82:24 call  parser.add_argument("-s", "--subprotocols", nargs="*", he...
+    -> argparse.ArgumentParser.add_argument
+83:24 call  parser.add_argument("-o", "--origin", help="Set origin")
+    -> argparse.ArgumentParser.add_argument
+84:24 call  parser.add_argument( "--eof-wait", default=0, type=int, h...
+    -> argparse.ArgumentParser.add_argument
+90:24 call  parser.add_argument("-t", "--text", help="Send initial te...
+    -> argparse.ArgumentParser.add_argument
+91:24 call  parser.add_argument( "--timings", action="store_true", he...
+    -> argparse.ArgumentParser.add_argument
+94:24 call  parser.add_argument("--headers", help="Set custom headers...
+    -> argparse.ArgumentParser.add_argument
+96:29 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+    -> websocket._wsdump.VAction.__call__
+    note: parse_args calls the VAction of -v/--verbose back when the option is given (library call-back, B5)
+    reject websocket._wsdump.parse_args: parser is an argparse.ArgumentParser
+
+[websocket._wsdump.RawInput.raw_input]
+101:21 call  input(prompt)
+    -> <builtin>.input
+101:36 call  input(prompt).encode("utf-8")
+    -> <builtin>.str.encode
+
+[websocket._wsdump.InteractiveConsole.write]
+106:25 call  sys.stdout.write("\033[2K\033[E")
+    -> io.TextIOWrapper.write
+    note: the default sys.stdout is named by its class (README, callees outside the package)
+    reject *: the receiver is sys.stdout
+108:25 call  sys.stdout.write("\033[34m< " + data + "\033[39m")
+    -> io.TextIOWrapper.write
+    reject *: the receiver is sys.stdout
+109:25 call  sys.stdout.write("\n> ")
+    -> io.TextIOWrapper.write
+    reject *: the receiver is sys.stdout
+110:25 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+
+[websocket._wsdump.InteractiveConsole.read]
+113:30 call  self.raw_input("> ")
+    -> websocket._wsdump.RawInput.raw_input
+    note: in the MRO of InteractiveConsole, RawInput comes before code.InteractiveConsole, so RawInput.raw_input is found first
+
+[websocket._wsdump.NonInteractive.write]
+118:25 call  sys.stdout.write(data)
+    -> io.TextIOWrapper.write
+    reject *: the receiver is sys.stdout
+119:25 call  sys.stdout.write("\n")
+    -> io.TextIOWrapper.write
+    reject *: the receiver is sys.stdout
+120:25 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+
+[websocket._wsdump.NonInteractive.read]
+123:30 call  self.raw_input("")
+    -> websocket._wsdump.RawInput.raw_input
+
+[websocket._wsdump.main]
+127:27 call  time.time()
+    -> time.time
+128:22 call  parse_args()
+    -> websocket._wsdump.parse_args
+130:30 call  websocket.enableTrace(True)
+    -> websocket._logging.enableTrace
+133:21 call  urlparse(args.proxy)
+    -> urllib.parse.urlparse
+143:13 getattr  args.headers
+    reject websocket._core.WebSocket.getheaders: args is the argparse.Namespace of parse_args
+144:33 call  list(map(str.strip, args.headers.split(",")))
+    -> <builtin>.list
+144:37 call  map(str.strip, args.headers.split(","))
+    -> <builtin>.map
+144:54 getattr  args.headers
+    reject websocket._core.WebSocket.getheaders: args is the argparse.Namespace of parse_args
+144:67 call  args.headers.split(",")
+    -> <builtin>.str.split
+145:37 call  websocket.create_connection(args.url, sslopt=opts, **opti...
+    -> websocket._core.create_connection
+147:33 call  NonInteractive()
+    note: NonInteractive and RawInput define no __init__; the first __init__ is object.__init__, so no constructor edge
+149:37 call  InteractiveConsole()
+    -> code.InteractiveConsole.__init__
+    note: the first __init__ in the MRO of InteractiveConsole is code.InteractiveConsole's (README: an inherited __init__ is named through the nearest base outside the package)
+150:14 call  print("Press Ctrl+C to quit")
+    -> <builtin>.print
+206:30 call  threading.Thread(target=recv_ws)
+    -> threading.Thread
+    reject websocket._wsdump.main.recv_ws: Thread stores the target; thread.start() (208:17) runs it
+208:17 call  thread.start()
+    -> threading.Thread.start
+    -> websocket._wsdump.main.recv_ws
+    note: start() runs the target recv_ws of the Thread made at line 206 (callback rule)
+211:16 call  ws.send(args.text)
+    -> websocket._core.WebSocket.send
+    reject *: ws is the WebSocket that create_connection returns (class_ is its default WebSocket)
+215:35 call  console.read()
+    -> websocket._wsdump.InteractiveConsole.read
+    -> websocket._wsdump.NonInteractive.read
+    reject websocket._app.WebSocketApp.run_forever.read, websocket._dispatcher.Dispatcher.read, websocket._dispatcher.SSLDispatcher.read, websocket._dispatcher.WrappedDispatcher.read: console is the NonInteractive or InteractiveConsole of lines 147 and 149
+216:20 call  ws.send(message)
+    -> websocket._core.WebSocket.send
+    reject *: ws is the WebSocket that create_connection returns
+220:23 call  time.sleep(args.eof_wait)
+    -> time.sleep
+
+[websocket._wsdump.main.recv]
+154:34 call  ws.recv_frame()
+    -> websocket._core.WebSocket.recv_frame
+    reject websocket._abnf.frame_buffer.recv_frame: ws is a WebSocket
+160:26 call  ws.send_close()
+    -> websocket._core.WebSocket.send_close
+163:20 call  ws.pong(frame.data)
+    -> websocket._core.WebSocket.pong
+
+[websocket._wsdump.main.recv_ws]
+170:32 call  recv()
+    -> websocket._wsdump.main.recv
+    reject websocket._core.WebSocket.recv, websocket._socket.recv: recv is the local function of main (line 152)
+172:67 call  isinstance(data, bytes)
+    -> <builtin>.isinstance
+173:27 call  str(data, "utf-8")
+    -> <builtin>.str
+175:27 call  isinstance(data, bytes)
+    -> <builtin>.isinstance
+175:48 call  len(data)
+    -> <builtin>.len
+178:43 call  str(gzip.decompress(data), "utf-8")
+    -> <builtin>.str
+178:59 call  gzip.decompress(data)
+    -> gzip.decompress
+181:28 call  isinstance(data, bytes)
+    -> <builtin>.isinstance
+183:43 call  str( zlib.decompress(data, -zlib.MAX_WBITS), "utf-8" )
+    -> <builtin>.str
+184:40 call  zlib.decompress(data, -zlib.MAX_WBITS)
+    -> zlib.decompress
+189:26 call  isinstance(data, bytes)
+    -> <builtin>.isinstance
+190:28 call  repr(data)
+    -> <builtin>.repr
+193:55 call  websocket.ABNF.OPCODE_MAP.get(opcode)
+    -> <builtin>.dict.get
+199:34 call  console.write(f"{time.time() - start_time}: {msg}")
+    -> websocket._wsdump.InteractiveConsole.write
+    -> websocket._wsdump.NonInteractive.write
+199:47 call  time.time()
+    -> time.time
+201:34 call  console.write(msg)
+    -> websocket._wsdump.InteractiveConsole.write
+    -> websocket._wsdump.NonInteractive.write
+

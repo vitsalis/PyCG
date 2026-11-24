@@ -1,0 +1,856 @@
+# Call-site ledger of pyfiglet at sha256:db9c9940ed1bf3048deff534ed52ff2dafbbc2cd7610b17bb5eca1df6d4278ef.
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# pyfiglet.md shows how this ledger applies them and records each judgement
+# (J1 to J8). No trace exists: every edge comes from reading. Supported
+# runtimes: CPython 3.9 and later (setup.py python_requires=">=3.9"; no other
+# implementation is declared), on Unix only (J1). The package's
+# own resources can be a directory or a zip import (J2). Fonts, text,
+# directions and justifications are strs (annotations); no package object
+# reaches a str parameter with a method that pyfiglet overrides.
+
+== pyfiglet
+
+[pyfiglet]
+62:36 call  os.path.join(os.environ["APPDATA"], "pyfiglet")
+    note: no edge: the branch sys.platform == 'win32' does not run; the release declares only Operating System :: Unix, and a platform branch does not by itself admit a platform (the referee's platform ruling, J1)
+120:31 call  re.compile(r'^[tf]lf2.')
+    -> re.compile
+121:29 call  re.compile(r'(.)\s*$')
+    -> re.compile
+132:6 decorator  @classmethod
+    -> <builtin>.classmethod
+171:6 decorator  @classmethod
+    -> <builtin>.classmethod
+198:6 decorator  @classmethod
+    -> <builtin>.classmethod
+207:6 decorator  @classmethod
+    -> <builtin>.classmethod
+228:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+374:22 call  type(''.encode('ascii').decode('ascii'))
+    -> <builtin>.type
+374:32 call  ''.encode('ascii')
+    -> <builtin>.str.encode
+374:48 call  ''.encode('ascii').decode('ascii')
+    -> <builtin>.bytes.decode
+872:6 decorator  @property
+    -> <builtin>.property
+886:6 decorator  @property
+    -> <builtin>.property
+1035:13 call  sys.exit(main())
+    -> sys.exit
+    note: the if __name__ == '__main__' block is code of the module and keeps its edges (README, "Edges"); python -m pyfiglet.__init__ runs it with the package imported, so the relative import of line 21 works
+1035:18 call  main()
+    -> pyfiglet.main
+
+[pyfiglet.figlet_format]
+68:17 call  Figlet(font, **kwargs)
+    -> pyfiglet.Figlet.__init__
+69:26 call  fig.renderText(text)
+    -> pyfiglet.Figlet.renderText
+
+[pyfiglet.print_figlet]
+73:29 call  parse_color(colors)
+    -> pyfiglet.parse_color
+75:25 call  sys.stdout.write(ansiColors)
+    -> io.TextIOWrapper.write
+    -> io.BufferedWriter.write
+    -> io.FileIO.write
+    note: sys.stdout is the interpreter's text stream (io.TextIOWrapper), or the binary stream that an earlier pyfiglet.main() in the same process left there with sys.stdout = sys.stdout.detach() (__init__.py:1019): io.BufferedWriter, io.FileIO (under -u, or after a second main()); write(str) then raises TypeError in its body, which keeps the edge (J3)
+77:10 call  print(figlet_format(text, font, **kwargs))
+    -> <builtin>.print
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is the FigletString of renderText, a str subclass that defines no __str__, so print runs no package code
+77:24 call  figlet_format(text, font, **kwargs)
+    -> pyfiglet.figlet_format
+80:25 call  sys.stdout.write(RESET_COLORS.decode('UTF-8', 'replace'))
+    -> io.TextIOWrapper.write
+    -> io.BufferedWriter.write
+    -> io.FileIO.write
+    note: reached only after write(ansiColors) at 75:25 and print at 77:10 succeeded on a text stream; but another thread can complete main() in between, and line 1019 replaces sys.stdout with its binary stream (io.BufferedWriter, or io.FileIO under -u); write(str) then raises TypeError in its body, which keeps the edge (J3, Codex round 1)
+80:45 call  RESET_COLORS.decode('UTF-8', 'replace')
+    -> <builtin>.bytes.decode
+81:25 call  sys.stdout.flush()
+    -> io.TextIOWrapper.flush
+    -> io.BufferedWriter.flush
+    -> io.FileIO.flush
+    note: sys.stdout is the text stream on which 80:25 succeeded, or the binary stream that a main() in another thread put there between lines 80 and 81 (io.BufferedWriter, or io.FileIO under -u; flush is inherited by FileIO and named by the receiver class) (J3, Codex round 1)
+
+[pyfiglet.FigletFont.__init__]
+129:37 call  self.preloadFont(font)
+    -> pyfiglet.FigletFont.preloadFont
+130:22 call  self.loadFont()
+    -> pyfiglet.FigletFont.loadFont
+
+[pyfiglet.FigletFont.preloadFont]
+141:26 op  '%s.%s' % (font, extension)
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: font is a str (annotation; FigletString, the one package str subclass, defines no __str__) and extension a str literal
+142:45 call  importlib.resources.files('pyfiglet.fonts')
+    -> importlib.resources.files
+    note: from CPython 3.12 files is the package_to_anchor wrapper, a Python function at the public attribute, which keeps that path (README, "Outside names")
+142:72 call  importlib.resources.files('pyfiglet.fonts').joinpath(fn)
+    -> pathlib.PosixPath.joinpath
+    -> zipfile.Path.joinpath
+    note: files() of the regular package pyfiglet.fonts is pathlib.Path(loader.path).parent (3.9 importlib/_common.py fallback_resources; 3.10 to 3.15 FileReader.files): a PosixPath (Unix only, J1); for a zip import it is a zipfile.Path (3.9 fallback_resources, 3.10 to 3.15 ZipReader.files; J2)
+143:27 call  path.exists()
+    -> pathlib.PosixPath.exists
+    -> zipfile.Path.exists
+    note: path as at 142:72
+148:45 call  os.path.join(location, fn)
+    -> os.path.join
+149:38 call  os.path.isfile(full_name)
+    -> os.path.isfile
+150:49 call  pathlib.Path(full_name)
+    -> pathlib.Path
+155:32 call  font_path.open('rb')
+    -> pathlib.PosixPath.open
+    -> zipfile.Path.open
+    note: font_path is the resource path of 142:72 or pathlib.Path(full_name) of 150:49 (a PosixPath); open('rb') gives an io.BufferedReader, or for a zipfile.Path a zipfile.ZipExtFile (zipfile.Path.open returns ZipFile.open's stream for a binary mode, 3.9 to 3.15)
+156:38 call  zipfile.is_zipfile(f)
+    -> zipfile.is_zipfile
+157:41 call  zipfile.ZipFile(f)
+    -> zipfile.ZipFile
+158:49 call  zip_file.open(zip_file.namelist()[0])
+    -> zipfile.ZipFile.open
+158:67 call  zip_file.namelist()
+    -> zipfile.ZipFile.namelist
+159:45 call  zip_font.read()
+    -> zipfile.ZipExtFile.read
+162:27 call  f.seek(0)
+    -> io.BufferedReader.seek
+    -> zipfile.ZipExtFile.seek
+    note: f as at 155:32
+163:34 call  f.read()
+    -> io.BufferedReader.read
+    -> zipfile.ZipExtFile.read
+    note: f as at 155:32
+167:31 call  data.decode('UTF-8', 'replace')
+    -> <builtin>.bytes.decode
+169:31 call  FontNotFound(font)
+    -> pyfiglet.FigletError.__init__
+
+[pyfiglet.FigletFont.isValidFont]
+173:29 call  font.endswith(('.flf', '.tlf'))
+    -> <builtin>.str.endswith
+176:33 call  os.path.join(SHARED_DIRECTORY, font)
+    -> os.path.join
+177:26 call  os.path.isfile(font)
+    -> os.path.isfile
+178:21 call  open(font, 'rb')
+    -> <builtin>.open
+179:28 call  os.path.isfile(full_file)
+    -> os.path.isfile
+180:21 call  open(full_file, 'rb')
+    -> <builtin>.open
+182:42 call  importlib.resources.files('pyfiglet.fonts')
+    -> importlib.resources.files
+182:69 call  importlib.resources.files('pyfiglet.fonts').joinpath(font)
+    -> pathlib.PosixPath.joinpath
+    -> zipfile.Path.joinpath
+    note: as at 142:72 (J1, J2)
+182:80 call  importlib.resources.files('pyfiglet.fonts').joinpath(font...
+    -> pathlib.PosixPath.open
+    -> zipfile.Path.open
+    note: as at 142:72 (J1, J2); the result is an io.BufferedReader or a zipfile.ZipExtFile
+184:30 call  zipfile.is_zipfile(f)
+    -> zipfile.is_zipfile
+186:33 call  zipfile.ZipFile(f)
+    -> zipfile.ZipFile
+187:41 call  zip_file.open(zip_file.namelist()[0])
+    -> zipfile.ZipFile.open
+187:59 call  zip_file.namelist()
+    -> zipfile.ZipFile.namelist
+188:43 call  zip_font.readline()
+    -> zipfile.ZipExtFile.readline
+188:52 call  zip_font.readline().decode('UTF-8', 'replace')
+    -> <builtin>.bytes.decode
+191:19 call  f.seek(0)
+    -> io.BufferedReader.seek
+    -> zipfile.ZipExtFile.seek
+    note: f is the io.BufferedReader of open() at 178:21 or 180:21, or the stream of 182:80 (io.BufferedReader, or zipfile.ZipExtFile for a zip import, J2)
+192:32 call  f.readline()
+    -> io.BufferedReader.readline
+    -> zipfile.ZipExtFile.readline
+    note: f as at 191:19
+192:41 call  f.readline().decode('UTF-8', 'replace')
+    -> <builtin>.bytes.decode
+194:16 call  f.close()
+    -> io.BufferedReader.close
+    -> zipfile.ZipExtFile.close
+    note: f as at 191:19
+196:40 call  cls.reMagicNumber.search(header)
+    -> re.Pattern.search
+
+[pyfiglet.FigletFont.getFonts]
+200:46 call  importlib.resources.files('pyfiglet.fonts')
+    -> importlib.resources.files
+200:72 call  importlib.resources.files('pyfiglet.fonts').iterdir()
+    -> pathlib.PosixPath.iterdir
+    -> zipfile.Path.iterdir
+    note: as at 142:72 (J1, J2)
+201:25 call  os.path.isdir(SHARED_DIRECTORY)
+    -> os.path.isdir
+202:41 call  itertools.chain(all_files, pathlib.Path(SHARED_DIRECTORY)...
+    -> itertools.chain
+202:65 call  pathlib.Path(SHARED_DIRECTORY)
+    -> pathlib.Path
+202:91 call  pathlib.Path(SHARED_DIRECTORY).iterdir()
+    -> pathlib.PosixPath.iterdir
+    note: pathlib.Path() makes a PosixPath on Unix (J1)
+203:32 call  font.name.split('.', 2)
+    -> <builtin>.str.split
+205:32 call  font.is_file()
+    -> pathlib.PosixPath.is_file
+    -> zipfile.Path.is_file
+    note: the items of iterdir() at 200:72 and 202:91 have the class of their directory: PosixPath or zipfile.Path (J2)
+205:54 call  cls.isValidFont(font.name)
+    -> pyfiglet.FigletFont.isValidFont
+
+[pyfiglet.FigletFont.infoFont]
+212:38 call  FigletFont.preloadFont(font)
+    -> pyfiglet.FigletFont.preloadFont
+214:35 call  re.compile(r""" ^(FONT|COMMENT|FONTNAME_REGISTRY|FAMILY_N...
+    -> re.compile
+220:33 call  re.compile(r'^.*[@#$]$')
+    -> re.compile
+221:36 call  data.splitlines()
+    -> <builtin>.str.splitlines
+222:41 call  cls.reMagicNumber.search(line)
+    -> re.Pattern.search
+223:45 call  reStartMarker.search(line)
+    -> re.Pattern.search
+224:43 call  reEndMarker.search(line)
+    -> re.Pattern.search
+225:29 call  infos.append(line)
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: infos is a list
+226:25 call  '\n'.join(infos)
+    -> <builtin>.str.join
+
+[pyfiglet.FigletFont.installFonts]
+233:19 call  hasattr(importlib.resources.files('pyfiglet'), 'resolve')
+    -> <builtin>.hasattr
+233:45 call  importlib.resources.files('pyfiglet')
+    -> importlib.resources.files
+235:27 call  str(importlib.resources.files('pyfiglet.fonts'))
+    -> <builtin>.str
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is the resource path of pyfiglet.fonts, a PosixPath here (zipfile.Path has no resolve, so a zip import takes the else branch)
+235:53 call  importlib.resources.files('pyfiglet.fonts')
+    -> importlib.resources.files
+240:14 call  print("Installing {} to {}".format(file_name, location))
+    -> <builtin>.print
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is a str
+240:43 call  "Installing {} to {}".format(file_name, location)
+    -> <builtin>.str.format
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: file_name is a str (annotation) and location a str
+243:30 call  os.path.exists(location)
+    -> os.path.exists
+244:24 call  os.makedirs(location)
+    -> os.makedirs
+247:28 call  os.path.splitext(file_name)
+    -> os.path.splitext
+247:48 call  os.path.splitext(file_name)[1].lower()
+    -> <builtin>.str.lower
+249:33 call  zipfile.ZipFile(file_name)
+    -> zipfile.ZipFile
+250:46 call  zip_file.namelist()
+    -> zipfile.ZipFile.namelist
+251:49 call  os.path.basename(font)
+    -> os.path.basename
+254:39 call  zip_file.open(font)
+    -> zipfile.ZipFile.open
+255:34 call  open(os.path.join(location, font_file), "wb")
+    -> <builtin>.open
+255:47 call  os.path.join(location, font_file)
+    -> os.path.join
+256:47 call  shutil.copyfileobj(src, dest)
+    -> shutil.copyfileobj
+258:24 call  shutil.copy(file_name, location)
+    -> shutil.copy
+
+[pyfiglet.FigletFont.loadFont]
+267:26 call  re.sub(r"[\u0085\u2028\u2029]", " ", self.data)
+    -> re.sub
+270:35 call  data.splitlines()
+    -> <builtin>.str.splitlines
+272:30 call  data.pop(0)
+    -> <builtin>.list.pop
+273:41 call  self.reMagicNumber.search(header)
+    -> re.Pattern.search
+274:32 call  FontError('%s is not a valid figlet font' % self.font)
+    -> pyfiglet.FigletError.__init__
+274:65 op  '%s is not a valid figlet font' % self.font
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: self.font is the str font name of __init__ (annotation)
+276:44 call  self.reMagicNumber.sub('', header)
+    -> re.Pattern.sub
+277:34 call  header.split()
+    -> <builtin>.str.split
+279:19 call  len(header)
+    -> <builtin>.len
+280:32 call  FontError('malformed header for %s' % self.font)
+    -> pyfiglet.FigletError.__init__
+280:59 op  'malformed header for %s' % self.font
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: self.font is the str font name of __init__ (annotation)
+283:71 call  map( # type: ignore int, header[1:6])
+    -> <builtin>.map
+    note: map calls the builtin int when the assignment unpacks it; a builtin that library code calls back is no edge
+288:19 call  len(header)
+    -> <builtin>.len
+289:37 call  int(header[6])
+    -> <builtin>.int
+290:19 call  len(header)
+    -> <builtin>.len
+291:33 call  int(header[7])
+    -> <builtin>.int
+311:27 call  range(0, commentLines)
+    -> <builtin>.range
+312:41 call  data.pop(0)
+    -> <builtin>.list.pop
+339:27 call  range(32, 127)
+    -> <builtin>.range
+340:39 call  __char(data)
+    -> pyfiglet.FigletFont.loadFont.__char
+341:38 call  ''.join(letter)
+    -> <builtin>.str.join
+348:43 call  __char(data)
+    -> pyfiglet.FigletFont.loadFont.__char
+349:31 call  ''.join(letter)
+    -> <builtin>.str.join
+350:39 call  ord(i)
+    -> <builtin>.ord
+351:39 call  ord(i)
+    -> <builtin>.ord
+355:32 call  data.pop(0)
+    -> <builtin>.list.pop
+355:41 call  data.pop(0).strip()
+    -> <builtin>.str.strip
+356:31 call  line.split(' ', 1)
+    -> <builtin>.str.split
+359:38 call  re.search('^0x', i, re.IGNORECASE)
+    -> re.search
+361:28 call  int(i, 16)
+    -> <builtin>.int
+362:43 call  __char(data)
+    -> pyfiglet.FigletFont.loadFont.__char
+363:31 call  ''.join(letter)
+    -> <builtin>.str.join
+368:28 call  FontError('problem parsing %s font: %s' % (self.font, e))
+    -> pyfiglet.FigletError.__init__
+368:59 op  'problem parsing %s font: %s' % (self.font, e)
+    -> pyfiglet.FigletError.__str__
+    reject pyfiglet.FigletFont.__str__: the operands are the str self.font and the caught exception e
+    note: e can be the FontError that the try block raises itself at 274:32 or 280:32; %s formats it with str(e), which runs FigletError.__str__ (J5)
+
+[pyfiglet.FigletFont.loadFont.__char]
+322:31 call  range(0, height)
+    -> <builtin>.range
+323:36 call  data.pop(0)
+    -> <builtin>.list.pop
+325:54 call  self.reEndMarker.search(line)
+    -> re.Pattern.search
+325:66 call  self.reEndMarker.search(line).group(1)
+    -> re.Match.group
+326:41 call  re.compile(re.escape(end) + r'{1,2}\s*$')
+    -> re.compile
+326:51 call  re.escape(end)
+    -> re.escape
+328:35 call  end.sub('', line)
+    -> re.Pattern.sub
+330:27 call  len(line)
+    -> <builtin>.len
+331:36 call  len(line)
+    -> <builtin>.len
+332:33 call  chars.append(line)
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: chars is a list
+
+[pyfiglet.FigletFont.__str__]
+371:42 op  '<FigletFont object: %s>' % self.font
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: self.font is the str font name of __init__ (annotation)
+
+[pyfiglet.FigletString.reverse]
+422:35 call  self.splitlines()
+    -> <builtin>.str.splitlines
+    note: FigletString inherits splitlines from str (named through the builtin base)
+423:23 call  out.append(row.translate(self.__reverse_map__)[::-1])
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: out is a list
+423:37 call  row.translate(self.__reverse_map__)
+    -> <builtin>.str.translate
+425:32 call  self.newFromList(out)
+    -> pyfiglet.FigletString.newFromList
+
+[pyfiglet.FigletString.flip]
+429:35 call  self.splitlines()
+    -> <builtin>.str.splitlines
+430:23 call  out.append(row.translate(self.__flip_map__))
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: out is a list
+430:37 call  row.translate(self.__flip_map__)
+    -> <builtin>.str.translate
+432:32 call  self.newFromList(out)
+    -> pyfiglet.FigletString.newFromList
+
+[pyfiglet.FigletString.strip_surrounding_newlines]
+439:35 call  self.splitlines()
+    -> <builtin>.str.splitlines
+441:25 call  row.strip()
+    -> <builtin>.str.strip
+443:27 call  out.append(row)
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: out is a list
+446:32 call  self.newFromList(out)
+    -> pyfiglet.FigletString.newFromList
+446:44 call  self.newFromList(out).rstrip()
+    -> <builtin>.str.rstrip
+    note: the receiver is the FigletString of newFromList, which inherits rstrip from str
+
+[pyfiglet.FigletString.normalize_surrounding_newlines]
+449:54 call  self.strip_surrounding_newlines()
+    -> pyfiglet.FigletString.strip_surrounding_newlines
+
+[pyfiglet.FigletString.newFromList]
+452:28 call  FigletString('\n'.join(list) + '\n')
+    note: FigletString subclasses str and defines neither __init__ nor __new__; str defines no __init__, so the first __init__ of the MRO is object.__init__ and the call has no edge (README, "An inherited __init__", tabulate's JupyterHTMLStr)
+452:38 call  '\n'.join(list)
+    -> <builtin>.str.join
+
+[pyfiglet.FigletRenderingEngine.render]
+468:32 call  FigletBuilder(text, self.base.Font, self.base.direction, ...
+    -> pyfiglet.FigletBuilder.__init__
+    reject pyfiglet.Figlet.direction, pyfiglet.Figlet.justify: the arguments are the strs that the properties return (the loads at 470:43 and 472:43 run them); FigletBuilder stores them and never calls them
+470:43 getattr  self.base.direction
+    -> pyfiglet.Figlet.direction
+    note: self.base is the Figlet that Figlet.__init__ passes (base=self, 864:44; annotation Optional[Figlet]); with base None, self.base.Font raises first
+472:43 getattr  self.base.justify
+    -> pyfiglet.Figlet.justify
+    note: self.base as at 470:43
+474:36 call  builder.isNotFinished()
+    -> pyfiglet.FigletBuilder.isNotFinished
+475:37 call  builder.addCharToProduct()
+    -> pyfiglet.FigletBuilder.addCharToProduct
+476:33 call  builder.goToNextChar()
+    -> pyfiglet.FigletBuilder.goToNextChar
+478:37 call  builder.returnProduct()
+    -> pyfiglet.FigletBuilder.returnProduct
+
+[pyfiglet.FigletProduct.__init__]
+486:43 call  list()
+    -> <builtin>.list
+
+[pyfiglet.FigletProduct.append]
+490:26 call  self.queue.append(buffer)
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: self.queue is the list of __init__
+
+[pyfiglet.FigletProduct.getString]
+493:28 call  FigletString(self.buffer_string)
+    note: no edge, as at 452:28: the first __init__ of FigletString's MRO is object.__init__
+
+[pyfiglet.FigletBuilder.__init__]
+502:25 call  list(map(ord, list(text)))
+    -> <builtin>.list
+    note: list drives the map, which calls the builtin ord: no edge for ord
+502:29 call  map(ord, list(text))
+    -> <builtin>.map
+502:39 call  list(text)
+    -> <builtin>.list
+516:62 call  list()
+    -> <builtin>.list
+517:37 call  FigletProduct()
+    -> pyfiglet.FigletProduct.__init__
+518:41 call  range(self.font.height)
+    -> <builtin>.range
+
+[pyfiglet.FigletBuilder.addCharToProduct]
+533:34 call  self.getCurChar()
+    -> pyfiglet.FigletBuilder.getCurChar
+536:43 call  ord("\n")
+    -> <builtin>.ord
+537:41 call  self.blankMarkers.append(([row for row in self.buffer], s...
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: self.blankMarkers is a list (__init__, cutBufferCommon)
+538:35 call  self.handleNewLine()
+    -> pyfiglet.FigletBuilder.handleNewLine
+543:41 call  self.getCurWidth()
+    -> pyfiglet.FigletBuilder.getCurWidth
+544:33 call  CharNotPrinted("Width is not enough to print this charact...
+    -> pyfiglet.FigletError.__init__
+545:45 call  self.getCurWidth()
+    -> pyfiglet.FigletBuilder.getCurWidth
+546:48 call  self.currentSmushAmount(curChar)
+    -> pyfiglet.FigletBuilder.currentSmushAmount
+548:37 call  len(self.buffer[0])
+    -> <builtin>.len
+550:43 call  ord(' ')
+    -> <builtin>.ord
+551:37 call  self.blankMarkers.append(([row for row in self.buffer], s...
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: self.blankMarkers is a list (__init__, cutBufferCommon)
+553:43 call  ord('\n')
+    -> <builtin>.ord
+554:37 call  self.blankMarkers.append(([row for row in self.buffer], s...
+    -> <builtin>.list.append
+    reject pyfiglet.FigletProduct.append: self.blankMarkers is a list (__init__, cutBufferCommon)
+    note: in one thread line 536 has returned for a newline and the test at 553 is false; but FigletBuilder is public, and another thread can call the public goToNextChar() between lines 550 and 553 (a builder for "A\n"), so the test meets the newline (J4, Codex round 1)
+555:31 call  self.handleNewLine()
+    -> pyfiglet.FigletBuilder.handleNewLine
+    note: the branch runs when another thread advances self.iterator, as at 554:37 (J4, Codex round 1)
+558:31 call  self.handleNewLine()
+    -> pyfiglet.FigletBuilder.handleNewLine
+560:29 call  range(0, self.font.height)
+    -> <builtin>.range
+561:46 call  self.addCurCharRowToBufferRow(curChar, row)
+    -> pyfiglet.FigletBuilder.addCurCharRowToBufferRow
+
+[pyfiglet.FigletBuilder.returnProduct]
+574:33 call  self.flushLastBuffer()
+    -> pyfiglet.FigletBuilder.flushLastBuffer
+575:27 call  self.formatProduct()
+    -> pyfiglet.FigletBuilder.formatProduct
+576:38 call  self.product.getString()
+    -> pyfiglet.FigletProduct.getString
+
+[pyfiglet.FigletBuilder.isNotFinished]
+579:34 call  len(self.text)
+    -> <builtin>.len
+
+[pyfiglet.FigletBuilder.flushLastBuffer]
+585:28 call  self.product.append(self.buffer)
+    -> pyfiglet.FigletProduct.append
+
+[pyfiglet.FigletBuilder.formatProduct]
+594:40 call  self.justifyString(self.justify, buffer)
+    -> pyfiglet.FigletBuilder.justifyString
+    reject pyfiglet.Figlet.justify: the argument is the str attribute justify of the FigletBuilder self, not the property of Figlet
+594:46 getattr  self.justify
+    reject pyfiglet.Figlet.justify: self is a FigletBuilder, whose justify is an instance attribute (a str)
+595:49 call  self.replaceHardblanks(buffer)
+    -> pyfiglet.FigletBuilder.replaceHardblanks
+
+[pyfiglet.FigletBuilder.getCharAt]
+599:29 call  len(list(self.text))
+    -> <builtin>.len
+599:34 call  list(self.text)
+    -> <builtin>.list
+
+[pyfiglet.FigletBuilder.getCharWidthAt]
+609:29 call  len(self.text)
+    -> <builtin>.len
+
+[pyfiglet.FigletBuilder.getCurChar]
+618:30 call  self.getCharAt(self.iterator)
+    -> pyfiglet.FigletBuilder.getCharAt
+
+[pyfiglet.FigletBuilder.getCurWidth]
+621:35 call  self.getCharWidthAt(self.iterator)
+    -> pyfiglet.FigletBuilder.getCharWidthAt
+
+[pyfiglet.FigletBuilder.getLeftSmushedChar]
+624:18 call  len(addLeft)
+    -> <builtin>.len
+625:34 call  len(addLeft)
+    -> <builtin>.len
+
+[pyfiglet.FigletBuilder.currentSmushAmount]
+632:32 call  self.smushAmount(self.buffer, curChar)
+    -> pyfiglet.FigletBuilder.smushAmount
+
+[pyfiglet.FigletBuilder.updateSmushedCharInLeftBuffer]
+635:17 call  list(addLeft)
+    -> <builtin>.list
+636:32 call  len(l)
+    -> <builtin>.len
+639:26 call  ''.join(l)
+    -> <builtin>.str.join
+
+[pyfiglet.FigletBuilder.smushRow]
+646:17 getattr  self.direction
+    reject pyfiglet.Figlet.direction: self is a FigletBuilder, whose direction is an instance attribute (a str)
+649:23 call  range(0, self.maxSmush)
+    -> <builtin>.range
+650:48 call  self.getLeftSmushedChar(i, addLeft)
+    -> pyfiglet.FigletBuilder.getLeftSmushedChar
+652:38 call  self.smushChars(left=left, right=right)
+    -> pyfiglet.FigletBuilder.smushChars
+653:57 call  self.updateSmushedCharInLeftBuffer(addLeft, idx, smushed)
+    -> pyfiglet.FigletBuilder.updateSmushedCharInLeftBuffer
+
+[pyfiglet.FigletBuilder.addCurCharRowToBufferRow]
+657:42 call  self.smushRow(curChar, row)
+    -> pyfiglet.FigletBuilder.smushRow
+
+[pyfiglet.FigletBuilder.cutBufferCommon]
+662:41 call  range(self.font.height)
+    -> <builtin>.range
+663:33 call  list()
+    -> <builtin>.list
+665:34 call  self.getCurChar()
+    -> pyfiglet.FigletBuilder.getCurChar
+668:48 call  self.currentSmushAmount(curChar)
+    -> pyfiglet.FigletBuilder.currentSmushAmount
+
+[pyfiglet.FigletBuilder.cutBufferAtLastBlank]
+671:28 call  self.product.append(saved_buffer)
+    -> pyfiglet.FigletProduct.append
+673:29 call  self.cutBufferCommon()
+    -> pyfiglet.FigletBuilder.cutBufferCommon
+
+[pyfiglet.FigletBuilder.cutBufferAtLastChar]
+676:28 call  self.product.append(self.buffer)
+    -> pyfiglet.FigletProduct.append
+678:29 call  self.cutBufferCommon()
+    -> pyfiglet.FigletBuilder.cutBufferCommon
+
+[pyfiglet.FigletBuilder.getLastBlank]
+685:65 call  self.blankMarkers.pop()
+    -> <builtin>.list.pop
+
+[pyfiglet.FigletBuilder.handleNewLine]
+691:57 call  self.getLastBlank()
+    -> pyfiglet.FigletBuilder.getLastBlank
+692:27 call  self.blankExist(saved_iterator)
+    -> pyfiglet.FigletBuilder.blankExist
+693:38 call  self.cutBufferAtLastBlank(saved_buffer, saved_iterator)
+    -> pyfiglet.FigletBuilder.cutBufferAtLastBlank
+695:37 call  self.cutBufferAtLastChar()
+    -> pyfiglet.FigletBuilder.cutBufferAtLastChar
+
+[pyfiglet.FigletBuilder.justifyString]
+699:29 call  range(0, self.font.height)
+    -> <builtin>.range
+701:48 call  len(buffer[row])
+    -> <builtin>.len
+704:29 call  range(0, self.font.height)
+    -> <builtin>.range
+706:34 call  int((self.width - len(buffer[row])) / 2)
+    -> <builtin>.int
+706:52 call  len(buffer[row])
+    -> <builtin>.len
+
+[pyfiglet.FigletBuilder.replaceHardblanks]
+711:27 call  '\n'.join(buffer)
+    -> <builtin>.str.join
+712:32 call  string.replace(self.font.hardBlank, ' ')
+    -> <builtin>.str.replace
+
+[pyfiglet.FigletBuilder.smushAmount]
+728:25 call  range(0, self.font.height)
+    -> <builtin>.range
+731:21 getattr  self.direction
+    reject pyfiglet.Figlet.direction: self is a FigletBuilder, whose direction is an instance attribute (a str)
+735:25 call  len(lineLeft.rstrip(' '))
+    -> <builtin>.len
+735:41 call  lineLeft.rstrip(' ')
+    -> <builtin>.str.rstrip
+739:28 call  len(lineLeft)
+    -> <builtin>.len
+746:25 call  len(lineRight)
+    -> <builtin>.len
+746:42 call  len(lineRight.lstrip(' '))
+    -> <builtin>.len
+746:59 call  lineRight.lstrip(' ')
+    -> <builtin>.str.lstrip
+747:28 call  len(lineRight)
+    -> <builtin>.len
+750:29 call  len(lineRight)
+    -> <builtin>.len
+753:31 call  len(lineLeft)
+    -> <builtin>.len
+758:40 call  self.smushChars(left=ch1, right=ch2)
+    -> pyfiglet.FigletBuilder.smushChars
+
+[pyfiglet.FigletBuilder.smushChars]
+799:21 getattr  self.direction
+    reject pyfiglet.Figlet.direction: self is a FigletBuilder, whose direction is an instance attribute (a str)
+
+[pyfiglet.Figlet.__init__]
+863:21 call  self.setFont()
+    -> pyfiglet.Figlet.setFont
+864:44 call  FigletRenderingEngine(base=self)
+    -> pyfiglet.FigletRenderingEngine.__init__
+
+[pyfiglet.Figlet.setFont]
+870:31 call  FigletFont(font=self.font)
+    -> pyfiglet.FigletFont.__init__
+
+[pyfiglet.Figlet.justify]
+889:21 getattr  self.direction
+    -> pyfiglet.Figlet.direction
+891:23 getattr  self.direction
+    -> pyfiglet.Figlet.direction
+
+[pyfiglet.Figlet.renderText]
+899:34 call  self.engine.render(text)
+    -> pyfiglet.FigletRenderingEngine.render
+
+[pyfiglet.Figlet.getFonts]
+902:34 call  self.Font.getFonts()
+    -> pyfiglet.FigletFont.getFonts
+    reject pyfiglet.Figlet.getFonts: self.Font is the FigletFont of setFont
+
+[pyfiglet.color_to_ansi]
+908:24 call  color.upper()
+    -> <builtin>.str.upper
+909:19 call  color.count(';')
+    -> <builtin>.str.count
+909:44 call  color.count(';')
+    -> <builtin>.str.count
+910:27 call  InvalidColor('Specified color \'{}\' not a valid color in...
+    -> pyfiglet.FigletError.__init__
+911:21 call  color.count(';')
+    -> <builtin>.str.count
+912:27 call  InvalidColor('Specified color \'{}\' not found in ANSI CO...
+    -> pyfiglet.FigletError.__init__
+912:94 call  'Specified color \'{}\' not found in ANSI COLOR_CODES lis...
+    -> <builtin>.str.format
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: color is the str that color.upper() returned
+920:36 call  '{};2;{}'.format(ansiCode, color)
+    -> <builtin>.str.format
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: ansiCode is an int and color a str
+922:29 call  '\033[{}m'.format(ansiCode)
+    -> <builtin>.str.format
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: ansiCode is an int or a str
+
+[pyfiglet.parse_color]
+926:48 call  color.partition(":")
+    -> <builtin>.str.partition
+927:35 call  color_to_ansi(foreground, isBackground=False)
+    -> pyfiglet.color_to_ansi
+928:35 call  color_to_ansi(background, isBackground=True)
+    -> pyfiglet.color_to_ansi
+
+[pyfiglet.main]
+933:26 call  OptionParser(version=__version__, usage='%prog [options] ...
+    -> optparse.OptionParser
+935:22 call  parser.add_option('-f', '--font', default=DEFAULT_FONT, h...
+    -> optparse.OptionParser.add_option
+938:22 call  parser.add_option('-D', '--direction', type='choice', cho...
+    -> optparse.OptionParser.add_option
+943:22 call  parser.add_option('-j', '--justify', type='choice', choic...
+    -> optparse.OptionParser.add_option
+947:22 call  parser.add_option('-w', '--width', type='int', default=80...
+    -> optparse.OptionParser.add_option
+950:22 call  parser.add_option('-r', '--reverse', action='store_true',...
+    -> optparse.OptionParser.add_option
+952:22 call  parser.add_option('-n', '--normalize-surrounding-newlines...
+    -> optparse.OptionParser.add_option
+954:22 call  parser.add_option('-s', '--strip-surrounding-newlines', a...
+    -> optparse.OptionParser.add_option
+956:22 call  parser.add_option('-F', '--flip', action='store_true', de...
+    -> optparse.OptionParser.add_option
+958:22 call  parser.add_option('-l', '--list_fonts', action='store_tru...
+    -> optparse.OptionParser.add_option
+960:22 call  parser.add_option('-i', '--info_font', action='store_true...
+    -> optparse.OptionParser.add_option
+962:22 call  parser.add_option('-L', '--load', default=None, help='loa...
+    -> optparse.OptionParser.add_option
+964:22 call  parser.add_option('-c', '--color', default=':', help='''p...
+    -> optparse.OptionParser.add_option
+971:35 call  parser.parse_args()
+    -> optparse.OptionParser.parse_args
+    note: no option has a callback action, so optparse calls no package code
+974:14 call  print('\n'.join(sorted(FigletFont.getFonts())))
+    -> <builtin>.print
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is a str
+974:24 call  '\n'.join(sorted(FigletFont.getFonts()))
+    -> <builtin>.str.join
+974:31 call  sorted(FigletFont.getFonts())
+    -> <builtin>.sorted
+974:51 call  FigletFont.getFonts()
+    -> pyfiglet.FigletFont.getFonts
+    reject pyfiglet.Figlet.getFonts: the receiver is the class FigletFont
+975:13 call  exit(0)
+    -> _sitebuiltins.Quitter.__call__
+    note: exit is the instance of _sitebuiltins.Quitter that site puts into builtins; calling it calls Quitter.__call__ (J6)
+978:14 call  print('[0-255];[0-255];[0-255] # RGB\n' + '\n'.join((sort...
+    -> <builtin>.print
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is a str
+978:60 call  '\n'.join((sorted(COLOR_CODES.keys())))
+    -> <builtin>.str.join
+978:68 call  sorted(COLOR_CODES.keys())
+    -> <builtin>.sorted
+978:85 call  COLOR_CODES.keys()
+    -> <builtin>.dict.keys
+979:13 call  exit(0)
+    -> _sitebuiltins.Quitter.__call__
+    note: as at 975:13 (J6)
+982:14 call  print(FigletFont.infoFont(opts.font))
+    -> <builtin>.print
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is the str that infoFont returns
+982:34 call  FigletFont.infoFont(opts.font)
+    -> pyfiglet.FigletFont.infoFont
+983:13 call  exit(0)
+    -> _sitebuiltins.Quitter.__call__
+    note: as at 975:13 (J6)
+986:32 call  FigletFont.installFonts(opts.load)
+    -> pyfiglet.FigletFont.installFonts
+987:13 call  exit(0)
+    -> _sitebuiltins.Quitter.__call__
+    note: as at 975:13 (J6)
+989:11 call  len(args)
+    -> <builtin>.len
+990:26 call  parser.print_help()
+    -> optparse.OptionParser.print_help
+994:27 call  arg.decode('UTF-8')
+    note: the branch sys.version_info < (3,) runs only on Python 2, which the release does not support (python_requires=">=3.9"): no edge (J7)
+996:20 call  ' '.join(args)
+    -> <builtin>.str.join
+999:19 call  Figlet( font=opts.font, direction=opts.direction, justify...
+    -> pyfiglet.Figlet.__init__
+    reject pyfiglet.Figlet.direction, pyfiglet.Figlet.justify: the arguments are attributes of the optparse.Values opts (strs), not the properties of Figlet
+1000:44 getattr  opts.direction
+    reject pyfiglet.Figlet.direction: opts is the optparse.Values of parse_args; direction is an attribute of it
+1001:26 getattr  opts.justify
+    reject pyfiglet.Figlet.justify: opts is the optparse.Values of parse_args; justify is an attribute of it
+1004:14 call  print(f"pyfiglet error: requested font {opts.font!r} not ...
+    -> <builtin>.print
+    reject pyfiglet.FigletError.__str__, pyfiglet.FigletFont.__str__: the argument is a str
+1007:21 call  f.renderText(text)
+    -> pyfiglet.Figlet.renderText
+1009:22 call  r.reverse()
+    -> pyfiglet.FigletString.reverse
+    note: r is the FigletString of renderText (FigletProduct.getString)
+1011:19 call  r.flip()
+    -> pyfiglet.FigletString.flip
+    note: r is the FigletString of renderText or of reverse (newFromList)
+1013:41 call  r.strip_surrounding_newlines()
+    -> pyfiglet.FigletString.strip_surrounding_newlines
+1015:45 call  r.normalize_surrounding_newlines()
+    -> pyfiglet.FigletString.normalize_surrounding_newlines
+1019:39 call  sys.stdout.detach()
+    -> io.TextIOWrapper.detach
+    -> io.BufferedWriter.detach
+    note: in a fresh process sys.stdout is the interpreter's io.TextIOWrapper; a second main() in the same process finds the io.BufferedWriter that the first one left (J3). After a -u run, or after a second main(), sys.stdout is a raw stream without detach: AttributeError, no edge
+1021:29 call  parse_color(opts.color)
+    -> pyfiglet.parse_color
+1023:25 call  sys.stdout.write(ansiColors.encode('UTF-8'))
+    -> io.BufferedWriter.write
+    -> io.FileIO.write
+    note: sys.stdout is what sys.stdout.detach() returned at 1019:39: the io.BufferedWriter of the standard text stream; under -u (PYTHONUNBUFFERED) the raw stream, io.FileIO (the structlog precedent); after a second main() the raw stream of the first one's BufferedWriter (J3)
+1023:43 call  ansiColors.encode('UTF-8')
+    -> <builtin>.str.encode
+1025:21 call  sys.stdout.write(r.encode('UTF-8'))
+    -> io.BufferedWriter.write
+    -> io.FileIO.write
+    note: sys.stdout as at 1023:25 (J3)
+1025:30 call  r.encode('UTF-8')
+    -> <builtin>.str.encode
+    note: r is a FigletString (encode inherited from str) or the plain str of strip_surrounding_newlines or normalize_surrounding_newlines
+1026:21 call  sys.stdout.write(b'\n')
+    -> io.BufferedWriter.write
+    -> io.FileIO.write
+    note: sys.stdout as at 1023:25 (J3)
+1029:25 call  sys.stdout.write(RESET_COLORS)
+    -> io.BufferedWriter.write
+    -> io.FileIO.write
+    note: sys.stdout as at 1023:25 (J3)
+
+== pyfiglet.__main__
+
+[pyfiglet.__main__]
+7:13 call  sys.exit(main())
+    -> sys.exit
+7:18 call  main()
+    -> pyfiglet.main

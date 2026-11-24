@@ -1,0 +1,1508 @@
+# Call-site ledger of tinydb at 1e39ad3a2d9eca57efd9019fd089b5a04676da95.
+# Hand-written from the source; judgements in tinydb.md.
+#
+# Receivers and values used below (tinydb.md, "Values"):
+#   storage of a TinyDB, Table._storage: a JSONStorage, MemoryStorage,
+#     CachingMiddleware or plain Middleware instance (README, docs/usage.rst:
+#     597, 635, 640; docs/api.rst:94-102), or a client storage (opaque).
+#   cond of the Table methods: a QueryInstance (the documented queries), or a
+#     client callable (opaque); never a Query (a query builder, see tinydb.md).
+#   self._handle of a JSONStorage: io.TextIOWrapper (text modes),
+#     io.BufferedReader ('rb'), io.BufferedWriter ('wb', 'ab', 'xb'),
+#     io.BufferedRandom ('rb+', 'wb+', 'ab+').
+default reject tinydb.database.TinyDB.__getattr__: no attribute that package code loads on a TinyDB is missing from the class: TinyDB's own code loads its methods, the storage property, its class variables and the instance attributes _storage, _opened and _tables that __init__ sets, and no other package code has a TinyDB as receiver (the forwarded calls run on the Table that __getattr__ returns)
+default reject tinydb.middlewares.Middleware.__getattr__: at this site the receiver is not a Middleware, or the attribute is one that the receiver's class or instance defines (storage, _storage_cls, cache, _cache_modified_count, WRITE_CACHE_SIZE, __dict__ and the methods); the storage sites that can load read, write or close from a plain Middleware accept it explicitly
+default reject tinydb.queries.Query.__getattr__: no attribute that package code loads on a Query is missing from it: the package loads only _path, _hash, _test and the methods of Query and QueryInstance, which every Query has after __init__; only the explicit self.__getattr__(item) in Query.__getitem__ calls it
+default reject tinydb.queries.Query.__getitem__: the subscripted object is not a Query: a typing construct or builtin type in an annotation, a dict, tuple, list, the instance __dict__ of a Middleware, a client document or a client value (only where() subscripts a Query, accepted there)
+default reject tinydb.utils.LRUCache.__getitem__: the package never subscripts an LRUCache for a load: the subscripted objects are typing constructs, dicts (storage data, tables), OrderedDicts, tuples, lists, client documents and values; Table uses the query cache only through get, __setitem__ and clear
+default reject tinydb.queries.Query.__hash__, tinydb.queries.QueryInstance.__hash__, tinydb.queries.QueryLike.__hash__, tinydb.utils.FrozenDict.__hash__: no query or FrozenDict is hashed at this site: the hashed keys and set or dict elements are strs (table names, field names), ints (document ids), typing constructs, or client values; QueryLike is a Protocol without instances; the sites of the query cache and of query hashes accept them explicitly
+default reject tinydb.queries.Query.__eq__, tinydb.queries.QueryInstance.__eq__: no operand of this comparison or `in` test, and no key of this dict or set operation, is a query: the operands are strs, ints, None, dicts, tuples, lists, typing constructs or client values; the sites of the query cache and of query hashes accept them explicitly
+default reject tinydb.database.TinyDB.__iter__, tinydb.table.Table.__iter__, tinydb.utils.LRUCache.__iter__: no TinyDB, Table or LRUCache is iterated, unpacked or searched with `in` here: the iterables are dicts and dict views of storage data, lists, tuples, sets, strs, generators, *args tuples and client values; the explicit iter() sites of TinyDB.__iter__ and Table.all accept Table.__iter__, and the five document-field sites of tinydb.md J10 (tinydb.queries 425:68, 429:70, 458:68, 462:53, 485:24) accept TinyDB.__iter__
+default reject tinydb.database.TinyDB.__len__, tinydb.table.Table.__len__, tinydb.utils.LRUCache.__len__: no TinyDB, Table or LRUCache is measured or truth-tested here: the measured and tested values are dicts, lists, sets, strs, ints, bools, None, tuples, OrderedDicts and client values; the explicit len() and __len__() sites of TinyDB and Table accept them
+
+== tinydb.database
+
+[tinydb.database]
+14:39 call  with_typehint(Table)
+    -> tinydb.utils.with_typehint
+    note: TYPE_CHECKING is False at run time, so with_typehint returns object and TinyDB's only base is object
+204:6 decorator  @property
+    -> <builtin>.property
+
+[tinydb.database.TinyDB.__init__]
+92:29 call  kwargs.pop('storage', self.default_storage_class)
+    -> <builtin>.dict.pop
+    reject tinydb.utils.FrozenDict.pop: kwargs is the dict that the interpreter builds for **kwargs
+95:41 call  storage(*args, **kwargs)
+    -> tinydb.storages.JSONStorage.__init__
+    -> tinydb.storages.MemoryStorage.__init__
+    -> tinydb.middlewares.Middleware.__call__
+    reject tinydb.database.TinyDB.storage, tinydb.table.Table.storage: storage is the local variable of line 92, not the property
+    note: value site: storage is the storage keyword or the class attribute default_storage_class = JSONStorage (line 85): a storage class (JSONStorage, MemoryStorage: docs/usage.rst:592-617) or a middleware instance (CachingMiddleware(JSONStorage), docs/usage.rst:635; a plain Middleware, docs/api.rst:94-102), whose class inherits Middleware.__call__; Storage is abstract by abc; client storages are client code
+
+[tinydb.database.TinyDB.__repr__]
+103:22 format  {list(self.tables())}
+    reject *: the formatted value is a list of strs (table names)
+103:27 call  list(self.tables())
+    -> <builtin>.list
+103:39 call  self.tables()
+    -> tinydb.database.TinyDB.tables
+104:28 format  {len(self.tables())}
+    reject *: the formatted value is an int
+104:32 call  len(self.tables())
+    -> <builtin>.len
+104:44 call  self.tables()
+    -> tinydb.database.TinyDB.tables
+105:45 format  {self.__len__()}
+    reject *: the formatted value is the int that TinyDB.__len__ returns
+105:58 call  self.__len__()
+    -> tinydb.database.TinyDB.__len__
+    reject tinydb.table.Table.__len__, tinydb.utils.LRUCache.__len__: self is a TinyDB
+106:42 format  {[f"{table}={len(self.table(table))}" for table in self.t...
+    reject *: the formatted value is a list of strs
+106:46 format  {table}
+    reject *: table is a str (a table name)
+106:54 format  {len(self.table(table))}
+    reject *: the formatted value is an int
+106:58 call  len(self.table(table))
+    -> <builtin>.len
+    -> tinydb.table.Table.__len__
+    reject tinydb.database.TinyDB.__len__, tinydb.utils.LRUCache.__len__: the argument is the Table that TinyDB.table returns
+106:69 call  self.table(table)
+    -> tinydb.database.TinyDB.table
+106:104 call  self.tables()
+    -> tinydb.database.TinyDB.tables
+109:32 call  '<{} {}>'.format(type(self).__name__, ', '.join(args))
+    -> <builtin>.str.format
+    reject *: the arguments are strs
+109:37 call  type(self)
+    -> <builtin>.type
+109:63 call  ', '.join(args)
+    -> <builtin>.str.join
+
+[tinydb.database.TinyDB.table]
+127:17 op  name in self._tables
+    reject tinydb.utils.LRUCache.__contains__: self._tables is the dict of __init__ (line 98)
+130:33 call  self.table_class(self.storage, name, **kwargs)
+    -> tinydb.table.Table.__init__
+    reject tinydb.database.TinyDB.storage, tinydb.table.Table.storage: self.storage is an argument (its getter runs at 130:39); Table.__init__ only stores it
+    note: value site: table_class is the class attribute TinyDB.table_class = Table (line 75); a documented override (docs/extend.rst:195-199) is a client subclass, which runs Table.__init__ unless it overrides it
+130:39 getattr  self.storage
+    -> tinydb.database.TinyDB.storage
+    reject tinydb.table.Table.storage: the receiver is a TinyDB
+131:21 setitem  self._tables[name]
+    reject tinydb.utils.LRUCache.__setitem__: self._tables is a dict
+
+[tinydb.database.TinyDB.tables]
+161:19 call  set(self.storage.read() or {})
+    -> <builtin>.set
+    reject tinydb.operations.set, tinydb.utils.LRUCache.set: the builtin set; database.py imports neither
+161:25 getattr  self.storage
+    -> tinydb.database.TinyDB.storage
+    reject tinydb.table.Table.storage: the receiver is a TinyDB
+161:33 getattr  self.storage.read
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: a plain Middleware defines no read; its __getattr__ forwards the name to its storage (docs/api.rst:101-102)
+161:37 call  self.storage.read()
+    -> tinydb.middlewares.CachingMiddleware.read
+    -> tinydb.storages.JSONStorage.read
+    -> tinydb.storages.MemoryStorage.read
+    reject tinydb.storages.Storage.read: abstract by abc; every package storage overrides it, and a class that does not cannot be instantiated
+    note: for a plain Middleware the call runs the read that its __getattr__ returns: one of the same three
+
+[tinydb.database.TinyDB.drop_tables]
+170:14 getattr  self.storage
+    -> tinydb.database.TinyDB.storage
+    reject tinydb.table.Table.storage: the receiver is a TinyDB
+170:22 getattr  self.storage.write
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: a plain Middleware defines no write; its __getattr__ forwards the name to its storage
+170:27 call  self.storage.write({})
+    -> tinydb.middlewares.CachingMiddleware.write
+    -> tinydb.storages.JSONStorage.write
+    -> tinydb.storages.MemoryStorage.write
+    reject tinydb.storages.Storage.write: abstract by abc; every package storage overrides it
+174:27 call  self._tables.clear()
+    -> <builtin>.dict.clear
+    reject tinydb.utils.LRUCache.clear: self._tables is a dict
+    note: value site by name only (FrozenDict binds clear = _immutable, utils.py:133); _tables is the dict of __init__ (line 98)
+
+[tinydb.database.TinyDB.drop_table]
+185:17 op  name in self._tables
+    reject tinydb.utils.LRUCache.__contains__: self._tables is a dict
+186:29 delitem  self._tables[name]
+    reject tinydb.utils.LRUCache.__delitem__: self._tables is a dict
+188:21 getattr  self.storage
+    -> tinydb.database.TinyDB.storage
+    reject tinydb.table.Table.storage: the receiver is a TinyDB
+188:29 getattr  self.storage.read
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: a plain Middleware defines no read; its __getattr__ forwards the name to its storage
+188:33 call  self.storage.read()
+    -> tinydb.middlewares.CachingMiddleware.read
+    -> tinydb.storages.JSONStorage.read
+    -> tinydb.storages.MemoryStorage.read
+    reject tinydb.storages.Storage.read: abstract by abc; every package storage overrides it
+195:17 op  name not in data
+    reject tinydb.utils.LRUCache.__contains__: data is the dict that the storage read returned (a JSON object, or the dict that a package storage was given)
+199:17 delitem  data[name]
+    reject tinydb.utils.LRUCache.__delitem__: data is a dict
+202:14 getattr  self.storage
+    -> tinydb.database.TinyDB.storage
+    reject tinydb.table.Table.storage: the receiver is a TinyDB
+202:22 getattr  self.storage.write
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: a plain Middleware defines no write; its __getattr__ forwards the name to its storage
+202:27 call  self.storage.write(data)
+    -> tinydb.middlewares.CachingMiddleware.write
+    -> tinydb.storages.JSONStorage.write
+    -> tinydb.storages.MemoryStorage.write
+    reject tinydb.storages.Storage.write: abstract by abc; every package storage overrides it
+
+[tinydb.database.TinyDB.close]
+230:14 getattr  self.storage
+    -> tinydb.database.TinyDB.storage
+    reject tinydb.table.Table.storage: the receiver is a TinyDB
+230:22 getattr  self.storage.close
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: a plain Middleware defines no close; its __getattr__ forwards the name to its storage (tests/test_tinydb.py:671-676, a client subclass that inherits it)
+230:27 call  self.storage.close()
+    -> tinydb.middlewares.CachingMiddleware.close
+    -> tinydb.storages.JSONStorage.close
+    -> tinydb.storages.Storage.close
+    reject tinydb.database.TinyDB.close: the receiver is a storage, never a TinyDB
+    note: MemoryStorage inherits Storage.close; a plain Middleware returns the close of its storage
+
+[tinydb.database.TinyDB.__exit__]
+249:23 call  self.close()
+    -> tinydb.database.TinyDB.close
+    reject tinydb.middlewares.CachingMiddleware.close, tinydb.storages.JSONStorage.close, tinydb.storages.Storage.close: self is a TinyDB
+
+[tinydb.database.TinyDB.__getattr__]
+255:23 call  getattr(self.table(self.default_table_name), name)
+    -> <builtin>.getattr
+    -> tinydb.table.Table.name
+    note: getattr runs the property Table.name when the forwarded name is name: a tested name on the Table (tests/test_tables.py:153, tests/test_tinydb.py:644) that this proxy forwards (README, "Forwarded attribute names"); TinyDB.storage shadows Table.storage, so that property is never forwarded
+255:34 call  self.table(self.default_table_name)
+    -> tinydb.database.TinyDB.table
+
+[tinydb.database.TinyDB.__len__]
+268:19 call  len(self.table(self.default_table_name))
+    -> <builtin>.len
+    -> tinydb.table.Table.__len__
+    reject tinydb.database.TinyDB.__len__, tinydb.utils.LRUCache.__len__: the argument is the Table that TinyDB.table returns
+268:30 call  self.table(self.default_table_name)
+    -> tinydb.database.TinyDB.table
+
+[tinydb.database.TinyDB.__iter__]
+274:20 call  iter(self.table(self.default_table_name))
+    -> <builtin>.iter
+    -> tinydb.table.Table.__iter__
+    reject tinydb.database.TinyDB.__iter__, tinydb.utils.LRUCache.__iter__: the argument is the Table that TinyDB.table returns
+274:31 call  self.table(self.default_table_name)
+    -> tinydb.database.TinyDB.table
+
+== tinydb.middlewares
+
+[tinydb.middlewares.Middleware.__call__]
+63:41 call  self._storage_cls(*args, **kwargs)
+    -> tinydb.storages.JSONStorage.__init__
+    -> tinydb.storages.MemoryStorage.__init__
+    -> tinydb.middlewares.Middleware.__call__
+    note: value site: _storage_cls is the storage_cls argument of __init__ (line 22): a storage class (JSONStorage, MemoryStorage; client classes) or, for nested middlewares, a middleware instance (docs/usage.rst:637-641; the docstring, lines 57-60), whose class inherits Middleware.__call__
+
+[tinydb.middlewares.Middleware.__getattr__]
+73:23 call  getattr(self.__dict__['storage'], name)
+    -> <builtin>.getattr
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: the storage of a nested middleware is a Middleware or CachingMiddleware (docs/usage.rst:637-641), which forwards a name that it lacks once more: read, write and close for a plain Middleware, a tested name such as _handle (tests/test_middlewares.py:99) for both; the storages define no properties
+
+[tinydb.middlewares.CachingMiddleware.__init__]
+90:14 call  super()
+    -> <builtin>.super
+90:25 call  super().__init__(storage_cls)
+    -> tinydb.middlewares.Middleware.__init__
+    reject *: super() of CachingMiddleware resolves __init__ in Middleware
+
+[tinydb.middlewares.CachingMiddleware.read]
+99:31 getattr  self.storage
+    reject *: storage is an instance attribute of the middleware (lines 23, 63), not a property
+99:39 getattr  self.storage.read
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: the storage of a nested CachingMiddleware can be a plain Middleware, which defines no read
+99:43 call  self.storage.read()
+    -> tinydb.middlewares.CachingMiddleware.read
+    -> tinydb.storages.JSONStorage.read
+    -> tinydb.storages.MemoryStorage.read
+    reject tinydb.storages.Storage.read: abstract by abc; every package storage overrides it
+    note: the storage is a storage instance or a nested middleware (CachingMiddleware, or a plain Middleware that returns the read of its own storage)
+
+[tinydb.middlewares.CachingMiddleware.write]
+110:39 op  self._cache_modified_count >= self.WRITE_CACHE_SIZE
+    reject *: both operands are ints (a counter; the class constant, or the int a test assigns, tests/test_middlewares.py:27)
+111:23 call  self.flush()
+    -> tinydb.middlewares.CachingMiddleware.flush
+
+[tinydb.middlewares.CachingMiddleware.flush]
+117:39 op  self._cache_modified_count > 0
+    reject *: an int counter
+119:18 getattr  self.storage
+    reject *: storage is an instance attribute of the middleware, not a property
+119:26 getattr  self.storage.write
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: the storage of a nested CachingMiddleware can be a plain Middleware, which defines no write
+119:31 call  self.storage.write(self.cache)
+    -> tinydb.middlewares.CachingMiddleware.write
+    -> tinydb.storages.JSONStorage.write
+    -> tinydb.storages.MemoryStorage.write
+    reject tinydb.storages.Storage.write: abstract by abc; every package storage overrides it
+
+[tinydb.middlewares.CachingMiddleware.close]
+124:19 call  self.flush()
+    -> tinydb.middlewares.CachingMiddleware.flush
+127:14 getattr  self.storage
+    reject *: storage is an instance attribute of the middleware, not a property
+127:22 getattr  self.storage.close
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: the storage of a nested CachingMiddleware can be a plain Middleware, which defines no close
+127:27 call  self.storage.close()
+    -> tinydb.middlewares.CachingMiddleware.close
+    -> tinydb.storages.JSONStorage.close
+    -> tinydb.storages.Storage.close
+    reject tinydb.database.TinyDB.close: the receiver is a storage, never a TinyDB
+
+== tinydb.mypy_plugin
+
+[tinydb.mypy_plugin]
+8:12 call  TypeVar('T')
+    -> typing.TypeVar
+
+[tinydb.mypy_plugin.TinyDBPlugin.__init__]
+15:14 call  super()
+    -> <builtin>.super
+15:25 call  super().__init__(options)
+    -> mypy.plugin.Plugin.__init__
+    reject *: the base of TinyDBPlugin is mypy.plugin.Plugin; mypy is not installed in the test environment, so it is named as a missing module (tinydb.md, judgement J8)
+
+[tinydb.mypy_plugin.TinyDBPlugin.get_dynamic_class_hook.hook]
+23:34 call  isinstance(klass, NameExpr)
+    -> <builtin>.isinstance
+28:56 call  self.lookup_fully_qualified(type_name)
+    -> mypy.plugin.Plugin.lookup_fully_qualified
+    note: TinyDBPlugin inherits lookup_fully_qualified from the missing-module base mypy.plugin.Plugin
+31:46 call  ctx.api.add_symbol_table_node(ctx.name, qualified)
+    -> mypy.plugin.DynamicClassDefContext.api.add_symbol_table_node
+    reject tinydb.table.Table.name: ctx.name is an attribute of the mypy context, passed as an argument
+    note: ctx is annotated with the missing-module class DynamicClassDefContext (line 21); the direct attribute chain keeps its access path
+31:51 getattr  ctx.name
+    reject tinydb.table.Table.name: ctx is a mypy.plugin.DynamicClassDefContext, not a Table
+
+== tinydb.operations
+
+[tinydb.operations.delete.transform]
+21:16 delitem  doc[field]
+    reject tinydb.utils.LRUCache.__delitem__: doc is a document of the table data, a dict (Table.update passes table[doc_id], table.py:429 and 525)
+
+[tinydb.operations.add.transform]
+31:12 setitem  doc[field]
+    reject tinydb.utils.LRUCache.__setitem__: doc is a document of the table data, a dict
+
+[tinydb.operations.subtract.transform]
+41:12 setitem  doc[field]
+    reject tinydb.utils.LRUCache.__setitem__: doc is a document of the table data, a dict
+
+[tinydb.operations.set.transform]
+51:12 setitem  doc[field]
+    reject tinydb.utils.LRUCache.__setitem__: doc is a document of the table data, a dict
+
+[tinydb.operations.increment.transform]
+61:12 setitem  doc[field]
+    reject tinydb.utils.LRUCache.__setitem__: doc is a document of the table data, a dict
+
+[tinydb.operations.decrement.transform]
+71:12 setitem  doc[field]
+    reject tinydb.utils.LRUCache.__setitem__: doc is a document of the table data, a dict
+
+== tinydb.queries
+
+[tinydb.queries.is_sequence]
+29:19 call  hasattr(obj, '__iter__')
+    -> <builtin>.hasattr
+
+[tinydb.queries.QueryInstance.__init__]
+77:21 call  hash(hashval)
+    -> <builtin>.hash
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.Query.__hash__
+    -> tinydb.utils.FrozenDict.__hash__
+    reject tinydb.queries.QueryLike.__hash__: QueryLike is a Protocol without instances
+    note: hashing the tuple hashval hashes its items: FrozenDicts that freeze makes from dict operands (tests/test_queries.py:293, fragment, test arguments), the QueryInstance or Query that any and all keep as cond (freeze returns it unchanged; cond: Union[QueryInstance, list[Any]], line 401, admits a Query), and the hashes of ~, which nest the hash of the negated query (tinydb.md, J3)
+
+[tinydb.queries.QueryInstance.__call__]
+94:26 call  self._test(value)
+    -> tinydb.queries.Query.__init__.notest
+    -> tinydb.queries.Query._generate_test.<lambda1>
+    -> tinydb.queries.QueryInstance.__and__.<lambda1>
+    -> tinydb.queries.QueryInstance.__or__.<lambda1>
+    -> tinydb.queries.QueryInstance.__invert__.<lambda1>
+    -> tinydb.queries.Query.noop.<lambda1>
+    note: value site: _test is the test argument of __init__ (line 74); the package passes exactly these six (lines 121, 131, 135, 180, 247, 504); test is a bare Callable, so a client's test is opaque
+
+[tinydb.queries.QueryInstance.__hash__]
+100:20 call  hash(self._hash)
+    -> <builtin>.hash
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.Query.__hash__
+    -> tinydb.utils.FrozenDict.__hash__
+    reject tinydb.queries.QueryLike.__hash__: QueryLike is a Protocol without instances
+    note: the tuple _hash holds the same items as at 77:21; CPython before 3.14 and PyPy do not cache the hash of a tuple, so every hash of the query hashes them again (tinydb.md, J3)
+
+[tinydb.queries.QueryInstance.__repr__]
+103:36 call  'QueryImpl{}'.format(self._hash)
+    -> <builtin>.str.format
+    -> tinydb.queries.QueryInstance.__repr__
+    -> tinydb.queries.Query.__repr__
+    reject tinydb.database.TinyDB.__repr__, tinydb.table.Table.__repr__: no TinyDB or Table is part of a query hash
+    note: formatting the tuple _hash takes the repr of its items: the QueryInstance or Query that any and all keep (also inside the frozenset of & and |)
+
+[tinydb.queries.QueryInstance.__eq__]
+106:22 call  isinstance(other, QueryInstance)
+    -> <builtin>.isinstance
+107:31 op  self._hash == other._hash
+    -> tinydb.queries.QueryInstance.__eq__
+    -> tinydb.queries.Query.__eq__
+    note: the tuples compare their items: two distinct QueryInstances or Querys that any or all keep as cond (also inside the frozensets of & and |) are compared with their own __eq__; Query.__eq__ makes a query (tinydb.md, J4)
+
+[tinydb.queries.QueryInstance.__and__]
+117:29 call  self.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+117:54 call  other.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+    note: other is annotated QueryInstance: a QueryInstance or a Query; a client object is opaque
+118:40 call  frozenset([self._hash, other._hash])
+    -> <builtin>.frozenset
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.Query.__hash__
+    -> tinydb.utils.FrozenDict.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    -> tinydb.queries.Query.__eq__
+    reject tinydb.queries.QueryLike.__hash__: QueryLike is a Protocol without instances
+    note: the frozenset hashes the two hash tuples (their items as at 77:21, where no cached tuple hash exists: before CPython 3.14, PyPy, and the ('path', ...) hash of a Query) and compares them when their hashes are equal (two equal queries: q1 & q2); the tuples then compare their items (tinydb.md, J3, J4)
+121:29 call  QueryInstance(lambda value: self(value) and other(value),...
+    -> tinydb.queries.QueryInstance.__init__
+    reject tinydb.queries.QueryInstance.__and__.<lambda1>: __init__ stores it as _test; QueryInstance.__call__ calls it (94:26)
+
+[tinydb.queries.QueryInstance.__and__.<lambda1>]
+121:48 call  self(value)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: self is the QueryInstance or Query whose __and__ made the lambda; both have QueryInstance.__call__
+121:65 call  other(value)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: other is a QueryInstance or Query (annotation, line 113); a client object is opaque
+
+[tinydb.queries.QueryInstance.__or__]
+127:29 call  self.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+127:54 call  other.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+    note: other is annotated QueryInstance: a QueryInstance or a Query; a client object is opaque
+128:39 call  frozenset([self._hash, other._hash])
+    -> <builtin>.frozenset
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.Query.__hash__
+    -> tinydb.utils.FrozenDict.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    -> tinydb.queries.Query.__eq__
+    reject tinydb.queries.QueryLike.__hash__: QueryLike is a Protocol without instances
+    note: as at 118:40 (tinydb.md, J3, J4)
+131:29 call  QueryInstance(lambda value: self(value) or other(value), ...
+    -> tinydb.queries.QueryInstance.__init__
+    reject tinydb.queries.QueryInstance.__or__.<lambda1>: __init__ stores it as _test; QueryInstance.__call__ calls it (94:26)
+
+[tinydb.queries.QueryInstance.__or__.<lambda1>]
+131:48 call  self(value)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: self is the QueryInstance or Query whose __or__ made the lambda; both have QueryInstance.__call__
+131:64 call  other(value)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: other is a QueryInstance or Query (annotation, line 123); a client object is opaque
+
+[tinydb.queries.QueryInstance.__invert__]
+134:59 call  self.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+135:29 call  QueryInstance(lambda value: not self(value), hashval)
+    -> tinydb.queries.QueryInstance.__init__
+    reject tinydb.queries.QueryInstance.__invert__.<lambda1>: __init__ stores it as _test; QueryInstance.__call__ calls it (94:26)
+
+[tinydb.queries.QueryInstance.__invert__.<lambda1>]
+135:52 call  self(value)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: self is the QueryInstance or Query whose __invert__ made the lambda; both have QueryInstance.__call__
+
+[tinydb.queries.Query.__init__]
+179:14 call  super()
+    -> <builtin>.super
+179:25 call  super().__init__( test=notest, hashval=(None,) )
+    -> tinydb.queries.QueryInstance.__init__
+    reject tinydb.queries.Query.__init__.notest: __init__ stores it as _test; QueryInstance.__call__ calls it (94:26)
+    reject *: super() of Query resolves __init__ in QueryInstance
+
+[tinydb.queries.Query.__init__.notest]
+177:31 call  RuntimeError('Empty query was evaluated')
+    -> <builtin>.RuntimeError
+
+[tinydb.queries.Query.__repr__]
+185:29 call  '{}()'.format(type(self).__name__)
+    -> <builtin>.str.format
+    reject *: the argument is a str (the class name)
+185:34 call  type(self)
+    -> <builtin>.type
+
+[tinydb.queries.Query.__hash__]
+188:21 call  super()
+    -> <builtin>.super
+188:32 call  super().__hash__()
+    -> tinydb.queries.QueryInstance.__hash__
+    reject tinydb.queries.Query.__hash__, tinydb.queries.QueryLike.__hash__, tinydb.utils.FrozenDict.__hash__: super() of Query resolves __hash__ in QueryInstance
+
+[tinydb.queries.Query.__getattr__]
+194:21 call  type(self)
+    -> <builtin>.type
+194:27 call  type(self)()
+    -> tinydb.queries.Query.__init__
+    note: value site: type(self) is Query or a client subclass (tests/test_queries.py:438), which runs Query.__init__ unless it overrides it
+200:65 call  self.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+
+[tinydb.queries.Query.__getitem__]
+213:32 call  self.__getattr__(item)
+    -> tinydb.queries.Query.__getattr__
+    reject tinydb.database.TinyDB.__getattr__, tinydb.middlewares.Middleware.__getattr__: self is a Query
+
+[tinydb.queries.Query._generate_test]
+230:29 call  ValueError('Query has no path')
+    -> <builtin>.ValueError
+246:29 call  QueryInstance( lambda value: runner(value), (hashval if s...
+    -> tinydb.queries.QueryInstance.__init__
+    reject tinydb.queries.Query._generate_test.<lambda1>: __init__ stores it as _test; QueryInstance.__call__ calls it (94:26)
+248:42 call  self.is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+
+[tinydb.queries.Query._generate_test.runner]
+236:34 call  isinstance(part, str)
+    -> <builtin>.isinstance
+239:37 call  part(value)
+    note: value site: the callables in _path come only from Query.map (line 516): fn is a bare Callable that the client passes (docs/usage.rst:58-59 maps unidecode; the tests map their own lambdas), so no package function is a callee
+244:28 call  test(value)
+    -> tinydb.queries.Query.__eq__.<lambda1>
+    -> tinydb.queries.Query.__ne__.<lambda1>
+    -> tinydb.queries.Query.__lt__.<lambda1>
+    -> tinydb.queries.Query.__le__.<lambda1>
+    -> tinydb.queries.Query.__gt__.<lambda1>
+    -> tinydb.queries.Query.__ge__.<lambda1>
+    -> tinydb.queries.Query.exists.<lambda1>
+    -> tinydb.queries.Query.matches.test
+    -> tinydb.queries.Query.search.test
+    -> tinydb.queries.Query.test.<lambda1>
+    -> tinydb.queries.Query.any.<lambda1>
+    -> tinydb.queries.Query.all.<lambda1>
+    -> tinydb.queries.Query.one_of.<lambda1>
+    -> tinydb.queries.Query.fragment.<lambda1>
+    reject tinydb.queries.Query.all.test, tinydb.queries.Query.any.test, tinydb.queries.Query.fragment.test: their own lambdas call these local functions (432:31, 465:31, 491:31); they are not passed to _generate_test
+    reject tinydb.queries.Query.test: a method, never passed as test
+    note: value site: test is the test argument of _generate_test (line 217), a private method; the package passes these fourteen functions (lines 259-491); a client subclass's test (tests/test_queries.py:440) is client code
+
+[tinydb.queries.Query._generate_test.<lambda1>]
+247:33 call  runner(value)
+    -> tinydb.queries.Query._generate_test.runner
+
+[tinydb.queries.Query.__eq__]
+259:35 call  self._generate_test( lambda value: value == rhs, ('==', s...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.__eq__.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+261:38 call  freeze(rhs)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.__eq__.<lambda1>]
+260:33 op  value == rhs
+    -> tinydb.queries.Query.__eq__
+    -> tinydb.queries.QueryInstance.__eq__
+    note: QueryInstance.__eq__ (107:31) compares hash tuples that hold the Query or QueryInstance kept by any/all, so the package itself calls Query.__eq__ with a nested query as rhs, and the lambda made there captures it (Codex round 1; tinydb.md, J4); by rule A and the round-1 ruling (a) on package-made objects, its body keeps its edges: a document field (a scalar or dict) returns NotImplemented, so Python calls the reflected __eq__ of rhs
+
+[tinydb.queries.Query.__ne__]
+272:35 call  self._generate_test( lambda value: value != rhs, ('!=', s...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.__ne__.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+274:38 call  freeze(rhs)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.__ne__.<lambda1>]
+273:33 op  value != rhs
+    reject tinydb.queries.Query.__ne__: value is a field of a client document and rhs a literal value of the client (docs/getting-started.rst:117-120: no field-to-field comparison), never a Query
+
+[tinydb.queries.Query.__lt__]
+285:35 call  self._generate_test( lambda value: value < rhs, ('<', sel...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.__lt__.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+
+[tinydb.queries.Query.__lt__.<lambda1>]
+286:33 op  value < rhs
+    reject *: value is a field of a client document and rhs a literal value of the client, never a Query
+
+[tinydb.queries.Query.__le__]
+298:35 call  self._generate_test( lambda value: value <= rhs, ('<=', s...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.__le__.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+
+[tinydb.queries.Query.__le__.<lambda1>]
+299:33 op  value <= rhs
+    reject *: value is a field of a client document and rhs a literal value of the client, never a Query
+
+[tinydb.queries.Query.__gt__]
+311:35 call  self._generate_test( lambda value: value > rhs, ('>', sel...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.__gt__.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+
+[tinydb.queries.Query.__gt__.<lambda1>]
+312:33 op  value > rhs
+    reject *: value is a field of a client document and rhs a literal value of the client, never a Query
+
+[tinydb.queries.Query.__ge__]
+324:35 call  self._generate_test( lambda value: value >= rhs, ('>=', s...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.__ge__.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+
+[tinydb.queries.Query.__ge__.<lambda1>]
+325:33 op  value >= rhs
+    reject *: value is a field of a client document and rhs a literal value of the client, never a Query
+
+[tinydb.queries.Query.exists]
+335:35 call  self._generate_test( lambda _: True, ('exists', self._pat...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.exists.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+
+[tinydb.queries.Query.matches]
+355:35 call  self._generate_test(test, ('matches', self._path, regex))
+    -> tinydb.queries.Query._generate_test
+    reject *: the local function matches.test is kept by _generate_test for runner, which calls it (244:28); the other functions named test are not passed here
+
+[tinydb.queries.Query.matches.test]
+350:30 call  isinstance(value, str)
+    -> <builtin>.isinstance
+353:28 call  re.match(regex, value, flags)
+    -> re.match
+
+[tinydb.queries.Query.search]
+374:35 call  self._generate_test(test, ('search', self._path, regex))
+    -> tinydb.queries.Query._generate_test
+    reject *: the local function search.test is kept by _generate_test for runner, which calls it (244:28); the other functions named test are not passed here
+
+[tinydb.queries.Query.search.test]
+369:30 call  isinstance(value, str)
+    -> <builtin>.isinstance
+372:29 call  re.search(regex, value, flags)
+    -> re.search
+    reject tinydb.queries.Query.search, tinydb.table.Table.search: re.search is the function of the module re
+
+[tinydb.queries.Query.test]
+396:35 call  self._generate_test( lambda value: func(value, *args), ('...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.test.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+398:45 call  tuple(freeze(arg) for arg in args)
+    -> <builtin>.tuple
+398:52 call  freeze(arg)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.test.<lambda1>]
+397:31 call  func(value, *args)
+    note: value site: func is the client's test function (func: Callable[[Mapping], bool], a bare callable; docs/usage.rst:95-103): no package callee
+
+[tinydb.queries.Query.any]
+423:20 call  callable(cond)
+    -> <builtin>.callable
+431:35 call  self._generate_test( lambda value: test(value), ('any', s...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.any.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+433:39 call  freeze(cond)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.any.test]
+425:35 call  is_sequence(value)
+    -> tinydb.queries.is_sequence
+425:50 call  any(cond(e) for e in value)
+    -> <builtin>.any
+    reject tinydb.queries.Query.any: the builtin any; the method Query.any is not in this scope
+425:55 call  cond(e)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: in this branch cond is callable: a QueryInstance or a Query (annotation Union[QueryInstance, list[Any]], line 401; docs/usage.rst:152-162); both have QueryInstance.__call__; a client callable is opaque
+425:68 iter  value
+    -> tinydb.database.TinyDB.__iter__
+    note: the document field can be a TinyDB: a test inserts {'int': db} (tests/test_tinydb.py:623); with MemoryStorage or a CachingMiddleware the document is stored, and a search with this query iterates the field (ruling, b7-ruling-tinydb.md; tinydb.md, J10)
+429:35 call  is_sequence(value)
+    -> tinydb.queries.is_sequence
+429:50 call  any(e in cond for e in value)
+    -> <builtin>.any
+    reject tinydb.queries.Query.any: the builtin any; the method Query.any is not in this scope
+429:53 op  e in cond
+    reject tinydb.utils.LRUCache.__contains__: in this branch cond is the client's list (list[Any])
+429:70 iter  value
+    -> tinydb.database.TinyDB.__iter__
+    note: the document field can be a TinyDB: a test inserts {'int': db} (tests/test_tinydb.py:623); with MemoryStorage or a CachingMiddleware the document is stored, and a search with this query iterates the field (ruling, b7-ruling-tinydb.md; tinydb.md, J10)
+
+[tinydb.queries.Query.any.<lambda1>]
+432:31 call  test(value)
+    -> tinydb.queries.Query.any.test
+    reject *: test is the local function of Query.any (both definitions, lines 424 and 428, are the node Query.any.test)
+
+[tinydb.queries.Query.all]
+456:20 call  callable(cond)
+    -> <builtin>.callable
+464:35 call  self._generate_test( lambda value: test(value), ('all', s...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.all.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+466:39 call  freeze(cond)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.all.test]
+458:35 call  is_sequence(value)
+    -> tinydb.queries.is_sequence
+458:50 call  all(cond(e) for e in value)
+    -> <builtin>.all
+    reject tinydb.queries.Query.all, tinydb.table.Table.all: the builtin all; neither method is in this scope
+458:55 call  cond(e)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: in this branch cond is callable: a QueryInstance or a Query (annotation, line 436; docs/usage.rst:160-162); a client callable is opaque
+458:68 iter  value
+    -> tinydb.database.TinyDB.__iter__
+    note: the document field can be a TinyDB: a test inserts {'int': db} (tests/test_tinydb.py:623); with MemoryStorage or a CachingMiddleware the document is stored, and a search with this query iterates the field (ruling, b7-ruling-tinydb.md; tinydb.md, J10)
+462:35 call  is_sequence(value)
+    -> tinydb.queries.is_sequence
+462:50 call  all(e in value for e in cond)
+    -> <builtin>.all
+    reject tinydb.queries.Query.all, tinydb.table.Table.all: the builtin all; neither method is in this scope
+462:53 op  e in value
+    -> tinydb.database.TinyDB.__iter__
+    reject tinydb.utils.LRUCache.__contains__: value is a field of a client document, never an LRUCache
+    note: TinyDB defines no __contains__, so `in` iterates a TinyDB field (a nonempty cond list); see 425:68
+
+[tinydb.queries.Query.all.<lambda1>]
+465:31 call  test(value)
+    -> tinydb.queries.Query.all.test
+    reject *: test is the local function of Query.all (both definitions, lines 457 and 461, are the node Query.all.test)
+
+[tinydb.queries.Query.one_of]
+477:35 call  self._generate_test( lambda value: value in items, ('one_...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.one_of.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+479:42 call  freeze(items)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.one_of.<lambda1>]
+478:33 op  value in items
+    reject tinydb.utils.LRUCache.__contains__: items is the client's list or generator (line 471)
+
+[tinydb.queries.Query.fragment]
+490:35 call  self._generate_test( lambda value: test(value), ('fragmen...
+    -> tinydb.queries.Query._generate_test
+    reject tinydb.queries.Query.fragment.<lambda1>: _generate_test keeps it for runner, which calls it (244:28)
+492:32 call  freeze(document)
+    -> tinydb.utils.freeze
+
+[tinydb.queries.Query.fragment.test]
+485:24 op  key not in value
+    -> tinydb.database.TinyDB.__iter__
+    reject tinydb.utils.LRUCache.__contains__: value is a client document (or a field of one), never an LRUCache
+    note: TinyDB defines no __contains__, so `in` iterates a TinyDB field (a nonempty fragment); see 425:68
+485:51 op  value[key] != document[key]
+    reject tinydb.queries.Query.__ne__: both operands are values of client documents
+
+[tinydb.queries.Query.fragment.<lambda1>]
+491:31 call  test(value)
+    -> tinydb.queries.Query.fragment.test
+    reject *: test is the local function of Query.fragment
+
+[tinydb.queries.Query.noop]
+503:29 call  QueryInstance( lambda value: True, () )
+    -> tinydb.queries.QueryInstance.__init__
+    reject tinydb.queries.Query.noop.<lambda1>: __init__ stores it as _test; QueryInstance.__call__ calls it (94:26)
+
+[tinydb.queries.Query.map]
+513:21 call  type(self)
+    -> <builtin>.type
+513:27 call  type(self)()
+    -> tinydb.queries.Query.__init__
+    note: value site: type(self) is Query or a client subclass, which runs Query.__init__ unless it overrides it
+
+[tinydb.queries.where]
+528:17 call  Query()
+    -> tinydb.queries.Query.__init__
+    reject tinydb.queries.QueryInstance.__init__: Query defines __init__, which calls QueryInstance.__init__ itself (179:25)
+528:19 getitem  Query()[key]
+    -> tinydb.queries.Query.__getitem__
+
+== tinydb.storages
+
+[tinydb.storages]
+47:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+59:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+
+[tinydb.storages.touch]
+24:35 call  os.path.dirname(path)
+    -> os.path.dirname
+27:43 call  os.path.exists(base_dir)
+    -> os.path.exists
+    reject tinydb.queries.Query.exists: os.path.exists is the function of os.path
+28:24 call  os.makedirs(base_dir)
+    -> os.makedirs
+32:10 with  open(path, 'a')
+    reject tinydb.database.TinyDB.__enter__, tinydb.database.TinyDB.__exit__: the context manager is the file that open returns
+32:14 call  open(path, 'a')
+    -> <builtin>.open
+
+[tinydb.storages.Storage.read]
+57:34 call  NotImplementedError('To be overridden!')
+    -> <builtin>.NotImplementedError
+
+[tinydb.storages.Storage.write]
+69:34 call  NotImplementedError('To be overridden!')
+    -> <builtin>.NotImplementedError
+
+[tinydb.storages.JSONStorage.__init__]
+103:14 call  super()
+    -> <builtin>.super
+103:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: Storage defines no __init__; the next class of the MRO is abc.ABC (object.__init__ runs), named through the nearest base outside the package
+108:24 op  access_mode not in ('r', 'rb', 'r+', 'rb+')
+    reject tinydb.utils.LRUCache.__contains__: the container is a tuple of strs
+109:26 call  warnings.warn( 'Using an `access_mode` other than \'r\', ...
+    -> warnings.warn
+116:15 call  any([character in self._mode for character in ('+', 'w', ...
+    -> <builtin>.any
+    reject tinydb.queries.Query.any: the builtin any
+116:27 op  character in self._mode
+    reject tinydb.utils.LRUCache.__contains__: self._mode is the access mode, a str
+117:18 call  touch(path, create_dirs=create_dirs)
+    -> tinydb.storages.touch
+120:28 call  open(path, mode=self._mode, encoding=encoding)
+    -> <builtin>.open
+
+[tinydb.storages.JSONStorage.close]
+123:27 call  self._handle.close()
+    -> io.TextIOWrapper.close
+    -> io.BufferedReader.close
+    -> io.BufferedWriter.close
+    -> io.BufferedRandom.close
+    reject *: _handle is the file object that open returns (120:28), never a package object
+    note: the class of _handle follows the access mode (tinydb.md, J6): text modes give a TextIOWrapper, 'rb' a BufferedReader, 'wb', 'ab', 'xb' a BufferedWriter, 'rb+', 'wb+', 'ab+' a BufferedRandom
+
+[tinydb.storages.JSONStorage.read]
+128:26 call  self._handle.seek(0, os.SEEK_END)
+    -> io.TextIOWrapper.seek
+    -> io.BufferedReader.seek
+    -> io.BufferedWriter.seek
+    -> io.BufferedRandom.seek
+    note: the class of _handle follows the access mode (tinydb.md, J6)
+129:33 call  self._handle.tell()
+    -> io.TextIOWrapper.tell
+    -> io.BufferedReader.tell
+    -> io.BufferedWriter.tell
+    -> io.BufferedRandom.tell
+137:30 call  self._handle.seek(0)
+    -> io.TextIOWrapper.seek
+    -> io.BufferedReader.seek
+    -> io.BufferedWriter.seek
+    -> io.BufferedRandom.seek
+140:29 call  json.load(self._handle)
+    -> json.load
+
+[tinydb.storages.JSONStorage.write]
+144:26 call  self._handle.seek(0)
+    -> io.TextIOWrapper.seek
+    -> io.BufferedReader.seek
+    -> io.BufferedWriter.seek
+    -> io.BufferedRandom.seek
+    note: the class of _handle follows the access mode (tinydb.md, J6)
+147:32 call  json.dumps(data, **self.kwargs)
+    -> json.dumps
+    note: self.kwargs are the client's json.dumps options; callables among them (default, cls) are client callbacks
+151:31 call  self._handle.write(serialized)
+    -> io.TextIOWrapper.write
+    -> io.BufferedReader.write
+    -> io.BufferedWriter.write
+    -> io.BufferedRandom.write
+    reject *: _handle is the file object that open returns, never a package storage
+    note: serialized is a str from the default encoder: a TextIOWrapper writes it (or, in mode 'r', raises io.UnsupportedOperation); BufferedReader.write raises io.UnsupportedOperation; BufferedWriter.write and BufferedRandom.write raise TypeError for a str but write the bytes that a client cls encoder can return (docs/usage.rst:599; tinydb.md, J6)
+153:26 call  IOError('Cannot write to the database. Access mode is "{0...
+    -> <builtin>.IOError
+153:86 call  'Cannot write to the database. Access mode is "{0}"'.form...
+    -> <builtin>.str.format
+    reject *: the argument is the access mode, a str
+156:27 call  self._handle.flush()
+    -> io.TextIOWrapper.flush
+    -> io.BufferedWriter.flush
+    -> io.BufferedRandom.flush
+    reject tinydb.middlewares.CachingMiddleware.flush: _handle is a file object
+    note: a text stream gets past the write at 151:31, and so does a writable binary stream when a client cls encoder returns bytes (the referee's ruling on Codex R1, b7-ruling-round1-disputes.md, case 2); a BufferedReader never writes
+157:17 call  os.fsync(self._handle.fileno())
+    -> os.fsync
+157:37 call  self._handle.fileno()
+    -> io.TextIOWrapper.fileno
+    -> io.BufferedWriter.fileno
+    -> io.BufferedRandom.fileno
+    note: a text stream, or a writable binary stream after a bytes result of a client cls encoder (see 156:27)
+161:30 call  self._handle.truncate()
+    -> io.TextIOWrapper.truncate
+    -> io.BufferedWriter.truncate
+    -> io.BufferedRandom.truncate
+    reject tinydb.table.Table.truncate: _handle is a file object
+    note: a text stream, or a writable binary stream after a bytes result of a client cls encoder (see 156:27)
+
+[tinydb.storages.MemoryStorage.__init__]
+174:14 call  super()
+    -> <builtin>.super
+174:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: Storage defines no __init__; the next class of the MRO is abc.ABC (object.__init__ runs), named through the nearest base outside the package
+
+== tinydb.table
+
+[tinydb.table]
+123:6 decorator  @property
+    -> <builtin>.property
+130:6 decorator  @property
+    -> <builtin>.property
+279:6 decorator  @overload
+    -> typing.overload
+282:6 decorator  @overload
+    -> typing.overload
+287:6 decorator  @overload
+    -> typing.overload
+292:6 decorator  @overload
+    -> typing.overload
+297:6 decorator  @overload
+    -> typing.overload
+302:6 decorator  @overload
+    -> typing.overload
+307:6 decorator  @overload
+    -> typing.overload
+312:6 decorator  @overload
+    -> typing.overload
+
+[tinydb.table.Document.__init__]
+31:14 call  super()
+    -> <builtin>.super
+31:25 call  super().__init__(value)
+    -> <builtin>.dict.__init__
+    reject *: the base of Document is dict
+    note: value is a document of the table data (a dict) or the client's Mapping, whose keys and __getitem__ are client code
+
+[tinydb.table.Table.__init__]
+108:37 call  self.query_cache_class(capacity=cache_size)
+    -> tinydb.utils.LRUCache.__init__
+    note: value site: query_cache_class is the class attribute Table.query_cache_class = LRUCache (line 87); a documented override (class docstring, lines 60-61) is a client class
+112:31 call  self._update_table(lambda table: table.clear())
+    -> tinydb.table.Table._update_table
+    reject tinydb.table.Table.__init__.<lambda1>: _update_table calls it (817:16)
+
+[tinydb.table.Table.__init__.<lambda1>]
+112:57 call  table.clear()
+    -> <builtin>.dict.clear
+    reject tinydb.utils.LRUCache.clear: table is the dict that _update_table builds (lines 811-814)
+    note: value site by name only (FrozenDict binds clear = _immutable, utils.py:133); table is the dict of _update_table
+
+[tinydb.table.Table.__repr__]
+116:31 call  'name={!r}'.format(self.name)
+    -> <builtin>.str.format
+    reject *: the argument is the str that Table.name returns (the getter runs at 116:37)
+116:37 getattr  self.name
+    -> tinydb.table.Table.name
+117:30 call  'total={}'.format(len(self))
+    -> <builtin>.str.format
+    reject *: the argument is an int
+117:34 call  len(self)
+    -> <builtin>.len
+    -> tinydb.table.Table.__len__
+    reject tinydb.database.TinyDB.__len__, tinydb.utils.LRUCache.__len__: self is a Table
+118:32 call  'storage={}'.format(self._storage)
+    -> <builtin>.str.format
+    reject *: the argument is the storage: the package storages and middlewares define no __format__, __str__ or __repr__ (object's run, which load no instance attribute), and no TinyDB, Table or query is a storage
+121:32 call  '<{} {}>'.format(type(self).__name__, ', '.join(args))
+    -> <builtin>.str.format
+    reject *: the arguments are strs
+121:37 call  type(self)
+    -> <builtin>.type
+121:63 call  ', '.join(args)
+    -> <builtin>.str.join
+
+[tinydb.table.Table.insert]
+146:26 call  isinstance(document, Mapping)
+    -> <builtin>.isinstance
+147:29 call  ValueError('Document is not a Mapping')
+    -> <builtin>.ValueError
+150:22 call  isinstance(document, self.document_class)
+    -> <builtin>.isinstance
+159:39 call  self._get_next_id()
+    -> tinydb.table.Table._get_next_id
+173:27 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+
+[tinydb.table.Table.insert.updater]
+163:23 op  doc_id in table
+    reject tinydb.utils.LRUCache.__contains__: table is the dict of _update_table
+164:33 call  ValueError(f'Document with ID {str(doc_id)} ' f'already e...
+    -> <builtin>.ValueError
+164:53 format  {str(doc_id)}
+    reject *: the formatted value is a str
+164:57 call  str(doc_id)
+    -> <builtin>.str
+    reject *: doc_id is an int (from _get_next_id, or the doc_id of a Document, annotated int, line 30)
+170:18 setitem  table[doc_id]
+    reject tinydb.utils.LRUCache.__setitem__: table is the dict of _update_table
+170:33 call  dict(document)
+    -> <builtin>.dict
+
+[tinydb.table.Table.insert_multiple]
+217:27 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+
+[tinydb.table.Table.insert_multiple.updater]
+190:34 call  isinstance(document, Mapping)
+    -> <builtin>.isinstance
+191:37 call  ValueError('Document is not a Mapping')
+    -> <builtin>.ValueError
+193:30 call  isinstance(document, self.document_class)
+    -> <builtin>.isinstance
+195:40 op  document.doc_id in table
+    reject tinydb.utils.LRUCache.__contains__: table is the dict of _update_table
+196:41 call  ValueError( f'Document with ID {str(document.doc_id)} ' f...
+    -> <builtin>.ValueError
+197:48 format  {str(document.doc_id)}
+    reject *: the formatted value is a str
+197:52 call  str(document.doc_id)
+    -> <builtin>.str
+    reject *: doc_id of a Document is an int (line 30)
+205:35 call  doc_ids.append(doc_id)
+    -> <builtin>.list.append
+206:26 setitem  table[doc_id]
+    reject tinydb.utils.LRUCache.__setitem__: table is the dict of _update_table
+206:41 call  dict(document)
+    -> <builtin>.dict
+212:43 call  self._get_next_id()
+    -> tinydb.table.Table._get_next_id
+213:31 call  doc_ids.append(doc_id)
+    -> <builtin>.list.append
+214:22 setitem  table[doc_id]
+    reject tinydb.utils.LRUCache.__setitem__: table is the dict of _update_table
+214:37 call  dict(document)
+    -> <builtin>.dict
+
+[tinydb.table.Table.all]
+233:20 call  list(iter(self))
+    -> <builtin>.list
+233:25 call  iter(self)
+    -> <builtin>.iter
+    -> tinydb.table.Table.__iter__
+    reject tinydb.database.TinyDB.__iter__, tinydb.utils.LRUCache.__iter__: self is a Table
+
+[tinydb.table.Table.search]
+245:47 call  self._query_cache.get(cond)
+    -> tinydb.utils.LRUCache.get
+    reject tinydb.table.Table.get: _query_cache is the LRUCache of __init__ (line 108)
+253:32 call  self.document_class(doc, self.document_id_class(doc_id))
+    -> tinydb.table.Document.__init__
+    note: value site: document_class is the class attribute Table.document_class = Document (line 77); a documented override (lines 56-57) is a client class
+253:60 call  self.document_id_class(doc_id)
+    -> <builtin>.int
+    note: value site: document_id_class is the class attribute Table.document_id_class = int (line 82); a documented override is a client class
+254:48 call  self._read_table()
+    -> tinydb.table.Table._read_table
+254:56 call  self._read_table().items()
+    -> <builtin>.dict.items
+255:20 call  cond(doc)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: cond is a query that the package builds (a QueryInstance; tinydb.md, J1) or a client callable (docs/usage.rst:208), which is opaque
+271:51 call  getattr(cond, 'is_cacheable', lambda: True)
+    -> <builtin>.getattr
+    reject tinydb.table.Table.search.<lambda1>: getattr returns the default without calling it (273:24 calls it)
+273:24 call  is_cacheable()
+    -> tinydb.queries.QueryInstance.is_cacheable
+    -> tinydb.table.Table.search.<lambda1>
+    note: value site: the bound is_cacheable of a QueryInstance, or the default lambda for a client callable without that attribute (docs/usage.rst:208); a client's own is_cacheable is opaque (tests/test_tinydb.py:781)
+275:30 setitem  self._query_cache[cond]
+    -> tinydb.utils.LRUCache.__setitem__
+
+[tinydb.table.Table.get]
+336:33 call  self._read_table()
+    -> tinydb.table.Table._read_table
+340:32 call  table.get(str(doc_id), None)
+    -> <builtin>.dict.get
+    reject tinydb.table.Table.get, tinydb.utils.LRUCache.get: table is the dict that _read_table returns
+340:36 call  str(doc_id)
+    -> <builtin>.str
+    reject *: doc_id is an int (Optional[int]) or a client value
+346:39 call  self.document_class(raw_doc, doc_id)
+    -> tinydb.table.Document.__init__
+    note: value site: document_class is the class attribute Table.document_class = Document (line 77); a documented override is a client class
+354:30 call  set(str(doc_id) for doc_id in doc_ids)
+    -> <builtin>.set
+    reject tinydb.operations.set, tinydb.utils.LRUCache.set: the builtin set; table.py imports neither
+354:34 call  str(doc_id)
+    -> <builtin>.str
+    reject *: the items of doc_ids are ints (Optional[list]) or client values
+358:36 call  self.document_class(doc, self.document_id_class(doc_id))
+    -> tinydb.table.Document.__init__
+    note: value site: document_class is the class attribute Table.document_class = Document (line 77); a documented override is a client class
+358:64 call  self.document_id_class(doc_id)
+    -> <builtin>.int
+    note: value site: document_id_class is the class attribute Table.document_id_class = int (line 82); a documented override is a client class
+359:47 call  table.items()
+    -> <builtin>.dict.items
+360:27 op  doc_id in doc_ids_set
+    reject tinydb.utils.LRUCache.__contains__: doc_ids_set is a set of strs
+369:49 call  self._read_table()
+    -> tinydb.table.Table._read_table
+369:57 call  self._read_table().items()
+    -> <builtin>.dict.items
+370:24 call  cond(doc)
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: cond is a QueryInstance (tinydb.md, J1) or a client callable, which is opaque
+371:47 call  self.document_class( doc, self.document_id_class(doc_id_) )
+    -> tinydb.table.Document.__init__
+    note: value site: document_class is the class attribute Table.document_class = Document (line 77); a documented override is a client class
+373:47 call  self.document_id_class(doc_id_)
+    -> <builtin>.int
+    note: value site: document_id_class is the class attribute Table.document_id_class = int (line 82); a documented override is a client class
+378:27 call  RuntimeError('You have to pass either cond or doc_id or d...
+    -> <builtin>.RuntimeError
+
+[tinydb.table.Table.contains]
+396:28 call  self.get(doc_id=doc_id)
+    -> tinydb.table.Table.get
+    reject tinydb.utils.LRUCache.get: self is a Table
+400:28 call  self.get(cond)
+    -> tinydb.table.Table.get
+    reject tinydb.utils.LRUCache.get: self is a Table
+402:27 call  RuntimeError('You have to pass either cond or doc_id')
+    -> <builtin>.RuntimeError
+
+[tinydb.table.Table.update]
+425:20 call  callable(fields)
+    -> <builtin>.callable
+442:33 call  list(doc_ids)
+    -> <builtin>.list
+456:31 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+485:31 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+504:31 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+
+[tinydb.table.Table.update.perform_update]
+429:23 call  fields(table[doc_id])
+    -> tinydb.operations.delete.transform
+    -> tinydb.operations.add.transform
+    -> tinydb.operations.subtract.transform
+    -> tinydb.operations.set.transform
+    -> tinydb.operations.increment.transform
+    -> tinydb.operations.decrement.transform
+    note: value site: in this branch fields is callable: a transform that tinydb.operations returns (docs/usage.rst:306-317) or a client function (opaque)
+433:37 call  table[doc_id].update(fields)
+    -> <builtin>.dict.update
+    reject tinydb.table.Table.update, tinydb.utils.FrozenDict.update: table[doc_id] is a document of the table data, a dict
+    note: fields is the client's Mapping (a dict, a Document, or a client Mapping, whose keys and __getitem__ are client code)
+
+[tinydb.table.Table.update.updater]
+449:35 call  updated_ids.extend( doc_id for doc_id in requested_ids if...
+    -> <builtin>.list.extend
+450:66 op  doc_id in table
+    reject tinydb.utils.LRUCache.__contains__: table is the dict of _update_table
+453:35 call  perform_update(table, doc_id)
+    -> tinydb.table.Table.update.perform_update
+    reject tinydb.table.Table.update_multiple.perform_update: perform_update is the local function of Table.update (both definitions, lines 426 and 431)
+467:29 call  cast(QueryLike, cond)
+    -> typing.cast
+474:35 call  list(table.keys())
+    -> <builtin>.list
+474:46 call  table.keys()
+    -> <builtin>.dict.keys
+477:29 call  _cond(table[doc_id])
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: _cond is cond: a QueryInstance (tinydb.md, J1) or a client callable, which is opaque
+479:43 call  updated_ids.append(doc_id)
+    -> <builtin>.list.append
+482:39 call  perform_update(table, doc_id)
+    -> tinydb.table.Table.update.perform_update
+    reject tinydb.table.Table.update_multiple.perform_update: perform_update is the local function of Table.update
+496:35 call  list(table.keys())
+    -> <builtin>.list
+496:46 call  table.keys()
+    -> <builtin>.dict.keys
+498:39 call  updated_ids.append(doc_id)
+    -> <builtin>.list.append
+501:35 call  perform_update(table, doc_id)
+    -> tinydb.table.Table.update.perform_update
+    reject tinydb.table.Table.update_multiple.perform_update: perform_update is the local function of Table.update
+
+[tinydb.table.Table.update_multiple]
+556:27 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+
+[tinydb.table.Table.update_multiple.perform_update]
+522:24 call  callable(fields)
+    -> <builtin>.callable
+525:23 call  fields(table[doc_id])
+    -> tinydb.operations.delete.transform
+    -> tinydb.operations.add.transform
+    -> tinydb.operations.subtract.transform
+    -> tinydb.operations.set.transform
+    -> tinydb.operations.increment.transform
+    -> tinydb.operations.decrement.transform
+    note: value site: in this branch fields is callable: a transform that tinydb.operations returns (docs/usage.rst:337-342) or a client function (opaque)
+529:37 call  table[doc_id].update(fields)
+    -> <builtin>.dict.update
+    reject tinydb.table.Table.update, tinydb.utils.FrozenDict.update: table[doc_id] is a document of the table data, a dict
+
+[tinydb.table.Table.update_multiple.updater]
+542:31 call  list(table.keys())
+    -> <builtin>.list
+542:42 call  table.keys()
+    -> <builtin>.dict.keys
+544:33 call  cast(QueryLike, cond)
+    -> typing.cast
+548:29 call  _cond(table[doc_id])
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: _cond is the cond of an update pair: a QueryInstance (tinydb.md, J1) or a client callable, which is opaque
+550:43 call  updated_ids.append(doc_id)
+    -> <builtin>.list.append
+553:39 call  perform_update(fields, table, doc_id)
+    -> tinydb.table.Table.update_multiple.perform_update
+    reject tinydb.table.Table.update.perform_update: perform_update is the local function of Table.update_multiple
+
+[tinydb.table.Table.upsert]
+578:22 call  isinstance(document, self.document_class)
+    -> <builtin>.isinstance
+578:65 call  hasattr(document, 'doc_id')
+    -> <builtin>.hasattr
+585:29 call  ValueError("If you don't specify a search query, you must...
+    -> <builtin>.ValueError
+592:35 call  self.update(document, cond, doc_ids)
+    -> tinydb.table.Table.update
+    reject tinydb.utils.FrozenDict.update: self is a Table
+600:28 call  self.insert(document)
+    -> tinydb.table.Table.insert
+
+[tinydb.table.Table.remove]
+625:33 call  list(doc_ids)
+    -> <builtin>.list
+639:31 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+669:31 call  self._update_table(updater)
+    -> tinydb.table.Table._update_table
+    reject *: _update_table calls updater (817:16); the updaters of the other methods are not passed here
+673:27 call  RuntimeError('Use truncate() to remove all documents')
+    -> <builtin>.RuntimeError
+
+[tinydb.table.Table.remove.updater]
+632:35 call  removed_ids.extend( doc_id for doc_id in requested_ids if...
+    -> <builtin>.list.extend
+633:66 op  doc_id in table
+    reject tinydb.utils.LRUCache.__contains__: table is the dict of _update_table
+636:30 delitem  table[doc_id]
+    reject tinydb.utils.LRUCache.__delitem__: table is the dict of _update_table
+653:29 call  cast(QueryLike, cond)
+    -> typing.cast
+660:35 call  list(table.keys())
+    -> <builtin>.list
+660:46 call  table.keys()
+    -> <builtin>.dict.keys
+661:29 call  _cond(table[doc_id])
+    -> tinydb.queries.QueryInstance.__call__
+    note: value site: _cond is cond: a QueryInstance (tinydb.md, J1) or a client callable, which is opaque
+663:43 call  removed_ids.append(doc_id)
+    -> <builtin>.list.append
+666:34 call  table.pop(doc_id)
+    -> <builtin>.dict.pop
+    reject tinydb.utils.FrozenDict.pop: table is the dict of _update_table
+
+[tinydb.table.Table.truncate]
+681:27 call  self._update_table(lambda table: table.clear())
+    -> tinydb.table.Table._update_table
+    reject tinydb.table.Table.truncate.<lambda1>: _update_table calls it (817:16)
+
+[tinydb.table.Table.truncate.<lambda1>]
+681:53 call  table.clear()
+    -> <builtin>.dict.clear
+    reject tinydb.utils.LRUCache.clear: table is the dict that _update_table builds (lines 811-814)
+    note: value site by name only (FrozenDict binds clear = _immutable, utils.py:133); table is the dict of _update_table
+
+[tinydb.table.Table.count]
+693:19 call  len(self.search(cond))
+    -> <builtin>.len
+693:31 call  self.search(cond)
+    -> tinydb.table.Table.search
+    reject tinydb.queries.Query.search: self is a Table
+
+[tinydb.table.Table.clear_cache]
+700:32 call  self._query_cache.clear()
+    -> tinydb.utils.LRUCache.clear
+    note: value site by name only (FrozenDict binds clear = _immutable, utils.py:133); _query_cache is the LRUCache that query_cache_class makes (line 108)
+
+[tinydb.table.Table.__len__]
+707:19 call  len(self._read_table())
+    -> <builtin>.len
+707:36 call  self._read_table()
+    -> tinydb.table.Table._read_table
+
+[tinydb.table.Table.__iter__]
+717:44 call  self._read_table()
+    -> tinydb.table.Table._read_table
+717:52 call  self._read_table().items()
+    -> <builtin>.dict.items
+719:38 call  self.document_class(doc, self.document_id_class(doc_id))
+    -> tinydb.table.Document.__init__
+    note: value site: document_class is the class attribute Table.document_class = Document (line 77); a documented override is a client class
+719:66 call  self.document_id_class(doc_id)
+    -> <builtin>.int
+    note: value site: document_id_class is the class attribute Table.document_id_class = int (line 82); a documented override is a client class
+
+[tinydb.table.Table._get_next_id]
+737:33 call  self._read_table()
+    -> tinydb.table.Table._read_table
+747:21 call  max(self.document_id_class(i) for i in table.keys())
+    -> <builtin>.max
+    reject *: max compares the ints that document_id_class makes
+747:44 call  self.document_id_class(i)
+    -> <builtin>.int
+    note: value site: document_id_class is the class attribute Table.document_id_class = int (line 82); a documented override is a client class
+747:67 call  table.keys()
+    -> <builtin>.dict.keys
+
+[tinydb.table.Table._read_table]
+766:32 getattr  self._storage.read
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: TinyDB passes its storage (130:33), which can be a plain Middleware: it defines no read, and its __getattr__ forwards the name
+766:36 call  self._storage.read()
+    -> tinydb.middlewares.CachingMiddleware.read
+    -> tinydb.storages.JSONStorage.read
+    -> tinydb.storages.MemoryStorage.read
+    reject tinydb.storages.Storage.read: abstract by abc; every package storage overrides it
+774:33 getattr  self.name
+    -> tinydb.table.Table.name
+
+[tinydb.table.Table._update_table]
+795:32 getattr  self._storage.read
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: the storage can be a plain Middleware, which defines no read
+795:36 call  self._storage.read()
+    -> tinydb.middlewares.CachingMiddleware.read
+    -> tinydb.storages.JSONStorage.read
+    -> tinydb.storages.MemoryStorage.read
+    reject tinydb.storages.Storage.read: abstract by abc; every package storage overrides it
+802:37 getattr  self.name
+    -> tinydb.table.Table.name
+812:35 call  self.document_id_class(doc_id)
+    -> <builtin>.int
+    note: value site: document_id_class is the class attribute Table.document_id_class = int (line 82); a documented override is a client class
+813:47 call  raw_table.items()
+    -> <builtin>.dict.items
+817:16 call  updater(table)
+    -> tinydb.table.Table.__init__.<lambda1>
+    -> tinydb.table.Table.truncate.<lambda1>
+    -> tinydb.table.Table.insert.updater
+    -> tinydb.table.Table.insert_multiple.updater
+    -> tinydb.table.Table.update.updater
+    -> tinydb.table.Table.update_multiple.updater
+    -> tinydb.table.Table.remove.updater
+    note: value site: updater is the argument of this private method; the package passes these seven (lines 112, 173, 217, 456, 485, 504, 556, 639, 669, 681)
+822:15 setitem  tables[self.name]
+    reject tinydb.utils.LRUCache.__setitem__: tables is the dict that the storage read returned, or {}
+822:21 getattr  self.name
+    -> tinydb.table.Table.name
+823:16 call  str(doc_id)
+    -> <builtin>.str
+    reject *: doc_id is the int that document_id_class made, or an int key that an updater stored
+824:43 call  table.items()
+    -> <builtin>.dict.items
+828:23 getattr  self._storage.write
+    -> tinydb.middlewares.Middleware.__getattr__
+    note: the storage can be a plain Middleware, which defines no write
+828:28 call  self._storage.write(tables)
+    -> tinydb.middlewares.CachingMiddleware.write
+    -> tinydb.storages.JSONStorage.write
+    -> tinydb.storages.MemoryStorage.write
+    reject tinydb.storages.Storage.write: abstract by abc; every package storage overrides it
+831:25 call  self.clear_cache()
+    -> tinydb.table.Table.clear_cache
+
+== tinydb.utils
+
+[tinydb.utils]
+9:12 call  TypeVar('K')
+    -> typing.TypeVar
+10:12 call  TypeVar('V')
+    -> typing.TypeVar
+11:12 call  TypeVar('D')
+    -> typing.TypeVar
+12:12 call  TypeVar('T')
+    -> typing.TypeVar
+57:6 decorator  @property
+    -> <builtin>.property
+61:6 decorator  @property
+    -> <builtin>.property
+
+[tinydb.utils.LRUCache.__init__]
+55:52 call  OrderedDict()
+    -> collections.OrderedDict
+
+[tinydb.utils.LRUCache.lru]
+59:20 call  list(self.cache.keys())
+    -> <builtin>.list
+59:36 call  self.cache.keys()
+    -> collections.OrderedDict.keys
+
+[tinydb.utils.LRUCache.length]
+63:19 call  len(self.cache)
+    -> <builtin>.len
+
+[tinydb.utils.LRUCache.clear]
+66:25 call  self.cache.clear()
+    -> collections.OrderedDict.clear
+    reject tinydb.utils.LRUCache.clear: self.cache is the OrderedDict of __init__
+    note: value site by name only (FrozenDict binds clear = _immutable, line 133); self.cache is the OrderedDict of __init__ (line 55)
+
+[tinydb.utils.LRUCache.__len__]
+69:21 getattr  self.length
+    -> tinydb.utils.LRUCache.length
+
+[tinydb.utils.LRUCache.__contains__]
+72:20 op  key in self.cache
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    reject tinydb.utils.LRUCache.__contains__: the container is the OrderedDict self.cache
+    note: the tests test a QueryInstance against the query cache (tests/test_tables.py:63, 66, 71, 74, 130); the lookup hashes it and compares it with a stored query of equal hash (tinydb.md, J2)
+
+[tinydb.utils.LRUCache.__setitem__]
+75:17 call  self.set(key, value)
+    -> tinydb.utils.LRUCache.set
+    reject tinydb.operations.set: self is an LRUCache
+
+[tinydb.utils.LRUCache.__delitem__]
+78:23 delitem  self.cache[key]
+    -> tinydb.queries.QueryInstance.__eq__
+    reject tinydb.utils.LRUCache.__delitem__: the container is the OrderedDict self.cache
+    note: the package never deletes from the query cache, but LRUCache is public (tinydb.utils.__all__, docs/api.rst:125) and a QueryInstance is an admitted key (Table.search stores its cond, table.py:275); deleting a plain int key whose hash equals a stored query's hash (possible whenever that hash is in the int hash range) compares the stored query first: QueryInstance.__eq__ runs, returns False, and KeyError follows (Codex round 1; tinydb.md, J2)
+
+[tinydb.utils.LRUCache.__getitem__]
+81:25 call  self.get(key)
+    -> tinydb.utils.LRUCache.get
+    reject tinydb.table.Table.get: self is an LRUCache
+83:27 call  KeyError(key)
+    -> <builtin>.KeyError
+
+[tinydb.utils.LRUCache.__iter__]
+88:20 call  iter(self.cache)
+    -> <builtin>.iter
+
+[tinydb.utils.LRUCache.get]
+91:31 call  self.cache.get(key)
+    -> collections.OrderedDict.get
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    reject tinydb.table.Table.get, tinydb.utils.LRUCache.get: self.cache is the OrderedDict of __init__
+    note: Table.search passes its cond (245:47), a QueryInstance: the lookup hashes it and compares it with a stored query of equal hash, also two equal queries (tests/test_tinydb.py:408-411; tinydb.md, J2)
+94:35 call  self.cache.move_to_end(key, last=True)
+    -> collections.OrderedDict.move_to_end
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    note: move_to_end looks the key up again (hash, and __eq__ with a stored key of equal hash)
+
+[tinydb.utils.LRUCache.set]
+101:16 op  key in self.cache
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    reject tinydb.utils.LRUCache.__contains__: the container is the OrderedDict self.cache
+    note: Table.search stores its cond (275:30) through __setitem__: a QueryInstance; a stored query of equal hash is compared (tinydb.md, J2)
+102:23 setitem  self.cache[key]
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    reject tinydb.utils.LRUCache.__setitem__: the container is the OrderedDict self.cache
+103:35 call  self.cache.move_to_end(key, last=True)
+    -> collections.OrderedDict.move_to_end
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+105:23 setitem  self.cache[key]
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    reject tinydb.utils.LRUCache.__setitem__: the container is the OrderedDict self.cache
+110:51 getattr  self.length
+    -> tinydb.utils.LRUCache.length
+110:58 op  self.length > self.capacity
+    reject *: both operands are ints (capacity is the cache_size of Table.__init__, an int)
+111:35 call  self.cache.popitem(last=False)
+    -> collections.OrderedDict.popitem
+    -> tinydb.queries.QueryInstance.__hash__
+    -> tinydb.queries.QueryInstance.__eq__
+    note: value site by name only (FrozenDict binds popitem = _immutable, line 135); self.cache is the OrderedDict of __init__; the oldest key, a QueryInstance, is looked up in the dict: on CPython with its stored hash, and a stored key of equal hash met earlier on the probe path is compared (move_to_end reorders the list, not the slots); PyPy's OrderedDict.popitem(last=False) calls self.pop(k), which hashes it (tinydb.md, J2)
+
+[tinydb.utils.FrozenDict.__hash__]
+125:20 call  hash(tuple(sorted(self.items())))
+    -> <builtin>.hash
+    -> tinydb.utils.FrozenDict.__hash__
+    note: freeze turns nested dicts into FrozenDicts (line 150), so hashing the items hashes the nested FrozenDicts; the values are what freeze makes from client data, never a query (tinydb.md, J3)
+125:26 call  tuple(sorted(self.items()))
+    -> <builtin>.tuple
+125:33 call  sorted(self.items())
+    -> <builtin>.sorted
+    reject *: sorted compares (key, value) pairs whose keys are the distinct keys of a client dict, so the values are never compared; no key is a Query
+125:44 call  self.items()
+    -> <builtin>.dict.items
+
+[tinydb.utils.FrozenDict._immutable]
+128:24 call  TypeError('object is immutable')
+    -> <builtin>.TypeError
+
+[tinydb.utils.FrozenDict.update]
+138:24 call  TypeError('object is immutable')
+    -> <builtin>.TypeError
+
+[tinydb.utils.FrozenDict.pop]
+141:24 call  TypeError('object is immutable')
+    -> <builtin>.TypeError
+
+[tinydb.utils.freeze]
+148:18 call  isinstance(obj, dict)
+    -> <builtin>.isinstance
+150:26 call  FrozenDict((k, freeze(v)) for k, v in obj.items())
+    -> <builtin>.dict.__init__
+    note: FrozenDict defines no __init__; dict.__init__ inserts the pairs directly and calls no FrozenDict method (CPython dict_merge_from_seq2; tinydb.md, J7)
+150:37 call  freeze(v)
+    -> tinydb.utils.freeze
+150:63 call  obj.items()
+    -> <builtin>.dict.items
+151:20 call  isinstance(obj, list)
+    -> <builtin>.isinstance
+153:21 call  tuple(freeze(el) for el in obj)
+    -> <builtin>.tuple
+153:28 call  freeze(el)
+    -> tinydb.utils.freeze
+154:20 call  isinstance(obj, tuple)
+    -> <builtin>.isinstance
+157:21 call  tuple(freeze(el) for el in obj)
+    -> <builtin>.tuple
+157:28 call  freeze(el)
+    -> tinydb.utils.freeze
+158:20 call  isinstance(obj, set)
+    -> <builtin>.isinstance
+    reject tinydb.operations.set, tinydb.utils.LRUCache.set: set is the builtin class, an argument of isinstance
+160:25 call  frozenset(obj)
+    -> <builtin>.frozenset
