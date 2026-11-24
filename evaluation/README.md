@@ -10,13 +10,35 @@ are data: PyCG reads them, and no script imports or runs them.
 
 | Command | What it does |
 |---|---|
-| `make eval` | Builds the inputs image (the 30 sources, fetched by their pins), copies the sources into `macro-benchmark/projects/`, then runs `common/loop.py run` on this checkout in a container without network and prints the summary; the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
-| `python -I evaluation/common/loop.py compare OLD NEW` | Lists the edges and micro cases that changed between two such directories, scored again now (Python 3.14 or later) |
+| `make eval [BASE=<ref>]` | Builds the inputs image (the 30 sources, fetched by their pins), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary and runs the gate (below); the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
+| `make eval-record [BASE=<ref>]` | Writes `metrics.json`: each best is the larger of the base's and the measured value (measures first if this commit has no result) |
+| `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures the engine of BASE on this checkout's benchmarks, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
+| `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
+| `make eval-measure-pr`, `eval-measure-seed1`, `eval-measure-base BASE=<ref>`; `make eval-gate`, `eval-compare BASE=<ref>`, `eval-same-graphs`, `eval-labels BASE=<ref> [LABELS=<file>]` | The pieces of the targets above, which CI runs in separate jobs: each of the first three measures one result into `EVAL_OUT` without gating; the others check results that are there. `eval-labels` (`common/labels.py`) decides the labels `metrics-changed` and `benchmark-changed` of a pull request (AGENTS.md, "Protected files"), appends the decision to SUMMARY and writes `<label>=true|false` lines to LABELS |
+| `python -I evaluation/common/loop.py compare OLD NEW` | Lists the edges and micro cases that changed between two result directories, scored again now (Python 3.14 or later) |
 | `NAME=<project> docker compose -f evaluation/compose.yaml run --rm trace --compare` | Records the trace of one project again and compares it with the committed one (`macro-benchmark/README.md`, "Re-recording a trace") |
 
 `make eval` measures the commit that is checked out: a checkout with
 changes is refused. Its container has the repository read-only, no
-network, 6 GiB of memory and `PYTHONHASHSEED=0`.
+network, 6 GiB of memory and `PYTHONHASHSEED=0`. The micro-benchmark runs
+`EVAL_JOBS` cases at a time (default: the number of CPUs); the
+macro-benchmark one project at a time, as its times and memory are
+reported. CI measures the pull request, its second hash seed and its base
+(`BASE=HEAD^1`, the first parent of the merge commit) in three parallel
+jobs, then gates, compares, checks the two seeds and decides the labels
+in one job; a last job, the only one that may write to the pull request,
+sets or removes the labels.
+
+## The gate
+
+`metrics.json` holds, for six values, the best value that main has
+reached, and the margin: micro edge precision and recall (all edges), and
+the macro-benchmark's precision and recall inside and outside the package,
+summed over the 30 projects. `make eval` (`common/gate.py check`) fails
+when a value is below its best minus the margin, or when a run failed.
+With `BASE`, it also fails unless `metrics.json` is what `make
+eval-record` writes from the base's file and this measurement: floors only
+rise. Time and memory are reported, not gated.
 
 ## Layout
 
@@ -26,6 +48,9 @@ network, 6 GiB of memory and `PYTHONHASHSEED=0`.
 | `common/analyse.py` | The child process: one adapter per API flavour (`new`, and `original` for the 2021 engine, commit 046479e) |
 | `common/score.py` | Scores call graphs against the ground truths |
 | `common/loop.py` | `run`: run and score a checkout, print a summary; `compare`: what changed between two runs |
+| `common/labels.py` | The labels of a pull request: a changed TP, FP or FN count; a changed protected file |
+| `common/gate.py` | The gate: the values of a result against `metrics.json`, the new `metrics.json`, the summary of a pull request |
+| `metrics.json` | The best value of each gated value, and the margin |
 | `common/same_function.json` | Names of one function of the standard library, which the scorer matches as one callee |
 | `common/lookup.py` | The static lookup of standard-library names that `tests/test_same_function_table.py` checks the table with |
 | `macro-benchmark/` | The projects, ground truths, traces and their tools (`macro-benchmark/README.md`) |

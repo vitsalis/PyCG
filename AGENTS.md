@@ -23,7 +23,8 @@ make setup              # create the environment (uv sync --locked)
 make test               # all tests: the engine's and the evaluation's
 make lint               # ruff check and format check
 make format             # apply formatting
-make eval               # measure this commit on both benchmarks (Docker)
+make eval               # measure this commit on both benchmarks and gate it (Docker)
+make eval-record        # raise evaluation/metrics.json to the values measured
 uv run pytest -k classes/call   # one benchmark case
 ```
 
@@ -46,11 +47,50 @@ not add one without discussion.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
 - Record every measurable result (benchmark numbers, bugs found in ground
   truth, design decisions and their reasons) in the commit message of the
-  change. Benchmark numbers come from `make eval` on a clean commit.
+  change.
 - **The evaluation measures PyCG only.** Work under `evaluation/` follows
   `evaluation/AGENTS.md`: third-party code runs only in Docker.
+
+## Protected files
+
+These paths define what PyCG is measured against:
+
+- `evaluation/macro-benchmark/ground-truth/`
+- `evaluation/macro-benchmark/dynamic/`
+- `evaluation/macro-benchmark/projects.toml`
+- `evaluation/macro-benchmark/requirements/`
+- `evaluation/common/same_function.json`
+- `micro-benchmark/snippets/**/callgraph.json`
+- `tests/known_failures.txt`
+- `evaluation/metrics.json`
+- `.github/`
+
+Every agent follows these rules:
+
+1. Change a protected file other than `evaluation/metrics.json` (rule 3)
+   only when your task names that file and the change to make. Otherwise
+   stop and report the change you would make and why.
+2. Never change a protected file to make a test, the gate or CI pass.
+3. Only `make eval-record` writes `evaluation/metrics.json`. Never edit it by
+   hand, never lower a value, never change the margin. Run `make
+   eval-record` when a change raises a value, and commit the file with the
+   change.
+4. Only `tests/triage.py` writes `tests/known_failures.txt`. A case leaves
+   the file when it passes. Add a case only with `tests/triage.py
+   --readmit`, and only when your task says so.
+5. Report a failing gate, a failed run or a lost edge; never work around
+   it. No special case for a benchmark program, no option that exists for a
+   benchmark, no edit of a ground truth to match PyCG's output.
+
+CI labels every pull request `benchmark-changed` when its diff touches a
+protected file, and `metrics-changed` when a TP, FP or FN count (micro,
+macro inside, macro outside) differs from its base. The maintainer reviews
+both.
 
 ## Workflow
 
 Do each feature on its own branch from `main`, in a worktree under
-`.worktrees/`, and open a pull request when tests and lint pass.
+`.worktrees/`. One pull request makes one change. Open it when tests and
+lint pass; it merges only with CI green: lint, tests, the gate of `make
+eval` (no value below its floor, no failed run) and the determinism check.
+Its commit message carries the numbers of `make eval` on its commit.

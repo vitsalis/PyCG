@@ -34,6 +34,7 @@ $TMPDIR/pycg-evaluation by default, outside the repository.
 """
 
 import argparse
+import contextlib
 import importlib.util
 import json
 import os
@@ -41,7 +42,9 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
+from concurrent.futures import FIRST_EXCEPTION, ThreadPoolExecutor, wait
 from pathlib import Path
 from typing import NamedTuple
 
@@ -137,7 +140,8 @@ def run_job(tool, job, graph_path, timeout, memory_limit_mib=None):
             )
             unmeasured = cleanup = None
             try:
-                killed, largest = _watch(child, timeout, memory_limit_mib)
+                with active(child):
+                    killed, largest = _watch(child, timeout, memory_limit_mib)
             except MemoryUnmeasured as error:
                 killed, largest, unmeasured = "unmeasured", None, error
             finally:  # also on an exception or an interrupt of the parent
@@ -195,6 +199,82 @@ WATCH_INTERVAL = 0.2
 # The longest pause between two looks at whether the child has ended: the
 # wall time of a run is measured to this resolution.
 POLL_INTERVAL = 0.01
+
+
+# The children of run_job that run now, in any thread, and not yet reaped.
+_active = set()
+_active_lock = threading.Lock()
+
+
+@contextlib.contextmanager
+def active(child):
+    """Count `child` among the children that run now, which kill_active
+    kills."""
+    with _active_lock:
+        _active.add(child)
+    try:
+        yield child
+    finally:
+        with _active_lock:
+            _active.discard(child)
+
+
+def run_tasks(tasks, function, jobs):
+    """[function(task) for each of `tasks`], `jobs` at a time in threads:
+    the results in the order of `tasks`, whatever the order in which they
+    end. The first exception of a task, or an interrupt, starts no other
+    task and kills the children that run now (kill_active); then it is
+    raised. Each task keeps its own limits: a child of run_job is watched
+    by the thread that started it."""
+    stopping = threading.Event()  # an error or an interrupt: start no task
+    in_flight = set()  # the tasks that a thread runs now
+    lock = threading.Lock()
+
+    def task(index):
+        with lock:
+            in_flight.add(index)  # before the check, so the cleanup waits
+        try:
+            return None if stopping.is_set() else function(tasks[index])
+        finally:
+            with lock:
+                in_flight.discard(index)
+
+    pool = ThreadPoolExecutor(max_workers=jobs)
+    futures = []
+    try:
+        for index in range(len(tasks)):
+            futures.append(pool.submit(task, index))
+        # The first error, as soon as it comes, not after the tasks before it.
+        wait(futures, return_when=FIRST_EXCEPTION)
+        for future in futures:
+            if future.done() and future.exception() is not None:
+                raise future.exception()
+        return [future.result() for future in futures]
+    except BaseException:
+        # Ctrl-C (it reaches this thread only) or the error of one task: stop
+        # the children now and start no other task before waiting for the
+        # threads; an interrupt can come before submit() returns the future
+        # of a task that runs.
+        stopping.set()
+        pool.shutdown(wait=False, cancel_futures=True)
+        while in_flight:
+            kill_active()  # also a child that a thread started just now
+            time.sleep(0.05)
+        raise
+    finally:
+        pool.shutdown()
+
+
+def kill_active():
+    """Kill the process group of every child that runs now (an interrupt
+    of the runner: a thread that runs jobs does not get the interrupt). The
+    thread of each child sees it end, and reaps it."""
+    with _active_lock:
+        for child in _active:
+            try:
+                os.killpg(child.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass  # ended; its thread kills what is left and reaps it
 
 
 def _watch(child, timeout, memory_limit_mib):
@@ -610,9 +690,11 @@ def run(
     progress=print,
     allow_dirty=False,
     memory_limit_mib=None,
+    workers=1,
 ):
-    """Run the jobs of one benchmark; write and return its runs.json, each
-    job under `timeout` seconds and `memory_limit_mib` (None: no limit).
+    """Run the jobs of one benchmark, `workers` at a time; write and return
+    its runs.json, each job under `timeout` seconds and `memory_limit_mib`
+    (None: no limit).
 
     Refuses (DirtyCheckout) a checkout whose `git status --porcelain` is not
     empty or that is not a git checkout, unless `allow_dirty`."""
@@ -622,12 +704,16 @@ def run(
         raise DirtyCheckout(f"{tool.checkout} {problem}")
     tool_dir = Path(out).resolve() / tool.name
     runs = {key: {"status": "skipped"} for key in skipped}
-    for job in jobs:
+
+    def one(job):
         graph_path = graph_file(tool_dir, job.key)
         record = run_job(tool, job, graph_path, timeout, memory_limit_mib)
-        runs[job.key] = record
         if progress and not job.key.startswith("micro/"):
             progress(f"{tool.name} {job.key}: {_summary(record)}")
+        return record
+
+    for job, record in zip(jobs, run_tasks(jobs, one, workers)):
+        runs[job.key] = record
     if progress and benchmark == "micro":
         counts = {}
         for record in runs.values():
@@ -640,6 +726,7 @@ def run(
         "hash_seed": tool.hash_seed,
         "timeout": timeout,
         "memory_limit_mib": memory_limit_mib,
+        "workers": workers,
         "runs": dict(sorted(runs.items())),
     }
     path = tool_dir / benchmark / "runs.json"
