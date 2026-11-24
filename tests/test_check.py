@@ -1,5 +1,3 @@
-"""tools/check.py: which checks a change runs, and whether CI measures it."""
-
 import importlib.util
 import sys
 from pathlib import Path

@@ -1,11 +1,3 @@
-"""Call backs by type: a function or class of the `builtins` module calls
-back an argument that it binds to a parameter typed as a callable; of other
-outside code, only `re.sub` and `re.subn` call back, their replacement.
-
-The call belongs to the scope that called the builtin
-(evaluation/micro-benchmark/README.md, "Callbacks").
-"""
-
 from programs import callees, main_graph
 
 
@@ -29,8 +21,6 @@ def test_builtins_call_back_parameters_typed_as_callables(tmp_path):
         """,
     )
 
-    # functools.reduce and threading.Thread are not builtins: library code
-    # is not modelled.
     assert callees(graph, "main.use") == [
         "<builtin>.filter",
         "<builtin>.map",
@@ -76,8 +66,6 @@ def test_parameters_that_are_not_callables_are_not_called_back(tmp_path):
 
 
 def test_an_overload_that_takes_any_object_does_not_call_it(tmp_path):
-    # inspect.iscoroutinefunction has overloads for callables, and one for
-    # any object: the function only inspects its argument.
     graph = main_graph(
         tmp_path,
         """
@@ -207,12 +195,8 @@ def test_re_sub_calls_no_replacement_that_is_not_callable(tmp_path):
         """,
     )
 
-    # The control: the function is called back where it is the replacement.
     assert callees(graph, "main.control") == ["main.repl", "re.sub"]
     assert callees(graph, "main.text") == ["re.sub"]
-    # A partial is a typed outside value: the call back reaches
-    # `functools.partial.__call__`, an implicit call to outside code, so no
-    # edge (design, *Typed outside values*).
     assert callees(graph, "main.partial") == ["functools.partial", "re.sub"]
 
 
@@ -227,9 +211,6 @@ def test_limit_the_replacement_gets_no_match_object(tmp_path):
         """,
     )
 
-    # The replacement is called with one argument, which holds no value: a
-    # typed `re.Match` would drop its type argument and give `bytes` edges
-    # for a `str` match (design, *Call backs*).
     assert callees(graph, "main") == ["main.repl", "re.sub"]
     assert callees(graph, "main.repl") == []
 
@@ -249,12 +230,7 @@ def test_keyword_and_unpacked_arguments_bind_to_their_parameters(tmp_path):
     assert callees(graph, "main") == ["<builtin>.sorted", "main.key"]
 
 
-# Special methods that builtins call.
-
-
 def test_builtins_call_the_special_methods_of_their_protocol_parameters(tmp_path):
-    # abs(x: SupportsAbs[T]) and round(number: SupportsRound[T]): the
-    # special methods that the protocol declares, on an analysed argument.
     graph = main_graph(
         tmp_path,
         """
@@ -327,7 +303,6 @@ reversed(Row())
 """,
     )
 
-    # reversed() uses __reversed__, else __len__ and __getitem__.
     assert callees(graph, "main") == [
         "<builtin>.reversed",
         "main.Deck.__reversed__",
@@ -390,8 +365,6 @@ by_reflection()
 """,
     )
 
-    # sorted and min compare with `<`, max with `>`; each falls back to the
-    # reflected method of the other item.
     assert callees(graph, "main.by_sorted") == ["<builtin>.sorted", "main.Score.__lt__"]
     assert callees(graph, "main.by_max") == ["<builtin>.max", "main.Score.__gt__"]
     assert callees(graph, "main.by_min") == ["<builtin>.min", "main.Low.__lt__"]
@@ -429,7 +402,6 @@ by_sort([Item(), Item()])
 """,
     )
 
-    # Python calls key(item) and compares what it returns, never the items.
     assert callees(graph, "main.key") == ["main.Item.rank"]
     assert callees(graph, "main.by_sorted") == [
         "<builtin>.sorted",
@@ -483,9 +455,6 @@ options([Item()], key=key)
 """,
     )
 
-    # max compares with `>` only, where the class defines it; the default
-    # is returned, not compared. A key that `**kwargs` may give leaves the
-    # items compared too.
     assert callees(graph, "main.unpacked") == ["<builtin>.sorted", "main.Item.__lt__"]
     assert callees(graph, "main.arguments") == ["<builtin>.max", "main.Item.__gt__"]
     assert callees(graph, "main.with_default") == [
@@ -518,7 +487,6 @@ by_key()
 """,
     )
 
-    # A class's special methods are its metaclass's: items and key results.
     assert callees(graph, "main.by_items") == ["<builtin>.sorted", "main.Meta.__lt__"]
     assert callees(graph, "main.by_key") == [
         "<builtin>.min",
@@ -538,7 +506,6 @@ max(a, b, c, key=lambda f: f.__name__)()
 """,
     )
 
-    # max(arg1: T, arg2: T, *_args: T, key=...) -> T
     assert {"main.a", "main.b", "main.c"} <= set(callees(graph, "main"))
 
 
@@ -553,7 +520,6 @@ max([1], **{"key": key, "default": fallback})
 """,
     )
 
-    # `default` is a value, not a callable parameter.
     assert callees(graph, "main") == ["<builtin>.max", "main.key"]
 
 
@@ -586,7 +552,6 @@ int(Index())
 """,
     )
 
-    # int(x: SupportsInt | SupportsIndex): __int__, else __index__.
     assert callees(graph, "main") == [
         "<builtin>.int",
         "main.Index.__index__",
@@ -612,10 +577,6 @@ frozendict(Table())
 """,
     )
 
-    # print(file: SupportsWrite[str]) writes; flush only with flush=True,
-    # which the overloads tell apart by a literal type that the stub data
-    # does not keep. frozendict(map: SupportsKeysAndGetItem) uses keys and
-    # __getitem__, not __iter__ (the first overload's protocol).
     assert callees(graph, "main.Log.report") == ["<builtin>.print", "main.Log.write"]
     assert {"main.Table.keys", "main.Table.__getitem__"} <= set(callees(graph, "main"))
     assert "main.Table.__iter__" not in callees(graph, "main")

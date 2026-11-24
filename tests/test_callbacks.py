@@ -1,9 +1,3 @@
-"""Call backs: the builtins that apply a function (`map`, `sorted` with a
-key) call it, from the scope that called the builtin
-(evaluation/micro-benchmark/README.md, "Callbacks"); other outside code
-calls nothing that the analysed code passes it.
-"""
-
 import pytest
 from programs import analysed, call_graph, callees, main_graph
 
@@ -107,8 +101,6 @@ def test_classes_passed_to_external_code_are_not_instantiated(tmp_path):
 
 
 def test_calls_through_external_names_past_the_bound_call_nothing(tmp_path):
-    # add_done_callback is past the two steps that names keep: the call has
-    # no named edge, and the function passed to it is not called.
     graph = main_graph(
         tmp_path,
         """
@@ -171,16 +163,12 @@ ADVERSARIAL_EXTERNALS = {
 def test_external_names_stay_within_the_bound(tmp_path, program):
     generator = analysed(tmp_path, {"main.py": ADVERSARIAL_EXTERNALS[program]})
 
-    # Every root here (ext, unittest, <builtin>.name) has at most two parts,
-    # and a name grows at most two steps past its root.
     for external in generator.program.analysis.externals.values():
         assert external.steps <= 2, external.name
         assert external.name.count(".") + 1 - external.steps <= 2, external.name
 
 
 def test_callbacks_are_implicit_calls(tmp_path):
-    # Outside code makes the calls back: an instance whose __call__ only an
-    # external base may define gives no edge to it.
     graph = main_graph(
         tmp_path,
         """
@@ -197,8 +185,6 @@ def test_callbacks_are_implicit_calls(tmp_path):
 
 
 def test_implicit_calls_of_outside_methods_call_nothing(tmp_path):
-    # Python calls lib.Registry.__setitem__ and lib.Signal.__add__ without a
-    # call expression: no edge to them, and they call nothing.
     graph = main_graph(
         tmp_path,
         """
@@ -224,9 +210,6 @@ def test_implicit_calls_of_outside_methods_call_nothing(tmp_path):
 
 @pytest.mark.parametrize("getter", ["lib.get", "lib.a.b.c"])
 def test_an_outside_property_getter_calls_nothing(tmp_path, getter):
-    # One property load calls the getter with either instance as its
-    # argument; outside code does not call them. lib.a.b.c is past the
-    # bound of external names.
     graph = main_graph(
         tmp_path,
         f"""
@@ -246,15 +229,12 @@ def test_an_outside_property_getter_calls_nothing(tmp_path, getter):
     assert callees(graph, "main.use") == []
 
 
-# typing.final is analysed here: the model of what it returns replaces its
-# body, but it is not outside code.
-ANALYSED_MODEL = {"typing.py": "def final(f):\n    return f\n"}
+ANALYSED_TYPING_WITH_MODELLED_FINAL = {"typing.py": "def final(f):\n    return f\n"}
 
 
 def test_an_analysed_function_with_a_model_keeps_its_edge_as_a_callback(tmp_path):
-    # map calls final implicitly: the edge stays, as for any analysed function.
     files = {
-        **ANALYSED_MODEL,
+        **ANALYSED_TYPING_WITH_MODELLED_FINAL,
         "main.py": "from typing import final\n"
         "def target(): pass\n"
         "list(map(final, [target]))\n",
@@ -272,7 +252,7 @@ def test_an_analysed_function_with_a_model_keeps_its_edge_as_a_callback(tmp_path
 def test_an_analysed_function_with_a_model_is_no_external_callee(tmp_path, is_analysed):
     files = {"main.py": "from typing import final\ndef target(): pass\nfinal(target)\n"}
     if is_analysed:
-        files.update(ANALYSED_MODEL)
+        files.update(ANALYSED_TYPING_WITH_MODELLED_FINAL)
     generator = analysed(tmp_path, files)
 
     assert callees(generator.output(), "main") == ["typing.final"]

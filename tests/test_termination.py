@@ -1,16 +1,3 @@
-"""The analysis terminates, without an error, on every program: termination
-must hold by construction (see *Termination* in docs/design.md). Seeded
-random programs search for counterexamples in five families: callables
-that are wrapped, bound and stored back in every order; special methods
-that are assigned classes and functions while iteration, calls and
-subscripts feed their results back into the values they came from;
-classes whose bases are builtin and outside classes read from attributes
-that get more values later, with attribute hooks, accessed every way;
-typed outside values fed back into the variable they came from; and
-classes whose `__new__`, `__call__` and `__init__` dispatch to each other
-and to the builtins that call back. The programs that broke earlier
-versions are fixed cases."""
-
 import inspect
 import random
 import signal
@@ -31,151 +18,169 @@ RANDOM_PROGRAMS = 500
 SECONDS_PER_PROGRAM = 5
 MAX_OBJECTS = 5_000
 
-FIXED = [
-    # Containers that hold themselves and each other, converted with repr()
-    # (review of the cost of converting containers).
-    "class E:\n    def __repr__(self): return ''\n"
-    "a = [E()]\nb = {'k': a}\na.append(a)\na.append(b)\n"
-    "for x in (a, b):\n    repr(x)\n    f'{x}'\n",
-    # A container-valued stub attribute fed back into its receiver (final
-    # review of stream T, finding 1).
-    "from types import SimpleNamespace\n"
-    "x = SimpleNamespace()\nfor _ in (0,):\n    x = x.__dict__\n",
-    # An attribute whose stub type has type[T] (review of T2).
-    "from dataclasses import dataclass, fields\n"
-    "@dataclass\nclass R:\n    value: int\n"
-    "fields(R)[0].type\n",
-    # Stub tuple results of two lengths at one call site (review of T2).
-    "import os.path\n"
-    "for split in (os.path.split, os.path.splitroot):\n"
-    "    split('/tmp/file')\n",
-    # One call that reaches zip with one iterable and, through a `__new__`
-    # that passes the class first, with two (final review, finding 1).
-    "class M(type):\n    def __iter__(cls): return iter(())\n"
-    "class Factory:\n    __call__ = staticmethod(zip)\n"
-    "class C(metaclass=M):\n    __new__ = Factory()\n"
-    "def make(factory): return factory(())\nmake(zip)\nmake(C)\n",
-    # A class method stored back as the attribute it was loaded from.
-    "class C:\n    def f(cls): pass\nC.f = classmethod(C.f)\nC.f()\n",
-    "class C:\n    def f(cls): pass\nc = C()\nC.f = classmethod(c.f)\nc.f()\n",
-    # A cycle through a bound method and a static method.
-    "class C:\n    def f(*args): pass\nC.f = classmethod(staticmethod(C.f))\nC.f()\n",
-    # A chain of class methods without a cycle.
-    "class A:\n    @classmethod\n    def f(a, b, c):\n        c.run()\n"
-    "class B:\n    f = classmethod(A.f)\n"
-    "class C:\n    f = classmethod(B.f)\n    @staticmethod\n    def run(): pass\n"
-    "C.f()\n",
-    # An iterator class stored as its own __iter__, fed back into the list
-    # that is iterated.
-    "class It:\n    def __init__(self):\n        self.done = False\n"
-    "    def __next__(self):\n        if self.done:\n            raise StopIteration\n"
-    "        self.done = True\n        return self\n"
-    "It.__iter__ = It\nxs = [It()]\nfor item in xs:\n    xs.extend(item)\n    break\n",
-    # A class method of the class as its own __init__: each instantiation
-    # binds the class again.
-    "class It:\n    def __init__(self, *args): pass\n"
-    "It.__init__ = classmethod(It)\nIt()\n",
-    # A tuple of exception classes that contains itself.
-    "class Error(Exception): pass\nkinds = ()\nkinds = (kinds, Error)\n"
-    "try:\n    raise Error()\nexcept kinds as error:\n    pass\n",
-    # *args unpacked at a shifted position into the function itself.
-    "def g(): pass\ndef shift(*args):\n    args[0]()\n    shift(g, *args)\nshift(g)\n",
-    # A base read from an attribute that gets builtin bases and, at the
-    # completion, one more class: a missing attribute then walks an MRO with
-    # external classes.
-    "class Holder: pass\nclass A: pass\nclass Last: pass\nholder = Holder()\n"
-    "for base in (int, str, list, tuple, dict, set, bytes, Exception, A):\n"
-    "    holder.base = base\n"
-    "class C(holder.base): pass\ngetattr(C(), 'missing', None)\n"
-    "name = 'base'\nsetattr(holder, name, Last)\n",
-    # A module named abc that defines abstractmethod and imports the frozen
-    # abc: one name, modelled both as an analysed and as an outside function
-    # (whole-branch review, round 2).
-    {
+FIXED = {
+    "containers_holding_themselves_and_each_other_converted_with_repr": (
+        "class E:\n    def __repr__(self): return ''\n"
+        "a = [E()]\nb = {'k': a}\na.append(a)\na.append(b)\n"
+        "for x in (a, b):\n    repr(x)\n    f'{x}'\n"
+    ),
+    "container_valued_stub_attribute_fed_back_into_its_receiver": (
+        "from types import SimpleNamespace\n"
+        "x = SimpleNamespace()\nfor _ in (0,):\n    x = x.__dict__\n"
+    ),
+    "attribute_whose_stub_type_has_type_of_a_type_variable": (
+        "from dataclasses import dataclass, fields\n"
+        "@dataclass\nclass R:\n    value: int\n"
+        "fields(R)[0].type\n"
+    ),
+    "stub_tuple_results_of_two_lengths_at_one_call_site": (
+        "import os.path\n"
+        "for split in (os.path.split, os.path.splitroot):\n"
+        "    split('/tmp/file')\n"
+    ),
+    "zip_with_one_iterable_and_with_two_through_a_new_that_passes_the_class": (
+        "class M(type):\n    def __iter__(cls): return iter(())\n"
+        "class Factory:\n    __call__ = staticmethod(zip)\n"
+        "class C(metaclass=M):\n    __new__ = Factory()\n"
+        "def make(factory): return factory(())\nmake(zip)\nmake(C)\n"
+    ),
+    "class_method_stored_back_as_the_attribute_it_was_loaded_from": (
+        "class C:\n    def f(cls): pass\nC.f = classmethod(C.f)\nC.f()\n"
+    ),
+    "bound_method_stored_back_as_a_class_method_of_its_attribute": (
+        "class C:\n    def f(cls): pass\nc = C()\nC.f = classmethod(c.f)\nc.f()\n"
+    ),
+    "cycle_through_a_bound_method_and_a_static_method": (
+        "class C:\n    def f(*args): pass\n"
+        "C.f = classmethod(staticmethod(C.f))\nC.f()\n"
+    ),
+    "chain_of_class_methods_without_a_cycle": (
+        "class A:\n    @classmethod\n    def f(a, b, c):\n        c.run()\n"
+        "class B:\n    f = classmethod(A.f)\n"
+        "class C:\n    f = classmethod(B.f)\n    @staticmethod\n    def run(): pass\n"
+        "C.f()\n"
+    ),
+    "iterator_class_as_its_own_iter_fed_back_into_the_iterated_list": (
+        "class It:\n    def __init__(self):\n        self.done = False\n"
+        "    def __next__(self):\n        if self.done:\n"
+        "            raise StopIteration\n"
+        "        self.done = True\n        return self\n"
+        "It.__iter__ = It\nxs = [It()]\n"
+        "for item in xs:\n    xs.extend(item)\n    break\n"
+    ),
+    "class_method_of_the_class_as_its_own_init_binds_the_class_again": (
+        "class It:\n    def __init__(self, *args): pass\n"
+        "It.__init__ = classmethod(It)\nIt()\n"
+    ),
+    "tuple_of_exception_classes_that_contains_itself": (
+        "class Error(Exception): pass\nkinds = ()\nkinds = (kinds, Error)\n"
+        "try:\n    raise Error()\nexcept kinds as error:\n    pass\n"
+    ),
+    "args_unpacked_at_a_shifted_position_into_the_function_itself": (
+        "def g(): pass\ndef shift(*args):\n"
+        "    args[0]()\n    shift(g, *args)\nshift(g)\n"
+    ),
+    "missing_attribute_walks_an_mro_of_builtin_bases_and_a_completion_base": (
+        "class Holder: pass\nclass A: pass\nclass Last: pass\nholder = Holder()\n"
+        "for base in (int, str, list, tuple, dict, set, bytes, Exception, A):\n"
+        "    holder.base = base\n"
+        "class C(holder.base): pass\ngetattr(C(), 'missing', None)\n"
+        "name = 'base'\nsetattr(holder, name, Last)\n"
+    ),
+    "abc_module_defining_abstractmethod_both_analysed_and_outside": {
         "abc.py": "import abc\n"
         "def abstractmethod(funcobj):\n    return funcobj\n"
         "def target():\n    pass\n"
         "abstractmethod(*(target,))\n"
         "abc.abstractmethod(*(target,))\n"
     },
-    # An attribute of an external base fed back as the base.
-    "import unittest\nbases = [unittest.TestCase]\nclass C(bases[0]): pass\n"
-    "bases[0] = C.failureException\n",
-    # Annotations that make a scope, quoted and not (review of the declared
-    # types: crashed).
-    'def f(x: "(lambda: None).__class__"): pass\n'
-    "def g(x: (lambda: None).__class__): pass\n",
-    # A format field whose digits int() does not read (crashed).
-    '"{\u00b2}_handler".format(**{"\u00b2": "x"})\n',
-    # An index and an int literal longer than the 4300 digits that int() and
-    # repr() convert by default (final review, finding 3).
-    '"{' + "0" * 4301 + '}".format("ok")\n',
-    "def f(): pass\nd = {0x" + "f" * 4000 + ": f}\nd[0x" + "f" * 4000 + "]()\n",
-    # Each class is the other's __new__: every call passes one more receiver,
-    # up to the cap of receivers.
-    "class C: pass\nclass D: pass\nC.__new__ = D\nD.__new__ = C\nC()\n",
-    # Two such classes whose __new__ is also an instance that calls map: map
-    # gets the receivers as iterables, and its call back, a new root, calls
-    # the class again (final review, round 2, finding 1).
-    "class Caller:\n    __call__ = map\n"
-    "class X: pass\nclass Y: pass\n"
-    "X.__new__ = Y\nY.__new__ = X\nY.__new__ = Caller()\nY([1])\n",
-    # Two classes whose bases are calls that return each other: they wait for
-    # each other until the fixpoint decides the cycle.
-    "def left(): return Q\ndef right(): return P\n"
-    "class P(left()): ...\nclass Q(right()): ...\n",
-    # Aliases whose forms subscript themselves or each other, read through a
-    # subscript (review of round 1, finding 1).
-    "type Loop[T] = Loop[T]\ndef f(x: Loop[int]): pass\n",
-    "type A[T] = B[T]\ntype B[T] = A[T]\ndef f(x: A[int], y: 'B[int]'): pass\n",
-    "from typing import List, TypeAlias, TypeVar\nT = TypeVar('T')\n"
-    "A = List[T]\nA = A[T]\nB: TypeAlias = A[T]\nA = B[T]\n"
-    "class C:\n    D = List[T]\n    D = D[T]\n    def f(self, x: D[int]): pass\n"
-    "def f(x: A[int], y: B[int]): pass\n",
-    # A tuple of classes that contains itself, tested in both branches
-    # (review of r1-isinstance, finding 1).
-    "classes = (int,)\nfor _ in range(2):\n    classes = (classes,)\n"
-    "x = 's'\nif isinstance(x, classes):\n    x.upper()\nelse:\n    x.lower()\n"
-    "if issubclass(x, classes):\n    x.upper()\n",
-    # Tuples of classes that share their elements, nested ten deep.
-    "t0 = (int, str)\n"
-    + "".join(f"t{i} = (t{i - 1}, t{i - 1}, t{i - 1})\n" for i in range(1, 10))
-    + "def f(x=1):\n    if isinstance(x, t9):\n        x.bit_length()\n"
-    "    if not isinstance(x, t9):\n        x.upper()\n",
-    # A defaultdict whose factory copies it, read again and again (review
-    # of r2-builtins, finding 1); nested factories; a factory that returns a
-    # defaultdict of itself.
-    "from collections import defaultdict\n"
-    "def build(factory):\n    return defaultdict(factory)\n"
-    "d = build(list)\nd = build(d.copy)\nfor _ in range(2):\n    d = d[0]\n",
-    "from collections import defaultdict\n"
-    "d = defaultdict(lambda: defaultdict(list))\n"
-    "for _ in range(2):\n    d = d[0]\n    d = d.copy()\n",
-    "from collections import defaultdict\n"
-    "def tree():\n    return defaultdict(tree)\n"
-    "t = tree()\nfor _ in range(2):\n    t = t['k'].copy()\n",
-    *[
-        # Class methods whose results are fed back through the explicit
-        # `__get__`: bound to an outside owner, to the type of an instance
-        # and to a metaclass; and a property subclass fed its own result.
+    "attribute_of_an_external_base_fed_back_as_the_base": (
+        "import unittest\nbases = [unittest.TestCase]\nclass C(bases[0]): pass\n"
+        "bases[0] = C.failureException\n"
+    ),
+    "annotations_that_make_a_scope_quoted_and_not": (
+        'def f(x: "(lambda: None).__class__"): pass\n'
+        "def g(x: (lambda: None).__class__): pass\n"
+    ),
+    "format_field_whose_digits_int_does_not_read": (
+        '"{\u00b2}_handler".format(**{"\u00b2": "x"})\n'
+    ),
+    "format_index_longer_than_the_default_int_conversion_digits": (
+        '"{' + "0" * 4301 + '}".format("ok")\n'
+    ),
+    "int_literal_longer_than_the_default_int_conversion_digits": (
+        "def f(): pass\nd = {0x" + "f" * 4000 + ": f}\nd[0x" + "f" * 4000 + "]()\n"
+    ),
+    "each_class_the_new_of_the_other_up_to_the_cap_of_receivers": (
+        "class C: pass\nclass D: pass\nC.__new__ = D\nD.__new__ = C\nC()\n"
+    ),
+    "mutual_new_classes_whose_new_calls_map_that_calls_a_class_again": (
+        "class Caller:\n    __call__ = map\n"
+        "class X: pass\nclass Y: pass\n"
+        "X.__new__ = Y\nY.__new__ = X\nY.__new__ = Caller()\nY([1])\n"
+    ),
+    "bases_from_calls_that_return_each_other_wait_for_the_fixpoint": (
+        "def left(): return Q\ndef right(): return P\n"
+        "class P(left()): ...\nclass Q(right()): ...\n"
+    ),
+    "type_alias_whose_form_subscripts_itself": (
+        "type Loop[T] = Loop[T]\ndef f(x: Loop[int]): pass\n"
+    ),
+    "type_aliases_whose_forms_subscript_each_other": (
+        "type A[T] = B[T]\ntype B[T] = A[T]\ndef f(x: A[int], y: 'B[int]'): pass\n"
+    ),
+    "legacy_aliases_whose_forms_subscript_themselves_and_each_other": (
+        "from typing import List, TypeAlias, TypeVar\nT = TypeVar('T')\n"
+        "A = List[T]\nA = A[T]\nB: TypeAlias = A[T]\nA = B[T]\n"
+        "class C:\n    D = List[T]\n    D = D[T]\n    def f(self, x: D[int]): pass\n"
+        "def f(x: A[int], y: B[int]): pass\n"
+    ),
+    "tuple_of_classes_that_contains_itself_tested_in_both_branches": (
+        "classes = (int,)\nfor _ in range(2):\n    classes = (classes,)\n"
+        "x = 's'\nif isinstance(x, classes):\n    x.upper()\nelse:\n    x.lower()\n"
+        "if issubclass(x, classes):\n    x.upper()\n"
+    ),
+    "tuples_of_classes_that_share_their_elements_nested_ten_deep": (
+        "t0 = (int, str)\n"
+        + "".join(f"t{i} = (t{i - 1}, t{i - 1}, t{i - 1})\n" for i in range(1, 10))
+        + "def f(x=1):\n    if isinstance(x, t9):\n        x.bit_length()\n"
+        "    if not isinstance(x, t9):\n        x.upper()\n"
+    ),
+    "defaultdict_whose_factory_copies_it_read_again_and_again": (
+        "from collections import defaultdict\n"
+        "def build(factory):\n    return defaultdict(factory)\n"
+        "d = build(list)\nd = build(d.copy)\nfor _ in range(2):\n    d = d[0]\n"
+    ),
+    "nested_defaultdict_factories": (
+        "from collections import defaultdict\n"
+        "d = defaultdict(lambda: defaultdict(list))\n"
+        "for _ in range(2):\n    d = d[0]\n    d = d.copy()\n"
+    ),
+    "defaultdict_factory_that_returns_a_defaultdict_of_itself": (
+        "from collections import defaultdict\n"
+        "def tree():\n    return defaultdict(tree)\n"
+        "t = tree()\nfor _ in range(2):\n    t = t['k'].copy()\n"
+    ),
+    "class_methods_fed_back_through_explicit_get_to_every_owner_kind": (
         "class Meta(type): pass\nclass C(metaclass=Meta): pass\n"
         "def make(cls):\n    return classmethod(make)\n"
         "m = classmethod(make)\nfor _ in range(2):\n"
         "    m = m.__get__(None, int)()\n    m = m.__get__(C)()\n"
-        "    m = m.__get__(C())()\n    m = m.__get__(None, m)()\n",
+        "    m = m.__get__(C())()\n    m = m.__get__(None, m)()\n"
+    ),
+    "property_subclass_fed_its_own_result_through_explicit_get": (
         "class P(property): pass\n"
         "def read(self):\n    return P(read)\n"
         "p = P(read)\nfor _ in range(2):\n"
         "    p = p.__get__(p)\n    p = P.__get__(p, p, type(p))\n"
-        "    p = p.getter(p)\n",
-    ],
+        "    p = p.getter(p)\n"
+    ),
+}
+
+GET_FEEDBACK = [
+    FIXED["class_methods_fed_back_through_explicit_get_to_every_owner_kind"],
+    FIXED["property_subclass_fed_its_own_result_through_explicit_get"],
 ]
-
-# The programs of `FIXED` for the explicit `__get__`, solved without a cap.
-GET_FEEDBACK = FIXED[-2:]
-
-# Wrappers: staticmethod, classmethod, property and functools.partial around
-# what loading an attribute gives, stored back, often to that attribute.
 
 WRAPPER_HEADER = """\
 import functools
@@ -206,17 +211,14 @@ WRAPPERS = (
 
 def _wrapped(rng, depth, target):
     if depth == 0 or rng.random() < 0.25:
-        # Often the attribute that the result is stored to: flow-insensitively
-        # it then wraps itself.
-        if rng.random() < 0.5:
+        wraps_the_attribute_it_is_stored_to = rng.random() < 0.5
+        if wraps_the_attribute_it_is_stored_to:
             return target
         return f"{rng.choice(OWNERS)}.{rng.choice(NAMES)}"
     return f"{rng.choice(WRAPPERS)}({_wrapped(rng, depth - 1, target)})"
 
 
 def _wrapper_statements(rng):
-    """One store, often followed by a call of what it stored, or one
-    access."""
     roll = rng.random()
     name = rng.choice(NAMES)
     if roll < 0.6:
@@ -240,10 +242,6 @@ def wrapper_program(rng):
         statements += _wrapper_statements(rng)
     return WRAPPER_HEADER + "\n".join(statements) + "\n"
 
-
-# Feedback: special methods hold classes, functions and bound methods, and
-# the results of iterating, calling and subscripting flow back into the
-# containers, variables and attributes they came from.
 
 FEEDBACK_HEADER = """\
 class It:
@@ -378,17 +376,12 @@ def _feedback_statement(rng):
 def feedback_program(rng):
     statements = [_feedback_statement(rng) for _ in range(rng.randint(3, 10))]
     body = "\n".join(statements)
-    if rng.random() < 0.3:
-        # The same statements in a function that is called with them.
+    repeated_in_a_called_function = rng.random() < 0.3
+    if repeated_in_a_called_function:
         indented = body.replace("\n", "\n    ")
         body += f"\ndef run(x, xs, d):\n    {indented}\n    return x\nx = run(x, xs, d)"
     return FEEDBACK_HEADER + body + "\n"
 
-
-# Hierarchies: bases that are builtin or outside classes, read from an
-# attribute that gets more values later (assigned, or set through setattr
-# with a name in a variable), attribute hooks in class bodies or assigned,
-# and loads, stores and deletions on the instances.
 
 HIERARCHY_HEADER = """\
 import lib
@@ -441,8 +434,8 @@ ACCESSES = (
 
 def hierarchy_program(rng):
     lines = []
-    if rng.random() < 0.5:
-        # More candidate bases than a class keeps alternative MROs for.
+    base_from_many_candidates = rng.random() < 0.5
+    if base_from_many_candidates:
         bases = rng.sample(BASES[:-1], rng.randint(6, len(BASES) - 1))
         lines.append(f"for base in ({', '.join(bases)},):\n    holder.base = base")
     classes = []
@@ -479,10 +472,6 @@ def hierarchy_program(rng):
 
 
 def long_hierarchies(length):
-    """A chain of `length` classes and one of as many metaclasses, each a
-    subclass of the one before, used through every rule that walks a
-    hierarchy: lookups, `type[...]` and class annotations, `except` and
-    class patterns."""
     last = length - 1
     lines = [
         "class C0(Exception):",
@@ -521,8 +510,6 @@ def long_hierarchies(length):
 
 
 def wide_hierarchies(width):
-    """A class with `width` subclasses, and a class with `width` bases, used
-    as `long_hierarchies` uses its chains."""
     lines = ["class Root:", "    def run(self): pass"]
     for i in range(width):
         lines += [
@@ -542,17 +529,13 @@ def wide_hierarchies(width):
     return "\n".join(lines) + "\n"
 
 
-# The analysis needs a few dozen frames for these programs, whatever their
-# size; each rule walks a hierarchy without a frame per class.
-FRAMES = 200
-CLASSES = 300
+STACK_FRAMES_ABOVE_CALLER_MAX = 200
+HIERARCHY_CLASSES = 300
+assert HIERARCHY_CLASSES > STACK_FRAMES_ABOVE_CALLER_MAX
 
 
 @contextmanager
-def stack_limit(frames):
-    """Allow `frames` more frames on the Python stack than the caller uses,
-    so that a hierarchy of a few hundred classes is longer than the stack
-    (the default allows a thousand)."""
+def stack_frames_above_caller_limit(frames):
     previous = sys.getrecursionlimit()
     sys.setrecursionlimit(len(inspect.stack(0)) + frames)
     try:
@@ -562,12 +545,10 @@ def stack_limit(frames):
 
 
 def test_a_hierarchy_longer_than_the_stack_is_analysed(tmp_path):
-    # `type[C0]` once recursed per subclass (final review of the engine,
-    # finding 2).
-    with stack_limit(FRAMES):
-        graph = analyse(tmp_path, long_hierarchies(CLASSES)).output()
+    with stack_frames_above_caller_limit(STACK_FRAMES_ABOVE_CALLER_MAX):
+        graph = analyse(tmp_path, long_hierarchies(HIERARCHY_CLASSES)).output()
 
-    last = CLASSES - 1
+    last = HIERARCHY_CLASSES - 1
     assert graph["main.declared"] == [
         "main.C0.make",
         "main.C0.run",
@@ -580,18 +561,15 @@ def test_a_hierarchy_longer_than_the_stack_is_analysed(tmp_path):
 
 
 def test_a_hierarchy_wider_than_the_stack_is_analysed(tmp_path):
-    with stack_limit(FRAMES):
-        graph = analyse(tmp_path, wide_hierarchies(CLASSES)).output()
+    with stack_frames_above_caller_limit(STACK_FRAMES_ABOVE_CALLER_MAX):
+        graph = analyse(tmp_path, wide_hierarchies(HIERARCHY_CLASSES)).output()
 
-    last = CLASSES - 1
+    last = HIERARCHY_CLASSES - 1
     assert graph["main"] == [f"main.Base{last}.run{last}", "main.Root.run"]
     assert graph["main.declared"] == ["main.Root.run"]
 
 
 def test_a_chain_of_type_aliases_longer_than_the_stack_is_analysed(tmp_path):
-    # Each alias is a union that names the alias before: the reading of
-    # annotations attaches a constraint per alias, which the solver's
-    # bound on nested attachments keeps off the stack.
     last = sys.getrecursionlimit() + 100
     aliases = "".join(f"T{i} = T{i - 1} | None\n" for i in range(1, last + 1))
     source = (
@@ -608,15 +586,9 @@ def test_a_chain_of_type_aliases_longer_than_the_stack_is_analysed(tmp_path):
 
 
 def analyse(root, program, **options):
-    """Analyse `program`: the source of main.py, or files by name, the first
-    of which is the entry point; `options` go to the generator."""
     files = {"main.py": program} if isinstance(program, str) else program
     return analysed(root, files, entry_points=(next(iter(files)),), **options)
 
-
-# Typed values: instances of stub classes (generic ones among them), whose
-# attributes, method results and elements feed back into the variable they
-# came from, in loops.
 
 TYPED_HEADER = """\
 import collections
@@ -686,11 +658,6 @@ def typed_program(rng):
     return TYPED_HEADER + "\n".join(statements) + "\n"
 
 
-# Dispatch: classes whose `__new__`, `__call__` and `__init__` are other
-# classes, callable instances, class methods and the builtins that call back
-# (`map`, `filter`, `sorted` with a key) or make containers by arity (`zip`), so that
-# receivers pile up before a builtin whose call back calls a class again.
-
 DISPATCH_HEADER = """\
 class A:
     def m(cls, *args):
@@ -745,14 +712,13 @@ FAMILIES = 5
 
 def random_programs():
     rng = random.Random(SEED)
-    # Its own sequence, so that the other families keep their programs.
-    dispatch = random.Random(SEED)
+    dispatch_rng_apart_from_the_other_families = random.Random(SEED)
     for _ in range(RANDOM_PROGRAMS):
         yield wrapper_program(rng)
         yield feedback_program(rng)
         yield hierarchy_program(rng)
         yield typed_program(rng)
-        yield dispatch_program(dispatch)
+        yield dispatch_program(dispatch_rng_apart_from_the_other_families)
 
 
 @contextmanager
@@ -776,9 +742,6 @@ def test_the_random_programs_are_valid_and_differ():
     assert len(set(programs)) > len(programs) * 0.9
 
 
-# The tables of Analysis that hold what it makes on demand while it solves:
-# objects, calls, nodes and the constraints made per key. Termination means
-# they stay finite, so `object_count` counts them.
 COUNTED = {
     "externals",
     "_class_filters",
@@ -819,10 +782,6 @@ COUNTED = {
     "_library_advances",
 }
 
-# The other tables: what the builder makes, one per definition or name in
-# the source; the call graph; indexes of counted calls; records of
-# constraints already attached to counted things; and the work lists of
-# the completion.
 NOT_COUNTED = {
     "_stub_definitions",
     "_library_calls",
@@ -873,8 +832,7 @@ NOT_COUNTED = {
     "_notices",
 }
 
-# A program that puts something in every counted table.
-EVERY_TABLE = """\
+PROGRAM_FILLING_EVERY_COUNTED_TABLE = """\
 import functools
 import itertools
 import typing
@@ -935,14 +893,15 @@ list(itertools.islice(c, 1))
 
 
 def test_the_object_count_covers_every_table(tmp_path):
-    analysis = analysed(tmp_path, {"main.py": EVERY_TABLE}).program.analysis
+    analysis = analysed(
+        tmp_path, {"main.py": PROGRAM_FILLING_EVERY_COUNTED_TABLE}
+    ).program.analysis
     tables = {
         name
         for name, value in vars(analysis).items()
         if isinstance(value, (dict, set, list, deque))
     }
 
-    # A new table must be added to one of the two sets.
     assert tables == COUNTED | NOT_COUNTED
     assert not COUNTED & NOT_COUNTED
     assert [name for name in sorted(COUNTED) if not getattr(analysis, name)] == []
@@ -952,7 +911,7 @@ def test_the_object_count_covers_every_table(tmp_path):
 
 @pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs SIGALRM")
 def test_every_program_terminates(tmp_path):
-    for index, source in enumerate([*FIXED, *random_programs()]):
+    for index, source in enumerate([*FIXED.values(), *random_programs()]):
         try:
             with time_limit(SECONDS_PER_PROGRAM):
                 generator = analyse(tmp_path / str(index), source)
@@ -974,16 +933,13 @@ def test_fed_back_get_results_terminate_without_a_cap(tmp_path, index):
     assert generator.program.analysis.object_count() < MAX_OBJECTS
 
 
-# How many random programs of each family are also solved in two orders.
-ORDER_SAMPLE = 100
+ORDER_SAMPLE_PROGRAMS_PER_FAMILY = 100
 
 
 @pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs SIGALRM")
 def test_random_programs_give_the_same_call_graph_in_any_order(tmp_path, monkeypatch):
-    # Call graphs and MROs do not depend on the solver's order (see
-    # tests/test_order_independence.py), also for these programs.
-    programs = list(random_programs())[: FAMILIES * ORDER_SAMPLE]
-    for index, source in enumerate([*FIXED, *programs]):
+    programs = list(random_programs())[: FAMILIES * ORDER_SAMPLE_PROGRAMS_PER_FAMILY]
+    for index, source in enumerate([*FIXED.values(), *programs]):
         graphs = []
         for order in (solver.Order(), solver.LastInFirstOut()):
             monkeypatch.setattr(solver.Solver, "order", order)
@@ -994,12 +950,8 @@ def test_random_programs_give_the_same_call_graph_in_any_order(tmp_path, monkeyp
         assert graphs[0] == graphs[1], f"program {index}:\n{source}"
 
 
-# With a small cap on the objects of a node, many nodes of these programs
-# saturate: they still end, with few objects, and in any order. A
-# regression check: on these programs a cap adds no edge (it may, through
-# the steps at a fixpoint; see tests/test_saturation.py).
 SATURATION_CAP = 3
-SATURATION_SAMPLE = 40
+SATURATION_SAMPLE_PROGRAMS_PER_FAMILY = 40
 
 
 def _edges(generator):
@@ -1007,11 +959,12 @@ def _edges(generator):
 
 
 @pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs SIGALRM")
-def test_random_programs_with_a_small_cap_end_the_same_in_any_order(
+def test_random_programs_with_a_small_cap_end_the_same_in_any_order_with_no_new_edge(
     tmp_path, monkeypatch
 ):
-    programs = list(random_programs())[: FAMILIES * SATURATION_SAMPLE]
-    for index, source in enumerate([*FIXED, *programs]):
+    sample = FAMILIES * SATURATION_SAMPLE_PROGRAMS_PER_FAMILY
+    programs = list(random_programs())[:sample]
+    for index, source in enumerate([*FIXED.values(), *programs]):
         with time_limit(SECONDS_PER_PROGRAM):
             full = _edges(analyse(tmp_path / f"{index}", source))
         no_rule_sees_what_is_opaque(monkeypatch)
@@ -1029,9 +982,6 @@ def test_random_programs_with_a_small_cap_end_the_same_in_any_order(
         monkeypatch.undo()
 
 
-# Codex review of the class fixes, N1: the default of an entry point calls a
-# method with another receiver, so its receiver saturates at a small cap; a
-# completion that inserts into it again is no progress.
 SATURATED_ENTRY_RECEIVER = """
 class C:
     def m(self): pass

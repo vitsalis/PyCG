@@ -1,6 +1,3 @@
-"""Lists, tuples, sets and dicts; str and int constants; subscripts, slices,
-unpacking, iteration over containers, and the methods of builtin types."""
-
 import sys
 
 import pytest
@@ -12,11 +9,7 @@ FUNCTIONS = "def f(): pass\ndef g(): pass\ndef h(): pass\n"
 
 
 def run(tmp_path, source):
-    """The callees of `main` in a program that defines f, g and h first."""
     return callees(main_graph(tmp_path, FUNCTIONS + source), "main")
-
-
-# Subscripts with constant keys
 
 
 @pytest.mark.parametrize(
@@ -60,8 +53,6 @@ pick(int("1"))()
 
 
 def test_key_without_a_value_reads_every_element(tmp_path):
-    # Nothing analysed calls item, and the key of last is arithmetic: code
-    # outside the analysis or an untracked value provides the key.
     graph = main_graph(
         tmp_path,
         FUNCTIONS
@@ -105,23 +96,28 @@ def test_key_from_a_variable_with_constants(tmp_path):
 
 
 def test_bool_and_none_keys_are_not_constants(tmp_path):
-    # True == 1, so d[True] is d[1]: the analysis reads every element.
     assert run(tmp_path, "d = {1: f, 'x': g}\nd[True]()\n") == ["main.f", "main.g"]
 
 
-# An int literal with more decimal digits than Python converts to a str by
-# default (4300): hexadecimal literals have no such limit (final review of
-# the engine, finding 3).
-HUGE = "0x" + "f" * 4000
+HEX_INT_PAST_DECIMAL_LIMIT = "0x" + "f" * 4000
 
 
 def test_a_key_too_long_for_a_decimal_str_selects_its_element(tmp_path):
-    assert run(tmp_path, f"d = {{{HUGE}: f, 1: g}}\nd[{HUGE}]()\n") == ["main.f"]
+    key = HEX_INT_PAST_DECIMAL_LIMIT
+    assert run(tmp_path, f"d = {{{key}: f, 1: g}}\nd[{key}]()\n") == ["main.f"]
 
 
-# The fewest decimal digits that Python may be set to convert, the default,
-# and no limit.
-@pytest.mark.parametrize("limit", [640, 4300, 0])
+INT_MAX_STR_DIGITS_UNLIMITED = 0
+
+
+@pytest.mark.parametrize(
+    "limit",
+    [
+        sys.int_info.str_digits_check_threshold,
+        sys.int_info.default_max_str_digits,
+        INT_MAX_STR_DIGITS_UNLIMITED,
+    ],
+)
 def test_constants_are_named_the_same_whatever_the_conversion_limit(tmp_path, limit):
     previous = sys.get_int_max_str_digits()
     sys.set_int_max_str_digits(limit)
@@ -129,19 +125,15 @@ def test_constants_are_named_the_same_whatever_the_conversion_limit(tmp_path, li
         generator = analysed(
             tmp_path,
             {
-                "main.py": f"big = {HUGE}\nsmall = {'9' * 640}\n"
-                f"d = {{{HUGE}: big, '\\U0001fae9': small}}\n"
+                "main.py": f"big = {HEX_INT_PAST_DECIMAL_LIMIT}\nsmall = {'9' * 640}\n"
+                f"d = {{{HEX_INT_PAST_DECIMAL_LIMIT}: big, '\\U0001fae9': small}}\n"
             },
         )
         points_to = generator.output_points_to()
     finally:
         sys.set_int_max_str_digits(previous)
 
-    # Every int that every Python converts to decimal is named in decimal;
-    # a longer one in hexadecimal. A str is named with ascii(), so the name
-    # does not depend on the Unicode version of the running Python either
-    # (repr() shows U+1FAE9 from Python 3.14 on).
-    big, small = hex(int(HUGE, 16)), "9" * 640
+    big, small = hex(int(HEX_INT_PAST_DECIMAL_LIMIT, 16)), "9" * 640
     assert points_to["main.big"] == [big]
     assert points_to["main.small"] == [small]
     assert points_to[f"dict@main:3:4[{big}]"] == [big]
@@ -163,12 +155,7 @@ xs[0]()
     assert run(tmp_path, source) == ["main.f", "main.g", "main.h"]
 
 
-# Subscripts with pattern keys: a str with a constant prefix p and suffix s
-# equals only the strs that start with p and end with s.
-
-
 def own_callees(tmp_path, source, caller="main.read"):
-    """The callees of `caller` that the program defines."""
     graph = main_graph(tmp_path, FUNCTIONS + source)
     return [c for c in callees(graph, caller) if c.startswith("main.")]
 
@@ -182,7 +169,6 @@ def own_callees(tmp_path, source, caller="main.read"):
     ],
 )
 def test_a_pattern_key_reads_the_entries_whose_key_it_may_equal(tmp_path, key):
-    # "ext." is "ext.%s" % "": the other value may be empty.
     source = f"""
 table = {{"ext.a": f, "ext.": g, "ext": h, "other": h}}
 def read(name):
@@ -193,8 +179,6 @@ read("x")
 
 
 def test_limit_a_format_key_also_holds_the_str_that_the_stub_gives(tmp_path):
-    # str.format returns a str of unknown value in the stubs. The key holds
-    # it beside the pattern, and it may be any key.
     source = """
 table = {"ext.a": f, "other": g}
 def read(name):
@@ -216,8 +200,6 @@ read("x")
 
 
 def test_a_pattern_key_is_never_shorter_than_its_prefix_and_suffix(tmp_path):
-    # "aba" starts with "ab" and ends with "ba", but "ab" + x + "ba" has at
-    # least four characters.
     source = """
 table = {"aba": g, "abba": f}
 def read(name):
@@ -252,10 +234,8 @@ read("x")
 @pytest.mark.parametrize(
     "key, expected",
     [
-        # A constant selects its entry, the pattern those it may equal.
         ('"ext.%s" % name if name else "other"', ["main.f", "main.g"]),
         ('"ext.%s" % name if name else 1', ["main.f", "main.h"]),
-        # A str of unknown value may be any key.
         ('"ext.%s" % name if name else str(name)', ["main.f", "main.g", "main.h"]),
     ],
 )
@@ -312,7 +292,6 @@ read("x")
 
 
 def test_a_store_under_a_pattern_key_reaches_the_keys_it_may_equal(tmp_path):
-    # Python reads g for name "a". The store goes to the unknown key.
     source = """
 table = {"ext.a": f}
 def put(name):
@@ -324,10 +303,6 @@ def read():
 
 
 def test_a_case_pattern_key_reads_the_keys_that_the_case_method_may_give(tmp_path):
-    # lower() never gives "A", but gives "é" for "É". The case of a
-    # character that is not ASCII depends on the Unicode database of the
-    # running Python, so the analysis does not decide it: a key with one
-    # may always be equal ("ext_É" too).
     source = """
 def k(): pass
 table = {"ext_a": f, "ext_A": g, "ext_é": h, "ext_É": k}
@@ -342,8 +317,6 @@ read("x")
     "key", ['"pre_" + ext.value', 'ext.value + "_x"', '"pre_%s" % ext.value']
 )
 def test_an_outside_operand_may_give_any_key(tmp_path, key):
-    # ext is outside code without stubs. Its value may be a str subclass
-    # whose `__radd__`, `__add__` or `__rmod__` runs and returns "hit".
     source = f"""
 import ext
 table = {{"hit": f, "pre_x": g, "other": h}}
@@ -355,7 +328,6 @@ def read():
 
 @pytest.mark.parametrize("key", ['"pre_" + name', '"pre_%s" % name'])
 def test_an_operand_that_holds_nothing_may_give_any_key(tmp_path, key):
-    # No analysed code calls read: code outside the analysis gives name.
     source = f"""
 table = {{"hit": f, "pre_x": g}}
 def read(name):
@@ -365,9 +337,6 @@ def read(name):
 
 
 def test_an_operand_that_the_entry_points_fill_is_not_unknown(tmp_path):
-    # Nothing calls use: its receiver is an entry point, which the
-    # completion fills at a fixpoint; only then does `self.config` call
-    # `__getattr__` with "config". The operand is decided after that.
     graph = main_graph(
         tmp_path,
         """
@@ -392,15 +361,14 @@ Request({"app": App()})
     "key",
     [
         '"pre_" + Odd()',
-        # The first `+` replaces the prefix (Codex review, round 2).
-        '"pre_" + Odd() + "_tail"',
-        # str.__mod__ runs first unless the class derives from str, which
-        # the analysis does not decide here.
-        '"pre_%s" % Odd()',
+        pytest.param('"pre_" + Odd() + "_tail"', id="first_plus_replaces_the_prefix"),
+        pytest.param(
+            '"pre_%s" % Odd()',
+            id="str_mod_runs_first_unless_the_class_derives_from_str",
+        ),
     ],
 )
 def test_an_instance_of_an_analysed_class_may_give_any_key(tmp_path, key):
-    # The operator still calls its reflected method, whose result joins.
     source = f"""
 class Odd:
     def __radd__(self, other):
@@ -420,8 +388,6 @@ def read():
 
 
 def test_a_single_field_fstring_operand_may_give_any_key(tmp_path):
-    # f"{x}" is what format() returns, which may be a str subclass whose
-    # `__radd__` runs (Codex review, round 2).
     source = """
 class Odd(str):
     def __radd__(self, other):
@@ -440,8 +406,6 @@ def read():
     "operand", ['f"a{name}"', 'f"{name}{name}"', '"a%s" % name', '"a{}".format(name)']
 )
 def test_an_operand_that_is_an_exact_str_leaves_the_pattern(tmp_path, operand):
-    # An f-string with a literal part or two fields, `%` and `str.format` of
-    # a literal build a new str of exactly that class.
     source = f"""
 table = {{"pre_ax": f, "other": g}}
 def read(name):
@@ -453,8 +417,6 @@ read("x")
 
 @pytest.mark.parametrize("key", ['"pre_" + E.A', '"pre_%s" % E.A'])
 def test_an_enum_member_whose_value_is_a_pattern_may_give_any_key(tmp_path, key):
-    # The member is a str subclass instance whose `__radd__` or `__rmod__`
-    # runs first; its value is a pattern (Codex review, round 4).
     source = f"""
 from enum import Enum
 def suffix():
@@ -474,8 +436,6 @@ def read():
 
 
 def test_a_widened_result_of_an_empty_operand_is_not_a_plain_str(tmp_path):
-    # No analysed code calls read: name holds nothing until step 4, which
-    # makes k any value; the second `+` widens again.
     source = """
 table = {"hit": f, "top_x": g}
 def read(name):
@@ -486,8 +446,6 @@ def read(name):
 
 
 def test_an_enum_member_operand_may_give_any_key(tmp_path):
-    # A member is a constant that the class machinery may replace (an
-    # inexact constant); this one's `__radd__` runs first.
     source = """
 from enum import Enum
 class Kind(str, Enum):
@@ -503,7 +461,6 @@ def read():
 
 
 def test_a_tuple_right_operand_of_percent_leaves_the_pattern(tmp_path):
-    # No tuple derives from str: str.__mod__ runs and formats it.
     source = """
 table = {"pre_x": f, "other": g}
 def read(name):
@@ -514,9 +471,6 @@ read("x")
 
 
 def test_an_inexact_container_operand_may_give_any_key(tmp_path):
-    # An enum member whose value is a tuple is a container that the class
-    # machinery replaces: here a str subclass whose `__rmod__` runs first
-    # (Codex review, round 3).
     source = """
 from enum import Enum
 class E(str, Enum):
@@ -534,8 +488,8 @@ def read():
 @pytest.mark.parametrize(
     "first",
     [
-        # Codex review, round 3: k is an Odd, whose `__radd__` gives "hit".
-        """
+        pytest.param(
+            """
 class Odd(str):
     def __format__(self, spec):
         return self
@@ -543,16 +497,18 @@ class Odd(str):
         return self if left == "pre_" else "hit"
 k = "pre_" + f"{Odd('x')}"
 """,
-        # k may be what ext.value's `__radd__` returns, of any class.
-        """
+            id="str_subclass_whose_radd_gives_hit",
+        ),
+        pytest.param(
+            """
 import ext
 k = "pre_" + ext.value
 """,
+            id="radd_of_an_outside_value_gives_any_class",
+        ),
     ],
 )
 def test_a_widened_result_is_not_taken_as_a_plain_str(tmp_path, first):
-    # The result of the first `+` is not known: the second `+` may run its
-    # reflected method too.
     source = (
         first
         + """
@@ -566,8 +522,6 @@ def read():
 
 
 def test_the_operands_wait_for_the_opened_files(tmp_path):
-    # Codex review, round 2: the mode holds nothing until step 3 of the
-    # fixpoint steps makes it unknown; then read() gives a str or bytes.
     source = """
 table = {"pre_x": f, "other": g}
 def read(mode):
@@ -577,10 +531,6 @@ def read(mode):
 
 
 def test_limit_an_operand_that_only_the_completion_fills_stays_unknown(tmp_path):
-    # Python raises KeyError: no key starts with "pre_". k holds nothing
-    # until step 4 widens the read, which gives "x" to v and to k. k then
-    # holds a str constant only, but the unknown value stays: v keeps "x",
-    # and getattr loads O.x, which only the widened read can reach.
     source = """
 class O:
     def x(self): pass
@@ -594,9 +544,6 @@ def read(k):
 
 
 def test_limit_a_typed_str_operand_is_of_its_declared_class(tmp_path):
-    # A subclass of str that overrides `__radd__` may reach name, but a
-    # typed value is taken to be of its declared class. (`"pre_%s" % name`
-    # also holds the str of unknown value that the stubs give.)
     source = """
 table = {"hit": f, "pre_x": g}
 def read(name: str):
@@ -606,7 +553,6 @@ def read(name: str):
 
 
 def test_limit_a_store_under_a_pattern_key_is_read_by_any_constant_key(tmp_path):
-    # Python never reads g by "other": the stored key starts with "ext.".
     source = """
 table = {"other": f}
 def put(name):
@@ -617,10 +563,6 @@ def read():
 """
     assert own_callees(tmp_path, source) == ["main.f", "main.g"]
 
-
-# Keys stored under a class member (an enum member): the member may equal
-# any str, whatever its value, by its own equality, hashing or
-# construction. A pattern read reads them all.
 
 ALIAS_KEYS = {
     "a StrEnum member with its own __eq__ and __hash__": """
@@ -659,7 +601,6 @@ class E(str, Enum):
 def test_a_pattern_read_reads_the_keys_stored_under_a_class_member(
     tmp_path, enum, table
 ):
-    # Python calls hit for kind "a".
     source = (
         ALIAS_KEYS[enum]
         + f"""
@@ -674,8 +615,6 @@ read("a")
 
 
 def test_a_constant_read_of_a_member_key_stays_as_it_was(tmp_path):
-    # Not part of the pattern rule: a constant key reads its field and the
-    # unknown field only.
     source = """
 from enum import Enum
 class E(Enum):
@@ -691,9 +630,6 @@ def read():
 @pytest.mark.parametrize("value", ['"enum_" + suffix()', '"x"'])
 @pytest.mark.parametrize("key", ["E.A.{method}()", '"pre_" + E.A.{method}()'])
 def test_a_case_method_of_a_member_may_give_any_key(tmp_path, method, value, key):
-    # The member's class defines the method (Codex review, round 5). It
-    # returns an Odd, which equals "hit", and whose `__radd__` gives "hit":
-    # Python reads "hit" either way.
     source = f"""
 from enum import Enum
 def suffix():
@@ -713,7 +649,6 @@ def read():
 
 
 def test_a_member_whose_value_is_a_pattern_is_not_a_str_to_a_class_test(tmp_path):
-    # A plain Enum member is no str, whatever its value.
     generator = analysed(
         tmp_path,
         {
@@ -748,39 +683,47 @@ def hit(): pass
 @pytest.mark.parametrize(
     "flow",
     [
-        # Codex review, round 6: the keys of `**` reach the callee's
-        # `**kwargs`, a model's `**kwargs` and from there a dict.
-        """
+        pytest.param(
+            """
 def read(**table):
     kind = "a"
     table["pre_" + kind]()
 read(**{E.A: hit})
 """,
-        """
+            id="double_star_keys_reach_the_callee_kwargs",
+        ),
+        pytest.param(
+            """
 table = dict(**{E.A: hit})
 def read(kind):
     table["pre_" + kind]()
 read("a")
 """,
-        """
+            id="double_star_keys_reach_the_kwargs_of_dict",
+        ),
+        pytest.param(
+            """
 table = {}
 table.update(**{E.A: hit})
 def read(kind):
     table["pre_" + kind]()
 read("a")
 """,
-        # A dict that a class body binds is an alias of the dict.
-        """
+            id="double_star_keys_reach_the_kwargs_of_update",
+        ),
+        pytest.param(
+            """
 class Holder:
     table = {E.A: hit}
 def read(kind):
     Holder.table["pre_" + kind]()
 read("a")
 """,
+            id="dict_bound_in_a_class_body_is_an_alias_of_the_dict",
+        ),
     ],
 )
 def test_the_keys_stored_under_a_class_member_travel_with_the_dict(tmp_path, flow):
-    # Python calls hit: E.A equals "pre_a".
     source = NEW_MEMBER + flow
     graph = main_graph(tmp_path, FUNCTIONS + source)
     assert any("main.hit" in found for found in graph.values())
@@ -792,8 +735,6 @@ def test_the_keys_stored_under_a_class_member_travel_with_the_dict(tmp_path, flo
 def test_a_member_whose_value_is_a_pattern_as_the_key_reads_every_element(
     tmp_path, read
 ):
-    # Codex review, round 6: the member's own `__eq__` and `__hash__` make
-    # it equal to "hit"; Python calls f.
     source = f"""
 from enum import Enum
 def suffix():
@@ -812,8 +753,6 @@ def read():
 
 
 def test_a_case_method_of_a_member_keeps_the_str_it_gives(tmp_path):
-    # Codex review, round 6: the any value is added, not put in place of the
-    # str (or pattern) that str's own method gives.
     graph = main_graph(
         tmp_path,
         """
@@ -836,7 +775,6 @@ getattr(V(), Names.name.lower())()
 
 
 def test_the_frozen_engine_program_calls_nothing_through_a_pattern_key(tmp_path):
-    # Round 3, proposal B1: Python raises KeyError at `request.config`.
     graph = main_graph(
         tmp_path,
         """
@@ -855,9 +793,6 @@ request.config.run()
     )
 
     assert "main.App.run" not in callees(graph, "main")
-
-
-# Slices and unpacking
 
 
 @pytest.mark.parametrize(
@@ -903,9 +838,6 @@ def test_unpacking_a_dict_gives_its_keys(tmp_path):
     assert run(tmp_path, "a, b = {f: 1, g: 2}\na()\n") == ["main.f", "main.g"]
 
 
-# Iteration over containers
-
-
 def test_for_loops_over_containers(tmp_path):
     source = """
 for x in [f]:
@@ -935,9 +867,6 @@ for y in (x for x in [h]):
     y()
 """
     assert run(tmp_path, source) == ["main.f", "main.g", "main.h"]
-
-
-# Methods and constructors
 
 
 def test_methods_of_builtin_types_are_edges(tmp_path):
@@ -1040,8 +969,6 @@ s.pop()()
     ],
 )
 def test_modelled_methods_keep_the_instances_they_hold(tmp_path, source, methods):
-    # An instance, not a function: external code calls back the functions
-    # passed to it, which would hide a method that is not modelled.
     graph = main_graph(tmp_path, "class C:\n    def m(self): pass\n" + source)
 
     assert callees(graph, "main") == [
@@ -1090,9 +1017,6 @@ xs += [g]
 xs[0]()
 """
     assert run(tmp_path, source) == ["main.f", "main.g", "main.h"]
-
-
-# Termination
 
 
 def test_self_containing_containers_terminate(tmp_path):
@@ -1171,7 +1095,6 @@ def test_unpacked_arguments_may_supply_optional_parameters(tmp_path):
         """,
     )
 
-    # The sentinel makes iter call its first argument.
     assert callees(graph, "main") == [
         "<builtin>.iter",
         "<builtin>.list",
@@ -1214,8 +1137,6 @@ names(m=None)
 def test_long_chain_of_concatenations_does_not_exhaust_the_stack(
     tmp_path, monkeypatch, order
 ):
-    # Copying the fields of each `+` into the next must not nest calls, in
-    # any order of the solve.
     monkeypatch.setattr(solver.Solver, "order", order)
     chain = " + ".join(f"['n{i}']" for i in range(700))
     graph = call_graph(tmp_path, {"main.py": f"__all__ = {chain}\n"})
@@ -1264,7 +1185,6 @@ def test_a_set_comprehension_hashes_what_it_unpacks_unless_a_set_holds_it(tmp_pa
 
 
 def test_dict_comprehension_with_a_lambda_value(tmp_path):
-    # The scope pass visits the key and the value of a dict comprehension.
     graph = main_graph(
         tmp_path,
         """
@@ -1276,9 +1196,6 @@ def test_dict_comprehension_with_a_lambda_value(tmp_path):
 
     assert callees(graph, "main") == ["main.<lambda1>"]
     assert callees(graph, "main.<lambda1>") == ["main.f"]
-
-
-# The containers of collections
 
 
 @pytest.mark.parametrize(
@@ -1347,9 +1264,6 @@ def test_containers_of_collections_hold_their_elements(tmp_path, source, expecte
 
 
 def test_a_deque_keeps_no_positions_also_for_an_index(tmp_path):
-    # appendleft moves every element: an indexed store goes to the
-    # elements, and an indexed read, negative or not, reads them all. A list
-    # keeps its positions.
     source = """
 import collections
 def use():
@@ -1434,9 +1348,6 @@ def test_a_dict_of_collections_hashes_its_keys(tmp_path):
 
 
 def test_a_defaultdict_read_calls_its_factory(tmp_path):
-    # `d[k]` calls `__missing__` for a missing key, which calls the factory
-    # without arguments: an implicit call from the scope that reads, whose
-    # result is the value (evaluation/micro-benchmark/README.md, "Callbacks").
     graph = main_graph(
         tmp_path,
         """
@@ -1477,7 +1388,6 @@ def test_a_defaultdict_read_calls_its_factory(tmp_path):
 
 
 def test_only_a_read_of_a_defaultdict_calls_its_factory(tmp_path):
-    # A store, `get`, `in` and `del` never call `__missing__`.
     graph = main_graph(
         tmp_path,
         """
@@ -1496,9 +1406,6 @@ def test_only_a_read_of_a_defaultdict_calls_its_factory(tmp_path):
 
 
 def test_a_defaultdict_factory_gives_what_a_call_without_arguments_returns(tmp_path):
-    # The factory's result is that of an ordinary call with no arguments:
-    # a default that it returns, the receiver of a bound method that returns
-    # itself. What other calls pass to it is not its result here.
     graph = main_graph(
         tmp_path,
         """

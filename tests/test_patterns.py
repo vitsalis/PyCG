@@ -1,11 +1,3 @@
-"""Names built from a constant part and another value (patterns).
-
-`"visit_" + t`, `"visit_%s" % t`, `"visit_{}".format(t)` and `f"visit_{t}"`
-are patterns: the constant prefix and suffix. `getattr(x, pattern)` loads
-every attribute of `x` whose name matches: the names that the class bodies
-of its MRO define and the fields that stores assign on it.
-"""
-
 import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -40,7 +32,6 @@ def visit_callees(tmp_path, name):
 
 
 def test_a_prefix_and_an_unknown_part_load_every_matching_method(tmp_path):
-    # kind is a parameter that no analysed code passes: any string.
     for index, name in enumerate(
         [
             '"visit_" + kind',
@@ -62,8 +53,6 @@ def test_a_suffix(tmp_path):
 
 
 def test_every_matching_name_whatever_the_other_value_is(tmp_path):
-    # One rule: the other value does not narrow the names, even when it is
-    # a constant.
     graph = main_graph(
         tmp_path,
         """
@@ -148,8 +137,6 @@ def dispatch(kind):
 """,
     )
 
-    # Proxy defines no visit_ name, so its __getattr__ is not called; a name
-    # of Visitor is not loaded on a Remote.
     assert callees(graph, "main.dispatch") == [
         "<builtin>.getattr",
         "ext.Base.__init__",
@@ -237,7 +224,6 @@ def case_callees(tmp_path, name):
 
 
 def test_lower_of_a_pattern_loads_the_names_that_lower_case_gives(tmp_path):
-    # Python looks up the converted name: visit_Field never is one.
     for index, name in enumerate(
         [
             'f"visit_{kind}".lower()',
@@ -292,9 +278,6 @@ def test_other_str_methods_give_no_pattern(tmp_path):
 def test_a_case_pattern_matches_every_name_with_a_character_that_is_not_ascii(
     tmp_path,
 ):
-    # Python calls visit_é for kind "É". The case of a character that is not
-    # ASCII depends on the Unicode database, so a name with one may be what
-    # the method gives, and a constant part with one gives no pattern.
     assert case_callees(tmp_path / "name", 'f"visit_{kind}".lower()') == [
         "main.Visitor.default",
         "main.Visitor.visit_field",
@@ -306,10 +289,6 @@ def test_a_case_pattern_matches_every_name_with_a_character_that_is_not_ascii(
 
 
 def test_limit_an_outside_operand_names_no_other_attribute(tmp_path):
-    # ext is outside code without stubs: its value may be a str subclass
-    # whose `__radd__` returns "hit", and Python calls hit. The name then
-    # also holds a str of unknown value, which names no attribute (see
-    # *Computed attribute names*), so only the matching names are loaded.
     graph = main_graph(
         tmp_path,
         """
@@ -329,11 +308,6 @@ Visitor().visit()
     ]
 
 
-# The `%` grammar as CPython reads it (Codex review, round 7). A pattern
-# restricts a dict read, so it must hold for every str that `fmt % args`
-# gives; where the analysis cannot read a format with certainty, it makes
-# no pattern and the read is unrestricted.
-
 PERCENT_PROGRAM = """
 def f(): pass
 def g(): pass
@@ -351,10 +325,8 @@ def percent_callees(tmp_path, fmt, args, result):
 @pytest.mark.parametrize(
     "fmt, args",
     [
-        # A mapping key with nested parentheses.
         ("%(a(b)c)s_tail", {"a(b)c": "hit"}),
         ("pre_%(k)s", {"k": "v"}),
-        # Flags, width and precision, in digits or `*`.
         ("pre_%-5s_x", ("a",)),
         ("pre_% s_x", ("a",)),
         ("pre_%#s_x", ("a",)),
@@ -364,14 +336,11 @@ def percent_callees(tmp_path, fmt, args, result):
         ("pre_%.1s_x", ("abc",)),
         ("pre_%.*s_x", (1, "abc")),
         ("pre_%.s_x", ("abc",)),
-        # One length modifier.
         ("pre_%hs_x", ("a",)),
         ("pre_%ls_x", ("a",)),
         ("pre_%Ls_x", ("a",)),
-        # Every conversion type.
         *[(f"pre_%{kind}_x", (65,)) for kind in "diouxXeEfFgGc"],
         *[(f"pre_%{kind}_x", ("a",)) for kind in "sra"],
-        # A literal percent.
         ("pre_%%_%s_x", ("a",)),
     ],
 )
@@ -383,7 +352,6 @@ def test_a_percent_format_gives_a_pattern_that_its_result_matches(tmp_path, fmt,
 @pytest.mark.parametrize(
     "fmt",
     [
-        # Python rejects each of these; the analysis makes no pattern.
         "pre_%s%",
         "pre_%s%y",
         "pre_%s%5%",
@@ -409,15 +377,19 @@ read("x")
     ]
 
 
-# A field: `%`, a key, flags, a width, a precision, a length modifier
-# and a conversion, each sometimes absent; between fields, literal text.
+FIELD_KEYS = st.sampled_from(["", "(k)", "(a(b)c)", "((x))"])
+FIELD_FLAGS = st.sampled_from(["", "-", "0", " ", "#", "+", "-0"])
+FIELD_WIDTHS = st.sampled_from(["", "5", "*"])
+FIELD_PRECISIONS = st.sampled_from(["", ".", ".1", ".*"])
+FIELD_LENGTH_MODIFIERS = st.sampled_from(["", "h", "l", "L"])
+FIELD_CONVERSIONS = st.sampled_from(list("sradxcf%"))
 FIELDS = st.tuples(
-    st.sampled_from(["", "(k)", "(a(b)c)", "((x))"]),
-    st.sampled_from(["", "-", "0", " ", "#", "+", "-0"]),
-    st.sampled_from(["", "5", "*"]),
-    st.sampled_from(["", ".", ".1", ".*"]),
-    st.sampled_from(["", "h", "l", "L"]),
-    st.sampled_from(list("sradxcf%")),
+    FIELD_KEYS,
+    FIELD_FLAGS,
+    FIELD_WIDTHS,
+    FIELD_PRECISIONS,
+    FIELD_LENGTH_MODIFIERS,
+    FIELD_CONVERSIONS,
 )
 LITERALS = st.sampled_from(["", "a", "_", "(", ")", "pre_", "_tail", "x)"])
 

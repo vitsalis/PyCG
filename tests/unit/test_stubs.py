@@ -1,6 +1,3 @@
-"""The loader of the stub data (pycg/analysis/stubs.py): on the data that
-the package ships, and on the data of the fixture typeshed checkout."""
-
 from pathlib import Path
 
 import pytest
@@ -34,7 +31,6 @@ def test_methods_are_found_through_the_class(stubs):
     assert _paths(stubs.find("re.Pattern.match")) == [
         ("function", "re.Pattern.match", "re.Pattern")
     ]
-    # Inherited: the class of the MRO that defines it.
     assert _paths(stubs.find("collections.OrderedDict.get")) == [
         ("function", "builtins.dict.get", "builtins.dict")
     ]
@@ -44,7 +40,6 @@ def test_methods_are_found_through_the_class(stubs):
 
 
 def test_paths_through_re_exports_and_submodules(stubs):
-    # `os.path` is a submodule whose names come from a module per platform.
     assert _paths(stubs.find("os.path.join")) == [
         ("function", "ntpath.join", None),
         ("function", "posixpath.join", None),
@@ -75,7 +70,6 @@ def test_what_the_stubs_do_not_have(stubs):
     assert stubs.find("no_such_module.f") == []
     assert stubs.find("re.no_such_name") == []
     assert stubs.find("re.Pattern.no_such_method") == []
-    # Attributes of functions and variables are not described.
     assert stubs.find("re.compile.cache") == []
     assert stubs.module("no_such_module") is None
     assert stubs.definition("re.no_such_name") is None
@@ -91,7 +85,6 @@ def test_public_names(stubs):
     assert stubs.public_name("_io.TextIOWrapper") == "io.TextIOWrapper"
     assert stubs.public_name("re.Pattern") == "re.Pattern"
     assert stubs.public_name("builtins.str") == "builtins.str"
-    # A function has no public name of its own.
     assert stubs.public_name("re.compile") == "re.compile"
 
 
@@ -132,7 +125,6 @@ def test_the_fixture_data(tmp_path):
         ("function", "shapes._impl.Shape.Edge.length", "shapes._impl.Shape.Edge")
     ]
     assert stubs.public_name("shapes._impl._Hidden") == "shapes.Hidden"
-    # Both the definition and the re-export of another version.
     assert _paths(stubs.find("shapes._impl.Extra")) == [
         ("class", "shapes._impl.Extra", None),
         ("class", "shapes._extra.Extra", None),
@@ -149,7 +141,6 @@ def test_the_fixture_third_party_data():
     assert _paths(stubs.find("extras.Tool.use")) == [
         ("function", "extras.core.Tool.use", "extras.core.Tool")
     ]
-    # Inherited from a class of the standard library.
     assert _paths(stubs.find("extras.Tool.copy")) == [
         ("function", "shapes._impl.Shape.copy", "shapes._impl.Shape")
     ]
@@ -160,17 +151,14 @@ def test_the_fixture_third_party_data():
         "builtins.object",
     ]
     assert stubs.public_name("extras.core.Tool") == "extras.Tool"
-    # A namespace package that two distributions share.
     assert _paths(stubs.find("ns.one")) == [("module", "ns.one", None)]
     assert _paths(stubs.find("ns.two.first")) == [("function", "ns.one.first", None)]
-    # The standard library's `legacy`, not legacy-backport's.
     assert _paths(stubs.find("legacy.old")) == [("function", "legacy.old", None)]
     assert stubs.find("legacy.new") == []
     assert _paths(stubs.find("backport.run")) == [("function", "backport.run", None)]
 
 
 def test_third_party_definitions(stubs):
-    # requests.get is defined in requests.api and re-exported by requests.
     (get,) = stubs.find("requests.get")
     assert (get.kind, get.path) == ("function", "requests.api.get")
     assert {s["r"] for s in get.entry["s"]} == {"requests.models.Response"}
@@ -178,7 +166,6 @@ def test_third_party_definitions(stubs):
     assert _paths(stubs.find("yaml.SafeLoader")) == [
         ("class", "yaml.loader.SafeLoader", None)
     ]
-    # A namespace package: protobuf gives google.protobuf.
     assert _paths(stubs.find("google.protobuf")) == [
         ("module", "google.protobuf", None)
     ]

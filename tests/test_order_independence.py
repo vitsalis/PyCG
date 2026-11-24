@@ -1,13 +1,3 @@
-"""Results do not depend on the order in which the solver processes nodes,
-nor on the order of the entry modules.
-
-`Solver.order` is a test hook: it decides which node the solver takes from
-its worklist next and in which order it visits successors and constraints.
-The analysis must give the same call graph, assignment graph and MROs
-under every order. Class hierarchies are where that is not obvious: a lookup must
-not keep what an incomplete MRO found.
-"""
-
 import itertools
 import json
 from pathlib import Path
@@ -17,6 +7,7 @@ from programs import analysed, call_graph, callees, no_rule_sees_what_is_opaque,
 from test_scaling import hub
 
 from pycg.analysis import solver
+from pycg.analysis.hierarchy import HIERARCHIES_PER_CLASS_MAX
 from pycg.analysis.model import BUILTIN_MODULE, Signature
 from pycg.analysis.semantics import Analysis
 from pycg.analysis.solver import Constraint, Each
@@ -36,7 +27,6 @@ def orders():
     }
 
 
-# A base that arrives after the lookups on the class.
 TWO_BASES = """
 class A:
     def f(self): pass
@@ -47,7 +37,6 @@ class C(A, B):
 C().f()
 """
 
-# A base that only a call gives.
 BASE_FROM_A_CALL = """
 class A:
     def f(self): pass
@@ -60,7 +49,6 @@ class C(base(), B):
 C().f()
 """
 
-# An external base defines every attribute, so __getattr__ is not called.
 EXTERNAL_BASE_AND_GETATTR = """
 import ext
 class C(ext.Base):
@@ -69,8 +57,6 @@ class C(ext.Base):
 C().f
 """
 
-# P and Q may be each other's base: a function rebinds the names of their
-# bases, so they hold every value they are given.
 BASES_ON_A_CYCLE = """
 Left = Right = object
 class P(Right):
@@ -83,7 +69,6 @@ def swap():
 Q().p()
 """
 
-# C and D are ready before each one becomes a candidate base of the other.
 CYCLE_FORMED_LATE = """
 class A:
     def f(self): pass
@@ -100,7 +85,6 @@ def late():
 D().f()
 """
 
-# D is a candidate base of C, but waits for its own base, which a call gives.
 CANDIDATE_THAT_WAITS = """
 import sys
 class X:
@@ -116,13 +100,11 @@ class C(D if sys.argv else Y):
 C().f()
 """
 
-# Copying fields along a long chain of `+` must not nest calls.
-LONG_ALL = "__all__ = " + " + ".join(f"['n{i}']" for i in range(700)) + "\n"
+LONG_CHAIN_OF_CONCATENATIONS = (
+    "__all__ = " + " + ".join(f"['n{i}']" for i in range(700)) + "\n"
+)
 
-# The rules of E2's review rounds: attribute hooks, membership with late
-# containers, callbacks through outside code, and the reviewers' programs.
 
-# A hook whose name only a fixpoint decides: accesses wait for the name.
 LATE_HOOK_NAME = """
 def target(): pass
 def put(self, name, value):
@@ -133,8 +115,6 @@ setattr(C, name, put)
 C().anything = target
 """
 
-# Hooks assigned after the class, a property behind each, and a late base
-# that removes the analysed __getattribute__ from one hierarchy.
 HOOKS_AFTER_THE_CLASS = """
 def helper(): pass
 def target(): pass
@@ -171,8 +151,6 @@ c.value = target
 del c.value
 """
 
-# C is ready with Hooked as its base, which defines __getattribute__;
-# Plain, which leaves Python's own, arrives later in some orders.
 BASE_WITHOUT_THE_HOOK = """
 def helper(): pass
 class Hooked:
@@ -196,7 +174,6 @@ def use():
     C().value
 """
 
-# The container of `in` arrives late.
 MEMBERSHIP_WITH_LATE_CONTAINERS = """
 import lib
 class Item:
@@ -229,7 +206,6 @@ Needle() in []
 Needle() in b"abc"
 """
 
-# Calls to outside code, explicit and implicit, and what they call back.
 CALLBACKS = """
 import lib
 class Registry(lib.Registry):
@@ -256,7 +232,6 @@ def use(flag):
     list(map(handler, [1]))
 """
 
-# The programs of E2's review rounds 4 to 8.
 REVIEWS = {
     "r4 iterator class as its own __iter__": """
 class It:
@@ -407,7 +382,6 @@ def make(factory): return factory(())
 make(zip)
 make(C)
 """,
-    # A metaclass that a call gives: `in` and truth wait for it.
     "final review: protocols of classes and results tested for truth": """
 class Truth:
     def __bool__(self): return True
@@ -461,8 +435,6 @@ async def use(value):
 """,
 }
 
-# Every builtin model that makes a container or iterates, reached through one
-# call site, so that each pair of them meets there.
 MODELS_AT_ONE_SITE = """
 import collections
 def a(): pass
@@ -512,8 +484,6 @@ for result in made:
         f()
 """
 
-# Typed outside values: results of methods, type variables bound by
-# arguments (also elements), iteration, `Self`, operators and handlers.
 TYPED_OUTSIDE_VALUES = """
 import collections
 import copy
@@ -541,7 +511,6 @@ except ValueError as error:
     error.with_traceback(None)
 """
 
-# Classes with outside bases that the stubs describe, and object's members.
 OUTSIDE_BASES = """
 import abc
 import collections.abc
@@ -569,7 +538,6 @@ Store().popitem()
 Request().run().helper()
 """
 
-# Outside code that calls the methods of analysed objects it gets.
 LIBRARY_CALLS = """
 import contextlib
 import heapq
@@ -594,10 +562,6 @@ with contextlib.ExitStack() as stack:
     stack.enter_context(Resource())
 """
 
-# Annotations as declared values: an alias imported under
-# TYPE_CHECKING from a module that defines it after its use, a recursive
-# alias, `type[...]`, containers, variadic parameters, and the fields of
-# dataclass-like classes whose decorator and base arrive through names.
 ANNOTATIONS = {
     "kinds.py": """
 import typing
@@ -637,9 +601,6 @@ class Record(typing.NamedTuple):
 """,
 }
 
-# Annotations that name outside classes: the analysed classes below them
-# arrive late, through a base that a call gives, a subclass, and the stub
-# MRO of another outside base.
 OUTSIDE_CLASSES_IN_ANNOTATIONS = """
 import collections.abc
 import typing
@@ -668,9 +629,6 @@ def use(
 BASE = typing.AsyncIterator
 """
 
-# The protocols of the builtin types: the analysed classes below them arrive
-# through a base that a call gives, a subclass, and the bases that a
-# module's own stub declares.
 PROTOCOL_BASES = {
     "main.py": """
 import collections.abc
@@ -694,8 +652,6 @@ BASE = collections.abc.Iterator
     "class Peek(Iterator[int]): ...\nclass Measured(Sized): ...\n",
 }
 
-# Annotated assignments: an alias and a class defined after the use, a base
-# that a call gives, and a container of the annotation.
 ANNOTATED_ASSIGNMENTS = """
 import typing
 class Holder:
@@ -722,8 +678,6 @@ BASE = typing.Sequence
 current: typing.Optional[typing.Sequence[int]] = None
 """
 
-# Loads by pattern: names stored on the class and on the instance later, a
-# base that arrives from a call, and a module target.
 PATTERNS = {
     "handlers.py": """
 def cmd_start(): pass
@@ -756,9 +710,6 @@ def second():
     return "close"
 """,
 }
-# Dict reads by pattern keys: a table that a call gives, an entry whose key
-# three calls give after the reads, and an unknown key that the completion
-# decides.
 PATTERN_KEYS = """
 def on_open(): pass
 def on_close(): pass
@@ -782,8 +733,6 @@ def second():
     return TABLE
 first()
 """
-# Definitions that meet at joins and loop heads, where back edges make
-# cycles through values that calls and loads compute.
 DEFINITIONS = """
 import ext
 class Node:
@@ -822,8 +771,6 @@ result[0].walk()
 C.method()
 """
 
-# Jumps that wait for `finally` blocks, which carry their definitions or
-# replace them.
 JUMPS_THROUGH_FINALLY = """
 import ext
 def f(): pass
@@ -845,8 +792,6 @@ def run():
 run()()
 """
 
-# A class body that uses its namespace, so the builder does not track its
-# names: its members are still its own and the class statement's.
 NAMESPACE_CLASS_BODY = """
 class Base:
     def method(self): pass
@@ -864,9 +809,6 @@ class Grandchild(Child):
 Grandchild().method()
 """
 
-# Namespaces read by reflection: a base that only a call gives, names that
-# stores add to a class and to an instance during the solve, a property
-# that getmembers runs on an instance.
 REFLECTION = """
 import inspect
 def action(): pass
@@ -896,8 +838,6 @@ for value in item.__dict__.values():
 Item.__dict__["own"](item)
 """
 
-# Names that a module binds only in code that cannot run: a load of one
-# calls the module's `__getattr__`, and a star import does not take it.
 DEAD_MODULE_NAMES = {
     "lib.py": """
 from typing import TYPE_CHECKING
@@ -924,8 +864,6 @@ facade.actual()
 """,
 }
 
-# Patterns whose captures come from attributes that __match_args__ names,
-# which a later fixpoint decides, and from subscripts of instances.
 MATCH_PATTERNS = """
 import ext
 def f(): pass
@@ -962,8 +900,6 @@ run(Items())
 run({"key": f, "other": g})
 """
 
-# __new__ returns an instance of a subclass whose base only a call gives:
-# the instance may reach the result before the subclass joins the class.
 NEW_RETURNS_A_LATE_SUBCLASS = """
 class Shape:
     def __new__(cls, kind):
@@ -979,8 +915,6 @@ def make():
     Shape("circle")
 """
 
-# Metaclasses that a call or a rebound name gives, inherited, and reached
-# through super() in a method of a metaclass.
 METACLASSES = """
 class BaseMeta(type):
     def create(cls):
@@ -1012,9 +946,6 @@ Leaf.create()
 Picked.describe()
 """
 
-# Third-party code that typeshed's distributions describe: typed results, a
-# subclass of a third-party class, callbacks that it gets, a namespace
-# package; and an analysed module named like a stubbed distribution.
 THIRD_PARTY_STUBS = """
 import requests
 import yaml
@@ -1045,12 +976,6 @@ requests.get("u").json()
 """,
 }
 
-# Results of calls of outside code without stubs: unnamed, through loads,
-# elements, calls, `with`, `await`, a decorator, a base and a loop; next to
-# names that keep their path (a module path, an element of an external, a
-# base class, a handler) and a typed result. Unnamed decorators (a factory,
-# a stored one, a method of an unnamed instance, a stacked pair) keep what
-# they decorate.
 OUTSIDE_CALL_RESULTS = """
 import lib
 import lib.sub
@@ -1193,8 +1118,6 @@ ordered[Key()] = 1
 look(ordered, Key()).move_to_end(Key())
 look({Key(): 2}, Key())
 """,
-    # A type variable whose parameter one call leaves out and another
-    # passes, with a receiver that arrives late.
     "type variables that no argument binds": """
 import argparse
 class Parser(argparse.ArgumentParser):
@@ -1209,8 +1132,6 @@ LATE = argparse.ArgumentParser()
     "annotations": ANNOTATIONS,
     "outside classes in annotations": OUTSIDE_CLASSES_IN_ANNOTATIONS,
     "builtin protocols through late and stub bases": PROTOCOL_BASES,
-    # Calls of a standard-library operation that share an origin, each with
-    # its receivers (code review of R3, finding 1).
     "library operations sharing an origin": "import itertools\n"
     "class MetaA(type):\n    def __iter__(cls): return iter(())\n"
     "class MetaB(type):\n    def __iter__(cls): return iter(())\n"
@@ -1221,8 +1142,6 @@ LATE = argparse.ArgumentParser()
     "annotated assignments": ANNOTATED_ASSIGNMENTS,
     "patterns": PATTERNS,
     "dict reads by pattern keys": PATTERN_KEYS,
-    # Keys and pattern parts that are class members (enum members): through
-    # `**`, a class-held dict, a lookup key, and a case method.
     "class members in pattern reads": """
 from enum import Enum
 def suffix():
@@ -1249,8 +1168,6 @@ def late(kind):
     Holder.table[F.B.lower()]()
 late("a")
 """,
-    # The operand of a pattern that only an entry point fills, and one that
-    # holds nothing: decided after every other completion.
     "pattern operands decided last": """
 class App:
     def run(self): pass
@@ -1416,10 +1333,9 @@ Base().helper()
     "bases on a cycle": BASES_ON_A_CYCLE,
     "cycle formed late": CYCLE_FORMED_LATE,
     "candidate that waits": CANDIDATE_THAT_WAITS,
-    "long __all__": LONG_ALL,
+    "long __all__": LONG_CHAIN_OF_CONCATENATIONS,
     "hub": hub(20),
     "typed outside values": TYPED_OUTSIDE_VALUES,
-    # Stub tuple results of two lengths at one call site.
     "stub tuples of two lengths": """
 import os.path
 for split in (os.path.split, os.path.splitroot):
@@ -1428,7 +1344,6 @@ for split in (os.path.split, os.path.splitroot):
 """,
     "outside bases": OUTSIDE_BASES,
     "library calls": LIBRARY_CALLS,
-    # type() with one and with three arguments, through a late value.
     "type of an object": """
 from typing import Sequence
 class Meta(type):
@@ -1449,8 +1364,6 @@ def run(fields: Sequence[Base | type[Base]], name="x"):
         type(field)()
 late().copy()
 """,
-    # Slots that shadow a base property and stop `__getattr__`, on a class
-    # whose base arrives late.
     "slots": """
 from typing import Protocol
 def work(): pass
@@ -1471,8 +1384,6 @@ class Wrapper(base()):
         self.missing()
 Wrapper(work).run()
 """,
-    # Codex review of the class rules, finding 1: a metaclass that may or
-    # may not derive from ABCMeta keeps the class concrete in every order.
     "abstract by a metaclass with two bases": """
 import abc, sys
 class PlainMeta(type): pass
@@ -1484,9 +1395,6 @@ class C(metaclass=Meta):
     def __init__(self): pass
 C()
 """,
-    # Classes abstract by abc, decided as their bases and metaclasses
-    # arrive: an inherited abstract method, an outside ABC, an alternative
-    # concrete hierarchy, object.__new__ in an analysed __new__.
     "abstract classes": """
 import abc
 from collections.abc import Mapping
@@ -1516,8 +1424,6 @@ class Partial(Mapping):
 for kind in (Base, Middle, Leaf, Either, Partial):
     kind().step()
 """,
-    # super(C, x) with receivers that Python accepts or not, a late base
-    # and a metaclass.
     "two-argument super": """
 class Meta(type):
     def describe(cls): pass
@@ -1537,7 +1443,6 @@ for x in (Late(), Other(), Late, Model):
     pick(Base, x)
     pick(Meta, x)
 """,
-    # Calls that cannot bind their arguments, through late callees.
     "call arity": """
 class Needs:
     def __init__(self, value): pass
@@ -1555,8 +1460,6 @@ def run(kind, f):
 for kind in late():
     run(kind, kind)
 """,
-    # Entry receivers without the subclasses that override the method, with
-    # a subclass whose base arrives late.
     "override receivers": """
 class Base:
     def run(self):
@@ -1578,7 +1481,6 @@ class Late(base()):
 Child()
 Late()
 """,
-    # Bases written as typing aliases of collections.abc classes.
     "typing aliases as bases": """
 import typing
 from typing import AbstractSet
@@ -1593,7 +1495,6 @@ class D(A, C):
 D().__iter__()
 D().isdisjoint(())
 """,
-    # Subscripted aliases in annotations, recursive ones too.
     "subscripted aliases": """
 from typing import Generic, Optional, TypeVar, Union
 T = TypeVar("T")
@@ -1607,8 +1508,6 @@ def use(box: Optional[AnyBox[int]], rec: Rec[int]):
     box.run()
     rec.run()
 """,
-    # defaultdict factories called without arguments: a returned default, a
-    # bound method that returns its receiver, factories that flow late.
     "defaultdict factories": """
 import collections
 def f(): pass
@@ -1626,8 +1525,6 @@ factories.append(Node().same)
 d["b"].visit()
 make(g)
 """,
-    # Sets and dicts that hash keys, and comparisons of containers, whose
-    # keys, elements and containers arrive late.
     "hashing and comparing elements": """
 class Key:
     def __hash__(self): return 1
@@ -1656,9 +1553,6 @@ pairs.append((1, Key()))
 table[Key()] = 1
 LATE = Sized()
 """,
-    # Unpacked sets and dicts in a set display, and containers of other
-    # families at the top and inside, that arrive late (review of
-    # r2-builtins, findings 2 to 4).
     "unpacked keys and container families": """
 import collections
 class Key:
@@ -1679,9 +1573,6 @@ compare(Key(), Key(), LATE)
 sources.extend([{Key()}, {Key(): 1}, [Key()]])
 LATE = [(Key(),), [Key()], collections.deque([Key()])]
 """,
-    # Reads at one site of two defaultdicts, one a copy, whose factories
-    # arrive late; and attributes named by the `__name__` of functions
-    # that arrive late, one renamed.
     "defaultdict reads and function names": """
 import collections
 class Cache:
@@ -1708,8 +1599,6 @@ renamed.__name__ = "clear"
 commands.append(renamed)
 LATE = Cache()
 """,
-    # Dict lookups whose searched keys are constants and functions, and
-    # whose stored keys arrive late.
     "lookups by any key": """
 def f(): pass
 class Key:
@@ -1723,7 +1612,6 @@ table.pop(keys[0], None)
 table[Key()] = 0
 keys.append(Key())
 """,
-    # Indexed stores and reads of a deque, with keys that arrive late.
     "deque indexes": """
 import collections
 def f(): pass
@@ -1737,8 +1625,6 @@ q[-1] = g
 keys.append(1)
 q[keys[-1]]()
 """,
-    # `%` of one container that is no tuple, whose elements and format
-    # arrive late.
     "percent of a container": """
 class Item:
     def __repr__(self): return "item"
@@ -1755,8 +1641,6 @@ items.append(Item())
 table["a"] = Item()
 items.append(items)
 """,
-    # `%` of one value that is no tuple, given to what the format takes
-    # first, with formats and values that arrive late.
     "percent of one value by position": """
 class Item:
     def __repr__(self): return "item"
@@ -1772,8 +1656,6 @@ for fmt in formats:
 formats.extend(["%*s", "%d%s", "%s%s", "%s%(a)s", "%(a)s%s"])
 values.extend([[Item()], Item(), {"a": Item()}])
 """,
-    # `%` formats with keys in parentheses, empty precisions and fields
-    # that Python rejects, with values that arrive late.
     "percent syntax": """
 class Item:
     def __repr__(self): return "item"
@@ -1792,7 +1674,6 @@ formats.extend(["%r %.2147483648s %r", b"%r %9223372036854775808r %r"])
 values.extend([(Item(), Item()), {"(a)": Item(), "a": Item()}, [Item()]])
 values.append({b"(a)": Item()})
 """,
-    # Aliases whose forms subscript themselves or each other.
     "aliases that subscript themselves": """
 from typing import List, TypeAlias, TypeVar, Union
 T = TypeVar("T")
@@ -1810,7 +1691,6 @@ def use(a: Loop[int], b: Pong[int], c: Left[int], d: "Right[int]"):
     c.run()
     d.run()
 """,
-    # Iterator bases whose __iter__ and __aiter__ return the receiver.
     "iterator bases": """
 import collections.abc
 def f(): pass
@@ -1828,7 +1708,6 @@ items(Items())
 items(Items().__iter__())
 stream(Stream())
 """,
-    # Async generators of functions and expressions, through their methods.
     "async generators": """
 def f(): pass
 async def wait(x): return x
@@ -1840,8 +1719,6 @@ async def use():
             h()
         await g.aclose()
 """,
-    # Elements of *args returned unchanged: by position, after a receiver,
-    # from `__new__`, through unpacked arguments, and a negative index.
     "returned elements of args": """
 def f(): pass
 def g(): pass
@@ -1872,7 +1749,6 @@ def use(items):
 use([g, h])
 last(h)
 """,
-    # Implicit calls of several constructs at one site, and unresolved calls.
     "call sites": """
 import lib
 class Lock:
@@ -1891,8 +1767,6 @@ def run(callback, name):
     lib.a.b.c()
     return lock.p, f"{lock}", [y for y in list(Lock())]
 """,
-    # Class tests whose classes, bases and values arrive late, through
-    # calls, tuples held by names, and an outside base.
     "class tests": """
 import collections, ext
 class A:
@@ -1928,8 +1802,6 @@ def use(flag, kind=None):
             x = x.next
         x.f()
 """,
-    # An empty tuple of classes, and classes whose metaclass and outside
-    # bases arrive late (review of r1-isinstance, finding 2).
     "class tests with empty and late classes": """
 import abc
 def f(x, classes):
@@ -1958,8 +1830,6 @@ def g(y=Plain(), z=Late()):
         if not isinstance(v, (Later, Plain)):
             v.f()
 """,
-    # Containers and generators that the analysis makes are exactly of their
-    # class; a container of an annotation stands for any value of its type.
     "class tests of containers and generators": """
 import collections
 from collections.abc import Sequence
@@ -1998,9 +1868,6 @@ parse(x for x in [B()])
 for pair in zip([A()], [B()]):
     parse(pair)
 """,
-    # What Python makes from such a container is another object, and what a
-    # container of a declared type makes may come from a subclass's method
-    # (review of r2 class tests).
     "class tests of iterators, declared containers and enum members": """
 from enum import Enum
 def target(): pass
@@ -2032,8 +1899,6 @@ def members(x=E.A):
 run()
 use(L(), D())
 """,
-    # The class of an inexact value, and generator and constant members
-    # (review 2 of r2 class tests).
     "class tests of classes of values and generator members": """
 from enum import Enum
 def target(): pass
@@ -2077,9 +1942,6 @@ class Both(Left, Right):
     pass
 Both().append(0)
 """,
-    # The stub beside a module annotates parameters, a class attribute and a
-    # module variable, with overloads, through its imports, while the
-    # classes below what it names arrive through calls.
     "the stub of a module": {
         "main.py": """
 import shapes
@@ -2148,8 +2010,7 @@ SNIPPETS = (
 )
 
 
-def results(monkeypatch, order, entry, root):
-    """The text of the document and the assignment graph."""
+def document_text_and_points_to(monkeypatch, order, entry, root):
     monkeypatch.setattr(solver.Solver, "order", order)
     generator = CallGraphGenerator([str(entry)], str(root))
     generator.analyze()
@@ -2161,15 +2022,13 @@ def assert_same_under_every_order(monkeypatch, entry, root, names=None):
     for name, order in orders().items():
         if names is not None and name not in names:
             continue
-        found = results(monkeypatch, order, entry, root)
+        found = document_text_and_points_to(monkeypatch, order, entry, root)
         if expected is None:
             expected = found
         assert found == expected, name
 
 
 def test_the_reflection_program_reads_the_namespaces(tmp_path):
-    # The program of the matrix exercises the rule: these edges come only
-    # through the class namespace and getmembers.
     graph = call_graph(tmp_path, {"main.py": REFLECTION})
 
     assert {"main.Item.own", "main.Base.inherited", "main.late"} <= set(
@@ -2190,9 +2049,6 @@ def test_programs_give_the_same_results_under_every_order(
     assert_same_under_every_order(monkeypatch, tmp_path / "main.py", tmp_path)
 
 
-# What some programs above must call, so that their case fails when the rule
-# that they test is off: the caller and its callees whose name starts with
-# the prefix.
 EXPECTED_CALLEES = {
     "library operations sharing an origin": (
         "main.use",
@@ -2214,8 +2070,6 @@ EXPECTED_CALLEES = {
             "main.managed",
         ],
     ),
-    # Python reads no other entry: "other" neither starts with "on_" nor
-    # ends with "_x".
     "dict reads by pattern keys": (
         "main.dispatch",
         "main.",
@@ -2230,9 +2084,6 @@ EXPECTED_CALLEES = {
         "main.use",
         "io.",
         [
-            # "r", "wb" and "r+b" ("rw" is rejected), each with a buffering
-            # of 0, -1 or any int where it reads one; no "rb", so no
-            # BufferedReader but the one of the mode that holds nothing.
             "io.BufferedRandom.close",
             "io.BufferedRandom.read",
             "io.BufferedRandom.write",
@@ -2273,19 +2124,14 @@ def test_programs_call_what_their_rule_gives(tmp_path, program):
     ids=lambda path: f"{path.parent.name}/{path.name}",
 )
 def test_benchmark_cases_give_the_same_results_under_every_order(monkeypatch, snippet):
-    # Three orders keep the suite fast; the programs above see all five.
-    names = ("first in, first out", "last in, first out", "random 1")
-    assert_same_under_every_order(monkeypatch, snippet / "main.py", snippet, names)
+    fast_subset_of_orders = ("first in, first out", "last in, first out", "random 1")
+    assert_same_under_every_order(
+        monkeypatch, snippet / "main.py", snippet, fast_subset_of_orders
+    )
 
-
-# The order of the entry modules decides the order in which the modules are
-# built, and so the order in which their classes and functions are made. The
-# results do not depend on it either.
 
 ENTRY_ORDERS = {
     "builtin protocols through late and stub bases": PROTOCOL_BASES,
-    # A base expression that holds a class of each of two modules (final
-    # review of the engine, finding 4).
     "bases from two modules": {
         "a.py": "class A: pass\n",
         "b.py": "class B: pass\n",
@@ -2293,8 +2139,6 @@ ENTRY_ORDERS = {
         "def choose(flag):\n    if flag: return A\n    return B\n"
         "class C(choose(True)): pass\n",
     },
-    # More hierarchies than the bound: one exhaustive order, which lists the
-    # classes of two modules in a canonical order.
     "an exhaustive order across modules": {
         "a.py": "class A1: pass\nclass A2: pass\nclass A3: pass\n",
         "b.py": "class B1: pass\nclass B2: pass\nclass B3: pass\n",
@@ -2302,16 +2146,12 @@ ENTRY_ORDERS = {
         "def pick(i):\n    return [A1, B1, A2, B2, A3, B3][i]\n"
         "class C(pick(0), pick(1)): pass\n",
     },
-    # Modules that fail, which the document lists.
     "modules that fail": {
         "a.py": "def f(): pass\n",
         "broken.py": "def oops(:\n",
         "latin.py": b"x = '\xe9'\n",
         "main.py": "import broken, latin\nfrom a import f\nf()\n",
     },
-    # Files of one module name (review round 3, finding 1): a package and a
-    # module file, a module file and binaries, a stub beside a module file,
-    # a namespace package beside a module file.
     "a package and a module file of one name": {
         "a.py": "def f(): pass\nf()\n",
         "a/__init__.py": "def g(): pass\ng()\n",
@@ -2332,9 +2172,6 @@ ENTRY_ORDERS = {
         "a/x.py": "def g(): pass\ng()\n",
         "main.py": "import a.x\n",
     },
-    # Files that only an entry point names (review round 4, finding 1): a
-    # `.pyw` and a script without a suffix, a file name with a dot, and
-    # `__main__.py` files.
     "files that only an entry point names": {
         "a.pyw": "def f(): pass\nf()\n",
         "a": "def g(): pass\ng()\n",
@@ -2350,8 +2187,6 @@ ENTRY_ORDERS = {
         "pkg/__init__.py": "",
         "pkg/__main__.py": "def g(): pass\ng()\n",
     },
-    # The class `a.b.C` twice: in the class `b` of the package `a`, and in
-    # the module `a.b`.
     "classes of one name in two modules": {
         "a/__init__.py": "class b:\n    class C:\n        def f(self): pass\n",
         "a/b.py": "class C:\n    def g(self): pass\n",
@@ -2400,14 +2235,11 @@ def test_programs_give_the_same_results_for_every_order_of_entry_modules(
 def test_benchmark_cases_give_the_same_results_for_two_orders_of_entry_modules(
     snippet,
 ):
-    # Every module of the case is an entry module, in two orders.
     entries = sorted(str(path.relative_to(snippet)) for path in snippet.rglob("*.py"))
     orders_of_entries = [entries, entries[::-1]]
     assert_same_for_every_order_of_entry_modules(snippet, orders_of_entries)
 
 
-# Definitions that share a qualified name (review round 2, finding 2): the
-# document lists the sites of each, and none may overwrite another.
 ONE_NAME = {
     "a module and a function of one name": {
         "p/__init__.py": "def helper(): pass\ndef retry():\n    helper()\n",
@@ -2440,8 +2272,6 @@ def test_definitions_of_one_name_give_one_document_under_every_order(
 
 
 def test_one_file_given_several_ways_is_one_module_in_every_order(tmp_path):
-    # The same file twice, through a path with `..`, through a symbolic link,
-    # and an entry point outside the package root.
     root = tmp_path / "root"
     write(root, {"a.py": "def f(): pass\nf()\n", "sub/b.py": "import a\n"})
     (root / "link.py").symlink_to(root / "a.py")
@@ -2458,7 +2288,6 @@ def test_one_file_given_several_ways_is_one_module_in_every_order(tmp_path):
 def test_directories_and_trailing_separators_give_one_document_in_every_order(
     tmp_path,
 ):
-    # A directory is refused; a separator after a file name is dropped.
     write(
         tmp_path,
         {"__init__.py": "x = 1\n", "pkg/__init__.py": "", "pkg/mod.py": "f = 1\n"},
@@ -2491,15 +2320,11 @@ def test_extension_modules_are_the_same_for_every_order_of_entry_modules(tmp_pat
 
 
 def test_a_base_expression_orders_its_classes_by_module(tmp_path):
-    # Each hierarchy is one MRO; the reported MRO lists them by module.
     write(tmp_path, ENTRY_ORDERS["bases from two modules"])
     document = whole_output(tmp_path, ["main.py", "b.py", "a.py"])["document"]
     classes = json.loads(document)["definitions"]
 
     assert classes["main.C"]["mro"] == ["main.C", "a.A", "b.B", "<builtin>.object"]
-
-
-# What the analysis finds, under the order that used to hide the problem.
 
 
 @pytest.fixture(params=["first in, first out", "last in, first out"])
@@ -2539,14 +2364,12 @@ def test_classes_on_a_cycle_of_bases_see_each_other(tmp_path, order):
 def test_cycle_that_forms_after_the_classes_are_ready_is_exhaustive(tmp_path, order):
     graph = call_graph(tmp_path, {"main.py": CYCLE_FORMED_LATE})
 
-    # D may derive from C, which may derive from D: every definition counts.
     assert callees(graph, "main") == ["main.A.f", "main.B.f", "main.D.f"]
 
 
 def test_lookup_ignores_a_candidate_base_until_its_own_bases_are_known(tmp_path, order):
     graph = call_graph(tmp_path, {"main.py": CANDIDATE_THAT_WAITS})
 
-    # Before X arrived, D had no f: C's __getattr__ must not count.
     assert callees(graph, "main") == ["main.X.f", "main.Y.f", "main.make_base"]
 
 
@@ -2566,7 +2389,6 @@ def test_object_as_a_base_means_the_base_may_be_absent(tmp_path, order):
         },
     )
 
-    # Without A, C has no f and Python calls __getattr__.
     assert callees(graph, "main") == ["main.A.f", "main.C.__getattr__"]
 
 
@@ -2605,8 +2427,6 @@ def test_base_decided_absent_that_arrives_later_adds_a_hierarchy(tmp_path, order
         },
     )
 
-    # No analysed code calls make: its default arrives at the completion,
-    # after C was decided to have no base. Both hierarchies count.
     assert callees(graph, "main.make.C.g") == [
         "main.Base.f",
         "main.make.C.__getattr__",
@@ -2641,13 +2461,11 @@ def test_exhaustive_order_finds_what_every_hierarchy_would(tmp_path, order):
         },
     )
 
-    # 16 hierarchies, more than the analysis enumerates. In those whose
-    # first base is X0, no class defines f and Python calls __getattr__.
+    candidate_bases_count = 2
+    base_expressions_count = 4
+    hierarchies_count = candidate_bases_count**base_expressions_count
+    assert hierarchies_count > HIERARCHIES_PER_CLASS_MAX
     assert callees(graph, "main") == ["main.X0.__getattr__", "main.Y0.f"]
-
-
-# Scenarios of the review of the solver: objects that reach base expressions
-# in another order than E2's solver delivered them.
 
 
 def two_classes_defining_f(analysis):
@@ -2668,9 +2486,7 @@ def names_of(analysis, node):
     return [obj.name for obj in analysis.solver.objects(node)]
 
 
-class FirstObject(Constraint):
-    """Calls `action` for the first object it sees."""
-
+class CallOnFirstObject(Constraint):
     def __init__(self, action):
         self.action = action
 
@@ -2694,7 +2510,7 @@ def collected_additions_scenario():
         analysis.add_edge(source, slot_b)
 
     trigger = analysis.node()
-    analysis.solver.attach(trigger, FirstObject(act))
+    analysis.solver.attach(trigger, CallOnFirstObject(act))
     for marker in (analysis.const("x"), analysis.const("y")):
         analysis.add_object(trigger, marker)
     analysis.solve()
@@ -2736,15 +2552,12 @@ def test_bases_that_arrive_in_any_order_give_the_lookup_of_the_whole_hierarchy(
 ):
     for name, order in orders().items():
         monkeypatch.setattr(solver.Solver, "order", order)
-        # C(A, B): A.f hides B.f, whichever base arrives first.
         assert scenario() == ["mod.A.f"], name
 
 
 def test_python_hook_counts_once_any_hierarchy_leaves_it(tmp_path, order):
     graph = call_graph(tmp_path, {"main.py": BASE_WITHOUT_THE_HOOK})
 
-    # With Hooked as the base, its __getattribute__ calls the getter; with
-    # Plain, Python's own calls it from the scope of the access.
     assert callees(graph, "main.use") == [
         "main.C.value",
         "main.Hooked.__getattribute__",
@@ -2756,8 +2569,6 @@ def test_two_models_that_extend_at_one_call_each_iterate_their_input(tmp_path, o
     program = REVIEWS["whole-branch review: two models extend at one call"]
     graph = call_graph(tmp_path, {"main.py": program})
 
-    # set.update binds [b] and [c], which list.extend at the same call does
-    # not bind: c must reach ys (a does too, as action and args merge).
     assert "main.c" in callees(graph, "main")
 
 
@@ -2765,15 +2576,10 @@ def test_a_tuple_and_an_items_pair_at_one_call_keep_their_lengths(tmp_path, orde
     program = REVIEWS["whole-branch review: a tuple and an items pair at one call"]
     graph = call_graph(tmp_path, {"main.py": program})
 
-    # items[-1] is c: the tuple that tuple() makes at the call where
-    # d.items() makes a pair of two fields has a length that is not known.
     assert "main.c" in callees(graph, "main")
 
 
 def repeated_bases_scenario():
-    """A class whose base expressions give `A` and `B` in two hierarchies,
-    [C, A, B] and [C, B, A], which arrive in another order under each
-    processing order."""
     analysis = Analysis()
     a = analysis.new_class("mod.A", "mod", [], [])
     b = analysis.new_class("mod.B", "mod", [], [])
@@ -2793,15 +2599,10 @@ def repeated_bases_scenario():
 def test_hierarchies_that_arrive_in_any_order_give_the_same_mro(monkeypatch):
     for name, order in orders().items():
         monkeypatch.setattr(solver.Solver, "order", order)
-        # The hierarchies in a canonical order: [C, A, B] before [C, B, A].
         assert repeated_bases_scenario() == ["mod.C", "mod.A", "mod.B"], name
 
 
 def test_exhaustive_lookup_after_a_class_ignores_what_that_class_defines():
-    # A lookup that starts after `C` and skips the hierarchies that define
-    # `__str__`: in each hierarchy, `C` is not searched, so its own
-    # `__str__` excludes none. Nine candidate bases make `C` exhaustive, and
-    # the exhaustive order must find what each hierarchy would.
     analysis = Analysis()
     b = analysis.new_class("mod.B", "mod", ["__repr__"], [])
     method = analysis.function("mod.B.__repr__", "mod", Signature(["self"]), {})
@@ -2818,16 +2619,7 @@ def test_exhaustive_lookup_after_a_class_ignores_what_that_class_defines():
     assert names_of(analysis, found) == ["mod.B.__repr__"]
 
 
-# Saturation: a node that would hold more objects than the cap holds the
-# saturated value. The rules that its objects started before it passed the
-# cap stay, so which objects those are must not depend on the order: they
-# are those of a fixpoint of propagation (see *The solver*). Programs whose
-# nodes pass a small cap, under every solver order and every order of the
-# entry modules.
-
 SATURATING = {
-    # The sources of a lazy object of the standard library saturate after it
-    # was advanced (a source that only a late call gives), beside a hub.
     "lazy library objects past the cap": {
         "main.py": "import itertools\n"
         + "".join(
@@ -2839,8 +2631,6 @@ SATURATING = {
         "def use(xs):\n    it = itertools.chain(*xs)\n    for x in it:\n        x()\n"
         "use([S0()])\nuse(late())\n",
     },
-    # The node of the bases that a stub declares saturates (four bases, a cap
-    # of 3), beside a late base and a hub that saturates.
     "stub bases past the cap": {
         "main.py": PROTOCOL_BASES["main.py"]
         + "".join(f"def h{i}(): pass\n" for i in range(5))
@@ -2857,8 +2647,6 @@ SATURATING = {
         "def run(handler):\n    handler()\n"
         "for handler in HANDLERS:\n    run(handler)\n",
     },
-    # Callables that reach one hub in different rounds, from two modules
-    # (the rule without rounds kept the first ones to arrive).
     "a hub fed from two modules": {
         "pkg/__init__.py": "",
         "pkg/funcs.py": "def f1(): pass\ndef f2(): pass\ndef f3(): pass\n"
@@ -2871,7 +2659,6 @@ SATURATING = {
         "def get3(): return f3\ndef get4(): return f4\n"
         "y = run(get3(), Item())\nrun(get4(), Item())\n",
     },
-    # Two fields that copy each other: a cycle whose union passes the cap.
     "a cycle of fields": {
         "main.py": "def f0(): pass\ndef f1(): pass\ndef f2(): pass\ndef f3(): pass\n"
         "class Box: pass\na = Box()\nb = Box()\n"
@@ -2901,7 +2688,6 @@ def test_programs_that_saturate_give_the_same_results_in_every_order(
             if expected is None:
                 expected = found
             assert found == expected, (name, entries_order)
-    # The cap is reached: some call is unresolved for it.
     calls = json.loads(expected["document"])["calls"]
     causes = {site.get("unresolved") for sites in calls.values() for site in sites}
     assert "saturated" in causes

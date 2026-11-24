@@ -1,5 +1,3 @@
-"""The triage tool must not hide a regression when it regenerates the list."""
-
 import importlib.util
 from pathlib import Path
 
@@ -29,7 +27,6 @@ def test_a_case_that_passes_now_is_left_out():
 
 
 def test_a_case_that_was_fixed_and_fails_again_is_a_regression():
-    # Its old reason is still in the causes; it must not come back by itself.
     result = triage.select(["a/fixed"], [], {"a/known"}, CAUSES, set())
     assert result.listed == []
     assert result.regressed == ["a/fixed"]

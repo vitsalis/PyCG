@@ -1,5 +1,3 @@
-"""A name that `__slots__` lists is defined by that class body."""
-
 from programs import callees, main_graph
 
 
@@ -63,7 +61,6 @@ def test_a_slot_shadows_a_property_of_a_base(tmp_path):
         """,
     )
 
-    # The slot of Wrapper ends the lookup: no call of the base's getter.
     assert callees(graph, "main.Wrapper.run") == []
 
 
@@ -112,7 +109,6 @@ def test_a_slot_of_a_subclass_does_not_hide_the_base_attribute(tmp_path):
         """,
     )
 
-    # A Base has no slot `value`.
     assert callees(graph, "main.Base.run") == ["main.Base.__getattr__"]
 
 
@@ -127,12 +123,10 @@ def test_dict_and_weakref_in_slots_are_no_slots(tmp_path):
         """,
     )
 
-    # They give the instance a `__dict__` as without `__slots__`: object's.
     assert callees(graph, "main.Relay.run") == ["<builtin>.dict.values"]
 
 
 def test_slots_follow_the_binding_that_reaches_the_end_of_the_body(tmp_path):
-    # Codex review, finding 2: the final declaration is empty.
     graph = main_graph(
         tmp_path,
         """
@@ -178,14 +172,10 @@ def test_slots_given_as_a_dict_and_the_weakref_slot(tmp_path):
         """,
     )
 
-    # The dict's keys are slots, and `__weakref__` is a descriptor of the
-    # class: neither load calls __getattr__.
     assert callees(graph, "main.Node.run") == []
 
 
 def test_a_later_plain_binding_replaces_an_uncertain_one(tmp_path):
-    # Codex review of the class fixes, N4: the final `__slots__` is the
-    # plain one after the `if`.
     graph = main_graph(
         tmp_path,
         """

@@ -1,5 +1,3 @@
-"""*args and **kwargs parameters, and unpacked arguments at call sites."""
-
 from programs import callees, main_graph
 
 FUNCTIONS = "def f(): pass\ndef g(): pass\ndef h(): pass\n"
@@ -73,7 +71,6 @@ spread([g])
 """,
     )
 
-    # values[0] may be at any position from b on.
     assert callees(graph, "main.pair") == ["main.f", "main.g"]
 
 
@@ -108,8 +105,6 @@ forward(f, g, key=h)
 
 
 def test_functions_unpacked_into_a_builtin_that_applies_them_are_called(tmp_path):
-    # map(f, xs) and sorted(xs, key=g) unpacked; outside code without stubs
-    # calls nothing.
     graph = graph_of(
         tmp_path,
         """
@@ -163,8 +158,6 @@ def test_a_method_with_only_args_gets_its_receiver_first(tmp_path):
         """,
     )
 
-    # The receiver, a Base, is args[0]; the argument is args[1]. A Child
-    # exists, but no analysed code calls run on it.
     assert callees(graph, "main.Base.run") == ["main.Base.step", "main.target"]
 
 
@@ -188,7 +181,6 @@ def test_a_forwarding_wrapper_used_as_a_method_passes_the_receiver(tmp_path):
         """,
     )
 
-    # The wrapper passes its receiver, a Base, on to run.
     assert callees(graph, "main.Base.run") == ["main.Base.step"]
 
 
@@ -203,8 +195,6 @@ def test_a_method_with_only_args_gets_an_outside_receiver(tmp_path):
         """,
     )
 
-    # No analysed code calls run: as an entry point, its receiver is any
-    # instance of C.
     assert callees(graph, "main.C.run") == ["main.C.helper"]
 
 
@@ -231,10 +221,4 @@ dispatch(invoke, Source())
 """,
     )
 
-    # Python unpacks `*src` once, before the call, so the analysis iterates
-    # it once per call site whatever function the site calls: the `Item`
-    # that the iteration creates is one object for `set_action` and
-    # `invoke`, as two objects from one allocation site are. A run calls
-    # only `g` here; the edge to `f` is the price of that abstraction (an
-    # iteration per call and callee kept the two apart).
     assert callees(graph, "main.invoke") == ["main.f", "main.g"]

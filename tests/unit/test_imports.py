@@ -36,7 +36,6 @@ def make_files(root, *paths, content=""):
 
 
 def manager_in(root, current_mod, current_file):
-    """Return an ImportManager for `root` that analyses `current_file`."""
     make_files(root, current_file)
     im = ImportManager()
     im.set_pkg(str(root))
@@ -44,9 +43,6 @@ def manager_in(root, current_mod, current_file):
     im.set_filepath(current_mod, str(root / current_file))
     im.set_current_mod(current_mod, str(root / current_file))
     return im
-
-
-# Import graph
 
 
 def test_create_node():
@@ -96,12 +92,11 @@ def test_set_filepath_requires_node():
         ImportManager().set_filepath("missing", "filepath")
 
 
-def test_create_edge_from_current_module():
+def test_create_edge_requires_a_current_module_and_starts_there():
     im = ImportManager()
     im.create_node("node1")
     im.create_node("node2")
 
-    # no current module yet
     with pytest.raises(ImportManagerError):
         im.create_edge("node2")
 
@@ -118,9 +113,6 @@ def test_get_imports_of_unknown_module():
     assert ImportManager().get_imports("missing") == []
 
 
-# Path containment
-
-
 def test_is_internal(tmp_path):
     im = ImportManager()
     im.set_pkg(str(tmp_path / "pkg"))
@@ -128,8 +120,8 @@ def test_is_internal(tmp_path):
     assert im.is_internal(str(tmp_path / "pkg" / "mod.py"))
     assert im.is_internal(str(tmp_path / "pkg" / "sub" / "mod.py"))
     assert im.is_internal(str(tmp_path / "pkg"))
-    # A sibling directory whose name starts with the root name is outside.
-    assert not im.is_internal(str(tmp_path / "pkg2" / "mod.py"))
+    sibling_with_the_root_name_as_prefix = tmp_path / "pkg2" / "mod.py"
+    assert not im.is_internal(str(sibling_with_the_root_name_as_prefix))
     assert not im.is_internal(str(tmp_path / "mod.py"))
 
 
@@ -140,9 +132,6 @@ def test_set_pkg_makes_root_absolute(tmp_path, monkeypatch):
 
     assert im.get_mod_dir() == str(tmp_path / "pkg")
     assert im.is_internal(str(tmp_path / "pkg" / "mod.py"))
-
-
-# Absolute imports
 
 
 def test_import_module_file(tmp_path):
@@ -174,7 +163,6 @@ def test_import_submodule_adds_every_package_on_the_path(tmp_path):
 
 
 def test_from_package_import_submodule(tmp_path):
-    # from pkg import mod
     make_files(tmp_path, "pkg/__init__.py", "pkg/mod.py")
     im = manager_in(tmp_path, "main", "main.py")
 
@@ -182,7 +170,6 @@ def test_from_package_import_submodule(tmp_path):
 
 
 def test_from_package_import_attribute(tmp_path):
-    # from pkg import func, where func is defined in pkg/__init__.py
     make_files(tmp_path, "pkg/__init__.py")
     im = manager_in(tmp_path, "main", "main.py")
 
@@ -192,19 +179,17 @@ def test_from_package_import_attribute(tmp_path):
 
 
 def test_from_module_import_attribute(tmp_path):
-    # from mod import func
     make_files(tmp_path, "mod.py")
     im = manager_in(tmp_path, "main", "main.py")
 
     assert im.handle_import("mod.func", 0) == "mod"
 
 
-def test_from_package_import_star(tmp_path):
+def test_from_package_import_star_is_the_package_even_beside_a_star_file(tmp_path):
     make_files(tmp_path, "pkg/__init__.py")
     im = manager_in(tmp_path, "main", "main.py")
 
     assert im.handle_import("pkg.*", 0) == "pkg"
-    # Even a file named "*.py" is not a module.
     make_files(tmp_path, "pkg/*.py")
     assert im.handle_import("pkg.*", 0) == "pkg"
 
@@ -221,20 +206,17 @@ def test_module_file_takes_precedence_over_namespace_package(tmp_path):
     make_files(tmp_path, "name.py", "name/sub.py")
     im = manager_in(tmp_path, "main", "main.py")
 
-    # name is the module name.py, so "sub" can only be an attribute of it.
     assert im.handle_import("name.sub", 0) == "name"
     assert im.get_filepath("name") == str(tmp_path / "name.py")
 
 
 def test_namespace_package(tmp_path):
-    # nest/ has no __init__.py
     make_files(tmp_path, "nest/imported.py")
     im = manager_in(tmp_path, "main", "main.py")
 
     assert im.handle_import("nest.imported", 0) == "nest.imported"
     assert im.get_filepath("nest.imported") == str(tmp_path / "nest" / "imported.py")
     assert im.get_imports("main") == {"nest", "nest.imported"}
-    # A namespace package has no file to analyse.
     assert not im.get_filepath("nest")
 
 
@@ -251,14 +233,14 @@ def test_import_namespace_package_itself(tmp_path):
     [
         ("missing", {}),
         ("missing.sub", {}),
-        # Python runs pkg/__init__.py and mod.py before the import fails, so
-        # they are in the graph.
         ("pkg.missing.sub", {"pkg": "pkg/__init__.py"}),
         ("pkg.sub.missing.thing", {"pkg": "pkg/__init__.py", "pkg.sub": None}),
         ("mod.sub.func", {"mod": "mod.py"}),
     ],
 )
-def test_missing_module(tmp_path, name, found):
+def test_missing_module_keeps_the_modules_that_python_ran_before_failing(
+    tmp_path, name, found
+):
     make_files(tmp_path, "pkg/__init__.py", "pkg/sub/other.py", "mod.py")
     im = manager_in(tmp_path, "main", "main.py")
 
@@ -303,21 +285,16 @@ def skip_unless_importlib_util_is_frozen():
     assert FrozenImporter.find_spec("importlib") is None
 
 
-def test_frozen_submodule_wins_over_local_file(tmp_path):
-    # importlib is not frozen, but importlib.util is: Python runs a local
-    # importlib/__init__.py and then imports the frozen importlib.util.
+def test_frozen_submodule_wins_over_local_file_of_a_local_package(tmp_path):
     skip_unless_importlib_util_is_frozen()
     make_files(
         tmp_path, "importlib/__init__.py", "importlib/util.py", "importlib/other.py"
     )
     im = manager_in(tmp_path, "main", "main.py")
 
-    # from importlib.util import find_spec
     assert im.handle_import("importlib.util.find_spec", 0) is None
-    # import importlib.util, from importlib import util
     assert im.handle_import("importlib.util", 0) is None
     assert im.get_imports("main") == {"importlib"}
-    # Submodules that are not frozen stay local.
     assert im.handle_import("importlib.other", 0) == "importlib.other"
 
 
@@ -325,7 +302,6 @@ def test_relative_import_of_a_frozen_submodule_name_is_local(tmp_path):
     make_files(tmp_path, "importlib/__init__.py", "importlib/util.py")
     im = manager_in(tmp_path, "importlib", "importlib/__init__.py")
 
-    # from . import util
     assert im.handle_import("util", 1) == "importlib.util"
 
 
@@ -344,7 +320,6 @@ def test_directory_named_like_a_source_file_is_not_a_file(tmp_path):
     im = manager_in(tmp_path, "main", "main.py")
 
     assert im.handle_import("mod", 0) is None
-    # Without an __init__.py file, pkg is a namespace package.
     assert im.handle_import("pkg", 0) == "pkg"
     assert not im.get_filepath("pkg")
 
@@ -362,14 +337,32 @@ def test_module_name_is_case_sensitive(tmp_path):
     [
         (("pkg/__init__.py", "pkg/sub/__init__.py"), "pkg.sub.mod", ["pkg", "pkg.sub"]),
         (("ns/sub/mod.py",), "ns.sub.mod", ["ns", "ns.sub"]),
-        (("ns.py", "ns/sub/mod.py"), "ns.sub.mod", []),
+        pytest.param(
+            ("ns.py", "ns/sub/mod.py"),
+            "ns.sub.mod",
+            [],
+            id="module_file_wins_over_namespace_directory",
+        ),
         (("ns/sub.py", "ns/sub/mod.py"), "ns.sub.mod", ["ns"]),
-        (("os/sub/mod.py",), "os.sub.mod", []),
+        pytest.param(
+            ("os/sub/mod.py",),
+            "os.sub.mod",
+            [],
+            id="builtin_or_frozen_module_wins_over_any_file",
+        ),
         (("mod.py",), "mod", []),
-        # An extension module wins over a namespace directory of its name.
-        (("ns.cpython-312-darwin.so", "ns/sub/mod.py"), "ns.sub.mod", []),
-        # `pkg.__init__` is the module pkg/__init__.py, no package.
-        (("pkg/__init__.py", "pkg/__init__/b.py"), "pkg.__init__.b", ["pkg"]),
+        pytest.param(
+            ("ns.cpython-312-darwin.so", "ns/sub/mod.py"),
+            "ns.sub.mod",
+            [],
+            id="extension_module_wins_over_namespace_directory",
+        ),
+        pytest.param(
+            ("pkg/__init__.py", "pkg/__init__/b.py"),
+            "pkg.__init__.b",
+            ["pkg"],
+            id="init_name_is_the_module_init_py_not_a_package",
+        ),
         (
             ("pkg/__init__.py", "pkg/__init__/__init__.py", "pkg/__init__/b.py"),
             "pkg.__init__.b",
@@ -380,8 +373,6 @@ def test_module_name_is_case_sensitive(tmp_path):
 def test_packages_are_the_prefixes_that_an_import_resolves_as_packages(
     tmp_path, files, name, packages
 ):
-    # A module file wins over a namespace directory of its name, and a
-    # built-in or frozen module over any file.
     make_files(tmp_path, *files)
     im = manager_in(tmp_path, "main", "main.py")
 
@@ -397,15 +388,12 @@ def test_resolution_does_not_import_or_touch_sys(tmp_path):
 
     assert im.handle_import("boom", 0) == "boom"
     assert im.handle_import("pkg", 0) == "pkg"
-    # A frozen module that nothing has imported; importing it prints a line.
-    assert "__hello__" not in modules
-    assert im.handle_import("__hello__", 0) is None
+    frozen_module_that_prints_when_imported = "__hello__"
+    assert frozen_module_that_prints_when_imported not in modules
+    assert im.handle_import(frozen_module_that_prints_when_imported, 0) is None
     assert sys.path == path
     assert sys.path_hooks == path_hooks
     assert set(sys.modules) == modules
-
-
-# Relative imports
 
 
 def test_relative_import_from_module(tmp_path):
@@ -418,13 +406,9 @@ def test_relative_import_from_module(tmp_path):
     )
     im = manager_in(tmp_path, "pkg.sub.mod", "pkg/sub/mod.py")
 
-    # from . import sibling
     assert im.handle_import("sibling", 1) == "pkg.sub.sibling"
-    # from .sibling import func
     assert im.handle_import("sibling.func", 1) == "pkg.sub.sibling"
-    # from .. import other
     assert im.handle_import("other", 2) == "pkg.other"
-    # from . import func, where func is defined in pkg/sub/__init__.py
     assert im.handle_import("func", 1) == "pkg.sub"
 
 
@@ -432,9 +416,7 @@ def test_relative_import_from_init(tmp_path):
     make_files(tmp_path, "pkg/__init__.py", "pkg/other.py", "pkg/sub/mod.py")
     im = manager_in(tmp_path, "pkg.sub", "pkg/sub/__init__.py")
 
-    # from . import mod
     assert im.handle_import("mod", 1) == "pkg.sub.mod"
-    # from .. import other
     assert im.handle_import("other", 2) == "pkg.other"
 
 
@@ -449,8 +431,7 @@ def test_relative_import_does_not_add_edge_to_current_module(tmp_path):
 @pytest.mark.parametrize(
     ("current_mod", "current_file", "level"),
     [
-        # The package root is not a package.
-        ("main", "main.py", 1),
+        pytest.param("main", "main.py", 1, id="package_root_is_not_a_package"),
         ("pkg.mod", "pkg/mod.py", 2),
         ("pkg", "pkg/__init__.py", 2),
         ("pkg.sub.mod", "pkg/sub/mod.py", 3),
@@ -468,15 +449,10 @@ def test_relative_import_of_builtin_name_is_local(tmp_path):
     make_files(tmp_path, "pkg/__init__.py", "pkg/sys.py")
     im = manager_in(tmp_path, "pkg.mod", "pkg/mod.py")
 
-    # from . import sys
     assert im.handle_import("sys", 1) == "pkg.sys"
 
 
-# Call graph
-
-
 def test_failed_import_still_runs_package_init(tmp_path):
-    # Python runs pkg/__init__.py before "from pkg.missing import" fails.
     package_init = "def setup():\n    pass\n\nsetup()\n"
     main = "try:\n    from pkg.missing import thing\nexcept ImportError:\n    pass\n"
     make_files(tmp_path, "pkg/__init__.py", content=package_init)
@@ -518,10 +494,6 @@ def test_directory_named_like_a_source_file_does_not_crash_analysis(tmp_path):
 
 
 def test_limit_import_as_binds_the_submodule_not_the_package_attribute(tmp_path):
-    # Python's `import a.b as c` reads the attribute `b` of `a` after the
-    # import (IMPORT_FROM; a longer name reads each part). The package
-    # rebinds `b` after it imported the submodule, so Python calls
-    # `a.Replacement.hit`. The analysis binds the submodule (a limit).
     package_init = (
         "from . import b\n"
         "class Replacement:\n"
@@ -542,8 +514,6 @@ def test_limit_import_as_binds_the_submodule_not_the_package_attribute(tmp_path)
     sys.version_info < (3, 15), reason="`lazy import` is Python 3.15 syntax"
 )
 def test_an_unread_lazy_import_as_reads_no_attribute(tmp_path):
-    # `target` is never read, so Python never reifies the import and runs
-    # no getter on the package's `b`.
     package_init = (
         "from . import b\n"
         "class Replacement:\n"
@@ -563,9 +533,9 @@ def test_an_unread_lazy_import_as_reads_no_attribute(tmp_path):
     assert generator.output()["main"] == []
 
 
-def test_a_literal_import_module_gives_the_module(tmp_path):
-    # `importlib.import_module("a.b")` returns sys.modules["a.b"], the
-    # module, whatever the package binds to `b`.
+def test_a_literal_import_module_gives_the_module_whatever_the_package_binds(
+    tmp_path,
+):
     make_files(tmp_path, "a/__init__.py", content="from . import b\nb = None\n")
     make_files(tmp_path, "a/b.py", content="def hit(): pass\n")
     main = "import importlib\nimportlib.import_module('a.b').hit()\n"
@@ -586,14 +556,6 @@ def test_a_literal_import_module_gives_the_module(tmp_path):
 def test_limit_a_submodule_that_a_package_attribute_shadows_is_analysed(
     tmp_path, statement, binding
 ):
-    # Python's `from pkg import x` reads the attribute `x` that
-    # pkg/__init__.py binds, and imports pkg/x.py only where the package
-    # has no such attribute when the import runs. That depends on what ran
-    # before: an import that runs while pkg/__init__.py runs (also through a
-    # call back) finds no attribute yet, and a deletion removes it. So
-    # discovery follows the submodule: the program has `pkg.x` and its call,
-    # which Python does not run here. In a class body, the from-list keeps
-    # `__x`, which decides the submodule, and the name read is `_C__x`.
     name = statement.rpartition(" ")[2]
     make_files(tmp_path, "pkg/__init__.py", content="def hit(): pass\n" + binding)
     make_files(tmp_path, f"pkg/{name}.py", content="def hit(): pass\nhit()\n")

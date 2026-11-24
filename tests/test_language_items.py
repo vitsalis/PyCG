@@ -1,7 +1,3 @@
-"""Language features of the builder: `await`, a module's `__getattr__`,
-builtins reached through `builtins`, star imports of a package's
-submodules, and `lazy import`."""
-
 import sys
 import textwrap
 
@@ -17,9 +13,6 @@ def g(): pass
 
 def graph_of(tmp_path, source):
     return main_graph(tmp_path, DEFINITIONS + textwrap.dedent(source))
-
-
-# await
 
 
 def test_await_on_an_instance_calls_await_and_gets_what_it_returns(tmp_path):
@@ -38,7 +31,6 @@ def test_await_on_an_instance_calls_await_and_gets_what_it_returns(tmp_path):
         """,
     )
 
-    # The value is what the iterator of __await__ returns, not the instance.
     assert callees(graph, "main.use") == ["main.Deferred.__await__", "main.f"]
 
 
@@ -64,7 +56,6 @@ def test_a_coroutine_gives_its_return_value_only_when_awaited(tmp_path):
         """,
     )
 
-    # A coroutine's result is not awaited again.
     assert callees(graph, "main.awaited") == ["main.Box.__call__", "main.make"]
     assert callees(graph, "main.not_awaited") == [
         "main.make",
@@ -91,7 +82,6 @@ def test_an_await_method_that_delegates_to_a_coroutine(tmp_path):
         "main.compute",
         "types.CoroutineType.__await__",
     ]
-    # The value of awaiting an outside value is that value.
     assert callees(graph, "main.use") == ["ext.fetch", "main.Deferred.__await__"]
 
 
@@ -145,10 +135,6 @@ def test_a_coroutine_handed_to_outside_code_keeps_its_calls(tmp_path):
         """,
     )
 
-    # The call of a coroutine function is the edge, wherever the coroutine
-    # runs. `new_event_loop()` gives an `AbstractEventLoop`, an abstract
-    # class of the stubs, whose methods give no edge (design, *Typed
-    # outside values*).
     assert callees(graph, "main") == [
         "asyncio.new_event_loop",
         "asyncio.run",
@@ -161,9 +147,6 @@ def test_a_coroutine_handed_to_outside_code_keeps_its_calls(tmp_path):
         "main.f",
         "main.work",
     ]
-
-
-# A module's __getattr__
 
 
 def test_a_missing_module_attribute_calls_the_module_getattr(tmp_path):
@@ -190,7 +173,6 @@ def __getattr__(name):
     )
 
     assert callees(graph, "main.missing") == ["api.__getattr__", "api._fetch"]
-    # A name that the module binds is found without __getattr__.
     assert callees(graph, "main.defined") == ["api.present"]
     assert callees(graph, "main") == ["api.__getattr__"]
     assert callees(graph, "main.by_import") == ["api._fetch"]
@@ -302,8 +284,6 @@ class Proxy(Base):
         },
     )
 
-    # What a module binds at run time: not a name bound only in code that
-    # cannot run, under `if TYPE_CHECKING:`, or deleted at its end.
     assert callees(graph, "main.dead") == ["lib.__getattr__", "lib.actual"]
     assert callees(graph, "main.type_only") == ["lib.__getattr__", "lib.actual"]
     assert callees(graph, "main.deleted") == ["lib.__getattr__", "lib.actual"]
@@ -312,18 +292,13 @@ class Proxy(Base):
         "dynamic.__getattr__",
         "dynamic.actual",
     ]
-    # A star import does not bring such a name.
     assert callees(graph, "main.star") == ["facade.__getattr__", "facade.other"]
     assert callees(graph, "main.star_present") == ["lib.present"]
-    # The same holds for a class.
     assert callees(graph, "main.method") == [
         "proxy.Proxy.__getattr__",
         "proxy.actual",
     ]
     assert callees(graph, "main.inherited") == ["proxy.Base.inherited"]
-
-
-# Star imports of a package's submodules
 
 
 def test_a_star_import_without_all_brings_the_imported_public_submodules(tmp_path):
@@ -343,7 +318,6 @@ _hidden.run()
         },
     )
 
-    # A name that starts with an underscore is not public.
     assert callees(graph, "main") == ["pkg.child.run"]
 
 
@@ -364,9 +338,6 @@ child.run()
     assert callees(graph, "main") == []
 
 
-# Builtins reached through the module `builtins`
-
-
 def test_builtins_reached_through_the_module_are_the_builtins(tmp_path):
     graph = graph_of(
         tmp_path,
@@ -384,7 +355,6 @@ def test_builtins_reached_through_the_module_are_the_builtins(tmp_path):
         """,
     )
 
-    # The modelled getattr finds the method; the name is the builtin's.
     assert callees(graph, "main.through_import") == [
         "<builtin>.getattr",
         "main.Handler.run",
@@ -395,8 +365,6 @@ def test_builtins_reached_through_the_module_are_the_builtins(tmp_path):
         "main.Handler.run",
     ]
 
-
-# Lazy imports (PEP 810)
 
 LAZY_MODULES = {
     "report.py": "def setup(): pass\ndef build(): pass\nsetup()\n",
@@ -434,7 +402,6 @@ def later():
 """,
     )
 
-    # No reachability: the function that reads the name may run.
     assert callees(graph, "audit") == ["audit.record"]
     assert callees(graph, "main.later") == ["audit.record"]
 
@@ -467,7 +434,6 @@ except ImportError:
 """,
     )
 
-    # An import before the list, or inside `try`, runs at once.
     assert callees(graph, "report") == ["report.setup"]
     assert callees(graph, "audit") == ["audit.record"]
 
@@ -489,8 +455,6 @@ globals()["audit"].record()
     "change", ["__lazy_modules__.clear()", '__lazy_modules__ += ["report"]']
 )
 def test_a_lazy_modules_that_is_not_one_literal_makes_no_import_lazy(tmp_path, change):
-    # As for `__all__`, only an assignment of one literal list or tuple of
-    # strings counts.
     graph = lazy_graph(
         tmp_path,
         f"""
@@ -519,10 +483,6 @@ def test_limit_a_coroutine_names_an_attribute_that_it_lacks(tmp_path):
         """,
     )
 
-    # Python: a coroutine has no `cancel`; the load raises AttributeError.
-    # A stated limit (the maintainer's decision of 2026-11-15, defect D-a of
-    # the final pass): an attribute of a coroutine is named whether the
-    # coroutine type has it or not, so this wrong edge to outside code stays.
     assert callees(graph, "main.use") == [
         "main.work",
         "types.CoroutineType.cancel",
@@ -540,9 +500,4 @@ def test_limit_an_operator_on_a_string_constant_gives_no_receiver(tmp_path):
         """,
     )
 
-    # Python calls str.upper and str.strip. A stated limit (the maintainer's
-    # decision of 2026-11-15, defect D-b of the final pass): the result of
-    # an operator, a subscript or a slice on a str or bytes constant has no
-    # value, so a method call on it has no receiver and these edges to
-    # outside code are missed.
     assert callees(graph, "main.use") == []

@@ -1,8 +1,7 @@
-"""The iteration protocol on instances, generator functions, next(), iter()
-and yield from."""
-
 import pytest
 from programs import callees, main_graph
+
+from pycg.analysis.hierarchy import HIERARCHIES_PER_CLASS_MAX
 
 ITERATOR = """
 def f(): pass
@@ -298,11 +297,21 @@ def test_a_generator_function_keeps_the_generator_type(tmp_path):
         ("(x for y in [1] for x in await wait([f]))", "types.AsyncGeneratorType"),
         ("([await wait(x) for x in [f]][0] for y in [1])", "types.AsyncGeneratorType"),
         ("([x async for x in produce()][0] for y in [1])", "types.AsyncGeneratorType"),
-        # The first iterable runs in the enclosing scope.
-        ("(x for x in await wait([f]))", "types.GeneratorType"),
-        # A nested generator expression or lambda is a scope of its own.
-        ("(f for y in [(await wait(x) for x in [1])])", "types.GeneratorType"),
-        ("((lambda: f)() for y in [1])", "types.GeneratorType"),
+        pytest.param(
+            "(x for x in await wait([f]))",
+            "types.GeneratorType",
+            id="first_iterable_runs_in_the_enclosing_scope",
+        ),
+        pytest.param(
+            "(f for y in [(await wait(x) for x in [1])])",
+            "types.GeneratorType",
+            id="nested_generator_expression_is_a_scope_of_its_own",
+        ),
+        pytest.param(
+            "((lambda: f)() for y in [1])",
+            "types.GeneratorType",
+            id="lambda_is_a_scope_of_its_own",
+        ),
         ("(x for x in [f])", "types.GeneratorType"),
     ],
 )
@@ -424,7 +433,6 @@ def test_iter_with_a_sentinel_calls_its_callable(tmp_path):
 
 
 def test_callable_iterator_calls_its_callable_where_it_is_consumed(tmp_path):
-    # Making the iterator calls nothing; each next() calls the callable.
     graph = main_graph(
         tmp_path,
         """
@@ -448,8 +456,7 @@ def test_callable_iterator_calls_its_callable_where_it_is_consumed(tmp_path):
     assert callees(graph, "main.step") == ["<builtin>.next", "main.callback"]
 
 
-def test_explicit_next_advances_every_iterator(tmp_path):
-    # it.__next__() does what next(it) does, from the scope of the call.
+def test_explicit_dunder_next_does_what_next_does_from_the_calling_scope(tmp_path):
     graph = main_graph(
         tmp_path,
         """
@@ -518,7 +525,6 @@ def test_sequence_protocol_and_membership_fallbacks(tmp_path):
 
 
 def test_iter_of_a_sequence_calls_getitem_where_it_is_consumed(tmp_path):
-    # iter() makes an iterator whose next() calls __getitem__.
     graph = main_graph(
         tmp_path,
         """
@@ -544,7 +550,6 @@ def test_iter_of_a_sequence_calls_getitem_where_it_is_consumed(tmp_path):
         """,
     )
 
-    # async for has no sequence protocol.
     assert callees(graph, "main.drain") == []
 
     assert callees(graph, "main.make") == ["<builtin>.iter"]
@@ -558,8 +563,6 @@ def test_iter_of_a_sequence_calls_getitem_where_it_is_consumed(tmp_path):
 
 
 def test_membership_compares_the_elements_with_eq(tmp_path):
-    # Without __contains__, `x in y` compares x with each element that
-    # iterating over y gives: both sides' __eq__ may run.
     graph = main_graph(
         tmp_path,
         """
@@ -587,8 +590,6 @@ def test_membership_compares_the_elements_with_eq(tmp_path):
 
 
 def test_membership_through_contains_compares_nothing_else(tmp_path):
-    # With __contains__ there is no fallback, so the searched value's
-    # __eq__ does not run.
     graph = main_graph(
         tmp_path,
         """
@@ -614,8 +615,6 @@ def test_membership_through_contains_compares_nothing_else(tmp_path):
 
 
 def test_membership_compares_untracked_elements_too(tmp_path):
-    # None, bools and floats are not tracked, but a container that holds
-    # them is not empty: the value's __eq__ runs.
     graph = main_graph(
         tmp_path,
         """
@@ -681,8 +680,6 @@ def test_membership_compares_untracked_elements_too(tmp_path):
     ],
 )
 def test_membership_in_containers_of_untracked_values(tmp_path, body):
-    # Each container below holds None, which has no object: `in` must still
-    # compare the value with it.
     graph = main_graph(
         tmp_path,
         f"""
@@ -728,31 +725,37 @@ def blank():
 """
 
 
+ITERATORS_CONVERTED_INTO_CONTAINERS = [
+    "xs = list(iter(Seq()))",
+    "xs = tuple(iter(make, 0))",
+    "xs = set(iter(Seq()))",
+    "xs = frozenset(iter(make, 0))",
+    "xs = dict(enumerate(iter(Seq())))",
+]
+ITERATORS_OF_UNTRACKED_ELEMENTS_CONVERTED_INTO_CONTAINERS = [
+    "xs = list(iter(Blank()))",
+    "xs = tuple(iter(blank, 0))",
+]
+CONTAINERS_FROM_ITERATORS_COPIED_SLICED_CONCATENATED_OR_EXTENDED = [
+    "xs = list(iter(Seq())).copy()",
+    "xs = list(iter(Seq()))[:]",
+    "xs = list(iter(Seq())) + []",
+    "xs = []\n    xs.extend(iter(Seq()))",
+    "xs = set()\n    xs.update(iter(make, 0))",
+    "xs = []\n    xs += iter(Seq())",
+    "xs = {}\n    xs.update(enumerate(iter(make, 0)))",
+]
+
+
 @pytest.mark.parametrize(
     "body",
     [
-        # An iterator converted into a container: its elements fill it.
-        "xs = list(iter(Seq()))",
-        "xs = tuple(iter(make, 0))",
-        "xs = set(iter(Seq()))",
-        "xs = frozenset(iter(make, 0))",
-        "xs = dict(enumerate(iter(Seq())))",
-        # The elements are not tracked: what the iterator may give counts.
-        "xs = list(iter(Blank()))",
-        "xs = tuple(iter(blank, 0))",
-        # ...and then copied, sliced, concatenated or extended.
-        "xs = list(iter(Seq())).copy()",
-        "xs = list(iter(Seq()))[:]",
-        "xs = list(iter(Seq())) + []",
-        "xs = []\n    xs.extend(iter(Seq()))",
-        "xs = set()\n    xs.update(iter(make, 0))",
-        "xs = []\n    xs += iter(Seq())",
-        "xs = {}\n    xs.update(enumerate(iter(make, 0)))",
+        *ITERATORS_CONVERTED_INTO_CONTAINERS,
+        *ITERATORS_OF_UNTRACKED_ELEMENTS_CONVERTED_INTO_CONTAINERS,
+        *CONTAINERS_FROM_ITERATORS_COPIED_SLICED_CONCATENATED_OR_EXTENDED,
     ],
 )
 def test_containers_made_from_iterators_hold_their_elements(tmp_path, body):
-    # A container holds an element as soon as any element reaches it, from
-    # wherever it comes; `in` then compares the value.
     graph = main_graph(
         tmp_path, f"{COMPOSITIONS}def use():\n    {body}\n    Needle() in xs\n"
     )
@@ -780,9 +783,6 @@ def test_containers_made_from_iterators_hold_their_elements(tmp_path, body):
     ],
 )
 def test_membership_limit_an_empty_container_still_compares(tmp_path, body):
-    # A limit: the analysis cannot tell an empty container from one that
-    # holds values it does not track (None, numbers, bytes), so `in` on a
-    # builtin container always may call the searched value's __eq__.
     graph = main_graph(
         tmp_path, f"{COMPOSITIONS}def use():\n    {body}\n    Needle() in xs\n"
     )
@@ -804,8 +804,6 @@ def test_membership_in_containers_of_untracked_bytes_compares(tmp_path, body):
 
 @pytest.mark.parametrize("container", ['"abc"', 'b"abc"'])
 def test_membership_in_a_str_or_bytes_constant_compares_nothing(tmp_path, container):
-    # str.__contains__ and bytes.__contains__ test substrings and bytes; they
-    # call no __eq__ of the value. The analysis does not search constants.
     use = f"def use():\n    Needle() in {container}\n"
     graph = main_graph(tmp_path, COMPOSITIONS + use)
 
@@ -813,9 +811,6 @@ def test_membership_in_a_str_or_bytes_constant_compares_nothing(tmp_path, contai
 
 
 def test_limit_membership_in_a_value_without_objects_compares_nothing(tmp_path):
-    # Nothing in the analysed code passes `values`, so the container never
-    # holds an object and the value is not compared. Python compares it with
-    # the elements of whatever a caller passes.
     use = "def use(values):\n    return Needle() in values\n"
     graph = main_graph(tmp_path, COMPOSITIONS + use)
 
@@ -823,7 +818,6 @@ def test_limit_membership_in_a_value_without_objects_compares_nothing(tmp_path):
 
 
 def test_membership_in_arguments_from_outside(tmp_path):
-    # Nothing in the code calls f: code outside may pass anything.
     graph = main_graph(
         tmp_path,
         COMPOSITIONS
@@ -848,8 +842,6 @@ class Needle:
 
 
 def test_membership_compares_a_container_from_a_late_getattr(tmp_path):
-    # getattr's name is decided at a fixpoint: the list arrives after the
-    # first one, and its element reaches Needle.__eq__.
     graph = main_graph(
         tmp_path,
         NEEDLE_AND_ITEM
@@ -865,8 +857,6 @@ Needle() in getattr(Holder, name)
 
 
 def test_membership_waits_for_a_contains_from_a_late_getattr(tmp_path):
-    # Bag.__contains__ answers alone; the comparison must not be decided
-    # before getattr supplies the Bag.
     graph = main_graph(
         tmp_path,
         NEEDLE_AND_ITEM
@@ -885,7 +875,6 @@ Needle() in getattr(Holder, name)
     assert callees(graph, "main.Needle.__eq__") == []
 
 
-# 16 hierarchies, more than the analysis enumerates: one exhaustive order.
 EXHAUSTIVE_CONTAINER = """
 import sys
 class Needle:
@@ -915,22 +904,25 @@ Needle() in C()
 @pytest.mark.parametrize(
     "body, compared",
     [
-        # With Plain as a base, Python iterates and compares.
-        ("    pass", True),
-        # C's own __contains__ answers in every hierarchy.
-        ("    def __contains__(self, item): return False", False),
+        pytest.param("    pass", True, id="plain_base_iterates_and_compares"),
+        pytest.param(
+            "    def __contains__(self, item): return False",
+            False,
+            id="own_contains_answers_in_every_hierarchy",
+        ),
     ],
 )
 def test_membership_in_an_instance_of_an_exhaustive_class(tmp_path, body, compared):
+    candidate_bases_count = 2
+    base_expressions_count = 4
+    hierarchies_count = candidate_bases_count**base_expressions_count
+    assert hierarchies_count > HIERARCHIES_PER_CLASS_MAX
     graph = main_graph(tmp_path, EXHAUSTIVE_CONTAINER.format(body=body))
 
     assert ("main.Needle.__eq__" in callees(graph, "main")) is compared
 
 
 def test_membership_decides_contains_again_when_bases_arrive_late(tmp_path):
-    # `in` sees C with Bag's __contains__ when the completion calls use;
-    # only a later completion round, which decides the name that setattr
-    # gets, gives C the list subclass, which compares the elements.
     graph = main_graph(
         tmp_path,
         """
@@ -965,10 +957,6 @@ def test_membership_decides_contains_again_when_bases_arrive_late(tmp_path):
 
 
 def test_builtin_containers_rule_out_the_fallbacks(tmp_path):
-    # list.__iter__ and list.__contains__ never call __getitem__ or __iter__
-    # of a subclass; Exception has neither, and an external class may lack
-    # both, so their subclasses still fall back. int.__format__ does call
-    # __str__.
     graph = main_graph(
         tmp_path,
         """
@@ -1004,8 +992,6 @@ def test_builtin_containers_rule_out_the_fallbacks(tmp_path):
 
 
 def test_a_class_stored_as_its_own_iter_terminates(tmp_path):
-    # Each iteration calls It to make an iterator, whose items flow back
-    # into the list that is iterated: one instance per construct.
     graph = main_graph(
         tmp_path,
         """
@@ -1033,8 +1019,6 @@ def test_a_class_stored_as_its_own_iter_terminates(tmp_path):
 
 
 def test_one_construct_iterating_two_receivers_reaches_both(tmp_path):
-    # One extend site with two lists: the __iter__ of It runs once for the
-    # site, and its result reaches both lists.
     graph = main_graph(
         tmp_path,
         """

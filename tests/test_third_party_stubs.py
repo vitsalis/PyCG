@@ -1,9 +1,3 @@
-"""Third-party code that typeshed has stubs for is typed from them, exactly as
-the standard library is (docs/design.md, *Outside code*): a function keeps
-the path through which the code reached it, a method of a typed value is
-named by the public name of its class, a stubbed function calls none of its
-arguments, and the analysed package wins over any stub."""
-
 import subprocess
 import sys
 import textwrap
@@ -25,8 +19,6 @@ def test_the_result_of_a_function_is_typed(tmp_path):
         """,
     )
 
-    # requests.get is defined in requests.api; Response in requests.models,
-    # and its public name is requests.Response.
     assert callees(graph, "main") == [
         "requests.Response.json",
         "requests.Response.raise_for_status",
@@ -44,7 +36,6 @@ def test_a_class_is_instantiated_and_its_methods_called(tmp_path):
         """,
     )
 
-    # __enter__ returns Self: the session.
     assert callees(graph, "main") == [
         "requests.Response.json",
         "requests.Session",
@@ -66,10 +57,6 @@ def test_an_inherited_method_is_named_by_the_class_of_the_value(tmp_path):
         """,
     )
 
-    # get_redirect_target is defined on SessionRedirectMixin, a base of
-    # Session; headers is a CaseInsensitiveDict, whose get comes from
-    # Mapping in the standard library. An analysed subclass reaches the
-    # members of its outside base one step past the base.
     assert callees(graph, "main") == [
         "requests.Session",
         "requests.Session.__init__",
@@ -95,11 +82,6 @@ def test_re_exports_keep_the_path_through_which_the_code_reached_them(tmp_path):
         """,
     )
 
-    # yaml.load is defined in yaml. SafeLoader is defined in yaml.loader
-    # and re-exported by a star import of yaml, which gives its public
-    # name; get_single_data is defined on BaseConstructor, a base of
-    # SafeLoader. YAMLError is defined in yaml.error, re-exported by yaml,
-    # and gets with_traceback from BaseException.
     assert callees(graph, "main") == [
         "yaml.SafeLoader",
         "yaml.SafeLoader.get_single_data",
@@ -126,7 +108,6 @@ def test_a_third_party_function_calls_none_of_its_arguments(tmp_path):
         """,
     )
 
-    # Both parameters are typed as callables; only a builtin calls back.
     assert callees(graph, "main") == [
         "<builtin>.list",
         "<builtin>.map",
@@ -160,16 +141,11 @@ def test_a_namespace_package_of_two_distributions(tmp_path):
         """,
     )
 
-    # google has no __init__.pyi: protobuf gives google.protobuf, and
-    # google-cloud-ndb gives google.cloud.ndb.
     assert callees(graph, "main") == [
         "<builtin>.str.upper",
         "google.protobuf.json_format.MessageToJson",
         "google.protobuf.message.Message",
     ]
-
-
-# The analysed package wins over any stub.
 
 
 def test_an_analysed_package_named_like_a_stubbed_distribution(tmp_path):
@@ -189,7 +165,6 @@ def test_an_analysed_package_named_like_a_stubbed_distribution(tmp_path):
         },
     )
 
-    # The stub's load returns an unknown value; the analysed one a Document.
     assert callees(graph, "main") == ["yaml.Document.run", "yaml.load"]
     assert callees(graph, "yaml.load") == []
 
@@ -228,8 +203,6 @@ def test_a_vendored_copy_of_a_stubbed_library(tmp_path):
     assert callees(graph, "main") == [*expected, "app.client.fetch"]
     assert callees(graph, "app.client.fetch") == expected
 
-
-# Loading stays lazy.
 
 TRACE_OPENS = """
 import sys

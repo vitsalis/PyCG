@@ -1,11 +1,3 @@
-"""Values of outside classes that the stubs describe (typed outside values).
-
-A value whose type the stubs give is an instance of that class: its methods
-are named through the public name of the class (evaluation/micro-benchmark/README.md,
-"Methods"), a name the stubs do not have gives nothing, and calling a method
-gives a value of its return type.
-"""
-
 from programs import callees, main_graph
 from test_order_independence import orders
 
@@ -194,7 +186,6 @@ def test_methods_of_abstract_types_give_no_edge(tmp_path):
         """,
     )
 
-    # The stubs say AbstractEventLoop; the class that runs is unknown.
     assert callees(graph, "main") == ["asyncio.new_event_loop", "main.start"]
 
 
@@ -215,9 +206,6 @@ def test_a_type_variable_returns_the_argument(tmp_path):
 
 
 def test_a_type_variable_that_no_argument_binds_is_its_bound(tmp_path):
-    # `add_parser(..., parents: Iterable[_ArgumentParserT] = ...) ->
-    # _ArgumentParserT`: a parameter has the variable, but the call does not
-    # pass it, so the result is the bound, `ArgumentParser`.
     graph = main_graph(
         tmp_path,
         """
@@ -231,8 +219,6 @@ def test_a_type_variable_that_no_argument_binds_is_its_bound(tmp_path):
 
 
 def test_typing_cast_returns_its_value(tmp_path):
-    # The stub says the result is an instance of the class; at run time it
-    # is the value.
     graph = main_graph(
         tmp_path,
         """
@@ -318,8 +304,6 @@ def test_a_module_variable_is_a_value_of_its_type(tmp_path):
 
 
 def test_calling_a_function_object_gives_no_call_of_its_type(tmp_path):
-    # Calling a method or function object runs its function, which the
-    # stubs do not know: not types.MethodType.__call__.
     graph = main_graph(
         tmp_path,
         """
@@ -333,9 +317,6 @@ def test_calling_a_function_object_gives_no_call_of_its_type(tmp_path):
 
     assert "types.MethodType.__call__" not in callees(graph, "main")
     assert "types.MethodType" in callees(graph, "main")
-
-
-# Analysed classes with outside bases.
 
 
 def test_a_name_that_the_outside_base_does_not_have_is_not_found(tmp_path):
@@ -352,7 +333,6 @@ def test_a_name_that_the_outside_base_does_not_have_is_not_found(tmp_path):
         """,
     )
 
-    # Python's MRO is Task, ABC, Mixin, object: helper is Mixin's.
     assert callees(graph, "main.Task.run") == ["main.Mixin.helper"]
 
 
@@ -424,7 +404,6 @@ def test_a_typing_alias_of_a_collections_abc_class_is_that_class(tmp_path):
     assert callees(graph, "main.collections_abc") == [
         "collections.abc.Iterator.__iter__"
     ]
-    # typing.IO is a class of typing, not an alias.
     assert callees(graph, "main.typing_only") == ["typing.IO.close"]
 
 
@@ -477,8 +456,6 @@ def test_iter_of_an_iterator_and_aiter_of_an_async_iterator_return_the_receiver(
         "main.Stream.__anext__",
         "main.f",
     ]
-    # Sequence.__iter__ is a generator over __getitem__, not the receiver:
-    # no __next__.
     assert callees(graph, "main.rows") == ["main.Rows.__getitem__"]
 
 
@@ -497,10 +474,6 @@ def test_a_member_of_an_outside_base_is_named_one_step_past_the_base(tmp_path):
         """,
     )
 
-    # A stub class has finitely many members, so a member is named one step
-    # past its base even where that passes the bound of external names:
-    # `done` is three steps past `concurrent.futures`. A base past the bound
-    # (the member class `ForkingPickler`, three steps) names no member.
     assert callees(graph, "main.use") == ["concurrent.futures._base.Future.done"]
 
 
@@ -523,8 +496,6 @@ def test_object_init_runs_without_an_edge_unless_it_is_called(tmp_path):
         """,
     )
 
-    # Instantiation through object's __init__ gives no edge; an explicit
-    # call names it through the nearest outside base.
     assert callees(graph, "main.make") == [
         "<builtin>.Exception.__init__",
         "main.Request.__init__",
@@ -555,13 +526,10 @@ def test_explicit_calls_of_object_methods(tmp_path):
         "<builtin>.object.__setattr__",
         "<builtin>.super",
     ]
-    # `__class__` is the class of the instance.
     assert callees(graph, "main.Clone.copy") == ["main.Clone.__init__"]
 
 
 def test_decorators_that_library_factories_return_are_named_as_they_run(tmp_path):
-    # dataclass(...) returns its closure `wrap`; functools.wraps(f) returns a
-    # functools.partial of update_wrapper (micro-benchmark conventions).
     graph = main_graph(
         tmp_path,
         """
@@ -589,9 +557,6 @@ def test_decorators_that_library_factories_return_are_named_as_they_run(tmp_path
         "functools.partial.__call__",
         "functools.wraps",
     ]
-
-
-# Findings of the review of milestone T2.
 
 
 def test_an_attribute_typed_with_type_of_a_type_variable(tmp_path):
@@ -681,9 +646,6 @@ def test_members_of_the_metaclass_of_an_outside_base(tmp_path):
 
 
 def test_self_on_an_analysed_receiver_is_the_receiver_and_a_new_instance(tmp_path):
-    # A fluent method returns the receiver, a copying one a new instance of
-    # its class: the type cannot tell them apart, so the result is both, and
-    # a field stored on the receiver stays visible.
     graph = main_graph(
         tmp_path,
         """
@@ -719,9 +681,6 @@ def test_a_metaclass_method_does_not_hide_what_object_defines(tmp_path):
         """,
     )
 
-    # `C()` runs `object.__new__`, not the `ABCMeta.__new__` that makes
-    # classes, and the interpreter calls it: no edge. `register` is only
-    # the metaclass's.
     assert callees(graph, "main") == ["abc.ABC.register"]
 
 
@@ -748,8 +707,6 @@ def test_a_stub_new_gives_an_instance_of_the_class_it_is_given(tmp_path):
         """,
     )
 
-    # `__new__(cls, ...) -> Self`: an instance of `cls`, whose class then
-    # runs `__init__` on it.
     assert {
         "main.E.go",
         "main.S.go",
@@ -772,8 +729,6 @@ def test_a_class_with_base_named_tuple_is_a_tuple_subclass(tmp_path):
         """,
     )
 
-    # NamedTuple's __mro_entries__ puts a tuple class in the bases; the
-    # stub's __init__ is the functional form's, which a subclass lacks.
     assert callees(graph, "main") == [
         "<builtin>.tuple.count",
         "main.Point.total",
@@ -793,15 +748,10 @@ def test_an_alias_of_an_outside_class_is_a_type_on_every_python(tmp_path):
         """,
     )
 
-    # The stub data decides what is a class, not the running Python
-    # (PythonFinalizationError is new in 3.13).
     assert {
         "<builtin>.PythonFinalizationError.add_note",
         "pathlib.Path.exists",
     } <= set(callees(graph, "main.report"))
-
-
-# Stated limits (design, *Typed outside values*), pinned.
 
 
 def test_limit_results_are_the_union_over_overloads(tmp_path):
@@ -813,8 +763,6 @@ def test_limit_results_are_the_union_over_overloads(tmp_path):
         """,
     )
 
-    # `text=True` selects the overload that gives a str at run time; the
-    # analysis takes every overload that fits by arity and keywords.
     assert callees(graph, "main") == [
         "<builtin>.bytes.splitlines",
         "<builtin>.str.splitlines",
@@ -842,12 +790,6 @@ def test_limit_a_result_whose_class_python_chooses_at_run_time_keeps_its_stub_ty
         """,
     )
 
-    # The loop's class depends on the platform and the event loop policy,
-    # the parser's on the environment (`PY_SAX_PARSER`), the traversable's
-    # on the package's loader. The stubs give the abstract
-    # `AbstractEventLoop` and `Traversable`, whose methods give no edge, and
-    # the base class `XMLReader`, where Python runs `ExpatParser.parse` by
-    # default.
     assert callees(graph, "main.run") == [
         "asyncio.get_running_loop",
         "asyncio.new_event_loop",
@@ -979,8 +921,6 @@ def test_a_mode_or_buffering_from_a_default_selects_its_class(tmp_path):
     def closed(caller):
         return [c for c in callees(graph, caller) if c.endswith(".close")]
 
-    # The defaults reach the mode before a mode that holds nothing is taken
-    # as unknown.
     assert closed("main.C.run") == ["io.BufferedReader.close"]
     assert closed("main.uncalled") == ["io.BufferedReader.close"]
     assert closed("main.unbuffered") == ["io.FileIO.close"]
@@ -1011,8 +951,6 @@ def test_a_mode_read_through_a_class_attribute_selects_its_class(tmp_path):
     def closed(caller):
         return [c for c in callees(graph, caller) if c.endswith(".close")]
 
-    # A class attribute is the alias of its constant, whose class is not
-    # known (a str subclass may stand for it); `open` reads its value.
     assert closed("main.read") == ["io.BufferedReader.close"]
     assert closed("main.raw") == ["io.FileIO.close"]
     assert closed("main.write") == ["io.BufferedWriter.close"]
@@ -1021,12 +959,6 @@ def test_a_mode_read_through_a_class_attribute_selects_its_class(tmp_path):
 def test_limit_an_argument_that_another_open_of_the_same_step_gives(
     tmp_path, monkeypatch
 ):
-    # The first open's buffering holds nothing (the match holds no value),
-    # and the second open's mode holds nothing until the first open's
-    # result, a list of lines, gets "mode" and the computed name loads
-    # `Options.mode`. The last fixpoint step makes both arguments unknown at
-    # once, so the second open gives every class that fits by arity, where
-    # Python makes a `BufferedReader` (design, *Typed outside values*).
     source = """
         import re
         class Options:
@@ -1088,23 +1020,14 @@ def test_open_with_modes_that_are_not_one_constant(tmp_path):
         "io.BufferedWriter.close",
         "io.TextIOWrapper.close",
     ]
-    # Each constant selects its class.
     assert closed("main.two") == ["io.BufferedWriter.close", "io.TextIOWrapper.close"]
-    # A str whose value is not known, a mode that holds nothing (`missing`
-    # is never called and has no default) and an unpacked argument give the
-    # class of every overload that fits by arity, as other outside calls
-    # do: without a buffering, not `FileIO`. `typing.IO` and
-    # `typing.BinaryIO` are abstract.
     assert closed("main.unknown") == buffered
     assert closed("main.missing") == buffered
     assert closed("main.unpacked") == sorted([*buffered, "io.FileIO.close"])
-    # Each buffering selects too: 0 gives the raw file.
     assert closed("main.buffering") == [
         "io.BufferedReader.close",
         "io.FileIO.close",
     ]
-    # Python raises ValueError for a mode with two of r, w, a, x, and for
-    # unbuffered text.
     assert closed("main.rejected") == []
 
 
@@ -1125,12 +1048,10 @@ def test_a_constrained_type_variable_is_the_constraint_its_value_is(tmp_path):
         """,
     )
 
-    # escape(pathname: AnyStr) -> AnyStr: str for a str, bytes for bytes.
     assert "<builtin>.str.upper" in callees(graph, "main.text")
     assert "<builtin>.bytes.upper" not in callees(graph, "main.text")
     assert "<builtin>.bytes.lower" in callees(graph, "main.data")
     assert "<builtin>.str.lower" not in callees(graph, "main.data")
-    # A value of neither constraint is not passed through as itself.
     assert "<builtin>.bytearray.lower" not in callees(graph, "main.other")
 
 
@@ -1149,14 +1070,8 @@ def test_limit_an_outside_base_hides_a_mixin_with_a_shared_ancestor(tmp_path):
         """,
     )
 
-    # Python's MRO puts Mixin before the shared MutableMapping, so
-    # Mixin.popitem runs; the lookup searches UserDict's stub hierarchy
-    # first.
     assert "collections.UserDict.popitem" in callees(graph, "main")
     assert "main.Mixin.popitem" not in callees(graph, "main")
-
-
-# Annotations of outside types (macro scope rule B4).
 
 
 def test_a_parameter_annotated_with_an_outside_class_has_its_type(tmp_path):
@@ -1195,9 +1110,6 @@ def test_a_parameter_annotated_with_an_outside_class_has_its_type(tmp_path):
     ]
 
 
-# Awaiting with outside code.
-
-
 def test_a_parameter_typed_awaitable_binds_what_the_argument_finishes_with(tmp_path):
     graph = main_graph(
         tmp_path,
@@ -1215,7 +1127,6 @@ def test_a_parameter_typed_awaitable_binds_what_the_argument_finishes_with(tmp_p
         """,
     )
 
-    # `run(main: Coroutine[Any, Any, T])`, `Runner.run(coro: Awaitable[T])`
     assert "main.Result.done" in callees(graph, "main")
     assert "main.Result.done" in callees(graph, "main.use")
 
@@ -1274,8 +1185,6 @@ def test_awaiting_an_instance_without_await_gives_the_instance(tmp_path):
         """,
     )
 
-    # wait_for gives the T at the call; awaiting an instance whose class
-    # defines no __await__ keeps it (code that runs never awaits one).
     assert {"main.Result.done", "main.Later.__await__"} <= set(
         callees(graph, "main.use")
     )
@@ -1292,5 +1201,4 @@ def test_a_class_method_returning_self_gives_the_class_it_was_loaded_through(
         """,
     )
 
-    # date.fromordinal -> Self, loaded through datetime.
     assert "datetime.datetime.timestamp" in callees(graph, "main")
