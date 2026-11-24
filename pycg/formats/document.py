@@ -54,6 +54,7 @@ CONSTRUCTS = {
     "named load": "attribute",
     "operator": "operator",
     "prepare": "class",
+    "property": "attribute",
     "protocol": None,
     "raise": "raise",
     "reversed": None,
@@ -89,7 +90,7 @@ _WRITTEN = frozenset(
 _ITERATION = frozenset({"iterate", "index", "callable"})
 
 # The roles of an attribute access, with its kind (Load, Store, Delete).
-_ACCESSES = frozenset({"accessor", "getattr", "hook"})
+_ACCESSES = frozenset({"accessor", "getattr", "hook", "property"})
 
 
 def build(program, package_name=None, package_version=None):

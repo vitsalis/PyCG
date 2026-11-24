@@ -979,6 +979,10 @@ WITHOUT_RESULTS = {
     "_percent_format",
     "_percent",
     "_call_protocol",
+    # A builtin that consumes a lazy object of the standard library: the
+    # activation joins its result node to the consuming iteration's.
+    "_consume_library",
+    "_sequence_length",
     "_raise",
     "_set_name",
     "_call_back_object",
@@ -1005,6 +1009,10 @@ WITHOUT_RESULTS = {
     "_keyword_candidate",
     "_dataclass_decorator",
     "_dataclass_base",
+    # The bases that a module's own stub declares: a class below an outside
+    # class joins its nodes by edges. Past the cap the node admits nothing
+    # more; what it admitted stays (design.md, "A module's own stub").
+    "_stub_base",
     # What they find goes to the accesses that reach the object, which
     # name their results; a name that is not a str constant makes the
     # access a computed name (`MAX_DYNAMIC_NAMES`). `_pattern_class_instance`

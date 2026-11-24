@@ -87,8 +87,11 @@ value is named by the public name of its class. No name is invented for a
 value whose type the stubs give. Outside code is not assumed to call what
 the analysed code gives it. Only the builtins of Python apply their
 arguments: `map`, `sorted(key=...)`, and the special methods of their
-protocol parameters (`len(x)` calls `x.__len__`). The one other exception
-is `re.sub` and `re.subn`, which call a callable replacement.
+protocol parameters (`len(x)` calls `x.__len__`). The other exceptions are
+`re.sub` and `re.subn`, which call a callable replacement, and a table of
+selected standard-library operations (`itertools`, `functools.reduce`,
+`math.sumprod`, `heapq.nlargest`, ...), which iterate what they get: at
+the call, or, for a lazy object, where analysed code advances it.
 
 ```python
 m = re.match("a+", text)  # a re.Match
@@ -110,10 +113,13 @@ the instances of the class it names and of its subclasses. For an
 abstract class of outside code, which no value of its own can be, the
 subclasses are the analysed classes that derive from it
 (`it: AsyncIterator[T]` holds the instances of the analysed async
-iterators), except for the protocols that the builtin types implement
-(`Iterable`, `Sized`, ...), for which a client most likely passes a
+iterators). For the protocols that the builtin types implement
+(`Iterable`, `Sized`, ...), only those that derive from them through
+abstract classes count: for a class that reaches one only through a
+concrete class (a subclass of `list`), a client most likely passes a
 builtin. A stub `x.pyi` that the package ships beside `x.py` gives the
-annotations that the source leaves out.
+annotations that the source leaves out, and the bases of its classes for
+what an annotation names.
 
 ```python
 class Shape:
@@ -189,8 +195,8 @@ test.
    (`imports._candidates`), then the files that only entry points name
    (`a.pyw`, a script without a suffix), by path; the output lists the
    others as shadowed. The stub `x.pyi` beside a module file `x.py` is
-   read for annotations only (see *A module's own stub*); a stub is never a
-   module. The
+   read for annotations and for the bases of its classes only (see *A
+   module's own stub*); a stub is never a module. The
    other rules of imports are under *Imports*.
 2. **Scopes** (`scopes.py`). A light pass over each AST decides which scope
    binds each name, by Python's rules computed from the AST (not from
@@ -1328,7 +1334,9 @@ Per module the data keeps:
 
 Every Python version and platform counts: all branches of
 `sys.version_info` and `sys.platform` tests are read, and a name that they
-bind differently keeps every definition (the data records no versions). A
+bind differently keeps every definition (the data records no versions).
+The implicit calls that the hand rules model take the union of the
+supported CPython versions in the same way (see *Length hints*). A
 class has a public name, its shortest path through public modules and names
 (`asyncio.AbstractEventLoop` for `asyncio.events.AbstractEventLoop`,
 `io.TextIOWrapper` for `_io.TextIOWrapper`). A type keeps classes, unions,
@@ -1644,9 +1652,10 @@ elements (see *Comparisons of containers*). Like a builtin with a hand
 rule, these call through their protocols only the methods that are not
 special.
 
-Outside code other than `builtins` calls no method of the analysed objects
-it gets (`Thread.start` and `run`, `Logger.warning` and a handler's
-`emit`, `ExitStack.enter_context` and `__enter__`).
+Outside code other than `builtins` and the operations below calls no
+method of the analysed objects it gets (`Thread.start` and `run`,
+`Logger.warning` and a handler's `emit`, `ExitStack.enter_context` and
+`__enter__`).
 
 - Limit: the stubs list the buffer protocol before `SupportsInt` and
   `SupportsFloat` for `int` and `float`, and `Iterable` and
@@ -1658,6 +1667,99 @@ it gets (`Thread.start` and `run`, `Logger.warning` and a handler's
   compared too.
 - Limit: with an unpacked argument every overload fits, so `min(*[a, b])`
   also iterates `a`.
+
+### Selected standard-library operations
+
+A table of operations of the standard library (`LIBRARY_ITERATION`, keyed
+by the canonical stub definition and the exact parameters whose arguments
+they iterate) calls the iteration methods of what they get, as CPython
+3.12 to 3.15 does (probed with an iterable apart from its iterator). The
+stubs cannot state it: `islice`, `chain`, `groupby` and `product` have one
+shape there (no bases, `__iter__` and `__next__`), but `product` makes a
+tuple of its argument at once and the others do not. A name that only
+looks like an operation (a package function `islice`) is not one; an
+alias is.
+
+| Operation | At the call | Where the object is advanced |
+|---|---|---|
+| `functools.reduce`, `math.sumprod`, `math.fsum`, `math.prod`, `operator.countOf`, `operator.indexOf` | iterate | (no object) |
+| `math.dist`, `itertools.product`, `combinations`, `combinations_with_replacement`, `permutations` | make a tuple: iterate, ask the length (`LENGTH_HINT`, 3.12 and 3.13; every version counts); `math.dist` reads a tuple, also of a subclass of `tuple`, without either | nothing of the program; the items come in tuples |
+| `heapq.nlargest`, `nsmallest` | `__len__`, `iter()`, `iter()` of that iterator again, advance it | (no object) |
+| `itertools.islice`, `dropwhile`, `takewhile`, `filterfalse`, `compress`, `cycle`, `accumulate`, `pairwise`, `batched`, `zip_longest` | `iter()` | advance the iterators |
+| `itertools.tee` | `iter()`, and `iter()` of that iterator again | each copy advances the iterator |
+| `itertools.starmap` | `iter()` | advance; make a tuple of each argument bundle (iterate it, ask its length) |
+| `itertools.groupby` | `iter()` | advance; a group, also one that another scope advances, advances the same iterator |
+| `itertools.chain` | nothing | `iter()` of each argument and advance it |
+| `heapq.merge` | nothing | `iter()` of each argument, advance it, and `iter()` of that iterator again (it delegates to the last one with `yield from`) |
+| `itertools.chain.from_iterable` | `iter()` of the outer iterable | advance it; iterate each inner iterable |
+
+A lazy object is an engine container of the operation's class (methods
+named by it, `itertools._tee` for a copy of `tee`, `itertools._grouper`
+for a group) whose state holds the iterators (the iterables for `chain`
+and `merge`). It is advanced by what advances an iterator: `next()`, its
+`__next__` called explicitly or through a stored bound method, a loop,
+unpacking, a builtin or an operation that consumes it (`list`, `sorted`,
+`deque`, `"".join`, `sum`, `reduce`), and another lazy object when that
+one is advanced. Making, storing, returning it and `iter()` of it advance
+nothing. Advancing it from a scope and a site advances its sources from
+there: library frames are transparent, so the calls belong to the scope
+that advances the object, and a lazy object that only a client advances
+gives no `__next__` edge, neither at the call that made it nor in the
+function that returns it. A lazy operation's result type does not bind
+its type variables by iterating the argument at the call (the deferred
+binding of that definition's signature; another callable at the same call
+keeps its own). Items pass through the objects that keep them (`islice`,
+`dropwhile`, `takewhile`, `filterfalse`, the data of `compress`, `cycle`,
+`accumulate`, `chain`, `chain.from_iterable`, `tee`, `merge`), as tuples
+(`pairwise`, `batched`, the combinatorial ones), per position
+(`zip_longest`, `product`: the arguments that `*iterables` takes keep
+their positions, and the tuples have one shape per arity of the calls,
+of unknown length where an unpacked argument or `repeat` hides the
+positions; `compress` keeps its data apart from its selectors, also in a
+call that unpacks them),
+and as (item, group) pairs for `groupby` whose key is the item (no key,
+`key=None` by keyword or position, or a key that `**kwargs` may omit);
+`starmap` gives nothing. `zip_longest`'s `fillvalue` and `accumulate`'s
+`initial` are values of the result, at any position.
+
+One state stands for every call of one origin of an operation (the
+implicit calls that copy a call expression, each with its receivers): each
+merges its arguments into the state's nodes and gets its result, and what
+a later one brings (a position, a fill value) is wired into every
+activation made before; a call of another arity adds a tuple shape and
+changes none, and the key becoming the item rewires what came before.
+
+Each advancing of a lazy object from a scope and a site is one
+activation: a result node made before its subscriptions, which every
+request of that key joins, also a later one. The lazy objects are keyed by
+their call origin, so activations are finite; a lazy object that is its
+own source (`acc = chain(acc, x)` in a loop) reaches its own activation.
+A saturated source passes the saturated value to the result node.
+
+The builtin `map`, `zip`, `enumerate` and `filter` stay eager: they
+iterate their arguments, and `map` and `filter` call their function, where
+they are made (an approximation, C26), so a lazy object that one of them
+gets is advanced there.
+
+Limits, each pinned by a test:
+
+- The callbacks of these operations (`starmap`'s function, the predicates
+  of `takewhile`, `dropwhile`, `filterfalse`, `groupby`'s key,
+  `accumulate`'s function and its `__add__`) are not called.
+- Counts are not read: `tee(x, 0)` and `product(x, repeat=0)` iterate and
+  `islice(x, 0)` advances, where Python does not
+  (`test_limit_a_count_of_zero_still_iterates`); `nlargest(1, x)` asks the
+  length, which its shortcut does not (`test_limit_nlargest_of_one_asks_the_length`).
+- `heapq.merge` reads `__next__` by an ordinary attribute lookup, so an
+  instance attribute wins in Python; the analysis calls the class's method
+  (`test_limit_merge_advances_by_the_special_method`).
+- A `groupby` key that a variable gives is taken as a key function, also
+  where the variable may hold `None`.
+- `Counter(mapping)` counts the keys of a mapping, and a deque that
+  extends itself copies itself first: the existing rules of `Counter` and
+  `deque` model neither.
+- `math.dist` is in the table; `statistics` and the other Python modules
+  of the standard library are not.
 
 ## Declared types (idea 4)
 
@@ -1739,9 +1841,9 @@ The annotation of a parameter names (`annotations.py`):
 - a class of the stubs: a typed value of it, as a call result of that type
   is, and for `type[C]` the class (a concrete outside type gives the edges
   of its methods; an abstract one gives none, see *What is reported as an
-  edge*); and, for an abstract class that is not a protocol of the builtin
-  types, also every instance of each analysed class below it, and for
-  `type[C]` those classes (see *Analysed classes below an outside class*);
+  edge*); and, for an abstract class, also every instance of each analysed
+  class below it, and for `type[C]` those classes (see *Analysed classes
+  below an outside class*);
 - `Optional[...]`, `Union[...]`, `A | B`: what each arm names;
   `Annotated`, `Required`, `NotRequired`, `ReadOnly`, `Final`, `ClassVar`:
   what the first argument names;
@@ -1835,20 +1937,28 @@ annotation into a store, that of its generated `__init__`.
 
 **Analysed classes below an outside class.** An annotation that names an
 outside class names the analysed classes below it only when that class is
-abstract and is not one of the protocols that the builtin types implement.
-Abstract means that the class cannot be instantiated as it is: a protocol,
-a class that exists only in the stubs, or a class whose MRO has an
-abstract method that no class before it implements (`Stubs.abstract`).
-The protocols of the builtin types are `Iterable`, `Iterator`,
-`Collection`, `Container`, `Sized`, `Hashable` and `Reversible` (of
-`typing` and `collections.abc`). The reasons: for a concrete outside class
-(`list`, `dict`, `BaseException`, `Enum`, `object`, `type`, `Any`) the
-annotation already names a value, an instance of that class, so its
-analysed subclasses are as unlikely as any other value; for a protocol
-that the builtin types implement, a client most likely passes a builtin.
-On hypothesis, the analysed classes below concrete classes and below these
-protocols gave about 19,000 edges, no traced one, and most of the cost of
-the rule.
+abstract. Abstract means that the class cannot be instantiated as it is: a
+protocol, a class that exists only in the stubs, or a class whose MRO has
+an abstract method that no class before it implements (`Stubs.abstract`).
+For a concrete outside class (`list`, `dict`, `BaseException`, `Enum`,
+`object`, `type`, `Any`) the annotation already names a value, an instance
+of that class, so its analysed subclasses are as unlikely as any other
+value. The protocols that the builtin types implement, `Iterable`,
+`Iterator`, `Collection`, `Container`, `Sized`, `Hashable` and
+`Reversible` (of `typing` and `collections.abc`), name a class below them
+only through abstract classes: some outside base of the class reaches the
+protocol by stub bases that are all abstract (`Stubs.abstract_reach`;
+`class Line(Sequence)` and `class Countdown(Iterator)` count, a subclass of
+`list`, `str`, `tuple`, `dict` or `NamedTuple` does not, nor does a class
+of the stub-only base `tokenize._TokenInfo`, abstract itself but a
+`NamedTuple`). A class that reaches one only through a concrete class is a
+builtin value, and a client most likely passes a builtin one. This is a
+policy for what an annotation supplies, not Python's subclass relation: a
+subclass of `list` is an `Iterable`, and a value of it that the program
+passes is called as any value is. On hypothesis (6.170.12, the package
+alone) the rule adds 308 edges to 20,200 and removes none, with no
+saturated site; admitting the protocols through concrete classes as well
+gives the same graph there.
 
 An analysed class is below an outside class `B` when one of its MROs
 reaches `B` through the stub MROs: a candidate base of it, or of one of
@@ -1899,7 +2009,27 @@ scope that binds it contributes (a binding under an `if` or a `try` of
 that scope counts): an import, what a type-only import of it binds,
 without loads (so no hook runs) and without registering a module; a class
 statement, the source's class definitions of the same qualified name; any
-other binding (an alias, a variable, a function), nothing. Nothing else of the stub is used: it defines no function, class or
+other binding (an alias, a variable, a function), nothing.
+
+The bases that the stub declares for a class count for what an annotation
+names, and for nothing else: the source's class definitions of the same
+path are below each outside class that a base names (subscripts dropped:
+`class Peek(Iterator[_T])` for `class Peek:` puts `Peek` below `Iterator`
+and `Iterable`), as if the source declared that base, under the rule
+above. The source's own bases count too, so a stub that contradicts them
+adds its classes (`class C(list)` with the stub `class C(Iterator[int])`
+is below `Iterable` through `Iterator`). The stub's bases never give an
+inherited method, never change whether the class has instances, its MROs
+or `super()`: lookup is the source's. A base that names an analysed class
+adds nothing, a limit of scope: the declared relation could follow it
+without changing the source's hierarchy, but no case asks for it. The
+bases are one node per class statement. When it saturates, as any node
+past the cap does, it admits nothing more: the classes that it already put
+the class below stay (rules only add), those that would arrive later are
+lost, and the source's hierarchy is untouched
+(`test_a_stub_base_node_that_saturates_late_keeps_what_it_admitted`).
+
+Nothing else of the stub is used: it defines no function, class or
 variable, a name that only it defines is ignored, its calls and return
 types give nothing, and its imports bring in no module. A stub without its
 `.py`, a stub that cannot be read or parsed, a stub with a `global` or
@@ -1927,12 +2057,24 @@ Limits:
   below it, also where the package does not play that role (a set-like
   class for a parameter annotated `AbstractSet[str]` that is only ever
   given sets).
-- An annotation of a concrete outside class or of a protocol of the
-  builtin types names no analysed class below it, also where the package
-  passes one: an analysed exception for `BaseException`, an analysed
-  iterator for `Iterator`
-  (`test_the_protocols_of_the_builtin_types_name_no_class_below_them`,
-  micro case `type_hints/outside_class_annotation`).
+- An annotation of a concrete outside class names no analysed class below
+  it, and one of a protocol of the builtin types none that reaches it only
+  through a concrete class, also where the package passes one: an analysed
+  exception for `BaseException`, a subclass of `list` for `Iterable`
+  (`test_limit_a_builtin_protocol_names_no_class_below_it_through_a_concrete_class`).
+- The admission through abstract classes, with the stubs' bases, has a
+  measured cost. On the 40 development packages, the 30 older ones get 40
+  false edges inside the package and no true one (cachetools 20,
+  marshmallow 19, h11 1); more-itertools gets 2,142 true and 334 false
+  edges, 182 of the false ones at parameters whose annotation is wider than
+  the documented contract (numbers, mappings, matrices and the helpers
+  they reach). Batch 6's recall inside the packages rises from 0.383 to
+  0.788, and its precision falls from 0.975 to 0.915.
+- The stubs' `Collection` does not derive from `Sized`, where Python's
+  does, and classes are compared by their stub definitions: a subclass of
+  `Sequence` is not below `Sized`.
+- A stub base that names an analysed class adds nothing
+  (`test_limit_a_stub_base_that_names_an_analysed_class_adds_nothing`).
 - A stub annotation's attribute chain must start at a name that the stub
   imports: `Outer.Inner` for a class nested in the module's class names
   nothing
@@ -2090,9 +2232,10 @@ C.attr
 - Through the class, the metaclass of a stubbed base gives its members too
   (`API.register` for `class API(abc.ABC)`), unless a class of the MRO,
   `object` included, defines the name.
-- An instance found there whose class defines `__get__` calls it with None
-  and the class, from the scope of the load, and the load gets the result;
-  a property loaded through its class is itself.
+- An instance found there whose class resolves `__get__` to an analysed
+  method calls it with no value for the instance and the class, from the
+  scope of the load, and the load gets the result; a property loaded
+  through its class is itself (see *Descriptors*).
 - The lookup is remembered and redone when the MROs change.
 - Limit: the stub hierarchy of an outside base is searched where the base
   stands in the analysed MRO, so a later analysed base that shares an
@@ -2325,19 +2468,92 @@ hook, see *Attribute hooks*), and the access gets the result:
 
 - a property calls its getter with the instance on a load, its setter on
   a store and its deleter on a `del`;
-- an instance whose class defines `__get__`, `__set__` or `__delete__`
-  calls it, with the instance and its class for `__get__`.
+- an instance whose class resolves `__get__`, `__set__` or `__delete__`
+  to an analysed method calls it, with the instance and its class for
+  `__get__`.
 
-An instance whose class does not define `__get__` (or where only an
-outside base does, whose `__get__` is not called) is itself the value.
-`prop.setter(f)` and its siblings add `f` to `prop` itself and give
-`prop`.
+A *property* is the engine's own (`property(...)`, `@property`) or an
+instance of an analysed class that may derive from the builtin `property`
+(`Hierarchy.relation`, so a base that comes late counts; an analysed class
+that is itself named `property` and derives from nothing is an ordinary
+class). Such an instance keeps the accessors that a valid call of the
+resolved builtin `property.__init__` passes: the inherited `__init__` of
+`Sub(f)` and `@Sub`, `super().__init__(f)` in an `__init__` of its own, or
+`property.__init__(self, f)`. The call is valid if it may bind `(self, /,
+fget=None, fset=None, fdel=None, doc=None)`: no other keyword, `self` by
+position, at most five positional arguments. `property.__init__` calls none
+of its arguments. In each MRO of the instance's class, the first class that
+resolves the descriptor method decides (an outside base by its stubs): an
+analysed class's method runs; the builtin `property`'s runs as the engine's
+own property does; any other outside class's method that the stubs describe
+is called by its stub, with a typed result, and the descriptor is also the
+value of the load; an outside base without stubs gives an external that is
+not called, and the descriptor is the value. Where no class resolves
+`__get__` (`object` has none), the instance is itself the value (decided
+like a lookup: `Hierarchy.descriptor_itself`).
 
-- Limit: Python's `prop.setter(f)` gives a copy, so the original property
-  keeps its accessors apart from the copy's; the analysis merges them.
+A load through the class runs `__get__` with no value for the instance and
+the class: a property is then itself (property's own `__get__` is not
+run), and a subclass's own `__get__` runs.
+
+The methods of `property` are also called explicitly, on the engine's
+property or on a property instance, through the instance, through
+`super()` or unbound: `p.__get__(obj, owner)` calls the getter with `obj`
+and gives its result, or gives `p` where `obj` is the literal `None` and an
+owner other than the literal `None` may be passed; `p.__set__(obj, v)` and
+`p.__delete__(obj)` call the setter and the deleter and give None, whatever
+the accessor returns. `prop.setter(f)` and its siblings add `f` to `prop`
+itself and give `prop`, for a subclass too. An explicit `__get__` of the
+engine's `staticmethod` gives the function it wraps; of a `classmethod`,
+its function bound to each class that the owner may hold (analysed or
+outside), and, where the owner may be absent (an unpacking may omit it) or
+is the literal `None`, to the class of the instance, or to the metaclasses
+of a class (see `Hierarchy.bind`). A call of these methods is valid if it
+passes no keyword and a number of positional arguments in the range of the
+signature (`(instance, owner=None, /)`), or an unpacking that may fill it;
+`x.__get__(None)` and `x.__get__(None, None)` give nothing, as Python
+raises. "The literal `None`" is what the source writes: the builder
+records the positions at which a call expression passes `None` (before any
+unpacking), and the calls that copy it keep them, with bound receivers
+before them (`Analysis.literal_none`). An argument without a value is not
+`None` (`False` and `1.5` have none either), and a node that holds nothing
+decides nothing.
+
+- Limit: Python's `prop.setter(f)` calls the class of `prop` to make a
+  copy, so the original property keeps its accessors apart from the
+  copy's, and a subclass's own `__init__` may run for the copy; the
+  analysis merges them and calls nothing (the micro-benchmark cases
+  `descriptors/property_subclass_copy` and `property_subclass_copy_init`).
 - Limit: which of a data descriptor and the instance's `__dict__` wins is
   not decided: both count.
-- Limit: the descriptor methods of outside bases are not called.
+- Limit: a known `None` flows only as a literal argument: a subclass
+  `__get__(self, obj, owner=None)` that forwards to `super().__get__(obj,
+  owner)` calls the getter on a load through the class
+  (`descriptors/property_get_forwards_none`).
+- Limit: an explicit `__get__` with `**` gives nothing, even with an empty
+  mapping (`descriptors/wrapper_get_double_star`).
+- Limit: a second `property.__init__` adds accessors; Python replaces them.
+  The reads and writes of `__doc__` that construction makes, and the name
+  that a property keeps, are not modelled.
+- Limit: a class that derives from `property` only through an outside
+  class (`abc.abstractproperty`) is not a property: that class resolves the
+  descriptor methods by its stubs. The descriptor methods of other outside
+  bases (`functools.cached_property`) run only by their stubs
+  (`descriptors/outside_descriptor_subclass`).
+- Limit: in Python 3.12, `classmethod.__get__` calls `__get__` of a
+  wrapped descriptor with the owner twice; the analysis binds as 3.13 to
+  3.15 do, and gives a wrapped callable other than a function unbound. An
+  explicit `__get__` of a function is not modelled.
+- Limit: a descriptor method has one set of parameter and return nodes for
+  all the descriptor objects that it serves (no calling context), so the
+  accessors of all the instances of one property subclass, and the owners
+  of all its accesses, mix in its body. Measured on the one development
+  package where the rule fires (path, whose `ClassProperty.__get__` serves
+  four instances): of the 41 false edges that the rule adds, 40 come from
+  this mixing (36 to `functools.partial.__call__`, 4 from `Multi.__iter__`),
+  and 74 of its 168 true edges (`TempDir.__new__` and `__init__`) are
+  reached only through it, while Python makes those calls through a class
+  that `type()` makes.
 
 ### Attribute hooks
 
@@ -2895,9 +3111,63 @@ holds every instance of `E` and of its subclasses that the analysis
 creates, and an outside instance for an outside class. A bare `raise`
 raises nothing that the analysis tracks.
 
-**Builtins with hand rules.** `len()` calls `__len__`. `list(x)` and
-`list.extend(x)` ask the length of `x` before they iterate it: `__len__`,
-else `__length_hint__` (`LENGTH_HINT`). `enumerate`, `zip`,
+**Builtins with hand rules.** `len()` calls `__len__`.
+
+**Length hints.** Some builtins ask the length of what they iterate before
+they iterate it (CPython's `PyObject_LengthHint`): `__len__`, else
+`__length_hint__` (`LENGTH_HINT`, which selects by definition; the fallback
+to `__length_hint__` after a `__len__` that raises `TypeError` is not
+modelled). They are, by probes of CPython 3.12.12, 3.13.12, 3.14.9 and
+3.15.2:
+
+| Asks the length of `x` | 3.12, 3.13 | 3.14, 3.15 |
+|---|---|---|
+| `list(x)`, `l.extend(x)`, `l += x` on a list, `sorted(x)`, `[*x]`, `(*x,)`, `f(a, *x)` and a call with more than one argument besides `*x`, `bytes(x)` (after `__bytes__`, `__index__` and a buffer), `bytearray.extend(x)` (after a buffer) | yes | yes |
+| `tuple(x)`, a call `f(*x)` whose only argument is `*x` | yes | no |
+| `str.join(x)`, `bytes.join(x)`, `bytearray.join(x)`, an assignment to a starred target (`a, *b = x`): the iterator that `iter(x)` gives, so `x` where `x.__iter__` returns `x` | yes | yes |
+| `set`, `frozenset`, `{*x}`, `bytearray(x)`, `collections.deque`, `dict.fromkeys`, `min`, `max`, `sum`, `zip`, `enumerate`, `map`, an assignment without a starred target (`a, b = x`), `for` | no | no |
+
+Implicit calls that a hand rule models take the union of the supported
+CPython versions, as the stub data does (see *Stub data*): `tuple(x)` and
+`f(*x)` ask on every version. The unpacking of an argument is the
+interpreter's work, so `f(*x)` asks whatever `f` is, also an outside name
+without stubs or a name that has no value. The builtins of the stubs that
+ask are `LENGTH_HINTS`.
+
+The length is asked of an argument, or of the iterators that `iter()` of
+it gives: `join` takes, for an instance or a class, what the `__iter__`
+that its protocol calls returns (a class's metaclass's), or the sequence
+protocol's iterator where the type has `__getitem__` only; an engine
+container goes on as it is, so an iterator that the program already made
+(`"".join(iter(x))`) is its own. A starred target takes the iterators of
+its unpacking. What that node may hold, and what Python asks of it (the
+table of `BuiltinRules.add_length_hint`):
+
+- an instance of an analysed class: `__len__`, else `__length_hint__`, by
+  its class;
+- an analysed class: the same, by its metaclass;
+- the sequence protocol's iterator: the `__len__` of each sequence that it
+  iterates, instance or class, and nothing else; a class whose outside
+  base defines `__iter__` (a subclass of `Sequence`, iterated by its
+  mixin's generator) is asked nothing there;
+- a `reversed` object: the `__len__` of its sequence again, instance or
+  class, unless a class of its MRO defines `__reversed__` (also the mixin
+  of `Sequence`, a generator);
+- any other engine container (lists, tuples, sets, dicts, views, their
+  iterators, `enumerate`, `zip`, `map`, `filter`, `callable_iterator`), a
+  generator, a coroutine, a constant, an outside value, a function, the
+  saturated value: nothing that the program defines.
+
+A buffer is a class that defines `__buffer__` or derives from an outside
+class whose stubs define it (`bytes`, `bytearray`, `memoryview`,
+`array.array`): `bytes()` and `bytearray.extend` read it without asking
+its length. Only the length hints test the outside classes for a method,
+for `__buffer__`, `__iter__` and `__reversed__` (`DEFINES_MARKERS`); the
+conversions of `int()` and `float()`, whose overloads list `Buffer` first,
+still call `__int__` and `__float__` of a subclass of `bytearray`, as
+CPython does.
+
+`enumerate`, `zip`,
 `reversed`, `map` and `filter` are hand rules over the engine's
 containers: iterators whose elements are pairs of an index and an element,
 tuples of the elements of each argument, the elements (or what
@@ -2920,9 +3190,11 @@ Limits:
 - `__instancecheck__` and `__subclasscheck__` are not called: without
   CPython's exact-type shortcut, `isinstance(Duck(), Duck)` would call
   them.
-- `tuple(x)` asks the length of `x` on Python 3.12 and 3.13, and not from
-  3.14 on; the analysis does not, on every version. `sorted(x)`, `[*x]`,
-  `(*x,)` and `bytes(x)` ask it too; the analysis does not.
+- `join` asks the length of the iterator of `x`, but the analysis does not
+  iterate that iterator further (`__iter__` on it again, `__next__`): its
+  protocol gives `x.__iter__` only.
+- `xs += ys` asks the length of `ys` only where `xs` is a list of the
+  engine, not an instance of an analysed subclass of `list`.
 
 ### Containers and iteration
 
@@ -3344,9 +3616,11 @@ reads only constant nodes. Class lookups wait for complete hierarchies
 not fixpoint steps: whether Python's own special method may run
 (`__contains__`, an attribute hook, `__new__`, `__get__`, `__await__`,
 `__class_getitem__`, a metaclass's `__getitem__`) is decided like a lookup
-(`Hierarchy.python_method`), when the class is ready and again when its
-MROs grow, and so is whether a class may derive from another, or may not,
-for a class test (`Hierarchy.relation`).
+(`Hierarchy.python_method`, and `Hierarchy.descriptor_itself` for whether a
+descriptor is itself the value of a load), when the class is ready and
+again when its MROs grow, and so is whether a class may derive from
+another, or may not, for a class test and for a property
+(`Hierarchy.relation`).
 
 ### Saturation and the rounds
 
@@ -3498,6 +3772,7 @@ another origin without a bound.
 | Call back from outside code | the origin of the outside calls; every call with that origin passes its arguments to it once |
 | `Instance` | class and origin; one more per class, the abstract instance |
 | `Container` | kind, origin and the rule that makes it: a display or comprehension; a call origin and the model (`tuple(x)` and the pair of `d.items()` at one call are two containers), and for the tuples of `zip` their length (a call that adds receivers keeps the origin and passes more iterables); a slice, operator or unpacking of the source; `(scope, site, role)` for an iterator that `iter()` makes; the container, for the iterator of an exact collection and for its inexact alias; the function and parameter (or class and field) whose annotation names it; the class, for its namespace; for the result of a stubbed call, the call origin (or the stub attribute, never the receiver that it is loaded through, which may itself be such a container: `x = x.__dict__` in a loop), the position in the type and the type, which the stub data bounds; an instance of a generic stub class likewise |
+| Lazy object of a standard-library operation | its container (as above); an activation of its advancing: the object, the scope and the site |
 | `Wrapper` | kind and origin |
 | `BoundMethod` | function (or outside method) and receiver |
 | `Generator` | function, and whether it is the inexact alias |

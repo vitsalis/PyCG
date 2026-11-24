@@ -17,6 +17,7 @@ give. Classes on a cycle of candidate bases get the exhaustive order.
 from collections import deque
 from functools import cache
 
+from .builtin_models import DEFINES_MARKERS, TUPLE_STORAGE
 from .model import (
     BUILTIN_MODULE,
     Class,
@@ -52,6 +53,10 @@ MAX_HIERARCHIES = 8
 # The `unless` of the lookup that tells whether Python's own special method
 # may run (see `python_method`).
 _PYTHONS_OWN = ("<python's own>",)
+
+# The `unless` of the lookup that tells whether a load through an instance
+# may give a descriptor itself (see `descriptor_itself`).
+_ITSELF = ("<the descriptor itself>",)
 
 # The `unless` of the lookup that tells whether the attribute that Python
 # finds may be the default one, that of `object` or `type` (see
@@ -239,6 +244,37 @@ class Hierarchy:
         answer from no to yes."""
         return self.lookup(cls, name, None, None, _PYTHONS_OWN)
 
+    def descriptor_itself(self, cls):
+        """A node that gets an object once a load through an instance of
+        `cls` (`obj.attr` for an instance found on a class) may give that
+        instance itself: no class resolves `__get__` (`object` has none), or
+        an outside class does whose `__get__` the analysis does not run. The
+        builtin `property`'s runs (it calls the getter, see
+        `BuiltinRules._rule_property_run`). Like a lookup, it waits until
+        `cls` is ready and is redone when its MROs grow, which can only turn
+        the answer from no to yes."""
+        return self.lookup(cls, "__get__", None, None, _ITSELF)
+
+    def _may_give_itself(self, cls, name):
+        """See `descriptor_itself`: in some MRO, the first class that
+        resolves `name` is an outside class other than `property` (by its
+        stubs; one without stubs may define any name), or none is. In an
+        exhaustive order, unless `cls` itself defines it."""
+        if cls.exhaustive:
+            return name not in cls.defines
+        for mro in cls.mros:
+            for base in mro:
+                if isinstance(base, Class):
+                    if name in base.defines:
+                        break
+                elif is_property(base):
+                    break
+                elif self.outside_member(base, name) != _INHERITED:
+                    return True
+            else:
+                return True
+        return False
+
     def default_member(self, cls, name):
         """A node that gets an object once the attribute `name` (`__dir__`
         or `__dict__`) that Python finds for an instance of `cls` may be the
@@ -381,6 +417,11 @@ class Hierarchy:
         explicit = unless == EXPLICIT
         if explicit:
             unless = ()
+        if unless == _ITSELF:
+            if self._may_give_itself(cls, attr):
+                name = f"{BUILTIN_OBJECT}.{attr}"
+                self.add_object(dst, self.external(name, 1))
+            return
         if unless == _PYTHONS_OWN:
             if _python_may_define(cls, attr):
                 name = f"{BUILTIN_OBJECT}.{attr}"
@@ -1032,19 +1073,60 @@ def _python_may_define(cls, name):
     return False
 
 
+def is_property(obj):
+    """Whether `obj` is the builtin class `property`."""
+    return isinstance(obj, External) and obj.name == f"{BUILTIN_MODULE}.property"
+
+
 def _defines(classes, names):
     """Whether a class among `classes` defines one of `names`: an analysed
-    class, or a builtin class that defines one of `FINAL_BUILTIN_METHODS`
-    among them."""
+    class, a builtin class that defines one of `FINAL_BUILTIN_METHODS`
+    among them; for a marker of `DEFINES_MARKERS`, a class that defines its
+    method, analysed or outside (as the stubs say)."""
+    marked = [DEFINES_MARKERS[name] for name in names if name in DEFINES_MARKERS]
     for base in classes:
         if isinstance(base, Class):
-            if any(name in base.defines for name in names):
+            if any(name in base.defines for name in (*names, *marked)):
                 return True
         elif isinstance(base, External):
             final = FINAL_BUILTIN_METHODS.intersection(names)
             if any(_builtin_defines(base.name, name) for name in final):
                 return True
+            if any(_outside_defines(base.name, name) for name in marked):
+                return True
+            if TUPLE_STORAGE in names and _derives_from_tuple(base.name):
+                return True
     return False
+
+
+@cache
+def _derives_from_tuple(name):
+    """Whether the outside class named `name` is `tuple` or derives from it,
+    as the stubs say."""
+    prefix = f"{BUILTIN_MODULE}."
+    if name.startswith(prefix):
+        name = f"builtins.{name[len(prefix) :]}"
+    return any(
+        definition.kind == "class" and "builtins.tuple" in _STUBS.mro(definition.path)
+        for definition in _STUBS.find(name)
+    )
+
+
+@cache
+def _outside_defines(name, attr):
+    """Whether the outside class named `name` (`array.array`,
+    `<builtin>.bytearray`) or one of its bases other than `object` defines
+    `attr`, as the stubs say (in some version)."""
+    prefix = f"{BUILTIN_MODULE}."
+    if name.startswith(prefix):
+        name = f"builtins.{name[len(prefix) :]}"
+    return any(
+        definition.kind == "class"
+        and any(
+            m.owner != "builtins.object" for m in _STUBS.member(definition.path, attr)
+        )
+        for definition in _STUBS.find(name)
+    )
 
 
 @cache

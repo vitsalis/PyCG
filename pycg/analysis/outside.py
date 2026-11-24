@@ -29,6 +29,10 @@ from .builtin_models import (
     CLOSURES,
     CONTAINER_CLASSES,
     HASHED_ARGUMENTS,
+    ITERATOR,
+    LAZY_MODES,
+    LENGTH_HINTS,
+    LIBRARY_ITERATION,
     OPENERS,
     REFLECTION_CALLS,
     VARIABLE_TYPES,
@@ -459,7 +463,8 @@ class Outside:
                         overloads += self._constructor_signatures(definition, call)
                 self.call_protocols(base, overloads, plain=True)
             return
-        overloads, builtins, calling = [], [], []
+        overloads, builtins, calling, hinting, library = [], [], [], [], []
+        consuming = []
         for definition in definitions:
             if definition.kind == "function":
                 found = self._call_signatures(definition, call, receivers, external)
@@ -473,8 +478,14 @@ class Outside:
             overloads += found
             if definition.path.startswith(f"{STUB_BUILTINS}."):
                 builtins += found
+            if definition.path in LENGTH_HINTS:
+                hinting += [(LENGTH_HINTS[definition.path], each) for each in found]
             if definition.path in CALLS_BACK:
                 calling += [(CALLS_BACK[definition.path], each) for each in found]
+            if definition.path in LIBRARY_ITERATION:
+                library.append((definition.path, found))
+            elif definition.path.startswith(f"{STUB_BUILTINS}."):
+                consuming += [(definition.path, each) for each in found]
         if call.dst is not None and call.decorator and call.args[-1] is not None:
             # An outside decorator may return what it decorates.
             self.add_edge(call.args[-1], call.dst)
@@ -498,6 +509,12 @@ class Outside:
                 self.call_protocols(base, builtins)
             if calling:
                 self.call_back_library(call, calling)
+            if hinting:
+                self.length_hints(call, hinting)
+            for path, found in library:
+                self.library_operation(call, path, found)
+            if consuming:
+                self.consume_library(call, consuming)
             # A namespace read by reflection (see reflection.py).
             for definition in definitions:
                 entry = REFLECTION_CALLS.get(definition.path)
@@ -519,6 +536,21 @@ class Outside:
                 node = self._parameter_node(bound, parameter)
                 if parameter[0] == name and node is not None:
                     self.add_edge(node, self._callee(back))
+
+    def length_hints(self, call, hinting):
+        """A builtin of `LENGTH_HINTS` asks the length of the argument that
+        each fitting overload binds to its parameter, or of the iterator of
+        that argument (`ITERATOR`); `hinting` holds the entry and the
+        overload (parameters, result, bound arguments)."""
+        for (name, plan, how), (parameters, _, bound) in hinting:
+            for parameter in parameters:
+                node = self._parameter_node(bound, parameter)
+                if parameter[0] != name or node is None:
+                    continue
+                if how == ITERATOR:
+                    self.add_iterator_length_hint(node, call.caller, call.site)
+                else:
+                    self.add_length_hint(node, call.caller, call.site, plan)
 
     def compare_items(self, method, call, overloads):
         """`sorted`, `min`, `max` and `list.sort` compare their items with
@@ -637,6 +669,11 @@ class Outside:
             bound = self.bind_stub(call, definition.path, index, parameters)
             if call.dst is not None:
                 context = _Context(call, receivers, bound, parameters)
+                # A lazy operation of the table advances its arguments
+                # where its object is advanced: its result's type variables
+                # are not bound by iterating them here (see library.py).
+                entry = LIBRARY_ITERATION.get(definition.path)
+                context.deferred = entry is not None and entry[0] in LAZY_MODES
                 results.append((signature["r"], context))
             overloads.append((parameters, signature["r"], bound))
         unpacked = call.star or call.double_star
@@ -1099,6 +1136,8 @@ class Outside:
                 self.solver.attach(
                     node, Each(self._add_instances_of, dst, results=(dst,))
                 )
+            elif how == "elements" and context.deferred:
+                continue
             elif how == "elements":
                 call = context.call
                 construct = ("elements", call, node)
@@ -1174,11 +1213,14 @@ class _Context:
     parameters of the signature, and those parameters (for type
     variables)."""
 
-    __slots__ = ("call", "receivers", "bound", "parameters", "origin")
+    __slots__ = ("call", "receivers", "bound", "parameters", "origin", "deferred")
 
     def __init__(
         self, call=None, receivers=(), bound=None, parameters=None, origin=None
     ):
+        # Whether the type variables that an iterable argument binds are
+        # left unbound: a lazy operation's (see library.py).
+        self.deferred = False
         self.call = call
         self.receivers = receivers
         self.bound = bound

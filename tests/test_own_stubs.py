@@ -2,9 +2,10 @@
 annotations that the source leaves out. The stub is read for annotations
 only: where a parameter, a class attribute or a module variable of the
 source has none, the annotation of the same name in the stub is read as if
-it were written in the source. The stub defines nothing, calls nothing and
-imports nothing; its names resolve through its own imports and to the
-module's own classes.
+it were written in the source, and the outside bases of its classes put the
+source's classes below them for what annotations name. The stub defines
+nothing, calls nothing and imports nothing; its names resolve through its
+own imports and to the module's own classes.
 """
 
 import json
@@ -1176,3 +1177,296 @@ def test_a_class_body_from_import_of_a_private_submodule(tmp_path, package, stat
     assert callees(graph, entry.removesuffix(".py").replace("/", ".")) == [
         f"{package}.hit"
     ]
+
+
+# The bases that a stub declares for its classes: they put the source class
+# below the outside classes that they name, for what annotations name, and
+# for nothing else.
+STUB_BASES_SOURCE = """
+import collections.abc
+import sys
+class Peek:
+    def __iter__(self): return self
+    def __next__(self): raise StopIteration
+    def ping(self): pass
+class Measured:
+    def __len__(self): return 0
+    def ping(self): pass
+class Versioned:
+    def ping(self): pass
+class Outer:
+    class Inner:
+        def ping(self): pass
+class Plain:
+    def ping(self): pass
+"""
+
+STUB_BASES_STUB = """
+import collections.abc
+import sys
+from typing import Generic, Iterator, TypeVar
+_T = TypeVar("_T")
+class Peek(Generic[_T], Iterator[_T]): ...
+class Measured(collections.abc.Sized): ...
+if sys.version_info >= (3, 13):
+    class Versioned(Iterator[int]): ...
+else:
+    class Versioned: ...
+class Outer:
+    class Inner(Iterator[int]): ...
+"""
+
+STUB_BASES_MAIN = """
+import typing
+import mod
+def iterable(xs: typing.Iterable[int]):
+    xs.ping()
+def sized(xs: typing.Sized):
+    xs.ping()
+"""
+
+
+def stub_base_graph(
+    tmp_path, source=STUB_BASES_SOURCE, stub=STUB_BASES_STUB, **options
+):
+    files = {"main.py": STUB_BASES_MAIN, "mod.py": source}
+    if stub is not None:
+        files["mod.pyi"] = stub
+    generator = analysed(tmp_path, files, ("main.py", "mod.py"), **options)
+    return generator.output()
+
+
+def test_a_stub_base_puts_its_class_below_the_outside_class_it_names(tmp_path):
+    graph = stub_base_graph(tmp_path)
+
+    # A subscripted base, a dotted one, one in a branch of an `if`, and a
+    # nested class by its path.
+    assert callees(graph, "main.iterable") == [
+        "mod.Outer.Inner.ping",
+        "mod.Peek.ping",
+        "mod.Versioned.ping",
+    ]
+    assert callees(graph, "main.sized") == ["mod.Measured.ping"]
+
+
+def test_without_the_stub_bases_the_classes_are_below_nothing(tmp_path):
+    # Control: the edges above come from the stub's declarations.
+    graph = stub_base_graph(tmp_path, stub=None)
+
+    assert callees(graph, "main.iterable") == []
+    assert callees(graph, "main.sized") == []
+
+
+def test_a_stub_base_gives_no_inherited_method(tmp_path):
+    # `Iterator.__iter__` returns the iterator: inherited, it would make a
+    # `for` over a Half call `Half.__next__`. Python does not run it either:
+    # the source class has no `__iter__`. Full derives from Iterator in the
+    # source, so its loop does call `__next__`.
+    source = """
+import collections.abc
+class Half:
+    def __next__(self): raise StopIteration
+class Full(collections.abc.Iterator):
+    def __next__(self): raise StopIteration
+def loop(half: Half, full: Full):
+    for x in half:
+        pass
+    for y in full:
+        pass
+def lookup(half: Half):
+    half.__iter__()
+    half.__length_hint__()
+"""
+    stub = """
+from collections.abc import Iterator
+class Half(Iterator[int]): ...
+"""
+    graph = stub_base_graph(tmp_path, source, stub)
+
+    assert callees(graph, "mod.loop") == ["mod.Full.__next__"]
+    assert callees(graph, "mod.lookup") == []
+
+
+def test_the_source_keeps_lookup_super_and_instances_where_the_stub_contradicts(
+    tmp_path,
+):
+    # The source says `C(list)`, the stub `C(Iterator[int])`: the stub's
+    # abstract path admits C at an Iterable, but lookup, `super()` and the
+    # MRO are the source's. Abstract, whose stub base has an abstract
+    # `__next__` that it does not define, still has instances.
+    source = """
+class C(list):
+    def __iter__(self):
+        return super().__iter__()
+    def ping(self): pass
+class Abstract:
+    def run(self): pass
+def use(a: Abstract):
+    a.run()
+"""
+    stub = """
+from collections.abc import Iterator
+class C(Iterator[int]): ...
+class Abstract(Iterator[int]): ...
+"""
+    graph = stub_base_graph(tmp_path, source, stub)
+
+    assert "mod.C.ping" in callees(graph, "main.iterable")
+    assert callees(graph, "mod.C.__iter__") == [
+        "<builtin>.list.__iter__",
+        "<builtin>.super",
+    ]
+    assert callees(graph, "mod.use") == ["mod.Abstract.run"]
+
+
+def test_limit_a_stub_base_that_names_an_analysed_class_adds_nothing(tmp_path):
+    # A scope limit: only the outside classes that a stub base names count.
+    # The stub resolves `Base` (an import and a class statement of it): the
+    # annotation of `check` reads it.
+    source = """
+import collections.abc
+class Base(collections.abc.Iterator):
+    def __next__(self): raise StopIteration
+    def ping(self): pass
+class Declared:
+    def ping(self): pass
+class Also:
+    def ping(self): pass
+class Stated(collections.abc.Iterator):
+    def __next__(self): raise StopIteration
+    def ping(self): pass
+def check(base):
+    base.ping()
+"""
+    stub = """
+from mod import Base
+class Stated: ...
+class Declared(Base): ...
+class Also(Stated): ...
+def check(base: Base) -> None: ...
+"""
+    graph = stub_base_graph(tmp_path, source, stub)
+
+    assert callees(graph, "mod.check") == ["mod.Base.ping"]
+    assert callees(graph, "main.iterable") == ["mod.Base.ping", "mod.Stated.ping"]
+
+
+def test_a_stub_base_node_that_saturates_late_keeps_what_it_admitted(tmp_path):
+    # The stub's base is an alias of the source that holds Iterator, and only
+    # entry-point completion (the defaults of `widen`, which nothing calls)
+    # adds three more outside classes: at a cap of 3 the node saturates
+    # after it admitted Late below Iterator. Saturation stops further
+    # admissions (below Sized); the earlier one remains.
+    source = """
+import collections.abc
+BASE = collections.abc.Iterator
+def widen(
+    a=collections.abc.Sized,
+    b=collections.abc.Hashable,
+    c=collections.abc.Container,
+):
+    global BASE
+    BASE = a
+    BASE = b
+    BASE = c
+class Late:
+    def ping(self): pass
+"""
+    stub = "from mod import BASE\nclass Late(BASE): ...\n"
+    capped = stub_base_graph(tmp_path / "capped", source, stub, cap=3)
+    whole = stub_base_graph(tmp_path / "whole", source, stub, cap=None)
+
+    assert callees(capped, "main.iterable") == ["mod.Late.ping"]
+    assert callees(capped, "main.sized") == []
+    assert callees(whole, "main.iterable") == ["mod.Late.ping"]
+    assert callees(whole, "main.sized") == ["mod.Late.ping"]
+
+
+def test_a_saturated_stub_base_node_loses_the_stub_declarations_only(tmp_path):
+    # The stub's bases of Wide are four classes that arrive at once, past a
+    # cap of 3: the node saturates before it admits anything, so the class
+    # gets no admission through its stub; the source's classes and methods
+    # stay.
+    source = """
+import collections.abc
+class Wide:
+    def ping(self): pass
+class Own(collections.abc.Iterator):
+    def __next__(self): raise StopIteration
+    def ping(self): pass
+Wide().ping()
+"""
+    stub = """
+from collections.abc import Container, Hashable, Iterator, Sized
+class Wide(Iterator[int], Sized, Hashable, Container[int]): ...
+"""
+    capped = stub_base_graph(tmp_path / "capped", source, stub, cap=3)
+    whole = stub_base_graph(tmp_path / "whole", source, stub, cap=None)
+
+    assert callees(capped, "main.iterable") == ["mod.Own.ping"]
+    assert callees(capped, "mod") == ["mod.Wide.ping"]
+    assert callees(whole, "main.iterable") == ["mod.Own.ping", "mod.Wide.ping"]
+
+
+SNIPPETS = Path(__file__).resolve().parent.parent / "micro-benchmark" / "snippets"
+
+
+def case_graph(tmp_path, case, edits):
+    """The call graph of a copy of the micro-benchmark case `case`, with
+    each (file, old, new) of `edits` applied to the copy."""
+    root = tmp_path / "case"
+    for path in (SNIPPETS / case).iterdir():
+        (root / path.name).parent.mkdir(parents=True, exist_ok=True)
+        (root / path.name).write_bytes(path.read_bytes())
+    for name, old, new in edits:
+        text = (root / name).read_text()
+        assert old in text
+        (root / name).write_text(text.replace(old, new))
+    generator = CallGraphGenerator([str(root / "main.py")], str(root))
+    generator.analyze()
+    return generator.output()
+
+
+OWN_STUB_CASE = "type_hints/own_stub_protocol_base"
+
+
+def test_the_stub_case_takes_its_edges_from_the_stub(tmp_path):
+    graph = case_graph(tmp_path / "whole", OWN_STUB_CASE, [])
+    without_bases = case_graph(
+        tmp_path / "bases",
+        OWN_STUB_CASE,
+        [
+            ("mod.pyi", "class Peek(Iterator[int]): ...", "class Peek: ..."),
+            ("mod.pyi", "class Bag(Container[int]): ...", "class Bag: ..."),
+        ],
+    )
+    without_annotations = case_graph(
+        tmp_path / "annotations",
+        OWN_STUB_CASE,
+        [
+            ("mod.pyi", "numbers: Iterable[int]", "numbers"),
+            ("mod.pyi", "items: Container[int]", "items"),
+        ],
+    )
+
+    assert callees(graph, "mod.drain") == ["mod.Peek.__iter__", "mod.Peek.__next__"]
+    # The positive control of Bag: its stub base was read.
+    assert callees(graph, "mod.has") == ["mod.Bag.__contains__"]
+    assert callees(without_bases, "mod.drain") == []
+    assert callees(without_bases, "mod.has") == []
+    # The pickle round trip gives no value: the annotations do.
+    assert callees(without_annotations, "mod.drain") == []
+    assert callees(without_annotations, "mod.has") == []
+
+
+def test_the_builtin_protocol_case_takes_its_edge_from_the_annotation(tmp_path):
+    case = "type_hints/builtin_protocol_annotation"
+    graph = case_graph(tmp_path / "whole", case, [])
+    without = case_graph(
+        tmp_path / "without",
+        case,
+        [("main.py", "numbers: typing.Iterable[int]", "numbers")],
+    )
+
+    assert callees(graph, "main.drain") == ["main.Line.__iter__"]
+    assert callees(without, "main.drain") == []
