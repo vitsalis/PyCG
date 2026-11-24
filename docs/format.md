@@ -144,7 +144,10 @@ with how PyCG knows it:
   builtins declare (a builtin, the standard library, a third-party library
   with a stub). A function is named by the path through which the code
   reaches it (`os.path.join`, `requests.get`), a method of an outside value
-  by the public name of its class (`requests.Response.json`);
+  by the public name of its class (`requests.Response.json`). A name that
+  the models of the builtins give to analysed code that does not define it
+  is `stub` too (`functools.partial.__call__`, which an analysed
+  `functools.wraps` returns);
 - `name`: a name built from the access path of a value without a type
   (`foo.get.bar`): it need not exist under that name;
 - `extension`: a name in an extension module of the package, by the
@@ -186,7 +189,9 @@ whose code holds it; such sites come after the others, by `module`.
   "p")` runs a property, `sorted(xs, key=k)` calls `k` and `__lt__`, and
   `f(*xs)` iterates `xs`. Where the construct written at the same node
   iterates too (`for x in list(c)`), the analysis makes one call for both,
-  listed as `iteration`.
+  listed as `iteration`. Any other construct written at the node of a call
+  expression keeps its word (`with f():` is `with`, `if f():` is `truth`,
+  `{f(): v}` is `dict`).
 - Implicit calls to outside code are not listed: the call graph reports
   outside callees for call expressions only. A call expression whose
   callee is known but calls nothing that the call graph reports (a class
@@ -267,4 +272,11 @@ site's `module`, or else the module of its caller), and puts an
 `extension` name in the extension module whose name is the longest prefix
 of it. A site in another module than its caller's shows that module's file. The filters hide outside
 callees, implicit sites or unresolved sites everywhere on the page; the
-counts in the header are those of the whole document.
+counts in the header are those of the whole document. The page holds the
+document in a `<script type="application/json">` block with each `<`
+written as `\u003c`: in JSON a `<` is always inside a string, where the
+escape means the same character, so no name in the document can end the
+block. Every name comes from the analysed code, so the page puts text in
+as text nodes only. A site is labelled `line:col`, with its end when the
+caller has another site that starts at the same place, and after the file
+of its module when that is not the module of the listed definition.

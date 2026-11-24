@@ -342,12 +342,12 @@ def test_the_distributions_record_their_metadata(reader):
         "ns-two",
     ]
     assert found["extras-lib"].version == "1.2.*"
-    assert found["extras-lib"].tops == ["extras"]
+    assert found["extras-lib"].top_level_modules == ["extras"]
     assert found["ns-one"].obsolete_since == "2.1.0"
     assert found["ns-two"].partial
     assert not found["ns-one"].partial and found["ns-two"].obsolete_since is None
-    assert found["legacy-backport"].tops == ["backport"]
-    assert found["legacy-backport"].left_out == ["legacy"]
+    assert found["legacy-backport"].top_level_modules == ["backport"]
+    assert found["legacy-backport"].top_level_modules_left_out == ["legacy"]
 
 
 def test_the_readme_lists_the_distributions(tmp_path, reader, data):

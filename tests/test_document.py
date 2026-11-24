@@ -18,7 +18,7 @@ from test_micro_benchmark import SNIPPETS, version_skip_reason
 
 import pycg
 from pycg.formats import dumps, edges
-from pycg.formats.document import CONSTRUCTS
+from pycg.formats.document import IMPLICIT_CONSTRUCT_BY_ROLE
 from pycg.pycg import CallGraphGenerator
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -1502,7 +1502,7 @@ def function_roles(function, path):
 def test_every_role_of_the_engine_has_a_construct():
     # Another role must be named in the table (a closed list), and a role
     # that the engine no longer makes leaves it.
-    assert engine_roles() == set(CONSTRUCTS)
+    assert engine_roles() == set(IMPLICIT_CONSTRUCT_BY_ROLE)
 
 
 # Definitions of one qualified name

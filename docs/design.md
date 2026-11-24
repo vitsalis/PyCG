@@ -221,6 +221,14 @@ test.
    along the constraints with a worklist until nothing changes. Then run
    the fixpoint steps (see Part 3), which add what the solve cannot find
    alone, and solve again. Calls are resolved and call edges emitted here.
+6. **Output** (`pycg.py`, `formats/document.py`).
+   `CallGraphGenerator.document()` builds the document of
+   `docs/format.md`. Every part is sorted, so the document does not depend
+   on the order of the analysis. `output()` is its classic call graph
+   (`pycg.formats.edges`). `output_points_to()` is the assignment graph,
+   for tests only: each variable, field and return value with the sorted
+   names of the objects that it may hold; a saturated node holds none that
+   it can name.
 
 The AST is never walked again after the builder, and there is no cap on
 iterations.
@@ -1284,8 +1292,9 @@ imports under its own name, `pkg._vendor.requests`).
 ### Stub data
 
 The stubs of typeshed are read as data. `tools/generate_stubs.py`, a
-development tool that is not installed, reads the stubs of one pinned
-typeshed commit with `ast`: the standard library (`stdlib/`) and every
+development tool that is not installed and uses the standard library
+only, reads the stubs of one pinned typeshed commit with `ast`, importing
+and executing none: the standard library (`stdlib/`) and every
 third-party distribution (`stubs/`, all of them: 201 at the pinned commit).
 It writes one JSON file per top-level module into
 `pycg/analysis/stub_data/`, those of the distributions into its
@@ -1311,6 +1320,7 @@ Which stub gives a module:
   generator; none does at the pinned commit.
 - Every module is kept, also the helper modules that exist only in stubs
   (`_typeshed`, `_win32typing`): they define types.
+- Directories whose name starts with `@` (`@tests`) hold no stubs.
 - A distribution that `METADATA.toml` marks obsolete (the library ships its
   own types since a version: 8, among them `requests`) or partial (the stub
   describes part of the library: 10, among them protobuf and Pygments) is
@@ -1329,8 +1339,22 @@ Per module the data keeps:
   `async`);
 - classes: bases, members, type parameters, whether it is a protocol,
   whether the class exists only in stubs;
-- properties, variables, and references: imports that re-export, star
-  imports, `__all__` and assignments of names.
+- properties, variables, and references: imports that re-export (`from x
+  import y as y`, `import x as x`), star imports, the names in `__all__`
+  and assignments of names. An assignment of a value (`x = f()`) is a
+  variable, of the class that it calls if it calls one. A name bound to a
+  method of an instance that the module holds (`uniform = _inst.uniform`
+  in `random`) is a function with the method's signatures, without the
+  receiver.
+
+A name in a stub resolves as for type checkers: a class body sees its own
+names and those of the enclosing class bodies first, then the module's,
+then the builtins'. A name on a cycle of imports resolves to nothing. The
+parameters with two leading underscores (and no trailing ones) after the
+receiver are positional-only, as stubs marked them before PEP 570. The
+type parameters of a generic class are those of its `Generic[...]` or
+`Protocol[...]` base if it has one, else those of its bases in order of
+appearance (PEP 484), or those of `class C[T]`.
 
 Every Python version and platform counts: all branches of
 `sys.version_info` and `sys.platform` tests are read, and a name that they
@@ -1339,15 +1363,27 @@ The implicit calls that the hand rules model take the union of the
 supported CPython versions in the same way (see *Length hints*). A
 class has a public name, its shortest path through public modules and names
 (`asyncio.AbstractEventLoop` for `asyncio.events.AbstractEventLoop`,
-`io.TextIOWrapper` for `_io.TextIOWrapper`). A type keeps classes, unions,
-`None`, `Self`, `type[...]`, callables with their result, type variables
-with their bound, and two layers of generic arguments (see *Bounds*):
+`io.TextIOWrapper` for `_io.TextIOWrapper`), preferring a path from its
+own module, then the first in alphabetical order. A nested class is named
+through the public name of its enclosing class; a class without a public
+path keeps its definition path. A type keeps classes, unions,
+`None`, `Self`, `type[...]`, callables with their result (and their
+parameters, when listed), type variables with their bound or their
+constraints (a constrained variable, `AnyStr = TypeVar("AnyStr", str,
+bytes)`, is one of the constraints, not any subclass of their union), and
+two layers of generic arguments (see *Bounds*):
 `list[tuple[list[str], int]]` keeps `tuple` and its arguments, and the
 inner `list` without its own. Dropped:
-`Any`, `ParamSpec`, `TypeVarTuple`, the parameters of generic aliases (an
-alias stands for its definition), imports that a stub only uses, and the
-platform of a definition. `Literal` is the class of its values, and
-`TypeGuard` and `TypeIs` are `bool`. Lookups on a class walk a C3 order of
+`Any`, `ParamSpec`, `TypeVarTuple`, `Concatenate`, the parameters of
+generic aliases (an alias stands for its definition, unsubstituted),
+imports that a stub only uses, and the platform of a definition. A
+recursive alias is unknown where it recurs. The parameters that a function
+passes on (`*args: P.args`, `**kwargs: P.kwargs`, `*args: Unpack[Ts]`,
+`*args: *Ts`) are `object`. `Literal` is the class of its values (an enum
+member: its class), `TypeGuard` and `TypeIs` are `bool`, and `Annotated`,
+`ClassVar`, `Final`, `Required`, `NotRequired` and `ReadOnly` are the type
+that they wrap; a variable without a type (`x: Final = 1`) has the type of
+its value. Lookups on a class walk a C3 order of
 its bases in every version, ending with `object`.
 
 One fact of Python corrects the data: the two mixin methods of
@@ -3919,7 +3955,7 @@ closure of the standard library. The document records it (`tool.cap`).
 | Alternative MROs of a class (`MAX_HIERARCHIES`) | 8 | Cost: the hierarchies are the product of the candidates of each base expression | One exhaustive order stands for all of them and finds every definition (see *Alternative hierarchies*) |
 | Steps of an outside name past its root (`MAX_EXTERNAL_STEPS`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
 | Receivers that a call passes before its arguments (`MAX_RECEIVERS`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |
-| Layers of generic arguments in the stub data (`MAX_DEPTH` of `tools/generate_stubs.py`) | 2 | Termination and size: the types of recursive aliases nest without end, and the containers of stubbed results are keyed by the position in the type | A deeper argument keeps its class without its type arguments (see *Stub data*) |
+| Layers of generic arguments in the stub data (`GENERIC_ARGUMENT_DEPTH_MAX` of `tools/generate_stubs.py`) | 2 | Termination and size: the types of recursive aliases nest without end, and the containers of stubbed results are keyed by the position in the type | A deeper argument keeps its class without its type arguments (see *Stub data*) |
 | Nested attachments of constraints in the solver (`_MAX_NESTING`) | 50 | The Python stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
 | Objects that a node holds (the cap, a parameter; `DEFAULT_CAP`) | 5,000 by default; any positive integer, or none | Cost and precision: a hub of generic code (a parameter that every strategy of a library reaches) costs its size times its constraints, and its calls are noise; real registries (the lexers of pygments) stay under it | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, stores into it are dropped. What it stood for is lost: code reached only through it is code that no analysed code calls, and a set it would have filled holds less, so a rule that depends on how much a set holds (nothing, or at most four computed names) may apply where it would not without the cap and add edges (`leaf -> fallback`, `main -> C.a` in *The solver*). The bound of hierarchies counts candidates too, but fewer candidates give a part of the hierarchies, which the exhaustive order over-approximates: it adds none; the bound of receivers counts the receivers that a call passes, not the objects of a set. A rule that widens a value adds one object (the pattern rule for a class member, see *Computed attribute names*), so a node saturates one object sooner: at a cap of 1 such a widening may lose a call that the analysis without it keeps |
 

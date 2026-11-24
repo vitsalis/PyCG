@@ -1,6 +1,3 @@
-"""The command line: analyse a package and write its document
-(docs/format.md)."""
-
 import argparse
 
 from pycg import formats
@@ -8,8 +5,7 @@ from pycg.analysis.solver import DEFAULT_CAP
 from pycg.pycg import CallGraphGenerator
 
 
-def cap(text):
-    """The value of `--cap`: a positive integer, or `none`."""
+def parse_cap(text):
     if text == "none":
         return None
     if text.isdecimal() and int(text) > 0:
@@ -40,7 +36,7 @@ def main():
     parser.add_argument("-o", "--output", help="Output path", default=None)
     parser.add_argument(
         "--cap",
-        type=cap,
+        type=parse_cap,
         metavar="N",
         default=DEFAULT_CAP,
         help=(
@@ -52,15 +48,18 @@ def main():
         ),
     )
 
-    args = parser.parse_args()
+    arguments = parser.parse_args()
 
-    cg = CallGraphGenerator(args.entry_point, args.package, args.cap)
-    cg.analyze()
-    text = formats.dumps(cg.document(args.package_name, args.package_version))
+    generator = CallGraphGenerator(
+        arguments.entry_point, arguments.package, arguments.cap
+    )
+    generator.analyze()
+    document = generator.document(arguments.package_name, arguments.package_version)
+    text = formats.dumps(document)
 
-    if args.output:
-        with open(args.output, "w", encoding="utf-8") as f:
-            f.write(text + "\n")
+    if arguments.output:
+        with open(arguments.output, "w", encoding="utf-8") as output_file:
+            output_file.write(text + "\n")
     else:
         print(text)
 

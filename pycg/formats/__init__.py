@@ -18,26 +18,16 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-"""The document that PyCG writes (docs/format.md), and how to read it."""
-
 import json
 
-# The name and version of the format, which a reader checks.
 FORMAT = "pycg/1"
 
 
 def dumps(document):
-    """The text of `document`: compact, with sorted keys, so the same
-    document is the same bytes."""
     return json.dumps(document, sort_keys=True, separators=(",", ":"))
 
 
 def edges(document):
-    """The classic call graph of `document`: each node mapped to the sorted
-    names it calls. The nodes are the modules and functions of
-    `definitions` and the names of `outside`; the edges go from each caller
-    to each callee of each of its sites. A document of another format is
-    refused."""
     if document.get("format") != FORMAT:
         raise ValueError(f"not a {FORMAT} document: {document.get('format')!r}")
     graph = {

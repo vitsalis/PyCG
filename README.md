@@ -140,7 +140,11 @@ a browser: it needs no server and makes no network request.
 ```
 Without `-o`, the page goes next to the document (`cg.html`). The page shows
 the callers and callees of each function, which you expand in place, and a
-map of the calls between the modules. Press `/` to search.
+map of the calls between the modules. Press `/` to search. The search
+ignores case and lists the whole name first, then a dotted tail (the last
+part, or `Class.method`), the start of the last part, the start of any
+part, and then any substring. The address names the shown node, so Back
+returns to the last one.
 
 # Development
 
