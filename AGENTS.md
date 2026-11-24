@@ -95,6 +95,18 @@ both.
 Do each feature on its own branch from `main`, in a worktree under
 `.worktrees/`. One pull request makes one change.
 
+Name a branch `<username>/<feature>`: the GitHub username the work is
+pushed under, then the feature in lowercase words joined by hyphens, for
+example `vitsalis/no-comments-eval`.
+
+Write each commit message as `type(scope): summary`, for example
+`fix(engine): bind explicit static method __get__`. The type is one of
+`feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `ci`, `build` and
+`chore`; the scope is the area the change touches (`engine`, `cli`, `agents`,
+`micro`, `bench`, `eval`, `ci`, `docs`). The summary is lowercase and in
+the imperative, with no full stop. The body says why, with the commands
+and the measurements behind the change.
+
 While developing, run the narrowest tests that cover the change (`uv run
 pytest tests/test_x.py -k name`). Before pushing, run `make check` and
 nothing more. Then push the branch and open a draft pull request at once.
