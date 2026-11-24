@@ -64,10 +64,8 @@ base's file and this measurement: on the base's benchmark, floors only
 rise; on a changed benchmark, the measured values are the new bests, and
 the summary of the pull request says "benchmark changed: floors
 re-based". A base without `metrics.json` (an empty base file) has no
-floors to check. A base `metrics.json` without `benchmark_sha256` was
-recorded before the digest existed, by the change that added it, which
-changes no file of the benchmark: it counts as this checkout's benchmark.
-`gate.py summary` writes the Markdown of a pull request: each value of the
+floors to check. Every `metrics.json` carries `benchmark_sha256`: the gate
+fails with an assertion on one without it. `gate.py summary` writes the Markdown of a pull request: each value of the
 base and of the result with its floor, whether the benchmark changed, the
 changes that `loop.py compare` wrote, and the time and peak memory of each
 macro package. Time and memory are reported, not gated.

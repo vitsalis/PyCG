@@ -197,12 +197,18 @@ def test_record_on_another_benchmark_takes_the_measured_values():
     assert recorded == metrics(micro_P=0.95, micro_R=0.79)
 
 
-def test_a_base_without_a_digest_is_on_the_same_benchmark():
-    base = metrics(macro_inside_P=0.75)
+def test_a_base_without_a_digest_is_an_invalid_state():
+    base = metrics()
     del base["benchmark_sha256"]
-    values = gate.measured(result(micro=(0.95, 0.79)))
-    recorded = gate.recorded(base, values, DIGEST)
-    assert recorded == metrics(micro_P=0.95, macro_inside_P=0.75)
+    with pytest.raises(AssertionError):
+        gate.recorded(base, gate.measured(result()), DIGEST)
+
+
+def test_metrics_without_a_digest_are_an_invalid_state():
+    floors = metrics()
+    del floors["benchmark_sha256"]
+    with pytest.raises(AssertionError):
+        gate.check(result(), floors, DIGEST)
 
 
 def test_floors_only_rise_on_the_same_benchmark():

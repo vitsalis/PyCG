@@ -80,7 +80,8 @@ def benchmark_digest(root=ROOT):
 
 
 def rebased(base, digest):
-    return base.get("benchmark_sha256", digest) != digest
+    assert "benchmark_sha256" in base, base
+    return base["benchmark_sha256"] != digest
 
 
 def floor(metrics, name):
@@ -105,10 +106,11 @@ def check(result, metrics, digest, base=None):
     values = measured(result)
     lines = [f"{'value':16} {'measured':>8} {'best':>8} {'floor':>8}"]
     failures = []
-    if metrics.get("benchmark_sha256") != digest:
+    assert "benchmark_sha256" in metrics, metrics
+    if metrics["benchmark_sha256"] != digest:
         failures.append(
             "evaluation/metrics.json was recorded on another benchmark "
-            f"(benchmark_sha256 {metrics.get('benchmark_sha256')}, this "
+            f"(benchmark_sha256 {metrics['benchmark_sha256']}, this "
             f"checkout's {digest}): run make eval-record"
         )
     for name, value in values.items():
