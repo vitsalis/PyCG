@@ -35,13 +35,33 @@ writes the decision to the job summary. On a push they always run.
 ## The gate
 
 `metrics.json` holds, for six values, the best value that main has
-reached, and the margin: micro edge precision and recall (all edges), and
-the macro-benchmark's precision and recall inside and outside the package,
-summed over the 30 projects. `make eval` (`common/gate.py check`) fails
-when a value is below its best minus the margin, or when a run failed.
-With `BASE`, it also fails unless `metrics.json` is what `make
-eval-record` writes from the base's file and this measurement: floors only
-rise. Time and memory are reported, not gated.
+reached, the margin, and `benchmark_sha256`, the digest of the benchmark
+on which the bests were measured: micro edge precision and recall (all
+edges), and the macro-benchmark's precision and recall inside and outside
+the package, summed over the 30 projects. `make eval` (`common/gate.py
+check`) fails when a value is below its best minus the margin, when a run
+failed, or when the digest is not that of this checkout. With `BASE`, it
+also fails unless `metrics.json` is what `make eval-record` writes from the
+base's file and this measurement: on the base's benchmark, floors only
+rise; on a changed benchmark, the measured values are the new bests, and
+the summary of the pull request says "benchmark changed: floors
+re-based". Time and memory are reported, not gated.
+
+The digest is `sha256sum FILES | sha256sum`, FILES sorted by path: the
+files that a measurement reads besides the code of PyCG and of the
+evaluation (`common/gate.py`, `benchmark_files`).
+
+| Files | Why |
+|---|---|
+| `macro-benchmark/projects.toml` | The projects, their pins and their analysed packages |
+| `macro-benchmark/ground-truth/<name>.json` of each project | The expected edges |
+| `macro-benchmark/dynamic/<name>.json` of each project | Its `aliases` name callees outside the package |
+| `common/same_function.json` | Names of one function, matched as one callee |
+| `micro-benchmark/snippets/*/*/`: the `.py` files, `callgraph.json`, `requires-python` | The programs, their expected graphs, and which cases run |
+
+The ledgers, notes and audits of a ground truth, the test environments
+and the READMEs are not read by a measurement: a change of them keeps the
+floors, and cannot re-base them.
 
 ## Layout
 
@@ -53,7 +73,7 @@ rise. Time and memory are reported, not gated.
 | `common/loop.py` | `run`: run and score a checkout, print a summary; `compare`: what changed between two runs |
 | `common/labels.py` | The labels of a pull request: a changed TP, FP or FN count; a changed protected file |
 | `common/gate.py` | The gate: the values of a result against `metrics.json`, the new `metrics.json`, the summary of a pull request |
-| `metrics.json` | The best value of each gated value, and the margin |
+| `metrics.json` | The best value of each gated value, the margin, and the digest of the benchmark |
 | `common/same_function.json` | Names of one function of the standard library, which the scorer matches as one callee |
 | `common/lookup.py` | The static lookup of standard-library names that `tests/test_same_function_table.py` checks the table with |
 | `macro-benchmark/` | The projects, ground truths, traces and their tools (`macro-benchmark/README.md`) |

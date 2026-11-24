@@ -48,7 +48,8 @@ endef
 
 define compare
 $(LOOP) compare $(BASE_RESULT) $(RESULT) > $(RESULT)-changes.txt
-$(GATE) summary $(RESULT)/result.json $(CURDIR)/$(METRICS) \
+$(base_metrics)
+$(GATE) summary $(RESULT)/result.json $(CURDIR)/$(METRICS) $(base_flag) \
 	--base-result $(BASE_RESULT)/result.json \
 	--changes $(RESULT)-changes.txt >> $(SUMMARY)
 endef

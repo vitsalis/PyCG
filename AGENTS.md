@@ -76,8 +76,9 @@ Every agent follows these rules:
 2. Never change a protected file to make a test, the gate or CI pass.
 3. Only `make eval-record` writes `evaluation/metrics.json`. Never edit it by
    hand, never lower a value, never change the margin. Run `make
-   eval-record` when a change raises a value, and commit the file with the
-   change.
+   eval-record` when a change raises a value or changes the benchmark (its
+   digest in the file; the measured values then become the bests), and
+   commit the file with the change.
 4. Only `tests/triage.py` writes `tests/known_failures.txt`. A case leaves
    the file when it passes. Add a case only with `tests/triage.py
    --readmit`, and only when your task says so.
