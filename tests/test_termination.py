@@ -152,7 +152,25 @@ FIXED = [
     "from collections import defaultdict\n"
     "def tree():\n    return defaultdict(tree)\n"
     "t = tree()\nfor _ in range(2):\n    t = t['k'].copy()\n",
+    *[
+        # Class methods whose results are fed back through the explicit
+        # `__get__`: bound to an outside owner, to the type of an instance
+        # and to a metaclass; and a property subclass fed its own result.
+        "class Meta(type): pass\nclass C(metaclass=Meta): pass\n"
+        "def make(cls):\n    return classmethod(make)\n"
+        "m = classmethod(make)\nfor _ in range(2):\n"
+        "    m = m.__get__(None, int)()\n    m = m.__get__(C)()\n"
+        "    m = m.__get__(C())()\n    m = m.__get__(None, m)()\n",
+        "class P(property): pass\n"
+        "def read(self):\n    return P(read)\n"
+        "p = P(read)\nfor _ in range(2):\n"
+        "    p = p.__get__(p)\n    p = P.__get__(p, p, type(p))\n"
+        "    p = p.getter(p)\n",
+    ],
 ]
+
+# The programs of `FIXED` for the explicit `__get__`, solved without a cap.
+GET_FEEDBACK = FIXED[-2:]
 
 # Wrappers: staticmethod, classmethod, property and functools.partial around
 # what loading an attribute gives, stored back, often to that attribute.
@@ -795,6 +813,8 @@ COUNTED = {
     "_open_arguments",
     "_open_modes",
     "_closures",
+    "_library",
+    "_library_advances",
 }
 
 # The other tables: what the builder makes, one per definition or name in
@@ -803,6 +823,7 @@ COUNTED = {
 # the completion.
 NOT_COUNTED = {
     "_stub_definitions",
+    "_library_calls",
     "_typed_callbacks",
     "_unknown_modes",
     "modules",
@@ -817,6 +838,8 @@ NOT_COUNTED = {
     "zero_argument_super",
     "_called",
     "literal_imports",
+    "none_arguments",
+    "none_keywords",
     "_type_forms",
     "_annotated",
     "_tested_classes",
@@ -851,6 +874,7 @@ NOT_COUNTED = {
 # A program that puts something in every counted table.
 EVERY_TABLE = """\
 import functools
+import itertools
 import typing
 import lib
 async def coroutine(): pass
@@ -904,6 +928,7 @@ class E:
     def idle(self): pass
 E()
 vars(C)
+list(itertools.islice(c, 1))
 """
 
 
@@ -936,6 +961,15 @@ def test_every_program_terminates(tmp_path):
             )
         count = generator.program.analysis.object_count()
         assert count < MAX_OBJECTS, f"{count} objects for program {index}:\n{source}"
+
+
+@pytest.mark.skipif(not hasattr(signal, "setitimer"), reason="needs SIGALRM")
+@pytest.mark.parametrize("index", range(len(GET_FEEDBACK)))
+def test_fed_back_get_results_terminate_without_a_cap(tmp_path, index):
+    with time_limit(SECONDS_PER_PROGRAM):
+        generator = analyse(tmp_path, GET_FEEDBACK[index], cap=None)
+        generator.output()
+    assert generator.program.analysis.object_count() < MAX_OBJECTS
 
 
 # How many random programs of each family are also solved in two orders.

@@ -1,0 +1,37 @@
+{
+    "main": [
+        "itertools.cycle",
+        "main.Source.__iter__",
+        "main.consume",
+        "main.make",
+        "main.returned",
+        "main.step"
+    ],
+    "main.Countdown.__init__": [],
+    "main.Countdown.__iter__": [],
+    "main.Countdown.__next__": [],
+    "main.Item.ping": [],
+    "main.Source.__iter__": [
+        "main.Countdown.__init__"
+    ],
+    "main.consume": [
+        "main.Countdown.__next__",
+        "main.Item.ping"
+    ],
+    "main.make": [
+        "itertools.islice",
+        "main.Source.__iter__"
+    ],
+    "main.returned": [
+        "itertools.takewhile",
+        "main.Source.__iter__"
+    ],
+    "main.step": [
+        "<builtin>.next",
+        "main.Countdown.__next__"
+    ],
+    "<builtin>.next": [],
+    "itertools.islice": [],
+    "itertools.takewhile": [],
+    "itertools.cycle": []
+}

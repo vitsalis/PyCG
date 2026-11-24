@@ -17,6 +17,7 @@ from .builtin_models import DECORATOR, method_model
 from .builtin_rules import BuiltinRules
 from .containers import Containers
 from .hierarchy import Hierarchy, opaque
+from .library import LibraryIteration
 from .model import (
     BUILTIN_MODULE,
     BoundMethod,
@@ -71,6 +72,7 @@ class Analysis(
     Patterns,
     Reflection,
     Outside,
+    LibraryIteration,
 ):
     def __init__(self, cap=None):
         # What a node holds once it would hold more objects than `cap`, if
@@ -163,6 +165,13 @@ class Analysis(
         # Construct -> what iterating over its iterable gives (see
         # Containers.iterated).
         self._iterated = {}
+        # The lazy objects of the selected standard-library operations, with
+        # their state; the activations of their advancing, by (object,
+        # scope, site), with their result nodes; the calls that made one
+        # (see library.py).
+        self._library = {}
+        self._library_advances = {}
+        self._library_calls = {}
         self._consts = {}
         self._containers = {}
         self._constants = {}
@@ -184,6 +193,12 @@ class Analysis(
         # The module that each call site imports by a str literal, if its
         # callee is an importer (see `IMPORTERS`).
         self.literal_imports = {}
+        # The positions at which each call expression, by scope and site,
+        # passes the literal None (see `literal_none`).
+        self.none_arguments = {}
+        # The keywords that a call expression passes the literal `None`, by
+        # (caller, site) (see `literal_none_keyword`).
+        self.none_keywords = {}
         # The sites of `super()` without arguments, whose arguments the
         # builder supplies (see `BuiltinRules._rule_super`); the calls and
         # classes of `super(C, x)` with arguments that are paired; and the
@@ -412,6 +427,8 @@ class Analysis(
             self.named_nodes,
             self._open_arguments,
             self._open_modes,
+            self._library,
+            self._library_advances,
         )
         return sum(map(len, made))
 
@@ -838,6 +855,28 @@ class Analysis(
             self._receiver_calls[key] = call
             self._prefixes[call] = (base, receivers)
         return self._receiver_calls[key]
+
+    def literal_none(self, call, index):
+        """Whether `call` passes the literal `None` at the position `index`:
+        a fact of the source, which a call expression records (see
+        `none_arguments`) and the calls that copy it keep, with their
+        receivers before it. An argument without a value is not None
+        (`False`, `1.5` and `...` have none either)."""
+        base, receivers = self._prefixes.get(call, (call, ()))
+        root = self._roots.get(base, base)
+        if root.origin is not root:
+            return False
+        nones = self.none_arguments.get((root.caller, root.site), ())
+        return index - len(receivers) in nones
+
+    def literal_none_keyword(self, call, name):
+        """Whether `call`, or the call expression that it copies, passes the
+        literal `None` to the keyword `name`."""
+        base, _ = self._prefixes.get(call, (call, ()))
+        root = self._roots.get(base, base)
+        if root.origin is not root:
+            return False
+        return name in self.none_keywords.get((root.caller, root.site), ())
 
     def _callee(self, call):
         """A node whose objects `call` calls, through the worklist."""

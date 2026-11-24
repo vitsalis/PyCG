@@ -50,6 +50,13 @@ decorators/singledispatch: outside/library-callables: functools.singledispatch d
 descriptors/cached_property: outside/library-calls-back: a function passed to library code is not a call: functools.cached_property calls the function it wraps
 descriptors/non_data_descriptor_shadowed: dynamic/dynamic: the first __get__ writes the value into the instance's __dict__, which hides the descriptor from the second read; both reads call __get__
 descriptors/object_setattr_runs_set: language/special-methods: object.__setattr__ with a literal name does not run the class's data descriptor
+descriptors/outside_descriptor_subclass: outside/library-calls-back: the inherited functools.cached_property.__get__ runs by its stub, not its code, so the wrapped method is not called
+descriptors/property_earlier_outside_base: outside/library-calls-back: functools.cached_property comes before property in the MRO: its __init__ and __get__ run by their stubs, so the wrapped method is not called
+descriptors/property_get_forwards_none: language/descriptors: a load through the class passes None to the subclass's __get__, which forwards it to property.__get__: None is known only as a literal, so the getter is called
+descriptors/property_on_metaclass: language/metaclasses: a property on the metaclass is not run for a load through the class
+descriptors/property_subclass_copy: language/descriptors: prop.getter(f) merges f into prop instead of making a copy, so the original also calls the new getter
+descriptors/property_subclass_copy_init: language/descriptors: prop.setter(f) merges f into prop instead of calling the subclass, so its __init__ does not run for the copy
+descriptors/wrapper_get_double_star: language/descriptors: an explicit __get__ with ** gives no result, even with an empty mapping
 dicts/assign: flow/container-update: a key assigned again keeps the old function
 dicts/equal_keys_overwrite: flow/container-update: keys 1 and True are one key
 dicts/merge_operator: outside/builtin-models: the `|` of two dicts gives no dict
@@ -160,7 +167,6 @@ stdlib_classes/userdict_update_calls_setitem: outside/library-calls-back: UserDi
 type_hints/annotated_metadata: outside/library-types: typing.get_type_hints and Annotated metadata are not modelled
 type_hints/deferred_annotation_evaluated: dynamic/dynamic: annotations are not evaluated
 type_hints/generic_alias_instantiation: outside/library-callables: calling Box[int] goes through typing._GenericAlias.__call__
-type_hints/outside_class_annotation: types/builtin-protocols: the parameter annotated collections.abc.Iterator does not hold the snippet's Iterator subclass that a pickle round trip passes
 type_hints/string_annotation_evaluated: dynamic/dynamic: typing.get_type_hints does not evaluate string annotations
 type_hints/subclass_behind_base_annotation: types/annotation-believed: the parameter annotated with the base also holds the base's instances, though only a subclass is passed
 type_hints/wrong_annotation: types/annotation-believed: the parameter holds the instances that its wrong annotation names

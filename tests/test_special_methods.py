@@ -1500,9 +1500,9 @@ largest([(1, Item()), (2, Item())])
 
 
 def test_list_asks_the_length_of_what_it_copies(tmp_path):
-    # list() and list.extend() ask `__len__`, else `__length_hint__`, of an
-    # iterable that is no list or tuple. tuple() asks nothing (Python 3.14
-    # on; 3.12 and 3.13 ask too).
+    # list(), list.extend() and tuple() ask `__len__`, else
+    # `__length_hint__`, of an iterable that is no list or tuple. tuple()
+    # asks on Python 3.12 and 3.13 only; every supported version counts.
     graph = main_graph(
         tmp_path,
         """
@@ -1538,7 +1538,192 @@ as_tuple(Sized())
         "main.Sized.__iter__",
         "main.Sized.__len__",
     ]
-    assert callees(graph, "main.as_tuple") == ["<builtin>.tuple", "main.Sized.__iter__"]
+    assert callees(graph, "main.as_tuple") == [
+        "<builtin>.tuple",
+        "main.Sized.__iter__",
+        "main.Sized.__len__",
+    ]
+
+
+LENGTH_HINTED = """
+import ext
+class Sized:
+    def __iter__(self): return iter([])
+    def __len__(self): return 0
+class Hinted:
+    def __iter__(self): return iter([])
+    def __length_hint__(self): return 0
+def f(*args): pass
+"""
+
+
+def length_hints(graph, caller):
+    return [c for c in callees(graph, caller) if c.endswith(("__len__", "_hint__"))]
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        "sorted(x)",
+        "[*x]",
+        "(*x,)",
+        "[0, *x]",
+        "bytes(x)",
+        "bytearray().extend(x)",
+        "f(*x)",
+        "f(1, *x)",
+        "f(*x, *[])",
+        "f(*x, 1)",
+        "print(*x)",
+        # Unpacking is the interpreter's work, whatever the callee.
+        "missing(*x)",
+        "ext.call(*x)",
+    ],
+)
+def test_builtins_and_unpacking_ask_the_length_of_what_they_get(tmp_path, call):
+    graph = main_graph(
+        tmp_path,
+        LENGTH_HINTED
+        + f"""
+def use(x):
+    {call}
+use(Sized())
+use(Hinted())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == [
+        "main.Hinted.__length_hint__",
+        "main.Sized.__len__",
+    ]
+
+
+def test_a_list_extended_in_place_asks_the_length_of_what_it_gets(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        LENGTH_HINTED
+        + """
+def use(x):
+    items = []
+    items += x
+use(Sized())
+use(Hinted())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == [
+        "main.Hinted.__length_hint__",
+        "main.Sized.__len__",
+    ]
+
+
+@pytest.mark.parametrize(
+    "call",
+    [
+        "set(x)",
+        "frozenset(x)",
+        "{*x}",
+        "bytearray(x)",
+        "collections.deque(x)",
+        "dict.fromkeys(x)",
+        "min(x)",
+        "max(x)",
+        "sum(x)",
+        "zip(x)",
+        "enumerate(x)",
+        "map(str, x)",
+        "for item in x: pass",
+    ],
+)
+def test_iterating_alone_asks_no_length(tmp_path, call):
+    graph = main_graph(
+        tmp_path,
+        "import collections\n"
+        + LENGTH_HINTED
+        + f"""
+def use(x):
+    {call}
+use(Sized())
+use(Hinted())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == []
+
+
+def test_bytes_asks_no_length_of_what_converts_otherwise(tmp_path):
+    # bytes() takes `__bytes__`, then `__index__`, before it iterates.
+    graph = main_graph(
+        tmp_path,
+        """
+class Index:
+    def __index__(self): return 1
+    def __iter__(self): return iter([])
+    def __len__(self): return 0
+class Convertible:
+    def __bytes__(self): return b""
+    def __iter__(self): return iter([])
+    def __len__(self): return 0
+def use(x):
+    bytes(x)
+use(Index())
+use(Convertible())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == []
+
+
+JOINED = """
+class Itself:
+    def __iter__(self): return self
+    def __next__(self): raise StopIteration
+    def __len__(self): return 0
+class Hinted:
+    def __iter__(self): return self
+    def __next__(self): raise StopIteration
+    def __length_hint__(self): return 0
+class Inner:
+    def __iter__(self): return self
+    def __next__(self): raise StopIteration
+    def __len__(self): return 0
+class Outer:
+    def __iter__(self): return Inner()
+    def __len__(self): return 0
+class Builtin:
+    def __iter__(self): return iter([])
+    def __len__(self): return 0
+"""
+
+
+@pytest.mark.parametrize("join", ['"".join', 'b"".join', "bytearray().join"])
+def test_join_asks_the_length_of_the_iterator_of_its_argument(tmp_path, join):
+    # join makes a list of `iter(x)`, which asks the length of that iterator:
+    # x itself where `__iter__` returns it, else the iterator it returns; a
+    # builtin iterator has no analysed method.
+    graph = main_graph(
+        tmp_path,
+        JOINED
+        + f"""
+def itself(x):
+    {join}(x)
+def other(x):
+    {join}(x)
+def builtin(x):
+    {join}(x)
+itself(Itself())
+itself(Hinted())
+other(Outer())
+builtin(Builtin())
+""",
+    )
+
+    assert length_hints(graph, "main.itself") == [
+        "main.Hinted.__length_hint__",
+        "main.Itself.__len__",
+    ]
+    assert length_hints(graph, "main.other") == ["main.Inner.__len__"]
+    assert length_hints(graph, "main.builtin") == []
 
 
 def test_conditions_test_truth_with_bool_else_len(tmp_path):
@@ -1663,3 +1848,311 @@ pattern(Value())
         "main.Truth.__bool__",
         "main.Value.__eq__",
     ]
+
+
+@pytest.mark.parametrize("call", ["bytes(x)", "bytearray().extend(x)"])
+def test_a_buffer_is_read_without_asking_its_length(tmp_path, call):
+    # bytes() and bytearray.extend() read a buffer exporter before they try
+    # to iterate: a subclass of bytes, bytearray, memoryview or array.array,
+    # or a class with `__buffer__`, is not asked its length.
+    graph = main_graph(
+        tmp_path,
+        f"""
+import array
+class Mutable(bytearray):
+    def __len__(self): return 0
+class Frozen(bytes):
+    def __len__(self): return 0
+class View(array.array):
+    def __len__(self): return 0
+class Exporter:
+    def __buffer__(self, flags): return memoryview(b"x")
+    def __iter__(self): return iter([65])
+    def __len__(self): return 0
+class Sized:
+    def __iter__(self): return iter([65])
+    def __len__(self): return 0
+def use(x):
+    {call}
+use(Mutable(b"x"))
+use(Frozen(b"x"))
+use(View("b", [1]))
+use(Exporter())
+use(Sized())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == ["main.Sized.__len__"]
+
+
+UNPACKED = """
+class Itself:
+    def __init__(self): self.left = 3
+    def __iter__(self): return self
+    def __next__(self):
+        if self.left == 0:
+            raise StopIteration
+        self.left -= 1
+        return 1
+    def __len__(self): return self.left
+class Outer:
+    def __iter__(self): return Itself()
+    def __len__(self): return 3
+"""
+
+
+@pytest.mark.parametrize("target", ["a, *b", "*a, b", "[a, *b]"])
+def test_a_starred_target_asks_the_length_of_the_iterator(tmp_path, target):
+    # The starred target makes a list of the rest of the iterator, which
+    # asks that iterator's length: x where `__iter__` returns x.
+    graph = main_graph(
+        tmp_path,
+        UNPACKED
+        + f"""
+def itself(x):
+    {target} = x
+def other(x):
+    {target} = x
+itself(Itself())
+other(Outer())
+""",
+    )
+
+    assert length_hints(graph, "main.itself") == ["main.Itself.__len__"]
+    assert length_hints(graph, "main.other") == ["main.Itself.__len__"]
+
+
+def test_ordinary_unpacking_asks_no_length(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        UNPACKED
+        + """
+def use(x):
+    a, b, c = x
+use(Itself())
+use(Outer())
+""",
+    )
+
+    # Control: the unpacking iterates the self-iterator.
+    assert "main.Itself.__next__" in callees(graph, "main.use")
+    assert length_hints(graph, "main.use") == []
+
+
+@pytest.mark.parametrize(
+    ("call", "method"),
+    [
+        ("int(x)", "__int__"),
+        ("float(x)", "__float__"),
+        ("complex(x)", "__complex__"),
+    ],
+)
+def test_a_buffer_subclass_still_converts_through_its_own_method(
+    tmp_path, call, method
+):
+    # CPython calls the conversion method before it reads a buffer; the
+    # buffer stops only the length hint of bytes().
+    graph = main_graph(
+        tmp_path,
+        f"""
+class Data(bytearray):
+    def __int__(self): return 1
+    def __float__(self): return 1.0
+    def __complex__(self): return 1j
+    def __bytes__(self): return b""
+    def __len__(self): return 0
+def use(x):
+    {call}
+use(Data(b"1"))
+""",
+    )
+
+    assert f"main.Data.{method}" in callees(graph, "main.use")
+    assert length_hints(graph, "main.use") == []
+
+
+SEQUENCES = """
+class Seq:
+    def __getitem__(self, index):
+        if index >= 2:
+            raise IndexError
+        return "a"
+    def __len__(self): return 2
+class Hinted:
+    def __getitem__(self, index):
+        raise IndexError
+    def __length_hint__(self): return 0
+def f(*args): pass
+"""
+
+
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "*rest, = x",
+        "a, *b = x",
+        '"".join(x)',
+        "list(iter(x))",
+        "f(*iter(x))",
+        "sorted(iter(x))",
+    ],
+)
+def test_a_sequence_iterator_asks_the_length_of_its_sequence(tmp_path, statement):
+    # The iterator that the sequence protocol makes forwards its length hint
+    # to the sequence's `__len__`, and to nothing else.
+    graph = main_graph(
+        tmp_path,
+        SEQUENCES
+        + f"""
+def use(x):
+    {statement}
+use(Seq())
+use(Hinted())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == ["main.Seq.__len__"]
+
+
+def test_limit_bytes_of_an_iterable_buffer_subclass_does_not_call_its_bytes(tmp_path):
+    # CPython calls `__bytes__` first; the stubs list Iterable before
+    # SupportsBytes, and `bytearray` defines `__iter__` (design.md, "Methods
+    # that builtins call on their arguments", the limit of the protocol
+    # order). Nor does bytes() ask the length of the buffer.
+    graph = main_graph(
+        tmp_path,
+        """
+class Data(bytearray):
+    def __bytes__(self): return b""
+    def __len__(self): return 0
+def use(x):
+    bytes(x)
+use(Data(b"1"))
+""",
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.bytes"]
+
+
+@pytest.mark.parametrize("statement", ["*rest, = x", '"".join(x)', "list(iter(x))"])
+def test_the_iterator_of_an_outside_iterable_base_asks_no_length(tmp_path, statement):
+    # A subclass of Sequence iterates through the library's `Sequence.__iter__`,
+    # a generator, which has no length: Python never calls `View.__len__`
+    # there; list(x) asks x itself.
+    graph = main_graph(
+        tmp_path,
+        f"""
+import collections.abc
+class View(collections.abc.Sequence):
+    def __getitem__(self, index):
+        if index >= 2:
+            raise IndexError
+        return "a"
+    def __len__(self): return 2
+def use(x):
+    {statement}
+def copy(x):
+    list(x)
+use(View())
+copy(View())
+""",
+    )
+
+    assert length_hints(graph, "main.use") == []
+    assert length_hints(graph, "main.copy") == ["main.View.__len__"]
+
+
+# The rows of the table in `BuiltinRules.add_length_hint`: what a node whose
+# length Python asks may hold. Sequence metaclasses make the class rows.
+LENGTH_ROWS = """
+import collections.abc
+class Seq:
+    def __getitem__(self, index):
+        if index >= 2:
+            raise IndexError
+        return "a"
+    def __len__(self): return 2
+class SeqMeta(type):
+    def __getitem__(cls, index):
+        if index >= 2:
+            raise IndexError
+        return "a"
+    def __len__(cls): return 2
+class SeqClass(metaclass=SeqMeta): pass
+class IterMeta(type):
+    def __iter__(cls): return cls
+    def __next__(cls): raise StopIteration
+    def __len__(cls): return 0
+class IterClass(metaclass=IterMeta): pass
+class Back:
+    def __getitem__(self, index):
+        raise IndexError
+    def __len__(self): return 0
+    def __reversed__(self): return iter([])
+class View(collections.abc.Sequence):
+    def __getitem__(self, index):
+        raise IndexError
+    def __len__(self): return 0
+def make_iter(x):
+    return iter(x)
+def make_reversed(x):
+    return reversed(x)
+def gen(x):
+    for item in x:
+        yield item
+"""
+
+
+@pytest.mark.parametrize(
+    ("make", "argument", "asked"),
+    [
+        # A class: its metaclass's methods.
+        ("IterClass", "x", "main.IterMeta.__len__"),
+        # The sequence protocol's iterator of an instance and of a class.
+        ("make_iter(Seq())", "x", "main.Seq.__len__"),
+        ("make_iter(SeqClass)", "x", "main.SeqMeta.__len__"),
+        # reversed() over a sequence asks it again, unless `__reversed__`.
+        ("make_reversed(Seq())", "x", "main.Seq.__len__"),
+        ("make_reversed(Back())", "x", None),
+        # Sequence's mixin `__reversed__` is a generator: no reversed object.
+        ("make_reversed(View())", "x", None),
+        # Builtin iterators and generators have no analysed length.
+        ("enumerate(Seq())", "x", None),
+        ("zip(Seq())", "x", None),
+        ("map(str, Seq())", "x", None),
+        ("filter(None, Seq())", "x", None),
+        ("gen(Seq())", "x", None),
+        ("iter([Seq()])", "x", None),
+    ],
+)
+@pytest.mark.parametrize("site", ["list({})", '"".join({})', "*rest, = {}"])
+def test_every_kind_of_value_whose_length_is_asked(
+    tmp_path, make, argument, asked, site
+):
+    statement = site.format(argument)
+    graph = main_graph(
+        tmp_path,
+        LENGTH_ROWS
+        + f"""
+def use(x):
+    {statement}
+use({make})
+""",
+    )
+
+    assert length_hints(graph, "main.use") == ([asked] if asked else [])
+
+
+@pytest.mark.parametrize("site", ['"".join(x)', "*rest, = x", "[*x]", "list(x)"])
+def test_a_sequence_class_is_asked_its_metaclass_length(tmp_path, site):
+    graph = main_graph(
+        tmp_path,
+        LENGTH_ROWS
+        + f"""
+def use(x):
+    {site}
+use(SeqClass)
+""",
+    )
+
+    assert length_hints(graph, "main.use") == ["main.SeqMeta.__len__"]

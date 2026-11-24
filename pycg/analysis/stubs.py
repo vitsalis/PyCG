@@ -128,6 +128,7 @@ class Stubs:
         self._members = {}
         self._mros = {}
         self._abstract = {}
+        self._abstract_reach = {}
         self._abc_names = None
 
     def module(self, name):
@@ -309,6 +310,28 @@ class Stubs:
                             result = result or bool(member.get("x"))
             self._abstract[cls] = result
         return self._abstract[cls]
+
+    def abstract_reach(self, cls):
+        """The classes that the class `cls` reaches through abstract classes
+        only: `cls` if it is abstract, and what each of its stub bases that
+        is abstract reaches; empty for a concrete `cls`."""
+        if cls not in self._abstract_reach:
+            reach = set()
+            pending = [cls]
+            while pending:
+                current = pending.pop()
+                if current in reach or not self.abstract(current):
+                    continue
+                reach.add(current)
+                definition = self.definition(current)
+                if definition is not None and definition.kind == "class":
+                    for base in definition.entry["b"]:
+                        for name in class_names(base):
+                            target = self.definition(name)
+                            if target is not None and target.kind == "class":
+                                pending.append(name)
+            self._abstract_reach[cls] = frozenset(reach)
+        return self._abstract_reach[cls]
 
     def abc_name(self, path):
         """The name in `collections.abc` of the class whose definition path
