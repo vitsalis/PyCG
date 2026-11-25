@@ -60,6 +60,7 @@ class Signature:
         "keyword_only",
         "vararg",
         "kwarg",
+        "_names",
     )
 
     def __init__(
@@ -76,10 +77,11 @@ class Signature:
         self.keyword_only = tuple(keyword_only)
         self.vararg = vararg
         self.kwarg = kwarg
+        extra = tuple(name for name in (vararg, kwarg) if name)
+        self._names = self.positional + self.keyword_only + extra
 
     def names(self):
-        extra = [name for name in (self.vararg, self.kwarg) if name]
-        return list(self.positional) + list(self.keyword_only) + extra
+        return self._names
 
     def accepts_keyword(self, name):
         return (

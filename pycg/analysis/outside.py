@@ -1,5 +1,3 @@
-import json
-
 from .builtin_models import (
     CALLS_BACK,
     CLOSURES,
@@ -202,7 +200,7 @@ class Outside:
         return self._typed[cls]
 
     def closure(self, name, result):
-        key = (name, json.dumps(result))
+        key = (name, _frozen(result))
         if key not in self._closures:
             self._closures[key] = Closure(name, result)
         return self._closures[key]
@@ -861,7 +859,7 @@ class Outside:
         fixed = kind == "tuple" and arguments and "..." not in arguments
         if fixed:
             length = len(arguments)
-        rule = ("stub", position, json.dumps([kind, *arguments]))
+        rule = ("stub", position, kind, _frozen(arguments))
         container = self.container_at(kind, context.origin, context.site, rule, length)
         self.add_object(dst, container)
         if fixed:
@@ -1082,6 +1080,15 @@ def _parameter_classes(reduced, classes):
 
 def _variable_type(definition):
     return VARIABLE_TYPES.get(definition.path, definition.entry["t"])
+
+
+def _frozen(reduced):
+    if type(reduced) in (list, tuple):
+        return tuple(map(_frozen, reduced))
+    if type(reduced) is dict:
+        return (dict, tuple((key, _frozen(value)) for key, value in reduced.items()))
+    assert reduced is None or type(reduced) in (str, int), reduced
+    return reduced
 
 
 def _named(definition):

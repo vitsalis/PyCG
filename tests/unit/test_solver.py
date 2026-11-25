@@ -431,15 +431,15 @@ def test_a_known_cycle_is_collapsed_before_objects_go_round_it(order, monkeypatc
 
 def dense_tail_edge_visits(size, monkeypatch):
     visits = 0
-    successors = solver_module._successors
+    successors = solver_module._successor_list
 
     def counted(node):
         nonlocal visits
-        for successor in successors(node):
-            visits += 1
-            yield successor
+        found = successors(node)
+        visits += len(found)
+        return found
 
-    monkeypatch.setattr(solver_module, "_successors", counted)
+    monkeypatch.setattr(solver_module, "_successor_list", counted)
     solver = Solver(SATURATED, cap=5000)
     x = Marker("x")
     tail = [Node(f"t{i}") for i in range(size)]
