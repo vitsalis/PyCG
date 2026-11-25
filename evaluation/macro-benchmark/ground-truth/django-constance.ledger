@@ -1757,7 +1757,7 @@ default reject constance.models.Constance.__str__: no package code converts or f
     -> django.db.backends.sqlite3.operations.DatabaseOperations.sequence_reset_sql
     note: judgement 8 (ruling R1): the package's own test settings select the SQLite backend (tests/settings.py:21-30), so connection is a django.db.backends.sqlite3 DatabaseWrapper; Django has no default engine and the package documents none; another configured backend is client code; SQLite inherits BaseDatabaseOperations.sequence_reset_sql, which returns [], so the loop at line 30 runs no execute
 28:62 call  no_style()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     note: django.core.management.color.no_style is decorated with functools.cache (lru_cache), so the callee is the wrapper object (judgement 9)
 29:10 with  connection.cursor()
     reject *: the cursor of the client's connection (judgement 8); its __enter__ and __exit__ are outside the package

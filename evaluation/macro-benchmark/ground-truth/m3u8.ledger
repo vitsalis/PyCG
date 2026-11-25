@@ -37,7 +37,7 @@ default reject m3u8.model.ContentSteering.__str__, m3u8.model.DateRange.__str__,
 [m3u8.load]
 93:16 call  urlsplit(uri)
     -> urllib.parse.urlsplit
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
 94:49 call  http_client.download(uri, timeout, headers, verify_ssl)
     -> m3u8.httpclient.DefaultHTTPClient.download
     note: http_client is the default DefaultHTTPClient() made at import (line 86), a DefaultHTTPClient that the client makes, or a client object (opaque, B5); no other package class has download
@@ -150,14 +150,14 @@ default reject m3u8.model.ContentSteering.__str__, m3u8.model.DateRange.__str__,
     reject m3u8.model.M3U8.base_uri: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), never an M3U8; Segment defines the base_uri property, the others have a plain instance attribute
 12:43 call  urlsplit(self.base_uri)
     -> urllib.parse.urlsplit
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     reject *: the property in the argument is read at its own attribute site; the callee receives the value and calls nothing back
 12:49 getattr  self.base_uri
     -> m3u8.model.Segment.base_uri
     reject m3u8.model.M3U8.base_uri: self is a BasePathMixin instance (Segment, PartialSegment, Key, SessionKey, InitializationSection, Playlist, IFramePlaylist, ImagePlaylist, Media, RenditionReport, PreloadHint, ContentSteering or Tiles), never an M3U8; Segment defines the base_uri property, the others have a plain instance attribute
 15:24 call  urlsplit(ret)
     -> urllib.parse.urlsplit
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
 16:29 call  ValueError("There can not be `absolute_uri` with no `base...
     -> <builtin>.ValueError
 

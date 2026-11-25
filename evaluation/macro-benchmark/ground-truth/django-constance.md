@@ -706,3 +706,24 @@ on one runtime. The package admits CPython 3.10 and later only:
 
 Graph: 680 edges (256 inside, 424 outside), unchanged in number; 497
 confirmed by the trace, unchanged.
+
+## Corrections of 2026-11-25: the lru_cache wrapper
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `constance.migrations.0002_migrate_from_old_table._migrate_from_old_table` | `constance/migrations/0002_migrate_from_old_table.py:28:62` |
+
+The package has no trace of these calls, so no trace edge is rejected.

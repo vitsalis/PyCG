@@ -2398,7 +2398,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 16:57 call  axes_lengths.items()
     -> <builtin>.dict.items
 17:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n...
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.einops._prepare_transformation_recipe
     note: _prepare_transformation_recipe is the lru_cache wrapper of the function (einops.py:289); on a cache miss the wrapper calls the function
 17:85 call  tuple(axes_lengths)
@@ -2427,7 +2427,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 
 [einops.array_api.pack]
 53:60 call  analyze_pattern(pattern, "pack")
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.packing.analyze_pattern
     note: analyze_pattern is the lru_cache wrapper of the function (packing.py:13)
 54:40 call  tensors[0].__array_namespace__()
@@ -2456,7 +2456,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 73:36 call  tensor.__array_namespace__()
     -> numpy.ndarray.__array_namespace__
 74:60 call  analyze_pattern(pattern, opname="unpack")
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.packing.analyze_pattern
 78:11 call  len(input_shape)
     -> <builtin>.len
@@ -2701,7 +2701,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 
 [einops.einops._apply_recipe]
 235:119 call  _reconstruct_from_shape( recipe, backend.shape(tensor), a...
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.einops._reconstruct_from_shape_uncached
     -> einops._backends.UnknownSize.__hash__
     -> einops._backends.UnknownSize.__eq__
@@ -2765,7 +2765,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 
 [einops.einops._apply_recipe_array_api]
 259:115 call  _reconstruct_from_shape( recipe, tensor.shape, axes_lengt...
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.einops._reconstruct_from_shape_uncached
     reject einops._torch_specific.TorchJitBackend.shape: tensor.shape is the shape attribute of a numpy array
     note: the lru_cache wrapper of einops.py:227 calls the function on a cache miss; the key holds the ints of a numpy shape and the int axes_lengths of array_api (annotated int), so no package __hash__ runs
@@ -2960,7 +2960,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 456:85 call  range(8)
     -> <builtin>.range
 457:49 call  _prepare_transformation_recipe(pattern, operation, axes_n...
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.einops._prepare_transformation_recipe
     note: the lru_cache wrapper (einops.py:289) calls the function on a cache miss
 
@@ -3001,7 +3001,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
     -> einops._backends.PyTensorBackend.shape
     reject einops._torch_specific.TorchJitBackend.shape: backend comes from get_backend, never TorchJitBackend
 539:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n...
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.einops._prepare_transformation_recipe
     note: the lru_cache wrapper (einops.py:289) calls the function on a cache miss; its key holds strs, an int and the client's reduction (a str or a client callable)
 539:85 call  tuple(axes_lengths)
@@ -3208,7 +3208,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 934:25 call  ValueError( "The last argument passed to `einops.einsum` ...
     -> <builtin>.ValueError
 938:45 call  _compactify_pattern_for_einsum(pattern)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.einops._compactify_pattern_for_einsum
     note: the lru_cache wrapper (einops.py:795) calls the function on a cache miss
 939:23 call  get_backend(tensors[0])
@@ -3815,7 +3815,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 
 [einops.packing.pack]
 69:60 call  analyze_pattern(pattern, "pack")
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.packing.analyze_pattern
     note: analyze_pattern is the lru_cache wrapper of the function (line 13); on a cache miss it calls the function
 72:26 call  get_backend(tensors[0])
@@ -3876,7 +3876,7 @@ default reject einops.parsing.AnonymousAxis.__repr__: the formatted value is not
 
 [einops.packing.unpack]
 138:60 call  analyze_pattern(pattern, opname="unpack")
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> einops.packing.analyze_pattern
 140:26 call  get_backend(tensor)
     -> einops._backends.get_backend

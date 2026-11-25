@@ -776,6 +776,9 @@
       "<builtin>.NotImplementedError": [
         "itables.sample_pandas_dfs 361:30 call  NotImplementedError(type)"
       ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "itables.sample_pandas_dfs 350:33 call  generate_date_series()"
+      ],
       "numpy.random.binomial": [
         "itables.sample_pandas_dfs 327:44 call  np.random.binomial(n=1, p=0.5, size=rows)",
         "itables.sample_pandas_dfs 330:33 call  np.random.binomial(n=1, p=0.1, size=rows)",
@@ -1401,6 +1404,9 @@
     ],
     "itables.sample_pandas_dfs 327:44 call  np.random.binomial(n=1, p=0.5, size=rows)": [
       "numpy.random.binomial and the other numpy.random functions are named by their module path, as random.random (tenacity, markdown2); the trace names these compiled methods _cython_3_2_8.cython_function_or_method.__call__, a naming artefact (itables.rejected.json)"
+    ],
+    "itables.sample_pandas_dfs 350:33 call  generate_date_series()": [
+      "On CPython the decorator returns functools._lru_cache_wrapper; its __call__ invokes the no-argument package body on a cache miss. itables has no explicit PyPy support declaration, so functools._lru_cache_wrapper.wrapper is outside the user-selected interpreter scope."
     ],
     "itables.sample_pandas_dfs 389:20 call  np.linspace(0, math.pi, 21)": [
       "NumPy1.24.4 array_function_dispatch returns a Python function, exported on this public numpy attribute. The C _ArrayFunctionDispatcher class used by later versions does not replace the older admitted callable. Read-only sources: numpy1.24.4 overrides.py176-212 and corresponding multiarray/function_base/fromnumeric definitions."

@@ -91,11 +91,15 @@ snippet reaches it:
   Every other callee follows the rules above, even if it is defined elsewhere
   (`collections.UserDict.update`, not `_collections_abc.MutableMapping.update`;
   `operator.add`, not `_operator.add`).
-- **Calls of instances**: Calling an instance of a class outside the snippet
-  calls `<class path>.__call__`, also when the class is private
-  (`functools._lru_cache_wrapper.__call__`, `typing._GenericAlias.__call__`).
-  For an instance of a snippet class that inherits `__call__`, see Inherited
-  methods (`contextlib.ContextDecorator.__call__`).
+- **Calls of instances**: Calling an instance of a class outside the
+  snippet calls `<class path>.__call__`, also when the class is private
+  (`_functools._lru_cache_wrapper.__call__`,
+  `typing._GenericAlias.__call__`). When no public class alias exists,
+  a private re-export outside a public module's `__all__` uses the
+  defining module's class path. For an extension type, use its exported
+  type attribute before falling back to its type name. For an instance
+  of a snippet class that inherits `__call__`, see Inherited methods
+  (`contextlib.ContextDecorator.__call__`).
 - **Missing modules**: The access path (`ext.Cls.fun`). The module `ext` in
   `external/*` does not exist (see [Missing modules](#missing-modules)).
 

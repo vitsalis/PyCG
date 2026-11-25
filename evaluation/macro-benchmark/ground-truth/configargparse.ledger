@@ -326,10 +326,10 @@
 
 [configargparse.unquote_str]
 599:17 call  is_quoted(text, triple=triple)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> functools._lru_cache_wrapper.wrapper
     -> configargparse.is_quoted
-    note: is_quoted is cached at line 577; CPython calls functools._lru_cache_wrapper.__call__, while supported PyPy 3.11 / 7.3.20 calls the Python function functools._lru_cache_wrapper.wrapper (functools.py:577-619; hidden_applevel returns the same function). Both call configargparse.is_quoted on a cache miss.
+    note: is_quoted is cached at line 577; CPython calls _functools._lru_cache_wrapper.__call__, while supported PyPy 3.11 / 7.3.20 calls the Python function functools._lru_cache_wrapper.wrapper (functools.py:577-619; hidden_applevel returns the same function). Both call configargparse.is_quoted on a cache miss.
 601:33 call  ast.literal_eval(text)
     -> ast.literal_eval
 602:30 call  isinstance(s, str)
@@ -455,7 +455,7 @@
 856:34 call  str(e)
     -> <builtin>.str
 860:33 call  is_quoted(strip_v)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> functools._lru_cache_wrapper.wrapper
     -> configargparse.is_quoted
     note: is_quoted is cached at line 577; the supported CPython/PyPy wrapper union and cache-miss callback are the same as at 599:17.

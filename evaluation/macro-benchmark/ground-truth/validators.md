@@ -10,9 +10,10 @@ root `src` (32 modules, 96 functions, no lambdas, 4 classes).
 
 The ledger is `validators.ledger`; the graph `validators.json` is generated
 from it. The graph has 422 edges (152 inside, 270 outside; 424, 152 and 272 before Codex audit round 1). The trace has
-394 edges, and the graph has all of them: no trace edge is rejected, so
-there is no `validators.rejected.json`. 28 edges come from reading only
-(`validators.added.json`). The tests run 94 of the 96 functions; the two
+394 edges, and the graph has all of them but the nine `lru_cache` wrapper
+spellings that `validators.rejected.json` rejects as naming artefacts
+(Corrections of 2026-11-25). 37 edges come from reading only, 11 inside
+and 26 outside (`validators.added.json`). The tests run 94 of the 96 functions; the two
 others are `uri._file_url` and `uri._ipfs_url`.
 
 The writer read every function of the package, the tests (for the values
@@ -159,7 +160,7 @@ reading only.
 
 **J8. `urlsplit` (`uri.py:54`, `url.py:240`).** From Python 3.11 on,
 `urllib.parse.urlsplit` is an `lru_cache` wrapper, so the callee is
-`functools._lru_cache_wrapper.__call__` only (the precedent of
+`_functools._lru_cache_wrapper.__call__` only (the precedent of
 fastjsonschema; validators has no 3.10).
 
 **J9. `validate_scheme` (`url.py:249`).** The parameter's default is
@@ -255,3 +256,34 @@ would come first ("Public class aliases by configuration",
 | CPython 3.12 to 3.15 | `_sha2.sha256` | `_sha2.SHA256Type` (`Modules/sha2module.c:547` of 3.12.16, `:540` of 3.15.2) | `SHA256Type` (`PyModule_AddType`, `:855`, `:867`) | `_sha2.SHA256Type` |
 
 `_hashlib.HASH.digest` (OpenSSL) and `_sha2.SHA256Type.digest` stay.
+
+## Corrections of 2026-11-25: the lru_cache wrapper
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `validators.hostname._port_validator` | `src/validators/hostname.py:37:23, 43:23` |
+| `validators.hostname.hostname._matches_simple_hostname` | `src/validators/hostname.py:123:38` |
+| `validators.i18n.fi.fi_business_id` | `src/validators/i18n/fi.py:57:41` |
+| `validators.i18n.fi.fi_ssn` | `src/validators/i18n/fi.py:95:44` |
+| `validators.i18n.fr.fr_ssn` | `src/validators/i18n/fr.py:96:36` |
+| `validators.uri._telnet_url` | `src/validators/uri.py:54:57` |
+| `validators.url._validate_auth_segment` | `src/validators/url.py:81:31, 83:31, 85:27` |
+| `validators.url._validate_optionals` | `src/validators/url.py:142:46` |
+| `validators.url.url` | `src/validators/url.py:240:57` |
+
+The trace names the type by its facade qualname, so its 9 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`validators.rejected.json` (rule A).

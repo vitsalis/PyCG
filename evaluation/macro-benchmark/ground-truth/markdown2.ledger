@@ -2034,7 +2034,7 @@ default reject markdown2.Admonitions.sub, markdown2.Alerts.sub, markdown2.Fenced
 2902:76 call  delim_run.end()
     -> re.Match.end
 2904:45 call  self._delimiter_left_or_right(run, delim_run.group(1))
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> functools._lru_cache_wrapper.wrapper
     -> markdown2.GFMItalicAndBoldProcessor._delimiter_left_or_right
     note: @functools.lru_cache at markdown2.py:2906 returns a callable cache object on CPython (__call__) and a Python function on supported PyPy 3.11 / 7.3.20 (functools._lru_cache_wrapper.wrapper); bound to self, both call the original method on a cache miss. PyPy has no _functools accelerator; hidden_applevel returns the same function.
@@ -2065,7 +2065,7 @@ default reject markdown2.Admonitions.sub, markdown2.Alerts.sub, markdown2.Fenced
 2950:15 call  len(text)
     -> <builtin>.len
 2953:47 call  self._body_crosses_span_borders(text)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> functools._lru_cache_wrapper.wrapper
     -> markdown2.GFMItalicAndBoldProcessor._body_crosses_span_borders
     note: @functools.lru_cache at markdown2.py:2955 returns a callable cache object on CPython (__call__) and a Python function on supported PyPy 3.11 / 7.3.20 (functools._lru_cache_wrapper.wrapper); bound to self, both call the original method on a cache miss. PyPy has no _functools accelerator; hidden_applevel returns the same function.

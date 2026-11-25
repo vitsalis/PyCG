@@ -2425,7 +2425,7 @@ default reject itables.typing._SubscriptableFallback.__getitem__: the only insta
 348:25 call  pd.Series(x, dtype="category")
     -> pandas.Series
 350:33 call  generate_date_series()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> itables.sample_pandas_dfs.generate_date_series
     note: On CPython the decorator returns functools._lru_cache_wrapper; its __call__ invokes the no-argument package body on a cache miss. itables has no explicit PyPy support declaration, so functools._lru_cache_wrapper.wrapper is outside the user-selected interpreter scope.
 350:42 call  generate_date_series().sample(rows, replace=True)

@@ -2,8 +2,9 @@
 
 Status (writer, batch 8, 2026-11-24): complete. `check.py --write tablib`
 and `check.py tablib` report no error; every site is decided; every
-missing trace edge is in the graph or in `tablib.rejected.json` (14
-edges). The blind audit (`tablib.audit.md`, 95 of 95 sites agree, four
+missing trace edge is in the graph or in `tablib.rejected.json` (16
+edges, two of them `lru_cache` wrapper spellings since the Corrections of
+2026-11-25). The blind audit (`tablib.audit.md`, 95 of 95 sites agree, four
 findings) and the lead's rulings (2026-11-24) are applied: see "Audit"
 at the end of this file. Codex round 1: T01 to T07 applied (+7 edges),
 T08 ruled by the lead: no edge ("Codex round 1").
@@ -15,8 +16,8 @@ written at build time and absent from the checkout: `__init__.py:5-10`
 takes the `except ImportError` branch, which calls nothing.
 
 The ledger is `tablib.ledger`; `tablib.json` and `tablib.added.json` are
-generated from it. 1086 edges (505 inside, 581 outside); 867 confirmed by
-the trace, 219 from reading; 1440 ledger entries; 26 value sites; 13
+generated from it. 1086 edges (505 inside, 581 outside); 865 confirmed by
+the trace, 221 from reading; 1440 ledger entries; 26 value sites; 13
 default rejection lines (26 candidates, 4233 candidate-site pairs); no
 exclusion.
 
@@ -268,7 +269,7 @@ the `rjust` branch of the closure `just` (`_rst.py:74`; F1).
   imported.
 - `get_column_letter` (`_xlsx.py:165`, `218`) is a `functools.lru_cache`
   wrapper in openpyxl 3.1.5 (`utils/cell.py:78`):
-  `functools._lru_cache_wrapper.__call__`; in openpyxl 2.6.0, 2.6.4 and
+  `_functools._lru_cache_wrapper.__call__`; in openpyxl 2.6.0, 2.6.4 and
   3.0.10 it is a plain function (`utils/cell.py:107`, `107`, `105`),
   re-exported by `openpyxl.utils` without `__all__`:
   `openpyxl.utils.cell.get_column_letter`. Both names (README, a plain
@@ -327,7 +328,8 @@ None.
 
 ## Rejected trace edges
 
-`tablib.rejected.json`, 14 edges:
+`tablib.rejected.json`, 16 edges (two `lru_cache` wrapper spellings in the
+Corrections of 2026-11-25), the others:
 - 9 from the tests' direct calls of the private `utils.getDate` (int,
   str) and `utils.getDateTime` (None, date, int, str): private input
   (J4).
@@ -363,14 +365,14 @@ None.
 ## Statistics
 
 `check.py tablib`: 1086 edges (505 inside, 581 outside); the trace
-confirms 867 of 1086 (79.8%); 227 of 276 functions run (82.2%); 14
+confirms 865 of 1086 (79.7%); 227 of 276 functions run (82.2%); 16
 rejected.
 
 `check.py --origin tablib`:
 
 | Project | Trace edges | Rejected | Traced edges in the graph (inside / outside) | Added (inside / outside) | Graph edges (inside / outside) |
 | --- | --- | --- | --- | --- | --- |
-| tablib | 880 | 14 | 867 (397 / 470) | 219 (108 / 111) | 1086 (505 / 581) |
+| tablib | 880 | 16 | 865 (397 / 468) | 221 (108 / 113) | 1086 (505 / 581) |
 
 ## Audit
 
@@ -444,3 +446,27 @@ _csv.writer.writerow` becomes `_csv.Writer.writerow` (`_csv.py:26:26`;
 `tp_name`, `_csv.writer`, and lists no alias `_csv.Writer` for the
 method: that traced edge is now a rejected trace edge (a naming artefact,
 rule A; `tablib.rejected.json`).
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `tablib.formats._xlsx.XLSXFormat.dset_sheet` | `src/tablib/formats/_xlsx.py:165:44` |
+| `tablib.formats._xlsx.XLSXFormat._adapt_column_width` | `src/tablib/formats/_xlsx.py:218:58` |
+
+The trace names the type by its facade qualname, so its 2 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`tablib.rejected.json` (rule A).

@@ -722,7 +722,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 36:42 call  value.rsplit(":", 1)
     -> <builtin>.str.rsplit
 37:23 call  _port_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.hostname._port_regex
 37:31 call  _port_regex().match(f":{port_seg}")
     -> re.Pattern.match
@@ -735,7 +735,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 42:42 call  value.rsplit(":", 1)
     -> <builtin>.str.rsplit
 43:23 call  _port_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.hostname._port_regex
 43:31 call  _port_regex().match(f":{port_seg}")
     -> re.Pattern.match
@@ -786,7 +786,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 121:38 call  host.endswith(".")
     -> <builtin>.str.endswith
 123:38 call  _simple_hostname_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.hostname._simple_hostname_regex
 123:46 call  _simple_hostname_regex().match(host)
     -> re.Pattern.match
@@ -896,7 +896,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 57:20 call  re.match(_business_id_pattern(), value)
     -> re.match
 57:41 call  _business_id_pattern()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.i18n.fi._business_id_pattern
 60:18 call  map(int, value[:7])
     -> <builtin>.map
@@ -911,7 +911,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 95:31 call  re.match(_ssn_pattern(ssn_check_marks), value)
     -> re.match
 95:44 call  _ssn_pattern(ssn_check_marks)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.i18n.fi._ssn_pattern
     reject validators.i18n.fr._ssn_pattern: another module's function; the name _ssn_pattern here is validators.i18n.fi._ssn_pattern
 97:26 call  result.groupdict()
@@ -949,7 +949,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 96:23 call  re.match(_ssn_pattern(), value)
     -> re.match
 96:36 call  _ssn_pattern()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.i18n.fr._ssn_pattern
     reject validators.i18n.fi._ssn_pattern: another module's function; the name _ssn_pattern here is validators.i18n.fr._ssn_pattern
 99:18 call  list(matched.groups())
@@ -1157,7 +1157,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 50:50 call  char.isprintable()
     -> <builtin>.str.isprintable
 54:57 call  urlsplit(value)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     note: from Python 3.11 on, urllib.parse.urlsplit is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code); validators supports 3.11 and later (the precedent of fastjsonschema, ref_resolver.py:52)
 69:31 call  netloc.rsplit("@", 1)
     -> <builtin>.str.rsplit
@@ -1231,21 +1231,21 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 78:35 call  value.count(":")
     -> <builtin>.str.count
 81:31 call  _username_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.url._username_regex
 81:39 call  _username_regex().match(unquote(value))
     -> re.Pattern.match
 81:47 call  unquote(value)
     -> urllib.parse.unquote
 83:31 call  _username_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.url._username_regex
 83:39 call  _username_regex().match(value)
     -> re.Pattern.match
 84:38 call  value.rsplit(":", 1)
     -> <builtin>.str.rsplit
 85:27 call  _username_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.url._username_regex
 85:35 call  _username_regex().match(username)
     -> re.Pattern.match
@@ -1291,7 +1291,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 142:34 call  bool(_path_regex().match(path))
     -> <builtin>.bool
 142:46 call  _path_regex()
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> validators.url._path_regex
 142:54 call  _path_regex().match(path)
     -> re.Pattern.match
@@ -1311,7 +1311,7 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
 234:30 call  re.search(r"\s", value)
     -> re.search
 240:57 call  urlsplit(value)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     note: from Python 3.11 on, urllib.parse.urlsplit is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code); validators supports 3.11 and later (the precedent of fastjsonschema, ref_resolver.py:52)
 249:24 call  validate_scheme(scheme)
     -> validators.url._validate_scheme

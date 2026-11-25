@@ -148,7 +148,7 @@ Windows with `--node=system`, line 1733; pyfiglet J6). The POSIX branches
 Linux and macOS.
 
 J5. **`urlsplit`** (`1048:21`): `urllib.parse.urlsplit` (3.10) and
-`functools._lru_cache_wrapper.__call__` (3.11 and later), the
+`_functools._lru_cache_wrapper.__call__` (3.11 and later), the
 fastjsonschema precedent. `parts._replace` is
 `urllib.parse.SplitResult._replace` (the trace's
 `collections.namedtuple._replace` is an alias).
@@ -204,7 +204,8 @@ None.
 
 ## Rejected trace edges
 
-`nodeenv.rejected.json`, 29 edges:
+`nodeenv.rejected.json`, 30 edges (the `lru_cache` wrapper spelling of
+`split_url_auth` since the Corrections of 2026-11-25), the others:
 
 - 25 edges to `unittest.mock.CallableMixin.__call__`: the tests patch a
   callee of the function with a mock (each entry names the patch and its
@@ -249,7 +250,7 @@ None.
 nodeenv: 1 modules, 66 functions (2 lambdas), 2 classes, 595 calls
   sites: 598 (595 call, 3 decorator); 120 with candidates (120 candidates); 76 value sites
   ground truth: 439 edges (120 internal, 319 outside)
-  trace: 357 edges; confirms 328 of 439 ground-truth edges (74.7%); 62 of 66 functions run (93.9%); 29 rejected
+  trace: 357 edges; confirms 327 of 439 ground-truth edges (74.5%); 62 of 66 functions run (93.9%); 30 rejected
 nodeenv: no errors
 ```
 
@@ -257,7 +258,7 @@ nodeenv: no errors
 
 | Project | Trace edges | Rejected | Traced edges in the graph (inside / outside) | Added (inside / outside) | Graph edges (inside / outside) |
 | --- | --- | --- | --- | --- | --- |
-| nodeenv | 357 | 29 | 328 (79 / 249) | 111 (41 / 70) | 439 (120 / 319) |
+| nodeenv | 357 | 30 | 327 (79 / 248) | 112 (41 / 71) | 439 (120 / 319) |
 
 | | Count |
 |---|---|
@@ -265,7 +266,30 @@ nodeenv: no errors
 | Ledger entries | 598 (669 callee lines, 7 rejection lines, 107 notes, no exclusion) |
 | Nodes | 67 (1 module, 66 functions) |
 | Edges | 439: 120 in the package, 319 outside |
-| Confirmed by the trace | 328 of 439 (74.7%) |
-| From reading only | 111 (41 inside, 70 outside) |
-| Rejected trace edges | 29 |
+| Confirmed by the trace | 327 of 439 (74.5%) |
+| From reading only | 112 (41 inside, 71 outside) |
+| Rejected trace edges | 30 |
 | Default rejections | 0 |
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `nodeenv.split_url_auth` | `nodeenv.py:1048:21` |
+
+The trace names the type by its facade qualname, so its 1 pair `caller ->
+functools._lru_cache_wrapper.__call__` is rejected as a naming artefact in
+`nodeenv.rejected.json` (rule A).

@@ -713,7 +713,7 @@
 [nodeenv.split_url_auth]
 1048:21 call  urlsplit(url)
     -> urllib.parse.urlsplit
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     note: urlsplit is a plain function on Python 3.10 and an lru_cache wrapper from 3.11 (J5)
 1051:37 call  unquote(parts.username)
     -> urllib.parse.unquote

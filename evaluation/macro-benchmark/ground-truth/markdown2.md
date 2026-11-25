@@ -25,8 +25,9 @@ The optional dependencies are `pygments>=2.7.3`, `wavedrom` and
 `latex2mathml` (`setup.py:32-36`).
 
 The ledger is `markdown2.ledger`; the graph `markdown2.json` is generated
-from it. One trace edge is rejected (`markdown2.rejected.json`, judgement
-J11). The blind audit is in `markdown2.audit.md`: 122 of 124 sites agree;
+from it. Three trace edges are rejected (`markdown2.rejected.json`: one by
+judgement J11, two `lru_cache` wrapper spellings by the Corrections of
+2026-11-25). The blind audit is in `markdown2.audit.md`: 122 of 124 sites agree;
 its finding F1 is applied (J6). The lead kept J1 to J13 and ruled on J3, J4
 and J7 (see each).
 
@@ -311,9 +312,9 @@ five functions of `ItalicAndBoldProcessor` (abstract, no package subclass),
 | Default rejections | 10 candidates in 2 lines, deciding 241 sites |
 | Nodes | 197 (1 module, 196 functions) |
 | Edges | 883: 286 in the package, 597 outside |
-| Graph edges with a trace name or alias | 752 of 883 (85.2%) |
-| Edges only from reading | 131 |
-| Trace edges rejected | 1 |
+| Graph edges with a trace name or alias | 750 of 883 (84.9%) |
+| Edges only from reading | 133 |
+| Trace edges rejected | 3 |
 | Functions that the tests run | 180 of 196 |
 
 The third audit reviewed all 3419 previously unlisted sites: 129 decided
@@ -415,3 +416,30 @@ What stays: `_hashlib.HASH.hexdigest`; `_sha2.SHA256Type.hexdigest`
 fallback class `_sha256.sha256` took the factory for the type. One graph
 edge renamed and two added (outside): 883 edges, 286 in the package, 597
 outside.
+
+## Corrections of 2026-11-25: the lru_cache wrapper
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `markdown2.GFMItalicAndBoldProcessor.delimiter_left_or_right` | `lib/markdown2.py:2904:45` |
+| `markdown2.GFMItalicAndBoldProcessor.body_crosses_span_borders` | `lib/markdown2.py:2953:47` |
+
+PyPy's Python closure `functools._lru_cache_wrapper.wrapper` stays where
+the ledger names it.
+
+The trace names the type by its facade qualname, so its 2 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`markdown2.rejected.json` (rule A).

@@ -155,7 +155,7 @@ classes keep the name the package imports: `ctypes.c_uint32`,
 `516`) is a method of the structure metaclass, which has no public path.
 It is named by the class of the receiver (micro-benchmark README,
 "Names": methods take the class of the instance, a private class keeps
-its path, as `functools._lru_cache_wrapper.__call__`; this README: also
+its path, as `_functools._lru_cache_wrapper.__call__`; this README: also
 when that class inherits the method): `_ctypes.PyCStructType.in_dll` on
 CPython and `_ctypes.structure.StructureMeta.in_dll` on PyPy (lib_pypy
 3.11 `_ctypes/structure.py:340`, which inherits `in_dll` from

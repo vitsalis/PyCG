@@ -11,8 +11,9 @@ the stubs count as annotations (README, B4). `pyproject.toml` sets
 no package call, so they change no edge.
 
 The ledger is `more-itertools.ledger`; the graph `more-itertools.json` is
-generated from it. 27 trace edges are rejected in
-`more-itertools.rejected.json` (below).
+generated from it. 28 trace edges are rejected in
+`more-itertools.rejected.json` (below, and one `lru_cache` wrapper spelling
+in the Corrections of 2026-11-25).
 
 The writer drafted the entries with scratch tools of its own: a guess of the
 outside callee of each plain name call (an import, a builtin or a package
@@ -307,7 +308,7 @@ passes.
 8. **Calls of library wrapper objects**: `functools.partial.__call__` for
    `algorithm(...)` in `distinct_permutations` (`more.py:895`, `899`, with
    `_partial` behind it), and for the `@wraps(func)` decorators
-   (`512`, `5520`); `functools._lru_cache_wrapper.__call__` and
+   (`512`, `5520`); `_functools._lru_cache_wrapper.__call__` and
    `_shift_to_odd` for the `lru_cache` function (`recipes.py:1211`);
    `operator.itemgetter.__call__` (`more.py:2023`, `recipes.py:502`,
    `1617`); `random.Random.randrange` for `_private_randrange`
@@ -349,7 +350,8 @@ unless a `SequenceView` cannot reach that site (`always_reversible` and
 
 ## Rejected trace edges
 
-27, in `more-itertools.rejected.json`: the builtins, methods and mocks that
+28, in `more-itertools.rejected.json`: one `lru_cache` wrapper spelling
+(Corrections of 2026-11-25), and the builtins, methods and mocks that
 the tests pass as callbacks (`key=str.lower`, `int`, `sum`, `list`, `len`,
 `frozenset`, a `Mock`, `l.pop`, `f.close`, `itertools.islice` as
 `wrapping_func`), the `index` methods of the tests' lists and strings in
@@ -432,7 +434,7 @@ Checked: the 75 of the 153 outside callees whose class or module CPython impleme
   `_shift_to_odd` (`recipes.py:1211`) therefore also names
   `functools._lru_cache_wrapper.wrapper` (+1 outside edge). On PyPy,
   `functools._lru_cache_wrapper` is a function, so CPython's
-  `functools._lru_cache_wrapper.__call__` is no path to the callee there.
+  `_functools._lru_cache_wrapper.__call__` is no path to the callee there.
 
 ## Statistics
 
@@ -442,8 +444,8 @@ Checked: the 75 of the 153 outside callees whose class or module CPython impleme
 | Ledger entries | 1318 |
 | Nodes | 294 |
 | Edges | 3814: 2961 in the package, 853 outside |
-| Edges that the trace confirms | 968 (25.4%); 2846 from reading only |
-| Trace edges rejected | 27 |
+| Edges that the trace confirms | 967 (25.4%); 2847 from reading only |
+| Trace edges rejected | 28 |
 | Functions that the tests run | 286 of 291 (not run: `dl_split`, `dl_mul`, `_fsumprod`, `_batched`, `_running_median_minheap_only`: older Python versions) |
 
 The low share confirmed by the trace comes from the role: the tests pass
@@ -509,3 +511,29 @@ stays through `781:9` and `782:9`).
 
 Edges: 3797 (2947 inside, 850 outside) before, 3814 (2961 inside, 853
 outside) after: +16 from the audit, +1 from PyPy.
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `more_itertools.recipes._strong_probable_prime` | `more_itertools/recipes.py:1211:25` |
+
+PyPy's Python closure `functools._lru_cache_wrapper.wrapper` stays where
+the ledger names it.
+
+The trace names the type by its facade qualname, so its 1 pair `caller ->
+functools._lru_cache_wrapper.__call__` is rejected as a naming artefact in
+`more-itertools.rejected.json` (rule A).

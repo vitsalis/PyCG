@@ -144,7 +144,7 @@ sites have `<builtin>.float` only (`ParseFloat` is a bare `Callable`, B2).
 `fp.read()` and `s_bytes.decode()` have no callee. `Output(...)` is a
 `NamedTuple` class call: no edge. `cached_tz` is wrapped by
 `lru_cache(maxsize=None)`: its call has
-`functools._lru_cache_wrapper.__call__` and `cached_tz` (configargparse
+`_functools._lru_cache_wrapper.__call__` and `cached_tz` (configargparse
 and einops precedents; no PyPy, so no `.wrapper`).
 
 **J4. Platforms (17 + 1 outside edges).** See the table above. The
@@ -220,7 +220,7 @@ the `types.SimpleNamespace` of `make_wheel_in`, not `Module.file`.
 | loader | `importlib.machinery.SourceFileLoader.exec_module` | J5 |
 | argparse | `argparse.ArgumentParser.add_argument` | the receiver's class (the trace names `_ActionsContainer`) |
 | `@contextmanager` calls | `contextlib.contextmanager.helper` and the package generator function | argcomplete precedent |
-| `@lru_cache` | `functools.lru_cache`, `functools.lru_cache.decorating_function`, `functools._lru_cache_wrapper.__call__` | J3 |
+| `@lru_cache` | `functools.lru_cache`, `functools.lru_cache.decorating_function`, `_functools._lru_cache_wrapper.__call__` | J3 |
 | package exceptions | `<builtin>.ValueError.__init__` | J7 |
 
 ## Open path sets
@@ -290,3 +290,24 @@ Counts: 647 to 648 edges (200 inside, 448 outside).
 The referee's ruling on the names of exported C types
 (`selection/batch-8-proposal/rulings/b8-ruling-c-type-names-1.md`,
 adopted by the lead) confirms N1 to N4 and M1 as applied: no change.
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `flit_core.vendor.tomli._re.match_to_datetime` | `flit_core/flit_core/vendor/tomli/_re.py:71:41` |
+
+The package has no trace of these calls, so no trace edge is rejected.
