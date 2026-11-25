@@ -176,6 +176,7 @@ class Class(Object):
         "instantiable",
         "ancestry",
         "unknown",
+        "allocator",
     )
 
     def __init__(self, name, module, defines, base_count):
@@ -207,6 +208,7 @@ class Class(Object):
         self.instantiable = None
         self.ancestry = ()
         self.unknown = False
+        self.allocator = None
 
     @property
     def mros(self):

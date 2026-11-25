@@ -1,5 +1,6 @@
 import textwrap
 
+import pytest
 from programs import callees, main_graph
 
 DEFINITIONS = """
@@ -348,3 +349,192 @@ def test_super_finds_the_attributes_of_object_after_the_last_class(tmp_path):
         "<builtin>.super",
     ]
     assert callees(graph, "main") == ["main.Plain.__init__"]
+
+
+SHARED_NEW = """
+{prelude}
+class Base:
+{new}
+class Loud(Base):
+    def __getattr__(self, name):
+        return f
+class Quiet(Base):
+    def speak(self):
+        pass
+Loud()
+Quiet().speak()
+"""
+
+ALLOCATING_NEWS = {
+    "object.__new__": """
+    def __new__(cls, *args):
+        return object.__new__(cls)
+""",
+    "super()": """
+    def __new__(cls, *args):
+        return super().__new__(cls)
+""",
+    "super naming the class, through a local with stores": """
+    def __new__(cls, *args, **kwargs):
+        instance = super(Base, cls).__new__(cls)
+        instance.ready = False
+        return instance
+""",
+    "a static method": """
+    @staticmethod
+    def __new__(cls):
+        return super().__new__(cls)
+""",
+}
+
+OTHER_NEWS = {
+    "another class": """
+    def __new__(cls, *args):
+        return object.__new__(Loud)
+""",
+    "cls rebound": """
+    def __new__(cls, *args):
+        cls = Loud
+        return object.__new__(cls)
+""",
+    "a local bound to something else too": """
+    def __new__(cls, *args):
+        instance = object.__new__(cls)
+        if args:
+            instance = Loud()
+        return instance
+""",
+    "a store of __class__": """
+    def __new__(cls, *args):
+        instance = object.__new__(cls)
+        instance.__class__ = Loud
+        return instance
+""",
+    "another decorator": """
+    @keep
+    def __new__(cls, *args):
+        return object.__new__(cls)
+""",
+}
+
+KEEP = """
+def keep(function):
+    return function
+"""
+
+SHADOWING_PRELUDES = {
+    "a module object": "class object: pass",
+    "a module super": """
+class Maker:
+    def __new__(cls, *rest):
+        return object.__new__(Loud)
+def super(*args):
+    return Maker
+""",
+}
+
+
+@pytest.mark.parametrize("new", ALLOCATING_NEWS)
+def test_a_new_that_allocates_gives_a_class_call_only_its_class(tmp_path, new):
+    source = SHARED_NEW.format(prelude="", new=ALLOCATING_NEWS[new])
+    graph = graph_of(tmp_path, source)
+
+    assert "main.Quiet.speak" in callees(graph, "main")
+    assert "main.Loud.__getattr__" not in callees(graph, "main")
+
+
+@pytest.mark.parametrize("new", OTHER_NEWS)
+def test_a_new_that_may_give_another_object_keeps_what_it_returns(tmp_path, new):
+    source = SHARED_NEW.format(prelude=KEEP, new=OTHER_NEWS[new])
+    graph = graph_of(tmp_path, source)
+
+    assert "main.Loud.__getattr__" in callees(graph, "main")
+
+
+@pytest.mark.parametrize("prelude", SHADOWING_PRELUDES)
+def test_a_new_allocates_only_through_the_builtin_names(tmp_path, prelude):
+    new = ALLOCATING_NEWS["object.__new__" if "object" in prelude else "super()"]
+    source = SHARED_NEW.format(prelude=SHADOWING_PRELUDES[prelude], new=new)
+    graph = graph_of(tmp_path, source)
+
+    assert "main.Loud.__getattr__" in callees(graph, "main")
+
+
+def test_super_naming_a_rebound_class_name_does_not_allocate(tmp_path):
+    source = SHARED_NEW.format(
+        prelude="",
+        new=ALLOCATING_NEWS["super naming the class, through a local with stores"],
+    )
+    graph = graph_of(tmp_path, source + "Base = Loud\n")
+
+    assert "main.Loud.__getattr__" in callees(graph, "main")
+
+
+def test_an_allocating_chain_allocates_through_every_new(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class Root:
+            def __new__(cls, *args):
+                instance = super(Root, cls).__new__(cls)
+                instance.flag = False
+                return instance
+        class Base(Root):
+            def __new__(cls, *args, **kwargs):
+                instance = super().__new__(cls, *args, **kwargs)
+                instance.done = Done()
+                return instance
+            def finish(self):
+                self.done.run()
+        class Done:
+            def run(self):
+                pass
+        class Loud(Base):
+            def __getattr__(self, name):
+                return f
+        class Quiet(Base):
+            def speak(self):
+                pass
+        Loud()
+        quiet = Quiet()
+        quiet.speak()
+        quiet.finish()
+        """,
+    )
+
+    assert callees(graph, "main") == [
+        "main.Base.__new__",
+        "main.Base.finish",
+        "main.Quiet.speak",
+    ]
+    assert callees(graph, "main.Base.finish") == ["main.Done.run"]
+
+
+def test_a_class_whose_mro_reaches_a_new_that_gives_another_keeps_it(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class Allocating:
+            def __new__(cls):
+                return super().__new__(cls)
+        class Factory(Allocating):
+            def __new__(cls):
+                return Real()
+        class Real:
+            def run(self):
+                pass
+        class Made(Factory):
+            def run(self):
+                pass
+        class Plain(Allocating):
+            def run(self):
+                pass
+        def made():
+            Made().run()
+        def plain():
+            Plain().run()
+        """,
+    )
+
+    assert callees(graph, "main.made") == ["main.Factory.__new__", "main.Real.run"]
+    assert callees(graph, "main.plain") == ["main.Allocating.__new__", "main.Plain.run"]

@@ -270,10 +270,93 @@ class ModuleBuilder(
                 if scope.local_name == name:
                     self.analysis.read_namespaces.add(scope.name)
 
-    def _is_builtin_reference(self, node, name):
+    def _allocator(self, statement, class_node):
+        if not isinstance(statement, ast.FunctionDef):
+            return None
+        class_scope = self.scopes.scope_of(class_node)
+        for decorator in statement.decorator_list:
+            if not self._is_builtin_in(class_scope, decorator, "staticmethod"):
+                return None
+        positional = [*statement.args.posonlyargs, *statement.args.args]
+        scope = self.scopes.scope_of(statement)
+        if not positional or scope.generator:
+            return None
+        cls = positional[0].arg
+        if cls in scope.rebound or cls in scope.shared:
+            return None
+        if any(
+            isinstance(node, ast.Attribute) and node.attr == "__class__"
+            for node in ast.walk(statement)
+            if isinstance(getattr(node, "ctx", None), (ast.Store, ast.Del))
+        ):
+            return None
+        stores = {}
+        for line in statement.body:
+            for name in [*_bound_names(line), *_walrus_names(line)]:
+                stores[name] = stores.get(name, 0) + 1
+        returns, bindings = [], {}
+        for node in _own_statements(statement):
+            match node:
+                case ast.Return(value=value) if value is not None:
+                    returns.append(value)
+                case ast.Assign(targets=[ast.Name(id=name)], value=value):
+                    bindings.setdefault(name, []).append(value)
+        kinds = set()
+        for value in returns:
+            values = [value]
+            if isinstance(value, ast.Name):
+                name = value.id
+                values = bindings.get(name, [])
+                local = self.scopes.resolve(scope, name) is scope
+                if not local or name in scope.shared:
+                    return None
+                if not values or len(values) != stores[name]:
+                    return None
+            for value in values:
+                kind = self._allocation(value, cls, scope, class_node)
+                if kind is None:
+                    return None
+                kinds.add(kind)
+        if len(kinds) != 1:
+            return None
+        return kinds.pop()
+
+    def _allocation(self, value, cls, scope, class_node):
+        match value:
+            case ast.Call(
+                func=ast.Attribute(value=owner, attr="__new__"),
+                args=[ast.Name(id=first), *_],
+            ) if first == cls:
+                pass
+            case _:
+                return None
+        if self._is_builtin_in(scope, owner, "object"):
+            return "object"
+        match owner:
+            case ast.Call(func=func, args=[], keywords=[]) if self._is_builtin_in(
+                scope, func, "super"
+            ):
+                cell = self.scopes.resolve(scope, "__class__")
+                if cell is self.scopes.scope_of(class_node):
+                    return "super"
+            case ast.Call(
+                func=func,
+                args=[ast.Name(id=start), ast.Name(id=second)],
+                keywords=[],
+            ) if second == cls and self._is_builtin_in(scope, func, "super"):
+                start = scope.mangle(start)
+                binder = self.scopes.resolve(scope, start)
+                if self.scopes.definition(binder, start) is class_node:
+                    return "super"
+        return None
+
+    def _is_builtin_in(self, scope, node, name):
         if not (isinstance(node, ast.Name) and node.id == name):
             return False
-        return self._is_builtin(self.scopes.resolve(self._scope, name), name)
+        return self._is_builtin(self.scopes.resolve(scope, name), name)
+
+    def _is_builtin_reference(self, node, name):
+        return self._is_builtin_in(self._scope, node, name)
 
     def _statements(self, statements):
         for statement in statements:
@@ -403,6 +486,7 @@ class ModuleBuilder(
             scope.dynamic,
         )
         cls.lineno, cls.end_lineno = node.lineno, node.end_lineno
+        cls.allocator = self._allocator(finals.get("__new__"), node)
         self._classes[scope] = cls
         self.defined_class(scope, cls)
         site = self._site(node)
@@ -597,8 +681,8 @@ class ModuleBuilder(
             return False
         name = self._scope.mangle(node.func.id)
         scope = self.scopes.resolve(self._scope, name)
-        definition = self.scopes.function_definition(scope, name)
-        if definition is None:
+        definition = self.scopes.definition(scope, name)
+        if definition is None or isinstance(definition, ast.ClassDef):
             return False
         arguments = definition.args
         signature = _signature(arguments, self.scopes.scope_of(definition))
@@ -1062,6 +1146,19 @@ def _abstract_methods(finals):
         if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef))
         and any(_names(d, "abstractmethod") for d in statement.decorator_list)
     ]
+
+
+def _own_statements(function):
+    pending = list(function.body)
+    while pending:
+        node = pending.pop()
+        if isinstance(node, _SCOPES):
+            continue
+        yield node
+        pending.extend(ast.iter_child_nodes(node))
+
+
+_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
 
 
 _COMPOUND_STATEMENTS = (
