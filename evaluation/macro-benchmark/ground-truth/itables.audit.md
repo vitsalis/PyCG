@@ -179,3 +179,76 @@ These were auditor-model errors, not defects in the installed ground truth.
 The raw primary sources and all source, baseline and final hashes are retained.
 No package/dependency/test/generated code was executed or imported. Root
 verification and ordered acceptance remain the final step for this handoff.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-itables-tomli` (88c1bb9, PR #98) against `main`
+(a044b5c): four outside edges added, none removed, in `itables.json`,
+`itables.added.json`, `itables.ledger`, `itables.md` and
+`evaluation/metrics.json`; no other file changed. I read the itables
+source from the inputs image, tomli 2.4.1 (fetched in a container,
+`tomli-2.4.1-py3-none-any.whl`, PyPI SHA-256
+`0d85819802132122da43cb86656f8d1f8c6587d54ae7dcaf30e90533028b49fe`,
+checked, read as text), tomli 1.1.0, 1.2.3 and 2.0.2 and CPython 3.9.25
+and 3.10.22 from the dependency sources. Nothing ran; no PyCG output was
+read.
+
+The premises hold. `pyproject.toml:48` declares the extra `config =
+["tomli;python_version<\"3.11\"", "platformdirs"]`; `requires-python >=
+3.9` (`:30`), so CPython 3.9 and 3.10 bind tomli at `config.py:20`. The
+test environment (CPython 3.14, `test-environments/itables.txt`) has no
+tomli: a missing module (ledger header, `config.py:61:38` and `85:34`
+already name `tomli.load`). tomli 2.4.1 (`pixi.lock:18077`,
+`Requires-Python >=3.8`) returns `loads(...)`'s dict from a binary file
+(`tomli/_parser.py:144-153`, `:224`), so the code after `:85` runs
+(honcho J6). tomli 1.1.0 (`_parser.py:64-69`), 1.2.3 (`:51-64`) and
+2.0.2 (`src/tomli/_parser.py:57-66`) do the same for a binary file.
+
+| Site | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `config.py:106:39` | `set_options_from_config_file -> tomli.load.items` | agree | `:105` binds `load_config_file`'s return; for a file not named `pyproject.toml` (`:53-55`, `:34-45`) `:85` assigns the result, `:89-94` is skipped, `:100` returns `cast(ITableOptions, config)`, and `typing.cast` returns `val` (3.9.25 `Lib/typing.py:1383`, 3.10.22 `:1745`): the stub instance itself, so its path stays (einops: assignment and forwarding through package functions; micro README "Missing modules": a call of a stub returns an instance of that stub) |
+| `show_config.py:29:35` | `show_config -> tomli.load.items` | agree | `:27` binds the same return; `:16` passes with the `config` extra (tomli and platformdirs) |
+| `typing.py:277:6`, `281:6` | `check_itable_arguments -> tomli.load.get` | agree | `config.py:97` passes the result as `kwargs` with `ITableOptions`, so `typed_dict is ITableOptions` (`:276`, `:280`) selects `kwargs.get`; the `dict[str, Any]` annotation does not rename the forwarded stub value (pgvector) |
+| `typing.py:329:35` | `check_itable_argument_types -> tomli.load.items` | agree | `:287` forwards `kwargs` when the file's `warn_on_unexpected_option_type` is true (tomli's real dict, J6); the import at `:321` succeeds with the `check_type` extra (`typeguard>=4.4.1`) |
+
+`<builtin>.dict.items`, `.get` and `.pop` stay correctly (tomllib on 3.11
+and later, the `pyproject.toml` sub-dict, the dicts of
+`javascript.py:423`, `1415`, `1563`). The release sampling (batch 8,
+"Which releases of a dependency are read") decides names taken from a
+release's source; here every name is the access path, and one admitted
+release is a witness of each edge, so reading only 2.4.1 for the
+behaviour is sufficient; the three older releases above agree.
+
+Nothing missed. Every flow of a `tomllib.load` result: `config.py:61`
+(only `in` and a subscript at `:62`); `:85` to `:90` (`in`), `:94`
+(subscript, no path), `:97`, `:100`; `check_itable_arguments` uses
+`kwargs` at `:276`, `:280`, `set(kwargs)` at `:284` (the existing
+`<builtin>.set` edge; the set has no path) and `:287`;
+`check_itable_argument_types` unpacks `.items()` at `:329`, so `key` and
+`value` (and `{key: value}` at `:338`) have no path. The loops at
+`config.py:106` and `show_config.py:29` unpack items, so the values that
+`options.py:195` stores have no path, and `options.py:206` and `:234`
+pass package-built dicts. No other module imports `load_config_file`,
+`check_itable_argument_types` or `tomllib`. `kwargs.pop` gets no
+`tomli.load.pop`: `config.py:97` is the only caller that passes the
+result. `except tomllib.TOMLDecodeError` (`:86`) is not a call.
+
+Counts. Callee lines 1559 to 1564 (five sites), notes 113 to 114 (the
+new note at `typing.py:329:35`), 930 edges (188 inside, 742 outside),
+610 of 930 traced (65.6%): as `check.py itables` reports, which passes
+with the source in place, as do `--origin` (930: 188 / 742; added 320:
+49 / 271) and `--report`. `gate.benchmark_digest()` on the branch gives
+`310bc7e2868333e388c47a50ebfd3cc14fa1bee9b007a3029df84813aac58816`, the
+recorded digest. The `make eval` numbers and the recorded macro outside
+R come from PyCG's output, which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| A1 | `typing.cast` is cited at `Lib/typing.py:1745` for CPython 3.9.25; there it is `:1375-1383` (`return val` at `:1383`); `:1745` holds for 3.10.22 only | `itables.md`, "Corrections of 2026-11-25" ("CPython 3.9.25 `:1745`"), and the commit message of 88c1bb9 | cite 3.9.25 `:1383` |
+
+**Verdict.** The four edges stand, and nothing is missed. One citation
+(A1) must be corrected before the merge; no edge depends on it.
+
+A1 was applied before the merge: `itables.md` and the commit message now
+cite CPython 3.9.25 `:1375-1383` and 3.10.22 `:1737-1745`. The audit is
+closed.
