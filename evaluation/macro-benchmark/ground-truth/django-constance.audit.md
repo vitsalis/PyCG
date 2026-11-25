@@ -199,3 +199,88 @@ library passes; no call cannot bind. No edge changes.
 Rulings for the lead or the referee: J3 (with R1, R2 and N1), J10, and
 the scope question of R1, which also decides J8. J1 needs only the lead's
 confirmation; J2 and J4 are decided by existing rules.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-constance-redis` (fe9da93, PR #105) against `main`
+(0febb44): two outside edges renamed, none added or removed, in
+`django-constance.json`, `django-constance.added.json`,
+`django-constance.ledger` and `django-constance.md`, and
+`evaluation/metrics.json` re-based; no other file changed. I read
+`constance/` and `pyproject.toml` from the inputs image; the redis sdists
+of every release before 2.6.1 and of 2.6.1, 2.6.2, 2.10.6, 3.0.1, 3.5.3,
+4.1.4, 4.2.2, 5.0.8, 6.4.0 and 8.1.0, fetched in a container by PyPI's
+SHA-256 and parsed (never imported or run) by CPython 3.10.22's `ast` in
+the container; and CPython 3.10.22 to 3.15.2 from the dependency sources.
+No PyCG output was read.
+
+**(a) The redis releases.** `pyproject.toml:42-43` declares the extra
+`redis = ["redis"]`, and the package admits CPython 3.10 and later only
+(`:11`, `:37`), so batch 7's rule admits every redis release that runs on
+CPython 3.10 and later, and batch 8's rule reads the floor and the last
+release of each minor series up to the pin 8.1.0.
+
+- Floor: agree, 2.6.1. CPython 3.10's parser rejects every release before
+  it: 0.6.0 and 0.6.1 (`redis.py:85`, `:92`), 1.34 and 1.34.1
+  (`client.py:28`), 2.0.0 (`client.py:53`), 2.2.0 and 2.2.2 (`:54`),
+  2.2.4 to 2.4.13 (`connection.py:26` to `:73`), 2.6.0 (`connection.py:76`,
+  "multiple exception types must be parenthesized"). 2.6.1 parses, and its
+  imports take `_compat.py`'s Python 3 branch (`:29-50`; no
+  `collections` ABC alias, no Python 2 module). The parser matters: CPython
+  3.14 accepts `except (socket.error, socket.timeout), e:` as a tuple of
+  exceptions (PEP 758), so this check must use a 3.10 parser.
+- The series: agree. PyPI's last release of each minor series from 2.6 to
+  8.1 is exactly the writer's list; 8.2.0 (2026-11-23) is after the pin
+  and the release of django-constance 4.5.0.
+- The sample I read gives the writer's answer: `redis.from_url` is exported
+  by `__init__.py` in all ten and returns a `redis.Redis` (`Redis(...)` in
+  2.6.1 `utils.py:27-31`, `Redis.from_url(url, db, **kwargs)` in 2.6.2);
+  `redis.Redis` is a class (2.6.1 `client.py:1152`, a subclass of
+  `StrictRedis` `:148`; 3.0.1 `:416`; 8.1.0 `:156`); `get`, `mget` and `set`
+  exist with signatures that bind the package's calls (`redisd.py:62`,
+  `78`, `90`: one key; a list; a key and a value): 2.6.1 `client.py:454`,
+  `492`, `538`; 3.5.3 `:1602`, `1663`, `1763`; 4.1.4 `commands/core.py:1227`,
+  `1392`, `1590`; 8.1.0 `:3194`, `3751-3760`, `4292`. `redis/asyncio` is
+  absent in 4.1.4 and present from 4.2.2 (`__init__.py:1`, `15`;
+  `asyncio/client.py:83`, `asyncio/utils.py:7`) to 8.1.0 (`:21`, `:136`),
+  so `import redis.asyncio` before 4.2.0 raises `ImportError` and
+  `redisd.py:40-44` sets `_ard` to `None`, the branch that already runs.
+- No edge depends on a release-specific name: every redis callee of the
+  graph (`redis.from_url`, `redis.Redis` and its `get`, `mget`, `set`,
+  `redis.asyncio.from_url`, `redis.asyncio.Redis` and its `get`, `mget`,
+  `set`) is a public path that every release after its introduction has,
+  and the methods are named through the receiver class, so the class that
+  defines them (`StrictRedis`, `Redis`, `CoreCommands`) changes no name.
+
+**(b) The builtin SHA-256 object.**
+
+| Site | Change | Verdict | Evidence |
+|---|---|---|---|
+| `forms.py:124:32` `version_hash.update(...)` | `_sha256.sha256.update` renamed `_sha256.SHA256Type.update` | agree | `version_hash = hashlib.sha256()` (`:81`). On CPython 3.10 and 3.11 hashlib's fallback is the factory `_sha256.sha256` (`Lib/hashlib.py:94-97` of 3.11.18), whose objects have `.name = "_sha256.sha256"` (`sha256module.c:567` of 3.10.22, `:570` of 3.11.18) and whose type `_sha256` exports as `SHA256Type` (`PyModule_AddObject`, `:725`, `:728`) |
+| `forms.py:125:57` `version_hash.hexdigest()` | `_sha256.sha256.hexdigest` renamed `_sha256.SHA256Type.hexdigest` | agree | the same object |
+| both | `_sha2.SHA256Type.*` and `_hashlib.HASH.*` kept | agree | from 3.12 the fallback is `_sha2.sha256` (3.12.16 `hashlib.py:95-97`), type `.name = "_sha2.SHA256Type"` added by `PyModule_AddType` (`sha2module.c:547`, `855` of 3.12.16; `:540`, `867` of 3.15.2); `_hashlib.HASH` as in the bottle audit |
+
+No public class alias applies (ruling-names-2): the package declares
+`Implementation :: CPython` only (`pyproject.toml:37`), and CPython's
+`hashlib.sha256` is a factory. Nothing missed: `forms.py:81` is the only
+hash in the package; its locks (`memory.py:13`, `redisd.py:109`) are used
+only in `with` statements, implicit sites with no outside edge, and the
+constructor names `threading.Lock` and `threading.RLock` do not change.
+No other outside callee falls under the two rulings.
+
+Counts. 680 edges (256 inside, 424 outside), 497 traced, 183 added: as
+`check.py django-constance` reports, which passes with the source in
+place, as do `--origin` and `--report`. `gate.benchmark_digest()` on the
+branch gives `7636db90bff3d5642c226403bade93101c540f974adf73875bf7a59194802ce0`,
+the recorded digest. The `make eval` numbers come from PyCG's output,
+which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| A1 | the Python 2 syntax of redis 1.34 is cited at `client.py:31`; that line is `sock.setsockopt(...)`, and the syntax is `except socket.error, e:` at `:28` | `django-constance.md`, "Corrections of 2026-11-25", (a), floor | cite `:28` |
+
+**Verdict.** The two renames stand, the floor and the sample hold, and
+nothing is missed. A1 corrects one citation; no edge depends on it.
+
+A1 was applied before the merge (`django-constance.md` cites
+`client.py:28` of redis 1.34). The audit is closed.
