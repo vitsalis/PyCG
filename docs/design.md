@@ -2935,6 +2935,19 @@ A load through the class runs `__get__` with no value for the instance and
 the class: a property is then itself (property's own `__get__` is not
 run), and a subclass's own `__get__` runs.
 
+A store through an instance writes the instance's field unless a data
+descriptor takes it, as `object.__setattr__` does: in every MRO of the
+instance's class, the first class that binds the name with a value binds a
+property, or an instance of a class that resolves `__set__` or `__delete__`
+in each of its MROs (to an analysed method, or through the builtin
+`property`). A slot, a name that a class only annotates, a member of an
+outside base, a name that no class binds and any other member value leave
+the store to the field, as does every name of a class whose MROs are the
+exhaustive order (see *Alternative hierarchies*). The decision is made like
+a lookup (`Hierarchy.instance_dict_written` and `not_data_descriptor`): it
+waits for complete hierarchies, is made again as MROs grow, and only ever
+adds the write, so it does not depend on the order of the solve.
+
 The methods of `property` are also called explicitly, on the engine's
 property or on a property instance, through the instance, through
 `super()` or unbound: `p.__get__(obj, owner)` calls the getter with `obj`
@@ -2964,8 +2977,16 @@ decides nothing.
   copy's, and a subclass's own `__init__` may run for the copy; the
   analysis merges them and calls nothing (the micro-benchmark cases
   `descriptors/property_subclass_copy` and `property_subclass_copy_init`).
-- Limit: which of a data descriptor and the instance's `__dict__` wins is
-  not decided: both count.
+- Limit: beside a non-data descriptor, a load runs the descriptor and also
+  reads the instance's field; Python reads only the field once it is set.
+- Limit: a member whose value the analysis does not see (a class body that
+  binds a parameter that holds nothing) takes the store, as if it were a
+  data descriptor
+  (`test_limit_a_member_whose_value_the_analysis_does_not_see_takes_the_store`).
+- Limit: a property stored on the class after its body (`C.x =
+  property(...)`) is not a binding of the class for this decision, so a
+  store through an instance also writes the field
+  (`test_limit_a_property_stored_on_the_class_after_its_body_lets_the_store_write`).
 - Limit: a known `None` flows only as a literal argument: a subclass
   `__get__(self, obj, owner=None)` that forwards to `super().__get__(obj,
   owner)` calls the getter on a load through the class

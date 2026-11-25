@@ -152,6 +152,8 @@ class Class(Object):
     __slots__ = (
         "module",
         "defines",
+        "bound",
+        "slots",
         "bases",
         "_mros",
         "ancestors",
@@ -185,6 +187,8 @@ class Class(Object):
         super().__init__(name)
         self.module = module
         self.defines = frozenset(defines)
+        self.bound = frozenset()
+        self.slots = frozenset()
         self.bases = [{} for _ in range(base_count)]
         self.mros = [[self]]
         self.exhaustive = False

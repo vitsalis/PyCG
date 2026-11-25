@@ -65,6 +65,30 @@ def quiet():
     Quiet().run()
 """
 
+LATE_DATA_DESCRIPTOR = """
+class Rows:
+    def index(self, value): pass
+class Pairs:
+    def index(self, value): pass
+class Setter:
+    def __set__(self, obj, value): pass
+def setter_base():
+    return Setter
+class Field(setter_base()):
+    def __get__(self, obj, owner=None): return Rows()
+class WithField:
+    value = Field()
+def late():
+    return WithField
+class Model(late()):
+    pass
+def use(model):
+    model.value = Pairs()
+    model.value.index(1)
+use(Model())
+"""
+
+
 BASE_FROM_A_CALL = """
 class A:
     def f(self): pass
@@ -1358,6 +1382,7 @@ Base().helper()
     "two bases": TWO_BASES,
     "a late base whose new gives another object": LATE_FACTORY_BASE,
     "base from a call": BASE_FROM_A_CALL,
+    "a store through a data descriptor that late bases give": LATE_DATA_DESCRIPTOR,
     "external base and __getattr__": EXTERNAL_BASE_AND_GETATTR,
     "bases on a cycle": BASES_ON_A_CYCLE,
     "cycle formed late": CYCLE_FORMED_LATE,
@@ -2079,6 +2104,11 @@ def test_programs_give_the_same_results_under_every_order(
 
 
 EXPECTED_CALLEES = {
+    "a store through a data descriptor that late bases give": (
+        "main.use",
+        "main.",
+        ["main.Field.__get__", "main.Rows.index", "main.Setter.__set__"],
+    ),
     "a late base whose new gives another object": (
         "main.made",
         "main.",

@@ -506,7 +506,9 @@ class ModuleBuilder(
                     self.analysis.add_class_member(value, field)
                 self.analysis.add_set_name(value, cls, name, self._caller, site)
             slots = _slots(finals) if "__slots__" in members else ()
-            cls.defines = frozenset(members).union(map(self._scope.mangle, slots))
+            cls.slots = frozenset(map(self._scope.mangle, slots))
+            cls.bound = frozenset(name for name, _ in namespace)
+            cls.defines = frozenset(members).union(cls.slots)
             fields = {
                 name: self.annotation(kind) for name, kind in _structure_fields(finals)
             }
