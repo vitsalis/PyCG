@@ -55,6 +55,10 @@ EXPLICIT = ("<explicit>",)
 
 FINAL_BUILTIN_METHODS = frozenset({"__iter__", "__contains__"})
 
+STR_DEFINED_BEYOND_STUBS = frozenset(
+    {"builtins.str", "builtins.bytes", "builtins.bytearray"}
+)
+
 
 class Hierarchy:
     def new_class(
@@ -797,7 +801,23 @@ def _defines(classes, names):
                 return True
             if TUPLE_STORAGE in names and _derives_from_tuple(base.name):
                 return True
+            if "__str__" in names and _outside_defines_str(base.name):
+                return True
     return False
+
+
+@cache
+def _outside_defines_str(name):
+    if _outside_defines(name, "__str__"):
+        return True
+    prefix = f"{BUILTIN_MODULE}."
+    if name.startswith(prefix):
+        name = f"builtins.{name[len(prefix) :]}"
+    return any(
+        definition.kind == "class"
+        and not STR_DEFINED_BEYOND_STUBS.isdisjoint(_STUBS.mro(definition.path))
+        for definition in _STUBS.find(name)
+    )
 
 
 @cache

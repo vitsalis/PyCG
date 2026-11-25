@@ -214,6 +214,37 @@ def test_conversions_to_str(tmp_path):
     ]
 
 
+def test_conversions_fall_back_to_repr_only_past_every_outside_str(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Text(str):
+            def __repr__(self): return ""
+        class Data(bytes):
+            def __repr__(self): return ""
+        class Buffer(bytearray):
+            def __repr__(self): return ""
+        class Failure(Exception):
+            def __repr__(self): return ""
+        class Number(int):
+            def __repr__(self): return ""
+        def convert(value):
+            str(value)
+            f"{value}"
+            "{}".format(value)
+        convert(Text("a"))
+        convert(Data(b"a"))
+        convert(Buffer(b"a"))
+        convert(Failure())
+        convert(Number(1))
+        """,
+    )
+
+    assert [c for c in callees(graph, "main.convert") if c.startswith("main.")] == [
+        "main.Number.__repr__"
+    ]
+
+
 def test_format_passes_the_format_spec_to_format_only(tmp_path):
     graph = main_graph(
         tmp_path,
