@@ -311,6 +311,40 @@ reversed(Row())
     ]
 
 
+def test_reversed_calls_nothing_of_a_class_without_both_len_and_getitem(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import collections.abc
+class OnlyItems:
+    def __getitem__(self, index):
+        return index
+class OnlyLength:
+    def __len__(self):
+        return 1
+class ItemsMeta(type):
+    def __getitem__(cls, index):
+        return index
+class Keyed(metaclass=ItemsMeta): pass
+class View(collections.abc.Sequence):
+    def __getitem__(self, index):
+        return index
+    def __len__(self):
+        return 1
+reversed(OnlyItems())
+reversed(OnlyLength())
+reversed(Keyed)
+reversed(View())
+""",
+    )
+
+    assert callees(graph, "main") == [
+        "<builtin>.reversed",
+        "main.View.__getitem__",
+        "main.View.__len__",
+    ]
+
+
 def test_reversed_of_a_class_calls_its_metaclass(tmp_path):
     graph = main_graph(
         tmp_path,
