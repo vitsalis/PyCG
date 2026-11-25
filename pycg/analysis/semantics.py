@@ -119,6 +119,7 @@ class Analysis(
         self._subscriptions = set()
         self._compared_keys = {}
         self._dict_hubs = {}
+        self._subscript_keys = {}
         self._watches = {}
         self._field_readers = {}
         self._notices = deque()
