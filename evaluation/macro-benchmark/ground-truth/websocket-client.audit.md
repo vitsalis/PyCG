@@ -289,3 +289,28 @@ the trace confirms 353, 29 rejected).
   updated with the referee's text. One slip, wording only: J6 cites the
   classifiers as `setup.py:39`; they are at `setup.py:53-55` (line 39 is
   `python_requires`).
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-websocket-client-sha1` (3943dc8, PR #112) against
+`main` (2130a69): one outside edge renamed in `websocket-client.json`,
+`websocket-client.added.json`, `websocket-client.ledger` and
+`websocket-client.md`; `evaluation/metrics.json` is not recorded yet. I
+read `websocket/` and `setup.py` from the inputs image and CPython 3.10.22
+to 3.15.2 from the dependency sources, as text. Nothing ran; no PyCG
+output was read.
+
+| Site | Change | Verdict | Evidence |
+|---|---|---|---|
+| `_handshake.py:215:53` `hashlib.sha1(value).digest()` (`_handshake._validate`) | `_sha1.sha1.digest` renamed `_sha1.SHA1Type.digest` | agree | websocket-client admits CPython 3.10 and later only (`setup.py:39`, classifiers `:47-52`; `websocket-client.md`, the opening section); hashlib's fallback is the factory `_sha1.sha1`, whose type `_sha1` exports as `SHA1Type` on 3.10.22 `sha1module.c:568-570` through 3.15.2 `:353` (all checked for bottle); `hashlib.sha1` is a factory, so no public class alias applies (ruling-names-2) |
+| the same | `_hashlib.HASH.digest` kept | agree | `_hashlib` exports `HASH` (`PyModule_AddType`) |
+
+Nothing missed: `_handshake.py:215` is the package's only hash object; its
+locks (`_core.py:124-125`, `_abnf.py:320`, `_app.py:170`) are used only in
+`with` statements, implicit sites; no other outside callee of the graph
+falls under the two rulings. Counts: 648 edges (202 inside, 446 outside),
+unchanged in number, 353 traced: as `check.py websocket-client` reports,
+which passes with the source in place, as do `--origin` and `--report`.
+
+**Verdict.** Closed: the rename stands, and nothing is missed. No
+finding.
