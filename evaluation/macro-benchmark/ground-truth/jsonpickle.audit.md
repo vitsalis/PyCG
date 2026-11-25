@@ -259,3 +259,99 @@ The lead asked for an opinion on J4, J7 and J9.
 - The opacity of a client object's `__dict__` and `__class__` is stated
   only through B5's "one of its attributes" and in an audit file
   (cachetools C2). One sentence in B5 would prevent J9-type questions.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-jsonpickle-decoded` (50005d3, PR #107) against `main`
+(14798e4): 30 outside edges added, none removed, in `jsonpickle.json`,
+`jsonpickle.added.json`, `jsonpickle.ledger` and `jsonpickle.md`;
+`evaluation/metrics.json` is not recorded yet. I read `jsonpickle/` and
+`pyproject.toml` from the inputs image; every ujson release up to 1.19 and
+PyYAML 3.10, fetched in a container by PyPI's SHA-256 and parsed (never
+imported, built or run) by CPython 3.8.20's `ast`, the oldest Python that
+jsonpickle admits (`requires-python = ">=3.8"`, `pyproject.toml:19`); and
+ujson 1.35, 2.0.3, 5.13.0 and 6.1.0 as read for bottle. No PyCG output was
+read.
+
+**Releases.** Agree.
+
+- ujson floor 1.19: 1.4 to 1.18 build only a Python 2 module
+  (`Py_InitModule`, `python/ujson.c:37` of 1.18); 1.19 adds the Python 3
+  module (`ujson.c:61-82`, `PyModule_Create`). Its `setup.py` parses on
+  3.8, and every C API name of `python/*.c` exists in CPython 3.8
+  (`PyInt_*` and `PyString_*` are mapped by `py_defines.h` under
+  `PY_MAJOR_VERSION >= 3`; `PyUnicode_AS_UNICODE` and
+  `PyUnicode_GET_SIZE` are still there in 3.8). `loads` builds a dict with
+  `PyDict_New` (`JSONtoObj.c:77`).
+- PyYAML floor 3.10: the oldest release with files; under 3.8 its `lib3/`
+  and `setup.py` parse (only Python 2 `lib/` and `tests/lib/` do not), and
+  `setup.py` selects `lib3` on Python 3 (`:331`); `safe_load` is
+  `load(stream, SafeLoader)` (`lib3/yaml/__init__.py:94`),
+  `construct_yaml_map` starts `data = {}` (`constructor.py:396`), and
+  `dump_all` returns `io.StringIO().getvalue()` when `encoding` is `None`.
+- The series: PyPI's lists match the writer's; PyYAML 4.x has only
+  pre-releases (4.2b1, b2, b4), and ujson 6.1.0 (2026-11-03) and PyYAML
+  6.0.4 (2026-11-20) are after jsonpickle 4.1.4's upload.
+- The names are access paths, so no release changes them; each release
+  read is a witness of the behaviour.
+
+**Flows.** Agree with all 30 edges.
+
+| Site | Edges | Verdict | Evidence |
+|---|---|---|---|
+| `util.py:626:26` | `items -> X.items` | agree | `decode` returns `backend.decode(string)` to `context.restore` (`unpickler.py:129-130`); `_restore_tags` selects `_restore_dict` for a `type(obj) is dict` without tags, which loops `util.items(obj)` (`926`, `939`, `953`); `_restore_from_dict` likewise (`711`) |
+| `unpickler.py:739:36` | `_restore_from_dict -> X.startswith` | agree | with `keys=True`, `_restore_pickled_key` decodes a `json://` key with `context=self, reset=False` (`674-684`); the pickler escapes a `str` attribute name that starts with `json://` (`_flatten_string_key_value_pair`, `_escape_key`, `pickler.py:765-772`, `784-792`), and the nested result is that `str` through `_passthrough` |
+| `handlers.py:271:20` | `LockHandler.restore -> X.get` | agree | `_restore_object` calls `handler(self).restore(obj)` with the object itself (`unpickler.py:895`) |
+| `ext/pandas.py:91`, `96`, `98` | `restore_pandas -> X.get` | agree | the pandas handlers pass their `obj`/`data` (`206`, `353`, ...); `meta` returns in a tuple that is unpacked |
+| `ext/numpy.py:96`, `112`, `114`, `151`, `216`, `217`, `224`, `225`, `327` | `X.get` and `X.get.get` | agree | the array handlers receive the object itself; `NumpyNDArrayHandlerView.restore` forwards `data.get('base')` through `self.context.restore` (`327`, `333`) to the base's handler, whose calls are then `X.get.get`. A base dict never has `base`: `flatten` stores `base` only for an `ndarray` base (`281-283`), numpy keeps a base that is an array only when that array owns its data or has a non-array base, and such an array is stored by value or as a copy (`274-279`, `304-319`) |
+| `ext/numpy.py:343-346` | `NumpyNDArrayHandlerView.restore -> X.get` | agree | a view's own dict only, as above |
+| `ext/pandas.py:79:59` | `flatten_pandas -> ujson.dumps.encode`, `yaml.dump.encode` | agree | `pd_encode` and the handlers call `jsonpickle.encode` (`22`, `199`, `348`), which returns `backend.encode(...)` (`pickler.py:198`), the encoder's result (`backend.py:232`); `buf.encode()` runs when `size_threshold` is exceeded and `compression` is set (`78-79`) |
+
+No other package call takes a decoded top-level object or an encoded
+string: the sweep of `data.X(` and `obj.X(` in `handlers.py` and `ext/`
+finds exactly the sites above, and the other restore functions of
+`unpickler.py` only subscript, iterate or unpack it.
+
+**Missed.**
+
+| Id | Finding | Edges | Confidence |
+|---|---|---|---|
+| F1 | The reduce-state path of the writer's last paragraph has a witness that the package's own output gives. Encode, with `keys=True` and the ujson or yaml backend preferred, `{k: r}` where `k` is an instance of a client class `K` with only plain attributes, and `r` of a client class `R` without `__setstate__` whose `__reduce__` returns `(R, (), k)`; decode it with `keys=True` where `K` cannot be imported (the documented `on_missing`, default `'ignore'`). Pickler: phase 2 escapes `k` first through a nested encode on the same context (`pickler.py:765-772`, `775-780`), then flattens `r`, whose state `k` is already referenced: `{"py/id": i}`. Unpickler: phase 2 decodes the key on the same context (`unpickler.py:674-684`); `_restore_object` finds no class and returns `self._mkref(obj)` (`902`), so `_objs[i]` holds the `ujson.loads` (`yaml.safe_load`) result itself. `data[k] = result = self._restore(v)` evaluates the value before the failing assignment of an unhashable key: `_restore_reduce` restores the state through `_restore_id` (`626-629`) to that result; `stage1.__setstate__(state)` raises `AttributeError`; for an `R` whose instances have a non-empty `__dict__`, `state.setdefault(k, v)` runs (`595`), and for an `R` with `__slots__`, `stage1.__dict__` raises and `state.items()` runs (`600`) | `Unpickler._restore_reduce -> ujson.loads.setdefault`, `-> yaml.safe_load.setdefault` (`unpickler.py:595:41`); `-> ujson.loads.items`, `-> yaml.safe_load.items` (`600:48`): +4 outside | likely; the writer should check the id alignment of the two phases (both allocate `k`'s index before its attributes, and `K` has no object attributes) |
+
+**Remark.** R1: ujson 1.19 to 1.33 reject jsonpickle's encoder options
+(`sort_keys`, `escape_forward_slashes`; `kwlist` at `objToJSON.c:732` of
+1.19, which has only `ensure_ascii` and `double_precision`), so with those
+releases the ujson encode raises `TypeError` and the backend falls
+through (`backend.py:35-43`); 1.35 (`:1000`), 2.0.3 (`:754`) and later
+accept both. The sentence "Every admitted release returns a `str`" of the
+encoded-results paragraph is true of `dumps` itself; the `79:59` edges
+rest on the releases that accept the options. No edge changes.
+
+Counts. 1307 edges (383 inside, 924 outside), 794 traced (60.7%), 513 from
+reading only (474 outside): as `check.py jsonpickle` reports, which passes
+with the source in place, as do `--origin` and `--report`. The `make eval`
+numbers come from PyCG's output, which I did not read.
+
+**Verdict.** The 30 edges stand. F1 (+4 outside) needs the writer's
+answer: add the four edges, or show why the witness fails.
+
+### Addendum: the answer to F1 and R1
+
+The writer's branch is now one commit, 053e965, on `main` (c399abd); it
+changes only `jsonpickle.json`, `jsonpickle.added.json`,
+`jsonpickle.ledger` and `jsonpickle.md` against `main`, and against the
+audited 50005d3 it adds the four edges of F1 and the R1 sentence.
+
+| Item | Verdict | Evidence |
+|---|---|---|
+| F1: `Unpickler._restore_reduce -> ujson.loads.setdefault`, `yaml.safe_load.setdefault` (`unpickler.py:595:41`); `-> ujson.loads.items`, `yaml.safe_load.items` (`600:48`) | agree | The id alignment holds; both sides number from 0 (`pickler.py:339-340`, `_log_ref`; `unpickler.py:514-515`, `_mkref`). Pickler: the dict gets 0 (`_get_flattener`, `864`); phase 2 escapes `k` through `encode(..., reset=False, context=self)` (`765-772`), whose `_ref_obj_instance` gives `k` 1 (`747`), and `k`'s `__dict__` is flattened by `_flatten_dict_obj` without an id (`724-730`); `r` gets 2, and its reduce tuple is flattened item by item (`670`): `R` as a type reference and `()` as a tuple, neither with an id, and the state `k` as `{"py/id": 1}` (`_getref`, `754`, `353-355`). Unpickler: `_restore_dict` takes 0 (`915-918`); the key decode on the same context (`677-684`) reaches `_restore_object`, which for a class it cannot load returns `self._mkref(obj)`, 1 (`900-902`); the right side of `data[k] = result = self._restore(v)` (`945`) runs before the assignment of the unhashable key, `_restore_reduce` takes 2 for its proxy (`558-559`), and `_restore_id` returns `_objs[1]` (`626-629`), the result of `ujson.loads` or `yaml.safe_load` of the key's string. `stage1.__setstate__` raises `AttributeError` (`587`); then `595` or `600` runs as stated |
+| R1 as corrected: the encoder edges at `ext/pandas.py:79:59` rest on ujson 1.34 and later | agree | `kwlist` of `dumps`: 1.30 `python/objToJSON.c:813` and 1.33 `:793` have `obj`, `ensure_ascii`, `double_precision`, `encode_html_chars` only; 1.34 `:949` adds `escape_forward_slashes` and `sort_keys` (fetched in a container by PyPI's SHA-256); jsonpickle passes both (`backend.py:108`), and `JSONBackend.encode` falls through on any exception (`backend.py:40-43`) |
+
+Counts. 1311 edges (383 inside, 928 outside), 794 traced (60.6%), 517
+from reading only (478 outside), callee lines 1627, notes 216: as
+`check.py jsonpickle` reports on 053e965, which passes with the source in
+place, as do `--origin` and `--report`. `evaluation/metrics.json` is
+unchanged, as agreed with the lead.
+
+**Verdict of the addendum.** Closed: F1 and R1 are answered, and the 34
+added edges stand. No finding.

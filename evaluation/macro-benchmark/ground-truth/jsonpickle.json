@@ -240,10 +240,18 @@
     "jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags",
     "jsonpickle.unpickler.Unpickler.restore",
     "numpy.array",
-    "numpy.ndarray.reshape"
+    "numpy.ndarray.reshape",
+    "ujson.loads.get",
+    "ujson.loads.get.get",
+    "yaml.safe_load.get",
+    "yaml.safe_load.get.get"
   ],
   "jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags": [
-    "<builtin>.dict.get"
+    "<builtin>.dict.get",
+    "ujson.loads.get",
+    "ujson.loads.get.get",
+    "yaml.safe_load.get",
+    "yaml.safe_load.get.get"
   ],
   "jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.__init__": [],
   "jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten": [
@@ -306,6 +314,10 @@
     "numpy.ndarray",
     "numpy.ndarray.copy",
     "numpy.ndarray.reshape",
+    "ujson.loads.get",
+    "ujson.loads.get.get",
+    "yaml.safe_load.get",
+    "yaml.safe_load.get.get",
     "zlib.decompress"
   ],
   "jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore_byteorder": [
@@ -332,7 +344,11 @@
     "numpy.dtypes.UInt32DType.newbyteorder",
     "numpy.dtypes.UInt64DType.newbyteorder",
     "numpy.dtypes.UInt8DType.newbyteorder",
-    "numpy.dtypes.VoidDType.newbyteorder"
+    "numpy.dtypes.VoidDType.newbyteorder",
+    "ujson.loads.get",
+    "ujson.loads.get.get",
+    "yaml.safe_load.get",
+    "yaml.safe_load.get.get"
   ],
   "jsonpickle.ext.numpy.NumpyNDArrayHandlerView.__init__": [
     "<builtin>.super",
@@ -411,7 +427,11 @@
     "numpy.dtypes.UInt64DType.newbyteorder",
     "numpy.dtypes.UInt8DType.newbyteorder",
     "numpy.dtypes.VoidDType.newbyteorder",
-    "numpy.ndarray"
+    "numpy.ndarray",
+    "ujson.loads.get",
+    "ujson.loads.get.get",
+    "yaml.safe_load.get",
+    "yaml.safe_load.get.get"
   ],
   "jsonpickle.ext.numpy.UnpickleableNumpyGenericHandler.flatten": [
     "<builtin>.super",
@@ -565,12 +585,16 @@
     "<builtin>.len",
     "<builtin>.str.encode",
     "jsonpickle.util.b64encode",
+    "ujson.dumps.encode",
+    "yaml.dump.encode",
     "zlib.compress"
   ],
   "jsonpickle.ext.pandas.PandasProcessor.restore_pandas": [
     "<builtin>.bytes.decode",
     "<builtin>.dict.get",
     "jsonpickle.util.b64decode",
+    "ujson.loads.get",
+    "yaml.safe_load.get",
     "zlib.decompress"
   ],
   "jsonpickle.ext.pandas.PandasSeriesHandler.flatten": [
@@ -711,7 +735,9 @@
     "<builtin>.dict.get",
     "_thread.LockType.acquire",
     "threading.Lock",
-    "threading.Lock.acquire"
+    "threading.Lock.acquire",
+    "ujson.loads.get",
+    "yaml.safe_load.get"
   ],
   "jsonpickle.handlers.QueueHandler.flatten": [],
   "jsonpickle.handlers.QueueHandler.restore": [
@@ -1240,7 +1266,9 @@
     "jsonpickle.unpickler._passthrough",
     "jsonpickle.util.is_dictionary_subclass",
     "jsonpickle.util.is_noncomplex",
-    "jsonpickle.util.items"
+    "jsonpickle.util.items",
+    "ujson.loads.startswith",
+    "yaml.safe_load.startswith"
   ],
   "jsonpickle.unpickler.Unpickler._restore_function": [
     "jsonpickle.unpickler.loadclass"
@@ -1429,7 +1457,11 @@
     "pandas.tseries.offsets.QuarterEnd",
     "pandas.tseries.offsets.Second",
     "pandas.tseries.offsets.Week",
-    "pandas.tseries.offsets.YearEnd"
+    "pandas.tseries.offsets.YearEnd",
+    "ujson.loads.items",
+    "ujson.loads.setdefault",
+    "yaml.safe_load.items",
+    "yaml.safe_load.setdefault"
   ],
   "jsonpickle.unpickler.Unpickler._restore_repr": [
     "jsonpickle.unpickler.Unpickler._mkref",
@@ -1720,7 +1752,9 @@
     "operator.itemgetter.__call__"
   ],
   "jsonpickle.util.items": [
-    "<builtin>.dict.items"
+    "<builtin>.dict.items",
+    "ujson.loads.items",
+    "yaml.safe_load.items"
   ],
   "jsonpickle.util.translate_module_name": [
     "<builtin>.dict",
