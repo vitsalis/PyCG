@@ -1,25 +1,3 @@
-"""Score call graphs against the ground truths of the micro- and macro-benchmark.
-
-A tool directory has the layout that evaluation/common/run.py writes:
-macro/<project>.json and micro/<category>/<case>.json, each a call graph
-`{caller: [callees]}`, and optionally <benchmark>/runs.json with the status
-of each run. Graphs of other tools in this layout are scored too; without
-runs.json a missing graph counts as a failed run. tool_results gives the
-scores of one tool directory.
-
-Edges are compared as sets of (caller, callee) pairs, in two modes:
-- raw: the names as the tool writes them. A callee outside the package
-  that the project's trace knows (dynamic/<name>.json, `aliases`) is
-  matched by the function it resolves to: every name that resolves to one
-  traced function counts as that function, with check.callee_names. A
-  callee outside the package that is in a group of the table
-  same_function.json (names of one function of the standard library)
-  counts as the group's representative. Any other name is matched by string
-  equality. Nothing is imported or looked up while scoring.
-- normalised: the same, after the renamings of NORMALISATIONS, applied to
-  both graphs. None changes the function that an edge refers to.
-"""
-
 import ast
 import hashlib
 import importlib.util
@@ -32,36 +10,35 @@ import warnings
 from pathlib import Path
 from typing import NamedTuple
 
-HERE = Path(__file__).resolve().parent
-EVALUATION = HERE.parent
-REPO = EVALUATION.parent
+COMMON = Path(__file__).resolve().parent
 
 
 def _load(name, path):
-    """Load a script by path: neither evaluation/ nor macro-benchmark/ is a package."""
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
-run = _load("evaluation_run", HERE / "run.py")
+run = _load("evaluation_run", COMMON / "run.py")
 BENCHMARK = run.BENCHMARK
 SNIPPETS = run.SNIPPETS
 check = _load("macro_check", BENCHMARK / "check.py")
-# JSON with each container of scalars on one line.
 dumps = run.dumps
 
 MODES = ("raw", "normalised")
-# The headline is "inside": edges whose callee is in the analysed package.
-# The names of outside callees depend on how a tool models code that it does
-# not analyse; "all" is kept for comparison with PyCG's 2021 evaluation.
 EDGE_SETS = ("inside", "outside", "all")
 
-# The renamings of the normalised mode: (rule, what it renames, example,
-# why the edge still refers to the same function). Applied to both graphs.
+
+class Normalisation(NamedTuple):
+    rule: str
+    renames: str
+    example: str
+    why_the_edge_keeps_its_function: str
+
+
 NORMALISATIONS = (
-    (
+    Normalisation(
         "class-body caller",
         "a caller that is a class of the analysed source (and not also a "
         "module or function) becomes the scope that runs the class body: "
@@ -72,7 +49,7 @@ NORMALISATIONS = (
         "(decorators of methods, default values, base classes) run when the "
         "enclosing scope runs. Only the caller changes; the callee is the same",
     ),
-    (
+    Normalisation(
         "2021 names of builtin types",
         "`<**PyStr**>.m`, `<**PyChar**>.m` become `<builtin>.str.m`; "
         "`<**PyList**>`, `<**PyDict**>`, `<**PySet**>`, `<**PyTuple**>` become "
@@ -82,7 +59,7 @@ NORMALISATIONS = (
         "the 2021 ground truths name the method `m` of the builtin type `T` "
         "`<**PyT**>.m`; today's rule names it `<builtin>.T.m`",
     ),
-    (
+    Normalisation(
         "generator type",
         "`<builtin>.generator.m` becomes `types.GeneratorType.m`",
         "`<builtin>.generator.send` becomes `types.GeneratorType.send`",
@@ -104,14 +81,9 @@ _OLD_BUILTIN = re.compile(r"^<\*\*(\w+)\*\*>(?=\.|$)")
 _GENERATOR = re.compile(r"^<builtin>\.generator(?=\.|$)")
 
 
-# --------------------------------------------------------------------------
-# Names
-# --------------------------------------------------------------------------
-
-
-def _parse(path):
+def _parse_ignoring_syntax_warnings(path):
     try:
-        with warnings.catch_warnings():  # invalid escapes in old code
+        with warnings.catch_warnings():
             warnings.simplefilter("ignore", SyntaxWarning)
             return ast.parse(Path(path).read_bytes())
     except (SyntaxError, ValueError):
@@ -119,7 +91,6 @@ def _parse(path):
 
 
 def module_name(path, root):
-    """The dotted name of a module file; a package __init__.py is the package."""
     parts = list(Path(path).resolve().relative_to(Path(root).resolve()).parts)
     parts[-1] = parts[-1].removesuffix(".py")
     if parts[-1] == "__init__" and len(parts) > 1:
@@ -128,14 +99,9 @@ def module_name(path, root):
 
 
 def class_owners(files, root):
-    """{class: owner} for the classes defined in `files` (read with `ast`).
-
-    The owner is the node whose code runs the class body: the nearest
-    enclosing function, else the module. Names are relative to `root`. A
-    file that does not parse (Python 2 code) is skipped."""
     owners = {}
     for path in files:
-        tree = _parse(path)
+        tree = _parse_ignoring_syntax_warnings(path)
         if tree is None:
             continue
         name = module_name(path, root)
@@ -156,38 +122,22 @@ def _add_classes(node, scope, owner, owners):
             _add_classes(child, scope, owner, owners)
 
 
-# Groups of names of one function of the standard library, each with its
-# representative: a committed table, reviewed by a person, so that the
-# scores depend on no interpreter (README, "How names are matched").
-SAME_FUNCTION_TABLE = HERE / "same_function.json"
+SAME_FUNCTION_TABLE_PATH = COMMON / "same_function.json"
 
 
-def same_function_table(path=SAME_FUNCTION_TABLE):
-    """({name: representative} of the table, the SHA-256 of its bytes)."""
+def same_function_table(path=SAME_FUNCTION_TABLE_PATH):
     data = Path(path).read_bytes()
     groups = json.loads(data.decode("utf-8"))["groups"]
-    mapping = {name: g["representative"] for g in groups for name in g["names"]}
-    return mapping, hashlib.sha256(data).hexdigest()
+    representative_by_name = {
+        name: g["representative"] for g in groups for name in g["names"]
+    }
+    return representative_by_name, hashlib.sha256(data).hexdigest()
 
 
-# The table that this scorer loaded, and the hash that every result records.
-SAME_FUNCTION, SAME_FUNCTION_SHA256 = same_function_table()
+SAME_FUNCTION_REPRESENTATIVE_BY_NAME, SAME_FUNCTION_SHA256 = same_function_table()
 
 
 class Names:
-    """How the names of one comparison are matched.
-
-    `identities` maps the name of an outside callee to the traced function
-    that it resolves to; `owners` maps a class to the scope that runs its
-    body; `nodes` are the modules and functions (a class-body caller is
-    renamed only if the class name is not also one of them). With
-    `packages` (for_packages), a callee outside them that is a name of a
-    group of the table SAME_FUNCTION stands for the group's representative;
-    a name in the packages never changes, and nor does a name whose
-    representative would be in them. Callers are matched as written: the
-    identities and the table apply to callees only. Without `normalise`, no
-    renaming applies."""
-
     def __init__(
         self, identities=None, owners=None, nodes=(), normalise=False, packages=None
     ):
@@ -198,7 +148,6 @@ class Names:
         self.packages = packages
 
     def for_packages(self, packages):
-        """These names, with the table applied outside `packages`."""
         return Names(
             self.identities, self.owners, self.nodes, self.normalise, tuple(packages)
         )
@@ -208,22 +157,21 @@ class Names:
             return name
         if name in self.owners and name not in self.nodes:
             return self.owners[name]
-        return _rename(name)
+        return _rename_by_normalisations_of_any_name(name)
 
     def callee(self, name):
         if self.normalise:
-            name = _rename(name)
+            name = _rename_by_normalisations_of_any_name(name)
         name = self.identities.get(name, name)
         if self.packages is None or check.ledger.in_package(name, self.packages):
             return name
-        found = SAME_FUNCTION.get(name)
+        found = SAME_FUNCTION_REPRESENTATIVE_BY_NAME.get(name)
         if found is None or check.ledger.in_package(found, self.packages):
             return name
         return found
 
 
-def _rename(name):
-    """The renamings of NORMALISATIONS that apply to any name."""
+def _rename_by_normalisations_of_any_name(name):
     name = _OLD_BUILTIN.sub(_new_builtin, name)
     return _GENERATOR.sub("types.GeneratorType", name)
 
@@ -234,15 +182,6 @@ def _new_builtin(match):
 
 
 def identities(trace):
-    """{name: canonical name} for every name of a traced callee outside the package.
-
-    The names of one callee are check.callee_names. A name that the trace
-    gives to two or more callees identifies none of them and is left out,
-    so the trace maps it to nothing (the table of names of one function
-    still applies to it afterwards, as to any name): classes that a library
-    creates at run time can share one qualified name (each `type("Call",
-    (Base,), {"__call__": staticmethod(f)})` is another class of that
-    name), and then `lib.Call.__call__` is a name of every `f`."""
     callees = {}
     for callee in trace.get("aliases", {}):
         for name in check.callee_names(trace, callee):
@@ -252,11 +191,6 @@ def identities(trace):
         for name, found in sorted(callees.items())
         if len(found) == 1
     }
-
-
-# --------------------------------------------------------------------------
-# Counting
-# --------------------------------------------------------------------------
 
 
 class Counts(NamedTuple):
@@ -309,8 +243,7 @@ class Counts(NamedTuple):
 ZERO = Counts(0, 0, 0)
 
 
-def _edges(graph, names):
-    """{(caller, callee) matched: [(caller, callee) as written]}."""
+def _written_edges_by_matched_edge(graph, names):
     edges = {}
     for caller, callees in graph.items():
         for callee in callees:
@@ -326,19 +259,13 @@ def _nodes(graph, names):
 
 
 def compare(tool, truth, packages, names):
-    """Compare a tool graph with a ground truth of a package.
-
-    Every tool edge is scored. "inside" are the edges whose callee is in
-    `packages` (by name), "outside" the others. Returns the counts per edge
-    set, the false positives and negatives as written in each graph, and
-    the nodes: those of the ground truth that the tool lacks, and the
-    tool's nodes in the package that the ground truth lacks."""
     names = names.for_packages(packages)
-    tool_edges, truth_edges = _edges(tool, names), _edges(truth, names)
+    tool_edges, truth_edges = (
+        _written_edges_by_matched_edge(tool, names),
+        _written_edges_by_matched_edge(truth, names),
+    )
     result = split_counts(tool_edges.keys(), truth_edges.keys(), packages)
     tool_nodes, truth_nodes = _nodes(tool, names), set(truth)
-    # One entry per scored edge, by its matched names; the spellings of an
-    # edge whose names in the graph differ from the matched ones.
     false_positives = sorted(tool_edges.keys() - truth_edges.keys())
     false_negatives = sorted(truth_edges.keys() - tool_edges.keys())
     result["false_positives"] = [list(edge) for edge in false_positives]
@@ -362,8 +289,6 @@ def compare(tool, truth, packages, names):
 
 
 def split_counts(tool_edges, truth_edges, packages):
-    """{edge set: Counts} of two sets of matched edges. "inside": the callee
-    is in `packages` (by name)."""
     tool_edges, truth_edges = set(tool_edges), set(truth_edges)
 
     def inside(edge):
@@ -381,13 +306,7 @@ def split_counts(tool_edges, truth_edges, packages):
     return result
 
 
-# --------------------------------------------------------------------------
-# Macro-benchmark
-# --------------------------------------------------------------------------
-
-
 def score_macro_project(tool, truth, packages, trace=None, owners=None):
-    """The comparison of one project in both modes; `tool` None: no graph."""
     ids = identities(trace) if trace else {}
     result = {}
     for mode in MODES:
@@ -397,10 +316,6 @@ def score_macro_project(tool, truth, packages, trace=None, owners=None):
 
 
 def macro_projects(config=None):
-    """For each project of `config` (default: macro-benchmark/projects.toml)
-    with a ground truth: (name, project, truth, trace or None, class owners).
-    The benchmark directory is the directory of `config`, with projects/,
-    ground-truth/ and dynamic/."""
     config = Path(config or check.macro_trace.CONFIG_PATH).resolve()
     benchmark_dir = config.parent
     for name, project in check.macro_trace.load_projects(config).items():
@@ -416,12 +331,10 @@ def macro_projects(config=None):
 
 
 def score_macro(tool_dir, config=None):
-    """Score the macro-benchmark graphs of a tool directory against the
-    projects of `config` (projects.toml) that have a ground truth."""
-    runs = _runs(tool_dir, "macro")
+    runs = _runs_or_none(tool_dir, "macro")
     scores = {}
     for name, project, truth, trace, owners in macro_projects(config):
-        status, tool = _graph(tool_dir, f"macro/{name}", runs)
+        status, tool = _status_and_graph(tool_dir, f"macro/{name}", runs)
         scores[name] = {
             "status": status,
             **score_macro_project(tool, truth, project.package_names, trace, owners),
@@ -430,17 +343,15 @@ def score_macro(tool_dir, config=None):
 
 
 def macro_edges(tool_dir, config=None, mode="raw"):
-    """{project: {"status", "tp", "fp", "fn": sets of matched (caller,
-    callee), and "packages": the package names}} of a tool directory."""
-    runs = _runs(tool_dir, "macro")
+    runs = _runs_or_none(tool_dir, "macro")
     result = {}
     for name, project, truth, trace, owners in macro_projects(config):
-        status, tool = _graph(tool_dir, f"macro/{name}", runs)
+        status, tool = _status_and_graph(tool_dir, f"macro/{name}", runs)
         ids = identities(trace) if trace else {}
         names = Names(ids, owners, truth.keys(), normalise=mode == "normalised")
         names = names.for_packages(project.package_names)
-        tool_edges = set(_edges(tool or {}, names))
-        truth_edges = set(_edges(truth, names))
+        tool_edges = set(_written_edges_by_matched_edge(tool or {}, names))
+        truth_edges = set(_written_edges_by_matched_edge(truth, names))
         result[name] = {
             "status": status,
             "tp": tool_edges & truth_edges,
@@ -451,15 +362,12 @@ def macro_edges(tool_dir, config=None, mode="raw"):
     return result
 
 
-def _runs(tool_dir, benchmark):
-    """The runs.json of a tool directory, or None."""
+def _runs_or_none(tool_dir, benchmark):
     path = Path(tool_dir) / benchmark / "runs.json"
     return json.loads(path.read_text()) if path.exists() else None
 
 
-def _graph(tool_dir, key, runs):
-    """(status, graph or None) of one job of a tool directory. A run that
-    runs.json records as ok but whose graph is gone is "missing graph"."""
+def _status_and_graph(tool_dir, key, runs):
     path = Path(tool_dir) / f"{key}.json"
     status = runs["runs"].get(key, {}).get("status", "not run") if runs else None
     if status not in (None, "ok"):
@@ -476,40 +384,29 @@ def summed(per_project, mode, edge_set):
     return total
 
 
-# --------------------------------------------------------------------------
-# Micro-benchmark
-# --------------------------------------------------------------------------
-
-
 def score_micro_case(tool, truth, owners=None, packages=("main",)):
-    """Complete, sound and exact for one case in both modes (tool None: no
-    graph), and the edge counts per edge set (`packages`: the top-level
-    modules of the case).
-
-    As in PyCG's 2021 evaluation, a call graph is complete if every edge it
-    reports is in the ground truth (no false positive) and sound if it
-    reports every edge of the ground truth (no false negative), all edges
-    counted. Exact:
-    the graph equals the ground truth, nodes included, as
-    tests/test_micro_benchmark.py compares them. Without a graph, all three
-    are false."""
     result = {}
     for mode in MODES:
         names = Names(owners=owners, nodes=truth.keys(), normalise=mode == "normalised")
         names = names.for_packages(packages)
-        counts = split_counts(_edges(tool or {}, names), _edges(truth, names), packages)
+        counts = split_counts(
+            _written_edges_by_matched_edge(tool or {}, names),
+            _written_edges_by_matched_edge(truth, names),
+            packages,
+        )
         ok = tool is not None
         result[mode] = {
             "complete": ok and counts["all"].fp == 0,
             "sound": ok and counts["all"].fn == 0,
-            "exact": ok and _canonical(tool, names) == _canonical(truth, names),
+            "exact": ok
+            and _graph_with_matched_names(tool, names)
+            == _graph_with_matched_names(truth, names),
             "counts": counts,
         }
     return result
 
 
-def _canonical(graph, names):
-    """The graph with matched names: keys that name one node are merged."""
+def _graph_with_matched_names(graph, names):
     result = {}
     for caller, callees in graph.items():
         result.setdefault(names.caller(caller), set()).update(
@@ -519,12 +416,11 @@ def _canonical(graph, names):
 
 
 def score_micro(tool_dir, snippets=SNIPPETS):
-    """Score the micro-benchmark graphs of a tool directory, per case."""
-    runs = _runs(tool_dir, "micro")
+    runs = _runs_or_none(tool_dir, "micro")
     cases = {}
     for case in sorted(p for p in Path(snippets).glob("*/*") if p.is_dir()):
         key = f"{case.parent.name}/{case.name}"
-        status, tool = _graph(tool_dir, f"micro/{key}", runs)
+        status, tool = _status_and_graph(tool_dir, f"micro/{key}", runs)
         if status == "skipped":
             cases[key] = {"status": status}
             continue
@@ -540,7 +436,6 @@ def score_micro(tool_dir, snippets=SNIPPETS):
 
 
 def micro_categories(cases, mode):
-    """Per category: cases, skipped, failed, complete, sound, exact, counts."""
     rows = {}
     for key, case in cases.items():
         row = rows.setdefault(
@@ -582,15 +477,7 @@ def micro_total(categories):
     return total
 
 
-# --------------------------------------------------------------------------
-# Results
-# --------------------------------------------------------------------------
-
-
 def scorer():
-    """What scored a result: the SHA-256 of the table of names of one
-    function that it used (`table`), which the counts depend on, and the
-    interpreter (recorded only: the counts do not depend on it)."""
     return {
         "table": SAME_FUNCTION_SHA256,
         "python": platform.python_version(),
@@ -600,17 +487,17 @@ def scorer():
 
 
 def tool_results(tool_dir, config=None, snippets=SNIPPETS):
-    """The scores of one tool directory, as JSON data (`config`: the
-    projects.toml of the macro-benchmark)."""
     tool_dir = Path(tool_dir)
     data = {"tool": {"name": tool_dir.name}, "macro": None, "micro": None}
     data["scorer"] = scorer()
     tools = {}
     for benchmark in ("macro", "micro"):
-        runs = _runs(tool_dir, benchmark)
+        runs = _runs_or_none(tool_dir, benchmark)
         if runs:
             tools[benchmark] = runs["tool"]
-            data[f"{benchmark}_runs"] = _run_records(runs, full=benchmark == "macro")
+            data[f"{benchmark}_runs"] = _run_records(
+                runs, every_record=benchmark == "macro"
+            )
     if len({json.dumps(t, sort_keys=True) for t in tools.values()}) > 1:
         raise ValueError(
             f"{tool_dir}: macro and micro ran different tools: {tools['macro']} and "
@@ -675,9 +562,6 @@ def tool_results(tool_dir, config=None, snippets=SNIPPETS):
 
 
 def failed_runs(data):
-    """The runs that did not give a scored graph, from the scored statuses
-    (a run that runs.json records as ok but whose graph is gone is one), with
-    the error and its place from the run record when it has them."""
     records = dict((data.get("macro_runs") or {}).get("runs", {}))
     records.update((data.get("micro_runs") or {}).get("failed", {}))
     statuses = {}
@@ -698,15 +582,13 @@ def failed_runs(data):
     return failed
 
 
-def _run_records(runs, full):
-    """How a benchmark ran: every run record, or (not `full`) a summary of
-    the statuses, times and memory, with the runs that did not finish."""
+def _run_records(runs, every_record):
     result = {
         key: runs.get(key)
         for key in ("tool", "benchmark", "python", "hash_seed", "timeout")
     }
     records = runs["runs"]
-    if full:
+    if every_record:
         return result | {"runs": records}
     finished = [r for r in records.values() if "seconds" in r]
     seconds = [r["seconds"] for r in finished]

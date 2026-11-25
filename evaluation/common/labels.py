@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
-"""The labels of a pull request, decided from its measurement and its diff.
-
-    python -I evaluation/common/labels.py RESULT BASE_RESULT CHANGED_FILES OUTPUTS
-
-RESULT and BASE_RESULT are the result.json of `loop.py run` for the pull
-request and for its base; CHANGED_FILES lists the paths that the pull request
-changes against its base, one per line. `metrics-changed` is true when a TP,
-FP or FN count of COUNTS differs between the two results; `benchmark-changed`
-when a changed path is under PROTECTED (AGENTS.md lists the same paths).
-OUTPUTS gets `<label>=true` or `<label>=false` per label (the format of
-$GITHUB_OUTPUT); the Markdown of the decision goes to standard output.
-"""
-
 import json
 import sys
 from pathlib import Path
 
+USAGE = """usage: python -I evaluation/common/labels.py \\
+    RESULT BASE_RESULT CHANGED_FILES OUTPUTS
+
+RESULT and BASE_RESULT are the result.json of `loop.py run` for the pull
+request and for its base; CHANGED_FILES lists the paths that the pull request
+changes, one per line. OUTPUTS gets `<label>=true|false` per label (the format
+of $GITHUB_OUTPUT); the Markdown of the decision goes to standard output."""
 PROTECTED = (
     "evaluation/macro-benchmark/ground-truth/",
     "evaluation/macro-benchmark/dynamic/",
@@ -88,7 +82,7 @@ def markdown(moved, touched):
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if len(argv) != 4:
-        print(__doc__, file=sys.stderr)
+        print(USAGE, file=sys.stderr)
         return 2
     result, base_result, changed_files, outputs = argv
     changed = Path(changed_files).read_text(encoding="utf-8").splitlines()

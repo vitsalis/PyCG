@@ -98,6 +98,42 @@ their time. They name a batch by its former directory:
 (batch 4), `-heldout-4` (batch 5) and `macro-benchmark-2021` (the ICSE
 2021 set); "held-out set" N is batch N + 1. See "How the benchmark grew".
 
+### `projects.toml`
+
+`projects.py` reads `projects.toml` for `trace.py`, `check.py` and the
+evaluation scripts. It needs nothing but the standard library of Python
+3.12, so that the runner of `evaluation/` finds the analysed source
+without loading the tracer (Python 3.14). Each table is a project; its
+name is one path component of letters, digits, `_`, `-` and `.`, and names
+`projects/<name>` and the files of its results.
+
+| Key | Content |
+|---|---|
+| `batch` | 1 to 5 and 7, the batches in the order in which they were built, or `icse-2021`, the projects of PyCG's ICSE 2021 evaluation |
+| `repository`, `tag`, `commit` | A git source: the repository's URL, the release tag if the commit is one, and the pinned commit |
+| `sdist`, `sdist_url`, `sdist_sha256` | In place of a git source, a source archive from PyPI: its file name, which names the release, an https URL that ends in that name, and its SHA-256 (see "A project held as an sdist") |
+| `root` | The directory on `sys.path`; module names are relative to it |
+| `packages` | Package directories or module files: the analysed source. A module file is named as its module (`configargparse.py` is `configargparse`) |
+| `exclude` | Paths in the packages that are not analysed |
+| `dependencies` | Installed top-level modules that are library code |
+| `pytest_args`, `test_requirements` | The test paths, and what the test environment has installed (name or name==version). They go together: a project without them has no test run, its ground truth comes from reading only, and `trace.py` refuses it |
+| `pytest_config` | The project's own pytest configuration file |
+| `deselect` | The deselected tests: `{test = <node id>, reason = <why>}` |
+| `plugins` | pytest plugins: `.py` files of the benchmark directory, given relative to it and outside `projects/`, so that the tests of a project cannot change them |
+| `also_installed` | Packages of the project that the test environment installs too: a test requirement can need the package itself (pytest needs pluggy). The run checks that the package was imported from the checkout |
+| `environment` | Variables of the test run, by name and value; a name that `trace.py` sets or that configures the interpreter, pytest, the dynamic loader or the locale is refused (see "Precautions") |
+| `not_importable` | Packages of the project that the test environment cannot import: they need a library that the environment lacks. No test imports them, and the run checks that |
+
+A project's source is `<sources>/<name>`: the files of a git commit, or the
+unpacked copy of an sdist. For this directory's `projects.toml`,
+`<sources>` is `/inputs/macro-benchmark/projects` in the images of the
+evaluation; any other `projects.toml` (a test's, the copy of a trace), and
+this one on the host, has its sources in `projects/` beside it. The root,
+the packages and the configuration file, resolved, must stay inside the
+project's directory, and every reader of a project's files fails if a
+link below the directory has a target outside it: the pin fixes the text
+of a link, not what it reaches.
+
 ## Construction
 
 The ground truth of a project has two parts, and the benchmark keeps both:
@@ -1304,14 +1340,17 @@ blind and changed these edges:
 
 ## Choosing a new batch
 
-Batches 1 and 2 were chosen by hand. A further batch is chosen by
-`draw.py`, so that another person can run the choice again (Baltes and
-Ralph, EMSE 2022: write down each stage of the sampling and archive the
-script). It has two steps: a quality-filtered **frame**, computed once from
-a fixed public list and frozen; and a seeded **draw** from the frame,
-stratified by size. A claim about a drawn batch holds for the frame, not for all
-of PyPI. The thresholds are named constants at the top of the script; the
-frame and the round logs record them.
+Batches 1 and 2 were chosen by hand. A further batch is chosen by `draw.py`,
+so that another person can run the choice again (Baltes and Ralph, EMSE
+2022: write down each stage of the sampling and archive the script). It has
+two steps: a quality-filtered **frame**, computed once from a fixed public
+list and frozen; and a seeded **draw** from the frame, stratified by size. A
+claim about a drawn batch holds for the frame, not for all of PyPI. The
+thresholds are named constants at the top of the script; the frame and the
+round logs record them. The logs record every public upper-case module
+constant except the paths, `USER_AGENT` and the `HTTP_*` settings, and
+`FILTERS` as the filter names in order: a new or renamed constant of that
+form changes the logs.
 
 **List.** `selection/top-pypi-packages-2026-11-01.json` is the 30-day
 download list of hugovk/top-pypi-packages (`top-pypi-packages.min.json` at
@@ -1337,10 +1376,10 @@ and only the draw skips it.
 | 3 | `release` | its latest release that is neither yanked nor a pre-release and was uploaded on or before D (version order of PEP 440) was uploaded in the 3 years before D | CPyGraph (Chen and Li, arXiv 2026) uses the same window; Alfadel et al. (EMSE 2023) and JARVIS (Huang et al., arXiv 2024) require recent activity |
 | 4 | `pure-python` | that release has an sdist and a wheel, and every wheel is `py3-none-any` or `py2.py3-none-any` | Pynguin (Lukasczyk et al., EMSE 2023); CPyGraph |
 | 5 | `requires-python` | its `requires_python` admits Python 3.14.0 (no `requires_python` admits it) | ours: the tracer needs Python 3.14 |
-| 6 | `licence` | the licence that PyPI states is permissive: every licence of `license_expression`, else every `License ::` classifier, else a `license` field that is one identifier. A licence that PyPI does not state (no field, or a field of free text) is decided by filter 14 | SWE-bench; CodeSearchNet (Husain et al., arXiv 2019); DaCapo (Blackburn et al., OOPSLA 2006) |
-| 7 | `no-dependency` | no `requires_dist` entry applies on CPython 3.14 on Linux without an extra; a marker with another variable fails | ours, with no precedent in the literature: the ground truth covers the package without outside code. It removes the frameworks and applications that build on other packages: a threat to representativeness |
+| 6 | `licence` | the licence that PyPI states is permissive: every licence of `license_expression` (an exception, `WITH`, fails), else every `License ::` classifier, else a `license` field that is one identifier. A licence that PyPI does not state (no field, or a field of free text) is decided by filter 14 | SWE-bench; CodeSearchNet (Husain et al., arXiv 2019); DaCapo (Blackburn et al., OOPSLA 2006) |
+| 7 | `no-dependency` | no `requires_dist` entry applies on CPython 3.14 on Linux without an extra; a marker with another variable fails wherever the variable is, since every comparison is evaluated; a comparison is between versions when both sides are versions, else between strings, and `~=` and `===` compare versions only (PEP 508) | ours, with no precedent in the literature: the ground truth covers the package without outside code. It removes the frameworks and applications that build on other packages: a threat to representativeness |
 | 8 | `size` | the wheel has the SHA-256 that PyPI gives, can be read as a zip (member names that decode, no encrypted or unreadable `.py` member), has no member path that is absolute or has `..`, and 800 to 4,000 code lines in its `.py` files outside `*.dist-info`, `*.data` and directories named `tests`, `test`, `testing`, `unittests` | PyCG (Salis et al., ICSE 2021) used projects of fewer than 3,500 lines |
-| 9 | `source` | `project_urls` and `home_page` name one GitHub repository, which has the tag `X`, `vX`, `<name>-X` or `release-X` of the release X (`git ls-remote`) | ours: the release must be cloned from its tag |
+| 9 | `source` | `project_urls` and `home_page` name one GitHub repository (URLs that differ only in the case of the owner or the repository name the same one, as GitHub names ignore case), which has the tag `X`, `vX`, `<name>-X` or `release-X` of the release X (`git ls-remote`) | ours: the release must be cloned from its tag |
 | 10 | `history` | at the tag, at least 100 commits and at least 2 distinct commit authors (by author e-mail, without case), from the history of the tag, fetched without blobs | Alfadel et al. (EMSE 2023): at least 100 commits and 2 developers; Kalliamvakou et al. (EMSE 2016): avoid personal projects by the number of committers |
 | 11 | `ci` | at the tag, a file below `.github/workflows/` or `.circleci/`, or a file `.travis.yml`, `.gitlab-ci.yml` or `azure-pipelines.yml` at the root (`tox.ini` is not enough) | reaper's CI dimension (Munaiah et al., EMSE 2017); OpenSSF Scorecard, CI-Tests check |
 | 12 | `tests` | at the tag, a file `test_*.py` or `*_test.py` anywhere (also in the package) holds a test, by a rule on the text that is the same on every Python version: a `def test...(` on one line, with or without type parameters (`def test_x[T](`), or a `class` line without type parameters whose bases name something that ends in `TestCase` (`class C(unittest.TestCase`), in a file that decodes as UTF-8. The rule reads text, so such a line inside a string, or `TestCase` in a comment of the bases, counts too; type parameters over several lines, and a class with type parameters, do not count: limits of the rule. A test file over 4 MiB is not read and does not count. The ratio of the code lines of those files to the package's code lines is recorded | JARVIS; DynaPyt (Eghbali and Pradel, ESEC/FSE 2022); DyPyBench (Bouzenia et al., FSE 2024) require runnable tests; reaper's unit-test dimension |
@@ -1391,6 +1430,12 @@ selected with its facts from the frame. The frame and the logs have sorted
 keys and no time of the run (the dates in them are facts of the list, of
 the releases and of the repositories): a rerun from the same cache writes
 the same bytes.
+`tests/test_draw.py` draws rounds 1, 2, 3, 6 and 7 (batches 3 to 5 and
+7) again from the committed frame and list, with the seed and the drops of
+each round, reading files only, and checks that each gives the recorded
+log. The benchmark directories that the draws used then are gone (one
+benchmark now holds every batch), so the test takes the projects already
+used from the round log itself.
 
 ```sh
 python -I evaluation/macro-benchmark/draw.py frame --work ~/draw-work
@@ -1401,34 +1446,52 @@ python -I evaluation/macro-benchmark/draw.py check sqlparse==0.6.1 --work ~/draw
 ```
 
 `check NAME[==VERSION]` evaluates every filter on named projects, all of
-them even after a failure. It writes no frame and no round log, but it
-fills the cache. Every network access (PyPI JSON, the wheel, the GitHub
-API, `git ls-remote`, `git fetch`) is cached under `--work`: an
-interrupted `frame` resumes where it stopped, a rerun reads the cache, and
-`--offline` fails rather than fetch. A response that arrives cut is
-continued with a `Range` request, and a failed request is tried again a
-fixed number of times; a network failure stops the run and is never
-recorded as a result. When the GitHub API answers that its limit of
-requests is reached, the script reads the reset time from the answer, says
-so, waits, and goes on; it uses no token. PyPI and GitHub answer with
-their state of the day: a release yanked after D changes the answer of a
-run with an empty cache.
+them even after a failure. With `==VERSION`, a release uploaded after D
+fails `release`, and the later filters still evaluate that release. It
+writes no frame and no round log, but it fills the cache. Every network
+access (PyPI JSON, the wheel, the GitHub API, `git ls-remote`, `git fetch`)
+is cached under `--work`: an interrupted `frame` resumes where it stopped, a
+rerun reads the cache, and `--offline` fails rather than fetch. A response
+or a fetched tag is written under a temporary name and renamed into the
+cache once complete, so an interrupted run leaves no partial entry for a
+rerun to read. A response that arrives cut is continued with a `Range`
+request, and a failed request is tried again a fixed number of times; a
+network failure stops the run and is never recorded as a result. The `Range`
+request names the first answer's validator in `If-Range`: its strong ETag,
+else its Last-Modified (a weak ETag cannot validate a range). An answer that
+is not the asked continuation, or an answer 416, starts the body again from
+zero; without a validator, so does every attempt. A body is complete when a
+read ends without being cut and its length is the total that the server
+announced: the Content-Length of the first answer, or the total of a
+continuation's Content-Range (a part's own Content-Length counts the part
+only). Continuations count against the same `HTTP_REQUESTS_PER_BODY_MAX`
+requests, `HTTP_PAUSE_SECONDS` apart; after the last one, the last failure
+is raised. When the GitHub API answers that its limit of requests is
+reached, the script reads the reset time from the answer, says so, waits,
+and goes on; it uses no token. PyPI and GitHub answer with their state of
+the day: a release yanked after D changes the answer of a run with an empty
+cache.
 
 Nothing of a project is installed, imported or run. The wheel is read as a
-zip. The release tag is fetched by its explicit ref (`refs/tags/<tag>`, so
-a branch of the same name cannot take its place) into bare repositories,
-and peeled to its commit; the frame records both. Its files are read from
-git's object store: nothing is checked out, so no hook, filter or
-line-ending conversion applies, and git runs without the user's and the
-system's configuration and without the caller's `GIT_*` variables (no
-submodules, no LFS content). The history is fetched without blobs; the
-tree of the tag is fetched whole (depth 1), with all its blobs. From that
-store, the filters read only the blobs that they need: the test-file
-candidates and the files whose path ends in a module path of the wheel.
-Each one goes to the cache as one checked record (object, type, size and
-delimiter, and git's exit status). A blob over 4 MiB (`MAX_BLOB_BYTES`) is
-downloaded with the tree but not read: such a test file does not count for
-`tests`, and such a module differs for `released-code`.
+zip. The release tag is fetched by its explicit ref (`refs/tags/<tag>`, so a
+branch of the same name cannot take its place) into bare repositories, and
+peeled to its commit; the frame records both. Its files are read from git's
+object store: nothing is checked out, so no hook, filter or line-ending
+conversion applies, and git runs without the user's and the system's
+configuration and without the caller's `GIT_*` variables (no submodules, no
+LFS content). git never asks for credentials (`GIT_TERMINAL_PROMPT=0`): for
+a repository that GitHub does not have, `git ls-remote` fails with `not
+found` or `could not read Username`, and the script reads both as a missing
+repository. The history is fetched without blobs; the tree of the tag is
+fetched whole (depth 1), with all its blobs. The files of the tag are the
+regular files of its tree (git modes 100644 and 100755): a symbolic link or
+a submodule is not a file of the checkout. From that store, the filters read
+only the blobs that they need: the test-file candidates and the files whose
+path ends in a module path of the wheel. Each one goes to the cache as one
+checked record (object, type, size and delimiter, and git's exit status). A
+blob over 4 MiB (`MAX_BLOB_BYTES`) is downloaded with the tree but not read:
+such a test file does not count for `tests`, and such a module differs for
+`released-code`.
 
 `draw.py` reaches the network and runs git on third-party
 repositories: run it in the target `maintain` of
@@ -1442,14 +1505,14 @@ them (the indexed `GIT_CONFIG_KEY_n` first, `GIT_CONFIG_PARAMETERS` last),
 so that the last one of a key wins as it does for the caller: a proxy may
 need them, as this repository's sandbox needs `http.proxyAuthMethod`.
 
-`frame` and `check` run only on Python 3.15 (`FRAME_PYTHON`), and refuse
-any other version; the frame records the version. The code-line count uses
-the tokenizer of the running Python, and tokenizers differ between versions
-on valid code: a t-string with a comment in a replacement field is one
-string token before 3.14 and several tokens, with a comment, from 3.14 on,
-so the same file has another count. A file that the tokenizer cannot read
-counts its non-blank lines. `draw` reads only the frame and runs on Python
-3.12 to 3.15.
+`frame` and `check` run only on Python 3.15 (`FRAME_PYTHON`), and refuse any
+other version; the frame records the version. The code-line count uses the
+tokenizer of the running Python, and tokenizers differ between versions on
+valid code: a t-string with a comment in a replacement field is one string
+token before 3.14 and several tokens, with a comment, from 3.14 on, so the
+same file has another count. A file that the tokenizer cannot read counts
+its non-blank lines. `draw` reads only the frame and runs on Python 3.12 to
+3.15. `draw.py` uses the standard library only.
 
 The literature also suggests filters that the procedure does not use: a
 documentation filter (no Python benchmark uses one), strata by PyPI topic,
@@ -2573,10 +2636,11 @@ rules above did not decide, and adopted by the lead:
 ## Call sites and candidates
 
 `sites.py` reads the source with `ast` and `tokenize` and finds every call
-site. A site belongs to the node that its calls belong to (a call in a class
-body belongs to the enclosing function or module). It is identified by its
-module, the position of the token that makes the call (line and column from
-1, in characters), and its kind:
+site. Nothing of the source is imported or run. A site belongs to the node
+that its calls belong to (a call in a class body belongs to the enclosing
+function or module). It is identified by its module, the position of the
+token that makes the call (line and column from 1, in characters), and its
+kind:
 
 | Kind | Site | Position | Candidates by name |
 |---|---|---|---|
@@ -2595,45 +2659,65 @@ module, the position of the token that makes the call (line and column from
 | `raise` | `raise C` without a call | `C` | what instantiating a class named `C` runs (as for `call`) |
 | `match` | class, mapping and sequence patterns | the pattern | `__instancecheck__`; `keys`, `get`, `__getitem__`, `__len__`; `__len__` and the iteration methods |
 
-The rules are naive on purpose: a candidate is any package function with a
-matching name, wherever it is defined. Names match as Python stores them: a
-private name `__x` in the body of class `C` is `_C__x` (name mangling), so
-`self.__walk()` in `C` proposes only `C.__walk`. A subscripted base
-(`class String(Field[str])`) is the base `Field`. A module-level alias
-(`nullcontext = NullContext`) is not followed, and neither is a class-body
-alias (`__radd__ = __add__`). An annotation without a value
-(`tags: List[str]`) binds nothing: the name is no value, no descriptor and
-no attribute for `__set_name__`. A dict or set calls `__eq__` of a key when
-two keys have the same hash, also when no two are equal: CPython hashes
-integers modulo 2**61 - 1, so two IPv6 networks of netaddr can collide,
-and its sets and dicts of networks call `BaseIP.__eq__` (the trace has
-`IPSet.__init__ -> BaseIP.__eq__`). `update` and `union` from a dict or a
-set reuse the stored hashes and call no `__hash__`. Some sites are not sites,
-because the object is builtin by its syntax: iteration over a display
-(`[a, b]`), a comprehension or `range()`, `enumerate()` and similar
-builtins; `**` of a dict display or of `globals()`; the truth value of a
-comparison, a constant or `isinstance()` and similar builtins. Annotations
-are sites unless the module has `from __future__ import annotations`: the
-supported versions before 3.14 evaluate them when the function is defined.
-Annotations of local variables are never evaluated.
+Two files can hold nodes of one name, so the module, not the node,
+identifies a site. The skeleton orders the sites by module, then by the
+position of the definition of their node, then by line, column and the order
+of the kinds in this table. The text of a site is its source on one line,
+cut to 60 characters with a trailing `...`.
 
-An explicit site (`call`, `decorator`) always needs a ledger entry. Any other
-site needs one only if it has candidates; the skeleton leaves out the
+The rules are naive on purpose: a candidate is any package function with a
+matching name, wherever it is defined. A `%` conversion proposes the methods
+that its fallbacks call too: `%s` reaches `__repr__` through
+`object.__str__`, and `%d` and `%f` accept an object that has only
+`__index__`. A `str.format` template also proposes what the fields nested in
+a format spec call (`{0:{1}}`), and a literal template that `str.format`
+rejects proposes every special method that a field can call, as a template
+that is not a literal does. Names match as Python stores them: a private
+name `__x` in the body of class `C` is `_C__x` (name mangling), so
+`self.__walk()` in `C` proposes only `C.__walk`. A subscripted base (`class
+String(Field[str])`) is the base `Field`. A module-level alias (`nullcontext
+= NullContext`) is not followed, and neither is a class-body alias
+(`__radd__ = __add__`). An annotation without a value (`tags: List[str]`)
+binds nothing: the name is no value, no descriptor and no attribute for
+`__set_name__`. A dict or set calls `__eq__` of a key when two keys have the
+same hash, also when no two are equal: CPython hashes integers modulo 2**61
+- 1, so two IPv6 networks of netaddr can collide, and its sets and dicts of
+networks call `BaseIP.__eq__` (the trace has `IPSet.__init__ ->
+BaseIP.__eq__`). `update` and `union` from a dict or a set reuse the stored
+hashes and call no `__hash__`. Some sites are not sites, because the object
+is builtin by its syntax: iteration over a display (`[a, b]`), a
+comprehension or `range()`, `enumerate()` and similar builtins; `**` of a
+dict display or of `globals()`; the truth value of a comparison, a constant
+or `isinstance()` and similar builtins. Annotations are sites unless the
+module has `from __future__ import annotations`: the supported versions
+before 3.14 evaluate them when the function is defined. Annotations of local
+variables are never evaluated. An augmented assignment to an attribute or a
+subscript (`x.a += 1`, `x[k] += 1`) is also a load site of its target
+(`getattr`, `getitem`), at the position of its store site.
+
+An explicit site (`call`, `decorator`) always needs a ledger entry. Any
+other site needs one only if it has candidates; the skeleton leaves out the
 implicit sites without candidates, and `check.py --report <name>
 --without-candidates` lists them (`netaddr.ip
-[netaddr.ip.IPNetwork.__getstate__] 1053:21 getattr  self._value`), to find
-a site whose callee no candidate names. A **value site** is a call whose
+[netaddr.ip.IPNetwork.__getstate__] 1053:21 getattr self._value`), to find a
+site whose callee no candidate names. A **value site** is a call whose
 callee is a value, with no name to match: a parameter or variable (`cb()`),
 an attribute that the package assigns a value to (`self._reader(...)`), the
 class of an object (`self.__class__(...)`, `type(self)(...)`), or another
-expression (`table[k](...)`). The test is by name too: a call `x.f(...)` is
-a value site if the package assigns a value to an attribute `f` anywhere, or
-to a name `f` in a module or class body (sqlparse: every `sql.Token(...)`,
-because `tokens.py:35` binds the name `Token` to a token type). A value
-site can also have candidates by name, when a package function has the name
-of the attribute (`self.stop(...)` and a function `stop`); it then needs
-both the decisions and the note. Its entry needs a note on where the values
-come from. These are the sites where a missing edge is most likely.
+expression (`table[k](...)`). A name bound by `def`, `class`, `import` or
+the assignment of a lambda is not a value; a name bound by a parameter, any
+other assignment, a loop, `with ... as`, `:=`, `except ... as` or a pattern
+is. A name resolves as in Python, to the nearest enclosing scope that binds
+it, where a class body is visible only to its own code; a builtin such as
+`len` proposes its special methods only where no such scope binds its name.
+The test is by name too: a call `x.f(...)` is a value site if the package
+assigns a value to an attribute `f` anywhere, or to a name `f` in a module
+or class body (sqlparse: every `sql.Token(...)`, because `tokens.py:35`
+binds the name `Token` to a token type). A value site can also have
+candidates by name, when a package function has the name of the attribute
+(`self.stop(...)` and a function `stop`); it then needs both the decisions
+and the note. Its entry needs a note on where the values come from. These
+are the sites where a missing edge is most likely.
 
 **Limits of the site finder.** It follows an accessor of `property(...)`
 only when it is a lambda or a function of the same class body. It proposes
@@ -2861,24 +2945,30 @@ environment that you trust for that code.
 ### Preparing an environment
 
 The environment of a trace is the image that `trace.sh` builds (see
-"Recording traces in a container"): no project, test dependency or wheel
-is installed or run on the host. The image holds Python 3.14 (the tracer
-uses `sys.monitoring` events of 3.14) and exactly the `test_requirements`
-of `projects.toml`: the full closure of the test dependencies, which
+"Recording traces in a container"): no project, test dependency or wheel is
+installed or run on the host. The image holds Python 3.14 (the tracer uses
+`sys.monitoring` events of 3.14) and exactly the `test_requirements` of
+`projects.toml`: the full closure of the test dependencies, which
 `test-environments/<name>.txt` pins by hash, installed from wheels only
-(`--require-hashes --only-binary :all: --no-deps`), so that no build
-script of a package runs. The tracer refuses to run if the environment
-does not have the pinned versions. The project itself is not installed:
-the tracer puts the `root` of the source first on `sys.path`, and refuses
-to run if the package comes from somewhere else. One project cannot avoid
-it: pytest requires pluggy, so pluggy's environment has pluggy's wheel.
-Its entry says so (`also_installed`): `trace.py --locate` then accepts the
-installed copy, and the run still checks that pluggy was imported from
-the source. The run checks that every package of `packages` was imported
-from the source, except those that the entry names in `not_importable`:
-analysed source that needs a library the test environment does not have
-(itables's `itables_for_dash` needs dash). For those, the run fails if
-the trace has an edge from or to them.
+(`--require-hashes --only-binary :all: --no-deps`), so that no build script
+of a package runs. The tracer refuses to run if the environment does not
+have the pinned versions; metadata inside the project's own directory is not
+an installation (an sdist carries the metadata of its build,
+`<name>.egg-info`, and its source directory is on the path). The project
+itself is not installed: the tracer puts the `root` of the source first on
+`sys.path`, and refuses to run if the package comes from somewhere else. One
+project cannot avoid it: pytest requires pluggy, so pluggy's environment has
+pluggy's wheel. Its entry says so (`also_installed`): `trace.py --locate`
+then accepts the installed copy, and the run still checks that pluggy was
+imported from the source. `--locate` asks every finder of the interpreter
+directly, not through `sys.modules`, and they read the file system only: a
+package must be found in the root and by no other finder (a builtin or
+frozen module, `sys.path` without the root, an editable install), so that
+the environment cannot supply it. The run checks that every package of
+`packages` was imported from the source, except those that the entry names
+in `not_importable`: analysed source that needs a library the test
+environment does not have (itables's `itables_for_dash` needs dash). For
+those, the run fails if the trace has an edge from or to them.
 
 ```sh
 PYTHON_IMAGE=python:3.14-slim@sha256:<digest> \
@@ -2901,16 +2991,17 @@ The trace records the version of every installed distribution
   `PYTEST_ADDOPTS`): `PATH` (the bin directory of the interpreter,
   `/usr/bin`, `/bin`), `HOME` and `TMPDIR` (new directories that are deleted
   after the run), `LANG=C.UTF-8`, `PYTHONHASHSEED=0`,
-  `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and `NO_PROXY=127.0.0.1,localhost`.
-  An entry may add variables of its own, by name and value (`environment =
-  { EINOPS_TEST_BACKENDS = "numpy" }`): a suite that reads its settings from
-  the environment gets them, and nothing else does. `projects.py` refuses a
-  name that this environment sets and the names that configure the
-  interpreter, pytest, the dynamic loader or the locale (`PYTHON*`,
-  `PYTEST*`, `LD_*`, `LC_*`; compared without case), so that an entry cannot
-  undo a precaution. The child checks that it has the variables, and the
-  trace records them (`environment`); `trace_helper.py` refuses a trace whose
-  variables are not its entry's. The
+  `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` and `NO_PROXY=127.0.0.1,localhost`
+  (the fixed hash seed makes sets of strings iterate in the same order in
+  every run). An entry may add variables of its own, by name and value
+  (`environment = { EINOPS_TEST_BACKENDS = "numpy" }`): a suite that reads
+  its settings from the environment gets them, and nothing else does.
+  `projects.py` refuses a name that this environment sets and the names
+  that configure the interpreter, pytest, the dynamic loader or the locale
+  (`PYTHON*`, `PYTEST*`, `LD_*`, `LC_*`; compared without case), so that an
+  entry cannot undo a precaution. The child checks that it has the
+  variables, and the trace records them (`environment`); `trace_helper.py`
+  refuses a trace whose variables are not its entry's. The
   interpreter runs with `-s -P`: no user site-packages, and neither the
   script directory nor the working directory on `sys.path`. Its stdin is
   `/dev/null`, so that code that reads stdin when it is not a terminal
@@ -2928,12 +3019,14 @@ The trace records the version of every installed distribution
   collect `extra/test_hypothesis.py`). `deselect` removes tests, each with a
   reason (h11: `test_against_stdlib_http.py` binds a TCP server on
   127.0.0.1). The trace records them and counts the deselected tests. A
-  project without `pytest_args` has no test run, and the tracer refuses it.
+  project without `pytest_args` has no test run, and the tracer refuses it:
+  pytest would collect the whole checkout.
 - **Plugins outside the checkout.** `plugins` lists pytest plugins that
   the run needs and the project does not have: `.py` files of the benchmark
   directory, outside `projects/`, so that no test can change them. The
-  child imports each one by its path (not through `sys.path`) after the
-  tracer starts, and passes it to pytest; its code is client code. The
+  child imports each one by its path (not through `sys.path`, so that it
+  cannot hide a module of the project) after the tracer starts, and passes
+  it to pytest; its code is client code. The
   trace records them (`plugins`). markdown2's plugin calls the project's
   own case generator, which only its harness calls.
   `plugins/hypothesis_profile.py` is the plugin of a project whose tests use
@@ -2955,7 +3048,54 @@ The trace records the version of every installed distribution
 - **Time limit.** The parent stops the run after `--timeout` seconds
   (default 600). The child runs in its own process group; after the run,
   or when it is stopped, every process left in that group (a server that a
-  test started) is killed.
+  test started) is killed. The parent waits for the child without reaping
+  it first, so that its process group id cannot go to an unrelated
+  process in between.
+
+### The pytest plugins
+
+`plugins/` holds the four pytest plugins that `plugins` of `projects.toml`
+names. Each changes nothing in the checkout; for the tracer it is client
+code.
+
+- `hypothesis_profile.py` (the projects whose tests use Hypothesis): see
+  "Plugins outside the checkout" under "Precautions".
+- `nose_tools.py` (asciinema). asciinema's tests import `assert_equal` and
+  `assert_raises` from `nose.tools`. nose 1.3.7, its last release (2015),
+  cannot be imported on Python 3.12 and later: importing `nose.tools`
+  imports the package `nose`, whose importer imports the module `imp`,
+  which Python 3.12 removed. `nose.tools` defines its `assert_*` functions
+  as the methods of a `unittest.TestCase`, so they need an instance of it.
+  The plugin puts a module `nose.tools` with those two methods in
+  `sys.modules` before pytest collects the tests; an empty `__path__`
+  makes `nose` a package, so that `nose.tools` is its submodule.
+- `testlib_cases.py` (markdown2). markdown2's own harness
+  (`test/testlib.py`, run by `make testone`) imports
+  `test/test_markdown2.py` and exhausts its generator `test_cases()`. That
+  hook adds one test method per case file to the unittest classes of the
+  module. pytest never calls it, so without the plugin it sees none of the
+  cases. The plugin exhausts the hook once, before pytest collects the
+  module, so that pytest collects the generated methods as unittest tests.
+  The hook itself is not collected as a test: pytest 9 would refuse the
+  whole module because a function named `test_*` yields. The plugin runs
+  only the project's own hook.
+- `outputs_cleanup.py` (python-barcode). 19 test items of python-barcode
+  0.16.1 (21 with Pillow) write barcodes (SVG, PNG, JPEG files) and an
+  `index.html` into `tests/test_outputs/` of the checkout; the directory's
+  `.gitignore` ignores them. `trace.py` fails a run that leaves a file in
+  the checkout copy, so these tests could not run without the plugin. At
+  the start of the session it records every file of the rootdir (the
+  checkout): the SHA-256 of a file, the target of a link (links are not
+  followed), or a directory. At its end it removes what is new in
+  `tests/test_outputs/` and nothing else, in reverse order so that a
+  directory's contents go before it: new files and links (never the
+  target of a link), then new directories. Then the checkout must be as it
+  was at the start. If anything else changed (a file outside that
+  directory, or one that was in it at the start), it raises
+  `OutputsChanged`, listing the changes as `git status` does, and the run
+  fails: `trace.py` reports the exception. Its end of session runs last
+  (`trylast`), so that the other plugins (the tracer's test counts) finish
+  first.
 
 ### What the tracer does
 
@@ -2980,6 +3120,15 @@ The trace records the version of every installed distribution
      `threading.Thread.start` did not start has no caller and is counted in
      `dropped.unknown_caller`.
    - Threads, generators and coroutines follow the validator.
+   - **Starts.** A second `sys.monitoring` tool (id 3; the validator's is
+     `PROFILER_ID`) records the first `PY_START` of each package function,
+     then stops watching it: that is the only event of a generator or
+     coroutine function that the interpreter drives (`__iter__` written as
+     a generator, `__anext__`), which no call expression calls. A
+     function's code object is registered when its module starts, so
+     before the function can run. A function also counts as executed when
+     it is the caller or callee of an edge, so a generator function counts
+     when its generator is created, even if it never runs.
 4. After the run, it checks that the package was imported from the checkout
    and traced from its first import, that pytest used the expected rootdir
    and configuration, that pytest finished with exit status 0 or 1, and that
@@ -3021,6 +3170,15 @@ the pin, exactly the distributions of the requirements file) and writes
 edges of both traces, the distributions that differ and the edges that
 only one trace has, and exits with 0 only if the edge sets are equal. The
 committed `dynamic/jmespath.json` is never changed by the service.
+
+The service (`container/trace_entry.py`) runs without network, with a
+read-only root, no capability and a non-root user. `/repo` is this
+repository, read-only; `/results/trace` (`evaluation/results/trace/`) is
+the only writable host mount, so the test suite of a project
+(third-party code) writes nowhere else on the host (a finding of the
+security scan of 2026-11-14); `/tmp` is a tmpfs. Like `trace.sh`, it runs only
+our own code and the project's tests: the trace image holds CPython, the
+pinned test requirements and the project's source, neither PyCG nor git.
 
 To replace a committed trace (after a change of the tracer, of the test
 selection or of the environment), copy the two files and check the ground
@@ -3095,12 +3253,15 @@ PYTHON_IMAGE=python:3.14-slim@sha256:<digest> \
 ```
 
 `--dry-run` prints the commands and runs no container; it only
-checks the pin. The script:
+checks the pin. The checks are in `trace_helper.py`, which runs on the
+host, runs nothing of a project, and uses neither the network nor git.
+The script:
 
 1. checks that the commit of `projects.toml` is that of the round log that
    drew the project (`trace_helper.py check-pin`); for a project held as an
    sdist (see below), that the sdist of `projects.toml` names the release
-   of the round log;
+   of the round log (`dagster_pipes-1.13.28.tar.gz` for dagster-pipes
+   1.13.28);
 2. builds the image `pycg-trace-<name>:<tag>` from
    `evaluation/container/Dockerfile.trace`, the requirements file (with
    the Dockerfile the only files of the build context) and the project's
@@ -3117,18 +3278,22 @@ checks the pin. The script:
    plugins into a temporary directory, and makes an empty output
    directory;
 4. runs `entry.sh` in the container. It copies the source to a work
-   directory on a tmpfs, prints the interpreter, runs `trace.py --locate`
+   directory on a tmpfs, so that the tests may write next to themselves,
+   prints the interpreter, runs `trace.py --locate`
    (the package must be found in the copy and nowhere in the
    environment, by the finders, without importing it), and runs
    `trace.py`: the tracer compares the copy's files before and after the
    run;
-5. checks the trace (a regular file under 64 MiB, the keys and types that
+5. checks the trace (a regular file under 64 MiB, while the first
+   traces were under 2 MiB; the keys and types that
    `trace.py` writes, in its format, of this project and commit, and with
    exactly the distributions of the requirements file), copies it to
    `dynamic/<name>.json`, writes the distributions to
    `test-environments/<name>.installed.txt`, and prints the test counts;
 6. removes the temporary directories, and the container if a step failed.
-   A failure names the step.
+   A failure names the step. The temporary directory goes to the trash
+   where the host has a `trash` command (recoverable); else it stays, and
+   its path is printed.
 
 The container runs with `--network none --read-only --cap-drop ALL
 --security-opt no-new-privileges --pids-limit 512 --memory 6g
@@ -3211,7 +3376,18 @@ paths through the library modules that are loaded at the end of the run:
 `module.name`, and `module.Class.name` where the class defines the name or
 is in the MRO of a package class or of an object whose method the package
 called. Only public names count: those in `__all__` if the module has one,
-else those that do not start with an underscore. The checker accepts a
+else those that do not start with an underscore. Modules whose dotted
+name has a part that starts with an underscore, and `__main__`, give no
+names; `builtins` is written `<builtin>`. A module's namespace is read
+with `object.__getattribute__`, neither `isinstance()` nor `vars()`:
+`sys.modules` can hold an object that runs code when an attribute is read
+(a lazy module). A method call passes a bound method, or the function or
+descriptor of the method with the object as first argument; the tracer
+notes the class of that object only when the function is what the type
+holds under that name, not a function that merely takes the object as
+first argument. A callee outside the package of another kind than those
+above keeps, as canonical name, the first in sort order of the names that
+the validator recorded for it. The checker accepts a
 ground-truth callee if it is the canonical name or one of these names.
 
 The output is deterministic for one environment. Another interpreter or

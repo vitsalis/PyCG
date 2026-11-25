@@ -1,9 +1,3 @@
-"""Tests of the fetch program (evaluation/container/fetch.py, a step of the
-build of the inputs image) in-process on local git repositories that the
-tests make (our own data, never third-party code), and of where the
-sources of the projects are read (macro-benchmark/projects.py sources).
-Nothing here needs Docker or the network."""
-
 import hashlib
 import importlib.util
 import io
@@ -30,9 +24,8 @@ def load(name, path):
 fetch = load("evaluation_fetch", CONTAINER / "fetch.py")
 projects = load("macro_projects", EVALUATION / "macro-benchmark" / "projects.py")
 needs_git = pytest.mark.skipif(shutil.which("git") is None, reason="needs git")
-SUBMODULE = "5" * 40
-FILES = {
-    # The blobs as committed: no attribute, filter or line-ending conversion.
+SUBMODULE_COMMIT = "5" * 40
+FILES_AS_COMMITTED = {
     "pkg/__init__.py": b"x = 'released'\n",
     "pkg/run.sh": ("exec", b"#!/bin/sh\n"),
     "pkg/link.py": ("link", "__init__.py"),
@@ -41,8 +34,7 @@ FILES = {
 }
 
 
-def git(directory, *args):
-    """Run git in `directory` with no configuration of the user or system."""
+def git_without_user_configuration(directory, *args):
     environment = {
         "PATH": os.environ["PATH"],
         "HOME": str(directory),
@@ -61,13 +53,10 @@ def git(directory, *args):
     return done.stdout.decode().strip()
 
 
-def make_repository(root, files, submodules=()):
-    """A git repository at `root` with one commit of `files` ({path: bytes,
-    or ("exec", bytes), or ("link", target)}) and of nested submodule
-    entries `submodules` ({path: commit id}); return (file URL, commit)."""
+def make_repository(root, content_by_path, submodule_commit_by_path=()):
     root.mkdir(parents=True)
-    git(root, "init", "--quiet", "--initial-branch=main")
-    for path, content in files.items():
+    git_without_user_configuration(root, "init", "--quiet", "--initial-branch=main")
+    for path, content in content_by_path.items():
         target = root / path
         target.parent.mkdir(parents=True, exist_ok=True)
         kind, data = content if isinstance(content, tuple) else ("file", content)
@@ -76,23 +65,26 @@ def make_repository(root, files, submodules=()):
         else:
             target.write_bytes(data)
             target.chmod(0o755 if kind == "exec" else 0o644)
-    git(root, "add", "--all")
-    for path, oid in dict(submodules).items():
-        git(root, "update-index", "--add", "--cacheinfo", f"160000,{oid},{path}")
-    git(root, "commit", "--quiet", "--no-gpg-sign", "--allow-empty", "-m", "c")
-    return f"file://{root}", git(root, "rev-parse", "HEAD")
+    git_without_user_configuration(root, "add", "--all")
+    for path, oid in dict(submodule_commit_by_path).items():
+        git_without_user_configuration(
+            root, "update-index", "--add", "--cacheinfo", f"160000,{oid},{path}"
+        )
+    git_without_user_configuration(
+        root, "commit", "--quiet", "--no-gpg-sign", "--allow-empty", "-m", "c"
+    )
+    return f"file://{root}", git_without_user_configuration(root, "rev-parse", "HEAD")
 
 
 @pytest.fixture
 def source(tmp_path, monkeypatch):
-    """A local repository with FILES and a nested submodule; (url, commit).
-    The fetch program may read file:// URLs (and no other non-https one)."""
-    monkeypatch.setattr(fetch, "PROTOCOLS", ("file",))
-    return make_repository(tmp_path / "source", FILES, {"vendor/sub": SUBMODULE})
+    monkeypatch.setattr(fetch, "GIT_PROTOCOLS_ALLOWED", ("file",))
+    return make_repository(
+        tmp_path / "source", FILES_AS_COMMITTED, {"vendor/sub": SUBMODULE_COMMIT}
+    )
 
 
-def benchmark(root, entry):
-    """A benchmark directory whose projects.toml has the project demo."""
+def write_benchmark_with_project_demo(root, entry):
     root.mkdir(parents=True)
     (root / "projects.toml").write_text(
         "[demo]\n" + dedent(entry) + 'exclude = []\ndependencies = []\nroot = "."\n'
@@ -116,7 +108,7 @@ def test_only_a_full_commit_id_is_fetched(tmp_path):
 @needs_git
 def test_the_projects_are_fetched_into_the_destination(tmp_path, source, capsys):
     url, commit = source
-    config = benchmark(
+    config = write_benchmark_with_project_demo(
         tmp_path / "bench",
         f'repository = "{url}"\ncommit = "{commit}"\npackages = ["pkg"]\n',
     )
@@ -145,7 +137,7 @@ def make_tar(members):
 
 
 def sdist_config(root, data):
-    return benchmark(
+    return write_benchmark_with_project_demo(
         root,
         f"""
         sdist = "demo-1.0.tar.gz"
@@ -157,8 +149,7 @@ def sdist_config(root, data):
 
 
 @pytest.fixture
-def served(monkeypatch):
-    """The program's downloads: {url: body}."""
+def served_body_by_url(monkeypatch):
     bodies = {}
 
     def urlopen(url, timeout):
@@ -169,10 +160,10 @@ def served(monkeypatch):
 
 
 def test_an_sdist_of_another_hash_is_not_written_and_the_command_fails(
-    tmp_path, served, capsys, monkeypatch
+    tmp_path, served_body_by_url, capsys, monkeypatch
 ):
     data = make_tar(SDIST)
-    served[SDIST_URL] = data + b"\0"
+    served_body_by_url[SDIST_URL] = data + b"\0"
     config = sdist_config(tmp_path / "bench", data)
     monkeypatch.setattr(projects, "CONFIG_PATH", config)
     monkeypatch.setattr(fetch, "_load", lambda name, path: projects)
@@ -180,9 +171,6 @@ def test_an_sdist_of_another_hash_is_not_written_and_the_command_fails(
     assert fetch.main(["macro", str(out)]) == 1
     assert "demo: refused: " in capsys.readouterr().err
     assert not (out / "demo").exists()
-
-
-# Where the sources are read
 
 
 def test_the_benchmark_reads_the_sources_of_the_image_where_it_has_them(
@@ -195,7 +183,11 @@ def test_the_benchmark_reads_the_sources_of_the_image_where_it_has_them(
     projects.SOURCES.mkdir(parents=True)
     found = projects.load_projects()
     assert {p.directory.parent for p in found.values()} == {projects.SOURCES.resolve()}
-    # Any other projects.toml has its sources beside it.
-    config = benchmark(tmp_path / "bench", 'packages = ["pkg"]\n')
-    other = projects.load_projects(config)["demo"]
-    assert other.directory == (tmp_path / "bench" / "projects" / "demo").resolve()
+    config = write_benchmark_with_project_demo(
+        tmp_path / "bench", 'packages = ["pkg"]\n'
+    )
+    project_of_other_benchmark = projects.load_projects(config)["demo"]
+    assert (
+        project_of_other_benchmark.directory
+        == (tmp_path / "bench" / "projects" / "demo").resolve()
+    )

@@ -1,16 +1,3 @@
-"""The projects of the macro-benchmark, as projects.toml describes them.
-
-Read by trace.py, check.py and the evaluation scripts. It needs nothing but
-the standard library of Python 3.12, so that the runner of evaluation/ can
-find the analysed source without loading the tracer (Python 3.14).
-
-The sources of the projects are not in git. The build of the inputs image
-(evaluation/container/Dockerfile.inputs) fetches each one by its pin and
-fails if one is not its pin; every image of the evaluation holds them at
-SOURCES. On the host, projects/ beside projects.toml holds them only if
-they were copied out of that image, to be read (see the README).
-"""
-
 import os
 import re
 import tomllib
@@ -18,71 +5,50 @@ from pathlib import Path
 from typing import NamedTuple
 
 BENCHMARK_DIR = Path(__file__).resolve().parent
-# The micro-benchmark is versioned with the tool, at the root of this
-# repository. Every script takes its place from here.
 MICRO_BENCHMARK = BENCHMARK_DIR.parents[1] / "micro-benchmark"
-# A project name names projects/<name> and the files of its results.
-_NAME = re.compile(r"[A-Za-z0-9_.-]+")
+_PROJECT_NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]+")
 CONFIG_PATH = BENCHMARK_DIR / "projects.toml"
-# Where the images of the evaluation hold the sources of the projects of
-# CONFIG_PATH. Any other projects.toml (a test's, the copy of a trace) has
-# its sources in projects/ beside it.
 SOURCES = Path("/inputs/macro-benchmark/projects")
-# The keys of the two forms of a project's source: a git checkout at a
-# commit, or a source archive from PyPI.
 _GIT_KEYS = ("repository", "tag", "commit")
 _SDIST_KEYS = ("sdist", "sdist_url", "sdist_sha256")
 _SDIST_FILE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*\.tar\.gz")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-# The batches in the order in which they were built, then the projects of
-# PyCG's ICSE 2021 evaluation.
 BATCHES = (1, 2, 3, 4, 5, 7, "icse-2021")
 
 
 class Sdist(NamedTuple):
-    """A source archive from PyPI, in place of a git checkout."""
-
-    file: str  # the file name of the archive, which names the release
+    file: str
     url: str
     sha256: str
 
 
 class Project(NamedTuple):
-    """A project of the benchmark, as projects.toml describes it."""
-
     name: str
-    batch: int | str | None  # one of BATCHES (None: a project of the tests)
-    directory: Path  # the source, sources(projects.toml)/<name>
-    root: Path  # the directory on sys.path; module names are relative to it
-    packages: tuple  # package directories or module files: the analysed source
-    exclude: tuple  # paths in the packages that are not analysed
-    dependencies: frozenset  # installed top-level modules that are library code
-    pytest_args: tuple  # empty: no test run (a ground truth from reading only)
-    config: Path | None  # the project's own pytest configuration file
-    deselect: tuple  # ({"test": node id, "reason": why}, ...)
-    plugins: tuple  # pytest plugins: .py files of the benchmark, outside projects/
-    also_installed: frozenset  # packages that the test environment also installs
-    not_importable: frozenset  # packages that the test environment cannot import
-    requirements: (
-        tuple  # what the test environment has installed: name or name==version
-    )
-    repository: str | None  # the git repository's URL
+    batch: int | str | None
+    directory: Path
+    root: Path
+    packages: tuple
+    exclude: tuple
+    dependencies: frozenset
+    pytest_args: tuple
+    config: Path | None
+    deselect: tuple
+    plugins: tuple
+    also_installed: frozenset
+    not_importable: frozenset
+    requirements: tuple
+    repository: str | None
     commit: str | None
-    sdist: Sdist | None  # in place of a commit; the source is its unpacked copy
-    environment: tuple = ()  # ((name, value), ...): variables of the test run
+    sdist: Sdist | None
+    environment: tuple = ()
 
     @property
     def pin(self):
-        """What the source is pinned at: the commit, or `sha256:` and the hash
-        of the sdist (None for an unpinned checkout, as in the tests)."""
         if self.sdist is not None:
             return f"sha256:{self.sdist.sha256}"
         return self.commit
 
     def pytest_command(self):
-        """The arguments of pytest: the checkout is the rootdir and the limit
-        for conftest.py files, and only the project's own configuration counts
-        (none: os.devnull, so that pytest does not look in parent directories)."""
         return [
             *self.pytest_args,
             "-c",
@@ -97,9 +63,6 @@ class Project(NamedTuple):
 
     @property
     def package_names(self):
-        """The names of the analysed packages (`jmespath`). A module file is
-        named as its module, by module_name: `configargparse.py` is
-        `configargparse`, `pkg/__init__.py` is `pkg`."""
         return tuple(
             self.module_name(package)
             if package.suffix == ".py"
@@ -108,7 +71,6 @@ class Project(NamedTuple):
         )
 
     def in_scope(self, filename):
-        """Whether `filename` is a module of the analysed source."""
         path = os.path.realpath(filename)
         if not path.endswith(".py"):
             return False
@@ -117,17 +79,12 @@ class Project(NamedTuple):
         )
 
     def module_name(self, path):
-        """The dotted name of a source file; a package __init__.py is the package."""
         parts = list(Path(path).resolve().relative_to(self.root).with_suffix("").parts)
         if parts[-1] == "__init__" and len(parts) > 1:
             parts.pop()
         return ".".join(parts)
 
     def source_files(self):
-        """The modules of the analysed source, sorted by path. A package is a
-        directory, or a module file. ValueError if a link of the project's
-        directory leaves it: the pin fixes a link's text, not what it reaches
-        (escaping_links)."""
         leaving = escaping_links(self.directory)
         if leaving:
             raise ValueError(
@@ -143,11 +100,6 @@ class Project(NamedTuple):
 
 
 def escaping_links(directory):
-    """The paths (relative, sorted) of the links below `directory` whose
-    target, resolved, is not inside `directory`; no link is followed while
-    walking. Every reader of a project's files goes through this check
-    (source_files), so a fetched link cannot select a file that the pin
-    does not fix."""
     directory = os.path.realpath(directory)
     if not os.path.isdir(directory):
         return []
@@ -165,9 +117,6 @@ def is_under(path, directory):
 
 
 def sources(config_path):
-    """The directory of the sources of the projects of `config_path`:
-    SOURCES for the benchmark's own projects.toml in an image of the
-    evaluation, else projects/ beside the file."""
     config_path = Path(config_path).resolve()
     if config_path == CONFIG_PATH and SOURCES.is_dir():
         return SOURCES
@@ -175,22 +124,17 @@ def sources(config_path):
 
 
 def load_projects(config_path=CONFIG_PATH):
-    """Read projects.toml: {name: Project}. The source of a project is
-    sources(config_path)/<name>: the files of a git commit, or the unpacked
-    copy of an sdist."""
     config_path = Path(config_path).resolve()
     source_dir = sources(config_path)
     with config_path.open("rb") as f:
         data = tomllib.load(f)
     projects = {}
     for name, entry in data.items():
-        if not _NAME.fullmatch(name) or name in (".", ".."):
+        if not _PROJECT_NAME_PATTERN.fullmatch(name) or name in (".", ".."):
             raise ValueError(
                 f"{config_path}: [{name}]: a project name is one path component "
                 "of letters, digits, _, - and ."
             )
-        # A project without both has no test run: its ground truth comes
-        # from reading only, and trace.py refuses it.
         if ("pytest_args" in entry) != ("test_requirements" in entry):
             raise ValueError(
                 f"{config_path}: [{name}]: pytest_args and test_requirements go "
@@ -221,8 +165,6 @@ def load_projects(config_path=CONFIG_PATH):
         config = (
             directory / entry["pytest_config"] if "pytest_config" in entry else None
         )
-        # The root, the packages and the configuration, resolved, must stay
-        # in the project's directory: a link of the tree may not lead out.
         for path in (root, *packages, *([config.resolve()] if config else [])):
             if not is_under(str(path), directory):
                 raise ValueError(
@@ -249,16 +191,11 @@ def load_projects(config_path=CONFIG_PATH):
             sdist=_sdist(config_path, name, entry),
             environment=_environment(config_path, name, entry),
         )
-        # A test requirement can need the package itself (pytest needs
-        # pluggy): the environment then has it too. The run checks that the
-        # package was imported from the checkout.
         if not project.also_installed <= set(project.package_names):
             raise ValueError(
                 f"{config_path}: [{name}]: also_installed names a package of "
                 f"the project: {sorted(project.also_installed)}"
             )
-        # A package of the analysed source can need a library that the test
-        # environment lacks: no test imports it, and the run checks that.
         if not project.not_importable <= set(project.package_names):
             raise ValueError(
                 f"{config_path}: [{name}]: not_importable names a package of "
@@ -268,29 +205,25 @@ def load_projects(config_path=CONFIG_PATH):
     return projects
 
 
-# The variables that an entry may not set: those of trace.py's environment of
-# the test run, and the families that configure the interpreter, pytest, the
-# dynamic loader and the locale (compared without case).
 _TRACER_VARIABLES = frozenset(
     {"PATH", "HOME", "TMPDIR", "LANG", "NO_PROXY", "PYTHONHASHSEED"}
 )
-_RESERVED_PREFIXES = ("PYTHON", "PYTEST", "LD_", "LC_")
-_VARIABLE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+_RESERVED_VARIABLE_PREFIXES = ("PYTHON", "PYTEST", "LD_", "LC_")
+_VARIABLE_NAME_PATTERN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
 def reserved_variable(name):
-    """Whether an entry's `environment` may not set the variable `name`."""
     upper = name.upper()
-    return upper in _TRACER_VARIABLES or upper.startswith(_RESERVED_PREFIXES)
+    return upper in _TRACER_VARIABLES or upper.startswith(_RESERVED_VARIABLE_PREFIXES)
 
 
 def _environment(config_path, name, entry):
-    """The environment variables of an entry's test run, sorted by name: a
-    table of variable names and string values; a reserved name is refused."""
     table = entry.get("environment", {})
     where = f"{config_path}: [{name}]: environment"
     if not isinstance(table, dict) or not all(
-        isinstance(key, str) and _VARIABLE.fullmatch(key) and isinstance(value, str)
+        isinstance(key, str)
+        and _VARIABLE_NAME_PATTERN.fullmatch(key)
+        and isinstance(value, str)
         for key, value in table.items()
     ):
         raise ValueError(f"{where}: a table of variable names and strings")
@@ -304,9 +237,6 @@ def _environment(config_path, name, entry):
 
 
 def _sdist(config_path, name, entry):
-    """The sdist of an entry (None if it names none): a file name ending in
-    .tar.gz, an https URL that ends in that name, and the SHA-256 of the
-    file."""
     given = [key for key in _SDIST_KEYS if key in entry]
     if not given:
         return None
@@ -333,9 +263,6 @@ def _sdist(config_path, name, entry):
 
 
 def _plugin_path(config_path, name, plugin):
-    """The path of a pytest plugin of projects.toml: a relative path to a .py
-    file of the benchmark directory, outside the checkouts, so that the
-    tests of a project cannot change it."""
     benchmark = config_path.parent
     if isinstance(plugin, str) and not os.path.isabs(plugin):
         path = (benchmark / plugin).resolve()

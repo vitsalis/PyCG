@@ -1,44 +1,4 @@
 #!/usr/bin/env python3
-"""Check the hand-written ground truth of the macro-benchmark projects.
-
-    cd evaluation/macro-benchmark
-    python -I check.py [PROJECT ...]           # check
-    python -I check.py --write PROJECT ...      # regenerate the graph
-    python -I check.py --skeleton PROJECT      # print a new ledger
-    python -I check.py --report PROJECT        # report for auditors
-    python -I check.py --report PROJECT --without-candidates
-    python -I check.py --origin [PROJECT ...]  # traced and added edges
-
-For each project (default: every project of projects.toml), print the size
-of the analysed source and of its call sites, read with `ast`, and each
-candidate callee of 50 or more sites (see README, "Writing a ground
-truth"). The ground truth is the call-site ledger
-ground-truth/PROJECT.ledger. If it exists,
-check that:
-
-- it has an entry for every call site that needs one, and every entry is a
-  site of the source with the same text;
-- every candidate of a site is a callee or rejected with a reason (or by a
-  default rejection), a value site has a note, an explicit site has callees
-  or a note, an exclusion names a node that is not a candidate, and nothing
-  is undecided;
-- ground-truth/PROJECT.json is the graph that the ledger gives (--write
-  writes it), and every callee in the package is a module, function or
-  lambda of the source;
-- if dynamic/PROJECT.json exists, every edge of the trace is in the graph,
-  or in ground-truth/PROJECT.rejected.json with a reason;
-- ground-truth/PROJECT.added.json is the edges of the graph that the trace
-  does not have, with the ledger sites that give them (--write writes it),
-  and the graph is the traced edges without the rejected ones, plus the
-  added edges.
-
---origin reads only the committed files (the graph, the added edges, the
-trace and the rejected edges), checks the last point, and prints a table:
-per project, where the edges of the graph come from.
-
-The exit status is 1 if a check fails.
-"""
-
 import argparse
 import importlib.util
 import json
@@ -46,9 +6,20 @@ import re
 from collections import Counter
 from pathlib import Path
 
+DESCRIPTION = """Checks the hand-written ground truths of the macro-benchmark
+(evaluation/macro-benchmark/README.md, "Writing a ground truth"). The exit
+status is 1 if a check fails.
+
+    cd evaluation/macro-benchmark
+    python -I check.py [PROJECT ...]           # check
+    python -I check.py --write PROJECT ...      # regenerate the graph
+    python -I check.py --skeleton PROJECT      # print a new ledger
+    python -I check.py --report PROJECT        # report for auditors
+    python -I check.py --report PROJECT --without-candidates
+    python -I check.py --origin [PROJECT ...]  # traced and added edges"""
+
 
 def _load(name):
-    """Load a sibling script by path: its directory is not a package."""
     path = Path(__file__).resolve().parent / f"{name}.py"
     spec = importlib.util.spec_from_file_location(f"macro_{name}", path)
     module = importlib.util.module_from_spec(spec)
@@ -60,12 +31,10 @@ macro_trace = _load("trace")
 sites = _load("sites")
 ledger = _load("ledger")
 
-# The size report lists each candidate of at least this many sites.
-_MANY_SITES = 50
+CANDIDATE_SITES_REPORTED_MIN = 50
 
 
 def load_graph(path):
-    """Read a graph: a JSON object that maps each node to a list of callees."""
     graph = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(graph, dict) or not all(
         isinstance(callees, list) and all(isinstance(c, str) for c in callees)
@@ -78,7 +47,6 @@ def load_graph(path):
 
 
 def load_rejected(path):
-    """Read {caller: {callee: reason}}: trace edges that are not package edges."""
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or not all(
         isinstance(callees, dict)
@@ -96,7 +64,6 @@ def load_rejected(path):
 
 
 def check(project, source, graph, trace=None, rejected=None):
-    """Return (errors, statistics) for a graph, a trace and rejected edges."""
     rejected = rejected or {}
     nodes = source.modules | source.functions
     errors = [
@@ -130,7 +97,7 @@ def check(project, source, graph, trace=None, rejected=None):
         f"trace node is not in the source: {node}" for node in sorted(traced - nodes)
     ]
     dynamic = {(c, e) for c, callees in trace["edges"].items() for e in callees}
-    confirmed = traced_names(trace).keys() & expected
+    confirmed = trace_callee_by_named_edge(trace).keys() & expected
     run = len(source.functions & set(trace["executed"]))
     statistics.append(
         f"trace: {len(dynamic)} edges; confirms {len(confirmed)} of {len(expected)} "
@@ -142,16 +109,10 @@ def check(project, source, graph, trace=None, rejected=None):
 
 
 def callee_names(trace, callee):
-    """The names that resolve to a callee of the trace: its canonical name,
-    then the other names (`aliases`) of a callee outside the package. A
-    ground-truth callee matches the trace callee if it is one of them."""
     return (callee, *trace["aliases"].get(callee, ()))
 
 
-def traced_names(trace):
-    """{(caller, name): trace callee} for each edge of the trace, under each
-    name of its callee (callee_names). A graph edge with one of these names
-    is a traced edge, also where the graph names the callee by an alias."""
+def trace_callee_by_named_edge(trace):
     names = {}
     for caller, callees in sorted(trace["edges"].items()):
         for callee in sorted(callees):
@@ -161,17 +122,7 @@ def traced_names(trace):
 
 
 def added_edges(parsed, trace, trace_name):
-    """The content of ground-truth/PROJECT.added.json: the edges of the
-    ledger's graph that the trace does not have.
-
-    "edges" maps each caller to {callee: [site, ...]}: the ledger entries
-    that give the edge, in site order. A site is written as the ledger
-    writes it, after its module: `jmespath.parser 102:31 call  self._parse(x)`.
-    "notes" maps each of these sites that has notes to its notes. "trace" is
-    the path of the trace, or None for a project without a trace: then every
-    edge is added.
-    """
-    traced = traced_names(trace) if trace is not None else {}
+    traced = trace_callee_by_named_edge(trace) if trace is not None else {}
     edges, notes = {}, {}
     for entry in sorted(parsed.entries, key=lambda entry: entry.key):
         site = f"{entry.module} {entry.line}:{entry.column} {entry.kind}"
@@ -186,12 +137,10 @@ def added_edges(parsed, trace, trace_name):
     return {"trace": trace_name, "edges": edges, "notes": notes}
 
 
-# A site of the added edges: the module, then the site line of the ledger.
-_ADDED_SITE = re.compile(r"\S+ \d+:\d+ \S+(  .*)?$")
+_ADDED_SITE_PATTERN = re.compile(r"\S+ \d+:\d+ \S+(  .*)?$")
 
 
 def load_added(path, trace_name):
-    """Read the added edges of a project whose trace would be `trace_name`."""
     data = json.loads(path.read_text(encoding="utf-8"))
     shape = (
         isinstance(data, dict)
@@ -204,7 +153,8 @@ def load_added(path, trace_name):
                 isinstance(sites_, list)
                 and sites_
                 and all(
-                    isinstance(site, str) and _ADDED_SITE.match(site) for site in sites_
+                    isinstance(site, str) and _ADDED_SITE_PATTERN.match(site)
+                    for site in sites_
                 )
                 for sites_ in callees.values()
             )
@@ -216,14 +166,14 @@ def load_added(path, trace_name):
             for notes in data["notes"].values()
         )
     )
-    if shape:  # a note belongs to a site of an added edge
-        listed = {
+    if shape:
+        sites_of_added_edges = {
             site
             for callees in data["edges"].values()
             for sites_ in callees.values()
             for site in sites_
         }
-        shape = data["notes"].keys() <= listed
+        shape = data["notes"].keys() <= sites_of_added_edges
     if not shape:
         raise ValueError(
             f'{path.name}: expected {{"trace": "{trace_name}" or null, '
@@ -233,14 +183,9 @@ def load_added(path, trace_name):
 
 
 def origin(graph, added, trace):
-    """Check, edge by edge, that every edge of the graph is traced or added,
-    and not both, and that every added edge is in the graph. (The rest of
-    the identity, that the graph has each trace edge that is not rejected,
-    is the check of _missing_edges.) Return (errors, the traced edges of the
-    graph, the other edges of the graph)."""
     edges = {(caller, callee) for caller in graph for callee in graph[caller]}
     listed = {(caller, callee) for caller in added for callee in added[caller]}
-    traced = traced_names(trace) if trace is not None else {}
+    traced = trace_callee_by_named_edge(trace) if trace is not None else {}
     errors = [
         f"added edge is not in the graph: {caller} -> {callee}"
         for caller, callee in sorted(listed - edges)
@@ -258,9 +203,6 @@ def origin(graph, added, trace):
 
 
 def rejection_errors(trace, expected, rejected):
-    """The checks of the rejected edges, shared by the check and --origin.
-    No rejected edge is in the graph. With a trace, see _missing_edges.
-    Without a trace, nothing ran, so no edge can be a rejected trace edge."""
     errors = [
         f"rejected edge is in the ground truth: {caller} -> {callee}"
         for caller, callee in sorted(rejected.keys() & expected)
@@ -275,10 +217,6 @@ def rejection_errors(trace, expected, rejected):
 
 
 def _missing_edges(trace, expected, rejected):
-    """Trace edges that neither the graph nor the rejected edges have; trace
-    edges that the graph has under one name and the rejected edges under
-    another (a traced callee and its aliases are one callee); and rejected
-    edges that the trace does not have."""
     errors, used = [], set()
     for caller, callees in sorted(trace["edges"].items()):
         for callee in callees:
@@ -290,7 +228,6 @@ def _missing_edges(trace, expected, rejected):
                 note = f" (also named {', '.join(also)})" if also else ""
                 errors.append(f"missing edge: {caller} -> {callee}{note}")
             elif in_graph and in_rejected and not in_graph & in_rejected:
-                # (The same name in both: "rejected edge is in the ground truth".)
                 graph_names = ", ".join(sorted(name for _, name in in_graph))
                 rejected_names = ", ".join(sorted(name for _, name in in_rejected))
                 errors.append(
@@ -309,9 +246,7 @@ def _percent(part, whole):
     return f"{100 * part / whole:.1f}%" if whole else "-"
 
 
-def _summary(project, source):
-    """The size of the source and of its sites, and the candidates that make
-    many sites: the first ones to consider for a default rejection."""
+def _size_report_lines(project, source):
     needed = [site for site in source.sites if site.needs_entry]
     kinds = Counter(site.kind for site in needed)
     by_kind = ", ".join(f"{kinds[k]} {k}" for k in sites.KINDS if kinds[k])
@@ -325,25 +260,25 @@ def _summary(project, source):
         f"{sum(s.value for s in needed)} value sites",
     ]
     counts = Counter(name for site in needed for name in site.candidates)
-    frequent = [(name, n) for name, n in counts.items() if n >= _MANY_SITES]
+    frequent = [
+        (name, n) for name, n in counts.items() if n >= CANDIDATE_SITES_REPORTED_MIN
+    ]
     if frequent:
-        lines.append(f"  candidates at {_MANY_SITES} or more sites:")
+        lines.append(f"  candidates at {CANDIDATE_SITES_REPORTED_MIN} or more sites:")
         for name, n in sorted(frequent, key=lambda item: (-item[1], item[0])):
             lines.append(f"    {n} {name}")
     return lines
 
 
-class _Files:
-    """The ground-truth and trace files of a project."""
-
+class _ProjectFiles:
     def __init__(self, project, benchmark_dir):
         truth = benchmark_dir / "ground-truth"
         self.ledger = truth / f"{project.name}.ledger"
         self.graph = truth / f"{project.name}.json"
         self.rejected = truth / f"{project.name}.rejected.json"
         self.added = truth / f"{project.name}.added.json"
-        self.trace_name = f"dynamic/{project.name}.json"  # as the added edges name it
-        self.trace = benchmark_dir / self.trace_name
+        self.trace_name_in_added_edges = f"dynamic/{project.name}.json"
+        self.trace = benchmark_dir / self.trace_name_in_added_edges
 
     def load_trace(self):
         if not self.trace.exists():
@@ -354,25 +289,23 @@ class _Files:
         return load_rejected(self.rejected) if self.rejected.exists() else {}
 
     def load_added(self):
-        return load_added(self.added, self.trace_name)
+        return load_added(self.added, self.trace_name_in_added_edges)
 
-    def trace_errors(self, added):
-        """Whether the added edges know of the trace that exists, or not."""
+    def trace_presence_errors(self, added):
         if added["trace"] is None and self.trace.exists():
             return [
                 f"{self.added.name} says that the project has no trace, "
-                f"but {self.trace_name} exists"
+                f"but {self.trace_name_in_added_edges} exists"
             ]
         if added["trace"] is not None and not self.trace.exists():
             return [
-                f"{self.added.name} names the trace {self.trace_name}, "
-                "which does not exist"
+                f"{self.added.name} names the trace "
+                f"{self.trace_name_in_added_edges}, which does not exist"
             ]
         return []
 
 
-def _dumps(data):
-    """The text of a generated file: sorted keys, stable formatting."""
+def _generated_file_text(data):
     return json.dumps(data, indent=2, sort_keys=True) + "\n"
 
 
@@ -381,15 +314,14 @@ def _missing_file(path):
 
 
 def check_project(project, benchmark_dir, write=False):
-    """Print the report for one project; return the number of errors."""
     source = sites.scan_source(project)
     if not source.modules:
         print(
             f"{project.name}: no source in {project.root} (submodule not checked out?)"
         )
         return 1
-    print("\n".join(_summary(project, source)))
-    files = _Files(project, benchmark_dir)
+    print("\n".join(_size_report_lines(project, source)))
+    files = _ProjectFiles(project, benchmark_dir)
     if not files.ledger.exists():
         generated = [path for path in (files.graph, files.added) if path.exists()]
         for path in generated:
@@ -402,11 +334,11 @@ def check_project(project, benchmark_dir, write=False):
     errors += ledger.check(parsed, source, project.package_names)
     graph = ledger.graph(parsed, source)
     trace = files.load_trace()
-    added = added_edges(parsed, trace, files.trace_name)
+    added = added_edges(parsed, trace, files.trace_name_in_added_edges)
     try:
         if write:
-            files.graph.write_text(_dumps(graph), encoding="utf-8")
-            files.added.write_text(_dumps(added), encoding="utf-8")
+            files.graph.write_text(_generated_file_text(graph), encoding="utf-8")
+            files.added.write_text(_generated_file_text(added), encoding="utf-8")
         else:
             if not files.graph.exists() or load_graph(files.graph) != graph:
                 errors.append(
@@ -422,13 +354,13 @@ def check_project(project, benchmark_dir, write=False):
                 )
         rejected = files.load_rejected()
         committed = files.load_added() if files.added.exists() else None
-    except ValueError as exc:  # json.JSONDecodeError is a ValueError
+    except ValueError as exc:
         print(f"  error: {exc}")
         return 1
     more, statistics = check(project, source, graph, trace, rejected)
     errors += more
     if committed is not None:
-        errors += files.trace_errors(committed)
+        errors += files.trace_presence_errors(committed)
         errors += origin(graph, committed["edges"], trace)[0]
     for line in statistics:
         print(f"  {line}")
@@ -449,13 +381,7 @@ _ORIGIN_COLUMNS = (
 
 
 def origin_project(project, benchmark_dir):
-    """(counts, errors) of one project, from its committed files only.
-
-    counts is None without a ground truth, or if a file cannot be read; else
-    (trace edges or None, rejected edges, traced edges of the graph, added
-    edges, graph edges), each set of edges as (all, inside the package).
-    """
-    files = _Files(project, benchmark_dir)
+    files = _ProjectFiles(project, benchmark_dir)
     if not files.graph.exists():
         return None, []
     if not files.added.exists():
@@ -465,9 +391,9 @@ def origin_project(project, benchmark_dir):
         added = files.load_added()
         rejected = files.load_rejected()
         trace = files.load_trace()
-    except ValueError as exc:  # json.JSONDecodeError is a ValueError
+    except ValueError as exc:
         return None, [str(exc)]
-    errors = files.trace_errors(added)
+    errors = files.trace_presence_errors(added)
     more, traced, other = origin(graph, added["edges"], trace)
     errors += more
     edges = traced | other
@@ -485,8 +411,6 @@ def origin_project(project, benchmark_dir):
 
 
 def origin_table(projects, benchmark_dir):
-    """Print where the edges of each graph come from; return the number of
-    errors. Graph edges = traced edges in the graph + added edges."""
 
     def cell(edges):
         everything, inside = edges
@@ -529,19 +453,14 @@ def origin_table(projects, benchmark_dir):
 
 
 def report_project(project, benchmark_dir, listed=None, without_candidates=False):
-    """Print the report for auditors (with no ledger: that of the skeleton).
-
-    With `listed`, a default rejection, also list the sites that it decides;
-    with `without_candidates`, the implicit sites without candidates.
-    """
     source = sites.scan_source(project)
-    files = _Files(project, benchmark_dir)
+    files = _ProjectFiles(project, benchmark_dir)
     if files.ledger.exists():
         text = files.ledger.read_text(encoding="utf-8")
     else:
         text = ledger.skeleton(source, project.name)
     parsed, syntax_errors = ledger.parse(text)
-    if listed is not None and listed not in parsed.defaults:
+    if listed is not None and listed not in parsed.default_rejections:
         print(f"{project.name}: {listed} is not rejected by default")
         return 1
     missing = []
@@ -555,7 +474,7 @@ def report_project(project, benchmark_dir, listed=None, without_candidates=False
             for error in _missing_edges(trace, expected, files.load_rejected())
             if error.startswith(prefix)
         ]
-    print("\n".join(_summary(project, source)))
+    print("\n".join(_size_report_lines(project, source)))
     if syntax_errors:
         print(f"  the ledger has {len(syntax_errors)} syntax errors (run check.py)")
     for line in ledger.report(parsed, source, missing, listed, without_candidates):
@@ -563,15 +482,13 @@ def report_project(project, benchmark_dir, listed=None, without_candidates=False
     return 0
 
 
-def _skeleton(project, benchmark_dir):
-    """A new ledger, with the header of the existing one: its comments and
-    default rejections, before its first module."""
+def _skeleton_keeping_ledger_header(project, benchmark_dir):
     source = sites.scan_source(project)
-    files = _Files(project, benchmark_dir)
+    files = _ProjectFiles(project, benchmark_dir)
     defaults, header = {}, None
     if files.ledger.exists():
         text = files.ledger.read_text(encoding="utf-8")
-        defaults = ledger.parse(text)[0].defaults
+        defaults = ledger.parse(text)[0].default_rejections
         header = []
         for line in text.splitlines():
             if line.startswith("=="):
@@ -585,7 +502,7 @@ def _skeleton(project, benchmark_dir):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("projects", nargs="*", help="default: every project")
     parser.add_argument(
@@ -643,7 +560,9 @@ def main(argv=None):
     benchmark_dir = args.benchmark_dir.resolve()
     if args.skeleton:
         for name in names:
-            print(_skeleton(projects[name], benchmark_dir), end="")
+            print(
+                _skeleton_keeping_ledger_header(projects[name], benchmark_dir), end=""
+            )
         return 0
     if args.report:
         statuses = [

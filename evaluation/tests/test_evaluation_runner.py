@@ -1,10 +1,3 @@
-"""Behaviour tests for evaluation/common/run.py and evaluation/common/analyse.py.
-
-They run fake PyCG checkouts, written to tmp_path, in child processes. They
-need neither the network nor the sources of the benchmark, and run on every
-supported Python version.
-"""
-
 import importlib.util
 import json
 import sys
@@ -19,7 +12,7 @@ fakes = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(fakes)
 
 
-gone = fakes.gone
+process_ends_within_five_seconds = fakes.process_ends_within_five_seconds
 run, project, tool, fake_checkout = (
     fakes.run,
     fakes.project,
@@ -31,8 +24,9 @@ run, project, tool, fake_checkout = (
 def test_a_crash_is_recorded_with_the_error_and_where_it_happened(tmp_path):
     job = project(tmp_path, "crash")
     graph_path = tmp_path / "graph.json"
-    graph_path.write_text("{}")  # a graph of an earlier run
-    record = run.run_job(tool(tmp_path), job, graph_path, timeout=60)
+    graph_of_earlier_run = "{}"
+    graph_path.write_text(graph_of_earlier_run)
+    record = run.run_job(tool(tmp_path), job, graph_path, timeout_seconds=60)
     assert record["status"] == "crash"
     assert record["error"].startswith("JSONDecodeError: Expecting property name")
     assert record["where"].startswith("pycg/pycg.py:")
@@ -46,7 +40,7 @@ def test_an_analysis_runs_isolated_and_never_runs_the_analysed_source(
 ):
     job, fake = project(tmp_path, "ok"), tool(tmp_path, flavour)
     graph_path = tmp_path / "out" / "graph.json"
-    record = run.run_job(fake, job, graph_path, timeout=60)
+    record = run.run_job(fake, job, graph_path, timeout_seconds=60)
     assert record["status"] == "ok"
     assert record["files"] == 1 and record["peak_rss_mib"] > 0
     graph = json.loads(graph_path.read_text())
@@ -59,7 +53,7 @@ def test_an_analysis_runs_isolated_and_never_runs_the_analysed_source(
     assert Path(graph["cwd"][0]).name.startswith("pycg-run-")
     assert not (job.package / "main.py.ran").exists()
     again = tmp_path / "again.json"
-    run.run_job(fake, job, again, timeout=60)
+    run.run_job(fake, job, again, timeout_seconds=60)
     assert json.loads(again.read_text())["hash"] == graph["hash"]
 
 
@@ -67,7 +61,7 @@ def test_an_analysis_runs_isolated_and_never_runs_the_analysed_source(
 def test_a_child_of_a_large_parent_reports_its_own_peak_memory(tmp_path):
     ballast = b"x" * (400 << 20)
     record = run.run_job(
-        tool(tmp_path), project(tmp_path, "ok"), tmp_path / "g.json", timeout=60
+        tool(tmp_path), project(tmp_path, "ok"), tmp_path / "g.json", timeout_seconds=60
     )
     assert len(ballast) == 400 << 20
     assert record["status"] == "ok"
@@ -76,26 +70,38 @@ def test_a_child_of_a_large_parent_reports_its_own_peak_memory(tmp_path):
 
 def test_a_run_past_its_time_limit_is_killed(tmp_path):
     job = project(tmp_path, "hang")
-    record = run.run_job(tool(tmp_path), job, tmp_path / "graph.json", timeout=1)
+    record = run.run_job(
+        tool(tmp_path), job, tmp_path / "graph.json", timeout_seconds=1
+    )
     assert record == {"status": "timeout", "wall_seconds": 1}
-    assert gone(int((job.package / "child.pid").read_text()))
+    assert process_ends_within_five_seconds(
+        int((job.package / "child.pid").read_text())
+    )
     assert not (tmp_path / "graph.json").exists()
 
 
 def test_a_run_over_its_memory_limit_is_killed_with_its_workers(tmp_path):
     job = project(tmp_path, "fork-eat")
     record = run.run_job(
-        tool(tmp_path), job, tmp_path / "graph.json", timeout=60, memory_limit_mib=200
+        tool(tmp_path),
+        job,
+        tmp_path / "graph.json",
+        timeout_seconds=60,
+        memory_limit_mib=200,
     )
     assert record["status"] == "memory"
     assert record["peak_rss_mib"] > 200
     assert record["wall_seconds"] < 60
-    assert gone(int((job.package / "worker.pid").read_text()))
+    assert process_ends_within_five_seconds(
+        int((job.package / "worker.pid").read_text())
+    )
 
 
 def test_a_child_that_dies_without_a_result_is_a_crash(tmp_path):
     job = project(tmp_path, "die")
-    record = run.run_job(tool(tmp_path), job, tmp_path / "graph.json", timeout=60)
+    record = run.run_job(
+        tool(tmp_path), job, tmp_path / "graph.json", timeout_seconds=60
+    )
     assert record["status"] == "crash"
     assert record["error"].startswith("exit status 3")
 

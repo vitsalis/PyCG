@@ -1,11 +1,3 @@
-"""Behaviour tests for evaluation/common/score.py, on small hand-made graphs
-and fake PyCG checkouts written to tmp_path. No network is needed.
-
-The scorer reuses macro-benchmark/check.py, which loads the tracer: it
-needs Python 3.14 or later. tests/test_evaluation_runner.py tests the
-runner on every version.
-"""
-
 import hashlib
 import importlib.util
 import json
@@ -50,10 +42,6 @@ def counts(result, edge_set="all"):
     return (c.tool, c.truth, c.tp, c.fp, c.fn)
 
 
-# --------------------------------------------------------------------------
-# Scorer: matching names
-# --------------------------------------------------------------------------
-
 TRACE = {
     "aliases": {"posixpath.join": ["os.path.join"], "yaml.main.load": ["yaml.load"]},
     "edges": {"pkg.f": ["posixpath.join", "yaml.main.load"]},
@@ -61,13 +49,12 @@ TRACE = {
 
 
 def test_an_alias_of_the_trace_matches_the_ground_truth_name():
-    # yaml is not in the standard library: only the trace knows its names.
     tool = {"pkg.f": ["yaml.main.load"]}
     truth = {"pkg.f": ["yaml.load"]}
     ids = score.identities(TRACE)
     assert counts(compare(tool, truth, identities=ids)) == (1, 1, 1, 0, 0)
-    # Without the trace, the two names are two functions.
-    assert counts(compare(tool, truth)) == (1, 1, 0, 1, 1)
+    without_trace_two_functions = compare(tool, truth)
+    assert counts(without_trace_two_functions) == (1, 1, 0, 1, 1)
 
 
 def test_one_function_under_two_names_counts_once():
@@ -96,13 +83,9 @@ def test_a_node_key_is_renamed_as_its_edges_are():
 
 
 def test_a_name_of_two_traced_callees_identifies_neither():
-    # Classes that a library creates at run time can share one qualified
-    # name: each `type("Call", (Base,), {"__call__": staticmethod(f)})` is
-    # another class named lib.Call, so lib.Call.__call__ names every f.
     trace = {"aliases": {"a.f": ["lib.Call.__call__"], "c.f": ["lib.Call.__call__"]}}
     ids = score.identities(trace)
     assert ids == {"a.f": "a.f", "c.f": "c.f"}
-    # The shared name is matched by string equality only: it is neither.
     truth = {"pkg.g": ["a.f", "c.f"]}
     tool = {"pkg.g": ["lib.Call.__call__", "a.f"]}
     result = compare(tool, truth, identities=ids)
@@ -137,18 +120,12 @@ def test_a_name_listed_twice_for_one_callee_is_not_shared():
 
 
 def test_a_shared_name_still_gets_the_table_of_names_of_one_function():
-    # The trace gives the shared name to no callee; the table of names of
-    # one standard-library function applies after the trace, as to any name.
     trace = {"aliases": {"a.f": ["os._Environ.get"], "c.f": ["os._Environ.get"]}}
     tool = {"pkg.g": ["os._Environ.get"]}
     truth = {"pkg.g": ["collections.abc.Mapping.get"]}
     result = compare(tool, truth, identities=score.identities(trace))
     assert counts(result)[2:] == (1, 0, 0)
 
-
-# --------------------------------------------------------------------------
-# Scorer: normalisation
-# --------------------------------------------------------------------------
 
 OWNERS = {"pkg.mod.C": "pkg.mod", "pkg.mod.f.D": "pkg.mod.f"}
 
@@ -168,8 +145,7 @@ def test_a_class_body_caller_is_renamed_only_when_normalised():
     assert normalised["extra_nodes"] == []
 
 
-def test_a_class_that_is_also_a_node_keeps_its_name():
-    # pkg.mod.C is a class and, in the ground truth, a function.
+def test_a_class_that_is_also_a_function_of_the_ground_truth_keeps_its_name():
     tool = {"pkg.mod.C": ["x"]}
     truth = {"pkg.mod.C": [], "pkg.mod": ["x"]}
     result = compare(tool, truth, owners=OWNERS, nodes=truth, normalise=True)
@@ -203,10 +179,10 @@ def test_names_of_builtin_types_are_renamed_only_when_normalised(old, new):
 @pytest.mark.parametrize(
     "name",
     [
-        "<**PyFile**>.write",  # no single type
+        pytest.param("<**PyFile**>.write", id="no single type"),
         "<**PyIter**>.__next__",
-        "<**PyDict**>pop",  # not a method name of the scheme
-        "pkg.<**PyStr**>.join",  # not a prefix
+        pytest.param("<**PyDict**>pop", id="not a method name of the scheme"),
+        pytest.param("pkg.<**PyStr**>.join", id="not a prefix"),
         "<builtin>.generators.send",
     ],
 )
@@ -246,8 +222,12 @@ def test_class_owners_names_classes_as_the_benchmarks_do(tmp_path):
         """)
     )
     (tmp_path / "pkg" / "old.py").write_text("print 'Python 2'\n")
-    # An invalid escape warns; pytest makes the warning an error.
-    (tmp_path / "pkg" / "escape.py").write_text('PATTERN = "\\d"\nclass F:\n    pass\n')
+    source_whose_invalid_escape_warns_as_error_under_pytest = (
+        'PATTERN = "\\d"\nclass F:\n    pass\n'
+    )
+    (tmp_path / "pkg" / "escape.py").write_text(
+        source_whose_invalid_escape_warns_as_error_under_pytest
+    )
     files = sorted(tmp_path.rglob("*.py"))
     assert score.class_owners(files, tmp_path) == {
         "pkg.A": "pkg",
@@ -257,11 +237,6 @@ def test_class_owners_names_classes_as_the_benchmarks_do(tmp_path):
         "pkg.E": "pkg",
         "pkg.escape.F": "pkg.escape",
     }
-
-
-# --------------------------------------------------------------------------
-# Scorer: edge sets, nodes, empty output
-# --------------------------------------------------------------------------
 
 
 def test_edges_are_split_by_where_the_callee_is():
@@ -344,12 +319,12 @@ def test_score_macro_reads_ground_truth_trace_runs_and_source(tmp_path):
     (tool_dir / "macro" / "demo.json").write_text(json.dumps(graph))
 
     scores = score.score_macro(tool_dir, config=benchmark / "projects.toml")
-    assert list(scores) == ["demo"]  # no ground truth for `other`
+    projects_with_a_ground_truth = list(scores)
+    assert projects_with_a_ground_truth == ["demo"]
     assert scores["demo"]["status"] == "ok"
     assert counts(scores["demo"]["raw"]) == (1, 1, 0, 1, 1)
     assert counts(scores["demo"]["normalised"]) == (1, 1, 1, 0, 0)
 
-    # A run that crashed: its graph is not read, every edge is missed.
     (tool_dir / "macro" / "runs.json").write_text(
         json.dumps({"runs": {"macro/demo": {"status": "crash"}}})
     )
@@ -357,10 +332,6 @@ def test_score_macro_reads_ground_truth_trace_runs_and_source(tmp_path):
     assert scores["demo"]["status"] == "crash"
     assert counts(scores["demo"]["raw"]) == (0, 1, 0, 0, 1)
 
-
-# --------------------------------------------------------------------------
-# Scorer: micro-benchmark
-# --------------------------------------------------------------------------
 
 MICRO_TRUTH = {"main": ["main.f", "<builtin>.len"], "main.f": [], "<builtin>.len": []}
 
@@ -392,9 +363,12 @@ def test_a_group_counts_once_on_one_side():
 
 
 def test_a_name_that_is_not_in_the_table_is_matched_as_written():
-    # One object on Python 3.15 only, so not in the table; and dict's own get.
+    one_object_on_python_3_15_only = (
+        "urllib.parse.SplitResult.geturl",
+        "urllib.parse.SplitResultBytes.geturl",
+    )
     for tool_name, truth_name in (
-        ("urllib.parse.SplitResult.geturl", "urllib.parse.SplitResultBytes.geturl"),
+        one_object_on_python_3_15_only,
         ("collections.abc.Mapping.get", "<builtin>.dict.get"),
         ("os.path.join", "posixpath.join"),
     ):
@@ -403,17 +377,16 @@ def test_a_name_that_is_not_in_the_table_is_matched_as_written():
 
 
 def test_a_name_of_the_analysed_package_never_stands_for_the_library(tmp_path):
-    # The analysed package is called os; its _Environ.get is its own.
     truth = {"os.f": ["os._Environ.get"], "os._Environ.get": []}
     tool = {"os.f": ["collections.abc.Mapping.get"], "os._Environ.get": []}
     for mode in ("raw", "normalised"):
         result = score.score_macro_project(tool, truth, ("os",))[mode]
         assert (result["inside"].tp, result["inside"].fn) == (0, 1)
         assert (result["outside"].tp, result["outside"].fp) == (0, 1)
-    # Nor is a library name mapped to a representative inside the package:
-    # the analysed package is called collections.
-    names = score.Names().for_packages(("collections",))
-    assert names.callee("os._Environ.get") == "os._Environ.get"
+    names_for_package_called_collections = score.Names().for_packages(("collections",))
+    assert names_for_package_called_collections.callee("os._Environ.get") == (
+        "os._Environ.get"
+    )
 
 
 def test_the_table_is_used_only_with_the_packages_of_a_comparison():
@@ -547,12 +520,12 @@ def test_score_micro_scores_each_case_with_its_run_status(tmp_path):
     }
     assert cases["a/new"] == {"status": "skipped"}
     assert flags(cases["a/ok"]) == (True, True, True)
-    # The case has no module: no callee is inside it.
-    assert cases["a/ok"]["raw"]["counts"]["inside"] == score.Counts(0, 0, 0)
+    case_without_module = cases["a/ok"]
+    assert case_without_module["raw"]["counts"]["inside"] == score.Counts(0, 0, 0)
     (snippets / "a" / "ok" / "main.py").write_text("")
     counts = score.score_micro(tool_dir, snippets)["a/ok"]["raw"]["counts"]
-    assert counts["inside"] == score.Counts(1, 1, 1)  # main -> main.f
-    assert counts["outside"] == score.Counts(1, 1, 1)  # main -> <builtin>.len
+    assert counts["inside"] == score.Counts(1, 1, 1)
+    assert counts["outside"] == score.Counts(1, 1, 1)
     assert flags(cases["b/crash"]) == (False, False, False)
     total = score.micro_total(score.micro_categories(cases, "raw"))
     assert (total["cases"], total["skipped"], total["failed"], total["exact"]) == (
@@ -563,13 +536,7 @@ def test_score_micro_scores_each_case_with_its_run_status(tmp_path):
     )
 
 
-# --------------------------------------------------------------------------
-# Review fixes: matching, provenance, missing graphs
-# --------------------------------------------------------------------------
-
-
-def test_aliases_do_not_apply_to_callers():
-    # Callers are package functions, matched as written.
+def test_aliases_do_not_apply_to_callers_which_are_matched_as_written():
     ids = score.identities({"aliases": {"posixpath.join": ["os.path.join"]}})
     result = compare({"os.path.join": ["x"]}, {"posixpath.join": ["x"]}, identities=ids)
     assert counts(result) == (1, 1, 0, 1, 1)
@@ -616,16 +583,16 @@ def test_a_successful_run_without_its_graph_is_a_failure(tmp_path):
     assert total["failed"] == 1
 
 
-# --------------------------------------------------------------------------
-# Review fixes: the lookup of names
-# --------------------------------------------------------------------------
-
-
 @pytest.mark.parametrize(
     ("files", "root", "packages", "truth"),
     [
-        # An initializer file names its package.
-        (["pkg/__init__.py", "pkg/other.py"], ".", ["pkg/__init__.py"], "pkg"),
+        pytest.param(
+            ["pkg/__init__.py", "pkg/other.py"],
+            ".",
+            ["pkg/__init__.py"],
+            "pkg",
+            id="an initializer file names its package",
+        ),
         (["single.py", "single_helper.py"], ".", ["single.py"], "single"),
         (["pkg/__init__.py", "pkg/mod.py"], ".", ["pkg"], "pkg.mod"),
         (["src/pkg/__init__.py"], "src", ["pkg"], "pkg"),
@@ -648,9 +615,12 @@ def test_the_package_name_of_an_entry_puts_its_edges_inside(
     (benchmark / "ground-truth" / "demo.json").write_text(json.dumps(graph))
     tool_dir = tmp_path / "tool"
     (tool_dir / "macro").mkdir(parents=True)
-    helper = {"single_helper": ["single_helper.f"]} if "single.py" in packages else {}
-    (tool_dir / "macro" / "demo.json").write_text(json.dumps({**graph, **helper}))
+    edges_of_module_sharing_only_a_prefix = (
+        {"single_helper": ["single_helper.f"]} if "single.py" in packages else {}
+    )
+    (tool_dir / "macro" / "demo.json").write_text(
+        json.dumps({**graph, **edges_of_module_sharing_only_a_prefix})
+    )
     result = score.score_macro(tool_dir, benchmark / "projects.toml")["demo"]["raw"]
     assert (result["inside"].tp, result["outside"].tp) == (1, 0)
-    # A module that only shares a prefix with the package is outside it.
-    assert result["outside"].fp == len(helper)
+    assert result["outside"].fp == len(edges_of_module_sharing_only_a_prefix)

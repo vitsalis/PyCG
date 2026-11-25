@@ -1,28 +1,4 @@
 #!/usr/bin/env python3
-"""The checks of trace.sh that are easier to write, and to test, in Python.
-
-It runs on the host, runs nothing of a project, and uses neither the
-network nor git:
-
-    trace_helper.py check-pin BENCHMARK_DIR NAME
-    trace_helper.py plugins BENCHMARK_DIR NAME
-    trace_helper.py image-tag NAME DOCKERFILE REQUIREMENTS PYTHON_IMAGE
-    trace_helper.py check-trace TRACE BENCHMARK_DIR NAME PYTHON_IMAGE
-    trace_helper.py compare COMMITTED_TRACE NEW_TRACE
-
-A project's source is a git tree at a commit, or an sdist (a source archive
-from PyPI); the inputs image holds it (container/Dockerfile.inputs, whose
-build checks it against its pin), and the trace image takes it from there.
-check-pin checks that the pin of projects.toml is that of the round log
-that drew the project. check-trace checks the trace that the container
-wrote and copies it to BENCHMARK_DIR/dynamic/NAME.json, and writes the
-distributions of the container to BENCHMARK_DIR/test-environments/NAME.installed.txt.
-
-compare prints the test counts and edges of two traces of one project, and
-the edges that only one has, by caller module and callee kind (package,
-builtin, library); it exits with 0 only if the edge sets are equal.
-"""
-
 import hashlib
 import importlib.util
 import json
@@ -34,12 +10,10 @@ from pathlib import Path
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 ROUND_LOGS = REPOSITORY / "evaluation" / "macro-benchmark" / "selection"
-# The largest trace that check-trace accepts (the first sets: under 2 MiB).
-MAX_TRACE_BYTES = 64 * 1024 * 1024
-IMAGE = re.compile(r"[a-z0-9][a-z0-9._/:-]*@sha256:[0-9a-f]{64}")
+TRACE_SIZE_BYTES_MAX = 64 * 1024 * 1024
+PYTHON_IMAGE_PATTERN = re.compile(r"[a-z0-9][a-z0-9._/:-]*@sha256:[0-9a-f]{64}")
 OUTCOMES = ("passed", "failed", "errors", "skipped", "xfailed", "xpassed")
-# The keys of a trace (macro-benchmark/trace.py) and the type of each value.
-TRACE_KEYS = {
+TRACE_TYPE_BY_KEY = {
     "aliases": dict,
     "commit": str,
     "deselect": list,
@@ -54,11 +28,20 @@ TRACE_KEYS = {
     "python": str,
     "tests": dict,
 }
-OPTIONAL_KEYS = {"plugins": list, "environment": dict, "failures": dict}
+TRACE_OPTIONAL_TYPE_BY_KEY = {"plugins": list, "environment": dict, "failures": dict}
+USAGE = """usage:
+    trace_helper.py check-pin BENCHMARK_DIR NAME
+    trace_helper.py plugins BENCHMARK_DIR NAME
+    trace_helper.py image-tag NAME DOCKERFILE REQUIREMENTS PYTHON_IMAGE
+    trace_helper.py check-trace TRACE BENCHMARK_DIR NAME PYTHON_IMAGE
+    trace_helper.py compare COMMITTED_TRACE NEW_TRACE
+
+The checks of container/trace.sh (evaluation/macro-benchmark/README.md,
+"Recording traces in a container")."""
 
 
 class HelperError(Exception):
-    """A check failed."""
+    pass
 
 
 def _projects():
@@ -82,8 +65,7 @@ def project(benchmark_dir, name):
     return projects[name]
 
 
-def round_facts(logs=ROUND_LOGS):
-    """{name: (facts, log file name)} of the projects that the round logs selected."""
+def round_log_selection_by_name(logs=ROUND_LOGS):
     found = {}
     for path in sorted(Path(logs).glob("round-*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -94,12 +76,11 @@ def round_facts(logs=ROUND_LOGS):
     return found
 
 
-def commit(benchmark_dir, name, logs=ROUND_LOGS):
-    """The pinned commit of `name`; it must be the commit of its round log."""
+def commit_checked_against_round_log(benchmark_dir, name, logs=ROUND_LOGS):
     pinned = project(benchmark_dir, name).commit
     if pinned is None:
         raise HelperError(f"{name} has no commit in projects.toml: it names an sdist")
-    drawn = round_facts(logs).get(name)
+    drawn = round_log_selection_by_name(logs).get(name)
     if drawn is not None and drawn[0]["commit"] != pinned:
         raise HelperError(
             f"projects.toml pins {name} at {pinned}, {drawn[1]} at {drawn[0]['commit']}"
@@ -107,14 +88,11 @@ def commit(benchmark_dir, name, logs=ROUND_LOGS):
     return pinned
 
 
-def sdist(benchmark_dir, name, logs=ROUND_LOGS):
-    """The file name of the sdist of `name`, or None for a git checkout. It
-    must name the release of the round log that drew the project
-    (`dagster_pipes-1.13.28.tar.gz` for dagster-pipes 1.13.28)."""
+def sdist_checked_against_round_log(benchmark_dir, name, logs=ROUND_LOGS):
     archive = project(benchmark_dir, name).sdist
     if archive is None:
         return None
-    drawn = round_facts(logs).get(name)
+    drawn = round_log_selection_by_name(logs).get(name)
     if drawn is not None:
         release = drawn[0]["release"]
         wanted = f"{re.sub(r'[-_.]+', '_', name).lower()}-{release}.tar.gz"
@@ -127,19 +105,16 @@ def sdist(benchmark_dir, name, logs=ROUND_LOGS):
 
 
 def check_pin(benchmark_dir, name, logs=ROUND_LOGS):
-    """Check that the pin of `name` is that of its round log; return the
-    summary line."""
     item = project(benchmark_dir, name)
     if item.sdist is None:
-        commit(benchmark_dir, name, logs)
+        commit_checked_against_round_log(benchmark_dir, name, logs)
     else:
-        sdist(benchmark_dir, name, logs)
+        sdist_checked_against_round_log(benchmark_dir, name, logs)
     kind = "commit" if item.sdist is None else "sdist"
     return f"{kind} of the round log: {name} at {item.pin}"
 
 
 def plugins(benchmark_dir, name):
-    """The pytest plugins of `name`, relative to the benchmark directory."""
     benchmark = Path(benchmark_dir).resolve()
     return [
         p.relative_to(benchmark).as_posix() for p in project(benchmark, name).plugins
@@ -147,8 +122,7 @@ def plugins(benchmark_dir, name):
 
 
 def image_tag(name, dockerfile, requirements, python_image):
-    """pycg-trace-NAME:<12 hex of SHA-256(Dockerfile + requirements + image)>."""
-    if not IMAGE.fullmatch(python_image):
+    if not PYTHON_IMAGE_PATTERN.fullmatch(python_image):
         raise HelperError(f"PYTHON_IMAGE {python_image!r} is not NAME@sha256:<digest>")
     digest = hashlib.sha256()
     digest.update(Path(dockerfile).read_bytes())
@@ -157,8 +131,7 @@ def image_tag(name, dockerfile, requirements, python_image):
     return f"pycg-trace-{name.lower()}:{digest.hexdigest()[:12]}"
 
 
-def requirements(path):
-    """{normalized name: (name, version)} of a hash-pinned requirements file."""
+def requirement_by_normalized_name(path):
     text = Path(path).read_text(encoding="utf-8").replace("\\\n", " ")
     found = {}
     for line in text.splitlines():
@@ -180,11 +153,11 @@ def _check_shape(data, name, pinned, environment=None):
     problems = []
     if not isinstance(data, dict):
         return ["the trace is not a JSON object"]
-    extra = data.keys() - TRACE_KEYS.keys() - OPTIONAL_KEYS.keys()
-    missing = TRACE_KEYS.keys() - data.keys()
+    extra = data.keys() - TRACE_TYPE_BY_KEY.keys() - TRACE_OPTIONAL_TYPE_BY_KEY.keys()
+    missing = TRACE_TYPE_BY_KEY.keys() - data.keys()
     problems += [f"unexpected key {k!r}" for k in sorted(extra)]
     problems += [f"missing key {k!r}" for k in sorted(missing)]
-    for key, kind in {**TRACE_KEYS, **OPTIONAL_KEYS}.items():
+    for key, kind in {**TRACE_TYPE_BY_KEY, **TRACE_OPTIONAL_TYPE_BY_KEY}.items():
         if key in data and not isinstance(data[key], kind):
             problems.append(f"{key!r} is not a {kind.__name__}")
     if problems:
@@ -226,28 +199,22 @@ def _check_shape(data, name, pinned, environment=None):
 
 
 def check_trace(trace_path, benchmark_dir, name, python_image, destination=None):
-    """Check the trace of the container and copy it into the benchmark (or,
-    with `destination`, into that directory: the trace as NAME.json, its
-    distributions as NAME.installed.txt).
-
-    Return the summary line. The trace must be a regular file under the size
-    limit, in the format that trace.py writes, of this project and commit,
-    and its distributions must be exactly the requirements file.
-    """
     benchmark = Path(benchmark_dir)
     entry = project(benchmark, name)
     pinned = entry.pin
     info = os.lstat(trace_path)
     if not stat.S_ISREG(info.st_mode):
         raise HelperError(f"{trace_path} is not a regular file")
-    if info.st_size > MAX_TRACE_BYTES:
+    if info.st_size > TRACE_SIZE_BYTES_MAX:
         raise HelperError(f"{trace_path} has {info.st_size} bytes, over the limit")
     text = Path(trace_path).read_text(encoding="utf-8")
     data = json.loads(text)
     problems = _check_shape(data, name, pinned, dict(entry.environment))
     if not problems and json.dumps(data, indent=2, sort_keys=True) + "\n" != text:
         problems.append("the trace is not in the format that trace.py writes")
-    wanted = requirements(benchmark / "test-environments" / f"{name}.txt")
+    wanted = requirement_by_normalized_name(
+        benchmark / "test-environments" / f"{name}.txt"
+    )
     if not problems:
         installed = {_normalize(n): (n, v) for n, v in data["distributions"].items()}
         for key in sorted(wanted.keys() | installed.keys()):
@@ -295,7 +262,8 @@ CALLEE_KINDS = ("package", "builtin", "library")
 def _read_trace(path):
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     if not isinstance(data, dict) or not all(
-        isinstance(data.get(k), TRACE_KEYS[k]) for k in ("edges", "tests", "modules")
+        isinstance(data.get(k), TRACE_TYPE_BY_KEY[k])
+        for k in ("edges", "tests", "modules")
     ):
         raise HelperError(f"{path} is not a trace")
     return data
@@ -310,14 +278,12 @@ def _test_counts(data):
     return ", ".join(counts) or "no tests"
 
 
-def _module_of(name, modules):
-    """The longest package module that is `name` or contains it."""
+def _longest_package_module_containing(name, modules):
     found = [m for m in modules if name == m or name.startswith(m + ".")]
     return max(found, key=len) if found else name
 
 
 def _callee_kind(callee, modules):
-    """A package function is named under its module (`pkg.mod.f`)."""
     if callee.startswith("<builtin>."):
         return "builtin"
     if any(callee.startswith(m + ".") for m in modules):
@@ -326,13 +292,6 @@ def _callee_kind(callee, modules):
 
 
 def compare(committed_path, new_path):
-    """Compare a committed trace with a new trace of the same project.
-
-    Return (lines, equal). The lines give the Python version, the test
-    counts and the number of edges of both, the distributions that differ,
-    and the edges that only one trace has, by caller module and callee kind
-    (package, builtin, library), so that a reader sees their causes.
-    """
     traces = {"committed": _read_trace(committed_path), "new": _read_trace(new_path)}
     old, new = traces["committed"], traces["new"]
     modules = set(old["modules"]) | set(new["modules"])
@@ -367,7 +326,7 @@ def compare(committed_path, new_path):
         grouped = {}
         for caller, callee in only:
             kind = _callee_kind(callee, modules)
-            module = _module_of(caller, modules)
+            module = _longest_package_module_containing(caller, modules)
             grouped.setdefault(module, []).append((caller, callee, kind))
         column = max(len(m) for m in grouped) + 2
         lines.append(f"  {'caller module':<{column}}" + " ".join(CALLEE_KINDS))
@@ -404,7 +363,7 @@ def main(argv):
             print("\n".join(lines))
             return 0 if equal else 1
         else:
-            print(__doc__, file=sys.stderr)
+            print(USAGE, file=sys.stderr)
             return 2
     except (HelperError, ValueError, OSError) as exc:
         print(f"trace_helper.py {command}: {exc}", file=sys.stderr)

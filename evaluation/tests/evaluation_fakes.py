@@ -1,8 +1,3 @@
-"""Fake PyCG checkouts and analysed projects for the evaluation tests.
-
-Not a test module: tests/test_evaluation*.py load it by path.
-"""
-
 import importlib.util
 import os
 import sys
@@ -12,11 +7,10 @@ from pathlib import Path
 EVALUATION = Path(__file__).resolve().parents[1]
 
 
-def load(name):
-    """Load evaluation/<name>.py by path (`name`: "common/run", say):
-    evaluation/ is not a package."""
+def load(name_under_evaluation):
     spec = importlib.util.spec_from_file_location(
-        f"evaluation_{Path(name).name}", EVALUATION / f"{name}.py"
+        f"evaluation_{Path(name_under_evaluation).name}",
+        EVALUATION / f"{name_under_evaluation}.py",
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -93,10 +87,10 @@ def project(tmp_path, behaviour):
     directory = tmp_path / f"project-{behaviour}"
     directory.mkdir()
     (directory / "BEHAVIOUR").write_text(behaviour)
-    # Analysed source: running or importing it would leave a file behind.
-    (directory / "main.py").write_text(
+    source_that_leaves_a_file_when_run = (
         "open(__file__ + '.ran', 'w').close()\nimport os\n"
     )
+    (directory / "main.py").write_text(source_that_leaves_a_file_when_run)
     return run.Job(f"micro/demo/{behaviour}", (directory / "main.py",), directory)
 
 
@@ -105,16 +99,15 @@ def tool(tmp_path, flavour="new"):
     return run.Tool("fake", flavour, checkout, sys.executable)
 
 
-def gone(pid):
-    """Whether the process `pid` has ended, within a few seconds."""
+def process_ends_within_five_seconds(pid):
     deadline = time.monotonic() + 5
     while time.monotonic() < deadline:
         try:
             os.kill(pid, 0)
         except ProcessLookupError:
             return True
-        # A killed process that its new parent has not yet reaped.
-        if run.resident_mib(pid) in (None, 0.0):
+        killed_but_not_yet_reaped = run.resident_mib(pid) in (None, 0.0)
+        if killed_but_not_yet_reaped:
             return True
         time.sleep(0.05)
     return False

@@ -1,19 +1,3 @@
-"""The maintainer's rule of 2026-11-14: git and every download run only in
-a container, never on the host; the repository holds no submodule, and
-projects.toml is the only lock of every source of the benchmark. The
-inputs are fetched in the build of the inputs image
-(evaluation/container/Dockerfile.inputs); the maintenance commands that
-need the network run in its target `maintain`.
-
-A short inventory: every place in evaluation/ (but its tests) that
-writes a command line of git (a list or tuple whose first item is "git")
-or imports a network client is stated below, as "our own checkout" (git on
-this repository or a PyCG checkout), "runs in the build of the inputs
-image" or "runs in the maintenance image". A new place fails the test
-until it is stated; a stated place that is gone fails it too. It reads the
-syntax trees only: it is a guard, not a proof.
-"""
-
 import ast
 import shutil
 import subprocess
@@ -23,15 +7,13 @@ import pytest
 
 EVALUATION = Path(__file__).resolve().parents[1]
 REPOSITORY = EVALUATION.parent
-# Not scanned: the tests, and a copy of the sources (data).
-SKIPPED = (EVALUATION / "tests", EVALUATION / "macro-benchmark" / "projects")
+NOT_SCANNED = (EVALUATION / "tests", EVALUATION / "macro-benchmark" / "projects")
 OWN = "our own checkout"
 FETCH = "runs in the build of the inputs image"
 MAINTAIN = "runs in the maintenance image"
 NETWORK = {"urllib.request", "http.client", "socket", "requests", "urllib3", "httpx"}
 
-# (file, the function that holds it, kind): why it may be there.
-STATED = {
+REASON_BY_STATED_PLACE = {
     ("evaluation/common/run.py", "git_version.git", "git"): OWN,
     ("evaluation/container/fetch.py", "git", "git"): FETCH,
     ("evaluation/container/fetch.py", "<module>", "network"): FETCH,
@@ -41,9 +23,7 @@ STATED = {
 }
 
 
-def inventory(source, name):
-    """{(name, function, kind)} of the places of `source` that write a git
-    command line (kind "git") or import a network client ("network")."""
+def places_writing_git_command_or_importing_network_client(source, name):
     found = set()
 
     def visit(node, scope):
@@ -74,7 +54,7 @@ def scanned(pattern):
     return [
         path
         for path in sorted(EVALUATION.rglob(pattern))
-        if not any(path.is_relative_to(skipped) for skipped in SKIPPED)
+        if not any(path.is_relative_to(skipped) for skipped in NOT_SCANNED)
     ]
 
 
@@ -82,9 +62,15 @@ def test_every_place_that_runs_git_or_reaches_the_network_is_stated():
     found = set()
     for path in scanned("*.py"):
         relative = path.relative_to(REPOSITORY).as_posix()
-        found |= inventory(path.read_text(encoding="utf-8"), relative)
-    assert found - set(STATED) == set(), "a new place: state it, or remove it"
-    assert set(STATED) - found == set(), "a stated place is gone: remove it"
+        found |= places_writing_git_command_or_importing_network_client(
+            path.read_text(encoding="utf-8"), relative
+        )
+    assert found - set(REASON_BY_STATED_PLACE) == set(), (
+        "a new place: state it, or remove it"
+    )
+    assert set(REASON_BY_STATED_PLACE) - found == set(), (
+        "a stated place is gone: remove it"
+    )
 
 
 def test_no_shell_script_runs_git():
@@ -95,8 +81,6 @@ def test_no_shell_script_runs_git():
 
 
 def test_the_repository_has_no_submodule():
-    """Every source of the benchmark is a pin that the build of the inputs
-    image fetches."""
     assert not (REPOSITORY / ".gitmodules").exists()
     if shutil.which("git") is None or not (REPOSITORY / ".git").exists():
         pytest.skip("not a git checkout")

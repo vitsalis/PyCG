@@ -1,46 +1,27 @@
 #!/usr/bin/env python3
-"""The two steps of an optimisation iteration: measure a checkout, compare two.
-
-    python -I evaluation/common/loop.py run --flavour new --checkout PATH --name NAME
-    python -I evaluation/common/loop.py compare OLD_DIR NEW_DIR
-
-`run` runs the checkout on the micro- and macro-benchmark (run.py, into
-OUT/NAME), scores the graphs (score.py, into OUT/NAME/result.json) and
-prints a summary: the micro-benchmark (cases, exact cases, edge precision
-and recall), the macro-benchmark inside the package and outside it
-(precision, recall and F1 per project and summed), and the runs that
-failed. Raw names, the headline mode.
-
-`compare` reads two such directories (the same tool at two commits) and
-lists, per project of the macro-benchmark, the edges that became true
-positives, stopped being true positives, became false positives and
-stopped being false positives (matched names, raw mode; [in] marks a
-callee inside the package), and the micro-benchmark cases that became or
-stopped being exact. It never reads their result.json: it scores both
-graph directories again, now, with today's table of names of one function,
-and says which (its SHA-256, also under "scorer" in --json).
-
-The graphs of a name go to OUT/NAME/ ($TMPDIR/pycg-evaluation by default).
-"""
-
 import argparse
 import importlib.util
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
+COMMON = Path(__file__).resolve().parent
+DESCRIPTION = """The two steps of an optimisation iteration (evaluation/README.md,
+"Commands"): `run` measures and scores a checkout, `compare` lists what
+changed between two results.
+
+    python -I evaluation/common/loop.py run --flavour new --checkout PATH --name NAME
+    python -I evaluation/common/loop.py compare OLD_DIR NEW_DIR"""
 
 
 def _load(name, path):
-    """Load a sibling script by path: evaluation/ is not a package."""
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
 
-run = _load("evaluation_run", HERE / "run.py")
-score = run.load_sibling("evaluation_score", HERE / "score.py")
+run = _load("evaluation_run", COMMON / "run.py")
+score = run.load_sibling("evaluation_score", COMMON / "score.py")
 
 MODE = "raw"
 CHANGES = (
@@ -55,38 +36,36 @@ def measure(
     tool,
     out,
     benchmark_dir=score.BENCHMARK,
-    timeout=run.DEFAULT_TIMEOUT,
+    timeout_seconds=run.TIMEOUT_SECONDS_DEFAULT,
     allow_dirty=False,
     snippets=score.SNIPPETS,
     progress=None,
     micro_workers=1,
 ):
-    """Run both benchmarks, score them; write and return OUT/NAME/result.json.
-    The micro-benchmark runs `micro_workers` cases at a time, the
-    macro-benchmark one project at a time: its times and memory are reported."""
     config = Path(benchmark_dir) / "projects.toml"
-    macro, macro_skipped = run.macro_jobs(config)  # the pins first, before any run
+    macro, macro_skipped = run.macro_jobs(config)
     micro, skipped = run.micro_jobs(snippets, run.python_version(tool.python))
     run.run(
         tool,
         "micro",
         micro,
         out,
-        timeout,
+        timeout_seconds,
         skipped,
         progress,
         allow_dirty,
         workers=micro_workers,
     )
-    run.run(tool, "macro", macro, out, timeout, macro_skipped, progress, allow_dirty)
+    run.run(
+        tool, "macro", macro, out, timeout_seconds, macro_skipped, progress, allow_dirty
+    )
     tool_dir = Path(out) / tool.name
     data = score.tool_results(tool_dir, config, snippets)
     (tool_dir / "result.json").write_text(score.dumps(data) + "\n", encoding="utf-8")
     return data
 
 
-def summary(data):
-    """The lines of the terminal summary of a result (score.tool_results)."""
+def summary_lines(data):
     tool = data["tool"]
     if not tool.get("commit"):
         state = "not under git"
@@ -97,9 +76,9 @@ def summary(data):
     lines.append(
         f"micro: {total['cases']} cases, {total['skipped']} skipped, "
         f"{total['failed']} failed; exact {total['exact']}; edges "
-        f"P {_n(total['all']['precision'])} R {_n(total['all']['recall'])}"
-        f" (inside P {_n(total['inside']['precision'])}"
-        f" R {_n(total['inside']['recall'])})"
+        f"P {_ratio(total['all']['precision'])} R {_ratio(total['all']['recall'])}"
+        f" (inside P {_ratio(total['inside']['precision'])}"
+        f" R {_ratio(total['inside']['recall'])})"
     )
     for edge_set in ("inside", "outside"):
         lines.append(f"macro, {edge_set}:  P      R      F1     TP/FP/FN")
@@ -110,8 +89,8 @@ def summary(data):
         rows.append(("summed", data["macro"]["summed"][MODE][edge_set]))
         for name, c in rows:
             lines.append(
-                f"  {name:14} {_n(c['precision'])}  {_n(c['recall'])}  "
-                f"{_n(c['f1'])}  {c['tp']}/{c['fp']}/{c['fn']}"
+                f"  {name:14} {_ratio(c['precision'])}  {_ratio(c['recall'])}  "
+                f"{_ratio(c['f1'])}  {c['tp']}/{c['fp']}/{c['fn']}"
             )
     failed = data["failed"]
     lines.append(f"failed runs: {len(failed)}")
@@ -122,20 +101,19 @@ def summary(data):
     return lines
 
 
-def _n(x):
+def _ratio(x):
     return "  -  " if x is None else f"{x:.3f}"
 
 
 def compare(old_dir, new_dir, benchmark_dir=score.BENCHMARK, snippets=score.SNIPPETS):
-    """The changes from one tool directory to another (see the docstring)."""
     config = Path(benchmark_dir) / "projects.toml"
     old = score.macro_edges(old_dir, config, MODE)
     new = score.macro_edges(new_dir, config, MODE)
     projects = {}
     for name, now in new.items():
         before = old.get(name, {"status": "not run"})
-        if (before["status"], now["status"]) != ("ok", "ok"):
-            # A failed or absent run is no measurement: its edges are not lost.
+        both_runs_measured = (before["status"], now["status"]) == ("ok", "ok")
+        if not both_runs_measured:
             projects[name] = {
                 "measured": False,
                 "old": before["status"],
@@ -214,17 +192,22 @@ def changes_text(changes):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     commands = parser.add_subparsers(dest="command", required=True)
     measure_parser = commands.add_parser("run", help="run and score a checkout")
     measure_parser.add_argument("--checkout", type=Path, required=True)
     measure_parser.add_argument(
-        "--flavour", choices=sorted(run.analyse.FLAVOURS), required=True
+        "--flavour", choices=sorted(run.analyse.GENERATOR_BY_FLAVOUR), required=True
     )
     measure_parser.add_argument("--name", required=True)
-    measure_parser.add_argument("--out", type=Path, default=run.DEFAULT_OUT)
-    measure_parser.add_argument("--timeout", type=float, default=run.DEFAULT_TIMEOUT)
+    measure_parser.add_argument("--out", type=Path, default=run.OUT_DEFAULT)
+    measure_parser.add_argument(
+        "--timeout",
+        type=float,
+        default=run.TIMEOUT_SECONDS_DEFAULT,
+        help="seconds per job",
+    )
     measure_parser.add_argument("--python", default=sys.executable)
     measure_parser.add_argument("--hash-seed", type=int, default=0)
     measure_parser.add_argument("--allow-dirty", action="store_true")
@@ -248,13 +231,13 @@ def main(argv=None):
             data = measure(
                 tool,
                 args.out,
-                timeout=args.timeout,
+                timeout_seconds=args.timeout,
                 allow_dirty=args.allow_dirty,
                 micro_workers=args.micro_jobs,
             )
         except run.DirtyCheckout as error:
             parser.error(f"{error}; commit it, or pass --allow-dirty")
-        print("\n".join(summary(data)))
+        print("\n".join(summary_lines(data)))
         print(f"result: {args.out / args.name / 'result.json'}")
         return 0
     changes = compare(args.old_dir, args.new_dir)

@@ -1,8 +1,3 @@
-"""Behaviour tests for evaluation/common/gate.py: the values of a result
-against the floors of metrics.json, the rule that floors only rise on one
-benchmark and are re-based on another, the digest of the benchmark, and the
-summary of a pull request. Small hand-made results and trees; no run."""
-
 import hashlib
 import importlib.util
 import json
