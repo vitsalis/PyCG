@@ -275,6 +275,30 @@ def test_class_method_of_a_library_class_receives_its_class(tmp_path):
     assert callees(graph, "main.Config.load") == ["main.Config.defaults"]
 
 
+def test_a_module_name_for_a_stub_class_method_binds_its_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import tarfile
+        def through_module(path):
+            tarfile.open(path).close()
+        def through_class(path):
+            tarfile.TarFile.open(path).close()
+        through_module("a.tar")
+        through_class("a.tar")
+        """,
+    )
+
+    assert callees(graph, "main.through_module") == [
+        "tarfile.TarFile.close",
+        "tarfile.open",
+    ]
+    assert callees(graph, "main.through_class") == [
+        "tarfile.TarFile.close",
+        "tarfile.TarFile.open",
+    ]
+
+
 def test_property_read_on_an_instance_calls_the_getter(tmp_path):
     graph = main_graph(
         tmp_path,

@@ -1644,7 +1644,9 @@ or a list:
   the receiver, a copying one a new object: `Path.with_suffix`). For a
   class of the analysed code, or a class method loaded through a class, it
   is an instance of that class (`date.today()`; `datetime.fromordinal(n)`,
-  defined on `date`, gives a `datetime`).
+  defined on `date`, gives a `datetime`). A module name that a stub binds
+  to a class method of a class (`open = TarFile.open` in `tarfile`) is
+  that method bound to the class, so `tarfile.open(p)` gives a `TarFile`.
 - **Type variables.** A type variable that parameters have gives what the
   call binds to them (to `*args` too: `max(a, b, c)`; not to `**kwargs`,
   whose keys a type argument would lose): the argument (`copy.copy(x)`),
