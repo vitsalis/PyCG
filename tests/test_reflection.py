@@ -740,3 +740,92 @@ def test_limit_a_subclass_defined_after_the_call_is_listed(tmp_path):
     )
 
     assert "main.Late.run" in callees(graph, "main.each")
+
+
+FIVE_PROPERTIES = """
+class Record:
+    @property
+    def a(self): pass
+    @property
+    def b(self): pass
+    @property
+    def c(self): pass
+    @property
+    def d(self): pass
+    @property
+    def e(self): pass
+"""
+FIVE_GETTERS = {f"main.Record.{name}" for name in "abcde"}
+
+
+def test_names_of_a_class_namespace_that_the_code_reads_pass_the_bound(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        FIVE_PROPERTIES
+        + """
+def by_dict(record):
+    for name in Record.__dict__:
+        getattr(record, name)
+def by_vars(record):
+    for name in vars(Record):
+        getattr(record, name)
+by_dict(Record())
+by_vars(Record())
+""",
+    )
+
+    assert FIVE_GETTERS <= set(callees(graph, "main.by_dict"))
+    assert FIVE_GETTERS <= set(callees(graph, "main.by_vars"))
+
+
+def test_names_of_a_namespace_that_no_code_reads_count_against_the_bound(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        FIVE_PROPERTIES
+        + """
+def run(record):
+    for name in ("a", "b", "c", "d", "e"):
+        getattr(record, name)
+run(Record())
+""",
+    )
+
+    assert not FIVE_GETTERS & set(callees(graph, "main.run"))
+
+
+def test_a_store_by_namespace_names_past_the_bound_stores_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+class Slots:
+    def a(self): pass
+    def b(self): pass
+    def c(self): pass
+    def d(self): pass
+    def e(self): pass
+def target(): pass
+def run(obj):
+    for name in Slots.__dict__:
+        setattr(obj, name, target)
+    obj.a()
+run(Slots())
+""",
+    )
+
+    assert "main.target" not in callees(graph, "main.run")
+
+
+def test_limit_a_read_namespace_exempts_its_names_from_any_origin(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        FIVE_PROPERTIES
+        + """
+Record.__dict__
+def run(record):
+    for name in ("a", "b", "c", "d", "e"):
+        getattr(record, name)
+run(Record())
+""",
+    )
+
+    assert FIVE_GETTERS <= set(callees(graph, "main.run"))

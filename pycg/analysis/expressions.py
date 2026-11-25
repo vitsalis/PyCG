@@ -186,6 +186,8 @@ class Expressions:
         return value
 
     def _expr_Attribute(self, node):
+        if node.attr == "__dict__" and isinstance(node.value, ast.Name):
+            self.namespace_read(node.value.id)
         base = self.expression(node.value)
         if base is None:
             return None
@@ -198,6 +200,12 @@ class Expressions:
         return value
 
     def _expr_Call(self, node):
+        if (
+            self._is_builtin_reference(node.func, "vars")
+            and len(node.args) == 1
+            and isinstance(node.args[0], ast.Name)
+        ):
+            self.namespace_read(node.args[0].id)
         callee = self.expression(node.func)
         args, star = self._implicit_super_arguments(node), []
         nones = frozenset(

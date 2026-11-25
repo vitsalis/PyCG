@@ -799,6 +799,7 @@ NOT_COUNTED = {
     "zero_argument_super",
     "_called",
     "literal_imports",
+    "read_namespaces",
     "none_arguments",
     "none_keywords",
     "_type_forms",

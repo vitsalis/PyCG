@@ -124,6 +124,8 @@ class Analysis(
         self._notifying = False
         self._external_modules = set()
         self.literal_imports = {}
+        self.read_namespaces = set()
+        self._namespace_names_read = frozenset()
         self.none_arguments = {}
         self.none_keywords = {}
         self.zero_argument_super = set()
@@ -386,6 +388,12 @@ class Analysis(
 
     def solve(self):
         self.freeze_module_names()
+        self._namespace_names_read = frozenset(
+            name
+            for cls in self.classes
+            if cls.name in self.read_namespaces
+            for name in cls.defines
+        )
         self.solver.solve()
         while self.decide_hierarchies() or self._complete():
             self.solver.solve()

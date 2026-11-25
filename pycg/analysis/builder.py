@@ -238,6 +238,14 @@ class ModuleBuilder(
             self._builtin_values[name] = value
         return self._builtin_values[name]
 
+    def namespace_read(self, name):
+        name = self._scope.mangle(name)
+        binder = self.scopes.resolve(self._scope, name)
+        for scope in self.scopes.scopes:
+            if scope.kind == CLASS and scope.parent is binder:
+                if scope.local_name == name:
+                    self.analysis.read_namespaces.add(scope.name)
+
     def _is_builtin_reference(self, node, name):
         if not (isinstance(node, ast.Name) and node.id == name):
             return False
