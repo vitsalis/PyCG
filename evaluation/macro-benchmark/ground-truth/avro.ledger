@@ -3683,8 +3683,8 @@ default reject avro.name.Name.name, avro.protocol.Message.name, avro.protocol.Pr
     -> _hashlib.HASH.digest
     -> _hashlib._OneShotHash.digest
     -> _md5.MD5Type.digest
-    -> _md5.md5.digest
-    note: hashlib.md5 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.md5 is _hashlib.openssl_md5, lib-python/3/hashlib.py:172 and :307, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin MD5 object: _md5.MD5Type on CPython (the module's exported type attribute, md5module.c, b8-ruling-c-type-names-1), _md5.md5 on PyPy (pypy/module/_md5/moduledef.py:22) (avro.md J5)
+    -> hashlib.md5.digest
+    note: hashlib.md5 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.md5 is _hashlib.openssl_md5, lib-python/3/hashlib.py:172 and :307, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin MD5 object: _md5.MD5Type on CPython (the module's exported type attribute, md5module.c, b8-ruling-c-type-names-1; hashlib.md5 is a factory there); on PyPy the class _md5.md5 (pypy/module/_md5/moduledef.py:22), which the fallback binds as hashlib.md5 (lib-python/3/hashlib.py:94 in 3.10, :93 in 3.11), so its public alias names it: hashlib.md5.digest (ruling-names-2; a direct named constructor makes no separate builtin fallback) (avro.md J5, Corrections of 2026-11-25)
 
 [avro.protocol.Protocol.fullname]
 120:30 call  avro.name.Name(self.name, self.namespace, None, validate_...
@@ -4162,8 +4162,17 @@ default reject avro.name.Name.name, avro.protocol.Message.name, avro.protocol.Pr
     note: algorithm is a str (a name of SUPPORTED_ALGORITHMS, tested at line 332)
 338:24 call  h.digest()
     -> _hashlib.HASH.digest
-    -> _blake2.blake2b.digest
-    -> _blake2.blake2s.digest
+    -> hashlib.blake2b.digest
+    -> hashlib.blake2s.digest
+    -> hashlib.md5.digest
+    -> hashlib.sha224.digest
+    -> hashlib.sha256.digest
+    -> hashlib.sha384.digest
+    -> hashlib.sha512.digest
+    -> hashlib.sha3_224.digest
+    -> hashlib.sha3_256.digest
+    -> hashlib.sha3_384.digest
+    -> hashlib.sha3_512.digest
     -> _md5.MD5Type.digest
     -> _md5.md5.digest
     -> _sha1.SHA1Type.digest
@@ -4184,7 +4193,7 @@ default reject avro.name.Name.name, avro.protocol.Message.name, avro.protocol.Pr
     -> _sha3.sha3_256.digest
     -> _sha3.sha3_384.digest
     -> _sha3.sha3_512.digest
-    note: h is hashlib.new(name, schema) for a name of hashlib.algorithms_guaranteed: an OpenSSL _hashlib.HASH, the builtin _blake2 objects (hashlib never takes blake2 from OpenSSL), or by hashlib's documented fallback the builtin classes, named by their module's exported type attribute (b8-ruling-c-type-names-1): _md5.MD5Type, _sha1.SHA1Type, on CPython 3.10 and 3.11 _sha256.SHA224Type and SHA256Type, _sha512.SHA384Type for SHA-512 (sha512module.c overwrites that attribute with the SHA-512 type) and _sha512.sha384 for SHA-384 (no export left), _sha2.SHA*Type from 3.12; on PyPy the classes _md5.md5, _sha1.sha, _sha256.sha224/sha256, _sha512.sha384/sha512; on PyPy (3.10 and 3.11, admitted by upstream's CI) hashlib.new is __hash_new (lib-python/3/hashlib.py:170-171), which calls _hashlib.new(name, data) (:160), and with non-empty data PyPy 3.11's _hashlib.new returns a _hashlib._OneShotHash (lib_pypy/_hashlib/__init__.py:40-57) and the fallback _sha1.sha1 is a function that returns a _sha1.sha (lib_pypy/_sha1.py:129, 359); shake_128 and shake_256 objects need a length, so their digest() cannot bind, except PyPy 3.11's one-shot object, already named (avro.md J5)
+    note: h is hashlib.new(name, schema) for a name of hashlib.algorithms_guaranteed: an OpenSSL _hashlib.HASH, the builtin BLAKE2 objects (hashlib never takes blake2 from OpenSSL and binds the builtin classes as hashlib.blake2b and hashlib.blake2s on every admitted CPython and PyPy, so the public class alias names them: hashlib.blake2b/blake2s, ruling-names-2), or by hashlib's documented fallback the builtin classes, named by their module's exported type attribute (b8-ruling-c-type-names-1): _md5.MD5Type, _sha1.SHA1Type, on CPython 3.10 and 3.11 _sha256.SHA224Type and SHA256Type, _sha512.SHA384Type for SHA-512 (sha512module.c overwrites that attribute with the SHA-512 type) and _sha512.sha384 for SHA-384 (no export left), _sha2.SHA*Type from 3.12; on PyPy the classes _md5.md5, _sha1.sha, _sha256.sha224/sha256, _sha512.sha384/sha512; on PyPy (3.10 and 3.11, admitted by upstream's CI) hashlib.new is __hash_new (lib-python/3/hashlib.py:170-171), which calls _hashlib.new(name, data) (:160), and with non-empty data PyPy 3.11's _hashlib.new returns a _hashlib._OneShotHash (lib_pypy/_hashlib/__init__.py:40-57) and the fallback _sha1.sha1 is a function that returns a _sha1.sha (lib_pypy/_sha1.py:129, 359); shake_128 and shake_256 objects need a length, so their digest() cannot bind, except PyPy 3.11's one-shot object, already named. Where the fallback binds a builtin class to the public hashlib attribute (MD5 and SHA-2 on PyPy; SHA-3 on CPython and PyPy), that alias names it (ruling-names-2): hashlib.md5, sha224, sha256, sha384, sha512, sha3_224, sha3_256, sha3_384, sha3_512; the private names stay too, since hashlib.new can build a builtin object without that binding (its security-default probe differs from the attribute's), which no source excludes (the lead's decision on the part that ruling-names-2 leaves open) (avro.md J5, Corrections of 2026-11-25)
 
 [avro.schema.NamedSchema.__init__]
 353:14 call  super()
