@@ -1901,6 +1901,7 @@ function `islice`) is not one; an alias is.
 | `itertools.starmap` | `iter()` | advance; make a tuple of each argument bundle (iterate it, ask its length) |
 | `itertools.groupby` | `iter()` | advance; a group, also one that another scope advances, advances the same iterator |
 | `itertools.chain` | nothing | `iter()` of each argument and advance it |
+| `itertools.repeat` | nothing | nothing of the program; each item is its `object` |
 | `heapq.merge` | nothing | `iter()` of each argument, advance it, and `iter()` of that iterator again (it delegates to the last one with `yield from`) |
 | `itertools.chain.from_iterable` | `iter()` of the outer iterable | advance it; iterate each inner iterable |
 
@@ -1930,8 +1931,9 @@ positions; `compress` keeps its data apart from its selectors, also in a
 call that unpacks them),
 and as (item, group) pairs for `groupby` whose key is the item (no key,
 `key=None` by keyword or position, or a key that `**kwargs` may omit);
-`starmap` gives nothing. `zip_longest`'s `fillvalue` and `accumulate`'s
-`initial` are values of the result, at any position.
+`starmap` gives nothing. `zip_longest`'s `fillvalue`, `accumulate`'s
+`initial` and `repeat`'s `object` are values of the result, at any
+position.
 
 One state stands for every call of one origin of an operation (the
 implicit calls that copy a call expression, each with its receivers): each

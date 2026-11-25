@@ -126,6 +126,7 @@ LIBRARY_ITERATION = {
     "itertools.filterfalse": (LAZY, ("iterable",), ITEMS, "itertools.filterfalse"),
     "itertools.compress": (LAZY, ("data", "selectors"), FIRST, "itertools.compress"),
     "itertools.cycle": (LAZY, ("iterable",), ITEMS, "itertools.cycle"),
+    "itertools.repeat": (LAZY, (), ITEMS, "itertools.repeat"),
     "itertools.accumulate": (LAZY, ("iterable",), ITEMS, "itertools.accumulate"),
     "itertools.pairwise": (LAZY, ("iterable",), TUPLES, "itertools.pairwise"),
     "itertools.batched": (LAZY, ("iterable",), TUPLES, "itertools.batched"),
@@ -145,6 +146,7 @@ LIBRARY_ITERATION = {
 LIBRARY_VALUES = {
     "itertools.zip_longest": "fillvalue",
     "itertools.accumulate": "initial",
+    "itertools.repeat": "object",
 }
 READS_TUPLES = frozenset({"math.dist"})
 REPEATS = {"itertools.product": "repeat"}
