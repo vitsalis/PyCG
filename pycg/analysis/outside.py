@@ -101,6 +101,7 @@ MRO_ENTRIES = {
     "typing_extensions.TypedDict": "builtins.dict",
 }
 TYPES_SAYING_NOTHING = frozenset({OBJECT})
+STRING_CONSTANT_CLASSES = {str: "builtins.str", bytes: "builtins.bytes"}
 
 FUNCTION_TYPES = frozenset(
     {
@@ -176,6 +177,10 @@ class Outside:
             if abc is not None and abc != base.name:
                 return self.external(abc)
         return base
+
+    def string_constant_value(self, const):
+        cls = STRING_CONSTANT_CLASSES.get(type(const.value))
+        return None if cls is None else self.typed(cls)
 
     def typed(self, cls):
         if cls not in self._typed:

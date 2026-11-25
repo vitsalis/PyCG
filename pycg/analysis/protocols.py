@@ -66,7 +66,17 @@ def comparison_family(container):
 
 class Protocols:
     def add_operator(
-        self, left, right, method, reflected, inplace, dst, caller, site, unary=False
+        self,
+        left,
+        right,
+        method,
+        reflected,
+        inplace,
+        dst,
+        caller,
+        site,
+        unary=False,
+        constants=False,
     ):
         operation = _Operator(
             self, left, right, method, reflected, inplace, dst, unary, caller, site
@@ -75,6 +85,8 @@ class Protocols:
             kinds = (Instance, Class, Container, Generator, External, Typed)
         else:
             kinds = (Instance, Class, Container, Typed)
+        if constants:
+            kinds = (*kinds, Const)
         results = (dst,) if method != "__contains__" else ()
         for node, is_left in ((left, True), (right, False)):
             if node is not None:
@@ -84,6 +96,10 @@ class Protocols:
                 self.solver.attach(node, operand)
 
     def _operand(self, obj, operation, is_left):
+        if isinstance(obj, Const):
+            obj = self.string_constant_value(obj)
+            if obj is None:
+                return
         if operation.method == "__contains__":
             if is_left:
                 self._contains(obj, operation)
