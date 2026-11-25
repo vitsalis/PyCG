@@ -2285,8 +2285,16 @@ module, else among the builtins. Each binding that it has in the first
 scope that binds it contributes (a binding under an `if` or a `try` of
 that scope counts): an import, what a type-only import of it binds,
 without loads (so no hook runs) and without registering a module; a class
-statement, the source's class definitions of the same qualified name; any
-other binding (an alias, a variable, a function), nothing.
+statement, the source's class definitions of the same qualified name; an
+alias, what its value names; any other binding (a variable, a function),
+nothing. An alias is a name that one assignment binds to a type expression
+(a name, an attribute, a subscript or a union: `X = A | None`), or that
+`X: TypeAlias = v` or `type X = v` binds: its value is read as an annotation
+of the scope that binds it, once, so a recursive alias ends. A name that
+one assignment binds to another name of the stub (`batched = _batched`)
+also gives the source function of its path the parameter annotations of
+every function that the other name is, or is in turn bound to
+(`test_a_stub_name_bound_to_a_stub_function_takes_its_parameter_annotations`).
 
 The bases that the stub declares for a class count for what an annotation
 names, and for nothing else: the source's class definitions of the same
@@ -2307,7 +2315,8 @@ lost, and the source's hierarchy is untouched
 (`test_a_stub_base_node_that_saturates_late_keeps_what_it_admitted`).
 
 Nothing else of the stub is used: it defines no function, class or
-variable, a name that only it defines is ignored, its calls and return
+variable, a name that only it defines is ignored (but for what an alias
+reads), its calls and return
 types give nothing, and its imports bring in no module. A stub without its
 `.py`, a stub that cannot be read or parsed, a stub with a `global` or
 `nonlocal` statement, and a `-stubs` directory are
@@ -2355,8 +2364,10 @@ Limits:
 - A stub annotation's attribute chain must start at a name that the stub
   imports: `Outer.Inner` for a class nested in the module's class names
   nothing
-  (`test_limit_a_stub_attribute_chain_must_start_at_a_stub_import`). An
-  alias that the stub defines names nothing.
+  (`test_limit_a_stub_attribute_chain_must_start_at_a_stub_import`).
+- A stub name bound to a function that the stub imports gives no parameter
+  annotations: only the stub's own functions are read
+  (`test_limit_a_stub_name_bound_to_an_imported_function_takes_no_annotations`).
 - A stub with a `global` or `nonlocal` statement is not read at all: the
   module is analysed as if it had no stub, so its annotations are lost.
   The stub reader does not model these scope declarations, which stubs do

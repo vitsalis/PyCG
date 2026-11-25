@@ -81,7 +81,7 @@ DATACLASS_BASES = frozenset(
 NAMED, VARARG, KWARG = "named", "*", "**"
 
 
-STUB_CLASS, STUB_IMPORT, STUB_OTHER = "class", "import", "other"
+STUB_CLASS, STUB_IMPORT, STUB_ALIAS, STUB_OTHER = "class", "import", "alias", "other"
 
 
 class OwnStub:
@@ -91,11 +91,24 @@ class OwnStub:
         self.names = {}
         self.bases = {}
         self._absolute = absolute
+        self._function_aliases = []
         pending = [(tree.body, ())]
         while pending:
             statements, path = pending.pop()
             for statement in statements:
                 self._definition(statement, path, pending)
+        copied = True
+        while copied:
+            copied = False
+            for path, name, source in self._function_aliases:
+                for key, annotations in list(self.parameters.items()):
+                    function, arg, kind = key
+                    if function != (*path, source):
+                        continue
+                    known = self.parameters.setdefault(((*path, name), arg, kind), [])
+                    added = [a for a in annotations if a not in known]
+                    known.extend(added)
+                    copied = copied or bool(added)
 
     def _bind(self, path, name, how, target=None):
         key = (path, _stored(path, name))
@@ -124,6 +137,18 @@ class OwnStub:
                     if isinstance(base, (ast.Name, ast.Attribute)):
                         bases.append(base)
                 pending.append((statement.body, cls))
+            case ast.Assign(targets=[ast.Name() as target], value=value) if (
+                _alias_value(value)
+            ):
+                self._bind(path, target.id, STUB_ALIAS, value)
+                if isinstance(value, ast.Name):
+                    self._function_aliases.append((path, target.id, value.id))
+            case ast.AnnAssign(target=ast.Name() as target, value=value) if (
+                value is not None and _type_alias(statement.annotation)
+            ):
+                self._bind(path, target.id, STUB_ALIAS, value)
+            case ast.TypeAlias(name=ast.Name() as target, value=value):
+                self._bind(path, target.id, STUB_ALIAS, value)
             case ast.AnnAssign(target=ast.Name() as target):
                 self._bind(path, target.id, STUB_OTHER)
                 key = (*path, _stored(path, target.id))
@@ -144,6 +169,19 @@ class OwnStub:
                     pending.append((getattr(statement, field, ()), path))
                 for handler in getattr(statement, "handlers", ()):
                     pending.append((handler.body, path))
+
+
+def _alias_value(value):
+    if isinstance(value, ast.BinOp):
+        return isinstance(value.op, ast.BitOr)
+    return isinstance(value, (ast.Name, ast.Attribute, ast.Subscript))
+
+
+def _type_alias(annotation):
+    match annotation:
+        case ast.Name(id="TypeAlias") | ast.Attribute(attr="TypeAlias"):
+            return True
+    return False
 
 
 def _stored(path, name):
@@ -400,10 +438,26 @@ class AnnotationBuilder:
                     contributions.append(self._imported(target + rest))
                 elif how == STUB_CLASS and not attributes:
                     contributions.append(self.source_classes(target))
+                elif how == STUB_ALIAS and not attributes:
+                    contributions.append(self._stub_alias(path, target))
             return self._join(contributions)
         if attributes:
             return None
         return self.builtin_name(name)
+
+    def _stub_alias(self, path, value):
+        node = self._stub_aliases.get(value)
+        if node is None:
+            node = self._stub_aliases[value] = self.analysis.node()
+            reading = self._stub_scope_path_being_read
+            self._stub_scope_path_being_read = path
+            try:
+                read = self.annotation(value, f"{self.module.name}:stub")
+            finally:
+                self._stub_scope_path_being_read = reading
+            if read is not None:
+                self.analysis.add_edge(read, node)
+        return node
 
     def source_classes(self, path):
         if path not in self._source_classes_by_stub_path:

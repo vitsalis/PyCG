@@ -726,8 +726,8 @@ def test_stub_names_resolve_in_the_stubs_own_namespace(tmp_path):
         },
     )
 
-    assert callees(graph, "main.use") == ["main.Right.good"]
-    assert callees(graph, "main.use_alias") == []
+    assert callees(graph, "main.use") == ["<builtin>.bytes.upper", "main.Right.good"]
+    assert callees(graph, "main.use_alias") == ["main.Right.good"]
     assert callees(graph, "main.C.use") == ["main.Right.good"]
 
 
@@ -914,6 +914,203 @@ def test_only_names_that_a_stub_assignment_binds_are_its_bindings(tmp_path):
         "<builtin>.list.append",
         "<builtin>.str.upper",
     ]
+
+
+def test_a_stub_alias_of_a_type_names_what_its_value_names(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def implicit(shape):
+                shape.area()
+            def explicit(shape):
+                shape.area()
+            def statement(shape):
+                shape.area()
+            def subscripted(shapes):
+                for shape in shapes:
+                    shape.size()
+            def text(shape):
+                shape.size()
+            """,
+            "main.pyi": """
+            from typing import TypeAlias, TypeVar
+            from shapes import Shape, Square
+            T = TypeVar("T")
+            MaybeShape = Shape | None
+            Named: TypeAlias = "Shape"
+            type Exact = Shape
+            Pair = tuple[Square, T]
+            Later: TypeAlias = "Square"
+            def implicit(shape: MaybeShape) -> None: ...
+            def explicit(shape: Named) -> None: ...
+            def statement(shape: Exact) -> None: ...
+            def subscripted(shapes: Pair[int]) -> None: ...
+            def text(shape: Later) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.implicit") == ALL_AREAS
+    assert callees(graph, "main.explicit") == ALL_AREAS
+    assert callees(graph, "main.statement") == ALL_AREAS
+    assert callees(graph, "main.subscripted") == ["shapes.Square.size"]
+    assert callees(graph, "main.text") == ["shapes.Square.size"]
+
+
+def test_a_stub_alias_resolves_its_names_in_its_own_scope(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            class Canvas:
+                def draw(self, shape):
+                    shape.size()
+            def paint(shape):
+                shape.size()
+            """,
+            "main.pyi": """
+            import shapes
+            Pick = shapes.Square
+            class Canvas:
+                Pick = shapes.Shape
+                def draw(self, shape: Pick) -> None: ...
+            def paint(shape: Pick) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.Canvas.draw") == [
+        "shapes.Shape.size",
+        "shapes.Square.size",
+    ]
+    assert callees(graph, "main.paint") == ["shapes.Square.size"]
+
+
+def test_a_recursive_stub_alias_names_its_types_and_ends(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def walk(tree):
+                tree.size()
+            def loop(x):
+                x.size()
+            """,
+            "main.pyi": """
+            from shapes import Square
+            Tree = Square | tuple[Tree, ...]
+            A = B | None
+            B = A | None
+            def walk(tree: Tree) -> None: ...
+            def loop(x: A) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.walk") == ["shapes.Square.size"]
+    assert callees(graph, "main.loop") == []
+
+
+def test_a_stub_name_bound_to_a_stub_function_takes_its_parameter_annotations(
+    tmp_path,
+):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def first(shape, *more):
+                shape.area()
+                for each in more:
+                    each.size()
+            def second(shape, *more):
+                shape.area()
+                for each in more:
+                    each.size()
+            def third(shape, *more):
+                shape.area()
+            class Canvas:
+                def draw(self, shape):
+                    shape.size()
+            """,
+            "main.pyi": """
+            from typing import overload
+            from shapes import Shape, Square
+            third = second
+            @overload
+            def _first(shape: Shape) -> None: ...
+            @overload
+            def _first(shape: Square, *more: Square) -> None: ...
+            first = _first
+            second = first
+            class Canvas:
+                def _draw(self, shape: Square) -> None: ...
+                draw = _draw
+            """,
+        },
+    )
+
+    expected = ALL_AREAS + ["shapes.Square.size"]
+    assert callees(graph, "main.first") == expected
+    assert callees(graph, "main.second") == expected
+    assert callees(graph, "main.third") == ALL_AREAS
+    assert callees(graph, "main.Canvas.draw") == ["shapes.Square.size"]
+
+
+def test_a_stub_name_bound_to_a_value_names_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def use(a, b, c, d):
+                a.area()
+                b.area()
+                c.area()
+                d.area()
+            """,
+            "main.pyi": """
+            from typing import TypeVar
+            from shapes import Shape
+            A = "Shape"
+            B = TypeVar("B")
+            C = 1
+            current: Shape
+            D = current
+            def use(a: A, b: B, c: C, d: D) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.use") == []
+
+
+def test_limit_a_stub_name_bound_to_an_imported_function_takes_no_annotations(
+    tmp_path,
+):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def report(shape):
+                shape.area()
+            """,
+            "other.py": """
+            def report(shape):
+                pass
+            """,
+            "other.pyi": """
+            from shapes import Shape
+            def report(shape: Shape) -> None: ...
+            """,
+            "main.pyi": """
+            import other
+            from other import report as _report
+            report = _report
+            """,
+        },
+    )
+
+    assert callees(graph, "main.report") == []
 
 
 def test_an_import_in_a_stub_class_body_binds_there(tmp_path):
@@ -1394,3 +1591,21 @@ def test_the_builtin_protocol_case_takes_its_edge_from_the_annotation(tmp_path):
 
     assert callees(graph, "main.drain") == ["main.Line.__iter__"]
     assert callees(without, "main.drain") == []
+
+
+def test_the_stub_alias_case_takes_its_edges_from_the_aliases(tmp_path):
+    case = "type_hints/own_stub_alias"
+    graph = case_graph(tmp_path / "whole", case, [])
+    without = case_graph(
+        tmp_path / "without",
+        case,
+        [
+            ("mod.pyi", "drain = _drain", "drain: int"),
+            ("mod.pyi", "MaybeJob = Job | None", "MaybeJob: int"),
+        ],
+    )
+
+    assert callees(graph, "mod.drain") == ["mod.Peek.__iter__", "mod.Peek.__next__"]
+    assert callees(graph, "mod.work") == ["mod.Job.run"]
+    assert callees(without, "mod.drain") == []
+    assert callees(without, "mod.work") == []

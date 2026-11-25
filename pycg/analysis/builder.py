@@ -75,6 +75,7 @@ class ModuleBuilder(
         self._stub_scope_path_being_read = None
         self._source_annotated_names_by_scope = {}
         self._source_classes_by_stub_path = {}
+        self._stub_aliases = {}
 
     def build(self):
         try:
