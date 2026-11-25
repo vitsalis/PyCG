@@ -3172,6 +3172,69 @@ was.
   and runs a concurrent isochronous transfer's callback (6 inside edges;
   `pyusb.md`, J9).
 
+### Rulings for the corrections of 2026-11-25
+
+The corrections of 2026-11-25 re-read published ground truths under the
+rulings above. Where those rules did not decide, a referee (Codex) ruled
+and the lead adopted the ruling; its file is in
+`selection/corrections-2026-11-25/rulings/`, and the package's `<name>.md`
+records the application under "Corrections of 2026-11-25".
+
+- **Forwarded stub paths through constructors and recursive forwarding
+  (fabric Q-F1, Q-F2; the referee, `ruling-fabric-1.md`).** An admitted
+  stub keeps its access path through package storage and argument
+  forwarding, constructors included; a parameter's documented or
+  annotated type does not rename it (pgvector, einops). Passing a package
+  class to an ordinary missing-library factory does not make its result a
+  package instance: the result stays a stub (avro's provenance ruling
+  covers values that package code constructs or selects, not a library
+  result built from a class argument). Recursive forwarding that extends a
+  path again and again without a finite bound in the source is an open
+  path set, as an unbounded loop reassignment is: the ground truth records
+  one and two repetitions of the repeated path segment beyond the
+  originating path as lower-bound witnesses, not a count of recursive
+  calls, and longer verified members stay valid additions. This does not
+  cover recursion that the source bounds, inadmissible inputs, paths lost
+  through a subscript, unpacking or arithmetic of a missing-library value,
+  or calls that an earlier failure prevents. fabric: `Connection` stores
+  the clone `invoke.config.Config.clone` of a vanilla Invoke config
+  (`connection.py:261-262`); `get_gateway` forwards `self.config.clone()`
+  to a new `Connection` (388, 391), which stores it or clones it again,
+  and the first hop of each level repeats the flow through its own
+  ProxyJump lookup (281, 303) with no bound on a chain of distinct hosts
+  (`sites/docs/concepts/networking.rst:53-55`: gateways "can be chained
+  indefinitely"). 18 outside edges added (22 site-callee additions),
+  none removed, no inside edge changed; three open path families
+  declared in `fabric.md`. The package judgement J1, which reset the path
+  at the constructor's parameter, yields to the global rules.
+- **Public class aliases by configuration (avro, Sublist3r, pymysql,
+  markdown2; the referee, `ruling-names-2.md`; it clarifies
+  `b8-ruling-c-type-names-1.md`).** A direct public class alias names the
+  receiver's class in each admitted implementation, version and
+  configuration where that attribute actually holds the class: stable,
+  configuration-dependent and version-dependent aliases alike; a factory
+  that returns instances is not a class alias. Without such an alias, the
+  defining extension's exported type attribute names it, then the type
+  name where no attribute is exported. One name per class in each
+  configuration; the names are the union over the admitted
+  configurations, and an alias in one configuration does not rename the
+  receiver in another where that attribute is a factory. `hashlib.blake2b`
+  and `blake2s` always hold the builtin classes (hashlib never takes BLAKE2
+  from OpenSSL), so `_blake2.blake2b`/`blake2s` give way to them; PyPy's
+  builtin MD5, SHA-2 and SHA-3 classes are `hashlib.md5`, `hashlib.sha256`,
+  ... where hashlib falls back to them, while CPython's attributes there
+  are factories, so its exported-type names stay; from CPython 3.13
+  `threading.Lock` is `_thread.LockType`, so a lock's methods are named
+  `threading.Lock.acquire` there beside `_thread.LockType.acquire` for the
+  earlier versions. At a direct named constructor (`hashlib.md5(...)`,
+  `hashlib.sha256(...)`) the PyPy private names give way to the aliases.
+  At `hashlib.new(name)` (avro `schema.py:337`) CPython can fall back to a
+  builtin constructor without rebinding the public attribute, so the
+  referee found the deletion of the private names undecidable from the
+  sources; the lead keeps them beside the added aliases there (no source
+  excludes the fallback, and the benchmark removes an edge only on
+  evidence that it cannot happen).
+
 ## Call sites and candidates
 
 `sites.py` reads the source with `ast` and `tokenize` and finds every call
