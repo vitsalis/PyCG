@@ -223,6 +223,28 @@ def test_limit_a_stub_getattr_of_another_class_gives_nothing(tmp_path):
     assert callees(graph, "main.use") == []
 
 
+def test_method_type_binds_a_function_to_an_object(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import types
+        def samples(self):
+            return self.items
+        class Metric:
+            def __init__(self):
+                self.items = []
+                self.get = types.MethodType(samples, self)
+            def collect(self):
+                self.get().append(1)
+        """,
+    )
+
+    assert callees(graph, "main.Metric.collect") == [
+        "<builtin>.list.append",
+        "main.samples",
+    ]
+
+
 def test_a_result_of_unknown_type_has_no_invented_names(tmp_path):
     graph = main_graph(
         tmp_path,
