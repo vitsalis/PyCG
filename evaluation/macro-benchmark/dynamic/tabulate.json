@@ -1,0 +1,721 @@
+{
+  "aliases": {
+    "<builtin>.bytes.decode": [
+      "uuid.bytes_.decode"
+    ],
+    "<builtin>.dict.get": [
+      "collections.OrderedDict.get"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.isdigit": [
+      "typing.Text.isdigit"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.rfind": [
+      "typing.Text.rfind"
+    ],
+    "<builtin>.str.rstrip": [
+      "typing.Text.rstrip"
+    ],
+    "<builtin>.str.splitlines": [
+      "typing.Text.splitlines"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "_functools.reduce": [
+      "functools.reduce"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "collections.abc.Mapping.keys": [
+      "collections.UserDict.keys",
+      "collections.abc.MutableMapping.keys",
+      "selectors.Mapping.keys"
+    ],
+    "collections.namedtuple": [
+      "selectors.namedtuple",
+      "ssl.namedtuple",
+      "unittest.util.namedtuple"
+    ],
+    "wcwidth.wcwidth.wcswidth": [
+      "wcwidth.wcswidth"
+    ]
+  },
+  "commit": "3b4cd509820e4c45cd2aaba833aa585ea6308b94",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0",
+    "wcwidth": "0.6.0"
+  },
+  "dropped": {
+    "client_callbacks": 0,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "tabulate": [
+      "<builtin>.dict.keys",
+      "<builtin>.property",
+      "<builtin>.sorted",
+      "<builtin>.staticmethod",
+      "<builtin>.str.encode",
+      "collections.namedtuple",
+      "functools.partial",
+      "importlib.metadata.version",
+      "re.compile"
+    ],
+    "tabulate._CustomTextWrap.__init__": [
+      "textwrap.TextWrapper.__init__"
+    ],
+    "tabulate._CustomTextWrap._handle_long_word": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.list.pop",
+      "re.Match.end",
+      "re.Pattern.findall",
+      "re.Pattern.search",
+      "tabulate._CustomTextWrap._len",
+      "tabulate._strip_ansi"
+    ],
+    "tabulate._CustomTextWrap._len": [
+      "tabulate._strip_ansi",
+      "wcwidth.wcwidth.wcswidth"
+    ],
+    "tabulate._CustomTextWrap._update_lines": [
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.join",
+      "re.Match.span",
+      "re.Pattern.finditer"
+    ],
+    "tabulate._CustomTextWrap._wrap_chunks": [
+      "<builtin>.list.append",
+      "<builtin>.list.pop",
+      "<builtin>.list.reverse",
+      "<builtin>.map",
+      "<builtin>.str.join",
+      "<builtin>.str.strip",
+      "<builtin>.sum",
+      "tabulate._CustomTextWrap._handle_long_word",
+      "tabulate._CustomTextWrap._len",
+      "tabulate._CustomTextWrap._update_lines"
+    ],
+    "tabulate._afterpoint": [
+      "<builtin>.len",
+      "<builtin>.str.lower",
+      "<builtin>.str.rfind",
+      "tabulate._isint",
+      "tabulate._isnumber",
+      "tabulate._isnumber_with_thousands_separator"
+    ],
+    "tabulate._align_cell_veritically": [
+      "<builtin>.len"
+    ],
+    "tabulate._align_column": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.map",
+      "<builtin>.max",
+      "<builtin>.str.join",
+      "<builtin>.str.splitlines",
+      "<builtin>.zip",
+      "re.split",
+      "tabulate._align_column_choose_padfn",
+      "tabulate._align_column_choose_width_fn",
+      "tabulate._align_column_choose_width_fn.<lambda1>",
+      "tabulate._flat_list",
+      "tabulate._padboth",
+      "tabulate._padleft",
+      "tabulate._padnone",
+      "tabulate._padright",
+      "tabulate._visible_width"
+    ],
+    "tabulate._align_column_choose_padfn": [
+      "<builtin>.max",
+      "<builtin>.str.strip",
+      "<builtin>.zip",
+      "tabulate._afterpoint",
+      "tabulate._strip_ansi"
+    ],
+    "tabulate._align_column_choose_width_fn.<lambda1>": [
+      "tabulate._align_column_multiline_width"
+    ],
+    "tabulate._align_column_multiline_width": [
+      "<builtin>.list",
+      "<builtin>.map",
+      "re.split",
+      "tabulate._visible_width"
+    ],
+    "tabulate._align_header": [
+      "<builtin>.len",
+      "<builtin>.str.join",
+      "re.split",
+      "tabulate._align_header",
+      "tabulate._choose_width_fn.<lambda1>",
+      "tabulate._padboth",
+      "tabulate._padleft",
+      "tabulate._padright"
+    ],
+    "tabulate._append_basic_row": [
+      "<builtin>.list.append",
+      "tabulate._build_row"
+    ],
+    "tabulate._append_line": [
+      "<builtin>.list.append",
+      "tabulate._build_line"
+    ],
+    "tabulate._append_multiline_row": [
+      "<builtin>.map",
+      "<builtin>.max",
+      "<builtin>.range",
+      "<builtin>.str.splitlines",
+      "<builtin>.zip",
+      "tabulate._align_cell_veritically",
+      "tabulate._append_basic_row",
+      "tabulate._pad_row"
+    ],
+    "tabulate._asciidoc_row": [
+      "<builtin>.len",
+      "<builtin>.str.join",
+      "tabulate._asciidoc_row.make_header_line"
+    ],
+    "tabulate._asciidoc_row.make_header_line": [
+      "<builtin>.list.append",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.zip"
+    ],
+    "tabulate._bool": [
+      "<builtin>.bool"
+    ],
+    "tabulate._build_line": [
+      "<builtin>.callable",
+      "functools.partial.__call__",
+      "tabulate._asciidoc_row",
+      "tabulate._build_simple_row",
+      "tabulate._grid_line_with_colons",
+      "tabulate._html_begin_table_without_header",
+      "tabulate._latex_line_begin_tabular",
+      "tabulate._pipe_line_with_colons"
+    ],
+    "tabulate._build_row": [
+      "<builtin>.callable",
+      "functools.partial.__call__",
+      "tabulate._asciidoc_row",
+      "tabulate._build_simple_row",
+      "tabulate._html_row_with_attrs",
+      "tabulate._latex_row",
+      "tabulate._mediawiki_row_with_attrs",
+      "tabulate._moin_row_with_attrs",
+      "tabulate._textile_row_with_attrs"
+    ],
+    "tabulate._build_simple_row": [
+      "<builtin>.str.join",
+      "<builtin>.str.rstrip"
+    ],
+    "tabulate._choose_width_fn.<lambda1>": [
+      "tabulate._multiline_width"
+    ],
+    "tabulate._column_type": [
+      "_functools.reduce",
+      "tabulate._more_generic",
+      "tabulate._type"
+    ],
+    "tabulate._expand_iterable": [
+      "<builtin>.isinstance",
+      "<builtin>.len"
+    ],
+    "tabulate._expand_numparse": [
+      "<builtin>.isinstance"
+    ],
+    "tabulate._flat_list": [
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.list.extend"
+    ],
+    "tabulate._format": [
+      "<builtin>.bytes.decode",
+      "<builtin>.float",
+      "<builtin>.format",
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str",
+      "<builtin>.str.encode",
+      "<builtin>.str.isdigit",
+      "<builtin>.str.replace",
+      "re.Match.group",
+      "re.Match.groups",
+      "re.search",
+      "tabulate._strip_ansi"
+    ],
+    "tabulate._format_table": [
+      "<builtin>.str.join",
+      "<builtin>.zip",
+      "functools.partial",
+      "functools.partial.__call__",
+      "tabulate._append_basic_row",
+      "tabulate._append_line",
+      "tabulate._append_multiline_row",
+      "tabulate._format_table.<lambda1>",
+      "tabulate._is_separating_line",
+      "tabulate._pad_row"
+    ],
+    "tabulate._grid_line_with_colons": [
+      "<builtin>.str.join",
+      "<builtin>.zip",
+      "tabulate._grid_segment_with_colons"
+    ],
+    "tabulate._html_row_with_attrs": [
+      "<builtin>.dict.get",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.str.rstrip",
+      "<builtin>.zip",
+      "html.escape"
+    ],
+    "tabulate._is_multiline": [
+      "<builtin>.bool",
+      "<builtin>.isinstance",
+      "re.search"
+    ],
+    "tabulate._is_separating_line": [
+      "<builtin>.len",
+      "<builtin>.type",
+      "tabulate._is_separating_line_value"
+    ],
+    "tabulate._is_separating_line_value": [
+      "<builtin>.str.strip",
+      "<builtin>.type"
+    ],
+    "tabulate._isbool": [
+      "<builtin>.isinstance",
+      "<builtin>.type"
+    ],
+    "tabulate._isconvertible": [
+      "<builtin>.float",
+      "<builtin>.int"
+    ],
+    "tabulate._isint": [
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "<builtin>.str",
+      "<builtin>.str.startswith",
+      "<builtin>.type",
+      "tabulate._isconvertible"
+    ],
+    "tabulate._isnumber": [
+      "<builtin>.float",
+      "<builtin>.isinstance",
+      "<builtin>.str.lower",
+      "<builtin>.type",
+      "math.isinf",
+      "math.isnan",
+      "tabulate._isconvertible"
+    ],
+    "tabulate._isnumber_with_thousands_separator": [
+      "<builtin>.bool",
+      "<builtin>.bytes.decode",
+      "re.match"
+    ],
+    "tabulate._latex_line_begin_tabular": [
+      "<builtin>.dict.get",
+      "<builtin>.str.join"
+    ],
+    "tabulate._latex_row": [
+      "<builtin>.map",
+      "<builtin>.str.join",
+      "tabulate._build_simple_row",
+      "tabulate._latex_row.escape_char"
+    ],
+    "tabulate._latex_row.escape_char": [
+      "<builtin>.dict.get"
+    ],
+    "tabulate._mediawiki_row_with_attrs": [
+      "<builtin>.dict.get",
+      "<builtin>.str.join",
+      "<builtin>.str.rstrip",
+      "<builtin>.zip"
+    ],
+    "tabulate._moin_row_with_attrs": [
+      "<builtin>.dict.get",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.zip"
+    ],
+    "tabulate._more_generic": [
+      "<builtin>.dict.get",
+      "<builtin>.max",
+      "<builtin>.type"
+    ],
+    "tabulate._multiline_width": [
+      "<builtin>.map",
+      "<builtin>.max",
+      "re.split",
+      "tabulate._visible_width"
+    ],
+    "tabulate._normalize_tabular_data": [
+      "<builtin>.ValueError",
+      "<builtin>.bool",
+      "<builtin>.callable",
+      "<builtin>.dict.get",
+      "<builtin>.dict.keys",
+      "<builtin>.dict.values",
+      "<builtin>.getattr",
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.list.extend",
+      "<builtin>.map",
+      "<builtin>.max",
+      "<builtin>.range",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "<builtin>.set.update",
+      "<builtin>.type",
+      "collections.OrderedDict.keys",
+      "collections.UserDict.get",
+      "collections.abc.Mapping.keys",
+      "dataclasses.fields",
+      "dataclasses.is_dataclass",
+      "itertools.zip_longest",
+      "tabulate._bool",
+      "tabulate._is_separating_line",
+      "tabulate._normalize_tabular_data.<lambda1>",
+      "tabulate._prepend_row_index"
+    ],
+    "tabulate._normalize_tabular_data.<lambda1>": [
+      "<builtin>.list",
+      "tabulate._is_separating_line"
+    ],
+    "tabulate._padboth": [
+      "<builtin>.str.format"
+    ],
+    "tabulate._padleft": [
+      "<builtin>.str.format"
+    ],
+    "tabulate._padright": [
+      "<builtin>.str.format"
+    ],
+    "tabulate._pipe_line_with_colons": [
+      "<builtin>.len",
+      "<builtin>.str.join",
+      "<builtin>.zip",
+      "tabulate._pipe_segment_with_colons"
+    ],
+    "tabulate._prepend_row_index": [
+      "<builtin>.ValueError",
+      "<builtin>.isinstance",
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.next",
+      "tabulate._reinsert_separating_lines",
+      "tabulate._remove_separating_lines"
+    ],
+    "tabulate._reinsert_separating_lines": [
+      "<builtin>.list.insert"
+    ],
+    "tabulate._remove_separating_lines": [
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "tabulate._is_separating_line"
+    ],
+    "tabulate._rst_escape_first_column": [
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "tabulate._rst_escape_first_column.escape_empty"
+    ],
+    "tabulate._rst_escape_first_column.escape_empty": [
+      "<builtin>.isinstance",
+      "<builtin>.str.strip"
+    ],
+    "tabulate._strip_ansi": [
+      "<builtin>.isinstance",
+      "re.Pattern.sub"
+    ],
+    "tabulate._textile_row_with_attrs": [
+      "<builtin>.dict.get",
+      "<builtin>.str.join",
+      "<builtin>.zip"
+    ],
+    "tabulate._to_str": [
+      "<builtin>.bytes.decode",
+      "<builtin>.isinstance",
+      "<builtin>.str"
+    ],
+    "tabulate._type": [
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "<builtin>.type",
+      "tabulate._isbool",
+      "tabulate._isint",
+      "tabulate._isnumber",
+      "tabulate._isnumber_with_thousands_separator",
+      "tabulate._strip_ansi"
+    ],
+    "tabulate._visible_width": [
+      "<builtin>.isinstance",
+      "tabulate._strip_ansi",
+      "wcwidth.wcwidth.wcswidth"
+    ],
+    "tabulate._wrap_text_to_colwidths": [
+      "<builtin>.bool",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "<builtin>.str.splitlines",
+      "<builtin>.str.strip",
+      "<builtin>.zip",
+      "tabulate._CustomTextWrap.__init__",
+      "tabulate._CustomTextWrap._wrap_chunks",
+      "tabulate._expand_iterable",
+      "tabulate._isnumber",
+      "tabulate._type",
+      "textwrap.TextWrapper.wrap"
+    ],
+    "tabulate.tabulate": [
+      "<builtin>.dict.get",
+      "<builtin>.enumerate",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.copy",
+      "<builtin>.list.extend",
+      "<builtin>.map",
+      "<builtin>.max",
+      "<builtin>.str.join",
+      "<builtin>.type",
+      "<builtin>.zip",
+      "_warnings.warn",
+      "itertools.chain",
+      "itertools.chain.from_iterable",
+      "itertools.zip_longest",
+      "re.Pattern.search",
+      "tabulate._align_column",
+      "tabulate._align_header",
+      "tabulate._choose_width_fn",
+      "tabulate._choose_width_fn.<lambda1>",
+      "tabulate._column_type",
+      "tabulate._expand_iterable",
+      "tabulate._expand_numparse",
+      "tabulate._format",
+      "tabulate._format_table",
+      "tabulate._is_multiline",
+      "tabulate._normalize_tabular_data",
+      "tabulate._reinsert_separating_lines",
+      "tabulate._remove_separating_lines",
+      "tabulate._rst_escape_first_column",
+      "tabulate._to_str",
+      "tabulate._visible_width",
+      "tabulate._wrap_text_to_colwidths",
+      "wcwidth.wcwidth.wcswidth"
+    ]
+  },
+  "executed": [
+    "tabulate.JupyterHTMLStr._repr_html_",
+    "tabulate.JupyterHTMLStr.str",
+    "tabulate._CustomTextWrap.__init__",
+    "tabulate._CustomTextWrap._handle_long_word",
+    "tabulate._CustomTextWrap._len",
+    "tabulate._CustomTextWrap._update_lines",
+    "tabulate._CustomTextWrap._wrap_chunks",
+    "tabulate._afterpoint",
+    "tabulate._align_cell_veritically",
+    "tabulate._align_column",
+    "tabulate._align_column_choose_padfn",
+    "tabulate._align_column_choose_width_fn",
+    "tabulate._align_column_choose_width_fn.<lambda1>",
+    "tabulate._align_column_multiline_width",
+    "tabulate._align_header",
+    "tabulate._append_basic_row",
+    "tabulate._append_line",
+    "tabulate._append_multiline_row",
+    "tabulate._asciidoc_row",
+    "tabulate._asciidoc_row.make_header_line",
+    "tabulate._bool",
+    "tabulate._build_line",
+    "tabulate._build_row",
+    "tabulate._build_simple_row",
+    "tabulate._choose_width_fn",
+    "tabulate._choose_width_fn.<lambda1>",
+    "tabulate._column_type",
+    "tabulate._expand_iterable",
+    "tabulate._expand_numparse",
+    "tabulate._flat_list",
+    "tabulate._format",
+    "tabulate._format_table",
+    "tabulate._format_table.<lambda1>",
+    "tabulate._grid_line_with_colons",
+    "tabulate._grid_segment_with_colons",
+    "tabulate._html_begin_table_without_header",
+    "tabulate._html_row_with_attrs",
+    "tabulate._is_multiline",
+    "tabulate._is_separating_line",
+    "tabulate._is_separating_line_value",
+    "tabulate._isbool",
+    "tabulate._isconvertible",
+    "tabulate._isint",
+    "tabulate._isnumber",
+    "tabulate._isnumber_with_thousands_separator",
+    "tabulate._latex_line_begin_tabular",
+    "tabulate._latex_row",
+    "tabulate._latex_row.escape_char",
+    "tabulate._mediawiki_row_with_attrs",
+    "tabulate._moin_row_with_attrs",
+    "tabulate._more_generic",
+    "tabulate._multiline_width",
+    "tabulate._normalize_tabular_data",
+    "tabulate._normalize_tabular_data.<lambda1>",
+    "tabulate._pad_row",
+    "tabulate._padboth",
+    "tabulate._padleft",
+    "tabulate._padnone",
+    "tabulate._padright",
+    "tabulate._pipe_line_with_colons",
+    "tabulate._pipe_segment_with_colons",
+    "tabulate._prepend_row_index",
+    "tabulate._reinsert_separating_lines",
+    "tabulate._remove_separating_lines",
+    "tabulate._rst_escape_first_column",
+    "tabulate._rst_escape_first_column.escape_empty",
+    "tabulate._strip_ansi",
+    "tabulate._textile_row_with_attrs",
+    "tabulate._to_str",
+    "tabulate._type",
+    "tabulate._visible_width",
+    "tabulate._wrap_text_to_colwidths",
+    "tabulate.simple_separated_format",
+    "tabulate.tabulate"
+  ],
+  "functions": [
+    "tabulate.JupyterHTMLStr._repr_html_",
+    "tabulate.JupyterHTMLStr.str",
+    "tabulate._CustomTextWrap.__init__",
+    "tabulate._CustomTextWrap._handle_long_word",
+    "tabulate._CustomTextWrap._len",
+    "tabulate._CustomTextWrap._update_lines",
+    "tabulate._CustomTextWrap._wrap_chunks",
+    "tabulate._afterpoint",
+    "tabulate._align_cell_veritically",
+    "tabulate._align_column",
+    "tabulate._align_column_choose_padfn",
+    "tabulate._align_column_choose_width_fn",
+    "tabulate._align_column_choose_width_fn.<lambda1>",
+    "tabulate._align_column_multiline_width",
+    "tabulate._align_header",
+    "tabulate._append_basic_row",
+    "tabulate._append_line",
+    "tabulate._append_multiline_row",
+    "tabulate._asciidoc_row",
+    "tabulate._asciidoc_row.make_header_line",
+    "tabulate._bool",
+    "tabulate._build_line",
+    "tabulate._build_row",
+    "tabulate._build_simple_row",
+    "tabulate._choose_width_fn",
+    "tabulate._choose_width_fn.<lambda1>",
+    "tabulate._column_type",
+    "tabulate._expand_iterable",
+    "tabulate._expand_numparse",
+    "tabulate._flat_list",
+    "tabulate._format",
+    "tabulate._format_table",
+    "tabulate._format_table.<lambda1>",
+    "tabulate._grid_line_with_colons",
+    "tabulate._grid_segment_with_colons",
+    "tabulate._html_begin_table_without_header",
+    "tabulate._html_row_with_attrs",
+    "tabulate._is_file",
+    "tabulate._is_multiline",
+    "tabulate._is_separating_line",
+    "tabulate._is_separating_line_value",
+    "tabulate._isbool",
+    "tabulate._isconvertible",
+    "tabulate._isint",
+    "tabulate._isnumber",
+    "tabulate._isnumber_with_thousands_separator",
+    "tabulate._latex_line_begin_tabular",
+    "tabulate._latex_row",
+    "tabulate._latex_row.escape_char",
+    "tabulate._main",
+    "tabulate._mediawiki_row_with_attrs",
+    "tabulate._moin_row_with_attrs",
+    "tabulate._more_generic",
+    "tabulate._multiline_width",
+    "tabulate._normalize_tabular_data",
+    "tabulate._normalize_tabular_data.<lambda1>",
+    "tabulate._pad_row",
+    "tabulate._padboth",
+    "tabulate._padleft",
+    "tabulate._padnone",
+    "tabulate._padright",
+    "tabulate._pipe_line_with_colons",
+    "tabulate._pipe_segment_with_colons",
+    "tabulate._pprint_file",
+    "tabulate._prepend_row_index",
+    "tabulate._reinsert_separating_lines",
+    "tabulate._remove_separating_lines",
+    "tabulate._rst_escape_first_column",
+    "tabulate._rst_escape_first_column.escape_empty",
+    "tabulate._strip_ansi",
+    "tabulate._textile_row_with_attrs",
+    "tabulate._to_str",
+    "tabulate._type",
+    "tabulate._visible_width",
+    "tabulate._wrap_text_to_colwidths",
+    "tabulate.simple_separated_format",
+    "tabulate.tabulate"
+  ],
+  "modules": [
+    "tabulate"
+  ],
+  "project": "tabulate",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 312,
+    "skipped": 16,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

@@ -1,0 +1,1527 @@
+# Call-site ledger of validators 0.36.0 at e2e49fb3bb4b9f1ce955638386aa167356d24055.
+# Hand-written from the source; the judgements are in validators.md.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md. validators
+# requires Python 3.11 or later and declares CPython only. Every public
+# validator is a plain function decorated with @validator (utils.py:45): the
+# module name is bound to the closure validators.utils.validator.wrapper, so a
+# call by that name calls the wrapper, and the wrapper calls the decorated
+# function (utils.py:84, 91; validators.md, J1). The wrapper returns True or a
+# ValidationError, whose __bool__ runs where the package tests such a result
+# (J2). Arguments are client values of the annotated types (str, mostly).
+default reject validators.utils.ValidationError.__bool__: the tested value is not a ValidationError; it is a str, bool, int, None, list, dict, set, re.Match, ipaddress or uuid object, a client value, or the result of a package function that is not a decorated validator (the truth sites that test the result of a call of a decorated validator accept the candidate explicitly)
+default reject validators._extremes.AbsMax.__ge__, validators._extremes.AbsMin.__le__: the operands of this comparison are ints, strs or client values, never an AbsMax or AbsMin object: they are ints and strs that the function makes, or parameters annotated str, int or Union[str, int]; only the min_val and max_val of between are annotated to admit AbsMin and AbsMax (between.py:19-20), and its sites accept the candidates explicitly
+default reject validators.utils.ValidationError.__repr__, validators.utils.ValidationError.__str__: no ValidationError is formatted, converted with str() or formatted by %; the operands are ints and strs (the left operand of every % is an int, so % is a modulo), and str(exp) converts a ValueError, TypeError or UnicodeError (ValidationError subclasses Exception only); only ValidationError.__str__ calls repr on a ValidationError (accepted there)
+
+== validators._extremes
+
+[validators._extremes]
+8:2 decorator  @total_ordering
+    -> functools.total_ordering
+29:2 decorator  @total_ordering
+    -> functools.total_ordering
+
+== validators.between
+
+[validators.between]
+11:29 call  TypeVar("PossibleValueTypes", int, float, str, datetime, ...
+    -> typing.TypeVar
+14:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.between.between]
+69:25 call  AbsMax()
+    note: AbsMax defines no __init__ or __new__; type.__call__ runs object.__new__ and object.__init__, which give no edge (as h11's Http10Reader); @total_ordering only adds comparison methods
+71:25 call  AbsMin()
+    note: AbsMin defines no __init__ or __new__; type.__call__ runs object.__new__ and object.__init__, which give no edge (as h11's Http10Reader); @total_ordering only adds comparison methods
+74:20 op  min_val > max_val
+    -> validators._extremes.AbsMin.__le__
+    -> validators._extremes.AbsMax.__ge__
+    note: min_val is a client value or AbsMin (the default, line 71; annotated Union[PossibleValueTypes, AbsMin, None]); max_val is a client value or AbsMax (line 69). @total_ordering adds generated comparison methods. AbsMin > x runs AbsMin.__gt__ (functools._gt_from_le), which calls type(self).__le__. x > AbsMax(), with x an int, float, str or datetime, gets NotImplemented from x and runs the reflected AbsMax.__lt__ (functools._lt_from_ge), which calls type(self).__ge__. The functools frames between are library code (the callback rule, B5). The site finder proposes no candidate here: the package defines no __gt__ or __lt__ (validators.md, J6)
+75:29 call  ValueError("`min_val` cannot be greater than `max_val`")
+    -> <builtin>.ValueError
+77:24 call  TypeError("Comparison type mismatch")
+    -> <builtin>.TypeError
+79:20 op  min_val <= value <= max_val
+    -> validators._extremes.AbsMin.__le__
+    reject validators._extremes.AbsMax.__ge__: the operands are min_val (a client value or AbsMin) and value (a client value of PossibleValueTypes, never an AbsMax), so the reflected __ge__ is that of a client value
+    note: AbsMin defines __le__ itself (_extremes.py:45)
+79:29 op  min_val <= value <= max_val
+    -> validators._extremes.AbsMax.__ge__
+    reject validators._extremes.AbsMin.__le__: the operands are value (a client value of PossibleValueTypes, never an AbsMin) and max_val (a client value or AbsMax)
+    note: value <= AbsMax(): the int, float, str or datetime __le__ returns NotImplemented, and Python calls the reflected AbsMax.__ge__ (_extremes.py:24)
+
+== validators.card
+
+[validators.card]
+10:2 decorator  @validator
+    -> validators.utils.validator
+43:2 decorator  @validator
+    -> validators.utils.validator
+65:2 decorator  @validator
+    -> validators.utils.validator
+87:2 decorator  @validator
+    -> validators.utils.validator
+109:2 decorator  @validator
+    -> validators.utils.validator
+131:2 decorator  @validator
+    -> validators.utils.validator
+153:2 decorator  @validator
+    -> validators.utils.validator
+175:2 decorator  @validator
+    -> validators.utils.validator
+197:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.card.card_number]
+35:22 call  list(map(int, value))
+    -> <builtin>.list
+35:26 call  map(int, value)
+    -> <builtin>.map
+36:22 call  sum(digits[-1::-2])
+    -> <builtin>.sum
+37:23 call  sum(sum(divmod(2 * d, 10)) for d in digits[-2::-2])
+    -> <builtin>.sum
+37:27 call  sum(divmod(2 * d, 10))
+    -> <builtin>.sum
+37:34 call  divmod(2 * d, 10)
+    -> <builtin>.divmod
+
+[validators.card.visa]
+61:25 call  re.compile(r"^4")
+    -> re.compile
+62:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+62:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+62:38 call  len(value)
+    -> <builtin>.len
+62:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.mastercard]
+83:25 call  re.compile(r"^(5[1-5]|222[1-9]|22[3-9][0-9]|2[3-6][0-9]{2...
+    -> re.compile
+84:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+84:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+84:38 call  len(value)
+    -> <builtin>.len
+84:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.amex]
+105:25 call  re.compile(r"^(34|37)")
+    -> re.compile
+106:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+106:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+106:38 call  len(value)
+    -> <builtin>.len
+106:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.unionpay]
+127:25 call  re.compile(r"^62")
+    -> re.compile
+128:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+128:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+128:38 call  len(value)
+    -> <builtin>.len
+128:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.diners]
+149:25 call  re.compile(r"^(30|36|38|39)")
+    -> re.compile
+150:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+150:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+150:38 call  len(value)
+    -> <builtin>.len
+150:75 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.jcb]
+171:25 call  re.compile(r"^35")
+    -> re.compile
+172:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+172:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+172:38 call  len(value)
+    -> <builtin>.len
+172:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.discover]
+193:25 call  re.compile(r"^(60|64|65)")
+    -> re.compile
+194:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+194:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+194:38 call  len(value)
+    -> <builtin>.len
+194:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+[validators.card.mir]
+215:25 call  re.compile(r"^(220[0-4])")
+    -> re.compile
+216:12 truth  card_number(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)
+216:23 call  card_number(value)
+    -> validators.utils.validator.wrapper
+    reject validators.card.card_number: the module name card_number is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.card.card_number (utils.py:84, 91)
+216:38 call  len(value)
+    -> <builtin>.len
+216:69 call  pattern.match(value)
+    -> re.Pattern.match
+
+== validators.country
+
+[validators.country]
+240:2 decorator  @validator
+    -> validators.utils.validator
+266:2 decorator  @validator
+    -> validators.utils.validator
+320:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.country._get_code_type]
+230:29 call  format_type.isdecimal()
+    -> <builtin>.str.isdecimal
+232:27 call  format_type.isalpha()
+    -> <builtin>.str.isalpha
+233:15 call  len(format_type)
+    -> <builtin>.len
+235:15 call  len(format_type)
+    -> <builtin>.len
+
+[validators.country.calling_code]
+263:24 call  set(_calling_codes.values())
+    -> <builtin>.set
+263:46 call  _calling_codes.values()
+    -> <builtin>.dict.values
+
+[validators.country.country_code]
+302:20 call  len(value)
+    -> <builtin>.len
+305:62 call  _get_code_type(value)
+    -> validators.country._get_code_type
+310:24 call  value.upper()
+    -> <builtin>.str.upper
+310:33 call  set(_alpha3_to_alpha2.values())
+    -> <builtin>.set
+310:58 call  _alpha3_to_alpha2.values()
+    -> <builtin>.dict.values
+312:30 call  set(_alpha3_to_alpha2.values())
+    -> <builtin>.set
+312:55 call  _alpha3_to_alpha2.values()
+    -> <builtin>.dict.values
+315:27 call  value.upper()
+    -> <builtin>.str.upper
+
+[validators.country.currency]
+352:11 call  len(value)
+    -> <builtin>.len
+355:23 call  value.upper()
+    -> <builtin>.str.upper
+
+== validators.cron
+
+[validators.cron]
+37:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.cron._validate_cron_item]
+10:39 call  item.partition("/")
+    -> <builtin>.str.partition
+11:30 call  step.isdecimal()
+    -> <builtin>.str.isdecimal
+11:39 call  int(step)
+    -> <builtin>.int
+20:27 call  base.split("-")
+    -> <builtin>.str.split
+21:15 call  len(parts)
+    -> <builtin>.len
+21:53 call  parts[0].isdecimal()
+    -> <builtin>.str.isdecimal
+21:81 call  parts[1].isdecimal()
+    -> <builtin>.str.isdecimal
+23:25 call  int(parts[0])
+    -> <builtin>.int
+23:40 call  int(parts[1])
+    -> <builtin>.int
+26:22 call  base.isdecimal()
+    -> <builtin>.str.isdecimal
+27:30 call  int(base)
+    -> <builtin>.int
+
+[validators.cron._validate_cron_component]
+34:15 call  all(_validate_cron_item(item, min_val, max_val) for item ...
+    -> <builtin>.all
+34:35 call  _validate_cron_item(item, min_val, max_val)
+    -> validators.cron._validate_cron_item
+34:87 call  component.split(",")
+    -> <builtin>.str.split
+
+[validators.cron.cron]
+59:61 call  value.strip()
+    -> <builtin>.str.strip
+59:69 call  value.strip().split()
+    -> <builtin>.str.split
+61:25 call  ValueError("Badly formatted cron string")
+    -> <builtin>.ValueError
+63:36 call  _validate_cron_component(minutes, 0, 59)
+    -> validators.cron._validate_cron_component
+65:36 call  _validate_cron_component(hours, 0, 23)
+    -> validators.cron._validate_cron_component
+67:36 call  _validate_cron_component(days, 1, 31)
+    -> validators.cron._validate_cron_component
+69:36 call  _validate_cron_component(months, 1, 12)
+    -> validators.cron._validate_cron_component
+71:36 call  _validate_cron_component(weekdays, 0, 7)
+    -> validators.cron._validate_cron_component
+
+== validators.crypto_addresses.bsc_address
+
+[validators.crypto_addresses.bsc_address]
+10:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.crypto_addresses.bsc_address.bsc_address]
+33:24 call  re.fullmatch(r"0x[a-fA-F0-9]{40}", value)
+    -> re.fullmatch
+
+== validators.crypto_addresses.btc_address
+
+[validators.crypto_addresses.btc_address]
+26:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.crypto_addresses.btc_address._decode_base58]
+14:15 call  sum((58**enm) * alphabet.index(idx) for enm, idx in enume...
+    -> <builtin>.sum
+14:42 call  alphabet.index(idx)
+    -> <builtin>.str.index
+14:73 call  enumerate(addr[::-1])
+    -> <builtin>.enumerate
+
+[validators.crypto_addresses.btc_address._validate_old_btc_address]
+19:11 call  len(addr)
+    -> <builtin>.len
+19:30 call  range(25, 35)
+    -> <builtin>.range
+21:35 call  _decode_base58(addr)
+    -> validators.crypto_addresses.btc_address._decode_base58
+21:50 call  _decode_base58(addr).to_bytes(25, "big")
+    -> <builtin>.int.to_bytes
+    note: _decode_base58 returns the int that sum() makes
+23:30 call  sha256(sha256(header).digest())
+    -> hashlib.sha256
+    reject validators.hashes.sha256: another function; the name sha256 here is hashlib.sha256 (btc_address.py:4)
+23:37 call  sha256(header)
+    -> hashlib.sha256
+    reject validators.hashes.sha256: another function; the name sha256 here is hashlib.sha256 (btc_address.py:4)
+23:52 call  sha256(header).digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+23:62 call  sha256(sha256(header).digest()).digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+
+[validators.crypto_addresses.btc_address.btc_address]
+53:19 call  re.compile(r"^(bc|tb)[0-3][02-9ac-hj-np-z]{14,74}$")
+    -> re.compile
+53:67 call  re.compile(r"^(bc|tb)[0-3][02-9ac-hj-np-z]{14,74}$").matc...
+    -> re.Pattern.match
+55:39 call  _validate_old_btc_address(value)
+    -> validators.crypto_addresses.btc_address._validate_old_btc_address
+
+== validators.crypto_addresses.eth_address
+
+[validators.crypto_addresses.eth_address]
+34:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.crypto_addresses.eth_address._validate_eth_checksum_address]
+19:24 call  addr.replace("0x", "")
+    -> <builtin>.str.replace
+21:24 call  re.fullmatch(r"[0-9a-fA-F]{40}", addr)
+    -> re.fullmatch
+24:27 call  keccak.new(addr.lower().encode("ascii"))
+    -> eth_hash.main.Keccak256.new
+    note: keccak is Keccak256(AutoBackend()), the object of eth_hash.auto (eth_address.py:12; eth_hash/auto.py:8), installed with the extra crypto-eth-addresses (eth-hash[pycryptodome]); new is defined at eth_hash/main.py:48 (read in the pinned eth-hash 0.8.0 source); see validators.md, judgement J3
+24:38 call  addr.lower()
+    -> <builtin>.str.lower
+24:47 call  addr.lower().encode("ascii")
+    -> <builtin>.str.encode
+24:64 call  keccak.new(addr.lower().encode("ascii")).digest()
+    -> eth_hash.backends.pycryptodome.CryptodomePreimage.digest
+    note: Keccak256.new returns self.preimage(...) (eth_hash/main.py:54): the preimage method of the backend that AutoBackend chooses at its first use (eth_hash/utils.py:13-19; pycryptodome first, eth_hash/backends/__init__.py:11). The extra crypto-eth-addresses installs pycryptodome, whose backend returns a CryptodomePreimage (eth_hash/backends/pycryptodome.py:39-40); its digest is defined at pycryptodome.py:27 (read in the pinned eth-hash 0.8.0 source); see validators.md, judgement J3
+24:70 call  keccak.new(addr.lower().encode("ascii")).digest().hex()
+    -> <builtin>.bytes.hex
+    note: digest() returns bytes
+26:19 call  range(0, 40)
+    -> <builtin>.range
+27:16 call  int(addr_hash[i], 16)
+    -> <builtin>.int
+27:56 call  addr[i].upper()
+    -> <builtin>.str.upper
+28:16 call  int(addr_hash[i], 16)
+    -> <builtin>.int
+28:57 call  addr[i].lower()
+    -> <builtin>.str.lower
+
+[validators.crypto_addresses.eth_address.eth_address]
+55:26 call  ImportError( "Do `pip install validators[crypto-eth-addre...
+    -> <builtin>.ImportError
+62:22 call  re.compile(r"^0x[0-9a-f]{40}$|^0x[0-9A-F]{40}$")
+    -> re.compile
+62:66 call  re.compile(r"^0x[0-9a-f]{40}$|^0x[0-9A-F]{40}$").match( v...
+    -> re.Pattern.match
+64:40 call  _validate_eth_checksum_address(value)
+    -> validators.crypto_addresses.eth_address._validate_eth_checksum_address
+
+== validators.crypto_addresses.trx_address
+
+[validators.crypto_addresses.trx_address]
+37:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.crypto_addresses.trx_address._base58_decode]
+16:40 call  alphabet.index(char)
+    -> <builtin>.str.index
+17:24 call  num.to_bytes(25, byteorder="big")
+    -> <builtin>.int.to_bytes
+
+[validators.crypto_addresses.trx_address._validate_trx_checksum_address]
+22:11 call  len(addr)
+    -> <builtin>.len
+26:33 call  _base58_decode(addr)
+    -> validators.crypto_addresses.trx_address._base58_decode
+30:11 call  len(address)
+    -> <builtin>.len
+33:31 call  hashlib.sha256(hashlib.sha256(address[:-4]).digest())
+    -> hashlib.sha256
+    reject validators.hashes.sha256: another function; the name sha256 here is hashlib.sha256 (import hashlib, trx_address.py:4)
+33:46 call  hashlib.sha256(address[:-4])
+    -> hashlib.sha256
+    reject validators.hashes.sha256: another function; the name sha256 here is hashlib.sha256 (import hashlib, trx_address.py:4)
+33:67 call  hashlib.sha256(address[:-4]).digest()
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+33:77 call  hashlib.sha256(hashlib.sha256(address[:-4]).digest()).dig...
+    -> _hashlib.HASH.digest
+    -> _sha256.sha256.digest
+    -> _sha2.SHA256Type.digest
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+
+[validators.crypto_addresses.trx_address.trx_address]
+60:22 call  re.compile(r"^[T][a-km-zA-HJ-NP-Z1-9]{33}$")
+    -> re.compile
+60:62 call  re.compile(r"^[T][a-km-zA-HJ-NP-Z1-9]{33}$").match( value )
+    -> re.Pattern.match
+62:41 call  _validate_trx_checksum_address(value)
+    -> validators.crypto_addresses.trx_address._validate_trx_checksum_address
+
+== validators.domain
+
+[validators.domain]
+19:23 call  _popular_cache.add("ONION")
+    -> <builtin>.set.add
+    note: _popular_cache is a set display (domain.py:18)
+21:6 decorator  @classmethod
+    -> <builtin>.classmethod
+28:6 decorator  @classmethod
+    -> <builtin>.classmethod
+40:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.domain._IanaTLD._retrieve]
+23:18 call  Path(__file__)
+    -> pathlib.Path
+23:44 call  Path(__file__).parent.joinpath("_tld.txt")
+    -> pathlib.PosixPath.joinpath
+    -> pathlib.WindowsPath.joinpath
+    note: Path(__file__) makes a PosixPath or a WindowsPath (the package declares Operating System :: OS Independent); .parent and joinpath keep the flavour (the precedent of netaddr and itables)
+23:61 call  Path(__file__).parent.joinpath("_tld.txt").open()
+    -> pathlib.PosixPath.open
+    -> pathlib.WindowsPath.open
+    note: Path(__file__) makes a PosixPath or a WindowsPath (the package declares Operating System :: OS Independent); .parent and joinpath keep the flavour (the precedent of netaddr and itables)
+24:21 call  next(tld_f)
+    -> <builtin>.next
+26:33 call  line.strip()
+    -> <builtin>.str.strip
+
+[validators.domain._IanaTLD.check]
+33:27 call  environ.get("PYVLD_CACHE_TLD")
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, a private class that inherits get from collections.abc.Mapping (the precedent of anytree, config.py:6)
+34:38 call  set(cls._retrieve())
+    note: no edge (Codex audit round 1): the branch runs only when the environment variable PYVLD_CACHE_TLD is "True"; it sets a package-owned value (the cache _full_cache), and neither the documentation, the README, the CI files nor the tests set it, so it is not admitted configuration (the tinytag ruling); see validators.md, J10
+34:52 call  cls._retrieve()
+    reject validators.domain._IanaTLD._retrieve: the call is in the branch of 34:38, which is not admitted configuration (PYVLD_CACHE_TLD); the edge check -> _retrieve stays through 36:44
+    note: no edge (Codex audit round 1): in the branch of 34:38, which is not admitted configuration (PYVLD_CACHE_TLD); see validators.md, J10
+36:44 call  cls._retrieve()
+    -> validators.domain._IanaTLD._retrieve
+    note: cls is _IanaTLD: check is called only as _IanaTLD.check (domain.py:79), and the package defines no subclass of _IanaTLD; the `in` test iterates the generator, whose body belongs to _retrieve
+
+[validators.domain.domain]
+79:43 call  _IanaTLD.check(value.rstrip(".").rsplit(".", 1)[-1].upper())
+    -> validators.domain._IanaTLD.check
+79:56 call  value.rstrip(".")
+    -> <builtin>.str.rstrip
+79:68 call  value.rstrip(".").rsplit(".", 1)
+    -> <builtin>.str.rsplit
+79:86 call  value.rstrip(".").rsplit(".", 1)[-1].upper()
+    -> <builtin>.str.upper
+86:31 call  value.encode("idna")
+    -> <builtin>.str.encode
+86:46 call  value.encode("idna").decode("utf-8")
+    -> <builtin>.bytes.decode
+87:15 call  len(encoded.rstrip("."))
+    -> <builtin>.len
+87:30 call  encoded.rstrip(".")
+    -> <builtin>.str.rstrip
+91:29 call  re.search(r"\s|__+", value)
+    -> re.search
+91:60 call  re.match( # First character of the domain rf"^(?:[a-z0-9{...
+    -> re.match
+107:27 call  UnicodeError(f"Unable to encode/decode {value}")
+    -> <builtin>.UnicodeError
+
+== validators.email
+
+[validators.email]
+11:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.email.email]
+58:32 call  value.count("@")
+    -> <builtin>.str.count
+61:46 call  value.rsplit("@", 1)
+    -> <builtin>.str.rsplit
+63:11 call  len(username_part)
+    -> <builtin>.len
+63:38 call  len(domain_part)
+    -> <builtin>.len
+68:34 call  domain_part.startswith("[")
+    -> <builtin>.str.startswith
+68:64 call  domain_part.endswith("]")
+    -> <builtin>.str.endswith
+70:45 call  domain_part.lstrip("[")
+    -> <builtin>.str.lstrip
+70:57 call  domain_part.lstrip("[").rstrip("]")
+    -> <builtin>.str.rstrip
+75:13 call  bool( hostname( domain_part, skip_ipv6_addr=not ipv6_addr...
+    -> <builtin>.bool
+    -> validators.utils.ValidationError.__bool__
+    note: bool() of the result of the hostname wrapper: True or a ValidationError, whose __bool__ runs
+76:21 call  hostname( domain_part, skip_ipv6_addr=not ipv6_address, s...
+    -> validators.utils.validator.wrapper
+    reject validators.hostname.hostname: the module name hostname is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.hostname.hostname (utils.py:84, 91)
+86:20 call  re.match( # extended latin r"(^[\u0100-\u017F\u0180-\u024...
+    -> re.match
+
+== validators.encoding
+
+[validators.encoding]
+10:2 decorator  @validator
+    -> validators.utils.validator
+31:2 decorator  @validator
+    -> validators.utils.validator
+52:2 decorator  @validator
+    -> validators.utils.validator
+73:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.encoding.base16]
+28:24 call  re.fullmatch(r"^[0-9A-Fa-f]+$", value)
+    -> re.fullmatch
+
+[validators.encoding.base32]
+49:24 call  re.fullmatch(r"^[A-Z2-7]+=*$", value)
+    -> re.fullmatch
+
+[validators.encoding.base58]
+70:24 call  re.fullmatch(r"^[1-9A-HJ-NP-Za-km-z]+$", value)
+    -> re.fullmatch
+
+[validators.encoding.base64]
+92:21 call  re.fullmatch(r"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}=...
+    -> re.fullmatch
+
+== validators.finance
+
+[validators.finance]
+65:2 decorator  @validator
+    -> validators.utils.validator
+88:2 decorator  @validator
+    -> validators.utils.validator
+111:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.finance._cusip_checksum]
+9:21 call  range(9)
+    -> <builtin>.range
+12:22 call  ord(c)
+    -> <builtin>.ord
+12:31 call  ord("0")
+    -> <builtin>.ord
+14:27 call  ord(c)
+    -> <builtin>.ord
+14:36 call  ord("A")
+    -> <builtin>.ord
+16:27 call  ord(c)
+    -> <builtin>.ord
+16:36 call  ord("a")
+    -> <builtin>.ord
+
+[validators.finance._isin_checksum]
+36:31 call  value[-1].isdecimal()
+    -> <builtin>.str.isdecimal
+42:21 call  range(12)
+    -> <builtin>.range
+47:26 call  str(10 + ord(c) - ord("A"))
+    -> <builtin>.str
+47:35 call  ord(c)
+    -> <builtin>.ord
+47:44 call  ord("A")
+    -> <builtin>.ord
+49:26 call  str(10 + ord(c) - ord("a"))
+    -> <builtin>.str
+49:35 call  ord(c)
+    -> <builtin>.ord
+49:44 call  ord("a")
+    -> <builtin>.ord
+56:28 call  enumerate(reversed(digits))
+    -> <builtin>.enumerate
+56:37 call  reversed(digits)
+    -> <builtin>.reversed
+57:18 call  ord(c)
+    -> <builtin>.ord
+57:27 call  ord("0")
+    -> <builtin>.ord
+
+[validators.finance.cusip]
+85:15 call  len(value)
+    -> <builtin>.len
+85:77 call  _cusip_checksum(value)
+    -> validators.finance._cusip_checksum
+
+[validators.finance.isin]
+108:15 call  len(value)
+    -> <builtin>.len
+108:47 call  _isin_checksum(value)
+    -> validators.finance._isin_checksum
+
+[validators.finance.sedol]
+131:11 call  len(value)
+    -> <builtin>.len
+136:21 call  range(7)
+    -> <builtin>.range
+143:22 call  ord(c)
+    -> <builtin>.ord
+143:31 call  ord("0")
+    -> <builtin>.ord
+145:27 call  ord(c)
+    -> <builtin>.ord
+145:36 call  ord("A")
+    -> <builtin>.ord
+
+== validators.hashes
+
+[validators.hashes]
+10:2 decorator  @validator
+    -> validators.utils.validator
+31:2 decorator  @validator
+    -> validators.utils.validator
+52:2 decorator  @validator
+    -> validators.utils.validator
+73:2 decorator  @validator
+    -> validators.utils.validator
+97:2 decorator  @validator
+    -> validators.utils.validator
+121:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.hashes.md5]
+28:24 call  re.fullmatch(r"^[0-9a-f]{32}$", value, re.IGNORECASE)
+    -> re.fullmatch
+
+[validators.hashes.sha1]
+49:24 call  re.fullmatch(r"^[0-9a-f]{40}$", value, re.IGNORECASE)
+    -> re.fullmatch
+
+[validators.hashes.sha224]
+70:24 call  re.fullmatch(r"^[0-9a-f]{56}$", value, re.IGNORECASE)
+    -> re.fullmatch
+
+[validators.hashes.sha256]
+94:24 call  re.fullmatch(r"^[0-9a-f]{64}$", value, re.IGNORECASE)
+    -> re.fullmatch
+
+[validators.hashes.sha384]
+118:24 call  re.fullmatch(r"^[0-9a-f]{96}$", value, re.IGNORECASE)
+    -> re.fullmatch
+
+[validators.hashes.sha512]
+143:24 call  re.fullmatch(r"^[0-9a-f]{128}$", value, re.IGNORECASE)
+    -> re.fullmatch
+
+== validators.hostname
+
+[validators.hostname]
+15:2 decorator  @lru_cache
+    -> functools.lru_cache
+24:2 decorator  @lru_cache
+    -> functools.lru_cache
+49:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.hostname._port_regex]
+18:22 call  re.compile( r"^\:(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}...
+    -> re.compile
+
+[validators.hostname._simple_hostname_regex]
+29:22 call  re.compile(r"^(?!-)[a-z0-9](?:[a-z0-9-]{0,59}[a-z0-9])?(?...
+    -> re.compile
+
+[validators.hostname._port_validator]
+34:19 call  value.count("]:")
+    -> <builtin>.str.count
+36:42 call  value.rsplit(":", 1)
+    -> <builtin>.str.rsplit
+37:23 call  _port_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.hostname._port_regex
+37:31 call  _port_regex().match(f":{port_seg}")
+    -> re.Pattern.match
+38:35 call  host_seg.lstrip("[")
+    -> <builtin>.str.lstrip
+38:47 call  host_seg.lstrip("[").rstrip("]")
+    -> <builtin>.str.rstrip
+40:19 call  value.count(":")
+    -> <builtin>.str.count
+42:42 call  value.rsplit(":", 1)
+    -> <builtin>.str.rsplit
+43:23 call  _port_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.hostname._port_regex
+43:31 call  _port_regex().match(f":{port_seg}")
+    -> re.Pattern.match
+
+[validators.hostname.hostname]
+125:54 call  _port_validator(value)
+    -> validators.hostname._port_validator
+127:37 call  _matches_simple_hostname(host_seg)
+    -> validators.hostname.hostname._matches_simple_hostname
+128:16 truth  domain(host_seg, consider_tld=consider_tld, rfc_1034=rfc_...
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here
+128:22 call  domain(host_seg, consider_tld=consider_tld, rfc_1034=rfc_...
+    -> validators.utils.validator.wrapper
+    reject validators.domain.domain: the module name domain is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.domain.domain (utils.py:84, 91)
+129:17 truth  False if skip_ipv4_addr else ipv4(host_seg, cidr=False, p...
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (ipv4); the other arm is False
+129:50 call  ipv4(host_seg, cidr=False, private=private)
+    -> validators.utils.validator.wrapper
+    reject validators.ip_address.ipv4: the module name ipv4 is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.ip_address.ipv4 (utils.py:84, 91)
+130:17 truth  False if skip_ipv6_addr else ipv6(host_seg, cidr=False)
+    reject validators.utils.ValidationError.__bool__: the last operand of the `or` chain is not tested in hostname; hostname returns it, and the wrapper tests it (utils.py:84, 91)
+130:50 call  ipv6(host_seg, cidr=False)
+    -> validators.utils.validator.wrapper
+    reject validators.ip_address.ipv6: the module name ipv6 is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.ip_address.ipv6 (utils.py:84, 91)
+134:33 call  _matches_simple_hostname(value)
+    -> validators.hostname.hostname._matches_simple_hostname
+135:12 truth  domain(value, consider_tld=consider_tld, rfc_1034=rfc_103...
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here
+135:18 call  domain(value, consider_tld=consider_tld, rfc_1034=rfc_103...
+    -> validators.utils.validator.wrapper
+    reject validators.domain.domain: the module name domain is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.domain.domain (utils.py:84, 91)
+136:13 truth  False if skip_ipv4_addr else ipv4(value, cidr=False, priv...
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (ipv4); the other arm is False
+136:46 call  ipv4(value, cidr=False, private=private)
+    -> validators.utils.validator.wrapper
+    reject validators.ip_address.ipv4: the module name ipv4 is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.ip_address.ipv4 (utils.py:84, 91)
+137:13 truth  False if skip_ipv6_addr else ipv6(value, cidr=False)
+    reject validators.utils.ValidationError.__bool__: the last operand of the `or` chain is not tested in hostname; hostname returns it, and the wrapper tests it (utils.py:84, 91)
+137:46 call  ipv6(value, cidr=False)
+    -> validators.utils.validator.wrapper
+    reject validators.ip_address.ipv6: the module name ipv6 is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.ip_address.ipv6 (utils.py:84, 91)
+
+[validators.hostname.hostname._matches_simple_hostname]
+121:38 call  host.endswith(".")
+    -> <builtin>.str.endswith
+123:38 call  _simple_hostname_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.hostname._simple_hostname_regex
+123:46 call  _simple_hostname_regex().match(host)
+    -> re.Pattern.match
+
+== validators.i18n.es
+
+[validators.i18n.es]
+23:2 decorator  @validator
+    -> validators.utils.validator
+80:2 decorator  @validator
+    -> validators.utils.validator
+110:2 decorator  @validator
+    -> validators.utils.validator
+143:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.i18n.es._nif_nie_validation]
+12:11 call  len(value)
+    -> <builtin>.len
+14:24 call  value.upper()
+    -> <builtin>.str.upper
+18:35 call  number_by_letter.get(value[0], value[0])
+    -> <builtin>.dict.get
+    note: number_by_letter is annotated Dict[str, str]; the package passes dict displays (es.py:106, 136)
+20:27 call  numbers.isdigit()
+    -> <builtin>.str.isdigit
+20:55 call  int(numbers)
+    -> <builtin>.int
+
+[validators.i18n.es.es_cif]
+54:24 call  len(value)
+    -> <builtin>.len
+56:24 call  value.upper()
+    -> <builtin>.str.upper
+61:28 call  doi_body.isdigit()
+    -> <builtin>.str.isdigit
+65:14 call  sum( # Multiply each positionally even doi # digit by 2 a...
+    -> <builtin>.sum
+68:16 call  sum(map(int, str(int(char) * 2)))
+    -> <builtin>.sum
+68:20 call  map(int, str(int(char) * 2))
+    -> <builtin>.map
+68:29 call  str(int(char) * 2)
+    -> <builtin>.str
+68:33 call  int(char)
+    -> <builtin>.int
+68:73 call  int(char)
+    -> <builtin>.int
+69:41 call  enumerate(doi_body)
+    -> <builtin>.enumerate
+74:19 call  str(res)
+    -> <builtin>.str
+77:27 call  str(res)
+    -> <builtin>.str
+
+[validators.i18n.es.es_nif]
+107:31 call  _nif_nie_validation(value, number_by_letter)
+    -> validators.i18n.es._nif_nie_validation
+
+[validators.i18n.es.es_nie]
+139:35 call  _nif_nie_validation(value, number_by_letter)
+    -> validators.i18n.es._nif_nie_validation
+
+[validators.i18n.es.es_doi]
+168:12 truth  es_nie(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here
+168:18 call  es_nie(value)
+    -> validators.utils.validator.wrapper
+    reject validators.i18n.es.es_nie: the module name es_nie is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.i18n.es.es_nie (utils.py:84, 91)
+168:29 truth  es_nif(value)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here
+168:35 call  es_nif(value)
+    -> validators.utils.validator.wrapper
+    reject validators.i18n.es.es_nif: the module name es_nif is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.i18n.es.es_nif (utils.py:84, 91)
+168:46 truth  es_cif(value)
+    reject validators.utils.ValidationError.__bool__: the last operand of the `or` chain is not tested in es_doi; es_doi returns it, and the wrapper tests it (utils.py:84, 91)
+168:52 call  es_cif(value)
+    -> validators.utils.validator.wrapper
+    reject validators.i18n.es.es_cif: the module name es_cif is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.i18n.es.es_cif (utils.py:84, 91)
+
+== validators.i18n.fi
+
+[validators.i18n.fi]
+11:2 decorator  @lru_cache
+    -> functools.lru_cache
+17:2 decorator  @lru_cache
+    -> functools.lru_cache
+32:2 decorator  @validator
+    -> validators.utils.validator
+66:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.i18n.fi._business_id_pattern]
+14:22 call  re.compile(r"^[0-9]{7}-[0-9]$")
+    -> re.compile
+
+[validators.i18n.fi._ssn_pattern]
+20:22 call  re.compile( r"""^ (?P<date>(0[1-9]|[1-2]\d|3[01]) (0[1-9]...
+    -> re.compile
+27:49 call  r"""^ (?P<date>(0[1-9]|[1-2]\d|3[01]) (0[1-9]|1[012]) (\d...
+    -> <builtin>.str.format
+    note: the receiver is a str literal; the one field {check_marks} gets the str ssn_check_marks
+
+[validators.i18n.fi.fi_business_id]
+57:20 call  re.match(_business_id_pattern(), value)
+    -> re.match
+57:41 call  _business_id_pattern()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.i18n.fi._business_id_pattern
+60:18 call  map(int, value[:7])
+    -> <builtin>.map
+61:19 call  int(value[8])
+    -> <builtin>.int
+62:17 call  sum(f * n for f, n in zip(factors, numbers))
+    -> <builtin>.sum
+62:39 call  zip(factors, numbers)
+    -> <builtin>.zip
+
+[validators.i18n.fi.fi_ssn]
+95:31 call  re.match(_ssn_pattern(ssn_check_marks), value)
+    -> re.match
+95:44 call  _ssn_pattern(ssn_check_marks)
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.i18n.fi._ssn_pattern
+    reject validators.i18n.fr._ssn_pattern: another module's function; the name _ssn_pattern here is validators.i18n.fi._ssn_pattern
+97:26 call  result.groupdict()
+    -> re.Match.groupdict
+98:19 call  int(gd["date"] + gd["serial"])
+    -> <builtin>.int
+100:12 call  int(gd["serial"])
+    -> <builtin>.int
+101:39 call  int(gd["serial"])
+    -> <builtin>.int
+102:43 call  len(ssn_check_marks)
+    -> <builtin>.len
+
+== validators.i18n.fr
+
+[validators.i18n.fr]
+12:2 decorator  @lru_cache
+    -> functools.lru_cache
+27:2 decorator  @validator
+    -> validators.utils.validator
+67:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.i18n.fr._ssn_pattern]
+15:22 call  re.compile( r"^([12])" # gender (1=M, 2=F) r"\s(\d{2})" #...
+    -> re.compile
+
+[validators.i18n.fr.fr_department]
+57:18 call  isinstance(value, str)
+    -> <builtin>.isinstance
+61:24 call  int(value)
+    -> <builtin>.int
+
+[validators.i18n.fr.fr_ssn]
+96:23 call  re.match(_ssn_pattern(), value)
+    -> re.match
+96:36 call  _ssn_pattern()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.i18n.fr._ssn_pattern
+    reject validators.i18n.fi._ssn_pattern: another module's function; the name _ssn_pattern here is validators.i18n.fr._ssn_pattern
+99:18 call  list(matched.groups())
+    -> <builtin>.list
+99:33 call  matched.groups()
+    -> re.Match.groups
+102:35 truth  fr_department(department)
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here
+102:48 call  fr_department(department)
+    -> validators.utils.validator.wrapper
+    reject validators.i18n.fr.fr_department: the module name fr_department is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.i18n.fr.fr_department (utils.py:84, 91)
+108:11 call  len(department)
+    -> <builtin>.len
+108:30 call  len(groups[4])
+    -> <builtin>.len
+118:17 call  int("".join(groups[:-1]))
+    -> <builtin>.int
+118:25 call  "".join(groups[:-1])
+    -> <builtin>.str.join
+119:15 call  int(control_key)
+    -> <builtin>.int
+
+== validators.i18n.ind
+
+[validators.i18n.ind]
+10:2 decorator  @validator
+    -> validators.utils.validator
+30:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.i18n.ind.ind_aadhar]
+27:20 call  re.match(r"^[2-9]{1}\d{3}\s\d{4}\s\d{4}$", value)
+    -> re.match
+
+[validators.i18n.ind.ind_pan]
+47:24 call  re.fullmatch(r"[A-Z]{5}\d{4}[A-Z]{1}", value)
+    -> re.fullmatch
+
+== validators.i18n.ru
+
+[validators.i18n.ru]
+6:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.i18n.ru.ru_inn]
+37:22 call  list(map(int, value))
+    -> <builtin>.list
+37:26 call  map(int, value)
+    -> <builtin>.map
+39:15 call  len(digits)
+    -> <builtin>.len
+41:33 call  sum([d * w for d, w in zip(digits, weight_coefs)])
+    -> <builtin>.sum
+41:56 call  zip(digits, weight_coefs)
+    -> <builtin>.zip
+48:17 call  len(digits)
+    -> <builtin>.len
+50:34 call  sum([d * w for d, w in zip(digits, weight_coefs1)])
+    -> <builtin>.sum
+50:57 call  zip(digits, weight_coefs1)
+    -> <builtin>.zip
+52:34 call  sum([d * w for d, w in zip(digits, weight_coefs2)])
+    -> <builtin>.sum
+52:57 call  zip(digits, weight_coefs2)
+    -> <builtin>.zip
+
+== validators.iban
+
+[validators.iban]
+22:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.iban._char_value]
+12:32 call  char.isdigit()
+    -> <builtin>.str.isdigit
+12:43 call  str(10 + ord(char.upper()) - ord("A"))
+    -> <builtin>.str
+12:52 call  ord(char.upper())
+    -> <builtin>.ord
+12:63 call  char.upper()
+    -> <builtin>.str.upper
+12:72 call  ord("A")
+    -> <builtin>.ord
+
+[validators.iban._mod_check]
+19:15 call  int("".join(_char_value(char) for char in rearranged))
+    -> <builtin>.int
+19:23 call  "".join(_char_value(char) for char in rearranged)
+    -> <builtin>.str.join
+19:35 call  _char_value(char)
+    -> validators.iban._char_value
+
+[validators.iban.iban]
+41:18 call  re.match(r"^[a-z]{2}[0-9]{2}[a-z0-9]{11,30}$", value, re....
+    -> re.match
+41:93 call  _mod_check(value)
+    -> validators.iban._mod_check
+
+== validators.ip_address
+
+[validators.ip_address]
+41:2 decorator  @validator
+    -> validators.utils.validator
+97:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.ip_address._check_private_ip]
+23:12 call  any( value.startswith(l_bit) for l_bit in { "10.", # priv...
+    -> <builtin>.any
+24:29 call  value.startswith(l_bit)
+    -> <builtin>.str.startswith
+33:20 call  re.match(r"^172\.(?:1[6-9]|2\d|3[0-1])\.", value)
+    -> re.match
+34:20 call  re.match(r"^(?:22[4-9]|23[0-9]|24[0-9]|25[0-5])\.", value)
+    -> re.match
+
+[validators.ip_address.ipv4]
+89:38 call  value.count("/")
+    -> <builtin>.str.count
+90:33 call  ValueError("IPv4 address was expected in CIDR notation")
+    -> <builtin>.ValueError
+91:31 call  IPv4Network(value, strict=not host_bit)
+    -> ipaddress.IPv4Network
+91:81 call  _check_private_ip(value, private)
+    -> validators.ip_address._check_private_ip
+92:27 call  IPv4Address(value)
+    -> ipaddress.IPv4Address
+92:56 call  _check_private_ip(value, private)
+    -> validators.ip_address._check_private_ip
+
+[validators.ip_address.ipv6]
+134:38 call  value.count("/")
+    -> <builtin>.str.count
+135:33 call  ValueError("IPv6 address was expected in CIDR notation")
+    -> <builtin>.ValueError
+136:31 call  IPv6Network(value, strict=not host_bit)
+    -> ipaddress.IPv6Network
+137:27 call  IPv6Address(value)
+    -> ipaddress.IPv6Address
+
+== validators.length
+
+[validators.length]
+11:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.length.length]
+41:25 call  ValueError("Length cannot be negative. `min_val` is less ...
+    -> <builtin>.ValueError
+43:25 call  ValueError("Length cannot be negative. `max_val` is less ...
+    -> <builtin>.ValueError
+45:16 call  bool(between(len(value), min_val=min_val, max_val=max_val))
+    -> <builtin>.bool
+    -> validators.utils.ValidationError.__bool__
+    note: bool() of the result of the between wrapper: True or a ValidationError, whose __bool__ runs
+45:24 call  between(len(value), min_val=min_val, max_val=max_val)
+    -> validators.utils.validator.wrapper
+    reject validators.between.between: the module name between is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.between.between (utils.py:84, 91)
+45:28 call  len(value)
+    -> <builtin>.len
+
+== validators.mac_address
+
+[validators.mac_address]
+10:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.mac_address.mac_address]
+36:20 call  re.match(r"^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$", va...
+    -> re.match
+
+== validators.slug
+
+[validators.slug]
+9:26 call  re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+    -> re.compile
+12:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.slug.slug]
+32:34 call  _SLUG_REGEXP.fullmatch(value)
+    -> re.Pattern.fullmatch
+    note: _SLUG_REGEXP is the compiled pattern of slug.py:9
+
+== validators.uri
+
+[validators.uri]
+73:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.uri._file_url]
+17:28 call  value.startswith("file:///")
+    -> <builtin>.str.startswith
+
+[validators.uri._ipfs_url]
+23:28 call  value.startswith("ipfs://")
+    -> <builtin>.str.startswith
+
+[validators.uri._telnet_url]
+50:11 call  any(char.isspace() or not char.isprintable() for char in ...
+    -> <builtin>.any
+50:24 call  char.isspace()
+    -> <builtin>.str.isspace
+50:50 call  char.isprintable()
+    -> <builtin>.str.isprintable
+54:57 call  urlsplit(value)
+    -> functools._lru_cache_wrapper.__call__
+    note: from Python 3.11 on, urllib.parse.urlsplit is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code); validators supports 3.11 and later (the precedent of fastjsonschema, ref_resolver.py:52)
+69:31 call  netloc.rsplit("@", 1)
+    -> <builtin>.str.rsplit
+70:20 call  hostname(netloc, may_have_port=True)
+    -> validators.utils.validator.wrapper
+    reject validators.hostname.hostname: the module name hostname is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.hostname.hostname (utils.py:84, 91)
+
+[validators.uri.uri]
+97:11 call  any( # fmt: off value.startswith(item) for item in { "ftp...
+    -> <builtin>.any
+99:25 call  value.startswith(item)
+    -> <builtin>.str.startswith
+115:19 call  url(value)
+    -> validators.utils.validator.wrapper
+    reject validators.url.url: the module name url is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.url.url (utils.py:84, 91)
+118:24 call  value.startswith("mailto:")
+    -> <builtin>.str.startswith
+119:21 call  email(value[len("mailto:") :])
+    -> validators.utils.validator.wrapper
+    reject validators.email.email: the module name email is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.email.email (utils.py:84, 91)
+119:31 call  len("mailto:")
+    -> <builtin>.len
+122:24 call  value.startswith("file:")
+    -> <builtin>.str.startswith
+123:25 call  _file_url(value)
+    -> validators.uri._file_url
+126:24 call  value.startswith("ipfs:")
+    -> <builtin>.str.startswith
+127:25 call  _ipfs_url(value)
+    -> validators.uri._ipfs_url
+130:24 call  value.startswith("magnet:?")
+    -> <builtin>.str.startswith
+134:24 call  value.startswith("tel:")
+    -> <builtin>.str.startswith
+138:24 call  value.startswith("data:")
+    -> <builtin>.str.startswith
+142:24 call  value.startswith("urn:")
+    -> <builtin>.str.startswith
+146:24 call  value.startswith("urc:")
+    -> <builtin>.str.startswith
+150:24 call  value.startswith("telnet:")
+    -> <builtin>.str.startswith
+151:27 call  _telnet_url(value)
+    -> validators.uri._telnet_url
+
+== validators.url
+
+[validators.url]
+14:2 decorator  @lru_cache
+    -> functools.lru_cache
+27:2 decorator  @lru_cache
+    -> functools.lru_cache
+164:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.url._username_regex]
+16:22 call  re.compile( # extended latin r"(^[\u0100-\u017F\u0180-\u0...
+    -> re.compile
+
+[validators.url._path_regex]
+29:22 call  re.compile( # allowed symbols r"^[\/a-z0-9\-\.\_\~\!\$\&\...
+    -> re.compile
+
+[validators.url._confirm_ipv6_skip]
+71:41 call  value.count(":")
+    -> <builtin>.str.count
+71:74 call  value.startswith("[")
+    -> <builtin>.str.startswith
+
+[validators.url._validate_auth_segment]
+78:35 call  value.count(":")
+    -> <builtin>.str.count
+81:31 call  _username_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.url._username_regex
+81:39 call  _username_regex().match(unquote(value))
+    -> re.Pattern.match
+81:47 call  unquote(value)
+    -> urllib.parse.unquote
+83:31 call  _username_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.url._username_regex
+83:39 call  _username_regex().match(value)
+    -> re.Pattern.match
+84:38 call  value.rsplit(":", 1)
+    -> <builtin>.str.rsplit
+85:27 call  _username_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.url._username_regex
+85:35 call  _username_regex().match(username)
+    -> re.Pattern.match
+85:53 call  all( char_to_avoid not in password for char_to_avoid in (...
+    -> <builtin>.all
+
+[validators.url._validate_netloc]
+102:32 call  value.count("@")
+    -> <builtin>.str.count
+104:19 call  value.count("@")
+    -> <builtin>.str.count
+105:24 call  hostname( ( value if _confirm_ipv6_skip(value, skip_ipv6_...
+    -> validators.utils.validator.wrapper
+    reject validators.hostname.hostname: the module name hostname is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.hostname.hostname (utils.py:84, 91)
+108:38 call  _confirm_ipv6_skip(value, skip_ipv6_addr)
+    -> validators.url._confirm_ipv6_skip
+109:34 call  value.lstrip("[")
+    -> <builtin>.str.lstrip
+109:47 call  value.lstrip("[").replace("]", "", 1)
+    -> <builtin>.str.replace
+111:46 call  _confirm_ipv6_skip(value, skip_ipv6_addr)
+    -> validators.url._confirm_ipv6_skip
+120:36 call  value.rsplit("@", 1)
+    -> <builtin>.str.rsplit
+121:12 truth  hostname( ( host if _confirm_ipv6_skip(host, skip_ipv6_ad...
+    -> validators.utils.ValidationError.__bool__
+    note: the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here
+121:20 call  hostname( ( host if _confirm_ipv6_skip(host, skip_ipv6_ad...
+    -> validators.utils.validator.wrapper
+    reject validators.hostname.hostname: the module name hostname is bound to the wrapper that @validator returns (utils.py:102); the wrapper calls validators.hostname.hostname (utils.py:84, 91)
+124:34 call  _confirm_ipv6_skip(host, skip_ipv6_addr)
+    -> validators.url._confirm_ipv6_skip
+125:29 call  host.lstrip("[")
+    -> <builtin>.str.lstrip
+125:42 call  host.lstrip("[").replace("]", "", 1)
+    -> <builtin>.str.replace
+127:42 call  _confirm_ipv6_skip(host, skip_ipv6_addr)
+    -> validators.url._confirm_ipv6_skip
+135:33 call  _validate_auth_segment(basic_auth)
+    -> validators.url._validate_auth_segment
+
+[validators.url._validate_optionals]
+142:34 call  bool(_path_regex().match(path))
+    -> <builtin>.bool
+142:46 call  _path_regex()
+    -> functools._lru_cache_wrapper.__call__
+    -> validators.url._path_regex
+142:54 call  _path_regex().match(path)
+    -> re.Pattern.match
+147:25 call  parse_qs(query, strict_parsing=strict_query, separator="&")
+    -> urllib.parse.parse_qs
+148:25 call  parse_qs(query, strict_parsing=strict_query, separator=";")
+    -> urllib.parse.parse_qs
+153:30 call  parse_qs(query, strict_parsing=strict_query)
+    -> urllib.parse.parse_qs
+    note: Codex audit round 1: the except TypeError branch (url.py:151-154) was written for Python before 3.9.2, but it also runs on supported versions. value is annotated str, and an admitted str subclass can override its methods (B5, client control flow). urlsplit keeps the subclass through lstrip, replace, slicing and split (CPython 3.12 urllib/parse.py:494-520), and parse_qsl calls qs.split(separator) on the query (parse.py:819), which the subclass can make raise TypeError; then this call enters parse_qs. See validators.md, J5
+158:34 call  bool( re.fullmatch(r"[0-9a-z?/:@\-._~%!$&'()*+,;=#]*", fr...
+    -> <builtin>.bool
+159:25 call  re.fullmatch(r"[0-9a-z?/:@\-._~%!$&'()*+,;=#]*", fragment...
+    -> re.fullmatch
+
+[validators.url.url]
+234:30 call  re.search(r"\s", value)
+    -> re.search
+240:57 call  urlsplit(value)
+    -> functools._lru_cache_wrapper.__call__
+    note: from Python 3.11 on, urllib.parse.urlsplit is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code); validators supports 3.11 and later (the precedent of fastjsonschema, ref_resolver.py:52)
+249:24 call  validate_scheme(scheme)
+    -> validators.url._validate_scheme
+    note: validate_scheme is the parameter of url, default _validate_scheme (url.py:178); its annotation Callable[[str], bool] is a bare callable, and neither the documentation nor the tests pass another package function, so every other value is a client callback (B2, B5)
+252:16 truth  _validate_netloc( netloc, skip_ipv6_addr, skip_ipv4_addr,...
+    -> validators.utils.ValidationError.__bool__
+    note: the outer `and` (url.py:248-265) tests the value of `(is_local_file or _validate_netloc(...))`, which is the result of _validate_netloc when is_local_file is False; _validate_netloc can return the ValidationError of the hostname wrapper (url.py:105) or of `hostname(...) and ...` (url.py:121)
+252:32 call  _validate_netloc( netloc, skip_ipv6_addr, skip_ipv4_addr,...
+    -> validators.url._validate_netloc
+264:32 call  _validate_optionals(path, query, fragment, strict_query)
+    -> validators.url._validate_optionals
+
+== validators.utils
+
+[validators.utils.ValidationError.__init__]
+19:29 call  self.__dict__.update(arg_dict)
+    -> <builtin>.dict.update
+    note: self.__dict__ of an exception instance is a dict
+
+[validators.utils.ValidationError.__repr__]
+25:64 call  self.__dict__.items()
+    -> <builtin>.dict.items
+
+[validators.utils.ValidationError.__str__]
+30:20 call  repr(self)
+    -> <builtin>.repr
+    -> validators.utils.ValidationError.__repr__
+    note: self is a ValidationError (B1); the package defines no subclass
+
+[validators.utils._func_args_as_dict]
+39:16 call  dict( list(zip(dict.fromkeys(chain(getfullargspec(func)[0...
+    -> <builtin>.dict
+40:13 call  list(zip(dict.fromkeys(chain(getfullargspec(func)[0], kwa...
+    -> <builtin>.list
+40:17 call  zip(dict.fromkeys(chain(getfullargspec(func)[0], kwargs.k...
+    -> <builtin>.zip
+40:31 call  dict.fromkeys(chain(getfullargspec(func)[0], kwargs.keys()))
+    -> <builtin>.dict.fromkeys
+40:37 call  chain(getfullargspec(func)[0], kwargs.keys())
+    -> itertools.chain
+40:52 call  getfullargspec(func)
+    -> inspect.getfullargspec
+    note: func is one of the package's 54 decorated functions (plain functions: inspect reads their code objects and runs no package code), or a client callable given to @validator (a function, or a callable instance whose __call__ inspect reads, CPython 3.12 inspect.py:2670): client code (B5). Corrected in Codex audit round 1
+40:74 call  kwargs.keys()
+    -> <builtin>.dict.keys
+41:15 call  list(kwargs.items())
+    -> <builtin>.list
+41:28 call  kwargs.items()
+    -> <builtin>.dict.items
+
+[validators.utils.validator]
+73:6 decorator  @wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns (73:11); it calls functools.update_wrapper, which copies attributes and calls no package code (the precedent of aiocache)
+73:11 call  wraps(func)
+    -> functools.wraps
+
+[validators.utils.validator.wrapper]
+79:23 call  environ.get("RAISE_VALIDATION_ERROR", "False")
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, a private class that inherits get from collections.abc.Mapping (the precedent of anytree, config.py:6)
+84:20 truth  func(*args, **kwargs)
+    -> validators.utils.ValidationError.__bool__
+    note: func can return a ValidationError: the decorated validators that return the result of another wrapped validator (card.py:62 and the other cards through card_number, hostname.py:130 and 137 through ipv6, es.py:168 through es_cif, url.py:248-265 through _validate_netloc and the hostname wrapper, uri.py:115, 119, 151 through url, email and hostname)
+84:24 call  func(*args, **kwargs)
+    -> validators.between.between
+    -> validators.card.amex
+    -> validators.card.card_number
+    -> validators.card.diners
+    -> validators.card.discover
+    -> validators.card.jcb
+    -> validators.card.mastercard
+    -> validators.card.mir
+    -> validators.card.unionpay
+    -> validators.card.visa
+    -> validators.country.calling_code
+    -> validators.country.country_code
+    -> validators.country.currency
+    -> validators.cron.cron
+    -> validators.crypto_addresses.bsc_address.bsc_address
+    -> validators.crypto_addresses.btc_address.btc_address
+    -> validators.crypto_addresses.eth_address.eth_address
+    -> validators.crypto_addresses.trx_address.trx_address
+    -> validators.domain.domain
+    -> validators.email.email
+    -> validators.encoding.base16
+    -> validators.encoding.base32
+    -> validators.encoding.base58
+    -> validators.encoding.base64
+    -> validators.finance.cusip
+    -> validators.finance.isin
+    -> validators.finance.sedol
+    -> validators.hashes.md5
+    -> validators.hashes.sha1
+    -> validators.hashes.sha224
+    -> validators.hashes.sha256
+    -> validators.hashes.sha384
+    -> validators.hashes.sha512
+    -> validators.hostname.hostname
+    -> validators.i18n.es.es_cif
+    -> validators.i18n.es.es_doi
+    -> validators.i18n.es.es_nie
+    -> validators.i18n.es.es_nif
+    -> validators.i18n.fi.fi_business_id
+    -> validators.i18n.fi.fi_ssn
+    -> validators.i18n.fr.fr_department
+    -> validators.i18n.fr.fr_ssn
+    -> validators.i18n.ind.ind_aadhar
+    -> validators.i18n.ind.ind_pan
+    -> validators.i18n.ru.ru_inn
+    -> validators.iban.iban
+    -> validators.ip_address.ipv4
+    -> validators.ip_address.ipv6
+    -> validators.length.length
+    -> validators.mac_address.mac_address
+    -> validators.slug.slug
+    -> validators.uri.uri
+    -> validators.url.url
+    -> validators.uuid.uuid
+    note: func is the parameter of validator; the package applies @validator to these 54 functions (every @validator line of the package), and a client may decorate its own functions (the docstring example, utils.py:52), which are client code; the annotation Callable[..., Any] names no package value (B2)
+87:42 call  ValidationError(func, _func_args_as_dict(func, *args, **k...
+    -> validators.utils.ValidationError.__init__
+87:67 call  _func_args_as_dict(func, *args, **kwargs)
+    -> validators.utils._func_args_as_dict
+91:24 truth  func(*args, **kwargs)
+    -> validators.utils.ValidationError.__bool__
+    note: as at 84:20
+91:28 call  func(*args, **kwargs)
+    -> validators.between.between
+    -> validators.card.amex
+    -> validators.card.card_number
+    -> validators.card.diners
+    -> validators.card.discover
+    -> validators.card.jcb
+    -> validators.card.mastercard
+    -> validators.card.mir
+    -> validators.card.unionpay
+    -> validators.card.visa
+    -> validators.country.calling_code
+    -> validators.country.country_code
+    -> validators.country.currency
+    -> validators.cron.cron
+    -> validators.crypto_addresses.bsc_address.bsc_address
+    -> validators.crypto_addresses.btc_address.btc_address
+    -> validators.crypto_addresses.eth_address.eth_address
+    -> validators.crypto_addresses.trx_address.trx_address
+    -> validators.domain.domain
+    -> validators.email.email
+    -> validators.encoding.base16
+    -> validators.encoding.base32
+    -> validators.encoding.base58
+    -> validators.encoding.base64
+    -> validators.finance.cusip
+    -> validators.finance.isin
+    -> validators.finance.sedol
+    -> validators.hashes.md5
+    -> validators.hashes.sha1
+    -> validators.hashes.sha224
+    -> validators.hashes.sha256
+    -> validators.hashes.sha384
+    -> validators.hashes.sha512
+    -> validators.hostname.hostname
+    -> validators.i18n.es.es_cif
+    -> validators.i18n.es.es_doi
+    -> validators.i18n.es.es_nie
+    -> validators.i18n.es.es_nif
+    -> validators.i18n.fi.fi_business_id
+    -> validators.i18n.fi.fi_ssn
+    -> validators.i18n.fr.fr_department
+    -> validators.i18n.fr.fr_ssn
+    -> validators.i18n.ind.ind_aadhar
+    -> validators.i18n.ind.ind_pan
+    -> validators.i18n.ru.ru_inn
+    -> validators.iban.iban
+    -> validators.ip_address.ipv4
+    -> validators.ip_address.ipv6
+    -> validators.length.length
+    -> validators.mac_address.mac_address
+    -> validators.slug.slug
+    -> validators.uri.uri
+    -> validators.url.url
+    -> validators.uuid.uuid
+    note: func as at 84:24
+92:41 call  ValidationError(func, _func_args_as_dict(func, *args, **k...
+    -> validators.utils.ValidationError.__init__
+92:66 call  _func_args_as_dict(func, *args, **kwargs)
+    -> validators.utils._func_args_as_dict
+96:38 call  ValidationError( func, _func_args_as_dict(func, *args, **...
+    -> validators.utils.ValidationError.__init__
+97:45 call  _func_args_as_dict(func, *args, **kwargs)
+    -> validators.utils._func_args_as_dict
+97:73 call  str(exp)
+    -> <builtin>.str
+100:39 call  ValidationError(func, _func_args_as_dict(func, *args, **k...
+    -> validators.utils.ValidationError.__init__
+100:64 call  _func_args_as_dict(func, *args, **kwargs)
+    -> validators.utils._func_args_as_dict
+100:92 call  str(exp)
+    -> <builtin>.str
+
+== validators.uuid
+
+[validators.uuid]
+12:2 decorator  @validator
+    -> validators.utils.validator
+
+[validators.uuid.uuid]
+36:18 call  isinstance(value, UUID)
+    -> <builtin>.isinstance
+39:20 call  UUID(value)
+    -> uuid.UUID
+39:39 call  re.match( r"^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-...
+    note: no edge (Codex audit round 1): the second operand of `or` never runs. UUID(value) either raises or returns an exact uuid.UUID, a class with no __bool__ and no __len__ (CPython 3.12 to 3.14 uuid.py), so every result is true; a UUID argument returns earlier (uuid.py:36-37)

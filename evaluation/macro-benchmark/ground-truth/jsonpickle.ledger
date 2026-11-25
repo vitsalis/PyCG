@@ -1,0 +1,3351 @@
+# Call-site ledger of jsonpickle at 6d5968c37735bb9365d354952de1f63d67670b13.
+# Hand-written from the source; judgements in jsonpickle.md.
+#
+# Roles used below (jsonpickle.md, "Value sites"):
+#   handlers: the registry holds handler classes and instances; every
+#     package subclass of BaseHandler fits the role (judgement J4).
+#   backends: simplejson, json, ujson and yaml (the package's own loads);
+#     ujson, yaml and gmpy2 are not installed and are named as missing modules.
+#   objects to pickle and decoded classes are client values (B5), except the
+#     CloneFactory that the pickler makes for a defaultdict (judgement J6) and
+#     the library values that the package itself forwards to the generic
+#     pickler (judgement J11; the outside callees at the sites of
+#     jsonpickle.md, "Open receiver sets", are a lower bound).
+default reject jsonpickle.ext.gmpy.GmpyMPZHandler.flatten, jsonpickle.ext.numpy.NumpyDTypeHandler.flatten, jsonpickle.ext.numpy.NumpyGenericHandler.flatten, jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten, jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten, jsonpickle.ext.numpy.NumpyNDArrayHandlerView.flatten, jsonpickle.ext.numpy.UnpickleableNumpyGenericHandler.flatten, jsonpickle.ext.pandas.PandasDfHandler.flatten, jsonpickle.ext.pandas.PandasIndexHandler.flatten, jsonpickle.ext.pandas.PandasIntervalHandler.flatten, jsonpickle.ext.pandas.PandasPeriodHandler.flatten, jsonpickle.ext.pandas.PandasSeriesHandler.flatten, jsonpickle.ext.pandas.PandasTimestampHandler.flatten, jsonpickle.handlers.ArrayHandler.flatten, jsonpickle.handlers.BaseHandler.flatten, jsonpickle.handlers.DatetimeHandler.flatten, jsonpickle.handlers.LockHandler.flatten, jsonpickle.handlers.QueueHandler.flatten, jsonpickle.handlers.RegexHandler.flatten, jsonpickle.handlers.TextIOHandler.flatten, jsonpickle.handlers.UUIDHandler.flatten: a handler's flatten runs only at the handler dispatch of the pickler (pickler.py:597) and at the super() calls inside the numpy handlers, whose entries accept the flatten that the MRO gives; at every other .flatten( site the receiver is the Pickler that a handler holds as its context (self.context, pickler) or that encode makes, never a handler
+default reject jsonpickle.ext.gmpy.GmpyMPZHandler.restore, jsonpickle.ext.numpy.NumpyDTypeHandler.restore, jsonpickle.ext.numpy.NumpyDatetimeHandler.restore, jsonpickle.ext.numpy.NumpyGenericHandler.restore, jsonpickle.ext.numpy.NumpyNDArrayHandler.restore, jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore, jsonpickle.ext.numpy.NumpyNDArrayHandlerView.restore, jsonpickle.ext.numpy.UnpickleableNumpyGenericHandler.restore, jsonpickle.ext.pandas.PandasDfHandler.restore, jsonpickle.ext.pandas.PandasIndexHandler.restore, jsonpickle.ext.pandas.PandasIntervalHandler.restore, jsonpickle.ext.pandas.PandasPeriodHandler.restore, jsonpickle.ext.pandas.PandasSeriesHandler.restore, jsonpickle.ext.pandas.PandasTimestampHandler.restore, jsonpickle.handlers.ArrayHandler.restore, jsonpickle.handlers.BaseHandler.restore, jsonpickle.handlers.DatetimeHandler.restore, jsonpickle.handlers.LockHandler.restore, jsonpickle.handlers.QueueHandler.restore, jsonpickle.handlers.RegexHandler.restore, jsonpickle.handlers.TextIOHandler.restore, jsonpickle.handlers.UUIDHandler.restore: a handler's restore runs only at the handler dispatch of the unpickler (unpickler.py:895) and at the super() calls inside the numpy handlers, whose entries accept the restore that the MRO gives; at every other .restore( site the receiver is the Unpickler that a handler holds as its context or that decode makes, never a handler
+default reject jsonpickle.handlers.Registry.get, jsonpickle.unpickler._Proxy.get, jsonpickle.unpickler._IDProxy.get: at these .get( sites the receiver is a dict (a decoded JSON object or its meta dict, an options dict, a handler table, TYPE_MAP and REVERSE_TYPE_MAP, the translation dict of util) or a mappingproxy, never the Registry or a proxy; the entries accept Registry.get at handlers.get(...) and the proxy methods at proxy.get() and default_factory.get()
+default reject jsonpickle.handlers.CloneFactory.__repr__: no value formatted, converted with str() or repr() or %-formatted at these sites is a CloneFactory or holds one: the pickler flattens the CloneFactory that it makes only through _flatten_obj_instance (pickler.py:844), which formats nothing of it, and a decoded CloneFactory sits only in the default_factory of a restored defaultdict (unpickler.py:854-855), which the pickler calls (pickler.py:844) and which repr() of that defaultdict formats, at pickler.py:447 and handlers.py:245, and which is_cython_function formats when include_properties flattens that default_factory (util.py:429), whose entries accept it; a client that hands a CloneFactory itself to encode is not considered (B3)
+default reject jsonpickle.ext.yaml.register: no package code calls jsonpickle.ext.yaml.register; every register(...) of the package is the bound method registry.register (handlers.py:86), imported as register by jsonpickle.ext.numpy, jsonpickle.ext.pandas and jsonpickle.ext.gmpy, or registry.register itself
+default reject jsonpickle.util.items: util.items is called only by its qualified name (util.items(...)), and the entries accept it there; every other .items() of the package is the method of a dict or of a client mapping
+
+== jsonpickle
+
+[jsonpickle]
+82:11 call  __import__('jsonpickle.handlers', level=0)
+    -> <builtin>.__import__
+    note: jsonpickle.handlers is already imported (line 71), so the import runs no module code; an import adds no edge to the module node
+
+== jsonpickle.backend
+
+[jsonpickle.backend]
+305:19 call  JSONBackend()
+    -> jsonpickle.backend.JSONBackend.__init__
+
+[jsonpickle.backend.JSONBackend._verify]
+19:29 call  AssertionError('jsonpickle could not load any json modules')
+    -> <builtin>.AssertionError
+
+[jsonpickle.backend.JSONBackend.encode]
+29:21 call  self._verify()
+    -> jsonpickle.backend.JSONBackend._verify
+33:39 call  self.backend_encode(name, obj, indent=indent, separators=...
+    -> jsonpickle.backend.JSONBackend.backend_encode
+35:35 call  enumerate(self._backend_names)
+    -> <builtin>.enumerate
+37:43 call  self.backend_encode( name, obj, indent=indent, separators...
+    -> jsonpickle.backend.JSONBackend.backend_encode
+41:30 call  len(self._backend_names)
+    -> <builtin>.len
+
+[jsonpickle.backend.JSONBackend.decode]
+55:21 call  self._verify()
+    -> jsonpickle.backend.JSONBackend._verify
+59:39 call  self.backend_decode(name, string)
+    -> jsonpickle.backend.JSONBackend.backend_decode
+61:35 call  enumerate(self._backend_names)
+    -> <builtin>.enumerate
+63:43 call  self.backend_decode(name, string)
+    -> jsonpickle.backend.JSONBackend.backend_decode
+65:30 call  len(self._backend_names)
+    -> <builtin>.len
+
+[jsonpickle.backend.JSONBackend.__init__]
+95:26 call  self.load_backend('simplejson')
+    -> jsonpickle.backend.JSONBackend.load_backend
+    note: a value site by name only: __init__.py:88 binds the module name jsonpickle.load_backend to json.load_backend; here the method is looked up on self, a JSONBackend
+96:26 call  self.load_backend('json')
+    -> jsonpickle.backend.JSONBackend.load_backend
+    note: a value site by name only (__init__.py:88); the method of the JSONBackend self
+97:26 call  self.load_backend('ujson')
+    -> jsonpickle.backend.JSONBackend.load_backend
+    note: a value site by name only (__init__.py:88); the method of the JSONBackend self
+101:61 call  self.load_backend( 'yaml', dumps='dump', loads='safe_load...
+    -> jsonpickle.backend.JSONBackend.load_backend
+    note: a value site by name only (__init__.py:88); the method of the JSONBackend self
+
+[jsonpickle.backend.JSONBackend._store]
+133:35 call  getattr(obj, name)
+    -> <builtin>.getattr
+    note: obj is a backend module (simplejson, json, ujson, yaml); a module attribute runs no package code
+135:32 call  self.remove_backend(backend)
+    -> jsonpickle.backend.JSONBackend.remove_backend
+    note: a value site by name only: __init__.py:89 binds jsonpickle.remove_backend; here the method of the JSONBackend self
+
+[jsonpickle.backend.JSONBackend.load_backend]
+165:29 call  __import__(name)
+    -> <builtin>.__import__
+171:35 call  name.split('.')
+    -> <builtin>.str.split
+172:30 call  getattr(mod, attr)
+    -> <builtin>.getattr
+176:27 call  self._store(self._encoders, name, mod, dumps)
+    -> jsonpickle.backend.JSONBackend._store
+176:80 call  self._store( self._decoders, name, mod, loads )
+    -> jsonpickle.backend.JSONBackend._store
+181:22 call  isinstance(loads_exc, str)
+    -> <builtin>.isinstance
+183:31 call  self._store(self._decoder_exceptions, name, mod, loads_exc)
+    -> jsonpickle.backend.JSONBackend._store
+190:41 call  self._encoder_options.setdefault(name, ([], {}))
+    -> <builtin>.dict.setdefault
+191:41 call  self._decoder_options.setdefault(name, ([], {}))
+    -> <builtin>.dict.setdefault
+195:39 call  self._backend_names.append(name)
+    -> <builtin>.list.append
+
+[jsonpickle.backend.JSONBackend.remove_backend]
+203:27 call  self._encoders.pop(name, None)
+    -> <builtin>.dict.pop
+204:27 call  self._decoders.pop(name, None)
+    -> <builtin>.dict.pop
+205:37 call  self._decoder_exceptions.pop(name, None)
+    -> <builtin>.dict.pop
+206:34 call  self._decoder_options.pop(name, None)
+    -> <builtin>.dict.pop
+207:34 call  self._encoder_options.pop(name, None)
+    -> <builtin>.dict.pop
+209:39 call  self._backend_names.remove(name)
+    -> <builtin>.list.remove
+210:30 call  bool(self._backend_names)
+    -> <builtin>.bool
+
+[jsonpickle.backend.JSONBackend._warn_if_default_yaml]
+215:26 call  warnings.warn( "The yaml backend will no longer be regist...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, pickler.py:251); here warn is the function of the module warnings
+
+[jsonpickle.backend.JSONBackend.backend_encode]
+224:35 call  self._warn_if_default_yaml(name)
+    -> jsonpickle.backend.JSONBackend._warn_if_default_yaml
+225:55 call  self._encoder_options.get(name, ([], {}))
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds the module name get); here get is a method of a dict
+226:40 call  optkwargs.copy()
+    -> <builtin>.dict.copy
+    note: optkwargs is the dict of an (args, kwargs) pair of _encoder_options: the dict literals of lines 106-112, setdefault at line 190, or the **kwargs of set_encoder_options
+231:38 call  tuple(optargs)
+    -> <builtin>.tuple
+232:36 call  self._encoders[name](*encoder_args, **encoder_kwargs)
+    -> simplejson.dumps
+    -> json.dumps
+    -> ujson.dumps
+    -> yaml.dump
+    -> os.path.split
+    note: _encoders holds the dumps functions that load_backend stores: the package loads simplejson, json, ujson and yaml (lines 95-103) and jsonpickle.ext.yaml.register loads yaml again; ujson and yaml are not installed in the test environment and are named as missing modules. The tests load os.path by name with split as dumps (jsonpickle_test.py:986, 997): a string of the client selects a function of a module that the package imports (B2, the aiocache rule; audit F1). The documented django.util.simplejson (docs/api.rst:45) names a module that no Django release has, so its import fails and it is never stored (jsonpickle.md, judgement J3). The encoders get plain flattened data and call no package code back
+
+[jsonpickle.backend.JSONBackend.backend_decode]
+235:35 call  self._warn_if_default_yaml(name)
+    -> jsonpickle.backend.JSONBackend._warn_if_default_yaml
+236:55 call  self._decoder_options.get(name, ((), {}))
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds the module name get); here get is a method of a dict
+237:40 call  optkwargs.copy()
+    -> <builtin>.dict.copy
+    note: optkwargs is the dict of an (args, kwargs) pair of _decoder_options: setdefault at line 191, the default at line 236, or the **kwargs of set_decoder_options
+238:36 call  self._decoders[name](string, *optargs, **decoder_kwargs)
+    -> simplejson.loads
+    -> json.loads
+    -> ujson.loads
+    -> yaml.safe_load
+    -> os.path.join
+    note: _decoders holds the loads functions that load_backend stores for simplejson, json, ujson and yaml (lines 95-103; jsonpickle.ext.yaml.register). The tests load os.path by name with join as loads (jsonpickle_test.py:986, 997), as at 232:36 (audit F1)
+
+[jsonpickle.backend.JSONBackend.set_preferred_backend]
+259:39 call  self._backend_names.remove(name)
+    -> <builtin>.list.remove
+260:39 call  self._backend_names.insert(0, name)
+    -> <builtin>.list.insert
+263:33 call  AssertionError(errmsg)
+    -> <builtin>.AssertionError
+
+== jsonpickle.compat
+
+[jsonpickle.compat]
+10:23 call  type(iter(''))
+    -> <builtin>.type
+10:28 call  iter('')
+    -> <builtin>.iter
+
+== jsonpickle.ext.gmpy
+
+[jsonpickle.ext.gmpy.GmpyMPZHandler.flatten]
+13:26 call  int(obj)
+    -> <builtin>.int
+    note: obj is a gmpy2.mpz (the handler is registered for gmpy.mpz only, line 22); int() of a missing-module value calls nothing in the package
+
+[jsonpickle.ext.gmpy.GmpyMPZHandler.restore]
+17:24 call  gmpy.mpz(data['int'])
+    -> gmpy2.mpz
+    note: optional import (lines 1-4): gmpy2 is not installed in the test environment; both sides of the import run, and gmpy2 is named as a missing module
+
+[jsonpickle.ext.gmpy.register_handlers]
+22:17 call  register(gmpy.mpz, GmpyMPZHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+
+[jsonpickle.ext.gmpy.unregister_handlers]
+27:19 call  unregister(gmpy.mpz)
+    -> jsonpickle.handlers.Registry.unregister
+
+== jsonpickle.ext.numpy
+
+[jsonpickle.ext.numpy.NumpyBaseHandler.flatten_dtype]
+25:19 call  hasattr(dtype, 'tostring')
+    -> <builtin>.hasattr
+26:43 call  dtype.tostring()
+    note: no callee: the package passes a numpy.dtype here (obj.dtype.newbyteorder('N') at lines 52, 100, 188, 293, or the dtype that NumpyDTypeHandler.flatten gets), and numpy.dtype has no tostring, so the hasattr test at line 25 is false; a client value passed directly is opaque (B5)
+28:24 call  str(dtype)
+    -> <builtin>.str
+30:32 call  dtype.startswith(prefix)
+    -> <builtin>.str.startswith
+31:34 call  len(prefix)
+    -> <builtin>.len
+
+[jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype]
+36:28 call  dtype.startswith(('{', '['))
+    -> <builtin>.str.startswith
+    note: data['dtype'] is the str that flatten_dtype wrote (str(dtype), line 28-32)
+37:37 call  ast.literal_eval(dtype)
+    -> ast.literal_eval
+38:24 call  np.dtype(dtype)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+
+[jsonpickle.ext.numpy.NumpyDTypeHandler.flatten]
+43:27 call  self.flatten_dtype(obj, data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.flatten_dtype
+
+[jsonpickle.ext.numpy.NumpyDTypeHandler.restore]
+47:34 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+
+[jsonpickle.ext.numpy.NumpyGenericHandler.flatten]
+52:27 call  self.flatten_dtype(obj.dtype.newbyteorder('N'), data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.flatten_dtype
+52:50 call  obj.dtype.newbyteorder('N')
+    -> numpy.dtype.newbyteorder
+    -> numpy.dtypes.BoolDType.newbyteorder
+    -> numpy.dtypes.Int8DType.newbyteorder
+    -> numpy.dtypes.Int16DType.newbyteorder
+    -> numpy.dtypes.Int32DType.newbyteorder
+    -> numpy.dtypes.Int64DType.newbyteorder
+    -> numpy.dtypes.UInt8DType.newbyteorder
+    -> numpy.dtypes.UInt16DType.newbyteorder
+    -> numpy.dtypes.UInt32DType.newbyteorder
+    -> numpy.dtypes.UInt64DType.newbyteorder
+    -> numpy.dtypes.Float16DType.newbyteorder
+    -> numpy.dtypes.Float32DType.newbyteorder
+    -> numpy.dtypes.Float64DType.newbyteorder
+    -> numpy.dtypes.LongDoubleDType.newbyteorder
+    -> numpy.dtypes.Complex64DType.newbyteorder
+    -> numpy.dtypes.Complex128DType.newbyteorder
+    -> numpy.dtypes.CLongDoubleDType.newbyteorder
+    -> numpy.dtypes.BytesDType.newbyteorder
+    -> numpy.dtypes.StrDType.newbyteorder
+    -> numpy.dtypes.VoidDType.newbyteorder
+    -> numpy.dtypes.DateTime64DType.newbyteorder
+    -> numpy.dtypes.TimeDelta64DType.newbyteorder
+    -> numpy.dtypes.IntDType.newbyteorder
+    -> numpy.dtypes.UIntDType.newbyteorder
+    -> numpy.dtypes.LongLongDType.newbyteorder
+    -> numpy.dtypes.ULongLongDType.newbyteorder
+    note: obj is a numpy scalar (the handler is registered for numpy.generic, line 372, and inherited by NumpyDatetimeHandler, line 378); its dtype is a numpy.dtype. The concrete dtype classes of numpy 1.25 and later are named too, one by one (the set G of the referee, ruling (e) after Codex audit round 1; no ObjectDType: no numpy scalar has an object dtype); numpy.dtype.newbyteorder stays as the name of the older admitted releases. Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+53:45 call  self.context.flatten(obj.tolist(), reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+53:56 call  obj.tolist()
+    -> numpy.bool_.tolist
+    -> numpy.int8.tolist
+    -> numpy.int16.tolist
+    -> numpy.int32.tolist
+    -> numpy.int64.tolist
+    -> numpy.uint8.tolist
+    -> numpy.uint16.tolist
+    -> numpy.uint32.tolist
+    -> numpy.uint64.tolist
+    -> numpy.float16.tolist
+    -> numpy.float32.tolist
+    -> numpy.float64.tolist
+    -> numpy.longdouble.tolist
+    -> numpy.complex64.tolist
+    -> numpy.complex128.tolist
+    -> numpy.clongdouble.tolist
+    -> numpy.bytes_.tolist
+    -> numpy.str_.tolist
+    -> numpy.void.tolist
+    -> numpy.record.tolist
+    -> numpy.timedelta64.tolist
+    -> numpy.datetime64.tolist
+    -> numpy.intc.tolist
+    -> numpy.uintc.tolist
+    -> numpy.longlong.tolist
+    -> numpy.ulonglong.tolist
+    note: named by the class of the receiver, one name per concrete numpy scalar class (the referee, ruling (e) after Codex audit round 1; Codex audit round 1, G1, for datetime64): the handler is registered for numpy.generic (line 372), which has no instances, and NumpyDatetimeHandler, which inherits this flatten, for numpy.datetime64 (line 378). Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+
+[jsonpickle.ext.numpy.NumpyGenericHandler.restore]
+57:37 call  self.context.restore(data['value'], reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+58:34 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+58:45 call  self.restore_dtype(data).type(value)
+    -> numpy.bool_
+    -> numpy.int8
+    -> numpy.int16
+    -> numpy.int32
+    -> numpy.int64
+    -> numpy.uint8
+    -> numpy.uint16
+    -> numpy.uint32
+    -> numpy.uint64
+    -> numpy.float16
+    -> numpy.float32
+    -> numpy.float64
+    -> numpy.longdouble
+    -> numpy.complex64
+    -> numpy.complex128
+    -> numpy.clongdouble
+    -> numpy.str_
+    -> numpy.bytes_
+    -> numpy.void
+    -> numpy.timedelta64
+    -> numpy.datetime64
+    note: the type attribute of the dtype that restore_dtype rebuilds from the dtype string that NumpyGenericHandler.flatten wrote for a numpy scalar (str of its dtype): the scalar classes that a dtype string names (numpy.datetime64 has its own handler, NumpyDatetimeHandler; longdouble and clongdouble are float128 and complex256 on the platforms where they are wider than float64); jsonpickle.md, judgement J5. numpy.datetime64 too, after unregister(numpy.datetime64), which removes the exact registration of NumpyDatetimeHandler (line 378) and leaves the base registration of numpy.generic (line 372): a datetime64 scalar then goes through NumpyGenericHandler (ruling (d) after Codex audit round 1: a default handler removed with the public unregister is an admitted state)
+
+[jsonpickle.ext.numpy.NumpyDatetimeHandler.restore]
+65:37 call  self.context.restore(data['value'], reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+67:26 call  dtype.endswith('[ns]')
+    -> <builtin>.str.endswith
+68:38 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+68:49 call  self.restore_dtype(data).type(value, 'ns')
+    -> numpy.datetime64
+    note: the handler is registered for numpy.datetime64 only (line 378), so the dtype is a datetime64 dtype and its type attribute is numpy.datetime64
+69:34 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+69:45 call  self.restore_dtype(data).type(value)
+    -> numpy.datetime64
+    note: the handler is registered for numpy.datetime64 only (line 378): the type attribute of a datetime64 dtype
+
+[jsonpickle.ext.numpy.UnpickleableNumpyGenericHandler.flatten]
+80:40 call  self.context.flatten(obj.tolist(), reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+80:51 call  obj.tolist()
+    -> numpy.bool_.tolist
+    -> numpy.int8.tolist
+    -> numpy.int16.tolist
+    -> numpy.int32.tolist
+    -> numpy.int64.tolist
+    -> numpy.uint8.tolist
+    -> numpy.uint16.tolist
+    -> numpy.uint32.tolist
+    -> numpy.uint64.tolist
+    -> numpy.float16.tolist
+    -> numpy.float32.tolist
+    -> numpy.float64.tolist
+    -> numpy.longdouble.tolist
+    -> numpy.complex64.tolist
+    -> numpy.complex128.tolist
+    -> numpy.clongdouble.tolist
+    -> numpy.bytes_.tolist
+    -> numpy.str_.tolist
+    -> numpy.void.tolist
+    -> numpy.record.tolist
+    -> numpy.datetime64.tolist
+    -> numpy.timedelta64.tolist
+    -> numpy.intc.tolist
+    -> numpy.uintc.tolist
+    -> numpy.longlong.tolist
+    -> numpy.ulonglong.tolist
+    note: obj is a numpy scalar: the handler is meant for numpy.generic (the documented example of encode, pickler.py:51-53); named by the class of the receiver, one name per concrete scalar class (the referee, ruling (e) after Codex audit round 1). Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+82:25 call  super(NumpyGenericHandler, self)
+    -> <builtin>.super
+82:60 call  super(NumpyGenericHandler, self).flatten(obj, data)
+    -> jsonpickle.handlers.BaseHandler.flatten
+    reject jsonpickle.pickler.Pickler.flatten: the receiver is a super object of the handler; after NumpyGenericHandler the MRO has NumpyBaseHandler (no flatten) and BaseHandler, whose flatten raises NotImplementedError
+    note: super(NumpyGenericHandler, self) skips NumpyGenericHandler.flatten
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags]
+96:24 call  data.get('writeable', True)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten]
+100:27 call  self.flatten_dtype(obj.dtype.newbyteorder('N'), data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.flatten_dtype
+100:50 call  obj.dtype.newbyteorder('N')
+    -> numpy.dtype.newbyteorder
+    -> numpy.dtypes.BoolDType.newbyteorder
+    -> numpy.dtypes.Int8DType.newbyteorder
+    -> numpy.dtypes.Int16DType.newbyteorder
+    -> numpy.dtypes.Int32DType.newbyteorder
+    -> numpy.dtypes.Int64DType.newbyteorder
+    -> numpy.dtypes.UInt8DType.newbyteorder
+    -> numpy.dtypes.UInt16DType.newbyteorder
+    -> numpy.dtypes.UInt32DType.newbyteorder
+    -> numpy.dtypes.UInt64DType.newbyteorder
+    -> numpy.dtypes.Float16DType.newbyteorder
+    -> numpy.dtypes.Float32DType.newbyteorder
+    -> numpy.dtypes.Float64DType.newbyteorder
+    -> numpy.dtypes.LongDoubleDType.newbyteorder
+    -> numpy.dtypes.Complex64DType.newbyteorder
+    -> numpy.dtypes.Complex128DType.newbyteorder
+    -> numpy.dtypes.CLongDoubleDType.newbyteorder
+    -> numpy.dtypes.ObjectDType.newbyteorder
+    -> numpy.dtypes.BytesDType.newbyteorder
+    -> numpy.dtypes.StrDType.newbyteorder
+    -> numpy.dtypes.VoidDType.newbyteorder
+    -> numpy.dtypes.DateTime64DType.newbyteorder
+    -> numpy.dtypes.TimeDelta64DType.newbyteorder
+    -> numpy.dtypes.StringDType.newbyteorder
+    -> numpy.dtypes.IntDType.newbyteorder
+    -> numpy.dtypes.UIntDType.newbyteorder
+    -> numpy.dtypes.LongLongDType.newbyteorder
+    -> numpy.dtypes.ULongLongDType.newbyteorder
+    note: obj is a numpy.ndarray (the handlers are registered for numpy.ndarray, line 370). The concrete dtype classes of numpy 1.25 and later are named one by one (the set F of the referee, ruling (e) after Codex audit round 1, with StringDType, whose newbyteorder raises inside its body); numpy.dtype.newbyteorder stays as the name of the older admitted releases. Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+101:27 call  self.flatten_flags(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten_flags
+102:46 call  self.context.flatten(obj.tolist(), reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+102:57 call  obj.tolist()
+    -> numpy.ndarray.tolist
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandler.restore]
+110:38 call  self.context.restore(data['values'], reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+111:23 call  np.array( values, dtype=self.restore_dtype(data), order=d...
+    -> numpy.array
+112:45 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+112:67 call  data.get('order', 'C')
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+114:25 call  data.get('shape', None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+116:30 call  arr.reshape(shape)
+    -> numpy.ndarray.reshape
+118:27 call  self.restore_flags(data, arr)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten_byteorder]
+148:46 call  get_byteorder(obj)
+    -> jsonpickle.ext.numpy.get_byteorder
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore_byteorder]
+151:29 call  data.get('byteorder', None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+153:47 call  arr.dtype.newbyteorder(byteorder)
+    -> numpy.dtype.newbyteorder
+    -> numpy.dtypes.BoolDType.newbyteorder
+    -> numpy.dtypes.Int8DType.newbyteorder
+    -> numpy.dtypes.Int16DType.newbyteorder
+    -> numpy.dtypes.Int32DType.newbyteorder
+    -> numpy.dtypes.Int64DType.newbyteorder
+    -> numpy.dtypes.UInt8DType.newbyteorder
+    -> numpy.dtypes.UInt16DType.newbyteorder
+    -> numpy.dtypes.UInt32DType.newbyteorder
+    -> numpy.dtypes.UInt64DType.newbyteorder
+    -> numpy.dtypes.Float16DType.newbyteorder
+    -> numpy.dtypes.Float32DType.newbyteorder
+    -> numpy.dtypes.Float64DType.newbyteorder
+    -> numpy.dtypes.LongDoubleDType.newbyteorder
+    -> numpy.dtypes.Complex64DType.newbyteorder
+    -> numpy.dtypes.Complex128DType.newbyteorder
+    -> numpy.dtypes.CLongDoubleDType.newbyteorder
+    -> numpy.dtypes.ObjectDType.newbyteorder
+    -> numpy.dtypes.BytesDType.newbyteorder
+    -> numpy.dtypes.StrDType.newbyteorder
+    -> numpy.dtypes.VoidDType.newbyteorder
+    -> numpy.dtypes.DateTime64DType.newbyteorder
+    -> numpy.dtypes.TimeDelta64DType.newbyteorder
+    note: arr is a numpy.ndarray rebuilt from the dtype strings that flatten_dtype writes; its dtype class is one of the set R (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten]
+159:25 call  super()
+    -> <builtin>.super
+159:35 call  super().flatten(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten
+    reject jsonpickle.pickler.Pickler.flatten: the receiver is the super object of a NumpyNDArrayHandlerBinary or NumpyNDArrayHandlerView; the next flatten in the MRO is NumpyNDArrayHandler.flatten
+176:33 call  json.dumps(obj.tolist())
+    -> json.dumps
+    note: a value site by name only (backend.py:45 and __init__.py:93 bind a name dumps); json is the standard-library module imported at line 2
+176:44 call  obj.tolist()
+    -> numpy.ndarray.tolist
+176:54 call  json.dumps(obj.tolist()).encode()
+    -> <builtin>.str.encode
+    reject jsonpickle.backend.JSONBackend.encode, jsonpickle.pickler.encode: the receiver is the str that json.dumps returns
+177:25 call  hasattr(obj, 'tobytes')
+    -> <builtin>.hasattr
+180:34 call  obj.tobytes(order='a')
+    -> numpy.ndarray.tobytes
+183:35 call  obj.tostring(order='a')
+    note: no callee: every numpy release that runs on the supported Pythons (3.8 and later) has ndarray.tobytes (numpy 1.9 and later), so the hasattr test at line 177 is true and this branch never runs
+185:48 call  self.compression.compress(buf)
+    -> zlib.compress
+    note: compression is the constructor argument, zlib by default; the docstring (lines 138-140) also names bz2 and None, but no package code and no test passes bz2, and a module that a client passes is a client value (B2, B5; audit F2)
+186:39 call  b64encode(buf)
+    -> jsonpickle.util.b64encode
+188:31 call  self.flatten_dtype(obj.dtype.newbyteorder('N'), data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.flatten_dtype
+188:54 call  obj.dtype.newbyteorder('N')
+    -> numpy.dtype.newbyteorder
+    -> numpy.dtypes.BoolDType.newbyteorder
+    -> numpy.dtypes.Int8DType.newbyteorder
+    -> numpy.dtypes.Int16DType.newbyteorder
+    -> numpy.dtypes.Int32DType.newbyteorder
+    -> numpy.dtypes.Int64DType.newbyteorder
+    -> numpy.dtypes.UInt8DType.newbyteorder
+    -> numpy.dtypes.UInt16DType.newbyteorder
+    -> numpy.dtypes.UInt32DType.newbyteorder
+    -> numpy.dtypes.UInt64DType.newbyteorder
+    -> numpy.dtypes.Float16DType.newbyteorder
+    -> numpy.dtypes.Float32DType.newbyteorder
+    -> numpy.dtypes.Float64DType.newbyteorder
+    -> numpy.dtypes.LongDoubleDType.newbyteorder
+    -> numpy.dtypes.Complex64DType.newbyteorder
+    -> numpy.dtypes.Complex128DType.newbyteorder
+    -> numpy.dtypes.CLongDoubleDType.newbyteorder
+    -> numpy.dtypes.ObjectDType.newbyteorder
+    -> numpy.dtypes.BytesDType.newbyteorder
+    -> numpy.dtypes.StrDType.newbyteorder
+    -> numpy.dtypes.VoidDType.newbyteorder
+    -> numpy.dtypes.DateTime64DType.newbyteorder
+    -> numpy.dtypes.TimeDelta64DType.newbyteorder
+    -> numpy.dtypes.StringDType.newbyteorder
+    -> numpy.dtypes.IntDType.newbyteorder
+    -> numpy.dtypes.UIntDType.newbyteorder
+    -> numpy.dtypes.LongLongDType.newbyteorder
+    -> numpy.dtypes.ULongLongDType.newbyteorder
+    note: obj is a numpy.ndarray; its dtype class is one of the set F (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases. Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+189:35 call  self.flatten_byteorder(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten_byteorder
+190:31 call  self.flatten_flags(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten_flags
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore]
+200:22 call  isinstance(values, list)
+    -> <builtin>.isinstance
+202:24 call  super()
+    -> <builtin>.super
+202:34 call  super().restore(data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.restore
+    reject jsonpickle.unpickler.Unpickler.restore: the receiver is the super object of a NumpyNDArrayHandlerBinary or NumpyNDArrayHandlerView; the next restore in the MRO is NumpyNDArrayHandler.restore
+203:24 call  isinstance(values, (int, float))
+    -> <builtin>.isinstance
+205:27 call  np.array([values], dtype=self.restore_dtype(data))
+    -> numpy.array
+205:62 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+208:39 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+209:28 call  b64decode(values)
+    -> jsonpickle.util.b64decode
+211:50 call  self.compression.decompress(buf)
+    -> zlib.decompress
+    note: compression is the constructor argument, zlib by default; the docstring (lines 138-140) also names bz2 and None, but no package code and no test passes bz2, and a module that a client passes is a client value (B2, B5; audit F2)
+215:36 call  json.loads(buf.decode())
+    -> json.loads
+    note: a value site by name only (backend.py:71 and __init__.py:94 bind a name loads); json is the standard-library module imported at line 2
+215:47 call  buf.decode()
+    -> <builtin>.bytes.decode
+    reject jsonpickle.backend.JSONBackend.decode, jsonpickle.unpickler.decode: buf is the bytes that b64decode (and decompress) return
+216:31 call  np.array(values, dtype=dtype, order=data.get('order', 'C'))
+    -> numpy.array
+216:67 call  data.get('order', 'C')
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+217:33 call  data.get('shape', None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+219:38 call  arr.reshape(shape)
+    -> numpy.ndarray.reshape
+221:33 call  np.ndarray( buffer=buf, dtype=dtype, shape=data.get('shap...
+    -> numpy.ndarray
+224:35 call  data.get('shape')
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+225:35 call  data.get('order', 'C')
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+226:23 call  np.ndarray( buffer=buf, dtype=dtype, shape=data.get('shap...
+    -> numpy.ndarray.copy
+227:39 call  self.restore_byteorder(data, arr)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore_byteorder
+228:31 call  self.restore_flags(data, arr)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerView.__init__]
+268:14 call  super()
+    -> <builtin>.super
+268:25 call  super().__init__(size_threshold, compression)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.__init__
+    reject *: the receiver is the super object of a NumpyNDArrayHandlerView, whose next class in the MRO, NumpyNDArrayHandlerBinary, defines __init__
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerView.flatten]
+276:25 call  super()
+    -> <builtin>.super
+276:35 call  super().flatten(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten
+    reject jsonpickle.pickler.Pickler.flatten: the receiver is the super object of a NumpyNDArrayHandlerView; the next flatten in the MRO is NumpyNDArrayHandlerBinary.flatten
+281:24 call  isinstance(base, np.ndarray)
+    -> <builtin>.isinstance
+283:48 call  self.context.flatten(base, reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+293:31 call  self.flatten_dtype(obj.dtype.newbyteorder('N'), data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.flatten_dtype
+293:54 call  obj.dtype.newbyteorder('N')
+    -> numpy.dtype.newbyteorder
+    -> numpy.dtypes.BoolDType.newbyteorder
+    -> numpy.dtypes.Int8DType.newbyteorder
+    -> numpy.dtypes.Int16DType.newbyteorder
+    -> numpy.dtypes.Int32DType.newbyteorder
+    -> numpy.dtypes.Int64DType.newbyteorder
+    -> numpy.dtypes.UInt8DType.newbyteorder
+    -> numpy.dtypes.UInt16DType.newbyteorder
+    -> numpy.dtypes.UInt32DType.newbyteorder
+    -> numpy.dtypes.UInt64DType.newbyteorder
+    -> numpy.dtypes.Float16DType.newbyteorder
+    -> numpy.dtypes.Float32DType.newbyteorder
+    -> numpy.dtypes.Float64DType.newbyteorder
+    -> numpy.dtypes.LongDoubleDType.newbyteorder
+    -> numpy.dtypes.Complex64DType.newbyteorder
+    -> numpy.dtypes.Complex128DType.newbyteorder
+    -> numpy.dtypes.CLongDoubleDType.newbyteorder
+    -> numpy.dtypes.ObjectDType.newbyteorder
+    -> numpy.dtypes.BytesDType.newbyteorder
+    -> numpy.dtypes.StrDType.newbyteorder
+    -> numpy.dtypes.VoidDType.newbyteorder
+    -> numpy.dtypes.DateTime64DType.newbyteorder
+    -> numpy.dtypes.TimeDelta64DType.newbyteorder
+    -> numpy.dtypes.StringDType.newbyteorder
+    -> numpy.dtypes.IntDType.newbyteorder
+    -> numpy.dtypes.UIntDType.newbyteorder
+    -> numpy.dtypes.LongLongDType.newbyteorder
+    -> numpy.dtypes.ULongLongDType.newbyteorder
+    note: obj is a numpy.ndarray view; its dtype class is one of the set F (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases. Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+294:31 call  self.flatten_flags(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten_flags
+296:29 call  get_byteorder(obj)
+    -> jsonpickle.ext.numpy.get_byteorder
+297:49 call  get_byteorder(obj)
+    -> jsonpickle.ext.numpy.get_byteorder
+297:71 call  get_byteorder(base)
+    -> jsonpickle.ext.numpy.get_byteorder
+304:22 call  super(NumpyNDArrayHandlerBinary, self)
+    -> <builtin>.super
+304:63 call  super(NumpyNDArrayHandlerBinary, self).flatten(obj, data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten
+    reject jsonpickle.pickler.Pickler.flatten: the receiver is a super object that skips NumpyNDArrayHandlerBinary; the next flatten in the MRO is NumpyNDArrayHandler.flatten
+314:30 call  warnings.warn(msg)
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, pickler.py:251); here warn is the function of the module warnings
+320:33 call  ValueError(msg)
+    -> <builtin>.ValueError
+321:25 call  super()
+    -> <builtin>.super
+321:35 call  super().flatten(obj.copy(), data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten
+    reject jsonpickle.pickler.Pickler.flatten: the receiver is the super object of a NumpyNDArrayHandlerView; the next flatten in the MRO is NumpyNDArrayHandlerBinary.flatten
+321:44 call  obj.copy()
+    -> numpy.ndarray.copy
+
+[jsonpickle.ext.numpy.NumpyNDArrayHandlerView.restore]
+327:24 call  data.get('base', None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+330:24 call  super()
+    -> <builtin>.super
+330:34 call  super().restore(data)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore
+    reject jsonpickle.unpickler.Unpickler.restore: the receiver is the super object of a NumpyNDArrayHandlerView; the next restore in the MRO is NumpyNDArrayHandlerBinary.restore
+333:40 call  self.context.restore(base, reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+334:30 call  isinstance(base, np.ndarray)
+    -> <builtin>.isinstance
+336:32 call  np.array(base)
+    -> numpy.array
+341:29 call  np.ndarray( buffer=base.data, dtype=self.restore_dtype(da...
+    -> numpy.ndarray
+343:41 call  self.restore_dtype(data)
+    -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
+343:60 call  self.restore_dtype(data).newbyteorder(data.get('byteorder...
+    -> numpy.dtype.newbyteorder
+    -> numpy.dtypes.BoolDType.newbyteorder
+    -> numpy.dtypes.Int8DType.newbyteorder
+    -> numpy.dtypes.Int16DType.newbyteorder
+    -> numpy.dtypes.Int32DType.newbyteorder
+    -> numpy.dtypes.Int64DType.newbyteorder
+    -> numpy.dtypes.UInt8DType.newbyteorder
+    -> numpy.dtypes.UInt16DType.newbyteorder
+    -> numpy.dtypes.UInt32DType.newbyteorder
+    -> numpy.dtypes.UInt64DType.newbyteorder
+    -> numpy.dtypes.Float16DType.newbyteorder
+    -> numpy.dtypes.Float32DType.newbyteorder
+    -> numpy.dtypes.Float64DType.newbyteorder
+    -> numpy.dtypes.LongDoubleDType.newbyteorder
+    -> numpy.dtypes.Complex64DType.newbyteorder
+    -> numpy.dtypes.Complex128DType.newbyteorder
+    -> numpy.dtypes.CLongDoubleDType.newbyteorder
+    -> numpy.dtypes.ObjectDType.newbyteorder
+    -> numpy.dtypes.BytesDType.newbyteorder
+    -> numpy.dtypes.StrDType.newbyteorder
+    -> numpy.dtypes.VoidDType.newbyteorder
+    -> numpy.dtypes.DateTime64DType.newbyteorder
+    -> numpy.dtypes.TimeDelta64DType.newbyteorder
+    note: the receiver is the dtype that restore_dtype rebuilds from a dtype string of flatten_dtype, a class of the set R (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases
+343:69 call  data.get('byteorder', '|')
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+344:31 call  data.get('shape')
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+345:32 call  data.get('offset', 0)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+346:33 call  data.get('strides', None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+349:31 call  self.restore_flags(data, arr)
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags
+
+[jsonpickle.ext.numpy.register_handlers]
+365:46 call  NumpyNDArrayHandlerView( mode=ndarray_mode, size_threshol...
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerView.__init__
+    reject jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.__init__: called from NumpyNDArrayHandlerView.__init__ through super() (line 268), not here
+    reject jsonpickle.handlers.BaseHandler.__init__: NumpyNDArrayHandlerView defines __init__, and the chain of __init__ ends at NumpyNDArrayHandlerBinary.__init__, which does not call super()
+370:13 call  register(np.ndarray, ndarray_handler, base=True)
+    -> jsonpickle.handlers.Registry.register
+371:13 call  register(np.dtype, NumpyDTypeHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+372:13 call  register(np.generic, NumpyGenericHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+374:13 call  register(np.dtype(np.void).__class__, NumpyDTypeHandler, ...
+    -> jsonpickle.handlers.Registry.register
+374:22 call  np.dtype(np.void)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+375:13 call  register(np.dtype(np.float32).__class__, NumpyDTypeHandle...
+    -> jsonpickle.handlers.Registry.register
+375:22 call  np.dtype(np.float32)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+376:13 call  register(np.dtype(np.int32).__class__, NumpyDTypeHandler,...
+    -> jsonpickle.handlers.Registry.register
+376:22 call  np.dtype(np.int32)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+377:13 call  register(np.dtype(np.datetime64).__class__, NumpyDTypeHan...
+    -> jsonpickle.handlers.Registry.register
+377:22 call  np.dtype(np.datetime64)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+378:13 call  register(np.datetime64, NumpyDatetimeHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+
+[jsonpickle.ext.numpy.unregister_handlers]
+383:15 call  unregister(np.dtype)
+    -> jsonpickle.handlers.Registry.unregister
+384:15 call  unregister(np.generic)
+    -> jsonpickle.handlers.Registry.unregister
+385:15 call  unregister(np.ndarray)
+    -> jsonpickle.handlers.Registry.unregister
+387:15 call  unregister(np.dtype(np.void).__class__)
+    -> jsonpickle.handlers.Registry.unregister
+387:24 call  np.dtype(np.void)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+388:15 call  unregister(np.dtype(np.float32).__class__)
+    -> jsonpickle.handlers.Registry.unregister
+388:24 call  np.dtype(np.float32)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+389:15 call  unregister(np.dtype(np.int32).__class__)
+    -> jsonpickle.handlers.Registry.unregister
+389:24 call  np.dtype(np.int32)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+390:15 call  unregister(np.dtype(np.datetime64).__class__)
+    -> jsonpickle.handlers.Registry.unregister
+390:24 call  np.dtype(np.datetime64)
+    -> numpy.dtype
+    note: a value site by name only (the package assigns an attribute dtype, line 153); np.dtype is numpy's dtype class
+
+== jsonpickle.ext.pandas
+
+[jsonpickle.ext.pandas]
+135:25 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+320:25 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+339:25 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+374:25 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+390:25 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+410:25 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+
+[jsonpickle.ext.pandas.pd_encode]
+19:18 call  isinstance(obj, np.generic)
+    -> <builtin>.isinstance
+21:24 call  obj.item()
+    -> numpy.bool_.item
+    -> numpy.int8.item
+    -> numpy.int16.item
+    -> numpy.int32.item
+    -> numpy.int64.item
+    -> numpy.uint8.item
+    -> numpy.uint16.item
+    -> numpy.uint32.item
+    -> numpy.uint64.item
+    -> numpy.float16.item
+    -> numpy.float32.item
+    -> numpy.float64.item
+    -> numpy.longdouble.item
+    -> numpy.complex64.item
+    -> numpy.complex128.item
+    -> numpy.clongdouble.item
+    -> numpy.bytes_.item
+    -> numpy.str_.item
+    -> numpy.void.item
+    -> numpy.record.item
+    -> numpy.datetime64.item
+    -> numpy.timedelta64.item
+    -> numpy.intc.item
+    -> numpy.uintc.item
+    -> numpy.longlong.item
+    -> numpy.ulonglong.item
+    note: obj is a numpy scalar (isinstance, line 19), named by the class of the receiver, one name per concrete scalar class (the referee, ruling (e) after Codex audit round 1). Also the distinct C-family classes (the C-integer ruling after Codex audit round 1: numpy names the C int family intc/uintc on Windows and long long longlong/ulonglong on LP64 (numpy _core/src/multiarray/arraytypes.h.src:99-139)); numpy.long, ulong, LongDType and ULongDType are only second names and stay out
+22:18 call  encode(obj, **kwargs)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+
+[jsonpickle.ext.pandas.pd_decode]
+26:18 call  decode(s, **kwargs)
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+
+[jsonpickle.ext.pandas.rle_encode]
+44:27 call  encoded.append([current_type, count])
+    -> <builtin>.list.append
+47:19 call  encoded.append([current_type, count])
+    -> <builtin>.list.append
+
+[jsonpickle.ext.pandas.rle_decode]
+58:23 call  decoded.extend([typ] * count)
+    -> <builtin>.list.extend
+
+[jsonpickle.ext.pandas.PandasProcessor.flatten_pandas]
+77:51 call  len(buf)
+    -> <builtin>.len
+79:48 call  self.compression.compress(buf.encode())
+    -> zlib.compress
+    note: compression is the constructor argument, zlib by default; the docstring (lines 69-71) also names bz2 and None, but no package code and no test passes bz2, and a module that a client passes is a client value (B2, B5; audit F2)
+79:59 call  buf.encode()
+    -> <builtin>.str.encode
+    reject jsonpickle.backend.JSONBackend.encode, jsonpickle.pickler.encode: buf is a str, the output of encode or the literal '' (lines 199, 348, 378, 397, 418)
+81:39 call  b64encode(buf)
+    -> jsonpickle.util.b64encode
+
+[jsonpickle.ext.pandas.PandasProcessor.restore_pandas]
+91:20 call  data.get('txt', True)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object
+95:28 call  b64decode(data['values'])
+    -> jsonpickle.util.b64decode
+96:24 call  data.get('comp', False)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object
+97:50 call  self.compression.decompress(buf)
+    -> zlib.decompress
+    note: compression is the constructor argument, zlib by default; the docstring (lines 69-71) also names bz2 and None, but no package code and no test passes bz2, and a module that a client passes is a client value (B2, B5; audit F2)
+97:62 call  self.compression.decompress(buf).decode()
+    -> <builtin>.bytes.decode
+    reject jsonpickle.backend.JSONBackend.decode, jsonpickle.unpickler.decode: the receiver is the bytes that decompress returns
+98:24 call  data.get('meta', {})
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object
+
+[jsonpickle.ext.pandas.make_read_csv_params]
+103:34 call  context.restore(meta.get('dtypes', {}), reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+    note: context is the handler's context, the Unpickler (restore_v3_3, line 299)
+103:43 call  meta.get('dtypes', {})
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+106:22 call  meta.get('header', [0])
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+113:34 call  meta_dtypes.items()
+    -> <builtin>.dict.items
+    note: meta_dtypes is the restored dtypes dict of the meta (line 103): a dict of column names to dtype strings
+114:24 call  v.startswith('datetime')
+    -> <builtin>.str.startswith
+115:31 call  parse_dates.append(k)
+    -> <builtin>.list.append
+117:26 call  v.startswith('complex')
+    -> <builtin>.str.startswith
+119:26 call  v.startswith('timedelta')
+    -> <builtin>.str.startswith
+120:30 call  timedeltas.append(k)
+    -> <builtin>.list.append
+126:13 call  dict( dtype=dtype, header=header, parse_dates=parse_dates...
+    -> <builtin>.dict
+
+[jsonpickle.ext.pandas.PandasDfHandler.flatten]
+138:29 call  PandasProcessor()
+    -> jsonpickle.ext.pandas.PandasProcessor.__init__
+140:22 call  isinstance(obj.columns, pd.MultiIndex)
+    -> <builtin>.isinstance
+    note: obj is a pandas.DataFrame (the handler is registered for pandas.DataFrame, line 433)
+141:29 call  tuple(col)
+    -> <builtin>.tuple
+145:41 call  obj.columns.tolist()
+    -> pandas.Index.tolist
+    -> pandas.RangeIndex.tolist
+    -> pandas.DatetimeIndex.tolist
+    -> pandas.TimedeltaIndex.tolist
+    -> pandas.PeriodIndex.tolist
+    -> pandas.IntervalIndex.tolist
+    note: the columns of a DataFrame are a pandas Index that is not a MultiIndex (line 140), named by the class of the receiver: Index and RangeIndex (the default) of a client DataFrame, and the classes that pandas infers when restore sets decoded labels as columns (line 262): DatetimeIndex, TimedeltaIndex, PeriodIndex and IntervalIndex for timestamps, timedeltas, periods and intervals (Codex audit round 1, G1; pandas core/indexes/base.py:614-637)
+150:22 call  isinstance(obj.index, pd.MultiIndex)
+    -> <builtin>.isinstance
+151:34 call  tuple(idx)
+    -> <builtin>.tuple
+155:44 call  obj.index.tolist()
+    -> pandas.Index.tolist
+    -> pandas.RangeIndex.tolist
+    -> pandas.DatetimeIndex.tolist
+    -> pandas.TimedeltaIndex.tolist
+    -> pandas.PeriodIndex.tolist
+    -> pandas.IntervalIndex.tolist
+    note: the index of a DataFrame is a pandas Index that is not a MultiIndex (line 150), named by the class of the receiver: Index and RangeIndex (the default) of a client DataFrame, and the classes that pd.Index infers from the decoded index values in restore (lines 285-286): DatetimeIndex, TimedeltaIndex, PeriodIndex and IntervalIndex (Codex audit round 1, G1; pandas core/indexes/base.py:614-637)
+167:34 call  col_data.apply( lambda x: isinstance(x, (list, dict, set,...
+    -> pandas.Series.apply
+    -> jsonpickle.ext.pandas.PandasDfHandler.flatten.<lambda1>
+    note: col_data is the column obj[col], a pandas.Series; Series.apply calls the lambda back
+169:22 call  col_data.apply( lambda x: isinstance(x, (list, dict, set,...
+    -> pandas.Series.any
+    note: the receiver is the Series of booleans that Series.apply returns
+171:55 call  col_data.apply(lambda x: encode(x))
+    -> pandas.Series.apply
+    -> jsonpickle.ext.pandas.PandasDfHandler.flatten.<lambda2>
+171:83 call  col_data.apply(lambda x: encode(x)).tolist()
+    -> pandas.Series.tolist
+173:38 call  type_codes.append("py/jp")
+    -> <builtin>.list.append
+176:56 call  col_data.tolist()
+    -> pandas.Series.tolist
+177:38 call  type_codes.append(TYPE_MAP.get(dtype_name, "object"))
+    -> <builtin>.list.append
+177:51 call  TYPE_MAP.get(dtype_name, "object")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); TYPE_MAP is the dict of tags_pd.py:232
+180:52 call  col_data.tolist()
+    -> pandas.Series.tolist
+181:34 call  type_codes.append(TYPE_MAP.get(dtype_name, "object"))
+    -> <builtin>.list.append
+181:47 call  TYPE_MAP.get(dtype_name, "object")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); TYPE_MAP is the dict of tags_pd.py:232
+184:31 call  encode(index_values, keys=True)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+186:31 call  rle_encode(type_codes)
+    -> jsonpickle.ext.pandas.rle_encode
+192:30 call  encode(columns, keys=True)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+199:30 call  encode(data_columns, keys=True)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+202:33 call  pp.flatten_pandas(data_encoded, data, meta)
+    -> jsonpickle.ext.pandas.PandasProcessor.flatten_pandas
+
+[jsonpickle.ext.pandas.PandasDfHandler.flatten.<lambda1>]
+168:41 call  isinstance(x, (list, dict, set, tuple, np.ndarray))
+    -> <builtin>.isinstance
+
+[jsonpickle.ext.pandas.PandasDfHandler.flatten.<lambda2>]
+171:72 call  encode(x)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+
+[jsonpickle.ext.pandas.PandasDfHandler.restore]
+206:52 call  self.pp.restore_pandas(obj)
+    -> jsonpickle.ext.pandas.PandasProcessor.restore_pandas
+208:34 call  decode(data_encoded, keys=True)
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+211:26 call  warnings.warn( ( "jsonpickle versions at and above v3.4 h...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, pickler.py:251); here warn is the function of the module warnings
+219:37 call  self.restore_v3_3(obj)
+    -> jsonpickle.ext.pandas.PandasDfHandler.restore_v3_3
+226:26 call  warnings.warn( ( "jsonpickle versions at and above v3.4 h...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, pickler.py:251); here warn is the function of the module warnings
+233:37 call  self.restore_v3_3(obj)
+    -> jsonpickle.ext.pandas.PandasDfHandler.restore_v3_3
+234:32 call  rle_decode(rle_types)
+    -> jsonpickle.ext.pandas.rle_decode
+237:33 call  decode(meta["columns"], keys=True)
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+238:20 call  meta.get("is_multicolumns", False)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+239:48 call  pd.MultiIndex.from_tuples( columns_decoded, names=meta.ge...
+    -> pandas.MultiIndex.from_tuples
+240:48 call  meta.get("column_names")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+248:34 call  zip(columns, type_codes)
+    -> <builtin>.zip
+252:37 call  decode(item)
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+257:49 call  REVERSE_TYPE_MAP.get(type_code, "object")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); REVERSE_TYPE_MAP is the dict of tags_pd.py:235
+261:26 call  pd.DataFrame(df_data)
+    -> pandas.DataFrame
+266:35 call  dtypes.get(col, "object")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); dtypes is the dict of line 247
+268:33 call  np.dtype(dtype_str)
+    -> numpy.dtype
+    note: a value site by name only (jsonpickle/ext/numpy.py:153 assigns an attribute dtype); np.dtype is numpy's dtype class
+269:41 call  df[col].astype(dtype)
+    -> pandas.Series.astype
+    note: df[col] is a column of the DataFrame made at line 261, a pandas.Series
+276:30 call  warnings.warn(msg)
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, pickler.py:251); here warn is the function of the module warnings
+279:30 call  decode(meta["index"], keys=True)
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+280:20 call  meta.get("is_multiindex", False)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+281:46 call  pd.MultiIndex.from_tuples( index_values, names=meta.get("...
+    -> pandas.MultiIndex.from_tuples
+282:45 call  meta.get("index_names")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+285:29 call  pd.Index(index_values, name=meta.get("index_names"))
+    -> pandas.Index
+285:57 call  meta.get("index_names")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+290:24 call  meta.get("is_multicolumns", False)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+291:44 call  meta.get("column_names")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+293:43 call  meta.get("column_names")
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+
+[jsonpickle.ext.pandas.PandasDfHandler.restore_v3_3]
+298:43 call  self.pp.restore_pandas(data)
+    -> jsonpickle.ext.pandas.PandasProcessor.restore_pandas
+299:69 call  make_read_csv_params(meta, self.context)
+    -> jsonpickle.ext.pandas.make_read_csv_params
+302:38 call  meta.get("column_level_names", None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+304:24 call  pd.read_csv(StringIO(csv), **params)
+    -> pandas.read_csv
+304:33 call  StringIO(csv)
+    -> io.StringIO
+305:36 call  data["values"].strip()
+    -> <builtin>.str.strip
+    note: data["values"] is the csv text of a pre-3.4 encoding, a str of the decoded JSON
+306:30 call  pd.DataFrame()
+    -> pandas.DataFrame
+309:38 call  pd.to_timedelta(df[col])
+    -> pandas.to_timedelta
+310:23 call  df.astype(parse_datetime_v2)
+    -> pandas.DataFrame.astype
+312:21 call  df.set_index(decode(meta["index"]), inplace=True)
+    -> pandas.DataFrame.set_index
+312:28 call  decode(meta["index"])
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+
+[jsonpickle.ext.pandas.PandasSeriesHandler.flatten]
+326:45 call  self.context.flatten(obj.index, reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+327:46 call  self.context.flatten(obj.values, reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+
+[jsonpickle.ext.pandas.PandasSeriesHandler.restore]
+333:37 call  self.context.restore(data['index'], reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+334:38 call  self.context.restore(data['values'], reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+335:25 call  pd.Series(values, index=index, name=name)
+    -> pandas.Series
+
+[jsonpickle.ext.pandas.PandasIndexHandler.flatten]
+346:40 call  self.name_bundler(obj)
+    -> jsonpickle.ext.pandas.PandasIndexHandler.name_bundler
+    -> jsonpickle.ext.pandas.PandasMultiIndexHandler.name_bundler
+    note: self is a PandasIndexHandler, a PandasPeriodIndexHandler (both inherit name_bundler of PandasIndexHandler) or a PandasMultiIndexHandler (lines 435-437)
+347:20 call  dict(dtype=str(obj.dtype), **name_bundle)
+    -> <builtin>.dict
+347:30 call  str(obj.dtype)
+    -> <builtin>.str
+348:21 call  encode(obj.tolist())
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+348:32 call  obj.tolist()
+    -> pandas.Index.tolist
+    -> pandas.RangeIndex.tolist
+    -> pandas.PeriodIndex.tolist
+    -> pandas.MultiIndex.tolist
+    -> pandas.DatetimeIndex.tolist
+    -> pandas.TimedeltaIndex.tolist
+    -> pandas.IntervalIndex.tolist
+    -> pandas.CategoricalIndex.tolist
+    note: obj is a pandas Index, named by the class of the receiver (README, "Callees outside the package"): Index and RangeIndex, the PeriodIndex and MultiIndex that the package registers explicitly (lines 436-437), and the classes that pd.Index makes from a stored dtype in restore (line 360) and that a client encodes again: DatetimeIndex, TimedeltaIndex, IntervalIndex and CategoricalIndex (pandas core/indexes/base.py:614-637, the index_class of the extension dtypes); Codex audit round 1, G1
+349:38 call  self.pp.flatten_pandas(buf, data, meta)
+    -> jsonpickle.ext.pandas.PandasProcessor.flatten_pandas
+
+[jsonpickle.ext.pandas.PandasIndexHandler.restore]
+353:43 call  self.pp.restore_pandas(data)
+    -> jsonpickle.ext.pandas.PandasProcessor.restore_pandas
+354:25 call  meta.get('dtype', None)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); meta is the dict that restore_pandas returns, decoded from the JSON (line 98)
+356:62 call  (tuple if v is not None else lambda x: x)(v)
+    -> <builtin>.tuple
+    -> jsonpickle.ext.pandas.PandasIndexHandler.restore.<lambda1>
+    note: the conditional expression gives the builtin tuple or the lambda of the same line
+357:35 call  meta.items()
+    -> <builtin>.dict.items
+360:37 call  self.index_constructor(decode(buf), dtype=dtype, **name_b...
+    -> pandas.Index
+    -> pandas.PeriodIndex
+    note: index_constructor is the class attribute pd.Index of PandasIndexHandler (line 340), inherited by PandasMultiIndexHandler, or pd.PeriodIndex of PandasPeriodIndexHandler (line 365)
+360:44 call  decode(buf)
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+
+[jsonpickle.ext.pandas.PandasTimestampHandler.flatten]
+377:43 call  obj.isoformat()
+    -> pandas.Timestamp.isoformat
+    note: obj is a pandas.Timestamp (the handler is registered for pandas.Timestamp, line 438)
+379:38 call  self.pp.flatten_pandas(buf, data, meta)
+    -> jsonpickle.ext.pandas.PandasProcessor.flatten_pandas
+
+[jsonpickle.ext.pandas.PandasTimestampHandler.restore]
+383:41 call  self.pp.restore_pandas(data)
+    -> jsonpickle.ext.pandas.PandasProcessor.restore_pandas
+385:27 call  pd.Timestamp(isoformat)
+    -> pandas.Timestamp
+
+[jsonpickle.ext.pandas.PandasPeriodHandler.flatten]
+394:33 call  encode(obj.start_time)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+398:38 call  self.pp.flatten_pandas(buf, data, meta)
+    -> jsonpickle.ext.pandas.PandasProcessor.flatten_pandas
+
+[jsonpickle.ext.pandas.PandasPeriodHandler.restore]
+402:41 call  self.pp.restore_pandas(data)
+    -> jsonpickle.ext.pandas.PandasProcessor.restore_pandas
+403:28 call  decode(meta['start_time'])
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+405:24 call  pd.Period(start_time, freqstr)
+    -> pandas.Period
+
+[jsonpickle.ext.pandas.PandasIntervalHandler.flatten]
+414:27 call  encode(obj.left)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+415:28 call  encode(obj.right)
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is imported from jsonpickle (line 8), which binds it to jsonpickle.pickler.encode
+419:38 call  self.pp.flatten_pandas(buf, data, meta)
+    -> jsonpickle.ext.pandas.PandasProcessor.flatten_pandas
+
+[jsonpickle.ext.pandas.PandasIntervalHandler.restore]
+423:41 call  self.pp.restore_pandas(data)
+    -> jsonpickle.ext.pandas.PandasProcessor.restore_pandas
+424:22 call  decode(meta['left'])
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+425:23 call  decode(meta['right'])
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is imported from jsonpickle (line 8), which binds it to jsonpickle.unpickler.decode
+426:21 call  str(meta['closed'])
+    -> <builtin>.str
+427:26 call  pd.Interval(left, right, closed=closed)
+    -> pandas.Interval
+
+[jsonpickle.ext.pandas.register_handlers]
+432:28 call  register_numpy_handlers()
+    -> jsonpickle.ext.numpy.register_handlers
+    reject jsonpickle.ext.gmpy.register_handlers, jsonpickle.ext.pandas.register_handlers: register_numpy_handlers is imported from jsonpickle.ext.numpy (line 12)
+433:13 call  register(pd.DataFrame, PandasDfHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+434:13 call  register(pd.Series, PandasSeriesHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+435:13 call  register(pd.Index, PandasIndexHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+436:13 call  register(pd.PeriodIndex, PandasPeriodIndexHandler, base=T...
+    -> jsonpickle.handlers.Registry.register
+437:13 call  register(pd.MultiIndex, PandasMultiIndexHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+438:13 call  register(pd.Timestamp, PandasTimestampHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+439:13 call  register(pd.Period, PandasPeriodHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+440:13 call  register(pd.Interval, PandasIntervalHandler, base=True)
+    -> jsonpickle.handlers.Registry.register
+
+[jsonpickle.ext.pandas.unregister_handlers]
+444:30 call  unregister_numpy_handlers()
+    -> jsonpickle.ext.numpy.unregister_handlers
+    reject jsonpickle.ext.gmpy.unregister_handlers, jsonpickle.ext.pandas.unregister_handlers: unregister_numpy_handlers is imported from jsonpickle.ext.numpy (line 13)
+445:15 call  unregister(pd.DataFrame)
+    -> jsonpickle.handlers.Registry.unregister
+446:15 call  unregister(pd.Series)
+    -> jsonpickle.handlers.Registry.unregister
+447:15 call  unregister(pd.Index)
+    -> jsonpickle.handlers.Registry.unregister
+448:15 call  unregister(pd.PeriodIndex)
+    -> jsonpickle.handlers.Registry.unregister
+449:15 call  unregister(pd.MultiIndex)
+    -> jsonpickle.handlers.Registry.unregister
+450:15 call  unregister(pd.Timestamp)
+    -> jsonpickle.handlers.Registry.unregister
+451:15 call  unregister(pd.Period)
+    -> jsonpickle.handlers.Registry.unregister
+452:15 call  unregister(pd.Interval)
+    -> jsonpickle.handlers.Registry.unregister
+
+== jsonpickle.ext.yaml
+
+[jsonpickle.ext.yaml.register]
+13:32 call  backend.load_backend( 'yaml', dumps='dump', loads='safe_l...
+    -> jsonpickle.backend.JSONBackend.load_backend
+    note: backend is jsonpickle.backend.json (line 12) or the JSONBackend that the client passes (the docstring: "Register the yaml module with jsonpickle's JSONBackend"); load_backend is also bound as a module name at __init__.py:88
+
+== jsonpickle.handlers
+
+[jsonpickle.handlers]
+85:20 call  Registry()
+    -> jsonpickle.handlers.Registry.__init__
+120:6 decorator  @classmethod
+    -> <builtin>.classmethod
+160:21 call  ArrayHandler.handles(array.array)
+    -> jsonpickle.handlers.BaseHandler.handles
+197:24 call  DatetimeHandler.handles(datetime.datetime)
+    -> jsonpickle.handlers.BaseHandler.handles
+198:24 call  DatetimeHandler.handles(datetime.date)
+    -> jsonpickle.handlers.BaseHandler.handles
+199:24 call  DatetimeHandler.handles(datetime.time)
+    -> jsonpickle.handlers.BaseHandler.handles
+213:21 call  RegexHandler.handles(type(re.compile('')))
+    -> jsonpickle.handlers.BaseHandler.handles
+213:26 call  type(re.compile(''))
+    -> <builtin>.type
+213:37 call  re.compile('')
+    -> re.compile
+231:21 call  QueueHandler.handles(queue.Queue)
+    -> jsonpickle.handlers.BaseHandler.handles
+259:20 call  UUIDHandler.handles(uuid.UUID)
+    -> jsonpickle.handlers.BaseHandler.handles
+276:23 call  threading.Lock()
+    -> threading.Lock
+277:20 call  LockHandler.handles(_lock.__class__)
+    -> jsonpickle.handlers.BaseHandler.handles
+291:22 call  TextIOHandler.handles(io.TextIOWrapper)
+    -> jsonpickle.handlers.BaseHandler.handles
+
+[jsonpickle.handlers.Registry.get]
+38:37 call  self._handlers.get(cls_or_name)
+    -> <builtin>.dict.get
+    reject jsonpickle.handlers.Registry.get: the receiver is the dict _handlers of the Registry (line 25), not a Registry
+    note: a value site by name only (line 88 binds the module name get to registry.get); here get is a method of the dict _handlers
+40:44 call  util.is_type(cls_or_name)
+    -> jsonpickle.util.is_type
+41:63 call  self._base_handlers.items()
+    -> <builtin>.dict.items
+42:30 call  issubclass(cls_or_name, cls)
+    -> <builtin>.issubclass
+
+[jsonpickle.handlers.Registry.register]
+70:28 call  util.is_type(cls)
+    -> jsonpickle.util.is_type
+71:28 call  TypeError(f'{cls!r} is not a class/type')
+    -> <builtin>.TypeError
+74:44 call  util.importable_name(cls)
+    -> jsonpickle.util.importable_name
+
+[jsonpickle.handlers.Registry.register._register]
+66:30 call  self.register(cls, handler=handler_cls, base=base)
+    -> jsonpickle.handlers.Registry.register
+    note: self is the Registry of the enclosing register; register is also bound as a module name at line 86
+
+[jsonpickle.handlers.Registry.unregister]
+80:27 call  self._handlers.pop(cls, None)
+    -> <builtin>.dict.pop
+81:27 call  self._handlers.pop(util.importable_name(cls), None)
+    -> <builtin>.dict.pop
+81:48 call  util.importable_name(cls)
+    -> jsonpickle.util.importable_name
+82:32 call  self._base_handlers.pop(cls, None)
+    -> <builtin>.dict.pop
+
+[jsonpickle.handlers.BaseHandler.flatten]
+111:34 call  NotImplementedError('You must implement flatten() in %s' ...
+    -> <builtin>.NotImplementedError
+
+[jsonpickle.handlers.BaseHandler.restore]
+118:34 call  NotImplementedError('You must implement restore() in %s' ...
+    -> <builtin>.NotImplementedError
+
+[jsonpickle.handlers.BaseHandler.handles]
+131:26 call  registry.register(cls, self)
+    -> jsonpickle.handlers.Registry.register
+    note: registry is the module's Registry (line 85); register is also bound as a module name at line 86
+
+[jsonpickle.handlers.ArrayHandler.flatten]
+149:46 call  self.context.flatten(obj.tolist(), reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+149:57 call  obj.tolist()
+    -> array.array.tolist
+    note: obj is an array.array, the class that the handler is registered for (line 160)
+
+[jsonpickle.handlers.ArrayHandler.restore]
+154:38 call  self.context.restore(data['values'], reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+156:28 call  bytes(x)
+    -> <builtin>.bytes
+    note: typecode 'c' exists only in the array module of Python 2; the branch restores arrays that jsonpickle wrote under Python 2 (jsonpickle.md, judgement J7)
+157:27 call  array.array(typecode, values)
+    -> array.array
+
+[jsonpickle.handlers.DatetimeHandler.flatten]
+175:23 call  hasattr(obj, 'isoformat')
+    -> <builtin>.hasattr
+176:39 call  obj.isoformat()
+    -> datetime.datetime.isoformat
+    -> datetime.date.isoformat
+    -> datetime.time.isoformat
+    note: obj is a datetime.datetime, datetime.date or datetime.time, the classes that the handler is registered for (lines 197-199); a class that a client binds to the handler is a client object
+178:29 call  str(obj)
+    -> <builtin>.str
+    note: reached for an object without isoformat, of a class that a client binds to the handler (the module docstring: "A handler can be bound to other types by calling jsonpickle.handlers.register")
+180:35 call  obj.__reduce__()
+    -> datetime.datetime.__reduce__
+    -> datetime.date.__reduce__
+    -> datetime.time.__reduce__
+182:33 call  util.b64encode(args[0])
+    -> jsonpickle.util.b64encode
+183:36 call  flatten(i, reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+    note: flatten is the bound method pickler.flatten of the handler's context, the Pickler (lines 173, 181)
+184:38 call  flatten(cls, reset=False)
+    -> jsonpickle.pickler.Pickler.flatten
+    note: flatten is the bound method pickler.flatten of the handler's context, the Pickler (lines 173, 181)
+
+[jsonpickle.handlers.DatetimeHandler.restore]
+191:22 call  restore(cls, reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+    note: restore is the bound method unpickler.restore of the handler's context, the Unpickler (lines 189-190)
+192:31 call  util.b64decode(args[0])
+    -> jsonpickle.util.b64decode
+193:34 call  tuple([restore(i, reset=False) for i in args[1:]])
+    -> <builtin>.tuple
+193:43 call  restore(i, reset=False)
+    -> jsonpickle.unpickler.Unpickler.restore
+    note: restore is the bound method unpickler.restore of the handler's context, the Unpickler (lines 189-190)
+194:27 call  cls.__new__(cls, *params)
+    -> datetime.datetime.__new__
+    -> datetime.date.__new__
+    -> datetime.time.__new__
+    note: cls is the restored py/type that flatten wrote at line 184: the class of the datetime, date or time
+
+[jsonpickle.handlers.RegexHandler.restore]
+210:26 call  re.compile(data['pattern'])
+    -> re.compile
+
+[jsonpickle.handlers.QueueHandler.restore]
+228:27 call  queue.Queue()
+    -> queue.Queue
+
+[jsonpickle.handlers.CloneFactory.__call__]
+242:21 call  clone(self.exemplar)
+    -> copy.copy
+    note: clone is the parameter whose default is copy.copy (line 240); the package calls a CloneFactory without arguments (pickler.py:844), and so does a defaultdict for a missing key
+
+[jsonpickle.handlers.CloneFactory.__repr__]
+245:47 call  id(self)
+    -> <builtin>.id
+245:58 format  {self.exemplar}
+    -> jsonpickle.handlers.CloneFactory.__repr__
+    note: the exemplar is the client's value, or a defaultdict that the unpickler restored with its own CloneFactory default_factory (a nested defaultdict of the package's output); its repr calls that CloneFactory's __repr__ back (judgement J6)
+
+[jsonpickle.handlers.UUIDHandler.restore]
+256:25 call  uuid.UUID(data['hex'])
+    -> uuid.UUID
+
+[jsonpickle.handlers.LockHandler.flatten]
+266:36 call  obj.locked()
+    -> threading.Lock.locked
+    -> _thread.LockType.locked
+    note: obj is a lock of the class of threading.Lock() (line 277); that class is threading.Lock from Python 3.13 and _thread.LockType (threading.Lock is a factory function) on 3.8 to 3.12 (jsonpickle.md, judgement J8)
+
+[jsonpickle.handlers.LockHandler.restore]
+270:30 call  threading.Lock()
+    -> threading.Lock
+271:20 call  data.get('locked', False)
+    -> <builtin>.dict.get
+    note: a value site by name only (line 88 binds get); data is the decoded JSON dict of the lock
+272:25 call  lock.acquire()
+    -> threading.Lock.acquire
+    -> _thread.LockType.acquire
+    note: lock is the lock of line 270: the class threading.Lock from Python 3.13, _thread.LockType on 3.8 to 3.12 (judgement J8)
+
+[jsonpickle.handlers.TextIOHandler.restore]
+288:29 call  AssertionError('Restoring IO.TextIOHandler is not support...
+    -> <builtin>.AssertionError
+
+== jsonpickle.pickler
+
+[jsonpickle.pickler.encode]
+151:26 call  warnings.warn( "keys will default to True in jsonpickle 5...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, line 251); here warn is the function of the module warnings
+157:26 call  warnings.warn( "numeric_keys is deprecated, use keys=True...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, line 251); here warn is the function of the module warnings
+163:26 call  warnings.warn( "use_decimal is deprecated and will be rem...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, line 251); here warn is the function of the module warnings
+169:26 call  warnings.warn( "backend is deprecated and will be removed...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, line 251); here warn is the function of the module warnings
+176:26 call  warnings.warn( "max_iter is deprecated and will be remove...
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, line 251); here warn is the function of the module warnings
+182:33 call  Pickler( unpicklable=unpicklable, make_refs=make_refs, ke...
+    -> jsonpickle.pickler.Pickler.__init__
+198:26 call  backend.encode( context.flatten(value, reset=reset), inde...
+    -> jsonpickle.backend.JSONBackend.encode
+    reject jsonpickle.pickler.encode: the receiver is the backend, jsonpickle.backend.json or the JSONBackend that the client passes (documented at line 74)
+199:24 call  context.flatten(value, reset=reset)
+    -> jsonpickle.pickler.Pickler.flatten
+    note: context is the Pickler made at line 182, or the pre-built Pickler that the client passes (documented at lines 79-83; _escape_key passes self)
+
+[jsonpickle.pickler._in_cycle]
+206:46 call  id(obj)
+    -> <builtin>.id
+207:34 call  util.is_primitive(obj)
+    -> jsonpickle.util.is_primitive
+208:29 call  util.is_enum(obj)
+    -> jsonpickle.util.is_enum
+
+[jsonpickle.pickler._mktyperef]
+219:44 call  util.importable_name(obj)
+    -> jsonpickle.util.importable_name
+
+[jsonpickle.pickler._wrap_string_slot]
+224:18 call  isinstance(string, str)
+    -> <builtin>.isinstance
+
+[jsonpickle.pickler.Pickler._determine_sort_keys]
+285:34 call  getattr(self.backend, '_encoder_options', {})
+    -> <builtin>.getattr
+285:79 call  getattr(self.backend, '_encoder_options', {}).values()
+    -> <builtin>.dict.values
+    note: the _encoder_options dict of the JSONBackend, or the default {}
+286:27 call  options.get('sort_keys', False)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); options is the kwargs dict of an (args, kwargs) pair of _encoder_options
+
+[jsonpickle.pickler.Pickler._sort_attrs]
+292:19 call  hasattr(obj, '__slots__')
+    -> <builtin>.hasattr
+298:28 call  TypeError( 'Objects with __slots__ cannot have their keys...
+    -> <builtin>.TypeError
+303:21 call  hasattr(obj, '__dict__')
+    -> <builtin>.hasattr
+305:36 call  dict(sorted(obj.__dict__.items()))
+    -> <builtin>.dict
+305:43 call  sorted(obj.__dict__.items())
+    -> <builtin>.sorted
+305:62 call  obj.__dict__.items()
+    -> <builtin>.dict.items
+    -> types.MappingProxyType.items
+    note: the receiver is the __dict__ of a value that the package itself hands to flatten, with a backend that sorts keys (documented at lines 91-92): the class of a datetime, date or time that DatetimeHandler.flatten passes (handlers.py:184), whose __dict__ is a mappingproxy, and the pandas Index that PandasSeriesHandler.flatten passes (ext/pandas.py:326), whose instance __dict__ is a dict. The __dict__ of a client object is opaque (B5; jsonpickle.md, judgement J9)
+
+[jsonpickle.pickler.Pickler._pop]
+327:23 call  self.reset()
+    -> jsonpickle.pickler.Pickler.reset
+    reject jsonpickle.unpickler.Unpickler.reset, jsonpickle.unpickler._Proxy.reset: self is a Pickler
+
+[jsonpickle.pickler.Pickler._log_ref]
+336:19 call  id(obj)
+    -> <builtin>.id
+339:25 call  len(self._objs)
+    -> <builtin>.len
+
+[jsonpickle.pickler.Pickler._mkref]
+348:31 call  self._log_ref(obj)
+    -> jsonpickle.pickler.Pickler._log_ref
+
+[jsonpickle.pickler.Pickler._getref]
+355:40 call  self._objs.get(id(obj))
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); _objs is the dict of line 259
+355:43 call  id(obj)
+    -> <builtin>.id
+
+[jsonpickle.pickler.Pickler._flatten]
+360:40 call  self._flatten_impl(obj)
+    -> jsonpickle.pickler.Pickler._flatten_impl
+363:44 call  id(obj)
+    -> <builtin>.id
+365:44 call  id(obj)
+    -> <builtin>.id
+365:71 call  self._flatten_impl(obj)
+    -> jsonpickle.pickler.Pickler._flatten_impl
+
+[jsonpickle.pickler.Pickler.flatten]
+397:23 call  self.reset()
+    -> jsonpickle.pickler.Pickler.reset
+    reject jsonpickle.unpickler.Unpickler.reset, jsonpickle.unpickler._Proxy.reset: self is a Pickler
+398:37 call  self._determine_sort_keys()
+    -> jsonpickle.pickler.Pickler._determine_sort_keys
+399:35 call  self._sort_attrs(obj)
+    -> jsonpickle.pickler.Pickler._sort_attrs
+400:29 call  self._flatten(obj)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_bytestring]
+403:53 call  self._bytes_encoder(obj)
+    -> jsonpickle.util.b85encode
+    -> jsonpickle.util.b64encode
+    note: _bytes_encoder is util.b85encode or util.b64encode, by use_base85 (lines 271-276)
+
+[jsonpickle.pickler.Pickler._flatten_impl]
+409:16 call  type(obj)
+    -> <builtin>.type
+410:44 call  self._flatten_bytestring(obj)
+    -> jsonpickle.pickler.Pickler._flatten_bytestring
+413:16 call  type(obj)
+    -> <builtin>.type
+413:53 call  type(None)
+    -> <builtin>.type
+414:45 call  isinstance(obj, decimal.Decimal)
+    -> <builtin>.isinstance
+419:19 call  self._push()
+    -> jsonpickle.pickler.Pickler._push
+420:25 call  self._pop(self._flatten_obj(obj))
+    -> jsonpickle.pickler.Pickler._pop
+420:43 call  self._flatten_obj(obj)
+    -> jsonpickle.pickler.Pickler._flatten_obj
+
+[jsonpickle.pickler.Pickler._pickle_warning]
+428:26 call  warnings.warn(msg)
+    -> warnings.warn
+    note: a value site by name only (Pickler.__init__ assigns an attribute warn, line 251); here warn is the function of the module warnings
+
+[jsonpickle.pickler.Pickler._flatten_obj]
+431:26 call  self._seen.append(obj)
+    -> <builtin>.list.append
+433:40 call  self._max_reached()
+    -> jsonpickle.pickler.Pickler._max_reached
+436:33 call  _in_cycle(obj, self._objs, max_reached, self.make_refs)
+    -> jsonpickle.pickler._in_cycle
+441:51 call  self._get_flattener(obj)
+    -> jsonpickle.pickler.Pickler._get_flattener
+444:37 call  self._pickle_warning(obj)
+    -> jsonpickle.pickler.Pickler._pickle_warning
+447:32 call  flatten_func(obj)
+    -> <builtin>.repr
+    -> jsonpickle.pickler.Pickler._list_recurse
+    -> jsonpickle.pickler.Pickler._flatten_dict_obj
+    -> jsonpickle.pickler.Pickler._getref
+    -> jsonpickle.pickler.Pickler._get_flattener.<lambda1>
+    -> jsonpickle.pickler.Pickler._flatten_function
+    -> jsonpickle.pickler.Pickler._ref_obj_instance
+    -> jsonpickle.pickler._mktyperef
+    -> jsonpickle.handlers.CloneFactory.__repr__
+    note: flatten_func is repr (line 439) or what _get_flattener returns (lines 862-892): _list_recurse, _flatten_dict_obj, _getref, the lambda of tuples and sets, _flatten_function, _ref_obj_instance or _mktyperef. repr of a defaultdict that the unpickler restored from the package's output calls the repr of its CloneFactory default_factory back (max_depth reached, or a repeated object with make_refs=False; judgement J6)
+455:38 call  self.fail_safe(e)
+    note: no callee: fail_safe is the client's function (documented at lines 109-111: "If set to a function"), a client callback
+
+[jsonpickle.pickler.Pickler._list_recurse]
+458:30 call  self._flatten(v)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_function]
+462:56 call  util.importable_name(obj)
+    -> jsonpickle.util.importable_name
+
+[jsonpickle.pickler.Pickler._getstate]
+469:30 call  self._flatten(obj)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_key_value_pair]
+478:33 call  util.is_picklable(k, v)
+    -> jsonpickle.util.is_picklable
+484:63 call  inspect.getmembers(self._original_object)
+    -> inspect.getmembers
+485:33 call  util.is_readonly(self._original_object, k, v)
+    -> jsonpickle.util.is_readonly
+492:44 call  isinstance(k, (int, float))
+    -> <builtin>.isinstance
+494:28 call  isinstance(k, str)
+    -> <builtin>.isinstance
+496:25 call  repr(k)
+    -> <builtin>.repr
+498:24 call  str(k)
+    -> <builtin>.str
+500:32 call  self._flatten(v)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_obj_attrs]
+508:36 call  k.startswith('__')
+    -> <builtin>.str.startswith
+    note: k is an attribute name: a slot name (line 558) or a name of dir(obj) (line 560)
+509:36 call  getattr(obj, k)
+    -> <builtin>.getattr
+511:36 call  getattr(obj, f"_{obj.__class__.__name__}{k}")
+    -> <builtin>.getattr
+512:24 call  flatten(k, value, data)
+    -> jsonpickle.pickler.Pickler._flatten_key_value_pair
+    reject jsonpickle.pickler.Pickler.flatten: flatten is the bound method self._flatten_key_value_pair (line 504)
+    note: the local flatten of line 504
+
+[jsonpickle.pickler.Pickler._flatten_properties]
+525:27 call  set(itertools.chain.from_iterable(allslots))
+    -> <builtin>.set
+525:57 call  itertools.chain.from_iterable(allslots)
+    -> itertools.chain.from_iterable
+532:45 call  inspect.getmembers(obj.__class__)
+    -> inspect.getmembers
+532:78 call  valid_property(x)
+    -> jsonpickle.pickler.Pickler._flatten_properties.valid_property
+537:28 call  getattr(obj, p_name)
+    -> <builtin>.getattr
+538:33 call  util.is_not_class(p_val)
+    -> jsonpickle.util.is_not_class
+541:56 call  self._flatten(p_val)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_properties.valid_property]
+529:39 call  x[0].startswith('__')
+    -> <builtin>.str.startswith
+    note: x is a (name, value) pair of inspect.getmembers; the name is a str
+
+[jsonpickle.pickler.Pickler._flatten_newstyle_with_slots]
+550:30 call  _wrap_string_slot(getattr(cls, '__slots__', tuple()))
+    -> jsonpickle.pickler._wrap_string_slot
+550:38 call  getattr(cls, '__slots__', tuple())
+    -> <builtin>.getattr
+550:62 call  tuple()
+    -> <builtin>.tuple
+551:41 call  obj.__class__.mro()
+    -> <builtin>.type.mro
+    note: obj is a client object with __slots__, whose class is an attribute of a client object and opaque (B5, cachetools C2; judgement J9), or a library object that the package reaches (ruling (c)): dateutil's weekday (dateutil/_common.py:6-7, slots, no state method) inside a dateutil tzstr of a DatetimeTZDtype cached in a forwarded Index, with unpicklable=False and the Index handler unregistered; its class is a type (Codex audit round 3, witness 4). A lower bound (jsonpickle.md, "Open receiver sets")
+556:44 call  self._flatten_properties(obj, data, allslots)
+    -> jsonpickle.pickler.Pickler._flatten_properties
+558:39 call  self._flatten_obj_attrs(obj, chain(*allslots), data)
+    -> jsonpickle.pickler.Pickler._flatten_obj_attrs
+558:50 call  chain(*allslots)
+    -> itertools.chain
+560:31 call  dir(obj)
+    -> <builtin>.dir
+560:56 call  x.startswith('__')
+    -> <builtin>.str.startswith
+560:81 call  x.endswith('__')
+    -> <builtin>.str.endswith
+562:36 call  self._flatten_obj_attrs(obj, attrs, data)
+    -> jsonpickle.pickler.Pickler._flatten_obj_attrs
+
+[jsonpickle.pickler.Pickler._flatten_obj_instance]
+569:28 call  hasattr(obj, '__class__')
+    -> <builtin>.hasattr
+570:27 call  hasattr(obj, '__dict__')
+    -> <builtin>.hasattr
+571:45 call  hasattr(obj, '__slots__')
+    -> <builtin>.hasattr
+572:41 call  util.has_method(obj, '__getnewargs__')
+    -> jsonpickle.util.has_method
+573:44 call  util.has_method(obj, '__getnewargs_ex__')
+    -> jsonpickle.util.has_method
+574:42 call  util.has_method(obj, '__getinitargs__')
+    -> jsonpickle.util.has_method
+575:52 call  util.has_reduce(obj)
+    -> jsonpickle.util.has_reduce
+576:22 call  set(getattr(obj, '_jsonpickle_exclude', ()))
+    -> <builtin>.set
+576:30 call  getattr(obj, '_jsonpickle_exclude', ())
+    -> <builtin>.getattr
+580:35 call  hasattr(type(obj), '__getstate__')
+    -> <builtin>.hasattr
+580:40 call  type(obj)
+    -> <builtin>.type
+580:71 call  type( obj )
+    -> <builtin>.type
+582:38 call  getattr(object, '__getstate__', None)
+    -> <builtin>.getattr
+589:23 call  type(obj)
+    -> <builtin>.type
+592:42 call  util.importable_name(cls)
+    -> jsonpickle.util.importable_name
+593:31 call  handlers.get(cls, handlers.get(class_name))
+    -> jsonpickle.handlers.Registry.get
+    note: handlers.get is the bound method registry.get (handlers.py:88)
+593:49 call  handlers.get(class_name)
+    -> jsonpickle.handlers.Registry.get
+    note: handlers.get is the bound method registry.get (handlers.py:88)
+597:29 call  handler(self)
+    -> jsonpickle.handlers.BaseHandler.__init__
+    -> jsonpickle.handlers.BaseHandler.__call__
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.__init__
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerView.__init__
+    note: handler is a value of the registry: a handler class, whose instantiation runs BaseHandler.__init__ (every package handler class but the two numpy classes with their own __init__), or a handler instance, whose __call__ is BaseHandler.__call__ (jsonpickle.ext.numpy.register_handlers registers a NumpyNDArrayHandlerView instance); the role admits every package subclass of BaseHandler (jsonpickle.md, judgement J4); client handlers are client code
+597:43 call  handler(self).flatten(obj, data)
+    -> jsonpickle.ext.gmpy.GmpyMPZHandler.flatten
+    -> jsonpickle.ext.numpy.NumpyDTypeHandler.flatten
+    -> jsonpickle.ext.numpy.NumpyGenericHandler.flatten
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerView.flatten
+    -> jsonpickle.ext.numpy.UnpickleableNumpyGenericHandler.flatten
+    -> jsonpickle.ext.pandas.PandasDfHandler.flatten
+    -> jsonpickle.ext.pandas.PandasIndexHandler.flatten
+    -> jsonpickle.ext.pandas.PandasIntervalHandler.flatten
+    -> jsonpickle.ext.pandas.PandasPeriodHandler.flatten
+    -> jsonpickle.ext.pandas.PandasSeriesHandler.flatten
+    -> jsonpickle.ext.pandas.PandasTimestampHandler.flatten
+    -> jsonpickle.handlers.ArrayHandler.flatten
+    -> jsonpickle.handlers.BaseHandler.flatten
+    -> jsonpickle.handlers.DatetimeHandler.flatten
+    -> jsonpickle.handlers.LockHandler.flatten
+    -> jsonpickle.handlers.QueueHandler.flatten
+    -> jsonpickle.handlers.RegexHandler.flatten
+    -> jsonpickle.handlers.TextIOHandler.flatten
+    -> jsonpickle.handlers.UUIDHandler.flatten
+    reject jsonpickle.pickler.Pickler.flatten: the receiver is a handler (BaseHandler.__init__ makes it, BaseHandler.__call__ returns self), never a Pickler
+    note: the flatten of each package handler class: the ones that the package registers (handlers.py, jsonpickle.ext.numpy, jsonpickle.ext.pandas, jsonpickle.ext.gmpy), UnpickleableNumpyGenericHandler (the documented example of lines 51-53) and the other BaseHandler subclasses of the package, which a client can register (judgement J4); NumpyDatetimeHandler inherits NumpyGenericHandler.flatten, PandasPeriodIndexHandler and PandasMultiIndexHandler inherit PandasIndexHandler.flatten
+599:37 call  self._pickle_warning(obj)
+    -> jsonpickle.pickler.Pickler._pickle_warning
+605:44 call  self._flatten_properties(obj, data)
+    -> jsonpickle.pickler.Pickler._flatten_properties
+610:48 call  obj.__reduce__()
+    -> datetime.timedelta.__reduce__
+    -> pandas.Timedelta.__reduce__
+    -> pandas.api.typing.NAType.__reduce__
+    -> datetime.date.__reduce__
+    -> <builtin>.range.__reduce__
+    -> numpy.dtypes.BoolDType.__reduce__
+    -> numpy.dtypes.Int8DType.__reduce__
+    -> numpy.dtypes.Int16DType.__reduce__
+    -> numpy.dtypes.Int32DType.__reduce__
+    -> numpy.dtypes.Int64DType.__reduce__
+    -> numpy.dtypes.UInt8DType.__reduce__
+    -> numpy.dtypes.UInt16DType.__reduce__
+    -> numpy.dtypes.UInt32DType.__reduce__
+    -> numpy.dtypes.UInt64DType.__reduce__
+    -> numpy.dtypes.Float16DType.__reduce__
+    -> numpy.dtypes.Float32DType.__reduce__
+    -> numpy.dtypes.Float64DType.__reduce__
+    -> numpy.dtypes.LongDoubleDType.__reduce__
+    -> numpy.dtypes.Complex64DType.__reduce__
+    -> numpy.dtypes.Complex128DType.__reduce__
+    -> numpy.dtypes.CLongDoubleDType.__reduce__
+    -> numpy.dtypes.ObjectDType.__reduce__
+    -> numpy.dtypes.BytesDType.__reduce__
+    -> numpy.dtypes.StrDType.__reduce__
+    -> numpy.dtypes.VoidDType.__reduce__
+    -> numpy.dtypes.DateTime64DType.__reduce__
+    -> numpy.dtypes.TimeDelta64DType.__reduce__
+    -> numpy.dtypes.IntDType.__reduce__
+    -> numpy.dtypes.UIntDType.__reduce__
+    -> numpy.dtypes.LongLongDType.__reduce__
+    -> numpy.dtypes.ULongLongDType.__reduce__
+    -> numpy.longdouble.__reduce__
+    -> numpy.clongdouble.__reduce__
+    -> pandas.Period.__reduce__
+    -> pandas.Interval.__reduce__
+    -> pandas.core.arrays.sparse.IntIndex.__reduce__
+    -> pandas.core.arrays.sparse.BlockIndex.__reduce__
+    -> pandas.tseries.offsets.Day.__reduce__
+    -> pandas.tseries.offsets.Hour.__reduce__
+    -> pandas.tseries.offsets.Minute.__reduce__
+    -> pandas.tseries.offsets.Second.__reduce__
+    -> pandas.tseries.offsets.Milli.__reduce__
+    -> pandas.tseries.offsets.Micro.__reduce__
+    -> pandas.tseries.offsets.Nano.__reduce__
+    -> pandas.tseries.offsets.BusinessDay.__reduce__
+    -> pandas.tseries.offsets.YearEnd.__reduce__
+    -> pandas.tseries.offsets.QuarterEnd.__reduce__
+    -> pandas.tseries.offsets.MonthEnd.__reduce__
+    -> pandas.tseries.offsets.Week.__reduce__
+    -> numpy.int8.__reduce__
+    -> numpy.int16.__reduce__
+    -> numpy.int32.__reduce__
+    -> numpy.int64.__reduce__
+    -> numpy.uint8.__reduce__
+    -> numpy.uint16.__reduce__
+    -> numpy.uint32.__reduce__
+    -> numpy.uint64.__reduce__
+    -> numpy.float32.__reduce__
+    -> numpy.float64.__reduce__
+    note: obj is the client object being pickled (encode accepts any object), whose __reduce__ is client code (B5), or a library value that the package itself reaches: a numpy timedelta64 scalar or array of a unit up to microseconds gives Python timedelta values through tolist (ext/numpy.py:53, 102), which no default handler takes, and has_reduce finds timedelta.__reduce__ (Codex audit round 1, G2; ruling (c) of batch 6). Also the pandas handlers forward the Python values of tolist() without any unregistration: a Timedelta from a TimedeltaIndex (ext/pandas.py:348) or a timedelta64 column (176-180) or an Interval of timedeltas (414-415), NaT from a datetime-like index or column, NA from a nullable column: Timedelta and NAType define __reduce__ and no __reduce_ex__ (pandas 3.0.6 _libs/tslibs/timedeltas.pyx:2320, _libs/missing.pyx:422), named by the receiver class (Codex audit round 1, Unsure 2). After a public unregister (ruling (d) after Codex audit round 1: a default handler removed with the public unregister is an admitted state): with DatetimeHandler unregistered for datetime.date and the numpy handlers kept, the datetime.date values that a datetime64[D] value gives through tolist reach date.__reduce__; with the pandas.Index handler unregistered and the Series handler kept (it forwards obj.index, ext/pandas.py:326), a RangeIndex is pickled through its __dict__ (is_list_like makes it not reducible), and its _range, a range, reaches range.__reduce__. Codex audit round 2, after a public unregister (ruling (d)) and through nested library values: (D) the dtype of an ndarray in the tolist() of a structured numpy.void, with the ndarray and dtype handlers unregistered: numpy.dtype.__reduce__ (descriptor.c:2768, 3488), named by the 26 dtype classes; (S) the numpy.longdouble and clongdouble scalars that an array tolist() keeps (arraytypes.c.src:602, 636), with numpy.generic unregistered; (T) Period and Interval from an index tolist(), with their handlers unregistered (period.pyx:2747, interval.pyx:508); (Q) the IntIndex or BlockIndex in the __dict__ of a SparseArray (sparse.pyx:59, 305); (F) the frequency offset of a Period (SingleConstructorOffset.__reduce__, offsets.pyx:1137); (E) the numpy endpoints of an Interval (interval.py:1791), with numpy.generic unregistered
+622:51 call  obj.__reduce_ex__(2)
+    -> pandas.api.typing.NaTType.__reduce_ex__
+    -> datetime.datetime.__reduce_ex__
+    -> numpy.ndarray.__reduce_ex__
+    -> pandas.Timestamp.__reduce_ex__
+    note: obj is the client object being pickled (encode accepts any object), whose __reduce_ex__ is client code (B5), or a library value that the package itself hands to flatten: the pandas handlers forward NaT from the tolist() of a datetime-like index or column without any unregistration (ext/pandas.py:176-180, 348); NaTType defines both __reduce__ and __reduce_ex__ (pandas 3.0.6 _libs/tslibs/nattype.pyx:391-398), so has_reduce_ex takes this call. The CloneFactory and the forwarded complex, timedelta, Timedelta and NA values define no own __reduce_ex__ (Codex audit round 1, Unsure 2). After a public unregister (ruling (d) after Codex audit round 1: a default handler removed with the public unregister is an admitted state): with DatetimeHandler unregistered for datetime.datetime and the numpy handlers kept, the datetimes that a datetime64[us] value gives through tolist reach datetime.__reduce_ex__ (C datetime defines it); with the numpy.ndarray handler unregistered and the Series handler kept (it forwards obj.values, ext/pandas.py:327), the ndarray reaches ndarray.__reduce_ex__. Codex audit round 2 (T): the Timestamp that PandasPeriodHandler forwards as start_time (ext/pandas.py:394), with the Timestamp handler unregistered; _Timestamp defines __reduce_ex__ (timestamps.pyx:1355)
+629:41 call  isinstance(reduce_val, str)
+    -> <builtin>.isinstance
+631:35 call  iter(reduce_val.split('.'))
+    -> <builtin>.iter
+631:52 call  reduce_val.split('.')
+    -> <builtin>.str.split
+    note: reduce_val is a str (isinstance, line 629)
+634:46 call  next(varpath)
+    -> <builtin>.next
+636:41 call  getattr(curmod, modname)
+    -> <builtin>.getattr
+638:45 call  self._flatten(curmod)
+    -> jsonpickle.pickler.Pickler._flatten
+646:34 call  list(reduce_val)
+    -> <builtin>.list
+647:40 call  len(rv_as_list)
+    -> <builtin>.len
+651:27 call  getattr(rv_as_list[0], '__name__', '')
+    -> <builtin>.getattr
+660:36 call  hasattr(obj, '__setstate__')
+    -> <builtin>.hasattr
+661:39 call  isinstance(obj, dict)
+    -> <builtin>.isinstance
+665:46 call  tuple(rv_as_list[3])
+    -> <builtin>.tuple
+668:46 call  tuple(rv_as_list[4])
+    -> <builtin>.tuple
+670:39 call  list(map(self._flatten, rv_as_list))
+    -> <builtin>.list
+670:43 call  map(self._flatten, rv_as_list)
+    -> <builtin>.map
+    -> jsonpickle.pickler.Pickler._flatten
+    note: list() at the same line iterates the map and calls _flatten back
+671:37 call  len(reduce_args)
+    -> <builtin>.len
+678:40 call  isinstance(obj, types.ModuleType)
+    -> <builtin>.isinstance
+684:34 call  self._flatten(arg)
+    -> jsonpickle.pickler.Pickler._flatten
+684:72 call  obj.__getnewargs_ex__()
+    note: no callee: obj is the client object being pickled (encode accepts any object), so its pickle protocol method is client code (B5). The package objects and the library values that the package itself hands to flatten (a CloneFactory, line 844; the Python complex and timedelta values that the numpy handlers get from tolist, ext/numpy.py:53, 102) do not define this method (Codex audit round 1, G2)
+688:51 call  self._flatten(obj.__getnewargs__())
+    -> jsonpickle.pickler.Pickler._flatten
+688:70 call  obj.__getnewargs__()
+    -> <builtin>.complex.__getnewargs__
+    note: obj is the client object being pickled, whose __getnewargs__ is client code (B5), or a Python complex that a numpy complex scalar or array gives through tolist (ext/numpy.py:53, 102; jsonpickle/ext/pandas.py:176-180 for a complex column); util.has_method finds the builtin __getnewargs__ (Codex audit round 1, G2)
+691:52 call  self._flatten(obj.__getinitargs__())
+    -> jsonpickle.pickler.Pickler._flatten
+691:72 call  obj.__getinitargs__()
+    note: no callee: obj is the client object being pickled (encode accepts any object), so its pickle protocol method is client code (B5). The package objects and the library values that the package itself hands to flatten (a CloneFactory, line 844; the Python complex and timedelta values that the numpy handlers get from tolist, ext/numpy.py:53, 102) do not define this method (Codex audit round 1, G2)
+695:41 call  obj.__getstate__()
+    -> pandas.CategoricalDtype.__getstate__
+    -> pandas.DatetimeTZDtype.__getstate__
+    -> pandas.IntervalDtype.__getstate__
+    -> pandas.PeriodDtype.__getstate__
+    -> pandas.tseries.offsets.BHalfYearBegin.__getstate__
+    -> pandas.tseries.offsets.BHalfYearEnd.__getstate__
+    -> pandas.tseries.offsets.BQuarterBegin.__getstate__
+    -> pandas.tseries.offsets.BQuarterEnd.__getstate__
+    -> pandas.tseries.offsets.BYearBegin.__getstate__
+    -> pandas.tseries.offsets.BYearEnd.__getstate__
+    -> pandas.tseries.offsets.BusinessDay.__getstate__
+    -> pandas.tseries.offsets.BusinessHour.__getstate__
+    -> pandas.tseries.offsets.BusinessMonthBegin.__getstate__
+    -> pandas.tseries.offsets.BusinessMonthEnd.__getstate__
+    -> pandas.tseries.offsets.CustomBusinessDay.__getstate__
+    -> pandas.tseries.offsets.CustomBusinessHour.__getstate__
+    -> pandas.tseries.offsets.CustomBusinessMonthBegin.__getstate__
+    -> pandas.tseries.offsets.CustomBusinessMonthEnd.__getstate__
+    -> pandas.tseries.offsets.Day.__getstate__
+    -> pandas.tseries.offsets.FY5253.__getstate__
+    -> pandas.tseries.offsets.FY5253Quarter.__getstate__
+    -> pandas.tseries.offsets.HalfYearBegin.__getstate__
+    -> pandas.tseries.offsets.HalfYearEnd.__getstate__
+    -> pandas.tseries.offsets.Hour.__getstate__
+    -> pandas.tseries.offsets.LastWeekOfMonth.__getstate__
+    -> pandas.tseries.offsets.Micro.__getstate__
+    -> pandas.tseries.offsets.Milli.__getstate__
+    -> pandas.tseries.offsets.Minute.__getstate__
+    -> pandas.tseries.offsets.MonthBegin.__getstate__
+    -> pandas.tseries.offsets.MonthEnd.__getstate__
+    -> pandas.tseries.offsets.Nano.__getstate__
+    -> pandas.tseries.offsets.QuarterBegin.__getstate__
+    -> pandas.tseries.offsets.QuarterEnd.__getstate__
+    -> pandas.tseries.offsets.Second.__getstate__
+    -> pandas.tseries.offsets.SemiMonthBegin.__getstate__
+    -> pandas.tseries.offsets.SemiMonthEnd.__getstate__
+    -> pandas.tseries.offsets.Week.__getstate__
+    -> pandas.tseries.offsets.WeekOfMonth.__getstate__
+    -> pandas.tseries.offsets.YearBegin.__getstate__
+    -> pandas.tseries.offsets.YearEnd.__getstate__
+    -> dateutil.tz.tz._ttinfo.__getstate__
+    note: obj is the client object being pickled (encode accepts any object), whose __getstate__ is client code (B5), or a library value that the package reaches (Codex audit round 3, after a public unregister, ruling (d)): the dtypes cached in an Index that the Series handler forwards (ext/pandas.py:326; pandas core/indexes/base.py:986), which inherit PandasExtensionDtype.__getstate__ (core/dtypes/dtypes.py:146; PeriodDtype only with unpicklable=False, which skips its __reduce__); the frequency offset of a DatetimeArray in that Index's __dict__ (datetimes.py:334), with unpicklable=False, through BaseOffset.__getstate__ (offsets.pyx:950); the _ttinfo records of a dateutil time zone in a DatetimeTZDtype (dateutil tz/tz.py:328-345, 611). A lower bound: the receiver set is open (jsonpickle.md, "Open receiver sets")
+699:37 call  self._pickle_warning(obj)
+    -> jsonpickle.pickler.Pickler._pickle_warning
+703:42 call  self._getstate(state, data)
+    -> jsonpickle.pickler.Pickler._getstate
+705:22 call  isinstance(obj, types.ModuleType)
+    -> <builtin>.isinstance
+707:59 call  '{name}/{name}'.format(name=obj.__name__)
+    -> <builtin>.str.format
+709:27 call  str(obj)
+    -> <builtin>.str
+712:39 call  util.is_dictionary_subclass(obj)
+    -> jsonpickle.util.is_dictionary_subclass
+713:35 call  self._flatten_dict_obj(obj, data, exclude=exclude)
+    -> jsonpickle.pickler.Pickler._flatten_dict_obj
+716:37 call  util.is_sequence_subclass(obj)
+    -> jsonpickle.util.is_sequence_subclass
+717:46 call  self._flatten_sequence_obj(obj, data)
+    -> jsonpickle.pickler.Pickler._flatten_sequence_obj
+719:28 call  util.is_iterator(obj)
+    -> jsonpickle.util.is_iterator
+721:39 call  list(map(self._flatten, islice(obj, self._max_iter)))
+    -> <builtin>.list
+721:43 call  map(self._flatten, islice(obj, self._max_iter))
+    -> <builtin>.map
+    -> jsonpickle.pickler.Pickler._flatten
+    note: list() at the same line iterates the map and calls _flatten back
+721:65 call  islice(obj, self._max_iter)
+    -> itertools.islice
+726:41 call  util.is_sequence_subclass(obj)
+    -> jsonpickle.util.is_sequence_subclass
+727:50 call  self._flatten_sequence_obj(obj, data)
+    -> jsonpickle.pickler.Pickler._flatten_sequence_obj
+730:20 call  getattr(obj, '_', None)
+    -> <builtin>.getattr
+731:42 call  self._flatten_dict_obj(obj.__dict__, data, exclude=exclude)
+    -> jsonpickle.pickler.Pickler._flatten_dict_obj
+734:53 call  self._flatten_newstyle_with_slots(obj, data)
+    -> jsonpickle.pickler.Pickler._flatten_newstyle_with_slots
+741:29 call  self._pickle_warning(obj)
+    -> jsonpickle.pickler.Pickler._pickle_warning
+
+[jsonpickle.pickler.Pickler._ref_obj_instance]
+747:27 call  self._mkref(obj)
+    -> jsonpickle.pickler.Pickler._mkref
+    reject jsonpickle.unpickler.Unpickler._mkref: self is a Pickler
+750:50 call  self._flatten_obj_instance(obj)
+    -> jsonpickle.pickler.Pickler._flatten_obj_instance
+754:32 call  self._getref(obj)
+    -> jsonpickle.pickler.Pickler._getref
+756:44 call  self._max_reached()
+    -> jsonpickle.pickler.Pickler._max_reached
+757:33 call  _in_cycle(obj, self._objs, max_reached, False)
+    -> jsonpickle.pickler._in_cycle
+762:24 call  self._mkref(obj)
+    -> jsonpickle.pickler.Pickler._mkref
+    reject jsonpickle.unpickler.Unpickler._mkref: self is a Pickler
+763:46 call  self._flatten_obj_instance(obj)
+    -> jsonpickle.pickler.Pickler._flatten_obj_instance
+
+[jsonpickle.pickler.Pickler._escape_key]
+766:38 call  encode( k, reset=False, keys=True, context=self, backend=...
+    -> jsonpickle.pickler.encode
+    reject jsonpickle.backend.JSONBackend.encode: encode is the function of this module (line 19)
+
+[jsonpickle.pickler.Pickler._flatten_non_string_key_value_pair]
+777:33 call  util.is_picklable(k, v)
+    -> jsonpickle.util.is_picklable
+779:40 call  isinstance(k, str)
+    -> <builtin>.isinstance
+780:33 call  self._escape_key(k)
+    -> jsonpickle.pickler.Pickler._escape_key
+781:36 call  self._flatten(v)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_string_key_value_pair]
+786:33 call  util.is_picklable(k, v)
+    -> jsonpickle.util.is_picklable
+789:30 call  isinstance(k, str)
+    -> <builtin>.isinstance
+791:30 call  k.startswith(tags.JSON_KEY)
+    -> <builtin>.str.startswith
+    note: k is a str (isinstance, line 789)
+792:37 call  self._escape_key(k)
+    -> jsonpickle.pickler.Pickler._escape_key
+797:48 call  isinstance(k, (int, float))
+    -> <builtin>.isinstance
+799:32 call  isinstance(k, str)
+    -> <builtin>.isinstance
+801:29 call  repr(k)
+    -> <builtin>.repr
+803:28 call  str(k)
+    -> <builtin>.str
+805:32 call  self._flatten(v)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_dict_obj]
+811:33 call  obj.__class__()
+    -> <builtin>.dict
+    note: data is None only when _get_flattener returns this method for an exact dict (lines 863-866, called at line 447); every other caller passes data, so obj.__class__ is dict
+818:35 call  util.items(obj, exclude=exclude)
+    -> jsonpickle.util.items
+819:24 call  flatten(k, v, data)
+    -> jsonpickle.pickler.Pickler._flatten_string_key_value_pair
+    reject jsonpickle.pickler.Pickler.flatten: flatten is the bound method self._flatten_string_key_value_pair (line 817)
+    note: the local flatten of line 817
+823:35 call  util.items(obj, exclude=exclude)
+    -> jsonpickle.util.items
+824:24 call  flatten(k, v, data)
+    -> jsonpickle.pickler.Pickler._flatten_non_string_key_value_pair
+    reject jsonpickle.pickler.Pickler.flatten: flatten is the bound method self._flatten_non_string_key_value_pair (line 822)
+    note: the local flatten of line 822
+828:35 call  util.items(obj, exclude=exclude)
+    -> jsonpickle.util.items
+829:24 call  flatten(k, v, data)
+    -> jsonpickle.pickler.Pickler._flatten_key_value_pair
+    reject jsonpickle.pickler.Pickler.flatten: flatten is the bound method self._flatten_key_value_pair (line 827)
+    note: the local flatten of line 827
+832:19 call  hasattr(obj, 'default_factory')
+    -> <builtin>.hasattr
+832:56 call  callable(obj.default_factory)
+    -> <builtin>.callable
+834:28 call  util.is_type(factory)
+    -> jsonpickle.util.is_type
+836:35 call  _mktyperef(factory)
+    -> jsonpickle.pickler._mktyperef
+840:31 call  self._mkref(factory)
+    -> jsonpickle.pickler.Pickler._mkref
+    reject jsonpickle.unpickler.Unpickler._mkref: self is a Pickler
+844:55 call  self._flatten_obj_instance(handlers.CloneFactory(factory()))
+    -> jsonpickle.pickler.Pickler._flatten_obj_instance
+844:77 call  handlers.CloneFactory(factory())
+    -> jsonpickle.handlers.CloneFactory.__init__
+844:85 call  factory()
+    -> jsonpickle.handlers.CloneFactory.__call__
+    note: factory is the default_factory of the dict, a callable that is not a type: the client's callable (client code), or the CloneFactory that the unpickler puts into a defaultdict that it restores from the package's own output (unpickler.py:854-855), when the client encodes the decoded defaultdict again (jsonpickle.md, judgement J6)
+848:41 call  self._getref(factory)
+    -> jsonpickle.pickler.Pickler._getref
+852:19 call  hasattr(obj, '__dict__')
+    -> <builtin>.hasattr
+853:27 call  self._mkref(obj.__dict__)
+    -> jsonpickle.pickler.Pickler._mkref
+    reject jsonpickle.unpickler.Unpickler._mkref: self is a Pickler
+855:39 call  self._flatten_dict_obj(obj.__dict__, dict_data, exclude=e...
+    -> jsonpickle.pickler.Pickler._flatten_dict_obj
+858:48 call  self._getref(obj.__dict__)
+    -> jsonpickle.pickler.Pickler._getref
+
+[jsonpickle.pickler.Pickler._get_flattener]
+863:16 call  type(obj)
+    -> <builtin>.type
+864:27 call  self._mkref(obj)
+    -> jsonpickle.pickler.Pickler._mkref
+    reject jsonpickle.unpickler.Unpickler._mkref: self is a Pickler
+866:47 call  type(obj)
+    -> <builtin>.type
+872:18 call  type(obj)
+    -> <builtin>.type
+881:37 call  util.is_module_function(obj)
+    -> jsonpickle.util.is_module_function
+884:28 call  util.is_object(obj)
+    -> jsonpickle.util.is_object
+887:26 call  util.is_type(obj)
+    -> jsonpickle.util.is_type
+891:29 call  self._pickle_warning(obj)
+    -> jsonpickle.pickler.Pickler._pickle_warning
+
+[jsonpickle.pickler.Pickler._get_flattener.<lambda1>]
+877:24 call  type(obj)
+    -> <builtin>.type
+878:46 call  self._flatten(v)
+    -> jsonpickle.pickler.Pickler._flatten
+
+[jsonpickle.pickler.Pickler._flatten_sequence_obj]
+896:19 call  hasattr(obj, '__dict__')
+    -> <builtin>.hasattr
+897:35 call  self._flatten_dict_obj(obj.__dict__, data)
+    -> jsonpickle.pickler.Pickler._flatten_dict_obj
+898:31 call  self._flatten(v)
+    -> jsonpickle.pickler.Pickler._flatten
+
+== jsonpickle.tags_pd
+
+[jsonpickle.tags_pd]
+219:17 call  list( dict.fromkeys( [dtype for dtype in get_all_numpy_dt...
+    -> <builtin>.list
+220:18 call  dict.fromkeys( [dtype for dtype in get_all_numpy_dtype_st...
+    -> <builtin>.dict.fromkeys
+221:56 call  get_all_numpy_dtype_strings()
+    -> jsonpickle.tags_pd.get_all_numpy_dtype_strings
+221:72 call  isinstance(dtype, str)
+    -> <builtin>.isinstance
+225:17 call  list( dict.fromkeys( [dtype for dtype in get_all_pandas_d...
+    -> <builtin>.list
+226:18 call  dict.fromkeys( [dtype for dtype in get_all_pandas_dtype_s...
+    -> <builtin>.dict.fromkeys
+227:57 call  get_all_pandas_dtype_strings()
+    -> jsonpickle.tags_pd.get_all_pandas_dtype_strings
+227:73 call  isinstance(dtype, str)
+    -> <builtin>.isinstance
+232:42 call  get_smallest_unique_substrings(np_dtypes, prefix="np")
+    -> jsonpickle.tags_pd.get_smallest_unique_substrings
+233:16 call  TYPE_MAP.update(get_smallest_unique_substrings(pd_dtypes,...
+    -> <builtin>.dict.update
+233:47 call  get_smallest_unique_substrings(pd_dtypes, prefix="pd")
+    -> jsonpickle.tags_pd.get_smallest_unique_substrings
+235:52 call  TYPE_MAP.items()
+    -> <builtin>.dict.items
+
+[jsonpickle.tags_pd.split_letters_numbers_brackets]
+18:31 call  re.search(r"\[.*?\]", s)
+    -> re.search
+20:45 call  brackets_match.group()
+    -> re.Match.group
+21:28 call  s.replace(brackets_part, "")
+    -> <builtin>.str.replace
+27:16 call  len(s_clean)
+    -> <builtin>.len
+28:51 call  s_clean[index - 1].isdigit()
+    -> <builtin>.str.isdigit
+
+[jsonpickle.tags_pd.get_smallest_unique_substrings]
+36:26 call  set()
+    -> <builtin>.set
+37:29 call  set()
+    -> <builtin>.set
+41:26 call  isinstance(s, str)
+    -> <builtin>.isinstance
+45:83 call  split_letters_numbers_brackets(s2)
+    -> jsonpickle.tags_pd.split_letters_numbers_brackets
+46:42 call  letters_part.lower()
+    -> <builtin>.str.lower
+54:36 call  used_substrings.add(substr)
+    -> <builtin>.set.add
+60:36 call  used_substrings.add(substr)
+    -> <builtin>.set.add
+74:44 call  used_substrings.add(substr)
+    -> <builtin>.set.add
+85:48 call  used_substrings.add(substr)
+    -> <builtin>.set.add
+89:40 call  range(1, len(letters_part) + 1)
+    -> <builtin>.range
+89:47 call  len(letters_part)
+    -> <builtin>.len
+93:48 call  used_substrings.add(substr)
+    -> <builtin>.set.add
+98:36 call  range(1, len(letters_part) + 1)
+    -> <builtin>.range
+98:43 call  len(letters_part)
+    -> <builtin>.len
+102:44 call  used_substrings.add(substr)
+    -> <builtin>.set.add
+105:39 call  used_letters_parts.add(letters_part)
+    -> <builtin>.set.add
+110:32 call  used_substrings.add(s)
+    -> <builtin>.set.add
+
+[jsonpickle.tags_pd.all_subclasses]
+120:21 call  set()
+    -> <builtin>.set
+121:39 call  cls.__subclasses__()
+    -> <builtin>.type.__subclasses__
+    note: cls is pandas' ExtensionDtype (line 202) or one of its subclasses, classes that the package itself enumerates, not client objects; their metaclass is type (pandas core/dtypes/base.py), whose __subclasses__ they inherit (judgement J9)
+122:23 call  subclasses.add(subclass)
+    -> <builtin>.set.add
+123:26 call  subclasses.update(all_subclasses(subclass))
+    -> <builtin>.set.update
+123:41 call  all_subclasses(subclass)
+    -> jsonpickle.tags_pd.all_subclasses
+124:16 call  list(subclasses)
+    -> <builtin>.list
+
+[jsonpickle.tags_pd.get_all_numpy_dtype_strings]
+131:38 call  np.sctypeDict.values()
+    -> <builtin>.dict.values
+133:33 call  np.dtype(dtype)
+    -> numpy.dtype
+    note: a value site by name only (jsonpickle/ext/numpy.py:153 assigns an attribute dtype); np.dtype is numpy's dtype class
+134:26 call  dtypes.append(dtype_obj.name.lower())
+    -> <builtin>.list.append
+134:47 call  dtype_obj.name.lower()
+    -> <builtin>.str.lower
+142:27 call  list( dict.fromkeys( [ "datetime64[" + re.search(r"\[(.*?...
+    -> <builtin>.list
+143:26 call  dict.fromkeys( [ "datetime64[" + re.search(r"\[(.*?)\]", ...
+    -> <builtin>.dict.fromkeys
+145:46 call  re.search(r"\[(.*?)\]", var)
+    -> re.search
+145:71 call  re.search(r"\[(.*?)\]", var).group(1)
+    -> re.Match.group
+147:33 call  re.search(r"\[(.*?)\]", var)
+    -> re.search
+151:27 call  list( dict.fromkeys( [ "timedelta64[" + re.search(r"\[(.*...
+    -> <builtin>.list
+152:26 call  dict.fromkeys( [ "timedelta64[" + re.search(r"\[(.*?)\]",...
+    -> <builtin>.dict.fromkeys
+154:47 call  re.search(r"\[(.*?)\]", var)
+    -> re.search
+154:72 call  re.search(r"\[(.*?)\]", var).group(1)
+    -> re.Match.group
+156:33 call  re.search(r"\[(.*?)\]", var)
+    -> re.search
+195:16 call  list(dict.fromkeys(dtypes))
+    -> <builtin>.list
+195:30 call  dict.fromkeys(dtypes)
+    -> <builtin>.dict.fromkeys
+
+[jsonpickle.tags_pd.get_all_pandas_dtype_strings]
+202:38 call  all_subclasses(ExtensionDtype)
+    -> jsonpickle.tags_pd.all_subclasses
+206:19 call  hasattr(dtype_cls, "name")
+    -> <builtin>.hasattr
+209:30 call  dtypes.append(dtype_name.lower())
+    -> <builtin>.list.append
+209:47 call  dtype_name.lower()
+    -> <builtin>.str.lower
+    note: dtype_name is the class attribute name of a pandas ExtensionDtype subclass: a str, or a property object, whose missing lower raises AttributeError (caught at line 210)
+214:18 call  dtypes.extend([pd.Timestamp, pd.Timedelta, pd.Period, pd....
+    -> <builtin>.list.extend
+216:16 call  list(dict.fromkeys(dtypes))
+    -> <builtin>.list
+216:30 call  dict.fromkeys(dtypes)
+    -> <builtin>.dict.fromkeys
+
+== jsonpickle.unpickler
+
+[jsonpickle.unpickler.decode]
+89:26 call  warnings.warn( "keys will default to True in jsonpickle 5...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+95:26 call  warnings.warn( "safe=False is deprecated and will be remo...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+101:26 call  warnings.warn( "backend is deprecated and will be removed...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+108:26 call  warnings.warn( "v1_decode is deprecated and will be remov...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+114:18 call  isinstance(on_missing, str)
+    -> <builtin>.isinstance
+115:38 call  on_missing.lower()
+    -> <builtin>.str.lower
+116:30 call  util.is_function(on_missing)
+    -> jsonpickle.util.is_function
+117:22 call  warnings.warn( "Unpickler.on_missing must be a string or ...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+122:35 call  Unpickler( keys=keys, backend=backend, safe=safe, v1_deco...
+    -> jsonpickle.unpickler.Unpickler.__init__
+130:26 call  backend.decode(string)
+    -> jsonpickle.backend.JSONBackend.decode
+    reject jsonpickle.unpickler.decode: the receiver is the backend, jsonpickle.backend.json or the JSONBackend that the client passes (documented at line 29)
+131:27 call  context.restore(data, reset=reset, classes=classes)
+    -> jsonpickle.unpickler.Unpickler.restore
+    note: context is the Unpickler made at line 122, or the pre-built Unpickler that the client passes (documented at lines 32-36; _restore_pickled_key passes self)
+
+[jsonpickle.unpickler._safe_hasattr]
+137:32 call  object.__getattribute__(obj, attr)
+    -> <builtin>.object.__getattribute__
+
+[jsonpickle.unpickler._is_json_key]
+145:22 call  isinstance(key, str)
+    -> <builtin>.isinstance
+145:51 call  key.startswith(tags.JSON_KEY)
+    -> <builtin>.str.startswith
+
+[jsonpickle.unpickler._obj_setattr]
+201:12 call  setattr(obj, attr, proxy.get())
+    -> <builtin>.setattr
+201:33 call  proxy.get()
+    -> jsonpickle.unpickler._Proxy.get
+    -> jsonpickle.unpickler._IDProxy.get
+    note: proxy is a value that _restore_from_dict records because it is a _Proxy (lines 767-768): a _Proxy that _mkref stored (lines 559, 833, 894) and _restore_id returned, or an _IDProxy of _restore_id (line 631)
+
+[jsonpickle.unpickler._obj_setvalue]
+206:25 call  proxy.get()
+    -> jsonpickle.unpickler._Proxy.get
+    -> jsonpickle.unpickler._IDProxy.get
+    note: proxy is a value that _restore_list and _restore_dict record because it is a _Proxy (lines 527-532, 947-948, 960-961): a stored _Proxy or an _IDProxy of _restore_id (line 631)
+
+[jsonpickle.unpickler.loadclass]
+229:54 call  module_and_name.rsplit('.', 1)
+    -> <builtin>.str.rsplit
+233:34 call  module_and_name.split('.')
+    -> <builtin>.str.split
+237:23 call  range(len(names) - 1, 0, -1)
+    -> <builtin>.range
+237:27 call  len(names)
+    -> <builtin>.len
+238:46 call  util.untranslate_module_name('.'.join(names[:up_to]))
+    -> jsonpickle.util.untranslate_module_name
+238:55 call  '.'.join(names[:up_to])
+    -> <builtin>.str.join
+240:23 call  __import__(module)
+    -> <builtin>.__import__
+243:30 call  getattr(obj, class_name)
+    -> <builtin>.getattr
+249:20 call  type(None)
+    -> <builtin>.type
+
+[jsonpickle.unpickler.has_tag]
+267:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.unpickler.getargs]
+273:15 call  has_tag(obj, tags.NEWARGSEX)
+    -> jsonpickle.unpickler.has_tag
+274:25 call  ValueError('__newargs_ex__ returns both args and kwargs')
+    -> <builtin>.ValueError
+276:15 call  has_tag(obj, tags.NEWARGS)
+    -> jsonpickle.unpickler.has_tag
+279:15 call  has_tag(obj, tags.INITARGS)
+    -> jsonpickle.unpickler.has_tag
+287:24 call  loadclass(obj_dict, classes=classes)
+    -> jsonpickle.unpickler.loadclass
+290:15 call  hasattr(typeref, '_fields')
+    -> <builtin>.hasattr
+291:15 call  len(typeref._fields)
+    -> <builtin>.len
+291:39 call  len(seq_list)
+    -> <builtin>.len
+
+[jsonpickle.unpickler.make_blank_classic]
+308:31 call  _trivialclassic()
+    note: _trivialclassic (line 296) defines no __init__; its instantiation runs object.__init__, which is no edge
+
+[jsonpickle.unpickler.loadrepr]
+326:36 call  reprstr.split('/')
+    -> <builtin>.str.split
+327:22 call  locals()
+    -> <builtin>.locals
+330:33 call  module.split('.', 1)
+    -> <builtin>.str.split
+331:37 call  __import__(module)
+    -> <builtin>.__import__
+332:16 call  eval(evalstr, mylocals)
+    -> <builtin>.eval
+    -> datetime.datetime.now
+    note: calls in the evaluated string belong to loadrepr; the string is the client's (a py/repr entry of old jsonpickle output), whose calls are client values, except the documented example of the docstring (line 321), 'datetime/datetime.datetime.now()', which calls datetime.datetime.now (jsonpickle.md, judgement J10)
+
+[jsonpickle.unpickler._loadmodule]
+343:42 call  module_str.split('/')
+    -> <builtin>.str.split
+345:28 call  __import__(module)
+    -> <builtin>.__import__
+348:40 call  identifier.split('.')
+    -> <builtin>.str.split
+350:60 call  module.startswith(f'{first_identifier}.')
+    -> <builtin>.str.startswith
+354:29 call  getattr(result, name)
+    -> <builtin>.getattr
+
+[jsonpickle.unpickler.Unpickler.__init__]
+399:19 call  self.reset()
+    -> jsonpickle.unpickler.Unpickler.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler._Proxy.reset: self is an Unpickler
+
+[jsonpickle.unpickler.Unpickler._swap_proxies]
+420:19 call  method(obj, attr, proxy)
+    -> jsonpickle.unpickler._obj_setattr
+    -> jsonpickle.unpickler._obj_setvalue
+    note: method is the fourth item of an entry of _proxies: _obj_setvalue (lines 526-532, 948, 961) or _obj_setattr (lines 708, 768)
+
+[jsonpickle.unpickler.Unpickler._restore]
+426:26 call  isinstance(obj, (str, list, dict, set, tuple))
+    -> <builtin>.isinstance
+429:41 call  self._restore_tags(obj)
+    -> jsonpickle.unpickler.Unpickler._restore_tags
+430:23 call  restore(obj)
+    -> jsonpickle.unpickler._passthrough
+    -> jsonpickle.unpickler.Unpickler._restore_tuple
+    -> jsonpickle.unpickler.Unpickler._restore_set
+    -> jsonpickle.unpickler.Unpickler._restore_base64
+    -> jsonpickle.unpickler.Unpickler._restore_base85
+    -> jsonpickle.unpickler.Unpickler._restore_id
+    -> jsonpickle.unpickler.Unpickler._restore_iterator
+    -> jsonpickle.unpickler.Unpickler._restore_object
+    -> jsonpickle.unpickler.Unpickler._restore_type
+    -> jsonpickle.unpickler.Unpickler._restore_reduce
+    -> jsonpickle.unpickler.Unpickler._restore_function
+    -> jsonpickle.unpickler.Unpickler._restore_module
+    -> jsonpickle.unpickler.Unpickler._restore_repr_safe
+    -> jsonpickle.unpickler.Unpickler._restore_repr
+    -> jsonpickle.unpickler.Unpickler._restore_dict
+    -> jsonpickle.unpickler.Unpickler._restore_list
+    reject jsonpickle.unpickler.Unpickler.restore: restore is the local of line 427 or 429, not the method
+    note: restore is the default _passthrough of the parameter (line 427; no caller passes it) or what _restore_tags returns (lines 971-1012): _passthrough, or one of the fifteen _restore_ methods of a tag, a dict or a list (_restore_repr when safe is False)
+
+[jsonpickle.unpickler.Unpickler.restore]
+445:23 call  self.reset()
+    -> jsonpickle.unpickler.Unpickler.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler._Proxy.reset: self is an Unpickler
+447:34 call  self.register_classes(classes)
+    -> jsonpickle.unpickler.Unpickler.register_classes
+448:30 call  self._restore(obj)
+    -> jsonpickle.unpickler.Unpickler._restore
+450:31 call  self._swap_proxies()
+    -> jsonpickle.unpickler.Unpickler._swap_proxies
+
+[jsonpickle.unpickler.Unpickler.register_classes]
+459:22 call  isinstance(classes, (list, tuple, set))
+    -> <builtin>.isinstance
+461:38 call  self.register_classes(cls)
+    -> jsonpickle.unpickler.Unpickler.register_classes
+462:24 call  isinstance(classes, dict)
+    -> <builtin>.isinstance
+463:33 call  self._classes.update( ( cls if isinstance(cls, str) else ...
+    -> <builtin>.dict.update
+465:38 call  isinstance(cls, str)
+    -> <builtin>.isinstance
+465:74 call  util.importable_name(cls)
+    -> jsonpickle.util.importable_name
+468:50 call  classes.items()
+    -> <builtin>.dict.items
+    note: classes is a dict (isinstance, line 462)
+471:47 call  util.importable_name(classes)
+    -> jsonpickle.util.importable_name
+
+[jsonpickle.unpickler.Unpickler._restore_base64]
+475:34 call  util.b64decode(obj[tags.B64].encode('utf-8'))
+    -> jsonpickle.util.b64decode
+475:55 call  obj[tags.B64].encode('utf-8')
+    -> <builtin>.str.encode
+    reject jsonpickle.backend.JSONBackend.encode, jsonpickle.pickler.encode: the receiver is the base64 text of the decoded JSON, a str
+    note: a non-str value raises AttributeError, which line 476 catches
+
+[jsonpickle.unpickler.Unpickler._restore_base85]
+481:34 call  util.b85decode(obj[tags.B85].encode('utf-8'))
+    -> jsonpickle.util.b85decode
+481:55 call  obj[tags.B85].encode('utf-8')
+    -> <builtin>.str.encode
+    reject jsonpickle.backend.JSONBackend.encode, jsonpickle.pickler.encode: the receiver is the base85 text of the decoded JSON, a str
+    note: a non-str value raises AttributeError, which line 482 catches
+
+[jsonpickle.unpickler.Unpickler._refname]
+507:30 call  '/'.join(self._namestack)
+    -> <builtin>.str.join
+
+[jsonpickle.unpickler.Unpickler._mkref]
+510:20 call  id(obj)
+    -> <builtin>.id
+514:43 call  len(self._objs)
+    -> <builtin>.len
+515:30 call  self._objs.append(obj)
+    -> <builtin>.list.append
+518:41 call  self._refname()
+    -> jsonpickle.unpickler.Unpickler._refname
+
+[jsonpickle.unpickler.Unpickler._restore_list]
+523:20 call  self._mkref(parent)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+524:34 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+525:22 call  parent.extend(children)
+    -> <builtin>.list.extend
+529:40 call  enumerate(parent)
+    -> <builtin>.enumerate
+530:26 call  isinstance(value, _Proxy)
+    -> <builtin>.isinstance
+532:29 call  self._proxies.extend(proxies)
+    -> <builtin>.list.extend
+
+[jsonpickle.unpickler.Unpickler._restore_iterator]
+537:24 call  iter(self._restore_list(obj[tags.ITERATOR]))
+    -> <builtin>.iter
+537:43 call  self._restore_list(obj[tags.ITERATOR])
+    -> jsonpickle.unpickler.Unpickler._restore_list
+539:24 call  iter([])
+    -> <builtin>.iter
+
+[jsonpickle.unpickler.Unpickler._swapref]
+542:22 call  id(proxy)
+    -> <builtin>.id
+543:25 call  id(instance)
+    -> <builtin>.id
+550:37 call  self._refname()
+    -> jsonpickle.unpickler.Unpickler._refname
+
+[jsonpickle.unpickler.Unpickler._restore_reduce]
+558:23 call  _Proxy()
+    -> jsonpickle.unpickler._Proxy.__init__
+559:20 call  self._mkref(proxy)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+561:30 call  list(map(self._restore, obj[tags.REDUCE]))
+    -> <builtin>.list
+561:34 call  map(self._restore, obj[tags.REDUCE])
+    -> <builtin>.map
+    -> jsonpickle.unpickler.Unpickler._restore
+    note: list() at the same line iterates the map and calls _restore back
+564:24 call  proxy.reset(result)
+    -> jsonpickle.unpickler._Proxy.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler.Unpickler.reset: the receiver is a _Proxy made in this function
+565:26 call  self._swapref(proxy, result)
+    -> jsonpickle.unpickler.Unpickler._swapref
+567:15 call  len(reduce_val)
+    -> <builtin>.len
+568:30 call  reduce_val.extend([None] * (5 - len(reduce_val)))
+    -> <builtin>.list.extend
+568:48 call  len(reduce_val)
+    -> <builtin>.len
+571:39 call  getattr(f, '__name__', '')
+    -> <builtin>.getattr
+574:30 call  isinstance(cls, type)
+    -> <builtin>.isinstance
+575:36 call  self._restore(cls)
+    -> jsonpickle.unpickler.Unpickler._restore
+576:33 call  cls.__new__(cls, *args[1:])
+    note: no callee: cls is the class of a py/newobj reduce entry, which the pickler writes only for the client objects whose __reduce_ex__ returns __newobj__; a client class (B5)
+578:28 call  callable(f)
+    -> <builtin>.callable
+580:28 call  proxy.reset(result)
+    -> jsonpickle.unpickler._Proxy.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler.Unpickler.reset: the receiver is a _Proxy made in this function
+581:30 call  self._swapref(proxy, result)
+    -> jsonpickle.unpickler.Unpickler._swapref
+583:23 call  f(*args)
+    -> datetime.timedelta
+    -> pandas._libs.tslibs.timedeltas._timedelta_unpickle
+    -> pandas._libs.tslibs.nattype._nat_unpickle
+    -> datetime.date
+    -> datetime.datetime
+    -> <builtin>.range
+    -> numpy._core.multiarray._reconstruct
+    -> numpy.dtype
+    -> numpy._core.multiarray.scalar
+    -> pandas._libs.tslibs.timestamps._unpickle_timestamp
+    -> pandas.Period
+    -> pandas.Interval
+    -> pandas.core.arrays.sparse.IntIndex
+    -> pandas.core.arrays.sparse.BlockIndex
+    -> pandas.tseries.offsets.Day
+    -> pandas.tseries.offsets.Hour
+    -> pandas.tseries.offsets.Minute
+    -> pandas.tseries.offsets.Second
+    -> pandas.tseries.offsets.Milli
+    -> pandas.tseries.offsets.Micro
+    -> pandas.tseries.offsets.Nano
+    -> pandas.tseries.offsets.BusinessDay
+    -> pandas.tseries.offsets.YearEnd
+    -> pandas.tseries.offsets.QuarterEnd
+    -> pandas.tseries.offsets.MonthEnd
+    -> pandas.tseries.offsets.Week
+    note: f is the restored first item of a py/reduce entry, which the pickler writes from the __reduce__ or __reduce_ex__ of the object (pickler.py:608-676): for a client object the client's reconstructor, a client callback; for the Python timedelta that a numpy handler forwards (pickler.py:610) the class datetime.timedelta (Codex audit round 1, G2; jsonpickle.md, judgement J11). For the Timedelta and NaT values that the pandas handlers forward, the reconstructors that their reducers return: _timedelta_unpickle and _nat_unpickle (pandas 3.0.6 timedeltas.pyx:1044, 2320-2322; nattype.pyx:79, 397-398), Cython functions named by their module path; the pickler writes them as py/function (is_cython_function), and loadclass restores them (Codex audit round 1, Unsure 2). After a public unregister (ruling (d) after Codex audit round 1: a default handler removed with the public unregister is an admitted state): the reconstructors that date.__reduce__, datetime.__reduce_ex__ and range.__reduce__ return for the forwarded values (pickler.py:610, 622): datetime.date, datetime.datetime and range; the range subrecord is restored before its enclosing RangeIndex. Codex audit round 2: the reconstructors that the library reducers at pickler.py:610 and 622 return: _reconstruct of an ndarray (methods.c:1785; __module__ set in multiarray.py:54), numpy.dtype (descriptor.c:2768), scalar of a numpy scalar (scalartypes.c.src:2406), _unpickle_timestamp, the Period and Interval classes, the sparse index classes and the offset classes
+587:36 call  stage1.__setstate__(state)
+    -> numpy.ndarray.__setstate__
+    -> numpy.dtypes.BoolDType.__setstate__
+    -> numpy.dtypes.Int8DType.__setstate__
+    -> numpy.dtypes.Int16DType.__setstate__
+    -> numpy.dtypes.Int32DType.__setstate__
+    -> numpy.dtypes.Int64DType.__setstate__
+    -> numpy.dtypes.UInt8DType.__setstate__
+    -> numpy.dtypes.UInt16DType.__setstate__
+    -> numpy.dtypes.UInt32DType.__setstate__
+    -> numpy.dtypes.UInt64DType.__setstate__
+    -> numpy.dtypes.Float16DType.__setstate__
+    -> numpy.dtypes.Float32DType.__setstate__
+    -> numpy.dtypes.Float64DType.__setstate__
+    -> numpy.dtypes.LongDoubleDType.__setstate__
+    -> numpy.dtypes.Complex64DType.__setstate__
+    -> numpy.dtypes.Complex128DType.__setstate__
+    -> numpy.dtypes.CLongDoubleDType.__setstate__
+    -> numpy.dtypes.ObjectDType.__setstate__
+    -> numpy.dtypes.BytesDType.__setstate__
+    -> numpy.dtypes.StrDType.__setstate__
+    -> numpy.dtypes.VoidDType.__setstate__
+    -> numpy.dtypes.DateTime64DType.__setstate__
+    -> numpy.dtypes.TimeDelta64DType.__setstate__
+    note: stage1 is what the reconstructor of line 583 made: for a client object a client value, whose __setstate__ is client code (B5); for the library values that the package forwards (Codex audit round 2): an ndarray, whose reducer state is nonempty (methods.c:1840-1860), and a numpy dtype, rebuilt by numpy.dtype as one of the 22 sized dtype classes (descriptor.c:2768, 3488)
+594:54 call  stage1.__dict__.items()
+    note: no callee: stage1 is what the client reconstructor returns (line 583); its __dict__ is an attribute of a client object, which is opaque (B5, cachetools C2; judgement J9, audit F3). The edge to dict.items stays through lines 600 and 607
+595:41 call  state.setdefault(k, v)
+    -> <builtin>.dict.setdefault
+    note: state is the restored third item of the reduce entry; a value without setdefault raises AttributeError, which line 597 catches
+600:48 call  state.items()
+    -> <builtin>.dict.items
+601:36 call  setattr(stage1, k, v)
+    -> <builtin>.setattr
+605:51 call  stage1.__dict__.update(dict_state)
+    note: no callee: stage1 is what the client reconstructor returns (line 583); its __dict__ is an attribute of a client object, which is opaque (B5, cachetools C2; judgement J9, audit F3)
+607:58 call  slots_state.items()
+    -> <builtin>.dict.items
+608:40 call  setattr(stage1, k, v)
+    -> <builtin>.setattr
+613:30 call  stage1.extend(listitems)
+    note: no callee: the receiver is an object that a client class or reduce callable of the decoded data made (client code, B5); no package class reaches this call
+616:34 call  stage1.append(x)
+    note: no callee: the receiver is an object that a client class or reduce callable of the decoded data made (client code, B5); no package class reaches this call
+620:35 call  stage1.__setitem__(k, v)
+    note: no callee: the receiver is an object that a client class or reduce callable of the decoded data made (client code, B5); no package class reaches this call
+622:20 call  proxy.reset(stage1)
+    -> jsonpickle.unpickler._Proxy.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler.Unpickler.reset: the receiver is a _Proxy made in this function
+623:22 call  self._swapref(proxy, stage1)
+    -> jsonpickle.unpickler.Unpickler._swapref
+
+[jsonpickle.unpickler.Unpickler._restore_id]
+631:28 call  _IDProxy(self._objs, idx)
+    -> jsonpickle.unpickler._IDProxy.__init__
+    reject jsonpickle.unpickler._Proxy.__init__: _IDProxy defines __init__ (line 188), which does not call super()
+
+[jsonpickle.unpickler.Unpickler._restore_type]
+636:28 call  loadclass(obj[tags.TYPE], classes=self._classes)
+    -> jsonpickle.unpickler.loadclass
+
+[jsonpickle.unpickler.Unpickler._restore_module]
+642:26 call  _loadmodule(obj[tags.MODULE])
+    -> jsonpickle.unpickler._loadmodule
+643:27 call  self._mkref(obj)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+
+[jsonpickle.unpickler.Unpickler._restore_repr_safe]
+646:26 call  _loadmodule(obj[tags.REPR])
+    -> jsonpickle.unpickler._loadmodule
+647:27 call  self._mkref(obj)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+
+[jsonpickle.unpickler.Unpickler._restore_repr]
+650:23 call  loadrepr(obj[tags.REPR])
+    -> jsonpickle.unpickler.loadrepr
+651:27 call  self._mkref(obj)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+
+[jsonpickle.unpickler.Unpickler._loadfactory]
+659:29 call  self._restore(default_factory)
+    -> jsonpickle.unpickler.Unpickler._restore
+
+[jsonpickle.unpickler.Unpickler._process_missing]
+666:26 call  warnings.warn('Unpickler._restore_object could not find %...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+668:44 call  errors.ClassNotFoundError( 'Unpickler.restore_object coul...
+    -> jsonpickle.errors.ClassNotFoundError.__init__
+671:30 call  util.is_function(self.on_missing)
+    -> jsonpickle.util.is_function
+672:28 call  self.on_missing(class_name)
+    note: no callee: on_missing is the client's function (documented at lines 69-73), a client callback
+
+[jsonpickle.unpickler.Unpickler._restore_pickled_key]
+676:24 call  _is_json_key(key)
+    -> jsonpickle.unpickler._is_json_key
+677:25 call  decode( key[len(tags.JSON_KEY) :], backend=self.backend, ...
+    -> jsonpickle.unpickler.decode
+    reject jsonpickle.backend.JSONBackend.decode: decode is the function of this module (line 15)
+678:24 call  len(tags.JSON_KEY)
+    -> <builtin>.len
+
+[jsonpickle.unpickler.Unpickler._restore_from_dict]
+707:43 call  self._restore_key_fn()
+    -> jsonpickle.unpickler.Unpickler._restore_key_fn
+711:31 call  util.items(obj)
+    -> jsonpickle.util.items
+715:26 call  isinstance(k, (int, float))
+    -> <builtin>.isinstance
+716:34 call  k.__str__()
+    -> <builtin>.int.__str__
+    -> <builtin>.float.__str__
+    -> <builtin>.bool.__str__
+    note: k is an int, a bool or a float (isinstance, line 715): a key of a backend that decodes numeric keys (yaml; a bool key also with numeric_keys=True, pickler.py:492, 797; audit F5), or a key that _restore_pickled_key restored in a state dict
+719:35 call  self._namestack.append(str_k)
+    -> <builtin>.list.append
+721:32 call  restore_key(k)
+    -> jsonpickle.unpickler.Unpickler._restore_pickled_key
+    -> jsonpickle.unpickler._passthrough
+    note: restore_key is what _restore_key_fn returns (lines 698-702): _restore_pickled_key or _passthrough
+723:38 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+726:34 call  util.is_noncomplex(instance)
+    -> jsonpickle.util.is_noncomplex
+726:75 call  util.is_dictionary_subclass(instance)
+    -> jsonpickle.util.is_dictionary_subclass
+729:32 call  setattr(instance, k, value)
+    -> <builtin>.setattr
+736:40 call  self._namestack.pop()
+    -> <builtin>.list.pop
+739:36 call  k.startswith('__')
+    -> <builtin>.str.startswith
+    note: k is an attribute name, a str key of the decoded object
+741:32 call  setattr(instance, k, value)
+    -> <builtin>.setattr
+746:32 call  setattr(instance, f'_{k}', value)
+    -> <builtin>.setattr
+750:43 call  object.__setattr__(instance, k, value)
+    -> <builtin>.object.__setattr__
+754:36 call  hasattr(instance, '__slots__')
+    -> <builtin>.hasattr
+755:40 call  len(instance.__slots__)
+    -> <builtin>.len
+757:43 call  issubclass(instance.__class__, (int, str))
+    -> <builtin>.issubclass
+763:28 call  setattr(instance, f'_{instance.__class__.__name__}{k}', v...
+    -> <builtin>.setattr
+767:26 call  isinstance(value, _Proxy)
+    -> <builtin>.isinstance
+768:37 call  self._proxies.append((instance, k, value, method))
+    -> <builtin>.list.append
+771:32 call  self._namestack.pop()
+    -> <builtin>.list.pop
+775:42 call  instance.__class__(deferred)
+    note: no callee: instance is a struct_time or a client dict subclass that refused item assignment (line 732); its class is a client value (an immutable mapping, as the comment at line 774 says), B5
+
+[jsonpickle.unpickler.Unpickler._restore_state]
+780:30 call  self._restore(obj[tags.STATE])
+    -> jsonpickle.unpickler.Unpickler._restore
+782:23 call  isinstance(state, tuple)
+    -> <builtin>.isinstance
+782:45 call  len(state)
+    -> <builtin>.len
+782:72 call  isinstance(state[1], dict)
+    -> <builtin>.isinstance
+784:54 call  isinstance(state[0], dict)
+    -> <builtin>.isinstance
+785:19 call  hasattr(instance, '__setstate__')
+    -> <builtin>.hasattr
+786:34 call  instance.__setstate__(state)
+    -> pandas.CategoricalDtype.__setstate__
+    -> pandas.DatetimeTZDtype.__setstate__
+    -> pandas.IntervalDtype.__setstate__
+    -> dateutil.tz.tz._ttinfo.__setstate__
+    note: instance is the client object that the py/object entry names, whose __setstate__ is client code (B5), or a library value that the package wrote with py/state (Codex audit round 3): CategoricalDtype, DatetimeTZDtype and IntervalDtype (pandas core/dtypes/dtypes.py:396, 965, 1429) and dateutil's _ttinfo (tz/tz.py:339-345). A lower bound (jsonpickle.md, "Open receiver sets")
+787:24 call  isinstance(state, dict)
+    -> <builtin>.isinstance
+791:47 call  self._restore_from_dict( state, instance, ignorereserved=...
+    -> jsonpickle.unpickler.Unpickler._restore_from_dict
+795:47 call  self._restore_from_dict( state[1], instance, ignorereserv...
+    -> jsonpickle.unpickler.Unpickler._restore_from_dict
+799:51 call  self._restore_from_dict( state[0], instance, ignorereserv...
+    -> jsonpickle.unpickler.Unpickler._restore_from_dict
+802:25 call  hasattr(instance, '__getnewargs__')
+    -> <builtin>.hasattr
+802:69 call  hasattr( instance, '__getnewargs_ex__' )
+    -> <builtin>.hasattr
+
+[jsonpickle.unpickler.Unpickler._restore_object_instance_variables]
+813:43 call  self._restore_from_dict(obj, instance)
+    -> jsonpickle.unpickler.Unpickler._restore_from_dict
+816:19 call  has_tag(obj, tags.SEQ)
+    -> jsonpickle.unpickler.has_tag
+817:23 call  hasattr(instance, 'append')
+    -> <builtin>.hasattr
+819:36 call  instance.append(self._restore(v))
+    -> pandas.api.typing.FrozenList.append
+    note: instance is a client list subclass, whose append is client code (B5), or a pandas FrozenList of a MultiIndex that the Series handler forwards with the Index and MultiIndex handlers unregistered (pandas core/indexes/multi.py:906, 1147): the pickler writes it with py/seq, and FrozenList.append is _disabled, which binds any arguments and raises inside its body (core/indexes/frozen.py:104-120) (Codex audit round 3, witness 5). A lower bound (jsonpickle.md, "Open receiver sets")
+819:50 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+820:25 call  hasattr(instance, 'add')
+    -> <builtin>.hasattr
+822:33 call  instance.add(self._restore(v))
+    note: no callee: instance is a client set subclass (pickler.py:894-903); its add is client code (B5)
+822:47 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+824:19 call  has_tag(obj, tags.STATE)
+    -> jsonpickle.unpickler.has_tag
+825:43 call  self._restore_state(obj, instance)
+    -> jsonpickle.unpickler.Unpickler._restore_state
+
+[jsonpickle.unpickler.Unpickler._restore_object_instance]
+832:23 call  _Proxy()
+    -> jsonpickle.unpickler._Proxy.__init__
+833:20 call  self._mkref(proxy)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+837:36 call  self._loadfactory(obj)
+    -> jsonpickle.unpickler.Unpickler._loadfactory
+839:19 call  has_tag(obj, tags.NEWARGSEX)
+    -> jsonpickle.unpickler.has_tag
+842:27 call  getargs(obj, classes=self._classes)
+    -> jsonpickle.unpickler.getargs
+845:33 call  self._restore(args)
+    -> jsonpickle.unpickler.Unpickler._restore
+847:35 call  self._restore(kwargs)
+    -> jsonpickle.unpickler.Unpickler._restore
+849:38 call  isinstance(cls, type)
+    -> <builtin>.isinstance
+849:60 call  getattr(cls, '__meta__', None)
+    -> <builtin>.getattr
+851:43 call  hasattr(cls, '__new__')
+    -> <builtin>.hasattr
+854:43 call  cls.__new__(cls, factory, *args, **kwargs)
+    note: no callee: cls is the class of a py/object entry with a default_factory, the client's defaultdict or dict subclass (B5)
+857:43 call  cls.__new__(cls, *args, **kwargs)
+    -> <builtin>.object.__new__
+    -> <builtin>.complex.__new__
+    -> pandas.api.typing.NAType.__new__
+    -> pandas.Index.__new__
+    -> pandas.RangeIndex.__new__
+    -> pandas.DatetimeIndex.__new__
+    -> pandas.TimedeltaIndex.__new__
+    -> pandas.PeriodIndex.__new__
+    -> pandas.CategoricalIndex.__new__
+    -> pandas.MultiIndex.__new__
+    -> pandas.arrays.BooleanArray.__new__
+    -> pandas.arrays.IntegerArray.__new__
+    -> pandas.arrays.FloatingArray.__new__
+    -> pandas.arrays.SparseArray.__new__
+    -> pandas.SparseDtype.__new__
+    -> pandas.BooleanDtype.__new__
+    -> pandas.Int8Dtype.__new__
+    -> pandas.Int16Dtype.__new__
+    -> pandas.Int32Dtype.__new__
+    -> pandas.Int64Dtype.__new__
+    -> pandas.UInt8Dtype.__new__
+    -> pandas.UInt16Dtype.__new__
+    -> pandas.UInt32Dtype.__new__
+    -> pandas.UInt64Dtype.__new__
+    -> pandas.Float32Dtype.__new__
+    -> pandas.Float64Dtype.__new__
+    note: cls is the class that a py/object entry names: a client class (client code, B5); jsonpickle.handlers.CloneFactory, which the pickler itself writes for the default_factory of a defaultdict (pickler.py:844) and which inherits object.__new__ (judgement J6); or complex, which the pickler writes with py/newargs for a Python complex that a numpy handler forwards (pickler.py:688; Codex audit round 1, G2). Also pandas.api.typing.NAType: NAType.__reduce__ returns the str "NA", which names no module (pickler.py:629-641), so the pickler writes the class and its empty __dict__, and decoding calls NAType.__new__ (pandas 3.0.6 _libs/missing.pyx:357, 396-403; Codex audit round 1, Unsure 2). After unregister(pandas.Index) with the Series handler kept (ruling (d) after Codex audit round 1: a default handler removed with the public unregister is an admitted state): the pickler writes a forwarded Index or RangeIndex as its class and __dict__ (ext/pandas.py:326), and decoding calls Index.__new__ or RangeIndex.__new__ with no data, which raises TypeError inside its body (pandas core/indexes/base.py:540-541, range.py:174-175). Codex audit round 2: (I) after unregister of pandas.Index and of the PeriodIndex or MultiIndex registration, the Series handler forwards these index classes; they are pickled through their __dict__ (is_list_like), and the no-data __new__ raises TypeError inside its body (datetimes.py:668, timedeltas.py:169, period.py:223, category.py:202, multi.py:297); (A) without any unregistration, Series.values gives a BooleanArray, IntegerArray, FloatingArray or SparseArray (blocks.py:2376), which define no reducer and no own __getstate__, so the pickler writes the class and its __dict__, which holds the array's dtype (boolean.py:340, sparse/array.py:506, the cached dtype of numeric.py:283); restoring each calls the class's __new__, named by the receiver class
+859:42 call  object.__new__(cls)
+    -> <builtin>.object.__new__
+865:31 call  cls(*args)
+    -> pandas.Index
+    -> pandas.RangeIndex
+    -> pandas.DatetimeIndex
+    -> pandas.TimedeltaIndex
+    -> pandas.PeriodIndex
+    -> pandas.CategoricalIndex
+    -> pandas.MultiIndex
+    note: cls is a client class that is not a type, or a class whose __new__ raised TypeError: a client value (B5), or, after unregister(pandas.Index) with the Series handler kept, the pandas.Index or pandas.RangeIndex whose __new__ raised at line 857; the class call binds with no arguments and raises inside its body (ruling (d) after Codex audit round 1: a default handler removed with the public unregister is an admitted state). Also (I, Codex audit round 2) the five index classes whose no-data __new__ raised at line 857: the class call binds and raises inside its body
+868:50 call  make_blank_classic(cls)
+    -> jsonpickle.unpickler.make_blank_classic
+870:42 call  self._process_missing(class_name)
+    -> jsonpickle.unpickler.Unpickler._process_missing
+871:39 call  self._mkref(obj)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+873:20 call  proxy.reset(instance)
+    -> jsonpickle.unpickler._Proxy.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler.Unpickler.reset: the receiver is a _Proxy made in this function
+874:22 call  self._swapref(proxy, instance)
+    -> jsonpickle.unpickler.Unpickler._swapref
+876:22 call  isinstance(instance, tuple)
+    -> <builtin>.isinstance
+879:59 call  self._restore_object_instance_variables(obj, instance)
+    -> jsonpickle.unpickler.Unpickler._restore_object_instance_variables
+881:25 call  _safe_hasattr(instance, 'default_factory')
+    -> jsonpickle.unpickler._safe_hasattr
+881:69 call  isinstance( instance.default_factory, _Proxy )
+    -> <builtin>.isinstance
+884:68 call  instance.default_factory.get()
+    -> jsonpickle.unpickler._Proxy.get
+    -> jsonpickle.unpickler._IDProxy.get
+    note: default_factory is a _Proxy or an _IDProxy here (isinstance, line 881): the factory that _restore_id returned for a reference to an object not yet made
+
+[jsonpickle.unpickler.Unpickler._restore_object]
+890:24 call  loadclass(class_name, classes=self._classes)
+    -> jsonpickle.unpickler.loadclass
+891:31 call  handlers.get(cls, handlers.get(class_name))
+    -> jsonpickle.handlers.Registry.get
+    note: handlers.get is the bound method registry.get (handlers.py:88)
+891:49 call  handlers.get(class_name)
+    -> jsonpickle.handlers.Registry.get
+    note: handlers.get is the bound method registry.get (handlers.py:88)
+893:27 call  _Proxy()
+    -> jsonpickle.unpickler._Proxy.__init__
+894:24 call  self._mkref(proxy)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+895:31 call  handler(self)
+    -> jsonpickle.handlers.BaseHandler.__init__
+    -> jsonpickle.handlers.BaseHandler.__call__
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.__init__
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerView.__init__
+    note: handler is a value of the registry, as at pickler.py:597: a handler class (BaseHandler.__init__, or the own __init__ of the two numpy classes) or a handler instance (BaseHandler.__call__); jsonpickle.md, judgement J4
+895:45 call  handler(self).restore(obj)
+    -> jsonpickle.ext.gmpy.GmpyMPZHandler.restore
+    -> jsonpickle.ext.numpy.NumpyDTypeHandler.restore
+    -> jsonpickle.ext.numpy.NumpyDatetimeHandler.restore
+    -> jsonpickle.ext.numpy.NumpyGenericHandler.restore
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandler.restore
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore
+    -> jsonpickle.ext.numpy.NumpyNDArrayHandlerView.restore
+    -> jsonpickle.ext.numpy.UnpickleableNumpyGenericHandler.restore
+    -> jsonpickle.ext.pandas.PandasDfHandler.restore
+    -> jsonpickle.ext.pandas.PandasIndexHandler.restore
+    -> jsonpickle.ext.pandas.PandasIntervalHandler.restore
+    -> jsonpickle.ext.pandas.PandasPeriodHandler.restore
+    -> jsonpickle.ext.pandas.PandasSeriesHandler.restore
+    -> jsonpickle.ext.pandas.PandasTimestampHandler.restore
+    -> jsonpickle.handlers.ArrayHandler.restore
+    -> jsonpickle.handlers.BaseHandler.restore
+    -> jsonpickle.handlers.DatetimeHandler.restore
+    -> jsonpickle.handlers.LockHandler.restore
+    -> jsonpickle.handlers.QueueHandler.restore
+    -> jsonpickle.handlers.RegexHandler.restore
+    -> jsonpickle.handlers.TextIOHandler.restore
+    -> jsonpickle.handlers.UUIDHandler.restore
+    reject jsonpickle.unpickler.Unpickler.restore: the receiver is a handler, never an Unpickler
+    note: the restore of each package handler class, as at pickler.py:597 (judgement J4); PandasPeriodIndexHandler and PandasMultiIndexHandler inherit PandasIndexHandler.restore
+896:24 call  proxy.reset(instance)
+    -> jsonpickle.unpickler._Proxy.reset
+    reject jsonpickle.pickler.Pickler.reset, jsonpickle.unpickler.Unpickler.reset: the receiver is a _Proxy made in this function
+897:26 call  self._swapref(proxy, instance)
+    -> jsonpickle.unpickler.Unpickler._swapref
+901:34 call  self._process_missing(class_name)
+    -> jsonpickle.unpickler.Unpickler._process_missing
+902:31 call  self._mkref(obj)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+904:45 call  self._restore_object_instance(obj, cls, class_name)
+    -> jsonpickle.unpickler.Unpickler._restore_object_instance
+
+[jsonpickle.unpickler.Unpickler._restore_function]
+907:25 call  loadclass(obj[tags.FUNCTION], classes=self._classes)
+    -> jsonpickle.unpickler.loadclass
+
+[jsonpickle.unpickler.Unpickler._restore_set]
+911:34 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+913:23 call  set()
+    -> <builtin>.set
+
+[jsonpickle.unpickler.Unpickler._restore_dict]
+918:24 call  self._mkref(data)
+    -> jsonpickle.unpickler.Unpickler._mkref
+    reject jsonpickle.pickler.Pickler._mkref: self is an Unpickler
+926:35 call  util.items(obj)
+    -> jsonpickle.util.items
+927:32 call  _is_json_key(k)
+    -> jsonpickle.unpickler._is_json_key
+929:30 call  isinstance(k, (int, float))
+    -> <builtin>.isinstance
+930:38 call  k.__str__()
+    -> <builtin>.int.__str__
+    -> <builtin>.float.__str__
+    -> <builtin>.bool.__str__
+    note: k is an int, a bool or a float (isinstance, line 929): a key of a backend that decodes numeric keys (yaml; a bool key also with numeric_keys=True, pickler.py:492, 797; audit F5)
+933:39 call  self._namestack.append(str_k)
+    -> <builtin>.list.append
+934:40 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+936:36 call  self._namestack.pop()
+    -> <builtin>.list.pop
+939:35 call  util.items(obj)
+    -> jsonpickle.util.items
+940:36 call  _is_json_key(k)
+    -> jsonpickle.unpickler._is_json_key
+942:39 call  self._namestack.append(k)
+    -> <builtin>.list.append
+944:46 call  self._restore_pickled_key(k)
+    -> jsonpickle.unpickler.Unpickler._restore_pickled_key
+945:49 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+947:30 call  isinstance(result, _Proxy)
+    -> <builtin>.isinstance
+948:41 call  self._proxies.append((data, k, result, _obj_setvalue))
+    -> <builtin>.list.append
+950:36 call  self._namestack.pop()
+    -> <builtin>.list.pop
+953:35 call  util.items(obj)
+    -> jsonpickle.util.items
+954:30 call  isinstance(k, (int, float))
+    -> <builtin>.isinstance
+955:38 call  k.__str__()
+    -> <builtin>.int.__str__
+    -> <builtin>.float.__str__
+    -> <builtin>.bool.__str__
+    note: k is an int, a bool or a float (isinstance, line 954): a key of a backend that decodes numeric keys (yaml; a bool key also with numeric_keys=True, pickler.py:492, 797; audit F5)
+958:39 call  self._namestack.append(str_k)
+    -> <builtin>.list.append
+959:49 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+960:30 call  isinstance(result, _Proxy)
+    -> <builtin>.isinstance
+961:41 call  self._proxies.append((data, k, result, _obj_setvalue))
+    -> <builtin>.list.append
+962:36 call  self._namestack.pop()
+    -> <builtin>.list.pop
+
+[jsonpickle.unpickler.Unpickler._restore_tuple]
+967:25 call  tuple(self._restore(v) for v in obj[tags.TUPLE])
+    -> <builtin>.tuple
+967:39 call  self._restore(v)
+    -> jsonpickle.unpickler.Unpickler._restore
+
+[jsonpickle.unpickler.Unpickler._restore_tags]
+974:40 call  set(obj)
+    -> <builtin>.set
+974:54 call  type(obj)
+    -> <builtin>.type
+978:16 call  type(obj)
+    -> <builtin>.type
+1008:18 call  type(obj)
+    -> <builtin>.type
+
+== jsonpickle.util
+
+[jsonpickle.util]
+25:22 call  type(iter(''))
+    -> <builtin>.type
+25:27 call  iter('')
+    -> <builtin>.iter
+28:42 call  type(None)
+    -> <builtin>.type
+617:47 call  operator.itemgetter(0)
+    -> operator.itemgetter
+    reject jsonpickle.util.itemgetter: the attribute itemgetter of the module operator, not the function of this module
+    note: the default value of itemgetter's getter, evaluated when the def runs
+
+[jsonpickle.util.is_type]
+71:22 call  isinstance(obj, type)
+    -> <builtin>.isinstance
+
+[jsonpickle.util.has_method]
+76:19 call  hasattr(obj, name)
+    -> <builtin>.hasattr
+78:19 call  getattr(obj, name)
+    -> <builtin>.getattr
+81:18 call  isinstance(func, types.BuiltinMethodType)
+    -> <builtin>.isinstance
+85:22 call  isinstance(func, (types.MethodType, types.FunctionType))
+    -> <builtin>.isinstance
+92:31 call  is_type(obj)
+    -> jsonpickle.util.is_type
+95:34 call  inspect.getmro(base_type)
+    -> inspect.getmro
+96:24 call  vars(subtype)
+    -> <builtin>.vars
+96:37 call  vars(subtype).get(name)
+    -> types.MappingProxyType.get
+    note: a value site by name only (handlers.py:88 binds get); vars() of a class of the MRO is its mappingproxy
+105:18 call  isinstance(original, staticmethod)
+    -> <builtin>.isinstance
+109:19 call  hasattr(func, '__self__')
+    -> <builtin>.hasattr
+111:23 call  getattr(func, '__self__')
+    -> <builtin>.getattr
+114:18 call  isinstance(original, classmethod)
+    -> <builtin>.isinstance
+115:26 call  issubclass(base_type, bound_to)
+    -> <builtin>.issubclass
+118:22 call  isinstance(obj, type(bound_to))
+    -> <builtin>.isinstance
+118:32 call  type(bound_to)
+    -> <builtin>.type
+
+[jsonpickle.util.is_object]
+133:22 call  isinstance(obj, object)
+    -> <builtin>.isinstance
+133:54 call  isinstance( obj, (type, types.FunctionType, types.Builtin...
+    -> <builtin>.isinstance
+
+[jsonpickle.util.is_not_class]
+142:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_primitive]
+155:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_enum]
+160:48 call  isinstance(obj, sys.modules['enum'].Enum)
+    -> <builtin>.isinstance
+
+[jsonpickle.util.is_dictionary]
+170:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+174:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_sequence]
+184:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_list]
+193:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+197:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_set]
+206:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+210:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_bytes]
+219:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+223:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_unicode]
+228:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+232:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_tuple]
+241:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+245:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_dictionary_subclass]
+258:16 call  hasattr(obj, '__class__')
+    -> <builtin>.hasattr
+259:23 call  issubclass(obj.__class__, dict)
+    -> <builtin>.issubclass
+260:17 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_sequence_subclass]
+275:16 call  hasattr(obj, '__class__')
+    -> <builtin>.hasattr
+276:23 call  issubclass(obj.__class__, SEQUENCES)
+    -> <builtin>.issubclass
+277:28 call  is_sequence(obj)
+    -> jsonpickle.util.is_sequence
+
+[jsonpickle.util.is_noncomplex]
+287:12 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_function]
+308:16 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_module_function]
+324:16 call  hasattr(obj, '__class__')
+    -> <builtin>.hasattr
+325:23 call  isinstance(obj, (types.FunctionType, types.BuiltinFunctio...
+    -> <builtin>.isinstance
+326:20 call  hasattr(obj, '__module__')
+    -> <builtin>.hasattr
+327:20 call  hasattr(obj, '__name__')
+    -> <builtin>.hasattr
+329:28 call  is_cython_function(obj)
+    -> jsonpickle.util.is_cython_function
+
+[jsonpickle.util.is_module]
+340:18 call  warnings.warn( "This function will be removed in the next...
+    -> warnings.warn
+    note: a value site by name only (jsonpickle/pickler.py:251 assigns an attribute warn); here warn is the function of the module warnings
+344:22 call  isinstance(obj, types.ModuleType)
+    -> <builtin>.isinstance
+
+[jsonpickle.util.is_picklable]
+364:30 call  is_module_function(value)
+    -> jsonpickle.util.is_module_function
+364:56 call  is_function(value)
+    -> jsonpickle.util.is_function
+
+[jsonpickle.util.is_installed]
+377:19 call  __import__(module)
+    -> <builtin>.__import__
+
+[jsonpickle.util.is_list_like]
+384:19 call  hasattr(obj, '__getitem__')
+    -> <builtin>.hasattr
+384:51 call  hasattr(obj, 'append')
+    -> <builtin>.hasattr
+
+[jsonpickle.util.is_iterator]
+388:22 call  isinstance(obj, abc_iterator)
+    -> <builtin>.isinstance
+388:60 call  isinstance(obj, io.IOBase)
+    -> <builtin>.isinstance
+
+[jsonpickle.util.is_collections]
+393:20 call  type(obj)
+    -> <builtin>.type
+
+[jsonpickle.util.is_reducible_sequence_subclass]
+399:19 call  hasattr(obj, '__class__')
+    -> <builtin>.hasattr
+399:52 call  issubclass(obj.__class__, SEQUENCES)
+    -> <builtin>.issubclass
+
+[jsonpickle.util.is_reducible]
+408:22 call  is_collections(obj)
+    -> jsonpickle.util.is_collections
+408:46 call  isinstance(obj, collections.defaultdict)
+    -> <builtin>.isinstance
+411:13 call  type(obj)
+    -> <builtin>.type
+413:34 call  is_dictionary_subclass(obj)
+    -> jsonpickle.util.is_dictionary_subclass
+414:22 call  isinstance(obj, types.ModuleType)
+    -> <builtin>.isinstance
+415:42 call  is_reducible_sequence_subclass(obj)
+    -> jsonpickle.util.is_reducible_sequence_subclass
+416:24 call  is_list_like(obj)
+    -> jsonpickle.util.is_list_like
+417:22 call  isinstance(getattr(obj, '__slots__', None), _ITERATOR_TYPE)
+    -> <builtin>.isinstance
+417:30 call  getattr(obj, '__slots__', None)
+    -> <builtin>.getattr
+418:20 call  is_type(obj)
+    -> jsonpickle.util.is_type
+
+[jsonpickle.util.is_cython_function]
+427:17 call  callable(obj)
+    -> <builtin>.callable
+428:20 call  hasattr(obj, '__repr__')
+    -> <builtin>.hasattr
+429:17 call  repr(obj)
+    -> <builtin>.repr
+    -> jsonpickle.handlers.CloneFactory.__repr__
+    note: a CloneFactory reaches here when a client encodes, with include_properties=True (documented at pickler.py:126-131), a defaultdict that decode restored from the package's output: _flatten_properties flattens its default_factory (pickler.py:532-541), _get_flattener calls is_module_function (pickler.py:881), and a CloneFactory is callable, so repr() runs its __repr__ (judgement J6, audit F4)
+429:33 call  repr(obj).startswith('<cyfunction ')
+    -> <builtin>.str.startswith
+
+[jsonpickle.util.is_readonly]
+436:16 call  setattr(obj, attr, value)
+    -> <builtin>.setattr
+
+[jsonpickle.util.in_dict]
+452:44 call  getattr(obj, '__dict__', None)
+    -> <builtin>.getattr
+
+[jsonpickle.util.in_slots]
+460:45 call  getattr(obj, '__slots__', None)
+    -> <builtin>.getattr
+
+[jsonpickle.util.has_reduce]
+471:24 call  is_reducible(obj)
+    -> jsonpickle.util.is_reducible
+471:40 call  is_type(obj)
+    -> jsonpickle.util.is_type
+477:21 call  is_noncomplex(obj)
+    -> jsonpickle.util.is_noncomplex
+487:25 call  in_dict(obj, REDUCE)
+    -> jsonpickle.util.in_dict
+487:50 call  in_slots(obj, REDUCE)
+    -> jsonpickle.util.in_slots
+488:28 call  in_dict(obj, REDUCE_EX)
+    -> jsonpickle.util.in_dict
+488:56 call  in_slots(obj, REDUCE_EX)
+    -> jsonpickle.util.in_slots
+491:21 call  type(obj)
+    -> <builtin>.type
+492:24 call  is_reducible(base)
+    -> jsonpickle.util.is_reducible
+493:47 call  in_dict(base, REDUCE)
+    -> jsonpickle.util.in_dict
+494:53 call  in_dict(base, REDUCE_EX)
+    -> jsonpickle.util.in_dict
+500:15 call  type(obj)
+    -> <builtin>.type
+501:28 call  getattr(object, REDUCE)
+    -> <builtin>.getattr
+502:31 call  getattr(object, REDUCE_EX)
+    -> <builtin>.getattr
+504:33 call  getattr(cls, REDUCE, False)
+    -> <builtin>.getattr
+509:36 call  getattr(cls, REDUCE_EX, False)
+    -> <builtin>.getattr
+
+[jsonpickle.util.translate_module_name]
+531:18 call  dict(__builtin__='builtins', exceptions='builtins')
+    -> <builtin>.dict
+532:22 call  lookup.get(module, module)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); lookup is the dict of line 531
+
+[jsonpickle.util._0_9_6_compat_untranslate]
+539:18 call  dict(__builtin__='builtins', exceptions='builtins')
+    -> <builtin>.dict
+540:22 call  lookup.get(module, module)
+    -> <builtin>.dict.get
+    note: a value site by name only (handlers.py:88 binds get); lookup is the dict of line 539
+
+[jsonpickle.util.untranslate_module_name]
+550:37 call  _0_9_6_compat_untranslate(module)
+    -> jsonpickle.util._0_9_6_compat_untranslate
+
+[jsonpickle.util.importable_name]
+572:19 call  getattr(cls, '__qualname__', cls.__name__)
+    -> <builtin>.getattr
+573:35 call  translate_module_name(cls.__module__)
+    -> jsonpickle.util.translate_module_name
+575:19 call  hasattr(cls, '__self__')
+    -> <builtin>.hasattr
+576:23 call  hasattr(cls.__self__, '__module__')
+    -> <builtin>.hasattr
+
+[jsonpickle.util.b64encode]
+587:28 call  base64.b64encode(data)
+    -> base64.b64encode
+    reject jsonpickle.util.b64encode: the attribute of the module base64, not this function
+587:41 call  base64.b64encode(data).decode('ascii')
+    -> <builtin>.bytes.decode
+    reject jsonpickle.backend.JSONBackend.decode, jsonpickle.unpickler.decode: the receiver is the bytes that base64.b64encode returns
+
+[jsonpickle.util.b64decode]
+595:32 call  base64.b64decode(payload)
+    -> base64.b64decode
+    reject jsonpickle.util.b64decode: the attribute of the module base64, not this function
+
+[jsonpickle.util.b85encode]
+604:28 call  base64.b85encode(data)
+    -> base64.b85encode
+    reject jsonpickle.util.b85encode: the attribute of the module base64, not this function
+604:41 call  base64.b85encode(data).decode('ascii')
+    -> <builtin>.bytes.decode
+    reject jsonpickle.backend.JSONBackend.decode, jsonpickle.unpickler.decode: the receiver is the bytes that base64.b85encode returns
+
+[jsonpickle.util.b85decode]
+612:32 call  base64.b85decode(payload)
+    -> base64.b85decode
+    reject jsonpickle.util.b85decode: the attribute of the module base64, not this function
+
+[jsonpickle.util.itemgetter]
+618:15 call  str(getter(obj))
+    -> <builtin>.str
+618:22 call  getter(obj)
+    -> operator.itemgetter.__call__
+    note: getter is the parameter whose default is operator.itemgetter(0) (line 617); the package never calls itemgetter, and a getter that a client passes is a client callback
+
+[jsonpickle.util.items]
+626:26 call  obj.items()
+    -> <builtin>.dict.items
+    note: the package passes dicts: an exact dict (pickler.py:447), an instance __dict__ (pickler.py:731, 855, 897), the decoded JSON dicts and state dicts (unpickler.py:711, 926, 939, 953); a client dict subclass (pickler.py:713) is a client object, whose items is client code (B5)
+
+== jsonpickle.version
+
+[jsonpickle.version]
+16:27 call  _get_version()
+    -> jsonpickle.version._get_version
+
+[jsonpickle.version._get_version]
+10:35 call  metadata.version('jsonpickle')
+    -> importlib.metadata.version

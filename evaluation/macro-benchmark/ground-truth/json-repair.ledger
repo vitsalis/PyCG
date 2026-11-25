@@ -1,0 +1,3188 @@
+# Call-site ledger of json-repair at f13a96b9c7ef0f590bc647e7c5424560b948462e.
+# Drafted with a scratch script for the plain entries, then read entry by entry against the source; judgements in json-repair.md.
+#
+# The analysed package is src/json_repair under the root "." (module names
+# src.json_repair.*). Supported versions: Python 3.10 and later
+# (pyproject.toml, requires-python = ">=3.10").
+#
+# Where StringFileWrapper is: a StringFileWrapper is made only by
+# JSONParser.__init__ (json_parser.py:62) and stored in JSONParser.json_str; a
+# client can also pass one as json_str (JSONParser and StringFileWrapper are
+# public, and the annotation is `str | StringFileWrapper`). json_str is
+# reassigned only to str values (parse_object.py:239, 342). So the
+# StringFileWrapper candidates are callees only where the operand is a
+# parser's json_str (self.json_str, parser.json_str, the local alias json_str
+# of _try_parse_simple_quoted_string) outside an isinstance(..., str) guard,
+# or the wrapper itself (self[i], len(self) in StringFileWrapper); those sites
+# accept them explicitly.
+default reject src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__: the subscripted object is not a StringFileWrapper: it is a typing construct in an annotation, or a str, list, dict, tuple or schema value; the sites whose operand is a parser's json_str (outside an isinstance str guard) or the wrapper itself accept the candidate explicitly
+default reject src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__: the operand of this truth test, len() or other builtin is not a StringFileWrapper (a str, list, dict, set, tuple, int, bool, None, schema value or client object); no truth test in the package tests json_str, and the len() sites whose argument is a parser's json_str or the wrapper itself accept the candidate explicitly
+default reject src.json_repair.utils.string_file_wrapper.StringFileWrapper.__setitem__: the package never assigns an item of a StringFileWrapper: json_str is only reassigned as a whole (parse_object.py:239, 342); the item assignments here store into dicts and lists
+default reject src.json_repair.utils.constants.MissingValueType.__repr__: no value that is formatted, printed, converted with str() or %-formatted here is MISSING_VALUE: the package passes MISSING_VALUE only to SchemaRepairer.repair_value (parse_object.py:312), and its tests pass it inside a dict to the same method (tests/test_schema_repairer.py:479-480); on every path repair_value replaces it (normalize_missing_values, _fill_missing or a nested repair_value) before anything formats it; the operands are strs, ints, schema values and exceptions, and every `%` is an integer remainder
+
+== src.json_repair.__main__
+
+[src.json_repair.__main__]
+6:13 call  sys.exit(cli())
+    -> sys.exit
+    note: module code under `if __name__ == "__main__":` (python -m src.json_repair); it keeps its edges
+6:17 call  cli()
+    -> src.json_repair.json_repair.cli
+
+== src.json_repair.json_parser
+
+[src.json_repair.json_parser.JSONParser.parse_array]
+29:28 call  _parse_array(self, schema, path, closing_delimiter)
+    -> src.json_repair.parse_array.parse_array
+    reject src.json_repair.json_parser.JSONParser.parse_array: _parse_array is the module function parse_array.parse_array, imported under that alias (json_parser.py:6); the bare name does not reach the method
+
+[src.json_repair.json_parser.JSONParser.parse_comment]
+32:30 call  _parse_comment(self, record_top_level_value=record_top_le...
+    -> src.json_repair.parse_comment.parse_comment
+    reject src.json_repair.json_parser.JSONParser.parse_comment: _parse_comment is the module function parse_comment.parse_comment, imported under that alias (json_parser.py:7); the bare name does not reach the method
+
+[src.json_repair.json_parser.JSONParser.parse_number]
+35:29 call  _parse_number(self)
+    -> src.json_repair.parse_number.parse_number
+    reject src.json_repair.json_parser.JSONParser.parse_number: _parse_number is the module function parse_number.parse_number, imported under that alias (json_parser.py:8); the bare name does not reach the method
+
+[src.json_repair.json_parser.JSONParser.parse_object]
+42:29 call  _parse_object(self, schema, path)
+    -> src.json_repair.parse_object.parse_object
+    reject src.json_repair.json_parser.JSONParser.parse_object: _parse_object is the module function parse_object.parse_object, imported under that alias (json_parser.py:9); the bare name does not reach the method
+
+[src.json_repair.json_parser.JSONParser.parse_string]
+45:29 call  _parse_string(self)
+    -> src.json_repair.parse_string.parse_string
+    reject src.json_repair.json_parser.JSONParser.parse_string: _parse_string is the module function parse_string.parse_string, imported under that alias (json_parser.py:10); the bare name does not reach the method
+
+[src.json_repair.json_parser.JSONParser.__init__]
+62:46 call  StringFileWrapper(json_fd, json_fd_chunk_length)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__init__
+66:35 call  JsonContext()
+    -> src.json_repair.utils.json_context.JsonContext.__init__
+
+[src.json_repair.json_parser.JSONParser.parse]
+100:37 call  self._parse_top_level(self.parse_json)
+    -> src.json_repair.json_parser.JSONParser._parse_top_level
+    reject src.json_repair.json_parser.JSONParser.parse_json: passed as parse_element; _parse_top_level calls it (144:29, 155:34), no library code does
+
+[src.json_repair.json_parser.JSONParser.parse_with_schema]
+110:61 call  self._parse_top_level_salvage_with_schema(repairer, schema)
+    -> src.json_repair.json_parser.JSONParser._parse_top_level_salvage_with_schema
+111:37 call  self._parse_top_level(lambda: self.parse_json(schema, "$"))
+    -> src.json_repair.json_parser.JSONParser._parse_top_level
+    reject src.json_repair.json_parser.JSONParser.parse_with_schema.<lambda1>: passed as parse_element; _parse_top_level calls it (144:29, 155:34), no library code does
+
+[src.json_repair.json_parser.JSONParser.parse_with_schema.<lambda1>]
+111:61 call  self.parse_json(schema, "$")
+    -> src.json_repair.json_parser.JSONParser.parse_json
+
+[src.json_repair.json_parser.JSONParser._parse_top_level_salvage_with_schema]
+120:31 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62); len() of a StringFileWrapper runs its __len__
+121:31 call  self.context.clear()
+    -> src.json_repair.utils.json_context.JsonContext.clear
+122:41 call  self.deferred_contexts.clear()
+    -> <builtin>.list.clear
+    reject src.json_repair.utils.json_context.JsonContext.clear: self.deferred_contexts is a list (json_parser.py:67, 284)
+123:36 call  self.parse_json(schema, "$", finalize_schema=False, recor...
+    -> src.json_repair.json_parser.JSONParser.parse_json
+127:49 call  repairer.repair_value(value, schema, "$")
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+128:34 call  repairer.validate(repaired, schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.validate
+131:37 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+133:25 call  self.log("Skipped top-level fragment that did not match s...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+
+[src.json_repair.json_parser.JSONParser._parse_top_level]
+144:29 call  parse_element()
+    -> src.json_repair.json_parser.JSONParser.parse_json
+    -> src.json_repair.json_parser.JSONParser.parse_with_schema.<lambda1>
+    note: _parse_top_level is private; its two package calls pass the bound method self.parse_json (parse, 100:37) and the lambda of parse_with_schema (111:37)
+145:28 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+146:21 call  self.log( "The parser returned early, checking if there's...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+150:35 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+151:35 call  self.context.clear()
+    -> src.json_repair.utils.json_context.JsonContext.clear
+152:45 call  self.deferred_contexts.clear()
+    -> <builtin>.list.clear
+    reject src.json_repair.utils.json_context.JsonContext.clear: self.deferred_contexts is a list (json_parser.py:67, 284)
+153:83 call  self._next_top_level_value_is_comma_separated()
+    -> src.json_repair.json_parser.JSONParser._next_top_level_value_is_comma_separated
+155:34 call  parse_element()
+    -> src.json_repair.json_parser.JSONParser.parse_json
+    -> src.json_repair.json_parser.JSONParser.parse_with_schema.<lambda1>
+    note: _parse_top_level is private; its two package calls pass the bound method self.parse_json (parse, 100:37) and the lambda of parse_with_schema (111:37)
+157:29 call  self.log( "Multiple top-level JSON elements found in stri...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+160:37 call  ValueError("Multiple top-level JSON elements found in str...
+    -> <builtin>.ValueError
+162:80 call  ObjectComparer.is_same_object(json[-1], j)
+    -> src.json_repair.utils.object_comparer.ObjectComparer.is_same_object
+164:33 call  json.pop()
+    -> <builtin>.list.pop
+    note: json is the list [json] of line 149
+167:37 call  json.pop()
+    -> <builtin>.list.pop
+168:32 call  json.append(j)
+    -> <builtin>.list.append
+171:19 call  len(json)
+    -> <builtin>.len
+172:25 call  self.log( "There were no more elements, returning the ele...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+
+[src.json_repair.json_parser.JSONParser._next_top_level_value_is_comma_separated]
+179:38 call  self.scroll_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+180:28 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+184:41 getitem  self.json_str[idx]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+184:54 call  self.json_str[idx].isspace()
+    -> <builtin>.str.isspace
+186:42 getitem  self.json_str[idx]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+[src.json_repair.json_parser.JSONParser._initial_container_has_non_comma_trailing_content]
+189:45 call  isinstance(self.json_str, str)
+    -> <builtin>.isinstance
+196:37 call  enumerate(self.json_str)
+    -> <builtin>.enumerate
+209:34 call  containers.append(char)
+    -> <builtin>.list.append
+211:79 call  containers.pop()
+    -> <builtin>.list.pop
+215:47 call  len(self.json_str)
+    -> <builtin>.len
+215:104 call  self.json_str[trailing_index].isspace()
+    -> <builtin>.str.isspace
+217:48 call  len(self.json_str)
+    -> <builtin>.len
+
+[src.json_repair.json_parser.JSONParser._try_parse_valid_json_value]
+226:30 call  isinstance(self.json_str, str)
+    -> <builtin>.isinstance
+232:46 call  json.JSONDecoder()
+    -> json.JSONDecoder
+232:59 call  json.JSONDecoder().raw_decode(self.json_str[self.index :])
+    -> json.JSONDecoder.raw_decode
+    note: self.json_str is a str here (the isinstance guard at 226); its slice is a str
+
+[src.json_repair.json_parser.JSONParser._try_parse_missing_opening_object]
+240:35 call  self.scroll_whitespaces(-self.index)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+243:40 call  self.skip_to_character(delimiter, idx=1)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+244:28 call  self.get_char_at(offset)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+247:41 call  self.scroll_whitespaces(offset + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+248:28 call  self.get_char_at(offset)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+251:45 call  self.scroll_whitespaces(len(self.json_str) - self.index -...
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+251:49 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+252:28 call  self.get_char_at(end_offset)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+257:40 getitem  self.json_str[:]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: no isinstance guard in this method: self.json_str can be a StringFileWrapper (load, from_file), whose slice runs __getitem__
+259:46 call  json.JSONDecoder()
+    -> json.JSONDecoder
+259:59 call  json.JSONDecoder().raw_decode(candidate)
+    -> json.JSONDecoder.raw_decode
+    note: candidate is the str "{" + self.json_str[:] (a slice of a StringFileWrapper is a str)
+264:37 call  candidate[end_idx:].strip(" \t\r\n")
+    -> <builtin>.str.strip
+268:29 call  ValueError("Missing opening object brace in strict mode.")
+    -> <builtin>.ValueError
+269:17 call  self.log("Inserted missing opening object brace")
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+270:25 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+
+[src.json_repair.json_parser.JSONParser.parse_json]
+285:18 with  ExitStack()
+    -> src.json_repair.utils.json_context._JsonContextEntry.__exit__
+    reject src.json_repair.utils.json_context._JsonContextEntry.__enter__: ExitStack.__enter__ returns the stack and calls nothing; each entry's __enter__ runs at stack.enter_context (287:40)
+    note: on leaving the block, ExitStack.__exit__ calls back the __exit__ of every _JsonContextEntry that enter_context pushed (287:40; JsonContext.enter returns a _JsonContextEntry)
+285:27 call  ExitStack()
+    -> contextlib.ExitStack
+287:40 call  stack.enter_context(self.context.enter(context_value))
+    -> contextlib.ExitStack.enter_context
+    -> src.json_repair.utils.json_context._JsonContextEntry.__enter__
+    note: enter_context calls the __enter__ of its argument, the _JsonContextEntry that JsonContext.enter returns (json_context.py:39); the matching __exit__ runs when the with block of 285:18 ends
+287:59 call  self.context.enter(context_value)
+    -> src.json_repair.utils.json_context.JsonContext.enter
+288:39 call  self.parse_json(schema, path, finalize_schema, record_top...
+    -> src.json_repair.json_parser.JSONParser.parse_json
+290:58 call  self._resolve_schema_for_parse(schema)
+    -> src.json_repair.json_parser.JSONParser._resolve_schema_for_parse
+294:36 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+301:75 call  self._initial_container_has_non_comma_trailing_content()
+    -> src.json_repair.json_parser.JSONParser._initial_container_has_non_comma_trailing_content
+303:72 call  self._try_parse_valid_json_value()
+    -> src.json_repair.json_parser.JSONParser._try_parse_valid_json_value
+305:55 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+311:42 call  self.parse_object(schema, path)
+    -> src.json_repair.json_parser.JSONParser.parse_object
+    reject src.json_repair.parse_object.parse_object: the receiver self is a JSONParser
+311:91 call  self.parse_object()
+    -> src.json_repair.json_parser.JSONParser.parse_object
+    reject src.json_repair.parse_object.parse_object: the receiver self is a JSONParser
+312:51 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+318:41 call  self.parse_array(schema, path)
+    -> src.json_repair.json_parser.JSONParser.parse_array
+    reject src.json_repair.parse_array.parse_array: the receiver self is a JSONParser
+318:89 call  self.parse_array()
+    -> src.json_repair.json_parser.JSONParser.parse_array
+    reject src.json_repair.parse_array.parse_array: the receiver self is a JSONParser
+319:51 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+326:90 call  self.top_level_parenthesized_can_start_value()
+    -> src.json_repair.json_parser.JSONParser.top_level_parenthesized_can_start_value
+    reject src.json_repair.parser_parenthesized.top_level_parenthesized_can_start_value: the receiver self is a JSONParser
+327:53 call  self.parse_parenthesized(schema, path)
+    -> src.json_repair.json_parser.JSONParser.parse_parenthesized
+327:109 call  self.parse_parenthesized()
+    -> src.json_repair.json_parser.JSONParser.parse_parenthesized
+328:55 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+334:85 call  char.isalpha()
+    -> <builtin>.str.isalpha
+335:42 call  self.parse_string()
+    -> src.json_repair.json_parser.JSONParser.parse_string
+    reject src.json_repair.parse_string.parse_string: the receiver self is a JSONParser
+336:51 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+340:56 call  char.isdigit()
+    -> <builtin>.str.isdigit
+341:42 call  self.parse_number()
+    -> src.json_repair.json_parser.JSONParser.parse_number
+    reject src.json_repair.parse_number.parse_number: the receiver self is a JSONParser
+342:51 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+346:43 call  self.parse_comment(record_top_level_value)
+    -> src.json_repair.json_parser.JSONParser.parse_comment
+    reject src.json_repair.parse_comment.parse_comment: the receiver self is a JSONParser
+347:51 call  self._finalize_parsed_value(value, repairer, schema, path...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+352:78 call  self._try_parse_missing_opening_object(char)
+    -> src.json_repair.json_parser.JSONParser._try_parse_missing_opening_object
+354:55 call  self._finalize_parsed_value( value, repairer, schema, pat...
+    -> src.json_repair.json_parser.JSONParser._finalize_parsed_value
+
+[src.json_repair.json_parser.JSONParser._resolve_schema_for_parse]
+368:41 call  repairer.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+372:29 call  ValueError("Schema does not allow any values.")
+    -> <builtin>.ValueError
+
+[src.json_repair.json_parser.JSONParser._finalize_parsed_value]
+388:37 call  repairer.repair_value(value, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+
+[src.json_repair.json_parser.JSONParser.skip_whitespaces]
+402:33 getitem  self.json_str[self.index]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+403:31 call  char.isspace()
+    -> <builtin>.str.isspace
+405:37 getitem  self.json_str[self.index]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+[src.json_repair.json_parser.JSONParser.scroll_whitespaces]
+416:33 getitem  self.json_str[self.index + idx]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+417:57 call  char.isspace()
+    -> <builtin>.str.isspace
+419:37 getitem  self.json_str[self.index + idx]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+[src.json_repair.json_parser.JSONParser.skip_to_character]
+429:22 call  set(character)
+    -> <builtin>.set
+    reject src.json_repair.utils.json_context.JsonContext.set: the builtin set; JsonContext.set is a method
+429:47 call  isinstance(character, list)
+    -> <builtin>.isinstance
+431:16 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+435:31 getitem  self.json_str[i]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+[src.json_repair.json_parser.JSONParser.parenthesized_is_explicit_tuple]
+454:47 call  parenthesized_is_explicit_tuple(self)
+    -> src.json_repair.parser_parenthesized.parenthesized_is_explicit_tuple
+    reject src.json_repair.json_parser.JSONParser.parenthesized_is_explicit_tuple: the bare name is the module function imported at json_parser.py:11, not the method
+
+[src.json_repair.json_parser.JSONParser.top_level_parenthesized_can_start_value]
+457:55 call  top_level_parenthesized_can_start_value(self)
+    -> src.json_repair.parser_parenthesized.top_level_parenthesized_can_start_value
+    reject src.json_repair.json_parser.JSONParser.top_level_parenthesized_can_start_value: the bare name is the module function imported at json_parser.py:11, not the method
+
+[src.json_repair.json_parser.JSONParser.parse_parenthesized]
+464:62 call  self.parenthesized_is_explicit_tuple()
+    -> src.json_repair.json_parser.JSONParser.parenthesized_is_explicit_tuple
+    reject src.json_repair.parser_parenthesized.parenthesized_is_explicit_tuple: the receiver self is a JSONParser
+466:34 call  self.parse_array(schema, path, closing_delimiter=")")
+    -> src.json_repair.json_parser.JSONParser.parse_array
+    reject src.json_repair.parse_array.parse_array: the receiver self is a JSONParser
+467:33 call  len(values)
+    -> <builtin>.len
+
+[src.json_repair.json_parser.JSONParser._log]
+473:25 call  max(self.index - window, 0)
+    -> <builtin>.max
+474:23 call  min(self.index + window, len(self.json_str))
+    -> <builtin>.min
+474:48 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+475:37 getitem  self.json_str[start:end]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+476:27 call  self.logger.append( { "text": text, "context": context, } )
+    -> <builtin>.list.append
+    note: self.logger is a list: [] (json_parser.py:74) or the repair_log list that repair_json assigns (json_repair.py:202)
+
+[src.json_repair.json_parser.JSONParser.get_char_at]
+393:33 getitem  self.json_str[self.index + count]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+== src.json_repair.json_repair
+
+[src.json_repair.json_repair]
+36:2 decorator  @overload
+    -> typing.overload
+52:2 decorator  @overload
+    -> typing.overload
+68:2 decorator  @overload
+    -> typing.overload
+84:2 decorator  @overload
+    -> typing.overload
+484:13 call  sys.exit(cli())
+    -> sys.exit
+    note: module code under `if __name__ == "__main__":`; it keeps its edges
+484:17 call  cli()
+    -> src.json_repair.json_repair.cli
+
+[src.json_repair.json_repair.repair_json]
+131:54 call  normalize_schema_repair_mode(schema_repair_mode)
+    -> src.json_repair.schema_repair.normalize_schema_repair_mode
+133:25 call  ValueError("schema_repair_mode='salvage' requires schema.")
+    -> <builtin>.ValueError
+137:25 call  ValueError("schema and strict cannot be used together.")
+    -> <builtin>.ValueError
+146:28 call  JSONParser( json_str, json_fd, logging, chunk_length, str...
+    -> src.json_repair.json_parser.JSONParser.__init__
+156:35 call  schema_from_input(schema)
+    -> src.json_repair.schema_repair.schema_from_input
+158:23 call  SchemaRepairer(schema_obj, repair_log if logging else Non...
+    -> src.json_repair.schema_repair.SchemaRepairer.__init__
+168:36 call  json.load(json_fd)
+    -> json.load
+    reject src.json_repair.json_repair.load: json.load of the standard library (json is imported at json_repair.py:26)
+    note: json.load reads json_fd (a client stream, or the io.TextIOWrapper that from_file opens): library code calling a library object, no package callee
+168:72 call  json.loads(json_str)
+    -> json.loads
+    reject src.json_repair.json_repair.loads: json.loads of the standard library (json is imported at json_repair.py:26)
+172:41 call  repairer.is_valid(parsed_json, schema_obj)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_valid
+178:67 call  repairer.repair_value(parsed_json, schema_obj, "$")
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+179:49 call  repairer.is_valid(repaired_value, schema_obj)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_valid
+185:37 call  ValueError("Input schema nesting exceeds the supported sc...
+    -> <builtin>.ValueError
+192:32 call  JSONParser( json_str, json_fd, logging, chunk_length, str...
+    -> src.json_repair.json_parser.JSONParser.__init__
+207:59 call  parser.parse_with_schema(repairer, schema_obj)
+    -> src.json_repair.json_parser.JSONParser.parse_with_schema
+208:38 call  repairer.validate(parsed_json, schema_obj)
+    -> src.json_repair.schema_repair.SchemaRepairer.validate
+210:37 call  ValueError("Input schema nesting exceeds the supported sc...
+    -> <builtin>.ValueError
+213:43 call  parser.parse()
+    -> src.json_repair.json_parser.JSONParser.parse
+215:29 call  ValueError("Input nesting exceeds the supported parser re...
+    -> <builtin>.ValueError
+226:22 call  json.dumps(parsed_json, **json_dumps_args)
+    -> json.dumps
+    note: parsed_json holds only JSON values (dict, list, str, int, float, bool, None) that the parser or json.loads made; a default= or cls= in json_dumps_args is a client callback
+
+[src.json_repair.json_repair.loads]
+253:23 call  repair_json( json_str=json_str, return_objects=True, skip...
+    -> src.json_repair.json_repair.repair_json
+
+[src.json_repair.json_repair.load]
+290:23 call  repair_json( json_fd=fd, chunk_length=chunk_length, retur...
+    -> src.json_repair.json_repair.repair_json
+
+[src.json_repair.json_repair.from_file]
+326:10 with  Path(filename).open()
+    reject src.json_repair.utils.json_context._JsonContextEntry.__enter__, src.json_repair.utils.json_context._JsonContextEntry.__exit__: the context manager is the io.TextIOWrapper that Path.open returns
+326:14 call  Path(filename)
+    -> pathlib.Path
+326:29 call  Path(filename).open()
+    -> pathlib.PosixPath.open
+    -> pathlib.WindowsPath.open
+    note: Path(...) makes a PosixPath or a WindowsPath on the corresponding platform (the package declares Operating System :: OS Independent)
+327:20 call  load( fd=fd, skip_json_loads=skip_json_loads, logging=log...
+    -> src.json_repair.json_repair.load
+
+[src.json_repair.json_repair.cli]
+364:37 call  argparse.ArgumentParser(description="Repair and parse JSO...
+    -> argparse.ArgumentParser
+366:24 call  parser.add_argument( "filename", nargs="?", help="The JSO...
+    -> argparse.ArgumentParser.add_argument
+371:24 call  parser.add_argument( "-i", "--inline", action="store_true...
+    -> argparse.ArgumentParser.add_argument
+377:24 call  parser.add_argument( "-o", "--output", metavar="TARGET", ...
+    -> argparse.ArgumentParser.add_argument
+383:24 call  parser.add_argument( "--ensure_ascii", action="store_true...
+    -> argparse.ArgumentParser.add_argument
+388:24 call  parser.add_argument( "--indent", type=int, default=2, hel...
+    -> argparse.ArgumentParser.add_argument
+394:24 call  parser.add_argument( "--skip-json-loads", action="store_t...
+    -> argparse.ArgumentParser.add_argument
+399:24 call  parser.add_argument( "--schema", metavar="SCHEMA", help="...
+    -> argparse.ArgumentParser.add_argument
+404:24 call  parser.add_argument( "--schema-model", metavar="MODEL", h...
+    -> argparse.ArgumentParser.add_argument
+409:24 call  parser.add_argument( "--strict", action="store_true", hel...
+    -> argparse.ArgumentParser.add_argument
+414:24 call  parser.add_argument( "--schema-repair-mode", choices=["st...
+    -> argparse.ArgumentParser.add_argument
+421:29 call  parser.parse_args(inline_args)
+    -> argparse.ArgumentParser.parse_args
+    note: argparse calls the type int of --indent back: a builtin that library code calls, no edge
+425:14 call  print("Error: Inline mode requires a filename", file=sys....
+    -> <builtin>.print
+426:17 call  sys.exit(1)
+    -> sys.exit
+429:14 call  print("Error: You cannot pass both --inline and --output"...
+    -> <builtin>.print
+430:17 call  sys.exit(1)
+    -> sys.exit
+433:14 call  print("Error: You cannot pass both --schema and --schema-...
+    -> <builtin>.print
+434:17 call  sys.exit(1)
+    -> sys.exit
+437:14 call  print("Error: --strict cannot be used with --schema or --...
+    -> <builtin>.print
+438:17 call  sys.exit(1)
+    -> sys.exit
+440:14 call  print("Error: --schema-repair-mode salvage requires --sch...
+    -> <builtin>.print
+441:17 call  sys.exit(1)
+    -> sys.exit
+448:18 with  Path(args.schema).open()
+    reject src.json_repair.utils.json_context._JsonContextEntry.__enter__, src.json_repair.utils.json_context._JsonContextEntry.__exit__: the context manager is the io.TextIOWrapper that Path.open returns
+448:22 call  Path(args.schema)
+    -> pathlib.Path
+448:40 call  Path(args.schema).open()
+    -> pathlib.PosixPath.open
+    -> pathlib.WindowsPath.open
+    note: Path(...) makes a PosixPath or a WindowsPath on the corresponding platform
+449:35 call  json.load(fd)
+    -> json.load
+    reject src.json_repair.json_repair.load: json.load of the standard library (json is imported at json_repair.py:26)
+451:39 call  load_schema_model(args.schema_model)
+    -> src.json_repair.schema_repair.load_schema_model
+455:31 call  from_file( args.filename, skip_json_loads=args.skip_json_...
+    -> src.json_repair.json_repair.from_file
+463:34 call  sys.stdin.read()
+    -> io.TextIOWrapper.read
+    note: the default sys.stdin is an io.TextIOWrapper; a stream that a client puts in its place is a client object (the tests' io.StringIO, rejected in json-repair.rejected.json)
+464:27 call  loads( data, skip_json_loads=args.skip_json_loads, strict...
+    -> src.json_repair.json_repair.loads
+472:18 with  Path(args.output or args.filename).open(mode="w")
+    reject src.json_repair.utils.json_context._JsonContextEntry.__enter__, src.json_repair.utils.json_context._JsonContextEntry.__exit__: the context manager is the io.TextIOWrapper that Path.open returns
+472:22 call  Path(args.output or args.filename)
+    -> pathlib.Path
+472:57 call  Path(args.output or args.filename).open(mode="w")
+    -> pathlib.PosixPath.open
+    -> pathlib.WindowsPath.open
+    note: Path(...) makes a PosixPath or a WindowsPath on the corresponding platform
+473:26 call  json.dump(result, fd, indent=args.indent, ensure_ascii=en...
+    -> json.dump
+    note: result holds only JSON values; json.dump writes to the file (library code calling a library object)
+475:18 call  print(json.dumps(result, indent=args.indent, ensure_ascii...
+    -> <builtin>.print
+475:29 call  json.dumps(result, indent=args.indent, ensure_ascii=ensur...
+    -> json.dumps
+477:14 call  print(f"Error: {e!s}", file=sys.stderr)
+    -> <builtin>.print
+
+== src.json_repair.parse_array
+
+[src.json_repair.parse_array._resolve_array_item_schema]
+21:18 call  isinstance(schema_config.items_schema, list)
+    -> <builtin>.isinstance
+22:21 call  len(schema_config.items_schema)
+    -> <builtin>.len
+24:57 call  isinstance(raw_schema, (dict, bool))
+    -> <builtin>.isinstance
+25:33 call  ValueError("Schema must be an object.")
+    -> <builtin>.ValueError
+26:31 call  cast("dict[str, Any] | bool | None", raw_schema)
+    -> typing.cast
+29:24 call  isinstance(schema_config.additional_items, dict)
+    -> <builtin>.isinstance
+30:31 call  cast("dict[str, Any]", schema_config.additional_items)
+    -> typing.cast
+33:20 call  isinstance(schema_config.items_schema, dict)
+    -> <builtin>.isinstance
+34:27 call  cast("dict[str, Any]", schema_config.items_schema)
+    -> typing.cast
+
+[src.json_repair.parse_array.parse_array]
+48:74 call  resolve_parser_array_schema(self.schema_repairer, schema)
+    -> src.json_repair.parser_schema.resolve_parser_array_schema
+54:10 with  self.context.enter(ContextValues.ARRAY)
+    -> src.json_repair.utils.json_context._JsonContextEntry.__enter__
+    -> src.json_repair.utils.json_context._JsonContextEntry.__exit__
+    note: self.context.enter returns a _JsonContextEntry (json_context.py:39)
+54:28 call  self.context.enter(ContextValues.ARRAY)
+    -> src.json_repair.utils.json_context.JsonContext.enter
+55:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+56:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+59:64 call  _resolve_array_item_schema(schema_config, idx)
+    -> src.json_repair.parse_array._resolve_array_item_schema
+68:43 call  self.skip_to_character(char, i)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+69:44 call  self.scroll_whitespaces(idx=i + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+70:36 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+71:61 call  all(not isinstance(item, (dict, list)) for item in arr)
+    -> <builtin>.all
+71:76 call  isinstance(item, (dict, list))
+    -> <builtin>.isinstance
+72:33 call  self.log("Closed unclosed array before object member afte...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+77:50 call  self.parse_object(item_schema, item_path)
+    -> src.json_repair.json_parser.JSONParser.parse_object
+    reject src.json_repair.parse_object.parse_object: the receiver self is a JSONParser
+78:68 call  active_schema_repairer.repair_value(value, item_schema, i...
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+81:50 call  self.parse_object()
+    -> src.json_repair.json_parser.JSONParser.parse_object
+    reject src.json_repair.parse_object.parse_object: the receiver self is a JSONParser
+83:46 call  self.parse_string()
+    -> src.json_repair.json_parser.JSONParser.parse_string
+    reject src.json_repair.parse_string.parse_string: the receiver self is a JSONParser
+86:68 call  active_schema_repairer.repair_value(value, item_schema, i...
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+90:36 call  self.parse_json(item_schema, item_path)
+    -> src.json_repair.json_parser.JSONParser.parse_json
+90:119 call  self.parse_json()
+    -> src.json_repair.json_parser.JSONParser.parse_json
+93:48 call  ObjectComparer.is_strictly_empty(value)
+    -> src.json_repair.utils.object_comparer.ObjectComparer.is_strictly_empty
+93:76 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+95:53 call  self.get_char_at(-1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+96:25 call  self.log( "While parsing an array, found a stray '...'; i...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+100:27 call  arr.append(value)
+    -> <builtin>.list.append
+103:37 call  schema_repairer._log("Dropped extra array item not covere...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver schema_repairer is a SchemaRepairer
+106:36 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+107:71 call  char.isspace()
+    -> <builtin>.str.isspace
+109:40 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+112:21 call  self.log( f"While parsing an array we missed the closing ...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+
+== src.json_repair.parse_comment
+
+[src.json_repair.parse_comment.parse_comment]
+22:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+25:42 call  termination_characters.append("]")
+    -> <builtin>.list.append
+27:42 call  termination_characters.append("}")
+    -> <builtin>.list.append
+29:42 call  termination_characters.append(":")
+    -> <builtin>.list.append
+36:40 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+37:21 call  self.log(f"Found line comment: {comment}, ignoring")
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+40:41 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+45:40 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+49:44 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+50:25 call  self.log(f"Found line comment: {comment}, ignoring")
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+56:44 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+58:33 call  self.log("Reached end-of-string while parsing block comme...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+62:40 call  comment.endswith("*/")
+    -> <builtin>.str.endswith
+64:25 call  self.log(f"Found block comment: {comment}, ignoring")
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+72:34 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+73:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+75:35 call  self.parse_json(record_top_level_value=record_top_level_v...
+    -> src.json_repair.json_parser.JSONParser.parse_json
+
+== src.json_repair.parse_number
+
+[src.json_repair.parse_number]
+6:29 call  set("0123456789-.eE/,_")
+    -> <builtin>.set
+    reject src.json_repair.utils.json_context.JsonContext.set: the builtin set; JsonContext.set is a method
+
+[src.json_repair.parse_number.parse_number]
+17:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+21:74 call  number_str.endswith(("e", "E"))
+    -> <builtin>.str.endswith
+27:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+28:25 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+28:42 call  (self.get_char_at() or "").isalpha()
+    -> <builtin>.str.isalpha
+31:33 call  self.parse_string()
+    -> src.json_repair.json_parser.JSONParser.parse_string
+    reject src.json_repair.parse_string.parse_string: the receiver self is a JSONParser
+40:25 call  float(number_str)
+    -> <builtin>.float
+41:19 call  int(number_str)
+    -> <builtin>.int
+
+== src.json_repair.parse_object
+
+[src.json_repair.parse_object._finalize_object]
+23:53 call  schema_repairer.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+25:28 call  resolved_schema.get("x-json-repair-property-aliases", {})
+    -> <builtin>.dict.get
+    note: resolved_schema is a dict here (the isinstance test of the conditional expression)
+25:80 call  isinstance(resolved_schema, dict)
+    -> <builtin>.isinstance
+27:34 call  set()
+    -> <builtin>.set
+    reject src.json_repair.utils.json_context.JsonContext.set: the builtin set; JsonContext.set is a method
+28:18 call  isinstance(property_aliases, dict)
+    -> <builtin>.isinstance
+31:61 call  property_aliases.items()
+    -> <builtin>.dict.items
+32:26 call  isinstance(alias, str)
+    -> <builtin>.isinstance
+33:27 call  isinstance(field_names, list)
+    -> <builtin>.isinstance
+34:20 call  any(isinstance(name, str) and name in obj for name in fie...
+    -> <builtin>.any
+34:31 call  isinstance(name, str)
+    -> <builtin>.isinstance
+39:25 call  ValueError(f"Missing required properties at {path}: {', '...
+    -> <builtin>.ValueError
+39:77 call  ', '.join(missing_required)
+    -> <builtin>.str.join
+41:59 call  schema_config.properties.items()
+    -> <builtin>.dict.items
+    note: schema_config.properties is a dict (object_schema_config, parser_schema.py:55-57)
+44:22 call  isinstance(prop_schema, dict)
+    -> <builtin>.isinstance
+45:56 call  schema_repairer._copy_json_value(prop_schema["default"], ...
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+46:33 call  schema_repairer._log("Inserted default value for missing ...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver schema_repairer is a SchemaRepairer
+
+[src.json_repair.parse_object._strip_comments_for_empty_object_classification]
+55:22 call  len(body)
+    -> <builtin>.len
+57:55 call  len(body)
+    -> <builtin>.len
+61:28 call  stripped.append(char)
+    -> <builtin>.list.append
+65:28 call  stripped.append(char)
+    -> <builtin>.list.append
+73:28 call  stripped.append(char)
+    -> <builtin>.list.append
+81:30 call  len(body)
+    -> <builtin>.len
+86:30 call  len(body)
+    -> <builtin>.len
+88:24 call  min(index + 2, len(body))
+    -> <builtin>.min
+88:39 call  len(body)
+    -> <builtin>.len
+91:24 call  stripped.append(char)
+    -> <builtin>.list.append
+94:19 call  "".join(stripped)
+    -> <builtin>.str.join
+
+[src.json_repair.parse_object._classify_empty_object_repair]
+103:37 getitem  self.json_str[start_index - 1 : self.index + 1]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+105:29 call  body.removesuffix("}")
+    -> <builtin>.str.removesuffix
+106:23 call  body.lstrip()
+    -> <builtin>.str.lstrip
+109:24 call  body.startswith('\\"')
+    -> <builtin>.str.startswith
+109:71 call  body.startswith("\\'")
+    -> <builtin>.str.startswith
+110:53 call  attempted_object.replace('\\"', '"')
+    -> <builtin>.str.replace
+110:73 call  attempted_object.replace('\\"', '"').replace("\\'", "'")
+    -> <builtin>.str.replace
+111:17 call  self.log( "Parsed object is empty but the input starts li...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+115:59 call  _strip_comments_for_empty_object_classification(body)
+    -> src.json_repair.parse_object._strip_comments_for_empty_object_classification
+115:72 call  _strip_comments_for_empty_object_classification(body).lst...
+    -> <builtin>.str.lstrip
+131:21 call  self.log( "Parsed object is empty but the input still con...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+139:23 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+140:45 call  schema_repairer.is_object_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_object_schema
+141:48 call  schema_repairer.is_array_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_array_schema
+
+[src.json_repair.parse_object._merge_object_array_continuation]
+151:20 call  list(obj.keys())
+    -> <builtin>.list
+151:29 call  obj.keys()
+    -> <builtin>.dict.keys
+152:38 call  isinstance(obj[prev_key], list)
+    -> <builtin>.isinstance
+156:33 call  self.parse_array()
+    -> src.json_repair.json_parser.JSONParser.parse_array
+    reject src.json_repair.parse_array.parse_array: the receiver self is a JSONParser
+157:18 call  isinstance(new_array, list)
+    -> <builtin>.isinstance
+159:22 call  isinstance(prev_value, list)
+    -> <builtin>.isinstance
+160:32 call  len(item)
+    -> <builtin>.len
+160:75 call  isinstance(item, list)
+    -> <builtin>.isinstance
+162:56 call  all(length == list_lengths[0] for length in list_lengths)
+    -> <builtin>.all
+166:52 call  isinstance(prev_value[-1], list)
+    -> <builtin>.isinstance
+167:32 call  tail.append(prev_value.pop())
+    -> <builtin>.list.append
+167:47 call  prev_value.pop()
+    -> <builtin>.list.pop
+    note: prev_value is a list (the isinstance test at 159)
+169:33 call  tail.reverse()
+    -> <builtin>.list.reverse
+170:27 call  len(tail)
+    -> <builtin>.len
+171:33 call  self.log( "While parsing an object we found row values wi...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+174:39 call  range(0, len(tail), expected_len)
+    -> <builtin>.range
+174:46 call  len(tail)
+    -> <builtin>.len
+175:46 call  prev_value.append(tail[i : i + expected_len])
+    -> <builtin>.list.append
+177:42 call  prev_value.extend(tail)
+    -> <builtin>.list.extend
+179:27 call  all(isinstance(item, list) for item in new_array)
+    -> <builtin>.all
+179:38 call  isinstance(item, list)
+    -> <builtin>.isinstance
+180:33 call  self.log( "While parsing an object we found additional ro...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+183:42 call  prev_value.extend(new_array)
+    -> <builtin>.list.extend
+185:42 call  prev_value.append(new_array)
+    -> <builtin>.list.append
+187:34 call  prev_value.extend(new_array[0] if len(new_array) == 1 and...
+    -> <builtin>.list.extend
+187:54 call  len(new_array)
+    -> <builtin>.len
+187:85 call  isinstance(new_array[0], list)
+    -> <builtin>.isinstance
+189:26 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+190:24 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+192:26 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+
+[src.json_repair.parse_object._parse_object_key]
+202:21 call  self.context.set(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context.JsonContext.set
+204:31 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+206:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+206:92 call  _merge_object_array_continuation(self, obj)
+    -> src.json_repair.parse_object._merge_object_array_continuation
+209:40 call  self.parse_string()
+    -> src.json_repair.json_parser.JSONParser.parse_string
+    reject src.json_repair.parse_string.parse_string: the receiver self is a JSONParser
+210:30 call  isinstance(raw_key, str)
+    -> <builtin>.isinstance
+213:38 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+214:60 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+216:29 call  self.log( "Empty key found in strict mode while parsing o...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+219:37 call  ValueError("Empty key found in strict mode while parsing ...
+    -> <builtin>.ValueError
+222:27 call  self.context.reset()
+    -> src.json_repair.utils.json_context.JsonContext.reset
+
+[src.json_repair.parse_object._should_split_duplicate_object]
+228:43 call  self.get_char_at(lookback_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+229:62 call  prev_non_whitespace.isspace()
+    -> <builtin>.str.isspace
+231:47 call  self.get_char_at(lookback_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+232:38 call  self.get_char_at(rollback_index - self.index)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+233:43 call  self.get_char_at(self.scroll_whitespaces())
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+233:67 call  self.scroll_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+
+[src.json_repair.parse_object._resolve_object_property_schema]
+256:55 call  isinstance(schema_value, (dict, bool))
+    -> <builtin>.isinstance
+257:29 call  ValueError("Schema must be an object.")
+    -> <builtin>.ValueError
+258:27 call  cast("dict[str, Any] | bool | None", schema_value)
+    -> typing.cast
+261:53 call  schema_repairer.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+263:28 call  resolved_schema.get("x-json-repair-property-aliases", {})
+    -> <builtin>.dict.get
+    note: resolved_schema is a dict here (the isinstance test of the conditional expression)
+263:80 call  isinstance(resolved_schema, dict)
+    -> <builtin>.isinstance
+265:18 call  isinstance(property_aliases, dict)
+    -> <builtin>.isinstance
+266:57 call  property_aliases.items()
+    -> <builtin>.dict.items
+267:26 call  isinstance(alias, str)
+    -> <builtin>.isinstance
+267:53 call  isinstance(field_names, list)
+    -> <builtin>.isinstance
+268:60 call  schema_config.properties.get(alias)
+    -> <builtin>.dict.get
+    note: schema_config.properties is a dict (object_schema_config, parser_schema.py:55-57)
+269:28 call  cast("dict[str, Any] | bool | None", schema_value)
+    -> typing.cast
+274:65 call  match_pattern_properties(schema_config.pattern_properties...
+    -> src.json_repair.utils.pattern_properties.match_pattern_properties
+276:17 call  self.log( f"Skipped unsupported patternProperties regex '...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+281:57 call  isinstance(primary_schema, (dict, bool))
+    -> <builtin>.isinstance
+282:29 call  ValueError("Schema must be an object.")
+    -> <builtin>.ValueError
+283:27 call  cast("dict[str, Any] | bool | None", primary_schema)
+    -> typing.cast
+285:59 call  isinstance(extra_schema, (dict, bool))
+    -> <builtin>.isinstance
+286:33 call  ValueError("Schema must be an object.")
+    -> <builtin>.ValueError
+287:33 call  extra_schemas.append(cast("dict[str, Any] | bool | None",...
+    -> <builtin>.list.append
+287:38 call  cast("dict[str, Any] | bool | None", extra_schema)
+    -> typing.cast
+292:18 call  isinstance(schema_config.additional_properties, dict)
+    -> <builtin>.isinstance
+293:20 call  cast("dict[str, Any]", schema_config.additional_properties)
+    -> typing.cast
+
+[src.json_repair.parse_object._parse_object_value]
+303:21 call  self.context.set(ContextValues.OBJECT_VALUE)
+    -> src.json_repair.utils.json_context.JsonContext.set
+305:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+306:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+308:21 call  self.log( f"While parsing an object value we found a stra...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+312:52 call  schema_repairer.repair_value(MISSING_VALUE, prop_schema, ...
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+316:35 call  self.parse_json(prop_schema, key_path)
+    -> src.json_repair.json_parser.JSONParser.parse_json
+317:31 call  self.parse_json()
+    -> src.json_repair.json_parser.JSONParser.parse_json
+319:27 call  self.context.reset()
+    -> src.json_repair.utils.json_context.JsonContext.reset
+
+[src.json_repair.parse_object._repair_empty_object_result]
+334:17 call  self.log( "Parsed object is empty but contains extra char...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+337:25 call  ValueError("Parsed object is empty but contains extra cha...
+    -> <builtin>.ValueError
+339:75 call  _classify_empty_object_repair(self, start_index, schema, ...
+    -> src.json_repair.parse_object._classify_empty_object_repair
+342:38 getitem  self.json_str[: start_index - 1]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: self.json_str is a str or a StringFileWrapper until this assignment makes it a str
+342:93 getitem  self.json_str[end_index:]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+344:14 with  self.context.enter(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context._JsonContextEntry.__enter__
+    -> src.json_repair.utils.json_context._JsonContextEntry.__exit__
+    note: self.context.enter returns a _JsonContextEntry (json_context.py:39)
+344:32 call  self.context.enter(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context.JsonContext.enter
+345:47 call  self.parse_object(schema, path)
+    -> src.json_repair.json_parser.JSONParser.parse_object
+    reject src.json_repair.parse_object.parse_object: the receiver self is a JSONParser
+346:38 call  self.deferred_contexts.append(ContextValues.OBJECT_KEY)
+    -> <builtin>.list.append
+349:17 call  self.log( "Parsed object is empty but salvage schema expe...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+353:14 with  self.context.enter(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context._JsonContextEntry.__enter__
+    -> src.json_repair.utils.json_context._JsonContextEntry.__exit__
+    note: self.context.enter returns a _JsonContextEntry (json_context.py:39)
+353:32 call  self.context.enter(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context.JsonContext.enter
+354:41 call  self.parse_array()
+    -> src.json_repair.json_parser.JSONParser.parse_array
+    reject src.json_repair.parse_array.parse_array: the receiver self is a JSONParser
+355:38 call  self.deferred_contexts.append(ContextValues.OBJECT_KEY)
+    -> <builtin>.list.append
+356:22 call  isinstance(set_items, list)
+    -> <builtin>.isinstance
+357:82 call  isinstance(item, str)
+    -> <builtin>.isinstance
+358:19 call  len(key_candidates)
+    -> <builtin>.len
+358:42 call  len(set_items)
+    -> <builtin>.len
+359:34 call  cast("JSONReturnType", dict.fromkeys(key_candidates))
+    -> typing.cast
+359:66 call  dict.fromkeys(key_candidates)
+    -> <builtin>.dict.fromkeys
+362:17 call  self.log("Parsed object is empty, we will try to parse th...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+364:14 with  self.context.enter(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context._JsonContextEntry.__enter__
+    -> src.json_repair.utils.json_context._JsonContextEntry.__exit__
+    note: self.context.enter returns a _JsonContextEntry (json_context.py:39)
+364:32 call  self.context.enter(ContextValues.OBJECT_KEY)
+    -> src.json_repair.utils.json_context.JsonContext.enter
+365:46 call  self.parse_array()
+    -> src.json_repair.json_parser.JSONParser.parse_array
+    reject src.json_repair.parse_array.parse_array: the receiver self is a JSONParser
+366:38 call  self.deferred_contexts.append(ContextValues.OBJECT_KEY)
+    -> <builtin>.list.append
+
+[src.json_repair.parse_object._complete_object_parse]
+380:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+384:21 call  self.log( "Found an extra closing brace that shouldn't be...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+390:26 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+391:24 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+393:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+394:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+395:21 call  self.log( "Found a comma and string delimiter after objec...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+398:47 call  self.parse_object(schema, path)
+    -> src.json_repair.json_parser.JSONParser.parse_object
+    reject src.json_repair.parse_object.parse_object: the receiver self is a JSONParser
+399:26 call  isinstance(additional_obj, dict)
+    -> <builtin>.isinstance
+400:27 call  obj.update(additional_obj)
+    -> <builtin>.dict.update
+402:28 call  _finalize_object(obj, schema, schema_repairer, schema_con...
+    -> src.json_repair.parse_object._finalize_object
+
+[src.json_repair.parse_object.parse_object]
+414:74 call  resolve_parser_object_schema(self.schema_repairer, schema)
+    -> src.json_repair.parser_schema.resolve_parser_object_schema
+416:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+417:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+419:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+420:21 call  self.log( "While parsing an object we found a : before a ...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+425:48 call  _parse_object_key(self, obj)
+    -> src.json_repair.parse_object._parse_object_key
+428:25 call  self.log("Duplicate key found in strict mode while parsin...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+429:33 call  ValueError("Duplicate key found in strict mode while pars...
+    -> <builtin>.ValueError
+431:50 call  _should_split_duplicate_object(self, rollback_index)
+    -> src.json_repair.parse_object._should_split_duplicate_object
+432:29 call  self.log( "While parsing an object we found a duplicate k...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+435:51 call  _split_object_on_duplicate_key(self, rollback_index)
+    -> src.json_repair.parse_object._split_object_on_duplicate_key
+437:25 call  self.log( "While parsing an object we found a duplicate k...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+441:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+442:29 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+445:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+446:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+448:25 call  self.log( "Missing ':' after key in strict mode while par...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+451:33 call  ValueError("Missing ':' after key in strict mode while pa...
+    -> <builtin>.ValueError
+452:21 call  self.log( "While parsing an object we missed a : after a ...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+457:84 call  _resolve_object_property_schema( self, schema_repairer, s...
+    -> src.json_repair.parse_object._resolve_object_property_schema
+465:36 call  _parse_object_value(self, schema_repairer, prop_schema, k...
+    -> src.json_repair.parse_object._parse_object_value
+469:53 call  schema_repairer.repair_value(value, extra_schema, key_path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+471:88 call  self.get_char_at(-1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+472:21 call  self.log( "Parsed value is empty in strict mode while par...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+475:29 call  ValueError("Parsed value is empty in strict mode while pa...
+    -> <builtin>.ValueError
+480:33 call  schema_repairer._log("Dropped extra property not covered ...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver schema_repairer is a SchemaRepairer
+482:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+484:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+485:21 call  self.log( "While parsing an object we found a closing arr...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+490:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+494:72 call  _repair_empty_object_result( self, obj, start_index, sche...
+    -> src.json_repair.parse_object._repair_empty_object_result
+505:34 call  _complete_object_parse( self, obj, schema, path, schema_r...
+    -> src.json_repair.parse_object._complete_object_parse
+
+[src.json_repair.parse_object._split_object_on_duplicate_key]
+239:34 getitem  self.json_str[: self.index + 1]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: self.json_str is a str or a StringFileWrapper until this assignment makes it a str
+239:74 getitem  self.json_str[self.index + 1 :]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+== src.json_repair.parse_string
+
+[src.json_repair.parse_string]
+14:26 call  object()
+    -> <builtin>.object
+16:33 call  tuple(INLINE_CONTAINER_CLOSING_DELIMITERS)
+    -> <builtin>.tuple
+20:2 decorator  @dataclass
+    -> dataclasses.dataclass
+29:46 call  field(default_factory=list)
+    -> dataclasses.field
+    note: list is stored as the default_factory; the generated __init__ of StringParseState calls it, which is not an edge
+31:75 call  field(default_factory=dict)
+    -> dataclasses.field
+    note: dict is stored as the default_factory; the generated __init__ of StringParseState calls it, which is not an edge
+
+[src.json_repair.parse_string._in_low_smart_quote_span]
+45:37 call  _active_rstring_delimiter(state)
+    -> src.json_repair.parse_string._active_rstring_delimiter
+
+[src.json_repair.parse_string._try_parse_simple_quoted_string]
+57:24 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+62:18 call  isinstance(json_str, str)
+    -> <builtin>.isinstance
+63:28 call  json_str.find('"', start)
+    -> <builtin>.str.find
+71:20 call  len(json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: in this branch json_str is not a str, so it is the parser's StringFileWrapper
+73:28 getitem  json_str[end]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: in this branch json_str is not a str, so it is the parser's StringFileWrapper
+81:25 getitem  json_str[start:end]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: in this branch json_str is not a str, so it is the parser's StringFileWrapper
+84:16 call  len(json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: json_str is the parser's json_str, a str or a StringFileWrapper
+85:47 getitem  self.json_str[next_index]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+85:67 call  self.json_str[next_index].isspace()
+    -> <builtin>.str.isspace
+87:30 getitem  self.json_str[next_index]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+[src.json_repair.parse_string._append_literal_char]
+111:27 call  _append_string_content(state, current_char)
+    -> src.json_repair.parse_string._append_string_content
+113:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+
+[src.json_repair.parse_string._append_string_content]
+117:22 call  len(state.string_acc)
+    -> <builtin>.len
+119:34 call  enumerate(content)
+    -> <builtin>.enumerate
+
+[src.json_repair.parse_string._quote_belongs_to_regex_character_class]
+136:28 call  any(char.isspace() for char in state.string_acc[start:])
+    -> <builtin>.any
+136:41 call  char.isspace()
+    -> <builtin>.str.isspace
+139:49 call  self.skip_to_character("]", idx=1)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+140:28 call  self.get_char_at(closing_bracket_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+
+[src.json_repair.parse_string._rebuild_unmatched_opening_braces]
+146:33 call  enumerate(state.string_acc)
+    -> <builtin>.enumerate
+
+[src.json_repair.parse_string._cached_skip_to_character]
+163:41 call  isinstance(character, str)
+    -> <builtin>.isinstance
+163:68 call  tuple(character)
+    -> <builtin>.tuple
+165:39 call  state.lookahead_cache.get(targets)
+    -> <builtin>.dict.get
+169:23 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+173:42 call  self.skip_to_character(character, idx)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+174:29 call  self.get_char_at(match_offset)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+180:41 getitem  self.json_str[match_index - 1]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+
+[src.json_repair.parse_string._prepare_string_entry]
+188:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+190:40 call  self.parse_comment()
+    -> src.json_repair.json_parser.JSONParser.parse_comment
+    reject src.json_repair.parse_comment.parse_comment: the receiver self is a JSONParser
+192:70 call  char.isalnum()
+    -> <builtin>.str.isalnum
+194:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+199:54 call  _try_parse_simple_quoted_string(self)
+    -> src.json_repair.parse_string._try_parse_simple_quoted_string
+203:29 call  StringParseState()
+    note: StringParseState is a dataclass (parse_string.py:20); its __init__ is generated by dataclasses and has no node, and the list() and dict() of its default factories are calls of that generated code, not edges
+210:22 call  char.isalnum()
+    -> <builtin>.str.isalnum
+211:22 call  char.lower()
+    -> <builtin>.str.lower
+212:57 call  parse_boolean_or_null(self)
+    -> src.json_repair.parse_string_helpers.parse_boolean_or_null.parse_boolean_or_null
+215:17 call  self.log( "While parsing a string, we found a literal ins...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+222:24 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+223:39 call  parse_json_llm_block(self)
+    -> src.json_repair.parse_string_helpers.parse_json_llm_block.parse_json_llm_block
+226:17 call  self.log( "While parsing a string, we found code fences b...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+230:24 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+232:83 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+233:88 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+234:81 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+238:28 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+239:21 call  self.log( "While parsing a string, we found a doubled quo...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+243:33 call  ValueError("Found doubled quotes followed by another quot...
+    -> <builtin>.ValueError
+245:35 call  self.skip_to_character(character=state.rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+246:28 call  self.get_char_at(i + 1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+247:21 call  self.log( "While parsing a string, we found a valid start...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+253:32 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+254:57 call  self.skip_to_character(character=state.rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+255:64 call  self.scroll_whitespaces(idx=outer_quote_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+256:53 call  self.get_char_at(after_outer_quote_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+259:51 call  _only_whitespace_until(self, i)
+    -> src.json_repair.parse_string._only_whitespace_until
+260:41 call  self.get_char_at(outer_quote_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+263:29 call  self.log( "While parsing a string, we found a leading quo...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+266:43 call  _append_string_content(state, state.lstring_delimiter)
+    -> src.json_repair.parse_string._append_string_content
+270:40 call  self.scroll_whitespaces(idx=1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+271:38 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+273:25 call  self.log( "While parsing a string, we found a doubled quo...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+277:37 call  ValueError( "Found doubled quotes followed by another quo...
+    -> <builtin>.ValueError
+283:25 call  self.log( "While parsing a string, we found a doubled quo...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+
+[src.json_repair.parse_string._normalize_escape_sequence]
+296:13 call  self.log("Found a stray escape sequence, normalizing it")
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+297:57 call  _active_rstring_delimiter(state)
+    -> src.json_repair.parse_string._active_rstring_delimiter
+298:32 call  _in_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._in_low_smart_quote_span
+300:42 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+301:34 call  _pop_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._pop_low_smart_quote_span
+303:38 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+307:28 call  len(self.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+307:61 getitem  self.json_str[run_end]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+310:37 call  self.get_char_at(run_end - self.index)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+313:46 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+315:42 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+319:44 call  escape_seqs.get(char, char)
+    -> <builtin>.dict.get
+320:42 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+322:37 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+330:46 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+332:41 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+336:35 getitem  self.json_str[self.index + 1 : self.index + 1 + num_chars]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+337:15 call  len(next_chars)
+    -> <builtin>.len
+337:48 call  all(c in "0123456789abcdefABCDEF" for c in next_chars)
+    -> <builtin>.all
+338:21 call  self.log("Found a unicode escape sequence, normalizing it")
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+339:59 call  chr(int(next_chars, 16))
+    -> <builtin>.chr
+339:63 call  int(next_chars, 16)
+    -> <builtin>.int
+340:46 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+342:42 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+344:17 call  self.log("Found a delimiter that was escaped but shouldn'...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+346:42 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+348:38 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+
+[src.json_repair.parse_string._brace_before_code_fence_belongs_to_string]
+359:61 call  _scroll_comment_prefixed_member_start(self, quote_search_...
+    -> src.json_repair.parse_string._scroll_comment_prefixed_member_start
+361:24 call  self.get_char_at(next_content_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+362:51 call  _skip_inline_container(self, next_content_idx)
+    -> src.json_repair.parse_string._skip_inline_container
+364:56 call  _post_fence_container_starts_next_member(self, container_...
+    -> src.json_repair.parse_string._post_fence_container_starts_next_member
+369:55 call  _outer_rstring_delimiter(state)
+    -> src.json_repair.parse_string._outer_rstring_delimiter
+370:39 call  self.skip_to_character(character=outer_rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+371:27 call  self.get_char_at(quote_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+372:50 call  self.scroll_whitespaces(idx=quote_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+373:39 call  self.get_char_at(after_quote_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+378:43 call  self.skip_to_character(character=outer_rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+
+[src.json_repair.parse_string._bare_key_is_followed_by_colon]
+390:32 call  self.get_char_at(key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+391:45 call  key_char.isalnum()
+    -> <builtin>.str.isalnum
+395:36 call  self.get_char_at(key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+396:49 call  key_char.isalnum()
+    -> <builtin>.str.isalnum
+400:38 call  self.scroll_whitespaces(idx=key_idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+401:28 call  self.get_char_at(key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+
+[src.json_repair.parse_string._post_fence_container_starts_next_member]
+408:50 call  self.scroll_whitespaces(idx=container_end_idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+409:39 call  self.get_char_at(after_container_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+415:60 call  _scroll_comment_prefixed_member_start(self, after_contain...
+    -> src.json_repair.parse_string._scroll_comment_prefixed_member_start
+416:28 call  self.get_char_at(next_member_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+416:88 call  _object_member_starts_at(self, next_member_idx)
+    -> src.json_repair.parse_string._object_member_starts_at
+
+[src.json_repair.parse_string._starts_nested_inline_container]
+423:41 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+426:37 call  self.get_char_at(prev_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+429:33 call  prev_char.isspace()
+    -> <builtin>.str.isspace
+435:47 call  self.scroll_whitespaces(idx=idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+436:41 call  self.get_char_at(next_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+439:64 call  next_char.isdigit()
+    -> <builtin>.str.isdigit
+445:71 call  _bare_key_is_followed_by_colon(self, next_idx)
+    -> src.json_repair.parse_string._bare_key_is_followed_by_colon
+
+[src.json_repair.parse_string._skip_inline_container]
+454:41 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+461:32 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+465:55 call  _matching_string_delimiter(char)
+    -> src.json_repair.parse_string._matching_string_delimiter
+466:39 call  self.skip_to_character(character=end_delimiter, idx=i + 1)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+467:32 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+469:93 call  _starts_nested_inline_container(self, i)
+    -> src.json_repair.parse_string._starts_nested_inline_container
+470:25 call  stack.append(INLINE_CONTAINER_CLOSING_DELIMITERS[char])
+    -> <builtin>.list.append
+472:22 call  stack.pop()
+    -> <builtin>.list.pop
+
+[src.json_repair.parse_string._scroll_comment_prefixed_member_start]
+484:34 call  self.scroll_whitespaces(idx=idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+486:32 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+490:40 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+491:42 call  self.scroll_whitespaces(idx=idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+494:41 call  self.get_char_at(idx + 1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+497:40 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+500:44 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+501:46 call  self.scroll_whitespaces(idx=idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+506:44 call  self.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+509:56 call  self.get_char_at(idx + 1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+513:46 call  self.scroll_whitespaces(idx=idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+
+[src.json_repair.parse_string._quoted_object_member_follows]
+522:40 call  self.scroll_whitespaces(idx=quote_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+523:24 call  self.get_char_at(comma_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+526:60 call  _scroll_comment_prefixed_member_start(self, comma_idx + 1)
+    -> src.json_repair.parse_string._scroll_comment_prefixed_member_start
+527:36 call  _object_member_starts_at(self, next_member_idx)
+    -> src.json_repair.parse_string._object_member_starts_at
+
+[src.json_repair.parse_string._object_member_starts_at]
+534:24 call  self.get_char_at(next_member_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+537:35 call  self.get_char_at(next_member_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+539:55 call  _matching_string_delimiter(next_member)
+    -> src.json_repair.parse_string._matching_string_delimiter
+540:45 call  self.skip_to_character(character=key_end_delimiter, idx=n...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+541:28 call  self.get_char_at(key_end_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+543:48 call  self.scroll_whitespaces(idx=key_end_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+544:32 call  self.get_char_at(after_key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+546:44 call  next_member.isalnum()
+    -> <builtin>.str.isalnum
+547:46 call  _bare_key_is_followed_by_colon(self, next_member_idx)
+    -> src.json_repair.parse_string._bare_key_is_followed_by_colon
+
+[src.json_repair.parse_string._handle_right_delimiter_candidate]
+557:55 call  _outer_rstring_delimiter(state)
+    -> src.json_repair.parse_string._outer_rstring_delimiter
+559:49 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+560:17 call  self.log("While parsing a string, we found a doubled quot...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+566:34 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+572:38 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+575:40 call  self.scroll_whitespaces(idx=i)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+576:32 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+578:45 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+579:25 call  self.log( "In a string with missing quotes and object val...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+587:41 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+591:30 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+597:58 call  next_c.isalpha()
+    -> <builtin>.str.isalpha
+607:34 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+610:35 call  self.skip_to_character(character=outer_rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+611:34 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+613:36 call  self.scroll_whitespaces(idx=i)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+614:34 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+616:21 call  self.log( "While parsing a string, we found a misplaced q...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+619:45 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+621:64 call  self.get_char_at(i - 1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+622:34 call  _only_whitespace_until(self, i)
+    -> src.json_repair.parse_string._only_whitespace_until
+623:97 call  _quoted_object_member_follows(self, i)
+    -> src.json_repair.parse_string._quoted_object_member_follows
+627:45 call  _quoted_object_member_follows(self, i)
+    -> src.json_repair.parse_string._quoted_object_member_follows
+628:25 call  self.log( "While parsing a string, we found a misplaced q...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+631:49 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+633:39 call  self.skip_to_character(character=outer_rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+635:38 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+637:104 call  self.get_char_at(i - 1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+640:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+642:25 call  self.log( "While parsing a string, we found a misplaced q...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+646:49 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+651:43 call  self.skip_to_character(character=[outer_rstring_delimiter...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+652:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+656:43 call  self.skip_to_character(character=[outer_rstring_delimiter...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+657:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+659:25 call  self.log( "While parsing a string in Array context, we de...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+663:49 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+667:21 call  self.log( "While parsing a string in Object Key context, ...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+670:45 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+
+[src.json_repair.parse_string._scan_string_body]
+680:55 call  _outer_rstring_delimiter(state)
+    -> src.json_repair.parse_string._outer_rstring_delimiter
+685:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+686:80 call  _in_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._in_low_smart_quote_span
+688:97 call  char.isspace()
+    -> <builtin>.str.isspace
+689:25 call  self.log( "While parsing a string missing the left delimi...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+694:25 call  self.log( "While parsing a string missing the left delimi...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+699:39 call  _push_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._push_low_smart_quote_span
+700:40 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+702:36 call  _in_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._in_low_smart_quote_span
+703:38 call  _pop_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._pop_low_smart_quote_span
+704:40 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+712:41 call  self.get_char_at(-1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+713:55 call  _bare_key_is_followed_by_colon(self, self.scroll_whitespa...
+    -> src.json_repair.parse_string._bare_key_is_followed_by_colon
+713:85 call  self.scroll_whitespaces(idx=1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+719:55 call  _skip_inline_container(self, 0)
+    -> src.json_repair.parse_string._skip_inline_container
+721:25 call  self.log( "While parsing a string in object value context...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+725:51 call  state.inline_container_stack.clear()
+    -> <builtin>.list.clear
+    reject src.json_repair.utils.json_context.JsonContext.clear: state.inline_container_stack is a list (field(default_factory=list), parse_string.py:29)
+726:39 call  _append_string_content(state, self.json_str[self.index : ...
+    -> src.json_repair.parse_string._append_string_content
+726:60 getitem  self.json_str[self.index : self.index + container_end_idx]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+728:40 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+740:49 call  classify_object_value_comma( self, cached_skip_to_charact...
+    -> src.json_repair.parse_string_helpers.object_value_context.classify_object_value_comma
+    reject src.json_repair.parse_string._scan_string_body.cached_skip_to_character: passed as cached_skip_to_character; classify_object_value_comma calls it (object_value_context.py:83, 90, and through _bare_member_has_recoverable_value), no library code does
+746:25 call  self.log( "While parsing a string missing the right delim...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+753:21 call  self.log( "While parsing a string in object value context...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+756:40 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+758:99 call  update_inline_container_stack( char, state.pending_inline...
+    -> src.json_repair.parse_string_helpers.object_value_context.update_inline_container_stack
+764:40 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+773:44 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+776:34 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+777:32 call  self.get_char_at(1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+779:42 call  _cached_skip_to_character(self, state, outer_rstring_deli...
+    -> src.json_repair.parse_string._cached_skip_to_character
+780:38 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+783:44 call  self.scroll_whitespaces(idx=i)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+784:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+788:47 call  self.skip_to_character(character=state.lstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+789:46 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+793:52 call  self.scroll_whitespaces(idx=i + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+794:50 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+798:43 call  self.skip_to_character(character=":", idx=1)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+799:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+802:44 call  self.scroll_whitespaces(idx=1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+803:43 call  self.skip_to_character(character="}", idx=i)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+807:25 call  self.log( "While parsing a string missing the left delimi...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+817:39 call  self.skip_to_character(outer_rstring_delimiter)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+818:36 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+821:40 call  self.scroll_whitespaces(idx=1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+822:38 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+823:50 call  self.get_char_at(i + 1)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+823:85 call  self.get_char_at(i + 2)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+824:62 call  _brace_before_code_fence_belongs_to_string(self, state, i)
+    -> src.json_repair.parse_string._brace_before_code_fence_belongs_to_string
+825:29 call  self.log( "While parsing a string in object value context...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+828:48 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+830:25 call  self.log( "While parsing a string in object value context...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+835:25 call  self.log( "While parsing a string in object value context...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+840:31 call  _append_string_content(state, char)
+    -> src.json_repair.parse_string._append_string_content
+842:32 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+846:50 call  _rebuild_unmatched_opening_braces(state)
+    -> src.json_repair.parse_string._rebuild_unmatched_opening_braces
+849:62 call  _normalize_escape_sequence(self, state, char)
+    -> src.json_repair.parse_string._normalize_escape_sequence
+853:39 call  self.skip_to_character(character=state.lstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+854:38 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+857:43 call  self.skip_to_character(character=outer_rstring_delimiter,...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+858:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+861:48 call  self.scroll_whitespaces(idx=i)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+862:42 call  self.get_char_at(i)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+864:33 call  self.log( f"While parsing a string missing the right deli...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+869:25 call  self.log( "While parsing a string missing the right delim...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+873:36 call  _in_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._in_low_smart_quote_span
+874:38 call  _pop_low_smart_quote_span(state)
+    -> src.json_repair.parse_string._pop_low_smart_quote_span
+875:40 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+880:56 call  _quote_belongs_to_regex_character_class(self, state)
+    -> src.json_repair.parse_string._quote_belongs_to_regex_character_class
+882:21 call  self.log( "While parsing a string, we found a bare quote ...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+886:40 call  _append_literal_char(self, state, char)
+    -> src.json_repair.parse_string._append_literal_char
+890:86 call  _handle_right_delimiter_candidate(self, state, char)
+    -> src.json_repair.parse_string._handle_right_delimiter_candidate
+
+[src.json_repair.parse_string._scan_string_body.cached_skip_to_character]
+683:41 call  _cached_skip_to_character(self, state, character, idx)
+    -> src.json_repair.parse_string._cached_skip_to_character
+
+[src.json_repair.parse_string._finalize_string_result]
+903:55 call  _outer_rstring_delimiter(state)
+    -> src.json_repair.parse_string._outer_rstring_delimiter
+904:107 call  char.isspace()
+    -> <builtin>.str.isspace
+905:17 call  self.log( "While parsing a string, handling an extreme co...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+908:30 call  self.skip_whitespaces()
+    -> src.json_repair.json_parser.JSONParser.skip_whitespaces
+909:28 call  self.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+914:21 call  self.log( "While parsing a string, we missed the closing ...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+917:55 call  state.string_acc.rstrip()
+    -> <builtin>.str.rstrip
+922:51 call  state.string_acc.rstrip()
+    -> <builtin>.str.rstrip
+
+[src.json_repair.parse_string.parse_string]
+928:49 call  _prepare_string_entry(self)
+    -> src.json_repair.parse_string._prepare_string_entry
+930:20 call  cast("JSONReturnType", direct_result)
+    -> typing.cast
+933:29 call  _scan_string_body(self, state)
+    -> src.json_repair.parse_string._scan_string_body
+934:35 call  _finalize_string_result(self, state, char)
+    -> src.json_repair.parse_string._finalize_string_result
+
+[src.json_repair.parse_string._only_whitespace_until]
+938:19 call  range(1, end)
+    -> <builtin>.range
+939:29 call  self.get_char_at(j)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+940:43 call  c.isspace()
+    -> <builtin>.str.isspace
+
+== src.json_repair.parse_string_helpers.object_value_context
+
+[src.json_repair.parse_string_helpers.object_value_context._bare_member_has_recoverable_value]
+18:48 call  parser.scroll_whitespaces(idx=value_idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+19:37 call  parser.get_char_at(value_start_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+22:43 call  value_start.isdigit()
+    -> <builtin>.str.isdigit
+26:15 call  all(parser.get_char_at(value_start_idx + offset) == char ...
+    -> <builtin>.all
+26:34 call  parser.get_char_at(value_start_idx + offset)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+26:98 call  enumerate(literal)
+    -> <builtin>.enumerate
+27:43 call  parser.get_char_at(value_start_idx + len(literal))
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+27:65 call  len(literal)
+    -> <builtin>.len
+28:54 call  value_end.isspace()
+    -> <builtin>.str.isspace
+34:38 call  skip_to_character([*STRING_DELIMITERS, "}"], value_start_...
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+    -> src.json_repair.parse_string._scan_string_body.cached_skip_to_character
+    note: _bare_member_has_recoverable_value is private; its one package call (73:90) passes classify_object_value_comma's skip_to_character, which is cached_skip_to_character or parser.skip_to_character (42:25)
+35:30 call  parser.get_char_at(value_end_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+
+[src.json_repair.parse_string_helpers.object_value_context.classify_object_value_comma]
+43:41 call  parser.scroll_whitespaces(idx=1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+44:32 call  parser.get_char_at(next_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+49:47 call  parser.skip_to_character(character=next_c, idx=next_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+50:34 call  parser.get_char_at(key_end_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+52:48 call  parser.scroll_whitespaces(idx=key_end_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+53:46 call  parser.get_char_at(key_end_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+58:42 call  parser.get_char_at(bare_key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+59:53 call  key_char.isalnum()
+    -> <builtin>.str.isalnum
+62:49 call  parser.scroll_whitespaces(idx=bare_key_idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+63:46 call  parser.get_char_at(bare_key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+65:34 call  next_c.isalnum()
+    -> <builtin>.str.isalnum
+68:42 call  parser.get_char_at(bare_key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+69:53 call  key_char.isalnum()
+    -> <builtin>.str.isalnum
+72:49 call  parser.scroll_whitespaces(idx=bare_key_idx)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+73:30 call  parser.get_char_at(bare_key_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+73:90 call  _bare_member_has_recoverable_value( parser, bare_key_idx ...
+    -> src.json_repair.parse_string_helpers.object_value_context._bare_member_has_recoverable_value
+83:41 call  skip_to_character([*STRING_DELIMITERS, "{", "["], next_idx)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+    -> src.json_repair.parse_string._scan_string_body.cached_skip_to_character
+    note: skip_to_character = cached_skip_to_character or parser.skip_to_character (42:25); the package's one call (parse_string.py:740) passes the closure _scan_string_body.cached_skip_to_character, and the default None gives the bound method of the JSONParser parser; a callable that a client passes is a client callback (bare Callable annotation)
+84:38 call  parser.get_char_at(next_special_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+90:36 call  skip_to_character(next_special, next_special_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+    -> src.json_repair.parse_string._scan_string_body.cached_skip_to_character
+    note: skip_to_character = cached_skip_to_character or parser.skip_to_character (42:25); see 83:41
+91:30 call  parser.get_char_at(key_end_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+93:44 call  parser.scroll_whitespaces(idx=key_end_idx + 1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+94:42 call  parser.get_char_at(key_end_idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+
+[src.json_repair.parse_string_helpers.object_value_context.update_inline_container_stack]
+104:42 call  inline_container_stack.append(char)
+    -> <builtin>.list.append
+107:42 call  inline_container_stack.append(char)
+    -> <builtin>.list.append
+112:35 call  inline_container_stack.pop()
+    -> <builtin>.list.pop
+
+== src.json_repair.parse_string_helpers.parse_boolean_or_null
+
+[src.json_repair.parse_string_helpers.parse_boolean_or_null.parse_boolean_or_null]
+17:31 call  parser.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+17:46 call  (parser.get_char_at() or "").lower()
+    -> <builtin>.str.lower
+19:47 call  LITERAL_VALUES.items()
+    -> <builtin>.dict.items
+24:35 call  parser.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+24:50 call  (parser.get_char_at() or "").lower()
+    -> <builtin>.str.lower
+28:43 call  parser.get_char_at()
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+29:54 call  next_char.isspace()
+    -> <builtin>.str.isspace
+31:31 call  parser.log("Converted unquoted Python None literal to JSO...
+    -> src.json_repair.json_parser.JSONParser._log
+    -> src.json_repair.json_parser.JSONParser.__init__.<lambda1>
+    note: the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable
+
+== src.json_repair.parse_string_helpers.parse_json_llm_block
+
+[src.json_repair.parse_string_helpers.parse_json_llm_block.parse_json_llm_block]
+14:23 getitem  parser.json_str[parser.index : parser.index + 7]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+15:37 call  parser.skip_to_character("`", idx=7)
+    -> src.json_repair.json_parser.JSONParser.skip_to_character
+16:27 getitem  parser.json_str[parser.index + i : parser.index + i + 3]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+18:37 call  parser.parse_json()
+    -> src.json_repair.json_parser.JSONParser.parse_json
+
+== src.json_repair.parser_parenthesized
+
+[src.json_repair.parser_parenthesized.parenthesized_is_explicit_tuple]
+16:12 call  len(parser.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+25:29 getitem  parser.json_str[i]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+51:27 call  ch.isspace()
+    -> <builtin>.str.isspace
+
+[src.json_repair.parser_parenthesized.top_level_parenthesized_can_start_value]
+91:29 getitem  parser.json_str[i]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+94:26 call  ch.isspace()
+    -> <builtin>.str.isspace
+98:36 call  parser.scroll_whitespaces(idx=1)
+    -> src.json_repair.json_parser.JSONParser.scroll_whitespaces
+99:42 call  parser.get_char_at(idx)
+    -> src.json_repair.json_parser.JSONParser.get_char_at
+103:33 getitem  parser.json_str[parser.index + idx :]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+103:61 call  parser.json_str[parser.index + idx :].lower()
+    -> <builtin>.str.lower
+106:41 call  first_inner_char.isdigit()
+    -> <builtin>.str.isdigit
+114:12 call  len(parser.json_str)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)
+122:29 getitem  parser.json_str[i]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+150:46 getitem  parser.json_str[i]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+153:43 call  trailer.isspace()
+    -> <builtin>.str.isspace
+
+== src.json_repair.parser_schema
+
+[src.json_repair.parser_schema]
+10:2 decorator  @dataclass(frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: dataclass(frozen=True) returns its local function wrap (CPython 3.10 and later), which the decorator applies to the class
+10:11 call  dataclass(frozen=True)
+    -> dataclasses.dataclass
+18:2 decorator  @dataclass(frozen=True)
+    -> dataclasses.dataclass.wrap
+    note: dataclass(frozen=True) returns its local function wrap (CPython 3.10 and later), which the decorator applies to the class
+18:11 call  dataclass(frozen=True)
+    -> dataclasses.dataclass
+
+[src.json_repair.parser_schema.resolve_parser_object_schema]
+31:37 call  repairer.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+33:25 call  ValueError("Schema does not allow any values.")
+    -> <builtin>.ValueError
+34:55 call  repairer.is_object_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_object_schema
+36:50 call  object_schema_config(schema)
+    -> src.json_repair.parser_schema.object_schema_config
+
+[src.json_repair.parser_schema.resolve_parser_array_schema]
+46:37 call  repairer.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+48:25 call  ValueError("Schema does not allow any values.")
+    -> <builtin>.ValueError
+49:54 call  repairer.is_array_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_array_schema
+51:49 call  array_schema_config(schema)
+    -> src.json_repair.parser_schema.array_schema_config
+
+[src.json_repair.parser_schema.object_schema_config]
+55:28 call  schema.get("properties", {})
+    -> <builtin>.dict.get
+    note: schema is a dict (annotation dict[str, Any]; the package passes the dict that resolve_schema returns)
+56:22 call  isinstance(properties, dict)
+    -> <builtin>.isinstance
+58:36 call  schema.get("patternProperties", {})
+    -> <builtin>.dict.get
+59:22 call  isinstance(pattern_properties, dict)
+    -> <builtin>.isinstance
+61:30 call  ObjectSchemaConfig( properties=properties, pattern_proper...
+    note: ObjectSchemaConfig is a frozen dataclass (parser_schema.py:10); its generated __init__ has no node and calls no package code
+64:41 call  schema.get("additionalProperties")
+    -> <builtin>.dict.get
+65:21 call  set(schema.get("required", []))
+    -> <builtin>.set
+    reject src.json_repair.utils.json_context.JsonContext.set: the builtin set; JsonContext.set is a method
+65:32 call  schema.get("required", [])
+    -> <builtin>.dict.get
+
+[src.json_repair.parser_schema.array_schema_config]
+70:18 call  isinstance(schema.get("prefixItems"), list)
+    -> <builtin>.isinstance
+70:29 call  schema.get("prefixItems")
+    -> <builtin>.dict.get
+    note: schema is a dict (annotation dict[str, Any]; the package passes the dict that resolve_schema returns, or the schema of _repair_array)
+71:33 call  ArraySchemaConfig( items_schema=schema["prefixItems"], ad...
+    note: ArraySchemaConfig is a frozen dataclass (parser_schema.py:18); its generated __init__ has no node and calls no package code
+73:40 call  schema.get("items")
+    -> <builtin>.dict.get
+75:29 call  ArraySchemaConfig( items_schema=schema.get("items"), addi...
+    note: ArraySchemaConfig is a frozen dataclass (parser_schema.py:18); its generated __init__ has no node and calls no package code
+76:32 call  schema.get("items")
+    -> <builtin>.dict.get
+77:36 call  schema.get("additionalItems")
+    -> <builtin>.dict.get
+
+== src.json_repair.schema_repair
+
+[src.json_repair.schema_repair.normalize_schema_repair_mode]
+27:25 call  ", ".join(SUPPORTED_SCHEMA_REPAIR_MODES)
+    -> <builtin>.str.join
+28:21 call  ValueError(f"schema_repair_mode must be one of: {expected...
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair._require_jsonschema]
+33:39 call  importlib.import_module("jsonschema")
+    -> importlib.import_module
+35:25 call  ValueError("jsonschema is required when using schema-awar...
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair._require_pydantic]
+40:39 call  importlib.import_module("pydantic")
+    -> importlib.import_module
+42:25 call  ValueError("pydantic is required when using schema models.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair._add_pydantic_field_metadata]
+46:40 call  schema_dict.setdefault("properties", {})
+    -> <builtin>.dict.setdefault
+    note: schema_dict is the dict that the model's model_json_schema() returns (schema_from_input, 133:63)
+47:22 call  isinstance(properties, dict)
+    -> <builtin>.isinstance
+50:27 call  getattr(model, "model_config", {})
+    -> <builtin>.getattr
+51:43 call  model_config.get("populate_by_name", False)
+    -> <builtin>.dict.get
+    note: model is the client's pydantic model class (schema_from_input passes it); pydantic documents model_config as a ConfigDict, a TypedDict, so a dict (B4); the default {} is a dict too
+51:90 call  model_config.get("validate_by_name", False)
+    -> <builtin>.dict.get
+    note: see 51:43
+53:48 call  model.model_fields.items()
+    -> <builtin>.dict.items
+    note: pydantic documents model_fields as a dict of field names to pydantic.fields.FieldInfo (B4)
+54:35 call  getattr(field, "validation_alias", None)
+    -> <builtin>.getattr
+55:47 call  isinstance(validation_alias, str)
+    -> <builtin>.isinstance
+55:83 call  getattr(field, "alias", None)
+    -> <builtin>.getattr
+56:77 call  isinstance(candidate, str)
+    -> <builtin>.isinstance
+57:29 call  next((candidate for candidate in candidates if candidate ...
+    -> <builtin>.next
+61:40 call  property_aliases.setdefault(property_name, [])
+    -> <builtin>.dict.setdefault
+61:66 call  property_aliases.setdefault(property_name, []).append(name)
+    -> <builtin>.list.append
+62:29 call  field.is_required()
+    -> pydantic.fields.FieldInfo.is_required
+    note: field is a value of model.model_fields, a pydantic.fields.FieldInfo (B4)
+64:48 call  properties.setdefault(property_name, {})
+    -> <builtin>.dict.setdefault
+    note: properties is a dict (the isinstance test at 47 and the replacement at 48)
+65:26 call  isinstance(property_schema, dict)
+    -> <builtin>.isinstance
+70:67 call  field.default_factory()
+    note: field.default_factory is the default factory that the client's model declares: a client callback, no callee (B5)
+
+[src.json_repair.schema_repair._prepare_schema_for_validation_node]
+78:18 call  isinstance(node, dict)
+    -> <builtin>.isinstance
+79:63 call  _prepare_schema_for_validation_node(value)
+    -> src.json_repair.schema_repair._prepare_schema_for_validation_node
+79:99 call  node.items()
+    -> <builtin>.dict.items
+80:31 call  normalized.get("items")
+    -> <builtin>.dict.get
+81:22 call  isinstance(items, list)
+    -> <builtin>.isinstance
+82:27 call  normalized.pop("items", None)
+    -> <builtin>.dict.pop
+84:46 call  normalized.pop("additionalItems", None)
+    -> <builtin>.dict.pop
+87:28 call  isinstance(additional_items, dict)
+    -> <builtin>.isinstance
+90:18 call  isinstance(node, list)
+    -> <builtin>.isinstance
+91:52 call  _prepare_schema_for_validation_node(item)
+    -> src.json_repair.schema_repair._prepare_schema_for_validation_node
+
+[src.json_repair.schema_repair.load_schema_model]
+97:25 call  ValueError("Schema model must be in the form 'module:Clas...
+    -> <builtin>.ValueError
+98:41 call  path.split(":", 1)
+    -> <builtin>.str.split
+99:37 call  importlib.import_module(module_name)
+    -> importlib.import_module
+    note: module_name comes from the client's 'module:ClassName' string; the import runs the client's module code (client code)
+100:47 call  module.__dict__.get(class_name)
+    note: Codex audit round 1: module is the client's module, named by the client's 'module:ClassName' string (the tests import their own modules, tests/test_schema_repairer.py:34-38, tests/test_repair_json_cli.py:128); a call on the __dict__ of a client object is opaque (B5; batch-6 ruling jsonpickle (c)), so no callee; the traced edge is rejected in json-repair.rejected.json
+101:39 call  isinstance(model, type)
+    -> <builtin>.isinstance
+102:25 call  ValueError(f"Schema model '{class_name}' not found in mod...
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.normalize_missing_values]
+107:44 call  isinstance(value, MissingValueType)
+    -> <builtin>.isinstance
+109:18 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+111:37 call  value.items()
+    -> <builtin>.dict.items
+112:30 call  isinstance(key, str)
+    -> <builtin>.isinstance
+113:33 call  ValueError("Object keys must be strings.")
+    -> <builtin>.ValueError
+114:55 call  normalize_missing_values(item)
+    -> src.json_repair.schema_repair.normalize_missing_values
+116:18 call  isinstance(value, list)
+    -> <builtin>.isinstance
+117:41 call  normalize_missing_values(item)
+    -> src.json_repair.schema_repair.normalize_missing_values
+118:35 call  isinstance(value, (str, int, float, bool))
+    -> <builtin>.isinstance
+120:21 call  ValueError("Value is not JSON compatible.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.schema_from_input]
+124:18 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+128:15 call  hasattr(schema, "model_json_schema")
+    -> <builtin>.hasattr
+129:37 call  _require_pydantic()
+    -> src.json_repair.schema_repair._require_pydantic
+130:26 call  getattr(pydantic, "VERSION", getattr(pydantic, "__version...
+    -> <builtin>.getattr
+130:55 call  getattr(pydantic, "__version__", "0")
+    -> <builtin>.getattr
+131:15 call  int(version.split(".")[0])
+    -> <builtin>.int
+131:29 call  version.split(".")
+    -> <builtin>.str.split
+132:29 call  ValueError("pydantic v2 is required for schema models.")
+    note: Codex audit round 1: this branch needs a pydantic below 2, which the package does not admit (pyproject.toml:27, pydantic>=2); a branch on a dependency version runs only if an admitted version takes it, so no callee (the test reaches it by setting pydantic.VERSION, tests/test_schema_repairer.py:129-131); schema_from_input keeps <builtin>.ValueError through 137:21
+133:63 call  schema.model_json_schema()
+    -> pydantic.BaseModel.model_json_schema
+    note: schema is documented as "a pydantic v2 model" (json_repair.py:126, 247; README "Schema-guided repairs"), a subclass of pydantic.BaseModel; the annotation is Any, so the documentation fixes the type (B4) and the inherited classmethod is named through pydantic.BaseModel
+134:19 call  hasattr(schema, "model_fields")
+    -> <builtin>.hasattr
+135:41 call  _add_pydantic_field_metadata(schema_dict, schema)
+    -> src.json_repair.schema_repair._add_pydantic_field_metadata
+137:21 call  ValueError("Schema must be a JSON Schema dict, boolean sc...
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer.__init__]
+149:63 call  normalize_schema_repair_mode(schema_repair_mode)
+    -> src.json_repair.schema_repair.normalize_schema_repair_mode
+
+[src.json_repair.schema_repair.SchemaRepairer._log]
+155:28 call  self.log.append({"text": text, "context": path})
+    -> <builtin>.list.append
+    note: self.log is the list passed to SchemaRepairer (annotation list[dict[str, str]] | None; repair_json passes repair_log); the test against None guards the call
+
+[src.json_repair.schema_repair.SchemaRepairer._get_validator]
+158:23 call  id(schema)
+    -> <builtin>.id
+159:53 call  self._validator_cache.get(cache_key)
+    -> <builtin>.dict.get
+163:62 call  self._prepare_schema_for_validation(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer._prepare_schema_for_validation
+164:50 call  self._get_root_validator()
+    -> src.json_repair.schema_repair.SchemaRepairer._get_root_validator
+165:92 call  root_validator.evolve(schema=prepared_schema)
+    -> jsonschema.validators.Draft202012Validator.evolve
+    note: root_validator is the validator that _get_root_validator builds: an instance of the class that jsonschema.validators.validator_for picks for the root schema; see 176:45
+
+[src.json_repair.schema_repair.SchemaRepairer._get_root_validator]
+173:67 call  self._prepare_schema_for_validation(self.root_schema)
+    -> src.json_repair.schema_repair.SchemaRepairer._prepare_schema_for_validation
+174:41 call  _require_jsonschema()
+    -> src.json_repair.schema_repair._require_jsonschema
+175:60 call  jsonschema.validators.validator_for(prepared_root_schema)
+    -> jsonschema.validators.validator_for
+176:45 call  validator_cls(prepared_root_schema)
+    -> jsonschema.validators.Draft202012Validator
+    note: validator_cls is what jsonschema.validators.validator_for returns for the root schema: the class that its "$schema" names, else the default, the latest draft (Draft202012Validator for the jsonschema versions that the package admits, >=4.21). Neither the package, its tests nor its documentation sets "$schema", and pydantic's model_json_schema() emits none, so only the library's default is in scope (B5, library defaults; json-repair.md J4)
+
+[src.json_repair.schema_repair.SchemaRepairer.is_valid]
+180:37 call  self.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+185:40 call  self._get_validator(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer._get_validator
+186:20 call  bool(validator.is_valid(value))
+    -> <builtin>.bool
+186:39 call  validator.is_valid(value)
+    -> jsonschema.validators.Draft202012Validator.is_valid
+    reject src.json_repair.schema_repair.SchemaRepairer.is_valid: validator is the jsonschema validator that _get_validator returns, not a SchemaRepairer
+
+[src.json_repair.schema_repair.SchemaRepairer.validate]
+189:37 call  self.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+193:29 call  ValueError("Schema does not allow any values.")
+    -> <builtin>.ValueError
+194:41 call  _require_jsonschema()
+    -> src.json_repair.schema_repair._require_jsonschema
+195:40 call  self._get_validator(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer._get_validator
+197:31 call  validator.validate(value)
+    -> jsonschema.validators.Draft202012Validator.validate
+    reject src.json_repair.schema_repair.SchemaRepairer.validate: validator is the jsonschema validator that _get_validator returns, not a SchemaRepairer
+199:29 call  ValueError(exc.message)
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer.resolve_schema]
+204:22 call  isinstance(schema, bool)
+    -> <builtin>.isinstance
+206:26 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+207:40 call  SchemaDefinitionError("Schema must be an object.")
+    -> <builtin>.ValueError.__init__
+    note: SchemaDefinitionError subclasses ValueError and defines no __init__
+209:30 call  isinstance(key, str)
+    -> <builtin>.isinstance
+210:44 call  SchemaDefinitionError("Schema keys must be strings.")
+    -> <builtin>.ValueError.__init__
+211:27 call  cast("dict[str, Any]", schema)
+    -> typing.cast
+212:40 call  set()
+    -> <builtin>.set
+    reject src.json_repair.utils.json_context.JsonContext.set: the builtin set; JsonContext.set is a method
+215:30 call  isinstance(ref, str)
+    -> <builtin>.isinstance
+216:44 call  SchemaDefinitionError("$ref must be a string.")
+    -> <builtin>.ValueError.__init__
+217:27 call  id(schema_dict)
+    -> <builtin>.id
+219:44 call  SchemaDefinitionError(f"Circular $ref detected: {ref}")
+    -> <builtin>.ValueError.__init__
+220:32 call  seen_schema_ids.add(schema_id)
+    -> <builtin>.set.add
+221:41 call  self._resolve_ref(ref)
+    -> src.json_repair.schema_repair.SchemaRepairer._resolve_ref
+222:26 call  isinstance(resolved, bool)
+    -> <builtin>.isinstance
+
+[src.json_repair.schema_repair.SchemaRepairer.is_object_schema]
+228:37 call  self.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+229:26 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+231:33 call  schema.get("type")
+    -> <builtin>.dict.get
+234:22 call  isinstance(schema_type, list)
+    -> <builtin>.isinstance
+236:19 call  any(key in schema for key in ("properties", "patternPrope...
+    -> <builtin>.any
+
+[src.json_repair.schema_repair.SchemaRepairer.is_array_schema]
+239:37 call  self.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+240:26 call  isinstance(schema, dict)
+    -> <builtin>.isinstance
+242:33 call  schema.get("type")
+    -> <builtin>.dict.get
+245:22 call  isinstance(schema_type, list)
+    -> <builtin>.isinstance
+
+[src.json_repair.schema_repair.SchemaRepairer._allows_schema_type]
+250:35 call  schema.get("type")
+    -> <builtin>.dict.get
+251:22 call  isinstance(declared_type, str)
+    -> <builtin>.isinstance
+253:22 call  isinstance(declared_type, list)
+    -> <builtin>.isinstance
+256:41 call  self.is_object_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_object_schema
+258:36 call  self.is_array_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_array_schema
+
+[src.json_repair.schema_repair.SchemaRepairer._can_salvage_list_as_object]
+261:40 call  self._allows_schema_type(schema, "object")
+    -> src.json_repair.schema_repair.SchemaRepairer._allows_schema_type
+261:91 call  self._allows_schema_type(schema, "array")
+    -> src.json_repair.schema_repair.SchemaRepairer._allows_schema_type
+
+[src.json_repair.schema_repair.SchemaRepairer.repair_value]
+265:37 call  self.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+267:44 call  normalize_missing_values(value)
+    -> src.json_repair.schema_repair.normalize_missing_values
+269:29 call  ValueError("Schema does not allow any values.")
+    -> <builtin>.ValueError
+271:44 call  normalize_missing_values(value)
+    -> src.json_repair.schema_repair.normalize_missing_values
+274:38 call  self._fill_missing(schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._fill_missing
+279:48 call  normalize_missing_values(value)
+    -> src.json_repair.schema_repair.normalize_missing_values
+280:41 call  self.repair_value(value, subschemas[0], path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+282:45 call  self.repair_value(repaired, subschema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+286:38 call  self._repair_union(value, schema["oneOf"], path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_union
+288:38 call  self._repair_union(value, schema["anyOf"], path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_union
+290:35 call  schema.get("type")
+    -> <builtin>.dict.get
+292:37 call  self.is_object_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_object_schema
+294:38 call  self.is_array_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_array_schema
+297:22 call  isinstance(expected_type, list)
+    -> <builtin>.isinstance
+298:43 call  self._repair_type_union(value, expected_type, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_type_union
+301:43 call  self._repair_object(value, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_object
+303:42 call  self._repair_array(value, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_array
+304:24 call  isinstance(expected_type, str)
+    -> <builtin>.isinstance
+305:43 call  self._coerce_scalar(value, expected_type, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._coerce_scalar
+307:48 call  normalize_missing_values(value)
+    -> src.json_repair.schema_repair.normalize_missing_values
+309:38 call  self._apply_enum_const(repaired, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._apply_enum_const
+
+[src.json_repair.schema_repair.SchemaRepairer._repair_union]
+315:46 call  self.repair_value(copy.deepcopy(value), subschema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+315:60 call  copy.deepcopy(value)
+    -> copy.deepcopy
+    -> src.json_repair.utils.constants.MissingValueType.__deepcopy__
+    note: value is not MISSING_VALUE itself (repair_value returned for it at 273), but it can be a container that holds it: the package's tests pass {"a": MISSING_VALUE} to the public repair_value (tests/test_schema_repairer.py:479-480), an admitted value by B2's test clause (the lead's ruling on audit F1); with a schema {"anyOf": [...]} that dict reaches this deepcopy, which calls MISSING_VALUE.__deepcopy__ back
+316:30 call  self.validate(candidate, subschema)
+    -> src.json_repair.schema_repair.SchemaRepairer.validate
+322:29 call  ValueError(str(last_error))
+    -> <builtin>.ValueError
+322:33 call  str(last_error)
+    -> <builtin>.str
+323:25 call  ValueError("No schema matched the value.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer._repair_type_union]
+337:49 call  self._repair_by_type(copy.deepcopy(value), schema_type, s...
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_by_type
+337:63 call  copy.deepcopy(value)
+    -> copy.deepcopy
+    -> src.json_repair.utils.constants.MissingValueType.__deepcopy__
+    note: the tests' container {"a": MISSING_VALUE} (see 315:60) reaches this deepcopy with a schema whose type is a list, such as {"type": ["object", "null"]}; deepcopy calls MISSING_VALUE.__deepcopy__ back
+338:51 call  self._apply_enum_const(candidate, branch_schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._apply_enum_const
+339:30 call  self.validate(candidate, branch_schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.validate
+345:29 call  ValueError(str(last_error))
+    -> <builtin>.ValueError
+345:33 call  str(last_error)
+    -> <builtin>.str
+346:25 call  ValueError("No schema type matched the value.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer._repair_by_type]
+350:38 call  self._repair_array(value, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_array
+352:39 call  self._repair_object(value, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_object
+353:35 call  self._coerce_scalar(value, schema_type, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._coerce_scalar
+
+[src.json_repair.schema_repair.SchemaRepairer._load_json_string_container]
+363:26 call  isinstance(value, str)
+    -> <builtin>.isinstance
+366:32 call  json.loads(value)
+    -> json.loads
+    reject src.json_repair.json_repair.loads: json.loads of the standard library (json is imported at schema_repair.py:5)
+370:57 call  importlib.import_module(f"{__package__}.json_repair")
+    -> importlib.import_module
+371:48 call  json_repair_module.loads(value, skip_json_loads=True)
+    -> src.json_repair.json_repair.loads
+    note: __package__ of this module is "src.json_repair", so importlib.import_module returns the module src.json_repair.json_repair and its loads runs
+372:26 call  isinstance(repaired, expected_type)
+    -> <builtin>.isinstance
+373:26 call  self._log(salvage_log_message, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+376:22 call  isinstance(parsed, expected_type)
+    -> <builtin>.isinstance
+377:22 call  self._log(unwrap_log_message, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+
+[src.json_repair.schema_repair.SchemaRepairer._repair_array]
+382:49 call  self._load_json_string_container( value, list, path, "Unw...
+    -> src.json_repair.schema_repair.SchemaRepairer._load_json_string_container
+389:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+392:22 call  self._log("Wrapped value in array to match schema", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+393:46 call  normalize_missing_values(value)
+    -> src.json_repair.schema_repair.normalize_missing_values
+395:44 call  array_schema_config(schema)
+    -> src.json_repair.parser_schema.array_schema_config
+409:26 call  isinstance(schema_config.items_schema, list)
+    -> <builtin>.isinstance
+411:50 call  enumerate(schema_config.items_schema)
+    -> <builtin>.enumerate
+412:34 call  len(items)
+    -> <builtin>.len
+415:63 call  repair_or_drop(items[idx], item_schema, item_path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_array.repair_or_drop
+417:46 call  repaired_items.append(repaired_value)
+    -> <builtin>.list.append
+418:23 call  len(items)
+    -> <builtin>.len
+418:36 call  len(schema_config.items_schema)
+    -> <builtin>.len
+419:37 call  len(schema_config.items_schema)
+    -> <builtin>.len
+420:34 call  isinstance(schema_config.additional_items, dict)
+    -> <builtin>.isinstance
+421:54 call  enumerate(tail, start=len(schema_config.items_schema))
+    -> <builtin>.enumerate
+421:70 call  len(schema_config.items_schema)
+    -> <builtin>.len
+423:71 call  repair_or_drop(item, schema_config.additional_items, item...
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_array.repair_or_drop
+425:54 call  repaired_items.append(repaired_value)
+    -> <builtin>.list.append
+427:46 call  repaired_items.extend(normalize_missing_values(item) for ...
+    -> <builtin>.list.extend
+427:71 call  normalize_missing_values(item)
+    -> src.json_repair.schema_repair.normalize_missing_values
+429:55 call  enumerate(tail, start=len(schema_config.items_schema))
+    -> <builtin>.enumerate
+429:71 call  len(schema_config.items_schema)
+    -> <builtin>.len
+430:38 call  self._log("Dropped extra array item not covered by schema...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+434:43 call  enumerate(items)
+    -> <builtin>.enumerate
+436:63 call  repair_or_drop(item, schema_config.items_schema, item_path)
+    -> src.json_repair.schema_repair.SchemaRepairer._repair_array.repair_or_drop
+438:46 call  repaired_items.append(repaired_value)
+    -> <builtin>.list.append
+440:31 call  schema.get("minItems")
+    -> <builtin>.dict.get
+441:41 call  len(items)
+    -> <builtin>.len
+442:29 call  ValueError(f"Array at {path} does not meet minItems.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer._repair_array.repair_or_drop]
+399:47 call  self.repair_value(raw_item, item_schema, item_path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+405:26 call  self._log("Dropped invalid array item while salvaging", i...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+
+[src.json_repair.schema_repair.SchemaRepairer._repair_object]
+448:27 call  isinstance(value, list)
+    -> <builtin>.isinstance
+449:49 call  self._can_salvage_list_as_object(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer._can_salvage_list_as_object
+451:46 call  self._map_list_to_object(value, schema, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._map_list_to_object
+454:37 call  len(value)
+    -> <builtin>.len
+454:64 call  isinstance(value[0], dict)
+    -> <builtin>.isinstance
+457:26 call  self._log("Unwrapped single-item root array to object whi...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+458:49 call  self._load_json_string_container( value, dict, path, "Unw...
+    -> src.json_repair.schema_repair.SchemaRepairer._load_json_string_container
+465:26 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+466:29 call  ValueError(f"Expected object at {path}, got {type(value)....
+    -> <builtin>.ValueError
+466:68 call  type(value)
+    -> <builtin>.type
+468:38 call  schema.get("x-json-repair-property-aliases", {})
+    -> <builtin>.dict.get
+469:22 call  isinstance(property_aliases, dict)
+    -> <builtin>.isinstance
+470:36 call  dict(value)
+    -> <builtin>.dict
+471:61 call  property_aliases.items()
+    -> <builtin>.dict.items
+472:34 call  isinstance(alias, str)
+    -> <builtin>.isinstance
+472:64 call  isinstance(field_names, list)
+    -> <builtin>.isinstance
+474:77 call  isinstance(name, str)
+    -> <builtin>.isinstance
+477:45 call  normalized_value.pop(name)
+    -> <builtin>.dict.pop
+478:34 call  self._log(f"Dropped field-name key because alias '{alias}...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+482:67 call  normalized_value.pop(name)
+    -> <builtin>.dict.pop
+483:30 call  self._log(f"Mapped field name to validation alias '{alias...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+486:45 call  object_schema_config(schema)
+    -> src.json_repair.parser_schema.object_schema_config
+489:44 call  dict(value)
+    -> <builtin>.dict
+493:59 call  schema_config.properties.get(key)
+    -> <builtin>.dict.get
+497:79 call  self._fill_missing_required_for_salvage(prop_schema, key_...
+    -> src.json_repair.schema_repair.SchemaRepairer._fill_missing_required_for_salvage
+500:30 call  self._log("Filled missing required property while salvagi...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+505:29 call  ValueError(f"Missing required properties at {path}: {', '...
+    -> <builtin>.ValueError
+505:81 call  ', '.join(missing_required)
+    -> <builtin>.str.join
+509:63 call  schema_config.properties.items()
+    -> <builtin>.dict.items
+512:50 call  self.repair_value(value[key], prop_schema, key_path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+513:28 call  isinstance(prop_schema, dict)
+    -> <builtin>.isinstance
+514:54 call  self._copy_json_value(prop_schema["default"], key_path, "...
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+515:26 call  self._log("Inserted default value for missing property", ...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+517:42 call  value.items()
+    -> <builtin>.dict.items
+524:73 call  match_pattern_properties(schema_config.pattern_properties...
+    -> src.json_repair.utils.pattern_properties.match_pattern_properties
+526:26 call  self._log(f"Skipped unsupported patternProperties regex '...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+528:51 call  self.repair_value(raw_value, matched[0], key_path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+530:55 call  self.repair_value(repaired_value, prop_schema, key_path)
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+533:26 call  isinstance(schema_config.additional_properties, dict)
+    -> <builtin>.isinstance
+534:50 call  self.repair_value( raw_value, cast("dict[str, Any]", sche...
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+536:25 call  cast("dict[str, Any]", schema_config.additional_properties)
+    -> typing.cast
+541:57 call  normalize_missing_values(raw_value)
+    -> src.json_repair.schema_repair.normalize_missing_values
+543:22 call  self._log("Dropped extra property not covered by schema",...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+545:36 call  schema.get("minProperties")
+    -> <builtin>.dict.get
+546:46 call  len(repaired)
+    -> <builtin>.len
+547:29 call  ValueError(f"Object at {path} does not meet minProperties.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer._map_list_to_object]
+553:32 call  schema.get("properties")
+    -> <builtin>.dict.get
+554:26 call  isinstance(properties, dict)
+    -> <builtin>.isinstance
+558:49 call  properties.items()
+    -> <builtin>.dict.items
+559:30 call  isinstance(key, str)
+    -> <builtin>.isinstance
+560:44 call  SchemaDefinitionError("Schema object property names must ...
+    -> <builtin>.ValueError.__init__
+563:20 call  list(typed_properties.keys())
+    -> <builtin>.list
+563:42 call  typed_properties.keys()
+    -> <builtin>.dict.keys
+564:15 call  len(value)
+    -> <builtin>.len
+564:29 call  len(keys)
+    -> <builtin>.len
+568:34 call  enumerate(keys)
+    -> <builtin>.enumerate
+571:48 call  self.repair_value(value[idx], typed_properties[key], key_...
+    -> src.json_repair.schema_repair.SchemaRepairer.repair_value
+577:18 call  self._log("Mapped array to object by schema property orde...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+
+[src.json_repair.schema_repair.SchemaRepairer._fill_missing_required_for_salvage]
+581:46 call  self.resolve_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.resolve_schema
+582:26 call  isinstance(resolved_schema, dict)
+    -> <builtin>.isinstance
+586:47 call  self._copy_json_value(resolved_schema["default"], path, "...
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+588:47 call  self._copy_json_value(resolved_schema["const"], path, "co...
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+589:42 call  resolved_schema.get("enum")
+    -> <builtin>.dict.get
+591:47 call  self._copy_json_value(enum_values[0], path, "enum")
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+593:44 call  resolved_schema.get("type")
+    -> <builtin>.dict.get
+595:36 call  self.is_array_schema(resolved_schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_array_schema
+597:39 call  self.is_object_schema(resolved_schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_object_schema
+600:64 call  resolved_schema.get("minItems")
+    -> <builtin>.dict.get
+602:65 call  resolved_schema.get("minProperties")
+    -> <builtin>.dict.get
+
+[src.json_repair.schema_repair.SchemaRepairer._fill_missing]
+610:22 call  self._log("Filled missing value with const", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+611:41 call  self._copy_json_value(schema["const"], path, "const")
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+615:33 call  ValueError(f"Enum at {path} has no values.")
+    -> <builtin>.ValueError
+616:22 call  self._log("Filled missing value with first enum value", p...
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+617:41 call  self._copy_json_value(enum_values[0], path, "enum")
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+619:22 call  self._log("Filled missing value with default", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+620:41 call  self._copy_json_value(schema["default"], path, "default")
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+622:35 call  schema.get("type")
+    -> <builtin>.dict.get
+623:22 call  isinstance(expected_type, list)
+    -> <builtin>.isinstance
+626:46 call  self._fill_missing({**schema, "type": schema_type}, path)
+    -> src.json_repair.schema_repair.SchemaRepairer._fill_missing
+629:29 call  ValueError(f"Cannot infer missing value at {path}.")
+    -> <builtin>.ValueError
+633:37 call  self.is_object_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_object_schema
+635:38 call  self.is_array_schema(schema)
+    -> src.json_repair.schema_repair.SchemaRepairer.is_array_schema
+639:22 call  self._log("Filled missing value with empty string", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+642:22 call  self._log("Filled missing value with 0", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+645:22 call  self._log("Filled missing value with false", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+648:35 call  schema.get("minItems")
+    -> <builtin>.dict.get
+650:33 call  ValueError(f"Array at {path} requires at least {min_items...
+    -> <builtin>.ValueError
+651:22 call  self._log("Filled missing value with empty array", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+654:40 call  schema.get("minProperties")
+    -> <builtin>.dict.get
+656:33 call  ValueError(f"Object at {path} requires at least {min_prop...
+    -> <builtin>.ValueError
+657:22 call  self._log("Filled missing value with empty object", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+660:22 call  self._log("Filled missing value with null", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+663:25 call  ValueError(f"Cannot infer missing value at {path}.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer._coerce_scalar]
+667:26 call  isinstance(value, str)
+    -> <builtin>.isinstance
+669:26 call  isinstance(value, (int, float))
+    -> <builtin>.isinstance
+669:66 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+670:26 call  self._log("Coerced number to string", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+671:27 call  str(value)
+    -> <builtin>.str
+672:29 call  ValueError(f"Expected string at {path}.")
+    -> <builtin>.ValueError
+675:26 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+676:33 call  ValueError(f"Expected integer at {path}.")
+    -> <builtin>.ValueError
+677:26 call  isinstance(value, int)
+    -> <builtin>.isinstance
+679:26 call  isinstance(value, float)
+    -> <builtin>.isinstance
+680:36 call  value.is_integer()
+    -> <builtin>.float.is_integer
+681:30 call  self._log("Coerced number to integer", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+682:31 call  int(value)
+    -> <builtin>.int
+683:33 call  ValueError(f"Expected integer at {path}.")
+    -> <builtin>.ValueError
+684:26 call  isinstance(value, str)
+    -> <builtin>.isinstance
+686:36 call  int(value)
+    -> <builtin>.int
+690:30 call  self._log("Coerced string to integer", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+693:32 call  float(value)
+    -> <builtin>.float
+695:37 call  ValueError(f"Expected integer at {path}.")
+    -> <builtin>.ValueError
+696:38 call  num.is_integer()
+    -> <builtin>.float.is_integer
+697:37 call  ValueError(f"Expected integer at {path}.")
+    -> <builtin>.ValueError
+698:26 call  self._log("Coerced number to integer", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+699:27 call  int(num)
+    -> <builtin>.int
+700:29 call  ValueError(f"Expected integer at {path}.")
+    -> <builtin>.ValueError
+703:26 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+704:33 call  ValueError(f"Expected number at {path}.")
+    -> <builtin>.ValueError
+705:26 call  isinstance(value, (int, float))
+    -> <builtin>.isinstance
+707:26 call  isinstance(value, str)
+    -> <builtin>.isinstance
+709:40 call  float(value)
+    -> <builtin>.float
+711:37 call  ValueError(f"Expected number at {path}.")
+    -> <builtin>.ValueError
+712:26 call  self._log("Coerced string to number", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+714:29 call  ValueError(f"Expected number at {path}.")
+    -> <builtin>.ValueError
+717:26 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+719:26 call  isinstance(value, str)
+    -> <builtin>.isinstance
+720:38 call  value.lower()
+    -> <builtin>.str.lower
+722:30 call  self._log("Coerced string to boolean", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+725:30 call  self._log("Coerced string to boolean", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+727:26 call  isinstance(value, (int, float))
+    -> <builtin>.isinstance
+727:66 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+728:26 call  self._log("Coerced number to boolean", path)
+    -> src.json_repair.schema_repair.SchemaRepairer._log
+    reject src.json_repair.json_parser.JSONParser._log: the receiver self is a SchemaRepairer
+729:28 call  bool(value)
+    -> <builtin>.bool
+730:29 call  ValueError(f"Expected boolean at {path}.")
+    -> <builtin>.ValueError
+735:29 call  ValueError(f"Expected null at {path}.")
+    -> <builtin>.ValueError
+737:36 call  SchemaDefinitionError(f"Unsupported schema type {schema_t...
+    -> <builtin>.ValueError.__init__
+
+[src.json_repair.schema_repair.SchemaRepairer._apply_enum_const]
+741:29 call  ValueError(f"Value at {path} does not match const.")
+    -> <builtin>.ValueError
+743:29 call  ValueError(f"Value at {path} does not match enum.")
+    -> <builtin>.ValueError
+
+[src.json_repair.schema_repair.SchemaRepairer._resolve_ref]
+747:30 call  ref.startswith("#/")
+    -> <builtin>.str.startswith
+748:40 call  SchemaDefinitionError(f"Unsupported $ref: {ref}")
+    -> <builtin>.ValueError.__init__
+749:27 call  ref.lstrip("#/")
+    -> <builtin>.str.lstrip
+749:39 call  ref.lstrip("#/").split("/")
+    -> <builtin>.str.split
+752:41 call  part.replace("~1", "/")
+    -> <builtin>.str.replace
+752:60 call  part.replace("~1", "/").replace("~0", "~")
+    -> <builtin>.str.replace
+753:30 call  isinstance(current, dict)
+    -> <builtin>.isinstance
+754:44 call  SchemaDefinitionError(f"Unresolvable $ref: {ref}")
+    -> <builtin>.ValueError.__init__
+756:22 call  isinstance(current, dict)
+    -> <builtin>.isinstance
+762:36 call  SchemaDefinitionError(f"Unresolvable $ref: {ref}")
+    -> <builtin>.ValueError.__init__
+
+[src.json_repair.schema_repair.SchemaRepairer._copy_json_value]
+765:39 call  isinstance(value, (str, int, float, bool))
+    -> <builtin>.isinstance
+767:22 call  isinstance(value, list)
+    -> <builtin>.isinstance
+768:42 call  self._copy_json_value(item, f"{path}[{idx}]", label)
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+768:100 call  enumerate(value)
+    -> <builtin>.enumerate
+769:22 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+771:41 call  value.items()
+    -> <builtin>.dict.items
+772:34 call  isinstance(key, str)
+    -> <builtin>.isinstance
+773:37 call  ValueError(f"{label.capitalize()} value at {path} contain...
+    -> <builtin>.ValueError
+773:57 call  label.capitalize()
+    -> <builtin>.str.capitalize
+774:52 call  self._copy_json_value(item, f"{path}.{key}", label)
+    -> src.json_repair.schema_repair.SchemaRepairer._copy_json_value
+776:25 call  ValueError(f"{label.capitalize()} value at {path} is not ...
+    -> <builtin>.ValueError
+776:45 call  label.capitalize()
+    -> <builtin>.str.capitalize
+
+[src.json_repair.schema_repair.SchemaRepairer._prepare_schema_for_validation]
+779:57 call  _prepare_schema_for_validation_node(schema)
+    -> src.json_repair.schema_repair._prepare_schema_for_validation_node
+780:26 call  isinstance(normalized, dict)
+    -> <builtin>.isinstance
+781:29 call  ValueError("Schema must be an object.")
+    -> <builtin>.ValueError
+
+== src.json_repair.utils.constants
+
+[src.json_repair.utils.constants]
+12:33 call  MissingValueType()
+    note: MissingValueType defines no __init__; object.__init__ gives no edge
+
+== src.json_repair.utils.json_context
+
+[src.json_repair.utils.json_context]
+7:22 call  auto()
+    -> enum.auto
+8:24 call  auto()
+    -> enum.auto
+9:17 call  auto()
+    -> enum.auto
+
+[src.json_repair.utils.json_context._JsonContextEntry.__enter__]
+20:25 call  self.context.set(self.value)
+    -> src.json_repair.utils.json_context.JsonContext.set
+    note: _JsonContextEntry is private; the package makes it only in JsonContext.enter (39:33), with the JsonContext self as context
+
+[src.json_repair.utils.json_context._JsonContextEntry.__exit__]
+28:27 call  self.context.reset()
+    -> src.json_repair.utils.json_context.JsonContext.reset
+    note: self.context is the JsonContext of JsonContext.enter (39:33)
+
+[src.json_repair.utils.json_context.JsonContext.enter]
+39:33 call  _JsonContextEntry(self, value)
+    -> src.json_repair.utils.json_context._JsonContextEntry.__init__
+
+[src.json_repair.utils.json_context.JsonContext.set]
+51:28 call  self.context.append(value)
+    -> <builtin>.list.append
+
+[src.json_repair.utils.json_context.JsonContext.reset]
+63:29 call  self.context.pop()
+    -> <builtin>.list.pop
+
+[src.json_repair.utils.json_context.JsonContext.clear]
+76:27 call  self.context.clear()
+    -> <builtin>.list.clear
+    reject src.json_repair.utils.json_context.JsonContext.clear: self.context is the list of JsonContext.__init__ (json_context.py:34), not a JsonContext
+
+== src.json_repair.utils.object_comparer
+
+[src.json_repair.utils.object_comparer]
+8:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+41:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[src.json_repair.utils.object_comparer.ObjectComparer.is_same_object]
+15:16 call  type(obj1)
+    -> <builtin>.type
+15:34 call  type(obj2)
+    -> <builtin>.type
+19:22 call  isinstance(obj1, dict)
+    -> <builtin>.isinstance
+21:30 call  isinstance(obj2, dict)
+    -> <builtin>.isinstance
+21:49 call  len(obj1)
+    -> <builtin>.len
+21:62 call  len(obj2)
+    -> <builtin>.len
+27:53 call  ObjectComparer.is_same_object(obj1[key], obj2[key])
+    -> src.json_repair.utils.object_comparer.ObjectComparer.is_same_object
+31:22 call  isinstance(obj1, list)
+    -> <builtin>.isinstance
+33:30 call  isinstance(obj2, list)
+    -> <builtin>.isinstance
+33:49 call  len(obj1)
+    -> <builtin>.len
+33:62 call  len(obj2)
+    -> <builtin>.len
+36:23 call  all(ObjectComparer.is_same_object(obj1[i], obj2[i]) for i...
+    -> <builtin>.all
+36:53 call  ObjectComparer.is_same_object(obj1[i], obj2[i])
+    -> src.json_repair.utils.object_comparer.ObjectComparer.is_same_object
+36:86 call  range(len(obj1))
+    -> <builtin>.range
+36:90 call  len(obj1)
+    -> <builtin>.len
+
+[src.json_repair.utils.object_comparer.ObjectComparer.is_strictly_empty]
+47:26 call  isinstance(value, str | list | dict | set | tuple)
+    -> <builtin>.isinstance
+47:74 call  len(value)
+    -> <builtin>.len
+
+== src.json_repair.utils.pattern_properties
+
+[src.json_repair.utils.pattern_properties]
+4:38 call  frozenset({".", "^", "$", "*", "+", "?", "{", "}", "[", "...
+    -> <builtin>.frozenset
+
+[src.json_repair.utils.pattern_properties.match_pattern_properties]
+29:52 call  pattern_properties.items()
+    -> <builtin>.dict.items
+    note: the annotation Mapping[str, Any] fixes no class; the package passes only schema_config.pattern_properties, a dict (parser_schema.py:58-60); a client's own mapping is a client object (B5)
+30:44 call  pattern.startswith("^")
+    -> <builtin>.str.startswith
+31:40 call  pattern.endswith("$")
+    -> <builtin>.str.endswith
+34:15 call  any(token in literal for token in _UNSUPPORTED_REGEX_TOKENS)
+    -> <builtin>.any
+35:40 call  unsupported_patterns.append(pattern)
+    -> <builtin>.list.append
+41:38 call  key.startswith(literal)
+    -> <builtin>.str.startswith
+43:36 call  key.endswith(literal)
+    -> <builtin>.str.endswith
+48:35 call  matched_schemas.append(schema)
+    -> <builtin>.list.append
+
+== src.json_repair.utils.string_file_wrapper
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper.__init__]
+30:41 call  fd.tell()
+    -> io.TextIOWrapper.tell
+    note: fd is a client stream (opaque, B5) or the io.TextIOWrapper that from_file opens (json_repair.py:326) and passes through load and repair_json to JSONParser (json_parser.py:62); the annotation TextIO fixes no concrete class
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer]
+45:29 call  IndexError("Negative indexing is not supported")
+    -> <builtin>.IndexError
+47:34 call  self.buffers.get(index)
+    -> <builtin>.dict.get
+51:36 call  self._ensure_chunk_position(index)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper._ensure_chunk_position
+53:21 call  self.fd.seek(start_pos)
+    -> io.TextIOWrapper.seek
+    note: self.fd: a client stream or the io.TextIOWrapper of from_file (see 30:41)
+54:29 call  self.fd.read(self.buffer_length)
+    -> io.TextIOWrapper.read
+    note: self.fd: a client stream or the io.TextIOWrapper of from_file (see 30:41)
+56:29 call  IndexError("Chunk index out of range")
+    -> <builtin>.IndexError
+57:31 call  self.fd.tell()
+    -> io.TextIOWrapper.tell
+58:15 call  len(self._chunk_positions)
+    -> <builtin>.len
+59:41 call  self._chunk_positions.append(end_pos)
+    -> <builtin>.list.append
+60:15 call  len(chunk)
+    -> <builtin>.len
+61:59 call  len(chunk)
+    -> <builtin>.len
+65:26 call  max(2, int(2_000_000 / self.buffer_length))
+    -> <builtin>.max
+65:33 call  int(2_000_000 / self.buffer_length)
+    -> <builtin>.int
+66:15 call  len(self.buffers)
+    -> <builtin>.len
+67:30 call  next(iter(self.buffers))
+    -> <builtin>.next
+67:35 call  iter(self.buffers)
+    -> <builtin>.iter
+69:33 call  self.buffers.pop(oldest_key)
+    -> <builtin>.dict.pop
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__]
+85:22 call  isinstance(index, slice)
+    -> <builtin>.isinstance
+86:54 call  self._normalize_slice(index)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper._normalize_slice
+89:33 call  ValueError("slice step cannot be zero")
+    -> <builtin>.ValueError
+91:31 call  "".join(self[i] for i in range(start, stop, step))
+    -> <builtin>.str.join
+91:36 getitem  self[i]
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__
+    note: self is a StringFileWrapper; the generator expression runs inside "".join, so the item lookup belongs to __getitem__
+91:54 call  range(start, stop, step)
+    -> <builtin>.range
+95:44 call  self._slice_from_buffers(start, stop)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper._slice_from_buffers
+97:25 call  len(self)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: len(self) of a StringFileWrapper runs its __len__
+99:29 call  IndexError("string index out of range")
+    -> <builtin>.IndexError
+101:33 call  self.get_buffer(buffer_index)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__]
+113:34 call  len(self._chunk_positions)
+    -> <builtin>.len
+114:44 call  self._ensure_chunk_position(chunk_index)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper._ensure_chunk_position
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper._normalize_slice]
+119:24 call  len(self)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: len(self) of a StringFileWrapper runs its __len__
+129:20 call  max(start, 0)
+    -> <builtin>.max
+130:19 call  min(stop, total_len)
+    -> <builtin>.min
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper._slice_from_buffers]
+141:37 call  self.get_buffer(buffer_index)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer
+144:38 call  self.get_buffer(buffer_index)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer
+145:36 call  self.get_buffer(buffer_end)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer
+146:41 call  self.get_buffer(i)
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer
+146:59 call  range(buffer_index + 1, buffer_end)
+    -> <builtin>.range
+147:37 call  "".join(middle_slices)
+    -> <builtin>.str.join
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper.__setitem__]
+157:47 call  isinstance(index, slice)
+    -> <builtin>.isinstance
+160:25 call  len(self)
+    -> <builtin>.len
+    -> src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__
+    note: len(self) of a StringFileWrapper runs its __len__
+162:40 call  self.fd.tell()
+    -> io.TextIOWrapper.tell
+    note: referee's ruling (a) after Codex audit round 1: rule A keeps the body edges of this method, which the package never calls, and B1 admits the wrappers that the package creates, whose fd is the io.TextIOWrapper of from_file (json_repair.py:326, json_parser.py:62); the instance need not escape to the client; a client's own stream stays opaque (B5)
+163:21 call  self.fd.seek(self._initial_position + start)
+    -> io.TextIOWrapper.seek
+    note: self.fd: the io.TextIOWrapper of from_file (see 162:40)
+164:22 call  self.fd.write(value)
+    -> io.TextIOWrapper.write
+    note: the arguments bind; on the read-only stream of from_file write is entered and raises io.UnsupportedOperation in its body, which keeps the edge (batch-6 ruling on binding for a callable written in C)
+165:21 call  self.fd.seek(current_position)
+    note: no callee: with the package's read-only stream the write at 164:22 raises, so this witness never reaches the second seek; any other stream here is a client stream (B5); the pair __setitem__ -> io.TextIOWrapper.seek comes from 163:21
+
+[src.json_repair.utils.string_file_wrapper.StringFileWrapper._ensure_chunk_position]
+171:18 call  len(self._chunk_positions)
+    -> <builtin>.len
+172:29 call  len(self._chunk_positions)
+    -> <builtin>.len
+174:25 call  self.fd.seek(start_pos, os.SEEK_SET)
+    -> io.TextIOWrapper.seek
+    note: self.fd: a client stream or the io.TextIOWrapper of from_file (see 30:41)
+175:33 call  self.fd.read(self.buffer_length)
+    -> io.TextIOWrapper.read
+176:35 call  self.fd.tell()
+    -> io.TextIOWrapper.tell
+177:19 call  len(chunk)
+    -> <builtin>.len
+178:68 call  len(chunk)
+    -> <builtin>.len
+179:41 call  self._chunk_positions.append(end_pos)
+    -> <builtin>.list.append
+182:15 call  len(self._chunk_positions)
+    -> <builtin>.len
+183:29 call  IndexError("Chunk index out of range")
+    -> <builtin>.IndexError

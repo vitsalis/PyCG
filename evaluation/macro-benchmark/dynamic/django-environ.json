@@ -1,0 +1,644 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__",
+      "<builtin>.UserWarning.__init__",
+      "<builtin>.Warning.__init__"
+    ],
+    "<builtin>.bytes.startswith": [
+      "uuid.bytes_.startswith"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.object.__init__": [
+      "<builtin>.bytes.__init__",
+      "<builtin>.str.__init__",
+      "<builtin>.tuple.__init__",
+      "collections.abc.Collection.__init__",
+      "collections.abc.Container.__init__",
+      "collections.abc.Iterable.__init__",
+      "collections.abc.Mapping.__init__",
+      "collections.abc.MutableMapping.__init__",
+      "collections.abc.Sized.__init__",
+      "re.Match.__init__",
+      "selectors.Mapping.__init__",
+      "typing.Text.__init__",
+      "urllib.parse.ParseResult.__init__",
+      "uuid.bytes_.__init__"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.__getitem__": [
+      "typing.Text.__getitem__"
+    ],
+    "<builtin>.str.encode": [
+      "typing.Text.encode"
+    ],
+    "<builtin>.str.endswith": [
+      "typing.Text.endswith"
+    ],
+    "<builtin>.str.find": [
+      "typing.Text.find"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.isdigit": [
+      "typing.Text.isdigit"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.lstrip": [
+      "typing.Text.lstrip"
+    ],
+    "<builtin>.str.replace": [
+      "typing.Text.replace"
+    ],
+    "<builtin>.str.rfind": [
+      "typing.Text.rfind"
+    ],
+    "<builtin>.str.rsplit": [
+      "typing.Text.rsplit"
+    ],
+    "<builtin>.str.rstrip": [
+      "typing.Text.rstrip"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.splitlines": [
+      "typing.Text.splitlines"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "<builtin>.str.upper": [
+      "typing.Text.upper"
+    ],
+    "_io.StringIO.read": [
+      "io.StringIO.read"
+    ],
+    "_io.TextIOWrapper.read": [
+      "io.TextIOWrapper.read"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "collections.namedtuple._replace": [
+      "urllib.parse.ParseResult._replace"
+    ],
+    "genericpath.exists": [
+      "ntpath.exists",
+      "os.path.exists",
+      "posixpath.exists"
+    ],
+    "posixpath.abspath": [
+      "os.path.abspath"
+    ],
+    "posixpath.dirname": [
+      "os.path.dirname"
+    ],
+    "posixpath.join": [
+      "os.path.join"
+    ]
+  },
+  "commit": "6e1b461125e2313cae362e1ab9426a97d9e843b0",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 2,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "environ.compat": [
+      "environ.compat.choose_postgres_driver",
+      "environ.compat.choose_pymemcache_driver",
+      "environ.compat.choose_rediscache_driver",
+      "importlib.util.find_spec"
+    ],
+    "environ.compat.choose_pymemcache_driver": [
+      "importlib.util.find_spec",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "environ.compat.choose_rediscache_driver": [
+      "importlib.util.find_spec",
+      "unittest.mock.CallableMixin.__call__"
+    ],
+    "environ.environ": [
+      "<builtin>.classmethod",
+      "<builtin>.property",
+      "<builtin>.staticmethod",
+      "<builtin>.str.startswith",
+      "environ.fileaware_mapping.FileAwareMapping.__init__",
+      "logging.getLogger"
+    ],
+    "environ.environ.Env.__call__": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env._parse_common_search_params": [
+      "<builtin>.str",
+      "<builtin>.str.split",
+      "environ.environ.Env.parse_value",
+      "urllib.parse.parse_qs"
+    ],
+    "environ.environ.Env._parse_elasticsearch_search_params": [
+      "<builtin>.len",
+      "<builtin>.str.rsplit",
+      "environ.environ.Env.parse_value",
+      "urllib.parse.urlunparse"
+    ],
+    "environ.environ.Env._parse_solr_search_params": [
+      "environ.environ.Env.parse_value",
+      "urllib.parse.urlunparse"
+    ],
+    "environ.environ.Env._parse_whoosh_search_params": [
+      "environ.environ.Env.parse_value"
+    ],
+    "environ.environ.Env.bool": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.bytes": [
+      "<builtin>.hasattr",
+      "<builtin>.str.encode",
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.cache_url": [
+      "environ.environ.Env.cache_url_config",
+      "environ.environ.Env.url"
+    ],
+    "environ.environ.Env.cache_url_config": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str.lower",
+      "<builtin>.str.replace",
+      "<builtin>.str.split",
+      "<builtin>.str.startswith",
+      "<builtin>.str.upper",
+      "environ.environ._cast",
+      "urllib.parse.parse_qs",
+      "urllib.parse.urlparse"
+    ],
+    "environ.environ.Env.channels_url_config": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.isinstance",
+      "<builtin>.str.split",
+      "<builtin>.str.startswith",
+      "collections.namedtuple._replace",
+      "urllib.parse.ParseResult.geturl",
+      "urllib.parse.urlparse"
+    ],
+    "environ.environ.Env.db_url": [
+      "environ.environ.Env.db_url_config",
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.db_url_config": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.filter",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "<builtin>.str",
+      "<builtin>.str.find",
+      "<builtin>.str.isdigit",
+      "<builtin>.str.join",
+      "<builtin>.str.rsplit",
+      "<builtin>.str.split",
+      "<builtin>.str.startswith",
+      "<builtin>.str.upper",
+      "<builtin>.tuple",
+      "_warnings.warn",
+      "environ.environ._cast",
+      "environ.environ._cast_int",
+      "environ.environ._cast_urlstr",
+      "environ.environ._urlparse_quote",
+      "itertools.zip_longest",
+      "urllib.parse.parse_qs",
+      "urllib.parse.unquote",
+      "urllib.parse.unquote_plus",
+      "urllib.parse.urlparse",
+      "urllib.parse.urlunparse"
+    ],
+    "environ.environ.Env.dict": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.email_url": [
+      "environ.environ.Env.email_url_config",
+      "environ.environ.Env.url"
+    ],
+    "environ.environ.Env.email_url_config": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.isinstance",
+      "<builtin>.str.split",
+      "<builtin>.str.upper",
+      "environ.environ._cast_int",
+      "environ.environ._cast_urlstr",
+      "urllib.parse.parse_qs",
+      "urllib.parse.unquote_plus",
+      "urllib.parse.urlparse"
+    ],
+    "environ.environ.Env.float": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.get_value": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytes.startswith",
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str.lstrip",
+      "<builtin>.str.replace",
+      "<builtin>.str.startswith",
+      "<builtin>.type",
+      "_warnings.warn",
+      "environ.environ.Env.get_value",
+      "environ.environ.Env.parse_value",
+      "logging.Logger.debug"
+    ],
+    "environ.environ.Env.int": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.json": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.list": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.parse_value": [
+      "<builtin>.dict",
+      "<builtin>.dict.get",
+      "<builtin>.float",
+      "<builtin>.int",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.map",
+      "<builtin>.str",
+      "<builtin>.str.join",
+      "<builtin>.str.lower",
+      "<builtin>.str.split",
+      "<builtin>.str.strip",
+      "<builtin>.tuple",
+      "environ.environ.Env.parse_value.<lambda1>",
+      "json.loads",
+      "re.split",
+      "re.sub",
+      "urllib.parse.urlparse"
+    ],
+    "environ.environ.Env.parse_value.<lambda1>": [
+      "<builtin>.dict.get",
+      "<builtin>.str",
+      "environ.environ.Env.parse_value"
+    ],
+    "environ.environ.Env.path": [
+      "environ.environ.Env.get_value",
+      "environ.environ.Path.__init__"
+    ],
+    "environ.environ.Env.read_env": [
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.open",
+      "<builtin>.str",
+      "<builtin>.str.splitlines",
+      "<builtin>.str.startswith",
+      "_io.StringIO.read",
+      "_io.TextIOWrapper.read",
+      "environ.environ.Env.read_env._keep_escaped_format_characters",
+      "environ.environ.Env.read_env.set_environ",
+      "environ.environ.Env.read_env.set_environ.<lambda1>",
+      "environ.environ.Env.read_env.set_environ.<lambda2>",
+      "logging.Logger.debug",
+      "logging.Logger.info",
+      "logging.Logger.warning",
+      "posixpath.dirname",
+      "posixpath.join",
+      "re.Match.group",
+      "re.match",
+      "re.sub",
+      "sys._getframe"
+    ],
+    "environ.environ.Env.read_env._keep_escaped_format_characters": [
+      "re.Match.group"
+    ],
+    "environ.environ.Env.read_env.set_environ.<lambda1>": [
+      "<builtin>.dict.update",
+      "<builtin>.str"
+    ],
+    "environ.environ.Env.read_env.set_environ.<lambda2>": [
+      "<builtin>.dict.setdefault",
+      "<builtin>.str"
+    ],
+    "environ.environ.Env.search_url_config": [
+      "<builtin>.dict.update",
+      "<builtin>.isinstance",
+      "<builtin>.str.endswith",
+      "<builtin>.str.split",
+      "environ.environ.Env._parse_common_search_params",
+      "environ.environ.Env._parse_elasticsearch_search_params",
+      "environ.environ.Env._parse_solr_search_params",
+      "environ.environ.Env._parse_whoosh_search_params",
+      "environ.environ.Env._parse_xapian_search_params",
+      "urllib.parse.unquote_plus",
+      "urllib.parse.urlparse"
+    ],
+    "environ.environ.Env.str": [
+      "<builtin>.BaseException.__init__",
+      "environ.environ.Env.get_value",
+      "re.sub"
+    ],
+    "environ.environ.Env.tuple": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Env.url": [
+      "environ.environ.Env.get_value"
+    ],
+    "environ.environ.Path.__add__": [
+      "<builtin>.isinstance",
+      "environ.environ.Path.__init__"
+    ],
+    "environ.environ.Path.__call__": [
+      "environ.environ.Path._absolute_join"
+    ],
+    "environ.environ.Path.__contains__": [
+      "<builtin>.len",
+      "<builtin>.str.startswith",
+      "posixpath.join"
+    ],
+    "environ.environ.Path.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "environ.environ.Path.__fspath__": [
+      "environ.environ.Path.__str__"
+    ],
+    "environ.environ.Path.__getitem__": [
+      "<builtin>.str.__getitem__",
+      "environ.environ.Path.__str__"
+    ],
+    "environ.environ.Path.__init__": [
+      "<builtin>.dict.get",
+      "<builtin>.object.__init__",
+      "<builtin>.super",
+      "environ.environ.Path._absolute_join",
+      "posixpath.dirname"
+    ],
+    "environ.environ.Path.__invert__": [
+      "environ.environ.Path.path"
+    ],
+    "environ.environ.Path.__ne__": [
+      "environ.environ.Path.__eq__"
+    ],
+    "environ.environ.Path.__sub__": [
+      "<builtin>.TypeError",
+      "<builtin>.isinstance",
+      "<builtin>.str.endswith",
+      "<builtin>.str.format",
+      "<builtin>.str.rstrip",
+      "<builtin>.type",
+      "environ.environ.Path.__init__",
+      "environ.environ.Path.path"
+    ],
+    "environ.environ.Path._absolute_join": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.dict.get",
+      "genericpath.exists",
+      "posixpath.abspath",
+      "posixpath.join"
+    ],
+    "environ.environ.Path.find": [
+      "<builtin>.str",
+      "<builtin>.str.find",
+      "environ.environ.Path.__str__"
+    ],
+    "environ.environ.Path.path": [
+      "environ.environ.Path.__init__"
+    ],
+    "environ.environ.Path.rfind": [
+      "<builtin>.str",
+      "<builtin>.str.rfind",
+      "environ.environ.Path.__str__"
+    ],
+    "environ.environ._cast": [
+      "ast.literal_eval"
+    ],
+    "environ.environ._cast_int": [
+      "<builtin>.hasattr",
+      "<builtin>.int",
+      "<builtin>.str.isdigit"
+    ],
+    "environ.environ._cast_urlstr": [
+      "<builtin>.isinstance",
+      "urllib.parse.unquote"
+    ],
+    "environ.environ._urlparse_quote": [
+      "urllib.parse.quote",
+      "urllib.parse.urlparse"
+    ],
+    "environ.fileaware_mapping.FileAwareMapping.__delitem__": [
+      "<builtin>.str.endswith",
+      "environ.fileaware_mapping.FileAwareMapping.__delitem__"
+    ],
+    "environ.fileaware_mapping.FileAwareMapping.__getitem__": [
+      "<builtin>.dict.get",
+      "<builtin>.open",
+      "_io.TextIOWrapper.read"
+    ],
+    "environ.fileaware_mapping.FileAwareMapping.__iter__": [
+      "<builtin>.str.endswith"
+    ],
+    "environ.fileaware_mapping.FileAwareMapping.__len__": [
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.tuple"
+    ],
+    "environ.fileaware_mapping.FileAwareMapping.__setitem__": [
+      "<builtin>.str.endswith"
+    ]
+  },
+  "executed": [
+    "environ.compat.choose_postgres_driver",
+    "environ.compat.choose_pymemcache_driver",
+    "environ.compat.choose_rediscache_driver",
+    "environ.environ.Env.__call__",
+    "environ.environ.Env.__contains__",
+    "environ.environ.Env.__init__",
+    "environ.environ.Env._parse_common_search_params",
+    "environ.environ.Env._parse_elasticsearch_search_params",
+    "environ.environ.Env._parse_solr_search_params",
+    "environ.environ.Env._parse_whoosh_search_params",
+    "environ.environ.Env._parse_xapian_search_params",
+    "environ.environ.Env.bool",
+    "environ.environ.Env.bytes",
+    "environ.environ.Env.cache_url",
+    "environ.environ.Env.cache_url_config",
+    "environ.environ.Env.channels_url_config",
+    "environ.environ.Env.db_url",
+    "environ.environ.Env.db_url_config",
+    "environ.environ.Env.dict",
+    "environ.environ.Env.email_url",
+    "environ.environ.Env.email_url_config",
+    "environ.environ.Env.float",
+    "environ.environ.Env.get_value",
+    "environ.environ.Env.int",
+    "environ.environ.Env.json",
+    "environ.environ.Env.list",
+    "environ.environ.Env.parse_value",
+    "environ.environ.Env.parse_value.<lambda1>",
+    "environ.environ.Env.path",
+    "environ.environ.Env.read_env",
+    "environ.environ.Env.read_env._keep_escaped_format_characters",
+    "environ.environ.Env.read_env.set_environ",
+    "environ.environ.Env.read_env.set_environ.<lambda1>",
+    "environ.environ.Env.read_env.set_environ.<lambda2>",
+    "environ.environ.Env.search_url_config",
+    "environ.environ.Env.str",
+    "environ.environ.Env.tuple",
+    "environ.environ.Env.url",
+    "environ.environ.Path.__add__",
+    "environ.environ.Path.__call__",
+    "environ.environ.Path.__contains__",
+    "environ.environ.Path.__eq__",
+    "environ.environ.Path.__fspath__",
+    "environ.environ.Path.__getitem__",
+    "environ.environ.Path.__init__",
+    "environ.environ.Path.__invert__",
+    "environ.environ.Path.__ne__",
+    "environ.environ.Path.__repr__",
+    "environ.environ.Path.__str__",
+    "environ.environ.Path.__sub__",
+    "environ.environ.Path._absolute_join",
+    "environ.environ.Path.find",
+    "environ.environ.Path.path",
+    "environ.environ.Path.rfind",
+    "environ.environ.Path.root",
+    "environ.environ._cast",
+    "environ.environ._cast_int",
+    "environ.environ._cast_urlstr",
+    "environ.environ._urlparse_quote",
+    "environ.fileaware_mapping.FileAwareMapping.__delitem__",
+    "environ.fileaware_mapping.FileAwareMapping.__getitem__",
+    "environ.fileaware_mapping.FileAwareMapping.__init__",
+    "environ.fileaware_mapping.FileAwareMapping.__iter__",
+    "environ.fileaware_mapping.FileAwareMapping.__len__",
+    "environ.fileaware_mapping.FileAwareMapping.__setitem__"
+  ],
+  "functions": [
+    "environ.compat.choose_postgres_driver",
+    "environ.compat.choose_pymemcache_driver",
+    "environ.compat.choose_rediscache_driver",
+    "environ.environ.Env.__call__",
+    "environ.environ.Env.__contains__",
+    "environ.environ.Env.__init__",
+    "environ.environ.Env._parse_common_search_params",
+    "environ.environ.Env._parse_elasticsearch_search_params",
+    "environ.environ.Env._parse_solr_search_params",
+    "environ.environ.Env._parse_whoosh_search_params",
+    "environ.environ.Env._parse_xapian_search_params",
+    "environ.environ.Env.bool",
+    "environ.environ.Env.bytes",
+    "environ.environ.Env.cache_url",
+    "environ.environ.Env.cache_url_config",
+    "environ.environ.Env.channels_url",
+    "environ.environ.Env.channels_url_config",
+    "environ.environ.Env.db_url",
+    "environ.environ.Env.db_url_config",
+    "environ.environ.Env.dict",
+    "environ.environ.Env.email_url",
+    "environ.environ.Env.email_url_config",
+    "environ.environ.Env.float",
+    "environ.environ.Env.get_value",
+    "environ.environ.Env.int",
+    "environ.environ.Env.json",
+    "environ.environ.Env.list",
+    "environ.environ.Env.parse_value",
+    "environ.environ.Env.parse_value.<lambda1>",
+    "environ.environ.Env.path",
+    "environ.environ.Env.read_env",
+    "environ.environ.Env.read_env._keep_escaped_format_characters",
+    "environ.environ.Env.read_env.set_environ",
+    "environ.environ.Env.read_env.set_environ.<lambda1>",
+    "environ.environ.Env.read_env.set_environ.<lambda2>",
+    "environ.environ.Env.search_url",
+    "environ.environ.Env.search_url_config",
+    "environ.environ.Env.str",
+    "environ.environ.Env.tuple",
+    "environ.environ.Env.url",
+    "environ.environ.NoValue.__repr__",
+    "environ.environ.Path.__add__",
+    "environ.environ.Path.__call__",
+    "environ.environ.Path.__contains__",
+    "environ.environ.Path.__eq__",
+    "environ.environ.Path.__fspath__",
+    "environ.environ.Path.__getitem__",
+    "environ.environ.Path.__init__",
+    "environ.environ.Path.__invert__",
+    "environ.environ.Path.__ne__",
+    "environ.environ.Path.__repr__",
+    "environ.environ.Path.__str__",
+    "environ.environ.Path.__sub__",
+    "environ.environ.Path.__unicode__",
+    "environ.environ.Path._absolute_join",
+    "environ.environ.Path.file",
+    "environ.environ.Path.find",
+    "environ.environ.Path.path",
+    "environ.environ.Path.rfind",
+    "environ.environ.Path.root",
+    "environ.environ._cast",
+    "environ.environ._cast_int",
+    "environ.environ._cast_urlstr",
+    "environ.environ._urlparse_quote",
+    "environ.fileaware_mapping.FileAwareMapping.__delitem__",
+    "environ.fileaware_mapping.FileAwareMapping.__getitem__",
+    "environ.fileaware_mapping.FileAwareMapping.__init__",
+    "environ.fileaware_mapping.FileAwareMapping.__iter__",
+    "environ.fileaware_mapping.FileAwareMapping.__len__",
+    "environ.fileaware_mapping.FileAwareMapping.__setitem__"
+  ],
+  "modules": [
+    "environ",
+    "environ.compat",
+    "environ.environ",
+    "environ.fileaware_mapping"
+  ],
+  "project": "django-environ",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 433,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

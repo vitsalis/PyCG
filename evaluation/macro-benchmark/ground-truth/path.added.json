@@ -1,0 +1,1003 @@
+{
+  "edges": {
+    "path.Multi.detect": {
+      "path.TempDir.__init__": [
+        "path 1950:19 call  cls(input)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1950:19 call  cls(input)"
+      ]
+    },
+    "path.Path.__add__": {
+      "path.TempDir.__init__": [
+        "path 218:32 call  self._next_class(super().__add__(more))"
+      ],
+      "path.TempDir.__new__": [
+        "path 218:32 call  self._next_class(super().__add__(more))"
+      ]
+    },
+    "path.Path.__new__": {
+      "path.Path.__add__": [
+        "path 185:31 call  super().__new__(cls, other)"
+      ],
+      "path.Path.replace": [
+        "path 185:31 call  super().__new__(cls, other)"
+      ]
+    },
+    "path.Path.__radd__": {
+      "path.Path.__add__": [
+        "path 221:46 call  other.__add__(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 221:32 call  self._next_class(other.__add__(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 221:32 call  self._next_class(other.__add__(self))"
+      ]
+    },
+    "path.Path.__rtruediv__": {
+      "path.Path.__add__": [
+        "path 243:49 call  self.module.join(rel, self)"
+      ],
+      "path.Path.replace": [
+        "path 243:49 call  self.module.join(rel, self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 243:32 call  self._next_class(self.module.join(rel, self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 243:32 call  self._next_class(self.module.join(rel, self))"
+      ]
+    },
+    "path.Path.__truediv__": {
+      "path.TempDir.__init__": [
+        "path 232:32 call  self._next_class(self.module.join(self, rel))"
+      ],
+      "path.TempDir.__new__": [
+        "path 232:32 call  self._next_class(self.module.join(self, rel))"
+      ]
+    },
+    "path.Path._hash": {
+      "_md5.md5.update": [
+        "path 979:21 call  m.update(chunk)"
+      ],
+      "_sha1.sha.update": [
+        "path 979:21 call  m.update(chunk)"
+      ],
+      "_sha1.sha1.update": [
+        "path 979:21 call  m.update(chunk)"
+      ]
+    },
+    "path.Path.absolute": {
+      "path.Path.__add__": [
+        "path 270:52 call  self.module.abspath(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 270:32 call  self._next_class(self.module.abspath(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 270:32 call  self._next_class(self.module.abspath(self))"
+      ]
+    },
+    "path.Path.basename": {
+      "path.Path.__add__": [
+        "path 298:53 call  self.module.basename(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 298:32 call  self._next_class(self.module.basename(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 298:32 call  self._next_class(self.module.basename(self))"
+      ]
+    },
+    "path.Path.chmod": {
+      "path.masks.compose.<lambda1>.<lambda1>": [
+        "path 1295:24 call  mask(self.stat().st_mode)"
+      ],
+      "path.masks.simple.<lambda1>": [
+        "path 1295:24 call  mask(self.stat().st_mode)"
+      ]
+    },
+    "path.Path.chown.resolve_gid": {
+      "grp.getgrnam": [
+        "path 1312:69 call  grp.getgrnam(gid)"
+      ]
+    },
+    "path.Path.chroot": {
+      "os.chroot": [
+        "path 1686:22 call  os.chroot(self)"
+      ]
+    },
+    "path.Path.chunks.<lambda1>": {
+      "io.BufferedRandom.read": [
+        "path 816:43 call  f.read(size)"
+      ],
+      "io.BufferedWriter.read": [
+        "path 816:43 call  f.read(size)"
+      ],
+      "io.FileIO.read": [
+        "path 816:43 call  f.read(size)"
+      ],
+      "io._WindowsConsoleIO.read": [
+        "path 816:43 call  f.read(size)"
+      ]
+    },
+    "path.Path.copy": {
+      "path.Path.__radd__": [
+        "path 1512:44 call  shutil.copy(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.Path.__repr__": [
+        "path 1512:44 call  shutil.copy(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.Path.replace": [
+        "path 1512:44 call  shutil.copy(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1512:32 call  self._next_class(shutil.copy(self, dst, follow_symlinks=f..."
+      ],
+      "path.TempDir.__new__": [
+        "path 1512:32 call  self._next_class(shutil.copy(self, dst, follow_symlinks=f..."
+      ]
+    },
+    "path.Path.copy2": {
+      "path.Path.__add__": [
+        "path 1516:25 call  shutil.copy2(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.Path.__init__": [
+        "path 1515:32 call  self._next_class( shutil.copy2(self, dst, follow_symlinks..."
+      ],
+      "path.Path.__new__": [
+        "path 1515:32 call  self._next_class( shutil.copy2(self, dst, follow_symlinks..."
+      ],
+      "path.Path.__radd__": [
+        "path 1516:25 call  shutil.copy2(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.Path.__repr__": [
+        "path 1516:25 call  shutil.copy2(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.Path.replace": [
+        "path 1516:25 call  shutil.copy2(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1515:32 call  self._next_class( shutil.copy2(self, dst, follow_symlinks..."
+      ],
+      "path.TempDir.__new__": [
+        "path 1515:32 call  self._next_class( shutil.copy2(self, dst, follow_symlinks..."
+      ],
+      "path.classes.ClassProperty.__get__": [
+        "path 1515:21 getattr  self._next_class"
+      ],
+      "shutil.copy2": [
+        "path 1516:25 call  shutil.copy2(self, dst, follow_symlinks=follow_symlinks)"
+      ]
+    },
+    "path.Path.copyfile": {
+      "path.Path.__repr__": [
+        "path 1502:28 call  shutil.copyfile(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1501:32 call  self._next_class( shutil.copyfile(self, dst, follow_symli..."
+      ],
+      "path.TempDir.__new__": [
+        "path 1501:32 call  self._next_class( shutil.copyfile(self, dst, follow_symli..."
+      ]
+    },
+    "path.Path.copymode": {
+      "path.Path.replace": [
+        "path 1506:24 call  shutil.copymode(self, dst, follow_symlinks=follow_symlinks)"
+      ],
+      "shutil.copymode": [
+        "path 1506:24 call  shutil.copymode(self, dst, follow_symlinks=follow_symlinks)"
+      ]
+    },
+    "path.Path.copystat": {
+      "path.Path.replace": [
+        "path 1509:24 call  shutil.copystat(self, dst, follow_symlinks=follow_symlinks)"
+      ]
+    },
+    "path.Path.copytree": {
+      "path.Path.__radd__": [
+        "path 1529:28 call  shutil.copytree( self, dst, symlinks=symlinks, ignore=ign..."
+      ],
+      "path.Path.__repr__": [
+        "path 1529:28 call  shutil.copytree( self, dst, symlinks=symlinks, ignore=ign..."
+      ],
+      "path.Path.replace": [
+        "path 1529:28 call  shutil.copytree( self, dst, symlinks=symlinks, ignore=ign..."
+      ],
+      "path.TempDir.__init__": [
+        "path 1528:32 call  self._next_class( shutil.copytree( self, dst, symlinks=sy..."
+      ],
+      "path.TempDir.__new__": [
+        "path 1528:32 call  self._next_class( shutil.copytree( self, dst, symlinks=sy..."
+      ]
+    },
+    "path.Path.cwd": {
+      "path.TempDir.__init__": [
+        "path 259:19 call  cls(os.getcwd())"
+      ],
+      "path.TempDir.__new__": [
+        "path 259:19 call  cls(os.getcwd())"
+      ]
+    },
+    "path.Path.dirname": {
+      "path.Path.__add__": [
+        "path 294:52 call  self.module.dirname(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 294:32 call  self._next_class(self.module.dirname(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 294:32 call  self._next_class(self.module.dirname(self))"
+      ]
+    },
+    "path.Path.dirs": {
+      "path.matchers.Null.__call__": [
+        "path 553:28 iter  self.iterdir(match)"
+      ]
+    },
+    "path.Path.drive": {
+      "path.Path.__radd__": [
+        "path 357:42 call  self.module.splitdrive(self)"
+      ],
+      "path.Path.replace": [
+        "path 357:42 call  self.module.splitdrive(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 358:32 call  self._next_class(drive)"
+      ],
+      "path.TempDir.__new__": [
+        "path 358:32 call  self._next_class(drive)"
+      ]
+    },
+    "path.Path.expanduser": {
+      "path.TempDir.__init__": [
+        "path 286:32 call  self._next_class(self.module.expanduser(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 286:32 call  self._next_class(self.module.expanduser(self))"
+      ]
+    },
+    "path.Path.expandvars": {
+      "path.TempDir.__init__": [
+        "path 290:32 call  self._next_class(self.module.expandvars(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 290:32 call  self._next_class(self.module.expandvars(self))"
+      ]
+    },
+    "path.Path.files": {
+      "path.matchers.Null.__call__": [
+        "path 564:28 iter  self.iterdir(match)"
+      ]
+    },
+    "path.Path.get_owner": {
+      "<builtin>.NotImplementedError": [
+        "path 1203:42 call  NotImplementedError(\"Ownership not available on this plat..."
+      ],
+      "<builtin>.globals": [
+        "path 1202:46 call  globals()"
+      ],
+      "win32security.GetFileSecurity": [
+        "path 1205:49 call  win32security.GetFileSecurity( self, win32security.OWNER_..."
+      ],
+      "win32security.GetFileSecurity.GetSecurityDescriptorOwner": [
+        "path 1208:50 call  desc.GetSecurityDescriptorOwner()"
+      ],
+      "win32security.LookupAccountSid": [
+        "path 1209:71 call  win32security.LookupAccountSid(None, sid)"
+      ]
+    },
+    "path.Path.glob": {
+      "path.Path.__add__": [
+        "path 652:42 call  glob.glob(self / pattern)"
+      ],
+      "path.Path.replace": [
+        "path 652:42 call  glob.glob(self / pattern)"
+      ],
+      "path.TempDir.__init__": [
+        "path 652:20 call  cls(s)"
+      ],
+      "path.TempDir.__new__": [
+        "path 652:20 call  cls(s)"
+      ]
+    },
+    "path.Path.home": {
+      "path.TempDir.__init__": [
+        "path 263:19 call  cls(os.path.expanduser('~'))"
+      ],
+      "path.TempDir.__new__": [
+        "path 263:19 call  cls(os.path.expanduser('~'))"
+      ]
+    },
+    "path.Path.iglob": {
+      "path.Path.__add__": [
+        "path 670:33 iter  glob.iglob(self / pattern)"
+      ],
+      "path.Path.replace": [
+        "path 670:33 iter  glob.iglob(self / pattern)"
+      ],
+      "path.TempDir.__init__": [
+        "path 670:20 call  cls(s)"
+      ],
+      "path.TempDir.__new__": [
+        "path 670:20 call  cls(s)"
+      ]
+    },
+    "path.Path.in_place": {
+      "io.BufferedReader.close": [
+        "path 1792:27 call  readable.close()",
+        "path 1798:27 call  readable.close()"
+      ],
+      "io.BufferedReader.fileno": [
+        "path 1773:39 call  readable.fileno()"
+      ],
+      "io.BufferedWriter.close": [
+        "path 1793:27 call  writable.close()",
+        "path 1799:27 call  writable.close()"
+      ],
+      "io.FileIO.close": [
+        "path 1792:27 call  readable.close()",
+        "path 1793:27 call  writable.close()",
+        "path 1798:27 call  readable.close()",
+        "path 1799:27 call  writable.close()"
+      ],
+      "io.FileIO.fileno": [
+        "path 1773:39 call  readable.fileno()"
+      ]
+    },
+    "path.Path.isabs": {
+      "path.Path.replace": [
+        "path 1014:33 call  self.module.isabs(self)"
+      ]
+    },
+    "path.Path.ismount": {
+      "path.Path.__radd__": [
+        "path 1039:35 call  self.module.ismount(self)"
+      ],
+      "path.Path.replace": [
+        "path 1039:35 call  self.module.ismount(self)"
+      ]
+    },
+    "path.Path.joinpath": {
+      "path.Path.__radd__": [
+        "path 444:47 call  cls.module.join(first, *others)"
+      ],
+      "path.Path.replace": [
+        "path 444:47 call  cls.module.join(first, *others)"
+      ],
+      "path.TempDir.__init__": [
+        "path 444:31 call  cls._next_class(cls.module.join(first, *others))"
+      ],
+      "path.TempDir.__new__": [
+        "path 444:31 call  cls._next_class(cls.module.join(first, *others))"
+      ]
+    },
+    "path.Path.link": {
+      "path.TempDir.__init__": [
+        "path 1456:32 call  self._next_class(newpath)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1456:32 call  self._next_class(newpath)"
+      ]
+    },
+    "path.Path.makedirs": {
+      "path.Path.__add__": [
+        "path 1378:20 call  os.makedirs(self, mode)"
+      ],
+      "path.Path.replace": [
+        "path 1378:20 call  os.makedirs(self, mode)"
+      ]
+    },
+    "path.Path.merge_tree": {
+      "path.Path.__add__": [
+        "path 1675:30 call  copy_function(source, dest)"
+      ],
+      "path.Path.__radd__": [
+        "path 1675:30 call  copy_function(source, dest)"
+      ],
+      "path.Path.__repr__": [
+        "path 1675:30 call  copy_function(source, dest)"
+      ],
+      "path.Path.replace": [
+        "path 1675:30 call  copy_function(source, dest)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1653:36 call  self._next_class(dst)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1653:36 call  self._next_class(dst)"
+      ]
+    },
+    "path.Path.move": {
+      "path.Path.__add__": [
+        "path 1541:29 call  shutil.move(self, dst, copy_function=copy_function)"
+      ],
+      "path.Path.__init__": [
+        "path 1543:32 call  self._next_class(retval or dst)"
+      ],
+      "path.Path.__new__": [
+        "path 1543:32 call  self._next_class(retval or dst)"
+      ],
+      "path.Path.__radd__": [
+        "path 1541:29 call  shutil.move(self, dst, copy_function=copy_function)"
+      ],
+      "path.Path.__repr__": [
+        "path 1541:29 call  shutil.move(self, dst, copy_function=copy_function)"
+      ],
+      "path.Path.replace": [
+        "path 1541:29 call  shutil.move(self, dst, copy_function=copy_function)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1543:32 call  self._next_class(retval or dst)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1543:32 call  self._next_class(retval or dst)"
+      ],
+      "path.classes.ClassProperty.__get__": [
+        "path 1543:21 getattr  self._next_class"
+      ],
+      "shutil.move": [
+        "path 1541:29 call  shutil.move(self, dst, copy_function=copy_function)"
+      ]
+    },
+    "path.Path.normcase": {
+      "path.TempDir.__init__": [
+        "path 274:32 call  self._next_class(self.module.normcase(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 274:32 call  self._next_class(self.module.normcase(self))"
+      ]
+    },
+    "path.Path.normpath": {
+      "path.Path.__add__": [
+        "path 278:53 call  self.module.normpath(self)"
+      ],
+      "path.Path.replace": [
+        "path 278:53 call  self.module.normpath(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 278:32 call  self._next_class(self.module.normpath(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 278:32 call  self._next_class(self.module.normpath(self))"
+      ]
+    },
+    "path.Path.owner": {
+      "path.Path.get_owner": [
+        "path 1229:30 call  self.get_owner()"
+      ]
+    },
+    "path.Path.read_hash": {
+      "_md5.md5.digest": [
+        "path 990:44 call  self._hash(hash_name).digest()"
+      ],
+      "_sha1.sha.digest": [
+        "path 990:44 call  self._hash(hash_name).digest()"
+      ],
+      "_sha1.sha1.digest": [
+        "path 990:44 call  self._hash(hash_name).digest()"
+      ]
+    },
+    "path.Path.read_hexhash": {
+      "_md5.md5.hexdigest": [
+        "path 1000:47 call  self._hash(hash_name).hexdigest()"
+      ],
+      "_sha1.sha.hexdigest": [
+        "path 1000:47 call  self._hash(hash_name).hexdigest()"
+      ],
+      "_sha1.sha1.hexdigest": [
+        "path 1000:47 call  self._hash(hash_name).hexdigest()"
+      ]
+    },
+    "path.Path.readlink": {
+      "path.TempDir.__init__": [
+        "path 1486:32 call  self._next_class(removeprefix(os.readlink(self), '\\\\\\\\?\\\\'))"
+      ],
+      "path.TempDir.__new__": [
+        "path 1486:32 call  self._next_class(removeprefix(os.readlink(self), '\\\\\\\\?\\\\'))"
+      ]
+    },
+    "path.Path.realpath": {
+      "path.Path.__add__": [
+        "path 282:53 call  self.module.realpath(self)"
+      ],
+      "path.Path.__radd__": [
+        "path 282:53 call  self.module.realpath(self)"
+      ],
+      "path.Path.replace": [
+        "path 282:53 call  self.module.realpath(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 282:32 call  self._next_class(self.module.realpath(self))"
+      ],
+      "path.TempDir.__new__": [
+        "path 282:32 call  self._next_class(self.module.realpath(self))"
+      ]
+    },
+    "path.Path.relpath": {
+      "path.TempDir.__init__": [
+        "path 485:31 call  self._next_class(start)"
+      ],
+      "path.TempDir.__new__": [
+        "path 485:31 call  self._next_class(start)"
+      ]
+    },
+    "path.Path.relpathto": {
+      "path.TempDir.__init__": [
+        "path 496:37 call  self._next_class(dest)",
+        "path 524:32 call  self._next_class(relpath)"
+      ],
+      "path.TempDir.__new__": [
+        "path 496:37 call  self._next_class(dest)",
+        "path 524:32 call  self._next_class(relpath)"
+      ]
+    },
+    "path.Path.removedirs": {
+      "path.Path.replace": [
+        "path 1404:22 call  os.removedirs(self)"
+      ]
+    },
+    "path.Path.removedirs_p": {
+      "path.DirectoryNotEmpty.translate": [
+        "path 1411:45 call  DirectoryNotEmpty.translate()"
+      ]
+    },
+    "path.Path.rename": {
+      "path.TempDir.__init__": [
+        "path 1320:32 call  self._next_class(new)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1320:32 call  self._next_class(new)"
+      ]
+    },
+    "path.Path.renames": {
+      "path.Path.__add__": [
+        "path 1324:19 call  os.renames(self, new)"
+      ],
+      "path.Path.replace": [
+        "path 1324:19 call  os.renames(self, new)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1325:32 call  self._next_class(new)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1325:32 call  self._next_class(new)"
+      ]
+    },
+    "path.Path.replace": {
+      "path.Path.__add__": [
+        "path 1358:44 call  pathlib.Path(self).replace(target_or_old)"
+      ],
+      "path.Path.replace": [
+        "path 1358:44 call  pathlib.Path(self).replace(target_or_old)"
+      ],
+      "path.TempDir.__init__": [
+        "path 1355:32 call  self._next_class( super().replace(target_or_old, *args) i..."
+      ],
+      "path.TempDir.__new__": [
+        "path 1355:32 call  self._next_class( super().replace(target_or_old, *args) i..."
+      ],
+      "pathlib.WindowsPath.replace": [
+        "path 1358:44 call  pathlib.Path(self).replace(target_or_old)"
+      ]
+    },
+    "path.Path.rmdir_p": {
+      "path.DirectoryNotEmpty.translate": [
+        "path 1398:45 call  DirectoryNotEmpty.translate()"
+      ]
+    },
+    "path.Path.rmtree": {
+      "path.Path.__radd__": [
+        "path 1606:22 call  shutil.rmtree(self, *args, **kwargs)"
+      ],
+      "path.Path.replace": [
+        "path 1606:22 call  shutil.rmtree(self, *args, **kwargs)"
+      ]
+    },
+    "path.Path.splitdrive": {
+      "os.path.splitdrive": [
+        "path 408:44 call  self.module.splitdrive(self)"
+      ],
+      "path.Path.__radd__": [
+        "path 408:44 call  self.module.splitdrive(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 409:32 call  self._next_class(drive)",
+        "path 409:57 call  self._next_class(rel)"
+      ],
+      "path.TempDir.__new__": [
+        "path 409:32 call  self._next_class(drive)",
+        "path 409:57 call  self._next_class(rel)"
+      ]
+    },
+    "path.Path.splitext": {
+      "path.TempDir.__init__": [
+        "path 424:32 call  self._next_class(filename)"
+      ],
+      "path.TempDir.__new__": [
+        "path 424:32 call  self._next_class(filename)"
+      ]
+    },
+    "path.Path.splitpath": {
+      "path.Path.__add__": [
+        "path 396:42 call  self.module.split(self)"
+      ],
+      "path.TempDir.__init__": [
+        "path 397:32 call  self._next_class(parent)"
+      ],
+      "path.TempDir.__new__": [
+        "path 397:32 call  self._next_class(parent)"
+      ]
+    },
+    "path.Path.startfile": {
+      "os.startfile": [
+        "path 1716:25 call  os.startfile(self, *args, **kwargs)"
+      ]
+    },
+    "path.Path.symlink": {
+      "path.TempDir.__init__": [
+        "path 1477:32 call  self._next_class(newlink)"
+      ],
+      "path.TempDir.__new__": [
+        "path 1477:32 call  self._next_class(newlink)"
+      ]
+    },
+    "path.Path.walk": {
+      "path.Handlers.strict": [
+        "path 591:21 call  error_fn(f\"Unable to list directory '{self}': {exc}\")",
+        "path 602:25 call  error_fn(f\"Unable to access '{child}': {exc}\")"
+      ],
+      "path.Handlers.warn": [
+        "path 591:21 call  error_fn(f\"Unable to list directory '{self}': {exc}\")",
+        "path 602:25 call  error_fn(f\"Unable to access '{child}': {exc}\")"
+      ]
+    },
+    "path.Path.with_name": {
+      "path.Path.__radd__": [
+        "path 389:63 op  removesuffix(self, self.name) + name"
+      ],
+      "path.TempDir.__init__": [
+        "path 389:32 call  self._next_class(removesuffix(self, self.name) + name)"
+      ],
+      "path.TempDir.__new__": [
+        "path 389:32 call  self._next_class(removesuffix(self, self.name) + name)"
+      ]
+    },
+    "path.Path.with_stem": {
+      "path.Path.__add__": [
+        "path 325:36 op  stem + self.suffix"
+      ]
+    },
+    "path.TempDir.__enter__": {
+      "path.TempDir.__init__": [
+        "path 2005:32 call  self._next_class(self)"
+      ],
+      "path.TempDir.__new__": [
+        "path 2005:32 call  self._next_class(self)"
+      ]
+    },
+    "path.TempDir.__new__": {
+      "path.Path.__add__": [
+        "path 1994:35 call  tempfile.mkdtemp(*args, **kwargs)"
+      ],
+      "path.Path.__radd__": [
+        "path 1994:35 call  tempfile.mkdtemp(*args, **kwargs)"
+      ],
+      "path.Path.replace": [
+        "path 1994:35 call  tempfile.mkdtemp(*args, **kwargs)"
+      ]
+    },
+    "path.masks.compose.<lambda1>.<lambda1>": {
+      "path.masks.compose.<lambda1>.<lambda1>": [
+        "path.masks 13:60 call  f1(f2(*args, **kwargs))"
+      ]
+    },
+    "path.masks.padded": {
+      "<builtin>.ValueError": [
+        "path.masks 56:25 call  ValueError('n must be at least 1')"
+      ],
+      "itertools.chain": [
+        "path.masks 54:35 call  itertools.chain(it, itertools.repeat(fillvalue))"
+      ],
+      "itertools.repeat": [
+        "path.masks 54:56 call  itertools.repeat(fillvalue)"
+      ]
+    }
+  },
+  "notes": {
+    "path 1000:47 call  self._hash(hash_name).hexdigest()": [
+      "the hash object of _hash (path.md J6) PyPy (in scope, path.md \"PyPy\"): hashlib's fallback _sha1.sha1 is a function that returns an instance of the pure-Python class _sha1.sha (lib_pypy/_sha1.py:129 and :359 in PyPy 3.10 v7.3.19 and 3.11 v7.3.20); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) and _md5.md5 (pypy/module/_md5) keep the CPython paths"
+    ],
+    "path 1014:33 call  self.module.isabs(self)": [
+      "ntpath.isabs of CPython 3.9 and 3.10 (Windows; Python-3.10.14/Lib/ntpath.py:96) calls s.replace on the Path; 3.11 and later replace on the slice s[:3], a plain str (Codex confirmation pass) (path.md J3)"
+    ],
+    "path 1039:35 call  self.module.ismount(self)": [
+      "posixpath.ismount computes join(path, '..') on the Path (Path.__add__); ntpath.ismount (Windows) calls abspath, whose fallback for a path with a null character calls .replace and Path.__radd__ (path.md J3, J5)"
+    ],
+    "path 1202:46 call  globals()": [
+      "platform branch __init__.py:1191 (Windows, a supported platform; path.md J9)"
+    ],
+    "path 1205:49 call  win32security.GetFileSecurity( self, win32security.OWNER_...": [
+      "win32security (pywin32) is not installed: a missing module, named by its access path (path.md J9)"
+    ],
+    "path 1208:50 call  desc.GetSecurityDescriptorOwner()": [
+      "desc is the stub instance that win32security.GetFileSecurity returns"
+    ],
+    "path 1209:71 call  win32security.LookupAccountSid(None, sid)": [
+      "the missing-module rule fixes the name only; the real LookupAccountSid returns a 3-tuple, and the return line has only str operations, so it adds no edge either way"
+    ],
+    "path 1295:24 call  mask(self.stat().st_mode)": [
+      "mask is what masks.compound returns: functools.reduce over the partials of masks.simple gives the one partial for one mode, or the inner lambda of compose for several; a partial of the '=' operator calls simple.<lambda1>"
+    ],
+    "path 1320:32 call  self._next_class(new)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1324:19 call  os.renames(self, new)": [
+      "os.renames calls os.path.split on old and new; ntpath.split (Windows) calls .replace on a Path (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 1325:32 call  self._next_class(new)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1355:32 call  self._next_class( super().replace(target_or_old, *args) i...": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1358:44 call  pathlib.Path(self).replace(target_or_old)": [
+      "Codex audit round 1: for a UNC self on Windows, CPython 3.12, os.replace's fspath formats the parsed parts as drv + root + ..., with drv the Path itself (pathlib.py:430-432): Path.__add__",
+      "pathlib.Path() makes a PosixPath or a WindowsPath; its replace calls os.replace, whose fspath parses the raw path, this Path, with .replace(altsep, sep) on Windows in CPython 3.12 and later (path.md J3, J11)"
+    ],
+    "path 1378:20 call  os.makedirs(self, mode)": [
+      "os.makedirs calls os.path.split on the Path; ntpath.split (Windows) calls .replace (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 1398:45 call  DirectoryNotEmpty.translate()": [
+      "translate is a @contextmanager generator function under @staticmethod; the call runs the helper of contextlib.contextmanager, which calls translate (the trace misses it: tracer defect T1)"
+    ],
+    "path 1404:22 call  os.removedirs(self)": [
+      "os.removedirs calls os.path.split on the Path; ntpath.split (Windows) calls .replace (CPython 3.9 to 3.12; path.md J3)"
+    ],
+    "path 1411:45 call  DirectoryNotEmpty.translate()": [
+      "as at 1398:45"
+    ],
+    "path 1456:32 call  self._next_class(newpath)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1477:32 call  self._next_class(newlink)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1486:32 call  self._next_class(removeprefix(os.readlink(self), '\\\\\\\\?\\\\'))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1501:32 call  self._next_class( shutil.copyfile(self, dst, follow_symli...": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1502:28 call  shutil.copyfile(self, dst, follow_symlinks=follow_symlinks)": [
+      "when src and dst are the same file, copyfile raises SameFileError with \"{!r} and {!r}\".format(src, dst), which runs Path.__repr__ on self (path.md J12)"
+    ],
+    "path 1506:24 call  shutil.copymode(self, dst, follow_symlinks=follow_symlinks)": [
+      "Codex audit round 2 (README ruling \"Implementation, version and platform combinations\": PyPy 3.11 on Windows is admitted): for a Path dst that is a symlink, PyPy 3.11's shutil.copymode calls os.path.realpath(dst, strict=True) (lib-python/3/shutil.py:309), whose Python normpath calls dst.replace(altsep, sep) (ntpath.py:494); dst admits a Path (path.md J2)"
+    ],
+    "path 1509:24 call  shutil.copystat(self, dst, follow_symlinks=follow_symlinks)": [
+      "Codex audit round 2 (README ruling \"Implementation, version and platform combinations\": PyPy 3.11 on Windows is admitted): for a Path dst that is a symlink, after the metadata calls, PyPy 3.11's shutil.copystat calls os.path.realpath(dst, strict=True) (lib-python/3/shutil.py:389), whose Python normpath calls dst.replace (path.md J2)"
+    ],
+    "path 1512:32 call  self._next_class(shutil.copy(self, dst, follow_symlinks=f...": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1512:44 call  shutil.copy(self, dst, follow_symlinks=follow_symlinks)": [
+      "for a dst that is a directory, shutil.copy computes os.path.join(dst, os.path.basename(src)): Path.__add__ for a Path dst, and on Windows (CPython 3.9 to 3.12) .replace on the Paths and Path.__radd__ in ntpath.join; copyfile's SameFileError runs Path.__repr__ (path.md J2, J3, J12)"
+    ],
+    "path 1515:21 getattr  self._next_class": [
+      "`_next_class` is a ClassProperty (classes.py:7) over a classmethod; the load runs ClassProperty.__get__, which calls the classmethod"
+    ],
+    "path 1515:32 call  self._next_class( shutil.copy2(self, dst, follow_symlinks...": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1516:25 call  shutil.copy2(self, dst, follow_symlinks=follow_symlinks)": [
+      "as at 1512:44"
+    ],
+    "path 1528:32 call  self._next_class( shutil.copytree( self, dst, symlinks=sy...": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1529:28 call  shutil.copytree( self, dst, symlinks=symlinks, ignore=ign...": [
+      "shutil copytree joins src and dst with each entry name (os.path.join(src, name): Path.__add__; Windows CPython 3.9 to 3.12 also .replace and Path.__radd__), and formats errors with str(why), whose filename may be a joined Path (%R: Path.__repr__); copy2 of a file onto itself (dirs_exist_ok) raises SameFileError ({!r}) (path.md J3, J12); copy_function is the default shutil.copy2 (library code that library code calls, no edge) or a client callable: only_newer is documented for merge_tree only, and the shared alias _CopyFn of a bare Callable is no evidence (B2; J8)"
+    ],
+    "path 1541:29 call  shutil.move(self, dst, copy_function=copy_function)": [
+      "shutil.move joins a directory dst with the base name (Path.__add__ for a Path dst); when os.rename fails for a directory, _destinsrc takes abspath (CPython 3.9 to 3.12) of the relative Path src (Path.__radd__), copytree joins the Path src with names (Path.__add__), formats its errors with str(why) (%R of a Path file name: Path.__repr__) and rmtree(src) joins it again; when os.rename fails for a file, copy_function is shutil.copy2, whose copyfile formats SameFileError with {!r} (Path.__repr__); on Windows ntpath also calls .replace (path.md J3, J12; audit F1); copy_function is the default or a client callable (J8)"
+    ],
+    "path 1543:21 getattr  self._next_class": [
+      "`_next_class` is a ClassProperty (classes.py:7) over a classmethod; the load runs ClassProperty.__get__, which calls the classmethod"
+    ],
+    "path 1543:32 call  self._next_class(retval or dst)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1606:22 call  shutil.rmtree(self, *args, **kwargs)": [
+      "rmtree joins the Path with each entry name (os.path.join(path, entry.name) in _rmtree_safe_fd, or os.walk and join in _rmtree_unsafe): Path.__add__; on Windows CPython 3.12 os.walk and ntpath.join call .replace and Path.__radd__ (path.md J3)"
+    ],
+    "path 1653:36 call  self._next_class(dst)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 1675:30 call  copy_function(source, dest)": [
+      "copy_function is the default shutil.copy2, only_newer's wrapper (the docstring's example, path.md J8), or a client callable (opaque); shutil.copy2 gets two Paths: for a dest that is an existing directory it joins dest with the base name (Path.__add__; Windows also .replace and Path.__radd__), and copying a file onto itself (merging a tree into itself) raises SameFileError ({!r}: Path.__repr__) (J3, J12)"
+    ],
+    "path 1716:25 call  os.startfile(self, *args, **kwargs)": [
+      "platform branch __init__.py:1688, Windows only (path.md J9)"
+    ],
+    "path 1773:39 call  readable.fileno()": [
+      "readable is open(backup_fn, mode, buffering=...) with a read-only mode: text gives io.TextIOWrapper, binary io.BufferedReader, binary with buffering=0 io.FileIO (path.md J7)"
+    ],
+    "path 1792:27 call  readable.close()": [
+      "readable as at 1773:39"
+    ],
+    "path 1793:27 call  writable.close()": [
+      "writable is open(fd, \"w\" + mode without \"r\", buffering=...): text io.TextIOWrapper, binary io.BufferedWriter, buffering=0 io.FileIO (path.md J7)"
+    ],
+    "path 1798:27 call  readable.close()": [
+      "readable as at 1773:39"
+    ],
+    "path 1799:27 call  writable.close()": [
+      "writable as at 1793:27"
+    ],
+    "path 185:31 call  super().__new__(cls, other)": [
+      "Codex audit round 1 (found by the writer at the same chain): for a UNC target Path, pathlib 3.12's _parse_path keeps the Path as the drive and _format_parsed_parts computes drv + root + ... (pathlib.py:430-432): Path.__add__",
+      "str.__new__ calls str() of `other`; for the pathlib.Path that Path.replace passes (1355, from pathlib.Path.replace), pathlib's __str__ on Windows, CPython 3.12 and later, parses the raw path, the client's target Path, with path.replace(altsep, sep) (path.md J11)"
+    ],
+    "path 1950:19 call  cls(input)": [
+      "cls is a class that for_class made from SpecialResolver.path_class, the class on which the client loads `special` (Path, ExtantPath, ExtantFile, TempDir), or without os.pathsep in the value its first non-Multi base; for TempDir, mkdtemp gets the appdirs value as suffix and succeeds when the value has no separator (path.md J4)"
+    ],
+    "path 1994:35 call  tempfile.mkdtemp(*args, **kwargs)": [
+      "TempDir takes the parameters of tempfile.mkdtemp (its docstring), so `dir` is a path role and admits a Path (path.md J2; audit F2): mkdtemp keeps it and computes os.path.join(dir, prefix + name + suffix), where posixpath.join does `path += ...` on the Path (Path.__add__), and abspath of a relative joined Path (3.12 and later) or a Path suffix gives Path.__radd__; the package's own TempDir calls (a MultiTempDir receiver, J4) pass a Path as the suffix (prefix + name + suffix: Path.__radd__); on Windows, CPython 3.9 to 3.12, ntpath also calls .replace (J3)"
+    ],
+    "path 2005:32 call  self._next_class(self)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 218:32 call  self._next_class(super().__add__(more))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 221:32 call  self._next_class(other.__add__(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 221:46 call  other.__add__(self)": [
+      "other is a str for `other + path`; a client can also call the public special method directly, Path('b').__radd__(Path('a')), and other.__add__ is then Path.__add__ (Codex audit round 1; README, django-constance ruling (d): direct calls of public special methods are admitted)"
+    ],
+    "path 232:32 call  self._next_class(self.module.join(self, rel))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 243:32 call  self._next_class(self.module.join(rel, self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 243:49 call  self.module.join(rel, self)": [
+      "Codex audit round 1: a direct call Path('b').__rtruediv__(Path('a')) passes a Path rel, and posixpath.join's `path += sep + b` on it runs Path.__add__ (direct calls of public special methods are admitted, django-constance ruling (d)); on Windows 3.12, ntpath.join with a UNC self keeps it as the drive and computes result_drive + ...: Path.__add__ too. os.path.join(rel, self) with rel a str: posixpath.join computes `rel + sep + self` (Path.__radd__); ntpath.join on Windows, CPython 3.9 to 3.12, also calls self.replace in splitdrive/splitroot and adds the Path at the right (path.md J3); self.module is os.path (J1)"
+    ],
+    "path 259:19 call  cls(os.getcwd())": [
+      "cls is Path or a public subclass that inherits the classmethod (ExtantPath, ExtantFile, TempDir, the Multi classes of these); Path.__enter__ calls it with type(self); TempDir.cwd() runs TempDir.__new__ with the absolute cwd as suffix (path.md J4); a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 263:19 call  cls(os.path.expanduser('~'))": [
+      "cls is Path or a public subclass (ExtantPath, ExtantFile, TempDir, their Multi classes); with HOME set to a name without a separator, TempDir.home() makes a temporary directory and runs TempDir.__init__ (path.md J4)"
+    ],
+    "path 270:32 call  self._next_class(self.module.abspath(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 270:52 call  self.module.abspath(self)": [
+      "Codex audit round 2 (README ruling \"Implementation, version and platform combinations\": PyPy 3.11 on Windows is admitted): PyPy 3.11's abspath is normpath(_getfullpathname(path)) (ntpath.py:576); for a UNC Path with an embedded null character, _getfullpathname raises ValueError (pypy/interpreter/baseobjspace.py:1932), and the fallback passes the Path itself to the Python normpath: PyPy 3.11 on Windows: nt has no _path_normpath, so ntpath.normpath is the Python fallback (lib-python/3/ntpath.py:494); for a UNC path without a third separator, splitdrive keeps the Path as the drive (:194) and normpath ends with prefix + ... (:536): Path.__add__. posixpath.abspath of a relative Path joins it to os.getcwd() (`cwd + sep + path`: Path.__radd__); ntpath.abspath on Windows falls back to isabs, splitdrive/splitroot and join on the Path when _getfullpathname raises ValueError (a path with an embedded null character), which call .replace and Path.__radd__ (path.md J3, J5); self.module is os.path (J1)"
+    ],
+    "path 274:32 call  self._next_class(self.module.normcase(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 278:32 call  self._next_class(self.module.normpath(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 278:53 call  self.module.normpath(self)": [
+      "ntpath.normpath of CPython 3.9 and 3.10 (Windows; Python-3.10.14/Lib/ntpath.py:511) calls path.replace(altsep, sep) on the Path; CPython 3.11 and later use the C nt._path_normpath (Python-3.11.9/Lib/ntpath.py:493), PyPy 3.11 on Windows the Python fallback (Codex audit round 2) (path.md J3); self.module is os.path (J1). -> Path.__add__: Codex audit round 2 (README ruling \"Implementation, version and platform combinations\": PyPy 3.11 on Windows is admitted): PyPy 3.11 on Windows: nt has no _path_normpath, so ntpath.normpath is the Python fallback (lib-python/3/ntpath.py:494); for a UNC path without a third separator, splitdrive keeps the Path as the drive (:194) and normpath ends with prefix + ... (:536): Path.__add__"
+    ],
+    "path 282:32 call  self._next_class(self.module.realpath(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 282:53 call  self.module.realpath(self)": [
+      "posixpath.realpath of CPython 3.9 to 3.12: for a relative Path without a separator, rest.partition(sep) returns the Path itself and join('', name) computes '' + name (Path.__radd__), and abspath joins it to the cwd (Path.__radd__); ntpath.realpath of CPython 3.9 on Windows starts with the Python normpath, which calls .replace (path.md J3); -> Path.__add__: Codex audit round 2 (README ruling \"Implementation, version and platform combinations\": PyPy 3.11 on Windows is admitted): PyPy's realpath starts with normpath(path) (ntpath.py:680), before any file-system lookup; PyPy 3.11 on Windows: nt has no _path_normpath, so ntpath.normpath is the Python fallback (lib-python/3/ntpath.py:494); for a UNC path without a third separator, splitdrive keeps the Path as the drive (:194) and normpath ends with prefix + ... (:536): Path.__add__"
+    ],
+    "path 286:32 call  self._next_class(self.module.expanduser(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 290:32 call  self._next_class(self.module.expandvars(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 294:32 call  self._next_class(self.module.dirname(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 294:52 call  self.module.dirname(self)": [
+      "ntpath.dirname (Windows) is split(p)[0], whose splitdrive/splitroot calls p.replace on the Path (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 298:32 call  self._next_class(self.module.basename(self))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 298:53 call  self.module.basename(self)": [
+      "ntpath.basename (Windows) is split(p)[1], whose splitdrive/splitroot calls p.replace (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 325:36 op  stem + self.suffix": [
+      "stem is annotated str; a Path fits, and the package's own Path.stem returns the Path self.name itself when the name has no extension (genericpath._splitext returns p unchanged), so `p.with_stem(q.stem)` passes a Path (path.md J2)"
+    ],
+    "path 357:42 call  self.module.splitdrive(self)": [
+      "ntpath.splitdrive (Windows) calls p.replace on the Path (CPython 3.9 to 3.12), and in CPython 3.12 returns `root + tail` with tail the Path itself (Path.__radd__) (path.md J3)"
+    ],
+    "path 358:32 call  self._next_class(drive)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 389:32 call  self._next_class(removesuffix(self, self.name) + name)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 389:63 op  removesuffix(self, self.name) + name": [
+      "name is annotated str; a Path fits, and the package's own Path.name returns a Path, so `p.with_name(q.name)` gives `str + Path` (path.md J2)"
+    ],
+    "path 396:42 call  self.module.split(self)": [
+      "ntpath.split (Windows) calls p.replace in splitdrive/splitroot (CPython 3.9 to 3.12; path.md J3); self.module is os.path (J1); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 397:32 call  self._next_class(parent)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 408:44 call  self.module.splitdrive(self)": [
+      "as at 357:42 (path.md J3)"
+    ],
+    "path 409:32 call  self._next_class(drive)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 409:57 call  self._next_class(rel)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 424:32 call  self._next_class(filename)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4), whose value is an absolute path, so this argument has a separator; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 444:31 call  cls._next_class(cls.module.join(first, *others))": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)",
+      "cls is the owner of the multimethod: Path, a public subclass or a Multi class (Multi._next_class gives TempDir for MultiTempDir); a single relative part has no separator"
+    ],
+    "path 444:47 call  cls.module.join(first, *others)": [
+      "os.path.join with a Path argument calls back the Path's operators (path.md J3): posixpath.join does `path += sep + b` (Path.__add__ when the first part is a Path, Path.__radd__ when a later part is a Path); ntpath.join on Windows (the default os.path there) also calls .replace on each Path in splitdrive/splitroot (CPython 3.9 to 3.12)",
+      "first is the instance when joinpath is called on one (multimethod passes it), or a client str or Path"
+    ],
+    "path 485:31 call  self._next_class(start)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 496:37 call  self._next_class(dest)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 524:32 call  self._next_class(relpath)": [
+      "the class is type(self) or Path (Path._next_class, TempDir._next_class) or the first base that is not a Multi (Multi._next_class); TempDir for a MultiTempDir receiver (path.md J4); this argument can be a name without a separator, so mkdtemp can succeed and TempDir.__init__ runs (with a separator too, README ruling (c) after Codex audit round 1)"
+    ],
+    "path 553:28 iter  self.iterdir(match)": [
+      "iterating the filter of iterdir calls match: the Null() or Pattern (CaseInsensitive) that matchers.load returns, or a client callable (opaque)"
+    ],
+    "path 564:28 iter  self.iterdir(match)": [
+      "iterating the filter of iterdir calls match (Null, Pattern or CaseInsensitive, or a client callable)"
+    ],
+    "path 591:21 call  error_fn(f\"Unable to list directory '{self}': {exc}\")": [
+      "error_fn is what Handlers._resolve returns: Handlers.strict, warn or ignore for the names, or a client callable (opaque); the recursive call passes the resolved function back"
+    ],
+    "path 602:25 call  error_fn(f\"Unable to access '{child}': {exc}\")": [
+      "error_fn as at 591:21"
+    ],
+    "path 652:20 call  cls(s)": [
+      "cls is self._next_class (the load at 651:20); s is a glob result, absolute for an absolute self; a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 652:42 call  glob.glob(self / pattern)": [
+      "glob calls os.path.split on the Path pattern; ntpath.split (Windows) calls .replace on it (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 670:20 call  cls(s)": [
+      "cls is self._next_class (the load at 669:20); a separator in the suffix does not make mkdtemp fail: it succeeds when the parent that the random name gives exists and lacks the child (README, after Codex audit round 1, ruling (c): possible random outcomes and ordinary file-system histories count), so TempDir.__init__ runs"
+    ],
+    "path 670:33 iter  glob.iglob(self / pattern)": [
+      "the generator of glob.iglob runs when this generator expression iterates it; it calls os.path.split on the Path pattern, and ntpath.split (Windows) calls .replace on it (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
+    ],
+    "path 816:43 call  f.read(size)": [
+      "on Windows (CPython 3.9 and later, default stdio), open() of a console name such as Path(\"CONIN$\") makes the raw stream a _WindowsConsoleIO (Python-3.11.9 and 3.13.1 Modules/_io/_iomodule.c:323-327 with _PyIO_get_console_type, winconsoleio.c:64-95), and buffering=0 returns that raw object (_iomodule.c:380/382); io re-exports the class as io._WindowsConsoleIO (Lib/io.py:110-111 of 3.10.14 and 3.11.9) (Codex audit round 2, Unsure 1; path.md J7). f is what open returns for the client's mode and buffering, the arguments that chunks passes on (its overloads admit text and binary modes); _hash passes mode 'rb' (path.md J7)"
+    ],
+    "path 979:21 call  m.update(chunk)": [
+      "hashlib.new returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _md5.md5 or _sha1.sha1; the hash names in scope are md5 (read_md5, the tests) and sha1 (the docstring of _hash) (path.md J6) PyPy (in scope, path.md \"PyPy\"): hashlib's fallback _sha1.sha1 is a function that returns an instance of the pure-Python class _sha1.sha (lib_pypy/_sha1.py:129 and :359 in PyPy 3.10 v7.3.19 and 3.11 v7.3.20); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) and _md5.md5 (pypy/module/_md5) keep the CPython paths"
+    ],
+    "path 990:44 call  self._hash(hash_name).digest()": [
+      "the hash object of _hash (path.md J6) PyPy (in scope, path.md \"PyPy\"): hashlib's fallback _sha1.sha1 is a function that returns an instance of the pure-Python class _sha1.sha (lib_pypy/_sha1.py:129 and :359 in PyPy 3.10 v7.3.19 and 3.11 v7.3.20); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) and _md5.md5 (pypy/module/_md5) keep the CPython paths"
+    ],
+    "path.masks 13:60 call  f1(f2(*args, **kwargs))": [
+      "f1 is a function that compose gets or an inner lambda of an earlier reduce step; the package's own functions here are the partials of masks.simple (compound), whose '=' partial calls simple.<lambda1>; client functions are opaque"
+    ]
+  },
+  "trace": "dynamic/path.json"
+}

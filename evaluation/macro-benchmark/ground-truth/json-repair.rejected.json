@@ -1,0 +1,24 @@
+{
+  "src.json_repair.json_repair.cli": {
+    "_io.StringIO.read": "the test puts an io.StringIO in place of sys.stdin (tests/test_repair_json_cli.py:49): a method of a client object (B5); the default sys.stdin is an io.TextIOWrapper, which the graph names at json_repair.py:463"
+  },
+  "src.json_repair.schema_repair._add_pydantic_field_metadata": {
+    "<builtin>.list": "field.default_factory() at schema_repair.py:70 calls the default factory of a test's pydantic model, field(default_factory=list) (tests/test_schema_guided_parse.py:530): a client callback (B5)"
+  },
+  "src.json_repair.schema_repair.load_schema_model": {
+    "<builtin>.dict.get": "Codex audit round 1: module.__dict__.get(class_name) at schema_repair.py:100 is a call on the __dict__ of the client's module (the tests import their own schema_mod, tests/test_schema_repairer.py:34-38): opaque (B5; batch-6 ruling jsonpickle (c))"
+  },
+  "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__init__": {
+    "_io.StringIO.tell": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)"
+  },
+  "src.json_repair.utils.string_file_wrapper.StringFileWrapper._ensure_chunk_position": {
+    "_io.StringIO.read": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)",
+    "_io.StringIO.seek": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)",
+    "_io.StringIO.tell": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)"
+  },
+  "src.json_repair.utils.string_file_wrapper.StringFileWrapper.get_buffer": {
+    "_io.StringIO.read": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)",
+    "_io.StringIO.seek": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)",
+    "_io.StringIO.tell": "the tests pass io.StringIO streams to load() and to StringFileWrapper (tests/test_parse_number.py:27, tests/test_repair_json_from_file.py:14-37, tests/test_parse_string.py:535): methods of a client object (B5)"
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "edges": {
+    "environ.environ.Env.__contains__": {
+      "environ.fileaware_mapping.FileAwareMapping.__getitem__": [
+        "environ.environ 261:20 op  var in self.ENVIRON"
+      ]
+    },
+    "environ.environ.Env._parse_elasticsearch_search_params": {
+      "<builtin>.str.join": [
+        "environ.environ 948:28 call  '/'.join(split[:-1])"
+      ]
+    },
+    "environ.environ.Env.cache_url_config": {
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 778:39 call  ImproperlyConfigured(f'Invalid cache schema {url.scheme}')"
+      ]
+    },
+    "environ.environ.Env.channels_url": {
+      "environ.environ.Env.channels_url_config": [
+        "environ.environ 454:40 call  self.channels_url_config( self.url(var, default=default),..."
+      ],
+      "environ.environ.Env.url": [
+        "environ.environ 455:21 call  self.url(var, default=default)"
+      ]
+    },
+    "environ.environ.Env.channels_url_config": {
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 913:39 call  ImproperlyConfigured(f\"Invalid channels schema {url.schem..."
+      ]
+    },
+    "environ.environ.Env.email_url_config": {
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 875:39 call  ImproperlyConfigured(f'Invalid email schema {url.scheme}')"
+      ]
+    },
+    "environ.environ.Env.get_value": {
+      "<builtin>.bytes.lstrip": [
+        "environ.environ 539:33 call  value.lstrip(prefix)"
+      ],
+      "<builtin>.bytes.replace": [
+        "environ.environ 543:34 call  value.replace(escape, prefix)"
+      ],
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 524:43 call  ImproperlyConfigured(error_msg)"
+      ],
+      "environ.environ.Path.__ne__": [
+        "environ.environ 553:18 op  value != default"
+      ],
+      "environ.fileaware_mapping.FileAwareMapping.__getitem__": [
+        "environ.environ 520:33 getitem  self.ENVIRON[var_name]"
+      ]
+    },
+    "environ.environ.Env.parse_value": {
+      "environ.environ.NoValue.__repr__": [
+        "environ.environ 613:25 call  cast(value)"
+      ],
+      "environ.environ.Path.__init__": [
+        "environ.environ 613:25 call  cast(value)"
+      ],
+      "environ.environ.Path.__str__": [
+        "environ.environ 613:25 call  cast(value)"
+      ],
+      "simplejson.loads": [
+        "environ.environ 613:25 call  cast(value)"
+      ]
+    },
+    "environ.environ.Env.read_env": {
+      "<builtin>.RuntimeError": [
+        "environ.environ 1087:35 call  RuntimeError('Unable to determine caller frame')"
+      ],
+      "os.path.exists": [
+        "environ.environ 1092:34 call  os.path.exists(env_file)"
+      ]
+    },
+    "environ.environ.Env.read_env.set_environ.<lambda1>": {
+      "collections.abc.MutableMapping.update": [
+        "environ.environ 1169:50 call  envval.update({k: str(v)})"
+      ],
+      "environ.fileaware_mapping.FileAwareMapping.__setitem__": [
+        "environ.environ 1169:50 call  envval.update({k: str(v)})"
+      ]
+    },
+    "environ.environ.Env.read_env.set_environ.<lambda2>": {
+      "collections.abc.MutableMapping.setdefault": [
+        "environ.environ 1170:50 call  envval.setdefault(k, str(v))"
+      ],
+      "environ.fileaware_mapping.FileAwareMapping.__getitem__": [
+        "environ.environ 1170:50 call  envval.setdefault(k, str(v))"
+      ],
+      "environ.fileaware_mapping.FileAwareMapping.__setitem__": [
+        "environ.environ 1170:50 call  envval.setdefault(k, str(v))"
+      ],
+      "os._Environ.setdefault": [
+        "environ.environ 1170:50 call  envval.setdefault(k, str(v))"
+      ]
+    },
+    "environ.environ.Env.search_url": {
+      "environ.environ.Env.search_url_config": [
+        "environ.environ 438:38 call  self.search_url_config( self.url(var, default=default), e..."
+      ],
+      "environ.environ.Env.url": [
+        "environ.environ 439:21 call  self.url(var, default=default)"
+      ]
+    },
+    "environ.environ.Env.search_url_config": {
+      "<builtin>.Exception.__init__": [
+        "environ.environ 1014:39 call  ImproperlyConfigured(f'Invalid search schema {url.scheme}')"
+      ],
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 1014:39 call  ImproperlyConfigured(f'Invalid search schema {url.scheme}')"
+      ]
+    },
+    "environ.environ.Env.str": {
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 281:43 call  ImproperlyConfigured( f\"Invalid value: {value} not in {ch..."
+      ],
+      "environ.environ.NoValue.__repr__": [
+        "environ.environ 282:38 format  {value}"
+      ]
+    },
+    "environ.environ.Path.__init__": {
+      "environ.environ.Path.__fspath__": [
+        "environ.environ 1230:36 call  os.path.dirname(start)"
+      ]
+    },
+    "environ.environ.Path.__unicode__": {
+      "environ.environ.Path.__str__": [
+        "environ.environ 1284:28 call  self.__str__()"
+      ]
+    },
+    "environ.environ.Path._absolute_join": {
+      "django.core.exceptions.ImproperlyConfigured": [
+        "environ.environ 1304:39 call  ImproperlyConfigured( f'Create required path: {absolute_p..."
+      ],
+      "environ.environ.Path.__fspath__": [
+        "environ.environ 1302:53 call  os.path.join(base, *paths)"
+      ]
+    },
+    "environ.environ.Path.file": {
+      "<builtin>.open": [
+        "environ.environ 1217:20 call  open(self(name), *args, **kwargs)"
+      ],
+      "environ.environ.Path.__call__": [
+        "environ.environ 1217:25 call  self(name)"
+      ]
+    },
+    "environ.fileaware_mapping.FileAwareMapping.__getitem__": {
+      "collections.abc.Mapping.get": [
+        "environ.fileaware_mapping 47:32 call  self.env.get(key + \"_FILE\")"
+      ]
+    },
+    "environ.fileaware_mapping.FileAwareMapping.__len__": {
+      "environ.fileaware_mapping.FileAwareMapping.__iter__": [
+        "environ.fileaware_mapping 73:30 call  iter(self)"
+      ]
+    }
+  },
+  "notes": {
+    "environ.environ 1014:39 call  ImproperlyConfigured(f'Invalid search schema {url.scheme}')": [
+      "optional import compat.py:19-25 (see Env.str, 281:43)"
+    ],
+    "environ.environ 1087:35 call  RuntimeError('Unable to determine caller frame')": [
+      "reached when read_env runs with no Python caller frame, as when a client starts it with _thread.start_new_thread(Env.read_env, ()) or registers it with atexit: f_back of its frame is then None"
+    ],
+    "environ.environ 1169:50 call  envval.update({k: str(v)})": [
+      "envval is cls.ENVIRON: os.environ (os._Environ inherits update from collections.abc.MutableMapping), the FileAwareMapping of FileAwareEnv (MutableMapping.update stores each item with self[key] = value, so FileAwareMapping.__setitem__ runs), or the tests' dict (opaque, B5; its dict.update trace edge is rejected)"
+    ],
+    "environ.environ 1170:50 call  envval.setdefault(k, str(v))": [
+      "envval is cls.ENVIRON: os.environ (os._Environ defines setdefault itself; os.py, the asciinema precedent os._Environ.copy), the FileAwareMapping of FileAwareEnv (it inherits collections.abc.MutableMapping.setdefault, which reads self[key] and stores self[key] = default on KeyError), or the tests' dict (opaque, B5; its dict.setdefault trace edge is rejected)"
+    ],
+    "environ.environ 1217:25 call  self(name)": [
+      "a value site. self is a Path; calling it runs Path.__call__"
+    ],
+    "environ.environ 1230:36 call  os.path.dirname(start)": [
+      "start can be a Path: Env.path passes the result of get_value, which is its Path default (annotated Union['Path', NoValue]) or the Path that smart casting makes (parse_value 613); os.path.dirname calls os.fspath, which calls Path.__fspath__ (is_file passes through Env.path's **kwargs)"
+    ],
+    "environ.environ 1302:53 call  os.path.join(base, *paths)": [
+      "base is the start of Path.__init__, which can be a Path (see 1230:36); os.path.join calls os.fspath on it. paths are the client's sub-path strs (a package object there is not considered, B3; Path.__add__ passes other.__root__)"
+    ],
+    "environ.environ 1304:39 call  ImproperlyConfigured( f'Create required path: {absolute_p...": [
+      "optional import compat.py:19-25 (see Env.str, 281:43)"
+    ],
+    "environ.environ 261:20 op  var in self.ENVIRON": [
+      "for FileAwareEnv, ENVIRON is the FileAwareMapping of environ.py:1193, and Mapping.__contains__ calls FileAwareMapping.__getitem__; os.environ and the tests' dict run no package code"
+    ],
+    "environ.environ 281:43 call  ImproperlyConfigured( f\"Invalid value: {value} not in {ch...": [
+      "optional import compat.py:19-25: with Django, ImproperlyConfigured is django.core.exceptions.ImproperlyConfigured (not installed in the test environment: a missing module); without it, the package class compat.ImproperlyConfigured(Exception), whose first __init__ is Exception's"
+    ],
+    "environ.environ 282:38 format  {value}": [
+      "the default can be a NoValue other than NOTSET (B2: the annotation names the public class NoValue; get_value tests the default by identity, 522): env.str('UNSET', default=NoValue(), choices=['a']) returns that NoValue, and formatting it runs object.__str__, then NoValue.__repr__ (audit F1)"
+    ],
+    "environ.environ 520:33 getitem  self.ENVIRON[var_name]": [
+      "for FileAwareEnv, ENVIRON is the FileAwareMapping of environ.py:1193"
+    ],
+    "environ.environ 524:43 call  ImproperlyConfigured(error_msg)": [
+      "optional import compat.py:19-25 (see Env.str, 281:43)"
+    ],
+    "environ.environ 539:33 call  value.lstrip(prefix)": [
+      "a str value, or the bytes default of Env.bytes when it starts with b'$'"
+    ],
+    "environ.environ 543:34 call  value.replace(escape, prefix)": [
+      "escape_proxy is documented (docs/tips.rst \"Escape Proxy\"); the value is a str or the bytes default of Env.bytes (escape and prefix are bytes then)"
+    ],
+    "environ.environ 553:18 op  value != default": [
+      "Env.path passes a default annotated Union['Path', NoValue]; then value is that Path or the str of the environment, and `!=` runs Path.__ne__ (reflected for str != Path, since str.__ne__ returns NotImplemented); Path.__ne__ calls Path.__eq__ itself"
+    ],
+    "environ.environ 613:25 call  cast(value)": [
+      "a value site. The package's own casts that reach this branch: str (Env.str, Env.bytes, the key and value defaults of a dict cast, 580-581), int (Env.int, the search parameters 939, 958, 969, 980), compat.json.loads (Env.json; json, or simplejson when installed: optional import compat.py:14-17, simplejson is a missing module), urlparse (Env.url) and the class Path (smart casting, 549, of the Path default of Env.path) or Path.__init__. bool, float, list, tuple, dict and the list/tuple/dict casts have their own branches. Path.__str__: str(value) of a Path value, when the client passes a Path default (admitted through Env.path, B2), cast=str and parse_default=True to get_value or Env.__call__ for an unset variable. NoValue.__repr__: the same witness with a NoValue default (admitted: the package passes its annotated Union[X, NoValue] defaults and NOTSET there; smart casting skips a NoValue, 548); str() of a NoValue runs object.__str__, then NoValue.__repr__ (audit F2; the combination rule of the lead's ruling on J5). Every other cast is the client's (its argument, its scheme, or the class of its own default through smart casting): a client callback (B2/B5)"
+    ],
+    "environ.environ 778:39 call  ImproperlyConfigured(f'Invalid cache schema {url.scheme}')": [
+      "optional import compat.py:19-25 (see Env.str, 281:43)"
+    ],
+    "environ.environ 875:39 call  ImproperlyConfigured(f'Invalid email schema {url.scheme}')": [
+      "optional import compat.py:19-25 (see Env.str, 281:43)"
+    ],
+    "environ.environ 913:39 call  ImproperlyConfigured(f\"Invalid channels schema {url.schem...": [
+      "optional import compat.py:19-25 (see Env.str, 281:43)"
+    ],
+    "environ.fileaware_mapping 47:32 call  self.env.get(key + \"_FILE\")": [
+      "self.env is the package default os.environ (an os._Environ, which inherits get from collections.abc.Mapping; anytree precedent) or the client's mapping (opaque, B5; the tests' dict.get trace edge is rejected)"
+    ],
+    "environ.fileaware_mapping 73:30 call  iter(self)": [
+      "iter() calls the generator function __iter__ of self"
+    ]
+  },
+  "trace": "dynamic/django-environ.json"
+}

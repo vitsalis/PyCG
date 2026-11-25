@@ -671,12 +671,12 @@ def locate(project):
     lines, problems = [], []
     for package in project.package_names:
         top = package.partition(".")[0]
-        spec = importlib.machinery.PathFinder.find_spec(top, [str(project.root)])
+        spec = _find_in(package, [str(project.root)])
         origin = spec.origin if spec is not None else None
         if origin is None or not project.in_scope(origin):
-            problems.append(f"{top} is not found in the checkout {project.root}")
+            problems.append(f"{package} is not found in the checkout {project.root}")
             continue
-        lines.append(f"{top}: {origin}")
+        lines.append(f"{package}: {origin}")
         for finder in sys.meta_path:
             find = getattr(finder, "find_spec", None)
             path = sys.path if finder is importlib.machinery.PathFinder else None
@@ -689,6 +689,35 @@ def locate(project):
             else:
                 problems.append(f"{top} is also found outside the checkout: {where}")
     return lines, problems
+
+
+def _find_in(name, path):
+    *parents, last = name.split(".")
+    for part in parents:
+        path = _package_path(part, path)
+        if not path:
+            return None
+    return importlib.machinery.PathFinder.find_spec(last, path)
+
+
+def _package_path(part, path):
+    portions = []
+    for directory in path:
+        candidate = os.path.join(directory, part)
+        is_directory = os.path.isdir(candidate)
+        if is_directory and any(
+            os.path.isfile(os.path.join(candidate, "__init__" + suffix))
+            for suffix in importlib.machinery.all_suffixes()
+        ):
+            return [candidate]
+        if any(
+            os.path.isfile(os.path.join(directory, part + suffix))
+            for suffix in importlib.machinery.all_suffixes()
+        ):
+            return []
+        if is_directory:
+            portions.append(candidate)
+    return portions
 
 
 def write_trace(data, path):

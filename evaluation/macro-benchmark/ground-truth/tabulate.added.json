@@ -1,0 +1,171 @@
+{
+  "edges": {
+    "tabulate": {
+      "tabulate._main": [
+        "tabulate 3074:10 call  _main()"
+      ]
+    },
+    "tabulate._CustomTextWrap._len": {
+      "<builtin>.len": [
+        "tabulate 2756:23 call  len(stripped)"
+      ]
+    },
+    "tabulate._CustomTextWrap._wrap_chunks": {
+      "<builtin>.ValueError": [
+        "tabulate 2854:29 call  ValueError(\"invalid width %r (must be > 0)\" % self.width)"
+      ]
+    },
+    "tabulate._afterpoint": {
+      "<builtin>.bytes.rfind": [
+        "tabulate 1057:31 call  string.rfind(\".\")"
+      ]
+    },
+    "tabulate._format": {
+      "<builtin>.bytes.replace": [
+        "tabulate 1376:31 call  val.replace(raw_val, formatted_val)"
+      ]
+    },
+    "tabulate._grid_line_with_colons": {
+      "<builtin>.len": [
+        "tabulate 179:31 call  len(colwidths)"
+      ]
+    },
+    "tabulate._is_file": {
+      "<builtin>.isinstance": [
+        "tabulate 33:22 call  isinstance(f, io.IOBase)"
+      ]
+    },
+    "tabulate._isnumber": {
+      "<builtin>.bytes.lower": [
+        "tabulate 948:36 call  string.lower()"
+      ]
+    },
+    "tabulate._main": {
+      "<builtin>.open": [
+        "tabulate 3028:48 call  open(outfile, \"w\")",
+        "tabulate 3044:26 call  open(f)"
+      ],
+      "<builtin>.print": [
+        "tabulate 2995:14 call  print(e)",
+        "tabulate 2996:14 call  print(usage)",
+        "tabulate 3018:22 call  print(\"%s is not a supported table format\" % value)",
+        "tabulate 3019:22 call  print(usage)",
+        "tabulate 3025:18 call  print(usage)"
+      ],
+      "<builtin>.str.split": [
+        "tabulate 3015:35 call  value.split()"
+      ],
+      "getopt.getopt": [
+        "tabulate 2980:35 call  getopt.getopt( sys.argv[1:], \"h1o:s:F:I:f:\", [ \"help\", \"h..."
+      ],
+      "sys.exit": [
+        "tabulate 2997:17 call  sys.exit(2)",
+        "tabulate 3020:25 call  sys.exit(3)",
+        "tabulate 3026:21 call  sys.exit(0)"
+      ],
+      "tabulate._is_file": [
+        "tabulate 3032:24 call  _is_file(f)"
+      ],
+      "tabulate._pprint_file": [
+        "tabulate 3033:29 call  _pprint_file( f, headers=headers, tablefmt=tablefmt, sep=...",
+        "tabulate 3045:33 call  _pprint_file( fobj, headers=headers, tablefmt=tablefmt, s..."
+      ],
+      "textwrap.dedent": [
+        "tabulate 2978:28 call  textwrap.dedent(_main.__doc__)"
+      ]
+    },
+    "tabulate._normalize_tabular_data": {
+      "<builtin>.TypeError": [
+        "tabulate 1514:32 call  TypeError(err_msg)",
+        "tabulate 1541:28 call  TypeError(err_msg)"
+      ]
+    },
+    "tabulate._pprint_file": {
+      "<builtin>.print": [
+        "tabulate 3060:10 call  print( tabulate( table, headers, tablefmt, floatfmt=float..."
+      ],
+      "<builtin>.str.rstrip": [
+        "tabulate 3059:36 call  r.rstrip()"
+      ],
+      "<builtin>.str.strip": [
+        "tabulate 3059:64 call  r.strip()"
+      ],
+      "io.TextIOWrapper.readlines": [
+        "tabulate 3058:29 call  fobject.readlines()"
+      ],
+      "re.split": [
+        "tabulate 3059:22 call  re.split(sep, r.rstrip())"
+      ],
+      "tabulate.tabulate": [
+        "tabulate 3061:17 call  tabulate( table, headers, tablefmt, floatfmt=floatfmt, in..."
+      ]
+    },
+    "tabulate._rst_escape_first_column.escape_empty": {
+      "<builtin>.bytes.strip": [
+        "tabulate 345:59 call  val.strip()"
+      ]
+    },
+    "tabulate._visible_width": {
+      "<builtin>.len": [
+        "tabulate 1137:22 call  len_fn(_strip_ansi(s))",
+        "tabulate 1139:22 call  len_fn(str(s))"
+      ],
+      "<builtin>.str": [
+        "tabulate 1139:26 call  str(s)"
+      ]
+    },
+    "tabulate._wrap_text_to_colwidths": {
+      "<builtin>.bytes": [
+        "tabulate 1705:55 call  _type(cell, numparse)(cell)"
+      ],
+      "<builtin>.float": [
+        "tabulate 1705:55 call  _type(cell, numparse)(cell)"
+      ],
+      "<builtin>.int": [
+        "tabulate 1705:55 call  _type(cell, numparse)(cell)"
+      ]
+    }
+  },
+  "notes": {
+    "tabulate 1057:31 call  string.rfind(\".\")": [
+      "_afterpoint is private; the package passes the formatted cells of a decimal column (_align_column_choose_padfn, lines 1180, 1182), which are str, except under the witness of judgement 6 of tabulate.md: a client str subclass whose replace returns bytes (line 1376), in a table with ANSI codes, reaches line 1180 with the exact bytes that re.Pattern.sub returns in _strip_ansi (line 1121); for b\"1.5\" _isnumber is true and _isint false, so bytes.rfind(\".\") is called (it binds its one argument and refuses the str in its body)"
+    ],
+    "tabulate 1137:22 call  len_fn(_strip_ansi(s))": [
+      "len_fn is wcwidth.wcswidth when wcwidth imported and WIDE_CHARS_MODE is true (lines 1132-1133), else len; WIDE_CHARS_MODE is a documented module flag (README.md \"Wide (fullwidth CJK) symbols\"), and the import of wcwidth is optional (both sides run)"
+    ],
+    "tabulate 1139:22 call  len_fn(str(s))": [
+      "len_fn as at 1137:22. _visible_width is private and the package passes str cells and headers, but a client str subclass cell whose replace override returns a non-str reaches it through _format (line 1376) with numalign=None (judgement 6 of tabulate.md)"
+    ],
+    "tabulate 1139:26 call  str(s)": [
+      "see 1139:22 (judgement 6 of tabulate.md)"
+    ],
+    "tabulate 1376:31 call  val.replace(raw_val, formatted_val)": [
+      "val passed isinstance(val, (str, bytes)) (line 1369). For a str val the call is str.replace. For a bytes cell of a float column in a table with ANSI codes elsewhere (tabulate([[b\"1.5\"], [\"\\x1b[31m2\\x1b[0m\"]])), raw_val is bytes and formatted_val a str, and bytes.replace binds its two arguments and raises TypeError in its body: an edge (the lead's ruling for batch 6: binding of a C callable is the match of the arguments to the parameters of its signature; judgement 5 of tabulate.md)"
+    ],
+    "tabulate 1705:55 call  _type(cell, numparse)(cell)": [
+      "the callee is the type that _type returns (lines 1012-1035): NoneType, str, bool, int, float or bytes. Here cell is not None, not \"\" and not a number by _isnumber. bool: \"True\" or \"False\"; int: a str with thousands separators such as \"1,000\" (int() raises ValueError in its body); float: such a str with a point, \"1,000.5\" (float() raises ValueError); bytes: a bytes cell; str: any other cell. NoneType: a cell that is only ANSI codes, or b\"\" (for bytes, cell == \"\" is false); NoneType() refuses any argument before its body runs: no edge (judgement 4 of tabulate.md)"
+    ],
+    "tabulate 2854:29 call  ValueError(\"invalid width %r (must be > 0)\" % self.width)": [
+      "self.width is a column width of maxcolwidths or maxheadercolwidths, which the client chooses (0 is an int)"
+    ],
+    "tabulate 3015:35 call  value.split()": [
+      "value is the str argument of --colalign from getopt"
+    ],
+    "tabulate 3058:29 call  fobject.readlines()": [
+      "_pprint_file is private; _main passes sys.stdin (a text stream, the default) or the text file that open(f) returns (line 3044); the arguments of the command line are str, so _is_file is true only for sys.stdin"
+    ],
+    "tabulate 3060:10 call  print( tabulate( table, headers, tablefmt, floatfmt=float...": [
+      "print writes to file, the stdout or the file that _main opened; print calls its write (library code)"
+    ],
+    "tabulate 3074:10 call  _main()": [
+      "the if __name__ == \"__main__\" block is module code (README, \"Edges\"); it runs when tabulate/__init__.py runs as a script"
+    ],
+    "tabulate 345:59 call  val.strip()": [
+      "val passed the isinstance check for str or bytes; the headers are str, and a first-column cell can be a client bytes value (bytes cells are documented, README.md \"Type Deduction and Missing Values\", line 802)"
+    ],
+    "tabulate 948:36 call  string.lower()": [
+      "string passed isinstance(string, (str, bytes)) (line 943) and float(string) succeeded: a str or bytes that names inf or nan (bytes cells are documented, README.md \"Type Deduction and Missing Values\", line 802)"
+    ]
+  },
+  "trace": "dynamic/tabulate.json"
+}

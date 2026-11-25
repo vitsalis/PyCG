@@ -1,0 +1,1813 @@
+# Call-site ledger of tinytag at c123836e950a897bd4bbee04d3700bec8762ca27.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# tinytag.md shows how this ledger applies them. The package is one module
+# (tinytag/tinytag.py) and the command line (tinytag/__main__.py). The parser
+# classes _ID3, _MPEG, _Ogg, _Wave, _Flac, _ASF, _MP4 and _Aiff are private
+# (C); a client reaches them only through TinyTag.get. File objects: the
+# client's file_obj is opaque (annotated BinaryIO, an abstract type; B4, B5);
+# the package's own files are the io.BufferedReader that get opens and the
+# io.BytesIO objects that the parsers make (tinytag.md, "File objects").
+# OtherFields and OtherImages subclass dict at run time (line 56).
+default reject tinytag.tinytag.Image.__repr__: no package code formats, prints or converts an Image; the formatted and printed values are strs, bytes, ints, floats, bools, lists of str, exceptions (OSError, TinyTagException and its subclasses, which define no __str__ or __repr__) and dicts of those
+
+== tinytag.__main__
+
+[tinytag.__main__]
+114:13 call  sys.exit(_run())
+    -> sys.exit
+114:18 call  _run()
+    -> tinytag.__main__._run
+
+[tinytag.__main__._usage]
+17:10 call  print('''tinytag [options] <filename...> -h, --help Displ...
+    -> <builtin>.print
+
+[tinytag.__main__._pop_param]
+36:29 call  sys.argv.index(name)
+    -> <builtin>.list.index
+37:21 call  sys.argv.pop(idx)
+    -> <builtin>.list.pop
+38:28 call  sys.argv.pop(idx)
+    -> <builtin>.list.pop
+
+[tinytag.__main__._pop_switch]
+44:29 call  sys.argv.index(name)
+    -> <builtin>.list.index
+45:21 call  sys.argv.pop(idx)
+    -> <builtin>.list.pop
+
+[tinytag.__main__._print_tag]
+51:23 call  tag.as_dict()
+    -> tinytag.tinytag.TinyTag.as_dict
+    reject tinytag.tinytag.Images.as_dict: tag is the TinyTag parser instance that TinyTag.get returns (_run, line 95)
+54:14 call  print(json.dumps(data, ensure_ascii=False, indent=2))
+    -> <builtin>.print
+54:25 call  json.dumps(data, ensure_ascii=False, indent=2)
+    -> json.dumps
+    note: data is the dict of TinyTag.as_dict: strs, ints, floats, bools and lists of str; no default= callback
+59:35 call  data.items()
+    -> <builtin>.dict.items
+60:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+62:40 call  value.replace('\x00', ';')
+    -> <builtin>.str.replace
+63:24 call  StringIO()
+    -> io.StringIO
+65:24 call  csv.writer(csv_file, delimiter=delimiter, lineterminator=...
+    -> csv.writer
+68:28 call  writer.writerow(data.keys())
+    -> _csv.writer.writerow
+    note: writer is the csv writer object that csv.writer returns (line 65); its type has no public path and is named as the tracer names it (netaddr precedent)
+68:38 call  data.keys()
+    -> <builtin>.dict.keys
+70:24 call  writer.writerow(data.values())
+    -> _csv.writer.writerow
+70:36 call  data.values()
+    -> <builtin>.dict.values
+71:34 call  csv_file.getvalue()
+    -> io.StringIO.getvalue
+71:42 call  csv_file.getvalue().strip()
+    -> <builtin>.str.strip
+73:25 call  writer.writerows(data.items())
+    -> _csv.writer.writerows
+73:36 call  data.items()
+    -> <builtin>.dict.items
+74:34 call  csv_file.getvalue()
+    -> io.StringIO.getvalue
+75:10 call  print(value)
+    -> <builtin>.print
+
+[tinytag.__main__._run]
+81:28 call  _pop_param('--save-image', None)
+    -> tinytag.__main__._pop_param
+81:64 call  _pop_param('-i', None)
+    -> tinytag.__main__._pop_param
+82:22 call  _pop_param('--format', None)
+    -> tinytag.__main__._pop_param
+82:54 call  _pop_param('-f', None)
+    -> tinytag.__main__._pop_param
+83:35 call  _pop_switch('--skip-unsupported')
+    -> tinytag.__main__._pop_switch
+83:72 call  _pop_switch('-s')
+    -> tinytag.__main__._pop_switch
+85:48 call  _pop_switch('--help')
+    -> tinytag.__main__._pop_switch
+85:73 call  _pop_switch('-h')
+    -> tinytag.__main__._pop_switch
+87:15 call  _usage()
+    -> tinytag.__main__._usage
+90:33 call  enumerate(filenames)
+    -> <builtin>.enumerate
+92:46 call  TinyTag.is_supported(filename)
+    -> tinytag.tinytag.TinyTag.is_supported
+92:67 call  isfile(filename)
+    -> os.path.isfile
+95:30 call  TinyTag.get(filename, image=image_path is not None)
+    -> tinytag.tinytag.TinyTag.get
+99:23 call  len(filenames)
+    -> <builtin>.len
+100:54 call  splitext(actual_image_path)
+    -> os.path.splitext
+102:36 getattr  tag.images.any
+    -> tinytag.tinytag.Images.any
+104:30 call  open(actual_image_path, 'wb')
+    -> <builtin>.open
+105:42 call  file_handle.write(image.data)
+    -> io.BufferedWriter.write
+    note: file_handle is the file that open(actual_image_path, "wb") returns (line 104)
+106:40 call  _print_tag(tag, fmt, header_printed)
+    -> tinytag.__main__._print_tag
+108:29 call  sys.stderr.write(f'{filename}: {exc}\n')
+    -> io.TextIOWrapper.write
+    note: the default sys.stderr is a TextIOWrapper
+
+== tinytag.tinytag
+
+[tinytag.tinytag]
+59:14 call  bool(environ.get('TINYTAG_DEBUG'))
+    -> <builtin>.bool
+59:26 call  environ.get('TINYTAG_DEBUG')
+    -> collections.abc.Mapping.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is os.environ, an os._Environ, which inherits get from collections.abc.Mapping
+125:6 decorator  @classmethod
+    -> <builtin>.classmethod
+177:6 decorator  @classmethod
+    -> <builtin>.classmethod
+213:6 decorator  @classmethod
+    -> <builtin>.classmethod
+231:6 decorator  @classmethod
+    -> <builtin>.classmethod
+270:6 decorator  @classmethod
+    -> <builtin>.classmethod
+349:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+354:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+367:6 decorator  @property
+    -> <builtin>.property
+376:6 decorator  @property
+    -> <builtin>.property
+398:6 decorator  @property
+    -> <builtin>.property
+556:6 decorator  @classmethod
+    -> <builtin>.classmethod
+571:6 decorator  @classmethod
+    -> <builtin>.classmethod
+613:6 decorator  @classmethod
+    -> <builtin>.classmethod
+625:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+734:6 decorator  @classmethod
+    -> <builtin>.classmethod
+752:6 decorator  @classmethod
+    -> <builtin>.classmethod
+764:6 decorator  @classmethod
+    -> <builtin>.classmethod
+772:6 decorator  @classmethod
+    -> <builtin>.classmethod
+783:6 decorator  @classmethod
+    -> <builtin>.classmethod
+810:6 decorator  @classmethod
+    -> <builtin>.classmethod
+819:6 decorator  @classmethod
+    -> <builtin>.classmethod
+880:6 decorator  @classmethod
+    -> <builtin>.classmethod
+897:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1206:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1254:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1424:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1460:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1635:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1650:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+1830:6 decorator  @classmethod
+    -> <builtin>.classmethod
+2173:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tinytag.tinytag.TinyTag.__init__]
+113:29 call  Images()
+    -> tinytag.tinytag.Images.__init__
+114:33 call  OtherFields()
+    -> <builtin>.dict.__init__
+    note: OtherFields subclasses dict (line 56: _StringListDict = dict at run time) and defines no __init__
+
+[tinytag.tinytag.TinyTag.get]
+140:36 call  fsdecode(filename)
+    -> os.fsdecode
+143:53 call  cls._get_parser_class(filename_str)
+    -> tinytag.tinytag.TinyTag._get_parser_class
+146:32 call  open(filename, 'rb')
+    -> <builtin>.open
+148:29 call  ValueError( 'Either filename or file_obj argument is requ...
+    -> <builtin>.ValueError
+153:17 call  warn('ignore_errors argument is obsolete, and will be rem...
+    -> warnings.warn
+158:53 call  cls._get_parser_class(filename_str, file_obj)
+    -> tinytag.tinytag.TinyTag._get_parser_class
+159:26 call  file_obj.seek(0, SEEK_END)
+    -> io.BufferedReader.seek
+    note: file_obj is a client object (annotated BinaryIO, an abstract type: opaque, B5) or the file that get opens itself (line 146)
+160:37 call  file_obj.tell()
+    -> io.BufferedReader.tell
+    note: file_obj is a client object (annotated BinaryIO, an abstract type: opaque, B5) or the file that get opens itself (line 146)
+161:26 call  file_obj.seek(0)
+    -> io.BufferedReader.seek
+    note: file_obj is a client object (annotated BinaryIO, an abstract type: opaque, B5) or the file that get opens itself (line 146)
+163:31 call  parser_class()
+    -> tinytag.tinytag._ID3.__init__
+    -> tinytag.tinytag._MPEG.__init__
+    -> tinytag.tinytag._Ogg.__init__
+    -> tinytag.tinytag.TinyTag.__init__
+    note: parser_class is what _get_parser_class returns (lines 143, 158): with cls == TinyTag (the public path; the parser classes are private, C) it is a class of _file_extension_mapping (_ID3, _Ogg, _Wave, _ASF, _MP4, _Aiff) or of the magic bytes (also _MPEG, _Flac). _ID3, _MPEG and _Ogg define __init__; _Wave, _Flac, _ASF, _MP4 and _Aiff inherit TinyTag.__init__
+    exclude tinytag.tinytag.Image.__init__, tinytag.tinytag.Images.__init__: parser_class is always one of the eight TinyTag subclasses
+169:26 call  tag._load(tags=tags, duration=duration, image=image)
+    -> tinytag.tinytag.TinyTag._load
+171:33 call  ParseError(exc)
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+175:31 call  file_obj.close()
+    -> io.BufferedReader.close
+    note: file_obj is a client object (annotated BinaryIO, an abstract type: opaque, B5) or the file that get opens itself (line 146)
+
+[tinytag.tinytag.TinyTag.is_supported]
+181:32 call  fsdecode(filename)
+    -> os.fsdecode
+182:44 call  cls._get_parser_for_filename(filename_str)
+    -> tinytag.tinytag.TinyTag._get_parser_for_filename
+
+[tinytag.tinytag.TinyTag.as_dict]
+192:46 call  self.__dict__.items()
+    -> <builtin>.dict.items
+193:30 call  key.startswith('_')
+    -> <builtin>.str.startswith
+195:26 call  isinstance(value, Images)
+    -> <builtin>.isinstance
+197:30 call  isinstance(value, OtherFields)
+    -> <builtin>.isinstance
+203:39 call  str(value)
+    -> <builtin>.str
+205:55 call  value.items()
+    -> <builtin>.dict.items
+206:42 call  fields.get(other_key)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+207:34 call  isinstance(other_fields, list)
+    -> <builtin>.isinstance
+
+[tinytag.tinytag.TinyTag._get_parser_for_filename]
+225:34 call  filename.lower()
+    -> <builtin>.str.lower
+226:63 call  cls._file_extension_mapping.items()
+    -> <builtin>.dict.items
+227:33 call  filename.endswith(ext)
+    -> <builtin>.str.endswith
+
+[tinytag.tinytag.TinyTag._get_parser_for_file_handle]
+237:33 call  filehandle.read(30)
+    -> io.BufferedReader.read
+238:29 call  header.startswith(b'ID3')
+    -> <builtin>.bytes.startswith
+240:16 call  len(header)
+    -> <builtin>.len
+245:32 call  filehandle.seek(-_ID3._ID3V1_TAG_SIZE, SEEK_END)
+    -> io.BufferedReader.seek
+246:41 call  filehandle.read(3)
+    -> io.BufferedReader.read
+253:29 call  header.startswith(b'fLaC')
+    -> <builtin>.bytes.startswith
+255:29 call  header.startswith(b'ftyp', 4)
+    -> <builtin>.bytes.startswith
+257:29 call  header.startswith(b'OggS')
+    -> <builtin>.bytes.startswith
+259:29 call  header.startswith(b'RIFF')
+    -> <builtin>.bytes.startswith
+259:60 call  header.startswith(b'WAVE', 8)
+    -> <builtin>.bytes.startswith
+261:29 call  header.startswith( b'\x30\x26\xB2\x75\x8E\x66\xCF\x11\xA6...
+    -> <builtin>.bytes.startswith
+263:32 call  header.startswith(b'\x02', 29)
+    -> <builtin>.bytes.startswith
+265:30 call  header.startswith(b'FORM')
+    -> <builtin>.bytes.startswith
+266:38 call  header.startswith((b'AIFF', b'AIFC'), 8)
+    -> <builtin>.bytes.startswith
+
+[tinytag.tinytag.TinyTag._get_parser_class]
+279:56 call  cls._get_parser_for_filename(filename)
+    -> tinytag.tinytag.TinyTag._get_parser_for_filename
+284:59 call  cls._get_parser_for_file_handle(filehandle)
+    -> tinytag.tinytag.TinyTag._get_parser_for_file_handle
+287:37 call  UnsupportedFormatError( 'No tag reader found to support f...
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+
+[tinytag.tinytag.TinyTag._load]
+295:29 call  ValueError("File handle is required")
+    note: no callee: _load is private, and each package caller sets _filehandler to a file object first (get line 164, after the None check of line 147; _ID3._parse lines 1092 and 1110; _Ogg._parse line 1774; _Wave._parse line 2056; _Aiff._parse line 2517), so the check cannot fail under the package's own values (B1; judgement J4)
+299:24 call  self._parse(self._filehandler)
+    -> tinytag.tinytag._ASF._parse
+    -> tinytag.tinytag._Aiff._parse
+    -> tinytag.tinytag._Flac._parse
+    -> tinytag.tinytag._ID3._parse
+    -> tinytag.tinytag._MP4._parse
+    -> tinytag.tinytag._MPEG._parse
+    -> tinytag.tinytag._Ogg._parse
+    -> tinytag.tinytag._Wave._parse
+    reject tinytag.tinytag.TinyTag._parse: _load is private; its package callers (get, _ID3._parse, _Ogg._parse, _Wave._parse, _Aiff._parse) call it only on instances of the eight parser classes, which all override _parse (B1, C)
+
+[tinytag.tinytag.TinyTag._set_field]
+302:22 call  isinstance(value, str)
+    -> <builtin>.isinstance
+304:38 call  self.__dict__.get(fieldname)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+308:34 call  self._set_other_field(fieldname, str(value))
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+308:49 call  str(value)
+    -> <builtin>.str
+310:32 call  fieldname.startswith(self._OTHER_PREFIX)
+    -> <builtin>.str.startswith
+311:38 call  len(self._OTHER_PREFIX)
+    -> <builtin>.len
+314:34 call  self._set_other_field(fieldname, str(value))
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+314:49 call  str(value)
+    -> <builtin>.str
+317:18 call  print(f'Setting field {fieldname} to {value!r}')
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+
+[tinytag.tinytag.TinyTag._set_other_field]
+328:18 call  print(f'Adding value {value!r} to field {fieldname}')
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+329:37 call  self.other[fieldname].append(value)
+    -> <builtin>.list.append
+
+[tinytag.tinytag.TinyTag._update]
+337:47 call  other.__dict__.items()
+    -> <builtin>.dict.items
+338:30 call  key.startswith('_')
+    -> <builtin>.str.startswith
+340:26 call  isinstance(value, OtherFields)
+    -> <builtin>.isinstance
+341:65 call  other.other.items()
+    -> <builtin>.dict.items
+343:46 call  self._set_other_field(other_key, other_value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+344:28 call  isinstance(value, Images)
+    -> <builtin>.isinstance
+345:36 call  self.images._update(value)
+    -> tinytag.tinytag.Images._update
+    reject tinytag.tinytag.TinyTag._update: self.images is the Images that TinyTag.__init__ makes
+347:32 call  self._set_field(key, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+
+[tinytag.tinytag.TinyTag._unpad]
+352:24 call  s.rstrip('\x00')
+    -> <builtin>.str.rstrip
+
+[tinytag.tinytag.TinyTag._unpad_bytes]
+356:24 call  s.rstrip(b'\x00')
+    -> <builtin>.bytes.rstrip
+
+[tinytag.tinytag.TinyTag.get_image]
+361:13 call  warn('get_image() is deprecated, and will be removed in t...
+    -> warnings.warn
+364:29 getattr  self.images.any
+    -> tinytag.tinytag.Images.any
+
+[tinytag.tinytag.TinyTag.audio_offset]
+371:13 call  warn("'audio_offset' attribute is obsolete, and will be "...
+    -> warnings.warn
+
+[tinytag.tinytag.TinyTag.extra]
+380:13 call  warn("'extra' attribute is obsolete, and will be " "remov...
+    -> warnings.warn
+
+[tinytag.tinytag.Images.__init__]
+395:33 call  OtherImages()
+    -> <builtin>.dict.__init__
+    note: OtherImages subclasses dict (line 56: _ImageListDict = dict at run time) and defines no __init__
+
+[tinytag.tinytag.Images.any]
+403:42 call  self.__dict__.values()
+    -> <builtin>.dict.values
+404:26 call  isinstance(value, OtherImages)
+    -> <builtin>.isinstance
+405:49 call  value.values()
+    -> <builtin>.dict.values
+
+[tinytag.tinytag.Images.as_dict]
+416:46 call  self.__dict__.items()
+    -> <builtin>.dict.items
+417:30 call  isinstance(value, OtherImages)
+    -> <builtin>.isinstance
+421:55 call  value.items()
+    -> <builtin>.dict.items
+422:42 call  images.get(other_key)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+423:34 call  isinstance(other_images, list)
+    -> <builtin>.isinstance
+
+[tinytag.tinytag.Images._set_field]
+430:38 call  self.__dict__.get(fieldname)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+432:34 call  self._set_other_field(fieldname, value)
+    -> tinytag.tinytag.Images._set_other_field
+    reject tinytag.tinytag.TinyTag._set_other_field: self is an Images
+434:32 call  fieldname.startswith(self._OTHER_PREFIX)
+    -> <builtin>.str.startswith
+435:38 call  len(self._OTHER_PREFIX)
+    -> <builtin>.len
+436:34 call  self._set_other_field(fieldname, value)
+    -> tinytag.tinytag.Images._set_other_field
+    reject tinytag.tinytag.TinyTag._set_other_field: self is an Images
+439:18 call  print(f'Setting image field {fieldname}')
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+
+[tinytag.tinytag.Images._set_other_field]
+446:18 call  print(f'Adding image to field {fieldname}')
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+447:37 call  self.other[fieldname].append(value)
+    -> <builtin>.list.append
+
+[tinytag.tinytag.Images._update]
+450:47 call  other.__dict__.items()
+    -> <builtin>.dict.items
+451:26 call  isinstance(value, OtherImages)
+    -> <builtin>.isinstance
+452:59 call  value.items()
+    -> <builtin>.dict.items
+454:46 call  self._set_other_field(other_key, image_other)
+    -> tinytag.tinytag.Images._set_other_field
+    reject tinytag.tinytag.TinyTag._set_other_field: self is an Images
+457:32 call  self._set_field(key, value)
+    -> tinytag.tinytag.Images._set_field
+    reject tinytag.tinytag.TinyTag._set_field: self is an Images
+
+[tinytag.tinytag.Image.__repr__]
+475:25 call  vars(self)
+    -> <builtin>.vars
+475:36 call  vars(self).copy()
+    -> <builtin>.dict.copy
+476:29 call  variables.get("data")
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+478:59 call  len(data)
+    -> <builtin>.len
+479:29 call  ', '.join(f'{k}={v!r}' for k, v in variables.items())
+    -> <builtin>.str.join
+479:70 call  variables.items()
+    -> <builtin>.dict.items
+480:23 call  type(self)
+    -> <builtin>.type
+
+[tinytag.tinytag._MP4._parse]
+547:45 call  self._build_combined_tree()
+    -> tinytag.tinytag._MP4._build_combined_tree
+549:47 call  self._build_audio_data_tree()
+    -> tinytag.tinytag._MP4._build_audio_data_tree
+551:46 call  self._build_meta_data_tree()
+    -> tinytag.tinytag._MP4._build_meta_data_tree
+552:29 call  self._traverse_atoms(fh, path=tree)
+    -> tinytag.tinytag._MP4._traverse_atoms
+
+[tinytag.tinytag._MP4._build_meta_data_tree]
+577:56 call  _MP4._data_parser('artist')
+    -> tinytag.tinytag._MP4._data_parser
+578:56 call  _MP4._data_parser('album')
+    -> tinytag.tinytag._MP4._data_parser
+579:56 call  _MP4._data_parser('comment')
+    -> tinytag.tinytag._MP4._data_parser
+580:56 call  _MP4._data_parser('composer')
+    -> tinytag.tinytag._MP4._data_parser
+581:56 call  _MP4._data_parser('other.conductor')
+    -> tinytag.tinytag._MP4._data_parser
+582:56 call  _MP4._data_parser('year')
+    -> tinytag.tinytag._MP4._data_parser
+583:56 call  _MP4._data_parser('other.description')
+    -> tinytag.tinytag._MP4._data_parser
+584:56 call  _MP4._data_parser('other.director')
+    -> tinytag.tinytag._MP4._data_parser
+585:56 call  _MP4._data_parser('genre')
+    -> tinytag.tinytag._MP4._data_parser
+586:56 call  _MP4._data_parser('other.grouping')
+    -> tinytag.tinytag._MP4._data_parser
+587:56 call  _MP4._data_parser('other.lyrics')
+    -> tinytag.tinytag._MP4._data_parser
+589:47 call  _MP4._data_parser('other.movement_total')
+    -> tinytag.tinytag._MP4._data_parser
+591:56 call  _MP4._data_parser('other.movement')
+    -> tinytag.tinytag._MP4._data_parser
+593:47 call  _MP4._data_parser('other.movement_name')
+    -> tinytag.tinytag._MP4._data_parser
+595:56 call  _MP4._data_parser('title')
+    -> tinytag.tinytag._MP4._data_parser
+596:56 call  _MP4._data_parser('other.publisher')
+    -> tinytag.tinytag._MP4._data_parser
+597:56 call  _MP4._data_parser('other.encoded_by')
+    -> tinytag.tinytag._MP4._data_parser
+598:56 call  _MP4._data_parser('other.work')
+    -> tinytag.tinytag._MP4._data_parser
+599:56 call  _MP4._data_parser('composer')
+    -> tinytag.tinytag._MP4._data_parser
+600:53 call  _MP4._data_parser('albumartist')
+    -> tinytag.tinytag._MP4._data_parser
+601:53 call  _MP4._data_parser('other.copyright')
+    -> tinytag.tinytag._MP4._data_parser
+602:53 call  _MP4._data_parser('other.description')
+    -> tinytag.tinytag._MP4._data_parser
+603:53 call  _MP4._nums_parser('disc', 'disc_total')
+    -> tinytag.tinytag._MP4._nums_parser
+605:53 call  _MP4._data_parser('other.show_movement')
+    -> tinytag.tinytag._MP4._data_parser
+606:53 call  _MP4._nums_parser('track', 'track_total')
+    -> tinytag.tinytag._MP4._nums_parser
+607:53 call  _MP4._data_parser('other.bpm')
+    -> tinytag.tinytag._MP4._data_parser
+
+[tinytag.tinytag._MP4._build_combined_tree]
+616:47 call  dict(cls._build_audio_data_tree())
+    -> <builtin>.dict
+616:74 call  cls._build_audio_data_tree()
+    -> tinytag.tinytag._MP4._build_audio_data_tree
+617:56 call  cls._build_meta_data_tree()
+    -> tinytag.tinytag._MP4._build_meta_data_tree
+617:64 call  cls._build_meta_data_tree().items()
+    -> <builtin>.dict.items
+618:37 call  result.get(key)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+619:30 call  isinstance(current, dict)
+    -> <builtin>.isinstance
+619:60 call  isinstance(value, dict)
+    -> <builtin>.isinstance
+
+[tinytag.tinytag._MP4._read_atom_header]
+631:30 call  fh.read(8)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+632:26 call  len(atom_header)
+    -> <builtin>.len
+635:32 call  unpack_from('>I', atom_header)
+    -> struct.unpack_from
+638:38 call  fh.read(8)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+639:31 call  len(ext_size_header)
+    -> <builtin>.len
+641:35 call  unpack('>Q', ext_size_header)
+    -> struct.unpack
+
+[tinytag.tinytag._MP4._traverse_atoms]
+658:31 call  fh.tell()
+    -> io.BufferedReader.tell
+659:67 call  self._read_atom_header(fh)
+    -> tinytag.tinytag._MP4._read_atom_header
+664:58 call  atom_type.isascii()
+    -> <builtin>.bytes.isascii
+665:33 call  ParseError('Invalid MP4 header')
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+672:22 call  print(f'{" " * 4 * len(curr_path)} ' f'pos: {curr_pos - h...
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+672:39 call  len(curr_path)
+    -> <builtin>.len
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+677:39 call  fh.seek(4, SEEK_CUR)
+    -> io.BufferedReader.seek
+680:39 call  fh.seek(4, SEEK_CUR)
+    -> io.BufferedReader.seek
+682:32 call  path.get(atom_type)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+684:24 call  callable(sub_path)
+    -> <builtin>.callable
+686:39 call  fh.seek(atom_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+688:35 call  fh.read(atom_size)
+    -> io.BufferedReader.read
+689:36 call  len(data)
+    -> <builtin>.len
+690:53 call  sub_path(data)
+    -> tinytag.tinytag._MP4._parse_mvhd
+    -> tinytag.tinytag._MP4._parse_mp4a
+    -> tinytag.tinytag._MP4._parse_alac
+    -> tinytag.tinytag._MP4._data_parser._parse_data_atom
+    -> tinytag.tinytag._MP4._nums_parser._parse_nums
+    -> tinytag.tinytag._MP4._parse_id3v1_genre
+    -> tinytag.tinytag._MP4._parse_cover_image
+    -> tinytag.tinytag._MP4._parse_custom_field
+    -> tinytag.tinytag._MP4._parse_uuid
+    note: sub_path is a callable leaf of the atom tree path: the trees of _build_audio_data_tree (_parse_mvhd, _parse_mp4a, _parse_alac), _build_meta_data_tree (the _data_parser and _nums_parser closures, _parse_id3v1_genre, _parse_cover_image, _parse_custom_field, _parse_uuid), their union from _build_combined_tree, and the one-leaf tree of line 721 (a _data_parser closure). All leaves are generator functions: the call starts them
+    exclude tinytag.tinytag._Ogg._parse_vorbis_comment, tinytag.tinytag._Flac._parse_image: generator or parser functions of other formats are never leaves of an atom tree
+692:34 call  print(' ' * 4 * len(curr_path), 'FIELD: ', fieldname)
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+692:48 call  len(curr_path)
+    -> <builtin>.len
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+694:38 call  isinstance(value, Image)
+    -> <builtin>.isinstance
+696:51 call  self.images._set_field(fieldname, value)
+    -> tinytag.tinytag.Images._set_field
+    reject tinytag.tinytag.TinyTag._set_field: self.images is the Images that TinyTag.__init__ makes
+697:40 call  isinstance(value, list)
+    -> <builtin>.isinstance
+699:48 call  self._set_field(fieldname, subval)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+703:44 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+705:28 call  isinstance(sub_path, dict)
+    -> <builtin>.isinstance
+706:48 call  self._traverse_atoms( fh, path=sub_path, curr_pos=curr_po...
+    -> tinytag.tinytag._MP4._traverse_atoms
+715:58 call  atom_type.decode('latin-1')
+    -> <builtin>.bytes.decode
+715:75 call  atom_type.decode('latin-1').lower()
+    -> <builtin>.str.lower
+717:24 call  fh.seek(-header_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+719:48 call  self._traverse_atoms( fh, path={atom_type: {b'data': self...
+    -> tinytag.tinytag._MP4._traverse_atoms
+721:65 call  self._data_parser(field_name)
+    -> tinytag.tinytag._MP4._data_parser
+727:35 call  fh.seek(atom_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+731:71 call  self._read_atom_header(fh)
+    -> tinytag.tinytag._MP4._read_atom_header
+
+[tinytag.tinytag._MP4._data_parser._parse_data_atom]
+739:36 call  unpack_from('>I', data)
+    -> struct.unpack_from
+743:36 call  data.decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+746:31 call  len(data)
+    -> <builtin>.len
+748:32 call  str(unpack(fmts[data_len], data)[0])
+    -> <builtin>.str
+748:39 call  unpack(fmts[data_len], data)
+    -> struct.unpack
+
+[tinytag.tinytag._MP4._nums_parser._parse_nums]
+758:29 call  unpack('>3H', number_data)
+    -> struct.unpack
+
+[tinytag.tinytag._MP4._parse_id3v1_genre]
+767:26 call  unpack_from('>H', data, 8)
+    -> struct.unpack_from
+769:21 call  len(_ID3._ID3V1_GENRES)
+    -> <builtin>.len
+
+[tinytag.tinytag._MP4._parse_cover_image]
+775:32 call  unpack_from('>I', data)
+    -> struct.unpack_from
+778:22 call  Image( image_name, len(image_data), image_data, cls._IMAG...
+    -> tinytag.tinytag.Image.__init__
+779:28 call  len(image_data)
+    -> <builtin>.len
+780:38 call  cls._IMAGE_MIME_TYPES.get(data_type)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+
+[tinytag.tinytag._MP4._parse_custom_field]
+786:21 call  BytesIO(data)
+    -> io.BytesIO
+789:67 call  cls._read_atom_header(fh)
+    -> tinytag.tinytag._MP4._read_atom_header
+792:37 call  fh.read(atom_size)
+    -> io.BytesIO.read
+792:58 call  fh.read(atom_size)[4:].lower()
+    -> <builtin>.bytes.lower
+793:47 call  atom_value.decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+795:64 call  cls._CUSTOM_FIELD_NAME_MAPPING.get( field_name, cls._OTHE...
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+798:36 call  fh.read(atom_size)
+    -> io.BytesIO.read
+799:42 call  cls._data_parser(field_name)
+    -> tinytag.tinytag._MP4._data_parser
+800:37 call  parser(data_atom)
+    -> tinytag.tinytag._MP4._data_parser._parse_data_atom
+    note: parser is the closure that cls._data_parser(field_name) returns (line 799)
+    exclude tinytag.tinytag._MP4._nums_parser._parse_nums: parser comes only from _data_parser
+802:34 call  values.append(value)
+    -> <builtin>.list.append
+805:24 call  fh.seek(atom_size, SEEK_CUR)
+    -> io.BytesIO.seek
+806:71 call  cls._read_atom_header(fh)
+    -> tinytag.tinytag._MP4._read_atom_header
+
+[tinytag.tinytag._MP4._parse_uuid]
+817:54 call  data[uuid_len:].decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+
+[tinytag.tinytag._MP4._parse_mp4a]
+827:31 call  unpack_from('>H', data, 16)
+    -> struct.unpack_from
+829:33 call  unpack_from('>I', data, 22)
+    -> struct.unpack_from
+850:46 call  _read_descriptor_size(data, offset)
+    -> tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size
+854:46 call  _read_descriptor_size(data, offset)
+    -> tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size
+858:29 call  unpack_from('>I', data, offset)
+    -> struct.unpack_from
+864:15 call  len(data)
+    -> <builtin>.len
+868:54 call  _read_descriptor_size(data, offset)
+    -> tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size
+
+[tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size]
+839:28 call  range(4)
+    -> <builtin>.range
+
+[tinytag.tinytag._MP4._parse_alac]
+887:41 call  unpack_from('>II', data, 56)
+    -> struct.unpack_from
+
+[tinytag.tinytag._MP4._parse_mvhd]
+903:47 call  unpack_from('>II', data, 12)
+    -> struct.unpack_from
+907:47 call  unpack_from('>IQ', data, 20)
+    -> struct.unpack_from
+
+[tinytag.tinytag._ID3.__init__]
+1067:14 call  super()
+    -> <builtin>.super
+1067:25 call  super().__init__()
+    -> tinytag.tinytag.TinyTag.__init__
+    reject *: the MRO after the parser class is TinyTag, object; TinyTag.__init__ is the next __init__
+
+[tinytag.tinytag._ID3._parse]
+1073:31 call  fh.tell()
+    -> io.BufferedReader.tell
+    -> io.BytesIO.tell
+1076:41 call  self._parse_id3v2(fh)
+    -> tinytag.tinytag._ID3._parse_id3v2
+1078:67 call  self._parse_id3v2_header(fh)
+    -> tinytag.tinytag._ID3._parse_id3v2_header
+1081:16 call  fh.seek(audio_offset)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+1084:25 call  fh.read(4)
+    -> io.BufferedReader.read
+1085:66 call  self.filename.endswith('.flac')
+    -> <builtin>.str.endswith
+1088:20 call  fh.seek(audio_offset)
+    -> io.BufferedReader.seek
+1089:29 call  _Flac()
+    -> tinytag.tinytag.TinyTag.__init__
+1093:27 call  flac_tag._load( # pylint: disable=protected-access tags=s...
+    -> tinytag.tinytag.TinyTag._load
+1096:25 call  self._update(flac_tag)
+    -> tinytag.tinytag.TinyTag._update
+    reject tinytag.tinytag.Images._update: self is a TinyTag parser instance
+1102:24 call  fh.seek(-self._ID3V1_TAG_SIZE, SEEK_END)
+    -> io.BufferedReader.seek
+1103:37 call  self._parse_id3v1(fh)
+    -> tinytag.tinytag._ID3._parse_id3v1
+1105:20 call  fh.seek(audio_offset)
+    -> io.BufferedReader.seek
+1106:29 call  _MPEG()
+    -> tinytag.tinytag._MPEG.__init__
+    reject tinytag.tinytag.TinyTag.__init__: _MPEG defines __init__; TinyTag.__init__ runs only through its super().__init__()
+1112:27 call  mpeg_tag._load(tags=False, duration=self._parse_duration)
+    -> tinytag.tinytag.TinyTag._load
+1113:25 call  self._update(mpeg_tag)
+    -> tinytag.tinytag.TinyTag._update
+    reject tinytag.tinytag.Images._update: self is a TinyTag parser instance
+
+[tinytag.tinytag._ID3._parse_id3v2_header]
+1121:25 call  fh.read(self._ID3V2_HEADER_SIZE)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1123:16 call  len(header)
+    -> <builtin>.len
+1124:38 call  header.startswith(b'ID3')
+    -> <builtin>.bytes.startswith
+1127:38 call  self._unsynchsafe(header, 6)
+    -> tinytag.tinytag._ID3._unsynchsafe
+1129:22 call  print(f'Found id3 v2.{major} tag with size {size}')
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+
+[tinytag.tinytag._ID3._parse_id3v2]
+1133:57 call  self._parse_id3v2_header(fh)
+    -> tinytag.tinytag._ID3._parse_id3v2_header
+1138:42 call  self._unsynchsafe(fh.read(6))
+    -> tinytag.tinytag._ID3._unsynchsafe
+1138:50 call  fh.read(6)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1140:20 call  fh.seek(extd_size - 6, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+1142:43 call  self._parse_frame(fh, size, id3version=major)
+    -> tinytag.tinytag._ID3._parse_frame
+1146:39 call  self._set_grouping_work_fields()
+    -> tinytag.tinytag._ID3._set_grouping_work_fields
+
+[tinytag.tinytag._ID3._parse_id3v1]
+1150:26 call  fh.read(128 if self._parse_tags else 3)
+    -> io.BufferedReader.read
+1151:34 call  content.startswith(b'TAG')
+    -> <builtin>.bytes.startswith
+1162:32 call  asciidecode(content[3:33])
+    -> tinytag.tinytag._ID3._parse_id3v1.asciidecode
+1163:28 call  self._set_field('title', value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1165:32 call  asciidecode(content[33:63])
+    -> tinytag.tinytag._ID3._parse_id3v1.asciidecode
+1166:28 call  self._set_field('artist', value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1168:32 call  asciidecode(content[63:93])
+    -> tinytag.tinytag._ID3._parse_id3v1.asciidecode
+1169:28 call  self._set_field('album', value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1171:32 call  asciidecode(content[93:97])
+    -> tinytag.tinytag._ID3._parse_id3v1.asciidecode
+1172:28 call  self._set_field('year', value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1176:32 call  self._set_field('track', comment[-1])
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1179:32 call  asciidecode(comment)
+    -> tinytag.tinytag._ID3._parse_id3v1.asciidecode
+1180:28 call  self._set_field('comment', value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1183:30 call  len(self._ID3V1_GENRES)
+    -> <builtin>.len
+1184:32 call  self._set_field('genre', self._ID3V1_GENRES[genre_id])
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+
+[tinytag.tinytag._ID3._parse_id3v1.asciidecode]
+1157:31 call  self._unpad( x.decode(self._default_encoding or 'latin1',...
+    -> tinytag.tinytag.TinyTag._unpad
+1158:25 call  x.decode(self._default_encoding or 'latin1', 'replace')
+    -> <builtin>.bytes.decode
+
+[tinytag.tinytag._ID3._set_custom_field]
+1188:58 call  custom_field_name.lower()
+    -> <builtin>.str.lower
+1189:50 call  self._ID3_MAPPING_CUSTOM.get( custom_field_name_lower, se...
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+1192:24 call  self._set_field(field_name, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+
+[tinytag.tinytag._ID3._set_grouping_work_fields]
+1199:38 call  self._set_other_field('grouping', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+1201:38 call  self._set_other_field('work', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+1204:34 call  self._set_other_field('grouping', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+
+[tinytag.tinytag._ID3._create_tag_image]
+1213:32 call  len(cls._IMAGE_TYPES)
+    -> <builtin>.len
+1216:33 call  field_name.startswith(cls._OTHER_PREFIX)
+    -> <builtin>.str.startswith
+1217:34 call  len(cls._OTHER_PREFIX)
+    -> <builtin>.len
+1218:22 call  Image(name, len(data), data)
+    -> tinytag.tinytag.Image.__init__
+1218:32 call  len(data)
+    -> <builtin>.len
+
+[tinytag.tinytag._ID3._parse_image]
+1231:43 call  content[1:4].lower()
+    -> <builtin>.bytes.lower
+1232:56 call  self._ID3V2_2_IMAGE_FORMATS.get(imgformat)
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+1236:53 call  self._find_string_end_pos( content, start_pos=mime_start_...
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1238:44 call  self._decode_string( content[mime_start_pos:mime_end_pos])
+    -> tinytag.tinytag._ID3._decode_string
+1239:60 call  self._decode_string( content[mime_start_pos:mime_end_pos]...
+    -> <builtin>.str.lower
+1242:49 call  self._find_string_end_pos( content, encoding, desc_start_...
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1245:35 call  len(content)
+    -> <builtin>.len
+1249:35 call  self._decode_string( content[desc_start_pos:desc_end_pos]...
+    -> tinytag.tinytag._ID3._decode_string
+1251:38 call  self._create_tag_image( content[desc_end_pos:], pic_type,...
+    -> tinytag.tinytag._ID3._create_tag_image
+
+[tinytag.tinytag._ID3._lrc_timestamp]
+1256:17 call  int(seconds * 100)
+    -> <builtin>.int
+1257:29 call  divmod(cs, 6000)
+    -> <builtin>.divmod
+1258:29 call  divmod(cs, 100)
+    -> <builtin>.divmod
+
+[tinytag.tinytag._ID3._parse_synced_lyrics]
+1264:29 call  len(content)
+    -> <builtin>.len
+1270:44 call  self._find_string_end_pos(content, encoding, start_pos)
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1274:48 call  self._find_string_end_pos(content, encoding, offset)
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1275:40 call  self._decode_string( content[offset:end_pos], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1276:58 call  self._decode_string( content[offset:end_pos], encoding).l...
+    -> <builtin>.str.lstrip
+1280:31 call  unpack_from('>I', content, offset)
+    -> struct.unpack_from
+1287:48 call  self._lrc_timestamp(time / 1000)
+    -> tinytag.tinytag._ID3._lrc_timestamp
+
+[tinytag.tinytag._ID3._parse_frame]
+1302:25 call  fh.read(header_len)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1303:15 call  len(header)
+    -> <builtin>.len
+1310:40 call  int.from_bytes(header[3:6], 'big')
+    -> <builtin>.int.from_bytes
+1312:43 call  self._unsynchsafe(header, 4)
+    -> tinytag.tinytag._ID3._unsynchsafe
+1314:37 call  unpack_from('>I', header, 4)
+    -> struct.unpack_from
+1317:18 call  print(f'Found id3 Frame {frame_id!r} at ' f'{fh.tell()}-{...
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+1318:29 call  fh.tell()
+    -> io.BufferedReader.tell
+    -> io.BytesIO.tell
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+1318:41 call  fh.tell()
+    -> io.BufferedReader.tell
+    -> io.BytesIO.tell
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+1326:30 call  fh.read(frame_size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1330:52 call  self._find_string_end_pos(content, encoding)
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1331:44 call  self._decode_string(content[:end_pos], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1332:33 call  len(content)
+    -> <builtin>.len
+1334:48 call  self._decode_string(content[end_pos:], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1337:47 call  self._set_custom_field(content_descriptor, value)
+    -> tinytag.tinytag._ID3._set_custom_field
+1339:32 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1341:35 call  frame_id.startswith(b'W')
+    -> <builtin>.bytes.startswith
+1342:44 call  self._decode_string(content)
+    -> tinytag.tinytag._ID3._decode_string
+1343:32 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1347:33 call  len(content)
+    -> <builtin>.len
+1350:52 call  self._find_string_end_pos(content, encoding, offset)
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1353:44 call  self._decode_string(content[offset:end_pos], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1357:51 call  value.split('/')
+    -> <builtin>.str.split
+1358:43 call  total.isdecimal()
+    -> <builtin>.str.isdecimal
+1359:44 call  self._set_field(f'{fieldname}_total', int(total))
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1359:70 call  int(total)
+    -> <builtin>.int
+1360:39 call  value.isdecimal()
+    -> <builtin>.str.isdecimal
+1361:40 call  self._set_field(fieldname, int(value))
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1361:55 call  int(value)
+    -> <builtin>.int
+1365:39 call  value.isdecimal()
+    -> <builtin>.str.isdecimal
+1366:39 call  int(value)
+    -> <builtin>.int
+1368:42 call  value.startswith('(')
+    -> <builtin>.str.startswith
+1369:45 call  value.find(')')
+    -> <builtin>.str.find
+1371:65 call  parens_text.isdecimal()
+    -> <builtin>.str.isdecimal
+1372:43 call  int(parens_text)
+    -> <builtin>.int
+1373:43 call  len(self._ID3V1_GENRES)
+    -> <builtin>.len
+1375:36 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1377:56 call  self._modern_grouping_values.append(value)
+    -> <builtin>.list.append
+1379:56 call  self._legacy_grouping_values.append(value)
+    -> <builtin>.list.append
+1381:36 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1383:30 call  fh.read(frame_size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1384:47 call  self._parse_synced_lyrics(content)
+    -> tinytag.tinytag._ID3._parse_synced_lyrics
+1385:34 call  self._set_other_field('lyrics', lyrics)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+1388:30 call  fh.read(frame_size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1390:48 call  self._find_string_end_pos( content, encoding, start_pos=1)
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1392:46 call  self._decode_string(content[1:end_pos], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1393:40 call  self._decode_string(content[end_pos:], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1395:39 call  self._set_custom_field(description, value)
+    -> tinytag.tinytag._ID3._set_custom_field
+1397:30 call  fh.read(frame_size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1398:57 call  self._find_string_end_pos(content)
+    -> tinytag.tinytag._ID3._find_string_end_pos
+1401:42 call  self._unpad_bytes( content[owner_id_end_pos:])
+    -> tinytag.tinytag.TinyTag._unpad_bytes
+1402:55 call  self._unpad_bytes( content[owner_id_end_pos:]).decode('ut...
+    -> <builtin>.bytes.decode
+1403:38 call  self._set_other_field('xmp', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+1406:30 call  fh.read(frame_size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1409:44 call  self._decode_string(content[1:], encoding)
+    -> tinytag.tinytag._ID3._decode_string
+1411:44 call  self._decode_string(content)
+    -> tinytag.tinytag._ID3._decode_string
+1412:28 call  self._set_field( self._OTHER_PREFIX + frame_id.decode('la...
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+1413:53 call  frame_id.decode('latin-1')
+    -> <builtin>.bytes.decode
+1413:70 call  frame_id.decode('latin-1').lower()
+    -> <builtin>.str.lower
+1416:30 call  fh.read(frame_size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1417:50 call  self._parse_image(frame_id, content)
+    -> tinytag.tinytag._ID3._parse_image
+    reject tinytag.tinytag._Flac._parse_image: self is an _ID3
+1419:35 call  self.images._set_field(field_name, image)
+    -> tinytag.tinytag.Images._set_field
+    reject tinytag.tinytag.TinyTag._set_field: self.images is the Images that TinyTag.__init__ makes
+1421:20 call  fh.seek(frame_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+
+[tinytag.tinytag._ID3._find_string_end_pos]
+1431:35 call  content.find(b'\x00', start_pos)
+    -> <builtin>.bytes.find
+1434:31 call  content.find(b'\x00\x00', start_pos)
+    -> <builtin>.bytes.find
+1436:35 call  content.find(b'\x00\x00', end_pos + 1)
+    -> <builtin>.bytes.find
+
+[tinytag.tinytag._ID3._decode_string]
+1445:47 call  value.startswith(b'\xFE\xFF')
+    -> <builtin>.bytes.startswith
+1447:32 call  value.startswith(b'\xFE\xFF')
+    -> <builtin>.bytes.startswith
+1447:65 call  value.startswith(b'\xFF\xFE')
+    -> <builtin>.bytes.startswith
+1448:41 call  len(value)
+    -> <builtin>.len
+1452:19 call  len(value)
+    -> <builtin>.len
+1458:27 call  self._unpad(value.decode(encoding_name, 'replace'))
+    -> tinytag.tinytag.TinyTag._unpad
+1458:40 call  value.decode(encoding_name, 'replace')
+    -> <builtin>.bytes.decode
+
+[tinytag.tinytag._MPEG.__init__]
+1524:14 call  super()
+    -> <builtin>.super
+1524:25 call  super().__init__()
+    -> tinytag.tinytag.TinyTag.__init__
+    reject *: the MRO after the parser class is TinyTag, object; TinyTag.__init__ is the next __init__
+
+[tinytag.tinytag._MPEG._parse]
+1537:38 call  set()
+    -> <builtin>.set
+1540:31 call  fh.tell()
+    -> io.BufferedReader.tell
+1543:29 call  fh.read(4)
+    -> io.BufferedReader.read
+1544:29 call  len(header)
+    -> <builtin>.len
+1564:34 call  header.find(b'\xFF', 1)
+    -> <builtin>.bytes.find
+1568:28 call  fh.seek(idx - header_len, SEEK_CUR)
+    -> io.BufferedReader.seek
+1591:40 call  fh.read(min(50, frame_length))
+    -> io.BufferedReader.read
+1591:44 call  min(50, frame_length)
+    -> <builtin>.min
+1592:56 call  frame_content.find(b'Xing')
+    -> <builtin>.bytes.find
+1594:60 call  frame_content.find(b'Info')
+    -> <builtin>.bytes.find
+1596:66 call  self._parse_xing_header( frame_content, xing_header_offset)
+    -> tinytag.tinytag._MPEG._parse_xing_header
+1600:60 call  frame_content.find(b'VBRI')
+    -> <builtin>.bytes.find
+1602:70 call  self._parse_vbri_header( frame_content, vbri_header_offset)
+    -> tinytag.tinytag._MPEG._parse_vbri_header
+1609:24 call  fh.seek(prev_offset)
+    -> io.BufferedReader.seek
+1613:34 call  last_bitrates.add(frame_br)
+    -> <builtin>.set.add
+1617:30 call  len(last_bitrates)
+    -> <builtin>.len
+1622:38 call  int( stream_size / (frame_size_accu / frames) + 0.5)
+    -> <builtin>.int
+1630:24 call  fh.seek(frame_length - header_len, SEEK_CUR)
+    -> io.BufferedReader.seek
+
+[tinytag.tinytag._MPEG._parse_xing_header]
+1639:35 call  unpack_from('>i', content, offset)
+    -> struct.unpack_from
+1643:33 call  unpack_from('>i', content, offset)
+    -> struct.unpack_from
+1646:37 call  unpack_from('>i', content, offset)
+    -> struct.unpack_from
+
+[tinytag.tinytag._MPEG._parse_vbri_header]
+1654:33 call  unpack_from('>I', content, offset)
+    -> struct.unpack_from
+1656:29 call  unpack_from('>I', content, offset)
+    -> struct.unpack_from
+
+[tinytag.tinytag._Ogg.__init__]
+1714:14 call  super()
+    -> <builtin>.super
+1714:25 call  super().__init__()
+    -> tinytag.tinytag.TinyTag.__init__
+    reject *: the MRO after the parser class is TinyTag, object; TinyTag.__init__ is the next __init__
+
+[tinytag.tinytag._Ogg._parse]
+1724:48 call  self._parse_pages(fh)
+    -> tinytag.tinytag._Ogg._parse_pages
+1725:33 call  packet.startswith(b'\x01vorbis')
+    -> <builtin>.bytearray.startswith
+1727:55 call  unpack_from('<Bi', packet, 11)
+    -> struct.unpack_from
+1728:42 call  unpack_from('<i', packet, 20)
+    -> struct.unpack_from
+1739:35 call  packet.startswith(b'\x03vorbis')
+    -> <builtin>.bytearray.startswith
+1741:37 call  BytesIO(packet)
+    -> io.BytesIO
+1742:32 call  walker.seek(7)
+    -> io.BytesIO.seek
+1743:52 call  self._set_vorbis_comment_fields(walker)
+    -> tinytag.tinytag._Ogg._set_vorbis_comment_fields
+1745:35 call  packet.startswith(b'OpusHead')
+    -> <builtin>.bytearray.startswith
+1749:61 call  unpack_from('<BBH', packet, 8)
+    -> struct.unpack_from
+1758:35 call  packet.startswith(b'OpusTags')
+    -> <builtin>.bytearray.startswith
+1760:37 call  BytesIO(packet)
+    -> io.BytesIO
+1761:32 call  walker.seek(8)
+    -> io.BytesIO.seek
+1762:52 call  self._set_vorbis_comment_fields(walker)
+    -> tinytag.tinytag._Ogg._set_vorbis_comment_fields
+1765:35 call  packet.startswith(b'\x7FFLAC')
+    -> <builtin>.bytearray.startswith
+1767:33 call  BytesIO(packet)
+    -> io.BytesIO
+1769:28 call  walker.seek(9)
+    -> io.BytesIO.seek
+1771:32 call  _Flac()
+    -> tinytag.tinytag.TinyTag.__init__
+1775:30 call  flactag._load( tags=False, duration=self._parse_duration,...
+    -> tinytag.tinytag.TinyTag._load
+1778:29 call  self._update(flactag)
+    -> tinytag.tinytag.TinyTag._update
+    reject tinytag.tinytag.Images._update: self is a TinyTag parser instance
+1787:37 call  BytesIO(packet)
+    -> io.BytesIO
+1788:46 call  walker.read(4)
+    -> io.BytesIO.read
+1792:56 call  self._set_vorbis_comment_fields(walker)
+    -> tinytag.tinytag._Ogg._set_vorbis_comment_fields
+1795:35 call  packet.startswith(b'Speex ')
+    -> <builtin>.bytearray.startswith
+1798:45 call  unpack_from('<i', packet, 36)
+    -> struct.unpack_from
+1799:52 call  unpack_from('<ii', packet, 48)
+    -> struct.unpack_from
+1813:37 call  BytesIO(packet)
+    -> io.BytesIO
+1814:52 call  self._set_vorbis_comment_fields(walker)
+    -> tinytag.tinytag._Ogg._set_vorbis_comment_fields
+1824:28 call  max( (self._granule_pos - preskip) / self.samplerate, 0 )
+    -> <builtin>.max
+
+[tinytag.tinytag._Ogg._parse_vorbis_comment]
+1840:31 call  unpack('<I', fh.read(4))
+    -> struct.unpack
+1840:45 call  fh.read(4)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1841:16 call  fh.seek(vendor_length, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+1842:26 call  unpack('<I', fh.read(4))
+    -> struct.unpack
+1842:40 call  fh.read(4)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1843:24 call  range(elements)
+    -> <builtin>.range
+1844:28 call  unpack('<I', fh.read(4))
+    -> struct.unpack
+1844:42 call  fh.read(4)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1846:24 call  fh.seek(length, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+1848:33 call  fh.read(length)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+1848:48 call  fh.read(length).decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+1850:46 call  keyvalpair.split('=', 1)
+    -> <builtin>.str.split
+1851:38 call  key.lower()
+    -> <builtin>.str.lower
+1855:34 call  print('Found Vorbis Image', key, value[:64])
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+1857:52 call  _Flac._parse_image(BytesIO(a2b_base64(value)))
+    -> tinytag.tinytag._Flac._parse_image
+    reject tinytag.tinytag._ID3._parse_image: the receiver is the class _Flac
+1857:60 call  BytesIO(a2b_base64(value))
+    -> io.BytesIO
+1857:71 call  a2b_base64(value)
+    -> binascii.a2b_base64
+1863:30 call  print('Found Vorbis Comment', key, value[:64])
+    -> <builtin>.print
+    note: debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)
+1864:56 call  cls._VORBIS_MAPPING.get( key_lower, cls._OTHER_PREFIX + k...
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+1870:55 call  value.split('/')
+    -> <builtin>.str.split
+1871:47 call  total.isdecimal()
+    -> <builtin>.str.isdecimal
+1872:64 call  int(total)
+    -> <builtin>.int
+1873:43 call  value.isdecimal()
+    -> <builtin>.str.isdecimal
+1874:49 call  int(value)
+    -> <builtin>.int
+
+[tinytag.tinytag._Ogg._set_vorbis_comment_fields]
+1879:59 call  self._parse_vorbis_comment( fh, self._load_image )
+    -> tinytag.tinytag._Ogg._parse_vorbis_comment
+1882:26 call  isinstance(value, Image)
+    -> <builtin>.isinstance
+1884:39 call  self.images._set_field(fieldname, value)
+    -> tinytag.tinytag.Images._set_field
+    reject tinytag.tinytag.TinyTag._set_field: self.images is the Images that TinyTag.__init__ makes
+1886:28 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+
+[tinytag.tinytag._Ogg._parse_pages]
+1894:30 call  fh.read(header_len)
+    -> io.BufferedReader.read
+1895:39 call  page_header.startswith(b'OggS')
+    -> <builtin>.bytes.startswith
+1896:46 call  page_header.startswith(b'\x00', 4)
+    -> <builtin>.bytes.startswith
+1897:29 call  ParseError('Invalid OGG header')
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+1899:18 call  len(page_header)
+    -> <builtin>.len
+1901:42 call  page_header.startswith(b'OggS')
+    -> <builtin>.bytes.startswith
+1907:46 call  unpack_from('<qI', page_header, 6)
+    -> struct.unpack_from
+1909:44 call  bytearray()
+    -> <builtin>.bytearray
+1919:32 call  fh.read(segments)
+    -> io.BufferedReader.read
+1928:43 call  fh.read(read_size)
+    -> io.BufferedReader.read
+1930:38 call  packet_data.clear()
+    -> <builtin>.bytearray.clear
+    note: packet_data is a bytearray of packets (line 1909)
+1934:28 call  fh.seek(read_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+1936:43 call  fh.read(read_size)
+    -> io.BufferedReader.read
+1943:34 call  fh.read(header_len)
+    -> io.BufferedReader.read
+
+[tinytag.tinytag._Wave._parse]
+1991:25 call  fh.read(12)
+    -> io.BufferedReader.read
+1992:33 call  header.startswith(b'RIFF')
+    -> <builtin>.bytes.startswith
+1992:67 call  header.startswith(b'WAVE', 8)
+    -> <builtin>.bytes.startswith
+1993:29 call  ParseError('Invalid WAV header')
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+1999:31 call  fh.read(header_len)
+    -> io.BufferedReader.read
+2000:18 call  len(chunk_header)
+    -> <builtin>.len
+2001:40 call  unpack_from('<I', chunk_header, 4)
+    -> struct.unpack_from
+2005:64 call  chunk_header.startswith(b'fmt ')
+    -> <builtin>.bytes.startswith
+2006:32 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2007:63 call  unpack_from( '<HHI', chunk)
+    -> struct.unpack_from
+2009:52 call  unpack_from('<HH', chunk, 12)
+    -> struct.unpack_from
+2011:45 call  unpack_from('<H', chunk, 24)
+    -> struct.unpack_from
+2021:66 call  chunk_header.startswith(b'data')
+    -> <builtin>.bytes.startswith
+2023:24 call  fh.seek(subchunk_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+2024:66 call  chunk_header.startswith(b'fact')
+    -> <builtin>.bytes.startswith
+2025:32 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2026:42 call  unpack_from('<I', chunk)
+    -> struct.unpack_from
+2027:62 call  chunk_header.startswith(b'LIST')
+    -> <builtin>.bytes.startswith
+2028:32 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2029:36 call  chunk.startswith(b'INFO')
+    -> <builtin>.bytes.startswith
+2030:37 call  BytesIO(chunk)
+    -> io.BytesIO
+2031:32 call  walker.seek(4)
+    -> io.BytesIO.seek
+2032:40 call  walker.read(4)
+    -> io.BytesIO.read
+2033:30 call  len(field)
+    -> <builtin>.len
+2034:45 call  unpack('<I', walker.read(4))
+    -> struct.unpack
+2034:63 call  walker.read(4)
+    -> io.BytesIO.read
+2037:49 call  self._unpad_bytes(walker.read(data_length))
+    -> tinytag.tinytag.TinyTag._unpad_bytes
+2037:61 call  walker.read(data_length)
+    -> io.BytesIO.read
+2038:59 call  self._RIFF_MAPPING.get( field, (self._OTHER_PREFIX + fiel...
+    -> <builtin>.dict.get
+    reject tinytag.tinytag.TinyTag.get: the receiver is a dict
+2041:44 call  field.decode('latin-1')
+    -> <builtin>.bytes.decode
+2041:62 call  (self._OTHER_PREFIX + field.decode('latin-1')).lower()
+    -> <builtin>.str.lower
+2043:44 call  data.decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2045:47 call  value.isdecimal()
+    -> <builtin>.str.isdecimal
+2046:48 call  self._set_field(fieldname, int(value))
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+2046:63 call  int(value)
+    -> <builtin>.int
+2048:44 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+2049:44 call  walker.read(4)
+    -> io.BytesIO.read
+2051:48 call  chunk_header.startswith((b'id3 ', b'ID3 '))
+    -> <builtin>.bytes.startswith
+2053:27 call  _ID3()
+    -> tinytag.tinytag._ID3.__init__
+    reject tinytag.tinytag.TinyTag.__init__: _ID3 defines __init__; TinyTag.__init__ runs only through its super().__init__()
+2056:43 call  BytesIO(fh.read(subchunk_size))
+    -> io.BytesIO
+2056:51 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2058:26 call  id3._load(tags=True, duration=False, image=self._load_image)
+    -> tinytag.tinytag.TinyTag._load
+2059:29 call  self._update(id3)
+    -> tinytag.tinytag.TinyTag._update
+    reject tinytag.tinytag.Images._update: self is a TinyTag parser instance
+2060:62 call  chunk_header.startswith(b'_PMX')
+    -> <builtin>.bytes.startswith
+2061:42 call  self._unpad_bytes(fh.read(subchunk_size))
+    -> tinytag.tinytag.TinyTag._unpad_bytes
+2061:50 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2062:37 call  chunk.decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2063:38 call  self._set_other_field('xmp', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+2065:24 call  fh.seek(subchunk_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+2066:35 call  fh.read(header_len)
+    -> io.BufferedReader.read
+
+[tinytag.tinytag._Flac._parse]
+2090:25 call  fh.read(4)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2091:33 call  header.startswith(b'fLaC')
+    -> <builtin>.bytes.startswith
+2092:29 call  ParseError('Invalid FLAC header')
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+2097:31 call  fh.read(header_len)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2098:18 call  len(block_header)
+    -> <builtin>.len
+2100:33 call  bool(block_header[0] & 0x80)
+    -> <builtin>.bool
+2102:34 call  int.from_bytes(block_header[1:], 'big')
+    -> <builtin>.int.from_bytes
+2106:31 call  fh.read(size)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2123:40 call  unpack_from(">Q", head, 10)
+    -> struct.unpack_from
+2141:67 call  _Ogg._parse_vorbis_comment( fh, read_data=self._parse_tags )
+    -> tinytag.tinytag._Ogg._parse_vorbis_comment
+2144:38 call  isinstance(value, Image)
+    -> <builtin>.isinstance
+2145:40 call  self._set_field(fieldname, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+2150:43 call  self._parse_image(fh, read_data=self._load_image)
+    -> tinytag.tinytag._Flac._parse_image
+    reject tinytag.tinytag._ID3._parse_image: self is a _Flac
+2154:43 call  self.images._set_field(fieldname, value)
+    -> tinytag.tinytag.Images._set_field
+    reject tinytag.tinytag.TinyTag._set_field: self.images is the Images that TinyTag.__init__ makes
+2156:24 call  fh.seek(size, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+2164:35 call  fh.read(header_len)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2166:35 call  fh.tell()
+    -> io.BufferedReader.tell
+    -> io.BytesIO.tell
+
+[tinytag.tinytag._Flac._parse_image]
+2179:41 call  unpack('>II', fh.read(8))
+    -> struct.unpack
+2179:56 call  fh.read(8)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2181:32 call  fh.read(mime_type_len)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2181:54 call  fh.read(mime_type_len).decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2183:20 call  fh.seek(mime_type_len, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+2185:33 call  unpack('>I', fh.read(4))
+    -> struct.unpack
+2185:47 call  fh.read(4)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2187:34 call  fh.read(description_len)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2187:58 call  fh.read(description_len).decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2189:20 call  fh.seek(description_len, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+2190:16 call  fh.seek(16, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+2191:25 call  unpack('>I', fh.read(4))
+    -> struct.unpack
+2191:39 call  fh.read(4)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+2193:20 call  fh.seek(pic_len, SEEK_CUR)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+2196:38 call  _ID3._create_tag_image( fh.read(pic_len), pic_type, mime_...
+    -> tinytag.tinytag._ID3._create_tag_image
+2197:20 call  fh.read(pic_len)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+
+[tinytag.tinytag._ASF._parse]
+2276:25 call  fh.read(30)
+    -> io.BufferedReader.read
+2277:34 call  header.startswith( b'\x30\x26\xB2\x75\x8E\x66\xCF\x11\xA6...
+    -> <builtin>.bytes.startswith
+2279:35 call  header.startswith(b'\x02', 29)
+    -> <builtin>.bytes.startswith
+2280:29 call  ParseError('Invalid WMA header')
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+2283:32 call  fh.read(header_len)
+    -> io.BufferedReader.read
+2284:18 call  len(object_header)
+    -> <builtin>.len
+2285:38 call  unpack_from('<Q', object_header, 16)
+    -> struct.unpack_from
+2290:49 call  object_header.startswith(self._ASF_CONTENT_DESC)
+    -> <builtin>.bytes.startswith
+2291:33 call  BytesIO(fh.read(object_size))
+    -> io.BytesIO
+2291:41 call  fh.read(object_size)
+    -> io.BufferedReader.read
+2294:41 call  unpack('<5H', walker.read(10))
+    -> struct.unpack
+2294:60 call  walker.read(10)
+    -> io.BytesIO.read
+2302:62 call  data_blocks.items()
+    -> <builtin>.dict.items
+2303:40 call  self._unpad( walker.read(length).decode('utf-16le', 'repl...
+    -> tinytag.tinytag.TinyTag._unpad
+2304:36 call  walker.read(length)
+    -> io.BytesIO.read
+2304:51 call  walker.read(length).decode('utf-16le', 'replace')
+    -> <builtin>.bytes.decode
+2305:51 call  i_field_name.startswith('_')
+    -> <builtin>.str.startswith
+2306:40 call  self._set_field(i_field_name, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+2308:49 call  object_header.startswith(self._ASF_EXT_CONTENT_DESC)
+    -> <builtin>.bytes.startswith
+2310:33 call  BytesIO(fh.read(object_size))
+    -> io.BytesIO
+2310:41 call  fh.read(object_size)
+    -> io.BufferedReader.read
+2311:42 call  unpack('<H', walker.read(2))
+    -> struct.unpack
+2311:60 call  walker.read(2)
+    -> io.BytesIO.read
+2312:31 call  range(descriptor_count)
+    -> <builtin>.range
+2313:38 call  unpack('<H', walker.read(2))
+    -> struct.unpack
+2313:56 call  walker.read(2)
+    -> io.BytesIO.read
+2314:39 call  self._unpad( walker.read(name_len).decode('utf-16le', 're...
+    -> tinytag.tinytag.TinyTag._unpad
+2315:36 call  walker.read(name_len)
+    -> io.BytesIO.read
+2315:53 call  walker.read(name_len).decode('utf-16le', 'replace')
+    -> <builtin>.bytes.decode
+2316:51 call  unpack('<HH', walker.read(4))
+    -> struct.unpack
+2316:70 call  walker.read(4)
+    -> io.BytesIO.read
+2317:38 call  self._parse_value(walker, name, value_type, value_len)
+    -> tinytag.tinytag._ASF._parse_value
+2319:49 call  object_header.startswith(self._ASF_HEADER_EXTENSION)
+    -> <builtin>.bytes.startswith
+2320:33 call  fh.seek(18, SEEK_CUR)
+    -> io.BufferedReader.seek
+2321:35 call  unpack('<I', fh.read(4))
+    -> struct.unpack
+2321:49 call  fh.read(4)
+    -> io.BufferedReader.read
+2325:40 call  fh.read(header_len)
+    -> io.BufferedReader.read
+2326:34 call  len(subheader)
+    -> <builtin>.len
+2327:35 call  max( unpack_from('<Q', subheader, 16)[0] - header_len, 0)
+    -> <builtin>.max
+2328:36 call  unpack_from('<Q', subheader, 16)
+    -> struct.unpack_from
+2329:44 call  subheader.startswith( (self._ASF_METADATA, self._ASF_META...
+    -> <builtin>.bytes.startswith
+2332:42 call  fh.read(sub_size)
+    -> io.BufferedReader.read
+2333:41 call  BytesIO(content)
+    -> io.BytesIO
+2334:38 call  len(content)
+    -> <builtin>.len
+2335:50 call  unpack('<H', walker.read(2))
+    -> struct.unpack
+2335:68 call  walker.read(2)
+    -> io.BytesIO.read
+2336:39 call  range(descriptor_count)
+    -> <builtin>.range
+2337:40 call  walker.seek(4, SEEK_CUR)
+    -> io.BytesIO.seek
+2338:46 call  unpack('<H', walker.read(2))
+    -> struct.unpack
+2338:64 call  walker.read(2)
+    -> io.BytesIO.read
+2339:48 call  unpack('<H', walker.read(2))
+    -> struct.unpack
+2339:66 call  walker.read(2)
+    -> io.BytesIO.read
+2340:47 call  unpack('<I', walker.read(4))
+    -> struct.unpack
+2340:65 call  walker.read(4)
+    -> io.BytesIO.read
+2341:47 call  self._unpad( walker.read(name_len) .decode('utf-16le', 'r...
+    -> tinytag.tinytag.TinyTag._unpad
+2342:44 call  walker.read(name_len)
+    -> io.BytesIO.read
+2343:40 call  walker.read(name_len) .decode('utf-16le', 'replace')
+    -> <builtin>.bytes.decode
+2344:46 call  self._parse_value( walker, name, value_type, value_len)
+    -> tinytag.tinytag._ASF._parse_value
+2347:41 call  fh.seek(sub_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+2349:49 call  object_header.startswith(self._ASF_FILE_PROP)
+    -> <builtin>.bytes.startswith
+2350:31 call  fh.read(object_size)
+    -> io.BufferedReader.read
+2351:44 call  unpack_from('<Q', data, 40)
+    -> struct.unpack_from
+2352:38 call  unpack_from('<Q', data, 56)
+    -> struct.unpack_from
+2354:36 call  max(play_duration - preroll, 0.0)
+    -> <builtin>.max
+2356:49 call  object_header.startswith(self._ASF_STREAM_PROPS)
+    -> <builtin>.bytes.startswith
+2357:31 call  fh.read(object_size)
+    -> io.BufferedReader.read
+2361:57 call  unpack_from('<HHII', data, 54)
+    -> struct.unpack_from
+2374:43 call  unpack_from('<H', data, 68)
+    -> struct.unpack_from
+2378:49 call  object_header.startswith(self._XMP_METADATA)
+    -> <builtin>.bytes.startswith
+2379:32 call  fh.read(object_size)
+    -> io.BufferedReader.read
+2379:52 call  fh.read(object_size).decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2380:38 call  self._set_other_field('xmp', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+2383:24 call  fh.seek(object_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+2384:36 call  fh.read(header_len)
+    -> io.BufferedReader.read
+
+[tinytag.tinytag._ASF._parse_value]
+2395:32 call  self._unpad( fh.read(value_len).decode('utf-16le', 'repla...
+    -> tinytag.tinytag.TinyTag._unpad
+2396:24 call  fh.read(value_len)
+    -> io.BytesIO.read
+2396:42 call  fh.read(value_len).decode('utf-16le', 'replace')
+    -> <builtin>.bytes.decode
+2401:24 call  str(unpack(fmt, fh.read(value_len))[0])
+    -> <builtin>.str
+2401:31 call  unpack(fmt, fh.read(value_len))
+    -> struct.unpack
+2401:44 call  fh.read(value_len)
+    -> io.BytesIO.read
+2403:20 call  fh.seek(value_len, SEEK_CUR)
+    -> io.BytesIO.seek
+2409:31 call  name.startswith('WM/')
+    -> <builtin>.str.startswith
+2411:57 call  name.lower()
+    -> <builtin>.str.lower
+2413:31 call  value.isdecimal()
+    -> <builtin>.str.isdecimal
+2414:32 call  self._set_field(field_name, int(value))
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+2414:48 call  int(value)
+    -> <builtin>.int
+2416:28 call  self._set_field(field_name, value)
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+
+[tinytag.tinytag._Aiff._parse]
+2463:25 call  fh.read(12)
+    -> io.BufferedReader.read
+2464:34 call  header.startswith(b'FORM')
+    -> <builtin>.bytes.startswith
+2465:41 call  header.startswith((b'AIFC', b'AIFF'), 8)
+    -> <builtin>.bytes.startswith
+2466:29 call  ParseError('Invalid AIFF header')
+    -> <builtin>.Exception.__init__
+    note: ParseError and UnsupportedFormatError define no __init__; the first __init__ of the MRO is that of Exception
+2469:31 call  fh.read(header_len)
+    -> io.BufferedReader.read
+2470:18 call  len(chunk_header)
+    -> <builtin>.len
+2472:40 call  unpack_from('>I', chunk_header, 4)
+    -> struct.unpack_from
+2476:42 call  self._unpad_bytes(fh.read(subchunk_size))
+    -> tinytag.tinytag.TinyTag._unpad_bytes
+2476:50 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2477:44 call  chunk.split(b'\x00')
+    -> <builtin>.bytes.split
+2478:36 call  self._set_field( self._AIFF_MAPPING[subchunk_id], subvalu...
+    -> tinytag.tinytag.TinyTag._set_field
+    reject tinytag.tinytag.Images._set_field: self is a TinyTag parser instance; no parser class overrides the method
+2480:40 call  subvalue.decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2481:66 call  chunk_header.startswith(b'COMM')
+    -> <builtin>.bytes.startswith
+2482:32 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2483:61 call  unpack_from('>hLh', chunk)
+    -> struct.unpack_from
+2490:48 call  unpack_from('>HQ', chunk, 8)
+    -> struct.unpack_from
+2491:29 call  int(mantissa * (2 ** (exp - 0x3FFF - 63)))
+    -> <builtin>.int
+2501:55 call  chunk[18:22].decode('latin-1')
+    -> <builtin>.bytes.decode
+2512:48 call  chunk_header.startswith((b'id3 ', b'ID3 '))
+    -> <builtin>.bytes.startswith
+2514:27 call  _ID3()
+    -> tinytag.tinytag._ID3.__init__
+    reject tinytag.tinytag.TinyTag.__init__: _ID3 defines __init__; TinyTag.__init__ runs only through its super().__init__()
+2517:43 call  BytesIO(fh.read(subchunk_size))
+    -> io.BytesIO
+2517:51 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2519:26 call  id3._load(tags=True, duration=False, image=self._load_image)
+    -> tinytag.tinytag.TinyTag._load
+2520:29 call  self._update(id3)
+    -> tinytag.tinytag.TinyTag._update
+    reject tinytag.tinytag.Images._update: self is a TinyTag parser instance
+2521:62 call  chunk_header.startswith(b'APPL')
+    -> <builtin>.bytes.startswith
+2522:32 call  fh.read(subchunk_size)
+    -> io.BufferedReader.read
+2523:36 call  chunk.startswith(b'XMP ')
+    -> <builtin>.bytes.startswith
+2524:48 call  self._unpad_bytes(chunk[4:])
+    -> tinytag.tinytag.TinyTag._unpad_bytes
+2525:43 call  content.decode('utf-8', 'replace')
+    -> <builtin>.bytes.decode
+2526:42 call  self._set_other_field('xmp', value)
+    -> tinytag.tinytag.TinyTag._set_other_field
+    reject tinytag.tinytag.Images._set_other_field: self is a TinyTag parser instance; no parser class overrides the method
+2528:24 call  fh.seek(subchunk_size, SEEK_CUR)
+    -> io.BufferedReader.seek
+2529:35 call  fh.read(header_len)
+    -> io.BufferedReader.read
+

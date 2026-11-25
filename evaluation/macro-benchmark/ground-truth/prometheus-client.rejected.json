@@ -1,0 +1,21 @@
+{
+    "prometheus_client.asgi.make_asgi_app.prometheus_app": {
+        "asyncio.queues.Queue.get": "client callback: receive is the callable of the ASGI server, here the input queue's get of asgiref's ApplicationCommunicator in tests/test_asgi.py (B5)",
+        "asyncio.queues.Queue.put": "client callback: send is the callable of the ASGI server, here the output queue's put of asgiref's ApplicationCommunicator in tests/test_asgi.py (B5)"
+    },
+    "prometheus_client.decorator.FunctionMaker.__init__": {
+        "<builtin>.dict.copy": "client object: func.__dict__ of the client's function that the tests decorate with count_exceptions, track_inprogress or time (decorate forwards it); a call on the __dict__ of a client object is opaque (B5; the jsonpickle ruling (c); Codex audit round 1)"
+    },
+    "prometheus_client.exposition.make_wsgi_app.prometheus_app": {
+        "unittest.mock.CallableMixin.__call__": "client change to package internals: tests/test_wsgi.py:73 patches prometheus_client.exposition._bake_output with a Mock (side_effect=_bake_output), so the call of _bake_output runs the Mock's __call__; a state that only a client's change to package internals makes is not considered"
+    },
+    "prometheus_client.metrics.Enum.state": {
+        "<builtin>.list.index": "client object: self._states is the client's states, annotated Optional[Sequence[str]], an abstract type that fixes no class; the annotation decides over the List[str] of the documentation (B4), so the method call on it has no callee (B5); the tests pass lists (judgement J6)"
+    },
+    "prometheus_client.registry.CollectorRegistry._get_names": {
+        "unittest.mock.CallableMixin.__call__": "client callback: desc_func is the describe of a MagicMock collector that tests/test_core.py:1059-1061 registers (B5)"
+    },
+    "prometheus_client.registry.RestrictedRegistry.collect": {
+        "unittest.mock.CallableMixin.__call__": "client callback: collector.collect of a MagicMock collector that tests/test_core.py:1079-1083 registers (B5)"
+    }
+}

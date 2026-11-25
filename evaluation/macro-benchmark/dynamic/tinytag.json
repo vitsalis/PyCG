@@ -1,0 +1,832 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__"
+    ],
+    "<builtin>.bytes.decode": [
+      "uuid.bytes_.decode"
+    ],
+    "<builtin>.bytes.find": [
+      "uuid.bytes_.find"
+    ],
+    "<builtin>.bytes.isascii": [
+      "uuid.bytes_.isascii"
+    ],
+    "<builtin>.bytes.lower": [
+      "uuid.bytes_.lower"
+    ],
+    "<builtin>.bytes.rstrip": [
+      "uuid.bytes_.rstrip"
+    ],
+    "<builtin>.bytes.split": [
+      "uuid.bytes_.split"
+    ],
+    "<builtin>.bytes.startswith": [
+      "uuid.bytes_.startswith"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.int.from_bytes": [
+      "uuid.int_.from_bytes"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.endswith": [
+      "typing.Text.endswith"
+    ],
+    "<builtin>.str.find": [
+      "typing.Text.find"
+    ],
+    "<builtin>.str.isdecimal": [
+      "typing.Text.isdecimal"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.lstrip": [
+      "typing.Text.lstrip"
+    ],
+    "<builtin>.str.rstrip": [
+      "typing.Text.rstrip"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "_io.BufferedReader.close": [
+      "io.BufferedReader.close"
+    ],
+    "_io.BufferedReader.read": [
+      "io.BufferedReader.read"
+    ],
+    "_io.BufferedReader.seek": [
+      "io.BufferedReader.seek"
+    ],
+    "_io.BufferedReader.tell": [
+      "io.BufferedReader.tell"
+    ],
+    "_io.BytesIO": [
+      "io.BytesIO"
+    ],
+    "_io.BytesIO.read": [
+      "io.BytesIO.read"
+    ],
+    "_io.BytesIO.seek": [
+      "io.BytesIO.seek"
+    ],
+    "_io.BytesIO.tell": [
+      "io.BytesIO.tell"
+    ],
+    "_struct.unpack": [
+      "struct.unpack"
+    ],
+    "_struct.unpack_from": [
+      "struct.unpack_from"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "collections.abc.Mapping.get": [
+      "collections.abc.MutableMapping.get",
+      "selectors.Mapping.get"
+    ],
+    "os._fscodec.fsdecode": [
+      "os.fsdecode"
+    ]
+  },
+  "commit": "c123836e950a897bd4bbee04d3700bec8762ca27",
+  "deselect": [],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 0,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "tinytag.tinytag": [
+      "<builtin>.bool",
+      "<builtin>.classmethod",
+      "<builtin>.property",
+      "<builtin>.staticmethod",
+      "collections.abc.Mapping.get"
+    ],
+    "tinytag.tinytag.Image.__repr__": [
+      "<builtin>.dict.copy",
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.len",
+      "<builtin>.str.join",
+      "<builtin>.type",
+      "<builtin>.vars"
+    ],
+    "tinytag.tinytag.Images.__init__": [
+      "<builtin>.dict.__init__"
+    ],
+    "tinytag.tinytag.Images._set_field": [
+      "<builtin>.dict.get",
+      "<builtin>.len",
+      "<builtin>.str.startswith",
+      "tinytag.tinytag.Images._set_other_field"
+    ],
+    "tinytag.tinytag.Images._set_other_field": [
+      "<builtin>.list.append"
+    ],
+    "tinytag.tinytag.Images._update": [
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "tinytag.tinytag.Images._set_field",
+      "tinytag.tinytag.Images._set_other_field"
+    ],
+    "tinytag.tinytag.Images.any": [
+      "<builtin>.dict.values",
+      "<builtin>.isinstance"
+    ],
+    "tinytag.tinytag.Images.as_dict": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance"
+    ],
+    "tinytag.tinytag.TinyTag.__init__": [
+      "<builtin>.dict.__init__",
+      "tinytag.tinytag.Images.__init__"
+    ],
+    "tinytag.tinytag.TinyTag._get_parser_class": [
+      "<builtin>.BaseException.__init__",
+      "tinytag.tinytag.TinyTag._get_parser_for_file_handle",
+      "tinytag.tinytag.TinyTag._get_parser_for_filename"
+    ],
+    "tinytag.tinytag.TinyTag._get_parser_for_file_handle": [
+      "<builtin>.bytes.startswith",
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO.read"
+    ],
+    "tinytag.tinytag.TinyTag._get_parser_for_filename": [
+      "<builtin>.dict.items",
+      "<builtin>.str.endswith",
+      "<builtin>.str.lower"
+    ],
+    "tinytag.tinytag.TinyTag._load": [
+      "<builtin>.ValueError",
+      "tinytag.tinytag.TinyTag._parse",
+      "tinytag.tinytag._ASF._parse",
+      "tinytag.tinytag._Aiff._parse",
+      "tinytag.tinytag._Flac._parse",
+      "tinytag.tinytag._ID3._parse",
+      "tinytag.tinytag._MP4._parse",
+      "tinytag.tinytag._MPEG._parse",
+      "tinytag.tinytag._Ogg._parse",
+      "tinytag.tinytag._Wave._parse"
+    ],
+    "tinytag.tinytag.TinyTag._set_field": [
+      "<builtin>.dict.get",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str",
+      "<builtin>.str.startswith",
+      "tinytag.tinytag.TinyTag._set_other_field"
+    ],
+    "tinytag.tinytag.TinyTag._set_other_field": [
+      "<builtin>.list.append"
+    ],
+    "tinytag.tinytag.TinyTag._unpad": [
+      "<builtin>.str.rstrip"
+    ],
+    "tinytag.tinytag.TinyTag._unpad_bytes": [
+      "<builtin>.bytes.rstrip"
+    ],
+    "tinytag.tinytag.TinyTag._update": [
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.str.startswith",
+      "tinytag.tinytag.Images._update",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag.TinyTag._set_other_field"
+    ],
+    "tinytag.tinytag.TinyTag.as_dict": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.str",
+      "<builtin>.str.startswith"
+    ],
+    "tinytag.tinytag.TinyTag.audio_offset": [
+      "_warnings.warn"
+    ],
+    "tinytag.tinytag.TinyTag.extra": [
+      "_warnings.warn"
+    ],
+    "tinytag.tinytag.TinyTag.get": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.ValueError",
+      "<builtin>.open",
+      "_io.BufferedReader.close",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "_io.BytesIO.seek",
+      "_io.BytesIO.tell",
+      "_warnings.warn",
+      "os._fscodec.fsdecode",
+      "tinytag.tinytag.TinyTag.__init__",
+      "tinytag.tinytag.TinyTag._get_parser_class",
+      "tinytag.tinytag.TinyTag._load",
+      "tinytag.tinytag._ID3.__init__",
+      "tinytag.tinytag._MPEG.__init__",
+      "tinytag.tinytag._Ogg.__init__"
+    ],
+    "tinytag.tinytag.TinyTag.get_image": [
+      "_warnings.warn",
+      "tinytag.tinytag.Images.any"
+    ],
+    "tinytag.tinytag.TinyTag.is_supported": [
+      "os._fscodec.fsdecode",
+      "tinytag.tinytag.TinyTag._get_parser_for_filename"
+    ],
+    "tinytag.tinytag._ASF._parse": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.startswith",
+      "<builtin>.dict.items",
+      "<builtin>.len",
+      "<builtin>.max",
+      "<builtin>.range",
+      "<builtin>.str.startswith",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack",
+      "_struct.unpack_from",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag.TinyTag._set_other_field",
+      "tinytag.tinytag.TinyTag._unpad",
+      "tinytag.tinytag._ASF._parse_value"
+    ],
+    "tinytag.tinytag._ASF._parse_value": [
+      "<builtin>.bytes.decode",
+      "<builtin>.int",
+      "<builtin>.str",
+      "<builtin>.str.isdecimal",
+      "<builtin>.str.lower",
+      "<builtin>.str.startswith",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag.TinyTag._unpad"
+    ],
+    "tinytag.tinytag._Aiff._parse": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.split",
+      "<builtin>.bytes.startswith",
+      "<builtin>.int",
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO",
+      "_struct.unpack_from",
+      "tinytag.tinytag.TinyTag._load",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag.TinyTag._set_other_field",
+      "tinytag.tinytag.TinyTag._unpad_bytes",
+      "tinytag.tinytag.TinyTag._update",
+      "tinytag.tinytag._ID3.__init__"
+    ],
+    "tinytag.tinytag._Flac._parse": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bool",
+      "<builtin>.bytes.startswith",
+      "<builtin>.int.from_bytes",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "_io.BytesIO.read",
+      "_io.BytesIO.tell",
+      "_struct.unpack_from",
+      "tinytag.tinytag.Images._set_field",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag._Flac._parse_image",
+      "tinytag.tinytag._Ogg._parse_vorbis_comment"
+    ],
+    "tinytag.tinytag._Flac._parse_image": [
+      "<builtin>.bytes.decode",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack",
+      "tinytag.tinytag._ID3._create_tag_image"
+    ],
+    "tinytag.tinytag._ID3.__init__": [
+      "<builtin>.super",
+      "tinytag.tinytag.TinyTag.__init__"
+    ],
+    "tinytag.tinytag._ID3._create_tag_image": [
+      "<builtin>.len",
+      "<builtin>.str.startswith",
+      "tinytag.tinytag.Image.__init__"
+    ],
+    "tinytag.tinytag._ID3._decode_string": [
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.startswith",
+      "<builtin>.len",
+      "tinytag.tinytag.TinyTag._unpad"
+    ],
+    "tinytag.tinytag._ID3._find_string_end_pos": [
+      "<builtin>.bytes.find"
+    ],
+    "tinytag.tinytag._ID3._lrc_timestamp": [
+      "<builtin>.divmod",
+      "<builtin>.int"
+    ],
+    "tinytag.tinytag._ID3._parse": [
+      "<builtin>.str.endswith",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_io.BytesIO.tell",
+      "tinytag.tinytag.TinyTag.__init__",
+      "tinytag.tinytag.TinyTag._load",
+      "tinytag.tinytag.TinyTag._update",
+      "tinytag.tinytag._ID3._parse_id3v1",
+      "tinytag.tinytag._ID3._parse_id3v2",
+      "tinytag.tinytag._ID3._parse_id3v2_header",
+      "tinytag.tinytag._MPEG.__init__"
+    ],
+    "tinytag.tinytag._ID3._parse_frame": [
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.startswith",
+      "<builtin>.int",
+      "<builtin>.int.from_bytes",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.str.find",
+      "<builtin>.str.isdecimal",
+      "<builtin>.str.lower",
+      "<builtin>.str.split",
+      "<builtin>.str.startswith",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack_from",
+      "tinytag.tinytag.Images._set_field",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag.TinyTag._set_other_field",
+      "tinytag.tinytag.TinyTag._unpad_bytes",
+      "tinytag.tinytag._ID3._decode_string",
+      "tinytag.tinytag._ID3._find_string_end_pos",
+      "tinytag.tinytag._ID3._parse_image",
+      "tinytag.tinytag._ID3._parse_synced_lyrics",
+      "tinytag.tinytag._ID3._set_custom_field",
+      "tinytag.tinytag._ID3._unsynchsafe"
+    ],
+    "tinytag.tinytag._ID3._parse_id3v1": [
+      "<builtin>.bytes.startswith",
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BytesIO.read",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag._ID3._parse_id3v1.asciidecode"
+    ],
+    "tinytag.tinytag._ID3._parse_id3v1.asciidecode": [
+      "<builtin>.bytes.decode",
+      "tinytag.tinytag.TinyTag._unpad"
+    ],
+    "tinytag.tinytag._ID3._parse_id3v2": [
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "tinytag.tinytag._ID3._parse_frame",
+      "tinytag.tinytag._ID3._parse_id3v2_header",
+      "tinytag.tinytag._ID3._set_grouping_work_fields",
+      "tinytag.tinytag._ID3._unsynchsafe"
+    ],
+    "tinytag.tinytag._ID3._parse_id3v2_header": [
+      "<builtin>.bytes.startswith",
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BytesIO.read",
+      "tinytag.tinytag._ID3._unsynchsafe"
+    ],
+    "tinytag.tinytag._ID3._parse_image": [
+      "<builtin>.bytes.lower",
+      "<builtin>.dict.get",
+      "<builtin>.len",
+      "<builtin>.str.lower",
+      "tinytag.tinytag._ID3._create_tag_image",
+      "tinytag.tinytag._ID3._decode_string",
+      "tinytag.tinytag._ID3._find_string_end_pos"
+    ],
+    "tinytag.tinytag._ID3._parse_synced_lyrics": [
+      "<builtin>.len",
+      "<builtin>.str.lstrip",
+      "_struct.unpack_from",
+      "tinytag.tinytag._ID3._decode_string",
+      "tinytag.tinytag._ID3._find_string_end_pos",
+      "tinytag.tinytag._ID3._lrc_timestamp"
+    ],
+    "tinytag.tinytag._ID3._set_custom_field": [
+      "<builtin>.dict.get",
+      "<builtin>.str.lower",
+      "tinytag.tinytag.TinyTag._set_field"
+    ],
+    "tinytag.tinytag._ID3._set_grouping_work_fields": [
+      "tinytag.tinytag.TinyTag._set_other_field"
+    ],
+    "tinytag.tinytag._MP4._build_combined_tree": [
+      "<builtin>.dict",
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "tinytag.tinytag._MP4._build_audio_data_tree",
+      "tinytag.tinytag._MP4._build_meta_data_tree"
+    ],
+    "tinytag.tinytag._MP4._build_meta_data_tree": [
+      "tinytag.tinytag._MP4._data_parser",
+      "tinytag.tinytag._MP4._nums_parser"
+    ],
+    "tinytag.tinytag._MP4._data_parser._parse_data_atom": [
+      "<builtin>.bytes.decode",
+      "<builtin>.len",
+      "<builtin>.str",
+      "_struct.unpack",
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._MP4._nums_parser._parse_nums": [
+      "_struct.unpack"
+    ],
+    "tinytag.tinytag._MP4._parse": [
+      "tinytag.tinytag._MP4._build_audio_data_tree",
+      "tinytag.tinytag._MP4._build_combined_tree",
+      "tinytag.tinytag._MP4._build_meta_data_tree",
+      "tinytag.tinytag._MP4._traverse_atoms"
+    ],
+    "tinytag.tinytag._MP4._parse_alac": [
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._MP4._parse_cover_image": [
+      "<builtin>.dict.get",
+      "<builtin>.len",
+      "_struct.unpack_from",
+      "tinytag.tinytag.Image.__init__"
+    ],
+    "tinytag.tinytag._MP4._parse_custom_field": [
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.lower",
+      "<builtin>.dict.get",
+      "<builtin>.list.append",
+      "_io.BytesIO",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "tinytag.tinytag._MP4._data_parser",
+      "tinytag.tinytag._MP4._data_parser._parse_data_atom",
+      "tinytag.tinytag._MP4._read_atom_header"
+    ],
+    "tinytag.tinytag._MP4._parse_id3v1_genre": [
+      "<builtin>.len",
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._MP4._parse_mp4a": [
+      "<builtin>.len",
+      "_struct.unpack_from",
+      "tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size"
+    ],
+    "tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size": [
+      "<builtin>.range"
+    ],
+    "tinytag.tinytag._MP4._parse_mvhd": [
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._MP4._parse_uuid": [
+      "<builtin>.bytes.decode"
+    ],
+    "tinytag.tinytag._MP4._read_atom_header": [
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BytesIO.read",
+      "_struct.unpack",
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._MP4._traverse_atoms": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.isascii",
+      "<builtin>.callable",
+      "<builtin>.dict.get",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.str.lower",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "tinytag.tinytag.Images._set_field",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag._MP4._data_parser",
+      "tinytag.tinytag._MP4._data_parser._parse_data_atom",
+      "tinytag.tinytag._MP4._nums_parser._parse_nums",
+      "tinytag.tinytag._MP4._parse_alac",
+      "tinytag.tinytag._MP4._parse_cover_image",
+      "tinytag.tinytag._MP4._parse_custom_field",
+      "tinytag.tinytag._MP4._parse_id3v1_genre",
+      "tinytag.tinytag._MP4._parse_mp4a",
+      "tinytag.tinytag._MP4._parse_mvhd",
+      "tinytag.tinytag._MP4._parse_uuid",
+      "tinytag.tinytag._MP4._read_atom_header",
+      "tinytag.tinytag._MP4._traverse_atoms"
+    ],
+    "tinytag.tinytag._MPEG.__init__": [
+      "<builtin>.super",
+      "tinytag.tinytag.TinyTag.__init__"
+    ],
+    "tinytag.tinytag._MPEG._parse": [
+      "<builtin>.bytes.find",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.min",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BufferedReader.tell",
+      "_io.BytesIO.read",
+      "_io.BytesIO.tell",
+      "tinytag.tinytag._MPEG._parse_vbri_header",
+      "tinytag.tinytag._MPEG._parse_xing_header"
+    ],
+    "tinytag.tinytag._MPEG._parse_vbri_header": [
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._MPEG._parse_xing_header": [
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._Ogg.__init__": [
+      "<builtin>.super",
+      "tinytag.tinytag.TinyTag.__init__"
+    ],
+    "tinytag.tinytag._Ogg._parse": [
+      "<builtin>.bytearray.startswith",
+      "<builtin>.max",
+      "_io.BytesIO",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack_from",
+      "tinytag.tinytag.TinyTag.__init__",
+      "tinytag.tinytag.TinyTag._load",
+      "tinytag.tinytag.TinyTag._update",
+      "tinytag.tinytag._Ogg._parse_pages",
+      "tinytag.tinytag._Ogg._set_vorbis_comment_fields"
+    ],
+    "tinytag.tinytag._Ogg._parse_pages": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytearray",
+      "<builtin>.bytearray.clear",
+      "<builtin>.bytes.startswith",
+      "<builtin>.len",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_struct.unpack_from"
+    ],
+    "tinytag.tinytag._Ogg._parse_vorbis_comment": [
+      "<builtin>.bytes.decode",
+      "<builtin>.dict.get",
+      "<builtin>.int",
+      "<builtin>.range",
+      "<builtin>.str.isdecimal",
+      "<builtin>.str.lower",
+      "<builtin>.str.split",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack",
+      "binascii.a2b_base64",
+      "tinytag.tinytag._Flac._parse_image"
+    ],
+    "tinytag.tinytag._Ogg._set_vorbis_comment_fields": [
+      "<builtin>.isinstance",
+      "tinytag.tinytag.Images._set_field",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag._Ogg._parse_vorbis_comment"
+    ],
+    "tinytag.tinytag._Wave._parse": [
+      "<builtin>.BaseException.__init__",
+      "<builtin>.bytes.decode",
+      "<builtin>.bytes.startswith",
+      "<builtin>.dict.get",
+      "<builtin>.int",
+      "<builtin>.len",
+      "<builtin>.str.isdecimal",
+      "<builtin>.str.lower",
+      "_io.BufferedReader.read",
+      "_io.BufferedReader.seek",
+      "_io.BytesIO",
+      "_io.BytesIO.read",
+      "_io.BytesIO.seek",
+      "_struct.unpack",
+      "_struct.unpack_from",
+      "tinytag.tinytag.TinyTag._load",
+      "tinytag.tinytag.TinyTag._set_field",
+      "tinytag.tinytag.TinyTag._set_other_field",
+      "tinytag.tinytag.TinyTag._unpad_bytes",
+      "tinytag.tinytag.TinyTag._update",
+      "tinytag.tinytag._ID3.__init__"
+    ]
+  },
+  "executed": [
+    "tinytag.tinytag.Image.__init__",
+    "tinytag.tinytag.Image.__repr__",
+    "tinytag.tinytag.Images.__init__",
+    "tinytag.tinytag.Images._set_field",
+    "tinytag.tinytag.Images._set_other_field",
+    "tinytag.tinytag.Images._update",
+    "tinytag.tinytag.Images.any",
+    "tinytag.tinytag.Images.as_dict",
+    "tinytag.tinytag.TinyTag.__init__",
+    "tinytag.tinytag.TinyTag._get_parser_class",
+    "tinytag.tinytag.TinyTag._get_parser_for_file_handle",
+    "tinytag.tinytag.TinyTag._get_parser_for_filename",
+    "tinytag.tinytag.TinyTag._load",
+    "tinytag.tinytag.TinyTag._parse",
+    "tinytag.tinytag.TinyTag._set_field",
+    "tinytag.tinytag.TinyTag._set_other_field",
+    "tinytag.tinytag.TinyTag._unpad",
+    "tinytag.tinytag.TinyTag._unpad_bytes",
+    "tinytag.tinytag.TinyTag._update",
+    "tinytag.tinytag.TinyTag.as_dict",
+    "tinytag.tinytag.TinyTag.audio_offset",
+    "tinytag.tinytag.TinyTag.extra",
+    "tinytag.tinytag.TinyTag.get",
+    "tinytag.tinytag.TinyTag.get_image",
+    "tinytag.tinytag.TinyTag.is_supported",
+    "tinytag.tinytag._ASF._parse",
+    "tinytag.tinytag._ASF._parse_value",
+    "tinytag.tinytag._Aiff._parse",
+    "tinytag.tinytag._Flac._parse",
+    "tinytag.tinytag._Flac._parse_image",
+    "tinytag.tinytag._ID3.__init__",
+    "tinytag.tinytag._ID3._create_tag_image",
+    "tinytag.tinytag._ID3._decode_string",
+    "tinytag.tinytag._ID3._find_string_end_pos",
+    "tinytag.tinytag._ID3._lrc_timestamp",
+    "tinytag.tinytag._ID3._parse",
+    "tinytag.tinytag._ID3._parse_frame",
+    "tinytag.tinytag._ID3._parse_id3v1",
+    "tinytag.tinytag._ID3._parse_id3v1.asciidecode",
+    "tinytag.tinytag._ID3._parse_id3v2",
+    "tinytag.tinytag._ID3._parse_id3v2_header",
+    "tinytag.tinytag._ID3._parse_image",
+    "tinytag.tinytag._ID3._parse_synced_lyrics",
+    "tinytag.tinytag._ID3._set_custom_field",
+    "tinytag.tinytag._ID3._set_grouping_work_fields",
+    "tinytag.tinytag._ID3._unsynchsafe",
+    "tinytag.tinytag._MP4._build_audio_data_tree",
+    "tinytag.tinytag._MP4._build_combined_tree",
+    "tinytag.tinytag._MP4._build_meta_data_tree",
+    "tinytag.tinytag._MP4._data_parser",
+    "tinytag.tinytag._MP4._data_parser._parse_data_atom",
+    "tinytag.tinytag._MP4._nums_parser",
+    "tinytag.tinytag._MP4._nums_parser._parse_nums",
+    "tinytag.tinytag._MP4._parse",
+    "tinytag.tinytag._MP4._parse_alac",
+    "tinytag.tinytag._MP4._parse_cover_image",
+    "tinytag.tinytag._MP4._parse_custom_field",
+    "tinytag.tinytag._MP4._parse_id3v1_genre",
+    "tinytag.tinytag._MP4._parse_mp4a",
+    "tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size",
+    "tinytag.tinytag._MP4._parse_mvhd",
+    "tinytag.tinytag._MP4._parse_uuid",
+    "tinytag.tinytag._MP4._read_atom_header",
+    "tinytag.tinytag._MP4._traverse_atoms",
+    "tinytag.tinytag._MPEG.__init__",
+    "tinytag.tinytag._MPEG._parse",
+    "tinytag.tinytag._MPEG._parse_vbri_header",
+    "tinytag.tinytag._MPEG._parse_xing_header",
+    "tinytag.tinytag._Ogg.__init__",
+    "tinytag.tinytag._Ogg._parse",
+    "tinytag.tinytag._Ogg._parse_pages",
+    "tinytag.tinytag._Ogg._parse_vorbis_comment",
+    "tinytag.tinytag._Ogg._set_vorbis_comment_fields",
+    "tinytag.tinytag._Wave._parse"
+  ],
+  "functions": [
+    "tinytag.tinytag.Image.__init__",
+    "tinytag.tinytag.Image.__repr__",
+    "tinytag.tinytag.Images.__init__",
+    "tinytag.tinytag.Images._set_field",
+    "tinytag.tinytag.Images._set_other_field",
+    "tinytag.tinytag.Images._update",
+    "tinytag.tinytag.Images.any",
+    "tinytag.tinytag.Images.as_dict",
+    "tinytag.tinytag.TinyTag.__init__",
+    "tinytag.tinytag.TinyTag._get_parser_class",
+    "tinytag.tinytag.TinyTag._get_parser_for_file_handle",
+    "tinytag.tinytag.TinyTag._get_parser_for_filename",
+    "tinytag.tinytag.TinyTag._load",
+    "tinytag.tinytag.TinyTag._parse",
+    "tinytag.tinytag.TinyTag._set_field",
+    "tinytag.tinytag.TinyTag._set_other_field",
+    "tinytag.tinytag.TinyTag._unpad",
+    "tinytag.tinytag.TinyTag._unpad_bytes",
+    "tinytag.tinytag.TinyTag._update",
+    "tinytag.tinytag.TinyTag.as_dict",
+    "tinytag.tinytag.TinyTag.audio_offset",
+    "tinytag.tinytag.TinyTag.extra",
+    "tinytag.tinytag.TinyTag.get",
+    "tinytag.tinytag.TinyTag.get_image",
+    "tinytag.tinytag.TinyTag.is_supported",
+    "tinytag.tinytag._ASF._parse",
+    "tinytag.tinytag._ASF._parse_value",
+    "tinytag.tinytag._Aiff._parse",
+    "tinytag.tinytag._Flac._parse",
+    "tinytag.tinytag._Flac._parse_image",
+    "tinytag.tinytag._ID3.__init__",
+    "tinytag.tinytag._ID3._create_tag_image",
+    "tinytag.tinytag._ID3._decode_string",
+    "tinytag.tinytag._ID3._find_string_end_pos",
+    "tinytag.tinytag._ID3._lrc_timestamp",
+    "tinytag.tinytag._ID3._parse",
+    "tinytag.tinytag._ID3._parse_frame",
+    "tinytag.tinytag._ID3._parse_id3v1",
+    "tinytag.tinytag._ID3._parse_id3v1.asciidecode",
+    "tinytag.tinytag._ID3._parse_id3v2",
+    "tinytag.tinytag._ID3._parse_id3v2_header",
+    "tinytag.tinytag._ID3._parse_image",
+    "tinytag.tinytag._ID3._parse_synced_lyrics",
+    "tinytag.tinytag._ID3._set_custom_field",
+    "tinytag.tinytag._ID3._set_grouping_work_fields",
+    "tinytag.tinytag._ID3._unsynchsafe",
+    "tinytag.tinytag._MP4._build_audio_data_tree",
+    "tinytag.tinytag._MP4._build_combined_tree",
+    "tinytag.tinytag._MP4._build_meta_data_tree",
+    "tinytag.tinytag._MP4._data_parser",
+    "tinytag.tinytag._MP4._data_parser._parse_data_atom",
+    "tinytag.tinytag._MP4._nums_parser",
+    "tinytag.tinytag._MP4._nums_parser._parse_nums",
+    "tinytag.tinytag._MP4._parse",
+    "tinytag.tinytag._MP4._parse_alac",
+    "tinytag.tinytag._MP4._parse_cover_image",
+    "tinytag.tinytag._MP4._parse_custom_field",
+    "tinytag.tinytag._MP4._parse_id3v1_genre",
+    "tinytag.tinytag._MP4._parse_mp4a",
+    "tinytag.tinytag._MP4._parse_mp4a._read_descriptor_size",
+    "tinytag.tinytag._MP4._parse_mvhd",
+    "tinytag.tinytag._MP4._parse_uuid",
+    "tinytag.tinytag._MP4._read_atom_header",
+    "tinytag.tinytag._MP4._traverse_atoms",
+    "tinytag.tinytag._MPEG.__init__",
+    "tinytag.tinytag._MPEG._parse",
+    "tinytag.tinytag._MPEG._parse_vbri_header",
+    "tinytag.tinytag._MPEG._parse_xing_header",
+    "tinytag.tinytag._Ogg.__init__",
+    "tinytag.tinytag._Ogg._parse",
+    "tinytag.tinytag._Ogg._parse_pages",
+    "tinytag.tinytag._Ogg._parse_vorbis_comment",
+    "tinytag.tinytag._Ogg._set_vorbis_comment_fields",
+    "tinytag.tinytag._Wave._parse"
+  ],
+  "modules": [
+    "tinytag",
+    "tinytag.tinytag"
+  ],
+  "project": "tinytag",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 0,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 20,
+    "skipped": 0,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

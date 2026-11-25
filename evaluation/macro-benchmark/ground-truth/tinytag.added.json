@@ -1,0 +1,238 @@
+{
+  "edges": {
+    "tinytag.__main__": {
+      "sys.exit": [
+        "tinytag.__main__ 114:13 call  sys.exit(_run())"
+      ],
+      "tinytag.__main__._run": [
+        "tinytag.__main__ 114:18 call  _run()"
+      ]
+    },
+    "tinytag.__main__._pop_param": {
+      "<builtin>.list.index": [
+        "tinytag.__main__ 36:29 call  sys.argv.index(name)"
+      ],
+      "<builtin>.list.pop": [
+        "tinytag.__main__ 37:21 call  sys.argv.pop(idx)",
+        "tinytag.__main__ 38:28 call  sys.argv.pop(idx)"
+      ]
+    },
+    "tinytag.__main__._pop_switch": {
+      "<builtin>.list.index": [
+        "tinytag.__main__ 44:29 call  sys.argv.index(name)"
+      ],
+      "<builtin>.list.pop": [
+        "tinytag.__main__ 45:21 call  sys.argv.pop(idx)"
+      ]
+    },
+    "tinytag.__main__._print_tag": {
+      "<builtin>.dict.items": [
+        "tinytag.__main__ 59:35 call  data.items()",
+        "tinytag.__main__ 73:36 call  data.items()"
+      ],
+      "<builtin>.dict.keys": [
+        "tinytag.__main__ 68:38 call  data.keys()"
+      ],
+      "<builtin>.dict.values": [
+        "tinytag.__main__ 70:36 call  data.values()"
+      ],
+      "<builtin>.isinstance": [
+        "tinytag.__main__ 60:22 call  isinstance(value, str)"
+      ],
+      "<builtin>.print": [
+        "tinytag.__main__ 54:14 call  print(json.dumps(data, ensure_ascii=False, indent=2))",
+        "tinytag.__main__ 75:10 call  print(value)"
+      ],
+      "<builtin>.str.replace": [
+        "tinytag.__main__ 62:40 call  value.replace('\\x00', ';')"
+      ],
+      "<builtin>.str.strip": [
+        "tinytag.__main__ 71:42 call  csv_file.getvalue().strip()"
+      ],
+      "_csv.writer.writerow": [
+        "tinytag.__main__ 68:28 call  writer.writerow(data.keys())",
+        "tinytag.__main__ 70:24 call  writer.writerow(data.values())"
+      ],
+      "_csv.writer.writerows": [
+        "tinytag.__main__ 73:25 call  writer.writerows(data.items())"
+      ],
+      "csv.writer": [
+        "tinytag.__main__ 65:24 call  csv.writer(csv_file, delimiter=delimiter, lineterminator=..."
+      ],
+      "io.StringIO": [
+        "tinytag.__main__ 63:24 call  StringIO()"
+      ],
+      "io.StringIO.getvalue": [
+        "tinytag.__main__ 71:34 call  csv_file.getvalue()",
+        "tinytag.__main__ 74:34 call  csv_file.getvalue()"
+      ],
+      "json.dumps": [
+        "tinytag.__main__ 54:25 call  json.dumps(data, ensure_ascii=False, indent=2)"
+      ],
+      "tinytag.tinytag.TinyTag.as_dict": [
+        "tinytag.__main__ 51:23 call  tag.as_dict()"
+      ]
+    },
+    "tinytag.__main__._run": {
+      "<builtin>.enumerate": [
+        "tinytag.__main__ 90:33 call  enumerate(filenames)"
+      ],
+      "<builtin>.len": [
+        "tinytag.__main__ 99:23 call  len(filenames)"
+      ],
+      "<builtin>.open": [
+        "tinytag.__main__ 104:30 call  open(actual_image_path, 'wb')"
+      ],
+      "io.BufferedWriter.write": [
+        "tinytag.__main__ 105:42 call  file_handle.write(image.data)"
+      ],
+      "io.TextIOWrapper.write": [
+        "tinytag.__main__ 108:29 call  sys.stderr.write(f'{filename}: {exc}\\n')"
+      ],
+      "os.path.isfile": [
+        "tinytag.__main__ 92:67 call  isfile(filename)"
+      ],
+      "os.path.splitext": [
+        "tinytag.__main__ 100:54 call  splitext(actual_image_path)"
+      ],
+      "tinytag.__main__._pop_param": [
+        "tinytag.__main__ 81:28 call  _pop_param('--save-image', None)",
+        "tinytag.__main__ 81:64 call  _pop_param('-i', None)",
+        "tinytag.__main__ 82:22 call  _pop_param('--format', None)",
+        "tinytag.__main__ 82:54 call  _pop_param('-f', None)"
+      ],
+      "tinytag.__main__._pop_switch": [
+        "tinytag.__main__ 83:35 call  _pop_switch('--skip-unsupported')",
+        "tinytag.__main__ 83:72 call  _pop_switch('-s')",
+        "tinytag.__main__ 85:48 call  _pop_switch('--help')",
+        "tinytag.__main__ 85:73 call  _pop_switch('-h')"
+      ],
+      "tinytag.__main__._print_tag": [
+        "tinytag.__main__ 106:40 call  _print_tag(tag, fmt, header_printed)"
+      ],
+      "tinytag.__main__._usage": [
+        "tinytag.__main__ 87:15 call  _usage()"
+      ],
+      "tinytag.tinytag.Images.any": [
+        "tinytag.__main__ 102:36 getattr  tag.images.any"
+      ],
+      "tinytag.tinytag.TinyTag.get": [
+        "tinytag.__main__ 95:30 call  TinyTag.get(filename, image=image_path is not None)"
+      ],
+      "tinytag.tinytag.TinyTag.is_supported": [
+        "tinytag.__main__ 92:46 call  TinyTag.is_supported(filename)"
+      ]
+    },
+    "tinytag.__main__._usage": {
+      "<builtin>.print": [
+        "tinytag.__main__ 17:10 call  print('''tinytag [options] <filename...> -h, --help Displ..."
+      ]
+    },
+    "tinytag.tinytag.Images._set_field": {
+      "<builtin>.print": [
+        "tinytag.tinytag 439:18 call  print(f'Setting image field {fieldname}')"
+      ]
+    },
+    "tinytag.tinytag.Images._set_other_field": {
+      "<builtin>.print": [
+        "tinytag.tinytag 446:18 call  print(f'Adding image to field {fieldname}')"
+      ]
+    },
+    "tinytag.tinytag.TinyTag._set_field": {
+      "<builtin>.print": [
+        "tinytag.tinytag 317:18 call  print(f'Setting field {fieldname} to {value!r}')"
+      ]
+    },
+    "tinytag.tinytag.TinyTag._set_other_field": {
+      "<builtin>.print": [
+        "tinytag.tinytag 328:18 call  print(f'Adding value {value!r} to field {fieldname}')"
+      ]
+    },
+    "tinytag.tinytag._Flac._parse": {
+      "io.BytesIO.seek": [
+        "tinytag.tinytag 2156:24 call  fh.seek(size, SEEK_CUR)"
+      ]
+    },
+    "tinytag.tinytag._ID3._parse_frame": {
+      "<builtin>.print": [
+        "tinytag.tinytag 1317:18 call  print(f'Found id3 Frame {frame_id!r} at ' f'{fh.tell()}-{..."
+      ],
+      "io.BufferedReader.tell": [
+        "tinytag.tinytag 1318:29 call  fh.tell()",
+        "tinytag.tinytag 1318:41 call  fh.tell()"
+      ],
+      "io.BytesIO.tell": [
+        "tinytag.tinytag 1318:29 call  fh.tell()",
+        "tinytag.tinytag 1318:41 call  fh.tell()"
+      ]
+    },
+    "tinytag.tinytag._ID3._parse_id3v2_header": {
+      "<builtin>.print": [
+        "tinytag.tinytag 1129:22 call  print(f'Found id3 v2.{major} tag with size {size}')"
+      ]
+    },
+    "tinytag.tinytag._MP4._traverse_atoms": {
+      "<builtin>.print": [
+        "tinytag.tinytag 672:22 call  print(f'{\" \" * 4 * len(curr_path)} ' f'pos: {curr_pos - h...",
+        "tinytag.tinytag 692:34 call  print(' ' * 4 * len(curr_path), 'FIELD: ', fieldname)"
+      ]
+    },
+    "tinytag.tinytag._Ogg._parse_vorbis_comment": {
+      "<builtin>.print": [
+        "tinytag.tinytag 1855:34 call  print('Found Vorbis Image', key, value[:64])",
+        "tinytag.tinytag 1863:30 call  print('Found Vorbis Comment', key, value[:64])"
+      ]
+    }
+  },
+  "notes": {
+    "tinytag.__main__ 105:42 call  file_handle.write(image.data)": [
+      "file_handle is the file that open(actual_image_path, \"wb\") returns (line 104)"
+    ],
+    "tinytag.__main__ 108:29 call  sys.stderr.write(f'{filename}: {exc}\\n')": [
+      "the default sys.stderr is a TextIOWrapper"
+    ],
+    "tinytag.__main__ 54:25 call  json.dumps(data, ensure_ascii=False, indent=2)": [
+      "data is the dict of TinyTag.as_dict: strs, ints, floats, bools and lists of str; no default= callback"
+    ],
+    "tinytag.__main__ 68:28 call  writer.writerow(data.keys())": [
+      "writer is the csv writer object that csv.writer returns (line 65); its type has no public path and is named as the tracer names it (netaddr precedent)"
+    ],
+    "tinytag.tinytag 1129:22 call  print(f'Found id3 v2.{major} tag with size {size}')": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 1317:18 call  print(f'Found id3 Frame {frame_id!r} at ' f'{fh.tell()}-{...": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 1318:29 call  fh.tell()": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 1318:41 call  fh.tell()": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 1855:34 call  print('Found Vorbis Image', key, value[:64])": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 1863:30 call  print('Found Vorbis Comment', key, value[:64])": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 317:18 call  print(f'Setting field {fieldname} to {value!r}')": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 328:18 call  print(f'Adding value {value!r} to field {fieldname}')": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 439:18 call  print(f'Setting image field {fieldname}')": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 446:18 call  print(f'Adding image to field {fieldname}')": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 672:22 call  print(f'{\" \" * 4 * len(curr_path)} ' f'pos: {curr_pos - h...": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ],
+    "tinytag.tinytag 692:34 call  print(' ' * 4 * len(curr_path), 'FIELD: ', fieldname)": [
+      "debug output: runs when the environment has TINYTAG_DEBUG at import (line 59; judgement J1)"
+    ]
+  },
+  "trace": "dynamic/tinytag.json"
+}
