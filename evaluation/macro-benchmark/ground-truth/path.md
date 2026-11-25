@@ -183,10 +183,9 @@ tests' ntpath module) and `ismount -> Path.replace`, `-> Path.__radd__`.
 **J6. Hash objects.** `hashlib.new(hash_name)` returns an OpenSSL
 `_hashlib.HASH`, or by the documented fallback a builtin object. The hash
 names in scope are `md5` (`read_md5`, the tests) and `sha1` (the docstring
-of `_hash`), so the builtin classes are `_md5.md5` and `_sha1.sha1` (their
-names on CPython 3.9, 3.12, 3.14 and 3.15), and on PyPy `_sha1.sha` (see
-"PyPy"). Precedents: markdown2 J13, bottle,
-validators.
+of `_hash`). The builtin classes are named `_md5.MD5Type` and
+`_sha1.SHA1Type` on CPython, and `hashlib.md5` (beside `_md5.md5`) and
+`_sha1.sha` on PyPy (see "Corrections of 2026-11-25").
 
 **J7. File objects.** `chunks` passes the client's `mode` and `buffering`
 to `open`; its overloads admit text and binary modes. The lambda's
@@ -198,12 +197,12 @@ modes: `readable` is a `TextIOWrapper`, `BufferedReader` or (`buffering=0`)
 `FileIO`; `writable` a `TextIOWrapper`, `BufferedWriter` or `FileIO`. The
 fixed modes (`bytes`, `read_bytes`, `write_bytes`, `read_text`,
 `write_lines`) have one class each. On Windows, `open` of a console name
-(`CONIN$`, `CONOUT$`, `CON`) makes the raw stream an `io._WindowsConsoleIO`
+(`CONIN$`, `CONOUT$`, `CON`) makes the raw stream an `_io._WindowsConsoleIO`
 instead of a `FileIO` (CPython `Modules/_io/_iomodule.c:323-327`, with
 `_PyIO_get_console_type`, `winconsoleio.c:64-95`; 3.11.9 and 3.13.1), and
 with `buffering=0` returns it unbuffered (`_iomodule.c:380`). So `chunks`'
-lambda also has `io._WindowsConsoleIO.read` (the class's re-export in
-`io`, `Lib/io.py:110-111`). At the other sites the console raw stream is
+lambda also has `_io._WindowsConsoleIO.read`, on CPython and on PyPy (see
+"Corrections of 2026-11-25"). At the other sites the console raw stream is
 wrapped in a `BufferedReader`, `BufferedWriter` or `TextIOWrapper`, which
 are already named. `in_place` cannot open a console: it first renames
 `self` to the backup name, and a console device cannot be renamed.
@@ -306,8 +305,8 @@ client's `copy_func` of `only_newer`.
 
 ## Statistics
 
-187 nodes; 674 edges (422 inside, 252 outside); 487 (72.3%) confirmed by
-the trace, 187 from reading only; 177 of 182 functions run (not run:
+187 nodes; 680 edges (422 inside, 258 outside); 487 (71.6%) confirmed by
+the trace, 193 from reading only; 177 of 182 functions run (not run:
 `copy2`, `copymode`, `move`, `owner`, `startfile`). Of the edges from
 reading only, 78 rest on J4 and most of the others on the Windows branches
 of J3 and on functions that no test runs. Tracer defect T1: the
@@ -343,9 +342,10 @@ are those for Python 3.9 and later. I read the provided sources of PyPy
   at `979:21`, `990:44` and `1000:47`. That is +3 edges, the same name that
   the bottle ledger notes.
 - Same paths as on CPython, so no change:
-  - `_hashlib.HASH` (`lib_pypy/_hashlib/__init__.py:57`) and `_md5.md5`
-    (`pypy/module/_md5`; `hashlib.py` uses the same fallback, `83-94`,
-    `153-170`)
+  - `_hashlib.HASH` (`lib_pypy/_hashlib/__init__.py:57`). PyPy's builtin
+    MD5 class `_md5.md5` (`pypy/module/_md5`; `hashlib.py` uses the same
+    fallback, `83-94`, `153-170`) is not a CPython path: CPython names its
+    MD5 type `_md5.MD5Type` (see "Corrections of 2026-11-25")
   - the `io` classes (`_io.FileIO`, `TextIOWrapper`, `BufferedReader`,
     `BufferedWriter`, `BufferedRandom`, exported as `io.*`)
   - `functools.partial` (the pure Python class, `lib-python/3/functools.py:282`,
@@ -380,8 +380,10 @@ graph (Codex audit round 2, below).
 `platform`, and no import of a C accelerator with a Python fallback. Its
 optional imports (`win32security`, `pwd`, `grp`) are judged in J9.
 
-PyPy 3.9 sources were not provided. `lib_pypy/_sha1.py` is the same file in
-3.10 and 3.11, so I assume the same for 3.9.
+PyPy 3.9 sources were not provided at first, and `_sha1.sha` was assumed
+for 3.9. The corrections of 2026-11-25 read PyPy 3.9 v7.3.16 (audit A1):
+it has the same names, `_sha1.sha` included (see "Corrections of
+2026-11-25").
 
 ## Outside names verified in the pinned test dependencies
 
@@ -523,3 +525,46 @@ with `prefix + ...`.
 ## Codex confirmation pass
 
 No missing or false edge. Two notes were corrected: `isabs` calls `replace` on the Path only in CPython 3.9 and 3.10 (3.11 uses a slice); the reason of the `Multi.__iter__` default now names `Path.__enter__`/`__exit__`, which keep a Multi value but do not iterate it. 674 edges, unchanged.
+
+## Corrections of 2026-11-25
+
+**The Windows console stream (`__init__.py:816:43`, `chunks.<lambda1>`).**
+The callee `io._WindowsConsoleIO.read` is renamed `_io._WindowsConsoleIO.read`
+(one edge renamed). `io`
+imports the class outside its `__all__`, only to register it with
+`RawIOBase`, so `io._WindowsConsoleIO` is no public path (README, batch 7,
+"A private class that a public module re-exports"), and batch 8's ruling
+"A C type exported under a module attribute other than its type name"
+names it by the attribute under which the defining module exports it. The
+name is the same on every runtime that path admits on Windows:
+
+| Runtime | Definition | Exported by `_io` as | `io` |
+|---|---|---|---|
+| CPython 3.9 to 3.15 | `Modules/_io/winconsoleio.c`, type name `"_io._WindowsConsoleIO"` (`:1117` of 3.9.25, `:1131` of 3.11.18, `.name` at `:1234` of 3.12.16, `:1269` of 3.15.2); `open` makes it for a console name (`_iomodule.c:380` of 3.9.25, `:324` of 3.11.18, `:329` of 3.13.18) | `_WindowsConsoleIO` (`PyModule_AddType`, `_iomodule.c:737` of 3.9.25, `ADD_TYPE` `:704` of 3.12.16, `:710` of 3.15.2) | `from _io import _WindowsConsoleIO` and `RawIOBase.register` only (`Lib/io.py:95-99` of 3.9.25, `110-114` of 3.10.22, `111-115` of 3.11.18, `94-98` of 3.15.2) |
+| PyPy 3.9, 3.10 and 3.11 on Windows | `pypy/module/_io/interp_win32consoleio.py`, TypeDef `'_io.WinConsoleIO'` with `read` (`:522-531` of 3.9 v7.3.16, `:528-537` of 3.10 v7.3.19, `:529-538` of 3.11 v7.3.23); `open` makes it for a console name (`interp_io.py:123-126` of 3.9, `113-116` of 3.11) | `_WindowsConsoleIO` (`pypy/module/_io/moduledef.py:33` of 3.9, `:34` of 3.10 and 3.11) | as CPython (`lib-python/3/io.py:95-99` of 3.9, `110-114` of 3.10, `111-115` of 3.11) |
+
+The other `io` names of the ground truth (`TextIOWrapper`,
+`BufferedReader`, `BufferedWriter`, `BufferedRandom`, `FileIO`) are in
+`io.__all__` and stay.
+
+**The builtin hash objects (`_hash`, `read_hash`, `read_hexhash`:
+`__init__.py:979:21`, `990:44`, `1000:47`).** `hashlib.new(hash_name)`
+(`977`) returns an OpenSSL `_hashlib.HASH` or, by hashlib's fallback, a
+builtin MD5 or SHA-1 object (J6). Batch 8's ruling "A C type exported under
+a module attribute other than its type name"
+(`selection/batch-8-proposal/rulings/b8-ruling-c-type-names-1.md`) and the
+ruling "Public class aliases by configuration" (Rulings for the
+corrections of 2026-11-25, `ruling-names-2.md`) name each class by a public class alias where the attribute holds it, else
+by the attribute that its module exports, else by its type name:
+
+| Runtime | MD5 | SHA-1 |
+|---|---|---|
+| CPython 3.9 to 3.15 | type `"_md5.md5"`, exported as `MD5Type` (`Modules/md5module.c:583` of 3.9.25, `:358` of 3.15.2); `hashlib.md5` is a factory: `_md5.MD5Type` | type `"_sha1.sha1"`, exported as `SHA1Type` (`sha1module.c:560` of 3.9.25, `:568-570` of 3.10.22, `:353` of 3.15.2); `hashlib.sha1` is a factory: `_sha1.SHA1Type` |
+| PyPy 3.9, 3.10, 3.11 | the class `_md5.md5` (`pypy/module/_md5/moduledef.py:22` of 3.9, 3.10 and 3.11), which the fallback binds as `hashlib.md5` (`lib-python/3/hashlib.py:94` of 3.9 v7.3.16, `92-94` of 3.10): `hashlib.md5`, and `_md5.md5` beside it at `hashlib.new` (the lead's decision at avro `schema.py:337`) | `_sha1.sha1` is a function (`lib_pypy/_sha1.py:347` of 3.9, `:359` of 3.10) that returns the class `_sha1.sha` (`:117` of 3.9, with `update`, `digest` and `hexdigest` at `:219`, `:265`, `:314`; `:129` of 3.10): `_sha1.sha` |
+
+So at each of the three sites `_sha1.sha1.X` is renamed `_sha1.SHA1Type.X`
+(it names no class on any runtime), and `_md5.MD5Type.X` and
+`hashlib.md5.X` are added; `_hashlib.HASH.X`, `_md5.md5.X` and
+`_sha1.sha.X` stay; on PyPy `_hashlib.HASH` is the class of
+`lib_pypy/_hashlib/__init__.py:34` (3.9), `:57` (3.10). 3 edges renamed, 6
+added: 680 edges (422 inside, 258 outside); no trace edge changes.

@@ -58,13 +58,19 @@
       ]
     },
     "path.Path._hash": {
+      "_md5.MD5Type.update": [
+        "path 979:21 call  m.update(chunk)"
+      ],
       "_md5.md5.update": [
+        "path 979:21 call  m.update(chunk)"
+      ],
+      "_sha1.SHA1Type.update": [
         "path 979:21 call  m.update(chunk)"
       ],
       "_sha1.sha.update": [
         "path 979:21 call  m.update(chunk)"
       ],
-      "_sha1.sha1.update": [
+      "hashlib.md5.update": [
         "path 979:21 call  m.update(chunk)"
       ]
     },
@@ -109,6 +115,9 @@
       ]
     },
     "path.Path.chunks.<lambda1>": {
+      "_io._WindowsConsoleIO.read": [
+        "path 816:43 call  f.read(size)"
+      ],
       "io.BufferedRandom.read": [
         "path 816:43 call  f.read(size)"
       ],
@@ -116,9 +125,6 @@
         "path 816:43 call  f.read(size)"
       ],
       "io.FileIO.read": [
-        "path 816:43 call  f.read(size)"
-      ],
-      "io._WindowsConsoleIO.read": [
         "path 816:43 call  f.read(size)"
       ]
     },
@@ -469,24 +475,36 @@
       ]
     },
     "path.Path.read_hash": {
+      "_md5.MD5Type.digest": [
+        "path 990:44 call  self._hash(hash_name).digest()"
+      ],
       "_md5.md5.digest": [
+        "path 990:44 call  self._hash(hash_name).digest()"
+      ],
+      "_sha1.SHA1Type.digest": [
         "path 990:44 call  self._hash(hash_name).digest()"
       ],
       "_sha1.sha.digest": [
         "path 990:44 call  self._hash(hash_name).digest()"
       ],
-      "_sha1.sha1.digest": [
+      "hashlib.md5.digest": [
         "path 990:44 call  self._hash(hash_name).digest()"
       ]
     },
     "path.Path.read_hexhash": {
+      "_md5.MD5Type.hexdigest": [
+        "path 1000:47 call  self._hash(hash_name).hexdigest()"
+      ],
       "_md5.md5.hexdigest": [
+        "path 1000:47 call  self._hash(hash_name).hexdigest()"
+      ],
+      "_sha1.SHA1Type.hexdigest": [
         "path 1000:47 call  self._hash(hash_name).hexdigest()"
       ],
       "_sha1.sha.hexdigest": [
         "path 1000:47 call  self._hash(hash_name).hexdigest()"
       ],
-      "_sha1.sha1.hexdigest": [
+      "hashlib.md5.hexdigest": [
         "path 1000:47 call  self._hash(hash_name).hexdigest()"
       ]
     },
@@ -707,7 +725,7 @@
   },
   "notes": {
     "path 1000:47 call  self._hash(hash_name).hexdigest()": [
-      "the hash object of _hash (path.md J6) PyPy (in scope, path.md \"PyPy\"): hashlib's fallback _sha1.sha1 is a function that returns an instance of the pure-Python class _sha1.sha (lib_pypy/_sha1.py:129 and :359 in PyPy 3.10 v7.3.19 and 3.11 v7.3.20); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) and _md5.md5 (pypy/module/_md5) keep the CPython paths"
+      "the hash object of _hash, named as at 979:21 (path.md J6; Corrections of 2026-11-25)"
     ],
     "path 1014:33 call  self.module.isabs(self)": [
       "ntpath.isabs of CPython 3.9 and 3.10 (Windows; Python-3.10.14/Lib/ntpath.py:96) calls s.replace on the Path; 3.11 and later replace on the slice s[:3], a plain str (Codex confirmation pass) (path.md J3)"
@@ -987,13 +1005,13 @@
       "the generator of glob.iglob runs when this generator expression iterates it; it calls os.path.split on the Path pattern, and ntpath.split (Windows) calls .replace on it (CPython 3.9 to 3.12; path.md J3); Codex audit round 1: on Windows, CPython 3.12, ntpath.splitroot returns a UNC path without a third separator (\\\\server\\share) itself as the drive (ntpath.py:211-216), and ntpath.split computes d + r + head (ntpath.py:250): Path.__add__ (path.md J3)"
     ],
     "path 816:43 call  f.read(size)": [
-      "on Windows (CPython 3.9 and later, default stdio), open() of a console name such as Path(\"CONIN$\") makes the raw stream a _WindowsConsoleIO (Python-3.11.9 and 3.13.1 Modules/_io/_iomodule.c:323-327 with _PyIO_get_console_type, winconsoleio.c:64-95), and buffering=0 returns that raw object (_iomodule.c:380/382); io re-exports the class as io._WindowsConsoleIO (Lib/io.py:110-111 of 3.10.14 and 3.11.9) (Codex audit round 2, Unsure 1; path.md J7). f is what open returns for the client's mode and buffering, the arguments that chunks passes on (its overloads admit text and binary modes); _hash passes mode 'rb' (path.md J7)"
+      "on Windows (CPython 3.9 and later, default stdio), open() of a console name such as Path(\"CONIN$\") makes the raw stream a _WindowsConsoleIO (Python-3.11.9 and 3.13.1 Modules/_io/_iomodule.c:323-327 with _PyIO_get_console_type, winconsoleio.c:64-95), and buffering=0 returns that raw object (_iomodule.c:380/382); PyPy on Windows does the same (pypy/module/_io/interp_io.py:113-116 of PyPy 3.11 v7.3.23). The class is named _io._WindowsConsoleIO on every admitted runtime: CPython's type name and the attribute under which _io exports it (winconsoleio.c tp_name \"_io._WindowsConsoleIO\", added by PyModule_AddType, 3.9 to 3.15), PyPy's _io attribute (pypy/module/_io/moduledef.py:34, PyPy 3.10 and 3.11); io imports it outside __all__ only to register it (Lib/io.py:110-114 of 3.10.22, 94-98 of 3.15.2), so io._WindowsConsoleIO is no public path (README, batch-7 ruling \"A private class that a public module re-exports\"; batch-8 ruling \"A C type exported under a module attribute other than its type name\") (Codex audit round 2, Unsure 1; path.md J7; corrected 2026-11-25). f is what open returns for the client's mode and buffering, the arguments that chunks passes on (its overloads admit text and binary modes); _hash passes mode 'rb' (path.md J7)"
     ],
     "path 979:21 call  m.update(chunk)": [
-      "hashlib.new returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _md5.md5 or _sha1.sha1; the hash names in scope are md5 (read_md5, the tests) and sha1 (the docstring of _hash) (path.md J6) PyPy (in scope, path.md \"PyPy\"): hashlib's fallback _sha1.sha1 is a function that returns an instance of the pure-Python class _sha1.sha (lib_pypy/_sha1.py:129 and :359 in PyPy 3.10 v7.3.19 and 3.11 v7.3.20); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) and _md5.md5 (pypy/module/_md5) keep the CPython paths"
+      "hashlib.new returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback a builtin MD5 or SHA-1 object; the hash names in scope are md5 (read_md5, the tests) and sha1 (the docstring of _hash) (path.md J6). Names (README, batch 8 \"A C type exported under a module attribute other than its type name\", b8-ruling-c-type-names-1.md; \"Public class aliases by configuration\", ruling-names-2.md): CPython 3.9 to 3.15 export the builtin types as _md5.MD5Type and _sha1.SHA1Type (Modules/md5module.c:583 of 3.9.25, :358 of 3.15.2; sha1module.c:560 of 3.9.25, :353 of 3.15.2), and hashlib.md5 and hashlib.sha1 are factories there; on PyPy (in scope, path.md \"PyPy\") _md5 exports the class as md5 (pypy/module/_md5/moduledef.py:22), which hashlib's fallback binds as hashlib.md5 (lib-python/3/hashlib.py:92-94), and _sha1.sha1 is a function that returns an instance of the class _sha1.sha (lib_pypy/_sha1.py:129, :359); at hashlib.new the private name _md5.md5 stays beside the alias (the avro schema.py:337 precedent); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) as on CPython (path.md, Corrections of 2026-11-25)"
     ],
     "path 990:44 call  self._hash(hash_name).digest()": [
-      "the hash object of _hash (path.md J6) PyPy (in scope, path.md \"PyPy\"): hashlib's fallback _sha1.sha1 is a function that returns an instance of the pure-Python class _sha1.sha (lib_pypy/_sha1.py:129 and :359 in PyPy 3.10 v7.3.19 and 3.11 v7.3.20); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) and _md5.md5 (pypy/module/_md5) keep the CPython paths"
+      "the hash object of _hash, named as at 979:21 (path.md J6; Corrections of 2026-11-25)"
     ],
     "path.masks 13:60 call  f1(f2(*args, **kwargs))": [
       "f1 is a function that compose gets or an inner lambda of an earlier reduce step; the package's own functions here are the partials of masks.simple (compound), whose '=' partial calls simple.<lambda1>; client functions are opaque"
