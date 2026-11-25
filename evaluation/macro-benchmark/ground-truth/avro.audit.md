@@ -470,3 +470,42 @@ defined. No other avro site names a type whose module exports it under
 another attribute, and no runtime gets two names for one class.
 
 No disagreement. The audit stays closed.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-avro-hash-aliases` (4b1fb60, PR #113) against `main`
+(08e9430): at `schema.py:338:24` eleven outside callees added and two
+removed, at `protocol.py:108:59` one renamed, in `avro.json`,
+`avro.added.json`, `avro.ledger` and `avro.md`; `evaluation/metrics.json`
+is not recorded yet. I read `avro/schema.py` and `avro/protocol.py` from
+the inputs image, CPython 3.10.22 to 3.15.2 and PyPy 3.10 v7.3.19 and 3.11
+v7.3.23 from the dependency sources, and the referee's `ruling-names-2.md`
+on `main`. Nothing ran; no PyCG output was read. avro admits CPython 3.10
+and later and PyPy 3.10 and 3.11.
+
+**`Schema.fingerprint`, `schema.py:338:24`** (`h = hashlib.new(algorithm.lower(), schema)`, `:337`, for a name of `hashlib.algorithms_guaranteed`, `:138`, `:332`):
+
+| Change | Verdict | Evidence |
+|---|---|---|
+| `_blake2.blake2b.digest`, `_blake2.blake2s.digest` removed; `hashlib.blake2b.digest`, `hashlib.blake2s.digest` added | agree | `__block_openssl_constructor = {'blake2b', 'blake2s'}` and the builtin binding `cache['blake2b'] = _blake2.blake2b` in every hashlib read (CPython 3.10.22, 3.12.16, 3.14.10 `:78-79`, `:102-105`; 3.15.2 `:107-110`; PyPy 3.10 `:79-80`, `:103-106`; 3.11 `:78-79`, `:102-105`), so `hashlib.blake2b` holds the class on every admitted runtime; the classes are types (`PyModule_AddType`, 3.10.22 `_blake2/blake2module.c:85`, `:107`; 3.15.2 `blake2module.c:240`, `:262`) and PyPy's `make_blake_hash` returns a class (`lib_pypy/_blake2/__init__.py:14-18`, `157`, `163`, `166`); the ruling's H1 removes the private names |
+| `hashlib.sha3_224.digest` to `hashlib.sha3_512.digest` added, `_sha3.sha3_*` kept | agree | the fallback caches the `_sha3` classes (CPython 3.10.22 to 3.14.10 `:107-111`, 3.15.2 `:112-116`; PyPy 3.10 `:108-112`, 3.11 `:107-111`), and the public attribute holds them where OpenSSL lacks SHA-3 (H3); the private names stay at `hashlib.new` (the lead's decision, README, "Rulings for the corrections of 2026-11-25") |
+| `hashlib.md5`, `sha224`, `sha256`, `sha384`, `sha512` `.digest` added, the PyPy private names kept | agree | PyPy binds its classes as these attributes in the fallback (H2; `_md5.md5` `moduledef.py:22`, `_sha256.sha256`/`sha224` `:218`/`:242`, `_sha512.sha512`/`sha384` `:245`/`:269`); CPython's attributes are factories, so its exported-type names (`_md5.MD5Type`, `_sha256.SHA224Type`/`SHA256Type`, `_sha512.SHA384Type`, `_sha2.*`) stay; `_sha512.sha384` stays for CPython 3.10 and 3.11, as the ruling's table says |
+
+**`Protocol.__init__`, `protocol.py:108:59`** (`hashlib.md5(str(self).encode()).digest()`): `_md5.md5.digest` renamed `hashlib.md5.digest`: agree. A direct named constructor; on PyPy the fallback class is `hashlib.md5` (ruling-names-2's own table); `_md5.MD5Type.digest`, `_hashlib.HASH.digest` and `_hashlib._OneShotHash.digest` stay.
+
+Every row of the ruling's avro table is applied as the ruling and the
+lead's decision say: the two BLAKE2 removals, the nine additions with the
+private names kept ("full-union deletion unresolved"), and the
+`protocol.py` rename. Nothing missed: `:108` and `:337-338` are the
+package's only hash objects, and `hashlib.sha1` is a factory on both
+implementations, so SHA-1 gains no alias. The trace has no BLAKE2 edge,
+so the removals reject nothing.
+
+Counts. 1763 edges (1050 inside, 713 outside), callee lines 2386 to 2395
+(eleven added, two removed), 837 traced (47.5%), 926 from reading only:
+as `check.py avro` reports, which passes with the source in place, as do
+`--origin` and `--report`. The `make eval` numbers come from PyCG's
+output, which I did not read.
+
+**Verdict.** Closed: the additions, removals and rename stand and match
+the ruling and the lead's decision. No finding.
