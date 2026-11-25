@@ -636,6 +636,9 @@ class Hierarchy:
         cls.bases[index][base] = None
         if isinstance(base, Class):
             base.subclasses[cls] = None
+            listed = self._namespace_nodes.get((base, "subclasses"))
+            if listed is not None:
+                self.add_object(listed, cls)
             self.add_edge(cls.instances, base.instances)
             if base in self._families:
                 self.add_edge(self.family(cls), self._families[base])

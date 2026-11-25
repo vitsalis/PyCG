@@ -653,3 +653,90 @@ def test_any_candidate_mro_that_reaches_the_default_applies_the_rule(tmp_path):
     )
 
     assert "main.C.f" in callees(graph, "main.members")
+
+
+def test_subclasses_of_a_class_are_the_classes_that_name_it_as_a_base(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Base:
+            def run(self): pass
+        class A(Base):
+            def run(self): pass
+        class B(Base):
+            def run(self): pass
+        class C(A):
+            def run(self): pass
+        def each():
+            for cls in Base.__subclasses__():
+                cls().run()
+        each()
+        """,
+    )
+
+    assert set(callees(graph, "main.each")) == {
+        "<builtin>.type.__subclasses__",
+        "main.A.run",
+        "main.B.run",
+    }
+
+
+def test_subclasses_follow_the_class_that_reaches_the_receiver(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Base:
+            def run(self): pass
+        class A(Base):
+            def run(self): pass
+        class C(A):
+            def run(self): pass
+        def each(kind):
+            for cls in kind.__subclasses__():
+                cls().run()
+        each(A)
+        """,
+    )
+
+    assert "main.C.run" in callees(graph, "main.each")
+    assert "main.A.run" not in callees(graph, "main.each")
+
+
+def test_a_class_chosen_as_a_base_at_run_time_is_a_candidate_subclass(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Left:
+            pass
+        class Right:
+            pass
+        def pick(flag):
+            return Left if flag else Right
+        class C(pick(input())):
+            def run(self): pass
+        def each():
+            for cls in Left.__subclasses__():
+                cls().run()
+        each()
+        """,
+    )
+
+    assert "main.C.run" in callees(graph, "main.each")
+
+
+def test_limit_a_subclass_defined_after_the_call_is_listed(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Base:
+            pass
+        def each():
+            for cls in Base.__subclasses__():
+                cls().run()
+        each()
+        class Late(Base):
+            def run(self): pass
+        """,
+    )
+
+    assert "main.Late.run" in callees(graph, "main.each")

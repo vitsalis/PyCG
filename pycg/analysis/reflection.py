@@ -13,6 +13,14 @@ class Reflection:
                     self.add_object(node, self.const(name))
         return self._namespace_nodes[key]
 
+    def subclasses_listed(self, cls):
+        key = (cls, "subclasses")
+        if key not in self._namespace_nodes:
+            node = self._namespace_nodes[key] = self.node()
+            for subclass in cls.subclasses:
+                self.add_object(node, subclass)
+        return self._namespace_nodes[key]
+
     def stored_name(self, obj, name):
         self.add_object(self._namespace_names(obj), self.const(name))
 
