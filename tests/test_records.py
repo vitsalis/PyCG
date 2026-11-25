@@ -181,17 +181,22 @@ def test_a_special_method_call_is_attached_once(tmp_path):
     )
     analysis = generator.program.analysis
 
-    requests = [
-        (owner, name, call, unless)
-        for (owner, name, _, unless), call in analysis._dunder_calls.items()
+    requests = {
+        call: (name, unless)
+        for (_, _, name, _, unless), call in analysis._dunder_calls.items()
+    }
+    attached = [
+        (owner, call, *requests[call])
+        for call, owners in analysis._dunder_owners.items()
+        for owner in owners
     ]
-    attached = [name for _, name, call, _ in requests if call.attached]
-    assert attached.count("__len__") == 4 and attached.count("__iter__") == 2
-    for owner, name, call, unless in requests:
-        analysis.call_dunder(owner, name, call, None, unless)
+    names = [name for _, _, name, _ in attached]
+    assert names.count("__len__") == 4 and names.count("__iter__") == 2
+    assert len({call for _, call, name, _ in attached if name == "__len__"}) == 2
+    for owner, call, name, unless in attached:
         work = analysis.solver.work
         analysis.call_dunder(owner, name, call, None, unless)
-        assert call.attached and analysis.solver.work == work
+        assert analysis.solver.work == work
     assert generator.output()["main.measure"] == [
         "<builtin>.len",
         "main.Sized.__iter__",
@@ -220,7 +225,7 @@ def test_the_calls_of_a_class_share_the_set_of_its_instances(tmp_path):
 
     classes = {
         call: owner
-        for (owner, name, _, _), call in analysis._dunder_calls.items()
+        for (owner, _, name, _, _), call in analysis._dunder_calls.items()
         if name == "__new__"
     }
     by_class = {}

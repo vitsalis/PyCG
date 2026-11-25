@@ -75,6 +75,7 @@ class Analysis(
         self.named_nodes = []
         self._instances = {}
         self._dunder_calls = {}
+        self._dunder_owners = {}
         self._new_results = {}
         self._class_instances = {}
         self._statement_calls = {}
@@ -793,8 +794,9 @@ class Analysis(
 
     def _call_dunder(self, obj, name, call, dst, unless):
         implicit = self._implicit_call(obj, name, call, dst, unless)
-        if not implicit.attached:
-            implicit.attached = True
+        owners = self._dunder_owners.setdefault(implicit, set())
+        if obj not in owners:
+            owners.add(obj)
             method = Each(
                 self._type_method, obj, name, implicit, unless, results=(implicit.dst,)
             )
@@ -818,7 +820,8 @@ class Analysis(
     def _implicit_call(self, owner, name, call, dst, unless=()):
         base, receivers = self._prefixes.get(call, (call, ()))
         root = self._roots.get(base, base)
-        key = (owner, name, root, unless)
+        typed = owner.cls if type(owner) is Instance else owner
+        key = (typed, type(owner) is Instance, name, root, unless)
         template = self._dunder_calls.get(key)
         if template is None:
             template = Call(
@@ -894,7 +897,6 @@ class Call(Constraint):
         "implicit",
         "decorator",
         "applies",
-        "attached",
     )
 
     def __init__(
@@ -922,7 +924,6 @@ class Call(Constraint):
         self.implicit = implicit
         self.decorator = False
         self.applies = False
-        self.attached = False
 
     def apply(self, obj):
         self.analysis.call(obj, self)
