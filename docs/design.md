@@ -3857,6 +3857,12 @@ version classes as letters is followed only there.
 - Limit: a relative name (`import_module(".alpha", "pkg")`) is not followed
   (`test_limit_a_relative_literal_import_is_not_followed`).
 
+**`sys.modules`.** A read `sys.modules["a.b"]` with a str literal of dotted
+identifiers, where `sys` is the module's import of `sys`, also gives the
+outside module of that name, the entry that an import of it stored (a
+name that the program never imported raises `KeyError`). It imports
+nothing, and a name of the analysed package gives nothing more.
+
 **Lazy imports** (PEP 810). A lazy import imports its module when code
 first reads the name that it binds, so discovery follows it only if some
 code of the importing module reads that name (in any scope, whether or not

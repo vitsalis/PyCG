@@ -597,7 +597,23 @@ class Expressions:
             return None
         result = self.analysis.node()
         self._subscript(base, index, result, None, node)
+        module = self._loaded_module(node)
+        if module is not None:
+            self.analysis.add_object(result, self.analysis.external(module))
         return result
+
+    def _loaded_module(self, node):
+        if self._imported_function(node.value) != "sys.modules":
+            return None
+        key = node.slice
+        if not (isinstance(key, ast.Constant) and isinstance(key.value, str)):
+            return None
+        parts = key.value.split(".")
+        if not all(part.isidentifier() for part in parts):
+            return None
+        if parts[0] == self.module.name.split(".")[0]:
+            return None
+        return key.value
 
     def _expr_Tuple(self, node):
         kind = _DISPLAYS[type(node)]
