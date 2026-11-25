@@ -200,10 +200,10 @@ tinytag`); its `_`-functions are private and called only by `_run`.
 7. **Names outside the package.** `os.environ.get` is
    `collections.abc.Mapping.get` (anytree precedent; trace confirms).
    `fsdecode` is `os.fsdecode` (the trace names `os._fscodec.fsdecode` with
-   that alias). The csv writer's methods are `_csv.writer.writerow` and
-   `.writerows` (netaddr precedent): the writer's type has no public path;
-   `type(csv.writer(io.StringIO()))` is `_csv.writer` on CPython 3.12 to
-   3.15, checked with the standard library only. `sys.stderr.write` is
+   that alias). The csv writer's methods are `_csv.Writer.writerow` and
+   `.writerows` on CPython 3.10 and later, and `_csv.writer.writerow` and
+   `.writerows` on CPython 3.7 to 3.9 and on PyPy (see "Corrections of
+   2026-11-25"). `sys.stderr.write` is
    `io.TextIOWrapper.write` and the image file of `open(..., 'wb')` is an
    `io.BufferedWriter`. `isfile` and `splitext` are `os.path.isfile` and
    `os.path.splitext`, the paths that the module imports.
@@ -242,9 +242,10 @@ change):**
 - `io.TextIOWrapper.write`: `_io.TextIOWrapper`
   (`interp_textio.py:1464-1474` in 3.11, `1424-1434` in 3.10).
 - `_csv.writer.writerow` and `.writerows`, and `csv.writer`: PyPy's writer
-  type is also named `_csv.writer` (`pypy/module/_csv/interp_writer.py:185-188`
-  in 3.11, `172-175` in 3.10), and `lib-python/3/csv.py:7` imports `writer`
-  from `_csv`.
+  type is named `_csv.writer` (`pypy/module/_csv/interp_writer.py:185-188`
+  in 3.11, `172-175` in 3.10), its `_csv` exports only the factory
+  `writer`, and `lib-python/3/csv.py:7` imports `writer` from `_csv` (see
+  "Corrections of 2026-11-25").
 - `struct.unpack` and `struct.unpack_from`: the interpreter-level module
   `_struct` (`pypy/module/struct/moduledef.py:48`, `56-57`), re-exported by
   `lib-python/3/struct.py:13`.
@@ -299,11 +300,45 @@ is no edge of its own.
 |---|---|
 | Sites | 780 (704 call, 31 decorator, 6 op, 2 getattr, 37 format); 272 with candidates; 3 value sites |
 | Ledger entries | 737 (704 call, 31 decorator, 2 getattr) |
-| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 793 / 76 (3) / 3 (5 nodes) / 37 |
+| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 796 / 76 (3) / 3 (5 nodes) / 39 |
 | Default rejections | 1, deciding 61 sites |
 | Nodes | 82 (3 modules, 79 functions) |
-| Edges | 437: 134 in the package, 303 outside |
-| Edges that the trace confirms | 391 of 437 (89.5%) |
-| Edges only from reading | 46 (9 inside, 37 outside): 35 of `__main__`, 10 of the debug branches (J1), 1 `_Flac._parse -> io.BytesIO.seek` |
+| Edges | 439: 134 in the package, 305 outside |
+| Edges that the trace confirms | 391 of 439 (89.1%) |
+| Edges only from reading | 48 (9 inside, 39 outside): 37 of `__main__`, 10 of the debug branches (J1), 1 `_Flac._parse -> io.BytesIO.seek` |
 | Trace edges rejected | 9 |
 | Functions that the tests run | 74 of 79 (the 5 of `__main__` do not run) |
+
+## Corrections of 2026-11-25
+
+The batch-8 ruling "A C type exported under a module attribute other than
+its type name" (README, Rulings for batch 8;
+`selection/batch-8-proposal/rulings/b8-ruling-c-type-names-1.md`) names a
+method of an outside class by the attribute under which the defining
+extension module exports the type, and by the type name only on a runtime
+that exports none; the names are the union over the admitted runtimes,
+never two aliases of one class on one runtime. tinytag admits CPython 3.7
+and later and PyPy 3.7 and later (opening section and "PyPy").
+
+| Runtime | `_csv` exports the writer type as | Source | Name |
+|---|---|---|---|
+| CPython 3.7, 3.8, 3.9 | nothing (`Dialect`, `Error` and constants only) | `Modules/_csv.c:1635-1668` (3.7.17), `1645-1678` (3.8.20), `1688-1720` (3.9.25); type name `"_csv.writer"` at `1327`, `1330`, `1376` | `_csv.writer` |
+| CPython 3.10 to 3.15 | `Writer` | `PyModule_AddObjectRef(module, "Writer", temp)`: `_csv.c:1719` (3.10.22), `1753` (3.11.18), `1776` (3.12.16), `1760` (3.13.18), `1799` (3.14.10, 3.15.2) | `_csv.Writer` |
+| PyPy 3.8 to 3.11 | nothing (the factory `writer` only) | `pypy/module/_csv/moduledef.py:73-86`; TypeDef `'_csv.writer'` at `interp_writer.py:167` (3.8 v7.3.11, 3.9 v7.3.16), `173` (3.10 v7.3.19), `186` (3.11 v7.3.23) | `_csv.writer` |
+
+`csv` itself re-exports only the factory `writer` (`Lib/csv.py:7` of
+3.10.22, `67` of 3.15.2; not `Writer`), so there is no public alias. PyPy
+3.7 (v7.3.9, read at the commit of tag release-pypy3.7-v7.3.9,
+3a614a6737a1) exports only the factory as well (`moduledef.py:86`; TypeDef
+`'_csv.writer'` at `interp_writer.py:166-170`).
+
+| Site (`tinytag/__main__.py`) | Change | Edge |
+|---|---|---|
+| `68:28` `writer.writerow(data.keys())` | added | `_print_tag -> _csv.Writer.writerow` |
+| `70:24` `writer.writerow(data.values())` | added (the same edge) | `_print_tag -> _csv.Writer.writerow` |
+| `73:25` `writer.writerows(data.items())` | added | `_print_tag -> _csv.Writer.writerows` |
+
+`_csv.writer.writerow` and `.writerows` stay, for CPython 3.7 to 3.9 and
+PyPy. Net +2 outside edges (437 to 439: 134 inside, 305 outside); the
+trace has no csv edge (`__main__` runs in no test), so no trace edge
+changes.

@@ -187,3 +187,53 @@ there the package fixes the state itself, and here the process environment
 sets it. The ruling decides 10 edges of 437. By "Rulings for batch 6",
 the lead decides whether that is many enough to need the independent
 referee.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-tinytag-csv` (7ffe863, PR #102) against `main`
+(2130a69): two outside edges added, at three sites, in `tinytag.json`,
+`tinytag.added.json`, `tinytag.ledger` and `tinytag.md`, and
+`evaluation/metrics.json` re-based; no other file changed. I read
+`tinytag/__main__.py` and `pyproject.toml` from the inputs image,
+`Modules/_csv.c` and `Lib/csv.py` of CPython 3.7.17 to 3.15.2 and
+`pypy/module/_csv/` and `lib-python/3/csv.py` of PyPy 3.8 v7.3.11 to 3.11
+v7.3.23 from the dependency sources, and `pypy/module/_csv/moduledef.py`
+and `interp_writer.py` of PyPy 3.7 v7.3.9, fetched in a container at the
+commit of the tag `release-pypy3.7-v7.3.9` of the PyPy repository
+(`3a614a6737a119273a601c86eae9ee822a60d607`), read as text. Nothing ran;
+no PyCG output was read.
+
+| Site (`tinytag/__main__.py`) | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `68:28` `writer.writerow(data.keys())` | `_print_tag -> _csv.Writer.writerow` | agree | `writer` is `csv.writer(csv_file, ...)` (`:65`), an object of the type `_csv.writer`; `_csv` exports it as `Writer` on CPython 3.10.22 `_csv.c:1719`, 3.11.18 `:1753`, 3.12.16 `:1776`, 3.13.18 `:1760`, 3.14.10 and 3.15.2 `:1799` (all checked); `csv` re-exports only the factory (`Lib/csv.py:7` in 3.10.22, `:67` in 3.15.2; no `Writer` in any `csv.py` read), so there is no public alias |
+| `70:24` `writer.writerow(data.values())` | the same edge | agree | the same writer |
+| `73:25` `writer.writerows(data.items())` | `_print_tag -> _csv.Writer.writerows` | agree | the same writer |
+| the three sites | `_csv.writer.writerow`, `.writerows` kept | agree | CPython 3.7.17, 3.8.20 and 3.9.25 add only `__version__`, `_dialects`, constants, `Dialect` and `Error` in the module init (`_csv.c:1635-1668`, `1645-1678`, `1688-1720`); PyPy 3.7 to 3.11 export the factory `writer` only (`moduledef.py:86`) with the TypeDef `'_csv.writer'` and its `writerow` and `writerows` (`interp_writer.py:166-170` in 3.7 v7.3.9; `:167` in 3.8 and 3.9, `:173` in 3.10, `:186` in 3.11) |
+
+The two names belong to different runtimes, as the ruling requires.
+Nothing missed: `csv` is used only in `_print_tag`; `csv.writer` at
+`65:24` is the factory's own call; no other outside callee of
+`tinytag.json` falls under the ruling (`io.*` are public aliases,
+`binascii.a2b_base64`, `struct.unpack` and `struct.unpack_from` are
+functions).
+
+Counts. Callee lines 793 to 796, notes 37 to 39 (the new notes at
+`70:24` and `73:25`), 439 edges (134 inside, 305 outside), 391 of 439
+traced (89.1%), 48 from reading only (39 outside): as `check.py tinytag`
+reports, which passes with the source in place, as do `--origin` and
+`--report`. `gate.benchmark_digest()` on the branch gives
+`37823be3545aab56524294b149d928718a582cab3865cdb96edc29679d4060a0`, the
+recorded digest. The `make eval` numbers and the macro outside P come
+from PyCG's output, which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| A1 | `pypy/module/_csv/moduledef.py:85` is a blank line in PyPy 3.8 to 3.11; the factory `'writer'` is at `:86` | the note at `68:28` (`tinytag.ledger`, `tinytag.added.json`) and the commit message | cite `:86` |
+| A2 | PyPy 3.7 is "assumed to be that of 3.8"; its source gives the same answer: `moduledef.py:86` exports the factory only, `interp_writer.py:166-167` names the type `'_csv.writer'` (v7.3.9, `3a614a6737a119273a601c86eae9ee822a60d607`) | `tinytag.md`, "Corrections of 2026-11-25" | replace the assumption with this evidence |
+
+**Verdict.** The two edges stand and nothing is missed. A1 and A2 correct
+the evidence; no edge depends on them.
+
+A1 and A2 were applied before the merge (the note cites `moduledef.py:86`;
+`tinytag.md` gives the PyPy 3.7 v7.3.9 evidence instead of the
+assumption). The audit is closed.

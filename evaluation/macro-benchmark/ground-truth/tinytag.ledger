@@ -57,12 +57,15 @@ default reject tinytag.tinytag.Image.__repr__: no package code formats, prints o
 65:24 call  csv.writer(csv_file, delimiter=delimiter, lineterminator=...
     -> csv.writer
 68:28 call  writer.writerow(data.keys())
+    -> _csv.Writer.writerow
     -> _csv.writer.writerow
-    note: writer is the csv writer object that csv.writer returns (line 65); its type has no public path and is named as the tracer names it (netaddr precedent)
+    note: writer is the csv writer object that csv.writer returns (line 65); its type has no public path in csv, so it is named by the attribute under which _csv exports it: _csv.Writer on CPython 3.10 to 3.15 (Modules/_csv.c PyModule_AddObjectRef(module, "Writer", ...), 3.10.22:1719, 3.15.2:1799); CPython 3.7 to 3.9 export no writer type (3.9.25 _csv.c:1688-1720) and PyPy exports only the factory (pypy/module/_csv/moduledef.py:86, 3.7 to 3.11), so there the type name _csv.writer is the fallback (3.9.25 _csv.c:1376; PyPy interp_writer.py:186 in 3.11 v7.3.23) (README, batch-8 ruling "A C type exported under a module attribute other than its type name"; tinytag.md, "Corrections of 2026-11-25")
 68:38 call  data.keys()
     -> <builtin>.dict.keys
 70:24 call  writer.writerow(data.values())
+    -> _csv.Writer.writerow
     -> _csv.writer.writerow
+    note: the csv writer of line 65, named as at 68:28
 70:36 call  data.values()
     -> <builtin>.dict.values
 71:34 call  csv_file.getvalue()
@@ -70,7 +73,9 @@ default reject tinytag.tinytag.Image.__repr__: no package code formats, prints o
 71:42 call  csv_file.getvalue().strip()
     -> <builtin>.str.strip
 73:25 call  writer.writerows(data.items())
+    -> _csv.Writer.writerows
     -> _csv.writer.writerows
+    note: the csv writer of line 65, named as at 68:28
 73:36 call  data.items()
     -> <builtin>.dict.items
 74:34 call  csv_file.getvalue()
