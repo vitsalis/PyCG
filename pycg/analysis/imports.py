@@ -22,28 +22,13 @@ import os
 
 
 class ImportManager(object):
-    """Resolves imports to modules under the package root.
-
-    Module names are dotted paths relative to the package root (`mod_dir`).
-    Resolution reads only the filesystem: it never imports or executes code
-    and never reads or changes `sys.path` or `sys.modules`.
-
-    The import graph maps each module under the root to its file and to the
-    modules under the root that it imports. An import may also find an
-    extension module, a binary file (see `_extension`): it is outside code,
-    named by its dotted name, and `extension_modules` maps it to its file.
-    """
-
     def __init__(self):
         self.import_graph = dict()
         self.extension_modules = {}
         self.current_module = ""
         self.input_file = ""
         self.mod_dir = None
-        # The names in each directory read so far: every import of a module
-        # looks in the directories of its packages, and the files are those
-        # of one analysis.
-        self._listings = {}
+        self._directory_entries_by_path = {}
 
     def set_pkg(self, input_pkg):
         self.mod_dir = os.path.abspath(input_pkg)
@@ -52,7 +37,6 @@ class ImportManager(object):
         return self.mod_dir
 
     def is_internal(self, filename):
-        """Return True if `filename` is inside the package root."""
         path = os.path.abspath(filename)
         return os.path.commonpath([self.mod_dir, path]) == self.mod_dir
 
@@ -107,24 +91,6 @@ class ImportManager(object):
         return self.import_graph
 
     def handle_import(self, name, level, record=True):
-        """Resolve the import of `name` with relative `level` from the current
-        module.
-
-        `name` is the imported module for `import a.b` and the module joined
-        with the imported name for `from a import b` ("a.b"). If no module
-        "a.b" exists, "b" is taken to be an attribute of module "a".
-
-        Return the name of the imported module if it is under the package
-        root, else None. Add the module and every package on its path to the
-        import graph, with edges from the current module. The packages are
-        added even if the module is missing, because Python runs them before
-        the import fails. Without `record` (a lazy import that nothing
-        reads), only resolve: the import runs nothing.
-
-        In an absolute import, built-in and frozen modules take precedence
-        over any file, as in Python, also for submodules: `importlib` is not
-        frozen but `importlib.util` is. Such a module is external.
-        """
         base = self._get_base_package(level)
         if base is None:
             return None
@@ -141,26 +107,15 @@ class ImportManager(object):
 
         if reached_frozen:
             return None
-        # Either the whole name is a module, or all but its last part is
-        # and the last part is an attribute of that module.
         if modules and len(modules) >= len(parts) - 1:
             return modules[-1][0]
         return None
 
     def module_files(self, name):
-        """The files under the root that hold the module `name`, in the
-        order of `_candidates`: the first is the module, the others are
-        shadowed. The directories of its packages are taken as they are
-        named, whatever holds them."""
         *packages, last = name.split(".")
         return self._candidates(os.path.join(self.mod_dir, *packages), last)
 
     def locate(self, name):
-        """What an absolute import of the dotted `name` would find under the
-        package root, without importing it: `(module, None)` if `name` is a
-        module, `(module, attribute)` if its last part is an attribute of a
-        module, None if neither is under the root. It registers nothing: an
-        extension module that it meets is not recorded."""
         parts = name.split(".")
         modules, reached_frozen = self._find_modules(parts, True, record=False)
         if reached_frozen or not modules:
@@ -172,13 +127,6 @@ class ImportManager(object):
         return None
 
     def packages(self, name):
-        """The packages that an absolute import of the dotted `name` passes
-        through, from the top-level one, as `_find_modules` resolves them:
-        each prefix of `name` (not `name` itself) that is a regular or a
-        namespace package, up to the first that is not (a module, a
-        built-in or frozen module, nothing). A regular package's file is
-        the `__init__.py` in its own directory: the module `pkg/__init__.py`
-        that `pkg.__init__` names is no package. It registers nothing."""
         parts = name.split(".")[:-1]
         found, _ = self._find_modules(parts, True, record=False)
         packages = []
@@ -191,17 +139,10 @@ class ImportManager(object):
         return packages
 
     def _get_base_package(self, level):
-        """Return the package that a relative import of `level` starts from,
-        as a list of name parts.
-
-        Return [] for an absolute import and None if the import goes beyond
-        the top-level package. The package root itself is not a package.
-        """
         if level == 0:
             return []
 
         package = self.current_module.split(".")
-        # The module name of an __init__.py file is the name of its package.
         if os.path.basename(self.input_file) != "__init__.py":
             package = package[:-1]
 
@@ -211,25 +152,9 @@ class ImportManager(object):
         return package[: len(package) - level + 1]
 
     def _find_modules(self, parts, absolute, record=True):
-        """Find the modules on the path `parts` (a list of name parts).
-
-        Return a list with a (name, filename) pair for each module of the
-        longest prefix of `parts` that exists under the root: the first
-        element is the top-level package, the last is the deepest module
-        found. The filename is None for a namespace package. Within a
-        directory the files of a name decide by `_candidates`: a package
-        with __init__.py, then a module file, then an extension module, which
-        ends the search; with none, a namespace package.
-
-        For an `absolute` import, the search also stops at a prefix that is a
-        built-in or frozen module; the second element of the result tells
-        whether it did. With `record`, an extension module that the search
-        meets becomes one of the program's (`extension_modules`).
-        """
         found = []
         directory = self.mod_dir
         for index, part in enumerate(parts):
-            # `*` from `from a import *` is never a module.
             if not part.isidentifier():
                 break
 
@@ -242,7 +167,6 @@ class ImportManager(object):
                 found.append((name, files[0]))
             elif files and files[0].endswith(".py"):
                 found.append((name, files[0]))
-                # A plain module has no submodules.
                 break
             elif files:
                 if record:
@@ -257,16 +181,6 @@ class ImportManager(object):
         return found, False
 
     def _candidates(self, directory, part):
-        """The files in `directory` that hold the module `part`, in the order
-        that decides which one is the module, the one rule for imports and
-        entry points: its package (`part/__init__.py`), its module file
-        (`part.py`), its extension binaries by name (see `extension_name`).
-        The first is the module and the others are shadowed: whatever the
-        order in which they are reached, the analysis uses the first. Python
-        tries a binary before a module file; PyCG analyses the source. Names
-        are compared with directory listings, so the match is case sensitive
-        also on case-insensitive filesystems, and a directory named like a
-        file is not that file. Only file names are read."""
         entries = self._list_dir(directory)
         path = os.path.join(directory, part)
         found = []
@@ -283,24 +197,17 @@ class ImportManager(object):
         return found
 
     def _list_dir(self, path):
-        entries = self._listings.get(path)
+        entries = self._directory_entries_by_path.get(path)
         if entries is None:
             try:
                 entries = frozenset(os.listdir(path))
             except OSError:
                 entries = frozenset()
-            self._listings[path] = entries
+            self._directory_entries_by_path[path] = entries
         return entries
 
 
-# The modules that are builtin or frozen in every supported Python, 3.12 to
-# 3.15: the intersection of `sys.builtin_module_names` and
-# `_imp._frozen_module_names()` over those versions (and over static and
-# shared builds), computed once. Python imports these before any file on
-# the path, so an analysed module of the same name is never imported by an
-# absolute import. A constant, so that the result does not depend on the
-# Python that runs the analysis.
-BUILTIN_OR_FROZEN = frozenset(
+BUILTIN_OR_FROZEN_MODULES = frozenset(
     {
         "__hello__",
         "__hello_alias__",
@@ -370,14 +277,10 @@ BUILTIN_OR_FROZEN = frozenset(
 
 
 def _is_builtin_or_frozen(name):
-    return name in BUILTIN_OR_FROZEN
+    return name in BUILTIN_OR_FROZEN_MODULES
 
 
 def extension_name(filename):
-    """The module name of the extension binary `filename`, or None:
-    `name.so` or `name.pyd`, or with a tag before the suffix
-    (`name.cpython-312-darwin.so`, `name.abi3.so`,
-    `name.cp312-win_amd64.pyd`)."""
     stem, dot, suffix = filename.rpartition(".")
     name, _, tag = stem.partition(".")
     if dot and suffix in ("so", "pyd") and name and "." not in tag:

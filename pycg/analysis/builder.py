@@ -432,7 +432,7 @@ class ModuleBuilder(
         kwarg = scope.mangle(arguments.kwarg.arg) if arguments.kwarg else None
         signature = Signature(
             positional=positional,
-            positional_only=len(arguments.posonlyargs),
+            positional_only_count=len(arguments.posonlyargs),
             keyword_only=keyword_only,
             vararg=vararg,
             kwarg=kwarg,

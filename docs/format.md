@@ -108,7 +108,9 @@ its linearization, outside classes included). Code that the analysis
 proves cannot run defines nothing.
 
 - A module's lines are `[1, n]`, `n` its number of lines as Python numbers
-  them; `[0, 0]` for an empty module. A function's or class's lines are
+  them (the file is read with universal newlines, and only a newline ends
+  a line: a form feed does not, though `str.splitlines` breaks there);
+  `[0, 0]` for an empty module. A function's or class's lines are
   those of its `ast` node: from its `def` or `class` line (not its
   decorators) to its last line.
 - The `mro` is the C3 linearization over the bases that the analysis

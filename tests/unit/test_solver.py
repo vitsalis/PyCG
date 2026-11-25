@@ -1241,7 +1241,7 @@ def test_long_chain_of_attachments_to_constant_nodes_does_not_exhaust_the_stack(
 
 
 def test_constant_sets_stay_shared_across_a_rebuild_of_the_table(monkeypatch):
-    monkeypatch.setattr(solver_module, "_MIN_SWEEP", 1)
+    monkeypatch.setattr(solver_module, "_SWEEP_NEW_OBJECTS_MIN", 1)
     solver = Solver(SATURATED)
     x = Marker("x")
     constant = solver.constant(x)

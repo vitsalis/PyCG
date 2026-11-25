@@ -127,7 +127,7 @@ class Containers:
             alias.fields = container.fields
             alias.observers = container.observers
             alias.unknown = self.unknown(container)
-            alias.every = self.every(container)
+            alias.every_element = self.every(container)
             alias.keys = self.keys(container)
             alias.factory = container.factory
             alias.aliased = self.aliased(container)
@@ -162,8 +162,8 @@ class Containers:
         if node is None:
             node = self.node(f"{container.name}[{constant_name(key)}]")
             container.fields[key] = node
-            if container.every is not None:
-                self.add_edge(node, container.every)
+            if container.every_element is not None:
+                self.add_edge(node, container.every_element)
             for observer in list(container.observers):
                 self._notify(observer, key, node)
         return node
@@ -172,19 +172,19 @@ class Containers:
         """The node of the elements stored under keys that are not known."""
         if container.unknown is None:
             container.unknown = self.node(f"{container.name}[?]")
-            if container.every is not None:
-                self.add_edge(container.unknown, container.every)
+            if container.every_element is not None:
+                self.add_edge(container.unknown, container.every_element)
         return container.unknown
 
     def every(self, container):
         """A node that holds every element of `container`."""
-        if container.every is None:
-            container.every = self.node()
+        if container.every_element is None:
+            container.every_element = self.node()
             for node in container.fields.values():
-                self.add_edge(node, container.every)
+                self.add_edge(node, container.every_element)
             if container.unknown is not None:
-                self.add_edge(container.unknown, container.every)
-        return container.every
+                self.add_edge(container.unknown, container.every_element)
+        return container.every_element
 
     def keys(self, container):
         """The node of the keys of a dict."""
