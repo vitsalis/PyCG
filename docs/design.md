@@ -1611,6 +1611,15 @@ or a list:
     `contextlib.redirect_stdout`) still has a `TextIOWrapper` there: what
     code stores on an outside module is not tracked; an interpreter started
     without a console (`pythonw`) has `None` there.
+- **Functions declared as variables.** Two stub variables of callable
+  types hold a known function in CPython: `timeit.default_timer` is
+  `time.perf_counter`, and `shutil.rmtree` is a function that the stubs
+  type as the protocol `_RmtreeType` (`builtin_models.py`,
+  `VARIABLE_FUNCTIONS`). A load of either gives that function, so a call
+  names it.
+  - Limit: the other callable variables of the stubs (`sys.excepthook`,
+    `sys.displayhook`, `threading.excepthook`) are hooks that a program
+    may replace, so their calls stay unnamed.
 - **Opened files.** `open`, `io.open`, `os.fdopen` and `pathlib.Path.open`
   give the class that `io.open` makes for their mode and buffering, where
   the stubs give one overload per kind of mode (their `Literal` modes

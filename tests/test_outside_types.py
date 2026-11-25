@@ -109,6 +109,29 @@ def test_standard_streams_are_text_io_wrappers(tmp_path):
     assert callees(graph, "main.read") == ["io.TextIOWrapper.readline"]
 
 
+def test_stub_variables_that_hold_a_function_name_it(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import shutil
+        import timeit
+        from shutil import rmtree
+        from timeit import default_timer
+        def use(path):
+            timeit.default_timer().is_integer()
+            default_timer()
+            shutil.rmtree(path)
+            rmtree(path, ignore_errors=True)
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "<builtin>.float.is_integer",
+        "shutil.rmtree",
+        "time.perf_counter",
+    ]
+
+
 def test_other_variables_of_sys_keep_their_stub_types(tmp_path):
     graph = main_graph(
         tmp_path,

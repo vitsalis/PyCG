@@ -12,6 +12,7 @@ from .builtin_models import (
     LIBRARY_ITERATION,
     OPENERS,
     REFLECTION_CALLS,
+    VARIABLE_FUNCTIONS,
     VARIABLE_TYPES,
     builtin_kind,
     opened_class,
@@ -151,7 +152,10 @@ class Outside:
             return self.constant(external)
         node = self.node()
         for definition in definitions:
-            if definition in values:
+            if definition.path in VARIABLE_FUNCTIONS:
+                function = self.external(VARIABLE_FUNCTIONS[definition.path])
+                self.add_object(node, function)
+            elif definition in values:
                 context = _Context(origin=("attribute", definition.path))
                 self.add_type(_variable_type(definition), node, context)
             else:
@@ -209,7 +213,10 @@ class Outside:
         named = False
         for definition in definitions:
             for found in self.stubs.attribute(definition, attr):
-                if _named(found):
+                if found.path in VARIABLE_FUNCTIONS:
+                    function = self.external(VARIABLE_FUNCTIONS[found.path])
+                    self.add_object(dst, function)
+                elif _named(found):
                     named = True
                 else:
                     context = _Context(origin=("attribute", found.path))
