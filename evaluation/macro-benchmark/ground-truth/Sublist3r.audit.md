@@ -266,3 +266,42 @@ from PyCG's output, which I did not read.
 
 **Verdict.** Closed: the edge stands, the kept names are right, and
 nothing is missed. No finding.
+
+### Addendum: the lock names of ruling-names-2
+
+The writer's second commit (748e2e7, local, message `wip`) applies the
+referee's `ruling-names-2.md` (README, "Rulings for the corrections of
+2026-11-25"): two outside edges added, none removed, in
+`Sublist3r.json`, `Sublist3r.added.json`, `Sublist3r.ledger` and
+`Sublist3r.md`. I read `threading.py` and `_threadmodule.c` of CPython
+3.0.1, 3.3.7 and 3.6.15 at the tag commits above, and of 3.7.17 and 3.12.16
+to 3.15.2 from the dependency sources.
+
+| Site | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `sublist3r.py:611:26` `self.lock.acquire()` | `DNSdumpster.check_host -> threading.Lock.acquire` | agree | `DNSdumpster.__init__` sets a `BoundedSemaphore` (`602`), then `super().__init__` (`604`) runs `enumratorBaseThreaded.__init__`, which stores its default `lock=threading.Lock()` (`260`, `264`). On CPython 3.13.18 `Lib/threading.py` lists `Lock` (`:28`), binds `_LockType = _thread.LockType` (`:38`) and `Lock = _LockType` (`:120`); 3.14.10 `:38`, `:124`; 3.15.2 `:39`, `:125`: a public class alias that holds the receiver's class, which takes precedence there (ruling-names-2) |
+| `sublist3r.py:621:26` `self.lock.release()` | `DNSdumpster.check_host -> threading.Lock.release` | agree | the same receiver |
+| both sites | `_thread.LockType.acquire`, `.release` kept | agree | on CPython 3.0 to 3.12 `threading.Lock` is the factory `_allocate_lock` (3.0.1 `threading.py:80`, 3.3.7 `:68`, 3.6.15 `:72`, 3.7.17 `:73`, 3.12.16 `:122`), not a class alias, and `_thread` exports the type (`tp_name` `"_thread.lock"`) as `LockType` (3.0.1 `_threadmodule.c:740`, 3.3.7 `:1319`, 3.6.15 `:1395`, 3.7.17 `:1390`, 3.12.16 `:1675`); one name per runtime |
+
+Nothing missed: the package calls methods of a `threading.Lock` only at
+611 and 621 (the locks of `528`, `679`, `731`, `770` and `815` are never
+called, and `portscan`'s `858` and `869` use its `BoundedSemaphore`, `854`),
+and there is no `with` on a lock. The constructor call `threading.Lock`
+(`260:99`, `528:35`) keeps its name. `check.py Sublist3r`, `--origin` and
+`--report` pass on 748e2e7 with the source in place: 460 edges (143
+inside, 317 outside, to 107 outside callees), callee lines 573, notes 103,
+as `Sublist3r.md` states.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| B1 | `evaluation/metrics.json` is not re-based: its `benchmark_sha256` is still `8fd786e5…`, while the digest of 748e2e7 is `73497299b30c5eb228aa452b57d11dea11a8ccccd034f62b5b0ac3b6958edcaa` | `evaluation/metrics.json` | run `make eval-record` and record the change of the outside metrics in the commit message |
+| B2 | the commit message is `wip`: it states neither the ruling, the edges, the counts nor the measurement | 748e2e7 | write the message (or fold the commit into the branch's one commit) in the style of 9f14e75 |
+| B3 | one prose line of judgement 9 runs past 80 columns (``.release` (3.13 and later; Corrections of 2026-11-25). `portscan` keeps…``) | `Sublist3r.md`, judgement 9 | rewrap |
+
+**Verdict of the addendum.** The two edges stand and the kept names are
+right; B1 to B3 must be fixed before the merge, and no edge depends on
+them.
+
+B1 to B3 were applied before the merge: the lock commit is folded into the
+correction commit with a full message, `metrics.json` is re-recorded on
+main, and judgement 9 is rewrapped. The audit is closed.
