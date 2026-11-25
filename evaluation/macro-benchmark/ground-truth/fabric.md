@@ -76,10 +76,16 @@ Concrete input contracts still apply under B4. Connection's `config`
 parameter is documented as Fabric Config or Invoke Config. A vanilla
 InvokeConfig's ordinary clone result is stored as an imported-path stub,
 so its later `base_ssh_config.lookup`, `connect_kwargs.setdefault`, `clone`,
-`runners.remote`, and `gateway` method chains keep that origin. Recursive
-gateway construction crosses the documented config parameter boundary
-again; it admits the same Config roles, not an unlimited chain of inferred
-outside types. TunnelManager's constructor similarly documents its transport
+`runners.remote`, and `gateway` method chains keep that origin. The stub
+keeps its path also where the package forwards it: `get_gateway` passes
+`self.config.clone()` to a new Connection (388, 391), whose documented
+`config` parameter does not rename it; the new Connection stores it or
+clones it again (260-262), and recursive gateway construction repeats this
+without a bound. These are open path sets (see "Open path sets"; the
+referee's `ruling-fabric-1.md`, adopted 2026-11-25). The earlier reading,
+that the constructor's parameter re-admits only the documented Config
+roles, yields to the global forwarding rules (batch 7, pgvector and
+einops). TunnelManager's constructor similarly documents its transport
 as `paramiko.transport.Transport`. The stored transport keeps that name;
 its ordinary `open_channel` result remains a `Transport.open_channel` stub
 through the close, recv and sendall calls in Tunnel. Tunnel's generic "SSH channel" prose does
@@ -211,8 +217,9 @@ package calls `GroupResult()` without arguments.
 ## Scope rules
 
 **B1. Receivers.** Connection.config is either the admitted Fabric Config
-or the stored result of an ordinary vanilla InvokeConfig.clone. Later direct
-attribute/call chains preserve that result path (J1). Remote's documented
+or the stored result of an ordinary vanilla InvokeConfig.clone, also one
+forwarded through a recursive gateway construction (the open path sets).
+Later direct attribute/call chains preserve that result path (J1). Remote's documented
 context role is Connection. A gateway explicitly supplied in its documented
 role can be a Connection or string. A fallback from the stored clone result
 can instead retain `invoke.config.Config.clone.gateway`; its open and
@@ -389,10 +396,10 @@ External six and pywin32 implementations were not independently read.
 | Sites | 432 (333 call, 17 decorator, 1 with, 21 op, 27 getitem, 16 setitem, 1 delitem, 16 getattr) |
 | Sites with candidates / value sites | 205 / 4 |
 | Ledger entries | 375 |
-| Callee lines / rejection lines / exclusion lines / notes | 428 / 91 / 0 / 113 |
+| Callee lines / rejection lines / exclusion lines / notes | 448 / 91 / 0 / 124 |
 | Default rejections | 2, deciding 57 and 49 sites, all implicit |
 | Nodes | 93 (12 modules, 81 functions) |
-| Edges | 353: 99 in the package, 254 to 163 callees outside |
+| Edges | 369: 99 in the package, 270 to 175 callees outside (after the Corrections of 2026-11-25) |
 | Trace | none: no edge confirmed, no edge rejected |
 
 ## Third source-first audit (2026-11-16)
@@ -427,3 +434,69 @@ retain their separately justified inherited callbacks. No graph decision
 changes. Normal/-O/-OO is the round-4 working scope assumption. Python 2.7
 and Python 3.4+ paths remain, with release-local interpreter evidence and
 retained Invoke/decorator source checked statically. No analyzed code ran.
+
+## Open path sets
+
+Write `Sk` for `invoke.config.Config` followed by `k` copies of `.clone`.
+A Connection made with a vanilla Invoke config stores `S1`
+(`connection.py:261-262`). For a Connection that stores `Sm`,
+`get_gateway` calls `self.config.clone()` (388:55), giving `S(m+1)`, and
+forwards it in its own `kwargs` to `Connection(hop, **kwargs)` (391). The
+new Connection stores it when `isinstance(config, Config)` succeeds on the
+stub (260; batch 7, websocket-client) or appends another `.clone` at 261.
+The first hop of each level gets no gateway (377-391), so its own lookup
+(281) and `get_gateway()` (303) can repeat the flow; the guard at 384-385
+excludes only the current host, and the documentation allows gateways
+"chained indefinitely" (`sites/docs/concepts/networking.rst:53-55`). The
+source gives no bound, so the families are open (the referee's
+`ruling-fabric-1.md`). The ledger records the members with one and two
+repetitions of `.clone` beyond the originating path; the graph at these
+sites is a LOWER BOUND, and a longer verified member is a valid addition.
+
+| Sites | Family | Members recorded |
+|---|---|---|
+| The stored-config suffix calls: `__init__` 281:61 (`.base_ssh_config.lookup`), 291:48, 296:52, 320:50 (`.base_ssh_config.lookup.get`); `resolve_connect_kwargs` 363:38 (`.connect_kwargs.setdefault`); `open_gateway` 549:26 (`.gateway.open`), 558:51 (`.gateway.transport.open_channel`); `run` 608:44 and `sudo` 623:44 (`.runners.remote`) | `Sm.<suffix>`, `m >= 1` | `m` = 1, 2, 3 |
+| `get_gateway` 388:55 `self.config.clone()` | `Sm`, `m >= 2` | `S2`, `S3`, `S4` |
+| `__init__` 261:34 `config.clone(into=Config)` | `S1`, and `Sm`, `m >= 3` | `S1`, `S3`, `S4` |
+
+There is no `S2` at 261: a forwarded config arrives as `S2` or longer, and
+261 appends a `.clone`. No inside edge depends on these families.
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-fabric-1.md`
+(`selection/corrections-2026-11-25/rulings/`; README, "Rulings for the
+corrections of 2026-11-25"), adopted by the lead, decided the forwarded
+clone stubs: an admitted stub keeps its access path through package
+storage and argument forwarding, constructors included, and a documented
+parameter type does not rename it (batch 7, pgvector and einops); passing
+the package class `Config` as `into` to the missing library's
+`clone` does not make the result a package instance (avro's provenance
+ruling covers values that package code constructs or selects, not this
+library result), so no stub edge goes and no constructor callback is
+added; the recursive forwarding is an open path set, recorded with one and
+two repetitions of `.clone` beyond the originating path. J1's earlier
+reset at the constructor's parameter yields. Added, all outside, callers
+`fabric.connection.Connection.*`, none removed:
+
+| Caller | Site | Callees added |
+|---|---|---|
+| `__init__` | 261:34 | `S3`, `S4` |
+| `__init__` | 281:61 | `S2.base_ssh_config.lookup`, `S3.base_ssh_config.lookup` |
+| `__init__` | 291:48, 296:52, 320:50 | `S2.base_ssh_config.lookup.get`, `S3.base_ssh_config.lookup.get` |
+| `resolve_connect_kwargs` | 363:38 | `S2.connect_kwargs.setdefault`, `S3.connect_kwargs.setdefault` |
+| `get_gateway` | 388:55 | `S3`, `S4` |
+| `open_gateway` | 549:26 | `S2.gateway.open`, `S3.gateway.open` |
+| `open_gateway` | 558:51 | `S2.gateway.transport.open_channel`, `S3.gateway.transport.open_channel` |
+| `run` | 608:44 | `S2.runners.remote`, `S3.runners.remote` |
+| `sudo` | 623:44 | `S2.runners.remote`, `S3.runners.remote` |
+
+The receivers: the storage at 262, the lookup result assigned at 281,
+`connect_kwargs` assigned at 349, the gateway fallback at 398 stored at
+303, and `self.config` at 608 and 623. 22 site-callee additions, 18 graph
+edges (the three `.get` sites share two pairs): 369 edges, 99 in the
+package, 270 outside. The Statistics table above gives the current
+counts; its earlier row (353 edges, 254 outside, 163 outside callees, 428
+callee lines) was 2 edges too high against the graph before this
+correction (351, 252, 161, 426), and is replaced. The earlier audit
+sections keep their dated counts.

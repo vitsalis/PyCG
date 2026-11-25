@@ -252,6 +252,28 @@
         "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)",
         "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou..."
       ],
+      "invoke.config.Config.clone.clone.base_ssh_config.lookup": [
+        "fabric.connection 281:61 call  self.config.base_ssh_config.lookup(host)"
+      ],
+      "invoke.config.Config.clone.clone.base_ssh_config.lookup.get": [
+        "fabric.connection 291:48 call  self.ssh_config.get(\"user\", self.config.user)",
+        "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)",
+        "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou..."
+      ],
+      "invoke.config.Config.clone.clone.clone": [
+        "fabric.connection 261:34 call  config.clone(into=Config)"
+      ],
+      "invoke.config.Config.clone.clone.clone.base_ssh_config.lookup": [
+        "fabric.connection 281:61 call  self.config.base_ssh_config.lookup(host)"
+      ],
+      "invoke.config.Config.clone.clone.clone.base_ssh_config.lookup.get": [
+        "fabric.connection 291:48 call  self.ssh_config.get(\"user\", self.config.user)",
+        "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)",
+        "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou..."
+      ],
+      "invoke.config.Config.clone.clone.clone.clone": [
+        "fabric.connection 261:34 call  config.clone(into=Config)"
+      ],
       "paramiko.client.AutoAddPolicy": [
         "fabric.connection 334:57 call  AutoAddPolicy()"
       ],
@@ -411,6 +433,12 @@
       ],
       "invoke.config.Config.clone.clone": [
         "fabric.connection 388:55 call  self.config.clone()"
+      ],
+      "invoke.config.Config.clone.clone.clone": [
+        "fabric.connection 388:55 call  self.config.clone()"
+      ],
+      "invoke.config.Config.clone.clone.clone.clone": [
+        "fabric.connection 388:55 call  self.config.clone()"
       ]
     },
     "fabric.connection.Connection.local": {
@@ -462,6 +490,18 @@
       "fabric.connection.Connection.open": [
         "fabric.connection 549:26 call  self.gateway.open()"
       ],
+      "invoke.config.Config.clone.clone.clone.gateway.open": [
+        "fabric.connection 549:26 call  self.gateway.open()"
+      ],
+      "invoke.config.Config.clone.clone.clone.gateway.transport.open_channel": [
+        "fabric.connection 558:51 call  self.gateway.transport.open_channel( kind=\"direct-tcpip\",..."
+      ],
+      "invoke.config.Config.clone.clone.gateway.open": [
+        "fabric.connection 549:26 call  self.gateway.open()"
+      ],
+      "invoke.config.Config.clone.clone.gateway.transport.open_channel": [
+        "fabric.connection 558:51 call  self.gateway.transport.open_channel( kind=\"direct-tcpip\",..."
+      ],
       "invoke.config.Config.clone.gateway.open": [
         "fabric.connection 549:26 call  self.gateway.open()"
       ],
@@ -508,6 +548,12 @@
       "<builtin>.list.extend": [
         "fabric.connection 364:50 call  connect_kwargs[\"key_filename\"].extend( self.ssh_config[\"i..."
       ],
+      "invoke.config.Config.clone.clone.clone.connect_kwargs.setdefault": [
+        "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])"
+      ],
+      "invoke.config.Config.clone.clone.connect_kwargs.setdefault": [
+        "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])"
+      ],
       "invoke.config.Config.clone.connect_kwargs.setdefault": [
         "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])"
       ],
@@ -547,6 +593,12 @@
         "fabric.connection 609:25 call  self._run(runner, command, **kwargs)"
       ],
       "invoke.Runner.__init__": [
+        "fabric.connection 608:44 call  self.config.runners.remote(self)"
+      ],
+      "invoke.config.Config.clone.clone.clone.runners.remote": [
+        "fabric.connection 608:44 call  self.config.runners.remote(self)"
+      ],
+      "invoke.config.Config.clone.clone.runners.remote": [
         "fabric.connection 608:44 call  self.config.runners.remote(self)"
       ],
       "invoke.config.Config.clone.runners.remote": [
@@ -590,6 +642,12 @@
         "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)"
       ],
       "invoke.Runner.__init__": [
+        "fabric.connection 623:44 call  self.config.runners.remote(self)"
+      ],
+      "invoke.config.Config.clone.clone.clone.runners.remote": [
+        "fabric.connection 623:44 call  self.config.runners.remote(self)"
+      ],
+      "invoke.config.Config.clone.clone.runners.remote": [
         "fabric.connection 623:44 call  self.config.runners.remote(self)"
       ],
       "invoke.config.Config.clone.runners.remote": [
@@ -1308,34 +1366,41 @@
       "Context.__init__ makes an invoke Config when config is None and stores it with _set; it calls no package code"
     ],
     "fabric.connection 261:34 call  config.clone(into=Config)": [
-      "The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub."
+      "The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): besides the client's vanilla Invoke config (callee invoke.config.Config.clone), the config that get_gateway forwards (388, 391) arrives here as invoke.config.Config + .clone repeated m times, m >= 2, when isinstance fails, so the callee is that path + .clone: the family is m >= 3 (no m = 2 here); the members m = 3 and 4 are recorded, a lower bound"
     ],
     "fabric.connection 27:2 decorator  @decorator": [
       "optional import (connection.py:4-11): the vendored copy in invoke, or the decorator package; both sides run (J6). decorator(caller) generates the decorator function that the name opens then names; it does not call opens"
     ],
     "fabric.connection 281:61 call  self.config.base_ssh_config.lookup(host)": [
-      "Vanilla config.clone result is stored unchanged by inherited _set; direct attribute/call chain on this result retains the original imported clone path, alongside real Fabric Config SSHConfig path."
+      "Vanilla config.clone result is stored unchanged by inherited _set; direct attribute/call chain on this result retains the original imported clone path, alongside real Fabric Config SSHConfig path.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 291:48 call  self.ssh_config.get(\"user\", self.config.user)": [
-      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type."
+      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 296:52 call  self.ssh_config.get(\"port\", self.config.port)": [
-      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type."
+      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 30:18 call  method(self, *args, **kwargs)": [
       "the original opens is called only by the wrappers that decorate() generated for the six methods decorated with @opens (586, 593, 611, 639, 681, 780); each wrapper passes its own undecorated method as method. forward_local and forward_remote are generator functions: the call makes the generator (J2)"
     ],
     "fabric.connection 320:50 call  self.ssh_config.get( \"connecttimeout\", self.config.timeou...": [
-      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type."
+      "SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 363:38 call  connect_kwargs.setdefault(\"key_filename\", [])": [
-      "Plain DataProxy.setdefault does not invoke a package subclass definition; do not trace merge callbacks. Actual Fabric Config inherited lookup still supplies DataProxy. Vanilla cloned configuration supplies an additional direct stub chain."
+      "Plain DataProxy.setdefault does not invoke a package subclass definition; do not trace merge callbacks. Actual Fabric Config inherited lookup still supplies DataProxy. Vanilla cloned configuration supplies an additional direct stub chain.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 364:50 call  connect_kwargs[\"key_filename\"].extend( self.ssh_config[\"i...": [
       "the key_filename value is a list: the [] of setdefault, the list of the -i flag (main.py:121-123), or the merged list of 358"
     ],
     "fabric.connection 388:55 call  self.config.clone()": [
-      "A Connection made from a vanilla InvokeConfig stores the ordinary clone result; the later .clone call extends that stub path. Actual FabricConfig receiver retains its package clone target."
+      "A Connection made from a vanilla InvokeConfig stores the ordinary clone result; the later .clone call extends that stub path. Actual FabricConfig receiver retains its package clone target.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): self.config is invoke.config.Config + .clone repeated m times for every m >= 1 (stored from 261 or forwarded from an earlier level), so the callee is that path + .clone, m >= 2; the members m = 3 and 4 beyond the existing invoke.config.Config.clone.clone are recorded, a lower bound"
     ],
     "fabric.connection 434:51 call  other._identity()": [
       "other is a Connection (isinstance at 432)"
@@ -1350,10 +1415,12 @@
       "Both optional imports are ordinary missing dependencies. Vendored/external six is not a package base/decorator at this call, so alias implementation cannot replace imported paths with io.StringIO."
     ],
     "fabric.connection 549:26 call  self.gateway.open()": [
-      "get_gateway may return the gateway attribute of an ordinary vanilla-config clone stub. Its explicit open method retains that direct attribute path; documented actual Connection gateway values retain the package open method."
+      "get_gateway may return the gateway attribute of an ordinary vanilla-config clone stub. Its explicit open method retains that direct attribute path; documented actual Connection gateway values retain the package open method.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 558:51 call  self.gateway.transport.open_channel( kind=\"direct-tcpip\",...": [
-      "Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain."
+      "Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 586:6 decorator  @opens": [
       "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
@@ -1365,7 +1432,8 @@
       "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
     ],
     "fabric.connection 608:44 call  self.config.runners.remote(self)": [
-      "Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__."
+      "Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 609:25 call  self._run(runner, command, **kwargs)": [
       "Context._run calls runner.run, invoke's Runner.run on the Remote of 608, which calls back the Remote methods: start, the IO threads (read_proc_stdout, read_proc_stderr without a pty, _write_proc_stdin for stdin and watcher responses), process_is_finished in wait(), send_interrupt on KeyboardInterrupt, returncode, generate_result, and stop in its finally (J3)"
@@ -1374,7 +1442,8 @@
       "The optional external decorator branch is in scope. Pinned decorator5.0.9 supports Python>=3.5 (setup.py21), overlapping Fabric3.5/3.6, and Fabric places no version ceiling on the optional package. Unlike vendored decorator4.0.11 generated functions, decorator5.0.9 defines named dec and fun closures in its source. There is no public outside module/class attribute for these closures: their installation at a Fabric attribute does not create an outside public path or replace the original package node. Use lexical outside names under the micro README closure rule. Keep each existing opens callback: the wrapper calls the original opens, which calls the original method. No direct Connection.run or Connection.sftp edge is introduced at wrapper call sites. decorator5.0.9.py272-294 defines/returns dec; all six @opens sites call it at module evaluation."
     ],
     "fabric.connection 623:44 call  self.config.runners.remote(self)": [
-      "Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__."
+      "Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__.",
+      "open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound"
     ],
     "fabric.connection 624:26 call  self._sudo(runner, command, **kwargs)": [
       "Context._sudo calls runner.run with a FailingResponder watcher, whose responses go through _write_proc_stdin; the callbacks are those of 609 (J3)"
