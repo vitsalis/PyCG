@@ -650,24 +650,9 @@ class Analysis(
         base = self._prefixes.get(call, (call, ()))[0]
         if self._roots.get(base, base).implicit:
             return True
-        signature = function.signature
         given = len(call.args) + (receiver is not None)
-        if given > len(signature.positional) and signature.vararg is None:
-            return False
-        filled = set(signature.positional[:given])
-        for name, _ in call.keywords:
-            if signature.accepts_keyword(name):
-                if name in filled:
-                    return False
-                filled.add(name)
-            elif signature.kwarg is None:
-                return False
-        required = [
-            name
-            for name in (*signature.positional, *signature.keyword_only)
-            if name not in function.optional
-        ]
-        return all(name in filled for name in required)
+        keywords = [name for name, _ in call.keywords]
+        return function.signature.binds(given, keywords, function.optional)
 
     def instantiate(self, cls, call):
         default = self.python_method(cls, "__new__")

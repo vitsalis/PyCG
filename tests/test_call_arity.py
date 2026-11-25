@@ -151,3 +151,60 @@ def test_a_default_of_none_makes_a_parameter_optional(tmp_path):
     )
 
     assert callees(graph, "main.run") == ["main.optional"]
+
+
+def test_a_statement_that_calls_a_function_that_cannot_bind_ends_the_path(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def warn(major, minor, cause, fix): pass
+        def keyed(*, key): pass
+        def after(): pass
+        def missing():
+            warn(0, 13, "cause")
+            after()
+        def assigned():
+            result = keyed(1)
+            after()
+        def unknown_keyword():
+            warn(0, 13, "cause", fix="fix", extra=1)
+            after()
+        def binds():
+            warn(0, 13, "cause", fix="fix")
+            after()
+        def unpacked(args):
+            warn(*args)
+            after()
+        def nested():
+            print(warn(0))
+            after()
+        def guarded():
+            try:
+                warn(0)
+            except TypeError:
+                pass
+            after()
+        def decorated_wrapper(f):
+            return f
+        @decorated_wrapper
+        def decorated(a): pass
+        def through_decorator():
+            decorated()
+            after()
+        def rebound_name():
+            twice()
+            after()
+        def twice(a): pass
+        twice = after
+        for function in (missing, assigned, unknown_keyword, binds, unpacked,
+                         nested, guarded, through_decorator, rebound_name):
+            function()
+        """,
+    )
+
+    for function in ("missing", "assigned", "unknown_keyword"):
+        assert callees(graph, f"main.{function}") == [], function
+    for function in ("binds", "unpacked", "nested", "guarded"):
+        assert "main.after" in callees(graph, f"main.{function}"), function
+    assert "main.after" in callees(graph, "main.through_decorator")
+    assert callees(graph, "main.rebound_name") == ["main.after"]

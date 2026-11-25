@@ -311,19 +311,8 @@ class ModuleBuilder(
 
     def _function_object(self, node, scope):
         arguments = node.args
-        positional = [
-            scope.mangle(arg.arg) for arg in arguments.posonlyargs + arguments.args
-        ]
-        keyword_only = [scope.mangle(arg.arg) for arg in arguments.kwonlyargs]
-        vararg = scope.mangle(arguments.vararg.arg) if arguments.vararg else None
-        kwarg = scope.mangle(arguments.kwarg.arg) if arguments.kwarg else None
-        signature = Signature(
-            positional=positional,
-            positional_only_count=len(arguments.posonlyargs),
-            keyword_only=keyword_only,
-            vararg=vararg,
-            kwarg=kwarg,
-        )
+        signature = _signature(arguments, scope)
+        positional, keyword_only = signature.positional, signature.keyword_only
         defaults = {}
         with_defaults = positional[len(positional) - len(arguments.defaults) :]
         for name, default in zip(with_defaults, arguments.defaults):
@@ -458,6 +447,9 @@ class ModuleBuilder(
 
     def _stmt_Assign(self, node):
         value = self.expression(node.value)
+        if self._cannot_bind(node.value):
+            self._flow.end_path()
+            return
         facts = self._facts(node.value)
         if self._may_alias(node.targets):
             value = self._join([value, self.alias_form(node.value)])
@@ -485,6 +477,9 @@ class ModuleBuilder(
             cls.annotations[self._scope.mangle(target.id)] = annotation
         if node.value is not None:
             value = self.expression(node.value)
+            if self._cannot_bind(node.value):
+                self._flow.end_path()
+                return
             facts = self._facts(node.value)
             if self._may_alias([target]):
                 value = self._join([value, self.alias_form(node.value)])
@@ -546,6 +541,32 @@ class ModuleBuilder(
     def _stmt_Expr(self, node):
         if not isinstance(node.value, ast.Constant):
             self.expression(node.value)
+            if self._cannot_bind(node.value):
+                self._flow.end_path()
+
+    def _cannot_bind(self, node):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)):
+            return False
+        if any(isinstance(arg, ast.Starred) for arg in node.args):
+            return False
+        if any(keyword.arg is None for keyword in node.keywords):
+            return False
+        name = self._scope.mangle(node.func.id)
+        scope = self.scopes.resolve(self._scope, name)
+        definition = self.scopes.function_definition(scope, name)
+        if definition is None:
+            return False
+        arguments = definition.args
+        signature = _signature(arguments, self.scopes.scope_of(definition))
+        positional = signature.positional
+        optional = set(positional[len(positional) - len(arguments.defaults) :])
+        optional.update(
+            name
+            for name, default in zip(signature.keyword_only, arguments.kw_defaults)
+            if default is not None
+        )
+        keywords = [keyword.arg for keyword in node.keywords]
+        return not signature.binds(len(node.args), keywords, optional)
 
     def _stmt_Delete(self, node):
         for target in node.targets:
@@ -1058,3 +1079,15 @@ def _walrus_names(statement):
                 continue
         pending.extend(ast.iter_child_nodes(node))
     return names
+
+
+def _signature(arguments, scope):
+    return Signature(
+        positional=[
+            scope.mangle(arg.arg) for arg in arguments.posonlyargs + arguments.args
+        ],
+        positional_only_count=len(arguments.posonlyargs),
+        keyword_only=[scope.mangle(arg.arg) for arg in arguments.kwonlyargs],
+        vararg=scope.mangle(arguments.vararg.arg) if arguments.vararg else None,
+        kwarg=scope.mangle(arguments.kwarg.arg) if arguments.kwarg else None,
+    )
