@@ -245,6 +245,19 @@ def test_method_type_binds_a_function_to_an_object(tmp_path):
     ]
 
 
+def test_the_dict_of_an_outside_module_is_a_dict(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import errno
+        def name(code):
+            return errno.__dict__.get(code)
+        """,
+    )
+
+    assert callees(graph, "main.name") == ["<builtin>.dict.get"]
+
+
 def test_a_result_of_unknown_type_has_no_invented_names(tmp_path):
     graph = main_graph(
         tmp_path,
