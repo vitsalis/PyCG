@@ -22,6 +22,8 @@ CLASS_TESTS = {"isinstance": False, "issubclass": True}
 TYPE_PATH = "builtins.type"
 COROUTINE_PATH = "types.CoroutineType"
 
+CLASS_PREDICATES = {"inspect.iscoroutine": COROUTINE_PATH}
+
 ANALYSED, EXACTLY, BELOW = "analysed", "exactly", "below"
 
 UNKNOWN_CLASS = (None, None)
@@ -29,29 +31,50 @@ UNKNOWN_CLASS = (None, None)
 
 class ClassTestBuilder:
     def class_test(self, node, args):
-        if node.keywords or len(node.args) != 2 or len(args) != 2:
+        if node.keywords or not node.args or len(node.args) != len(args):
             return
-        subject, classes = node.args
-        if not isinstance(subject, ast.Name) or not _names_classes(classes):
-            return
-        checker = next(
-            (n for n in CLASS_TESTS if self._is_builtin_reference(node.func, n)),
-            None,
-        )
-        if checker is None:
+        tested = self._tested_classes(node, args)
+        subject = node.args[0]
+        if tested is None or not isinstance(subject, ast.Name):
             return
         name = self._scope.mangle(subject.id)
         scope = self.scopes.resolve(self._scope, name)
         if scope is not self._scope or not self.scopes.tracked(scope, name):
             return
-        tested = self._flow.definition(name)
+        classes, as_class = tested
+        definition = self._flow.definition(name)
         self._class_tests_by_call[node] = (
             name,
-            tested,
+            definition,
             args[0],
-            args[1],
-            CLASS_TESTS[checker],
+            classes,
+            as_class,
         )
+
+    def _tested_classes(self, node, args):
+        if len(args) == 2 and _names_classes(node.args[1]):
+            for checker, as_class in CLASS_TESTS.items():
+                if self._is_builtin_reference(node.func, checker):
+                    return args[1], as_class
+        if len(args) == 1:
+            path = CLASS_PREDICATES.get(self._imported_function(node.func))
+            if path is not None:
+                tested = self.analysis.constant(self.analysis.external(path))
+                return tested, False
+        return None
+
+    def _imported_function(self, func):
+        if isinstance(func, ast.Name):
+            return self._import_of(func.id)
+        if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+            module = self._import_of(func.value.id)
+            if module is not None:
+                return f"{module}.{func.attr}"
+        return None
+
+    def _import_of(self, name):
+        name = self._scope.mangle(name)
+        return self.scopes.imported(self.scopes.resolve(self._scope, name), name)
 
     def narrow(self, test, holds, state=None):
         match test:

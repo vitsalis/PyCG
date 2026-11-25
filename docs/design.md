@@ -1076,7 +1076,9 @@ value for a class of the stubs (so `isinstance(content, bytes)` then
 `content.decode()` calls `<builtin>.bytes.decode`), and each of them for a
 tuple of classes. In the branch where the test fails, it gets the values
 that may not be instances of `C`. `issubclass(x, C)` does the same with
-classes.
+classes. `inspect.iscoroutine(x)` is `isinstance(x, types.CoroutineType)`
+(`CLASS_PREDICATES`), called through a name or a module that an import of
+`inspect` binds.
 
 ```python
 def load(parser, stream):
@@ -1184,13 +1186,15 @@ class of the stubs exactly, anything else not known.
   - a class of the stubs of `builtins`, or `Generic`;
   - a class of the stubs whose stub MRO has no class that declares a
     metaclass other than `type` (`IntEnum`: `int`, then `Enum` of
-    `EnumMeta`), and, up to its first class of `builtins`, no protocol, no
-    class that exists only in stubs, no abstract class and no class of the
-    modules `abc`, `typing`, `typing_extensions` and `_collections_abc`
-    (the stubs declare no metaclass for the ABCs of `collections.abc`, so
-    a missing metaclass proves nothing there); the stubs give the builtin
-    classes protocol bases that they do not have at run time, so the MRO
-    is read only up to them;
+    `EnumMeta`), and, up to its first class of `builtins` or final class,
+    no protocol, no class that exists only in stubs, no abstract class and
+    no class of the modules `abc`, `typing`, `typing_extensions` and
+    `_collections_abc` (the stubs declare no metaclass for the ABCs of
+    `collections.abc`, so a missing metaclass proves nothing there); the
+    stubs give the builtin classes protocol bases that they do not have at
+    run time, so the MRO is read only up to them, and a final class
+    (`types.CoroutineType`) is one from which no class derives, so its
+    protocol bases do not answer for it either;
   - an analysed class whose metaclasses are all `type` and none of whose
     MROs holds an outside class that is not one of the above (an outside
     class without stubs included).

@@ -1301,3 +1301,62 @@ def test_a_base_taken_from_a_class_attribute_is_the_builtin_class(tmp_path):
     )
 
     assert "main.Right.append" in callees(graph, "main.run")
+
+
+def test_inspect_iscoroutine_tests_the_coroutine_class(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import inspect
+        from inspect import iscoroutine
+        import inspect as introspection
+        async def run():
+            return 1
+        def through_name(result):
+            if iscoroutine(result):
+                result.close()
+            else:
+                result.inside()
+        def through_module(result):
+            if not inspect.iscoroutine(result):
+                result.inside()
+        def through_alias(result):
+            if introspection.iscoroutine(result):
+                result.inside()
+        def rebound(result, iscoroutine=bool):
+            if iscoroutine(result):
+                result.inside()
+        for function in (through_name, through_module, through_alias, rebound):
+            function(run())
+            function(A())
+        """,
+    )
+
+    assert callees(graph, "main.through_name") == [
+        "inspect.iscoroutine",
+        "main.A.inside",
+        "types.CoroutineType.close",
+    ]
+    assert classes_called(graph, "main.through_module", "inside") == ["A"]
+    assert classes_called(graph, "main.through_alias", "inside") == []
+    assert classes_called(graph, "main.rebound", "inside") == ["A"]
+
+
+def test_a_final_class_of_the_stubs_filters_whatever_its_protocol_bases(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import types
+        def items():
+            yield A()
+        def parse(arg):
+            if isinstance(arg, types.GeneratorType):
+                arg.inside()
+            else:
+                arg.close()
+        parse(items())
+        parse(A())
+        """,
+    )
+
+    assert callees(graph, "main.parse") == ["<builtin>.isinstance"]

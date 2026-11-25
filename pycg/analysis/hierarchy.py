@@ -837,7 +837,7 @@ def _nominal_stub_class(path):
         entry = definition.entry
         if entry.get("proto") or entry.get("tco"):
             return False
-        if owner.startswith("builtins."):
+        if owner.startswith("builtins.") or entry.get("final"):
             return True
         if owner.partition(".")[0] in _MODULES_OF_ABCS or _STUBS.abstract(owner):
             return False
