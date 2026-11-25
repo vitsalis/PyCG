@@ -288,3 +288,78 @@ covered. Source-only reasoning; no target, dependency, test, generated code or
 PyCG execution. Root owns the structural/origin verification gate.
 
 Evidence bundle: audits/2026-11-15/pass-4/bottle/.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-bottle-names` (e9547ae) against `main` (a044b5c): two
+outside edges added and one renamed in `bottle.json`, `bottle.added.json`,
+`bottle.ledger` and `bottle.md`, and `evaluation/metrics.json` re-based;
+no other file changed. I read `bottle.py` from the inputs image, the four
+ujson sdists (fetched again in a container, each SHA-256 checked against
+the writer's, read as text) and the CPython 3.8.20 to 3.15.2 sources of
+the dependency set. Nothing ran; no PyCG output was read.
+
+The ujson premises hold. `bottle.py:81-84` imports `dumps` and `loads`
+from ujson, else from json; the test environment lacks ujson (a missing
+module, as the existing sites `114:36`, `2032:38`, `2037:32` and
+`4650:48` name it). Every release read returns a `str` from `dumps` on
+Python 3 and a `dict` for a JSON object from `loads`: 1.35
+`python/objToJSON.c:1086` with `python/py_defines.h:51` (under
+`PY_MAJOR_VERSION >= 3`, `:41`), `python/JSONtoObj.c:83`; 2.0.3
+`objToJSON.c:844`, `py_defines.h:51`, `JSONtoObj.c:83`; 5.13.0
+`src/ujson/python/objToJSON.c:867`, `JSONtoObj.c:119`; 6.1.0
+`src/ujson/encode.c:817`, `decode.c:661`. The names are access paths, so
+no release changes them, and each release read is a witness of the
+behaviour.
+
+| Site | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `bottle.py:1046:29` | `Bottle._cast -> ujson.dumps.encode` | agree | `JSONPlugin()` is installed by default (`661`) with `json_dumps` (`2004`); it is applied after `TemplatePlugin` (`all_plugins`, `550`), so its wrapper is the outermost: `dumps(rv)` returned at `2035` reaches `_handle`'s `route.call` (`996`) and `wsgi`'s `self._cast(...)` (`1104`); an `HTTPResponse` body set at `2037` reaches `_cast(out.body)` (`1061`). On Python 3 the `str` passes `isinstance(out, unicode)` (`1045`); the B4 name stays beside the path (websocket-client), the path through the package's returns (einops) |
+| `bottle.py:2438:39` | `ConfigDict.load_dict -> ujson.loads.items` | agree | `_main` passes `json_loads(fp.read())` (`4650`); on Python 3 the lambda of `114` returns `json_lds(touni(s))`, on Python 2 `json_loads` is `json_lds` (`143`); the stub result keeps its path through the package's forwarding (einops, pgvector) |
+| `bottle.py:2918:49` | `static_file -> _sha1.sha1.hexdigest` renamed `_sha1.SHA1Type.hexdigest` | agree | `hashlib`'s fallback caches `_sha1.sha1` (3.8.20 `Lib/hashlib.py:85-87`, 3.15.2 `:93-95`), whose objects have `tp_name` `_sha1.sha1` and are exported as `SHA1Type` on every admitted CPython: `Modules/sha1module.c` 3.8.20 `:559`, 3.9.25 `:560`, 3.10.22 `:568-570`, 3.11.18 `:571`, 3.12.16 `:354`, 3.13.18 `:356`, 3.14.10 `:371`, 3.15.2 `:353` (all checked); the ruling's table gives the same name; no PyPy (no declaration), and Python 2.7's library is named for Python 3 (J2) |
+
+Nothing missed for ujson. Every flow of a `dumps` result: in `_cast` the
+calls after `1046` take the encoded value (`len(out)`, `1050`); `_handle`
+(`1008-1009`) and `_cast` (`1060`) copy an `HTTPResponse` body into
+`response` (`HTTPResponse.apply`, `1974`), where `BaseResponse.__iter__`
+calls `iter` (`1696`) and `BaseResponse.close` calls `close` only if
+`hasattr(self.body, 'close')` (`1699-1700`), false for ujson's `str`
+(honcho J6), so no `ujson.dumps.close`; an `HTTPError` body reaches the
+error page's `{{e.body}}`, which `_escape` passes through `touni`
+(`4210`), whose `unicode(...)` (`157`) makes a new `str`. No package code
+reads `BaseRequest.json` (`1298` returns `json_loads(b)` to the client),
+and `load_dict` unpacks `source.items()`, so its recursive `value`
+(`2442`) has no path. `json.dump_func` (`2014`) is defined but never
+read.
+
+Other C-type names. No other outside callee of `bottle.json` falls under
+the ruling: `_hashlib.HASH` is the exported attribute (`PyModule_AddObject
+(m, "HASH", ...)` in 3.8.20 `Modules/_hashopenssl.c:1149`;
+`PyModule_AddType` of `_hashlib.HASH` from 3.9.25 `:2179` to 3.15.2
+`:2787`); `hmac.new` returns the Python class `hmac.HMAC` on 3.8.20 and
+3.15.2 (`Lib/hmac.py`), so `hmac.HMAC.digest` at `1227`, `1871`, `3077`
+and `3089` stays; `io.BytesIO`, `io.BufferedReader`, `re.Pattern`,
+`re.Match`, `threading.local`, `weakref.ref` and `functools.partial` are
+public aliases.
+
+Counts. 1505 edges (647 inside, 858 outside), 1014 confirmed by the trace
+(67.4%), 491 from reading only: as `check.py bottle` reports, which passes
+with the source in place, as do `--origin` (added 491: 219 / 272) and
+`--report`. `gate.benchmark_digest()` on the branch gives
+`28a0068475b6162071a73da9496eff48fd771eaee3d8ed47399138daea1c512a`, the
+recorded digest. The `make eval` numbers and the macro outside R come from
+PyCG's output, which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| A1 | `touni`'s `<builtin>.str` is cited at line 159; it is `bottle.py:157` (site `157:19`; 159 is `tonat`) | `bottle.md`, "Corrections of 2026-11-25", the paragraph after the edge table | cite 157 |
+| A2 | "bottle declares no dependency and says nothing about ujson's versions, so no release statement narrows the optional import" reads as admitting every ujson release; batch 7 ("Which releases of a dependency are admitted") says that without a declared requirement an unpinned installation is not support for every historical release. No edge depends on it: the names are access paths and every release read behaves alike | `bottle.md`, "Corrections of 2026-11-25", first paragraph of **ujson** | state that bottle declares no requirement for ujson, and that the edges do not depend on which releases are admitted |
+
+**Verdict.** The three edge changes stand, and nothing is missed. Two
+statements in `bottle.md` (A1, A2) must be corrected before the merge;
+no edge depends on them.
+
+A1 and A2 were applied before the merge (`bottle.md`: `touni`'s
+`<builtin>.str` at 157; the ujson paragraph says that bottle declares no
+requirement and that the edges do not depend on the admitted releases).
+The audit is closed.
