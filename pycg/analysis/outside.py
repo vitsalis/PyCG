@@ -34,6 +34,7 @@ from .model import (
 from .solver import Each
 
 STUB_BUILTINS = "builtins"
+SUBCLASSES = f"{STUB_BUILTINS}.type.__subclasses__"
 OBJECT = "builtins.object"
 TYPE_CALL = "builtins.type.__call__"
 
@@ -336,6 +337,10 @@ class Outside:
         if not (receivers and self._unknown_class(receivers[0])):
             self.add_external_call_edge(external.name, call, "stub")
         receiver = external if external.inexact else None
+        if receivers and isinstance(receivers[0], Class):
+            if any(d.path == SUBCLASSES for d in definitions):
+                self._subclasses(receivers[0], call)
+                return
         for definition in definitions:
             if definition.kind == "class" and definition.path in CONTAINER_CLASSES:
                 entry = CONTAINER_CLASSES[definition.path][1]
@@ -488,6 +493,13 @@ class Outside:
         if isinstance(obj, Container) and "." in obj.kind:
             return self.stubs.abstract(obj.kind)
         return False
+
+    def _subclasses(self, cls, call):
+        if call.dst is None:
+            return
+        found = self.container_at("list", call.origin, call.site, "subclasses")
+        self.add_edge(self.subclasses_listed(cls), self.unknown(found))
+        self.add_object(call.dst, found)
 
     def _call_signatures(self, definition, call, receivers, external=None):
         entry = definition.entry

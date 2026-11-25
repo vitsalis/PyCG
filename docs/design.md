@@ -3092,6 +3092,14 @@ their own and at one shared site cost the sum of the two
   names*) give what the stubs say
   (`test_limit_dir_modules_and_vars_without_an_argument`).
 
+`C.__subclasses__()` of an analysed class gives a list whose element holds
+the classes that have `C` among their candidate bases, a class that gets
+`C` as a base later included, and not the stubs' `list[type[Self]]`, which
+names `C` itself.
+
+- Limit: a subclass whose class statement has not run yet is listed
+  (`test_limit_a_subclass_defined_after_the_call_is_listed`).
+
 ### Metaclasses
 
 A class is an instance of its metaclass: the most derived of the classes
