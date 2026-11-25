@@ -426,6 +426,39 @@ def test_receivers_and_sites_that_reflection_reads_cost_their_number(tmp_path):
     assert large < 2.5 * medium
 
 
+def dicts_updated_pairwise(size):
+    lines = []
+    for i in range(size):
+        lines += [f"def f{i}(): pass", f"s{i} = {{'a': f{i}}}", f"t{i} = {{}}"]
+    sources = ", ".join(f"s{i}" for i in range(size))
+    targets = ", ".join(f"t{i}" for i in range(size))
+    lines += [
+        f"for target in [{targets}]:",
+        f"    for source in [{sources}]:",
+        "        target.update(source)",
+        "t0['a']()",
+    ]
+    return "\n".join(lines) + "\n"
+
+
+def pairwise_update_work(tmp_path, size):
+    program = dicts_updated_pairwise(size)
+    generator = analysed(tmp_path / str(size), {"main.py": program})
+    graph = generator.output()
+    assert set(graph["main"]) >= {f"main.f{i}" for i in range(size)}
+    counts = generator.program.analysis.solver.work
+    return counts["copied"] + counts["edges"]
+
+
+def test_dicts_updated_from_many_dicts_at_one_site_cost_their_number(tmp_path):
+    small, medium, large = (
+        pairwise_update_work(tmp_path, size) for size in (40, 80, 160)
+    )
+
+    assert medium < 2.5 * small
+    assert large < 2.5 * medium
+
+
 def test_a_dict_copied_into_another_at_many_sites_is_copied_once(tmp_path):
     sites = 20
     program = (

@@ -876,6 +876,18 @@ c + ...`) does not exhaust the stack in any order. Copying the fields of
 one container to another is done once per pair: many sites copy the same
 container to the same place (pydantic: half of 191,000 copies), and each
 copy would add the same edges again for every field.
+A dict update (`t.update(s)`, `dict(s)`, `{**s}`, the rest of a mapping
+pattern) copies every dict of its source node into every dict of its target,
+fields times sources times targets: on cerberus one site pairs 980 dicts
+with 980 (162 million field copies). So from the second dict that reaches a
+source node, the node's dicts are copied once into an intermediate dict that
+no node holds (`_DictHub`), and it once into every target: fields times
+sources plus targets. Each field of a target gets the union of that field
+over the source dicts either way, and every source dict meets every target,
+so the result is the same; the `__hash__` and key-comparison calls of each
+site go to the keys of the sources that do not keep their hashes, as each
+pair's did. While one dict reaches the source node it is copied directly, so
+the copy once per pair above holds.
 
 A program has millions of `Each` constraints and of nodes with a successor.
 An `Each` keeps its function and the function's owner, not a bound method

@@ -216,11 +216,14 @@ class Containers:
         call = self.site_call(caller, site, ("hash",))
         self.add_special_call(key, "__hash__", call)
         if stored is not None:
-            compare = self.site_call(caller, site, ("hash_eq",), [None])
-            compared = self._compared_keys.setdefault(compare, set())
-            pairing = _KeyLookup(self, compare, compared)
-            self.solver.attach(key, Each(pairing.key))
-            self.solver.attach(stored, Each(pairing.stored, kinds=(Instance, Class)))
+            self._compare_keys(key, caller, site, stored)
+
+    def _compare_keys(self, key, caller, site, stored):
+        compare = self.site_call(caller, site, ("hash_eq",), [None])
+        compared = self._compared_keys.setdefault(compare, set())
+        pairing = _KeyLookup(self, compare, compared)
+        self.solver.attach(key, Each(pairing.key))
+        self.solver.attach(stored, Each(pairing.stored, kinds=(Instance, Class)))
 
     def key_store(self, container):
         return self.keys(container) if is_dict(container) else self.unknown(container)
@@ -369,7 +372,12 @@ class Containers:
                 self.add_edge(obj.function.return_node, dst)
 
     def add_dict_items(self, target, source, caller, site):
-        self.solver.attach(source, _DictItems(self, target, caller, site))
+        hub = self._dict_hubs.get(source)
+        if hub is None:
+            hub = self._dict_hubs[source] = _DictHub(
+                Container("dict", site), self.node()
+            )
+        self.solver.attach(source, _DictItems(self, target, hub, caller, site))
 
     def add_elements(self, target, source, caller, site):
         iteration = _Iterate(self, self.unknown(target), caller, site, role="elements")
@@ -620,13 +628,43 @@ class Containers:
         self.call_dunder(obj, "__getitem__", iteration.index_call(), iteration.dst)
 
     def apply_dict_items(self, obj, items):
-        if isinstance(obj, Container) and is_dict(obj):
-            self.copy_items(obj, items.target)
-            if not keeps_mapping_hashes(obj):
-                stored = self.keys(items.target)
-                self.add_hash(self.keys(obj), items.caller, items.site, stored)
-        else:
+        if not (isinstance(obj, Container) and is_dict(obj)):
             items.pairs().apply(obj)
+            return
+        hub, target, caller, site = items.hub, items.target, items.caller, items.site
+        if obj not in hub.sources:
+            hub.sources[obj] = None
+            if hub.active:
+                self._into_hub(hub, obj)
+        if (target, caller, site) not in hub.targets:
+            hub.targets[(target, caller, site)] = None
+            if hub.active:
+                self._out_of_hub(hub, target, caller, site)
+        if hub.active:
+            return
+        if len(hub.sources) == 1:
+            self.copy_items(obj, target)
+            if not keeps_mapping_hashes(obj):
+                self.add_hash(self.keys(obj), caller, site, self.keys(target))
+            return
+        hub.active = True
+        for source in hub.sources:
+            self._into_hub(hub, source)
+        for target, caller, site in hub.targets:
+            self._out_of_hub(hub, target, caller, site)
+
+    def _into_hub(self, hub, source):
+        self.copy_items(source, hub.container)
+        if not keeps_mapping_hashes(source):
+            self.add_edge(self.keys(source), hub.hashed)
+
+    def _out_of_hub(self, hub, target, caller, site):
+        if (caller, site) not in hub.sites:
+            hub.sites.add((caller, site))
+            call = self.site_call(caller, site, ("hash",))
+            self.add_special_call(hub.hashed, "__hash__", call)
+        self.copy_items(hub.container, target)
+        self._compare_keys(hub.hashed, caller, site, self.keys(target))
 
 
 class _Keyed(Constraint):
@@ -853,12 +891,25 @@ class _Iterate(_Site):
         return (self.dst,)
 
 
-class _DictItems(_Site):
-    __slots__ = ("target", "_pairs")
+class _DictHub:
+    __slots__ = ("container", "hashed", "sources", "targets", "sites", "active")
 
-    def __init__(self, analysis, target, caller, site):
+    def __init__(self, container, hashed):
+        self.container = container
+        self.hashed = hashed
+        self.sources = {}
+        self.targets = {}
+        self.sites = set()
+        self.active = False
+
+
+class _DictItems(_Site):
+    __slots__ = ("target", "hub", "_pairs")
+
+    def __init__(self, analysis, target, hub, caller, site):
         super().__init__(analysis, caller, site)
         self.target = target
+        self.hub = hub
         self._pairs = None
 
     def pairs(self):
