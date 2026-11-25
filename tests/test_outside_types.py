@@ -258,6 +258,24 @@ def test_the_dict_of_an_outside_module_is_a_dict(tmp_path):
     assert callees(graph, "main.name") == ["<builtin>.dict.get"]
 
 
+def test_urlsplit_names_the_function_and_its_cache_wrapper(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import urllib.parse
+        from urllib.parse import urlsplit
+        def host(url):
+            urllib.parse.urlsplit(url)
+            return urlsplit(url).netloc
+        """,
+    )
+
+    assert callees(graph, "main.host") == [
+        "_functools._lru_cache_wrapper.__call__",
+        "urllib.parse.urlsplit",
+    ]
+
+
 def test_a_result_of_unknown_type_has_no_invented_names(tmp_path):
     graph = main_graph(
         tmp_path,

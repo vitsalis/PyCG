@@ -1702,6 +1702,16 @@ or a list:
   arguments gives, for each analysed function `f` and each value `obj`,
   the method of `f` bound to `obj`, as a load of `f` through an instance
   does, so calling it calls `f` with `obj` first.
+- **Cached library functions.** From Python 3.11 `urllib.parse.urlsplit`
+  is decorated with `functools.lru_cache`, so its module attribute is an
+  `_lru_cache_wrapper`; the stubs describe the plain function, as it is on
+  3.10. As every Python version counts, a call of it names both the
+  function and the wrapper's `__call__` (`builtin_models.py`,
+  `CACHED_FUNCTIONS`; the only public function of the standard library
+  that 3.12 to 3.15 decorate so).
+  - Limit: the analysis does not read a package's minimum Python
+    version, so a package that admits only 3.11 and later also gets the
+    plain function's edge.
 - **Opened files.** `open`, `io.open`, `os.fdopen` and `pathlib.Path.open`
   give the class that `io.open` makes for their mode and buffering, where
   the stubs give one overload per kind of mode (their `Literal` modes

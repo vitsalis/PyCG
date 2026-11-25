@@ -315,6 +315,8 @@ STUB_RESULTS = {
     "ctypes.CDLL.__getitem__": "ctypes.CDLL.__init__._FuncPtr",
 }
 
+CACHED_FUNCTIONS = {"urllib.parse.urlsplit": "functools._lru_cache_wrapper"}
+
 REFLECTION_CALLS = {
     "builtins.vars": ("(object=None, /)", "namespace"),
     "inspect.getmembers": ("(object, predicate=None)", "members"),
