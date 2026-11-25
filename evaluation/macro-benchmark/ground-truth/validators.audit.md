@@ -238,3 +238,33 @@ only by reading eth-hash 0.7.0.
   copy, `--report --default`, `--report --without-candidates` and the plain
   check gave consistent counts (721 sites, 4 value sites; defaults 168, 32,
   32, 38, 38 sites).
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-validators-sha256` (cf42fd1, PR #108) against `main`
+(14798e4): two outside edges renamed in `validators.json`,
+`validators.added.json`, `validators.ledger` and `validators.md`;
+`evaluation/metrics.json` is not recorded yet. I read `src/validators/`
+and `pyproject.toml` from the inputs image and CPython 3.11.18 to 3.15.2
+from the dependency sources, as text. Nothing ran; no PyCG output was read.
+
+| Site | Change | Verdict | Evidence |
+|---|---|---|---|
+| `crypto_addresses/btc_address.py:23:52`, `23:62` (`_validate_old_btc_address`) | `_sha256.sha256.digest` renamed `_sha256.SHA256Type.digest` | agree | `sha256` is `hashlib.sha256` (`from hashlib import sha256`, `:4`). validators admits CPython 3.11 and later only (`pyproject.toml:32`, `:35`). On 3.11 hashlib's fallback is the factory `_sha256.sha256` (`Lib/hashlib.py:94-97` of 3.11.18), whose objects have `.name = "_sha256.sha256"` (`sha256module.c:570`) and whose type `_sha256` exports as `SHA256Type` (`PyModule_AddObject`, `:728`); `hashlib.sha256` is a factory, so no public class alias applies (ruling-names-2) |
+| `crypto_addresses/trx_address.py:33:67`, `33:77` (`_validate_trx_checksum_address`) | the same | agree | `hashlib.sha256` (`import hashlib`, `:4`) |
+| the four sites | `_hashlib.HASH.digest`, `_sha2.SHA256Type.digest` kept | agree | `_hashlib` exports `HASH` (`PyModule_AddType`); from 3.12 the fallback is `_sha2.sha256`, type `.name = "_sha2.SHA256Type"` added by `PyModule_AddType` (`sha2module.c:547`, `855` of 3.12.16; `:540`, `867` of 3.15.2) |
+
+Nothing missed: these two lines are the package's only hash objects
+(`hashes.py` defines validators, not hash calls; `eth_address.py:24` uses
+the installed `eth_hash`, outside both rulings), and no other outside
+callee of `validators.json` falls under them (`re.Pattern`, `re.Match`,
+`functools.partial`, the `ipaddress` and `pathlib` classes are public;
+`functools._lru_cache_wrapper` is the micro-benchmark's own example).
+
+Counts. 422 edges (152 inside, 270 outside), unchanged in number; 394
+traced, 28 from reading only: as `check.py validators` reports, which
+passes with the source in place, as do `--origin` and `--report`. The
+`make eval` numbers come from PyCG's output, which I did not read.
+
+**Verdict.** Closed: the two renames stand, and nothing is missed. No
+finding.
