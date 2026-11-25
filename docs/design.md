@@ -1600,7 +1600,10 @@ or a list:
   A variable or property gives a value of its type (`os.environ`); a
   variable that a module declares is a value of its type also when the
   code imports it by name (`from os import environ`). A name that the stubs
-  do not have gives nothing.
+  do not have gives nothing, except `__dict__` of an outside module,
+  which is the module's namespace, a dict (the stubs do not list the
+  attributes that every module has): `errno.__dict__.get(code)` calls
+  `<builtin>.dict.get`.
 - **Standard streams.** `sys.stdout`, `sys.stderr` and `sys.stdin` are
   `io.TextIOWrapper` objects, which the interpreter makes at start-up; the
   stubs type them as the abstract `TextIO`, whose methods give no edge

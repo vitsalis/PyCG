@@ -217,6 +217,8 @@ class Outside:
             self.add_edge(call.args[-1], call.dst)
 
     def outside_attribute(self, external, attr, dst, definitions, bounded):
+        if attr == "__dict__" and any(d.kind == "module" for d in definitions):
+            self.add_object(dst, self.typed(f"{STUB_BUILTINS}.dict"))
         named = False
         for definition in definitions:
             for found in self.stubs.attribute(definition, attr):
