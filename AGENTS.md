@@ -23,7 +23,7 @@ make setup              # create the environment (uv sync --locked)
 make check              # before pushing: lint, and the tests of what the change touches
 make check FULL=1       # every check, as make lint and make test
 make test               # all tests: the engine's and the evaluation's
-make lint               # ruff check and format check
+make lint               # ruff check, format check, no comments
 make format             # apply formatting
 make eval               # measure this commit on both benchmarks and gate it (Docker)
 make eval-record        # raise evaluation/metrics.json to the values measured
@@ -47,6 +47,11 @@ not add one without discussion.
 - **Results are deterministic.** The same input gives the same output on every
   run and every supported Python version.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
+- **No comments or docstrings in code.** Names carry the meaning; the why
+  goes to `docs/` and to commit messages. Licence headers and the pragmas
+  that tools read (`# noqa`, `# type:`, `# shellcheck`) stay; the analysed
+  programs and test data are data, not code. `make lint` runs
+  `tools/no_comments.py`, which enforces this.
 - Record every measurable result (bugs found in ground truth, measurements
   other than those of `make eval`, design decisions and their reasons) in
   the commit message of the change. The numbers of `make eval` go in the

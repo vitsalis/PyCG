@@ -151,7 +151,7 @@ returns to the last one.
 Install [uv](https://docs.astral.sh/uv/). Then, from the root directory:
 ```
 uv run make test    # unit tests, the micro-benchmark and its validator
-uv run make lint    # ruff check and ruff format --check
+uv run make lint    # ruff check, ruff format --check, no comments
 uv run make format  # sort imports and format the code
 ```
 
