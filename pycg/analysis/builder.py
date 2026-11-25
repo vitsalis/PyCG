@@ -58,6 +58,7 @@ class ModuleBuilder(
         self._variables = {}
         self._untracked_nodes_by_scope = {}
         self._builtin_globals = {}
+        self._maybe_builtins = {}
         self._builtin_values = {}
         self._names_bound_to_importlib = set()
         self._import_module_names = set()
@@ -86,6 +87,15 @@ class ModuleBuilder(
             self._statements(self.tree.body)
         finally:
             self.names_bound_at_run_time = list(self._bound_at_end(self.scopes.module))
+            module = self.scopes.module
+            top_level = _top_level_bindings(self.tree.body)
+            for name, node in self._maybe_builtins.items():
+                if self.scopes.tracked(module, name):
+                    unbound = self._flows[module].state.get(name)[1]
+                else:
+                    unbound = name not in top_level
+                if unbound:
+                    self.analysis.add_edge(self._builtin_value(name), node)
             self.module.defines.update(self.names_bound_at_run_time)
 
     @contextmanager
@@ -147,7 +157,10 @@ class ModuleBuilder(
             facts = unknown
             if self.scopes.imported(scope, name) in TYPE_CHECKING_IMPORTS:
                 facts = (FALSE, literals_of(False))
-            return self._variable(scope, name), facts
+            variable = self._variable(scope, name)
+            if scope.kind == MODULE and name in BUILTIN_NAMES:
+                return self._join([variable, self._maybe_builtin(name)]), facts
+            return variable, facts
         value, unbound, truth, values = definition
         if not unbound:
             return value, (truth or UNKNOWN, values)
@@ -158,6 +171,11 @@ class ModuleBuilder(
             value = self._join([value, self._builtin_value(name)])
             return value, unknown
         return value, (truth or UNKNOWN, values)
+
+    def _maybe_builtin(self, name):
+        if name not in self._maybe_builtins:
+            self._maybe_builtins[name] = self.analysis.node()
+        return self._maybe_builtins[name]
 
     def _value_of(self, scope, name):
         if self._is_builtin(scope, name):
@@ -1015,6 +1033,26 @@ def _slots(finals):
         case _:
             return []
     return [name for name in names if isinstance(name, str) and name != "__dict__"]
+
+
+def _top_level_bindings(statements):
+    names = set()
+    for statement in statements:
+        match statement:
+            case (
+                ast.FunctionDef(name=name)
+                | ast.AsyncFunctionDef(name=name)
+                | ast.ClassDef(name=name)
+            ):
+                names.add(name)
+            case ast.Assign(targets=targets):
+                names.update(t.id for t in targets if isinstance(t, ast.Name))
+            case ast.AnnAssign(target=ast.Name(id=name), value=value) if value:
+                names.add(name)
+            case ast.Import(names=aliases) | ast.ImportFrom(names=aliases):
+                for alias in aliases:
+                    names.add(alias.asname or alias.name.partition(".")[0])
+    return names
 
 
 def _abstract_methods(finals):

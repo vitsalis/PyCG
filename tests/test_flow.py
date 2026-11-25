@@ -1634,3 +1634,26 @@ if __name__ == "other":
     )
 
     assert callees(graph, "helper") == ["<builtin>.exec", "helper.hit"]
+
+
+def test_a_module_name_that_a_path_may_leave_unbound_also_reads_the_builtin(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        if sys.platform == "win32":
+            callable = lambda value: True
+        len = len
+        def check(value):
+            callable(value)
+            len(value)
+        """,
+    )
+
+    assert callees(graph, "main.check") == [
+        "<builtin>.callable",
+        "<builtin>.len",
+        "main.<lambda1>",
+    ]
