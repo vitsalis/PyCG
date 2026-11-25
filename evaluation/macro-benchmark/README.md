@@ -3244,7 +3244,7 @@ the way to do it with Docker only. `evaluation/container/trace.sh` is the
 maintainers' own script for the same run: it runs Docker from the host,
 needs Python on the host for its checks, and writes the trace into
 `dynamic/`. It takes the source from the inputs image
-(`pycg-evaluation-inputs`: build it first with `$C build inputs`), a
+(`pycg-inputs`: build it first with `$C build inputs`), a
 benchmark directory and one project that has `test-environments/<name>.txt`:
 
 ```sh

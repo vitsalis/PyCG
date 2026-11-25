@@ -113,7 +113,7 @@ else
     cp "$requirements" "$work/context/requirements.txt"
 fi
 docker_cli build --pull=false --network=default \
-    --build-context inputs=docker-image://pycg-evaluation-inputs \
+    --build-context inputs=docker-image://pycg-inputs \
     --build-arg "PYTHON_IMAGE=$PYTHON_IMAGE" --build-arg "NAME=$name" \
     --tag "$tag" "$work/context"
 
