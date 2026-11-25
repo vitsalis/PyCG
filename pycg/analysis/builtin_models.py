@@ -301,6 +301,8 @@ CLOSURES = {
     "functools.lru_cache": "functools.lru_cache.decorating_function",
 }
 
+DECORATING_CLOSURES = frozenset({"functools.lru_cache.decorating_function"})
+
 REFLECTION_CALLS = {
     "builtins.vars": ("(object=None, /)", "namespace"),
     "inspect.getmembers": ("(object, predicate=None)", "members"),

@@ -373,6 +373,7 @@ class Analysis(
         star=(),
         double_star=(),
         decorator=False,
+        applies=False,
     ):
         if not decorator:
             self.call_expressions.append((caller, site, callee))
@@ -380,6 +381,7 @@ class Analysis(
             return
         call = Call(self, caller, args, keywords, dst, site, None, star, double_star)
         call.decorator = decorator
+        call.applies = applies
         self.solver.attach(callee, call)
 
     def solve(self):
@@ -600,6 +602,7 @@ class Analysis(
                 base.implicit,
             )
             call.decorator = base.decorator
+            call.applies = base.applies
             self._receiver_calls[key] = call
             self._prefixes[call] = (base, receivers)
         return self._receiver_calls[key]
@@ -817,6 +820,7 @@ class Analysis(
                 base.implicit,
             )
             template.decorator = base.decorator
+            template.applies = base.applies
             self._dunder_calls[key] = template
             self._roots[template] = root
         assert (template.args, template.keywords) == (base.args, base.keywords)
@@ -875,6 +879,7 @@ class Call(Constraint):
         "double_star",
         "implicit",
         "decorator",
+        "applies",
         "attached",
     )
 
@@ -902,6 +907,7 @@ class Call(Constraint):
         self.double_star = double_star
         self.implicit = implicit
         self.decorator = False
+        self.applies = False
         self.attached = False
 
     def apply(self, obj):

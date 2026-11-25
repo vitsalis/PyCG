@@ -504,8 +504,18 @@ managed():` calls `contextlib.contextmanager.helper` and `managed`, which
 the closure calls back. A call of a function that `lru_cache` or `cache`
 decorates calls `functools._lru_cache_wrapper.__call__` and the function in
 the same way; given a function, `lru_cache` and `cache` return the wrapper
-at once, as their stubs say. Other library callables whose stubs return a
-callable return the unnamed external (see *Typed outside values*).
+at once, as their stubs say. `decorating_function` wraps the function that
+an explicit call gives it as it wraps a decorated one, where the call is
+written on the call that returns it with one argument: `lru_cache(16)(f)`
+holds `f` too (`DECORATING_CLOSURES`). Other library callables whose stubs
+return a callable return the unnamed external (see *Typed outside
+values*).
+
+- Limit: a `decorating_function` stored first and applied later
+  (`cache = lru_cache(16)`, then `cache(f)`) does not hold `f`; reading it
+  there would also apply the closure that a bare `@lru_cache` leaves on the
+  decorated name (below) to each call's argument
+  (`test_limit_a_stored_lru_cache_decorator_does_not_wrap_what_it_gets`).
 
 - Limit: the overloads of `lru_cache` are not selected by the class of the
   argument (see *Typed outside values*), and both fit `@lru_cache` and

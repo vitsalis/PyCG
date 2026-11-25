@@ -4,6 +4,7 @@ from .builtin_models import (
     CALLS_BACK,
     CLOSURES,
     CONTAINER_CLASSES,
+    DECORATING_CLOSURES,
     HASHED_ARGUMENTS,
     ITERATOR,
     LAZY_MODES,
@@ -199,7 +200,8 @@ class Outside:
         if call.dst is None:
             return
         self.add_type(closure.result, call.dst, _Context(call))
-        if call.decorator and call.args[-1] is not None:
+        applied = call.applies and closure.name in DECORATING_CLOSURES
+        if (call.decorator or applied) and call.args[-1] is not None:
             self.add_edge(call.args[-1], call.dst)
 
     def outside_attribute(self, external, attr, dst, definitions, bounded):
