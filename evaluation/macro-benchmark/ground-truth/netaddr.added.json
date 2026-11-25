@@ -461,6 +461,11 @@
         "netaddr.eui.ieee 65:27 call  open(index_file, 'w')"
       ]
     },
+    "netaddr.eui.ieee.FileIndexer.update": {
+      "_csv.Writer.writerow": [
+        "netaddr.eui.ieee 75:29 call  self.writer.writerow(data)"
+      ]
+    },
     "netaddr.eui.ieee.IABIndexParser.__init__": {
       "<builtin>.open": [
         "netaddr.eui.ieee 197:27 call  open(ieee_file, 'rb')"
@@ -1256,6 +1261,9 @@
     ],
     "netaddr.eui.ieee 293:19 call  create_indices()": [
       "under `if __name__ == '__main__':`, code of the module (README); the else branch loads the indices on import"
+    ],
+    "netaddr.eui.ieee 75:29 call  self.writer.writerow(data)": [
+      "self.writer is the csv writer object that csv.writer returns (FileIndexer.__init__). Its type is exported as _csv.Writer on CPython 3.10 and later (3.10.22 Modules/_csv.c:1719, 3.11.18 :1753, 3.12.16 :1776, 3.13.18 :1760, 3.14.10 and 3.15.2 :1799); CPython 3.7 to 3.9 export only the factory functions (3.7.17 :1587, 3.8.20 :1597, 3.9.25 :1643), and PyPy exports factories only (pypy/module/_csv/moduledef.py:86), so the type name _csv.writer stays for them (batch 8, a C type exported under a module attribute other than its type name; netaddr.md, Corrections of 2026-11-25)"
     ],
     "netaddr.ip 1140:63 op  'IP version mismatch: %s and %s' % (ip, self)": [
       "%s of the IPAddress ip and of the IPNetwork self"
