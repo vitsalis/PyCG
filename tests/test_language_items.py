@@ -535,14 +535,76 @@ def test_limit_a_coroutine_names_an_attribute_that_it_lacks(tmp_path):
     ]
 
 
-def test_limit_an_operator_on_a_string_constant_gives_no_receiver(tmp_path):
+def test_an_operation_on_a_string_constant_gives_a_string(tmp_path):
     graph = graph_of(
         tmp_path,
         """
-        def use(count):
+        def use(count, text):
             ("ab" * count).upper()
             "abc"[1:].strip()
+            "abc"[0].isdigit()
+            b"abc"[1:].hex()
+            for letter in "abc":
+                letter.isalpha()
+            comment = "/*"
+            comment += text
+            comment.endswith("*/")
         """,
     )
 
-    assert callees(graph, "main.use") == []
+    assert callees(graph, "main.use") == [
+        "<builtin>.bytes.hex",
+        "<builtin>.str.endswith",
+        "<builtin>.str.isalpha",
+        "<builtin>.str.isdigit",
+        "<builtin>.str.strip",
+        "<builtin>.str.upper",
+    ]
+
+
+def test_an_fstring_that_makes_no_pattern_gives_a_string(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def use(a, b):
+            f"{a}.{b}".rstrip("0")
+            f"{a:08b}".zfill(3)
+            f"{a}"[:-1].strip()
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "<builtin>.str.rstrip",
+        "<builtin>.str.strip",
+        "<builtin>.str.zfill",
+    ]
+
+
+def test_a_pattern_stays_the_whole_value_of_an_operation_on_constants(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        table = {"pre_a": f, "other": g}
+        def read(name):
+            table["pre_" + name]()
+            table["pre_%s" % name]()
+        read("a")
+        """,
+    )
+
+    assert callees(graph, "main.read") == ["main.f"]
+
+
+def test_limit_a_key_built_from_a_name_of_a_constant_reads_every_entry(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        table = {"pre_a": f, "other": g}
+        def read(name):
+            prefix = "pre_"
+            table[prefix + name]()
+        read("a")
+        """,
+    )
+
+    assert callees(graph, "main.read") == ["main.f", "main.g"]

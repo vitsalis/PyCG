@@ -389,6 +389,10 @@ class Containers:
             iteration.apply(obj)
 
     def apply_subscript(self, obj, subscript):
+        if isinstance(obj, Const):
+            obj = self.string_constant_value(obj)
+            if obj is None:
+                return
         if isinstance(obj, Container):
             self.read_keyed(obj, subscript.key, subscript.dst)
             self.write_keyed(obj, subscript.key, subscript.src)
@@ -471,6 +475,10 @@ class Containers:
         self.add_object(dst, cls)
 
     def apply_slice(self, obj, slice_):
+        if isinstance(obj, Const):
+            obj = self.string_constant_value(obj)
+            if obj is None:
+                return
         if isinstance(obj, (Instance, Class)):
             self.subscript_object(obj, slice_, None)
         elif isinstance(obj, Container) and obj.kind in SEQUENCES:
@@ -547,6 +555,10 @@ class Containers:
         self.iterator(obj, iteration, iteration.iterators())
 
     def iterator(self, obj, iteration, dst):
+        if isinstance(obj, Const):
+            obj = self.string_constant_value(obj)
+            if obj is None:
+                return
         if isinstance(obj, Typed):
             name = "__aiter__" if iteration.is_async else "__iter__"
             origin = (iteration.caller, iteration.site, iteration.role)

@@ -9,20 +9,27 @@ from .solver import Each
 
 class PatternBuilder:
     def string_pattern(self, node):
-        parts = _parts(node)
-        if parts is None:
+        affixes = pattern_affixes(node)
+        if affixes is None:
             return None
-        merged = []
-        for part in parts:
-            if isinstance(part, str) and merged and isinstance(merged[-1], str):
-                merged[-1] += part
-            else:
-                merged.append(part)
-        prefix = merged.pop(0) if merged and isinstance(merged[0], str) else ""
-        suffix = merged.pop() if merged and isinstance(merged[-1], str) else ""
-        if not merged or not (prefix or suffix):
-            return None
-        return self.analysis.constant(self.analysis.pattern(prefix, suffix))
+        return self.analysis.constant(self.analysis.pattern(*affixes))
+
+
+def pattern_affixes(node):
+    parts = _parts(node)
+    if parts is None:
+        return None
+    merged = []
+    for part in parts:
+        if isinstance(part, str) and merged and isinstance(merged[-1], str):
+            merged[-1] += part
+        else:
+            merged.append(part)
+    prefix = merged.pop(0) if merged and isinstance(merged[0], str) else ""
+    suffix = merged.pop() if merged and isinstance(merged[-1], str) else ""
+    if not merged or not (prefix or suffix):
+        return None
+    return prefix, suffix
 
 
 def _parts(node):

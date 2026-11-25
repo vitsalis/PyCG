@@ -3,6 +3,7 @@ import operator as operators
 import string
 
 from .flow import FALSE, LITERAL_TYPES, TRUE, UNKNOWN, literals_of, truth_of, values_of
+from .patterns import pattern_affixes
 
 TYPING_MODULES = ("typing", "typing_extensions")
 TYPE_CHECKING_IMPORTS = frozenset(
@@ -419,10 +420,11 @@ class Expressions:
             chain.append(node)
             node = node.left
         value = self.expression(node)
+        constants = pattern_affixes(chain[0]) is None
         for operation in reversed(chain):
             right = self.expression(operation.right)
             self._operand_nodes_by_binop[operation] = (value, right)
-            value = self._operator(value, right, operation, inplace=False)
+            value = self._operator(value, right, operation, False, constants)
         return value
 
     def _expr_Constant(self, node):
@@ -575,7 +577,9 @@ class Expressions:
                 kind = _CONVERSION_BY_FSTRING_FLAG.get(value.conversion, "format")
                 site = self._site(value)
                 self.analysis.add_conversion(operand, kind, self._caller, site, spec)
-        return None
+        if pattern_affixes(node) is not None:
+            return None
+        return self.analysis.constant(self.analysis.typed("builtins.str"))
 
     def _expr_Subscript(self, node):
         base, index = self._subscript_parts(node)
@@ -760,7 +764,7 @@ class Expressions:
         else:
             self.analysis.add_subscript(base, index, dst, src, caller, site, delete)
 
-    def _operator(self, left, right, node, inplace=True):
+    def _operator(self, left, right, node, inplace=True, constants=True):
         if left is None and right is None:
             return None
         name = _SPECIAL_METHOD_BY_OPERATOR[type(node.op)]
@@ -776,6 +780,7 @@ class Expressions:
             result,
             self._caller,
             self._site(node),
+            constants=constants,
         )
         return result
 

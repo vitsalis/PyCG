@@ -2903,6 +2903,20 @@ instance of an analysed class, and its result joins. A `%` whose right
 operand is an instance of an analysed class that does not derive from
 str runs `str.__mod__`; the analysis does not decide the class here and
 widens it too.
+
+An arithmetic operator, a subscript, a slice or an iteration on a `str` or
+`bytes` constant runs the method of its builtin class, so it gives what
+the stub of that method gives, as for a typed value (`("ab" * n).upper()`
+calls `<builtin>.str.upper`); an expression that makes a pattern has the
+pattern alone as its value, so the operators of its own chain add nothing
+on its constants. An f-string that makes no pattern is a str of unknown
+value.
+
+- Limit: whether an expression makes a pattern is read from its own
+  syntax, so a constant prefix that a name holds makes none: `prefix +
+  kind` is a str of unknown value, and a dict read by it reads every
+  element
+  (`test_limit_a_key_built_from_a_name_of_a_constant_reads_every_entry`).
 `getattr` and `hasattr` with a pattern
 load every attribute of the object whose name matches: on an instance, the
 names that the class bodies of its MRO define or that stores assign on
@@ -3868,16 +3882,6 @@ outside code. A fix that prunes the names outside the stubs was built and
 measured; it leaves a receiver empty where the wrong name was, and the
 receiver completion then adds an edge that the engine did not have. The
 maintainer left it out (2026-11-15); a test pins the limit.
-
-**An operator on a string constant gives no receiver.** The result of an
-arithmetic operator, a subscript, a slice or an iteration on a `str` or
-`bytes` constant has no value, so a method call on that result has no
-receiver: `("ab" * n).upper()` misses its edge to `<builtin>.str.upper`. On
-the 30 benchmark packages a fix gains 9 edges to outside code (8 of them
-carry this cause in the labels of RQ3, which were made before). A fix
-needs a value that the key patterns do not see, which is a new kind of
-value in the solver; the maintainer left it out (2026-11-15); a test pins
-the limit.
 
 **Hubs reach class hierarchies.** `unittest`'s skip decorators rebind their
 argument, so every name that they decorate holds every item that they
