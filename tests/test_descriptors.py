@@ -1,7 +1,3 @@
-"""Descriptors other than functions, `staticmethod`, `classmethod` and
-`property`: instances whose class defines `__get__`, `__set__` or
-`__delete__`, found as class attributes."""
-
 import itertools
 import json
 import textwrap
@@ -46,7 +42,6 @@ def test_a_load_through_an_instance_calls_get_with_the_instance_and_class(
 ):
     graph = graph_of(tmp_path, "App().hook()\n")
 
-    # From the scope of the load; the load gives what `__get__` returns.
     assert callees(graph, "main") == [
         "<builtin>.classmethod",
         "main.Hook.__get__",
@@ -65,7 +60,6 @@ def test_a_load_through_the_class_calls_get_without_an_instance(tmp_path):
     )
 
     assert callees(graph, "main.load") == ["main.Hook.__get__", "main.f"]
-    # The instance is None: only the class is used.
     assert callees(graph, "main.Hook.__get__") == ["main.App.made"]
 
 
@@ -98,7 +92,6 @@ def test_a_value_in_the_instance_is_no_descriptor(tmp_path):
         """,
     )
 
-    # Python calls `__get__` only for what it finds on the class.
     assert callees(graph, "main.use") == []
 
 
@@ -142,17 +135,12 @@ def test_the_class_hook_is_the_caller_of_get_and_super_is_not(tmp_path):
         """,
     )
 
-    # As for a property: the class's own hook runs the accessor.
     assert "main.Hook.__get__" in callees(graph, "main.Hooked.__getattribute__")
     assert "main.Hook.__get__" not in callees(graph, "main.use")
     assert callees(graph, "main.Child.run") == ["<builtin>.super", "main.Hook.__get__"]
 
 
 def test_limit_object_hooks_by_name_run_no_descriptor(tmp_path):
-    # Python's `object.__setattr__(self, "x", v)` and its siblings, also
-    # through `super()`, run the data descriptor of the class. The analysis
-    # does not: the stubs do not tell whose native slot a hook is, and a
-    # star import may supply another `object` (a limit).
     graph = main_graph(
         tmp_path,
         """
@@ -179,14 +167,7 @@ User().by_super()
         assert not [c for c in found if c.startswith("main.Field")]
 
 
-# Subclasses of the builtin `property`, and descriptors of outside bases.
-
-
 def test_a_subclass_of_a_stubbed_outside_descriptor_is_itself_the_value(tmp_path):
-    # Regression: the lookup of `__get__` gives a bound outside method that
-    # the stubs describe (`functools.cached_property.__get__`), which is
-    # called by its stub; the instance is also the value of the load, and the
-    # wrapped method is not called (Python calls it).
     graph = main_graph(
         tmp_path,
         """
@@ -206,8 +187,6 @@ def test_a_subclass_of_a_stubbed_outside_descriptor_is_itself_the_value(tmp_path
 
 
 def test_a_subclass_of_an_unstubbed_outside_base_is_itself_the_value(tmp_path):
-    # Regression: an outside base without stubs gives a plain external for
-    # `__get__`, which is not called; the instance is the value of the load.
     graph = main_graph(
         tmp_path,
         """
@@ -227,9 +206,6 @@ def test_a_subclass_of_an_unstubbed_outside_base_is_itself_the_value(tmp_path):
 
 
 def test_a_property_subclass_in_an_exhaustive_order_runs_the_getter(tmp_path):
-    # More hierarchies than the analysis enumerates: the exhaustive order
-    # stands for all of them, so `property`'s `__get__` runs, and, as in an
-    # order without `property`, the instance is also the value.
     graph = main_graph(
         tmp_path,
         """
@@ -277,7 +253,6 @@ def test_a_class_method_without_an_owner_binds_the_metaclass_of_a_class(tmp_path
         """,
     )
 
-    # `type(Model)` is `Meta`: `Meta.kind`, not `Model.kind`.
     assert callees(graph, "main.make") == ["main.Meta.kind"]
 
 
@@ -313,10 +288,6 @@ def test_an_explicit_owner_wins_over_the_class_of_the_instance(tmp_path):
     assert callees(graph, "main.make") == ["main.Other.kind"]
 
 
-# Saturation: a cap of 2 reached by the receiver of a descriptor method, by
-# the accessor field of a property and by the base expression of a property
-# subclass. Each program gives the same documents under every solver order
-# and every order of its modules, and fewer edges than without a cap.
 SATURATING = {
     "the receiver of __get__": {
         "main.py": """
@@ -398,7 +369,6 @@ def test_saturated_descriptors_give_the_same_results_in_every_order(
             if expected is None:
                 expected = found
             assert found == expected, (name, entries)
-    # The cap is reached: the graph is not the one without a cap.
     uncapped = documents(tmp_path, list(files), cap=None)
     assert edges(expected) < edges(uncapped)
 
@@ -431,7 +401,6 @@ def documents(root, entries, **options):
     return dumps(generator.document())
 
 
-# The micro-benchmark cases of this rule give the same graph without a cap.
 CASES = [
     "outside_descriptor_subclass",
     "own_class_named_property",

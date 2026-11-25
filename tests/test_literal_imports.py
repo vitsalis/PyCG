@@ -1,6 +1,3 @@
-"""`importlib.import_module` and `__import__` with a str literal are
-imports: the builder resolves them as it resolves an import statement."""
-
 from programs import analysed, call_graph, callees
 
 PLUGINS = {
@@ -75,8 +72,6 @@ importlib.import_module("plugins." + "beta").run()
     graph = generator.output()
     assert "plugins.alpha" not in graph
     assert "plugins.beta" not in graph
-    # The result is what the stub of import_module gives, a module of no
-    # known name, whose attributes the stubs do not name.
     assert callees(graph, "main") == ["importlib.import_module"]
 
 
@@ -147,7 +142,7 @@ import_module(".alpha", "plugins").run()
     assert "plugins.alpha" not in graph
 
 
-def test_a_module_named_like_a_builtin_module_is_not_imported(tmp_path):
+def test_only_a_module_builtin_or_frozen_in_every_python_wins_over_a_file(tmp_path):
     graph = call_graph(
         tmp_path,
         {
@@ -157,8 +152,5 @@ def test_a_module_named_like_a_builtin_module_is_not_imported(tmp_path):
         },
     )
 
-    # os is frozen in every supported Python and wins over a file; math is
-    # builtin only in some builds, so the file is the module, the same on
-    # every Python that runs the analysis.
     assert callees(graph, "math.floor") == ["math.helper"]
     assert callees(graph, "os.getcwd") == []

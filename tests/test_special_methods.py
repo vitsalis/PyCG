@@ -1,6 +1,3 @@
-"""Implicit calls of special methods on instances: operators, subscripts,
-conversions to str, len() and __getattr__."""
-
 import sys
 
 import pytest
@@ -64,7 +61,6 @@ use(Number(), Plain())
 """,
     )
 
-    # `__add__` runs only where no `__iadd__` is defined.
     assert callees(graph, "main.use") == ["main.Number.__iadd__", "main.Plain.__add__"]
 
 
@@ -84,7 +80,6 @@ use(Number(), Distinct())
 """,
     )
 
-    # object.__ne__ calls __eq__; a class with its own __ne__ answers alone.
     assert callees(graph, "main.use") == [
         "main.Distinct.__ne__",
         "main.Number.__eq__",
@@ -353,8 +348,6 @@ def test_getattr_and_setattr_with_constant_names(tmp_path):
 
 
 def test_getattr_default_and_setattr_hold_instances(tmp_path):
-    # Instances, not functions: external code calls back the functions
-    # passed to it, which would hide a builtin that is not modelled.
     graph = main_graph(
         tmp_path,
         """
@@ -400,7 +393,6 @@ def test_getattr_with_a_name_of_a_few_constants_only(tmp_path):
         """,
     )
 
-    # At most four string constants: a load of each. More: dynamic.
     assert callees(graph, "main.few") == [
         "<builtin>.getattr",
         "main.C.a",
@@ -412,8 +404,6 @@ def test_getattr_with_a_name_of_a_few_constants_only(tmp_path):
 
 
 def test_the_name_of_a_function_is_a_str_constant(tmp_path):
-    # `__name__` of a def is its name, of a method too (through the class
-    # or bound), of a lambda `<lambda>`; a name stored there is one too.
     graph = main_graph(
         tmp_path,
         """
@@ -473,8 +463,6 @@ def test_getattr_loads_the_constants_of_a_name_whatever_else_it_holds(tmp_path):
         """,
     )
 
-    # A str of unknown value or an outside value names nothing, and does not
-    # hide the constants; more than four constants are still dynamic.
     assert callees(graph, "main.annotated") == ["<builtin>.getattr", "main.C.a"]
     assert callees(graph, "main.mixed") == [
         "<builtin>.getattr",
@@ -504,7 +492,6 @@ def test_hasattr_runs_the_load(tmp_path):
 
 
 def test_getattr_names_found_by_a_later_completion_round(tmp_path):
-    # The second getattr's name gets "b" only after the first is decided.
     graph = main_graph(
         tmp_path,
         """
@@ -557,7 +544,6 @@ def test_stores_of_untracked_values_still_call_setters(tmp_path):
         "main.C.change",
         "main.C.other",
     ]
-    # An annotation without a value evaluates its target but stores nothing.
     assert callees(graph, "main.annotate") == ["main.key", "main.make"]
 
 
@@ -613,7 +599,6 @@ use(Defaults(), Own())
 """,
     )
 
-    # dict.__getitem__ calls __missing__; a class's own __getitem__ does not.
     assert callees(graph, "main.use") == [
         "<builtin>.dict.get",
         "main.Defaults.__missing__",
@@ -640,7 +625,6 @@ use(Value(), Named(), Number())
 """,
     )
 
-    # `%d` converts with __int__ or __index__, not __str__.
     assert callees(graph, "main.use") == [
         "main.Named.__str__",
         "main.Value.__repr__",
@@ -699,8 +683,6 @@ use(Item(), None)
 """,
     )
 
-    # An instance's __mod__ decides; an int and bytes do not call __str__;
-    # a format that the analysis does not know converts nothing.
     assert callees(graph, "main.use") == ["main.Formatter.__mod__"]
 
 
@@ -730,8 +712,6 @@ def converted(tmp_path, conversion, value):
 def test_a_conversion_of_a_builtin_container_converts_its_elements_with_repr(
     tmp_path,
 ):
-    # list, tuple, set and dict have no __str__ or __format__: each
-    # conversion gives repr(), which calls repr() of the elements.
     for index, (conversion, value) in enumerate(
         [
             ("repr(xs)", "[Element()]"),
@@ -749,9 +729,6 @@ def test_a_conversion_of_a_builtin_container_converts_its_elements_with_repr(
 
 
 def test_percent_of_one_container_that_is_no_tuple_converts_it_whole(tmp_path):
-    # A value that is no tuple is the one item of `%`, also a container: a
-    # dict too, where the format names no key. A tuple gives its elements as
-    # the items, and a dict gives its values to the named fields.
     for index, (conversion, value, expected) in enumerate(
         [
             ('"%s" % xs', "[Element()]", "__repr__"),
@@ -769,10 +746,6 @@ def test_percent_of_one_container_that_is_no_tuple_converts_it_whole(tmp_path):
 
 
 def test_percent_gives_a_value_that_is_no_tuple_to_its_first_item_only(tmp_path):
-    # Python gives the one value to whatever the format takes first: a `*`
-    # width or `%d` takes it and fails, and a field after the first one
-    # lacks an argument, after the first is converted. `%%` takes nothing,
-    # and a positional field before the named ones takes a dict whole.
     for index, (conversion, value, expected) in enumerate(
         [
             ('"%*s" % xs', "[Element()]", []),
@@ -794,16 +767,14 @@ def test_percent_gives_a_value_that_is_no_tuple_to_its_first_item_only(tmp_path)
         ], (conversion, value)
 
 
-PERCENT_SYNTAX = [
-    # An empty precision is zero; a key may hold balanced parentheses.
+PERCENT_FIELDS_THAT_PYTHON_ACCEPTS = [
     ('"%.s" % xs', "[Element()]", ["Element.__repr__"]),
     ('"%5.s %r" % xs', "(Element(), Inner())", ["Element.__str__", "Inner.__repr__"]),
     ('"%((a))s" % xs', '{"(a)": Element()}', ["Element.__str__"]),
     ('"%(a(b)c)r" % xs', '{"a(b)c": Element()}', ["Element.__repr__"]),
     ('"%ls %Ls" % xs', "(Element(), Inner())", ["Element.__str__", "Inner.__repr__"]),
-    # Python rejects the first field it cannot take and converts nothing
-    # from there: a named field with a `*`, a key whose parentheses do not
-    # close, an unsupported conversion, a `%` that ends the format.
+]
+PERCENT_FIELDS_THAT_PYTHON_REJECTS_STOP_THE_CONVERSIONS = [
     ('"%(a)*s" % xs', '{"a": Element()}', []),
     ('"%(a).*s" % xs', '{"a": Element()}', []),
     ('"%(a)s%(b)*s%(c)r" % xs', '{"a": Element(), "c": Inner()}', ["Element.__str__"]),
@@ -812,28 +783,36 @@ PERCENT_SYNTAX = [
     ('"%s %5% %r" % xs', "(Element(), Inner())", ["Element.__str__"]),
     ('"%lls" % xs', "(Element(),)", []),
     ('"%r %" % xs', "(Element(),)", ["Element.__repr__"]),
-    # A tuple has no keys, a positional field after a named one has no
-    # argument, and a dict is no number.
+]
+PERCENT_FIELDS_WITHOUT_A_FITTING_ITEM_STOP_THE_CONVERSIONS = [
     ('"%s %(a)s %r" % xs', "(Element(), 1, Inner())", ["Element.__str__"]),
     ('"%(a)s %r" % xs', '{"a": Element()}', ["Element.__str__"]),
     ('"%d%(a)s" % xs', '{"a": Element()}', []),
 ]
+PERCENT_SYNTAX = [
+    *PERCENT_FIELDS_THAT_PYTHON_ACCEPTS,
+    *PERCENT_FIELDS_THAT_PYTHON_REJECTS_STOP_THE_CONVERSIONS,
+    *PERCENT_FIELDS_WITHOUT_A_FITTING_ITEM_STOP_THE_CONVERSIONS,
+]
 
 
-PERCENT_BYTES = [
-    # A bytes format converts with repr() for `%r` and `%a`; `%s` and `%b`
-    # take an item without converting it with str().
+PERCENT_BYTES_CONVERSIONS = [
     ('b"%r" % xs', "(Element(),)", ["Element.__repr__"]),
     ('b"%a" % xs', "[Element()]", ["Element.__repr__"]),
     ('b"%s %r" % xs', '(b"x", Inner())', ["Inner.__repr__"]),
     ('b"%b %a" % xs', '(b"x", Inner())', ["Inner.__repr__"]),
     ('b"%(a)r" % xs', '{b"a": Element()}', ["Element.__repr__"]),
     ('b"%((a))r" % xs', '{b"(a)": Element()}', ["Element.__repr__"]),
-    # Its keys are bytes, and it rejects fields as a str format does.
+]
+PERCENT_BYTES_WITH_STR_KEYS_OR_REJECTED_FIELDS = [
     ('b"%(a)r" % xs', '{"a": Element()}', []),
     ('b"%y %r" % xs', "(1, Inner())", []),
     ('b"%(a)*r" % xs', '{b"a": Element()}', []),
     ('b"%s" % xs', "(Element(),)", []),
+]
+PERCENT_BYTES = [
+    *PERCENT_BYTES_CONVERSIONS,
+    *PERCENT_BYTES_WITH_STR_KEYS_OR_REJECTED_FIELDS,
 ]
 
 
@@ -844,22 +823,19 @@ def test_percent_of_bytes_converts_with_repr(tmp_path, conversion, value, expect
     ]
 
 
-# Python rejects a width above PY_SSIZE_T_MAX (taken as 2**63 - 1) and a
-# precision above INT_MAX (2**31 - 1) before it converts the item. Each
-# format: whether Python accepts it.
-WIDTH, PRECISION = 2**63 - 1, 2**31 - 1
+WIDTH_MAX, PRECISION_MAX = 2**63 - 1, 2**31 - 1
 PERCENT_BOUNDS = [
-    (f"%{WIDTH}s", True),
-    (f"%{WIDTH + 1}s", False),
-    (f"%.{PRECISION}s", True),
-    (f"%.{PRECISION + 1}s", False),
-    (f"%000{WIDTH}.000{PRECISION}s", True),
+    (f"%{WIDTH_MAX}s", True),
+    (f"%{WIDTH_MAX + 1}s", False),
+    (f"%.{PRECISION_MAX}s", True),
+    (f"%.{PRECISION_MAX + 1}s", False),
+    (f"%000{WIDTH_MAX}.000{PRECISION_MAX}s", True),
     (f"%{'9' * 5000}s", False),
     (f"%.{'9' * 5000}s", False),
-    (f"%{WIDTH}r".encode(), True),
-    (f"%{WIDTH + 1}r".encode(), False),
-    (f"%.{PRECISION}r".encode(), True),
-    (f"%.{PRECISION + 1}r".encode(), False),
+    (f"%{WIDTH_MAX}r".encode(), True),
+    (f"%{WIDTH_MAX + 1}r".encode(), False),
+    (f"%.{PRECISION_MAX}r".encode(), True),
+    (f"%.{PRECISION_MAX + 1}r".encode(), False),
 ]
 
 
@@ -867,9 +843,7 @@ class _Converted(Exception):
     pass
 
 
-class _Raises:
-    """An item whose conversion raises before Python writes any output."""
-
+class _ItemWhoseConversionRaises:
     def __str__(self):
         raise _Converted
 
@@ -878,13 +852,11 @@ class _Raises:
 
 @pytest.mark.parametrize("fmt, accepted", PERCENT_BOUNDS)
 def test_the_bounds_of_widths_and_precisions_are_those_of_python(fmt, accepted):
-    if accepted and sys.maxsize != WIDTH and str(WIDTH) in str(fmt):
-        # A 32-bit Python rejects this width; the analysis takes the bound
-        # of a 64-bit one (see the design).
+    if accepted and sys.maxsize != WIDTH_MAX and str(WIDTH_MAX) in str(fmt):
         pytest.skip("PY_SSIZE_T_MAX of this Python is not 2**63 - 1")
     error = _Converted if accepted else ValueError
     with pytest.raises(error):
-        fmt % (_Raises(),)
+        fmt % (_ItemWhoseConversionRaises(),)
 
 
 @pytest.mark.parametrize("fmt, accepted", PERCENT_BOUNDS)
@@ -894,7 +866,6 @@ def test_percent_converts_nothing_from_a_width_or_precision_past_its_bound(
     method = "__repr__" if fmt[-1:] in ("r", b"r") else "__str__"
     expected = [f"main.Element.{method}"] if accepted else []
     assert converted(tmp_path, f"{fmt!r} % xs", "(Element(),)") == expected
-    # Python formats the fields before the rejected one, and none after it.
     text = fmt.decode() if isinstance(fmt, bytes) else fmt
     marked = f"%r {text} %r"
     if isinstance(fmt, bytes):
@@ -920,7 +891,6 @@ def test_a_dict_converts_its_keys_and_values_and_nested_containers_theirs(
         "main.Inner.__repr__",
         "main.Key.__repr__",
     ]
-    # A list that holds itself is converted once.
     assert converted(
         tmp_path / "cycle", "xs.append(xs)\n    repr(xs)", "[Inner()]"
     ) == ["main.Inner.__repr__"]
@@ -929,14 +899,12 @@ def test_a_dict_converts_its_keys_and_values_and_nested_containers_theirs(
 def test_a_value_that_is_no_builtin_container_does_not_convert_its_elements(
     tmp_path,
 ):
-    # A generator and an instance are converted by their own __repr__ only.
     for index, value in enumerate(["(x for x in [Inner()])", "Element()"]):
         found = converted(tmp_path / str(index), "repr(xs)", value)
         assert "main.Inner.__repr__" not in found, value
 
 
 def test_an_iterator_of_a_container_does_not_convert_its_elements(tmp_path):
-    # repr() of a list_iterator names its class, not its elements.
     assert converted(tmp_path, "repr(iter(xs))", "[Inner()]") == []
 
 
@@ -962,7 +930,6 @@ mixed(Shown(), Quoted())
 """,
     )
 
-    # Each `*` takes an int item before the item that is converted.
     assert callees(graph, "main.width") == ["main.Shown.__str__"]
     assert callees(graph, "main.both") == ["main.Quoted.__repr__"]
     assert callees(graph, "main.mixed") == [
@@ -997,8 +964,6 @@ use(Money(), User())
 
 
 def test_str_format_reads_an_index_of_any_length(tmp_path):
-    # int() of an index longer than 4300 digits fails (final review of the
-    # engine, finding 3).
     zeros, ones = "0" * 5000, "1" * 5000
     graph = main_graph(
         tmp_path,
@@ -1017,8 +982,6 @@ use(First(), Second(), Never())
 """,
     )
 
-    # An index is a number, whatever its leading zeros; Python rejects an
-    # index past sys.maxsize, which no call supplies.
     assert callees(graph, "main.use") == [
         "<builtin>.str.format",
         "main.First.__format__",
@@ -1052,7 +1015,6 @@ stored()
 """,
     )
 
-    # A lookup compares the key with a stored key that is another object.
     assert callees(graph, "main.same") == ["main.Key.__hash__"]
     assert callees(graph, "main.equal") == ["main.Key.__eq__", "main.Key.__hash__"]
     assert callees(graph, "main.stored") == ["main.Other.__hash__"]
@@ -1094,10 +1056,6 @@ look({Key(): 1})
 
 
 def test_a_lookup_compares_a_stored_key_with_any_searched_object(tmp_path):
-    # Python compares the stored key with the searched one where the hashes
-    # are equal, whatever the searched object is: an int or a function.
-    # Only the stored key's __eq__ is analysed; a stored key found by
-    # identity, or one that is not an instance or class, gives no edge.
     graph = main_graph(
         tmp_path,
         """
@@ -1161,7 +1119,6 @@ member(Key(), {}, [])
 """,
     )
 
-    # A list is searched without hashing.
     assert callees(graph, "main.member") == ["main.Key.__hash__"]
 
 
@@ -1180,10 +1137,6 @@ Table().get(Key())
 
     assert callees(graph, "main") == ["<builtin>.list.pop", "main.Table.get"]
 
-
-# Keys that enter a set or a dict, or are looked up there, are hashed and
-# compared with the stored keys; sequences, sets and dicts compared, and the
-# items that sorted, min and max compare, compare their elements.
 
 KEYS = """
 class Key:
@@ -1263,8 +1216,6 @@ def test_one_key_is_hashed_and_compared_with_no_other(tmp_path, use):
     ],
 )
 def test_keys_from_a_set_or_dict_keep_their_hash(tmp_path, use):
-    # A set or dict stores the hash of each key: one made from it, or
-    # extended with it, does not hash its keys again.
     graph = main_graph(
         tmp_path,
         KEYS
@@ -1280,11 +1231,6 @@ def test_keys_from_a_set_or_dict_keep_their_hash(tmp_path, use):
 def test_python_reuses_the_hashes_of_sets_and_of_dicts_that_iterate_as_dict(
     tmp_path,
 ):
-    # CPython reuses the hashes of a set and of a dict of exactly that
-    # class when a set or `fromkeys` takes them, and of every dict that
-    # iterates as `dict` does when a dict takes its items; an OrderedDict
-    # iterates by its own `__iter__`, and a Counter counts the elements of
-    # any iterable that is no mapping.
     uses = {
         "kept": [
             "{*keys}",
@@ -1339,7 +1285,6 @@ sets({Key()}, frozenset([Key()]))
 """,
     )
 
-    # The stored hashes are compared, not computed again.
     assert callees(graph, "main.dicts") == ["main.Key.__eq__", "main.Value.__eq__"]
     assert callees(graph, "main.sets") == ["main.Key.__eq__"]
 
@@ -1367,24 +1312,15 @@ other((Item(),))
 """,
     )
 
-    # `==` compares with `__eq__`; an ordering finds the first elements that
-    # differ with `__eq__` and orders them.
     assert callees(graph, "main.equal") == ["main.Item.__eq__"]
     assert callees(graph, "main.less") == ["main.Item.__eq__", "main.Item.__lt__"]
-    # A limit: containers inside the operands compare nothing.
     assert callees(graph, "main.nested") == []
-    # A tuple and an int compare no elements.
     assert callees(graph, "main.other") == []
 
 
 def test_containers_compare_elements_only_with_containers_of_their_family(
     tmp_path,
 ):
-    # The families of CPython: a list with a list, a tuple with a tuple, a
-    # deque with a deque, a set with a set or frozenset, a dict with any
-    # dict. An ordering compares two sets as subsets; two dicts it does not
-    # order. A limit: containers inside the operands compare nothing, also
-    # where Python compares their elements.
     cases = [
         ("[a] == (b,)", []),
         ("collections.deque([a]) == [b]", []),
@@ -1430,8 +1366,6 @@ class Item:
 def test_limit_a_strict_subset_test_compares_keys_whatever_the_sizes(
     tmp_path, operator
 ):
-    # Python returns False on the sizes of two sets of one element each
-    # before it compares a key; the analysis does not know the sizes.
     graph = main_graph(
         tmp_path,
         f"""
@@ -1448,9 +1382,6 @@ compare(Key(), Key())
 
 
 def test_limit_a_set_method_reuses_the_hashes_of_any_dict(tmp_path):
-    # Python hashes the keys of the dict again in `intersection` (and in
-    # `issubset`, `issuperset`, `isdisjoint`); the analysis looks only at
-    # the class of the source.
     graph = main_graph(
         tmp_path,
         """
@@ -1500,9 +1431,6 @@ largest([(1, Item()), (2, Item())])
 
 
 def test_list_asks_the_length_of_what_it_copies(tmp_path):
-    # list(), list.extend() and tuple() ask `__len__`, else
-    # `__length_hint__`, of an iterable that is no list or tuple. tuple()
-    # asks on Python 3.12 and 3.13 only; every supported version counts.
     graph = main_graph(
         tmp_path,
         """
@@ -1575,7 +1503,6 @@ def length_hints(graph, caller):
         "f(*x, *[])",
         "f(*x, 1)",
         "print(*x)",
-        # Unpacking is the interpreter's work, whatever the callee.
         "missing(*x)",
         "ext.call(*x)",
     ],
@@ -1652,7 +1579,6 @@ use(Hinted())
 
 
 def test_bytes_asks_no_length_of_what_converts_otherwise(tmp_path):
-    # bytes() takes `__bytes__`, then `__index__`, before it iterates.
     graph = main_graph(
         tmp_path,
         """
@@ -1698,9 +1624,6 @@ class Builtin:
 
 @pytest.mark.parametrize("join", ['"".join', 'b"".join', "bytearray().join"])
 def test_join_asks_the_length_of_the_iterator_of_its_argument(tmp_path, join):
-    # join makes a list of `iter(x)`, which asks the length of that iterator:
-    # x itself where `__iter__` returns it, else the iterator it returns; a
-    # builtin iterator has no analysed method.
     graph = main_graph(
         tmp_path,
         JOINED
@@ -1766,7 +1689,6 @@ for f, q in [(Flag(), Queue())]:
     assert callees(graph, "main.branch") == flag
     assert callees(graph, "main.loop") == queue
     assert callees(graph, "main.negate") == flag
-    # The last operand of `and` gives the result; its truth is not tested.
     assert callees(graph, "main.operands") == flag
     assert callees(graph, "main.arm") == queue
     assert callees(graph, "main.check") == queue
@@ -1798,13 +1720,11 @@ contains(Low(), High(), [1])
 """,
     )
 
-    # Python tests the truth of `a < b` to decide whether to go on.
     assert callees(graph, "main.chain") == [
         "main.High.__lt__",
         "main.Low.__lt__",
         "main.Tested.__bool__",
     ]
-    # The condition tests the value of the chain: either result.
     assert callees(graph, "main.condition") == [
         "main.High.__lt__",
         "main.Low.__lt__",
@@ -1852,9 +1772,6 @@ pattern(Value())
 
 @pytest.mark.parametrize("call", ["bytes(x)", "bytearray().extend(x)"])
 def test_a_buffer_is_read_without_asking_its_length(tmp_path, call):
-    # bytes() and bytearray.extend() read a buffer exporter before they try
-    # to iterate: a subclass of bytes, bytearray, memoryview or array.array,
-    # or a class with `__buffer__`, is not asked its length.
     graph = main_graph(
         tmp_path,
         f"""
@@ -1903,8 +1820,6 @@ class Outer:
 
 @pytest.mark.parametrize("target", ["a, *b", "*a, b", "[a, *b]"])
 def test_a_starred_target_asks_the_length_of_the_iterator(tmp_path, target):
-    # The starred target makes a list of the rest of the iterator, which
-    # asks that iterator's length: x where `__iter__` returns x.
     graph = main_graph(
         tmp_path,
         UNPACKED
@@ -1934,7 +1849,6 @@ use(Outer())
 """,
     )
 
-    # Control: the unpacking iterates the self-iterator.
     assert "main.Itself.__next__" in callees(graph, "main.use")
     assert length_hints(graph, "main.use") == []
 
@@ -1950,8 +1864,6 @@ use(Outer())
 def test_a_buffer_subclass_still_converts_through_its_own_method(
     tmp_path, call, method
 ):
-    # CPython calls the conversion method before it reads a buffer; the
-    # buffer stops only the length hint of bytes().
     graph = main_graph(
         tmp_path,
         f"""
@@ -1998,8 +1910,6 @@ def f(*args): pass
     ],
 )
 def test_a_sequence_iterator_asks_the_length_of_its_sequence(tmp_path, statement):
-    # The iterator that the sequence protocol makes forwards its length hint
-    # to the sequence's `__len__`, and to nothing else.
     graph = main_graph(
         tmp_path,
         SEQUENCES
@@ -2015,10 +1925,6 @@ use(Hinted())
 
 
 def test_limit_bytes_of_an_iterable_buffer_subclass_does_not_call_its_bytes(tmp_path):
-    # CPython calls `__bytes__` first; the stubs list Iterable before
-    # SupportsBytes, and `bytearray` defines `__iter__` (design.md, "Methods
-    # that builtins call on their arguments", the limit of the protocol
-    # order). Nor does bytes() ask the length of the buffer.
     graph = main_graph(
         tmp_path,
         """
@@ -2036,9 +1942,6 @@ use(Data(b"1"))
 
 @pytest.mark.parametrize("statement", ["*rest, = x", '"".join(x)', "list(iter(x))"])
 def test_the_iterator_of_an_outside_iterable_base_asks_no_length(tmp_path, statement):
-    # A subclass of Sequence iterates through the library's `Sequence.__iter__`,
-    # a generator, which has no length: Python never calls `View.__len__`
-    # there; list(x) asks x itself.
     graph = main_graph(
         tmp_path,
         f"""
@@ -2062,8 +1965,6 @@ copy(View())
     assert length_hints(graph, "main.copy") == ["main.View.__len__"]
 
 
-# The rows of the table in `BuiltinRules.add_length_hint`: what a node whose
-# length Python asks may hold. Sequence metaclasses make the class rows.
 LENGTH_ROWS = """
 import collections.abc
 class Seq:
@@ -2101,28 +2002,36 @@ def gen(x):
     for item in x:
         yield item
 """
+LENGTH_OF_A_CLASS_FROM_ITS_METACLASS = [("IterClass", "x", "main.IterMeta.__len__")]
+LENGTH_OF_THE_SEQUENCE_PROTOCOL_ITERATOR_OF_AN_INSTANCE_OR_CLASS = [
+    ("make_iter(Seq())", "x", "main.Seq.__len__"),
+    ("make_iter(SeqClass)", "x", "main.SeqMeta.__len__"),
+]
+LENGTH_OF_A_REVERSED_SEQUENCE_UNLESS_IT_DEFINES_REVERSED = [
+    ("make_reversed(Seq())", "x", "main.Seq.__len__"),
+    ("make_reversed(Back())", "x", None),
+]
+LENGTH_OF_NOTHING_FOR_THE_GENERATOR_OF_THE_SEQUENCE_MIXIN_REVERSED = [
+    ("make_reversed(View())", "x", None),
+]
+LENGTH_OF_NOTHING_FOR_BUILTIN_ITERATORS_AND_GENERATORS = [
+    ("enumerate(Seq())", "x", None),
+    ("zip(Seq())", "x", None),
+    ("map(str, Seq())", "x", None),
+    ("filter(None, Seq())", "x", None),
+    ("gen(Seq())", "x", None),
+    ("iter([Seq()])", "x", None),
+]
 
 
 @pytest.mark.parametrize(
     ("make", "argument", "asked"),
     [
-        # A class: its metaclass's methods.
-        ("IterClass", "x", "main.IterMeta.__len__"),
-        # The sequence protocol's iterator of an instance and of a class.
-        ("make_iter(Seq())", "x", "main.Seq.__len__"),
-        ("make_iter(SeqClass)", "x", "main.SeqMeta.__len__"),
-        # reversed() over a sequence asks it again, unless `__reversed__`.
-        ("make_reversed(Seq())", "x", "main.Seq.__len__"),
-        ("make_reversed(Back())", "x", None),
-        # Sequence's mixin `__reversed__` is a generator: no reversed object.
-        ("make_reversed(View())", "x", None),
-        # Builtin iterators and generators have no analysed length.
-        ("enumerate(Seq())", "x", None),
-        ("zip(Seq())", "x", None),
-        ("map(str, Seq())", "x", None),
-        ("filter(None, Seq())", "x", None),
-        ("gen(Seq())", "x", None),
-        ("iter([Seq()])", "x", None),
+        *LENGTH_OF_A_CLASS_FROM_ITS_METACLASS,
+        *LENGTH_OF_THE_SEQUENCE_PROTOCOL_ITERATOR_OF_AN_INSTANCE_OR_CLASS,
+        *LENGTH_OF_A_REVERSED_SEQUENCE_UNLESS_IT_DEFINES_REVERSED,
+        *LENGTH_OF_NOTHING_FOR_THE_GENERATOR_OF_THE_SEQUENCE_MIXIN_REVERSED,
+        *LENGTH_OF_NOTHING_FOR_BUILTIN_ITERATORS_AND_GENERATORS,
     ],
 )
 @pytest.mark.parametrize("site", ["list({})", '"".join({})', "*rest, = {}"])

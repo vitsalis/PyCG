@@ -1,7 +1,3 @@
-"""A call that cannot bind its arguments gives no edge: Python raises
-`TypeError` before the callee starts. Decided only where the arguments and
-the signature are known in full."""
-
 from programs import callees, main_graph
 
 
@@ -87,9 +83,6 @@ def test_receivers_count_as_arguments(tmp_path):
         """,
     )
 
-    # Base() cannot bind `value`: no edge to its __init__. A known limit:
-    # the instance that Python's __new__ made still flows, so its
-    # `method` is called.
     assert callees(graph, "main.build") == [
         "main.Base.make",
         "main.Base.method",
@@ -129,7 +122,6 @@ def test_unknown_arguments_or_signatures_keep_the_edge(tmp_path):
         """,
     )
 
-    # The outside decorator may give `decorated` another signature.
     assert callees(graph, "main.run") == ["main.decorated", "main.one"]
 
 

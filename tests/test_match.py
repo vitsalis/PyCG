@@ -1,6 +1,3 @@
-"""`match` patterns: a capture binds what its position in the pattern holds
-(see *Match patterns* in the design)."""
-
 import textwrap
 
 from programs import callees, main_graph
@@ -161,7 +158,6 @@ def test_a_class_pattern_binds_attributes(tmp_path):
     assert callees(graph, "main.keyword") == ["main.Command.__init__", "main.g"]
     assert callees(graph, "main.inherited") == ["main.Command.__init__", "main.f"]
     assert callees(graph, "main.computed") == ["main.Lazy.action", "main.h"]
-    # `str(text)` binds the subject itself.
     assert callees(graph, "main.builtin") == ["<builtin>.str.upper"]
 
 
@@ -226,12 +222,9 @@ def test_value_and_literal_patterns_compare_whatever_is_tracked(tmp_path):
         """,
     )
 
-    # `subject == 0.5` runs and its result is tested, though the float has
-    # no object; a literal subject runs the value's reflected __eq__.
     compared = ["main.Compared.__eq__", "main.Falsy.__bool__"]
     assert callees(graph, "main.literal") == compared
     assert callees(graph, "main.reflected") == compared
-    # None, True and False are compared by identity.
     assert callees(graph, "main.singletons") == []
 
 

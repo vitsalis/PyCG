@@ -1,8 +1,3 @@
-"""The worklist solver and the rules that resolve loads, stores and calls.
-
-These tests build constraints by hand, without the AST builder.
-"""
-
 import types
 
 import pytest
@@ -20,14 +15,10 @@ class Marker:
         self.name = name
 
 
-# What a node holds once it would hold more objects than the cap.
 SATURATED = Marker("<saturated>")
 
 
 class Recorder(Constraint):
-    """A constraint that records the objects it is applied to; `result`, if
-    given, is the node where it would put what it finds."""
-
     def __init__(self, result=None):
         self.applied = []
         self.result = result
@@ -40,14 +31,12 @@ class Recorder(Constraint):
 
 
 def names(node, solver):
-    """The names of the objects of `node`, in the solver's order."""
     if isinstance(solver, Analysis):
         solver = solver.solver
     return [obj.name for obj in solver.objects(node)]
 
 
 def call_graph(analysis):
-    """Each caller with the names it calls, over all its sites."""
     graph = {}
     for (caller, _site, _construct), callees in analysis.site_edges.items():
         graph.setdefault(caller, {}).update(callees)
@@ -56,9 +45,6 @@ def call_graph(analysis):
 
 def objects(analysis, node):
     return analysis.solver.objects(node)
-
-
-# The constraint of a rule
 
 
 def test_each_calls_a_rule_with_its_arguments_and_names_its_results():
@@ -89,8 +75,6 @@ def test_each_calls_a_rule_with_its_arguments_and_names_its_results():
 
 
 def test_each_keeps_no_bound_method_and_no_tuple_of_one_result():
-    # A program has millions of these constraints: each kept a bound method
-    # and, for its one result, a tuple (64 and 56 bytes).
     class Rules:
         def rule(self, obj):
             pass
@@ -101,9 +85,6 @@ def test_each_keeps_no_bound_method_and_no_tuple_of_one_result():
     assert not any(
         isinstance(value, (types.MethodType, tuple)) and value for value in kept
     )
-
-
-# The propagation engine
 
 
 def test_objects_propagate_along_edges():
@@ -118,7 +99,6 @@ def test_objects_propagate_along_edges():
 
 
 def test_one_successor_is_kept_without_a_dict():
-    # Most nodes with a successor have one, and a program has millions.
     solver = Solver(SATURATED)
     a, b, c = Node("a"), Node("b"), Node("c")
     x = Marker("x")
@@ -227,8 +207,6 @@ def test_constraint_may_add_objects_to_its_own_node():
     node = Node("x")
 
     class Grow(Constraint):
-        """x = x.attr: each object adds a longer one, up to a bound."""
-
         def apply(self, obj):
             if len(obj.name) < 5:
                 solver.add_object(node, Marker(obj.name + "a"))
@@ -246,10 +224,6 @@ def test_constraint_may_add_objects_to_its_own_node():
     ids=["first in, first out", "last in, first out"],
 )
 def test_constraints_see_a_node_after_propagation_has_filled_it(order, monkeypatch):
-    # The solve alternates propagation along edges, to its fixpoint, with
-    # the application of constraints: when a constraint sees an object, its
-    # node holds everything that the edges bring it in that round, whatever
-    # order the solver processes nodes in.
     monkeypatch.setattr(Solver, "order", order)
     solver = Solver(SATURATED)
     a, b, c = Node("a"), Node("b"), Node("c")
@@ -296,9 +270,6 @@ def test_objects_include_those_not_yet_propagated():
 
 
 def test_holds_agrees_with_objects_in_every_state_of_a_node():
-    """`holds` answers `obj in objects(node)`: for the objects that the
-    node has, those still in its inbox (one set, then several), those that
-    a constraint adds while it is applied, and for a merged node."""
     solver = Solver(SATURATED)
     a, b, c = Node("a"), Node("b"), Node("c")
     x, y, z, other = Marker("x"), Marker("y"), Marker("z"), Marker("other")
@@ -323,7 +294,6 @@ def test_holds_agrees_with_objects_in_every_state_of_a_node():
             assert solver.holds(node, obj) == (obj in solver.objects(node))
     assert solver.holds(a, y) and not solver.holds(a, other)
     solver.solve()
-    # The constraint sees `z` too, which it adds to its own node.
     assert seen == dict.fromkeys((x, y, z), (True, False))
     for node in (a, b, c):
         for obj in (x, y, z, other):
@@ -350,7 +320,6 @@ def test_objects_are_listed_in_the_order_they_first_arrived():
     solver.add_object(a, first)
     solver.add_object(b, second)
     solver.solve()
-    # `second` reaches the sink first.
     solver.add_edge(b, sink)
     solver.add_edge(a, sink)
     recorder = Recorder()
@@ -361,14 +330,14 @@ def test_objects_are_listed_in_the_order_they_first_arrived():
     assert recorder.applied == [first, second]
 
 
-@pytest.mark.parametrize("size", [3, 100])
+@pytest.mark.parametrize(
+    "size",
+    [
+        pytest.param(3, id="small set"),
+        pytest.param(100, id="set large enough to keep the selection"),
+    ],
+)
 def test_constraints_of_some_kinds_see_those_objects_once_in_order(size):
-    """Two constraints that act on one kind of object, on nodes that hold
-    the same set (small, or large enough for the solver to keep the
-    selection): each sees the objects of its kind, once, in the order they
-    arrived, also those that arrive later; a constraint of every kind on
-    the same node sees them all."""
-
     class Other(Marker):
         pass
 
@@ -434,9 +403,6 @@ ORDERS = {
 
 
 def ring_copied(size):
-    """Objects copied to solve a ring of `size` nodes that closes on two
-    nodes which already hold the same set, with a new object waiting in
-    each other node: the ring is known to be a cycle before propagation."""
     solver = Solver(SATURATED, cap=5000)
     nodes = [Node(f"v{i}") for i in range(size)]
     x = Marker("x")
@@ -456,9 +422,6 @@ def ring_copied(size):
 
 @pytest.mark.parametrize("order", ORDERS)
 def test_a_known_cycle_is_collapsed_before_objects_go_round_it(order, monkeypatch):
-    # Letting the waiting objects go round the ring before collapsing it
-    # copied each object to every node: quadratic in the first in, first
-    # out order and cubic in the last in, first out one.
     monkeypatch.setattr(Solver, "order", ORDERS[order]())
     small, medium, large = (ring_copied(size) for size in (40, 80, 160))
 
@@ -467,10 +430,6 @@ def test_a_known_cycle_is_collapsed_before_objects_go_round_it(order, monkeypatc
 
 
 def dense_tail_edge_visits(size, monkeypatch):
-    """The edges that searches for cycles walk, when `size` * `size` new
-    nodes in one propagation each send to the head of a tail of `size`
-    nodes with an edge from each to every later one: each new edge may
-    close a cycle, and each search walks the whole tail."""
     visits = 0
     successors = solver_module._successors
 
@@ -504,11 +463,6 @@ def dense_tail_edge_visits(size, monkeypatch):
 def test_searches_for_cycles_walk_about_as_many_edges_as_propagation(
     order, monkeypatch
 ):
-    # A search after every `size` processed nodes, as many as the last
-    # search visited, walked the tail's size * size / 2 edges each time:
-    # cubic in `size`, for a graph of about 1.5 * size * size edges.
-    # Charging a search with the edges it walks too keeps its walks within
-    # a small multiple of the graph.
     monkeypatch.setattr(Solver, "order", ORDERS[order]())
     for size in (20, 40, 80):
         edges = size * (size - 1) // 2 + size * size
@@ -516,9 +470,6 @@ def test_searches_for_cycles_walk_about_as_many_edges_as_propagation(
 
 
 def merged_ring_copied(size):
-    """Objects copied when a ring of `size` nodes that hold {0}, {0}, {1},
-    ..., {size - 2} is known to be a cycle before propagation starts: the
-    ring merges at once, and every successor of a member is a member."""
     solver = Solver(SATURATED, cap=5000)
     nodes = [Node(f"v{i}") for i in range(size)]
     values = [Marker(str(i)) for i in range(size - 1)]
@@ -537,9 +488,6 @@ def merged_ring_copied(size):
 
 @pytest.mark.parametrize("order", ORDERS)
 def test_merging_a_cycle_copies_its_union_once(order, monkeypatch):
-    # The successors of the members of a merged cycle that are themselves
-    # members get no catch-up set; computing the union minus each member's
-    # set for them copied about size * size objects.
     monkeypatch.setattr(Solver, "order", ORDERS[order]())
     small, medium, large = (merged_ring_copied(size) for size in (20, 40, 80))
 
@@ -601,7 +549,6 @@ def test_cycle_that_closes_after_objects_arrived_is_collapsed():
 
 
 def test_successor_of_a_collapsed_cycle_gets_objects_still_in_flight():
-    # When the cycle is found, b has seen x but not yet y.
     solver = Solver(SATURATED)
     a, b, c = cycle(solver, 3)
     out = Node("out")
@@ -649,16 +596,12 @@ def test_constraint_attached_to_a_collapsed_node_sees_every_object_once():
     assert recorder.applied == [x, y]
 
 
-# Loads, stores and calls
-
-
 def make_function(analysis, name, positional=(), keyword_only=(), defaults=None):
     signature = Signature(positional=positional, keyword_only=keyword_only)
     return analysis.function(name, "mod", signature, defaults=defaults or {})
 
 
 def call(analysis, callee, args=(), keywords=(), caller="mod"):
-    """Attach a call to `callee` and return the node of its result."""
     result = analysis.node()
     analysis.add_call(callee, caller, list(args), list(keywords), result, "mod:1:0")
     return result
@@ -719,7 +662,6 @@ def test_a_call_with_extra_or_unknown_arguments_binds_nothing():
     call(analysis, holding(analysis, f), args=[value], keywords=[("z", value)])
     analysis.solve()
 
-    # Python raises TypeError before f starts.
     assert names(f.parameters["a"], analysis) == []
     assert call_graph(analysis) == {}
 
@@ -786,7 +728,6 @@ def test_instantiation_calls_init_bound_to_a_new_instance_per_site():
 
 
 def test_instance_stored_as_its_own_call_method_terminates():
-    # class A: pass; A.__call__ = A(); A()()
     analysis = Analysis()
     cls_node = holding(analysis, make_class(analysis, "mod.A"))
     instance = call(analysis, cls_node)
@@ -798,7 +739,6 @@ def test_instance_stored_as_its_own_call_method_terminates():
 
 
 def test_class_stored_as_its_own_init_terminates():
-    # class A: pass; A.__init__ = A; A()
     analysis = Analysis()
     cls = make_class(analysis, "mod.A")
     cls_node = holding(analysis, cls)
@@ -928,8 +868,6 @@ def test_late_base_of_a_base_reaches_subclasses():
 
 
 def alternative_slots(analysis, count):
-    """`count` base slots; slot i may be Xi or Yi. Root, Xi and Yi all
-    define n; Xi and Yi derive from Root."""
     root = make_class(analysis, "mod.Root", defines=["n"])
     analysis.add_object(
         analysis.field(root, "n"), make_function(analysis, "mod.Root.n")
@@ -954,8 +892,6 @@ def test_lookup_is_the_union_over_alternative_hierarchies():
     load(analysis, holding(analysis, c), "n", loaded)
     analysis.solve()
 
-    # Each of the 4 hierarchies finds the n of its first base; Root.n is
-    # always overridden.
     assert sorted(names(loaded, analysis)) == ["mod.X0.n", "mod.Y0.n"]
 
 
@@ -966,8 +902,6 @@ def test_too_many_alternative_hierarchies_find_every_definition():
     load(analysis, holding(analysis, c), "n", loaded)
     analysis.solve()
 
-    # 16 hierarchies are more than the analysis enumerates: it falls back to
-    # every definition in every candidate, which includes Root.n.
     assert sorted(names(loaded, analysis)) == sorted(
         [f"mod.{p}{i}.n" for p in "XY" for i in range(4)] + ["mod.Root.n"]
     )
@@ -985,8 +919,6 @@ def test_cyclic_inheritance_terminates():
     load(analysis, holding(analysis, a, b), "m", loaded)
     analysis.solve()
 
-    # A's base is B (A itself is left out) and B's base is A: a cycle,
-    # which gives both the exhaustive order, whatever arrives first.
     assert (a.mros, a.exhaustive) == ([[a, b]], True)
     assert (b.mros, b.exhaustive) == ([[b, a]], True)
 
@@ -1009,9 +941,6 @@ def test_inconsistent_hierarchy_does_not_fail():
     assert z.mro == [z, xy, x, y, yx]
 
 
-# Externals
-
-
 def test_external_attributes_calls_and_results():
     analysis = Analysis()
     module = holding(analysis, analysis.external("ext"))
@@ -1023,8 +952,6 @@ def test_external_attributes_calls_and_results():
     call(analysis, method)
     analysis.solve()
 
-    # Without stubs, the class is known by its access path, and the result
-    # of calling it has no name: its method names nothing.
     assert names(instance, analysis) == ["<unknown>"]
     assert names(method, analysis) == ["<unknown>"]
     assert call_graph(analysis) == {"mod": {"ext.Cls": None}}
@@ -1032,19 +959,15 @@ def test_external_attributes_calls_and_results():
 
 
 def test_loop_over_an_attribute_adds_one_name():
-    # x = x.next
     analysis = Analysis()
     x = holding(analysis, analysis.external("ext"))
     load(analysis, x, "next", x)
     analysis.solve()
 
-    # The second load past the root would repeat `next`: it gives the
-    # external without a name.
     assert names(x, analysis) == ["ext", "ext.next", "<unknown>"]
 
 
 def chain_of_loads(analysis, start, attrs):
-    """Load `attrs` one after the other from `start`; return the nodes."""
     nodes = []
     for attr in attrs:
         node = analysis.node()
@@ -1055,7 +978,6 @@ def chain_of_loads(analysis, start, attrs):
 
 
 def test_stored_external_is_extended():
-    # path = os.path; path.join
     analysis = Analysis()
     path, join = chain_of_loads(
         analysis, holding(analysis, analysis.external("os")), ["path", "join"]
@@ -1077,7 +999,6 @@ def test_names_grow_at_most_two_steps_past_their_root():
 
 
 def test_imported_module_path_is_a_root():
-    # import ext.sub.mod; ext.sub.mod.f
     analysis = Analysis()
     analysis.add_external_module("ext.sub.mod")
     *_, f = chain_of_loads(
@@ -1099,7 +1020,6 @@ def test_attribute_already_past_the_root_is_not_appended_again():
 
 
 def test_loop_over_method_calls_is_bounded():
-    # x = x.next()
     analysis = Analysis()
     x = holding(analysis, analysis.external("ext"))
     method = analysis.node()
@@ -1107,7 +1027,6 @@ def test_loop_over_method_calls_is_bounded():
     analysis.add_edge(call(analysis, method), x)
     analysis.solve()
 
-    # The result of ext.next() has no name, and nothing loaded from it has.
     assert names(x, analysis) == ["ext", "<unknown>"]
     assert call_graph(analysis) == {"mod": {"ext.next": None}}
 
@@ -1138,7 +1057,6 @@ def test_external_base_class_provides_missing_attributes():
 
 
 def test_attribute_of_an_external_base_is_one_step_past_the_base():
-    # class A(ext.Base): ... self.attr.b
     analysis = Analysis()
     (base,) = chain_of_loads(
         analysis, holding(analysis, analysis.external("ext")), ["Base"]
@@ -1148,7 +1066,6 @@ def test_attribute_of_an_external_base_is_one_step_past_the_base():
     attr, b = chain_of_loads(analysis, instance, ["attr", "b"])
     analysis.solve()
 
-    # An instance of ext.Base is named like the class: two steps past ext.
     assert names(attr, analysis) == ["ext.Base.attr"]
     assert names(b, analysis) == ["<unknown>"]
 
@@ -1182,8 +1099,6 @@ def test_modelled_builtin_called_without_unpacked_arguments(builtin):
 
 
 def test_the_parts_of_the_analysis_define_distinct_methods():
-    # Analysis combines several classes; a name defined in two of them would
-    # silently hide one definition.
     parts = Analysis.__mro__[1:-1]
     names = [name for part in parts for name in vars(part) if not name.startswith("__")]
     assert len(names) == len(set(names))
@@ -1191,15 +1106,10 @@ def test_the_parts_of_the_analysis_define_distinct_methods():
 
 
 def test_constant_names_do_not_depend_on_the_unicode_database():
-    # repr() keeps characters that the running Python finds printable, which
-    # changes between versions; the name escapes every non-ASCII character.
     analysis = Analysis()
 
     assert analysis.const("a͸é").name == "'a\\u0378\\xe9'"
     assert analysis.const(-3).name == "-3"
-
-
-# Findings of the review of the solver
 
 
 def test_constraint_sees_the_objects_it_added_while_it_is_applied():
@@ -1249,7 +1159,6 @@ def test_constant_sets_stay_shared_across_a_rebuild_of_the_table(monkeypatch):
     for name in ("y", "z"):
         solver.add_object(other, Marker(name))
     solver.solve()
-    # The table was rebuilt; b now gets {x} from elsewhere.
     a, b = Node("a"), Node("b")
     solver.add_object(b, x)
     solver.solve()
@@ -1263,7 +1172,6 @@ def test_constant_sets_stay_shared_across_a_rebuild_of_the_table(monkeypatch):
     solver.attach(a, Close())
     solver.solve()
 
-    # a and b hold the same set: the cycle is found and collapsed.
     assert solver.work["merged"] == 1
 
 
@@ -1277,12 +1185,7 @@ def test_copying_fields_along_a_long_chain_of_containers_does_not_exhaust_the_st
     assert 0 in containers[-1].fields
 
 
-# Caches: the key decides the inputs, and a hit with another input fails.
-
-
 def _cache_violations():
-    """For each cache that keeps the input it was first asked with: a
-    function that asks it twice under one key with other inputs."""
     from pycg.analysis.protocols import _Operator
     from pycg.analysis.semantics import Call
 
@@ -1307,7 +1210,6 @@ def _cache_violations():
         copy = Call(analysis, "mod", [second], [], None, site, call)
         analysis._roots[copy] = call
         cls = analysis.new_class("mod.C", "mod", ["__call__"], [])
-        # The class answers the name: the implicit calls are made at once.
         analysis.add_object(analysis.field(cls, "__call__"), analysis.external("m.f"))
         analysis.solve()
         instance = analysis.instance(cls, call)
@@ -1345,16 +1247,11 @@ def test_a_cache_refuses_another_input_under_one_key(ask_twice):
 
 
 def test_a_modelled_name_may_be_both_analysed_and_outside():
-    # A module abc that defines abstractmethod and imports the frozen abc.
     analysis = Analysis()
     analysed = analysis.returning_argument("abc.abstractmethod", True)
     outside = analysis.returning_argument("abc.abstractmethod", False)
 
     assert (analysed.analysed, outside.analysed) == (True, False)
-
-
-# Saturation: a node that would hold more objects than the cap, or
-# that receives the saturated value, holds the saturated value only.
 
 
 def test_a_node_at_the_cap_keeps_its_objects():
@@ -1379,8 +1276,6 @@ def test_a_node_past_the_cap_holds_the_saturated_value():
 
     assert names(a, solver) == ["<saturated>"]
     assert names(b, solver) == ["<saturated>"]
-    # The three objects arrived in one round, so the constraint saw none of
-    # them; it never sees the saturated value, which goes to its result.
     assert recorder.applied == []
     assert names(result, solver) == ["<saturated>"]
 
@@ -1434,8 +1329,6 @@ def test_a_cycle_whose_union_passes_the_cap_is_saturated():
 
 
 def test_a_constraint_that_holds_an_opaque_object_gives_the_saturated_value():
-    # An object that stands for the saturated value (`Solver.opaque`) is
-    # seen as it, as an argument that a constraint holds too.
     solver = Solver(SATURATED)
     hidden, shown = Marker("hidden"), Marker("shown")
     node, result, other = Node("node"), Node("result"), Node("other")

@@ -1,7 +1,3 @@
-"""The records that the analysis keeps for each pair of an object and a
-site are shared where they hold nothing of the pair: on large programs they
-are most of the memory (millions of bindings and implicit calls)."""
-
 import pytest
 from programs import analysed
 
@@ -11,8 +7,6 @@ def _analysis(tmp_path, source):
 
 
 def _possible(bound):
-    """The set of the parameters that a call may supply: for a plain call,
-    those that it surely supplies."""
     return getattr(bound, "_possible", bound._supplied)
 
 
@@ -43,8 +37,6 @@ def test_equal_sets_of_parameter_names_are_one_object(tmp_path):
         copies.setdefault(names, set()).add(id(names))
     assert len(bindings) >= 9
     assert {len(ids) for ids in copies.values()} == {1}
-    # What a call surely supplies and what it may supply differ only with
-    # `*` or `**` arguments.
     differ = [
         bool(call.star)
         for (call, *_), bound in analysis._model_bindings.items()
@@ -97,9 +89,6 @@ def test_a_plain_call_makes_a_parameter_node_when_a_rule_reads_it(tmp_path):
     for (call, *_), bound in analysis._model_bindings.items():
         line = int(call.site.split(":")[1])
         made.setdefault(line, set()).update(bound._nodes or ())
-    # No rule reads the arguments of `re.compile`; `sorted` iterates over
-    # one argument and calls the other; `format` converts its value with
-    # its format.
     assert made == {5: set(), 6: {"iterable", "key"}, 7: {"value", "format_spec"}}
     assert "main.key" in generator.output()["main"]
 
@@ -107,14 +96,11 @@ def test_a_plain_call_makes_a_parameter_node_when_a_rule_reads_it(tmp_path):
 def test_a_parameter_node_made_late_holds_what_the_call_binds(tmp_path):
     analysis = _analysis(tmp_path, PLAIN_CALLS)
 
-    # By line: the binding to the model of a builtin, else to a stub.
     bound = {}
     for (call, *rest), binding in analysis._model_bindings.items():
         line = int(call.site.split(":")[1])
         if len(rest) == 1 or line not in bound:
             bound[line] = binding
-    # By position, by keyword, a default, and nothing; before and after
-    # the solver has run again.
     holds = [
         _names(analysis, bound[5]["pattern"]),
         _names(analysis, bound[5]["flags"]),
@@ -162,8 +148,6 @@ def test_a_call_that_unpacks_or_passes_twice_is_bound_at_once(tmp_path):
     ],
 )
 def test_a_call_that_passes_a_keyword_twice_is_bound_at_once(tmp_path, cap, callees):
-    # Python rejects the call, but the analysis reads it: both arguments
-    # reach the parameter, as when the binding is made at once.
     generator = analysed(
         tmp_path,
         {
@@ -203,7 +187,6 @@ def test_a_special_method_call_is_attached_once(tmp_path):
     ]
     attached = [name for _, name, call, _ in requests if call.attached]
     assert attached.count("__len__") == 4 and attached.count("__iter__") == 2
-    # Asking again for a call that is attached does nothing.
     for owner, name, call, unless in requests:
         analysis.call_dunder(owner, name, call, None, unless)
         work = analysis.solver.work
@@ -247,10 +230,7 @@ def test_the_calls_of_a_class_share_the_set_of_its_instances(tmp_path):
         len(records): {id(record.instances) for record in records}
         for records in by_class.values()
     }
-    # Four calls of Shape and two of Square, each with its own record of
-    # what `__new__` returned; one set of instances for each class.
     assert {count: len(sets) for count, sets in seen.items()} == {4: 1, 2: 1}
-    # What `Square.__new__` returns is no Square: its `__init__` does not run.
     assert generator.output()["main.make"] == [
         "main.Shape.__init__",
         "main.Square.__new__",
@@ -258,12 +238,6 @@ def test_the_calls_of_a_class_share_the_set_of_its_instances(tmp_path):
 
 
 def test_a_call_after_the_instances_of_its_class_saturated_shares_none(tmp_path):
-    # With a cap of 4, the instances of C (three abstract ones and the one
-    # that `early` makes) saturate when those of D and E arrive. The call in
-    # `late` comes after that: its constraint on the instances is never
-    # applied, so it runs no `__init__`, as with a set of its own. The
-    # shared set holds the instance that `__new__` returns to it, from the
-    # calls before.
     generator = analysed(
         tmp_path,
         {

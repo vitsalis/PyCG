@@ -1,6 +1,3 @@
-"""The names that imports under `if TYPE_CHECKING:` would bind, which the
-builder records for the reader of annotations and binds nothing to."""
-
 import ast
 import textwrap
 
@@ -59,7 +56,6 @@ def test_imports_of_type_checking_blocks_are_type_only(tmp_path):
         "pkg.mod.Base": "pkg.base.Base",
         "pkg.mod.C.Other": "pkg.other.Other",
     }
-    # They import nothing: no module of the package is discovered.
     assert "pkg.models" not in imports.get_imports("pkg.mod")
 
 

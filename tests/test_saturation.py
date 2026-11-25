@@ -1,15 +1,3 @@
-"""Saturation: a node that would hold more objects than the cap (`cap`)
-holds the saturated value instead, and so does every node it reaches.
-
-The saturated value stands for objects that the analysis no longer tracks.
-A call of it has no callee: the call expression is unresolved, with the
-cause `saturated`. Loading an attribute of it, subscripting it, iterating
-over it, awaiting it, entering it and calling it give it again; a store
-into it is dropped. It causes no edge, no object and no constraint, so
-the call graph with a cap is part of the call graph without one; and the
-document never names it. The tests set a small cap.
-"""
-
 import ast
 import json
 from pathlib import Path
@@ -33,11 +21,10 @@ ORDERS = {
 }
 
 
-def registry(count):
-    """A program that calls each of `count` handlers through one parameter."""
-    handlers = ", ".join(f"h{i}" for i in range(count))
+def registry(handler_count):
+    handlers = ", ".join(f"h{i}" for i in range(handler_count))
     return (
-        "".join(f"def h{i}(): pass\n" for i in range(count))
+        "".join(f"def h{i}(): pass\n" for i in range(handler_count))
         + f"HANDLERS = [{handlers}]\n"
         + "def run(handler):\n"
         + "    handler()\n"
@@ -47,12 +34,10 @@ def registry(count):
 
 
 def line_of(source, text):
-    """The line of the first occurrence of `text` in `source`."""
     return source[: source.index(text)].count("\n") + 1
 
 
 def sites(tmp_path, source, caller, **options):
-    """The call sites of `caller`: (line, callees, cause if unresolved)."""
     generator = analysed(tmp_path, {"main.py": source}, **options)
     return [
         (site["line"], site["callees"], site.get("unresolved"))
@@ -117,9 +102,6 @@ for handler in HANDLERS:
 
 
 def test_what_a_saturated_value_gives_is_saturated(tmp_path):
-    # A load, a subscript and an iteration give the saturated value, and a
-    # store into it is dropped: a call of each is unresolved. The argument
-    # that is not saturated is still called.
     source = SATURATED_VALUE
     found = sites(tmp_path, source, "main.use", cap=4)
     calls = ("handler.attribute()", "handler[0]()", "each()", "handler.stored()")
@@ -128,10 +110,6 @@ def test_what_a_saturated_value_gives_is_saturated(tmp_path):
         (line_of(source, "    item()"), ["main.item"], None)
     ]
 
-
-# Saturation never adds an edge: for programs where a value of three
-# objects meets each protocol, and for every case of the micro-benchmark,
-# the call graph with a small cap is part of the call graph without one.
 
 THREE = """
 class A:
@@ -167,7 +145,6 @@ def classes():
 """
 
 PROTOCOLS = {
-    # Final review, round 3, finding 2: Python calls only `__contains__`.
     "membership": """
 class Needle:
     def __eq__(self, other): return False
@@ -293,9 +270,7 @@ for h in (h0, h1, h2, Base().run):
 }
 
 
-# Final review, round 4, findings 3 to 5: the saturated value reached rule
-# code, which took a branch for what it is not. No rule sees it now.
-MARKER = {
+RULE_BRANCHES = {
     "a saturated dict key": """
 def good(): pass
 def bad(): pass
@@ -390,29 +365,24 @@ def edges(root, source, **options):
 
 
 @pytest.fixture
-def no_completion(monkeypatch):
-    """The analysis without its steps at a fixpoint (see *The fixpoint
-    steps* in the design): no entry points, no reads for keys that hold
-    nothing, no bases decided absent. Without them every rule only adds,
-    and the saturated value reaches none, so a cap can only take edges
-    away."""
+def without_fixpoint_steps(monkeypatch):
     monkeypatch.setattr(Analysis, "_complete", lambda self: False)
     monkeypatch.setattr(Analysis, "decide_hierarchies", lambda self: False)
 
 
-@pytest.mark.parametrize("program", [*PROTOCOLS, *MARKER])
+@pytest.mark.parametrize("program", [*PROTOCOLS, *RULE_BRANCHES])
 def test_without_completion_a_cap_only_takes_edges_away(
-    tmp_path, no_completion, program
+    tmp_path, without_fixpoint_steps, program
 ):
-    source = THREE + {**PROTOCOLS, **MARKER}[program]
+    source = THREE + {**PROTOCOLS, **RULE_BRANCHES}[program]
     full = edges(tmp_path / "full", source)
     for limit in (2, 3):
         assert edges(tmp_path / str(limit), source, cap=limit) <= full, limit
 
 
-@pytest.mark.parametrize("program", MARKER)
+@pytest.mark.parametrize("program", RULE_BRANCHES)
 def test_the_saturated_value_takes_no_branch_of_a_rule(tmp_path, program):
-    source = MARKER[program]
+    source = RULE_BRANCHES[program]
     full = edges(tmp_path / "full", source)
     assert capped_edges(tmp_path / "capped", source) <= full
 
@@ -432,7 +402,7 @@ def case_id(path):
 
 @pytest.mark.parametrize("snippet", CASES, ids=case_id)
 def test_without_completion_a_cap_only_takes_edges_away_from_a_benchmark_case(
-    no_completion, snippet
+    without_fixpoint_steps, snippet
 ):
     full = graph_edges(analysed(snippet, {}))
     for limit in (2, 3, 10):
@@ -441,17 +411,10 @@ def test_without_completion_a_cap_only_takes_edges_away_from_a_benchmark_case(
 
 @pytest.mark.parametrize("snippet", CASES, ids=case_id)
 def test_regression_a_small_cap_adds_no_edge_to_a_benchmark_case(snippet):
-    # With the steps at a fixpoint a cap may add edges (see the tests
-    # below); on these programs it adds none.
     full = graph_edges(analysed(snippet, {}))
     for limit in (2, 3, 10):
         assert graph_edges(analysed(snippet, {}, cap=limit)) <= full, limit
 
-
-# Final review, round 4, finding 2: code that only a suppressed call
-# reaches is, for the analysis, code that no analysed code calls, or a value
-# that holds nothing; the steps at a fixpoint apply to it. These tests pin
-# what that gives at a cap of 2.
 
 FACTORIES = (
     "def first(): return {name}\n"
@@ -476,7 +439,6 @@ def test_a_function_that_a_suppressed_call_passed_an_argument_gets_its_default(
     full = edges(tmp_path / "full", source)
     capped = capped_edges(tmp_path / "capped", source)
 
-    # Python calls leaf(real), then real.
     assert ("main.leaf", "main.real") in full
     assert ("main.leaf", "main.fallback") not in full
     assert ("main.leaf", "main.fallback") in capped
@@ -517,8 +479,6 @@ def test_a_base_that_a_suppressed_call_passed_is_decided_absent(tmp_path):
 
 
 def test_a_receiver_whose_annotation_saturated_holds_the_saturated_value(tmp_path):
-    # Final review, round 8: the annotation gave nothing, so the receiver
-    # was completed with an instance of its class (`K.run -> K.step`).
     source = (
         "import sys\n"
         "class A:\n    def step(self): pass\n"
@@ -536,8 +496,9 @@ def test_a_receiver_whose_annotation_saturated_holds_the_saturated_value(tmp_pat
     assert capped == [(line_of(source, "self.step()"), [], "saturated")]
 
 
-def test_the_static_and_class_methods_of_an_absorbed_instance_are_called(tmp_path):
-    # A call of the saturated value may run them: they get no defaults.
+def test_the_static_and_class_methods_of_an_absorbed_instance_get_no_defaults(
+    tmp_path,
+):
     source = (
         "def f(): pass\ndef g(): pass\n"
         "class Tool:\n"
@@ -552,8 +513,6 @@ def test_the_static_and_class_methods_of_an_absorbed_instance_are_called(tmp_pat
 
 
 def test_the_document_never_names_the_saturated_value(tmp_path):
-    # Final review, round 3, finding 3: an export target, like any other
-    # part of the document, is a definition or an outside name.
     source = THREE + "def f(): pass\ndef g(): pass\ndef h(): pass\n"
     source += "for exported in (f, g, h):\n    pass\n"
     source += PROTOCOLS["a saturated base"] + PROTOCOLS["a saturated metaclass"]
@@ -567,12 +526,6 @@ def test_the_document_never_names_the_saturated_value(tmp_path):
     assert "<saturated>" not in json.dumps([document, calls])
     assert "<saturated>" not in json.dumps(generator.output_points_to())
 
-
-# A class is unknown when the set of a base expression or of its metaclass
-# (written or inferred) holds the saturated value, or a base expression
-# holds an unknown class. Nothing about it is known, its own members
-# included: it and its instances are seen as the saturated value. Whether a
-# class is unknown is decided between rounds (final review, rounds 5 and 6).
 
 ANCESTRY = """
 class Root:
@@ -599,8 +552,6 @@ for base in (A, B, C):
     make(base)
 """
 
-# Final review, round 6, finding 1: whether `Made` is unknown was read in
-# the round that decided it.
 MADE = """
 class A: pass
 class B: pass
@@ -612,7 +563,6 @@ for base in (A, B, C):
     instance()
 """
 
-# Round 6, finding 2: every possible base supplies `__bool__`.
 TRUTH = """
 class M1(type):
     def __bool__(cls): return True
@@ -629,8 +579,7 @@ if Value:
     pass
 """
 
-# Round 6, finding 3: an inferred metaclass that saturates.
-INFERRED = """
+INFERRED_METACLASS = """
 class M0(type): pass
 class M1(M0): pass
 class M2(M1): pass
@@ -643,7 +592,12 @@ class C(A, B): pass
 C.method(None)
 """
 
-UNKNOWN = {"ancestry": ANCESTRY, "made": MADE, "truth": TRUTH, "inferred": INFERRED}
+UNKNOWN = {
+    "ancestry": ANCESTRY,
+    "made": MADE,
+    "truth": TRUTH,
+    "inferred": INFERRED_METACLASS,
+}
 
 
 def everything(root, source, entries=("main.py",), **options):
@@ -672,10 +626,8 @@ def test_nothing_about_an_unknown_class_is_known(tmp_path):
     full = edges(tmp_path / "full", ANCESTRY)
     capped = capped_edges(tmp_path / "capped", ANCESTRY)
 
-    # Python orders Child, Left, the base, Root: the base's hook runs.
     assert ("main.make", "main.A.__init_subclass__") in full
     assert ("main.make", "main.make.Child.own") in full
-    # Not even what Child's own body defines is known.
     assert not {e for e in capped if e[0] == "main.make"}
     assert not {
         e for e in capped if e[0].startswith("main.make.") and e[1].startswith("main.")
@@ -683,9 +635,6 @@ def test_nothing_about_an_unknown_class_is_known(tmp_path):
 
 
 def test_an_unknown_class_is_seen_as_the_saturated_value(tmp_path):
-    # Called, a receiver, iterated, entered, a key, an operand, a base, an
-    # except class, and through super(): each gives the saturated value,
-    # and each call of what it gives is unresolved.
     source = (
         "class A:\n    def method(self): pass\n"
         "class B(A): pass\nclass C(A): pass\n"
@@ -708,27 +657,25 @@ def test_an_unknown_class_is_seen_as_the_saturated_value(tmp_path):
     sites = generator.document()["calls"]
 
     assert {callee for site in sites["main.use"] for callee in site["callees"]} == set()
-    # The instances that the except class catches were never made: its
-    # name holds nothing.
-    handler = line_of(source, "error()")
-    assert {s.get("unresolved") for s in sites["main.use"] if s["line"] != handler} == {
-        "saturated"
-    }
-    # super() in it: the method that it would find is not known.
-    assert not {
+    error_line_of_instances_never_made = line_of(source, "error()")
+    assert {
+        s.get("unresolved")
+        for s in sites["main.use"]
+        if s["line"] != error_line_of_instances_never_made
+    } == {"saturated"}
+    callees_through_super = {
         callee
         for site in sites.get("main.use.Unknown.method", [])
         for callee in site["callees"]
         if callee.startswith("main.")
     }
+    assert not callees_through_super
     definitions = generator.document()["definitions"]
     assert definitions["main.use.Unknown"]["mro"] == ["main.use.Unknown"]
     assert definitions["main.use.Derived"]["mro"] == ["main.use.Derived"]
 
 
 def test_a_name_that_a_suppressed_call_set_is_within_the_bound_of_names(tmp_path):
-    # Final review, round 5, finding 2: a set that a cap leaves smaller
-    # but not empty can pass under another bound (four computed names).
     source = """
 class C:
     def a(): pass
@@ -754,15 +701,10 @@ getattr(C, name)()
     full = edges(tmp_path / "full", source)
     capped = capped_edges(tmp_path / "capped", source)
 
-    # Five names: the call is unresolved without the cap.
     assert ("main", "main.C.a") not in full
     assert ("main", "main.C.a") in capped
 
 
-# Final review, round 7: a rule that came back to an instance it remembered
-# (here the instances that a pattern of attribute names reaches, when a
-# matching name is assigned on their class later) loaded the attribute after
-# the instance's class had become unknown.
 PATTERN_REVISIT = """
 from abc import ABC, abstractmethod
 class A(ABC):
@@ -791,10 +733,6 @@ assign(late()()()()()()()()())
 use(obj, "late")
 """
 
-# Final review, round 8: a constraint that held an object (an `Each` that
-# remembered the class of a class statement, the receiver of a binding) or a
-# `__getattr__` that a lookup cached passed it to a rule after its class had
-# become unknown.
 HELD = {
     "statement class": """
 class Meta(type):
@@ -859,7 +797,7 @@ late()()()()()()()()().missing()
 
 GUARDED = {
     **{f"protocol: {name}": THREE + source for name, source in PROTOCOLS.items()},
-    **{f"marker: {name}": source for name, source in MARKER.items()},
+    **{f"marker: {name}": source for name, source in RULE_BRANCHES.items()},
     **{f"unknown: {name}": source for name, source in UNKNOWN.items()},
     "pattern revisit": PATTERN_REVISIT,
     **{f"held: {name}": source for name, source in HELD.items()},
@@ -876,13 +814,7 @@ def test_no_rule_sees_the_saturated_value_or_an_unknown_class(
     analysed(tmp_path, {"main.py": GUARDED[program]}, cap=2)
 
 
-# The audit itself: it sees the objects that the solver applies a constraint
-# to in one call (`apply_each`), as it sees those of `apply`.
-
-
-class _Records(solver.Constraint):
-    """A constraint of its own class, which holds `held` in a slot."""
-
+class _ConstraintHeldInSlot(solver.Constraint):
     __slots__ = ("held", "seen")
 
     def __init__(self, held, seen):
@@ -894,10 +826,6 @@ class _Records(solver.Constraint):
 
 
 def _audited_constraints(held, seen):
-    """A constraint of each kind that reaches a rule in its own way: an
-    `Each` (its own loop over the set), an `Each` of some kinds, an `Each`
-    of a method (it keeps the function and its owner), and a constraint that
-    the default loop applies object by object."""
     from pycg.analysis.model import Object
 
     def rule(obj, *args):
@@ -911,7 +839,7 @@ def _audited_constraints(held, seen):
         "each": solver.Each(rule, held),
         "each of kinds": solver.Each(rule, held, kinds=(Object,)),
         "each of a method": solver.Each(Rules().rule, held),
-        "own apply": _Records(held, seen),
+        "own apply": _ConstraintHeldInSlot(held, seen),
     }
 
 
@@ -928,7 +856,6 @@ def test_the_audit_checks_each_object_of_a_set_that_reaches_a_rule(monkeypatch, 
 
     constraint.apply_each([first, second])
     assert seen == [first, second]
-    # Each object is checked when it arrives: the rule sees those before.
     with pytest.raises(AssertionError, match="saturated"):
         constraint.apply_each([first, opaque, second])
     assert seen == [first, second, first]
@@ -950,8 +877,6 @@ def test_the_audit_checks_what_a_constraint_holds_when_it_gets_a_set(monkeypatch
 
 
 def test_a_load_by_pattern_of_the_saturated_value_gives_it(tmp_path):
-    # Final review, round 8, finding 2: the load dropped the saturated value,
-    # and the call was unresolved as a computed name.
     source = """
 class A:
     def visit_x(self): pass
@@ -972,12 +897,7 @@ for value in (A(), B(), C()):
 
 ANALYSIS = Path(__file__).resolve().parent.parent / "pycg" / "analysis"
 
-# The rules of `Each` constraints that put nothing in a node of their own,
-# by name; every other `Each` names the nodes where its rule puts what it
-# finds (`results`), which get the saturated value in its place.
-WITHOUT_RESULTS = {
-    # Calls whose result is not used (special methods that Python calls,
-    # call backs, comparisons, conversions, the class statement's calls).
+EACH_RULES_WITHOUT_RESULTS = {
     "call_dunder",
     "_call_eq",
     "compare_member",
@@ -986,8 +906,6 @@ WITHOUT_RESULTS = {
     "_percent_format",
     "_percent",
     "_call_protocol",
-    # A builtin that consumes a lazy object of the standard library: the
-    # activation joins its result node to the consuming iteration's.
     "_consume_library",
     "_sequence_length",
     "_raise",
@@ -997,7 +915,6 @@ WITHOUT_RESULTS = {
     "_init_statement_class",
     "_statement_new",
     "_statement_made",
-    # What `type(name, bases, dict)` calls for the class that it makes.
     "_type_bases",
     "_type_base",
     "_call_type_metaclass",
@@ -1005,37 +922,20 @@ WITHOUT_RESULTS = {
     "of_class",
     "key",
     "stored",
-    # The pairing of compared containers, which joins their elements by
-    # edges only.
     "arrive",
-    # Stores and deletions.
     "_deliver_store",
     "_deliver_delete",
     "_field_values",
-    # Decisions about a class: its metaclass and whether it is a dataclass.
     "_keyword_candidate",
     "_dataclass_decorator",
     "_dataclass_base",
-    # The bases that a module's own stub declares: a class below an outside
-    # class joins its nodes by edges. Past the cap the node admits nothing
-    # more; what it admitted stays (design.md, "A module's own stub").
     "_stub_base",
-    # What they find goes to the accesses that reach the object, which
-    # name their results; a name that is not a str constant makes the
-    # access a computed name (`DYNAMIC_NAMES_MAX`). `_pattern_class_instance`
-    # watches the instances of a class for the accesses by pattern on them:
-    # when that node saturates, the candidates of those accesses are lost
-    # and their calls keep the cause `computed name` (final review, round
-    # 9: decided as a stated limit, see docs/format.md, not a result node
-    # that follows accesses registered later).
     "_pattern_class_instance",
     "load_by_pattern",
 }
 
 
 def test_every_rule_that_puts_objects_in_a_node_names_it():
-    # Final review, round 8, finding 2: a load by pattern had a result and
-    # did not name it, so it dropped the saturated value.
     unnamed = set()
     for path in sorted(ANALYSIS.glob("*.py")):
         for node in ast.walk(ast.parse(path.read_text())):
@@ -1048,11 +948,9 @@ def test_every_rule_that_puts_objects_in_a_node_names_it():
                 rule = node.args[0]
                 unnamed.add(rule.attr if isinstance(rule, ast.Attribute) else rule.id)
 
-    assert unnamed == WITHOUT_RESULTS
+    assert unnamed == EACH_RULES_WITHOUT_RESULTS
 
 
-# The other constraints without results: a store, a deletion, the bases of
-# a class, the items that `dict.update` stores.
 CONSTRAINTS_WITHOUT_RESULTS = {"Store", "Delete", "_Bases", "_DictItems"}
 
 
@@ -1073,10 +971,6 @@ def test_every_other_constraint_with_a_result_names_it():
 
 
 def test_limit_an_outside_operand_may_saturate_a_getattr_name(tmp_path):
-    # Codex review, round 2: the name holds the pattern and the str of
-    # unknown value that the outside operand adds. With a cap of 1 that
-    # saturates the name, and the load of visit_a is lost; with a cap of 2
-    # it stays. Python calls hit when ext.value is "a".
     source = """
 import ext
 def hit(): pass
@@ -1093,23 +987,22 @@ getattr(c, "visit_" + ext.value)()
 @pytest.mark.parametrize(
     "source",
     [
-        # Codex review, round 7: lower() of a class member gives the str
-        # and any value, two objects.
-        "class C:\n    value = 'abc'\nC.value.lower().upper()\n",
-        # Both values stored under class members go to the alias node of
-        # the callee's **kw, two objects.
-        "class Keys:\n    taken = 'taken'\n    keep = 'pre_a'\n"
-        "def consumed(): pass\ndef target(): pass\n"
-        "def use(taken, **kw):\n    kind = 'a'\n    kw['pre_' + kind]()\n"
-        "use(**{Keys.taken: consumed, Keys.keep: target})\n",
+        pytest.param(
+            "class C:\n    value = 'abc'\nC.value.lower().upper()\n",
+            id="lower of a class member gives the str and any value",
+        ),
+        pytest.param(
+            "class Keys:\n    taken = 'taken'\n    keep = 'pre_a'\n"
+            "def consumed(): pass\ndef target(): pass\n"
+            "def use(taken, **kw):\n    kind = 'a'\n    kw['pre_' + kind]()\n"
+            "use(**{Keys.taken: consumed, Keys.keep: target})\n",
+            id="two values stored under class members reach the alias of kw",
+        ),
     ],
 )
 def test_limit_a_widening_for_an_alias_may_saturate_a_node_at_cap_1(
     tmp_path, monkeypatch, source
 ):
-    # The widening adds one object, so a node saturates one object sooner:
-    # at a cap of 1 the call is lost, on every order; caps of 2 and more
-    # keep it (a cap only takes edges away, see design, Bounds).
     for name, order in ORDERS.items():
         monkeypatch.setattr(solver.Solver, "order", order())
         for cap in (1, 2, 3, 5000):

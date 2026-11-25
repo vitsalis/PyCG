@@ -1,7 +1,3 @@
-"""Default values per call, and receivers and defaults of the code that no
-analysed code calls, which is analysed as an entry point (see also
-test_declared_types.py)."""
-
 from programs import call_graph, callees, main_graph
 
 
@@ -43,13 +39,11 @@ def test_default_flows_when_unpacking_may_omit_the_argument(tmp_path):
         """,
     )
 
-    # The elements of ext.args may also reach cb.
     assert callees(graph, "main.star") == ["ext.args", "main.g"]
     assert callees(graph, "main.double_star") == ["main.g"]
 
 
 def test_defaults_of_functions_that_no_analysed_code_calls_flow(tmp_path):
-    # Library code: its users call these functions.
     graph = main_graph(
         tmp_path,
         """
@@ -81,8 +75,6 @@ def test_method_with_a_real_receiver_gets_no_outside_instance(tmp_path):
         """,
     )
 
-    # Only a Child runs Base.run. Base.handler, which nothing calls, still
-    # gets a receiver: an instance that code outside the program creates.
     assert callees(graph, "main.Base.run") == ["main.Child.handler"]
 
 
@@ -100,8 +92,6 @@ def test_a_method_that_no_analysed_code_calls_gets_every_instance(tmp_path):
         """,
     )
 
-    # Code outside may call run on any instance of Base or of a subclass:
-    # the template method dispatches to the override.
     assert callees(graph, "main.Base.run") == ["main.Base.step", "main.Child.step"]
 
 
@@ -144,7 +134,6 @@ def test_a_method_that_analysed_code_calls_keeps_its_real_receivers(tmp_path):
         """,
     )
 
-    # Only a Base runs run; the Child that exists never does.
     assert callees(graph, "main.Base.run") == ["main.Base.step"]
 
 
@@ -161,8 +150,6 @@ def test_receivers_of_library_classes_are_completed(tmp_path):
         """,
     )
 
-    # parse gets an outside instance; through it, step and finish have real
-    # receivers, so the completion stops there.
     assert callees(graph, "main.Parser.parse") == ["main.Parser.step"]
     assert callees(graph, "main.Parser.step") == ["main.Parser.finish"]
 
@@ -186,12 +173,8 @@ def test_completion_reaches_code_behind_completed_receivers(tmp_path):
         },
     )
 
-    # register's hook is omitted at the only call, which completion found.
     assert callees(graph, "lib.Plugin.setup") == ["lib.Plugin.register", "lib.make"]
     assert callees(graph, "lib.Plugin.register") == ["lib.g"]
-
-
-# Functions that return a parameter
 
 
 def test_identity_decorator_keeps_the_functions_it_decorates_apart(tmp_path):
@@ -240,7 +223,6 @@ def test_a_choice_between_parameters_gives_each_call_its_own_arguments(tmp_path)
         """,
     )
 
-    # A branch that is not a parameter is the function's own result.
     assert callees(graph, "main.use") == [
         "main.either",
         "main.f",
@@ -274,8 +256,6 @@ def test_decorator_that_may_return_another_value_merges_its_results(tmp_path):
 
 
 def test_decorator_that_rebinds_its_parameter_to_itself_returns_it(tmp_path):
-    # `f or None` is f or None, so the definition that reaches the return
-    # is the parameter's own.
     graph = main_graph(
         tmp_path,
         """
@@ -361,7 +341,6 @@ def test_parameter_rebound_by_a_nested_nonlocal_merges_results(tmp_path):
 
 
 def test_nonlocal_rebinding_from_a_nested_class_method_merges(tmp_path):
-    # nonlocal skips the class namespace, which also binds f.
     graph = main_graph(
         tmp_path,
         """
@@ -381,8 +360,6 @@ def test_nonlocal_rebinding_from_a_nested_class_method_merges(tmp_path):
 
     assert callees(graph, "main") == ["main.a", "main.b", "main.choose"]
 
-
-# Functions that return an element of *args
 
 ARGS_FUNCTIONS = """
 def f(): pass
@@ -454,7 +431,6 @@ C.plain(k)
 
 
 def test_method_that_returns_args_0_returns_its_receiver(tmp_path):
-    # In `def run(*args)` the receiver is args[0], as `return self`.
     graph = main_graph(
         tmp_path,
         """
@@ -514,8 +490,6 @@ second(g, h)
 
 
 def test_unpacked_arguments_give_the_call_only_what_it_unpacks(tmp_path):
-    # Positions that a list display keeps are matched; elements at unknown
-    # positions may be args[0] of this call, but of no other call.
     graph = main_graph(
         tmp_path,
         ARGS_FUNCTIONS
@@ -569,8 +543,6 @@ pick(True, g)
 
 
 def test_args_passed_on_still_gives_each_call_its_own_argument(tmp_path):
-    # A tuple cannot change: what the callee does with it does not change
-    # args[0].
     graph = main_graph(
         tmp_path,
         ARGS_FUNCTIONS
@@ -613,7 +585,6 @@ nested(g)
 """,
     )
 
-    # The nested function's `args = (h,)` reaches the return too.
     assert callees(graph, "main.use") == [
         "main.f",
         "main.g",
@@ -624,8 +595,6 @@ nested(g)
 
 
 def test_limit_a_negative_index_or_kwargs_merges_the_results_of_every_call(tmp_path):
-    # Python gives `use` only f and h: a negative index depends on the
-    # number of arguments, and a dict may change (design, *Decorators*).
     graph = main_graph(
         tmp_path,
         ARGS_FUNCTIONS
@@ -665,6 +634,4 @@ choose(first, fallback)()
 """,
     )
 
-    # Python calls only fallback (design, *Decorators*, the limit of
-    # returned parameters).
     assert {"main.fallback", "main.first"} <= set(callees(graph, "main"))

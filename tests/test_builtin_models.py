@@ -1,7 +1,3 @@
-"""Builtin functions and operators of builtin types whose results the
-analysis models beyond their stubs: enumerate, zip, reversed, map and
-filter over the engine's containers."""
-
 from programs import callees, main_graph
 
 
@@ -25,8 +21,6 @@ use()
 """,
     )
 
-    # The stubs carry the elements: enumerate[T] gives tuple[int, T],
-    # zip.__new__ gives zip[tuple[T1, T2]], reversed[T] gives T.
     assert {"main.f", "main.g", "main.h", "main.k"} <= set(callees(graph, "main.use"))
 
 
@@ -49,7 +43,6 @@ use()
 """,
     )
 
-    # map(f, xs) calls f (a class is instantiated) and yields its results.
     assert {
         "main.inner",
         "main.make",
@@ -81,8 +74,6 @@ use()
 """,
     )
 
-    # Python calls the function with each element and tests the truth of
-    # what it returns; the iterator gives the elements, not the results.
     assert callees(graph, "main.use") == [
         "<builtin>.filter",
         "main.Item.keep",
@@ -93,8 +84,6 @@ use()
     assert callees(graph, "main.first") == ["main.Item.keep"]
 
 
-# One call that reaches zip with one iterable, and, through a `__new__` that
-# passes the class first, with two (final review of the engine, finding 1).
 ZIP_OF_TWO_ARITIES = """
 class M(type):
     def __iter__(cls): return iter([h])
@@ -118,8 +107,6 @@ for first, second in make(C, f):
 def test_zip_at_one_call_with_two_arities_gives_a_tuple_of_each_length(tmp_path):
     graph = main_graph(tmp_path, ZIP_OF_TWO_ARITIES)
 
-    # zip([g]) gives (g,); C([f]) is zip(C, [f]), which iterates C through
-    # its metaclass and gives (h, f).
     assert callees(graph, "main.make") == ["<builtin>.zip", "main.M.__iter__"]
     assert callees(graph, "main") == [
         "<builtin>.staticmethod",
@@ -147,8 +134,6 @@ for first, second in pair([h], [k]):
 """,
     )
 
-    # Without unpacking, the tuple has a known length and positions; with
-    # it, the elements of every iterable may be at any position.
     found = callees(graph, "main")
     assert {"main.g", "main.h"} <= set(found)
     assert "main.f" not in found
@@ -175,9 +160,6 @@ use()
 """,
     )
 
-    # An explicit iterable passes its elements at its position; the
-    # iterables that an unpacked argument passes give theirs at any later
-    # position. `second` returns its second argument: h and k, never g.
     assert callees(graph, "main.use") == [
         "<builtin>.map",
         "main.apply",

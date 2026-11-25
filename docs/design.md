@@ -179,6 +179,10 @@ The rules in full, under the five ideas and then by language feature.
 Each rule is followed by its limits. A limit that a test pins names the
 test.
 
+A test of a limit asserts the edge that the analysis keeps although Python
+makes no such call, so that a change which removes the edge, and with it
+real calls of other programs, fails that test.
+
 ## Pipeline and modules
 
 1. **Module discovery** (`program.py`, `imports.py`). Start from the entry
@@ -235,6 +239,17 @@ test.
    for tests only: each variable, field and return value with the sorted
    names of the objects that it may hold; a saturated node holds none that
    it can name.
+
+   A built-in or frozen module of the running Python wins over any file of
+   its name under the root, and so does a frozen submodule of a package that
+   is not frozen: `importlib` is not frozen but `importlib.util` is, so
+   `import importlib.util` runs a local `importlib/__init__.py` and then
+   imports the frozen `importlib.util`. Submodules that are not frozen stay
+   local, and a relative import of a frozen name (`from . import util` in
+   that package) is local too. An import that fails still adds to the import
+   graph the packages and modules that Python ran before it failed: for
+   `import pkg.missing.sub`, Python runs `pkg/__init__.py` first, so `pkg`
+   is analysed.
 
 The AST is never walked again after the builder, and there is no cap on
 iterations.
@@ -296,7 +311,10 @@ and computes its name when asked.
   name, also in attribute accesses and parameters, but
   not in keyword arguments). In a function inside a class, an unbound
   `__class__` is the class (Python's implicit cell, which `super()`
-  without arguments uses). A module-level name is `Field(module, name)`
+  without arguments uses). The cell of the innermost class wins over a
+  variable `__class__` of an enclosing function; a `global __class__`
+  declaration or a local binding of `__class__` in the method wins over
+  the cell. A module-level name is `Field(module, name)`
   and a class-body name is `Field(class, name)`. The variable holds every
   value of the name; a read in statement order may get fewer (idea 2).
 - A name that the module does not bind and that is a builtin (a name of
@@ -766,6 +784,15 @@ a registry of every lexer) cost its size times its constraints, and its
 calls were noise. The solve still ends (see *Termination*), and the result
 does not depend on the order (see *Order independence*).
 
+A hub is generic code that calls every callable with every argument, such as
+`func(*args, **kwds)` in `contextlib`: without context, each callable gets
+each argument, so a solver that keeps a private copy of a set per node and
+moves objects one at a time does work quadratic in the size of the hub.
+`tests/test_scaling.py` measures the work of the solver without a clock, as
+the objects written into sets, the constraint applications and the subset
+edges that `Solver.work` counts, and checks that it grows about linearly
+with the size of a hub.
+
 Two mechanisms keep the cost close to the size of the result:
 
 - **Shared sets (hash consing).** Every set is immutable and exists once; a
@@ -837,6 +864,17 @@ c + ...`) does not exhaust the stack in any order. Copying the fields of
 one container to another is done once per pair: many sites copy the same
 container to the same place (pydantic: half of 191,000 copies), and each
 copy would add the same edges again for every field.
+
+A program has millions of `Each` constraints and of nodes with a successor.
+An `Each` keeps its function and the function's owner, not a bound method
+(64 bytes), and its one result node itself, not a tuple of one (56 bytes).
+Most nodes with a successor have exactly one, and a node keeps that one
+successor itself, without a dict. The records that the analysis keeps for
+each pair of an object and a site (the parameters that a call supplies, the
+set of instances that the calls of a class make, an attached special-method
+call) are shared between pairs where they hold nothing of the pair: on large
+programs these records are most of the memory, millions of bindings and
+implicit calls.
 
 A node that no rule can read yet need not exist. A call of a modelled builtin
 or of a stubbed function binds its arguments to the parameters of each
@@ -2034,6 +2072,10 @@ descriptor, so a name that only a hook gives names nothing
 (`test_a_string_annotation_runs_no_attribute_hook`). A shape that names
 no type (a call, a lambda, a comprehension) gives nothing.
 
+`tuple[()]`, the annotation of the empty tuple, is a subscript with no
+arguments. It names a tuple, as `tuple[int]` does, and `type[tuple[()]]`
+names the class `tuple`.
+
 A union or a subscript becomes a `TypeForm`, one per site, that holds the
 nodes of its parts. A name bound at module or class level to a union or a
 subscript (`T = A | B`, `T: TypeAlias = ...`) also gets its `TypeForm`, once
@@ -2390,6 +2432,12 @@ C.attr
   ancestor with it (`class C(UserDict, Mixin)` with `class
   Mixin(MutableMapping)`) is searched after that whole hierarchy, not
   before the shared ancestor as in Python's MRO.
+
+On a chain of n classes, each class looks a name up through an MRO of up to
+n classes: n² steps in all. The step that asks whether the receiver derives
+from a class of the MRO, the C3 merge and the reported MRO look classes up
+in a set or a dict; searching a list of the classes placed so far made each
+of them cubic (`tests/test_scaling.py`).
 
 #### Lookup through an instance
 
@@ -2863,6 +2911,12 @@ and a suffix cannot state) and for a str constant (`"Visit".lower()`).
 - Limit: `eval`, `exec`, names that may be more than four strings, and
   stores on an object through its namespace (`obj.__dict__[name] = value`)
   are not modelled (see *Namespaces read by reflection*).
+- Limit: an operand that holds nothing at a fixpoint widens the result of
+  `+` or `%` (step 4), and the widening stays when a later round gives the
+  operand a str constant, since rules only add. A dict read by such a result
+  reads every element, though Python, where no key matches the pattern,
+  raises `KeyError`, and what the widened read gives flows on
+  (`test_limit_an_operand_that_only_the_completion_fills_stays_unknown`).
 
 ### Namespaces read by reflection
 
@@ -2920,6 +2974,12 @@ so `getmembers` of an enum class or member gives the stubs' result. The list
 and its pair are made when the first such class or instance arrives, so
 `getmembers` of a module gives the stubs' result alone. These rules add to
 what the stubs give for `vars` and `getmembers`.
+
+Each member is loaded once per object that `getmembers` reaches, and is one
+field of one namespace dict, whatever the loops that read it. Each receiver
+is read once per site that reaches it, so many classes read at sites of
+their own and at one shared site cost the sum of the two
+(`tests/test_scaling.py`).
 
 - Limit: neither the predicate of `getmembers` nor a test on the name
   (`if name.startswith("_func_")`) is evaluated: every member is called
@@ -3015,6 +3075,10 @@ is redone when its MROs or its bases' metaclasses grow
   the arguments of its own statement, and `__init__` is the same method
   for each, so the work grows with the number of classes, not with its
   square. A class whose metaclass is `type` makes no such call.
+
+  The metaclass's `__init__` still runs on the class of its own statement
+  only, not on every class that `type.__new__` gives there, so the
+  statements of one metaclass cost their number (`tests/test_scaling.py`).
 
 Limits:
 
@@ -3423,6 +3487,12 @@ calls its factory whatever the key. A store under a pattern goes to
 has. A list, tuple or `deque` read by a pattern reads every element, and
 an instance with `__getitem__` gets the call, as for any other key.
 
+`target.update(source)` copies the fields of `source` to `target` key by
+key, also the keys that `source` gets later. Every site that copies one dict
+into another copies the same fields to the same place, so the copy is made
+once per pair of dicts, not once per site, which would cost the sites times
+the keys.
+
 - Limit: `"ext.{}".format(name)` is a pattern and also the str of unknown
   value that the stub of `str.format` returns, so the read gets every
   element.
@@ -3467,6 +3537,10 @@ so the calls, and what the factories make (a copy of the dict, another
   before it starts; a `Counter` built from a mapping that is an instance
   of an analysed class gives nothing (Python reads it through `items()`,
   the analysis iterates it).
+- Limit: `+` on an instance of a subclass of `list` copies the list's
+  storage in Python and calls no `__iter__`; the analysis iterates the
+  operand, so the subclass's `__iter__` gets an edge
+  (`test_limit_list_concatenation_iterates_a_list_subclass`).
 
 #### Iteration
 
@@ -3489,6 +3563,10 @@ from the scope that iterates. `next()`, `iter()`, `send()` and `yield from`
 are modelled; the value of a `yield` expression is what is sent; `yield
 from` gives the inner generator's return value. The edge to a generator
 function comes from the scope that calls it.
+
+`async for` has no sequence protocol: an instance whose type defines
+`__getitem__` but no `__aiter__` gives nothing to `async for`, and no
+`__getitem__` is called.
 
 ### `match`
 
@@ -3591,6 +3669,13 @@ computed once) come before any file, as in Python, also for submodules
 code, and no absolute import reaches an analysed module of that name. The
 set is a constant, so the result does not depend on the Python that runs
 the analysis.
+
+Python imports a builtin or frozen module before any file on the path, so an
+analysed module of the same name (`os.py`) is not what an absolute import
+gives. The analysis applies this only to the modules that are builtin or
+frozen in every supported Python and build (`os` is frozen in all of them);
+a module that is builtin only in some builds (`math`) is the analysed file,
+so the result is the same on every Python that runs the analysis.
 
 **Literal imports.** `importlib.import_module("a.b")` and `__import__("a.b")`
 with a str literal are imports too, where the called name is, in the scope
@@ -4068,6 +4153,12 @@ them, so no kind of node keys another of its own kind:
 The other rules make nodes and constraints per call and object, or per
 constraint and object, and no rule makes a constraint whose application
 makes another of its kind without passing through a keyed call or object.
+
+No rule walks a hierarchy with a Python frame per class: lookups,
+`type[...]` and class annotations, `except` and class patterns walk a chain
+or a fan of classes iteratively, so the analysis needs a few dozen frames
+whatever the length or width of a hierarchy. The test analyses a chain and a
+fan of 300 classes with at most 200 frames above its own.
 
 **The test.** `tests/test_termination.py` searches seeded random programs
 for a counterexample in five families: callables wrapped, bound and

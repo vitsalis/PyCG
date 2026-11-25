@@ -1,5 +1,3 @@
-"""Name resolution and scope naming, computed from the AST."""
-
 import ast
 import textwrap
 
@@ -19,7 +17,6 @@ def scope_named(scopes, name):
 
 
 def binder(scopes, scope_name, name):
-    """Return the name of the scope that binds `name` as seen from a scope."""
     return scopes.resolve(scope_named(scopes, scope_name), name).name
 
 
@@ -343,14 +340,9 @@ def test_private_names_are_mangled_inside_classes():
         "_Outer__p",
         "_Outer__local",
     }
-    # A nested class mangles with its own name.
     assert set(scope_named(scopes, "mod._Outer.__Inner").bound) == {"_Inner__b"}
-    # A class name made only of underscores mangles nothing.
     assert set(scope_named(scopes, "mod.___").bound) == {"__c"}
     assert set(scopes.module.bound) == {"_Outer", "___", "__module_level", "_Outer__g"}
-
-
-# What the builder follows by definition (see `ModuleScopes.tracked`)
 
 
 def test_names_that_another_scope_rebinds_are_not_tracked():
@@ -374,11 +366,9 @@ def test_names_that_another_scope_rebinds_are_not_tracked():
     outer = scope_named(scopes, "mod.outer")
 
     assert not scopes.tracked(scopes.module, "rebound")
-    # Reading a global does not rebind it.
     assert scopes.tracked(scopes.module, "read")
     assert scopes.tracked(outer, "mine")
     assert not scopes.tracked(outer, "cell")
-    # A comprehension binds `last` on each of its iterations.
     assert not scopes.tracked(outer, "last")
     assert not scopes.tracked(scope_named(scopes, "mod.outer.<listcomp>"), "x")
 
@@ -472,7 +462,6 @@ def test_names_that_only_one_import_binds():
     assert scopes.imported(module, "t") == "typing"
     assert scopes.imported(module, "os") == "os"
     assert scopes.imported(module, "TYPE_CHECKING") == "typing.TYPE_CHECKING"
-    # A relative import, a name bound another way, a name another scope binds.
     assert scopes.imported(module, "sibling") is None
     assert scopes.imported(module, "cast") is None
     assert scopes.imported(module, "json") is None
@@ -501,7 +490,6 @@ def test_scopes_that_use_their_namespace_track_no_name():
     assert not scopes.tracked(scope_named(scopes, "mod.reads"), "x")
     assert scopes.tracked(scope_named(scopes, "mod.described"), "x")
     assert scopes.tracked(scope_named(scopes, "mod.shadowed"), "x")
-    # exec also reaches the module's names.
     assert not scopes.tracked(scope_named(scopes, "mod.runs"), "x")
     assert not scopes.tracked(scopes.module, "sys")
     plain = scopes_of("import sys\nx = 1\nsys.modules['other']\n")

@@ -1,4 +1,8 @@
-"""Write a large synthetic call graph document for the viewer's size test.
+import argparse
+import json
+import random
+
+DESCRIPTION = """Write a large synthetic call graph document for the viewer's size test.
 
     python tests/data/view/generate.py OUT.json [--definitions N] [--sites N]
 
@@ -8,10 +12,6 @@ kinds, implicit and unresolved sites, one failed and one extension module,
 and one hub function that a few percent of the sites call. The same
 arguments give the same bytes.
 """
-
-import argparse
-import json
-import random
 
 PER_MODULE = 65
 METHODS = 6
@@ -136,7 +136,7 @@ def generate(definitions=20000, sites=100000, seed=1):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=DESCRIPTION.splitlines()[0])
     parser.add_argument("output")
     parser.add_argument("--definitions", type=int, default=20000)
     parser.add_argument("--sites", type=int, default=100000)

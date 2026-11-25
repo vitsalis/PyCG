@@ -1,6 +1,3 @@
-"""A class that Python does not instantiate: a call of it makes no instance
-and runs no `__init__`, and it has no abstract instance."""
-
 from programs import callees, main_graph
 
 
@@ -25,7 +22,6 @@ def test_calling_a_class_that_is_abstract_by_abc_runs_no_init(tmp_path):
         """,
     )
 
-    # Middle inherits the abstract run: Python raises for it too.
     assert callees(graph, "main.make") == ["main.Leaf.__init__"]
     assert callees(graph, "main") == [
         "abc.abstractmethod",
@@ -68,11 +64,10 @@ def test_abstract_through_an_outside_abc(tmp_path):
         """,
     )
 
-    # Partial lacks __iter__ and __len__, which Mapping declares abstract.
     assert callees(graph, "main") == ["main.Full.__init__"]
 
 
-def test_abstractmethod_without_abcmeta_is_instantiated(tmp_path):
+def test_a_class_abstract_without_abcmeta_or_by_convention_is_instantiated(tmp_path):
     graph = main_graph(
         tmp_path,
         """
@@ -97,15 +92,12 @@ def test_abstractmethod_without_abcmeta_is_instantiated(tmp_path):
         """,
     )
 
-    # Without ABCMeta, abstractmethod does nothing, and a method that
-    # raises NotImplementedError is an ordinary method.
     assert callees(graph, "main") == [
         "abc.abstractmethod",
         "main.Conventional.__init__",
         "main.Plain.__init__",
     ]
     assert callees(graph, "main.Plain.run") == ["main.Plain.step"]
-    # Lone has an object of its own, which its entry point receives.
     assert callees(graph, "main.Lone.run") == ["main.Lone.step"]
 
 
@@ -126,8 +118,6 @@ def test_a_protocol_class_is_refused_only_by_its_own_initializer(tmp_path):
         """,
     )
 
-    # Protocol's initializer refuses a protocol class; one that defines its
-    # own __init__ replaces it, and Python makes the object.
     assert callees(graph, "main") == ["main.Box.__init__", "main.Sized.__init__"]
 
 
@@ -144,7 +134,6 @@ def test_an_abstract_class_with_another_allocator_is_instantiated(tmp_path):
         """,
     )
 
-    # object.__new__ refuses an abstract class; list.__new__ does not.
     assert callees(graph, "main") == ["abc.abstractmethod", "main.Items.__init__"]
 
 
@@ -223,7 +212,6 @@ def test_abstract_class_and_static_methods_count(tmp_path):
 def test_a_metaclass_with_a_concrete_alternative_keeps_the_class_concrete(
     tmp_path,
 ):
-    # Codex review, finding 1: the metaclass may derive from ABCMeta or not.
     graph = main_graph(tmp_path, METACLASS_ALTERNATIVES)
 
     assert "main.C.__init__" in callees(graph, "main")
@@ -257,7 +245,6 @@ def test_object_new_makes_no_instance_of_an_abstract_class(tmp_path):
         """,
     )
 
-    # The analysed __new__ runs; object.__new__ raises inside it.
     assert callees(graph, "main") == ["abc.abstractmethod", "main.Base.__new__"]
 
 
@@ -279,7 +266,6 @@ def test_an_alternative_concrete_hierarchy_makes_an_instance(tmp_path):
         """,
     )
 
-    # One hierarchy of Thing is concrete: the call may make an instance.
     assert callees(graph, "main") == [
         "abc.abstractmethod",
         "main.Thing.__init__",
@@ -307,7 +293,6 @@ def test_a_mixin_concrete_method_resolves_the_abstract_one(tmp_path):
 
 
 def test_an_annotation_without_a_value_binds_nothing(tmp_path):
-    # Codex review of the class fixes, N4.
     graph = main_graph(
         tmp_path,
         """
@@ -328,14 +313,10 @@ def test_an_annotation_without_a_value_binds_nothing(tmp_path):
         """,
     )
 
-    # Neither the annotation nor the assignment expression of the nested
-    # function rebinds `f` in the class body: both classes stay abstract.
     assert callees(graph, "main") == ["abc.abstractmethod"]
 
 
 def test_a_body_that_uses_its_namespace_keeps_its_instance(tmp_path):
-    # Codex review, round 4, finding 1: nothing makes C abstract (its
-    # metaclass is `type`), so a client's `C().run()` calls `C.f`.
     graph = main_graph(
         tmp_path,
         """
@@ -355,9 +336,6 @@ def test_a_body_that_uses_its_namespace_keeps_its_instance(tmp_path):
 def test_a_body_that_writes_its_namespace_may_replace_an_inherited_method(
     tmp_path,
 ):
-    # Codex review, round 4, finding 2: the body of C may bind `f`, so the
-    # abstract `f` of A does not refuse C, nor a subclass that inherits
-    # through C.
     graph = main_graph(
         tmp_path,
         """
@@ -384,9 +362,6 @@ def test_a_body_that_writes_its_namespace_may_replace_an_inherited_method(
 
 
 def test_a_protocol_body_that_uses_its_namespace_may_define_init(tmp_path):
-    # Codex review, round 5: the namespace may supply `__init__`, so
-    # Protocol's initializer does not certainly refuse P, nor a protocol
-    # that inherits through it.
     graph = main_graph(
         tmp_path,
         """
@@ -412,8 +387,6 @@ def test_a_protocol_body_that_uses_its_namespace_may_define_init(tmp_path):
 
 
 def test_an_abstract_method_below_a_namespace_body_still_refuses(tmp_path):
-    # The body of D uses no namespace and its `g` is final: Python refuses
-    # D, whatever the body of C binds.
     graph = main_graph(
         tmp_path,
         """
@@ -434,8 +407,6 @@ def test_an_abstract_method_below_a_namespace_body_still_refuses(tmp_path):
 def test_an_assignment_expression_in_a_default_under_a_compound_statement(
     tmp_path,
 ):
-    # Codex review, round 3, finding 3: the default runs in the class body
-    # and binds `f = 1` there, so C is concrete.
     graph = main_graph(
         tmp_path,
         """

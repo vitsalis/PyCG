@@ -1,13 +1,4 @@
-"""Entry points and declared values. A function that no analysed code
-calls is analysed as an entry point: its receiver is any instance of its
-class or of a subclass, and its parameters take their defaults. A type
-annotation names values that a parameter may hold (test_annotations.py).
-No caller outside the analysed code is modelled: a call edge exists only
-where analysed code makes the call."""
-
 from programs import call_graph, callees, main_graph
-
-# self
 
 
 def test_self_is_an_instance_of_the_class(tmp_path):
@@ -44,8 +35,6 @@ def test_self_is_an_instance_of_every_subclass(tmp_path):
 
 
 def test_limit_a_method_that_analysed_code_calls_keeps_those_receivers(tmp_path):
-    # A known limit: the package calls run on a Base only, so run is no
-    # entry point and gets no Child, although code outside could pass one.
     graph = main_graph(
         tmp_path,
         """
@@ -85,8 +74,6 @@ def test_subclasses_in_other_modules(tmp_path):
 
 
 def test_a_subclass_that_overrides_the_method_is_no_receiver(tmp_path):
-    # Python runs Base.run on a Child only through super() or Base.run(self),
-    # which are analysed calls.
     graph = main_graph(
         tmp_path,
         """
@@ -112,7 +99,6 @@ def test_a_subclass_that_overrides_the_method_is_no_receiver(tmp_path):
 
 
 def test_an_alias_of_the_same_method_is_no_override(tmp_path):
-    # Codex review, finding 9: Child's run is Base.run itself.
     graph = main_graph(
         tmp_path,
         """
@@ -188,7 +174,6 @@ def test_a_method_with_only_args_gets_its_receiver_first(tmp_path):
 
 
 def test_limit_a_decorators_wrapper_gets_no_receiver(tmp_path):
-    # A known limit: the wrapper is no function of the class body.
     graph = main_graph(
         tmp_path,
         """
@@ -205,14 +190,11 @@ def test_limit_a_decorators_wrapper_gets_no_receiver(tmp_path):
         """,
     )
 
-    # The wrapper calls what it wraps, but args[0] holds nothing.
     assert callees(graph, "main.decorate.wrapper") == ["main.C.run"]
     assert callees(graph, "main.C.run") == ["main.C.before"]
 
 
 def test_limit_no_arguments_from_callers_that_the_analysis_does_not_see(tmp_path):
-    # A known limit: a parameter holds what analysed code passes, its default
-    # and what its annotation names, nothing else.
     graph = main_graph(
         tmp_path,
         """
@@ -294,9 +276,6 @@ def test_a_subclass_that_inherits_an_abstract_method_has_no_instance(tmp_path):
     assert callees(graph, "main.Base.run") == []
 
 
-# Defaults
-
-
 def test_defaults_flow_where_a_call_may_omit_them(tmp_path):
     graph = main_graph(
         tmp_path,
@@ -336,8 +315,6 @@ def test_an_entry_point_takes_its_defaults(tmp_path):
 
 
 def test_a_class_method_entry_point_gets_every_subclass(tmp_path):
-    # By the class hierarchy: Child has no instance of its own (it is
-    # abstract), but a class method may run on it.
     graph = main_graph(
         tmp_path,
         """

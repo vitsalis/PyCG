@@ -1,12 +1,4 @@
 "use strict";
-/*
- * A small fake DOM to run the viewer's page script in node, without a
- * browser. It has only what the page uses; it refuses to parse HTML, so a
- * test fails if the page ever builds markup from text.
- *
- * Usage: const {loadPage} = require("./view_dom.js");
- *        const page = loadPage(html, {hash: "#name"});
- */
 const vm = require("vm");
 
 let created = 0;
@@ -277,7 +269,6 @@ function blocks(html) {
   return out;
 }
 
-/* Run the page's scripts against a fresh fake document. */
 function loadPage(html, options = {}) {
   created = 0;
   const document = new Document();
@@ -322,7 +313,6 @@ function loadPage(html, options = {}) {
     location,
     context,
     created: () => created,
-    /* Deliver the hash changes that the page queued, as a browser does. */
     settle() {
       while (queue.length) queue.shift()();
     },

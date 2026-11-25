@@ -1,10 +1,3 @@
-"""`pycg-view` turns a call graph document into one self-contained HTML page.
-
-These tests cover the command line, the embedding of the document in the page
-and the rules for the page template. `test_view_page.py` runs the page's
-JavaScript.
-"""
-
 import json
 import re
 import subprocess
@@ -41,7 +34,6 @@ HOSTILE = [
 
 
 def document(**parts):
-    """A minimal valid document, with `parts` replacing its parts."""
     base = {
         "format": "pycg/1",
         "tool": {"name": "pycg", "version": "1.0.0", "typeshed": "abc"},
@@ -57,7 +49,6 @@ def document(**parts):
 
 
 def hostile_document():
-    """A document whose every name, cause and file is a hostile string."""
     modules = {}
     definitions = {}
     outside = {}
@@ -93,7 +84,6 @@ def write_json(path, value):
 
 
 def embedded(html):
-    """The text of the document block of a page."""
     blocks = BLOCK.findall(html)
     assert len(blocks) == 1
     return blocks[0]
@@ -106,9 +96,6 @@ def run_cli(*args):
         text=True,
         cwd=ROOT,
     )
-
-
-# The command line
 
 
 def test_writes_the_page_to_the_output_path(tmp_path):
@@ -256,9 +243,6 @@ def test_console_script_runs_the_viewer():
     assert scripts["pycg"] == "pycg.__main__:main"
 
 
-# The embedding
-
-
 def test_page_holds_the_document_byte_for_byte(tmp_path):
     for source_text in [SAMPLE.read_text(encoding="utf-8"), json.dumps(document())]:
         html = view.render(source_text)
@@ -296,9 +280,6 @@ def test_page_bytes_are_utf8_without_newline_translation(tmp_path):
     raw = output.read_bytes()
     assert text.replace("<", "\\u003c").encode("utf-8") in raw
     assert b"\r\n" not in raw
-
-
-# The template
 
 
 def test_template_has_exactly_one_document_marker():

@@ -1,6 +1,3 @@
-"""The document that PyCG writes (docs/format.md): its parts, read through
-`CallGraphGenerator.document()` and the command line."""
-
 import ast
 import inspect
 import json
@@ -41,9 +38,6 @@ def run_cli(*args):
         cwd=ROOT,
     )
     return result.stdout
-
-
-# The whole document
 
 
 SAMPLE = """\
@@ -102,8 +96,6 @@ def test_document_of_a_small_program(tmp_path):
                 "callees": ["main.Box.__iter__"],
                 "implicit": "iteration",
             },
-            # `re.compile(text)` and the call of its result's `match` start
-            # at one position: the inner call ends first.
             {"line": 12, "col": 8, "end": [12, 24], "callees": ["re.compile"]},
             {"line": 12, "col": 8, "end": [12, 36], "callees": ["re.Pattern.match"]},
             {"line": 13, "col": 4, "end": [13, 17], "callees": ["foo.get.bar"]},
@@ -192,9 +184,6 @@ def test_command_line_writes_to_a_file(tmp_path):
     ]
 
 
-# The classic call graph is the edges of the document
-
-
 @pytest.mark.parametrize(
     "snippet",
     sorted(path for path in SNIPPETS.glob("*/*") if path.is_dir()),
@@ -229,11 +218,9 @@ def test_the_edges_of_the_document_are_consistent(snippet):
             )
             for site in sites
         ]
-        # Sorted, and one site per node and construct.
         assert keys == sorted(set(keys))
-        # A site names its module only where it is not the definition's.
-        own = found["definitions"][caller]["module"]
-        assert all(site.get("module") != own for site in sites)
+        definition_module = found["definitions"][caller]["module"]
+        assert all(site.get("module") != definition_module for site in sites)
     graph = edges(found)
     assert set(graph) == nodes | set(found["outside"])
     assert generator.output() == graph
@@ -246,13 +233,7 @@ def test_a_reader_refuses_a_version_that_it_does_not_know(tmp_path):
         edges({**found, "format": "pycg/2"})
 
 
-# Call sites
-
-
-def spans(path):
-    """The (line, col, end line, end col) of every node of the module, and
-    of every link of a comparison chain, from its left operand to its right
-    one (the one site that is not a node)."""
+def spans_of_nodes_and_comparison_links(path):
     found = set()
     for node in ast.walk(ast.parse(path.read_bytes())):
         if hasattr(node, "end_col_offset"):
@@ -280,7 +261,7 @@ def test_every_site_is_the_span_of_a_node_of_its_caller(snippet):
     found = generator.document()
 
     modules = {
-        name: spans(snippet / module["file"])
+        name: spans_of_nodes_and_comparison_links(snippet / module["file"])
         for name, module in found["modules"].items()
         if module.get("status") == "analysed"
     }
@@ -434,7 +415,6 @@ class D:
 C()
 D()
 """
-    # D() calls object.__init__, which the call graph does not report.
     assert calls(tmp_path, source) == [
         {"line": 5, "col": 0, "end": [5, 3], "callees": ["main.C.__init__"]},
     ]
@@ -455,7 +435,6 @@ for x in C():
 """
     sites = calls(tmp_path, source)
 
-    # The loop's __iter__ and __next__, and the loads of the two fields.
     assert sites[-3:] == [
         {
             "line": 8,
@@ -486,9 +465,6 @@ a, b, c = C(), C(), C()
 a < b < c
 1 in a
 """
-    # A comparison of one link is its whole expression. Each link of a
-    # chain spans its two operands, with the truth test of its result
-    # where the chain goes on.
     assert calls(tmp_path, source) == [
         {
             "line": 7,
@@ -679,9 +655,6 @@ with open("f") as f:
     ]
 
 
-# Unresolved call expressions
-
-
 def test_a_call_whose_callee_holds_nothing_is_unresolved(tmp_path):
     source = """\
 def run(callback):
@@ -712,7 +685,6 @@ def run(name):
 
 
 def test_a_call_of_an_outside_value_without_a_name_is_unresolved(tmp_path):
-    # Names of outside code stop two attributes past their root.
     source = """\
 import lib
 lib.a.b.c()
@@ -752,9 +724,6 @@ if False:
     assert calls(tmp_path, source) == []
 
 
-# Modules
-
-
 def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
     found = document(
         tmp_path,
@@ -766,8 +735,6 @@ def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
         },
     )
 
-    # The cause is the type of the error and where it is, not its message,
-    # which changes between versions of Python.
     assert found["modules"] == {
         "broken": {
             "file": "broken.py",
@@ -789,8 +756,6 @@ def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
         },
         "main": {"file": "main.py", "kind": "source", "status": "analysed"},
     }
-    # A failed module defines nothing but itself, and calls nothing; its
-    # lines are not known.
     assert found["definitions"] == {
         "broken": {"kind": "module", "module": "broken", "lines": [0, 0]},
         "latin": {"kind": "module", "module": "latin", "lines": [0, 0]},
@@ -804,10 +769,9 @@ def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
 
 
 @contextmanager
-def stack_limit(frames):
-    """Allow `frames` more frames on the Python stack than the caller uses."""
+def stack_limit(frames_beyond_caller):
     previous = sys.getrecursionlimit()
-    sys.setrecursionlimit(len(inspect.stack(0)) + frames)
+    sys.setrecursionlimit(len(inspect.stack(0)) + frames_beyond_caller)
     try:
         yield
     finally:
@@ -815,8 +779,10 @@ def stack_limit(frames):
 
 
 def test_a_module_whose_analysis_stops_early_is_partial(tmp_path):
-    # Python parses the nested lambdas; the analysis runs out of stack.
-    source = "def f(): pass\nf()\nx = " + "lambda: " * 300 + "None\n"
+    lambdas_nested_beyond_the_analysis_stack = "lambda: " * 300
+    source = (
+        "def f(): pass\nf()\nx = " + lambdas_nested_beyond_the_analysis_stack + "None\n"
+    )
     write(tmp_path, {"main.py": source})
     generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
     with stack_limit(200):
@@ -831,15 +797,12 @@ def test_a_module_whose_analysis_stops_early_is_partial(tmp_path):
             "cause": "RecursionError",
         }
     }
-    # What the analysis found before it stopped is kept.
     assert found["definitions"]["main"]["lines"] == [1, 3]
     assert found["definitions"]["main.f"]["lines"] == [1, 1]
     assert found["calls"]["main"] == [
         {"line": 2, "col": 0, "end": [2, 3], "callees": ["main.f"]}
     ]
 
-
-# Files of one module name (review round 3, finding 1)
 
 ONE_MODULE_NAME = {
     "a.py": "def f(): pass\nf()\n",
@@ -861,7 +824,6 @@ ONE_MODULE_NAME = {
 def test_a_package_comes_before_a_module_file_of_its_name(tmp_path, entries):
     found = document(tmp_path, ONE_MODULE_NAME, entries)
 
-    # Python imports the package; the module file is listed, not analysed.
     assert found["modules"]["a"] == {
         "file": "a/__init__.py",
         "kind": "source",
@@ -930,15 +892,11 @@ def test_a_module_file_beside_a_namespace_package_of_its_name(tmp_path, entries)
     files = {"a.py": "def f(): pass\nf()\n", "a/x.py": "def g(): pass\ng()\n"}
     found = document(tmp_path, files, entries)
 
-    # Python imports the module file for `a`; the entry `a/x.py` is analysed
-    # as the module `a.x` it names, though no import reaches it.
     assert found["modules"] == {
         "a": {"file": "a.py", "kind": "source", "status": "analysed"},
         "a.x": {"file": "a/x.py", "kind": "source", "status": "analysed"},
     }
 
-
-# Files that only an entry point names (review round 4, finding 1)
 
 ENTRY_ONLY = {"a.pyw": "def f(): pass\nf()\n", "a": "def g(): pass\ng()\n"}
 
@@ -947,7 +905,6 @@ ENTRY_ONLY = {"a.pyw": "def f(): pass\nf()\n", "a": "def g(): pass\ng()\n"}
 def test_files_that_only_entry_points_name_are_ordered_by_name(tmp_path, entries):
     found = document(tmp_path, ENTRY_ONLY, entries)
 
-    # No file that an import finds: the first by name is the module.
     assert found["modules"] == {
         "a": {
             "file": "a",
@@ -1054,15 +1011,12 @@ def test_extension_modules_are_found_by_their_file_names(tmp_path):
             "file": "pkg/_speedups.cpython-312-darwin.so",
             "kind": "extension",
         },
-        # A module with a source file is a source module; its binary is
-        # shadowed.
         "pkg.both": {
             "file": "pkg/both.py",
             "kind": "source",
             "status": "analysed",
             "shadows": ["pkg/both.cpython-312-darwin.so"],
         },
-        # pkg._win is not imported.
     }
 
 
@@ -1080,9 +1034,6 @@ def test_a_call_into_an_extension_module_is_named_by_its_module(tmp_path):
         "pkg._fast.escape": {"known": "extension"},
         "pkg._speedups.run": {"known": "extension"},
     }
-
-
-# Definitions, exports, outside names, package and tool
 
 
 def test_definitions_have_their_kind_module_lines_and_mro(tmp_path):
@@ -1112,7 +1063,6 @@ def outer():
             "module": "main",
             "lines": [4, 4],
         },
-        # Past an outside class, the linearization is outside code.
         "main.Child": {
             "kind": "class",
             "module": "main",
@@ -1144,7 +1094,6 @@ def g(): pass
         "module": "main",
         "lines": [3, 3],
     }
-    # The call graph has functions, not classes, as nodes.
     assert definitions["main.g"] == {
         "kind": "function",
         "module": "main",
@@ -1193,13 +1142,11 @@ def fetch(url):
 """
     found = document(tmp_path, {"main.py": source})
 
-    # requests has a stub in typeshed: its methods are named by their class.
     assert found["outside"] == {
         "requests.Response.json": {"known": "stub"},
         "requests.get": {"known": "stub"},
         "untyped.get": {"known": "name"},
     }
-    # What code without stubs returns has no name.
     assert [site["callees"] for site in found["calls"]["main.fetch"]] == [
         ["untyped.get"],
         [],
@@ -1236,26 +1183,20 @@ def test_the_tool_is_named_with_its_version_and_typeshed_commit(tmp_path):
         "typeshed": re.search(r"`([0-9a-f]{40})`", readme)[1],
         "cap": 5000,
     }
-    # The build backend reads the version from the package: one source.
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
     assert pyproject["project"]["dynamic"] == ["version"]
     assert pyproject["tool"]["hatch"]["version"]["path"] == "pycg/__init__.py"
 
 
 def test_a_module_has_the_lines_that_python_numbers(tmp_path):
-    # A form feed does not end a line for Python, though str.splitlines()
-    # breaks there.
     source = "import empty, last\ndef f():\n    pass\n\x0c\ndef g(): pass\n"
     found = document(tmp_path, {"main.py": source, "empty.py": "", "last.py": "x"})
 
     assert found["definitions"]["main"]["lines"] == [1, 5]
     assert found["definitions"]["main.g"]["lines"] == [5, 5]
     assert found["definitions"]["empty"]["lines"] == [0, 0]
-    # The last line need not end with a newline.
     assert found["definitions"]["last"]["lines"] == [1, 1]
 
-
-# Determinism
 
 VERSIONS = {
     "main.py": """\
@@ -1275,7 +1216,6 @@ def show(items, key):
     return sorted(items, key=lambda item: item[key])
 """,
     "broken.py": "x = (\n",
-    # A comparison chain, and two definitions of one name.
     "chain.py": """\
 class C:
     def __lt__(self, other): return True
@@ -1286,7 +1226,6 @@ if a:
 else:
     def f(): b < c
 """,
-    # Python 3.12 fails to parse it; later versions fail to read it.
     "nul.py": "x = 1\x00\n",
 }
 
@@ -1433,8 +1372,6 @@ class C:
         },
     )
 
-    # The hook calls the setter, in Python's code that its body runs: the
-    # site is the hook's definition, not the store in main.
     assert found["calls"]["model.C.__setattr__"] == [
         {
             "line": 2,
@@ -1461,12 +1398,7 @@ class C:
     ]
 
 
-def engine_roles():
-    """The first name of every role of an implicit call in the engine's
-    sources: of the role of each `site_call` (its third argument) and of
-    each origin of a `Call` (its seventh) that names a step of a class
-    statement, as a tuple or through a variable that the function assigns
-    a tuple."""
+def engine_implicit_call_roles():
     roles = set()
     for path in sorted((ROOT / "pycg" / "analysis").glob("*.py")):
         for function in ast.walk(ast.parse(path.read_text())):
@@ -1495,20 +1427,13 @@ def function_roles(function, path):
             if isinstance(value, ast.Tuple) and isinstance(value.elts[0], ast.Constant):
                 yield value.elts[0].value
             else:
-                # A copy of another call's origin, or a role built elsewhere.
                 assert name == "Call", f"{path.name}:{node.lineno}: role {role}"
 
 
-def test_every_role_of_the_engine_has_a_construct():
-    # Another role must be named in the table (a closed list), and a role
-    # that the engine no longer makes leaves it.
-    assert engine_roles() == set(IMPLICIT_CONSTRUCT_BY_ROLE)
+def test_every_role_of_the_engine_and_no_other_has_a_construct():
+    assert engine_implicit_call_roles() == set(IMPLICIT_CONSTRUCT_BY_ROLE)
 
 
-# Definitions of one qualified name
-
-# Two functions named `a.b.f`, in the package `a` and in the module `a.b`,
-# whose calls are at one position of their files (review round 2).
 ONE_NAME_IN_TWO_MODULES = {
     "a/__init__.py": """\
 def b():
@@ -1529,13 +1454,11 @@ def f():
 def test_the_sites_of_two_definitions_of_one_name_are_kept_apart(tmp_path, entries):
     found = document(tmp_path, ONE_NAME_IN_TWO_MODULES, entries)
 
-    # The name's definition is the first by module: the function in `a`.
     assert found["definitions"]["a.b.f"] == {
         "kind": "function",
         "module": "a",
         "lines": [2, 3],
     }
-    # Both definitions' sites are listed; one in another module says so.
     assert found["calls"]["a.b.f"] == [
         {"line": 3, "col": 8, "end": [3, 11], "callees": [], "unresolved": "no value"},
         {
@@ -1547,7 +1470,6 @@ def test_the_sites_of_two_definitions_of_one_name_are_kept_apart(tmp_path, entri
             "module": "a.b",
         },
     ]
-    # The module `a.b` wins its name over the function `a.b`.
     assert found["calls"]["a.b"] == [
         {"line": 1, "col": 17, "end": [1, 35], "callees": ["json.loads"]}
     ]
@@ -1564,8 +1486,6 @@ def test_a_module_and_a_function_of_one_name_keep_their_sites(tmp_path):
     )
 
     assert found["definitions"]["p.retry"]["kind"] == "module"
-    # The module's own call stays where it is; the function's call is in
-    # the package's file.
     assert found["calls"]["p.retry"] == [
         {"line": 2, "col": 0, "end": [2, 3], "callees": ["p.retry.g"]},
         {

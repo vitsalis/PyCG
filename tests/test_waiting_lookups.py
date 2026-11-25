@@ -1,10 +1,3 @@
-"""Accesses through several instances of one class, where the class or the
-instance gets the attribute only after the access was first seen: the
-records of a lookup through an instance wait until the class may answer
-(`Hierarchy.later`), and the node of an instance attribute until its first
-write (`Analysis.read_field`). Each access must still find what any
-instance may have, in the round in which it would have found it at once."""
-
 import textwrap
 
 import pytest
@@ -211,13 +204,6 @@ def test_a_property_of_a_class_with_getattr_runs_for_every_instance(tmp_path):
     ]
 
 
-# Invariants of the waiting (docs/design.md, *Records on demand*). The
-# reference is the same analysis with the rules run at once (`at_once`), as
-# before they waited: rules that wait must give the same document, and their
-# nodes must get objects in the same rounds, also where nodes saturate.
-
-# `Late` becomes unknown under a cap of 1 or 2 after its instances have
-# asked it for names that it does not have.
 UNKNOWN_LATER = """
 class A:
     def method(self): pass
@@ -310,10 +296,6 @@ for p in (Point(), Point()):
     use(p)
 """
 
-# Codex review, finding 1: both loads of `x` share the site of the format
-# field, so they share the call of the attribute hook. The hook call joins
-# its result to each load it is asked for, also through an instance of a
-# class without the hook: a record keyed by the site, not the instance.
 SHARED_HOOK_SITE = """
 class D:
     x = "ok"
@@ -323,10 +305,6 @@ class C:
 answer = "{0.x.x}".format(C())
 """
 
-# Codex review, finding 2: the lookups of `__len__` hold the fallback
-# before the method arrives, so at a cap of 1 they saturate. Through two
-# instances, the second lookup is made at the wake: it must get the
-# fallback in the same round as the witness.
 FALLBACK_THEN_METHOD = """
 class C:
     def __getattr__(self, name): pass
@@ -354,9 +332,6 @@ INVARIANT_PROGRAMS = {
 
 
 def _at_once(patch):
-    """Run every rule at once, as before records waited: the class side of
-    each access through an instance, and the node of each attribute that
-    an instance loads."""
     from pycg.analysis.hierarchy import Hierarchy
     from pycg.analysis.semantics import Analysis
 
@@ -370,10 +345,7 @@ def _at_once(patch):
     patch.setattr(Analysis, "read_field", read_field)
 
 
-def _rounds(root, source, cap, at_once, monkeypatch):
-    """The document of `source` and the rounds of its assignment graph: for
-    each label and each object that a node of that label holds, the round
-    in which it first does (the saturated value when the node saturates)."""
+def _document_and_first_rounds(root, source, cap, at_once, monkeypatch):
     from pycg.analysis import solver
     from pycg.analysis.semantics import Analysis
 
@@ -415,8 +387,12 @@ def test_rules_that_wait_give_what_rules_run_at_once_give_in_every_round(
     tmp_path, monkeypatch, program, cap
 ):
     source = INVARIANT_PROGRAMS[program]
-    waited = _rounds(tmp_path / "waited", source, cap, False, monkeypatch)
-    at_once = _rounds(tmp_path / "at once", source, cap, True, monkeypatch)
+    waited = _document_and_first_rounds(
+        tmp_path / "waited", source, cap, False, monkeypatch
+    )
+    at_once = _document_and_first_rounds(
+        tmp_path / "at once", source, cap, True, monkeypatch
+    )
 
     assert waited[0] == at_once[0]
     assert waited[1] == at_once[1]
@@ -426,7 +402,6 @@ def test_rules_that_wait_give_what_rules_run_at_once_give_in_every_round(
 def test_no_rule_that_waits_sees_an_instance_of_a_class_that_became_unknown(
     tmp_path, monkeypatch, cap
 ):
-    # `Late` becomes unknown while its rules wait: they run before it does.
     no_rule_sees_what_is_opaque(monkeypatch)
     analysis = analysed(tmp_path, {"main.py": UNKNOWN_LATER}, cap=cap).program.analysis
 

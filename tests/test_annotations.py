@@ -1,9 +1,3 @@
-"""Annotations as declared values: a parameter holds every instance of
-each analysed class that its annotation names, and of the subclasses. The
-annotation is read from the AST and its names are resolved as any name is:
-imports, aliases, imports under `if TYPE_CHECKING:`, strings.
-"""
-
 import pytest
 from programs import analysed, call_graph, callees, main_graph
 
@@ -22,7 +16,6 @@ def graph_of(tmp_path, source):
 
 
 def inside(graph, caller):
-    """The callees of `caller` in the program, not outside it."""
     return [callee for callee in callees(graph, caller) if callee.startswith("main.")]
 
 
@@ -155,7 +148,6 @@ def build(kind: type[Base]):
 """,
     )
 
-    # Both is below Base twice; Later's base is the result of a call.
     expected = ["main.Base.make", "main.Both.make", "main.Later.make"]
     assert callees(graph, "main.build") == expected
 
@@ -201,7 +193,6 @@ def deeper(items: list[list[Strategy]]):
         "old_mapping",
     ):
         assert inside(graph, f"main.{function}") == BOTH, function
-    # One level only: the inner lists hold nothing that the analysis knows.
     assert callees(graph, "main.deeper") == []
 
 
@@ -290,8 +281,6 @@ def use():
 """,
     )
 
-    # A known limit: only a Fast is passed, but the annotation is taken as a
-    # declaration of what the parameter may hold.
     assert callees(graph, "main._helper") == BOTH
 
 
@@ -326,7 +315,6 @@ class Plain:
     assert callees(graph, "main.Config.run") == BOTH
     assert callees(graph, "main.Frozen.run") == BOTH
     assert inside(graph, "main.Pair.run") == BOTH
-    # Not dataclass-like: a class-level annotation alone gives nothing.
     assert callees(graph, "main.Plain.run") == []
 
 
@@ -344,7 +332,6 @@ def use():
 """,
     )
 
-    # The generated __init__ is not analysed; its parameters are declared.
     assert inside(graph, "main.use") == BOTH
 
 
@@ -402,17 +389,11 @@ def element(box: TABLE[0]):
     assert callees(graph, "main.pair") == both
     assert callees(graph, "main.text") == both
     assert callees(graph, "main.nested") == both
-    # Recursive aliases end.
     assert callees(graph, "main.walk") == both
-    # A subscript of a value that is no type names nothing.
     assert callees(graph, "main.element") == []
 
 
 def test_an_alias_that_subscripts_itself_ends(tmp_path):
-    # Each reading of the alias through a subscript is read once, as every
-    # reading of an annotation is: an alias whose form subscripts itself, or
-    # an alias that subscripts another one that subscripts it, ends. Python
-    # accepts every one of these aliases (`List[T][T]` is `List[T]`).
     graph = graph_of(
         tmp_path,
         """
@@ -443,9 +424,6 @@ def plain(s: Plain[int], t: Left[int]):
 
 
 def test_names_that_only_a_type_checker_imports(tmp_path):
-    # Imports under `if TYPE_CHECKING:` bind nothing when the code runs, but
-    # an annotation that names them names what they would import (here
-    # modules that the program also imports when it runs).
     graph = call_graph(
         tmp_path,
         {
@@ -507,15 +485,11 @@ def use(e: "Extra"):
         },
     )
 
-    # No module that the program runs imports `extra`.
     assert "extra" not in generator.output()
 
 
 @pytest.mark.parametrize("submodule", [None, "pkg/X.py", "pkg/X/__init__.py"])
 def test_a_type_only_from_import_reads_the_package_attribute(tmp_path, submodule):
-    # `from pkg import X` reads the attribute `X` that pkg/__init__.py binds.
-    # Python imports a submodule `pkg.X` only where the package has no such
-    # attribute, so a file of that name does not change what the name is.
     files = {
         "pkg/__init__.py": "class T:\n    def run(self): pass\nX = T\n",
         "main.py": """
@@ -537,8 +511,6 @@ def use(value: "X"):
 def test_a_type_only_from_import_of_a_private_name_reads_the_package_attribute(
     tmp_path,
 ):
-    # In a class body, `from pkg import __x` reads the attribute `_Holder__x`
-    # of the package (CPython 3.12 and 3.15).
     graph = call_graph(
         tmp_path,
         {
@@ -563,8 +535,6 @@ class Holder:
 def test_a_type_only_import_reaches_a_deep_entry_module_through_its_packages(
     tmp_path,
 ):
-    # The entry module ns/a/b.py is an attribute of the package ns.a, and
-    # ns.a of ns, though no import names the packages.
     graph = call_graph(
         tmp_path,
         {
@@ -584,17 +554,13 @@ def use(x: "sub.b.T"):
 
 
 DEEP_ENTRY_LAYOUTS = {
-    # The packages of the entry, as an import resolves them.
     "regular packages": ({"ns/__init__.py": "", "ns/a/__init__.py": ""}, True),
     "namespace packages": ({}, True),
     "a package beside a module of its name": (
         {"ns.py": "def f(): pass\n", "ns/__init__.py": ""},
         True,
     ),
-    # A module wins over a namespace directory of its name: `ns` is the
-    # module ns.py, which has no `a`.
     "a module beside a namespace directory": ({"ns.py": "def f(): pass\n"}, False),
-    # Deeper down: `ns.a` is the module ns/a.py, which has no `b`.
     "a deeper module beside a namespace directory": (
         {"ns/a.py": "def f(): pass\n"},
         False,
@@ -627,8 +593,6 @@ def use(x: "sub.b.T"):
 def test_a_module_that_shadows_a_namespace_directory_has_no_entry_below_it(
     tmp_path,
 ):
-    # Python imports the module ns.py, which has no `a`: `T.run` is never
-    # called.
     graph = call_graph(
         tmp_path,
         {
@@ -652,9 +616,6 @@ except AttributeError:
 def test_a_directory_named_init_is_a_package_only_with_its_own_initializer(
     tmp_path, package
 ):
-    # Without pkg/__init__/__init__.py, `pkg.__init__` is the module
-    # pkg/__init__.py, which has no `b`: Python makes no call. With it,
-    # pkg/__init__/ is a package and the entry pkg/__init__/b.py is its `b`.
     files = {
         "pkg/__init__.py": "",
         "pkg/__init__/b.py": "class T:\n    def run(self): pass\nimport main\n",
@@ -674,8 +635,6 @@ except AttributeError:
 
 
 def test_a_type_only_dotted_name_walks_the_package_attributes(tmp_path):
-    # `pkg.X` is the module `other` that the package binds to `X`, not the
-    # file pkg/X.py: `pkg.X.T` names `other.T`.
     graph = call_graph(
         tmp_path,
         {
@@ -699,8 +658,6 @@ def use(x: "X.T", y: "pkg.X.T"):
 
 
 def test_a_type_only_from_import_of_a_module_member_takes_the_real_module(tmp_path):
-    # `from pkg.X import T` imports the module pkg.X and reads `T` from it;
-    # it does not read the attribute `X` that the package rebinds.
     graph = call_graph(
         tmp_path,
         {
@@ -723,8 +680,6 @@ use(T())
 
 
 def test_a_namespace_directory_does_not_hide_an_outside_package(tmp_path):
-    # xml/local.py, without xml/__init__.py, is a portion of a namespace
-    # package; the standard library's `xml` still supplies xml.etree.
     graph = call_graph(
         tmp_path,
         {
@@ -745,8 +700,6 @@ def use(x: "Element"):
 def test_a_type_only_from_import_of_a_submodule_that_the_package_does_not_bind(
     tmp_path,
 ):
-    # The package binds no `kinds`: the import gives the submodule, which
-    # the program imports when it runs.
     graph = call_graph(
         tmp_path,
         {
@@ -766,10 +719,6 @@ def use(value: "kinds.Kind", other: "aliased.Kind"):
     )
 
     assert callees(graph, "main.use") == ["pkg.kinds.Kind.run"]
-
-
-# Review of the declared types: forward references, shapes that give
-# nothing, type forms that stay out of ordinary values.
 
 
 def test_forward_references(tmp_path):
@@ -875,8 +824,6 @@ def use(cfg: Config):
 """,
     )
 
-    # A TypedDict value is a dict: its class-level annotations are no
-    # fields of instances.
     assert inside(graph, "main.use") == []
 
 
@@ -908,9 +855,6 @@ Sized(size=2, name="a")
     assert callees(graph, "main.use") == ["<builtin>.dict.get"]
 
 
-# Analysed classes below outside classes: through `collections.abc`, through
-# a name of `typing` subscripted, and through an analysed base; and a class
-# that only has the methods (structural fit), which no annotation names.
 ITERATORS = """
 import collections.abc
 import dataclasses
@@ -1021,8 +965,6 @@ def plain(it: AsyncIterator[int], kind: type[AsyncIterator]):
 """,
     )
 
-    # Peer has the methods of an async iterator and Sized another outside
-    # base: neither is below AsyncIterator.
     assert inside(graph, "main.plain") == sorted(
         [*CLOSERS, "main.Chain.make", "main.Scoped.make"]
     )
@@ -1067,10 +1009,6 @@ class Schema:
 """,
     )
 
-    # A bare `type` is some class: calling it makes an instance of that
-    # class, which is not known, so the call names no callee (no
-    # `<builtin>.type.__call__`); its other methods are those of `type`.
-    # `type[Opts]` names Opts.
     assert callees(graph, "main.Schema.make") == [
         "<builtin>.type.mro",
         "main.Opts.__init__",
@@ -1088,8 +1026,6 @@ def lookup(kind: enum.EnumMeta, meta: abc.ABCMeta):
 """,
     )
 
-    # `EnumMeta` defines `__call__`, which Python runs; `ABCMeta` keeps
-    # `type.__call__`, so its instance is a class that is not known.
     assert callees(graph, "main.lookup") == ["enum.EnumMeta.__call__"]
 
 
@@ -1105,8 +1041,6 @@ def alias(meta: typing.Type[type]):
 """,
     )
 
-    # Called with no argument: only the annotation gives `type`, whose call
-    # makes a class.
     assert callees(graph, "main.build") == ["<builtin>.type"]
     assert callees(graph, "main.alias") == ["<builtin>.type"]
 
@@ -1151,8 +1085,6 @@ def table(rows: typing.Mapping[str, int]):
 """,
     )
 
-    # A list is a sequence through the stub MRO of `list`; both set-like
-    # classes are sets, only one is mutable.
     assert inside(graph, "main.ordered") == ["main.Names.tick"]
     assert inside(graph, "main.sets") == ["main.Bag.tick", "main.Pool.tick"]
     assert inside(graph, "main.mutable") == ["main.Pool.tick"]
@@ -1180,7 +1112,6 @@ def synchronous(m: typing.ContextManager[int]):
 """,
     )
 
-    # The context managers have abstract methods in the stubs.
     assert inside(graph, "main.asynchronous") == ["main.Manager.tick"]
     assert inside(graph, "main.stub_name") == ["main.Manager.tick"]
     assert inside(graph, "main.synchronous") == ["main.Plain.tick"]
@@ -1242,8 +1173,6 @@ def reversible(g: typing.Reversible[int]):
     assert inside(graph, "main.iterator") == ["main.Countdown.tick"]
     assert inside(graph, "main.collection") == ["main.Box.tick", "main.Line.tick"]
     assert inside(graph, "main.container") == ["main.Box.tick", "main.Line.tick"]
-    # The stubs' Collection does not derive from Sized (Python's does), and
-    # classes are compared by their stub definitions.
     assert inside(graph, "main.sized") == ["main.Sized.tick"]
     assert inside(graph, "main.hashable") == ["main.Key.tick"]
     assert inside(graph, "main.reversible") == ["main.Backwards.tick", "main.Line.tick"]
@@ -1284,12 +1213,7 @@ def sequence(s: typing.Sequence[int]):
 """,
     )
 
-    # A client most likely passes a builtin value: the classes reach these
-    # protocols only through `list`, `str`, `tuple`, `dict`, ...
     assert inside(graph, "main.protocols") == []
-    # Control: the same classes are below the protocols in the stub MROs;
-    # the abstract Sequence, no protocol of the builtin types, names those
-    # that are sequences.
     assert inside(graph, "main.sequence") == [
         "main.Names.ping",
         "main.Pair.ping",
@@ -1300,8 +1224,6 @@ def sequence(s: typing.Sequence[int]):
 
 
 def test_an_abstract_base_reaches_a_protocol_only_through_abstract_classes(tmp_path):
-    # `tokenize._TokenInfo` exists only in the stubs, so it is abstract, but
-    # it reaches Iterable through `tuple`: it is no abstract path.
     graph = main_graph(
         tmp_path,
         """
@@ -1341,8 +1263,6 @@ def use(xs: typing.Iterable[str]):
 
 
 def test_value_flow_still_reaches_a_subclass_of_a_concrete_builtin(tmp_path):
-    # The restriction is about what an annotation names; a value that the
-    # program passes is called as always.
     graph = main_graph(
         tmp_path,
         """
@@ -1359,8 +1279,6 @@ drain(Names())
     assert inside(graph, "main.drain") == ["main.Names.__iter__"]
 
 
-# One analysed subclass of each concrete class that an annotation, a
-# container alias of `typing` or `type[...]` may name.
 CONCRETE_SUBCLASSES = """
 import collections
 import types
@@ -1443,12 +1361,8 @@ def sets(a: typing.AbstractSet[int], b: type[typing.AbstractSet[int]]):
 """,
     )
 
-    # For a concrete class the annotation already names a value: an
-    # instance of that class.
     assert inside(graph, "main.concrete") == []
     assert inside(graph, "main.classes") == []
-    # Controls: the abstract classes above the same subclasses name them.
-    # (`list`, `tuple` and `deque` are sequences).
     assert inside(graph, "main.sequence") == [
         "main.Names.make",
         "main.Names.ping",
@@ -1464,9 +1378,6 @@ def sets(a: typing.AbstractSet[int], b: type[typing.AbstractSet[int]]):
 
 
 def test_an_empty_tuple_annotation_is_a_tuple(tmp_path):
-    # `tuple[()]` is the annotation of the empty tuple: a subscript with no
-    # arguments. It names a tuple, as `tuple[int]` does, and `type[tuple[()]]`
-    # names the class `tuple`.
     graph = main_graph(
         tmp_path,
         """
@@ -1522,7 +1433,6 @@ def module_level():
 """,
     )
 
-    # Each kind of target has its own caller.
     for caller in (
         "Runner.attribute",
         "Runner.listed",
@@ -1547,8 +1457,6 @@ def run():
 """,
     )
 
-    # The value and what the annotation names (believed, as for a
-    # parameter).
     assert inside(graph, "main.run") == sorted([*BOTH, "main.Other.__call__"])
 
 
@@ -1598,17 +1506,10 @@ f(None)
         },
     )
 
-    # A known limit: Python never evaluates the annotation of an assignment
-    # in a function, but the analysis reads its names as it reads every
-    # annotation, so the module's `__getattr__` that `mod.Other` would run
-    # is an edge of `f`.
     assert callees(graph, "main.f") == ["mod.Thing.run", "mod.__getattr__"]
 
 
 def test_a_string_annotation_runs_no_attribute_hook(tmp_path):
-    # Python never evaluates a string annotation, so `"mod.Other"` runs no
-    # module `__getattr__`: its names are looked up without hooks, and a
-    # name that only the hook would give names nothing.
     graph = call_graph(
         tmp_path,
         {

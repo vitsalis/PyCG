@@ -1,9 +1,3 @@
-"""Compare the call graph of each micro-benchmark snippet with its expectation.
-
-Every directory ``evaluation/micro-benchmark/snippets/<category>/<name>/`` is one case:
-PyCG analyses its ``main.py`` and the result must equal ``callgraph.json``.
-"""
-
 import json
 import sys
 from pathlib import Path
@@ -23,7 +17,6 @@ KNOWN_FAILURES_FILE = Path(__file__).resolve().parent / "known_failures.txt"
 
 
 def read_known_failures(path):
-    """Read `<case id>: <reason>` lines; blank lines and `#` comments are skipped."""
     failures = {}
     for line in path.read_text().splitlines():
         if line.strip() and not line.startswith("#"):
@@ -32,13 +25,10 @@ def read_known_failures(path):
     return failures
 
 
-# Cases that fail because of known limitations of the analysis. The marks are
-# strict: when a case starts to pass, the suite fails until its line is removed.
 KNOWN_FAILURES = read_known_failures(KNOWN_FAILURES_FILE)
 
 
 def version_skip_reason(case):
-    """Why the interpreter cannot run the case (its `requires-python`), or None."""
     path = case / "requires-python"
     if not path.is_file():
         return None

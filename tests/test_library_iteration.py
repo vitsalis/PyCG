@@ -1,16 +1,6 @@
-"""Selected operations of the standard library iterate what they get
-(design.md, "Selected standard-library operations"): eagerly at the call,
-or, for a lazy object, `iter()` at the call and the advancing where an
-analysed scope advances the object. An object that only a client advances
-gives no `__next__` edge. The calls belong to the scope that makes them
-(library frames are transparent).
-"""
-
 import pytest
 from programs import callees, main_graph
 
-# An iterable whose iterator is another object, so that `__iter__` of the
-# one and `__next__` of the other tell apart where Python calls each.
 CLASSES = """
 import collections
 import functools
@@ -56,7 +46,6 @@ use(make(Able()))
 """,
     )
 
-    # islice calls iter() at once; the list advances it.
     assert inside(graph, "main.make") == ["main.Able.__iter__"]
     assert inside(graph, "main.use") == ["main.Iter.__next__"]
 
@@ -209,9 +198,6 @@ use(Able(), OtherAble())
     ],
 )
 def test_materializers_iterate_at_the_call_and_ask_the_length(tmp_path, operation):
-    # Each makes a tuple of each input at once (with its length hint on
-    # Python 3.12 and 3.13); advancing its result iterates nothing of the
-    # program.
     graph = graph_of(
         tmp_path,
         f"""
@@ -250,8 +236,6 @@ def test_eager_operations_iterate_at_the_call(tmp_path, call):
 
 @pytest.mark.parametrize("name", ["nlargest", "nsmallest"])
 def test_nlargest_asks_the_length_and_iterates_its_iterator_again(tmp_path, name):
-    # Longer than n: no sorted shortcut; zip(range(n), it) takes iter() of
-    # the iterator again.
     graph = graph_of(
         tmp_path,
         f"""
@@ -371,8 +355,6 @@ use(merged(Able(), OtherAble()))
     )
 
     assert inside(graph, "main.merged") == []
-    # merge delegates to the last source with `yield from`, which takes
-    # iter() of its iterator again; either source may be the last.
     assert inside(graph, "main.use") == [
         "main.Able.__iter__",
         "main.Iter.__iter__",
@@ -415,7 +397,6 @@ own(Iter())
     )
 
     assert inside(graph, "main.aliased") == ["main.Able.__iter__", "main.Iter.__next__"]
-    # The package's own islice returns its argument: list() iterates it.
     assert inside(graph, "main.own") == [
         "main.Iter.__iter__",
         "main.Iter.__next__",
@@ -473,8 +454,6 @@ use(Able(), Names())
 
 
 def test_limit_list_concatenation_iterates_a_list_subclass(tmp_path):
-    # An existing approximation, not this rule's: `+` on a subclass of list
-    # copies its storage in Python; the analysis iterates it.
     graph = graph_of(
         tmp_path,
         """
@@ -490,8 +469,6 @@ use(Names())
 
 
 def test_limit_a_count_of_zero_still_iterates(tmp_path):
-    # tee(x, 0) and product(x, repeat=0) iterate nothing in Python; islice(x,
-    # 0) obtains the iterator and never advances it. The counts are not read.
     graph = graph_of(
         tmp_path,
         """
@@ -507,16 +484,12 @@ use(Able())
 
 
 def test_limit_nlargest_of_one_asks_the_length(tmp_path):
-    # heapq.nlargest(1, x) takes a shortcut without len(); the count is not
-    # read.
     graph = graph_of(tmp_path, "def use(x):\n    heapq.nlargest(1, x)\nuse(Able())\n")
 
     assert "main.Able.__len__" in callees(graph, "main.use")
 
 
 def test_limit_merge_advances_by_the_special_method(tmp_path):
-    # heapq.merge reads `it.__next__` by an ordinary attribute lookup, so an
-    # instance attribute would win; the analysis calls the class's method.
     graph = graph_of(
         tmp_path,
         """
@@ -538,8 +511,6 @@ use(Shadowed())
 
 
 def test_a_site_of_a_lazy_and_an_eager_operation_gives_both(tmp_path):
-    # The deferred binding of tee's type variable is that of tee's own
-    # signature: sorted, at the same call, still iterates at once.
     graph = graph_of(
         tmp_path,
         """
@@ -559,8 +530,6 @@ later(use(Able(), True))
     assert "main.Iter.__iter__" in callees(graph, "main.use")
 
 
-# Self-reference, loop rebinding, an attribute cycle, tee of tee, repeated
-# destinations and a late input, across two modules.
 CYCLES = {
     "main.py": """
 import heapq
@@ -651,7 +620,6 @@ def test_cycles_of_lazy_objects_give_one_result_in_every_order(
             ["main.Item.ping"],
             ["main.Other.ping"],
         ),
-        # Repetition or unpacking leaves the positions unknown.
         (
             "itertools.product(x, y, repeat=2)",
             ["main.Item.ping", "main.Other.ping"],
@@ -699,7 +667,6 @@ use(Point(), Able())
 """,
     )
 
-    # Control: a plain iterable is iterated; a tuple subclass is read.
     assert inside(graph, "main.use") == [
         "main.Able.__iter__",
         "main.Able.__len__",
@@ -782,10 +749,7 @@ use(Able(), OtherAble())
     ]
 
 
-# One call expression that is a call of zip_longest with one argument and,
-# through a metaclass's __new__, with two (the class first); its result is
-# advanced at two sites (code review 2 of R3, finding 1).
-GROWING = """
+ZIP_LONGEST_OF_TWO_ARITIES = """
 def b(): pass
 class M(type):
     def __iter__(cls): return iter([b, b])
@@ -807,7 +771,7 @@ use(C)
 
 
 def test_tuples_of_calls_of_two_arities_at_two_sites(tmp_path):
-    graph = graph_of(tmp_path, GROWING)
+    graph = graph_of(tmp_path, ZIP_LONGEST_OF_TWO_ARITIES)
 
     assert inside(graph, "main.use") == [
         "main.Delay.__call__",
@@ -823,7 +787,7 @@ def test_tuples_of_calls_of_two_arities_in_every_order(tmp_path, monkeypatch, ca
 
     from pycg.analysis import solver
 
-    write(tmp_path, {"main.py": CLASSES + GROWING})
+    write(tmp_path, {"main.py": CLASSES + ZIP_LONGEST_OF_TWO_ARITIES})
     expected = None
     for name, order in orders().items():
         monkeypatch.setattr(solver.Solver, "order", order)
@@ -854,7 +818,6 @@ use()
 def test_two_advances_of_one_object_give_the_same_results_in_every_order(
     tmp_path, monkeypatch, make
 ):
-    # The tuples that each advancing makes are those of its own site.
     from programs import write
     from test_order_independence import orders, whole_output
 
@@ -902,8 +865,6 @@ use(Two)
 
 
 def test_calls_that_share_an_origin_give_every_argument(tmp_path):
-    # One call expression is a call of chain with either class first,
-    # through the `__new__` of each: both are iterated by their metaclass.
     graph = graph_of(tmp_path, SHARED_ORIGIN)
 
     assert inside(graph, "main.use") == ["main.MetaA.__iter__", "main.MetaB.__iter__"]

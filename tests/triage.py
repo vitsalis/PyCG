@@ -1,4 +1,16 @@
-"""Triage of the micro-benchmark cases that the engine fails.
+import argparse
+import json
+import sys
+from collections import Counter
+from dataclasses import dataclass
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from pycg.pycg import CallGraphGenerator  # noqa: E402
+
+DESCRIPTION = """Triage of the micro-benchmark cases that the engine fails.
 
 Each failing case has a cause: a group, named by its stream first
 (`flow/dead-code`), and a one-line reason that names the missing feature or
@@ -22,18 +34,6 @@ reason in `CASES` and name it:
 
 The benchmark test (tests/test_micro_benchmark.py) reads the file.
 """
-
-import argparse
-import json
-import sys
-from collections import Counter
-from dataclasses import dataclass
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
-
-from pycg.pycg import CallGraphGenerator  # noqa: E402
 
 SNIPPETS = ROOT / "evaluation" / "micro-benchmark" / "snippets"
 KNOWN_FAILURES = ROOT / "tests" / "known_failures.txt"
@@ -827,7 +827,6 @@ CASES = {
 
 
 def runs(case):
-    """Whether this interpreter can run `case` (its `requires-python`)."""
     path = case / "requires-python"
     if not path.is_file():
         return True
@@ -836,7 +835,6 @@ def runs(case):
 
 
 def fails(case):
-    """Whether the engine's call graph of `case` differs from its truth."""
     generator = CallGraphGenerator([str(case / "main.py")], str(case))
     generator.analyze()
     expected = json.loads((case / "callgraph.json").read_text())
@@ -849,12 +847,10 @@ def fails(case):
 
 @dataclass
 class Selection:
-    """What a run of the tool decides (see `select`)."""
-
-    listed: list  # the cases of the new file
-    regressed: list  # fail now, have a reason, were not in the file
-    untriaged: list  # fail now and have no reason
-    passing: list  # were in the file and pass now
+    listed: list
+    regressed: list
+    untriaged: list
+    passing: list
 
     @property
     def ok(self):
@@ -862,13 +858,6 @@ class Selection:
 
 
 def select(failing, not_run, listed_before, causes, readmit):
-    """Decide the lines of the new file.
-
-    `failing`: the cases whose graph differs; `not_run`: the cases this
-    interpreter cannot run (they keep their line, and get none); `listed_before`:
-    the cases of the current file; `causes`: the reasons by case; `readmit`:
-    the cases that may be added.
-    """
     allowed = set(listed_before) | set(readmit)
     listed = sorted(
         case_id for case_id in failing if case_id in causes and case_id in allowed
@@ -887,7 +876,6 @@ def select(failing, not_run, listed_before, causes, readmit):
 
 
 def read_listed(path):
-    """The case ids of a known-failures file (none if there is no file)."""
     if not path.is_file():
         return set()
     return {
@@ -898,7 +886,7 @@ def read_listed(path):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=DESCRIPTION.splitlines()[0])
     parser.add_argument(
         "--readmit",
         action="append",

@@ -1,10 +1,6 @@
-"""Decorators, and the staticmethod, classmethod and property objects."""
-
 import programs
 import pytest
 from programs import call_graph, callees, main_graph
-
-# Decorators
 
 
 def test_decorated_name_is_bound_to_the_result_of_the_decorator(tmp_path):
@@ -134,10 +130,6 @@ def test_class_decorator(tmp_path):
 
 
 def test_name_decorated_by_an_external_also_keeps_the_definition(tmp_path):
-    # An unknown decorator may return its argument (many do: typing.final,
-    # dataclasses.dataclass), or something else: the name holds both. What
-    # a decorator without stubs returns has no name, so calls and loads on
-    # it name nothing after the decorator.
     graph = main_graph(
         tmp_path,
         """
@@ -172,9 +164,6 @@ def test_decorator_that_returns_itself_terminates(tmp_path):
     )
 
     assert callees(graph, "main") == ["main.same"]
-
-
-# staticmethod
 
 
 def test_static_method_is_not_bound(tmp_path):
@@ -245,9 +234,6 @@ def test_static_method_stored_on_another_class_binds_there(tmp_path):
     assert callees(graph, "main.A.s") == ["main.B.run"]
 
 
-# classmethod
-
-
 def test_class_method_binds_the_class_it_is_loaded_through(tmp_path):
     graph = main_graph(
         tmp_path,
@@ -289,9 +275,6 @@ def test_class_method_of_a_library_class_receives_its_class(tmp_path):
     assert callees(graph, "main.Config.load") == ["main.Config.defaults"]
 
 
-# property
-
-
 def test_property_read_on_an_instance_calls_the_getter(tmp_path):
     graph = main_graph(
         tmp_path,
@@ -331,14 +314,11 @@ def test_property_setter_and_getter_from_the_decorator_chain(tmp_path):
         """,
     )
 
-    # The getter returns what the setter stores; only the setter calls g.
     assert "main.h" in callees(graph, "main")
     assert callees(graph, "main.C.value") == ["main.g"]
 
 
 def test_property_accessor_methods_keep_the_other_accessors(tmp_path):
-    # A limit: `plain.setter(replace)` is `plain` with `replace` as a setter
-    # too, so `replaced` keeps `put` (Python makes a copy without it).
     graph = main_graph(
         tmp_path,
         """
@@ -367,10 +347,6 @@ def test_property_accessor_methods_keep_the_other_accessors(tmp_path):
 
 
 def test_property_getter_and_deleter_methods(tmp_path):
-    # The deleter uses what __init__ stored, so it must get the instance;
-    # external code calls back the functions passed to it, but without it.
-    # A limit: `plain.getter(other)` adds a getter to `plain`, so `regot`
-    # also calls `get`.
     graph = main_graph(
         tmp_path,
         """
@@ -464,8 +440,6 @@ def test_class_method_called_through_an_instance_binds_its_class(tmp_path):
     assert callees(graph, "main.Base.make") == ["main.Child.__init__"]
 
 
-# Library callables that return their argument
-
 WRAPS_PROGRAM = """
 import functools
 def deco(f):
@@ -484,7 +458,6 @@ def use():
 
 @pytest.mark.parametrize("analysed", [False, True])
 def test_functools_wraps_returns_the_wrapper(tmp_path, analysed):
-    # The table applies whether functools is analysed or not.
     files = {"main.py": WRAPS_PROGRAM}
     if analysed:
         files["functools.py"] = """
@@ -494,7 +467,6 @@ def test_functools_wraps_returns_the_wrapper(tmp_path, analysed):
     graph = call_graph(tmp_path, files)
 
     assert callees(graph, "main.use") == ["main.deco.wrapper"]
-    # The decorator that wraps(f) returns is a functools.partial.
     assert callees(graph, "main.deco") == [
         "functools.partial.__call__",
         "functools.wraps",
@@ -504,10 +476,16 @@ def test_functools_wraps_returns_the_wrapper(tmp_path, analysed):
 @pytest.mark.parametrize(
     "decorator",
     [
-        # An outside decorator held as __call__: the instance applies it.
-        "class Decorator:\n    __call__ = staticmethod(ext.keep)\ndeco = Decorator()\n",
-        # An outside decorator bound to a class by a class method.
-        "class Decorator:\n    apply = classmethod(ext.keep)\ndeco = Decorator.apply\n",
+        pytest.param(
+            "class Decorator:\n    __call__ = staticmethod(ext.keep)\n"
+            "deco = Decorator()\n",
+            id="held as __call__ of an instance",
+        ),
+        pytest.param(
+            "class Decorator:\n    apply = classmethod(ext.keep)\n"
+            "deco = Decorator.apply\n",
+            id="bound to a class by a class method",
+        ),
     ],
 )
 def test_an_outside_decorator_reached_through_a_call_keeps_the_function(
@@ -520,16 +498,11 @@ def test_an_outside_decorator_reached_through_a_call_keeps_the_function(
         + "@deco\ndef target(): pass\ndef use():\n    target()\n",
     )
 
-    # An unknown decorator may return what it decorates, as when it is
-    # applied directly: the name holds the result, which has no name, and
-    # the function.
     assert "ext.keep" in callees(graph, "main")
     assert callees(graph, "main.use") == ["main.target"]
 
 
 def test_an_analysed_library_callable_and_its_decorator_are_not_external(tmp_path):
-    # functools is analysed: neither functools.wraps(f) nor the decorator it
-    # returns, applied to wrapper, is a call to outside code.
     generator = programs.analysed(
         tmp_path,
         {
@@ -544,8 +517,6 @@ def test_an_analysed_library_callable_and_its_decorator_are_not_external(tmp_pat
     ]
     document = generator.document()
     assert document["definitions"]["functools.wraps"]["kind"] == "function"
-    # The analysed functools does not define the decorator's name: an
-    # outside callee is a definition or an outside name.
     assert document["outside"] == {"functools.partial.__call__": {"known": "stub"}}
 
 
@@ -568,9 +539,7 @@ def test_an_analysed_library_callable_and_its_decorator_are_not_external(tmp_pat
         ("typing.runtime_checkable(C())", "typing.runtime_checkable"),
     ],
 )
-def test_each_library_callable_returns_its_argument(tmp_path, call, callee):
-    # An instance, not a function: external code calls back the functions
-    # passed to it, which would hide a callable missing from the table.
+def test_each_library_callable_returns_an_instance_argument(tmp_path, call, callee):
     graph = main_graph(
         tmp_path,
         "import abc, dataclasses, enum, functools, typing\n"
@@ -604,8 +573,6 @@ def test_dataclass_returns_the_class(tmp_path):
 
     assert callees(graph, "main.use") == ["main.Line.length", "main.Point.norm"]
 
-
-# Library decorators that return a closure
 
 CLOSURES_PROGRAM = """
 import contextlib
@@ -655,8 +622,6 @@ def test_a_library_decorator_that_returns_a_closure_puts_it_on_the_call_path(
 ):
     graph = main_graph(tmp_path, CLOSURES_PROGRAM)
 
-    # A call of the decorated function calls the closure, which calls the
-    # function back: both are callees of the site.
     assert callees(graph, "main.use") == [
         "contextlib._GeneratorContextManager.__enter__",
         "contextlib.contextmanager.helper",
@@ -669,15 +634,12 @@ def test_a_library_decorator_that_returns_a_closure_puts_it_on_the_call_path(
         "contextlib.asynccontextmanager.helper",
         "main.amanaged",
     ]
-    # Loaded through an instance, as a method.
     assert callees(graph, "main.C.run") == [
         "contextlib.contextmanager.helper",
         "functools._lru_cache_wrapper.__call__",
         "main.C.cm",
         "main.C.m",
     ]
-    # lru_cache(maxsize=32) returns its closure decorating_function, which the
-    # decorator application calls.
     assert "functools.lru_cache.decorating_function" in callees(graph, "main")
 
 
@@ -695,10 +657,6 @@ def test_limit_lru_cache_is_not_selected_by_the_class_of_its_argument(tmp_path):
         """,
     )
 
-    # Both overloads of lru_cache fit both calls by their arguments. Python
-    # makes the wrapper of `bare` at once, so `bare(1)` does not call the
-    # closure decorating_function; and it applies decorating_function, not a
-    # wrapper, to `sized`.
     assert callees(graph, "main.use") == [
         "functools._lru_cache_wrapper.__call__",
         "functools.lru_cache.decorating_function",
@@ -727,11 +685,6 @@ def test_limit_a_context_manager_is_made_where_it_is_called_and_yields_nothing(
         """,
     )
 
-    # The site that calls the decorated function calls the closure and the
-    # generator function (a generator function is a callee of the site that
-    # calls it), although its body runs only when `with` enters. What the
-    # generator yields does not pass through the context manager: `value`
-    # holds nothing, where Python calls `action`.
     assert callees(graph, "main.make") == [
         "contextlib.contextmanager.helper",
         "main.managed",
@@ -754,9 +707,6 @@ def test_limit_a_context_manager_of_a_class_method_object(tmp_path):
         """,
     )
 
-    # `helper` calls the class method object, which is not callable: Python
-    # raises `TypeError` in the helper. The decorated name still holds the
-    # function, and the helper's result is a context manager.
     assert callees(graph, "main.use") == [
         "contextlib._GeneratorContextManager.__enter__",
         "contextlib.contextmanager.helper",
@@ -776,15 +726,11 @@ def test_limit_at_a_low_cap_the_closure_values_saturate_the_decorated_name(
     low = programs.analysed(tmp_path / "low", {"main.py": source}, cap=2)
     full = programs.analysed(tmp_path / "full", {"main.py": source})
 
-    # Besides `f`, the name holds the wrapper and the unknown result of the
-    # other overload: more than a cap of 2, so the set saturates and the
-    # call of `f` is lost (see *The solver*).
     assert "main.f" not in callees(low.output(), "main")
     assert "main.f" in callees(full.output(), "main")
 
 
 def test_wrappers_that_wrap_themselves_terminate(tmp_path):
-    # Flow-insensitively each wrapper also wraps itself.
     graph = main_graph(
         tmp_path,
         """
@@ -809,8 +755,6 @@ def test_wrappers_that_wrap_themselves_terminate(tmp_path):
 
 
 def test_wrappers_rebound_through_the_class_terminate(tmp_path):
-    # Flow-insensitively C.f also holds the class method, so the class
-    # method also wraps what loading it gives, a bound method.
     graph = main_graph(
         tmp_path,
         """
@@ -837,9 +781,6 @@ def test_wrappers_rebound_through_the_class_terminate(tmp_path):
     ]
 
 
-# Each kind of callable that a class method may wrap, with a call through it
-# that only the bound class makes. CPython binds the class to every one; the
-# analysis binds it to a function only.
 CLASS_METHOD_OF = {
     "function": ("def wrapped(owner):\n    owner.target()\n", "wrapped"),
     "bound method": (
@@ -878,7 +819,6 @@ def test_a_class_method_binds_the_class_to_a_function_only(tmp_path, kind):
     )
 
     targets = [caller for caller, called in graph.items() if "main.C.target" in called]
-    # A limit for the other kinds: nothing passes the class.
     assert (targets != []) == (kind == "function"), kind
 
 
@@ -1073,12 +1013,6 @@ def hooked_graph(tmp_path):
 
 
 def test_a_hook_that_the_class_defines_is_the_caller_of_the_accessors(tmp_path):
-    # A class's __getattribute__, __setattr__ and __delattr__ run instead of
-    # Python's own, which calls the property accessors from the scope of the
-    # access. Where the class defines the hook for the access, the hook is
-    # the caller of the accessor, whatever its body does: Delegating's hooks
-    # hand the access on to Python's, which calls the accessor; Replacing's
-    # do not, and still get the edges (a limit).
     graph = hooked_graph(tmp_path)
 
     accessors = {"get": "__getattribute__", "change": "__setattr__"}
@@ -1098,7 +1032,6 @@ def test_a_hook_that_the_class_defines_is_the_caller_of_the_accessors(tmp_path):
         )
         for accessor, hook in accessors.items():
             assert f"main.{owner}.{accessor}" in callees(graph, f"main.{owner}.{hook}")
-    # Hooks assigned from object are Python's own: the access is the caller.
     assert callees(graph, "main.use_Restoring") == [
         "main.Replacing.change",
         "main.Replacing.get",
@@ -1109,8 +1042,6 @@ def test_a_hook_that_the_class_defines_is_the_caller_of_the_accessors(tmp_path):
 def test_a_hook_stored_after_the_class_and_python_s_own_both_call_the_accessor(
     tmp_path,
 ):
-    # The class body does not define __setattr__, so Python's own may run
-    # too (flow-insensitively): the setter is called from both.
     graph = main_graph(
         tmp_path,
         """
@@ -1130,8 +1061,6 @@ def test_a_hook_stored_after_the_class_and_python_s_own_both_call_the_accessor(
 
 
 def test_getattr_runs_from_the_load_site_under_a_delegating_hook(tmp_path):
-    # Python's attribute lookup calls __getattr__ after __getattribute__
-    # fails, from the scope of the load.
     graph = main_graph(
         tmp_path,
         """
@@ -1153,7 +1082,6 @@ def test_getattr_runs_from_the_load_site_under_a_delegating_hook(tmp_path):
 
 
 def test_super_loads_run_the_getter_and_not_the_class_hook(tmp_path):
-    # super().item goes through super's __getattribute__, not the class's.
     graph = main_graph(
         tmp_path,
         ATTRIBUTE_HOOKS
@@ -1172,8 +1100,6 @@ Child().via_super()
 
 
 def test_attribute_hooks_of_external_classes_are_not_called(tmp_path):
-    # An external base's __getattribute__ is Python's, which the analysis
-    # models itself: its result is not an external of that name.
     graph = main_graph(
         tmp_path,
         """
@@ -1198,8 +1124,10 @@ def test_attribute_hooks_of_external_classes_are_not_called(tmp_path):
     [
         "D.__setattr__ = put",
         'setattr(D, "__setattr__", put)',
-        # The name is decided at a fixpoint, after the store is processed.
-        'name = "__setattr__"\nsetattr(D, name, put)',
+        pytest.param(
+            'name = "__setattr__"\nsetattr(D, name, put)',
+            id="setattr with a name decided at a fixpoint",
+        ),
     ],
 )
 def test_hooks_assigned_outside_class_bodies_are_called(tmp_path, assign):
@@ -1232,18 +1160,12 @@ ASSIGNED_HOOKS = {
 
 
 GETTERS = ("__getattr__", "__getattribute__")
-# The access that runs each hook from `use`.
 HOOK_ACCESSES = {
     "__getattr__": "C().missing()",
     "__getattribute__": "C().anything()",
     "__setattr__": "C().anything = 1",
     "__delattr__": "del C().anything",
 }
-# Each kind of callable a class attribute may hold, and the function that a
-# call of it runs. CPython calls every one of them as the hook, from the
-# scope of the access (checked with a script for every cell): a
-# staticmethod gets no instance, a classmethod the class, and a bound
-# method and a callable instance keep their own receiver.
 HOOK_KINDS = {
     "function": ("hook", "main.hook"),
     "lambda": ("lambda *args: {body}", "main.<lambda1>"),
@@ -1259,7 +1181,6 @@ PLACES = {
 }
 
 
-# `__getattr__` is looked up in the class bodies only (see the next test).
 HOOK_CASES = [
     (hook, kind, place)
     for hook in sorted(HOOK_ACCESSES)
@@ -1271,8 +1192,6 @@ HOOK_CASES = [
 
 @pytest.mark.parametrize(("hook", "kind", "place"), HOOK_CASES)
 def test_every_hook_is_whatever_the_class_attribute_holds(tmp_path, hook, kind, place):
-    # A getter hook returns target, which `use` calls; a setter or deleter
-    # hook calls target itself.
     body = "target" if hook in GETTERS else "target()"
     value, callee = HOOK_KINDS[kind]
     if kind == "lambda" and place == "class body":
@@ -1298,9 +1217,6 @@ def test_every_hook_is_whatever_the_class_attribute_holds(tmp_path, hook, kind, 
 
 @pytest.mark.parametrize("place", ["assignment", "setattr"])
 def test_limit_getattr_assigned_after_the_class_is_not_called(tmp_path, place):
-    # The fallback of a missing attribute is the `__getattr__` that a class
-    # body of the MRO defines; Python also calls one stored on the class
-    # later.
     graph = main_graph(
         tmp_path,
         "def target(): pass\n"
@@ -1314,8 +1230,6 @@ def test_limit_getattr_assigned_after_the_class_is_not_called(tmp_path, place):
 
 @pytest.mark.parametrize("hook", sorted(HOOK_ACCESSES))
 def test_limit_a_partial_hook_is_not_called(tmp_path, hook):
-    # A limit: functools.partial is outside code, which the analysis does
-    # not model: neither the access nor making the partial calls hook.
     body = "target" if hook in GETTERS else "target()"
     graph = main_graph(
         tmp_path,
@@ -1367,11 +1281,6 @@ def test_getattr_of_a_base_runs_for_a_subclass_that_defines_none(tmp_path):
 
 
 def test_limit_a_getter_that_raises_attribute_error_does_not_call_getattr(tmp_path):
-    """Python: a property's getter or a descriptor's `__get__` that raises
-    AttributeError makes the load call the class's `__getattr__` with the
-    name, so `use` also calls `Node.__getattr__` and, through its result,
-    `fetch`. The analysis calls `__getattr__` only where no class of the
-    MRO defines the name (see *Lookup through an instance*, limits)."""
     graph = main_graph(
         tmp_path,
         """
@@ -1398,8 +1307,6 @@ def test_limit_a_getter_that_raises_attribute_error_does_not_call_getattr(tmp_pa
 
 @pytest.mark.parametrize("name", sorted(ASSIGNED_HOOKS))
 def test_a_hook_named_late_still_runs_for_earlier_accesses(tmp_path, name):
-    # The name is a constant f-string in a variable, so setattr stores the
-    # hook only when the completion decides the name, after the access.
     definition, access = ASSIGNED_HOOKS[name]
     graph = main_graph(
         tmp_path,
@@ -1407,9 +1314,8 @@ def test_a_hook_named_late_still_runs_for_earlier_accesses(tmp_path, name):
         f'name = f"{name}"\nsetattr(C, name, hook)\ndef use():\n    {access}\n',
     )
 
-    # A getter's result is called by `use`; a setter or deleter calls it.
-    caller = "main.use" if name in GETTERS else "main.hook"
+    caller_of_target = "main.use" if name in GETTERS else "main.hook"
     assert "main.hook" in callees(graph, "main.use")
-    assert "main.target" in callees(graph, caller)
-    other = "main.hook" if caller == "main.use" else "main.use"
-    assert "main.target" not in callees(graph, other)
+    assert "main.target" in callees(graph, caller_of_target)
+    other_caller = "main.hook" if caller_of_target == "main.use" else "main.use"
+    assert "main.target" not in callees(graph, other_caller)

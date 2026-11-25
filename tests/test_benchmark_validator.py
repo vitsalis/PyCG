@@ -1,5 +1,3 @@
-"""Behaviour tests for evaluation/micro-benchmark/validate.py."""
-
 import importlib.util
 import json
 import sys
@@ -25,7 +23,6 @@ _spec.loader.exec_module(validate)
 
 
 def make_case(root, files, graph=None):
-    """Write a snippet directory from {relative path: source} and a call graph."""
     for name, source in files.items():
         path = root / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -155,7 +152,7 @@ def test_init_inherited_from_outside_the_snippet_is_named_by_its_owner(tmp_path)
         },
     )
     assert edges == {
-        ("main", "<builtin>.Exception.__init__"),  # named through Exception
+        ("main", "<builtin>.Exception.__init__"),
         ("main", "collections.UserList.__init__"),
         ("main", "main.Own.__init__"),
         ("main.Own.__init__", "<builtin>.super"),
@@ -326,8 +323,6 @@ def test_implicit_interpreter_calls_to_builtins_are_ignored(tmp_path):
 
 
 def test_explicit_enter_call_as_the_with_item_is_a_call(tmp_path):
-    # The call has the source position of the with item, like the calls that
-    # the with statement makes.
     edges = edges_of(
         tmp_path,
         {
@@ -429,9 +424,6 @@ def test_comprehension_and_generator_expression_belong_to_enclosing_scope(tmp_pa
 
 
 def test_builtin_call_that_the_compiler_inlines_is_recorded(tmp_path):
-    # Python 3.14+ compiles any(), all() and tuple() (3.15: also list() and
-    # set()) over a generator expression into a loop when the name is the
-    # builtin.
     result = validate.trace(
         make_case(
             tmp_path,
@@ -477,13 +469,11 @@ def test_builtin_call_that_the_compiler_inlines_is_recorded(tmp_path):
         ("main.run", "<builtin>.tuple"),
         ("main.run", "<builtin>.list"),
         ("main.run", "<builtin>.set"),
-        ("shadow", "shadow.any"),  # the name is not the builtin
+        ("shadow", "shadow.any"),
     }
 
 
 def test_identity_check_with_a_common_constant_is_not_a_call(tmp_path):
-    # Python 3.15 loads True, False and None with LOAD_COMMON_CONSTANT, like
-    # the check of an inlined builtin call.
     edges = edges_of(
         tmp_path,
         {
@@ -505,7 +495,6 @@ def test_identity_check_with_a_common_constant_is_not_a_call(tmp_path):
 
 
 def test_inlined_builtin_call_counts_only_if_the_builtin_runs(tmp_path):
-    # The argument of an inlined call raises before the builtin would run.
     edges = edges_of(
         tmp_path,
         {
@@ -592,7 +581,7 @@ def test_coroutine_function_that_the_interpreter_calls(tmp_path):
         ("main.start", "main.loop"),
         ("main.start", "main.step"),
         ("main.start", "main.fetch"),
-        ("main.start", "main.wait_for"),  # but not main.wait_for -> main.fetch
+        ("main.start", "main.wait_for"),
         ("main.loop", "main.Countdown.__init__"),
         ("main.loop", "main.Countdown.__aiter__"),
         ("main.loop", "main.Countdown.__anext__"),
@@ -600,10 +589,10 @@ def test_coroutine_function_that_the_interpreter_calls(tmp_path):
         ("main.step", "<builtin>.anext"),
         ("main.step", "main.Countdown.__anext__"),
     }
+    assert ("main.wait_for", "main.fetch") not in edges
 
 
 def test_coroutine_method_that_the_interpreter_calls_in_a_thread(tmp_path):
-    # Coroutine origin tracking is per thread.
     edges = edges_of(
         tmp_path,
         {
@@ -673,7 +662,7 @@ def test_generator_function_called_by_library_code(tmp_path):
         ("main", "contextlib.contextmanager"),
         ("main", "main.use"),
         ("main.use", "contextlib.contextmanager.helper"),
-        ("main.use", "main.managed"),  # the scope whose library call runs it
+        ("main.use", "main.managed"),
         ("main.managed", "main.acquire"),
     }
 
@@ -718,15 +707,12 @@ def test_thread_callbacks_belong_to_the_scope_that_starts_the_thread(tmp_path):
         ("main", "main.submit"),
         ("main.start_both", "main.work"),
         ("main.start_both", "main.Worker.run"),
-        ("main.submit", "main.task"),  # the thread starts inside submit()
+        ("main.submit", "main.task"),
     }
     assert not any(validate.UNKNOWN_CALLER in edge for edge in edges)
 
 
 def test_tracer_runs_no_snippet_code_to_classify_a_callee(tmp_path):
-    # A lazy proxy reports the class of its target through a __class__
-    # property; isinstance() falls back to it when the real type does not
-    # match. The tracer must classify callables by their real type.
     edges = edges_of(
         tmp_path,
         {
@@ -759,8 +745,6 @@ def test_tracer_runs_no_snippet_code_to_classify_a_callee(tmp_path):
 
 
 def test_tracer_reads_no_attribute_of_a_replaced_module(tmp_path):
-    # A module that replaces itself in sys.modules with an object whose
-    # attribute access runs code (lazy loading).
     edges = edges_of(
         tmp_path,
         {
@@ -794,8 +778,6 @@ def test_tracer_reads_no_attribute_of_a_replaced_module(tmp_path):
 
 
 def test_raise_in_a_class_body_with_a_custom_namespace_runs_no_snippet_code(tmp_path):
-    # To find the class that `raise Problem` instantiates, the tracer reads
-    # the name again from the class namespace, which __prepare__ made.
     edges = edges_of(
         tmp_path,
         {
@@ -836,11 +818,10 @@ def test_raise_in_a_class_body_with_a_custom_namespace_runs_no_snippet_code(tmp_
             """
         },
     )
-    assert ("main", "<builtin>.Exception.__init__") in edges  # raise Problem
+    assert ("main", "<builtin>.Exception.__init__") in edges
 
 
 def test_start_of_a_thread_without_init_does_not_break_the_tracer(tmp_path):
-    # Thread.ident is a property that raises AssertionError on such a thread.
     edges = edges_of(
         tmp_path,
         {
@@ -862,8 +843,6 @@ def test_start_of_a_thread_without_init_does_not_break_the_tracer(tmp_path):
 
 
 def test_thread_callback_belongs_to_the_start_call_that_starts_it(tmp_path):
-    # A second start() raises RuntimeError and does not start the thread. The
-    # timer calls work() later, after the second start().
     edges = edges_of(
         tmp_path,
         {
@@ -984,7 +963,7 @@ def test_lazily_evaluated_type_scopes_are_not_nodes(tmp_path):
         ("main", "main.handle"),
         ("main", "main.make"),
         ("main", "main.define"),
-        ("main.define", "main.make"),  # the scope that defines the alias
+        ("main.define", "main.make"),
     }
 
 
@@ -1044,8 +1023,6 @@ def test_library_internals_are_not_recorded(tmp_path):
 
 
 def test_library_closure_is_named_by_its_definition_site(tmp_path):
-    # functools.wraps copies __module__ and __qualname__ of the snippet
-    # function to the wrapper; the code object keeps where it is defined.
     edges = edges_of(
         tmp_path,
         {
@@ -1179,7 +1156,6 @@ def test_resolving_expected_names_imports_nothing(tmp_path):
             "main.py": "import os\nos.path.join('a', 'b')\n",
             "marker.py": "open('imported', 'w').close()\ndef func():\n    pass\n",
         },
-        # marker.func sorts first, so it is resolved while matching os.path.join.
         graph={
             "main": ["marker.func", "os.path.join"],
             "marker.func": [],
@@ -1434,10 +1410,6 @@ def test_stub_subclasses_keep_cooperative_method_resolution(tmp_path):
 
 
 def test_names_that_stub_subclasses_add_change_no_attribute(tmp_path):
-    # Subclasses of one stub share the place where super() finds stub
-    # attributes. A name that one subclass defines gives the stub there, as
-    # attribute lookup on the stub does, and never hides what the stub's own
-    # classes define (BaseException.args).
     edges = edges_of(
         tmp_path,
         {
@@ -1472,8 +1444,6 @@ def test_names_that_stub_subclasses_add_change_no_attribute(tmp_path):
 
 
 def test_stub_subclass_class_hooks_see_the_stub_through_super(tmp_path):
-    # __init_subclass__ runs while type.__new__ creates the class, so the
-    # names must be in place before that.
     edges = edges_of(
         tmp_path,
         {

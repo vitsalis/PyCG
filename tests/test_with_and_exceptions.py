@@ -1,8 +1,4 @@
-"""with statements, raise and except."""
-
 from programs import callees, main_graph
-
-# with
 
 
 def test_with_calls_enter_and_exit_and_binds_the_result_of_enter(tmp_path):
@@ -80,7 +76,6 @@ def test_async_with_awaits_what_aenter_and_aexit_return(tmp_path):
         """,
     )
 
-    # Both results are awaited, whether or not a target takes one.
     assert callees(graph, "main.bound") == [
         "main.Manager.__aenter__",
         "main.Manager.__aexit__",
@@ -91,7 +86,6 @@ def test_async_with_awaits_what_aenter_and_aexit_return(tmp_path):
         "main.Unbound.__aenter__",
         "main.Unbound.__aexit__",
     ]
-    # `with` awaits nothing.
     assert callees(graph, "main.sync") == ["main.Sync.__enter__", "main.Sync.__exit__"]
 
 
@@ -107,15 +101,11 @@ def test_with_on_external_objects_gives_no_implicit_edges(tmp_path):
         """,
     )
 
-    # open() with the default mode gives a text file.
     assert callees(graph, "main.read") == [
         "<builtin>.open",
         "ext.connection.close",
         "io.TextIOWrapper.read",
     ]
-
-
-# raise
 
 
 def test_raise_instantiates_a_class(tmp_path):
@@ -161,9 +151,6 @@ def test_raise_of_a_builtin_class_without_a_call_gives_no_edge(tmp_path):
 
     assert callees(graph, "main.stop") == []
     assert callees(graph, "main.fail") == ["<builtin>.ValueError"]
-
-
-# except
 
 
 def test_handler_name_holds_instances_of_the_handled_classes(tmp_path):
@@ -216,8 +203,6 @@ def test_handler_with_a_tuple_and_with_external_classes(tmp_path):
         """,
     )
 
-    # error.b() on an A also names <builtin>.Exception.b: the lookup reaches
-    # the external base.
     assert {"ext.Error.details", "main.A.a", "main.B.b"} <= set(callees(graph, "main"))
 
 

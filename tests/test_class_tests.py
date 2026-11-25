@@ -1,13 +1,7 @@
-"""Class tests: in the branch where `isinstance(x, C)` holds, a read of a
-local name `x` also gets what an annotation `x: C` names, and the value
-stays in the branch (see *Class tests* in the design)."""
-
 import textwrap
 
 from programs import callees, main_graph
 
-# Each class defines every method that the tests call, so the edges show
-# which classes a read of the name sees.
 METHODS = ("inside", "after", "other", "more")
 CLASSES = "".join(
     f"class {name}{base}:\n"
@@ -20,8 +14,7 @@ def graph_of(tmp_path, source):
     return main_graph(tmp_path, CLASSES + textwrap.dedent(source))
 
 
-def methods(graph, caller, method):
-    """The classes whose `method` `caller` calls."""
+def classes_called(graph, caller, method):
     suffix = f".{method}"
     return sorted(
         callee.removeprefix("main.").removesuffix(suffix)
@@ -41,7 +34,7 @@ def test_the_branch_reads_the_instances_of_the_class_and_its_subclasses(tmp_path
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
 
 
 def test_the_value_does_not_leave_the_branch(tmp_path):
@@ -66,12 +59,12 @@ def test_the_value_does_not_leave_the_branch(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.use", "more") == ["B"]
-    assert methods(graph, "main.loop", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.use", "after") == []
-    assert methods(graph, "main.use", "other") == []
-    assert methods(graph, "main.loop", "after") == []
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "more") == ["B"]
+    assert classes_called(graph, "main.loop", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "after") == []
+    assert classes_called(graph, "main.use", "other") == []
+    assert classes_called(graph, "main.loop", "after") == []
 
 
 def test_what_the_name_holds_stays_in_the_branch(tmp_path):
@@ -85,8 +78,8 @@ def test_what_the_name_holds_stays_in_the_branch(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.use", "after") == ["Other"]
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "after") == ["Other"]
 
 
 def test_elif_and_else_branches(tmp_path):
@@ -103,9 +96,9 @@ def test_elif_and_else_branches(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.use", "other") == ["B"]
-    assert methods(graph, "main.use", "after") == []
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "other") == ["B"]
+    assert classes_called(graph, "main.use", "after") == []
 
 
 def test_not_and_or(tmp_path):
@@ -136,16 +129,16 @@ def test_not_and_or(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.negated", "inside") == []
-    assert methods(graph, "main.negated", "after") == ["A", "Sub"]
-    assert methods(graph, "main.both", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.both", "after") == []
-    assert methods(graph, "main.neither", "inside") == []
-    assert methods(graph, "main.neither", "after") == []
-    assert methods(graph, "main.operands", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.operands", "after") == ["B"]
-    assert methods(graph, "main.operands", "other") == ["Other"]
-    assert methods(graph, "main.operands", "more") == []
+    assert classes_called(graph, "main.negated", "inside") == []
+    assert classes_called(graph, "main.negated", "after") == ["A", "Sub"]
+    assert classes_called(graph, "main.both", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.both", "after") == []
+    assert classes_called(graph, "main.neither", "inside") == []
+    assert classes_called(graph, "main.neither", "after") == []
+    assert classes_called(graph, "main.operands", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.operands", "after") == ["B"]
+    assert classes_called(graph, "main.operands", "other") == ["Other"]
+    assert classes_called(graph, "main.operands", "more") == []
 
 
 def test_after_a_guard_the_rest_of_the_block_is_the_branch(tmp_path):
@@ -187,18 +180,15 @@ def test_after_a_guard_the_rest_of_the_block_is_the_branch(tmp_path):
     )
 
     for function in ("returns", "raises", "loops", "asserts", "block", "waits"):
-        assert methods(graph, f"main.{function}", "inside") == ["A", "Sub"], function
-    assert methods(graph, "main.loops", "other") == ["B"]
-    assert methods(graph, "main.loops", "after") == []
-    assert methods(graph, "main.block", "after") == []
+        assert classes_called(graph, f"main.{function}", "inside") == ["A", "Sub"], (
+            function
+        )
+    assert classes_called(graph, "main.loops", "other") == ["B"]
+    assert classes_called(graph, "main.loops", "after") == []
+    assert classes_called(graph, "main.block", "after") == []
 
 
 def test_limit_an_assert_narrows_as_if_it_always_runs(tmp_path):
-    """Python: `use` calls `str.strip`, and the assert then fails. Under
-    `python -O` the assert does not run, so `use` also calls `str.lower`
-    and `str.split` on the str. The analysis follows the default
-    interpreter: after the assert, `name` holds only bytes (see *Class
-    tests*, limits)."""
     graph = graph_of(
         tmp_path,
         """
@@ -234,9 +224,9 @@ def test_nested_functions_read_the_variable_and_comprehensions_the_branch(tmp_pa
         """,
     )
 
-    assert methods(graph, "main.use.inner", "after") == []
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.use", "other") == []
+    assert classes_called(graph, "main.use.inner", "after") == []
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "other") == []
 
 
 def test_a_rebinding_in_the_branch_ends_the_test(tmp_path):
@@ -263,12 +253,11 @@ def test_a_rebinding_in_the_branch_ends_the_test(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.rebinds", "inside") == ["Other"]
-    assert methods(graph, "main.loops", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.loops", "after") == ["Other"]
-    assert methods(graph, "main.walrus", "inside") == ["Other"]
-    # Limit: the join holds what x held before the test.
-    assert methods(graph, "main.joins", "inside") == ["Other"]
+    assert classes_called(graph, "main.rebinds", "inside") == ["Other"]
+    assert classes_called(graph, "main.loops", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.loops", "after") == ["Other"]
+    assert classes_called(graph, "main.walrus", "inside") == ["Other"]
+    assert classes_called(graph, "main.joins", "inside") == ["Other"]
 
 
 def test_a_tuple_of_classes_gives_each_of_them(tmp_path):
@@ -285,8 +274,8 @@ def test_a_tuple_of_classes_gives_each_of_them(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.display", "inside") == ["A", "B", "Sub"]
-    assert methods(graph, "main.named", "inside") == ["B", "Other"]
+    assert classes_called(graph, "main.display", "inside") == ["A", "B", "Sub"]
+    assert classes_called(graph, "main.named", "inside") == ["B", "Other"]
 
 
 def test_a_class_of_the_stubs_gives_a_typed_value(tmp_path):
@@ -323,7 +312,7 @@ def test_issubclass_gives_the_classes(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.make", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.make", "inside") == ["A", "Sub"]
 
 
 def test_a_class_that_the_analysis_does_not_know_gives_nothing(tmp_path):
@@ -344,8 +333,8 @@ def test_a_class_that_the_analysis_does_not_know_gives_nothing(tmp_path):
     )
 
     assert [c for c in callees(graph, "main.outside") if "Thing" in c] == []
-    assert methods(graph, "main.unknown", "inside") == []
-    assert methods(graph, "main.kept", "inside") == ["Other"]
+    assert classes_called(graph, "main.unknown", "inside") == []
+    assert classes_called(graph, "main.kept", "inside") == ["Other"]
 
 
 def test_parameters_with_and_without_an_annotation(tmp_path):
@@ -362,9 +351,9 @@ def test_parameters_with_and_without_an_annotation(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.annotated", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.annotated", "after") == ["Other"]
-    assert methods(graph, "main.bare", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.annotated", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.annotated", "after") == ["Other"]
+    assert classes_called(graph, "main.bare", "inside") == ["A", "Sub"]
 
 
 def test_a_name_that_holds_nothing_gets_the_instances(tmp_path):
@@ -378,7 +367,7 @@ def test_a_name_that_holds_nothing_gets_the_instances(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
 
 
 def test_only_a_local_name_tested_by_the_builtins_counts(tmp_path):
@@ -407,7 +396,7 @@ def test_only_a_local_name_tested_by_the_builtins_counts(tmp_path):
     )
 
     for function in ("attribute", "rebound", "helper", "computed", "global_name"):
-        assert methods(graph, f"main.{function}", "inside") == [], function
+        assert classes_called(graph, f"main.{function}", "inside") == [], function
 
 
 def test_module_code_and_class_bodies_keep_the_test_in_the_branch(tmp_path):
@@ -430,10 +419,10 @@ def test_module_code_and_class_bodies_keep_the_test_in_the_branch(tmp_path):
         """,
     )
 
-    assert methods(graph, "main", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.read", "after") == ["Other"]
-    assert methods(graph, "main", "other") == ["B"]
-    assert methods(graph, "main", "more") == ["Other"]
+    assert classes_called(graph, "main", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.read", "after") == ["Other"]
+    assert classes_called(graph, "main", "other") == ["B"]
+    assert classes_called(graph, "main", "more") == ["Other"]
 
 
 def test_a_handler_in_the_branch_keeps_the_test(tmp_path):
@@ -451,12 +440,8 @@ def test_a_handler_in_the_branch_keeps_the_test(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "other") == ["A", "Sub"]
-    # After the handler, which rebinds x, x is the join of both paths.
-    assert methods(graph, "main.use", "after") == ["Other"]
-
-
-# Values that cannot pass the test
+    assert classes_called(graph, "main.use", "other") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "after") == ["Other"]
 
 
 def test_values_that_cannot_be_an_instance_do_not_reach_the_branch(tmp_path):
@@ -476,11 +461,11 @@ def test_values_that_cannot_be_an_instance_do_not_reach_the_branch(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.use", "other") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "other") == ["A", "Sub"]
     assert "<builtin>.bytes.decode" in callees(graph, "main.strings")
     assert "<builtin>.str.decode" not in callees(graph, "main.strings")
-    assert methods(graph, "main.strings", "inside") == []
+    assert classes_called(graph, "main.strings", "inside") == []
 
 
 def test_where_the_test_fails_certain_instances_do_not_reach(tmp_path):
@@ -502,8 +487,8 @@ def test_where_the_test_fails_certain_instances_do_not_reach(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["Other"]
-    assert methods(graph, "main.use", "after") == ["A", "Sub"]
+    assert classes_called(graph, "main.use", "inside") == ["Other"]
+    assert classes_called(graph, "main.use", "after") == ["A", "Sub"]
     assert "<builtin>.str.upper" in callees(graph, "main.text")
     assert "<builtin>.bytes.upper" not in callees(graph, "main.text")
 
@@ -524,9 +509,8 @@ def test_a_class_whose_bases_may_differ_passes_both_branches(tmp_path):
         """,
     )
 
-    # M may derive from A, or from Other: its lookups find both.
-    assert methods(graph, "main.use", "inside") == ["A", "Other", "Sub"]
-    assert methods(graph, "main.use", "after") == ["A", "Other"]
+    assert classes_called(graph, "main.use", "inside") == ["A", "Other", "Sub"]
+    assert classes_called(graph, "main.use", "after") == ["A", "Other"]
 
 
 def test_outside_bases_decide_against_outside_classes(tmp_path):
@@ -549,8 +533,8 @@ def test_outside_bases_decide_against_outside_classes(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.use", "inside") == ["Mine", "Unknown"]
-    assert methods(graph, "main.use", "after") == ["Other", "Unknown"]
+    assert classes_called(graph, "main.use", "inside") == ["Mine", "Unknown"]
+    assert classes_called(graph, "main.use", "after") == ["Other", "Unknown"]
 
 
 def test_values_and_classes_that_the_analysis_does_not_know_pass(tmp_path):
@@ -592,14 +576,14 @@ def test_values_and_classes_that_the_analysis_does_not_know_pass(tmp_path):
     )
 
     assert "ext.value.after" in callees(graph, "main.unknown_value")
-    assert methods(graph, "main.unknown_class", "inside") == ["Other"]
-    assert methods(graph, "main.nothing", "inside") == ["Other"]
-    assert methods(graph, "main.nothing", "after") == ["Other"]
-    assert methods(graph, "main.partly", "inside") == ["Other"]
-    assert methods(graph, "main.partly", "after") == ["B", "Other"]
-    assert methods(graph, "main.abstract", "inside") == ["Abstract", "Other"]
-    assert methods(graph, "main.abstract", "after") == ["Other"]
-    assert methods(graph, "main.abstract", "other") == ["Other"]
+    assert classes_called(graph, "main.unknown_class", "inside") == ["Other"]
+    assert classes_called(graph, "main.nothing", "inside") == ["Other"]
+    assert classes_called(graph, "main.nothing", "after") == ["Other"]
+    assert classes_called(graph, "main.partly", "inside") == ["Other"]
+    assert classes_called(graph, "main.partly", "after") == ["B", "Other"]
+    assert classes_called(graph, "main.abstract", "inside") == ["Abstract", "Other"]
+    assert classes_called(graph, "main.abstract", "after") == ["Other"]
+    assert classes_called(graph, "main.abstract", "other") == ["Other"]
 
 
 def test_issubclass_filters_the_classes(tmp_path):
@@ -615,11 +599,8 @@ def test_issubclass_filters_the_classes(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.make", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.make", "after") == ["Other"]
-
-
-# Review of r1-isinstance: the tested classes that may answer otherwise
+    assert classes_called(graph, "main.make", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.make", "after") == ["Other"]
 
 
 def test_object_is_the_root_of_every_class(tmp_path):
@@ -642,11 +623,11 @@ def test_object_is_the_root_of_every_class(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.instances", "inside") == ["A"]
-    assert methods(graph, "main.instances", "after") == []
-    assert methods(graph, "main.instances", "other") == []
-    assert methods(graph, "main.classes", "inside") == ["A"]
-    assert methods(graph, "main.classes", "after") == []
+    assert classes_called(graph, "main.instances", "inside") == ["A"]
+    assert classes_called(graph, "main.instances", "after") == []
+    assert classes_called(graph, "main.instances", "other") == []
+    assert classes_called(graph, "main.classes", "inside") == ["A"]
+    assert classes_called(graph, "main.classes", "after") == []
 
 
 def test_type_and_bool_as_tested_classes(tmp_path):
@@ -667,7 +648,7 @@ def test_type_and_bool_as_tested_classes(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.classes", "inside") == ["Meta"]
+    assert classes_called(graph, "main.classes", "inside") == ["Meta"]
     assert "<builtin>.int.bit_length" in callees(graph, "main.numbers")
 
 
@@ -712,16 +693,13 @@ def test_classes_that_may_answer_otherwise_let_every_value_pass(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.structural", "inside") == ["Loops"]
-    assert methods(graph, "main.registered", "inside") == ["Registered"]
-    assert methods(graph, "main.protocol", "other") == ["Other"]
-    # Generic does not change the instance check: Other cannot pass.
-    assert methods(graph, "main.generic", "more") == []
+    assert classes_called(graph, "main.structural", "inside") == ["Loops"]
+    assert classes_called(graph, "main.registered", "inside") == ["Registered"]
+    assert classes_called(graph, "main.protocol", "other") == ["Other"]
+    assert classes_called(graph, "main.generic", "more") == []
 
 
 def test_enums_let_every_value_pass(tmp_path):
-    # Their metaclass is EnumMeta, also where a builtin class comes first in
-    # the stub MRO (IntEnum: int, then Enum).
     graph = graph_of(
         tmp_path,
         """
@@ -738,9 +716,9 @@ def test_enums_let_every_value_pass(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.ints", "inside") == ["Other"]
-    assert methods(graph, "main.flags", "after") == ["Other"]
-    assert methods(graph, "main.strs", "other") == ["Other"]
+    assert classes_called(graph, "main.ints", "inside") == ["Other"]
+    assert classes_called(graph, "main.flags", "after") == ["Other"]
+    assert classes_called(graph, "main.strs", "other") == ["Other"]
 
 
 def test_stub_classes_with_plain_instance_checks_still_filter(tmp_path):
@@ -761,8 +739,8 @@ def test_stub_classes_with_plain_instance_checks_still_filter(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.errors", "inside") == ["Mine"]
-    assert methods(graph, "main.ids", "inside") == []
+    assert classes_called(graph, "main.errors", "inside") == ["Mine"]
+    assert classes_called(graph, "main.ids", "inside") == []
 
 
 def test_tuples_that_are_empty_or_not_known(tmp_path):
@@ -791,18 +769,12 @@ def test_tuples_that_are_empty_or_not_known(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.empty", "inside") == ["Other"]
-    assert methods(graph, "main.empty", "after") == []
-    assert methods(graph, "main.unknown", "other") == ["Other"]
-    # No value is an instance of an empty tuple, whatever its class.
+    assert classes_called(graph, "main.empty", "inside") == ["Other"]
+    assert classes_called(graph, "main.empty", "after") == []
+    assert classes_called(graph, "main.unknown", "other") == ["Other"]
     assert "main.target" not in callees(graph, "main.function")
     assert "main.target" not in callees(graph, "main.classes")
-    # A function may be an instance of A, as far as the analysis knows.
     assert "main.target" in callees(graph, "main.any_class")
-
-
-# The containers and generators that the analysis makes: exactly of their
-# builtin class (see *Class tests* in the design)
 
 
 def test_a_list_display_is_not_a_tuple(tmp_path):
@@ -821,8 +793,8 @@ def test_a_list_display_is_not_a_tuple(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["B"]
-    assert methods(graph, "main.parse", "after") == ["A"]
+    assert classes_called(graph, "main.parse", "inside") == ["B"]
+    assert classes_called(graph, "main.parse", "after") == ["A"]
 
 
 def test_a_generator_is_not_a_tuple(tmp_path):
@@ -850,9 +822,9 @@ def test_a_generator_is_not_a_tuple(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["B"]
-    assert methods(graph, "main.parse_async", "inside") == []
-    assert methods(graph, "main.parse_async", "after") == []
+    assert classes_called(graph, "main.parse", "inside") == ["B"]
+    assert classes_called(graph, "main.parse_async", "inside") == []
+    assert classes_called(graph, "main.parse_async", "after") == []
 
 
 def test_a_coroutine_is_not_a_tuple(tmp_path):
@@ -893,8 +865,8 @@ def test_comprehensions_are_of_their_class(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["Other"]
-    assert methods(graph, "main.parse", "after") == ["Sub"]
+    assert classes_called(graph, "main.parse", "inside") == ["Other"]
+    assert classes_called(graph, "main.parse", "after") == ["Sub"]
 
 
 def test_builtin_constructors_make_their_class(tmp_path):
@@ -915,8 +887,8 @@ def test_builtin_constructors_make_their_class(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["B"]
-    assert methods(graph, "main.parse", "after") == ["A"]
+    assert classes_called(graph, "main.parse", "inside") == ["B"]
+    assert classes_called(graph, "main.parse", "after") == ["A"]
 
 
 def test_slices_copies_pairs_and_rest_keep_the_class(tmp_path):
@@ -945,10 +917,10 @@ def test_slices_copies_pairs_and_rest_keep_the_class(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["B"]
-    assert methods(graph, "main.pairs", "after") == []
-    assert methods(graph, "main.pairs", "more") == ["B"]
-    assert methods(graph, "main.rest", "other") == []
+    assert classes_called(graph, "main.parse", "inside") == ["B"]
+    assert classes_called(graph, "main.pairs", "after") == []
+    assert classes_called(graph, "main.pairs", "more") == ["B"]
+    assert classes_called(graph, "main.rest", "other") == []
 
 
 def test_star_args_is_a_tuple_and_star_kwargs_a_dict(tmp_path):
@@ -968,10 +940,10 @@ def test_star_args_is_a_tuple_and_star_kwargs_a_dict(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.star", "inside") == []
-    assert methods(graph, "main.star", "after") == ["A"]
-    assert methods(graph, "main.star", "other") == []
-    assert methods(graph, "main.star", "more") == ["B"]
+    assert classes_called(graph, "main.star", "inside") == []
+    assert classes_called(graph, "main.star", "after") == ["A"]
+    assert classes_called(graph, "main.star", "other") == []
+    assert classes_called(graph, "main.star", "more") == ["B"]
 
 
 def test_where_the_test_fails_a_container_of_the_class_does_not_pass(tmp_path):
@@ -988,13 +960,11 @@ def test_where_the_test_fails_a_container_of_the_class_does_not_pass(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["B"]
-    assert methods(graph, "main.parse", "after") == []
+    assert classes_called(graph, "main.parse", "inside") == ["B"]
+    assert classes_called(graph, "main.parse", "after") == []
 
 
 def test_a_base_of_the_class_passes_the_container(tmp_path):
-    # A tuple of builtin classes filters; an ABC (Sequence) may answer
-    # otherwise and lets every value pass, as for a str constant.
     graph = graph_of(
         tmp_path,
         """
@@ -1018,9 +988,9 @@ def test_a_base_of_the_class_passes_the_container(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["A", "B"]
-    assert methods(graph, "main.parse", "after") == ["A", "B", "Other", "Sub"]
-    assert methods(graph, "main.parse", "other") == ["A", "B", "Other", "Sub"]
+    assert classes_called(graph, "main.parse", "inside") == ["A", "B"]
+    assert classes_called(graph, "main.parse", "after") == ["A", "B", "Other", "Sub"]
+    assert classes_called(graph, "main.parse", "other") == ["A", "B", "Other", "Sub"]
 
 
 def test_a_container_of_an_annotation_stands_for_any_value_of_its_type(tmp_path):
@@ -1036,8 +1006,8 @@ def test_a_container_of_an_annotation_stands_for_any_value_of_its_type(tmp_path)
         """,
     )
 
-    assert methods(graph, "main.declared", "inside") == ["A", "Sub"]
-    assert methods(graph, "main.written", "after") == ["A", "Sub"]
+    assert classes_called(graph, "main.declared", "inside") == ["A", "Sub"]
+    assert classes_called(graph, "main.written", "after") == ["A", "Sub"]
 
 
 def test_a_subclass_of_a_builtin_container_is_tested_by_its_class(tmp_path):
@@ -1056,12 +1026,8 @@ def test_a_subclass_of_a_builtin_container_is_tested_by_its_class(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == []
-    assert methods(graph, "main.parse", "after") == ["Items"]
-
-
-# Where Python makes another object than the container, or may run a method
-# that a subclass overrides, the value's class is not known
+    assert classes_called(graph, "main.parse", "inside") == []
+    assert classes_called(graph, "main.parse", "after") == ["Items"]
 
 
 def test_an_iterator_of_a_container_is_not_the_container(tmp_path):
@@ -1089,18 +1055,14 @@ def test_an_iterator_of_a_container_is_not_the_container(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.run", "inside") == ["A"]
-    # The list itself keeps its class.
-    assert methods(graph, "main.run", "after") == []
-    assert methods(graph, "main.run", "other") == ["B"]
-    # The iterator is exactly of its own class, below object.
-    assert methods(graph, "main.parse", "inside") == []
-    assert methods(graph, "main.parse", "after") == ["Other", "Sub"]
+    assert classes_called(graph, "main.run", "inside") == ["A"]
+    assert classes_called(graph, "main.run", "after") == []
+    assert classes_called(graph, "main.run", "other") == ["B"]
+    assert classes_called(graph, "main.parse", "inside") == []
+    assert classes_called(graph, "main.parse", "after") == ["Other", "Sub"]
 
 
 def test_what_a_declared_container_makes_is_not_exact(tmp_path):
-    # A subclass of list or dict may override `__getitem__`, `__add__`,
-    # `__mul__` or `items` to return another class.
     graph = graph_of(
         tmp_path,
         """
@@ -1137,14 +1099,13 @@ def test_what_a_declared_container_makes_is_not_exact(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.sliced", "inside") == ["A"]
-    assert methods(graph, "main.added", "after") == ["A"]
-    assert methods(graph, "main.repeated", "other") == ["A"]
-    assert methods(graph, "main.pairs", "more") == ["A"]
+    assert classes_called(graph, "main.sliced", "inside") == ["A"]
+    assert classes_called(graph, "main.added", "after") == ["A"]
+    assert classes_called(graph, "main.repeated", "other") == ["A"]
+    assert classes_called(graph, "main.pairs", "more") == ["A"]
 
 
 def test_an_operator_on_containers_is_not_exact(tmp_path):
-    # The right operand may be a subclass whose `__radd__` runs first.
     graph = graph_of(
         tmp_path,
         """
@@ -1157,12 +1118,10 @@ def test_an_operator_on_containers_is_not_exact(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.parse", "inside") == ["A", "B"]
+    assert classes_called(graph, "main.parse", "inside") == ["A", "B"]
 
 
 def test_a_class_attribute_is_not_exact(tmp_path):
-    # A metaclass (Enum's), `__init_subclass__` or a class decorator may
-    # replace what the class body binds: `E.A` is a member, not a list.
     graph = graph_of(
         tmp_path,
         """
@@ -1194,18 +1153,13 @@ def test_a_class_attribute_is_not_exact(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.members", "inside") == ["Other"]
-    assert methods(graph, "main.members", "after") == ["Sub"]
-    # In the class body, the name is the list.
-    assert methods(graph, "main.body", "other") == ["B"]
-    assert methods(graph, "main.body", "more") == []
+    assert classes_called(graph, "main.members", "inside") == ["Other"]
+    assert classes_called(graph, "main.members", "after") == ["Sub"]
+    assert classes_called(graph, "main.body", "other") == ["B"]
+    assert classes_called(graph, "main.body", "more") == []
 
 
 def test_limit_what_a_stub_type_variable_gives_keeps_the_argument_class(tmp_path):
-    # Python: reduce returns what the function returned (a list), deepcopy
-    # what the memo holds (a tuple), so both calls run. The analysis takes
-    # the stub's type variable at its word: the result is the argument, of
-    # its class, and the test drops it (see *Class tests*, limits).
     graph = graph_of(
         tmp_path,
         """
@@ -1223,8 +1177,8 @@ def test_limit_what_a_stub_type_variable_gives_keeps_the_argument_class(tmp_path
         """,
     )
 
-    assert methods(graph, "main.folded", "inside") == []
-    assert methods(graph, "main.copied", "after") == []
+    assert classes_called(graph, "main.folded", "inside") == []
+    assert classes_called(graph, "main.copied", "after") == []
 
 
 def test_the_class_of_an_inexact_container_is_not_known(tmp_path):
@@ -1258,11 +1212,10 @@ def test_the_class_of_an_inexact_container_is_not_known(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.member", "inside") == ["Other"]
+    assert classes_called(graph, "main.member", "inside") == ["Other"]
     assert "<builtin>.list" in callees(graph, "main.member_class")
-    assert methods(graph, "main.tested", "after") == ["Sub"]
-    # The class of an exact list is list.
-    assert methods(graph, "main.exact", "other") == []
+    assert classes_called(graph, "main.tested", "after") == ["Sub"]
+    assert classes_called(graph, "main.exact", "other") == []
 
 
 def test_a_generator_or_coroutine_class_attribute_is_not_exact(tmp_path):
@@ -1298,15 +1251,12 @@ def test_a_generator_or_coroutine_class_attribute_is_not_exact(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.members", "inside") == ["Other"]
+    assert classes_called(graph, "main.members", "inside") == ["Other"]
     assert any(callee.endswith(".close") for callee in callees(graph, "main.members"))
-    # In the class body, the name is the generator.
-    assert methods(graph, "main.body", "after") == []
+    assert classes_called(graph, "main.body", "after") == []
 
 
 def test_a_constant_class_attribute_keeps_its_value_but_not_its_class(tmp_path):
-    # `E.A` is a member, an instance of E (of str and Mark), whose value
-    # names the attribute.
     graph = graph_of(
         tmp_path,
         """
@@ -1327,13 +1277,11 @@ def test_a_constant_class_attribute_keeps_its_value_but_not_its_class(tmp_path):
         """,
     )
 
-    assert methods(graph, "main.member", "inside") == ["A"]
-    # In the class body, the name is the str.
-    assert methods(graph, "main.body", "after") == []
+    assert classes_called(graph, "main.member", "inside") == ["A"]
+    assert classes_called(graph, "main.body", "after") == []
 
 
 def test_a_base_taken_from_a_class_attribute_is_the_builtin_class(tmp_path):
-    # `Base` is `list`: the MRO of C is C, A, B, list, object.
     graph = graph_of(
         tmp_path,
         """

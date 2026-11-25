@@ -1,13 +1,3 @@
-"""A package's own stubs: `x.pyi` beside an analysed `x.py` gives the
-annotations that the source leaves out. The stub is read for annotations
-only: where a parameter, a class attribute or a module variable of the
-source has none, the annotation of the same name in the stub is read as if
-it were written in the source, and the outside bases of its classes put the
-source's classes below them for what annotations name. The stub defines
-nothing, calls nothing and imports nothing; its names resolve through its
-own imports and to the module's own classes.
-"""
-
 import json
 import os
 import subprocess
@@ -37,8 +27,6 @@ ALL_AREAS = ["shapes.Circle.area", "shapes.Shape.area", "shapes.Square.area"]
 
 
 def graph_of(tmp_path, files):
-    """The call graph of `files` with the module `shapes`, an entry point:
-    a module that only a stub imports is not analysed."""
     files = {"shapes.py": SHAPES, **files}
     return call_graph(tmp_path, files, entry_points=("main.py", "shapes.py"))
 
@@ -74,8 +62,6 @@ def test_a_parameter_typed_only_in_the_stub_holds_what_the_annotation_names(
 
 
 def test_a_stub_parameter_matches_by_name_and_kind(tmp_path):
-    # The stub's parameter `shape` annotates the source's `shape` wherever it
-    # is; the stub's `*shapes` annotates no plain parameter `shapes`.
     graph = graph_of(
         tmp_path,
         {
@@ -96,8 +82,6 @@ def test_a_stub_parameter_matches_by_name_and_kind(tmp_path):
 
 
 def test_a_return_type_in_the_stub_names_nothing_as_in_the_source(tmp_path):
-    # The annotation rule reads no return types: one in the stub gives what
-    # one in the source gives.
     source = """
     import shapes
     def make(){annotation}:
@@ -165,8 +149,6 @@ def test_a_module_variable_typed_only_in_the_stub(tmp_path):
 
 
 def test_an_annotation_in_the_source_wins_over_the_stub(tmp_path):
-    # Python has the source's annotation; the stub fills only what the
-    # source leaves out.
     graph = graph_of(
         tmp_path,
         {
@@ -198,8 +180,6 @@ def test_an_annotation_in_the_source_wins_over_the_stub(tmp_path):
 
 
 def test_an_overload_set_names_the_union_of_its_annotations(tmp_path):
-    # Every definition of the name counts: the overloads, and the branches
-    # of an `if` that only a type checker decides.
     graph = graph_of(
         tmp_path,
         {
@@ -230,9 +210,6 @@ def test_an_overload_set_names_the_union_of_its_annotations(tmp_path):
 
 
 def test_a_name_that_only_the_stub_defines_is_ignored(tmp_path):
-    # The stub adds no function, class, method or variable: `helper`,
-    # `Extra`, `Canvas.erase` and `spare` exist only in the stub, and the
-    # stub's class `outer` annotates nothing in the function `outer`.
     graph = graph_of(
         tmp_path,
         {
@@ -278,8 +255,6 @@ def test_a_name_that_only_the_stub_defines_is_ignored(tmp_path):
 
 
 def test_limit_a_stub_attribute_chain_must_start_at_a_stub_import(tmp_path):
-    # Names in the stub resolve without loads: `Canvas.Pen` and `shapes.Shape`
-    # through names that the stub does not import name nothing.
     graph = graph_of(
         tmp_path,
         {
@@ -305,8 +280,6 @@ def test_limit_a_stub_attribute_chain_must_start_at_a_stub_import(tmp_path):
 
 
 def test_a_stub_without_its_source_is_ignored(tmp_path):
-    # `pkg/__init__.pyi` beside no `__init__.py` and `alone.pyi` are no
-    # module; `pkg/mod.pyi` is the stub of `pkg/mod.py`.
     graph = graph_of(
         tmp_path,
         {
@@ -351,9 +324,6 @@ def test_a_stub_in_a_subpackage(tmp_path):
 
 
 def test_a_stub_from_import_reads_the_package_attribute(tmp_path):
-    # `from pkg import X` reads the attribute `X` that pkg/__init__.py binds;
-    # the empty submodule pkg/X.py is not what the name is. So is the
-    # attribute chain `pkg.X`.
     graph = call_graph(
         tmp_path,
         {
@@ -377,11 +347,6 @@ def test_a_stub_from_import_reads_the_package_attribute(tmp_path):
 
 
 def test_limit_a_stub_attribute_chain_reads_a_submodule_file(tmp_path):
-    # Python: `X` is the module `other` that pkg/__init__.py binds, not the
-    # file pkg/X.py, so `X.T` and `pkg.X.T` name `other.T`. The stub reader
-    # joins the chain into the dotted name `pkg.X.T`, which the file
-    # pkg/X.py resolves, a module that no import analyses (a limit; the
-    # same annotation in the source names `other.T`).
     graph = call_graph(
         tmp_path,
         {
@@ -406,9 +371,6 @@ def test_limit_a_stub_attribute_chain_reads_a_submodule_file(tmp_path):
 
 
 def test_stub_names_resolve_through_the_stubs_own_imports(tmp_path):
-    # The source binds none of `Shape`, `Sequence`, `abc` or `Square`; the
-    # stub imports them, also under `TYPE_CHECKING`, and names the module's
-    # own class `Local` without importing it.
     graph = graph_of(
         tmp_path,
         {
@@ -475,8 +437,6 @@ def test_a_stub_that_cannot_be_parsed_is_ignored(tmp_path):
     assert generator.program.modules["main"].status == "analysed"
 
 
-# The same annotation in the source and in the stub names the same values:
-# type variables, `Self`, a generic class, a protocol and strings as well.
 EQUIVALENCE_HEADER = """
 from typing import Generic, Optional, Protocol, Self, TypeVar
 from shapes import Shape
@@ -537,8 +497,6 @@ def test_a_stub_annotation_names_what_the_same_annotation_in_the_source_does(
     assert in_stub == in_source
 
 
-# Every way to give the entry points and the package root finds the stub of a
-# module, whether an entry point names it or an import finds it.
 STUBBED = {
     "shapes.py": SHAPES,
     "main.py": "import pkg.mod\n",
@@ -595,8 +553,6 @@ def test_the_command_line_finds_the_stub(tmp_path, package):
 
 
 def test_only_x_pyi_beside_x_py_is_a_stub(tmp_path):
-    # Not a stub of another file name, nor of an entry point without the
-    # `.py` suffix; `tool.pyi` is the stub of `tool.py`.
     write(
         tmp_path,
         {
@@ -620,8 +576,6 @@ def test_only_x_pyi_beside_x_py_is_a_stub(tmp_path):
 
 
 def test_a_module_that_only_the_stub_imports_is_not_analysed(tmp_path):
-    # Nothing in a stub runs: its imports bring in no module, so a class of
-    # a module that the source does not import names nothing.
     graph = call_graph(
         tmp_path,
         {
@@ -639,9 +593,6 @@ def test_a_module_that_only_the_stub_imports_is_not_analysed(tmp_path):
 
 
 def test_a_stub_import_adds_no_module_to_the_program(tmp_path):
-    # Reading the stub's imports registers no module: not the extension
-    # module `pkg.native`, which would make `pkg.native.run()` an edge, not
-    # an analysed module that no source imports, not a missing module.
     files = {
         "main.py": """
         import pkg
@@ -684,8 +635,6 @@ SOURCE_ANNOTATED = {
 
 @pytest.mark.parametrize("source", SOURCE_ANNOTATED)
 def test_a_source_annotation_wins_for_the_whole_binding(tmp_path, source):
-    # Any annotation of the binding in the source, wherever it is, keeps the
-    # stub's annotation of that name off every assignment to it.
     module = SOURCE_ANNOTATED[source]
     in_class = "class C:\n" + "".join(f"    {line}\n" for line in module.splitlines())
     graph = call_graph(
@@ -705,10 +654,6 @@ def test_a_source_annotation_wins_for_the_whole_binding(tmp_path, source):
 
 
 def test_stub_names_resolve_in_the_stubs_own_namespace(tmp_path):
-    # A name that the stub binds to anything but a class or an import names
-    # nothing (`str = bytes`, an alias); a stub class names the source's
-    # definition of the same qualified name (not the class body's `Right`);
-    # a name that the stub does not bind is a builtin or nothing.
     graph = call_graph(
         tmp_path,
         {
@@ -751,9 +696,6 @@ def test_stub_names_resolve_in_the_stubs_own_namespace(tmp_path):
 
 
 def test_a_stub_annotates_the_binding_that_an_assignment_makes(tmp_path):
-    # `global x` in a class body binds the module's `x`, not `C.x`; `global y`
-    # in a function binds the module's `y`; `nonlocal z` binds the local of
-    # `outer`, which no stub annotates.
     graph = call_graph(
         tmp_path,
         {
@@ -797,9 +739,6 @@ def test_a_stub_annotates_the_binding_that_an_assignment_makes(tmp_path):
 
 
 def test_a_stub_class_names_the_source_class_definitions_of_its_name(tmp_path):
-    # The stub's class `C` names the source's class definitions `main.C`,
-    # also one defined after the use and one nested in a class, never what
-    # a source variable `C` holds.
     graph = call_graph(
         tmp_path,
         {
@@ -831,8 +770,6 @@ def test_a_stub_class_names_the_source_class_definitions_of_its_name(tmp_path):
 
 
 def test_a_class_body_reads_its_stub_class_by_path(tmp_path):
-    # A method of the stub's `Outer` names `Inner`, the class of its own
-    # body: the source's `Outer.Inner`.
     graph = call_graph(
         tmp_path,
         {
@@ -855,10 +792,6 @@ def test_a_class_body_reads_its_stub_class_by_path(tmp_path):
 
 
 def test_private_names_are_the_variables_that_python_binds(tmp_path):
-    # In a class body `__x` is `_C__x`: `global __x` binds the module's
-    # `_C__x`, which the stub's module `__x` does not annotate; the source's
-    # `_D__x: object` is the annotation of `D`'s `__x`, so the stub's does not
-    # apply; the stub's `D.__y` annotates `D`'s `__y`, which is `_D__y`.
     graph = call_graph(
         tmp_path,
         {
@@ -895,8 +828,6 @@ def test_private_names_are_the_variables_that_python_binds(tmp_path):
 
 
 def test_each_binding_of_a_stub_name_contributes(tmp_path):
-    # An import in one branch and a class in the other: the annotation names
-    # what each names.
     graph = call_graph(
         tmp_path,
         {
@@ -925,7 +856,6 @@ def test_each_binding_of_a_stub_name_contributes(tmp_path):
 
 
 def test_only_names_that_a_stub_assignment_binds_are_its_bindings(tmp_path):
-    # `registry[str] = None` binds no `str`, and `obj.attr = 1` no `obj`.
     graph = call_graph(
         tmp_path,
         {
@@ -951,7 +881,6 @@ def test_only_names_that_a_stub_assignment_binds_are_its_bindings(tmp_path):
 
 
 def test_an_import_in_a_stub_class_body_binds_there(tmp_path):
-    # The first scope that binds `T` is the class body, by an import.
     graph = call_graph(
         tmp_path,
         {
@@ -973,10 +902,6 @@ def test_an_import_in_a_stub_class_body_binds_there(tmp_path):
     assert callees(graph, "main.C.use") == ["other.T.run"]
 
 
-# Stubs with a scope declaration, which the stub reader does not read: a
-# class statement under `global T`, a method under `global f` (the stub's
-# module function `f`, not `C.f`), a class under `global str` (the module's
-# `str`, not the builtin).
 SCOPE_DECLARATIONS = {
     "global class": (
         """
@@ -1029,8 +954,6 @@ SCOPE_DECLARATIONS = {
 def test_limit_a_stub_with_a_scope_declaration_is_not_read(
     tmp_path, monkeypatch, program
 ):
-    # A stub with a `global` or `nonlocal` statement is not read: the module
-    # is analysed as if it had no stub, under every order.
     source, stub = SCOPE_DECLARATIONS[program]
     write(tmp_path / "without", {"main.py": source})
     write(tmp_path / "with", {"main.py": source, "main.pyi": stub})
@@ -1046,8 +969,6 @@ def test_limit_a_stub_with_a_scope_declaration_is_not_read(
 
 
 def test_private_names_in_a_stub_class_body_are_mangled(tmp_path):
-    # In the class `C`, `from other import __T` imports `other._C__T`, and
-    # `other.__T` reads `other._C__T`.
     graph = call_graph(
         tmp_path,
         {
@@ -1082,9 +1003,6 @@ def test_private_names_in_a_stub_class_body_are_mangled(tmp_path):
 
 
 def test_a_private_module_operand_in_a_stub_class_body_is_mangled(tmp_path):
-    # In the class `C`, `import __m as m` imports `_C__m`; `import __p.a`
-    # imports `__p.a` as written (a dotted operand is not mangled) and binds
-    # `_C__p`, which `__p` in an annotation of the class reads.
     graph = call_graph(
         tmp_path,
         {
@@ -1142,8 +1060,6 @@ PRIVATE_MODULE_FILES = {
 def test_a_class_body_imports_the_module_that_python_imports(
     tmp_path, statement, imported, not_imported
 ):
-    # Python mangles the module operand of an import in a class body when it
-    # is one private name, and a dotted operand not at all.
     files = {**PRIVATE_MODULE_FILES, "pkg/main.py": f"class C:\n    {statement}\n"}
     generator = analysed(tmp_path, files, entry_points=("pkg/main.py",))
 
@@ -1156,9 +1072,6 @@ def test_a_class_body_imports_the_module_that_python_imports(
     [("pkg", "from . import __x"), ("_C__pkg", "from __pkg import __x")],
 )
 def test_a_class_body_from_import_of_a_private_submodule(tmp_path, package, statement):
-    # Python's from-list keeps the written `__x`, so the import runs the
-    # submodule `__x`; the name that it then reads from the package, and
-    # binds, is `_C__x` (CPython 3.12 and 3.15).
     files = {
         f"{package}/__init__.py": "def hit(): pass\n_C__x = hit\n",
         f"{package}/__x.py": "def hit(): pass\nhit()\n",
@@ -1179,9 +1092,6 @@ def test_a_class_body_from_import_of_a_private_submodule(tmp_path, package, stat
     ]
 
 
-# The bases that a stub declares for its classes: they put the source class
-# below the outside classes that they name, for what annotations name, and
-# for nothing else.
 STUB_BASES_SOURCE = """
 import collections.abc
 import sys
@@ -1239,8 +1149,6 @@ def stub_base_graph(
 def test_a_stub_base_puts_its_class_below_the_outside_class_it_names(tmp_path):
     graph = stub_base_graph(tmp_path)
 
-    # A subscripted base, a dotted one, one in a branch of an `if`, and a
-    # nested class by its path.
     assert callees(graph, "main.iterable") == [
         "mod.Outer.Inner.ping",
         "mod.Peek.ping",
@@ -1250,7 +1158,6 @@ def test_a_stub_base_puts_its_class_below_the_outside_class_it_names(tmp_path):
 
 
 def test_without_the_stub_bases_the_classes_are_below_nothing(tmp_path):
-    # Control: the edges above come from the stub's declarations.
     graph = stub_base_graph(tmp_path, stub=None)
 
     assert callees(graph, "main.iterable") == []
@@ -1258,10 +1165,6 @@ def test_without_the_stub_bases_the_classes_are_below_nothing(tmp_path):
 
 
 def test_a_stub_base_gives_no_inherited_method(tmp_path):
-    # `Iterator.__iter__` returns the iterator: inherited, it would make a
-    # `for` over a Half call `Half.__next__`. Python does not run it either:
-    # the source class has no `__iter__`. Full derives from Iterator in the
-    # source, so its loop does call `__next__`.
     source = """
 import collections.abc
 class Half:
@@ -1290,10 +1193,6 @@ class Half(Iterator[int]): ...
 def test_the_source_keeps_lookup_super_and_instances_where_the_stub_contradicts(
     tmp_path,
 ):
-    # The source says `C(list)`, the stub `C(Iterator[int])`: the stub's
-    # abstract path admits C at an Iterable, but lookup, `super()` and the
-    # MRO are the source's. Abstract, whose stub base has an abstract
-    # `__next__` that it does not define, still has instances.
     source = """
 class C(list):
     def __iter__(self):
@@ -1320,9 +1219,6 @@ class Abstract(Iterator[int]): ...
 
 
 def test_limit_a_stub_base_that_names_an_analysed_class_adds_nothing(tmp_path):
-    # A scope limit: only the outside classes that a stub base names count.
-    # The stub resolves `Base` (an import and a class statement of it): the
-    # annotation of `check` reads it.
     source = """
 import collections.abc
 class Base(collections.abc.Iterator):
@@ -1352,11 +1248,6 @@ def check(base: Base) -> None: ...
 
 
 def test_a_stub_base_node_that_saturates_late_keeps_what_it_admitted(tmp_path):
-    # The stub's base is an alias of the source that holds Iterator, and only
-    # entry-point completion (the defaults of `widen`, which nothing calls)
-    # adds three more outside classes: at a cap of 3 the node saturates
-    # after it admitted Late below Iterator. Saturation stops further
-    # admissions (below Sized); the earlier one remains.
     source = """
 import collections.abc
 BASE = collections.abc.Iterator
@@ -1383,10 +1274,6 @@ class Late:
 
 
 def test_a_saturated_stub_base_node_loses_the_stub_declarations_only(tmp_path):
-    # The stub's bases of Wide are four classes that arrive at once, past a
-    # cap of 3: the node saturates before it admits anything, so the class
-    # gets no admission through its stub; the source's classes and methods
-    # stay.
     source = """
 import collections.abc
 class Wide:
@@ -1417,8 +1304,6 @@ SNIPPETS = (
 
 
 def case_graph(tmp_path, case, edits):
-    """The call graph of a copy of the micro-benchmark case `case`, with
-    each (file, old, new) of `edits` applied to the copy."""
     root = tmp_path / "case"
     for path in (SNIPPETS / case).iterdir():
         (root / path.name).parent.mkdir(parents=True, exist_ok=True)
@@ -1455,11 +1340,9 @@ def test_the_stub_case_takes_its_edges_from_the_stub(tmp_path):
     )
 
     assert callees(graph, "mod.drain") == ["mod.Peek.__iter__", "mod.Peek.__next__"]
-    # The positive control of Bag: its stub base was read.
     assert callees(graph, "mod.has") == ["mod.Bag.__contains__"]
     assert callees(without_bases, "mod.drain") == []
     assert callees(without_bases, "mod.has") == []
-    # The pickle round trip gives no value: the annotations do.
     assert callees(without_annotations, "mod.drain") == []
     assert callees(without_annotations, "mod.has") == []
 

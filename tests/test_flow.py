@@ -1,6 +1,3 @@
-"""Local variables by definition: a read gets the definitions that reach it
-(see *Local variables by definition* in the design)."""
-
 import textwrap
 
 from programs import call_graph, callees, main_graph
@@ -14,9 +11,6 @@ def h(): pass
 
 def graph_of(tmp_path, source):
     return main_graph(tmp_path, DEFINITIONS + textwrap.dedent(source))
-
-
-# Statements in order
 
 
 def test_a_read_gets_the_last_definition_before_it(tmp_path):
@@ -52,8 +46,6 @@ def test_module_names_read_by_the_module_follow_its_statements(tmp_path):
 
 
 def test_a_function_reads_every_definition_of_a_module_name(tmp_path):
-    # The function may run at any point of the module's statements, or
-    # later; another module sees every definition too.
     graph = call_graph(
         tmp_path,
         {
@@ -159,7 +151,6 @@ def test_definitions_by_statements(tmp_path):
 
     assert callees(graph, "main.imported") == ["ext.f"]
     assert callees(graph, "main.defined") == ["main.defined.g"]
-    # `+=` binds what the in-place operator returns.
     assert callees(graph, "main.augmented") == [
         "main.Accumulator.__iadd__",
         "main.f",
@@ -208,9 +199,6 @@ def test_a_module_name_that_may_be_unbound_may_be_the_builtin(tmp_path):
     )
 
     assert callees(graph, "main") == ["<builtin>.len", "main.f"]
-
-
-# Branches
 
 
 def test_if_joins_the_definitions_of_its_branches(tmp_path):
@@ -302,12 +290,8 @@ def test_match_joins_its_cases(tmp_path):
         """,
     )
 
-    # No case may match: the definition before the match reaches the end.
     assert callees(graph, "main.some") == ["main.f", "main.g", "main.h"]
     assert callees(graph, "main.every") == ["main.g", "main.h"]
-
-
-# Loops
 
 
 def test_a_loop_reads_what_its_body_binds_on_the_iteration_before(tmp_path):
@@ -323,7 +307,6 @@ def test_a_loop_reads_what_its_body_binds_on_the_iteration_before(tmp_path):
         """,
     )
 
-    # The last call may run after any iteration, or after none.
     assert callees(graph, "main.use") == ["main.f", "main.g", "main.h"]
 
 
@@ -339,12 +322,10 @@ def test_a_loop_variable_after_the_loop(tmp_path):
         """,
     )
 
-    # The loop may run no iteration.
     assert callees(graph, "main.use") == ["main.f", "main.g"]
 
 
 def test_break_and_continue_carry_their_definitions(tmp_path):
-    # In each function, g is always replaced before the loop goes on.
     graph = graph_of(
         tmp_path,
         """
@@ -380,7 +361,6 @@ def test_break_and_continue_carry_their_definitions(tmp_path):
 
     assert callees(graph, "main.broken") == ["main.f", "main.h"]
     assert callees(graph, "main.continued") == ["main.f", "main.h"]
-    # The else block runs where the test is false, never after a break.
     assert callees(graph, "main.otherwise") == ["ext.more", "main.f", "main.h"]
 
 
@@ -418,12 +398,7 @@ def test_the_else_block_of_a_loop_leaves_the_enclosing_loop(tmp_path):
         """,
     )
 
-    # The else block always leaves the outer loop, so `handler = h` never
-    # runs.
     assert callees(graph, "main.use") == ["main.f", "main.g"]
-
-
-# Exceptions
 
 
 def test_a_handler_starts_from_any_point_of_the_try_body(tmp_path):
@@ -504,7 +479,6 @@ def test_the_name_of_a_handler_is_unbound_after_it(tmp_path):
         """,
     )
 
-    # After the handler the name is unbound, so only f can be called.
     assert callees(graph, "main.use") == ["ext.run", "main.f"]
 
 
@@ -542,7 +516,6 @@ def test_finally_starts_anywhere_and_its_definitions_follow(tmp_path):
 
     assert callees(graph, "main.inside") == ["ext.run", "main.f", "main.g", "main.h"]
     assert callees(graph, "main.after") == ["ext.run", "main.g"]
-    # Only the paths that end normally continue after the statement.
     assert callees(graph, "main.normal") == ["ext.cleanup", "ext.run", "main.h"]
 
 
@@ -629,12 +602,9 @@ def test_a_jump_waits_for_finally_which_may_replace_it(tmp_path):
         """,
     )
 
-    # The `finally` block's own exit replaces the pending jump.
     assert callees(graph, "main.returned") == []
     assert callees(graph, "main.nested_leaves") == ["ext.cleanup"]
     assert callees(graph, "main.from_handler") == ["ext.run", "main.g"]
-    # A jump that goes on carries the definitions of the `finally` block,
-    # and stays a `break` or a `continue`.
     assert callees(graph, "main.replaced") == ["main.g"]
     assert callees(graph, "main.kept_kind") == []
     assert callees(graph, "main.nested") == ["ext.cleanup", "main.g"]
@@ -682,9 +652,6 @@ def test_with_may_suppress_an_exception_of_its_body(tmp_path):
     ]
 
 
-# Class bodies
-
-
 def test_a_class_namespace_holds_what_reaches_the_end_of_its_body(tmp_path):
     graph = graph_of(
         tmp_path,
@@ -717,7 +684,6 @@ def test_a_class_body_reads_the_module_until_it_binds_the_name(tmp_path):
         """,
     )
 
-    # Before its own definition, the class body reads the module's handler.
     assert callees(graph, "main") == ["main.f", "main.g"]
 
 
@@ -747,9 +713,6 @@ def test_a_class_body_that_uses_its_namespace_also_reads_the_module(tmp_path):
         """,
     )
 
-    # The body does not track its names, so a read gets every value that it
-    # binds; where the name may be unbound, also the module's, then the
-    # builtin (LOAD_NAME), never an enclosing function's local.
     assert callees(graph, "main") == ["<builtin>.locals", "main.f", "main.g"]
     assert callees(graph, "main.builtin") == [
         "<builtin>.len",
@@ -757,12 +720,10 @@ def test_a_class_body_that_uses_its_namespace_also_reads_the_module(tmp_path):
         "main.h",
     ]
     assert callees(graph, "main.outer") == ["<builtin>.locals", "main.f", "main.g"]
-    # A function reads only its own local (LOAD_FAST): unbound, it raises.
     assert callees(graph, "main.function") == ["<builtin>.locals", "main.g"]
 
 
 def test_a_method_that_rebinds_self_still_gets_outside_receivers(tmp_path):
-    # The parameter keeps what calls pass; a rebinding is another definition.
     graph = graph_of(
         tmp_path,
         """
@@ -781,9 +742,6 @@ def test_a_method_that_rebinds_self_still_gets_outside_receivers(tmp_path):
     )
 
     assert callees(graph, "main.Base.run") == ["main.Base.step", "main.Child.step"]
-
-
-# Names that keep one node
 
 
 def test_a_comprehension_assignment_expression_keeps_every_value(tmp_path):
@@ -815,9 +773,6 @@ handler = g
     )
 
     assert callees(graph, "main") == ["main.f", "main.g", "tools.handler"]
-
-
-# Value choice: what `bool()` of a definition gives
 
 
 def test_and_and_or_keep_the_operands_that_can_be_the_result(tmp_path):
@@ -852,13 +807,10 @@ def test_and_and_or_keep_the_operands_that_can_be_the_result(tmp_path):
     )
 
     assert callees(graph, "main.first") == ["main.f"]
-    # A function is true: `and` gives the operand after it, `or` the function.
     assert callees(graph, "main.second") == ["main.second.two"]
     assert callees(graph, "main.third") == ["main.third.one"]
     assert callees(graph, "main.unknown") == ["ext.value", "main.f"]
     assert callees(graph, "main.chain") == ["main.chain.two"]
-    # A function reads every value of a module name: another module may
-    # rebind it.
     assert callees(graph, "main.module_names") == ["main.f", "main.g"]
 
 
@@ -879,7 +831,6 @@ def test_a_conditional_expression_with_a_known_test_keeps_one_arm(tmp_path):
     )
 
     assert callees(graph, "main") == ["main.f", "main.g"]
-    # A function reads the module variable, which other code may rebind.
     assert callees(graph, "main.use") == ["main.f", "main.g"]
 
 
@@ -929,10 +880,8 @@ def test_values_whose_truth_may_change_or_differ_keep_both_operands(tmp_path):
     )
 
     assert callees(graph, "main.joined") == ["main.f", "main.g"]
-    # A list display is false when made, but a list changes.
     assert callees(graph, "main.mutated") == ["<builtin>.list.append", "main.f"]
     assert callees(graph, "main.looped") == ["ext.more", "main.f", "main.g"]
-    # A decorator may return any value.
     assert callees(graph, "main.wrapped") == [
         "ext.register",
         "main.f",
@@ -955,9 +904,6 @@ def test_an_operand_that_never_runs_binds_nothing(tmp_path):
     )
 
     assert callees(graph, "main.use") == ["main.f"]
-
-
-# Code that cannot run
 
 
 def test_statements_after_a_jump_do_not_run(tmp_path):
@@ -1021,7 +967,6 @@ def test_handlers_and_suppressing_managers_keep_what_follows(tmp_path):
     )
 
     assert callees(graph, "main.handled") == ["ext.run", "main.f"]
-    # `__exit__` may suppress what the body raises before its `return`.
     assert callees(graph, "main.managed") == ["ext.manager", "ext.run", "main.g"]
 
 
@@ -1056,7 +1001,6 @@ def test_a_branch_whose_test_cannot_hold_does_not_run(tmp_path):
 
     assert callees(graph, "main") == ["main.g", "main.h", "main.handler"]
     assert callees(graph, "main.handler") == ["main.g"]
-    # A function whose definition never runs does not exist.
     assert "main.unused" not in graph
 
 
@@ -1149,8 +1093,6 @@ def use():
     )
 
     assert callees(graph, "main") == ["main.g", "main.h"]
-    # The import does not run: the module is not analysed, and the name has
-    # no value at run time.
     assert "plugins" not in graph
     assert callees(graph, "main.use") == []
 
@@ -1201,7 +1143,6 @@ def test_literal_values_decide_comparisons(tmp_path):
         """,
     )
 
-    # `mode < 1` compares a str with an int: no truth is known.
     assert callees(graph, "main") == ["main.g", "main.h"]
 
 
@@ -1276,11 +1217,7 @@ def test_type_checking_is_false_in_functions_too(tmp_path):
         """,
     )
 
-    # `flag` is a module name that a function rebinds: it may hold anything.
     assert callees(graph, "main.use") == ["main.g"]
-
-
-# Evaluation order and expressions that may not be evaluated (F1 review)
 
 
 def test_except_star_handlers_run_in_sequence(tmp_path):
@@ -1402,7 +1339,6 @@ def test_an_assert_message_does_not_reach_what_follows(tmp_path):
         """,
     )
 
-    # Where the message runs, the statement raises.
     assert callees(graph, "main.known") == ["main.f"]
     assert callees(graph, "main.unknown") == ["main.f"]
 
@@ -1421,9 +1357,6 @@ def fallback(): pass
     )
 
     assert callees(graph, "main") == ["main.fallback"]
-
-
-# Code that reads or writes names behind the statements
 
 
 def test_names_of_a_scope_that_reads_or_writes_them_dynamically(tmp_path):
@@ -1523,8 +1456,6 @@ def test_a_class_body_that_uses_its_namespace_keeps_its_members(tmp_path):
         "main.Field.__set_name__",
         "main.Plugin.__init_subclass__",
     ]
-    # Its own method overrides the base's, but not one defined in code that
-    # cannot run; a plain `__init_subclass__` is a class method.
     assert callees(graph, "main.use") == [
         "main.Base.other",
         "main.Plugin.__init__",
@@ -1533,7 +1464,6 @@ def test_a_class_body_that_uses_its_namespace_keeps_its_members(tmp_path):
     ]
     assert callees(graph, "main.Plugin.__init_subclass__") == ["main.Plugin.__init__"]
 
-    # Reading or writing the namespace changes no member.
     def functions(graph):
         return {name: graph[name] for name in graph if name.startswith("main.")}
 
@@ -1544,9 +1474,6 @@ def test_a_class_body_that_uses_its_namespace_keeps_its_members(tmp_path):
             callees(graph, "main") + [f"<builtin>.{use}"]
         ), use
         assert functions(dynamic) == functions(graph), use
-
-
-# Where the rule must keep every value
 
 
 def test_a_function_that_rebinds_a_global_between_two_uses(tmp_path):
@@ -1596,7 +1523,6 @@ def test_a_method_reads_a_class_attribute_at_call_time(tmp_path):
         """,
     )
 
-    # The class gets f from its body; the store after it adds g.
     assert callees(graph, "main.C.run") == ["main.f", "main.g"]
 
 
@@ -1625,11 +1551,7 @@ def test_names_that_one_path_unbinds_or_never_binds(tmp_path):
 
     assert callees(graph, "main.deleted") == ["main.f"]
     assert callees(graph, "main.raised") == ["<builtin>.ValueError", "main.f", "main.g"]
-    # The loop may run no iteration: `len` may still be the builtin.
     assert callees(graph, "main") == ["<builtin>.len", "main.f"]
-
-
-# Second review of the flow rules
 
 
 def test_literals_of_different_types_stay_apart(tmp_path):
@@ -1694,7 +1616,6 @@ if __name__ == "__main__":
         entry_points=("main.py", "worker.py"),
     )
 
-    # worker.py runs as a script and as the module `worker`.
     assert callees(graph, "worker") == ["worker.hit", "worker.run"]
 
 

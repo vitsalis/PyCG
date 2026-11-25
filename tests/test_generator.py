@@ -1,9 +1,3 @@
-"""Behaviour of CallGraphGenerator on small programs.
-
-These cases complement the micro-benchmark: they cover what it does not
-(parameter kinds, allocation sites, robustness, determinism).
-"""
-
 import json
 import logging
 import os
@@ -17,8 +11,6 @@ from programs import analysed, call_graph, callees, write
 
 from pycg.formats import edges
 from pycg.pycg import CallGraphGenerator
-
-# Parameters
 
 
 def test_positional_only_parameters_with_defaults(tmp_path):
@@ -78,9 +70,6 @@ def test_keyword_argument_does_not_bind_a_positional_only_parameter(tmp_path):
     assert callees(graph, "main.f") == []
 
 
-# Objects
-
-
 def test_instances_of_one_class_keep_their_own_attributes(tmp_path):
     graph = call_graph(
         tmp_path,
@@ -124,7 +113,6 @@ def test_bound_method_stored_and_called_later(tmp_path):
 
 
 def test_methods_of_a_class_instantiated_elsewhere_are_resolved(tmp_path):
-    # Library code: no analysed module creates a Parser, its users do.
     graph = call_graph(
         tmp_path,
         {
@@ -143,7 +131,6 @@ def test_methods_of_a_class_instantiated_elsewhere_are_resolved(tmp_path):
         },
     )
 
-    # Users may call parse on a Parser or on a Child.
     assert callees(graph, "main.Parser.parse") == [
         "main.Child.step",
         "main.Parser.step",
@@ -152,9 +139,6 @@ def test_methods_of_a_class_instantiated_elsewhere_are_resolved(tmp_path):
 
 
 def test_name_that_a_class_body_binds_is_read_from_globals(tmp_path):
-    # A class body reads a name that it binds from the class namespace, then
-    # the module globals, then the builtins (LOAD_NAME): never from an
-    # enclosing function. A name it does not bind resolves lexically.
     graph = call_graph(
         tmp_path,
         {
@@ -178,7 +162,6 @@ def test_name_that_a_class_body_binds_is_read_from_globals(tmp_path):
     )
 
     assert callees(graph, "main") == ["main.global_target", "main.outer"]
-    # The calls in D's body belong to outer.
     assert callees(graph, "main.outer") == ["main.global_target", "main.outer.lexical"]
 
 
@@ -233,14 +216,12 @@ def test_private_names_are_mangled_per_class(tmp_path):
         "main.D.h",
         "main._Private.__p",
     ]
-    # C.g means C's __f, also on a D instance.
     assert callees(graph, "main.C.g") == ["main.C.__f", "main.C.g.inner"]
     assert callees(graph, "main.C.g.inner") == ["main.helper"]
     assert callees(graph, "main.D.h") == ["main.D.__f"]
 
 
 def test_private_names_imported_in_a_class_are_mangled(tmp_path):
-    # Inside class C, `from helper import __f` imports helper._C__f.
     graph = call_graph(
         tmp_path,
         {
@@ -304,8 +285,6 @@ def test_class_cell_follows_lexical_scoping(tmp_path):
         },
     )
 
-    # The cell of the innermost class wins over the enclosing function's
-    # variable; a global declaration or a local binding wins over the cell.
     assert callees(graph, "main.outer.C.m") == ["main.outer.C.g"]
     assert callees(graph, "main.D.uses_global") == ["main.A.g"]
     assert callees(graph, "main.D.binds") == ["main.A.g"]
@@ -367,7 +346,6 @@ def test_calls_in_class_bodies_belong_to_the_enclosing_scope(tmp_path):
         },
     )
 
-    # Classes are not nodes; lambdas are.
     assert callees(graph, "main") == ["<builtin>.range", "main.make"]
     assert callees(graph, "main.f") == ["main.make"]
     assert callees(graph, "main.C.<lambda1>") == ["main.make"]
@@ -390,7 +368,6 @@ def test_builtin_calls_and_shadowed_builtins(tmp_path):
 
 
 def test_builtins_are_the_same_on_every_python_version(tmp_path):
-    # frozendict and sentinel are builtins since Python 3.15.
     graph = call_graph(tmp_path, {"main.py": "frozendict(a=sentinel('x'))\n"})
 
     assert callees(graph, "main") == ["<builtin>.frozendict", "<builtin>.sentinel"]
@@ -430,15 +407,11 @@ def test_externals_stored_and_used_later(tmp_path):
         "io.TextIOWrapper.write",
         "os.path.join",
     ]
-    # The result of pool_lib.Client() has no name.
     assert callees(graph, "main.Writer.query") == ["pool_lib.pool.conn.execute"]
     assert callees(graph, "main.join") == ["os.path.join"]
 
 
 def test_elements_of_externals_keep_their_name_and_results_have_none(tmp_path):
-    # An element of an external gives that external back; the result of a
-    # call of code without stubs has no name: names stay within two steps
-    # of a true root.
     graph = call_graph(
         tmp_path,
         {
@@ -472,7 +445,6 @@ def test_external_submodule_used_by_its_full_path(tmp_path):
 
 
 def test_aliased_and_from_imports_make_module_paths_roots(tmp_path):
-    # Both spellings attach the imported modules to their parent packages.
     graph = call_graph(
         tmp_path,
         {
@@ -645,9 +617,6 @@ def test_lambdas_are_named_per_enclosing_scope(tmp_path):
     assert "main.C.<lambda1>" in graph
 
 
-# Imports and names
-
-
 def test_reexported_function_has_one_name(tmp_path):
     graph = call_graph(
         tmp_path,
@@ -750,7 +719,6 @@ def test_all_is_used_only_when_assigned_one_literal(tmp_path):
         },
     )
 
-    # listed exports p only; the others fall back to their public names.
     assert callees(graph, "main.use") == [
         "extended.x",
         "extended.y",
@@ -792,9 +760,6 @@ def test_cyclic_imports_terminate(tmp_path):
 
     assert callees(graph, "a.fa") == ["b.fb"]
     assert callees(graph, "b.fb") == ["a.fa"]
-
-
-# Entry points and the package root
 
 
 def test_entry_points_without_package_use_their_common_directory(tmp_path):
@@ -843,9 +808,6 @@ def test_multiple_entry_points_share_imported_modules(tmp_path):
         "shared": [],
         "shared.f": [],
     }
-
-
-# Robustness
 
 
 def test_module_that_cannot_be_parsed_is_skipped_with_a_warning(tmp_path, caplog):
@@ -915,10 +877,7 @@ def test_self_referential_structures_terminate(tmp_path):
     )
 
     assert "main.Node.walk" in callees(graph, "main.Node.walk")
-    # The loop adds one name: .parent is not appended twice.
     externals = [name for name in callees(graph, "main") if name.startswith("ext")]
-    # ext.start is one step past ext; .parent is the second step, past which
-    # names do not grow.
     assert externals == ["ext.start.visit"]
     assert callees(graph, "main.recurse") == ["main.recurse"]
 
@@ -945,7 +904,6 @@ def test_alternative_bases_are_alternative_hierarchies(tmp_path, order):
     source = ALTERNATIVE_BASES.format(first=first, second=second)
     graph = call_graph(tmp_path, {"main.py": source})
 
-    # C is either A (whose m wins) or B (which inherits m and n from Root).
     assert callees(graph, "main") == ["main.A.m", "main.Root.m", "main.Root.n"]
 
 
@@ -979,12 +937,8 @@ def test_cyclic_and_inconsistent_inheritance_terminate(tmp_path):
 
     assert callees(generator.output(), "main") == ["main.A.m", "main.P.p"]
     classes = generator.document()["definitions"]
-    # P and Q may be each other's base: both get the exhaustive order.
     assert classes["main.P"]["mro"] == ["main.P", "main.Q", "<builtin>.object"]
     assert classes["main.Q"]["mro"] == ["main.Q", "main.P", "<builtin>.object"]
-    # Two classes are named main.A: the program redefines A, and the second
-    # derives from the first (not from itself). X and Y order A and B
-    # differently, so Z has no C3 order and takes the base MROs left to right.
     assert classes["main.Z"]["mro"] == [
         "main.Z",
         "main.X",
@@ -1010,14 +964,14 @@ def test_deeply_nested_code_is_analysed(tmp_path):
 
 
 def test_too_deep_module_is_analysed_in_part_with_a_warning(tmp_path, caplog):
-    # Parsing succeeds, but the builder's recursion over the attribute chain
-    # does not: the analysis warns and continues with the other modules.
-    chain = "x" + ".a" * 4000
+    attribute_chain_that_parses_but_is_too_deep_to_build = "x" + ".a" * 4000
     with caplog.at_level(logging.WARNING):
         graph = call_graph(
             tmp_path,
             {
-                "deep.py": f"import ext\nx = ext\ny = {chain}\n",
+                "deep.py": "import ext\nx = ext\ny = "
+                + attribute_chain_that_parses_but_is_too_deep_to_build
+                + "\n",
                 "main.py": "import deep\ndef f(): pass\nf()\n",
             },
         )
@@ -1039,7 +993,7 @@ def test_entry_point_outside_the_package_is_skipped(tmp_path, caplog):
     assert "other.py" in caplog.text
 
 
-# Determinism and outputs
+REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 
 
 def run_cli(args, seed):
@@ -1047,8 +1001,6 @@ def run_cli(args, seed):
 
 
 def run_python(code, args, seed):
-    """Run `code`, or PyCG's command line if it is None, with `args`, from
-    the repository, whose pycg it imports."""
     environment = dict(os.environ, PYTHONHASHSEED=str(seed))
     command = ["-m", "pycg"] if code is None else ["-c", code]
     result = subprocess.run(
@@ -1057,7 +1009,7 @@ def run_python(code, args, seed):
         text=True,
         check=True,
         env=environment,
-        cwd=Path(__file__).resolve().parent.parent,
+        cwd=REPOSITORY_ROOT,
     )
     return result.stdout
 
@@ -1091,9 +1043,7 @@ DETERMINISM_PROGRAM = {
 }
 
 
-# Prints the assignment graph of the package argv[1] from the entry points
-# that follow it.
-POINTS_TO = """
+POINTS_TO_SCRIPT = """
 import json, sys
 from pycg.pycg import CallGraphGenerator
 generator = CallGraphGenerator(sys.argv[2:], sys.argv[1])
@@ -1108,7 +1058,7 @@ def test_output_is_the_same_for_every_hash_seed(tmp_path):
     outputs = []
     for seed in (0, 1, 12345):
         document = run_cli(["--package", str(tmp_path), *entries], seed)
-        points_to = run_python(POINTS_TO, [str(tmp_path), *entries], seed)
+        points_to = run_python(POINTS_TO_SCRIPT, [str(tmp_path), *entries], seed)
         outputs.append((document, points_to))
 
     assert outputs[0] == outputs[1] == outputs[2]
@@ -1182,7 +1132,7 @@ def test_removed_options_are_rejected(flag):
         [sys.executable, "-m", "pycg", flag, "1", "x.py"],
         capture_output=True,
         text=True,
-        cwd=Path(__file__).resolve().parent.parent,
+        cwd=REPOSITORY_ROOT,
     )
 
     assert result.returncode == 2

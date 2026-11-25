@@ -1,12 +1,3 @@
-"""Results of calls of outside code without stubs (design, *External names*).
-
-The result of calling an outside value that no stub describes has no name:
-nothing loaded from it, no element of it and no call of it names a callee.
-Names that do not pass through a call keep their path, values that the stubs
-describe keep their type, and the instance of an outside class that a base
-class or an `except` clause gives keeps the name of the class.
-"""
-
 import pytest
 from programs import analysed, callees, main_graph
 
@@ -14,17 +5,13 @@ from programs import analysed, callees, main_graph
 @pytest.mark.parametrize(
     "use",
     [
-        # An attribute of the result, also through a name.
         "lib.make().run()",
         "x = lib.make()\nx.run()",
         "x = lib.make()\nwhile x:\n    x = x.next()",
-        # An element of the result.
         "lib.make()[0].run()",
         "for x in lib.make():\n    x.run()",
         "a, b = lib.make()\na.run()",
-        # A class without stubs called: its instance.
         "lib.Cls().run()",
-        # A context manager that the call returns.
         "with lib.make() as x:\n    x.run()",
     ],
 )
@@ -53,7 +40,6 @@ def test_an_awaited_outside_call_without_stubs_names_nothing(tmp_path):
 
 
 def test_a_method_called_on_the_result_is_named_by_its_path_only(tmp_path):
-    # x = x.next(): the method is a path from the import, its result is not.
     graph = main_graph(
         tmp_path,
         """
@@ -65,28 +51,21 @@ def test_a_method_called_on_the_result_is_named_by_its_path_only(tmp_path):
         """,
     )
 
-    # x never holds a name past the result of lib.next() (`lib.next.visit`).
     assert callees(graph, "main") == ["lib.next", "lib.visit"]
 
 
 @pytest.mark.parametrize(
     "decorators",
     [
-        # A decorator factory.
         "@lib.task()",
-        # A stored factory.
         "deco = lib.task()\n@deco",
-        # A method of an unnamed instance, called or not.
         'app = lib.App()\n@app.route("/")',
         "app = lib.App()\n@app.register",
-        # A pair of outside decorators, both or one of them a factory.
         "@lib.first()\n@lib.second()",
         "@lib.first\n@lib.second()",
     ],
 )
 def test_an_unnamed_outside_decorator_keeps_what_it_decorates(tmp_path, decorators):
-    # As for a named outside decorator, the name holds the unnamed result and
-    # the undecorated function or class.
     graph = main_graph(
         tmp_path,
         "import lib\n"
@@ -101,8 +80,6 @@ def test_an_unnamed_outside_decorator_keeps_what_it_decorates(tmp_path, decorato
 
 
 def test_an_ordinary_call_of_an_outside_value_returns_no_argument(tmp_path):
-    # Only a decorator may return what it gets; a call of a named or an
-    # unnamed outside value with a function as argument does not.
     graph = main_graph(
         tmp_path,
         """
@@ -159,8 +136,6 @@ def test_a_call_of_the_result_is_unresolved_as_an_outside_value(tmp_path):
 
 
 def test_a_known_attribute_name_of_the_result_is_an_outside_value(tmp_path):
-    # getattr with a name that the analysis knows loads from the unnamed
-    # result: the call is unresolved as an outside value, as with a literal.
     found = analysed(
         tmp_path,
         {
@@ -180,7 +155,6 @@ invoke("run")
         "outside value",
         None,
     ]
-    # A name that the analysis does not know.
     assert [site.get("unresolved") for site in found["calls"]["main.guess"]] == [
         None,
         "computed name",

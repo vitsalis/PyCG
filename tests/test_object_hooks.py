@@ -1,6 +1,3 @@
-"""The hooks that Python calls when it creates classes and objects:
-`__new__`, `__init_subclass__`, `__set_name__` and `__class_getitem__`."""
-
 import textwrap
 
 from programs import callees, main_graph
@@ -14,9 +11,6 @@ def g(): pass
 
 def graph_of(tmp_path, source):
     return main_graph(tmp_path, DEFINITIONS + textwrap.dedent(source))
-
-
-# __new__
 
 
 def test_a_call_of_a_class_calls_new_then_init_on_its_instance(tmp_path):
@@ -63,8 +57,6 @@ def test_a_new_that_returns_another_object_runs_no_init(tmp_path):
         """,
     )
 
-    # The value of the call is what __new__ returns, and neither __init__
-    # runs for it.
     assert callees(graph, "main") == ["main.Proxy.__new__", "main.Real.run"]
     assert callees(graph, "main.Proxy.__new__") == ["main.Real.__init__"]
 
@@ -86,8 +78,6 @@ def test_new_may_return_an_instance_of_a_subclass(tmp_path):
         """,
     )
 
-    # An instance of a subclass is an instance of the class: its __init__
-    # runs.
     assert callees(graph, "main.make") == ["main.Circle.__init__", "main.Shape.__new__"]
 
 
@@ -122,8 +112,6 @@ def test_new_gets_the_class_even_when_no_analysed_code_calls_it(tmp_path):
         """,
     )
 
-    # Its first parameter is the class, not an instance of it: `cls()`
-    # creates an object, it does not call one.
     assert callees(graph, "main.Library.__new__") == ["main.Library.__new__"]
 
 
@@ -141,9 +129,6 @@ def test_an_outside_base_creates_the_instance(tmp_path):
     )
 
     assert callees(graph, "main") == ["main.Failure.__init__", "main.Failure.describe"]
-
-
-# __init_subclass__
 
 
 def test_a_class_statement_calls_init_subclass_of_its_base(tmp_path):
@@ -164,8 +149,6 @@ def test_a_class_statement_calls_init_subclass_of_its_base(tmp_path):
         """,
     )
 
-    # It is called with the new class and the keyword arguments of the
-    # statement, from the scope of the statement; not for Plugin itself.
     assert callees(graph, "main") == [
         "<builtin>.classmethod",
         "main.Plugin.__init_subclass__",
@@ -196,7 +179,6 @@ def test_init_subclass_chains_through_super(tmp_path):
         """,
     )
 
-    # Middle is a subclass of Base too, but has no `ready`.
     assert callees(graph, "main.declare") == [
         "<builtin>.classmethod",
         "main.Middle.__init_subclass__",
@@ -221,11 +203,7 @@ def test_an_outside_base_hook_gives_no_edge(tmp_path):
         """,
     )
 
-    # The implicit call of an outside method is no edge.
     assert callees(graph, "main") == []
-
-
-# __set_name__
 
 
 def test_a_class_statement_calls_set_name_on_the_values_of_its_body(tmp_path):
@@ -247,7 +225,6 @@ def test_a_class_statement_calls_set_name_on_the_values_of_its_body(tmp_path):
         """,
     )
 
-    # From the scope of the class statement, with the class.
     assert callees(graph, "main.build") == [
         "<builtin>.classmethod",
         "main.Field.__set_name__",
@@ -271,9 +248,6 @@ def test_set_name_gets_the_name_of_the_attribute(tmp_path):
     )
 
     assert callees(graph, "main.Alias.__set_name__") == ["<builtin>.getattr", "main.f"]
-
-
-# __class_getitem__
 
 
 def test_a_subscript_of_a_class_calls_class_getitem_with_the_class(tmp_path):
@@ -302,9 +276,7 @@ def test_a_subscript_of_a_class_calls_class_getitem_with_the_class(tmp_path):
         """,
     )
 
-    # It gives what the method returns, not the class.
     assert callees(graph, "main.use") == ["main.Registry.__class_getitem__", "main.f"]
-    # Bound to the class that is subscripted.
     assert callees(graph, "main.Registry.__class_getitem__") == [
         "main.Audio.lookup",
         "main.Registry.lookup",
@@ -331,8 +303,6 @@ def test_an_outside_class_getitem_gives_the_class(tmp_path):
         """,
     )
 
-    # The generic alias calls the class, and gives no edge to the outside
-    # method that makes it; Stub inherits `__init__` from its outside base.
     assert callees(graph, "main.use") == [
         "ext.Generic.__init__",
         "main.Box.__init__",
@@ -357,12 +327,8 @@ def test_class_hooks_that_no_analysed_code_calls_get_classes(tmp_path):
         """,
     )
 
-    # `cls()` creates an object: the receiver is a class, not an instance.
     assert callees(graph, "main.Hooks.__init_subclass__") == ["main.Hooks.__init__"]
     assert callees(graph, "main.Hooks.__class_getitem__") == ["main.Hooks.__init__"]
-
-
-# super() at the end of an MRO
 
 
 def test_super_finds_the_attributes_of_object_after_the_last_class(tmp_path):
@@ -377,8 +343,6 @@ def test_super_finds_the_attributes_of_object_after_the_last_class(tmp_path):
         """,
     )
 
-    # `object` has `__init__` but no `missing`; instantiation still gives
-    # no edge to `object.__init__`.
     assert callees(graph, "main.Plain.__init__") == [
         "<builtin>.object.__init__",
         "<builtin>.super",

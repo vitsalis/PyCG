@@ -1,28 +1,3 @@
-"""The solver against a naive reference on random constraint systems.
-
-The reference keeps a plain set per node, shares nothing and merges
-nothing. It solves in the solver's rounds by brute force: copy along every
-edge until nothing changes (a node past the cap holds the saturated value),
-then apply every constraint to the objects of its node that it has not
-seen, and again, until nothing changes. A system has nodes, objects, subset
-edges (cycles included) and constraints. A constraint reacts to each object
-that reaches its node with actions from a table: add an edge, add an
-object, or attach a new constraint. The solver must give every node the
-same set as the reference, and apply every constraint exactly once to each
-object it sees, whatever order it processes nodes in, also with a cap
-small enough that nodes saturate.
-
-A system also has followers: nodes with one edge from a node, which nothing
-reads at first. The reference adds the edge at once. The solver makes the
-node only when something reads it (`Solver.follower`), and must then give
-it the state that the reference's node has.
-
-The rules of class hierarchies read state that depends on the order in
-which bases arrive; random hierarchies on the real analysis must give the
-same lookups and MROs under every order. The exhaustive order, which stands
-for many hierarchies, must find at least what each of them finds.
-"""
-
 from contextlib import contextmanager
 
 import pytest
@@ -48,23 +23,15 @@ class Marker:
         self.index = index
 
 
-# What a saturated node holds.
 SATURATED = Marker(-1)
 
 
 class ReferenceSolver:
-    """The rounds of the solver by brute force: copy along every edge until
-    nothing changes, then apply every constraint to the objects of its node
-    that it has not seen, until nothing changes. An object added to a node
-    arrives with the next copying; a constraint attached to a node sees at
-    once what the node held after the last copying. A node past `cap`
-    objects holds the saturated value; None for no cap."""
-
     def __init__(self, cap=None):
         self.cap = cap
         self.pts = {}
         self.edges = []
-        self.constraints = []  # (node, constraint, objects applied)
+        self.constraints = []
         self.added = []
 
     def _cap(self, objects):
@@ -102,7 +69,6 @@ class ReferenceSolver:
             for node, constraint, applied in list(self.constraints):
                 new = self.pts.get(node, set()) - applied
                 applied |= new
-                # A constraint never sees the saturated value.
                 new.discard(SATURATED)
                 for obj in sorted(new, key=lambda o: o.index):
                     constraint.apply(obj)
@@ -120,10 +86,6 @@ class ReferenceSolver:
 
 
 class Rule(Constraint):
-    """A constraint of kind `kind`. Its actions for each object come from
-    `table`; `path` identifies it the same way in every solver. A rule only
-    attaches rules of higher kinds, so every system is finite."""
-
     def __init__(self, system, kind, path):
         self.system = system
         self.kind = kind
@@ -158,8 +120,6 @@ class System:
         self.objects = [Marker(i) for i in range(OBJECTS)]
         self.rules = []
         self.constant_rules = []
-        # The followers by slot: the node, for the solver the source and
-        # the phase until something reads it; None until `follow`.
         self.late = hasattr(solver, "follower")
         self.make_node = make_node
         self.followers = [None] * FOLLOWERS
@@ -195,9 +155,6 @@ class System:
         solver.solve()
 
     def follow(self, slot):
-        """Make follower `slot` follow its node, once: the node after
-        `slot`. What tried to read it before reads it now, so that the
-        order of the actions of a round does not matter."""
         if self.followers[slot] is not None:
             return
         src = self.nodes[slot + 1]
@@ -210,8 +167,6 @@ class System:
             self.read(slot, rule)
 
     def read(self, slot, rule):
-        """Read follower `slot`: attach `rule` to it and send what it holds
-        on to node `slot`."""
         if self.followers[slot] is None:
             self.waiting.setdefault(slot, []).append(rule)
             return
@@ -224,11 +179,11 @@ class System:
         self.solver.add_edge(self.followers[slot], self.nodes[slot])
 
     def result(self):
-        # A follower that nothing read is not compared: the solver has none.
-        nodes = self.nodes + [
+        read_followers = [
             self.followers[slot] if slot in self.read_slots else None
             for slot in range(FOLLOWERS)
         ]
+        nodes = self.nodes + read_followers
         sets = [
             frozenset(o.index for o in self.solver.objects(node))
             if node is not None
@@ -301,12 +256,6 @@ ORDERS = {
     ]
 )
 def variant(request, monkeypatch):
-    """The solver without a cap; with its table of sets rebuilt as often as
-    possible; with other processing orders; and with a cap that saturates
-    nodes. None may change a result, and with the cap the result is that of
-    the reference with the cap. Return a function that makes the order,
-    and the cap: each example gets a new order, so that an example replays
-    in the same order when hypothesis shrinks it."""
     name = request.param
     if name == "sweep always":
         monkeypatch.setattr(solver_module, "_SWEEP_NEW_OBJECTS_MIN", 1)
@@ -316,8 +265,6 @@ def variant(request, monkeypatch):
     return ORDERS[name], None
 
 
-# The fixture's state (the sweep threshold) is the same for every example;
-# the order is made inside each example.
 @settings(
     max_examples=1500,
     deadline=None,
@@ -334,12 +281,11 @@ def test_solver_agrees_with_the_naive_reference(spec, variant):
 
     assert sets == expected_sets
     assert applied == expected_applied
-    # Exactly once: each rule saw each object once, and each object of its
-    # node unless the node saturated.
     for node, rule in real.rules:
         seen = sorted(o.index for o in rule.applied)
         assert len(seen) == len(set(seen))
-        if sets[node] != {SATURATED.index}:
+        node_saturated = sets[node] == {SATURATED.index}
+        if not node_saturated:
             assert seen == sorted(sets[node])
     for index, rule in real.constant_rules:
         assert [o.index for o in rule.applied] == [index]
@@ -357,18 +303,12 @@ def test_solver_is_deterministic(spec):
     assert run() == run()
 
 
-# Hierarchies
-
-
 CLASSES = 4
-# Few nodes, so that base expressions often get classes.
 BASE_NODES = 4
 base_node = st.integers(0, BASE_NODES - 1)
 
 hierarchy_systems = st.fixed_dictionaries(
     {
-        # Per class: whether it defines f, g and __getattr__, and its base
-        # expressions: nodes, or names of classes defined before it.
         "classes": st.lists(
             st.tuples(
                 st.booleans(),
@@ -387,13 +327,8 @@ hierarchy_systems = st.fixed_dictionaries(
         ),
         "steps": st.lists(
             st.one_of(
-                # Put a class (or `object`, past the last class) in a node.
                 st.tuples(st.just("class"), base_node, st.integers(0, CLASSES)),
                 st.tuples(st.just("edge"), base_node, base_node),
-                # Look f up on a class, through it or an instance of it;
-                # after a class, as super() does; only where no class
-                # defines g or __getattr__, as for the special method that
-                # Python falls back to.
                 st.tuples(
                     st.just("lookup"),
                     st.integers(0, CLASSES - 1),
@@ -411,17 +346,12 @@ hierarchy_systems = st.fixed_dictionaries(
 
 
 def lookups(spec):
-    """Build the hierarchy system `spec` on an analysis and return what each
-    of its lookups finds, and the MRO of each class. Every class is looked
-    up before the steps put classes in base nodes, and the steps add lookups
-    at other times."""
     analysis = Analysis()
     nodes = [analysis.node(f"n{i}") for i in range(BASE_NODES)]
     classes = []
     for index, (*defines, bases) in enumerate(spec["classes"]):
         defined = zip(("f", "g", "__getattr__"), defines)
         names = [name for name, defines in defined if defines]
-        # A name of a class defined later is no base expression.
         bases = [
             nodes[base]
             if isinstance(base, int)
@@ -477,7 +407,6 @@ def at_most_hierarchies(limit):
 @given(hierarchy_systems)
 def test_the_exhaustive_order_finds_what_every_hierarchy_would(spec):
     found, _ = lookups(spec)
-    # Every class with two hierarchies or more gets the exhaustive order.
     with at_most_hierarchies(1):
         exhaustive, _ = lookups(spec)
     for ordinary, over in zip(found, exhaustive, strict=True):

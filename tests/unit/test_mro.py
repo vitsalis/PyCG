@@ -1,5 +1,3 @@
-"""C3 linearization of class hierarchies, including the ones Python rejects."""
-
 from hypothesis import given
 from hypothesis import strategies as st
 
@@ -7,10 +5,6 @@ from pycg.analysis.mro import linearize
 
 
 def mro_table(**mros):
-    """Return an `mro_of` function that looks classes up in `mros`.
-
-    Classes are strings; each keyword maps a class to its linearization.
-    """
     return lambda cls: mros[cls]
 
 
@@ -31,7 +25,6 @@ def test_diamond():
 
 
 def test_classic_c3_example():
-    # The example from "A Monotonic Superclass Linearization for Dylan".
     mro_of = mro_table(
         O=["O"],
         A=["A", "O"],
@@ -59,7 +52,6 @@ def test_classic_c3_example():
 
 
 def test_inconsistent_order_falls_back_to_depth_first_order():
-    # Python raises TypeError for Z; the analysis still needs an order.
     mro_of = mro_table(A=["A"], B=["B"], X=["X", "A", "B"], Y=["Y", "B", "A"])
 
     assert linearize("Z", ["X", "Y"], mro_of) == ["Z", "X", "A", "B", "Y"]
@@ -72,7 +64,6 @@ def test_class_listed_as_its_own_base_is_left_out():
 
 
 def test_base_that_already_inherits_from_the_class_is_left_out():
-    # B's current MRO contains C, so C(B) would make the hierarchy cyclic.
     mro_of = mro_table(A=["A"], B=["B", "C", "A"])
 
     assert linearize("C", ["A", "B"], mro_of) == ["C", "A"]
@@ -96,7 +87,6 @@ def test_python_gives_the_same_order_for_every_hierarchy_that_it_accepts(data):
         try:
             cls = type(name, tuple(classes[base] for base in bases), {})
         except TypeError:
-            # No C3 order: Python rejects the class.
             continue
         expected = [c.__name__ for c in cls.__mro__ if c is not object]
 
@@ -105,7 +95,6 @@ def test_python_gives_the_same_order_for_every_hierarchy_that_it_accepts(data):
 
 
 def naive_merge(sequences):
-    """C3's merge as it is written: search every tail for each head."""
     sequences = [list(sequence) for sequence in sequences if sequence]
     result = []
     while sequences:
@@ -134,14 +123,12 @@ def naive_linearize(cls, bases, mro_of):
     return [cls] + merged
 
 
-# MROs of any shape, also ones that no hierarchy has: repeats, orders that
-# contradict each other, the class itself.
-SHAPES = st.lists(st.sampled_from("ABCDEFZ"), max_size=6)
+MRO_TAILS_OF_ANY_SHAPE = st.lists(st.sampled_from("ABCDEFZ"), max_size=6)
 
 
 @given(
     st.lists(st.sampled_from("ABCDEF"), max_size=4),
-    st.dictionaries(st.sampled_from("ABCDEF"), SHAPES, min_size=6),
+    st.dictionaries(st.sampled_from("ABCDEF"), MRO_TAILS_OF_ANY_SHAPE, min_size=6),
 )
 def test_the_merge_gives_what_the_naive_merge_gives(bases, shapes):
     mros = {name: [name, *shape] for name, shape in shapes.items()}

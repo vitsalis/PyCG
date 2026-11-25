@@ -1,11 +1,3 @@
-"""The viewer page's JavaScript, run with node.
-
-The pure logic (indexes, callers and callees with filters, search, module
-map) runs directly. The page script runs against the small fake DOM of
-`view_dom.js`. Every test is skipped when node is not installed. No test
-opens a browser.
-"""
-
 import json
 import re
 import shutil
@@ -51,7 +43,6 @@ def run_node(program, tmp_path):
 
 
 def logic(tmp_path, expression, source=SAMPLE):
-    """The value of `expression`, with `index` built from `source`."""
     program = script("pycg-logic") + (
         "\nconst fs = require('fs');\n"
         f"const doc = JSON.parse(fs.readFileSync({json.dumps(str(source))}, 'utf8'));\n"
@@ -63,7 +54,6 @@ def logic(tmp_path, expression, source=SAMPLE):
 
 
 def rows(tmp_path, function, name, filters=ALL):
-    """`[name, [[line, col, implicit], ...]]` for each row of callers or callees."""
     return logic(
         tmp_path,
         f"PyCG.{function}(index, {json.dumps(name)}, {json.dumps(filters)})"
@@ -72,7 +62,6 @@ def rows(tmp_path, function, name, filters=ALL):
 
 
 def page(tmp_path, steps, source=SAMPLE, hash=""):
-    """Run `steps` (JavaScript, with `page` loaded from `source`); return `out`."""
     html = view.render(Path(source).read_text(encoding="utf-8"))
     html_path = tmp_path / "page.html"
     html_path.write_text(html, encoding="utf-8")
@@ -91,9 +80,6 @@ def page(tmp_path, steps, source=SAMPLE, hash=""):
 def write_json(path, value):
     path.write_text(json.dumps(value, sort_keys=True), encoding="utf-8")
     return path
-
-
-# The logic
 
 
 def test_counts(tmp_path):
@@ -609,9 +595,6 @@ def test_names_of_object_properties_are_plain_names(tmp_path):
     assert found == ["constructor.__proto__"]
 
 
-# The page
-
-
 def test_header_shows_the_package_tool_and_counts(tmp_path):
     out = page(
         tmp_path,
@@ -977,9 +960,6 @@ def test_page_reports_a_malformed_document(tmp_path):
     assert "cannot be read" in out["text"]
 
 
-# A document of the producer: the call graph of PyCG itself
-
-
 @pytest.fixture(scope="module")
 def own(tmp_path_factory):
     root = HERE.parent
@@ -1042,9 +1022,6 @@ def test_page_of_a_real_document(own, tmp_path):
     assert f"{len(document['modules'])} modules" in out["header"]
     assert sorted(out["callees"]) == expected
     assert out["modules"] == len(document["modules"])
-
-
-# Size
 
 
 @pytest.fixture(scope="module")

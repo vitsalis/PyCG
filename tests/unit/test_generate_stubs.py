@@ -1,7 +1,3 @@
-"""The generator of the stub data (tools/generate_stubs.py), on a fixture
-typeshed checkout in tests/fixtures/typeshed: a standard library in
-`stdlib/` and third-party distributions in `stubs/`."""
-
 import importlib.util
 import json
 import shutil
@@ -55,7 +51,6 @@ def test_the_fixture_regenerates_to_the_committed_files(tmp_path, reader, data):
     written = _files(tmp_path)
     assert written == _files(expected)
     for name in written:
-        # Bytes: the files must be the same on every platform.
         assert (tmp_path / name).read_bytes() == (expected / name).read_bytes(), name
 
 
@@ -74,9 +69,6 @@ def test_third_party_data_goes_to_its_own_directory(tmp_path, reader, data):
 
 
 def test_third_party_stubs_leave_the_standard_library_data_unchanged(tmp_path, data):
-    # A checkout with the standard library only gives the same files, byte
-    # for byte: no name of a distribution changes what the standard library
-    # data says (public names, re-exports).
     checkout = tmp_path / "typeshed"
     shutil.copytree(FIXTURE / "stdlib", checkout / "stdlib")
     alone = generate_stubs.StubReader.from_typeshed(checkout)
@@ -90,7 +82,6 @@ def test_third_party_stubs_leave_the_standard_library_data_unchanged(tmp_path, d
 def test_the_output_does_not_depend_on_the_order_of_reading():
     first = generate_stubs.StubReader.from_typeshed(FIXTURE)
     second = generate_stubs.StubReader.from_typeshed(FIXTURE)
-    # Reading a module before the others resolves its imports first.
     second.resolve("shapes", "Shape")
     assert generate_stubs.dumps(first.generate()) == generate_stubs.dumps(
         second.generate()
@@ -121,7 +112,6 @@ def test_version_branches_keep_every_signature(data):
         ["self", "radius"],
     ]
     assert init["s"][0]["p"][2] == ["label", "k", 1, "builtins.str"]
-    # Neither an entry nor a module records its versions.
     assert all("v" not in s for s in init["s"])
     assert "v" not in data["legacy"]["modules"]["legacy"]
 
@@ -147,8 +137,6 @@ def test_two_layers_of_generic_arguments_are_kept():
     sources["m"] = ("two: list[list[str]]\nthree: list[list[list[str]]]\n", False)
     data = generate_stubs.StubReader(sources).generate()
     names = data["m"]["modules"]["m"]["names"]
-    # The arguments of a class and those of its arguments; a class in the
-    # third layer keeps no arguments (`MAX_DEPTH`).
     assert names["two"]["t"] == ["builtins.list", ["builtins.list", "builtins.str"]]
     assert names["three"]["t"] == ["builtins.list", ["builtins.list", "builtins.list"]]
 
@@ -159,8 +147,6 @@ def test_platform_branches_keep_every_definition(data):
 
 
 def test_a_definition_keeps_the_re_export_of_another_version(data):
-    # Extra is re-exported from shapes._extra from 3.12 on, defined in
-    # shapes._impl before.
     extra = _names(data, "shapes._impl")["Extra"]
     assert extra["k"] == "c" and sorted(extra["m"]) == ["old"]
     assert extra["also"] == [["shapes._extra", "Extra"]]
@@ -184,25 +170,18 @@ def test_members_of_classes(data):
 
 def test_public_names_of_classes(data):
     names = _names(data, "shapes._impl")
-    # Re-exported through the package (star import, `as` import).
     assert names["Shape"]["pub"] == "shapes.Shape"
     assert names["Circle"]["pub"] == "shapes.Circle"
     assert names["_Hidden"]["pub"] == "shapes.Hidden"
-    # Nested, through the enclosing class.
     assert names["Shape"]["m"]["Edge"]["pub"] == "shapes.Shape.Edge"
-    # No public path: the definition path, which needs no `pub`.
     assert "pub" not in names["_Callback"]
-    # Defined in a public module.
     assert "pub" not in _names(data, "builtins")["str"]
 
 
 def test_what_a_module_keeps(data):
     package = _names(data, "shapes")
     assert package["Hidden"] == {"k": "r", "to": [["shapes._impl", "_Hidden"]]}
-    # A star import re-exports, also what the package's __all__ omits.
     assert package["Circle"] == {"k": "r", "to": [["shapes._impl", "Circle"]]}
-    # An import without re-export is dropped, and so are names of modules
-    # without stubs, type variables and type aliases.
     assert "Any" not in package and "sys" not in package
     impl = _names(data, "shapes._impl")
     for name in ("Iterable", "_T", "_Number", "_Handler", "abstractmethod"):
@@ -220,7 +199,6 @@ def test_types_of_signatures(data):
     names = _names(data, "shapes._impl")
     area = names["area"]["s"]
     assert area[1]["p"][0] == ["shape", "/", 0, "*none"]
-    # Literal[0] is the class of its value.
     assert area[1]["r"] == "builtins.int"
     scale = names["scale"]["s"][0]
     assert scale["p"] == [
@@ -235,21 +213,17 @@ def test_types_of_signatures(data):
     assert names["identity"]["s"][0]["r"] == ["*var", "shapes._impl._T"]
     assert names["make"]["s"][0]["p"][0][3] == ["*type", ["*var", "shapes._impl._T"]]
     assert names["wait"]["s"][0]["a"] == 1
-    # Positional-only by the convention before PEP 570.
     kinds = [p[1] for p in names["legacy"]["s"][0]["p"]]
     assert kinds == ["/", "/", ""]
     assert names["Circle"]["m"]["scaled"]["s"][0]["p"][1][1] == "/"
 
 
 def test_a_method_of_a_module_instance_is_a_function(data):
-    # `default_area = _default.area`, with `_default: Circle`: the receiver
-    # is bound, so the function has the method's other parameters.
     names = _names(data, "shapes._impl")
     assert names["default_area"] == {
         "k": "f",
         "s": [{"p": [], "r": "builtins.float"}],
     }
-    # A static method, found on a base class, keeps its parameters.
     assert names["default_kinds"]["s"][0]["r"] == ["builtins.list", "builtins.str"]
     assert "d" not in names["default_kinds"]
     assert names["_default"] == {"k": "v", "t": "shapes._impl.Circle"}
@@ -268,16 +242,11 @@ def test_types_of_callable_parameters(data):
     names = _names(data, "shapes._impl")
     run = names["Runner"]["m"]["run"]["s"][0]["p"][1]
     start = names["Runner"]["m"]["start"]["s"][0]["p"][1]
-    # A callable through a type alias; a protocol keeps its class.
     assert run[3] == ["*call", "*none", ["builtins.str"]]
     assert start[3] == ["|", "shapes._impl._Callback", "*none"]
 
 
-# Third-party distributions
-
-
 def test_a_namespace_package_is_a_module_without_names(data):
-    # `ns` has no __init__.pyi; ns-one gives `ns.one`, ns-two `ns.two`.
     assert data["ns"]["modules"] == {
         "ns": {"names": {}},
         "ns.one": {
@@ -295,7 +264,6 @@ def test_a_namespace_package_is_a_module_without_names(data):
                         }
                     },
                 },
-                # A re-export from another distribution.
                 "first": {"k": "r", "to": [["ns.one", "first"]]},
             }
         },
@@ -310,9 +278,6 @@ def test_stubs_of_a_distribution_use_the_standard_library(data):
 
 
 def test_public_names_go_through_the_distribution_of_the_class(data):
-    # `alpha.Hidden` and `alpha.Tool` are shorter paths than `shapes.Hidden`
-    # and `extras.Tool` and come first in alphabetical order, but alpha is
-    # another distribution.
     assert _names(data, "shapes._impl")["_Hidden"]["pub"] == "shapes.Hidden"
     assert _names(data, "extras.core")["Tool"]["pub"] == "extras.Tool"
     assert _names(data, "alpha") == {
@@ -322,7 +287,6 @@ def test_public_names_go_through_the_distribution_of_the_class(data):
 
 
 def test_the_standard_library_keeps_its_top_level_names(data):
-    # legacy-backport also has a `legacy`: the standard library's is kept.
     assert sorted(_names(data, "legacy")) == ["old"]
     assert sorted(_names(data, "backport")) == ["run"]
 
@@ -381,9 +345,8 @@ def test_one_module_in_two_distributions_stops_the_generator(tmp_path):
         generate_stubs.StubReader.from_typeshed(checkout)
 
 
-# Distributions are read in the order of their names.
 @pytest.mark.parametrize("package, namespace", [("a", "b"), ("b", "a")])
-def test_a_package_wins_over_a_namespace_package_of_one_name(
+def test_a_package_wins_over_a_namespace_package_of_one_name_in_either_order(
     tmp_path, package, namespace
 ):
     checkout = tmp_path / "typeshed"
