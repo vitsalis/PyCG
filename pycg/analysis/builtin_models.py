@@ -308,6 +308,13 @@ VARIABLE_FUNCTIONS = {
     "shutil.rmtree": "shutil.rmtree",
 }
 
+CONCRETE_CLASSES = {"ctypes.CDLL.__init__._FuncPtr": "_ctypes.CFuncPtr"}
+
+STUB_RESULTS = {
+    "ctypes.CDLL.__getattr__": "ctypes.CDLL.__init__._FuncPtr",
+    "ctypes.CDLL.__getitem__": "ctypes.CDLL.__init__._FuncPtr",
+}
+
 REFLECTION_CALLS = {
     "builtins.vars": ("(object=None, /)", "namespace"),
     "inspect.getmembers": ("(object, predicate=None)", "members"),

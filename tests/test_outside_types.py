@@ -186,6 +186,43 @@ def test_names_that_the_stubs_do_not_have_give_nothing(tmp_path):
     assert callees(graph, "main") == ["re.compile"]
 
 
+def test_a_symbol_of_a_ctypes_library_is_a_foreign_function_of_that_library(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import ctypes
+        def use():
+            lib = ctypes.CDLL("libc.so.6")
+            lib.free(0)
+            lib["abs"](-1)
+            ctypes.cdll.LoadLibrary("libc.so.6").getpid()
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "ctypes.CDLL",
+        "ctypes.CDLL.__init__._FuncPtr.__call__",
+        "ctypes.LibraryLoader.LoadLibrary",
+    ]
+
+
+def test_limit_a_stub_getattr_of_another_class_gives_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import ctypes
+        import xmlrpc.client
+        def use(proxy: xmlrpc.client.ServerProxy):
+            proxy.system_listMethods()
+            ctypes.cdll.libc.getpid()
+        """,
+    )
+
+    assert callees(graph, "main.use") == []
+
+
 def test_a_result_of_unknown_type_has_no_invented_names(tmp_path):
     graph = main_graph(
         tmp_path,

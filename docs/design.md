@@ -1620,6 +1620,21 @@ or a list:
   - Limit: the other callable variables of the stubs (`sys.excepthook`,
     `sys.displayhook`, `threading.excepthook`) are hooks that a program
     may replace, so their calls stay unnamed.
+- **Foreign functions.** `ctypes.CDLL.__getattr__` and `__getitem__`
+  return an instance of the class `_FuncPtr` that `CDLL.__init__` defines
+  for the library, where the stubs give the stub-only `_NamedFuncPointer`
+  (`builtin_models.py`, `STUB_RESULTS`). A name that a `CDLL` lacks, and a
+  subscript of one, give a typed value of `_ctypes.CFuncPtr` named after
+  that definition site, `ctypes.CDLL.__init__._FuncPtr`
+  (`CONCRETE_CLASSES`), so `lib.free(p)` calls
+  `ctypes.CDLL.__init__._FuncPtr.__call__`.
+  - Limit: the stub `__getattr__` of other classes is not read, so a name
+    that they give that way gives nothing: `ctypes.cdll.libc` (a
+    `LibraryLoader`), the methods of `xmlrpc.client.ServerProxy`
+    (`test_limit_a_stub_getattr_of_another_class_gives_nothing`). Reading
+    every stub `__getattr__` adds 83% to the time of hypothesis.
+  - Limit: the `restype` that a program stores on a foreign function is
+    not read: a call gives what the stub of `__call__` gives.
 - **Opened files.** `open`, `io.open`, `os.fdopen` and `pathlib.Path.open`
   give the class that `io.open` makes for their mode and buffering, where
   the stubs give one overload per kind of mode (their `Literal` modes
