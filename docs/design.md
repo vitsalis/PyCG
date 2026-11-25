@@ -3374,8 +3374,8 @@ table of `BuiltinRules.add_length_hint`):
   base defines `__iter__` (a subclass of `Sequence`, iterated by its
   mixin's generator) is asked nothing there;
 - a `reversed` object: the `__len__` of its sequence again, instance or
-  class, unless a class of its MRO defines `__reversed__` (also the mixin
-  of `Sequence`, a generator);
+  class, where the sequence has `__getitem__`, unless a class of its MRO
+  defines `__reversed__` (also the mixin of `Sequence`, a generator);
 - any other engine container (lists, tuples, sets, dicts, views, their
   iterators, `enumerate`, `zip`, `map`, `filter`, `callable_iterator`), a
   generator, a coroutine, a constant, an outside value, a function, the
@@ -3395,8 +3395,10 @@ CPython does.
 containers: iterators whose elements are pairs of an index and an element,
 tuples of the elements of each argument, the elements (or what
 `__reversed__` of an instance, or of a class's metaclass, returns, else
-`__getitem__` after `__len__`), what the function returns when called with
-the elements (a class is instantiated), and the elements again; `map`
+`__getitem__` after `__len__`, both only where the class has both: with one
+of them `reversed` raises `TypeError` and calls neither), what the function
+returns when called with the elements (a class is instantiated), and the
+elements again; `map`
 calls the function from the scope of the call, with an element of each
 iterable at its position, and `filter` with an element of its iterable,
 and tests the truth of what it returns. An unpacked argument passes a number of iterables

@@ -666,15 +666,48 @@ class BuiltinRules:
         if isinstance(obj, (Instance, Class)):
             reverse = self.site_call(call.caller, call.site, ("reversed",))
             self.call_dunder(obj, "__reversed__", reverse, dst)
-            unless = ("__reversed__",)
-            length = self.site_call(call.caller, call.site, ("reversed", "len"))
-            self.call_dunder(obj, "__len__", length, None, unless)
-            index = self.site_call(call.caller, call.site, ("reversed", "item"), [None])
-            self.call_dunder(obj, "__getitem__", index, self.unknown(result), unless)
-            self.add_object(self.iterator_source(result), obj)
+            items = self.unknown(result)
+            sequence = Each(
+                self._reversed_sequence, obj, call, result, results=(items,)
+            )
+            self.solver.attach(self._types(obj), sequence)
         else:
             iteration.apply(obj)
         self.add_object(dst, result)
+
+    def _reversed_sequence(self, cls, obj, call, result):
+        if not isinstance(cls, Class):
+            return
+        unless = ("__reversed__",)
+        lengths = self.lookup(cls, "__len__", obj, None, unless)
+        getters = self.lookup(cls, "__getitem__", obj, None, unless)
+        length = self.site_call(call.caller, call.site, ("reversed", "len"))
+        index = self.site_call(call.caller, call.site, ("reversed", "item"), [None])
+        length = self._implicit_call(obj, "__len__", length, None, unless)
+        items = self.unknown(result)
+        index = self._implicit_call(obj, "__getitem__", index, items, unless)
+        source = self.iterator_source(result)
+        for other, methods, implicit, reversing in (
+            (getters, lengths, length, source),
+            (lengths, getters, index, None),
+        ):
+            each = Each(
+                self._reverse_sequence,
+                obj,
+                methods,
+                implicit,
+                reversing,
+                results=(implicit.dst,),
+            )
+            self.solver.attach(other, each)
+
+    def _reverse_sequence(self, method, obj, methods, implicit, reversing):
+        key = ("reverse sequence", obj, methods, implicit)
+        if key not in self._subscriptions:
+            self._subscriptions.add(key)
+            self.solver.attach(methods, implicit)
+            if reversing is not None:
+                self.add_object(reversing, obj)
 
     def _rule_map(self, call, receiver, args):
         result = self.container_at("map", call.origin, call.site, "map")
