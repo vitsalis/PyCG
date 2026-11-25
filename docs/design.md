@@ -2174,6 +2174,19 @@ evaluate the annotation), so no store exists to add the declared values
 to. A dataclass-like class differs because the library turns each such
 annotation into a store, that of its generated `__init__`.
 
+A class statement evaluates its bases when it runs, before any later
+store. So a base that is a name which the statement reads by definition
+(idea 2) gets the value that the assignment binds there, without what
+its annotation (or the package's own stub) declares: `TableBase:
+type[Table] = with_typehint(Table)`, where the call returns `object`, makes
+`class TinyDB(TableBase)` no subclass of `Table`. Every other read of the
+name, a base read through another scope or an attribute among them, gets
+the declared values as before, since outside code may have stored by then.
+
+- Limit: a base whose definitions join (an annotated assignment in each
+  branch of an `if`) gets the declared values
+  (`test_limit_a_base_read_through_a_join_keeps_the_declared_values`).
+
 **Analysed classes below an outside class.** An annotation that names an
 outside class names the analysed classes below it only when that class is
 abstract. Abstract means that the class cannot be instantiated as it is: a

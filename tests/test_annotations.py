@@ -1460,6 +1460,54 @@ def run():
     assert inside(graph, "main.run") == sorted([*BOTH, "main.Other.__call__"])
 
 
+TYPEHINT = """
+import sys
+from typing import TYPE_CHECKING
+class Table:
+    def insert(self):
+        self.storage()
+    def storage(self): pass
+def with_typehint(baseclass):
+    if TYPE_CHECKING:
+        return baseclass
+    return object
+"""
+
+DATABASE = """
+class Database(TableBase):
+    def __getattr__(self, name):
+        return getattr(Table(), name)
+def later():
+    TableBase().insert()
+"""
+
+
+def test_a_class_statement_reads_its_bases_without_declared_values(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TYPEHINT + "TableBase: type[Table] = with_typehint(Table)" + DATABASE,
+    )
+
+    assert callees(graph, "main.Table.insert") == ["main.Table.storage"]
+    assert callees(graph, "main.later") == ["<builtin>.object", "main.Table.insert"]
+
+
+def test_limit_a_base_read_through_a_join_keeps_the_declared_values(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TYPEHINT
+        + """
+if sys.argv:
+    TableBase: type[Table] = with_typehint(Table)
+else:
+    TableBase: type[Table] = with_typehint(Table)
+"""
+        + DATABASE,
+    )
+
+    assert "main.Database.__getattr__" in callees(graph, "main.Table.insert")
+
+
 def test_an_annotation_without_a_value_names_nothing(tmp_path):
     graph = graph_of(
         tmp_path,

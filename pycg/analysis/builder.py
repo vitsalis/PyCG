@@ -68,6 +68,7 @@ class ModuleBuilder(
         self._type_checking_truth_by_test = {}
         self._class_tests_by_call = {}
         self._narrowed_nodes = {}
+        self._assigned_by_declared_binding = {}
         self.own_stub = None
         if stub is not None:
             self.own_stub = OwnStub(stub, self._absolute_module_name)
@@ -353,7 +354,7 @@ class ModuleBuilder(
     def _stmt_ClassDef(self, node):
         scope = self.scopes.scope_of(node)
         decorators = [self.expression(decorator) for decorator in node.decorator_list]
-        bases = [self.expression(base) for base in node.bases]
+        bases = [self._base(base) for base in node.bases]
         keywords, double_star, metaclass = [], [], None
         for keyword in node.keywords:
             value = self.expression(keyword.value)
@@ -412,6 +413,18 @@ class ModuleBuilder(
         truth = TRUE if plain else UNKNOWN
         self._bind(node.name, self._decorate(node, decorators, cls), truth)
 
+    def _base(self, node):
+        value = self.expression(node)
+        if isinstance(node, ast.Name) and value in self._assigned_by_declared_binding:
+            return self._assigned_by_declared_binding[value]
+        return value
+
+    def _declared_binding(self, value, declared):
+        joined = self._join([value, declared])
+        if declared is not None:
+            self._assigned_by_declared_binding[joined] = value
+        return joined
+
     def _stmt_Return(self, node):
         if node.value is not None:
             value = self._returned(node.value)
@@ -463,7 +476,7 @@ class ModuleBuilder(
             value = self._join([value, self.alias_form(node.value)])
         for target in node.targets:
             declared = self.declared(self.stub_variable(target), target)
-            self._assign(target, self._join([value, declared]), *facts)
+            self._assign(target, self._declared_binding(value, declared), *facts)
 
     def _may_alias(self, targets):
         return (
@@ -491,8 +504,8 @@ class ModuleBuilder(
             facts = self._facts(node.value)
             if self._may_alias([target]):
                 value = self._join([value, self.alias_form(node.value)])
-            value = self._join([value, self.declared(annotation, target)])
-            self._assign(target, value, *facts)
+            declared = self.declared(annotation, target)
+            self._assign(target, self._declared_binding(value, declared), *facts)
         elif isinstance(target, ast.Attribute):
             self.expression(target.value)
         elif isinstance(target, ast.Subscript):
