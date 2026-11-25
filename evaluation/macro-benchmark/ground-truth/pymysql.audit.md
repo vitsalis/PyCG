@@ -278,3 +278,36 @@ finding.**
   private. 1 edge.
 - README and tools: no error found. The skeleton, `--report`,
   `--default` and `--without-candidates` worked as documented.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-pymysql-hash` (7865eca, PR #110) against `main`
+(2130a69): four outside edges renamed and six added in `pymysql.json`,
+`pymysql.added.json`, `pymysql.ledger` and `pymysql.md`;
+`evaluation/metrics.json` is not recorded yet. I read `pymysql/_auth.py`
+from the inputs image and CPython 3.9.25 to 3.15.2 and PyPy 3.9 v7.3.16,
+3.10 v7.3.19 and 3.11 v7.3.23 from the dependency sources, as text.
+Nothing ran; no PyCG output was read. pymysql admits CPython 3.9 and
+later and PyPy 3.9 to 3.11 (J2).
+
+| Sites (`_auth.py`) | Change | Verdict | Evidence |
+|---|---|---|---|
+| `33:39`, `34:37`, `38:22`; `36:13`, `37:13` | `_sha1.sha1.digest`, `.update` renamed `_sha1.SHA1Type.*` | agree | `sha1_new = partial(hashlib.new, "sha1")` (`:21`); CPython's fallback `_sha1.sha1` is a factory whose type `_sha1` exports as `SHA1Type` (checked for bottle); PyPy's `_sha1.sha1` is a function returning `_sha1.sha` (kept), and `hashlib.sha1` is that function, so no alias |
+| `200:41`, `201:35`, `202:43` | `_sha256.SHA256Type.digest` added; `_sha256.sha256.digest` renamed `hashlib.sha256.digest` | agree | CPython 3.9.25 `sha256module.c:556` (type `"_sha256.sha256"`), `:720`; 3.10.22 `:567`, `:725`; 3.11.18 `:570`, `:728` (`SHA256Type`). PyPy: the class `_sha256.sha256` (`lib_pypy/_sha256.py:206` in 3.9, `:218` in 3.10 and 3.11), cached as `hashlib.sha256` by the fallback (`lib-python/3/hashlib.py`); at a direct constructor the alias holds the class (ruling-names-2), so no runtime keeps `_sha256.sha256` as a name |
+| `87:40`, `93:49`, `103:48` | `_sha512.SHA512Type.digest` and `_sha512.SHA384Type.digest` added; `_sha512.sha512.digest` renamed `hashlib.sha512.digest` | agree | CPython 3.9.25 `sha512module.c:778` exports `SHA512Type`; 3.10.22 `:782` and `:788`, 3.11.18 `:785` and `:791` set `SHA384Type` to the SHA-384 type and then to the SHA-512 type, so that attribute names the SHA-512 object there (the C-type ruling's own example); PyPy's class `_sha512.sha512` (`_sha512.py:234` in 3.9, `:245` in 3.10 and 3.11) is `hashlib.sha512` in the fallback |
+| the eight sites with data: `33:39`, `34:37`, `87:40`, `93:49`, `103:48`, `200:41`, `201:35`, `202:43` | `_hashlib._OneShotHash.digest` added | agree | PyPy 3.11 `lib_pypy/_hashlib/__init__.py:40-55`: `new(name, string)` returns `_OneShotHash(...)` when `string` is non-empty (the class at `:57`); `hashlib.new` reaches `_hashlib.new(name, data)` (`__hash_new`, `hashlib.py:160`), and `hashlib.sha256`/`sha512` are `openssl_*` from `make_new_hash`, which calls `new(name, string)` (`:367-374`); PyPy 3.9 and 3.10 have no `_OneShotHash` (`new` at `:28` and `:40` returns a `HASH`). `35:17` `sha1_new()` has no data, so `36:13` to `38:22` stay `HASH` |
+
+Kept, rightly: `_hashlib.HASH.*`, `_sha2.SHA256Type.digest` and
+`_sha2.SHA512Type.digest` (CPython 3.12 and later), `_sha1.sha.*`.
+Nothing missed: `_auth.py:33-38`, `87-103` and `200-202` are the
+package's only hash objects (the other "sha256" matches are plugin names),
+and the eight sites take non-empty data from the package's callers (a
+password, a digest, a concatenation with the scramble or nonce).
+
+Counts. 623 edges (311 inside, 312 outside), 132 traced: as `check.py
+pymysql` reports, which passes with the source in place, as do `--origin`
+and `--report`; four renamed and six added, as the commit says. The `make
+eval` numbers come from PyCG's output, which I did not read.
+
+**Verdict.** Closed: the renames and additions stand, and nothing is
+missed. No finding.
