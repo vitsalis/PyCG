@@ -234,8 +234,9 @@ including the explicit privacy contract and fixed bundled-data witnesses.
     therefore include `io.BytesIO` and `zipfile.ZipExtFile` alongside
     `io.BufferedReader`. CPython 3.12.0 retains the public `zipfile.Path`
     alias when its implementation moves into `_path`; no duplicate alias
-    is added. `_csv.writer.writerow` (the type of the csv writer has
-    no public path; the trace uses this name); `argparse._SubParsersAction.add_parser`;
+    is added. `_csv.Writer.writerow` (CPython 3.10 and later) and
+    `_csv.writer.writerow` (CPython 3.7 to 3.9 and PyPy, which export no
+    attribute for the type; Corrections of 2026-11-25); `argparse._SubParsersAction.add_parser`;
     `xml.sax.expatreader.ExpatParser.setContentHandler` and `.parse` for
     `make_parser()`; `struct.pack` and `struct.unpack` for the `fbsocket`
     imports `from struct import pack as _pack`.
@@ -364,13 +365,13 @@ clashes with the attribute `FileIndexer.writer`), and
 |---|---|
 | Sites requiring decisions (all inventory sites: 4383) | 3027 (1329 call, 31 decorator, 157 iter, 929 op, 180 getitem, 37 setitem, 7 delitem, 255 getattr, 10 setattr, 81 truth, 11 format) |
 | Ledger entries | 1708 (1329 call, 31 decorator, 174 getattr, 10 setattr, 116 op, 18 getitem, 16 setitem, 6 delitem, 5 format, 2 iter, 1 truth) |
-| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 1833 / 333 (122) / 0 / 272 |
+| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 1834 / 333 (122) / 0 / 272 |
 | Default rejections | 71 candidates in 25 lines, deciding 1820 sites |
 | Exclusions | 0 |
 | Nodes | 382 |
-| Edges | 1224: 625 in the package, 599 outside |
-| Graph edges with a trace name or alias | 957 of 1224 (78.2%) |
-| Edges only from reading | 267 |
+| Edges | 1225: 625 in the package, 600 outside |
+| Graph edges with a trace name or alias | 957 of 1225 (78.1%) |
+| Edges only from reading | 268 |
 | Trace edges rejected | 3 |
 | Functions that the tests run | 312 of 362 |
 
@@ -382,3 +383,31 @@ so this additional source location is recorded here.
 Both the constructor call at `cli.py:64:34` and the outer call at
 `64:94` retain the same missing-library stub path. Sharing a graph pair
 does not remove either call site from the ledger.
+
+## Corrections of 2026-11-25
+
+Batch 8's ruling "A C type exported under a module attribute other than
+its type name" (the referee's `b8-ruling-c-type-names-1.md`) names a method
+of an outside class by the attribute under which the defining extension
+module exports the type on each admitted implementation and version, and
+keeps the type name only on a runtime that exports none. netaddr admits
+CPython and PyPy from Python 3.7 (`pyproject.toml`, `requires-python =
+">=3.7"`; `docs/source/reference/compatibility.rst:7-14`).
+
+| Site | Caller | Edge added | Evidence |
+|---|---|---|---|
+| `eui/ieee.py:75:29` `self.writer.writerow(data)` | `eui.ieee.FileIndexer.update` | `_csv.Writer.writerow` | the writer that `csv.writer` makes (`ieee.py:67`) has the type `_csv.writer` (CPython 3.10.22 `Modules/_csv.c:1425`), which `_csv` exports as `Writer` on CPython 3.10.22 `:1719`, 3.11.18 `:1753`, 3.12.16 `:1776`, 3.13.18 `:1760`, 3.14.10 and 3.15.2 `:1799` |
+
+`_csv.writer.writerow` stays at the site: CPython 3.7.17, 3.8.20 and
+3.9.25 export only the factories `reader` and `writer` (`Modules/_csv.c`
+`:1585-1587`, `:1595-1597`, `:1641-1643`; type name `:1327`, `:1330`,
+`:1376`), and PyPy 3.8 to 3.11 export the factories only
+(`pypy/module/_csv/moduledef.py:86`; the type `'_csv.writer'`,
+`interp_writer.py:166-167` in 3.8 and 3.9, `:172-173` in 3.10, `:185-186` in
+3.11); PyPy 3.7 likewise (v7.3.9, read at the commit of tag
+release-pypy3.7-v7.3.9, 3a614a6737a1: `moduledef.py:86` exports only the
+factory; TypeDef `'_csv.writer'` at `interp_writer.py:166-170`). The two
+names belong to different runtimes, so no runtime has two
+aliases. `csv.reader` at `ieee.py:277:31` is the factory's own call and
+stays; no reader method is called explicitly. One graph edge added
+(outside): 1225 edges, 625 in the package, 600 outside.
