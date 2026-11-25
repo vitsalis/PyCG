@@ -1,4 +1,4 @@
-from programs import analysed, call_graph, callees
+from programs import analysed, call_graph, callees, main_graph
 
 PLUGINS = {
     "plugins/__init__.py": "",
@@ -154,3 +154,17 @@ def test_only_a_module_builtin_or_frozen_in_every_python_wins_over_a_file(tmp_pa
 
     assert callees(graph, "math.floor") == ["math.helper"]
     assert callees(graph, "os.getcwd") == []
+
+
+def test_sys_modules_with_a_literal_gives_that_outside_module(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import json
+        import sys
+        def dump(value):
+            return sys.modules["json"].dumps(value)
+        """,
+    )
+
+    assert callees(graph, "main.dump") == ["json.dumps"]
